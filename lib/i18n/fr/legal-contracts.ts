@@ -200,7 +200,7 @@ export const legalContracts = {
     noTemplate:
       "Aucun modèle validé : ajoutez-en un dans la bibliothèque des modèles.",
     empty: "Aucune personne créditée sur les titres du projet.",
-    mappingTitle: "Contrats à prévoir",
+    mappingTitle: "Contrats des intervenants",
     mappingDescription:
       "Proposés d'après les rôles et les modèles validés. Corrigez si besoin, puis confirmez en une fois quels contrats sont nécessaires : ce n'est ni valider leur contenu, ni les générer. Étape suivante : chaque contrat se prépare seul dès que ses informations sont là.",
     mappingApproved: (name: string, date: string) =>
@@ -232,8 +232,13 @@ export const legalContracts = {
       choose: "Choisir un contrat",
       noDeal: "Pas d'accord nécessaire",
       noDealWhy: "Pourquoi aucun accord n'est nécessaire",
+      // « Déjà payé » ne suffit pas (JUR-12).
+      noDealHint:
+        "Dites quel accord couvre déjà ses droits, ou pourquoi sa contribution n'en ouvre pas. « Déjà payé » ne suffit pas : un paiement ne cède aucun droit.",
+      onlyPaid:
+        "« Déjà payé » ne suffit pas : un paiement ne cède aucun droit. Dites quel accord couvre ses droits, ou pourquoi sa contribution n'en ouvre pas.",
       noDealReason: (reason: string) =>
-        `Pas d'accord nécessaire : « ${reason} »`,
+        `Pas d'accord nécessaire · justification : « ${reason} »`,
       noValidated: "Aucun modèle validé pour ce rôle",
       proposedFrom: (role: string) =>
         `Proposé d'après son rôle (${role}) · bibliothèque, validé par la direction`,
@@ -250,17 +255,26 @@ export const legalContracts = {
       launchFirst: "Confirmez d'abord les contrats à prévoir.",
       done: "Contrats nécessaires confirmés",
     },
+    // Where each person's agreement stands (JUR-12, proto Juridique v3).
     states: {
-      unmapped: "Contrats nécessaires à confirmer",
-      not_needed: "Pas d'accord",
-      needs_info: "Informations manquantes",
-      ready_to_generate: "Prêt à générer",
-      draft: "Brouillon",
-      review_required: "À valider",
-      ready_for_signature: "Approuvé, prêt à envoyer",
+      unmapped: "Contrat nécessaire",
+      not_needed: "Non nécessaire · justifié",
+      needs_info: "Contrat nécessaire",
+      ready_to_generate: "En préparation",
+      draft: "En préparation",
+      review_required: "En préparation · chez la direction",
+      ready_for_signature: "Validé · à envoyer",
       signature_pending: "En signature",
       signed: "Signé",
       ended: "Terminé",
+    },
+    // Before the mapping is confirmed, a person's pill (JUR-12).
+    choiceStates: {
+      needed: "Contrat nécessaire",
+      notNeeded: "Non nécessaire",
+      missingTemplate: "Modèle manquant",
+      pendingTemplate: "Modèle en validation",
+      existing: "Contrat existant",
     },
     generate: "Générer le contrat",
     generating: "Génération…",

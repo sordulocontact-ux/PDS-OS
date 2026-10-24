@@ -15,6 +15,7 @@ import {
 import { loadAgreements } from "@/lib/legal/contracts/queries";
 import { getProject } from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
+import { isOnlyPaid } from "@/lib/legal/contracts/no-deal";
 
 // The project's side of the agreements (ticket Juridique 03). People,
 // roles and values are found again on the server from the project's
@@ -70,6 +71,13 @@ export async function approveContractMapping(
   const parsed = mappingSchema.safeParse(input);
   if (!parsed.success)
     return { ok: false, error: fr.legalContracts.agreements.errors.fee };
+  // A payment alone assigns no right (JUR-12): checked again here.
+  if (
+    parsed.data.items.some(
+      (item) => !item.needed && isOnlyPaid(item.reason ?? ""),
+    )
+  )
+    return { ok: false, error: fr.legalContracts.agreements.plan.onlyPaid };
   const loaded = await loadFor(parsed.data.projectId);
   if (!loaded) return { ok: false, error: fr.auth.errors.forbidden };
 

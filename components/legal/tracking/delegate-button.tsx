@@ -26,6 +26,7 @@ export function DelegateButton({
   responsibleId,
   dueOn,
   people,
+  triggerLabel,
 }: {
   projectId: string;
   itemId: string;
@@ -33,6 +34,8 @@ export function DelegateButton({
   responsibleId: string | null;
   dueOn: string | null;
   people: Array<{ personId: string; name: string }>;
+  // « Modifier » in the plan's list, « Changer » in the démarche.
+  triggerLabel?: string;
 }) {
   const router = useRouter();
   const t = fr.legal.tracking;
@@ -77,10 +80,10 @@ export function DelegateButton({
         type="button"
         variant="outline"
         size="xs"
-        aria-label={`${t.delegate} · ${label}`}
+        aria-label={`${triggerLabel ?? t.delegate} · ${label}`}
         onClick={() => setOpen(true)}
       >
-        {t.delegate}
+        {triggerLabel ?? t.delegate}
       </Button>
       <FormDialog
         open={open}

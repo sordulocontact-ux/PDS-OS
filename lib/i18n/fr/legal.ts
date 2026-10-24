@@ -364,7 +364,38 @@ export const legal = {
       formalityWhy:
         "La déclaration ouvre les droits d'auteur. Elle attend les informations des créateurs, la répartition, les emprunts sécurisés et le master final.",
     },
-    after: (labels: string) => `Après : ${labels}`,
+    after: (labels: string) => `Prérequis : ${labels}`,
+    // JUR-05: immediate actions apart from dependent ones.
+    sections: {
+      immediate: {
+        title: (n: number) => `Démarches immédiates · ${n}`,
+        body: "Aucun prérequis : elles démarrent en parallèle dès le lancement.",
+      },
+      dependent: {
+        title: (n: number) => `Démarches dépendantes · ${n}`,
+        body: "Elles s'ouvrent seules quand leur prérequis est fait.",
+      },
+    },
+    noPrereq: "Aucun prérequis",
+    // What launching makes, said once before it happens (JUR-05).
+    creates: {
+      title: "Ce que le lancement crée",
+      aside: "Rien ne part à l'extérieur, aucun contrat n'est généré",
+      then: "Chaque démarche part quand son responsable le décide.",
+      kind: {
+        onboarding:
+          "une étape par personne, sa fiche pré-remplie avec ce que PDS OS sait d'elle, son lien privé créé seulement à l'envoi",
+        contract:
+          "son contrat, généré une fois sa fiche validée, soumis à la direction avant tout envoi",
+        clearance:
+          "une étape d'autorisation, la demande aux ayants droit préparée mais pas envoyée",
+        splits:
+          "une étape de répartition, les liens de confirmation créés seulement à l'envoi",
+        formality:
+          "une étape de déclaration, le bulletin pré-rempli depuis le dossier, généré seulement après vérification",
+      },
+      line: (label: string, what: string) => `${label} : ${what}`,
+    },
     // One group per kind of action: what they share is said once.
     groups: {
       onboarding: "Fiches de renseignements",

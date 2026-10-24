@@ -25,6 +25,7 @@ export async function PlanStep({ projectId }: { projectId: string }) {
     clearances,
     templateRequests,
     direction,
+    steps,
   } = await legalJourneyContext(projectId);
   const t = fr.legalJourney.plan;
   // The direction decides on the templates asked from this project here.
@@ -77,7 +78,12 @@ export async function PlanStep({ projectId }: { projectId: string }) {
             <AddedActions projectId={projectId} count={tracking.added} />
           )}
           {contracts}
-          <LaunchedDemarches demarches={demarches} />
+          <LaunchedDemarches
+            projectId={projectId}
+            demarches={demarches}
+            steps={steps}
+            people={tracking.state === "tracking" ? tracking.people : []}
+          />
         </div>
       ) : (
         <div className="flex flex-col gap-6">

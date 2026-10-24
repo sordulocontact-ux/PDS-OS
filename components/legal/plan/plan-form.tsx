@@ -10,19 +10,21 @@ import {
 } from "@/components/legal/plan/plan-item-row";
 import { ActionGroup } from "@/components/legal/plan/action-group";
 import { EmptyNote } from "@/components/shell/empty-state";
-import { PageSection } from "@/components/shell/page-section";
+import { StepSection } from "@/components/shell/journey/step-section";
 import { usePublishResult } from "@/components/shell/module/result-banner";
 import { Button } from "@/components/ui/button";
+import { Fold } from "@/components/ui/fold";
 import { fr } from "@/lib/i18n/fr";
 import { launchLegalPlan } from "@/lib/legal/plan/actions";
 import { groupActions, lineOf } from "@/lib/legal/plan/groups";
-import { PLAN_COLUMNS } from "@/lib/legal/plan/proposal";
 import type { PlanRow } from "@/lib/legal/plan/queries";
 
 /**
- * The proposed plan, in ticket 07's three columns, then « Lancer le plan »:
- * the one human decision (« Confirmation du plan avant lancement »). The
- * server rebuilds the items; only these choices are sent.
+ * The proposed plan (JUR-05): the immediate démarches apart from the
+ * dependent ones, each with what it waits for, who answers for it and by
+ * when; what launching creates, said once and folded; then « Lancer le
+ * plan », the one human decision. The server rebuilds the items; only
+ * these choices are sent.
  */
 export function PlanForm({
   projectId,
@@ -68,55 +70,78 @@ export function PlanForm({
 
   if (items.length === 0) return <EmptyNote>{t.nothing}</EmptyNote>;
 
+  // Immediate: nothing kept in the plan holds it back (JUR-05).
+  const kept = items.filter((item) => choices[item.key]?.include);
+  const isImmediate = (item: PlanRow) =>
+    item.dependsOn.every((key) => !labelOf.has(key));
+  const section = (immediate: boolean) => {
+    const rows = items.filter((item) => isImmediate(item) === immediate);
+    if (rows.length === 0) return null;
+    const s = immediate ? t.sections.immediate : t.sections.dependent;
+    return (
+      <StepSection title={s.title(rows.length)}>
+        <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
+          {s.body}
+        </p>
+        <div className="flex flex-col gap-6">
+          {groupActions(rows, labelOf).map((group) => (
+            <ActionGroup
+              key={group.kind}
+              title={group.title}
+              count={group.items.length}
+              why={group.why}
+              after={group.after}
+              action={null}
+            >
+              {group.items.map((item) => (
+                <PlanItemRow
+                  key={item.key}
+                  item={item}
+                  line={lineOf(item, group, labelOf)}
+                  choice={choices[item.key]}
+                  people={people}
+                  onChange={(choice) =>
+                    setChoices((current) => ({
+                      ...current,
+                      [item.key]: choice,
+                    }))
+                  }
+                />
+              ))}
+            </ActionGroup>
+          ))}
+        </div>
+      </StepSection>
+    );
+  };
+
   return (
-    <div className="grid gap-8">
-      {PLAN_COLUMNS.map((column) => {
-        const rows = items.filter((item) => item.column === column);
-        return (
-          <PageSection
-            key={column}
-            card
-            id={`legal-plan-${column}`}
-            title={t.columns[column].title}
-            description={t.columns[column].description}
-          >
-            {rows.length === 0 ? (
-              <EmptyNote>{t.empty}</EmptyNote>
-            ) : (
-              <div className="flex flex-col gap-6">
-                {groupActions(rows, labelOf).map((group) => (
-                  <ActionGroup
-                    key={group.kind}
-                    title={group.title}
-                    count={group.items.length}
-                    why={group.why}
-                    after={group.after}
-                    action={null}
-                  >
-                    {group.items.map((item) => (
-                      <PlanItemRow
-                        key={item.key}
-                        item={item}
-                        line={lineOf(item, group, labelOf)}
-                        choice={choices[item.key]}
-                        people={people}
-                        onChange={(choice) =>
-                          setChoices((current) => ({
-                            ...current,
-                            [item.key]: choice,
-                          }))
-                        }
-                      />
-                    ))}
-                  </ActionGroup>
-                ))}
-              </div>
-            )}
-          </PageSection>
-        );
-      })}
-      <div className="flex flex-col items-end gap-3">
-        <p className="text-sm text-muted-foreground">{t.notice}</p>
+    <div className="flex flex-col gap-3.5">
+      {section(true)}
+      {section(false)}
+      <Fold
+        className="mt-3.5"
+        summary={
+          <>
+            {t.creates.title}
+            <span className="font-medium text-[color:var(--text-tertiary)]">
+              · {t.creates.aside}
+            </span>
+          </>
+        }
+      >
+        <ul className="flex list-disc flex-col gap-1 pl-5 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)]">
+          {kept.map((item) => (
+            <li key={item.key}>
+              {t.creates.line(item.label, t.creates.kind[item.kind])}
+            </li>
+          ))}
+        </ul>
+        <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
+          {t.creates.then}
+        </p>
+      </Fold>
+      <div className="flex flex-col items-start gap-3">
         <Button
           type="button"
           size="lg"

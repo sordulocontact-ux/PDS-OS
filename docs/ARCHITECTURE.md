@@ -2792,6 +2792,13 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
     l'étape dans le `lead` de `StepPanel` quand l'étape attend le lecteur ; JUR-04 :
     `legalOutcome` (`lib/legal/outcome.ts`, `withOutcome` + `openNext`) et `useLegalAction`
     qui publie le bandeau de résultat, branchés geste par geste dans les lots suivants.
+  - *Lot 2, Plan d'action* (JUR-05, JUR-12) : avant lancement, « Démarches immédiates » (aucun
+    prérequis gardé dans le plan) / « Démarches dépendantes » (`PlanForm`), « Prérequis : … » au
+    lieu de « Après : … », un seul repli « Ce que le lancement crée » (`fr.legal.plan.creates`) ;
+    après lancement, `LaunchedDemarches` lit les prérequis du parcours (`prereqsOf`, hors
+    « plan ») ; « Contrats des intervenants » : libellés d'état de la recette
+    (`agreements.states`), pastille par personne dans `MappingRow`, motif « déjà payé » refusé
+    par `isOnlyPaid` dans le formulaire et dans `approveContractMapping`.
 
 - **Intervenants non crédités** (08/10/2026, lot 6 de l'architecture globale ;
   `legal_project_contacts`, migration `20261008000101`, 11 tests pgTAP) : un avocat, un

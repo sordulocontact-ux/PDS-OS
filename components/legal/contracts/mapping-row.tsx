@@ -5,7 +5,9 @@ import { TextareaField } from "@/components/auth/textarea-field";
 import { NewTemplateButton } from "@/components/legal/contracts/new-template-button";
 import { OptionSelect } from "@/components/projects/option-select";
 import { ReturnCallout } from "@/components/ui/return-callout";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { fr } from "@/lib/i18n/fr";
+import { agreementTone, type Tone } from "@/lib/ui/state-tones";
 import type { AgreementRow } from "@/lib/legal/contracts/mapping";
 
 export const NO_DEAL = "none";
@@ -55,23 +57,41 @@ export function MappingRow({
   const p = t.plan;
   const roles = row.creditRoles.map((r) => fr.masterPage.credits.roles[r]);
   const roleLabel = roles.join(", ") || fr.legalForms.roles.performer;
+  // Where this person stands while the contracts are chosen (JUR-12).
+  const c = t.choiceStates;
+  const pill: { tone: Tone; label: string } | null = !row.contactId
+    ? null
+    : row.contract
+      ? { tone: agreementTone[row.state], label: t.states[row.state] }
+      : row.existing && value.choice === null
+        ? { tone: "success", label: c.existing }
+        : value.choice === NO_DEAL
+          ? { tone: "neutral", label: c.notNeeded }
+          : row.compatible.length === 0
+            ? request?.pending
+              ? { tone: "warning", label: c.pendingTemplate }
+              : { tone: "danger", label: c.missingTemplate }
+            : { tone: "info", label: c.needed };
   return (
     <li className="flex flex-col gap-3 py-4 first:pt-0">
-      <div className="flex flex-col gap-0.5">
-        <span className="font-semibold break-words">{row.name}</span>
-        <span className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
-          {roleLabel}
-        </span>
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <span className="font-semibold break-words">{row.name}</span>
+          <span className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
+            {roleLabel}
+          </span>
+        </div>
+        {pill && (
+          <StatusBadge tone={pill.tone} size="sm">
+            {pill.label}
+          </StatusBadge>
+        )}
       </div>
       {!row.contactId ? (
         <span className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
           {t.noContact}
         </span>
-      ) : row.contract ? (
-        <span className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
-          {t.states[row.state]}
-        </span>
-      ) : (
+      ) : row.contract ? null : (
         <div className="flex flex-col gap-3">
           <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem]">
             <OptionSelect
@@ -111,6 +131,7 @@ export function MappingRow({
               id={`no-deal-${row.key}`}
               name={`no-deal-${row.key}`}
               label={p.noDealWhy}
+              hint={p.noDealHint}
               required
               rows={2}
               maxLength={1000}

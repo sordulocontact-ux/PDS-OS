@@ -8,6 +8,22 @@ const de = (name: string) =>
   /^[aeiouyàâéèêëîïôûüh]/i.test(name) ? `d'${name}` : `de ${name}`;
 
 export const legalDemarches = {
+  // The plan once launched (JUR-05): each démarche, immediate or dependent.
+  launched: {
+    nature: { immediate: "immédiate", dependent: "dépendante" },
+    responsible: (name: string) => `Responsable : ${name}`,
+    due: (day: string) => `avant le ${day}`,
+    prereq: (labels: string) => `Prérequis : ${labels}`,
+    edit: "Modifier",
+    state: {
+      done: "Faite",
+      blocked: "Attend son prérequis",
+      overdue: "Échéance dépassée",
+      waiting: "En attente d'un retour",
+      current: "En cours",
+      obsolete: "Obsolète",
+    },
+  },
   groups: {
     dossier: "Dossier",
     tracking: "Suivi",

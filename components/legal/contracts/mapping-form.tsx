@@ -12,6 +12,7 @@ import {
 } from "@/components/legal/contracts/mapping-row";
 import { Button } from "@/components/ui/button";
 import { fr } from "@/lib/i18n/fr";
+import { isOnlyPaid } from "@/lib/legal/contracts/no-deal";
 import { approveContractMapping } from "@/lib/legal/contracts/actions";
 import { feeCentsOf } from "@/lib/legal/contracts/fields";
 import type { AgreementRow } from "@/lib/legal/contracts/mapping";
@@ -82,6 +83,8 @@ export function MappingForm({
       };
     if (c.choice === NO_DEAL && !c.reason.trim())
       return { reason: t.errors.reason };
+    if (c.choice === NO_DEAL && isOnlyPaid(c.reason))
+      return { reason: t.plan.onlyPaid };
     return {};
   };
 
@@ -89,7 +92,10 @@ export function MappingForm({
     setTried(true);
     const wrong = open.filter((r) => {
       const c = choices[r.key];
-      return !c.choice || (c.choice === NO_DEAL && !c.reason.trim());
+      return (
+        !c.choice ||
+        (c.choice === NO_DEAL && (!c.reason.trim() || isOnlyPaid(c.reason)))
+      );
     });
     if (wrong.length > 0) {
       setError(t.plan.remaining);
