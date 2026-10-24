@@ -22,11 +22,11 @@ import {
   agreementTone,
   clearanceTone,
   formalityTone,
-  legalFormTone,
   splitVersionTone,
   type Tone,
 } from "@/lib/ui/state-tones";
 import { formatInstant } from "@/lib/utils/instant";
+import { ficheBadge } from "@/lib/legal/forms/state";
 
 export type BoardGroup = TrackGroup | "done";
 
@@ -198,7 +198,6 @@ function metaOf(item: TrackedItem | null, extra: Array<string | null>) {
 
 function ficheRow(row: FormRow, item: TrackedItem | null): BoardRow {
   const t = fr.legal.board;
-  const s = fr.legalForms.page.states as Record<string, string>;
   const group: BoardGroup =
     row.namesakeId || row.artistId
       ? "now"
@@ -208,7 +207,8 @@ function ficheRow(row: FormRow, item: TrackedItem | null): BoardRow {
           expired: "now",
           revoked: "now",
           sent: "waiting",
-          action_required: "decision",
+          // A complement asked waits for the person (JUR-06).
+          action_required: row.complement ? "waiting" : "decision",
           complete: "done",
         }[row.state] as BoardGroup);
   return {
@@ -230,7 +230,7 @@ function ficheRow(row: FormRow, item: TrackedItem | null): BoardRow {
       ? { label: t.namesake, tone: "warning" }
       : row.artistId
         ? { label: t.notInNetwork, tone: "warning" }
-        : { label: s[row.state] ?? row.state, tone: legalFormTone[row.state] },
+        : ficheBadge(row),
     verb: row.namesakeId
       ? t.verbs.link
       : row.artistId

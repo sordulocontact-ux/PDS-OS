@@ -49,6 +49,16 @@ export const legalForms = {
       consentMissing: "Cochez la case pour envoyer votre fiche.",
       receipt: (date: string) => `Fiche envoyée le ${date}.`,
     },
+    // A complement asked by the team (JUR-06): only what is missing.
+    complement: {
+      title: "Il manque une information à votre fiche",
+      intro: (person: string) =>
+        `Bonjour ${person}. Votre fiche est bien arrivée, il n'y manque que ceci. Le reste est gardé tel quel.`,
+      send: "Compléter ma fiche",
+      sending: "Envoi…",
+      done: "Merci, votre fiche est complétée : l'équipe la vérifie.",
+      missing: "Complétez chaque champ demandé.",
+    },
     submitting: "Envoi…",
     required: "Obligatoire",
     missing: "Complétez les champs obligatoires.",
@@ -202,6 +212,38 @@ export const legalForms = {
     revokeBody:
       "Le lien cesse de fonctionner tout de suite ; ce que la personne a déjà envoyé est conservé.",
     revoked: "Accès révoqué",
+    // A fiche's pill (JUR-06, lib/legal/forms/state.ts).
+    status: {
+      toCreate: "À créer",
+      toSend: "À envoyer",
+      sent: "Envoyée",
+      opened: "En attente · ouverte, pas renvoyée",
+      complement: "En attente · complément demandé",
+      incomplete: "À vérifier · incomplète",
+      corrections: "À vérifier · corrections",
+      toValidate: "Complète · à valider",
+      validated: "Validée",
+      expired: "Lien expiré",
+      revoked: "Lien révoqué",
+    },
+    // JUR-06: received is not complete; validated, or asked again.
+    validated: "Fiche validée",
+    incomplete:
+      "La fiche n'est pas complète : redemandez ce qui manque avant de la valider.",
+    complementAsked: "Complément demandé",
+    validate: "Valider la fiche",
+    validateCorrections: "Accepter les corrections et valider",
+    keepOld: "Garder les anciennes valeurs et valider",
+    receivedIncomplete: (fields: string) =>
+      `Reçue, pas complète. Il manque à la fiche : ${fields}. Elle ne se valide qu'une fois complète.`,
+    askMessage: "Message à la personne",
+    askMessageDefault: (first: string, fields: string) =>
+      `Bonjour ${first}, il manque à votre fiche : ${fields}. Complétez-la depuis votre lien privé, le même qu'avant.`,
+    askHint:
+      "Sur son lien privé, la personne ne verra que ce qui manque. Prévenez-la ensuite : « Relancer » prépare l'e-mail avec ce message.",
+    ask: "Redemander ce qui manque",
+    complementWaiting: (at: string, fields: string) =>
+      `Complément demandé le ${at} : ${fields}.`,
     revokedWhy: (reason: string) => `Accès révoqué : « ${reason} »`,
     remind: "Relancer",
     // The private link's card (Figma PDS OS, node 229:2257).

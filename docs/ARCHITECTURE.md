@@ -2799,6 +2799,22 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
     « plan ») ; « Contrats des intervenants » : libellés d'état de la recette
     (`agreements.states`), pastille par personne dans `MappingRow`, motif « déjà payé » refusé
     par `isOnlyPaid` dans le formulaire et dans `approveContractMapping`.
+  - *Lot 3, fiche* (JUR-06, migration `20261024000101_legal_form_validation`, test pgTAP
+    `legal-form-validation`) : une fiche reçue reste `action_required` (« à vérifier »), seule
+    la validation (`review_legal_form`, `validated_by`) la passe à `complete`, qui reste « c'est
+    fait » pour le contrat, la répartition, la coche du plan et l'État des lieux. Règle de
+    complétude du code (`ficheMissing`, `lib/legal/forms/completeness.ts` : état civil, e-mail,
+    adresse ou raison sociale + SIREN/SIRET + facturation, IPI/COAD d'un auteur, compositeur ou
+    arrangeur ; pas d'IBAN, la facture le porte) : une fiche incomplète ne se valide pas
+    (`reviewLegalForm` refuse) ; « Redemander ce qui manque » (`request_legal_form_complement`,
+    champs manquants + message) rouvre le lien privé sur ces seuls champs (`get_legal_form`
+    état `complement`, `ComplementForm`, `submit_legal_form_complement`, deux surcharges) ;
+    le lien reste visible et « Relancer » prépare l'e-mail du complément. Pastille de la
+    fiche en un seul endroit (`ficheBadge`, `lib/legal/forms/state.ts`) : À créer, À envoyer,
+    Envoyée, En attente · ouverte, En attente · complément demandé, À vérifier · incomplète /
+    corrections, Complète · à valider, Validée. Validation et complément passent par
+    `legalOutcome` : le bandeau dit la prochaine action réelle et l'étape débloquée. L'étape
+    d'un intervenant ne montre qu'un titre à la fois (`DemarcheBody`).
 
 - **Intervenants non crédités** (08/10/2026, lot 6 de l'architecture globale ;
   `legal_project_contacts`, migration `20261008000101`, 11 tests pgTAP) : un avocat, un

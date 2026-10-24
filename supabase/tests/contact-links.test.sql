@@ -117,7 +117,7 @@ select is(public.get_legal_form(pg_temp.v('token'), pg_temp.id_of('mona_elsewher
 select is(public.submit_legal_form(pg_temp.v('token'), pg_temp.id_of('mona_form'), array['artist'], null,
           '{"legal_first_name": "Mona", "legal_last_name": "Lys", "email": "mona@example.com", "entity_type": "person"}'::jsonb,
           '{}'::jsonb, 1),
-          'complete', 'she sends it from her page');
+          'action_required', 'she sends it from her page (received, to validate)');
 select is(public.get_contact_page(pg_temp.v('token')) -> 'items' -> 0 ->> 'state', 'done',
           'then it is « Fait »');
 select public.note_contact_link_opened(pg_temp.v('token'));

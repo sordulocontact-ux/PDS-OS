@@ -6,6 +6,8 @@ import { useTransition } from "react";
 import { toast } from "sonner";
 
 import { NextCard } from "@/components/ui/next-card";
+import { usePublishResult } from "@/components/shell/module/result-banner";
+import { ComplementRequest } from "@/components/legal/forms/complement-request";
 import {
   usePlanSheet,
   type PreparedLink,
@@ -20,9 +22,13 @@ import { fr } from "@/lib/i18n/fr";
 import { mailtoHref } from "@/lib/utils/mailto";
 import {
   prepareLegalForm,
+  requestLegalFormComplement,
   reviewLegalForm,
   setLegalFormState,
 } from "@/lib/legal/forms/actions";
+import { ficheMissing } from "@/lib/legal/forms/completeness";
+import { ficheBadge, missingLabels } from "@/lib/legal/forms/state";
+import type { WriteResult } from "@/lib/utils/write-result";
 import type { FormRow } from "@/lib/legal/forms/queries";
 import { formatInstant } from "@/lib/utils/instant";
 
@@ -57,11 +63,20 @@ export function FichePanel({
   // Just prepared, or kept sealed by the server (rule 19).
   const url = link?.url ?? row.link?.url ?? null;
   const [pending, startTransition] = useTransition();
+  const publish = usePublishResult();
 
   const act = (action: () => Promise<{ ok: boolean; error?: string }>) =>
     startTransition(async () => {
       const result = await action();
       if (!result.ok) return void toast.error(result.error ?? t.failed);
+      router.refresh();
+    });
+  // A gesture that says what follows (JUR-04, JUR-06): the step's banner.
+  const decide = (action: () => Promise<WriteResult>) =>
+    startTransition(async () => {
+      const result = await action();
+      if (!result.ok) return void toast.error(result.error);
+      publish(result);
       router.refresh();
     });
   const prepare = () =>
@@ -243,41 +258,85 @@ export function FichePanel({
       </NextCard>
     );
 
-  if (row.state === "action_required" && row.submission)
+  // A complement asked: the person answers on their link (JUR-06).
+  if (row.state === "action_required" && row.complement)
     return (
       <>
-        <NextCard kind="decision" label={p.decision} title={p.corrected}>
-          <FactList
-            facts={Object.entries(row.submission.corrections).map(
-              ([id, c]) => ({
-                label: fr.legalForms.fields[id] ?? id,
-                value: t.correction(c.before, c.after),
-              }),
-            )}
+        <NextCard
+          kind="wait"
+          label={p.waiting}
+          title={t.complementWaiting(
+            formatInstant(row.complement.at),
+            missingLabels(row.complement.fields),
+          )}
+        >
+          <FicheLinkCard
+            projectId={projectId}
+            projectTitle={projectTitle}
+            row={row}
+            pending={pending}
+            onRenew={prepare}
           />
-          <div className="flex flex-wrap gap-2">
-            <Button
-              disabled={pending}
-              onClick={() =>
-                act(() => reviewLegalForm(projectId, row.formId!, true))
-              }
-            >
-              {t.accept}
-            </Button>
-            <Button
-              variant="ghost"
-              disabled={pending}
-              onClick={() =>
-                act(() => reviewLegalForm(projectId, row.formId!, false))
-              }
-            >
-              {t.refuse}
-            </Button>
-          </div>
         </NextCard>
         {answers}
       </>
     );
+
+  // Received, to check (JUR-06): incomplete, it is asked again; complete,
+  // validated (its corrections accepted or not).
+  if (row.state === "action_required" && row.submission) {
+    const missing = ficheMissing(row.submission);
+    const corrections = Object.entries(row.submission.corrections);
+    const validate = (accept: boolean) =>
+      decide(() => reviewLegalForm(projectId, row.formId!, accept));
+    return (
+      <>
+        <NextCard
+          kind="decision"
+          label={p.decision}
+          title={ficheBadge(row).label}
+        >
+          {corrections.length > 0 && (
+            <FactList
+              facts={corrections.map(([id, c]) => ({
+                label: fr.legalForms.fields[id] ?? id,
+                value: t.correction(c.before, c.after),
+              }))}
+            />
+          )}
+          {missing.length > 0 ? (
+            <ComplementRequest
+              key={missing.join(",")}
+              name={row.name}
+              missing={missing}
+              pending={pending}
+              onAsk={(note) =>
+                decide(() =>
+                  requestLegalFormComplement(projectId, row.formId!, note),
+                )
+              }
+            />
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              <Button disabled={pending} onClick={() => validate(true)}>
+                {corrections.length > 0 ? t.validateCorrections : t.validate}
+              </Button>
+              {corrections.length > 0 && (
+                <Button
+                  variant="ghost"
+                  disabled={pending}
+                  onClick={() => validate(false)}
+                >
+                  {t.keepOld}
+                </Button>
+              )}
+            </div>
+          )}
+        </NextCard>
+        {answers}
+      </>
+    );
+  }
 
   return (
     <>

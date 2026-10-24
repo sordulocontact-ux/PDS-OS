@@ -1,6 +1,7 @@
 import { DemarchePart } from "@/components/legal/demarches/demarche-part";
 import { DelegateButton } from "@/components/legal/tracking/delegate-button";
 import { PlanSheetProvider } from "@/components/legal/tracking/plan-sheet-context";
+import { StepSection } from "@/components/shell/journey/step-section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { ContractProof } from "@/lib/contracts/proof";
 import { fr } from "@/lib/i18n/fr";
@@ -11,10 +12,10 @@ import type { Demarche } from "@/lib/legal/demarches/build";
 import type { BoardRow } from "@/lib/legal/plan/board";
 
 /**
- * The body of a démarche's step (proto « Projet complet », Juridique): its
- * current step in place — a person's fiche then contract, the other one
- * folded with its state — then who answers for it and by when, changeable
- * (a delegation kept in the plan's journal).
+ * The body of a démarche's step (proto Juridique v3): its current part in
+ * place — a person's fiche, then once validated their contract, one title
+ * at a time — then who answers for it and by when, changeable (a
+ * delegation kept in the plan's journal).
  */
 export function DemarcheBody({
   projectId,
@@ -59,44 +60,31 @@ export function DemarcheBody({
       owner={owner}
     />
   );
-  const head = (row: BoardRow, index: number) => (
-    <span className="flex flex-wrap items-center gap-2">
-      <span className="text-[length:var(--type-body-sm)] font-semibold">
-        {index + 1}. {fr.legal.board.steps[row.panel.kind]}
-      </span>
-      <StatusBadge tone={row.badge.tone} size="sm">
-        {row.badge.label}
-      </StatusBadge>
-    </span>
-  );
+  // One title at a time (proto Juridique v3): the fiche while it is the
+  // object at work, then « Contrat · <modèle> »; what was done before is in
+  // « Déjà fait ». A done démarche shows its last part.
+  const shown = current ?? parts[parts.length - 1] ?? null;
+  const titleOf = (row: BoardRow) =>
+    row.panel.kind === "contract" && row.panel.row.template
+      ? `${fr.legal.board.steps.contract} · ${row.panel.row.template.name}`
+      : fr.legal.board.steps[row.panel.kind];
   return (
     <PlanSheetProvider projectId={projectId} initialOpen={null} actionable={[]}>
-      {parts.length === 1 ? (
-        <div className="flex flex-col gap-4">{part(parts[0])}</div>
-      ) : (
-        <ol
-          aria-label={fr.legalDemarches.partsLabel}
-          className="flex flex-col gap-4"
-        >
-          {parts.map((row, index) => (
-            <li key={row.id} className="flex flex-col gap-3">
-              {row.id === current?.id ? (
-                <>
-                  {head(row, index)}
-                  {part(row)}
-                </>
-              ) : (
-                <details className="group rounded-xl border border-[color:var(--border-hairline)] px-3.5 py-2.5">
-                  <summary className="cursor-pointer list-none marker:hidden">
-                    {head(row, index)}
-                  </summary>
-                  <div className="flex flex-col gap-4 pt-3">{part(row)}</div>
-                </details>
-              )}
-            </li>
-          ))}
-        </ol>
-      )}
+      {shown &&
+        (parts.length === 1 ? (
+          <div className="flex flex-col gap-4">{part(shown)}</div>
+        ) : (
+          <StepSection
+            title={titleOf(shown)}
+            aside={
+              <StatusBadge tone={shown.badge.tone} size="sm">
+                {shown.badge.label}
+              </StatusBadge>
+            }
+          >
+            {part(shown)}
+          </StepSection>
+        ))}
       {own && demarche.step.status !== "done" && (
         <div className="flex flex-wrap items-center gap-2 border-t border-[color:var(--border-hairline)] pt-3.5 text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
           <span>

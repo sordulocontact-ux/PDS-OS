@@ -19,6 +19,9 @@ import {
 import { readInventoryRows } from "@/lib/legal/inventory-rows";
 import { getProject } from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
+import { ficheMissing } from "@/lib/legal/forms/completeness";
+import { legalOutcome } from "@/lib/legal/outcome";
+import type { WriteResult } from "@/lib/utils/write-result";
 
 // The project's side of the fiches (ticket Juridique 02): « Alizé vérifie
 // les destinataires et copie les liens », then follows the answers. Every
@@ -159,17 +162,78 @@ export async function revokeLegalForm(
   );
 }
 
-/** The corrections of a submission, accepted or not (« revue avant
- * propagation »). */
+/** The latest answers of a fiche, to check what a contract needs (JUR-06). */
+async function submissionOf(formId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("legal_form_submissions")
+    .select("roles, person")
+    .eq("form_id", formId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) console.error("legal form submission:", error.message);
+  return data
+    ? {
+        roles: data.roles,
+        person: Object.fromEntries(
+          Object.entries((data.person ?? {}) as Record<string, unknown>).map(
+            ([k, v]) => [k, String(v ?? "")],
+          ),
+        ),
+      }
+    : null;
+}
+
+/** « Valider la fiche », its corrections accepted or not (« revue avant
+ * propagation »). A fiche that misses what the contract needs is never
+ * validated (JUR-06); validated, the banner says the next real action. */
 export async function reviewLegalForm(
   projectId: string,
   formId: string,
   accept: boolean,
-): Promise<FormActionResult> {
-  return run({ projectId, formId }, (supabase, id) =>
-    supabase.rpc("review_legal_form", {
-      p_form_id: id,
-      p_accept: accept === true,
-    }),
+): Promise<WriteResult> {
+  const t = fr.legalForms.page;
+  const parsed = formAction.safeParse({ projectId, formId });
+  const access = await requireApproved();
+  if (!parsed.success || !can(access, "manage_legal"))
+    return { ok: false, error: fr.auth.errors.forbidden };
+  const submission = await submissionOf(parsed.data.formId);
+  if (!submission || ficheMissing(submission).length > 0)
+    return { ok: false, error: t.incomplete };
+  return legalOutcome(parsed.data.projectId, t.validated, () =>
+    run({ projectId, formId }, (supabase, id) =>
+      supabase.rpc("review_legal_form", {
+        p_form_id: id,
+        p_accept: accept === true,
+      }),
+    ),
+  );
+}
+
+/** « Redemander ce qui manque » (JUR-06): the person's private link then
+ * shows only these fields, with the team's message. Only fields of the
+ * fiche, still missing, are asked. */
+export async function requestLegalFormComplement(
+  projectId: string,
+  formId: string,
+  note: string,
+): Promise<WriteResult> {
+  const t = fr.legalForms.page;
+  const parsed = formAction.safeParse({ projectId, formId });
+  const access = await requireApproved();
+  if (!parsed.success || !can(access, "manage_legal"))
+    return { ok: false, error: fr.auth.errors.forbidden };
+  const submission = await submissionOf(parsed.data.formId);
+  const fields = submission ? ficheMissing(submission) : [];
+  if (fields.length === 0) return { ok: false, error: t.failed };
+  return legalOutcome(parsed.data.projectId, t.complementAsked, () =>
+    run({ projectId, formId }, (supabase, id) =>
+      supabase.rpc("request_legal_form_complement", {
+        p_form_id: id,
+        p_fields: fields,
+        p_note: note.trim().slice(0, 2000) || null,
+      }),
+    ),
   );
 }

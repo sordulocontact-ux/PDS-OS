@@ -7292,6 +7292,10 @@ export type Database = {
       legal_forms: {
         Row: {
           opened_at: string | null
+          complement_fields: string[] | null
+          complement_note: string | null
+          complement_requested_at: string | null
+          validated_by: string | null
           completed_at: string | null
           contact_id: string
           created_at: string
@@ -7315,6 +7319,10 @@ export type Database = {
         }
         Insert: {
           opened_at?: string | null
+          complement_fields?: string[] | null
+          complement_note?: string | null
+          complement_requested_at?: string | null
+          validated_by?: string | null
           completed_at?: string | null
           contact_id: string
           created_at?: string
@@ -7338,6 +7346,10 @@ export type Database = {
         }
         Update: {
           opened_at?: string | null
+          complement_fields?: string[] | null
+          complement_note?: string | null
+          complement_requested_at?: string | null
+          validated_by?: string | null
           completed_at?: string | null
           contact_id?: string
           created_at?: string
@@ -19475,6 +19487,10 @@ export type Database = {
         Args: { p_keys: string[]; p_project_id: string }
         Returns: undefined
       }
+      request_legal_form_complement: {
+        Args: { p_fields: string[]; p_form_id: string; p_note: string | null }
+        Returns: undefined
+      }
       review_legal_form: {
         Args: { p_accept: boolean; p_form_id: string }
         Returns: undefined
@@ -19590,6 +19606,9 @@ export type Database = {
       submit_legal_form:
         | { Args: { p_contribution: Json; p_other_role: string | null; p_person: Json; p_roles: string[]; p_token: string; p_version: number }; Returns: string }
         | { Args: { p_contact_token: string; p_contribution: Json; p_item_id: string; p_other_role: string | null; p_person: Json; p_roles: string[]; p_version: number }; Returns: string }
+      submit_legal_form_complement:
+        | { Args: { p_token: string; p_values: Json }; Returns: string }
+        | { Args: { p_contact_token: string; p_item_id: string; p_values: Json }; Returns: string }
       submit_production_direction: {
         Args: { p_sheet_id: string }
         Returns: undefined

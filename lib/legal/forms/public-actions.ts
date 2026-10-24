@@ -59,3 +59,42 @@ export async function submitLegalForm(
     status: data === "action_required" ? "action_required" : "complete",
   };
 }
+
+export type ComplementResult = { ok: true } | { ok: false; error: string };
+
+/**
+ * Sends what the team asked for (JUR-06), from the fiche's private link:
+ * submit_legal_form_complement keeps only the fields asked, each filled,
+ * then the fiche goes back to the team.
+ */
+export async function submitLegalFormComplement(
+  token: string,
+  values: Record<string, string>,
+): Promise<ComplementResult> {
+  const t = fr.legalForms.public;
+  const parsedToken = TOKEN.safeParse(token);
+  const parsed = z
+    .record(z.string().max(40), z.string().max(2000))
+    .safeParse(values);
+  if (!parsedToken.success || !parsed.success)
+    return { ok: false, error: t.invalid };
+  if (Object.values(parsed.data).some((v) => v.trim() === ""))
+    return { ok: false, error: t.complement.missing };
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("submit_legal_form_complement", {
+    ...linkKeyArgs(parsedToken.data),
+    p_values: parsed.data,
+  });
+  if (error) {
+    console.error("submitLegalFormComplement:", error.message);
+    return {
+      ok: false,
+      error: error.message.includes("legal_form_closed")
+        ? t.closed
+        : error.message.includes("legal_form_invalid")
+          ? t.complement.missing
+          : t.failed,
+    };
+  }
+  return { ok: true };
+}

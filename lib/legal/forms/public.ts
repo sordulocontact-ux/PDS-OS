@@ -47,6 +47,24 @@ const publicSchema = z.discriminatedUnion("state", [
         ),
       ),
   }),
+  // The team asked for what is missing (JUR-06): only those fields.
+  z.object({
+    state: z.literal("complement"),
+    person: z.string(),
+    project: z.string(),
+    requester: requesterSchema,
+    missing: z.array(z.string()).default([]),
+    note: z.string().nullable().default(null),
+    known: z
+      .record(z.string(), z.unknown())
+      .transform((known) =>
+        Object.fromEntries(
+          Object.entries(known).flatMap(([k, v]) =>
+            typeof v === "string" ? [[k, v]] : [],
+          ),
+        ),
+      ),
+  }),
   z.object({
     state: z.enum(["submitted", "expired", "revoked"]),
     requester: requesterSchema,

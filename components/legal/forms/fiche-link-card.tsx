@@ -32,16 +32,31 @@ export function FicheLinkCard({
   return (
     <PrivateLinkCard
       name={row.name}
-      state={row.openedAt ? "opened" : link.sentAt ? "sent" : "unsent"}
+      state={
+        row.openedAt || row.complement
+          ? "opened"
+          : link.sentAt
+            ? "sent"
+            : "unsent"
+      }
       url={link.url}
       remindHref={
-        link.url && row.state === "sent"
-          ? mailtoHref(
-              "",
-              t.emailSubject(projectTitle),
-              t.emailBody(row.name, projectTitle, link.url),
-            )
-          : null
+        !link.url
+          ? null
+          : row.complement
+            ? // The complement asked, with its message (JUR-06).
+              mailtoHref(
+                "",
+                t.emailSubject(projectTitle),
+                `${row.complement.note ?? ""}\n\n${link.url}`.trim(),
+              )
+            : row.state === "sent"
+              ? mailtoHref(
+                  "",
+                  t.emailSubject(projectTitle),
+                  t.emailBody(row.name, projectTitle, link.url),
+                )
+              : null
       }
       pending={pending}
       onRenew={onRenew}

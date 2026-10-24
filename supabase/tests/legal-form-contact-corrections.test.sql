@@ -114,7 +114,7 @@ reset role;
 set local role anon;
 select is(public.submit_legal_form((select token from links), array['artist'], null,
           '{"email": " Maya.Lenoir@example.com "}'::jsonb, '{}'::jsonb, 1),
-          'complete', 'the same e-mail written differently is not a correction');
+          'action_required', 'the same e-mail written differently is not a correction: received, to validate (JUR-06)');
 
 reset role;
 select * from finish();

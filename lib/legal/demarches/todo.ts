@@ -42,6 +42,8 @@ export function expectedOf(row: BoardRow): Expected | null {
       if (f.artistId) return owner(t.addToNetwork);
       if (f.state === "sent") return outside(f.name, t.fillFiche);
       if (f.state === "link_generated") return owner(t.markSent);
+      if (f.state === "action_required" && f.complement)
+        return outside(f.name, t.completeFiche);
       if (f.state === "action_required") return owner(t.review);
       return owner(t.prepareFiche);
     }

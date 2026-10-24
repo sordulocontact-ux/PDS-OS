@@ -49,6 +49,8 @@ export type FormRow = FormPerson & {
   // Why the access was revoked, when it was.
   revokedReason: string | null;
   submission: FormSubmission | null;
+  // What the team asked again, while the person has not answered (JUR-06).
+  complement: { fields: string[]; note: string | null; at: string } | null;
 };
 
 const asText = (value: unknown): Record<string, string> =>
@@ -78,7 +80,7 @@ export async function loadForms(
     supabase
       .from("legal_forms")
       .select(
-        "id, contact_id, status, expires_at, sent_at, sent_by, submitted_at, completed_at, created_at, opened_at, link_sealed, revoked_reason",
+        "id, contact_id, status, expires_at, sent_at, sent_by, submitted_at, completed_at, created_at, opened_at, link_sealed, revoked_reason, complement_fields, complement_note, complement_requested_at",
       )
       .eq("project_id", project.id)
       .order("created_at", { ascending: false }),
@@ -156,8 +158,14 @@ export async function loadForms(
         link: null,
         revokedReason: null,
         submission: null,
+        complement: null,
       };
     const open = form.status === "link_generated" || form.status === "sent";
+    // A complement asked keeps the link usable (JUR-06).
+    const asked =
+      form.status === "action_required" &&
+      form.complement_requested_at !== null &&
+      form.expires_at >= now;
     const state: FormState =
       open && form.expires_at < now ? "expired" : (form.status as FormState);
     return {
@@ -170,20 +178,29 @@ export async function loadForms(
         form.sent_at ??
         form.created_at,
       openedAt: open ? form.opened_at : null,
-      link: open
-        ? {
-            url: ((token) =>
-              token ? `${siteUrl()}${routes.legalForm(token)}` : null)(
-              unsealLinkToken(form.link_sealed),
-            ),
-            createdAt: form.created_at,
-            sentAt: form.sent_at,
-            sentBy: form.sent_by ? (nameOf.get(form.sent_by) ?? null) : null,
-            expiresAt: form.expires_at,
-          }
-        : null,
+      link:
+        open || asked
+          ? {
+              url: ((token) =>
+                token ? `${siteUrl()}${routes.legalForm(token)}` : null)(
+                unsealLinkToken(form.link_sealed),
+              ),
+              createdAt: form.created_at,
+              sentAt: form.sent_at,
+              sentBy: form.sent_by ? (nameOf.get(form.sent_by) ?? null) : null,
+              expiresAt: form.expires_at,
+            }
+          : null,
       revokedReason: form.status === "revoked" ? form.revoked_reason : null,
       submission: submissionOf.get(form.id) ?? null,
+      complement:
+        form.status === "action_required" && form.complement_requested_at
+          ? {
+              fields: form.complement_fields ?? [],
+              note: form.complement_note,
+              at: form.complement_requested_at,
+            }
+          : null,
     };
   });
 }

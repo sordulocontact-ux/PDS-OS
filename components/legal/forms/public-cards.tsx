@@ -1,4 +1,5 @@
 import type { PortalCardItem } from "@/components/portal/portal-sections";
+import { ComplementForm } from "@/components/legal/forms/complement-form";
 import { PublicForm } from "@/components/legal/forms/public-form";
 import {
   DataUseNote,
@@ -21,10 +22,11 @@ export function formPortalCard({
   linkKey: string;
   form: Exclude<PublicFormData, { state: "expired" | "revoked" }>;
 }): PortalCardItem {
-  const open = form.state === "open";
+  const open = form.state === "open" || form.state === "complement";
   return {
     id: "ps-form",
-    title: fr.portal.form.title,
+    title:
+      form.state === "complement" ? t.complement.title : fr.portal.form.title,
     state: open ? "todo" : "done",
     action: { label: fr.portal.form.action },
     order: 1,
@@ -44,6 +46,15 @@ export function formPortalCard({
           />
           <RequesterNote requester={form.requester} />
           <DataUseNote requester={form.requester} />
+        </>
+      ) : form.state === "complement" ? (
+        <>
+          <p className="text-muted-foreground">
+            {t.complement.intro(form.person)}
+          </p>
+          {form.note && <p className="whitespace-pre-line">{form.note}</p>}
+          <ComplementForm linkKey={linkKey} missing={form.missing} />
+          <RequesterNote requester={form.requester} />
         </>
       ) : (
         <>

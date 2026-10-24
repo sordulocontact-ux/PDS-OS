@@ -90,7 +90,7 @@ select is(public.get_legal_form(repeat('0', 64)), null, 'an unknown token shows 
 select is(public.submit_legal_form((select token from links), array['composer'], null,
           '{"legal_first_name": "Evan", "legal_last_name": "Ever", "email": "ever@example.com", "entity_type": "person", "ipi_coad": "00123456789"}'::jsonb,
           '{"proposed_split": "33,33 %"}'::jsonb, 1),
-          'complete', 'the fiche is submitted and complete');
+          'action_required', 'the fiche is submitted, to validate (JUR-06: received is not complete)');
 select throws_ok($$ select public.submit_legal_form((select token from links), array['composer'], null, '{}'::jsonb, '{}'::jsonb, 1) $$,
                  'P0001', 'legal_form_closed', 'a fiche is submitted once');
 reset role;
