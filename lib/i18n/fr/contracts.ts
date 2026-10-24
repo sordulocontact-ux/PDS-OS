@@ -197,6 +197,7 @@ export const contracts = {
       approve: "Contrat validé.",
       request_changes: "Modifications demandées au responsable.",
       send: "Contrat marqué comme envoyé.",
+      countersign: "Contrat signé pour PDS.",
       sign: "Signature enregistrée.",
       terminate: "Contrat résilié.",
     },

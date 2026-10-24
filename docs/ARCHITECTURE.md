@@ -2815,6 +2815,18 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
     corrections, Complète · à valider, Validée. Validation et complément passent par
     `legalOutcome` : le bandeau dit la prochaine action réelle et l'étape débloquée. L'étape
     d'un intervenant ne montre qu'un titre à la fois (`DemarcheBody`).
+  - *Lot 4, signature d'un contrat* (JUR-11, migration `20261024000201_contract_countersign`,
+    tests `legal-contracts` et `signed-returns`) : `advance_contract` gagne `countersign` (la
+    direction, permission `validate`, signe pour PDS : `pds_signed_by` / `pds_signed_at`,
+    évènement `contract.countersigned`) et `p_checked` ; un contrat **généré** ne passe à `signed`
+    qu'avec cette signature (`contract_countersign_missing`) et la vérification de l'équipe
+    (`contract_signature_unchecked`, `signature_checked_by` / `_at`) ; un contrat déposé à la
+    main ne change pas. `InventoryContract.returned` (copie signée revenue par le lien) et
+    `countersigned` alimentent le suivi (« la direction doit signer pour PDS », puis « vérifier
+    la signature »), le geste attendu (`expectedOf` : la direction, puis le responsable) et
+    `AgreementRow.contract`. Écran : « Vérification de la signature » (version, signataire,
+    signature pour PDS, dispositifs) dans `ContractReceived`, et `SignatureGate` (signer pour
+    PDS, case « J'ai vérifié… », « Marquer comme signé ») partagé avec `ContractSign`.
 
 - **Intervenants non crédités** (08/10/2026, lot 6 de l'architecture globale ;
   `legal_project_contacts`, migration `20261008000101`, 11 tests pgTAP) : un avocat, un

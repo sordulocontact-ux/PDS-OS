@@ -77,6 +77,8 @@ export const legalDemarches = {
     send: "Envoyer le contrat",
     signContract: "Signer et renvoyer le contrat",
     deposit: "Marquer comme signé",
+    countersign: "Signer le contrat pour PDS",
+    checkSigned: "Vérifier la signature et marquer signé",
     decide: "Décider de la suite",
     ask: "Demander l'autorisation",
     answer: "Répondre à la demande",

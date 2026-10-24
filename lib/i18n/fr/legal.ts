@@ -482,6 +482,10 @@ export const legal = {
       sentForSignature:
         "Envoyé pour signature : en attente du contrat signé, à déposer avec sa preuve",
       awaitingDirector: "À valider par la direction",
+      // JUR-11: signed back by the person, PDS still to sign, then checked.
+      awaitingCountersign:
+        "Signé par la personne : la direction doit signer pour PDS",
+      signatureToCheck: "Signé des deux côtés : vérifier la signature",
       noContract: "Aucun contrat pour l'instant",
       titleRemoved: "Le titre n'est plus dans le projet",
       splitConfirmed: "Répartition confirmée par tous",

@@ -11,6 +11,8 @@ export type ContractProof = {
   // The signed copy the person deposited by their link, timestamped: the
   // proof of their signature (« Voir le PDF »: a link valid one hour).
   deposit: { fileName: string; at: string; url: string | null } | null;
+  // Signed for PDS in PDS OS (JUR-11): by whom, when.
+  countersign: { by: string | null; at: string } | null;
 };
 
 const empty = (): ContractProof => ({
@@ -18,6 +20,7 @@ const empty = (): ContractProof => ({
   evidence: false,
   sent: null,
   deposit: null,
+  countersign: null,
 });
 
 /** Whether each contract holds its signed copy and its proof of signature,
@@ -42,7 +45,9 @@ export async function contractProofOf(
       .order("created_at", { ascending: false }),
     supabase
       .from("contracts")
-      .select("id, sent_via, sent_how, sent_on")
+      .select(
+        "id, sent_via, sent_how, sent_on, pds_signed_at, signer:people!contracts_pds_signed_by_fkey(first_name, last_name)",
+      )
       .in("id", contractIds),
   ]);
   if (files.error) console.error("contractProofOf:", files.error.message);
@@ -67,6 +72,13 @@ export async function contractProofOf(
     const known = proof.get(c.id);
     if (known && c.sent_on && (c.sent_via === "link" || c.sent_via === "other"))
       known.sent = { via: c.sent_via, how: c.sent_how, on: c.sent_on };
+    if (known && c.pds_signed_at)
+      known.countersign = {
+        by: c.signer
+          ? [c.signer.first_name, c.signer.last_name].filter(Boolean).join(" ")
+          : null,
+        at: c.pds_signed_at,
+      };
   }
   if (deposits.length > 0) {
     const { data } = await supabase.storage

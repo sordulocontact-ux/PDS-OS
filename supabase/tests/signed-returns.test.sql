@@ -1,7 +1,7 @@
 -- What comes back signed comes back by the person's private link (20261020070101): a token only
 -- signs the documents of its own contact, in its own project.
 begin;
-select plan(30);
+select plan(33);
 
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
 declare v_id uuid := gen_random_uuid();
@@ -148,8 +148,18 @@ select is((select count(*)::int from public.notifications
           1, 'the owner is told');
 select is((select status from public.contracts where id = pg_temp.id_of('contract')),
           'sent', 'the team checks it before it is signed');
+-- JUR-11: both parties, and the team's check (20261024000201).
 select pg_temp.act_as(pg_temp.id_of('manager'));
-select lives_ok(format($$ select public.advance_contract(%L, 'sign', null, current_date) $$, pg_temp.id_of('contract')),
+select throws_ok(format($$ select public.advance_contract(%L, 'sign', null, current_date, true) $$, pg_temp.id_of('contract')),
+                 'P0001', 'contract_countersign_missing', 'never signed without PDS''s signature');
+select throws_ok(format($$ select public.advance_contract(%L, 'countersign') $$, pg_temp.id_of('contract')),
+                 '42501', null, 'only the direction signs for PDS');
+select pg_temp.act_as(pg_temp.id_of('director'));
+select public.advance_contract(pg_temp.id_of('contract'), 'countersign');
+select pg_temp.act_as(pg_temp.id_of('manager'));
+select throws_ok(format($$ select public.advance_contract(%L, 'sign', null, current_date) $$, pg_temp.id_of('contract')),
+                 'P0001', 'contract_signature_unchecked', 'nor without the team''s check of the signature');
+select lives_ok(format($$ select public.advance_contract(%L, 'sign', null, current_date, true) $$, pg_temp.id_of('contract')),
                 'the deposit by the link is the proof of the signature');
 reset role;
 select is((select status from public.contracts where id = pg_temp.id_of('contract')), 'signed', 'signed');

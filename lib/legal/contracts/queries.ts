@@ -235,6 +235,8 @@ export async function loadAgreements(
         title: c.title,
         state: contractStateOf(c, today),
         partyIds: c.partyIds,
+        returned: c.returned,
+        countersigned: c.countersigned,
       })),
       contextOf,
       ficheFeeOf,

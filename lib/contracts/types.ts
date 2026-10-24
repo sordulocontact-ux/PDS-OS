@@ -34,6 +34,8 @@ export const CONTRACT_ACTIONS = [
   "approve",
   "request_changes",
   "send",
+  // The direction signs for PDS (JUR-11).
+  "countersign",
   "sign",
   "terminate",
 ] as const;

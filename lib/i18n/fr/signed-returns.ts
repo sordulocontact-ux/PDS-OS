@@ -79,6 +79,34 @@ export const signedReturns = {
     sentOther: (how: string, date: string) => `${how.toLowerCase()} le ${date}`,
     otherwise: "Le signé vous est parvenu autrement ?",
     received: (name: string) => `Reçu de ${name} par son lien privé`,
+    // JUR-11: both parties sign, the team checks before « signé ».
+    checkTitle: "Vérification de la signature",
+    checkVersion: "Version signée",
+    checkVersionValue: (version: number) =>
+      `v${version}, la version validée par la direction et envoyée`,
+    checkSigner: "Signataire",
+    checkSignerValue: (name: string) => `${name} · déposé par son lien privé`,
+    checkPds: "Signature pour PDS",
+    checkPdsDone: (name: string, at: string) =>
+      `${name}, habilitée à signer pour PDS · le ${at}`,
+    checkPdsMissing: (direction: string) =>
+      `Manquante : ${direction}, habilitée à signer pour PDS, doit signer`,
+    checkDevices: "Dispositifs de signature",
+    checkDevicesValue: (name: string) =>
+      `${name} : signature manuscrite, document déposé · PDS : signature électronique simple dans PDS OS, horodatée. Une confirmation dans PDS OS n'est jamais une signature.`,
+    checkBox: (name: string) =>
+      `J'ai vérifié que la signature est bien celle de ${name}, sur chaque page à parapher`,
+    checkMissing:
+      "Cochez après avoir vérifié la signature : c'est ce qui permet de le marquer signé.",
+    countersign: "Signer le contrat pour PDS",
+    countersigning: "Signature…",
+    countersigned: "Contrat signé pour PDS",
+    countersignBody:
+      "Signature électronique simple dans PDS OS, horodatée, liée à votre compte, sur la version que vous avez validée.",
+    countersignMissing:
+      "Le contrat ne vaut qu'avec la signature de PDS : la direction doit d'abord le signer.",
+    awaitingCountersign: (direction: string) =>
+      `En attente de ${direction} : signer le contrat pour PDS. Il ne vaut qu'avec la signature de PDS.`,
     signedFile: "Contrat signé",
     depositedBy: (name: string, date: string) =>
       `Déposé par ${name} le ${date}`,

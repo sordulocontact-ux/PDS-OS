@@ -48,6 +48,7 @@ export function ContractPanel({
   invoice,
   hasLink = false,
   personLink,
+  direction = fr.legalDemarches.direction,
 }: {
   projectId: string;
   projectTitle: string;
@@ -63,6 +64,8 @@ export function ContractPanel({
   // The person's private page (/c/): sent there, deposited signed there.
   hasLink?: boolean;
   personLink?: ReactNode;
+  // Who signs for PDS (« Claire Morel », else « la direction »).
+  direction?: string;
 }) {
   const t = fr.legal.panels.contract;
   const d = fr.legalDocuments.contract;
@@ -77,8 +80,8 @@ export function ContractPanel({
       router.refresh();
     });
   const advance = (
-    action: "submit" | "send" | "sign",
-    extra?: { comment?: string; signedOn?: string },
+    action: "submit" | "send" | "sign" | "countersign",
+    extra?: { comment?: string; signedOn?: string; checked?: boolean },
   ) =>
     contractId && run(() => advanceContract({ contractId, action, ...extra }));
 
@@ -252,7 +255,13 @@ export function ContractPanel({
               organizationId={organizationId}
               proof={proof}
               pending={pending}
-              onSign={(signedOn) => advance("sign", { signedOn })}
+              onSign={(signedOn, checked) =>
+                advance("sign", { signedOn, checked })
+              }
+              version={card?.version ?? null}
+              canCountersign={canValidate}
+              direction={direction}
+              onCountersign={() => advance("countersign")}
               personLink={personLink}
               extra={open}
             />

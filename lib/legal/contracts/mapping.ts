@@ -55,7 +55,13 @@ export type AgreementRow = {
   creditRoles: FormPerson["creditRoles"];
   formRoles: FormRole[];
   needId: string | null;
-  contract: { id: string; state: ContractState } | null;
+  contract: {
+    id: string;
+    state: ContractState;
+    // JUR-11: back signed by the person's link, and signed for PDS.
+    returned: boolean;
+    countersigned: boolean;
+  } | null;
   template: { id: string; name: string; version: number } | null;
   // Validated templates meant for these roles, best match first.
   compatible: Array<{ id: string; label: string }>;
@@ -84,6 +90,9 @@ export type MappingInput = {
     title: string;
     state: ContractState;
     partyIds: string[];
+    // JUR-11: back signed by the person's link, and signed for PDS.
+    returned?: boolean;
+    countersigned?: boolean;
   }>;
   contextOf: Map<string, Omit<ValueContext, "feeCents">>;
   ficheFeeOf: Map<string, number>;
@@ -172,7 +181,14 @@ export function agreementRows(input: MappingInput): AgreementRow[] {
       creditRoles: person.creditRoles,
       formRoles: person.formRoles,
       needId: need?.id ?? null,
-      contract: generated ? { id: generated.id, state: generated.state } : null,
+      contract: generated
+        ? {
+            id: generated.id,
+            state: generated.state,
+            returned: generated.returned ?? false,
+            countersigned: generated.countersigned ?? false,
+          }
+        : null,
       template: template
         ? { id: template.id, name: template.name, version: template.version }
         : null,

@@ -129,6 +129,16 @@ export function itemSource(
         href: person,
       };
     const sent = pick("sent");
+    // Back signed by the person: PDS signs, then the team checks (JUR-11).
+    if (sent?.c.returned)
+      return sent.c.countersigned
+        ? { status: "action_now", reason: t.signatureToCheck, href: person }
+        : {
+            status: "waiting_external",
+            decision: true,
+            reason: t.awaitingCountersign,
+            href: person,
+          };
     if (sent)
       return {
         status: "waiting_external",

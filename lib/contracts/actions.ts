@@ -236,6 +236,8 @@ const advanceSchema = z.object({
   action: z.enum(CONTRACT_ACTIONS),
   comment: z.string().trim().max(2000).optional(),
   signedOn: z.iso.date().optional(),
+  // « J'ai vérifié la signature » (JUR-11): required to sign a generated one.
+  checked: z.boolean().optional(),
 });
 
 /** Moves a contract one step (SQL advance_contract decides). */
@@ -244,12 +246,13 @@ export async function advanceContract(input: {
   action: ContractAction;
   comment?: string;
   signedOn?: string;
+  checked?: boolean;
 }): Promise<Result> {
   const t = fr.contracts.errors;
   await requireApproved();
   const parsed = advanceSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: t.invalid };
-  const { contractId, action, comment, signedOn } = parsed.data;
+  const { contractId, action, comment, signedOn, checked } = parsed.data;
   if (action === "request_changes" && !comment)
     return { ok: false, error: t.comment };
 
@@ -259,6 +262,7 @@ export async function advanceContract(input: {
     p_action: action,
     p_comment: comment || undefined,
     p_signed_on: signedOn,
+    p_checked: checked === true,
   });
   if (error) {
     const message = error.message ?? "";
@@ -273,6 +277,10 @@ export async function advanceContract(input: {
       return { ok: false, error: fr.legalContracts.document.sendLabel };
     if (message.includes("contract_proof_missing"))
       return { ok: false, error: fr.legalContracts.document.proofMissing };
+    if (message.includes("contract_countersign_missing"))
+      return { ok: false, error: fr.signedReturns.team.countersignMissing };
+    if (message.includes("contract_signature_unchecked"))
+      return { ok: false, error: fr.signedReturns.team.checkMissing };
     if (error.code === "42501") return { ok: false, error: t.forbidden };
     console.error("advanceContract:", message);
     return { ok: false, error: t.failed };

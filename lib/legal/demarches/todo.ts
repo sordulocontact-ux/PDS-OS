@@ -63,6 +63,10 @@ export function expectedOf(row: BoardRow): Expected | null {
         case "ready_for_signature":
           return owner(t.send);
         case "signature_pending":
+          // JUR-11: back signed, PDS signs, then the team checks.
+          if (a.contract?.returned && !a.contract.countersigned)
+            return { who: "direction", todo: t.countersign };
+          if (a.contract?.returned) return owner(t.checkSigned);
           return row.group === "waiting"
             ? outside(a.name, t.signContract)
             : owner(t.deposit);

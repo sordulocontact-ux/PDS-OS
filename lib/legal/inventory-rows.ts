@@ -159,7 +159,7 @@ async function readRows(
     supabase
       .from("contracts")
       .select(
-        "id, title, status, ends_on, updated_at, contract_parties(contact_id, contact:network_contacts!contract_parties_contact_same_org(name))",
+        "id, title, status, ends_on, updated_at, pds_signed_at, contract_parties(contact_id, contact:network_contacts!contract_parties_contact_same_org(name)), contract_files(category, via_contact_id)",
       )
       .eq("project_id", projectId)
       .order("created_at"),
@@ -241,6 +241,10 @@ async function readRows(
         .sort((a, b) => a.localeCompare(b, "fr")),
       partyIds: row.contract_parties.map((party) => party.contact_id),
       updatedAt: row.updated_at,
+      returned: row.contract_files.some(
+        (f) => f.category === "signed" && f.via_contact_id !== null,
+      ),
+      countersigned: row.pds_signed_at !== null,
     })),
     flags: [
       ...(flags.data ?? []).map((row) => ({

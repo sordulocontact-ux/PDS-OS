@@ -21,6 +21,10 @@ export type InventoryContract = {
   partyIds: string[];
   // Last change: since when a contract out for signature has been waiting.
   updatedAt: string;
+  // Its signed copy came back by the person's private link (JUR-11).
+  returned: boolean;
+  // Signed for PDS by the direction (JUR-11).
+  countersigned: boolean;
 };
 
 export type InventoryFlag = {

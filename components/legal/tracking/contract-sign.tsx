@@ -4,15 +4,16 @@ import { useState } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { ContractProofSlot } from "@/components/legal/clearance/contract-proof-slot";
-import { Button } from "@/components/ui/button";
+import { SignatureGate } from "@/components/legal/signed-returns/signature-gate";
 import { NextCard } from "@/components/ui/next-card";
 import type { ContractProof } from "@/lib/contracts/proof";
 import { fr } from "@/lib/i18n/fr";
 
 /**
  * « Marquer comme signé » (proto « Projet complet »): the signed copy and
- * its proof dropped here, then the contract marked signed — refused, in
- * red, while one of them is missing.
+ * its proof dropped here, PDS's signature by the direction, then the
+ * team's check and the contract marked signed (JUR-11) — refused, in red,
+ * while a file is missing.
  */
 export function ContractSign({
   contractId,
@@ -20,6 +21,10 @@ export function ContractSign({
   proof,
   pending,
   onSign,
+  person,
+  canCountersign,
+  direction,
+  onCountersign,
   extra,
 }: {
   contractId: string;
@@ -27,6 +32,11 @@ export function ContractSign({
   proof: ContractProof | null;
   pending: boolean;
   onSign: () => void;
+  // JUR-11: PDS signs, then the team checks.
+  person: string;
+  canCountersign: boolean;
+  direction: string;
+  onCountersign: () => void;
   extra?: React.ReactNode;
 }) {
   const t = fr.legal.panels.contract;
@@ -66,19 +76,18 @@ export function ContractSign({
           {f.filesMissing(missing.join(f.and))}
         </FormMessage>
       )}
-      <div className="flex flex-wrap gap-2">
-        <Button
-          variant={missing.length === 0 ? "default" : "outline"}
-          disabled={pending}
-          onClick={() => {
-            if (missing.length > 0) return setTried(true);
-            onSign();
-          }}
-        >
-          {t.markSigned}
-        </Button>
-        {extra}
-      </div>
+      <SignatureGate
+        person={person}
+        countersign={proof?.countersign ?? null}
+        canCountersign={canCountersign}
+        direction={direction}
+        pending={pending}
+        onCountersign={onCountersign}
+        onSign={onSign}
+        ready={missing.length === 0}
+        onBlocked={() => setTried(true)}
+        extra={extra}
+      />
     </NextCard>
   );
 }

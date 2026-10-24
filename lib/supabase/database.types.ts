@@ -3783,6 +3783,10 @@ export type Database = {
           due_on: string | null
           ends_on: string | null
           id: string
+          pds_signed_at: string | null
+          pds_signed_by: string | null
+          signature_checked_at: string | null
+          signature_checked_by: string | null
           notes: string | null
           organization_id: string
           owner_person_id: string
@@ -3807,6 +3811,10 @@ export type Database = {
           due_on?: string | null
           ends_on?: string | null
           id?: string
+          pds_signed_at?: string | null
+          pds_signed_by?: string | null
+          signature_checked_at?: string | null
+          signature_checked_by?: string | null
           notes?: string | null
           organization_id: string
           owner_person_id: string
@@ -3831,6 +3839,10 @@ export type Database = {
           due_on?: string | null
           ends_on?: string | null
           id?: string
+          pds_signed_at?: string | null
+          pds_signed_by?: string | null
+          signature_checked_at?: string | null
+          signature_checked_by?: string | null
           notes?: string | null
           organization_id?: string
           owner_person_id?: string
@@ -3849,6 +3861,20 @@ export type Database = {
           sent_on?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "contracts_pds_signed_by_fkey"
+            columns: ["pds_signed_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_signature_checked_by_fkey"
+            columns: ["signature_checked_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "contracts_artist_same_org"
             columns: ["artist_id", "organization_id"]
@@ -18089,6 +18115,7 @@ export type Database = {
       advance_contract: {
         Args: {
           p_action: string
+          p_checked?: boolean
           p_comment?: string
           p_contract_id: string
           p_signed_on?: string

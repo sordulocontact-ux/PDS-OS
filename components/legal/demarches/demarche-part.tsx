@@ -87,6 +87,7 @@ export function DemarchePart({
           }
           canValidate={clearances.canValidate}
           organizationId={clearances.organizationId}
+          direction={direction}
           hasLink={
             panel.row.contactId !== null &&
             linkedContacts.includes(panel.row.contactId)

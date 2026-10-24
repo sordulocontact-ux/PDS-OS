@@ -26,6 +26,10 @@ export function ContractAwaiting({
   proof,
   pending,
   onSign,
+  version,
+  canCountersign,
+  direction,
+  onCountersign,
   personLink,
   extra,
 }: {
@@ -34,7 +38,12 @@ export function ContractAwaiting({
   organizationId: string | null;
   proof: ContractProof | null;
   pending: boolean;
-  onSign: (signedOn: string) => void;
+  onSign: (signedOn: string, checked?: boolean) => void;
+  // JUR-11: the version signed, and PDS's signature by the direction.
+  version: number | null;
+  canCountersign: boolean;
+  direction: string;
+  onCountersign: () => void;
   personLink?: ReactNode;
   extra?: ReactNode;
 }) {
@@ -43,7 +52,12 @@ export function ContractAwaiting({
       <ContractReceived
         person={person}
         deposit={proof.deposit}
+        version={version}
+        countersign={proof.countersign}
+        canCountersign={canCountersign}
+        direction={direction}
         pending={pending}
+        onCountersign={onCountersign}
         onSign={onSign}
         extra={extra}
       />
@@ -72,7 +86,11 @@ export function ContractAwaiting({
           organizationId={organizationId}
           proof={proof}
           pending={pending}
-          onSign={() => onSign(todayInParis(new Date()))}
+          onSign={() => onSign(todayInParis(new Date()), true)}
+          person={person}
+          canCountersign={canCountersign}
+          direction={direction}
+          onCountersign={onCountersign}
           extra={extra}
         />
       </Fold>

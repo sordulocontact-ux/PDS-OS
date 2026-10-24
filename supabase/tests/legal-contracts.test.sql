@@ -142,6 +142,8 @@ begin
   perform public.advance_contract(p_contract, 'submit');
   perform pg_temp.act_as(pg_temp.id_of('director'));
   perform public.advance_contract(p_contract, 'approve');
+  -- JUR-11: the direction signs for PDS (20261024000201).
+  perform public.advance_contract(p_contract, 'countersign');
   perform pg_temp.act_as(pg_temp.id_of('manager'));
 end $$;
 create function pg_temp.add_file(p_contract uuid, p_category text) returns void language sql as $$
@@ -159,7 +161,7 @@ select pg_temp.add_file(pg_temp.id_of('contract_ever'), 'signed');
 select throws_ok(format($$ select public.advance_contract(%L, 'sign', null, current_date) $$, pg_temp.id_of('contract_ever')),
                  'P0001', 'contract_proof_missing', 'the signature is not recorded without its proof');
 select pg_temp.add_file(pg_temp.id_of('contract_ever'), 'evidence');
-select public.advance_contract(pg_temp.id_of('contract_ever'), 'sign', null, current_date);
+select public.advance_contract(pg_temp.id_of('contract_ever'), 'sign', null, current_date, true);
 
 reset role;
 select is((select amount_cents || ' ' || status from public.financial_needs
@@ -183,8 +185,8 @@ select pg_temp.add_file(pg_temp.id_of('contract_samy'), 'signed');
 select pg_temp.add_file(pg_temp.id_of('contract_samy'), 'evidence');
 select pg_temp.add_file(pg_temp.id_of('contract_lej'), 'signed');
 select pg_temp.add_file(pg_temp.id_of('contract_lej'), 'evidence');
-select public.advance_contract(pg_temp.id_of('contract_samy'), 'sign', null, current_date);
-select public.advance_contract(pg_temp.id_of('contract_lej'), 'sign', null, current_date);
+select public.advance_contract(pg_temp.id_of('contract_samy'), 'sign', null, current_date, true);
+select public.advance_contract(pg_temp.id_of('contract_lej'), 'sign', null, current_date, true);
 select is((select sum(amount_cents)::int || ' ' || count(*) || ' ' || string_agg(distinct status, ',')
              from public.financial_needs where project_id = pg_temp.id_of('project')),
           '130000 3 waiting_for_invoice', 'the three fees wait for their invoice, none is to pay');
