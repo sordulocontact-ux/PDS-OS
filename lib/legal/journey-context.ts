@@ -183,6 +183,7 @@ export const legalJourneyContext = cache(async (projectId: string) => {
           verdict: readiness.verdict,
           blocking: readiness.blocking.length,
           validated: readiness.validated,
+          delivered: readiness.deliveredOn !== null,
           viewer: {
             name: viewerName ?? fr.legalDemarches.direction,
             canValidate: clearances.canValidate,

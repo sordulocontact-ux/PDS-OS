@@ -18,6 +18,7 @@ export type ReadinessInputs = {
   waivers: ReadinessWaiver[];
   sacemBlocks: boolean;
   validated: { by: string; at: string } | null;
+  deliveredOn: string | null;
 };
 
 /**
@@ -31,30 +32,40 @@ export async function loadReadinessInputs(
   access: Access,
 ): Promise<ReadinessInputs> {
   const supabase = await createClient();
-  const [waivers, policy, validation, distribution] = await Promise.all([
-    supabase
-      .from("release_readiness_waivers")
-      .select("control_key, reason, granted_by, granted_at")
-      .eq("project_id", project.id),
-    access.organizationId
-      ? supabase
-          .from("release_readiness_policies")
-          .select("sacem_blocks")
-          .eq("organization_id", access.organizationId)
-          .maybeSingle()
-      : Promise.resolve({ data: null, error: null }),
-    supabase
-      .from("release_validations")
-      .select("validated_by, validated_at")
-      .eq("project_id", project.id)
-      .maybeSingle(),
-    loadDistributionSources(project, access)
-      .then((s) => distributionReadiness(s.input, formatDay).items)
-      .catch((error: unknown) => {
-        console.error("loadReadinessInputs distribution:", error);
-        return null;
-      }),
-  ]);
+  const [waivers, policy, validation, distribution, release] =
+    await Promise.all([
+      supabase
+        .from("release_readiness_waivers")
+        .select("control_key, reason, granted_by, granted_at")
+        .eq("project_id", project.id),
+      access.organizationId
+        ? supabase
+            .from("release_readiness_policies")
+            .select("sacem_blocks")
+            .eq("organization_id", access.organizationId)
+            .maybeSingle()
+        : Promise.resolve({ data: null, error: null }),
+      supabase
+        .from("release_validations")
+        .select("validated_by, validated_at")
+        .eq("project_id", project.id)
+        .maybeSingle(),
+      loadDistributionSources(project, access)
+        .then((s) => distributionReadiness(s.input, formatDay).items)
+        .catch((error: unknown) => {
+          console.error("loadReadinessInputs distribution:", error);
+          return null;
+        }),
+      // JUR-07: « Livrée au distributeur », as the Distribution recorded it.
+      supabase
+        .from("releases")
+        .select("delivered_on")
+        .eq("project_id", project.id)
+        .not("delivered_on", "is", null)
+        .order("delivered_on")
+        .limit(1)
+        .maybeSingle(),
+    ]);
   if (waivers.error)
     console.error("loadReadinessInputs waivers:", waivers.error.message);
   const ids = [
@@ -79,6 +90,7 @@ export async function loadReadinessInputs(
       at: formatShortInstant(w.granted_at),
     })),
     sacemBlocks: policy.data?.sacem_blocks ?? false,
+    deliveredOn: release.data?.delivered_on ?? null,
     validated: validation.data
       ? {
           by: nameOf.get(validation.data.validated_by) ?? "—",

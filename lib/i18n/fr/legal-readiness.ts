@@ -42,8 +42,38 @@ export const legalReadiness = {
     risk: "Rien ne bloque, des points restent à suivre.",
     ok: "Tout est en ordre pour la livraison.",
   },
-  blockingTitle: "À résoudre avant sortie",
-  followTitle: "Reste à suivre",
+  // JUR-07: at the top, where the release stands, the direction's decision,
+  // the next action, then three figures; the detail folded.
+  head: {
+    delivered: "Livrée au distributeur",
+    validated: "Sortie validée",
+    no: "Non prête",
+    ready: "Prête à être validée",
+    deliveredBody: (date: string) =>
+      `Le distributeur a reçu la sortie le ${date}.`,
+    validatedBody: (who: string, at: string) =>
+      `Validée par ${who} le ${at} : la Distribution livre au distributeur.`,
+    undecided: "Décision de la direction : pas encore prise.",
+    next: (who: string, what: string) => `Prochaine action : ${who} · ${what}`,
+    nextValidate: "valider la sortie avant The Orchard",
+    nextDeliver: "livrer au distributeur",
+    distribution: "La Distribution",
+    validateNote: (n: number) =>
+      n > 0
+        ? `Valider la sortie autorise la Distribution à livrer. Les ${n} point${n > 1 ? "s" : ""} à suivre restent suivis après.`
+        : "Valider la sortie autorise la Distribution à livrer.",
+  },
+  tiles: {
+    controls: "Contrôles validés",
+    controlsValue: (ok: number, total: number) => `${ok} sur ${total}`,
+    blocking: "Blocages",
+    blockingHint: (n: number) =>
+      n > 0 ? "À résoudre avant la sortie" : "Rien ne bloque",
+    follow: "Points à suivre",
+    followHint: (n: number) => (n > 0 ? "Ne bloquent pas la sortie" : "Rien"),
+  },
+  blockingTitle: "Blocages",
+  followTitle: "Points à suivre",
   badge: {
     blocking: "Bloquant",
     notBlocking: "Ne bloque pas",
@@ -65,7 +95,7 @@ export const legalReadiness = {
     by: (who: string, at: string, reason: string) =>
       `Dérogation de ${who} le ${at} : « ${reason} »`,
   },
-  all: "Voir tous les contrôles",
+  all: "Le détail des contrôles",
   allCount: (done: number, total: number) => `${done} faits sur ${total}`,
   policy: {
     title: "Politique du label",

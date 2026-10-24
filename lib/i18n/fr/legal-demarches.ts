@@ -157,17 +157,19 @@ export const legalDemarches = {
   ready: {
     verdict: {
       no: "Non prête",
-      risk: "À risque",
-      ok: "Prête à sortir",
+      risk: "Prête à être validée",
+      ok: "Prête à être validée",
     },
     summary: {
       no: (n: number) =>
         n === 1
           ? "Non prête · 1 point à résoudre"
           : `Non prête · ${n} points à résoudre`,
-      risk: "À risque · rien ne bloque, des points à suivre",
-      ok: "Prête à sortir",
+      // JUR-07: ready to be validated ≠ validated ≠ delivered.
+      risk: "Prête à être validée · des points à suivre",
+      ok: "Prête à être validée",
       validated: (name: string) => `Sortie validée par ${name}`,
+      delivered: "Livrée au distributeur",
     },
     todo: "Valider la sortie avant The Orchard",
   },

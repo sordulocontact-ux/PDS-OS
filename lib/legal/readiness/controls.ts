@@ -54,6 +54,11 @@ export type LegalReadiness = {
   total: number;
   sacemBlocks: boolean;
   validated: { by: string; at: string } | null;
+  // JUR-07: delivered to the distributor (« 2026-12-01 »), else null.
+  deliveredOn: string | null;
+  // The controls counted at the top: all but the direction's validation,
+  // which is the decision, not a control.
+  counted: { ok: number; total: number };
 };
 
 export type ReadinessWaiver = {
@@ -187,6 +192,7 @@ export function legalReadiness(input: {
   waivers: ReadinessWaiver[];
   sacemBlocks: boolean;
   validated: { by: string; at: string } | null;
+  deliveredOn?: string | null;
   direction: string;
   // The project's invoices, where each one stands (never their content).
   invoices?: InvoiceStateRow[];
@@ -245,5 +251,10 @@ export function legalReadiness(input: {
     total: all.length,
     sacemBlocks: input.sacemBlocks,
     validated: input.validated,
+    deliveredOn: input.deliveredOn ?? null,
+    counted: {
+      ok: controls.filter((c) => c.status === "ok").length,
+      total: controls.length,
+    },
   };
 }

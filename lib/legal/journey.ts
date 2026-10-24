@@ -50,6 +50,8 @@ export type LegalJourneyInput = {
     verdict: "no" | "risk" | "ok";
     blocking: number;
     validated: { by: string; at: string } | null;
+    // JUR-07: delivered to the distributor.
+    delivered: boolean;
     viewer: { name: string; canValidate: boolean };
   } | null;
   // The direction's name, when one member validates.
@@ -179,13 +181,15 @@ function readyStep(i: LegalJourneyInput): JourneyStep {
       : null,
     summary: !r
       ? null
-      : r.validated
-        ? d.ready.summary.validated(r.validated.by)
-        : r.verdict === "no"
-          ? d.ready.summary.no(r.blocking)
-          : r.verdict === "risk"
-            ? d.ready.summary.risk
-            : d.ready.summary.ok,
+      : r.delivered
+        ? d.ready.summary.delivered
+        : r.validated
+          ? d.ready.summary.validated(r.validated.by)
+          : r.verdict === "no"
+            ? d.ready.summary.no(r.blocking)
+            : r.verdict === "risk"
+              ? d.ready.summary.risk
+              : d.ready.summary.ok,
     group: d.groups.release,
     alert: decide ? "decision" : undefined,
   };

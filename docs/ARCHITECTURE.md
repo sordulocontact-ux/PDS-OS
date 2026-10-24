@@ -2886,6 +2886,14 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
     autorisée · licence signée, refusée), puis le seul temps en cours sous son titre
     (`ClearanceStages` sans frise). Pas de migration : ayants droit, conditions et contrats
     étaient déjà par droit.
+  - *Lot 8, Prêt pour la sortie* (JUR-07) : en tête, un bandeau dit où en est la sortie —
+    « Non prête », « Prête à être validée », « Sortie validée », « Livrée au distributeur »
+    (`releases.delivered_on`, `LegalReadiness.deliveredOn`) —, la décision de la direction et
+    la prochaine action (tue quand c'est le geste du lecteur : « À vous » le dit) ; puis trois
+    tuiles (`StatTiles` : contrôles validés hors validation finale, `LegalReadiness.counted` ;
+    blocages ; points à suivre) ; « Blocages » et « Points à suivre » seulement s'il y en a ;
+    le détail par domaine et la politique du label repliés (`Fold`). Le résumé de l'étape dans
+    le parcours suit les mêmes mots.
 
 - **Intervenants non crédités** (08/10/2026, lot 6 de l'architecture globale ;
   `legal_project_contacts`, migration `20261008000101`, 11 tests pgTAP) : un avocat, un
