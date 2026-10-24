@@ -757,3 +757,37 @@ propre circuit « Payé déclaré / vérifié »), non fusionnés ; envoi réel 
   ouverte dit qui agit et quoi (`StepActor`, masqué quand l'encadré « À vous » du lot 4 le dit déjà),
   « Ensuite » nomme qui reprend. À la fusion, le tableau du Travail (`lib/work/rows.ts`) suit
   `actionHref` pour garder les liens directs des lots 4 et 5. Reste : à rejouer dans un vrai navigateur.
+
+## Recette Juridique V1 d'Ibé (24/10/2026, branche `retours/juridique-v1`)
+
+Ticket de recette du 21/10/2026 (JUR-01 à JUR-12, scénario « Néons »), d'après le proto
+`docs/protos/juridique-v3.html` validé avec Sacha. Détail technique : `docs/ARCHITECTURE.md`
+§ 8 sexies, « Recette Juridique V1 ». Migrations `20261024000101` à `20261024000601`, à pousser
+en prod avec accord.
+
+- [x] **Lot 1, transverse** : sections d'étape (`StepSection`), carte « Lien privé » de la
+      maquette Figma, « À vous » en tête de l'étape (JUR-08), bandeau de résultat qui mène à la
+      suite (JUR-04).
+- [x] **Lot 2, plan d'action** (JUR-05, JUR-12) : démarches immédiates / dépendantes,
+      « Prérequis », ce que le lancement crée ; contrats des intervenants par état, « déjà payé »
+      refusé comme motif.
+- [x] **Lot 3, fiche** (JUR-06) : reçue n'est pas complète ; validée par l'équipe, ou complément
+      redemandé sur le lien privé.
+- [x] **Lot 4, signature d'un contrat** (JUR-11) : la direction signe pour PDS, l'équipe vérifie
+      la signature, puis « Marquer comme signé ».
+- [x] **Lot 5, répartition** (JUR-01) : créateurs, qui édite la part de chacun (PDS Éditions,
+      éditeur du Réseau, coédition, aucun), parts saisies, jamais proposées ; PDS Éditions sans
+      lien de confirmation.
+- [x] **Lot 6, SACEM** (JUR-02, JUR-03, JUR-10) : bulletin en cinq sections, état sur chaque
+      ligne, genre en liste, première exploitation et vérification DEP / DR exigées ; dépôt et
+      réponse (enregistrée / à corriger / rejetée) avec preuves PDF et identifiant SACEM.
+- [x] **Lot 7, autorisation d'utilisation** (JUR-09, JUR-10) : « Emprunt » renommé, œuvre et
+      enregistrement autorisés à part, conditions acceptées ≠ autorisée, plus de frise.
+- [x] **Lot 8, Prêt pour la sortie** (JUR-07) : bandeau (non prête, prête à être validée,
+      validée, livrée au distributeur), trois tuiles, détail replié.
+- [x] **Lot 9, modales** : « A signé autrement » (avec le scan), « Je l'ai remis autrement »,
+      facture reçue autrement, « Marquer comme payée », « Je conteste ».
+
+Reste : signature de PDS Éditions sur le bulletin par la direction dans l'app (le bulletin ne
+sait pas encore quelle ligne d'éditeur est la maison) ; « Continuer vers l'étape suivante » branché
+sur les autres gestes (JUR-04, fait pour la fiche) ; tout rejouer dans un vrai navigateur.
