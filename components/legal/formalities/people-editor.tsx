@@ -17,13 +17,6 @@ import {
   listSacemPublishers,
   type PublishingContractOption,
 } from "@/lib/legal/formalities/party-actions";
-import {
-  FULL,
-  formatShare,
-  totalUnits,
-  unitsOf,
-} from "@/lib/legal/splits/shares";
-import { cn } from "@/lib/utils";
 
 import { CreatorCard } from "./creator-card";
 import { PublisherRow } from "./publisher-row";
@@ -53,10 +46,12 @@ function useRowIds(count: number) {
   };
 }
 
-/** Creators 1 to 5 and publishers 1 to 3, each picked in the Réseau with an
- * exact Phono share; the total of both groups is shown, and must be exactly
- * 100 %. */
+/** Creators 1 to 5 (`part` « creators ») or publishers 1 to 3 (« publishers
+ * »), each picked in the Réseau with an exact Phono share — the bulletin's
+ * sections 2 and 3 (JUR-02); the total is in « 4. Répartition »
+ * (`PhonoTotal`). */
 export function PeopleEditor({
+  part,
   masterId,
   formalityId,
   creators,
@@ -68,6 +63,7 @@ export function PeopleEditor({
   onCreators,
   onPublishers,
 }: {
+  part: "creators" | "publishers";
   masterId: string;
   // The project's publishing contracts are read through it (JUR-25).
   formalityId: string;
@@ -102,14 +98,6 @@ export function PeopleEditor({
     position: i + 1,
     name: c.pseudonym || [c.first_name, c.last_name].filter(Boolean).join(" "),
   }));
-  // Totals by category (JUR-23): creators and publishers, then Phono.
-  const sumOf = (list: Array<{ phono: string }>) =>
-    totalUnits(list.map((p) => unitsOf(p.phono.replace(",", ".") || "0")));
-  const total = totalUnits(
-    [...creators, ...publishers].map((p) =>
-      unitsOf(p.phono.replace(",", ".") || "0"),
-    ),
-  );
   // A person picked gets their share of the confirmed split, if theirs is
   // still empty (UX test of 09/10/2026: « parts Phono connues, non
   // pré-remplies »).
@@ -145,64 +133,48 @@ export function PeopleEditor({
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-sm text-muted-foreground">{t.notes.creators}</p>
-      {(fromSplit || pickedShare) && !disabled && (
-        <ToneCallout tone="warning">{t.notes.phonoFromSplit}</ToneCallout>
-      )}
-      {!splitShares && !disabled && (
-        <ToneCallout tone="neutral">{t.notes.noConfirmedSplit}</ToneCallout>
-      )}
-      <FieldError id={`creators-${masterId}-error`}>
-        {errors?.fields.creators}
-      </FieldError>
-      {creators.map((c, i) => (
-        <CreatorCard
-          key={creatorRows.ids[i] ?? i}
-          rowId={`${masterId}-${creatorRows.ids[i] ?? i}`}
-          creator={c}
-          load={loadCreators}
-          disabled={disabled}
-          errors={errors?.creators[i]}
-          onChange={(change) => setCreator(i, change)}
-          onRemove={() => {
-            creatorRows.remove(i);
-            onCreators(creators.filter((_, j) => j !== i));
-            // The publishers' links follow the creators' new positions.
-            const removed = i + 1;
-            onPublishers(
-              publishers.map((p) => ({
-                ...p,
-                represents: (p.represents ?? [])
-                  .filter((n) => n !== removed)
-                  .map((n) => (n > removed ? n - 1 : n)),
-              })),
-            );
-          }}
-        />
-      ))}
-      {publishers.map((p, i) => (
-        <PublisherRow
-          key={publisherRows.ids[i] ?? i}
-          rowId={`${masterId}-${publisherRows.ids[i] ?? i}`}
-          publisher={p}
-          load={loadPublishers}
-          disabled={disabled}
-          onChange={(change) => setPublisher(i, change)}
-          errors={errors?.publishers[i]}
-          creators={creatorNames}
-          contracts={contracts}
-          onRemove={() => {
-            publisherRows.remove(i);
-            onPublishers(publishers.filter((_, j) => j !== i));
-          }}
-        />
-      ))}
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        {!disabled && (
-          <div className="flex flex-wrap gap-2">
+      {part === "creators" && (
+        <>
+          <p className="text-sm text-muted-foreground">{t.notes.creators}</p>
+          {(fromSplit || pickedShare) && !disabled && (
+            <ToneCallout tone="warning">{t.notes.phonoFromSplit}</ToneCallout>
+          )}
+          {!splitShares && !disabled && (
+            <ToneCallout tone="neutral">{t.notes.noConfirmedSplit}</ToneCallout>
+          )}
+          <FieldError id={`creators-${masterId}-error`}>
+            {errors?.fields.creators}
+          </FieldError>
+          {creators.map((c, i) => (
+            <CreatorCard
+              key={creatorRows.ids[i] ?? i}
+              rowId={`${masterId}-${creatorRows.ids[i] ?? i}`}
+              creator={c}
+              load={loadCreators}
+              disabled={disabled}
+              errors={errors?.creators[i]}
+              onChange={(change) => setCreator(i, change)}
+              onRemove={() => {
+                creatorRows.remove(i);
+                onCreators(creators.filter((_, j) => j !== i));
+                // The publishers' links follow the creators' new positions.
+                const removed = i + 1;
+                onPublishers(
+                  publishers.map((p) => ({
+                    ...p,
+                    represents: (p.represents ?? [])
+                      .filter((n) => n !== removed)
+                      .map((n) => (n > removed ? n - 1 : n)),
+                  })),
+                );
+              }}
+            />
+          ))}
+          {!disabled && (
             <Button
               size="sm"
               variant="outline"
+              className="self-start"
               disabled={creators.length >= 5}
               onClick={() => {
                 creatorRows.add();
@@ -212,9 +184,33 @@ export function PeopleEditor({
               <IconPlus aria-hidden />
               {t.creator.add}
             </Button>
+          )}
+        </>
+      )}
+      {part === "publishers" && (
+        <>
+          {publishers.map((p, i) => (
+            <PublisherRow
+              key={publisherRows.ids[i] ?? i}
+              rowId={`${masterId}-${publisherRows.ids[i] ?? i}`}
+              publisher={p}
+              load={loadPublishers}
+              disabled={disabled}
+              onChange={(change) => setPublisher(i, change)}
+              errors={errors?.publishers[i]}
+              creators={creatorNames}
+              contracts={contracts}
+              onRemove={() => {
+                publisherRows.remove(i);
+                onPublishers(publishers.filter((_, j) => j !== i));
+              }}
+            />
+          ))}
+          {!disabled && (
             <Button
               size="sm"
               variant="outline"
+              className="self-start"
               disabled={publishers.length >= 3}
               onClick={() => {
                 publisherRows.add();
@@ -224,31 +220,9 @@ export function PeopleEditor({
               <IconPlus aria-hidden />
               {t.publisher.add}
             </Button>
-          </div>
-        )}
-        <div className="flex flex-col items-end gap-1">
-          <span className="text-sm text-muted-foreground tabular-nums">
-            {t.creator.totals(
-              formatShare(sumOf(creators)),
-              formatShare(sumOf(publishers)),
-            )}
-          </span>
-          <span
-            className={cn(
-              "font-medium",
-              total !== FULL &&
-                (errors?.phono
-                  ? "text-error"
-                  : "text-[color:var(--tone-warning-fg)]"),
-            )}
-          >
-            {t.creator.phono} : {formatShare(total)}
-          </span>
-          <FieldError id={`phono-${masterId}-error`}>
-            {errors?.phono}
-          </FieldError>
-        </div>
-      </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

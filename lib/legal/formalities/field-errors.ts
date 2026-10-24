@@ -9,8 +9,8 @@ import type { Creator, Publisher } from "@/lib/legal/formalities/definition";
 import { FULL, totalUnits, unitsOf } from "@/lib/legal/splits/shares";
 
 export type DossierErrors = {
-  // By field key (title, duration, creators, dep_dr, arrangement,
-  // publishing_contract).
+  // By field key (title, duration, creators, dep_dr, dep_dr_check,
+  // first_exploitation, arrangement, publishing_contract).
   fields: Record<string, string>;
   // By creator's position, from 0.
   creators: Record<
@@ -65,7 +65,13 @@ export function dossierErrors(
       case "title":
       case "duration":
       case "genre":
+      case "first_exploitation":
         if (blank(values[what])) field(what, t[what]);
+        break;
+      // JUR-02: the DEP / DR shares computed by the code, checked by a person.
+      case "dep_dr_check":
+        if (!(values.dep_dr as { checked?: boolean } | null)?.checked)
+          field("dep_dr_check", t.dep_dr_check);
         break;
       case "creators":
         if (creators.length === 0) field("creators", t.creators);

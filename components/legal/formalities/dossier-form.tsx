@@ -9,22 +9,21 @@ import { downloadPdf } from "@/components/ui/pdf-export-button";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { saveFormalityValues } from "@/lib/legal/formalities/actions";
-import { beforeItems, type Entry } from "@/lib/legal/formalities/before-items";
 import {
+  FORMALITY_SECTIONS,
   SACEM_725_FIELDS,
   type Creator,
   type Publisher,
 } from "@/lib/legal/formalities/definition";
+import { fieldStates, type Entry } from "@/lib/legal/formalities/field-states";
 import { splitShareOf } from "@/lib/legal/formalities/prefill";
 import { generateFormality } from "@/lib/legal/formalities/step-actions";
 import type { TitleFormality } from "@/lib/legal/formalities/types";
 import { fileNamePart } from "@/lib/utils/file-name-part";
 
-import { BeforeGenerate } from "./before-generate";
 import { DossierSection } from "./dossier-section";
 import { useDossierErrors } from "./use-dossier-errors";
 
-const SECTIONS = ["work", "exploitation", "people", "agreements"] as const;
 const EDITABLE = [
   "collecting_data",
   "ready_to_generate",
@@ -35,12 +34,12 @@ const EDITABLE = [
 ];
 
 /**
- * The SACEM dossier on one page (proto « Projet complet », Déclaration
- * SACEM): every section in place, each field pre-filled from its source
- * and kept as typed, then « Avant de générer » in three columns (Bloquant,
- * À confirmer, Facultatif) and « Générer la version à signer » — refused
- * while something blocks or waits for a confirmation — or « Générer un
- * brouillon », never signed.
+ * The SACEM bulletin on one page (recette Juridique V1, JUR-02 and JUR-03,
+ * proto Juridique v3): five numbered sections, each field pre-filled from
+ * its source, kept as typed and saying where it stands on its line; then
+ * « Générer la version à signer » — refused, with the count, while
+ * something misses or waits for a confirmation — or « Générer un
+ * brouillon », marked « ne pas signer ».
  */
 export function DossierForm({
   projectId,
@@ -112,7 +111,7 @@ export function DossierForm({
   const obj = <T,>(key: string, fallback: T) =>
     (entries[key]?.value as T | null) ?? fallback;
 
-  const items = beforeItems({
+  const items = fieldStates({
     entries,
     sourceOf: (key) =>
       title.prefill[key]?.source ?? f.values[key]?.source ?? null,
@@ -122,27 +121,33 @@ export function DossierForm({
         .map(([k]) => k),
     ),
     missing: f.missing,
-  }).map((item) => ({
-    ...item,
-    onConfirm:
-      item.confirmable && editable(item.key)
-        ? () => set(item.key, entries[item.key]?.value)
-        : undefined,
-  }));
-  const blocking = items.filter((i) => i.column === "blocking").length;
-  const toConfirm = items.filter((i) => i.column === "toConfirm").length;
+  });
+  const fieldKeys = new Set(SACEM_725_FIELDS.map((x) => x.key));
+  const stateOf = (key: string) => items.find((i) => i.key === key) ?? null;
+  // A borrowing has its own line in « 1. Œuvre ».
+  const othersOf = (section: string) =>
+    items.filter(
+      (i) =>
+        !fieldKeys.has(i.key) &&
+        i.section === section &&
+        !i.key.startsWith("borrowing:"),
+    );
+  const open = items.filter((i) => i.state !== "optional").length;
   const save = () =>
     saveFormalityValues(projectId, title.masterId, f.id, entries);
 
   return (
-    <div ref={root} className="flex flex-col gap-8">
-      {SECTIONS.map((section) => (
+    <div ref={root} className="flex flex-col gap-3.5">
+      {FORMALITY_SECTIONS.map((section) => (
         <DossierSection
           key={section}
+          projectId={projectId}
           section={section}
           title={title}
           errors={errors}
           editable={editable}
+          stateOf={stateOf}
+          others={othersOf(section)}
           fromSplit={
             initial.filled ||
             (Boolean(title.prefill.phono_from_split) &&
@@ -153,7 +158,6 @@ export function DossierForm({
           set={set}
         />
       ))}
-      <BeforeGenerate items={items} />
       {EDITABLE.includes(f.status) && (
         <div className="flex flex-col gap-3 border-t border-[color:var(--border-hairline)] pt-6">
           {refused && <FormMessage kind="error">{refused}</FormMessage>}
@@ -163,8 +167,7 @@ export function DossierForm({
               aria-busy={pending || undefined}
               onClick={() => {
                 attempt();
-                if (blocking > 0 || toConfirm > 0)
-                  return setRefused(b.notYet(blocking, toConfirm));
+                if (open > 0) return setRefused(b.notYet(open));
                 run(
                   async () => {
                     const saved = await save();
@@ -194,6 +197,7 @@ export function DossierForm({
               {b.draft}
             </Button>
           </div>
+          <p className="text-caption text-muted-foreground">{b.draftNote}</p>
         </div>
       )}
     </div>

@@ -89,28 +89,29 @@ export const legalDocuments = {
     fileName: (title: string, version: number) =>
       `Bulletin_725_${title}_v${version}.pdf`,
     draftName: (title: string) => `Bulletin_725_${title}_BROUILLON.pdf`,
-    draftMark: "BROUILLON — informations manquantes",
+    draftMark: "BROUILLON — ne pas signer",
     generatedOn: (day: string, signed: number, total: number) =>
       `Généré le ${day} · signatures : ${signed} sur ${total}`,
     download: "Télécharger",
     pdfPending: "Préparation du PDF…",
     pdfFailed: "Le PDF n'a pas pu être préparé.",
     values: "Les valeurs du bulletin",
-    // « Avant de générer », in three columns (proto).
-    before: "Avant de générer",
-    blocking: "Bloquant",
-    toConfirm: "À confirmer",
-    optional: "Facultatif",
-    nothing: "Rien.",
+    // JUR-02: each value says where it stands, on its line.
+    states: {
+      confirmed: "Confirmé",
+      proposed: "Proposé",
+      missing: "Manquant",
+    },
     required: "Obligatoire pour la SACEM : sans lui, pas de version à signer",
     proposed: (source: string) =>
       `Proposé depuis ${source} : à confirmer, jamais repris sans votre accord`,
-    optionalNote: "Facultatif",
     confirm: "Confirmer",
     generate: "Générer la version à signer",
     draft: "Générer un brouillon",
-    notYet: (blocking: number, toConfirm: number) =>
-      `Pas encore : ${blocking} point${blocking > 1 ? "s" : ""} bloquant${blocking > 1 ? "s" : ""} et ${toConfirm} à confirmer. Un brouillon reste possible.`,
+    draftNote:
+      "Le brouillon porte « BROUILLON — ne pas signer » sur chaque page : il sert à relire, jamais à signer.",
+    notYet: (count: number) =>
+      `${count} information${count > 1 ? "s" : ""} à compléter ou à confirmer avant la version à signer, chacune sur sa ligne. Un brouillon reste possible.`,
     draftDone: "Brouillon prêt",
   },
   split: {

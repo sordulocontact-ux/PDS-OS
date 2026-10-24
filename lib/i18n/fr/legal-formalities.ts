@@ -35,23 +35,6 @@ export const legalFormalities = {
     complete:
       "Résultat enregistré : la déclaration est terminée et reste dans l'Historique du dossier.",
   },
-  // The declaration's frise, from the dossier to the registration (JUR-26).
-  timeline: {
-    label: "Avancement de la déclaration",
-    done: "fait",
-    dossier: "Dossier complet",
-    correction: "Correction demandée par la SACEM",
-    generated: "Bulletin généré",
-    signed: (signed: number, total: number) =>
-      signed === total
-        ? `Signé par les ${total} signataires`
-        : `Signatures : ${signed} sur ${total}`,
-    partial: (signed: number, total: number) =>
-      `Déclaration partielle : ${signed} signature${signed > 1 ? "s" : ""} sur ${total}`,
-    signedNone: "Signatures",
-    submitted: "Déposé à la SACEM",
-    completed: "Enregistré par la SACEM",
-  },
   statuses: {
     none: "Pas encore ouverte",
     collecting_data: "Données à compléter",
@@ -64,11 +47,14 @@ export const legalFormalities = {
     completed: "Enregistrée",
     action_required: "Correction demandée",
   } as Record<string, string>,
+  genrePlaceholder: "Choisir un genre",
+  // JUR-02: the bulletin in five numbered sections.
   sections: {
-    work: "L'œuvre",
-    exploitation: "Exploitation",
-    people: "Créateurs et éditeurs",
-    agreements: "Contrats et emprunts",
+    work: "1. Œuvre",
+    creators: "2. Créateurs",
+    publishers: "3. Éditeurs",
+    sharing: "4. Répartition",
+    exploitation: "5. Exploitation",
   } as Record<string, string>,
   fields: {
     title: "Titre",
@@ -91,7 +77,7 @@ export const legalFormalities = {
     duration:
       "Seulement la durée du master final, jamais celle d'un brouillon.",
     first_exploitation:
-      "Ce qui a réellement eu lieu, pas la date de sortie prévue. Jamais déduite.",
+      "Proposée depuis la date de sortie prévue : confirmez-la, ou corrigez-la si l'œuvre a été exploitée avant.",
     iswc: "Seulement s'il est déjà connu : jamais inventé.",
     territories: "« Monde », ou les territoires exacts de la cession.",
     dep_dr:
@@ -121,6 +107,11 @@ export const legalFormalities = {
   },
   // JUR-23: what the rubrique D does to the DEP and DR, computed by the code.
   sharing: {
+    // JUR-02: computed by the code, checked by a person.
+    toCheck: "Calculées par le code depuis les parts de l'œuvre : à vérifier",
+    check: "J'ai vérifié les parts DEP et DR",
+    explain:
+      "DEP, droits d'exécution publique : quand l'œuvre est diffusée (radio, télé, lieux publics, streaming). DR, droits de reproduction mécanique : quand elle est copiée (disques, téléchargements, streaming). Ils ne se partagent pas comme les parts de l'œuvre : le code les calcule selon la règle de la SACEM.",
     title: "Aperçu des DEP et DR",
     intro:
       "Phono, DEP et DR sont trois partages différents : ils ne s'additionnent jamais. Les DEP et DR sont d'abord répartis entre catégories par la règle, puis au sein de chaque catégorie.",
@@ -222,6 +213,8 @@ export const legalFormalities = {
     publisher_link: (i: string) => `Les créateurs que publie l'éditeur ${i}`,
     phono_total: "Des parts Phono qui font exactement 100 %",
     dep_dr: "Le partage des DEP et DR",
+    dep_dr_check: "La vérification des parts DEP et DR",
+    first_exploitation: "La date de la première exploitation",
     arrangement: "La portée de l'autorisation d'arrangement",
     publishing_contract: "Le contrat d'édition (seuls les éditeurs signent)",
     rubric_g: "La date du contrat d'édition (copie non jointe, rubrique G)",
@@ -236,7 +229,12 @@ export const legalFormalities = {
       "Obligatoire : la durée du master final, qui n'est pas encore reçu.",
     creators: "Le bulletin nomme au moins un créateur.",
     creator_name: "Le nom civil est obligatoire pour la SACEM.",
-    genre: "Obligatoire sur le bulletin : chanson, rap, musique électronique…",
+    genre:
+      "Obligatoire pour la SACEM : aucune source ne le donne, vous le choisissez.",
+    first_exploitation:
+      "Obligatoire : la date de la première exploitation, proposée depuis la date de sortie, à confirmer.",
+    dep_dr_check:
+      "Vérifiez les parts DEP et DR calculées par le code, puis cochez la case.",
     creator_first:
       "Donnez le prénom, ou le pseudonyme sous lequel la personne est déclarée.",
     publisher_name:
@@ -273,13 +271,10 @@ export const legalFormalities = {
       n === 1
         ? "Une information manque : elle est en rouge."
         : `${n} informations manquent : elles sont en rouge.`,
-    needs: "Avant de générer le bulletin :",
-    // Every field of the dossier answered: only what is done elsewhere is left.
-    validatedNeeds: "Dossier validé. Avant de générer le bulletin, il reste :",
-    openClearances: "Ouvrir les emprunts",
+    openClearances: "Ouvrir l'autorisation",
     update: "Enregistrer les modifications",
-    borrowings: "Emprunts",
-    noBorrowing: "Aucun emprunt à une œuvre existante.",
+    borrowings: "Œuvre préexistante",
+    noBorrowing: "Aucune",
     generate: "Générer le bulletin",
     version: (n: number) => `Version ${n}`,
     export: "Exporter en PDF",

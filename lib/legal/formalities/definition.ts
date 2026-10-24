@@ -23,6 +23,7 @@ export type FormalityStatus = (typeof FORMALITY_STATUSES)[number];
 
 export type FieldKind =
   | "text"
+  | "genre"
   | "date"
   | "textarea"
   | "creators"
@@ -31,9 +32,20 @@ export type FieldKind =
   | "arrangement"
   | "contract";
 
+// The bulletin in five sections (recette Juridique V1, JUR-02): the work,
+// its creators, its publishers, how its rights are shared, its exploitation.
+export const FORMALITY_SECTIONS = [
+  "work",
+  "creators",
+  "publishers",
+  "sharing",
+  "exploitation",
+] as const;
+export type FormalitySection = (typeof FORMALITY_SECTIONS)[number];
+
 export type FormalityField = {
   key: string;
-  section: "work" | "exploitation" | "people" | "agreements";
+  section: FormalitySection;
   kind: FieldKind;
   required: boolean;
 };
@@ -41,18 +53,39 @@ export type FormalityField = {
 export const SACEM_725_FIELDS: readonly FormalityField[] = [
   { key: "title", section: "work", kind: "text", required: true },
   { key: "subtitle", section: "work", kind: "text", required: false },
+  { key: "performers", section: "work", kind: "text", required: false },
   // Required since JUR-24: an official bulletin went out without it.
-  { key: "genre", section: "work", kind: "text", required: true },
+  { key: "genre", section: "work", kind: "genre", required: true },
   { key: "duration", section: "work", kind: "text", required: true },
   { key: "group_name", section: "work", kind: "text", required: false },
   { key: "iswc", section: "work", kind: "text", required: false },
-  { key: "performers", section: "exploitation", kind: "text", required: false },
-  // The bulletin asks the date and, apart, the place or broadcaster.
+  { key: "creators", section: "creators", kind: "creators", required: true },
+  {
+    key: "arrangement",
+    section: "creators",
+    kind: "arrangement",
+    required: false,
+  },
+  {
+    key: "publishers",
+    section: "publishers",
+    kind: "publishers",
+    required: false,
+  },
+  {
+    key: "publishing_contract",
+    section: "publishers",
+    kind: "contract",
+    required: false,
+  },
+  { key: "dep_dr", section: "sharing", kind: "dep_dr", required: true },
+  // The bulletin asks the date and, apart, the place or broadcaster. The
+  // date is required since JUR-02 (formality_missing, 20261024000401).
   {
     key: "first_exploitation",
     section: "exploitation",
     kind: "date",
-    required: false,
+    required: true,
   },
   {
     key: "first_exploitation_place",
@@ -66,22 +99,16 @@ export const SACEM_725_FIELDS: readonly FormalityField[] = [
     kind: "text",
     required: false,
   },
-  { key: "creators", section: "people", kind: "creators", required: true },
-  { key: "publishers", section: "people", kind: "publishers", required: false },
-  { key: "dep_dr", section: "people", kind: "dep_dr", required: true },
-  {
-    key: "arrangement",
-    section: "agreements",
-    kind: "arrangement",
-    required: false,
-  },
-  {
-    key: "publishing_contract",
-    section: "agreements",
-    kind: "contract",
-    required: false,
-  },
 ];
+
+// The genres offered (proto Juridique v3); a genre typed before stays.
+export const SACEM_GENRES = [
+  "Variétés / pop",
+  "Rap / hip-hop",
+  "Électro",
+  "Musique de film",
+  "Autre",
+] as const;
 
 export const QUALITIES = ["author", "composer", "arranger", "adapter"] as const;
 

@@ -1,24 +1,37 @@
-// « Avant de générer » (proto « Projet complet », Déclaration SACEM): each
-// field of the bulletin as it stands on screen — missing and required
-// (Bloquant), proposed from a source and not confirmed yet (À confirmer),
-// empty and optional (Facultatif); what the SACEM reopened is to confirm
-// again. Codes of formality_missing that no field answers (a borrowing, a
-// creator's name) are blocking too. Pure, client-safe.
+// Where each value of the bulletin stands, said on its line (recette
+// Juridique V1, JUR-02, proto Juridique v3): missing and required
+// (Manquant), proposed from a source and not confirmed yet (Proposé), or
+// confirmed — empty and optional says nothing. What the SACEM reopened is to
+// confirm again. Codes of formality_missing that no field answers (a
+// borrowing, a creator's name) are missing too. Pure, client-safe.
 
 import { fr } from "@/lib/i18n/fr";
 import {
   SACEM_725_FIELDS,
   formalityMissingLabel,
   type Creator,
+  type FormalitySection,
   type Publisher,
 } from "@/lib/legal/formalities/definition";
 
+// The section of a code that no field answers.
+function sectionOfCode(code: string): FormalitySection {
+  if (code.startsWith("creator")) return "creators";
+  if (code.startsWith("publisher")) return "publishers";
+  if (code === "phono_total") return "sharing";
+  return "work";
+}
+// Codes said by a field itself, on screen, never twice.
+const FIELD_CODES = new Set(["dep_dr_check"]);
+
 export type Entry = { value: unknown; typed: boolean };
-export type BeforeColumn = "blocking" | "toConfirm" | "optional";
-export type BeforeEntry = {
+export type FieldState = "missing" | "proposed" | "optional";
+export type FieldStateEntry = {
   key: string;
+  // The section whose line says it.
+  section: FormalitySection;
   label: string;
-  column: BeforeColumn;
+  state: FieldState;
   reason: string;
   // A proposed value the person may confirm as it is.
   confirmable: boolean;
@@ -36,13 +49,13 @@ export function filled(value: unknown): boolean {
   return true;
 }
 
-export function beforeItems(input: {
+export function fieldStates(input: {
   entries: Record<string, Entry>;
   // Where each proposed value comes from (prefill, or the stored source).
   sourceOf: (key: string) => string | null;
   reopened: ReadonlySet<string>;
   missing: string[];
-}): BeforeEntry[] {
+}): FieldStateEntry[] {
   const t = fr.legalFormalities;
   const b = fr.legalDocuments.bulletin;
   const { entries } = input;
@@ -53,29 +66,38 @@ export function beforeItems(input: {
     (key === "arrangement" && creators.some((c) => c.quality === "arranger")) ||
     (key === "publishing_contract" && publishers.length > 0);
 
-  const fields = SACEM_725_FIELDS.filter(
-    (f) => f.kind !== "publishers",
-  ).flatMap((field): BeforeEntry[] => {
+  const fields = SACEM_725_FIELDS.flatMap((field): FieldStateEntry[] => {
     const entry = entries[field.key];
     const label = t.fields[field.key];
-    const base = { key: field.key, label, confirmable: false };
-    if (!entry || !filled(entry.value))
+    const base = {
+      key: field.key,
+      section: field.section,
+      label,
+      confirmable: false,
+    };
+    const depDr = entry?.value as { choice?: string; checked?: boolean } | null;
+    const empty =
+      field.key === "dep_dr" ? !depDr?.choice : !entry || !filled(entry.value);
+    if (empty)
       return [
         requiredOf(field.key, field.required)
           ? {
               ...base,
-              column: "blocking",
+              state: "missing",
               reason: t.notes[field.key] ?? b.required,
             }
-          : { ...base, column: "optional", reason: b.optionalNote },
+          : { ...base, state: "optional", reason: "" },
       ];
     if (input.reopened.has(field.key))
-      return [{ ...base, column: "toConfirm", reason: t.sources.toVerify }];
-    if (!entry.typed)
+      return [{ ...base, state: "proposed", reason: t.sources.toVerify }];
+    // Computed by the code, checked by a person (JUR-02).
+    if (field.key === "dep_dr" && !depDr?.checked)
+      return [{ ...base, state: "proposed", reason: t.sharing.toCheck }];
+    if (!entry?.typed)
       return [
         {
           ...base,
-          column: "toConfirm",
+          state: "proposed",
           reason: b.proposed(input.sourceOf(field.key) ?? t.sources.toVerify),
           confirmable: true,
         },
@@ -84,11 +106,13 @@ export function beforeItems(input: {
   });
   const keys = new Set(SACEM_725_FIELDS.map((f) => f.key));
   const others = input.missing
-    .filter((code) => !keys.has(code))
-    .map((code): BeforeEntry => ({
+    .filter((code) => !keys.has(code) && !FIELD_CODES.has(code))
+    .filter((code) => !code.startsWith("to_verify:"))
+    .map((code): FieldStateEntry => ({
       key: code,
+      section: sectionOfCode(code),
       label: formalityMissingLabel(code),
-      column: "blocking",
+      state: "missing",
       reason: b.required,
       confirmable: false,
     }));

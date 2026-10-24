@@ -3,7 +3,7 @@
 -- `supabase test db`. Fixture of the ticket (« Piégée », test data only: the
 -- shares, signatures, deposit, registration and ISWC here are SIMULATED).
 begin;
-select plan(24);
+select plan(25);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -105,6 +105,13 @@ select public.save_formality_values(pg_temp.id_of('f'), jsonb_build_object(
 select ok('phono_total' = any (public.formality_missing(pg_temp.id_of('f'))), 'the Phono shares must total exactly 100 %');
 select public.save_formality_values(pg_temp.id_of('f'), jsonb_build_object(
   'creators', jsonb_build_object('value', pg_temp.creators(array['33.3334', '33.3333', '33.3333']), 'source', 'Saisi')));
+-- JUR-02/03 (…20261024000401): the first exploitation, and the DEP / DR checked by a person.
+select is(public.formality_missing(pg_temp.id_of('f')),
+          array['borrowing:Humanisme', 'first_exploitation', 'dep_dr_check'],
+          'the first exploitation and the check of the DEP / DR shares are required');
+select public.save_formality_values(pg_temp.id_of('f'), jsonb_build_object(
+  'first_exploitation', jsonb_build_object('value', '2026-11-20', 'source', 'Saisi'),
+  'dep_dr', jsonb_build_object('value', jsonb_build_object('choice', 'follow_phono', 'checked', true), 'source', 'Saisi')));
 select is(public.formality_missing(pg_temp.id_of('f')), array['borrowing:Humanisme'], 'only the unsecured borrowing remains');
 -- JUR-24 (…20261012100401): a creator without first name nor pseudonym,
 -- and a publisher without denomination, block the bulletin.

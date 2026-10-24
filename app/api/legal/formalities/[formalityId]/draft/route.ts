@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 /**
  * « Générer un brouillon » (proto « Projet complet », Déclaration SACEM):
  * the official 725 bulletin filled with the dossier's values as they are
- * saved, « BROUILLON — informations manquantes » across each page. No
+ * saved, « BROUILLON — ne pas signer » across each page. No
  * version is made, nothing is kept: a draft is never signed. Read with the
  * user's session (RLS: manage_legal).
  */

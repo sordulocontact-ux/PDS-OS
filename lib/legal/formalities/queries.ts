@@ -48,6 +48,7 @@ export async function loadFormalities(
     people,
     publishing,
     publisherSplits,
+    release,
   ] = await Promise.all([
     supabase
       .from("masters")
@@ -97,6 +98,15 @@ export async function loadFormalities(
       .eq("kind", "publishing")
       .eq("role", "publisher")
       .order("share", { ascending: false }),
+    // The planned release: the first exploitation proposed (JUR-02).
+    supabase
+      .from("releases")
+      .select("planned_release_date")
+      .eq("project_id", project.id)
+      .not("planned_release_date", "is", null)
+      .order("planned_release_date")
+      .limit(1)
+      .maybeSingle(),
   ]);
   const contactIds = [
     ...new Set(
@@ -210,6 +220,7 @@ export async function loadFormalities(
           })),
         signedPublishingContract: publishing.data?.title ?? null,
         splitShares: splits.get(m.id) ?? null,
+        releaseDate: release.data?.planned_release_date ?? null,
       });
       // Kept for the people added by hand: they take their share too.
       const splitShares = splits.get(m.id) ?? null;

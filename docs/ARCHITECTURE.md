@@ -2845,6 +2845,20 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
     dans la fiche, le contrat d'édition prévu au plan, « Pas d'accord nécessaire » ; sinon
     « À choisir ». Une répartition de la fiche du titre qui a un éditeur passe par l'éditeur
     (on ne sait pas qui il représente).
+  - *Lot 6a, bulletin SACEM* (JUR-02, JUR-03, migration `20261024000401_sacem_checks`, test
+    `legal-formalities`) : cinq sections numérotées (`FORMALITY_SECTIONS` : 1. Œuvre,
+    2. Créateurs, 3. Éditeurs, 4. Répartition, 5. Exploitation ; plus de section
+    « Vérification ») ; chaque ligne dit son état (`fieldStates` + `FieldStateLine` :
+    « Confirmé », « Proposé » avec sa source et « Confirmer », « Manquant » avec pourquoi), le
+    bouton « Générer la version à signer » compte les manques ; genre en liste
+    (`SACEM_GENRES`) ; « Œuvre préexistante » dans l'Œuvre (`BorrowingLine`) ; total Phono en
+    tête de la Répartition (`PhonoTotal`), DEP / DR expliqués, calculés par le code et
+    « J'ai vérifié les parts DEP et DR » (`DepDrField`, `dep_dr.checked`) ; première
+    exploitation **obligatoire**, proposée depuis la date de sortie prévue
+    (`releases.planned_release_date`, « Proposé » jusqu'à « Confirmer ») — ce qui remplace la
+    règle « jamais déduite » du ticket 06. `formality_missing` (renommée
+    `formality_missing_base` et enveloppée) ajoute `first_exploitation` et `dep_dr_check`.
+    Plus de frise ni de liste « Il manque » en tête ; brouillon « BROUILLON — ne pas signer ».
 
 - **Intervenants non crédités** (08/10/2026, lot 6 de l'architecture globale ;
   `legal_project_contacts`, migration `20261008000101`, 11 tests pgTAP) : un avocat, un
@@ -3659,8 +3673,8 @@ la personne (`/c/`). Migration `20261020070101_signed_returns.sql`, pgTAP `signe
 - **SACEM (JUR-24, JUR-26)** : `formality_missing` exige aussi le genre, un prénom ou un
   pseudonyme par créateur et la dénomination de chaque éditeur (migration `20261012100401`,
   dossiers non générés rejugés) ; l'IPI / COAD reste facultatif (un créateur non membre n'en a
-  pas). La déclaration a sa frise (`formalityTimeline` : dossier, bulletin, signatures « x sur
-  y » ou partielle, dépôt, enregistrement ; `ProcessingSteps idle`), et chaque signature
+  pas). La frise de la déclaration (`formalityTimeline`) a été retirée par la recette
+  Juridique V1 (lot 6) ; chaque signature
   s'enregistre par « Enregistrer la signature de X » avec « Comment X a signé » expliqué.
 ### Le reste du Juridique (retours du 11/10/2026, lot 4)
 
@@ -3859,14 +3873,12 @@ Remplace l'étape « Suivi » et les pages de branche (`docs/projet-complet/lega
   « Pourquoi * » `revoke_split_confirmation`). Un lien reporté sur une nouvelle version (JUR-27)
   garde son sceau et son envoi (trigger `a_carry_link`). Sans clé, le lien s'affiche une fois
   comme avant. La carte de la confirmation est déjà sur la page de la personne (`/c/`, lot 11).
-- **SACEM sur une page** : sections en place (`DossierSection`), puis « Avant de générer » en
-  trois colonnes Bloquant / À confirmer / Facultatif (`BeforeGenerate`,
-  `lib/legal/formalities/before-items.ts` : requis vide, proposé par une source non confirmé —
-  « Confirmer » le fait sien —, rouvert par la SACEM, codes de `formality_missing` hors champ),
-  « Générer la version à signer » (enregistre puis génère ; refusé par le code : « Pas encore :
-  n points bloquants et m à confirmer. Un brouillon reste possible. ») et « Générer un
-  brouillon » (`/api/legal/formalities/[id]/draft` : le 725 rempli des valeurs enregistrées,
-  « BROUILLON — informations manquantes » en travers, aucune version gardée). Une fois généré,
+- **SACEM sur une page** : sections en place (`DossierSection`) ; depuis la recette Juridique
+  V1 (lot 6), plus de « Avant de générer » à part : chaque ligne dit son état
+  (`lib/legal/formalities/field-states.ts`), « Générer la version à signer » (enregistre puis
+  génère ; refusé avec le compte des manques) et « Générer un brouillon »
+  (`/api/legal/formalities/[id]/draft` : le 725 rempli des valeurs enregistrées,
+  « BROUILLON — ne pas signer » en travers, aucune version gardée). Une fois généré,
   `BulletinCard` (« Bulletin_725_Neons_v1.pdf · Généré le … · signatures : n sur m »,
   « Télécharger ») est en tête à chaque étape qui suit, le dossier replié sous « Les valeurs du
   bulletin ». Retirés : étapes du dossier (`DossierStepChips`), récapitulatif (`DossierRecap`).

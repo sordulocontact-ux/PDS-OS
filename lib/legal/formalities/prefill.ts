@@ -1,7 +1,9 @@
 // What PDS OS already knows for each field of the bulletin, with where it
 // comes from (ticket Juridique 06, « PO préremplit les champs sourcés et
-// liste les valeurs manquantes »). Never a first exploitation, never an
-// ISWC that is not on the title, never a draft's duration. The Phono shares
+// liste les valeurs manquantes »). Never an ISWC that is not on the title,
+// never a draft's duration. The first exploitation is proposed from the
+// planned release (recette Juridique V1, JUR-02), « Proposé » until a person
+// confirms it. The Phono shares
 // start from the title's confirmed split (UX test of 09/10/2026, decided
 // with Sacha on 10/10: they were retyped right after the confirmation),
 // matched by contact, never by name, and shown « à vérifier ». A signed
@@ -51,6 +53,8 @@ export type PrefillContext = {
   signedPublishingContract: string | null;
   // The title's confirmed split, if there is one.
   splitShares: SplitShare[] | null;
+  // The project's planned release day, « 2026-12-05 ».
+  releaseDate: string | null;
 };
 
 // The share of a person in the confirmed split: the line of their contact
@@ -109,6 +113,9 @@ export function prefillSacem725(ctx: PrefillContext): Prefill {
         ? { value: minutes(ctx.durationSeconds), source: "Master final" }
         : undefined,
     iswc: ctx.iswc ? { value: ctx.iswc, source: "Titre" } : undefined,
+    first_exploitation: ctx.releaseDate
+      ? { value: ctx.releaseDate, source: "Date de sortie prévue" }
+      : undefined,
     performers:
       ctx.performers.length > 0
         ? { value: ctx.performers.join(", "), source: "Artistes du titre" }

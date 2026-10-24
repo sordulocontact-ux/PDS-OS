@@ -8,8 +8,6 @@ import { OptionSelect } from "@/components/projects/option-select";
 import { useLegalAction } from "@/components/legal/use-legal-action";
 import { Button } from "@/components/ui/button";
 import { SignaturesList } from "@/components/legal/formalities/signatures-list";
-import { ProcessingSteps } from "@/components/ui/processing-steps";
-import { formalityTimeline } from "@/lib/legal/formalities/timeline";
 import { fr } from "@/lib/i18n/fr";
 import {
   completeFormality,
@@ -43,13 +41,6 @@ export function StepsPanel({
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Where the declaration stands, step by step (JUR-26). */}
-      <ProcessingSteps
-        idle
-        label={fr.legalFormalities.timeline.label}
-        doneLabel={fr.legalFormalities.timeline.done}
-        steps={formalityTimeline(f)}
-      />
       <div className="flex flex-wrap gap-2">
         {f.status === "signatures_pending" && (
           <Button

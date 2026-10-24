@@ -48,6 +48,8 @@ const VALUE: Record<string, z.ZodType> = {
     choice: z.enum(DEP_DR_CHOICES).or(z.literal("")),
     // The sharing rule the dossier was computed with (JUR-23).
     rule: z.string().max(40).optional(),
+    // « J'ai vérifié les parts DEP et DR » (JUR-02, formality_missing).
+    checked: z.boolean().optional(),
   }),
   arrangement: z.object({
     scope: z.enum(["all", "specific"]).or(z.literal("")),
