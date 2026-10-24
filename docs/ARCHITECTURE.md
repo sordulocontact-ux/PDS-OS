@@ -2827,6 +2827,24 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
     `AgreementRow.contract`. Écran : « Vérification de la signature » (version, signataire,
     signature pour PDS, dispositifs) dans `ContractReceived`, et `SignatureGate` (signer pour
     PDS, case « J'ai vérifié… », « Marquer comme signé ») partagé avec `ContractSign`.
+  - *Lot 5, répartition* (JUR-01, migration `20261024000301_split_publishers`, test pgTAP
+    `legal-split-publishers`) : trois sections distinctes dans l'éditeur (`SplitEditor`) —
+    « Qui a créé quoi » (créateurs, rôle `author_composer` pour paroles et musique),
+    « Qui édite la part de chaque créateur » (`SplitPublishingRow` : PDS Éditions, un autre
+    éditeur **choisi dans le Réseau**, coédition par PDS Éditions, ou aucun éditeur), puis
+    « Parts de l'œuvre » (`SplitParts` : une part par créateur et par éditeur, vide à « 0 % »,
+    jamais proposée ; manques et total signalés à l'enregistrement seulement). Les éditeurs ne
+    se saisissent pas : ils découlent des choix (`publishersOf`, `lib/legal/splits/draft.ts`).
+    En base, une ligne d'éditeur porte `represents` (positions des créateurs qu'il représente :
+    un éditeur peut n'en représenter qu'un) et `house` (PDS Éditions : l'équipe, **sans lien de
+    confirmation**, hors du compte des réponses de `consolidate_split_version`) ;
+    `save_split_draft` refuse un éditeur sans créateur représenté (`split_publisher_unlinked`)
+    ou hors Réseau (`split_publisher_contact_required`). Le contenu confirmé
+    (`split_version_content`) dit qui chaque éditeur représente ; une version sans éditeur garde
+    la même empreinte. Pré-remplissage avec sa source (`loadPublishingHints`) : l'éditeur nommé
+    dans la fiche, le contrat d'édition prévu au plan, « Pas d'accord nécessaire » ; sinon
+    « À choisir ». Une répartition de la fiche du titre qui a un éditeur passe par l'éditeur
+    (on ne sait pas qui il représente).
 
 - **Intervenants non crédités** (08/10/2026, lot 6 de l'architecture globale ;
   `legal_project_contacts`, migration `20261008000101`, 11 tests pgTAP) : un avocat, un
@@ -3335,9 +3353,9 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
     envoyée, confirmée en partie, confirmée, contestée, remplacée), **lignes**
     (`legal_split_entries` : nom, rôle, part `numeric(7,4)`, contact et crédit d'origine).
   - **Parts exactes** : le code compte en dix-millièmes de pourcent (entiers,
-    `lib/legal/splits/shares.ts`), « Parts égales » donne le reste aux premières lignes
-    (33,3334 + 33,3333 + 33,3333) ; `propose_split_version` refuse tout total autre que 100 ;
-    l'écran arrondit à 2 décimales.
+    `lib/legal/splits/shares.ts`) ; `propose_split_version` refuse tout total autre que 100 ;
+    l'écran arrondit à 2 décimales. Plus de « Parts égales » depuis la recette Juridique V1
+    (JUR-01) : aucune part n'est proposée par le code.
   - **Un lien par personne et par version** (`legal_split_confirmations`, jeton de 64 hex,
     seul son `sha256` gardé, 30 jours, « Nouveau lien » révoque l'ancien). La page publique lit
     la version et son empreinte (`split_content_hash`) ; la réponse est refusée si l'empreinte

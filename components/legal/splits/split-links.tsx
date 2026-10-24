@@ -13,6 +13,7 @@ import {
   markSplitLinkSent,
   revokeSplitLink,
 } from "@/lib/legal/splits/link-actions";
+import { roleOfLine } from "@/lib/legal/splits/draft";
 import type { SplitLine } from "@/lib/legal/splits/queries";
 import { mailtoHref } from "@/lib/utils/mailto";
 
@@ -58,7 +59,7 @@ export function SplitLinks({
           return (
             <li key={line.id} className="flex flex-col gap-1.5">
               <PrivateLinkCard
-                name={`${line.name} · ${fr.legalSplits.roles[line.role]}`}
+                name={`${line.name} · ${roleOfLine(line, lines)}`}
                 state={link.sentAt ? "sent" : "unsent"}
                 url={link.url}
                 remindHref={

@@ -1,12 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import { toast } from "sonner";
 
-import { SplitEditor } from "@/components/legal/splits/split-editor";
 import { Button } from "@/components/ui/button";
-import { FormDialog } from "@/components/ui/form-dialog";
 import { useShowLinks } from "@/components/ui/one-time-links";
 import { fr } from "@/lib/i18n/fr";
 import { mailtoHref } from "@/lib/utils/mailto";
@@ -16,65 +14,7 @@ import {
   proposeTitleSplit,
   type SplitLink,
 } from "@/lib/legal/splits/actions";
-import type { SplitLine } from "@/lib/legal/splits/queries";
 
-/** « Préparer », « Reprendre le brouillon » or « Modifier la répartition »:
- * the editor in the wide modal. */
-export function SplitEditorButton({
-  projectId,
-  masterId,
-  title,
-  label,
-  initial,
-  withNote,
-  primary,
-}: {
-  projectId: string;
-  masterId: string;
-  title: string;
-  label: string;
-  initial: SplitLine[];
-  withNote: boolean;
-  primary?: boolean;
-}) {
-  const router = useRouter();
-  const [open, setOpen] = useState(false);
-  const t = fr.legalSplits.editor;
-  return (
-    <>
-      <Button
-        size="sm"
-        variant={primary ? "default" : "outline"}
-        onClick={() => setOpen(true)}
-      >
-        {label}
-      </Button>
-      <FormDialog
-        open={open}
-        onOpenChange={setOpen}
-        title={t.title(title)}
-        description={t.description}
-        closeLabel={fr.legalSplits.links.close}
-        size="wide"
-      >
-        <SplitEditor
-          projectId={projectId}
-          masterId={masterId}
-          initial={initial}
-          withNote={withNote}
-          onCancel={() => setOpen(false)}
-          onDone={() => {
-            setOpen(false);
-            router.refresh();
-          }}
-        />
-      </FormDialog>
-    </>
-  );
-}
-
-/** Shows the split's links once, in the dialog that outlives the page's
- * refresh (the button that asked for them moves to « En attente »). */
 /** The confirmation links of a split, shown once above the page (they
  * survive its refresh). */
 export function useShowSplitLinks() {

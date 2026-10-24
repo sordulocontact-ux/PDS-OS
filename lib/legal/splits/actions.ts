@@ -51,6 +51,9 @@ const draftSchema = z.object({
         share: z.string().max(12),
         contactId: catalogIdSchema.nullable(),
         creditId: catalogIdSchema.nullable(),
+        // A publisher's line (JUR-01): whom it represents, the house.
+        represents: z.array(z.number().int().min(1).max(30)).max(30).nullable(),
+        house: z.boolean(),
       }),
     )
     .min(1)
@@ -61,6 +64,9 @@ function errorOf(message: string) {
   const t = fr.legalSplits.errors;
   if (message.includes("split_total_not_100")) return t.total;
   if (message.includes("split_contact_invalid")) return t.contactInvalid;
+  if (message.includes("split_publisher_contact_required"))
+    return fr.legalSplits.editor.publisherMissing;
+  if (message.includes("split_publisher_unlinked")) return t.publisherUnlinked;
   if (
     message.includes("split_version_closed") ||
     message.includes("split_version_not_draft")
@@ -94,6 +100,8 @@ export async function saveSplitDraft(
       share: shareOf(units[i]!),
       contact_id: line.contactId,
       credit_id: line.creditId,
+      represents: line.represents,
+      house: line.house,
     })),
   });
   if (error) {
@@ -147,6 +155,9 @@ export async function proposeTitleSplit(
   );
   const lines = readError ? null : titlePublishingLines(splits);
   if (!lines) return { ok: false, error: fr.legalSplits.errors.total };
+  // A publisher there does not say whom it represents (JUR-01).
+  if (lines.some((line) => line.role === "publisher"))
+    return { ok: false, error: fr.legalSplits.errors.publisherUnlinked };
 
   const supabase = await createClient();
   const { data: versionId, error } = await supabase.rpc("save_split_draft", {

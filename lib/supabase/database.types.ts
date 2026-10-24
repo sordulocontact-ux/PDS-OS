@@ -7994,10 +7994,12 @@ export type Database = {
         Row: {
           contact_id: string | null
           credit_id: string | null
+          house: boolean
           id: string
           name: string
           organization_id: string
           position: number
+          represents: number[] | null
           role: string
           share: number
           version_id: string
@@ -8005,10 +8007,12 @@ export type Database = {
         Insert: {
           contact_id?: string | null
           credit_id?: string | null
+          house?: boolean
           id?: string
           name: string
           organization_id: string
           position: number
+          represents?: number[] | null
           role: string
           share: number
           version_id: string
@@ -8016,10 +8020,12 @@ export type Database = {
         Update: {
           contact_id?: string | null
           credit_id?: string | null
+          house?: boolean
           id?: string
           name?: string
           organization_id?: string
           position?: number
+          represents?: number[] | null
           role?: string
           share?: number
           version_id?: string

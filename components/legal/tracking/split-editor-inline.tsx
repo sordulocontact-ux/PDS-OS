@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { SplitEditor } from "@/components/legal/splits/split-editor";
 import { Button } from "@/components/ui/button";
+import type { PublishingHint } from "@/lib/legal/splits/draft";
 import type { SplitLine } from "@/lib/legal/splits/queries";
 
 /** The split editor inside the plan's panel (no modal over the panel):
@@ -13,14 +14,17 @@ export function SplitEditorInline({
   projectId,
   masterId,
   initial,
-  withNote,
+  hints,
+  version,
   startOpen,
   label,
 }: {
   projectId: string;
   masterId: string;
   initial: SplitLine[];
-  withNote: boolean;
+  hints: Record<string, PublishingHint>;
+  // The version a new one follows (why it changes is asked), else null.
+  version: number | null;
   startOpen: boolean;
   label: string;
 }) {
@@ -41,7 +45,8 @@ export function SplitEditorInline({
       projectId={projectId}
       masterId={masterId}
       initial={initial}
-      withNote={withNote}
+      hints={hints}
+      version={version}
       onDone={() => {
         setOpen(false);
         router.refresh();

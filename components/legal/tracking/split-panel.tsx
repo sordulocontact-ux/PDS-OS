@@ -7,13 +7,21 @@ import { SplitEditorInline } from "@/components/legal/tracking/split-editor-inli
 import { EmptyNote } from "@/components/shell/empty-state";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { fr } from "@/lib/i18n/fr";
-import type { SplitVersionView, TitleSplit } from "@/lib/legal/splits/queries";
+import type {
+  SplitLine,
+  SplitVersionView,
+  TitleSplit,
+} from "@/lib/legal/splits/queries";
+
+const muted =
+  "text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]";
 
 /**
- * One title's split in the plan's panel (the prototype's): the parts to
- * propose (« Parts égales », exactly 100 %), sent for confirmation — one
- * link per person, shown once — then each answer; a dispute asks for a new
- * version, nothing is erased. Ticket Juridique 04.
+ * One title's split in its démarche (recette Juridique V1, JUR-01): who
+ * created what, who publishes each share, then the parts, typed by a
+ * person (the editor); sent for confirmation — one link per creator and per
+ * publisher outside the house (PDS Éditions is the team) — then each
+ * answer; a dispute asks for a new version, nothing is erased.
  */
 export function SplitPanel({
   projectId,
@@ -24,7 +32,7 @@ export function SplitPanel({
 }) {
   const t = fr.legal.panels.split;
   const page = fr.legalSplits.page;
-  const { active, draft } = split;
+  const { active, draft, hints } = split;
   // JUR-29: a version against the one it follows.
   const before = (v: SplitVersionView) =>
     [...(active ? [active] : []), ...split.history]
@@ -36,11 +44,32 @@ export function SplitPanel({
       <SplitVersionChanges previous={previous} version={v} />
     ) : null;
   };
+  const editor = (
+    initial: SplitLine[],
+    version: number | null,
+    startOpen: boolean,
+    label: string,
+  ) => (
+    <SplitEditorInline
+      projectId={projectId}
+      masterId={split.masterId}
+      initial={initial}
+      hints={hints}
+      version={version}
+      startOpen={startOpen}
+      label={label}
+    />
+  );
+  // Who answers by their own link: everyone but the house.
+  const sendBody = (lines: SplitLine[]) =>
+    t.sendBody(
+      lines.filter((l) => !l.house).map((l) => l.name),
+      lines.some((l) => l.house),
+    );
 
   if (draft)
     return (
       <NextCard kind="act" label={t.next} title={t.send}>
-        <p className="text-sm text-muted-foreground">{t.sendBody}</p>
         {changes(draft)}
         <SplitLines
           projectId={projectId}
@@ -48,19 +77,13 @@ export function SplitPanel({
           lines={draft.lines}
           open={false}
         />
+        <p className={muted}>{sendBody(draft.lines)}</p>
         <ProposeSplitButton
           projectId={projectId}
           target={{ versionId: draft.id }}
           title={split.title}
         />
-        <SplitEditorInline
-          projectId={projectId}
-          masterId={split.masterId}
-          initial={draft.lines}
-          withNote={Boolean(active)}
-          startOpen={false}
-          label={page.resume}
-        />
+        {editor(draft.lines, active?.version ?? null, false, page.editFirst)}
       </NextCard>
     );
 
@@ -70,7 +93,7 @@ export function SplitPanel({
     if (split.fromTitle)
       return (
         <NextCard kind="act" label={t.next} title={t.fromTitle}>
-          <p className="text-sm text-muted-foreground">{page.fromTitle}</p>
+          <p className={muted}>{page.fromTitle}</p>
           <SplitLines
             projectId={projectId}
             title={split.title}
@@ -82,32 +105,18 @@ export function SplitPanel({
             target={{ masterId: split.masterId }}
             title={split.title}
           />
-          <SplitEditorInline
-            projectId={projectId}
-            masterId={split.masterId}
-            initial={split.proposal}
-            withNote={false}
-            startOpen={false}
-            label={page.editFirst}
-          />
+          {editor(split.proposal, null, false, page.editFirst)}
         </NextCard>
       );
     return (
       <NextCard kind="act" label={t.next} title={t.propose}>
-        <p className="text-sm text-muted-foreground">{t.proposeBody}</p>
-        <SplitEditorInline
-          projectId={projectId}
-          masterId={split.masterId}
-          initial={split.proposal}
-          withNote={false}
-          startOpen
-          label={page.prepare}
-        />
+        {editor(split.proposal, null, true, page.prepare)}
       </NextCard>
     );
   }
 
-  const confirmed = active.lines.filter(
+  const awaited = active.lines.filter((line) => !line.house);
+  const confirmed = awaited.filter(
     (line) => line.confirmation.state === "confirmed",
   ).length;
   const disputes = active.lines.filter(
@@ -149,23 +158,16 @@ export function SplitPanel({
           </ToneCallout>
         ))}
         {lines}
-        <SplitEditorInline
-          projectId={projectId}
-          masterId={split.masterId}
-          initial={active.lines}
-          withNote
-          startOpen={false}
-          label={page.edit}
-        />
+        {editor(active.lines, active.version, false, page.edit)}
       </NextCard>
     );
   return (
     <NextCard
       kind="wait"
       label={t.waiting}
-      title={fr.legal.board.confirmations(confirmed, active.lines.length)}
+      title={fr.legal.board.confirmations(confirmed, awaited.length)}
     >
-      <p className="text-sm text-muted-foreground">{t.waitingBody}</p>
+      <p className={muted}>{t.waitingBody}</p>
       {lines}
     </NextCard>
   );

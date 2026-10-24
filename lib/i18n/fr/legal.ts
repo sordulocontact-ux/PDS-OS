@@ -674,13 +674,13 @@ export const legal = {
       next: "Prochaine action",
       waiting: "En attente d'un retour",
       decision: "Décision",
-      propose: "Proposer la répartition de l'édition",
-      proposeBody:
-        "Parts exactes, total exactement 100 %. Chacun la confirmera par son propre lien.",
+      propose: "Proposer la répartition",
       fromTitle: "Faire confirmer la répartition de la fiche du titre",
       send: "Envoyer pour confirmation",
-      sendBody:
-        "Un lien par personne, affiché une seule fois à l'envoi, à copier et envoyer par votre canal habituel.",
+      // JUR-01: every creator and every publisher outside the house answers.
+      sendBody: (names: string[], house: boolean) =>
+        `Un lien par personne, valable 30 jours : ${names.length > 1 ? `${names.slice(0, -1).join(", ")} et ${names[names.length - 1]}` : (names[0] ?? "")} confirment ou contestent.${house ? " PDS Éditions, c'est vous." : ""}`,
+      house: "PDS Éditions, c'est vous : aucun lien à envoyer.",
       waitingBody:
         "Seule la confirmation de chacun clôt la démarche. Une contestation ouvre une décision, sans rien effacer.",
       disputed: "Répartition contestée",

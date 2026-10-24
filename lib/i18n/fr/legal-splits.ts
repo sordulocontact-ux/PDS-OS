@@ -5,6 +5,7 @@ export const legalSplits = {
   roles: {
     author: "Auteur·rice (paroles)",
     composer: "Compositeur·rice",
+    author_composer: "Auteur·rice et compositeur·rice",
     arranger: "Arrangeur·se",
     publisher: "Éditeur",
     other: "Autre",
@@ -67,27 +68,76 @@ export const legalSplits = {
     },
     note: (text: string) => `Raison : ${text}`,
   },
+  // JUR-01: who created what, who publishes each creator's share, then the
+  // parts, typed by a person.
   editor: {
     title: (title: string) => `Répartition de « ${title} »`,
-    description:
-      "Les parts sont gardées exactes, à 4 décimales, et doivent faire 100 % tout juste ; l'affichage les arrondit.",
+    intro:
+      "Trois choses distinctes, dans cet ordre : qui a créé quoi, qui édite la part de chacun, puis les parts de l'œuvre. La répartition SACEM (DEP / DR) est calculée plus tard à partir de ces parts.",
+    creators: "Qui a créé quoi",
+    creatorsBody:
+      "Une contribution ne donne pas de part par elle-même : les parts se saisissent plus bas. L'interprétation passe par les contrats, pas par cette répartition.",
+    publishing: "Qui édite la part de chaque créateur",
+    parts: "Parts de l'œuvre",
+    partsBody: "Saisies par une personne : PO ne propose jamais de part.",
     name: "Personne",
     role: "Rôle",
     share: "Part",
-    add: "Ajouter une personne",
+    sharePlaceholder: "0",
+    add: "Ajouter un créateur",
     remove: (name: string) => `Retirer ${name || "cette ligne"}`,
-    equal: "Parts égales",
+    house: "PDS Éditions",
+    modePlaceholder: "À choisir",
+    modeLabel: (name: string) => `Éditeur de ${name || "ce créateur"}`,
+    modes: {
+      house: "PDS Éditions",
+      other: "Un autre éditeur, choisi dans le Réseau",
+      none: "Aucun éditeur : il garde toute sa part",
+    },
+    modeBadges: {
+      house: "PDS Éditions",
+      other: "Son éditeur",
+      coedition: "Coédition",
+      none: "Sans éditeur",
+    },
+    proposed: (source: string) => `Proposé : ${source}`,
+    publisher: "Son éditeur",
+    coedition: (publisher: string | null) =>
+      `PDS Éditions coédite sa part avec ${publisher ?? "son éditeur"}`,
+    hint: {
+      fiche: (name: string) => `Sa fiche de renseignements : « ${name} »`,
+      ficheCoedition: (name: string) =>
+        `Sa fiche : « ${name} » · contrat d'édition prévu au plan d'action`,
+      planned: "Plan d'action · contrat d'édition prévu avec PDS",
+      none: (reason: string) => `Plan d'action · « ${reason} »`,
+    },
+    represents: (names: string[]) =>
+      `Éditeur · représente ${names.join(" et ")}`,
     note: "Raison du changement",
-    save: "Enregistrer le brouillon",
+    notePlaceholder: (version: number) =>
+      `Ce qui change par rapport à la version ${version}`,
+    save: "Enregistrer la répartition",
+    saveNew: "Proposer la nouvelle version",
     saving: "Enregistrement…",
     totalOk: "Total : 100 %",
-    totalOff: (value: string) => `Total : ${value}, il faut 100 % tout juste`,
+    total: (value: string) => `Total : ${value}`,
+    totalOff: (value: string) =>
+      `Le total fait ${value} : il faut 100 % tout juste.`,
     invalid: "Vérifiez les noms et les parts (un nombre, 4 décimales au plus).",
     personMissing:
       "Choisissez la personne dans le Réseau, ou gardez seulement son nom.",
-    shareInvalid: "Indiquez sa part : un nombre, 4 décimales au plus.",
+    roleMissing: "Indiquez ce qu'il ou elle a créé.",
+    modeMissing: "Dites qui édite sa part : PDS OS ne le devine pas.",
+    publisherMissing:
+      "Choisissez son éditeur dans le Réseau : PDS OS ne le choisit pas à votre place.",
+    shareMissing: (name: string, publisher: boolean) =>
+      `Indiquez la part ${name.match(/^[AEÉIOUY]/i) ? "d'" : "de "}${name} : chaque ${publisher ? "éditeur" : "créateur"} en a une.`,
+    thisCreator: "ce créateur",
+    noteMissing: "Dites ce qui change par rapport à la version précédente.",
     missingCount: (n: number) =>
-      n === 1 ? "1 ligne à compléter" : `${n} lignes à compléter`,
+      n === 1
+        ? "1 point à corriger avant d'enregistrer."
+        : `${n} points à corriger avant d'enregistrer.`,
     notInNetwork: "pas encore dans le Réseau",
   },
   links: {
@@ -108,6 +158,8 @@ export const legalSplits = {
     closed: "Cette version n'est plus active.",
     contactInvalid:
       "Une personne n'est plus dans le Réseau : choisissez-la de nouveau.",
+    publisherUnlinked:
+      "Dites quels créateurs chaque éditeur représente, dans la répartition.",
     failed: "L'action n'a pas pu être faite. Réessayez.",
   },
   public: {

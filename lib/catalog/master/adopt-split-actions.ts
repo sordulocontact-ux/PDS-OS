@@ -16,9 +16,12 @@ import { createClient } from "@/lib/supabase/server";
 // still total 100 % (largest remainder); the exact version stays in the
 // Juridique.
 
+// The title's page has one role per line: an author-composer shows as
+// author there, the Juridique keeps both.
 const ROLE = {
   author: "author",
   composer: "composer",
+  author_composer: "author",
   arranger: "other",
   publisher: "publisher",
   other: "other",

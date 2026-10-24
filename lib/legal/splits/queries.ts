@@ -5,8 +5,9 @@ import { routes } from "@/lib/auth/redirects";
 import { siteUrl } from "@/lib/auth/site-url";
 import { unsealLinkToken } from "@/lib/legal/forms/link-seal";
 import { readInventoryRows } from "@/lib/legal/inventory-rows";
+import type { PublishingHint } from "@/lib/legal/splits/draft";
+import { loadPublishingHints } from "@/lib/legal/splits/hints";
 import {
-  equalUnits,
   splitRoleOf,
   titlePublishingLines,
   unitsOf,
@@ -15,6 +16,7 @@ import {
 import { personName } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
 import { normalizeSearch } from "@/lib/utils/search";
+import type { ContributorRole } from "@/lib/catalog/master/rules";
 
 // The split sheets of a project's titles (ticket Juridique 04), read with
 // the viewer's session (RLS: manage_legal on a visible project).
@@ -37,6 +39,10 @@ export type SplitLine = {
   units: number;
   contactId: string | null;
   creditId: string | null;
+  // A publisher's line (JUR-01): the positions (from 1) of the creators it
+  // represents, and whether it is the house (PDS Éditions: the team, no link).
+  represents: number[] | null;
+  house: boolean;
   confirmation: {
     state: ConfirmationState;
     at: string | null;
@@ -73,10 +79,12 @@ export type TitleSplit = {
   draft: SplitVersionView | null;
   history: SplitVersionView[];
   // What the editor starts from when nothing is written yet: the split of
-  // the title's page when it makes 100 %, else the creators credited on the
-  // title, in equal parts (to verify).
+  // the title's page when it makes 100 % without a publisher, else the
+  // creators credited on the title, with no part (PO never proposes one).
   proposal: SplitLine[];
   fromTitle: boolean;
+  // What PDS OS knows of each creator's publisher, by contact.
+  hints: Record<string, PublishingHint>;
 };
 
 const NO_ANSWER = { state: "none" as const, at: null, comment: null };
@@ -117,7 +125,7 @@ export async function loadSplits(
           supabase
             .from("legal_split_entries")
             .select(
-              "id, version_id, position, name, role, share, contact_id, credit_id",
+              "id, version_id, position, name, role, share, contact_id, credit_id, represents, house",
             )
             .in("version_id", versionIds)
             .order("position"),
@@ -197,9 +205,52 @@ export async function loadSplits(
         units: unitsOf(String(e.share)) ?? 0,
         contactId: e.contact_id,
         creditId: e.credit_id,
+        represents: e.represents,
+        house: e.house,
         confirmation: answerOf.get(e.id) ?? NO_ANSWER,
       })),
   });
+
+  // Who created each title, once each (by contact, else by name), with all
+  // their creator credits (words and music: author and composer).
+  const creatorsOf = (masterId: string) => {
+    const byKey = new Map<
+      string,
+      {
+        name: string;
+        contactId: string | null;
+        creditId: string;
+        roles: ContributorRole[];
+      }
+    >();
+    for (const c of rows.creditsOf.get(masterId) ?? []) {
+      const key = c.contactId ?? normalizeSearch(c.name);
+      const known = byKey.get(key);
+      if (known) known.roles.push(c.role);
+      else
+        byKey.set(key, {
+          name: c.name,
+          contactId: c.contactId,
+          creditId: c.id,
+          roles: [c.role],
+        });
+    }
+    return [...byKey.values()].flatMap((c) => {
+      const role = splitRoleOf(c.roles);
+      return role ? [{ ...c, role }] : [];
+    });
+  };
+  const contactIds = [
+    ...new Set([
+      ...rows.titles.flatMap((m) =>
+        creatorsOf(m.id).flatMap((c) => (c.contactId ? [c.contactId] : [])),
+      ),
+      ...(entries.data ?? []).flatMap((e) =>
+        e.contact_id ? [e.contact_id] : [],
+      ),
+    ]),
+  ];
+  const hints = await loadPublishingHints(project.id, contactIds);
 
   return rows.titles.map((master): TitleSplit => {
     const sheet = (sheets.data ?? []).find((s) => s.master_id === master.id);
@@ -211,37 +262,39 @@ export async function loadSplits(
       theirs.find((v) => v.status !== "draft" && v.status !== "superseded") ??
       null;
 
-    // The creators once each (by name), from the title's credits.
-    const seen = new Set<string>();
-    const creators = (rows.creditsOf.get(master.id) ?? []).flatMap((c) => {
-      const role = splitRoleOf(c.role);
-      const key = normalizeSearch(c.name);
-      if (!role || seen.has(key)) return [];
-      seen.add(key);
-      return [{ name: c.name, role, contactId: c.contactId, creditId: c.id }];
-    });
-    const parts = equalUnits(creators.length);
     const titleLines = titlePublishingLines(rows.splitsOf.get(master.id) ?? []);
+    // A publisher on the title's page does not say whom it represents: the
+    // team says it in the editor.
+    const fromTitle =
+      titleLines !== null && !titleLines.some((l) => l.role === "publisher");
     return {
       masterId: master.id,
       title: master.title,
       active,
       draft,
       history: theirs.filter((v) => v.status === "superseded"),
-      proposal: titleLines
+      proposal: fromTitle
         ? titleLines.map((line) => ({
             id: null,
             ...line,
             creditId: null,
+            represents: null,
+            house: false,
             confirmation: NO_ANSWER,
           }))
-        : creators.map((c, i) => ({
+        : creatorsOf(master.id).map((c) => ({
             id: null,
-            ...c,
-            units: parts[i],
+            name: c.name,
+            role: c.role,
+            units: 0,
+            contactId: c.contactId,
+            creditId: c.creditId,
+            represents: null,
+            house: false,
             confirmation: NO_ANSWER,
           })),
-      fromTitle: Boolean(titleLines),
+      fromTitle,
+      hints,
     };
   });
 }
@@ -267,7 +320,9 @@ export async function splitStates(projectId: string) {
           supabase
             .from("legal_split_entries")
             .select("id, version_id")
-            .in("version_id", vIds),
+            .in("version_id", vIds)
+            // The house is the team: no answer is awaited from it.
+            .eq("house", false),
           supabase
             .from("legal_split_confirmations")
             .select("entry_id, version_id, status, created_at")

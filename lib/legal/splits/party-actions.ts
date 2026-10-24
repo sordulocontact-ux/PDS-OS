@@ -48,17 +48,22 @@ export async function listSplitPeople(
   const t = fr.legalSplits.editor;
   const roles = fr.masterPage.credits.roles as Record<string, string>;
   const credited = new Map<string, SplitPersonOption>();
+  // Words and music by the same person: author and composer.
+  const rolesOf = new Map<string, ContributorRole[]>();
   const seenNames = new Set<string>();
   for (const c of credits.data ?? []) {
-    const role = splitRoleOf(c.role as ContributorRole);
+    const role = splitRoleOf([c.role as ContributorRole]);
     if (!role) continue;
     const label = roles[c.role] ?? c.role;
     const key = c.contact_id ? `contact:${c.contact_id}` : `credit:${c.id}`;
     const known = credited.get(key);
     if (known) {
       known.detail = `${known.detail}, ${label}`;
+      rolesOf.get(key)!.push(c.role as ContributorRole);
+      known.role = splitRoleOf(rolesOf.get(key)!) ?? known.role;
       continue;
     }
+    rolesOf.set(key, [c.role as ContributorRole]);
     // A credit not linked to the Réseau, once by name.
     if (!c.contact_id) {
       const name = normalizeSearch(c.name);
@@ -91,4 +96,27 @@ export async function listSplitPeople(
         role: null,
       })),
   ];
+}
+
+/** The publishers of the Réseau a creator's share may be published by
+ * (JUR-01): picked, never typed nor matched by name. */
+export async function listSplitPublishers(): Promise<SplitPersonOption[]> {
+  await requireApproved();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("network_contacts")
+    .select("id, name")
+    .is("archived_at", null)
+    .contains("roles", ["publisher"])
+    .order("name")
+    .limit(500);
+  if (error) console.error("listSplitPublishers:", error.message);
+  return (data ?? []).map((c) => ({
+    id: `contact:${c.id}`,
+    label: c.name,
+    detail: fr.network.roles.publisher,
+    contactId: c.id,
+    creditId: null,
+    role: "publisher" as const,
+  }));
 }

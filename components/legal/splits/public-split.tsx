@@ -68,7 +68,9 @@ export function PublicSplit({ token, split }: { token: string; split: Open }) {
                   <span className="text-muted-foreground"> · {t.you}</span>
                 )}
                 <span className="block text-sm font-medium text-muted-foreground">
-                  {fr.legalSplits.roles[entry.role]}
+                  {entry.represents?.length
+                    ? fr.legalSplits.editor.represents(entry.represents)
+                    : fr.legalSplits.roles[entry.role]}
                 </span>
               </span>
               <span className="shrink-0 tabular-nums">

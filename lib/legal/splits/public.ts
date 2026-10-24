@@ -26,6 +26,9 @@ const publicSchema = z.discriminatedUnion("state", [
           name: z.string(),
           role: z.enum(SPLIT_ROLES),
           share: z.string(),
+          // A publisher: whom it represents; the house (JUR-01).
+          represents: z.array(z.string()).optional(),
+          house: z.boolean().optional(),
         }),
       ),
     }),

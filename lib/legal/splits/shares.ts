@@ -14,11 +14,23 @@ import {
 export const SPLIT_ROLES = [
   "author",
   "composer",
+  "author_composer",
   "arranger",
   "publisher",
   "other",
 ] as const;
 export type SplitRole = (typeof SPLIT_ROLES)[number];
+
+// The roles of a creator of the work (JUR-01); a publisher represents them.
+export const CREATOR_ROLES = [
+  "author",
+  "composer",
+  "author_composer",
+  "arranger",
+] as const satisfies readonly SplitRole[];
+export type CreatorRole = (typeof CREATOR_ROLES)[number];
+export const isCreatorRole = (role: SplitRole): role is CreatorRole =>
+  (CREATOR_ROLES as readonly SplitRole[]).includes(role);
 
 /** 100 % in units. */
 export const FULL = 1_000_000;
@@ -51,25 +63,24 @@ const shown = new Intl.NumberFormat("fr-FR", {
 export const formatShare = (units: number) =>
   `${shown.format(units / 10_000)} %`;
 
-/** n equal parts that total exactly 100 %: the remainder goes to the first. */
-export function equalUnits(count: number): number[] {
-  if (count <= 0) return [];
-  const base = Math.floor(FULL / count);
-  const rest = FULL - base * count;
-  return Array.from({ length: count }, (_, i) => base + (i < rest ? 1 : 0));
-}
-
 export const totalUnits = (units: Array<number | null>) =>
   units.reduce<number>((sum, u) => sum + (u ?? 0), 0);
 
-// A creator's credit as a line of the sheet; other credits are not in it.
-const ROLE_OF: Partial<Record<ContributorRole, SplitRole>> = {
+// A creator's credits as a line of the sheet; other credits are not in it.
+// Words and music by the same person: one line, author and composer.
+const ROLE_OF: Partial<Record<ContributorRole, CreatorRole>> = {
   lyricist: "author",
   composer: "composer",
   arranger: "arranger",
 };
-export const splitRoleOf = (role: ContributorRole): SplitRole | null =>
-  ROLE_OF[role] ?? null;
+export function splitRoleOf(roles: ContributorRole[]): CreatorRole | null {
+  const mine = new Set(roles.flatMap((r) => ROLE_OF[r] ?? []));
+  if (mine.has("author") && mine.has("composer")) return "author_composer";
+  return (
+    (["author", "composer", "arranger"] as const).find((r) => mine.has(r)) ??
+    null
+  );
+}
 
 const ROLE_OF_TITLE: Partial<Record<TitleSplitRole, SplitRole>> = {
   author: "author",
