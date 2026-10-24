@@ -92,8 +92,18 @@ export type JourneyPrereq = {
   source?: string;
 };
 
-/** What follows a step in another module (« Distribution › Dossier »). */
-export type JourneyNext = { key: string; label: string; module?: string };
+/** Something that stops an action, and the page where it is lifted (null:
+ * nothing to lift, only to know). Shown by BlockerCallout. */
+export type Blocker = { text: string; href: string | null };
+
+/** What follows a step in another module (« Distribution › Dossier »), and
+ * who takes over when the journey knows it. */
+export type JourneyNext = {
+  key: string;
+  label: string;
+  module?: string;
+  who?: string;
+};
 
 export type JourneyStep = {
   key: string;
@@ -143,6 +153,13 @@ export function prereqsOf(
   return [...own, ...(step.external ?? [])];
 }
 
+/** Who takes a step over: whoever acts on it, else who executes or is
+ * responsible for it. */
+const holderOf = (s: JourneyStep): string | undefined =>
+  s.actor?.name ??
+  s.roles?.find((r) => r.kind === "exec" || r.kind === "owner")?.name ??
+  s.owner?.name;
+
 /** What the step unlocks, this journey's then the others'. */
 export function nextOf(
   step: JourneyStep,
@@ -150,7 +167,7 @@ export function nextOf(
 ): JourneyNext[] {
   const own = step.next.flatMap((key) => {
     const s = steps.find((x) => x.key === key);
-    return s ? [{ key, label: s.title }] : [];
+    return s ? [{ key, label: s.title, who: holderOf(s) }] : [];
   });
   return [...own, ...(step.nextExternal ?? [])];
 }

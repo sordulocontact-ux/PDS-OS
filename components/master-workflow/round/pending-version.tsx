@@ -1,7 +1,9 @@
+import { BlockerCallout } from "@/components/ui/blocker-callout";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { fr } from "@/lib/i18n/fr";
 import type { MixVersion } from "@/lib/master-workflow/mix-types";
 import type { RoundStepView } from "@/lib/master-workflow/round-step";
+import { masterStepHref } from "@/lib/ui/master-steps";
 
 import { VersionDecision } from "./version-decision";
 import { VersionFeedback } from "./version-feedback";
@@ -28,9 +30,22 @@ export function PendingVersion({
   return (
     <>
       {extra?.working && (
-        <ToneCallout tone="warning">
-          {t.decision.working(extra.source ?? "")}
-        </ToneCallout>
+        <>
+          <ToneCallout tone="warning">
+            {t.decision.working(extra.source ?? "")}
+          </ToneCallout>
+          <BlockerCallout
+            blockers={[
+              extra.finalVocals
+                ? { text: t.decision.unblock.newMix(engineer), href: null }
+                : {
+                    text: t.decision.unblock.vocals,
+                    href: masterStepHref(round.view.projectId, "source"),
+                  },
+            ]}
+            then={t.decision.unblock.then(engineer)}
+          />
+        </>
       )}
       <VersionFeedback
         projectId={round.view.projectId}

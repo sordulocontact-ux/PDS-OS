@@ -749,3 +749,11 @@ propre circuit « Payé déclaré / vérifié »), non fusionnés ; envoi réel 
   à la demande sur le Mix V1 » : Mix V1, demande à Karim, Mix V2 se lisent d'un coup. Sur le lien de
   Karim, la demande est au-dessus de son dépôt. Sans migration. Détail : `docs/ARCHITECTURE.md`
   § 8 septies, « Retours rangés par version ». Reste : à rejouer dans un vrai navigateur.
+
+- [x] **Retours d'Ibé 04, 05 et 10** (21/10/2026, sur `main`, fusionnés dans `retours/lots-4-7` le
+  24/10) : le Brief Master enregistré ne repropose plus « Enregistrer » (« Enregistrer les
+  modifications » s'il a changé) ; un blocage dit sa raison et mène à « Résoudre le blocage »
+  (`BlockerCallout`, type `Blocker`), y compris sous le Mix fait sur des voix de travail ; toute étape
+  ouverte dit qui agit et quoi (`StepActor`, masqué quand l'encadré « À vous » du lot 4 le dit déjà),
+  « Ensuite » nomme qui reprend. À la fusion, le tableau du Travail (`lib/work/rows.ts`) suit
+  `actionHref` pour garder les liens directs des lots 4 et 5. Reste : à rejouer dans un vrai navigateur.

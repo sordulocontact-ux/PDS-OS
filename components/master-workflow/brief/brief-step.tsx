@@ -184,7 +184,13 @@ export function BriefStep({
             masterFinalFromFraming={step.masterFinalFromFraming}
             changedBy={step.changedBy}
           />
-          {canEdit && <BriefRecord projectId={view.projectId} />}
+          {canEdit && (
+            <BriefRecord
+              projectId={view.projectId}
+              recorded={step.recordedAt !== null}
+              dirty={step.dirty}
+            />
+          )}
         </>
       )}
     </>

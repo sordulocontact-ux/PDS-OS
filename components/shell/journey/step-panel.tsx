@@ -12,6 +12,8 @@ import {
   isLocked,
   type JourneyStep,
   LEAD_ANCHOR,
+  lowerFirst,
+  OPEN_STATUSES,
   prereqsOf,
   withModule,
 } from "@/lib/ui/journey";
@@ -124,6 +126,8 @@ export function StepPanel({
         <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
           {step.why}
         </p>
+        {/* The lead already names the viewer's own gesture. */}
+        {!(lead && step.actor?.viewer) && <StepActor step={step} />}
         {lead ? (
           <>
             {banner}
@@ -178,5 +182,22 @@ export function StepPanel({
         {slots.history}
       </section>
     </StepResultProvider>
+  );
+}
+
+/** Who acts on the open step now, and what (retour « Néons » 10): the
+ * viewer, someone else, or whom the step waits for. */
+function StepActor({ step }: { step: JourneyStep }) {
+  const actor = step.actor;
+  if (!actor || !OPEN_STATUSES.includes(step.status)) return null;
+  const todo = lowerFirst(actor.todo);
+  return (
+    <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] font-semibold">
+      {actor.viewer
+        ? t.actor.mine(todo)
+        : step.status === "waiting"
+          ? t.actor.waiting(actor.name, todo)
+          : t.actor.other(actor.name, todo)}
+    </p>
   );
 }

@@ -121,6 +121,9 @@ export const masterBrief = {
     none: "Aucun ingénieur dans le Réseau.",
   },
   record: "Enregistrer le Brief",
+  recordChanges: "Enregistrer les modifications",
+  upToDate:
+    "Brief enregistré. Pour le changer, modifiez une ligne : l'enregistrement reviendra ici.",
   recording: "Enregistrement…",
   recorded: "Brief enregistré",
   nothingChanged: (day: string) =>

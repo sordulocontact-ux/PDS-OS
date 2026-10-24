@@ -784,14 +784,25 @@ s'afficher sans chargement.
   Action vide ce cache, les notifications Realtime font `router.refresh()`. Une écriture
   d'un collègue **sans** notification peut rester invisible 60 s au plus.
 - **Squelettes** (`loading.tsx`) pour ce qui n'est pas préchargé (première entrée dans une
-  page) : `app/(app)/app/loading.tsx` générique (`PageLoading`), listes avec leur vrai titre,
+  page) : une page de premier niveau a le sien (`PageLoading`), listes avec leur vrai titre,
   sections d'un projet (`ProjectSectionLoading`, sous l'en-tête et les barres qui restent),
   onglets d'artiste, accueil (`HomeFrame` : PO utilisable avant les cartes). Piège : un
   `loading.tsx` enveloppe **aussi les segments enfants**, et le layout asynchrone d'un
   enfant s'attend sous le `loading.tsx` du parent. D'où les groupes `(list)` et `(home)` :
   sans eux, ouvrir une fiche artiste montrait le squelette de la liste des artistes.
-- **Streaming** : accueil et Travail affichent l'en-tête tout de suite, les cartes arrivent
-  derrière un `<Suspense>` (`HomeFeed`, `MyWorkCards`).
+  **Règle** (21/10) : pendant une navigation, Next n'affiche que le `loading.tsx` du segment
+  **dont l'enfant change** (la frontière est recréée pour le nouvel enfant) ; plus haut, la
+  transition garde l'ancienne page figée à l'écran, sans squelette. Donc tout dossier d'un
+  projet qui a plusieurs enfants (une page + des sous-pages) ou un enfant dynamique (`[id]`)
+  a son `loading.tsx` : Stratégie, Cadrage, Conception (et ses fiches, versions, décisions),
+  Master, Juridique, Suivi & bilan (et ses rapports), Activations (et une activation, ses
+  cibles), Calls, Production (et un livrable). Une ligne suffit
+  (`export { ProjectSectionLoading as default } …`) ; un changement de `?param=` ne recrée
+  pas la frontière (la vue reste, rafraîchie sur place). Exception voulue : l'entrée dans une
+  fiche (`[projectId]`, `[artistId]`, `[masterId]`…) lit l'enregistrement **avant** tout
+  squelette, pour un vrai 404 ; le préchargement des liens la rend d'ordinaire immédiate.
+- **Streaming** : accueil et Travail affichent l'en-tête tout de suite, le contenu arrive
+  derrière un `<Suspense>` (`HomeFeed`, `WorkList`).
 - **Pas de cascade** : une page lance l'accès, l'enregistrement et ses données en un seul
   aller-retour avec `allInOrder` (`lib/utils/parallel.ts`), qui renvoie la première erreur
   **dans l'ordre des arguments** (accès, puis enregistrement, puis données) : une
@@ -802,6 +813,10 @@ s'afficher sans chargement.
   d'interroger le serveur Auth deux fois par page. Revers : une session révoquée ailleurs
   reste lisible jusqu'à l'expiration du jeton (1 h) ; sans effet sur les droits,
   `get_my_access` relit l'adhésion à chaque page et le RLS s'applique au même jeton.
+- **Région des fonctions** (`vercel.json`, `regions: ["dub1"]`) : les fonctions Vercel tournent à
+  Dublin, à côté de la base Supabase (`eu-west-1`, Irlande). Sans ce réglage, Vercel les place à
+  Washington (`iad1`) et chaque requête à la base traverse l'Atlantique (~80 ms aller-retour,
+  multiplié par les lectures en série d'une page). Changer la région de la base = changer celle-ci.
 - **À savoir** : `next dev` ne précharge jamais et compile chaque page à sa première visite.
   La fluidité se juge avec `pnpm build && pnpm start`.
 - **Pas de cascade entre un layout et sa page** (finitions du 19/10) : une page ne commence à lire
@@ -2098,9 +2113,10 @@ Ce qui attend la personne vient **des parcours de chaque projet** (`docs/VISION-
   fois (`settleWithLimit`, `lib/utils/parallel.ts`) : tous ensemble, des milliers de requêtes
   partaient d'un coup et la passerelle répondait « fetch failed ». Un projet en échec est
   écarté et dit (`error`), jamais lu « rien ».
-- **Travail global** : un projet à accepter d'abord, puis **une carte « À vous » par projet**
-  (`WorkJourneyCards`, en streaming à part dans la grille), décisions marquées « À valider »
-  (acteur `kind: "validate"`) ; puis À retransmettre / En attente d'un chef de projet
+- **Travail global** : **un seul tableau** (`WorkList`, lignes de `lib/work/rows.ts`, onglets
+  Tout / À faire / À valider / En retard) : un projet à accepter d'abord, puis les actions des
+  parcours, chacune liée par `actionHref` (la section du geste, `#a-vous` ou la facture), décisions
+  marquées « À valider » (acteur `kind: "validate"`) ; puis À retransmettre / En attente d'un chef de projet
   (`assign_projects`, `handoverOf`), propositions de PO des projets dont on est responsable,
   et « Mes tâches » réduite aux **tâches libres** (rattachées à aucun workflow, `free` de
   `loadMyTodo`) : les autres sont des étapes des parcours. Retirés : « Mes projets » et sa

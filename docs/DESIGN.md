@@ -542,6 +542,20 @@ Une seule action pleine (`variant="default"`) par carte, le reste en contour.
   « Dicter ») ne sont pas des cartes : l'échange y reste en contour.
 - **Brief existant** : « Voir le Brief » est plein, « Mettre à jour le Brief » en contour
   (Sacha, 14/10/2026) ; sans Brief, « Créer le Brief » est plein.
+- **Bouton selon le statut** (retour « Néons » 04, 21/10/2026) : une action déjà faite
+  n'est jamais reproposée telle quelle. Rien n'a changé depuis → plus de bouton, une ligne
+  qui dit que c'est fait et comment le changer ; modifié depuis → « Enregistrer les
+  modifications » ; modification interdite → l'état terminé seul. Le serveur garde son
+  refus (« Rien à enregistrer… ») en filet. Premier cas : `BriefRecord` du Brief Master.
+- **Qui agit, quoi, qui prend le relais** (retour « Néons » 10, 21/10/2026) : toute étape
+  ouverte d'un parcours (`StepPanel`) dit sous son « pourquoi » qui agit maintenant et
+  quoi (« À vous : … », « En attente de Nadia : … »), même quand « Maintenant » ne la
+  répète pas ; « Ensuite » nomme qui reprend l'étape suivante (« Mixage · Karim »), lu
+  dans le parcours, jamais deviné.
+- **Blocage** (retour « Néons » 05) : un blocage dit sa raison, mène à l'endroit où on le
+  lève (« Résoudre le blocage », `BlockerCallout`, type `Blocker` de `lib/ui/journey.ts`)
+  et, quand c'est utile, comment l'action reprend ensuite. Pas de lien quand il n'y a
+  rien à lever (seulement à savoir) ou quand la résolution est juste en dessous.
 
 ### Décisions, propositions et faits (composants communs, 18/10/2026)
 

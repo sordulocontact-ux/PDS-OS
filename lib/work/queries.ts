@@ -22,7 +22,7 @@ export type MyWork = {
 /**
  * The global Travail of the signed-in person (docs/VISION-UX.md § 3, « Une
  * seule source »): what waits for them in the projects is read from the
- * journeys (lib/work/journeys.ts, streamed by WorkJourneyCards), never from
+ * journeys (lib/work/journeys.ts, shown by WorkList), never from
  * a list of its own; here, what comes before a project's journeys (a
  * project to accept, to transmit again), PO's proposals and the tasks tied
  * to no workflow. Read with the user's session (RLS).

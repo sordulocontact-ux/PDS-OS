@@ -31,6 +31,16 @@ export const journey = {
     blocking: "",
   },
   reported: "Blocage signalé",
+  resolveBlocker: "Résoudre le blocage",
+  // Under the open step's why: who acts on it now, and what (retour
+  // « Néons » 10). The todo comes lower-cased.
+  actor: {
+    mine: (todo: string) => `À vous : ${todo}.`,
+    other: (who: string, todo: string) => `${who} : ${todo}.`,
+    waiting: (who: string, todo: string) => `En attente ${de(who)} : ${todo}.`,
+  },
+  // « Ensuite » names who takes over (« Mixage · Karim »).
+  nextBy: (step: string, who: string) => `${step} · ${who}`,
   viaLink: "sur son lien privé",
   privateLink: "lien privé",
   meta: {

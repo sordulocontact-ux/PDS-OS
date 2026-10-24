@@ -9,7 +9,7 @@ import {
   DataTableRow,
 } from "@/components/ui/data-table";
 import { FactList } from "@/components/ui/fact-list";
-import { ToneCallout } from "@/components/ui/tone-callout";
+import { BlockerCallout } from "@/components/ui/blocker-callout";
 import { fr } from "@/lib/i18n/fr";
 import type { StepView } from "@/lib/master-workflow/transmission";
 import { formatShortDate } from "@/lib/release/format";
@@ -28,16 +28,7 @@ export function PackagePreview({ view }: { view: StepView }) {
     value ? formatShortDate(value) : null;
   return (
     <div className="grid gap-6">
-      {view.blockers.length > 0 && (
-        <ToneCallout tone="warning">
-          <span className="font-medium">{t.blockers.title}</span>
-          {view.blockers.map((blocker) => (
-            <span key={blocker} className="block">
-              {blocker}
-            </span>
-          ))}
-        </ToneCallout>
-      )}
+      <BlockerCallout blockers={view.blockers} title={t.blockers.title} />
       <FactList
         emptyLabel={p.none}
         facts={[

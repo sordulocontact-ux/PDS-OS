@@ -222,6 +222,15 @@ export const masterRound = {
       `En attente de ${who} : valider le ${label} V${n}.`,
     working: (file: string) =>
       `Ce mix repose sur ${file}, une version de travail : les voix définitives ne sont pas encore là. Il ne peut pas devenir le mix final.`,
+    // What lifts it (retour « Néons » 05), then how the validation resumes.
+    unblock: {
+      vocals:
+        "Les voix définitives ne sont pas encore confirmées sur l'État du master.",
+      newMix: (engineer: string) =>
+        `Les voix définitives sont confirmées : il faut un mix fait sur ces voix. Demandez une modification à ${first(engineer)} ci-dessous.`,
+      then: (engineer: string) =>
+        `Ensuite, ${first(engineer)} dépose un mix sur les voix définitives : c'est cette version que vous pourrez valider.`,
+    },
     final: (label: string, n: number, by: string | null) =>
       `${label} V${n} validé${by ? ` par ${by}` : ""} : c'est le ${label.toLowerCase()} final. Plus aucun dépôt n'est possible.`,
     errors: {
