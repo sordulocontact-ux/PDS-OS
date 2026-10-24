@@ -62,6 +62,8 @@ export const signedReturns = {
       `${name} n'a pas encore de lien privé sur ce projet : créez-le, puis envoyez-lui le contrat : il le signera et le déposera sur sa page.`,
     createLink: "Créer son lien privé",
     other: "Je l'ai remis autrement",
+    otherBody: (person: string) =>
+      `Le contrat a été remis à ${person} hors de son lien privé : dites comment, et quand.`,
     howLegend: "Comment l'avez-vous remis ?",
     ways: [
       "Remis en main propre",
@@ -134,6 +136,9 @@ export const signedReturns = {
     signedOnHint: "En main propre, sur papier… La date fait foi.",
     signedOnMissing: "Indiquez le jour de la signature.",
     note: "Noter la signature",
+    scan: "Le bulletin signé, scanné (PDF)",
+    otherwiseBody: (name: string) =>
+      `${name} a signé hors de son lien privé : la date et le bulletin signé scanné en sont la preuve.`,
     noted: (name: string) => `Signature de ${name} notée`,
     viewPdf: "Voir le PDF",
   },

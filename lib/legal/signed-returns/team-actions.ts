@@ -63,15 +63,24 @@ export async function sendContract(input: {
   return { ok: true };
 }
 
-/** « A signé autrement » + « Signé le »: the day is the proof. */
+/** « A signé autrement » + « Signé le » + the signed bulletin scanned, in
+ * the formality's folder (JUR-11): the scan is the proof. */
 export async function noteFormalitySignature(
   projectId: string,
   signatureId: string,
   signedOn: string,
+  file: string,
 ) {
   const p = z
-    .object({ projectId: z.uuid(), signatureId: z.uuid(), signedOn: day })
-    .safeParse({ projectId, signatureId, signedOn });
+    .object({
+      projectId: z.uuid(),
+      signatureId: z.uuid(),
+      signedOn: day,
+      file: z
+        .string()
+        .regex(/^[0-9a-f-]{36}\/proofs\/[0-9a-f-]{36}\/[0-9a-f-]{36}\.pdf$/),
+    })
+    .safeParse({ projectId, signatureId, signedOn, file });
   if (!p.success)
     return {
       ok: false as const,
@@ -81,6 +90,7 @@ export async function noteFormalitySignature(
     s.rpc("note_formality_signature", {
       p_signature_id: p.data.signatureId,
       p_signed_on: p.data.signedOn,
+      p_file: p.data.file,
     }),
   );
 }

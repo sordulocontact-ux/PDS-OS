@@ -1,7 +1,7 @@
 -- What comes back signed comes back by the person's private link (20261020070101): a token only
 -- signs the documents of its own contact, in its own project.
 begin;
-select plan(33);
+select plan(34);
 
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
 declare v_id uuid := gen_random_uuid();
@@ -210,10 +210,18 @@ select is((select status || ' · ' || via || ' · ' || file_name from public.leg
             where id = pg_temp.id_of('sig_sami')),
           'signed · link · Bulletin_signe.pdf', 'their signature is recorded with its file');
 
--- « A signé autrement », by the team, with its day: the last signature passes the bulletin on.
+-- « A signé autrement », by the team, with its day and the signed bulletin scanned
+-- (JUR-11, …20261024000601): the last signature passes the bulletin on.
+insert into storage.objects (bucket_id, name, metadata)
+values ('formality-signatures', pg_temp.id_of('org') || '/proofs/' || pg_temp.id_of('formality')
+                                || '/33333333-3333-3333-3333-333333333333.pdf', '{"size": 1200}');
 select pg_temp.act_as(pg_temp.id_of('manager'));
-select lives_ok(format($$ select public.note_formality_signature(%L, current_date - 1) $$, pg_temp.id_of('sig_yanis')),
-                'a signature made otherwise, with its day');
+select throws_ok(format($$ select public.note_formality_signature(%L, current_date - 1, null) $$, pg_temp.id_of('sig_yanis')),
+                 'P0001', 'formality_proof_file_required', 'a signature made otherwise needs its scan');
+select lives_ok(format($$ select public.note_formality_signature(%L, current_date - 1, %L) $$, pg_temp.id_of('sig_yanis'),
+                       pg_temp.id_of('org') || '/proofs/' || pg_temp.id_of('formality')
+                       || '/33333333-3333-3333-3333-333333333333.pdf'),
+                'a signature made otherwise, with its day and its scan');
 reset role;
 select is((select status from public.legal_formalities where id = pg_temp.id_of('formality')),
           'ready_to_submit', 'every signature in: ready to submit');

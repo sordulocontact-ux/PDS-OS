@@ -2894,6 +2894,15 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
     blocages ; points à suivre) ; « Blocages » et « Points à suivre » seulement s'il y en a ;
     le détail par domaine et la politique du label repliés (`Fold`). Le résumé de l'étape dans
     le parcours suit les mêmes mots.
+  - *Lot 9, gestes en modale* (règle `docs/DESIGN.md` « Modale saisie », migration
+    `20261024000601_signed_otherwise_scan`, test `signed-returns`) : « A signé autrement » sur le
+    bulletin (`SignedOtherwiseForm` : la date **et le bulletin signé scanné**, exigé par
+    `note_formality_signature`, rangé avec les preuves de la formalité), « Je l'ai remis
+    autrement » d'un contrat, « Ajouter une facture reçue autrement » et « Marquer comme payée »
+    (`InvoicePanel`, devenu composant client), « Je conteste » sur la page publique d'une
+    répartition (motif obligatoire, dit à l'envoi). Les gestes sans saisie (Relancer, Nouveau
+    lien, Envoyer à …) restent des boutons ; la correction d'une valeur reste la ligne qui se
+    change en champ (`FactRow edit`).
 
 - **Intervenants non crédités** (08/10/2026, lot 6 de l'architecture globale ;
   `legal_project_contacts`, migration `20261008000101`, 11 tests pgTAP) : un avocat, un

@@ -170,6 +170,9 @@ export const legalSplits = {
     confirm: "Je confirme",
     dispute: "Je conteste",
     disputeLabel: "Ce qui ne vous convient pas",
+    disputeTitle: "Contester la répartition",
+    disputeBody:
+      "L'équipe lira votre motif ; une nouvelle version vous sera proposée, par ce même lien.",
     sendDispute: "Envoyer ma contestation",
     sending: "Envoi…",
     cancel: "Annuler",

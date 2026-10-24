@@ -5,6 +5,8 @@ import { useState, useTransition } from "react";
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
+import { DialogButton } from "@/components/ui/dialog-button";
+import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { fr } from "@/lib/i18n/fr";
 import type { PublicSplit as Split } from "@/lib/legal/splits/public";
 import { answerSplit } from "@/lib/legal/splits/public-actions";
@@ -20,13 +22,11 @@ type Open = Extract<Split, { state: "open" }>;
  */
 export function PublicSplit({ token, split }: { token: string; split: Open }) {
   const t = fr.legalSplits.public;
-  const [disputing, setDisputing] = useState(false);
-  const [comment, setComment] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<"confirm" | "dispute" | null>(null);
   const [pending, startTransition] = useTransition();
 
-  const send = (decision: "confirm" | "dispute") =>
+  const send = (decision: "confirm" | "dispute", comment: string) =>
     startTransition(async () => {
       setError(null);
       const result = await answerSplit({
@@ -81,59 +81,79 @@ export function PublicSplit({ token, split }: { token: string; split: Open }) {
         })}
       </ul>
       <p className="text-sm text-muted-foreground">{t.notice}</p>
-      {disputing && (
-        <TextareaField
-          name="comment"
-          label={t.disputeLabel}
-          aria-required
-          rows={3}
-          maxLength={2000}
-          value={comment}
-          onChange={(event) => setComment(event.target.value)}
-        />
-      )}
       {error && <FormMessage kind="error">{error}</FormMessage>}
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        {disputing ? (
-          <>
-            <Button
-              variant="ghost"
-              size="lg"
-              disabled={pending}
-              onClick={() => setDisputing(false)}
-            >
-              {t.cancel}
-            </Button>
-            <Button
-              size="lg"
-              disabled={pending || !comment.trim()}
-              aria-busy={pending || undefined}
-              onClick={() => send("dispute")}
-            >
-              {pending ? t.sending : t.sendDispute}
-            </Button>
-          </>
-        ) : (
-          <>
-            <Button
-              variant="outline"
-              size="lg"
-              disabled={pending}
-              onClick={() => setDisputing(true)}
-            >
-              {t.dispute}
-            </Button>
-            <Button
-              size="lg"
-              disabled={pending}
-              aria-busy={pending || undefined}
-              onClick={() => send("confirm")}
-            >
-              {pending ? t.sending : t.confirm}
-            </Button>
-          </>
-        )}
+        {/* Contesting asks why: a dialog (proto Juridique v3). */}
+        <DialogButton
+          label={t.dispute}
+          variant="outline"
+          size="lg"
+          title={t.disputeTitle}
+          description={t.disputeBody}
+        >
+          {(close) => (
+            <DisputeForm
+              pending={pending}
+              error={error}
+              onSend={(comment) => send("dispute", comment)}
+              onCancel={close}
+            />
+          )}
+        </DialogButton>
+        <Button
+          size="lg"
+          disabled={pending}
+          aria-busy={pending || undefined}
+          onClick={() => send("confirm", "")}
+        >
+          {pending ? t.sending : t.confirm}
+        </Button>
       </div>
     </div>
+  );
+}
+
+/** Why the person contests: required, said on « Envoyer ma contestation ». */
+function DisputeForm({
+  pending,
+  error,
+  onSend,
+  onCancel,
+}: {
+  pending: boolean;
+  error: string | null;
+  onSend: (comment: string) => void;
+  onCancel: () => void;
+}) {
+  const t = fr.legalSplits.public;
+  const [comment, setComment] = useState("");
+  const [tried, setTried] = useState(false);
+  return (
+    <form
+      noValidate
+      className="flex flex-col gap-4"
+      onSubmit={(event) => {
+        event.preventDefault();
+        setTried(true);
+        if (comment.trim()) onSend(comment);
+      }}
+    >
+      <TextareaField
+        name="comment"
+        label={t.disputeLabel}
+        aria-required
+        rows={3}
+        maxLength={2000}
+        value={comment}
+        error={tried && !comment.trim() ? t.commentRequired : undefined}
+        onChange={(event) => setComment(event.target.value)}
+      />
+      {error && <FormMessage kind="error">{error}</FormMessage>}
+      <DialogFormActions
+        pending={pending}
+        submitLabel={t.sendDispute}
+        onCancel={onCancel}
+      />
+    </form>
   );
 }

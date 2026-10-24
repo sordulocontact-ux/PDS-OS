@@ -17408,7 +17408,7 @@ export type Database = {
         Returns: undefined
       }
       note_formality_signature: {
-        Args: { p_signature_id: string; p_signed_on: string }
+        Args: { p_file: string; p_signature_id: string; p_signed_on: string }
         Returns: undefined
       }
       get_contact_signatures: {

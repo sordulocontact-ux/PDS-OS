@@ -1,24 +1,21 @@
 "use client";
 
-import { useState } from "react";
-
-import { Field } from "@/components/auth/field";
-import { useLegalAction } from "@/components/legal/use-legal-action";
 import { Button } from "@/components/ui/button";
+import { DialogButton } from "@/components/ui/dialog-button";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
-import { todayInParis } from "@/lib/contracts/types";
 import { fr } from "@/lib/i18n/fr";
 import type { Creator, Publisher } from "@/lib/legal/formalities/definition";
 import type { FormalityView } from "@/lib/legal/formalities/types";
-import { noteFormalitySignature } from "@/lib/legal/signed-returns/team-actions";
 import { formatShortDay } from "@/lib/utils/day";
+
+import { SignedOtherwiseForm } from "./signed-otherwise-form";
 
 type Signature = FormalityView["signatures"][number];
 
 /** « Le bulletin doit être signé par tous les ayants droit » (proto
  * « Projet complet », E10 step 2): each signer of the current version —
  * on their private link, where they deposit it signed, or « A signé
- * autrement » with the day it was signed. Before the bulletin exists, who
+ * autrement » in a dialog, with the day and the signed bulletin scanned. Before the bulletin exists, who
  * will sign it, named (UX test of 09/10/2026). */
 export function SignaturesList({
   projectId,
@@ -42,6 +39,7 @@ export function SignaturesList({
           <SignatureRow
             key={s.id}
             projectId={projectId}
+            formalityId={f.id}
             s={s}
             open={f.status === "signatures_pending"}
           />
@@ -53,20 +51,17 @@ export function SignaturesList({
 
 function SignatureRow({
   projectId,
+  formalityId,
   s,
   open,
 }: {
   projectId: string;
+  formalityId: string;
   s: Signature;
   open: boolean;
 }) {
   const t = fr.legalFormalities.page;
   const r = fr.signedReturns.sacem;
-  const today = todayInParis(new Date());
-  const [other, setOther] = useState(false);
-  const [on, setOn] = useState(today);
-  const [tried, setTried] = useState(false);
-  const { pending, run } = useLegalAction();
   const role =
     s.role === "publisher"
       ? t.publisherRole
@@ -87,7 +82,6 @@ function SignatureRow({
         : s.role === "publisher"
           ? null
           : r.noLink;
-  const missing = tried && (!on || on > today) ? r.signedOnMissing : undefined;
   return (
     <FactRow
       label={role}
@@ -110,55 +104,26 @@ function SignatureRow({
               {r.viewPdf}
             </Button>
           )
-        ) : open && !other ? (
-          <Button variant="ghost" size="sm" onClick={() => setOther(true)}>
-            {r.signedOtherwise}
-          </Button>
-        ) : null
-      }
-      below={
-        s.status === "pending" &&
-        open &&
-        other && (
-          <form
-            noValidate
-            className="flex flex-wrap items-end gap-2"
-            onSubmit={(event) => {
-              event.preventDefault();
-              setTried(true);
-              if (!on || on > today) return;
-              run(
-                () => noteFormalitySignature(projectId, s.id, on),
-                undefined,
-                r.noted(s.signer),
-              );
-            }}
+        ) : open ? (
+          // A gesture that asks for something opens a dialog (proto v3).
+          <DialogButton
+            label={r.signedOtherwise}
+            variant="ghost"
+            size="sm"
+            title={r.signedOtherwise}
+            description={r.otherwiseBody(s.signer)}
           >
-            <Field
-              name={`${s.id}-signed-on`}
-              type="date"
-              label={r.signedOn}
-              hint={r.signedOnHint}
-              aria-required
-              max={today}
-              value={on}
-              error={missing}
-              onChange={(event) => setOn(event.target.value)}
-              className="h-10 w-fit"
-            />
-            <Button type="submit" size="sm" disabled={pending}>
-              {r.note}
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => setOther(false)}
-            >
-              {fr.signedReturns.team.cancel}
-            </Button>
-          </form>
-        )
+            {(close) => (
+              <SignedOtherwiseForm
+                projectId={projectId}
+                formalityId={formalityId}
+                signatureId={s.id}
+                signer={s.signer}
+                onDone={close}
+              />
+            )}
+          </DialogButton>
+        ) : null
       }
     />
   );

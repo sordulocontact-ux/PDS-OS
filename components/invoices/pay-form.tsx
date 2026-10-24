@@ -26,8 +26,9 @@ const mimeOf = (file: File): Mime | null =>
         ? "image/jpeg"
         : null);
 
-/** « Marquer comme payée » (proto, direction): the transfer made from
- * PDS's bank, its date and its proof. PDS OS pays nothing itself. */
+/** « Marquer comme payée » (proto, direction), in its dialog: the transfer
+ * made from PDS's bank, its date and its proof. PDS OS pays nothing
+ * itself. */
 export function PayForm({
   projectId,
   invoiceId,
@@ -81,11 +82,7 @@ export function PayForm({
   }
 
   return (
-    <div ref={root} className="flex flex-col gap-3">
-      <h4 className="font-semibold">{t.payTitle}</h4>
-      <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
-        {t.payNote}
-      </p>
+    <div ref={root} className="flex flex-col gap-4">
       <div className="max-w-60">
         <Field
           name={`paid-on-${invoiceId}`}

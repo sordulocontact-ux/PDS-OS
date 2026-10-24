@@ -1,6 +1,8 @@
+"use client";
+
 import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { VersionCard } from "@/components/ui/version-card";
+import { DialogButton } from "@/components/ui/dialog-button";
 import { fr } from "@/lib/i18n/fr";
 import type { ProjectInvoice, ProjectInvoicesView } from "@/lib/invoices/types";
 import { invoiceAnchor } from "@/lib/invoices/href";
@@ -52,24 +54,33 @@ export function InvoicePanel({
           {t.noEmail(i.contactName)}
         </p>
         {view.canAdd && (
-          <VersionCard title={t.other} meta={t.otherHint}>
-            <InvoiceForm
-              target={{ kind: "team", invoiceId: i.id, projectId }}
-              expectedCents={i.expected?.total ?? null}
-              holder={i.contactName}
-              rib={
-                i.bankState === "none"
-                  ? null
-                  : {
-                      value:
-                        i.bankState === "pending"
-                          ? t.ribTeamPending
-                          : t.ribTeamVerified,
-                      source: t.ribTeamSource,
-                    }
-              }
-            />
-          </VersionCard>
+          // A gesture that asks for something opens a dialog (proto v3).
+          <DialogButton
+            label={t.other}
+            variant="outline"
+            size="sm"
+            title={t.other}
+            description={t.otherHint}
+          >
+            {() => (
+              <InvoiceForm
+                target={{ kind: "team", invoiceId: i.id, projectId }}
+                expectedCents={i.expected?.total ?? null}
+                holder={i.contactName}
+                rib={
+                  i.bankState === "none"
+                    ? null
+                    : {
+                        value:
+                          i.bankState === "pending"
+                            ? t.ribTeamPending
+                            : t.ribTeamVerified,
+                        source: t.ribTeamSource,
+                      }
+                }
+              />
+            )}
+          </DialogButton>
         )}
       </div>
     );
@@ -90,11 +101,20 @@ export function InvoicePanel({
             </ToneCallout>
           )
         ) : view.isDirection ? (
-          <PayForm
-            projectId={projectId}
-            invoiceId={i.id}
-            receivedOn={i.receivedOn!}
-          />
+          <DialogButton
+            label={t.pay}
+            size="sm"
+            title={t.payTitle}
+            description={t.payNote}
+          >
+            {() => (
+              <PayForm
+                projectId={projectId}
+                invoiceId={i.id}
+                receivedOn={i.receivedOn!}
+              />
+            )}
+          </DialogButton>
         ) : (
           <ToneCallout tone="info">
             {t.waitPay(direction, i.contactName, formatDay(i.dueOn!))}
