@@ -697,3 +697,15 @@ propre circuit « Payé déclaré / vérifié »), non fusionnés ; envoi réel 
   § 3 bis « Vrais 404 », § 8 octies « UPC », § 8 nonies « Rejoué dans l'app »).
 - Reste : envoi réel des e-mails ; « Signer pour PDS Éditions » par la DG ; 404 d'une démarche juridique
   inconnue ; le contrat ne compte pas dans « n objets » des liens privés (`contact_page_items`).
+
+## Visibilité des projets en une passe (26/10/2026, branche `perf/visible-projects`)
+
+- [x] **`visible_project_ids()`** (`…20261026000101`) : la règle « qui voit un projet » calculée une
+      fois par requête ; 137 policies `can_see_project(project_id)` (et la lecture de `projects`)
+      réécrites dessus. Mesuré sur la pré-prod en tant que cheffe de projet : 45–50 ms → 1 ms par
+      lecture (étapes, réponses du Cadrage).
+- [x] Test `visible-project-ids.test.sql` (24) : même résultat que `can_see_project_row` pour dix
+      profils (DG, responsable, autre chef de projet, assigné en attente, créatif, ingénieur interne,
+      responsable de production, compte désactivé, membre en attente, autre maison).
+
+Reste : pousser la migration en prod avec accord.
