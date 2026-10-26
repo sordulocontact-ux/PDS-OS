@@ -90,6 +90,8 @@ export const strategyStepData = cache(async (projectId: string) => {
     envelopeToConfirm: data.envelopeToConfirm,
     referenceDate: data.referenceDate,
     lateUpstream: late,
+    today,
+    legalDependencies: data.legalDependencies,
     ctx: {
       name,
       sourceOf: (id) => (id ? (itemSources.get(id) ?? null) : null),

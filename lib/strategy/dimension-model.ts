@@ -6,6 +6,7 @@
 // in the Brief without blocking it. Client-safe, pure.
 
 import type { BudgetLine } from "@/lib/budget/types";
+import { formatBriefDate } from "@/lib/framing/assess";
 import { fr } from "@/lib/i18n/fr";
 import { budgetView, type BudgetView } from "@/lib/strategy/dimension-budget";
 import {
@@ -85,6 +86,14 @@ export type ModelInput = {
   referenceDate: string | null;
   // Upstream deadlines passed without a decision (lib/strategy/upstream.ts).
   lateUpstream: number;
+  // Paris's day (ISO): a milestone before it is already past (MKT-STR-004).
+  today?: string;
+  // The legal plan's open items: blocked or without a date, to arbitrate.
+  legalDependencies?: Array<{
+    label: string;
+    status: string;
+    dueOn: string | null;
+  }>;
   ctx: ItemContext;
 };
 
@@ -286,6 +295,23 @@ export function strategyModel(i: ModelInput): StrategyModel {
     ...(!i.referenceDate
       ? [{ dimension: "calendar" as const, text: t.noReleaseDate }]
       : []),
+    // Recette 23/10 (MKT-STR-004): a milestone already past is said too.
+    ...(i.today
+      ? i.milestones
+          .filter((m) => m.occurs_on < (i.today as string))
+          .map((m) => ({
+            dimension: "calendar" as const,
+            text: t.milestonePassed(m.title, formatBriefDate(m.occurs_on)),
+          }))
+      : []),
+    // A legal dependency blocked or without a date stays to arbitrate.
+    ...(i.legalDependencies ?? []).flatMap((d) =>
+      d.status === "blocked"
+        ? [{ dimension: "levers" as const, text: t.legalBlocked(d.label) }]
+        : d.dueOn === null
+          ? [{ dimension: "levers" as const, text: t.legalNoDate(d.label) }]
+          : [],
+    ),
   ];
   return {
     dimensions,

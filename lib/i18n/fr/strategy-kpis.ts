@@ -58,7 +58,8 @@ export const strategyKpis = {
     qualitative: "Signal observé",
   },
   labelPlaceholder: {
-    quantitative: "Streams du single le premier mois, fans Deezer…",
+    // One example, one metric (recette 23/10, MKT-STR-003).
+    quantitative: "Streams du single le premier mois",
     qualitative: "Retours de la presse spécialisée, reprises en playlists…",
   },
   metric: "Métrique",

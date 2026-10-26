@@ -4,7 +4,13 @@
 // (« Saisi par … »). Written by code from what the strategy holds, never by
 // PO (rule 6). Client-safe, pure.
 
+import {
+  STRATEGY_TEXT_FIELDS,
+  type StrategyTextField,
+} from "@/lib/framing/brief";
 import { fr } from "@/lib/i18n/fr";
+import { choicesKey, toChoiceValue } from "@/lib/strategy/choices";
+import { composeAnswer } from "@/lib/strategy/compose";
 import type { Proposal, ProposalState } from "@/lib/ui/proposal";
 
 export const STRATEGY_ANSWER_FIELDS = [
@@ -105,7 +111,7 @@ export function fieldItem(
   const own = rows.filter((r) => r.field_key === key);
   const latest = own[own.length - 1];
   if (!latest || typeof latest.value !== "string" || !latest.value.trim())
-    return null;
+    return choicesItem(key, rows, ctx);
   const proposed = own.find((r) => r.status === "proposed") ?? null;
   const state = STATE[latest.status] ?? "proposed";
   const decider = state === "proposed" ? null : ctx.name(latest.created_by);
@@ -131,6 +137,39 @@ export function fieldItem(
       state,
       decidedBy: decider,
       editedBy: edited && state === "kept" ? decider : null,
+    },
+  };
+}
+
+/**
+ * An answer only checked (no sentence written): the sentence composed from
+ * the choices, kept — the owner checked them (MKT-S1-01; recette 23/10,
+ * MKT-STR-001: never « — » in the Brief for a checked answer).
+ */
+function choicesItem(
+  key: StrategyAnswerField,
+  rows: FieldHistoryRow[],
+  ctx: ItemContext,
+): DimItem | null {
+  if (!(STRATEGY_TEXT_FIELDS as readonly string[]).includes(key)) return null;
+  const field = key as StrategyTextField;
+  const own = rows.filter((r) => r.field_key === choicesKey(field));
+  const latest = own[own.length - 1];
+  if (!latest) return null;
+  const text = composeAnswer(field, toChoiceValue(field, latest.value));
+  if (!text) return null;
+  const by = ctx.name(latest.created_by);
+  return {
+    target: { type: "field", key },
+    proposal: {
+      id: `field-${key}`,
+      text,
+      original: null,
+      quote: null,
+      from: by ? t.typedBy(by) : null,
+      state: "kept",
+      decidedBy: by,
+      editedBy: null,
     },
   };
 }

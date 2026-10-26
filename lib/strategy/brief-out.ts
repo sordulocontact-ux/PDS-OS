@@ -29,6 +29,11 @@ export const briefOutSchema = z.object({
   budget: z.object({
     proposedCents: z.number(),
     envelopeCents: z.number().nullable(),
+    // Recette 23/10 (MKT-STR-002), absent from older versions: how many
+    // lines are proposed (none: « Aucune dépense estimée », never 0 €) and
+    // whether the envelope is still to confirm.
+    lines: z.number().optional(),
+    envelopeToConfirm: z.boolean().optional(),
   }),
   openPoints: z.array(z.string()),
 });
@@ -73,6 +78,8 @@ export function briefOutFrom(
     budget: {
       proposedCents: budget?.proposedCents ?? 0,
       envelopeCents: budget?.envelopeCents ?? null,
+      lines: (budget?.lines ?? []).filter((l) => l.state === "proposed").length,
+      envelopeToConfirm: budget?.envelope === "to_confirm",
     },
     openPoints: model.openPoints.map((p) => p.text),
   };

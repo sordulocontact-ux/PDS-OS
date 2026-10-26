@@ -19,6 +19,10 @@ export const strategyBriefOut = {
     deliverables: "Livrables",
     objective: "Objectif",
     budget: "Budget proposé",
+    // No expense yet: never « 0 € », which reads as a zero envelope (MKT-STR-002).
+    noExpense: "Aucune dépense estimée",
+    envelopeToConfirm: (envelope: string) =>
+      `sur ${envelope} à confirmer · interne`,
     budgetOf: (envelope: string | null) =>
       envelope ? `sur ${envelope} · interne` : "interne",
     empty: "—",
@@ -29,6 +33,11 @@ export const strategyBriefOut = {
     envelopeToConfirm: "L'enveloppe du Brief de cadrage reste à confirmer",
     envelopeUndefined: "Aucune enveloppe n'est définie",
     noReleaseDate: "La date de sortie reste à fixer",
+    milestonePassed: (milestone: string, date: string) =>
+      `« ${milestone} » était prévu le ${date} : à déplacer ou retirer`,
+    legalBlocked: (label: string) => `Juridique : « ${label} » est bloqué`,
+    legalNoDate: (label: string) =>
+      `Juridique : « ${label} » n'a pas d'échéance`,
   },
   send: {
     title: "Envoyer en validation",

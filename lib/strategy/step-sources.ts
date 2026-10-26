@@ -8,6 +8,8 @@ import type {
   ProposalRecord,
   StrategyAnswerField,
 } from "@/lib/strategy/dimension-items";
+import { STRATEGY_TEXT_FIELDS } from "@/lib/framing/brief";
+import { choicesKey } from "@/lib/strategy/choices";
 import { STRATEGY_ANSWER_FIELDS } from "@/lib/strategy/dimension-items";
 import type { LeverRecord } from "@/lib/strategy/dimension-levers";
 import { createClient } from "@/lib/supabase/server";
@@ -64,7 +66,12 @@ export async function loadDimensionSources(projectId: string) {
       )
       .eq("project_id", projectId)
       .eq("deliverable", "strategy")
-      .in("field_key", [...STRATEGY_ANSWER_FIELDS])
+      // The checked choices too: an answer only checked is still an answer
+      // (recette 23/10, MKT-STR-001; fieldItem).
+      .in("field_key", [
+        ...STRATEGY_ANSWER_FIELDS,
+        ...STRATEGY_TEXT_FIELDS.map(choicesKey),
+      ])
       .order("created_at"),
     supabase
       .from("strategy_proposals")

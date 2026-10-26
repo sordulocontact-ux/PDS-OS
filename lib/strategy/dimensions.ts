@@ -305,7 +305,8 @@ function budget(input: DimensionInput): Omit<DimensionStatus, "key"> {
         };
     }
   }
-  const overrun = b.remainingCents !== null && b.remainingCents < 0;
+  // Reste = enveloppe − proposé − à arbitrer (recette 23/10, as the Brief).
+  const overrun = b.restCents !== null && b.restCents < 0;
   const selected = new Set(selectedLeverIds(input));
   const uncovered = b.byLever.filter(
     (l) =>

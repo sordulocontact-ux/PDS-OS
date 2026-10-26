@@ -51,6 +51,14 @@ export const strategyBrief = {
         ? `Budget : enveloppe de ${amount} à confirmer`
         : "Budget : enveloppe à confirmer",
     overrun: (amount: string) => `Budget : enveloppe dépassée de ${amount}`,
+    // Recette 23/10 (MKT-STR-004): a milestone already past, a legal
+    // dependency blocked or without a date.
+    milestonePassed: (milestone: string, date: string) =>
+      `« ${milestone} » était prévu le ${date} : déplacez ce temps fort ou retirez-le`,
+    legalBlocked: (label: string) =>
+      `Juridique : « ${label} » est bloqué (à lever avant la sortie)`,
+    legalNoDate: (label: string) =>
+      `Juridique : « ${label} » n'a pas d'échéance`,
     late: (c: {
       step: string;
       deliverable: string;

@@ -153,14 +153,18 @@ export function BriefOutDoc({
               {t.budget}
             </span>
             <b className="font-semibold tabular-nums">
-              {euros(out.budget.proposedCents)}
+              {out.budget.lines === 0
+                ? t.noExpense
+                : euros(out.budget.proposedCents)}
             </b>
             <span className="text-caption text-[color:var(--text-tertiary)]">
-              {t.budgetOf(
-                out.budget.envelopeCents === null
-                  ? null
-                  : euros(out.budget.envelopeCents),
-              )}
+              {out.budget.envelopeToConfirm && out.budget.envelopeCents !== null
+                ? t.envelopeToConfirm(euros(out.budget.envelopeCents))
+                : t.budgetOf(
+                    out.budget.envelopeCents === null
+                      ? null
+                      : euros(out.budget.envelopeCents),
+                  )}
             </span>
           </li>
         </Rows>

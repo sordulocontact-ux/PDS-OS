@@ -193,12 +193,15 @@ export function buildBriefSnapshot(input: SnapshotInput): BriefSnapshot {
             },
           ]
         : []),
-      ...data.narrativeParts.map((p) => ({
-        label: parts[p.key as keyof typeof parts],
-        value: p.value,
-        lines: [],
-        empty: t.empty,
-      })),
+      // A part left empty is not printed (recette 23/10, MKT-UX-003).
+      ...data.narrativeParts
+        .filter((p) => p.value)
+        .map((p) => ({
+          label: parts[p.key as keyof typeof parts],
+          value: p.value,
+          lines: [],
+          empty: t.empty,
+        })),
       {
         label: t.narrativeAngle,
         value: field("narrative"),
@@ -315,7 +318,7 @@ export function buildBriefSnapshot(input: SnapshotInput): BriefSnapshot {
             warn:
               budget.envelope === "to_confirm" ||
               budget.envelope === "undefined" ||
-              (budget.remainingCents !== null && budget.remainingCents < 0),
+              (budget.restCents !== null && budget.restCents < 0),
           },
           ...(budget.lineCount &&
           budget.remaining.forecast !== null &&

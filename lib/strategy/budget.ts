@@ -42,8 +42,12 @@ export type StrategyBudget = {
   validatedCents: number;
   toDecideCents: number;
   realCents: number;
-  // Envelope minus validated; null without an envelope. Negative = overrun.
+  // Envelope minus validated; null without an envelope.
   remainingCents: number | null;
+  // Envelope − proposé − à arbitrer, lines of a lever not retained left
+  // out: the overrun, as « Budget stratégie » says it (dimension-budget.ts).
+  // Null without an envelope; negative = overrun.
+  restCents: number | null;
   // MKT-S1-12: one remainder per kind (forecast, validated, real).
   remaining: {
     forecast: number | null;
@@ -108,12 +112,18 @@ export function strategyBudget(
   const total = sums(lines);
   const rest = (spent: number) =>
     envelopeCents === null ? null : envelopeCents - spent;
+  // A line of a lever known and neither selected nor to decide is dropped.
+  const counted = lines.filter((l) => {
+    const lever = l.leverId ? known.get(l.leverId) : undefined;
+    return !lever || lever.state === "selected" || lever.state === "to_decide";
+  });
   return {
     envelopeCents,
     envelope: envelopeState(envelopeCents, envelopeToConfirm),
     lineCount: lines.length,
     ...total,
     remainingCents: rest(total.validatedCents),
+    restCents: rest(sums(counted).proposedCents),
     remaining: {
       forecast: rest(total.proposedCents),
       validated: rest(total.validatedCents),

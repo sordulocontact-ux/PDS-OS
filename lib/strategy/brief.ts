@@ -67,6 +67,13 @@ export type ArbitrationInput = {
   }>;
   budget: StrategyBudget;
   today: string;
+  // The legal plan's open items (recette 23/10, MKT-STR-004).
+  legalDependencies?: Array<{
+    id: string;
+    label: string;
+    status: string;
+    dueOn: string | null;
+  }>;
 };
 
 /** Only what still waits for a decision, dimension by dimension. */
@@ -143,6 +150,27 @@ export function arbitrations(input: ArbitrationInput): Arbitration[] {
         }),
       });
 
+  // A milestone already past, never only the deadlines before it.
+  for (const m of input.milestones)
+    if (m.occurs_on < input.today)
+      items.push({
+        key: `milestone-passed-${m.id}`,
+        dimension: "calendar",
+        text: t.milestonePassed(m.title, formatBriefDate(m.occurs_on)),
+      });
+  // A legal dependency blocked or without a date is arbitrated here.
+  for (const d of input.legalDependencies ?? [])
+    if (d.status === "blocked" || d.dueOn === null)
+      items.push({
+        key: `legal-${d.id}`,
+        dimension: "levers",
+        critical: d.status === "blocked",
+        text:
+          d.status === "blocked"
+            ? t.legalBlocked(d.label)
+            : t.legalNoDate(d.label),
+      });
+
   const { budget } = input;
   // Never blocking (MKT-S1-02): an unknown or unconfirmed envelope is said.
   if (budget.envelope === "undefined")
@@ -167,12 +195,14 @@ export function arbitrations(input: ArbitrationInput): Arbitration[] {
       dimension: "budget",
       text: t.budget(formatEuros(budget.toDecideCents)),
     });
-  if (budget.remainingCents !== null && budget.remainingCents < 0)
+  // Reste = enveloppe − proposé − à arbitrer, as the dimension computes it
+  // (lib/strategy/dimension-budget.ts; recette 23/10).
+  if (budget.restCents !== null && budget.restCents < 0)
     items.push({
       key: "budget-overrun",
       dimension: "budget",
       critical: true,
-      text: t.overrun(formatEuros(-budget.remainingCents)),
+      text: t.overrun(formatEuros(-budget.restCents)),
     });
 
   return items;
