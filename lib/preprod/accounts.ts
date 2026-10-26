@@ -3,7 +3,7 @@ import type { OrganizationRole } from "@/lib/auth/redirects";
 /**
  * The pre-production test accounts: the people of the proto « Projet complet »
  * (docs/protos/projet.html). Two project managers, so « only the owner
- * writes » can be felt. The seed creates them (scripts/preprod-seed.mjs) and
+ * writes » can be felt. The seed creates them (supabase/preprod/seed.sql) and
  * the pre-production bar signs in as them: one list for both sides.
  */
 export const PREPROD_ACCOUNTS = [
