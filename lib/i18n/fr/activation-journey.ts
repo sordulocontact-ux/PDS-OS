@@ -309,6 +309,7 @@ export const activationJourney = {
     counter: "Répondre à la contre-proposition",
     terms: "Accepter les conditions ou attendre la réponse",
     prepareLink: "Préparer le lien d'accord",
+    sendLink: "Envoyer l'accord",
     agree: "Donner son accord",
     content: "Déposer le contenu",
     contentDecision: "Valider le contenu",

@@ -144,6 +144,7 @@ export async function InfluenceCollaboration({
         activationId={a.id}
         targetId={target.id}
         campaign={a.title}
+        creator={target.contactName}
         email={target.contactEmail}
         proposals={proposals}
         agreements={mine(influence.agreements)}

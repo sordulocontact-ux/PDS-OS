@@ -56,7 +56,7 @@ export const loadModuleFacts = cache(async (projectId: string) => {
       .order("created_at"),
     supabase
       .from("influence_agreements")
-      .select("target_id, status, created_at")
+      .select("target_id, status, created_at, sent_at")
       .eq("project_id", projectId)
       .order("created_at", { ascending: false }),
     supabase

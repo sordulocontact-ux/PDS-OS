@@ -79,9 +79,12 @@ export function collabAction(
         a,
       );
     case "agreement_to_obtain":
-      return c.agreementPending
-        ? line(k, contact(c.name), c_.agree, a)
-        : line(k, p.owner, of(c_.prepareLink), a);
+      // Prepared, then sent from the owner's view (MKT-INF-002), then hers.
+      return !c.agreementPending
+        ? line(k, p.owner, of(c_.prepareLink), a)
+        : c.agreementSent
+          ? line(k, contact(c.name), c_.agree, a)
+          : line(k, p.owner, of(c_.sendLink), a);
     case "agreed":
     case "content_in_progress":
       return line(k, contact(c.name), c_.content, a);

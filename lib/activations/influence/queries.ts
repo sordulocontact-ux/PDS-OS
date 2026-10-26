@@ -21,7 +21,7 @@ export const loadInfluenceData = cache(async (activationId: string) => {
       supabase
         .from("influence_agreements")
         .select(
-          "id, target_id, proposal_id, status, expires_at, displayed_at, identity_name, decided_at, comment, created_at",
+          "id, target_id, proposal_id, status, expires_at, displayed_at, identity_name, decided_at, comment, created_at, content, sent_at, sent_by, sent_channel",
         )
         .eq("activation_id", activationId)
         .order("created_at", { ascending: false }),

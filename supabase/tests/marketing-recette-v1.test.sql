@@ -1,4 +1,4 @@
--- Recette Marketing V1 of 23/10/2026 (20261026400101, 20261026400201):
+-- Recette Marketing V1 of 23/10/2026 (20261026400101 to 20261026400301):
 -- nothing with a creator before the launch, an influence closed once its
 -- creators have an issue, an agency campaign declared done only settled (or
 -- with a reserve), a deadline between today and the end of the campaign, the
@@ -6,7 +6,7 @@
 -- followed, a budget line on an activation of the project. Simulation only,
 -- rolled back. Run with `supabase test db` or `psql -f`.
 begin;
-select plan(25);
+select plan(30);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -116,6 +116,23 @@ insert into ids select 'proposal', id from public.influence_proposals where targ
 select pg_temp.act_as(pg_temp.id_of('manager'));
 select lives_ok(format('select public.accept_influence_terms(%L)', pg_temp.id_of('proposal')),
                 'the terms are accepted: the creator is engaged');
+-- The express agreement's link, sent from the owner's view (MKT-INF-002).
+select lives_ok(format('select public.prepare_influence_agreement(%L)', pg_temp.id_of('proposal')),
+                'the link of the express agreement is prepared');
+reset role;
+insert into ids select 'agreement', id from public.influence_agreements where target_id = pg_temp.id_of('target');
+select pg_temp.act_as(pg_temp.id_of('manager'));
+select throws_ok(format($$select public.declare_influence_agreement_sent(%L, 'pigeon')$$, pg_temp.id_of('agreement')),
+                 '23514', 'invalid_input', 'a channel among e-mail, message, WhatsApp, other');
+select lives_ok(format($$select public.declare_influence_agreement_sent(%L, 'email')$$, pg_temp.id_of('agreement')),
+                'the owner declares the link sent by e-mail');
+reset role;
+select is((select row(sent_channel, sent_by = pg_temp.id_of('manager_person'), sent_at is not null)::text
+             from public.influence_agreements where id = pg_temp.id_of('agreement')),
+          '(email,t,t)', 'how, who and when are kept');
+select pg_temp.act_as(pg_temp.id_of('manager'));
+select throws_ok(format($$select public.declare_influence_agreement_sent(%L, 'dm')$$, pg_temp.id_of('agreement')),
+                 '23514', 'invalid_transition', 'declared sent once');
 select throws_ok(format($$select public.close_activation(%L, 'definitive', null, null)$$, pg_temp.id_of('influence')),
                  '23514', 'creators_open:Léa RV1 (simulation)',
                  'an influence is not closed while an engaged creator has no issue, named');

@@ -92,6 +92,26 @@ export const activationInfluence = {
     acceptedBy: (name: string, date: string) =>
       `« Bon pour accord » de ${name} le ${date}`,
     noneYet: "Aucun lien préparé.",
+    // Sent from the owner's view (recette of 23/10, MKT-INF-002).
+    created: (date: string) => `Lien créé le ${date}`,
+    notSent: "pas encore envoyé",
+    sentBy: (name: string, date: string, channel: string) =>
+      `envoyé par ${name} le ${date} (${channel})`,
+    sendTitle: "Envoyer l'accord",
+    to: (name: string, email: string | null) =>
+      email ? `À : ${name} · ${email}` : `À : ${name}`,
+    sendHint:
+      "Envoyez le lien affiché à sa création (e-mail, message, WhatsApp), puis marquez-le envoyé : l'état ne change qu'à ce moment.",
+    channel: "Canal",
+    channels: {
+      email: "E-mail",
+      dm: "Message sur le réseau",
+      whatsapp: "WhatsApp",
+      other: "Autre",
+    },
+    markSent: "Marquer comme envoyé",
+    marked: "Accord marqué envoyé.",
+    preview: "Aperçu de la page du créateur",
     needsTerms: "Validez d'abord les conditions de la dernière position.",
     mailSubject: (campaign: string) => `Accord pour la campagne ${campaign}`,
     mailBody: (link: string) =>

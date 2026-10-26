@@ -1,12 +1,16 @@
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
+import { Fold } from "@/components/ui/fold";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
+import { agreementContentSchema } from "@/lib/activations/influence/agreement-content";
 import type { InfluenceData } from "@/lib/activations/influence/queries";
 import type { Member } from "@/lib/framing/related";
 import { fr } from "@/lib/i18n/fr";
 import { formatDate, formatDateTime } from "@/lib/release/format";
 
+import { AgreementSendForm } from "./agreement-send-form";
+import { AgreementTerms } from "./agreement-terms";
 import {
   AcceptTermsButton,
   AddProposalButton,
@@ -21,6 +25,19 @@ const agreementTone = {
   change_requested: "action",
   revoked: "neutral",
 } as const;
+
+/** « Aperçu de la page du créateur » : the exact version the link shows. */
+function agreementPreview(content: unknown) {
+  const parsed = agreementContentSchema.safeParse(content);
+  if (!parsed.success) return null;
+  return (
+    <Fold summary={t.agreement.preview}>
+      <div className="flex flex-col gap-4 rounded-xl border p-4">
+        <AgreementTerms content={parsed.data} />
+      </div>
+    </Fold>
+  );
+}
 
 const money = (amount: number | null, currency: string) =>
   amount === null
@@ -39,6 +56,7 @@ export function NegotiationSection({
   activationId,
   targetId,
   campaign,
+  creator,
   email,
   proposals,
   agreements,
@@ -50,6 +68,8 @@ export function NegotiationSection({
   activationId: string;
   targetId: string;
   campaign: string;
+  // The creator's name, for « À : … » (MKT-INF-002).
+  creator: string;
   email: string | null;
   proposals: InfluenceData["proposals"];
   agreements: InfluenceData["agreements"];
@@ -183,6 +203,20 @@ export function NegotiationSection({
           {agreement ? (
             <p className="text-sm">
               {[
+                t.agreement.created(formatDateTime(agreement.created_at)),
+                agreement.sent_at
+                  ? t.agreement.sentBy(
+                      nameOf(agreement.sent_by),
+                      formatDateTime(agreement.sent_at),
+                      t.agreement.channels[
+                        agreement.sent_channel as keyof typeof t.agreement.channels
+                      ] ??
+                        agreement.sent_channel ??
+                        "",
+                    )
+                  : agreement.status === "pending"
+                    ? t.agreement.notSent
+                    : null,
                 agreement.displayed_at
                   ? t.agreement.viewed(formatDateTime(agreement.displayed_at))
                   : null,
@@ -202,6 +236,17 @@ export function NegotiationSection({
               {t.agreement.noneYet}
             </p>
           )}
+          {agreement?.status === "pending" &&
+            agreementPreview(agreement.content)}
+          {canWrite &&
+            agreement?.status === "pending" &&
+            !agreement.sent_at && (
+              <AgreementSendForm
+                projectId={projectId}
+                agreementId={agreement.id}
+                to={t.agreement.to(creator, email)}
+              />
+            )}
           {canWrite && (
             <div className="flex flex-wrap gap-2">
               {latest?.accepted_at && agreement?.status !== "accepted" ? (

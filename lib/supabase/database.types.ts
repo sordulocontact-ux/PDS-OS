@@ -6400,6 +6400,9 @@ export type Database = {
           organization_id: string
           project_id: string
           proposal_id: string
+          sent_at: string | null
+          sent_by: string | null
+          sent_channel: string | null
           status: string
           target_id: string
           token_hash: string
@@ -6420,6 +6423,9 @@ export type Database = {
           organization_id: string
           project_id: string
           proposal_id: string
+          sent_at?: string | null
+          sent_by?: string | null
+          sent_channel?: string | null
           status?: string
           target_id: string
           token_hash: string
@@ -6440,6 +6446,9 @@ export type Database = {
           organization_id?: string
           project_id?: string
           proposal_id?: string
+          sent_at?: string | null
+          sent_by?: string | null
+          sent_channel?: string | null
           status?: string
           target_id?: string
           token_hash?: string
@@ -17629,6 +17638,10 @@ export type Database = {
       }
     }
     Functions: {
+      declare_influence_agreement_sent: {
+        Args: { p_agreement_id: string; p_channel: string }
+        Returns: undefined
+      }
       activation_is_live: {
         Args: { p_activation_id: string }
         Returns: boolean

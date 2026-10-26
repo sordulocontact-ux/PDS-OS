@@ -32,8 +32,10 @@ export type CollabView = {
   stage: CollaborationStage;
   outcome: TargetOutcome | null;
   publication: "none" | "declared" | "verified";
-  // An agreement link waits for the creator.
+  // An agreement link waits for the creator…
   agreementPending: boolean;
+  // …and was declared sent to her (MKT-INF-002).
+  agreementSent: boolean;
   // The latest position came from the creator (a counter-proposal).
   creatorSpokeLast: boolean;
   // A brief prepared and its circuit: draft, to validate, validated.
@@ -98,6 +100,7 @@ export function collaborationsOf(
         outcome,
         publication,
         agreementPending: agreements[0]?.status === "pending",
+        agreementSent: agreements[0]?.sent_at != null,
         creatorSpokeLast: proposals.at(-1)?.party === "creator",
         briefStatus: open.at(-1)?.status ?? null,
         paymentStatus: payment,

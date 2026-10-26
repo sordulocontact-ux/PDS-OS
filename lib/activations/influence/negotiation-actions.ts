@@ -117,3 +117,25 @@ export async function revokeAgreement(
     ? activationFailure(error)
     : activationDone(parsed.data.projectId);
 }
+
+/** « Marquer comme envoyé » : the pending agreement's link has left, by this
+ * channel (recette of 23/10, MKT-INF-002; PDS OS sends no e-mail itself). */
+export async function declareAgreementSent(input: {
+  projectId: string;
+  id: string;
+  channel: "email" | "dm" | "whatsapp" | "other";
+}): Promise<WriteResult> {
+  await requireApproved();
+  const parsed = idSchema
+    .extend({ channel: z.enum(["email", "dm", "whatsapp", "other"]) })
+    .safeParse(input);
+  if (!parsed.success) return invalid();
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("declare_influence_agreement_sent", {
+    p_agreement_id: parsed.data.id,
+    p_channel: parsed.data.channel,
+  });
+  return error
+    ? activationFailure(error)
+    : activationDone(parsed.data.projectId);
+}
