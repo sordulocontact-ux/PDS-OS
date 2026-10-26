@@ -35,6 +35,7 @@ export async function loadDashboardInput(
         ? {
             plannedCents: totals.plannedCents,
             committedCents: totals.committedCents,
+            invoicedCents: totals.realCents,
             paidCents: totals.paidCents,
           }
         : null,

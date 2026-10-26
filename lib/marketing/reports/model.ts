@@ -106,6 +106,8 @@ export type ReportSnapshot = {
 export type ReportBudget = {
   plannedCents: number;
   committedCents: number;
+  // Null: a version frozen before 26/10/2026 did not keep it.
+  invoicedCents: number | null;
   paidCents: number;
 };
 

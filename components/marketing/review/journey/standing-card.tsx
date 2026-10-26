@@ -2,9 +2,12 @@ import { DashboardFilterBar } from "@/components/marketing/review/dashboard-filt
 import { Fold } from "@/components/ui/fold";
 import { fr } from "@/lib/i18n/fr";
 import type { DashboardFilters } from "@/lib/marketing/dashboard";
+import type { BudgetBreakdown } from "@/lib/marketing/review/budget-breakdown";
+import type { ObjectiveRow } from "@/lib/marketing/review/objectives";
 import type { Standing } from "@/lib/marketing/review/standing";
 
 import { StandingRows, StandingTiles } from "./standing-figures";
+import { StandingGoals } from "./standing-goals";
 
 const t = fr.reviewJourney.standing;
 
@@ -16,6 +19,8 @@ const t = fr.reviewJourney.standing;
  */
 export function StandingCard({
   standing,
+  goals,
+  budget,
   filters,
   filtered,
   action,
@@ -23,6 +28,9 @@ export function StandingCard({
   sources,
 }: {
   standing: Standing;
+  // Objectives against results, budget by activation (MKT-BIL-002).
+  goals: ObjectiveRow[];
+  budget: BudgetBreakdown | null;
   filters: DashboardFilters;
   filtered: boolean;
   // The page the filters reload.
@@ -63,6 +71,7 @@ export function StandingCard({
               sources={sources}
             />
             <StandingTiles groups={standing.groups} />
+            <StandingGoals goals={goals} budget={budget} />
           </Fold>
         </>
       )}

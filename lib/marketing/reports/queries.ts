@@ -96,7 +96,7 @@ export async function loadReport(
       .maybeSingle(),
     supabase
       .from("marketing_report_budgets")
-      .select("planned_cents, committed_cents, paid_cents")
+      .select("planned_cents, committed_cents, invoiced_cents, paid_cents")
       .eq("report_id", reportId)
       .maybeSingle(),
     loadMembers(access),
@@ -111,6 +111,7 @@ export async function loadReport(
       ? {
           plannedCents: budget.planned_cents,
           committedCents: budget.committed_cents,
+          invoicedCents: budget.invoiced_cents,
           paidCents: budget.paid_cents,
         }
       : null,

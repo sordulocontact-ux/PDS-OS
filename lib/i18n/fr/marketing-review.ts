@@ -61,6 +61,7 @@ export const marketingReview = {
       statistics_unavailable: "Indisponibles",
       budget_planned: "Estimé",
       budget_committed: "Engagé",
+      budget_invoiced: "Facturé",
       budget_paid: "Payé administrativement",
       reserves_open: "Ouvertes",
       reserves_arbitrated: "Arbitrées",
@@ -98,7 +99,9 @@ export const marketingReview = {
       budget_planned:
         "Somme des lignes « Estimé » du budget du projet. Indisponible sans droit de lecture.",
       budget_committed:
-        "Somme des lignes « Engagé » et « Payé » : ce que le projet s'est engagé à dépenser.",
+        "Somme des lignes « Engagé », « Facturé » et « Payé » : ce que le projet s'est engagé à dépenser.",
+      budget_invoiced:
+        "Somme des lignes « Facturé » et « Payé » : les factures reçues, payées ou non.",
       budget_paid:
         "Somme des lignes « Payé » (paiement administratif déclaré, jamais réglé par PDS OS).",
       reserves_open: "Réserves pas encore arbitrées.",

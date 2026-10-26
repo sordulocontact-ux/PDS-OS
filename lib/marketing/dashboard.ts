@@ -50,6 +50,9 @@ export type ReserveFact = {
 export type BudgetFact = {
   plannedCents: number;
   committedCents: number;
+  // Invoiced or paid (recette of 23/10, MKT-BIL-002); null in a version
+  // frozen before it was kept.
+  invoicedCents: number | null;
   paidCents: number;
 } | null;
 
@@ -91,6 +94,7 @@ export const FIGURE_KEYS = [
   "statistics_unavailable",
   "budget_planned",
   "budget_committed",
+  "budget_invoiced",
   "budget_paid",
   "reserves_open",
   "reserves_arbitrated",
@@ -184,7 +188,10 @@ export function computeDashboard(
       evidenceIds: list.map((e) => e.id),
     };
   };
-  const budgetFigure = (key: FigureKey, cents: number | undefined): Figure => ({
+  const budgetFigure = (
+    key: FigureKey,
+    cents: number | null | undefined,
+  ): Figure => ({
     key,
     value: input.budget && cents !== undefined ? cents : null,
     activationIds: [],
@@ -289,6 +296,10 @@ export function computeDashboard(
     budget_committed: budgetFigure(
       "budget_committed",
       input.budget?.committedCents,
+    ),
+    budget_invoiced: budgetFigure(
+      "budget_invoiced",
+      input.budget?.invoicedCents,
     ),
     budget_paid: budgetFigure("budget_paid", input.budget?.paidCents),
     reserves_open: reserveFigure("reserves_open", "open"),
@@ -399,7 +410,12 @@ export const FIGURE_GROUPS = {
     "statistics_partial",
     "statistics_unavailable",
   ],
-  budget: ["budget_planned", "budget_committed", "budget_paid"],
+  budget: [
+    "budget_planned",
+    "budget_committed",
+    "budget_invoiced",
+    "budget_paid",
+  ],
   reserves: [
     "reserves_open",
     "reserves_arbitrated",

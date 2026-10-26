@@ -105,6 +105,44 @@ export const reviewJourney = {
       blocked: "bloquée",
     },
   },
+  // Objectives against results, the budget by activation (recette of 23/10,
+  // MKT-BIL-002), under « Voir le détail ».
+  goals: {
+    objectives: "Objectifs et résultats",
+    objectivesNone: "Aucun objectif chiffré dans la Stratégie.",
+    objective: "Objectif",
+    target: "Cible",
+    declared: "Déclaré",
+    verified: "Vérifié",
+    gap: "Écart",
+    states: {
+      reached: "Atteint",
+      below: "En dessous",
+      not_measurable: "Non mesurable",
+    },
+    reasons: {
+      no_target: "pas de cible chiffrée",
+      not_tracked: "les activations ne relèvent pas cette mesure",
+      no_reading: "aucun relevé dans les activations",
+    },
+    early: (day: string) => `provisoire, se lit le ${day}`,
+    rule: "Somme des derniers relevés valides des activations (nombres seulement), déclarés et vérifiés à part ; un chiffre absent n'est jamais un zéro.",
+    budget: "Budget par activation",
+    budgetNone: "Aucune ligne de budget.",
+    activation: "Activation",
+    estimated: "Estimé",
+    committed: "Engagé",
+    invoiced: "Facturé",
+    paid: "Payé",
+    budgetLabels: { outside: "Hors activation", total: "Total" },
+    envelope: (envelope: string, gap: string, over: boolean) =>
+      over
+        ? `Enveloppe ${envelope} : dépassée de ${gap} par l'engagé.`
+        : `Enveloppe ${envelope} : ${gap} restent après l'engagé.`,
+    noEnvelope: "Pas d'enveloppe fixée.",
+    budgetRule:
+      "Chaque ligne est lue sur l'activation qu'elle nomme, sinon celle de son livrable, sinon la seule activation de son levier. Facturé = facture reçue, payée ou non.",
+  },
   standing: {
     title: "Où on en est",
     computed: "Calculé à l'instant",
