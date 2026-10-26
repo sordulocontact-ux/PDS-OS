@@ -9,14 +9,30 @@ import { createClient } from "@/lib/supabase/client";
 // Coalesces a burst of changes (one action writes several rows).
 const DEBOUNCE_MS = 400;
 
+type LiveRow = { version?: number; changed_by?: string | null };
+
 /**
  * Keeps the pages of a project up to date (JUR-12 / JUR-28): a change of
- * the Juridique in this tab, another tab, by a teammate or through a public
- * link bumps project_live; the pages are then read again, without a manual
- * reload. Also on coming back to the tab, after sleep or a lost network.
- * While it reads, a short « Mise à jour… » says so.
+ * the Juridique in another tab, by a teammate or through a public link
+ * bumps project_live; the pages are then read again, without a manual
+ * reload. While it reads, a short « Mise à jour… » says so.
+ *
+ * A refresh re-reads the whole project and empties the router cache (its
+ * prefetched views), so it only runs for a change this tab has not shown
+ * yet (docs/ARCHITECTURE.md § 3 bis, page loads audit of 26/10):
+ * - the person's own change, in the tab they see, is skipped: the action
+ *   that wrote it already re-read the page (revalidatePath);
+ * - coming back to the tab, after sleep, a lost network or a Realtime
+ *   reconnection, the version is compared first (one small read): no
+ *   change, no refresh.
  */
-export function ProjectLive({ projectId }: { projectId: string }) {
+export function ProjectLive({
+  projectId,
+  accountId,
+}: {
+  projectId: string;
+  accountId: string | null;
+}) {
   const [pending, startTransition] = useTransition();
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -24,6 +40,8 @@ export function ProjectLive({ projectId }: { projectId: string }) {
     const supabase = createClient();
     let active = true;
     let subscribedOnce = false;
+    // The version this tab shows; null until read (nothing to compare yet).
+    let shown: number | null = null;
 
     const refresh = () => {
       if (timer.current) clearTimeout(timer.current);
@@ -35,6 +53,35 @@ export function ProjectLive({ projectId }: { projectId: string }) {
       }, DEBOUNCE_MS);
     };
 
+    const readVersion = async (): Promise<number | null> => {
+      const { data } = await supabase
+        .from("project_live")
+        .select("version")
+        .eq("project_id", projectId)
+        .maybeSingle();
+      return data?.version ?? null;
+    };
+
+    // Refreshes only if the project changed since what this tab shows.
+    const catchUp = async () => {
+      const version = await readVersion();
+      if (!active || version === null) return;
+      if (shown !== null && version !== shown) refresh();
+      shown = version;
+    };
+
+    const onChange = (payload: { new: LiveRow }) => {
+      const row = payload.new;
+      const own =
+        accountId !== null &&
+        row.changed_by === accountId &&
+        document.visibilityState === "visible";
+      // A hidden tab keeps its old version: it refreshes when shown.
+      if (document.visibilityState === "visible" && row.version)
+        shown = row.version;
+      if (!own && document.visibilityState === "visible") refresh();
+    };
+
     const channel = supabase.channel(`project-live:${projectId}`).on(
       "postgres_changes",
       {
@@ -43,7 +90,7 @@ export function ProjectLive({ projectId }: { projectId: string }) {
         table: "project_live",
         filter: `project_id=eq.${projectId}`,
       },
-      refresh,
+      onChange,
     );
 
     // The session token must reach Realtime before subscribing, or RLS
@@ -56,25 +103,27 @@ export function ProjectLive({ projectId }: { projectId: string }) {
         if (!active) return;
         channel.subscribe((status) => {
           if (status !== "SUBSCRIBED") return;
-          if (subscribedOnce) refresh();
+          if (subscribedOnce) void catchUp();
           subscribedOnce = true;
         });
       });
+    void catchUp();
 
     const onVisible = () => {
-      if (document.visibilityState === "visible") refresh();
+      if (document.visibilityState === "visible") void catchUp();
     };
+    const onOnline = () => void catchUp();
     document.addEventListener("visibilitychange", onVisible);
-    window.addEventListener("online", refresh);
+    window.addEventListener("online", onOnline);
 
     return () => {
       active = false;
       if (timer.current) clearTimeout(timer.current);
       document.removeEventListener("visibilitychange", onVisible);
-      window.removeEventListener("online", refresh);
+      window.removeEventListener("online", onOnline);
       supabase.removeChannel(channel);
     };
-  }, [projectId]);
+  }, [projectId, accountId]);
 
   if (!pending) return null;
   return (

@@ -108,7 +108,7 @@ export async function ProjectFrame({
   return (
     <div className="flex flex-1">
       {/* Pages read again when the project changes elsewhere (JUR-12). */}
-      <ProjectLive projectId={project.id} />
+      <ProjectLive projectId={project.id} accountId={access.accountId} />
       {/* Sits right against the main sidebar (collapsed to icons on a
           project page), so the two read as one "double sidebar" (Figma). */}
       {/* The viewer's counts come from the journeys, under a Suspense: the

@@ -785,6 +785,16 @@ s'afficher sans chargement.
   fois expirée). Jamais périmé après une écriture : tout `revalidatePath` d'une Server
   Action vide ce cache, les notifications Realtime font `router.refresh()`. Une écriture
   d'un collègue **sans** notification peut rester invisible 60 s au plus.
+- **Rafraîchissement d'un projet** (audit des chargements, 26/10) : un rafraîchissement de
+  `ProjectLive` relit tout le projet (200 à 300 requêtes) **et vide le cache du routeur**, donc les
+  vues préchargées. Il ne part plus que pour un changement que l'onglet n'a pas encore montré :
+  `project_live.changed_by` (= `auth.uid()`, nul pour un lien public ou un cron) fait ignorer à
+  l'onglet visible ses propres écritures (l'action a déjà fait son `revalidatePath`) ; au retour sur
+  l'onglet, après une coupure réseau ou une reconnexion Realtime, la version est relue d'abord (une
+  petite lecture) et rien ne part si elle n'a pas bougé ; un onglet caché attend d'être montré.
+  `NotificationListener` regroupe une rafale de notifications en un seul `router.refresh()` et
+  l'onglet caché attend aussi. Mesure de départ (pré-prod, `pg_stat_statements`) : 10 215 requêtes
+  en 44 min pour deux personnes ; `get_my_access` 0,4 ms seul, 140 ms en moyenne sous cette charge.
 - **Squelettes** (`loading.tsx`) pour ce qui n'est pas préchargé (première entrée dans une
   page) : une page de premier niveau a le sien (`PageLoading`), listes avec leur vrai titre,
   sections d'un projet (`ProjectSectionLoading`, sous l'en-tête et les barres qui restent),

@@ -9,16 +9,39 @@ import { getNotification } from "@/lib/notifications/actions";
 import { playChime } from "@/lib/notifications/chime";
 import { createClient } from "@/lib/supabase/client";
 
+// Coalesces a burst of notifications (one action notifies several times).
+const DEBOUNCE_MS = 400;
+
 // Listens to the signed-in person's new notifications (Supabase Realtime,
-// RLS applies). Each one refreshes the page, so a transmission or an answer
-// shows up without reloading, and pops a toast (with a chime) linking to
-// its project.
+// RLS applies). They refresh the page, so a transmission or an answer shows
+// up without reloading, and each pops a toast (with a chime) linking to its
+// project. A refresh re-reads the whole page: one per burst, and a hidden
+// tab waits until it is shown (docs/ARCHITECTURE.md § 3 bis).
 export function NotificationListener({ personId }: { personId: string }) {
   const router = useRouter();
 
   useEffect(() => {
     const supabase = createClient();
     let active = true;
+    let stale = false;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    const refresh = () => {
+      if (document.visibilityState !== "visible") {
+        stale = true;
+        return;
+      }
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        if (active) router.refresh();
+      }, DEBOUNCE_MS);
+    };
+    const onVisible = () => {
+      if (document.visibilityState !== "visible" || !stale) return;
+      stale = false;
+      refresh();
+    };
+    document.addEventListener("visibilitychange", onVisible);
 
     const channel = supabase.channel(`notifications:${personId}`).on(
       "postgres_changes",
@@ -29,7 +52,7 @@ export function NotificationListener({ personId }: { personId: string }) {
         filter: `recipient_person_id=eq.${personId}`,
       },
       async (payload) => {
-        router.refresh();
+        refresh();
         const id = (payload.new as { id?: string }).id;
         if (!id) return;
         const item = await getNotification(id);
@@ -58,6 +81,8 @@ export function NotificationListener({ personId }: { personId: string }) {
 
     return () => {
       active = false;
+      if (timer) clearTimeout(timer);
+      document.removeEventListener("visibilitychange", onVisible);
       supabase.removeChannel(channel);
     };
   }, [personId, router]);

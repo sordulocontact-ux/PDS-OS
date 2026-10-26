@@ -15451,18 +15451,21 @@ export type Database = {
       project_live: {
         Row: {
           changed_at: string
+          changed_by: string | null
           organization_id: string
           project_id: string
           version: number
         }
         Insert: {
           changed_at?: string
+          changed_by?: string | null
           organization_id: string
           project_id: string
           version?: number
         }
         Update: {
           changed_at?: string
+          changed_by?: string | null
           organization_id?: string
           project_id?: string
           version?: number
