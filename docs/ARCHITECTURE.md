@@ -4630,7 +4630,8 @@ plateformes. Ses colonnes de `releases` restent (données), plus rien ne les éc
   § 11 tant que la séparation n'est pas arbitrée) ; sans lui, rien ne peut être demandé.
   `submit_distribution_version` fige une **version** numérotée avec l'**instantané** construit par
   le serveur (`snapshotOf`) ; refusée tant qu'un élément bloque, qu'un paramètre manque, qu'un
-  contrôle est non conforme ; les contrôles non vérifiés sont dits, pas bloquants.
+  contrôle est non conforme ; les contrôles non vérifiés sont dits, pas bloquants (règle remplacée par la
+  recette V1 du 23/10 : voir « Recette Distribution V1 » plus bas).
   `decide_distribution_version` (validateur demandé seul, refus motivé). Paramètres figés tant
   qu'une version attend ou est validée (policy restrictive `distribution_dossier_editable`).
   **Écarts depuis la version** (`snapshotDrift`) : ce qui a changé à la source depuis la Vn (§ 13).
@@ -4747,6 +4748,61 @@ Remplace les cinq onglets ci-dessus (leurs données et fonctions SQL restent). C
   Un UPC qui arrive après une version validée (« Attribué au dépôt ») n'est pas un écart à la source
   (`snapshotDrift`) ; un UPC changé l'est. Le point « UPC » de la préparation mène aux paramètres.
 - Tests : `supabase/tests/distribution.test.sql` (105) et `distribution-journey.test.sql` (35).
+
+### Recette Distribution V1 d'Ibé (23/10/2026, DIST-001 à DIST-007)
+
+Le dernier retour d'Ibé fait foi sur ses tickets précédents. Migrations `20261026200101` à
+`…200401`, tests `supabase/tests/distribution-recette.test.sql` (47) ; `distribution.test.sql` (110) et
+`distribution-journey.test.sql` (38) adaptés.
+
+- **Garde-fous du dossier (DIST-001)**. *Avant* : « les contrôles non vérifiés sont dits, pas
+  bloquants » (ci-dessus), un refus était une note libre, une V(n+1) passait sans la correction
+  demandée par The Orchard. *Maintenant* (`submit_distribution_version`, `distribution_submit_blockers`) :
+  les six contrôles enregistrés (« Non applicable » compte) ; un **refus nomme ses modules**
+  (`distribution_versions.refusal_modules`, « À corriger dans ») et la version suivante est refusée tant
+  que les champs de ces modules sont identiques à ceux de la version refusée
+  (`distribution_snapshot_fields`, mêmes règles en TS `moduleFields`, l'UPC exclu) ; une **anomalie
+  ouverte** (hors « côté distributeur ») bloque tant que son module n'a pas changé depuis la version où
+  elle a été trouvée, et passe « en correction » à la soumission qui la corrige. Exception : une
+  **dérogation de la direction** (`administer`, `distribution_derogations` : ce qu'elle laisse passer —
+  contrôles, refus, anomalies —, risque, motif, échéance ; une seule en attente, la suivante remplace),
+  consommée par la soumission et lue par le validateur sur la version (`derogation_id`). La **validation
+  revérifie** les six contrôles (sauf dérogation « contrôles »). Le validateur enregistre les contrôles
+  restants pendant que la version attend. L'instantané reste construit par le serveur (action) : la RPC
+  est appelable par le responsable avec un autre instantané, il ne tromperait que son propre audit.
+- **Contrôles par version (DIST-006)** : `distribution_checks.version_number` (« pour la V2 ») ; un
+  refus ou une correction ne remet à « non vérifié » que les contrôles des modules concernés
+  (`distribution_module_checks` : Catalogue → identité, identifiants ; Master → audio ; Juridique →
+  droits ; Conception → visuel ; Projet → calendrier ; paramètres → droits, calendrier), avec l'ancien
+  résultat dans l'historique (`checks.reset`). Écart à la version refusée affiché comme à la version
+  remplacée.
+- **Clôture (DIST-003)**. *Avant* (ticket § 10, exemple Piégée) : avec réserves dès le dépôt, décidée
+  par le validateur. *Maintenant* : avec réserves seulement une fois **acceptée** par The Orchard
+  (`distribution_accepted`) ; avant, **décision de la direction** pour une raison typée
+  (`reason_kind` : sortie annulée, retrait de l'artiste, droits, refus du distributeur, décision
+  exceptionnelle, autre) : clôture anticipée avec réserves (`early`), **Annulée** ou **Abandonnée**
+  (genres distincts), décidées par un détenteur d'`administer`. Avant le dépôt, arrêter une sortie reste
+  l'affaire du projet (archivage).
+- **Réserves suivies (DIST-007)** : chaque réserve proposée porte criticité (proposée par le code selon
+  sa cause, modifiable), responsable (un membre, le responsable du projet proposé), échéance à venir,
+  preuve attendue (proposée selon la cause) ; à la décision elles deviennent `distribution_reserves`
+  (ouverte → levée demandée → levée). Lever = une preuve (fichier ou lien) par le responsable de la
+  réserve ou du projet, **confirmée par une autre personne** (responsable, validateur ou direction).
+  Réserve échue : `flag_overdue_distribution_reserves` (service role, appelé par le cron quotidien
+  `detect-releases`) la marque, un déclencheur prévient son responsable et le décideur. Tant qu'une
+  réserve est ouverte, l'étape Clôture est « à reprendre » (ambre) et le workflow « En cours », jamais
+  « Terminé » en vert.
+- **Déclarations (DIST-004)** : pas de badge « Simulation » — ce sont les déclarations manuelles
+  voulues (§ 7, CA07) ; chacune porte sa **source** (portail The Orchard, e-mail de The Orchard, autre
+  e-mail, appel, autre ; portail proposé pour le dépôt) et les dates suivent la frise (dépôt pas avant
+  la validation, réception ≤ acceptation ≤ livraison ≤ disponibilité ; `date_order`).
+- **Plateformes (DIST-005)** : « Tout est bon » exige le **territoire constaté**, le **jour** et une
+  **preuve** (capture dans `distribution-proofs` ou lien) ; une **indisponibilité** dit l'action, le
+  responsable et l'échéance (sur l'anomalie). Une plateforme non conforme ne compte plus comme vérifiée
+  (`availabilityOf`). `verify_distribution_platform` (sans preuve) n'est plus appelable. Le validateur
+  et le responsable d'une réserve peuvent déposer une preuve (`can_write_distribution_proof`).
+- **Disponibilité publique (DIST-002)** : informative, la vérification plateforme par plateforme fait
+  foi ; le texte ne dit plus « pas encore déclarée » quand les cinq sont vérifiées.
 
 ## 8 nonies. Marketing : Production et Suivi & bilan
 

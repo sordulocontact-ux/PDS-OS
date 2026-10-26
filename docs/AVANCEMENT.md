@@ -849,3 +849,26 @@ pré-prod). Détail : `docs/ARCHITECTURE.md` § 3 bis.
 Reste : rejouer la navigation en `pnpm build && pnpm start` puis sur la pré-prod avec `PERF_TRACE=1` ;
 pousser les migrations `20261026100101` et `20261026100201` en prod avec accord ; taille de la base
 Supabase de prod à vérifier (la pré-prod est sur l'offre gratuite).
+
+## Recette Distribution V1 d'Ibé (26/10/2026, branche `pre-prod`)
+
+Retours DIST-001 à DIST-007 du 23/10 sur le proto, appliqués à l'app (le dernier retour fait foi sur
+les tickets précédents). Détail : `docs/ARCHITECTURE.md` § 8 octies, « Recette Distribution V1 ».
+
+- [x] **SQL** (migrations `20261026200101` à `20261026200401`, appliquées sur la pré-prod) :
+      soumission et validation bloquées sans les six contrôles, refus nommant ses modules, anomalie
+      reliée à sa correction, dérogation de la direction ; contrôles par version, remis à zéro par
+      module ; clôture avec réserves après acceptation, anticipée / annulée / abandonnée par la
+      direction ; réserves suivies jusqu'à leur levée (preuve, autre personne, échéance) ; source et
+      ordre des déclarations ; plateforme vérifiée avec territoire et preuve, indisponibilité avec
+      action. Tests : `distribution-recette.test.sql` 47/47, `distribution.test.sql` 110/110,
+      `distribution-journey.test.sql` 38/38 (sur la pré-prod, en transaction annulée).
+- [x] **Écrans** : blocages de soumission dits et dérogation (direction), « À corriger dans » au
+      refus, version des contrôles, réserves à remplir puis suivies, arrêt de la distribution,
+      « Tout est bon » avec territoire/jour/preuve, indisponibilité avec action, source des
+      déclarations ; notifications (dérogation, levée demandée/décidée, réserve échue).
+
+Reste : passage dans un vrai navigateur (non fait : pas de session locale en mode auto) ; pousser les
+quatre migrations en prod avec accord ; le territoire est saisi en texte (aucun droit structuré par
+territoire n'existe au Juridique) ; une dérogation échue n'alerte pas encore (seules les réserves).
+
