@@ -818,3 +818,34 @@ valider, Master, Juridique, Conception, Distribution).
       responsable de production, compte désactivé, membre en attente, autre maison).
 
 Reste : pousser la migration en prod avec accord.
+
+## Chargement des pages (26/10/2026, branche `pre-prod`)
+
+Audit : la lenteur venait du volume de requêtes par rendu (65 à 250 par projet, 4 à 7 vagues) sur une
+petite base, amplifié par le préchargement et les rafraîchissements. En isolation une lecture prend
+moins de 1 ms ; sous la charge, `get_my_access` montait à 140 ms en moyenne (`pg_stat_statements`,
+pré-prod). Détail : `docs/ARCHITECTURE.md` § 3 bis.
+
+- [x] **`ProjectLive` / notifications** (`7394219`, migration `…20261026100101`) : plus de
+      rafraîchissement complet pour ses propres écritures ni au retour sur l'onglet sans changement ;
+      notifications regroupées, onglet caché en attente.
+- [x] **Préchargement à l'intention** (`4018c45`) : `ViewLink` précharge au survol, au focus, au
+      toucher, plus à l'entrée dans l'écran (15 à 20 rendus en fond par page de projet).
+- [x] **Une lecture par requête** (`73839bb`) : `list_legal_people` (×4), couverture et blocages de
+      la Distribution (×2), suivi du Juridique et vues du Master (×2) sous `cache()`/`memoPerRequest`.
+- [x] **Mesure** (`7092c70`) : `PERF_TRACE=1` → ligne `[perf]` par rendu (requêtes, durée, profondeur).
+- [x] **Cache des parcours par version du projet** (`2e06e5d`, migration `…20261026100201`) :
+      `project_live` couvre tout le projet (déclencheur sur 175 tables, une incrémentation par
+      transaction) ; états des workflows, parcours et contextes gardés d'une requête à l'autre pour la
+      version et le lecteur. Tests `project-live.test.sql` (10/10 sur la pré-prod, migration rejouée
+      dans une transaction annulée) ; logique du cache vérifiée hors app (copie, version, lecteur,
+      projet invisible, concurrence, échec, données non pures).
+- **Écarté pour l'instant : une RPC unique des données brutes des parcours.** Il faudrait couper
+      une quarantaine de lecteurs en « lecture » + « calcul » et réécrire leurs `select` en SQL, sans
+      pouvoir le vérifier dans un navigateur ; avec le cache par version, ce calcul ne repart
+      qu'après un changement du projet. À reprendre si `PERF_TRACE` montre des rendus à froid trop
+      lents, en commençant par la page la plus profonde.
+
+Reste : rejouer la navigation en `pnpm build && pnpm start` puis sur la pré-prod avec `PERF_TRACE=1` ;
+pousser les migrations `20261026100101` et `20261026100201` en prod avec accord ; taille de la base
+Supabase de prod à vérifier (la pré-prod est sur l'offre gratuite).
