@@ -148,19 +148,25 @@ export const planWorkflows = cache(
 );
 
 /**
- * Whether a workflow may be worked on: launched from the plan, or begun
- * before the plan existed (workflow_is_launched, SQL).
+ * The workflows that may be worked on: launched from the plan, or begun
+ * before the plan existed (workflow_is_launched, SQL), all in one call and
+ * once per request (page loads audit, docs/ARCHITECTURE.md § 3 bis).
  */
-export const isWorkflowLaunched = cache(
-  async (projectId: string, workflow: PlanWorkflow): Promise<boolean> => {
+export const launchedWorkflows = cache(
+  async (projectId: string): Promise<ReadonlySet<string>> => {
     const supabase = await createClient();
-    const { data, error } = await supabase.rpc("workflow_is_launched", {
+    const { data, error } = await supabase.rpc("launched_workflows", {
       p_project_id: projectId,
-      p_workflow: workflow,
     });
-    if (error) console.error("isWorkflowLaunched:", error.message);
-    return data === true;
+    if (error) console.error("launchedWorkflows:", error.message);
+    return new Set(data ?? []);
   },
+);
+
+/** Whether a workflow may be worked on (see launchedWorkflows). */
+export const isWorkflowLaunched = cache(
+  async (projectId: string, workflow: PlanWorkflow): Promise<boolean> =>
+    (await launchedWorkflows(projectId)).has(workflow),
 );
 
 export type WorkflowGate = {

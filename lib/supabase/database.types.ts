@@ -19868,6 +19868,10 @@ export type Database = {
           person_id: string
         }[]
       }
+      launched_workflows: {
+        Args: { p_project_id: string }
+        Returns: string[]
+      }
       list_legal_people: {
         Args: { p_organization_id: string }
         Returns: {
