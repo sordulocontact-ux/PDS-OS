@@ -872,3 +872,33 @@ Reste : passage dans un vrai navigateur (non fait : pas de session locale en mod
 quatre migrations en prod avec accord ; le territoire est saisi en texte (aucun droit structuré par
 territoire n'existe au Juridique) ; une dérogation échue n'alerte pas encore (seules les réserves).
 
+
+## Recette Marketing V1 d'Ibé (26/10/2026, branche `pre-prod`)
+
+Retours du 23/10 sur le proto (5 P0, 11 P1, 10 P2), appliqués au proto **et** à l'app ; le dernier
+retour fait foi sur les tickets précédents (règle 14 de `docs/VISION-UX.md` réécrite : un changement de
+lieu bloque désormais le tournage). Les retours Stratégie (11/10) visaient l'app d'alors, déjà
+corrigée aux lots 9a à 9e : seuls les reliquats sont repris. Détail : `docs/MARKETING-METIER.md`,
+`docs/PRODUCTION-METIER.md` § 8 bis, `docs/ARCHITECTURE.md` (Production, Stratégie, Activations, Suivi & bilan).
+
+- [x] **Protos** (`docs/protos/marketing.html`, `production-v2.html`, `distribution.html`, `projet.html`
+      reconstruit, copies sur le Bureau) : tous les tickets, tests `marketing.cjs`, `production-v2.cjs`,
+      `distribution.cjs`, `projet.cjs` à `errors: []`.
+- [x] **Production** (migration `20261026300101`) : un changement de lieu, date, devis ou proposition
+      rouvre la préparation validée ; point critique = direction + plan de rattrapage en tâches
+      (`production-ready-recette.test.sql` 30/30). Champs date/heure vides sous Safari (`Input`
+      `data-empty`), « * » sur l'organisation.
+- [x] **Stratégie** : réponse cochée dans le Brief V1, « Aucune dépense estimée », dépassement
+      « enveloppe − proposé − à arbitrer », temps forts passés et dépendances juridiques dans
+      « Restant à arbitrer », récit sans parties vides.
+- [x] **Activations et bilan** (migrations `20261026400101` à `20261026400301`) : Influence figée avant
+      le lancement et clôture refusée avec un créateur engagé ouvert ; « Envoyer l'accord » (envoi
+      déclaré) ; agence déclarée réalisée seulement sans média à examiner ni ligne en erreur, ou avec
+      une réserve ; échéance bornée à la fin de campagne ; sources de mesure par levier ; « Hors
+      filtre » ; activation ouverte = réserve non décochable jusqu'à la clôture ; doublon en boucle
+      interdit ; facturé, budget par activation, écart objectif / résultat (`marketing-recette-v1.test.sql` 30/30).
+
+Reste : passage dans un vrai navigateur ; pousser les quatre migrations en prod avec accord ; le
+formulaire d'une ligne de budget ne propose pas encore l'activation (colonne en base) ; paiements des
+créateurs hors du budget par activation ; envoi réel de l'accord quand le SMTP de PO sera branché ;
+`marketing-review.test.sql` échoue déjà avant ce lot (`multiple_validators` de la pré-prod).
