@@ -16,6 +16,7 @@ import type { Blocker } from "@/lib/ui/journey";
 import { masterStepHref } from "@/lib/ui/master-steps";
 import { personName } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
+import { argsKey, memoPerRequest } from "@/lib/utils/request-memo";
 
 /** A title the package carries: one whose master final is not there yet. */
 export type PlannedTitle = {
@@ -86,7 +87,7 @@ const withoutStemsOf = (derogations: unknown): string[] => {
  * validated Mix finals), what still blocks it, and the follow-up of each
  * sending. Read with the viewer's session.
  */
-export async function loadStepView(
+async function readStepView(
   project: {
     id: string;
     title: string;
@@ -348,3 +349,7 @@ export async function loadStepView(
       : null,
   };
 }
+
+// Once per request for the same project, viewer and role (the workflow
+// statuses and the Master's pages both read it, page loads audit).
+export const loadStepView = memoPerRequest(argsKey, readStepView);

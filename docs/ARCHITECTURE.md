@@ -796,6 +796,13 @@ s'afficher sans chargement.
   `NotificationListener` regroupe une rafale de notifications en un seul `router.refresh()` et
   l'onglet caché attend aussi. Mesure de départ (pré-prod, `pg_stat_statements`) : 10 215 requêtes
   en 44 min pour deux personnes ; `get_my_access` 0,4 ms seul, 140 ms en moyenne sous cette charge.
+- **Une lecture par requête** (audit, 26/10) : ce que les états des workflows (layout du projet) et
+  les parcours ou pages relisent passe par `cache()` ou `memoPerRequest(argsKey, …)`
+  (`lib/utils/request-memo.ts`, clé = tous les arguments) : `listLegalPeople`
+  (`lib/legal/legal-people.ts`, était lue 4 fois), `distributionCover` / `distributionLegalBlockers`
+  (`lib/distribution/shared-reads.ts`), `loadTracking`, `loadStepView`, `loadMixVersions`,
+  `loadFinalView`, `listCreativePeople`. Une Server Action relit toujours (le cache ne vaut qu'au
+  rendu). Un nouveau lecteur partagé par deux loaders d'un même rendu prend le même chemin.
 - **Squelettes** (`loading.tsx`) pour ce qui n'est pas préchargé (première entrée dans une
   page) : une page de premier niveau a le sien (`PageLoading`), listes avec leur vrai titre,
   sections d'un projet (`ProjectSectionLoading`, sous l'en-tête et les barres qui restent),

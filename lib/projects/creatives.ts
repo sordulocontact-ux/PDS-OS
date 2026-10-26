@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cache } from "react";
+
 import { personName } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -29,8 +31,9 @@ export async function listProjectCreatives(
   }));
 }
 
-// Every creative director of the organization, for the picker.
-export async function listCreativePeople(
+// Every creative director of the organization, for the picker. Once per
+// request (several loaders of a project page name them).
+export const listCreativePeople = cache(async function listCreativePeople(
   organizationId: string,
 ): Promise<CreativeMember[]> {
   const supabase = await createClient();
@@ -45,4 +48,4 @@ export async function listCreativePeople(
     personId: p.person_id,
     name: personName(p.first_name, p.last_name),
   }));
-}
+});

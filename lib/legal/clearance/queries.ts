@@ -14,6 +14,7 @@ import {
 } from "@/lib/legal/clearance/matrix";
 import type { Clearance, Clearances } from "@/lib/legal/clearance/types";
 import { personName } from "@/lib/projects/types";
+import { listLegalPeople } from "@/lib/legal/legal-people";
 import { createClient } from "@/lib/supabase/server";
 
 // The clearances of a project (ticket Juridique 05), with everything their
@@ -34,9 +35,7 @@ export async function loadClearances(
       .eq("project_id", project.id)
       .order("created_at"),
     access.organizationId
-      ? supabase.rpc("list_legal_people", {
-          p_organization_id: access.organizationId,
-        })
+      ? listLegalPeople(access.organizationId)
       : Promise.resolve({ data: [], error: null }),
     supabase
       .from("contracts")

@@ -12,7 +12,9 @@ import {
 } from "@/lib/legal/plan/proposal";
 import { trackPlan, type TrackedItem } from "@/lib/legal/tracking/state";
 import { personName } from "@/lib/projects/types";
+import { listLegalPeople } from "@/lib/legal/legal-people";
 import { createClient } from "@/lib/supabase/server";
+import { argsKey, memoPerRequest } from "@/lib/utils/request-memo";
 
 export type LegalTracking =
   | { state: "not_launched" }
@@ -28,7 +30,7 @@ export type LegalTracking =
 
 /** The Suivi of a launched plan, read with the viewer's session: the stored
  * actions, then their sources (Réseau, Contrats, titles, clearances). */
-export async function loadTracking(
+async function readTracking(
   project: {
     id: string;
     masters: Array<{ id: string; title: string; artists: string }>;
@@ -63,9 +65,7 @@ export async function loadTracking(
         .select("id, master_id, element, work, author, status, updated_at")
         .eq("project_id", project.id),
       access.organizationId
-        ? supabase.rpc("list_legal_people", {
-            p_organization_id: access.organizationId,
-          })
+        ? listLegalPeople(access.organizationId)
         : Promise.resolve({ data: [], error: null }),
       completeFormContacts(project.id),
       splitStates(project.id),
@@ -150,3 +150,7 @@ export async function loadTracking(
     }),
   };
 }
+
+// Once per request for the same project and viewer (the workflow statuses and
+// the Juridique's journey both read it, page loads audit).
+export const loadTracking = memoPerRequest(argsKey, readTracking);

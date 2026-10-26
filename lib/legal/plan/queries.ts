@@ -14,6 +14,7 @@ import {
   type PlanItemStatus,
 } from "@/lib/legal/plan/proposal";
 import { personName } from "@/lib/projects/types";
+import { listLegalPeople } from "@/lib/legal/legal-people";
 import { createClient } from "@/lib/supabase/server";
 
 export type PlanRow = PlanItem & {
@@ -110,9 +111,7 @@ export async function loadLegalPlan(
       .eq("project_id", project.id)
       .maybeSingle(),
     access.organizationId
-      ? supabase.rpc("list_legal_people", {
-          p_organization_id: access.organizationId,
-        })
+      ? listLegalPeople(access.organizationId)
       : Promise.resolve({ data: [], error: null }),
   ]);
   const names = new Map(

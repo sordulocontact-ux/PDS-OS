@@ -16,6 +16,7 @@ import type {
 } from "@/lib/legal/formalities/types";
 import { exactShare, unitsOf } from "@/lib/legal/splits/shares";
 import { personName } from "@/lib/projects/types";
+import { listLegalPeople } from "@/lib/legal/legal-people";
 import { createClient } from "@/lib/supabase/server";
 
 // The SACEM 725 formality of each title of a project (ticket Juridique 06),
@@ -75,9 +76,7 @@ export async function loadFormalities(
       .eq("project_id", project.id)
       .eq("definition_key", SACEM_725),
     access.organizationId
-      ? supabase.rpc("list_legal_people", {
-          p_organization_id: access.organizationId,
-        })
+      ? listLegalPeople(access.organizationId)
       : Promise.resolve(none),
     // A signed publishing contract of the project (RLS: the contracts the
     // viewer may read).

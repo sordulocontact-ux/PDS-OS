@@ -13,6 +13,7 @@ import {
 import { withDownloadName } from "@/lib/catalog/file-rules";
 import { personName } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
+import { argsKey, memoPerRequest } from "@/lib/utils/request-memo";
 
 const name = (
   person: { first_name: string; last_name: string | null } | null,
@@ -28,7 +29,7 @@ const statusOf = (value: string): MixVersionStatus =>
  * when a "mix" audio file arrives) and what the team said of each, in one
  * round of two queries, with the viewer's session.
  */
-export async function loadMixVersions(
+async function readMixVersions(
   project: {
     id: string;
     ownerPersonId: string | null;
@@ -146,3 +147,7 @@ export async function loadMixVersions(
     })),
   };
 }
+
+// Once per request for the same project, viewer and stage (the workflow
+// statuses and the Master's pages both read it, page loads audit).
+export const loadMixVersions = memoPerRequest(argsKey, readMixVersions);

@@ -24,3 +24,7 @@ export function memoPerRequest<A extends unknown[], R>(
     return result;
   };
 }
+
+/** The key of a call by all its arguments (plain data read from the
+ * database: a project, an access, a stage). */
+export const argsKey = (...args: unknown[]) => JSON.stringify(args);

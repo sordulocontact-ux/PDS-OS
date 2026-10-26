@@ -11,6 +11,7 @@ import {
 import { canEditProject } from "@/lib/projects/edit-access";
 import { personName } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
+import { argsKey, memoPerRequest } from "@/lib/utils/request-memo";
 
 // The masters themselves are the workflow's own results, not checked off.
 const WORKFLOW_RESULTS: BriefDeliverable[] = ["mix_final", "master_final"];
@@ -74,7 +75,7 @@ export type FinalView = {
  * the Catalogue, and the other deliverables the brief expects, checked off
  * by the owner as they arrive. In one round, with the viewer's session.
  */
-export async function loadFinalView(
+async function readFinalView(
   project: {
     id: string;
     ownerPersonId: string | null;
@@ -250,3 +251,7 @@ export async function loadFinalView(
 
 export const finalLabel = (state: AudioState | null) =>
   state ? fr.catalog.audioStates[state] : null;
+
+// Once per request for the same project and viewer (the workflow statuses,
+// the Distribution and the Master final page all read it, page loads audit).
+export const loadFinalView = memoPerRequest(argsKey, readFinalView);

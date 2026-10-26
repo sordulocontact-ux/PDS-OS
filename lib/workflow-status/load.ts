@@ -19,6 +19,10 @@ import { fr } from "@/lib/i18n/fr";
 import { getProject } from "@/lib/projects/queries";
 import { REFERENCE_PLATFORMS } from "@/lib/distribution/platforms";
 import { formatDate } from "@/lib/release/format";
+import {
+  distributionCover,
+  distributionLegalBlockers,
+} from "@/lib/distribution/shared-reads";
 import { createClient } from "@/lib/supabase/server";
 import type { LegalStepKey } from "@/lib/ui/legal-steps";
 import {
@@ -265,8 +269,8 @@ async function distributionFacts(projectId: string) {
       .select("params_confirmed_at")
       .eq("project_id", projectId)
       .maybeSingle(),
-    supabase.rpc("distribution_cover", { p_project_id: projectId }),
-    supabase.rpc("distribution_legal_blockers", { p_project_id: projectId }),
+    distributionCover(projectId),
+    distributionLegalBlockers(projectId),
   ]);
   const open = closures.data;
   if (release.error) console.error("distributionFacts:", release.error.message);

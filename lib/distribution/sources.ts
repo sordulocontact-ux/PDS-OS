@@ -17,6 +17,10 @@ import { loadFinalView } from "@/lib/master-workflow/final";
 import { loadProjectDates } from "@/lib/projects/dates";
 import type { ProjectDetail } from "@/lib/projects/types";
 import { getProjectRelease, type ReleaseRow } from "@/lib/release/queries";
+import {
+  distributionCover,
+  distributionLegalBlockers,
+} from "@/lib/distribution/shared-reads";
 import { createClient } from "@/lib/supabase/server";
 import { loadWorkflowStates } from "@/lib/workflow-status/load";
 
@@ -106,8 +110,8 @@ export const loadDistributionSources = cache(async function load(
           .eq("id", access.organizationId)
           .maybeSingle()
       : null,
-    supabase.rpc("distribution_legal_blockers", { p_project_id: project.id }),
-    supabase.rpc("distribution_cover", { p_project_id: project.id }),
+    distributionLegalBlockers(project.id),
+    distributionCover(project.id),
     loadProjectDates(project.id),
   ]);
 
