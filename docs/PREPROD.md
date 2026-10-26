@@ -17,11 +17,14 @@ comme ») et **sauter à un moment du parcours** (« Aller à »). Décision du 
 | Barre « Voir comme / Aller à » | jamais | oui (`PREPROD_TOOLS=1`) |
 | Données de test de PO (« remplis la page ») | jamais | oui |
 
-**`pre-prod` est une branche d'intégration** : `main` + chaque branche pas encore en prod + l'outillage
-(`feat/preprod-tools`). On y **fusionne** une branche dès qu'elle est à tester, on y fusionne `main`
-quand `main` avance, et on ne la fusionne **jamais** dans `main` : le code arrive en prod par sa propre
-branche. Contenu au 26/10/2026 : `retours/juridique-v1` (qui contient `retours/lots-4-7` et
-`retours/lot3-confirmation-suite`). `origin/front` (septembre, essais) est écartée.
+**Deux branches seulement** (décision du 26/10/2026, toutes les autres supprimées) : on travaille sur
+`pre-prod`, testée sur sa base ; quand c'est validé, `pre-prod` est fusionnée dans `main`, qui part en
+production (et ses migrations sont poussées sur la base de prod, avec accord). Au 26/10, `pre-prod` a
+d'avance sur `main` : la recette Juridique V1, les lots 3 à 7 des retours, l'outillage de la pré-prod et
+`visible_project_ids()`.
+
+Pousser avec l'adresse `sordulo.contact@gmail.com` en auteur du dernier commit : Vercel bloque sinon le
+déploiement.
 
 Le cron de `vercel.json` ne tourne que sur la Production : la pré-prod ne détecte pas de sorties.
 
