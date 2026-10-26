@@ -5,8 +5,9 @@ import { cn } from "@/lib/utils";
 
 const t = fr.productionReady;
 
-/** The synthesis before the shoot (proto synTable): each line, its value
- * as read, « Prêt » or « Pas prêt ». The same live and frozen. */
+/** The synthesis before the shoot (proto synTable): each line, its
+ * severity (« Critique » or « Mineur », recette 23/10), its value as read,
+ * « Prêt » or « Pas prêt ». The same live and frozen. */
 export function ReadySynthesisTable({
   rows,
   actions = {},
@@ -24,7 +25,12 @@ export function ReadySynthesisTable({
           className="flex flex-wrap items-start justify-between gap-3 border-b border-[color:var(--border-hairline)] px-4 py-3 last:border-b-0"
         >
           <span className="flex min-w-0 flex-1 flex-col gap-0.5 break-words">
-            <b className="font-semibold">{r.label}</b>
+            <span className="flex flex-wrap items-baseline gap-x-2">
+              <b className="font-semibold">{r.label}</b>
+              <span className="text-sm text-[color:var(--text-tertiary)]">
+                {r.critical ? t.critical : t.minor}
+              </span>
+            </span>
             <span
               className={cn(
                 r.ok

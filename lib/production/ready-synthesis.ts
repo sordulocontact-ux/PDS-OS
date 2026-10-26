@@ -10,7 +10,7 @@ import {
   type ProposalVersion,
 } from "@/lib/production/proposal/model";
 import type { ProductionQuote } from "@/lib/production/quotes/queries";
-import type { ReadyRow } from "@/lib/production/ready-rows";
+import { isCriticalReadyKey, type ReadyRow } from "@/lib/production/ready-rows";
 import { hourFr, type ScheduleDecision } from "@/lib/production/schedule/model";
 import type { ProductionSheetData } from "@/lib/production/sheet";
 import type { StepTools } from "@/lib/step-tools/queries";
@@ -22,7 +22,8 @@ const t = fr.productionReady;
  * The synthesis before the shoot (proto synthesis), computed by code from
  * what is validated — never from what is said: the place and its fit with
  * the quote, the date, the company's checklist, the quote, the proposal,
- * the open blockers and the informations still to confirm.
+ * the open blockers and the informations still to confirm. Each line's
+ * severity follows its key (recette 23/10, MKT-PROD-002).
  */
 export function readySynthesis({
   data,
@@ -60,7 +61,7 @@ export function readySynthesis({
     : null;
   const shoot = effectiveLogistics(sheet.logistics, data.heritage.fiche)
     .shootDate.value;
-  const task = (key: string, label: string, rowKey: string): ReadyRow => {
+  const task = (key: string, label: string, rowKey: string): Line => {
     const a = preprod.actions.find((x) => x.templateKey === `checklist_${key}`);
     const done = a && (a.doneAt !== null || a.taskDone === true);
     return {
@@ -88,7 +89,7 @@ export function readySynthesis({
     Boolean(sheet.quoteRevision) || (quotes[0] && quotes[0] !== active);
   const d = sheet.organization.direction.status;
   const pr = proposalState(proposal, Boolean(sheet.directionRevision));
-  const directionRow: ReadyRow = pr.retained
+  const directionRow: Line = pr.retained
     ? {
         key: "direction",
         label: t.rows.direction,
@@ -107,7 +108,7 @@ export function readySynthesis({
             : v.noDirection,
         ok: d === "approved" && !sheet.directionRevision,
       };
-  return [
+  const rows: Line[] = [
     {
       key: "place",
       label: t.rows.place,
@@ -164,4 +165,8 @@ export function readySynthesis({
       ok: notes.length === 0,
     },
   ];
+  return rows.map((row) => ({ ...row, critical: isCriticalReadyKey(row.key) }));
 }
+
+// A line before its severity, which only its key decides.
+type Line = Omit<ReadyRow, "critical">;

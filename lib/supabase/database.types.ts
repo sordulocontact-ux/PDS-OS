@@ -14184,6 +14184,15 @@ export type Database = {
       }
       production_sheets: {
         Row: {
+          ready_reopened_at: string | null
+          ready_reopened_because: string[]
+          ready_request_at: string | null
+          ready_request_by: string | null
+          ready_request_snapshot: Json | null
+          ready_request_reason: string | null
+          ready_request_plan: Json | null
+          ready_approved_by: string | null
+          ready_approved_at: string | null
           schedule_changed_at: string | null
           derived_from_sheet_id: string | null
           creative_ext_contact_id: string | null
@@ -14250,6 +14259,15 @@ export type Database = {
           staging_intent: string | null
         }
         Insert: {
+          ready_reopened_at?: string | null
+          ready_reopened_because?: string[]
+          ready_request_at?: string | null
+          ready_request_by?: string | null
+          ready_request_snapshot?: Json | null
+          ready_request_reason?: string | null
+          ready_request_plan?: Json | null
+          ready_approved_by?: string | null
+          ready_approved_at?: string | null
           schedule_changed_at?: string | null
           derived_from_sheet_id?: string | null
           creative_ext_contact_id?: string | null
@@ -14316,6 +14334,15 @@ export type Database = {
           staging_intent?: string | null
         }
         Update: {
+          ready_reopened_at?: string | null
+          ready_reopened_because?: string[]
+          ready_request_at?: string | null
+          ready_request_by?: string | null
+          ready_request_snapshot?: Json | null
+          ready_request_reason?: string | null
+          ready_request_plan?: Json | null
+          ready_approved_by?: string | null
+          ready_approved_at?: string | null
           schedule_changed_at?: string | null
           derived_from_sheet_id?: string | null
           creative_ext_contact_id?: string | null
@@ -17749,6 +17776,14 @@ export type Database = {
         Args: { p_confirmation_id: string; p_sealed: string }
         Returns: undefined
       }
+      production_ready_critical: {
+        Args: { p_key: string }
+        Returns: boolean
+      }
+      decide_production_ready: {
+        Args: { p_approve: boolean; p_reason?: string; p_sheet_id: string }
+        Returns: undefined
+      }
       decide_production_schedule: {
         Args: { p_date: string; p_end: string; p_sheet_id: string; p_source: string; p_start: string }
         Returns: undefined
@@ -17826,8 +17861,13 @@ export type Database = {
         | { Args: { p_token: string; p_url: string }; Returns: undefined }
         | { Args: { p_contact_token: string; p_item_id: string; p_url: string }; Returns: undefined }
       confirm_production_ready: {
-        Args: { p_force_reason: string | null; p_sheet_id: string; p_snapshot: Json }
-        Returns: undefined
+        Args: {
+          p_force_reason: string | null
+          p_plan?: Json
+          p_sheet_id: string
+          p_snapshot: Json
+        }
+        Returns: string
       }
       replace_production_location: {
         Args: { p_note_ids: string[]; p_option_id: string; p_reason: string; p_reviews: Json; p_revise_direction: boolean; p_revise_quote: boolean }

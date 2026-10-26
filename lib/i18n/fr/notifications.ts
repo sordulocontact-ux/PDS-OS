@@ -83,6 +83,10 @@ export const notifications = {
       `${actor} vous a livré un livrable de « ${project} ». Livré ne veut pas dire publié.`,
     production_schedule_changed: (actor: string, project: string) =>
       `${actor} a changé la date du tournage de « ${project} » : le planning est à revoir.`,
+    production_ready_requested: (actor: string, project: string) =>
+      `${actor} demande de valider la préparation du tournage de « ${project} » malgré des points critiques : votre décision est attendue.`,
+    production_ready_decided: (actor: string, project: string) =>
+      `${actor} a décidé de la dérogation avant le tournage de « ${project} ».`,
     production_rushes_linked: (_actor: string, project: string) =>
       `La société a transmis le lien des rushes de « ${project} » : à récupérer.`,
     production_director_proposed: (_actor: string, project: string) =>

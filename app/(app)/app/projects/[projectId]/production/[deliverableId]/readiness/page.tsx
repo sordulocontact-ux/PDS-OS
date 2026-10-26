@@ -1,6 +1,7 @@
 import { ProductionStepPanel } from "@/components/production/journey/production-step-panel";
 import { ReadinessSection } from "@/components/production/preprod/readiness-section";
 import { ReadyConfirmForm } from "@/components/production/readiness/ready-confirm-form";
+import { ReadyRequestView } from "@/components/production/readiness/ready-request-view";
 import { ReadySynthesisTable } from "@/components/production/readiness/ready-synthesis-table";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { shortStamp } from "@/lib/calls/prep/dates";
@@ -16,6 +17,8 @@ import { loadProposalVersions } from "@/lib/production/proposal/queries";
 import { loadScheduleDecisions } from "@/lib/production/schedule/queries";
 import { ScheduleButton } from "@/components/production/schedule/schedule-button";
 import { hourFr } from "@/lib/production/schedule/model";
+import { can } from "@/lib/auth/access";
+import { todayInParis } from "@/lib/insights/dates";
 import { formatDay, formatShortInstant } from "@/lib/utils/day";
 import { createClient } from "@/lib/supabase/server";
 
@@ -55,12 +58,6 @@ export default async function ProductionReadinessStepPage({
     </ProductionStepPanel>
   );
   if (sheet.organization.kind === "external") {
-    // A change of date after the confirmation: to confirm again (rule 14).
-    const rework = Boolean(
-      sheet.readyAt &&
-      sheet.scheduleChangedAt &&
-      sheet.scheduleChangedAt >= sheet.readyAt,
-    );
     const schedules = await loadScheduleDecisions(sheet.id);
     const current = schedules.find((x) => !x.replacedAt) ?? null;
     const shootDay =
@@ -92,7 +89,7 @@ export default async function ProductionReadinessStepPage({
           }}
         />
       ) : null;
-    if (sheet.readyAt && sheet.readySnapshot && !rework)
+    if (sheet.readyAt && sheet.readySnapshot)
       return panel(
         <>
           <ToneCallout tone="success">
@@ -100,10 +97,27 @@ export default async function ProductionReadinessStepPage({
             {r.by(sheet.readyBy ?? "—", shortStamp(sheet.readyAt))}
             {sheet.readyForcedReason && r.despite(sheet.readyForcedReason)}
             {r.kept}
+            {sheet.readyApprovedBy && r.approvedBy(sheet.readyApprovedBy)}
           </ToneCallout>
           <ReadySynthesisTable rows={sheet.readySnapshot} />
           {scheduleButton && <div>{scheduleButton}</div>}
         </>,
+      );
+    // A derogation asked (MKT-PROD-002): its synthesis and plan, and the
+    // decision for the direction or the quote validator, never the asker.
+    const request = sheet.readyRequest;
+    if (request)
+      return panel(
+        <ReadyRequestView
+          projectId={projectId}
+          deliverableId={deliverableId}
+          request={request}
+          decides={
+            request.byId !== access.personId &&
+            (can(access, "administer") ||
+              sheet.quoteValidatorId === access.personId)
+          }
+        />,
       );
     const [quotes, locations, tools, proposal] = await Promise.all([
       loadQuotes(sheet.id, data.members),
@@ -123,7 +137,14 @@ export default async function ProductionReadinessStepPage({
     });
     return panel(
       <>
-        {rework && <ToneCallout tone="warning">{s.rework}</ToneCallout>}
+        {sheet.readyReopened && (
+          <ToneCallout tone="warning">
+            {r.reopened(
+              shortStamp(sheet.readyReopened.at),
+              sheet.readyReopened.because.map((c) => r.changes[c]).join(", "),
+            )}
+          </ToneCallout>
+        )}
         <p className="text-[color:var(--text-secondary)]">{r.note}</p>
         <ReadySynthesisTable
           rows={rows}
@@ -159,7 +180,19 @@ export default async function ProductionReadinessStepPage({
           <ReadyConfirmForm
             projectId={projectId}
             deliverableId={deliverableId}
-            missing={rows.filter((x) => !x.ok).map((x) => x.label)}
+            missing={rows
+              .filter((x) => !x.ok)
+              .map((x) => ({
+                key: x.key,
+                label: x.label,
+                critical: x.critical,
+              }))}
+            members={data.members}
+            decider={
+              data.members.find((m) => m.personId === sheet.quoteValidatorId)
+                ?.name ?? r.direction
+            }
+            today={todayInParis()}
           />
         )}
       </>,

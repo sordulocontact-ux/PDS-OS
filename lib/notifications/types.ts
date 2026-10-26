@@ -113,6 +113,10 @@ export const NOTIFICATION_KINDS = [
   "production_final_deposited",
   "production_delivered",
   "production_schedule_changed",
+  // A derogation before the shoot asked to the direction, then decided
+  // (recette 23/10, MKT-PROD-002).
+  "production_ready_requested",
+  "production_ready_decided",
   // A step's blocker reported (to the person who unblocks and the owner) or
   // lifted (to its reporter and the owner); a noted information the owner
   // decides (to confirm, waiting for a decision, contradicting another).
@@ -208,6 +212,8 @@ const PRODUCTION_TARGETS: Partial<Record<NotificationKind, [string, string]>> =
     production_final_deposited: ["delivery", "decisions"],
     production_delivered: ["delivery", "decisions"],
     production_schedule_changed: ["readiness", "ready"],
+    production_ready_requested: ["readiness", "ready"],
+    production_ready_decided: ["readiness", "ready"],
     production_direction_submitted: ["direction", "proposal"],
     production_direction_decided: ["direction", "proposal"],
   };

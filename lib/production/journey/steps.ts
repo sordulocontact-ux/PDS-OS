@@ -399,7 +399,11 @@ function stepsOf(i: JourneyInput): Def[] {
     prereq: ext ? ["quote", "direction", "locations"] : ["call-sheet"],
     roles: [role("exec", owner, r.owner), role("coord", producer, r.producer)],
     done: passed,
-    act: () => actor(owner, t.todo.ready),
+    // A derogation asked waits for the quote validator (MKT-PROD-002).
+    act: () =>
+      i.readyRequested
+        ? actor(i.validator, t.todo.readyDecide, "validate")
+        : actor(owner, i.readyReopened ? t.todo.readyAgain : t.todo.ready),
     summary: i.readyAt ? t.summary.ready : null,
   };
 

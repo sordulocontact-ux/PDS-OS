@@ -123,6 +123,10 @@ export type JourneyInput = {
   };
   callSheet: { ready: boolean; published: number | null };
   readyAt: string | null;
+  // A derogation before the shoot waiting for the direction (MKT-PROD-002).
+  readyRequested: boolean;
+  // The preparation reopened by a change after it (MKT-PROD-001).
+  readyReopened: boolean;
   shotAt: string | null;
   rushes: { linked: boolean; received: boolean; backup: boolean };
   phase: ProductionPhase;

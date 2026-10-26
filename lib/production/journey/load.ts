@@ -308,6 +308,8 @@ export const loadJourney = cache(
         published,
       },
       readyAt: sheet?.readyAt ?? null,
+      readyRequested: Boolean(sheet?.readyRequest),
+      readyReopened: Boolean(sheet?.readyReopened && !sheet.readyAt),
       shotAt: shoot?.ended_at ?? null,
       rushes: {
         linked: Boolean(shoot?.rushes_url || shoot?.files_location),
@@ -325,12 +327,8 @@ export const loadJourney = cache(
         ...(sheet?.quoteRevision ? ["quote"] : []),
         ...(sheet?.directionRevision || proposal.rework ? ["direction"] : []),
         ...(checklist.some((a) => a.review && !isDone(a)) ? ["follow-up"] : []),
-        // The date changed after the preparation was confirmed.
-        ...(sheet?.readyAt &&
-        sheet.scheduleChangedAt &&
-        sheet.scheduleChangedAt >= sheet.readyAt
-          ? ["readiness"]
-          : []),
+        // A change after the preparation reopens it (recette 23/10,
+        // MKT-PROD-001, in SQL): the step is current again, not « à revoir ».
       ],
       later:
         next?.who && next.kind !== "done"

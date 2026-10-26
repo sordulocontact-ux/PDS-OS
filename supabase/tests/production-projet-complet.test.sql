@@ -260,11 +260,11 @@ select throws_ok($$ select public.confirm_production_ready(pg_temp.id_of('sheet'
                      '[{"key":"place","label":"Lieu retenu","value":"Entrepôt","ok":true},{"key":"crew","label":"Équipe confirmée","value":"Pas encore","ok":false}]'::jsonb, '') $$,
                  'P0001', 'reason_required', 'a line not ready needs a reason');
 select lives_ok($$ select public.confirm_production_ready(pg_temp.id_of('sheet'),
-                     '[{"key":"place","label":"Lieu retenu","value":"Entrepôt","ok":true},{"key":"crew","label":"Équipe confirmée","value":"Pas encore","ok":false}]'::jsonb, 'Équipe confirmée oralement') $$,
-                'the owner confirms anyway, with a reason');
+                     '[{"key":"place","label":"Lieu retenu","value":"Entrepôt","ok":true},{"key":"gear","label":"Matériel","value":"Pas encore","ok":false}]'::jsonb, 'Matériel loué la veille') $$,
+                'the owner confirms anyway a minor line, with a reason');
 reset role;
 select is((select ready_forced_reason from public.production_sheets where id = pg_temp.id_of('sheet')),
-          'Équipe confirmée oralement', 'the reason is kept with the frozen synthesis');
+          'Matériel loué la veille', 'the reason is kept with the frozen synthesis');
 set local role anon;
 select ok(public.get_production_link_journey((select v from vars where k = 'token3')) ->> 'readyAt' is not null,
           'the company reads that the preparation is validated');

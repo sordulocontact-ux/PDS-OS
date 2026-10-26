@@ -117,6 +117,8 @@ export const productionJourney = {
     locationsChoose: "Retenir un lieu",
     callSheet: "Compléter et diffuser la feuille de service",
     ready: "Confirmer : préparation validée",
+    readyAgain: "Contrôler à nouveau la préparation",
+    readyDecide: "Décider la dérogation avant tournage",
     shootDone: "Confirmer que le tournage a eu lieu",
     rushesLink: "Transmettre le lien des rushes",
     rushesReceived: "Confirmer la réception des rushes",

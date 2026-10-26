@@ -31,7 +31,14 @@ import {
   type SheetOrganization,
 } from "@/lib/production/organization";
 import { isNeedFamily, type NeedFamily } from "@/lib/production/roles";
-import { readyRowsOf, type ReadyRow } from "@/lib/production/ready-rows";
+import {
+  readyChangesOf,
+  readyPlanOf,
+  readyRowsOf,
+  type ReadyChange,
+  type ReadyPlanLine,
+  type ReadyRow,
+} from "@/lib/production/ready-rows";
 import { createClient } from "@/lib/supabase/server";
 
 export type ProductionMode = "direct" | "call" | "import";
@@ -142,6 +149,21 @@ export type ProductionSheetData = {
     // The synthesis confirmed before the shoot, as it was (external).
     readySnapshot: ReadyRow[] | null;
     readyForcedReason: string | null;
+    // Who approved a derogation before the shoot (MKT-PROD-002).
+    readyApprovedBy: string | null;
+    // Reopened by a change after the confirmation (MKT-PROD-001).
+    readyReopened: { at: string; because: ReadyChange[] } | null;
+    // A derogation asked to the direction, waiting (MKT-PROD-002).
+    readyRequest: {
+      at: string;
+      byId: string | null;
+      by: string | null;
+      rows: ReadyRow[];
+      reason: string;
+      plan: (ReadyPlanLine & { person: string | null })[];
+    } | null;
+    // Who decides a derogation: the quote validator (else the direction).
+    quoteValidatorId: string | null;
   } | null;
   needs: ProductionNeed[];
   // The owner, while Production may start or runs, on a validated sheet.
@@ -440,6 +462,27 @@ async function loadSheet(
             : null,
         readySnapshot: readyRowsOf(sheetRow.ready_snapshot),
         readyForcedReason: sheetRow.ready_forced_reason,
+        readyApprovedBy: nameOf(sheetRow.ready_approved_by),
+        readyReopened: sheetRow.ready_reopened_at
+          ? {
+              at: sheetRow.ready_reopened_at,
+              because: readyChangesOf(sheetRow.ready_reopened_because),
+            }
+          : null,
+        readyRequest: sheetRow.ready_request_at
+          ? {
+              at: sheetRow.ready_request_at,
+              byId: sheetRow.ready_request_by,
+              by: nameOf(sheetRow.ready_request_by),
+              rows: readyRowsOf(sheetRow.ready_request_snapshot) ?? [],
+              reason: sheetRow.ready_request_reason ?? "",
+              plan: readyPlanOf(sheetRow.ready_request_plan).map((l) => ({
+                ...l,
+                person: nameOf(l.personId),
+              })),
+            }
+          : null,
+        quoteValidatorId: sheetRow.quote_validator_person_id,
         directionRevision:
           sheetRow.direction_revision_at && sheetRow.direction_revision_reason
             ? {
