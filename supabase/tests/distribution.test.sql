@@ -10,7 +10,7 @@
 -- Nothing is sent to The Orchard: these tables only keep what people say.
 -- Run with `supabase test db`.
 begin;
-select plan(105);
+select plan(110);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -177,8 +177,12 @@ select lives_ok($$ select public.confirm_distribution_params(pg_temp.id_of('proj
 select throws_ok($$ select public.submit_distribution_version(pg_temp.id_of('project'), '{"format": 1}'::jsonb) $$,
                  'P0001', 'checks_non_compliant', 'never submitted with a check « non conforme »');
 select public.record_distribution_check(pg_temp.id_of('project'), 'rights', 'unchecked', null);
+select throws_ok($$ select public.submit_distribution_version(pg_temp.id_of('project'), '{"format": 1}'::jsonb) $$,
+                 'P0001', 'checks_unrecorded', 'never submitted while a check is not recorded (recette DIST-001)');
+select public.record_distribution_check(pg_temp.id_of('project'), k, 'compliant', null)
+  from unnest(array['identity', 'identifiers', 'rights', 'visual', 'calendar']) k;
 select is(public.submit_distribution_version(pg_temp.id_of('project'), '{"format": 1}'::jsonb),
-          1, 'the owner submits the V1 (unchecked checks are said, not blocking)');
+          1, 'the owner submits the V1 once the six checks are recorded');
 select throws_ok($$ select public.submit_distribution_version(pg_temp.id_of('project'), '{"format": 1}'::jsonb) $$,
                  'P0001', 'version_open', 'one version at a time');
 update public.distribution_dossiers set notes = 'changé' where project_id = pg_temp.id_of('project');
@@ -260,17 +264,20 @@ select lives_ok($$ select public.declare_distribution(pg_temp.id_of('project'), 
                 'Piégée: the public availability is declared, nothing verified');
 select lives_ok($$ select public.save_distribution_platform(pg_temp.id_of('project'), 'spotify', null, null, true) $$,
                 'Spotify declared available without a link');
-select throws_ok($$ select public.verify_distribution_platform(pg_temp.id_of('project'), 'spotify', 'verified', null, 'unchecked', null) $$,
+select throws_ok($$ select public.confirm_distribution_platform(pg_temp.id_of('project'), 'spotify', null,
+                      'France', null, null, null, 'https://captures.example.com/spotify') $$,
                  'P0001', 'no_link', 'nothing is verified without the official link');
 select throws_ok($$ select public.save_distribution_platform(pg_temp.id_of('project'), 'spotify', null, 'http://open.spotify.com/track/x', true) $$,
                  '23514', null, 'an official link is https');
 select lives_ok($$ select public.save_distribution_platform(pg_temp.id_of('project'), 'spotify', null, 'https://open.spotify.com/track/abc', true) $$,
                 'the official link is set');
-select throws_ok($$ select public.verify_distribution_platform(pg_temp.id_of('project'), 'spotify', 'unavailable', ' ', 'unchecked', null) $$,
-                 '23514', null, '« indisponible » says what was seen');
+select throws_ok($$ select public.report_distribution_platform_problem(pg_temp.id_of('project'), 'spotify', 'unavailable',
+                      ' ', 'distributor', null, 'Relancer', pg_temp.id_of('manager_person'), current_date) $$,
+                 'P0001', 'reason_required', '« indisponible » says what was seen');
 select pg_temp.act_as(pg_temp.id_of('director'));
-select lives_ok($$ select public.verify_distribution_platform(pg_temp.id_of('project'), 'spotify', 'verified', null, 'compliant', null) $$,
-                'the validator opened the link: available and compliant');
+select lives_ok($$ select public.confirm_distribution_platform(pg_temp.id_of('project'), 'spotify', null,
+                     'France', null, null, null, 'https://captures.example.com/spotify') $$,
+                'the validator opened the link: available and compliant, with the territory and the proof');
 select is((select (verified_by = pg_temp.id_of('director_person') and compliance_by = pg_temp.id_of('director_person'))
              from public.distribution_platforms where project_id = pg_temp.id_of('project') and platform = 'spotify'),
           true, 'who verified is written by the database');
@@ -287,7 +294,8 @@ select lives_ok($$ select public.save_distribution_platform(pg_temp.id_of('proje
 select pg_temp.act_as(pg_temp.id_of('other'));
 select throws_ok($$ select public.save_distribution_platform(pg_temp.id_of('project'), 'deezer', null, null, true) $$,
                  '42501', null, 'another manager writes no platform');
-select throws_ok($$ select public.verify_distribution_platform(pg_temp.id_of('project'), 'other_abcdefgh', 'verified', null, 'unchecked', null) $$,
+select throws_ok($$ select public.confirm_distribution_platform(pg_temp.id_of('project'), 'other_abcdefgh', null,
+                      'France', null, null, null, 'https://captures.example.com/tidal') $$,
                  '42501', null, 'nor verifies one');
 
 -- 10. Anomalies and a new version of the dossier (lot 6) ---------------------
@@ -329,8 +337,11 @@ select throws_ok($$ select public.declare_distribution(pg_temp.id_of('project'),
 update public.distribution_dossiers set notes = 'V2' where project_id = pg_temp.id_of('project');
 select is((select notes from public.distribution_dossiers where project_id = pg_temp.id_of('project')),
           'V2', 'the parameters are editable again');
-select is(public.submit_distribution_version(pg_temp.id_of('project'), '{"format": 1}'::jsonb),
-          2, 'the V2 is submitted');
+select public.record_distribution_check(pg_temp.id_of('project'), k, 'compliant', null)
+  from unnest(array['audio', 'identity', 'identifiers', 'rights', 'visual', 'calendar']) k;
+select is(public.submit_distribution_version(pg_temp.id_of('project'),
+            '{"format": 1, "sections": [{"key": "release", "groups": [{"key": "release", "fields": [{"key": "credits", "label": "Crédits", "origin": "catalog", "value": "Dioo, Sami Kader"}]}]}]}'::jsonb),
+          2, 'the V2 is submitted, the Catalogue corrected');
 select pg_temp.act_as(pg_temp.id_of('director'));
 select public.decide_distribution_version(
   (select id from public.distribution_versions where project_id = pg_temp.id_of('project') and number = 2), true, null);
@@ -340,37 +351,51 @@ select lives_ok($$ select public.declare_distribution(pg_temp.id_of('project'), 
 select lives_ok($$ select public.set_distribution_anomaly_state(pg_temp.id_of('anomaly'), 'resolved', 'Corrigé dans la V2') $$,
                 'the anomaly is resolved, with why');
 
--- 11. Closure, with reserves then normal, and reopening (lot 7) ----------------
+-- 11. Closure, with reserves then normal, and reopening (lot 7; recette DIST-003) --
+insert into vars values ('reserve', '[{"cause":"availability","label":"Disponibilité non vérifiée sur 5 plateformes","details":["Spotify","Apple Music","Deezer","YouTube Music","Amazon Music"],"criticality":"major","ownerPersonId":"'
+  || pg_temp.id_of('manager_person') || '","dueOn":"' || (current_date + 14) || '","expectedProof":"Capture de chaque plateforme"}]');
 select pg_temp.act_as(pg_temp.id_of('other'));
 select throws_ok($$ select public.propose_distribution_closure(pg_temp.id_of('project'), 'reserves',
-                      '[{"cause":"availability","label":"x","details":["Spotify"]}]'::jsonb, 'Arbitrage') $$,
+                      (select v from vars where k = 'reserve')::jsonb, 'Arbitrage', 'direction_decision') $$,
                  '42501', null, 'only the owner proposes a closure');
 select pg_temp.act_as(pg_temp.id_of('manager'));
 select throws_ok($$ select public.propose_distribution_closure(pg_temp.id_of('project'), 'normal', null, null) $$,
                  'P0001', 'conditions_not_met', 'no normal closure while reserves remain');
 select throws_ok($$ select public.propose_distribution_closure(pg_temp.id_of('project'), 'reserves',
-                      '[{"cause":"availability","label":"x","details":["Spotify"]}]'::jsonb, '  ') $$,
-                 '23514', null, 'a closure with reserves is arbitrated');
-select throws_ok($$ select public.propose_distribution_closure(pg_temp.id_of('project'), 'reserves', '[]'::jsonb, 'Arbitrage') $$,
-                 '23514', null, 'a closure with reserves lists them');
-select lives_ok($$ select public.propose_distribution_closure(pg_temp.id_of('project'), 'reserves',
-                     '[{"cause":"availability","label":"Disponibilité non vérifiée sur 5 plateformes","details":["Spotify","Apple Music","Deezer","YouTube Music","Amazon Music"]}]'::jsonb,
-                     'Piégée : une réserve de disponibilité pour les cinq plateformes') $$,
-                'Piégée: a closure with one grouped reserve is proposed');
+                      (select v from vars where k = 'reserve')::jsonb, 'Arbitrage') $$,
+                 'P0001', 'not_accepted', 'before The Orchard accepted, no closure with reserves without a reason of the direction');
 select throws_ok($$ select public.propose_distribution_closure(pg_temp.id_of('project'), 'reserves',
-                      '[{"cause":"x","label":"x","details":[]}]'::jsonb, 'Encore') $$,
+                      (select v from vars where k = 'reserve')::jsonb, '  ', 'direction_decision') $$,
+                 'P0001', 'reason_required', 'a closure with reserves is arbitrated');
+select throws_ok($$ select public.propose_distribution_closure(pg_temp.id_of('project'), 'reserves', '[]'::jsonb,
+                      'Arbitrage', 'direction_decision') $$,
+                 'P0001', 'reserves_invalid', 'a closure with reserves lists them');
+select throws_ok($$ select public.propose_distribution_closure(pg_temp.id_of('project'), 'reserves',
+                      '[{"cause":"availability","label":"x","details":["Spotify"]}]'::jsonb, 'Arbitrage', 'direction_decision') $$,
+                 'P0001', 'reserves_invalid', 'a reserve has its criticality, owner, deadline and proof expected');
+select lives_ok($$ select public.propose_distribution_closure(pg_temp.id_of('project'), 'reserves',
+                     (select v from vars where k = 'reserve')::jsonb,
+                     'Piégée : une réserve de disponibilité pour les cinq plateformes', 'direction_decision') $$,
+                'Piégée: an early closure with one grouped reserve, for a reason of the direction');
+select throws_ok($$ select public.propose_distribution_closure(pg_temp.id_of('project'), 'cancelled',
+                      null, 'Encore', 'release_cancelled') $$,
                  'P0001', 'closure_open', 'one closure at a time');
 insert into ids select 'closure1', id from public.distribution_closures where project_id = pg_temp.id_of('project');
+select is((select (early, reason_kind)::text from public.distribution_closures where id = pg_temp.id_of('closure1')),
+          '(t,direction_decision)', 'it is marked ahead of time, with its reason');
 select throws_ok($$ select public.decide_distribution_closure(pg_temp.id_of('closure1'), true, null) $$,
-                 '42501', 'not_the_validator', 'the owner does not validate the closure');
+                 '42501', 'not_direction', 'the owner does not decide an early closure');
 select pg_temp.act_as(pg_temp.id_of('director'));
 select throws_ok($$ select public.decide_distribution_closure(pg_temp.id_of('closure1'), false, '') $$,
                  'P0001', 'reason_required', 'a refused closure says why');
 select lives_ok($$ select public.decide_distribution_closure(pg_temp.id_of('closure1'), true, null) $$,
-                'the validator closes with reserves');
+                'the direction closes with reserves');
 select is((select (kind, status, jsonb_array_length(reserves))::text from public.distribution_closures
             where id = pg_temp.id_of('closure1')),
           '(reserves,closed,1)', 'it stays « clôturée avec réserves », the reserve kept as such');
+select is((select (category, criticality, status, owner_person_id = pg_temp.id_of('manager_person'))::text
+             from public.distribution_reserves where closure_id = pg_temp.id_of('closure1')),
+          '(availability,major,open,t)', 'the reserve is followed: category, criticality, owner, open');
 select throws_ok($$ select public.reopen_distribution_closure(pg_temp.id_of('project'), ' ') $$,
                  'P0001', 'reason_required', 'a reopening says why');
 select pg_temp.act_as(pg_temp.id_of('other'));
@@ -390,10 +415,10 @@ do $$ begin
 end $$;
 select public.save_distribution_platform(pg_temp.id_of('project'), p, null, 'https://example.com/' || p, true)
   from unnest(array['spotify', 'apple_music', 'deezer', 'youtube_music', 'amazon_music']) p;
-select public.verify_distribution_platform(pg_temp.id_of('project'), p, 'verified', null, 'compliant', null)
+select public.confirm_distribution_platform(pg_temp.id_of('project'), p, null, 'France', null, null, null,
+         'https://captures.example.com/' || p)
   from unnest(array['spotify', 'apple_music', 'deezer', 'youtube_music', 'amazon_music']) p;
-select public.record_distribution_check(pg_temp.id_of('project'), k, 'compliant', null)
-  from unnest(array['audio', 'identity', 'identifiers', 'rights', 'visual']) k;
+select public.record_distribution_check(pg_temp.id_of('project'), 'calendar', 'unchecked', null);
 select is(public.distribution_closure_ready(pg_temp.id_of('project')), false,
           'one check not recorded: not ready');
 select public.record_distribution_check(pg_temp.id_of('project'), 'calendar', 'not_applicable', null);

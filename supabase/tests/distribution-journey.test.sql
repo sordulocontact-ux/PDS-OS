@@ -6,7 +6,7 @@
 -- gesture, proof added later, corrections, « Tout est bon », a problem).
 -- Run with `supabase test db`.
 begin;
-select plan(35);
+select plan(38);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -117,6 +117,8 @@ select throws_ok($$ select public.submit_distribution_version(pg_temp.id_of('pro
 reset role;
 update public.legal_clearances set status = 'cleared' where id = pg_temp.id_of('clearance');
 select pg_temp.act_as(pg_temp.id_of('manager'));
+select public.record_distribution_check(pg_temp.id_of('project'), k, 'compliant', null)
+  from unnest(array['audio', 'identity', 'identifiers', 'rights', 'visual', 'calendar']) k;
 select is(public.submit_distribution_version(pg_temp.id_of('project'), '{"format": 1}'::jsonb),
           1, 'once secured, the V1 is submitted');
 reset role;
@@ -142,7 +144,7 @@ select throws_ok($$ select public.declare_distribution_answers(pg_temp.id_of('pr
                      '[{"kind": "deposit"}]'::jsonb) $$,
                  '22023', null, 'only answers of The Orchard');
 select is(public.declare_distribution_answers(pg_temp.id_of('project'),
-            '[{"kind": "accepted", "declared_on": "2026-10-01"}, {"kind": "received", "declared_on": "2026-10-01"}]'::jsonb),
+            '[{"kind": "accepted", "source": "orchard_email"}, {"kind": "received", "source": "orchard_portal"}]'::jsonb),
           2, 'two answers declared in one gesture');
 select is((select array_agg(kind order by declared_at, kind)::text from public.distribution_declarations
             where project_id = pg_temp.id_of('project') and kind <> 'deposit'),
@@ -159,19 +161,31 @@ select throws_ok($$ select public.attach_distribution_declaration_proof(pg_temp.
                  'P0001', 'proof_exists', 'never replaced');
 
 -- 6. « Tout est bon » and « Il y a un problème » ------------------------------
+select throws_ok($$ select public.confirm_distribution_platform(pg_temp.id_of('project'), 'spotify',
+                     'https://open.spotify.com/album/x1') $$,
+                 'P0001', 'territory_required', '« Tout est bon » says the territory seen (recette DIST-005)');
+select throws_ok($$ select public.confirm_distribution_platform(pg_temp.id_of('project'), 'spotify',
+                     'https://open.spotify.com/album/x1', 'France') $$,
+                 'P0001', 'proof_required', 'and its proof');
 select lives_ok($$ select public.confirm_distribution_platform(pg_temp.id_of('project'), 'spotify',
-                     'https://open.spotify.com/album/x1') $$, '« Tout est bon » on Spotify');
+                     'https://open.spotify.com/album/x1', 'France', null, null, null,
+                     'https://captures.example.com/spotify') $$, '« Tout est bon » on Spotify');
 select is((select array[verification, compliance, url] from public.distribution_platforms
             where project_id = pg_temp.id_of('project') and platform = 'spotify'),
           array['verified', 'compliant', 'https://open.spotify.com/album/x1'],
           'available and compliant in one click, with the link');
-select throws_ok($$ select public.confirm_distribution_platform(pg_temp.id_of('project'), 'deezer', null) $$,
+select throws_ok($$ select public.confirm_distribution_platform(pg_temp.id_of('project'), 'deezer', null,
+                     'France', null, null, null, 'https://captures.example.com/deezer') $$,
                  'P0001', 'no_link', 'never without a link');
 select throws_ok($$ select public.report_distribution_platform_problem(pg_temp.id_of('project'), 'amazon_music',
                      'unavailable', ' ', 'distributor', 'https://music.amazon.fr/x') $$,
                  'P0001', 'reason_required', 'a problem says what was seen');
-select lives_ok($$ select public.report_distribution_platform_problem(pg_temp.id_of('project'), 'amazon_music',
+select throws_ok($$ select public.report_distribution_platform_problem(pg_temp.id_of('project'), 'amazon_music',
                      'unavailable', 'Indisponible en France', 'distributor', 'https://music.amazon.fr/x') $$,
+                 'P0001', 'action_required', 'an unavailability says what is done, by whom, by when (recette DIST-005)');
+select lives_ok($$ select public.report_distribution_platform_problem(pg_temp.id_of('project'), 'amazon_music',
+                     'unavailable', 'Indisponible en France', 'distributor', 'https://music.amazon.fr/x',
+                     'Relancer The Orchard', pg_temp.id_of('manager_person'), current_date + 3) $$,
                 '« Il y a un problème » on Amazon Music');
 select is((select kind || ':' || platform from public.distribution_anomalies
             where project_id = pg_temp.id_of('project')),
