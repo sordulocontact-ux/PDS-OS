@@ -17,6 +17,7 @@ import { loadStepView } from "@/lib/master-workflow/transmission";
 import { isWorkflowLaunched, planLaunchedAt } from "@/lib/plan/queries";
 import { fr } from "@/lib/i18n/fr";
 import { getProject } from "@/lib/projects/queries";
+import { byProjectVersion } from "@/lib/projects/version-cache";
 import { REFERENCE_PLATFORMS } from "@/lib/distribution/platforms";
 import { formatDate } from "@/lib/release/format";
 import {
@@ -360,99 +361,102 @@ async function distributionFacts(projectId: string) {
  * (sidebar, chevrons) and its overview share one reading.
  */
 export const loadWorkflowStates = cache(
-  async (projectId: string): Promise<WorkflowStates | null> => {
-    const [access, project] = await Promise.all([
-      requireApproved(),
-      getProject(projectId),
-    ]);
-    if (!project || project.stages.length === 0) return null;
-    const workflows = applicableWorkflows({
-      type: project.type,
-      masterCount: project.masters.length,
-    });
-    const has = (workflow: WorkflowKey) => workflows.includes(workflow);
-    const legalAllowed = can(access, "manage_legal");
-
-    const supabase = await createClient();
-    const [
-      master,
-      legal,
-      strategyLaunched,
-      distribution,
-      constraints,
-      marketingStanding,
-      designDone,
-    ] = await Promise.all([
-      has("master") ? masterFacts(project, access.personId) : null,
-      has("legal") && legalAllowed ? legalFacts(project) : null,
-      has("marketing") ? isWorkflowLaunched(project.id, "strategy") : false,
-      has("distribution") ? distributionFacts(project.id) : null,
-      supabase
-        .from("framing_constraints")
-        .select("id, text")
-        .eq("project_id", project.id)
-        .eq("type", "rights")
-        .eq("review_status", "confirmed"),
-      has("marketing") ? loadMarketingStanding(project.id) : null,
-      // The Conception is done when every sheet is transferred (its stage
-      // is never validated as a whole, docs/ARCHITECTURE.md § 8 decies).
-      has("marketing")
-        ? supabase
-            .rpc("design_is_done", { p_project_id: project.id })
-            .then((r) => r.data === true)
-        : false,
-    ]);
-
-    let states: WorkflowStates["states"] = {};
-    if (master) states.master = master.state;
-    if (has("legal")) states.legal = legal ? legal.state : "restricted";
-    if (has("marketing"))
-      states.marketing = marketingState({
-        launched: strategyLaunched,
-        stages: project.stages.map((stage) =>
-          stage.key === "design" && designDone
-            ? { ...stage, state: "validated" }
-            : stage,
-        ),
-        closure: marketingStanding?.status ?? "not_started",
+  byProjectVersion(
+    "workflow-states",
+    async (projectId: string): Promise<WorkflowStates | null> => {
+      const [access, project] = await Promise.all([
+        requireApproved(),
+        getProject(projectId),
+      ]);
+      if (!project || project.stages.length === 0) return null;
+      const workflows = applicableWorkflows({
+        type: project.type,
+        masterCount: project.masters.length,
       });
-    if (distribution) states.distribution = distribution.state;
+      const has = (workflow: WorkflowKey) => workflows.includes(workflow);
+      const legalAllowed = can(access, "manage_legal");
 
-    const deps = dependencies({
-      cover: distribution?.cover ?? null,
-      legalBlockers: distribution?.legalBlockers ?? null,
-      projectId: project.id,
-      workflows,
-      states,
-      owner: project.ownerName,
-      masterDue: master?.dates?.masterFinalDue ?? null,
-      mastersFinal: master?.allFinal ?? null,
-      engineers: master?.engineers ?? null,
-      clearances: legal
-        ? legal.items
-            .filter((item) => item.kind === "clearance")
-            .map((item) => ({
-              title: item.subject
-                ? `${item.label} · ${item.subject}`
-                : item.label,
-              open: item.current !== "done" && item.current !== "obsolete",
-              due: item.dueOn,
-              href: item.sourceHref ?? legalActionHref(project.id, item.kind),
-            }))
-        : null,
-    });
-    states = withDependencies(states, deps);
-    return {
-      workflows,
-      states,
-      legalDone: legal?.done ?? [],
-      dependencies: deps,
-      details: {
-        masterDates: master?.dates ?? null,
-        releaseDate: distribution?.plannedDate ?? null,
-        legalItems: legal?.items ?? [],
-        rightsConstraints: constraints.data ?? [],
-      },
-    };
-  },
+      const supabase = await createClient();
+      const [
+        master,
+        legal,
+        strategyLaunched,
+        distribution,
+        constraints,
+        marketingStanding,
+        designDone,
+      ] = await Promise.all([
+        has("master") ? masterFacts(project, access.personId) : null,
+        has("legal") && legalAllowed ? legalFacts(project) : null,
+        has("marketing") ? isWorkflowLaunched(project.id, "strategy") : false,
+        has("distribution") ? distributionFacts(project.id) : null,
+        supabase
+          .from("framing_constraints")
+          .select("id, text")
+          .eq("project_id", project.id)
+          .eq("type", "rights")
+          .eq("review_status", "confirmed"),
+        has("marketing") ? loadMarketingStanding(project.id) : null,
+        // The Conception is done when every sheet is transferred (its stage
+        // is never validated as a whole, docs/ARCHITECTURE.md § 8 decies).
+        has("marketing")
+          ? supabase
+              .rpc("design_is_done", { p_project_id: project.id })
+              .then((r) => r.data === true)
+          : false,
+      ]);
+
+      let states: WorkflowStates["states"] = {};
+      if (master) states.master = master.state;
+      if (has("legal")) states.legal = legal ? legal.state : "restricted";
+      if (has("marketing"))
+        states.marketing = marketingState({
+          launched: strategyLaunched,
+          stages: project.stages.map((stage) =>
+            stage.key === "design" && designDone
+              ? { ...stage, state: "validated" }
+              : stage,
+          ),
+          closure: marketingStanding?.status ?? "not_started",
+        });
+      if (distribution) states.distribution = distribution.state;
+
+      const deps = dependencies({
+        cover: distribution?.cover ?? null,
+        legalBlockers: distribution?.legalBlockers ?? null,
+        projectId: project.id,
+        workflows,
+        states,
+        owner: project.ownerName,
+        masterDue: master?.dates?.masterFinalDue ?? null,
+        mastersFinal: master?.allFinal ?? null,
+        engineers: master?.engineers ?? null,
+        clearances: legal
+          ? legal.items
+              .filter((item) => item.kind === "clearance")
+              .map((item) => ({
+                title: item.subject
+                  ? `${item.label} · ${item.subject}`
+                  : item.label,
+                open: item.current !== "done" && item.current !== "obsolete",
+                due: item.dueOn,
+                href: item.sourceHref ?? legalActionHref(project.id, item.kind),
+              }))
+          : null,
+      });
+      states = withDependencies(states, deps);
+      return {
+        workflows,
+        states,
+        legalDone: legal?.done ?? [],
+        dependencies: deps,
+        details: {
+          masterDates: master?.dates ?? null,
+          releaseDate: distribution?.plannedDate ?? null,
+          legalItems: legal?.items ?? [],
+          rightsConstraints: constraints.data ?? [],
+        },
+      };
+    },
+  ),
 );

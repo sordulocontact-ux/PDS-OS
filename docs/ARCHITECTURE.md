@@ -810,6 +810,24 @@ s'afficher sans chargement.
   **profondeur** (la plus longue chaîne de requêtes faites l'une après l'autre = les allers-retours
   attendus en série) et les 5 plus lentes. Cible d'une page : quelques requêtes, profondeur ≤ 3,
   moins de 200 ms. Juger en `pnpm build && pnpm start`.
+- **Cache des parcours** (audit, 26/10, `lib/projects/version-cache.ts`) : `loadWorkflowStates`,
+  `loadProjectJourneys` et les contextes de parcours (Cadrage, Conception, Master, Juridique, Suivi &
+  bilan) sont gardés **d'une requête à l'autre** par `byProjectVersion(nom, lecteur)` (toujours sous
+  `cache()`), pour une clé = projet + `project_live.version` + lecteur (tout l'`Access` : compte,
+  poste, permissions) + jour à Paris, 5 min au plus, 300 entrées par instance. **La version est lue
+  avant les données** : une entrée n'est jamais plus ancienne que sa version. `project_live.version`
+  est désormais la version de **tout le projet** (`20261026100201_project_live_everywhere.sql`) : un
+  déclencheur `zz_project_live` sur chaque table qui mène à un projet (`project_id`, ou par
+  `project_stage_id`, `call_id`, `master_id` via `project_masters`, le projet et ses titres), une
+  incrémentation par projet et par transaction ; exclus : `project_live`, `notifications`, les parties
+  de l'enregistreur. **Toute nouvelle table liée à un projet** : `select public.attach_project_live();`
+  dans sa migration. Ce qui ne mène à aucun projet (un nom dans le Réseau) reste au plus 5 min en
+  cache ; les liens signés durent 15 min au moins. Pas de ligne de version (projet invisible pour le
+  lecteur) = jamais servi du cache ; un résultat qui n'est pas de la donnée pure (fonction, instance
+  de classe : `distributionContext` et son `nameOf`) n'est jamais gardé ; chaque requête reçoit sa
+  copie. Deux requêtes simultanées (préchargement au survol puis clic) partagent un seul calcul.
+  Une Server Action relit sans cache (`readProjectJourneys`). Conséquence pour `ProjectLive` : la
+  page ouverte se met à jour pour un changement d'un collègue dans **n'importe quel** workflow.
 - **Squelettes** (`loading.tsx`) pour ce qui n'est pas préchargé (première entrée dans une
   page) : une page de premier niveau a le sien (`PageLoading`), listes avec leur vrai titre,
   sections d'un projet (`ProjectSectionLoading`, sous l'en-tête et les barres qui restent),

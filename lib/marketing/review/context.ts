@@ -13,6 +13,7 @@ import { loadReserves } from "@/lib/marketing/reserves/queries";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { personName } from "@/lib/projects/types";
+import { byProjectVersion } from "@/lib/projects/version-cache";
 import { allInOrder } from "@/lib/utils/parallel";
 import { loadWorkflowStates } from "@/lib/workflow-status/load";
 
@@ -25,69 +26,71 @@ import { reviewJourney } from "./journey";
  * their decisions, the reserves, the closings, the activations and the
  * journey for the person looking.
  */
-export const reviewJourneyContext = cache(async (projectId: string) => {
-  const [access, project] = await allInOrder([
-    requireApproved(),
-    requireLaunchedProject(projectId),
-  ]);
-  const [
-    reports,
-    approvals,
-    reserves,
-    closures,
-    activations,
-    flows,
-    validators,
-  ] = await Promise.all([
-    listReports(projectId, access),
-    loadApprovals(projectId, access),
-    loadReserves(projectId, access),
-    loadClosures(projectId, access),
-    loadReviewActivations(projectId),
-    loadWorkflowStates(projectId),
-    access.organizationId
-      ? loadValidators(access.organizationId)
-      : Promise.resolve([]),
-  ]);
-  const owner = project.ownerPersonId
-    ? { personId: project.ownerPersonId, name: project.ownerName ?? "—" }
-    : null;
-  const validator = validators[0] ?? null;
-  const releaseDate = flows?.details.releaseDate ?? project.dueDate;
-  const today = todayInParis();
-  const steps = reviewJourney({
-    projectId,
-    viewerId: access.personId,
-    owner,
-    validator,
-    activationsCount: activations.length,
-    releaseDate,
-    today,
-    reports,
-    approvals,
-    reserves,
-    closures,
-  });
-  return {
-    access,
-    project,
-    reports,
-    approvals,
-    reserves,
-    closures,
-    activations,
-    owner,
-    validator,
-    releaseDate,
-    today,
-    steps,
-    viewer: {
-      personId: access.personId,
-      name: personName(access.firstName ?? "", access.lastName ?? "") || null,
-      isOwner: canEditProject(access, project),
-      canValidate: can(access, "validate"),
-    },
-  };
-});
+export const reviewJourneyContext = cache(
+  byProjectVersion("review-context", async (projectId: string) => {
+    const [access, project] = await allInOrder([
+      requireApproved(),
+      requireLaunchedProject(projectId),
+    ]);
+    const [
+      reports,
+      approvals,
+      reserves,
+      closures,
+      activations,
+      flows,
+      validators,
+    ] = await Promise.all([
+      listReports(projectId, access),
+      loadApprovals(projectId, access),
+      loadReserves(projectId, access),
+      loadClosures(projectId, access),
+      loadReviewActivations(projectId),
+      loadWorkflowStates(projectId),
+      access.organizationId
+        ? loadValidators(access.organizationId)
+        : Promise.resolve([]),
+    ]);
+    const owner = project.ownerPersonId
+      ? { personId: project.ownerPersonId, name: project.ownerName ?? "—" }
+      : null;
+    const validator = validators[0] ?? null;
+    const releaseDate = flows?.details.releaseDate ?? project.dueDate;
+    const today = todayInParis();
+    const steps = reviewJourney({
+      projectId,
+      viewerId: access.personId,
+      owner,
+      validator,
+      activationsCount: activations.length,
+      releaseDate,
+      today,
+      reports,
+      approvals,
+      reserves,
+      closures,
+    });
+    return {
+      access,
+      project,
+      reports,
+      approvals,
+      reserves,
+      closures,
+      activations,
+      owner,
+      validator,
+      releaseDate,
+      today,
+      steps,
+      viewer: {
+        personId: access.personId,
+        name: personName(access.firstName ?? "", access.lastName ?? "") || null,
+        isOwner: canEditProject(access, project),
+        canValidate: can(access, "validate"),
+      },
+    };
+  }),
+);
 
 export type ReviewContext = Awaited<ReturnType<typeof reviewJourneyContext>>;

@@ -5,6 +5,7 @@ import { cache } from "react";
 import { requireApproved } from "@/lib/auth/dal";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { personName } from "@/lib/projects/types";
+import { byProjectVersion } from "@/lib/projects/version-cache";
 import { createClient } from "@/lib/supabase/server";
 import { allInOrder } from "@/lib/utils/parallel";
 
@@ -16,35 +17,39 @@ import { loadMasterJourneyFacts } from "./journey-facts";
  * project, the facts of the round and the journey for the person looking.
  * Read by whoever sees the project (RLS decides the rows).
  */
-export const masterJourneyContext = cache(async (projectId: string) => {
-  const [access, project] = await allInOrder([
-    requireApproved(),
-    requireLaunchedProject(projectId),
-  ]);
-  const facts = await loadMasterJourneyFacts(project);
-  // Who pays an invoice, read only when one waits for it.
-  const direction =
-    facts.invoices.some((i) => i.receivedAt && !i.paidOn) ||
-    facts.messages.some((m) => m.status === "escalated")
-      ? await loadDirectionPerson()
-      : null;
-  const viewerName =
-    personName(access.firstName ?? "", access.lastName ?? "") || null;
-  const framing = project.stages.find((s) => s.key === "framing");
-  const steps = masterJourney({
-    projectId,
-    facts,
-    viewerId: access.personId,
-    owner: project.ownerPersonId
-      ? { personId: project.ownerPersonId, name: project.ownerName ?? "—" }
-      : null,
-    framingValidatedAt:
-      framing?.state === "validated" ? (framing.stateChangedAt ?? null) : null,
-    now: new Date(),
-    direction,
-  });
-  return { access, project, facts, steps, viewerName };
-});
+export const masterJourneyContext = cache(
+  byProjectVersion("master-context", async (projectId: string) => {
+    const [access, project] = await allInOrder([
+      requireApproved(),
+      requireLaunchedProject(projectId),
+    ]);
+    const facts = await loadMasterJourneyFacts(project);
+    // Who pays an invoice, read only when one waits for it.
+    const direction =
+      facts.invoices.some((i) => i.receivedAt && !i.paidOn) ||
+      facts.messages.some((m) => m.status === "escalated")
+        ? await loadDirectionPerson()
+        : null;
+    const viewerName =
+      personName(access.firstName ?? "", access.lastName ?? "") || null;
+    const framing = project.stages.find((s) => s.key === "framing");
+    const steps = masterJourney({
+      projectId,
+      facts,
+      viewerId: access.personId,
+      owner: project.ownerPersonId
+        ? { personId: project.ownerPersonId, name: project.ownerName ?? "—" }
+        : null,
+      framingValidatedAt:
+        framing?.state === "validated"
+          ? (framing.stateChangedAt ?? null)
+          : null,
+      now: new Date(),
+      direction,
+    });
+    return { access, project, facts, steps, viewerName };
+  }),
+);
 
 /** The direction (permission `validate`), who pays and arbitrates: the
  * first one (list_direction_people; a member reads only their own

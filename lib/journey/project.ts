@@ -2,6 +2,7 @@ import "server-only";
 
 import { cache } from "react";
 
+import { byProjectVersion } from "@/lib/projects/version-cache";
 import { allInOrder } from "@/lib/utils/parallel";
 
 import { isLaunched, JOURNEY_LOADERS } from "./sources";
@@ -56,8 +57,10 @@ export async function readProjectJourneys(
  * overview, Travail, Validations and the navigation's counts read it; none
  * computes its own list.
  */
-export const loadProjectJourneys = cache((projectId: string) =>
-  readProjectJourneys(projectId),
+export const loadProjectJourneys = cache(
+  byProjectVersion("journeys", (projectId: string) =>
+    readProjectJourneys(projectId),
+  ),
 );
 
 /** The viewer's actions outside the given steps (« À vous, ailleurs »). */

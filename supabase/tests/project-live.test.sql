@@ -1,8 +1,11 @@
 -- Signal de changement d'un projet (JUR-12 / JUR-28,
--- supabase/migrations/20261012100201_project_live.sql).
+-- supabase/migrations/20261012100201_project_live.sql), étendu à tout le
+-- projet et à une incrémentation par transaction
+-- (20261026100201_project_live_everywhere.sql). Each step below stands for
+-- its own transaction: pg_temp.next_tx() forgets what the current one bumped.
 -- Run with `supabase test db`.
 begin;
-select plan(7);
+select plan(10);
 
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
 declare v_id uuid := gen_random_uuid();
@@ -18,6 +21,13 @@ begin
   perform set_config('request.jwt.claims', json_build_object('sub', p_user, 'role', 'authenticated')::text, true);
   execute 'set local role authenticated';
 end $$;
+
+create function pg_temp.next_tx() returns void language sql as $$
+  select set_config('pds.live_bumped', '', true)
+$$;
+create function pg_temp.version_of(p_project uuid) returns bigint language sql as $$
+  select version from public.project_live where project_id = p_project
+$$;
 
 create temp table ids (name text primary key, id uuid) on commit drop;
 grant all on ids to authenticated;
@@ -44,21 +54,43 @@ values (pg_temp.id_of('org'), 'Live ' || (select v from vars where k = 'tag'), '
 insert into ids select 'project', id from public.projects
  where title = 'Live ' || (select v from vars where k = 'tag');
 
-select is((select count(*)::int from public.project_live where project_id = pg_temp.id_of('project')),
-          0, 'no signal before any legal change');
+select is(pg_temp.version_of(pg_temp.id_of('project')),
+          1::bigint, 'creating the project bumps its signal');
 
+select pg_temp.next_tx();
 insert into public.legal_intakes (organization_id, project_id)
 values (pg_temp.id_of('org'), pg_temp.id_of('project'));
-select is((select version from public.project_live where project_id = pg_temp.id_of('project')),
-          1::bigint, 'a legal row of the project bumps its signal');
+select is(pg_temp.version_of(pg_temp.id_of('project')),
+          2::bigint, 'a row of the project bumps its signal');
 
+select pg_temp.next_tx();
 update public.legal_intakes set updated_at = now() + interval '1 second' where project_id = pg_temp.id_of('project');
-select is((select version from public.project_live where project_id = pg_temp.id_of('project')),
-          2::bigint, 'each change bumps it again');
+select is(pg_temp.version_of(pg_temp.id_of('project')),
+          3::bigint, 'each change bumps it again');
 
+select pg_temp.next_tx();
 delete from public.legal_intakes where project_id = pg_temp.id_of('project');
-select is((select version from public.project_live where project_id = pg_temp.id_of('project')),
-          3::bigint, 'a deletion is a change too');
+select is(pg_temp.version_of(pg_temp.id_of('project')),
+          4::bigint, 'a deletion is a change too');
+
+select pg_temp.next_tx();
+update public.projects set title = title where id = pg_temp.id_of('project');
+update public.project_stages set state_changed_at = state_changed_at
+ where project_id = pg_temp.id_of('project');
+select is(pg_temp.version_of(pg_temp.id_of('project')),
+          5::bigint, 'several rows written in one transaction bump once');
+
+select pg_temp.next_tx();
+select is(
+  (select count(*)::int from pg_trigger t join pg_class c on c.oid = t.tgrelid
+    where t.tgname = 'zz_project_live'
+      and c.relname in ('projects', 'validations', 'masters', 'master_files', 'call_reports')),
+  5, 'the project, its validations, titles and calls carry the signal');
+select is(
+  (select count(*)::int from pg_trigger t join pg_class c on c.oid = t.tgrelid
+    where t.tgname = 'zz_project_live'
+      and c.relname in ('project_live', 'notifications', 'call_recording_pieces')),
+  0, 'the signal, notifications and the recorder do not');
 
 select pg_temp.act_as(pg_temp.id_of('owner'));
 select is((select count(*)::int from public.project_live where project_id = pg_temp.id_of('project')),
