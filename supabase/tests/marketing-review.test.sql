@@ -65,7 +65,7 @@ select pg_temp.id_of('org'), pg_temp.id_of('project'), d.id from public.stage_de
 -- how they are written); here, how the two views group them.
 select pg_temp.act_as(pg_temp.id_of('manager'));
 insert into public.marketing_activations (organization_id, project_id, title, kind, due_on)
-values (pg_temp.id_of('org'), pg_temp.id_of('project'), 'Session acoustique Dioo', 'content', date '2026-10-15');
+values (pg_temp.id_of('org'), pg_temp.id_of('project'), 'Session acoustique Dioo', 'content', (now() at time zone 'Europe/Paris')::date + 20);
 insert into ids select 'session', id from public.marketing_activations
  where project_id = pg_temp.id_of('project') and title = 'Session acoustique Dioo';
 insert into public.marketing_activations (organization_id, project_id, title, kind)
@@ -89,13 +89,13 @@ select is((select status from public.marketing_review_activations where id = pg_
 -- Starting needs an owner and a due date (20261011300101).
 update public.marketing_activations
    set owner_person_id = coalesce(owner_person_id, pg_temp.id_of('manager_person')),
-       due_on = coalesce(due_on, date '2026-10-20')
+       due_on = coalesce(due_on, (now() at time zone 'Europe/Paris')::date + 25)
  where project_id = pg_temp.id_of('project');
 update public.marketing_activations set status = 'done_declared' where id = pg_temp.id_of('session');
 update public.marketing_activations set status = 'in_progress'
  where project_id = pg_temp.id_of('project') and id <> pg_temp.id_of('session');
 select is((select row(status, ends_on)::text from public.marketing_review_activations where id = pg_temp.id_of('session')),
-          '(done,2026-10-15)', 'done declared is « Réalisée », its due date ends the period');
+          format('(done,%s)', (now() at time zone 'Europe/Paris')::date + 20), 'done declared is « Réalisée », its due date ends the period');
 update public.marketing_activations set status = 'blocked', status_reason = 'Montage en retard (simulation)'
  where id = pg_temp.id_of('capsule5');
 select is((select status from public.marketing_review_activations where id = pg_temp.id_of('capsule5')),

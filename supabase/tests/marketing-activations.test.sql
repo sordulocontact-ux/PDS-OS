@@ -101,7 +101,7 @@ select is((select row(status, status_reason, status_before_suspension)::text fro
 select throws_ok($$ update public.marketing_activations set status = 'in_progress' where id = pg_temp.id_of('session') $$,
                  '23514', 'activation_not_ready:owner,due', 'no start without an owner nor a due date');
 update public.marketing_activations
-   set owner_person_id = pg_temp.id_of('manager_person'), due_on = date '2026-10-15'
+   set owner_person_id = pg_temp.id_of('manager_person'), due_on = (now() at time zone 'Europe/Paris')::date + 20
  where id = pg_temp.id_of('session');
 insert into public.activation_blockers (organization_id, project_id, activation_id, category, description)
 values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('session'), 'production',
@@ -211,6 +211,11 @@ select isnt(public.save_activation_sheet(pg_temp.id_of('influence'), 'framing', 
             pg_temp.id_of('framing'), 'a change after validation opens a new version');
 
 -- 6. Influence in house : one collaboration, negotiation, express agreement ---------------
+-- Nothing happens with a creator before the campaign is launched (20261026400101).
+update public.marketing_activations
+   set owner_person_id = pg_temp.id_of('manager_person'),
+       due_on = (now() at time zone 'Europe/Paris')::date + 20, status = 'in_progress'
+ where id = pg_temp.id_of('influence');
 insert into public.activation_targets (organization_id, project_id, activation_id, contact_id)
 values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('influence'), pg_temp.id_of('alka'));
 insert into ids select 'collab', id from public.activation_targets where activation_id = pg_temp.id_of('influence');

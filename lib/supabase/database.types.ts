@@ -2973,6 +2973,7 @@ export type Database = {
       }
       budget_lines: {
         Row: {
+          activation_id: string | null
           committed_cents: number | null
           amount_cents: number
           attachment_file_id: string | null
@@ -2993,6 +2994,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          activation_id?: string | null
           committed_cents?: number | null
           amount_cents: number
           attachment_file_id?: string | null
@@ -3013,6 +3015,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          activation_id?: string | null
           committed_cents?: number | null
           amount_cents?: number
           attachment_file_id?: string | null
@@ -8851,6 +8854,7 @@ export type Database = {
       marketing_report_budgets: {
         Row: {
           committed_cents: number
+          invoiced_cents: number | null
           organization_id: string
           paid_cents: number
           planned_cents: number
@@ -8859,6 +8863,7 @@ export type Database = {
         }
         Insert: {
           committed_cents: number
+          invoiced_cents?: number | null
           organization_id: string
           paid_cents: number
           planned_cents: number
@@ -8867,6 +8872,7 @@ export type Database = {
         }
         Update: {
           committed_cents?: number
+          invoiced_cents?: number | null
           organization_id?: string
           paid_cents?: number
           planned_cents?: number
@@ -17623,6 +17629,28 @@ export type Database = {
       }
     }
     Functions: {
+      activation_is_live: {
+        Args: { p_activation_id: string }
+        Returns: boolean
+      }
+      agency_done_gaps: { Args: { p_activation_id: string }; Returns: string[] }
+      declare_activation_done_with_reserve: {
+        Args: {
+          p_activation_id: string
+          p_due_on: string
+          p_person_id: string
+          p_reason: string
+        }
+        Returns: string
+      }
+      marketing_campaign_end: {
+        Args: { p_project_id: string }
+        Returns: string
+      }
+      marketing_uncovered_activations: {
+        Args: { p_project_id: string }
+        Returns: string
+      }
       distribution_declaration_rank: {
         Args: { p_kind: string }
         Returns: number

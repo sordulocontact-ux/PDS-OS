@@ -20,6 +20,10 @@ insert into ids select 'project', id from public.projects where title = 'Néons 
 insert into public.marketing_activations (organization_id, project_id, kind, mode, title, owner_person_id)
 values (pg_temp.id_of('org'), pg_temp.id_of('project'), 'influence', 'internal', 'Influence', pg_temp.id_of('owner'));
 insert into ids select 'activation', id from public.marketing_activations where project_id = pg_temp.id_of('project');
+-- Nothing happens with a creator before the campaign is launched (20261026400101).
+update public.marketing_activations
+   set due_on = (now() at time zone 'Europe/Paris')::date + 20, status = 'in_progress'
+ where id = pg_temp.id_of('activation');
 insert into public.network_contacts (organization_id, kind, name, roles)
 values (pg_temp.id_of('org'), 'person', 'Léa (simulation créatrice)', array['influencer']);
 insert into ids select 'lea', id from public.network_contacts where name = 'Léa (simulation créatrice)';

@@ -55,6 +55,10 @@ values (pg_temp.id_of('org'), pg_temp.id_of('project'), 'influence', 'internal',
         pg_temp.id_of('manager_person'));
 insert into ids select 'internal', id from public.marketing_activations
  where project_id = pg_temp.id_of('project') and mode = 'internal';
+-- Nothing happens with a creator before the campaign is launched (20261026400101).
+update public.marketing_activations
+   set due_on = (now() at time zone 'Europe/Paris')::date + 20, status = 'in_progress'
+ where id = pg_temp.id_of('internal');
 insert into ids select 'agency', id from public.marketing_activations
  where project_id = pg_temp.id_of('project') and mode = 'agency';
 insert into public.network_contacts (organization_id, kind, name, roles)
