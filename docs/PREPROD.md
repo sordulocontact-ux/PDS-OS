@@ -34,7 +34,7 @@ Le cron de `vercel.json` ne tourne que sur la Production : la pré-prod ne déte
 
    ```
    PREPROD_DB_URL=postgresql://…
-   PREPROD_PASSWORD=<le mot de passe commun des comptes de test, sans apostrophe>
+   PREPROD_PASSWORD=<le mot de passe commun des comptes de test : 4 caractères au moins, sans apostrophe>
    ```
 
    puis `pnpm preprod:reset` (§ 4). Les migrations sont toutes rejouées : pas de `db push` à part.

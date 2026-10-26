@@ -86,7 +86,10 @@ export const serverEnvSchema = z
     /** Pre-production only (lib/preprod/config.ts): « 1 » shows the bar
      * « Voir comme / Aller à », whose test accounts share this password. */
     PREPROD_TOOLS: z.preprocess(blankToUndefined, z.enum(["1"]).optional()),
-    PREPROD_PASSWORD: optionalSecret,
+    PREPROD_PASSWORD: z.preprocess(
+      blankToUndefined,
+      z.string().trim().min(4).optional(),
+    ),
     VAPID_SUBJECT: z.preprocess(
       blankToUndefined,
       z
