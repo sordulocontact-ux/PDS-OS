@@ -233,6 +233,25 @@ extraction IA des devis (014, sortie du MVP jusqu'ici) ; envoi **effectif** au p
 l'état envoyé / consulté / traité (031). Le call technique doit aussi être fiabilisé (004 : création,
 ouverture, enregistrement).
 
+**Recette Marketing V1 du 23/10/2026 (Production externe)** — le dernier retour fait foi :
+
+- **MKT-PROD-001, un changement rouvre le contrôle avant tournage.** Un nouveau lieu, une nouvelle
+  date, une révision du devis ou une nouvelle version de la proposition demandés après « Préparation
+  validée » la rouvrent tant que le tournage n'a pas commencé ; le tournage (gardé en SQL sur
+  `ready_at`) attend un nouveau contrôle, et l'écran dit ce qui a changé (`ready_reopened_because`).
+  Remplace le « tout le reste continue » du 15/10 (`docs/VISION-UX.md`, règle 14).
+- **MKT-PROD-002, seuils de dérogation.** Chaque point de la synthèse a une gravité, décidée par sa
+  clé (SQL `production_ready_critical`) : **critiques** lieu, date, équipe, planning, devis,
+  proposition, blocage actif ; **mineurs** matériel, informations à confirmer. Un point mineur pas
+  prêt se confirme avec un motif, comme avant. Un point critique fait de la confirmation une
+  **demande** : motif et plan de rattrapage (qui, avant quand, pour chaque point critique, un membre
+  et une date non passée), décidée par la direction (`administer`) ou la personne qui valide les
+  devis, **jamais par celle qui demande** ; validée, chaque ligne du plan devient une tâche (origine
+  « Dérogation du … ») ; refusée, avec un motif. Choix faits faute de règle : le planning est critique
+  (Ibé le cite parmi les risques majeurs) ; le parcours montre la demande à la personne qui valide
+  les devis (la direction peut aussi décider) ; le contrôle interne garde sa dérogation par point.
+- **PROD-001** : « Qui produit ? » et « Comment organiser la préproduction ? » portent leur « * ».
+
 **Ce que les tickets ne disent pas** : interne / externe / hybride (seulement dans son message),
 compte ou lien pour le prestataire (« son espace », « l'accès nécessaire »), qui décide (« la
 personne autorisée », « le décideur »), qui est le « responsable de tournage », par quel canal

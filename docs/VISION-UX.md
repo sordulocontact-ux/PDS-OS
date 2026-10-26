@@ -211,12 +211,17 @@ valent partout, dans l'app comme dans les protos.
 14. **Une décision se remplace, elle ne s'efface pas.** Un parcours n'est pas linéaire : un lieu, un
     devis, une proposition déjà validés peuvent changer. La nouvelle version devient une nouvelle
     décision ; l'ancienne reste dans l'historique avec sa validation ; ce qui en dépend est marqué
-    « à revoir » (choisi à la main pour le MVP) et tout le reste continue. Une information notée
-    (appel, WhatsApp, e-mail) est « à confirmer » tant qu'une personne ne l'a pas décidée ; deux
-    informations contradictoires restent toutes les deux, et tant qu'aucune ne fait foi, c'est un
-    blocage. *(Ticket d'Ibé du 15/10, « Retours prototype Artefact » ; proto
-    `docs/protos/production-v2.html`. Dans l'app, « une étape validée est définitive » devra évoluer
-    dans ce sens.)*
+    « à revoir » (choisi à la main pour le MVP). **Avant le tournage, un changement structurant
+    rouvre le contrôle** : un nouveau lieu, une nouvelle date, une révision du devis ou une nouvelle
+    version de la proposition demandés après « Préparation validée » la rouvrent, et le tournage
+    attend un nouveau contrôle (le reste du parcours continue). Une fois le tournage commencé, rien ne
+    se rouvre. Une information notée (appel, WhatsApp, e-mail) est « à confirmer » tant qu'une
+    personne ne l'a pas décidée ; deux informations contradictoires restent toutes les deux, et tant
+    qu'aucune ne fait foi, c'est un blocage. *(Ticket d'Ibé du 15/10, « Retours prototype Artefact »,
+    qui disait « tout le reste continue » ; puis recette Marketing V1 du 23/10, MKT-PROD-001, qui
+    interdit de tourner avec l'ancienne proposition : le dernier retour fait foi. Proto
+    `docs/protos/production-v2.html` ; app : migration `20261026300101`. Dans l'app, « une étape
+    validée est définitive » devra évoluer dans ce sens.)*
 15. **Une décision non prise n'est pas une tâche.** Les points « À décider » ne sont jamais
     assignés ni datés.
 16. **Les mots sont ceux de l'app.** Libellés repris de `lib/i18n/fr/`, verbes précis

@@ -53,6 +53,8 @@ export async function answerAgreement(
       return { ok: false, error: t.nameRequired };
     if (message.includes("agreement_comment_required"))
       return { ok: false, error: t.commentRequired };
+    if (message.includes("collaboration_frozen"))
+      return { ok: false, error: fr.activationCreator.errors.paused };
     console.error("answerAgreement:", message);
     return { ok: false, error: t.failed };
   }

@@ -1,5 +1,6 @@
 import { FilterChipLink } from "@/components/ui/filter-chip";
 import { PhaseStrip } from "@/components/ui/phase-strip";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { ViewLink } from "@/components/ui/view-link";
 import {
   ACTIVATION_FILTERS,
@@ -28,7 +29,8 @@ export const filterOf = (value: unknown): ActivationFilter =>
  * cours », « À mesurer », « Terminées » with their counts; one line per
  * activation — title, type · mode · owner · due date, the frieze and what
  * it waits for (« À vous · … » in blue). The open one stays listed even when
- * it leaves the filter (an activation just handled does not vanish).
+ * it leaves the filter (an activation just handled does not vanish), marked
+ * « Hors filtre » and never counted (recette of 23/10, ACT-003).
  */
 export function ActivationList({
   projectId,
@@ -88,6 +90,7 @@ export function ActivationList({
       <ul className="flex flex-col gap-0.5">
         {shown.map((a) => {
           const open = a.id === openId;
+          const outside = !filtersOf(a, a.actions).includes(filter);
           const sentence = activationSentence(
             {
               ...a,
@@ -110,8 +113,13 @@ export function ActivationList({
                     : "[@media(hover:hover)]:hover:bg-[var(--surface-soft)]",
                 )}
               >
-                <span className="text-[length:var(--type-body-sm)] leading-snug font-semibold break-words">
+                <span className="flex flex-wrap items-center gap-1.5 text-[length:var(--type-body-sm)] leading-snug font-semibold break-words">
                   {a.title}
+                  {outside && (
+                    <StatusBadge tone="neutral" size="sm">
+                      {t.outOfFilter}
+                    </StatusBadge>
+                  )}
                 </span>
                 <span className="text-[length:var(--type-micro)] leading-[var(--type-micro-lh)] text-[color:var(--text-tertiary)]">
                   {[

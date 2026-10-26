@@ -61,6 +61,19 @@ export const activationJourney = {
     launch: "Lancer l'activation",
     doneNote:
       "Réalisée déclarée ne signifie ni publiée, ni vérifiée, ni mesurée.",
+    // An agency campaign not settled (recette of 23/10, MKT-ACT-001).
+    agencyPending: (list: string) =>
+      `Pas encore réalisée : ${list}. Réglez-le dans le tableau de l'agence, ou déclarez-la réalisée avec une réserve.`,
+    withReserve: "Déclarer réalisée avec une réserve",
+    reserveReason: "Ce qui reste et pourquoi on déclare quand même",
+    reserveReasonPlaceholder:
+      "Radio Lumen reste à confirmer par l'agence ; la diffusion est passée.",
+    reserveWho: "Qui suit la réserve",
+    reserveWhen: "À lever avant le",
+    reserveNote: "La réserve est reprise au bilan, où elle sera arbitrée.",
+    reserveReasonRequired: "Dites ce qui reste et pourquoi.",
+    reserveWhoRequired: "Choisissez qui suit la réserve.",
+    reserveWhenRequired: "Donnez la date à laquelle la lever.",
     noCreator:
       "Aucun créateur engagé pour l'instant : choisissez-les dans la campagne, plus bas.",
     noPublication: "Aucun créateur n'a encore publié.",
@@ -86,15 +99,31 @@ export const activationJourney = {
   snapshot: {
     title: "Nouveau relevé",
     platform: "Plateforme",
-    platforms: [
-      "TikTok",
-      "Instagram",
-      "YouTube",
-      "Spotify",
-      "Deezer",
-      "Presse",
-      "Autre",
-    ],
+    // Where a figure is read, by lever (recette of 23/10, MKT-ACT-002 and
+    // ACT-001): never a social network by default outside the networks.
+    measure: "Mesure",
+    platformSets: {
+      social: ["TikTok", "Instagram", "YouTube", "Autre"],
+      music: [
+        "Spotify",
+        "Apple Music",
+        "Deezer",
+        "YouTube Music",
+        "Amazon Music",
+        "Autre",
+      ],
+      event: ["Billetterie", "Comptage à l'entrée", "Liste d'invités", "Autre"],
+      press: ["Presse", "Radio", "Télévision", "Web", "Autre"],
+      other: [
+        "Autre",
+        "TikTok",
+        "Instagram",
+        "YouTube",
+        "Spotify",
+        "Deezer",
+        "Presse",
+      ],
+    },
     period: "Période",
     from: "Du",
     to: "Au",
@@ -225,6 +254,8 @@ export const activationJourney = {
     done: "Terminées",
   },
   noneHere: "Aucune activation ici.",
+  // The open activation listed though it is out of the filter (ACT-003).
+  outOfFilter: "Hors filtre",
   ownerToAppoint: "responsable à désigner",
   // « À vous · récupérer les statistiques · et 2 autres »
   sentence: {
@@ -344,6 +375,28 @@ export const activationJourney = {
     transmitted: "Transmission déclarée",
   },
   errors: {
+    // The recette of 23/10 (20261026400101): what the database refuses.
+    frozen: {
+      not_launched:
+        "Lancez d'abord l'activation (un responsable, une échéance, « Lancer l'activation ») : rien ne se fait avec un créateur avant.",
+      closed:
+        "L'activation est clôturée ou annulée : ses collaborations sont figées.",
+      suspended:
+        "L'activation est suspendue : reprenez-la pour avancer avec les créateurs.",
+    },
+    creatorsOpen: (names: string) =>
+      `Chaque créateur engagé doit d'abord avoir son issue (clôturée, refusée, abandonnée…) : ${names}.`,
+    agencyGaps: {
+      agency_review: "un média est encore « À examiner »",
+      agency_errors: "une ligne du tableau de l'agence est en erreur",
+      no_coverage: "aucune retombée n'est déclarée",
+    },
+    agencyNotDone: (list: string) =>
+      `La campagne n'est pas réalisée : ${list}. Si c'est voulu, déclarez-la réalisée avec une réserve.`,
+    dueInPast: "L'échéance ne peut pas être dans le passé.",
+    dueAfterCampaign: (day: string) =>
+      `L'échéance tombe au plus tard le ${day} : la fin de la campagne (sortie + 28 jours).`,
+    followUpIncomplete: "Choisissez qui suit la réserve et pour quand.",
     noPublication:
       "Aucun créateur n'a encore publié : la campagne n'est pas réalisée.",
     noMessage:

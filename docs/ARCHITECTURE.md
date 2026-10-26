@@ -5071,6 +5071,47 @@ pgTAP `production-reste.test.sql`.
   l'a réglé). Lieu non vérifié (PROD-013) : « À vérifier avant de le retenir » sur la carte du
   candidat, « Retenir ce lieu » refusé en rouge avec comment le vérifier (la base le refuse aussi).
 
+### Recette Marketing V1 du 23/10/2026 : Production et Stratégie (MKT-PROD-001/002, PROD-001, CONC-001, MKT-STR-*)
+
+Règles métier : `docs/PRODUCTION-METIER.md` § 8 bis (fin) et `docs/VISION-UX.md` règle 14. Migration
+`20261026300101_production_ready_reopen_derogation.sql`, pgTAP `production-ready-recette.test.sql`
+(`production-projet-complet` et `production-reste` adaptés : un point critique ne se force plus seul, un
+changement de date rouvre la préparation).
+
+- **Réouverture** (MKT-PROD-001) : trigger `e_ready_reopen` (`production_ready_reopen`) sur
+  `production_sheets` : `location_name`, `schedule_changed_at`, `quote_revision_at` ou
+  `direction_revision_at` changés alors que `ready_at` (ou une demande) est posé et que le tournage n'a
+  pas commencé → `ready_at` et la demande effacés, `ready_reopened_at` / `ready_reopened_because`
+  (`place`, `date`, `quote`, `direction`). Le tournage, gardé sur `ready_at` (`production_shoots_check`),
+  attend donc un nouveau contrôle. L'ancien « date changée après la confirmation = à revoir » calculé
+  (`scheduleChangedAt >= readyAt`, parcours et page) est retiré. Piège de test : dans une transaction,
+  `now()` est constant ; deux changements de date successifs ont la même valeur et ne se voient pas
+  (le test recule le premier d'une heure).
+- **Dérogation** (MKT-PROD-002) : `confirm_production_ready(p_sheet_id, p_snapshot, p_force_reason,
+  p_plan default null)` renvoie `ready` ou `requested` ; la gravité vient de la clé
+  (`production_ready_critical`, même liste que `isCriticalReadyKey` de `lib/production/ready-rows.ts`) ;
+  une ligne critique pas prête demande `p_plan` (`plan_required`, `plan_due_past`,
+  `plan_person_invalid`) et range la demande (`ready_request_*`). `decide_production_ready(p_sheet_id,
+  p_approve, p_reason)` : direction (`administer`) ou `quote_validator_person_id`, jamais le demandeur
+  (`same_person`), refus motivé ; validée : `ready_*` posés, `ready_approved_by/at`, une tâche
+  `production_plan_actions` par ligne du plan (`review`, `due_date`, origine « Dérogation du … »).
+  Notifications `production_ready_requested` (direction et validateur des devis) et
+  `production_ready_decided`. Écran : `ReadyConfirmForm` + `ReadyPlanFields`, `ReadyRequestView` +
+  `ReadyDecision`, gravité dans `ReadySynthesisTable` ; parcours : l'étape « Contrôle avant tournage »
+  attend le validateur des devis (`readyRequested`, geste « validate », donc dans Validations).
+- **CONC-001** : `components/ui/input.tsx` pose `data-empty` sur un champ date ou heure vide ;
+  `app/globals.css` cache son dessin hors focus (`::-webkit-datetime-edit { opacity: 0 }` — la couleur
+  transparente ne suffit pas sous WebKit, vérifié en Playwright WebKit). **PROD-001** : `required` sur les
+  deux `ChoiceCards` de `WhoProducesForm`.
+- **Stratégie (reliquats)** : `fieldItem` retombe sur `choicesItem` (réponse seulement cochée →
+  phrase de `composeAnswer`, gardée ; `loadDimensionSources` lit aussi les `*_choices`) ; Brief V1 :
+  `budget.lines` / `budget.envelopeToConfirm` (facultatifs, versions anciennes sans) → « Aucune dépense
+  estimée », « sur … à confirmer » ; `StrategyBudget.restCents` = enveloppe − proposé − à arbitrer (lignes
+  d'un levier écarté exclues), utilisé pour le dépassement par `arbitrations`, `dimensions.ts` et le
+  Brief figé ; `arbitrations` et `strategyModel.openPoints` disent un temps fort déjà passé et une
+  dépendance juridique bloquée (critique) ou sans échéance ; parties vides du récit non imprimées ;
+  exemple unique du champ KPI.
+
 ### Retours d'Ibé du 13/10/2026 sur la Production (PROD-001 à PROD-040)
 
 Référence métier et questions ouvertes : `docs/PRODUCTION-METIER.md`. Branche `feat/production-ibe`.

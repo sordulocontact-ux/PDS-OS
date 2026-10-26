@@ -7,7 +7,9 @@
 
 import type { CollabView } from "@/lib/activations/campaign";
 import type { ActionPerson, ActivationAction } from "@/lib/activations/journey";
+import type { ActivationStatus } from "@/lib/activations/model";
 import type { ModuleFacts } from "@/lib/activations/module-facts";
+import { collaborationGate } from "@/lib/activations/phase";
 import type { EvidenceRecord } from "@/lib/activations/types";
 import { fr } from "@/lib/i18n/fr";
 
@@ -24,7 +26,9 @@ type Activation = {
   id: string;
   kind: string;
   mode: string | null;
-  status: string;
+  status: ActivationStatus;
+  ownerPersonId: string | null;
+  dueOn: string | null;
 };
 
 const line = (
@@ -302,8 +306,11 @@ export function moduleActions(
 ): ActivationAction[] {
   if (["closed", "cancelled", "suspended"].includes(a.status)) return [];
   const { m, evidences, collabs, people, kit } = input;
+  // Nothing with a creator before the launch: the trunk asks for it first.
   if (a.kind === "influence" && a.mode === "internal")
-    return collabs.flatMap((c) => collabAction(c, people) ?? []);
+    return collaborationGate(a) === "live"
+      ? collabs.flatMap((c) => collabAction(c, people) ?? [])
+      : [];
   if (a.kind !== "influence" && a.kind !== "press") return [];
   const framingValidated = m.sheets.some(
     (s) =>

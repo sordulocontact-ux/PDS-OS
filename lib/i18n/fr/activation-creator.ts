@@ -37,5 +37,7 @@ export const activationCreator = {
     step: "Cette étape est déjà passée : la page s'est mise à jour.",
     upload: "Le fichier n'a pas été reçu : réessayez.",
     failed: "L'envoi a échoué : réessayez dans un instant.",
+    paused:
+      "La campagne est en pause chez PDS : rien ne peut être envoyé pour l'instant. Contactez votre interlocuteur.",
   },
 } as const;

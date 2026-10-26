@@ -1,5 +1,9 @@
 import { ToneCallout } from "@/components/ui/tone-callout";
+import { todayInParis } from "@/lib/insights/dates";
+import { createClient } from "@/lib/supabase/server";
+import { joinList } from "@/lib/utils/sentences";
 import { reserveText } from "@/lib/activations/describe";
+import { measureChoices } from "@/lib/activations/measure-sources";
 import { proposedDue } from "@/lib/activations/levers";
 import type { ActivationPeople } from "@/lib/activations/people";
 import { lastStatusEvent } from "@/lib/activations/status-events";
@@ -10,6 +14,7 @@ import type {
 import { fr } from "@/lib/i18n/fr";
 import { formatDay, formatShortDay } from "@/lib/utils/day";
 
+import { AgencyDoneForm } from "./agency-done-form";
 import { ProofForm, VerifyProofForm } from "./proof-forms";
 import { SnapshotForm } from "./snapshot-form";
 import { DesignateForm, DueForm, GestureButton } from "./trunk-gestures";
@@ -70,10 +75,15 @@ export async function TrunkNow({
         />
       );
     case "due": {
-      const proposal = await proposedDue(projectId, a.leverId);
+      const supabase = await createClient();
+      const [proposal, end] = await Promise.all([
+        proposedDue(projectId, a.leverId),
+        supabase.rpc("marketing_campaign_end", { p_project_id: projectId }),
+      ]);
       return (
         <DueForm
           ids={ids}
+          bounds={{ min: todayInParis(), max: end.data ?? null }}
           proposed={proposal?.date ?? null}
           hint={
             proposal
@@ -94,6 +104,37 @@ export async function TrunkNow({
           : a.kind === "press" && a.mode === "internal" && !pressSent
             ? t.gesture.noMessage
             : null;
+      // An agency campaign: its lines settled, or declared with a reserve
+      // (recette of 23/10, MKT-ACT-001; read in SQL, `agency_done_gaps`).
+      if (a.mode === "agency") {
+        const supabase = await createClient();
+        const { data: gaps } = await supabase.rpc("agency_done_gaps", {
+          p_activation_id: a.id,
+        });
+        const pending = (gaps ?? []).filter(
+          (g): g is keyof typeof t.errors.agencyGaps =>
+            g in t.errors.agencyGaps,
+        );
+        if (pending.length > 0)
+          return (
+            <div className="flex flex-col gap-2.5">
+              <ToneCallout tone="warning">
+                {t.gesture.agencyPending(
+                  joinList(
+                    pending.map((g) => t.errors.agencyGaps[g]),
+                    "et",
+                  ),
+                )}
+              </ToneCallout>
+              <AgencyDoneForm
+                ids={ids}
+                members={people.members}
+                defaultPersonId={a.ownerPersonId}
+                today={todayInParis()}
+              />
+            </div>
+          );
+      }
       return (
         <div className="flex flex-col gap-2.5">
           {note && <Note>{note}</Note>}
@@ -134,6 +175,7 @@ export async function TrunkNow({
           projectId={projectId}
           activationId={a.id}
           unit={t.units[a.kind]}
+          measure={measureChoices(a.kind, a.title)}
           defaultSource={a.mode === "agency" ? "agency" : "internal"}
         />
       );

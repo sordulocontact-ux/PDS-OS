@@ -27,6 +27,7 @@ export function SnapshotForm({
   projectId,
   activationId,
   unit,
+  measure,
   defaultSource = "internal",
   onCancel,
 }: {
@@ -34,6 +35,8 @@ export function SnapshotForm({
   activationId: string;
   // « vues », « retombées »…
   unit: string;
+  // Where the figure is read, by lever (lib/activations/measure-sources.ts).
+  measure: { label: string; platforms: string[] };
   defaultSource?: Source;
   onCancel?: () => void;
 }) {
@@ -91,9 +94,9 @@ export function SnapshotForm({
         />
         <OptionSelect
           name="platform"
-          label={t.platform}
-          items={Object.fromEntries(t.platforms.map((p) => [p, p]))}
-          defaultValue={t.platforms[0]}
+          label={measure.label}
+          items={Object.fromEntries(measure.platforms.map((p) => [p, p]))}
+          defaultValue={measure.platforms[0]}
         />
         <fieldset className="flex flex-col gap-1.5">
           <legend className="sr-only">{t.period}</legend>

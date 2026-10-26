@@ -29,6 +29,9 @@ function failure(message: string | undefined): { ok: false; error: string } {
     return { ok: false, error: e.step };
   if (message?.includes("upload_missing"))
     return { ok: false, error: e.upload };
+  // The activation is not launched, or closed, suspended (20261026400101).
+  if (message?.includes("collaboration_frozen"))
+    return { ok: false, error: e.paused };
   console.error("creator link:", message);
   return { ok: false, error: e.failed };
 }

@@ -10,6 +10,7 @@ import {
   memberValue,
 } from "@/components/activations/member-select";
 import { Button } from "@/components/ui/button";
+import { dueError, type DueBounds } from "@/lib/activations/due-bounds";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import {
   designateOwner,
@@ -71,18 +72,21 @@ export function DesignateForm({
   );
 }
 
-/** « Fixer l'échéance », the date of the launch calendar proposed. */
+/** « Fixer l'échéance », the date of the launch calendar proposed, between
+ * today and the end of the campaign. */
 export function DueForm({
   ids,
   proposed,
   hint,
+  bounds,
 }: {
   ids: Ids;
   proposed: string | null;
   hint: string | null;
+  bounds: DueBounds;
 }) {
   const router = useRouter();
-  const [missing, setMissing] = useState(false);
+  const [invalidDue, setInvalidDue] = useState<string | null>(null);
   const { pending, error, run } = useWriteSubmit(() => router.refresh(), "");
   return (
     <form
@@ -93,8 +97,12 @@ export function DueForm({
         const dueOn = String(
           new FormData(event.currentTarget).get("due") ?? "",
         );
-        setMissing(!dueOn);
-        if (dueOn) run(() => fixDue({ ...ids, dueOn }));
+        const why = dueOn
+          ? dueError(dueOn, bounds)
+          : fr.activationJourney.errors.dueRequired;
+        setInvalidDue(why);
+        if (why) document.getElementById("due")?.focus();
+        else run(() => fixDue({ ...ids, dueOn }));
       }}
     >
       <Field
@@ -103,8 +111,10 @@ export function DueForm({
         label={fr.activationJourney.infos.due}
         required
         defaultValue={proposed ?? ""}
+        min={bounds.min}
+        max={bounds.max ?? undefined}
         hint={hint ?? undefined}
-        error={missing ? fr.activationJourney.errors.dueRequired : undefined}
+        error={invalidDue ?? undefined}
       />
       <div>
         <Button type="submit" disabled={pending}>

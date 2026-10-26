@@ -3,9 +3,11 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 
 import { launchGapsText } from "@/lib/activations/describe";
+import { joinList } from "@/lib/utils/sentences";
 import { LAUNCH_GAPS, type LaunchGap } from "@/lib/activations/model";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
+import { formatDay } from "@/lib/utils/day";
 import type { WriteResult } from "@/lib/utils/write-result";
 
 const e = fr.activations.errors;
@@ -65,6 +67,37 @@ export function activationFailure(error: { code?: string; message?: string }): {
       );
     return { ok: false, error: e.notReady(launchGapsText(gaps)) };
   }
+  // The recette of 23/10 (20261026400101): a gesture with a creator on an
+  // activation not launched, closed or suspended; creators still engaged at
+  // the closure; an agency campaign not settled; a deadline out of bounds.
+  const frozen = /collaboration_frozen:([a-z_]+)/.exec(message)?.[1];
+  if (
+    frozen === "not_launched" ||
+    frozen === "closed" ||
+    frozen === "suspended"
+  )
+    return { ok: false, error: j.frozen[frozen] };
+  const open = /creators_open:(.+)$/.exec(message)?.[1];
+  if (open) return { ok: false, error: j.creatorsOpen(open.trim()) };
+  const notDone = /activation_not_done:([a-z_,]+)/.exec(message)?.[1];
+  const agency = (notDone ?? "")
+    .split(",")
+    .filter((g): g is keyof typeof j.agencyGaps => g in j.agencyGaps);
+  if (agency.length)
+    return {
+      ok: false,
+      error: j.agencyNotDone(
+        joinList(
+          agency.map((g) => j.agencyGaps[g]),
+          "et",
+        ),
+      ),
+    };
+  if (message.includes("due_in_past")) return { ok: false, error: j.dueInPast };
+  const end = /due_after_campaign:(\d{4}-\d{2}-\d{2})/.exec(message)?.[1];
+  if (end) return { ok: false, error: j.dueAfterCampaign(formatDay(end)) };
+  if (message.includes("follow_up_incomplete"))
+    return { ok: false, error: j.followUpIncomplete };
   for (const [code, sentence] of MESSAGES)
     if (message.includes(code)) return { ok: false, error: sentence };
   if (message.includes("not_found")) return { ok: false, error: e.notFound };

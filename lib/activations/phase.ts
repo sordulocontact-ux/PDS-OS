@@ -52,6 +52,24 @@ export function phaseOf(a: PhaseInput): Phase {
   return 4;
 }
 
+/** Where people may act with the creators (SQL `activation_is_live`,
+ * 20261026400101): launched — an owner, a deadline, « En cours » or
+ * « Réalisée déclarée ». Otherwise why not: not launched, suspended, closed
+ * (closed or cancelled). */
+export function collaborationGate(a: {
+  status: ActivationStatus;
+  ownerPersonId: string | null;
+  dueOn: string | null;
+}): "live" | "not_launched" | "suspended" | "closed" {
+  if (a.status === "closed" || a.status === "cancelled") return "closed";
+  if (a.status === "suspended") return "suspended";
+  return (a.status === "in_progress" || a.status === "done_declared") &&
+    a.ownerPersonId !== null &&
+    a.dueOn !== null
+    ? "live"
+    : "not_launched";
+}
+
 /** Its action took place: declared done, or closed. */
 export const isRealised = (a: { status: ActivationStatus }) =>
   a.status === "done_declared" || a.status === "closed";

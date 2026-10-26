@@ -1,11 +1,13 @@
 import { InfluenceCollaboration } from "@/components/activations/influence/influence-collaboration";
 import { AddTargetButton } from "@/components/activations/targets/add-target-button";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
+import { ToneCallout } from "@/components/ui/tone-callout";
 import { VersionCard } from "@/components/ui/version-card";
 import { collabAction } from "@/lib/activations/actors";
 import { collaborationsOf } from "@/lib/activations/campaign";
 import type { ActivationFiche } from "@/lib/activations/fiche";
 import { campaignConcept } from "@/lib/activations/levers";
+import { collaborationGate } from "@/lib/activations/phase";
 import type { ActivationPeople } from "@/lib/activations/people";
 import { loadTargets } from "@/lib/activations/targets";
 import type { Access } from "@/lib/auth/access";
@@ -47,6 +49,13 @@ export async function InfluenceBlock({
     ? people.person(a.ownerPersonId)
     : people.projectOwner;
   const open = a.status !== "closed" && a.status !== "cancelled";
+  // Nothing with a creator before the launch, nor once closed or suspended
+  // (20261026400101): the cards stay readable, their gestures go.
+  const gate = collaborationGate(a);
+  const live = gate === "live";
+  const shown = live
+    ? fiche
+    : { ...fiche, canWrite: false, canValidate: false };
   const verified = collabs.filter((c) =>
     ["published_verified", "administration", "closed"].includes(c.stage),
   ).length;
@@ -82,14 +91,21 @@ export async function InfluenceBlock({
           }
         />
       </FactRows>
+      {gate !== "live" && collabs.length > 0 && (
+        <ToneCallout tone={gate === "closed" ? "neutral" : "info"}>
+          {fr.activationJourney.errors.frozen[gate]}
+        </ToneCallout>
+      )}
       {collabs.map((c) => {
         const target = targets.find((x) => x.id === c.targetId);
         if (!target) return null;
-        const next = collabAction(c, {
-          owner,
-          direction: people.direction,
-          creative: people.creative,
-        });
+        const next = live
+          ? collabAction(c, {
+              owner,
+              direction: people.direction,
+              creative: people.creative,
+            })
+          : null;
         return (
           <VersionCard
             key={c.targetId}
@@ -112,7 +128,7 @@ export async function InfluenceBlock({
           >
             {next && <ModuleLine action={next} here />}
             <InfluenceCollaboration
-              fiche={fiche}
+              fiche={shown}
               target={target}
               access={access}
               inCard
