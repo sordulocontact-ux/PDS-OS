@@ -13,7 +13,41 @@ import { fr } from "@/lib/i18n/fr";
 export type ReserveCause =
   "distributor" | "availability" | "compliance" | "checks" | "anomalies";
 
-export type Reserve = { cause: ReserveCause; label: string; details: string[] };
+export const CRITICALITIES = ["minor", "major", "critical"] as const;
+export type Criticality = (typeof CRITICALITIES)[number];
+
+export type Reserve = {
+  cause: ReserveCause;
+  label: string;
+  details: string[];
+  // Proposed by the code, changed by the owner (recette DIST-007).
+  criticality: Criticality;
+};
+
+// Kinds of closure: normal, with reserves, or stopped by the direction
+// (recette DIST-003).
+export const CLOSURE_KINDS = [
+  "normal",
+  "reserves",
+  "cancelled",
+  "abandoned",
+] as const;
+export type ClosureKind = (typeof CLOSURE_KINDS)[number];
+export const isClosureKind = (value: string): value is ClosureKind =>
+  (CLOSURE_KINDS as readonly string[]).includes(value);
+
+// Why the direction closes ahead of time.
+export const REASON_KINDS = [
+  "release_cancelled",
+  "artist_withdrawal",
+  "rights_issue",
+  "distributor_refusal",
+  "direction_decision",
+  "other",
+] as const;
+export type ReasonKind = (typeof REASON_KINDS)[number];
+export const isReasonKind = (value: string): value is ReasonKind =>
+  (REASON_KINDS as readonly string[]).includes(value);
 
 export type ClosureCondition = {
   key: ReserveCause;
@@ -24,6 +58,9 @@ export type ClosureCondition = {
 export type ClosureReadiness = {
   // A closure (of either kind) needs a validated version and a deposit.
   canPropose: boolean;
+  // The Orchard accepted the current version: a closure with reserves is
+  // the owner's to propose; before, only the direction's (DIST-003).
+  accepted: boolean;
   conditions: ClosureCondition[];
   reserves: Reserve[];
   normalPossible: boolean;
@@ -87,12 +124,31 @@ export function closureReadiness(input: {
     ["checks", checks],
     ["anomalies", anomalies],
   ];
+  const worst = input.anomalies
+    .filter(isOpen)
+    .reduce<Criticality>(
+      (acc, a) =>
+        a.severity === "blocking"
+          ? "critical"
+          : a.severity === "major" && acc === "minor"
+            ? "major"
+            : acc,
+      "minor",
+    );
+  const CRITICALITY: Record<ReserveCause, Criticality> = {
+    distributor: "critical",
+    availability: "major",
+    compliance: "major",
+    checks: "minor",
+    anomalies: worst,
+  };
   const reserves: Reserve[] = groups
     .filter(([, details]) => details.length > 0)
     .map(([cause, details]) => ({
       cause,
       label: t.causes[cause](details.length),
       details,
+      criticality: CRITICALITY[cause],
     }));
   // Compliance is met only once every platform of reference was found
   // compliant: an unverified platform is not « conforme » either (its
@@ -108,6 +164,7 @@ export function closureReadiness(input: {
   const canPropose = cycle?.deposit !== null && cycle !== null;
   return {
     canPropose,
+    accepted: cycle?.outcome?.kind === "accepted",
     conditions,
     reserves,
     normalPossible: canPropose && reserves.length === 0 && allCompliant,

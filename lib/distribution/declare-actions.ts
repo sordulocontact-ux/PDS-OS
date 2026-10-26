@@ -10,6 +10,7 @@ import {
   ANOMALY_MODULES,
   SEVERITIES,
 } from "@/lib/distribution/anomalies";
+import { DECLARATION_SOURCES } from "@/lib/distribution/tracking";
 import { fr } from "@/lib/i18n/fr";
 import { withOutcome } from "@/lib/journey/outcome";
 import { createClient } from "@/lib/supabase/server";
@@ -26,6 +27,7 @@ function failure(error: { code?: string; message?: string }): WriteResult {
     ["not_deposited", e.notDeposited],
     ["already_declared", e.alreadyDeclared],
     ["already_withdrawn", e.alreadyWithdrawn],
+    ["date_order", e.dateOrder],
     ["proof_exists", t.proofExists],
     ["reason_required", e.noteRequired],
     ["validation_pending", fr.distribution.anomalies.errors.validationPending],
@@ -52,11 +54,17 @@ const proof = {
   proofPath: z.string().max(200),
   proofName: z.string().trim().max(255),
 };
+// Where the person learnt it (DIST-004); empty: not said.
+const source = z
+  .enum(["", ...DECLARATION_SOURCES])
+  .default("")
+  .transform((value) => value || null);
 
 const depositSchema = z.object({
   projectId: z.uuid(),
   declaredOn: date,
   orchardId: z.string().trim().max(100),
+  source,
   ...proof,
 });
 
@@ -81,6 +89,7 @@ export async function declareDeposit(
         p_orchard_id: v.orchardId,
         p_proof_path: v.proofPath,
         p_proof_name: v.proofName,
+        p_source: v.source ?? undefined,
       });
       return error ? failure(error) : ok(v.projectId);
     },
@@ -99,6 +108,7 @@ const answersSchema = z.object({
     )
     .min(1)
     .max(3),
+  source,
 });
 
 /** « Enregistrer » what The Orchard said, in one gesture (rule 7). */
@@ -108,7 +118,7 @@ export async function declareAnswers(
   await requireApproved();
   const p = answersSchema.safeParse(input);
   if (!p.success) return { ok: false, error: t.nothingTicked };
-  const { projectId, items } = p.data;
+  const { projectId, items, source: said } = p.data;
   return withOutcome(
     projectId,
     ["distribution"],
@@ -124,6 +134,7 @@ export async function declareAnswers(
           declared_on: i.declaredOn,
           proof_path: i.proofPath,
           proof_name: i.proofName,
+          source: said,
         })),
       });
       return error ? failure(error) : ok(projectId);

@@ -62,9 +62,25 @@ export function PlatformsStep({ ctx }: { ctx: DistributionContext }) {
             x.verificationNote ?? x.complianceNote,
           )
         : null,
+      seen:
+        x.verification === "verified" && x.observedOn
+          ? t.seenLine(formatShortDay(x.observedOn), x.territory)
+          : null,
+      proof: x.proof
+        ? { label: t.proofLabel(x.proof.name), href: x.proof.href }
+        : x.proofUrl
+          ? { label: t.proofLinkLabel, href: x.proofUrl }
+          : null,
       nextCount,
     };
   });
+  // The territory typed last, proposed for the next platform.
+  const territory =
+    [...view.platforms]
+      .filter((x) => x.territory && x.verified)
+      .sort((a, b) =>
+        (b.verified?.at ?? "").localeCompare(a.verified?.at ?? ""),
+      )[0]?.territory ?? "";
   const anomalies = ctx.anomalies.filter((a) => a.platform);
   const done = step?.status === "done";
   return (
@@ -121,6 +137,10 @@ export function PlatformsStep({ ctx }: { ctx: DistributionContext }) {
             projectId={ctx.project.id}
             line={line}
             canAct={mine}
+            organizationId={view.organizationId}
+            territory={territory}
+            members={ctx.closure.members}
+            ownerPersonId={ctx.project.ownerPersonId}
           />
         ))}
       </div>
@@ -143,9 +163,20 @@ export function PlatformsStep({ ctx }: { ctx: DistributionContext }) {
                 key={a.id}
                 label={`${fr.distribution.anomalies.kinds[a.kind]} · ${platformLabel({ platform: a.platform ?? "", label: null })}`}
                 value={`« ${a.description} »`}
-                source={fr.distribution.anomalies.correctIn(
-                  fr.distribution.anomalies.modules[a.module],
-                )}
+                source={[
+                  fr.distribution.anomalies.correctIn(
+                    fr.distribution.anomalies.modules[a.module],
+                  ),
+                  a.action
+                    ? t.anomalyAction(
+                        a.action,
+                        a.ownerName,
+                        a.dueOn ? formatShortDay(a.dueOn) : null,
+                      )
+                    : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
                 state={{
                   tone: isOpen(a) ? "danger" : "neutral",
                   label: fr.distribution.anomalies.states[a.state],

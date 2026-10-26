@@ -1,6 +1,7 @@
 import "server-only";
 
-import type { Access } from "@/lib/auth/access";
+import { can, type Access } from "@/lib/auth/access";
+import { loadAnomalies } from "@/lib/distribution/anomalies-queries";
 import {
   checksOf,
   computedSignal,
@@ -23,9 +24,12 @@ import {
 } from "@/lib/distribution/sources";
 import {
   asSnapshot,
+  isDerogationScope,
+  isRefusalModule,
   openVersion,
   snapshotDrift,
   submitGate,
+  type Derogation,
   type DistributionSnapshot,
   type DistributionVersion,
   type DriftLine,
@@ -53,6 +57,8 @@ export type DistributionView = {
   validatorOptions: Array<{ personId: string; name: string }>;
   versions: DistributionVersion[];
   open: DistributionVersion | null;
+  // The derogation of the direction waiting for the next submission.
+  derogation: Derogation | null;
   gate: SubmitGate;
   // What changed at the sources since the open version was submitted.
   drift: DriftLine[];
@@ -61,6 +67,8 @@ export type DistributionView = {
   canCheck: boolean;
   // The viewer is the validator the open version waits for.
   canDecide: boolean;
+  // The direction (`administer`) grants a derogation.
+  canDerogate: boolean;
 };
 
 /**
@@ -73,30 +81,46 @@ export async function loadDistributionView(
   access: Access,
 ): Promise<DistributionView> {
   const supabase = await createClient();
-  const [sources, members, validators, checkRows, versionRows, dossier] =
-    await Promise.all([
-      loadDistributionSources(project, access),
-      loadMembers(access),
-      access.organizationId
-        ? loadValidators(access.organizationId)
-        : Promise.resolve([]),
-      supabase
-        .from("distribution_checks")
-        .select("check_key, result, note, checked_by, checked_at")
-        .eq("project_id", project.id),
-      supabase
-        .from("distribution_versions")
-        .select(
-          "id, number, status, submitted_by, submitted_at, validator_person_id, decided_by, decided_at, decision_note, superseded_at, snapshot",
-        )
-        .eq("project_id", project.id)
-        .order("number", { ascending: false }),
-      supabase
-        .from("distribution_dossiers")
-        .select("validator_person_id")
-        .eq("project_id", project.id)
-        .maybeSingle(),
-    ]);
+  const [
+    sources,
+    members,
+    validators,
+    checkRows,
+    versionRows,
+    dossier,
+    derogationRows,
+    anomalies,
+  ] = await Promise.all([
+    loadDistributionSources(project, access),
+    loadMembers(access),
+    access.organizationId
+      ? loadValidators(access.organizationId)
+      : Promise.resolve([]),
+    supabase
+      .from("distribution_checks")
+      .select("check_key, result, note, checked_by, checked_at, version_number")
+      .eq("project_id", project.id),
+    supabase
+      .from("distribution_versions")
+      .select(
+        "id, number, status, submitted_by, submitted_at, validator_person_id, decided_by, decided_at, decision_note, superseded_at, snapshot, refusal_modules, derogation_id",
+      )
+      .eq("project_id", project.id)
+      .order("number", { ascending: false }),
+    supabase
+      .from("distribution_dossiers")
+      .select("validator_person_id")
+      .eq("project_id", project.id)
+      .maybeSingle(),
+    supabase
+      .from("distribution_derogations")
+      .select(
+        "id, scope, risk, reason, due_on, granted_by, granted_at, version_number, revoked_at",
+      )
+      .eq("project_id", project.id)
+      .is("revoked_at", null),
+    loadAnomalies(project.id, access),
+  ]);
   const nameOf = (personId: string | null) =>
     personId
       ? (members.find((m) => m.personId === personId)?.name ?? null)
@@ -125,6 +149,7 @@ export async function loadDistributionView(
             note: row.note,
             checkedBy: row.checked_by,
             checkedAt: row.checked_at,
+            version: row.version_number,
           },
         ]
       : [],
@@ -140,6 +165,16 @@ export async function loadDistributionView(
     }),
   }));
 
+  const derogations: Derogation[] = (derogationRows.data ?? []).map((row) => ({
+    id: row.id,
+    scope: row.scope.filter(isDerogationScope),
+    risk: row.risk,
+    reason: row.reason,
+    dueOn: row.due_on,
+    grantedBy: nameOf(row.granted_by),
+    grantedAt: row.granted_at,
+    versionNumber: row.version_number,
+  }));
   const versions: DistributionVersion[] = (versionRows.data ?? []).map(
     (row) => ({
       id: row.id,
@@ -157,9 +192,12 @@ export async function loadDistributionView(
       note: row.decision_note,
       supersededAt: row.superseded_at,
       snapshot: asSnapshot(row.snapshot),
+      refusalModules: (row.refusal_modules ?? []).filter(isRefusalModule),
+      derogation: derogations.find((d) => d.id === row.derogation_id) ?? null,
     }),
   );
   const open = openVersion(versions);
+  const derogation = derogations.find((d) => d.versionNumber === null) ?? null;
 
   const validatorId = dossier.data?.validator_person_id ?? null;
   const validatorOptions = validators.filter(
@@ -183,6 +221,7 @@ export async function loadDistributionView(
     validatorOptions,
     versions,
     open,
+    derogation,
     gate: submitGate({
       readiness,
       params: sources.params,
@@ -190,6 +229,9 @@ export async function loadDistributionView(
       checks,
       versions,
       paramsConfirmed: sources.paramsConfirmed !== null,
+      sections,
+      anomalies,
+      derogation,
     }),
     drift: open?.snapshot
       ? snapshotDrift(open.snapshot.sections, sections)
@@ -198,6 +240,7 @@ export async function loadDistributionView(
     canCheck: canEdit || isValidator,
     canDecide:
       open?.status === "pending" && open.validatorPersonId === access.personId,
+    canDerogate: can(access, "administer"),
   };
 }
 
@@ -206,13 +249,16 @@ export function snapshotOf(view: DistributionView): DistributionSnapshot {
   return {
     format: 1,
     sections: view.sections,
-    checks: view.checks.map(({ key, result, note, checkedBy, checkedAt }) => ({
-      key,
-      result,
-      note,
-      checkedBy,
-      checkedAt,
-    })),
+    checks: view.checks.map(
+      ({ key, result, note, checkedBy, checkedAt, version }) => ({
+        key,
+        result,
+        note,
+        checkedBy,
+        checkedAt,
+        version,
+      }),
+    ),
     readiness: { ready: view.readiness.ready, total: view.readiness.total },
     params: view.sources.params,
   };

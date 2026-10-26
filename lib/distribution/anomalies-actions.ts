@@ -99,16 +99,23 @@ export async function setDistributionAnomalyState(
 export async function prepareDistributionVersion(input: {
   projectId: string;
   note: string;
+  // The modules corrected (their checks only are redone); none: all six.
+  modules?: string[];
 }): Promise<DistributionResult> {
   await requireApproved();
   const parsed = z
-    .object({ projectId: z.uuid(), note: z.string().trim().min(1).max(1000) })
+    .object({
+      projectId: z.uuid(),
+      note: z.string().trim().min(1).max(1000),
+      modules: z.array(z.enum(ANOMALY_MODULES)).max(7).optional(),
+    })
     .safeParse(input);
   if (!parsed.success) return { ok: false, error: e.reasonRequired };
   const supabase = await createClient();
   const { error } = await supabase.rpc("prepare_distribution_version", {
     p_project_id: parsed.data.projectId,
     p_note: parsed.data.note,
+    p_modules: parsed.data.modules?.length ? parsed.data.modules : undefined,
   });
   return error ? failure(error) : done(parsed.data.projectId);
 }

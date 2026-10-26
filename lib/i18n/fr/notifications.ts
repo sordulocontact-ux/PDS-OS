@@ -95,6 +95,14 @@ export const notifications = {
       `${actor} propose de clôturer la distribution de « ${project} » : votre décision est attendue.`,
     distribution_closure_decided: (actor: string, project: string) =>
       `${actor} a tranché sur la clôture de la distribution de « ${project} ».`,
+    distribution_derogation_granted: (actor: string, project: string) =>
+      `${actor} a accordé une dérogation sur le dossier de distribution de « ${project} ».`,
+    distribution_reserve_lift_requested: (actor: string, project: string) =>
+      `${actor} demande à lever une réserve de la distribution de « ${project} » : confirmez la preuve.`,
+    distribution_reserve_lift_decided: (actor: string, project: string) =>
+      `${actor} a tranché sur la levée d'une réserve de la distribution de « ${project} ».`,
+    distribution_reserve_overdue: (_actor: string, project: string) =>
+      `Une réserve de la distribution de « ${project} » a dépassé son échéance : à lever ou à arbitrer.`,
     marketing_report_submitted: (actor: string, project: string) =>
       `${actor} a soumis le bilan Marketing de « ${project} » : il attend votre décision.`,
     marketing_report_decided: (actor: string, project: string) =>

@@ -12,11 +12,15 @@ import {
   type PlatformView,
   type Verification,
 } from "@/lib/distribution/platforms";
+import { PROOF_BUCKET } from "@/lib/distribution/proof-rules";
 import { cycleState, type CycleState } from "@/lib/distribution/tracking";
 import { loadTrackingView } from "@/lib/distribution/tracking-queries";
 import { loadMembers } from "@/lib/framing/related";
 import type { ProjectDetail } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
+
+// A capture opens for an hour after the page is read.
+const SIGNED_SECONDS = 3600;
 
 const isVerification = (value: string): value is Verification =>
   (VERIFICATIONS as readonly string[]).includes(value);
@@ -44,7 +48,7 @@ export const loadPlatformsView = cache(async function loadPlatformsView(
     supabase
       .from("distribution_platforms")
       .select(
-        "platform, label, url, available_declared_at, available_declared_by, verification, verification_note, verified_by, verified_at, compliance, compliance_note, compliance_by, compliance_at, created_at",
+        "platform, label, url, available_declared_at, available_declared_by, verification, verification_note, verified_by, verified_at, compliance, compliance_note, compliance_by, compliance_at, territory, observed_on, proof_path, proof_name, proof_url, created_at",
       )
       .eq("project_id", project.id)
       .order("created_at"),
@@ -75,6 +79,17 @@ export const loadPlatformsView = cache(async function loadPlatformsView(
   const stamp = (at: string | null, by: string | null) =>
     at ? { at, by: nameOf(by) } : null;
 
+  const paths = (rows.data ?? []).flatMap((row) =>
+    row.proof_path ? [row.proof_path] : [],
+  );
+  const signed = paths.length
+    ? await supabase.storage
+        .from(PROOF_BUCKET)
+        .createSignedUrls(paths, SIGNED_SECONDS)
+    : null;
+  const hrefOf = (path: string) =>
+    signed?.data?.find((item) => item.path === path)?.signedUrl ?? null;
+
   const views: PlatformView[] = (rows.data ?? []).map((row) => ({
     platform: row.platform,
     label: row.label,
@@ -89,6 +104,13 @@ export const loadPlatformsView = cache(async function loadPlatformsView(
     compliance: isCompliance(row.compliance) ? row.compliance : "unchecked",
     complianceNote: row.compliance_note,
     complianced: stamp(row.compliance_at, row.compliance_by),
+    territory: row.territory,
+    observedOn: row.observed_on,
+    proof:
+      row.proof_path && row.proof_name
+        ? { name: row.proof_name, href: hrefOf(row.proof_path) }
+        : null,
+    proofUrl: row.proof_url,
     suggestion: null,
     suggestedAt: null,
     fromDetection: null,

@@ -125,6 +125,12 @@ export const NOTIFICATION_KINDS = [
   "distribution_version_decided",
   "distribution_closure_proposed",
   "distribution_closure_decided",
+  // Recette V1 of 23/10: a derogation of the direction; a reserve's lift
+  // asked, decided; a reserve past its deadline.
+  "distribution_derogation_granted",
+  "distribution_reserve_lift_requested",
+  "distribution_reserve_lift_decided",
+  "distribution_reserve_overdue",
   // The Suivi & bilan (lot 7): a version of the bilan to decide, the
   // decision back; the Marketing closing asked, decided, reopened.
   "marketing_report_submitted",
@@ -229,7 +235,10 @@ export function notificationHref(
   if (kind.startsWith("distribution_"))
     return distributionStepHref(
       projectId,
-      kind.startsWith("distribution_closure") ? "closure" : "dossier",
+      kind.startsWith("distribution_closure") ||
+        kind.startsWith("distribution_reserve")
+        ? "closure"
+        : "dossier",
     );
   // The Suivi & bilan: the bilan's step, or the Marketing closing's.
   if (kind.startsWith("marketing_report_"))

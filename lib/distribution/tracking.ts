@@ -18,6 +18,20 @@ export type DeclarationKind = (typeof DECLARATION_KINDS)[number];
 export const isDeclarationKind = (value: string): value is DeclarationKind =>
   (DECLARATION_KINDS as readonly string[]).includes(value);
 
+// Where the person learnt it (ticket § 7: « sa source éventuelle »).
+export const DECLARATION_SOURCES = [
+  "orchard_portal",
+  "orchard_email",
+  "email",
+  "call",
+  "other",
+] as const;
+export type DeclarationSource = (typeof DECLARATION_SOURCES)[number];
+export const isDeclarationSource = (
+  value: string,
+): value is DeclarationSource =>
+  (DECLARATION_SOURCES as readonly string[]).includes(value);
+
 export type Declaration = {
   id: string;
   version: number;
@@ -28,6 +42,7 @@ export type Declaration = {
   // A file of distribution-proofs (signed URL, short-lived) or a link.
   proof: { name: string; href: string | null } | null;
   proofUrl: string | null;
+  source: DeclarationSource | null;
   declaredBy: string | null;
   declaredAt: string;
   withdrawn: { at: string; by: string | null; note: string | null } | null;

@@ -17,18 +17,20 @@ export function DossierReturn({
   by,
   outcome,
   note,
-  module,
+  modules,
 }: {
   projectId: string;
   firstMasterId: string | null;
   by: string;
   outcome: string;
   note: string;
-  module: AnomalyModule | null;
+  // Where it is corrected: the refusal's modules, or The Orchard's one.
+  modules: AnomalyModule[];
 }) {
-  const name = module ? fr.distribution.anomalies.modules[module] : null;
-  const fixable =
-    module && module !== "distribution" && module !== "distributor";
+  const name = (m: AnomalyModule) => fr.distribution.anomalies.modules[m];
+  const fixable = modules.filter(
+    (m) => m !== "distribution" && m !== "distributor",
+  );
   return (
     <ToneCallout
       tone="warning"
@@ -39,19 +41,25 @@ export function DossierReturn({
       <span>
         <strong className="font-semibold">{by}</strong> ({outcome}) : « {note} »
       </span>
-      {name && (
+      {modules.length > 0 && (
         <span>
-          {t.correctIn} <strong className="font-semibold">{name}</strong>
+          {t.correctIn}{" "}
+          <strong className="font-semibold">
+            {modules.map(name).join(", ")}
+          </strong>
         </span>
       )}
-      {fixable && (
-        <span>
-          <ViewLink
-            href={moduleHref(module, { projectId, firstMasterId })}
-            className={buttonVariants({ variant: "outline", size: "sm" })}
-          >
-            {fr.distributionJourney.prep.correctIn(name ?? "")}
-          </ViewLink>
+      {fixable.length > 0 && (
+        <span className="flex flex-wrap gap-2">
+          {fixable.map((m) => (
+            <ViewLink
+              key={m}
+              href={moduleHref(m, { projectId, firstMasterId })}
+              className={buttonVariants({ variant: "outline", size: "sm" })}
+            >
+              {fr.distributionJourney.prep.correctIn(name(m))}
+            </ViewLink>
+          ))}
         </span>
       )}
     </ToneCallout>

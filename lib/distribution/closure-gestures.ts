@@ -4,9 +4,17 @@ import { z } from "zod";
 
 import {
   decideDistributionClosure,
+  decideReserveLift,
   proposeDistributionClosure,
   reopenDistributionClosure,
+  requestReserveLift,
 } from "@/lib/distribution/closure-actions";
+import type {
+  ClosureKind,
+  Criticality,
+  ReasonKind,
+  ReserveCause,
+} from "@/lib/distribution/closure";
 import { fr } from "@/lib/i18n/fr";
 import { withOutcome } from "@/lib/journey/outcome";
 import type { WriteResult } from "@/lib/utils/write-result";
@@ -21,9 +29,17 @@ const invalid = {
 
 export async function proposeClosure(input: {
   projectId: string;
-  kind: "normal" | "reserves";
+  kind: ClosureKind;
   arbitration: string;
   acknowledged: boolean;
+  reasonKind: ReasonKind | null;
+  reserves: Array<{
+    cause: ReserveCause;
+    ownerPersonId: string;
+    dueOn: string;
+    expectedProof: string;
+    criticality: Criticality;
+  }>;
   done: string;
 }): Promise<WriteResult> {
   if (!id.safeParse(input.projectId).success) return invalid;
@@ -55,5 +71,37 @@ export async function reopenClosure(input: {
     ["distribution"],
     fr.distributionJourney.closure.reopened,
     () => reopenDistributionClosure(input),
+  );
+}
+
+export async function requestLift(input: {
+  projectId: string;
+  reserveId: string;
+  note: string;
+  proofPath: string;
+  proofName: string;
+  proofUrl: string;
+}): Promise<WriteResult> {
+  if (!id.safeParse(input.projectId).success) return invalid;
+  return withOutcome(
+    input.projectId,
+    ["distribution"],
+    fr.distributionJourney.closure.liftRequested,
+    () => requestReserveLift(input),
+  );
+}
+
+export async function decideLift(input: {
+  projectId: string;
+  reserveId: string;
+  approve: boolean;
+  note: string;
+}): Promise<WriteResult> {
+  if (!id.safeParse(input.projectId).success) return invalid;
+  return withOutcome(
+    input.projectId,
+    ["distribution"],
+    fr.distributionJourney.closure.liftDecided,
+    () => decideReserveLift(input),
   );
 }

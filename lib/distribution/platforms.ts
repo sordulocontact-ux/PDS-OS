@@ -51,6 +51,12 @@ export type PlatformView = {
   compliance: Compliance;
   complianceNote: string | null;
   complianced: { at: string; by: string | null } | null;
+  // What the person saw when verifying (recette DIST-005): the territory,
+  // the day, and the proof (a capture, signed for an hour, or a link).
+  territory: string | null;
+  observedOn: string | null;
+  proof: { name: string; href: string | null } | null;
+  proofUrl: string | null;
   // A link the automatic detection found: proposed with its source (rule
   // 1), never a verification until a person says « Tout est bon ».
   suggestion: string | null;
@@ -72,6 +78,10 @@ const empty = (platform: string): PlatformView => ({
   compliance: "unchecked",
   complianceNote: null,
   complianced: null,
+  territory: null,
+  observedOn: null,
+  proof: null,
+  proofUrl: null,
   suggestion: null,
   suggestedAt: null,
   fromDetection: null,
@@ -120,8 +130,10 @@ export function availabilityOf(input: {
   withoutLink: number;
 } {
   const reference = input.platforms.filter((p) => p.reference);
+  // Verified means available and compliant: a platform found non
+  // compliant is never counted as verified (recette DIST-005).
   const verified = reference.filter(
-    (p) => p.verification === "verified",
+    (p) => p.verification === "verified" && p.compliance === "compliant",
   ).length;
   const anyVerified = input.platforms.some(
     (p) => p.verification === "verified",

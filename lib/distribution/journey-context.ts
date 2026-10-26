@@ -188,7 +188,15 @@ export const distributionContext = cache(async (projectId: string) => {
       !(latestClosure.status === "closed" && latestClosure.reopened)
         ? {
             status: latestClosure.status,
+            kind: latestClosure.kind,
             reserves: latestClosure.reserves.length,
+            openReserves: closure.reserveRows.filter(
+              (r) => r.status !== "lifted",
+            ).length,
+            direction:
+              latestClosure.kind === "cancelled" ||
+              latestClosure.kind === "abandoned" ||
+              latestClosure.early,
           }
         : null,
   });

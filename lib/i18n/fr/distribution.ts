@@ -428,6 +428,12 @@ export const distribution = {
         `${count} contrôle${count > 1 ? "s" : ""} non conforme${count > 1 ? "s" : ""}.`,
       unchecked: (count: number) =>
         `${count} contrôle${count > 1 ? "s" : ""} sur 6 non vérifié${count > 1 ? "s" : ""} : le validateur le verra.`,
+      unrecorded: (count: number) =>
+        `${count} contrôle${count > 1 ? "s" : ""} sur 6 à enregistrer avant de soumettre (« Non applicable » compte).`,
+      refusalUnresolved: (n: number, modules: string) =>
+        `La cause du refus de la V${n} n'a pas changé : ${modules}.`,
+      anomaliesUnresolved: (modules: string) =>
+        `Une anomalie n'est pas corrigée à la source : ${modules}.`,
     },
     cancel: "Annuler",
     close: "Fermer",
@@ -448,10 +454,28 @@ export const distribution = {
       alreadyDecided: "Cette version a déjà été décidée.",
       reasonRequired: "Un refus dit pourquoi.",
       noteRequired: "Un contrôle non conforme dit pourquoi.",
+      checksUnrecorded:
+        "Les six contrôles ne sont pas tous enregistrés : enregistrez-les (« Non applicable » compte), ou demandez une dérogation à la direction.",
+      refusalUnresolved:
+        "La cause du refus n'a pas changé à la source : corrigez-la, ou demandez une dérogation à la direction.",
+      anomaliesUnresolved:
+        "Une anomalie n'est pas corrigée dans son module : corrigez-la, ou demandez une dérogation à la direction.",
+      modulesRequired: "Un refus dit ce qui est à corriger, et où.",
+      scopeRequired: "Dites ce que la dérogation laisse passer.",
+      dueInvalid: "L'échéance est à venir.",
+      noDerogation: "Aucune dérogation en attente.",
       generic: "L'action a échoué. Réessayez.",
     },
   },
   tracking: {
+    sources: {
+      orchard_portal: "Portail The Orchard",
+      orchard_email: "E-mail de The Orchard",
+      email: "Autre e-mail",
+      call: "Appel",
+      other: "Autre",
+    },
+    source: "Source",
     title: "Suivi du dépôt",
     description:
       "Le dépôt se fait à la main dans The Orchard. Ici, vous déclarez ce qui s'est passé : chaque état est distinct et aucun n'est déduit d'un autre.",
@@ -553,6 +577,8 @@ export const distribution = {
       notDeposited: "Déclarez d'abord le dépôt de cette version.",
       alreadyDeclared: "C'est déjà déclaré pour cette version.",
       alreadyWithdrawn: "Cette déclaration est déjà retirée.",
+      dateOrder:
+        "Cette date ne suit pas l'ordre : le dépôt après la validation, puis la réception, l'acceptation, la livraison.",
       depositInUse:
         "D'autres déclarations reposent sur ce dépôt : retirez-les d'abord.",
       reasonRequired: "Dites pourquoi.",
@@ -795,6 +821,29 @@ export const distribution = {
     kinds: {
       normal: "Clôture normale",
       reserves: "Clôture avec réserves",
+      cancelled: "Distribution annulée",
+      abandoned: "Distribution abandonnée",
+    },
+    reasonKinds: {
+      release_cancelled: "Sortie annulée",
+      artist_withdrawal: "Retrait de l'artiste",
+      rights_issue: "Problème de droits",
+      distributor_refusal: "Refus du distributeur",
+      direction_decision: "Décision exceptionnelle de la direction",
+      other: "Autre",
+    },
+    criticalities: {
+      minor: "Mineure",
+      major: "Majeure",
+      critical: "Critique",
+    },
+    // What proof lifts a reserve of each cause (proposed, changed).
+    expectedProofs: {
+      distributor: "L'e-mail ou la capture du portail de The Orchard",
+      availability: "La capture de chaque plateforme, avec son lien",
+      compliance: "La capture de la page conforme sur chaque plateforme",
+      checks: "Le contrôle enregistré par une personne",
+      anomalies: "L'anomalie résolue dans son module",
     },
     approve: "Valider la clôture",
     approveTitle: "Valider la clôture",
@@ -839,6 +888,17 @@ export const distribution = {
       alreadyDecided: "Cette clôture a déjà été décidée.",
       reasonRequired: "Dites pourquoi.",
       notClosed: "Le suivi n'est pas clôturé.",
+      notAccepted:
+        "The Orchard n'a pas encore accepté : seule la direction peut clôturer avant, pour une raison qu'elle dit.",
+      reasonKindRequired: "Choisissez la raison.",
+      reservesInvalid:
+        "Chaque réserve a un responsable, une échéance à venir et la preuve attendue.",
+      notDirection: "Seule la direction décide d'une clôture anticipée.",
+      notOpen: "Cette réserve n'est plus ouverte.",
+      notRequested: "Aucune levée n'est demandée pour cette réserve.",
+      samePerson:
+        "La levée est confirmée par une autre personne que celle qui l'a demandée.",
+      proofRequired: "Joignez la preuve : un fichier ou un lien.",
       generic: "L'action a échoué. Réessayez.",
     },
   },
@@ -873,6 +933,18 @@ export const distribution = {
       closureClosed: (kind: string) => `${kind} validée`,
       closureRejected: (kind: string) => `${kind} refusée`,
       closureReopened: "Suivi rouvert après clôture",
+      rejectedModules: (n: number, modules: string) =>
+        `V${n} du dossier refusée · à corriger dans : ${modules}`,
+      checksReset: (labels: string, reason: string) =>
+        `Contrôles à refaire (${reason}) : ${labels}`,
+      derogationGranted: (scope: string, due: string) =>
+        `Dérogation de la direction : ${scope}, à régler avant le ${due}`,
+      derogationRevoked: "Dérogation retirée",
+      submittedDerogated: (n: number) =>
+        `V${n} du dossier soumise à validation avec une dérogation de la direction`,
+      reserveLiftRequested: (label: string) => `Levée demandée : ${label}`,
+      reserveLifted: (label: string) => `Réserve levée : ${label}`,
+      reserveLiftRefused: (label: string) => `Levée refusée : ${label}`,
       other: (kind: string) => kind,
     },
     note: (text: string) => `« ${text} »`,

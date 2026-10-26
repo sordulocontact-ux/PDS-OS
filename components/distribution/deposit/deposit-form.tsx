@@ -1,20 +1,27 @@
 "use client";
 
-import { IconPaperclip } from "nucleo-sharp-essential";
 import { useState } from "react";
 
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
-import { ProofChip } from "@/components/distribution/deposit/proof-chip";
+import { ProofPick } from "@/components/distribution/deposit/proof-pick";
+import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
-import { FileDropZone } from "@/components/ui/file-drop-zone";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { declareDeposit } from "@/lib/distribution/declare-actions";
+import { isDeclarationSource } from "@/lib/distribution/tracking";
 import { removeProof, uploadProof } from "@/lib/distribution/upload-proof";
 import { fr } from "@/lib/i18n/fr";
 
 const t = fr.distributionJourney.deposit;
 const o = fr.distributionJourney.orchard;
+const s = fr.distribution.tracking;
+
+/** The source chosen in the form, or none. */
+export const sourceOf = (value: FormDataEntryValue | null) => {
+  const text = String(value ?? "");
+  return isDeclarationSource(text) ? text : "";
+};
 
 /**
  * « Dépôt manuel effectué dans The Orchard » (proto `UI.declare`): the date,
@@ -53,6 +60,7 @@ export function DepositForm({
         projectId,
         declaredOn: String(form.get("declaredOn") ?? ""),
         orchardId: String(form.get("orchardId") ?? ""),
+        source: sourceOf(form.get("source")),
         proofPath: proof.path,
         proofName: proof.name,
       });
@@ -84,23 +92,20 @@ export function DepositForm({
           maxLength={100}
         />
       </div>
-      <div className="flex flex-col gap-1.5">
-        <span className="text-[length:var(--type-body-sm)] font-medium">
-          {t.proof}
-        </span>
-        {file ? (
-          <span>
-            <ProofChip name={file.name} onRemove={() => setFile(null)} />
-          </span>
-        ) : (
-          <FileDropZone
-            label={t.proofDrop}
-            hint={t.proofHint}
-            icon={IconPaperclip}
-            onFiles={(files) => setFile(files[0] ?? null)}
-          />
-        )}
-      </div>
+      <OptionSelect
+        name="source"
+        label={s.source}
+        items={s.sources}
+        // The deposit is made by hand on The Orchard's portal.
+        defaultValue="orchard_portal"
+      />
+      <ProofPick
+        label={t.proof}
+        drop={t.proofDrop}
+        hint={t.proofHint}
+        file={file}
+        onFile={setFile}
+      />
       <FormMessage kind="error">{failed ?? error}</FormMessage>
       <div>
         <Button

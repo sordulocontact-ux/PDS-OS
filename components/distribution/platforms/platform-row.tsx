@@ -4,20 +4,11 @@ import { useState } from "react";
 
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
-import { TextareaField } from "@/components/auth/textarea-field";
-import { OptionSelect } from "@/components/projects/option-select";
+import { PlatformConfirm } from "@/components/distribution/platforms/platform-confirm";
+import { PlatformProblem } from "@/components/distribution/platforms/platform-problem";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { ChoiceCards } from "@/components/ui/choice-cards";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import {
-  ANOMALY_MODULES,
-  type AnomalyModule,
-} from "@/lib/distribution/anomalies";
-import {
-  confirmPlatform,
-  reportPlatformProblem,
-} from "@/lib/distribution/platform-gestures";
 import { saveDistributionPlatform } from "@/lib/distribution/platforms-actions";
 import { fr } from "@/lib/i18n/fr";
 
@@ -37,6 +28,9 @@ export type PlatformLine = {
   compliance: "unchecked" | "compliant" | "non_compliant";
   // « Vérifiée par Lina Haddad le 07/12, 16:22 ».
   by: string | null;
+  // « Constatée le 07/12 · France » and its proof (DIST-005).
+  seen: string | null;
+  proof: { label: string; href: string | null } | null;
   // The number verified once this one is (for the toast).
   nextCount: number;
 };
@@ -49,40 +43,40 @@ const VER_TONE = {
 
 /**
  * One platform (proto `.plat`): its state, its link with its source, who
- * verified it, then « Ouvrir », « Tout est bon » (available and compliant in
- * one click), « Il y a un problème » (what was seen, and the anomaly it
- * opens), « Renseigner le lien », « Revérifier ».
+ * verified it, what they saw (territory, day) and their proof, then
+ * « Ouvrir », « Tout est bon » (available and compliant, with the territory
+ * and the proof, recette DIST-005), « Il y a un problème » (what was seen,
+ * and the anomaly it opens), « Renseigner le lien », « Revérifier ».
  */
 export function PlatformRow({
   projectId,
   line,
   canAct,
+  organizationId,
+  territory,
+  members,
+  ownerPersonId,
 }: {
   projectId: string;
   line: PlatformLine;
   canAct: boolean;
+  organizationId: string | null;
+  // The territory typed last on another platform, proposed again.
+  territory: string;
+  members: Array<{ personId: string; name: string }>;
+  ownerPersonId: string | null;
 }) {
-  const [mode, setMode] = useState<"idle" | "link" | "problem" | "recheck">(
-    "idle",
-  );
-  const [problem, setProblem] = useState<
-    "unavailable" | "non_compliant" | null
-  >(null);
-  const [note, setNote] = useState("");
-  const [module, setModule] = useState<AnomalyModule>("distributor");
+  const [mode, setMode] = useState<
+    "idle" | "link" | "problem" | "recheck" | "confirm"
+  >("idle");
   const [linkError, setLinkError] = useState<string>();
-  const [missing, setMissing] = useState<string | null>(null);
-  const reset = () => {
-    setMode("idle");
-    setProblem(null);
-    setNote("");
-    setMissing(null);
-  };
-  const { pending, error, run } = useWriteSubmit(
-    reset,
-    t.verified(line.name, line.nextCount),
-  );
-  const ask = line.verification === "unchecked" || mode === "recheck";
+  const reset = () => setMode("idle");
+  const { pending, error, run } = useWriteSubmit(reset, t.linkSaved);
+  const ask =
+    line.verification === "unchecked" ||
+    mode === "recheck" ||
+    mode === "confirm";
+  const linkToSave = line.saved ? "" : (line.url ?? "");
 
   const saveLink = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -101,25 +95,6 @@ export function PlatformRow({
           available: false,
         }),
       t.linkSaved,
-    );
-  };
-
-  const saveProblem = () => {
-    if (!problem) return setMissing(t.problemRequired);
-    if (!note.trim()) return setMissing(t.problemRequired);
-    setMissing(null);
-    run(
-      () =>
-        reportPlatformProblem({
-          projectId,
-          platform: line.platform,
-          problem,
-          note: note.trim(),
-          module,
-          url: line.saved ? "" : (line.url ?? ""),
-          done: t.problemSaved(line.name),
-        }),
-      t.problemSaved(line.name),
     );
   };
 
@@ -159,18 +134,34 @@ export function PlatformRow({
             {line.source}
           </span>
         )}
-        {line.url && line.source && (
+        {[line.url && line.source, line.by, line.seen]
+          .filter(Boolean)
+          .map((text) => (
+            <span
+              key={String(text)}
+              className="text-[length:var(--type-caption)] text-[color:var(--text-secondary)]"
+            >
+              {text}
+            </span>
+          ))}
+        {line.proof && (
           <span className="text-[length:var(--type-caption)] text-[color:var(--text-secondary)]">
-            {line.source}
-          </span>
-        )}
-        {line.by && (
-          <span className="text-[length:var(--type-caption)] text-[color:var(--text-secondary)]">
-            {line.by}
+            {line.proof.href ? (
+              <a
+                href={line.proof.href}
+                target="_blank"
+                rel="noreferrer"
+                className="underline underline-offset-2"
+              >
+                {line.proof.label}
+              </a>
+            ) : (
+              line.proof.label
+            )}
           </span>
         )}
       </div>
-      {canAct && mode !== "link" && mode !== "problem" && (
+      {canAct && (mode === "idle" || mode === "recheck") && (
         <div className="flex flex-wrap gap-2">
           {!line.url ? (
             <Button size="sm" variant="outline" onClick={() => setMode("link")}>
@@ -191,17 +182,7 @@ export function PlatformRow({
                   <Button
                     size="sm"
                     variant="outline"
-                    disabled={pending}
-                    onClick={() =>
-                      run(() =>
-                        confirmPlatform({
-                          projectId,
-                          platform: line.platform,
-                          url: line.saved ? "" : (line.url ?? ""),
-                          done: t.verified(line.name, line.nextCount),
-                        }),
-                      )
-                    }
+                    onClick={() => setMode("confirm")}
                   >
                     {t.allGood}
                   </Button>
@@ -231,6 +212,18 @@ export function PlatformRow({
           )}
         </div>
       )}
+      {mode === "confirm" && (
+        <PlatformConfirm
+          projectId={projectId}
+          organizationId={organizationId}
+          platform={line.platform}
+          name={line.name}
+          url={linkToSave}
+          territory={territory}
+          done={t.verified(line.name, line.nextCount)}
+          onCancel={reset}
+        />
+      )}
       {mode === "link" && (
         <form noValidate onSubmit={saveLink} className="flex flex-col gap-2">
           <Field
@@ -254,67 +247,15 @@ export function PlatformRow({
         </form>
       )}
       {mode === "problem" && (
-        <div className="flex flex-col gap-2.5">
-          <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
-            {t.problemBody}
-          </p>
-          <ChoiceCards
-            name={`problem-${line.platform}`}
-            legend={t.problemLegend}
-            required
-            variant="list"
-            value={problem}
-            onChange={(value) => {
-              setProblem(value);
-              setModule(value === "unavailable" ? "distributor" : "design");
-            }}
-            choices={(["unavailable", "non_compliant"] as const).map(
-              (value) => ({
-                value,
-                label: t.problems[value][0],
-                hint: t.problems[value][1],
-              }),
-            )}
-          />
-          {problem && (
-            <>
-              <TextareaField
-                name={`note-${line.platform}`}
-                label={problem === "unavailable" ? t.seen : t.differs}
-                required
-                rows={2}
-                maxLength={1000}
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-              />
-              <OptionSelect
-                key={problem}
-                name={`module-${line.platform}`}
-                label={t.module}
-                required
-                items={Object.fromEntries(
-                  ANOMALY_MODULES.map((m) => [
-                    m,
-                    fr.distribution.anomalies.modules[m],
-                  ]),
-                )}
-                defaultValue={module}
-                onValueChange={(value: string) =>
-                  setModule(value as AnomalyModule)
-                }
-              />
-            </>
-          )}
-          <FormMessage kind="error">{missing ?? error}</FormMessage>
-          <div className="flex gap-2">
-            <Button size="sm" disabled={pending} onClick={saveProblem}>
-              {t.saveProblem}
-            </Button>
-            <Button size="sm" variant="ghost" onClick={reset}>
-              {t.cancel}
-            </Button>
-          </div>
-        </div>
+        <PlatformProblem
+          projectId={projectId}
+          platform={line.platform}
+          name={line.name}
+          url={linkToSave}
+          members={members}
+          ownerPersonId={ownerPersonId}
+          onCancel={reset}
+        />
       )}
       {mode === "idle" && error && (
         <FormMessage kind="error">{error}</FormMessage>

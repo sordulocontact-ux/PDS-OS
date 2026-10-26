@@ -93,12 +93,12 @@ function DepositDone({
       <FactRow
         label={t.doneFact}
         value={t.doneValue(deposit.version)}
-        source={t.doneSource(
+        source={`${t.doneSource(
           formatShortInstant(deposit.declaredAt),
           deposit.declaredBy,
           deposit.declaredOn ? formatDay(deposit.declaredOn) : null,
           deposit.orchardId,
-        )}
+        )}${deposit.source ? ` · ${fr.distribution.tracking.sources[deposit.source]}` : ""}`}
         state={{
           tone: "neutral",
           label: fr.distribution.tracking.evidence[evidence],
@@ -200,7 +200,7 @@ export function OrchardStep({ ctx }: { ctx: DistributionContext }) {
                 )}
               >
                 {d
-                  ? `${d.declaredOn ? formatDay(d.declaredOn) : o.noDate} · ${evidenceOf(d) === "proven" ? o.proven : o.unproven}`
+                  ? `${d.declaredOn ? formatDay(d.declaredOn) : o.noDate} · ${evidenceOf(d) === "proven" ? o.proven : o.unproven}${d.source ? ` · ${fr.distribution.tracking.sources[d.source]}` : ""}`
                   : now
                     ? o.waiting
                     : o.notYet}

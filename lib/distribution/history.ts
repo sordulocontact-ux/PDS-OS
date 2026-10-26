@@ -3,7 +3,12 @@
 
 import { isCheckKey, isCheckResult } from "@/lib/distribution/checks";
 import { ANOMALY_KINDS, ANOMALY_STATES } from "@/lib/distribution/anomalies";
+import { isClosureKind } from "@/lib/distribution/closure";
 import { platformLabel } from "@/lib/distribution/platforms";
+import {
+  DEROGATION_SCOPES,
+  isRefusalModule,
+} from "@/lib/distribution/validation";
 import { isDeclarationKind } from "@/lib/distribution/tracking";
 import { fr } from "@/lib/i18n/fr";
 
@@ -49,7 +54,13 @@ export function eventText(
   const d = fr.distribution;
   const note = str(data.note);
   const closureKind =
-    data.kind === "normal" ? d.closure.kinds.normal : d.closure.kinds.reserves;
+    typeof data.kind === "string" && isClosureKind(data.kind)
+      ? d.closure.kinds[data.kind]
+      : d.closure.kinds.reserves;
+  const strings = (value: unknown): string[] =>
+    Array.isArray(value)
+      ? value.filter((x): x is string => typeof x === "string")
+      : [];
   const platform = str(data.platform);
   const platformName = platform ? platformLabel({ platform, label: null }) : "";
   switch (kind) {
@@ -86,11 +97,63 @@ export function eventText(
       };
     }
     case "version.submitted":
-      return { text: t.submitted(num(data.number)), note: null };
+      return {
+        text: data.derogation
+          ? t.submittedDerogated(num(data.number))
+          : t.submitted(num(data.number)),
+        note: null,
+      };
     case "version.approved":
       return { text: t.approved(num(data.number)), note };
-    case "version.rejected":
-      return { text: t.rejected(num(data.number)), note };
+    case "version.rejected": {
+      const modules = strings(data.modules).filter(isRefusalModule);
+      return {
+        text: modules.length
+          ? t.rejectedModules(
+              num(data.number),
+              modules.map((m) => d.anomalies.modules[m]).join(", "),
+            )
+          : t.rejected(num(data.number)),
+        note,
+      };
+    }
+    case "checks.reset":
+      return {
+        text: t.checksReset(
+          strings(data.keys)
+            .filter(isCheckKey)
+            .map((k) => d.checks.items[k].label)
+            .join(", "),
+          str(data.reason) ?? "",
+        ),
+        note: null,
+      };
+    case "derogation.granted":
+      return {
+        text: t.derogationGranted(
+          strings(data.scope)
+            .filter((s): s is (typeof DEROGATION_SCOPES)[number] =>
+              (DEROGATION_SCOPES as readonly string[]).includes(s),
+            )
+            .map((s) =>
+              fr.distributionJourney.derogation.scopes[s].toLowerCase(),
+            )
+            .join(", "),
+          str(data.due_on) ?? "",
+        ),
+        note: str(data.reason),
+      };
+    case "derogation.revoked":
+      return { text: t.derogationRevoked, note: null };
+    case "reserve.lift_requested":
+      return {
+        text: t.reserveLiftRequested(str(data.label) ?? ""),
+        note: null,
+      };
+    case "reserve.lifted":
+      return { text: t.reserveLifted(str(data.label) ?? ""), note: null };
+    case "reserve.lift_refused":
+      return { text: t.reserveLiftRefused(str(data.label) ?? ""), note };
     case "version.superseded":
       return { text: t.superseded(num(data.number)), note };
     case "declaration.withdrawn": {

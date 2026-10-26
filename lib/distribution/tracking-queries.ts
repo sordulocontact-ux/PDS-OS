@@ -6,6 +6,7 @@ import type { Access } from "@/lib/auth/access";
 import { PROOF_BUCKET } from "@/lib/distribution/proof-rules";
 import {
   isDeclarationKind,
+  isDeclarationSource,
   type Declaration,
 } from "@/lib/distribution/tracking";
 import { loadMembers } from "@/lib/framing/related";
@@ -35,7 +36,7 @@ export const loadTrackingView = cache(async function loadTrackingView(
     supabase
       .from("distribution_declarations")
       .select(
-        "id, version_number, kind, declared_on, orchard_id, note, proof_path, proof_name, proof_url, declared_by, declared_at, withdrawn_at, withdrawn_by, withdraw_note",
+        "id, version_number, kind, declared_on, orchard_id, note, proof_path, proof_name, proof_url, source, declared_by, declared_at, withdrawn_at, withdrawn_by, withdraw_note",
       )
       .eq("project_id", project.id)
       .order("declared_at", { ascending: false }),
@@ -75,6 +76,8 @@ export const loadTrackingView = cache(async function loadTrackingView(
                 ? { name: row.proof_name, href: hrefOf(row.proof_path) }
                 : null,
             proofUrl: row.proof_url,
+            source:
+              row.source && isDeclarationSource(row.source) ? row.source : null,
             declaredBy: nameOf(row.declared_by),
             declaredAt: row.declared_at,
             withdrawn: row.withdrawn_at

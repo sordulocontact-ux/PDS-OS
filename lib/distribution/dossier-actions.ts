@@ -5,8 +5,14 @@ import { z } from "zod";
 import { prepareDistributionVersion } from "@/lib/distribution/anomalies-actions";
 import {
   decideDistributionVersion,
+  grantDistributionDerogation,
+  revokeDistributionDerogation,
   submitDistributionVersion,
 } from "@/lib/distribution/validation-actions";
+import type {
+  DerogationScope,
+  RefusalModule,
+} from "@/lib/distribution/validation";
 import { fr } from "@/lib/i18n/fr";
 import { withOutcome } from "@/lib/journey/outcome";
 import type { WriteResult } from "@/lib/utils/write-result";
@@ -42,6 +48,7 @@ export async function decideDossier(input: {
   approve: boolean;
   note: string;
   owner: string;
+  modules: RefusalModule[];
 }): Promise<WriteResult> {
   if (!id.safeParse(input.projectId).success)
     return { ok: false, error: fr.distribution.validation.errors.invalid };
@@ -57,6 +64,7 @@ export async function decideDossier(input: {
         versionId: input.versionId,
         approve: input.approve,
         note: input.note,
+        modules: input.modules,
       }),
   );
 }
@@ -66,6 +74,7 @@ export async function prepareNextDossier(input: {
   projectId: string;
   number: number;
   note: string;
+  modules?: string[];
 }): Promise<WriteResult> {
   if (!id.safeParse(input.projectId).success)
     return { ok: false, error: fr.distribution.validation.errors.invalid };
@@ -77,6 +86,39 @@ export async function prepareNextDossier(input: {
       prepareDistributionVersion({
         projectId: input.projectId,
         note: input.note,
+        modules: input.modules,
       }),
+  );
+}
+
+/** « Accorder la dérogation » (the direction). */
+export async function grantDerogation(input: {
+  projectId: string;
+  scope: DerogationScope[];
+  risk: string;
+  reason: string;
+  dueOn: string;
+}): Promise<WriteResult> {
+  if (!id.safeParse(input.projectId).success)
+    return { ok: false, error: fr.distribution.validation.errors.invalid };
+  return withOutcome(
+    input.projectId,
+    ["distribution"],
+    fr.distributionJourney.derogation.granted,
+    () => grantDistributionDerogation(input),
+  );
+}
+
+/** « Retirer la dérogation » not used yet. */
+export async function revokeDerogation(input: {
+  projectId: string;
+}): Promise<WriteResult> {
+  if (!id.safeParse(input.projectId).success)
+    return { ok: false, error: fr.distribution.validation.errors.invalid };
+  return withOutcome(
+    input.projectId,
+    ["distribution"],
+    fr.distributionJourney.derogation.revoked,
+    () => revokeDistributionDerogation(input),
   );
 }

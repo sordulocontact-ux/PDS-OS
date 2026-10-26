@@ -4,9 +4,17 @@ import { useState } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
+import {
+  ReserveFields,
+  draftErrors,
+  draftOf,
+  type ReserveDraft,
+} from "@/components/distribution/closure/reserve-fields";
+import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
 import { CheckboxField } from "@/components/ui/checkbox-field";
 import { DecisionPanel } from "@/components/ui/decision-panel";
+import { ToneCallout } from "@/components/ui/tone-callout";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { VersionCard } from "@/components/ui/version-card";
 import {
@@ -14,43 +22,106 @@ import {
   proposeClosure,
   reopenClosure,
 } from "@/lib/distribution/closure-gestures";
+import {
+  isReasonKind,
+  type ReasonKind,
+  type Reserve,
+} from "@/lib/distribution/closure";
 import { fr } from "@/lib/i18n/fr";
+import { todayInParis } from "@/lib/insights/dates";
 
 const t = fr.distributionJourney.closure;
+const c = fr.distribution.closure;
 
-/** « Proposer une clôture normale », or with reserves: the arbitration and
- * the acknowledgement asked, in red after a first try. */
+/** « Proposer une clôture normale », or with reserves: who follows each
+ * one, by when, with what proof; before The Orchard accepted, a reason of
+ * the direction; the arbitration and the acknowledgement — each in red with
+ * its reason after a first try. */
 export function ProposeClosure({
   projectId,
   reserves,
+  accepted,
+  members,
+  ownerPersonId,
   validator,
+  direction,
 }: {
   projectId: string;
-  reserves: number;
+  reserves: Reserve[];
+  accepted: boolean;
+  members: Array<{ personId: string; name: string }>;
+  ownerPersonId: string | null;
   validator: string;
+  direction: string;
 }) {
+  const [drafts, setDrafts] = useState<ReserveDraft[]>(() =>
+    reserves.map((r) => draftOf(r, ownerPersonId)),
+  );
+  const [reasonKind, setReasonKind] = useState<ReasonKind | null>(null);
   const [arbitration, setArbitration] = useState("");
   const [ack, setAck] = useState(false);
   const [tried, setTried] = useState(false);
-  const done = reserves ? t.proposedReserves(reserves) : t.proposedNormal;
+  const n = reserves.length;
+  const done = n ? t.proposedReserves(n) : t.proposedNormal;
   const { pending, error, run } = useWriteSubmit(() => setTried(false), done);
+  const today = todayInParis();
+  const early = n > 0 && !accepted;
   const submit = () => {
     setTried(true);
-    if (reserves && (!arbitration.trim() || !ack)) return;
+    if (n) {
+      const lacking =
+        !arbitration.trim() ||
+        !ack ||
+        (early && !reasonKind) ||
+        drafts.some((d) => Object.values(draftErrors(d, today)).some(Boolean));
+      if (lacking) return;
+    }
     run(() =>
       proposeClosure({
         projectId,
-        kind: reserves ? "reserves" : "normal",
+        kind: n ? "reserves" : "normal",
         arbitration: arbitration.trim(),
         acknowledged: ack,
+        reasonKind: early ? reasonKind : null,
+        reserves: n
+          ? drafts.map((d) => ({ ...d, expectedProof: d.expectedProof.trim() }))
+          : [],
         done,
       }),
     );
   };
   return (
     <div className="flex flex-col gap-3">
-      {reserves > 0 && (
+      {n > 0 && (
         <>
+          {drafts.map((draft, i) => (
+            <ReserveFields
+              key={draft.cause}
+              reserve={reserves[i]}
+              draft={draft}
+              members={members}
+              today={today}
+              tried={tried}
+              onChange={(next) =>
+                setDrafts((all) => all.map((d, j) => (j === i ? next : d)))
+              }
+            />
+          ))}
+          {early && (
+            <>
+              <ToneCallout tone="warning">{t.early(direction)}</ToneCallout>
+              <OptionSelect
+                name="closure-reason-kind"
+                label={t.reasonKind}
+                required
+                items={c.reasonKinds}
+                onValueChange={(value) =>
+                  setReasonKind(isReasonKind(value) ? value : null)
+                }
+                error={tried && !reasonKind ? t.reasonKindRequired : undefined}
+              />
+            </>
+          )}
           <TextareaField
             name="arbitration"
             label={t.arbitration}
@@ -61,7 +132,7 @@ export function ProposeClosure({
             onChange={(e) => setArbitration(e.target.value)}
             error={
               tried && !arbitration.trim()
-                ? t.arbitrationRequired(validator)
+                ? t.arbitrationRequired(early ? direction : validator)
                 : undefined
             }
           />
@@ -83,7 +154,7 @@ export function ProposeClosure({
           aria-busy={pending || undefined}
           onClick={submit}
         >
-          {reserves ? t.proposeReserves : t.proposeNormal}
+          {n ? t.proposeReserves : t.proposeNormal}
         </Button>
       </div>
     </div>

@@ -23,6 +23,7 @@ function failure(error: {
     ["not_deposited", e.notDeposited],
     ["already_declared", e.alreadyDeclared],
     ["already_withdrawn", e.alreadyWithdrawn],
+    ["date_order", e.dateOrder],
     ["deposit_in_use", e.depositInUse],
     ["reason_required", e.reasonRequired],
   ];

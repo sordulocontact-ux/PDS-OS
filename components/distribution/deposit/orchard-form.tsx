@@ -5,12 +5,17 @@ import { useState } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { ProofChip } from "@/components/distribution/deposit/proof-chip";
+import { OptionSelect } from "@/components/projects/option-select";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { declareAnswers } from "@/lib/distribution/declare-actions";
-import type { OrchardAnswer } from "@/lib/distribution/tracking";
+import {
+  isDeclarationSource,
+  type DeclarationSource,
+  type OrchardAnswer,
+} from "@/lib/distribution/tracking";
 import { removeProof, uploadProof } from "@/lib/distribution/upload-proof";
 import { fr } from "@/lib/i18n/fr";
 import { cn } from "@/lib/utils";
@@ -58,6 +63,9 @@ export function OrchardForm({
     return from && shared ? { file: shared, from } : null;
   };
 
+  // Where it was learnt (DIST-004): one source for what is saved together.
+  const [source, setSource] = useState<DeclarationSource | "">("");
+
   const toggle = (k: Answer, on: boolean) => {
     setMissing(false);
     const index = left.indexOf(k);
@@ -91,6 +99,7 @@ export function OrchardForm({
       }
       const result = await declareAnswers({
         projectId,
+        source,
         items: chosen.map((k) => {
           const proof = proofOf(k);
           const up = proof ? uploaded.get(proof.file) : undefined;
@@ -191,6 +200,14 @@ export function OrchardForm({
           );
         })}
       </div>
+      <OptionSelect
+        name="answers-source"
+        label={fr.distribution.tracking.source}
+        items={fr.distribution.tracking.sources}
+        onValueChange={(value) =>
+          setSource(isDeclarationSource(value) ? value : "")
+        }
+      />
       <FormMessage kind="error">
         {missing ? t.nothingTicked : error}
       </FormMessage>

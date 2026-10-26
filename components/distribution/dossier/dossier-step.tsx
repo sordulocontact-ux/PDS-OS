@@ -4,6 +4,8 @@ import {
   type CheckLine,
 } from "@/components/distribution/dossier/checks-block";
 import { DossierCard } from "@/components/distribution/dossier/dossier-card";
+import { DerogationForm } from "@/components/distribution/dossier/derogation-form";
+import { DerogationNote } from "@/components/distribution/dossier/derogation-note";
 import {
   DecideDossier,
   PrepareNext,
@@ -15,7 +17,11 @@ import { VersionCard } from "@/components/ui/version-card";
 import { ViewLink } from "@/components/ui/view-link";
 import { isOpen } from "@/lib/distribution/anomalies";
 import type { DistributionContext } from "@/lib/distribution/journey-context";
-import { snapshotDrift, type DriftLine } from "@/lib/distribution/validation";
+import {
+  driftModules,
+  snapshotDrift,
+  type DriftLine,
+} from "@/lib/distribution/validation";
 import { fr } from "@/lib/i18n/fr";
 import { formatShortInstant } from "@/lib/utils/day";
 
@@ -42,10 +48,13 @@ export function DossierStep({ ctx }: { ctx: DistributionContext }) {
   const blockers = v.readiness.blockers;
   const anomalies = ctx.anomalies.filter(isOpen);
 
+  // Since the version replaced or refused: what the next one changes.
   const sinceLines =
     !open && previous?.snapshot
       ? snapshotDrift(previous.snapshot.sections, v.sections)
       : [];
+  const sincePrevious =
+    !open && (previous?.supersededAt || previous?.status === "rejected");
   const fromOrchard = previous
     ? anomalies.find((a) => a.fromDistributor && a.version === previous.number)
     : undefined;
@@ -55,7 +64,7 @@ export function DossierStep({ ctx }: { ctx: DistributionContext }) {
           tone: "warning" as const,
           text: t.driftApproved(open.number, lines(v.drift)),
         }
-      : !open && previous?.supersededAt && sinceLines.length > 0
+      : sincePrevious && sinceLines.length > 0
         ? {
             tone: "info" as const,
             text: t.driftSince(previous.number, lines(sinceLines)),
@@ -70,14 +79,19 @@ export function DossierStep({ ctx }: { ctx: DistributionContext }) {
     note: c.note,
     by:
       c.checkedByName && c.checkedAt
-        ? k.by(c.checkedByName, formatShortInstant(c.checkedAt))
+        ? k.by(
+            c.checkedByName,
+            formatShortInstant(c.checkedAt),
+            c.version ?? null,
+          )
         : null,
     computed: c.computed,
   }));
   const nonCompliant = checks.filter(
     (c) => c.result === "non_compliant",
   ).length;
-  const unchecked = checks.filter((c) => c.result === "unchecked").length;
+  const gate = v.gate;
+  const d = fr.distributionJourney.derogation;
 
   const card = (
     <DossierCard
@@ -147,6 +161,12 @@ export function DossierStep({ ctx }: { ctx: DistributionContext }) {
           {t.waiting(validator, open.number)}
         </ToneCallout>
       )}
+      {open?.derogation && (
+        <DerogationNote
+          derogation={open.derogation}
+          head={d.onVersion(open.number)}
+        />
+      )}
       {card}
       {open?.status === "approved" &&
         v.canEdit &&
@@ -159,6 +179,7 @@ export function DossierStep({ ctx }: { ctx: DistributionContext }) {
               projectId={ctx.project.id}
               number={number + 1}
               proposal={lines(v.drift)}
+              modules={driftModules(v.drift)}
             />
           </section>
         ) : anomalies.length > 0 ? (
@@ -170,25 +191,59 @@ export function DossierStep({ ctx }: { ctx: DistributionContext }) {
               projectId={ctx.project.id}
               number={number + 1}
               proposal=""
+              modules={[...new Set(anomalies.map((x) => x.module))]}
             />
           </VersionCard>
         ) : null)}
       <ChecksBlock
         projectId={ctx.project.id}
         checks={checks}
-        editable={!open && v.canCheck}
+        // The validator records the checks left while the version waits.
+        editable={
+          (!open && v.canCheck) || (open?.status === "pending" && v.canDecide)
+        }
       />
+      {!open && v.derogation && (
+        <DerogationNote
+          derogation={v.derogation}
+          revoke={v.canDerogate ? ctx.project.id : undefined}
+        />
+      )}
+      {!open &&
+        v.canDerogate &&
+        gate.derogable.length > 0 &&
+        !gate.derogated && (
+          <DerogationForm
+            projectId={ctx.project.id}
+            blocking={gate.derogable.map((x) => x.scope)}
+          />
+        )}
       {!open && v.canEdit && (
         <>
-          {nonCompliant > 0 ? (
+          {nonCompliant > 0 && (
             <ToneCallout tone="danger">
               {t.nonCompliant(nonCompliant)}
             </ToneCallout>
-          ) : unchecked > 0 ? (
-            <ToneCallout tone="info">
-              {t.unchecked(unchecked, validator)}
+          )}
+          {gate.derogable.length > 0 && (
+            <ToneCallout
+              tone={gate.derogated ? "warning" : "danger"}
+              as="div"
+              contentClassName="flex flex-col gap-1"
+            >
+              <strong className="font-semibold">{t.cannotSubmit}</strong>
+              {gate.derogable.map((x) => (
+                <span key={x.scope}>{x.text}</span>
+              ))}
+              <span>
+                {gate.derogated
+                  ? t.derogated(v.derogation?.grantedBy ?? null)
+                  : v.canDerogate
+                    ? null
+                    : d.askDirection}
+              </span>
             </ToneCallout>
-          ) : null}
+          )}
           <SubmitDossier
             projectId={ctx.project.id}
             number={number}
@@ -199,6 +254,14 @@ export function DossierStep({ ctx }: { ctx: DistributionContext }) {
       )}
       {open?.status === "pending" && v.canDecide && (
         <>
+          {checks.some((x) => x.result === "unchecked") &&
+            !open.derogation?.scope.includes("checks") && (
+              <ToneCallout tone="warning">
+                {t.checksBeforeApproval(
+                  checks.filter((x) => x.result === "unchecked").length,
+                )}
+              </ToneCallout>
+            )}
           <ToneCallout tone="info">
             <strong className="font-semibold">{t.unknownLabel}</strong>{" "}
             {t.unknown}
@@ -266,7 +329,7 @@ export function dossierReturn(ctx: DistributionContext) {
       by: latest.decidedBy ?? "—",
       outcome: t.returnedOutcome,
       note: latest.note,
-      module: null,
+      modules: latest.refusalModules,
     };
   const from = ctx.anomalies.find(
     (a) => isOpen(a) && a.fromDistributor && a.version === latest.number,
@@ -276,7 +339,7 @@ export function dossierReturn(ctx: DistributionContext) {
         by: fr.distributionJourney.distributor,
         outcome: t.distributorReturn(from.reportedBy ?? "—"),
         note: from.description,
-        module: from.module,
+        modules: [from.module],
       }
     : null;
 }

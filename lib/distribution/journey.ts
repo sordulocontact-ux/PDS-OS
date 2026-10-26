@@ -71,7 +71,12 @@ export type DistributionJourneyInput = {
   };
   closure: {
     status: "pending" | "closed" | "rejected";
+    kind: "normal" | "reserves" | "cancelled" | "abandoned";
     reserves: number;
+    // Reserves not lifted yet (recette DIST-007): the step stays amber.
+    openReserves: number;
+    // Decided by the direction (cancelled, abandoned, ahead of time).
+    direction: boolean;
   } | null;
 };
 
@@ -92,7 +97,8 @@ const PREREQ: Record<DistributionStep, DistributionStep[]> = {
   deposit: ["dossier"],
   orchard: ["deposit"],
   platforms: ["orchard"],
-  // « Possible avec réserves dès maintenant » once deposited.
+  // Possible once deposited: with reserves after the acceptance, before
+  // it only by a decision of the direction (recette DIST-003).
   closure: ["deposit"],
 };
 
@@ -272,7 +278,12 @@ function platformsOutcome(
   if (i.closure?.status === "closed")
     return {
       done: true,
-      summary: t.summary.closedReserves(i.closure.reserves),
+      summary:
+        i.closure.kind === "cancelled" || i.closure.kind === "abandoned"
+          ? t.summary.closedStopped(
+              fr.distribution.closure.kinds[i.closure.kind],
+            )
+          : t.summary.closedReserves(i.closure.reserves),
       actor: null,
       reserve: true,
     };
@@ -303,6 +314,26 @@ function closureOutcome(
   validator: (todo: string) => JourneyActor | null,
 ): Outcome {
   const c = i.closure;
+  if (
+    c?.status === "closed" &&
+    (c.kind === "cancelled" || c.kind === "abandoned")
+  )
+    return {
+      done: true,
+      summary: t.summary.closedStopped(fr.distribution.closure.kinds[c.kind]),
+      actor: null,
+      reserve: true,
+    };
+  // Closed with reserves still open: never green (recette DIST-007), the
+  // reserves' lifting is what remains.
+  if (c?.status === "closed" && c.openReserves > 0)
+    return {
+      done: true,
+      rework: true,
+      summary: t.summary.closedReservesOpen(c.reserves, c.openReserves),
+      actor: owner(t.todo.liftReserves(c.openReserves)),
+      reserve: true,
+    };
   if (c?.status === "closed")
     return {
       done: true,
@@ -317,6 +348,8 @@ function closureOutcome(
     return {
       done: false,
       summary: null,
+      // The direction decides a closure ahead of time; it is not a person
+      // of the journey, the validator stands for it.
       actor: validator(t.todo.validateClosure),
     };
   // Refused, or the platforms all verified: the owner proposes it; before

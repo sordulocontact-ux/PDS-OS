@@ -6,7 +6,8 @@ import { detectAndRecord } from "@/lib/release/persist";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
- * Daily release detection (Vercel cron, see vercel.json). Not triggered by a
+ * Daily release detection (Vercel cron, see vercel.json), and the
+ * Distribution's reserves past their deadline. Not triggered by a
  * user: the only place where the service role is used. Releases are checked
  * one after the other, MusicBrainz allows one request per second.
  */
@@ -47,6 +48,12 @@ export async function GET(request: Request) {
 
   const supabase = createAdminClient();
   if (!supabase) return json({ error: "misconfigured" }, 503);
+
+  // The Distribution's reserves past their deadline (recette DIST-007): the
+  // database flags them and tells their owner and the decider (trigger).
+  const overdue = await supabase.rpc("flag_overdue_distribution_reserves");
+  if (overdue.error)
+    console.error("cron reserves overdue:", overdue.error.message);
 
   const { data: releases, error } = await supabase
     .from("releases")

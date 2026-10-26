@@ -188,6 +188,16 @@ export const distributionJourney = {
       `${n} contrôle${n > 1 ? "s" : ""} non conforme${n > 1 ? "s" : ""} : corrigez à la source, puis enregistrez le contrôle à nouveau.`,
     unchecked: (n: number, who: string) =>
       `${n} contrôle${n > 1 ? "s" : ""} sur 6 non vérifié${n > 1 ? "s" : ""} : ${who} le verra.`,
+    cannotSubmit: "Pas encore soumissible :",
+    checksBeforeApproval: (n: number) =>
+      `${n} contrôle${n > 1 ? "s" : ""} sur 6 à enregistrer avant de valider : faites-le ci-dessous, ou refusez la version.`,
+    derogated: (who: string | null) =>
+      `Ce qui reste passe par la dérogation${who ? ` de ${who}` : ""} : elle sera jointe à la version.`,
+    refuseModules: "À corriger dans",
+    refuseModulesHint:
+      "Les contrôles de ces modules sont à refaire ; la version suivante ne passe que si ce qui en vient a changé.",
+    refuseModulesRequired: "Choisissez ce qui est à corriger.",
+    returnModules: (modules: string) => `À corriger dans : ${modules}.`,
     submitNote: (who: string) =>
       `${who} recevra le dossier tel qu'il est maintenant. Les paramètres seront figés jusqu'à sa décision.`,
     submit: (n: number, who: string) => `Soumettre la V${n} à ${who}`,
@@ -213,7 +223,7 @@ export const distributionJourney = {
     correctIn: "À corriger dans :",
     prepareTitle: (n: number) => `Préparer la V${n}`,
     prepareBody: (n: number) =>
-      `Après une correction faite dans son module source. La V${n} et son cycle de dépôt restent dans l'historique ; paramètres et contrôles redeviennent modifiables et les six contrôles repartent à « non vérifié ».`,
+      `Après une correction faite dans son module source. La V${n} et son cycle de dépôt restent dans l'historique ; les paramètres redeviennent modifiables et les contrôles des modules corrigés repartent à « non vérifié ».`,
     prepareNote: "Ce qui a été corrigé, et où",
     prepareNoteRequired: "Dites ce qui a été corrigé, et où.",
     prepare: (n: number) => `Préparer la V${n}`,
@@ -242,6 +252,36 @@ export const distributionJourney = {
       approved: "validée",
     },
   },
+  // A derogation of the direction (recette DIST-001).
+  derogation: {
+    title: "Dérogation de la direction",
+    body: "Ce qui bloque la soumission peut passer par une décision de la direction : elle dit ce qu'elle laisse passer, le risque, le motif et l'échéance. Le validateur la lira avec la version.",
+    scope: "Elle laisse passer",
+    scopes: {
+      checks: "Les contrôles non enregistrés",
+      refusal: "La cause du refus, pas encore corrigée",
+      anomalies: "Une anomalie pas encore corrigée à la source",
+    },
+    scopeRequired: "Choisissez ce qu'elle laisse passer.",
+    risk: "Risque accepté",
+    riskRequired: "Dites le risque accepté.",
+    reason: "Motif",
+    reasonRequired: "Dites pourquoi.",
+    due: "À régler avant le",
+    dueRequired: "Choisissez une échéance à venir.",
+    grant: "Accorder la dérogation",
+    granted: "Dérogation accordée",
+    revoke: "Retirer la dérogation",
+    revoked: "Dérogation retirée",
+    line: (by: string | null, at: string, scope: string, due: string) =>
+      `Dérogation accordée${by ? ` par ${by}` : ""} le ${at} : ${scope}, à régler avant le ${due}.`,
+    riskLine: (risk: string) => `Risque accepté : « ${risk} »`,
+    reasonLine: (reason: string) => `Motif : « ${reason} »`,
+    onVersion: (n: number) =>
+      `La V${n} est passée avec une dérogation de la direction.`,
+    askDirection:
+      "Seule la direction peut accorder une dérogation : demandez-la, ou corrigez à la source.",
+  },
   checks: {
     title: "Contrôles de cohérence",
     count: (n: number) =>
@@ -249,7 +289,8 @@ export const distributionJourney = {
     body: "Chacun est enregistré par une personne. Le calcul de PDS OS aide, il ne vaut jamais contrôle.",
     computed: (status: string, text: string) =>
       `Calcul de PDS OS : ${status} · ${text}`,
-    by: (who: string, at: string) => `Contrôlé par ${who} le ${at}`,
+    by: (who: string, at: string, version: number | null) =>
+      `Contrôlé par ${who} le ${at}${version ? ` · pour la V${version}` : ""}`,
     nobody: "Personne n'a encore enregistré ce contrôle.",
     note: "Ce qui ne correspond pas",
     notePlaceholder: "Ex. la pochette publiée n'est pas la version validée.",
@@ -275,6 +316,7 @@ export const distributionJourney = {
     proofDrop: "Ajouter une capture, un PDF ou un courriel exporté",
     proofHint:
       "50 Mo au plus · sans preuve, la déclaration reste « sans preuve »",
+    proofHintRequired: "50 Mo au plus",
     removeProof: "Retirer la preuve",
     declare: "Déclarer le dépôt",
     doneFact: "Dépôt",
@@ -353,7 +395,7 @@ export const distributionJourney = {
   platforms: {
     availability: "Disponibilité publique",
     summary: (n: number, declared: string | null) =>
-      `${n} plateforme${n > 1 ? "s" : ""} de référence vérifiée${n > 1 ? "s" : ""} sur 5 · ${declared ?? "pas encore déclarée"}`,
+      `${n} plateforme${n > 1 ? "s" : ""} de référence vérifiée${n > 1 ? "s" : ""} sur 5 · ${declared ?? (n === 5 ? "vérifiée par une personne sur chacune : aucune déclaration n'est nécessaire" : "pas encore déclarée")}`,
     declaredBy: (at: string, by: string | null, proof: boolean) =>
       `déclarée le ${at}${by ? ` par ${by}` : ""}, ${proof ? "preuve jointe" : "sans preuve"}`,
     count: (n: number) => `${n} sur 5`,
@@ -415,6 +457,29 @@ export const distributionJourney = {
     saveProblem: "Enregistrer le problème",
     problemSaved: (name: string) =>
       `${name} : problème enregistré, anomalie ouverte`,
+    confirmBody: (name: string) =>
+      `Ce que vous avez vu en ouvrant ${name} : disponible et conforme, avec le territoire et la preuve.`,
+    territory: "Territoire constaté",
+    territoryPlaceholder: "Ex. France",
+    territoryRequired: "Dites depuis quel territoire vous l'avez vue.",
+    observedOn: "Constatée le",
+    observedRequired: "Choisissez le jour du constat (pas dans le futur).",
+    proofFile: "Preuve (capture)",
+    proofUrl: "Ou un lien vers la preuve",
+    proofRequired: "Joignez la preuve : une capture ou un lien.",
+    seenLine: (day: string, territory: string | null) =>
+      `Constatée le ${day}${territory ? ` · ${territory}` : ""}`,
+    proofLabel: (name: string) => `Preuve : ${name}`,
+    proofLinkLabel: "Preuve : lien",
+    action: "Ce qui est fait",
+    actionRequired:
+      "Une indisponibilité dit ce qui est fait, par qui et avant quand.",
+    owner: "Responsable",
+    ownerRequired: "Choisissez qui la suit.",
+    due: "Avant le",
+    dueRequired: "Choisissez une échéance à venir.",
+    anomalyAction: (action: string, owner: string | null, due: string | null) =>
+      `${action}${owner ? ` · ${owner}` : ""}${due ? ` · avant le ${due}` : ""}`,
     verified: (name: string, n: number) => `${name} vérifiée : ${n} sur 5`,
     allVerified: "Cinq plateformes vérifiées",
     anomalies: "Anomalies des plateformes",
@@ -472,6 +537,66 @@ export const distributionJourney = {
     reopenRequired: "Dites pourquoi.",
     reopenButton: "Rouvrir",
     reopened: "Suivi rouvert",
+    // Ahead of time: the direction's call (recette DIST-003).
+    early: (who: string) =>
+      `The Orchard n'a pas encore accepté la version : une clôture avec réserves n'est possible que sur une décision exceptionnelle de la direction (${who}), pour une raison dite.`,
+    reasonKind: "Raison",
+    reasonKindRequired: "Choisissez la raison.",
+    stopTitle: "Arrêter la distribution",
+    stopBody:
+      "Annuler ou abandonner la sortie est une décision de la direction : elle dit pourquoi, et la distribution reste dans l'historique.",
+    stopKind: "Décision",
+    stopKinds: {
+      cancelled: "Annuler la distribution",
+      abandoned: "Abandonner la distribution",
+    },
+    stopReason: "Motif",
+    stopReasonRequired: "Dites pourquoi.",
+    stopSubmit: (kind: string) => `Proposer : ${kind.toLowerCase()}`,
+    stopProposed: (kind: string) => `${kind} proposée à la direction`,
+    directionDecides: "La direction décide.",
+    closedStop: (
+      label: string,
+      reason: string,
+      at: string,
+      by: string | null,
+    ) => `${label} (${reason}) le ${at}${by ? ` par ${by}` : ""}`,
+    // Each reserve, followed until lifted (recette DIST-007).
+    reserveOwner: "Responsable",
+    reserveOwnerRequired: "Choisissez qui la suit.",
+    reserveDue: "À lever avant le",
+    reserveDueRequired: "Choisissez une échéance à venir.",
+    reserveProof: "Preuve attendue",
+    reserveProofRequired: "Dites quelle preuve la lèvera.",
+    reserveCriticality: "Criticité",
+    reserveLine: (owner: string, due: string, proof: string) =>
+      `${owner} · avant le ${due} · preuve attendue : ${proof}`,
+    reserveStatus: {
+      open: "Ouverte",
+      lift_requested: "Levée à confirmer",
+      lifted: "Levée",
+    },
+    overdue: "Échue",
+    lift: "Lever la réserve",
+    liftNote: "Ce qui a changé",
+    liftProofFile: "Preuve (fichier)",
+    liftProofUrl: "Ou un lien vers la preuve",
+    liftRequired: "Joignez la preuve : un fichier ou un lien.",
+    liftSubmit: "Demander la levée",
+    liftRequested: "Levée demandée",
+    liftAsked: (by: string | null, at: string) =>
+      `Levée demandée${by ? ` par ${by}` : ""} le ${at}`,
+    liftConfirm: "Confirmer la levée",
+    liftRefuse: "Refuser",
+    liftRefuseNote: "Motif du refus",
+    liftRefuseRequired: "Dites pourquoi.",
+    liftDecided: "Décision enregistrée",
+    liftedLine: (by: string | null, at: string) =>
+      `Levée le ${at}${by ? `, confirmée par ${by}` : ""}`,
+    liftRefusedLine: (note: string) => `Dernière levée refusée : « ${note} »`,
+    proofLink: "Voir la preuve",
+    stillOpen: (n: number) =>
+      `${n} réserve${n > 1 ? "s" : ""} encore ouverte${n > 1 ? "s" : ""} : la disponibilité reste partiellement vérifiée.`,
   },
   anomaliesView: {
     body: "Ce qui ne va pas, et le module où le corriger. Rien ne se corrige ici : une fois la source corrigée, une nouvelle version du dossier est préparée depuis l'étape Dossier.",
@@ -533,6 +658,8 @@ export const distributionJourney = {
     detectionTodoUndated: "trouver les liens, à partir de la sortie",
     proposeClosure: "Proposer la clôture",
     validateClosure: "Valider la clôture",
+    liftReserves: (n: number) =>
+      `Lever ${n > 1 ? `les ${n} réserves` : "la réserve"} restante${n > 1 ? "s" : ""}`,
   },
   summary: {
     prepReady: (ready: number, total: number) =>
@@ -546,9 +673,13 @@ export const distributionJourney = {
     depositDeclared: "Déclaré, sans preuve",
     orchardDone: "Acceptée et livrée, déclarées",
     platformsDone: "5 plateformes vérifiées sur 5",
-    closurePossible: "Possible avec réserves dès maintenant",
+    closurePossible:
+      "Avec réserves une fois la sortie acceptée par The Orchard ; avant, sur décision de la direction",
     closedNormal: "Clôturée normalement",
     closedReserves: (n: number) => `Clôturée avec réserves (${n})`,
+    closedReservesOpen: (n: number, open: number) =>
+      `Clôturée avec réserves (${n}) · ${open} encore ouverte${open > 1 ? "s" : ""}`,
+    closedStopped: (label: string) => label,
   },
   // A locked step: what it will ask, and who.
   coming: "Ce qui viendra",

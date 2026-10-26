@@ -48,6 +48,8 @@ export type RecordedCheck = {
   note: string | null;
   checkedBy: string | null;
   checkedAt: string | null;
+  // The version it was recorded for (recette DIST-006).
+  version?: number | null;
 };
 
 const same = (a: string, b: string) =>
@@ -183,6 +185,7 @@ export function checksOf(rows: RecordedCheck[]): RecordedCheck[] {
         note: null,
         checkedBy: null,
         checkedAt: null,
+        version: null,
       },
   );
 }

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
+import { ChipMultiChoice } from "@/components/ui/chip-choice";
 import { DecisionPanel } from "@/components/ui/decision-panel";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import {
@@ -12,6 +13,10 @@ import {
   prepareNextDossier,
   submitDossier,
 } from "@/lib/distribution/dossier-actions";
+import {
+  REFUSAL_MODULES,
+  type RefusalModule,
+} from "@/lib/distribution/validation";
 import { fr } from "@/lib/i18n/fr";
 
 const t = fr.distributionJourney.dossier;
@@ -59,7 +64,8 @@ export function SubmitDossier({
 }
 
 /** The validator decides on the evidence: « Valider la Vn » or refuse with
- * a reason that comes back in head of the owner's step. */
+ * a reason and what is to correct, which come back in head of the owner's
+ * step (the next version passes once those modules changed). */
 export function DecideDossier({
   projectId,
   versionId,
@@ -71,12 +77,36 @@ export function DecideDossier({
   number: number;
   owner: string;
 }) {
+  const [modules, setModules] = useState<RefusalModule[]>([]);
+  const [missing, setMissing] = useState(false);
   return (
     <DecisionPanel
       id="dossier-decision"
       title={null}
       commentLabel={t.reason}
       commentHint={t.reasonHint(owner)}
+      fields={
+        <ChipMultiChoice
+          name="refusal-modules"
+          legend={t.refuseModules}
+          options={REFUSAL_MODULES.map((m) => ({
+            value: m,
+            label: fr.distribution.anomalies.modules[m],
+          }))}
+          defaultValue={[]}
+          onChange={(next) => {
+            setModules(next);
+            if (next.length) setMissing(false);
+          }}
+          hint={t.refuseModulesHint}
+          error={missing ? t.refuseModulesRequired : undefined}
+        />
+      }
+      check={(kind) => {
+        const lacking = kind === "refuse" && modules.length === 0;
+        setMissing(lacking);
+        return !lacking;
+      }}
       outcomes={[
         { kind: "approve", label: t.approve(number), done: t.approved(number) },
         { kind: "refuse", label: t.refuse, done: t.refused(number, owner) },
@@ -89,6 +119,7 @@ export function DecideDossier({
           approve: kind === "approve",
           note: comment,
           owner,
+          modules: kind === "approve" ? [] : modules,
         })
       }
     />
@@ -100,10 +131,13 @@ export function PrepareNext({
   projectId,
   number,
   proposal,
+  modules,
 }: {
   projectId: string;
   number: number;
   proposal: string;
+  // The modules that changed: only their checks are to redo.
+  modules?: string[];
 }) {
   const [note, setNote] = useState(proposal);
   const [missing, setMissing] = useState(false);
@@ -133,7 +167,12 @@ export function PrepareNext({
             setMissing(lacking);
             if (!lacking)
               run(() =>
-                prepareNextDossier({ projectId, number, note: note.trim() }),
+                prepareNextDossier({
+                  projectId,
+                  number,
+                  note: note.trim(),
+                  modules,
+                }),
               );
           }}
         >

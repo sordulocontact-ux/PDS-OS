@@ -34,6 +34,193 @@ export type Database = {
   }
   public: {
     Tables: {
+      distribution_reserves: {
+        Row: {
+          category: string
+          closure_id: string
+          created_at: string
+          criticality: string
+          details: Json
+          due_on: string
+          expected_proof: string
+          id: string
+          label: string
+          lift_note: string | null
+          lift_proof_name: string | null
+          lift_proof_path: string | null
+          lift_proof_url: string | null
+          lift_refusal_note: string | null
+          lift_requested_at: string | null
+          lift_requested_by: string | null
+          lifted_at: string | null
+          lifted_by: string | null
+          organization_id: string
+          overdue_at: string | null
+          owner_person_id: string
+          position: number
+          project_id: string
+          status: string
+        }
+        Insert: {
+          category: string
+          closure_id: string
+          created_at?: string
+          criticality: string
+          details?: Json
+          due_on: string
+          expected_proof: string
+          id?: string
+          label: string
+          lift_note?: string | null
+          lift_proof_name?: string | null
+          lift_proof_path?: string | null
+          lift_proof_url?: string | null
+          lift_refusal_note?: string | null
+          lift_requested_at?: string | null
+          lift_requested_by?: string | null
+          lifted_at?: string | null
+          lifted_by?: string | null
+          organization_id: string
+          overdue_at?: string | null
+          owner_person_id: string
+          position: number
+          project_id: string
+          status?: string
+        }
+        Update: {
+          category?: string
+          closure_id?: string
+          created_at?: string
+          criticality?: string
+          details?: Json
+          due_on?: string
+          expected_proof?: string
+          id?: string
+          label?: string
+          lift_note?: string | null
+          lift_proof_name?: string | null
+          lift_proof_path?: string | null
+          lift_proof_url?: string | null
+          lift_refusal_note?: string | null
+          lift_requested_at?: string | null
+          lift_requested_by?: string | null
+          lifted_at?: string | null
+          lifted_by?: string | null
+          organization_id?: string
+          overdue_at?: string | null
+          owner_person_id?: string
+          position?: number
+          project_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "distribution_reserves_closure_id_fkey"
+            columns: ["closure_id"]
+            isOneToOne: false
+            referencedRelation: "distribution_closures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "distribution_reserves_lift_requested_by_fkey"
+            columns: ["lift_requested_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "distribution_reserves_lifted_by_fkey"
+            columns: ["lifted_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "distribution_reserves_owner_person_id_fkey"
+            columns: ["owner_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "distribution_reserves_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      distribution_derogations: {
+        Row: {
+          due_on: string
+          granted_at: string
+          granted_by: string
+          id: string
+          organization_id: string
+          project_id: string
+          reason: string
+          revoked_at: string | null
+          revoked_by: string | null
+          risk: string
+          scope: string[]
+          used_at: string | null
+          version_number: number | null
+        }
+        Insert: {
+          due_on: string
+          granted_at?: string
+          granted_by: string
+          id?: string
+          organization_id: string
+          project_id: string
+          reason: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+          risk: string
+          scope: string[]
+          used_at?: string | null
+          version_number?: number | null
+        }
+        Update: {
+          due_on?: string
+          granted_at?: string
+          granted_by?: string
+          id?: string
+          organization_id?: string
+          project_id?: string
+          reason?: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+          risk?: string
+          scope?: string[]
+          used_at?: string | null
+          version_number?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "distribution_derogations_granted_by_fkey"
+            columns: ["granted_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "distribution_derogations_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "distribution_derogations_revoked_by_fkey"
+            columns: ["revoked_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       production_schedule_decisions: {
         Row: {
           id: string
@@ -566,57 +753,63 @@ export type Database = {
           decided_at: string | null
           decided_by: string | null
           decision_note: string | null
+          early: boolean
           id: string
           kind: string
           organization_id: string
           project_id: string
           proposed_at: string
           proposed_by: string
+          reason_kind: string | null
           reopen_note: string | null
           reopened_at: string | null
           reopened_by: string | null
           reserves: Json
           status: string
           validator_person_id: string
-          version_number: number
+          version_number: number | null
         }
         Insert: {
           arbitration?: string | null
           decided_at?: string | null
           decided_by?: string | null
           decision_note?: string | null
+          early?: boolean
           id?: string
           kind: string
           organization_id: string
           project_id: string
           proposed_at?: string
           proposed_by: string
+          reason_kind?: string | null
           reopen_note?: string | null
           reopened_at?: string | null
           reopened_by?: string | null
           reserves?: Json
           status?: string
           validator_person_id: string
-          version_number: number
+          version_number?: number | null
         }
         Update: {
           arbitration?: string | null
           decided_at?: string | null
           decided_by?: string | null
           decision_note?: string | null
+          early?: boolean
           id?: string
           kind?: string
           organization_id?: string
           project_id?: string
           proposed_at?: string
           proposed_by?: string
+          reason_kind?: string | null
           reopen_note?: string | null
           reopened_at?: string | null
           reopened_by?: string | null
           reserves?: Json
           status?: string
           validator_person_id?: string
-          version_number?: number
+          version_number?: number | null
         }
         Relationships: [
           {
@@ -658,11 +851,14 @@ export type Database = {
       }
       distribution_anomalies: {
         Row: {
+          action: string | null
           description: string
+          due_on: string | null
           from_distributor: boolean
           id: string
           kind: string
           organization_id: string
+          owner_person_id: string | null
           platform: string | null
           project_id: string
           reported_at: string
@@ -676,11 +872,14 @@ export type Database = {
           version_number: number | null
         }
         Insert: {
+          action?: string | null
           description: string
+          due_on?: string | null
           from_distributor?: boolean
           id?: string
           kind: string
           organization_id: string
+          owner_person_id?: string | null
           platform?: string | null
           project_id: string
           reported_at?: string
@@ -694,11 +893,14 @@ export type Database = {
           version_number?: number | null
         }
         Update: {
+          action?: string | null
           description?: string
+          due_on?: string | null
           from_distributor?: boolean
           id?: string
           kind?: string
           organization_id?: string
+          owner_person_id?: string | null
           platform?: string | null
           project_id?: string
           reported_at?: string
@@ -712,6 +914,13 @@ export type Database = {
           version_number?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "distribution_anomalies_owner_person_id_fkey"
+            columns: ["owner_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "distribution_anomalies_project_same_org"
             columns: ["project_id", "organization_id"]
@@ -746,9 +955,14 @@ export type Database = {
           created_at: string
           id: string
           label: string | null
+          observed_on: string | null
           organization_id: string
           platform: string
           project_id: string
+          proof_name: string | null
+          proof_path: string | null
+          proof_url: string | null
+          territory: string | null
           updated_at: string
           url: string | null
           verification: string
@@ -766,9 +980,14 @@ export type Database = {
           created_at?: string
           id?: string
           label?: string | null
+          observed_on?: string | null
           organization_id: string
           platform: string
           project_id: string
+          proof_name?: string | null
+          proof_path?: string | null
+          proof_url?: string | null
+          territory?: string | null
           updated_at?: string
           url?: string | null
           verification?: string
@@ -786,9 +1005,14 @@ export type Database = {
           created_at?: string
           id?: string
           label?: string | null
+          observed_on?: string | null
           organization_id?: string
           platform?: string
           project_id?: string
+          proof_name?: string | null
+          proof_path?: string | null
+          proof_url?: string | null
+          territory?: string | null
           updated_at?: string
           url?: string | null
           verification?: string
@@ -841,6 +1065,7 @@ export type Database = {
           proof_name: string | null
           proof_path: string | null
           proof_url: string | null
+          source: string | null
           version_number: number
           withdraw_note: string | null
           withdrawn_at: string | null
@@ -859,6 +1084,7 @@ export type Database = {
           proof_name?: string | null
           proof_path?: string | null
           proof_url?: string | null
+          source?: string | null
           version_number: number
           withdraw_note?: string | null
           withdrawn_at?: string | null
@@ -877,6 +1103,7 @@ export type Database = {
           proof_name?: string | null
           proof_path?: string | null
           proof_url?: string | null
+          source?: string | null
           version_number?: number
           withdraw_note?: string | null
           withdrawn_at?: string | null
@@ -918,10 +1145,12 @@ export type Database = {
           decided_at: string | null
           decided_by: string | null
           decision_note: string | null
+          derogation_id: string | null
           id: string
           number: number
           organization_id: string
           project_id: string
+          refusal_modules: string[] | null
           snapshot: Json
           status: string
           submitted_at: string
@@ -933,10 +1162,12 @@ export type Database = {
           decided_at?: string | null
           decided_by?: string | null
           decision_note?: string | null
+          derogation_id?: string | null
           id?: string
           number: number
           organization_id: string
           project_id: string
+          refusal_modules?: string[] | null
           snapshot: Json
           status?: string
           submitted_at?: string
@@ -948,10 +1179,12 @@ export type Database = {
           decided_at?: string | null
           decided_by?: string | null
           decision_note?: string | null
+          derogation_id?: string | null
           id?: string
           number?: number
           organization_id?: string
           project_id?: string
+          refusal_modules?: string[] | null
           snapshot?: Json
           status?: string
           submitted_at?: string
@@ -965,6 +1198,13 @@ export type Database = {
             columns: ["decided_by"]
             isOneToOne: false
             referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "distribution_versions_derogation_id_fkey"
+            columns: ["derogation_id"]
+            isOneToOne: false
+            referencedRelation: "distribution_derogations"
             referencedColumns: ["id"]
           },
           {
@@ -1000,6 +1240,7 @@ export type Database = {
           organization_id: string
           project_id: string
           result: string
+          version_number: number | null
         }
         Insert: {
           check_key: string
@@ -1010,6 +1251,7 @@ export type Database = {
           organization_id: string
           project_id: string
           result?: string
+          version_number?: number | null
         }
         Update: {
           check_key?: string
@@ -1020,6 +1262,7 @@ export type Database = {
           organization_id?: string
           project_id?: string
           result?: string
+          version_number?: number | null
         }
         Relationships: [
           {
@@ -17353,6 +17596,62 @@ export type Database = {
       }
     }
     Functions: {
+      distribution_declaration_rank: {
+        Args: { p_kind: string }
+        Returns: number
+      }
+      distribution_is_member: {
+        Args: { p_organization_id: string; p_person_id: string }
+        Returns: boolean
+      }
+      distribution_accepted: {
+        Args: { p_project_id: string }
+        Returns: boolean
+      }
+      distribution_snapshot_fields: {
+        Args: { p_module: string; p_snapshot: Json }
+        Returns: Json
+      }
+      distribution_module_checks: {
+        Args: { p_module: string }
+        Returns: string[]
+      }
+      distribution_working_number: {
+        Args: { p_project_id: string }
+        Returns: number
+      }
+      distribution_submit_blockers: {
+        Args: { p_project_id: string; p_snapshot: Json }
+        Returns: string[]
+      }
+      decide_distribution_reserve_lift: {
+        Args: { p_approve: boolean; p_note: string; p_reserve_id: string }
+        Returns: undefined
+      }
+      request_distribution_reserve_lift: {
+        Args: {
+          p_note: string
+          p_proof_name: string
+          p_proof_path: string
+          p_proof_url: string
+          p_reserve_id: string
+        }
+        Returns: undefined
+      }
+      revoke_distribution_derogation: {
+        Args: { p_project_id: string }
+        Returns: undefined
+      }
+      grant_distribution_derogation: {
+        Args: {
+          p_due_on: string
+          p_project_id: string
+          p_reason: string
+          p_risk: string
+          p_scope: string[]
+        }
+        Returns: string
+      }
       add_received_invoice: {
         Args: { p_amount_cents: number; p_bic: string | null; p_file_name: string; p_holder: string | null; p_how: string | null; p_iban: string | null; p_invoice_id: string; p_mime: string; p_number: string; p_path: string; p_reason: string | null; p_received_on: string | null }
         Returns: undefined
@@ -17611,6 +17910,7 @@ export type Database = {
         Returns: string
       }
       ai_quota_day_start: { Args: never; Returns: string }
+      flag_overdue_distribution_reserves: { Args: never; Returns: number }
       ai_quota_resets_at: { Args: never; Returns: string }
       ai_usage_today: {
         Args: { p_organization_id: string }
@@ -17828,6 +18128,7 @@ export type Database = {
           p_arbitration: string
           p_kind: string
           p_project_id: string
+          p_reason_kind?: string
           p_reserves: Json
         }
         Returns: undefined
@@ -17879,7 +18180,7 @@ export type Database = {
         | { Args: { p_body: string; p_delay_days?: number | null; p_kind: string; p_token: string }; Returns: string }
         | { Args: { p_body: string; p_contact_token: string; p_delay_days: number | null; p_item_id: string; p_kind: string }; Returns: string }
       prepare_distribution_version: {
-        Args: { p_note: string; p_project_id: string }
+        Args: { p_modules?: string[]; p_note: string; p_project_id: string }
         Returns: undefined
       }
       decide_marketing_report: {
@@ -17967,13 +18268,25 @@ export type Database = {
         Returns: string
       }
       confirm_distribution_platform: {
-        Args: { p_platform: string; p_project_id: string; p_url: string | null }
+        Args: {
+          p_observed_on?: string
+          p_platform: string
+          p_project_id: string
+          p_proof_name?: string
+          p_proof_path?: string
+          p_proof_url?: string
+          p_territory?: string
+          p_url: string | null
+        }
         Returns: undefined
       }
       report_distribution_platform_problem: {
         Args: {
+          p_action?: string
+          p_due_on?: string
           p_module: string
           p_note: string
+          p_owner_person_id?: string
           p_platform: string
           p_problem: string
           p_project_id: string
@@ -18020,6 +18333,7 @@ export type Database = {
           p_proof_name?: string
           p_proof_path?: string
           p_proof_url?: string
+          p_source?: string
         }
         Returns: string
       }
@@ -18068,7 +18382,12 @@ export type Database = {
         Returns: boolean
       }
       decide_distribution_version: {
-        Args: { p_approve: boolean; p_note: string; p_version_id: string }
+        Args: {
+          p_approve: boolean
+          p_modules?: string[]
+          p_note: string
+          p_version_id: string
+        }
         Returns: undefined
       }
       can_check_distribution: {

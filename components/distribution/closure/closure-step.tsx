@@ -3,14 +3,17 @@ import {
   ProposeClosure,
   ReopenClosure,
 } from "@/components/distribution/closure/closure-gestures";
+import { StopDistribution } from "@/components/distribution/closure/stop-distribution";
+import { ReserveList } from "@/components/distribution/closure/reserve-list";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import type { DistributionContext } from "@/lib/distribution/journey-context";
 import type { Reserve } from "@/lib/distribution/closure";
+import type { DistributionContext } from "@/lib/distribution/journey-context";
 import { fr } from "@/lib/i18n/fr";
 import { formatShortInstant } from "@/lib/utils/day";
 
 const t = fr.distributionJourney.closure;
+const c = fr.distribution.closure;
 
 function Conditions({ ctx }: { ctx: DistributionContext }) {
   return (
@@ -19,20 +22,20 @@ function Conditions({ ctx }: { ctx: DistributionContext }) {
         {t.conditions}
       </h3>
       <FactRows>
-        {ctx.closure.readiness.conditions.map((c) => (
+        {ctx.closure.readiness.conditions.map((x) => (
           <FactRow
-            key={c.key}
-            value={`${c.met ? "✓" : "○"} ${c.label}`}
+            key={x.key}
+            value={`${x.met ? "✓" : "○"} ${x.label}`}
             source={
-              c.met
+              x.met
                 ? null
                 : (ctx.closure.readiness.reserves
-                    .find((r) => r.cause === c.key)
+                    .find((r) => r.cause === x.key)
                     ?.details.join(" · ") ?? null)
             }
             state={{
-              tone: c.met ? "success" : "neutral",
-              label: c.met ? t.met : t.unmet,
+              tone: x.met ? "success" : "neutral",
+              label: x.met ? t.met : t.unmet,
             }}
           />
         ))}
@@ -41,7 +44,8 @@ function Conditions({ ctx }: { ctx: DistributionContext }) {
   );
 }
 
-function Reserves({ reserves, label }: { reserves: Reserve[]; label: string }) {
+/** The reserves of a proposal, as the decider reads them. */
+function Proposed({ reserves }: { reserves: Reserve[] }) {
   return (
     <FactRows>
       {reserves.map((r) => (
@@ -49,7 +53,7 @@ function Reserves({ reserves, label }: { reserves: Reserve[]; label: string }) {
           key={r.cause}
           value={<b className="font-semibold">{r.label}</b>}
           source={r.details.join(" · ")}
-          state={{ tone: "warning", label }}
+          state={{ tone: "warning", label: c.criticalities[r.criticality] }}
         />
       ))}
     </FactRows>
@@ -58,33 +62,43 @@ function Reserves({ reserves, label }: { reserves: Reserve[]; label: string }) {
 
 /**
  * « Clôture » (proto step `closure`): the conditions of a normal closure,
- * then the owner's proposal (normal, or with reserves arbitrated), the
- * validator's decision on the evidence, and once closed what it kept —
- * a reserve stays « non vérifiée », never green — with « Rouvrir le suivi ».
+ * then the owner's proposal — normal, with reserves (each followed by a
+ * member, by a date, with the proof that lifts it), or, ahead of The
+ * Orchard's acceptance, a decision of the direction (recette DIST-003) —,
+ * the decision, and once closed the reserves followed until lifted
+ * (DIST-007), never green, with « Rouvrir le suivi ».
  */
 export function ClosureStep({ ctx }: { ctx: DistributionContext }) {
-  const c = ctx.closure;
-  const current = c.current;
+  const cl = ctx.closure;
+  const current = cl.current;
   const owner = ctx.project.ownerName ?? "—";
   const validator = ctx.validator?.name ?? fr.distributionJourney.toAppoint;
+  const direction = t.directionDecides;
   const step = ctx.steps.find((s) => s.key === "closure");
   if (current?.status === "closed") {
-    const label =
-      current.kind === "reserves"
+    const stopped =
+      current.kind === "cancelled" || current.kind === "abandoned";
+    const label = stopped
+      ? c.kinds[current.kind]
+      : current.kind === "reserves"
         ? fr.distributionJourney.summary.closedReserves(current.reserves.length)
         : fr.distributionJourney.summary.closedNormal;
+    const at = formatShortInstant(current.decidedAt ?? current.proposedAt);
     return (
       <div className="flex flex-col gap-4">
         <ToneCallout
-          tone={current.kind === "reserves" ? "warning" : "success"}
+          tone={current.kind === "normal" ? "success" : "warning"}
           as="div"
         >
           <strong className="font-semibold">
-            {t.closed(
-              label,
-              formatShortInstant(current.decidedAt ?? current.proposedAt),
-              current.decidedBy,
-            )}
+            {stopped && current.reasonKind
+              ? t.closedStop(
+                  label,
+                  c.reasonKinds[current.reasonKind],
+                  at,
+                  current.decidedBy,
+                )
+              : t.closed(label, at, current.decidedBy)}
           </strong>
           {current.arbitration && (
             <span className="block">
@@ -92,25 +106,38 @@ export function ClosureStep({ ctx }: { ctx: DistributionContext }) {
             </span>
           )}
         </ToneCallout>
-        {current.reserves.length > 0 && (
-          <Reserves reserves={current.reserves} label={t.notVerified} />
+        {cl.reserveRows.length > 0 && (
+          <ReserveList
+            projectId={ctx.project.id}
+            organizationId={ctx.tracking.organizationId}
+            rows={cl.reserveRows}
+          />
         )}
-        {c.canEdit && <ReopenClosure projectId={ctx.project.id} />}
+        {cl.canEdit && <ReopenClosure projectId={ctx.project.id} />}
       </div>
     );
   }
   if (current?.status === "pending") {
+    const ahead =
+      current.kind === "cancelled" ||
+      current.kind === "abandoned" ||
+      current.early;
     return (
       <div className="flex flex-col gap-4">
-        {!c.canDecide && (
-          <ToneCallout tone="info">{t.waiting(validator)}</ToneCallout>
+        {!cl.canDecide && (
+          <ToneCallout tone="info">
+            {t.waiting(ahead ? direction : validator)}
+          </ToneCallout>
         )}
         <FactRows>
           <FactRow
             label={t.proposal}
             value={
               <b className="font-semibold">
-                {fr.distribution.closure.kinds[current.kind]}
+                {c.kinds[current.kind]}
+                {current.reasonKind
+                  ? ` · ${c.reasonKinds[current.reasonKind]}`
+                  : ""}
               </b>
             }
             source={t.proposedBy(
@@ -120,7 +147,7 @@ export function ClosureStep({ ctx }: { ctx: DistributionContext }) {
           />
           {current.arbitration && (
             <FactRow
-              label={fr.distribution.closure.arbitration}
+              label={c.arbitration}
               value={`« ${current.arbitration} »`}
               source={current.proposedBy}
             />
@@ -132,10 +159,10 @@ export function ClosureStep({ ctx }: { ctx: DistributionContext }) {
             <h3 className="text-[length:var(--type-body-md)] font-semibold">
               {t.reservesKept}
             </h3>
-            <Reserves reserves={current.reserves} label={t.reserve} />
+            <Proposed reserves={current.reserves} />
           </>
         )}
-        {c.canDecide && (
+        {cl.canDecide && (
           <>
             <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
               {t.decideNote}
@@ -150,9 +177,9 @@ export function ClosureStep({ ctx }: { ctx: DistributionContext }) {
       </div>
     );
   }
-  const reserves = c.readiness.reserves;
+  const reserves = cl.readiness.reserves;
   const proposes =
-    c.canEdit && c.readiness.canPropose && step?.status !== "blocked";
+    cl.canEdit && cl.readiness.canPropose && step?.status !== "blocked";
   return (
     <div className="flex flex-col gap-4">
       <Conditions ctx={ctx} />
@@ -167,17 +194,21 @@ export function ClosureStep({ ctx }: { ctx: DistributionContext }) {
             <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
               {t.reservesBody}
             </p>
-            <Reserves reserves={reserves} label={t.reserve} />
           </section>
         ))}
       {proposes && (
         <ProposeClosure
           projectId={ctx.project.id}
-          reserves={reserves.length}
+          reserves={reserves}
+          accepted={cl.readiness.accepted}
+          members={cl.members}
+          ownerPersonId={ctx.project.ownerPersonId}
           validator={validator}
+          direction={direction}
         />
       )}
-      {!c.canEdit && (
+      {cl.canEdit && <StopDistribution projectId={ctx.project.id} />}
+      {!cl.canEdit && (
         <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
           {t.later(owner)}
         </p>

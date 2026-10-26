@@ -94,6 +94,10 @@ export type Anomaly = {
   stateAt: string | null;
   // Declared from The Orchard's corrections (declare_distribution_corrections).
   fromDistributor: boolean;
+  // What is done about it, by whom, by when (an unavailability, DIST-005).
+  action: string | null;
+  ownerName: string | null;
+  dueOn: string | null;
 };
 
 export const isOpen = (anomaly: Anomaly) =>

@@ -33,7 +33,7 @@ export const loadAnomalies = cache(async function loadAnomalies(
     supabase
       .from("distribution_anomalies")
       .select(
-        "id, version_number, kind, description, platform, severity, source_module, state, state_note, reported_by, reported_at, state_by, state_at, from_distributor",
+        "id, version_number, kind, description, platform, severity, source_module, state, state_note, reported_by, reported_at, state_by, state_at, from_distributor, action, owner_person_id, due_on",
       )
       .eq("project_id", projectId),
     loadMembers(access),
@@ -65,6 +65,9 @@ export const loadAnomalies = cache(async function loadAnomalies(
               stateBy: nameOf(row.state_by),
               stateAt: row.state_at,
               fromDistributor: row.from_distributor,
+              action: row.action,
+              ownerName: nameOf(row.owner_person_id),
+              dueOn: row.due_on,
             },
           ]
         : [],
