@@ -776,8 +776,9 @@ s'afficher sans chargement.
 
 - **Vues préchargées** : ces liens passent par `ViewLink` (`components/ui/view-link.tsx`),
   un `Link` en `prefetch` complet : la page **et ses données** sont rendues en arrière-plan
-  **dès que la personne montre son intention** (pointeur dessus, focus clavier, doigt posé), plus
-  à l'entrée dans l'écran (audit des chargements, 26/10). Avant, une page de projet affichait 15 à
+  **dès que la personne montre son intention** (pointeur **posé 150 ms**, focus clavier, doigt posé),
+  plus à l'entrée dans l'écran ni au simple passage du pointeur (audit des chargements, 26/10 : en
+  descendant la barre d'un projet, cinq pages se rendaient en même temps, 5 à 10 s chacune). Avant, une page de projet affichait 15 à
   20 `ViewLink` et chacun rendait sa cible en fond (40 à 250 requêtes) : la base mettait en file la
   page réellement ouverte derrière ces rendus. Un survol laisse 100 à 300 ms d'avance au rendu ;
   ne pas revenir au préchargement à l'écran tant qu'une page coûte plus de quelques requêtes.
@@ -805,11 +806,18 @@ s'afficher sans chargement.
   rendu). Un nouveau lecteur partagé par deux loaders d'un même rendu prend le même chemin.
 - **Mesurer une page** : `PERF_TRACE=1` (local ou Vercel) fait écrire, après chaque rendu, une ligne
   `[perf]` dans les journaux du serveur (`lib/supabase/query-trace.ts`, branché sur le `fetch` de
-  `createClient`) : chemin, type (`page`, `rsc` = navigation, `prefetch`, `action`), nombre de
-  lectures demandées (avant le regroupement de `withQueryBatching`), durée de bout en bout,
+  `createClient`) : chemin, type (`render` = page, navigation ou préchargement, que Next ne
+  distingue pas pour l'app ; `action` = une Server Action et la page qu'elle rend à nouveau, une
+  seule ligne par requête), nombre de
+  lectures demandées (avant le regroupement de `withQueryBatching`) et combien sont distinctes
+  (même URL comptée une fois), durée de bout en bout,
   **profondeur** (la plus longue chaîne de requêtes faites l'une après l'autre = les allers-retours
   attendus en série) et les 5 plus lentes. Cible d'une page : quelques requêtes, profondeur ≤ 3,
   moins de 200 ms. Juger en `pnpm build && pnpm start`.
+- **Workflows lancés en une lecture** (audit, 26/10) : `launchedWorkflows(projectId)`
+  (`lib/plan/queries.ts`, RPC `launched_workflows`, même règle que `workflow_is_launched`) ;
+  `isWorkflowLaunched` la lit. Mesure du 26/10 sur la pré-prod : `workflow_is_launched` était l'appel le
+  plus coûteux d'un rendu (460 appels, 200 ms en moyenne sous charge).
 - **Cache des parcours** (audit, 26/10, `lib/projects/version-cache.ts`) : `loadWorkflowStates`,
   `loadProjectJourneys` et les contextes de parcours (Cadrage, Conception, Master, Juridique, Suivi &
   bilan) sont gardés **d'une requête à l'autre** par `byProjectVersion(nom, lecteur)` (toujours sous

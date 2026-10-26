@@ -2,28 +2,24 @@ import "server-only";
 
 import { headers } from "next/headers";
 import { after } from "next/server";
-import { cache } from "react";
 
 import { getServerEnv } from "@/lib/env";
 
 // Measure of a page's database requests (page loads audit, docs/
 // ARCHITECTURE.md § 3 bis), on with PERF_TRACE=1. After the response, one
 // line per render in the server logs:
-//   [perf] /app/projects/…/legal rsc · 143 req · 1840 ms · depth 7 · 37 in flight max
-//     slowest: rpc/workflow_is_launched 620 ms, legal_clearances 410 ms…
+//   [perf] /app/projects/…/legal render · 143 req (120 distinct) · 1840 ms · depth 7 · 37 in flight max
+//     slowest: rpc/launched_workflows 620 ms, legal_clearances 410 ms…
+// « render » is a page, a navigation or a prefetch (Next hides which from
+// the app); « action » a Server Action with the page it renders again.
+// « distinct »: requests left once the same URL asked twice is counted once.
 // « depth » is the longest chain of requests where each starts after the
 // previous one ended: the round trips a render waits for one after another.
 // Off, the fetch is passed through untouched.
 
-type Call = { name: string; start: number; end: number };
+type Call = { name: string; url: string; start: number; end: number };
 
-type Trace = {
-  calls: Call[];
-  path: string | null;
-  kind: string;
-  logged: boolean;
-  labelled: Promise<void> | null;
-};
+type Trace = { calls: Call[]; path: string | null; kind: string };
 
 let enabled: boolean | null = null;
 function isEnabled(): boolean {
@@ -37,43 +33,46 @@ function isEnabled(): boolean {
   return enabled;
 }
 
-// One trace per request while rendering; a Server Action or a route
-// handler gets one per call (React's cache does not hold there).
-const traceOf = cache((): Trace => ({
-  calls: [],
-  path: null,
-  kind: "page",
-  logged: false,
-  labelled: null,
-}));
+// One trace per request, Server Actions included: keyed by the request's
+// headers, the same object for the whole request (next/headers).
+const traces = new WeakMap<object, Trace>();
 
-// `rpc/workflow_is_launched`, `legal_clearances`, `auth/user`…
-function nameOf(input: RequestInfo | URL): string {
-  const raw =
-    typeof input === "string"
-      ? input
-      : input instanceof URL
-        ? input.href
-        : input.url;
-  const path = new URL(raw).pathname;
-  return path.replace(/^\/rest\/v1\//, "").replace(/^\/(\w+)\/v1\//, "$1/");
+async function traceOf(): Promise<Trace | null> {
+  let list: Headers;
+  try {
+    list = await headers();
+  } catch {
+    // Outside a request (build, cron without headers): not measured.
+    return null;
+  }
+  const known = traces.get(list);
+  if (known) return known;
+  const trace: Trace = {
+    calls: [],
+    path: list.get("x-pds-path"),
+    kind: list.get("next-action") ? "action" : "render",
+  };
+  traces.set(list, trace);
+  try {
+    after(() => report(trace));
+  } catch {
+    // No request scope to report after.
+  }
+  return trace;
 }
 
-async function label(trace: Trace) {
-  try {
-    const list = await headers();
-    trace.path = list.get("x-pds-path");
-    trace.kind =
-      list.get("next-router-prefetch") === "1"
-        ? "prefetch"
-        : list.get("rsc") === "1"
-          ? "rsc"
-          : list.get("next-action")
-            ? "action"
-            : "page";
-  } catch {
-    // Outside a request (build, cron without headers): unnamed.
-  }
+// `rpc/workflow_is_launched`, `legal_clearances`, `auth/user`…
+function urlOf(input: RequestInfo | URL): string {
+  return typeof input === "string"
+    ? input
+    : input instanceof URL
+      ? input.href
+      : input.url;
+}
+
+function nameOf(raw: string): string {
+  const path = new URL(raw).pathname;
+  return path.replace(/^\/rest\/v1\//, "").replace(/^\/(\w+)\/v1\//, "$1/");
 }
 
 // The longest chain of requests that ran one after another.
@@ -118,7 +117,8 @@ function report(trace: Trace) {
     .map((c) => `${c.name} ${Math.round(c.end - c.start)} ms`)
     .join(", ");
   console.info(
-    `[perf] ${trace.path ?? "?"} ${trace.kind} · ${calls.length} req · ` +
+    `[perf] ${trace.path ?? "?"} ${trace.kind} · ${calls.length} req ` +
+      `(${new Set(calls.map((c) => c.url)).size} distinct) · ` +
       `${Math.round(last - first)} ms · depth ${depthOf(calls)} · ` +
       `${maxInFlight(calls)} in flight max\n  slowest: ${slowest}`,
   );
@@ -128,24 +128,19 @@ function report(trace: Trace) {
 export function tracingFetch(inner: typeof fetch): typeof fetch {
   return async (input, init) => {
     if (!isEnabled()) return inner(input, init);
-    const trace = traceOf();
-    if (!trace.logged) {
-      trace.logged = true;
-      trace.labelled = label(trace);
-      try {
-        after(async () => {
-          await trace.labelled;
-          report(trace);
-        });
-      } catch {
-        // Outside a request scope: nothing to report after.
-      }
-    }
+    const trace = await traceOf();
+    const url = urlOf(input);
     const start = performance.now();
     try {
       return await inner(input, init);
     } finally {
-      trace.calls.push({ name: nameOf(input), start, end: performance.now() });
+      trace?.calls.push({
+        name: nameOf(url),
+        // A POST (rpc) is told apart by its body.
+        url: `${init?.method ?? "GET"} ${url} ${typeof init?.body === "string" ? init.body : ""}`,
+        start,
+        end: performance.now(),
+      });
     }
   };
 }
