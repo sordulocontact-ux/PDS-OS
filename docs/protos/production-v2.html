@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>Production externe V2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -186,6 +187,13 @@ textarea.in{min-height:64px;resize:vertical}
 @media (prefers-reduced-motion:reduce){.wave i{animation:none;transform:scaleX(.3)}}
 .in[aria-invalid="true"]{border-color:var(--bad-fg)}
 .err{font-size:13px;color:var(--bad-fg)}
+.err{font-weight:600}
+.pick.bad .opts,.in.bad{box-shadow:0 0 0 1px var(--bad-fg);border-color:var(--bad-fg)}
+/* An empty date or time stays visibly empty: WebKit paints today's date and 12:30 in grey,
+   which read as a value already typed (CONC-001). The segments come back on focus. */
+.in.empty::-webkit-datetime-edit{color:transparent}
+.in.empty:focus::-webkit-datetime-edit{color:inherit}
+.formmsg{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-radius:10px;background:var(--bad-bg);color:var(--bad-fg);font-weight:600}
 
 /* Overview + lists */
 .wfgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
@@ -471,7 +479,7 @@ function done(id){
     case "creative":return !!retainedCreative();
     case "prep":return S.tasks.some(t=>t.step==="prep")&&prepOpen().length===0;
     case "locs":return S.locs.active!=null;
-    case "ready":return !!S.ready;
+    case "ready":return !!S.ready&&!S.ready.pending;
     case "shoot":return S.shoot;
     case "rushes":return !!S.rushes.received&&(!needsTransfer()||S.rushes.transfer==="received"||S.post.versions.length>0);
     case "post":return S.post.versions.some(v=>v.status==="approved");
@@ -514,7 +522,7 @@ function actorsOf(id){
       if(!S.locs.cands.length) return A("exec","Proposer des lieux","avant le 20/10");
       if(S.locs.active==null) return A("project","Retenir un lieu");
       return [];
-    case "ready": return S.ready?[]:A("project","Confirmer la préparation");
+    case "ready": return S.ready?(S.ready.pending&&dirHolder()?[{r:dirHolder(),todo:"Valider la dérogation avant tournage",step:id}]:[]):A("project","Confirmer la préparation");
     case "shoot": return S.shoot?[]:A("project","Confirmer que le tournage a eu lieu","après le 23/10");
     case "rushes":
       if(!S.rushes.link) return A("exec","Transmettre le lien des rushes","le 24/10");
@@ -553,7 +561,7 @@ function summary(id){
     case "creative":return c?`Retenue : V${c.n}`:"";
     case "prep":return `${S.tasks.filter(t=>t.step==="prep"&&t.status==="done").length} / ${S.tasks.filter(t=>t.step==="prep").length} tâches faites`;
     case "locs":return S.locs.active!=null?S.locs.cands[S.locs.active].name:"";
-    case "ready":return S.ready?"Préparation validée — tournage à venir":"";
+    case "ready":return S.ready?(S.ready.pending?`Dérogation en attente de ${nameOf(dirHolder())}`:S.ready.second?`Validée avec la dérogation de ${S.ready.second.by}`:"Préparation validée — tournage à venir"):"";
     case "shoot":return S.shoot?"Tournage terminé — fichiers attendus":"";
     case "rushes":return needsTransfer()?`Rushes reçus, transférés à ${nameOf(holder("post"))}`:"Rushes reçus";
     case "post":{const v=[...S.post.versions].reverse().find(x=>x.status==="approved");return v?`Montage V${v.n} validé`:"";}
@@ -574,6 +582,27 @@ function render(){
   document.getElementById("roleSel").innerHTML=ROLE_ORDER.map(k=>`<option value="${k}" ${k===S.role?"selected":""}>${esc(P[k].name)} · ${esc(P[k].role.split(" · ")[0])}${P[k].where==="lien"?" (lien)":""}</option>`).join("");
   app.innerHTML=(P[me()].where==="lien"?portal():shell())+modalHtml();
   const m=document.getElementById("modal");if(m){m.showModal();const f=m.querySelector("#pkQ,textarea,input");if(f) f.focus();}
+  app.querySelectorAll('input[type="date"],input[type="time"]').forEach(i=>i.classList.toggle("empty",!i.value));
+  // The flash goes next to what was just done, at the top of the open step, and is
+  // brought into view right after the action (MKT-UX-005).
+  const fl=app.querySelector(".flash"),card=app.querySelector('.layout section.card[aria-labelledby="dtitle"]');
+  if(fl&&card) card.prepend(fl);
+  if(fl&&S.flashNear) fl.scrollIntoView({block:"nearest"});
+  S.flashNear=false;
+}
+/* What was typed survives a refused action: values are read before, put back after,
+   and the first missing field gets the focus (CONC-001, PROD-001). */
+function readForm(){return [...app.querySelectorAll("input,select,textarea")].filter(x=>x.type!=="file"&&(x.id||x.name)).map(x=>({id:x.id,name:x.name,type:x.type,value:x.value,checked:x.checked}));}
+function restoreForm(list){
+  list.forEach(f=>{const x=f.id?document.getElementById(f.id):(f.type==="radio"?document.querySelector(`input[name="${f.name}"][value="${CSS.escape(f.value)}"]`):null);if(!x||x.type==="file") return;
+    if(f.type==="radio"||f.type==="checkbox"){if(x.type===f.type&&(f.type==="checkbox"||x.value===f.value)) x.checked=f.checked;}else if(x.type===f.type||x.tagName.toLowerCase()===f.type||f.type.startsWith("select")) x.value=f.value;});
+  app.querySelectorAll('input[type="date"],input[type="time"]').forEach(i=>i.classList.toggle("empty",!i.value));
+}
+function focusErr(){
+  const k=Object.keys(S.err)[0];if(!k) return;
+  const x=document.getElementById(k)||document.querySelector(`[name="${k}"]`);
+  if(x&&x.focus){x.setAttribute("aria-invalid","true");x.focus();return;}
+  const e=app.querySelector(".err");if(e) e.scrollIntoView({block:"center"});
 }
 function shell(){
   const nav=[["home","Accueil"],["work","Travail"],["folder","Projets"],["nodes","Réseau"]];
@@ -744,13 +773,24 @@ const BODY={
     ${can("exec")?"":waits("locs")}`;
   },
   ready(){
-    const rows=synthesis();
-    if(S.ready) return `<div class="callout ok">${I.ok}<span><b>Préparation validée — tournage à venir.</b> Confirmée par ${esc(S.ready.by)} le ${esc(S.ready.at)}${S.ready.forced?` malgré : « ${esc(S.ready.forced)} »`:""}. La synthèse ci-dessous est gardée telle qu'elle a été validée.</span></div>${synTable(S.ready.rows)}`;
-    const missing=rows.filter(r=>!r.ok);
-    return `<p class="note">Calculée à partir de ce qui est réellement validé : une information « à confirmer » ne compte jamais comme prête.</p>${synTable(rows,true)}
-    ${can("project")?`<div class="vers">${missing.length?`<div class="callout warn">${I.warn}<span>${missing.length} point${missing.length>1?"s":""} ne ${missing.length>1?"sont":"est"} pas prêt${missing.length>1?"s":""}. Vous pouvez confirmer quand même, en connaissance de cause et avec un motif.</span></div>
-      <div class="checks"><label><input type="checkbox" id="rForce">Je confirme la préparation malgré ${missing.map(m=>esc(m.k.toLowerCase())).join(", ")}</label></div>${ta("rReason","Motif","Ex. : autorisation promise par la mairie pour le 22/10",true)}${errOf("rForce")}`:""}
-      <div class="btnrow"><button class="btn" type="button" data-act="ready">Confirmer : préparation validée</button></div></div>`:waits("ready")}`;
+    const rows=synthesis(), R=S.ready, dir=dirHolder(), syn=(list,label,open)=>`<details class="vers"${open?" open":""}><summary><b>${label}</b></summary><p class="note">Calculée à partir de ce qui est réellement validé : une information « à confirmer » ne compte jamais comme prête.</p>${list}</details>`;
+    const plan=x=>x&&x.length?`<div class="rows">${x.map(p=>`<div class="row"><span><b>${esc(p.k)}</b><br><span class="src">Réglé par ${esc(nameOf(p.r))} avant le ${esc(fullDay(p.due))}</span></span></div>`).join("")}</div>`:"";
+    if(R&&R.pending) return `<div class="callout warn">${I.warn}<span><b>Dérogation demandée à ${esc(nameOf(dir))}</b> par ${esc(R.by)} le ${esc(R.at)} : ${esc(R.crit.join(", ").toLowerCase())} ${R.crit.length>1?"ne sont pas prêts":"n'est pas prêt"}. Motif : « ${esc(R.forced)} ». Le tournage attend sa décision.</span></div>
+      <div class="vers"><h3>Plan de rattrapage</h3>${plan(R.plan)}</div>
+      ${me()===dir?`<div class="vers"><h3>Votre décision</h3>${ta("rdNote","Commentaire","Obligatoire pour refuser")}<div class="btnrow"><button class="btn" type="button" data-act="readydec" data-v="ok">Valider la dérogation</button><button class="btn out" type="button" data-act="readydec" data-v="refuse">Refuser</button></div></div>`:waits("ready")}
+      ${syn(synTable(R.rows),"Synthèse envoyée")}`;
+    if(R) return `<div class="callout ok">${I.ok}<span><b>Préparation validée — tournage à venir.</b> Confirmée par ${esc(R.by)} le ${esc(R.at)}${R.forced?` malgré : « ${esc(R.forced)} »`:""}${R.second?` · dérogation validée par ${esc(R.second.by)} le ${esc(R.second.at)}`:""}. La synthèse ci-dessous est gardée telle qu'elle a été validée.</span></div>${R.plan&&R.plan.length?`<div class="vers"><h3>Plan de rattrapage</h3><span class="src">Chaque point est une tâche, suivie jusqu'à ce qu'il soit réglé.</span>${plan(R.plan)}</div>`:""}${synTable(R.rows)}`;
+    const missing=rows.filter(r=>!r.ok), crit=missing.filter(r=>r.crit), last=lastOf(S.readyHist||[]);
+    const back=last?`<div class="callout warn">${I.warn}<span>${last.refused?`<b>Dérogation refusée</b> par ${esc(last.refused.by)} le ${esc(last.refused.at)} : « ${esc(last.refused.note)} »`:`<b>À valider à nouveau</b> : ${esc(last.reopened.why)} le ${esc(last.reopened.at)}. La validation du ${esc(last.at)} reste dans l'historique.`}</span></div>`:"";
+    if(!can("project")) return back+waits("ready")+syn(synTable(rows),`Synthèse · ${rows.length-missing.length} point${rows.length-missing.length>1?"s":""} prêt${rows.length-missing.length>1?"s":""} sur ${rows.length}`);
+    if(!missing.length) return `${back}<div class="callout ok">${I.ok}<span>Les ${rows.length} points sont prêts.</span></div><div class="btnrow"><button class="btn" type="button" data-act="ready">Confirmer : préparation validée</button></div>${syn(synTable(rows,true),`Synthèse · ${rows.length} points prêts`)}`;
+    const people=ROLE_ORDER.filter(k=>P[k]&&k!=="mgmt");
+    return `${back}<div class="vers"><div class="callout warn">${I.warn}<span>${missing.length} point${missing.length>1?"s":""} sur ${rows.length} ${missing.length>1?"ne sont":"n'est"} pas prêt${missing.length>1?"s":""}${crit.length?`, dont ${crit.length} critique${crit.length>1?"s":""} : une dérogation demande en plus la validation de ${esc(nameOf(dir))} et un plan de rattrapage`:` : ${missing.length>1?"mineurs":"mineur"}, vous pouvez confirmer avec un motif`}.</span></div>
+      ${synTable(missing,true)}
+      ${crit.length?`<div class="field"><span><b>Plan de rattrapage</b> *</span><span class="src">Pour chaque point critique : qui le règle, et avant quand. Chacun devient une tâche.</span><div class="rows">${crit.map((r,i)=>`<div class="row" style="grid-template-columns:minmax(0,1fr)"><b>${esc(r.k)}</b><div class="grid2"><div class="field"><label for="rpW-${i}">Qui le règle *</label><select class="in" id="rpW-${i}">${people.map(k=>`<option value="${k}" ${k===(r.owner||holder("project"))?"selected":""}>${esc(P[k].name)} · ${esc(P[k].role.split(" · ")[0])}</option>`).join("")}</select></div><div class="field"><label for="rpD-${i}">Avant le *</label><input class="in" type="date" id="rpD-${i}" value="2026-10-22">${errOf("rpD-"+i)}</div></div></div>`).join("")}</div></div>`:""}
+      <div class="checks"><label><input type="checkbox" id="rForce">Je confirme la préparation malgré ${missing.map(m=>esc(m.k.toLowerCase())).join(", ")}</label></div>${errOf("rForce")}${ta("rReason","Motif","Ex. : autorisation promise par la mairie pour le 22/10",true)}
+      <div class="btnrow"><button class="btn" type="button" data-act="ready">${crit.length?`Demander la dérogation à ${esc(nameOf(dir))}`:"Confirmer malgré ces points"}</button></div></div>
+    ${syn(synTable(rows,true),`Synthèse complète · ${rows.length-missing.length} prêt${rows.length-missing.length>1?"s":""} sur ${rows.length}`)}`;
   },
   shoot(){
     return S.shoot?`<div class="callout ok">${I.ok}<span><b>Tournage terminé — fichiers attendus.</b> Confirmé par ${esc(S.shoot.by)} le ${esc(S.shoot.at)}.</span></div>`:`<p class="note">Prévu le Ven. 23/10/2026 à l'${esc(S.locs.active!=null?S.locs.cands[S.locs.active].name:"lieu retenu")}.</p>${can("project")?`<div class="btnrow"><button class="btn" type="button" data-act="shoot">Confirmer que le tournage a eu lieu</button></div>`:waits("shoot")}`;
@@ -826,6 +866,7 @@ function retainModal(){
    previous, which stays in the history. */
 const currentSchedule=()=>S.decisions.find(d=>d.key==="schedule"&&!d.discarded&&d.kind==="decided")||null;
 const DAYS=["Dim.","Lun.","Mar.","Mer.","Jeu.","Ven.","Sam."];
+const fullDay=d=>{const [y,mo,da]=d.split("-");return `${DAYS[new Date(+y,+mo-1,+da).getDay()]} ${da}/${mo}/${y}`;};
 const hourFr=t=>{const [h,m]=t.split(":");return `${+h} h${m!=="00"?" "+m:""}`;};
 const scheduleText=(d,a,b)=>{const [y,mo,da]=d.split("-");return `Tournage le ${DAYS[new Date(+y,+mo-1,+da).getDay()]} ${da}/${mo}/${y}, de ${hourFr(a)} à ${hourFr(b)}`;};
 function schedModal(){
@@ -917,7 +958,7 @@ const linkedInfo=()=>S.decisions.filter(d=>!d.discarded&&!d.group&&d.step==="loc
 function replaceForm(){
   if(S.form!=="replace") return `<div><button class="btn out sm" type="button" data-act="form" data-v="replace">Remplacer le lieu retenu</button></div>`;
   const L=S.locs, others=L.cands.map((o,i)=>[o,i]).filter(([o,i])=>i!==L.active&&!o.replaced);
-  return `<div class="card" style="background:var(--soft)"><h3>Remplacer ${esc(L.cands[L.active].name)}</h3><p class="note">Une nouvelle décision : l'ancienne reste dans l'historique, avec sa validation. Le reste du projet continue.</p>
+  return `<div class="card" style="background:var(--soft)"><h3>Remplacer ${esc(L.cands[L.active].name)}</h3><p class="note">Une nouvelle décision : l'ancienne reste dans l'historique, avec sa validation. Ce que vous cochez est à refaire, et le contrôle avant tournage repasse ; le reste continue.</p>
    <div class="field"><label for="rpNew"><b>Nouveau lieu</b> *</label><select class="in" id="rpNew">${others.map(([o,i])=>`<option value="${i}">${esc(o.name)} · ${euro(o.price)}${(f=>f?f.over?` · dépasse de ${euro(f.gap)}`:" · compris dans le devis":"")(locFit(o))}</option>`).join("")}</select>${(f=>`<span class="src ${f?f.cls:""}" id="rpFit">${f?esc(f.text):""}</span>`)(others.length?locFit(others[0][0]):null)}</div>
    ${(lk=>`${ta("rpReason","Motif","Ex. : la copropriété refuse le tournage sur le toit",true,lk.length===1?lk[0].text:"")}
    ${lk.length?`<div class="field"><b>Informations liées</b><span class="src">Notées dans Décisions, encore à confirmer. Cochées, elles passent en « Décidé » avec ce remplacement.</span><div class="checks">${lk.map(d=>`<label><input type="checkbox" id="lk-${d.id}" checked>« ${esc(d.text)} » <span class="src">${esc(d.source)}</span></label>`).join("")}</div></div>`:""}`)(linkedInfo())}
@@ -928,20 +969,29 @@ function synthesis(){
   const q=activeQuote(), c=retainedCreative(), L=S.locs, task=t=>S.tasks.find(x=>x.text===t);
   const sched=S.decisions.find(d=>d.key==="schedule"&&!d.discarded&&(d.kind==="decided"));
   const blk=openBlockers(), conf=S.decisions.filter(d=>!d.discarded&&!d.group&&d.kind==="confirm");
-  const T=(t,label)=>{const x=task(t);return {k:label,v:x?(x.status==="done"?`Fait · ${x.doneAt}`:`Pas encore · ${nameOf(x.r)}`):"Aucune tâche",ok:!!x&&x.status==="done"};};
+  const T=(t,label,crit)=>{const x=task(t);return {k:label,v:x?(x.status==="done"?`Fait · ${x.doneAt}`:`Pas encore · ${nameOf(x.r)}`):"Aucune tâche",ok:!!x&&x.status==="done",crit,owner:x?x.r:holder("exec")};};
   return [
-    (()=>{const f=L.active!=null?locFit(L.cands[L.active]):null;return {k:"Lieu retenu",v:L.active!=null?L.cands[L.active].name+(f?" · "+f.text:""):"Aucun lieu retenu",ok:L.active!=null&&!(f&&f.over)};})(),
-    {k:"Date et horaires",v:sched?`${sched.text} · décidé par ${sched.confirmedBy||sched.by}`:`Aucune décision validée · à fixer par ${nameOf(holder("project"))}`,ok:!!sched,
+    (()=>{const f=L.active!=null?locFit(L.cands[L.active]):null;return {k:"Lieu retenu",v:L.active!=null?L.cands[L.active].name+(f?" · "+f.text:""):"Aucun lieu retenu",ok:L.active!=null&&!(f&&f.over),crit:true,owner:holder("project")};})(),
+    {k:"Date et horaires",v:sched?`${sched.text} · décidé par ${sched.confirmedBy||sched.by}`:`Aucune décision validée · à fixer par ${nameOf(holder("project"))}`,ok:!!sched,crit:true,owner:holder("project"),
       btns:can("project")?[{act:"schedopen",label:sched?"Changer la date et les horaires":"Fixer la date et les horaires"}]:[]},
-    T("Équipe confirmée","Équipe confirmée"),T("Planning envoyé","Planning et feuille de service"),T("Matériel réservé","Matériel"),
-    {k:"Devis",v:q?`V${q.n} validé · ${euro(q.amount)}${S.quote.revision||lastOf(S.quote.versions)!==q?" · révision en cours":""}`:"Aucun devis validé",ok:!!q&&!S.quote.revision&&lastOf(S.quote.versions)===q},
-    {k:"Proposition de réalisation",v:c?`V${c.n} validée${lastOf(S.creative.versions)!==c||S.creative.requested?" · nouvelle version en cours":""}`:"Pas encore validée",ok:!!c&&lastOf(S.creative.versions)===c&&!S.creative.requested},
-    {k:"Blocages actifs",v:blk.length?blk.map(b=>`${b.text} · à lever par ${nameOf(b.owner)}`).join(" · "):"Aucun",ok:!blk.length,
+    T("Équipe confirmée","Équipe confirmée",true),T("Planning envoyé","Planning et feuille de service",true),T("Matériel réservé","Matériel",false),
+    {k:"Devis",v:q?`V${q.n} validé · ${euro(q.amount)}${S.quote.revision||lastOf(S.quote.versions)!==q?" · révision en cours":""}`:"Aucun devis validé",ok:!!q&&!S.quote.revision&&lastOf(S.quote.versions)===q,crit:true,owner:holder("exec")},
+    {k:"Proposition de réalisation",v:c?`V${c.n} validée${lastOf(S.creative.versions)!==c||S.creative.requested?" · nouvelle version en cours":""}`:"Pas encore validée",ok:!!c&&lastOf(S.creative.versions)===c&&!S.creative.requested,crit:true,owner:holder("director")},
+    {k:"Blocages actifs",v:blk.length?blk.map(b=>`${b.text} · à lever par ${nameOf(b.owner)}`).join(" · "):"Aucun",ok:!blk.length,crit:true,owner:blk.length?blk[0].owner:null,
       btns:blk.map(b=>b.auto?{act:"tab",v:"decisions",label:"Choisir ce qui fait foi"}:(b.owner===me()||holder("project")===me())?{act:"lift",id:b.id,label:blk.length>1?"Lever : "+b.text:"Lever le blocage"}:null).filter(Boolean)},
-    {k:"Informations à confirmer",v:conf.length?conf.map(d=>d.text).join(" · ")+` · à confirmer ou écarter par ${nameOf(holder("project"))}`:"Aucune",ok:!conf.length,btns:conf.length?[{act:"tab",v:"decisions",label:"Ouvrir les décisions"}]:[]}
+    {k:"Informations à confirmer",v:conf.length?conf.map(d=>d.text).join(" · ")+` · à confirmer ou écarter par ${nameOf(holder("project"))}`:"Aucune",ok:!conf.length,crit:false,owner:holder("project"),btns:conf.length?[{act:"tab",v:"decisions",label:"Ouvrir les décisions"}]:[]}
   ];
 }
-function synTable(rows,live){return `<div class="rows syn">${rows.map(r=>`<div class="row"><span><b>${esc(r.k)}</b><br><span class="${r.ok?"":"miss"}">${esc(r.v)}</span>${live&&r.btns&&r.btns.length?`<span class="btnrow" style="margin-top:8px">${r.btns.map(x=>`<button class="btn out sm" type="button" data-act="${x.act}"${x.v?` data-v="${x.v}"`:""}${x.id?` data-id="${x.id}"`:""}>${esc(x.label)}</button>`).join("")}</span>`:""}</span>${pill(r.ok?"ok":"bad",r.ok?"Prêt":"Pas prêt")}</div>`).join("")}</div>`;}
+function synTable(rows,live){return `<div class="rows syn">${rows.map(r=>`<div class="row"><span><b>${esc(r.k)}</b><br><span class="${r.ok?"":"miss"}">${esc(r.v)}</span>${live&&r.btns&&r.btns.length?`<span class="btnrow" style="margin-top:8px">${r.btns.map(x=>`<button class="btn out sm" type="button" data-act="${x.act}"${x.v?` data-v="${x.v}"`:""}${x.id?` data-id="${x.id}"`:""}>${esc(x.label)}</button>`).join("")}</span>`:""}</span>${pill(r.ok?"ok":r.crit?"bad":"warn",r.ok?"Prêt":r.crit?"Pas prêt · critique":"Pas prêt · mineur")}</div>`).join("")}</div>`;}
+/* Who gives the second approval of a waiver: the direction, or the budget approval
+   when the production is followed on its own. */
+const dirHolder=()=>holder("direction")||holder("budget");
+/* A change after the check reopens it, as long as nothing was shot (MKT-PROD-001). */
+function reopenReady(why){
+  if(!S.ready||S.shoot) return;
+  S.readyHist=(S.readyHist||[]).concat([{...S.ready,reopened:{at:stamp(),why}}]);S.ready=null;
+  log(`Contrôle avant tournage à refaire : ${why}`);
+}
 const PSTATE={review:["info","En revue"],changes:["warn","Modifications demandées"],approved:["ok","Validée"]};
 function postCard(v){
   const last=lastOf(S.post.versions)===v, status=v.status==="review"&&!last?pill("",`Remplacé par la V${v.n+1}`):pill(PSTATE[v.status][0],PSTATE[v.status][1]);
@@ -1001,7 +1051,7 @@ function portal(){
   return `<div class="portal"><header class="pbar"><span style="display:flex;align-items:center;gap:10px"><span class="brand" style="margin:0">PDS</span><b>Clip « Néons » · ${esc(P[k].name)}</b></span><span class="lockline">${I.lock} Lien privé ${P[k].link}… · sans compte</span></header>
   <div class="pwrap"><div><p class="cap">Néons · Mona Lys · ${esc(P[k].role)}</p><h1 class="h1">${acts.length?"Ce que PDS attend de vous":"Rien à faire pour l'instant"}</h1></div>
   ${S.flash?flash():""}
-  ${k==="societe"&&S.ready?`<div class="callout ok">${I.ok}<span><b>Préparation validée — tournage à venir.</b> Confirmée par ${esc(S.ready.by)} le ${esc(S.ready.at)} · lieu : ${esc(S.locs.cands[S.locs.active].name)}.</span></div>`:""}
+  ${k==="societe"&&S.ready&&!S.ready.pending?`<div class="callout ok">${I.ok}<span><b>Préparation validée — tournage à venir.</b> Confirmée par ${esc(S.ready.by)} le ${esc(S.ready.at)} · lieu : ${esc(S.locs.cands[S.locs.active].name)}.</span></div>`:""}
   ${acts.length>1?`<div class="rowlist">${acts.map(a=>`<div class="wr"><span class="grow"><b>${esc(a.todo)}</b>${a.due?" · "+esc(a.due):""} <span class="t3">· ${esc(STEP(a.step).title)}</span></span><a class="btn ghost sm" href="#ps-${a.step}">Voir</a></div>`).join("")}</div>`:""}
   ${shown.map(s=>{const mine=mineSteps.includes(s);return `<section class="card" id="ps-${s}" style="scroll-margin-top:16px"><div class="dhead"><h2>${esc(STEP(s).title)}</h2>${mine?pill("info","À vous"):pill(statusOf(s)==="done"?"ok":"",statusOf(s)==="done"?"Fait":"Suivi")}</div>${acts.filter(a=>a.step===s).map(a=>`<p class="note"><b>${esc(a.todo)}</b>${a.due?" · "+esc(a.due):""}</p>`).join("")}${BODY[s]()}</section>`;}).join("")}
   <section class="card"><h2>Votre contact chez PDS</h2><div class="eyebrow">${av("cp",true)}<span><b>Lina Haddad</b> · Cheffe de projet</span></div></section></div></div>`;
@@ -1014,7 +1064,7 @@ const need=(i,msg)=>{if(val(i)) return true;S.err[i]=msg;return false;};
 function after(title){
   const nx=allActions().filter(a=>a.r!==me()).slice(0,3);
   S.flash={title,lines:nx.map(a=>`Ensuite : <b>${esc(P[a.r].name)}</b> · ${esc(a.todo.toLowerCase())} <span class="t3">(${esc(actTitle(a))})</span>`)};
-  toast(title+".");
+  toast(title+".");S.flashNear=true;
 }
 const closeReview=step=>S.tasks.filter(t=>t.step===step&&t.origin.startsWith("Changement")&&t.status!=="done").forEach(t=>{t.status="done";t.doneAt=stamp();});
 document.addEventListener("click",e=>{
@@ -1023,7 +1073,7 @@ document.addEventListener("click",e=>{
   const el=e.target.closest("[data-act]");if(!el) return;
   const a=el.dataset.act, who=P[me()].name;
   if(a==="nolink"){e.preventDefault();toast("Lien externe, non ouvert dans le proto.");return;}
-  S.err={};
+  S.err={};const kept=readForm();
   switch(a){
     case "tab": S.tab=el.dataset.v; S.form=null; break;
     case "go": S.tab="parcours"; S.sel=el.dataset.step; S.form=null; S.flash=null; window.scrollTo({top:0}); break;
@@ -1053,7 +1103,7 @@ document.addEventListener("click",e=>{
       const at=stamp(), old=currentSchedule(), text=scheduleText(v.date,v.start,v.end);
       if(old){old.discarded=true;old.key=null;old.replacedAt=at;}
       S.decisions.push({id:id("d"),key:"schedule",text,date:v.date,start:v.start,end:v.end,kind:"decided",source:`${v.source} du ${at.split(",")[0]}`,by:who,at,step:"ready",confirmedBy:who,confirmedAt:at});
-      log(old?`Date et horaires changés : ${text} (remplace « ${old.text} »)`:`Date et horaires décidés : ${text}`);S.modal=null;after(old?"Date et horaires changés":"Date et horaires validés");break;}
+      log(old?`Date et horaires changés : ${text} (remplace « ${old.text} »)`:`Date et horaires décidés : ${text}`);if(old) reopenReady("date et horaires changés");S.modal=null;after(old?"Date et horaires changés":"Date et horaires validés");break;}
     case "pickopen": S.dSel=[...document.querySelectorAll('input[name="dTo"]:checked')].map(i=>i.value);S.modal={kind:"pick"};break;
     case "pickone": case "pickcreate": case "pickname": {let k=el.dataset.v;const q=val("pkQ");
       if(a!=="pickone"){if(!q){S.err.pkQ="Écrivez d'abord le nom.";toast("Écrivez d'abord le nom de la personne.");return;}k="x"+(++uid);P[k]={name:q,role:a==="pickcreate"?"Nouveau contact du Réseau":"Nom seul, sans fiche",ini:q.split(/\s+/).map(w=>w[0]).join("").slice(0,2).toUpperCase(),where:a==="pickcreate"?"reseau":"nom"};log(`${a==="pickcreate"?"Contact créé dans le Réseau":"Nom gardé sans fiche"} : ${q}`);}
@@ -1067,14 +1117,14 @@ document.addEventListener("click",e=>{
       const q=lastOf(S.quote.versions);q.status="submitted";q.checkedBy=who;log(`Devis V${q.n} vérifié et soumis à ${nameOf(holder("budget"))}`);after(`Devis V${q.n} soumis`);break;}
     case "qdecide": {const q=lastOf(S.quote.versions),v=el.dataset.v,c=val("qComment");if(v!=="approved"&&!c){S.err.qComment="Dites ce qui doit changer : Studio Ressac le lira.";break;}
       q.status=v;q.decidedBy=who;q.decidedAt=stamp();if(c) q.comments.push({by:who,text:c});if(v==="approved") seedPrep();log(`Devis V${q.n} : ${QSTATUS[v][1].toLowerCase()}${c?" · « "+c+" »":""}`);after(v==="approved"?`Devis V${q.n} validé`:v==="rejected"?`Devis V${q.n} refusé`:`Révision demandée sur le devis V${q.n}`);break;}
-    case "revision": {if(!need("revReason","Dites pourquoi.")) break;S.quote.revision={reason:val("revReason"),by:who,at:stamp()};log(`Révision du devis demandée : ${val("revReason")}`);S.form=null;after("Révision du devis demandée");break;}
+    case "revision": {if(!need("revReason","Dites pourquoi.")) break;S.quote.revision={reason:val("revReason"),by:who,at:stamp()};log(`Révision du devis demandée : ${val("revReason")}`);reopenReady("révision du devis demandée");S.form=null;after("Révision du devis demandée");break;}
     case "csample": S.cdraft=true; break;
     case "cdeposit": {if(!S.cdraft){S.err.cdeposit="Joignez au moins le traitement et le découpage.";break;}const n=S.creative.versions.length+1;
       S.creative.versions.push({n,by:who,at:stamp(),pieces:[["Traitement",`Traitement_Neons_V${n}.pdf`],["Moodboard",`Moodboard_Neons_V${n}.pdf`],["Découpage technique",`Decoupage_Neons_V${n}.pdf`]],int:"pending",ext:holder("creativeExt")?"pending":"none",comments:[]});
       S.creative.requested=null;S.cdraft=false;closeReview("creative");log(`Proposition V${n} déposée`);after(`Proposition V${n} déposée`);break;}
     case "cdecide": {const c=lastOf(S.creative.versions),f=el.dataset.slot==="creativeInt"?"int":"ext",v=el.dataset.v,t=val("cComment");if(v==="changes"&&!t){S.err.cComment="Dites ce qui doit changer.";break;}
       c[f]=v;if(t) c.comments.push({by:who,as:f==="int"?"interne":"externe",text:t});log(`Proposition V${c.n} · validation ${f==="int"?"interne":"externe"} : ${CSTATE[v][1].toLowerCase()}`);after(v==="approved"?`Proposition V${c.n} validée (${f==="int"?"interne":"externe"})`:"Modifications demandées");break;}
-    case "crequest": {if(!need("crReason","Dites pourquoi.")) break;S.creative.requested={reason:val("crReason"),by:who,at:stamp()};log(`Nouvelle version de la proposition demandée : ${val("crReason")}`);S.form=null;after("Nouvelle version demandée");break;}
+    case "crequest": {if(!need("crReason","Dites pourquoi.")) break;S.creative.requested={reason:val("crReason"),by:who,at:stamp()};log(`Nouvelle version de la proposition demandée : ${val("crReason")}`);reopenReady("nouvelle version de la proposition demandée");S.form=null;after("Nouvelle version demandée");break;}
     case "locsample": {const used=S.locs.cands.map(o=>o.name), x=LOC_SAMPLES.find(o=>!used.includes(o.name));if(!x) return;
       [["lName",x.name],["lAddr",x.addr],["lPrice",x.price],["lAvail",x.avail],["lCons",x.constraints],["lLink",x.link]].forEach(([k,v])=>{document.getElementById(k).value=v;});
       S.ldraft=photosFor(x.pics);document.getElementById("lPhotoList").innerHTML=thumbs();return;}
@@ -1097,10 +1147,21 @@ document.addEventListener("click",e=>{
         const step=k==="creative"?"creative":k==="budget"?"quote":"prep";
         S.tasks.push({id:id("t"),step,text:k==="creative"?"Adapter le découpage au nouveau lieu":k==="budget"?"Réviser le devis pour le nouveau lieu":k==="gear"?"Revoir le matériel pour "+L.cands[nw].name:"Mettre à jour le planning et la feuille de service",r:holder(slot),due:"20/10",status:"todo",origin});
         if(k==="creative") S.creative.requested={reason:`Changement de lieu : ${r}`,by:who,at};if(k==="budget") S.quote.revision={reason:`Changement de lieu : ${r}`,by:who,at};});
-      log(`Lieu remplacé : ${L.cands[old].name} → ${L.cands[nw].name} · « ${r} »`);S.form=null;after(`${L.cands[nw].name} remplace ${L.cands[old].name}`);break;}
-    case "ready": {const rows=synthesis(),miss=rows.filter(x=>!x.ok);let forced=null;
-      if(miss.length){const f=document.getElementById("rForce");if(!f||!f.checked||!val("rReason")){S.err.rForce="Cochez la confirmation et donnez le motif : des points ne sont pas prêts.";break;}forced=val("rReason");}
-      S.ready={by:who,at:stamp(),rows,forced};log(`Préparation validée${forced?" malgré : "+forced:""}`);after("Préparation validée — tournage à venir");break;}
+      const redo=REVIEW.filter(([k])=>document.getElementById("rv-"+k).checked).map(([,l])=>l.toLowerCase()),keep=REVIEW.filter(([k])=>!document.getElementById("rv-"+k).checked).map(([,l])=>l.toLowerCase());
+      log(`Lieu remplacé : ${L.cands[old].name} → ${L.cands[nw].name} · « ${r} »${redo.length?` · à refaire : ${redo.join(", ")}`:""}${keep.length?` · reste valable : ${keep.join(", ")}`:""}`);reopenReady(`lieu remplacé par ${L.cands[nw].name}`);S.form=null;after(`${L.cands[nw].name} remplace ${L.cands[old].name}`);break;}
+    case "ready": {const rows=synthesis(),miss=rows.filter(x=>!x.ok),crit=miss.filter(x=>x.crit),plan=[];let forced=null;
+      if(miss.length){const f=document.getElementById("rForce");
+        crit.forEach((r,i)=>{const d=val("rpD-"+i);if(!d) S.err["rpD-"+i]="Avant quand ce point sera réglé.";plan.push({k:r.k,r:val("rpW-"+i)||r.owner,due:d});});
+        if(!f||!f.checked) S.err.rForce="Cochez la confirmation : des points ne sont pas prêts.";
+        if(!val("rReason")) S.err.rReason="Donnez le motif de la dérogation.";
+        if(Object.keys(S.err).length) break;forced=val("rReason");}
+      const at=stamp();
+      if(crit.length){S.ready={pending:true,by:who,at,rows,forced,plan,crit:crit.map(r=>r.k)};log(`Dérogation avant tournage demandée à ${nameOf(dirHolder())} : ${crit.map(r=>r.k.toLowerCase()).join(", ")} · « ${forced} »`);after(`Dérogation demandée à ${nameOf(dirHolder())}`);break;}
+      S.ready={by:who,at,rows,forced};log(`Préparation validée${forced?" malgré : "+forced:""}`);after("Préparation validée — tournage à venir");break;}
+    case "readydec": {const R=S.ready,v=el.dataset.v,t=val("rdNote");if(v==="refuse"&&!t){S.err.rdNote="Dites pourquoi vous refusez la dérogation.";break;}const at=stamp();
+      if(v==="refuse"){S.readyHist=(S.readyHist||[]).concat([{...R,refused:{by:who,at,note:t}}]);S.ready=null;log(`Dérogation avant tournage refusée · « ${t} »`);after("Dérogation refusée");break;}
+      R.pending=false;R.second={by:who,at,note:t||null};R.plan.forEach(x=>S.tasks.push({id:id("t"),step:"ready",text:`Régler avant le tournage : ${x.k.toLowerCase()}`,r:x.r,due:x.due.slice(8)+"/"+x.due.slice(5,7),status:"todo",origin:`Dérogation du ${R.at.split(",")[0]}`}));
+      log(`Dérogation validée : préparation validée malgré ${R.crit.join(", ").toLowerCase()}`);after("Dérogation validée — tournage possible");break;}
     case "shoot": S.base=[2026,9,23,16,30];S.clock=0;S.shoot={by:who,at:stamp()};log("Tournage confirmé");after("Tournage terminé — fichiers attendus");break;
     case "rsample": document.getElementById("rLink").value="https://we.tl/t-Neons-rushes-2310";return;
     case "rlink": if(!need("rLink","Collez le lien des rushes.")) break;S.base=[2026,9,24,10,0];S.clock=0;S.rushes.link={url:val("rLink"),by:who,at:stamp()};log("Lien des rushes transmis");after("Lien des rushes transmis");break;
@@ -1124,7 +1185,9 @@ document.addEventListener("click",e=>{
       if(vs){const o=S.decisions.find(x=>x.id===vs);o.group=o.group||id("g");d.group=o.group;}S.decisions.push(d);log(`Information notée (${KIND[d.kind][1].toLowerCase()}) : « ${d.text} »`);S.form=null;toast(vs?"Notée : contradiction à trancher.":"Information notée.");break;}
     default: return;
   }
+  const failed=Object.keys(S.err).length>0;
   render();
+  if(failed){restoreForm(kept);focusErr();}
 });
 document.addEventListener("cancel",e=>{if(e.target.id==="modal"){e.preventDefault();S.modal=null;render();}},true);
 document.addEventListener("mousedown",e=>{if(e.target.id==="modal"){S.modal=null;render();}});
@@ -1137,7 +1200,9 @@ document.addEventListener("change",e=>{if(e.target.id==="lPhotos"){addPhotos(e.t
 document.addEventListener("dragover",e=>{const d=e.target.closest(".drop");if(!d) return;e.preventDefault();d.classList.add("over");});
 document.addEventListener("dragleave",e=>{const d=e.target.closest(".drop");if(d&&!d.contains(e.relatedTarget)) d.classList.remove("over");});
 document.addEventListener("drop",e=>{const d=e.target.closest(".drop");if(!d) return;e.preventDefault();d.classList.remove("over");addPhotos(e.dataTransfer.files);});
-document.getElementById("roleSel").addEventListener("change",e=>{S.role=e.target.value;S.flash=null;S.sel=null;S.form=null;S.tab="parcours";render();window.scrollTo({top:0});});
+// Seen as someone else, the same step stays open when it is theirs to see (MKT-UX-001).
+document.getElementById("roleSel").addEventListener("change",e=>{const was=S.sel;S.role=e.target.value;S.flash=null;S.form=null;S.tab="parcours";render();if(S.sel!==was) window.scrollTo({top:0});});
+document.addEventListener("input",e=>{const t=e.target;if(t.type==="date"||t.type==="time") t.classList.toggle("empty",!t.value);});
 document.getElementById("resetBtn").addEventListener("click",()=>{S=scenario("quote");document.getElementById("scenSel").value="quote";render();window.scrollTo({top:0});});
 document.getElementById("scenSel").addEventListener("change",e=>{S=scenario(e.target.value);render();window.scrollTo({top:0});});
 

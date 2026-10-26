@@ -7,7 +7,7 @@ const { chromium } = require(process.cwd() + "/node_modules/playwright-core");
 (async () => { const b = await chromium.launch({ channel: "chrome", headless: true }); const p = await b.newPage({ viewport:{width:1440,height:1100} }); p.setDefaultTimeout(8000);
  const errs=[]; p.on("pageerror", e => errs.push(e.message));
  await p.goto("file://" + html + "/production-v2.html");
- const L=[]; const log=(...a)=>{L.push(a.join(" "));};
+ const L=globalThis.__L=[]; const log=(...a)=>{L.push(a.join(" "));};
  const go = async t => { try { await p.locator("button.btn", { hasText: t }).first().click(); } catch(e){ console.log("FAIL click", t, (await p.locator("#app").innerText()).slice(0,900).replace(/\n/g," / ")); throw e; } };
  const role = r => p.selectOption("#roleSel", r);
  const step = id => p.locator(`.step[data-step="${id}"]`).click();
@@ -47,9 +47,16 @@ const { chromium } = require(process.cwd() + "/node_modules/playwright-core");
  // 5. Ready
  await p.selectOption("#scenSel","ready"); log("syn:", (await p.locator(".syn .pill").allInnerTexts()).join(","));
  await p.screenshot({ path: out + "/v2-ready.png", fullPage: true });
- await go("Confirmer : préparation validée"); log("force err:", await errTxt());
- await p.check("#rForce"); await p.fill("#rReason","Autorisation promise par la mairie pour le 22/10"); await go("Confirmer : préparation validée");
- log("ready:", await p.locator(".callout.ok").first().innerText());
+ log("ready first:", (await p.locator(".layout section.card .vers").first().innerText()).split("\n")[0], "| folded:", await p.locator("details.vers").count());
+ await go("Demander la dérogation"); log("force err:", await errTxt());
+ await p.check("#rForce"); await p.fill("#rpD-0",""); await go("Demander la dérogation"); log("reason err:", await errTxt(), "| still checked:", await p.isChecked("#rForce"), "| focus:", await p.evaluate(()=>document.activeElement.id));
+ await p.fill("#rpD-0","2026-10-22"); await p.fill("#rReason","Autorisation promise par la mairie pour le 22/10"); await go("Demander la dérogation");
+ log("pending:", (await p.locator(".callout.warn").first().innerText()).slice(0,120), "| shoot:", await p.locator('.step[data-step="shoot"] .s').innerText());
+ await role("charge"); log("same step for charge:", await p.locator("#dtitle").innerText());
+ await role("dg"); await go("Refuser"); log("refuse no note:", await errTxt());
+ await go("Valider la dérogation"); log("ready:", await p.locator(".callout.ok").first().innerText());
+ log("plan tasks:", (await p.locator(".rows .row", { hasText: "Avant le" }).count()) || (await p.evaluate(()=>document.body.innerText.match(/Réglé par/g)||[]).length));
+ await role("cp");
  await role("societe"); log("societe sees:", await p.locator(".callout.ok").first().innerText());
  // 6. After the shoot
  await role("cp"); await step("shoot"); await go("Confirmer que le tournage a eu lieu");
@@ -68,8 +75,16 @@ const { chromium } = require(process.cwd() + "/node_modules/playwright-core");
  await p.locator('[data-act="revoke"][data-v="realExt"]').click(); await role("realExt"); log("revoked:", await p.locator("h1").innerText());
  // 8. Blocker
  await p.selectOption("#scenSel","change"); await step("prep"); await go("Signaler un blocage"); await p.fill("#bText","Le loueur n'a plus de FX6"); await p.fill("#bNext","Trouver un autre loueur"); await go("Signaler");
- await role("charge"); log("charge now:", (await p.locator("section.now").innerText()).replace(/\n/g," | ").slice(0,160));
+ await role("charge"); log("charge stays on:", await p.locator("#dtitle").innerText(), "| blocker here:", await p.locator(".layout .callout.bad").count());
  await step("prep"); await p.locator('[data-act="lift"]').first().click(); await p.locator('[data-act="liftok"]').click(); log("lift without note:", await errTxt()); await p.fill("#liftNote","Un autre loueur a une FX6"); await p.locator('[data-act="liftok"]').click(); log("lifted, blockers:", await p.locator('.step[data-step="prep"] .flag').count());
+ // 9. A change after the check reopens it (MKT-PROD-001), a minor point alone needs no second approval
+ await p.selectOption("#scenSel","ready"); await role("charge"); await step("ready"); await p.locator('[data-act="lift"]').first().click(); await p.fill("#liftNote","Autorisation reçue"); await p.locator('[data-act="liftok"]').click();
+ await role("societe"); while (await p.locator('[data-act="taskdone"]').count()) await p.locator('[data-act="taskdone"]').first().click();
+ await role("cp"); await step("ready"); log("ready now:", (await p.locator(".layout section.card .callout").first().innerText()).slice(0,100));
+ await p.check("#rForce"); await p.fill("#rReason","Garder le 23/10, le 24 reste une option"); await p.locator("button.btn", { hasText: /Confirmer|Demander/ }).first().click(); log("minor only:", await p.locator(".flash b").first().innerText());
+ await step("creative"); await go("Demander une nouvelle version"); await p.fill("#crReason","Le découpage ne tient plus avec le nouveau lieu"); await go("Demander à");
+ log("ready after change:", await p.locator('.step[data-step="ready"] .s').innerText(), "| shoot:", await p.locator('.step[data-step="shoot"] .s').innerText());
+ await step("ready"); log("reopened says:", (await p.locator(".layout section.card .callout.warn").first().innerText()).slice(0,110));
  await p.setViewportSize({ width: 390, height: 900 }); log("mobile:", await p.evaluate(() => document.documentElement.scrollWidth));
  await p.emulateMedia({ colorScheme: "dark" }); await p.setViewportSize({ width: 1440, height: 1100 }); await p.selectOption("#scenSel","ready"); await p.screenshot({ path: out + "/v2-dark.png" });
- console.log(L.join("\n")); console.log("errors:", errs); await b.close(); })().catch(e=>{console.error("FAIL", e.message.split("\n")[0]); process.exit(1);});
+ console.log(L.join("\n")); console.log("errors:", errs); await b.close(); })().catch(e=>{console.log((globalThis.__L||[]).join("\n"));console.error("FAIL", e.message.split("\n")[0]); process.exit(1);});

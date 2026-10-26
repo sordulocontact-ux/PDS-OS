@@ -7,7 +7,7 @@ const { chromium } = require(process.cwd() + "/node_modules/playwright-core");
 (async () => { const b = await chromium.launch({ channel: "chrome", headless: true }); const p = await b.newPage({ viewport:{width:1440,height:1100} }); p.setDefaultTimeout(8000);
  const errs=[]; p.on("pageerror", e => errs.push(e.message));
  await p.goto("file://" + html + "/marketing.html");
- const L=[]; const log=(...a)=>{L.push(a.join(" "));};
+ const L=globalThis.__L=[]; const log=(...a)=>{L.push(a.join(" "));};
  log("opens on:", await p.locator("#scenSel").inputValue(), "|", (await p.locator('.step[data-step="st1"] .t').innerText()));
  await p.selectOption("#scenSel", "strat");
  const go = async t => { try { await p.locator("button.btn:visible", { hasText: t }).first().click(); } catch(e){ console.log("FAIL click", t, (await p.locator("#app").innerText()).slice(0,700).replace(/\n/g," / ")); throw e; } };
@@ -115,4 +115,4 @@ const { chromium } = require(process.cwd() + "/node_modules/playwright-core");
  log("reopened:", (await p.locator(".note", { hasText: "Rouvert" }).first().innerText()));
  await p.setViewportSize({ width: 390, height: 900 }); for (const k of ["strat","design","quote","acts","agency","rpint","bilan"]) { await p.selectOption("#scenSel", k); log("mobile", k + ":", await p.evaluate(() => document.documentElement.scrollWidth)); }
  await p.emulateMedia({ colorScheme: "dark" }); await p.setViewportSize({ width: 1440, height: 1100 }); await p.selectOption("#scenSel", "design"); await p.screenshot({ path: out + "/mk-dark.png" });
- console.log(L.join("\n")); console.log("errors:", errs); await b.close(); })().catch(e=>{console.error("FAIL", e.message.split("\n")[0]); process.exit(1);});
+ console.log(L.join("\n")); console.log("errors:", errs); await b.close(); })().catch(e=>{console.log((globalThis.__L||[]).join("\n"));console.error("FAIL", e.message.split("\n")[0]); process.exit(1);});
