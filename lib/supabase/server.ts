@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 import { getPublicEnv } from "@/lib/env-public";
 import { batchingFetch } from "@/lib/supabase/batch";
 import type { Database } from "@/lib/supabase/database.types";
+import { tracingFetch } from "@/lib/supabase/query-trace";
 
 /**
  * Supabase client for Server Components, Server Actions and Route Handlers.
@@ -20,8 +21,9 @@ export async function createClient() {
     NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
-      // Batched only inside withQueryBatching (lib/supabase/batch.ts).
-      global: { fetch: batchingFetch },
+      // Batched only inside withQueryBatching (lib/supabase/batch.ts);
+      // measured with PERF_TRACE=1 (lib/supabase/query-trace.ts).
+      global: { fetch: tracingFetch(batchingFetch) },
       cookies: {
         getAll() {
           return cookieStore.getAll();

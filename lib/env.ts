@@ -90,6 +90,9 @@ export const serverEnvSchema = z
       blankToUndefined,
       z.string().trim().min(4).optional(),
     ),
+    /** « 1 » logs, after each page, its database requests: count, time
+     * and the slowest (lib/supabase/query-trace.ts). Off by default. */
+    PERF_TRACE: z.preprocess(blankToUndefined, z.enum(["1"]).optional()),
     VAPID_SUBJECT: z.preprocess(
       blankToUndefined,
       z

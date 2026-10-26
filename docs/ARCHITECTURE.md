@@ -803,6 +803,13 @@ s'afficher sans chargement.
   (`lib/distribution/shared-reads.ts`), `loadTracking`, `loadStepView`, `loadMixVersions`,
   `loadFinalView`, `listCreativePeople`. Une Server Action relit toujours (le cache ne vaut qu'au
   rendu). Un nouveau lecteur partagé par deux loaders d'un même rendu prend le même chemin.
+- **Mesurer une page** : `PERF_TRACE=1` (local ou Vercel) fait écrire, après chaque rendu, une ligne
+  `[perf]` dans les journaux du serveur (`lib/supabase/query-trace.ts`, branché sur le `fetch` de
+  `createClient`) : chemin, type (`page`, `rsc` = navigation, `prefetch`, `action`), nombre de
+  lectures demandées (avant le regroupement de `withQueryBatching`), durée de bout en bout,
+  **profondeur** (la plus longue chaîne de requêtes faites l'une après l'autre = les allers-retours
+  attendus en série) et les 5 plus lentes. Cible d'une page : quelques requêtes, profondeur ≤ 3,
+  moins de 200 ms. Juger en `pnpm build && pnpm start`.
 - **Squelettes** (`loading.tsx`) pour ce qui n'est pas préchargé (première entrée dans une
   page) : une page de premier niveau a le sien (`PageLoading`), listes avec leur vrai titre,
   sections d'un projet (`ProjectSectionLoading`, sous l'en-tête et les barres qui restent),
