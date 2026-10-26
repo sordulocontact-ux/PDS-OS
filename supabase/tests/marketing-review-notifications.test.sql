@@ -82,6 +82,9 @@ select pg_temp.act_as(pg_temp.id_of('manager'));
 select is((select count(*)::int from public.notifications
             where kind = 'marketing_report_submitted' and project_id = pg_temp.id_of('project')),
           0, 'someone else''s notification stays unread by the manager (RLS)');
+-- An activation still open blocks the closure (20261026400201): this one is cancelled.
+update public.marketing_activations set status = 'cancelled', status_reason = 'Annulée (simulation)'
+ where id = pg_temp.id_of('activation');
 insert into ids select 'closure', public.request_marketing_closure(
   pg_temp.id_of('project'), pg_temp.id_of('report'), '');
 reset role;

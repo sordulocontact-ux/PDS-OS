@@ -6328,6 +6328,44 @@ du volet Marketing**. Aucun ne clôt le projet : la clôture du projet reste l'�
   soumise ; clôture demandée → la direction ; décidée → qui l'a demandée ; rouverte → le responsable.
   Test `supabase/tests/marketing-review-notifications.test.sql`.
 
+### Recette Marketing V1 d'Ibé (23/10/2026) : Activations et Suivi & bilan
+
+Migrations `20261026400101_activation_recette_guards.sql`, `20261026400201_marketing_bilan_recette.sql`,
+`20261026400301_influence_agreement_sent.sql` ; pgTAP `marketing-recette-v1.test.sql` (30). Règles métier :
+`docs/MARKETING-METIER.md` (le dernier retour d'Ibé fait foi sur les règles du 11/10).
+
+- **Gestes avec un créateur** : trigger `a_live` (`influence_gesture_guard`) sur les tables Influence
+  (propositions, accords, droits, contenus, retours, paiements), `activation_targets` (issue seulement),
+  `activation_evidence` / `activation_sheets` (ligne d'un créateur) : refus
+  `collaboration_frozen:not_launched|suspended|closed` hors activation lancée (`activation_is_live` ;
+  côté code `collaborationGate`, `lib/activations/phase.ts`). Révoquer un accord et ouvrir la page
+  restent permis. À l'écran : plus de ligne de module ni de geste dans les cartes (`InfluenceBlock`), un
+  encart dit pourquoi ; la page du créateur dit « La campagne est en pause ».
+- **Clôture d'une Influence** : `close_activation` refuse `creators_open:<noms>` tant qu'un créateur
+  engagé (conditions acceptées, contenu, publication) n'a pas d'issue (`activation_open_creators`).
+- **Agence « réalisée »** : `agency_done_gaps` (`agency_review`, `agency_errors` = ligne du dernier
+  aperçu en erreur et non refusée, `no_coverage`), refus `activation_not_done:<manques>` ; exception
+  `declare_activation_done_with_reserve` (réserve `coverage` ouverte du bilan, qui et quand pré-remplis),
+  formulaire `AgencyDoneForm` sous « Maintenant ».
+- **Échéance** : `due_in_past`, `due_after_campaign:<date>` dans `marketing_activations_check`, fin de
+  campagne `marketing_campaign_end` = `projects.due_date + 28` ; `DueForm` borne le champ
+  (`lib/activations/due-bounds.ts`). Les tests pgTAP datent leurs échéances depuis aujourd'hui.
+- **Accord envoyé** : `influence_agreements.sent_at / sent_by / sent_channel`,
+  `declare_influence_agreement_sent` (une fois, accord en attente) ; prochaine action « Envoyer l'accord »
+  avant « Bon pour accord » (`CollabView.agreementSent`) ; `AgreementSendForm`, aperçu `AgreementTerms`
+  (commun avec la page publique, schéma `lib/activations/influence/agreement-content.ts`).
+- **Mesures** : `lib/activations/measure-sources.ts` (`measureChoices` d'après le type et le titre).
+- **Réserves et clôture** : `arbitrate_marketing_reserve` refuse `activation_reserve_kept` (Non applicable
+  ou Doublon pour une activation ouverte) et un doublon d'une réserve déjà gardée ;
+  `request_marketing_closure` et `decide_marketing_closure` refusent `activations_uncovered:<titres>`
+  (`marketing_uncovered_activations`). Code : `BilanIssue.locked`, `reserveDecisionsFor`
+  (`lib/marketing/closure/reserves.ts`), ligne « Avant la clôture » non prête.
+- **Budget et objectifs** : `budget_lines.activation_id` (même projet, `check_budget_line_activation`),
+  `marketing_report_budgets.invoiced_cents` ; `lib/marketing/review/budget-breakdown.ts` et
+  `objectives.ts` (purs), `StandingGoals` sous « Voir le détail » ; figure `budget_invoiced` du tableau de
+  bord. Le formulaire d'une ligne de budget ne propose pas encore l'activation : la ligne est lue sur son
+  livrable ou son levier.
+
 ## 9. Design (`docs/DESIGN.md`)
 
 - Design system : tokens et pont shadcn dans `app/globals.css`, polices

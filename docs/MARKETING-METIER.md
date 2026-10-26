@@ -64,6 +64,27 @@ lue depuis son Google Sheets, décision PDS séparée, « Actualiser ») : fiche
 concept validé, négociation, accord express par lien, droits organiques ≠ publicitaires, paiement
 administratif ; cadrage RP, dossier de presse, ciblage, messages, relances, interviews, retombées.
 
+Recette Marketing V1 d'Ibé (23/10/2026), règles changées dans l'app (le dernier retour fait foi) :
+- **Rien avec un créateur avant le lancement** (MKT-INF-001) : proposition, accord, droits, contenu,
+  publication, paiement, concept du créateur, issue de la collaboration exigent une activation lancée
+  (responsable, échéance, « En cours » ou « Réalisée déclarée ») ; choisir les créateurs reste possible.
+  Suspendue, clôturée ou annulée : les collaborations sont figées (révoquer un lien reste possible). Avant
+  (11/10), rien ne le contrôlait. Une Influence ne se clôture que quand chaque créateur engagé (conditions
+  acceptées, contenu ou publication) a son issue.
+- **« Envoyer l'accord »** (MKT-INF-002) depuis la vue du responsable : destinataire, canal, aperçu de la
+  page du créateur, « Marquer comme envoyé » ; la collaboration n'attend le créateur qu'ensuite. PDS OS
+  n'envoie toujours aucun e-mail lui-même (pas de SMTP de l'app) : l'envoi est **déclaré**.
+- **Agence : « Déclarer réalisée » demande un tableau réglé** (MKT-ACT-001) : plus de média « À examiner »,
+  aucune ligne en erreur non refusée, au moins une retombée déclarée ; sinon « Déclarer réalisée avec une
+  réserve » (ce qui reste, qui suit, pour quand), reprise au bilan.
+- **Échéance** entre aujourd'hui (Paris) et la **fin de la campagne = sortie + 28 jours** (période des
+  KPI du premier mois, choix du proto), contrôlée quand elle est fixée ou déplacée.
+- **Sources d'un relevé selon le levier** (MKT-ACT-002, ACT-001) : playlists → Spotify, Apple Music,
+  Deezer, YouTube Music, Amazon Music, Autre ; Showcase → « Mesure » : Billetterie, Comptage à l'entrée,
+  Liste d'invités, Autre ; contenus et Influence → réseaux ; jamais TikTok par défaut ailleurs.
+- L'activation ouverte qui sort du filtre reste listée, marquée « Hors filtre », jamais comptée (ACT-003).
+- Paid : hors V1 (MKT-ACT-003, rien de demandé dans les tickets).
+
 ## Suivi & bilan
 
 Demandé : tableau de bord vivant (déclaré / vérifié / inconnu séparés), rapport figé et versionné, bilan
@@ -86,6 +107,22 @@ Décisions du lot 7 (19/10/2026, parcours du proto) :
   (« Attention »), jamais bloquants.
 - La période d'une version est obligatoire, pré-remplie du début de la première activation à
   aujourd'hui ; le résumé exécutif aussi (proto).
+
+Recette Marketing V1 d'Ibé (23/10/2026) :
+- **Une activation pas terminée reste une réserve jusqu'à la clôture** (MKT-BIL-001) : toujours incluse
+  dans la version (case figée), jamais « Non applicable » ni « Doublon » ; la clôture est refusée tant
+  qu'une activation ouverte n'a pas sa réserve suivie après la clôture (qui, quand, canal) ou acceptée
+  comme limite par la direction. Le bilan provisoire reste possible avec des activations ouvertes.
+  Avant, l'activation ouverte n'était qu'une ligne « Attention », jamais bloquante.
+- Une réserve gardée pour une autre n'est pas elle-même un doublon (pas de boucle).
+- Le texte d'aide dit qui décide quoi (MKT-002) : le responsable arbitre, la direction accepte une limite.
+- **Objectifs et budget** (MKT-BIL-002), sous « Voir le détail » : chaque objectif de la Stratégie
+  (indicateur, cible, échéance, déjà structurés) face aux relevés des activations — déclaré, vérifié,
+  écart absolu et relatif, « Non mesurable » avec sa raison (pas de cible, mesure non relevée par les
+  activations comme les playlists, aucun relevé) ; le budget par activation (ligne rattachée à son
+  activation, sinon à celle de son livrable, sinon à la seule activation de son levier) en estimé /
+  engagé / **facturé** (facture reçue, payée ou non) / payé, et l'écart à l'enveloppe. « Facturé » entre
+  aussi au tableau de bord et dans la version figée.
 
 ## Ce que le proto couvre et ce qui reste (18/10/2026)
 
