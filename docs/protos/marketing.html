@@ -1263,7 +1263,7 @@ document.addEventListener("click",e=>{
   S.err={};const kept=readForm();
   switch(a){
     case "tab": S.tab=el.dataset.v; S.form=null; break;
-    case "go": S.tab="parcours"; S.sel=el.dataset.step; S.mod=STEP(el.dataset.step).mod; if(STEP(el.dataset.step).liv) S.liv=STEP(el.dataset.step).liv; if(actById(el.dataset.step)) S.actOpen=el.dataset.step; S.form=null; S.flash=null; window.scrollTo({top:0}); break;
+    case "go": S.tab="parcours"; S.sel=el.dataset.step; S.mod=STEP(el.dataset.step).mod; if(STEP(el.dataset.step).liv) S.liv=STEP(el.dataset.step).liv; S.form=null; S.flash=null; window.scrollTo({top:0}); break;
     case "unflash": S.flash=null; break;
     case "form": {S.form=el.dataset.v||null;if((S.form||"").startsWith("ag:")) focusAgenda(); S.cdraft=false; S.lvals=null;
       const f=S.form||"";S.ldraft=f.startsWith("loc:")?[...(S.locs.cands[+f.split(":")[1]].photos||[])]:[];break;}
@@ -1382,6 +1382,7 @@ document.addEventListener("click",e=>{
         if(g==="Calendrier de lancement"){const j=parseInt(val("ad-x"),10);if(isNaN(j)){S.err["ad-x"]="Un nombre de jours, par exemple -3 pour J-3.";break;}x.j=j;}
         if(g==="Budget stratégie"){const n=parseInt(val("ad-x").replace(/\D/g,""),10);if(!n){S.err["ad-x"]="Un montant en euros, par exemple 1 500.";break;}x.amount=n;}
         if(g==="Livrables engagés") x.fmt=val("ad-x")||null;
+        if(g==="Objectifs & KPIs"){const n=parseInt(val("ad-target").replace(/\D/g,""),10),j=parseInt(val("ad-j"),10);if(!n) S.err["ad-target"]="La cible chiffrée, par exemple 150 000.";if(isNaN(j)) S.err["ad-j"]="Le nombre de jours après la sortie, par exemple 28.";if(!n||isNaN(j)) break;x.metric=val("ad-metric");x.target=n;x.j=j;}
         S.strat.items.push(x);}
       else if(c==="design"){x.group=g;x.q=val("ad-q");S.design.items.push(x);}
       else if(c.startsWith("prep:")){x.kind="action";x.topic="Ajouté";x.r=val("ad-who");const d=val("ad-due");x.due=d?d.slice(8)+"/"+d.slice(5,7):null;prepOf(c.slice(5)).items.push(x);}
@@ -1399,23 +1400,34 @@ document.addEventListener("click",e=>{
         log("Brief de sortie — V1 validé");after("Brief de sortie validé");}
       else after(k==="res"?"Brief de sortie validé avec réserves":"Brief de sortie validé");break;}
     case "stresend": {if(!need("stAnswer","Dites ce qui a changé.")) break;const r=S.strat.review;S.strat.review={round:r.round+1,validators:r.validators,dec:{},changes:null,at:stamp(),by:who,answer:val("stAnswer")};log(`Brief de sortie transmis à nouveau : « ${val("stAnswer")} »`);after("Brief de sortie transmis à nouveau");break;}
-    case "copylink": toast("Lien du Plan de sortie copié."); return;
+    case "cadd": {const a=actById(el.dataset.id),n=parseInt(val("cAmount").replace(/\D/g,""),10);if(!val("cLabel")) S.err.cLabel="Ce que c'est.";if(!n) S.err.cAmount="Un montant en euros, par exemple 1 200.";if(S.err.cLabel||S.err.cAmount) break;
+      a.costs=(a.costs||[]).concat([{label:val("cLabel"),amount:n,state:val("cState"),by:who,at:stamp()}]);S.form=null;log(`${a.title} : dépense ${euro(n)} (${COST_ST[val("cState")].toLowerCase()})`);toast("Dépense ajoutée.");break;}
+    case "cstate": {const a=actById(el.dataset.id),c=a.costs[+el.dataset.i];c.state=c.state==="engaged"?"invoiced":"paid";c[c.state+"At"]=stamp();log(`${a.title} · ${c.label} : ${COST_ST[c.state].toLowerCase()}`);toast(COST_ST[c.state]+".");break;}
+    case "copylink": copyText(copySource(el),"Lien copié."); return;
     case "dirsubmit": {let ok=true;DIR_FIELDS.forEach((f,i)=>{if(!dirValue(i)){const v=val("dirf"+i);if(!v){S.err["dirf"+i]="Écrivez ce point de la direction.";ok=false;}else S.design.dirManual[i]={text:v,by:who};}});if(!ok) break;
       const d=S.design.dir;d.sections=designGroups().filter((g,i)=>i===0||(document.getElementById("dsec-"+i)||{}).checked);d.status="submitted";d.rounds.push(`Soumise par ${who} le ${stamp()}`);log("Direction artistique soumise à "+nameOf(holder("direction")));after("Direction soumise");break;}
     case "dirdecide": {const d=S.design.dir,v=el.dataset.v,t=val("dirNote");if(v!=="approved"&&!t){S.err.dirNote="Dites ce qui doit changer.";break;}
       if(v==="approved") S.design.refs.forEach(r=>{if(r.groups.some(g=>(d.sections||[]).includes(g))) r.validated=true;});
       d.status=v;d.decidedBy=who;d.decidedAt=stamp();d.note=t;d.rounds.push(`${v==="approved"?"Validée":"Modifications demandées"} par ${who} le ${d.decidedAt}${t?" : « "+t+" »":""}`);log(`Direction artistique : ${v==="approved"?"validée":"modifications demandées"}`);after(v==="approved"?"Direction validée":"Modifications demandées");break;}
     case "aresp": {const a=actById(el.dataset.id);a.resp=val("aResp");log(`${a.title} : ${nameOf(a.resp)} responsable`);after(`${nameOf(a.resp)} désignée responsable`);break;}
-    case "adue": {const a=actById(el.dataset.id);if(!need("aDue","Choisissez l'échéance.")) break;a.due=val("aDue");log(`${a.title} : échéance le ${fullDate(fromIso(a.due))}`);after("Échéance fixée");break;}
+    case "adue": {const a=actById(el.dataset.id);if(!need("aDue","Choisissez l'échéance.")) break;
+      if(val("aDue")<isoOf(new Date(...S.base))){S.err.aDue="L'échéance ne peut pas être déjà passée.";break;}
+      if(val("aDue")>isoOf(CAMPAIGN_END)){S.err.aDue=`L'échéance doit tomber avant la fin de la campagne, le ${fullDate(CAMPAIGN_END)}.`;break;}a.due=val("aDue");log(`${a.title} : échéance le ${fullDate(fromIso(a.due))}`);after("Échéance fixée");break;}
     case "alaunch": {const a=actById(el.dataset.id);a.status="run";log(`${a.title} : lancée`);after(`${a.title} : activation lancée`);break;}
     case "adone": {const a=actById(el.dataset.id),m=moduleProof(a);
       if(m&&a.kind==="Influence"&&!m.pub){S.err.adone=m.n?"Aucun créateur n'a encore publié : la campagne n'est pas réalisée.":"Engagez au moins un créateur avant de déclarer la campagne réalisée.";break;}
       if(m&&a.kind==="Relations presse"&&!m.sent&&!m.pub){S.err.adone="Aucun message n'est parti aux médias : les relations presse ne sont pas réalisées.";break;}
-      a.status="done";log(`${a.title} : réalisée déclarée`);after("Activation déclarée réalisée");break;}
+      const iss=agencyIssues(a);
+      if(iss.length){const x=document.getElementById("aExc");if(!x||!x.checked){S.err.adone="Réglez ces points avec l'agence, ou déclarez réalisée avec une réserve.";break;}
+        if(!val("aExcWhy")) S.err.aExcWhy="Le motif de la réserve.";if(!val("aExcD")) S.err.aExcD="Avant quand elle sera réglée.";else if(val("aExcD")>isoOf(CAMPAIGN_END)) S.err.aExcD=`Avant la fin de la campagne, le ${fullDate(CAMPAIGN_END)}.`;
+        if(S.err.aExcWhy||S.err.aExcD) break;a.exception={items:iss,why:val("aExcWhy"),r:val("aExcR"),due:val("aExcD"),by:who,at:stamp()};}
+      a.status="done";log(`${a.title} : réalisée déclarée${a.exception?` avec une réserve · « ${a.exception.why} »`:""}`);after(a.exception?"Déclarée réalisée, avec une réserve":"Activation déclarée réalisée");break;}
     case "aproofsample": document.getElementById("aProof").value="https://www.tiktok.com/@monalys/video/7431"; return;
     case "averify": {const a=actById(el.dataset.id),v=el.dataset.v,t=val("aNote");if(v==="contest"&&!t){S.err.aNote="Dites ce qui ne va pas.";break;}
       a.proof.state=v==="ok"?"verified":"contested";a.proof.note=v==="ok"?null:t;a.proof.verifiedBy=who;log(`${a.title} : preuve ${v==="ok"?"vérifiée":"contestée · « "+t+" »"}`);after(v==="ok"?"Preuve vérifiée":"Preuve contestée");break;}
-    case "aclose": {const a=actById(el.dataset.id);a.status="closed";a.closedBy=who;log(`${a.title} : clôturée`);after(`${a.title} : activation clôturée`);break;}
+    case "aclose": {const a=actById(el.dataset.id);
+      if(a.kind==="Influence"&&a.mode!=="Agence externe"){const o=collabsOf(a).filter(c=>c.accepted!=null&&!["closed",...OUT].includes(c.stage));if(o.length){S.err.aclose=`${o.length>1?`${o.length} créateurs engagés ne sont`:"Un créateur engagé n'est"} pas terminé${o.length>1?"s":""} : ${o.map(c=>`${nameOf(c.k)} (${STAGE[c.stage].toLowerCase()})`).join(", ")}. Clôturez ou terminez chaque collaboration d'abord.`;break;}}
+      a.status="closed";a.closedBy=who;log(`${a.title} : clôturée`);after(`${a.title} : activation clôturée`);break;}
     case "bgen": {const fr=val("bFrom"),tt=val("bTo");if(!fr) S.err.bFrom="Le début de la période.";if(!tt) S.err.bTo="La fin de la période.";else if(fr&&tt<fr) S.err.bTo="La fin doit suivre le début.";if(!need("bSum","Écrivez le résumé exécutif.")||S.err.bFrom||S.err.bTo) break;
       const ids=S.acts.filter(a=>{const c=document.getElementById("bs-"+a.id);return !c||c.checked;}).map(a=>a.id),secs=REPORT_SECTIONS.map(x=>x[0]).filter(k=>{const c=document.getElementById("bx-"+k);return !c||c.checked;});const iss=bilanIssues().filter((_,i)=>{const c=document.getElementById("bi-"+i);return c&&c.checked;});const n=S.review.reports.length+1,at=stamp();
       const snap=reportSnapshot(ids,secs,fr,tt,val("bSum"),val("bReco"),iss);
@@ -1423,12 +1435,18 @@ document.addEventListener("click",e=>{
     case "bsubmit": {const r=lastReport();r.status="submitted";log(`Bilan V${r.n} soumis à ${nameOf(holder("direction"))}`);after("Bilan soumis à validation");break;}
     case "bdecide": {const r=lastReport(),v=el.dataset.v,t=val("bNote");if(v!=="approved"&&!t){S.err.bNote="Dites pourquoi.";break;}r.status=v;r.decidedBy=who;r.note=t;
       if(v==="approved") S.review.reserves=r.reserves.map(x=>({...x,id:id("r"),arb:null}));log(`Bilan V${r.n} : ${RSTATE[v][1].toLowerCase()}${t?" · « "+t+" »":""}`);after(v==="approved"?"Bilan provisoire approuvé":v==="changes"?"Corrections demandées":"Validation reportée");break;}
-    case "rarb": {const x=S.review.reserves.find(y=>y.id===el.dataset.id),k=val("ra-"+x.id),why=val("ry-"+x.id);if(k==="limit"&&!why){S.err["ry-"+x.id]="Une limite définitive demande un motif.";break;}
-      if(k==="dup"&&!val("rdup-"+x.id)){S.err["ry-"+x.id]="Choisissez la réserve conservée.";break;}if(k==="dup") x.dupOf=val("rdup-"+x.id);x.arb=k;x.by=who;x.why=why||null;if(k==="follow"){x.who=val("rw-"+x.id);x.due=val("rd-"+x.id);}log(`Réserve « ${x.text} » : ${ARB[k].toLowerCase()}`);after("Réserve arbitrée");break;}
+    case "rarb": {const x=S.review.reserves.find(y=>y.id===el.dataset.id),k=val("ra-"+x.id),why=val("ry-"+x.id);
+      if(k==="limit"?!can("direction"):!can("project")){S.err["ra-"+x.id]=k==="limit"?"Seule la direction accepte une limite définitive.":"Le responsable du projet arbitre les réserves.";break;}
+      if(x.open&&["na","dup"].includes(k)){S.err["ra-"+x.id]="Une activation encore ouverte ne peut être ni non applicable ni un doublon : suivez-la après la clôture, ou faites-la accepter comme limite.";break;}
+      if((k==="limit"||k==="na")&&!why){S.err["ry-"+x.id]=k==="na"?"Dites pourquoi cette réserve ne s'applique pas.":"Une limite définitive demande un motif.";break;}
+      if(k==="dup"){const t=S.review.reserves.find(y=>y.id===val("rdup-"+x.id));if(!t){S.err["ry-"+x.id]="Choisissez la réserve conservée.";break;}if(t===x||t.arb==="dup"){S.err["ry-"+x.id]="Choisissez une réserve conservée, pas un autre doublon.";break;}}
+      if(k==="follow"){if(!val("rd-"+x.id)) S.err["rd-"+x.id]="Pour quand.";if(!val("rc-"+x.id)) S.err["rc-"+x.id]="Choisissez le canal de suivi.";if(S.err["rd-"+x.id]||S.err["rc-"+x.id]) break;}
+      if(k==="dup") x.dupOf=val("rdup-"+x.id);x.arb=k;x.by=who;x.why=why||null;x.at=stamp();if(k==="follow"){x.who=val("rw-"+x.id);x.due=val("rd-"+x.id);x.channel=val("rc-"+x.id);}log(`Réserve « ${x.text} » : ${ARB[k].toLowerCase()}`);after("Réserve arbitrée");break;}
     case "rlift": {const x=S.review.reserves.find(y=>y.id===el.dataset.id);if(!need("rl-"+x.id,"Dites ce qui l'a levée.")) break;x.lifted=val("rl-"+x.id);log(`Réserve levée : « ${x.text} »`);after("Réserve levée");break;}
-    case "cloreq": S.review.closeReq={by:who,at:stamp()};S.review.corr=null;log("Clôture du Marketing demandée");after("Clôture demandée");break;
+    case "cloreq": if(uncoveredActs().length){S.err.cloreq=`${uncoveredActs().map(a=>a.title).join(", ")} : encore ouverte${uncoveredActs().length>1?"s":""} sans réserve suivie. Clôturez-la, suivez-la après la clôture dans Réserves, ou générez un nouveau bilan.`;break;}S.review.closeReq={by:who,at:stamp()};S.review.corr=null;log("Clôture du Marketing demandée");after("Clôture demandée");break;
     case "clodecide": {const v=el.dataset.v,t=val("cNote");if(v==="changes"&&!t){S.err.cNote="Dites ce qui doit être corrigé.";break;}
       if(v==="changes"){S.review.closeReq=null;S.review.corr={by:who,note:t};log(`Clôture : corrections demandées · « ${t} »`);after("Corrections demandées");break;}
+      if(uncoveredActs().length||reservesOpen().length){S.err.cNote="Des activations ouvertes ou des réserves ne sont pas réglées : la clôture attend.";break;}
       const withRes=S.review.reserves.some(r=>r.arb==="follow"||r.arb==="limit");S.review.closed={by:who,at:stamp(),withRes};log(`Marketing clôturé ${withRes?"avec":"sans"} réserve`);after("Marketing clôturé");break;}
 
     case "crset": S.roles.creative=val("crResp");S.design.respBy=who;log(`Responsable créatif : ${nameOf(S.roles.creative)}`);after(`${nameOf(S.roles.creative)} désignée responsable créative`);break;
@@ -1440,7 +1458,7 @@ document.addEventListener("click",e=>{
     case "reflink": {const r=S.design.refs.find(x=>x.id===el.dataset.id);r.groups=designGroups().filter((g,i)=>{const c=document.getElementById(`rg-${r.id}-${i}`);return c&&c.checked;});S.form=null;log(`Référence « ${r.title} » rattachée à : ${r.groups.join(", ")||"rien"}`);toast(r.groups.length?"Référence rattachée.":"Référence remise dans « À rattacher ».");break;}
     case "radd": {const l=val("rLink");if(!need("rTitle","Donnez un titre à la référence.")) break;if(l&&!/^https:\/\/\S+$/.test(l)){S.err.rLink="Un lien qui commence par https://.";break;}
       const groups=designGroups().filter((g,i)=>{const c=document.getElementById("rAdd-"+i);return c&&c.checked;});
-      S.design.refs.push({id:"r"+(++uid),img:S.rdraft&&S.rdraft.url,link:l||(S.rdraft&&!S.rdraft.url?S.rdraft.name:null),title:val("rTitle"),kind:val("rKind"),groups,notes:val("rNotes"),rights:val("rRights"),by:who,validated:false});
+      S.design.refs.push({id:"r"+(++uid),file:S.rdraft&&S.rdraft.size!=null?fileMeta(S.rdraft,stamp(),who):null,img:S.rdraft&&S.rdraft.url,link:l||(S.rdraft&&!S.rdraft.url?S.rdraft.name:null),title:val("rTitle"),kind:val("rKind"),groups,notes:val("rNotes"),rights:val("rRights"),by:who,validated:false});
       S.rdraft=null;S.form=null;log(`Référence ajoutée : ${val("rTitle")}`);toast(groups.length?"Référence ajoutée.":"Référence ajoutée dans « À rattacher ».");break;}
     case "brief": S.design.brief={v:1,by:who,at:stamp()};log("Brief créatif V1 établi");after("Brief créatif V1 établi");break;
     case "frset": {const f=ficheByKey(el.dataset.k);f.resp=val("fr-"+f.key);f.respBy=who;log(`Fiche ${f.name} : ${nameOf(f.resp)} responsable`);after(`${nameOf(f.resp)} responsable de la fiche ${f.name}`);break;}
@@ -1462,8 +1480,9 @@ document.addEventListener("click",e=>{
     case "fnewv": {const f=ficheByKey(el.dataset.k);f.version++;f.status="draft";f.rounds.push(`V${f.version} ouverte par ${who} le ${stamp()}`);log(`Fiche ${f.name} : V${f.version} ouverte`);toast(`V${f.version} ouverte : elle devra être validée à nouveau.`);break;}
     case "prodliv": S.liv=el.dataset.v;S.sel=null;S.form=null;break;
     case "pqset": {const k=el.dataset.k,m=(document.querySelector('input[name="pqMode"]:checked')||{}).value,co=k==="clip"&&m==="ext"?(document.querySelector('input[name="pqCo"]:checked')||{}).value:null,c0=choicesFor(k).find(x=>x[0]===m),c=co?[m,c0[1],c0[2],co,c0[4]]:c0,o=(document.querySelector('input[name="pqOrg"]:checked')||{}).value,needOrg=prepLiv(k)&&m!=="decl";
-      if(needOrg&&!o){S.err.pqOrg="Choisissez comment organiser la préproduction.";break;}
-      if(k==="clip"&&m==="ext"&&!co){S.err.pqCo="Choisissez la société.";break;}if(co) setCompany(co);S.pqDraft=null;
+      if(needOrg&&!o) S.err.pqOrg="Choisissez comment organiser la préproduction.";
+      if(k==="clip"&&m==="ext"&&!co) S.err.pqCo="Choisissez la société.";
+      if(S.err.pqOrg||S.err.pqCo){S.pqDraft=pqDraftRead(k);break;}if(co) setCompany(co);S.pqDraft=null;
       S.prods[k]={mode:m,who:c[3],by:who,at:stamp()};if(needOrg){Object.assign(prepOf(k),{org:o,orgBy:who,orgAt:S.prods[k].at});if(o==="po") prepReveal(k);}
       log(`${ficheByKey(k).name} : production ${MODE_LABEL[m].toLowerCase()}${c[3]?" · "+nameOf(c[3]):""}`);after(`${ficheByKey(k).name} : ${MODE_LABEL[m].toLowerCase()}`);break;}
     case "gdo": {const s=STEP(el.dataset.id),n=gph(s.id);S.gby[s.id+":"+n]=`${who}, ${stamp()}`;S.gph[s.id]=n+1;log(s.acts[n][2]);after(s.acts[n][2]);break;}
@@ -1474,7 +1493,7 @@ document.addEventListener("click",e=>{
     case "lccheck": {const k=el.dataset.k,n=+el.dataset.n,L=lightOf(k);let all=true;for(let i=0;i<n;i++){const c=document.getElementById("lc-"+i);if(!c||!c.checked) all=false;else L.checks[i]=true;}
       if(!all){S.err.lc="Cochez chaque point contrôlé, ou demandez une nouvelle version.";break;}L.controlled={by:who,at:stamp()};log(`${ficheByKey(k).name} : fichiers conformes`);after("Fichiers conformes");break;}
     case "lddeliver": {const k=el.dataset.k;lightOf(k).delivered={by:who,at:stamp()};log(`${ficheByKey(k).name} livré${k==="pochette"?" : pochette validée transmise à la Distribution":""}`);after(`${ficheByKey(k).name} livré`);break;}
-    case "apcreate": {const x=S.actProps[+el.dataset.i],m=document.getElementById("apm-"+el.dataset.i);x.mode=m?m.value:null;x.state="created";const a=newAct(x);S.acts.push(a);log(`Activation créée : ${a.title}${a.mode?" · "+a.mode.toLowerCase():""}`);after(`${a.title} : activation créée`);break;}
+    case "apcreate": {const x=S.actProps[+el.dataset.i],m=document.getElementById("apm-"+el.dataset.i);x.mode=m?m.value:null;x.state="created";const a=newAct(x);S.acts.push(a);if(S.mod==="activations") S.sel=a.id;log(`Activation créée : ${a.title}${a.mode?" · "+a.mode.toLowerCase():""}`);after(`${a.title} : activation créée`);break;}
     case "aplater": {const x=S.actProps[+el.dataset.i];x.state="later";log(`${x.title} : plus tard`);toast("Reporté : vous pourrez la créer plus tard.");break;}
     case "strelance": S.strat.relances=S.strat.relances||{};S.strat.relances[el.dataset.v]=stamp();log(`Relance envoyée à ${nameOf(el.dataset.v)} : Brief de sortie à valider`);toast(`${nameOf(el.dataset.v)} relancée.`);break;
     case "reopen": {if(!need("cReopen","Dites pourquoi vous rouvrez le Marketing.")) break;S.review.reopened={by:who,at:stamp(),why:val("cReopen")};S.review.closed=null;S.review.closeReq=null;log(`Marketing rouvert · « ${val("cReopen")} »`);after("Marketing rouvert");break;}
@@ -1505,39 +1524,46 @@ document.addEventListener("click",e=>{
     case "aresume": {const a=actById(el.dataset.id);a.status=a.prev||"prep";log(`${a.title} : reprise`);after(`${a.title} reprise`);break;}
     case "actview": S.actView=el.dataset.v; break;
     case "cpick": {const a=actById(el.dataset.id),k=el.dataset.k,camp=campOf(a);if(camp.collabs.some(c=>c.k===k)){toast("Déjà dans la campagne : la fiche existante est ouverte.");break;}camp.collabs.push({k,stage:"candidate",offers:[],versions:[],log:[`Ajoutée depuis le Réseau par ${who} le ${stamp()}`],pay:"none"});log(`Influence : ${nameOf(k)} ajoutée à la campagne`);toast(`${nameOf(k)} ajoutée.`);break;}
-    case "cconcept": {const a=actById(el.dataset.id),c=collabsOf(a).find(x=>x.k===el.dataset.k);if(!need(`cc-a-${c.k}`,"Écrivez l'angle.")) break;c.concept={angle:val(`cc-a-${c.k}`),format:val(`cc-f-${c.k}`),message:val(`cc-m-${c.k}`)};c.stage="concept";c.log.push(`Concept soumis par ${who} le ${stamp()}`);log(`Influence · ${nameOf(c.k)} : concept soumis`);after("Concept soumis");break;}
-    case "cconceptdec": {const a=actById(el.dataset.id),c=collabsOf(a).find(x=>x.k===el.dataset.k),v=el.dataset.v,t=val(`ccn-${c.k}`);if(v==="changes"&&!t){S.err[`ccn-${c.k}`]="Dites ce qui doit changer.";break;}
+    case "cconcept": {const a=actById(el.dataset.id),c=collabsOf(a).find(x=>x.k===el.dataset.k);if(!collabOpen(a)){toast("Activation pas lancée, ou close : rien ne change avec les créateurs.");break;}if(!need(`cc-a-${c.k}`,"Écrivez l'angle.")) break;c.concept={angle:val(`cc-a-${c.k}`),format:val(`cc-f-${c.k}`),message:val(`cc-m-${c.k}`)};c.stage="concept";c.log.push(`Concept soumis par ${who} le ${stamp()}`);log(`Influence · ${nameOf(c.k)} : concept soumis`);after("Concept soumis");break;}
+    case "cconceptdec": {const a=actById(el.dataset.id),c=collabsOf(a).find(x=>x.k===el.dataset.k),v=el.dataset.v,t=val(`ccn-${c.k}`);if(!collabOpen(a)){toast("Activation pas lancée, ou close : rien ne change avec les créateurs.");break;}if(v==="changes"&&!t){S.err[`ccn-${c.k}`]="Dites ce qui doit changer.";break;}
       if(v==="ok"){c.conceptOk=who;c.stage="validated";}else c.stage="candidate";c.log.push(`Concept ${v==="ok"?"validé":"à corriger"} par ${who} le ${stamp()}${t?" : « "+t+" »":""}`);log(`Influence · ${nameOf(c.k)} : concept ${v==="ok"?"validé":"à corriger"}`);after(v==="ok"?"Concept validé":"Corrections demandées");break;}
-    case "cbrief": {const a=actById(el.dataset.id),c=collabsOf(a).find(x=>x.k===el.dataset.k),n=parseInt(val(`co-a-${c.k}`).replace(/\D/g,""),10);if(!n){S.err[`co-a-${c.k}`]="Un montant en euros.";break;}
+    case "cbrief": {const a=actById(el.dataset.id),c=collabsOf(a).find(x=>x.k===el.dataset.k),n=parseInt(val(`co-a-${c.k}`).replace(/\D/g,""),10);if(!collabOpen(a)){toast("Activation pas lancée, ou close : rien ne change avec les créateurs.");break;}if(!n){S.err[`co-a-${c.k}`]="Un montant en euros.";break;}
       const at=stamp();c.offers.push({by:"PDS",amount:n,deliverables:val(`co-d-${c.k}`),organic:val(`co-o-${c.k}`),ads:val(`co-p-${c.k}`),at});c.stage="nego";c.log.push(`Brief envoyé par ${val(`co-ch-${c.k}`).toLowerCase()} (envoi déclaré par ${who}) le ${at}`);log(`Influence · ${nameOf(c.k)} : brief envoyé, proposition ${euro(n)}`);after("Brief envoyé");break;}
-    case "ccounter": {const a=actById(el.dataset.id),c=collabsOf(a).find(x=>x.k===el.dataset.k),l=lastOf(c.offers);c.offers.push({...l,by:"Créateur",amount:l.amount+150,at:stamp()});c.log.push(`Contre-proposition de ${nameOf(c.k)} : ${euro(l.amount+150)}`);log(`Influence · ${nameOf(c.k)} : contre-proposition ${euro(l.amount+150)}`);after("Contre-proposition reçue");break;}
-    case "cnewoffer": {const a=actById(el.dataset.id),c=collabsOf(a).find(x=>x.k===el.dataset.k),n=parseInt(val(`cn-a-${c.k}`).replace(/\D/g,""),10);if(!n){S.err[`cn-a-${c.k}`]="Un montant en euros.";break;}const l=lastOf(c.offers);c.offers.push({...l,by:"PDS",amount:n,ads:val(`cn-p-${c.k}`),at:stamp()});S.form=null;c.log.push(`Nouvelle proposition de PDS : ${euro(n)}`);log(`Influence · ${nameOf(c.k)} : nouvelle proposition ${euro(n)}`);toast("Proposition envoyée.");break;}
-    case "caccept": {const a=actById(el.dataset.id),c=collabsOf(a).find(x=>x.k===el.dataset.k);c.accepted=c.offers.length-1;c.token=Math.random().toString(36).slice(2,10);c.agreement={status:"pending"};c.stage="agreement";c.log.push(`Conditions acceptées par ${who} : ${euro(c.offers[c.accepted].amount)} · lien d'accord créé`);log(`Influence · ${nameOf(c.k)} : conditions acceptées, accord express demandé`);after("Lien d'accord créé");break;}
+    case "ccounter": {const a=actById(el.dataset.id),c=collabsOf(a).find(x=>x.k===el.dataset.k),l=lastOf(c.offers);if(!collabOpen(a)){toast("Activation pas lancée, ou close : rien ne change avec les créateurs.");break;}c.offers.push({...l,by:"Créateur",amount:l.amount+150,at:stamp()});c.log.push(`Contre-proposition de ${nameOf(c.k)} : ${euro(l.amount+150)}`);log(`Influence · ${nameOf(c.k)} : contre-proposition ${euro(l.amount+150)}`);after("Contre-proposition reçue");break;}
+    case "cnewoffer": {const a=actById(el.dataset.id),c=collabsOf(a).find(x=>x.k===el.dataset.k),n=parseInt(val(`cn-a-${c.k}`).replace(/\D/g,""),10);if(!collabOpen(a)){toast("Activation pas lancée, ou close : rien ne change avec les créateurs.");break;}if(!n){S.err[`cn-a-${c.k}`]="Un montant en euros.";break;}const l=lastOf(c.offers);c.offers.push({...l,by:"PDS",amount:n,ads:val(`cn-p-${c.k}`),at:stamp()});S.form=null;c.log.push(`Nouvelle proposition de PDS : ${euro(n)}`);log(`Influence · ${nameOf(c.k)} : nouvelle proposition ${euro(n)}`);toast("Proposition envoyée.");break;}
+    case "caccept": {const a=actById(el.dataset.id),c=collabsOf(a).find(x=>x.k===el.dataset.k);if(!collabOpen(a)){toast("Activation pas lancée, ou close : rien ne change avec les créateurs.");break;}c.accepted=c.offers.length-1;c.token=Math.random().toString(36).slice(2,10);c.agreement={status:"pending",createdAt:stamp()};c.stage="agreement";c.log.push(`Conditions acceptées par ${who} : ${euro(c.offers[c.accepted].amount)} · lien d'accord créé, à envoyer`);log(`Influence · ${nameOf(c.k)} : conditions acceptées, accord à envoyer`);after("Conditions acceptées : accord à envoyer");break;}
+    case "csend": {const a=actById(el.dataset.id),c=collabsOf(a).find(x=>x.k===el.dataset.k);if(!collabOpen(a)) break;const ch=val("ag-ch-"+c.k)||"E-mail",at=stamp(),to=inflOf(c.k).email;
+      c.agreement.sent={at,by:who,ch,to,text:val("ag-msg-"+c.k)};S.form=null;c.log.push(`Accord envoyé ${ch==="E-mail"?`par e-mail à ${to} par PDS OS`:`par ${ch.toLowerCase()} (envoi déclaré)`} · ${who}, ${at}`);
+      log(`Influence · ${nameOf(c.k)} : accord envoyé (${ch.toLowerCase()})`);after(ch==="E-mail"?`Accord envoyé à ${nameOf(c.k)}`:"Envoi de l'accord déclaré");break;}
+    case "crevoke": {const a=actById(el.dataset.id),c=collabsOf(a).find(x=>x.k===el.dataset.k),at=stamp();c.revoked=(c.revoked||[]).concat([{token:c.token,at,by:who}]);c.token=Math.random().toString(36).slice(2,10);c.agreement={status:"pending",createdAt:at};c.stage="agreement";S.form=null;
+      c.log.push(`Lien d'accord révoqué par ${who} le ${at} : l'ancien ne fonctionne plus, un nouveau est à envoyer`);log(`Influence · ${nameOf(c.k)} : lien d'accord révoqué`);toast("Ancien lien révoqué : un nouveau est prêt, à envoyer.");break;}
     case "cexit": {const a=actById(el.dataset.id),c=collabsOf(a).find(x=>x.k===el.dataset.k);c.stage=el.dataset.v;c.log.push(`${STAGE[el.dataset.v]} · ${who}, ${stamp()}`);log(`Influence · ${nameOf(c.k)} : ${STAGE[el.dataset.v].toLowerCase()}`);toast(STAGE[el.dataset.v]+".");break;}
-    case "cagree": {const a=actById(el.dataset.id),c=collabsOf(a).find(x=>x.k===el.dataset.k),v=el.dataset.v;if(v==="changes"){if(!need("agrNote","Dites ce que vous voulez changer.")) break;c.agreement={status:"changes",note:val("agrNote"),at:stamp()};c.stage="nego";S.form=null;c.log.push(`Modification demandée par ${who} : « ${val("agrNote")} »`);log(`Influence · ${who} demande une modification`);crAfter(a,c,"Demande envoyée à PDS");break;}
-      c.agreement={status:"accepted",at:stamp()};c.stage="agreed";c.log.push(`« Bon pour accord » donné par ${who} le ${c.agreement.at}`);log(`Influence · ${who} : bon pour accord`);crAfter(a,c,"Merci, votre accord est enregistré");break;}
+    case "cagree": {const a=actById(el.dataset.id),c=collabsOf(a).find(x=>x.k===el.dataset.k),v=el.dataset.v;if(!collabOpen(a)){toast("Activation pas lancée, ou close : rien ne change avec les créateurs.");break;}if(v==="changes"){if(!need("agrNote","Dites ce que vous voulez changer.")) break;c.agreement={status:"changes",note:val("agrNote"),at:stamp()};c.stage="nego";S.form=null;c.log.push(`Modification demandée par ${who} : « ${val("agrNote")} »`);log(`Influence · ${who} demande une modification`);crAfter(a,c,"Demande envoyée à PDS");break;}
+      c.agreement={...c.agreement,status:"accepted",at:stamp()};c.stage="agreed";c.log.push(`« Bon pour accord » donné par ${who} le ${c.agreement.at}`);log(`Influence · ${who} : bon pour accord`);crAfter(a,c,"Merci, votre accord est enregistré");break;}
+    case "crinvsample": S.invDraft={name:"Facture_Lea_Moreau_Neons.pdf",size:84210,type:"application/pdf"};break;
     case "crsample": document.getElementById("crUrl").value="https://drive.google.com/neons-lea-v1";return;
     case "crpubsample": document.getElementById("crPub").value="https://www.tiktok.com/@leamoreau/video/7442";return;
-    case "ccontent": {const a=actById(el.dataset.id),c=collabsOf(a).find(x=>x.k===el.dataset.k),u=val("crUrl");if(!/^https:\/\/\S+$/.test(u)){S.err.crUrl="Un lien qui commence par https://.";break;}c.versions.push({n:c.versions.length+1,url:u,at:stamp(),status:"review",notes:[]});c.stage="content";c.log.push(`V${c.versions.length} déposée par ${who}`);log(`Influence · ${who} : V${c.versions.length} déposée`);crAfter(a,c,`V${c.versions.length} envoyée à PDS`);break;}
-    case "ccontentdec": {const a=actById(el.dataset.id),c=collabsOf(a).find(x=>x.k===el.dataset.k),v=el.dataset.v,t=val(`cv-n-${c.k}`),x=lastOf(c.versions);if(v==="changes"&&!t){S.err[`cv-n-${c.k}`]="Écrivez le retour.";break;}
+    case "ccontent": {const a=actById(el.dataset.id),c=collabsOf(a).find(x=>x.k===el.dataset.k),u=val("crUrl");if(!collabOpen(a)){toast("Activation pas lancée, ou close : rien ne change avec les créateurs.");break;}if(!/^https:\/\/\S+$/.test(u)){S.err.crUrl="Un lien qui commence par https://.";break;}c.versions.push({n:c.versions.length+1,url:u,at:stamp(),status:"review",notes:[]});c.stage="content";c.log.push(`V${c.versions.length} déposée par ${who}`);log(`Influence · ${who} : V${c.versions.length} déposée`);crAfter(a,c,`V${c.versions.length} envoyée à PDS`);break;}
+    case "ccontentdec": {const a=actById(el.dataset.id),c=collabsOf(a).find(x=>x.k===el.dataset.k),v=el.dataset.v,t=val(`cv-n-${c.k}`),x=lastOf(c.versions);if(!collabOpen(a)){toast("Activation pas lancée, ou close : rien ne change avec les créateurs.");break;}if(v==="changes"&&!t){S.err[`cv-n-${c.k}`]="Écrivez le retour.";break;}
       if(t) x.notes.push({tc:val(`cv-tc-${c.k}`),cat:val(`cv-c-${c.k}`),text:t,by:who});x.status=v==="ok"?"ok":"changes";c.stage=v==="ok"?"ready":"agreed";c.log.push(`V${x.n} ${v==="ok"?"validée":"à corriger"} par ${who}`);log(`Influence · ${nameOf(c.k)} : V${x.n} ${v==="ok"?"validée":"à corriger"}`);after(v==="ok"?"Contenu validé":"Corrections demandées");break;}
-    case "cpub": {const a=actById(el.dataset.id),c=collabsOf(a).find(x=>x.k===el.dataset.k),u=val("crPub");if(!/^https:\/\/\S+$/.test(u)){S.err.crPub="Un lien qui commence par https://.";break;}c.pub={url:u,at:stamp()};c.stage="published";c.log.push(`Publication déclarée par ${who}`);log(`Influence · ${who} : publication déclarée`);crAfter(a,c,"Publication déclarée");break;}
-    case "cpubverify": {const a=actById(el.dataset.id),c=collabsOf(a).find(x=>x.k===el.dataset.k);c.pub.verifiedBy=who;c.stage="verified";c.log.push(`Publication vérifiée par ${who} le ${stamp()}`);log(`Influence · ${nameOf(c.k)} : publication vérifiée`);after("Publication vérifiée");break;}
-    case "cpay": {const a=actById(el.dataset.id),c=collabsOf(a).find(x=>x.k===el.dataset.k),at=stamp();
+    case "cpub": {const a=actById(el.dataset.id),c=collabsOf(a).find(x=>x.k===el.dataset.k),u=val("crPub");if(!collabOpen(a)){toast("Activation pas lancée, ou close : rien ne change avec les créateurs.");break;}if(!/^https:\/\/\S+$/.test(u)){S.err.crPub="Un lien qui commence par https://.";break;}c.pub={url:u,at:stamp()};c.stage="published";c.log.push(`Publication déclarée par ${who}`);log(`Influence · ${who} : publication déclarée`);crAfter(a,c,"Publication déclarée");break;}
+    case "cpubverify": {const a=actById(el.dataset.id),c=collabsOf(a).find(x=>x.k===el.dataset.k);if(!collabOpen(a)){toast("Activation pas lancée, ou close : rien ne change avec les créateurs.");break;}c.pub.verifiedBy=who;c.stage="verified";c.log.push(`Publication vérifiée par ${who} le ${stamp()}`);log(`Influence · ${nameOf(c.k)} : publication vérifiée`);after("Publication vérifiée");break;}
+    case "cpay": {const a=actById(el.dataset.id),c=collabsOf(a).find(x=>x.k===el.dataset.k),at=stamp();if(!collabOpen(a)){toast("Activation pas lancée, ou close : rien ne change avec les créateurs.");break;}
       if(c.stage==="verified"){c.stage="admin";c.pay="invoice";c.log.push(`Facture demandée par ${who}`);}
       else if(c.pay==="tovalidate"){if(!c.agreement||c.agreement.status!=="accepted"){toast("Pas de bon à payer sans accord accepté.");break;}c.pay="ok";c.log.push(`Bon à payer validé par ${who} le ${at}`);}
       else if(c.pay==="ok"){c.pay="paid";c.log.push(`Paiement déclaré par ${who} le ${at}`);}
       else if(c.pay==="paid"){c.pay="paidv";c.log.push(`Paiement vérifié par ${who} le ${at}`);}
       log(`Influence · ${nameOf(c.k)} : ${PAY[c.pay].toLowerCase()}`);after(PAY[c.pay]);break;}
-    case "cinvoice": {const a=actById(el.dataset.id),c=collabsOf(a).find(x=>x.k===el.dataset.k);if(!need("crInv","Le nom du fichier.")) break;c.invoice=val("crInv");c.pay="tovalidate";c.log.push(`Facture déposée par ${who}`);log(`Influence · ${who} : facture déposée`);crAfter(a,c,"Facture envoyée");break;}
+    case "cinvoice": {const a=actById(el.dataset.id),c=collabsOf(a).find(x=>x.k===el.dataset.k);if(!collabOpen(a)){toast("Activation pas lancée, ou close : rien ne change avec les créateurs.");break;}const fl=document.getElementById("crInvF"),f=fl&&fl.files[0]||S.invDraft;if(!f){S.err.crInvF="Joignez la facture : un PDF ou une photo.";break;}c.invoice=fileMeta(f,stamp(),who);S.invDraft=null;c.pay="tovalidate";c.log.push(`Facture déposée par ${who}`);log(`Influence · ${who} : facture déposée`);crAfter(a,c,"Facture envoyée");break;}
     case "cproto": {const a=actById(el.dataset.id),c=collabsOf(a).find(x=>x.k===el.dataset.k),nm=nameOf(c.k),at=stamp(),inf=inflOf(c.k);let t;
-      if(c.stage==="agreement"){c.agreement={status:"accepted",at};c.stage="agreed";t=`« Bon pour accord » donné par ${nm} le ${at}`;}
+      if(!collabOpen(a)) break;
+      if(c.stage==="agreement"){if(!c.agreement.sent){toast("L'accord n'est pas encore envoyé.");break;}c.agreement={...c.agreement,status:"accepted",at};c.stage="agreed";t=`« Bon pour accord » donné par ${nm} le ${at}`;}
       else if(c.stage==="agreed"){const n=c.versions.length+1;c.versions.push({n,url:`https://drive.google.com/neons-${c.k}-v${n}`,at,status:"review",notes:[]});c.stage="content";t=`V${n} déposée par ${nm}`;}
       else if(c.stage==="ready"){c.pub={url:`https://www.${inf.platform.toLowerCase()}.com/${inf.handle}/neons`,at};c.stage="published";t=`Publication déclarée par ${nm}`;}
-      else if(c.stage==="admin"&&c.pay==="invoice"){c.invoice=`Facture_${nm.replace(/ /g,"_")}_Neons.pdf`;c.pay="tovalidate";t=`Facture déposée par ${nm}`;}
+      else if(c.stage==="admin"&&c.pay==="invoice"){c.invoice={name:`Facture_${nm.replace(/ /g,"_")}_Neons.pdf`,size:84210,type:"application/pdf",at,by:nm};c.pay="tovalidate";t=`Facture déposée par ${nm}`;}
       else break;c.log.push(t);log(`Influence · ${t}`);toast(t+".");break;}
-    case "cclose": {const a=actById(el.dataset.id),c=collabsOf(a).find(x=>x.k===el.dataset.k);c.stage="closed";c.log.push(`Collaboration clôturée par ${who} le ${stamp()}`);log(`Influence · ${nameOf(c.k)} : collaboration clôturée`);after("Collaboration clôturée");break;}
-    case "copytext": toast(el.dataset.v); return;
+    case "cclose": {const a=actById(el.dataset.id),c=collabsOf(a).find(x=>x.k===el.dataset.k);if(!collabOpen(a)){toast("Activation pas lancée, ou close : rien ne change avec les créateurs.");break;}c.stage="closed";c.log.push(`Collaboration clôturée par ${who} le ${stamp()}`);log(`Influence · ${nameOf(c.k)} : collaboration clôturée`);after("Collaboration clôturée");break;}
+    case "copytext": copyText(copySource(el),el.dataset.v); return;
     case "agsample": document.getElementById("agUrl").value=agCfg(actById(el.dataset.id)).url;return;
     case "aglink": {const a=actById(el.dataset.id),u=val("agUrl");if(!/^https:\/\/docs\.google\.com\/spreadsheets\/\S+$/.test(u)){S.err.agUrl="Un lien Google Sheets : https://docs.google.com/spreadsheets/…";break;}const ag=agOf(a);ag.url=u;ag.by=who;ag.at=stamp();ag.sheetV=1;log(`${a.title} : tableau de ${agCfg(a).agency} relié`);after("Tableau relié");break;}
     case "agmap": {const a=actById(el.dataset.id),cfg=agCfg(a),map={};cfg.cols.forEach((c,j)=>{map[c]=val("agM-"+j);});const used=Object.values(map).filter(k=>k!=="ignore");
@@ -1602,13 +1628,13 @@ document.addEventListener("click",e=>{
     case "prepreset": {const k=el.dataset.k,p=prepOf(k);Object.assign(p,{org:null,call:null,doc:null,items:[]});if(k==="design") S.design.path=null;if(k==="strat") S.strat.items=[];if(isExtClip(k)) S.kick.items=[];toast("Choisissez une autre organisation.");break;}
     case "prepagadd": {const k=el.dataset.k;if(!need("pcAdd","Écrivez le point à ajouter.")) break;prepOf(k).call.agenda.push(val("pcAdd"));toast("Point ajouté à l'ordre du jour.");break;}
     case "prepagdel": {const k=el.dataset.k;prepOf(k).call.agenda.splice(+el.dataset.i,1);toast("Point retiré.");break;}
-    case "prepcreate": {const k=el.dataset.k,c=prepOf(k).call,d=val("pcDate"),h=val("pcHour");if(!d) S.err.pcDate="Choisissez la date.";if(!h) S.err.pcHour="Et l'heure.";if(!d||!h) break;if(!c.agenda.length){S.err.pcAdd="L'ordre du jour est vide.";break;}if((c.who||[]).length<2){S.err.pcWhoList="Un call réunit au moins deux personnes.";break;}
+    case "prepcreate": {const k=el.dataset.k,c=prepOf(k).call,d=val("pcDate"),h=val("pcHour");c.draft={date:d,h,fmt:val("pcFmt")};if(!d) S.err.pcDate="Choisissez la date.";if(!h) S.err.pcHour="Et l'heure.";if(!d||!h) break;if(!c.agenda.length){S.err.pcAdd="L'ordre du jour est vide.";break;}if((c.who||[]).length<2){S.err.pcWhoList="Un call réunit au moins deux personnes.";break;}
       c.draft={date:d,h,fmt:val("pcFmt")};S.form="recap:"+k;break;}
     case "prepconfirm": {const k=el.dataset.k,c=prepOf(k).call,{date:d,h,fmt}=c.draft;S.form=null;
       Object.assign(c,{date:d,h,fmt,meet:fmt==="Visio"?"https://meet.google.com/neo-"+Math.random().toString(36).slice(2,6)+"-pds":null,created:{by:who,at:stamp()}});const inv=c.who.filter(x=>P[x.k].where!=="app");log(`${livName(k)} : ${k==="design"?"échange créatif":k==="frame"?"échange de cadrage":callWord(k)==="échange"?"échange stratégique":"call de production"} créé pour le ${fullDate(fromIso(d))}${inv.length?`, invitation à ${inv.map(x=>nameOf(x.k)).join(", ")}`:""}`);after(k==="design"?"Échange créatif créé":k==="frame"?"Échange de cadrage créé":k==="strat"?"Échange stratégique créé":"Call de production créé");break;}
     case "prepheld": {const k=el.dataset.k;prepOf(k).call.held={at:stamp()};prepReveal(k);log(`${livName(k)} : ${k==="design"?"échange créatif tenu":k==="frame"?"échange de cadrage tenu":k==="strat"?"échange stratégique tenu":"call de production tenu"}, PO propose ce qui a été dit`);toast("Compte rendu reçu : PO propose ce qui a été dit.");break;}
-    case "prepdoc": {const k=el.dataset.k,fl=document.getElementById("pdFile"),name=el.dataset.v==="sample"?"Organisation_Neons.xlsx":fl&&fl.files[0]?fl.files[0].name:null;if(!name){S.err.pdFile="Choisissez un fichier, ou prenez le document d'exemple.";break;}
-      prepOf(k).doc={name,by:who,at:stamp()};prepReveal(k);log(`${livName(k)} : organisation importée (${name})`);toast("Document importé : PO en a tiré les points.");break;}
+    case "prepdoc": {const k=el.dataset.k,fl=document.getElementById("pdFile"),f=el.dataset.v==="sample"?{name:"Organisation_Neons.xlsx",size:48211,type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}:fl&&fl.files[0]?fl.files[0]:null,name=f&&f.name;if(!name){S.err.pdFile="Choisissez un fichier, ou prenez le document d'exemple.";break;}
+      prepOf(k).doc=fileMeta(f,stamp(),who);prepReveal(k);log(`${livName(k)} : organisation importée (${name})`);toast("Document importé : PO en a tiré les points.");break;}
     case "prepplan": {const k=el.dataset.k,p=prepOf(k),o=prepOrigin(k),kept=p.items.filter(x=>x.state==="kept");
       kept.filter(x=>x.kind==="action").forEach(x=>S.tasks.push({id:id("t"),step:"iv"+k+"-2",text:x.text,r:x.r||holder("production"),due:x.due,status:"todo",origin:o,quote:x.quote}));
       kept.filter(x=>x.kind==="arbitrate").forEach(x=>S.decisions.push({id:id("d"),text:x.text,kind:"confirm",source:o+(x.quote?` « ${x.quote} »`:""),by:who,at:stamp(),step:"iv"+k+"-2"}));
@@ -1681,7 +1707,7 @@ document.addEventListener("keydown",e=>{const t=e.target;
   if(e.key==="Enter"){e.preventDefault();const b=document.querySelector(`[data-act="itmsave"][data-id="${t.id.slice(3)}"]`);if(b) b.click();}
   if(e.key==="Escape"){e.preventDefault();S.form=null;render();}});
 document.addEventListener("change",e=>{
-  if(e.target.id==="rFile"){const f=e.target.files[0];if(!f) return;if(f.type.startsWith("image/")){const r=new FileReader();r.onload=()=>{S.rdraft={name:f.name,url:r.result};const t=document.getElementById("rThumb");if(t) t.innerHTML=`<span class="thumb"><img src="${r.result}" alt=""></span>`;};r.readAsDataURL(f);}else{S.rdraft={name:f.name,url:null};const t=document.getElementById("rThumb");if(t) t.textContent=f.name;}return;}
+  if(e.target.id==="rFile"){const f=e.target.files[0];if(!f) return;if(f.type.startsWith("image/")){const r=new FileReader();r.onload=()=>{S.rdraft={name:f.name,size:f.size,type:f.type,url:r.result};const t=document.getElementById("rThumb");if(t) t.innerHTML=`<span class="thumb"><img src="${r.result}" alt=""></span>`;};r.readAsDataURL(f);}else{S.rdraft={name:f.name,size:f.size,type:f.type,url:null};const t=document.getElementById("rThumb");if(t) t.textContent=f.name;}return;}
   if(e.target.id==="cvFile"){const f=e.target.files[0],k=STEP(S.sel).liv;if(!f) return;if(!f.type.startsWith("image/")){S.err.cvFile="Une image est attendue (JPG ou PNG).";render();return;}
     const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const L=lightOf(k);L.versions.push({n:L.versions.length+1,img:r.result,name:f.name,w:im.naturalWidth,h:im.naturalHeight,type:f.type,by:P[me()].name,at:stamp(),status:"review"});log(`Pochette : V${L.versions.length} déposée (${im.naturalWidth} × ${im.naturalHeight} px)`);after(`Pochette V${L.versions.length} déposée`);render();};im.src=r.result;};r.readAsDataURL(f);return;}
   if(e.target.id==="lPhotos"){addPhotos(e.target.files);e.target.value="";}
@@ -1769,11 +1795,16 @@ const STRAT_PROPS=[
   {dim:"Livrables engagés",text:"Teasers × 4, 15 s, en 9:16",quote:"quatre teasers de quinze secondes avant la sortie"},
   {dim:"Livrables engagés",text:"Pochette",quote:"la pochette, on la veut dans la même lumière que le clip"},
   {dim:"Calendrier de lancement",text:"Sortie du clip une semaine après le titre",quote:"le clip sort une semaine après le titre"},
-  {dim:"Objectifs & KPIs",text:"200 000 streams à 4 semaines",quote:"on vise 200 000 streams au bout d'un mois"}
+  {dim:"Objectifs & KPIs",text:"200 000 streams à 4 semaines",quote:"on vise 200 000 streams au bout d'un mois",metric:"streams",target:200000,j:28}
 ];
+/* An objective is an indicator, a target and a deadline, so the gap to the result is
+   computed by the code, never written (MKT-BIL-002). A unit links it to what activations measure. */
+const OBJ_METRICS=[["streams","Streams",null,"les streams viennent du distributeur, pas d'une activation"],["vues","Vues","vues"],["retombees","Retombées presse","retombées"],["ajouts","Ajouts en playlist","ajouts en playlist"],["personnes","Personnes présentes","personnes"],["abonnes","Abonnés",null,"aucune activation ne relève les abonnés"]];
+const objMetric=x=>OBJ_METRICS.find(m=>m[0]===x.metric);
+const objLine=x=>{const m=objMetric(x);return m&&x.target&&x.j!=null?`${m[1]} · cible ${fmtN(x.target)} · au ${fullDate(relDay(x.j))} (${jLabel(x.j)})`:"Indicateur, cible ou échéance à préciser";};
 /* What PO proposes is an item decided one by one: retained (possibly corrected),
    set aside, or still to decide. Nothing is pre-checked (VISION-UX rules 2, 11, 12). */
-const stratItems=()=>STRAT_PROPS.map((p,i)=>({id:"sp"+i,dim:p.dim,lever:p.lever,text:p.text,quote:p.quote,from:"Échange stratégique du 05/10",state:"proposed"}));
+const stratItems=()=>STRAT_PROPS.map((p,i)=>({id:"sp"+i,dim:p.dim,lever:p.lever,text:p.text,quote:p.quote,from:"Échange stratégique du 05/10",state:"proposed",...(p.metric?{metric:p.metric,target:p.target,j:p.j}:{})}));
 const itemOf=i=>S.strat.items.find(x=>x.id==="sp"+i);
 const kept=i=>{const x=itemOf(i);return !!x&&x.state==="kept";};
 const dimItems=name=>S.strat.items.filter(x=>x.dim===name);
@@ -1829,20 +1860,28 @@ function budget(){
 }
 function dims(){
   const lv=LEVERS.map(l=>({...l,state:leverState(l)}));
-  const by=name=>{const it=dimItems(name);return it.some(x=>x.state==="proposed")?"arb":it.some(x=>x.state==="kept")?"ok":"todo";};
+  const by=name=>{const it=dimItems(name),k=it.filter(x=>x.state==="kept");if(it.some(x=>x.state==="proposed")) return "arb";if(!k.length) return "todo";
+    if(name==="Objectifs & KPIs"&&k.some(x=>!objMetric(x)||!x.target||x.j==null)) return "run";
+    if(name==="Livrables engagés"&&k.some(x=>x.manual&&!x.fmt)) return "run";
+    return "ok";};
+  const why=name=>{const it=dimItems(name),k=it.filter(x=>x.state==="kept"),p=it.filter(x=>x.state==="proposed").length;if(p) return `${p} proposition${p>1?"s":""} à confirmer ou écarter`;
+    if(name==="Objectifs & KPIs"){const n=k.filter(x=>!objMetric(x)||!x.target||x.j==null).length;if(n) return `${n} objectif${n>1?"s":""} sans indicateur, cible ou échéance`;}
+    if(name==="Livrables engagés"){const n=k.filter(x=>x.manual&&!x.fmt).length;if(n) return `${n} livrable${n>1?"s":""} sans format`;}
+    return k.length?"":"rien de dit";};
   const cal=dimItems("Calendrier de lancement");
   return [
-    {name:"Positionnement",kind:"text",st:by("Positionnement"),add:"Ajouter une réponse"},
-    {name:"Publics prioritaires",kind:"text",st:by("Publics prioritaires"),add:"Ajouter un public"},
-    {name:"Narratif de sortie",kind:"text",st:by("Narratif de sortie"),add:"Ajouter un angle"},
-    {name:"Dispositif",kind:"levers",st:lv.some(l=>l.state==="arb")?"arb":"ok",levers:lv,add:lv.some(l=>l.state==="non")?"Ajouter un levier":null},
-    {name:"Livrables engagés",kind:"livs",st:by("Livrables engagés"),add:"Ajouter un livrable"},
-    {name:"Calendrier de lancement",kind:"cal",st:cal.some(x=>x.state==="proposed")?"arb":"ok",add:"Ajouter un temps fort"},
-    {name:"Budget stratégie",kind:"bud",st:budget().arb?"arb":"ok",add:"Ajouter une ligne"},
-    {name:"Objectifs & KPIs",kind:"text",st:by("Objectifs & KPIs"),add:"Ajouter un objectif"}
+    {name:"Positionnement",kind:"text",st:by("Positionnement"),why:why("Positionnement"),add:"Ajouter une réponse"},
+    {name:"Publics prioritaires",kind:"text",st:by("Publics prioritaires"),why:why("Publics prioritaires"),add:"Ajouter un public"},
+    {name:"Narratif de sortie",kind:"text",st:by("Narratif de sortie"),why:why("Narratif de sortie"),add:"Ajouter un angle"},
+    {name:"Dispositif",kind:"levers",st:lv.some(l=>l.state==="arb")?"arb":"ok",why:(n=>n?`${n} levier${n>1?"s":""} à retenir ou non`:"")(lv.filter(l=>l.state==="arb").length),levers:lv,add:lv.some(l=>l.state==="non")?"Ajouter un levier":null},
+    {name:"Livrables engagés",kind:"livs",st:by("Livrables engagés"),why:why("Livrables engagés"),add:"Ajouter un livrable"},
+    {name:"Calendrier de lancement",kind:"cal",st:cal.some(x=>x.state==="proposed")?"arb":"ok",why:cal.some(x=>x.state==="proposed")?"un temps fort à confirmer ou écarter":"",add:"Ajouter un temps fort"},
+    {name:"Budget stratégie",kind:"bud",st:budget().arb?"arb":"ok",why:budget().arb?`${euro(budget().arb)} de lignes à arbitrer`:"",add:"Ajouter une ligne"},
+    {name:"Objectifs & KPIs",kind:"text",st:by("Objectifs & KPIs"),why:why("Objectifs & KPIs"),add:"Ajouter un objectif"}
   ];
 }
-const DSTATE={todo:["","À compléter"],arb:["warn","À trancher"],ok:["ok","Complété"]};
+const DSTATE={todo:["","À compléter"],run:["info","En cours"],arb:["warn","À arbitrer"],ok:["ok","Complété"]};
+const restArb=()=>dims().filter(d=>d.st==="arb").map(d=>d.name);
 const stratFrozen=()=>!!S.strat.review&&!S.strat.validated&&!S.strat.review.changes;
 
 /* Proposals of PO, each with the sentence it comes from (VISION-UX rules 11 and 12). */
@@ -1871,6 +1910,7 @@ function addForm(coll,group){
     else if(group==="Livrables engagés") body=`<div class="grid2">${f("ad-text","Livrable *","Ex. : Session acoustique")}${f("ad-x","Format","Ex. : 16:9, 4 min")}</div>`;
     else if(group==="Calendrier de lancement") body=`<div class="grid2">${f("ad-text","Temps fort *","Ex. : Live sur Instagram")}${f("ad-x","Jour par rapport à la sortie *","Ex. : -3 pour J-3","number")}</div>`;
     else if(group==="Budget stratégie") body=`<div class="grid2">${f("ad-text","Ligne *","Ex. : Achat média")}${f("ad-x","Montant estimé *","En euros HT")}</div>`;
+    else if(group==="Objectifs & KPIs") body=`${f("ad-text","Objectif *","Ex. : 150 000 vues sur les teasers")}<div class="grid3"><div class="field"><label for="ad-metric">Indicateur *</label><select class="in" id="ad-metric">${OBJ_METRICS.map(m=>`<option value="${m[0]}">${esc(m[1])}</option>`).join("")}</select></div>${f("ad-target","Cible *","Ex. : 150 000")}<div class="field"><label for="ad-j">Échéance, en jours après la sortie *</label><input class="in" id="ad-j" type="number" value="28">${errOf("ad-j")}</div></div>`;
     else body=f("ad-text",esc(group)+" *","Ce qui a été décidé");
   }else if(coll==="design") body=`<div class="grid2"><div class="field"><label for="ad-q">Question</label><select class="in" id="ad-q">${(group==="Direction de la sortie"?DIR_FIELDS:LIV_Q).map(q=>`<option>${esc(q)}</option>`).join("")}</select></div>${f("ad-text","Intention *","Ce qui a été dit ou décidé")}</div>`;
   else body=`${f("ad-text","Tâche *","Ex. : Réserver le camion régie")}<div class="grid2"><div class="field"><label for="ad-who">Qui la fait</label><select class="in" id="ad-who">${ROLE_ORDER.filter(k=>k!=="mgmt"&&k!=="editor").map(k=>`<option value="${k}">${esc(P[k].name)}</option>`).join("")}</select></div>${f("ad-due","Échéance","","date")}</div>`;
@@ -1884,7 +1924,7 @@ function dimBody(d){
   const it=dimItems(d.name), head=groupHead("strat",d.name,d.add,canEdit);
   const rows=list=>list.length?`<div class="rows">${list.join("")}</div>`:"";
   const none=`<p class="note">Rien n'a été dit sur ce point pendant l'échange.</p>`;
-  if(d.kind==="text") return head+(it.length?rows(it.map(x=>itemRow(x,canEdit))):none);
+  if(d.kind==="text") return head+(it.length?rows(it.map(x=>itemRow(x,canEdit,d.name==="Objectifs & KPIs"?esc(objLine(x)):""))):none);
   if(d.kind==="levers") return head+rows(d.levers.map(l=>{
     if(l.prop!=null&&itemOf(l.prop)) return itemRow(itemOf(l.prop),canEdit,esc(l.name));
     return `<div class="irow"><span class="grow"><b>${esc(l.name)}</b><br><span class="src">${esc(l.src||"Leviers courants")}${S.strat.arb[l.k]?` · ${S.strat.arb[l.k]==="retenu"?"retenu":"non retenu"} par ${esc(S.strat.arbBy[l.k]||"")}`:""}</span></span>
@@ -1913,7 +1953,7 @@ function essentials(){
     ["Dispositif retenu",esc(get("Dispositif").levers.filter(l=>l.state==="retenu").map(l=>l.name).join(", "))],
     ["Livrables",esc(planItems().livs.map(x=>x.name).join(", ")||"—")],
     ["Temps forts",tempsForts().map(t=>`${esc(t.name)} · ${fullDate(relDay(t.j))}`).join("<br>")],
-    ["Objectif",esc(items(get("Objectifs & KPIs")))],
+    ["Objectif",dimItems("Objectifs & KPIs").filter(x=>x.state==="kept").map(x=>`${esc(x.text)} <span class="src">· ${esc(objLine(x))}</span>`).join("<br>")||"—"],
     ["Budget",`${euro(b.proposed)} proposés sur ${euro(BUDGET_ENV)}`]]);
 }
 const ACT_DEF={
@@ -1958,8 +1998,9 @@ function bilanIssues(){
   const l=[];
   S.acts.forEach(a=>{
     if(a.status==="cancelled") l.push({cat:"Activations",text:`${a.title} : annulée (« ${a.cancelled.why} »)`});
-    else if(a.status!=="closed") l.push({cat:"Activations",text:`${a.title} : pas encore clôturée (${OSTATE[dispStatus(a)][1].toLowerCase()})`});
-    else{if(a.proof.state!=="verified") l.push({cat:"Preuves",text:`${a.title} : preuve non vérifiée`});if(a.stats.state==="na") l.push({cat:"Statistiques",text:`${a.title} : statistiques indisponibles`});}
+    else if(a.status!=="closed") l.push({cat:"Activations",text:`${a.title} : pas encore clôturée (${OSTATE[dispStatus(a)][1].toLowerCase()})`,actId:a.id,open:true});
+    if(a.exception) l.push({cat:"Activations",text:`${a.title} : réalisée avec une réserve (« ${a.exception.why} »), à régler par ${nameOf(a.exception.r)} avant le ${fullDate(fromIso(a.exception.due))}`});
+    if(a.status==="closed"){if(a.proof.state!=="verified") l.push({cat:"Preuves",text:`${a.title} : preuve non vérifiée`});if(a.stats.state==="na") l.push({cat:"Statistiques",text:`${a.title} : statistiques indisponibles`});}
   });
   l.push({cat:"Statistiques",text:"Streams à 4 semaines : lus après le Sam. 02/01/2027"});
   return l;
@@ -1969,6 +2010,9 @@ const approvedReport=()=>[...S.review.reports].reverse().find(r=>r.status==="app
 const RSTATE={generated:["","Généré"],submitted:["info","À valider"],approved:["ok","Bilan provisoire approuvé"],changes:["warn","Corrections demandées"],postponed:["","Validation reportée"]};
 const ARB={lever:"À lever avant clôture",follow:"À suivre après clôture",limit:"Acceptée comme limite définitive",na:"Non applicable",dup:"Doublon"};
 const reservesOpen=()=>S.review.reserves.filter(r=>!r.arb||(r.arb==="lever"&&!r.lifted));
+/* An activation still open at closure needs a reserve followed after it or accepted by the
+   direction: never « non applicable », never a duplicate, never silent (MKT-BIL-001). */
+const uncoveredActs=()=>S.acts.filter(a=>!["closed","cancelled"].includes(a.status)&&!S.review.reserves.some(r=>r.actId===a.id&&["follow","limit"].includes(r.arb)));
 const fingerprint=s=>{let h=2166136261;for(const c of s){h^=c.charCodeAt(0);h=Math.imul(h,16777619);}return (h>>>0).toString(16).padStart(8,"0");};
 
 /* ---------- Steps of the four modules (Production keeps its own) ---------- */
@@ -1987,8 +2031,8 @@ const BODY_MK={
     const sp=S.stratPrep||{},sc=sp.call;
     return `${sp.org==="call"&&sc&&sc.held?callFacts([["Échange stratégique",`${esc(fullDate(fromIso(sc.date)))} à ${esc(sc.h)} · ${esc(sc.fmt)} · ${callWho(sc,PREP_CALL.strat).map(x=>esc(nameOf(x.k))).join(", ")}`],["Compte rendu",`${crBtn("strat")}`]]):callFacts([["Départ","Commencée directement, sans échange : ajoutez ce que vous savez dans chaque dimension"]])}
      ${p?poBox("PO a rangé dans chaque dimension ce qui a été dit pendant l'échange, avec la phrase exacte. Confirmez, corrigez ou écartez chaque proposition, et ajoutez ce qui manque : rien n'entre dans la Stratégie sans vous."):""}
-     <p class="note"><b>${n("ok")} complétées · ${n("arb")} à arbitrer · ${n("todo")} à compléter</b>${stratFrozen()?" · la Stratégie est figée pendant la validation":""}</p>
-     ${ds.map((d,i)=>versionCard("dim"+i,d.st!=="ok"||(S.form||"").includes(d.name),esc(d.name),pill(DSTATE[d.st][0],DSTATE[d.st][1]),counter(dimItems(d.name))||(d.st==="todo"?"rien de dit":""),dimBody(d))).join("")}${waits("st2")}`;
+     <p class="note"><b>${n("ok")} complétées · ${n("run")} en cours · ${n("arb")} à arbitrer · ${n("todo")} à compléter</b>${stratFrozen()?" · la Stratégie est figée pendant la validation":""}</p>
+     ${ds.map((d,i)=>versionCard("dim"+i,d.st!=="ok"||(S.form||"").includes(d.name),esc(d.name),pill(DSTATE[d.st][0],DSTATE[d.st][1]),esc(d.why||""),dimBody(d))).join("")}${waits("st2")}`;
   },
   st3(){
     const r=S.strat.review, v=S.strat.validated;
@@ -2001,7 +2045,7 @@ const BODY_MK={
     const decs=r?r.validators.map(k=>{const d=r.dec[k];return `<div class="row"><span><b>${esc(nameOf(k))}</b>${d&&d.note?`<br><span class="src">« ${esc(d.note)} »</span>`:""}</span>${pill(!d?"info":d.kind==="changes"?"warn":"ok",!d?"En attente":d.kind==="ok"?"Validé":d.kind==="res"?"Validé avec réserves":"Modification demandée")}</div>`;}).join(""):"";
     return `${v?`<div class="callout ok">${I.ok}<span><b>Brief de sortie — V${v.v} validé</b> le ${esc(v.at)}. Il est figé ; le réviser crée une V${v.v+1}.</span></div>`:""}
      ${r&&r.changes?`<div class="callout warn">${I.warn}<span><b>${esc(r.changes.by)} (demander une modification)</b> : « ${esc(r.changes.note)} »</span></div>`:""}
-     <div class="vers"><div class="dhead"><h3>Brief de sortie — V${v?v.v:(r?r.round:1)}</h3><button class="btn ghost sm" type="button" data-act="open" data-v="Brief de sortie — V1.pdf">Voir le PDF</button></div>${essentials()}<span class="src">Restant à arbitrer : aucun.</span></div>
+     <div class="vers"><div class="dhead"><h3>Brief de sortie — V${v?v.v:(r?r.round:1)}</h3><button class="btn ghost sm" type="button" data-act="open" data-v="Brief de sortie — V1.pdf">Voir le PDF</button></div>${essentials()}<span class="src">Restant à arbitrer : ${esc(restArb().join(", ")||"aucun")}.</span></div>
      ${decs?`<div class="vers"><h3>Validation</h3><div class="rows">${decs}</div></div>`:""}
      ${act||waits("st3")}`;
   },
@@ -2013,7 +2057,7 @@ const BODY_MK={
      ${!done&&can("project")?`<div class="btnrow"><button class="btn" type="button" data-act="stplan">Confirmer le plan d'exécution</button></div>`:done?"":waits("st4")}
      <div class="vers"><h3>Documents</h3><div class="rows">
       <div class="row"><span><b>Brief de sortie — V1</b><br><span class="src">Interne · avec le budget</span></span><button class="btn ghost sm" type="button" data-act="open" data-v="Brief de sortie — V1.pdf">Voir le PDF</button></div>
-      <div class="row"><span><b>Plan de sortie</b><br><span class="src">Pour l'équipe de l'artiste · lien public, sans budget</span></span><button class="btn out sm" type="button" data-act="copylink">Copier le lien</button></div>
+      <div class="row"><span><b>Plan de sortie</b><br><span class="src">Pour l'équipe de l'artiste · lien public, sans budget</span></span><button class="btn out sm" type="button" data-act="copylink" data-copy="https://pds-os.app/s/neons-plan-de-sortie">Copier le lien</button></div>
       <div class="row"><span><b>Dossier de presse</b><br><span class="src">Pour les médias · utilisé par les Relations presse</span></span><button class="btn ghost sm" type="button" data-act="open" data-v="Dossier de presse — Néons.pdf">Voir le PDF</button></div></div></div>`;
   },
   de1(){
@@ -2081,7 +2125,7 @@ const BODY_MK={
       <div class="field"><b>Périmètre</b><div class="checks">${S.acts.map(a=>`<label><input type="checkbox" id="bs-${a.id}" checked>${esc(a.title)} <span class="src">· ${a.status==="cancelled"?"annulée":phaseOf(a)>=5?"clôturée":"à "+PHASES[phaseOf(a)].toLowerCase()}</span></label>`).join("")}</div><span class="src">Une activation décochée est exclue et nommée dans le rapport.</span></div>
       <div class="field"><b>Sections</b><div class="checks">${REPORT_SECTIONS.map(([k,l])=>`<label><input type="checkbox" id="bx-${k}" checked ${k==="sum"?"disabled":""}>${esc(l)}</label>`).join("")}</div></div>
 
-       <div class="field"><b>Réserves à inclure</b><div class="checks">${issues.map((x,i)=>`<label><input type="checkbox" id="bi-${i}" checked>${esc(x.text)} <span class="src">· ${esc(x.cat)}</span></label>`).join("")}</div></div></div></details>
+       <div class="field"><b>Réserves à inclure</b><div class="checks">${issues.map((x,i)=>`<label><input type="checkbox" id="bi-${i}" checked${x.open?" disabled":""}>${esc(x.text)} <span class="src">· ${esc(x.cat)}${x.open?" · activation ouverte : toujours incluse":""}</span></label>`).join("")}</div></div></div></details>
       <div class="btnrow"><button class="btn" type="button" data-act="bgen">Générer la version ${n}</button></div></div>`;
     else if(r&&r.status==="generated"&&can("project")) act=`<div class="btnrow"><button class="btn" type="button" data-act="bsubmit">Soumettre à ${esc(nameOf(holder("direction")))}</button></div>`;
     else if(r&&r.status==="submitted"&&can("direction")) act=`<div class="vers"><h3>Votre décision</h3>${ta("bNote","Commentaire","Obligatoire pour demander des corrections ou reporter")}
@@ -2094,27 +2138,29 @@ const BODY_MK={
   },
   bi2(){
     if(!S.review.reserves.length) return `<p class="note">Le bilan approuvé n'a aucune réserve.</p>`;
-    const isDir=can("direction"), edit=can("project")||isDir;
-    return `<div class="rows">${S.review.reserves.map(x=>`<div class="row" style="grid-template-columns:minmax(0,1fr)"><span><span class="cap">${esc(x.cat)}</span><br><b>${esc(x.text)}</b>
-      ${x.arb?`<br><span class="src">${esc(ARB[x.arb])}${x.who?` · ${esc(nameOf(x.who))}, pour le ${esc(fullDate(fromIso(x.due)))}`:""}${x.dupOf?` de « ${esc((S.review.reserves.find(y=>y.id===x.dupOf)||{}).text||"")} »`:""}${x.why?` · « ${esc(x.why)} »`:""} · arbitrée par ${esc(x.by)}${x.lifted?` · levée : « ${esc(x.lifted)} »`:""}</span>`:""}</span>
-      ${!x.arb&&edit?`<div class="grid2"><div class="field"><label for="ra-${x.id}">Arbitrage</label><select class="in" id="ra-${x.id}">${Object.entries(ARB).filter(([k])=>k!=="limit"||isDir).map(([k,l])=>`<option value="${k}">${l}</option>`).join("")}</select></div>
-        <div class="field"><label for="rdup-${x.id}">Doublon de</label><select class="in" id="rdup-${x.id}">${S.review.reserves.filter(y=>y!==x).map(y=>`<option value="${y.id}">${esc(y.text)}</option>`).join("")}</select></div>
-        <div class="field"><label for="rw-${x.id}">Qui suit, et motif</label><select class="in" id="rw-${x.id}">${MEMBERS.map(k=>`<option value="${k}">${esc(P[k].name)}</option>`).join("")}</select></div></div>
-        <div class="grid2"><div class="field"><label for="rd-${x.id}">À suivre pour le</label><input class="in" type="date" id="rd-${x.id}" value="2027-01-15"></div><div class="field"><label for="ry-${x.id}">Motif</label><input class="in" id="ry-${x.id}" placeholder="Obligatoire pour une limite définitive">${errOf("ry-"+x.id)}</div></div>
+    const isDir=can("direction"), lead=can("project"), edit=lead||isDir;
+    const opts=x=>Object.entries(ARB).filter(([k])=>lead?(k!=="limit"||isDir)&&!(x.open&&["na","dup"].includes(k)):k==="limit");
+    return `<p class="note">${lead?`À lever avant la clôture, à suivre après (qui, quand, par quel canal), non applicable ou doublon, avec un motif. Une activation encore ouverte se suit ou se lève, elle ne s'écarte pas. ${esc(nameOf(holder("direction")))} peut aussi accepter une réserve comme limite définitive.`:isDir?`${esc(nameOf(holder("project")))} arbitre chaque réserve ; vous pouvez en accepter une comme limite définitive, avec un motif.`:"Le responsable arbitre chaque réserve ; la direction peut en accepter une comme limite définitive."}</p>
+     <div class="rows">${S.review.reserves.map(x=>`<div class="row" style="grid-template-columns:minmax(0,1fr)"><span><span class="cap">${esc(x.cat)}</span><br><b>${esc(x.text)}</b>
+      ${x.arb?`<br><span class="src">${esc(ARB[x.arb])}${x.who?` · ${esc(nameOf(x.who))}, pour le ${esc(fullDate(fromIso(x.due)))}${x.channel?`, par ${esc(x.channel.toLowerCase())}`:""}`:""}${x.dupOf?` de « ${esc((S.review.reserves.find(y=>y.id===x.dupOf)||{}).text||"")} »`:""}${x.why?` · « ${esc(x.why)} »`:""} · arbitrée par ${esc(x.by)}${x.lifted?` · levée : « ${esc(x.lifted)} »`:""}</span>`:""}</span>
+      ${!x.arb&&edit?`<div class="grid2"><div class="field"><label for="ra-${x.id}">Arbitrage</label><select class="in" id="ra-${x.id}" data-arb="${x.id}">${opts(x).map(([k,l])=>`<option value="${k}">${l}</option>`).join("")}</select>${errOf("ra-"+x.id)}</div>
+        ${lead?`<div class="field"><label for="rdup-${x.id}">Doublon de</label><select class="in" id="rdup-${x.id}">${S.review.reserves.filter(y=>y!==x&&y.arb!=="dup").map(y=>`<option value="${y.id}">${esc(y.text)}</option>`).join("")}</select></div>
+        <div class="field"><label for="rw-${x.id}">Qui suit</label><select class="in" id="rw-${x.id}">${MEMBERS.map(k=>`<option value="${k}">${esc(P[k].name)}</option>`).join("")}</select></div>`:""}</div>
+        <div class="grid3">${lead?`<div class="field"><label for="rd-${x.id}">À suivre pour le</label><input class="in" type="date" id="rd-${x.id}" value="2027-01-15">${errOf("rd-"+x.id)}</div><div class="field"><label for="rc-${x.id}">Canal de suivi</label><select class="in" id="rc-${x.id}"><option value="">Choisir…</option><option>Tâche dans Travail</option><option>Réunion de suivi</option><option>E-mail</option></select>${errOf("rc-"+x.id)}</div>`:""}<div class="field"><label for="ry-${x.id}" id="ryl-${x.id}">Motif${!lead?" *":""}</label><input class="in" id="ry-${x.id}" placeholder="Obligatoire pour non applicable ou une limite définitive">${errOf("ry-"+x.id)}</div></div>
         <div><button class="btn out sm" type="button" data-act="rarb" data-id="${x.id}">Arbitrer</button></div>`:""}
       ${x.arb==="lever"&&!x.lifted&&edit?`<div class="field"><label for="rl-${x.id}">Ce qui l'a levée</label><input class="in" id="rl-${x.id}">${errOf("rl-"+x.id)}</div><div><button class="btn out sm" type="button" data-act="rlift" data-id="${x.id}">Marquer levée</button></div>`:""}</div>`).join("")}</div>${waits("bi2")}`;
   },
   bi3(){
     const c=S.review.closed, req=S.review.closeReq, follow=S.review.reserves.filter(r=>r.arb==="follow"||r.arb==="limit");
     const notClosed=S.acts.filter(a=>a.status!=="closed");
-    const checks=[["Bilan provisoire approuvé",!!approvedReport()],["Réserves arbitrées",reservesOpen().length===0]];
+    const unc=uncoveredActs(),checks=[["Bilan provisoire approuvé",!!approvedReport()],["Réserves arbitrées",reservesOpen().length===0],[unc.length?`Activations ouvertes sans réserve suivie : ${unc.map(a=>a.title).join(", ")}${approvedReport()?" · suivez-les après la clôture, ou générez un nouveau bilan si elles sont nouvelles":""}`:"Activations ouvertes couvertes par une réserve suivie ou acceptée",!unc.length]];
     let act="";
     if(!c&&!req&&can("project")) act=`<div class="btnrow"><button class="btn" type="button" data-act="cloreq">Demander la clôture</button></div>`;
     else if(!c&&req&&can("direction")) act=`<div class="vers"><h3>Votre décision</h3>${ta("cNote","Commentaire","Obligatoire pour demander des corrections")}<div class="btnrow"><button class="btn" type="button" data-act="clodecide" data-v="close">${follow.length?"Clôturer avec réserves":"Clôturer sans réserve"}</button><button class="btn out" type="button" data-act="clodecide" data-v="changes">Demander des corrections</button></div></div>`;
     return `${c?`<div class="callout ok">${I.ok}<span><b>Marketing clôturé ${c.withRes?"avec":"sans"} réserve</b> par ${esc(c.by)} le ${esc(c.at)}. Lecture seule : plus de nouvelle activation, les preuves restent acceptées.</span></div>`:""}
-     ${S.review.corr&&!req&&!c?`<div class="callout warn">${I.warn}<span><b>${esc(S.review.corr.by)} (demander des corrections)</b> : « ${esc(S.review.corr.note)} »</span></div>`:""}
+     ${S.review.corr&&!req&&!c?`<div class="callout warn">${I.warn}<span><b>${esc(S.review.corr.by)} (demander des corrections)</b> : « ${esc(S.review.corr.note)} »</span></div>`:""}${errOf("cloreq")}
      <div class="vers"><h3>Avant la clôture</h3><div class="rows">${checks.map(([l,ok])=>`<div class="row"><span>${esc(l)}</span>${pill(ok?"ok":"bad",ok?"Prêt":"Pas prêt")}</div>`).join("")}
-      ${notClosed.length?`<div class="row"><span>${notClosed.length} activation${notClosed.length>1?"s":""} pas clôturée${notClosed.length>1?"s":""} : ${notClosed.map(a=>esc(a.title)).join(", ")}</span>${pill("warn","Attention")}</div>`:""}
+      ${notClosed.length&&!unc.length?`<div class="row"><span>${notClosed.length} activation${notClosed.length>1?"s":""} encore ouverte${notClosed.length>1?"s":""}, suivie${notClosed.length>1?"s":""} après la clôture : ${notClosed.filter(a=>a.status!=="cancelled").map(a=>esc(a.title)).join(", ")}</span>${pill("","Avec réserves")}</div>`:""}
       ${follow.length?`<div class="row"><span>${follow.length} réserve${follow.length>1?"s":""} suivie${follow.length>1?"s":""} après la clôture</span>${pill("","Avec réserves")}</div>`:""}</div></div>
      ${c&&can("direction")?`<div class="vers"><h3>Rouvrir le Marketing</h3>${ta("cReopen","Motif","Ex. : retombées presse arrivées après la clôture",true)}<div class="btnrow"><button class="btn out" type="button" data-act="reopen">Rouvrir le Marketing</button></div></div>`:""}
      ${S.review.reopened&&!c?`<p class="note">Rouvert par ${esc(S.review.reopened.by)} le ${esc(S.review.reopened.at)} : « ${esc(S.review.reopened.why)} »</p>`:""}
@@ -2274,7 +2320,7 @@ const refsEditable=()=>can("creative")&&!["submitted","approved"].includes(S.des
 function refTile(r,group){
   const others=r.groups.filter(g=>g!==group), ed=refsEditable(), link=S.form==="rl:"+r.id;
   return `<div class="ref">${r.img?`<img src="${r.img}" alt="${esc(r.title)}">`:`<div class="ph none">${esc(r.link||"Fichier")}</div>`}
-   <div class="bd"><b>${esc(r.title)}</b><span class="eyebrow">${pill(r.validated?"ok":"",r.validated?"Validée":"Proposée")}<span class="src">${esc(r.kind)} · ${esc(r.rights)}</span></span>
+   <div class="bd"><b>${esc(r.title)}</b>${r.file?`<span class="src" style="font-size:12px">${esc(fileLine(r.file))}</span>`:""}<span class="eyebrow">${pill(r.validated?"ok":"",r.validated?"Validée":"Proposée")}<span class="src">${esc(r.kind)} · ${esc(r.rights)}</span></span>
     ${r.notes?`<span class="cap">${esc(r.notes)}</span>`:""}${others.length?`<span class="src">Aussi pour : ${esc(others.join(", "))}</span>`:""}
     <span class="src" style="font-size:12px">${esc(r.credit||`Déposée par ${r.by}`)}</span>
     ${ed&&link?`<div class="checks">${designGroups().map(g=>`<label><input type="checkbox" id="rg-${r.id}-${designGroups().indexOf(g)}" ${r.groups.includes(g)?"checked":""}>${esc(g)}</label>`).join("")}</div><div class="btnrow"><button class="btn sm" type="button" data-act="reflink" data-id="${r.id}">Enregistrer</button><button class="btn ghost sm" type="button" data-act="form" data-v="">Annuler</button></div>`
@@ -2393,8 +2439,9 @@ function pqBody(s){
   if(p&&p.mode) return `<div class="callout ok">${I.ok}<span><b>${esc(MODE_LABEL[p.mode])}${p.who?` · ${esc(nameOf(p.who))}`:""}</b>${p.prep&&p.prep.org?` · ${esc(PREP_MODES.find(m=>m[0]===p.prep.org)[1].toLowerCase())}`:""}, choisi par ${esc(p.by)} le ${esc(p.at)}.</span></div>${callFacts([["Fiche transférée",`${esc(f.name)} · V${f.transferred.v}`],["Livraison finale le",esc(fieldText(f.fields.find(x=>x.k==="livraison"))||"—")]].concat(p.carried&&p.carried.length?[["Repris du parcours précédent",esc(p.carried.join(" · "))]]:[]))}
    ${can("project")&&!livDelivered(k)?`<div class="btnrow"><button class="btn out sm" type="button" data-act="pqchange" data-k="${k}">Changer qui produit</button></div>`:""}${hist}`;
   if(!can("project")) return waitRow(holder("project"),"choisir qui produit");
-  return `<div class="pqwrap">${callFacts([["Fiche transférée",`${esc(f.name)} · V${f.transferred.v} · ${esc(f.form)}`],["Livraison finale le",esc(fieldText(f.fields.find(x=>x.k==="livraison"))||"—")]])}
-   <fieldset class="pick"><legend><b>Qui produit ce livrable ?</b></legend><div class="opts">${ch.map(([m,l,d,who,src],i)=>`<label class="opt"><input type="radio" name="pqMode" value="${m}" ${(S.pqDraft&&S.pqDraft.k===k?S.pqDraft.mode===m:i===0)?"checked":""}><span class="grow"><b>${esc(l)}</b> · ${esc(d)}${who?`<br><span class="src">${esc(src)}</span>`:`<br><span class="src">${esc(src)}</span>`}</span></label>`).join("")}</div>
+  const miss=[S.err.pqCo?"la société":"",S.err.pqOrg?"l'organisation de la préproduction":""].filter(Boolean);
+  return `<div class="pqwrap">${miss.length?`<div class="formmsg" role="alert">${I.warn}<span>Il manque ${miss.join(" et ")} : choisissez-${miss.length>1?"les":"la"} ci-dessous, puis confirmez.</span></div>`:""}${callFacts([["Fiche transférée",`${esc(f.name)} · V${f.transferred.v} · ${esc(f.form)}`],["Livraison finale le",esc(fieldText(f.fields.find(x=>x.k==="livraison"))||"—")]])}
+   <fieldset class="pick"><legend><b>Qui produit ce livrable ?</b> *</legend><div class="opts">${ch.map(([m,l,d,who,src],i)=>`<label class="opt"><input type="radio" name="pqMode" value="${m}" ${(S.pqDraft&&S.pqDraft.k===k?S.pqDraft.mode===m:i===0)?"checked":""}><span class="grow"><b>${esc(l)}</b> · ${esc(d)}${who?`<br><span class="src">${esc(src)}</span>`:`<br><span class="src">${esc(src)}</span>`}</span></label>`).join("")}</div>
    <span class="src">Proposé d'après la fiche et le Réseau ; vous confirmez.</span></fieldset>
    ${k==="clip"?companyField(k):""}
    ${prepLiv(k)?prepModeField(k,"pqOrg"):""}
@@ -2424,7 +2471,7 @@ const MK_STEPS=[
 const AC0={id:"ac0",mod:"activations",title:"Leviers à préparer",why:"Chaque levier retenu dans le Brief de sortie peut devenir une activation. Vous la créez quand vous êtes prêt, avec son mode pour l'influence et la presse.",exec:"project",coord:null,valid:[],prereq:["st3"]};
 const REVIEW_STEPS=[
   {id:"bi1",mod:"review",title:"Bilan provisoire",why:"Un rapport figé à une date, calculé par le code. La direction l'approuve, même avec des activations encore ouvertes ; approuver ne vérifie ni ne clôture rien.",exec:"project",coord:null,valid:["direction"],prereq:["ac0"]},
-  {id:"bi2",mod:"review",title:"Réserves",why:"Chaque réserve est arbitrée : à lever avant la clôture, à suivre après, acceptée comme limite, non applicable ou doublon.",exec:"project",coord:null,valid:["direction"],prereq:["bi1"]},
+  {id:"bi2",mod:"review",title:"Réserves",why:"Chaque réserve est arbitrée par le responsable : à lever avant la clôture, à suivre après, non applicable ou doublon ; la direction peut l'accepter comme limite définitive.",exec:"project",coord:null,valid:["direction"],prereq:["bi1"]},
   {id:"bi3",mod:"review",title:"Clôture du Marketing",why:"La direction clôture le volet Marketing. Ensuite on lit seulement, et les preuves restent acceptées. Il peut être rouvert, avec un motif.",exec:"project",coord:null,valid:["direction"],prereq:["bi2"]}
 ];
 const actStep=a=>({id:a.id,mod:"activations",title:a.title,why:ACT_WHY[a.kind],exec:"p:"+(a.resp||""),coord:"project",valid:["direction"],prereq:["st3"],act:a,...(a.needs==="clip"?{gate:()=>livDelivered("clip"),gateText:"Clip officiel livré"}:{})});
@@ -2532,7 +2579,7 @@ function briefDoc(){
    <section><h4>Pour qui et pourquoi</h4><div class="rows">${row("Positionnement",esc(kept("Positionnement").join(" · ")||"—"))}${row("Publics prioritaires",esc(kept("Publics prioritaires").join(" · ")||"—"))}${row("Narratif",esc(kept("Narratif de sortie").join(" · ")||"—"))}</div></section>
    <section><h4>Comment</h4><div class="rows"><div class="irow"><span class="grow"><span class="cap">Dispositif retenu</span><br>${chips(get("Dispositif").levers.filter(l=>l.state==="retenu").map(l=>l.name))}</span></div><div class="irow"><span class="grow"><span class="cap">Livrables</span><br>${chips(planItems().livs.map(x=>x.name))}</span></div></div></section>
    <section><h4>Quand</h4><div class="rows">${tempsForts().map(t=>`<div class="irow"><span class="num" style="min-width:150px;font-weight:600">${fullDate(relDay(t.j))}</span><span class="grow">${esc(t.name)} <span class="src">· ${jLabel(t.j)}</span></span></div>`).join("")}</div></section>
-   <section><h4>Objectif et budget</h4><div class="statgrid"><div class="stat"><span class="k">Objectif</span><b>${esc(kept("Objectifs & KPIs").join(" · ")||"—")}</b></div><div class="stat"><span class="k">Budget proposé</span><b class="num">${euro(b.proposed)}</b><span class="src">sur ${euro(BUDGET_ENV)} · interne</span></div></div></section></div>`;
+   <section><h4>Objectif et budget</h4><div class="statgrid"><div class="stat"><span class="k">Objectif</span><b>${esc(kept("Objectifs & KPIs").join(" · ")||"—")}</b>${dimItems("Objectifs & KPIs").filter(x=>x.state==="kept").map(x=>`<span class="src">${esc(objLine(x))}</span>`).join("")}</div><div class="stat"><span class="k">Budget proposé</span><b class="num">${euro(b.proposed)}</b><span class="src">sur ${euro(BUDGET_ENV)} · interne</span></div></div></section></div>`;
 }
 Object.assign(BODY_MK,{
   st3(){
@@ -2547,7 +2594,7 @@ Object.assign(BODY_MK,{
     const decs=r?r.validators.map(k=>{const d=r.dec[k];return `<div class="irow"><span class="grow"><b>${esc(nameOf(k))}</b>${d&&d.note?`<br><span class="src">« ${esc(d.note)} »</span>`:""}${S.strat.relances&&S.strat.relances[k]&&!d?`<br><span class="src">Relancée le ${esc(S.strat.relances[k])}</span>`:""}</span>${pill(!d?"info":d.kind==="changes"?"warn":"ok",!d?"En attente":d.kind==="ok"?"Validé":d.kind==="res"?"Validé avec réserves":"Modification demandée")}</div>`;}).join(""):"";
     return `${v?`<div class="callout ok">${I.ok}<span><b>Brief de sortie — V${v.v} validé</b> le ${esc(v.at)}. Il est figé ; le réviser crée une V${v.v+1}.</span></div>`:""}
      ${r&&r.changes?`<div class="callout warn">${I.warn}<span><b>${esc(r.changes.by)} (demander une modification)</b> : « ${esc(r.changes.note)} »</span></div>`:""}
-     <div class="vers"><div class="dhead"><h3>Brief de sortie — V${v?v.v:(r?r.round:1)}</h3><span class="btnrow"><span class="src">Restant à arbitrer : aucun</span><button class="btn ghost sm" type="button" data-act="open" data-v="Brief de sortie — V1.pdf">Voir le PDF</button></span></div>${briefDoc()}</div>
+     <div class="vers"><div class="dhead"><h3>Brief de sortie — V${v?v.v:(r?r.round:1)}</h3><span class="btnrow"><span class="src">Restant à arbitrer : ${esc(restArb().join(", ")||"aucun")}</span><button class="btn ghost sm" type="button" data-act="open" data-v="Brief de sortie — V1.pdf">Voir le PDF</button></span></div>${briefDoc()}</div>
      ${decs?`<div class="vers"><h3>Validation</h3><div class="rows">${decs}</div></div>`:""}
      ${act||waits("st3")}`;
   },
@@ -2555,7 +2602,7 @@ Object.assign(BODY_MK,{
     const p=planItems(), tf=tempsForts(), up=LIVRABLES.filter(x=>kept(x.prop)).length*3;
     return `<div class="callout ok">${I.ok}<span><b>Stratégie validée</b> le ${esc(S.strat.validated.at)} : Brief de sortie — V1. Rien n'oblige à lancer la Conception maintenant.</span></div>
      <div class="vers"><h3>Documents</h3><div class="rows">
-      <div class="irow"><span class="grow"><b>Brief de sortie — V1</b><br><span class="src">Interne · avec le budget</span></span><span class="btnrow">${pill("ok","Validé")}<button class="btn ghost sm" type="button" data-act="open" data-v="Brief de sortie — V1.pdf">Voir</button><button class="btn ghost sm" type="button" data-act="copylink">Partager</button></span></div>
+      <div class="irow"><span class="grow"><b>Brief de sortie — V1</b><br><span class="src">Interne · avec le budget</span></span><span class="btnrow">${pill("ok","Validé")}<button class="btn ghost sm" type="button" data-act="open" data-v="Brief de sortie — V1.pdf">Voir</button><button class="btn ghost sm" type="button" data-act="copylink" data-copy="https://pds-os.app/s/neons-brief-de-sortie-v1">Partager</button></span></div>
       <div class="irow"><span class="grow"><b>Plan de sortie</b><br><span class="src">Pour l'équipe de l'artiste · sans budget</span></span>${pill("","À générer")}</div>
       <div class="irow"><span class="grow"><b>Dossier de presse</b><br><span class="src">Pour les médias · sans budget</span></span>${pill("","À générer")}</div></div></div>
      <div class="vers"><h3>Ce que la Stratégie alimente</h3><div class="rows">
@@ -2705,12 +2752,17 @@ function actNext(a){
   if(a.stats.state==="todo") return {r:a.resp,todo:"Récupérer les statistiques",skip:"stats"};
   return {r:a.resp,todo:"Clôturer l'activation"};
 }
-const PLATFORMS=["TikTok","Instagram","YouTube","Spotify","Deezer","Presse","Autre"];
+/* Where a figure is read depends on the lever: a playlist is counted on a music service,
+   a showcase at the door, never on a social network by default (MKT-ACT-002, ACT-001). */
+const PLATFORMS={social:["TikTok","Instagram","YouTube","Facebook","Autre"],influence:["TikTok","Instagram","YouTube","Autre"],clip:["YouTube","TikTok","Instagram","Autre"],
+  playlists:["Spotify","Apple Music","Deezer","YouTube Music","Amazon Music","Autre"],live:["Billetterie","Comptage à l'entrée","Liste d'invités","Autre"],rp:["Presse","Autre"],pub:["Meta","TikTok","YouTube","Google","Autre"]};
+const platformsFor=a=>PLATFORMS[a.k]||["Autre"];
+const CAMPAIGN_END=relDay(28); // the first month after the release, as the KPIs of the Brief
 const STAT_SOURCES=["Déclaré en interne","Déclaré par le créateur","Déclaré par l'agence","Relevé sur la plateforme"];
 function snapForm(a){
   return `<div class="card" style="background:var(--soft);padding:14px;gap:10px"><h3 style="font-size:15px">Nouveau relevé</h3>
    <div class="grid2"><div class="field"><label for="sV">${esc(a.unit[0].toUpperCase()+a.unit.slice(1))} *</label><input class="in" id="sV" inputmode="numeric" placeholder="Le chiffre relevé">${errOf("sV")}</div>
-    <div class="field"><label for="sP">Plateforme</label><select class="in" id="sP">${PLATFORMS.map(x=>`<option>${x}</option>`).join("")}</select></div>
+    <div class="field"><label for="sP">${a.k==="live"?"Mesure":"Plateforme"}</label><select class="in" id="sP">${platformsFor(a).map(x=>`<option>${esc(x)}</option>`).join("")}</select></div>
     <div class="field"><label for="sPer">Période *</label><input class="in" id="sPer" placeholder="Ex. : du 12/12 au 19/12">${errOf("sPer")}</div>
     <div class="field"><label for="sSrc">Source</label><select class="in" id="sSrc">${STAT_SOURCES.map(x=>`<option>${x}</option>`).join("")}</select></div></div>
    <div class="checks"><label><input type="checkbox" id="sPart">Relevé partiel (toutes les publications ne sont pas encore comptées)</label><label><input type="checkbox" id="aNA">Donnée indisponible : la plateforme ne la fournit pas</label></div>
@@ -2730,15 +2782,15 @@ function actBody(a){
     switch(n.todo){
       case "Reprendre l'activation":act=`<div class="callout warn">${I.warn}<span><b>Suspendue</b> par ${esc(a.suspended.by)} le ${esc(a.suspended.at)} : « ${esc(a.suspended.why)} »</span></div><div class="btnrow"><button class="btn" type="button" data-act="aresume" data-id="${a.id}">Reprendre l'activation</button></div>`;break;
       case "Désigner un responsable":act=`<div class="field"><label for="aResp">Responsable *</label><select class="in" id="aResp">${MEMBERS.map(k=>`<option value="${k}" ${k==="cp"?"selected":""}>${esc(P[k].name)} · ${esc(P[k].role)}</option>`).join("")}</select></div><div class="btnrow"><button class="btn" type="button" data-act="aresp" data-id="${a.id}">Désigner</button></div>`;break;
-      case "Fixer l'échéance":act=`<div class="field"><label for="aDue">Échéance *</label><input class="in" type="date" id="aDue" value="${isoOf(relDay(a.j))}"><span class="src">Proposée : ${esc(jLabel(a.j))} dans le calendrier de lancement, ${fullDate(relDay(a.j))}</span>${errOf("aDue")}</div><div class="btnrow"><button class="btn" type="button" data-act="adue" data-id="${a.id}">Fixer l'échéance</button></div>`;break;
+      case "Fixer l'échéance":act=`<div class="field"><label for="aDue">Échéance *</label><input class="in" type="date" id="aDue" value="${isoOf(relDay(a.j))}" min="${isoOf(new Date(...S.base))}" max="${isoOf(CAMPAIGN_END)}"><span class="src">Proposée : ${esc(jLabel(a.j))} dans le calendrier de lancement, ${fullDate(relDay(a.j))}</span>${errOf("aDue")}</div><div class="btnrow"><button class="btn" type="button" data-act="adue" data-id="${a.id}">Fixer l'échéance</button></div>`;break;
       case "Lancer l'activation":act=`<div class="btnrow"><button class="btn" type="button" data-act="alaunch" data-id="${a.id}">Lancer l'activation</button></div>`;break;
-      case "Déclarer l'activation réalisée":act=`${(m=>m&&!m.pub&&(a.kind==="Influence"||!m.sent)?`<p class="note">${a.kind==="Influence"?(m.n?"Aucun créateur n'a encore publié.":"Aucun créateur engagé pour l'instant : choisissez-les dans la campagne, plus bas."):"Aucun message n'est encore parti aux médias."}</p>`:"")(moduleProof(a))}${errOf("adone")}<span class="src">Réalisée déclarée ne signifie ni publiée, ni vérifiée, ni mesurée.</span><div class="btnrow"><button class="btn" type="button" data-act="adone" data-id="${a.id}">Déclarer réalisée</button></div>`;break;
+      case "Déclarer l'activation réalisée":act=`${agencyDoneForm(a)}${(m=>m&&!m.pub&&(a.kind==="Influence"||!m.sent)?`<p class="note">${a.kind==="Influence"?(m.n?"Aucun créateur n'a encore publié.":"Aucun créateur engagé pour l'instant : choisissez-les dans la campagne, plus bas."):"Aucun message n'est encore parti aux médias."}</p>`:"")(moduleProof(a))}${errOf("adone")}<span class="src">Réalisée déclarée ne signifie ni publiée, ni vérifiée, ni mesurée.</span><div class="btnrow"><button class="btn" type="button" data-act="adone" data-id="${a.id}">Déclarer réalisée</button></div>`;break;
       case "Fournir la preuve":case "Fournir une autre preuve":act=`<div class="field"><label for="aProof">Lien de la preuve *</label><input class="in" id="aProof" inputmode="url" placeholder="https://…">${errOf("aProof")}</div>
         <div class="checks"><label><input type="checkbox" id="aPNA" ${S.err.aPWhy?"checked":""}>Preuve indisponible (story expirée, publication retirée…)</label></div><div class="field"><label for="aPWhy">Motif si indisponible</label><input class="in" id="aPWhy">${errOf("aPWhy")}</div>
         <div class="btnrow"><button class="btn" type="button" data-act="aproof" data-id="${a.id}">Enregistrer la preuve</button><button class="btn ghost sm" type="button" data-act="aproofsample">Utiliser un lien d'exemple</button></div>`;break;
       case "Vérifier la preuve":act=`<p class="note">Preuve : <a href="#" data-act="nolink">${esc(a.proof.link)}</a> · fournie par ${esc(a.proof.by)} le ${esc(a.proof.at)}</p>${ta("aNote","Commentaire","Obligatoire pour contester")}<div class="btnrow"><button class="btn" type="button" data-act="averify" data-id="${a.id}" data-v="ok">Vérifier la preuve</button><button class="btn out" type="button" data-act="averify" data-id="${a.id}" data-v="contest">Contester</button></div>`;break;
       case "Récupérer les statistiques":act=snapForm(a);break;
-      case "Clôturer l'activation":act=`<div class="btnrow"><button class="btn" type="button" data-act="aclose" data-id="${a.id}">Clôturer l'activation</button></div>`;break;
+      case "Clôturer l'activation":act=`${a.kind==="Influence"&&a.mode!=="Agence externe"?closeMatrix(a):""}${errOf("aclose")}<div class="btnrow"><button class="btn" type="button" data-act="aclose" data-id="${a.id}">Clôturer l'activation</button></div>`;break;
     }
   }
   // Around the next action: make it a task, or say it does not apply (never automatic).
@@ -2754,10 +2806,18 @@ function actBody(a){
   const own=act||(n&&n.r&&n.r!==me()&&st!=="blocked"?waitRow(n.r,n.todo):"");
   const now=mods.some(x=>x.r===me())&&!act?modLines+own:own+modLines;
   return `${a.status==="cancelled"?`<div class="callout">${I.stop}<span><b>Annulée</b> par ${esc(a.cancelled.by)} le ${esc(a.cancelled.at)} : « ${esc(a.cancelled.why)} ». Elle reste dans le bilan, avec ce motif.</span></div>`:""}
+   ${a.exception?`<div class="callout warn">${I.warn}<span><b>Réalisée avec une réserve</b>, déclarée par ${esc(a.exception.by)} le ${esc(a.exception.at)} : « ${esc(a.exception.why)} ». Restait : ${esc(a.exception.items.join(" · "))}. À régler par ${esc(nameOf(a.exception.r))} avant le ${esc(fullDate(fromIso(a.exception.due)))} ; elle entre dans le bilan.</span></div>`:""}
    ${a.status==="prep"&&st!=="blocked"?`<p class="note">Pour lancer : ${ready?"prête : responsable, échéance, rien de bloquant.":"il manque "+[!a.resp?"un responsable":"",!a.due?"une échéance":""].filter(Boolean).join(" et ")+"."}</p>`:""}
    ${now||tools||(a.proof.derived&&a.status==="done")?`<div class="nowbox"><h3>Maintenant</h3>${a.proof.derived&&a.status==="done"&&a.proof.state!=="verified"?derivedProofBox(a):""}${now||(a.proof.derived&&a.status==="done"&&a.proof.state!=="verified"?"":`<p class="note">Rien à faire de votre côté pour l'instant.</p>`)}${tools}</div>`:""}
    ${influenceSection(a)}${rpSection(a)}${snapsList(a)}${extraSnap}
-   <details class="infos"><summary>Informations</summary>${infos}</details>${life}`;
+   <details class="infos"><summary>Informations</summary>${infos}</details>${me()==="cp"||me()==="dg"||me()===a.resp?costsBox(a,editor&&open):""}${life}`;
+}
+function costsBox(a,ed){
+  const l=costsOf(a),f=S.form==="cost:"+a.id;if(!l.length&&!ed) return "";
+  return `<details class="infos"${f||S.err.cAmount?" open":""}><summary>Dépenses · ${euro(sumCosts(l,["engaged","invoiced","paid"]))} engagés</summary><div class="vers">
+   ${l.length?`<div class="rows">${l.map((c,i)=>`<div class="irow"><span class="grow"><b>${esc(c.label)}</b> · <span class="num">${euro(c.amount)}</span><br><span class="src">${esc(c.src)}</span></span><span class="btnrow">${pill(c.state==="paid"?"ok":c.state==="invoiced"?"info":"",COST_ST[c.state])}${ed&&!c.auto&&c.state!=="paid"?`<button class="btn ghost sm" type="button" data-act="cstate" data-id="${a.id}" data-i="${i}">${c.state==="engaged"?"Facture reçue":"Payé"}</button>`:""}</span></div>`).join("")}</div>`:`<p class="note">Aucune dépense pour l'instant.</p>`}
+   ${ed?(f?`<div class="card" style="background:var(--soft);padding:14px;gap:10px"><div class="grid3"><div class="field"><label for="cLabel">Dépense *</label><input class="in" id="cLabel" placeholder="Ex. : location de la salle">${errOf("cLabel")}</div><div class="field"><label for="cAmount">Montant HT *</label><input class="in" id="cAmount" inputmode="numeric" placeholder="Ex. : 1 200">${errOf("cAmount")}</div><div class="field"><label for="cState">Où on en est</label><select class="in" id="cState">${Object.entries(COST_ST).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}</select></div></div><div class="btnrow"><button class="btn sm" type="button" data-act="cadd" data-id="${a.id}">Ajouter</button><button class="btn ghost sm" type="button" data-act="form" data-v="">Annuler</button></div></div>`
+     :`<div><button class="btn ghost sm" type="button" data-act="form" data-v="cost:${a.id}">Ajouter une dépense</button></div>`):""}</div></details>`;
 }
 const ACT_VIEWS=[["all","Toutes",()=>true],["prep","À lancer",a=>["prep","ready"].includes(dispStatus(a))],["run","En cours",a=>a.status==="run"],["check","À vérifier",a=>a.proof.state==="given"||(a.snaps||[]).some(x=>!x.verifiedBy)&&a.status!=="closed"],
   ["blocked","Bloquées",a=>["blocked","suspended"].includes(dispStatus(a))],["measure","À mesurer",a=>a.status==="done"&&a.stats.state==="todo"],
@@ -2789,10 +2849,10 @@ function reasonModal(){
    une fiche Collaboration par créateur, rien d'engageant sans un humain.
    ====================================================================== */
 const INFLUENCERS=[
-  {k:"lea",handle:"@leamoreau",platform:"TikTok",followers:328000,seen:"relevé le 02/10/2026",history:"A collaboré sur le clip « Lune » (2025) · 210 000 vues, déclaré par la créatrice",flag:["ok","Déjà collaboré"]},
-  {k:"sami",handle:"@samitee",platform:"TikTok",followers:112000,seen:"relevé le 28/09/2026",history:"Proposé en mai 2025, sans réponse",flag:["warn","Déjà contacté"]},
-  {k:"inesv",handle:"@inesvale",platform:"Instagram",followers:64000,seen:"relevé en mars 2025",history:"Donnée d'audience ancienne : à revérifier",flag:["warn","Donnée ancienne"]},
-  {k:"noa",handle:"@noabessa",platform:"TikTok",followers:47000,seen:"relevé le 30/09/2026",history:"Aucune collaboration passée",flag:null}
+  {k:"lea",handle:"@leamoreau",email:"lea@leamoreau.fr",platform:"TikTok",followers:328000,seen:"relevé le 02/10/2026",history:"A collaboré sur le clip « Lune » (2025) · 210 000 vues, déclaré par la créatrice",flag:["ok","Déjà collaboré"]},
+  {k:"sami",handle:"@samitee",email:"samitee.pro@gmail.com",platform:"TikTok",followers:112000,seen:"relevé le 28/09/2026",history:"Proposé en mai 2025, sans réponse",flag:["warn","Déjà contacté"]},
+  {k:"inesv",handle:"@inesvale",email:"ines.vale@gmail.com",platform:"Instagram",followers:64000,seen:"relevé en mars 2025",history:"Donnée d'audience ancienne : à revérifier",flag:["warn","Donnée ancienne"]},
+  {k:"noa",handle:"@noabessa",email:"noa.bessa@gmail.com",platform:"TikTok",followers:47000,seen:"relevé le 30/09/2026",history:"Aucune collaboration passée",flag:null}
 ];
 const inflOf=k=>INFLUENCERS.find(x=>x.k===k);
 const STAGES=[["candidate","Candidate"],["concept","Concept à valider"],["validated","Validée en interne"],["nego","Négociation"],["agreement","Accord à obtenir"],["agreed","Accordée"],["content","En validation"],["ready","Prête à publier"],["published","Publiée déclarée"],["verified","Publiée vérifiée"],["admin","Administration"],["closed","Clôturée"],["refused","Refusée"],["noanswer","Sans réponse"],["abandoned","Abandonnée"]];
@@ -2801,15 +2861,20 @@ const stageTone=s=>["closed","verified"].includes(s)?"ok":["refused","noanswer",
 const PAY={none:"Non demandé",invoice:"Pièce attendue",tovalidate:"À valider",ok:"Bon à payer",paid:"Payé déclaré",paidv:"Payé vérifié"};
 const campOf=a=>a.camp||(a.camp={concept:"Une nuit blanche à Paris, entre deux lumières : chaque créateur raconte sa nuit sur le refrain de « Néons ».",collabs:[]});
 const collabsOf=a=>(a.camp?a.camp.collabs:[]);
+/* Nothing happens with a creator before the activation is launched (a person, a deadline,
+   then « Lancer »), and nothing after it is closed, cancelled or suspended: picking creators
+   stays possible (MKT-INF-001). */
+const collabOpen=a=>["run","done"].includes(a.status);
 /* Who does the next gesture of a collaboration, and what (the creator acts through her private link). */
 function collabNext(a,c){
   const R=a.resp||holder("project"), V=holder("direction");
+  if(!collabOpen(a)) return null;
   switch(c.stage){
     case "candidate":return {r:R,todo:"Écrire le concept personnalisé",do:"cconcept"};
     case "concept":return {r:V,todo:"Valider le concept",do:"cconceptdec"};
     case "validated":return {r:R,todo:"Envoyer le brief et la proposition",do:"cbrief"};
     case "nego":{const last=lastOf(c.offers);return last&&last.by==="Créateur"?{r:R,todo:"Répondre à la contre-proposition",do:"coffer"}:{r:R,todo:"Accepter les conditions ou attendre la réponse",do:"coffer"};}
-    case "agreement":return {r:c.k,todo:"Donner son accord",ext:true};
+    case "agreement":return c.agreement&&c.agreement.sent?{r:c.k,todo:"Donner son accord",ext:true}:{r:R,todo:"Envoyer l'accord",do:"csend"};
     case "agreed":return {r:c.k,todo:"Déposer le contenu",ext:true};
     case "content":return {r:holder("creativeInt"),todo:"Valider le contenu",do:"ccontentdec"};
     case "ready":return {r:c.k,todo:"Déclarer la publication",ext:true};
@@ -2833,7 +2898,7 @@ function collabCard(a,c){
        <div class="field"><label for="co-o-${c.k}">Droits organiques</label><input class="in" id="co-o-${c.k}" value="Sur son compte ${esc(inf.platform)} · republication par Mona Lys"></div><div class="field"><label for="co-p-${c.k}">Droits publicitaires</label><select class="in" id="co-p-${c.k}"><option>Non demandés</option><option>Spark Ads · 30 jours · inclus</option><option>Spark Ads · 30 jours · +200 € HT</option></select></div></div>
       <div class="field"><label for="co-msg-${c.k}">Message</label><textarea class="in" id="co-msg-${c.k}" rows="4">Bonjour ${esc(nameOf(c.k).split(" ")[0])}, Mona Lys sort « Néons » le Sam. 05/12. On aimerait que tu racontes ta nuit blanche à Paris sur le refrain : ${esc(c.concept.angle.toLowerCase())}. Tout est dans le brief joint ; dis-nous si la proposition te va.</textarea><span class="src">Repris du concept validé. PDS OS ne l'envoie pas : copiez-le, puis indiquez qu'il est parti.</span></div>
       <div class="grid2"><div class="field"><label for="co-ch-${c.k}">Canal</label><select class="in" id="co-ch-${c.k}"><option>E-mail</option><option>Message TikTok</option><option>WhatsApp</option></select></div></div>
-      <div class="btnrow"><button class="btn sm" type="button" data-act="cbrief" data-id="${a.id}" data-k="${c.k}">Marquer le brief comme envoyé</button><button class="btn ghost sm" type="button" data-act="copytext" data-v="Message copié.">Copier le message</button></div></div>`;
+      <div class="btnrow"><button class="btn sm" type="button" data-act="cbrief" data-id="${a.id}" data-k="${c.k}">Marquer le brief comme envoyé</button><button class="btn ghost sm" type="button" data-act="copytext" data-from="co-msg-${c.k}" data-v="Message copié.">Copier le message</button></div></div>`;
     else if(n.do==="coffer"){const last=lastOf(c.offers);act=`<div class="btnrow">${last&&last.by==="Créateur"?`<button class="btn sm" type="button" data-act="caccept" data-id="${a.id}" data-k="${c.k}">Accepter ${euro(last.amount)}</button>`:""}<button class="btn out sm" type="button" data-act="form" data-v="cof:${c.k}">Faire une nouvelle proposition</button>${last&&last.by==="PDS"?`<button class="protobtn" type="button" data-act="ccounter" data-id="${a.id}" data-k="${c.k}">Proto : la créatrice répond</button>`:""}<button class="btn ghost sm" type="button" data-act="cexit" data-id="${a.id}" data-k="${c.k}" data-v="noanswer">Sans réponse</button></div>
       ${f==="cof:"+c.k?`<div class="card" style="background:var(--soft);padding:14px;gap:10px"><div class="grid2"><div class="field"><label for="cn-a-${c.k}">Montant *</label><input class="in" id="cn-a-${c.k}" inputmode="numeric">${errOf("cn-a-"+c.k)}</div><div class="field"><label for="cn-p-${c.k}">Droits publicitaires</label><select class="in" id="cn-p-${c.k}"><option>Non demandés</option><option>Spark Ads · 30 jours · inclus</option></select></div></div><div class="btnrow"><button class="btn sm" type="button" data-act="cnewoffer" data-id="${a.id}" data-k="${c.k}">Envoyer la proposition</button><button class="btn ghost sm" type="button" data-act="form" data-v="">Annuler</button></div></div>`:""}`;}
     else if(n.do==="ccontentdec"){const v=lastOf(c.versions);act=`<div class="vers"><h3>Votre décision sur la V${v.n}</h3><div class="grid2"><div class="field"><label for="cv-tc-${c.k}">Timecode</label><input class="in" id="cv-tc-${c.k}" placeholder="Ex. : 0:12"></div><div class="field"><label for="cv-c-${c.k}">Catégorie</label><select class="in" id="cv-c-${c.k}"><option>Montage</option><option>Audio</option><option>Sous-titres</option><option>Mentions</option><option>Autre</option></select></div></div>${ta(`cv-n-${c.k}`,"Retour","Obligatoire pour demander des corrections")}
@@ -2841,19 +2906,22 @@ function collabCard(a,c){
     else if(n.do==="cpubverify") act=`<p class="note">Publication déclarée : <a href="#" data-act="nolink">${esc(c.pub.url)}</a> le ${esc(c.pub.at)}.</p><div class="btnrow"><button class="btn sm" type="button" data-act="cpubverify" data-id="${a.id}" data-k="${c.k}">Vérifier la publication</button></div>`;
     else if(n.do==="cpay") act=`<div class="btnrow"><button class="btn sm" type="button" data-act="cpay" data-id="${a.id}" data-k="${c.k}">${esc(n.todo)}</button></div>${c.pay==="tovalidate"?`<span class="src">Accord « Bon pour accord » du ${esc(c.agreement.at)}, contenu publié et vérifié : le bon à payer ne déclenche aucun virement.</span>`:""}`;
     else if(n.do==="cclose") act=`<div class="btnrow"><button class="btn sm" type="button" data-act="cclose" data-id="${a.id}" data-k="${c.k}">Clôturer la collaboration</button></div>`;
+    else if(n.do==="csend") act=sendAgreementCard(a,c);
   }
-  const link=c.token?`<span class="linkbox"><code>https://pds-os.app/i/${c.token}</code><button class="btn ghost sm" type="button" data-act="copytext" data-v="Lien copié.">Copier le lien</button></span>`:"";
+  const sent=c.agreement&&c.agreement.sent, accepted=c.agreement&&c.agreement.status==="accepted";
+  const link=c.token&&sent?`<span class="linkbox"><code>https://pds-os.app/i/${c.token}</code><button class="btn ghost sm" type="button" data-act="copytext" data-v="Lien copié.">Copier le lien</button></span>`:"";
+  const sentLine=sent?`Envoyé ${sent.ch==="E-mail"?`par e-mail à ${esc(sent.to)} par PDS OS`:`par ${esc(sent.ch.toLowerCase())} (envoi déclaré)`}, par ${esc(sent.by)} le ${esc(sent.at)} · lien créé le ${esc(c.agreement.createdAt)}${c.revoked&&c.revoked.length?` · ${c.revoked.length} lien${c.revoked.length>1?"s":""} révoqué${c.revoked.length>1?"s":""}`:""}`:"";
   const body=`<div class="eyebrow">${inf.flag?pill(inf.flag[0],inf.flag[1]):""}<span class="src">${esc(inf.platform)} · ${fmtN(inf.followers)} abonnés · ${esc(inf.seen)} · ${esc(inf.history)}</span></div>
    ${c.concept?callFacts([["Concept",`${esc(c.concept.angle)} <span class="src">· ${esc(c.concept.format)} · ${c.conceptOk?`validé par ${esc(c.conceptOk)}`:"à valider"}</span>`]]):""}
    ${c.offers.length?`<div class="vers"><h3>Négociation</h3><ul class="hist">${c.offers.map((o,i)=>`<li><span class="${c.accepted===i?"okc":"noc"}">${c.accepted===i?"✓":"•"}</span><span><b>${esc(o.by==="PDS"?"PDS":nameOf(c.k))}</b> · ${esc(offerLine(o))} <span class="src">· ${esc(o.at)}${c.accepted===i?" · conditions acceptées":""}</span></span></li>`).join("")}</ul></div>`:""}
-   ${c.token?`<div class="vers"><h3>Accord express</h3><span class="src">${c.agreement&&c.agreement.status==="accepted"?`« Bon pour accord » donné le ${esc(c.agreement.at)} sur la version exacte des conditions.`:c.agreement&&c.agreement.status==="changes"?`Modification demandée : « ${esc(c.agreement.note)} »`:"Lien privé envoyé à la créatrice, sans compte : elle voit les conditions et répond."}</span>${link}
+   ${c.token&&(sent||accepted||c.agreement.status==="changes")?`<div class="vers"><h3>Accord express</h3><span class="src">${accepted?`« Bon pour accord » donné le ${esc(c.agreement.at)} sur la version exacte des conditions.`:c.agreement&&c.agreement.status==="changes"?`Modification demandée : « ${esc(c.agreement.note)} »`:"Lien privé envoyé à la créatrice, sans compte : elle voit les conditions et répond."}${sentLine?`<br>${sentLine}`:""}</span>${link}${sent&&!accepted&&(me()===(a.resp||holder("project"))||can("project"))?`<div><button class="btn ghost sm" type="button" data-act="crevoke" data-id="${a.id}" data-k="${c.k}">Révoquer le lien et en préparer un autre</button></div>`:""}
      <div class="grid2"><div class="stat"><span class="k">Droits organiques</span><b style="font-size:15px">${esc(c.offers[c.accepted].organic)}</b></div><div class="stat"><span class="k">Droits publicitaires</span><b style="font-size:15px">${esc(c.offers[c.accepted].ads)}</b><span class="src">Jamais déduits des droits organiques</span></div></div></div>`:""}
    ${c.versions.length?`<div class="vers"><h3>Contenus</h3><div class="rows">${[...c.versions].reverse().map(v=>`<div class="irow"><span class="grow"><b>V${v.n}</b> · <a href="#" data-act="nolink">${esc(v.url)}</a><br><span class="src">Déposée le ${esc(v.at)}${v.notes.length?" · "+v.notes.map(x=>`${x.tc?x.tc+" · ":""}${x.cat} : « ${x.text} »`).map(esc).join(" · "):""}</span></span>${pill(v.status==="ok"?"ok":v.status==="changes"?"warn":"info",v.status==="ok"?"Validée":v.status==="changes"?"Corrections demandées":"En validation")}</div>`).join("")}</div></div>`:""}
    ${c.pub?callFacts([["Publication",`<a href="#" data-act="nolink">${esc(c.pub.url)}</a> · déclarée le ${esc(c.pub.at)}${c.pub.verifiedBy?` · vérifiée par ${esc(c.pub.verifiedBy)}`:" · non vérifiée"}`]]):""}
-   ${c.pay&&c.pay!=="none"?callFacts([["Paiement administratif",`${esc(PAY[c.pay])} · ${euro(c.offers[c.accepted].amount)}${c.invoice?` · ${esc(c.invoice)}`:""} <span class="src">· aucun virement par PDS OS</span>`]]):""}
-   ${act||(n&&n.r&&!["closed","refused","noanswer","abandoned"].includes(c.stage)?waitRow(n.r,n.todo+(n.ext?" (lien privé)":""))+(n.ext&&P[c.k].where!=="lien"&&isMember(me())?`<div><button class="protobtn" type="button" data-act="cproto" data-id="${a.id}" data-k="${c.k}">Proto : ${esc(nameOf(c.k))} ${esc(n.todo.toLowerCase())}</button></div>`:""):"")}
+   ${c.pay&&c.pay!=="none"?callFacts([["Paiement administratif",`${esc(PAY[c.pay])} · ${euro(c.offers[c.accepted].amount)}${c.invoice?` · ${esc(fileLine(c.invoice))}`:""} <span class="src">· aucun virement par PDS OS</span>`]]):""}
+   ${act||(n&&n.r&&!["closed","refused","noanswer","abandoned"].includes(c.stage)?waitRow(n.r,n.todo+(n.ext?" (lien privé)":""))+(n.ext&&isMember(me())?`<div><button class="protobtn" type="button" data-act="cproto" data-id="${a.id}" data-k="${c.k}">Proto : ${esc(nameOf(c.k))} ${esc(n.todo.toLowerCase())}</button></div>`:""):"")}
    ${c.log.length?`<ul class="hist">${c.log.map(x=>`<li><span class="noc">•</span><span>${esc(x)}</span></li>`).join("")}</ul>`:""}`;
-  return versionCard("col"+a.id+c.k,!!(n&&((n.r===me()&&!n.ext)||(n.ext&&P[c.k].where!=="lien"&&isMember(me())))),`${esc(nameOf(c.k))} · ${esc(inf.handle)}`,pill(stageTone(c.stage),STAGE[c.stage]),esc(inf.platform),body);
+  return versionCard("col"+a.id+c.k,!!(n&&((n.r===me()&&!n.ext)||(n.ext&&isMember(me())))),`${esc(nameOf(c.k))} · ${esc(inf.handle)}`,pill(stageTone(c.stage),STAGE[c.stage]),esc(inf.platform),body);
 }
 function influenceSection(a){
   if(a.kind!=="Influence") return "";
@@ -2865,20 +2933,40 @@ function influenceSection(a){
   const c=f=>camp.collabs.filter(f).length;
   return `<div class="vers mod"><div class="dhead"><h3>Campagne d'influence · gestion interne</h3>${ed&&!picking&&!["closed","cancelled"].includes(a.status)?`<button class="btn out sm" type="button" data-act="form" data-v="pick:${a.id}">Choisir des créateurs</button>`:""}</div>
    ${callFacts([["Concept de campagne",`${esc(camp.concept)} <span class="src">· Brief de sortie V1 › Narratif</span>`],["Créateurs",camp.collabs.length?`${camp.collabs.length} · ${c(x=>x.stage==="verified"||x.stage==="admin"||x.stage==="closed")} publiés et vérifiés · ${c(x=>["refused","noanswer","abandoned"].includes(x.stage))} sortis`:"Aucun pour l'instant"]])}
+   ${!collabOpen(a)&&camp.collabs.length?`<div class="callout info">${I.lock}<span>${["closed","cancelled"].includes(a.status)?`Activation ${a.status==="closed"?"clôturée":"annulée"} : les collaborations sont figées telles quelles.`:a.status==="suspended"?"Activation suspendue : rien n'avance avec les créateurs jusqu'à sa reprise.":`Les échanges avec les créateurs commencent quand l'activation est lancée${!a.resp||!a.due?` : il manque ${[!a.resp?"un responsable":"",!a.due?"une échéance":""].filter(Boolean).join(" et ")}`:""}. Vous pouvez déjà les choisir.`}</span></div>`:""}
    ${pick}${camp.collabs.map(x=>collabCard(a,x)).join("")}</div>`;
+}
+/* The agreement as the creator will read it, and what the project lead sends (MKT-INF-002). */
+const agreementFacts=c=>{const o=c.offers[c.accepted];return callFacts([["Ce qu'on vous demande",esc(o.deliverables)],["Rémunération",euro(o.amount)],["Droits organiques",esc(o.organic)],["Droits publicitaires",esc(o.ads)],["Concept",esc(c.concept.angle)]]);};
+function sendAgreementCard(a,c){
+  const o=c.offers[c.accepted],inf=inflOf(c.k),prev=S.form==="aprev:"+c.k,url=`https://pds-os.app/i/${c.token}`,first=nameOf(c.k).split(" ")[0];
+  const msg=`Bonjour ${first}, voici l'accord pour « Néons » : ${o.deliverables}, ${euro(o.amount)}. Tu peux le relire et donner ton accord ici, sans compte : ${url}`;
+  return `<div class="vers"><h3>Envoyer l'accord à ${esc(nameOf(c.k))}</h3>
+   ${callFacts([["Destinataire",`${esc(nameOf(c.k))} · ${esc(inf.handle)} · ${esc(inf.email)} <span class="src">· Réseau</span>`],["Conditions",esc(offerLine(o))],["Lien privé",`<span class="linkbox"><code>${url}</code></span> <span class="src">créé le ${esc(c.agreement.createdAt)} · pas encore envoyé</span>`]])}
+   <div class="grid2"><div class="field"><label for="ag-ch-${c.k}">Canal *</label><select class="in" id="ag-ch-${c.k}"><option>E-mail</option><option>Message TikTok</option><option>WhatsApp</option></select><span class="src">Par e-mail, PDS OS l'envoie. Sur un autre canal, copiez le message puis dites qu'il est parti.</span></div></div>
+   <div class="field"><label for="ag-msg-${c.k}">Message</label><textarea class="in" id="ag-msg-${c.k}" rows="3">${esc(msg)}</textarea></div>
+   ${prev?`<div class="card" style="background:var(--soft);padding:14px;gap:10px"><span class="cap">Ce que ${esc(first)} verra sur sa page</span><h3>Votre accord</h3><p class="note">Version des conditions du ${esc(o.at)}. Ce n'est pas une signature électronique : c'est votre accord sur ces conditions, horodaté.</p>${agreementFacts(c)}<div class="btnrow"><button class="btn sm" type="button" disabled>Bon pour accord</button><button class="btn out sm" type="button" disabled>Demander une modification</button></div></div>`:""}
+   <div class="btnrow"><button class="btn sm" type="button" data-act="csend" data-id="${a.id}" data-k="${c.k}">Envoyer l'accord</button><button class="btn ghost sm" type="button" data-act="form" data-v="${prev?"":"aprev:"+c.k}">${prev?"Fermer l'aperçu":"Voir sa page"}</button><button class="btn ghost sm" type="button" data-act="copytext" data-from="ag-msg-${c.k}" data-v="Message copié.">Copier le message</button><button class="btn ghost sm" type="button" data-act="crevoke" data-id="${a.id}" data-k="${c.k}">Révoquer le lien</button></div></div>`;
+}
+/* Closing an influence campaign: every creator, and what became of her (MKT-INF-001). */
+function closeMatrix(a){
+  const cs=collabsOf(a);if(!cs.length) return "";
+  const st=c=>c.stage==="closed"?["ok","Clôturée"]:OUT.includes(c.stage)?["",STAGE[c.stage]]:c.accepted==null?["","Non engagée · figée à la clôture"]:["bad","À terminer · "+STAGE[c.stage]];
+  return `<div class="vers"><h3>Chaque créateur</h3><div class="rows">${cs.map(c=>`<div class="irow"><span class="grow"><b>${esc(nameOf(c.k))}</b> <span class="src">· ${esc(inflOf(c.k).handle)}</span></span>${pill(...st(c))}</div>`).join("")}</div><span class="src">Une collaboration engagée se clôture ou se termine (refusée, sans réponse, abandonnée) avant l'activation.</span></div>`;
 }
 /* The creator's private page (« Accord express ») : only her collaboration. */
 function creatorPortal(k){
   const pairs=S.acts.flatMap(a=>collabsOf(a).filter(c=>c.k===k).map(c=>[a,c])), inf=inflOf(k);
   const body=pairs.map(([a,c])=>{
     let part="";
-    if(c.stage==="agreement"){const o=c.offers[c.accepted];part=`<h2>Votre accord</h2><p class="note">Version des conditions du ${esc(o.at)}. Ce n'est pas une signature électronique : c'est votre accord sur ces conditions, horodaté.</p>
-      ${callFacts([["Ce qu'on vous demande",esc(o.deliverables)],["Rémunération",euro(o.amount)],["Droits organiques",esc(o.organic)],["Droits publicitaires",esc(o.ads)],["Concept",esc(c.concept.angle)]])}
+    if(!collabOpen(a)) part=`<h2>${a.status==="suspended"?"Campagne en pause":"Campagne terminée"}</h2><p class="note">Rien à faire pour vous pour l'instant.</p>`;
+    else if(c.stage==="agreement"&&c.agreement&&c.agreement.sent){const o=c.offers[c.accepted];part=`<h2>Votre accord</h2><p class="note">Version des conditions du ${esc(o.at)}. Ce n'est pas une signature électronique : c'est votre accord sur ces conditions, horodaté.</p>
+      ${agreementFacts(c)}
       ${S.form==="chg:"+c.k?`${ta("agrNote","Ce que vous voulez changer","",true)}<div class="btnrow"><button class="btn" type="button" data-act="cagree" data-id="${a.id}" data-k="${k}" data-v="changes">Envoyer la demande</button><button class="btn ghost" type="button" data-act="form" data-v="">Annuler</button></div>`
        :`<div class="btnrow"><button class="btn" type="button" data-act="cagree" data-id="${a.id}" data-k="${k}" data-v="ok" style="height:48px;padding:0 28px">Bon pour accord</button><button class="btn out" type="button" data-act="form" data-v="chg:${k}">Demander une modification</button></div>`}`;}
     else if(c.stage==="agreed") part=`<h2>Déposer votre contenu</h2>${c.versions.length?`<p class="note">Retours sur la V${lastOf(c.versions).n} : ${esc(lastOf(c.versions).notes.map(x=>`${x.tc?x.tc+" · ":""}${x.text}`).join(" · "))}</p>`:""}<div class="field"><label for="crUrl">Lien de la vidéo (non publiée) *</label><input class="in" id="crUrl" placeholder="https://…">${errOf("crUrl")}</div><div class="btnrow"><button class="btn" type="button" data-act="ccontent" data-id="${a.id}" data-k="${k}">Envoyer la V${c.versions.length+1}</button><button class="btn ghost sm" type="button" data-act="crsample">Utiliser un lien d'exemple</button></div>`;
     else if(c.stage==="ready") part=`<h2>Votre publication</h2><p class="note">Contenu validé : vous pouvez publier.</p><div class="field"><label for="crPub">Lien de la publication *</label><input class="in" id="crPub" placeholder="https://www.tiktok.com/@…">${errOf("crPub")}</div><div class="btnrow"><button class="btn" type="button" data-act="cpub" data-id="${a.id}" data-k="${k}">Déclarer la publication</button><button class="btn ghost sm" type="button" data-act="crpubsample">Utiliser un lien d'exemple</button></div>`;
-    else if(c.stage==="admin"&&c.pay==="invoice") part=`<h2>Votre facture</h2><div class="field"><label for="crInv">Nom du fichier *</label><input class="in" id="crInv" placeholder="Facture_Neons.pdf">${errOf("crInv")}</div><div class="btnrow"><button class="btn" type="button" data-act="cinvoice" data-id="${a.id}" data-k="${k}">Envoyer la facture</button></div>`;
+    else if(c.stage==="admin"&&c.pay==="invoice") part=`<h2>Votre facture</h2><div class="field"><label for="crInvF">Votre facture (PDF) *</label><input class="in" type="file" id="crInvF" accept="application/pdf,image/*">${S.invDraft?`<span class="src">${esc(fileLine({...S.invDraft,at:"à l'envoi"}))}</span>`:""}${errOf("crInvF")}</div><div class="btnrow"><button class="btn" type="button" data-act="cinvoice" data-id="${a.id}" data-k="${k}">Envoyer la facture</button><button class="btn ghost sm" type="button" data-act="crinvsample">Utiliser une facture d'exemple</button></div>`;
     else part=`<h2>${esc(STAGE[c.stage])}</h2><p class="note">Rien à faire pour vous pour l'instant.</p>`;
     return `<section class="card">${part}</section>`;}).join("");
   return `<div class="portal"><header class="pbar"><span style="display:flex;align-items:center;gap:10px"><span class="brand" style="margin:0">PDS</span><b>« Néons » · ${esc(nameOf(k))}</b></span><span class="lockline">${I.lock} Lien privé /i/… · sans compte</span></header>
@@ -3010,7 +3098,7 @@ function agencySection(a){
     <div class="btnrow"><button class="btn sm" type="button" data-act="agimport" data-id="${a.id}">Importer ces changements</button><button class="btn ghost sm" type="button" data-act="agcancel" data-id="${a.id}">Annuler</button></div>`}</div>`:"";
   const pending=ag.decSeq>ag.recapSeq&&ag.snaps.length;
   const recap=pending&&ed?`<div class="vers"><h3>Récapitulatif pour ${esc(cfg.agency)}</h3><div class="field"><label for="agMsg">Message</label><textarea class="in" id="agMsg" rows="8">${esc(agRecapText(a))}</textarea><span class="src">Écrit à partir de vos décisions, sans les notes internes. PDS OS ne l'envoie pas : copiez-le, puis indiquez qu'il est parti.</span></div>
-    <div class="btnrow"><button class="btn sm" type="button" data-act="agsent" data-id="${a.id}">Marquer comme envoyé</button><button class="btn ghost sm" type="button" data-act="copytext" data-v="Message copié.">Copier le message</button></div></div>`:"";
+    <div class="btnrow"><button class="btn sm" type="button" data-act="agsent" data-id="${a.id}">Marquer comme envoyé</button><button class="btn ghost sm" type="button" data-act="copytext" data-from="agMsg" data-v="Message copié.">Copier le message</button></div></div>`:"";
   const stat=cfg.statsFrom?cfg.statsFrom(live):0,rep=ag.report;
   const bilan=ag.rows.length?`<div class="vers"><h3>Bilan selon l'agence</h3><div class="statgrid">${cfg.tiles(a,live).map(([k,v])=>`<div class="stat"><span class="k">${esc(k)}</span><b class="num">${v}</b></div>`).join("")}</div>
      <span class="src">Données de l'agence, non vérifiées par PDS · instantané n° ${last?last.n:0}.</span>
@@ -3148,7 +3236,7 @@ function rpMsgCard(a,t,m,i){
     <div class="btnrow"><select class="in" id="rmC-${key}" style="width:auto;height:36px" aria-label="Canal"><option>E-mail</option><option>Message privé</option><option>Téléphone</option></select><button class="btn sm" type="button" data-act="rmsub" data-id="${a.id}" data-k="${t.k}" data-i="${i}">Soumettre à ${esc(nameOf(rpDir()))}</button></div>`;
   else if(m.status==="review"&&dir) act=`<div class="field"><label for="rmN-${key}">Commentaire</label><input class="in" id="rmN-${key}" placeholder="Obligatoire pour demander des corrections">${errOf("rmN-"+key)}</div><div class="btnrow"><button class="btn sm" type="button" data-act="rmdec" data-id="${a.id}" data-k="${t.k}" data-i="${i}" data-v="ok">Valider le message</button><button class="btn out sm" type="button" data-act="rmdec" data-id="${a.id}" data-k="${t.k}" data-i="${i}" data-v="changes">Demander des corrections</button></div>`;
   else if(m.status==="ok"&&ed) act=S.form==="rms:"+key?`<div class="callout">${I.warn}<span>Vous déclarez avoir envoyé ce message à <b>${esc(md.jour||md.name)}</b> par ${esc(m.canal.toLowerCase())}${m.kind==="first"?`, avec le dossier de presse V${rpOf(a).kit.validated?rpOf(a).kit.validated.v:"?"}`:""}. PDS OS ne l'a pas envoyé.</span></div>${errOf("rms")}<div class="btnrow"><button class="btn sm" type="button" data-act="rmsent" data-id="${a.id}" data-k="${t.k}" data-i="${i}">Confirmer l'envoi déclaré</button><button class="btn ghost sm" type="button" data-act="form" data-v="">Annuler</button></div>`
-    :`<div class="btnrow"><button class="btn sm" type="button" data-act="form" data-v="rms:${key}">Marquer l'envoi comme déclaré</button><button class="btn ghost sm" type="button" data-act="copytext" data-v="Message copié.">Copier le message</button></div>`;
+    :`<div class="btnrow"><button class="btn sm" type="button" data-act="form" data-v="rms:${key}">Marquer l'envoi comme déclaré</button><button class="btn ghost sm" type="button" data-act="copytext" data-copy="${esc(m.text)}" data-v="Message copié.">Copier le message</button></div>`;
   return `<div class="irow"><span class="grow"><b>${m.kind==="first"?"Premier message":"Relance "+(i)}</b> · ${esc(m.canal||"canal à choisir")}<br><span class="src">${esc(m.text)}</span>${m.sent?`<br><span class="src">Envoi déclaré par ${esc(m.sent.by)} le ${esc(m.sent.at)}</span>`:""}${m.okBy?`<br><span class="src">Validé par ${esc(m.okBy)}</span>`:""}${act?`<div style="margin-top:8px;display:flex;flex-direction:column;gap:8px">${act}</div>`:""}</span>${pill(s[0],s[1])}</div>`;
 }
 function rpTarget(a,t){
@@ -3289,7 +3377,7 @@ function prepItems(k){
 function prepReveal(k){if(k==="frame"){frReveal();return;}if(k==="design"){const c=prepOf(k).call,d=S.design;d.call={date:c.date,fmt:c.fmt,by:c.created.by,at:c.created.at};d.callDone=true;d.items=designItems().map(x=>({...x,from:`Échange créatif du ${prepDay(c)}`})).concat(d.items.filter(x=>x.manual));if(!d.refs.length) d.refs=seedRefs();return;}if(k==="strat"){const c=prepOf(k).call,from=c&&c.held?`Échange stratégique du ${prepDay(c)}`:"Commencée directement";S.strat.items=c&&c.held?stratItems().map(x=>({...x,from})):[];return;}if(isExtClip(k)) S.kick.items=prepItems(k);else prepOf(k).items=prepItems(k);}
 const prepReady=k=>{if(isMeet(k)){const p=prepOf(k);return p.org==="po"||(p.org==="call"&&!!(p.call&&p.call.held));}const p=prepOf(k);return p.org==="po"||(p.org==="call"&&p.call&&p.call.held)||(p.org==="import"&&!!p.doc);};
 function prepModeField(k,name){
-  return `<fieldset class="pick orgset"><legend><b>Comment organiser la préproduction ?</b></legend><div class="opts">${PREP_MODES.map(([m,l,d])=>`<label class="opt"><input type="radio" name="${name}" value="${m}" ${S.pqDraft&&S.pqDraft.k===k&&S.pqDraft.org===m&&name==="pqOrg"?"checked":""}><span class="grow"><b>${esc(l)}</b><br><span class="src">${esc(d)}</span></span></label>`).join("")}</div>${errOf(name)}<span class="src">Ce choix ne déclenche rien à l'extérieur.</span></fieldset>`;
+  return `<fieldset class="pick orgset${S.err[name]?" bad":""}"><legend><b>Comment organiser la préproduction ?</b> *</legend><div class="opts">${PREP_MODES.map(([m,l,d])=>`<label class="opt"><input type="radio" name="${name}" value="${m}" ${S.pqDraft&&S.pqDraft.k===k&&S.pqDraft.org===m&&name==="pqOrg"?"checked":""}><span class="grow"><b>${esc(l)}</b><br><span class="src">${esc(d)}</span></span></label>`).join("")}</div>${errOf(name)}<span class="src">Ce choix ne déclenche rien à l'extérieur.</span></fieldset>`;
 }
 /* Before the proposals: the choice, the call to prepare and to hold, or the document to import. */
 function prepGate(k){
@@ -3334,7 +3422,7 @@ function prepBody(s){
   const k=s.liv,p=prepOf(k),ed=can("project"),gate=prepGate(k);
   if(gate||!prepReady(k)) return gate;
   const it=p.items,open=it.filter(x=>x.state==="proposed").length,kept=it.filter(x=>x.state==="kept"),by=kd=>kept.filter(x=>x.kind===kd);
-  const head=callFacts([["Organisation",`${esc(PREP_MODES.find(m=>m[0]===p.org)[1])}${p.org==="call"?` · ${esc(fullDate(fromIso(p.call.date)))} à ${esc(p.call.h)}`:p.org==="import"?` · <a href="#" data-act="nolink">${esc(p.doc.name)}</a>`:""}`]].concat(p.org==="call"?[["Compte rendu",`${crBtn("prep:"+k)}`]]:[]));
+  const head=callFacts([["Organisation",`${esc(PREP_MODES.find(m=>m[0]===p.org)[1])}${p.org==="call"?` · ${esc(fullDate(fromIso(p.call.date)))} à ${esc(p.call.h)}`:p.org==="import"?` · <a href="#" data-act="nolink">${esc(p.doc.name)}</a>${p.doc.size?` <span class="src">· ${esc(fileLine(p.doc).slice(p.doc.name.length+3))}</span>`:""}`:""}`]].concat(p.org==="call"?[["Compte rendu",`${crBtn("prep:"+k)}`]]:[]));
   const rows=it.map(x=>itemRow(x,ed&&!p.plan,`${PREP_KIND[x.kind][1]} · ${esc(x.topic)}${x.r?` · ${esc(nameOf(x.r))}${x.due?" · pour le "+esc(x.due):""}`:""}`)).join("");
   const list=versionCard("prep"+k,!p.plan,p.org==="call"?"Ce qui a été dit, point par point":"Points proposés",open?pill("warn",`${open} à confirmer`):pill("ok","Tout est tranché"),"",(ed&&!p.plan?groupHead("prep:"+k,"Points","Ajouter un point",true):"")+`<div class="rows">${rows}</div>`);
   const silent=p.org==="call"?p.call.agenda.filter(t=>!it.some(x=>x.topic===t)):[];
@@ -3542,7 +3630,7 @@ const CO_INFO={societe:"a produit le précédent clip de Mona Lys",atelier:"troi
 const companies=()=>["societe","atelier","lumenf"].concat(S.newCos||[]).filter(x=>P[x]);
 function companyField(k,exclude){
   const d=S.pqDraft&&S.pqDraft.k===k?S.pqDraft.co:null,list=companies().filter(x=>x!==exclude);
-  return `<fieldset class="pick coset"><legend><b>Quelle société ?</b> *</legend><div class="opts">${list.map((x,i)=>`<label class="opt"><input type="radio" name="pqCo" value="${x}" ${(d?d===x:i===0)?"checked":""}><span class="grow"><b>${esc(nameOf(x))}</b>${i===0&&!d&&x==="societe"?` <span class="src">· proposée par PO</span>`:""}<br><span class="src">${esc(CO_INFO[x]?"Réseau · "+CO_INFO[x]:P[x].created?`Créée dans le Réseau par ${P[x].created}`:"Réseau")}</span></span></label>`).join("")}</div>
+  return `<fieldset class="pick coset${S.err.pqCo?" bad":""}"><legend><b>Quelle société ?</b> *</legend><div class="opts">${list.map((x,i)=>`<label class="opt"><input type="radio" name="pqCo" value="${x}" ${(d?d===x:i===0)?"checked":""}><span class="grow"><b>${esc(nameOf(x))}</b>${i===0&&!d&&x==="societe"?` <span class="src">· proposée par PO</span>`:""}<br><span class="src">${esc(CO_INFO[x]?"Réseau · "+CO_INFO[x]:P[x].created?`Créée dans le Réseau par ${P[x].created}`:"Réseau")}</span></span></label>`).join("")}</div>
     ${errOf("pqCo")}<div><button class="btn ghost sm" type="button" data-act="conew" data-k="${k}">Créer la fiche d'une société</button></div></fieldset>`;
 }
 /* The chosen company becomes the production company of the project (exec, postproduction), with its private link. */
@@ -3599,10 +3687,11 @@ function leversBanner(){
 }
 function actPage(){
   if(!S.acts.length) return leversBanner()||`<section class="card"><p class="note">Les activations arrivent quand la Stratégie est validée : chaque levier retenu peut en devenir une.</p></section>`;
-  const f=ACT_FILTERS.find(x=>x[0]===S.actView)||ACT_FILTERS[1],open=actById(S.actOpen)||actById(S.sel),list=S.acts.filter(a=>f[2](a)||a===open);
+  const f=ACT_FILTERS.find(x=>x[0]===S.actView)||ACT_FILTERS[1],open=actById(S.sel),list=S.acts.filter(a=>f[2](a)),out=open&&!list.includes(open)?open:null;
   const sel=open||list.find(a=>actorsOf(a.id).some(x=>x.r===me()))||list[0]||S.acts[0];
-  const rows=list.map(a=>{const s=actSentence(a);return `<button class="step arow ${a===sel?"sel":""} ${s.me?"me":""}" type="button" data-act="go" data-step="${a.id}"><span class="t">${esc(a.title)}</span><span class="src">${esc(a.kind)}${a.mode?" · "+esc(a.mode):""} · ${a.resp?esc(nameOf(a.resp)):"responsable à désigner"}${a.due?" · "+esc(shortDate(a.due)):""}</span>${frise(a)}<span class="s">${esc(s.t)}</span></button>`;}).join("");
-  return `${leversBanner()}<div class="layout"><nav class="spine alist" aria-label="Activations"><h2>Activations</h2><div class="strip fchips" role="group" aria-label="Filtrer">${ACT_FILTERS.map(([k,l,fn])=>`<button class="chipbtn" type="button" data-act="actview" data-v="${k}" aria-pressed="${f[0]===k}">${l} <span class="t3">${S.acts.filter(fn).length}</span></button>`).join("")}</div>${rows||`<p class="note">Aucune activation ici.</p>`}</nav>
+  const row=(a,hors)=>{const s=actSentence(a);return `<button class="step arow ${a===sel?"sel":""} ${s.me?"me":""}" type="button" data-act="go" data-step="${a.id}"><span class="t">${esc(a.title)}${hors?` <span class="pill">Hors filtre</span>`:""}</span><span class="src">${esc(a.kind)}${a.mode?" · "+esc(a.mode):""} · ${a.resp?esc(nameOf(a.resp)):"responsable à désigner"}${a.due?" · "+esc(shortDate(a.due)):""}</span>${frise(a)}<span class="s">${esc(s.t)}</span></button>`;};
+  const rows=list.map(a=>row(a)).join("")+(out?`<p class="cap" style="margin:10px 2px 2px">Ouverte, hors de ce filtre</p>${row(out,true)}`:"");
+  return `${leversBanner()}<div class="layout"><nav class="spine alist" aria-label="Activations"><h2>Activations</h2><div class="strip fchips" role="group" aria-label="Filtrer">${ACT_FILTERS.map(([k,l,fn])=>`<button class="chipbtn" type="button" data-act="actview" data-v="${k}" aria-pressed="${f[0]===k}">${l} <span class="t3">${S.acts.filter(fn).length}</span></button>`).join("")}</div>${list.length?"":`<p class="note">Aucune activation ici.</p>`}${rows}</nav>
    <section class="card" aria-labelledby="dtitle">${actDetail(sel)}</section></div>`;
 }
 function actDetail(a){
@@ -3668,7 +3757,47 @@ function summaryFor(v,k){
    interne) : calculée par le code à partir de chaque publication ou
    retombée vérifiée par une personne, jamais un lien unique pour tout.
    ====================================================================== */
+/* A file kept is a file described: name, size, type and when it was deposited, never a
+   name alone (MKT-SIM-001). */
+const fileMeta=(f,at,by)=>({name:f.name,size:f.size||0,type:f.type||"",at,by});
+const fmtSize=n=>n>=1048576?`${(n/1048576).toLocaleString("fr-FR",{maximumFractionDigits:1})} Mo`:`${Math.max(1,Math.round(n/1024))} Ko`;
+const fileKind=(t,n)=>t==="application/pdf"||/\.pdf$/i.test(n)?"PDF":t.startsWith("image/")?"Image "+t.slice(6).toUpperCase():t.startsWith("video/")?"Vidéo":/sheet|excel|\.xlsx?$/i.test(t+n)?"Tableur":t||"Fichier";
+const fileLine=m=>`${m.name} · ${fmtSize(m.size)} · ${fileKind(m.type,m.name)} · déposé${m.by?` par ${m.by}`:""} le ${m.at}`;
+/* « Copié » is said only once the clipboard took it (MKT-SIM-001). */
+function copySource(el){
+  if(el.dataset.from){const x=document.getElementById(el.dataset.from);if(x) return x.value||x.textContent;}
+  if(el.dataset.copy) return el.dataset.copy;
+  const box=el.closest(".linkbox")||el.closest(".vers,.card,.irow,.row"),x=box&&(box.querySelector("code")||box.querySelector("textarea"));
+  return x?(x.value||x.textContent):"";
+}
+function copyText(t,ok){
+  const fail=()=>toast("Copie impossible : sélectionnez le texte et copiez-le.");
+  if(!t||!navigator.clipboard) return fail();
+  navigator.clipboard.writeText(t).then(()=>toast(ok),fail);
+}
 const OUT=["refused","noanswer","abandoned"];
+/* An activation run by an agency is declared done only when PDS has decided on every line,
+   no line is in error and something was declared done; otherwise an exception, kept as a
+   reserve with its reason, owner and deadline (MKT-ACT-001). */
+function agencyIssues(a){
+  if(a.mode!=="Agence externe"||!agCfg(a)) return [];
+  const cfg=agCfg(a),ag=agOf(a),live=ag.rows.filter(r=>!r.removed),l=[];
+  if(!ag.url||!ag.snaps.length) return [`le tableau de ${cfg.agency} n'est pas encore repris`];
+  const rev=live.filter(r=>!r.dec||r.dec.d==="review"),bad=live.filter(r=>r.errs&&r.errs.length&&(!r.dec||r.dec.d!=="no"));
+  if(rev.length) l.push(`${rev.length} ${cfg.rowWord[rev.length>1?1:0]} à examiner (${rev.map(r=>agName(a,r)).join(", ")})`);
+  if(bad.length) l.push(`${bad.length} ligne${bad.length>1?"s":""} en erreur (${bad.map(r=>`${agName(a,r)} : ${r.errs[0]}`).join(" ; ")})`);
+  const doneWord=a.k==="rp"?"Action déclarée réalisée":cfg.published;
+  if(!live.some(r=>r.f.agencyStatus===doneWord||r.f.postUrl)) l.push(a.k==="rp"?"aucune retombée déclarée par l'agence":"aucune publication déclarée par l'agence");
+  return l;
+}
+function agencyDoneForm(a){
+  const iss=agencyIssues(a);if(!iss.length) return "";
+  return `<div class="callout warn">${I.warn}<span><b>Pas encore réalisée :</b> ${esc(iss.join(" · "))}.</span></div>
+   <div class="checks"><label><input type="checkbox" id="aExc">Déclarer réalisée quand même, avec une réserve</label></div>
+   <div class="grid2"><div class="field"><label for="aExcWhy">Motif de la réserve *</label><input class="in" id="aExcWhy" placeholder="Ex. : l'agence envoie les retombées le 12/12">${errOf("aExcWhy")}</div>
+    <div class="field"><label for="aExcR">Qui la règle *</label><select class="in" id="aExcR">${MEMBERS.map(k=>`<option value="${k}" ${k===(a.resp||"cp")?"selected":""}>${esc(P[k].name)}</option>`).join("")}</select></div>
+    <div class="field"><label for="aExcD">Avant le *</label><input class="in" type="date" id="aExcD" min="${isoOf(new Date(...S.base))}" max="${isoOf(CAMPAIGN_END)}">${errOf("aExcD")}</div></div>`;
+}
 function moduleProof(a){
   if(a.mode==="Agence externe") return null;
   if(a.kind==="Influence"){const cs=collabsOf(a).filter(c=>c.accepted!=null&&!OUT.includes(c.stage));if(!collabsOf(a).length) return {n:0,pub:0,ver:0,miss:[],unit:"créateur"};
@@ -3720,10 +3849,12 @@ function dashData(){
   add("Statistiques","sv","Vérifiées",A.filter(a=>a.stats.state==="verified").map(a=>({t:a.title,s:`${fmtN(a.stats.value)} ${a.unit}`})),"Tous les relevés vérifiés par la direction");
   add("Statistiques","sp","Partielles",A.filter(a=>a.stats.state==="partial").map(a=>({t:a.title,s:`${fmtN(a.stats.value)} ${a.unit} · partiel`})),"Relevé incomplet : toutes les publications ne sont pas comptées");
   add("Statistiques","sn","Indisponibles",A.filter(a=>a.stats.state==="na").map(a=>({t:a.title,s:"la plateforme ne les fournit pas"})),"Indisponible n'est jamais compté comme zéro");
-  if(me()==="cp"||me()==="dg"){const b=budget(),q=activeQuote(),acc=cs.map(c=>({t:nameOf(c.k),a:c.offers[c.accepted].amount,pay:c.pay}));
-    add("Budget","be","Estimé",b.lines.filter(l=>l.state==="retenu").map(l=>({t:l.name,s:euro(l.amount),a:l.amount})),"Lignes de budget des leviers retenus dans la Stratégie",true);
-    add("Budget","bg","Engagé",[...(q?[{t:"Clip officiel · devis V"+q.n,s:euro(q.amount),a:q.amount}]:[]),...acc.map(x=>({t:x.t,s:euro(x.a),a:x.a}))],"Devis validés et rémunérations acceptées",true);
-    add("Budget","bp","Payé administrativement",acc.filter(x=>["paid","paidv"].includes(x.pay)).map(x=>({t:x.t,s:euro(x.a)+(x.pay==="paidv"?" · vérifié":" · déclaré"),a:x.a})),"Paiements déclarés ou vérifiés ; PDS OS ne fait aucun virement",true);}
+  if(me()==="cp"||me()==="dg"){const B=budgetRows(),it=k=>B.rows.filter(r=>r[k]).map(r=>({t:r.t,s:`${euro(r[k])} · ${r.src}`,a:r[k]}));
+    add("Budget","be","Estimé",it("est"),"Lignes de budget des leviers retenus dans la Stratégie",true);
+    add("Budget","bg","Engagé",it("eng"),"Devis validés, rémunérations acceptées et dépenses engagées de chaque activation",true);
+    add("Budget","bf","Facturé",it("inv"),"Dépenses dont la facture est reçue",true);
+    add("Budget","bp","Payé administrativement",it("paid"),"Paiements déclarés ou vérifiés ; PDS OS ne fait aucun virement",true);}
+  objResults().forEach((o,i)=>add("Objectifs","ob"+i,o.x.text,[{t:`Cible ${o.target?fmtN(o.target):"—"} au ${o.due}`,s:o.status},{t:`Déclaré ${o.decl!=null?fmtN(o.decl):"—"} · vérifié ${o.ver!=null?fmtN(o.ver):"—"}`,s:o.from.length?"Depuis : "+o.from.join(", "):"Aucune source reliée"}].concat(o.gap!=null?[{t:`Écart ${o.gap>=0?"+":""}${fmtN(o.gap)} · ${o.pct} % de la cible`,s:"Calculé sur le déclaré"}]:[]),"Somme des derniers relevés des activations qui mesurent cet indicateur, comparée à la cible du Brief de sortie"));
   const pv=A.filter(a=>a.status!=="cancelled"&&!["prep","run"].includes(a.status));
   add("Synthèse","proofs","Preuves",pv.map(a=>({t:a.title,s:a.proof.derived?a.proof.text:PRSTATE[proofOf(a)][1],st:proofOf(a)})),"La preuve de chaque activation réalisée : vérifiée, à vérifier ou manquante");
   add("Synthèse","stats","Statistiques",pv.map(a=>({t:a.title,s:a.stats.value!=null?`${fmtN(a.stats.value)} ${a.unit} · ${STSTATE[a.stats.state][1].toLowerCase()}`:STSTATE[statsOf(a)][1],st:statsOf(a)})),"Le dernier relevé de chaque activation réalisée");
@@ -3734,6 +3865,43 @@ function dashData(){
   add("Réserves","rf","Suivies après clôture",rs.filter(r=>r.arb==="follow").map(r=>({t:r.text,s:r.who?nameOf(r.who):""})),"À suivre après la clôture du Marketing");
   return R;
 }
+/* Money per activation: estimated in the Strategy, engaged, invoiced (invoice received),
+   paid. Each line says where it comes from; the totals are compared with the envelope
+   (MKT-BIL-002). PDS OS makes no payment. */
+const COST_ST={engaged:"Engagé",invoiced:"Facture reçue",paid:"Payé"};
+function costsOf(a){
+  const l=(a.costs||[]).map(c=>({...c,src:`Saisi par ${c.by} le ${c.at}`}));
+  if(a.kind==="Influence"&&a.mode!=="Agence externe") collabsOf(a).filter(c=>c.accepted!=null&&!OUT.includes(c.stage)).forEach(c=>l.push({label:nameOf(c.k),amount:c.offers[c.accepted].amount,state:["paid","paidv"].includes(c.pay)?"paid":c.invoice?"invoiced":"engaged",src:"Conditions acceptées dans la campagne",auto:true}));
+  if(a.mode==="Agence externe"&&a.ag) agRows(a).filter(r=>!r.removed&&r.dec&&r.dec.d==="ok"&&r.f.fee).forEach(r=>l.push({label:agName(a,r),amount:r.f.fee,state:"engaged",src:`Validé par PDS, tarif de ${agCfg(a).agency}`,auto:true}));
+  return l;
+}
+const sumCosts=(l,sts)=>l.filter(c=>sts.includes(c.state)).reduce((t,c)=>t+c.amount,0);
+function budgetRows(){
+  const est=budget().lines.filter(l=>l.state==="retenu"),q=activeQuote(),rows=[];
+  const line=k=>est.filter(l=>l.lever===k).reduce((t,l)=>t+l.amount,0);
+  rows.push({t:"Clip officiel · production",scope:"Production",est:line("clip"),eng:q?q.amount:0,inv:0,paid:0,src:q?`Devis V${q.n} validé`:"Aucun devis validé"});
+  est.filter(l=>!l.lever).forEach(l=>rows.push({t:`${l.name} · production`,scope:"Production",est:l.amount,eng:0,inv:0,paid:0,src:"Réalisée en interne"}));
+  S.acts.forEach(a=>{const c=costsOf(a);rows.push({t:a.title,scope:"Activation",id:a.id,est:a.k==="clip"?0:line(a.k),eng:sumCosts(c,["engaged","invoiced","paid"]),inv:sumCosts(c,["invoiced","paid"]),paid:sumCosts(c,["paid"]),src:c.length?`${c.length} ligne${c.length>1?"s":""}`:"Aucune dépense saisie",cancelled:a.status==="cancelled"});});
+  const T=k=>rows.reduce((t,r)=>t+r[k],0),tot={est:T("est"),eng:T("eng"),inv:T("inv"),paid:T("paid")};
+  return {rows,tot,rest:BUDGET_ENV-tot.eng,overEst:tot.est-BUDGET_ENV};
+}
+function budgetTable(B){
+  const cols="minmax(0,2fr) repeat(4,minmax(0,1fr))",c=v=>`<span class="num">${v?euro(v):"—"}</span>`;
+  return `<div class="table"><div class="tr h" style="grid-template-columns:${cols}"><span>Ligne</span><span>Estimé</span><span>Engagé</span><span>Facturé</span><span>Payé</span></div>
+   ${B.rows.map(r=>`<div class="tr" style="grid-template-columns:${cols}"><span><b>${esc(r.t)}</b><br><span class="src">${esc(r.scope)} · ${esc(r.src)}${r.cancelled?" · annulée":""}</span></span>${c(r.est)}${c(r.eng)}${c(r.inv)}${c(r.paid)}</div>`).join("")}
+   <div class="tr" style="grid-template-columns:${cols}"><span><b>Total</b></span><b class="num">${euro(B.tot.est)}</b><b class="num">${euro(B.tot.eng)}</b><b class="num">${euro(B.tot.inv)}</b><b class="num">${euro(B.tot.paid)}</b></div></div>
+   <span class="src">Enveloppe ${euro(BUDGET_ENV)} · ${B.rest>=0?`reste ${euro(B.rest)} non engagés`:`engagé au-dessus de l'enveloppe de ${euro(-B.rest)}`} · estimé ${B.overEst>0?`au-dessus de l'enveloppe de ${euro(B.overEst)}`:`sous l'enveloppe de ${euro(-B.overEst)}`}. Facturé = facture reçue ; payé = paiement déclaré ou vérifié, sans virement par PDS OS.</span>`;
+}
+/* Each objective of the Strategy against what the activations measured, computed. */
+function objResults(){
+  return S.strat.items.filter(x=>x.dim==="Objectifs & KPIs"&&x.state==="kept").map(x=>{
+    const m=objMetric(x),acts=m&&m[2]?S.acts.filter(a=>a.unit===m[2]&&a.status!=="cancelled"&&a.stats.value!=null):[];
+    const decl=acts.length?acts.reduce((t,a)=>t+a.stats.value,0):null,va=acts.filter(a=>a.stats.state==="verified"),ver=va.length?va.reduce((t,a)=>t+a.stats.value,0):null;
+    const why=!m||!x.target?"objectif à préciser":!m[2]?m[3]:!acts.length?"aucun relevé pour l'instant":"";
+    return {x,label:m?m[1]:"Indicateur",target:x.target,due:x.j!=null?fullDate(relDay(x.j)):"—",decl,ver,from:acts.map(a=>a.title),gap:decl!=null&&x.target?decl-x.target:null,
+      pct:decl!=null&&x.target?Math.round(decl*100/x.target):null,status:why?"Non mesurable : "+why:decl>=x.target?"Atteint (déclaré)":"Pas atteint (déclaré)"};});
+}
+const objText=o=>`${o.x.text} · cible ${o.target?fmtN(o.target):"—"} au ${o.due} · déclaré ${o.decl!=null?fmtN(o.decl):"—"} · vérifié ${o.ver!=null?fmtN(o.ver):"—"}${o.gap!=null?` · écart ${o.gap>=0?"+":""}${fmtN(o.gap)} (${o.pct} %)`:""} · ${o.status}`;
 const dashVal=d=>d.sum?euro(d.items.reduce((s,x)=>s+(x.a||0),0)):String(d.items.length);
 function dashboard(){
   const D=dashData(),get=k=>D.find(d=>d.k===k),A=S.acts,closed=A.filter(a=>a.status==="closed").length,cx=A.filter(a=>a.status==="cancelled").length;
@@ -3747,7 +3915,9 @@ function dashboard(){
    <div class="rows">${row("all",`${closed} activation${closed>1?"s":""} sur ${A.length} clôturée${closed>1?"s":""}`,cx?`dont ${cx} annulée${cx>1?"s":""}`:"")}
     ${row("proofs",pr.length?`Preuves : ${ok} vérifiée${ok>1?"s":""}${tv?`, ${tv} à vérifier`:""}${miss?`, ${miss} manquante${miss>1?"s":""}`:""}`:"Preuves : aucune activation réalisée","")}
     ${row("stats",sv.length?`Statistiques : ${got} relevée${got>1?"s":""}${smiss?`, ${smiss} manquante${smiss>1?"s":""}`:""}${sna?`, ${sna} indisponible${sna>1?"s":""}`:""}`:"Statistiques : aucune activation réalisée","")}
+    ${objResults().map((o,i)=>row("ob"+i,`${esc(o.x.text)} : ${o.decl!=null?`${fmtN(o.decl)} déclarés, ${o.pct} % de la cible`:"non mesurable"}`,esc(o.status))).join("")}
     ${bg?row("bg",`Budget : ${dashVal(bg)} engagés sur ${euro(BUDGET_ENV)}`,"Visible de la cheffe de projet et de la direction"):""}</div>
+   ${bg?`<details class="infos"><summary>Budget par ligne</summary><div class="vers">${budgetTable(budgetRows())}</div></details>`:""}
    <details class="infos"><summary>Voir le détail</summary>${groups.map(g=>`<div class="vers"><h3>${esc(g)}</h3><div class="dgrid">${D.filter(d=>d.g===g).map(d=>`<button class="dtile" type="button" data-act="dashopen" data-v="${d.k}"><span class="k">${esc(d.l)}</span><b class="num">${dashVal(d)}</b></button>`).join("")}</div></div>`).join("")}</details></section>`;
 }
 function dashModal(){
@@ -3760,11 +3930,11 @@ const REPORT_SECTIONS=[["sum","Résumé exécutif et périmètre"],["strat","Obj
 function reportSnapshot(ids,secs,from,to,sum,reco,res){
   const A=S.acts.filter(a=>ids.includes(a.id)),D=dashData();
   return {from,to,secs,sum,reco,reserves:res,scope:A.length,excluded:S.acts.filter(a=>!ids.includes(a.id)).map(a=>a.title),
-    strat:S.strat.items.filter(x=>x.state==="kept"&&["Positionnement","Objectifs & KPIs","Narratif de sortie"].includes(x.dim)).map(x=>`${x.dim} : ${x.text}`),
+    strat:S.strat.items.filter(x=>x.state==="kept"&&["Positionnement","Narratif de sortie"].includes(x.dim)).map(x=>`${x.dim} : ${x.text}`),objs:objResults().map(objText),
     acts:A.map(a=>({t:a.title,k:`${a.kind}${a.mode?" · "+a.mode:""}`,r:a.resp?nameOf(a.resp):"—",ph:a.status==="cancelled"?"Annulée":phaseOf(a)>=5?"Clôturée":PHASES[phaseOf(a)],proof:a.proof.derived?a.proof.text:PRSTATE[proofOf(a)][1],stats:a.stats.value!=null?`${fmtN(a.stats.value)} ${a.unit} · ${STSTATE[a.stats.state][1].toLowerCase()}`:STSTATE[statsOf(a)][1]})),
     res:D.filter(d=>["Publications","Retombées"].includes(d.g)).map(d=>[`${d.g} · ${d.l}`,dashVal(d)]),
     stats:A.flatMap(a=>(a.snaps||[]).map(x=>`${a.title} : ${fmtN(x.value)} ${a.unit} · ${x.platform} · ${x.period} · ${x.source} · ${x.verifiedBy?"vérifié":"déclaré"}${x.partial?" · partiel":""}`)),
-    budget:D.filter(d=>d.g==="Budget").map(d=>[d.l,dashVal(d)]),
+    budget:D.filter(d=>d.g==="Budget").map(d=>[d.l,dashVal(d)]),btable:budgetRows(),
     annex:A.flatMap(a=>[...(a.proof.link?[`${a.title} : ${a.proof.link} · ${PRSTATE[proofOf(a)][1].toLowerCase()}`]:[]),...collabsOf(a).filter(c=>c.pub).map(c=>`${nameOf(c.k)} : ${c.pub.url} · ${c.pub.verifiedBy?"vérifiée":"déclarée"}`),...(a.rp?a.rp.cov.map(c=>`${rpMedia(c.t).name} : ${c.url||"sans lien"} · ${c.status==="verified"?"vérifiée":"déclarée"}`):[])])};
 }
 function reportModal(){
@@ -3773,11 +3943,11 @@ function reportModal(){
   return `<div class="mhead"><h2 id="mtitle">Bilan Marketing — Néons — V${x.n}</h2><button class="mx" type="button" data-act="modalx" aria-label="Fermer">${I.x}</button></div>
    ${callFacts([["Statut",`${RSTATE[x.status][1]}`],["Période",s.from?`du ${esc(fullDate(fromIso(s.from)))} au ${esc(fullDate(fromIso(s.to)))}`:"—"],["Périmètre",`${s.scope||S.acts.length} activations${s.excluded&&s.excluded.length?` · exclues : ${esc(s.excluded.join(", "))}`:""}`],["Généré",`par ${esc(x.by)} le ${esc(x.at)}`],["Empreinte",`<code>${x.fp}</code> · règles de calcul v1 · figé à la génération`]])}
    ${has("sum")?`<div class="vers"><h3>Résumé exécutif</h3><p class="note sumtext">${esc(x.sum)}</p></div>`:""}
-   ${has("strat")&&s.strat?`<div class="vers"><h3>Objectifs et stratégie source</h3>${list(s.strat)}<span class="src">Brief de sortie V1.</span></div>`:""}
+   ${has("strat")&&s.strat?`<div class="vers"><h3>Objectifs et stratégie source</h3>${s.objs?list(s.objs):""}${list(s.strat)}<span class="src">Brief de sortie V1 · écarts calculés sur le déclaré, au moment de la génération.</span></div>`:""}
    ${has("acts")&&s.acts?`<div class="vers"><h3>Récapitulatif des activations</h3><div class="rows">${s.acts.map(a=>`<div class="irow"><span class="grow"><b>${esc(a.t)}</b> <span class="src">· ${esc(a.k)} · ${esc(a.r)}</span><br><span class="src">Étape : ${esc(a.ph)} · Preuve : ${esc(a.proof)} · Statistiques : ${esc(a.stats)}</span></span></div>`).join("")}</div></div>`:""}
    ${has("res")&&s.res?`<div class="vers"><h3>Résultats déclarés et vérifiés</h3>${s.res.length?callFacts(s.res.map(([k,v])=>[k,esc(v)])):`<p class="note">Aucune publication ni retombée dans le périmètre.</p>`}<span class="src">Déclaré et vérifié restent séparés : une déclaration n'est jamais comptée comme vérifiée.</span></div>`:""}
    ${has("stats")&&s.stats?`<div class="vers"><h3>Statistiques</h3>${list(s.stats)}<span class="src">Chaque relevé garde sa période, sa plateforme et sa source ; ils ne s'additionnent pas.</span></div>`:""}
-   ${has("budget")&&s.budget&&seeBudget?`<div class="vers"><h3>Budget</h3>${s.budget.length?callFacts(s.budget.map(([k,v])=>[k,esc(v)])):`<p class="note">Non renseigné.</p>`}</div>`:""}
+   ${has("budget")&&s.budget&&seeBudget?`<div class="vers"><h3>Budget</h3>${s.btable?budgetTable(s.btable):s.budget.length?callFacts(s.budget.map(([k,v])=>[k,esc(v)])):`<p class="note">Non renseigné.</p>`}</div>`:""}
    ${has("gaps")?`<div class="vers"><h3>Écarts, réserves et recommandations</h3>${list((x.reserves||[]).map(r=>`${r.cat} : ${r.text}`))}${x.reco?`<p class="note"><b>Recommandations</b> : ${esc(x.reco)}</p>`:""}</div>`:""}
    ${has("annex")&&s.annex?`<div class="vers"><h3>Annexes : preuves et liens</h3>${list(s.annex)}</div>`:""}
    <div class="btnrow noprint"><button class="btn" type="button" data-act="repprint">Exporter en PDF</button><button class="btn ghost" type="button" data-act="modalx">Fermer</button></div>`;
@@ -3917,6 +4087,13 @@ function frSeed(s){
   fr.plan={rows:FR_PLAN(),launched:{by:"Lina Haddad",at:"03/10, 11:00"}};
   s.fr=fr;s.framePrep={org:"po",orgBy:"Lina Haddad",orgAt:"01/10, 10:00",call:null,doc:null,items:[],plan:null};
 }
+/* The call being prepared keeps its date, hour and format at every redraw (adding a
+   participant, an agenda point, a refused recap): CONC-001. */
+document.addEventListener("input",e=>{const t=e.target;if(!["pcDate","pcHour","pcFmt"].includes(t.id)) return;const b=document.querySelector('[data-act="prepcreate"]');if(!b) return;
+  const c=prepOf(b.dataset.k).call;if(!c) return;c.draft=Object.assign({},c.draft,{[t.id==="pcDate"?"date":t.id==="pcHour"?"h":"fmt"]:t.value});});
+document.addEventListener("change",e=>{if(e.target.id==="pcFmt") e.target.dispatchEvent(new Event("input",{bubbles:true}));});
+/* Motif becomes required as soon as the choice needs one (MKT-001). */
+document.addEventListener("change",e=>{const id=e.target.dataset&&e.target.dataset.arb;if(!id) return;const l=document.getElementById("ryl-"+id);if(l) l.textContent=["na","limit"].includes(e.target.value)?"Motif *":"Motif";});
 
 function rolesView(){return `<section class="card">${BODY.org()}</section>`;}
 BODY.kickoffDone=BODY.kickoff;BODY.creativeV2=BODY.creative;Object.assign(BODY,BODY_MK);
@@ -4023,7 +4200,7 @@ function scenario(k){
   s.acts.forEach(a=>{a.resp=a.resp||"cp";a.due=a.due||"2026-12-19";a.status="closed";a.closedBy=nameOf(a.resp);
     a.proof={state:a.title==="Relations presse"?"given":"verified",link:a.proof.link||"https://drive.google.com/neons-preuves",by:nameOf(a.resp),at:"20/12, 10:00"};
     a.stats=fin[a.title]?{state:"declared",value:fin[a.title],by:nameOf(a.resp),at:"02/01, 10:00"}:{state:"na",by:nameOf(a.resp)};
-    if(fin[a.title]) a.snaps=[{n:1,value:fin[a.title],platform:a.k==="rp"?"Presse":a.k==="playlists"?"Spotify":a.k==="clip"?"YouTube":"TikTok",period:"du 05/12 au 02/01",source:a.k==="influence"?"Déclaré par le créateur":"Relevé sur la plateforme",by:nameOf(a.resp),at:"02/01, 10:00"}];});
+    if(fin[a.title]) a.snaps=[{n:1,value:fin[a.title],platform:a.k==="rp"?"Presse":a.k==="playlists"?"Spotify":a.k==="clip"?"YouTube":a.k==="live"?"Billetterie":"TikTok",period:"du 05/12 au 02/01",source:a.k==="influence"?"Déclaré par le créateur":"Relevé sur la plateforme",by:nameOf(a.resp),at:"02/01, 10:00"}];});
   L("Toutes les activations clôturées","Lina Haddad","02/01, 11:00");
   if(k==="bilan"){s.role="cp";s.mod="review";s.base=[2027,0,5,10,0];return s;}
   return s;

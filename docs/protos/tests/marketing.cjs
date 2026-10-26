@@ -26,7 +26,8 @@ const { chromium } = require(process.cwd() + "/node_modules/playwright-core");
  await act('[data-act="form"][data-v="edit:sp1"]'); await p.fill("#ie-sp1", "Cœur de cible : 18–25 ans, R&B alternatif et pop urbaine"); await p.press("#ie-sp1", "Enter");
  await itm("sp9", "discard"); log("kpi dim:", (await p.locator("summary", { hasText: "Objectifs & KPIs" }).innerText()).replace(/\n/g," "));
  await go("Ajouter un objectif"); await act('[data-act="itmadd"]'); log("empty add:", await errTxt());
- await p.fill("#ad-text", "150 000 streams à 4 semaines"); await act('[data-act="itmadd"]');
+ await p.fill("#ad-text", "150 000 streams à 4 semaines"); await act('[data-act="itmadd"]'); log("objective without target:", await errTxt());
+ await p.fill("#ad-target", "150 000"); await act('[data-act="itmadd"]'); log("objective line:", await p.locator(".irow .cap", { hasText: "cible 150 000" }).first().textContent());
  await act('[data-act="lever"][data-k="pub"][data-v="non"]'); await act('[data-act="lever"][data-k="live"][data-v="retenu"]');
  log("st2 done:", await sub("st2"));
  await step("st3"); log("brief blocks:", (await p.locator(".doc h4").allInnerTexts()).join(" / ")); await go("Envoyer en validation");
@@ -93,10 +94,10 @@ const { chromium } = require(process.cwd() + "/node_modules/playwright-core");
  await p.selectOption("#scenSel", "acts");
  const infl = await p.locator(".spine .step", { hasText: "Influence" }).getAttribute("data-step");
  await role("cp"); await step(infl); log("collabs:", (await p.locator("summary", { hasText: "@" }).allInnerTexts()).map(x=>x.replace(/\n/g," ")).join(" || "));
- await role("lea"); await act('[data-act="cinvoice"]'); log("invoice empty:", await errTxt()); await p.fill("#crInv", "Facture_Neons.pdf"); await act('[data-act="cinvoice"]');
+ await role("lea"); await act('[data-act="cinvoice"]'); log("invoice empty:", await errTxt()); await act('[data-act="crinvsample"]'); await act('[data-act="cinvoice"]');
  await role("dg"); await step(infl); await act('[data-act="cpay"][data-k="lea"]'); log("lea pay:", await p.getByText("Bon à payer · 950 € HT").count());
  await role("dg"); await step(infl); log("computed proof:", (await p.locator("details.infos").first().evaluate(e=>e.textContent)).match(/\d+ publications? vérifiées? sur \d+ créateurs? engagés?/)[0]);
- await role("cp"); await step(infl); await p.fill("#sV", "312000"); await p.fill("#sPer", "du 12/12 au 19/12"); await go("Enregistrer le relevé"); await go("Clôturer l'activation"); log("influence:", await sub(infl));
+ await role("cp"); await step(infl); await p.fill("#sV", "312000"); await p.fill("#sPer", "du 12/12 au 19/12"); await go("Enregistrer le relevé"); await go("Clôturer l'activation"); log("influence:", await sub(infl), "| INF-001 close refused:", await errTxt(), "| matrix:", await p.locator(".vers h3", { hasText: "Chaque créateur" }).count());
  // 5 bis. Press relations given to an agency: refresh with a preview, report kept with reserves
  await p.selectOption("#scenSel", "acts"); await p.locator(".spine .step", { hasText: "Relations presse" }).click();
  await act('[data-act="agrefresh"]'); await act('[data-act="agimport"]'); log("rp gap:", await p.locator(".agcard .warnc", { hasText: "pas encore décidé" }).count());
@@ -107,12 +108,74 @@ const { chromium } = require(process.cwd() + "/node_modules/playwright-core");
  await p.fill("#bSum", "Objectif dépassé sur les vues ; la presse a moins suivi."); await go("Générer la version 1"); await go("Soumettre à Claire Morel");
  await role("dg"); await go("Approuver le bilan provisoire");
  await role("cp"); await step("bi2"); const ids = await p.locator('[data-act="rarb"]').evaluateAll(x=>x.map(e=>e.dataset.id)); log("reserves:", ids.length);
- await p.selectOption(`#ra-${ids[0]}`, "dup"); await act(`[data-act="rarb"][data-id="${ids[0]}"]`);
- for (const i of ids.slice(1)) { await p.selectOption(`#ra-${i}`, "follow"); await act(`[data-act="rarb"][data-id="${i}"]`); }
+ log("na offered for open activations:", (await Promise.all(ids.map(i=>p.locator(`#ra-${i} option[value="na"]`).count()))).join(","));
+ const naId = (await Promise.all(ids.map(async i=>[i, await p.locator(`#ra-${i} option[value="na"]`).count()]))).find(x=>x[1])?.[0];
+ if (naId) { await p.selectOption(`#ra-${naId}`, "na"); await act(`[data-act="rarb"][data-id="${naId}"]`); log("na without reason:", await errTxt()); await p.fill(`#ry-${naId}`, "Déjà couvert par le bilan de l'agence"); await act(`[data-act="rarb"][data-id="${naId}"]`); }
+ for (const i of ids.filter(x=>x!==naId)) { await p.selectOption(`#ra-${i}`, "follow"); await act(`[data-act="rarb"][data-id="${i}"]`); log("follow without channel:", await errTxt()); await p.selectOption(`#rc-${i}`, "Tâche dans Travail"); await act(`[data-act="rarb"][data-id="${i}"]`); }
  log("bi2:", await sub("bi2"));
  await step("bi3"); await go("Demander la clôture"); await role("dg"); await go("Clôturer avec réserves");
  await go("Rouvrir le Marketing"); log("reopen no reason:", await errTxt()); await p.fill("#cReopen", "Retombées presse arrivées après la clôture"); await go("Rouvrir le Marketing");
  log("reopened:", (await p.locator(".note", { hasText: "Rouvert" }).first().innerText()));
+ // 8. Ibé's review of 23/10
+ const toastTxt = async () => (await p.locator("#toast").innerText());
+ const hasErr = async () => errTxt();
+ // CONC-001: an empty date looks empty; the call keeps its date when a participant is removed
+ await p.selectOption("#scenSel", "designstart"); await go("Désigner"); await act('[data-act="depath"][data-v="call"]');
+ log("CONC empty date marked:", await p.locator("#pcDate.empty").count(), await p.locator("#pcHour.empty").count());
+ await p.fill("#pcDate", "2026-10-23"); await p.fill("#pcHour", "12:30"); await act('[data-act="prepwhodel"]');
+ log("CONC kept after removing a participant:", await p.inputValue("#pcDate"), await p.inputValue("#pcHour"));
+ // PROD-001: organisation required, error visible, choices kept, focus on the field
+ await p.selectOption("#scenSel", "prodstart"); await p.locator('input[name="pqCo"]').nth(1).check(); await act('[data-act="pqset"]');
+ log("PROD-001:", (await p.locator(".formmsg").innerText()).slice(0,70), "| company kept:", await p.locator('input[name="pqCo"]').nth(1).isChecked(), "| focus:", await p.evaluate(()=>document.activeElement.name), "| legend:", await p.locator(".orgset legend").innerText());
+ // Stratégie: four states, with their reason
+ await p.selectOption("#scenSel", "strat"); for (const i of [0,1,2,3,4,5,6,7,8,9]) { const b = p.locator(`[data-act="itm"][data-v="keep"][data-id="sp${i}"]`); if (await b.count()) await b.click(); }
+ await act('[data-act="lever"][data-k="pub"][data-v="non"]'); await act('[data-act="lever"][data-k="live"][data-v="retenu"]');
+ await p.locator("summary", { hasText: "Livrables engagés" }).click(); await act('[data-act="form"][data-v="add:strat:Livrables engagés"]'); await p.fill("#ad-text", "Session acoustique"); await act('[data-act="itmadd"]');
+ log("STR states:", (await p.locator("summary", { hasText: "Livrables engagés" }).innerText()).replace(/\n/g," "), "|", await p.locator(".note b", { hasText: "complétées" }).innerText());
+ // Activations: a single selection, a filter that never lies (ACT-002, ACT-003), measure by lever (MKT-ACT-002, ACT-001)
+ await p.selectOption("#scenSel", "acts"); await p.locator(".spine .step", { hasText: "Pitching playlists" }).click();
+ log("ACT playlists measure:", (await p.locator("#sP option").allInnerTexts()).join(", "));
+ await p.locator("details.levers summary").click(); await act('[data-act="apcreate"]'); log("ACT created:", await p.locator("#dtitle").innerText());
+ await p.locator('[data-act="actview"][data-v="done"]').click();
+ log("ACT-003 filter:", (await p.locator('[data-act="actview"][data-v="done"]').innerText()).replace(/\n/g," "), "| listed:", (await p.locator(".alist .arow .t").allInnerTexts()).join(" / ").replace(/\n/g," "), "| open stays:", await p.locator("#dtitle").innerText());
+ await go("Désigner"); await p.fill("#aDue", "2026-11-01"); await go("Fixer l'échéance"); log("MKT-ACT-001 past due:", await hasErr());
+ await p.fill("#aDue", "2027-03-01"); await go("Fixer l'échéance"); log("after campaign:", await hasErr()); await p.fill("#aDue", "2026-12-19"); await go("Fixer l'échéance");
+ await go("Lancer l'activation"); await go("Déclarer réalisée"); await act('[data-act="aproofsample"]'); await go("Enregistrer la preuve");
+ await role("dg"); await go("Vérifier la preuve"); await role("cp");
+ log("ACT-001 showcase measure:", await p.locator('label[for="sP"]').innerText(), "·", (await p.locator("#sP option").allInnerTexts()).join(", "), "| still on:", await p.locator("#dtitle").innerText());
+ // Press relations by an agency: not done while lines are to examine, unless a reserve (MKT-ACT-001)
+ await p.selectOption("#scenSel", "acts"); await p.locator(".spine .step", { hasText: "Relations presse" }).click(); await act('[data-act="agrefresh"]'); await act('[data-act="agimport"]');
+ log("RP blocked by:", (await p.locator(".nowbox .callout.warn").first().innerText()).slice(0,140));
+ await go("Déclarer réalisée"); log("RP done refused:", await hasErr());
+ await p.check("#aExc"); await go("Déclarer réalisée"); log("RP exception needs:", await hasErr());
+ await p.fill("#aExcWhy", "Plume envoie les retombées le 12/12"); await p.fill("#aExcD", "2026-12-20"); await go("Déclarer réalisée");
+ log("RP done with reserve:", (await p.locator(".callout.warn", { hasText: "Réalisée avec une réserve" }).innerText()).slice(0,90));
+ // Influence: nothing before launch, the agreement sent from the lead's view (MKT-INF-001, MKT-INF-002)
+ await p.selectOption("#scenSel", "acts"); const inf = await p.locator(".spine .step", { hasText: "Influence" }).getAttribute("data-step"); await step(inf);
+ await act('[data-act="ccounter"][data-k="noa"]'); await act('[data-act="caccept"][data-k="noa"]');
+ log("INF-002 card:", await p.locator(".vers h3", { hasText: "Envoyer l'accord" }).innerText(), "| link in the card:", await p.locator('.linkbox code').count());
+ await p.locator('[data-act="form"][data-v="aprev:noa"]').click(); log("preview:", await p.locator(".card .cap", { hasText: "verra sur sa page" }).innerText());
+ await p.locator('[data-act="copytext"][data-from="ag-msg-noa"]').click(); await p.waitForTimeout(200); log("copy says:", await toastTxt());
+ await act('[data-act="csend"][data-k="noa"]'); log("sent:", (await p.locator(".vers .src", { hasText: "Envoyé par e-mail" }).first().innerText()).slice(0,120));
+ await act('[data-act="cproto"][data-k="noa"]'); log("noa after proto:", (await p.locator("summary", { hasText: "Noa Bessa" }).innerText()).replace(/\n/g," "));
+ await act('[data-act="areason"][data-v="suspend"]'); await p.fill("#arWhy", "Budget gelé jusqu'au 20/12"); await act('[data-act="areasonok"]');
+ log("INF-001 suspended:", (await p.locator(".callout.info", { hasText: "suspendue" }).innerText()).slice(0,90), "| gestures left:", await p.locator('[data-act="cpay"],[data-act="cconcept"],[data-act="cbrief"],[data-act="csend"]').count());
+ // Budget per activation (MKT-BIL-002)
+ await act('[data-act="aresume"]'); await p.locator("details.infos summary", { hasText: "Dépenses" }).click(); await act('[data-act="form"][data-v^="cost:"]');
+ await act('[data-act="cadd"]'); log("cost needs:", await hasErr()); await p.fill("#cLabel", "Boost Spark Ads"); await p.fill("#cAmount", "200"); await act('[data-act="cadd"]');
+ log("costs:", (await p.locator("details.infos summary", { hasText: "Dépenses" }).innerText()));
+ // Bilan with open activations: always included, never « non applicable », the closure waits (MKT-BIL-001)
+ await mod("review"); await step("bi1"); await p.fill("#bSum", "Campagne en cours, bilan intermédiaire"); await p.locator("details.infos summary", { hasText: "Options" }).click();
+ log("BIL open always included:", await p.locator('input[id^="bi-"]:disabled').count()); await go("Générer la version"); await go("Soumettre à"); await role("dg"); await go("Approuver le bilan provisoire");
+ await role("cp"); await step("bi2"); const rids = await p.locator('[data-act="rarb"]').evaluateAll(x=>x.map(e=>e.dataset.id));
+ log("BIL na offered:", (await Promise.all(rids.map(i=>p.locator(`#ra-${i} option[value="na"]`).count()))).join(","));
+ for (const i of rids) { await p.selectOption(`#ra-${i}`, "follow"); await p.selectOption(`#rc-${i}`, "Réunion de suivi"); await act(`[data-act="rarb"][data-id="${i}"]`); }
+ await mod("activations"); await p.locator("details.levers summary").click(); await p.locator('[data-act="apcreate"]').first().click(); await mod("review"); await step("bi3");
+ log("BIL uncovered:", (await p.locator(".rows .row", { hasText: "sans réserve suivie" }).innerText()).replace(/\n/g," ").slice(0,120));
+ await go("Demander la clôture"); log("BIL closure refused:", await hasErr());
+ log("BIL objectives:", (await p.locator(".srow", { hasText: "streams" }).first().innerText()).replace(/\n/g," "));
+ // Seen as someone else, the same step stays open (MKT-UX-001)
+ await p.selectOption("#scenSel", "ready"); await step("ready"); await role("charge"); log("UX-001 charge on:", await p.locator("#dtitle").innerText());
  await p.setViewportSize({ width: 390, height: 900 }); for (const k of ["strat","design","quote","acts","agency","rpint","bilan"]) { await p.selectOption("#scenSel", k); log("mobile", k + ":", await p.evaluate(() => document.documentElement.scrollWidth)); }
  await p.emulateMedia({ colorScheme: "dark" }); await p.setViewportSize({ width: 1440, height: 1100 }); await p.selectOption("#scenSel", "design"); await p.screenshot({ path: out + "/mk-dark.png" });
  console.log(L.join("\n")); console.log("errors:", errs); await b.close(); })().catch(e=>{console.log((globalThis.__L||[]).join("\n"));console.error("FAIL", e.message.split("\n")[0]); process.exit(1);});

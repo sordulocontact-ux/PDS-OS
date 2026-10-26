@@ -101,7 +101,7 @@ function scenario(k){
   s.acts.forEach(a=>{a.resp=a.resp||"cp";a.due=a.due||"2026-12-19";a.status="closed";a.closedBy=nameOf(a.resp);
     a.proof={state:a.title==="Relations presse"?"given":"verified",link:a.proof.link||"https://drive.google.com/neons-preuves",by:nameOf(a.resp),at:"20/12, 10:00"};
     a.stats=fin[a.title]?{state:"declared",value:fin[a.title],by:nameOf(a.resp),at:"02/01, 10:00"}:{state:"na",by:nameOf(a.resp)};
-    if(fin[a.title]) a.snaps=[{n:1,value:fin[a.title],platform:a.k==="rp"?"Presse":a.k==="playlists"?"Spotify":a.k==="clip"?"YouTube":"TikTok",period:"du 05/12 au 02/01",source:a.k==="influence"?"Déclaré par le créateur":"Relevé sur la plateforme",by:nameOf(a.resp),at:"02/01, 10:00"}];});
+    if(fin[a.title]) a.snaps=[{n:1,value:fin[a.title],platform:a.k==="rp"?"Presse":a.k==="playlists"?"Spotify":a.k==="clip"?"YouTube":a.k==="live"?"Billetterie":"TikTok",period:"du 05/12 au 02/01",source:a.k==="influence"?"Déclaré par le créateur":"Relevé sur la plateforme",by:nameOf(a.resp),at:"02/01, 10:00"}];});
   L("Toutes les activations clôturées","Lina Haddad","02/01, 11:00");
   if(k==="bilan"){s.role="cp";s.mod="review";s.base=[2027,0,5,10,0];return s;}
   return s;
