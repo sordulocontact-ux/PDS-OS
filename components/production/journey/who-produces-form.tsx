@@ -122,6 +122,7 @@ export function WhoProducesForm({
         <ChoiceCards<Kind>
           name="producer-kind"
           legend={t.legend}
+          required
           variant="list"
           value={kind}
           onChange={setKind}
@@ -232,6 +233,8 @@ export function WhoProducesForm({
           <ChoiceCards<ProductionMode>
             name="producer-mode"
             legend={t.mode.legend}
+            // Required, as the company (recette 23/10, PROD-001).
+            required
             variant="list"
             value={mode}
             onChange={setMode}

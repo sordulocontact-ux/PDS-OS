@@ -728,6 +728,14 @@
     outline: 2px solid var(--focus-ring);
     outline-offset: 2px;
   }
+
+  /* Un champ date ou heure vide paraît vide : Safari y dessine en gris la
+     date du jour et 12:30, lus comme une valeur saisie (recette du 23/10,
+     CONC-001). Le format revient au focus. `data-empty` : components/ui/input.tsx.
+     L'opacité, pas la couleur : WebKit garde le gris des champs vides. */
+  input[data-empty]:not(:focus)::-webkit-datetime-edit {
+    opacity: 0;
+  }
 }
 
 /* Valeurs repérées dans un contrat à transformer en modèle, encore à
