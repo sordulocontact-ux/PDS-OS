@@ -11,6 +11,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "db:types": "supabase gen types typescript --local > lib/supabase/database.types.ts",
+    "preprod:reset": "bash scripts/preprod-reset.sh",
     "prepare": "simple-git-hooks"
   },
   "dependencies": {

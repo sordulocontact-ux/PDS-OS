@@ -20,6 +20,7 @@ import { routes } from "@/lib/auth/redirects";
 import { getArtist } from "@/lib/catalog/artist-queries";
 import { getMaster } from "@/lib/catalog/queries";
 import { fr } from "@/lib/i18n/fr";
+import { isPreprod } from "@/lib/preprod/config";
 import { CREATABLE_PROJECT_TYPES, MUSIC_FORMATS } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -29,9 +30,11 @@ import { createClient } from "@/lib/supabase/server";
  * by code (`fake.ts`); the model only chooses what to create. By default the
  * open page is used: a title made on an artist's page is credited to that
  * artist, a project made on a title's page carries that title. Never offered
- * in production.
+ * in production; offered in the pre-production too (lib/preprod/config.ts).
  */
-export const isTestDataEnabled = process.env.NODE_ENV !== "production";
+export function isTestDataEnabled(): boolean {
+  return process.env.NODE_ENV !== "production" || isPreprod();
+}
 
 /** The artist and the title of the open page, read with the user's session. */
 async function pageCatalog(pagePath: string | null) {

@@ -5,6 +5,7 @@ import { AccessWatcher } from "@/components/auth/access-watcher";
 import { FeedbackProvider } from "@/components/feedback/feedback-provider";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { NotificationListener } from "@/components/notifications/notification-listener";
+import { PreprodSlot } from "@/components/preprod/preprod-slot";
 import { MobileNav } from "@/components/shell/mobile-nav";
 import { Sidebar } from "@/components/shell/sidebar";
 import { CollapsedNavProvider } from "@/components/shell/use-collapsed-nav";
@@ -101,6 +102,7 @@ export default async function AppLayout({
                 </header>
                 <main className="flex min-w-0 flex-1 flex-col">{children}</main>
               </div>
+              {signedIn && <PreprodSlot email={access.email} />}
             </div>
           </OneTimeLinksProvider>
         </CollapsedNavProvider>

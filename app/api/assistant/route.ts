@@ -80,7 +80,7 @@ export async function POST(request: Request) {
       firstName: access.firstName,
       role: access.role,
       page: await pageContext(parsed.data.page),
-      testData: isTestDataEnabled,
+      testData: isTestDataEnabled(),
     }),
   );
   const result = streamText({

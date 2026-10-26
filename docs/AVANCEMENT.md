@@ -791,3 +791,18 @@ en prod avec accord.
 Reste : signature de PDS Éditions sur le bulletin par la direction dans l'app (le bulletin ne
 sait pas encore quelle ligne d'éditeur est la maison) ; « Continuer vers l'étape suivante » branché
 sur les autres gestes (JUR-04, fait pour la fiche) ; tout rejouer dans un vrai navigateur.
+
+## Pré-prod navigable comme un proto (26/10/2026, branches `feat/preprod-tools` et `pre-prod`)
+
+- [x] **Barre « Voir comme / Aller à »** (`components/preprod/`, `lib/preprod/`) : vraie connexion à un
+      compte de test sans quitter la page, cinq moments du parcours ; affichée seulement avec
+      `PREPROD_TOOLS=1` hors déploiement Production. Données de test de PO aussi actives en pré-prod.
+- [x] **Jeu de données** `supabase/preprod/seed.sql` : quatre comptes du proto, cinq projets amenés à
+      leur moment par les vrais gestes (de « à accepter » à « plan lancé ») ; rejoué sans erreur sur la
+      base locale dans une transaction annulée. `pnpm preprod:reset` remet la base à zéro (refuse une
+      base avec de vrais comptes).
+- [x] **Branche `pre-prod`** = `retours/juridique-v1` + `feat/preprod-tools`.
+
+Reste : créer le projet Supabase de pré-prod et les variables Vercel de la branche (`docs/PREPROD.md`
+§ 2), vérifier la connexion des comptes de test sur la vraie base ; moments suivants (Stratégie à
+valider, Master, Juridique, Conception, Distribution).

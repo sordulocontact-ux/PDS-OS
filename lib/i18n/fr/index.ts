@@ -43,6 +43,7 @@ import { conceptionSheet } from "./conception-sheet";
 import { design } from "./design";
 import { facts } from "./facts";
 import { feedback } from "./feedback";
+import { preprod } from "./preprod";
 import { framing } from "./framing";
 import { framingGuide } from "./framing-guide";
 import { framingIntel } from "./framing-intel";
@@ -309,4 +310,5 @@ export const fr = {
   roles,
   portal,
   contactLinks,
+  preprod,
 } as const;

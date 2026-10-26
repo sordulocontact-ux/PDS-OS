@@ -74,7 +74,7 @@ export function createAssistantTools(
     propose_budget_line: proposeBudgetLineTool(context),
     propose_feedback: proposeFeedbackTool(context),
     ...(can(access, "read_feedback") ? feedbackReviewTools(context) : {}),
-    ...(isTestDataEnabled
+    ...(isTestDataEnabled()
       ? {
           create_test_data: createTestDataTool(access, pagePath),
           fill_page_test_data: fillPageTestDataTool(access, pagePath),
