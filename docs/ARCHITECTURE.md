@@ -90,7 +90,9 @@ Principes :
   réponse (plus après un refus) ; directeur créatif ceux de son équipe créative. Tout ce qui
   est dans un projet suit la même règle. Piège : la policy de `projects` évalue la règle sur
   les colonnes de la ligne (`can_see_project_row`), car `INSERT … RETURNING` vérifie la
-  nouvelle ligne avant qu'un `select` sur `projects` puisse la voir.
+  nouvelle ligne avant qu'un `select` sur `projects` puisse la voir. Depuis `…261026000101`, la
+  même règle existe sous forme d'ensemble, `visible_project_ids()` (calculée une fois par requête) :
+  les deux doivent rester identiques, `visible-project-ids.test.sql` le vérifie pour chaque profil.
 - Invariants vérifiés **au commit** (triggers de contrainte différés) : un master a au
   moins un artiste (`master_requires_artist`) ; une sortie musicale non archivée a au moins
   un master (`music_release_requires_master`), quel que soit le chemin d'écriture.
@@ -6321,6 +6323,15 @@ clés VAPID et `PUSH_CLAIM_SECRET` (≥ 32 car., même valeur que le secret Vaul
 
 ## 12. Pièges rencontrés (à ne pas redécouvrir)
 
+- **Une policy par ligne qui appelle une fonction de visibilité coûte une requête par ligne lue.**
+  Une fonction `SECURITY DEFINER` avec son `search_path` n'est jamais intégrée au plan :
+  `can_see_project(project_id)` relançait 5 à 7 sous-requêtes pour chaque ligne, environ 1,5 ms la
+  ligne, 45 ms pour 28 étapes, des secondes par page (mesuré sur la pré-prod le 26/10/2026).
+  Une policy de lecture d'une table de projet s'écrit donc
+  `project_id = any ((select public.visible_project_ids())::uuid[])` : la liste est calculée une
+  fois par requête (InitPlan), 1 ms au lieu de 45. Le `::uuid[]` est obligatoire (sans lui,
+  `= any ((select …))` compare à chaque ligne de la sous-requête). Une nouvelle façon de voir un
+  projet s'ajoute **à la fois** à `can_see_project_row` et à `visible_project_ids`.
 - **Une sous-requête dans une policy subit le RLS de l'appelant.** Écrire « lisible s'il
   n'existe pas de ligne interdite » ne protège rien : pour qui ne voit pas ces lignes, le
   `not exists` est toujours vrai (fuite des contrats `artist-files`, corrigée en
