@@ -34,7 +34,7 @@ Le cron de `vercel.json` ne tourne que sur la Production : la pré-prod ne déte
 
    ```
    PREPROD_DB_URL=postgresql://…
-   PREPROD_PASSWORD=<openssl rand -base64 18>
+   PREPROD_PASSWORD=<le mot de passe commun des comptes de test, sans apostrophe>
    ```
 
    puis `pnpm preprod:reset` (§ 4). Les migrations sont toutes rejouées : pas de `db push` à part.
@@ -55,6 +55,10 @@ Le cron de `vercel.json` ne tourne que sur la Production : la pré-prod ne déte
 ## 3. S'en servir
 
 Se connecter avec `claire.morel@preprod.pds` (ou un autre compte de la barre) et `PREPROD_PASSWORD`.
+**Changer ce mot de passe** = le changer partout à la fois : `.env.preprod.local`, `.env.local`, la variable
+Vercel de la branche, **et** les comptes en base (`pnpm preprod:reset`, ou la mise à jour de
+`auth.users.encrypted_password` du § 6). Le 26/10, un mot de passe changé dans le fichier après la remise
+à zéro a donné « Email ou mot de passe incorrect ».
 
 - **Voir comme** : vraie connexion à un autre compte, retour sur la même page. Ce que chacun voit
   reste décidé par le RLS. Comptes : Claire Morel (directrice générale, seule validatrice), Lina
@@ -99,3 +103,24 @@ Limites : pas de fichier Storage (écoute d'un mix, pochette), pas d'appel à l'
 dans le jeu de données ; les dates sont relatives au jour de la remise à zéro (pas de voyage dans le
 temps : un retard se prépare avec des dates passées). Moments à ajouter ensuite : Stratégie à valider,
 Master (mix V1 à valider), Juridique (fiches, SACEM), Conception, Distribution.
+
+## 6. Développer sur la base de pré-prod (sans Docker)
+
+Décision du 26/10/2026 : la stack Supabase locale prend trop de mémoire, et personne d'autre que nous ne
+teste encore en pré-prod. `pnpm dev` tourne donc sur la base de pré-prod.
+
+- `.env.local` : bloc « Dev sur la base de pré-prod » en fin de fichier (adresse et clé anon de
+  `xluuruuzfohfixzaoxmu`, `PREPROD_TOOLS=1`, `PREPROD_PASSWORD`) ; les lignes de la base locale restent en
+  commentaire « LOCAL (Docker) » pour revenir en arrière. La barre « Voir comme » marche aussi en local.
+- **Nouvelle migration** : `supabase db push --db-url "$PREPROD_DB_URL"` (variable de `.env.preprod.local`).
+  Une migration ratée se répare par une migration suivante, ou par `pnpm preprod:reset`, qui rejoue les
+  migrations **de la branche en cours** et efface les données.
+- **Types** : `pnpm db:types:preprod` (par l'API, sans Docker), avec les précautions habituelles sur les
+  `| null` ajoutés à la main dans `lib/supabase/database.types.ts`.
+- **Tests SQL** : `supabase test db` exige Docker. Sans lui, un fichier se joue avec
+  `psql "$PREPROD_DB_URL" -f supabase/tests/<fichier>.test.sql` (chaque test finit par `rollback` : rien ne
+  reste ; l'extension `pgtap` doit être activée sur la base).
+- **E-mails** : pas de Mailpit ; les comptes de test sont déjà confirmés, le peu d'e-mails d'auth passe par
+  le SMTP par défaut de Supabase (limité).
+- Le jour où l'équipe teste en pré-prod, revenir à une base de dev séparée : nos essais et nos remises à
+  zéro arriveraient chez elle.
