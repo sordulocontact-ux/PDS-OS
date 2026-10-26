@@ -94,8 +94,9 @@ export function BilanPrepareForm({
           ],
           summary: text("summary"),
           recommendations: text("recommendations"),
+          // An open activation is always kept (its box is fixed, unsent).
           reserves: issues
-            .filter((i) => kept.includes(i.key))
+            .filter((i) => i.locked || kept.includes(i.key))
             .map((i) => ({
               category: i.category,
               description: i.text,

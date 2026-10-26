@@ -584,7 +584,11 @@ export const marketingReview = {
       reasonRequired: "Écrivez le motif.",
       followUpIncomplete:
         "Un suivi après clôture dit qui le suit (un membre), à quelle échéance et par quel canal.",
-      invalidDuplicate: "Choisissez la réserve gardée, dans ce projet.",
+      invalidDuplicate:
+        "Choisissez la réserve gardée, dans ce projet : une réserve gardée pour une autre n'est pas elle-même un doublon.",
+      // Recette of 23/10 (MKT-BIL-001).
+      activationKept:
+        "Cette activation n'est pas terminée : sa réserve reste suivie, acceptée comme limite ou à lever, jamais « Non applicable » ni « Doublon ».",
       taskAlreadyCreated: "Une tâche est déjà rattachée à ce suivi.",
       invalidTask: "Cette tâche n'est pas dans le projet.",
       transition: "Cette réserve ne peut plus changer ainsi.",
@@ -684,6 +688,8 @@ export const marketingReview = {
         "La clôture repose sur le dernier bilan provisoire approuvé.",
       unarbitrated: "Une réserve n'est pas arbitrée : arbitrez-la d'abord.",
       blocking: "Une réserve est à lever avant la clôture.",
+      uncovered: (titles: string) =>
+        `Des activations ne sont pas terminées : ${titles}. Chacune doit avoir sa réserve suivie après la clôture (qui, quand, par quel canal) ou acceptée comme limite par la direction.`,
       remaining:
         "Des réserves restent suivies ou acceptées : clôturez avec réserves.",
       noReserves: "Aucune réserve ne reste : clôturez sans réserve.",

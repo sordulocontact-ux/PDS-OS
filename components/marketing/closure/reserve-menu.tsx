@@ -25,7 +25,10 @@ import {
   linkReserveTask,
   noteReserve,
 } from "@/lib/marketing/closure/reserve-actions";
-import type { ReserveDecision } from "@/lib/marketing/closure/reserves";
+import {
+  reserveDecisionsFor,
+  type ReserveDecision,
+} from "@/lib/marketing/closure/reserves";
 import type { WriteResult } from "@/lib/utils/write-result";
 
 const t = fr.marketingReview.closure.reserves;
@@ -46,6 +49,8 @@ export type ReserveMenuReserve = {
     note: string | null;
   };
   taskId: string | null;
+  // Its activation is still open: never « Non applicable » nor « Doublon ».
+  activationOpen: boolean;
 };
 
 /**
@@ -86,12 +91,11 @@ export function ReserveMenu({
   };
   const live = r.status === "open" || r.status === "arbitrated";
   // The direction accepts a definitive limit; the owner decides the rest.
-  const decisions: ReserveDecision[] = [
-    ...(role.owner
-      ? (["blocking", "follow_up", "not_applicable", "duplicate"] as const)
-      : []),
-    ...(role.direction ? (["accepted_limit"] as const) : []),
-  ];
+  const decisions = reserveDecisionsFor({
+    owner: role.owner,
+    direction: role.direction,
+    activationOpen: r.activationOpen,
+  });
   const liftable =
     r.status === "arbitrated" &&
     (r.decision === "blocking" || r.decision === "follow_up") &&

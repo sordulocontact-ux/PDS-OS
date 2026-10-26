@@ -3,7 +3,7 @@ import { ReserveMenu } from "@/components/marketing/closure/reserve-menu";
 import { StepWaiting } from "@/components/shell/journey/step-waiting";
 import { loadMembers } from "@/lib/framing/related";
 import { fr } from "@/lib/i18n/fr";
-import type { ReserveDecision } from "@/lib/marketing/closure/reserves";
+import { reserveDecisionsFor } from "@/lib/marketing/closure/reserves";
 import type { ReviewContext } from "@/lib/marketing/review/context";
 import { activeClosureOf, isClosedState } from "@/lib/marketing/review/journey";
 import {
@@ -52,12 +52,21 @@ export async function ReservesStep({ ctx }: { ctx: ReviewContext }) {
     loadMembers(access),
     loadReserveTaskOptions(project.id),
   ]);
-  const decisions: ReserveDecision[] = [
-    ...(viewer.isOwner
-      ? (["blocking", "follow_up", "not_applicable", "duplicate"] as const)
-      : []),
-    ...(viewer.canValidate ? (["accepted_limit"] as const) : []),
-  ];
+  // The reserve of an activation still open stays one (MKT-BIL-001).
+  const activationOpen = (r: Reserve) =>
+    r.activationId !== null &&
+    activations.some(
+      (a) =>
+        a.id === r.activationId &&
+        a.status !== "closed" &&
+        a.status !== "cancelled",
+    );
+  const decisionsOf = (r: Reserve) =>
+    reserveDecisionsFor({
+      owner: viewer.isOwner,
+      direction: viewer.canValidate,
+      activationOpen: activationOpen(r),
+    });
   const dueOn = ctx.today;
   return (
     <>
@@ -100,6 +109,7 @@ export async function ReservesStep({ ctx }: { ctx: ReviewContext }) {
                       reason: r.reason,
                       followUp: r.followUp,
                       taskId: r.task?.id ?? null,
+                      activationOpen: activationOpen(r),
                     }}
                     role={{
                       owner: viewer.isOwner,
@@ -116,18 +126,20 @@ export async function ReservesStep({ ctx }: { ctx: ReviewContext }) {
                     tasks={tasks}
                   />
                 </div>
-                {r.status === "open" && !closed && decisions.length > 0 && (
-                  <ReserveArbitrateInline
-                    projectId={project.id}
-                    reserveId={r.id}
-                    decisions={decisions}
-                    members={members}
-                    others={reserves
-                      .filter((o) => o.id !== r.id)
-                      .map((o) => ({ id: o.id, label: o.description }))}
-                    defaults={{ personId: project.ownerPersonId, dueOn }}
-                  />
-                )}
+                {r.status === "open" &&
+                  !closed &&
+                  decisionsOf(r).length > 0 && (
+                    <ReserveArbitrateInline
+                      projectId={project.id}
+                      reserveId={r.id}
+                      decisions={decisionsOf(r)}
+                      members={members}
+                      others={reserves
+                        .filter((o) => o.id !== r.id)
+                        .map((o) => ({ id: o.id, label: o.description }))}
+                      defaults={{ personId: project.ownerPersonId, dueOn }}
+                    />
+                  )}
                 {r.status === "arbitrated" &&
                   r.decision === "blocking" &&
                   (viewer.isOwner || follower) && (

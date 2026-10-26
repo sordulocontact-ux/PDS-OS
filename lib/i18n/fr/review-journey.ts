@@ -59,7 +59,7 @@ export const reviewJourney = {
     },
     reserves: {
       title: "Réserves",
-      why: "Chaque réserve est arbitrée : à lever avant la clôture, à suivre après, acceptée comme limite, non applicable ou doublon.",
+      why: "Le responsable arbitre chaque réserve : à lever avant la clôture, à suivre après, non applicable ou doublon ; la direction peut aussi l'accepter comme limite définitive. Une activation pas terminée n'est jamais non applicable ni doublon.",
     },
     closure: {
       title: "Clôture du Marketing",
@@ -220,6 +220,8 @@ export const reviewJourney = {
     },
     sections: "Sections",
     reservesToInclude: "Réserves à inclure",
+    lockedReserve:
+      "Activation pas terminée : elle reste une réserve, à suivre après la clôture ou à accepter comme limite.",
     missingFields: (n: number) =>
       n > 1 ? `${n} champs à compléter.` : "Un champ à compléter.",
     generate: (n: number) => `Générer la version ${n}`,
@@ -327,6 +329,9 @@ export const reviewJourney = {
     withReserves: "Avec réserves",
     openActivations: (n: number, titles: string) =>
       `${n} activation${s(n)} pas clôturée${s(n)} : ${titles}`,
+    // Recette of 23/10 (MKT-BIL-001): each one followed or accepted first.
+    uncovered: (n: number, titles: string) =>
+      `${n} activation${s(n)} pas clôturée${s(n)} sans réserve suivie ni limite acceptée : ${titles}`,
     followed: (n: number) =>
       `${n} réserve${s(n)} suivie${s(n)} après la clôture`,
     unpaid: (amount: string) => `Engagé non payé : ${amount}`,

@@ -18,6 +18,9 @@ export type BilanIssue = {
   category: ReserveCategory;
   text: string;
   activationId: string | null;
+  // An activation still open: always a reserve of the version, never left
+  // out (recette of 23/10, MKT-BIL-001).
+  locked: boolean;
 };
 
 export type HorizonObjective = {
@@ -48,6 +51,7 @@ export function bilanIssues(
         category: "activations",
         text: t.cancelled(a.title, a.reason),
         activationId: a.id,
+        locked: false,
       });
     else if (a.status !== "closed")
       issues.push({
@@ -55,6 +59,7 @@ export function bilanIssues(
         category: "activations",
         text: t.notClosed(a.title, t.states[a.status]),
         activationId: a.id,
+        locked: true,
       });
     else {
       if (a.proof !== "verified" && a.proof !== "not_expected")
@@ -63,6 +68,7 @@ export function bilanIssues(
           category: "evidence",
           text: t.proof(a.title),
           activationId: a.id,
+          locked: false,
         });
       if (a.measure === "unavailable")
         issues.push({
@@ -70,6 +76,7 @@ export function bilanIssues(
           category: "statistics",
           text: t.statsUnavailable(a.title),
           activationId: a.id,
+          locked: false,
         });
     }
   }
@@ -80,6 +87,7 @@ export function bilanIssues(
         category: "statistics",
         text: t.horizon(o.label, formatDay(o.dueOn)),
         activationId: null,
+        locked: false,
       });
   return issues.filter((i) => !known.includes(i.text));
 }

@@ -41,6 +41,9 @@ function failure(error: { code?: string; message?: string }): WriteResult {
     ],
     ["invalid_transition", e.transition],
   ];
+  // « activations_uncovered:<titles> » (MKT-BIL-001).
+  const uncovered = /activations_uncovered:(.+)$/.exec(m)?.[1];
+  if (uncovered) return { ok: false, error: e.uncovered(uncovered.trim()) };
   const hit = known.find(([code]) => m.includes(code));
   if (hit) return { ok: false, error: hit[1] };
   if (error.code === "42501") return { ok: false, error: e.forbidden };

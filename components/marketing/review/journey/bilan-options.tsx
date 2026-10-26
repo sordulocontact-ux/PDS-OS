@@ -113,7 +113,9 @@ export function BilanOptions({
               key={issue.key}
               name={`reserve:${issue.key}`}
               label={`${issue.text} · ${categories[issue.category]}`}
+              hint={issue.locked ? t.lockedReserve : undefined}
               defaultChecked
+              disabled={issue.locked}
             />
           ))}
         </fieldset>

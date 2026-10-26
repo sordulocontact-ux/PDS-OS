@@ -14,6 +14,7 @@ export function CheckboxField({
   defaultChecked,
   checked,
   onChange,
+  disabled,
 }: {
   name?: string;
   label: string;
@@ -21,6 +22,8 @@ export function CheckboxField({
   defaultChecked?: boolean;
   checked?: boolean;
   onChange?: (checked: boolean) => void;
+  // Shown ticked but fixed (a reserve that may not be left out).
+  disabled?: boolean;
 }) {
   const id = useId();
   return (
@@ -32,6 +35,7 @@ export function CheckboxField({
         className="mt-0.5"
         defaultChecked={defaultChecked}
         checked={checked}
+        disabled={disabled}
         onChange={onChange ? (e) => onChange(e.target.checked) : undefined}
       />
       <span className="flex flex-col gap-0.5">

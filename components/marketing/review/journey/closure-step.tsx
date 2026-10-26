@@ -64,6 +64,11 @@ export async function ClosureStep({ ctx }: { ctx: ReviewContext }) {
   const open = activations.filter(
     (a) => a.status !== "closed" && a.status !== "cancelled",
   );
+  // Each open activation is followed or accepted before the closure
+  // (MKT-BIL-001; SQL marketing_uncovered_activations).
+  const uncovered = open.filter(
+    (a) => !followed.some((r) => r.activationId === a.id),
+  );
   const [flows, lines] = await Promise.all([
     loadWorkflowStates(project.id),
     canSeeProjectBudget(access, project)
@@ -96,18 +101,29 @@ export async function ClosureStep({ ctx }: { ctx: ReviewContext }) {
           ? "ready"
           : "not_ready",
     },
-    ...(open.length
+    ...(uncovered.length
       ? [
           {
             key: "activations",
-            text: t.openActivations(
-              open.length,
-              open.map((a) => a.title).join(", "),
+            text: t.uncovered(
+              uncovered.length,
+              uncovered.map((a) => a.title).join(", "),
             ),
-            kind: "attention" as const,
+            kind: "not_ready" as const,
           },
         ]
-      : []),
+      : open.length
+        ? [
+            {
+              key: "activations",
+              text: t.openActivations(
+                open.length,
+                open.map((a) => a.title).join(", "),
+              ),
+              kind: "with_reserves" as const,
+            },
+          ]
+        : []),
     ...(followed.length
       ? [
           {

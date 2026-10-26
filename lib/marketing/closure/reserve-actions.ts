@@ -27,6 +27,7 @@ function failure(error: { code?: string; message?: string }): WriteResult {
     ["reason_required", e.reasonRequired],
     ["follow_up_incomplete", e.followUpIncomplete],
     ["invalid_duplicate", e.invalidDuplicate],
+    ["activation_reserve_kept", e.activationKept],
     ["task_already_created", e.taskAlreadyCreated],
     ["invalid_task", e.invalidTask],
     ["invalid_transition", e.transition],
