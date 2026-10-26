@@ -192,8 +192,8 @@ textarea.in{min-height:64px;resize:vertical}
 .pick.bad .opts,.in.bad{box-shadow:0 0 0 1px var(--bad-fg);border-color:var(--bad-fg)}
 /* An empty date or time stays visibly empty: WebKit paints today's date and 12:30 in grey,
    which read as a value already typed (CONC-001). The segments come back on focus. */
-.in.empty::-webkit-datetime-edit{color:transparent}
-.in.empty:focus::-webkit-datetime-edit{color:inherit}
+.in.empty::-webkit-datetime-edit{opacity:0}
+.in.empty:focus::-webkit-datetime-edit{opacity:1}
 .formmsg{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-radius:10px;background:var(--bad-bg);color:var(--bad-fg);font-weight:600}
 
 /* Overview + lists */
