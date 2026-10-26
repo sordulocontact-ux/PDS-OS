@@ -776,10 +776,11 @@ s'afficher sans chargement.
 
 - **Vues préchargées** : ces liens passent par `ViewLink` (`components/ui/view-link.tsx`),
   un `Link` en `prefetch` complet : la page **et ses données** sont rendues en arrière-plan
-  dès que le lien est à l'écran. Mesuré en production locale : 5 à 25 ms par changement de
-  section, aucun squelette. Coût : ~12 rendus de page en fond à l'ouverture d'un projet,
-  acceptable pour 3 à 5 utilisateurs ; ne pas l'étendre à des listes longues (une ligne =
-  un préchargement complet).
+  **dès que la personne montre son intention** (pointeur dessus, focus clavier, doigt posé), plus
+  à l'entrée dans l'écran (audit des chargements, 26/10). Avant, une page de projet affichait 15 à
+  20 `ViewLink` et chacun rendait sa cible en fond (40 à 250 requêtes) : la base mettait en file la
+  page réellement ouverte derrière ces rendus. Un survol laisse 100 à 300 ms d'avance au rendu ;
+  ne pas revenir au préchargement à l'écran tant qu'une page coûte plus de quelques requêtes.
 - **Cache du routeur** (`next.config.ts`, `experimental.staleTimes`) : `dynamic: 30` (page
   revisitée en moins de 30 s), `static: 60` (vue préchargée, re-préchargée au survol une
   fois expirée). Jamais périmé après une écriture : tout `revalidatePath` d'une Server
