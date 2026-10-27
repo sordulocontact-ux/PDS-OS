@@ -70,8 +70,7 @@ export function ProjectLive({
       shown = version;
     };
 
-    const onChange = (payload: { new: LiveRow }) => {
-      const row = payload.new;
+    const onChange = ({ payload: row }: { payload: LiveRow }) => {
       const own =
         accountId !== null &&
         row.changed_by === accountId &&
@@ -82,19 +81,15 @@ export function ProjectLive({
       if (!own && document.visibilityState === "visible") refresh();
     };
 
-    const channel = supabase.channel(`project-live:${projectId}`).on(
-      "postgres_changes",
-      {
-        event: "*",
-        schema: "public",
-        table: "project_live",
-        filter: `project_id=eq.${projectId}`,
-      },
-      onChange,
-    );
+    // The project's private channel, sent by the database on each bump
+    // (20261027000401_live_broadcast.sql; RLS on realtime.messages: only
+    // who sees the project hears it).
+    const channel = supabase
+      .channel(`project:${projectId}`, { config: { private: true } })
+      .on("broadcast", { event: "changed" }, onChange);
 
-    // The session token must reach Realtime before subscribing, or RLS
-    // treats the socket as anonymous and nothing arrives. A new
+    // The session token must reach Realtime before subscribing, or the
+    // private channel refuses the socket as anonymous. A new
     // subscription after the first (reconnection) may have missed changes.
     supabase.realtime
       .setAuth()
