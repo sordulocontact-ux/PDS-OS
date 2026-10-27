@@ -921,3 +921,29 @@ requêtes, 3 à 6 s par bouton du Cadrage) ; une première entrée dans un proje
 l'Accueil 890 demandées / 310 envoyées ; Realtime (`list_changes`) = un quart du temps SQL de la
 pré-prod.
 
+## Navigation instantanée, lots 2 à 6 (27/10/2026, branche `pre-prod`)
+
+Codé après l'audit du 27/10 ; build passé, poussé sur `pre-prod`. **À mesurer** (`PERF_TRACE=1`,
+un bouton du Cadrage, une première entrée dans un projet) : rien n'a encore été rejoué en navigateur.
+
+- [x] Lot 2 — aucun bouton n'attend le projet entier : barre, en-tête, « Maintenant » et barre des
+      livrables sous `ProjectFresh` (frontière à clé = version, dernier rendu gardé) ; cadres de module
+      sans `loadProjectJourneys` ; ~98 `router.refresh()` retirés après des actions qui revalident
+      (12 gardés, raison dans le commit) ; cloche et compteur d'accès lus en parallèle de la page ;
+      droit de lecture de `influence_agreements.sent_*` (`20261027000101`, faits des Activations).
+- [x] Lot 3 — lectures dédoublonnées : `listProjectCreatives` en cache, lignes partagées du Master
+      (`lib/master-workflow/shared-rows.ts`) et du Juridique (`lib/legal/shared-rows.ts`),
+      `projectPlanRow`, lectures du projet partagées par tous les livrables, Stratégie et Distribution
+      gardées par version, provenance en une requête, vagues parallèles ; états de la Distribution en
+      une RPC (`20261027000201_distribution_status_rows`). Estimé : ~40 à 50 requêtes de moins à froid
+      (5 livrables).
+- [x] Lot 4 — poids des pages : dictionnaire `fr` découpé par domaine (le morceau de 700 Ko chargé
+      partout a disparu ; règle ESLint) ; SDK d'IA chargé au premier usage de PO.
+- [x] Lot 5 — barre de navigation en attente (`NavigationProgress`, après 150 ms).
+- [x] Lot 6 — Realtime par diffusion depuis la base sur canaux privés (`20261027000401_live_broadcast`,
+      RLS sur `realtime.messages` vérifié en base) ; plus de `postgres_changes`.
+
+Migrations `20261027000101` à `…000401` appliquées en pré-prod, à pousser en prod avec accord.
+Non fait : une RPC des états de tous les workflows (Master et Juridique y recopieraient les filtres
+de leurs pages : écarté au profit des lectures partagées) ; zod côté client (415 Ko).
+
