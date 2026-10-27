@@ -1,7 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-
 import { DecisionPanel } from "@/components/ui/decision-panel";
 import { fr } from "@/lib/i18n/fr";
 import { decideProposal } from "@/lib/production/proposal/actions";
@@ -29,7 +27,6 @@ export function ProposalDecision({
   projectId?: string;
   token?: string;
 }) {
-  const router = useRouter();
   return (
     <section className="flex flex-col gap-3">
       <h3 className="font-semibold">{t.title(number, t.slots[side])}</h3>
@@ -58,9 +55,6 @@ export function ProposalDecision({
                 approve,
                 comment,
               });
-        }}
-        onDone={() => {
-          if (token) router.refresh();
         }}
       />
     </section>

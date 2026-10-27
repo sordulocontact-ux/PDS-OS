@@ -1,7 +1,7 @@
 "use client";
 
 import { IconPlus } from "nucleo-sharp-essential";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { BudgetLineForm } from "@/components/budget/budget-line-form";
@@ -29,7 +29,6 @@ const MARKETING = /\/(strategy|design|production|activations|review)(\/|$)/;
 export function AddExpenseButton({ projectId }: { projectId: string }) {
   const t = fr.budget;
   const pathname = usePathname();
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   if (!MARKETING.test(pathname.replace(`/app/projects/${projectId}`, "")))
     return null;
@@ -61,7 +60,6 @@ export function AddExpenseButton({ projectId }: { projectId: string }) {
                     organizationId={data.organizationId}
                     onDone={() => {
                       setOpen(false);
-                      router.refresh();
                     }}
                   />
                 )}

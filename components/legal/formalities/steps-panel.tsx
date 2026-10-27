@@ -1,7 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-
 import { useLegalAction } from "@/components/legal/use-legal-action";
 import { SignaturesList } from "@/components/legal/formalities/signatures-list";
 import { Button } from "@/components/ui/button";
@@ -30,7 +28,6 @@ export function StepsPanel({
 }) {
   const t = fr.legalFormalities.page;
   const tr = fr.legalFormalities.transitions;
-  const router = useRouter();
   const { pending, run } = useLegalAction();
   const proof = (url: string | null, label: string) =>
     url && (
@@ -73,7 +70,6 @@ export function StepsPanel({
                 }
                 onDone={() => {
                   close();
-                  router.refresh();
                 }}
               />
             )}

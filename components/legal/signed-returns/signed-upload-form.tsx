@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
@@ -44,7 +43,6 @@ export function SignedUploadForm({
   submitLabel: string;
   doneLabel: string;
 }) {
-  const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -82,7 +80,6 @@ export function SignedUploadForm({
           });
           if (!result.ok) return setError(result.error);
           toast.success(`${doneLabel}.`);
-          router.refresh();
         });
       }}
     >

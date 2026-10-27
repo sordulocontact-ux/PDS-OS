@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { IconVolumeUp } from "nucleo-sharp-essential";
 import { useState, useTransition } from "react";
 
@@ -69,7 +68,6 @@ export function DeliverVersion({
   const t = fr.masterWorkflow.publicPackage.deliver;
   const d = fr.masterFinal.link;
   const zipOk = deliverable?.key === "stems";
-  const router = useRouter();
   const [chosen, setChosen] = useState<File | null>(null);
   const preview = useObjectUrl(chosen);
   const [message, setMessage] = useState<{
@@ -155,7 +153,6 @@ export function DeliverVersion({
           timeFormat.format(new Date()),
         ),
       });
-      router.refresh();
     });
   }
 

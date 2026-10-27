@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { toast } from "sonner";
 
@@ -17,7 +16,6 @@ export function LinkContactButton({
 }: {
   action: Extract<CreditContactAction, { kind: "link_contact" }>;
 }) {
-  const router = useRouter();
   const t = fr.facts;
   const [pending, startTransition] = useTransition();
 
@@ -36,8 +34,7 @@ export function LinkContactButton({
             contactId: action.contactId,
             links: action.links,
           });
-          if (result.ok) router.refresh();
-          else toast.error(result.error);
+          if (!result.ok) toast.error(result.error);
         })
       }
     >

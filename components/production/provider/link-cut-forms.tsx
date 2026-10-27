@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Field } from "@/components/auth/field";
@@ -138,7 +137,6 @@ export function LinkCutDecision({
   // A light journey's version: « Valider la Vn ».
   light?: boolean;
 }) {
-  const router = useRouter();
   const d = light ? fr.productionLight.decide : t.decide;
   return (
     <section className="flex flex-col gap-3">
@@ -165,7 +163,6 @@ export function LinkCutDecision({
             note,
           })
         }
-        onDone={() => router.refresh()}
       />
     </section>
   );

@@ -1,7 +1,6 @@
 "use client";
 
 import { IconLink } from "nucleo-sharp-essential";
-import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/copy-button";
@@ -55,7 +54,6 @@ export function PrivateLinkCard({
   markSentLabel?: string;
   revoke: (reason: string) => Promise<WriteResult>;
 }) {
-  const router = useRouter();
   return (
     <div className="flex min-w-0 flex-col rounded-xl border border-[color:var(--border-hairline)] bg-card">
       <div className="flex items-center gap-3 rounded-t-xl border-b border-[color:var(--border-hairline)] bg-[var(--surface-soft)] px-3.5 py-3">
@@ -130,7 +128,6 @@ export function PrivateLinkCard({
                 run={revoke}
                 onDone={() => {
                   close();
-                  router.refresh();
                 }}
               />
             )}

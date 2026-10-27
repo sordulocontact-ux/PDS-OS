@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Field } from "@/components/auth/field";
@@ -39,9 +38,8 @@ export function AgencyDoneForm({
   defaultPersonId: string | null;
   today: string;
 }) {
-  const router = useRouter();
   const [errors, setErrors] = useState<Errors>({});
-  const { pending, error, run } = useWriteSubmit(() => router.refresh(), "");
+  const { pending, error, run } = useWriteSubmit(undefined, "");
   return (
     <Fold summary={t.withReserve}>
       <form

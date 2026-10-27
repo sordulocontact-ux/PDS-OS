@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
@@ -35,10 +34,9 @@ function Choice({
     text: string,
   ) => Promise<{ ok: true } | { ok: false; error: string }>;
 }) {
-  const router = useRouter();
   const [text, setText] = useState("");
   const [tried, setTried] = useState(false);
-  const { pending, error, run } = useWriteSubmit(() => router.refresh(), done);
+  const { pending, error, run } = useWriteSubmit(undefined, done);
   const missing = !text.trim();
   return (
     <form

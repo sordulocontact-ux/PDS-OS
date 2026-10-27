@@ -1,7 +1,6 @@
 "use client";
 
 import { IconPenWriting2 } from "nucleo-sharp-essential";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { FormMessage } from "@/components/auth/form-message";
@@ -13,7 +12,6 @@ import { fr } from "@/lib/i18n/fr";
 /** "Modifier" of a contract page: its real form, read when it opens. */
 export function EditContractButton({ contractId }: { contractId: string }) {
   const t = fr.contracts.form;
-  const router = useRouter();
   return (
     <LoadedFormButton
       label={fr.contracts.page.edit}
@@ -33,7 +31,6 @@ export function EditContractButton({ contractId }: { contractId: string }) {
             onSaved={() => {
               close();
               toast.success(t.saved);
-              router.refresh();
             }}
           />
         ) : (

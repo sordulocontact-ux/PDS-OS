@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { RightsForm } from "@/components/catalog/master-page/rights-form";
@@ -17,7 +16,6 @@ export function TitleRightsButton({
   masterId: string;
   rights: MasterRights;
 }) {
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -36,7 +34,6 @@ export function TitleRightsButton({
           rights={rights}
           onDone={() => {
             setOpen(false);
-            router.refresh();
           }}
         />
       </FormDialog>

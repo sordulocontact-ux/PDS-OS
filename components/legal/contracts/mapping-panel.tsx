@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { AgreementList } from "@/components/legal/contracts/agreement-list";
@@ -32,7 +31,6 @@ export function MappingPanel({
   direction: string;
 }) {
   const t = fr.legalContracts.agreements;
-  const router = useRouter();
   const undecided = rows.some(
     (r) => r.contactId && !r.contract && r.state === "unmapped",
   );
@@ -55,7 +53,6 @@ export function MappingPanel({
           }
           onDone={() => {
             setEditing(false);
-            router.refresh();
           }}
         />
       </div>

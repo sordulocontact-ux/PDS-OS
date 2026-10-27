@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { BudgetLineSheet } from "@/components/budget/budget-line-sheet";
@@ -26,7 +25,6 @@ export function ExpenseLines({
 }) {
   const t = fr.framingIntel.expenses;
   const statuses = fr.budget.statuses as Record<string, string>;
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   return (
     <section className="flex flex-col gap-3 border-t border-[color:var(--border-hairline)] pt-4">
@@ -65,10 +63,7 @@ export function ExpenseLines({
         line={null}
         levers={[]}
         open={open}
-        onOpenChange={(next) => {
-          setOpen(next);
-          if (!next) router.refresh();
-        }}
+        onOpenChange={setOpen}
       />
     </section>
   );

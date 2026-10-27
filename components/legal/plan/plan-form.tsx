@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
@@ -35,7 +34,6 @@ export function PlanForm({
   items: PlanRow[];
   people: Array<{ personId: string; name: string }>;
 }) {
-  const router = useRouter();
   const t = fr.legal.plan;
   const [choices, setChoices] = useState<Record<string, PlanChoice>>(() =>
     Object.fromEntries(
@@ -65,7 +63,6 @@ export function PlanForm({
       if (!result.ok) return setError(result.error);
       // The banner in the step and the toast (rule 7).
       publish(result);
-      router.refresh();
     });
 
   if (items.length === 0) return <EmptyNote>{t.nothing}</EmptyNote>;

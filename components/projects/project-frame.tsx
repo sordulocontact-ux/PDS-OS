@@ -1,53 +1,26 @@
-import { Suspense } from "react";
-
 import { EditAccessProvider } from "@/components/projects/edit-access";
 import {
-  CountedProjectSidebar,
-  CountedProjectSidebarMobile,
+  ProjectNavMobile,
+  ProjectNavSidebar,
+  ProjectNavTabs,
 } from "@/components/projects/project-nav-counted";
-import type { NotStartedReason } from "@/components/projects/project-nav-list";
+import { ProjectFresh } from "@/components/projects/project-fresh";
 import {
-  ProjectSidebar,
-  ProjectSidebarMobile,
+  ProjectSidebarMobileSkeleton,
+  ProjectSidebarSkeleton,
 } from "@/components/projects/project-sidebar";
 import { ProjectHeader } from "@/components/projects/project-header";
 import { ProjectLive } from "@/components/projects/project-live";
-import { ProjectTabs } from "@/components/projects/project-tabs";
 import { BackLink } from "@/components/shell/back-link";
-import { can, type Access } from "@/lib/auth/access";
+import type { Access } from "@/lib/auth/access";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
-import { MARKETING_PARTS, type PlanWorkflow } from "@/lib/plan/propose";
-import { planLaunchedAt, planWorkflows } from "@/lib/plan/queries";
 import { projectKindLabel } from "@/lib/projects/labels";
-import {
-  canEditProject,
-  canSeeProjectBudget,
-} from "@/lib/projects/edit-access";
+import { canEditProject } from "@/lib/projects/edit-access";
 import type { getProject } from "@/lib/projects/queries";
 import { DOUBLE_SIDEBAR } from "@/lib/ui/project-sections";
-import { loadWorkflowStates } from "@/lib/workflow-status/load";
 
 type Project = NonNullable<Awaited<ReturnType<typeof getProject>>>;
-
-/** Why each workflow not started yet has not, once the plan is launched:
- * left out of it, or in it and waiting (the dot's hint, WorkflowLocked). */
-function reasonsOf(
-  statuses: Record<string, string>,
-  planned: PlanWorkflow[],
-): Partial<Record<string, NotStartedReason>> {
-  const inPlan = (key: string) =>
-    key === "marketing"
-      ? planned.some((w) => MARKETING_PARTS.includes(w))
-      : planned.includes(key as PlanWorkflow);
-  return Object.fromEntries(
-    Object.entries(statuses).flatMap(([key, status]) =>
-      status === "not_started" && key !== "framing"
-        ? [[key, inPlan(key) ? "waiting" : "absent"]]
-        : [],
-    ),
-  );
-}
 
 /**
  * Everything of a project's page around its content (the project's layout
@@ -64,7 +37,7 @@ function reasonsOf(
  * sidebar, the main app sidebar collapses to icons whenever a project page
  * is open.
  */
-export async function ProjectFrame({
+export function ProjectFrame({
   access,
   project,
   children,
@@ -73,37 +46,8 @@ export async function ProjectFrame({
   project: Project;
   children: React.ReactNode;
 }) {
-  // Each workflow's state, read from its sources (shared with the overview
-  // and the header in the same request): the navigation's dots. Started by
-  // the layout with the project, so no round of their own.
-  const [flows, launchedAt, planned] = await Promise.all([
-    loadWorkflowStates(project.id),
-    planLaunchedAt(project.id),
-    planWorkflows(project.id),
-  ]);
-
   const canEdit = canEditProject(access, project);
-  const canSeeLegal = can(access, "manage_legal");
-  const canSeeBudget = canSeeProjectBudget(access, project);
-
-  // The Cadrage's dot runs until the plan is launched, then is done (proto).
-  const statuses: Record<string, string> = {
-    framing: launchedAt ? "done" : "in_progress",
-    ...Object.fromEntries(
-      Object.entries(flows?.states ?? {}).flatMap(([key, state]) =>
-        state && state !== "restricted" ? [[key, state.status]] : [],
-      ),
-    ),
-  };
-  const nav = {
-    projectId: project.id,
-    projectTitle: project.title,
-    canSeeLegal,
-    canSeeBudget,
-    workflows: flows?.workflows,
-    statuses,
-    reasons: launchedAt ? reasonsOf(statuses, planned) : {},
-  };
+  const source = { access, project };
 
   return (
     <div className="flex flex-1">
@@ -111,12 +55,21 @@ export async function ProjectFrame({
       <ProjectLive projectId={project.id} accountId={access.accountId} />
       {/* Sits right against the main sidebar (collapsed to icons on a
           project page), so the two read as one "double sidebar" (Figma). */}
-      {/* The viewer's counts come from the journeys, under a Suspense: the
-          page never waits for them. */}
+      {/* Its entries and dots come from the workflows' states, its counts
+          from the journeys: the page never waits for them (ProjectFresh). */}
       {DOUBLE_SIDEBAR && project.stages.length > 0 && (
-        <Suspense fallback={<ProjectSidebar {...nav} />}>
-          <CountedProjectSidebar {...nav} />
-        </Suspense>
+        <ProjectFresh
+          projectId={project.id}
+          id="project-nav"
+          fallback={
+            <ProjectSidebarSkeleton
+              projectId={project.id}
+              projectTitle={project.title}
+            />
+          }
+        >
+          <ProjectNavSidebar {...source} />
+        </ProjectFresh>
       )}
 
       {/* Proto « Projet complet » (`.content`, `.wrap`): 28 / 40 px around a
@@ -151,16 +104,17 @@ export async function ProjectFrame({
           {/* Sections exist once the project is launched, not before. */}
           {project.stages.length > 0 &&
             (DOUBLE_SIDEBAR ? (
-              <Suspense fallback={<ProjectSidebarMobile {...nav} />}>
-                <CountedProjectSidebarMobile {...nav} />
-              </Suspense>
-            ) : (
-              <ProjectTabs
+              <ProjectFresh
                 projectId={project.id}
-                canSeeLegal={canSeeLegal}
-                canSeeBudget={canSeeBudget}
-                workflows={flows?.workflows}
-              />
+                id="project-nav-mobile"
+                fallback={<ProjectSidebarMobileSkeleton />}
+              >
+                <ProjectNavMobile {...source} />
+              </ProjectFresh>
+            ) : (
+              <ProjectFresh projectId={project.id} id="project-tabs">
+                <ProjectNavTabs {...source} />
+              </ProjectFresh>
             ))}
 
           {/* Only the owner writes inside a launched project; the database

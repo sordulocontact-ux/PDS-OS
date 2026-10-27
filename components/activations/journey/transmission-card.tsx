@@ -1,7 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-
 import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
@@ -32,8 +30,7 @@ export function TransmissionCard({
   canWrite: boolean;
   done: { by: string; at: string } | null;
 }) {
-  const router = useRouter();
-  const { pending, error, run } = useWriteSubmit(() => router.refresh(), "");
+  const { pending, error, run } = useWriteSubmit(undefined, "");
   return (
     <VersionCard
       id="transmit"

@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { toast } from "sonner";
 
@@ -35,7 +34,6 @@ export function SplitLinks({
   title: string;
   lines: SplitLine[];
 }) {
-  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const showLinks = useShowSplitLinks();
   const waiting = lines.filter((l) => l.id && l.confirmation.link);
@@ -45,7 +43,6 @@ export function SplitLinks({
     startTransition(async () => {
       const result = await task();
       if (!result.ok) return void toast.error(result.error);
-      router.refresh();
     });
 
   return (
@@ -89,7 +86,7 @@ export function SplitLinks({
                   startTransition(async () => {
                     const result = await newSplitLink(projectId, line.id!);
                     if (!result.ok) return void toast.error(result.error);
-                    if (result.data.sealed) return router.refresh();
+                    if (result.data.sealed) return;
                     showLinks(title, [
                       {
                         entryId: line.id!,

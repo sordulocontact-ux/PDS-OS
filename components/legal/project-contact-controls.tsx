@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, useTransition, type FormEvent } from "react";
 import { toast } from "sonner";
 
@@ -29,7 +28,6 @@ export function AddProjectContactForm({
   onDone: () => void;
 }) {
   const t = fr.legal.projectContacts;
-  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [role, setRole] = useState("other");
   const [error, setError] = useState<string | null>(null);
@@ -55,10 +53,7 @@ export function AddProjectContactForm({
         role: String(data.get("role") ?? role),
       });
       if (!result.ok) toast.error(result.error);
-      else {
-        router.refresh();
-        onDone();
-      }
+      else onDone();
     });
   }
 
@@ -109,7 +104,6 @@ export function RemoveProjectContactButton({
   name: string;
 }) {
   const t = fr.legal.projectContacts;
-  const router = useRouter();
   const [pending, startTransition] = useTransition();
   return (
     <Button
@@ -121,7 +115,6 @@ export function RemoveProjectContactButton({
         startTransition(async () => {
           const result = await removeLegalProjectContact(projectId, rowId);
           if (!result.ok) toast.error(result.error);
-          else router.refresh();
         })
       }
     >

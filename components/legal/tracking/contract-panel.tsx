@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useTransition, type ReactNode } from "react";
 import { toast } from "sonner";
 
@@ -69,7 +68,6 @@ export function ContractPanel({
 }) {
   const t = fr.legal.panels.contract;
   const d = fr.legalDocuments.contract;
-  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const contractId = row.contract?.id ?? null;
 
@@ -77,7 +75,6 @@ export function ContractPanel({
     startTransition(async () => {
       const result = await action();
       if (!result.ok) return void toast.error(result.error ?? t.failed);
-      router.refresh();
     });
   const advance = (
     action: "submit" | "send" | "sign" | "countersign",
@@ -221,7 +218,6 @@ export function ContractPanel({
                 ? { ok: true }
                 : { ok: false, error: result.error ?? t.failed };
             }}
-            onDone={() => router.refresh()}
           />
         </>
       );

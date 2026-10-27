@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
@@ -22,7 +21,6 @@ const t = fr.activationCreator;
 type Result = { ok: true } | { ok: false; error: string };
 
 function useSend(sent: string) {
-  const router = useRouter();
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const run = (task: () => Promise<Result>) => {
@@ -31,7 +29,6 @@ function useSend(sent: string) {
       const result = await task();
       if (!result.ok) return setError(result.error);
       toast.success(`${sent}.`);
-      router.refresh();
     });
   };
   return { pending, error, run };

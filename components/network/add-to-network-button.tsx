@@ -1,7 +1,6 @@
 "use client";
 
 import { IconPlus } from "nucleo-sharp-essential";
-import { useRouter } from "next/navigation";
 
 import { ContactForm } from "@/components/network/contact-form";
 import { LoadedFormButton } from "@/components/ui/loaded-form-button";
@@ -26,7 +25,6 @@ export function AddToNetworkButton({
   label?: string;
   header?: boolean;
 }) {
-  const router = useRouter();
   const t = fr.network.form;
   return (
     <LoadedFormButton
@@ -60,7 +58,6 @@ export function AddToNetworkButton({
           // The server links the credits of that name to the new contact.
           onSaved={() => {
             close();
-            router.refresh();
           }}
         />
       )}

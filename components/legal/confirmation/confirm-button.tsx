@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
@@ -12,7 +11,6 @@ import { confirmLegalIntake } from "@/lib/legal/intake/actions";
 /** « Confirmer le dossier »: the one decision of the step. The page then
  * shows who confirmed and when, and the result banner what follows. */
 export function ConfirmButton({ projectId }: { projectId: string }) {
-  const router = useRouter();
   const t = fr.legal.confirmation;
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -32,7 +30,6 @@ export function ConfirmButton({ projectId }: { projectId: string }) {
             if (!result.ok) return setError(result.error);
             // The banner in the step and the toast (rule 7).
             publish(result);
-            router.refresh();
           })
         }
       >

@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -29,7 +28,6 @@ type Media = "link" | "file";
  * recorded — numbered and submitted by the database, the label notified.
  */
 export function DepositVersion({ token }: { token: string }) {
-  const router = useRouter();
   const [media, setMedia] = useState<Media>("link");
   const [file, setFile] = useState<File | null>(null);
   const [missing, setMissing] = useState(false);
@@ -77,7 +75,6 @@ export function DepositVersion({ token }: { token: string }) {
       toast.success(t.done(result.number));
       form.reset();
       setFile(null);
-      router.refresh();
     } finally {
       setPending(false);
     }

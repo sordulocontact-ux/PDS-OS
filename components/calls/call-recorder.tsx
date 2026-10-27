@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import {
   useEffect,
   useState,
@@ -54,7 +53,6 @@ export function CallRecorder({
   alternative?: ReactNode;
 }) {
   const t = fr.calls.recorder;
-  const router = useRouter();
   const canEdit = useCanEditProject();
   const meter = useAudioMeter();
   // Browser capability, read without a server/client mismatch (the server assumes support).
@@ -111,7 +109,6 @@ export function CallRecorder({
     saver.forget();
     rec.discard();
     toast.success(t.sent);
-    router.refresh();
   }
 
   async function discard() {

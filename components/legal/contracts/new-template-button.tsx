@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { TemplateForm } from "@/components/contracts/templates/template-form";
@@ -26,7 +25,6 @@ export function NewTemplateButton({
   request: { projectId: string; key: string; name: string };
 }) {
   const t = fr.legalContracts;
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -63,7 +61,6 @@ export function NewTemplateButton({
           onCancel={() => setOpen(false)}
           onDone={() => {
             setOpen(false);
-            router.refresh();
           }}
         />
       </FormDialog>

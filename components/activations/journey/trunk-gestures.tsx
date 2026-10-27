@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Field } from "@/components/auth/field";
@@ -37,9 +36,8 @@ export function DesignateForm({
   members: Member[];
   defaultPersonId: string | null;
 }) {
-  const router = useRouter();
   const [missing, setMissing] = useState(false);
-  const { pending, error, run } = useWriteSubmit(() => router.refresh(), "");
+  const { pending, error, run } = useWriteSubmit(undefined, "");
   return (
     <form
       noValidate
@@ -85,9 +83,8 @@ export function DueForm({
   hint: string | null;
   bounds: DueBounds;
 }) {
-  const router = useRouter();
   const [invalidDue, setInvalidDue] = useState<string | null>(null);
-  const { pending, error, run } = useWriteSubmit(() => router.refresh(), "");
+  const { pending, error, run } = useWriteSubmit(undefined, "");
   return (
     <form
       noValidate
@@ -154,8 +151,7 @@ export function GestureButton({
   ids: Ids;
   gesture: keyof typeof GESTURES;
 }) {
-  const router = useRouter();
-  const { pending, error, run } = useWriteSubmit(() => router.refresh(), "");
+  const { pending, error, run } = useWriteSubmit(undefined, "");
   const g = GESTURES[gesture];
   return (
     <div className="flex flex-col gap-2">

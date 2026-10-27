@@ -1,6 +1,6 @@
 import { ProjectHeader } from "@/components/projects/project-header";
 import { JourneySpine } from "@/components/shell/journey/journey-spine";
-import { NowCard } from "@/components/shell/journey/now-card";
+import { ProjectNowCard } from "@/components/shell/journey/project-now-card";
 import { StepHistory } from "@/components/shell/journey/step-history";
 import {
   StepPanel,
@@ -13,7 +13,6 @@ import {
 } from "@/components/shell/module/step-tools-block";
 import { WhoDoesWhatButton } from "@/components/shell/module/who-does-what-button";
 import { fr } from "@/lib/i18n/fr";
-import { elsewhereOf, loadProjectJourneys } from "@/lib/journey/project";
 import { reviewJourneyContext } from "@/lib/marketing/review/context";
 import { reviewHistory } from "@/lib/marketing/review/history";
 import { loadStanding } from "@/lib/marketing/review/standing-data";
@@ -47,10 +46,7 @@ export async function ReviewStepFrame({
   query: Query;
   children: React.ReactNode;
 }) {
-  const [ctx, journeys] = await Promise.all([
-    reviewJourneyContext(projectId),
-    loadProjectJourneys(projectId),
-  ]);
+  const ctx = await reviewJourneyContext(projectId);
   const { steps, owner, validator } = ctx;
   const step = steps.find((s) => s.key === stepKey);
   if (!step) return null;
@@ -90,12 +86,12 @@ export async function ReviewStepFrame({
           />
         }
       />
-      <NowCard
+      <ProjectNowCard
+        projectId={projectId}
         steps={steps}
         viewerName={ctx.viewer.name}
         moduleLabel={`${fr.shell.project.sidebar.marketing} › ${t.module}`}
         shownKey={stepKey}
-        elsewhere={elsewhereOf(journeys, steps)}
         labels={t.now}
       />
       <ModuleAttention stepRef={stepRef} modules={["review"]} steps={choices} />

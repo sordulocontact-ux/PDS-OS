@@ -1,7 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-
 import { DialogButton } from "@/components/ui/dialog-button";
 import { ReasonForm } from "@/components/ui/reason-form";
 import { fr } from "@/lib/i18n/fr";
@@ -18,7 +16,6 @@ export function WithdrawButton({
   clearanceId: string;
 }) {
   const t = fr.legalClearance;
-  const router = useRouter();
   return (
     <div className="flex flex-wrap items-center gap-2 border-t pt-4">
       <span className="text-sm text-muted-foreground">{t.stages.other}</span>
@@ -36,7 +33,6 @@ export function WithdrawButton({
             run={(text) => withdrawClearance({ projectId, clearanceId, text })}
             onDone={() => {
               close();
-              router.refresh();
             }}
           />
         )}

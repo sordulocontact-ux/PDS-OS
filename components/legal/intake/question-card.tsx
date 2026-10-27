@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
@@ -54,7 +53,6 @@ export function QuestionCard({
   onCancel: () => void;
   onSaved: () => void;
 }) {
-  const router = useRouter();
   const t = fr.legal.intake;
   const q = t.questions[question.key];
   const from = correcting ? null : question.suggestionFrom;
@@ -113,7 +111,6 @@ export function QuestionCard({
       const result = await saveLegalAnswer({ ...input, text: answer, facts });
       if (!result.ok) return setError(result.error);
       onSaved();
-      router.refresh();
     });
   const save = () => review && record(text, kept);
   const saveNone = () => noneLabel && record(noneLabel, [NONE_FACT]);

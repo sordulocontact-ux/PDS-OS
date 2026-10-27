@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { toast } from "sonner";
 
@@ -17,7 +16,6 @@ export function ApplyAnswerButton({
   questionId: string;
 }) {
   const t = fr.masterWorkflow.questions;
-  const router = useRouter();
   const [pending, startTransition] = useTransition();
   return (
     <Button
@@ -32,7 +30,6 @@ export function ApplyAnswerButton({
             return;
           }
           toast.success(t.appliedToast);
-          router.refresh();
         })
       }
     >

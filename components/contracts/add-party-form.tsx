@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, useTransition, type FormEvent } from "react";
 import { toast } from "sonner";
 
@@ -22,7 +21,6 @@ import { fr } from "@/lib/i18n/fr";
  */
 export function AddPartyForm({ contractId }: { contractId: string }) {
   const t = fr.contracts.parties;
-  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [role, setRole] = useState("");
   // The role last filled from a contact: replaced when another is picked.
@@ -53,7 +51,6 @@ export function AddPartyForm({ contractId }: { contractId: string }) {
       const result = await addContractParty({ contractId, contactId, role });
       // On success the parent mounts this form again once the party is listed.
       if (!result.ok) toast.error(result.error);
-      else router.refresh();
     });
   }
 

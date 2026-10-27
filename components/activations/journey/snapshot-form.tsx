@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Field } from "@/components/auth/field";
@@ -40,11 +39,9 @@ export function SnapshotForm({
   defaultSource?: Source;
   onCancel?: () => void;
 }) {
-  const router = useRouter();
   const [missing, setMissing] = useState<"value" | "period" | null>(null);
   const [unavailable, setUnavailable] = useState(false);
   const { pending, error, run } = useWriteSubmit(() => {
-    router.refresh();
     onCancel?.();
   }, "");
   return (

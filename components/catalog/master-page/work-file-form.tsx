@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
@@ -49,7 +48,6 @@ export function WorkFileForm({
   onDone: () => void;
 }) {
   const t = fr.masterPage.workFiles;
-  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [file, setFile] = useState<File | null>(null);
   const [description, setDescription] = useState(item?.description ?? "");
@@ -110,7 +108,6 @@ export function WorkFileForm({
               });
       if (!result.ok) return setError(result.error);
       toast.success(t.saved);
-      router.refresh();
       onDone();
     });
   }

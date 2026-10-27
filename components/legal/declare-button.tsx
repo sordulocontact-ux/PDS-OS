@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { DeclarationForm } from "@/components/catalog/master-page/declaration-form";
@@ -28,7 +27,6 @@ export function DeclareButton({
   declared: Record<string, Organism[]>;
   row?: boolean;
 }) {
-  const router = useRouter();
   const t = fr.masterPage.declarations;
   const l = fr.legal.inventory.actions;
   const [open, setOpen] = useState(false);
@@ -90,7 +88,6 @@ export function DeclareButton({
                 declaration={null}
                 onDone={() => {
                   setOpen(false);
-                  router.refresh();
                 }}
               />
             </>

@@ -1,7 +1,7 @@
 import { WorkflowLocked } from "@/components/plan/workflow-locked";
 import { ProjectHeader } from "@/components/projects/project-header";
 import { JourneySpine } from "@/components/shell/journey/journey-spine";
-import { NowCard } from "@/components/shell/journey/now-card";
+import { ProjectNowCard } from "@/components/shell/journey/project-now-card";
 import { ModuleAttention } from "@/components/shell/module/module-attention";
 import { DistributionRolesButton } from "@/components/distribution/frame/distribution-roles";
 import { distributionStatus } from "@/lib/distribution/journey";
@@ -11,7 +11,6 @@ import {
 } from "@/lib/distribution/journey-context";
 import { isOpen } from "@/lib/distribution/anomalies";
 import { fr } from "@/lib/i18n/fr";
-import { elsewhereOf, loadProjectJourneys } from "@/lib/journey/project";
 import { projectFormatLabel } from "@/lib/projects/labels";
 import { distributionViewHref } from "@/lib/ui/distribution-steps";
 import type { ModuleFact } from "@/lib/ui/module-frame";
@@ -76,10 +75,7 @@ export async function DistributionFrame({
   shownKey?: string;
   children: (ctx: DistributionContext) => React.ReactNode;
 }) {
-  const [ctx, journeys] = await Promise.all([
-    distributionContext(projectId),
-    loadProjectJourneys(projectId),
-  ]);
+  const ctx = await distributionContext(projectId);
   if (!ctx) return <WorkflowLocked projectId={projectId} title={t.module} />;
   const status = distributionStatus(ctx.steps);
   const open = ctx.anomalies.filter(isOpen).length;
@@ -93,12 +89,12 @@ export async function DistributionFrame({
         steps={ctx.steps}
         actions={<DistributionRolesButton ctx={ctx} />}
       />
-      <NowCard
+      <ProjectNowCard
+        projectId={projectId}
         steps={ctx.steps}
         viewerName={ctx.viewerName}
         moduleLabel={t.module}
         shownKey={shownKey}
-        elsewhere={elsewhereOf(journeys, ctx.steps)}
         labels={{ waitingTitle: t.now.waitingTitle, finished: t.now.finished }}
       />
       {/* Blockers and noted information of the module (sub-lot C6). */}

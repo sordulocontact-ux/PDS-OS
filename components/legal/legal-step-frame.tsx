@@ -5,14 +5,13 @@ import {
   StepBlockers,
   StepToolsBlock,
 } from "@/components/shell/module/step-tools-block";
-import { NowCard } from "@/components/shell/journey/now-card";
+import { ProjectNowCard } from "@/components/shell/journey/project-now-card";
 import {
   StepPanel,
   type StepSlots,
 } from "@/components/shell/journey/step-panel";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
-import { elsewhereOf, loadProjectJourneys } from "@/lib/journey/project";
 import { legalJourneyContext } from "@/lib/legal/journey-context";
 import { isLocked } from "@/lib/ui/journey";
 import { stepChoiceKey, type StepRef } from "@/lib/step-tools/model";
@@ -34,10 +33,7 @@ export async function LegalStepFrame({
   stepKey: string;
   children: React.ReactNode;
 }) {
-  const [{ steps, viewerName }, journeys] = await Promise.all([
-    legalJourneyContext(projectId),
-    loadProjectJourneys(projectId),
-  ]);
+  const { steps, viewerName } = await legalJourneyContext(projectId);
   const step = steps.find((s) => s.key === stepKey);
   if (!step) return null;
   // The viewer's gesture comes first (« À vous », JUR-08): the step's content
@@ -56,12 +52,12 @@ export async function LegalStepFrame({
   return (
     <div className="flex flex-col gap-5">
       <ProjectHeader projectId={projectId} steps={steps} />
-      <NowCard
+      <ProjectNowCard
+        projectId={projectId}
         steps={steps}
         viewerName={viewerName}
         moduleLabel={fr.shell.project.sidebar.legal}
         shownKey={stepKey}
-        elsewhere={elsewhereOf(journeys, steps)}
         labels={{
           waitingTitle: fr.legalDemarches.nowWaiting,
           finished: fr.journey.now.finished,

@@ -8,11 +8,10 @@ import {
   sheetFacts,
 } from "@/components/production/prep/sheet-header";
 import { JourneySpine } from "@/components/shell/journey/journey-spine";
-import { PathNowCard } from "@/components/shell/journey/path-now-card";
+import { ProjectNowCard } from "@/components/shell/journey/project-now-card";
 import { ModuleAttention } from "@/components/shell/module/module-attention";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
-import { elsewhereOf, loadProjectJourneys } from "@/lib/journey/project";
 import { journeyContext } from "@/lib/production/journey/context";
 import { loadProductionHistory } from "@/lib/production/history";
 import {
@@ -36,11 +35,10 @@ export default async function ProductionSheetLayout({
   params,
 }: LayoutProps<"/app/projects/[projectId]/production/[deliverableId]">) {
   const { projectId, deliverableId } = await params;
-  const [{ access, data, steps }, journeys, header] = await Promise.all([
-    journeyContext(projectId, deliverableId),
-    loadProjectJourneys(projectId),
-    projectHeaderData(projectId),
-  ]);
+  const { access, data, steps } = await journeyContext(
+    projectId,
+    deliverableId,
+  );
   const started = Boolean(data.heritage.fiche || data.heritage.source);
   const viewer =
     data.members.find((m) => m.personId === access.personId)?.name ?? null;
@@ -68,7 +66,11 @@ export default async function ProductionSheetLayout({
       ?.roles?.find((x) => x.role === fr.productionJourney.roles.creativeInt)
       ?.name ??
     null;
-  const release = header?.facts.find((f) => f.key === "release");
+  // Once organized, the sheet's facts and the release (read with the header).
+  const facts = projectHeaderData(projectId).then((header) => {
+    const release = header?.facts.find((f) => f.key === "release");
+    return [...sheetFacts(data), ...(release ? [release] : [])];
+  });
   return (
     <div className="flex flex-col gap-5">
       <ProjectHeader
@@ -101,20 +103,17 @@ export default async function ProductionSheetLayout({
           </>
         }
         // Before « Qui produit ? », the project's own facts (proto).
-        facts={
-          organized
-            ? [...sheetFacts(data), ...(release ? [release] : [])]
-            : undefined
-        }
+        facts={organized ? facts : undefined}
       />
       <SheetNotices data={data} />
       {started && (
-        <PathNowCard
+        <ProjectNowCard
+          projectId={projectId}
+          byPath
           steps={steps}
           viewerName={viewer}
           moduleLabel={fr.shell.project.marketingSteps.production}
           labels={fr.productionJourney.now}
-          elsewhere={elsewhereOf(journeys, steps)}
         />
       )}
       <ModuleAttention
@@ -122,11 +121,7 @@ export default async function ProductionSheetLayout({
         modules={["production"]}
         steps={productionStepChoices(deliverableId, steps)}
       />
-      <DeliverableBar
-        projectId={projectId}
-        current={deliverableId}
-        journeys={journeys}
-      />
+      <DeliverableBar projectId={projectId} current={deliverableId} />
       {started ? (
         <div className="grid items-start gap-6 min-[900px]:grid-cols-[300px_minmax(0,1fr)]">
           <JourneySpine

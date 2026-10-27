@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
@@ -51,7 +50,6 @@ export function ContractFlow({
   proof?: { missing: boolean } | null;
 }) {
   const t = fr.contracts.flow;
-  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [comment, setComment] = useState("");
   const [terminating, setTerminating] = useState(false);
@@ -68,7 +66,6 @@ export function ContractFlow({
       }
       toast.success(t.done[action]);
       setTerminating(false);
-      router.refresh();
     });
   }
 

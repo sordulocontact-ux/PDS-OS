@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useRef } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
@@ -31,12 +30,8 @@ export function RecapForm({
   subject: string;
   body: string;
 }) {
-  const router = useRouter();
   const message = useRef<HTMLTextAreaElement>(null);
-  const { pending, error, run } = useWriteSubmit(
-    () => router.refresh(),
-    t.done,
-  );
+  const { pending, error, run } = useWriteSubmit(undefined, t.done);
   return (
     <form
       noValidate

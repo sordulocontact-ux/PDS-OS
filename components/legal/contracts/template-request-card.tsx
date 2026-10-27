@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { DecisionPanel } from "@/components/ui/decision-panel";
@@ -28,7 +27,6 @@ export function TemplateRequestCard({
   projectId: string;
   request: TemplateRequest;
 }) {
-  const router = useRouter();
   return (
     <section
       aria-label={t.toValidate}
@@ -88,7 +86,6 @@ export function TemplateRequestCard({
         onDecide={(kind, comment) =>
           decideTemplateRequest(projectId, request.id, kind, comment)
         }
-        onDone={() => router.refresh()}
       />
     </section>
   );

@@ -118,15 +118,16 @@ export function QuestionScreen({
   const help = () =>
     startHelp(async () => {
       const result = await proposeHelp(projectId, question.key);
-      if (!result.ok)
+      if (!result.ok) {
         toast.error(
           result.error === "quota"
             ? result.message
             : t.helpErrors[result.error],
         );
-      else if (result.count === 0 && suggestions.length === 0)
+        // The page may be stale (stage locked…): only a success revalidates.
+        router.refresh();
+      } else if (result.count === 0 && suggestions.length === 0)
         toast.message(t.helpEmpty);
-      router.refresh();
     });
 
   const secondary = editable && (

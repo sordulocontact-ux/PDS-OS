@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { SplitEditor } from "@/components/legal/splits/split-editor";
@@ -28,7 +27,6 @@ export function SplitEditorInline({
   startOpen: boolean;
   label: string;
 }) {
-  const router = useRouter();
   const [open, setOpen] = useState(startOpen);
   if (!open)
     return (
@@ -49,7 +47,6 @@ export function SplitEditorInline({
       version={version}
       onDone={() => {
         setOpen(false);
-        router.refresh();
       }}
       onCancel={() => setOpen(false)}
     />

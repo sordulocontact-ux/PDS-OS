@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
@@ -30,7 +29,6 @@ export function TakeChargeForm({
   // Cents per role of the link; null: this link does not carry the role.
   estimate: Partial<Record<Stage, number | null>>;
 }) {
-  const router = useRouter();
   const roles = (Object.keys(estimate) as Stage[]).filter(
     (r) => estimate[r] !== undefined,
   );
@@ -67,7 +65,6 @@ export function TakeChargeForm({
           );
           if (!result.ok) return setError(result.error);
           toast.success(`${t.done}.`);
-          router.refresh();
         });
       }}
     >

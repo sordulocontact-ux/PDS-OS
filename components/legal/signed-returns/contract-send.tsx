@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Field } from "@/components/auth/field";
@@ -38,8 +37,7 @@ export function ContractSend({
   // An active private link: « Envoyer à … » works; otherwise create it.
   hasLink: boolean;
 }) {
-  const router = useRouter();
-  const submit = useWriteSubmit(() => router.refresh(), t.sent(person));
+  const submit = useWriteSubmit(undefined, t.sent(person));
   return (
     <div className="flex flex-col gap-3">
       <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
@@ -84,7 +82,6 @@ export function ContractSend({
               contractId={contractId}
               onDone={() => {
                 close();
-                router.refresh();
               }}
               onCancel={close}
             />

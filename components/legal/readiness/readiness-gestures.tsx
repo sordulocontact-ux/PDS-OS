@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
@@ -29,7 +28,6 @@ export function WaiverButton({
   controlKey: string;
   label: string;
 }) {
-  const router = useRouter();
   return (
     <DialogButton
       label={t.waiver.grant}
@@ -47,7 +45,6 @@ export function WaiverButton({
           }
           onDone={() => {
             close();
-            router.refresh();
           }}
         />
       )}
@@ -63,7 +60,6 @@ export function SacemPolicyToggle({
   projectId: string;
   sacemBlocks: boolean;
 }) {
-  const router = useRouter();
   const [pending, startTransition] = useTransition();
   return (
     <label className="flex w-fit items-center gap-2.5 text-[length:var(--type-body-sm)] font-medium">
@@ -76,7 +72,6 @@ export function SacemPolicyToggle({
             const result = await setReleasePolicy(projectId, next);
             if (!result.ok) return void toast.error(result.error);
             toast.success(t.policy.saved);
-            router.refresh();
           });
         }}
       />
@@ -87,11 +82,9 @@ export function SacemPolicyToggle({
 
 /** « Valider la sortie avant The Orchard » (the direction, last). */
 export function ValidateReleaseButton({ projectId }: { projectId: string }) {
-  const router = useRouter();
   const [done, setDone] = useState(false);
   const { pending, error, run } = useWriteSubmit(() => {
     setDone(true);
-    router.refresh();
   }, t.validate.done);
   return (
     <div className="flex flex-col gap-2">

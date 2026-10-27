@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
@@ -37,7 +36,6 @@ export function DelegateButton({
   // « Modifier » in the plan's list, « Changer » in the démarche.
   triggerLabel?: string;
 }) {
-  const router = useRouter();
   const t = fr.legal.tracking;
   const p = fr.legal.plan;
   const [open, setOpen] = useState(false);
@@ -70,7 +68,6 @@ export function DelegateButton({
       setOpen(false);
       setReason("");
       setTried(false);
-      router.refresh();
     });
   };
 

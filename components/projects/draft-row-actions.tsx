@@ -37,7 +37,6 @@ export function DraftRowActions({
         return;
       }
       setConfirming(false);
-      router.refresh();
     });
   };
 

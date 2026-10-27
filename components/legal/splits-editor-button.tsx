@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import {
@@ -31,7 +30,6 @@ export function SplitsEditorButton({
 }: {
   action: Extract<LegalFactAction, { kind: "edit_splits" }>;
 }) {
-  const router = useRouter();
   const t = fr.masterPage.splits;
   const l = fr.legal.inventory.actions;
   const [open, setOpen] = useState(false);
@@ -81,7 +79,6 @@ export function SplitsEditorButton({
             available={available}
             onDone={() => {
               setForm(null);
-              router.refresh();
             }}
           />
         ) : (
@@ -118,7 +115,6 @@ export function SplitsEditorButton({
         body={t.confirmBody}
         onClose={() => {
           setDeleting(null);
-          router.refresh();
         }}
       />
     </>

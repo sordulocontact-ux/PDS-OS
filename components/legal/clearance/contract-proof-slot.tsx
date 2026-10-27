@@ -1,7 +1,6 @@
 "use client";
 
 import { IconCheck, IconFile } from "nucleo-sharp-essential";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -34,7 +33,6 @@ export function ContractProofSlot({
   invalid?: boolean;
 }) {
   const t = fr.legalClearance.stages.sign;
-  const router = useRouter();
   const [busy, setBusy] = useState(false);
 
   if (present)
@@ -70,7 +68,6 @@ export function ContractProofSlot({
           });
           setBusy(false);
           if (!result.ok) return void toast.error(result.error);
-          router.refresh();
         }}
       />
     </div>

@@ -10,6 +10,7 @@ import { MobileNav } from "@/components/shell/mobile-nav";
 import { Sidebar } from "@/components/shell/sidebar";
 import { CollapsedNavProvider } from "@/components/shell/use-collapsed-nav";
 import { UserPanel } from "@/components/shell/user-panel";
+import { NavigationProgress } from "@/components/ui/navigation-progress";
 import { OneTimeLinksProvider } from "@/components/ui/one-time-links";
 import { can } from "@/lib/auth/access";
 import { getAccess } from "@/lib/auth/dal";
@@ -18,6 +19,44 @@ import { getPublicEnv } from "@/lib/env-public";
 import { fr } from "@/lib/i18n/fr";
 import { countPendingMemberships } from "@/lib/members/queries";
 import { loadNotifications } from "@/lib/notifications/queries";
+
+type Notifications = Awaited<ReturnType<typeof loadNotifications>>;
+
+// The bell and the navigation wait for their own reads, never the page: the
+// layout no longer awaits them before its content starts rendering (page
+// loads audit, 27/10/2026), they are read alongside it.
+async function AppBell({
+  notifications,
+  ...props
+}: Omit<
+  React.ComponentProps<typeof NotificationBell>,
+  "items" | "unreadCount"
+> & {
+  notifications: Promise<Notifications>;
+}) {
+  const { items, unreadCount } = await notifications;
+  return (
+    <NotificationBell items={items} unreadCount={unreadCount} {...props} />
+  );
+}
+
+async function CountedSidebar({
+  pending,
+  ...props
+}: Omit<React.ComponentProps<typeof Sidebar>, "pendingMembers"> & {
+  pending: Promise<number>;
+}) {
+  return <Sidebar pendingMembers={await pending} {...props} />;
+}
+
+async function CountedMobileNav({
+  pending,
+  ...props
+}: Omit<React.ComponentProps<typeof MobileNav>, "pendingMembers"> & {
+  pending: Promise<number>;
+}) {
+  return <MobileNav pendingMembers={await pending} {...props} />;
+}
 
 // Authenticated shell: sidebar against the screen's edge on desktop, drawer on
 // mobile.
@@ -34,18 +73,18 @@ export default async function AppLayout({
   const userPanel = <UserPanel name={name} email={access.email} />;
   const signedIn = access.state === "approved" && access.personId !== null;
   // Access requests waiting for a decision: counted on "Équipe" for admins.
-  const [notifications, pendingMembers] = await Promise.all([
-    signedIn ? loadNotifications() : { items: [], unreadCount: 0 },
+  const notifications = signedIn
+    ? loadNotifications()
+    : Promise.resolve({ items: [], unreadCount: 0 });
+  const pendingMembers =
     isAdmin && access.organizationId
       ? countPendingMemberships(access.organizationId)
-      : 0,
-  ]);
+      : Promise.resolve(0);
   const vapidPublicKey = getPublicEnv().NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? null;
   const bell = (variant: "nav" | "ghost") =>
     signedIn ? (
-      <NotificationBell
-        items={notifications.items}
-        unreadCount={notifications.unreadCount}
+      <AppBell
+        notifications={notifications}
         vapidPublicKey={vapidPublicKey}
         side={variant === "nav" ? "right" : "bottom"}
         variant={variant}
@@ -73,6 +112,7 @@ export default async function AppLayout({
         <CollapsedNavProvider>
           <OneTimeLinksProvider>
             <div className="flex flex-1 bg-[var(--surface-app)] md:p-[var(--shell-inset)]">
+              <NavigationProgress />
               <AccessWatcher
                 current={access.state}
                 role={access.role}
@@ -82,9 +122,9 @@ export default async function AppLayout({
                 <NotificationListener personId={access.personId} />
               )}
 
-              <Sidebar
+              <CountedSidebar
                 isAdmin={isAdmin}
-                pendingMembers={pendingMembers}
+                pending={pendingMembers}
                 bell={bell("nav")}
                 name={name}
                 email={access.email}
@@ -92,9 +132,9 @@ export default async function AppLayout({
 
               <div className="flex min-w-0 flex-1 flex-col">
                 <header className="sticky top-0 z-40 flex h-14 items-center gap-2 border-b border-[color:var(--border-hairline)] bg-background px-2 md:hidden">
-                  <MobileNav
+                  <CountedMobileNav
                     isAdmin={isAdmin}
-                    pendingMembers={pendingMembers}
+                    pending={pendingMembers}
                     footer={userPanel}
                   />
                   {brand}

@@ -36,7 +36,7 @@ export function SignMoment({
   context: Omit<Clearances, "items">;
 }) {
   const t = fr.legalClearance.flow;
-  const { pending, run } = useLegalAction();
+  const { pending, run } = useLegalAction({ refresh: true });
   const [tried, setTried] = useState(false);
   // One contract usually holds every concerned right: shown once.
   const contracts = clearance.contracts.filter(

@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
@@ -36,7 +35,6 @@ export function EngineerThread({
   messages: EngineerMessage[];
 }) {
   const t = fr.masterWorkflow.engineerThread;
-  const router = useRouter();
   const [kind, setKind] = useState<EngineerMessageKind>("question");
   const [body, setBody] = useState("");
   const [days, setDays] = useState("");
@@ -63,7 +61,6 @@ export function EngineerThread({
       setBody("");
       setDays("");
       toast.success(t.sent);
-      router.refresh();
     });
   }
 

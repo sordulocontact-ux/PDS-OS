@@ -2,7 +2,6 @@
 
 import { IconOffice, IconUser, IconXmark } from "nucleo-sharp-essential";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { toast } from "sonner";
 
@@ -30,14 +29,12 @@ export function ContractParties({
   canEdit: boolean;
 }) {
   const t = fr.contracts.parties;
-  const router = useRouter();
   const [pending, startTransition] = useTransition();
 
   function remove(contactId: string) {
     startTransition(async () => {
       const result = await removeContractParty(contractId, contactId);
       if (!result.ok) toast.error(result.error);
-      else router.refresh();
     });
   }
 

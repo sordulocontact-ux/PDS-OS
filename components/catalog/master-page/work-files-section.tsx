@@ -6,7 +6,6 @@ import {
   IconPenWriting2,
   IconTrash,
 } from "nucleo-sharp-essential";
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
@@ -60,7 +59,6 @@ export function WorkFilesSection({
   sessions: MasterSession[];
 }) {
   const t = fr.masterPage.workFiles;
-  const router = useRouter();
   const [editing, setEditing] = useState<Editing | null>(null);
   const [deleting, setDeleting] = useState<WorkItem | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -81,7 +79,6 @@ export function WorkFilesSection({
       setError(null);
       setDeleting(null);
       toast.success(t.deleted);
-      router.refresh();
     });
 
   return (

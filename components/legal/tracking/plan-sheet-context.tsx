@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import {
   createContext,
   useCallback,
@@ -76,7 +75,6 @@ export function PlanSheetProvider({
   actionable: Array<{ id: string; label: string }>;
   children: React.ReactNode;
 }) {
-  const router = useRouter();
   const [openId, setOpenId] = useState(initialOpen);
   const [links, setLinks] = useState<Record<string, PreparedLink>>({});
   const [acting, setActing] = useState<string | null>(null);
@@ -157,13 +155,12 @@ export function PlanSheetProvider({
             }
           }
           open(rowId);
-          router.refresh();
         } finally {
           setActing(null);
         }
       });
     },
-    [open, projectId, router, setLink, showSplitLinks],
+    [open, projectId, setLink, showSplitLinks],
   );
 
   const value = useMemo<PlanSheet>(

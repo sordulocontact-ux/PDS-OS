@@ -1,12 +1,11 @@
 import { MasterHistoryCsv } from "@/components/master-workflow/master-history-csv";
 import { masterFacts } from "@/components/master-workflow/master-step-frame";
 import { ProjectHeader } from "@/components/projects/project-header";
-import { NowCard } from "@/components/shell/journey/now-card";
+import { ProjectNowCard } from "@/components/shell/journey/project-now-card";
 import { StepHistory } from "@/components/shell/journey/step-history";
 import { FilterChipLink } from "@/components/ui/filter-chip";
 import { ViewLink } from "@/components/ui/view-link";
 import { fr } from "@/lib/i18n/fr";
-import { elsewhereOf, loadProjectJourneys } from "@/lib/journey/project";
 import { historyPeople, masterHistory } from "@/lib/master-workflow/history";
 import { masterJourneyContext } from "@/lib/master-workflow/journey-context";
 import { masterStepHref } from "@/lib/ui/master-steps";
@@ -26,12 +25,7 @@ export async function MasterHistory({
   projectId: string;
   person: string | null;
 }) {
-  const [{ steps, viewerName, facts }, journeys, headerFacts] =
-    await Promise.all([
-      masterJourneyContext(projectId),
-      loadProjectJourneys(projectId),
-      masterFacts(projectId),
-    ]);
+  const { steps, viewerName, facts } = await masterJourneyContext(projectId);
   const all = masterHistory(facts).reverse();
   const people = historyPeople(all);
   const who = person && people.includes(person) ? person : null;
@@ -45,13 +39,13 @@ export async function MasterHistory({
           ...steps,
           { href: base, title: fr.masterJourney.steps.history.title },
         ]}
-        facts={headerFacts}
+        facts={masterFacts(projectId)}
       />
-      <NowCard
+      <ProjectNowCard
+        projectId={projectId}
         steps={steps}
         viewerName={viewerName}
         moduleLabel={fr.masterJourney.module}
-        elsewhere={elsewhereOf(journeys, steps)}
         labels={fr.masterJourney.now}
       />
       <section

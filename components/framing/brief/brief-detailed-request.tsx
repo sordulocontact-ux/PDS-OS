@@ -29,10 +29,8 @@ export function BriefDetailedRequest({
         error={error}
         onCancel={() => router.refresh()}
         onSubmit={(requests, comment) =>
-          run(
-            () =>
-              decideBrief(projectId, validationId, false, comment, requests),
-            () => router.refresh(),
+          run(() =>
+            decideBrief(projectId, validationId, false, comment, requests),
           )
         }
       />

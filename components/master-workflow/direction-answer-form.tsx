@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
@@ -32,7 +31,6 @@ export function DirectionAnswerForm({
   projectId: string;
   questionId: string;
 }) {
-  const router = useRouter();
   const [text, setText] = useState("");
   const [items, setItems] = useState<ReadItem[] | null>(null);
   const [tried, setTried] = useState(false);
@@ -61,7 +59,6 @@ export function DirectionAnswerForm({
       );
       if (!result.ok) return setError(result.error);
       toast.success(fr.masterWorkflow.questions.answered);
-      router.refresh();
     });
 
   if (items === null)

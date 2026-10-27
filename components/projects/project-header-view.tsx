@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { AddExpenseButton } from "@/components/budget/add-expense-button";
 import { ReadOnlyNotice } from "@/components/projects/read-only-notice";
 import { useSubModuleCounts } from "@/components/shell/module/sub-module-counts";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   ModuleHeader,
   type ModuleHeaderProps,
@@ -28,6 +29,30 @@ export type ProjectHeaderOverrides = Partial<
   // The module's steps: the one whose page is open ends the trail.
   steps?: Array<{ href: string; title: string }>;
 };
+
+// Before a page's first header is read (components/projects/project-
+// header.tsx): the trail, the title and the facts as rows. Like the header,
+// the default one steps aside when the page has its own.
+export function ProjectHeaderSkeleton({
+  isDefault = false,
+}: {
+  isDefault?: boolean;
+}) {
+  return (
+    <div
+      aria-hidden
+      data-project-header={isDefault ? "default" : "page"}
+      className={cn(
+        "flex flex-col gap-5",
+        isDefault && "group-has-[[data-project-header=page]]/project:hidden",
+      )}
+    >
+      <Skeleton className="h-5 w-56 max-w-full" />
+      <Skeleton className="h-9 w-64 max-w-full" />
+      <Skeleton className="h-5 w-96 max-w-full" />
+    </div>
+  );
+}
 
 /**
  * The head of a launched project's page, read from the URL (trail, h1, the

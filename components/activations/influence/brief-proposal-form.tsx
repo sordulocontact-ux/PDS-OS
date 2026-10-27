@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
 import { Field } from "@/components/auth/field";
@@ -34,14 +33,10 @@ export function BriefProposalForm({
   targetId: string;
   defaults: BriefDefaults;
 }) {
-  const router = useRouter();
   const message = useRef<HTMLTextAreaElement>(null);
   const [ads, setAds] = useState<Ads>("none");
   const [missing, setMissing] = useState<Missing | null>(null);
-  const { pending, error, run } = useWriteSubmit(
-    () => router.refresh(),
-    t.done,
-  );
+  const { pending, error, run } = useWriteSubmit(undefined, t.done);
   return (
     <form
       noValidate

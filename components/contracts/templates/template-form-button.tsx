@@ -1,7 +1,6 @@
 "use client";
 
 import { IconPlus } from "nucleo-sharp-essential";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { TemplateForm } from "@/components/contracts/templates/template-form";
@@ -16,7 +15,6 @@ export function TemplateFormButton({
   organizationId: string;
 }) {
   const t = fr.legalContracts.templates;
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -37,7 +35,6 @@ export function TemplateFormButton({
           onCancel={() => setOpen(false)}
           onDone={() => {
             setOpen(false);
-            router.refresh();
           }}
         />
       </FormDialog>

@@ -1,7 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-
 import { FormMessage } from "@/components/auth/form-message";
 import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
@@ -27,8 +25,7 @@ export function LeverRowActions({
   withMode: boolean;
   later: boolean;
 }) {
-  const router = useRouter();
-  const { pending, error, run } = useWriteSubmit(() => router.refresh(), "");
+  const { pending, error, run } = useWriteSubmit(undefined, "");
   return (
     <form
       className="flex flex-col items-end gap-1.5"

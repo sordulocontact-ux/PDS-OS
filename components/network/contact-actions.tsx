@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { EditPanel } from "@/components/archive/edit-panel";
@@ -22,7 +21,6 @@ export function ContactActions({
   leaveTo?: string;
   size?: "icon-sm" | "icon-lg";
 }) {
-  const router = useRouter();
   return (
     <RecordActions
       kind="contact"
@@ -41,7 +39,6 @@ export function ContactActions({
               onSaved={() => {
                 close();
                 toast.success(fr.records.edit.saved);
-                router.refresh();
               }}
             />
           )}

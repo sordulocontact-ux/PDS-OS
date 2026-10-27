@@ -72,7 +72,7 @@ export function NegotiateMoment({
   canValidate: boolean;
 }) {
   const t = fr.legalClearance.flow;
-  const { pending, run } = useLegalAction();
+  const { pending, run } = useLegalAction({ refresh: true });
   const [reply, setReply] = useState("");
   const [reading, setReading] = useState<Reading | null>(null);
   const [tried, setTried] = useState(false);

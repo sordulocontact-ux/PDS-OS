@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
@@ -30,7 +29,6 @@ export function ClauseForm({
   contractId: string;
   body: string;
 }) {
-  const router = useRouter();
   const [clause, setClause] = useState<Clause>("credit");
   const [text, setText] = useState(body);
   const [why, setWhy] = useState("");
@@ -38,7 +36,6 @@ export function ClauseForm({
   const { pending, error, run } = useWriteSubmit(() => {
     setWhy("");
     setTried(false);
-    router.refresh();
   }, t.created);
   const sameText = text.trim() === body.trim();
 

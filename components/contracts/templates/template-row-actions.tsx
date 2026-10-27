@@ -6,7 +6,6 @@ import {
   IconPenWriting2,
   IconXmark,
 } from "nucleo-sharp-essential";
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
@@ -32,7 +31,6 @@ export function TemplateRowActions({
   size?: "icon-sm" | "icon-lg";
 }) {
   const t = fr.legalContracts.templates;
-  const router = useRouter();
   const [open, setOpen] = useState<
     "view" | "version" | "retire" | "refuse" | null
   >(null);
@@ -43,7 +41,6 @@ export function TemplateRowActions({
       const result = await setContractTemplateStatus(template.id, status);
       if (!result.ok) return void toast.error(result.error);
       setOpen(null);
-      router.refresh();
     });
 
   const actions: RowAction[] = [
@@ -136,7 +133,6 @@ export function TemplateRowActions({
           onCancel={() => setOpen(null)}
           onDone={() => {
             setOpen(null);
-            router.refresh();
           }}
         />
       </FormDialog>
@@ -157,7 +153,6 @@ export function TemplateRowActions({
           }
           onDone={() => {
             setOpen(null);
-            router.refresh();
           }}
         />
       </FormDialog>

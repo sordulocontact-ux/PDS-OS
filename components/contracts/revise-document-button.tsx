@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
@@ -20,7 +19,6 @@ export function ReviseDocumentButton({
   body: string;
 }) {
   const t = fr.legalContracts.document;
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -34,7 +32,6 @@ export function ReviseDocumentButton({
       });
       if (!result.ok) return setError(result.error);
       setOpen(false);
-      router.refresh();
     });
   }
 

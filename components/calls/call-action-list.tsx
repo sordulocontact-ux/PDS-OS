@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { useFramingAction } from "@/components/framing/use-framing-action";
@@ -36,7 +35,6 @@ export function CallActionList({
   deliverableId?: string | null;
 }) {
   const t = fr.calls.outcomes;
-  const router = useRouter();
   const { pending, run } = useFramingAction();
   const canConvert = projects.length > 0;
 
@@ -98,10 +96,7 @@ export function CallActionList({
                       sourceReportItemId: action.id,
                       deliverableId,
                     }),
-                  () => {
-                    toast.success(t.created);
-                    router.refresh();
-                  },
+                  () => toast.success(t.created),
                 )
               }
             />

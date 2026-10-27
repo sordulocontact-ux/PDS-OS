@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 
@@ -55,7 +54,6 @@ export function InvoiceForm({
   // Pre-filled « Titulaire du compte »: the person's name.
   holder: string;
 }) {
-  const router = useRouter();
   const root = useRef<HTMLFormElement>(null);
   const link = target.kind === "link";
   const [draft, setDraft] = useState<InvoiceDraft>({
@@ -130,7 +128,6 @@ export function InvoiceForm({
           ),
         });
       else toast.success(t.team.added);
-      router.refresh();
     });
   }
 

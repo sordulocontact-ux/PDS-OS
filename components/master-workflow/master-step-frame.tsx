@@ -1,6 +1,6 @@
 import { ProjectHeader } from "@/components/projects/project-header";
 import { JourneySpine } from "@/components/shell/journey/journey-spine";
-import { NowCard } from "@/components/shell/journey/now-card";
+import { ProjectNowCard } from "@/components/shell/journey/project-now-card";
 import { StepHistory } from "@/components/shell/journey/step-history";
 import { StepPanel } from "@/components/shell/journey/step-panel";
 import { ModuleAttention } from "@/components/shell/module/module-attention";
@@ -11,7 +11,6 @@ import {
 import { ContactLinksSection } from "@/components/portal/contact-links-section";
 import { WhoDoesWhatButton } from "@/components/shell/module/who-does-what-button";
 import { fr } from "@/lib/i18n/fr";
-import { elsewhereOf, loadProjectJourneys } from "@/lib/journey/project";
 import { masterHistory } from "@/lib/master-workflow/history";
 import { masterJourneyContext } from "@/lib/master-workflow/journey-context";
 import { masterRoles } from "@/lib/master-workflow/roles";
@@ -64,12 +63,12 @@ export async function MasterStepFrame({
   children: React.ReactNode;
   slots?: Omit<React.ComponentProps<typeof StepPanel>, "step" | "steps">;
 }) {
-  const [{ steps, viewerName, facts: rows, project }, journeys, facts] =
-    await Promise.all([
-      masterJourneyContext(projectId),
-      loadProjectJourneys(projectId),
-      masterFacts(projectId),
-    ]);
+  const {
+    steps,
+    viewerName,
+    facts: rows,
+    project,
+  } = await masterJourneyContext(projectId);
   const step = steps.find((s) => s.key === stepKey);
   if (!step) return null;
   // Blockers and noted information of the step (C6).
@@ -87,7 +86,7 @@ export async function MasterStepFrame({
       <ProjectHeader
         projectId={projectId}
         steps={steps}
-        facts={facts}
+        facts={masterFacts(projectId)}
         actions={
           <WhoDoesWhatButton
             {...roles}
@@ -100,12 +99,12 @@ export async function MasterStepFrame({
           />
         }
       />
-      <NowCard
+      <ProjectNowCard
+        projectId={projectId}
         steps={steps}
         viewerName={viewerName}
         moduleLabel={t.module}
         shownKey={stepKey}
-        elsewhere={elsewhereOf(journeys, steps)}
         labels={t.now}
       />
       <ModuleAttention stepRef={stepRef} modules={["master"]} steps={choices} />

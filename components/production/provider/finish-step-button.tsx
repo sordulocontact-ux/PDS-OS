@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { toast } from "sonner";
 
@@ -18,7 +17,6 @@ export function FinishStepButton({
   token: string;
   stepId: string;
 }) {
-  const router = useRouter();
   const [pending, startTransition] = useTransition();
   return (
     <Button
@@ -31,7 +29,6 @@ export function FinishStepButton({
           const result = await finishStepByLink({ token, stepId });
           if (!result.ok) return void toast.error(result.error);
           toast.success(t.finished);
-          router.refresh();
         })
       }
     >

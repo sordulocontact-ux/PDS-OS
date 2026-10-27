@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { toast } from "sonner";
 
@@ -18,7 +17,6 @@ import {
 /** The confirmation links of a split, shown once above the page (they
  * survive its refresh). */
 export function useShowSplitLinks() {
-  const router = useRouter();
   const show = useShowLinks();
   const t = fr.legalSplits.links;
   return (title: string, links: SplitLink[]) =>
@@ -45,7 +43,6 @@ export function useShowSplitLinks() {
       copyLabel: t.copy,
       copiedLabel: t.copied,
       closeLabel: t.close,
-      onClose: () => router.refresh(),
     });
 }
 
@@ -64,12 +61,11 @@ export function ProposeSplitButton({
   const t = fr.legalSplits.page;
   const [pending, startTransition] = useTransition();
   const showLinks = useShowSplitLinks();
-  const router = useRouter();
   // Sealed, the links stay in the step (rule 19): nothing to show once.
   const setLinks = (links: SplitLink[]) => {
     if (links.every((l) => l.sealed)) {
       toast.success(`${fr.legalDocuments.split.proposed}.`);
-      return router.refresh();
+      return;
     }
     showLinks(title, links);
   };
@@ -108,11 +104,10 @@ export function NewSplitLinkButton({
 }) {
   const [pending, startTransition] = useTransition();
   const showLinks = useShowSplitLinks();
-  const router = useRouter();
   const setLinks = (links: SplitLink[]) => {
     if (links.every((l) => l.sealed)) {
       toast.success(`${fr.legalDocuments.split.renewed}.`);
-      return router.refresh();
+      return;
     }
     showLinks(title, links);
   };

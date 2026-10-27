@@ -109,8 +109,8 @@ export function useCallPrep(
       });
       if (!result.ok) return setError(result.error);
       toast.success(t.created[defaults.noun]);
-      if (options.stay) router.refresh();
-      else router.push(routes.projectCall(defaults.projectId, result.callId));
+      if (!options.stay)
+        router.push(routes.projectCall(defaults.projectId, result.callId));
     });
   };
 

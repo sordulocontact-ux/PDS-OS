@@ -11,7 +11,8 @@ export type OneTimeLinks = {
   copyLabel: string;
   copiedLabel: string;
   closeLabel: string;
-  /** Run once the dialog is closed (usually `router.refresh()`). */
+  /** Run once the dialog is closed. Not for a `router.refresh()`: the action
+   * that made the links already revalidated, so the page was re-rendered. */
   onClose?: () => void;
 };
 

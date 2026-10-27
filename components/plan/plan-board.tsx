@@ -5,7 +5,6 @@ import {
   IconChevronUp,
   IconPlus,
 } from "nucleo-sharp-essential";
-import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -72,11 +71,9 @@ export function PlanBoard({
   const t = fr.framingIntel.plan;
   const tj = fr.framingJourney.plan;
   const ts = fr.planSteps;
-  const router = useRouter();
   const [confirming, setConfirming] = useState(false);
   const { pending, run, error, setError } = useWriteSubmit(() => {
     setConfirming(false);
-    router.refresh();
   }, fr.framingJourney.done.planLaunched);
   const [editing, setEditing] = useState(false);
   // « Annuler » brings back the plan as it was before « Modifier le plan ».

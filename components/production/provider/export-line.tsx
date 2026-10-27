@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -44,7 +43,6 @@ export function ExportLine({
   line: Line;
   writable: boolean;
 }) {
-  const router = useRouter();
   const [missing, setMissing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -64,7 +62,6 @@ export function ExportLine({
     setPending(false);
     if (!result.ok) return setError(result.error);
     toast.success(t.done);
-    router.refresh();
   }
 
   return (

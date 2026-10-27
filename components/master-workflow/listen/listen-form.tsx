@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
@@ -23,7 +22,6 @@ export function ListenForm({
   versionId: string;
   validator: string | null;
 }) {
-  const router = useRouter();
   const [timecode, setTimecode] = useState("");
   const [body, setBody] = useState("");
   const [tried, setTried] = useState(false);
@@ -54,7 +52,6 @@ export function ListenForm({
           setTimecode("");
           setTried(false);
           setClientKey(crypto.randomUUID());
-          router.refresh();
         });
       }}
     >

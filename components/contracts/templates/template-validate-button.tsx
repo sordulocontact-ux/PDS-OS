@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,6 @@ import { setContractTemplateStatus } from "@/lib/legal/contracts/template-action
  * decision, asked first, the refusal kept in the dialog. */
 export function TemplateValidateButton({ templateId }: { templateId: string }) {
   const t = fr.legalContracts.templates;
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -43,7 +41,6 @@ export function TemplateValidateButton({ templateId }: { templateId: string }) {
             );
             if (!result.ok) return setError(result.error);
             setOpen(false);
-            router.refresh();
           })
         }
       />

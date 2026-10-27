@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -77,7 +76,6 @@ function ReviewForm({
   token: string;
   option: ProviderLocations["options"][number];
 }) {
-  const router = useRouter();
   const [verdict, setVerdict] = useState<Verdict | null>(
     option.review?.verdict ?? null,
   );
@@ -107,7 +105,6 @@ function ReviewForm({
         if (!result.ok) return setError(result.error);
         setError(null);
         toast.success(t.review.saved);
-        router.refresh();
       }}
     >
       <ReviewFields

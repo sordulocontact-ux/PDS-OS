@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useRef, useState, type FormEvent } from "react";
 
 import { FieldError, FormMessage } from "@/components/auth/form-message";
@@ -31,7 +30,8 @@ export type WhoProducesDefaults = {
  * proposes first, with why; « Créer la fiche d'une société »), how the
  * preproduction is organised, then « Confirmer ». Nothing goes outside:
  * the company's private link is made in « Qui fait quoi ». `defaults` (and
- * `stay`): opened prefilled by PO, the page stays.
+ * `stay`, which needs nothing here: the confirmation revalidates and the page
+ * stays): opened prefilled by PO.
  */
 export function WhoProducesForm({
   projectId,
@@ -39,7 +39,6 @@ export function WhoProducesForm({
   internalHint,
   companies,
   defaults,
-  stay = false,
   variant = "clip",
   clip = null,
 }: {
@@ -55,7 +54,6 @@ export function WhoProducesForm({
   defaults?: WhoProducesDefaults;
   stay?: boolean;
 }) {
-  const router = useRouter();
   const suggested = companies.find((c) => c.suggested) ?? null;
   const [kind, setKind] = useState<Kind | null>(
     defaults?.kind ??
@@ -78,10 +76,7 @@ export function WhoProducesForm({
   const [creating, setCreating] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const formRef = useRef<HTMLFormElement>(null);
-  const { pending, error, run } = useWriteSubmit(
-    () => (stay ? router.refresh() : undefined),
-    t.confirm,
-  );
+  const { pending, error, run } = useWriteSubmit(undefined, t.confirm);
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -223,7 +218,6 @@ export function WhoProducesForm({
             onCreated={(id) => {
               setCreating(false);
               setCompany(id);
-              router.refresh();
             }}
           />
         </div>

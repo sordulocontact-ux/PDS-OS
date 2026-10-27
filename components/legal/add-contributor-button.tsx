@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { ContributorForm } from "@/components/catalog/master-page/contributor-form";
@@ -19,7 +18,6 @@ export function AddContributorButton({
 }: {
   titles: Array<{ id: string; title: string }>;
 }) {
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   const t = fr.masterPage.credits;
   const first = titles[0];
@@ -41,7 +39,6 @@ export function AddContributorButton({
           contributor={null}
           onDone={() => {
             setOpen(false);
-            router.refresh();
           }}
         />
       </FormDialog>

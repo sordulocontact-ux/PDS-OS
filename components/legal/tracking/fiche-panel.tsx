@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { toast } from "sonner";
 
@@ -55,7 +54,6 @@ export function FichePanel({
 }) {
   const t = fr.legalForms.page;
   const p = fr.legal.panels.fiche;
-  const router = useRouter();
   // Kept by the plan, not here: the panel may remount after the refresh.
   const sheet = usePlanSheet();
   const link = sheet.links[row.key] ?? null;
@@ -69,7 +67,6 @@ export function FichePanel({
     startTransition(async () => {
       const result = await action();
       if (!result.ok) return void toast.error(result.error ?? t.failed);
-      router.refresh();
     });
   // A gesture that says what follows (JUR-04, JUR-06): the step's banner.
   const decide = (action: () => Promise<WriteResult>) =>
@@ -77,14 +74,12 @@ export function FichePanel({
       const result = await action();
       if (!result.ok) return void toast.error(result.error);
       publish(result);
-      router.refresh();
     });
   const prepare = () =>
     startTransition(async () => {
       const result = await prepareLegalForm(projectId, row.key);
       if (!result.ok) return void toast.error(result.error);
       setLink(result);
-      router.refresh();
     });
   const copy = async () => {
     if (!url) return;

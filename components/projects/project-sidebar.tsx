@@ -6,6 +6,7 @@ import {
   type ProjectNavState,
 } from "@/components/projects/project-nav-list";
 import { ProjectSwitcher } from "@/components/projects/project-switcher";
+import { Skeleton } from "@/components/ui/skeleton";
 import { fr } from "@/lib/i18n/fr";
 import { projectSections } from "@/lib/ui/project-sections";
 
@@ -54,6 +55,45 @@ export function ProjectSidebar(props: ProjectNavProps) {
         reasons={props.reasons}
       />
     </nav>
+  );
+}
+
+// The sidebar on a first visit, before the workflows it lists are read
+// (components/projects/project-frame.tsx): the switcher and rows standing
+// for the entries.
+export function ProjectSidebarSkeleton({
+  projectId,
+  projectTitle,
+}: Pick<ProjectNavProps, "projectId" | "projectTitle">) {
+  return (
+    <nav
+      aria-label={fr.shell.project.sidebar.label}
+      aria-busy="true"
+      className="sticky top-[var(--shell-inset)] hidden h-[calc(100dvh-2*var(--shell-inset))] w-[var(--project-nav-width)] shrink-0 flex-col overflow-y-auto border-r border-[color:var(--border-hairline)] bg-[var(--surface-page)] p-2 text-sidebar-foreground md:flex"
+    >
+      <div className="mb-1.5 border-b border-[color:var(--border-hairline)] pb-1.5">
+        <ProjectSwitcher projectId={projectId} projectTitle={projectTitle} />
+      </div>
+      <div className="flex flex-col gap-1.5 p-1">
+        {Array.from({ length: 9 }, (_, i) => (
+          <Skeleton key={i} className="h-8" />
+        ))}
+      </div>
+    </nav>
+  );
+}
+
+// Its row of chips on a phone, the same way.
+export function ProjectSidebarMobileSkeleton() {
+  return (
+    <div
+      aria-hidden
+      className="-mx-4 flex gap-1.5 overflow-hidden px-4 md:hidden"
+    >
+      {Array.from({ length: 5 }, (_, i) => (
+        <Skeleton key={i} className="h-8.5 w-24 shrink-0 rounded-full" />
+      ))}
+    </div>
   );
 }
 

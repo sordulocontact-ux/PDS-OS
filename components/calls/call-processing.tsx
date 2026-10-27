@@ -124,7 +124,10 @@ export function CallProcessing({
 
   useEffect(() => {
     if (!runningElsewhere) return;
-    const timer = window.setInterval(() => router.refresh(), POLL_MS);
+    // A hidden tab does not read the whole page again every few seconds.
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === "visible") router.refresh();
+    }, POLL_MS);
     return () => window.clearInterval(timer);
   }, [runningElsewhere, router]);
 

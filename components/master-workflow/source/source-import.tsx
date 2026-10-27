@@ -1,7 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-
 import {
   FileImport,
   FileImportButton,
@@ -19,7 +17,6 @@ export function SourceImport({
   organizationId: string | null;
   masterId: string;
 }) {
-  const router = useRouter();
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
       <p className="text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-secondary)]">
@@ -30,7 +27,6 @@ export function SourceImport({
           organizationId={organizationId}
           owner={{ kind: "master", id: masterId }}
           audio={{ defaultState: "demo" }}
-          onAdded={() => router.refresh()}
         >
           <FileImportButton compact label={t.importVersion} />
         </FileImport>

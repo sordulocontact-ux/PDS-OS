@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 
 import { ProjectHeader } from "@/components/projects/project-header";
 import { JourneySpine } from "@/components/shell/journey/journey-spine";
-import { NowCard } from "@/components/shell/journey/now-card";
+import { ProjectNowCard } from "@/components/shell/journey/project-now-card";
 import {
   StepPanel,
   type StepSlots,
@@ -14,7 +14,6 @@ import {
 } from "@/components/shell/module/step-tools-block";
 import { WhoDoesWhatButton } from "@/components/shell/module/who-does-what-button";
 import { fr } from "@/lib/i18n/fr";
-import { elsewhereOf, loadProjectJourneys } from "@/lib/journey/project";
 import type { StrategyStepKey } from "@/lib/strategy/journey";
 import { strategyStepData } from "@/lib/strategy/step-data";
 import { stepChoiceKey, type StepRef } from "@/lib/step-tools/model";
@@ -40,10 +39,7 @@ export async function StrategyStepFrame({
   stepKey: StrategyStepKey;
   children: React.ReactNode;
 }) {
-  const [ctx, journeys] = await Promise.all([
-    strategyStepData(projectId),
-    loadProjectJourneys(projectId),
-  ]);
+  const ctx = await strategyStepData(projectId);
   if (!ctx) notFound();
   const { steps, viewerName, validators, project } = ctx;
   const step = steps.find((s) => s.key === stepKey);
@@ -82,12 +78,12 @@ export async function StrategyStepFrame({
           />
         }
       />
-      <NowCard
+      <ProjectNowCard
+        projectId={projectId}
         steps={steps}
         viewerName={viewerName}
         moduleLabel={`${fr.shell.project.sidebar.marketing} › ${t.module}`}
         shownKey={stepKey}
-        elsewhere={elsewhereOf(journeys, steps)}
         labels={t.now}
       />
       <ModuleAttention

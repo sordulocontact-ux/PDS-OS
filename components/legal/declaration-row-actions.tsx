@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { DeclarationForm } from "@/components/catalog/master-page/declaration-form";
@@ -19,7 +18,6 @@ export function DeclarationRowActions({
 }: {
   action: Extract<LegalFactAction, { kind: "edit_declaration" }>;
 }) {
-  const router = useRouter();
   const t = fr.masterPage.declarations;
   const [editing, setEditing] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -46,7 +44,6 @@ export function DeclarationRowActions({
           declaration={declaration}
           onDone={() => {
             setEditing(false);
-            router.refresh();
           }}
         />
       </FormDialog>
@@ -58,7 +55,6 @@ export function DeclarationRowActions({
         body={t.confirmBody}
         onClose={() => {
           setDeleting(false);
-          router.refresh();
         }}
       />
     </>

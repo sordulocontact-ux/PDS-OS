@@ -1,7 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-
 import { FormMessage } from "@/components/auth/form-message";
 import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
@@ -28,11 +26,7 @@ export function AgreementSendForm({
   // « À : Léa · lea@… ».
   to: string;
 }) {
-  const router = useRouter();
-  const { pending, error, run } = useWriteSubmit(
-    () => router.refresh(),
-    t.marked,
-  );
+  const { pending, error, run } = useWriteSubmit(undefined, t.marked);
   return (
     <form
       noValidate

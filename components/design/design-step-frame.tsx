@@ -4,7 +4,7 @@ import { DesignWhoDoesWhatButton } from "@/components/design/roles/design-roles"
 import { ContactLinksSection } from "@/components/portal/contact-links-section";
 import { ProjectHeader } from "@/components/projects/project-header";
 import { JourneySpine } from "@/components/shell/journey/journey-spine";
-import { NowCard } from "@/components/shell/journey/now-card";
+import { ProjectNowCard } from "@/components/shell/journey/project-now-card";
 import {
   StepPanel,
   type StepSlots,
@@ -17,7 +17,6 @@ import {
 import { designJourneyContext } from "@/lib/design/journey-context";
 import type { DesignStepKey } from "@/lib/design/journey";
 import { fr } from "@/lib/i18n/fr";
-import { elsewhereOf, loadProjectJourneys } from "@/lib/journey/project";
 import { stepChoiceKey, type StepRef } from "@/lib/step-tools/model";
 import { isLocked } from "@/lib/ui/journey";
 
@@ -42,10 +41,7 @@ export async function DesignStepFrame({
   stepKey: DesignStepKey;
   children: React.ReactNode;
 }) {
-  const [ctx, journeys] = await Promise.all([
-    designJourneyContext(projectId),
-    loadProjectJourneys(projectId),
-  ]);
+  const ctx = await designJourneyContext(projectId);
   if (!ctx) notFound();
   const { steps, viewerName, people, data } = ctx;
   const step = steps.find((s) => s.key === stepKey);
@@ -77,12 +73,12 @@ export async function DesignStepFrame({
           />
         }
       />
-      <NowCard
+      <ProjectNowCard
+        projectId={projectId}
         steps={steps}
         viewerName={viewerName}
         moduleLabel={t.module}
         shownKey={stepKey}
-        elsewhere={elsewhereOf(journeys, steps)}
         labels={t.now}
       />
       <ModuleAttention stepRef={stepRef} modules={["design"]} steps={choices} />

@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Field } from "@/components/auth/field";
@@ -40,12 +39,10 @@ export function NowTools({
   skip: "proof" | "stats" | null;
   taskCreated: boolean;
 }) {
-  const router = useRouter();
   const [asking, setAsking] = useState(false);
   const [missing, setMissing] = useState(false);
   const { pending, error, run } = useWriteSubmit(() => {
     setAsking(false);
-    router.refresh();
   }, "");
   const ids = { projectId, activationId };
   if (asking && skip)

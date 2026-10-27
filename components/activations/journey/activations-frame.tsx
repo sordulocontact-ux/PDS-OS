@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 
 import { NewActivationButton } from "@/components/activations/new-activation-button";
 import { ProjectHeader } from "@/components/projects/project-header";
-import { NowCard } from "@/components/shell/journey/now-card";
+import { ProjectNowCard } from "@/components/shell/journey/project-now-card";
 import { loadActivationsBoard } from "@/lib/activations/board";
 import { loadActivationFiche } from "@/lib/activations/fiche";
 import type { ActivationFilter } from "@/lib/activations/journey";
@@ -10,7 +10,7 @@ import { loadLevers } from "@/lib/activations/levers";
 import { loadActivationPeople } from "@/lib/activations/people";
 import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
-import { elsewhereOf, loadProjectJourneys } from "@/lib/journey/project";
+import { activationsJourneys } from "@/lib/journey/activations";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { personName } from "@/lib/projects/types";
@@ -43,7 +43,7 @@ export async function ActivationsFrame({
     requireLaunchedProject(projectId),
     loadActivationsBoard(projectId),
     loadActivationPeople(projectId),
-    loadProjectJourneys(projectId),
+    activationsJourneys(projectId),
   ]);
   const open = openId ? board.summaries.find((a) => a.id === openId) : null;
   if (openId && !open) notFound();
@@ -51,8 +51,7 @@ export async function ActivationsFrame({
     loadLevers(projectId, board.data.activations),
     open ? loadActivationFiche(projectId, open.id, access) : null,
   ]);
-  const all =
-    journeys.journeys.find((j) => j.part?.key === "activations")?.steps ?? [];
+  const all = journeys.find((j) => j.part?.key === "activations")?.steps ?? [];
   // The open activation's other lines are in its « Maintenant ».
   const steps = all.filter((s) => !open || !s.key.startsWith(`${open.id}:`));
   const canCreate = canEditProject(access, project);
@@ -68,12 +67,13 @@ export async function ActivationsFrame({
         projectId={projectId}
         extraCrumbs={[{ label: open ? open.title : t.levers.step }]}
       />
-      <NowCard
+      <ProjectNowCard
+        projectId={projectId}
         steps={steps}
         viewerName={viewerName}
         moduleLabel={t.crumb}
         shownKey={open?.id}
-        elsewhere={elsewhereOf(journeys, all)}
+        here={all}
       />
       <LeversBanner
         projectId={projectId}

@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Field } from "@/components/auth/field";
@@ -20,10 +19,9 @@ type Ids = { projectId: string; activationId: string };
 /** « Fournir la preuve » (proto): its link, or « Preuve indisponible » with
  * why. Each missing field in red after the first try. */
 export function ProofForm({ ids }: { ids: Ids }) {
-  const router = useRouter();
   const [unavailable, setUnavailable] = useState(false);
   const [missing, setMissing] = useState<"url" | "why" | null>(null);
-  const { pending, error, run } = useWriteSubmit(() => router.refresh(), "");
+  const { pending, error, run } = useWriteSubmit(undefined, "");
   return (
     <form
       noValidate
@@ -90,9 +88,8 @@ export function VerifyProofForm({
   // « fournie par Lina Haddad le 14/10 »
   provided: string;
 }) {
-  const router = useRouter();
   const [missing, setMissing] = useState(false);
-  const { pending, error, run } = useWriteSubmit(() => router.refresh(), "");
+  const { pending, error, run } = useWriteSubmit(undefined, "");
   const decide = (verdict: "verified" | "contested", form: HTMLFormElement) => {
     const note = String(new FormData(form).get("note") ?? "").trim();
     const gap = verdict === "contested" && !note;

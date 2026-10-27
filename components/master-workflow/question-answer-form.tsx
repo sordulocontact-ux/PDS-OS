@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
@@ -30,7 +29,6 @@ export function QuestionAnswerForm({
   dimension: QuestionDimension;
 }) {
   const t = fr.masterWorkflow.questions;
-  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -60,7 +58,6 @@ export function QuestionAnswerForm({
             return;
           }
           toast.success(t.answered);
-          router.refresh();
         });
       }}
     >
