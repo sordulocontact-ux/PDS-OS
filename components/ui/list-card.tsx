@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { CountBadge } from "@/components/ui/count-badge";
+import { ViewLink } from "@/components/ui/view-link";
 import { cn } from "@/lib/utils";
 
 /**
@@ -73,6 +74,7 @@ export function ListCard({
  * One line of a card: main text linked to its page, secondary text below.
  * `leading` sits before the link, outside it (a checkbox stays its own control).
  * No `href`: plain text (a task already on the page where it is done).
+ * The page is prepared on intent only (ViewLink), never for every row shown.
  */
 export function CardRow({
   href,
@@ -106,9 +108,9 @@ export function CardRow({
     <li className={cn(leading && "flex items-start gap-2")}>
       {leading}
       {href ? (
-        <Link href={href} className={className}>
+        <ViewLink href={href} className={className}>
           {body}
-        </Link>
+        </ViewLink>
       ) : (
         <div className={className}>{body}</div>
       )}

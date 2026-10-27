@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import {
   Table,
   TableBody,
@@ -8,6 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ViewLink } from "@/components/ui/view-link";
 import { cn } from "@/lib/utils";
 
 // DataTable: the list design of the Masters page, shared by every list page.
@@ -130,6 +129,8 @@ export function DataTableCell({
 
 // The row's main link: its pseudo-element covers the whole row. Other
 // interactive elements of the row need `relative z-10` to stay clickable.
+// Prepared on intent only (ViewLink): a list prefetching every row it shows
+// rendered each record's page at once (page loads audit, 27/10).
 // Without `href` (an archived row has no page) the text stays plain.
 export function DataTableLink({
   href,
@@ -156,9 +157,9 @@ export function DataTableLink({
       </a>
     );
   return (
-    <Link href={href} className={className}>
+    <ViewLink href={href} className={className}>
       {children}
-    </Link>
+    </ViewLink>
   );
 }
 

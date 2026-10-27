@@ -9,7 +9,8 @@ import { useEffect, useRef, useState } from "react";
 const REST_MS = 150;
 
 // Link to another view of the same page (a project section, an artist tab,
-// a step of the breadcrumb, a list filter): prefetched in full, data
+// a step of the breadcrumb, a list filter), or to a record from a list (a
+// table row, a card row, the project switcher): prefetched in full, data
 // included, as soon as the person shows intent (pointer resting on it,
 // keyboard focus, finger down), so the click shows the content at once
 // instead of a loading state. Not on entering the viewport, nor on a pointer

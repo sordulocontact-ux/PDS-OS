@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { Loaded } from "@/components/ui/loaded";
+import { ViewLink } from "@/components/ui/view-link";
 import {
   Popover,
   PopoverContent,
@@ -83,7 +84,9 @@ export function ProjectSwitcher({
                     const current = project.id === projectId;
                     return (
                       <li key={project.id}>
-                        <Link
+                        {/* Prepared on intent: an open list must not render
+                            every project at once (page loads audit, 27/10). */}
+                        <ViewLink
                           href={switchHref(pathname, projectId, project)}
                           onClick={() => setOpen(false)}
                           aria-current={current ? "page" : undefined}
@@ -108,7 +111,7 @@ export function ProjectSwitcher({
                               className="size-4 shrink-0"
                             />
                           )}
-                        </Link>
+                        </ViewLink>
                       </li>
                     );
                   })}
