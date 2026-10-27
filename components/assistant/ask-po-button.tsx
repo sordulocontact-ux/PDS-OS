@@ -7,6 +7,7 @@ import {
   useAssistant,
   type PoOrigin,
 } from "@/components/assistant/assistant-provider";
+import { sharedChat } from "@/components/assistant/shared-chat";
 import { Button } from "@/components/ui/button";
 import { routes } from "@/lib/auth/redirects";
 
@@ -30,8 +31,8 @@ export function AskPoButton({
   origin?: PoOrigin;
 }) {
   const router = useRouter();
-  const { chat, setOrigin } = useAssistant();
-  const { sendMessage, setMessages, status } = useChat({ chat });
+  const { setOrigin } = useAssistant();
+  const { sendMessage, setMessages, status } = useChat({ chat: sharedChat() });
   const busy = status === "submitted" || status === "streaming";
   return (
     <Button

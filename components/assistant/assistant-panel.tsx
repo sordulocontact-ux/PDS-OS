@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { AssistantComposer } from "@/components/assistant/assistant-composer";
-import { useAssistant } from "@/components/assistant/assistant-provider";
+import { sharedChat } from "@/components/assistant/shared-chat";
 import { AssistantSuggestions } from "@/components/assistant/assistant-suggestions";
 import { AssistantThread } from "@/components/assistant/assistant-thread";
 import { Button } from "@/components/ui/button";
@@ -31,9 +31,8 @@ export function AssistantPanel({
 }) {
   const t = fr.assistant;
   const router = useRouter();
-  const { chat: sharedChat } = useAssistant();
   const { messages, sendMessage, status, stop, error, setMessages } = useChat({
-    chat: ownChat ?? sharedChat,
+    chat: ownChat ?? sharedChat(),
   });
   const busy = status === "submitted" || status === "streaming";
   // Only the window shows the conversation here; home has its own page.

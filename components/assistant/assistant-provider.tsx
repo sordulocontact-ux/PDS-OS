@@ -1,11 +1,10 @@
 "use client";
 
-import { Chat } from "@ai-sdk/react";
-import { DefaultChatTransport, type UIMessage } from "ai";
 import dynamic from "next/dynamic";
 import {
   createContext,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -13,6 +12,7 @@ import {
 import { toast } from "sonner";
 
 import { AssistantLauncher } from "@/components/assistant/assistant-launcher";
+import { keepChat, keptChat } from "@/components/assistant/chat-registry";
 import type { SavedLink } from "@/components/assistant/draft-forms";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { proposalOf, type DraftProposal } from "@/lib/assistant/drafts";
@@ -28,7 +28,6 @@ const DraftSheetBody = dynamic(
 export type PoOrigin = { href: string; trail: string[] };
 
 type AssistantContextValue = {
-  chat: Chat<UIMessage>;
   /** Drafts saved in this tab, by tool call: the card shows the link. */
   saved: Record<string, SavedLink>;
   review: (toolCallId: string, proposal: DraftProposal) => void;
@@ -65,12 +64,9 @@ export function AssistantProvider({
   launcher: boolean;
   children: ReactNode;
 }) {
-  const [chat] = useState(
-    () =>
-      new Chat<UIMessage>({
-        transport: new DefaultChatTransport({ api: "/api/assistant" }),
-      }),
-  );
+  // The tab's conversation (components/assistant/shared-chat.ts) ends with
+  // the signed-in shell.
+  useEffect(() => () => keepChat(null), []);
   const [saved, setSaved] = useState<Record<string, SavedLink>>({});
   const [launcherOpen, setLauncherOpen] = useState(false);
   const [pageSuggestions, setPageSuggestions] = useState<string[]>([]);
@@ -82,7 +78,6 @@ export function AssistantProvider({
 
   const value = useMemo<AssistantContextValue>(
     () => ({
-      chat,
       saved,
       launcherOpen,
       setLauncherOpen,
@@ -99,14 +94,14 @@ export function AssistantProvider({
         setSaved((previous) => ({ ...previous, [toolCallId]: link }));
       },
     }),
-    [chat, saved, launcherOpen, pageSuggestions, origin],
+    [saved, launcherOpen, pageSuggestions, origin],
   );
 
   // The draft after `toolCallId` in the same answer, not saved yet: an
   // artist, its titles and its project proposed together are reviewed one
   // after the other (UX test of 09/10/2026: six forms reopened by hand).
   function nextDraft(toolCallId: string, done: Record<string, SavedLink>) {
-    for (const message of chat.messages) {
+    for (const message of keptChat()?.messages ?? []) {
       const drafts = message.parts.flatMap((part) => {
         if (!("toolCallId" in part) || part.state !== "output-available")
           return [];

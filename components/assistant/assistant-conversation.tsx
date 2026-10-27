@@ -6,6 +6,7 @@ import Link from "next/link";
 
 import { AssistantComposer } from "@/components/assistant/assistant-composer";
 import { useAssistant } from "@/components/assistant/assistant-provider";
+import { sharedChat } from "@/components/assistant/shared-chat";
 import { AssistantSuggestions } from "@/components/assistant/assistant-suggestions";
 import { AssistantThread } from "@/components/assistant/assistant-thread";
 import { IconArrowLeft } from "@/components/icons";
@@ -22,9 +23,9 @@ import { fr } from "@/lib/i18n/fr";
  */
 export function AssistantConversation() {
   const t = fr.assistant;
-  const { chat, origin, setOrigin } = useAssistant();
+  const { origin, setOrigin } = useAssistant();
   const { messages, sendMessage, status, stop, error, setMessages } = useChat({
-    chat,
+    chat: sharedChat(),
   });
   const busy = status === "submitted" || status === "streaming";
   // The title is the first question, as asked: no model writes it.
