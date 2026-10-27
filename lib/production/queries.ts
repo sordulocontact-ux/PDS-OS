@@ -1,7 +1,7 @@
 import "server-only";
 
 import type { Access } from "@/lib/auth/access";
-import { listDesignVersions } from "@/lib/design/versions";
+import { projectDesignVersions } from "@/lib/design/versions";
 import {
   loadMembers,
   loadPendingValidation,
@@ -16,6 +16,7 @@ import {
   loadConceptionLinks,
   type ConceptionLink,
 } from "@/lib/production/conception-links";
+import { listProjectCreatives } from "@/lib/projects/creatives";
 import { createClient } from "@/lib/supabase/server";
 
 export type ProductionDeliverable = {
@@ -66,7 +67,7 @@ export async function loadProduction(
     stageRes,
     deliverablesRes,
     deliveriesRes,
-    creativesRes,
+    creatives,
     sheetsRes,
     versions,
     members,
@@ -88,15 +89,12 @@ export async function loadProduction(
         "deliverable_id, final_url, final_note, approved_at, approved_by, checked_at, checked_by, delivered_at, delivered_by",
       )
       .eq("project_id", projectId),
-    supabase
-      .from("project_creatives")
-      .select("person_id")
-      .eq("project_id", projectId),
+    listProjectCreatives(projectId),
     supabase
       .from("production_sheets")
       .select("deliverable_id")
       .eq("project_id", projectId),
-    listDesignVersions(supabase, projectId),
+    projectDesignVersions(projectId),
     loadMembers(access),
   ]);
   const conception = await loadConceptionLinks(supabase, projectId);
@@ -167,6 +165,6 @@ export async function loadProduction(
     deliverables,
     counts,
     isOwner: me !== null && project.owner_person_id === me,
-    isCreative: (creativesRes.data ?? []).some((c) => c.person_id === me),
+    isCreative: creatives.some((c) => c.personId === me),
   };
 }

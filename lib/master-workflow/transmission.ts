@@ -7,7 +7,7 @@ import {
   hasMasterFinal,
   type FlowAudio,
 } from "@/lib/master-workflow/audio-source";
-import { BRIEF_COLUMNS, briefFromRow } from "@/lib/master-workflow/brief-row";
+import { briefFromRow } from "@/lib/master-workflow/brief-row";
 import type { MasterBrief } from "@/lib/master-workflow/brief-types";
 import { readMasterRows } from "@/lib/master-workflow/inventory-rows";
 import type { TransmissionRow } from "@/lib/master-workflow/transmission-types";
@@ -15,6 +15,12 @@ import { canEditProject } from "@/lib/projects/edit-access";
 import type { Blocker } from "@/lib/ui/journey";
 import { masterStepHref } from "@/lib/ui/master-steps";
 import { personName } from "@/lib/projects/types";
+import {
+  masterBriefRow,
+  masterTransmissionRows,
+  masterVersionRows,
+  whereRows,
+} from "@/lib/master-workflow/shared-rows";
 import { createClient } from "@/lib/supabase/server";
 import { argsKey, memoPerRequest } from "@/lib/utils/request-memo";
 
@@ -60,9 +66,6 @@ export type StepView = {
   organizationId: string | null;
 };
 
-const HISTORY_SELECT =
-  "id, created_at, note, acknowledged_at, revoked_at, revoke_reason, expires_at, link_sent_at, opened_at, delivered_at, derogations, continues_id, sender:people!master_transmissions_created_by_fkey(first_name, last_name), contact:network_contacts!master_transmissions_contact_same_org(name)";
-
 export type MixView = StepView;
 
 export type MixDiagnosisRow = {
@@ -101,31 +104,14 @@ async function readStepView(
   const supabase = await createClient();
   const [rows, briefRow, history, finals, recorded] = await Promise.all([
     readMasterRows(project.id, project.masters),
-    supabase
-      .from("master_briefs")
-      .select(BRIEF_COLUMNS)
-      .eq("project_id", project.id)
-      .maybeSingle(),
-    supabase
-      .from("master_transmissions")
-      .select(HISTORY_SELECT)
-      .eq("project_id", project.id)
-      .eq("role", role)
-      .order("created_at", { ascending: false }),
+    // The brief, the sendings and the versions are read once per render
+    // for every loader of the Master (lib/master-workflow/shared-rows.ts).
+    masterBriefRow(project.id),
+    whereRows(masterTransmissionRows(project.id), (t) => t.role === role),
     // The validated Mix final of each title: what the mastering works from.
-    supabase
-      .from("master_mix_versions")
-      .select(
-        "master_id, stage, decision, file:master_files!master_mix_versions_file_id_fkey(id, file_name, audio_state, version, created_at)",
-      )
-      .eq("project_id", project.id)
-      .eq("stage", "mix"),
+    whereRows(masterVersionRows(project.id), (v) => v.stage === "mix"),
     // Recorded and unchanged since: what the engineer will receive.
-    supabase
-      .from("master_briefs")
-      .select("recorded_at, content_changed_at")
-      .eq("project_id", project.id)
-      .maybeSingle(),
+    masterBriefRow(project.id),
   ]);
   // Every version of the mix round, for where each title stands (PROJ-BUG-06).
   const mixVersions = finals.data ?? [];

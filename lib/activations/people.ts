@@ -7,9 +7,9 @@ import type { ActionPerson } from "@/lib/activations/journey";
 import { requireApproved } from "@/lib/auth/dal";
 import { listValidatorRows, loadMembers } from "@/lib/framing/related";
 import { fr } from "@/lib/i18n/fr";
+import { listProjectCreatives } from "@/lib/projects/creatives";
 import { getProject } from "@/lib/projects/queries";
 import { personName } from "@/lib/projects/types";
-import { createClient } from "@/lib/supabase/server";
 
 /**
  * Who acts on a project's activations, for the person looking: the
@@ -22,7 +22,6 @@ import { createClient } from "@/lib/supabase/server";
  */
 export const loadActivationPeople = cache(async (projectId: string) => {
   const access = await requireApproved();
-  const supabase = await createClient();
   const [project, members, canValidate, validators, creatives] =
     await Promise.all([
       getProject(projectId),
@@ -31,10 +30,7 @@ export const loadActivationPeople = cache(async (projectId: string) => {
       access.organizationId
         ? listValidatorRows(access.organizationId)
         : Promise.resolve({ data: null, error: null }),
-      supabase
-        .from("project_creatives")
-        .select("person_id")
-        .eq("project_id", projectId),
+      listProjectCreatives(projectId),
     ]);
   const viewerId = access.personId;
   const nameOf = (id: string | null) =>
@@ -54,7 +50,7 @@ export const loadActivationPeople = cache(async (projectId: string) => {
     viaLink: false,
     viewer: canValidate,
   };
-  const creativeId = creatives.data?.[0]?.person_id ?? null;
+  const creativeId = creatives[0]?.personId ?? null;
   const creative: ActionPerson = creativeId
     ? { ...person(creativeId), viewer: canValidate }
     : direction;

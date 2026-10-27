@@ -14,6 +14,7 @@ import { questionsToAsk } from "@/lib/master-workflow/questions-plan";
 import { listProjectCreatives } from "@/lib/projects/creatives";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { personName } from "@/lib/projects/types";
+import { masterBriefRow } from "@/lib/master-workflow/shared-rows";
 import { createClient } from "@/lib/supabase/server";
 
 const isDimension = (value: string): value is QuestionDimension =>
@@ -28,11 +29,8 @@ const isDimension = (value: string): value is QuestionDimension =>
 export async function readQuestionInputs(projectId: string) {
   const supabase = await createClient();
   const [brief, creatives, questions] = await Promise.all([
-    supabase
-      .from("master_briefs")
-      .select("direction, deliverables")
-      .eq("project_id", projectId)
-      .maybeSingle(),
+    // Shared with the Master's other loaders in the same render.
+    masterBriefRow(projectId),
     listProjectCreatives(projectId),
     supabase
       .from("master_brief_questions")

@@ -11,7 +11,11 @@ import {
   type PendingValidation,
 } from "@/lib/framing/related";
 import { designStateOf, type DesignState } from "@/lib/design/rules";
-import { listDesignVersions, type DesignVersion } from "@/lib/design/versions";
+import {
+  projectDesignVersions,
+  type DesignVersion,
+} from "@/lib/design/versions";
+import { listProjectCreatives } from "@/lib/projects/creatives";
 import { deliverableTitle } from "@/lib/strategy/deliverable-title";
 import { createClient } from "@/lib/supabase/server";
 
@@ -58,39 +62,30 @@ export async function loadDesign(
     .maybeSingle();
   if (!project) return null;
 
-  const [
-    stageRes,
-    fieldsRes,
-    deliverablesRes,
-    creativesRes,
-    versions,
-    members,
-  ] = await Promise.all([
-    supabase
-      .from("project_stages")
-      .select("id, state, stage_definitions!inner(key)")
-      .eq("project_id", projectId)
-      .eq("stage_definitions.key", "design")
-      .maybeSingle(),
-    supabase
-      .from("current_field_values")
-      .select("*")
-      .eq("project_id", projectId)
-      .eq("deliverable", "design_doc"),
-    supabase
-      .from("strategy_deliverables")
-      .select(
-        "id, title, quantity, assignee_person_id, due_date, levers(label)",
-      )
-      .eq("project_id", projectId)
-      .order("created_at"),
-    supabase
-      .from("project_creatives")
-      .select("person_id")
-      .eq("project_id", projectId),
-    listDesignVersions(supabase, projectId),
-    loadMembers(access),
-  ]);
+  const [stageRes, fieldsRes, deliverablesRes, creatives, versions, members] =
+    await Promise.all([
+      supabase
+        .from("project_stages")
+        .select("id, state, stage_definitions!inner(key)")
+        .eq("project_id", projectId)
+        .eq("stage_definitions.key", "design")
+        .maybeSingle(),
+      supabase
+        .from("current_field_values")
+        .select("*")
+        .eq("project_id", projectId)
+        .eq("deliverable", "design_doc"),
+      supabase
+        .from("strategy_deliverables")
+        .select(
+          "id, title, quantity, assignee_person_id, due_date, levers(label)",
+        )
+        .eq("project_id", projectId)
+        .order("created_at"),
+      listProjectCreatives(projectId),
+      projectDesignVersions(projectId),
+      loadMembers(access),
+    ]);
 
   const stage = stageRes.data
     ? { id: stageRes.data.id, state: stageRes.data.state }
@@ -98,7 +93,7 @@ export async function loadDesign(
   const me = access.personId;
   const inProgress = stage?.state === "in_progress";
   const isOwner = me !== null && project.owner_person_id === me;
-  const isCreative = (creativesRes.data ?? []).some((c) => c.person_id === me);
+  const isCreative = creatives.some((c) => c.personId === me);
   const nameOf = new Map(members.map((m) => [m.personId, m.name]));
   const versionsOf = (deliverableId: string | null) =>
     versions.filter((v) => v.deliverableId === deliverableId);

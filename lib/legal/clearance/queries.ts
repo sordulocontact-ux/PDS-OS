@@ -15,6 +15,7 @@ import {
 import type { Clearance, Clearances } from "@/lib/legal/clearance/types";
 import { personName } from "@/lib/projects/types";
 import { listLegalPeople } from "@/lib/legal/legal-people";
+import { legalClearanceRows } from "@/lib/legal/shared-rows";
 import { createClient } from "@/lib/supabase/server";
 
 // The clearances of a project (ticket Juridique 05), with everything their
@@ -27,13 +28,7 @@ export async function loadClearances(
   const supabase = await createClient();
   const today = todayInParis(new Date());
   const [rows, people, contracts] = await Promise.all([
-    supabase
-      .from("legal_clearances")
-      .select(
-        "id, master_id, element, work, author, status, usage, rights_scope, scope_reason, responsible_person_id",
-      )
-      .eq("project_id", project.id)
-      .order("created_at"),
+    legalClearanceRows(project.id),
     access.organizationId
       ? listLegalPeople(access.organizationId)
       : Promise.resolve({ data: [], error: null }),

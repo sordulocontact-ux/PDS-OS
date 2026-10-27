@@ -16,6 +16,7 @@ import {
   type ProposedFact,
   type QuestionKey,
 } from "@/lib/legal/intake/types";
+import { legalClearanceRows } from "@/lib/legal/shared-rows";
 import { createClient } from "@/lib/supabase/server";
 import { memoPerRequest } from "@/lib/utils/request-memo";
 
@@ -100,10 +101,8 @@ async function readIntake(project: {
       .eq("project_id", project.id)
       .is("superseded_by_answer_id", null)
       .order("created_at"),
-    supabase
-      .from("legal_clearances")
-      .select("id", { count: "exact", head: true })
-      .eq("project_id", project.id),
+    // Counted from the project's clearances, read once per render.
+    legalClearanceRows(project.id),
     // What the Cadrage confirmed about rights and agreements.
     supabase
       .from("framing_constraints")
@@ -175,6 +174,6 @@ async function readIntake(project: {
   return {
     questions: intakeQuestions(knowledge),
     notAsked: notAskedQuestions(knowledge),
-    clearances: clearances.count ?? 0,
+    clearances: (clearances.data ?? []).length,
   };
 }

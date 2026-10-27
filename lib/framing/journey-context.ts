@@ -6,6 +6,7 @@ import { requireApproved } from "@/lib/auth/dal";
 import { assessFraming } from "@/lib/framing/assess";
 import { framingJourney } from "@/lib/framing/journey";
 import { framingStarted, loadFramingKnowledge } from "@/lib/framing/knowledge";
+import { projectPlanRow } from "@/lib/plan/queries";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { getProject } from "@/lib/projects/queries";
 import { personName } from "@/lib/projects/types";
@@ -50,14 +51,7 @@ async function loadFramingCall(
 
 /** When the plan was launched, and by whom (project_plans). */
 async function loadPlanLaunch(projectId: string) {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("project_plans")
-    .select(
-      "launched_at, launcher:people!project_plans_launched_by_fkey(first_name, last_name)",
-    )
-    .eq("project_id", projectId)
-    .maybeSingle();
+  const { data } = await projectPlanRow(projectId);
   return data
     ? {
         launchedAt: data.launched_at,

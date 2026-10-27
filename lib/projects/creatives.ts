@@ -7,8 +7,11 @@ import { createClient } from "@/lib/supabase/server";
 
 export type CreativeMember = { personId: string; name: string };
 
-// Creative directors of a project (RLS: only people who see the project).
-export async function listProjectCreatives(
+// Creative directors of a project (RLS: only people who see the project),
+// oldest first. Once per request: a project page's loaders (Cadrage,
+// Conception, Master, Production, Activations…) all ask for them (page loads
+// audit, docs/ARCHITECTURE.md § 3 bis).
+export const listProjectCreatives = cache(async function listProjectCreatives(
   projectId: string,
 ): Promise<CreativeMember[]> {
   const supabase = await createClient();
@@ -29,7 +32,7 @@ export async function listProjectCreatives(
       ? personName(row.person.first_name, row.person.last_name)
       : "",
   }));
-}
+});
 
 // Every creative director of the organization, for the picker. Once per
 // request (several loaders of a project page name them).

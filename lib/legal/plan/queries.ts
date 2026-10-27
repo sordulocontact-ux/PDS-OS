@@ -15,6 +15,11 @@ import {
 } from "@/lib/legal/plan/proposal";
 import { personName } from "@/lib/projects/types";
 import { listLegalPeople } from "@/lib/legal/legal-people";
+import {
+  legalClearanceRows,
+  legalIntakeRow,
+  legalPlanRow,
+} from "@/lib/legal/shared-rows";
 import { createClient } from "@/lib/supabase/server";
 
 export type PlanRow = PlanItem & {
@@ -51,12 +56,7 @@ const COLUMN_OF: Record<string, PlanColumn> = {
 export async function listPlanClearances(
   projectId: string,
 ): Promise<PlanClearance[]> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("legal_clearances")
-    .select("id, master_id, element, work, author, status")
-    .eq("project_id", projectId)
-    .order("created_at");
+  const { data, error } = await legalClearanceRows(projectId);
   if (error) console.error("listPlanClearances:", error.message);
   return (data ?? []).map((row) => ({
     id: row.id,
@@ -100,16 +100,8 @@ export async function loadLegalPlan(
 ): Promise<LegalPlan> {
   const supabase = await createClient();
   const [intake, plan, people] = await Promise.all([
-    supabase
-      .from("legal_intakes")
-      .select("status")
-      .eq("project_id", project.id)
-      .maybeSingle(),
-    supabase
-      .from("legal_plans")
-      .select("id, launched_at, launched_by")
-      .eq("project_id", project.id)
-      .maybeSingle(),
+    legalIntakeRow(project.id),
+    legalPlanRow(project.id),
     access.organizationId
       ? listLegalPeople(access.organizationId)
       : Promise.resolve({ data: [], error: null }),

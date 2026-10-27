@@ -27,6 +27,37 @@ export type LeverBoard = {
   items: LeverItem[];
 };
 
+/** The rows « Leviers à préparer » is computed from, once per request: they
+ * do not depend on the activations, so a journey starts them with the
+ * board instead of after it (page loads audit, docs/ARCHITECTURE.md § 3 bis). */
+export const loadLeverRows = cache(async (projectId: string) => {
+  const supabase = await createClient();
+  const [brief, levers, choices] = await Promise.all([
+    supabase
+      .from("strategy_documents")
+      .select("version")
+      .eq("project_id", projectId)
+      .eq("kind", "brief")
+      .eq("state", "approved")
+      .order("version", { ascending: false })
+      .limit(1),
+    supabase
+      .from("levers")
+      .select("id, label")
+      .eq("project_id", projectId)
+      .eq("state", "selected")
+      .eq("review_status", "confirmed")
+      .order("created_at"),
+    supabase
+      .from("activation_lever_choices")
+      .select("lever_id, state")
+      .eq("project_id", projectId),
+  ]);
+  const failed = [brief, levers, choices].map((r) => r.error).find(Boolean);
+  if (failed) console.error("loadLevers:", failed.message);
+  return { brief, levers, choices };
+});
+
 /**
  * « Leviers à préparer » (proto ac0): each lever retained in the validated
  * Brief de sortie, and whether an activation was created from it, it waits
@@ -38,30 +69,7 @@ export const loadLevers = cache(
     projectId: string,
     activations: ActivationRecord[],
   ): Promise<LeverBoard> => {
-    const supabase = await createClient();
-    const [brief, levers, choices] = await Promise.all([
-      supabase
-        .from("strategy_documents")
-        .select("version")
-        .eq("project_id", projectId)
-        .eq("kind", "brief")
-        .eq("state", "approved")
-        .order("version", { ascending: false })
-        .limit(1),
-      supabase
-        .from("levers")
-        .select("id, label")
-        .eq("project_id", projectId)
-        .eq("state", "selected")
-        .eq("review_status", "confirmed")
-        .order("created_at"),
-      supabase
-        .from("activation_lever_choices")
-        .select("lever_id, state")
-        .eq("project_id", projectId),
-    ]);
-    const failed = [brief, levers, choices].map((r) => r.error).find(Boolean);
-    if (failed) console.error("loadLevers:", failed.message);
+    const { brief, levers, choices } = await loadLeverRows(projectId);
     const version = brief.data?.[0]?.version ?? null;
     if (version === null) return { briefVersion: null, items: [] };
     return {

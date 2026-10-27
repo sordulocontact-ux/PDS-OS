@@ -12,6 +12,7 @@ import {
   type JourneySheet,
 } from "@/lib/design/journey";
 import { loadDesignPeople } from "@/lib/design/people";
+import { loadMembers } from "@/lib/framing/related";
 import { sheetPhase, type SheetPhaseView } from "@/lib/design/sheet-phase";
 import { loadFacts, type SheetFacts } from "@/lib/design/sheets";
 import { getProject } from "@/lib/projects/queries";
@@ -126,16 +127,32 @@ const readDesignContext = byProjectVersion(
       getProject(projectId),
     ]);
     if (!project || project.stages.length === 0) return null;
-    const data = await loadConception(project, access);
+    // One wave instead of three (page loads audit, docs/ARCHITECTURE.md
+    // § 3 bis): the people start with the reader's organization (the
+    // project's, under RLS) and the direction with the members list
+    // (loadDesignPeople's `members` is the same cached loadMembers list).
+    const conception = loadConception(project, access);
+    const peopleRead = access.organizationId
+      ? loadDesignPeople(projectId, access.organizationId, access)
+      : null;
+    const [data, early, start, call, briefs, facts, direction] =
+      await Promise.all([
+        conception,
+        peopleRead,
+        loadStart(projectId),
+        loadDesignCall(projectId),
+        loadCreativeBriefs(projectId),
+        loadFacts(projectId),
+        loadMembers(access).then((members) =>
+          loadDirection(projectId, members),
+        ),
+      ]);
     if (!data) return null;
-    const [people, start, call, briefs, facts] = await Promise.all([
-      loadDesignPeople(projectId, data.organizationId, access),
-      loadStart(projectId),
-      loadDesignCall(projectId),
-      loadCreativeBriefs(projectId),
-      loadFacts(projectId),
-    ]);
-    const direction = await loadDirection(projectId, people.members);
+    // Never another organization than the project's.
+    const people =
+      early && access.organizationId === data.organizationId
+        ? early
+        : await loadDesignPeople(projectId, data.organizationId, access);
     const me = access.personId;
     const nameOf = (id: string | null) =>
       id ? (people.members.find((m) => m.personId === id)?.name ?? "") : "";

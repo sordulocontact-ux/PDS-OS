@@ -4,11 +4,13 @@ import { cache } from "react";
 
 import { requireApproved } from "@/lib/auth/dal";
 import { loadBudget } from "@/lib/budget/queries";
+import { loadMembers } from "@/lib/framing/related";
 import { todayInParis } from "@/lib/insights/dates";
 import { isWorkflowLaunched, planLaunchedAt } from "@/lib/plan/queries";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { getProject } from "@/lib/projects/queries";
 import { personName } from "@/lib/projects/types";
+import { byProjectVersion } from "@/lib/projects/version-cache";
 import { strategyModel } from "@/lib/strategy/dimension-model";
 import { approvedOf, latestOf, sentOf } from "@/lib/strategy/documents/model";
 import { loadStrategyDocuments } from "@/lib/strategy/documents/queries";
@@ -32,28 +34,38 @@ import { allInOrder } from "@/lib/utils/parallel";
  * exchange, the Brief's versions, the lines of « Les 8 dimensions » and
  * the journey for the person looking. Null when the project cannot be read
  * or is not launched.
+ *
+ * Kept per project version (page loads audit, docs/ARCHITECTURE.md § 3 bis):
+ * the result is plain data (no function), so byProjectVersion keeps it.
  */
-export const strategyStepData = cache(async (projectId: string) => {
+export const strategyStepData = cache(
+  byProjectVersion("strategy-context", readStrategyStepData),
+);
+
+async function readStrategyStepData(projectId: string) {
   const [access, project] = await allInOrder([
     requireApproved(),
     getProject(projectId),
   ]);
   if (!project || project.stages.length === 0) return null;
-  const [data, budget, launched, launchedAt, call, sources] = await Promise.all(
-    [
+  // The documents only need the members (loadStrategy's `members` is the
+  // same cached loadMembers list) and the sources' labels only the sources:
+  // both start with the first wave instead of after it.
+  const sourcesRead = loadDimensionSources(projectId);
+  const [data, budget, launched, launchedAt, call, sources, docs, itemSources] =
+    await Promise.all([
       loadStrategy(projectId, access),
       loadBudget(projectId),
       isWorkflowLaunched(projectId, "strategy"),
       planLaunchedAt(projectId),
       loadStrategyCall(projectId),
-      loadDimensionSources(projectId),
-    ],
-  );
+      sourcesRead,
+      loadMembers(access).then((members) =>
+        loadStrategyDocuments(projectId, members),
+      ),
+      sourcesRead.then((s) => loadItemSources(projectId, sourcedItemIds(s))),
+    ]);
   if (!data) return null;
-  const [docs, itemSources] = await Promise.all([
-    loadStrategyDocuments(projectId, data.members),
-    loadItemSources(projectId, sourcedItemIds(sources)),
-  ]);
 
   const names = new Map(data.members.map((m) => [m.personId, m.name]));
   const name = (id: string | null) => (id ? (names.get(id) ?? null) : null);
@@ -189,7 +201,7 @@ export const strategyStepData = cache(async (projectId: string) => {
     viewerName:
       personName(access.firstName ?? "", access.lastName ?? "") || null,
   };
-});
+}
 
 export type StrategyStepData = NonNullable<
   Awaited<ReturnType<typeof strategyStepData>>

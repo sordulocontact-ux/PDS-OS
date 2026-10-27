@@ -1,7 +1,13 @@
 import "server-only";
 
 import { audioStateOf, type AudioState } from "@/lib/catalog/title-rules";
+import { listProjectCreatives } from "@/lib/projects/creatives";
 import { personName } from "@/lib/projects/types";
+import {
+  masterBriefRow,
+  masterTransmissionRows,
+  masterVersionRows,
+} from "@/lib/master-workflow/shared-rows";
 import { createClient } from "@/lib/supabase/server";
 
 // What the Master's journey reads (lib/master-workflow/journey.ts), in one
@@ -193,35 +199,12 @@ export async function loadMasterJourneyFacts(project: {
       )
       .eq("project_id", project.id)
       .order("created_at", { ascending: false }),
-    supabase
-      .from("master_briefs")
-      .select(
-        "created_at, updated_at, recorded_at, content_changed_at, start_mode, direction, references_text, constraints_text, validator_person_id, mix_contact_id, mastering_same_engineer, mastering_contact_id, deliverables, master_final_due, validator:people!master_briefs_validator_person_id_fkey(first_name, last_name), updater:people!master_briefs_updated_by_fkey(first_name, last_name), recorder:people!master_briefs_recorded_by_fkey(first_name, last_name), mix:network_contacts!master_briefs_mix_contact_same_org(name), mastering:network_contacts!master_briefs_mastering_contact_same_org(name), mix_person_id, mastering_person_id, mix_assigned_at, mastering_assigned_at, mixer:people!master_briefs_mix_person_id_fkey(first_name, last_name), masterer:people!master_briefs_mastering_person_id_fkey(first_name, last_name)",
-      )
-      .eq("project_id", project.id)
-      .maybeSingle(),
-    supabase
-      .from("project_creatives")
-      .select(
-        "person_id, person:people!project_creatives_person_id_fkey(first_name, last_name)",
-      )
-      .eq("project_id", project.id)
-      .order("created_at")
-      .limit(1),
-    supabase
-      .from("master_transmissions")
-      .select(
-        "id, role, contact_id, created_at, link_sent_at, opened_at, acknowledged_at, delivered_at, revoked_at, revoke_reason, expires_at, continues_id, contact:network_contacts!master_transmissions_contact_same_org(name), sender:people!master_transmissions_created_by_fkey(first_name, last_name)",
-      )
-      .eq("project_id", project.id)
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("master_mix_versions")
-      .select(
-        "id, master_id, stage, number, created_at, feedback_sent_at, decision, decided_at, reopened_at, reopen_reason, source_file_id, file:master_files!master_mix_versions_file_id_fkey(file_name), author:people!master_mix_versions_created_by_fkey(first_name, last_name), decider:people!master_mix_versions_decided_by_fkey(first_name, last_name)",
-      )
-      .eq("project_id", project.id)
-      .order("number", { ascending: false }),
+    // The brief, the sendings and the versions: shared with the step's own
+    // loaders in the same render (lib/master-workflow/shared-rows.ts).
+    masterBriefRow(project.id),
+    listProjectCreatives(project.id),
+    masterTransmissionRows(project.id),
+    masterVersionRows(project.id),
     supabase
       .from("master_deliverables_received")
       .select(
@@ -293,7 +276,7 @@ export async function loadMasterJourneyFacts(project: {
     console.error("loadMasterJourneyFacts:", errors[0]?.message);
 
   const b = brief.data;
-  const creative = creatives.data?.[0];
+  const creative = creatives[0];
   return {
     titles: project.masters.map((m) => ({
       ...m,
@@ -364,7 +347,7 @@ export async function loadMasterJourneyFacts(project: {
         }
       : null,
     creative: creative
-      ? { personId: creative.person_id, name: nameOf(creative.person) ?? "" }
+      ? { personId: creative.personId, name: creative.name }
       : null,
     transmissions: (transmissions.data ?? []).map((t) => ({
       id: t.id,

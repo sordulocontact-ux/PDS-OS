@@ -26,6 +26,7 @@ import { planBoard } from "@/lib/legal/plan/board";
 import { legalReadiness } from "@/lib/legal/readiness/controls";
 import { loadReadinessInputs } from "@/lib/legal/readiness/queries";
 import { loadLegalPlan, proposeLegalPlan } from "@/lib/legal/plan/queries";
+import { legalPlanRow } from "@/lib/legal/shared-rows";
 import { loadSplits } from "@/lib/legal/splits/queries";
 import { loadTracking } from "@/lib/legal/tracking/queries";
 import { requireLaunchedProject } from "@/lib/projects/queries";
@@ -75,6 +76,7 @@ export const legalJourneyContext = cache(
       direction,
       templateRequests,
       invoiceStates,
+      readinessInputs,
     ] = await Promise.all([
       loadIntake(project),
       loadLegalInventory(project, access),
@@ -89,6 +91,12 @@ export const legalJourneyContext = cache(
       validatorName(access.organizationId),
       loadTemplateRequests(projectId),
       loadInvoiceStates(projectId),
+      // « Prêt pour la sortie » once the plan is launched (the Suivi's
+      // condition, same row): read in this round trip, not after it (page
+      // loads audit, docs/ARCHITECTURE.md § 3 bis).
+      legalPlanRow(projectId).then(({ data }) =>
+        data?.launched_at ? loadReadinessInputs(project, access) : null,
+      ),
     ]);
     const ownerPerson = project.ownerPersonId
       ? { personId: project.ownerPersonId, name: project.ownerName ?? "—" }
@@ -140,7 +148,7 @@ export const legalJourneyContext = cache(
     // « Prêt pour la sortie », once the plan is launched (ticket 08).
     const readiness = board
       ? legalReadiness({
-          ...(await loadReadinessInputs(project, access)),
+          ...(readinessInputs ?? (await loadReadinessInputs(project, access))),
           demarches,
           direction: direction ?? fr.legalDemarches.direction,
           invoices: invoiceStates,

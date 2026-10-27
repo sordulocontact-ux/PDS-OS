@@ -4,11 +4,7 @@ import { can, type Access } from "@/lib/auth/access";
 import { routes } from "@/lib/auth/redirects";
 import { isBudgetStatus } from "@/lib/budget/types";
 import { asCallStatus } from "@/lib/calls/constants";
-import {
-  BRIEF_COLUMNS,
-  briefFromRow,
-  emptyBrief,
-} from "@/lib/master-workflow/brief-row";
+import { briefFromRow, emptyBrief } from "@/lib/master-workflow/brief-row";
 import type {
   BriefPerson,
   BriefView,
@@ -28,12 +24,11 @@ import {
   canSeeProjectBudget,
 } from "@/lib/projects/edit-access";
 import { personName } from "@/lib/projects/types";
+import { masterBriefRow } from "@/lib/master-workflow/shared-rows";
 import { createClient } from "@/lib/supabase/server";
 
 // From these states on, the call has a transcript to propose from.
 const TRANSCRIBED = ["transcribed", "extracting", "ready"];
-
-const BRIEF_SELECT = `${BRIEF_COLUMNS}, updated_at, updater:people!master_briefs_updated_by_fkey(first_name, last_name)`;
 
 /**
  * The contact credited for a role on the project's titles, when it is one
@@ -73,11 +68,8 @@ export async function loadMasterBrief(
   const [rows, saved, creatives, exchanges, budget, framing, members] =
     await Promise.all([
       readMasterRows(project.id, project.masters),
-      supabase
-        .from("master_briefs")
-        .select(BRIEF_SELECT)
-        .eq("project_id", project.id)
-        .maybeSingle(),
+      // Shared with the Master's other loaders in the same render.
+      masterBriefRow(project.id),
       listProjectCreatives(project.id),
       supabase
         .from("master_brief_calls")

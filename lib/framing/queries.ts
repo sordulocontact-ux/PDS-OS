@@ -156,33 +156,34 @@ export async function loadFraming(
   const openPoints = pointsRes.data ?? [];
   const tasks = tasksRes.data ?? [];
 
-  const provenanceOf = await provenanceLookup(
-    [
-      ...fieldRows,
-      ...needs,
-      ...team,
-      ...constraints,
-      ...openPoints.map((p) => ({
-        source_report_item_id: p.source_report_item_id,
-      })),
-    ],
-    members,
-  );
-  const pendingValidation = await loadPendingValidation(
-    stage?.id ?? null,
-    members,
-  );
-
   // Next actions of imported reports that have not become tasks yet.
   const importedIds = reports.filter((r) => r.imported).map((r) => r.reportId);
-  const { data: actionItems } = importedIds.length
-    ? await supabase
-        .from("report_items")
-        .select("*")
-        .in("report_id", importedIds)
-        .eq("kind", "next_action")
-        .order("position")
-    : { data: [] as ReportItem[] };
+  // Three independent reads, in one round trip instead of three in a row
+  // (page loads audit, docs/ARCHITECTURE.md § 3 bis).
+  const [provenanceOf, pendingValidation, { data: actionItems }] =
+    await Promise.all([
+      provenanceLookup(
+        [
+          ...fieldRows,
+          ...needs,
+          ...team,
+          ...constraints,
+          ...openPoints.map((p) => ({
+            source_report_item_id: p.source_report_item_id,
+          })),
+        ],
+        members,
+      ),
+      loadPendingValidation(stage?.id ?? null, members),
+      importedIds.length
+        ? supabase
+            .from("report_items")
+            .select("*")
+            .in("report_id", importedIds)
+            .eq("kind", "next_action")
+            .order("position")
+        : { data: [] as ReportItem[] },
+    ]);
   const converted = new Set(tasks.map((t) => t.source_report_item_id));
 
   return {

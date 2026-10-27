@@ -15,6 +15,7 @@ import {
   type QuestionKey,
 } from "@/lib/legal/intake/types";
 import { personName } from "@/lib/projects/types";
+import { legalIntakeRow } from "@/lib/legal/shared-rows";
 import { createClient } from "@/lib/supabase/server";
 
 export type Confirmation = {
@@ -50,11 +51,7 @@ export async function loadConfirmation(
       can(access, "manage_catalog"),
     ),
     loadIntake(project),
-    supabase
-      .from("legal_intakes")
-      .select("status, confirmed_at, confirmed_by")
-      .eq("project_id", project.id)
-      .maybeSingle(),
+    legalIntakeRow(project.id),
     supabase
       .from("legal_facts")
       .select("question_key, master_id, kind, value, status")

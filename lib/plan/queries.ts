@@ -43,19 +43,32 @@ const nameOf = (
   person: { first_name: string; last_name: string | null } | null,
 ) => (person ? personName(person.first_name, person.last_name) : null);
 
-/** The plan of a project once launched, its steps in order and its history
- * (PROJ-UX-07), newest change first. */
-export async function loadLaunchedPlan(
-  projectId: string,
-): Promise<LaunchedPlan | null> {
+/**
+ * The project's plan row (one per project, null before « Lancer le plan »),
+ * once per request: the navigation, the overview, the locks, the Cadrage
+ * and the Distribution each asked for it (page loads audit,
+ * docs/ARCHITECTURE.md § 3 bis). The launcher is a left-joined embed: a
+ * person hidden by RLS reads as null, the plan row stays. Shared: callers
+ * never change it.
+ */
+export const projectPlanRow = cache(async (projectId: string) => {
   const supabase = await createClient();
-  const { data: plan } = await supabase
+  return supabase
     .from("project_plans")
     .select(
       "id, launched_at, launcher:people!project_plans_launched_by_fkey(first_name, last_name)",
     )
     .eq("project_id", projectId)
     .maybeSingle();
+});
+
+/** The plan of a project once launched, its steps in order and its history
+ * (PROJ-UX-07), newest change first. */
+export async function loadLaunchedPlan(
+  projectId: string,
+): Promise<LaunchedPlan | null> {
+  const supabase = await createClient();
+  const { data: plan } = await projectPlanRow(projectId);
   if (!plan) return null;
   const [{ data: items }, { data: events }] = await Promise.all([
     supabase
@@ -116,12 +129,7 @@ export async function loadLaunchedPlan(
  */
 export const planLaunchedAt = cache(
   async (projectId: string): Promise<string | null> => {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("project_plans")
-      .select("launched_at")
-      .eq("project_id", projectId)
-      .maybeSingle();
+    const { data, error } = await projectPlanRow(projectId);
     if (error) console.error("planLaunchedAt:", error.message);
     return data?.launched_at ?? null;
   },
@@ -189,11 +197,7 @@ export async function workflowGate(
   const supabase = await createClient();
   const [launched, plan, item] = await Promise.all([
     isWorkflowLaunched(project.id, workflow),
-    supabase
-      .from("project_plans")
-      .select("id")
-      .eq("project_id", project.id)
-      .maybeSingle(),
+    projectPlanRow(project.id),
     supabase
       .from("project_plan_items")
       .select("id")

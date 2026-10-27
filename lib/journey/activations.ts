@@ -2,7 +2,7 @@ import "server-only";
 
 import { loadActivationsBoard } from "@/lib/activations/board";
 import { isGated, phaseOf } from "@/lib/activations/phase";
-import { loadLevers } from "@/lib/activations/levers";
+import { loadLeverRows, loadLevers } from "@/lib/activations/levers";
 import {
   loadActivationPeople,
   type ActivationPeople,
@@ -90,6 +90,13 @@ function stepsOf(
 export async function activationsJourneys(
   projectId: string,
 ): Promise<ModuleJourney[]> {
+  // The people and the levers' rows do not depend on the board: read in
+  // the same round trip (page loads audit, docs/ARCHITECTURE.md § 3 bis).
+  const peopleRead = loadActivationPeople(projectId);
+  const leverRowsRead = loadLeverRows(projectId);
+  // Awaited below unless the board fails: never an unhandled rejection.
+  peopleRead.catch(() => {});
+  leverRowsRead.catch(() => {});
   let board: Awaited<ReturnType<typeof loadActivationsBoard>>;
   try {
     board = await loadActivationsBoard(projectId);
@@ -98,8 +105,10 @@ export async function activationsJourneys(
     console.error("activationsJourneys:", error);
     return [];
   }
-  const people = await loadActivationPeople(projectId);
-  const levers = await loadLevers(projectId, board.data.activations);
+  const [people, levers] = await Promise.all([
+    peopleRead,
+    loadLevers(projectId, board.data.activations),
+  ]);
   const steps: JourneyStep[] = [];
   if (levers.items.length > 0) {
     const proposed = levers.items.filter((l) => l.state === "proposed").length;

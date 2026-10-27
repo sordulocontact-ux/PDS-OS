@@ -10,6 +10,11 @@ import {
 } from "@/lib/master-workflow/brief-types";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { personName } from "@/lib/projects/types";
+import {
+  masterBriefRow,
+  masterVersionRows,
+  whereRows,
+} from "@/lib/master-workflow/shared-rows";
 import { createClient } from "@/lib/supabase/server";
 import { argsKey, memoPerRequest } from "@/lib/utils/request-memo";
 
@@ -88,14 +93,12 @@ async function readFinalView(
   const none = Promise.resolve({ data: [], error: null });
   const [finals, masters, catalogFinals, brief, received, mixFinals, sources] =
     await Promise.all([
-      supabase
-        .from("master_mix_versions")
-        .select(
-          "master_id, number, decided_at, file:master_files!master_mix_versions_file_id_fkey(id, file_name, path), decider:people!master_mix_versions_decided_by_fkey(first_name, last_name)",
-        )
-        .eq("project_id", project.id)
-        .eq("stage", "mastering")
-        .eq("decision", "approved"),
+      // Shared with the Master's other loaders in the same render
+      // (lib/master-workflow/shared-rows.ts).
+      whereRows(
+        masterVersionRows(project.id),
+        (v) => v.stage === "mastering" && v.decision === "approved",
+      ),
       ids.length
         ? supabase
             .from("masters")
@@ -110,27 +113,17 @@ async function readFinalView(
             .eq("audio_state", "final_master")
             .order("created_at", { ascending: false })
         : none,
-      supabase
-        .from("master_briefs")
-        .select(
-          "deliverables, mastering_same_engineer, mix:network_contacts!master_briefs_mix_contact_same_org(name), mastering:network_contacts!master_briefs_mastering_contact_same_org(name)",
-        )
-        .eq("project_id", project.id)
-        .maybeSingle(),
+      masterBriefRow(project.id),
       supabase
         .from("master_deliverables_received")
         .select(
           "master_id, deliverable, created_at, via_link, file:master_files!master_deliverables_received_file_id_fkey(file_name)",
         )
         .eq("project_id", project.id),
-      supabase
-        .from("master_mix_versions")
-        .select(
-          "master_id, number, file:master_files!master_mix_versions_file_id_fkey(file_name)",
-        )
-        .eq("project_id", project.id)
-        .eq("stage", "mix")
-        .eq("decision", "approved"),
+      whereRows(
+        masterVersionRows(project.id),
+        (v) => v.stage === "mix" && v.decision === "approved",
+      ),
       supabase
         .from("master_flow_sources")
         .select(

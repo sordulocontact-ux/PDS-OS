@@ -14,6 +14,7 @@ import { loadLightFacts } from "@/lib/production/light/queries";
 import { proposalState } from "@/lib/production/proposal/model";
 import { trackOf } from "@/lib/production/track";
 import { loadProposalVersions } from "@/lib/production/proposal/queries";
+import { listProjectCreatives } from "@/lib/projects/creatives";
 import { createClient } from "@/lib/supabase/server";
 
 import { journeySteps } from "./steps";
@@ -55,10 +56,7 @@ const journeyRows = cache(
             .eq("sheet_id", sheetId)
             .order("number", { ascending: true })
         : null,
-      supabase
-        .from("project_creatives")
-        .select("person_id")
-        .eq("project_id", projectId),
+      listProjectCreatives(projectId),
       sheetId
         ? supabase
             .from("production_location_options")
@@ -125,7 +123,7 @@ export const loadJourney = cache(
     const [
       preprod,
       quotesRes,
-      creativesRes,
+      creativeRows,
       optionsRes,
       versionsRes,
       tools,
@@ -160,10 +158,10 @@ export const loadJourney = cache(
       viewer: false,
       viaLink: false,
     };
-    const creatives = (creativesRes.data ?? []).map((c) =>
+    const creatives = creativeRows.map((c) =>
       person(
-        c.person_id,
-        data.members.find((m) => m.personId === c.person_id)?.name ?? null,
+        c.personId,
+        data.members.find((m) => m.personId === c.personId)?.name ?? null,
       ),
     );
     const creative =

@@ -216,66 +216,46 @@ async function legalFacts(project: Project) {
   };
 }
 
+// The Distribution's raw rows, in one call (distribution_status_rows: the
+// filters live there, the state is still decided by distributionState).
+type DistributionRows = {
+  release: { isrc: string | null; planned_release_date: string | null } | null;
+  version: { number: number; status: string } | null;
+  declarations: Array<{
+    version_number: number;
+    kind: string;
+    declared_at: string;
+  }>;
+  verified_platforms: number;
+  closure: {
+    kind: string;
+    status: string;
+    reserves: unknown;
+    proposed_at: string;
+    decided_at: string | null;
+  } | null;
+  params_confirmed_at: string | null;
+};
+
 async function distributionFacts(projectId: string) {
   const supabase = await createClient();
-  const [
-    release,
-    versions,
-    declarations,
-    platforms,
-    closures,
-    launchedAt,
-    dossier,
-    cover,
-    blockers,
-  ] = await Promise.all([
+  const [rows, launchedAt, cover, blockers] = await Promise.all([
     supabase
-      .from("releases")
-      .select("isrc, planned_release_date")
-      .eq("project_id", projectId)
-      .order("created_at", { ascending: true })
-      .limit(1)
-      .maybeSingle(),
-    supabase
-      .from("distribution_versions")
-      .select("number, status")
-      .eq("project_id", projectId)
-      .is("superseded_at", null)
-      .order("number", { ascending: false })
-      .limit(1),
-    supabase
-      .from("distribution_declarations")
-      .select("version_number, kind, declared_at")
-      .eq("project_id", projectId)
-      .is("withdrawn_at", null)
-      .order("declared_at", { ascending: false }),
-    supabase
-      .from("distribution_platforms")
-      .select("platform")
-      .eq("project_id", projectId)
-      .eq("verification", "verified")
-      .in("platform", [...REFERENCE_PLATFORMS]),
-    supabase
-      .from("distribution_closures")
-      .select("kind, status, reserves, proposed_at, decided_at, reopened_at")
-      .eq("project_id", projectId)
-      .is("reopened_at", null)
-      .in("status", ["pending", "closed"])
-      .limit(1)
-      .maybeSingle(),
+      .rpc("distribution_status_rows", {
+        p_project_id: projectId,
+        p_reference_platforms: [...REFERENCE_PLATFORMS],
+      })
+      .then(({ data, error }) => {
+        if (error) console.error("distributionFacts:", error.message);
+        return (data as DistributionRows | null) ?? null;
+      }),
     // The Distribution starts with the plan (lib/distribution/journey-context.ts).
     planLaunchedAt(projectId),
-    supabase
-      .from("distribution_dossiers")
-      .select("params_confirmed_at")
-      .eq("project_id", projectId)
-      .maybeSingle(),
     distributionCover(projectId),
     distributionLegalBlockers(projectId),
   ]);
-  const open = closures.data;
-  if (release.error) console.error("distributionFacts:", release.error.message);
-  const latest = versions.data?.[0] ?? null;
+  const open = rows?.closure ?? null;
+  const latest = rows?.version ?? null;
   const status = latest?.status;
   const version: DistributionFacts["version"] =
     latest &&
@@ -283,7 +263,7 @@ async function distributionFacts(projectId: string) {
       ? { number: latest.number, status }
       : null;
   // Only the current cycle's declarations, each kind read on its own.
-  const own = (declarations.data ?? []).filter(
+  const own = (rows?.declarations ?? []).filter(
     (d) =>
       version?.status === "approved" && d.version_number === version.number,
   );
@@ -291,7 +271,7 @@ async function distributionFacts(projectId: string) {
   const outcome = own.find(
     (d) => d.kind === "corrections_requested" || d.kind === "accepted",
   );
-  const data = release.data;
+  const data = rows?.release ?? null;
   // Like the other workflows, the Distribution starts when the plan is
   // launched (proto « Projet complet »); one begun before (a release
   // recorded) keeps going.
@@ -312,7 +292,7 @@ async function distributionFacts(projectId: string) {
   const state = distributionState(
     {
       launched: Boolean(launchedAt),
-      paramsConfirmed: Boolean(dossier.data?.params_confirmed_at),
+      paramsConfirmed: Boolean(rows?.params_confirmed_at),
       recorded: data !== null,
       isrc: Boolean(data?.isrc),
       plannedDate: data?.planned_release_date ?? null,
@@ -325,7 +305,7 @@ async function distributionFacts(projectId: string) {
           : null,
       delivered: own.some((d) => d.kind === "platforms_delivered"),
       platforms: {
-        verified: platforms.data?.length ?? 0,
+        verified: rows?.verified_platforms ?? 0,
         reference: REFERENCE_PLATFORMS.length,
       },
       closure:

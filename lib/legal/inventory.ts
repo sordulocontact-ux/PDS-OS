@@ -3,7 +3,7 @@ import "server-only";
 import { can, type Access } from "@/lib/auth/access";
 import { contractStateOf, todayInParis } from "@/lib/contracts/types";
 import { readInventoryRows } from "@/lib/legal/inventory-rows";
-import { createClient } from "@/lib/supabase/server";
+import { legalClearanceRows } from "@/lib/legal/shared-rows";
 import { splitStates, type SplitState } from "@/lib/legal/splits/queries";
 import { unlinkedCreditsByName } from "@/lib/facts/credit-contact";
 import { peopleFacts } from "@/lib/legal/people-facts";
@@ -36,20 +36,18 @@ export async function loadLegalInventory(
   // (credits, shares, rights, declarations). The database checks it again.
   const readSplits = can(access, "manage_catalog");
   const canEditCatalog = readSplits;
-  const supabase = await createClient();
   const [rows, splitOf, clearances] = await Promise.all([
     readInventoryRows(project.id, project.masters, readSplits),
     readSplits
       ? splitStates(project.id)
       : Promise.resolve(new Map<string, SplitState>()),
-    supabase
-      .from("legal_clearances")
-      .select("id", { count: "exact", head: true })
-      .eq("project_id", project.id)
-      .neq("status", "abandoned"),
+    // Counted from the project's clearances, read once per render.
+    legalClearanceRows(project.id),
   ]);
   // The borrowings the project follows: where a Cadrage constraint goes.
-  const borrowings = clearances.count ?? 0;
+  const borrowings = (clearances.data ?? []).filter(
+    (c) => c.status !== "abandoned",
+  ).length;
   const today = todayInParis(new Date());
   // What proves the rights of a complete split (JUR-01): a signed contract
   // still in force.

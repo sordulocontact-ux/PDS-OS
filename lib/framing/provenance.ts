@@ -14,7 +14,10 @@ type Sourced = {
 
 /**
  * Resolves the call each sourced row comes from (item → report → call), in
- * three small queries, so every value can link back to its origin.
+ * one query (nested, left-joined embeds: each table still under its own RLS,
+ * a hidden report or call reads as null exactly like the three separate
+ * reads it replaces; page loads audit, docs/ARCHITECTURE.md § 3 bis), so
+ * every value can link back to its origin.
  */
 export async function resolveProvenance(
   rows: Sourced[],
@@ -32,33 +35,20 @@ export async function resolveProvenance(
   const supabase = await createClient();
   const { data: items } = await supabase
     .from("report_items")
-    .select("id, report_id, located")
+    .select("id, located, report:call_reports(call_id, call:calls(title))")
     .in("id", itemIds);
-  const reportIds = [...new Set((items ?? []).map((i) => i.report_id))];
-  const { data: reports } = await supabase
-    .from("call_reports")
-    .select("id, call_id")
-    .in("id", reportIds);
-  const callIds = [...new Set((reports ?? []).map((r) => r.call_id))];
-  const { data: calls } = await supabase
-    .from("calls")
-    .select("id, title")
-    .in("id", callIds);
-
-  const callOfReport = new Map((reports ?? []).map((r) => [r.id, r.call_id]));
-  const titleOfCall = new Map((calls ?? []).map((c) => [c.id, c.title]));
 
   for (const row of rows) {
     if (!row.source_report_item_id) continue;
     const item = items?.find((i) => i.id === row.source_report_item_id);
-    const callId = item ? (callOfReport.get(item.report_id) ?? null) : null;
+    const callId = item?.report?.call_id ?? null;
     result.set(row.source_report_item_id, {
       kind: "call",
       quote: row.source_quote ?? "",
       located: item ? (item.located as CallProvenance["located"]) : null,
       startSeconds: row.source_start_seconds,
       callId,
-      callTitle: callId ? (titleOfCall.get(callId) ?? null) : null,
+      callTitle: callId ? (item?.report?.call?.title ?? null) : null,
     });
   }
   return result;

@@ -1,5 +1,6 @@
 import "server-only";
 
+import { listProjectCreatives } from "@/lib/projects/creatives";
 import type { createClient } from "@/lib/supabase/server";
 import type { Holder } from "@/lib/production/sheet";
 
@@ -48,10 +49,7 @@ export async function loadCorrectionRequests(
       .select("owner_person_id")
       .eq("id", projectId)
       .maybeSingle(),
-    supabase
-      .from("project_creatives")
-      .select("person_id")
-      .eq("project_id", projectId),
+    listProjectCreatives(projectId),
   ]);
   if (requests.error)
     console.error("loadCorrectionRequests:", requests.error.message);
@@ -76,7 +74,7 @@ export async function loadCorrectionRequests(
   }
   const reviewerIds = [
     project.data?.owner_person_id ?? null,
-    ...(creatives.data ?? []).map((c) => c.person_id),
+    ...creatives.map((c) => c.personId),
   ];
   const reviewers = [...new Set(reviewerIds)].flatMap((id) => {
     const name = people.nameOf(id);

@@ -13,6 +13,7 @@ import {
 import { trackPlan, type TrackedItem } from "@/lib/legal/tracking/state";
 import { personName } from "@/lib/projects/types";
 import { listLegalPeople } from "@/lib/legal/legal-people";
+import { legalClearanceRows, legalPlanRow } from "@/lib/legal/shared-rows";
 import { createClient } from "@/lib/supabase/server";
 import { argsKey, memoPerRequest } from "@/lib/utils/request-memo";
 
@@ -38,11 +39,7 @@ async function readTracking(
   access: Access,
 ): Promise<LegalTracking> {
   const supabase = await createClient();
-  const { data: plan, error } = await supabase
-    .from("legal_plans")
-    .select("id, launched_at, dismissed_keys")
-    .eq("project_id", project.id)
-    .maybeSingle();
+  const { data: plan, error } = await legalPlanRow(project.id);
   if (error) console.error("loadTracking plan:", error.message);
   if (!plan?.launched_at) return { state: "not_launched" };
 
@@ -60,10 +57,7 @@ async function readTracking(
         project.masters,
         can(access, "manage_catalog"),
       ),
-      supabase
-        .from("legal_clearances")
-        .select("id, master_id, element, work, author, status, updated_at")
-        .eq("project_id", project.id),
+      legalClearanceRows(project.id),
       access.organizationId
         ? listLegalPeople(access.organizationId)
         : Promise.resolve({ data: [], error: null }),

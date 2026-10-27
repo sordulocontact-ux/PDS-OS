@@ -17638,6 +17638,10 @@ export type Database = {
       }
     }
     Functions: {
+      distribution_status_rows: {
+        Args: { p_project_id: string; p_reference_platforms: string[] }
+        Returns: Json
+      }
       declare_influence_agreement_sent: {
         Args: { p_agreement_id: string; p_channel: string }
         Returns: undefined

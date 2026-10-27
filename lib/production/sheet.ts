@@ -13,7 +13,7 @@ import {
   isDesignTopic,
   type DesignTopic,
 } from "@/lib/design/intentions";
-import { listDesignVersions } from "@/lib/design/versions";
+import { projectDesignVersions } from "@/lib/design/versions";
 import {
   handedFicheOf,
   readHandoffs,
@@ -198,6 +198,53 @@ const availabilityOf = (value: string): Availability =>
   value === "available" || value === "unavailable" ? value : "to_confirm";
 
 /**
+ * What every deliverable's sheet reads of its project, once per request:
+ * the project's journeys read the sheet of each deliverable in one render,
+ * and each repeated these reads (page loads audit, docs/ARCHITECTURE.md
+ * § 3 bis). Same queries, under RLS; shared, never changed by a caller.
+ */
+const sheetProjectRows = cache(async (projectId: string) => {
+  const supabase = await createClient();
+  return Promise.all([
+    supabase
+      .from("projects")
+      .select("id, owner_person_id")
+      .eq("id", projectId)
+      .maybeSingle(),
+    supabase
+      .from("project_stages")
+      .select("state, stage_definitions!inner(key)")
+      .eq("project_id", projectId)
+      .eq("stage_definitions.key", "production")
+      .maybeSingle(),
+    projectDesignVersions(projectId),
+    supabase
+      .from("design_intentions")
+      .select("topic, value, status, target, design_deliverable_id, updated_at")
+      .eq("project_id", projectId)
+      .in("status", ["confirmed", "proposed"])
+      .order("updated_at", { ascending: false }),
+    supabase
+      .from("design_references")
+      .select("url, note, design_reference_links(design_deliverable_id)")
+      .eq("project_id", projectId)
+      .order("created_at"),
+  ]);
+});
+
+/** The Réseau's active contacts (the organization's, under RLS), once per
+ * request for every sheet. */
+const activeNetworkContacts = cache(async () => {
+  const supabase = await createClient();
+  return supabase
+    .from("network_contacts")
+    .select("id, name, roles")
+    .is("archived_at", null)
+    .order("name")
+    .limit(1000);
+});
+
+/**
  * One deliverable's production sheet and everything it inherits from
  * Conception, read with the user's session. Null when the deliverable is not
  * in this project (or not visible).
@@ -213,24 +260,16 @@ async function loadSheet(
   // once, then what needs the deliverable's lever or the sheet. RLS applies
   // to every read: starting them before the existence check reveals nothing.
   const [
-    projectRes,
+    [projectRes, stageRes, versions, intentionsRes, referencesRes],
     deliverableRes,
-    stageRes,
     sheetRes,
     designDeliverableRes,
     milestonesRes,
     contactsRes,
-    versions,
     members,
-    intentionsRes,
-    referencesRes,
     handoffs,
   ] = await Promise.all([
-    supabase
-      .from("projects")
-      .select("id, owner_person_id")
-      .eq("id", projectId)
-      .maybeSingle(),
+    sheetProjectRows(projectId),
     supabase
       .from("strategy_deliverables")
       .select(
@@ -238,12 +277,6 @@ async function loadSheet(
       )
       .eq("id", deliverableId)
       .eq("project_id", projectId)
-      .maybeSingle(),
-    supabase
-      .from("project_stages")
-      .select("state, stage_definitions!inner(key)")
-      .eq("project_id", projectId)
-      .eq("stage_definitions.key", "production")
       .maybeSingle(),
     supabase
       .from("production_sheets")
@@ -260,25 +293,8 @@ async function loadSheet(
       .select("title, occurs_on")
       .eq("deliverable_id", deliverableId)
       .order("occurs_on"),
-    supabase
-      .from("network_contacts")
-      .select("id, name, roles")
-      .is("archived_at", null)
-      .order("name")
-      .limit(1000),
-    listDesignVersions(supabase, projectId),
+    activeNetworkContacts(),
     loadMembers(access),
-    supabase
-      .from("design_intentions")
-      .select("topic, value, status, target, design_deliverable_id, updated_at")
-      .eq("project_id", projectId)
-      .in("status", ["confirmed", "proposed"])
-      .order("updated_at", { ascending: false }),
-    supabase
-      .from("design_references")
-      .select("url, note, design_reference_links(design_deliverable_id)")
-      .eq("project_id", projectId)
-      .order("created_at"),
     readHandoffs(supabase, deliverableId),
   ]);
   const project = projectRes.data;

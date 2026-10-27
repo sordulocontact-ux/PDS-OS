@@ -1,12 +1,14 @@
 import "server-only";
 
+import { cache } from "react";
+
 import {
   DESIGN_FILE_BUCKET,
   versionStatusOf,
   type VersionStatus,
 } from "@/lib/design/rules";
 import { personName } from "@/lib/projects/types";
-import type { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 
 type Client = Awaited<ReturnType<typeof createClient>>;
 
@@ -125,3 +127,13 @@ export async function listDesignFiles(
     }))
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
+
+/** listDesignVersions with the viewer's session, once per request and
+ * project: the Conception, the Production list and every deliverable's
+ * production sheet read them in one render (page loads audit,
+ * docs/ARCHITECTURE.md § 3 bis), each file signed once. Shared: callers
+ * never change it. */
+export const projectDesignVersions = cache(
+  async (projectId: string): Promise<DesignVersion[]> =>
+    listDesignVersions(await createClient(), projectId),
+);

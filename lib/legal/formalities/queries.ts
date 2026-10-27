@@ -17,6 +17,7 @@ import type {
 import { exactShare, unitsOf } from "@/lib/legal/splits/shares";
 import { personName } from "@/lib/projects/types";
 import { listLegalPeople } from "@/lib/legal/legal-people";
+import { legalClearanceRows } from "@/lib/legal/shared-rows";
 import { createClient } from "@/lib/supabase/server";
 
 // The SACEM 725 formality of each title of a project (ticket Juridique 06),
@@ -64,10 +65,7 @@ export async function loadFormalities(
       .select("master_id, name, role, contact_id")
       .in("master_id", masterIds)
       .order("created_at"),
-    supabase
-      .from("legal_clearances")
-      .select("master_id, work, status")
-      .eq("project_id", project.id),
+    legalClearanceRows(project.id),
     supabase
       .from("legal_formalities")
       .select(

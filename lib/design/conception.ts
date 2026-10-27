@@ -28,6 +28,7 @@ import { todayInParis } from "@/lib/insights/dates";
 import type { ProjectDetail } from "@/lib/projects/types";
 import { referenceDate } from "@/lib/strategy/calendar";
 import type { ChoiceValue } from "@/lib/ui/choice-value";
+import { listProjectCreatives } from "@/lib/projects/creatives";
 import { deliverableTitle } from "@/lib/strategy/deliverable-title";
 import { upstreamChains, type UpstreamStep } from "@/lib/strategy/upstream";
 import { createClient } from "@/lib/supabase/server";
@@ -172,7 +173,7 @@ export async function loadConception(
     leversRes,
     callsRes,
     workspaceRes,
-    creativesRes,
+    creatives,
     reportCountRes,
     members,
     responsibleRes,
@@ -250,10 +251,7 @@ export async function loadConception(
       .select("project_id")
       .eq("project_id", projectId)
       .maybeSingle(),
-    supabase
-      .from("project_creatives")
-      .select("person_id")
-      .eq("project_id", projectId),
+    listProjectCreatives(projectId),
     supabase
       .from("call_reports")
       .select("id, calls!inner(project_id)", { count: "exact", head: true })
@@ -272,7 +270,7 @@ export async function loadConception(
   const strategyState = stageOf("launch_strategy")?.state ?? "not_started";
   const me = access.personId;
   const isOwner = me !== null && project.ownerPersonId === me;
-  const isCreative = (creativesRes.data ?? []).some((c) => c.person_id === me);
+  const isCreative = creatives.some((c) => c.personId === me);
   const inProgress = stage?.state === "in_progress";
   const open =
     strategyState === "validated" &&

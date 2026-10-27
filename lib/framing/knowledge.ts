@@ -231,7 +231,6 @@ export async function loadFramingKnowledge(
   if (!framing) return null;
 
   const deadlines = deadlinesRes.data ?? [];
-  const provenanceOf = await provenanceLookup(deadlines, framing.members);
 
   const audioOf = new Map(
     (titlesRes.data ?? []).map((t) => [t.id, t.audio_state as AudioState]),
@@ -269,7 +268,10 @@ export async function loadFramingKnowledge(
       ...legalContacts.map((c) => c.contactId),
     ]),
   ];
-  const [legalPartiesRes, partiesRes] = await Promise.all([
+  // The deadlines' provenance is read in the same round trip (page loads
+  // audit, docs/ARCHITECTURE.md § 3 bis).
+  const [provenanceOf, legalPartiesRes, partiesRes] = await Promise.all([
+    provenanceLookup(deadlines, framing.members),
     supabase
       .from("framing_legal_parties")
       .select("*")

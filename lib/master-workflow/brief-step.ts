@@ -11,7 +11,9 @@ import { proposeMasterCalendar } from "@/lib/master-workflow/calendar";
 import { loadFramingDefaults } from "@/lib/master-workflow/framing-defaults";
 import { loadBriefQuestions } from "@/lib/master-workflow/questions";
 import type { BriefQuestionsView } from "@/lib/master-workflow/question-types";
+import { listProjectCreatives } from "@/lib/projects/creatives";
 import { personName } from "@/lib/projects/types";
+import { masterBriefRow } from "@/lib/master-workflow/shared-rows";
 import { createClient } from "@/lib/supabase/server";
 
 import { briefMissing, type BriefDesignation } from "./brief-rules";
@@ -69,13 +71,8 @@ export async function loadBriefStep(
     loadMasterBrief(project, access),
     loadBriefQuestions(project, access),
     loadFramingDefaults(project.id),
-    supabase
-      .from("master_briefs")
-      .select(
-        "recorded_at, content_changed_at, changed_by, start_mode, recorder:people!master_briefs_recorded_by_fkey(first_name, last_name)",
-      )
-      .eq("project_id", project.id)
-      .maybeSingle(),
+    // Shared with the Master's other loaders in the same render.
+    masterBriefRow(project.id),
     supabase
       .from("project_team_members")
       .select(
@@ -84,11 +81,7 @@ export async function loadBriefStep(
       .eq("project_id", project.id)
       .eq("review_status", "confirmed")
       .in("role_key", TEAM_ROLES),
-    supabase
-      .from("project_creatives")
-      .select("person_id")
-      .eq("project_id", project.id)
-      .order("created_at"),
+    listProjectCreatives(project.id),
   ]);
   const saved = row.data !== null;
   const ids = Object.values(
@@ -129,7 +122,7 @@ export async function loadBriefStep(
     if (brief.mixContactId && !brief.masteringContactId)
       brief.masteringSameEngineer = true;
     const creative =
-      creativeMember?.person_id ?? creatives.data?.[0]?.person_id ?? null;
+      creativeMember?.person_id ?? creatives[0]?.personId ?? null;
     if (creative && view.validators.some((v) => v.personId === creative))
       brief.validatorPersonId = creative;
   }

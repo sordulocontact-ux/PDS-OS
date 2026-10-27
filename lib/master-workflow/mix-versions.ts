@@ -12,6 +12,11 @@ import {
 } from "@/lib/master-workflow/mix-types";
 import { withDownloadName } from "@/lib/catalog/file-rules";
 import { personName } from "@/lib/projects/types";
+import {
+  masterBriefRow,
+  masterVersionRows,
+  whereRows,
+} from "@/lib/master-workflow/shared-rows";
 import { createClient } from "@/lib/supabase/server";
 import { argsKey, memoPerRequest } from "@/lib/utils/request-memo";
 
@@ -43,14 +48,9 @@ async function readMixVersions(
   const titles = project.masters;
   const supabase = await createClient();
   const [versions, comments, brief] = await Promise.all([
-    supabase
-      .from("master_mix_versions")
-      .select(
-        "id, master_id, number, status, feedback_summary, feedback_sent_at, decision, decision_note, decided_at, created_at, file:master_files!master_mix_versions_file_id_fkey(file_name, path), author:people!master_mix_versions_created_by_fkey(first_name, last_name), decider:people!master_mix_versions_decided_by_fkey(first_name, last_name)",
-      )
-      .eq("project_id", projectId)
-      .eq("stage", stage)
-      .order("number", { ascending: false }),
+    // Shared with the Master's other loaders in the same render
+    // (lib/master-workflow/shared-rows.ts).
+    whereRows(masterVersionRows(projectId), (v) => v.stage === stage),
     supabase
       .from("master_mix_comments")
       .select(
@@ -58,13 +58,7 @@ async function readMixVersions(
       )
       .eq("project_id", projectId)
       .order("created_at"),
-    supabase
-      .from("master_briefs")
-      .select(
-        "validator_person_id, validator:people!master_briefs_validator_person_id_fkey(first_name, last_name)",
-      )
-      .eq("project_id", projectId)
-      .maybeSingle(),
+    masterBriefRow(projectId),
   ]);
   if (versions.error || comments.error)
     console.error(
