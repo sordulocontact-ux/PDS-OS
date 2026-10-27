@@ -19,10 +19,15 @@ const REST_MS = 150;
 // each other (page loads audit, docs/ARCHITECTURE.md § 3 bis). Kept fresh by
 // experimental.staleTimes.static (next.config.ts) and emptied by every
 // revalidatePath. Production only: `next dev` never prefetches.
+// The intent ends when the pointer leaves or the focus moves on: a link left
+// « prefetchable » was rendered again in full after every write, Next
+// prefetching the visible links once its cache is emptied (audit, 27/10).
+// A finger's intent stays: its pointer leaves before the click.
 export function ViewLink({
   onPointerEnter,
   onPointerLeave,
   onFocus,
+  onBlur,
   onTouchStart,
   ...props
 }: React.ComponentProps<typeof Link>) {
@@ -48,11 +53,16 @@ export function ViewLink({
       }}
       onPointerLeave={(event) => {
         stopWaiting();
+        if (event.pointerType === "mouse") setIntent(false);
         onPointerLeave?.(event);
       }}
       onFocus={(event) => {
         setIntent(true);
         onFocus?.(event);
+      }}
+      onBlur={(event) => {
+        setIntent(false);
+        onBlur?.(event);
       }}
       onTouchStart={(event) => {
         setIntent(true);
