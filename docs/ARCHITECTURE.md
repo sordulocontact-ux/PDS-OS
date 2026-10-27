@@ -786,6 +786,48 @@ s'afficher sans chargement.
   (`DataTableLink`), ligne de carte (`CardRow`), projets du sélecteur (`ProjectSwitcher`). Avant, un
   `Link` simple préchargeait à l'écran toute fiche visible : afficher la liste Projets rendait trois
   projets à la fois (158 requêtes et 5,7 s chacun, base saturée) ; après, 2 requêtes.
+- **Rien n'attend le projet entier** (audit du 27/10, `ProjectFresh`,
+  `components/projects/project-fresh.tsx`) : après une Server Action, Next rend la page à nouveau
+  **depuis la racine** (dès qu'un `revalidatePath`, n'importe lequel, a été appelé) et une frontière
+  `Suspense` déjà affichée **retient toute l'action** jusqu'à ce que son contenu soit prêt. Chaque
+  bouton du Cadrage attendait ainsi les états de tous les workflows et les parcours de tout le projet
+  (110 à 230 requêtes, 3 à 6 s pour un geste qui en coûte 2 à 5). Les zones lues du projet entier
+  passent donc sous `ProjectFresh` : barre du projet (entrées et pastilles, puis compteurs),
+  en-tête (`ProjectHeader`, ses faits viennent des états des workflows ; un module peut lui passer
+  la **promesse** de ses faits, `masterFacts`), « Maintenant » (`ProjectNowCard`, les actions
+  « ailleurs » viennent de tous les parcours) et la barre des livrables de la Production. La
+  frontière a pour clé la version du projet : après une écriture c'est une **nouvelle** frontière,
+  l'action se termine dès que la page elle-même est prête, et le dernier rendu de la zone reste à
+  l'écran (`KeptView` / `KeptFallback`, `components/shell/kept-view.tsx`, en mémoire de l'onglet,
+  par zone et par URL) jusqu'à ce que le nouveau arrive ; à la première visite, un squelette de même
+  forme. Un cadre de module ne lit plus que **son** parcours sur le chemin du clic (le contexte du
+  module ; les Activations, `activationsJourneys`). **Règle** : une zone lue du projet entier dans
+  une page de projet passe par `ProjectFresh`, jamais par un `await` dans le cadre.
+- **`router.refresh()` après une action** (audit du 27/10) : inutile et coûteux (un second rendu
+  complet) dès que l'action a appelé `revalidatePath` / `revalidateTag` / `refresh()` : la réponse de
+  l'action porte déjà la page rendue à nouveau. On ne le garde qu'après une écriture qui ne passe pas
+  par une action qui revalide (client Supabase du navigateur, `fetch` vers une route), sur un
+  événement Realtime ou une attente (`call-processing.tsx`, seulement onglet visible).
+- **Coquille de l'app en parallèle de la page** (`app/(app)/layout.tsx`) : la cloche
+  (`loadNotifications`, deux allers-retours) et le compteur des demandes d'accès sont lus **pendant**
+  que la page se rend (composants asynchrones `AppBell`, `CountedSidebar`, `CountedMobileNav`), plus
+  avant elle.
+- **Lien en attente** (`components/ui/navigation-progress.tsx`) : chaque `ViewLink` et chaque entrée
+  de la navigation principale signale sa navigation en cours (`useLinkStatus`) ; une barre fine en
+  haut de la fenêtre l'indique **après 150 ms** seulement (jamais pour une vue prête), sans rien
+  changer au lien (pas de décalage). Un écran ne reste plus figé sans signe.
+- **Temps réel par diffusion** (`20261027000401_live_broadcast.sql`) : la base envoie elle-même les
+  signaux (`realtime.send`) sur des canaux privés, `project:<id>` (`changed`, depuis
+  `project_live_bump`) et `notifications:<personne>` (`inserted`) ; qui peut écouter est décidé par
+  le RLS de `realtime.messages` (le projet pour qui le voit, ses notifications pour la personne),
+  personne ne peut y écrire. Avant, `postgres_changes` faisait relire le journal des changements par
+  Realtime en continu (33 400 appels de `realtime.list_changes` en 24 h, ≈ 277 s de base).
+  `ProjectLive` et `NotificationListener` s'abonnent avec `{ config: { private: true } }`.
+- **Poids des pages** : le SDK d'IA (`ai`, `@ai-sdk/react`, ≈ 250 Ko) ne se charge plus sur chaque
+  page : la conversation de l'onglet est créée au premier usage (`sharedChat()`,
+  `components/assistant/shared-chat.ts`, gardée dans `chat-registry.ts` que le fournisseur lit sans
+  le SDK) et la fenêtre Espace Espace charge la sienne à l'ouverture (`launcher-conversation.tsx`,
+  `next/dynamic`).
 - **Cache du routeur** (`next.config.ts`, `experimental.staleTimes`) : `dynamic: 30` (page
   revisitée en moins de 30 s), `static: 60` (vue préchargée, re-préchargée au survol une
   fois expirée). Jamais périmé après une écriture : tout `revalidatePath` d'une Server
@@ -808,6 +850,16 @@ s'afficher sans chargement.
   (`lib/distribution/shared-reads.ts`), `loadTracking`, `loadStepView`, `loadMixVersions`,
   `loadFinalView`, `listCreativePeople`. Une Server Action relit toujours (le cache ne vaut qu'au
   rendu). Un nouveau lecteur partagé par deux loaders d'un même rendu prend le même chemin.
+  **Lignes partagées** (audit du 27/10) : une table lue par plusieurs loaders d'un même rendu passe
+  par un accesseur `cache()` qui lit l'**union des colonnes**, même filtre de projet et même ordre,
+  chaque appelant filtrant en mémoire (`whereRows`) : `listProjectCreatives`, `projectPlanRow`
+  (`lib/plan/queries.ts`), `projectDesignVersions` (`lib/design/versions.ts`, fichiers signés une
+  fois), `lib/legal/shared-rows.ts` (`legal_clearances`, `legal_plans`, `legal_intakes`),
+  `lib/master-workflow/shared-rows.ts` (`master_briefs`, `master_mix_versions`,
+  `master_transmissions`) ; la fiche de production lit son projet une fois pour tous ses livrables
+  (`sheetProjectRows`). Piège : une table à droits **colonne par colonne** (`grant select (…)`) ne
+  se prête pas à l'union (une colonne refusée fait échouer toute la lecture). La provenance d'un
+  élément (`resolveProvenance`) se lit en une requête imbriquée au lieu de trois.
 - **Mesurer une page** : `PERF_TRACE=1` (local ou Vercel) fait écrire, après chaque rendu, une ligne
   `[perf]` dans les journaux du serveur (`lib/supabase/query-trace.ts`, branché sur le `fetch` de
   `createClient`) : chemin, type (`render` = page, navigation ou préchargement, que Next ne
@@ -837,8 +889,9 @@ s'afficher sans chargement.
   dans sa migration. Ce qui ne mène à aucun projet (un nom dans le Réseau) reste au plus 5 min en
   cache ; les liens signés durent 15 min au moins. Pas de ligne de version (projet invisible pour le
   lecteur) = jamais servi du cache ; un résultat qui n'est pas de la donnée pure (fonction, instance
-  de classe : `distributionContext` et son `nameOf`) n'est jamais gardé ; chaque requête reçoit sa
-  copie. Deux requêtes simultanées (préchargement au survol puis clic) partagent un seul calcul.
+  de classe) n'est jamais gardé : on garde la donnée et on rajoute la fonction à chaque lecture
+  (`designJourneyContext`, `distributionContext` et leur `nameOf`) ; chaque requête reçoit sa
+  copie. Gardés aussi depuis le 27/10 : `strategyStepData`, `distributionContext`. Deux requêtes simultanées (préchargement au survol puis clic) partagent un seul calcul.
   Une Server Action relit sans cache (`readProjectJourneys`). Conséquence pour `ProjectLive` : la
   page ouverte se met à jour pour un changement d'un collègue dans **n'importe quel** workflow.
 - **Squelettes** (`loading.tsx`) pour ce qui n'est pas préchargé (première entrée dans une
@@ -878,8 +931,8 @@ s'afficher sans chargement.
 - **À savoir** : `next dev` ne précharge jamais et compile chaque page à sa première visite.
   La fluidité se juge avec `pnpm build && pnpm start`.
 - **Pas de cascade entre un layout et sa page** (finitions du 19/10) : une page ne commence à lire
-  qu'une fois son layout répondu. Le layout du projet lit `loadWorkflowStates` et `planLaunchedAt`
-  **avec** le projet ; `WorkflowGate` et les layouts Master / Juridique lisent `isWorkflowLaunched`
+  qu'une fois son layout répondu. Le layout du projet lance `loadWorkflowStates` et `planLaunchedAt`
+  **avec** le projet, sans les attendre (ils servent les zones sous `ProjectFresh`) ; `WorkflowGate` et les layouts Master / Juridique lisent `isWorkflowLaunched`
   avec l'accès et, lancé (le cas courant), rendent la page sans autre requête ; la fiche de
   production (`loadSheet`) lit en deux tours au lieu de quatre (hand-offs avec le premier,
   `readHandoffs`), la préproduction en deux au lieu de trois, et `journeyContext` lance les
