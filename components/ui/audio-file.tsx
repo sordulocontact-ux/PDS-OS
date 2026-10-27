@@ -1,5 +1,7 @@
 import { IconDownload } from "@/components/icons";
-import { fr } from "@/lib/i18n/fr";
+import { core } from "@/lib/i18n/fr/core";
+
+const fr = { audioFile: core.audioFile };
 
 /**
  * An audio file to listen to and download where it is shown (a version of

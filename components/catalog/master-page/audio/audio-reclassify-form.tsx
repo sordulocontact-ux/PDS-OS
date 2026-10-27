@@ -10,7 +10,10 @@ import {
   isAudioState,
   type AudioState,
 } from "@/lib/catalog/title-rules";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
+import { masterPage } from "@/lib/i18n/fr/master-page";
+
+const fr = { catalog, masterPage };
 
 /** « Corriger l'étape » of a version deposited at the wrong step (retour
  * Catalogue 19): the numbers follow, the title too. */

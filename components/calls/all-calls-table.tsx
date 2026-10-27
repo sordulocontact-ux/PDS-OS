@@ -15,7 +15,9 @@ import {
 import { JoinCallLink } from "@/components/calls/join-call-link";
 import { formatSlot, isUpcoming } from "@/lib/calls/format";
 import type { CallListItem } from "@/lib/calls/queries";
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
+
+const fr = { calls };
 
 // Calls of every visible project and the internal meetings: the row opens the
 // call, its project (or "Réunion interne") reads under the title; a planned

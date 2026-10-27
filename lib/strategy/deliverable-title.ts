@@ -1,7 +1,9 @@
 // How a committed deliverable is named everywhere (Stratégie, Conception):
 // its title, with its quantity when there is more than one. Client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { strategyDeliverables } from "@/lib/i18n/fr/strategy-deliverables";
+
+const fr = { strategyDeliverables };
 
 export function deliverableTitle(
   title: string,

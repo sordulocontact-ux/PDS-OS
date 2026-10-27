@@ -4,9 +4,12 @@ import { useTransition } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { framing } from "@/lib/i18n/fr/framing";
+import { strategyDraft } from "@/lib/i18n/fr/strategy-draft";
 import { prepareStrategyDraft } from "@/lib/strategy/actions/draft";
 import type { DraftField } from "@/lib/strategy/draft-plan";
+
+const fr = { framing, strategyDraft };
 
 /**
  * « Proposer à nouveau » of one Strategy part not confirmed yet (MKT-S1-06):

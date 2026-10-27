@@ -10,7 +10,9 @@ import {
   type SnapshotItem,
 } from "@/lib/framing/brief-snapshot";
 import type { Dimension, QuestionKey } from "@/lib/framing/dimensions";
-import { fr } from "@/lib/i18n/fr";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+
+const fr = { framingIntel };
 
 export type BriefRequest = {
   id: string;

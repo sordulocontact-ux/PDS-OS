@@ -3,9 +3,11 @@
 // moved. A person is the same across versions by their contact, else by
 // their name. Pure, client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { legalSplits } from "@/lib/i18n/fr/legal-splits";
 import type { SplitLine } from "@/lib/legal/splits/queries";
 import { formatShare } from "@/lib/legal/splits/shares";
+
+const fr = { legalSplits };
 
 const keyOf = (l: Pick<SplitLine, "contactId" | "name">) =>
   l.contactId ?? `name:${l.name.trim().toLowerCase()}`;

@@ -9,8 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { labelClass } from "@/components/ui/option-class";
-import { fr } from "@/lib/i18n/fr";
+import { strategyDeliverables } from "@/lib/i18n/fr/strategy-deliverables";
 import { updateDeliverables } from "@/lib/strategy/actions/deliverables";
+
+const fr = { strategyDeliverables };
 
 const KEEP = "keep";
 

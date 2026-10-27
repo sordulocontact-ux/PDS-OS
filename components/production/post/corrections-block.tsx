@@ -1,4 +1,4 @@
-import { fr } from "@/lib/i18n/fr";
+import { productionPost } from "@/lib/i18n/fr/production-post";
 import {
   correctionGroups,
   correctionsText,
@@ -7,6 +7,8 @@ import { timecodeLabel } from "@/lib/production/post/labels";
 import type { PostVersion } from "@/lib/production/post/types";
 
 import { CopyTextButton } from "./copy-text-button";
+
+const fr = { productionPost };
 
 const t = fr.productionPost;
 

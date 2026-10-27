@@ -4,7 +4,8 @@
 // source is « — », never invented, never zero. Computed by code from the
 // data. Pure, client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { marketingReview } from "@/lib/i18n/fr/marketing-review";
+import { reviewJourney } from "@/lib/i18n/fr/review-journey";
 import { formatAmount } from "@/lib/utils/money";
 import type { Dashboard, FigureKey } from "@/lib/marketing/dashboard";
 import type { Activation, Evidence } from "@/lib/marketing/model";
@@ -13,6 +14,8 @@ import type { Reserve } from "@/lib/marketing/reserves/queries";
 import { isRealised, PHASES } from "@/lib/activations/phase";
 
 import { proofBucket, type ReviewActivation } from "./review-activation";
+
+const fr = { marketingReview, reviewJourney };
 
 const t = fr.reviewJourney.standing;
 const d = fr.marketingReview.dashboard;

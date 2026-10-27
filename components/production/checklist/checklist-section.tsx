@@ -1,7 +1,7 @@
 import { EmptyNote } from "@/components/shell/empty-state";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionChecklist } from "@/lib/i18n/fr/production-checklist";
 import {
   isChecklistAction,
   type PlanAction,
@@ -11,6 +11,8 @@ import { formatShortDay } from "@/lib/utils/day";
 
 import { AddTaskForm } from "./add-task-form";
 import { FinishTaskButton } from "./finish-task-button";
+
+const fr = { productionChecklist };
 
 const t = fr.productionChecklist;
 

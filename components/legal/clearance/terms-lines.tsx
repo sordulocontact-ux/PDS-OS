@@ -1,9 +1,11 @@
 "use client";
 
 import { Field } from "@/components/auth/field";
-import { fr } from "@/lib/i18n/fr";
+import { legalClearance } from "@/lib/i18n/fr/legal-clearance";
 import { formatFee } from "@/lib/legal/contracts/fields";
 import { parseEurosToCents } from "@/lib/projects/schemas";
+
+const fr = { legalClearance };
 
 /** One line of conditions, as the person may correct it before it goes to
  * the direction: per right (the work, the recording) when the answer says

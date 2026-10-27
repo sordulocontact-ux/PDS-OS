@@ -1,7 +1,9 @@
 import type { CreatorCollaboration } from "@/lib/activations/influence/creator-link";
-import { fr } from "@/lib/i18n/fr";
+import { activationCreator } from "@/lib/i18n/fr/activation-creator";
 
 import { CreatorInvoiceForm, CreatorLinkForm } from "./creator-gestures";
+
+const fr = { activationCreator };
 
 const t = fr.activationCreator;
 

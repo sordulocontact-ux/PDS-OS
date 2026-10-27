@@ -4,7 +4,9 @@ import type { ReactNode } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { Loaded } from "@/components/ui/loaded";
-import { fr } from "@/lib/i18n/fr";
+import { records } from "@/lib/i18n/fr/records";
+
+const fr = { records };
 
 /** Body of an edit modal: loads the record, then shows its real form. */
 export function EditPanel<T>({

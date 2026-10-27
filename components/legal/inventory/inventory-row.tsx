@@ -3,8 +3,10 @@ import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { FactStatus } from "@/lib/facts/types";
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
 import { factTone } from "@/lib/ui/state-tones";
+
+const fr = { legal };
 
 /**
  * One fact of the État des lieux: what it is on the left, its source, its

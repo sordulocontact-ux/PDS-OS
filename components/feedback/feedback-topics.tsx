@@ -7,9 +7,11 @@ import { FormMessage } from "@/components/auth/form-message";
 import { EmptyState } from "@/components/shell/empty-state";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { Feedback, FeedbackTopic } from "@/lib/feedback/types";
-import { fr } from "@/lib/i18n/fr";
+import { feedback } from "@/lib/i18n/fr/feedback";
 import { formatLongDay } from "@/lib/project-history/format";
 import { feedbackPriorityTone } from "@/lib/ui/state-tones";
+
+const fr = { feedback };
 
 // The director's topics of one view, one card each: PO's title and summary,
 // the count and latest date (code), the priority and who sent it once sent,

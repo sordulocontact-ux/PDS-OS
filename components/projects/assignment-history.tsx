@@ -1,8 +1,10 @@
 import { ClarificationList } from "@/components/projects/clarification-list";
 import { formatDay } from "@/lib/assistant/facts";
-import { fr } from "@/lib/i18n/fr";
+import { transmission } from "@/lib/i18n/fr/transmission";
 import { clarificationsOf } from "@/lib/projects/clarifications";
 import type { Assignment } from "@/lib/projects/types";
+
+const fr = { transmission };
 
 // Every transmission of a project, newest first: who, to whom, when, the
 // director's message and the answer.

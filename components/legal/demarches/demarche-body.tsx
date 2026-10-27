@@ -4,12 +4,15 @@ import { PlanSheetProvider } from "@/components/legal/tracking/plan-sheet-contex
 import { StepSection } from "@/components/shell/journey/step-section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { ContractProof } from "@/lib/contracts/proof";
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
+import { legalDemarches } from "@/lib/i18n/fr/legal-demarches";
 import type { Clearances } from "@/lib/legal/clearance/types";
 import type { ContractCardData } from "@/lib/legal/contracts/document-card";
 import type { ContractInvoices } from "@/components/invoices/contract-invoice";
 import type { Demarche } from "@/lib/legal/demarches/build";
 import type { BoardRow } from "@/lib/legal/plan/board";
+
+const fr = { legal, legalDemarches };
 
 /**
  * The body of a démarche's step (proto Juridique v3): its current part in

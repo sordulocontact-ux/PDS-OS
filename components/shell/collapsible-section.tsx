@@ -4,10 +4,12 @@ import { IconChevronDown } from "nucleo-sharp-essential";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { shell } from "@/lib/i18n/fr/shell";
 import { cn } from "@/lib/utils";
 
 import { sectionClass, sectionHeaderClass } from "./page-section-classes";
+
+const fr = { shell };
 
 // PageSection `collapsible`: a chevron on the right folds the content. The
 // content stays mounted while folded (hidden), so a form keeps what was

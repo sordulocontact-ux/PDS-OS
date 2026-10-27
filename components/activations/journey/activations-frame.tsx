@@ -9,7 +9,7 @@ import type { ActivationFilter } from "@/lib/activations/journey";
 import { loadLevers } from "@/lib/activations/levers";
 import { loadActivationPeople } from "@/lib/activations/people";
 import { requireApproved } from "@/lib/auth/dal";
-import { fr } from "@/lib/i18n/fr";
+import { activationJourney } from "@/lib/i18n/fr/activation-journey";
 import { activationsJourneys } from "@/lib/journey/activations";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { requireLaunchedProject } from "@/lib/projects/queries";
@@ -19,6 +19,8 @@ import { allInOrder } from "@/lib/utils/parallel";
 import { ActivationDetail } from "./activation-detail";
 import { ActivationList } from "./activation-list";
 import { LeversBanner } from "./levers-banner";
+
+const fr = { activationJourney };
 
 const t = fr.activationJourney;
 

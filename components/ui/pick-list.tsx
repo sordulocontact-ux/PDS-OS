@@ -9,10 +9,12 @@ import { Input } from "@/components/ui/input";
 import { usePickListDone } from "@/components/ui/pick-list-context";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { decisions } from "@/lib/i18n/fr/decisions";
 import { cn } from "@/lib/utils";
 import { normalizeSearch } from "@/lib/utils/search";
 import type { WriteResult } from "@/lib/utils/write-result";
+
+const fr = { decisions };
 
 const t = fr.decisions.pick;
 

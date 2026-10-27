@@ -3,12 +3,14 @@
 // mastering credit is linked to them). Pure, from rows already read.
 
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { masterWorkflow } from "@/lib/i18n/fr/master-workflow";
 import type {
   EngineerRole,
   NetworkEngineer,
 } from "@/lib/master-workflow/types";
 import type { NetworkRole } from "@/lib/network/types";
+
+const fr = { masterWorkflow };
 
 export type FlowContact = {
   id: string;

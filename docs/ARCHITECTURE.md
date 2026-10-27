@@ -827,7 +827,14 @@ s'afficher sans chargement.
   page : la conversation de l'onglet est créée au premier usage (`sharedChat()`,
   `components/assistant/shared-chat.ts`, gardée dans `chat-registry.ts` que le fournisseur lit sans
   le SDK) et la fenêtre Espace Espace charge la sienne à l'ouverture (`launcher-conversation.tsx`,
-  `next/dynamic`).
+  `next/dynamic`). **Le dictionnaire français** (921 Ko, 271 Ko compressés) partait en entier dans un
+  morceau de 700 Ko chargé par toutes les pages : un composant (et tout module de `lib/` qui n'est ni
+  `server-only` ni `"use server"`) importe **seulement les domaines qu'il lit**
+  (`import { calls } from "@/lib/i18n/fr/calls"`) et se fait un `fr` local
+  (`const fr = { calls };`, les appels `fr.calls.…` ne changent pas ; une clé du tronc commun :
+  `app: core.app`) ; si un nom de domaine est déjà pris dans le fichier, l'import est renommé
+  (`designJourney as frDesignJourney`). Règle ESLint `no-restricted-imports` sur `components/**` ;
+  le code serveur peut garder `import { fr } from "@/lib/i18n/fr"`.
 - **Cache du routeur** (`next.config.ts`, `experimental.staleTimes`) : `dynamic: 30` (page
   revisitée en moins de 30 s), `static: 60` (vue préchargée, re-préchargée au survol une
   fois expirée). Jamais périmé après une écriture : tout `revalidatePath` d'une Server

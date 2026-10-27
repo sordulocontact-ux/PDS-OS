@@ -5,7 +5,9 @@ import { toast } from "sonner";
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { Button } from "@/components/ui/button";
 import { requestValidation } from "@/lib/framing/actions/validation";
-import { fr } from "@/lib/i18n/fr";
+import { framing } from "@/lib/i18n/fr/framing";
+
+const fr = { framing };
 
 /**
  * "Demander la validation": no validator to pick (there is one, resolved by

@@ -17,13 +17,15 @@
 //                  (Juridique 06).
 
 import { knownAnswer, type KnownPerson } from "@/lib/legal/intake/known-people";
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
 import type {
   IntakeQuestion,
   NotAskedQuestion,
   ProposedFact,
   QuestionKey,
 } from "@/lib/legal/intake/types";
+
+const fr = { legal };
 
 export type IntakeKnowledge = {
   // The project's titles, in its order.

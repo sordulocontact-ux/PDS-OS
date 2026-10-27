@@ -3,8 +3,10 @@
 import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { masterInHouse } from "@/lib/i18n/fr/master-inhouse";
 import { assignRound } from "@/lib/master-workflow/inhouse-actions";
+
+const fr = { masterInHouse };
 
 /** « Assigner à Hugo Martin » (proto `master:hugo`): the in-house engineer
  * gets the round in his Travail, no link, no e-mail. */

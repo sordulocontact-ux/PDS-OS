@@ -24,8 +24,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { signOut } from "@/lib/auth/actions";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { aiUsage } from "@/lib/i18n/fr/ai-usage";
+import { auth } from "@/lib/i18n/fr/auth";
+import { feedback } from "@/lib/i18n/fr/feedback";
+import { shell } from "@/lib/i18n/fr/shell";
 import { cn } from "@/lib/utils";
+
+const fr = { aiUsage, auth, shell, feedback };
 
 // Bottom of the desktop sidebar (Figma "PDS OS", node 47:12055): the signed-in
 // person's avatar and name, opening a menu with who they are, "Envoyer un

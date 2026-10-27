@@ -1,10 +1,12 @@
 import { DocumentCard } from "@/components/ui/document-card";
 import { PdfExportButton } from "@/components/ui/pdf-export-button";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { legalDocuments } from "@/lib/i18n/fr/legal-documents";
 import type { FormalityView } from "@/lib/legal/formalities/types";
 import { formatDay } from "@/lib/utils/day";
 import { fileNamePart } from "@/lib/utils/file-name-part";
+
+const fr = { legalDocuments };
 
 const t = fr.legalDocuments.bulletin;
 

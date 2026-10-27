@@ -7,7 +7,7 @@ import { ValueSuggestionRow } from "@/components/contracts/templates/value-sugge
 import { Button } from "@/components/ui/button";
 import { LoadingRegion, SkeletonRows } from "@/components/ui/skeleton";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
 import type { ContractFieldId } from "@/lib/legal/contracts/fields";
 import { countExcerpt } from "@/lib/legal/contracts/template-text";
 import {
@@ -15,6 +15,8 @@ import {
   type TemplateAbout,
   type ValueSuggestion,
 } from "@/lib/legal/contracts/template-values";
+
+const fr = { legalContracts };
 
 type Row = ValueSuggestion & { chips: HTMLElement[] | null };
 

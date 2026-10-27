@@ -1,9 +1,12 @@
 import { DeliverVersion } from "@/components/master-workflow/deliver-version";
 import type { PortalCardItem } from "@/components/portal/portal-sections";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
-import { fr } from "@/lib/i18n/fr";
+import { masterFinal } from "@/lib/i18n/fr/master-final";
+import { masterWorkflow } from "@/lib/i18n/fr/master-workflow";
 import type { LinkDeliverable } from "@/lib/master-workflow/deliverables-public";
 import { formatShortInstant } from "@/lib/utils/day";
+
+const fr = { masterWorkflow, masterFinal };
 
 const t = fr.masterFinal.link;
 const labels: Record<string, string> = fr.masterWorkflow.brief.deliverables;

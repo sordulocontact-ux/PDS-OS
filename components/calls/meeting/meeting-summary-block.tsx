@@ -13,8 +13,10 @@ import { sendMeetingSummary } from "@/lib/calls/meeting/actions";
 import type { SummaryVersion } from "@/lib/calls/meeting/types";
 import { shortStamp } from "@/lib/calls/prep/dates";
 import type { PrepPerson } from "@/lib/calls/prep/types";
-import { fr } from "@/lib/i18n/fr";
+import { meeting } from "@/lib/i18n/fr/meeting";
 import { meetingSummaryTone } from "@/lib/ui/state-tones";
+
+const fr = { meeting };
 
 /**
  * « Résumé pour les participants » (proto `summaryBlock`), once everything

@@ -5,7 +5,10 @@ import { useCallback } from "react";
 
 import { usePublishResult } from "@/components/shell/module/result-banner";
 import type { QuestionKey } from "@/lib/framing/dimensions";
-import { fr } from "@/lib/i18n/fr";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+import { framingJourney } from "@/lib/i18n/fr/framing-journey";
+
+const fr = { framingIntel, framingJourney };
 
 const t = fr.framingJourney;
 

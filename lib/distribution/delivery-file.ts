@@ -14,7 +14,10 @@ import type {
   ReadinessState,
   SourceModule,
 } from "@/lib/distribution/readiness";
-import { fr } from "@/lib/i18n/fr";
+import { distribution } from "@/lib/i18n/fr/distribution";
+import { masterPage } from "@/lib/i18n/fr/master-page";
+
+const fr = { distribution, masterPage };
 
 export type FieldOrigin = SourceModule | "distribution";
 

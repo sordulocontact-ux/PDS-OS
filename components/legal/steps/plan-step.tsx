@@ -6,9 +6,13 @@ import { PlanView } from "@/components/legal/plan/plan-view";
 import { AddedActions } from "@/components/legal/tracking/added-actions";
 import { PageSection } from "@/components/shell/page-section";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
+import { legalDemarches } from "@/lib/i18n/fr/legal-demarches";
+import { legalJourney } from "@/lib/i18n/fr/legal-journey";
 import { latestRequestOf } from "@/lib/legal/contracts/template-requests";
 import { legalJourneyContext } from "@/lib/legal/journey-context";
+
+const fr = { legalContracts, legalDemarches, legalJourney };
 
 /**
  * Plan d'action (proto « Projet complet »): the contracts to provide for,

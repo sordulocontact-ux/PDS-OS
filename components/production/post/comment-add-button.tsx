@@ -5,10 +5,12 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
-import { fr } from "@/lib/i18n/fr";
+import { productionPost } from "@/lib/i18n/fr/production-post";
 import type { PostScope } from "@/lib/production/post/types";
 
 import { CommentForm } from "./comment-form";
+
+const fr = { productionPost };
 
 const t = fr.productionPost;
 

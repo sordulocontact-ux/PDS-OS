@@ -6,11 +6,13 @@ import {
 } from "@/components/shell/module/step-tools-block";
 import type { DistributionContext } from "@/lib/distribution/journey-context";
 import { stepHistory } from "@/lib/distribution/step-history";
-import { fr } from "@/lib/i18n/fr";
+import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
 import { stepChoiceKey, type StepRef } from "@/lib/step-tools/model";
 import { isLocked } from "@/lib/ui/journey";
 import type { DistributionStep as StepKey } from "@/lib/ui/distribution-steps";
 import type { Tone } from "@/lib/ui/state-tones";
+
+const fr = { distributionJourney };
 
 const t = fr.distributionJourney;
 

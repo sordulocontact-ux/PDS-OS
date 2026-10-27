@@ -11,8 +11,10 @@ import {
   productionStepRef,
 } from "@/lib/production/journey/step-ref";
 import type { JourneyStep } from "@/lib/production/journey/types";
-import { fr } from "@/lib/i18n/fr";
+import { journey } from "@/lib/i18n/fr/journey";
 import { isLocked, lowerFirst } from "@/lib/ui/journey";
+
+const fr = { journey };
 
 /**
  * A step of a deliverable's production on the common pattern (proto

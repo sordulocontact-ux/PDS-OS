@@ -11,7 +11,9 @@ import { VoiceFieldControl } from "@/components/voice/voice-field-control";
 import { reviewDesignIntention } from "@/lib/design/actions/intentions";
 import { DIRECTION_KEY } from "@/lib/design/intentions";
 import type { Provenance } from "@/lib/framing/brief";
-import { fr } from "@/lib/i18n/fr";
+import { conceptionWork } from "@/lib/i18n/fr/conception-work";
+
+const fr = { conceptionWork };
 
 export type ProposalView = {
   id: string;

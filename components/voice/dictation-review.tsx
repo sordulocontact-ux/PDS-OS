@@ -4,8 +4,10 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { voice } from "@/lib/i18n/fr/voice";
 import { cn } from "@/lib/utils";
+
+const fr = { voice };
 
 /** One proposed change, already worded by the stage. */
 export type ReviewItem = {

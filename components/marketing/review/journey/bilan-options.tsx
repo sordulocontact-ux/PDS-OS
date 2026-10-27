@@ -3,9 +3,12 @@ import { FieldError } from "@/components/auth/form-message";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CheckboxField } from "@/components/ui/checkbox-field";
 import { Fold } from "@/components/ui/fold";
-import { fr } from "@/lib/i18n/fr";
+import { marketingReview } from "@/lib/i18n/fr/marketing-review";
+import { reviewJourney } from "@/lib/i18n/fr/review-journey";
 import type { BilanIssue } from "@/lib/marketing/review/issues";
 import { REPORT_SECTIONS } from "@/lib/marketing/reports/model";
+
+const fr = { marketingReview, reviewJourney };
 
 const t = fr.reviewJourney.bilan;
 const sections = fr.marketingReview.reports.sections;

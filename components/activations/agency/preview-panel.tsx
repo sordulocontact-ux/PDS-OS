@@ -14,7 +14,10 @@ import {
   applyAgencySnapshot,
   discardAgencySnapshot,
 } from "@/lib/activations/agency/source-actions";
-import { fr } from "@/lib/i18n/fr";
+import { activationAgency } from "@/lib/i18n/fr/activation-agency";
+import { activations } from "@/lib/i18n/fr/activations";
+
+const fr = { activations, activationAgency };
 
 const t = fr.activationAgency.preview;
 const changeTone = {

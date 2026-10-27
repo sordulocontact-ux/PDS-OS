@@ -9,9 +9,11 @@
 
 import { routes } from "@/lib/auth/redirects";
 import type { FactStatus } from "@/lib/facts/types";
-import { fr } from "@/lib/i18n/fr";
+import { facts } from "@/lib/i18n/fr/facts";
 import type { NetworkRole } from "@/lib/network/types";
 import { normalizeSearch } from "@/lib/utils/search";
+
+const fr = { facts };
 
 /** A credit to link to a contact. */
 export type CreditLink = { masterId: string; contributorId: string };

@@ -2,7 +2,7 @@ import { HeritageList } from "@/components/production/prep/heritage-list";
 import { PageSection } from "@/components/shell/page-section";
 import { FactList, type Fact } from "@/components/ui/fact-list";
 import { formatEuros } from "@/lib/budget/types";
-import { fr } from "@/lib/i18n/fr";
+import { productionPrep } from "@/lib/i18n/fr/production-prep";
 import {
   ficheDuration,
   fichePeriod,
@@ -10,6 +10,8 @@ import {
 } from "@/lib/production/heritage-facts";
 import type { ProductionSheetData } from "@/lib/production/sheet";
 import { formatDate } from "@/lib/release/format";
+
+const fr = { productionPrep };
 
 const t = fr.productionPrep.heritage;
 

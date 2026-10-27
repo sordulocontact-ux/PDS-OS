@@ -12,7 +12,8 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { Timestamp } from "@/components/ui/timestamp";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { formatBriefDate } from "@/lib/framing/assess";
-import { fr } from "@/lib/i18n/fr";
+import { masterDelay } from "@/lib/i18n/fr/master-delay";
+import { masterWorkflow } from "@/lib/i18n/fr/master-workflow";
 import { formatDay } from "@/lib/utils/day";
 import type { BriefDate } from "@/lib/master-workflow/brief-types";
 import { delayImpact } from "@/lib/master-workflow/delay-impact";
@@ -24,6 +25,8 @@ import type { TeamEngineerMessage } from "@/lib/master-workflow/engineer-thread"
 import { engineerSignalTone } from "@/lib/ui/state-tones";
 
 import { DelayDecision } from "./delay-decision";
+
+const fr = { masterWorkflow, masterDelay };
 
 /**
  * « Fil avec l'ingénieur » (PROJ-AMEL-02): the engineer's questions,

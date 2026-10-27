@@ -6,7 +6,9 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { removeConceptionDeliverable } from "@/lib/design/actions/deliverables";
-import { fr } from "@/lib/i18n/fr";
+import { conception } from "@/lib/i18n/fr/conception";
+
+const fr = { conception };
 
 /** « Retirer » a need still to qualify, confirmed first. */
 export function RemoveDeliverableButton({

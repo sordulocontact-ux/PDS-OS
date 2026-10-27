@@ -9,12 +9,15 @@ import { Button } from "@/components/ui/button";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
+import { productionSchedule } from "@/lib/i18n/fr/production-schedule";
 import { decideSchedule } from "@/lib/production/schedule/actions";
 import {
   SCHEDULE_SOURCES,
   type ScheduleSource,
 } from "@/lib/production/schedule/model";
+
+const fr = { dialogs, productionSchedule };
 
 const t = fr.productionSchedule;
 

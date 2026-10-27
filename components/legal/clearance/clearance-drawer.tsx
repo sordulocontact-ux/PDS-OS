@@ -12,7 +12,8 @@ import {
 } from "@/components/ui/sheet";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
+import { legalClearance } from "@/lib/i18n/fr/legal-clearance";
 import { isClosed } from "@/lib/legal/clearance/matrix";
 import type { Clearance, Clearances } from "@/lib/legal/clearance/types";
 import { clearanceTone } from "@/lib/ui/state-tones";
@@ -22,6 +23,8 @@ import { ClearanceStages } from "./clearance-stages";
 import { ExchangesTab } from "./exchanges-tab";
 import { HistoryTab } from "./history-tab";
 import { WithdrawButton } from "./withdraw-button";
+
+const fr = { legal, legalClearance };
 
 /**
  * The drawer of a borrowing (the ticket's « drawer validé »), in three

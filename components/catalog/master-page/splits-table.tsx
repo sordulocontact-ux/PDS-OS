@@ -11,9 +11,11 @@ import {
   DataTableRow,
 } from "@/components/ui/data-table";
 import { formatShare, type MasterSplit } from "@/lib/catalog/master/rules";
-import { fr } from "@/lib/i18n/fr";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 
 import { ItemRowActions } from "./item-dialogs";
+
+const fr = { masterPage };
 
 /** Shares of one kind (holder, role, share) with each row's "⋯" when the
  * viewer edits: the title's Splits and the Juridique's Répartitions. */

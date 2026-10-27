@@ -12,7 +12,10 @@ import { callWhen } from "@/lib/calls/prep/dates";
 import { loadPlannedCall } from "@/lib/calls/prep/planned";
 import type { FramingAssessment } from "@/lib/framing/assess";
 import type { FramingCallInfo } from "@/lib/framing/journey-context";
-import { fr } from "@/lib/i18n/fr";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+import { framingJourney } from "@/lib/i18n/fr/framing-journey";
+
+const fr = { framingIntel, framingJourney };
 
 /**
  * What PO filed from the framing exchange, as meeting lines (one per

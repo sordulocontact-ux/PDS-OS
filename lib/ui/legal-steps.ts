@@ -1,5 +1,7 @@
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { shell } from "@/lib/i18n/fr/shell";
+
+const fr = { shell };
 
 // The internal path of the Juridique workflow, as the DG defined it
 // (docs/CONTEXTE-PROJET.md § 2) — its own, never the project's 7 steps. Each

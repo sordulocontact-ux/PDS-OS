@@ -1,6 +1,6 @@
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { invoices } from "@/lib/i18n/fr/invoices";
 import type { InvoiceStateRow } from "@/lib/invoices/states";
 import {
   invoiceState,
@@ -12,6 +12,8 @@ import type { Tone } from "@/lib/ui/state-tones";
 import { formatDay } from "@/lib/utils/day";
 
 import { InvoicePanel } from "./invoice-panel";
+
+const fr = { invoices };
 
 const t = fr.invoices;
 const TONE: Record<InvoiceState, Tone> = {

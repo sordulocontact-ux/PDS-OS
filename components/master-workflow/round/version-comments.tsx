@@ -1,10 +1,12 @@
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { masterRound } from "@/lib/i18n/fr/master-round";
 import {
   formatTimecode,
   type MixComment,
 } from "@/lib/master-workflow/mix-types";
 import { formatShortInstant } from "@/lib/utils/day";
+
+const fr = { masterRound };
 
 const t = fr.masterRound;
 

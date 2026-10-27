@@ -23,8 +23,10 @@ import {
   type FileWriteScope,
 } from "@/lib/catalog/file-rules";
 import { formatDuration } from "@/lib/catalog/types";
-import { fr } from "@/lib/i18n/fr";
+import { catalogFiles } from "@/lib/i18n/fr/catalog-files";
 import { formatShortDate } from "@/lib/release/format";
+
+const fr = { catalogFiles };
 
 // Files of an artist or a title, newest first: name (opens the file in a new
 // tab), precision, format and size, category, author, date, then "⋯". A

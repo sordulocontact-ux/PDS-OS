@@ -1,9 +1,11 @@
 "use client";
 
 import { DecisionPanel } from "@/components/ui/decision-panel";
-import { fr } from "@/lib/i18n/fr";
+import { productionProposal } from "@/lib/i18n/fr/production-proposal";
 import { decideProposal } from "@/lib/production/proposal/actions";
 import { decideProposalByLink } from "@/lib/production/provider/proposal-link-actions";
+
+const fr = { productionProposal };
 
 const t = fr.productionProposal.decide;
 

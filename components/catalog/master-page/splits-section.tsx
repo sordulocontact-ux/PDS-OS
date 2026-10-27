@@ -13,7 +13,7 @@ import {
   type MasterSplit,
   type SplitKind,
 } from "@/lib/catalog/master/rules";
-import { fr } from "@/lib/i18n/fr";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 import type { SplitEvent } from "@/lib/catalog/master/split-queries";
 import {
   splitReviewState,
@@ -37,6 +37,8 @@ import {
 } from "./split-review-notes";
 import { SplitForm } from "./split-form";
 import { SplitsTable } from "./splits-table";
+
+const fr = { masterPage };
 
 // Shares of the master and of the publishing, one section each, never
 // sharing a total: total and remainder computed by code (splitTotal), never

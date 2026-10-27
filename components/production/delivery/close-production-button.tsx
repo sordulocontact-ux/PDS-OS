@@ -1,8 +1,10 @@
 "use client";
 
 import { ConfirmButton } from "@/components/ui/confirm-button";
-import { fr } from "@/lib/i18n/fr";
+import { productionClosure } from "@/lib/i18n/fr/production-closure";
 import { closeProductionSheet } from "@/lib/production/delivery/handoff-actions";
+
+const fr = { productionClosure };
 
 const t = fr.productionClosure.closure;
 

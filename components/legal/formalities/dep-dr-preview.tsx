@@ -1,11 +1,13 @@
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
 import type { Creator, Publisher } from "@/lib/legal/formalities/definition";
 import {
   sharingPreview,
   type SharingAlert,
 } from "@/lib/legal/formalities/sharing-rule";
 import { formatShare } from "@/lib/legal/splits/shares";
+
+const fr = { legalFormalities };
 
 const nameOf = (c: Creator) =>
   c.pseudonym || [c.first_name, c.last_name].filter(Boolean).join(" ") || "—";

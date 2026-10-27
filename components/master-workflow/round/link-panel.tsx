@@ -9,7 +9,7 @@ import { CopyButton } from "@/components/ui/copy-button";
 import { ReasonForm } from "@/components/ui/reason-form";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { masterRound } from "@/lib/i18n/fr/master-round";
 import { sendRound } from "@/lib/master-workflow/round-actions";
 import {
   markTransmissionSent,
@@ -17,6 +17,8 @@ import {
 } from "@/lib/master-workflow/transmission-actions";
 import { cn } from "@/lib/utils";
 import { formatDay, formatShortDay, formatShortInstant } from "@/lib/utils/day";
+
+const fr = { masterRound };
 
 const t = fr.masterRound.link;
 

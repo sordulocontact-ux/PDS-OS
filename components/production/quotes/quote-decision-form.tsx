@@ -1,11 +1,13 @@
 "use client";
 
 import { DecisionPanel } from "@/components/ui/decision-panel";
-import { fr } from "@/lib/i18n/fr";
+import { productionQuotes } from "@/lib/i18n/fr/production-quotes";
 import {
   decideQuote,
   requestQuoteChanges,
 } from "@/lib/production/quotes/actions";
+
+const fr = { productionQuotes };
 
 const t = fr.productionQuotes.decide;
 

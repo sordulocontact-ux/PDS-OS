@@ -3,8 +3,10 @@
 import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { reviewJourney } from "@/lib/i18n/fr/review-journey";
 import { submitReport } from "@/lib/marketing/reports/approval-actions";
+
+const fr = { reviewJourney };
 
 /** « Soumettre à Claire Morel » (proto `bsubmit`): straight, no confirm. */
 export function SubmitReportButton({

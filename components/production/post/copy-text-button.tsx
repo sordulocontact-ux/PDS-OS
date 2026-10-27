@@ -4,7 +4,9 @@ import { toast } from "sonner";
 
 import { IconCopy } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { productionPost } from "@/lib/i18n/fr/production-post";
+
+const fr = { productionPost };
 
 /** Copies a text written by the code (the corrections to transmit). */
 export function CopyTextButton({

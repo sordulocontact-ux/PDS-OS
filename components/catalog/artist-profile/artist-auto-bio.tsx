@@ -1,7 +1,9 @@
 import { ArtistBio } from "@/components/catalog/artist-profile/artist-bio";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getArtistProfile } from "@/lib/catalog/artist-profile";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
+
+const fr = { catalog };
 
 // Biography read from Deezer (then Wikipedia) when the team wrote none.
 export async function ArtistAutoBio({ deezerId }: { deezerId: number }) {

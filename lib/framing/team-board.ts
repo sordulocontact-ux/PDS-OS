@@ -7,7 +7,9 @@ import {
   rolesForNeeds,
   type TeamRoleKey,
 } from "@/lib/framing/team-roles";
-import { fr } from "@/lib/i18n/fr";
+import { framing } from "@/lib/i18n/fr/framing";
+
+const fr = { framing };
 
 type TeamRow = FramingData["team"][number];
 

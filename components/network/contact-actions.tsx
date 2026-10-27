@@ -6,8 +6,10 @@ import { EditPanel } from "@/components/archive/edit-panel";
 import { RecordActions } from "@/components/archive/record-actions";
 import { ContactForm } from "@/components/network/contact-form";
 import type { RecordRights } from "@/lib/archive/types";
-import { fr } from "@/lib/i18n/fr";
+import { records } from "@/lib/i18n/fr/records";
 import { loadContactEdit } from "@/lib/network/actions";
+
+const fr = { records };
 
 /** "⋯" of a network contact: edit it, archive, restore or delete it (director). */
 export function ContactActions({

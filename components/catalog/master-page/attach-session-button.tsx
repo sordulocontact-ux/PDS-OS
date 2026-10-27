@@ -7,12 +7,15 @@ import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { Loaded } from "@/components/ui/loaded";
-import { fr } from "@/lib/i18n/fr";
+import { masterPage } from "@/lib/i18n/fr/master-page";
+import { network } from "@/lib/i18n/fr/network";
 import {
   attachSession,
   listAttachableSessions,
   type AttachableSession,
 } from "@/lib/catalog/master/session-actions";
+
+const fr = { network, masterPage };
 
 /**
  * « Rattacher une session » (retour 27): an existing session of the

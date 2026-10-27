@@ -3,10 +3,12 @@
 import { DialogButton } from "@/components/ui/dialog-button";
 import type { ActivationSummary } from "@/lib/activations/types";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { activations } from "@/lib/i18n/fr/activations";
 
 import { ActivationForm } from "../activation-form";
 import { StatusForm } from "./status-form";
+
+const fr = { activations };
 
 const t = fr.activations;
 

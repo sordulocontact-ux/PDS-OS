@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { RowActions } from "@/components/ui/row-actions";
-import { fr } from "@/lib/i18n/fr";
+import { productionClosure } from "@/lib/i18n/fr/production-closure";
+import { productionDelivery } from "@/lib/i18n/fr/production-delivery";
 import { removeExportCheck } from "@/lib/production/delivery/checklist-actions";
 import type {
   ExportCheckLine,
@@ -17,6 +18,8 @@ import type {
 
 import { ExportCheckForm } from "./export-check-form";
 import { ExportPointsForm } from "./export-points-form";
+
+const fr = { productionDelivery, productionClosure };
 
 const t = fr.productionDelivery;
 const p = fr.productionClosure.points;

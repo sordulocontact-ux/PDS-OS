@@ -1,5 +1,17 @@
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
+import { conceptionCall } from "@/lib/i18n/fr/conception-call";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+import { productionCall } from "@/lib/i18n/fr/production-call";
+import { strategyEntry } from "@/lib/i18n/fr/strategy-entry";
 import type { CallDetail } from "@/lib/calls/queries";
+
+const fr = {
+  calls,
+  framingIntel,
+  strategyEntry,
+  conceptionCall,
+  productionCall,
+};
 
 /**
  * What a call prepared with « Préparer un échange » is for (Cadrage,

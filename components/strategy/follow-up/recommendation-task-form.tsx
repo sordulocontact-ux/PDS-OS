@@ -9,9 +9,11 @@ import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import type { Member } from "@/lib/framing/related";
 import { writtenOf } from "@/lib/framing/written";
-import { fr } from "@/lib/i18n/fr";
+import { strategyFollowUp } from "@/lib/i18n/fr/strategy-follow-up";
 import { applyRecommendation } from "@/lib/strategy/actions/follow-up";
 import type { Recommendation } from "@/lib/strategy/recommendations";
+
+const fr = { strategyFollowUp };
 
 type Errors = Partial<Record<"title" | "assignee" | "due", string>>;
 

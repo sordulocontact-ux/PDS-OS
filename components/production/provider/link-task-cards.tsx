@@ -1,9 +1,11 @@
 import type { PortalCardItem } from "@/components/portal/portal-sections";
-import { fr } from "@/lib/i18n/fr";
+import { productionChecklist } from "@/lib/i18n/fr/production-checklist";
 import type { LinkJourney } from "@/lib/production/provider/journey";
 import { formatShortDay } from "@/lib/utils/day";
 
 import { LinkTaskRow } from "./link-task-row";
+
+const fr = { productionChecklist };
 
 const t = fr.productionChecklist;
 type Action = LinkJourney["actions"][number];

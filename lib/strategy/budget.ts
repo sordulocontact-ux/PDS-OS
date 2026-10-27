@@ -5,7 +5,9 @@
 // Dossier de presse. Client-safe.
 
 import type { BudgetLine } from "@/lib/budget/types";
-import { fr } from "@/lib/i18n/fr";
+import { strategyBudget as frStrategyBudget } from "@/lib/i18n/fr/strategy-budget";
+
+const fr = { strategyBudget: frStrategyBudget };
 
 export type LeverBudget = {
   leverId: string | null;

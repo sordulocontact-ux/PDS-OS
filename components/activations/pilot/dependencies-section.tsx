@@ -4,12 +4,14 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { ViewLink } from "@/components/ui/view-link";
 import type { DependencyOptions } from "@/lib/activations/dependency-options";
 import type { DependencyRecord } from "@/lib/activations/types";
-import { fr } from "@/lib/i18n/fr";
+import { activations } from "@/lib/i18n/fr/activations";
 
 import {
   LinkDependencyButton,
   UnlinkDependencyButton,
 } from "./dependency-buttons";
+
+const fr = { activations };
 
 const t = fr.activations.dependencies;
 

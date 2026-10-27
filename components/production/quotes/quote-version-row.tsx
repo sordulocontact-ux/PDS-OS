@@ -2,8 +2,10 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { buttonVariants } from "@/components/ui/button";
 import { formatEuros } from "@/lib/budget/types";
 import { shortStamp } from "@/lib/calls/prep/dates";
-import { fr } from "@/lib/i18n/fr";
+import { productionQuotes } from "@/lib/i18n/fr/production-quotes";
 import type { QuoteStatus } from "@/lib/production/quotes/queries";
+
+const fr = { productionQuotes };
 
 const t = fr.productionQuotes;
 const TONE = {

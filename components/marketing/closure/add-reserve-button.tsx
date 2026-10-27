@@ -8,9 +8,11 @@ import { OptionSelect } from "@/components/projects/option-select";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { marketingReview } from "@/lib/i18n/fr/marketing-review";
 import { addReserve } from "@/lib/marketing/closure/reserve-actions";
 import { RESERVE_CATEGORIES } from "@/lib/marketing/reports/model";
+
+const fr = { marketingReview };
 
 const t = fr.marketingReview.closure.reserves;
 const NONE = "none";

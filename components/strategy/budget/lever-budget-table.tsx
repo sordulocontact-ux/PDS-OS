@@ -7,8 +7,10 @@ import {
   DataTableRow,
 } from "@/components/ui/data-table";
 import { formatEuros } from "@/lib/budget/types";
-import { fr } from "@/lib/i18n/fr";
+import { strategyBudget } from "@/lib/i18n/fr/strategy-budget";
 import type { LeverBudget } from "@/lib/strategy/budget";
+
+const fr = { strategyBudget };
 
 /**
  * Répartition par levier: each selected lever, even without budget, then

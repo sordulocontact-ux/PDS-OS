@@ -4,7 +4,10 @@ import { IconLink } from "nucleo-sharp-essential";
 
 import { CopyButton } from "@/components/ui/copy-button";
 import { PdfExportButton } from "@/components/ui/pdf-export-button";
-import { fr } from "@/lib/i18n/fr";
+import { framing } from "@/lib/i18n/fr/framing";
+import { framingGuide } from "@/lib/i18n/fr/framing-guide";
+
+const fr = { framing, framingGuide };
 
 /**
  * "Copier le lien" and "Exporter en PDF". The PDF is made on the server

@@ -9,8 +9,10 @@ import {
   DataTableRow,
 } from "@/components/ui/data-table";
 import { formatDateTime } from "@/lib/calls/format";
-import { fr } from "@/lib/i18n/fr";
+import { productionCall } from "@/lib/i18n/fr/production-call";
 import type { ProductionCallSummary } from "@/lib/production/call-queries";
+
+const fr = { productionCall };
 
 /** The production calls of one sheet: title (to the call's page), date, state. */
 export function ProductionCallList({

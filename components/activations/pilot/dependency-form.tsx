@@ -10,7 +10,9 @@ import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import type { DependencyOptions } from "@/lib/activations/dependency-options";
 import { DEPENDENCY_KINDS, type DependencyKind } from "@/lib/activations/model";
 import { linkDependency } from "@/lib/activations/pilot-actions";
-import { fr } from "@/lib/i18n/fr";
+import { activations } from "@/lib/i18n/fr/activations";
+
+const fr = { activations };
 
 const t = fr.activations.dependencies;
 

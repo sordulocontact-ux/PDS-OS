@@ -7,7 +7,7 @@ import { FormMessage } from "@/components/auth/form-message";
 import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { stepTools } from "@/lib/i18n/fr/step-tools";
 import { noteStepInformation } from "@/lib/step-tools/actions";
 import {
   NOTE_SOURCES,
@@ -22,6 +22,8 @@ import {
 } from "@/lib/step-tools/model";
 
 import { ToolCard } from "./tool-card";
+
+const fr = { stepTools };
 
 const t = fr.stepTools;
 // The « Rien » of « Contredit » (a select has no empty value).

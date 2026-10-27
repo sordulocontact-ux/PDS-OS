@@ -4,8 +4,10 @@ import { useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import { fr } from "@/lib/i18n/fr";
+import { production } from "@/lib/i18n/fr/production";
 import { advanceDeliverable } from "@/lib/production/actions";
+
+const fr = { production };
 
 type Step = "approve" | "check" | "deliver" | "reopen";
 

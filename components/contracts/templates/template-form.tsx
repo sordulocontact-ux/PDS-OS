@@ -18,13 +18,18 @@ import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { CONTRACT_TYPES, type ContractType } from "@/lib/contracts/types";
-import { fr } from "@/lib/i18n/fr";
+import { contracts } from "@/lib/i18n/fr/contracts";
+import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
+import { legalDocuments } from "@/lib/i18n/fr/legal-documents";
+import { legalForms } from "@/lib/i18n/fr/legal-forms";
 import { createContractTemplate } from "@/lib/legal/contracts/template-actions";
 import type { TemplateAbout } from "@/lib/legal/contracts/template-values";
 import type { TemplateSource } from "@/lib/legal/contracts/upload-source";
 import { FORM_ROLES, type FormRole } from "@/lib/legal/forms/definition";
 import { cn } from "@/lib/utils";
 import { jsonListOf } from "@/lib/utils/form-data";
+
+const fr = { contracts, legalContracts, legalDocuments, legalForms };
 
 export type TemplateDraft = {
   seriesId: string | null;

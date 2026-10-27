@@ -3,13 +3,17 @@
 // never rewritten by PO. The production team only gets the logistics (no
 // creative nor budget data). Client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { productionBrief } from "@/lib/i18n/fr/production-brief";
+import { productionPrep } from "@/lib/i18n/fr/production-prep";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import { ficheDuration } from "@/lib/production/heritage-facts";
 import { effectiveLogistics } from "@/lib/production/logistics";
 import type { ProductionSheetData } from "@/lib/production/sheet";
 import { formatDate } from "@/lib/release/format";
 
 import type { ExtractLine, Team } from "./team-briefs";
+
+const fr = { productionPrep, productionBrief, productionPreprod };
 
 const t = fr.productionPreprod.briefs.lines;
 const choices = fr.productionBrief.choices;

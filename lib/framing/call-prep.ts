@@ -6,7 +6,9 @@
 
 import type { FramingAssessment, QuestionState } from "@/lib/framing/assess";
 import type { Dimension } from "@/lib/framing/dimensions";
-import { fr } from "@/lib/i18n/fr";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+
+const fr = { framingIntel };
 
 export type FramingTopic = {
   dimension: Dimension;

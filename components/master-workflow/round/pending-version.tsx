@@ -1,12 +1,15 @@
 import { BlockerCallout } from "@/components/ui/blocker-callout";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { masterJourney } from "@/lib/i18n/fr/master-journey";
+import { masterRound } from "@/lib/i18n/fr/master-round";
 import type { MixVersion } from "@/lib/master-workflow/mix-types";
 import type { RoundStepView } from "@/lib/master-workflow/round-step";
 import { masterStepHref } from "@/lib/ui/master-steps";
 
 import { VersionDecision } from "./version-decision";
 import { VersionFeedback } from "./version-feedback";
+
+const fr = { masterJourney, masterRound };
 
 const t = fr.masterRound;
 

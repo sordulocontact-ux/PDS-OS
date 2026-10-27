@@ -1,5 +1,5 @@
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { productionProposal } from "@/lib/i18n/fr/production-proposal";
 import { proposalState } from "@/lib/production/proposal/model";
 import { loadProposalVersions } from "@/lib/production/proposal/queries";
 import type { ProductionSheetData } from "@/lib/production/sheet";
@@ -9,6 +9,8 @@ import { ProposalDecision } from "./proposal-decision";
 import { ProposalDepositForm } from "./proposal-deposit-form";
 import { ProposalRequestForm } from "./proposal-request-form";
 import { ProposalVersions } from "./proposal-versions";
+
+const fr = { productionProposal };
 
 const t = fr.productionProposal;
 

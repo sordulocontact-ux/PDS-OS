@@ -2,7 +2,7 @@ import { EmptyNote } from "@/components/shell/empty-state";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { formatEuros } from "@/lib/budget/types";
 import { shortStamp } from "@/lib/calls/prep/dates";
-import { fr } from "@/lib/i18n/fr";
+import { productionQuotes } from "@/lib/i18n/fr/production-quotes";
 import { quoteComputed } from "@/lib/production/quotes/check";
 import type { ProductionQuote } from "@/lib/production/quotes/queries";
 import { formatShortDay } from "@/lib/utils/day";
@@ -12,6 +12,8 @@ import { QuoteCheckForm } from "./quote-check-form";
 import { QuoteDecisionForm } from "./quote-decision-form";
 import { QuoteRevisionForm } from "./quote-revision-form";
 import { QuoteVersionList, type QuoteVersionView } from "./quote-version-row";
+
+const fr = { productionQuotes };
 
 const t = fr.productionQuotes;
 

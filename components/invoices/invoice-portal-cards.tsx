@@ -1,13 +1,15 @@
 import type { PortalCardItem } from "@/components/portal/portal-sections";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { invoices } from "@/lib/i18n/fr/invoices";
 import type { PersonInvoices } from "@/lib/invoices/public";
 import { formatDay, formatShortInstant } from "@/lib/utils/day";
 import { formatAmount } from "@/lib/utils/money";
 
 import { agreedParts } from "./invoice-card";
 import { InvoiceForm } from "./invoice-form";
+
+const fr = { invoices };
 
 const t = fr.invoices.portal;
 const h3 =

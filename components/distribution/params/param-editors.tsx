@@ -13,7 +13,10 @@ import {
   type TerritoryMode,
 } from "@/lib/distribution/dossier";
 import type { ParamsData } from "@/lib/distribution/params-view";
-import { fr } from "@/lib/i18n/fr";
+import { distribution } from "@/lib/i18n/fr/distribution";
+import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
+
+const fr = { distribution, distributionJourney };
 
 const t = fr.distributionJourney.params;
 const d = fr.distribution.dossier;

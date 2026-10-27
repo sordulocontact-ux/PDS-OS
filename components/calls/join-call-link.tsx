@@ -1,8 +1,10 @@
 import { IconUserLaptop } from "nucleo-sharp-essential";
 
 import { buttonVariants } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
 import { cn } from "@/lib/utils";
+
+const fr = { calls };
 
 /**
  * "Rejoindre": opens the call's video link (Meet, Zoom…) in a new tab. In a

@@ -5,7 +5,9 @@ import { IconPlus } from "nucleo-sharp-essential";
 import { ContractCreation } from "@/components/contracts/contract-creation";
 import { LoadedFormButton } from "@/components/ui/loaded-form-button";
 import { loadContractOptions } from "@/lib/contracts/actions";
-import { fr } from "@/lib/i18n/fr";
+import { contracts } from "@/lib/i18n/fr/contracts";
+
+const fr = { contracts };
 
 /** "Nouveau contrat": what is being made first (ContractCreation, JUR-18),
  * then the form in the modal; once created, its page opens

@@ -17,8 +17,11 @@ import {
 } from "@/components/voice/voice-input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { fr } from "@/lib/i18n/fr";
+import { assistant } from "@/lib/i18n/fr/assistant";
+import { voice } from "@/lib/i18n/fr/voice";
 import { cn } from "@/lib/utils";
+
+const fr = { assistant, voice };
 
 export const MAX_LENGTH = 2000;
 

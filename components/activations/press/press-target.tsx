@@ -14,10 +14,13 @@ import { loadOpportunities } from "@/lib/activations/press/queries";
 import { loadSheets, versionsOf } from "@/lib/activations/sheet-queries";
 import type { TargetRecord } from "@/lib/activations/targets";
 import type { Access } from "@/lib/auth/access";
-import { fr } from "@/lib/i18n/fr";
+import { activationJourney } from "@/lib/i18n/fr/activation-journey";
+import { activationPress } from "@/lib/i18n/fr/activation-press";
 import { todayInParis } from "@/lib/insights/dates";
 
 import { OpportunitiesSection } from "./opportunities-section";
+
+const fr = { activationPress, activationJourney };
 
 /**
  * One press target in house (ticket RP § 5.2 to 5.7) : its messages — pitch

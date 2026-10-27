@@ -27,8 +27,11 @@ import {
   type ReasonKind,
   type Reserve,
 } from "@/lib/distribution/closure";
-import { fr } from "@/lib/i18n/fr";
+import { distribution } from "@/lib/i18n/fr/distribution";
+import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
 import { todayInParis } from "@/lib/insights/dates";
+
+const fr = { distribution, distributionJourney };
 
 const t = fr.distributionJourney.closure;
 const c = fr.distribution.closure;

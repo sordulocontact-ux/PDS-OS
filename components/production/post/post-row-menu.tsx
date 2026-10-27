@@ -5,10 +5,12 @@ import { useState } from "react";
 
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { RowActions, type RowAction } from "@/components/ui/row-actions";
-import { fr } from "@/lib/i18n/fr";
+import { productionPost } from "@/lib/i18n/fr/production-post";
 import type { PostResult } from "@/lib/production/post/result";
 
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
+
+const fr = { productionPost };
 
 const t = fr.productionPost;
 

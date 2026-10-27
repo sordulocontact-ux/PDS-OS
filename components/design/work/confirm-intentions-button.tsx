@@ -6,7 +6,9 @@ import { useDesignAction } from "@/components/design/work/use-design-action";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { confirmDesignIntentions } from "@/lib/design/actions/consolidation";
-import { fr } from "@/lib/i18n/fr";
+import { conceptionIntents } from "@/lib/i18n/fr/conception-intents";
+
+const fr = { conceptionIntents };
 
 /**
  * « Confirmer les intentions » of a target, for the owner. When it cannot

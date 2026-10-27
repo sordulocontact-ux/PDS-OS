@@ -23,8 +23,10 @@ import type { ActionResult } from "@/lib/calls/constants";
 import type { CallContact } from "@/lib/calls/invite";
 import type { PrepPerson } from "@/lib/calls/prep/types";
 import { instantOf, slotFrom, slotMinutes } from "@/lib/calls/slot";
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
 import { cn } from "@/lib/utils";
+
+const fr = { calls };
 
 type Member = { personId: string; name: string };
 

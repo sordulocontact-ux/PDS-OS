@@ -24,8 +24,11 @@ import type {
 } from "@/lib/assistant/draft-records";
 import { routes } from "@/lib/auth/redirects";
 import { loadContractOptions } from "@/lib/contracts/actions";
-import { fr } from "@/lib/i18n/fr";
+import { assistant } from "@/lib/i18n/fr/assistant";
+import { assistantRecords } from "@/lib/i18n/fr/assistant-records";
 import { loadContactOptions } from "@/lib/network/actions";
+
+const fr = { assistant, assistantRecords };
 
 // The real forms of PO's record drafts (lib/assistant/draft-records.ts),
 // pre-filled; the person saves with their own session. Each form stays on

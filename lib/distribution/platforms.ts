@@ -3,8 +3,10 @@
 // is « vérifiée » only once a person verified every platform of reference;
 // a declaration never counts as a verification. Pure.
 
-import { fr } from "@/lib/i18n/fr";
+import { distribution } from "@/lib/i18n/fr/distribution";
 import type { Platform as DetectedPlatform } from "@/lib/release/platforms";
+
+const fr = { distribution };
 
 export const REFERENCE_PLATFORMS = [
   "spotify",

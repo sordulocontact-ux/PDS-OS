@@ -9,8 +9,11 @@ import { loadCallSummaries, loadMeeting } from "@/lib/calls/meeting/queries";
 import type { MeetingLine } from "@/lib/calls/meeting/types";
 import { loadPlannedCall } from "@/lib/calls/prep/planned";
 import type { DesignJourneyContext } from "@/lib/design/journey-context";
-import { fr } from "@/lib/i18n/fr";
+import { designJourney } from "@/lib/i18n/fr/design-journey";
+import { designSteps } from "@/lib/i18n/fr/design-steps";
 import { formatDay } from "@/lib/utils/day";
+
+const fr = { designJourney, designSteps };
 
 const t = fr.designSteps.home.start;
 

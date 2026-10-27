@@ -5,7 +5,8 @@ import { toast } from "sonner";
 
 import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { FilterChip } from "@/components/ui/filter-chip";
-import { fr } from "@/lib/i18n/fr";
+import { masterBrief } from "@/lib/i18n/fr/master-brief";
+import { masterWorkflow } from "@/lib/i18n/fr/master-workflow";
 import { saveBriefFact } from "@/lib/master-workflow/brief-fact-actions";
 import {
   BRIEF_DATES,
@@ -14,6 +15,8 @@ import {
   type MasterBrief,
 } from "@/lib/master-workflow/brief-types";
 import { formatDay } from "@/lib/utils/day";
+
+const fr = { masterWorkflow, masterBrief };
 
 const t = fr.masterBrief;
 const labels = fr.masterWorkflow.brief.deliverables;

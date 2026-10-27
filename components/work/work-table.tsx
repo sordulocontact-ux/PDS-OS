@@ -9,7 +9,9 @@ import {
   DataTableRow,
 } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { assistant } from "@/lib/i18n/fr/assistant";
+import { transmission } from "@/lib/i18n/fr/transmission";
+import { work } from "@/lib/i18n/fr/work";
 import {
   myValidationTone,
   overdueTone,
@@ -18,6 +20,8 @@ import {
 } from "@/lib/ui/state-tones";
 import { formatShortDay } from "@/lib/utils/day";
 import type { WorkRow } from "@/lib/work/rows";
+
+const fr = { assistant, transmission, work };
 
 const t = fr.work.table;
 

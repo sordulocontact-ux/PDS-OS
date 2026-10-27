@@ -1,11 +1,13 @@
 import { IconBan } from "@/components/icons";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { stepTools } from "@/lib/i18n/fr/step-tools";
 import type { StepBlocker, StepNote } from "@/lib/step-tools/model";
 import { formatDayMonth } from "@/lib/utils/instant";
 
 import { LiftBlockerDialog } from "./lift-blocker-dialog";
 import { NotesDialogButton, type NotesDialogProps } from "./notes-dialog";
+
+const fr = { stepTools };
 
 const t = fr.stepTools.blocker;
 

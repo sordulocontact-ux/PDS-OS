@@ -1,6 +1,9 @@
 import { QuoteVersionList } from "@/components/production/quotes/quote-version-row";
-import { fr } from "@/lib/i18n/fr";
+import { productionLink } from "@/lib/i18n/fr/production-link";
+import { productionQuotes } from "@/lib/i18n/fr/production-quotes";
 import type { LinkJourney } from "@/lib/production/provider/journey";
+
+const fr = { productionQuotes, productionLink };
 
 /** The versions of the quote as the company reads them on its link: its
  * own note, what PDS asked or why it refused; never the internal checks. */

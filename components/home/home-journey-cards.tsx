@@ -2,8 +2,10 @@ import { GlobalWorkCountReporter } from "@/components/shell/work-count";
 import { JourneyActionsCard } from "@/components/work/journey-actions-card";
 import { can, type Access } from "@/lib/auth/access";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { work } from "@/lib/i18n/fr/work";
 import { loadMyJourneyWork } from "@/lib/work/journeys";
+
+const fr = { work };
 
 /**
  * The home's « Validations qui m'attendent » (the journeys' decisions) and

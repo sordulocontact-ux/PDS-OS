@@ -8,12 +8,14 @@ import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { MoveButtons } from "@/components/ui/move-buttons";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { strategyReleasePlan } from "@/lib/i18n/fr/strategy-release-plan";
 import type { GeneratorKind } from "@/lib/strategy/documents/generator-kind";
 import type { AnyPageChoice } from "@/lib/strategy/documents/release-plan-model";
 import { draftTone } from "@/lib/ui/state-tones";
 import { move } from "@/lib/utils/move";
 import { cn } from "@/lib/utils";
+
+const fr = { strategyReleasePlan };
 
 /**
  * Step 6 (ticket § 11): exactly the pages that will be generated, in order.

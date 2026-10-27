@@ -10,7 +10,13 @@ import { z } from "zod";
 
 import { formatEuros } from "@/lib/budget/types";
 import { formatBriefDate } from "@/lib/framing/assess";
-import { fr } from "@/lib/i18n/fr";
+import { framing } from "@/lib/i18n/fr/framing";
+import { strategy } from "@/lib/i18n/fr/strategy";
+import { strategyBrief } from "@/lib/i18n/fr/strategy-brief";
+import { strategyCalendar } from "@/lib/i18n/fr/strategy-calendar";
+import { strategyDispositif } from "@/lib/i18n/fr/strategy-dispositif";
+import { strategyKpis } from "@/lib/i18n/fr/strategy-kpis";
+import { strategyPilot } from "@/lib/i18n/fr/strategy-pilot";
 import type { Arbitration } from "@/lib/strategy/brief";
 import { briefOutSchema } from "@/lib/strategy/brief-out";
 import type { StrategyBudget } from "@/lib/strategy/budget";
@@ -22,6 +28,16 @@ import {
   type StrategyDimension,
 } from "@/lib/strategy/dimensions";
 import type { StrategyData } from "@/lib/strategy/queries";
+
+const fr = {
+  framing,
+  strategy,
+  strategyDispositif,
+  strategyCalendar,
+  strategyKpis,
+  strategyBrief,
+  strategyPilot,
+};
 
 const line = z.object({
   // Bold head (a name), then a muted tail; `warn`: still to arbitrate.

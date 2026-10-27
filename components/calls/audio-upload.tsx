@@ -13,7 +13,9 @@ import {
   type CallErrorCode,
 } from "@/lib/calls/constants";
 import { uploadCallAudio } from "@/lib/calls/upload-audio";
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
+
+const fr = { calls };
 
 function describe(file: File): { ext: string; mime: string } | null {
   const ext = file.name.split(".").pop()?.toLowerCase() ?? "";

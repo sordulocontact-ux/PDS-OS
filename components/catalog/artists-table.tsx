@@ -18,7 +18,10 @@ import { SelectAllHead, SelectRowCell } from "@/components/ui/row-selection";
 import type { RecordRights } from "@/lib/archive/types";
 import { routes } from "@/lib/auth/redirects";
 import type { ArtistListItem } from "@/lib/catalog/types";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
+import { records } from "@/lib/i18n/fr/records";
+
+const fr = { catalog, records };
 
 export function ArtistsTable({
   artists,

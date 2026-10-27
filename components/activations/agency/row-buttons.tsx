@@ -15,9 +15,13 @@ import {
   decideAgencyRow,
   linkAgencyRow,
 } from "@/lib/activations/agency/row-actions";
-import { fr } from "@/lib/i18n/fr";
+import { activationAgency } from "@/lib/i18n/fr/activation-agency";
+import { activationWork } from "@/lib/i18n/fr/activation-work";
+import { activations } from "@/lib/i18n/fr/activations";
 import type { RankedPerson } from "@/lib/network/ranked-people";
 import { listNetworkForRole } from "@/lib/network/role-people-actions";
+
+const fr = { activations, activationWork, activationAgency };
 
 const t = fr.activationAgency.gallery;
 type Decision = keyof typeof t.decisions;

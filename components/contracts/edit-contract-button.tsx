@@ -7,7 +7,10 @@ import { FormMessage } from "@/components/auth/form-message";
 import { ContractForm } from "@/components/contracts/contract-form";
 import { LoadedFormButton } from "@/components/ui/loaded-form-button";
 import { loadContractEdit } from "@/lib/contracts/actions";
-import { fr } from "@/lib/i18n/fr";
+import { contracts } from "@/lib/i18n/fr/contracts";
+import { records } from "@/lib/i18n/fr/records";
+
+const fr = { contracts, records };
 
 /** "Modifier" of a contract page: its real form, read when it opens. */
 export function EditContractButton({ contractId }: { contractId: string }) {

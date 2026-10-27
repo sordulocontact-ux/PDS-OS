@@ -2,9 +2,11 @@
 
 import { IconDownload } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { masterJourney } from "@/lib/i18n/fr/master-journey";
 import type { MasterHistoryItem } from "@/lib/master-workflow/history";
 import { formatShortInstant } from "@/lib/utils/day";
+
+const fr = { masterJourney };
 
 const t = fr.masterJourney.history;
 const cell = (value: string | null) => `"${(value ?? "").replace(/"/g, '""')}"`;

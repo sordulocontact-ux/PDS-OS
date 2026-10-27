@@ -4,8 +4,11 @@ import {
 } from "@/components/distribution/closure/reserve-follow";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { ReserveRow } from "@/lib/distribution/closure-queries";
-import { fr } from "@/lib/i18n/fr";
+import { distribution } from "@/lib/i18n/fr/distribution";
+import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
 import { formatShortDay, formatShortInstant } from "@/lib/utils/day";
+
+const fr = { distribution, distributionJourney };
 
 const t = fr.distributionJourney.closure;
 const c = fr.distribution.closure;

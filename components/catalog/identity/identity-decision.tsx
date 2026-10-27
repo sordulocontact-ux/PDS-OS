@@ -6,7 +6,9 @@ import { DialogButton } from "@/components/ui/dialog-button";
 import { ReasonForm } from "@/components/ui/reason-form";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { decideArtistIdentity } from "@/lib/catalog/identity-actions";
-import { fr } from "@/lib/i18n/fr";
+import { artistIdentity } from "@/lib/i18n/fr/artist-identity";
+
+const fr = { artistIdentity };
 
 /** « Approuver » or « Refuser » (with a reason) a proposed version. */
 export function IdentityDecision({

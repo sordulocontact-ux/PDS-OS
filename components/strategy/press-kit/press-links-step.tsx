@@ -10,11 +10,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { strategyPressKit } from "@/lib/i18n/fr/strategy-press-kit";
+import { strategyReleasePlan } from "@/lib/i18n/fr/strategy-release-plan";
 import type {
   PressContact,
   PressLink,
 } from "@/lib/strategy/documents/press-kit-model";
+
+const fr = { strategyReleasePlan, strategyPressKit };
 
 const isHttps = (url: string) => /^https:\/\/[^\s"'<>]+$/i.test(url);
 

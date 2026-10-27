@@ -6,7 +6,9 @@ import { toast } from "sonner";
 
 import { IconDownload } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { core } from "@/lib/i18n/fr/core";
+
+const fr = { pdf: core.pdf };
 
 // A PDF file always starts with these bytes: anything else (a login page
 // after an expired session, an error page) is never saved as the PDF.

@@ -8,7 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import type { CallPrepDefaults } from "@/lib/calls/prep/types";
-import { fr } from "@/lib/i18n/fr";
+import { callPrep } from "@/lib/i18n/fr/call-prep";
+
+const fr = { callPrep };
 
 /**
  * « Envoyé avec l'invitation »: the objective (computed, « Modifier » on the

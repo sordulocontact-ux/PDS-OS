@@ -4,7 +4,8 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
-import { fr } from "@/lib/i18n/fr";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
+import { stepTools } from "@/lib/i18n/fr/step-tools";
 import {
   openContradictions,
   stepChoiceKey,
@@ -16,6 +17,8 @@ import {
 import { NoteForm } from "./note-form";
 import { NoteGroup } from "./note-group";
 import { NoteRow } from "./note-row";
+
+const fr = { dialogs, stepTools };
 
 const t = fr.stepTools;
 const GROUPS = [

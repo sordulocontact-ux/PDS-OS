@@ -4,8 +4,10 @@ import { FormMessage } from "@/components/auth/form-message";
 import { PeoplePicker } from "@/components/ui/people-picker";
 import { OptionSelect } from "@/components/projects/option-select";
 import type { FieldErrors } from "@/lib/auth/form-state";
-import { fr } from "@/lib/i18n/fr";
+import { shell } from "@/lib/i18n/fr/shell";
 import type { CreativeMember } from "@/lib/projects/creatives";
+
+const fr = { shell };
 
 // "Équipe" of the project form, creation only: the project goes to the
 // project manager chosen (the post is known, only the person is asked), and

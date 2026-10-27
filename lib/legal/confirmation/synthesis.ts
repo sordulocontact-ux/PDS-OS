@@ -7,7 +7,9 @@
 import { routes } from "@/lib/auth/redirects";
 import { contractStateOf } from "@/lib/contracts/types";
 import { groupOf, type Fact, type FactStatus } from "@/lib/facts/types";
-import { fr } from "@/lib/i18n/fr";
+import { contracts } from "@/lib/i18n/fr/contracts";
+import { legal } from "@/lib/i18n/fr/legal";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 import type { InventoryRows } from "@/lib/legal/inventory-rows";
 import { factLabel } from "@/lib/legal/intake/labels";
 import type {
@@ -16,6 +18,8 @@ import type {
   QuestionKey,
 } from "@/lib/legal/intake/types";
 import type { InventoryMaster } from "@/lib/legal/title-facts";
+
+const fr = { contracts, legal, masterPage };
 
 /** A row's link back to the conversation: answer it, or correct it. */
 export type SynthesisAction = { kind: "answer" | "correct"; href: string };

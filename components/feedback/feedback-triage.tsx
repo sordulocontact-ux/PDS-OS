@@ -6,7 +6,9 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { triageFeedback } from "@/lib/feedback/actions";
-import { fr } from "@/lib/i18n/fr";
+import { feedback } from "@/lib/i18n/fr/feedback";
+
+const fr = { feedback };
 
 // Before the director reads the topics, PO files the new feedback (one call
 // per opening). While it works, the list waits behind a status line; then

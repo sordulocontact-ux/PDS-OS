@@ -11,13 +11,15 @@ import type {
   ActivationSummary,
   EvidenceRecord,
 } from "@/lib/activations/types";
-import { fr } from "@/lib/i18n/fr";
+import { activationJourney } from "@/lib/i18n/fr/activation-journey";
 import { formatDay, formatShortDay } from "@/lib/utils/day";
 
 import { AgencyDoneForm } from "./agency-done-form";
 import { ProofForm, VerifyProofForm } from "./proof-forms";
 import { SnapshotForm } from "./snapshot-form";
 import { DesignateForm, DueForm, GestureButton } from "./trunk-gestures";
+
+const fr = { activationJourney };
 
 const t = fr.activationJourney;
 

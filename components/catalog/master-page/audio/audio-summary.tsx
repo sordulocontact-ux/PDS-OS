@@ -2,9 +2,11 @@ import { TitleAudioState } from "@/components/catalog/title/title-audio-state";
 import { FactList } from "@/components/ui/fact-list";
 import type { AudioOverview } from "@/lib/catalog/audio-versions";
 import type { AudioState } from "@/lib/catalog/title-rules";
-import { fr } from "@/lib/i18n/fr";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 import { formatInstant } from "@/lib/utils/instant";
 import { versionLabel } from "@/components/catalog/master-page/audio/audio-version-list";
+
+const fr = { masterPage };
 
 /**
  * Three separate facts (retours Catalogue 13 et 25): the step reached, the

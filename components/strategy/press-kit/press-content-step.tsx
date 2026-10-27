@@ -7,9 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Textarea } from "@/components/ui/textarea";
-import { fr } from "@/lib/i18n/fr";
+import { strategyPressKit } from "@/lib/i18n/fr/strategy-press-kit";
+import { strategyReleasePlan } from "@/lib/i18n/fr/strategy-release-plan";
 import type { PressBlock } from "@/lib/strategy/documents/press-kit-model";
 import { draftTone } from "@/lib/ui/state-tones";
+
+const fr = { strategyReleasePlan, strategyPressKit };
 
 type Item = {
   key: PressBlock;

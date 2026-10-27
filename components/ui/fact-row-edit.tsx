@@ -12,7 +12,9 @@ import {
 } from "@/components/ui/fact-row-frame";
 import { Input } from "@/components/ui/input";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { decisions } from "@/lib/i18n/fr/decisions";
+
+const fr = { decisions };
 
 const t = fr.decisions.fact;
 

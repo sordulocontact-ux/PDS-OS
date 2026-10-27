@@ -13,7 +13,9 @@ import {
   type ContractFormOptions,
   type ContractValues,
 } from "@/lib/contracts/types";
-import { fr } from "@/lib/i18n/fr";
+import { contracts } from "@/lib/i18n/fr/contracts";
+
+const fr = { contracts };
 
 /**
  * A contract, created or edited in the modal: what it is, who follows it,

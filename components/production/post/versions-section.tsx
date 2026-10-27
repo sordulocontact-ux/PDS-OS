@@ -1,6 +1,6 @@
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
-import { fr } from "@/lib/i18n/fr";
+import { productionPost } from "@/lib/i18n/fr/production-post";
 import type { PostRole } from "@/lib/production/post/rules";
 import type {
   PostPeople,
@@ -12,6 +12,8 @@ import type {
 
 import { VersionCard } from "./version-card";
 import { VersionAddButton } from "./version-dialog";
+
+const fr = { productionPost };
 
 const t = fr.productionPost.versions;
 

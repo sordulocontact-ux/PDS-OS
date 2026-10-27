@@ -2,9 +2,11 @@
 // (lib/strategy/documents/editorial-html.ts), named for the artist's team.
 // Client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { strategyReleasePlan } from "@/lib/i18n/fr/strategy-release-plan";
 import { editorialHtml } from "@/lib/strategy/documents/editorial-html";
 import type { ReleasePlanContent } from "@/lib/strategy/documents/release-plan-model";
+
+const fr = { strategyReleasePlan };
 
 export { escapeHtml } from "@/lib/strategy/documents/editorial-html";
 

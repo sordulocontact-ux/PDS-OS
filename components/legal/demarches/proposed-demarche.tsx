@@ -1,7 +1,9 @@
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { legalDemarches } from "@/lib/i18n/fr/legal-demarches";
 import type { Demarche } from "@/lib/legal/demarches/build";
 import { StepSection } from "@/components/shell/journey/step-section";
+
+const fr = { legalDemarches };
 
 const t = fr.legalDemarches.proposed;
 

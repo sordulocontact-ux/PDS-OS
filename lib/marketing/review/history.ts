@@ -5,12 +5,14 @@
 // recorded. Newest first. Pure, client-safe.
 
 import type { StepHistoryItem } from "@/components/shell/journey/step-history";
-import { fr } from "@/lib/i18n/fr";
+import { reviewJourney } from "@/lib/i18n/fr/review-journey";
 import type { MarketingClosure } from "@/lib/marketing/closure/queries";
 import type { Approval } from "@/lib/marketing/reports/approvals";
 import type { ReportVersion } from "@/lib/marketing/reports/model";
 import type { Reserve } from "@/lib/marketing/reserves/queries";
 import type { ReviewStepKey } from "@/lib/ui/review-steps";
+
+const fr = { reviewJourney };
 
 const t = fr.reviewJourney.history;
 const decisions = fr.reviewJourney.reserves.decisions;

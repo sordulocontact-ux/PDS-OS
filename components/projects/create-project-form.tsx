@@ -16,7 +16,7 @@ import { ChipChoice } from "@/components/ui/chip-choice";
 import { FormSection } from "@/components/ui/form-section";
 import { routes } from "@/lib/auth/redirects";
 import type { ArtistOption, MasterOption } from "@/lib/catalog/types";
-import { fr } from "@/lib/i18n/fr";
+import { shell } from "@/lib/i18n/fr/shell";
 import { createProject } from "@/lib/projects/actions";
 import type { CreativeMember } from "@/lib/projects/creatives";
 import { updateProject } from "@/lib/projects/edit-actions";
@@ -29,6 +29,8 @@ import {
   type Priority,
   type ProjectType,
 } from "@/lib/projects/types";
+
+const fr = { shell };
 
 export type ProjectFormDefaults = {
   title: string;

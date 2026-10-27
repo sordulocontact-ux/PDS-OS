@@ -7,7 +7,7 @@ import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { ChoiceCards } from "@/components/ui/choice-cards";
-import { fr } from "@/lib/i18n/fr";
+import { productionPost } from "@/lib/i18n/fr/production-post";
 import { uploadProductionFile } from "@/lib/production/files/upload";
 import { addPostReference } from "@/lib/production/post/reference-actions";
 import {
@@ -18,6 +18,8 @@ import type { PostScope } from "@/lib/production/post/types";
 
 import { FilePickField } from "@/components/ui/file-pick-field";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
+
+const fr = { productionPost };
 
 const t = fr.productionPost.references;
 const HTTPS = /^https:\/\/\S+$/;

@@ -5,7 +5,7 @@
 // even read here). Client-safe.
 
 import { formatDay } from "@/lib/assistant/facts";
-import { fr } from "@/lib/i18n/fr";
+import { strategyPressKit } from "@/lib/i18n/fr/strategy-press-kit";
 import {
   artistPresentation,
   type ArtistSheet,
@@ -17,6 +17,8 @@ import type {
   PressLink,
 } from "@/lib/strategy/documents/press-kit-model";
 import type { StrategyData } from "@/lib/strategy/queries";
+
+const fr = { strategyPressKit };
 
 export type PressKitInput = {
   project: {

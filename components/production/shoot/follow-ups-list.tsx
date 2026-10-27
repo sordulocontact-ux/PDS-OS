@@ -1,9 +1,11 @@
 import { EmptyNote } from "@/components/shell/empty-state";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionShoot } from "@/lib/i18n/fr/production-shoot";
 import type { FollowUp } from "@/lib/production/shoot/follow-ups";
 
 import { FollowUpTaskButton } from "./follow-up-task-button";
+
+const fr = { productionShoot };
 
 const t = fr.productionShoot.followUps;
 

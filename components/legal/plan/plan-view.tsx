@@ -8,13 +8,15 @@ import { PageSection } from "@/components/shell/page-section";
 import { Button } from "@/components/ui/button";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
 import { formatInstant } from "@/lib/utils/instant";
 import { PLAN_COLUMNS } from "@/lib/legal/plan/proposal";
 import { groupActions, lineOf } from "@/lib/legal/plan/groups";
 import type { LegalPlan, PlanRow } from "@/lib/legal/plan/queries";
 import { groupAction } from "@/lib/legal/plan/where";
 import { formatDate } from "@/lib/release/format";
+
+const fr = { legal };
 
 /** Juridique's fourth step: the plan to launch, or the plan launched. */
 export function PlanView({

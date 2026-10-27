@@ -15,7 +15,9 @@ import {
   type FeedbackKind,
   type FeedbackTopic,
 } from "@/lib/feedback/types";
-import { fr } from "@/lib/i18n/fr";
+import { feedback } from "@/lib/i18n/fr/feedback";
+
+const fr = { feedback };
 
 // The director's edit of a topic before sending it: title, summary, kind.
 // PO can propose a rewrite from the original feedback and an optional

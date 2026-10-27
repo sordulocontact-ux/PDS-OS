@@ -2,7 +2,7 @@ import { ContractValueList } from "@/components/legal/contracts/contract-value-l
 import { DocumentCard } from "@/components/ui/document-card";
 import { PdfExportButton } from "@/components/ui/pdf-export-button";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { legalDocuments } from "@/lib/i18n/fr/legal-documents";
 import { isBlocking } from "@/lib/legal/contracts/completeness";
 import type { ContractCardData } from "@/lib/legal/contracts/document-card";
 import { fileNamePart } from "@/lib/utils/file-name-part";
@@ -10,6 +10,8 @@ import type {
   AgreementField,
   AgreementRow,
 } from "@/lib/legal/contracts/mapping";
+
+const fr = { legalDocuments };
 
 const t = fr.legalDocuments.contract;
 

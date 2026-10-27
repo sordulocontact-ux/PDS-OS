@@ -1,7 +1,9 @@
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
+
+const fr = { legal };
 
 /**
  * The actions of one kind (Plan, Suivi): what they share said once (the

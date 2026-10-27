@@ -1,10 +1,12 @@
-import { fr } from "@/lib/i18n/fr";
+import { portal } from "@/lib/i18n/fr/portal";
 
 import {
   PortalCard,
   type PortalAction,
   type PortalCardState,
 } from "./portal-card";
+
+const fr = { portal };
 
 const t = fr.portal;
 

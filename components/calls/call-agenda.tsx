@@ -9,7 +9,10 @@ import { Button } from "@/components/ui/button";
 import { updateCallAgenda } from "@/lib/calls/actions";
 import type { AgendaItem } from "@/lib/calls/first-call-agenda";
 import { EXTRA_TOPIC_MINUTES } from "@/lib/calls/prepare";
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+
+const fr = { calls, framingIntel };
 
 const day = new Intl.DateTimeFormat("fr-FR", {
   dateStyle: "long",

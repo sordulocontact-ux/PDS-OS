@@ -7,7 +7,9 @@
 
 import type { ActivationStatus, LaunchGap } from "@/lib/activations/model";
 import type { MeasureState, ProofState } from "@/lib/activations/states";
-import { fr } from "@/lib/i18n/fr";
+import { activationJourney } from "@/lib/i18n/fr/activation-journey";
+
+const fr = { activationJourney };
 
 const t = fr.activationJourney;
 

@@ -8,7 +8,7 @@ import type { MasterSession } from "@/lib/catalog/master/rules";
 import { sessionLabel } from "@/lib/catalog/master/session-label";
 import type { AudioState } from "@/lib/catalog/title-rules";
 import { groupOf, type FactTitle } from "@/lib/facts/types";
-import { fr } from "@/lib/i18n/fr";
+import { masterWorkflow } from "@/lib/i18n/fr/master-workflow";
 import {
   audioSourceFact,
   type FlowAudio,
@@ -17,6 +17,8 @@ import {
 } from "@/lib/master-workflow/audio-source";
 import type { MasterFact } from "@/lib/master-workflow/types";
 import { viewHref } from "@/lib/ui/view-href";
+
+const fr = { masterWorkflow };
 
 export type FlowTitle = FactTitle & {
   // The title's own state: the audio import offers it first.

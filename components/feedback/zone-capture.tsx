@@ -8,8 +8,10 @@ import {
   captureRegion,
   type Region,
 } from "@/lib/feedback/capture-region";
-import { fr } from "@/lib/i18n/fr";
+import { feedback } from "@/lib/i18n/fr/feedback";
 import { cn } from "@/lib/utils";
+
+const fr = { feedback };
 
 type Point = { x: number; y: number };
 

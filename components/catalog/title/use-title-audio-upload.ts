@@ -10,7 +10,11 @@ import {
 } from "@/lib/catalog/file-rules";
 import { isAudioState } from "@/lib/catalog/title-rules";
 import { uploadCatalogFile } from "@/lib/catalog/upload-file";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
+import { catalogFiles } from "@/lib/i18n/fr/catalog-files";
+import { masterPage } from "@/lib/i18n/fr/master-page";
+
+const fr = { catalog, catalogFiles, masterPage };
 
 /**
  * The audio file chosen in the title form, sent once the title exists

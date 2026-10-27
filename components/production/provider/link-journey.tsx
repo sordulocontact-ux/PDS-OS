@@ -2,7 +2,9 @@ import type { PortalCardItem } from "@/components/portal/portal-sections";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { shortStamp } from "@/lib/calls/prep/dates";
-import { fr } from "@/lib/i18n/fr";
+import { portal } from "@/lib/i18n/fr/portal";
+import { productionLink } from "@/lib/i18n/fr/production-link";
+import { productionReady } from "@/lib/i18n/fr/production-ready";
 import type { LinkJourney } from "@/lib/production/provider/journey";
 
 import { linkCallCards } from "./link-call-cards";
@@ -15,6 +17,8 @@ import { linkProposalCard } from "./link-proposal-card";
 import { linkQuoteCard } from "./link-quote-card";
 import { LinkRushesForm } from "./link-rushes-form";
 import { linkChecklistCard, LinkTaskList } from "./link-task-cards";
+
+const fr = { productionLink, productionReady, portal };
 
 const t = fr.productionLink;
 const p = fr.portal.provider;

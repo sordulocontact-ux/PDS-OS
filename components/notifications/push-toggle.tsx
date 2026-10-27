@@ -4,11 +4,13 @@ import { IconBell } from "nucleo-sharp-essential";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { notifications } from "@/lib/i18n/fr/notifications";
 import {
   removePushSubscription,
   savePushSubscription,
 } from "@/lib/notifications/actions";
+
+const fr = { notifications };
 
 type State = "loading" | "unsupported" | "denied" | "off" | "on" | "failed";
 

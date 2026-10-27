@@ -7,8 +7,10 @@ import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { masterRound } from "@/lib/i18n/fr/master-round";
 import { sendRound } from "@/lib/master-workflow/round-actions";
+
+const fr = { masterRound };
 
 const t = fr.masterRound;
 

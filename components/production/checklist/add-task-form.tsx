@@ -8,9 +8,12 @@ import { HolderSelect } from "@/components/production/holder-select";
 import { Button } from "@/components/ui/button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
+import { productionChecklist } from "@/lib/i18n/fr/production-checklist";
 import { addChecklistTask } from "@/lib/production/checklist-actions";
 import type { NetworkOption } from "@/lib/production/sheet";
+
+const fr = { dialogs, productionChecklist };
 
 const t = fr.productionChecklist.add;
 

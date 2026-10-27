@@ -4,10 +4,12 @@ import { launchGapsText } from "@/lib/activations/describe";
 import { NOT_STARTED_STATUSES } from "@/lib/activations/model";
 import type { ActivationSummary } from "@/lib/activations/types";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { activations } from "@/lib/i18n/fr/activations";
 import { formatDate } from "@/lib/release/format";
 
 import { IdentityActions } from "./identity-actions";
+
+const fr = { activations };
 
 const t = fr.activations;
 

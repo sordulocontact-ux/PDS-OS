@@ -14,8 +14,10 @@ import {
 } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatEuros, type BudgetLine } from "@/lib/budget/types";
-import { fr } from "@/lib/i18n/fr";
+import { budget } from "@/lib/i18n/fr/budget";
 import { budgetStatusTone } from "@/lib/ui/state-tones";
+
+const fr = { budget };
 
 // Budget lines with their total (code), edit and delete for the owner.
 export function BudgetTable({

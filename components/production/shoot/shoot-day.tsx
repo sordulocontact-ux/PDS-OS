@@ -1,10 +1,13 @@
 import { needLabel } from "@/components/production/prep/need-label";
 import { PageSection } from "@/components/shell/page-section";
 import { FactList } from "@/components/ui/fact-list";
-import { fr } from "@/lib/i18n/fr";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
+import { productionShoot } from "@/lib/i18n/fr/production-shoot";
 import type { CallSheet, PlanAction } from "@/lib/production/preprod/types";
 import type { ProductionNeed, SheetLogistics } from "@/lib/production/sheet";
 import { formatDate } from "@/lib/release/format";
+
+const fr = { productionPreprod, productionShoot };
 
 const t = fr.productionShoot.day;
 

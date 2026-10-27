@@ -6,7 +6,9 @@ import { toast } from "sonner";
 
 import { FileDropZone } from "@/components/ui/file-drop-zone";
 import { uploadCatalogFile } from "@/lib/catalog/upload-file";
-import { fr } from "@/lib/i18n/fr";
+import { legalClearance } from "@/lib/i18n/fr/legal-clearance";
+
+const fr = { legalClearance };
 
 /**
  * Where the signed copy or its proof is dropped, inside the borrowing's

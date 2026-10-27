@@ -1,5 +1,7 @@
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { decisions } from "@/lib/i18n/fr/decisions";
+
+const fr = { decisions };
 
 /**
  * A validator's reason, signed, at the head of the step of the person who

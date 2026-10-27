@@ -6,11 +6,13 @@ import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { legalClearance } from "@/lib/i18n/fr/legal-clearance";
 import {
   replaceClearance,
   withdrawClearance,
 } from "@/lib/legal/clearance/actions";
+
+const fr = { legalClearance };
 
 const t = fr.legalClearance.stages.negotiate.decide;
 

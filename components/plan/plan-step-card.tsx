@@ -1,11 +1,14 @@
 import Link from "next/link";
 
 import { StatusDot } from "@/components/ui/status-dot";
-import { fr } from "@/lib/i18n/fr";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+import { workflowStatus } from "@/lib/i18n/fr/workflow-status";
 import type { StepIssue } from "@/lib/plan/steps";
 import { workflowStatusTone } from "@/lib/ui/state-tones";
 import { formatDay } from "@/lib/utils/day";
 import type { CommonStatus } from "@/lib/workflow-status/rules";
+
+const fr = { framingIntel, workflowStatus };
 
 /** The anchor of a step in the board: its dependencies link to it. */
 export const stepAnchor = (key: string) => `plan-step-${key}`;

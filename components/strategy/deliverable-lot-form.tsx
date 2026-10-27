@@ -9,10 +9,14 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { labelClass } from "@/components/ui/option-class";
-import { fr } from "@/lib/i18n/fr";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
+import { strategy } from "@/lib/i18n/fr/strategy";
+import { strategyDeliverables } from "@/lib/i18n/fr/strategy-deliverables";
 import { addDeliverableLot } from "@/lib/strategy/actions/deliverables";
 import type { LotItem } from "@/lib/strategy/deliverable-lots";
 import { toast } from "sonner";
+
+const fr = { dialogs, strategy, strategyDeliverables };
 
 const NONE = "none";
 

@@ -9,7 +9,7 @@ import { PersonPickerField } from "@/components/network/person-picker-field";
 import { usePickerLoad } from "@/components/network/use-picker-load";
 import { Button } from "@/components/ui/button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { stepTools } from "@/lib/i18n/fr/step-tools";
 import {
   loadUnblockerOptions,
   reportStepBlocker,
@@ -18,6 +18,8 @@ import {
 import type { StepRef } from "@/lib/step-tools/model";
 
 import { ToolCard } from "./tool-card";
+
+const fr = { stepTools };
 
 const t = fr.stepTools;
 

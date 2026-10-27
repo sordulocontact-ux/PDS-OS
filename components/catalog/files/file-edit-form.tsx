@@ -8,7 +8,9 @@ import { FileDetailsFields } from "@/components/catalog/files/file-details-field
 import { Button } from "@/components/ui/button";
 import { updateCatalogFile } from "@/lib/catalog/file-actions";
 import type { CatalogFile, FileOwner } from "@/lib/catalog/file-rules";
-import { fr } from "@/lib/i18n/fr";
+import { catalogFiles } from "@/lib/i18n/fr/catalog-files";
+
+const fr = { catalogFiles };
 
 // "Modifier" a file: its name, category (moving it to another view) and
 // precision. Closes once saved; the list refreshes from the server.

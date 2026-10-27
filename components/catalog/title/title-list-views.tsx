@@ -6,8 +6,10 @@ import {
   titleViewParam,
   type TitleView,
 } from "@/lib/catalog/title-views";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
 import { viewHref } from "@/lib/ui/view-href";
+
+const fr = { catalog };
 
 // Views of the Catalogue, in the URL: where the song stands as tabs (Tous,
 // En création, En production, Finalisés, with their counts) and, for the

@@ -1,8 +1,10 @@
 import { ContentCard } from "@/components/shell/content-card";
 import { InfoRow, Rows } from "@/components/ui/rows";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { projectShell } from "@/lib/i18n/fr/project-shell";
 import type { OverviewDependency } from "@/lib/overview/dependencies";
+
+const fr = { projectShell };
 
 /** « Ce qui dépend d'un autre workflow » (proto « Projet complet »): one
  * line per fact handed over, « A → B », Disponible or Attendu. */

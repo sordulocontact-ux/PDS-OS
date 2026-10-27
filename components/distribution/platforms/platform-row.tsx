@@ -10,7 +10,10 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { saveDistributionPlatform } from "@/lib/distribution/platforms-actions";
-import { fr } from "@/lib/i18n/fr";
+import { distribution } from "@/lib/i18n/fr/distribution";
+import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
+
+const fr = { distribution, distributionJourney };
 
 const t = fr.distributionJourney.platforms;
 const p = fr.distribution.platforms;

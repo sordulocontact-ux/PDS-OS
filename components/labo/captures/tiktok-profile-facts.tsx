@@ -1,6 +1,8 @@
 import { formatFans } from "@/lib/catalog/types";
 import type { CaptureTikTokProfile } from "@/lib/catalog/capture-artist-types";
-import { fr } from "@/lib/i18n/fr";
+import { laboCaptures } from "@/lib/i18n/fr/labo-captures";
+
+const fr = { laboCaptures };
 
 /**
  * The public TikTok profile of a person read on a screenshot: audience,

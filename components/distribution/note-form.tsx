@@ -7,7 +7,9 @@ import { TextareaField } from "@/components/auth/textarea-field";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import type { DistributionResult } from "@/lib/distribution/result";
-import { fr } from "@/lib/i18n/fr";
+import { distribution } from "@/lib/i18n/fr/distribution";
+
+const fr = { distribution };
 
 /**
  * A required note, then the action that needs it, in a dialog: refusing a

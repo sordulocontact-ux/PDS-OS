@@ -10,7 +10,8 @@ import { PersonPickerField } from "@/components/network/person-picker-field";
 import { usePickerLoad } from "@/components/network/use-picker-load";
 import { Button } from "@/components/ui/button";
 import { FilterChip } from "@/components/ui/filter-chip";
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
+import { legalClearance } from "@/lib/i18n/fr/legal-clearance";
 import { removeRightsholder } from "@/lib/legal/clearance/actions";
 import {
   declareNothingToSecure,
@@ -30,6 +31,8 @@ import type { Clearance } from "@/lib/legal/clearance/types";
 import type { NetworkRole } from "@/lib/network/types";
 
 import { useLegalAction } from "@/components/legal/use-legal-action";
+
+const fr = { legal, legalClearance };
 
 const SCOPE_ORDER: Scope[] = ["both", "work", "master", "none"];
 // Who holds a right when the Réseau says nothing of the contact: the

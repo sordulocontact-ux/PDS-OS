@@ -16,9 +16,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionBrief } from "@/lib/i18n/fr/production-brief";
 import type { Holder, NetworkOption } from "@/lib/production/sheet";
 import { setProductionDirector } from "@/lib/production/sheet-actions";
+
+const fr = { productionBrief };
 
 // Select values: "person:<uuid>", "contact:<uuid>", or NONE (the action
 // takes "" to clear; an empty value does not fit a select item).

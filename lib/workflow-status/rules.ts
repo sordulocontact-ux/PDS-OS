@@ -5,13 +5,17 @@
 // tables (lib/workflow-status/load.ts), never stored, never written by PO
 // (rule 6). Pure: every rule here is unit-tested.
 
-import { fr } from "@/lib/i18n/fr";
+import { marketingReview } from "@/lib/i18n/fr/marketing-review";
+import { shell } from "@/lib/i18n/fr/shell";
+import { workflowStatus } from "@/lib/i18n/fr/workflow-status";
 import {
   isMarketingClosed,
   type MarketingStatus,
 } from "@/lib/marketing/closure/status";
 import type { MasterTab } from "@/lib/ui/master-steps";
 import { workflowStepHref } from "@/lib/ui/workflow-hrefs";
+
+const fr = { shell, marketingReview, workflowStatus };
 
 export const WORKFLOWS = [
   "master",

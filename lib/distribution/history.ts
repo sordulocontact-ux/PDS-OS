@@ -10,7 +10,10 @@ import {
   isRefusalModule,
 } from "@/lib/distribution/validation";
 import { isDeclarationKind } from "@/lib/distribution/tracking";
-import { fr } from "@/lib/i18n/fr";
+import { distribution } from "@/lib/i18n/fr/distribution";
+import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
+
+const fr = { distribution, distributionJourney };
 
 const str = (value: unknown): string | null =>
   typeof value === "string" ? value : null;

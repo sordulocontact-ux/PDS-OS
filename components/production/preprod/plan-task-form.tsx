@@ -6,9 +6,11 @@ import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { OptionSelect } from "@/components/projects/option-select";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import { createTaskFromAction } from "@/lib/production/preprod/actions-plan-task";
 import type { PlanAction } from "@/lib/production/preprod/types";
+
+const fr = { productionPreprod };
 
 const t = fr.productionPreprod.plan;
 

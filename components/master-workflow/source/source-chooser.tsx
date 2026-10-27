@@ -3,11 +3,13 @@
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { masterSource } from "@/lib/i18n/fr/master-source";
 import type { SourceTitle } from "@/lib/master-workflow/source-step";
 
 import { ExistingMixForm } from "./existing-mix-form";
 import { SourceForm } from "./source-form";
+
+const fr = { masterSource };
 
 /**
  * The owner's gesture on a title's source: the form when nothing is

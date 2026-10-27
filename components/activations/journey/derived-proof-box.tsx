@@ -1,5 +1,7 @@
 import type { DerivedProof } from "@/lib/activations/campaign";
-import { fr } from "@/lib/i18n/fr";
+import { activationJourney } from "@/lib/i18n/fr/activation-journey";
+
+const fr = { activationJourney };
 
 const t = fr.activationJourney.derived;
 

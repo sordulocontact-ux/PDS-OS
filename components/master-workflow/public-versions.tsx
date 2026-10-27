@@ -1,9 +1,11 @@
 import { StatusBadge } from "@/components/ui/status-badge";
 import { sectionCardClass } from "@/components/ui/section-card";
-import { fr } from "@/lib/i18n/fr";
+import { masterWorkflow } from "@/lib/i18n/fr/master-workflow";
 import type { PublicPackage } from "@/lib/master-workflow/transmission-public";
 import { formatShortDate } from "@/lib/release/format";
 import type { Tone } from "@/lib/ui/state-tones";
+
+const fr = { masterWorkflow };
 
 type Version = Extract<
   PublicPackage,

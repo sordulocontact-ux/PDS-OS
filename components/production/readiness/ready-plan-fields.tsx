@@ -3,7 +3,9 @@
 import { Field } from "@/components/auth/field";
 import { HolderSelect } from "@/components/production/holder-select";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionReady } from "@/lib/i18n/fr/production-ready";
+
+const fr = { productionReady };
 
 const t = fr.productionReady;
 

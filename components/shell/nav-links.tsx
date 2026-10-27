@@ -13,9 +13,12 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { moduleFrame } from "@/lib/i18n/fr/module-frame";
+import { shell } from "@/lib/i18n/fr/shell";
 import { NAV_ITEMS } from "@/lib/ui/nav-items";
 import { cn } from "@/lib/utils";
+
+const fr = { shell, moduleFrame };
 
 function isActive(pathname: string, href: string, exact: boolean): boolean {
   return exact

@@ -1,8 +1,10 @@
 import { RevokeDerogation } from "@/components/distribution/dossier/derogation-form";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import type { Derogation } from "@/lib/distribution/validation";
-import { fr } from "@/lib/i18n/fr";
+import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
 import { formatShortDay, formatShortInstant } from "@/lib/utils/day";
+
+const fr = { distributionJourney };
 
 /** A derogation of the direction, as the owner and the validator read it. */
 export function DerogationNote({

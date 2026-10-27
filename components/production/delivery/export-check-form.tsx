@@ -7,7 +7,8 @@ import { FormMessage } from "@/components/auth/form-message";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { FilterChip } from "@/components/ui/filter-chip";
-import { fr } from "@/lib/i18n/fr";
+import { productionClosure } from "@/lib/i18n/fr/production-closure";
+import { productionDelivery } from "@/lib/i18n/fr/production-delivery";
 import { saveExportCheck } from "@/lib/production/delivery/checklist-actions";
 import {
   EXPORT_CHECK_KINDS,
@@ -15,6 +16,8 @@ import {
   type ExportCheckLine,
 } from "@/lib/production/delivery/rules";
 import { isHttpsLink } from "@/lib/production/rules";
+
+const fr = { productionDelivery, productionClosure };
 
 const t = fr.productionDelivery;
 

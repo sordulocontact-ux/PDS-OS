@@ -7,8 +7,10 @@ import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { RowActions, type RowAction } from "@/components/ui/row-actions";
-import { fr } from "@/lib/i18n/fr";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
 import type { WriteResult } from "@/lib/utils/write-result";
+
+const fr = { dialogs };
 
 const t = fr.dialogs;
 

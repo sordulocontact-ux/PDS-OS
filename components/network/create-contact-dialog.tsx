@@ -3,9 +3,12 @@
 import { ContactForm } from "@/components/network/contact-form";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { Loaded } from "@/components/ui/loaded";
-import { fr } from "@/lib/i18n/fr";
+import { network } from "@/lib/i18n/fr/network";
+import { records } from "@/lib/i18n/fr/records";
 import { loadContactOptions } from "@/lib/network/actions";
 import type { NetworkKind, NetworkRole } from "@/lib/network/types";
+
+const fr = { network, records };
 
 function Body({
   name,

@@ -5,7 +5,9 @@
  * This text is model context; activity labels are shared with the UI.
  */
 
-import { fr } from "@/lib/i18n/fr";
+import { assistant } from "@/lib/i18n/fr/assistant";
+
+const fr = { assistant };
 
 const STAGE_STATE: Record<string, string> = {
   not_started: "pas commencée",

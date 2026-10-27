@@ -9,7 +9,8 @@ import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { contracts } from "@/lib/i18n/fr/contracts";
+import { legalClearance } from "@/lib/i18n/fr/legal-clearance";
 import { isClosed, rightsOf } from "@/lib/legal/clearance/matrix";
 import { advanceContract } from "@/lib/contracts/actions";
 import { todayInParis } from "@/lib/contracts/types";
@@ -18,6 +19,8 @@ import type { Clearance } from "@/lib/legal/clearance/types";
 import { contractStateTone } from "@/lib/ui/state-tones";
 
 import { useLegalAction } from "@/components/legal/use-legal-action";
+
+const fr = { contracts, legalClearance };
 
 /** « Documents » : the contract of each concerned right, its signed copy and
  * its proof (kept in the Contracts module). With `organizationId` (the

@@ -1,7 +1,9 @@
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { formatBriefDate } from "@/lib/framing/assess";
-import { fr } from "@/lib/i18n/fr";
+import { strategyDispositif } from "@/lib/i18n/fr/strategy-dispositif";
 import type { LegalDependency, OpenNeed } from "@/lib/strategy/queries";
+
+const fr = { strategyDispositif };
 
 /**
  * Prerequisites the Dispositif depends on (MKT-S1-07), read from the

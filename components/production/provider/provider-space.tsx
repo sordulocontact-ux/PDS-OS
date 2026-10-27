@@ -1,5 +1,7 @@
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { productionLocations } from "@/lib/i18n/fr/production-locations";
+import { productionPost } from "@/lib/i18n/fr/production-post";
+import { productionProvider } from "@/lib/i18n/fr/production-provider";
 import { formatTimecode } from "@/lib/production/post/timecode";
 import { postStepKeyOf } from "@/lib/production/post/rules";
 import type {
@@ -14,6 +16,8 @@ import { FinishStepButton } from "./finish-step-button";
 import { ExportLine } from "./export-line";
 import { ProviderLocationsList } from "./provider-locations";
 import { ProviderSection } from "./provider-section";
+
+const fr = { productionPost, productionProvider, productionLocations };
 
 const t = fr.productionProvider;
 const keys = fr.productionPost.steps.keys;

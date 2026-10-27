@@ -3,7 +3,9 @@
 // said. The state itself is moved by advance_clearance (SQL), which checks
 // what each state needs. Pure, client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { legalClearance } from "@/lib/i18n/fr/legal-clearance";
+
+const fr = { legalClearance };
 
 export const CLEARANCE_PATH = [
   "to_investigate",

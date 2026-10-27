@@ -7,12 +7,14 @@ import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
 import { DecisionPanel } from "@/components/ui/decision-panel";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { reviewJourney } from "@/lib/i18n/fr/review-journey";
 import {
   decideClosure,
   reopenClosure,
   requestClosure,
 } from "@/lib/marketing/closure/closure-actions";
+
+const fr = { reviewJourney };
 
 const t = fr.reviewJourney.closure;
 

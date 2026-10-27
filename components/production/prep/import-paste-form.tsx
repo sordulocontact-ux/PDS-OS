@@ -4,9 +4,11 @@ import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { fr } from "@/lib/i18n/fr";
+import { productionImport } from "@/lib/i18n/fr/production-import";
 import { MAX_IMPORT_TEXT } from "@/lib/production/import-proposal";
 import { cn } from "@/lib/utils";
+
+const fr = { productionImport };
 
 /** The pasted organisation, then « Proposer ». Kept in the dialog only. */
 export function ImportPasteForm({

@@ -3,8 +3,10 @@ import {
   MAX_SCREENSHOT_BYTES,
   SCREENSHOT_EXTENSIONS,
 } from "@/lib/feedback/screenshot-rules";
-import { fr } from "@/lib/i18n/fr";
+import { feedback } from "@/lib/i18n/fr/feedback";
 import { createClient } from "@/lib/supabase/client";
+
+const fr = { feedback };
 
 /**
  * Browser-side: uploads the screenshot straight to the private bucket, into

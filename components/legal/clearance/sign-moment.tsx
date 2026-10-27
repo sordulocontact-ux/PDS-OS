@@ -7,7 +7,8 @@ import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { contracts } from "@/lib/i18n/fr/contracts";
+import { legalClearance } from "@/lib/i18n/fr/legal-clearance";
 import {
   secureClearanceFlow,
   sendClearanceContract,
@@ -19,6 +20,8 @@ import { termsLine } from "./clearance-stages";
 import { ContractProofSlot } from "./contract-proof-slot";
 import { DocumentsTab } from "./documents-tab";
 import { useLegalAction } from "@/components/legal/use-legal-action";
+
+const fr = { contracts, legalClearance };
 
 /**
  * « Signer »: the authorisation contract prepared when the direction

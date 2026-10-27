@@ -3,9 +3,11 @@ import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
 import { callWhen, shortStamp } from "@/lib/calls/prep/dates";
 import type { PlannedCall } from "@/lib/calls/prep/planned";
-import { fr } from "@/lib/i18n/fr";
+import { callPrep } from "@/lib/i18n/fr/call-prep";
 
 import { AttendeeChipList } from "./attendee-chip";
+
+const fr = { callPrep };
 
 /**
  * The call once prepared, in its step (proto `prepGate`, after creation):

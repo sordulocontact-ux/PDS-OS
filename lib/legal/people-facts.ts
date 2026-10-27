@@ -11,10 +11,13 @@ import {
   type NetworkIndex,
 } from "@/lib/facts/credit-contact";
 import { groupOf } from "@/lib/facts/types";
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 import type { InventoryMaster } from "@/lib/legal/title-facts";
 import type { LegalFact } from "@/lib/legal/types";
 import type { NetworkRole } from "@/lib/network/types";
+
+const fr = { legal, masterPage };
 
 export type InventoryContributor = {
   id: string;

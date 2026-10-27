@@ -8,7 +8,7 @@ import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { VersionCard } from "@/components/ui/version-card";
-import { fr } from "@/lib/i18n/fr";
+import { masterRound } from "@/lib/i18n/fr/master-round";
 import { addMixComment } from "@/lib/master-workflow/mix-actions";
 import {
   formatTimecode,
@@ -18,6 +18,8 @@ import {
 import { transmitFeedback } from "@/lib/master-workflow/round-actions";
 
 import { VersionComments } from "./version-comments";
+
+const fr = { masterRound };
 
 const t = fr.masterRound;
 

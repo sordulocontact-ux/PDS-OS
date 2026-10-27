@@ -3,12 +3,15 @@
 import { Button } from "@/components/ui/button";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { budget } from "@/lib/i18n/fr/budget";
+import { masterRound } from "@/lib/i18n/fr/master-round";
 import { acceptRate } from "@/lib/master-workflow/round-actions";
 import { budgetStatusTone } from "@/lib/ui/state-tones";
 import type { RoundRate } from "@/lib/master-workflow/round-step";
 import { formatShortInstant } from "@/lib/utils/day";
 import { formatAmount } from "@/lib/utils/money";
+
+const fr = { budget, masterRound };
 
 const t = fr.masterRound.rate;
 

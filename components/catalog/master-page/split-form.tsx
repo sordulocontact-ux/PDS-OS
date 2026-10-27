@@ -9,10 +9,12 @@ import {
   type SplitKind,
 } from "@/lib/catalog/master/rules";
 import { saveSplit } from "@/lib/catalog/master/rights-actions";
-import { fr } from "@/lib/i18n/fr";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 
 import { MasterForm } from "./master-form";
 import { SplitPartyField } from "./split-party-field";
+
+const fr = { masterPage };
 
 const shareInput = new Intl.NumberFormat("fr-FR", {
   maximumFractionDigits: 2,

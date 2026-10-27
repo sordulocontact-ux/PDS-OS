@@ -5,7 +5,9 @@ import { ContentCard } from "@/components/shell/content-card";
 import { buttonVariants } from "@/components/ui/button";
 import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { projectShell } from "@/lib/i18n/fr/project-shell";
+
+const fr = { projectShell };
 
 /**
  * A workflow before « Lancer le plan » (proto « Projet complet », `locked()`):

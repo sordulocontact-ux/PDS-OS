@@ -3,7 +3,9 @@ import { DistributionList } from "@/components/catalog/master-page/distribution-
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import type { MasterDistributionRelease } from "@/lib/catalog/master/related";
-import { fr } from "@/lib/i18n/fr";
+import { masterPage } from "@/lib/i18n/fr/master-page";
+
+const fr = { masterPage };
 
 // Distribution block: the releases of the projects carrying the title (UPC,
 // date, status, detected links). Read-only: edited in each project's Sortie.

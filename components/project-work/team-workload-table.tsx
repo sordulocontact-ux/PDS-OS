@@ -7,9 +7,11 @@ import {
   DataTableMedia,
   DataTableRow,
 } from "@/components/ui/data-table";
-import { fr } from "@/lib/i18n/fr";
+import { projectWork } from "@/lib/i18n/fr/project-work";
 import type { WorkPerson } from "@/lib/project-work/queries";
 import type { WorkCounts } from "@/lib/project-work/workload";
+
+const fr = { projectWork };
 
 const t = fr.projectWork;
 

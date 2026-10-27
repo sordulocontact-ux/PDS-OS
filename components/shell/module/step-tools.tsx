@@ -3,11 +3,13 @@
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { stepTools } from "@/lib/i18n/fr/step-tools";
 import type { StepChoice, StepNote, StepRef } from "@/lib/step-tools/model";
 
 import { BlockerForm, type BlockerDefaults } from "./blocker-form";
 import { NoteForm, type NoteDefaults } from "./note-form";
+
+const fr = { stepTools };
 
 const t = fr.stepTools;
 

@@ -6,12 +6,14 @@ import { BriefSummary } from "@/components/strategy/brief/brief-summary";
 import { BriefToDecide } from "@/components/strategy/brief/brief-to-decide";
 import { FactList } from "@/components/ui/fact-list";
 import { sectionCardClass } from "@/components/ui/section-card";
-import { fr } from "@/lib/i18n/fr";
+import { strategyBrief } from "@/lib/i18n/fr/strategy-brief";
 import type {
   BriefSnapshot,
   SnapshotItem,
 } from "@/lib/strategy/documents/brief-snapshot";
 import { cn } from "@/lib/utils";
+
+const fr = { strategyBrief };
 
 /**
  * A Brief de sortie as a snapshot: what remains to arbitrate first, then

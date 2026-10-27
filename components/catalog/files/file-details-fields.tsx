@@ -7,7 +7,9 @@ import {
   MAX_DESCRIPTION_LENGTH,
   type FileOwnerKind,
 } from "@/lib/catalog/file-rules";
-import { fr } from "@/lib/i18n/fr";
+import { catalogFiles } from "@/lib/i18n/fr/catalog-files";
+
+const fr = { catalogFiles };
 
 // What a file is, in the add and edit modals: its category (one choice, in
 // pills), then a free precision. Choosing Contract says who will read it.

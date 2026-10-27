@@ -9,7 +9,9 @@ import { FactRowFrame } from "@/components/ui/fact-row-frame";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { saveSheetField } from "@/lib/design/actions/sheet-step";
 import { fieldText, type SheetFieldView } from "@/lib/design/sheet-model";
-import { fr } from "@/lib/i18n/fr";
+import { designSteps } from "@/lib/i18n/fr/design-steps";
+
+const fr = { designSteps };
 
 const t = fr.designSteps.sheets;
 

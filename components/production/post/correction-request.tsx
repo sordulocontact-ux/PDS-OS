@@ -10,7 +10,8 @@ import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { productionCorrections } from "@/lib/i18n/fr/production-corrections";
+import { productionPost } from "@/lib/i18n/fr/production-post";
 import {
   sendCorrections,
   updateCorrections,
@@ -30,6 +31,8 @@ import { correctionRequestTone } from "@/lib/ui/state-tones";
 
 import { CorrectionFields, type CorrectionMissing } from "./correction-fields";
 import { ProviderLinkButton } from "./provider-link-button";
+
+const fr = { productionPost, productionCorrections };
 
 const t = fr.productionCorrections;
 

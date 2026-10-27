@@ -24,7 +24,9 @@ import { loadSheets, versionsOf } from "@/lib/activations/sheet-queries";
 import { sheetFieldKeys, type SheetFields } from "@/lib/activations/sheets";
 import type { TargetRecord } from "@/lib/activations/targets";
 import type { Access } from "@/lib/auth/access";
-import { fr } from "@/lib/i18n/fr";
+import { activationInfluence } from "@/lib/i18n/fr/activation-influence";
+import { activationJourney } from "@/lib/i18n/fr/activation-journey";
+import { activationWork } from "@/lib/i18n/fr/activation-work";
 import { todayInParis } from "@/lib/insights/dates";
 import { canSeeProjectBudget } from "@/lib/projects/edit-access";
 import { collaborationStageTone } from "@/lib/ui/state-tones";
@@ -34,6 +36,8 @@ import { ContentsSection } from "./contents-section";
 import { NegotiationSection } from "./negotiation-section";
 import { PaymentSection } from "./payment-section";
 import { RightsSection } from "./rights-section";
+
+const fr = { activationWork, activationInfluence, activationJourney };
 
 /**
  * The single fiche of a collaboration (ticket Influence § 5) : its concept,

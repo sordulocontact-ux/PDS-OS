@@ -4,10 +4,12 @@ import { FieldError } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { strategyDimensions } from "@/lib/i18n/fr/strategy-dimensions";
 import { arbitrateLever } from "@/lib/strategy/actions/add-line";
 import type { LeverLine } from "@/lib/strategy/dimension-levers";
 import { leverStateTone } from "@/lib/ui/state-tones";
+
+const fr = { strategyDimensions };
 
 const t = fr.strategyDimensions;
 

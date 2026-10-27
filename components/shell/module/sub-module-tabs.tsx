@@ -2,8 +2,10 @@ import { IconCheck } from "nucleo-sharp-essential";
 
 import { MineBadge } from "@/components/ui/mine-badge";
 import { ViewLink } from "@/components/ui/view-link";
-import { fr } from "@/lib/i18n/fr";
+import { moduleFrame } from "@/lib/i18n/fr/module-frame";
 import { cn } from "@/lib/utils";
+
+const fr = { moduleFrame };
 
 /** One sub-module of a workflow (a pill above the module's title). */
 export type SubModuleTab = {

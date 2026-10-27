@@ -5,7 +5,9 @@ import Link from "next/link";
 import { DraftCard } from "@/components/assistant/draft-card";
 import { evidenceOf, plainText } from "@/components/assistant/tool-output";
 import { proposalOf } from "@/lib/assistant/drafts";
-import { fr } from "@/lib/i18n/fr";
+import { assistant } from "@/lib/i18n/fr/assistant";
+
+const fr = { assistant };
 
 type Part = UIMessage["parts"][number];
 const isToolPart = (

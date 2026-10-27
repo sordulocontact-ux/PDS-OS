@@ -19,8 +19,10 @@ import {
 import { shareCallReport } from "@/lib/calls/closure-actions";
 import type { CallClosure } from "@/lib/calls/closure-queries";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
 import { mailtoHref } from "@/lib/utils/mailto";
+
+const fr = { calls };
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 

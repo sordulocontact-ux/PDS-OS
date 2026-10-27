@@ -2,7 +2,9 @@ import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { projectPlan } from "@/lib/i18n/fr/project-plan";
+
+const fr = { projectPlan };
 
 // These pages only read the plan: it is written in the Strategy, by the
 // project's owner (the database enforces it). Shown to the owner only.

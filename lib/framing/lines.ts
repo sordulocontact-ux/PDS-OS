@@ -4,8 +4,10 @@
 
 import type { QuestionState, QuestionStatus } from "@/lib/framing/assess";
 import { sourceLabel } from "@/components/framing/guide/source-quote";
-import { fr } from "@/lib/i18n/fr";
+import { framingJourney } from "@/lib/i18n/fr/framing-journey";
 import { formatDay } from "@/lib/utils/day";
+
+const fr = { framingJourney };
 
 export type FramingLineState =
   "known" | "confirmed" | "to_confirm" | "missing" | "na" | "later";

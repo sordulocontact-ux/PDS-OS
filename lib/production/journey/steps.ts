@@ -4,7 +4,10 @@
 // data, never from PO.
 
 import { formatEuros } from "@/lib/budget/types";
-import { fr } from "@/lib/i18n/fr";
+import { productionCut } from "@/lib/i18n/fr/production-cut";
+import { productionJourney } from "@/lib/i18n/fr/production-journey";
+import { productionLight } from "@/lib/i18n/fr/production-light";
+import { productionProposal } from "@/lib/i18n/fr/production-proposal";
 import { type JourneyRole, nowOf } from "@/lib/ui/journey";
 import { formatShortDay } from "@/lib/utils/day";
 
@@ -17,6 +20,13 @@ import type {
   JourneyStep,
   StepKey,
 } from "./types";
+
+const fr = {
+  productionJourney,
+  productionProposal,
+  productionLight,
+  productionCut,
+};
 
 const t = fr.productionJourney;
 const r = t.roles;

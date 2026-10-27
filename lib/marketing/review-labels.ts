@@ -3,8 +3,10 @@
 // names shown are the Activations' own (lib/i18n/fr/activations.ts). Pure,
 // client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { activations } from "@/lib/i18n/fr/activations";
 import type { EvidenceKind } from "@/lib/marketing/model";
+
+const fr = { activations };
 
 const evidenceSources: Record<string, string> = fr.activations.evidence.sources;
 const metricSources: Record<string, string> = fr.activations.metrics.sources;

@@ -5,7 +5,7 @@ import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { productionPost } from "@/lib/i18n/fr/production-post";
 import { addSuggestedPostSteps } from "@/lib/production/post/step-actions";
 import { deletePostStep } from "@/lib/production/post/step-actions";
 import type { PostStepKey } from "@/lib/production/post/rules";
@@ -18,6 +18,8 @@ import type {
 
 import { PostRowMenu } from "./post-row-menu";
 import { StepDialog } from "./step-dialog";
+
+const fr = { productionPost };
 
 const t = fr.productionPost.steps;
 

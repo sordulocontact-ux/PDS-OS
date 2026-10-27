@@ -4,8 +4,10 @@
 // faire »). Client-safe.
 
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
 import type { PlanItemKind } from "@/lib/legal/plan/proposal";
+
+const fr = { legal };
 
 export function legalActionHref(projectId: string, kind: PlanItemKind): string {
   switch (kind) {

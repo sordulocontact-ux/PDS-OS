@@ -7,13 +7,15 @@ import { CopyButton } from "@/components/ui/copy-button";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { ReasonForm } from "@/components/ui/reason-form";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { contactLinks } from "@/lib/i18n/fr/contact-links";
 import {
   issueContactLink,
   markContactLinkSent,
   revokeContactLink,
 } from "@/lib/portal/contact-link-actions";
 import type { ContactLinkRow } from "@/lib/portal/contact-links";
+
+const fr = { contactLinks };
 
 const t = fr.contactLinks;
 

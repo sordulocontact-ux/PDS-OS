@@ -5,10 +5,13 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import type { ActivationFile } from "@/lib/activations/files/queries";
 import type { InfluenceData } from "@/lib/activations/influence/queries";
 import type { ActivationScope } from "@/lib/activations/types";
-import { fr } from "@/lib/i18n/fr";
+import { activationInfluence } from "@/lib/i18n/fr/activation-influence";
+import { activations } from "@/lib/i18n/fr/activations";
 import { formatDate } from "@/lib/release/format";
 
 import { PaymentButtons } from "./payment-forms";
+
+const fr = { activations, activationInfluence };
 
 const t = fr.activationInfluence.payment;
 const tone = {

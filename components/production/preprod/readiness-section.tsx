@@ -1,7 +1,7 @@
 import { PageSection } from "@/components/shell/page-section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import {
   canMarkReady,
   openChecks,
@@ -14,6 +14,8 @@ import { readinessTone } from "@/lib/ui/state-tones";
 import { MarkReadyButton, ReadinessActions } from "./readiness-actions";
 import type { Member } from "@/lib/framing/related";
 import type { NetworkOption } from "@/lib/production/sheet";
+
+const fr = { productionPreprod };
 
 const t = fr.productionPreprod.readiness;
 

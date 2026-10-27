@@ -8,11 +8,13 @@ import { ProposalEditor } from "@/components/ui/proposal-editor";
 import { ProposalSource } from "@/components/ui/proposal-source";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { decisions } from "@/lib/i18n/fr/decisions";
 import type { Proposal } from "@/lib/ui/proposal";
 import { proposalTone } from "@/lib/ui/state-tones";
 import { cn } from "@/lib/utils";
 import type { WriteResult } from "@/lib/utils/write-result";
+
+const fr = { decisions };
 
 const t = fr.decisions.proposal;
 

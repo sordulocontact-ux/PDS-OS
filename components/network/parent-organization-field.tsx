@@ -1,8 +1,10 @@
 "use client";
 
 import { PersonPickerField } from "@/components/network/person-picker-field";
-import { fr } from "@/lib/i18n/fr";
+import { network } from "@/lib/i18n/fr/network";
 import { loadContactOptions } from "@/lib/network/actions";
+
+const fr = { network };
 
 type Organization = { id: string; name: string };
 

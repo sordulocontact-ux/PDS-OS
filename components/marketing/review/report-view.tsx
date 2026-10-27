@@ -5,13 +5,15 @@ import { MetricTotals } from "@/components/marketing/review/metric-totals";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { formatBriefDate } from "@/lib/framing/assess";
-import { fr } from "@/lib/i18n/fr";
+import { marketingReview } from "@/lib/i18n/fr/marketing-review";
 import type { Dashboard } from "@/lib/marketing/dashboard";
 import type {
   ReportBudget,
   ReportSection,
   ReportSnapshot,
 } from "@/lib/marketing/reports/model";
+
+const fr = { marketingReview };
 
 const t = fr.marketingReview.reports;
 const v = t.view;

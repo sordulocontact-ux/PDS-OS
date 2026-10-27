@@ -8,11 +8,13 @@ import { OptionSelect } from "@/components/framing/option-select";
 import { Button } from "@/components/ui/button";
 import { useCloseProposalAdd } from "@/components/ui/proposal-group";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { strategyDimensions } from "@/lib/i18n/fr/strategy-dimensions";
 import { addStrategyLine } from "@/lib/strategy/actions/add-line";
 import type { LeverOption } from "@/lib/strategy/dimension-levers";
 import { parseRelativeDay } from "@/lib/strategy/calendar";
 import type { StrategyDimension } from "@/lib/strategy/dimensions";
+
+const fr = { strategyDimensions };
 
 const t = fr.strategyDimensions;
 

@@ -2,8 +2,10 @@ import { WaiverButton } from "@/components/legal/readiness/readiness-gestures";
 import { buttonVariants } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ViewLink } from "@/components/ui/view-link";
-import { fr } from "@/lib/i18n/fr";
+import { legalReadiness } from "@/lib/i18n/fr/legal-readiness";
 import type { ReadinessControl } from "@/lib/legal/readiness/controls";
+
+const fr = { legalReadiness };
 
 const t = fr.legalReadiness;
 

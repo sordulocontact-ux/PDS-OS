@@ -4,7 +4,10 @@
 
 import type { InfluenceData } from "@/lib/activations/influence/queries";
 import type { SheetVersion } from "@/lib/activations/sheets";
-import { fr } from "@/lib/i18n/fr";
+import { activationInfluence } from "@/lib/i18n/fr/activation-influence";
+import { activationWork } from "@/lib/i18n/fr/activation-work";
+
+const fr = { activationWork, activationInfluence };
 
 const t = fr.activationInfluence;
 const fields = fr.activationWork.sheet.fields;

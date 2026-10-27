@@ -8,7 +8,8 @@ import { StepSection } from "@/components/shell/journey/step-section";
 import { Fold } from "@/components/ui/fold";
 import { StatTiles } from "@/components/ui/stat-tiles";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { legalDemarches } from "@/lib/i18n/fr/legal-demarches";
+import { legalReadiness } from "@/lib/i18n/fr/legal-readiness";
 import { legalJourneyContext } from "@/lib/legal/journey-context";
 import {
   READINESS_DOMAINS,
@@ -17,6 +18,8 @@ import {
 } from "@/lib/legal/readiness/controls";
 import { LEGAL_READY_KEY } from "@/lib/ui/legal-steps";
 import { formatDay } from "@/lib/utils/day";
+
+const fr = { legalDemarches, legalReadiness };
 
 const t = fr.legalReadiness;
 const muted =

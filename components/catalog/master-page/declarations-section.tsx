@@ -26,11 +26,14 @@ import {
   type Organism,
 } from "@/lib/catalog/master/rules";
 import { Timestamp } from "@/components/ui/timestamp";
-import { fr } from "@/lib/i18n/fr";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 import { formatShortDate } from "@/lib/release/format";
 import { declarationStatusTone } from "@/lib/ui/state-tones";
 
 import { DeclarationForm } from "./declaration-form";
+import { DeleteItemDialog, ItemRowActions } from "./item-dialogs";
+
+const fr = { masterPage };
 
 const t0 = fr.masterPage.declarations;
 // A recorded value as people read it: a status by its label, a proof as
@@ -43,7 +46,6 @@ function shown(field: string, value: unknown): string {
   if (field === "declared_on") return formatShortDate(String(value));
   return String(value);
 }
-import { DeleteItemDialog, ItemRowActions } from "./item-dialogs";
 
 // One row per collecting society: « À vérifier » until it is qualified,
 // then its status (final list, retour 63), who follows it, its reference

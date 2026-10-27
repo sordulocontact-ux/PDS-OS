@@ -9,7 +9,10 @@ import {
   type Reserve,
   type ReserveCause,
 } from "@/lib/distribution/closure";
-import { fr } from "@/lib/i18n/fr";
+import { distribution } from "@/lib/i18n/fr/distribution";
+import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
+
+const fr = { distribution, distributionJourney };
 
 const t = fr.distributionJourney.closure;
 const c = fr.distribution.closure;

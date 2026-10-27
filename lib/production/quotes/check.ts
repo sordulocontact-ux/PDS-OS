@@ -3,7 +3,9 @@
 // delays and the posts, ticked by the line producer. Pure, client-safe.
 
 import { formatEuros } from "@/lib/budget/types";
-import { fr } from "@/lib/i18n/fr";
+import { productionQuotes } from "@/lib/i18n/fr/production-quotes";
+
+const fr = { productionQuotes };
 
 const t = fr.productionQuotes.check;
 

@@ -11,7 +11,9 @@ import {
   listContractPartyOptions,
   type ContractPartyOption,
 } from "@/lib/contracts/party-options";
-import { fr } from "@/lib/i18n/fr";
+import { contracts } from "@/lib/i18n/fr/contracts";
+
+const fr = { contracts };
 
 /**
  * Adds a party to a contract: a contact of the Réseau, picked (the

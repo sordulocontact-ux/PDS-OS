@@ -9,8 +9,11 @@ import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import type { Reserve } from "@/lib/distribution/closure";
 import type { DistributionContext } from "@/lib/distribution/journey-context";
-import { fr } from "@/lib/i18n/fr";
+import { distribution } from "@/lib/i18n/fr/distribution";
+import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
 import { formatShortInstant } from "@/lib/utils/day";
+
+const fr = { distribution, distributionJourney };
 
 const t = fr.distributionJourney.closure;
 const c = fr.distribution.closure;

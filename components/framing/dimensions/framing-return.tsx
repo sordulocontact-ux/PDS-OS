@@ -8,7 +8,11 @@ import {
   type BriefRequest,
 } from "@/lib/framing/brief-request-view";
 import type { Dimension } from "@/lib/framing/dimensions";
-import { fr } from "@/lib/i18n/fr";
+import { briefRequests } from "@/lib/i18n/fr/brief-requests";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+import { framingJourney } from "@/lib/i18n/fr/framing-journey";
+
+const fr = { framingIntel, briefRequests, framingJourney };
 
 /**
  * The direction's return at the head of « Les 6 dimensions » (proto

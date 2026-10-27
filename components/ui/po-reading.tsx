@@ -3,7 +3,9 @@
 import { IconSparkle3 } from "nucleo-sharp-essential";
 
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { poQuestion } from "@/lib/i18n/fr/po-question";
+
+const fr = { poQuestion };
 
 const t = fr.poQuestion.reading;
 

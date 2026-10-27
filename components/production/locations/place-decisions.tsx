@@ -1,6 +1,8 @@
-import { fr } from "@/lib/i18n/fr";
+import { productionPlace } from "@/lib/i18n/fr/production-place";
 import type { PlaceDecision } from "@/lib/production/place";
 import { formatShortDay, formatShortInstant } from "@/lib/utils/day";
+
+const fr = { productionPlace };
 
 const t = fr.productionPlace;
 

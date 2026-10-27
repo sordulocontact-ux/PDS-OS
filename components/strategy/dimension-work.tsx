@@ -14,10 +14,13 @@ import type {
   NarrativePart,
   PositioningPart,
 } from "@/lib/framing/brief";
-import { fr } from "@/lib/i18n/fr";
+import { strategyBudget } from "@/lib/i18n/fr/strategy-budget";
+import { strategyPilot } from "@/lib/i18n/fr/strategy-pilot";
 import { strategyBudget as computeStrategyBudget } from "@/lib/strategy/budget";
 import type { StrategyDimension } from "@/lib/strategy/dimensions";
 import type { StrategyData } from "@/lib/strategy/queries";
+
+const fr = { strategyBudget, strategyPilot };
 
 /**
  * What a dimension keeps folded under its lines (« Garde, repliés »,

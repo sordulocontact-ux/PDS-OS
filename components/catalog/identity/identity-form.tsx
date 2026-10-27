@@ -17,7 +17,9 @@ import {
   type IdentityFields,
   type IdentityRef,
 } from "@/lib/catalog/identity-fields";
-import { fr } from "@/lib/i18n/fr";
+import { artistIdentity } from "@/lib/i18n/fr/artist-identity";
+
+const fr = { artistIdentity };
 
 type Row = IdentityRef & { id: number };
 

@@ -20,7 +20,10 @@ import {
   type ArtistOption,
   type MasterOption,
 } from "@/lib/catalog/types";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
+import { shell } from "@/lib/i18n/fr/shell";
+
+const fr = { shell, catalog };
 
 // Masters of a project: search, add several (up to `max`: one for a single),
 // remove. Submitted as one JSON field `masterIds`, in the order chosen. "Créer un master" opens step B in a

@@ -6,7 +6,9 @@ import {
   resolveBriefRequest,
   withdrawBriefRequest,
 } from "@/lib/framing/actions/brief-requests";
-import { fr } from "@/lib/i18n/fr";
+import { briefRequests } from "@/lib/i18n/fr/brief-requests";
+
+const fr = { briefRequests };
 
 /**
  * The owner's answer to a request: « Marquer comme corrigée » when the

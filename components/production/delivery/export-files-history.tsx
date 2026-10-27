@@ -1,6 +1,8 @@
-import { fr } from "@/lib/i18n/fr";
+import { productionClosure } from "@/lib/i18n/fr/production-closure";
 import type { ExportFile } from "@/lib/production/delivery/rules";
 import { formatDate } from "@/lib/release/format";
+
+const fr = { productionClosure };
 
 const t = fr.productionClosure.files;
 

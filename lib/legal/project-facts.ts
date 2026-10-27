@@ -8,8 +8,11 @@ import {
   type ContractState,
   type ContractStatus,
 } from "@/lib/contracts/types";
-import { fr } from "@/lib/i18n/fr";
+import { contracts } from "@/lib/i18n/fr/contracts";
+import { legal } from "@/lib/i18n/fr/legal";
 import type { LegalFact, LegalFactStatus } from "@/lib/legal/types";
+
+const fr = { contracts, legal };
 
 export type InventoryContract = {
   id: string;

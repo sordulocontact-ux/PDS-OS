@@ -1,7 +1,9 @@
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { QuoteLocation } from "@/lib/ai/provenance";
-import { fr } from "@/lib/i18n/fr";
+import { labo } from "@/lib/i18n/fr/labo";
 import { formatTimestamp } from "@/lib/labo/format";
+
+const fr = { labo };
 
 /** Where an extracted item comes from, as located by code — never by the model. */
 export function ProvenanceTag({

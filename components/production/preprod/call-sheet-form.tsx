@@ -5,7 +5,7 @@ import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import { saveCallSheet } from "@/lib/production/preprod/actions-readiness";
 import type { CallSheetDefaults } from "@/lib/production/preprod/call-sheet-defaults";
 import {
@@ -15,6 +15,8 @@ import {
 } from "@/lib/production/preprod/types";
 
 import { DialogButton } from "@/components/ui/dialog-button";
+
+const fr = { productionPreprod };
 
 const t = fr.productionPreprod.callSheet;
 

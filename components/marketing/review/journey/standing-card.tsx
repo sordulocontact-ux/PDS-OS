@@ -1,6 +1,6 @@
 import { DashboardFilterBar } from "@/components/marketing/review/dashboard-filters";
 import { Fold } from "@/components/ui/fold";
-import { fr } from "@/lib/i18n/fr";
+import { reviewJourney } from "@/lib/i18n/fr/review-journey";
 import type { DashboardFilters } from "@/lib/marketing/dashboard";
 import type { BudgetBreakdown } from "@/lib/marketing/review/budget-breakdown";
 import type { ObjectiveRow } from "@/lib/marketing/review/objectives";
@@ -8,6 +8,8 @@ import type { Standing } from "@/lib/marketing/review/standing";
 
 import { StandingRows, StandingTiles } from "./standing-figures";
 import { StandingGoals } from "./standing-goals";
+
+const fr = { reviewJourney };
 
 const t = fr.reviewJourney.standing;
 

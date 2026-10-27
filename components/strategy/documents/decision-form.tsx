@@ -16,9 +16,11 @@ import { RequiredMark } from "@/components/ui/required-mark";
 import { Textarea } from "@/components/ui/textarea";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { strategyDocuments } from "@/lib/i18n/fr/strategy-documents";
 import { todayInParis } from "@/lib/insights/dates";
 import { decideStrategyDocument } from "@/lib/strategy/actions/documents";
+
+const fr = { strategyDocuments };
 
 export type CriticalAlert = { key: string; text: string };
 

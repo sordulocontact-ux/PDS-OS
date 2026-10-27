@@ -3,12 +3,14 @@
 // risks and what is missing — taken from the snapshot's own sections, so
 // the summary never says anything the detail does not. Pure, client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { strategyBrief } from "@/lib/i18n/fr/strategy-brief";
 import type {
   BriefSnapshot,
   SnapshotItem,
 } from "@/lib/strategy/documents/brief-snapshot";
 import type { StrategyDimension } from "@/lib/strategy/dimensions";
+
+const fr = { strategyBrief };
 
 export type SummaryRow = {
   key: string;

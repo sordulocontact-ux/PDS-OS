@@ -16,7 +16,11 @@ import {
   type Dimension,
   type QuestionKey,
 } from "@/lib/framing/dimensions";
-import { fr } from "@/lib/i18n/fr";
+import { briefRequests } from "@/lib/i18n/fr/brief-requests";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+
+const fr = { dialogs, framingIntel, briefRequests };
 
 type Row = BriefRequestInput & { id: number };
 

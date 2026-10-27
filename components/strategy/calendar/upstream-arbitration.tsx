@@ -11,7 +11,8 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { formatBriefDate } from "@/lib/framing/assess";
 import { written } from "@/lib/framing/written";
-import { fr } from "@/lib/i18n/fr";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
+import { strategyCalendar } from "@/lib/i18n/fr/strategy-calendar";
 import { moveMilestone } from "@/lib/strategy/actions/plan";
 import { acceptUpstreamRisk } from "@/lib/strategy/actions/upstream";
 import {
@@ -19,6 +20,8 @@ import {
   type UpstreamChain,
   type UpstreamStepKey,
 } from "@/lib/strategy/upstream";
+
+const fr = { dialogs, strategyCalendar };
 
 /**
  * Under a chain whose deadline is really past (MKT-S1-04), the three ways

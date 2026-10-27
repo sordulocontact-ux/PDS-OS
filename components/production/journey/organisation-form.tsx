@@ -13,10 +13,12 @@ import { Button } from "@/components/ui/button";
 import { ChoiceCards } from "@/components/ui/choice-cards";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionOrganization } from "@/lib/i18n/fr/production-organization";
 import { organizeProduction } from "@/lib/production/organization-actions";
 import type { OrganizationKind } from "@/lib/production/organization";
 import type { Holder, NetworkOption } from "@/lib/production/sheet";
+
+const fr = { productionOrganization };
 
 const t = fr.productionOrganization;
 const NOBODY = "none";

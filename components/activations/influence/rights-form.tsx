@@ -11,7 +11,11 @@ import { ChipChoice } from "@/components/ui/chip-choice";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import type { InfluenceData } from "@/lib/activations/influence/queries";
 import { saveRights } from "@/lib/activations/influence/rights-actions";
-import { fr } from "@/lib/i18n/fr";
+import { activationInfluence } from "@/lib/i18n/fr/activation-influence";
+import { activationWork } from "@/lib/i18n/fr/activation-work";
+import { activations } from "@/lib/i18n/fr/activations";
+
+const fr = { activations, activationWork, activationInfluence };
 
 const t = fr.activationInfluence.rights;
 

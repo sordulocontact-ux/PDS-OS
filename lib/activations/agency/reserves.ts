@@ -4,7 +4,9 @@
 
 import type { AgencyRowRecord } from "@/lib/activations/agency/queries";
 import type { EvidenceRecord, MetricRecord } from "@/lib/activations/types";
-import { fr } from "@/lib/i18n/fr";
+import { activationAgency } from "@/lib/i18n/fr/activation-agency";
+
+const fr = { activationAgency };
 
 const l = fr.activationAgency.report.reserveLabels;
 

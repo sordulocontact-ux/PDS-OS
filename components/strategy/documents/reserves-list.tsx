@@ -6,10 +6,12 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDay } from "@/lib/assistant/facts";
 import { formatBriefDate } from "@/lib/framing/assess";
 import { written } from "@/lib/framing/written";
-import { fr } from "@/lib/i18n/fr";
+import { strategyDocuments } from "@/lib/i18n/fr/strategy-documents";
 import { liftStrategyReserve } from "@/lib/strategy/actions/documents";
 import type { StrategyReserve } from "@/lib/strategy/execution-queries";
 import { strategyReserveTone } from "@/lib/ui/state-tones";
+
+const fr = { strategyDocuments };
 
 /**
  * The reserves put on the Brief's versions (MKT-S1-16), open ones first:

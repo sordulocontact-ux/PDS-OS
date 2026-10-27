@@ -6,8 +6,10 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
 import { addLegalPlanItems } from "@/lib/legal/plan/actions";
+
+const fr = { legal };
 
 /** Actions the dossier asks for since the launch (a person or a title
  * added), with « Ajouter au plan »: each becomes an action and its task. */

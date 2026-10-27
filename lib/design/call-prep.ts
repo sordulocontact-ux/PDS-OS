@@ -6,9 +6,11 @@
 // no model (same idea as lib/strategy/call-prep.ts). Client-safe.
 
 import type { DeliverableStatus, DesignTopic } from "@/lib/design/intentions";
-import { fr } from "@/lib/i18n/fr";
+import { conceptionCall } from "@/lib/i18n/fr/conception-call";
 
 import type { CallPrepDefaults } from "@/lib/calls/prep/types";
+
+const fr = { conceptionCall };
 
 export {
   CALL_FORMATS,

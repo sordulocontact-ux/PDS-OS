@@ -7,7 +7,7 @@ import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FormDialog } from "@/components/ui/form-dialog";
-import { fr } from "@/lib/i18n/fr";
+import { productionShoot } from "@/lib/i18n/fr/production-shoot";
 import type { Member } from "@/lib/framing/related";
 import type { NetworkOption } from "@/lib/production/sheet";
 import {
@@ -18,6 +18,8 @@ import { DECLARATIONS, type ShootRecord } from "@/lib/production/shoot/rules";
 import { saveShootDeclarations } from "@/lib/production/shoot/shoot-actions";
 
 import { ShootFormActions } from "./shoot-form-actions";
+
+const fr = { productionShoot };
 
 const t = fr.productionShoot.files;
 

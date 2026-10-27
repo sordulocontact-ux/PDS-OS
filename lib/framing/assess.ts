@@ -25,7 +25,12 @@ import {
 } from "@/lib/framing/conflicts";
 import { legalPartyBoard } from "@/lib/framing/legal-parties";
 import { teamBoard } from "@/lib/framing/team-board";
-import { fr } from "@/lib/i18n/fr";
+import { budget } from "@/lib/i18n/fr/budget";
+import { contracts } from "@/lib/i18n/fr/contracts";
+import { framingGuide } from "@/lib/i18n/fr/framing-guide";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+
+const fr = { framingGuide, framingIntel, budget, contracts };
 
 export type QuestionStatus = "known" | "to_confirm" | "missing";
 

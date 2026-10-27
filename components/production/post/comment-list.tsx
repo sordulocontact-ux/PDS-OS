@@ -2,13 +2,15 @@ import { IconPaperclip } from "nucleo-sharp-essential";
 
 import { EmptyNote } from "@/components/shell/empty-state";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { productionPost } from "@/lib/i18n/fr/production-post";
 import { timecodeLabel } from "@/lib/production/post/labels";
 import type { PostComment } from "@/lib/production/post/types";
 import { formatDateTime } from "@/lib/release/format";
 import { versionCommentTone } from "@/lib/ui/state-tones";
 
 import { CommentStatusMenu } from "./comment-status-menu";
+
+const fr = { productionPost };
 
 const t = fr.productionPost.comments;
 

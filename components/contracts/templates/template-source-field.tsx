@@ -6,13 +6,15 @@ import { useRef, useState, useTransition } from "react";
 import { FieldError } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { useFileDrop } from "@/components/ui/use-file-drop";
-import { fr } from "@/lib/i18n/fr";
+import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
 import { cn } from "@/lib/utils";
 import { SOURCE_ACCEPT } from "@/lib/legal/contracts/source-rules";
 import {
   uploadTemplateSource,
   type TemplateSource,
 } from "@/lib/legal/contracts/upload-source";
+
+const fr = { legalContracts };
 
 /**
  * « Fichier source » of a template: a Word, PDF or text file chosen or

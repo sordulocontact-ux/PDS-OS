@@ -7,7 +7,10 @@ import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import type { ContractRights } from "@/lib/contracts/types";
-import { fr } from "@/lib/i18n/fr";
+import { contracts } from "@/lib/i18n/fr/contracts";
+import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
+
+const fr = { contracts, legalContracts };
 
 /**
  * Sending and signing a contract. A contract generated from a template

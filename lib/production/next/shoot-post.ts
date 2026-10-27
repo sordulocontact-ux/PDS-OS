@@ -2,11 +2,14 @@
 // rushes secured, the blocking incidents resolved, every step given to a
 // provider, then one decision per version (PROD-033). Client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { productionNext } from "@/lib/i18n/fr/production-next";
+import { productionShoot } from "@/lib/i18n/fr/production-shoot";
 
 import { blank, type NextContext } from "./context";
 import { deliveryNext } from "./delivery";
 import type { ProductionNext } from "./types";
+
+const fr = { productionShoot, productionNext };
 
 const t = fr.productionNext;
 

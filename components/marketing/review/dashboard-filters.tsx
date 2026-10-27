@@ -3,13 +3,16 @@ import Link from "next/link";
 import { Field } from "@/components/auth/field";
 import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { marketing } from "@/lib/i18n/fr/marketing";
+import { marketingReview } from "@/lib/i18n/fr/marketing-review";
 import { ANY_FILTER, type DashboardFilters } from "@/lib/marketing/dashboard";
 import {
   ACTIVATION_KINDS,
   ACTIVATION_STATUSES,
   VERIFICATIONS,
 } from "@/lib/marketing/model";
+
+const fr = { marketing, marketingReview };
 
 const t = fr.marketingReview.dashboard.filters;
 const a = fr.marketing.activations;

@@ -5,12 +5,14 @@ import { useState, useTransition } from "react";
 import { FormMessage } from "@/components/auth/form-message";
 import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { shell } from "@/lib/i18n/fr/shell";
 import {
   addProjectCreative,
   removeProjectCreative,
 } from "@/lib/projects/creative-actions";
 import type { CreativeMember } from "@/lib/projects/creatives";
+
+const fr = { shell };
 
 // Creative directors attached to a project: they see it (and all it holds)
 // without writing. The director and the project's owner manage the list.

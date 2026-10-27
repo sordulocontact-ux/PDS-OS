@@ -2,12 +2,14 @@ import { notFound } from "next/navigation";
 
 import { WorkflowLocked } from "@/components/plan/workflow-locked";
 import { requireApproved } from "@/lib/auth/dal";
-import { fr } from "@/lib/i18n/fr";
+import { shell } from "@/lib/i18n/fr/shell";
 import { MARKETING_PARTS, type PlanWorkflow } from "@/lib/plan/propose";
 import { isWorkflowLaunched, workflowGate } from "@/lib/plan/queries";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { allInOrder } from "@/lib/utils/parallel";
 import { applicableWorkflows } from "@/lib/workflow-status/rules";
+
+const fr = { shell };
 
 /**
  * A section that waits for the Plan du projet (proto « Projet complet »:

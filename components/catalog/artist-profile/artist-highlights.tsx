@@ -4,7 +4,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { routes } from "@/lib/auth/redirects";
 import { getArtistProfile } from "@/lib/catalog/artist-profile";
 import { formatFans } from "@/lib/catalog/types";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
+
+const fr = { catalog };
 
 // Top of the overview: the catalog's figures, then what Deezer adds (fans,
 // releases, latest release and latest album — one card when they are the

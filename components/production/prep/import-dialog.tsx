@@ -7,10 +7,12 @@ import { ImportPasteForm } from "@/components/production/prep/import-paste-form"
 import { ImportReview } from "@/components/production/prep/import-review";
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
-import { fr } from "@/lib/i18n/fr";
+import { productionImport } from "@/lib/i18n/fr/production-import";
 import type { ProductionBrief } from "@/lib/production/brief";
 import { proposeProductionImport } from "@/lib/production/import";
 import type { ProductionImportProposals } from "@/lib/production/import-proposal";
+
+const fr = { productionImport };
 
 /**
  * « Importer une organisation existante » for one production sheet: the

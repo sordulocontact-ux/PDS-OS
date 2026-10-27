@@ -6,7 +6,9 @@ import {
 } from "@/components/plan/plan-steps-table";
 import { PageSection } from "@/components/shell/page-section";
 import type { BriefChange } from "@/lib/framing/brief-snapshot";
-import { fr } from "@/lib/i18n/fr";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+import { planSteps } from "@/lib/i18n/fr/plan-steps";
+import { workflowStatus } from "@/lib/i18n/fr/workflow-status";
 import type { LaunchedPlan } from "@/lib/plan/queries";
 import {
   stepIssues,
@@ -18,6 +20,8 @@ import { formatDate } from "@/lib/release/format";
 import { workflowStatusTone } from "@/lib/ui/state-tones";
 import type { WorkflowStates } from "@/lib/workflow-status/load";
 import type { CommonStatus } from "@/lib/workflow-status/rules";
+
+const fr = { framingIntel, planSteps, workflowStatus };
 
 const GROUP: Record<CommonStatus, StepGroup> = {
   not_started: "next",

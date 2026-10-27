@@ -3,8 +3,10 @@ import { MAX_PROOF_BYTES, PROOF_BUCKET } from "@/lib/distribution/proof-rules";
 import type { DistributionResult } from "@/lib/distribution/result";
 import { declareDistribution } from "@/lib/distribution/tracking-actions";
 import type { DeclarationKind } from "@/lib/distribution/tracking";
-import { fr } from "@/lib/i18n/fr";
+import { distribution } from "@/lib/i18n/fr/distribution";
 import { createClient } from "@/lib/supabase/client";
+
+const fr = { distribution };
 
 /**
  * Browser-side: uploads the proof to the private bucket (storage RLS: the

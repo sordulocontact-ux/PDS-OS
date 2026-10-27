@@ -3,8 +3,10 @@
 // person — never estimated (CLAUDE.md, rule 6). Client-safe, pure. The
 // recommendations computed from them are in lib/strategy/recommendations.ts.
 
-import { fr } from "@/lib/i18n/fr";
+import { strategyFollowUp } from "@/lib/i18n/fr/strategy-follow-up";
 import type { KpiActual } from "@/lib/strategy/kpis";
+
+const fr = { strategyFollowUp };
 
 export type KpiMeasure = {
   objective_id: string;

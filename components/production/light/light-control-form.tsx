@@ -6,8 +6,10 @@ import { FieldError, FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { CheckboxField } from "@/components/ui/checkbox-field";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { productionLight } from "@/lib/i18n/fr/production-light";
 import { confirmLightCheck } from "@/lib/production/light/actions";
+
+const fr = { productionLight };
 
 const t = fr.productionLight.control;
 

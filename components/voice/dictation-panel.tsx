@@ -12,7 +12,9 @@ import {
 import type { useDictation } from "@/components/voice/use-dictation";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { voice } from "@/lib/i18n/fr/voice";
+
+const fr = { voice };
 
 /**
  * Dictation UI shared by every stage: the button that starts it, and the

@@ -3,10 +3,13 @@ import { PageSection } from "@/components/shell/page-section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { OpportunityRecord } from "@/lib/activations/press/queries";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { activationPress } from "@/lib/i18n/fr/activation-press";
+import { activationWork } from "@/lib/i18n/fr/activation-work";
 import { formatDate, formatDateTime } from "@/lib/release/format";
 
 import { BriefButton, OpportunityButton } from "./opportunity-buttons";
+
+const fr = { activationWork, activationPress };
 
 const t = fr.activationPress.opportunities;
 const tone = {

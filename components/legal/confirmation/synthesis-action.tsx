@@ -1,8 +1,10 @@
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
 import type { SynthesisAction as Action } from "@/lib/legal/confirmation/synthesis";
+
+const fr = { legal };
 
 /** « Répondre » / « Corriger »: back to the conversation, on that question
  * (« montrer les corrections possibles », Juridique 01). */

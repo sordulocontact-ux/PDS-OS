@@ -8,7 +8,10 @@ import type {
 } from "@/lib/design/conception";
 import { DIRECTION_KEY } from "@/lib/design/intentions";
 import type { Provenance } from "@/lib/framing/brief";
-import { fr } from "@/lib/i18n/fr";
+import { conception } from "@/lib/i18n/fr/conception";
+import { conceptionWork } from "@/lib/i18n/fr/conception-work";
+
+const fr = { conception, conceptionWork };
 
 type Data = Pick<
   ConceptionData,

@@ -6,7 +6,7 @@
 
 import { routes } from "@/lib/auth/redirects";
 import type { SheetPhase } from "@/lib/design/sheet-phase";
-import { fr } from "@/lib/i18n/fr";
+import { designJourney as frDesignJourney } from "@/lib/i18n/fr/design-journey";
 import type {
   JourneyActor,
   JourneyPerson,
@@ -15,6 +15,8 @@ import type {
   JourneyStep,
 } from "@/lib/ui/journey";
 import { formatShortDay } from "@/lib/utils/day";
+
+const fr = { designJourney: frDesignJourney };
 
 export const DESIGN_STEPS = [
   "home",

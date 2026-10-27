@@ -3,7 +3,9 @@
 import { IconFile, IconXmark } from "nucleo-sharp-essential";
 
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
+
+const fr = { distributionJourney };
 
 /** A proof chosen for a declaration: its name, and the cross that removes
  * it (proto `.pf`). */

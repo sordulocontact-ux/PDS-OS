@@ -1,8 +1,10 @@
 import { Fragment } from "react";
 
 import { ViewLink } from "@/components/ui/view-link";
-import { fr } from "@/lib/i18n/fr";
+import { moduleFrame } from "@/lib/i18n/fr/module-frame";
 import type { ModuleCrumb } from "@/lib/ui/module-frame";
+
+const fr = { moduleFrame };
 
 export type { ModuleCrumb };
 

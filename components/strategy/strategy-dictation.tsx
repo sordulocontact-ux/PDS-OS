@@ -10,9 +10,13 @@ import {
 } from "@/components/voice/dictation-panel";
 import type { ReviewItem } from "@/components/voice/dictation-review";
 import { useDictation } from "@/components/voice/use-dictation";
-import { fr } from "@/lib/i18n/fr";
+import { framing } from "@/lib/i18n/fr/framing";
+import { strategy } from "@/lib/i18n/fr/strategy";
+import { voice } from "@/lib/i18n/fr/voice";
 import { applyStrategyDictation } from "@/lib/strategy/actions/voice";
 import type { StrategyProposal } from "@/lib/strategy/voice-proposal";
+
+const fr = { framing, strategy, voice };
 
 /** Words a strategy proposal for review: what changes, and to what. */
 function toItem(

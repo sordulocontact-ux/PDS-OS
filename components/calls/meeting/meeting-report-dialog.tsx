@@ -12,9 +12,12 @@ import {
 } from "@/components/ui/dialog";
 import type { MeetingData, MeetingLine } from "@/lib/calls/meeting/types";
 import { callWhen } from "@/lib/calls/prep/dates";
-import { fr } from "@/lib/i18n/fr";
+import { callPrep } from "@/lib/i18n/fr/call-prep";
+import { meeting } from "@/lib/i18n/fr/meeting";
 
 import { MeetingLineRow } from "./meeting-line";
+
+const fr = { callPrep, meeting };
 
 function Section({
   title,

@@ -16,9 +16,12 @@ import {
 } from "@/components/shell/module/step-tools-block";
 import { designJourneyContext } from "@/lib/design/journey-context";
 import type { DesignStepKey } from "@/lib/design/journey";
-import { fr } from "@/lib/i18n/fr";
+import { designJourney } from "@/lib/i18n/fr/design-journey";
+import { journey } from "@/lib/i18n/fr/journey";
 import { stepChoiceKey, type StepRef } from "@/lib/step-tools/model";
 import { isLocked } from "@/lib/ui/journey";
+
+const fr = { journey, designJourney };
 
 const t = fr.designJourney;
 

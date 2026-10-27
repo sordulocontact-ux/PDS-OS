@@ -1,7 +1,9 @@
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { productionReady } from "@/lib/i18n/fr/production-ready";
 import type { ReadyRow } from "@/lib/production/ready-rows";
 import { cn } from "@/lib/utils";
+
+const fr = { productionReady };
 
 const t = fr.productionReady;
 

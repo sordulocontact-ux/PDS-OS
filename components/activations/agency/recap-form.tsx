@@ -8,7 +8,9 @@ import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/copy-button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { sendAgencyRecap } from "@/lib/activations/agency/report-actions";
-import { fr } from "@/lib/i18n/fr";
+import { activationBrief } from "@/lib/i18n/fr/activation-brief";
+
+const fr = { activationBrief };
 
 const t = fr.activationBrief.recap;
 

@@ -5,7 +5,7 @@ import { useTransition } from "react";
 import { toast } from "sonner";
 
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import {
   deleteEquipment,
   mergeEquipment,
@@ -18,6 +18,8 @@ import { ConfirmButton } from "@/components/ui/confirm-button";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { EquipmentForm } from "./equipment-form";
 import { RecordMenu } from "@/components/ui/record-menu";
+
+const fr = { productionPreprod };
 
 const t = fr.productionPreprod.equipment;
 

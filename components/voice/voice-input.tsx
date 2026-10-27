@@ -9,12 +9,14 @@ import type { VoiceInputPhase } from "@/components/voice/use-voice-input";
 import { AudioMeter } from "@/components/ui/audio-meter";
 import { Button } from "@/components/ui/button";
 import { formatClock } from "@/lib/calls/format";
-import { fr } from "@/lib/i18n/fr";
+import { voice } from "@/lib/i18n/fr/voice";
 import { cn } from "@/lib/utils";
 import {
   MAX_DICTATION_SECONDS,
   type VoiceErrorCode,
 } from "@/lib/voice/constants";
+
+const fr = { voice };
 
 /**
  * Voice typing controls for a text input: the microphone button next to the

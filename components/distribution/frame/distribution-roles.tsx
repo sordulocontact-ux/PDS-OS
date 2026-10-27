@@ -2,7 +2,10 @@ import { ContactLinksSection } from "@/components/portal/contact-links-section";
 import type { RoleRow } from "@/components/shell/module/roles-panel";
 import { WhoDoesWhatButton } from "@/components/shell/module/who-does-what-button";
 import type { DistributionContext } from "@/lib/distribution/journey-context";
-import { fr } from "@/lib/i18n/fr";
+import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
+import { roles } from "@/lib/i18n/fr/roles";
+
+const fr = { distributionJourney, roles };
 
 const t = fr.roles.distribution;
 

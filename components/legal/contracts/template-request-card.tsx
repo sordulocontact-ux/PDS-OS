@@ -7,9 +7,11 @@ import { DecisionPanel } from "@/components/ui/decision-panel";
 import { DocumentCard } from "@/components/ui/document-card";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { legalDocuments } from "@/lib/i18n/fr/legal-documents";
 import { decideTemplateRequest } from "@/lib/legal/contracts/template-request-actions";
 import type { TemplateRequest } from "@/lib/legal/contracts/template-requests";
+
+const fr = { legalDocuments };
 
 const t = fr.legalDocuments.template;
 

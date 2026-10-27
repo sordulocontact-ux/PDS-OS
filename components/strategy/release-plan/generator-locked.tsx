@@ -3,7 +3,9 @@ import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { strategyReleasePlan } from "@/lib/i18n/fr/strategy-release-plan";
+
+const fr = { strategyReleasePlan };
 
 /** The generator is closed for now: why, and the way back. */
 export function GeneratorLocked({

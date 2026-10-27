@@ -17,7 +17,7 @@ import { useKindRoles } from "@/components/network/use-kind-roles";
 import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
 import { ChipChoice } from "@/components/ui/chip-choice";
-import { fr } from "@/lib/i18n/fr";
+import { network } from "@/lib/i18n/fr/network";
 import { normalizeSearch } from "@/lib/utils/search";
 import { saveNetworkContact } from "@/lib/network/actions";
 import { similarContacts } from "@/lib/network/similar";
@@ -33,6 +33,8 @@ import {
   type NetworkKind,
   type NetworkRole,
 } from "@/lib/network/types";
+
+const fr = { network };
 
 /**
  * A network contact, created or edited in the modal: a person or an

@@ -1,4 +1,6 @@
-import { fr } from "@/lib/i18n/fr";
+import { artistActivity } from "@/lib/i18n/fr/artist-activity";
+
+const fr = { artistActivity };
 
 // Days and times of the log, in Europe/Paris, computed by the code.
 const TIME_ZONE = "Europe/Paris";

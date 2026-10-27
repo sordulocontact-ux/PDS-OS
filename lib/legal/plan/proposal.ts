@@ -17,11 +17,15 @@
 // débloqué ensuite ». Nothing is forced into a line: an item waits only for
 // what it really depends on (« aucune séquence artificiellement linéaire »).
 
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
+import { legalForms } from "@/lib/i18n/fr/legal-forms";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 import type { InventoryRows } from "@/lib/legal/inventory-rows";
 import { titleItems } from "@/lib/legal/plan/proposal-titles";
 import { featuredArtists, featuredKey } from "@/lib/legal/forms/people";
 import { normalizeSearch } from "@/lib/utils/search";
+
+const fr = { legal, legalForms, masterPage };
 
 export const PLAN_COLUMNS = ["now", "ongoing", "later"] as const;
 export type PlanColumn = (typeof PLAN_COLUMNS)[number];

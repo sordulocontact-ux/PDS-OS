@@ -3,7 +3,9 @@
 // code in one click; each lands « à arbitrer », the owner decides. Labels in
 // fr.strategyDispositif.presets. Client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { strategyDispositif } from "@/lib/i18n/fr/strategy-dispositif";
+
+const fr = { strategyDispositif };
 
 type Family =
   | "creation_content"

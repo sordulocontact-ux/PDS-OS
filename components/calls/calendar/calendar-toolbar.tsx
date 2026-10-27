@@ -8,7 +8,9 @@ import {
   type CalendarMode,
   type CalendarPeriod,
 } from "@/lib/calls/calendar";
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
+
+const fr = { calls };
 
 const utc = (day: string) => new Date(`${day}T00:00:00Z`);
 const rangeDate = new Intl.DateTimeFormat("fr-FR", {

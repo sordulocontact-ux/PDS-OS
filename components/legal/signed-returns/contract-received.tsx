@@ -7,8 +7,10 @@ import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { ContractProof } from "@/lib/contracts/proof";
 import { todayInParis } from "@/lib/contracts/types";
-import { fr } from "@/lib/i18n/fr";
+import { signedReturns } from "@/lib/i18n/fr/signed-returns";
 import { formatShortDay, formatShortInstant } from "@/lib/utils/day";
+
+const fr = { signedReturns };
 
 const t = fr.signedReturns.team;
 

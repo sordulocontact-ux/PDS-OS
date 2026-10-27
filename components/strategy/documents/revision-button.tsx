@@ -5,8 +5,10 @@ import { useState } from "react";
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import { fr } from "@/lib/i18n/fr";
+import { strategyDocuments } from "@/lib/i18n/fr/strategy-documents";
 import { openStrategyRevision } from "@/lib/strategy/actions/documents";
+
+const fr = { strategyDocuments };
 
 /**
  * « Réviser la stratégie » on a validated strategy (owner): a significant

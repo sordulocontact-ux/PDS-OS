@@ -1,7 +1,9 @@
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { productionShoot } from "@/lib/i18n/fr/production-shoot";
 import type { ClosingBlocker } from "@/lib/production/shoot/blockers";
 import { isReturnPending, type ReturnLine } from "@/lib/production/shoot/rules";
+
+const fr = { productionShoot };
 
 const t = fr.productionShoot.equipment;
 

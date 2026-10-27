@@ -7,7 +7,7 @@ import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { legalForms } from "@/lib/i18n/fr/legal-forms";
 import {
   fieldsFor,
   type FormBlock,
@@ -21,6 +21,8 @@ import { formatInstant } from "@/lib/utils/instant";
 import { FormReview } from "./form-review";
 import { RequesterNote } from "./requester-note";
 import { RoleStep } from "./role-step";
+
+const fr = { legalForms };
 
 /**
  * The fiche de renseignements of an outside person (ticket Juridique 02):

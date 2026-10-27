@@ -4,8 +4,10 @@ import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { FactList } from "@/components/ui/fact-list";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { strategyReleasePlan } from "@/lib/i18n/fr/strategy-release-plan";
 import { doneTone, draftTone } from "@/lib/ui/state-tones";
+
+const fr = { strategyReleasePlan };
 
 /**
  * Step 1 (ticket § 11): « Créons le Plan de sortie ». What the validated

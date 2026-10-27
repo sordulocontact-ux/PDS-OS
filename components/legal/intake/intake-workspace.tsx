@@ -9,12 +9,14 @@ import { QuestionCard } from "@/components/legal/intake/question-card";
 import { EmptyState } from "@/components/shell/empty-state";
 import { Button } from "@/components/ui/button";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
 import { answerKey } from "@/lib/legal/intake/questions";
 import type {
   IntakeQuestion,
   NotAskedQuestion,
 } from "@/lib/legal/intake/types";
+
+const fr = { legal };
 
 const keyOf = (q: IntakeQuestion) => answerKey(q.key, q.masterId);
 

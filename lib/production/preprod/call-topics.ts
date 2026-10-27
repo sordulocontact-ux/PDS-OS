@@ -5,13 +5,15 @@
 // by function and the documents to have at hand. No model. Client-safe.
 
 import { topicMinutes } from "@/lib/calls/prepare";
-import { fr } from "@/lib/i18n/fr";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import { missingBriefTopics } from "@/lib/production/brief";
 import type { EffectiveLogistics } from "@/lib/production/logistics";
 import type { ProductionSheetData } from "@/lib/production/sheet";
 
 import { multiRolePeople, staffingCounts, teamMembers } from "./team";
 import type { PreprodData } from "./types";
+
+const fr = { productionPreprod };
 
 export const TECHNICAL_TOPICS = [
   "direction",

@@ -1,10 +1,12 @@
 import Link from "next/link";
 
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
 import { isBlocking } from "@/lib/legal/contracts/completeness";
 import type { AgreementField } from "@/lib/legal/contracts/mapping";
 import { contractValueTone } from "@/lib/ui/state-tones";
+
+const fr = { legalContracts };
 
 /**
  * The completeness checklist of a contract (JUR-16): every value its

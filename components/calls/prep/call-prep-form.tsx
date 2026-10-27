@@ -6,7 +6,7 @@ import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { callWhen, instantOfInputs } from "@/lib/calls/prep/dates";
 import type { CallPrepDefaults, PrepTopic } from "@/lib/calls/prep/types";
-import { fr } from "@/lib/i18n/fr";
+import { callPrep } from "@/lib/i18n/fr/call-prep";
 
 import { AgendaList } from "./agenda-list";
 import { AttendeeChips } from "./attendee-chips";
@@ -14,6 +14,8 @@ import { CallPrepRecap } from "./call-prep-recap";
 import { CallPrepSent } from "./call-prep-sent";
 import { CallPrepWhen } from "./call-prep-when";
 import { useCallPrep } from "./use-call-prep";
+
+const fr = { callPrep };
 
 /**
  * The common call form, in the step (proto « Projet complet », `prepGate`):

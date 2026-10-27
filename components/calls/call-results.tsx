@@ -10,8 +10,10 @@ import {
 } from "@/components/ui/card";
 import { formatDateTime } from "@/lib/calls/format";
 import type { StoredReport, StoredTranscript } from "@/lib/calls/queries";
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
 import { formatMs, formatTimestamp } from "@/lib/labo/format";
+
+const fr = { calls };
 
 /** Transcript and latest report of a call, as stored. */
 export function CallResults({

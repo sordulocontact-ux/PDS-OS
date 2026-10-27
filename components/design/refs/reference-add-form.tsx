@@ -21,7 +21,10 @@ import {
 } from "@/lib/design/reference-kinds";
 import { REFERENCE_ACCEPT } from "@/lib/design/reference-rules";
 import { uploadReferenceFile } from "@/lib/design/upload-reference";
-import { fr } from "@/lib/i18n/fr";
+import { conceptionRefs } from "@/lib/i18n/fr/conception-refs";
+import { designSteps } from "@/lib/i18n/fr/design-steps";
+
+const fr = { conceptionRefs, designSteps };
 
 const t = fr.designSteps.references;
 

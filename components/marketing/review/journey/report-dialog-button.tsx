@@ -4,7 +4,9 @@ import dynamic from "next/dynamic";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { reviewJourney } from "@/lib/i18n/fr/review-journey";
+
+const fr = { reviewJourney };
 
 // Heavy and rarely opened: loaded on the first click.
 const ReportDialog = dynamic(() => import("./report-dialog"));

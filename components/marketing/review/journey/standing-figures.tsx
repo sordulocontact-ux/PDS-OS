@@ -4,12 +4,15 @@ import { IconChevronRight } from "nucleo-sharp-essential";
 import { useState } from "react";
 
 import { FormDialog } from "@/components/ui/form-dialog";
-import { fr } from "@/lib/i18n/fr";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
+import { reviewJourney } from "@/lib/i18n/fr/review-journey";
 import type {
   StandingFigure,
   StandingGroup,
   StandingRow,
 } from "@/lib/marketing/review/standing";
+
+const fr = { dialogs, reviewJourney };
 
 const t = fr.reviewJourney.standing;
 

@@ -14,7 +14,7 @@ import {
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDateTime } from "@/lib/calls/format";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionShoot } from "@/lib/i18n/fr/production-shoot";
 import type { ClosingBlocker } from "@/lib/production/shoot/blockers";
 import {
   isReturnOverdue,
@@ -31,6 +31,8 @@ import {
 
 import { ClosingCheck } from "./closing-check";
 import { EquipmentReturnActions } from "./equipment-return-actions";
+
+const fr = { productionShoot };
 
 const t = fr.productionShoot.equipment;
 

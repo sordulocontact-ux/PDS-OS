@@ -5,8 +5,10 @@ import { Button } from "@/components/ui/button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { VersionCard } from "@/components/ui/version-card";
 import { declareTransmission } from "@/lib/activations/journey-actions";
-import { fr } from "@/lib/i18n/fr";
+import { activationJourney } from "@/lib/i18n/fr/activation-journey";
 import { formatShortInstant } from "@/lib/utils/day";
+
+const fr = { activationJourney };
 
 const t = fr.activationJourney.pressBlock;
 

@@ -7,7 +7,7 @@ import { TextareaField } from "@/components/auth/textarea-field";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionShoot } from "@/lib/i18n/fr/production-shoot";
 import { OptionSelect } from "@/components/framing/option-select";
 import { CheckboxField } from "@/components/ui/checkbox-field";
 import {
@@ -24,6 +24,8 @@ import {
   holderValue,
 } from "@/components/production/holder-select";
 import { ShootFormActions } from "./shoot-form-actions";
+
+const fr = { productionShoot };
 
 const t = fr.productionShoot.incidents;
 

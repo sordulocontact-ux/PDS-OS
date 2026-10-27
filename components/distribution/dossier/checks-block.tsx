@@ -10,8 +10,11 @@ import { FactRows } from "@/components/ui/fact-row";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import type { CheckKey, CheckResult } from "@/lib/distribution/checks";
 import { recordDistributionCheck } from "@/lib/distribution/validation-actions";
-import { fr } from "@/lib/i18n/fr";
+import { distribution } from "@/lib/i18n/fr/distribution";
+import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
 import { cn } from "@/lib/utils";
+
+const fr = { distribution, distributionJourney };
 
 const t = fr.distributionJourney.checks;
 const c = fr.distribution.checks;

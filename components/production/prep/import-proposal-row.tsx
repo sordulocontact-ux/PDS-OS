@@ -1,8 +1,10 @@
 "use client";
 
 import { Checkbox } from "@/components/ui/checkbox";
-import { fr } from "@/lib/i18n/fr";
+import { productionImport } from "@/lib/i18n/fr/production-import";
 import { cn } from "@/lib/utils";
+
+const fr = { productionImport };
 
 /**
  * One proposal of an imported organisation: a box to keep it, what it is,

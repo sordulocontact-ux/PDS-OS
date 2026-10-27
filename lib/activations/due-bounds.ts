@@ -4,8 +4,10 @@
 // the period of the first-month KPIs). Said to the person before the
 // database refuses it. Pure, client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { activationJourney } from "@/lib/i18n/fr/activation-journey";
 import { formatDay } from "@/lib/utils/day";
+
+const fr = { activationJourney };
 
 const e = fr.activationJourney.errors;
 

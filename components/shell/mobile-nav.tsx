@@ -13,7 +13,9 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { fr } from "@/lib/i18n/fr";
+import { shell } from "@/lib/i18n/fr/shell";
+
+const fr = { shell };
 
 // Mobile navigation: a drawer from the left edge, closed on navigation.
 // The user panel is passed from the server (it holds the sign-out form).

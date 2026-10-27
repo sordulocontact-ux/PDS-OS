@@ -6,13 +6,15 @@ import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
-import { fr } from "@/lib/i18n/fr";
+import { strategyCalendar } from "@/lib/i18n/fr/strategy-calendar";
 import { setUpstreamLeadDays } from "@/lib/strategy/actions/upstream";
 import {
   UPSTREAM_LEAD_DAYS,
   UPSTREAM_STEPS,
   type UpstreamStepKey,
 } from "@/lib/strategy/upstream";
+
+const fr = { strategyCalendar };
 
 /**
  * « Ajuster les délais » of one deliverable (MKT-S1-04): days before its

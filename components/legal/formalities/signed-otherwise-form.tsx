@@ -8,10 +8,13 @@ import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { FilePickField } from "@/components/ui/file-pick-field";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { todayInParis } from "@/lib/contracts/types";
-import { fr } from "@/lib/i18n/fr";
+import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
+import { signedReturns } from "@/lib/i18n/fr/signed-returns";
 import { noteFormalitySignature } from "@/lib/legal/signed-returns/team-actions";
 
 import { isProofPdf, uploadProof } from "./upload-proof";
+
+const fr = { legalFormalities, signedReturns };
 
 const r = fr.signedReturns.sacem;
 const p = fr.legalFormalities.page;

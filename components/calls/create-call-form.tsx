@@ -8,7 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createCall } from "@/lib/calls/actions";
 import type { CallContact } from "@/lib/calls/invite";
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
+
+const fr = { calls };
 
 /**
  * "Nouveau call": a button that unfolds the form in place. When the project

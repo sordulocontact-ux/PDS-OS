@@ -6,7 +6,9 @@
 
 import { z } from "zod";
 
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
+
+const fr = { calls };
 
 const decision = z.object({
   what: z.string(),

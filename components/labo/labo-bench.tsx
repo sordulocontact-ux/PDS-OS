@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Transcript } from "@/lib/ai/schemas/transcript";
 import type { Transcription } from "@/lib/ai/transcribe";
-import { fr } from "@/lib/i18n/fr";
+import { labo } from "@/lib/i18n/fr/labo";
 import {
   requestReport,
   requestTranscription,
@@ -20,6 +20,8 @@ import {
   type ReportResult,
 } from "@/lib/labo/client";
 import { formatMs, formatTimestamp } from "@/lib/labo/format";
+
+const fr = { labo };
 
 type Source = {
   transcript: Transcript;

@@ -1,7 +1,8 @@
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { productionBrief } from "@/lib/i18n/fr/production-brief";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import type { Member } from "@/lib/framing/related";
 import type { ProductionBrief } from "@/lib/production/brief";
 import { duplicatePairs } from "@/lib/production/preprod/equipment";
@@ -12,6 +13,8 @@ import { formatShortDate } from "@/lib/release/format";
 import { AddEquipmentButton, MergeButton } from "./equipment-actions";
 import { EquipmentTable } from "./equipment-table";
 import { QuoteFiles } from "./quote-files";
+
+const fr = { productionBrief, productionPreprod };
 
 const t = fr.productionPreprod.equipment;
 const choices = fr.productionBrief.choices;

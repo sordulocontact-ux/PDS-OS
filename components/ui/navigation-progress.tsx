@@ -3,7 +3,9 @@
 import { useLinkStatus } from "next/link";
 import { useEffect, useSyncExternalStore } from "react";
 
-import { fr } from "@/lib/i18n/fr";
+import { auth } from "@/lib/i18n/fr/auth";
+
+const fr = { auth };
 
 // A click on a link whose page is not ready yet (a project, an artist, a
 // contact opened from a list, never prefetched: docs/ARCHITECTURE.md § 3

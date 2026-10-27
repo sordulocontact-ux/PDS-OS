@@ -2,8 +2,10 @@
 
 import { DecisionPanel } from "@/components/ui/decision-panel";
 import { ResubmitForm } from "@/components/ui/resubmit-form";
-import { fr } from "@/lib/i18n/fr";
+import { strategyBriefOut } from "@/lib/i18n/fr/strategy-brief-out";
 import { decideBriefOut, sendBriefOut } from "@/lib/strategy/actions/brief-out";
+
+const fr = { strategyBriefOut };
 
 const t = fr.strategyBriefOut;
 

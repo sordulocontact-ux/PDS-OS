@@ -11,7 +11,7 @@ import { ChipChoice } from "@/components/ui/chip-choice";
 import { sectionCardClass } from "@/components/ui/section-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Timestamp } from "@/components/ui/timestamp";
-import { fr } from "@/lib/i18n/fr";
+import { masterWorkflow } from "@/lib/i18n/fr/master-workflow";
 import {
   ENGINEER_SIGNALS,
   type EngineerMessage,
@@ -19,6 +19,8 @@ import {
 } from "@/lib/master-workflow/engineer-messages";
 import { postEngineerMessage } from "@/lib/master-workflow/transmission-public-actions";
 import { engineerSignalTone } from "@/lib/ui/state-tones";
+
+const fr = { masterWorkflow };
 
 /**
  * The engineer's thread with the label, on their page (PROJ-AMEL-02): every

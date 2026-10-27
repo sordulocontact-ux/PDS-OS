@@ -4,8 +4,10 @@ import { sourceLabel } from "@/components/framing/guide/source-quote";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { routes } from "@/lib/auth/redirects";
 import type { Provenance } from "@/lib/framing/brief";
-import { fr } from "@/lib/i18n/fr";
+import { framing } from "@/lib/i18n/fr/framing";
 import { formatTimestamp } from "@/lib/labo/format";
+
+const fr = { framing };
 
 const day = new Intl.DateTimeFormat("fr-FR", {
   dateStyle: "long",

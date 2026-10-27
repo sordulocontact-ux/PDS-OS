@@ -3,7 +3,7 @@
 // check — so the summary, the sections and the readiness agree. Code only
 // (rule 6). Client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import {
   effectiveLogistics,
   type EffectiveLogistics,
@@ -38,6 +38,8 @@ import {
   type TeamBriefState,
 } from "./team-briefs";
 import { CALL_SHEET_FIELDS, type CheckKey, type PreprodData } from "./types";
+
+const fr = { productionPreprod };
 
 export type BriefView = {
   team: Team;

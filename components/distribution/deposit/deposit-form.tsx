@@ -11,7 +11,10 @@ import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { declareDeposit } from "@/lib/distribution/declare-actions";
 import { isDeclarationSource } from "@/lib/distribution/tracking";
 import { removeProof, uploadProof } from "@/lib/distribution/upload-proof";
-import { fr } from "@/lib/i18n/fr";
+import { distribution } from "@/lib/i18n/fr/distribution";
+import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
+
+const fr = { distribution, distributionJourney };
 
 const t = fr.distributionJourney.deposit;
 const o = fr.distributionJourney.orchard;

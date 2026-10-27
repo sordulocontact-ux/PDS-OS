@@ -14,7 +14,9 @@ import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import type { DeclarationKind } from "@/lib/distribution/tracking";
 import { withdrawDistributionDeclaration } from "@/lib/distribution/tracking-actions";
 import { declareWithProof } from "@/lib/distribution/upload-proof";
-import { fr } from "@/lib/i18n/fr";
+import { distribution } from "@/lib/i18n/fr/distribution";
+
+const fr = { distribution };
 
 const t = fr.distribution.tracking;
 

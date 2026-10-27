@@ -9,11 +9,16 @@ import type {
   NarrativePart,
   StrategyFieldState,
 } from "@/lib/framing/brief";
-import { fr } from "@/lib/i18n/fr";
+import { strategy } from "@/lib/i18n/fr/strategy";
+import { strategyDimensions } from "@/lib/i18n/fr/strategy-dimensions";
+import { strategyEntry } from "@/lib/i18n/fr/strategy-entry";
+import { strategyPilot } from "@/lib/i18n/fr/strategy-pilot";
 import {
   STRATEGY_DIMENSIONS,
   type StrategyDimension,
 } from "@/lib/strategy/dimensions";
+
+const fr = { strategy, strategyEntry, strategyPilot, strategyDimensions };
 
 // One topic per dimension of the pilotage still open.
 export const STRATEGY_TOPICS = STRATEGY_DIMENSIONS;

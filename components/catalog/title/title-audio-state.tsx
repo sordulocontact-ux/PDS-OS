@@ -1,6 +1,8 @@
 import { AudioStateBadge } from "@/components/catalog/title/audio-state-badge";
 import type { AudioState } from "@/lib/catalog/title-rules";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
+
+const fr = { catalog };
 
 /**
  * Where a title stands in a list: the audio step reached, and « validé »

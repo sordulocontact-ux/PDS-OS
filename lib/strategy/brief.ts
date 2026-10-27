@@ -5,7 +5,9 @@
 
 import { formatEuros } from "@/lib/budget/types";
 import type { FieldState } from "@/lib/framing/brief";
-import { fr } from "@/lib/i18n/fr";
+import { strategyBrief } from "@/lib/i18n/fr/strategy-brief";
+import { strategyCalendar } from "@/lib/i18n/fr/strategy-calendar";
+import { strategyPilot } from "@/lib/i18n/fr/strategy-pilot";
 import type { StrategyBudget } from "@/lib/strategy/budget";
 import type { ChoiceSuggestion } from "@/lib/strategy/choices";
 import type {
@@ -17,6 +19,8 @@ import {
   type UpstreamDeliverable,
 } from "@/lib/strategy/upstream";
 import { formatBriefDate } from "@/lib/framing/assess";
+
+const fr = { strategyCalendar, strategyBrief, strategyPilot };
 
 /**
  * The Brief is established once every dimension is at least started: none

@@ -2,7 +2,9 @@ import type {
   CaptureEmail,
   SocialLink,
 } from "@/lib/catalog/capture-artist-types";
-import { fr } from "@/lib/i18n/fr";
+import { laboCaptures } from "@/lib/i18n/fr/labo-captures";
+
+const fr = { laboCaptures };
 
 /**
  * TikTok, Instagram, Spotify and e-mail of a person, each with its source.

@@ -3,7 +3,9 @@
 import { DialogButton } from "@/components/ui/dialog-button";
 import { ReasonForm } from "@/components/ui/reason-form";
 import { setActivationLife } from "@/lib/activations/journey-actions";
-import { fr } from "@/lib/i18n/fr";
+import { activationJourney } from "@/lib/i18n/fr/activation-journey";
+
+const fr = { activationJourney };
 
 const t = fr.activationJourney.life;
 

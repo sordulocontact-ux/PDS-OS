@@ -1,6 +1,8 @@
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { productionShoot } from "@/lib/i18n/fr/production-shoot";
 import type { PostBlocker } from "@/lib/production/shoot/blockers";
+
+const fr = { productionShoot };
 
 const t = fr.productionShoot.files;
 

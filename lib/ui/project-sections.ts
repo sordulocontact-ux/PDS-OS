@@ -1,6 +1,26 @@
 import { routes } from "@/lib/auth/redirects";
 import { DESIGN_STEPS } from "@/lib/design/journey";
-import { fr } from "@/lib/i18n/fr";
+import { conception } from "@/lib/i18n/fr/conception";
+import { legalClearance } from "@/lib/i18n/fr/legal-clearance";
+import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
+import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
+import { legalForms } from "@/lib/i18n/fr/legal-forms";
+import { legalHistory } from "@/lib/i18n/fr/legal-history";
+import { legalSplits } from "@/lib/i18n/fr/legal-splits";
+import { projectReview } from "@/lib/i18n/fr/production";
+import { shell } from "@/lib/i18n/fr/shell";
+
+const fr = {
+  shell,
+  conception,
+  projectReview,
+  legalClearance,
+  legalContracts,
+  legalFormalities,
+  legalForms,
+  legalHistory,
+  legalSplits,
+};
 
 // Navigation of a launched project — only one is ever shown (docs/DESIGN.md § 4):
 // - true: the contextual sidebar right against the main one, collapsed to

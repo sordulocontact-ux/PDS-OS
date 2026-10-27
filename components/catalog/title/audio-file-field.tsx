@@ -9,7 +9,10 @@ import { FileDropZone } from "@/components/ui/file-drop-zone";
 import { Label } from "@/components/ui/label";
 import { AUDIO_ACCEPT, formatFileSize } from "@/lib/catalog/file-rules";
 import { formatDuration } from "@/lib/catalog/types";
-import { fr } from "@/lib/i18n/fr";
+import { catalogFiles } from "@/lib/i18n/fr/catalog-files";
+import { masterPage } from "@/lib/i18n/fr/master-page";
+
+const fr = { catalogFiles, masterPage };
 
 /**
  * One audio file chosen before it is sent: a drop zone, then the chosen

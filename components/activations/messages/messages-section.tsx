@@ -4,13 +4,15 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import type { MessageRecord } from "@/lib/activations/messages/queries";
 import type { MessageKind } from "@/lib/activations/model";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { activationWork } from "@/lib/i18n/fr/activation-work";
 import { formatDate } from "@/lib/release/format";
 import { activationMessageTone } from "@/lib/ui/state-tones";
 
 import { MessageActions } from "./message-actions";
 import type { MessageDefaults } from "./message-form";
 import { NewMessageButton } from "./new-message-button";
+
+const fr = { activationWork };
 
 const t = fr.activationWork.messages;
 

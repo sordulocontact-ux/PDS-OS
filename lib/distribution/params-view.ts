@@ -6,8 +6,11 @@
 
 import { territoriesText } from "@/lib/distribution/delivery-file";
 import type { DossierParams } from "@/lib/distribution/dossier";
-import { fr } from "@/lib/i18n/fr";
+import { distribution } from "@/lib/i18n/fr/distribution";
+import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
 import { formatDay } from "@/lib/utils/day";
+
+const fr = { distribution, distributionJourney };
 
 export const PARAM_KEYS = [
   "territories",

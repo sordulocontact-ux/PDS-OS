@@ -1,8 +1,10 @@
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { masterRound } from "@/lib/i18n/fr/master-round";
 import type { MixVersion } from "@/lib/master-workflow/mix-types";
 import { formatShortDay } from "@/lib/utils/day";
+
+const fr = { masterRound };
 
 const t = fr.masterRound;
 

@@ -1,5 +1,7 @@
-import { fr } from "@/lib/i18n/fr";
+import { transmission } from "@/lib/i18n/fr/transmission";
 import type { ProjectDetail } from "@/lib/projects/types";
+
+const fr = { transmission };
 
 /**
  * Before accepting (PROJ-UX-02): what the transmission brings, what is

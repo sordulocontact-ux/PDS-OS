@@ -3,13 +3,15 @@ import { ViewLink } from "@/components/ui/view-link";
 import { reserveText } from "@/lib/activations/describe";
 import type { ActivationSummary } from "@/lib/activations/types";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { activations } from "@/lib/i18n/fr/activations";
 
 import {
   ActivationStatusBadge,
   MeasureBadge,
   ProofBadge,
 } from "./activation-badges";
+
+const fr = { activations };
 
 const t = fr.activations;
 

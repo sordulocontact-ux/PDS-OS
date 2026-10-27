@@ -4,11 +4,15 @@ import { buttonVariants } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { conceptionClosure } from "@/lib/i18n/fr/conception-closure";
+import { production } from "@/lib/i18n/fr/production";
+import { productionPrep } from "@/lib/i18n/fr/production-prep";
 import type { ProductionDeliverable } from "@/lib/production/queries";
 import { nextStep } from "@/lib/production/rules";
 import { formatDate } from "@/lib/release/format";
 import { productionDeliveryTone } from "@/lib/ui/state-tones";
+
+const fr = { conceptionClosure, production, productionPrep };
 
 const t = fr.production;
 

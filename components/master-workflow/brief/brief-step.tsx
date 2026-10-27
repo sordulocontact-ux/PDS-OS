@@ -6,7 +6,7 @@ import { PdfExportButton } from "@/components/ui/pdf-export-button";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { StepWaiting } from "@/components/shell/journey/step-waiting";
 import type { CallPrepDefaults } from "@/lib/calls/prep/types";
-import { fr } from "@/lib/i18n/fr";
+import { masterBrief } from "@/lib/i18n/fr/master-brief";
 import {
   briefStateOf,
   missingSentence,
@@ -19,6 +19,8 @@ import { BriefContent } from "./brief-content";
 import { BriefExchange } from "./brief-exchange";
 import { BriefRecord } from "./brief-record";
 import { BriefStart } from "./brief-start";
+
+const fr = { masterBrief };
 
 const t = fr.masterBrief;
 const STATE_TONE = {

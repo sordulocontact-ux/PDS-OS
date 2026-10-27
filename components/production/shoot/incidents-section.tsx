@@ -3,13 +3,15 @@ import { PageSection } from "@/components/shell/page-section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDateTime } from "@/lib/calls/format";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionShoot } from "@/lib/i18n/fr/production-shoot";
 import type { ShootIncident } from "@/lib/production/shoot/rules";
 import type { NetworkOption } from "@/lib/production/sheet";
 import { shootIncidentTone } from "@/lib/ui/state-tones";
 
 import { IncidentActions } from "./incident-actions";
 import { IncidentAddButton } from "./incident-add-button";
+
+const fr = { productionShoot };
 
 const t = fr.productionShoot.incidents;
 

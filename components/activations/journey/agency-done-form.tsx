@@ -14,7 +14,9 @@ import { Fold } from "@/components/ui/fold";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { declareDoneWithReserve } from "@/lib/activations/agency/done-actions";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { activationJourney } from "@/lib/i18n/fr/activation-journey";
+
+const fr = { activationJourney };
 
 const t = fr.activationJourney.gesture;
 const ID = "agency-done";

@@ -8,7 +8,9 @@
 // the gestures, the direction only its decisions (`kind: "validate"`),
 // someone outside through their link. Pure, never stored, never PO's.
 
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
+import { legalDemarches } from "@/lib/i18n/fr/legal-demarches";
+import { legalJourney } from "@/lib/i18n/fr/legal-journey";
 import type { FormRow } from "@/lib/legal/forms/queries";
 import type { BoardRow, PlanBoard } from "@/lib/legal/plan/board";
 import type { PlanItem } from "@/lib/legal/plan/proposal";
@@ -27,6 +29,8 @@ import {
 } from "@/lib/ui/legal-steps";
 
 import { expectedOf } from "./todo";
+
+const fr = { legal, legalDemarches, legalJourney };
 
 const t = fr.legalDemarches;
 

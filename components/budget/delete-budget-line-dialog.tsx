@@ -6,7 +6,9 @@ import { useFramingAction } from "@/components/framing/use-framing-action";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { deleteBudgetLine } from "@/lib/budget/actions";
 import type { BudgetLine } from "@/lib/budget/types";
-import { fr } from "@/lib/i18n/fr";
+import { budget } from "@/lib/i18n/fr/budget";
+
+const fr = { budget };
 
 // Confirms a definitive deletion; stays open if it fails, with the error.
 export function DeleteBudgetLineDialog({

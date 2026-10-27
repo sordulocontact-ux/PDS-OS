@@ -2,9 +2,12 @@ import { StatTiles } from "@/components/ui/stat-tiles";
 import { InfoRow, Rows } from "@/components/ui/rows";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatEuros } from "@/lib/budget/types";
-import { fr } from "@/lib/i18n/fr";
+import { budget } from "@/lib/i18n/fr/budget";
+import { strategyDimensions } from "@/lib/i18n/fr/strategy-dimensions";
 import type { BudgetView } from "@/lib/strategy/dimension-budget";
 import { strategyBudgetLineTone } from "@/lib/ui/state-tones";
+
+const fr = { strategyDimensions, budget };
 
 const t = fr.strategyDimensions.budget;
 const euros = formatEuros;

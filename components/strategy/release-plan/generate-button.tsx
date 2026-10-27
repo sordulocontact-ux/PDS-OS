@@ -5,10 +5,13 @@ import { toast } from "sonner";
 
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { strategyPressKit } from "@/lib/i18n/fr/strategy-press-kit";
+import { strategyReleasePlan } from "@/lib/i18n/fr/strategy-release-plan";
 import { generatePressKit } from "@/lib/strategy/actions/press-kit";
 import { generateReleasePlan } from "@/lib/strategy/actions/release-plan";
 import type { GeneratorKind } from "@/lib/strategy/documents/generator-kind";
+
+const fr = { strategyReleasePlan, strategyPressKit };
 
 /**
  * « Générer le Plan de sortie »: the server builds the next version from the

@@ -6,7 +6,8 @@ import { toast } from "sonner";
 import { useShowSplitLinks } from "@/components/legal/splits/split-actions";
 import { PrivateLinkCard } from "@/components/legal/private-link-card";
 import { StepSection } from "@/components/shell/journey/step-section";
-import { fr } from "@/lib/i18n/fr";
+import { legalDocuments } from "@/lib/i18n/fr/legal-documents";
+import { legalSplits } from "@/lib/i18n/fr/legal-splits";
 import { newSplitLink } from "@/lib/legal/splits/actions";
 import {
   markSplitLinkSent,
@@ -15,6 +16,8 @@ import {
 import { roleOfLine } from "@/lib/legal/splits/draft";
 import type { SplitLine } from "@/lib/legal/splits/queries";
 import { mailtoHref } from "@/lib/utils/mailto";
+
+const fr = { legalDocuments, legalSplits };
 
 const s = fr.legalDocuments.split;
 

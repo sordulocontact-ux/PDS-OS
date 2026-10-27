@@ -1,5 +1,7 @@
 import type { DeezerAccount } from "@/lib/catalog/capture-artist-types";
-import { fr } from "@/lib/i18n/fr";
+import { laboCaptures } from "@/lib/i18n/fr/labo-captures";
+
+const fr = { laboCaptures };
 
 const quoted = (values: string[]) => values.map((v) => `« ${v} »`).join(", ");
 

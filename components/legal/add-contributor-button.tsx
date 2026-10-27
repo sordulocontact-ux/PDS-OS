@@ -5,7 +5,9 @@ import { useState } from "react";
 import { ContributorForm } from "@/components/catalog/master-page/contributor-form";
 import { AddItemButton } from "@/components/catalog/master-page/item-dialogs";
 import { FormDialog } from "@/components/ui/form-dialog";
-import { fr } from "@/lib/i18n/fr";
+import { masterPage } from "@/lib/i18n/fr/master-page";
+
+const fr = { masterPage };
 
 /**
  * "Ajouter un contributeur" on the Personnes section of the État des lieux:

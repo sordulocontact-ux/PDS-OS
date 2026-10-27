@@ -7,13 +7,16 @@ import { useId } from "react";
 import { MineBadge } from "@/components/ui/mine-badge";
 import { StatusDot } from "@/components/ui/status-dot";
 import { ViewLink } from "@/components/ui/view-link";
-import { fr } from "@/lib/i18n/fr";
+import { shell } from "@/lib/i18n/fr/shell";
+import { workflowStatus } from "@/lib/i18n/fr/workflow-status";
 import type {
   ProjectSection,
   ProjectSectionGroup,
 } from "@/lib/ui/project-sections";
 import { workflowStatusTone } from "@/lib/ui/state-tones";
 import { cn } from "@/lib/utils";
+
+const fr = { shell, workflowStatus };
 
 /** What the navigation knows of each entry, computed on the server: its
  * common status (a dot, the Cadrage and the workflows) and the viewer's

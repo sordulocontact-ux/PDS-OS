@@ -6,7 +6,9 @@ import { screenshotProblem } from "@/components/feedback/screenshot-field";
 import { MAX_SCREENSHOTS } from "@/lib/feedback/screenshot-rules";
 import type { FeedbackScreenshot } from "@/lib/feedback/types";
 import { uploadFeedbackScreenshot } from "@/lib/feedback/upload-screenshot";
-import { fr } from "@/lib/i18n/fr";
+import { feedback } from "@/lib/i18n/fr/feedback";
+
+const fr = { feedback };
 
 const sameFile = (a: File, b: File) =>
   a.name === b.name && a.size === b.size && a.lastModified === b.lastModified;

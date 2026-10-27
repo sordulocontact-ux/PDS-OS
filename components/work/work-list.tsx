@@ -5,10 +5,12 @@ import { EmptyState } from "@/components/shell/empty-state";
 import { GlobalWorkCountReporter } from "@/components/shell/work-count";
 import { WorkBrowser } from "@/components/work/work-browser";
 import type { Access } from "@/lib/auth/access";
-import { fr } from "@/lib/i18n/fr";
+import { work } from "@/lib/i18n/fr/work";
 import { loadMyJourneyWork } from "@/lib/work/journeys";
 import { loadMyWork } from "@/lib/work/queries";
 import { workRowsOf } from "@/lib/work/rows";
+
+const fr = { work };
 
 // The global Travail's content, streamed behind a Suspense boundary (the
 // header shows first): the journeys' actions and what comes before or

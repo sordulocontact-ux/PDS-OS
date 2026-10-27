@@ -8,10 +8,12 @@
 
 import { routes } from "@/lib/auth/redirects";
 import type { SheetStatus } from "@/lib/design/states";
-import { fr } from "@/lib/i18n/fr";
+import { distribution } from "@/lib/i18n/fr/distribution";
 import { withReturn } from "@/lib/ui/return-to";
 import { masterStepHref } from "@/lib/ui/master-steps";
 import { formatShortDay } from "@/lib/utils/day";
+
+const fr = { distribution };
 
 export const SOURCE_MODULES = [
   "catalog",

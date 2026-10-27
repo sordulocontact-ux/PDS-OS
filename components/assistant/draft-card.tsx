@@ -7,9 +7,11 @@ import { FeedbackDraftActions } from "@/components/assistant/feedback-draft-acti
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { DraftProposal } from "@/lib/assistant/drafts";
-import { fr } from "@/lib/i18n/fr";
+import { assistant } from "@/lib/i18n/fr/assistant";
 import { reviewTone } from "@/lib/ui/state-tones";
 import { cn } from "@/lib/utils";
+
+const fr = { assistant };
 
 /**
  * A PO draft in the conversation: what it would write (written by code, the

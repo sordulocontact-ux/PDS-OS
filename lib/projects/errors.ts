@@ -1,7 +1,9 @@
 // Database refusals of create_project / update_project, as form errors.
 
 import type { FieldErrors } from "@/lib/auth/form-state";
-import { fr } from "@/lib/i18n/fr";
+import { shell } from "@/lib/i18n/fr/shell";
+
+const fr = { shell };
 
 const pe = fr.shell.newProject.errors;
 

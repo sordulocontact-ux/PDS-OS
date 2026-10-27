@@ -26,7 +26,10 @@ import { Button } from "@/components/ui/button";
 import type { CallErrorCode } from "@/lib/calls/constants";
 import { savedMs, type SavedTake } from "@/lib/calls/recording";
 import { discardRecording, sendRecording } from "@/lib/calls/recording-actions";
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
+import { core } from "@/lib/i18n/fr/core";
+
+const fr = { app: core.app, calls };
 
 const noSubscribe = () => () => {};
 

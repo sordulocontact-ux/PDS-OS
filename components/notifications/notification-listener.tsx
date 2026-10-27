@@ -4,10 +4,12 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { toast } from "sonner";
 
-import { fr } from "@/lib/i18n/fr";
+import { notifications } from "@/lib/i18n/fr/notifications";
 import { getNotification } from "@/lib/notifications/actions";
 import { playChime } from "@/lib/notifications/chime";
 import { createClient } from "@/lib/supabase/client";
+
+const fr = { notifications };
 
 // Coalesces a burst of notifications (one action notifies several times).
 const DEBOUNCE_MS = 400;

@@ -4,10 +4,14 @@ import { ContentCard } from "@/components/shell/content-card";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ViewLink } from "@/components/ui/view-link";
-import { fr } from "@/lib/i18n/fr";
+import { projectShell } from "@/lib/i18n/fr/project-shell";
+import { shell } from "@/lib/i18n/fr/shell";
+import { workflowStatus } from "@/lib/i18n/fr/workflow-status";
 import type { WorkflowCard } from "@/lib/overview/cards";
 import { workflowStatusTone } from "@/lib/ui/state-tones";
 import { cn } from "@/lib/utils";
+
+const fr = { shell, projectShell, workflowStatus };
 
 const frame =
   "flex h-full min-w-0 flex-col items-start gap-1.5 rounded-2xl border border-[color:var(--border-hairline)] bg-card p-4";

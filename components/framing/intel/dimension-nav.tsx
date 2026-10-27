@@ -4,9 +4,11 @@ import { IconCheck } from "nucleo-sharp-essential";
 import { useLayoutEffect, useRef, useState } from "react";
 
 import { ViewLink } from "@/components/ui/view-link";
-import { fr } from "@/lib/i18n/fr";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
 import { factTone, type Tone } from "@/lib/ui/state-tones";
 import { cn } from "@/lib/utils";
+
+const fr = { framingIntel };
 
 export type NavItem = {
   key: string;

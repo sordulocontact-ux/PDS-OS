@@ -14,8 +14,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { FilterChipLink } from "@/components/ui/filter-chip";
-import { fr } from "@/lib/i18n/fr";
+import { core } from "@/lib/i18n/fr/core";
 import { viewHref } from "@/lib/ui/view-href";
+
+const fr = { urlFilters: core.urlFilters };
 
 export type UrlFilterGroup = {
   // The URL param it writes (?domain=, ?audio=…).

@@ -6,10 +6,12 @@
 
 import type { DeliverableFormat } from "@/lib/design/formats";
 import { RATIO_PRESETS, type SheetProvenance } from "@/lib/design/sheet-fields";
-import { fr } from "@/lib/i18n/fr";
+import { designSteps } from "@/lib/i18n/fr/design-steps";
 import type { Database } from "@/lib/supabase/database.types";
 import { formatDay } from "@/lib/utils/day";
 import { formatAmount } from "@/lib/utils/money";
+
+const fr = { designSteps };
 
 type SheetRow = Database["public"]["Tables"]["design_sheets"]["Row"];
 

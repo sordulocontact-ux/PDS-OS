@@ -7,12 +7,15 @@ import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
-import { fr } from "@/lib/i18n/fr";
+import { masterAnswer } from "@/lib/i18n/fr/master-answer";
+import { masterWorkflow } from "@/lib/i18n/fr/master-workflow";
 import {
   readDirectionAnswer,
   type ReadItem,
 } from "@/lib/master-workflow/answer-reading";
 import { answerBriefQuestion } from "@/lib/master-workflow/question-actions";
+
+const fr = { masterWorkflow, masterAnswer };
 
 const t = fr.masterAnswer;
 const GROUPS = ["direction", "references", "constraints"] as const;

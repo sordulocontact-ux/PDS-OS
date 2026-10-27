@@ -5,8 +5,10 @@
 
 import type { OpportunityRecord } from "@/lib/activations/press/queries";
 import type { SheetFields } from "@/lib/activations/sheets";
-import { fr } from "@/lib/i18n/fr";
+import { activationPress } from "@/lib/i18n/fr/activation-press";
 import { formatDateTime } from "@/lib/release/format";
+
+const fr = { activationPress };
 
 const t = fr.activationPress.briefTemplate;
 

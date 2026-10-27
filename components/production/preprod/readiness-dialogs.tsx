@@ -12,13 +12,15 @@ import { DialogButton } from "@/components/ui/dialog-button";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import {
   assignReadinessCheck,
   derogateReadinessCheck,
 } from "@/lib/production/preprod/actions-readiness";
 import type { CheckRow } from "@/lib/production/preprod/readiness";
 import type { NetworkOption } from "@/lib/production/sheet";
+
+const fr = { productionPreprod };
 
 const t = fr.productionPreprod.readiness;
 

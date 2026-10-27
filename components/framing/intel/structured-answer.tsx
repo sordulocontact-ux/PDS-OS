@@ -17,7 +17,9 @@ import {
   type AnswerItem,
   type ItemState,
 } from "@/lib/framing/dimensions";
-import { fr } from "@/lib/i18n/fr";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+
+const fr = { framingIntel };
 
 type Props = {
   projectId: string;

@@ -9,7 +9,10 @@ import { FormDialog } from "@/components/ui/form-dialog";
 import { useDesignAction } from "@/components/design/work/use-design-action";
 import { setDesignValidators } from "@/lib/design/actions/people";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { conceptionIntents } from "@/lib/i18n/fr/conception-intents";
+import { roles } from "@/lib/i18n/fr/roles";
+
+const fr = { conceptionIntents, roles };
 
 /**
  * The validators of the artistic direction or of a Fiche Livrable: named

@@ -4,9 +4,12 @@
 // (amplification). Only the phases the calendar fills are proposed; their
 // number, names and bounds stay the owner's. Client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { strategy } from "@/lib/i18n/fr/strategy";
+import { strategyReleasePlan } from "@/lib/i18n/fr/strategy-release-plan";
 import { dayOffset } from "@/lib/strategy/calendar";
 import type { Phase } from "@/lib/strategy/documents/release-plan-model";
+
+const fr = { strategy, strategyReleasePlan };
 
 type Dated = { occurs_on: string };
 

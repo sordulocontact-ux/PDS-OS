@@ -3,8 +3,10 @@
 import { usePathname } from "next/navigation";
 
 import { TabBar } from "@/components/ui/tab-bar";
-import { fr } from "@/lib/i18n/fr";
+import { shell } from "@/lib/i18n/fr/shell";
 import { projectSections } from "@/lib/ui/project-sections";
+
+const fr = { shell };
 
 // Sections of a launched project as one row of tabs under its header, when
 // DOUBLE_SIDEBAR is off (lib/ui/project-sections.ts) — the same bar as an

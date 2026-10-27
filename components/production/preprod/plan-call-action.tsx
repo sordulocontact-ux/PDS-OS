@@ -10,9 +10,12 @@ import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionPost } from "@/lib/i18n/fr/production-post";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import { planCallAction } from "@/lib/production/preprod/actions-call-plan";
 import type { NetworkOption } from "@/lib/production/sheet";
+
+const fr = { productionPreprod, productionPost };
 
 const t = fr.productionPreprod.call.planAction;
 

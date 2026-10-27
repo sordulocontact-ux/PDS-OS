@@ -14,9 +14,11 @@ import {
   listDeclarationProofs,
   saveDeclaration,
 } from "@/lib/catalog/master/rights-actions";
-import { fr } from "@/lib/i18n/fr";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 
 import { MasterForm } from "./master-form";
+
+const fr = { masterPage };
 
 export function DeclarationForm({
   masterId,

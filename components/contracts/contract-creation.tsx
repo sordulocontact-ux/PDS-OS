@@ -8,7 +8,9 @@ import { Button } from "@/components/ui/button";
 import { ChoiceCards } from "@/components/ui/choice-cards";
 import { routes } from "@/lib/auth/redirects";
 import type { ContractFormOptions } from "@/lib/contracts/types";
-import { fr } from "@/lib/i18n/fr";
+import { contracts } from "@/lib/i18n/fr/contracts";
+
+const fr = { contracts };
 
 type Scenario = "import" | "generate" | "template";
 

@@ -15,7 +15,9 @@ import { FilterChip } from "@/components/ui/filter-chip";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { keepSimilarImage } from "@/lib/design/actions/reference-similar";
 import { similarKey, type SimilarGroup } from "@/lib/design/similar-rules";
-import { fr } from "@/lib/i18n/fr";
+import { conceptionRefs } from "@/lib/i18n/fr/conception-refs";
+
+const fr = { conceptionRefs };
 
 /**
  * What PO saw, where the images come from as pills (an Are.na channel, an

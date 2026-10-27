@@ -11,11 +11,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import type { ActionResult } from "@/lib/framing/result";
-import { fr } from "@/lib/i18n/fr";
+import { strategyDocuments } from "@/lib/i18n/fr/strategy-documents";
 import {
   requestBriefValidation,
   sendStrategyDocument,
 } from "@/lib/strategy/actions/documents";
+
+const fr = { strategyDocuments };
 
 type Person = { personId: string; name: string };
 

@@ -4,9 +4,11 @@ import { IconPlus } from "nucleo-sharp-essential";
 
 import { DialogButton } from "@/components/ui/dialog-button";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { activations } from "@/lib/i18n/fr/activations";
 
 import { ActivationForm, type ActivationFormSource } from "./activation-form";
+
+const fr = { activations };
 
 const t = fr.activations.create;
 

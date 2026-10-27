@@ -2,7 +2,9 @@ import { ReceivedHead } from "@/components/design/home/received-head";
 import { RemoveDeliverableButton } from "@/components/design/remove-deliverable-button";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
 import type { DesignJourneyContext } from "@/lib/design/journey-context";
-import { fr } from "@/lib/i18n/fr";
+import { designSteps } from "@/lib/i18n/fr/design-steps";
+
+const fr = { designSteps };
 
 const t = fr.designSteps.home;
 

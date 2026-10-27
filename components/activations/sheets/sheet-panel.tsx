@@ -8,12 +8,14 @@ import type {
   SheetVersion,
 } from "@/lib/activations/sheets";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { activationWork } from "@/lib/i18n/fr/activation-work";
 import { formatDate } from "@/lib/release/format";
 import { activationSheetTone } from "@/lib/ui/state-tones";
 
 import { SheetDecisions } from "./sheet-decisions";
 import { SheetForm } from "./sheet-form";
+
+const fr = { activationWork };
 
 const t = fr.activationWork.sheet;
 

@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { Button } from "@/components/ui/button";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import { setPlanStatus } from "@/lib/production/preprod/actions-plan";
 import { planFromCallItems } from "@/lib/production/preprod/actions-plan-task";
 import type { ActionState } from "@/lib/production/preprod/plan";
@@ -19,6 +19,8 @@ import { PlanActionForm } from "./plan-action-form";
 import { PlanTable } from "./plan-table";
 import { PlanTemplateControls } from "./plan-template-controls";
 import type { Reschedule } from "@/lib/production/preprod/plan-template";
+
+const fr = { productionPreprod };
 
 const t = fr.productionPreprod.plan;
 

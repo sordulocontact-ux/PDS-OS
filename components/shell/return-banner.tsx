@@ -5,8 +5,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { buttonVariants } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { shell } from "@/lib/i18n/fr/shell";
 import { RETURN_PARAM, safeReturn } from "@/lib/ui/return-to";
+
+const fr = { shell };
 
 // The way back is a navigation convenience, kept for the tab only (never
 // business data): the record's tabs do not carry the URL's parameter.

@@ -6,7 +6,9 @@ import { toast } from "sonner";
 import type { SelectableRow } from "@/components/ui/row-selection";
 import { setManyArchived } from "@/lib/archive/actions";
 import type { ArchiveKind } from "@/lib/archive/types";
-import { fr } from "@/lib/i18n/fr";
+import { records } from "@/lib/i18n/fr/records";
+
+const fr = { records };
 
 /**
  * Archives (or restores, `archived` = the list shows the archive) a

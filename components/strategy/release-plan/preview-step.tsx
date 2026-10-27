@@ -10,7 +10,8 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
 import { formatDay } from "@/lib/assistant/facts";
-import { fr } from "@/lib/i18n/fr";
+import { strategyPressKit } from "@/lib/i18n/fr/strategy-press-kit";
+import { strategyReleasePlan } from "@/lib/i18n/fr/strategy-release-plan";
 import type { StrategyDocument } from "@/lib/strategy/documents/queries";
 import type { GeneratorKind } from "@/lib/strategy/documents/generator-kind";
 import { pressKitHtml } from "@/lib/strategy/documents/press-kit-html";
@@ -28,6 +29,8 @@ function htmlOf(kind: GeneratorKind, content: unknown): string | null {
   return doc ? releasePlanHtml(doc) : null;
 }
 import { strategyDocumentTone } from "@/lib/ui/state-tones";
+
+const fr = { strategyReleasePlan, strategyPressKit };
 
 /**
  * The last step of a generator (ticket § 11 and § 12): the generated

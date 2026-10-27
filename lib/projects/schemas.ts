@@ -1,12 +1,15 @@
 import { z } from "zod";
 
-import { fr } from "@/lib/i18n/fr";
+import { auth } from "@/lib/i18n/fr/auth";
+import { shell } from "@/lib/i18n/fr/shell";
 import {
   CONTENT_MODES,
   MUSIC_FORMATS,
   PRIORITIES,
   PROJECT_TYPES,
 } from "@/lib/projects/types";
+
+const fr = { auth, shell };
 
 const e = fr.auth.errors;
 const pe = fr.shell.newProject.errors;

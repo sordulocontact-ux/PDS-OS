@@ -16,9 +16,14 @@ import {
 } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { contracts } from "@/lib/i18n/fr/contracts";
+import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
+import { legalForms } from "@/lib/i18n/fr/legal-forms";
+import { records } from "@/lib/i18n/fr/records";
 import type { TemplateSeries } from "@/lib/legal/contracts/templates";
 import { templateStatusTone } from "@/lib/ui/state-tones";
+
+const fr = { contracts, legalContracts, legalForms, records };
 
 // One line per template (its latest version): what it is, who it is for,
 // whether it can be used; « ⋯ » reads it and moves it on.

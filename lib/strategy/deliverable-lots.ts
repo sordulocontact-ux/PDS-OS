@@ -3,7 +3,9 @@
 // one go. A title already in the lever is not proposed again. Labels in
 // fr.strategyDeliverables.lots. Client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { strategyDeliverables } from "@/lib/i18n/fr/strategy-deliverables";
+
+const fr = { strategyDeliverables };
 
 type LotKey = keyof typeof fr.strategyDeliverables.lots.items;
 type Lot = Array<{ key: LotKey; quantity: number }>;

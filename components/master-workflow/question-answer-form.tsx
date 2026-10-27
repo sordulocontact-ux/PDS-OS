@@ -7,13 +7,15 @@ import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
 import { ChipMultiChoice } from "@/components/ui/chip-choice";
-import { fr } from "@/lib/i18n/fr";
+import { masterWorkflow } from "@/lib/i18n/fr/master-workflow";
 import { answerBriefQuestion } from "@/lib/master-workflow/question-actions";
 import {
   QUESTION_DELIVERABLES,
   questionDeliverablesOf,
   type QuestionDimension,
 } from "@/lib/master-workflow/question-types";
+
+const fr = { masterWorkflow };
 
 /**
  * The answer of the person asked: a text for the direction, the deliverables

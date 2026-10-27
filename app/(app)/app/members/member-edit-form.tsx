@@ -7,13 +7,16 @@ import { FormMessage } from "@/components/auth/form-message";
 import { SubmitButton } from "@/components/auth/submit-button";
 import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { aiUsage } from "@/lib/i18n/fr/ai-usage";
+import { auth } from "@/lib/i18n/fr/auth";
 import { memberAction } from "@/lib/members/actions";
 import {
   idleMemberActionState,
   retainedMemberValue,
   type MembershipRow,
 } from "@/lib/members/types";
+
+const fr = { aiUsage, auth };
 
 // Body of the "Modifier" modal of a team row: name, the position when it
 // can change here (invitation or active access, never one's own), and the

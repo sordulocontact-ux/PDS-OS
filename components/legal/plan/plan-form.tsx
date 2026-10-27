@@ -13,10 +13,12 @@ import { StepSection } from "@/components/shell/journey/step-section";
 import { usePublishResult } from "@/components/shell/module/result-banner";
 import { Button } from "@/components/ui/button";
 import { Fold } from "@/components/ui/fold";
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
 import { launchLegalPlan } from "@/lib/legal/plan/actions";
 import { groupActions, lineOf } from "@/lib/legal/plan/groups";
 import type { PlanRow } from "@/lib/legal/plan/queries";
+
+const fr = { legal };
 
 /**
  * The proposed plan (JUR-05): the immediate démarches apart from the

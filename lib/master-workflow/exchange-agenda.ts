@@ -4,11 +4,13 @@
 // Pure.
 
 import type { AgendaItem } from "@/lib/calls/first-call-agenda";
-import { fr } from "@/lib/i18n/fr";
+import { masterWorkflow } from "@/lib/i18n/fr/master-workflow";
 import {
   DEFAULT_DELIVERABLES,
   type MasterBrief,
 } from "@/lib/master-workflow/brief-types";
+
+const fr = { masterWorkflow };
 
 export function masterExchangeAgenda(
   brief: MasterBrief,

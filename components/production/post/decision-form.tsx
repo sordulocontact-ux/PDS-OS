@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import { CheckboxField } from "@/components/ui/checkbox-field";
 import { ChoiceCards } from "@/components/ui/choice-cards";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { productionCorrections } from "@/lib/i18n/fr/production-corrections";
+import { productionPost } from "@/lib/i18n/fr/production-post";
 import { requestCorrections } from "@/lib/production/post/correction-actions";
 import { timecodeLabel } from "@/lib/production/post/labels";
 import { decidePostVersion } from "@/lib/production/post/review-actions";
@@ -22,6 +23,8 @@ import type { PostPeople, PostVersion } from "@/lib/production/post/types";
 import type { Holder } from "@/lib/production/sheet";
 
 import { CorrectionFields, type CorrectionMissing } from "./correction-fields";
+
+const fr = { productionPost, productionCorrections };
 
 const t = fr.productionPost.decision;
 const tc = fr.productionCorrections;

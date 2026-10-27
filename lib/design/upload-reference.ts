@@ -13,8 +13,10 @@ import {
   REFERENCE_BUCKET,
   isReferenceMime,
 } from "@/lib/design/reference-rules";
-import { fr } from "@/lib/i18n/fr";
+import { conceptionRefs } from "@/lib/i18n/fr/conception-refs";
 import { createClient } from "@/lib/supabase/client";
+
+const fr = { conceptionRefs };
 
 /** The file's SHA-256, in hex: what tells two deposits of one file apart. */
 async function sha256Of(file: File): Promise<string> {

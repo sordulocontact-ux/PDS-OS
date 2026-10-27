@@ -1,7 +1,8 @@
 import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { FilterChipLink } from "@/components/ui/filter-chip";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
+import { masterSource } from "@/lib/i18n/fr/master-source";
 import type {
   SourceStepView,
   SourceTitle,
@@ -13,6 +14,8 @@ import { ReplaceSourceButton } from "./newer-source";
 import { SourceAudio } from "./source-audio";
 import { SourceChooser } from "./source-chooser";
 import { SourceImport } from "./source-import";
+
+const fr = { catalog, masterSource };
 
 const t = fr.masterSource;
 

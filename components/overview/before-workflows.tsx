@@ -4,8 +4,10 @@ import { InfoRow, Rows } from "@/components/ui/rows";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { projectShell } from "@/lib/i18n/fr/project-shell";
 import type { JourneyStep } from "@/lib/ui/journey";
+
+const fr = { projectShell };
 
 /**
  * « Avant les workflows » (proto « Projet complet »): before « Lancer le

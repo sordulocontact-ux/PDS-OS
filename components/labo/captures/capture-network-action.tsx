@@ -10,8 +10,11 @@ import { LoadedFormButton } from "@/components/ui/loaded-form-button";
 import { routes } from "@/lib/auth/redirects";
 import type { CaptureArtist } from "@/lib/catalog/capture-artist-types";
 import { captureContact } from "@/lib/catalog/capture-contact";
-import { fr } from "@/lib/i18n/fr";
+import { laboCaptures } from "@/lib/i18n/fr/labo-captures";
+import { network } from "@/lib/i18n/fr/network";
 import { loadContactOptions } from "@/lib/network/actions";
+
+const fr = { laboCaptures, network };
 
 /**
  * A person read on a screenshot and the Réseau: « Dans le Réseau » when a

@@ -8,8 +8,10 @@ import {
   ItemRowActions,
 } from "@/components/catalog/master-page/item-dialogs";
 import { FormDialog } from "@/components/ui/form-dialog";
-import { fr } from "@/lib/i18n/fr";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 import type { LegalFactAction } from "@/lib/legal/types";
+
+const fr = { masterPage };
 
 /** "⋯" of a filed declaration: edit or remove it, with the title page's
  * own form and confirmation; the page refreshes after each change. */

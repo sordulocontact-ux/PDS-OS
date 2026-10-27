@@ -8,8 +8,10 @@ import { NavLinks } from "@/components/shell/nav-links";
 import { useCollapsedNav } from "@/components/shell/use-collapsed-nav";
 import { Button } from "@/components/ui/button";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { shell } from "@/lib/i18n/fr/shell";
 import { cn } from "@/lib/utils";
+
+const fr = { shell };
 
 // Desktop sidebar against the screen's edge, full height, full width or
 // collapsed to icons (Figma "PDS OS", nodes 47:12055 and 47:12047,

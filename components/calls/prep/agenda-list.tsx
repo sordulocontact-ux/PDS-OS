@@ -6,11 +6,13 @@ import { FieldError } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { EXTRA_TOPIC_MINUTES } from "@/lib/calls/prepare";
-import { fr } from "@/lib/i18n/fr";
+import { callPrep } from "@/lib/i18n/fr/call-prep";
 
 import { AgendaRow } from "./agenda-row";
 import type { AgendaDraftItem } from "./use-agenda-draft";
 import { useReorder } from "./use-reorder";
+
+const fr = { callPrep };
 
 /**
  * The agenda of a call, one editor everywhere: points in order (drag by the

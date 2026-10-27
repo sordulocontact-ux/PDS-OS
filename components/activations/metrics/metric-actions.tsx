@@ -12,10 +12,12 @@ import {
   setMetricVerification,
 } from "@/lib/activations/proof-actions";
 import type { ActivationScope } from "@/lib/activations/types";
-import { fr } from "@/lib/i18n/fr";
+import { activations } from "@/lib/i18n/fr/activations";
 
 import { ReasonForm } from "@/components/ui/reason-form";
 import { MetricForm } from "./metric-form";
+
+const fr = { activations };
 
 const t = fr.activations.metrics;
 

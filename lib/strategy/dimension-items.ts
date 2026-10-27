@@ -8,10 +8,12 @@ import {
   STRATEGY_TEXT_FIELDS,
   type StrategyTextField,
 } from "@/lib/framing/brief";
-import { fr } from "@/lib/i18n/fr";
+import { strategyDimensions } from "@/lib/i18n/fr/strategy-dimensions";
 import { choicesKey, toChoiceValue } from "@/lib/strategy/choices";
 import { composeAnswer } from "@/lib/strategy/compose";
 import type { Proposal, ProposalState } from "@/lib/ui/proposal";
+
+const fr = { strategyDimensions };
 
 export const STRATEGY_ANSWER_FIELDS = [
   "positioning",

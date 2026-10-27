@@ -1,8 +1,10 @@
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { strategyBrief } from "@/lib/i18n/fr/strategy-brief";
 import type { Arbitration } from "@/lib/strategy/brief";
+
+const fr = { strategyBrief };
 
 /**
  * What the Brief still leaves to arbitrate, and only that (ticket § 8): each

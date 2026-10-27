@@ -15,7 +15,9 @@ import {
   type ParamKey,
   type ParamsData,
 } from "@/lib/distribution/params-view";
-import { fr } from "@/lib/i18n/fr";
+import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
+
+const fr = { distributionJourney };
 
 const t = fr.distributionJourney.params;
 

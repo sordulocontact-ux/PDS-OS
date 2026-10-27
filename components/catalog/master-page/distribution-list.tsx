@@ -12,9 +12,13 @@ import {
 import { StatusBadge } from "@/components/ui/status-badge";
 import { routes } from "@/lib/auth/redirects";
 import type { MasterDistributionRelease } from "@/lib/catalog/master/related";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
+import { masterPage } from "@/lib/i18n/fr/master-page";
+import { release } from "@/lib/i18n/fr/release";
 import { formatShortDate } from "@/lib/release/format";
 import { masterReleaseTone } from "@/lib/ui/state-tones";
+
+const fr = { catalog, release, masterPage };
 
 // Releases carrying the master, listed like every table: the release (opens
 // the project's Sortie, where it is edited) and its project, status, date,

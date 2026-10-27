@@ -6,12 +6,16 @@ import {
 } from "@/components/shell/module/roles-panel";
 import type { PrivateLinkRow } from "@/components/shell/module/private-links";
 import { WhoDoesWhatButton } from "@/components/shell/module/who-does-what-button";
-import { fr } from "@/lib/i18n/fr";
+import { productionOrganization } from "@/lib/i18n/fr/production-organization";
+import { productionProposal } from "@/lib/i18n/fr/production-proposal";
+import { roles } from "@/lib/i18n/fr/roles";
 import type { ProviderLinkState } from "@/lib/production/post/types";
 import type { Holder, ProductionSheetData } from "@/lib/production/sheet";
 
 import { RevokeLinkButton } from "./revoke-link-button";
 import { RoleChangeButton } from "./role-change-button";
+
+const fr = { productionOrganization, productionProposal, roles };
 
 const t = fr.productionOrganization;
 const r = fr.roles.production;

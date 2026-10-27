@@ -16,7 +16,11 @@ import {
 } from "@/lib/catalog/file-rules";
 import { AUDIO_STATES, type AudioState } from "@/lib/catalog/title-rules";
 import { uploadCatalogFile } from "@/lib/catalog/upload-file";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
+import { catalogFiles } from "@/lib/i18n/fr/catalog-files";
+import { masterPage } from "@/lib/i18n/fr/master-page";
+
+const fr = { catalog, catalogFiles, masterPage };
 
 // What the modal asks: a category and a precision (a library), or the audio
 // state the files stand for (the audio versions of a title).

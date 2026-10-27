@@ -13,7 +13,7 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { RowActions, type RowAction } from "@/components/ui/row-actions";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionShoot } from "@/lib/i18n/fr/production-shoot";
 import type { PrepResult } from "@/lib/production/prep-result";
 import {
   deleteShootIncident,
@@ -24,6 +24,8 @@ import type { NetworkOption } from "@/lib/production/sheet";
 
 import { IncidentForm } from "./incident-form";
 import { IncidentResolveForm } from "./incident-resolve-form";
+
+const fr = { productionShoot };
 
 const t = fr.productionShoot.incidents;
 

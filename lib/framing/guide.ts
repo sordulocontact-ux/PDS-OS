@@ -4,7 +4,9 @@
 
 import { NEED_PRESETS } from "@/lib/framing/needs-presets";
 import type { FramingData } from "@/lib/framing/queries";
-import { fr } from "@/lib/i18n/fr";
+import { framing } from "@/lib/i18n/fr/framing";
+
+const fr = { framing };
 
 /** Promotion & diffusion needs are "activations"; everything else is a need. */
 export const isActivation = (family: string) =>

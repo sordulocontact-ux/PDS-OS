@@ -1,8 +1,10 @@
 // How a project's kind reads everywhere (list, header, overview):
 // "Musical · EP", "Contenu · PDS Mic", "Contenu · Contenu ponctuel".
 
-import { fr } from "@/lib/i18n/fr";
+import { shell } from "@/lib/i18n/fr/shell";
 import type { MusicFormat, ProjectType } from "@/lib/projects/types";
+
+const fr = { shell };
 
 export type ProjectKind = {
   type: ProjectType;

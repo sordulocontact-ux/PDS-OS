@@ -5,7 +5,9 @@ import { IconPenWriting2 } from "nucleo-sharp-essential";
 import { useOpenFeedback } from "@/components/feedback/feedback-provider";
 import { Button } from "@/components/ui/button";
 import type { EditedFeedback } from "@/lib/feedback/types";
-import { fr } from "@/lib/i18n/fr";
+import { feedback } from "@/lib/i18n/fr/feedback";
+
+const fr = { feedback };
 
 // "Modifier" on the author's own feedback: the feedback window opens on it,
 // to add a detail or a screenshot.

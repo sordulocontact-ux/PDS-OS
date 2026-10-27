@@ -17,9 +17,11 @@ import {
 } from "@/lib/activations/model";
 import { addBlocker } from "@/lib/activations/pilot-actions";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { activations } from "@/lib/i18n/fr/activations";
 
 import { MemberSelect, memberValue } from "../member-select";
+
+const fr = { activations };
 
 const t = fr.activations.blockers;
 

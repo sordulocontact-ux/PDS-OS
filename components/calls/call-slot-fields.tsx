@@ -4,7 +4,9 @@ import { FieldError } from "@/components/auth/form-message";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { moveStart, slotMinutes, type SlotInput } from "@/lib/calls/slot";
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
+
+const fr = { calls };
 
 export type SlotErrors = Partial<Record<keyof SlotInput, string>>;
 

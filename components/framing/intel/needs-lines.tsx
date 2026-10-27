@@ -15,7 +15,10 @@ import {
   type NeedGroup,
 } from "@/lib/framing/guide";
 import type { FramingData } from "@/lib/framing/queries";
-import { fr } from "@/lib/i18n/fr";
+import { framingGuide } from "@/lib/i18n/fr/framing-guide";
+import { framingJourney } from "@/lib/i18n/fr/framing-journey";
+
+const fr = { framingGuide, framingJourney };
 
 const GROUPS: NeedGroup[] = ["needs", "activations"];
 const groupOf = (family: string): NeedGroup =>

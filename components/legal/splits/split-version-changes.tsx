@@ -1,6 +1,8 @@
-import { fr } from "@/lib/i18n/fr";
+import { legalSplits } from "@/lib/i18n/fr/legal-splits";
 import { splitChanges } from "@/lib/legal/splits/compare";
 import type { SplitVersionView } from "@/lib/legal/splits/queries";
+
+const fr = { legalSplits };
 
 /** A version against the one it follows (JUR-29): what changed, line by line. */
 export function SplitVersionChanges({

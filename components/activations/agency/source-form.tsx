@@ -10,9 +10,12 @@ import { usePickerLoad } from "@/components/network/use-picker-load";
 import { Button } from "@/components/ui/button";
 import { ChoiceCards } from "@/components/ui/choice-cards";
 import { createAgencySource } from "@/lib/activations/agency/source-actions";
-import { fr } from "@/lib/i18n/fr";
+import { activationAgency } from "@/lib/i18n/fr/activation-agency";
+import { activations } from "@/lib/i18n/fr/activations";
 import type { RankedPerson } from "@/lib/network/ranked-people";
 import { listNetworkForRole } from "@/lib/network/role-people-actions";
+
+const fr = { activations, activationAgency };
 
 const t = fr.activationAgency.sources;
 type Kind = "google_sheet" | "file" | "manual";

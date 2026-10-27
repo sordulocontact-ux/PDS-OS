@@ -1,10 +1,13 @@
 import Link from "next/link";
 
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { legalClearance } from "@/lib/i18n/fr/legal-clearance";
+import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
 import type { TitleFormality } from "@/lib/legal/formalities/types";
 
 import { FieldStateLine } from "./field-state";
+
+const fr = { legalClearance, legalFormalities };
 
 const SECURED = ["cleared", "abandoned"];
 

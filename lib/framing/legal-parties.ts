@@ -15,8 +15,13 @@
 import type { FramingKnowledge, PartyContract } from "@/lib/framing/knowledge";
 import { rolesContext } from "@/lib/framing/assess";
 import { teamBoard } from "@/lib/framing/team-board";
-import { fr } from "@/lib/i18n/fr";
+import { framingGuide } from "@/lib/i18n/fr/framing-guide";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+import { legalForms } from "@/lib/i18n/fr/legal-forms";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 import { normalizeSearch } from "@/lib/utils/search";
+
+const fr = { framingGuide, framingIntel, legalForms, masterPage };
 
 export const DOCUMENT_STATUSES = [
   "existing",

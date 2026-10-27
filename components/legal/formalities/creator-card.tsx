@@ -7,9 +7,11 @@ import { PersonPickerField } from "@/components/network/person-picker-field";
 import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { fr } from "@/lib/i18n/fr";
+import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
 import { QUALITIES, type Creator } from "@/lib/legal/formalities/definition";
 import type { CreatorOption } from "@/lib/legal/formalities/party-actions";
+
+const fr = { legalFormalities };
 
 const EMPTY_IDENTITY = {
   last_name: "",

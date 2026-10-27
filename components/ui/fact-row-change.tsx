@@ -10,7 +10,10 @@ import {
 } from "@/components/ui/fact-row-frame";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { PickListDoneContext } from "@/components/ui/pick-list-context";
-import { fr } from "@/lib/i18n/fr";
+import { decisions } from "@/lib/i18n/fr/decisions";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
+
+const fr = { decisions, dialogs };
 
 const t = fr.decisions.fact;
 

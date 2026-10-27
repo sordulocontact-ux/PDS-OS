@@ -23,8 +23,12 @@ import {
 import { formatBriefDate } from "@/lib/framing/assess";
 import type { FramingKnowledge } from "@/lib/framing/knowledge";
 import { deadlineWorkflows } from "@/lib/framing/deadline-workflows";
-import { fr } from "@/lib/i18n/fr";
+import { framingGuide } from "@/lib/i18n/fr/framing-guide";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+import { framingJourney } from "@/lib/i18n/fr/framing-journey";
 import { cn } from "@/lib/utils";
+
+const fr = { framingGuide, framingIntel, framingJourney };
 
 type Deadline = FramingKnowledge["deadlines"][number];
 

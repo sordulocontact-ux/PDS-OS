@@ -1,8 +1,10 @@
 import { PageSection } from "@/components/shell/page-section";
 import type { Closure, HistoryEvent } from "@/lib/distribution/closure-queries";
 import { eventText } from "@/lib/distribution/history";
-import { fr } from "@/lib/i18n/fr";
+import { distribution } from "@/lib/i18n/fr/distribution";
 import { formatDateTime, formatShortDate } from "@/lib/release/format";
+
+const fr = { distribution };
 
 const t = fr.distribution;
 

@@ -3,7 +3,10 @@ import { IconCheck } from "nucleo-sharp-essential";
 
 import { buttonVariants } from "@/components/ui/button";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { framing } from "@/lib/i18n/fr/framing";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+
+const fr = { framing, framingIntel };
 
 const dateFormat = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric",

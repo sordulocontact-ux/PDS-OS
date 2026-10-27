@@ -10,12 +10,15 @@ import { DialogButton } from "@/components/ui/dialog-button";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { productionLocations } from "@/lib/i18n/fr/production-locations";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import { decideLocation } from "@/lib/production/locations/actions";
 import type { LocationOption } from "@/lib/production/locations/types";
 
 import { LocationMediaForm } from "./location-media-form";
 import { LocationOptionForm } from "./location-option-form";
+
+const fr = { productionPreprod, productionLocations };
 
 const t = fr.productionLocations;
 

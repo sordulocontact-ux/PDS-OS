@@ -10,7 +10,9 @@ import {
   formatTimecode,
   type AudioComment,
 } from "@/lib/catalog/audio-versions";
-import { fr } from "@/lib/i18n/fr";
+import { masterPage } from "@/lib/i18n/fr/master-page";
+
+const fr = { masterPage };
 
 // Notes shown before « Voir les autres retours ».
 const SHOWN = 2;

@@ -3,12 +3,15 @@
 import { Button } from "@/components/ui/button";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
-import { fr } from "@/lib/i18n/fr";
+import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
+import { signedReturns } from "@/lib/i18n/fr/signed-returns";
 import type { Creator, Publisher } from "@/lib/legal/formalities/definition";
 import type { FormalityView } from "@/lib/legal/formalities/types";
 import { formatShortDay } from "@/lib/utils/day";
 
 import { SignedOtherwiseForm } from "./signed-otherwise-form";
+
+const fr = { legalFormalities, signedReturns };
 
 type Signature = FormalityView["signatures"][number];
 

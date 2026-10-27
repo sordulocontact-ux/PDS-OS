@@ -5,7 +5,7 @@
 // from PO (CLAUDE.md, rule 6). The project's responsible prepares, submits,
 // arbitrates and asks; the direction (the holder of « validate ») decides.
 
-import { fr } from "@/lib/i18n/fr";
+import { reviewJourney as frReviewJourney } from "@/lib/i18n/fr/review-journey";
 import type { MarketingClosure } from "@/lib/marketing/closure/queries";
 import type { Approval } from "@/lib/marketing/reports/approvals";
 import type { ReportVersion } from "@/lib/marketing/reports/model";
@@ -17,6 +17,8 @@ import type {
   JourneyStatus,
 } from "@/lib/ui/journey";
 import { reviewStepHref, type ReviewStepKey } from "@/lib/ui/review-steps";
+
+const fr = { reviewJourney: frReviewJourney };
 
 const t = fr.reviewJourney;
 

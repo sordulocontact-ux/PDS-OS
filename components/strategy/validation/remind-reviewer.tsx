@@ -2,8 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { strategyBriefOut } from "@/lib/i18n/fr/strategy-brief-out";
 import { remindBriefReviewer } from "@/lib/strategy/actions/brief-out";
+
+const fr = { strategyBriefOut };
 
 /** « Relancer <Nom> » (proto strelance): a notification, 12 hours apart. */
 export function RemindReviewer({

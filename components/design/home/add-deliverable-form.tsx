@@ -9,7 +9,9 @@ import { Button } from "@/components/ui/button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { addDesignDeliverable } from "@/lib/design/actions/home";
 import { ADDITION_ORIGINS, type AdditionOrigin } from "@/lib/design/intentions";
-import { fr } from "@/lib/i18n/fr";
+import { designSteps } from "@/lib/i18n/fr/design-steps";
+
+const fr = { designSteps };
 
 const t = fr.designSteps.home.form;
 

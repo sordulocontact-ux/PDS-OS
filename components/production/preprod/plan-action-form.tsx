@@ -9,7 +9,7 @@ import { OptionSelect } from "@/components/projects/option-select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import {
   addPlanAction,
   updatePlanAction,
@@ -19,6 +19,8 @@ import type { NetworkOption } from "@/lib/production/sheet";
 import { jsonListOf } from "@/lib/utils/form-data";
 
 import { holderItems, holderValue } from "./holder-items";
+
+const fr = { productionPreprod };
 
 const t = fr.productionPreprod.plan;
 

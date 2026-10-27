@@ -11,10 +11,16 @@ import {
   type StepSlots,
 } from "@/components/shell/journey/step-panel";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { journey } from "@/lib/i18n/fr/journey";
+import { legalDemarches } from "@/lib/i18n/fr/legal-demarches";
+import { legalHistory } from "@/lib/i18n/fr/legal-history";
+import { legalJourney } from "@/lib/i18n/fr/legal-journey";
+import { shell } from "@/lib/i18n/fr/shell";
 import { legalJourneyContext } from "@/lib/legal/journey-context";
 import { isLocked } from "@/lib/ui/journey";
 import { stepChoiceKey, type StepRef } from "@/lib/step-tools/model";
+
+const fr = { shell, journey, legalDemarches, legalHistory, legalJourney };
 
 /**
  * The frame of a Juridique step (docs/VISION-UX.md § 4, proto « Projet

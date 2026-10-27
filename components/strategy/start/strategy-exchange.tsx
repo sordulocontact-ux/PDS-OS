@@ -9,10 +9,12 @@ import { summaryDraft } from "@/lib/calls/meeting/draft";
 import { loadCallSummaries, loadMeeting } from "@/lib/calls/meeting/queries";
 import { callWhen } from "@/lib/calls/prep/dates";
 import { loadPlannedCall } from "@/lib/calls/prep/planned";
-import { fr } from "@/lib/i18n/fr";
+import { strategyJourney } from "@/lib/i18n/fr/strategy-journey";
 import type { StrategyModel } from "@/lib/strategy/dimension-model";
 import { strategyMeetingLines } from "@/lib/strategy/meeting-lines";
 import type { StrategyCallInfo } from "@/lib/strategy/step-sources";
+
+const fr = { strategyJourney };
 
 /**
  * The strategy exchange in « Démarrer la stratégie », once prepared (proto

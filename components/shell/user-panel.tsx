@@ -6,7 +6,9 @@ import { FeedbackNavButton } from "@/components/shell/feedback-nav-button";
 import { navItemClass } from "@/components/shell/nav-item";
 import { ThemeChips } from "@/components/shell/theme-chips";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { aiUsage } from "@/lib/i18n/fr/ai-usage";
+
+const fr = { aiUsage };
 
 // Bottom of the navigation: who is signed in, feedback about the app, the
 // settings (requests to PO of the day), the theme, and the way out. Both take the shape of a navigation item (nav-item.ts).

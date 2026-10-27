@@ -12,10 +12,13 @@ import { FilterChip } from "@/components/ui/filter-chip";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { OptionSelect } from "@/components/projects/option-select";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionClosure } from "@/lib/i18n/fr/production-closure";
+import { productionDelivery } from "@/lib/i18n/fr/production-delivery";
 import { transmitToActivations } from "@/lib/production/delivery/handoff-actions";
 
 import { HandoffExports } from "./handoff-exports";
+
+const fr = { productionDelivery, productionClosure };
 
 const t = fr.productionDelivery.handoff;
 const c = fr.productionClosure.handoff;

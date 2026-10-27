@@ -10,13 +10,15 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { RowActions } from "@/components/ui/row-actions";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionNeeds } from "@/lib/i18n/fr/production-needs";
 import { deleteProductionNeed } from "@/lib/production/needs-actions";
 import type { NetworkOption, ProductionNeed } from "@/lib/production/sheet";
 
 import { AssignmentForm } from "./assignment-form";
 import { NeedForm } from "./need-form";
 import { needLabel } from "./need-label";
+
+const fr = { productionNeeds };
 
 const t = fr.productionNeeds;
 

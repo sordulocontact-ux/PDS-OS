@@ -2,7 +2,9 @@ import { IconCircleLogout } from "nucleo-sharp-essential";
 
 import { SubmitButton } from "@/components/auth/submit-button";
 import { signOut } from "@/lib/auth/actions";
-import { fr } from "@/lib/i18n/fr";
+import { auth } from "@/lib/i18n/fr/auth";
+
+const fr = { auth };
 
 export function SignOutButton({
   variant = "outline",

@@ -3,11 +3,14 @@ import { PageSection } from "@/components/shell/page-section";
 import { FactList } from "@/components/ui/fact-list";
 import { PdfExportButton } from "@/components/ui/pdf-export-button";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { framingGuide } from "@/lib/i18n/fr/framing-guide";
+import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
 import type { ContractDocument } from "@/lib/legal/contracts/document";
 import { documentFileName } from "@/lib/legal/contracts/document-name";
 import { formatFee } from "@/lib/legal/contracts/fields";
 import { formatInstant } from "@/lib/utils/instant";
+
+const fr = { framingGuide, legalContracts };
 
 /**
  * The document of a contract generated from a template (Juridique 03): the

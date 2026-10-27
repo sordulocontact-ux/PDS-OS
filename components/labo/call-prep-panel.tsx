@@ -7,9 +7,11 @@ import { MetaList } from "@/components/labo/meta-list";
 import { Button } from "@/components/ui/button";
 import type { PreparedCall } from "@/lib/ai/call-prep";
 import type { LocatedCallReport } from "@/lib/ai/call-report";
-import { fr } from "@/lib/i18n/fr";
+import { labo } from "@/lib/i18n/fr/labo";
 import { requestCallPrep } from "@/lib/labo/client";
 import { formatMs } from "@/lib/labo/format";
+
+const fr = { labo };
 
 /** Next-call agenda built from what the report left open. */
 export function CallPrepPanel({ report }: { report: LocatedCallReport }) {

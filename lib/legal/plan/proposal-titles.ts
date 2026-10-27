@@ -3,9 +3,11 @@
 // the title's clearances (Juridique 04 and 06). Pure.
 
 import type { ContributorRole } from "@/lib/catalog/master/rules";
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
 import type { InventoryRows } from "@/lib/legal/inventory-rows";
 import type { PlanItem } from "@/lib/legal/plan/proposal";
+
+const fr = { legal };
 
 // Roles that make someone a creator of the work (the SACEM bulletin lists
 // authors, composers and arrangers).

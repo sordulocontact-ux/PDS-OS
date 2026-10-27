@@ -1,8 +1,10 @@
 "use client";
 
 import { Checkbox } from "@/components/ui/checkbox";
-import { fr } from "@/lib/i18n/fr";
+import { strategyReleasePlan } from "@/lib/i18n/fr/strategy-release-plan";
 import { cn } from "@/lib/utils";
+
+const fr = { strategyReleasePlan };
 
 /** One image the owner may allow in the document: a thumbnail and a box. */
 export function VisualTile({

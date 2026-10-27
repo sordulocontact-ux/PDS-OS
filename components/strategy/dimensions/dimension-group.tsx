@@ -7,9 +7,12 @@ import { StrategyLine } from "@/components/strategy/dimensions/strategy-line";
 import { Fold } from "@/components/ui/fold";
 import { ProposalGroup, ProposalRows } from "@/components/ui/proposal-group";
 import { InfoRow, Rows } from "@/components/ui/rows";
-import { fr } from "@/lib/i18n/fr";
+import { decisions } from "@/lib/i18n/fr/decisions";
+import { strategyDimensions } from "@/lib/i18n/fr/strategy-dimensions";
 import type { DimensionView } from "@/lib/strategy/dimension-model";
 import { strategyDimensionTone } from "@/lib/ui/state-tones";
+
+const fr = { decisions, strategyDimensions };
 
 const t = fr.strategyDimensions;
 

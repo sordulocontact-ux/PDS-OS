@@ -3,9 +3,11 @@
 import { IconPlus } from "nucleo-sharp-essential";
 
 import { DialogButton } from "@/components/ui/dialog-button";
-import { fr } from "@/lib/i18n/fr";
+import { productionLocations } from "@/lib/i18n/fr/production-locations";
 
 import { LocationOptionForm } from "./location-option-form";
+
+const fr = { productionLocations };
 
 const t = fr.productionLocations;
 

@@ -9,12 +9,14 @@ import { DialogButton } from "@/components/ui/dialog-button";
 import { ReasonForm } from "@/components/ui/reason-form";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { FormMessage } from "@/components/auth/form-message";
-import { fr } from "@/lib/i18n/fr";
+import { legalReadiness } from "@/lib/i18n/fr/legal-readiness";
 import {
   grantReleaseWaiver,
   setReleasePolicy,
   validateRelease,
 } from "@/lib/legal/readiness/actions";
+
+const fr = { legalReadiness };
 
 const t = fr.legalReadiness;
 

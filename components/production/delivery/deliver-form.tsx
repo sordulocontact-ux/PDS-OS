@@ -9,10 +9,13 @@ import { Button } from "@/components/ui/button";
 import { CheckboxField } from "@/components/ui/checkbox-field";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
+import { productionLight } from "@/lib/i18n/fr/production-light";
 import { listNetworkPeople } from "@/lib/network/people-actions";
 import type { RecipientOption } from "@/lib/production/delivery/recipients";
 import { deliverProduction } from "@/lib/production/light/actions";
+
+const fr = { dialogs, productionLight };
 
 const t = fr.productionLight.recipients;
 

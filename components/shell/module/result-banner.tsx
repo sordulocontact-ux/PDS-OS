@@ -13,9 +13,11 @@ import {
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { moduleFrame } from "@/lib/i18n/fr/module-frame";
 import { lowerFirst } from "@/lib/ui/journey";
 import type { WriteDone } from "@/lib/utils/write-result";
+
+const fr = { moduleFrame };
 
 const t = fr.moduleFrame.result;
 

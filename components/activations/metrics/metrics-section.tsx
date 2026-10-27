@@ -12,10 +12,12 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import type { MetricSource } from "@/lib/activations/model";
 import { formatMetric, metricTotals } from "@/lib/activations/totals";
 import type { ActivationScope, MetricRecord } from "@/lib/activations/types";
-import { fr } from "@/lib/i18n/fr";
+import { activations } from "@/lib/i18n/fr/activations";
 import { formatShortDate } from "@/lib/release/format";
 
 import { MetricActions, RecordMetricButton } from "./metric-actions";
+
+const fr = { activations };
 
 const t = fr.activations.metrics;
 const verificationTone = {

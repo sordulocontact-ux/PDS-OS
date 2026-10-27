@@ -13,9 +13,12 @@ import {
 import type { ActivationFiche } from "@/lib/activations/fiche";
 import { loadMessages } from "@/lib/activations/messages/queries";
 import type { Access } from "@/lib/auth/access";
-import { fr } from "@/lib/i18n/fr";
+import { activationAgency } from "@/lib/i18n/fr/activation-agency";
+import { activationBrief } from "@/lib/i18n/fr/activation-brief";
 import { createClient } from "@/lib/supabase/server";
 import { formatShortInstant } from "@/lib/utils/day";
+
+const fr = { activationBrief, activationAgency };
 
 /**
  * Agency mode in the activation's page (tickets Influence parcours B, RP

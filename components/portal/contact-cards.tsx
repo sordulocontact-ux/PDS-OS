@@ -8,7 +8,7 @@ import { splitPortalCard } from "@/components/legal/splits/public-cards";
 import { listenPortalCards } from "@/components/master-workflow/listen/listen-cards";
 import { masterPortalCards } from "@/components/master-workflow/public-cards";
 import { providerPortalCards } from "@/components/production/provider/provider-cards";
-import { fr } from "@/lib/i18n/fr";
+import { signedReturns } from "@/lib/i18n/fr/signed-returns";
 import { getCreatorCollaboration } from "@/lib/activations/influence/creator-link";
 import { getPublicAgreement } from "@/lib/activations/influence/public";
 import { getPublicForm, noteFormOpened } from "@/lib/legal/forms/public";
@@ -37,6 +37,8 @@ import {
 
 import { callPortalCard } from "./portal-call-card";
 import type { PortalCardItem } from "./portal-sections";
+
+const fr = { signedReturns };
 
 /**
  * Every card of the person's page (lot 11): each object of theirs in this

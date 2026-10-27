@@ -6,13 +6,15 @@ import { useState } from "react";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { DataTableViews } from "@/components/ui/data-table-views";
 import { WorkTable } from "@/components/work/work-table";
-import { fr } from "@/lib/i18n/fr";
+import { work } from "@/lib/i18n/fr/work";
 import {
   WORK_VIEWS,
   inView,
   type WorkRow,
   type WorkView,
 } from "@/lib/work/rows";
+
+const fr = { work };
 
 const VIEW_PARAM = "vue";
 

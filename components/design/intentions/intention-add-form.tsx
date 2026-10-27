@@ -11,7 +11,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { saveDesignIntention } from "@/lib/design/actions/intentions";
 import { DESIGN_TOPICS, type DesignTopic } from "@/lib/design/intentions";
-import { fr } from "@/lib/i18n/fr";
+import { conception } from "@/lib/i18n/fr/conception";
+import { designSteps } from "@/lib/i18n/fr/design-steps";
+
+const fr = { conception, designSteps };
 
 const t = fr.designSteps.intentions;
 

@@ -12,7 +12,9 @@ import {
   type FeedbackPriority,
   type TopicAction,
 } from "@/lib/feedback/types";
-import { fr } from "@/lib/i18n/fr";
+import { feedback } from "@/lib/i18n/fr/feedback";
+
+const fr = { feedback };
 
 // Confirmation of a decision on a topic prepared by PO: the director checks
 // it, picks or corrects the priority when there is one, and confirms. The

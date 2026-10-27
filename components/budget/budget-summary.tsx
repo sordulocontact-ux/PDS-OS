@@ -1,7 +1,9 @@
 import { StatTiles } from "@/components/ui/stat-tiles";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatEuros, type BudgetTotals } from "@/lib/budget/types";
-import { fr } from "@/lib/i18n/fr";
+import { budget } from "@/lib/i18n/fr/budget";
+
+const fr = { budget };
 
 // Envelope, then the forecast, the committed and the real spend, each with
 // its own remainder (MKT-S1-12), all computed by code from the lines. An

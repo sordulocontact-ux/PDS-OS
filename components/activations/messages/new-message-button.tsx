@@ -4,9 +4,11 @@ import { IconPlus } from "nucleo-sharp-essential";
 
 import { DialogButton } from "@/components/ui/dialog-button";
 import type { MessageKind } from "@/lib/activations/model";
-import { fr } from "@/lib/i18n/fr";
+import { activationWork } from "@/lib/i18n/fr/activation-work";
 
 import { MessageForm, type MessageDefaults } from "./message-form";
+
+const fr = { activationWork };
 
 const t = fr.activationWork.messages;
 

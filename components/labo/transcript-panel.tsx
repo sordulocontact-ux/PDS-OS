@@ -1,6 +1,8 @@
 import type { Transcript } from "@/lib/ai/schemas/transcript";
-import { fr } from "@/lib/i18n/fr";
+import { labo } from "@/lib/i18n/fr/labo";
 import { formatTimestamp } from "@/lib/labo/format";
+
+const fr = { labo };
 
 /** The transcript, segment by segment with its timing when available. */
 export function TranscriptPanel({ transcript }: { transcript: Transcript }) {

@@ -2,7 +2,10 @@ import type { ConceptionData } from "@/lib/design/conception";
 import type { DirectionData } from "@/lib/design/direction";
 import { directionSummary } from "@/lib/design/direction-summary";
 import type { DesignTopic } from "@/lib/design/intentions";
-import { fr } from "@/lib/i18n/fr";
+import { conception } from "@/lib/i18n/fr/conception";
+import { conceptionDirection } from "@/lib/i18n/fr/conception-direction";
+
+const fr = { conception, conceptionDirection };
 
 /**
  * The points still open in the Brief créatif, computed by code: what the

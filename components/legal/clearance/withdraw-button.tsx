@@ -2,8 +2,10 @@
 
 import { DialogButton } from "@/components/ui/dialog-button";
 import { ReasonForm } from "@/components/ui/reason-form";
-import { fr } from "@/lib/i18n/fr";
+import { legalClearance } from "@/lib/i18n/fr/legal-clearance";
 import { withdrawClearance } from "@/lib/legal/clearance/actions";
+
+const fr = { legalClearance };
 
 /** « Autre issue : Retirer l'élément du titre » — the borrowing abandoned
  * with its reason; it no longer blocks the release and whoever answers for

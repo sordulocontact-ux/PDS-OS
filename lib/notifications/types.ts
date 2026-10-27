@@ -2,9 +2,11 @@
 
 import { routes } from "@/lib/auth/redirects";
 import { legalDemarcheHref } from "@/lib/ui/legal-steps";
-import { fr } from "@/lib/i18n/fr";
+import { notifications } from "@/lib/i18n/fr/notifications";
 import { distributionStepHref } from "@/lib/ui/distribution-steps";
 import { reviewStepHref } from "@/lib/ui/review-steps";
+
+const fr = { notifications };
 
 export const NOTIFICATION_KINDS = [
   "project_transmitted",

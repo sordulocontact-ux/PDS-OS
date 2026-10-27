@@ -6,9 +6,11 @@ import { ConfirmButton } from "@/components/ui/confirm-button";
 import { DialogButton } from "@/components/ui/dialog-button";
 import type { DependencyOptions } from "@/lib/activations/dependency-options";
 import { unlinkDependency } from "@/lib/activations/pilot-actions";
-import { fr } from "@/lib/i18n/fr";
+import { activations } from "@/lib/i18n/fr/activations";
 
 import { DependencyForm } from "./dependency-form";
+
+const fr = { activations };
 
 const t = fr.activations.dependencies;
 

@@ -5,12 +5,14 @@ import { FormMessage } from "@/components/auth/form-message";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { centsToInput } from "@/lib/budget/types";
-import { fr } from "@/lib/i18n/fr";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import { saveSchedule } from "@/lib/production/preprod/actions-logistics";
 import type { SheetLogistics } from "@/lib/production/sheet";
 
 import { DialogButton } from "@/components/ui/dialog-button";
 import { ToneCallout } from "@/components/ui/tone-callout";
+
+const fr = { productionPreprod };
 
 const t = fr.productionPreprod.schedule;
 

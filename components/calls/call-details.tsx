@@ -8,9 +8,11 @@ import { CopyButton } from "@/components/ui/copy-button";
 import { sectionCardClass } from "@/components/ui/section-card";
 import type { CallDetail } from "@/lib/calls/queries";
 import { callSheetSubject, callSheetText, callWhen } from "@/lib/calls/sheet";
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
 import { cn } from "@/lib/utils";
 import { mailtoHref } from "@/lib/utils/mailto";
+
+const fr = { calls };
 
 /**
  * A call's details, as Teams shows a meeting: when, what it belongs to, who

@@ -4,9 +4,11 @@ import {
   DecisionPanel,
   type DecisionOutcomeKind,
 } from "@/components/ui/decision-panel";
-import { fr } from "@/lib/i18n/fr";
+import { reviewJourney } from "@/lib/i18n/fr/review-journey";
 import { decideReport } from "@/lib/marketing/reports/approval-actions";
 import type { ApprovalDecision } from "@/lib/marketing/reports/model";
+
+const fr = { reviewJourney };
 
 const t = fr.reviewJourney.bilan.decision;
 

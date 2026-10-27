@@ -18,8 +18,10 @@ import {
   type FileView,
 } from "@/lib/catalog/file-rules";
 import type { AudioState } from "@/lib/catalog/title-rules";
-import { fr } from "@/lib/i18n/fr";
+import { catalogFiles } from "@/lib/i18n/fr/catalog-files";
 import { viewHref } from "@/lib/ui/view-href";
+
+const fr = { catalogFiles };
 
 // Shared inside FileImport: the "Ajouter un fichier" button and the empty
 // frame open the picker; the drop area hands over dropped files (not while

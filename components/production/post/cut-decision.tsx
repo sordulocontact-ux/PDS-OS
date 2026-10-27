@@ -1,8 +1,10 @@
 "use client";
 
 import { DecisionPanel } from "@/components/ui/decision-panel";
-import { fr } from "@/lib/i18n/fr";
+import { productionCut } from "@/lib/i18n/fr/production-cut";
 import { decideLightVersion } from "@/lib/production/light/actions";
+
+const fr = { productionCut };
 
 const t = fr.productionCut.decide;
 

@@ -1,7 +1,9 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { release } from "@/lib/i18n/fr/release";
+
+const fr = { release };
 
 export default function ReleaseError({
   retry,

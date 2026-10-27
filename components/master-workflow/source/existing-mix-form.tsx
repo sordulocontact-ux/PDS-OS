@@ -7,8 +7,10 @@ import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
 import { ChoiceCards } from "@/components/ui/choice-cards";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { masterSource } from "@/lib/i18n/fr/master-source";
 import { declareExistingMix } from "@/lib/master-workflow/source-actions";
+
+const fr = { masterSource };
 
 const t = fr.masterSource;
 

@@ -11,8 +11,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { importDesignBrief } from "@/lib/design/actions/import";
 import { MAX_IMPORT_CHARS } from "@/lib/design/intentions";
-import { fr } from "@/lib/i18n/fr";
+import { conceptionWork } from "@/lib/i18n/fr/conception-work";
 import { cn } from "@/lib/utils";
+
+const fr = { conceptionWork };
 
 /**
  * « Importer un brief existant »: a text written elsewhere, pasted or read

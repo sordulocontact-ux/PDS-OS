@@ -4,9 +4,12 @@
 // Brief's confirmed needs still without lever to arbitrate (nothing is
 // decided in advance, rule 21), the common levers not chosen. Client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { strategyDimensions } from "@/lib/i18n/fr/strategy-dimensions";
+import { strategyDispositif } from "@/lib/i18n/fr/strategy-dispositif";
 import type { DimItem, ItemContext } from "@/lib/strategy/dimension-items";
 import { LEVER_PRESETS } from "@/lib/strategy/lever-presets";
+
+const fr = { strategyDispositif, strategyDimensions };
 
 export type LeverRecord = {
   id: string;

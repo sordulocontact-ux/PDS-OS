@@ -6,7 +6,9 @@ import { useEffect } from "react";
 import { EmptyState } from "@/components/shell/empty-state";
 import { PageContainer } from "@/components/shell/page-container";
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { errors } from "@/lib/i18n/fr/errors";
+
+const fr = { errors };
 
 const t = fr.errors.failed;
 

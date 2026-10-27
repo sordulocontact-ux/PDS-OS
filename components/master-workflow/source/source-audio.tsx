@@ -1,4 +1,6 @@
-import { fr } from "@/lib/i18n/fr";
+import { masterSource } from "@/lib/i18n/fr/master-source";
+
+const fr = { masterSource };
 
 /** A version to listen to before choosing (proto: the play button of each
  * row): the browser's player, nothing without a signed link. */

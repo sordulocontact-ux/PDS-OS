@@ -10,7 +10,9 @@ import {
 } from "@/components/labo/captures/use-capture-queue";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { FileDropZone } from "@/components/ui/file-drop-zone";
-import { fr } from "@/lib/i18n/fr";
+import { laboCaptures } from "@/lib/i18n/fr/labo-captures";
+
+const fr = { laboCaptures };
 
 /**
  * Labo: TikTok screenshots dropped, picked or pasted (⌘V anywhere on the

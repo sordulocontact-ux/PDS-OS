@@ -22,7 +22,9 @@ import {
   type FeedbackTopic,
   type TopicAction,
 } from "@/lib/feedback/types";
-import { fr } from "@/lib/i18n/fr";
+import { feedback } from "@/lib/i18n/fr/feedback";
+
+const fr = { feedback };
 
 // Rarely opened: loaded on first use.
 const TopicEditForm = dynamic(() =>

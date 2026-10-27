@@ -13,8 +13,10 @@ import {
 import { Timestamp } from "@/components/ui/timestamp";
 import { routes } from "@/lib/auth/redirects";
 import type { MasterReleaseDates } from "@/lib/catalog/master/related";
-import { fr } from "@/lib/i18n/fr";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 import { formatShortDate } from "@/lib/release/format";
+
+const fr = { masterPage };
 
 /**
  * The three release dates of each project of the title, side by side and

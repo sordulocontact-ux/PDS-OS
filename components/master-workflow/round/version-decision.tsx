@@ -5,8 +5,10 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { DecisionPanel } from "@/components/ui/decision-panel";
 import { ReasonForm } from "@/components/ui/reason-form";
-import { fr } from "@/lib/i18n/fr";
+import { masterRound } from "@/lib/i18n/fr/master-round";
 import { decideRound, reopenMix } from "@/lib/master-workflow/round-actions";
+
+const fr = { masterRound };
 
 const t = fr.masterRound;
 

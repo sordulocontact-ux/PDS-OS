@@ -9,7 +9,9 @@ import { Button } from "@/components/ui/button";
 import { CheckboxField } from "@/components/ui/checkbox-field";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { decideProof, provideProof } from "@/lib/activations/trunk-actions";
-import { fr } from "@/lib/i18n/fr";
+import { activationJourney } from "@/lib/i18n/fr/activation-journey";
+
+const fr = { activationJourney };
 
 const t = fr.activationJourney.gesture;
 const e = fr.activationJourney.errors;

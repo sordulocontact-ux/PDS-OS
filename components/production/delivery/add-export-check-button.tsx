@@ -4,9 +4,11 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
-import { fr } from "@/lib/i18n/fr";
+import { productionDelivery } from "@/lib/i18n/fr/production-delivery";
 
 import { ExportCheckForm } from "./export-check-form";
+
+const fr = { productionDelivery };
 
 const t = fr.productionDelivery;
 

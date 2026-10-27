@@ -20,11 +20,16 @@ import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
 import { advanceContract } from "@/lib/contracts/actions";
 import type { ContractProof } from "@/lib/contracts/proof";
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
+import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
+import { legalDemarches } from "@/lib/i18n/fr/legal-demarches";
+import { legalDocuments } from "@/lib/i18n/fr/legal-documents";
 import { generateLegalContract } from "@/lib/legal/contracts/actions";
 import type { ContractCardData } from "@/lib/legal/contracts/document-card";
 import { formatFee } from "@/lib/legal/contracts/fields";
 import type { AgreementRow } from "@/lib/legal/contracts/mapping";
+
+const fr = { legal, legalContracts, legalDemarches, legalDocuments };
 
 /**
  * One person's contract in their démarche (proto « Projet complet »): once

@@ -7,7 +7,10 @@ import { ContractProofSlot } from "@/components/legal/clearance/contract-proof-s
 import { SignatureGate } from "@/components/legal/signed-returns/signature-gate";
 import { NextCard } from "@/components/ui/next-card";
 import type { ContractProof } from "@/lib/contracts/proof";
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
+import { legalClearance } from "@/lib/i18n/fr/legal-clearance";
+
+const fr = { legal, legalClearance };
 
 /**
  * « Marquer comme signé » (proto « Projet complet »): the signed copy and

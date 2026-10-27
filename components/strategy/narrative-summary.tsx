@@ -9,7 +9,9 @@ import { Button } from "@/components/ui/button";
 import { ChipChoice } from "@/components/ui/chip-choice";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import type { FieldState, NarrativePart } from "@/lib/framing/brief";
-import { fr } from "@/lib/i18n/fr";
+import { framing } from "@/lib/i18n/fr/framing";
+import { strategyDraft } from "@/lib/i18n/fr/strategy-draft";
+import { strategyPilot } from "@/lib/i18n/fr/strategy-pilot";
 import { writeNarrativeSummary } from "@/lib/strategy/actions/draft";
 import {
   narrativeRepetitions,
@@ -19,6 +21,8 @@ import {
   type SummaryLength,
   type SummaryTone,
 } from "@/lib/strategy/narrative-review";
+
+const fr = { framing, strategyPilot, strategyDraft };
 
 /**
  * « Synthèse du récit » (MKT-S1-06), first in the narrative: the synthesis

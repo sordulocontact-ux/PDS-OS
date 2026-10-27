@@ -13,7 +13,9 @@ import {
   SCREENSHOT_EXTENSIONS,
 } from "@/lib/feedback/screenshot-rules";
 import type { FeedbackScreenshot } from "@/lib/feedback/types";
-import { fr } from "@/lib/i18n/fr";
+import { feedback } from "@/lib/i18n/fr/feedback";
+
+const fr = { feedback };
 
 const ACCEPT = Object.keys(SCREENSHOT_EXTENSIONS).join(",");
 

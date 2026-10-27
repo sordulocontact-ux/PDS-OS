@@ -23,7 +23,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { ArtistContact } from "@/lib/catalog/contacts";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
+
+const fr = { catalog };
 
 type Editing = { contact: ArtistContact | null } | null;
 

@@ -5,7 +5,10 @@ import { useMemo, useState } from "react";
 import { CreateArtistDialog } from "@/components/catalog/create-artist-dialog";
 import { SinglePicker } from "@/components/catalog/single-picker";
 import type { ArtistOption } from "@/lib/catalog/types";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
+import { shell } from "@/lib/i18n/fr/shell";
+
+const fr = { shell, catalog };
 
 // The artist a content project concerns, when there is one (optional). A
 // music project reads its artists from its masters instead.

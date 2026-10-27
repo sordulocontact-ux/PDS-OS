@@ -13,8 +13,11 @@ import {
   submitCreatorContent,
   submitCreatorInvoice,
 } from "@/lib/activations/influence/creator-actions";
-import { fr } from "@/lib/i18n/fr";
+import { activationCreator } from "@/lib/i18n/fr/activation-creator";
+import { activations } from "@/lib/i18n/fr/activations";
 import { createClient } from "@/lib/supabase/client";
+
+const fr = { activations, activationCreator };
 
 const t = fr.activationCreator;
 

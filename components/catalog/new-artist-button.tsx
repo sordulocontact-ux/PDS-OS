@@ -5,7 +5,9 @@ import { useState } from "react";
 
 import { CreateArtistDialog } from "@/components/catalog/create-artist-dialog";
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
+
+const fr = { catalog };
 
 // Opens the "Nouvel artiste" modal. Once created, the new artist's page opens:
 // its profile (contacts, files, masters) is what comes next.

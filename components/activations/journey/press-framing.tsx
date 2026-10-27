@@ -10,10 +10,13 @@ import {
   versionsOf,
 } from "@/lib/activations/sheet-queries";
 import { sheetFieldKeys } from "@/lib/activations/sheets";
-import { fr } from "@/lib/i18n/fr";
+import { activationJourney } from "@/lib/i18n/fr/activation-journey";
+import { activationWork } from "@/lib/i18n/fr/activation-work";
 import { activationSheetTone } from "@/lib/ui/state-tones";
 
 import { TransmissionCard } from "./transmission-card";
+
+const fr = { activationWork, activationJourney };
 
 const t = fr.activationJourney.pressBlock;
 

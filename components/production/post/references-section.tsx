@@ -1,12 +1,14 @@
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
-import { fr } from "@/lib/i18n/fr";
+import { productionPost } from "@/lib/i18n/fr/production-post";
 import { formatDate } from "@/lib/release/format";
 import type { HandedFiche } from "@/lib/production/fiche";
 import type { PostReference, PostScope } from "@/lib/production/post/types";
 
 import { ReferenceAddButton } from "./reference-add-button";
 import { ReferenceMenu } from "./reference-menu";
+
+const fr = { productionPost };
 
 const t = fr.productionPost.references;
 

@@ -8,12 +8,14 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { productionDirection } from "@/lib/i18n/fr/production-direction";
 import {
   decideDirection,
   submitDirection,
 } from "@/lib/production/direction-actions";
 import type { DirectionStatus } from "@/lib/production/organization";
+
+const fr = { productionDirection };
 
 const t = fr.productionDirection;
 const TONE = {

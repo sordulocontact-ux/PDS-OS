@@ -5,8 +5,10 @@
 // object (the fiche, the agreement, the borrowing, the split, the bulletin),
 // never stored. Pure, client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { legalDemarches } from "@/lib/i18n/fr/legal-demarches";
 import type { BoardRow } from "@/lib/legal/plan/board";
+
+const fr = { legalDemarches };
 
 const t = fr.legalDemarches.todo;
 

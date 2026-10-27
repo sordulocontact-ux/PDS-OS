@@ -5,11 +5,13 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
-import { fr } from "@/lib/i18n/fr";
+import { productionNeeds } from "@/lib/i18n/fr/production-needs";
 import type { NeedFamily, NeedSuggestion } from "@/lib/production/roles";
 
 import { NeedForm, type NeedDraft } from "./need-form";
 import { roleLabel } from "./need-label";
+
+const fr = { productionNeeds };
 
 const t = fr.productionNeeds;
 

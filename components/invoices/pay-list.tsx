@@ -3,13 +3,15 @@ import { buttonVariants } from "@/components/ui/button";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { ViewLink } from "@/components/ui/view-link";
 import { todayInParis } from "@/lib/insights/dates";
-import { fr } from "@/lib/i18n/fr";
+import { invoices } from "@/lib/i18n/fr/invoices";
 import { invoiceHref } from "@/lib/invoices/href";
 import { invoiceState, type ProjectInvoicesView } from "@/lib/invoices/types";
 import { formatDay } from "@/lib/utils/day";
 import { formatAmount } from "@/lib/utils/money";
 
 import { InvoicePanel } from "./invoice-panel";
+
+const fr = { invoices };
 
 const t = fr.invoices;
 

@@ -10,8 +10,10 @@ import {
 } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { Fact } from "@/lib/facts/types";
-import { fr } from "@/lib/i18n/fr";
+import { facts } from "@/lib/i18n/fr/facts";
 import { factTone } from "@/lib/ui/state-tones";
+
+const fr = { facts };
 
 /** Facts of one section of a workflow's first step (État des lieux, État
  * du master): a row opens its source, its state stays visible, and the last

@@ -1,7 +1,9 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
+
+const fr = { dialogs };
 
 /** The main button first, on the left, then « Annuler » (docs/DESIGN.md
  * § 4, « Modale », C0 of 18/10/2026): the one place a dialog form lays out

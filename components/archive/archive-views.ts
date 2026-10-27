@@ -1,7 +1,9 @@
 import type { TabBarItem } from "@/components/ui/tab-bar";
 import type { RecordCounts } from "@/lib/archive/types";
-import { fr } from "@/lib/i18n/fr";
+import { records } from "@/lib/i18n/fr/records";
 import { viewHref } from "@/lib/ui/view-href";
+
+const fr = { records };
 
 // Actifs / Archivés as the tabs of a list page (director only, in the URL:
 // ?view=archived), with their counts. Anyone else gets a single view, so no

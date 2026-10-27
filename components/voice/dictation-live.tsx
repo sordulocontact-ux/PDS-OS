@@ -4,8 +4,10 @@ import { AudioMeter } from "@/components/ui/audio-meter";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatClock } from "@/lib/calls/format";
-import { fr } from "@/lib/i18n/fr";
+import { voice } from "@/lib/i18n/fr/voice";
 import { MAX_DICTATION_SECONDS } from "@/lib/voice/constants";
+
+const fr = { voice };
 
 /** While dictating: state, clock against the limit, input level, finish or cancel. */
 export function DictationLive({

@@ -10,13 +10,15 @@ import {
   type DistributionContext,
 } from "@/lib/distribution/journey-context";
 import { isOpen } from "@/lib/distribution/anomalies";
-import { fr } from "@/lib/i18n/fr";
+import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
 import { projectFormatLabel } from "@/lib/projects/labels";
 import { distributionViewHref } from "@/lib/ui/distribution-steps";
 import type { ModuleFact } from "@/lib/ui/module-frame";
 import { stepChoiceKey } from "@/lib/step-tools/model";
 import { workflowStatusTone } from "@/lib/ui/state-tones";
 import { formatDay } from "@/lib/utils/day";
+
+const fr = { distributionJourney };
 
 const t = fr.distributionJourney;
 

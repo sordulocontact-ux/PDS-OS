@@ -6,7 +6,8 @@
 // recorded or declared, never from PO (CLAUDE.md, rule 6). Where each step
 // lives: lib/ui/distribution-steps.ts.
 
-import { fr } from "@/lib/i18n/fr";
+import { distribution } from "@/lib/i18n/fr/distribution";
+import { distributionJourney as frDistributionJourney } from "@/lib/i18n/fr/distribution-journey";
 import type {
   JourneyActor,
   JourneyNext,
@@ -19,6 +20,8 @@ import {
   distributionStepHref,
   type DistributionStep,
 } from "@/lib/ui/distribution-steps";
+
+const fr = { distribution, distributionJourney: frDistributionJourney };
 
 const t = fr.distributionJourney;
 

@@ -4,8 +4,12 @@ import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { formatBriefDate } from "@/lib/framing/assess";
-import { fr } from "@/lib/i18n/fr";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+import { planSteps } from "@/lib/i18n/fr/plan-steps";
 import { LAUNCHABLE, type PlanWorkflow } from "@/lib/plan/propose";
+
+const fr = { dialogs, framingIntel, planSteps };
 
 export type ReviewStep = {
   key: string;

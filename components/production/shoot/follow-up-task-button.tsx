@@ -8,11 +8,13 @@ import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionShoot } from "@/lib/i18n/fr/production-shoot";
 import type { FollowUp } from "@/lib/production/shoot/follow-ups";
 import { createShootTask } from "@/lib/production/shoot/task-actions";
 
 import { ShootFormActions } from "./shoot-form-actions";
+
+const fr = { productionShoot };
 
 const t = fr.productionShoot.followUps;
 

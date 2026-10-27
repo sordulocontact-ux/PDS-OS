@@ -1,7 +1,9 @@
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { routes } from "@/lib/auth/redirects";
 import type { TopicStatus } from "@/lib/feedback/types";
-import { fr } from "@/lib/i18n/fr";
+import { feedback } from "@/lib/i18n/fr/feedback";
+
+const fr = { feedback };
 
 export type FeedbackView = TopicStatus | "all";
 

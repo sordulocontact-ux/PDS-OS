@@ -3,8 +3,11 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { briefChanges, snapshotOf } from "@/lib/framing/brief-snapshot";
 import type { Dimension } from "@/lib/framing/dimensions";
 import type { BriefVersion } from "@/lib/framing/knowledge";
-import { fr } from "@/lib/i18n/fr";
+import { briefRequests } from "@/lib/i18n/fr/brief-requests";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
 import { briefVersionTone } from "@/lib/ui/state-tones";
+
+const fr = { framingIntel, briefRequests };
 
 const dateFormat = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric",

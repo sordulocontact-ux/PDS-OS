@@ -5,10 +5,12 @@ import { ProjectNowCard } from "@/components/shell/journey/project-now-card";
 import { StepHistory } from "@/components/shell/journey/step-history";
 import { FilterChipLink } from "@/components/ui/filter-chip";
 import { ViewLink } from "@/components/ui/view-link";
-import { fr } from "@/lib/i18n/fr";
+import { masterJourney } from "@/lib/i18n/fr/master-journey";
 import { historyPeople, masterHistory } from "@/lib/master-workflow/history";
 import { masterJourneyContext } from "@/lib/master-workflow/journey-context";
 import { masterStepHref } from "@/lib/ui/master-steps";
+
+const fr = { masterJourney };
 
 const t = fr.masterJourney.history;
 

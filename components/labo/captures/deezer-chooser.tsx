@@ -17,8 +17,10 @@ import type {
   CaptureArtist,
   DeezerAccount,
 } from "@/lib/catalog/capture-artist-types";
-import { fr } from "@/lib/i18n/fr";
+import { laboCaptures } from "@/lib/i18n/fr/labo-captures";
 import { reviewTone } from "@/lib/ui/state-tones";
+
+const fr = { laboCaptures };
 
 type Chosen = Extract<ChosenDeezer, { ok: true }>;
 

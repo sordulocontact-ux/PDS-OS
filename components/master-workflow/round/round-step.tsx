@@ -6,7 +6,9 @@ import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { Fold } from "@/components/ui/fold";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { VersionCard } from "@/components/ui/version-card";
-import { fr } from "@/lib/i18n/fr";
+import { invoices } from "@/lib/i18n/fr/invoices";
+import { masterInHouse } from "@/lib/i18n/fr/master-inhouse";
+import { masterRound } from "@/lib/i18n/fr/master-round";
 import type { RoundStepView } from "@/lib/master-workflow/round-step";
 import { masterStepHref } from "@/lib/ui/master-steps";
 import { formatDay, formatShortDay, formatShortInstant } from "@/lib/utils/day";
@@ -17,6 +19,8 @@ import { InHouseDeposit } from "./inhouse-deposit";
 import { RateBlock } from "./rate-block";
 import { RoundVersions } from "./round-versions";
 import { SendForm } from "./send-form";
+
+const fr = { invoices, masterRound, masterInHouse };
 
 const t = fr.masterRound;
 const h3 =

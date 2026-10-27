@@ -9,8 +9,10 @@ import { Button } from "@/components/ui/button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { confirmPlatform } from "@/lib/distribution/platform-gestures";
 import { removeProof, uploadProof } from "@/lib/distribution/upload-proof";
-import { fr } from "@/lib/i18n/fr";
+import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
 import { todayInParis } from "@/lib/insights/dates";
+
+const fr = { distributionJourney };
 
 const t = fr.distributionJourney.platforms;
 const d = fr.distributionJourney.deposit;

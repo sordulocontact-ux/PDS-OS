@@ -1,7 +1,10 @@
 import type { PortalCardItem } from "@/components/portal/portal-sections";
 import { PublicSplit } from "@/components/legal/splits/public-split";
-import { fr } from "@/lib/i18n/fr";
+import { legalSplits } from "@/lib/i18n/fr/legal-splits";
+import { portal } from "@/lib/i18n/fr/portal";
 import type { PublicSplit as PublicSplitData } from "@/lib/legal/splits/public";
+
+const fr = { legalSplits, portal };
 
 const t = fr.legalSplits.public;
 

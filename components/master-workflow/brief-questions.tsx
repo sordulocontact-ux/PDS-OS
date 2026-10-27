@@ -7,7 +7,9 @@ import { formatShortDay } from "@/lib/utils/day";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { facts } from "@/lib/i18n/fr/facts";
+import { masterAnswer } from "@/lib/i18n/fr/master-answer";
+import { masterWorkflow } from "@/lib/i18n/fr/master-workflow";
 import {
   questionStateOf,
   type BriefQuestion,
@@ -15,6 +17,8 @@ import {
 } from "@/lib/master-workflow/question-types";
 import { formatShortDate } from "@/lib/release/format";
 import { briefQuestionTone } from "@/lib/ui/state-tones";
+
+const fr = { facts, masterWorkflow, masterAnswer };
 
 const t = fr.masterWorkflow.questions;
 

@@ -4,7 +4,9 @@ import { ProvenanceTag } from "@/components/labo/provenance-tag";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { LocatedCallReport } from "@/lib/ai/call-report";
 import type { QuoteLocation } from "@/lib/ai/provenance";
-import { fr } from "@/lib/i18n/fr";
+import { labo } from "@/lib/i18n/fr/labo";
+
+const fr = { labo };
 
 type Item = {
   key: string;

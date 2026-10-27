@@ -4,10 +4,12 @@ import { InfoRow, Rows } from "@/components/ui/rows";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { strategyBriefOut } from "@/lib/i18n/fr/strategy-brief-out";
 import { latestOf, type DocumentKind } from "@/lib/strategy/documents/model";
 import type { StrategyDocument } from "@/lib/strategy/documents/queries";
 import { strategyDocumentTone } from "@/lib/ui/state-tones";
+
+const fr = { strategyBriefOut };
 
 const t = fr.strategyBriefOut.final;
 

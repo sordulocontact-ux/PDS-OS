@@ -12,10 +12,12 @@ import {
   type ContactRole,
 } from "@/lib/catalog/contacts";
 import { saveContact } from "@/lib/catalog/profile-actions";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
 import { Checkbox } from "@/components/ui/checkbox";
 
 import { ContactPersonFields } from "./contact-person-fields";
+
+const fr = { catalog };
 
 // Adds a contact, or edits `contact`. Closes itself once saved. `defaults`
 // pre-fills a new contact (one proposed by PO, reviewed before saving). The

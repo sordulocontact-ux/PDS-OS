@@ -6,9 +6,11 @@
 // lib/i18n/fr/conception-work.ts (choices). Client-safe.
 
 import type { DesignTopic } from "@/lib/design/intentions";
-import { fr } from "@/lib/i18n/fr";
+import { conceptionWork } from "@/lib/i18n/fr/conception-work";
 import type { ChoiceValue } from "@/lib/ui/choice-value";
 import { asSentence, joinList } from "@/lib/utils/sentences";
+
+const fr = { conceptionWork };
 
 export const INTENTION_CHOICES = {
   story: [

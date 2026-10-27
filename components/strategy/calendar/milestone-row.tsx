@@ -1,9 +1,12 @@
 import { optionClass } from "@/components/ui/option-class";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { strategy } from "@/lib/i18n/fr/strategy";
+import { strategyCalendar } from "@/lib/i18n/fr/strategy-calendar";
 import { dayOffset, isMilestoneChannel } from "@/lib/strategy/calendar";
 import type { Milestone } from "@/lib/strategy/queries";
 import { cn } from "@/lib/utils";
+
+const fr = { strategy, strategyCalendar };
 
 const dateFormat = new Intl.DateTimeFormat("fr-FR", {
   weekday: "short",

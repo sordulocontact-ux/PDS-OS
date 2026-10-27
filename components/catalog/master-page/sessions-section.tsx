@@ -28,13 +28,17 @@ import {
   detachSession,
 } from "@/lib/catalog/master/session-actions";
 import { sessionLabel } from "@/lib/catalog/master/session-label";
-import { fr } from "@/lib/i18n/fr";
+import { framing } from "@/lib/i18n/fr/framing";
+import { masterPage } from "@/lib/i18n/fr/master-page";
+import { records } from "@/lib/i18n/fr/records";
 import { formatShortDate } from "@/lib/release/format";
 import { sessionStatusTone } from "@/lib/ui/state-tones";
 
 import { AttachSessionButton } from "./attach-session-button";
 import { AddItemButton } from "./item-dialogs";
 import { SessionForm } from "./session-form";
+
+const fr = { framing, masterPage, records };
 
 /**
  * Sessions of the title, by date (retours Catalogue 27 à 35): one session

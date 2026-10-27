@@ -21,7 +21,10 @@ import {
 } from "@/lib/catalog/master/session-actions";
 import { sessionLabel } from "@/lib/catalog/master/session-label";
 import { uploadCatalogFile } from "@/lib/catalog/upload-file";
-import { fr } from "@/lib/i18n/fr";
+import { auth } from "@/lib/i18n/fr/auth";
+import { masterPage } from "@/lib/i18n/fr/master-page";
+
+const fr = { auth, masterPage };
 
 const NONE = "none";
 

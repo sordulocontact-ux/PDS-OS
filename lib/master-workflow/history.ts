@@ -3,12 +3,24 @@
 // sources, Brief, questions, sendings and their link, versions, decisions,
 // deliverables — never a separate journal written by hand. Pure.
 
-import { fr } from "@/lib/i18n/fr";
+import { masterDelay } from "@/lib/i18n/fr/master-delay";
+import { masterInHouse } from "@/lib/i18n/fr/master-inhouse";
+import { masterInvoice } from "@/lib/i18n/fr/master-invoice";
+import { masterJourney } from "@/lib/i18n/fr/master-journey";
+import { masterWorkflow } from "@/lib/i18n/fr/master-workflow";
 import type { MasterStepKey } from "@/lib/ui/master-steps";
 import { formatDay, formatShortInstant } from "@/lib/utils/day";
 import { formatAmount } from "@/lib/utils/money";
 
 import type { MasterJourneyFacts } from "./journey-facts";
+
+const fr = {
+  masterWorkflow,
+  masterJourney,
+  masterInvoice,
+  masterDelay,
+  masterInHouse,
+};
 
 const t = fr.masterJourney.history;
 

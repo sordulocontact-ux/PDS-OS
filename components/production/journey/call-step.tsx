@@ -11,10 +11,12 @@ import { summaryDraft } from "@/lib/calls/meeting/draft";
 import { loadCallSummaries, loadMeeting } from "@/lib/calls/meeting/queries";
 import type { MeetingLine } from "@/lib/calls/meeting/types";
 import { loadPlannedCall } from "@/lib/calls/prep/planned";
-import { fr } from "@/lib/i18n/fr";
+import { productionCall } from "@/lib/i18n/fr/production-call";
 import { productionCallDefaults } from "@/lib/production/call-prep-defaults";
 import type { CallItem, PreprodData } from "@/lib/production/preprod/types";
 import type { ProductionSheetData } from "@/lib/production/sheet";
+
+const fr = { productionCall };
 
 const t = fr.productionCall.step;
 

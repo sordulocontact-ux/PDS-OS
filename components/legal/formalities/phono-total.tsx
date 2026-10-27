@@ -1,5 +1,5 @@
 import { FieldError } from "@/components/auth/form-message";
-import { fr } from "@/lib/i18n/fr";
+import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
 import type { Creator, Publisher } from "@/lib/legal/formalities/definition";
 import {
   FULL,
@@ -8,6 +8,8 @@ import {
   unitsOf,
 } from "@/lib/legal/splits/shares";
 import { cn } from "@/lib/utils";
+
+const fr = { legalFormalities };
 
 /** The Phono shares of the bulletin by category (JUR-23), then their total,
  * which must be exactly 100 % — at the head of « 4. Répartition ». */

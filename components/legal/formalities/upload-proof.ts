@@ -1,8 +1,10 @@
 "use client";
 
-import { fr } from "@/lib/i18n/fr";
+import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
 import { openFormalityProof } from "@/lib/legal/formalities/step-actions";
 import { createClient } from "@/lib/supabase/client";
+
+const fr = { legalFormalities };
 
 /** A PDF of 20 Mo at most, like the bucket of the bulletins. */
 export const isProofPdf = (file: File | null): file is File =>

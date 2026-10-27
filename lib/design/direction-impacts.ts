@@ -7,7 +7,9 @@
 import type { ConceptionData } from "@/lib/design/conception";
 import type { DesignTopic } from "@/lib/design/intentions";
 import type { SheetStatus } from "@/lib/design/states";
-import { fr } from "@/lib/i18n/fr";
+import { conception } from "@/lib/i18n/fr/conception";
+
+const fr = { conception };
 
 export type DirectionImpacts = {
   // The changed topics, by their names for the release's direction.

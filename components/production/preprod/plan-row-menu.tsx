@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import type { RowAction } from "@/components/ui/row-actions";
 import { FormDialog } from "@/components/ui/form-dialog";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import {
   deletePlanAction,
   setPlanStatus,
@@ -23,6 +23,8 @@ import type { NetworkOption } from "@/lib/production/sheet";
 import { PlanActionForm } from "./plan-action-form";
 import { PlanTaskForm } from "./plan-task-form";
 import { RecordMenu } from "@/components/ui/record-menu";
+
+const fr = { productionPreprod };
 
 const t = fr.productionPreprod.plan;
 

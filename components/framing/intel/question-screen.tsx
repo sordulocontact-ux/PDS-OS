@@ -40,7 +40,10 @@ import {
 import type { QuestionState } from "@/lib/framing/assess";
 import { QUESTIONS } from "@/lib/framing/dimensions";
 import type { HelpSuggestion } from "@/lib/framing/help";
-import { fr } from "@/lib/i18n/fr";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+import { framingJourney } from "@/lib/i18n/fr/framing-journey";
+
+const fr = { framingIntel, framingJourney };
 
 // na / later: « Non applicable », « À définir plus tard » (PROJ-UX-04).
 type Mode = "view" | "write" | "na" | "later";

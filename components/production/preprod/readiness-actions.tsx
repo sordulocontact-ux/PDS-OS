@@ -8,7 +8,7 @@ import { TextareaField } from "@/components/auth/textarea-field";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import {
   markProductionReady,
   setReadinessCheck,
@@ -21,6 +21,8 @@ import { useState } from "react";
 import { ConfirmButton } from "@/components/ui/confirm-button";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { AssignCheckButton, DerogateButton } from "./readiness-dialogs";
+
+const fr = { productionPreprod };
 
 const t = fr.productionPreprod.readiness;
 

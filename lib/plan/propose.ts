@@ -7,8 +7,10 @@
 
 import { formatBriefDate } from "@/lib/framing/assess";
 import type { FramingKnowledge } from "@/lib/framing/knowledge";
-import { fr } from "@/lib/i18n/fr";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
 import { applicableWorkflows } from "@/lib/workflow-status/rules";
+
+const fr = { framingIntel };
 
 export const PLAN_COLUMNS = [
   "focus",

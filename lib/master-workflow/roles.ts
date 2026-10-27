@@ -4,9 +4,11 @@
 
 import type { PrivateLinkRow } from "@/components/shell/module/private-links";
 import type { RoleRow } from "@/components/shell/module/roles-panel";
-import { fr } from "@/lib/i18n/fr";
+import { masterJourney } from "@/lib/i18n/fr/master-journey";
 
 import type { MasterJourneyFacts } from "./journey-facts";
+
+const fr = { masterJourney };
 
 const t = fr.masterJourney.roles;
 

@@ -2,9 +2,11 @@
 
 import { IconDownload } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { legalHistory } from "@/lib/i18n/fr/legal-history";
 import type { LegalEvent } from "@/lib/legal/history/types";
 import { formatInstantFull } from "@/lib/utils/instant";
+
+const fr = { legalHistory };
 
 const cell = (value: string | null) => `"${(value ?? "").replace(/"/g, '""')}"`;
 

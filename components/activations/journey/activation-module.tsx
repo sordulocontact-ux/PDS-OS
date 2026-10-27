@@ -3,11 +3,13 @@ import { AgencyReports } from "@/components/activations/agency/agency-reports";
 import type { ActivationFiche } from "@/lib/activations/fiche";
 import type { ActivationPeople } from "@/lib/activations/people";
 import type { Access } from "@/lib/auth/access";
-import { fr } from "@/lib/i18n/fr";
+import { activationJourney } from "@/lib/i18n/fr/activation-journey";
 
 import { InfluenceBlock } from "./influence-block";
 import { PressBlock } from "./press-block";
 import { PressFraming } from "./press-framing";
+
+const fr = { activationJourney };
 
 const t = fr.activationJourney.pressBlock;
 

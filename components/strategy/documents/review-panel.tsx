@@ -10,11 +10,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDay } from "@/lib/assistant/facts";
-import { fr } from "@/lib/i18n/fr";
+import { strategyDocuments } from "@/lib/i18n/fr/strategy-documents";
 import type { Member } from "@/lib/framing/related";
 import { remindStrategyReview } from "@/lib/strategy/actions/documents";
 import type { DocumentReview } from "@/lib/strategy/documents/queries";
 import { strategyReviewTone } from "@/lib/ui/state-tones";
+
+const fr = { strategyDocuments };
 
 /**
  * Who must validate a sent version and where each stands (ticket Stratégie

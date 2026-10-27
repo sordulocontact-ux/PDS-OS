@@ -4,8 +4,10 @@ import { useTransition } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { strategyReleasePlan } from "@/lib/i18n/fr/strategy-release-plan";
 import { shareReleasePlan } from "@/lib/strategy/actions/release-plan";
+
+const fr = { strategyReleasePlan };
 
 /**
  * « Partager »: the version's public link (/d/[token]), created once by the

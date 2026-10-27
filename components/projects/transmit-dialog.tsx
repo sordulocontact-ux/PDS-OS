@@ -16,8 +16,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { idleFormState } from "@/lib/auth/form-state";
-import { fr } from "@/lib/i18n/fr";
+import { transmission } from "@/lib/i18n/fr/transmission";
 import { transmitProject } from "@/lib/projects/transmission-actions";
+
+const fr = { transmission };
 
 // "Transmettre à un chef de projet": the director picks a project manager and
 // may add a message. `mode`: a first transmission, the answer to a question

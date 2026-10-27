@@ -6,12 +6,14 @@ import type { EvidenceKind, EvidenceSource } from "@/lib/activations/model";
 import { evidenceState } from "@/lib/activations/states";
 import type { ActivationScope, EvidenceRecord } from "@/lib/activations/types";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { activations } from "@/lib/i18n/fr/activations";
 import { formatDate } from "@/lib/release/format";
 import { proofTone } from "@/lib/ui/state-tones";
 
 import { DeclareEvidenceButton } from "./declare-evidence-button";
 import { EvidenceActions } from "./evidence-actions";
+
+const fr = { activations };
 
 const t = fr.activations.evidence;
 

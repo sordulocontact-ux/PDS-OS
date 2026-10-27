@@ -10,9 +10,12 @@ import {
 } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDay } from "@/lib/assistant/facts";
-import { fr } from "@/lib/i18n/fr";
+import { framing } from "@/lib/i18n/fr/framing";
+import { projectPlan } from "@/lib/i18n/fr/project-plan";
 import type { PlanDeliverable } from "@/lib/project-plan/queries";
 import { deliverableStateTone } from "@/lib/ui/state-tones";
+
+const fr = { framing, projectPlan };
 
 /** Committed deliverables of a project, read only (written in the Strategy). */
 export function DeliverablesTable({

@@ -1,6 +1,8 @@
 import { SectionTabs } from "@/components/shell/section-tabs";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { masterPage } from "@/lib/i18n/fr/master-page";
+
+const fr = { masterPage };
 
 // Sections of a title ("master" in the code), in six tabs (docs/DESIGN.md
 // § 4): related sections are blocks of one page, not tabs of their own

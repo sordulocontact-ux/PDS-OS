@@ -1,7 +1,7 @@
 "use client";
 
 import { StepSection } from "@/components/shell/journey/step-section";
-import { fr } from "@/lib/i18n/fr";
+import { legalClearance } from "@/lib/i18n/fr/legal-clearance";
 import type { ClearanceStatus } from "@/lib/legal/clearance/matrix";
 import type { Clearance, Clearances } from "@/lib/legal/clearance/types";
 import { formatFee } from "@/lib/legal/contracts/fields";
@@ -9,6 +9,8 @@ import { formatFee } from "@/lib/legal/contracts/fields";
 import { AskMoment } from "./ask-moment";
 import { NegotiateMoment } from "./negotiate-moment";
 import { SignMoment } from "./sign-moment";
+
+const fr = { legalClearance };
 
 // The ticket's nine states, as three moments for the person (the prototype
 // of 07/10/2026): ask the rights holders, negotiate their conditions, get

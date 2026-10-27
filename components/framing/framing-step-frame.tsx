@@ -15,8 +15,11 @@ import {
 } from "@/components/shell/journey/step-panel";
 import { framingJourneyContext } from "@/lib/framing/journey-context";
 import type { FramingStepKey } from "@/lib/framing/journey";
-import { fr } from "@/lib/i18n/fr";
+import { framingJourney } from "@/lib/i18n/fr/framing-journey";
+import { journey } from "@/lib/i18n/fr/journey";
 import { stepChoiceKey, type StepRef } from "@/lib/step-tools/model";
+
+const fr = { journey, framingJourney };
 
 const t = fr.framingJourney;
 

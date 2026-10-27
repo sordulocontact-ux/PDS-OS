@@ -10,9 +10,12 @@ import { DialogButton } from "@/components/ui/dialog-button";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { todayInParis } from "@/lib/contracts/types";
-import { fr } from "@/lib/i18n/fr";
+import { contactLinks } from "@/lib/i18n/fr/contact-links";
+import { signedReturns } from "@/lib/i18n/fr/signed-returns";
 import { sendContract } from "@/lib/legal/signed-returns/team-actions";
 import { issueContactLink } from "@/lib/portal/contact-link-actions";
+
+const fr = { signedReturns, contactLinks };
 
 const t = fr.signedReturns.team;
 

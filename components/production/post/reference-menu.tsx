@@ -1,9 +1,11 @@
 "use client";
 
-import { fr } from "@/lib/i18n/fr";
+import { productionPost } from "@/lib/i18n/fr/production-post";
 import { deletePostReference } from "@/lib/production/post/reference-actions";
 
 import { PostRowMenu } from "./post-row-menu";
+
+const fr = { productionPost };
 
 const t = fr.productionPost.references;
 

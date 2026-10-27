@@ -12,7 +12,8 @@ import {
   StepToolsBlock,
 } from "@/components/shell/module/step-tools-block";
 import { WhoDoesWhatButton } from "@/components/shell/module/who-does-what-button";
-import { fr } from "@/lib/i18n/fr";
+import { reviewJourney } from "@/lib/i18n/fr/review-journey";
+import { shell } from "@/lib/i18n/fr/shell";
 import { reviewJourneyContext } from "@/lib/marketing/review/context";
 import { reviewHistory } from "@/lib/marketing/review/history";
 import { loadStanding } from "@/lib/marketing/review/standing-data";
@@ -21,6 +22,8 @@ import { isLocked } from "@/lib/ui/journey";
 import { reviewStepHref, type ReviewStepKey } from "@/lib/ui/review-steps";
 
 import { StandingCard } from "./standing-card";
+
+const fr = { shell, reviewJourney };
 
 const t = fr.reviewJourney;
 

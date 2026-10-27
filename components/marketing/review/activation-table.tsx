@@ -8,9 +8,11 @@ import {
   DataTableRow,
 } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { marketing } from "@/lib/i18n/fr/marketing";
 import type { Activation } from "@/lib/marketing/model";
 import { reviewActivationStatusTone } from "@/lib/ui/state-tones";
+
+const fr = { marketing };
 
 const t = fr.marketing.activations;
 

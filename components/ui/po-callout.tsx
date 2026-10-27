@@ -1,7 +1,9 @@
 import type { ReactNode } from "react";
 
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { framingGuide } from "@/lib/i18n/fr/framing-guide";
+
+const fr = { framingGuide };
 
 /**
  * What PO says at the head of a step (proto `poBox`: `.callout.info` and

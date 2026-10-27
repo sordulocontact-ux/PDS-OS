@@ -7,8 +7,10 @@ import { useState, useTransition } from "react";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { RowActions } from "@/components/ui/row-actions";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { shell } from "@/lib/i18n/fr/shell";
 import { deleteProjectDraft } from "@/lib/projects/draft-actions";
+
+const fr = { shell };
 
 /**
  * « ⋯ » of a draft in the projects list (PROJ-TEST-01): resume the new

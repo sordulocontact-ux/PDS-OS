@@ -17,7 +17,10 @@ import { Button } from "@/components/ui/button";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+import { framingJourney } from "@/lib/i18n/fr/framing-journey";
+import { planSteps } from "@/lib/i18n/fr/plan-steps";
 import { launchProjectPlan } from "@/lib/plan/actions";
 import {
   MARKETING_PARTS,
@@ -33,6 +36,8 @@ import type {
   WorkflowKey,
   WorkflowState,
 } from "@/lib/workflow-status/rules";
+
+const fr = { dialogs, framingIntel, planSteps, framingJourney };
 
 type Draft = ProposedItem & {
   removed: boolean;

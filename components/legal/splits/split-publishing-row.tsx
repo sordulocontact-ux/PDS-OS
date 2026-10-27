@@ -4,9 +4,11 @@ import { PersonPickerField } from "@/components/network/person-picker-field";
 import { OptionSelect } from "@/components/projects/option-select";
 import { CheckboxField } from "@/components/ui/checkbox-field";
 import { FactRow } from "@/components/ui/fact-row";
-import { fr } from "@/lib/i18n/fr";
+import { legalSplits } from "@/lib/i18n/fr/legal-splits";
 import type { CreatorDraft, PublishingMode } from "@/lib/legal/splits/draft";
 import type { SplitPersonOption } from "@/lib/legal/splits/party-actions";
+
+const fr = { legalSplits };
 
 const MODES: PublishingMode[] = ["house", "other", "none"];
 

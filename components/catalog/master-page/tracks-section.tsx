@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/data-table";
 import { FormDialog } from "@/components/ui/form-dialog";
 import type { MasterSession, MasterTrack } from "@/lib/catalog/master/rules";
-import { fr } from "@/lib/i18n/fr";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 
 import {
   AddItemButton,
@@ -25,6 +25,8 @@ import {
 } from "./item-dialogs";
 import { sessionLabel } from "@/lib/catalog/master/session-label";
 import { TrackForm } from "./track-form";
+
+const fr = { masterPage };
 
 // Tracks typed one by one before the working files (retour Catalogue 36):
 // kept for the history, read only and folded, never offered for new ones.

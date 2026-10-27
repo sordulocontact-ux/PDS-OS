@@ -6,9 +6,14 @@ import { NewTemplateButton } from "@/components/legal/contracts/new-template-but
 import { OptionSelect } from "@/components/projects/option-select";
 import { ReturnCallout } from "@/components/ui/return-callout";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
+import { legalDocuments } from "@/lib/i18n/fr/legal-documents";
+import { legalForms } from "@/lib/i18n/fr/legal-forms";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 import { agreementTone, type Tone } from "@/lib/ui/state-tones";
 import type { AgreementRow } from "@/lib/legal/contracts/mapping";
+
+const fr = { legalContracts, legalDocuments, legalForms, masterPage };
 
 export const NO_DEAL = "none";
 

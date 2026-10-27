@@ -1,4 +1,6 @@
-import { fr } from "@/lib/i18n/fr";
+import { invoices } from "@/lib/i18n/fr/invoices";
+
+const fr = { invoices };
 
 // The database's refusals of an invoice, in French. Client-safe.
 const words: Record<string, string> = fr.invoices.errors;

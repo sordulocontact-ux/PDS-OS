@@ -5,8 +5,10 @@ import { useTransition } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
 import { templateSourceUrl } from "@/lib/legal/contracts/template-source";
+
+const fr = { legalContracts };
 
 /** The file a template was imported from, downloaded by a short-lived link. */
 export function TemplateSourceLink({

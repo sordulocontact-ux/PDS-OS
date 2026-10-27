@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { legalClearance } from "@/lib/i18n/fr/legal-clearance";
 import { advanceClearance } from "@/lib/legal/clearance/actions";
 import {
   counterClearanceTerms,
@@ -31,6 +31,8 @@ import {
 } from "@/components/legal/clearance/terms-lines";
 import { useLegalAction } from "@/components/legal/use-legal-action";
 import { formatInstant } from "@/lib/utils/instant";
+
+const fr = { legalClearance };
 
 // What PO read, line by line (one per right), as the person may correct it.
 type Reading = { refusal: boolean; lines: TermsLine[] };

@@ -5,9 +5,11 @@ import { useState, useTransition, type FormEvent } from "react";
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { projectReview } from "@/lib/i18n/fr/production";
 import { saveReview } from "@/lib/review/actions";
 import type { ReviewText } from "@/lib/review/queries";
+
+const fr = { projectReview };
 
 const FIELDS = ["results", "worked", "improve"] as const;
 

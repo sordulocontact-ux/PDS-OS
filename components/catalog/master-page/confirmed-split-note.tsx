@@ -5,9 +5,12 @@ import { Button } from "@/components/ui/button";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { adoptConfirmedSplit } from "@/lib/catalog/master/adopt-split-actions";
 import type { MasterSplit } from "@/lib/catalog/master/rules";
-import { fr } from "@/lib/i18n/fr";
+import { legalSplits } from "@/lib/i18n/fr/legal-splits";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 import { formatShare } from "@/lib/legal/splits/shares";
 import type { ConfirmedSplit } from "@/lib/legal/splits/title-split";
+
+const fr = { legalSplits, masterPage };
 
 /** The Juridique's confirmed publishing split on the title's page, and
  * « Reprendre ces parts » when the title's own differ. */

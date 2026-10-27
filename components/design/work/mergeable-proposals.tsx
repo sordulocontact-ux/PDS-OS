@@ -10,7 +10,9 @@ import {
 import { SplitDialog } from "@/components/design/work/split-dialog";
 import { Button } from "@/components/ui/button";
 import { ProposalRows } from "@/components/ui/proposal-group";
-import { fr } from "@/lib/i18n/fr";
+import { conceptionIntents } from "@/lib/i18n/fr/conception-intents";
+
+const fr = { conceptionIntents };
 
 /**
  * PO's proposals of one place, consolidated by the person (ticket § 4):

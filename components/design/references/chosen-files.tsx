@@ -4,7 +4,9 @@ import { IconXmark } from "nucleo-sharp-essential";
 
 import { Button } from "@/components/ui/button";
 import { formatFileSize } from "@/lib/catalog/file-rules";
-import { fr } from "@/lib/i18n/fr";
+import { conceptionRefs } from "@/lib/i18n/fr/conception-refs";
+
+const fr = { conceptionRefs };
 
 /** The files picked for a deposit, each removable before sending. */
 export function ChosenFiles({

@@ -5,10 +5,12 @@
 // silently: the action is proposed without date, flagged. Pure,
 // client-safe; the owner adjusts, then approves.
 
-import { fr } from "@/lib/i18n/fr";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import type { ProductionBrief } from "@/lib/production/brief";
 
 import type { ScheduleStep } from "./schedule";
+
+const fr = { productionPreprod };
 
 export const TEMPLATE_KEYS = [
   "director_brief",

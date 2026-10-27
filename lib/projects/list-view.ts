@@ -2,10 +2,12 @@
 // a project belongs to, its administrative status apart from its phase,
 // the filters and the search. Decided by code (rule 6). Client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { shell } from "@/lib/i18n/fr/shell";
 import { progressLabel } from "@/lib/projects/progress";
 import type { ProjectListItem, ProjectType } from "@/lib/projects/types";
 import { normalizeSearch } from "@/lib/utils/search";
+
+const fr = { shell };
 
 /** Tous excludes the archives; Brouillons = not handed over yet; Actifs =
  * handed over, to accept or running. */

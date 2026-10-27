@@ -11,11 +11,14 @@ import {
   type RequestState,
 } from "@/components/legal/contracts/mapping-row";
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
+import { legalDocuments } from "@/lib/i18n/fr/legal-documents";
 import { isOnlyPaid } from "@/lib/legal/contracts/no-deal";
 import { approveContractMapping } from "@/lib/legal/contracts/actions";
 import { feeCentsOf } from "@/lib/legal/contracts/fields";
 import type { AgreementRow } from "@/lib/legal/contracts/mapping";
+
+const fr = { legalContracts, legalDocuments };
 
 const feeText = (cents: number | null) =>
   cents === null ? "" : String(cents / 100).replace(".", ",");

@@ -10,11 +10,13 @@ import { FieldError, FormMessage } from "@/components/auth/form-message";
 import { SubmitButton } from "@/components/auth/submit-button";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ORGANIZATION_ROLES, routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { auth } from "@/lib/i18n/fr/auth";
 import { inviteMember } from "@/lib/members/actions";
 import { idleInviteState, type InviteState } from "@/lib/members/types";
 
 import { CopyLinkButton } from "../copy-link-button";
+
+const fr = { auth };
 
 // Account created by the director: identity, address, password and position.
 // On success the form gives way to the login details (or, when the address

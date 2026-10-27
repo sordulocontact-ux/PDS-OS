@@ -1,6 +1,8 @@
 import type { SummaryVersion } from "@/lib/calls/meeting/types";
 import { shortStamp } from "@/lib/calls/prep/dates";
-import { fr } from "@/lib/i18n/fr";
+import { meeting } from "@/lib/i18n/fr/meeting";
+
+const fr = { meeting };
 
 /**
  * What a participant reads of a meeting (proto `summaryFor`): the last

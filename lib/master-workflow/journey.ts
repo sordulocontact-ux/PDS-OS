@@ -4,7 +4,10 @@
 // (CLAUDE.md, rule 6). Several titles: each step is done when every title
 // of the round is; the first title still waiting names the action.
 
-import { fr } from "@/lib/i18n/fr";
+import { masterInHouse } from "@/lib/i18n/fr/master-inhouse";
+import { masterInvoice } from "@/lib/i18n/fr/master-invoice";
+import { masterJourney as frMasterJourney } from "@/lib/i18n/fr/master-journey";
+import { shell } from "@/lib/i18n/fr/shell";
 import {
   type JourneyActor,
   type JourneyPrereq,
@@ -21,6 +24,13 @@ import { formatDay, formatShortDay } from "@/lib/utils/day";
 import type { JourneyTransmission, MasterJourneyFacts } from "./journey-facts";
 import { invoiceDueOn } from "@/lib/invoices/rules";
 import { newerThan, replacedForVocals, vocalsAwaited } from "./source-rules";
+
+const fr = {
+  shell,
+  masterJourney: frMasterJourney,
+  masterInvoice,
+  masterInHouse,
+};
 
 const t = fr.masterJourney;
 

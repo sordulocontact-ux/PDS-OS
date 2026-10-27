@@ -4,10 +4,13 @@
 
 import type { DesignState } from "@/lib/design/rules";
 import { formatBriefDate } from "@/lib/framing/assess";
-import { fr } from "@/lib/i18n/fr";
+import { strategyCalendar } from "@/lib/i18n/fr/strategy-calendar";
+import { strategyFollowUp } from "@/lib/i18n/fr/strategy-follow-up";
 import type { DeliveryState } from "@/lib/production/rules";
 import { deliverableTitle } from "@/lib/strategy/deliverable-title";
 import { upstreamChains, type UpstreamStepKey } from "@/lib/strategy/upstream";
+
+const fr = { strategyCalendar, strategyFollowUp };
 
 export const FOLLOW_UP_STATES = [
   "ready",

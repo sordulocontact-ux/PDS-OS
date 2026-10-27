@@ -12,7 +12,9 @@ import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
 import type { CalendarEvent } from "@/lib/calls/calendar";
 import { minutesOf, slotMinutes, type SlotInput } from "@/lib/calls/slot";
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
+
+const fr = { calls };
 
 type Place = { day: string; start: number; end: number };
 

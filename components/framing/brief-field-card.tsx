@@ -15,7 +15,9 @@ import {
   saveField,
 } from "@/lib/framing/actions/brief";
 import type { FieldState } from "@/lib/framing/brief";
-import { fr } from "@/lib/i18n/fr";
+import { framing } from "@/lib/i18n/fr/framing";
+
+const fr = { framing };
 
 /**
  * One deliverable text field (Brief or Strategy), edited in place. A proposal

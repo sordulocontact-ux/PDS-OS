@@ -21,12 +21,15 @@ import {
 import { SelectAllHead, SelectRowCell } from "@/components/ui/row-selection";
 import type { RecordRights } from "@/lib/archive/types";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { network } from "@/lib/i18n/fr/network";
+import { records } from "@/lib/i18n/fr/records";
 import {
   relationsText,
   rolesText,
   type NetworkContactRow,
 } from "@/lib/network/types";
+
+const fr = { network, records };
 
 // The network, by name: a person or an organization (its icon), what it
 // does, how to reach it; the row opens its page, "⋯" edits, archives or

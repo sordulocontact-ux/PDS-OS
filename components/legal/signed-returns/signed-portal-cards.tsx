@@ -2,7 +2,8 @@ import { contractFileName } from "@/components/legal/contracts/contract-document
 import type { PortalCardItem } from "@/components/portal/portal-sections";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { PdfExportButton } from "@/components/ui/pdf-export-button";
-import { fr } from "@/lib/i18n/fr";
+import { legalDocuments } from "@/lib/i18n/fr/legal-documents";
+import { signedReturns } from "@/lib/i18n/fr/signed-returns";
 import type {
   ContactBulletin,
   ContactContract,
@@ -12,6 +13,8 @@ import { formatDay } from "@/lib/utils/day";
 import { fileNamePart } from "@/lib/utils/file-name-part";
 
 import { SignedUploadForm } from "./signed-upload-form";
+
+const fr = { legalDocuments, signedReturns };
 
 const t = fr.signedReturns.portal;
 

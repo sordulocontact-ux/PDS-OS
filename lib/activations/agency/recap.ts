@@ -3,7 +3,9 @@
 // —, shown once a decision is newer than the last recap sent. Client-safe.
 
 import type { AgencyRowRecord } from "@/lib/activations/agency/queries";
-import { fr } from "@/lib/i18n/fr";
+import { activationBrief } from "@/lib/i18n/fr/activation-brief";
+
+const fr = { activationBrief };
 
 const t = fr.activationBrief.recap;
 

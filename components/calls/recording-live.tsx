@@ -4,7 +4,9 @@ import { AudioMeter } from "@/components/ui/audio-meter";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatClock } from "@/lib/calls/format";
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
+
+const fr = { calls };
 
 /** While recording: state, clock, input level, pause and stop. */
 export function RecordingLive({

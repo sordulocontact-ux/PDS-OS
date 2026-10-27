@@ -1,9 +1,11 @@
 import type { CaptureArtist } from "@/lib/catalog/capture-artist-types";
 import { formatFans } from "@/lib/catalog/types";
-import { fr } from "@/lib/i18n/fr";
+import { laboCaptures } from "@/lib/i18n/fr/labo-captures";
 import { asHandle, parseSpotifyId } from "@/lib/network/socials";
 import type { NetworkContactValues } from "@/lib/network/types";
 import { formatDate } from "@/lib/release/format";
+
+const fr = { laboCaptures };
 
 const NOTES_MAX = 2000;
 const WEBSITE_MAX = 500;

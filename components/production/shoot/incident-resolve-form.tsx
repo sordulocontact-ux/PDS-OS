@@ -4,10 +4,12 @@ import { useState } from "react";
 
 import { TextareaField } from "@/components/auth/textarea-field";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { productionShoot } from "@/lib/i18n/fr/production-shoot";
 import { resolveShootIncident } from "@/lib/production/shoot/incident-actions";
 
 import { ShootFormActions } from "./shoot-form-actions";
+
+const fr = { productionShoot };
 
 const t = fr.productionShoot.incidents;
 

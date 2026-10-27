@@ -16,8 +16,10 @@ import {
 } from "@/components/ui/data-table";
 import { routes } from "@/lib/auth/redirects";
 import { formatDateTime, formatMegabytes } from "@/lib/calls/format";
-import { fr } from "@/lib/i18n/fr";
+import { projectHistory } from "@/lib/i18n/fr/project-history";
 import type { ProjectFile } from "@/lib/project-history/queries";
+
+const fr = { projectHistory };
 
 // Call recordings of the project, each downloadable through a short-lived
 // signed URL built on the server with the viewer's session.

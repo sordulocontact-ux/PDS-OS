@@ -1,7 +1,10 @@
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { strategyBrief } from "@/lib/i18n/fr/strategy-brief";
+import { strategyPilot } from "@/lib/i18n/fr/strategy-pilot";
 import type { StrategyDimension } from "@/lib/strategy/dimensions";
 import { strategyDimensionTone } from "@/lib/ui/state-tones";
+
+const fr = { strategyBrief, strategyPilot };
 
 /**
  * One dimension of the Brief de sortie: its number and name, then its

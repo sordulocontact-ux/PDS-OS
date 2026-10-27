@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { fr } from "@/lib/i18n/fr";
+import { productionPost } from "@/lib/i18n/fr/production-post";
 import { uploadProductionFile } from "@/lib/production/files/upload";
 import { addPostComment } from "@/lib/production/post/review-actions";
 import {
@@ -27,6 +27,8 @@ import type { PostScope } from "@/lib/production/post/types";
 
 import { FilePickField } from "@/components/ui/file-pick-field";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
+
+const fr = { productionPost };
 
 const t = fr.productionPost.comments;
 

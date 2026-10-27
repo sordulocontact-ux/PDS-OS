@@ -9,7 +9,9 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/copy-button";
 import { Popover, PopoverContent, PopoverTitle } from "@/components/ui/popover";
 import type { CalendarEvent } from "@/lib/calls/calendar";
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
+
+const fr = { calls };
 
 const longDay = new Intl.DateTimeFormat("fr-FR", {
   weekday: "long",

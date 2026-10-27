@@ -13,7 +13,9 @@ import type { MasterDraft, ProjectDraft } from "@/lib/assistant/drafts";
 import { routes } from "@/lib/auth/redirects";
 import { matchByName } from "@/lib/assistant/fuzzy-name";
 import { masterLabel, type Credit } from "@/lib/catalog/types";
-import { fr } from "@/lib/i18n/fr";
+import { assistant } from "@/lib/i18n/fr/assistant";
+
+const fr = { assistant };
 
 export type SavedLink = { label: string; href: string };
 

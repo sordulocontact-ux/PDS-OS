@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionPost } from "@/lib/i18n/fr/production-post";
 import {
   POST_STEP_KEYS,
   POST_STEP_STATUSES,
@@ -33,6 +33,8 @@ import {
   holderValue,
 } from "@/components/production/holder-select";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
+
+const fr = { productionPost };
 
 const t = fr.productionPost.steps;
 

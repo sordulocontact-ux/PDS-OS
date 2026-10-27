@@ -1,8 +1,10 @@
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { MeetingLine } from "@/lib/calls/meeting/types";
-import { fr } from "@/lib/i18n/fr";
+import { meeting } from "@/lib/i18n/fr/meeting";
 import { meetingLineTone } from "@/lib/ui/state-tones";
 import { cn } from "@/lib/utils";
+
+const fr = { meeting };
 
 const stateLabel = (state: MeetingLine["state"]) => {
   const t = fr.meeting.states;

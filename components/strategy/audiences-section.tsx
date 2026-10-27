@@ -10,7 +10,9 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { removeAudience } from "@/lib/strategy/actions/audiences";
 import type { StrategyAudience } from "@/lib/strategy/queries";
-import { fr } from "@/lib/i18n/fr";
+import { strategyPilot } from "@/lib/i18n/fr/strategy-pilot";
+
+const fr = { strategyPilot };
 
 /**
  * The publics, one card each (MKT-S1-05): segment, priority, need or

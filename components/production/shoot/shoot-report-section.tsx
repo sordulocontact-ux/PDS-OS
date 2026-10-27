@@ -3,7 +3,7 @@ import { FactList } from "@/components/ui/fact-list";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { formatDateTime } from "@/lib/calls/format";
-import { fr } from "@/lib/i18n/fr";
+import { productionShoot } from "@/lib/i18n/fr/production-shoot";
 import type { FollowUp } from "@/lib/production/shoot/follow-ups";
 import type { ShootReport } from "@/lib/production/shoot/report";
 import type { ShootRecord } from "@/lib/production/shoot/rules";
@@ -14,6 +14,8 @@ import { shootReportTone } from "@/lib/ui/state-tones";
 import { FollowUpsList } from "./follow-ups-list";
 import { ReportValidateForm } from "./report-validate-form";
 import { PostBlockersCallout } from "./post-blockers-callout";
+
+const fr = { productionShoot };
 
 const t = fr.productionShoot.report;
 const s = fr.productionShoot;

@@ -12,7 +12,7 @@ import { useSplitDraft } from "@/components/legal/splits/use-split-draft";
 import { StepSection } from "@/components/shell/journey/step-section";
 import { Button } from "@/components/ui/button";
 import { FactRows } from "@/components/ui/fact-row";
-import { fr } from "@/lib/i18n/fr";
+import { legalSplits } from "@/lib/i18n/fr/legal-splits";
 import { saveSplitDraft } from "@/lib/legal/splits/actions";
 import {
   draftErrors,
@@ -21,6 +21,8 @@ import {
   type PublishingHint,
 } from "@/lib/legal/splits/draft";
 import type { SplitLine } from "@/lib/legal/splits/queries";
+
+const fr = { legalSplits };
 
 /**
  * A title's split (recette Juridique V1, JUR-01), in three distinct

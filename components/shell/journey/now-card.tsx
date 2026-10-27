@@ -2,7 +2,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { ViewLink } from "@/components/ui/view-link";
-import { fr } from "@/lib/i18n/fr";
+import { journey } from "@/lib/i18n/fr/journey";
 import {
   actionHref,
   lowerFirst,
@@ -13,6 +13,8 @@ import { cn } from "@/lib/utils";
 import { formatShortDay } from "@/lib/utils/day";
 
 import { WaitingRows } from "./now-waiting";
+
+const fr = { journey };
 
 const t = fr.journey.now;
 

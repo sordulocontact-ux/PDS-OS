@@ -9,7 +9,9 @@ import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { formatTimecode, parseTimecode } from "@/lib/catalog/audio-versions";
 import { commentAudioVersion } from "@/lib/catalog/master/audio-actions";
-import { fr } from "@/lib/i18n/fr";
+import { masterPage } from "@/lib/i18n/fr/master-page";
+
+const fr = { masterPage };
 
 /**
  * « Ajouter un retour », in a modal (Sacha, 12/10/2026: one small button per

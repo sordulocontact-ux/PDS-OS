@@ -5,7 +5,9 @@ import { useState, type ComponentType, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { Loaded } from "@/components/ui/loaded";
-import { fr } from "@/lib/i18n/fr";
+import { records } from "@/lib/i18n/fr/records";
+
+const fr = { records };
 
 /**
  * A button opening a form in the modal, whose data (the record, its

@@ -2,13 +2,16 @@
 
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
+import { poQuestion } from "@/lib/i18n/fr/po-question";
 import { factLabel } from "@/lib/legal/intake/labels";
 import type {
   IntakeQuestion,
   NotAskedQuestion,
 } from "@/lib/legal/intake/types";
 import { StepSection } from "@/components/shell/journey/step-section";
+
+const fr = { poQuestion, legal };
 
 /**
  * Under « Question de PO », every question at a glance (proto « Projet

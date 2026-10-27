@@ -5,7 +5,9 @@ import { buttonVariants } from "@/components/ui/button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { attachProof } from "@/lib/distribution/declare-actions";
 import { removeProof, uploadProof } from "@/lib/distribution/upload-proof";
-import { fr } from "@/lib/i18n/fr";
+import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
+
+const fr = { distributionJourney };
 
 const t = fr.distributionJourney.orchard;
 

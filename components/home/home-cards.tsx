@@ -2,7 +2,9 @@ import { CardRow, ListCard } from "@/components/ui/list-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDay } from "@/lib/assistant/facts";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { assistant } from "@/lib/i18n/fr/assistant";
+import { shell } from "@/lib/i18n/fr/shell";
+import { transmission } from "@/lib/i18n/fr/transmission";
 import type { ActivityEvent } from "@/lib/insights/activity";
 import type { ReleaseOverview } from "@/lib/insights/releases";
 import type { Todo } from "@/lib/insights/todo";
@@ -14,6 +16,8 @@ import {
   overdueTone,
   projectStatusTone,
 } from "@/lib/ui/state-tones";
+
+const fr = { shell, assistant, transmission };
 
 const t = fr.assistant.cards;
 const MAX = 5;

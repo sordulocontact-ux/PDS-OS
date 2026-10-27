@@ -6,10 +6,12 @@ import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { productionLink } from "@/lib/i18n/fr/production-link";
 import { proposeDirectorByLink } from "@/lib/production/provider/director-link-actions";
 
 import { useLinkSubmit } from "./use-link-submit";
+
+const fr = { productionLink };
 
 const t = fr.productionLink.director;
 

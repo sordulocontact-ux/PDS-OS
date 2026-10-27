@@ -9,7 +9,9 @@ import {
   idleMasterFormState,
   type MasterFormState,
 } from "@/lib/catalog/master/rules";
-import { fr } from "@/lib/i18n/fr";
+import { masterPage } from "@/lib/i18n/fr/master-page";
+
+const fr = { masterPage };
 
 type Action = (
   previous: MasterFormState,

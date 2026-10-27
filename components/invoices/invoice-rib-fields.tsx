@@ -1,9 +1,11 @@
 "use client";
 
 import { Field } from "@/components/auth/field";
-import { fr } from "@/lib/i18n/fr";
+import { invoices } from "@/lib/i18n/fr/invoices";
 
 import type { InvoiceDraft, InvoiceErrors } from "./invoice-check";
+
+const fr = { invoices };
 
 const t = fr.invoices.fields;
 const h3 =

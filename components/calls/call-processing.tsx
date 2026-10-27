@@ -12,7 +12,12 @@ import { useCanEditProject } from "@/components/projects/edit-access";
 import { Button } from "@/components/ui/button";
 import { routes } from "@/lib/auth/redirects";
 import type { ActionResult, CallStatus } from "@/lib/calls/constants";
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
+import { conceptionCall } from "@/lib/i18n/fr/conception-call";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
+import { strategyEntry } from "@/lib/i18n/fr/strategy-entry";
+
+const fr = { calls, strategyEntry, conceptionCall, productionPreprod };
 
 type ErrorKey = keyof typeof fr.calls.errors;
 type Phase = "transcribing" | "extracting";

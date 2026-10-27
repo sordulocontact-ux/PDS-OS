@@ -1,11 +1,13 @@
 import { MilestoneRow } from "@/components/strategy/calendar/milestone-row";
 import { EmptyNote } from "@/components/shell/empty-state";
-import { fr } from "@/lib/i18n/fr";
+import { strategyCalendar } from "@/lib/i18n/fr/strategy-calendar";
 import {
   MILESTONE_CHANNELS,
   type MilestoneChannel,
 } from "@/lib/strategy/calendar";
 import type { Milestone } from "@/lib/strategy/queries";
+
+const fr = { strategyCalendar };
 
 // Always shown, even empty: the channels every launch weighs. Live / Event
 // and Autre appear only when they hold a milestone (« lorsque nécessaire »).

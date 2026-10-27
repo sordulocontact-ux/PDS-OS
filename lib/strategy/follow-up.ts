@@ -19,7 +19,8 @@
 //   cours) and each stage validation pending → En attente.
 
 import { formatBriefDate } from "@/lib/framing/assess";
-import { fr } from "@/lib/i18n/fr";
+import { strategyCalendar } from "@/lib/i18n/fr/strategy-calendar";
+import { strategyFollowUp } from "@/lib/i18n/fr/strategy-follow-up";
 import {
   WATCHED,
   contentItem,
@@ -29,6 +30,8 @@ import {
   type FollowUpInput,
   type FollowUpItem,
 } from "@/lib/strategy/follow-up-model";
+
+const fr = { strategyCalendar, strategyFollowUp };
 
 export {
   FOLLOW_UP_AREAS,

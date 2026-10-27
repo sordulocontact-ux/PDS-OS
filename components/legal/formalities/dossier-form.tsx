@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { downloadPdf } from "@/components/ui/pdf-export-button";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { legalDocuments } from "@/lib/i18n/fr/legal-documents";
+import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
 import { saveFormalityValues } from "@/lib/legal/formalities/actions";
 import {
   FORMALITY_SECTIONS,
@@ -24,6 +25,8 @@ import { fileNamePart } from "@/lib/utils/file-name-part";
 
 import { DossierSection } from "./dossier-section";
 import { useDossierErrors } from "./use-dossier-errors";
+
+const fr = { legalDocuments, legalFormalities };
 
 const EDITABLE = [
   "collecting_data",

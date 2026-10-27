@@ -22,8 +22,10 @@ import {
   type ParamsData,
 } from "@/lib/distribution/params-view";
 import { setDistributionValidator } from "@/lib/distribution/validation-actions";
-import { fr } from "@/lib/i18n/fr";
+import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
 import { formatDay } from "@/lib/utils/day";
+
+const fr = { distributionJourney };
 
 const t = fr.distributionJourney.params;
 

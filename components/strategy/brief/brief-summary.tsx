@@ -1,9 +1,11 @@
 import { sectionCardClass } from "@/components/ui/section-card";
 import { formatBriefDate } from "@/lib/framing/assess";
-import { fr } from "@/lib/i18n/fr";
+import { strategyBrief } from "@/lib/i18n/fr/strategy-brief";
 import type { BriefSnapshot } from "@/lib/strategy/documents/brief-snapshot";
 import { briefSummary } from "@/lib/strategy/documents/brief-summary";
 import { cn } from "@/lib/utils";
+
+const fr = { strategyBrief };
 
 /**
  * « L'essentiel » (MKT-S1-14): one short page — objective, publics, angle,

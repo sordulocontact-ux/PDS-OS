@@ -2,7 +2,9 @@ import { BriefChangeList } from "@/components/framing/intel/brief-change-list";
 import { PageSection } from "@/components/shell/page-section";
 import { FilterChipLink } from "@/components/ui/filter-chip";
 import { briefChanges, snapshotOf } from "@/lib/framing/brief-snapshot";
-import { fr } from "@/lib/i18n/fr";
+import { briefRequests } from "@/lib/i18n/fr/brief-requests";
+
+const fr = { briefRequests };
 
 type Version = { version: number; content: unknown; sent_at: string | null };
 

@@ -13,7 +13,9 @@ import type { ReviewItem } from "@/components/voice/dictation-review";
 import { useDictation } from "@/components/voice/use-dictation";
 import { applyDictation } from "@/lib/framing/actions/voice";
 import type { FramingProposal } from "@/lib/framing/voice-proposal";
-import { fr } from "@/lib/i18n/fr";
+import { framing } from "@/lib/i18n/fr/framing";
+
+const fr = { framing };
 
 /** Words a framing proposal for review: what changes, and to what. */
 function toItem(

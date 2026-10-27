@@ -5,9 +5,14 @@ import { useState } from "react";
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import { fr } from "@/lib/i18n/fr";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+import { planSteps } from "@/lib/i18n/fr/plan-steps";
+import { workflowStatus } from "@/lib/i18n/fr/workflow-status";
 import { launchPlanWorkflow } from "@/lib/plan/actions";
 import type { PlanWorkflow } from "@/lib/plan/propose";
+
+const fr = { dialogs, framingIntel, planSteps, workflowStatus };
 
 /** « Lancer » on a workflow card not started yet: the same action as the
  * launched Plan du projet's « Lancer maintenant » (launch_plan_workflow),

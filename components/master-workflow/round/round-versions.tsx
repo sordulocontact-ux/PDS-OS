@@ -1,11 +1,15 @@
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { VersionCard } from "@/components/ui/version-card";
-import { fr } from "@/lib/i18n/fr";
+import { masterInHouse } from "@/lib/i18n/fr/master-inhouse";
+import { masterJourney } from "@/lib/i18n/fr/master-journey";
+import { masterRound } from "@/lib/i18n/fr/master-round";
 import type { RoundStepView } from "@/lib/master-workflow/round-step";
 
 import { PendingVersion } from "./pending-version";
 import { RoundVersionCard } from "./round-version-card";
 import { ReopenMix } from "./version-decision";
+
+const fr = { masterJourney, masterRound, masterInHouse };
 
 const t = fr.masterRound;
 

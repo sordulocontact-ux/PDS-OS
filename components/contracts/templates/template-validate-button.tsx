@@ -4,8 +4,11 @@ import { useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import { fr } from "@/lib/i18n/fr";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
+import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
 import { setContractTemplateStatus } from "@/lib/legal/contracts/template-actions";
+
+const fr = { dialogs, legalContracts };
 
 /** « Valider » a draft template, on its page (JUR-19): the director's
  * decision, asked first, the refusal kept in the dialog. */

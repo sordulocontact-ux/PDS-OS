@@ -1,5 +1,8 @@
 import type { DossierSection } from "@/lib/distribution/delivery-file";
-import { fr } from "@/lib/i18n/fr";
+import { distribution } from "@/lib/i18n/fr/distribution";
+import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
+
+const fr = { distribution, distributionJourney };
 
 const esc = (value: string) =>
   value.replace(/[&<>"']/g, (c) =>

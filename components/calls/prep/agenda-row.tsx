@@ -14,10 +14,12 @@ import { FieldError } from "@/components/auth/form-message";
 import { IconGrip } from "@/components/icons";
 import { MinutesInput } from "@/components/calls/minutes-input";
 import { Input } from "@/components/ui/input";
-import { fr } from "@/lib/i18n/fr";
+import { callPrep } from "@/lib/i18n/fr/call-prep";
 import { cn } from "@/lib/utils";
 
 import type { AgendaDraftItem } from "./use-agenda-draft";
+
+const fr = { callPrep };
 
 const ICON_BUTTON =
   "inline-flex size-8 shrink-0 items-center justify-center rounded-lg text-[color:var(--text-secondary)] hover:bg-[var(--surface-soft)] focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:outline-none";

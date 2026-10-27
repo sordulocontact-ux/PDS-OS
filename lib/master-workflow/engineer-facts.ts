@@ -12,7 +12,8 @@ import {
   type NetworkIndex,
 } from "@/lib/facts/credit-contact";
 import { groupOf } from "@/lib/facts/types";
-import { fr } from "@/lib/i18n/fr";
+import { masterPage } from "@/lib/i18n/fr/master-page";
+import { masterWorkflow } from "@/lib/i18n/fr/master-workflow";
 import type {
   FlowSession,
   FlowTitle,
@@ -22,6 +23,8 @@ import {
   type EngineerRole,
   type MasterFact,
 } from "@/lib/master-workflow/types";
+
+const fr = { masterWorkflow, masterPage };
 
 /** A mix or mastering credit of a title (master_contributors). */
 export type FlowCredit = {

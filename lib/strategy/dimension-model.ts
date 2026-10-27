@@ -7,7 +7,8 @@
 
 import type { BudgetLine } from "@/lib/budget/types";
 import { formatBriefDate } from "@/lib/framing/assess";
-import { fr } from "@/lib/i18n/fr";
+import { strategyBriefOut } from "@/lib/i18n/fr/strategy-brief-out";
+import { strategyDimensions } from "@/lib/i18n/fr/strategy-dimensions";
 import { budgetView, type BudgetView } from "@/lib/strategy/dimension-budget";
 import {
   audienceItem,
@@ -32,6 +33,8 @@ import {
 } from "@/lib/strategy/dimensions";
 import { addDays, dayOffset } from "@/lib/strategy/calendar";
 import { formatDay } from "@/lib/utils/day";
+
+const fr = { strategyDimensions, strategyBriefOut };
 
 export type DimState = "to_complete" | "in_progress" | "to_decide" | "complete";
 

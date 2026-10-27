@@ -4,10 +4,12 @@ import { AssignmentHistory } from "@/components/projects/assignment-history";
 import { TransmissionPanel } from "@/components/projects/transmission-panel";
 import { routes } from "@/lib/auth/redirects";
 import { masterLabel } from "@/lib/catalog/types";
-import { fr } from "@/lib/i18n/fr";
+import { shell } from "@/lib/i18n/fr/shell";
 import { projectDateLabel, projectKindLabel } from "@/lib/projects/labels";
 import type { ProjectDetail } from "@/lib/projects/types";
 import { FactList } from "@/components/ui/fact-list";
+
+const fr = { shell };
 
 const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric",

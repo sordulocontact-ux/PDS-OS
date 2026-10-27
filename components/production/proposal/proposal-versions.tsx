@@ -1,7 +1,7 @@
 import { buttonVariants } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { VersionCard } from "@/components/ui/version-card";
-import { fr } from "@/lib/i18n/fr";
+import { productionProposal } from "@/lib/i18n/fr/production-proposal";
 import {
   isSentBack,
   retainedOf,
@@ -10,6 +10,8 @@ import {
 } from "@/lib/production/proposal/model";
 import type { Tone } from "@/lib/ui/state-tones";
 import { formatShortInstant } from "@/lib/utils/day";
+
+const fr = { productionProposal };
 
 const t = fr.productionProposal;
 const SIDE_TONE: Record<ProposalExt | "stale", Tone> = {

@@ -1,7 +1,7 @@
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { FactList } from "@/components/ui/fact-list";
-import { fr } from "@/lib/i18n/fr";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import type { CallSheetDefaults } from "@/lib/production/preprod/call-sheet-defaults";
 import { isConfirmedEquipment } from "@/lib/production/preprod/equipment";
 import { teamMembers } from "@/lib/production/preprod/team";
@@ -14,6 +14,8 @@ import type {
 import { formatDate } from "@/lib/release/format";
 
 import { CallSheetEditButton } from "./call-sheet-form";
+
+const fr = { productionPreprod };
 
 const t = fr.productionPreprod.callSheet;
 

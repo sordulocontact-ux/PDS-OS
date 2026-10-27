@@ -4,11 +4,13 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { ViewLink } from "@/components/ui/view-link";
 import type { TargetRecord } from "@/lib/activations/targets";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { activationWork } from "@/lib/i18n/fr/activation-work";
 import { formatDate } from "@/lib/release/format";
 import type { Tone } from "@/lib/ui/state-tones";
 
 import { OutcomeButton } from "./outcome-form";
+
+const fr = { activationWork };
 
 const t = fr.activationWork.targets;
 

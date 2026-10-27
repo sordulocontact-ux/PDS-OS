@@ -1,9 +1,11 @@
 import { Avatar } from "@/components/ui/avatar";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { roles } from "@/lib/i18n/fr/roles";
 import { formatShortInstant } from "@/lib/utils/instant";
 
 import { PrivateLinks, type PrivateLinkRow } from "./private-links";
+
+const fr = { roles };
 
 const t = fr.roles;
 

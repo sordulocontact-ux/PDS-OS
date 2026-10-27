@@ -7,7 +7,8 @@
 import { formatBriefDate } from "@/lib/framing/assess";
 import type { BriefChange } from "@/lib/framing/brief-snapshot";
 import type { Dimension } from "@/lib/framing/dimensions";
-import { fr } from "@/lib/i18n/fr";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+import { planSteps } from "@/lib/i18n/fr/plan-steps";
 import type { PlanColumn, PlanWorkflow } from "@/lib/plan/propose";
 import type {
   CommonStatus,
@@ -15,6 +16,8 @@ import type {
   WorkflowKey,
   WorkflowState,
 } from "@/lib/workflow-status/rules";
+
+const fr = { framingIntel, planSteps };
 
 export type PlanStep = {
   key: string;

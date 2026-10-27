@@ -1,6 +1,9 @@
 import { ProvenanceNote } from "@/components/framing/provenance-note";
 import type { Provenance } from "@/lib/framing/brief";
-import { fr } from "@/lib/i18n/fr";
+import { framing } from "@/lib/i18n/fr/framing";
+import { framingGuide } from "@/lib/i18n/fr/framing-guide";
+
+const fr = { framing, framingGuide };
 
 /** Where a proposal comes from, in words: the call and its quote, or the dictation. */
 export function sourceLabel(provenance: Provenance): string {

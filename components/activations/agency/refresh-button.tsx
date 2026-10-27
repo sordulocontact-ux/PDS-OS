@@ -10,9 +10,13 @@ import { FormDialog } from "@/components/ui/form-dialog";
 import { uploadActivationFile } from "@/lib/activations/files/upload";
 import { refreshAgencySource } from "@/lib/activations/agency/source-actions";
 import type { ActivationScope } from "@/lib/activations/types";
-import { fr } from "@/lib/i18n/fr";
+import { activationAgency } from "@/lib/i18n/fr/activation-agency";
+import { activations } from "@/lib/i18n/fr/activations";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
 
 import { MappingForm } from "./mapping-form";
+
+const fr = { dialogs, activations, activationAgency };
 
 const t = fr.activationAgency.sources;
 

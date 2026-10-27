@@ -3,7 +3,9 @@ import { CallProcessing } from "@/components/calls/call-processing";
 import { CallRecorder } from "@/components/calls/call-recorder";
 import type { CallDetail } from "@/lib/calls/queries";
 import { formatMegabytes } from "@/lib/calls/format";
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
+
+const fr = { calls };
 
 /** Record (or drop a file) when there is no audio yet, then the automatic processing. */
 export function CallRecording({

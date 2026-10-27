@@ -12,7 +12,7 @@ import { ChipChoice } from "@/components/ui/chip-choice";
 import { ChoiceCards } from "@/components/ui/choice-cards";
 import type { FieldErrors } from "@/lib/auth/form-state";
 import type { ArtistOption, MasterOption } from "@/lib/catalog/types";
-import { fr } from "@/lib/i18n/fr";
+import { shell } from "@/lib/i18n/fr/shell";
 import {
   CONTENT_MODES,
   MUSIC_FORMATS,
@@ -22,6 +22,8 @@ import {
   type ProjectType,
 } from "@/lib/projects/types";
 import { cn } from "@/lib/utils";
+
+const fr = { shell };
 
 const TYPE_ICONS: Record<ProjectType, React.ReactNode> = {
   music_release: <IconMicrophone className="size-6" aria-hidden />,

@@ -1,11 +1,14 @@
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { formatEuros } from "@/lib/budget/types";
-import { fr } from "@/lib/i18n/fr";
+import { productionJourney } from "@/lib/i18n/fr/production-journey";
+import { productionPrep } from "@/lib/i18n/fr/production-prep";
 import { effectiveLogistics } from "@/lib/production/logistics";
 import type { ProductionSheetData } from "@/lib/production/sheet";
 import type { ModuleFact } from "@/lib/ui/module-frame";
 import { formatDay } from "@/lib/utils/day";
+
+const fr = { productionPrep, productionJourney };
 
 const t = fr.productionPrep;
 const j = fr.productionJourney.header;

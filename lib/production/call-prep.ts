@@ -5,13 +5,16 @@
 // by code, no model (same idea as lib/strategy/call-prep.ts). Client-safe.
 
 import { topicMinutes } from "@/lib/calls/prepare";
-import { fr } from "@/lib/i18n/fr";
+import { productionCall } from "@/lib/i18n/fr/production-call";
+import { productionNeeds } from "@/lib/i18n/fr/production-needs";
 import { missingBriefTopics } from "@/lib/production/brief";
 import { NEED_FAMILIES, isRoleOf } from "@/lib/production/roles";
 import type {
   ProductionNeed,
   ProductionSheetData,
 } from "@/lib/production/sheet";
+
+const fr = { productionNeeds, productionCall };
 
 export {
   CALL_FORMATS,

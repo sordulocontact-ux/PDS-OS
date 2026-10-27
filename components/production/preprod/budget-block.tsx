@@ -15,7 +15,7 @@ import { StatTiles } from "@/components/ui/stat-tiles";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { formatEuros } from "@/lib/budget/types";
-import { fr } from "@/lib/i18n/fr";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import type { PreprodBudgetTotals } from "@/lib/production/preprod/budget";
 import type {
   Equipment,
@@ -24,6 +24,8 @@ import type {
 import { preprodBudgetTone } from "@/lib/ui/state-tones";
 
 import { AddBudgetLineButton, BudgetLineMenu } from "./budget-line-form";
+
+const fr = { productionPreprod };
 
 const t = fr.productionPreprod.budget;
 

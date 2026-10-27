@@ -5,8 +5,10 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import { fr } from "@/lib/i18n/fr";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
 import type { WriteResult } from "@/lib/utils/write-result";
+
+const fr = { dialogs };
 
 const t = fr.dialogs;
 

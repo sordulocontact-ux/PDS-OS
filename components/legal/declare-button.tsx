@@ -9,7 +9,10 @@ import { EmptyNote } from "@/components/shell/empty-state";
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { ORGANISMS, type Organism } from "@/lib/catalog/master/rules";
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
+import { masterPage } from "@/lib/i18n/fr/master-page";
+
+const fr = { legal, masterPage };
 
 /**
  * "Déclarer" a filing from the État des lieux: choose the title (when the

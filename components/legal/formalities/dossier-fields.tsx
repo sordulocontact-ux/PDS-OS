@@ -3,7 +3,9 @@
 import { Field } from "@/components/auth/field";
 import { FieldError } from "@/components/auth/form-message";
 import { OptionSelect } from "@/components/projects/option-select";
-import { fr } from "@/lib/i18n/fr";
+import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
+
+const fr = { legalFormalities };
 
 type Arrangement = { scope: string; detail: string };
 type Contract = { provided: boolean; rubric_g: string };

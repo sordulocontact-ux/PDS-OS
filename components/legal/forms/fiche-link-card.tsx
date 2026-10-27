@@ -1,10 +1,12 @@
 "use client";
 
 import { PrivateLinkCard } from "@/components/legal/private-link-card";
-import { fr } from "@/lib/i18n/fr";
+import { legalForms } from "@/lib/i18n/fr/legal-forms";
 import { revokeLegalForm } from "@/lib/legal/forms/actions";
 import type { FormRow } from "@/lib/legal/forms/queries";
 import { mailtoHref } from "@/lib/utils/mailto";
+
+const fr = { legalForms };
 
 const t = fr.legalForms.page;
 

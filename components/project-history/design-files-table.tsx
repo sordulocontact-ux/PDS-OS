@@ -18,8 +18,11 @@ import { routes } from "@/lib/auth/redirects";
 import { formatDateTime } from "@/lib/calls/format";
 import { formatFileSize } from "@/lib/catalog/file-rules";
 import type { DesignFile } from "@/lib/design/versions";
-import { fr } from "@/lib/i18n/fr";
+import { design } from "@/lib/i18n/fr/design";
+import { projectHistory } from "@/lib/i18n/fr/project-history";
 import { designStateTone } from "@/lib/ui/state-tones";
+
+const fr = { design, projectHistory };
 
 // Versions deposited in the Conception, newest first; each opens the
 // Conception page, where it is reviewed. Files download through a signed URL

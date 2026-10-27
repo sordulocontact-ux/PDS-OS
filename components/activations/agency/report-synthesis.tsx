@@ -9,7 +9,10 @@ import {
   type MetricTotal,
 } from "@/lib/activations/totals";
 import type { MetricRecord } from "@/lib/activations/types";
-import { fr } from "@/lib/i18n/fr";
+import { activationAgency } from "@/lib/i18n/fr/activation-agency";
+import { activations } from "@/lib/i18n/fr/activations";
+
+const fr = { activations, activationAgency };
 
 const t = fr.activationAgency;
 

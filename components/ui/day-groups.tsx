@@ -1,8 +1,10 @@
 import type { ReactNode } from "react";
 
 import { daysAgo, todayInParis } from "@/lib/insights/dates";
-import { fr } from "@/lib/i18n/fr";
+import { projectHistory } from "@/lib/i18n/fr/project-history";
 import { formatLongDay, groupByDay } from "@/lib/project-history/format";
+
+const fr = { projectHistory };
 
 /**
  * A journal, newest first, one block per Paris day (« Aujourd'hui »,

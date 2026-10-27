@@ -9,7 +9,9 @@ import { PoQuestion } from "@/components/ui/po-question";
 import { PoReading } from "@/components/ui/po-reading";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { VoiceFieldControl } from "@/components/voice/voice-field-control";
-import { fr } from "@/lib/i18n/fr";
+import { auth } from "@/lib/i18n/fr/auth";
+import { legal } from "@/lib/i18n/fr/legal";
+import { poQuestion } from "@/lib/i18n/fr/po-question";
 import { factLabel } from "@/lib/legal/intake/labels";
 import {
   interpretLegalAnswer,
@@ -20,6 +22,8 @@ import {
   type IntakeQuestion,
   type ProposedFact,
 } from "@/lib/legal/intake/types";
+
+const fr = { auth, poQuestion, legal };
 
 const FIELD_ID = "legal-answer";
 const NONE_FACT: ProposedFact = { kind: "none", value: {}, quote: null };

@@ -1,10 +1,12 @@
 import type { PortalCardItem } from "@/components/portal/portal-sections";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { shortStamp } from "@/lib/calls/prep/dates";
-import { fr } from "@/lib/i18n/fr";
+import { productionLink } from "@/lib/i18n/fr/production-link";
 import type { LinkJourney } from "@/lib/production/provider/journey";
 
 import { LinkDirectorForm } from "./link-director-form";
+
+const fr = { productionLink };
 
 const t = fr.productionLink.director;
 const TONE = {

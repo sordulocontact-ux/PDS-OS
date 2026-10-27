@@ -6,7 +6,10 @@ import {
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { MASTER_ACTIVITY_LIMIT } from "@/lib/catalog/master/activity";
-import { fr } from "@/lib/i18n/fr";
+import { artistActivity } from "@/lib/i18n/fr/artist-activity";
+import { masterPage } from "@/lib/i18n/fr/master-page";
+
+const fr = { artistActivity, masterPage };
 
 // Activity block, last of the title overview: what happened around the
 // title, written by the database (triggers), filtered by RLS.

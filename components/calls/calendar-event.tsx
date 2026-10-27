@@ -2,9 +2,11 @@ import Link from "next/link";
 
 import type { CalendarEvent } from "@/lib/calls/calendar";
 import { callEndOf, formatTime } from "@/lib/calls/format";
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
 import { hueClass, projectHue } from "@/lib/ui/category-hues";
 import { cn } from "@/lib/utils";
+
+const fr = { calls };
 
 // Tall enough (in minutes) to show the project under the title and time;
 // below COMPACT_MINUTES, title and start share one line.

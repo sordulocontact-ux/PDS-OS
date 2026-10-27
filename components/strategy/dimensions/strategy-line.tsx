@@ -1,9 +1,11 @@
 "use client";
 
 import { ProposalRow } from "@/components/ui/proposal-row";
-import { fr } from "@/lib/i18n/fr";
+import { strategyDimensions } from "@/lib/i18n/fr/strategy-dimensions";
 import { decideStrategyLine } from "@/lib/strategy/actions/lines";
 import type { DimItem } from "@/lib/strategy/dimension-items";
+
+const fr = { strategyDimensions };
 
 const t = fr.strategyDimensions.done;
 

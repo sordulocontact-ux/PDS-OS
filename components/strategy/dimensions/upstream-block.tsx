@@ -1,8 +1,10 @@
 import { Rows } from "@/components/ui/rows";
-import { fr } from "@/lib/i18n/fr";
+import { strategyDimensions } from "@/lib/i18n/fr/strategy-dimensions";
 import { dayLabel } from "@/lib/strategy/dimension-model";
 import type { UpstreamChain } from "@/lib/strategy/upstream";
 import { formatDay } from "@/lib/utils/day";
+
+const fr = { strategyDimensions };
 
 const t = fr.strategyDimensions.upstream;
 

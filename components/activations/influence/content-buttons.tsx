@@ -18,11 +18,14 @@ import {
   setFeedbackStatus,
 } from "@/lib/activations/influence/content-actions";
 import type { ActivationScope } from "@/lib/activations/types";
-import { fr } from "@/lib/i18n/fr";
+import { activationInfluence } from "@/lib/i18n/fr/activation-influence";
+import { activationWork } from "@/lib/i18n/fr/activation-work";
 
 import { ReasonForm } from "@/components/ui/reason-form";
 import { ContentForm } from "./content-form";
 import { FeedbackForm } from "./feedback-form";
+
+const fr = { activationWork, activationInfluence };
 
 const t = fr.activationInfluence.contents;
 const FEEDBACK_STATUSES = [

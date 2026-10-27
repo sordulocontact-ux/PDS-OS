@@ -4,7 +4,9 @@ import {
   FileImport,
   FileImportButton,
 } from "@/components/catalog/files/file-import";
-import { fr } from "@/lib/i18n/fr";
+import { masterSource } from "@/lib/i18n/fr/master-source";
+
+const fr = { masterSource };
 
 const t = fr.masterSource;
 

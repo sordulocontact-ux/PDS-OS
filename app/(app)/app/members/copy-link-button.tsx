@@ -4,7 +4,9 @@ import { IconCopy } from "@/components/icons";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { auth } from "@/lib/i18n/fr/auth";
+
+const fr = { auth };
 
 // Copies a sign-up link, with the same feedback as the smartlink.
 export function CopyLinkButton({

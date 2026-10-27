@@ -8,7 +8,10 @@ import {
   type AudioComment,
 } from "@/lib/catalog/audio-versions";
 import { reviewAudioVersion } from "@/lib/catalog/master/audio-actions";
-import { fr } from "@/lib/i18n/fr";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
+import { masterPage } from "@/lib/i18n/fr/master-page";
+
+const fr = { dialogs, masterPage };
 
 /**
  * The decision on a version waiting for one, in the version's row of

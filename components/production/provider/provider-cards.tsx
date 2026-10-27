@@ -1,5 +1,6 @@
 import type { PortalCardItem } from "@/components/portal/portal-sections";
-import { fr } from "@/lib/i18n/fr";
+import { portal } from "@/lib/i18n/fr/portal";
+import { productionProvider } from "@/lib/i18n/fr/production-provider";
 import type { LinkJourney } from "@/lib/production/provider/journey";
 import type {
   OpenProviderSpace,
@@ -9,6 +10,8 @@ import { formatDate } from "@/lib/release/format";
 
 import { linkJourneyCards } from "./link-journey";
 import { ProviderSpaceView } from "./provider-space";
+
+const fr = { productionProvider, portal };
 
 const t = fr.productionProvider;
 

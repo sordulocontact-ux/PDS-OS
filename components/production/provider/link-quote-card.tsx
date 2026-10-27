@@ -1,10 +1,13 @@
 import type { PortalCardItem } from "@/components/portal/portal-sections";
-import { fr } from "@/lib/i18n/fr";
+import { portal } from "@/lib/i18n/fr/portal";
+import { productionLink } from "@/lib/i18n/fr/production-link";
 import type { LinkJourney } from "@/lib/production/provider/journey";
 import { formatDay, formatShortDay } from "@/lib/utils/day";
 
 import { LinkQuoteForm } from "./link-quote-form";
 import { LinkQuoteList } from "./link-quote-list";
+
+const fr = { productionLink, portal };
 
 const t = fr.productionLink.quote;
 

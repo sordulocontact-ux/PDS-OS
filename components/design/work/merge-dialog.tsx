@@ -9,7 +9,10 @@ import { FormDialog } from "@/components/ui/form-dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { mergeDesignIntentions } from "@/lib/design/actions/consolidation";
-import { fr } from "@/lib/i18n/fr";
+import { conception } from "@/lib/i18n/fr/conception";
+import { conceptionIntents } from "@/lib/i18n/fr/conception-intents";
+
+const fr = { conception, conceptionIntents };
 
 /**
  * « Fusionner »: the checked proposals become one, its words prefilled by

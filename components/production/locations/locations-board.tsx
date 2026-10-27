@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/data-table";
 import { formatEuros } from "@/lib/budget/types";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionLocations } from "@/lib/i18n/fr/production-locations";
 import {
   awaited,
   missingOf,
@@ -22,6 +22,8 @@ import type { NetworkOption } from "@/lib/production/sheet";
 import { LocationCard } from "./location-card";
 import { LocationConsults } from "./location-consults";
 import { AddLocationButton } from "./add-location-button";
+
+const fr = { productionLocations };
 
 const t = fr.productionLocations;
 

@@ -10,8 +10,10 @@ import type {
   DeleteErrorCode,
   DeleteResult,
 } from "@/lib/archive/types";
-import { fr } from "@/lib/i18n/fr";
+import { records } from "@/lib/i18n/fr/records";
 import { deleteProjectDrafts } from "@/lib/projects/draft-actions";
+
+const fr = { records };
 
 const IN_USE: DeleteErrorCode[] = [
   "artist_in_use",

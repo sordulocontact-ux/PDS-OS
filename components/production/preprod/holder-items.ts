@@ -1,6 +1,8 @@
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import type { Holder, NetworkOption } from "@/lib/production/sheet";
+
+const fr = { productionPreprod };
 
 const t = fr.productionPreprod.plan;
 

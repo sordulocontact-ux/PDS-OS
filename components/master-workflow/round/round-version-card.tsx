@@ -1,7 +1,8 @@
 import { AudioFile } from "@/components/ui/audio-file";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { VersionCard } from "@/components/ui/version-card";
-import { fr } from "@/lib/i18n/fr";
+import { masterJourney } from "@/lib/i18n/fr/master-journey";
+import { masterRound } from "@/lib/i18n/fr/master-round";
 import type { MixVersion } from "@/lib/master-workflow/mix-types";
 import type { RoundStepView } from "@/lib/master-workflow/round-step";
 import type { Tone } from "@/lib/ui/state-tones";
@@ -9,6 +10,8 @@ import { formatShortDay, formatShortInstant } from "@/lib/utils/day";
 
 import { SentRequest, sentOf } from "./sent-request";
 import { VersionComments } from "./version-comments";
+
+const fr = { masterJourney, masterRound };
 
 const t = fr.masterRound;
 

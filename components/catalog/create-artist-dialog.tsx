@@ -18,7 +18,9 @@ import type {
   ArtistRelation,
   DeezerArtistResult,
 } from "@/lib/catalog/types";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
+
+const fr = { catalog };
 
 // "Nouvel artiste" modal (step A): search Deezer first, then confirm the
 // name, the relation with PDS, the picture, the main contact and notes; "Créer sans Deezer" keeps the manual

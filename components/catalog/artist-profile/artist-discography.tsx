@@ -13,8 +13,10 @@ import {
   type ArtistRelease,
   type ReleaseKind,
 } from "@/lib/catalog/artist-types";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
 import { upcomingReleaseTone } from "@/lib/ui/state-tones";
+
+const fr = { catalog };
 
 // Enough covers for three rows on a wide screen before "Tout afficher".
 const COLLAPSED = 12;

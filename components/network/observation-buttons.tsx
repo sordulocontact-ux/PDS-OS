@@ -10,11 +10,14 @@ import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { activations } from "@/lib/i18n/fr/activations";
+import { network } from "@/lib/i18n/fr/network";
 import {
   invalidateObservation,
   recordObservation,
 } from "@/lib/network/observation-actions";
+
+const fr = { network, activations };
 
 const t = fr.network.page;
 type Kind = keyof typeof t.observationKinds;

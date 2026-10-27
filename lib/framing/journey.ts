@@ -5,7 +5,7 @@
 // records (rule 6), never stored. Client-safe.
 
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { framingJourney as frFramingJourney } from "@/lib/i18n/fr/framing-journey";
 import type {
   JourneyPerson,
   JourneyRole,
@@ -13,6 +13,8 @@ import type {
   JourneyStep,
 } from "@/lib/ui/journey";
 import { formatShortDay } from "@/lib/utils/day";
+
+const fr = { framingJourney: frFramingJourney };
 
 export const FRAMING_STEPS = ["start", "dimensions", "brief", "plan"] as const;
 export type FramingStepKey = (typeof FRAMING_STEPS)[number];

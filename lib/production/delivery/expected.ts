@@ -2,13 +2,16 @@
 // checklist: one line per expected file (lib/production/logistics.ts) and the
 // facts that guide the check. Read from the Fiche, never guessed. Client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { productionClosure } from "@/lib/i18n/fr/production-closure";
+import { productionDelivery } from "@/lib/i18n/fr/production-delivery";
 import {
   orientationOf,
   type ExportCheckKind,
 } from "@/lib/production/delivery/rules";
 import type { HandedFiche } from "@/lib/production/fiche";
 import { expectedExports } from "@/lib/production/logistics";
+
+const fr = { productionDelivery, productionClosure };
 
 const t = fr.productionDelivery.checklist;
 const s = fr.productionClosure.spec;

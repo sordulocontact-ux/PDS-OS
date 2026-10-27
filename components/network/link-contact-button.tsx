@@ -6,7 +6,9 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { linkContributorContact } from "@/lib/catalog/master/contact-link-actions";
 import type { CreditContactAction } from "@/lib/facts/credit-contact";
-import { fr } from "@/lib/i18n/fr";
+import { facts } from "@/lib/i18n/fr/facts";
+
+const fr = { facts };
 
 /** "Relier" a credit to the contact of the Réseau that bears its name, with
  * the other unlinked credits of that name in the project: a human decision,

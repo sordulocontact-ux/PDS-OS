@@ -9,7 +9,9 @@ import { buttonVariants } from "@/components/ui/button";
 import type { RecordRights } from "@/lib/archive/types";
 import { routes } from "@/lib/auth/redirects";
 import type { MasterRow } from "@/lib/catalog/types";
-import { fr } from "@/lib/i18n/fr";
+import { masterPage } from "@/lib/i18n/fr/master-page";
+
+const fr = { masterPage };
 
 // Variants block of the title overview: the other titles of its family (the
 // original and the variants that name it, retour 08), in the table of the

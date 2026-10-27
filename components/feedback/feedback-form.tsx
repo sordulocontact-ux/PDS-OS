@@ -21,7 +21,9 @@ import {
   type EditedFeedback,
   type FeedbackKind,
 } from "@/lib/feedback/types";
-import { fr } from "@/lib/i18n/fr";
+import { feedback } from "@/lib/i18n/fr/feedback";
+
+const fr = { feedback };
 
 // One feedback, in the feedback window: its kind, the message, optional
 // screenshots (dropped or pasted anywhere in the form, or picked) and the page

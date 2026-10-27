@@ -6,7 +6,7 @@ import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { OptionSelect } from "@/components/projects/option-select";
-import { fr } from "@/lib/i18n/fr";
+import { productionNeeds } from "@/lib/i18n/fr/production-needs";
 import {
   addProductionNeed,
   updateProductionNeed,
@@ -22,6 +22,8 @@ import type { ProductionNeed } from "@/lib/production/sheet";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { roleLabel } from "./need-label";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
+
+const fr = { productionNeeds };
 
 const t = fr.productionNeeds;
 

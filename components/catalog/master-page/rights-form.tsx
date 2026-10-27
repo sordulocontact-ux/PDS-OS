@@ -6,9 +6,11 @@ import { Field } from "@/components/auth/field";
 import { formatIswc, type MasterRights } from "@/lib/catalog/master/rules";
 import { saveMasterRights } from "@/lib/catalog/master/rights-actions";
 import { suggestRightsHolder } from "@/lib/catalog/master/rights-holder-actions";
-import { fr } from "@/lib/i18n/fr";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 
 import { MasterForm } from "./master-form";
+
+const fr = { masterPage };
 
 /** ISWC of the work, holder and year of the ℗: the title's Droits tab and
  * the Juridique's Titres. */

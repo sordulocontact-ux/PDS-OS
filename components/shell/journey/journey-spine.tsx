@@ -11,7 +11,7 @@ import { Fragment } from "react";
 
 import { IconStop } from "@/components/icons";
 import { ViewLink } from "@/components/ui/view-link";
-import { fr } from "@/lib/i18n/fr";
+import { journey } from "@/lib/i18n/fr/journey";
 import {
   isLocked,
   type JourneyStep,
@@ -20,6 +20,8 @@ import {
   withModule,
 } from "@/lib/ui/journey";
 import { cn } from "@/lib/utils";
+
+const fr = { journey };
 
 const t = fr.journey;
 

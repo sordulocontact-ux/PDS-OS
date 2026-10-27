@@ -1,6 +1,8 @@
 import { formatTime } from "@/lib/calls/format";
 import type { CallDetail } from "@/lib/calls/queries";
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
+
+const fr = { calls };
 
 const longDay = new Intl.DateTimeFormat("fr-FR", {
   weekday: "long",

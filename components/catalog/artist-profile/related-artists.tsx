@@ -5,7 +5,9 @@ import { ExternalLink } from "@/components/catalog/artist-profile/external-link"
 import { routes } from "@/lib/auth/redirects";
 import type { RelatedArtist } from "@/lib/catalog/artist-types";
 import { formatFans } from "@/lib/catalog/types";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
+
+const fr = { catalog };
 
 // Similar artists according to Deezer. One already in the catalog opens its
 // page here; the others open Deezer.

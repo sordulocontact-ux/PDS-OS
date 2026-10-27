@@ -9,8 +9,10 @@ import { TextareaField } from "@/components/auth/textarea-field";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { productionQuotes } from "@/lib/i18n/fr/production-quotes";
 import { addQuote } from "@/lib/production/quotes/actions";
+
+const fr = { productionQuotes };
 
 const t = fr.productionQuotes;
 

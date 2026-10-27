@@ -6,7 +6,10 @@ import { FieldError } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { CheckboxField } from "@/components/ui/checkbox-field";
 import type { ContractProof } from "@/lib/contracts/proof";
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
+import { signedReturns } from "@/lib/i18n/fr/signed-returns";
+
+const fr = { legal, signedReturns };
 
 const t = fr.signedReturns.team;
 

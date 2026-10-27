@@ -2,7 +2,10 @@ import { FramingLine } from "@/components/framing/framing-line";
 import { FactRows } from "@/components/ui/fact-row";
 import { Fold } from "@/components/ui/fold";
 import type { FramingAssessment } from "@/lib/framing/assess";
-import { fr } from "@/lib/i18n/fr";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+import { framingJourney } from "@/lib/i18n/fr/framing-journey";
+
+const fr = { framingIntel, framingJourney };
 
 /**
  * « Ce que le projet sait déjà » (proto frEntry): the counts read by code,

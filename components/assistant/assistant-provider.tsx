@@ -16,7 +16,9 @@ import { keepChat, keptChat } from "@/components/assistant/chat-registry";
 import type { SavedLink } from "@/components/assistant/draft-forms";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { proposalOf, type DraftProposal } from "@/lib/assistant/drafts";
-import { fr } from "@/lib/i18n/fr";
+import { assistant } from "@/lib/i18n/fr/assistant";
+
+const fr = { assistant };
 
 // Heavy and rarely shown: the forms load when a draft is opened.
 const DraftSheetBody = dynamic(

@@ -14,9 +14,13 @@ import { TemplateView } from "@/components/contracts/templates/template-view";
 import { ReasonForm } from "@/components/ui/reason-form";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { RowActions, type RowAction } from "@/components/ui/row-actions";
-import { fr } from "@/lib/i18n/fr";
+import { contracts } from "@/lib/i18n/fr/contracts";
+import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
+import { records } from "@/lib/i18n/fr/records";
 import { setContractTemplateStatus } from "@/lib/legal/contracts/template-actions";
 import type { TemplateSeries } from "@/lib/legal/contracts/templates";
+
+const fr = { contracts, legalContracts, records };
 
 /** « ⋯ » of a template: read it, start a new version, validate (the
  * director), retire. */

@@ -4,8 +4,10 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { Timestamp } from "@/components/ui/timestamp";
 import type { IdentityVersion } from "@/lib/catalog/artist-identity";
 import { formatInstantDay } from "@/lib/utils/instant";
-import { fr } from "@/lib/i18n/fr";
+import { artistIdentity } from "@/lib/i18n/fr/artist-identity";
 import { identityStatusTone } from "@/lib/ui/state-tones";
+
+const fr = { artistIdentity };
 
 /**
  * The versions of the artist's identity, newest first (MKT-C2-04): status,

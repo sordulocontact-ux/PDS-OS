@@ -19,7 +19,10 @@ import {
   type Severity,
 } from "@/lib/distribution/anomalies";
 import { declareCorrections } from "@/lib/distribution/declare-actions";
-import { fr } from "@/lib/i18n/fr";
+import { distribution } from "@/lib/i18n/fr/distribution";
+import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
+
+const fr = { distribution, distributionJourney };
 
 const t = fr.distributionJourney.orchard;
 const a = fr.distribution.anomalies;

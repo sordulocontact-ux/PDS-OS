@@ -11,7 +11,9 @@ import { Button } from "@/components/ui/button";
 import { StartChoices } from "@/components/ui/start-choices";
 import { chooseDesignStart } from "@/lib/design/actions/home";
 import type { DesignCallSheetData } from "@/lib/design/call-prep";
-import { fr } from "@/lib/i18n/fr";
+import { designSteps } from "@/lib/i18n/fr/design-steps";
+
+const fr = { designSteps };
 
 const t = fr.designSteps.home.start;
 

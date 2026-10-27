@@ -6,8 +6,11 @@ import { ToneCallout } from "@/components/ui/tone-callout";
 import { formatDay } from "@/lib/assistant/facts";
 import { DIRECTION_KEY } from "@/lib/design/intentions";
 import type { IntentionsState } from "@/lib/design/states";
-import { fr } from "@/lib/i18n/fr";
+import { conception } from "@/lib/i18n/fr/conception";
+import { conceptionIntents } from "@/lib/i18n/fr/conception-intents";
 import { intentionsStateTone } from "@/lib/ui/state-tones";
+
+const fr = { conception, conceptionIntents };
 
 export type RetainedIntention = {
   id: string;

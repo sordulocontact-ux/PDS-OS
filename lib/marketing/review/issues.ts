@@ -4,11 +4,13 @@
 // never by a model; ticked, they become the version's reserves.
 // Pure, client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { reviewJourney } from "@/lib/i18n/fr/review-journey";
 import type { ReserveCategory } from "@/lib/marketing/reports/model";
 import { formatDay } from "@/lib/utils/day";
 
 import type { ReviewActivation } from "./review-activation";
+
+const fr = { reviewJourney };
 
 const t = fr.reviewJourney.issues;
 

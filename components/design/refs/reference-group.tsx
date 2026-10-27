@@ -6,8 +6,10 @@ import { ReferenceAddForm } from "@/components/design/refs/reference-add-form";
 import type { TargetOption } from "@/components/design/references/target-picker";
 import { Button } from "@/components/ui/button";
 import { VersionCard } from "@/components/ui/version-card";
-import { fr } from "@/lib/i18n/fr";
+import { designSteps } from "@/lib/i18n/fr/design-steps";
 import type { Tone } from "@/lib/ui/state-tones";
+
+const fr = { designSteps };
 
 const t = fr.designSteps.references;
 

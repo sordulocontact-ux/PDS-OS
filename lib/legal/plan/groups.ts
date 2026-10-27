@@ -3,8 +3,10 @@
 // wait for, where they are done) is said once for the group, each line keeps
 // only its subject. Pure.
 
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
 import { type PlanItemKind } from "@/lib/legal/plan/proposal";
+
+const fr = { legal };
 
 // In the order they unlock: the fiches and the borrowings start together
 // (ticket Juridique 07: « Réseau et Humanisme démarrent en parallèle »),

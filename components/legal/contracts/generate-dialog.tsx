@@ -8,10 +8,12 @@ import { ContractValueList } from "@/components/legal/contracts/contract-value-l
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
 import { generateLegalContract } from "@/lib/legal/contracts/actions";
 import { isBlocking } from "@/lib/legal/contracts/completeness";
 import type { AgreementRow } from "@/lib/legal/contracts/mapping";
+
+const fr = { legalContracts };
 
 /**
  * The values a copy will carry, each with its source, the missing ones with

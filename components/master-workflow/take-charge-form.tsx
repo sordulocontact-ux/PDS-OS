@@ -7,10 +7,12 @@ import { Field } from "@/components/auth/field";
 import { FieldError, FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { ChoiceCards } from "@/components/ui/choice-cards";
-import { fr } from "@/lib/i18n/fr";
+import { masterRound } from "@/lib/i18n/fr/master-round";
 import { formatAmount } from "@/lib/utils/money";
 import { takeMasterPackage } from "@/lib/master-workflow/transmission-public-actions";
 import { parseEurosToCents } from "@/lib/projects/schemas";
+
+const fr = { masterRound };
 
 const t = fr.masterRound.take;
 type Stage = "mix" | "mastering";

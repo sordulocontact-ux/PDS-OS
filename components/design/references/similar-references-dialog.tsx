@@ -16,7 +16,9 @@ import { ProcessingSteps } from "@/components/ui/processing-steps";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { DIRECTION_TARGET } from "@/lib/design/reference-rules";
 import { ALL_IMAGES, type SimilarSource } from "@/lib/design/similar-rules";
-import { fr } from "@/lib/i18n/fr";
+import { conceptionRefs } from "@/lib/i18n/fr/conception-refs";
+
+const fr = { conceptionRefs };
 
 /** A moodboard PO can start from: the images of one target, or all of them. */
 export type SimilarBase = { key: string; label: string; count: number };

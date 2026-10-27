@@ -3,7 +3,8 @@ import { PageSection } from "@/components/shell/page-section";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { productionCut } from "@/lib/i18n/fr/production-cut";
+import { productionPost } from "@/lib/i18n/fr/production-post";
 import { versionName } from "@/lib/production/post/labels";
 import {
   isPendingCorrection,
@@ -14,6 +15,8 @@ import type { Holder } from "@/lib/production/sheet";
 import { productionVersionTone } from "@/lib/ui/state-tones";
 
 import { DecisionForm } from "./decision-form";
+
+const fr = { productionPost, productionCut };
 
 const t = fr.productionPost.decision;
 const linkClass = "w-fit text-sm underline underline-offset-4";

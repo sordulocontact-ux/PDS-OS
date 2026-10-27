@@ -5,7 +5,7 @@
 // Every check is required except the permits, unless the owner says
 // otherwise (same rule as production_check_default_required). Client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 
 import {
   CHECK_KEYS,
@@ -13,6 +13,8 @@ import {
   type CheckKey,
   type ReadinessCheck,
 } from "./types";
+
+const fr = { productionPreprod };
 
 export const defaultRequired = (key: CheckKey) => key !== "permits";
 

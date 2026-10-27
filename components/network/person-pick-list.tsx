@@ -9,9 +9,11 @@ import { Button } from "@/components/ui/button";
 import { PickList } from "@/components/ui/pick-list";
 import { usePickListDone } from "@/components/ui/pick-list-context";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { decisions } from "@/lib/i18n/fr/decisions";
 import type { NetworkKind, NetworkRole } from "@/lib/network/types";
 import type { WriteResult } from "@/lib/utils/write-result";
+
+const fr = { decisions };
 
 const t = fr.decisions.pick;
 

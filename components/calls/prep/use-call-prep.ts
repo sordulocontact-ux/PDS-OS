@@ -12,9 +12,11 @@ import type {
   PrepFormat,
   PrepPerson,
 } from "@/lib/calls/prep/types";
-import { fr } from "@/lib/i18n/fr";
+import { callPrep } from "@/lib/i18n/fr/call-prep";
 
 import { useAgendaDraft } from "./use-agenda-draft";
+
+const fr = { callPrep };
 
 export type PrepErrors = Partial<
   Record<"people" | "date" | "time" | "goal" | "link", string>

@@ -18,7 +18,11 @@ import {
   type LegalPartyLine,
   type PartyRelation,
 } from "@/lib/framing/legal-parties";
-import { fr } from "@/lib/i18n/fr";
+import { contracts } from "@/lib/i18n/fr/contracts";
+import { framingGuide } from "@/lib/i18n/fr/framing-guide";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+
+const fr = { framingGuide, framingIntel, contracts };
 
 const NONE = "none";
 

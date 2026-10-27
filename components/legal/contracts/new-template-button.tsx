@@ -5,8 +5,11 @@ import { useState } from "react";
 import { TemplateForm } from "@/components/contracts/templates/template-form";
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
-import { fr } from "@/lib/i18n/fr";
+import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
+import { legalDocuments } from "@/lib/i18n/fr/legal-documents";
 import type { FormRole } from "@/lib/legal/forms/definition";
+
+const fr = { legalContracts, legalDocuments };
 
 /**
  * « Nouveau modèle de contrat » from a person of the contracts to provide

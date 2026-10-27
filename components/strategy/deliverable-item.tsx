@@ -3,9 +3,12 @@
 import { optionClass } from "@/components/ui/option-class";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { fr } from "@/lib/i18n/fr";
+import { strategy } from "@/lib/i18n/fr/strategy";
+import { strategyDeliverables } from "@/lib/i18n/fr/strategy-deliverables";
 import { deliverableTitle } from "@/lib/strategy/deliverable-title";
 import type { StrategyDeliverable } from "@/lib/strategy/queries";
+
+const fr = { strategy, strategyDeliverables };
 
 const dueFormat = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric",

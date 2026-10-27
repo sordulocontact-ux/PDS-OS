@@ -18,7 +18,10 @@ import {
   type ConstraintType,
 } from "@/lib/framing/constraints";
 import type { FramingData } from "@/lib/framing/queries";
-import { fr } from "@/lib/i18n/fr";
+import { framingGuide } from "@/lib/i18n/fr/framing-guide";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+
+const fr = { framingGuide, framingIntel };
 
 type Constraint = FramingData["constraints"][number];
 

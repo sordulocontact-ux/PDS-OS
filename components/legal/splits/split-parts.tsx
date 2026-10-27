@@ -2,7 +2,7 @@
 
 import { FieldError } from "@/components/auth/form-message";
 import { Input } from "@/components/ui/input";
-import { fr } from "@/lib/i18n/fr";
+import { legalSplits } from "@/lib/i18n/fr/legal-splits";
 import {
   publishersOf,
   totalOf,
@@ -11,6 +11,8 @@ import {
 } from "@/lib/legal/splits/draft";
 import { FULL, formatShare } from "@/lib/legal/splits/shares";
 import { cn } from "@/lib/utils";
+
+const fr = { legalSplits };
 
 /** « Parts de l'œuvre » (JUR-01): one part per creator and per publisher
  * that follows from who publishes whom, typed by a person — empty at

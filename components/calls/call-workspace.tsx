@@ -22,7 +22,9 @@ import type {
   StoredReport,
   StoredTranscript,
 } from "@/lib/calls/queries";
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
+
+const fr = { calls };
 
 type StepTexts = { title: string; description: string };
 

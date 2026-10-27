@@ -2,7 +2,8 @@ import { AddReserveButton } from "@/components/marketing/closure/add-reserve-but
 import { ReserveMenu } from "@/components/marketing/closure/reserve-menu";
 import { StepWaiting } from "@/components/shell/journey/step-waiting";
 import { loadMembers } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { marketingReview } from "@/lib/i18n/fr/marketing-review";
+import { reviewJourney } from "@/lib/i18n/fr/review-journey";
 import { reserveDecisionsFor } from "@/lib/marketing/closure/reserves";
 import type { ReviewContext } from "@/lib/marketing/review/context";
 import { activeClosureOf, isClosedState } from "@/lib/marketing/review/journey";
@@ -14,6 +15,8 @@ import { formatDay } from "@/lib/utils/day";
 
 import { ReserveArbitrateInline } from "./reserve-arbitrate-inline";
 import { ReserveLiftInline } from "./reserve-lift-inline";
+
+const fr = { marketingReview, reviewJourney };
 
 const t = fr.reviewJourney.reserves;
 const categories = fr.marketingReview.reports.reserveCategories;

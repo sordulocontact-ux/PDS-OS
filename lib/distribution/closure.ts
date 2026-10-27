@@ -8,7 +8,9 @@ import { isOpen, type Anomaly } from "@/lib/distribution/anomalies";
 import type { RecordedCheck } from "@/lib/distribution/checks";
 import { platformLabel, type PlatformView } from "@/lib/distribution/platforms";
 import type { CycleState } from "@/lib/distribution/tracking";
-import { fr } from "@/lib/i18n/fr";
+import { distribution } from "@/lib/i18n/fr/distribution";
+
+const fr = { distribution };
 
 export type ReserveCause =
   "distributor" | "availability" | "compliance" | "checks" | "anomalies";

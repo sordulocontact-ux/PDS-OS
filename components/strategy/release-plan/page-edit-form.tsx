@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { fr } from "@/lib/i18n/fr";
+import { strategyReleasePlan } from "@/lib/i18n/fr/strategy-release-plan";
 import type { AnyPageChoice } from "@/lib/strategy/documents/release-plan-model";
+
+const fr = { strategyReleasePlan };
 
 /** « Modifier » a page: its own title and a text put at its head. */
 export function PageEditForm({

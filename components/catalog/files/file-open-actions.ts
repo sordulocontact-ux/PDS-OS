@@ -2,7 +2,9 @@ import { IconEyeOpen } from "nucleo-sharp-essential";
 
 import { IconDownload } from "@/components/icons";
 import type { RowAction } from "@/components/ui/row-actions";
-import { fr } from "@/lib/i18n/fr";
+import { catalogFiles } from "@/lib/i18n/fr/catalog-files";
+
+const fr = { catalogFiles };
 
 /**
  * The first entries of a file's "⋯": open it in a new tab (the browser

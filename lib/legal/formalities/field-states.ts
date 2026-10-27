@@ -5,7 +5,8 @@
 // confirm again. Codes of formality_missing that no field answers (a
 // borrowing, a creator's name) are missing too. Pure, client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { legalDocuments } from "@/lib/i18n/fr/legal-documents";
+import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
 import {
   SACEM_725_FIELDS,
   formalityMissingLabel,
@@ -13,6 +14,8 @@ import {
   type FormalitySection,
   type Publisher,
 } from "@/lib/legal/formalities/definition";
+
+const fr = { legalDocuments, legalFormalities };
 
 // The section of a code that no field answers.
 function sectionOfCode(code: string): FormalitySection {

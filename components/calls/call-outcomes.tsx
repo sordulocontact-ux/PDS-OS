@@ -8,7 +8,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { CallOutcomes as Outcomes } from "@/lib/calls/outcomes";
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
+
+const fr = { calls };
 
 /**
  * What a call decided and the actions it left, under its recording. An

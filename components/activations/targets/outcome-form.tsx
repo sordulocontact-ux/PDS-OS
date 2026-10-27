@@ -10,7 +10,10 @@ import { DialogButton } from "@/components/ui/dialog-button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { TARGET_OUTCOMES, type TargetOutcome } from "@/lib/activations/model";
 import { setTargetOutcome } from "@/lib/activations/target-actions";
-import { fr } from "@/lib/i18n/fr";
+import { activationWork } from "@/lib/i18n/fr/activation-work";
+import { activations } from "@/lib/i18n/fr/activations";
+
+const fr = { activations, activationWork };
 
 const t = fr.activationWork.targets;
 const OPEN = "open";

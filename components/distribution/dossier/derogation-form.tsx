@@ -17,8 +17,10 @@ import {
   DEROGATION_SCOPES,
   type DerogationScope,
 } from "@/lib/distribution/validation";
-import { fr } from "@/lib/i18n/fr";
+import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
 import { todayInParis } from "@/lib/insights/dates";
+
+const fr = { distributionJourney };
 
 const t = fr.distributionJourney.derogation;
 

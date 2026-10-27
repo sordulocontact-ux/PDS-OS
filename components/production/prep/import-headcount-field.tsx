@@ -3,8 +3,11 @@
 import { FieldError } from "@/components/auth/form-message";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { fr } from "@/lib/i18n/fr";
+import { productionImport } from "@/lib/i18n/fr/production-import";
+import { productionNeeds } from "@/lib/i18n/fr/production-needs";
 import { MAX_HEADCOUNT } from "@/lib/production/roles";
+
+const fr = { productionNeeds, productionImport };
 
 /** The number of people of an imported need: the person's, 1 by default,
  * never proposed by PO. Red with its reason after a wrong « Appliquer ». */

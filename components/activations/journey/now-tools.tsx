@@ -10,8 +10,10 @@ import {
   createNextTask,
   markNotApplicable,
 } from "@/lib/activations/journey-actions";
-import { fr } from "@/lib/i18n/fr";
+import { activationJourney } from "@/lib/i18n/fr/activation-journey";
 import { lowerFirst } from "@/lib/ui/journey";
+
+const fr = { activationJourney };
 
 const t = fr.activationJourney.now;
 

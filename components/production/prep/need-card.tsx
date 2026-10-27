@@ -1,10 +1,12 @@
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionNeeds } from "@/lib/i18n/fr/production-needs";
 import type { NetworkOption, ProductionNeed } from "@/lib/production/sheet";
 
 import { AssignmentItem } from "./assignment-item";
 import { NeedActions } from "./need-actions";
 import { needLabel } from "./need-label";
+
+const fr = { productionNeeds };
 
 const t = fr.productionNeeds;
 

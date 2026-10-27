@@ -1,7 +1,7 @@
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { ReturnCallout } from "@/components/ui/return-callout";
 import { StepWaiting } from "@/components/shell/journey/step-waiting";
-import { fr } from "@/lib/i18n/fr";
+import { reviewJourney } from "@/lib/i18n/fr/review-journey";
 import type { ReviewContext } from "@/lib/marketing/review/context";
 import { bilanIssues } from "@/lib/marketing/review/issues";
 import { createClient } from "@/lib/supabase/server";
@@ -11,6 +11,8 @@ import { BilanPrepareForm } from "./bilan-prepare-form";
 import { ReportCards } from "./report-cards";
 import { ReportDecision } from "./report-decision";
 import { SubmitReportButton } from "./submit-report-button";
+
+const fr = { reviewJourney };
 
 const t = fr.reviewJourney.bilan;
 const sl = fr.reviewJourney.standing.labels;

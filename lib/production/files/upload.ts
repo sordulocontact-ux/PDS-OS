@@ -1,5 +1,5 @@
 import { fileExtension } from "@/lib/catalog/file-rules";
-import { fr } from "@/lib/i18n/fr";
+import { productionPrep } from "@/lib/i18n/fr/production-prep";
 import {
   recordProductionFile,
   type RecordFileResult,
@@ -10,6 +10,8 @@ import {
   type ProductionFileKind,
 } from "@/lib/production/files/rules";
 import { createClient } from "@/lib/supabase/client";
+
+const fr = { productionPrep };
 
 /**
  * Browser-side: uploads the file straight to the private bucket (storage

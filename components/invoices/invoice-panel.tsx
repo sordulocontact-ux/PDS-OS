@@ -3,7 +3,7 @@
 import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { DialogButton } from "@/components/ui/dialog-button";
-import { fr } from "@/lib/i18n/fr";
+import { invoices } from "@/lib/i18n/fr/invoices";
 import type { ProjectInvoice, ProjectInvoicesView } from "@/lib/invoices/types";
 import { invoiceAnchor } from "@/lib/invoices/href";
 import { formatDay, formatShortInstant } from "@/lib/utils/day";
@@ -12,6 +12,8 @@ import { agreedLine, InvoiceCard } from "./invoice-card";
 import { InvoiceForm } from "./invoice-form";
 import { PayForm } from "./pay-form";
 import { RibConfirmForm } from "./rib-confirm-form";
+
+const fr = { invoices };
 
 const t = fr.invoices.team;
 

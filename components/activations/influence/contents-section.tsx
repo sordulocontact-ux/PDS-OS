@@ -5,7 +5,7 @@ import type { ActivationFile } from "@/lib/activations/files/queries";
 import type { InfluenceData } from "@/lib/activations/influence/queries";
 import type { ActivationScope } from "@/lib/activations/types";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { activationInfluence } from "@/lib/i18n/fr/activation-influence";
 import { formatDateTime } from "@/lib/release/format";
 
 import {
@@ -13,6 +13,8 @@ import {
   ContentDecisionButtons,
   FeedbackStatusSelect,
 } from "./content-buttons";
+
+const fr = { activationInfluence };
 
 const t = fr.activationInfluence.contents;
 const decisionTone = {

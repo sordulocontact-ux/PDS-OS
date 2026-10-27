@@ -4,10 +4,12 @@ import { IconBan } from "@/components/icons";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { ReasonForm } from "@/components/ui/reason-form";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { stepTools } from "@/lib/i18n/fr/step-tools";
 import { liftStepBlocker } from "@/lib/step-tools/actions";
 import type { StepBlocker } from "@/lib/step-tools/model";
 import { formatDayMonth } from "@/lib/utils/instant";
+
+const fr = { stepTools };
 
 const t = fr.stepTools;
 

@@ -17,7 +17,9 @@ import {
 } from "@/lib/activations/model";
 import { recordMetric } from "@/lib/activations/proof-actions";
 import type { ActivationScope } from "@/lib/activations/types";
-import { fr } from "@/lib/i18n/fr";
+import { activations } from "@/lib/i18n/fr/activations";
+
+const fr = { activations };
 
 const t = fr.activations.metrics;
 

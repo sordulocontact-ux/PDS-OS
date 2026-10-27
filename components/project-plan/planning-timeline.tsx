@@ -7,11 +7,15 @@ import {
   formatWeekday,
 } from "@/components/project-plan/format";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { projectPlan } from "@/lib/i18n/fr/project-plan";
+import { strategy } from "@/lib/i18n/fr/strategy";
+import { strategyCalendar } from "@/lib/i18n/fr/strategy-calendar";
 import type { TimelineItem, TimelineMonth } from "@/lib/project-plan/timeline";
 import { dayOffset, isMilestoneChannel } from "@/lib/strategy/calendar";
 import { overdueTone } from "@/lib/ui/state-tones";
 import { cn } from "@/lib/utils";
+
+const fr = { strategy, strategyCalendar, projectPlan };
 
 type MilestoneKind = keyof typeof fr.strategy.calendar.kinds;
 

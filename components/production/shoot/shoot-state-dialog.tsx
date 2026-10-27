@@ -8,7 +8,7 @@ import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { Button } from "@/components/ui/button";
 import { ChoiceCards } from "@/components/ui/choice-cards";
 import { FormDialog } from "@/components/ui/form-dialog";
-import { fr } from "@/lib/i18n/fr";
+import { productionShoot } from "@/lib/i18n/fr/production-shoot";
 import {
   needsMissingSequences,
   SHOOT_STATES,
@@ -19,6 +19,8 @@ import {
 import { saveShootState } from "@/lib/production/shoot/shoot-actions";
 
 import { ShootFormActions } from "./shoot-form-actions";
+
+const fr = { productionShoot };
 
 const t = fr.productionShoot.state;
 

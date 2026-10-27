@@ -1,6 +1,8 @@
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { poQuestion } from "@/lib/i18n/fr/po-question";
 import type { Tone } from "@/lib/ui/state-tones";
+
+const fr = { poQuestion };
 
 const t = fr.poQuestion;
 

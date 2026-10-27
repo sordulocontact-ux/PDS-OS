@@ -2,7 +2,7 @@ import { PageSection } from "@/components/shell/page-section";
 import { FactList } from "@/components/ui/fact-list";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDateTime } from "@/lib/calls/format";
-import { fr } from "@/lib/i18n/fr";
+import { productionShoot } from "@/lib/i18n/fr/production-shoot";
 import type { PostBlocker } from "@/lib/production/shoot/blockers";
 import { DECLARATIONS, type ShootRecord } from "@/lib/production/shoot/rules";
 import { shootDeclarationTone } from "@/lib/ui/state-tones";
@@ -11,6 +11,8 @@ import { DeclarationsDialog } from "./declarations-dialog";
 import type { Member } from "@/lib/framing/related";
 import type { NetworkOption } from "@/lib/production/sheet";
 import { PostBlockersCallout } from "./post-blockers-callout";
+
+const fr = { productionShoot };
 
 const t = fr.productionShoot.files;
 

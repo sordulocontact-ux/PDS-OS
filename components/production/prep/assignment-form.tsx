@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionNeeds } from "@/lib/i18n/fr/production-needs";
 import { assignProductionNeed } from "@/lib/production/needs-actions";
 import type { NetworkOption, ProductionNeed } from "@/lib/production/sheet";
 
@@ -23,6 +23,8 @@ import { AvailabilityChoices, availabilityOf } from "./assignment-availability";
 import { holderGroups, type HolderOption } from "./assignment-holders";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
+
+const fr = { productionNeeds };
 
 const t = fr.productionNeeds;
 

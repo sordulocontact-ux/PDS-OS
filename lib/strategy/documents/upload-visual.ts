@@ -1,6 +1,8 @@
-import { fr } from "@/lib/i18n/fr";
+import { strategyReleasePlan } from "@/lib/i18n/fr/strategy-release-plan";
 import type { Visual } from "@/lib/strategy/documents/release-plan-model";
 import { createClient } from "@/lib/supabase/client";
+
+const fr = { strategyReleasePlan };
 
 const BUCKET = "document-visuals";
 const MAX_BYTES = 10 * 1024 * 1024;

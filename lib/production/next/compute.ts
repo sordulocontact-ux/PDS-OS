@@ -5,13 +5,15 @@
 // delivery decisions), never from PO.
 
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { productionNext as frProductionNext } from "@/lib/i18n/fr/production-next";
 
 import { blank, nextContext, nobody } from "./context";
 import { deliveryNext } from "./delivery";
 import { preproductionNext } from "./preproduction";
 import { postNext, shotNext } from "./shoot-post";
 import type { NextInput, ProductionNext } from "./types";
+
+const fr = { productionNext: frProductionNext };
 
 const t = fr.productionNext;
 

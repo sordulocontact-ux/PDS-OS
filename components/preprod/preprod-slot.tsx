@@ -1,10 +1,13 @@
 import { PreprodBar } from "@/components/preprod/preprod-bar";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { auth } from "@/lib/i18n/fr/auth";
+import { preprod } from "@/lib/i18n/fr/preprod";
 import { PREPROD_ACCOUNTS } from "@/lib/preprod/accounts";
 import { isPreprod } from "@/lib/preprod/config";
 import { PREPROD_MOMENTS } from "@/lib/preprod/moments";
 import { createClient } from "@/lib/supabase/server";
+
+const fr = { auth, preprod };
 
 /**
  * Server side of the pre-production bar: nothing at all outside the

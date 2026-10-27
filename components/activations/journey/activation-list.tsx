@@ -11,10 +11,13 @@ import {
 import { phaseLabel, phaseOf } from "@/lib/activations/phase";
 import type { ActivationSummary } from "@/lib/activations/types";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { activationJourney } from "@/lib/i18n/fr/activation-journey";
+import { activations } from "@/lib/i18n/fr/activations";
 import { cn } from "@/lib/utils";
 import { formatDay } from "@/lib/utils/day";
 import { viewHref } from "@/lib/ui/view-href";
+
+const fr = { activations, activationJourney };
 
 const t = fr.activationJourney;
 

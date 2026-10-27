@@ -2,8 +2,10 @@ import { ArchiveViewToggle } from "@/components/archive/archive-view-toggle";
 import { DataTableViews } from "@/components/ui/data-table";
 import { routes } from "@/lib/auth/redirects";
 import { ARTIST_RELATIONS, type ArtistRelation } from "@/lib/catalog/types";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
 import { viewHref } from "@/lib/ui/view-href";
+
+const fr = { catalog };
 
 export type RelationCounts = Record<ArtistRelation | "all", number>;
 

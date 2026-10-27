@@ -20,10 +20,13 @@
 // assignee when it has one (else the project's owner, chosen by the page).
 
 import { formatBriefDate } from "@/lib/framing/assess";
-import { fr } from "@/lib/i18n/fr";
+import { strategyCalendar } from "@/lib/i18n/fr/strategy-calendar";
+import { strategyFollowUp } from "@/lib/i18n/fr/strategy-follow-up";
 import { addDays, dayOffset } from "@/lib/strategy/calendar";
 import { lateSteps, type FollowUpInput } from "@/lib/strategy/follow-up";
 import { figure, type KpiRow } from "@/lib/strategy/follow-up-results";
+
+const fr = { strategyCalendar, strategyFollowUp };
 
 export const RECOMMENDATION_LEVELS = [
   "information",

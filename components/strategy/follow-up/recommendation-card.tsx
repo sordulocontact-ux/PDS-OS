@@ -9,13 +9,15 @@ import { routes } from "@/lib/auth/redirects";
 import { formatBriefDate } from "@/lib/framing/assess";
 import type { Member } from "@/lib/framing/related";
 import { writtenOf } from "@/lib/framing/written";
-import { fr } from "@/lib/i18n/fr";
+import { strategyFollowUp } from "@/lib/i18n/fr/strategy-follow-up";
 import { ignoreRecommendation } from "@/lib/strategy/actions/follow-up";
 import {
   recommendationAnchor,
   type Recommendation,
 } from "@/lib/strategy/recommendations";
 import { recommendationLevelTone } from "@/lib/ui/state-tones";
+
+const fr = { strategyFollowUp };
 
 /**
  * A recommendation computed from real data (ticket § 14, MKT-C2-02): its

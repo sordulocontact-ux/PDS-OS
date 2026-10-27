@@ -19,8 +19,10 @@ import {
 } from "@/lib/activations/journey-actions";
 import { closeNow } from "@/lib/activations/trunk-actions";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { activationJourney } from "@/lib/i18n/fr/activation-journey";
 import type { WriteResult } from "@/lib/utils/write-result";
+
+const fr = { activationJourney };
 
 const t = fr.activationJourney.gesture;
 

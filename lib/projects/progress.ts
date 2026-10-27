@@ -4,7 +4,10 @@
 // database (the Marketing's checks read them); the screen says Cadrage,
 // plan du projet, then the workflow and its step. Pure, client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { projectReview } from "@/lib/i18n/fr/production";
+import { shell } from "@/lib/i18n/fr/shell";
+
+const fr = { shell, projectReview };
 
 const MARKETING_STEP_OF: Record<
   string,

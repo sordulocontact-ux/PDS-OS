@@ -6,7 +6,10 @@ import { BudgetLineSheet } from "@/components/budget/budget-line-sheet";
 import { Button } from "@/components/ui/button";
 import { formatEuros } from "@/lib/budget/types";
 import type { KnownBudgetLine } from "@/lib/framing/knowledge";
-import { fr } from "@/lib/i18n/fr";
+import { budget } from "@/lib/i18n/fr/budget";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+
+const fr = { framingIntel, budget };
 
 /**
  * Under « Engagements existants » (PROJ-UX-05): the project's expenses as

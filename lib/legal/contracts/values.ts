@@ -3,13 +3,17 @@
 // Pure: the code decides every value, never the model (CLAUDE.md rule 6).
 
 import type { ContributorRole } from "@/lib/catalog/master/rules";
-import { fr } from "@/lib/i18n/fr";
+import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
+import { legalForms } from "@/lib/i18n/fr/legal-forms";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 import {
   CONTRACT_FIELD_IDS,
   formatFee,
   type ContractFieldId,
   type FieldSource,
 } from "@/lib/legal/contracts/fields";
+
+const fr = { legalContracts, legalForms, masterPage };
 
 export type ValueContext = {
   contact: { name: string; email: string | null; phone: string | null };

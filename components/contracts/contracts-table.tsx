@@ -16,9 +16,11 @@ import {
 import { StatusBadge } from "@/components/ui/status-badge";
 import { routes } from "@/lib/auth/redirects";
 import type { ContractRow } from "@/lib/contracts/types";
-import { fr } from "@/lib/i18n/fr";
+import { contracts } from "@/lib/i18n/fr/contracts";
 import { formatShortDate } from "@/lib/release/format";
 import { overdueTone } from "@/lib/ui/state-tones";
+
+const fr = { contracts };
 
 // Contracts, newest first: the row opens the contract; its type and what it
 // is about read under the title; its state, its parties, its due date (past

@@ -3,7 +3,10 @@
 
 import type { CreativeBriefContent } from "@/lib/design/brief";
 import { formatBriefDate } from "@/lib/framing/assess";
-import { fr } from "@/lib/i18n/fr";
+import { conceptionDirection } from "@/lib/i18n/fr/conception-direction";
+import { conceptionKinds } from "@/lib/i18n/fr/conception-kinds";
+
+const fr = { conceptionKinds, conceptionDirection };
 
 type Content = CreativeBriefContent;
 type Sheet = NonNullable<Content["deliverables"][number]["sheet"]>;

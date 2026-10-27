@@ -3,11 +3,13 @@ import { MeetingSummaryFor } from "@/components/calls/meeting/meeting-summary-fo
 import type { PortalCardItem } from "@/components/portal/portal-sections";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { callWhen, shortDay, shortStamp } from "@/lib/calls/prep/dates";
-import { fr } from "@/lib/i18n/fr";
+import { productionLink } from "@/lib/i18n/fr/production-link";
 import type { LinkJourney } from "@/lib/production/provider/journey";
 import { formatShortDay } from "@/lib/utils/day";
 
 import { LinkTaskList } from "./link-task-cards";
+
+const fr = { productionLink };
 
 const t = fr.productionLink.call;
 

@@ -8,13 +8,16 @@ import { ChoiceCards } from "@/components/ui/choice-cards";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { productionLocations } from "@/lib/i18n/fr/production-locations";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import { reviewLocation } from "@/lib/production/locations/actions";
 import {
   VERDICTS,
   type LocationReview,
   type Verdict,
 } from "@/lib/production/locations/types";
+
+const fr = { productionPreprod, productionLocations };
 
 const t = fr.productionLocations.review;
 

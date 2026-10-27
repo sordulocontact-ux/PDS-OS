@@ -1,4 +1,6 @@
-import { fr } from "@/lib/i18n/fr";
+import { signedReturns } from "@/lib/i18n/fr/signed-returns";
+
+const fr = { signedReturns };
 
 // The SQL refusals of a signed document deposited by a link, in French.
 // Client-safe.

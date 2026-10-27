@@ -1,5 +1,7 @@
 import { LoadingRegion, SkeletonRows } from "@/components/ui/skeleton";
-import { fr } from "@/lib/i18n/fr";
+import { auth } from "@/lib/i18n/fr/auth";
+
+const fr = { auth };
 
 // Placeholder of a project section while it renders: the page's title and
 // the sidebars stay (layout), only the content below is replaced — rows

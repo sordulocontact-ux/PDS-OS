@@ -13,8 +13,10 @@ import { CheckboxField } from "@/components/ui/checkbox-field";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionReady } from "@/lib/i18n/fr/production-ready";
 import { confirmReady } from "@/lib/production/ready-actions";
+
+const fr = { productionReady };
 
 const t = fr.productionReady;
 

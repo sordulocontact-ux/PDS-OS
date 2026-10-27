@@ -1,9 +1,11 @@
-import { fr } from "@/lib/i18n/fr";
+import { masterRound } from "@/lib/i18n/fr/master-round";
 import type { MixVersion } from "@/lib/master-workflow/mix-types";
 import type { RoundStepView } from "@/lib/master-workflow/round-step";
 
 import { PendingVersion } from "./pending-version";
 import { RoundVersionCard } from "./round-version-card";
+
+const fr = { masterRound };
 
 /**
  * The versions the viewer decides now: the latest of each title, undecided

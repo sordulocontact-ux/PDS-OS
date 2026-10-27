@@ -8,9 +8,11 @@ import { Button } from "@/components/ui/button";
 import { FilePickField } from "@/components/ui/file-pick-field";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { todayInParis } from "@/lib/insights/dates";
-import { fr } from "@/lib/i18n/fr";
+import { invoices } from "@/lib/i18n/fr/invoices";
 import { openProofSlot, payInvoice } from "@/lib/invoices/actions";
 import { createClient } from "@/lib/supabase/client";
+
+const fr = { invoices };
 
 const t = fr.invoices.team;
 const MIMES = ["application/pdf", "image/png", "image/jpeg"] as const;

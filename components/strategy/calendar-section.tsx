@@ -15,7 +15,8 @@ import { UpstreamChains } from "@/components/strategy/calendar/upstream-chains";
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { TabBar } from "@/components/ui/tab-bar";
-import { fr } from "@/lib/i18n/fr";
+import { strategy } from "@/lib/i18n/fr/strategy";
+import { strategyCalendar } from "@/lib/i18n/fr/strategy-calendar";
 import { todayInParis } from "@/lib/insights/dates";
 import {
   addMilestone,
@@ -24,6 +25,8 @@ import {
 } from "@/lib/strategy/actions/plan";
 import type { Milestone, StrategyData } from "@/lib/strategy/queries";
 import { upstreamChains } from "@/lib/strategy/upstream";
+
+const fr = { strategy, strategyCalendar };
 
 type View = "milestones" | "channels";
 

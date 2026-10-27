@@ -8,8 +8,10 @@ import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { fr } from "@/lib/i18n/fr";
+import { strategyFollowUp } from "@/lib/i18n/fr/strategy-follow-up";
 import { noteKpiMeasure } from "@/lib/strategy/actions/follow-up";
+
+const fr = { strategyFollowUp };
 
 /**
  * « Noter une valeur »: the value really read for a quantitative KPI, with

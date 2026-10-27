@@ -1,7 +1,7 @@
 import { PageSection } from "@/components/shell/page-section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import type { ActionState, PlanState } from "@/lib/production/preprod/plan";
 import type { CallItem, PlanAction } from "@/lib/production/preprod/types";
 import type { NetworkOption } from "@/lib/production/sheet";
@@ -9,6 +9,8 @@ import { planStateTone } from "@/lib/ui/state-tones";
 
 import { PlanBoard } from "./plan-board";
 import type { Reschedule } from "@/lib/production/preprod/plan-template";
+
+const fr = { productionPreprod };
 
 const t = fr.productionPreprod.plan;
 

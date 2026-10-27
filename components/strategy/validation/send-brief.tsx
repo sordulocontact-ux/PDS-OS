@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CheckboxField } from "@/components/ui/checkbox-field";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { strategyBriefOut } from "@/lib/i18n/fr/strategy-brief-out";
 import { sendBriefOut } from "@/lib/strategy/actions/brief-out";
+
+const fr = { strategyBriefOut };
 
 const t = fr.strategyBriefOut.send;
 

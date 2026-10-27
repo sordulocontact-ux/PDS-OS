@@ -4,7 +4,7 @@
 // (PDS Éditions, another publisher picked in the Réseau, coedition, none),
 // and none ever gets a part from the code. Client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { legalSplits } from "@/lib/i18n/fr/legal-splits";
 import type { SplitLine } from "@/lib/legal/splits/queries";
 import {
   FULL,
@@ -16,6 +16,8 @@ import {
   unitsOf,
   type CreatorRole,
 } from "@/lib/legal/splits/shares";
+
+const fr = { legalSplits };
 
 export type PublishingMode = "house" | "other" | "none";
 

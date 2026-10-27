@@ -14,12 +14,14 @@ import {
 } from "@/components/ui/popover";
 import { SearchableList } from "@/components/ui/searchable-list";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { shell } from "@/lib/i18n/fr/shell";
 import {
   loadProjectSwitcher,
   type SwitcherProject,
 } from "@/lib/projects/switcher-actions";
 import { cn } from "@/lib/utils";
+
+const fr = { shell };
 
 // Where a project of the switcher leads: the same section of the other
 // project when it has sections (launched), its first page otherwise. Only the

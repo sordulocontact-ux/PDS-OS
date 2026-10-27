@@ -8,7 +8,9 @@ import { Button } from "@/components/ui/button";
 import { ChoiceCards } from "@/components/ui/choice-cards";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { closeActivation } from "@/lib/activations/actions";
-import { fr } from "@/lib/i18n/fr";
+import { activations } from "@/lib/i18n/fr/activations";
+
+const fr = { activations };
 
 const t = fr.activations.closure;
 

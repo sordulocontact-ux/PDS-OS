@@ -9,10 +9,12 @@ import {
   reviewMissing,
 } from "@/components/production/locations/location-review";
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { productionLocations } from "@/lib/i18n/fr/production-locations";
 import type { Verdict } from "@/lib/production/locations/types";
 import type { ProviderLocations } from "@/lib/production/provider/public";
 import { reviewLocationByLink } from "@/lib/production/provider/public-actions";
+
+const fr = { productionLocations };
 
 const t = fr.productionLocations;
 

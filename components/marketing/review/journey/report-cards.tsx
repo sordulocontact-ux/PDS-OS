@@ -2,7 +2,8 @@ import { ReportView } from "@/components/marketing/review/report-view";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { VersionCard } from "@/components/ui/version-card";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { marketingReview } from "@/lib/i18n/fr/marketing-review";
+import { reviewJourney } from "@/lib/i18n/fr/review-journey";
 import type { ReviewContext } from "@/lib/marketing/review/context";
 import { reportFigures } from "@/lib/marketing/reports/model";
 import { loadReport, type ReportDetail } from "@/lib/marketing/reports/queries";
@@ -10,6 +11,8 @@ import { marketingReportTone } from "@/lib/ui/state-tones";
 import { formatDay, formatShortInstant } from "@/lib/utils/day";
 
 import { ReportDialogButton } from "./report-dialog-button";
+
+const fr = { marketingReview, reviewJourney };
 
 const t = fr.reviewJourney.bilan;
 const f = t.facts;

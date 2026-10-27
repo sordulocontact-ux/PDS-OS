@@ -12,7 +12,9 @@ import { useObjectUrl } from "@/components/ui/use-object-url";
 import { formatClock, formatMegabytes } from "@/lib/calls/format";
 import { filledTakes, savedMs, type SavedTake } from "@/lib/calls/recording";
 import type { CallErrorCode } from "@/lib/calls/constants";
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
+
+const fr = { calls };
 
 const FREE_TIER_BYTES = 25 * 1024 * 1024;
 

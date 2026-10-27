@@ -11,10 +11,12 @@ import {
   type MasterSession,
   type SessionKind,
 } from "@/lib/catalog/master/rules";
-import { fr } from "@/lib/i18n/fr";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 
 import { MasterForm } from "./master-form";
 import { SessionEngineerField } from "./session-engineer-field";
+
+const fr = { masterPage };
 
 const isSessionKind = (value: string | undefined): value is SessionKind =>
   (SESSION_KINDS as readonly string[]).includes(value ?? "");

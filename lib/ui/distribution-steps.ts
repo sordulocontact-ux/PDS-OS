@@ -1,5 +1,7 @@
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
+
+const fr = { distributionJourney };
 
 // The Distribution workflow (ticket « Distribution », proto « Projet
 // complet », docs/ARCHITECTURE.md § 8 octies): PDS OS prepares, checks and

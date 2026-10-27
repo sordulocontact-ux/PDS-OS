@@ -16,7 +16,10 @@ import {
   UNKNOWN_AUDIO_STATE,
   VARIANTS,
 } from "@/lib/catalog/title-rules";
-import { fr } from "@/lib/i18n/fr";
+import { auth } from "@/lib/i18n/fr/auth";
+import { catalog } from "@/lib/i18n/fr/catalog";
+
+const fr = { auth, catalog };
 
 const e = fr.auth.errors;
 const me = fr.catalog.masterForm.errors;

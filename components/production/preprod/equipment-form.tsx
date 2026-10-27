@@ -8,7 +8,7 @@ import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { OptionSelect } from "@/components/projects/option-select";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import {
   addEquipment,
   updateEquipment,
@@ -25,6 +25,8 @@ import type { NetworkOption } from "@/lib/production/sheet";
 
 import { EquipmentRentalFields } from "./equipment-rental-fields";
 import { holderItems, holderValue } from "./holder-items";
+
+const fr = { productionPreprod };
 
 const t = fr.productionPreprod.equipment;
 

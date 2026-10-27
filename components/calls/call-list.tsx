@@ -5,7 +5,9 @@ import { CallStatusBadge } from "@/components/calls/call-badges";
 import { routes } from "@/lib/auth/redirects";
 import { formatSlot, isUpcoming } from "@/lib/calls/format";
 import type { CallSummary } from "@/lib/calls/queries";
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
+
+const fr = { calls };
 
 /** One row per call; the whole row is the link. Stacks on small screens. */
 export function CallList({

@@ -10,8 +10,10 @@ import { VersionCard } from "@/components/ui/version-card";
 import type { DesignJourneyContext } from "@/lib/design/journey-context";
 import { SHEET_PHASE_TONE } from "@/lib/design/sheet-phase";
 import type { SheetView } from "@/lib/design/sheet-views";
-import { fr } from "@/lib/i18n/fr";
+import { designSteps } from "@/lib/i18n/fr/design-steps";
 import { formatDay, formatShortInstant } from "@/lib/utils/day";
+
+const fr = { designSteps };
 
 const t = fr.designSteps.sheets;
 

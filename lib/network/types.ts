@@ -1,8 +1,10 @@
 // Network contacts (supabase/migrations/20260929000101_network_contacts.sql).
 // Client-safe: the lists mirror the database checks.
 
-import { fr } from "@/lib/i18n/fr";
+import { network } from "@/lib/i18n/fr/network";
 import type { ContactSocials } from "@/lib/network/socials";
+
+const fr = { network };
 
 export const NETWORK_KINDS = ["person", "organization"] as const;
 export type NetworkKind = (typeof NETWORK_KINDS)[number];

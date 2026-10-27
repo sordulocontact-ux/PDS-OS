@@ -1,7 +1,9 @@
 import { StatusBadge } from "@/components/ui/status-badge";
 import { CardRow, ListCard } from "@/components/ui/list-card";
 import { formatMetric } from "@/lib/activations/totals";
-import { fr } from "@/lib/i18n/fr";
+import { activationAgency } from "@/lib/i18n/fr/activation-agency";
+import { activationWork } from "@/lib/i18n/fr/activation-work";
+import { network } from "@/lib/i18n/fr/network";
 import type {
   ContactCampaign,
   ContactObservation,
@@ -12,6 +14,8 @@ import {
   AddObservationButton,
   InvalidateObservationButton,
 } from "./observation-buttons";
+
+const fr = { network, activationWork, activationAgency };
 
 const t = fr.network.page;
 

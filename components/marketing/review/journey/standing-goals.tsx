@@ -8,11 +8,13 @@ import {
   EMPTY_CELL,
 } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { reviewJourney } from "@/lib/i18n/fr/review-journey";
 import type { BudgetBreakdown } from "@/lib/marketing/review/budget-breakdown";
 import type { ObjectiveRow } from "@/lib/marketing/review/objectives";
 import { money } from "@/lib/marketing/review/standing";
 import { formatDay } from "@/lib/utils/day";
+
+const fr = { reviewJourney };
 
 const t = fr.reviewJourney.goals;
 const numbers = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 });

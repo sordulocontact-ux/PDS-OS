@@ -1,5 +1,6 @@
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { productionClosure } from "@/lib/i18n/fr/production-closure";
+import { productionDelivery } from "@/lib/i18n/fr/production-delivery";
 import type {
   ExportCheckLine,
   ExportLineState,
@@ -10,6 +11,8 @@ import { exportCheckTone } from "@/lib/ui/state-tones";
 
 import { ExportCheckActions } from "./export-check-actions";
 import { ExportFilesHistory } from "./export-files-history";
+
+const fr = { productionDelivery, productionClosure };
 
 const t = fr.productionDelivery.checklist;
 const p = fr.productionClosure.points;

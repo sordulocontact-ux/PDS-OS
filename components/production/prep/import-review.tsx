@@ -12,11 +12,14 @@ import {
 } from "@/components/production/prep/import-labels";
 import { ImportProposalRow } from "@/components/production/prep/import-proposal-row";
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { productionImport } from "@/lib/i18n/fr/production-import";
+import { productionNeeds } from "@/lib/i18n/fr/production-needs";
 import type { ProductionBrief } from "@/lib/production/brief";
 import { applyProductionImport } from "@/lib/production/import";
 import type { ProductionImportProposals } from "@/lib/production/import-proposal";
 import { MAX_HEADCOUNT } from "@/lib/production/roles";
+
+const fr = { productionNeeds, productionImport };
 
 /**
  * The review of what PO read in a pasted organisation: every proposal kept

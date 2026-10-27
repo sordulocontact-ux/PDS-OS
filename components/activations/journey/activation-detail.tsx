@@ -11,7 +11,7 @@ import { isGated, phaseLabel, phaseOf } from "@/lib/activations/phase";
 import type { ActivationPeople } from "@/lib/activations/people";
 import { lastStatusEvent } from "@/lib/activations/status-events";
 import type { Access } from "@/lib/auth/access";
-import { fr } from "@/lib/i18n/fr";
+import { activationJourney } from "@/lib/i18n/fr/activation-journey";
 import { todayInParis } from "@/lib/insights/dates";
 import { formatShortDay } from "@/lib/utils/day";
 
@@ -20,6 +20,8 @@ import { Informations } from "./informations";
 import { LifeButtons } from "./life-buttons";
 import { NowBox } from "./now-box";
 import { TrunkNow } from "./trunk-now";
+
+const fr = { activationJourney };
 
 const t = fr.activationJourney;
 

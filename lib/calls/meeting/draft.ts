@@ -5,7 +5,9 @@
 
 import { shortDay } from "@/lib/calls/prep/dates";
 import type { MeetingData, MeetingLine } from "@/lib/calls/meeting/types";
-import { fr } from "@/lib/i18n/fr";
+import { meeting } from "@/lib/i18n/fr/meeting";
+
+const fr = { meeting };
 
 const settledText = (line: MeetingLine) => line.became ?? line.text;
 const kept = (line: MeetingLine) =>

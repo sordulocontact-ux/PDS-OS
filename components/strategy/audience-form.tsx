@@ -10,7 +10,10 @@ import { Button } from "@/components/ui/button";
 import { ChipChoice } from "@/components/ui/chip-choice";
 import { saveAudience } from "@/lib/strategy/actions/audiences";
 import type { StrategyAudience } from "@/lib/strategy/queries";
-import { fr } from "@/lib/i18n/fr";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
+import { strategyPilot } from "@/lib/i18n/fr/strategy-pilot";
+
+const fr = { dialogs, strategyPilot };
 
 type Priority = "primary" | "secondary";
 

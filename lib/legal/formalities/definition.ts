@@ -4,7 +4,9 @@
 // requirement of formality_missing (SQL) is said. No SPPF field, no field
 // the ticket does not name. Client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
+
+const fr = { legalFormalities };
 
 export const SACEM_725 = "SACEM_725_EDITED_WORK";
 

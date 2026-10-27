@@ -5,7 +5,9 @@ import {
   Skeleton,
   SkeletonRows,
 } from "@/components/ui/skeleton";
-import { fr } from "@/lib/i18n/fr";
+import { auth } from "@/lib/i18n/fr/auth";
+
+const fr = { auth };
 
 // Placeholder of an application page while it renders (loading.tsx): the
 // page frame at once, with its real title when it is known in advance, and

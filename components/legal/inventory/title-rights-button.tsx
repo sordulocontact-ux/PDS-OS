@@ -6,7 +6,10 @@ import { RightsForm } from "@/components/catalog/master-page/rights-form";
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
 import type { MasterRights } from "@/lib/catalog/master/rules";
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
+import { masterPage } from "@/lib/i18n/fr/master-page";
+
+const fr = { legal, masterPage };
 
 /** « Modifier les droits » of a title (ISWC, ℗), with the title page's form. */
 export function TitleRightsButton({

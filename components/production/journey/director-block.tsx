@@ -1,11 +1,13 @@
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { shortStamp } from "@/lib/calls/prep/dates";
-import { fr } from "@/lib/i18n/fr";
+import { productionDirector } from "@/lib/i18n/fr/production-director";
 import { loadDirectorProposals } from "@/lib/production/director-proposals";
 import type { ProductionSheetData } from "@/lib/production/sheet";
 
 import { RetainDirectorButton } from "./retain-director-button";
+
+const fr = { productionDirector };
 
 const t = fr.productionDirector;
 const TONE = {

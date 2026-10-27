@@ -6,7 +6,9 @@ import { EditPanel } from "@/components/archive/edit-panel";
 import { RecordActions } from "@/components/archive/record-actions";
 import type { RecordRights } from "@/lib/archive/types";
 import { loadArtistEdit } from "@/lib/catalog/edit-form-actions";
-import { fr } from "@/lib/i18n/fr";
+import { records } from "@/lib/i18n/fr/records";
+
+const fr = { records };
 
 // Loaded when the modal opens only (picture upload, profile form).
 const ArtistEditBody = dynamic(() =>

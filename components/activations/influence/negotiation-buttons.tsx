@@ -13,10 +13,15 @@ import {
   prepareAgreement,
   revokeAgreement,
 } from "@/lib/activations/influence/negotiation-actions";
-import { fr } from "@/lib/i18n/fr";
+import { activationInfluence } from "@/lib/i18n/fr/activation-influence";
+import { activationWork } from "@/lib/i18n/fr/activation-work";
+import { activations } from "@/lib/i18n/fr/activations";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
 import { mailtoHref } from "@/lib/utils/mailto";
 
 import { ProposalForm } from "./proposal-form";
+
+const fr = { dialogs, activations, activationWork, activationInfluence };
 
 const t = fr.activationInfluence;
 

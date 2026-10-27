@@ -3,7 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { fr } from "@/lib/i18n/fr";
+import { masterWorkflow } from "@/lib/i18n/fr/master-workflow";
+
+const fr = { masterWorkflow };
 
 // The engineer's page has no account, hence no live channel: it asks again
 // every 30 seconds while it is in front, and says so (PROJ-BUG-08).

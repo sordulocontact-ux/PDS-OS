@@ -5,8 +5,10 @@ import { Button } from "@/components/ui/button";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { ReasonForm } from "@/components/ui/reason-form";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { productionReady } from "@/lib/i18n/fr/production-ready";
 import { decideReady } from "@/lib/production/ready-actions";
+
+const fr = { productionReady };
 
 const t = fr.productionReady;
 

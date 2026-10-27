@@ -4,10 +4,12 @@ import { Field } from "@/components/auth/field";
 import { OptionSelect } from "@/components/projects/option-select";
 import { saveTrack } from "@/lib/catalog/master/item-actions";
 import type { MasterSession, MasterTrack } from "@/lib/catalog/master/rules";
-import { fr } from "@/lib/i18n/fr";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 
 import { MasterForm } from "./master-form";
 import { sessionLabel } from "@/lib/catalog/master/session-label";
+
+const fr = { masterPage };
 
 export function TrackForm({
   masterId,

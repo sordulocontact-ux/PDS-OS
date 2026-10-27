@@ -4,8 +4,10 @@ import {
   PICTURE_EXTENSIONS,
 } from "@/lib/catalog/picture-rules";
 import { setArtistPicture } from "@/lib/catalog/profile-actions";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
 import { createClient } from "@/lib/supabase/client";
+
+const fr = { catalog };
 
 /**
  * Browser-side: uploads the picture straight to the private bucket (storage

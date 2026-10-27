@@ -1,6 +1,6 @@
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
-import { fr } from "@/lib/i18n/fr";
+import { productionDelivery } from "@/lib/i18n/fr/production-delivery";
 import type { DeliveryTabData } from "@/lib/production/delivery/queries";
 import {
   handoffStaleness,
@@ -12,6 +12,8 @@ import { formatDate } from "@/lib/release/format";
 
 import { HandoffItem } from "./handoff-item";
 import { TransmitButton } from "./transmit-button";
+
+const fr = { productionDelivery };
 
 const t = fr.productionDelivery.handoff;
 

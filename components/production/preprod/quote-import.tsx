@@ -13,7 +13,8 @@ import { Input } from "@/components/ui/input";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { centsToInput } from "@/lib/budget/types";
-import { fr } from "@/lib/i18n/fr";
+import { productionPost } from "@/lib/i18n/fr/production-post";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import { parseEurosToCents } from "@/lib/projects/schemas";
 import {
   applyQuoteImport,
@@ -24,6 +25,8 @@ import type {
   QuoteProposals,
 } from "@/lib/production/preprod/quote-verify";
 import type { EquipmentCategory } from "@/lib/production/preprod/types";
+
+const fr = { productionPreprod, productionPost };
 
 const t = fr.productionPreprod.quoteImport;
 const categories = fr.productionPreprod.equipment.categories;

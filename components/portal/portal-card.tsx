@@ -1,6 +1,8 @@
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { portal } from "@/lib/i18n/fr/portal";
 import { cn } from "@/lib/utils";
+
+const fr = { portal };
 
 const t = fr.portal;
 

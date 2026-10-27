@@ -10,7 +10,7 @@ import { FileDropZone } from "@/components/ui/file-drop-zone";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { strategyReleasePlan } from "@/lib/i18n/fr/strategy-release-plan";
 import type { GeneratorKind } from "@/lib/strategy/documents/generator-kind";
 import type { VisualCandidate } from "@/lib/strategy/documents/release-plan-sources";
 import {
@@ -21,6 +21,8 @@ import {
   documentVisualUrl,
   uploadDocumentVisual,
 } from "@/lib/strategy/documents/upload-visual";
+
+const fr = { strategyReleasePlan };
 
 const GROUPS = ["artist", "project", "uploads", "references"] as const;
 const isReference = (url: string) => /^https:\/\/[^\s"'<>]+$/i.test(url);

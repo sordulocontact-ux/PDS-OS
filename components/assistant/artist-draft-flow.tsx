@@ -10,7 +10,9 @@ import { loadArtistForm } from "@/lib/assistant/draft-form-actions";
 import type { ArtistDraft } from "@/lib/assistant/drafts";
 import { routes } from "@/lib/auth/redirects";
 import type { ArtistOption } from "@/lib/catalog/types";
-import { fr } from "@/lib/i18n/fr";
+import { assistant } from "@/lib/i18n/fr/assistant";
+
+const fr = { assistant };
 
 type Step =
   | { kind: "create" }

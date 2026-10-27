@@ -5,8 +5,10 @@ import { useState } from "react";
 import { ExternalLink } from "@/components/catalog/artist-profile/external-link";
 import { Button } from "@/components/ui/button";
 import type { ArtistBio as Bio } from "@/lib/catalog/artist-types";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
 import { cn } from "@/lib/utils";
+
+const fr = { catalog };
 
 // About four lines of text at the page width.
 const COLLAPSED_CHARS = 400;

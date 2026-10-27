@@ -3,11 +3,15 @@ import { StepSection } from "@/components/shell/journey/step-section";
 import { buttonVariants } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ViewLink } from "@/components/ui/view-link";
-import { fr } from "@/lib/i18n/fr";
+import { journey } from "@/lib/i18n/fr/journey";
+import { legal } from "@/lib/i18n/fr/legal";
+import { legalDemarches } from "@/lib/i18n/fr/legal-demarches";
 import type { Demarche } from "@/lib/legal/demarches/build";
 import { type JourneyStep, prereqsOf } from "@/lib/ui/journey";
 import type { Tone } from "@/lib/ui/state-tones";
 import { formatDay } from "@/lib/utils/day";
+
+const fr = { journey, legal, legalDemarches };
 
 const t = fr.legalDemarches.launched;
 

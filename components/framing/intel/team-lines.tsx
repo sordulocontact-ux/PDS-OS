@@ -12,8 +12,12 @@ import { reviewTeamMember } from "@/lib/framing/actions/needs-team";
 import { confirmQuestion } from "@/lib/framing/actions/questions";
 import type { FramingData } from "@/lib/framing/queries";
 import { teamBoard, type RoleCard } from "@/lib/framing/team-board";
-import { fr } from "@/lib/i18n/fr";
+import { framingGuide } from "@/lib/i18n/fr/framing-guide";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+import { framingJourney } from "@/lib/i18n/fr/framing-journey";
 import { cn } from "@/lib/utils";
+
+const fr = { framingGuide, framingIntel, framingJourney };
 
 /**
  * « Intervenants » (dimension Équipe): a card per role the needs call for —

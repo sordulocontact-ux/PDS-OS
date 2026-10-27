@@ -8,12 +8,15 @@ import { OptionSelect } from "@/components/projects/option-select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PersonPickerField } from "@/components/network/person-picker-field";
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { contracts } from "@/lib/i18n/fr/contracts";
+import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
 import type { Publisher } from "@/lib/legal/formalities/definition";
 import type {
   PublisherOption,
   PublishingContractOption,
 } from "@/lib/legal/formalities/party-actions";
+
+const fr = { contracts, legalFormalities };
 
 // « À obtenir »: no contract chosen yet (JUR-25).
 const TO_OBTAIN = "to_obtain";

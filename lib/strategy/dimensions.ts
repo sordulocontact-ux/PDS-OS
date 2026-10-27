@@ -6,13 +6,15 @@ import type { BudgetLine } from "@/lib/budget/types";
 import { formatEuros } from "@/lib/budget/types";
 import { formatBriefDate } from "@/lib/framing/assess";
 import type { FieldState } from "@/lib/framing/brief";
-import { fr } from "@/lib/i18n/fr";
+import { strategyPilot } from "@/lib/i18n/fr/strategy-pilot";
 import type { ChoiceSuggestion, ChoiceValue } from "@/lib/strategy/choices";
 import { strategyBudget } from "@/lib/strategy/budget";
 import {
   upstreamChains,
   type UpstreamDeliverable,
 } from "@/lib/strategy/upstream";
+
+const fr = { strategyPilot };
 
 export const STRATEGY_DIMENSIONS = [
   "positioning",

@@ -14,7 +14,7 @@ import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionLocations } from "@/lib/i18n/fr/production-locations";
 import {
   addLocationConsult,
   removeLocationConsult,
@@ -25,6 +25,8 @@ import {
   type LocationRole,
 } from "@/lib/production/locations/types";
 import type { NetworkOption } from "@/lib/production/sheet";
+
+const fr = { productionLocations };
 
 const t = fr.productionLocations.consults;
 const roles = fr.productionLocations.roles;

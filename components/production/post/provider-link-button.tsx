@@ -5,11 +5,14 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { useShowLinks } from "@/components/ui/one-time-links";
-import { fr } from "@/lib/i18n/fr";
+import { productionProvider } from "@/lib/i18n/fr/production-provider";
+import { roles } from "@/lib/i18n/fr/roles";
 import { createProviderLink } from "@/lib/production/post/provider-link-actions";
 import type { ProviderLinkState } from "@/lib/production/post/types";
 import type { Holder } from "@/lib/production/sheet";
 import { formatDateTime } from "@/lib/release/format";
+
+const fr = { productionProvider, roles };
 
 const t = fr.productionProvider;
 

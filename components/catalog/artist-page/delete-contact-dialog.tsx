@@ -13,7 +13,9 @@ import {
 } from "@/components/ui/dialog";
 import type { ArtistContact } from "@/lib/catalog/contacts";
 import { deleteContact } from "@/lib/catalog/profile-actions";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
+
+const fr = { catalog };
 
 // Confirms a definitive deletion; stays open with the error if it fails.
 export function DeleteContactDialog({

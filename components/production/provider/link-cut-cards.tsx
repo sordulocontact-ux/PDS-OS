@@ -2,7 +2,9 @@ import type { PortalCardItem } from "@/components/portal/portal-sections";
 import { LightDepositForm } from "@/components/production/light/light-deposit-form";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { VersionCard } from "@/components/ui/version-card";
-import { fr } from "@/lib/i18n/fr";
+import { productionCut } from "@/lib/i18n/fr/production-cut";
+import { productionLight } from "@/lib/i18n/fr/production-light";
+import { productionProposal } from "@/lib/i18n/fr/production-proposal";
 import type { LinkJourney } from "@/lib/production/provider/journey";
 import type { Tone } from "@/lib/ui/state-tones";
 import { formatShortInstant } from "@/lib/utils/day";
@@ -12,6 +14,8 @@ import {
   LinkCutDepositForm,
   LinkFinalForm,
 } from "./link-cut-forms";
+
+const fr = { productionProposal, productionLight, productionCut };
 
 const t = fr.productionCut;
 type Cut = NonNullable<LinkJourney["cut"]>;

@@ -3,8 +3,10 @@
 import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { masterSource } from "@/lib/i18n/fr/master-source";
 import { replaceSource } from "@/lib/master-workflow/source-actions";
+
+const fr = { masterSource };
 
 const t = fr.masterSource.newer;
 

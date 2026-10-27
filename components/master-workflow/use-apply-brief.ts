@@ -6,12 +6,14 @@ import { toast } from "sonner";
 
 import type { ReviewItem } from "@/components/voice/dictation-review";
 import { formatEuros } from "@/lib/budget/types";
-import { fr } from "@/lib/i18n/fr";
+import { masterWorkflow } from "@/lib/i18n/fr/master-workflow";
 import {
   rateCents,
   type BriefProposal,
 } from "@/lib/master-workflow/brief-proposals";
 import { applyBriefProposals } from "@/lib/master-workflow/brief-voice-actions";
+
+const fr = { masterWorkflow };
 
 const t = fr.masterWorkflow.brief;
 

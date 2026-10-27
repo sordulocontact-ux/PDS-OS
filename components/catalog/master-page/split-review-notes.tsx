@@ -7,7 +7,9 @@ import type {
   SplitValidation,
 } from "@/lib/catalog/master/split-review";
 import type { SplitEvent } from "@/lib/catalog/master/split-queries";
-import { fr } from "@/lib/i18n/fr";
+import { masterPage } from "@/lib/i18n/fr/master-page";
+
+const fr = { masterPage };
 
 const t = fr.masterPage.splits;
 

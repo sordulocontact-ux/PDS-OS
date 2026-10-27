@@ -7,7 +7,10 @@ import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { fr } from "@/lib/i18n/fr";
+import { framing } from "@/lib/i18n/fr/framing";
+import { framingGuide } from "@/lib/i18n/fr/framing-guide";
+
+const fr = { framing, framingGuide };
 
 type Family = keyof typeof fr.framing.needs.families;
 

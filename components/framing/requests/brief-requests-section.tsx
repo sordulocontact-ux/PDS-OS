@@ -14,7 +14,9 @@ import {
   requestHref,
   type BriefRequest,
 } from "@/lib/framing/brief-request-view";
-import { fr } from "@/lib/i18n/fr";
+import { briefRequests } from "@/lib/i18n/fr/brief-requests";
+
+const fr = { briefRequests };
 
 type Version = {
   id: string;

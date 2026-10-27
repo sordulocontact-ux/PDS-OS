@@ -10,8 +10,11 @@ import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { FormDialog } from "@/components/ui/form-dialog";
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 import { delegateLegalPlanItem } from "@/lib/legal/tracking/actions";
+
+const fr = { legal, masterPage };
 
 const NONE = "none";
 

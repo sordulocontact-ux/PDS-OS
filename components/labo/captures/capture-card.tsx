@@ -7,9 +7,11 @@ import type { CaptureItem } from "@/components/labo/captures/use-capture-queue";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useObjectUrl } from "@/components/ui/use-object-url";
-import { fr } from "@/lib/i18n/fr";
+import { laboCaptures } from "@/lib/i18n/fr/labo-captures";
 import { sectionCardClass } from "@/components/ui/section-card";
 import { cn } from "@/lib/utils";
+
+const fr = { laboCaptures };
 
 /** A screenshot, its reading state, and the people read on it. */
 export function CaptureCard({

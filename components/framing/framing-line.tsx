@@ -3,8 +3,11 @@ import type { ReactNode } from "react";
 import { FactRow } from "@/components/ui/fact-row";
 import type { QuestionState } from "@/lib/framing/assess";
 import { lineSourceOf, lineStateOf } from "@/lib/framing/lines";
-import { fr } from "@/lib/i18n/fr";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+import { framingJourney } from "@/lib/i18n/fr/framing-journey";
 import { framingLineTone } from "@/lib/ui/state-tones";
+
+const fr = { framingIntel, framingJourney };
 
 /**
  * One information of the Cadrage (proto `.irow`): « **Libellé** · valeur »

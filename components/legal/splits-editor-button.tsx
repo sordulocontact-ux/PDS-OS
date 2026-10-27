@@ -16,8 +16,11 @@ import {
   splitTotal,
   type MasterSplit,
 } from "@/lib/catalog/master/rules";
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 import type { LegalFactAction } from "@/lib/legal/types";
+
+const fr = { legal, masterPage };
 
 /**
  * "Répartir" / "Modifier" on a title's shares of one kind: one modal holding

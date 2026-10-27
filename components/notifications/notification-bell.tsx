@@ -14,10 +14,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { formatDay } from "@/lib/assistant/facts";
-import { fr } from "@/lib/i18n/fr";
+import { notifications } from "@/lib/i18n/fr/notifications";
 import { markNotificationsRead } from "@/lib/notifications/actions";
 import type { NotificationItem } from "@/lib/notifications/types";
 import { cn } from "@/lib/utils";
+
+const fr = { notifications };
 
 // Bell with the unread count, and the latest notifications. Opening one
 // marks it read and goes to its project. Data comes from the layout, which

@@ -4,8 +4,11 @@ import type { ChatStatus, UIMessage } from "ai";
 import { useEffect, useRef } from "react";
 
 import { AssistantMessage } from "@/components/assistant/assistant-message";
-import { fr } from "@/lib/i18n/fr";
+import { aiUsage } from "@/lib/i18n/fr/ai-usage";
+import { assistant } from "@/lib/i18n/fr/assistant";
 import { cn } from "@/lib/utils";
+
+const fr = { aiUsage, assistant };
 
 // The route answers 429 {"error":"quota","limit":n} when the member's
 // requests of the day are used (lib/ai/quota.ts); the AI SDK puts that body

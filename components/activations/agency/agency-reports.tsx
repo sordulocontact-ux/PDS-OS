@@ -12,9 +12,11 @@ import type { ActivationFiche } from "@/lib/activations/fiche";
 import { loadActivationFiles } from "@/lib/activations/files/queries";
 import { divergentRows } from "@/lib/activations/modules";
 import type { Access } from "@/lib/auth/access";
-import { fr } from "@/lib/i18n/fr";
+import { activationAgency } from "@/lib/i18n/fr/activation-agency";
 import { todayInParis } from "@/lib/insights/dates";
 import { formatDate } from "@/lib/release/format";
+
+const fr = { activationAgency };
 
 const statusTone = {
   received: "action",

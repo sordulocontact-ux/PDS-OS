@@ -6,12 +6,14 @@ import { toast } from "sonner";
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { productionShoot } from "@/lib/i18n/fr/production-shoot";
 import type { PrepResult } from "@/lib/production/prep-result";
 import {
   saveShootReportNote,
   validateShootReport,
 } from "@/lib/production/shoot/shoot-actions";
+
+const fr = { productionShoot };
 
 const t = fr.productionShoot.report;
 

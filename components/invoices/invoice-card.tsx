@@ -1,9 +1,11 @@
 import { buttonVariants } from "@/components/ui/button";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
-import { fr } from "@/lib/i18n/fr";
+import { invoices } from "@/lib/i18n/fr/invoices";
 import type { InvoiceExpected, ProjectInvoice } from "@/lib/invoices/types";
 import { formatDay, formatShortInstant } from "@/lib/utils/day";
 import { formatAmount } from "@/lib/utils/money";
+
+const fr = { invoices };
 
 const t = fr.invoices.team;
 

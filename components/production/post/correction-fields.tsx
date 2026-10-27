@@ -3,8 +3,10 @@
 import { Field } from "@/components/auth/field";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { HolderSelect } from "@/components/production/holder-select";
-import { fr } from "@/lib/i18n/fr";
+import { productionCorrections } from "@/lib/i18n/fr/production-corrections";
 import type { PostPeople } from "@/lib/production/post/types";
+
+const fr = { productionCorrections };
 
 const t = fr.productionCorrections;
 

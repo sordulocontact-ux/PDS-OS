@@ -6,12 +6,15 @@ import { NextCard } from "@/components/ui/next-card";
 import { SplitEditorInline } from "@/components/legal/tracking/split-editor-inline";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
+import { legalSplits } from "@/lib/i18n/fr/legal-splits";
 import type {
   SplitLine,
   SplitVersionView,
   TitleSplit,
 } from "@/lib/legal/splits/queries";
+
+const fr = { legal, legalSplits };
 
 const muted =
   "text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]";

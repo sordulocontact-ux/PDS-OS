@@ -15,8 +15,10 @@ import type {
   DeezerMatchStatus,
   SocialLink,
 } from "@/lib/catalog/capture-artist-types";
-import { fr } from "@/lib/i18n/fr";
+import { laboCaptures } from "@/lib/i18n/fr/labo-captures";
 import { rolesText } from "@/lib/network/types";
+
+const fr = { laboCaptures };
 
 const MATCH_TONE = {
   linked: "success",

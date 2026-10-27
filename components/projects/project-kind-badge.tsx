@@ -1,7 +1,9 @@
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { shell } from "@/lib/i18n/fr/shell";
 import { projectFormatLabel, type ProjectKind } from "@/lib/projects/labels";
 import { projectTypeHue } from "@/lib/ui/category-hues";
+
+const fr = { shell };
 
 // Kind of a project in a list: the type in its hue, so Musical and Contenu
 // read apart at a glance, then the format ("EP", "PDS Mic") as plain text.

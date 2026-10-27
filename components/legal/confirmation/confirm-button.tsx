@@ -5,8 +5,10 @@ import { useState, useTransition } from "react";
 import { FormMessage } from "@/components/auth/form-message";
 import { usePublishResult } from "@/components/shell/module/result-banner";
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
 import { confirmLegalIntake } from "@/lib/legal/intake/actions";
+
+const fr = { legal };
 
 /** « Confirmer le dossier »: the one decision of the step. The page then
  * shows who confirmed and when, and the result banner what follows. */

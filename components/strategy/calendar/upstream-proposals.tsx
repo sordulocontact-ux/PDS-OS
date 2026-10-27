@@ -8,9 +8,12 @@ import { formatMilestoneDate } from "@/components/strategy/calendar/milestone-ro
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DialogButton } from "@/components/ui/dialog-button";
-import { fr } from "@/lib/i18n/fr";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
+import { strategyCalendar } from "@/lib/i18n/fr/strategy-calendar";
 import { addUpstreamMilestones } from "@/lib/strategy/actions/plan";
 import type { UpstreamMilestone } from "@/lib/strategy/upstream";
+
+const fr = { dialogs, strategyCalendar };
 
 /**
  * « Proposer les jalons amont » (MKT-S1-10): the delivery and validation a

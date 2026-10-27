@@ -7,8 +7,10 @@ import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { masterListen } from "@/lib/i18n/fr/master-listen";
 import { sendListenFeedback } from "@/lib/master-workflow/listen-actions";
+
+const fr = { masterListen };
 
 const t = fr.masterListen;
 

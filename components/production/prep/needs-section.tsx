@@ -1,6 +1,6 @@
 import { PageSection } from "@/components/shell/page-section";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionNeeds } from "@/lib/i18n/fr/production-needs";
 import type { ProductionBriefChoices } from "@/lib/production/brief";
 import { NEED_FAMILIES, suggestNeeds } from "@/lib/production/roles";
 import type {
@@ -10,6 +10,8 @@ import type {
 } from "@/lib/production/sheet";
 
 import { NeedFamilyBlock } from "./need-family-block";
+
+const fr = { productionNeeds };
 
 /**
  * « Équipes » (ticket, parcours 3): one block per family, in NEED_FAMILIES'

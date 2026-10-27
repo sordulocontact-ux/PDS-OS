@@ -3,7 +3,7 @@
 import { Field } from "@/components/auth/field";
 import { OptionSelect } from "@/components/projects/option-select";
 import { StepSection } from "@/components/shell/journey/step-section";
-import { fr } from "@/lib/i18n/fr";
+import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
 import {
   SACEM_725_FIELDS,
   SACEM_GENRES,
@@ -22,6 +22,8 @@ import { ArrangementField, ContractField } from "./dossier-fields";
 import { FieldStateLine } from "./field-state";
 import { PeopleEditor } from "./people-editor";
 import { PhonoTotal } from "./phono-total";
+
+const fr = { legalFormalities };
 
 // Short fields side by side from `sm`; the people, arrangement and contract
 // blocks take the whole width.

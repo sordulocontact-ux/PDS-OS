@@ -2,10 +2,12 @@
 
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { productionChecklist } from "@/lib/i18n/fr/production-checklist";
 import { finishTaskByLink } from "@/lib/production/checklist-actions";
 
 import { useLinkSubmit } from "./use-link-submit";
+
+const fr = { productionChecklist };
 
 const t = fr.productionChecklist;
 

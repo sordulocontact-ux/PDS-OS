@@ -2,12 +2,16 @@
 // (ticket Stratégie § 11): never asked again, and never the budget (not
 // even read here). Client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { framing } from "@/lib/i18n/fr/framing";
+import { strategyPilot } from "@/lib/i18n/fr/strategy-pilot";
+import { strategyReleasePlan } from "@/lib/i18n/fr/strategy-release-plan";
 import type { ProjectDetail } from "@/lib/projects/types";
 import { deliverableTitle } from "@/lib/strategy/deliverable-title";
 import type { ReleasePlanInput } from "@/lib/strategy/documents/release-plan-build";
 import type { Format } from "@/lib/strategy/documents/release-plan-model";
 import type { StrategyData } from "@/lib/strategy/queries";
+
+const fr = { framing, strategyReleasePlan, strategyPilot };
 
 /** The validated deliverables as formats, when none were chosen yet. */
 export function formatsFrom(data: StrategyData): Format[] {

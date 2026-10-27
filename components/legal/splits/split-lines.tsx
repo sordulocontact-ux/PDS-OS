@@ -8,12 +8,15 @@ import {
   DataTableRow,
 } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
+import { legalSplits } from "@/lib/i18n/fr/legal-splits";
 import { roleOfLine } from "@/lib/legal/splits/draft";
 import type { SplitLine } from "@/lib/legal/splits/queries";
 import { formatShare, totalUnits } from "@/lib/legal/splits/shares";
 import { splitConfirmationTone } from "@/lib/ui/state-tones";
 import { formatInstant } from "@/lib/utils/instant";
+
+const fr = { legal, legalSplits };
 
 /** The lines of a version (or of the title's page, not sent yet): who,
  * which role — a publisher with the creators it represents —, which share

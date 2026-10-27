@@ -17,7 +17,10 @@ import {
   REFUSAL_MODULES,
   type RefusalModule,
 } from "@/lib/distribution/validation";
-import { fr } from "@/lib/i18n/fr";
+import { distribution } from "@/lib/i18n/fr/distribution";
+import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
+
+const fr = { distribution, distributionJourney };
 
 const t = fr.distributionJourney.dossier;
 

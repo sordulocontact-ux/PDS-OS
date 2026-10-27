@@ -2,7 +2,9 @@
 
 import { useOpenFeedback } from "@/components/feedback/feedback-provider";
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { feedback } from "@/lib/i18n/fr/feedback";
+
+const fr = { feedback };
 
 // Primary action of the feedback page: the same window as everywhere else.
 export function NewFeedbackButton() {

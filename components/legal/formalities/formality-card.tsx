@@ -6,10 +6,13 @@ import { PageSection } from "@/components/shell/page-section";
 import { Fold } from "@/components/ui/fold";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { legalDocuments } from "@/lib/i18n/fr/legal-documents";
+import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
 import type { TitleFormality } from "@/lib/legal/formalities/types";
 import { formalityTone } from "@/lib/ui/state-tones";
 import { formatInstant } from "@/lib/utils/instant";
+
+const fr = { legalDocuments, legalFormalities };
 
 /** One title's SACEM 725: where it stands, the bulletin, the steps, the
  * dossier in its five sections — each miss on its own line (JUR-02) —, the

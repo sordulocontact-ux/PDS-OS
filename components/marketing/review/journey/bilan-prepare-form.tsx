@@ -6,12 +6,14 @@ import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { reviewJourney } from "@/lib/i18n/fr/review-journey";
 import type { BilanIssue } from "@/lib/marketing/review/issues";
 import { generateReport } from "@/lib/marketing/reports/actions";
 import { REPORT_SECTIONS } from "@/lib/marketing/reports/model";
 
 import { BilanOptions, type BilanErrors } from "./bilan-options";
+
+const fr = { reviewJourney };
 
 const t = fr.reviewJourney.bilan;
 const ID = "bilan";

@@ -4,8 +4,10 @@ import { IconMsgSmile } from "nucleo-sharp-essential";
 
 import { useOpenFeedback } from "@/components/feedback/feedback-provider";
 import { navItemClass } from "@/components/shell/nav-item";
-import { fr } from "@/lib/i18n/fr";
+import { feedback } from "@/lib/i18n/fr/feedback";
 import { cn } from "@/lib/utils";
+
+const fr = { feedback };
 
 // "Envoyer un retour", in the user panel: opens the feedback window over the
 // current page, which the feedback then carries. `data-close-nav` closes the

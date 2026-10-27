@@ -2,7 +2,8 @@ import { IconFile, IconLink } from "nucleo-sharp-essential";
 
 import { sectionCardClass } from "@/components/ui/section-card";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { productionCut } from "@/lib/i18n/fr/production-cut";
+import { productionPost } from "@/lib/i18n/fr/production-post";
 import { versionName } from "@/lib/production/post/labels";
 import { versionActions, type PostRole } from "@/lib/production/post/rules";
 import type {
@@ -21,6 +22,8 @@ import { CorrectionAnswers } from "./correction-answers";
 import { CorrectionRequestBlock } from "./correction-request";
 import { CorrectionsBlock } from "./corrections-block";
 import { VersionControls } from "./version-controls";
+
+const fr = { productionPost, productionCut };
 
 const t = fr.productionPost;
 

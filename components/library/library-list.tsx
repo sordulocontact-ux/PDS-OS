@@ -2,8 +2,10 @@
 
 import { LibraryTable } from "@/components/library/library-table";
 import { SearchableList } from "@/components/ui/searchable-list";
-import { fr } from "@/lib/i18n/fr";
+import { library } from "@/lib/i18n/fr/library";
 import type { LibraryFile } from "@/lib/library/queries";
+
+const fr = { library };
 
 // The library with an instant search on the name, precision, category and
 // what each file belongs to.

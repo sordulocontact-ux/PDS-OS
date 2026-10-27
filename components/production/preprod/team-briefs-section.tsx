@@ -2,7 +2,7 @@ import { PageSection } from "@/components/shell/page-section";
 import { FactList } from "@/components/ui/fact-list";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import type { BriefView } from "@/lib/production/preprod/overview";
 import { teamMembers } from "@/lib/production/preprod/team";
 import { TEAM_FAMILY, TEAM_FIELDS } from "@/lib/production/preprod/team-briefs";
@@ -12,6 +12,8 @@ import { formatDate } from "@/lib/release/format";
 import { teamBriefTone } from "@/lib/ui/state-tones";
 
 import { TeamBriefActions } from "./team-brief-actions";
+
+const fr = { productionPreprod };
 
 const t = fr.productionPreprod.briefs;
 

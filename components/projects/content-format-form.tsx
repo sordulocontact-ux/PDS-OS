@@ -7,12 +7,14 @@ import { FormMessage } from "@/components/auth/form-message";
 import { SubmitButton } from "@/components/auth/submit-button";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { shell } from "@/lib/i18n/fr/shell";
 import {
   createContentFormat,
   type CreateContentFormatState,
 } from "@/lib/projects/content-format-actions";
 import type { ContentFormatOption } from "@/lib/projects/types";
+
+const fr = { shell };
 
 const idle: CreateContentFormatState = { status: "idle" };
 

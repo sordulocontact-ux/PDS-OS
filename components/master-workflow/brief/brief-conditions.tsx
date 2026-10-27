@@ -2,7 +2,7 @@
 
 import { FactRow, FactRows, type FactSource } from "@/components/ui/fact-row";
 import { PickList } from "@/components/ui/pick-list";
-import { fr } from "@/lib/i18n/fr";
+import { masterBrief } from "@/lib/i18n/fr/master-brief";
 import type { BriefDesignation } from "@/lib/master-workflow/brief-rules";
 import { saveBriefFact } from "@/lib/master-workflow/brief-fact-actions";
 import type {
@@ -12,6 +12,8 @@ import type {
 import type { NetworkEngineer } from "@/lib/master-workflow/types";
 import { parseEurosToCents } from "@/lib/projects/schemas";
 import { amountInput, formatAmount } from "@/lib/utils/money";
+
+const fr = { masterBrief };
 
 const t = fr.masterBrief;
 

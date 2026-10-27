@@ -1,7 +1,9 @@
-import { fr } from "@/lib/i18n/fr";
+import { invoices } from "@/lib/i18n/fr/invoices";
 import { todayInParis } from "@/lib/insights/dates";
 import { bicOk, ibanOk } from "@/lib/invoices/rules";
 import { formatAmount, parseAmount } from "@/lib/utils/money";
+
+const fr = { invoices };
 
 // What an invoice form must hold before it leaves (proto `invsend`): the
 // PDF, its number, its amount (and why it differs from what was agreed),

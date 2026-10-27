@@ -6,8 +6,10 @@ import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
 import type { WriteResult } from "@/lib/utils/write-result";
+
+const fr = { dialogs };
 
 const t = fr.dialogs;
 

@@ -12,12 +12,14 @@ import { toast } from "sonner";
 
 import { useShowSplitLinks } from "@/components/legal/splits/split-actions";
 import { advanceContract } from "@/lib/contracts/actions";
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
 import { generateLegalContract } from "@/lib/legal/contracts/actions";
 import { openFormality } from "@/lib/legal/formalities/actions";
 import { prepareLegalForm, setLegalFormState } from "@/lib/legal/forms/actions";
 import type { RowAction } from "@/lib/legal/plan/board";
 import { proposeSplit } from "@/lib/legal/splits/actions";
+
+const fr = { legal };
 
 /** A fiche's link just prepared: shown once, in its panel. */
 export type PreparedLink = {

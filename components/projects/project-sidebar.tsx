@@ -7,8 +7,10 @@ import {
 } from "@/components/projects/project-nav-list";
 import { ProjectSwitcher } from "@/components/projects/project-switcher";
 import { Skeleton } from "@/components/ui/skeleton";
-import { fr } from "@/lib/i18n/fr";
+import { shell } from "@/lib/i18n/fr/shell";
 import { projectSections } from "@/lib/ui/project-sections";
+
+const fr = { shell };
 
 export type ProjectNavProps = ProjectNavState & {
   projectId: string;

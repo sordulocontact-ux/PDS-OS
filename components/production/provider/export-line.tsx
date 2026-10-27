@@ -7,10 +7,13 @@ import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { productionClosure } from "@/lib/i18n/fr/production-closure";
+import { productionProvider } from "@/lib/i18n/fr/production-provider";
 import { depositProviderExport } from "@/lib/production/provider/public-actions";
 import type { OpenProviderSpace } from "@/lib/production/provider/public";
 import type { Tone } from "@/lib/ui/state-tones";
+
+const fr = { productionClosure, productionProvider };
 
 const t = fr.productionProvider.exports;
 const points = fr.productionClosure.points;

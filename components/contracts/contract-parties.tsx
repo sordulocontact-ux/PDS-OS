@@ -12,7 +12,9 @@ import { Button } from "@/components/ui/button";
 import { routes } from "@/lib/auth/redirects";
 import { removeContractParty } from "@/lib/contracts/actions";
 import type { ContractParty } from "@/lib/contracts/types";
-import { fr } from "@/lib/i18n/fr";
+import { contracts } from "@/lib/i18n/fr/contracts";
+
+const fr = { contracts };
 
 /**
  * Who the contract binds: contacts of the network with their role in it,

@@ -5,7 +5,10 @@ import { VersionCard } from "@/components/ui/version-card";
 import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
 import type { FramingAssessment, QuestionState } from "@/lib/framing/assess";
-import { fr } from "@/lib/i18n/fr";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+import { framingJourney } from "@/lib/i18n/fr/framing-journey";
+
+const fr = { framingIntel, framingJourney };
 
 const open = (q: QuestionState) =>
   q.status !== "known" && q.answer?.kind !== "na" && q.answer?.kind !== "later";

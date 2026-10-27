@@ -30,7 +30,9 @@ import { RowActions, type RowAction } from "@/components/ui/row-actions";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { Tone } from "@/lib/ui/state-tones";
 import { formatBriefDate } from "@/lib/framing/assess";
-import { fr } from "@/lib/i18n/fr";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+import { planSteps } from "@/lib/i18n/fr/plan-steps";
 import type { PlanWorkflow } from "@/lib/plan/propose";
 import {
   addPlanStep,
@@ -40,6 +42,8 @@ import {
   type PlanStepValues,
 } from "@/lib/plan/step-actions";
 import type { StepIssue } from "@/lib/plan/steps";
+
+const fr = { dialogs, framingIntel, planSteps };
 
 export type StepGroup = "active" | "next" | "blocked" | "done";
 

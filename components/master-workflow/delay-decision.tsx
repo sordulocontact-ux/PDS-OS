@@ -7,12 +7,14 @@ import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { masterDelay } from "@/lib/i18n/fr/master-delay";
 import {
   applyDelayDates,
   escalateDelay,
   keepDelayDates,
 } from "@/lib/master-workflow/engineer-thread-actions";
+
+const fr = { masterDelay };
 
 const t = fr.masterDelay;
 

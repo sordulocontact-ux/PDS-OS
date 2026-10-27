@@ -7,10 +7,12 @@ import { TextareaField } from "@/components/auth/textarea-field";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { FilePickField } from "@/components/ui/file-pick-field";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
 import { formalityStep } from "@/lib/legal/formalities/step-actions";
 
 import { isProofPdf, uploadProof } from "./upload-proof";
+
+const fr = { legalFormalities };
 
 const t = fr.legalFormalities.page;
 

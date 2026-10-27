@@ -8,8 +8,10 @@ import {
   type RecordActivationFileResult,
 } from "@/lib/activations/files/actions";
 import { fileExtension } from "@/lib/catalog/file-rules";
-import { fr } from "@/lib/i18n/fr";
+import { activations } from "@/lib/i18n/fr/activations";
 import { createClient } from "@/lib/supabase/client";
+
+const fr = { activations };
 
 /**
  * Browser-side: uploads the file straight to the private bucket, then records

@@ -4,10 +4,14 @@ import { SectionButtons } from "@/components/legal/inventory/section-buttons";
 import { TitleRightsButton } from "@/components/legal/inventory/title-rights-button";
 import { RemoveProjectContactButton } from "@/components/legal/project-contact-controls";
 import { EmptyNote } from "@/components/shell/empty-state";
-import { fr } from "@/lib/i18n/fr";
+import { facts } from "@/lib/i18n/fr/facts";
+import { legal } from "@/lib/i18n/fr/legal";
+import { legalForms } from "@/lib/i18n/fr/legal-forms";
 import type { FactStatus } from "@/lib/facts/types";
 import { filterFactSections } from "@/lib/facts/views";
 import type { LegalFact, LegalInventory as Inventory } from "@/lib/legal/types";
+
+const fr = { facts, legal, legalForms };
 
 /**
  * Juridique's first step: what the project already knows, as one list of

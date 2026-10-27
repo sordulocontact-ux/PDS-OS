@@ -16,9 +16,11 @@
 //
 // Nothing is guessed: no one becomes a composer or a lyricist here.
 
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
 import type { PersonRole } from "@/lib/legal/intake/types";
 import { normalizeSearch } from "@/lib/utils/search";
+
+const fr = { legal };
 
 export type KnownSource = "title" | "featuring" | "cadrage" | "session";
 

@@ -1,10 +1,14 @@
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
+import { masterWorkflow } from "@/lib/i18n/fr/master-workflow";
+import { shell } from "@/lib/i18n/fr/shell";
 import {
   DISTRIBUTION_STEPS,
   distributionStepHref,
   isDistributionStep,
 } from "@/lib/ui/distribution-steps";
+
+const fr = { shell, distributionJourney, masterWorkflow };
 
 // Where each step of a workflow is done (lib/workflow-status/rules.ts names
 // the step): the overview's cards and actions open it.

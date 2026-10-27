@@ -9,8 +9,10 @@ import {
 } from "@/components/calls/calendar-event";
 import { ViewLink } from "@/components/ui/view-link";
 import type { CalendarEvent } from "@/lib/calls/calendar";
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
 import { cn } from "@/lib/utils";
+
+const fr = { calls };
 
 // Calls listed in a day before « n autres ».
 const SHOWN = 3;

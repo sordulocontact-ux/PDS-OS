@@ -7,10 +7,12 @@ import { TextareaField } from "@/components/auth/textarea-field";
 import { ChipChoice } from "@/components/ui/chip-choice";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { productionClosure } from "@/lib/i18n/fr/production-closure";
 import { checkExportPoints } from "@/lib/production/delivery/check-actions";
 import { EXPORT_POINTS } from "@/lib/production/delivery/points";
 import type { ExportCheckLine } from "@/lib/production/delivery/rules";
+
+const fr = { productionClosure };
 
 const t = fr.productionClosure.points;
 type Result = "ok" | "not_ok";

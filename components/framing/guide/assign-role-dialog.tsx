@@ -22,10 +22,12 @@ import {
   isEngineerRole,
   type TeamRoleKey,
 } from "@/lib/framing/team-roles";
-import { fr } from "@/lib/i18n/fr";
+import { framingGuide } from "@/lib/i18n/fr/framing-guide";
 import type { RankedPerson } from "@/lib/network/ranked-people";
 import { listNetworkForRole } from "@/lib/network/role-people-actions";
 import type { NetworkRole } from "@/lib/network/types";
+
+const fr = { framingGuide };
 
 /**
  * Gives a role to someone already in the team (one click), to a creative

@@ -19,9 +19,13 @@ import {
 import type { FramingKnowledge } from "@/lib/framing/knowledge";
 import { legalPartyBoard, partyLineText } from "@/lib/framing/legal-parties";
 import { teamBoard } from "@/lib/framing/team-board";
-import { fr } from "@/lib/i18n/fr";
+import { framing } from "@/lib/i18n/fr/framing";
+import { framingGuide } from "@/lib/i18n/fr/framing-guide";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
 import { projectKindLabel } from "@/lib/projects/labels";
 import { normalizeSearch } from "@/lib/utils/search";
+
+const fr = { framing, framingGuide, framingIntel };
 
 export type SnapshotItem = {
   key: string;

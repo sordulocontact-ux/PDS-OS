@@ -1,5 +1,7 @@
 import type { AgreementContent } from "@/lib/activations/influence/agreement-content";
-import { fr } from "@/lib/i18n/fr";
+import { activationInfluence } from "@/lib/i18n/fr/activation-influence";
+
+const fr = { activationInfluence };
 
 const t = fr.activationInfluence;
 

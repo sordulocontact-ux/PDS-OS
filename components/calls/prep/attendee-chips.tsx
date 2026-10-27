@@ -6,13 +6,15 @@ import { FieldError } from "@/components/auth/form-message";
 import { CreateContactDialog } from "@/components/network/create-contact-dialog";
 import { Label } from "@/components/ui/label";
 import type { PrepPerson } from "@/lib/calls/prep/types";
-import { fr } from "@/lib/i18n/fr";
+import { callPrep } from "@/lib/i18n/fr/call-prep";
 import { listNetworkPeople } from "@/lib/network/people-actions";
 import { cn } from "@/lib/utils";
 
 import { AttendeeChip, ExternalsLine } from "./attendee-chip";
 import { AttendeeSuggestions } from "./attendee-suggestions";
 import { useAttendeeSearch } from "./use-attendee-search";
+
+const fr = { callPrep };
 
 /**
  * Who takes part, as in Teams or Outlook: one field of chips, type to find

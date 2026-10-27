@@ -3,11 +3,13 @@ import { loadCallClosures } from "@/lib/calls/closure-queries";
 import { summaryDraft } from "@/lib/calls/meeting/draft";
 import { loadCallSummaries, loadMeeting } from "@/lib/calls/meeting/queries";
 import type { MeetingLine } from "@/lib/calls/meeting/types";
-import { fr } from "@/lib/i18n/fr";
+import { meeting } from "@/lib/i18n/fr/meeting";
 
 import { MeetingFacts } from "./meeting-facts";
 import { MeetingSummaryBlock } from "./meeting-summary-block";
 import { MeetingSummaryFor } from "./meeting-summary-for";
+
+const fr = { meeting };
 
 /**
  * The meeting held, on a call's page: its facts and its report point by

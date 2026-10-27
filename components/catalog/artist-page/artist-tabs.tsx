@@ -1,6 +1,9 @@
 import { SectionTabs } from "@/components/shell/section-tabs";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { artistIdentity } from "@/lib/i18n/fr/artist-identity";
+import { catalog } from "@/lib/i18n/fr/catalog";
+
+const fr = { catalog, artistIdentity };
 
 // Sections of an artist. The discography only exists for an artist
 // imported from Deezer. « Identité »: its permanent identity (MKT-C2-04).

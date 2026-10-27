@@ -1,6 +1,8 @@
-import { fr } from "@/lib/i18n/fr";
+import { legalClearance } from "@/lib/i18n/fr/legal-clearance";
 import type { Clearance } from "@/lib/legal/clearance/types";
 import { formatInstant } from "@/lib/utils/instant";
+
+const fr = { legalClearance };
 
 /** The exchanges of a borrowing (sent, received, notes), newest first, in
  * the panel's « Journal » — each written by its moment: the request sent,

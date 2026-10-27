@@ -1,4 +1,8 @@
-import { fr } from "@/lib/i18n/fr";
+import { legalSplits } from "@/lib/i18n/fr/legal-splits";
+import { portal } from "@/lib/i18n/fr/portal";
+import { roles } from "@/lib/i18n/fr/roles";
+
+const fr = { legalSplits, roles, portal };
 
 const PORTAL: Record<string, string> = fr.portal.roles;
 const PRODUCTION: Record<string, string> = fr.roles.production;

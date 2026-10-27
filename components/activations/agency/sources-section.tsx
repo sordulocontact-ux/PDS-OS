@@ -2,7 +2,7 @@ import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import type { AgencySourceRecord } from "@/lib/activations/agency/queries";
 import type { ActivationScope } from "@/lib/activations/types";
-import { fr } from "@/lib/i18n/fr";
+import { activationAgency } from "@/lib/i18n/fr/activation-agency";
 import { formatDateTime } from "@/lib/release/format";
 
 import { RefreshButton } from "./refresh-button";
@@ -11,6 +11,8 @@ import {
   ImportMetricsButton,
   ManualRowButton,
 } from "./source-buttons";
+
+const fr = { activationAgency };
 
 const t = fr.activationAgency.sources;
 

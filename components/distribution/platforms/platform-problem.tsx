@@ -14,8 +14,11 @@ import {
   type AnomalyModule,
 } from "@/lib/distribution/anomalies";
 import { reportPlatformProblem } from "@/lib/distribution/platform-gestures";
-import { fr } from "@/lib/i18n/fr";
+import { distribution } from "@/lib/i18n/fr/distribution";
+import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
 import { todayInParis } from "@/lib/insights/dates";
+
+const fr = { distribution, distributionJourney };
 
 const t = fr.distributionJourney.platforms;
 

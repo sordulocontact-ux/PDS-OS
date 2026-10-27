@@ -11,7 +11,9 @@
 import type { ConceptionData } from "@/lib/design/conception";
 import { DESIGN_TOPICS } from "@/lib/design/intentions";
 import type { SheetStatus } from "@/lib/design/states";
-import { fr } from "@/lib/i18n/fr";
+import { conceptionDirection } from "@/lib/i18n/fr/conception-direction";
+
+const fr = { conceptionDirection };
 
 export type BriefChecks = {
   blocking: string[];

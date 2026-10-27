@@ -1,9 +1,11 @@
 import Link from "next/link";
 
 import { PageSection } from "@/components/shell/page-section";
-import { fr } from "@/lib/i18n/fr";
+import { artistActivity } from "@/lib/i18n/fr/artist-activity";
 
 import { formatActivityTime, groupByDay } from "./activity-days";
+
+const fr = { artistActivity };
 
 /** One line of a log, its sentence already written by the code. */
 export type ActivityEntry = {

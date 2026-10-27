@@ -6,8 +6,10 @@ import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
-import { fr } from "@/lib/i18n/fr";
+import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
 import { reviseContractDocument } from "@/lib/legal/contracts/actions";
+
+const fr = { legalContracts };
 
 /** « Modifier une clause »: a new version of the text with its reason
  * (« explicite, versionnée, auditée »). */

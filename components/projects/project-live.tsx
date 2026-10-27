@@ -2,9 +2,11 @@
 
 import { useEffect, useRef, useTransition } from "react";
 
-import { fr } from "@/lib/i18n/fr";
+import { shell } from "@/lib/i18n/fr/shell";
 import { refreshProjectData } from "@/lib/projects/live-actions";
 import { createClient } from "@/lib/supabase/client";
+
+const fr = { shell };
 
 // Coalesces a burst of changes (one action writes several rows).
 const DEBOUNCE_MS = 400;

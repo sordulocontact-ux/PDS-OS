@@ -8,7 +8,11 @@
 // decisions.
 
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
+import { legalDemarches } from "@/lib/i18n/fr/legal-demarches";
+import { legalDocuments } from "@/lib/i18n/fr/legal-documents";
+import { legalJourney as frLegalJourney } from "@/lib/i18n/fr/legal-journey";
+import { shell } from "@/lib/i18n/fr/shell";
 import {
   type JourneyPerson,
   type JourneyStep,
@@ -19,6 +23,14 @@ import {
   legalStepHref,
   type LegalStepKey,
 } from "@/lib/ui/legal-steps";
+
+const fr = {
+  shell,
+  legalContracts,
+  legalDemarches,
+  legalDocuments,
+  legalJourney: frLegalJourney,
+};
 
 const t = fr.legalJourney;
 const d = fr.legalDemarches;

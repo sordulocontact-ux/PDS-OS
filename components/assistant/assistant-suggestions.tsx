@@ -4,8 +4,10 @@ import { useEffect } from "react";
 
 import { useAssistant } from "@/components/assistant/assistant-provider";
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { assistant } from "@/lib/i18n/fr/assistant";
 import { cn } from "@/lib/utils";
+
+const fr = { assistant };
 
 /**
  * Ready-made questions in pills: outlined on a page, filled in the window.

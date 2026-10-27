@@ -7,11 +7,14 @@ import { CreateContactDialog } from "@/components/network/create-contact-dialog"
 import { Button } from "@/components/ui/button";
 import { ChoiceCards } from "@/components/ui/choice-cards";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { productionLight } from "@/lib/i18n/fr/production-light";
+import { productionProducer } from "@/lib/i18n/fr/production-producer";
 import type { CompanyOption } from "@/lib/production/companies";
 import type { OrganizationKind } from "@/lib/production/organization";
 import { chooseProducer } from "@/lib/production/producer-actions";
 import type { ProductionMode } from "@/lib/production/sheet";
+
+const fr = { productionLight, productionProducer };
 
 const t = fr.productionProducer;
 const tl = fr.productionLight.choices;

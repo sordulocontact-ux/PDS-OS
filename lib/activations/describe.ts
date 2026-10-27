@@ -3,9 +3,11 @@
 
 import type { LaunchGap } from "@/lib/activations/model";
 import type { Alert, Reserve, RuleStep } from "@/lib/activations/states";
-import { fr } from "@/lib/i18n/fr";
+import { activations } from "@/lib/i18n/fr/activations";
 import { formatDate } from "@/lib/release/format";
 import { joinList } from "@/lib/utils/sentences";
+
+const fr = { activations };
 
 const t = fr.activations;
 

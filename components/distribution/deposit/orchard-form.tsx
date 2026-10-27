@@ -17,8 +17,11 @@ import {
   type OrchardAnswer,
 } from "@/lib/distribution/tracking";
 import { removeProof, uploadProof } from "@/lib/distribution/upload-proof";
-import { fr } from "@/lib/i18n/fr";
+import { distribution } from "@/lib/i18n/fr/distribution";
+import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
 import { cn } from "@/lib/utils";
+
+const fr = { distribution, distributionJourney };
 
 const t = fr.distributionJourney.orchard;
 

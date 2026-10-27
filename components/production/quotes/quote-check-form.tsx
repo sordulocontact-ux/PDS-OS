@@ -5,7 +5,7 @@ import { useState } from "react";
 import { FormMessage } from "@/components/auth/form-message";
 import { CheckboxField } from "@/components/ui/checkbox-field";
 import { DecisionPanel } from "@/components/ui/decision-panel";
-import { fr } from "@/lib/i18n/fr";
+import { productionQuotes } from "@/lib/i18n/fr/production-quotes";
 import {
   requestQuoteChanges,
   submitQuote,
@@ -14,6 +14,8 @@ import {
   TICKED_CHECKS,
   type QuoteComputed,
 } from "@/lib/production/quotes/check";
+
+const fr = { productionQuotes };
 
 const t = fr.productionQuotes.check;
 

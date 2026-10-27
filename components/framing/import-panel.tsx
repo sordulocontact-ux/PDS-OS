@@ -5,7 +5,9 @@ import { useCanEditProject } from "@/components/projects/edit-access";
 import { Button } from "@/components/ui/button";
 import type { FramingData } from "@/lib/framing/queries";
 import type { ActionResult } from "@/lib/framing/result";
-import { fr } from "@/lib/i18n/fr";
+import { framing } from "@/lib/i18n/fr/framing";
+
+const fr = { framing };
 
 const dateFormat = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric",

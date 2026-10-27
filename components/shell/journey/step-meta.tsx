@@ -1,4 +1,4 @@
-import { fr } from "@/lib/i18n/fr";
+import { journey } from "@/lib/i18n/fr/journey";
 import {
   type JourneyRole,
   type JourneyStep,
@@ -7,6 +7,8 @@ import {
   withModule,
 } from "@/lib/ui/journey";
 import { cn } from "@/lib/utils";
+
+const fr = { journey };
 
 const t = fr.journey.meta;
 

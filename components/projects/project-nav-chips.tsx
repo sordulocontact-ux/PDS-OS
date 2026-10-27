@@ -9,9 +9,11 @@ import {
 } from "@/components/projects/project-nav-list";
 import { MineBadge } from "@/components/ui/mine-badge";
 import { ViewLink } from "@/components/ui/view-link";
-import { fr } from "@/lib/i18n/fr";
+import { shell } from "@/lib/i18n/fr/shell";
 import type { ProjectSection } from "@/lib/ui/project-sections";
 import { cn } from "@/lib/utils";
+
+const fr = { shell };
 
 // Proto « Projet complet » (`.mnav .chipbtn`): 34 px pills on a hairline,
 // the open one outlined in ink on soft grey.

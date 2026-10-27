@@ -1,4 +1,4 @@
-import { fr } from "@/lib/i18n/fr";
+import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
 import {
   MAX_SOURCE_BYTES,
   sourceExtensionOf,
@@ -6,6 +6,8 @@ import {
 } from "@/lib/legal/contracts/source-rules";
 import { readTemplateSource } from "@/lib/legal/contracts/template-source";
 import { createClient } from "@/lib/supabase/client";
+
+const fr = { legalContracts };
 
 export type TemplateSource = { path: string; name: string };
 

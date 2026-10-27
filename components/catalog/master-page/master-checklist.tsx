@@ -2,8 +2,10 @@ import Link from "next/link";
 
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { ChecklistItem } from "@/lib/catalog/master/overview";
-import { fr } from "@/lib/i18n/fr";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 import { checklistTone } from "@/lib/ui/state-tones";
+
+const fr = { masterPage };
 
 // What the title's dossier still needs, each line opening the tab where it
 // is completed, what the release needs marked (retour Catalogue 12), listed

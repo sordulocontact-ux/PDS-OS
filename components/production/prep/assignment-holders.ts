@@ -1,8 +1,10 @@
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionNeeds } from "@/lib/i18n/fr/production-needs";
 import { networkRolesOf, rolesText } from "@/lib/network/types";
 import { FAMILY_NETWORK_ROLES } from "@/lib/production/roles";
 import type { NetworkOption, ProductionNeed } from "@/lib/production/sheet";
+
+const fr = { productionNeeds };
 
 export type HolderOption = { value: string; label: string };
 export type HolderGroups = {

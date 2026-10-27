@@ -6,13 +6,15 @@ import { toast } from "sonner";
 import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { FilePickField } from "@/components/ui/file-pick-field";
-import { fr } from "@/lib/i18n/fr";
+import { signedReturns } from "@/lib/i18n/fr/signed-returns";
 import { signedFileError } from "@/lib/legal/signed-returns/errors";
 import {
   openSignedReturnSlot,
   submitSignedReturn,
 } from "@/lib/legal/signed-returns/public-actions";
 import { createClient } from "@/lib/supabase/client";
+
+const fr = { signedReturns };
 
 const t = fr.signedReturns;
 

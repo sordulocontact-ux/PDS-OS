@@ -1,6 +1,9 @@
 import type { ActivationAction } from "@/lib/activations/journey";
-import { fr } from "@/lib/i18n/fr";
+import { activationJourney } from "@/lib/i18n/fr/activation-journey";
+import { journey } from "@/lib/i18n/fr/journey";
 import { lowerFirst } from "@/lib/ui/journey";
+
+const fr = { journey, activationJourney };
 
 const t = fr.activationJourney.now;
 const tj = fr.journey.now;

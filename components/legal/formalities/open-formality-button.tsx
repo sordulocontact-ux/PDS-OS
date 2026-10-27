@@ -2,8 +2,10 @@
 
 import { useLegalAction } from "@/components/legal/use-legal-action";
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
 import { openFormality } from "@/lib/legal/formalities/actions";
+
+const fr = { legalFormalities };
 
 /** « Ouvrir la formalité » of a title: its dossier starts from what PDS OS
  * already knows. */

@@ -4,7 +4,7 @@
 // already turned into an open task (same title) is not proposed again.
 // Client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { productionShoot } from "@/lib/i18n/fr/production-shoot";
 import { formatDate } from "@/lib/release/format";
 import {
   isReturnOverdue,
@@ -15,6 +15,8 @@ import {
   type ShootIncident,
   type ShootRecord,
 } from "@/lib/production/shoot/rules";
+
+const fr = { productionShoot };
 
 const t = fr.productionShoot.followUps;
 

@@ -1,5 +1,7 @@
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { masterWorkflow } from "@/lib/i18n/fr/master-workflow";
+
+const fr = { masterWorkflow };
 
 // The internal path of the Master workflow (docs/ARCHITECTURE.md § 8
 // septies), from the ticket "Workflow Master" (30/09/2026): source →

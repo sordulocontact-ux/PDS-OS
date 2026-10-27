@@ -2,7 +2,9 @@
 // Two separate facts: how far the song has come, and which cut of it this
 // is. Client-safe; the database checks the same values.
 
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
+
+const fr = { catalog };
 
 /** From the first demo to the final master, in order. */
 export const AUDIO_STATES = [

@@ -3,7 +3,9 @@
 import { useTheme } from "next-themes";
 import { useSyncExternalStore } from "react";
 
-import { fr } from "@/lib/i18n/fr";
+import { shell } from "@/lib/i18n/fr/shell";
+
+const fr = { shell };
 
 export type ThemeChoice = "system" | "light" | "dark";
 

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { productionPost } from "@/lib/i18n/fr/production-post";
 import { versionName } from "@/lib/production/post/labels";
 import type { VersionActions } from "@/lib/production/post/rules";
 import type {
@@ -20,6 +20,8 @@ import {
 
 import { PostRowMenu } from "./post-row-menu";
 import { VersionDialog } from "./version-dialog";
+
+const fr = { productionPost };
 
 const t = fr.productionPost.versions;
 

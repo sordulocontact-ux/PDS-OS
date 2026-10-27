@@ -17,7 +17,9 @@ import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
 import { FicheLinkCard } from "@/components/legal/forms/fiche-link-card";
 import { AddToNetworkButton } from "@/components/network/add-to-network-button";
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
+import { legalForms } from "@/lib/i18n/fr/legal-forms";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 import { mailtoHref } from "@/lib/utils/mailto";
 import {
   prepareLegalForm,
@@ -30,6 +32,8 @@ import { ficheBadge, missingLabels } from "@/lib/legal/forms/state";
 import type { WriteResult } from "@/lib/utils/write-result";
 import type { FormRow } from "@/lib/legal/forms/queries";
 import { formatInstant } from "@/lib/utils/instant";
+
+const fr = { legal, legalForms, masterPage };
 
 const facts = (values: Record<string, string>) =>
   Object.entries(values).map(([id, value]) => ({

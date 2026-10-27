@@ -2,8 +2,10 @@ import { Avatar } from "@/components/ui/avatar";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { DeezerAccount } from "@/lib/catalog/capture-artist-types";
 import { formatFans } from "@/lib/catalog/types";
-import { fr } from "@/lib/i18n/fr";
+import { laboCaptures } from "@/lib/i18n/fr/labo-captures";
 import { cn } from "@/lib/utils";
+
+const fr = { laboCaptures };
 
 /** One Deezer account: picture, name (link to its Deezer page), audience. */
 export function DeezerAccountCard({

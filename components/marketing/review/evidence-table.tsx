@@ -9,10 +9,13 @@ import {
 } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatBriefDate } from "@/lib/framing/assess";
-import { fr } from "@/lib/i18n/fr";
+import { marketing } from "@/lib/i18n/fr/marketing";
+import { marketingReview } from "@/lib/i18n/fr/marketing-review";
 import type { Evidence } from "@/lib/marketing/model";
 import { formatLongDay } from "@/lib/project-history/format";
 import { evidenceVerificationTone } from "@/lib/ui/state-tones";
+
+const fr = { marketing, marketingReview };
 
 const t = fr.marketingReview.dashboard.detail;
 const ev = fr.marketing.evidence;

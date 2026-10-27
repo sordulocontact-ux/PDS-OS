@@ -14,9 +14,12 @@ import { ViewLink } from "@/components/ui/view-link";
 import { isOpen } from "@/lib/distribution/anomalies";
 import type { DistributionContext } from "@/lib/distribution/journey-context";
 import { platformLabel } from "@/lib/distribution/platforms";
-import { fr } from "@/lib/i18n/fr";
+import { distribution } from "@/lib/i18n/fr/distribution";
+import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
 import { distributionViewHref } from "@/lib/ui/distribution-steps";
 import { formatShortDay, formatShortInstant } from "@/lib/utils/day";
+
+const fr = { distribution, distributionJourney };
 
 const t = fr.distributionJourney.platforms;
 const p = fr.distribution.platforms;

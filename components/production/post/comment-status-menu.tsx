@@ -5,9 +5,11 @@ import { useTransition } from "react";
 import { toast } from "sonner";
 
 import { RowActions } from "@/components/ui/row-actions";
-import { fr } from "@/lib/i18n/fr";
+import { productionPost } from "@/lib/i18n/fr/production-post";
 import { setPostCommentStatus } from "@/lib/production/post/review-actions";
 import { commentMoves, type CommentStatus } from "@/lib/production/post/rules";
+
+const fr = { productionPost };
 
 const t = fr.productionPost.comments;
 

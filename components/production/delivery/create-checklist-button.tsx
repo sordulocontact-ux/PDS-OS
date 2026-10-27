@@ -5,8 +5,10 @@ import { toast } from "sonner";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { productionDelivery } from "@/lib/i18n/fr/production-delivery";
 import { createExportChecklist } from "@/lib/production/delivery/checklist-actions";
+
+const fr = { productionDelivery };
 
 const t = fr.productionDelivery;
 

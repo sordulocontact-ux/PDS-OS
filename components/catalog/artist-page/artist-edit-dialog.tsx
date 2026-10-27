@@ -11,7 +11,10 @@ import { DialogTrigger } from "@/components/ui/dialog";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { Separator } from "@/components/ui/separator";
 import type { ArtistDetail } from "@/lib/catalog/artist-types";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
+import { records } from "@/lib/i18n/fr/records";
+
+const fr = { catalog, records };
 
 // "Modifier": modal with the picture (applied at once) and the identity
 // form (applied on "Enregistrer"), without leaving the page.

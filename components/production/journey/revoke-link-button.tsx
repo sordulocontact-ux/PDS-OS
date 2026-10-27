@@ -2,8 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { productionProducer } from "@/lib/i18n/fr/production-producer";
 import { revokeProviderLink } from "@/lib/production/role-actions";
+
+const fr = { productionProducer };
 
 const t = fr.productionProducer.revoke;
 

@@ -6,9 +6,11 @@ import { Field } from "@/components/auth/field";
 import { SinglePicker } from "@/components/catalog/single-picker";
 import { CreateContactDialog } from "@/components/network/create-contact-dialog";
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { network } from "@/lib/i18n/fr/network";
 import type { NetworkKind, NetworkRole } from "@/lib/network/types";
 import { normalizeSearch } from "@/lib/utils/search";
+
+const fr = { network };
 
 export type PersonOption = { id: string; label: string; detail?: string };
 

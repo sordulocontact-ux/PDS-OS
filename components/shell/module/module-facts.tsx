@@ -1,5 +1,7 @@
-import { fr } from "@/lib/i18n/fr";
+import { moduleFrame } from "@/lib/i18n/fr/module-frame";
 import type { ModuleFact } from "@/lib/ui/module-frame";
+
+const fr = { moduleFrame };
 
 export type { ModuleFact };
 

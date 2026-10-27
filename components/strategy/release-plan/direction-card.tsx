@@ -1,10 +1,12 @@
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { strategyReleasePlan } from "@/lib/i18n/fr/strategy-release-plan";
 import {
   FONT_PAIRINGS,
   type Direction,
 } from "@/lib/strategy/documents/direction";
 import { doneTone } from "@/lib/ui/state-tones";
+
+const fr = { strategyReleasePlan };
 
 /**
  * A visual direction as the owner judges it: a sample in its own colours

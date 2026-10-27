@@ -9,7 +9,10 @@ import { Button } from "@/components/ui/button";
 import { ChipChoice } from "@/components/ui/chip-choice";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { recordProposal } from "@/lib/activations/influence/negotiation-actions";
-import { fr } from "@/lib/i18n/fr";
+import { activationInfluence } from "@/lib/i18n/fr/activation-influence";
+import { activations } from "@/lib/i18n/fr/activations";
+
+const fr = { activations, activationInfluence };
 
 const t = fr.activationInfluence.negotiation;
 

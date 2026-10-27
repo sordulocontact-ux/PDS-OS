@@ -9,7 +9,8 @@ import { ChipMultiChoice } from "@/components/ui/chip-choice";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { Label } from "@/components/ui/label";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+import { planSteps } from "@/lib/i18n/fr/plan-steps";
 import type { PlanStepValues } from "@/lib/plan/step-actions";
 import {
   PLAN_COLUMNS,
@@ -18,6 +19,8 @@ import {
   type PlanWorkflow,
 } from "@/lib/plan/propose";
 import type { WriteResult } from "@/lib/utils/write-result";
+
+const fr = { framingIntel, planSteps };
 
 const NOBODY = "none";
 

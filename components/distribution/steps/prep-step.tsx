@@ -12,8 +12,11 @@ import {
   type Readiness,
   type ReadinessItem,
 } from "@/lib/distribution/readiness";
-import { fr } from "@/lib/i18n/fr";
+import { distribution } from "@/lib/i18n/fr/distribution";
+import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
 import { distributionSourceTone } from "@/lib/ui/state-tones";
+
+const fr = { distribution, distributionJourney };
 
 const t = fr.distribution.readiness;
 const j = fr.distributionJourney.prep;

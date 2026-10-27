@@ -4,12 +4,15 @@ import { PageSection } from "@/components/shell/page-section";
 import { buttonVariants } from "@/components/ui/button";
 import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { productionDelivery } from "@/lib/i18n/fr/production-delivery";
+import { productionLight } from "@/lib/i18n/fr/production-light";
 import type { DeliveryTabData } from "@/lib/production/delivery/queries";
 import type { Decision, DecisionReason } from "@/lib/production/delivery/rules";
 import { formatDate } from "@/lib/release/format";
 
 import { DecisionCard } from "./decision-card";
+
+const fr = { productionDelivery, productionLight };
 
 const t = fr.productionDelivery.decisions;
 

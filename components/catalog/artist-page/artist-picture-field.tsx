@@ -10,7 +10,9 @@ import type { ArtistDetail } from "@/lib/catalog/artist-types";
 import { PICTURE_EXTENSIONS } from "@/lib/catalog/picture-rules";
 import { setArtistPicture } from "@/lib/catalog/profile-actions";
 import { uploadArtistPicture } from "@/lib/catalog/upload-picture";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
+
+const fr = { catalog };
 
 // Picture of the artist, applied at once (not on "Enregistrer"): upload,
 // replace, or remove the upload to come back to Deezer's picture.

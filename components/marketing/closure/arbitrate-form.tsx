@@ -9,9 +9,11 @@ import { OptionSelect } from "@/components/projects/option-select";
 import { ChoiceCards } from "@/components/ui/choice-cards";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { marketingReview } from "@/lib/i18n/fr/marketing-review";
 import { arbitrateReserve } from "@/lib/marketing/closure/reserve-actions";
 import type { ReserveDecision } from "@/lib/marketing/closure/reserves";
+
+const fr = { marketingReview };
 
 const t = fr.marketingReview.closure.reserves;
 const NONE = "none";

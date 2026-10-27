@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/copy-button";
-import { fr } from "@/lib/i18n/fr";
+import { roles } from "@/lib/i18n/fr/roles";
 import { formatDayMonth } from "@/lib/utils/instant";
+
+const fr = { roles };
 
 const t = fr.roles.links;
 

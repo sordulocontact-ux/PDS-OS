@@ -7,10 +7,13 @@ import { FactList } from "@/components/ui/fact-list";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { Fold } from "@/components/ui/fold";
 import { sectionCardClass } from "@/components/ui/section-card";
-import { fr } from "@/lib/i18n/fr";
+import { masterRound } from "@/lib/i18n/fr/master-round";
+import { masterWorkflow } from "@/lib/i18n/fr/master-workflow";
 import type { PublicPackage } from "@/lib/master-workflow/transmission-public";
 import { cn } from "@/lib/utils";
 import { formatShortDate } from "@/lib/release/format";
+
+const fr = { masterWorkflow, masterRound };
 
 type Open = Extract<PublicPackage, { state: "open" | "received" }>;
 

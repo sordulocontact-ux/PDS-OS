@@ -4,10 +4,13 @@ import { GenerateDialog } from "@/components/legal/contracts/generate-dialog";
 import { buttonVariants } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 import { formatFee } from "@/lib/legal/contracts/fields";
 import type { AgreementRow } from "@/lib/legal/contracts/mapping";
 import { agreementTone } from "@/lib/ui/state-tones";
+
+const fr = { legalContracts, masterPage };
 
 const linkClass =
   "underline-offset-4 outline-none hover:underline focus-visible:underline";

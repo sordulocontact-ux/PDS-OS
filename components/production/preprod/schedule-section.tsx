@@ -13,7 +13,7 @@ import { FactList } from "@/components/ui/fact-list";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { formatEuros } from "@/lib/budget/types";
-import { fr } from "@/lib/i18n/fr";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import type { EffectiveLogistics, Sourced } from "@/lib/production/logistics";
 import type {
   ScheduleRow,
@@ -24,6 +24,8 @@ import { formatShortDate } from "@/lib/release/format";
 import { scheduleStepTone } from "@/lib/ui/state-tones";
 
 import { ScheduleEditButton } from "./schedule-form";
+
+const fr = { productionPreprod };
 
 const t = fr.productionPreprod.schedule;
 

@@ -12,8 +12,11 @@ import {
   isQuestionKey,
   type Dimension,
 } from "@/lib/framing/dimensions";
-import { fr } from "@/lib/i18n/fr";
+import { briefRequests } from "@/lib/i18n/fr/brief-requests";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
 import { briefRequestTone } from "@/lib/ui/state-tones";
+
+const fr = { framingIntel, briefRequests };
 
 /** The validator's requests where they point, in the document itself. */
 function RequestNotes({ requests }: { requests: BriefRequest[] }) {

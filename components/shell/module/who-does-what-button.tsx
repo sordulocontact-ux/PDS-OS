@@ -4,9 +4,12 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
-import { fr } from "@/lib/i18n/fr";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
+import { roles } from "@/lib/i18n/fr/roles";
 
 import { RolesPanel, type RolesPanelProps } from "./roles-panel";
+
+const fr = { dialogs, roles };
 
 const t = fr.roles;
 

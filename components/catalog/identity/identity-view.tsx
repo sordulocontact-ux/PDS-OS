@@ -5,7 +5,9 @@ import {
   type IdentityFields,
   type IdentityRef,
 } from "@/lib/catalog/identity-fields";
-import { fr } from "@/lib/i18n/fr";
+import { artistIdentity } from "@/lib/i18n/fr/artist-identity";
+
+const fr = { artistIdentity };
 
 /**
  * One version of the artist's identity, read-only (MKT-C2-04): its texts,

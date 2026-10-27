@@ -5,8 +5,10 @@ import { useState } from "react";
 import { BriefForm } from "@/components/production/prep/brief-form";
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
-import { fr } from "@/lib/i18n/fr";
+import { productionBrief } from "@/lib/i18n/fr/production-brief";
 import type { ProductionBrief } from "@/lib/production/brief";
+
+const fr = { productionBrief };
 
 /** « Compléter le brief » (nothing written yet) or « Modifier », opening the
  * whole brief in the wide modal. */

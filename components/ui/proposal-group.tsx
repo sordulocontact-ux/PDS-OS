@@ -9,8 +9,10 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { VersionCard } from "@/components/ui/version-card";
-import { fr } from "@/lib/i18n/fr";
+import { decisions } from "@/lib/i18n/fr/decisions";
 import type { Tone } from "@/lib/ui/state-tones";
+
+const fr = { decisions };
 
 const t = fr.decisions.proposal;
 

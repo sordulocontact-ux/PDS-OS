@@ -23,9 +23,12 @@ import type { RecordRights } from "@/lib/archive/types";
 import { routes } from "@/lib/auth/redirects";
 import { variantText } from "@/lib/catalog/title-rules";
 import type { MasterRow } from "@/lib/catalog/types";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
+import { records } from "@/lib/i18n/fr/records";
 import { formatShortDate } from "@/lib/release/format";
 import { masterReleaseTone } from "@/lib/ui/state-tones";
+
+const fr = { catalog, records };
 
 export function MastersTable({
   masters,

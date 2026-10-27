@@ -1,9 +1,12 @@
 import { CallFacts } from "@/components/calls/call-facts";
 import type { MeetingData } from "@/lib/calls/meeting/types";
 import { callWhen } from "@/lib/calls/prep/dates";
-import { fr } from "@/lib/i18n/fr";
+import { callPrep } from "@/lib/i18n/fr/call-prep";
+import { meeting } from "@/lib/i18n/fr/meeting";
 
 import { MeetingReportDialog } from "./meeting-report-dialog";
+
+const fr = { callPrep, meeting };
 
 /**
  * A meeting held, in its step: « Échange stratégique · Lun. 05/10/2026 à

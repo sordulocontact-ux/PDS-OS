@@ -15,10 +15,14 @@ import {
 import { ConfirmButton } from "@/components/ui/confirm-button";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { confirmMasterRights } from "@/lib/catalog/master/rights-actions";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 import { formatInstant } from "@/lib/utils/instant";
 
 import { RightsForm } from "./rights-form";
+
+const fr = { dialogs, catalog, masterPage };
 
 // Rights on the master: ISWC of the work, holder and year of the ℗; the
 // holder proposed then confirmed by a person, and « à revoir » when the

@@ -9,7 +9,9 @@ import {
   UNKNOWN_AUDIO_STATE,
 } from "@/lib/catalog/title-rules";
 import type { MasterFormDefaults } from "@/lib/catalog/types";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
+
+const fr = { catalog };
 
 /**
  * The optional facts of a title, all fillable at creation when they are

@@ -1,6 +1,8 @@
 import type { MasterSession } from "@/lib/catalog/master/rules";
-import { fr } from "@/lib/i18n/fr";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 import { formatShortDate } from "@/lib/release/format";
+
+const fr = { masterPage };
 
 /** "Enregistrement · Studio Ferber · 12 sept. 2026", to name a session. */
 export function sessionLabel(

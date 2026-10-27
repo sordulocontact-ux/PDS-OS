@@ -3,7 +3,9 @@ import Link from "next/link";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
 import type { BriefChange } from "@/lib/framing/brief-snapshot";
-import { fr } from "@/lib/i18n/fr";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+
+const fr = { framingIntel };
 
 /**
  * Above the plan: the validated Brief it rests on no longer matches the

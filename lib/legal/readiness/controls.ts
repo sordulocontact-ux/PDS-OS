@@ -6,13 +6,16 @@
 // the label's policy (does the SACEM block?) and its final validation.
 // Pure, client-safe: never stored, never decided by PO (CLAUDE.md, rule 6).
 
-import { fr } from "@/lib/i18n/fr";
+import { legalDemarches } from "@/lib/i18n/fr/legal-demarches";
+import { legalReadiness as frLegalReadiness } from "@/lib/i18n/fr/legal-readiness";
 import type { ReadinessItem } from "@/lib/distribution/readiness";
 import type { InvoiceStateRow } from "@/lib/invoices/states";
 import { invoiceHref } from "@/lib/invoices/href";
 import type { Demarche } from "@/lib/legal/demarches/build";
 import { formatDay } from "@/lib/utils/day";
 import { legalRefSlug } from "@/lib/ui/legal-steps";
+
+const fr = { legalDemarches, legalReadiness: frLegalReadiness };
 
 export const READINESS_DOMAINS = [
   "master",

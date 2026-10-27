@@ -1,6 +1,6 @@
 import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { portal } from "@/lib/i18n/fr/portal";
 import type {
   ContactCallDetail,
   ContactCallRequests,
@@ -10,6 +10,8 @@ import { formatDay, formatShortDay, formatShortInstant } from "@/lib/utils/day";
 import { formatHour } from "@/lib/utils/instant";
 
 import type { PortalCardItem } from "./portal-sections";
+
+const fr = { portal };
 
 const t = fr.portal.call;
 

@@ -15,7 +15,9 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { loadExpenseForm } from "@/lib/budget/actions";
-import { fr } from "@/lib/i18n/fr";
+import { budget } from "@/lib/i18n/fr/budget";
+
+const fr = { budget };
 
 // The Marketing pages where a spend shows up while working (the Budget
 // page has its own button).

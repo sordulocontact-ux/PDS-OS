@@ -14,7 +14,9 @@ import type { ArtistDetail } from "@/lib/catalog/artist-types";
 import { countryItems } from "@/lib/catalog/countries";
 import { isArtistRelation } from "@/lib/catalog/types";
 import { updateArtist } from "@/lib/catalog/profile-actions";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
+
+const fr = { catalog };
 
 // Identity, relation with PDS, biography and notes of the artist. Closes once
 // saved.

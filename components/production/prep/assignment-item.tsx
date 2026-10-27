@@ -1,10 +1,12 @@
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDateTime } from "@/lib/calls/format";
-import { fr } from "@/lib/i18n/fr";
+import { productionNeeds } from "@/lib/i18n/fr/production-needs";
 import type { ProductionAssignment } from "@/lib/production/sheet";
 import { productionAvailabilityTone } from "@/lib/ui/state-tones";
 
 import { AssignmentActions } from "./assignment-actions";
+
+const fr = { productionNeeds };
 
 /** A person on a position: name, the availability a person set, who set it
  * and when, the note; the « ⋯ » for the owner. */

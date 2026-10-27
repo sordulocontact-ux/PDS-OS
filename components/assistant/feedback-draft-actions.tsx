@@ -9,7 +9,10 @@ import { Button } from "@/components/ui/button";
 import type { FeedbackDraft } from "@/lib/assistant/drafts";
 import { routes } from "@/lib/auth/redirects";
 import { sendFeedback } from "@/lib/feedback/actions";
-import { fr } from "@/lib/i18n/fr";
+import { assistant } from "@/lib/i18n/fr/assistant";
+import { feedback } from "@/lib/i18n/fr/feedback";
+
+const fr = { assistant, feedback };
 
 const feedbackPage = { label: fr.feedback.title, href: routes.feedback };
 

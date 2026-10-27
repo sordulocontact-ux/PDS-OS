@@ -5,8 +5,11 @@ import {
   DataUseNote,
   RequesterNote,
 } from "@/components/legal/forms/requester-note";
-import { fr } from "@/lib/i18n/fr";
+import { legalForms } from "@/lib/i18n/fr/legal-forms";
+import { portal } from "@/lib/i18n/fr/portal";
 import type { PublicForm as PublicFormData } from "@/lib/legal/forms/public";
+
+const fr = { legalForms, portal };
 
 const t = fr.legalForms.public;
 

@@ -10,7 +10,9 @@ import { Button } from "@/components/ui/button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { decideLift, requestLift } from "@/lib/distribution/closure-gestures";
 import { removeProof, uploadProof } from "@/lib/distribution/upload-proof";
-import { fr } from "@/lib/i18n/fr";
+import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
+
+const fr = { distributionJourney };
 
 const t = fr.distributionJourney.closure;
 const d = fr.distributionJourney.deposit;

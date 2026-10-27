@@ -13,8 +13,11 @@ import {
   engineerToChoose,
 } from "@/lib/catalog/master/contributor-groups";
 import type { ContributorRole } from "@/lib/catalog/master/rules";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 import { listNetworkPeople } from "@/lib/network/people-actions";
+
+const fr = { catalog, masterPage };
 
 type Row = {
   key: number;

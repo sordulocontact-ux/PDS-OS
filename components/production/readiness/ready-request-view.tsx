@@ -2,9 +2,11 @@ import { ReadyDecision } from "@/components/production/readiness/ready-decision"
 import { ReadySynthesisTable } from "@/components/production/readiness/ready-synthesis-table";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { shortStamp } from "@/lib/calls/prep/dates";
-import { fr } from "@/lib/i18n/fr";
+import { productionReady } from "@/lib/i18n/fr/production-ready";
 import type { ProductionSheetData } from "@/lib/production/sheet";
 import { formatDay } from "@/lib/utils/day";
+
+const fr = { productionReady };
 
 const r = fr.productionReady;
 

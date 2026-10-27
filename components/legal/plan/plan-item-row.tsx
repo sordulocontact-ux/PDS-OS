@@ -2,10 +2,12 @@
 
 import { Field } from "@/components/auth/field";
 import { OptionSelect } from "@/components/projects/option-select";
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
 import type { PlanRow } from "@/lib/legal/plan/queries";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
+
+const fr = { legal };
 
 export type PlanChoice = {
   include: boolean;

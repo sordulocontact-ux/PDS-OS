@@ -10,7 +10,9 @@ import type { Dimension, QuestionKey } from "@/lib/framing/dimensions";
 import type { FramingKnowledge } from "@/lib/framing/knowledge";
 import type { LegalPartyBoard } from "@/lib/framing/legal-parties";
 import { formatEuros } from "@/lib/budget/types";
-import { fr } from "@/lib/i18n/fr";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+
+const fr = { framingIntel };
 
 export type FramingConflict = {
   key: string;

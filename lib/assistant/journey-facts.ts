@@ -1,6 +1,8 @@
 import { formatDay } from "@/lib/assistant/facts";
-import { fr } from "@/lib/i18n/fr";
+import { assistant } from "@/lib/i18n/fr/assistant";
 import type { ProjectAction, ProjectJourneys } from "@/lib/journey/types";
+
+const fr = { assistant };
 
 const lineOf = (action: ProjectAction, mine: boolean) => {
   const t = fr.assistant.myWork;

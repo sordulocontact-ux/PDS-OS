@@ -6,7 +6,9 @@ import { toast } from "sonner";
 import { EditPanel } from "@/components/archive/edit-panel";
 import { useReturnAfterSave } from "@/components/shell/return-banner";
 import { loadMasterEdit } from "@/lib/catalog/edit-form-actions";
-import { fr } from "@/lib/i18n/fr";
+import { records } from "@/lib/i18n/fr/records";
+
+const fr = { records };
 
 const CreateMasterForm = dynamic(() =>
   import("@/components/catalog/create-master-form").then(

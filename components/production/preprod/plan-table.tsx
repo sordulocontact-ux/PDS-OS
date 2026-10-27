@@ -15,7 +15,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import {
   dependencyOptions,
   type ActionState,
@@ -26,6 +26,8 @@ import { formatShortDate } from "@/lib/release/format";
 import { planStateTone } from "@/lib/ui/state-tones";
 
 import { PlanRowMenu } from "./plan-row-menu";
+
+const fr = { productionPreprod };
 
 const t = fr.productionPreprod.plan;
 

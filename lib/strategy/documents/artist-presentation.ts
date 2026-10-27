@@ -4,7 +4,9 @@
 // presse; kept on its own so that the artist sheet can expose it later as a
 // reusable Artist Deck / Kit Artiste (ticket Stratégie § 12). Client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { strategyPressKit } from "@/lib/i18n/fr/strategy-press-kit";
+
+const fr = { strategyPressKit };
 
 export type ArtistSheet = {
   name: string;

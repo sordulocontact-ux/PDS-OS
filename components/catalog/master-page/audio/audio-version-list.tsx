@@ -5,9 +5,12 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { Timestamp } from "@/components/ui/timestamp";
 import type { NumberedVersion } from "@/lib/catalog/audio-versions";
 import { formatFileSize } from "@/lib/catalog/file-rules";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 import { formatInstant } from "@/lib/utils/instant";
 import { audioValidationTone } from "@/lib/ui/state-tones";
+
+const fr = { catalog, masterPage };
 
 /** « Mix V2 ». */
 export function versionLabel(version: NumberedVersion): string {

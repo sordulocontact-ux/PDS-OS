@@ -12,9 +12,12 @@ import type { ActivationFiche } from "@/lib/activations/fiche";
 import { loadActivationFiles } from "@/lib/activations/files/queries";
 import { loadActivationJournal } from "@/lib/activations/journal";
 import type { Access } from "@/lib/auth/access";
-import { fr } from "@/lib/i18n/fr";
+import { activationJourney } from "@/lib/i18n/fr/activation-journey";
+import { activations } from "@/lib/i18n/fr/activations";
 import { measureTone, proofTone } from "@/lib/ui/state-tones";
 import { formatDay } from "@/lib/utils/day";
+
+const fr = { activations, activationJourney };
 
 const t = fr.activationJourney.infos;
 const ta = fr.activations;

@@ -1,6 +1,8 @@
 import { SourceLine } from "@/components/framing/source-line";
 import type { Provenance } from "@/lib/framing/brief";
-import { fr } from "@/lib/i18n/fr";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+
+const fr = { framingIntel };
 
 /**
  * Under a list question: where each proposed line comes from, with the way

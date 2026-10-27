@@ -3,8 +3,10 @@
 import { ExternalLink } from "@/components/catalog/artist-profile/external-link";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { SimilarImage } from "@/lib/design/similar-rules";
-import { fr } from "@/lib/i18n/fr";
+import { conceptionRefs } from "@/lib/i18n/fr/conception-refs";
 import { cn } from "@/lib/utils";
+
+const fr = { conceptionRefs };
 
 /**
  * One image a source found: the whole picture ticks it (a native checkbox

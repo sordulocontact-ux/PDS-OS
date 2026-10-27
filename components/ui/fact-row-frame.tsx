@@ -2,10 +2,12 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { decisions } from "@/lib/i18n/fr/decisions";
 import type { Tone } from "@/lib/ui/state-tones";
 import { cn } from "@/lib/utils";
 import type { WriteResult } from "@/lib/utils/write-result";
+
+const fr = { decisions };
 
 const t = fr.decisions.fact;
 

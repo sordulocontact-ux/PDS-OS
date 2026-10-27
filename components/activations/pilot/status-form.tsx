@@ -18,7 +18,9 @@ import {
   type ActivationStatus,
   type LaunchGap,
 } from "@/lib/activations/model";
-import { fr } from "@/lib/i18n/fr";
+import { activations } from "@/lib/i18n/fr/activations";
+
+const fr = { activations };
 
 const t = fr.activations;
 

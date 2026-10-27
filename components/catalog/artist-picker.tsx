@@ -22,7 +22,9 @@ import {
   type ArtistOption,
   type Credit,
 } from "@/lib/catalog/types";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
+
+const fr = { catalog };
 
 // Credits of a master: search, multiple artists, main or featuring, order.
 // Submitted as one JSON field `credits`. Creating an artist from here selects

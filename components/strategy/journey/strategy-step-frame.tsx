@@ -13,10 +13,14 @@ import {
   StepToolsBlock,
 } from "@/components/shell/module/step-tools-block";
 import { WhoDoesWhatButton } from "@/components/shell/module/who-does-what-button";
-import { fr } from "@/lib/i18n/fr";
+import { journey } from "@/lib/i18n/fr/journey";
+import { shell } from "@/lib/i18n/fr/shell";
+import { strategyJourney } from "@/lib/i18n/fr/strategy-journey";
 import type { StrategyStepKey } from "@/lib/strategy/journey";
 import { strategyStepData } from "@/lib/strategy/step-data";
 import { stepChoiceKey, type StepRef } from "@/lib/step-tools/model";
+
+const fr = { shell, strategyJourney, journey };
 
 const t = fr.strategyJourney;
 

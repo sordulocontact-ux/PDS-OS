@@ -19,7 +19,7 @@ import {
   type ContributorGroup,
 } from "@/lib/catalog/master/contributor-groups";
 import type { MasterContributor } from "@/lib/catalog/master/rules";
-import { fr } from "@/lib/i18n/fr";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 
 import { ContributorForm } from "./contributor-form";
 import {
@@ -28,6 +28,8 @@ import {
   ItemRowActions,
   useItemDialogs,
 } from "./item-dialogs";
+
+const fr = { masterPage };
 
 // Every credit that is not a performing artist: one line per person with
 // all their roles (UX test of 09/10/2026), in the order of their first role.

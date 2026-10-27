@@ -10,7 +10,8 @@ import { DataTableViews } from "@/components/ui/data-table-views";
 import { Label } from "@/components/ui/label";
 import { SearchField } from "@/components/ui/search-field";
 import type { RecordRights } from "@/lib/archive/types";
-import { fr } from "@/lib/i18n/fr";
+import { records } from "@/lib/i18n/fr/records";
+import { shell } from "@/lib/i18n/fr/shell";
 import { todayInParis } from "@/lib/insights/dates";
 import type { ProjectDraftItem } from "@/lib/projects/drafts";
 import {
@@ -25,6 +26,8 @@ import {
   type ProjectView,
 } from "@/lib/projects/list-view";
 import { PROJECT_TYPES, type ProjectListItem } from "@/lib/projects/types";
+
+const fr = { shell, records };
 
 const ANY = "any";
 const VIEW_PARAM = "vue";

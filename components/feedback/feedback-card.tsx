@@ -1,7 +1,9 @@
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { FeedbackKind } from "@/lib/feedback/types";
-import { fr } from "@/lib/i18n/fr";
+import { feedback } from "@/lib/i18n/fr/feedback";
 import { feedbackKindTone } from "@/lib/ui/state-tones";
+
+const fr = { feedback };
 
 // Card of a feedback or a topic: the kind first, then facts on one line
 // (date, author, page, count) and an optional action at the end, then the

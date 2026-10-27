@@ -9,10 +9,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MoveButtons } from "@/components/ui/move-buttons";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { strategyReleasePlan } from "@/lib/i18n/fr/strategy-release-plan";
 import { inPhase, phaseRange } from "@/lib/strategy/documents/phases";
 import type { Phase } from "@/lib/strategy/documents/release-plan-model";
 import { move } from "@/lib/utils/move";
+
+const fr = { strategyReleasePlan };
 
 const bound = (raw: string): number | null => {
   const n = Number.parseInt(raw, 10);

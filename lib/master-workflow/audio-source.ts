@@ -7,13 +7,16 @@
 import { routes } from "@/lib/auth/redirects";
 import { byAudioProgress, type AudioState } from "@/lib/catalog/title-rules";
 import { groupOf, type FactTitle } from "@/lib/facts/types";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
+import { masterWorkflow } from "@/lib/i18n/fr/master-workflow";
 import type {
   MasterFact,
   MasterFactAction,
   SourceOption,
 } from "@/lib/master-workflow/types";
 import { formatShortDate } from "@/lib/release/format";
+
+const fr = { catalog, masterWorkflow };
 
 export type FlowAudio = {
   id: string;

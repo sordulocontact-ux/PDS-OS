@@ -12,12 +12,16 @@ import { loadPressKit } from "@/lib/activations/press-kit";
 import { loadOpportunities } from "@/lib/activations/press/queries";
 import { loadTargets } from "@/lib/activations/targets";
 import type { Access } from "@/lib/auth/access";
-import { fr } from "@/lib/i18n/fr";
+import { activationJourney } from "@/lib/i18n/fr/activation-journey";
+import { activationPress } from "@/lib/i18n/fr/activation-press";
+import { activationWork } from "@/lib/i18n/fr/activation-work";
 import { todayInParis } from "@/lib/insights/dates";
 import { activationMessageTone } from "@/lib/ui/state-tones";
 
 import { ModuleLine } from "./module-line";
 import { PressFraming } from "./press-framing";
+
+const fr = { activationWork, activationPress, activationJourney };
 
 const t = fr.activationJourney.pressBlock;
 const tp = fr.activationPress;

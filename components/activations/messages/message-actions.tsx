@@ -12,11 +12,14 @@ import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { advanceMessage } from "@/lib/activations/messages/actions";
 import type { MessageRecord } from "@/lib/activations/messages/queries";
 import type { MessageKind } from "@/lib/activations/model";
-import { fr } from "@/lib/i18n/fr";
+import { activationWork } from "@/lib/i18n/fr/activation-work";
+import { activations } from "@/lib/i18n/fr/activations";
 import { mailtoHref } from "@/lib/utils/mailto";
 
 import { ReasonForm } from "@/components/ui/reason-form";
 import { MessageForm, type MessageDefaults } from "./message-form";
+
+const fr = { activations, activationWork };
 
 const t = fr.activationWork.messages;
 

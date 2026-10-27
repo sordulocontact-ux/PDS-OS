@@ -10,7 +10,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { PdfExportButton } from "@/components/ui/pdf-export-button";
-import { fr } from "@/lib/i18n/fr";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
+import { marketingReview } from "@/lib/i18n/fr/marketing-review";
+import { reviewJourney } from "@/lib/i18n/fr/review-journey";
+
+const fr = { dialogs, marketingReview, reviewJourney };
 
 const t = fr.reviewJourney.bilan;
 const r = fr.marketingReview.reports;

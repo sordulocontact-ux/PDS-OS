@@ -14,7 +14,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { quantityGap } from "@/lib/production/preprod/types";
 import { formatEuros } from "@/lib/budget/types";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import type { ProductionFile } from "@/lib/production/files/queries";
 import {
   isConfirmedEquipment,
@@ -26,6 +26,8 @@ import { formatShortDate } from "@/lib/release/format";
 import { equipmentStatusTone } from "@/lib/ui/state-tones";
 
 import { EquipmentRowMenu } from "./equipment-actions";
+
+const fr = { productionPreprod };
 
 const t = fr.productionPreprod.equipment;
 

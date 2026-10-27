@@ -2,8 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { productionShootExternal } from "@/lib/i18n/fr/production-shoot-external";
 import { declareRushes } from "@/lib/production/shoot/shoot-actions";
+
+const fr = { productionShootExternal };
 
 const t = fr.productionShootExternal;
 

@@ -11,7 +11,9 @@ import type { Provenance } from "@/lib/framing/brief";
 import { QUESTIONS } from "@/lib/framing/dimensions";
 import type { FramingKnowledge } from "@/lib/framing/knowledge";
 import { legalPartyBoard } from "@/lib/framing/legal-parties";
-import { fr } from "@/lib/i18n/fr";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+
+const fr = { framingIntel };
 
 /**
  * The lines of a list question, under PO's question (needs, constraints,

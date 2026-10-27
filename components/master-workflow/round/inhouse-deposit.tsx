@@ -1,6 +1,9 @@
 import { DeliverVersion } from "@/components/master-workflow/deliver-version";
-import { fr } from "@/lib/i18n/fr";
+import { masterInHouse } from "@/lib/i18n/fr/master-inhouse";
+import { masterJourney } from "@/lib/i18n/fr/master-journey";
 import type { RoundStepView } from "@/lib/master-workflow/round-step";
+
+const fr = { masterJourney, masterInHouse };
 
 /**
  * « Déposer ma version » for the in-house engineer, in the app (proto

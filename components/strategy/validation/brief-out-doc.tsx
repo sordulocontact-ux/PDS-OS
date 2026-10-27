@@ -5,10 +5,12 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { buttonVariants } from "@/components/ui/button";
 import { VersionCard } from "@/components/ui/version-card";
 import { formatEuros } from "@/lib/budget/types";
-import { fr } from "@/lib/i18n/fr";
+import { strategyBriefOut } from "@/lib/i18n/fr/strategy-brief-out";
 import type { BriefOut } from "@/lib/strategy/brief-out";
 import { dayLabel } from "@/lib/strategy/dimension-model";
 import { formatDay } from "@/lib/utils/day";
+
+const fr = { strategyBriefOut };
 
 const t = fr.strategyBriefOut.doc;
 const euros = formatEuros;

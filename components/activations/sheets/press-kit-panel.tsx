@@ -3,7 +3,9 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { ViewLink } from "@/components/ui/view-link";
 import type { PressKitState } from "@/lib/activations/press-kit";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { activationWork } from "@/lib/i18n/fr/activation-work";
+
+const fr = { activationWork };
 
 const t = fr.activationWork.pressKit;
 

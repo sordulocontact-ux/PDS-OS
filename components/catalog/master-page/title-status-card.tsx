@@ -15,8 +15,11 @@ import type {
 } from "@/lib/catalog/master/title-status";
 import type { AudioState } from "@/lib/catalog/title-rules";
 import type { LinkedProject } from "@/lib/catalog/types";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 import { titleDistributionTone } from "@/lib/ui/state-tones";
+
+const fr = { catalog, masterPage };
 
 /**
  * The head of a title's overview (retours Catalogue 01 et 11): its audio

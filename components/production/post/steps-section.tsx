@@ -1,7 +1,7 @@
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { productionPost } from "@/lib/i18n/fr/production-post";
 import { stepLabel, stepPeriod } from "@/lib/production/post/labels";
 import type { StepSuggestion } from "@/lib/production/post/suggestions";
 import type {
@@ -15,6 +15,8 @@ import { STEP_AFTER } from "@/lib/production/post/suggestions";
 
 import { ProviderLinkButton } from "./provider-link-button";
 import { StepAddButton, StepMenu, StepSuggestions } from "./step-controls";
+
+const fr = { productionPost };
 
 const t = fr.productionPost.steps;
 

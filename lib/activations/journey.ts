@@ -5,8 +5,10 @@
 // Computed by code at each read, never stored. Pure, client-safe.
 
 import { isGated, phaseOf, type PhaseInput } from "@/lib/activations/phase";
-import { fr } from "@/lib/i18n/fr";
+import { activationJourney } from "@/lib/i18n/fr/activation-journey";
 import { lowerFirst } from "@/lib/ui/journey";
+
+const fr = { activationJourney };
 
 const t = fr.activationJourney;
 

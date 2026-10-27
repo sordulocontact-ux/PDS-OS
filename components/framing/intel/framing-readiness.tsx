@@ -1,6 +1,8 @@
 import { ToneCallout } from "@/components/ui/tone-callout";
 import type { FramingReadiness as Readiness } from "@/lib/framing/readiness";
-import { fr } from "@/lib/i18n/fr";
+import { briefRequests } from "@/lib/i18n/fr/brief-requests";
+
+const fr = { briefRequests };
 
 /**
  * Next to the Brief: the Cadrage's completeness and its operational

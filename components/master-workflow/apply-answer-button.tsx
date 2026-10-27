@@ -4,8 +4,10 @@ import { useTransition } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { masterWorkflow } from "@/lib/i18n/fr/master-workflow";
 import { applyBriefQuestion } from "@/lib/master-workflow/question-actions";
+
+const fr = { masterWorkflow };
 
 /** "Ajouter au Brief": the owner puts an answer into the brief, once. */
 export function ApplyAnswerButton({

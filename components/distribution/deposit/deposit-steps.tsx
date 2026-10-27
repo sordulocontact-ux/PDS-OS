@@ -16,9 +16,12 @@ import {
   type Declaration,
   type OrchardAnswer as Answer,
 } from "@/lib/distribution/tracking";
-import { fr } from "@/lib/i18n/fr";
+import { distribution } from "@/lib/i18n/fr/distribution";
+import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
 import { cn } from "@/lib/utils";
 import { formatDay, formatShortInstant } from "@/lib/utils/day";
+
+const fr = { distribution, distributionJourney };
 
 const t = fr.distributionJourney.deposit;
 const o = fr.distributionJourney.orchard;

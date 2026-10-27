@@ -1,4 +1,5 @@
-import { fr } from "@/lib/i18n/fr";
+import { projectShell } from "@/lib/i18n/fr/project-shell";
+import { shell } from "@/lib/i18n/fr/shell";
 import type { ProjectHeaderData } from "@/lib/projects/header";
 import { projectFormatLabel } from "@/lib/projects/labels";
 import type { ProjectDetail } from "@/lib/projects/types";
@@ -6,6 +7,8 @@ import type { Tone } from "@/lib/ui/state-tones";
 import type { ModuleFact } from "@/lib/ui/module-frame";
 import { formatDay } from "@/lib/utils/day";
 import type { WorkflowStates } from "@/lib/workflow-status/load";
+
+const fr = { shell, projectShell };
 
 /**
  * The head of the overview (proto « Projet complet »): the project's state

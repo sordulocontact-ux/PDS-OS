@@ -10,7 +10,10 @@ import { FormDialog } from "@/components/ui/form-dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { splitDesignIntention } from "@/lib/design/actions/consolidation";
-import { fr } from "@/lib/i18n/fr";
+import { conception } from "@/lib/i18n/fr/conception";
+import { conceptionIntents } from "@/lib/i18n/fr/conception-intents";
+
+const fr = { conception, conceptionIntents };
 
 type Part = { key: number; target: string; topic: string; value: string };
 

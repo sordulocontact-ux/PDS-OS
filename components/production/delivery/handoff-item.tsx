@@ -1,13 +1,16 @@
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { ViewLink } from "@/components/ui/view-link";
-import { fr } from "@/lib/i18n/fr";
+import { productionClosure } from "@/lib/i18n/fr/production-closure";
+import { productionDelivery } from "@/lib/i18n/fr/production-delivery";
 import type { HandoffRecord } from "@/lib/production/delivery/queries";
 import type { HandoffStaleness } from "@/lib/production/delivery/rules";
 import { formatDate } from "@/lib/release/format";
 import { activationHandoffTone } from "@/lib/ui/state-tones";
 
 import { HandoffExports } from "./handoff-exports";
+
+const fr = { productionDelivery, productionClosure };
 
 const t = fr.productionDelivery.handoff;
 const c = fr.productionClosure.handoff;

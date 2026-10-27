@@ -2,12 +2,14 @@ import type { PortalCardItem } from "@/components/portal/portal-sections";
 import { ProposalDecision } from "@/components/production/proposal/proposal-decision";
 import { ProposalDepositForm } from "@/components/production/proposal/proposal-deposit-form";
 import { ProposalVersions } from "@/components/production/proposal/proposal-versions";
-import { fr } from "@/lib/i18n/fr";
+import { productionProposal } from "@/lib/i18n/fr/production-proposal";
 import {
   proposalState,
   type ProposalVersion,
 } from "@/lib/production/proposal/model";
 import type { LinkJourney } from "@/lib/production/provider/journey";
+
+const fr = { productionProposal };
 
 const t = fr.productionProposal;
 

@@ -1,6 +1,8 @@
 import { ViewToggle } from "@/components/ui/view-toggle";
-import { fr } from "@/lib/i18n/fr";
+import { records } from "@/lib/i18n/fr/records";
 import { viewHref } from "@/lib/ui/view-href";
+
+const fr = { records };
 
 // Live rows or the archive as pills (director only), in the URL
 // (?view=archived): the secondary filter of a list whose tabs are another

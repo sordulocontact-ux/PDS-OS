@@ -4,10 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { marketingReview } from "@/lib/i18n/fr/marketing-review";
 import type { MarketingStanding } from "@/lib/marketing/closure/queries";
 import { isMarketingClosed } from "@/lib/marketing/closure/status";
 import { marketingStatusTone } from "@/lib/ui/state-tones";
+
+const fr = { marketingReview };
 
 const t = fr.marketingReview;
 

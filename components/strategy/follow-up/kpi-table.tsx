@@ -8,8 +8,10 @@ import {
   DataTableRow,
 } from "@/components/ui/data-table";
 import { formatBriefDate } from "@/lib/framing/assess";
-import { fr } from "@/lib/i18n/fr";
+import { strategyFollowUp } from "@/lib/i18n/fr/strategy-follow-up";
 import type { KpiRow } from "@/lib/strategy/follow-up-results";
+
+const fr = { strategyFollowUp };
 
 const number = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 });
 const figure = (value: number, unit: string | null) =>

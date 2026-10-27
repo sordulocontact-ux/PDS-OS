@@ -3,7 +3,10 @@ import { DesignateInline } from "@/components/design/people/designate-inline";
 import { DesignWaits } from "@/components/design/waiting-row";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
 import type { DesignJourneyContext } from "@/lib/design/journey-context";
-import { fr } from "@/lib/i18n/fr";
+import { designJourney } from "@/lib/i18n/fr/design-journey";
+import { designSteps } from "@/lib/i18n/fr/design-steps";
+
+const fr = { designJourney, designSteps };
 
 const t = fr.designSteps.home.creative;
 

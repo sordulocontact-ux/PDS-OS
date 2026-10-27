@@ -15,9 +15,14 @@ import {
 } from "@/components/ui/dialog";
 import { routes } from "@/lib/auth/redirects";
 import { isStrategyTextField } from "@/lib/framing/brief";
-import { fr } from "@/lib/i18n/fr";
+import { framing } from "@/lib/i18n/fr/framing";
+import { strategy } from "@/lib/i18n/fr/strategy";
+import { strategyDraft } from "@/lib/i18n/fr/strategy-draft";
+import { strategyPilot } from "@/lib/i18n/fr/strategy-pilot";
 import { prepareStrategyDraft } from "@/lib/strategy/actions/draft";
 import type { DraftField, PriorityQuestions } from "@/lib/strategy/draft-plan";
+
+const fr = { framing, strategy, strategyPilot, strategyDraft };
 
 /** The name of a drafted field, as its question or part is titled. */
 export function draftFieldLabel(field: DraftField): string {

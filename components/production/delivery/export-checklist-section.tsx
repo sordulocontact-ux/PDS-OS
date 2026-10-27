@@ -1,7 +1,8 @@
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { FactList } from "@/components/ui/fact-list";
-import { fr } from "@/lib/i18n/fr";
+import { productionClosure } from "@/lib/i18n/fr/production-closure";
+import { productionDelivery } from "@/lib/i18n/fr/production-delivery";
 import {
   expectedFacts,
   expectedLines,
@@ -15,6 +16,8 @@ import type { HandedFiche } from "@/lib/production/fiche";
 import { AddExportCheckButton } from "./add-export-check-button";
 import { CreateChecklistButton } from "./create-checklist-button";
 import { ExportCheckRow } from "./export-check-row";
+
+const fr = { productionDelivery, productionClosure };
 
 const t = fr.productionDelivery.checklist;
 const c = fr.productionClosure;

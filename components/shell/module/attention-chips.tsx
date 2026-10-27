@@ -3,10 +3,12 @@
 import { useState } from "react";
 
 import { ViewLink } from "@/components/ui/view-link";
-import { fr } from "@/lib/i18n/fr";
+import { stepTools } from "@/lib/i18n/fr/step-tools";
 import { cn } from "@/lib/utils";
 
 import { NotesDialog, type NotesDialogProps } from "./notes-dialog";
+
+const fr = { stepTools };
 
 const t = fr.stepTools.chips;
 

@@ -1,10 +1,12 @@
 // Names the code writes for the postproduction: a step, a version, a
 // timecode. Client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { productionPost } from "@/lib/i18n/fr/production-post";
 import { formatTimecode } from "@/lib/production/post/timecode";
 import { formatDate } from "@/lib/release/format";
 import type { PostStep, PostVersion } from "@/lib/production/post/types";
+
+const fr = { productionPost };
 
 const t = fr.productionPost;
 

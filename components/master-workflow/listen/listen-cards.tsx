@@ -1,12 +1,14 @@
 import type { PortalCardItem } from "@/components/portal/portal-sections";
 import { AudioFile } from "@/components/ui/audio-file";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
-import { fr } from "@/lib/i18n/fr";
+import { masterListen } from "@/lib/i18n/fr/master-listen";
 import type { PublicListen } from "@/lib/master-workflow/listen-public";
 import { formatTimecode } from "@/lib/master-workflow/mix-types";
 import { formatShortInstant } from "@/lib/utils/day";
 
 import { ListenForm } from "./listen-form";
+
+const fr = { masterListen };
 
 const t = fr.masterListen;
 

@@ -5,12 +5,14 @@ import { useState } from "react";
 import { Field } from "@/components/auth/field";
 import { PersonPickerField } from "@/components/network/person-picker-field";
 import type { ContactRole } from "@/lib/catalog/contacts";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
 import {
   listNetworkPeople,
   type NetworkPersonOption,
 } from "@/lib/network/people-actions";
 import type { NetworkRole } from "@/lib/network/types";
+
+const fr = { catalog };
 
 // The Réseau role of who holds a contact role for an artist: listed first.
 const NETWORK_ROLE: Partial<Record<ContactRole, NetworkRole>> = {

@@ -1,10 +1,12 @@
 import { PageSection } from "@/components/shell/page-section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { InfluenceData } from "@/lib/activations/influence/queries";
-import { fr } from "@/lib/i18n/fr";
+import { activationInfluence } from "@/lib/i18n/fr/activation-influence";
 import { formatDate } from "@/lib/release/format";
 
 import { RightsButtons } from "./rights-buttons";
+
+const fr = { activationInfluence };
 
 const t = fr.activationInfluence.rights;
 const tone = {

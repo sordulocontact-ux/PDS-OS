@@ -1,7 +1,9 @@
 import { CalendarEventLink } from "@/components/calls/calendar-event";
 import type { CalendarEvent } from "@/lib/calls/calendar";
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
 import { cn } from "@/lib/utils";
+
+const fr = { calls };
 
 const longDay = new Intl.DateTimeFormat("fr-FR", {
   weekday: "long",

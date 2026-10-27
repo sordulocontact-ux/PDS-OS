@@ -6,7 +6,7 @@ import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
 import { ChipChoice } from "@/components/ui/chip-choice";
-import { fr } from "@/lib/i18n/fr";
+import { productionBrief } from "@/lib/i18n/fr/production-brief";
 import {
   CAMERA_SETUPS,
   COVERAGES,
@@ -17,6 +17,8 @@ import {
   type ProductionBriefChoices,
 } from "@/lib/production/brief";
 import { saveProductionBrief } from "@/lib/production/brief-actions";
+
+const fr = { productionBrief };
 
 type ChoiceKey = keyof ProductionBriefChoices;
 

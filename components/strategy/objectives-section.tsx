@@ -9,7 +9,7 @@ import { KpiItem } from "@/components/strategy/kpi-item";
 import { ObjectiveForm } from "@/components/strategy/objective-form";
 import { labelClass } from "@/components/ui/option-class";
 import type { FieldState } from "@/lib/framing/brief";
-import { fr } from "@/lib/i18n/fr";
+import { strategyKpis } from "@/lib/i18n/fr/strategy-kpis";
 import {
   addObjective,
   removeObjective,
@@ -30,6 +30,8 @@ import type {
   FramingObjective,
   StrategyObjective,
 } from "@/lib/strategy/queries";
+
+const fr = { strategyKpis };
 
 /**
  * « Objectifs & KPIs » (ticket Stratégie § 7): the strategic objective in

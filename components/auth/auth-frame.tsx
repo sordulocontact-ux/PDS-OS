@@ -2,7 +2,9 @@ import Link from "next/link";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { core } from "@/lib/i18n/fr/core";
+
+const fr = { app: core.app };
 
 // Shared frame of public and gate screens: app name, centred card, title,
 // content, optional footer links.

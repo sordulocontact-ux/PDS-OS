@@ -15,7 +15,9 @@ import { toast } from "sonner";
 import { useCaptureShortcut } from "@/components/feedback/use-capture-shortcut";
 import { FormDialog } from "@/components/ui/form-dialog";
 import type { EditedFeedback, FeedbackKind } from "@/lib/feedback/types";
-import { fr } from "@/lib/i18n/fr";
+import { feedback } from "@/lib/i18n/fr/feedback";
+
+const fr = { feedback };
 
 // Heavy and rarely shown: loaded on first opening.
 const FeedbackForm = dynamic(() =>

@@ -7,7 +7,7 @@ import { FieldError } from "@/components/auth/form-message";
 import { usePickerLoad } from "@/components/network/use-picker-load";
 import { Button } from "@/components/ui/button";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
 import type { Creator, Publisher } from "@/lib/legal/formalities/definition";
 import type { DossierErrors } from "@/lib/legal/formalities/field-errors";
 import { splitShareOf, type SplitShare } from "@/lib/legal/formalities/prefill";
@@ -20,6 +20,8 @@ import {
 
 import { CreatorCard } from "./creator-card";
 import { PublisherRow } from "./publisher-row";
+
+const fr = { legalFormalities };
 
 const blankCreator: Creator = {
   last_name: "",

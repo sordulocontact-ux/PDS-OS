@@ -14,7 +14,9 @@ import {
 
 import { IconBriefcase, IconDisc } from "@/components/icons";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { shell } from "@/lib/i18n/fr/shell";
+
+const fr = { shell };
 
 // The 8 items of the main sidebar (Figma "Devis Sordulo", node 120:47 and
 // 120:74), plus the MVP's Réseau, Contrats and Fichiers, and "Retours": one

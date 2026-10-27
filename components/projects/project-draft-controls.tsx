@@ -7,9 +7,11 @@ import type { DraftStatus } from "@/components/projects/use-project-draft";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { shell } from "@/lib/i18n/fr/shell";
 import { deleteProjectDraft } from "@/lib/projects/draft-actions";
 import { cn } from "@/lib/utils";
+
+const fr = { shell };
 
 // Under the new project form: where its draft stands, and, once there is
 // one, the way to throw it away (confirmed: what was typed is lost).

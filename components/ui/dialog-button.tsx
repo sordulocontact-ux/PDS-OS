@@ -4,7 +4,9 @@ import { useState, type ComponentType, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
-import { fr } from "@/lib/i18n/fr";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
+
+const fr = { dialogs };
 
 /**
  * A button that opens a form in the modal (« Ajouter un article »,

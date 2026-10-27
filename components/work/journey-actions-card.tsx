@@ -1,11 +1,14 @@
 import { CardRow, ListCard } from "@/components/ui/list-card";
 import { LoadingRegion, Skeleton } from "@/components/ui/skeleton";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { auth } from "@/lib/i18n/fr/auth";
+import { work } from "@/lib/i18n/fr/work";
 import type { ProjectAction } from "@/lib/journey/types";
 import { actionHref } from "@/lib/ui/journey";
 import { myValidationTone, overdueTone } from "@/lib/ui/state-tones";
 import { formatShortDay } from "@/lib/utils/day";
+
+const fr = { auth, work };
 
 export type JourneyActionRow = {
   action: ProjectAction;

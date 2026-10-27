@@ -1,8 +1,10 @@
 import { sourceLabel } from "@/components/framing/guide/source-quote";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { Provenance } from "@/lib/framing/brief";
-import { fr } from "@/lib/i18n/fr";
+import { framing } from "@/lib/i18n/fr/framing";
 import { draftConfidenceTone } from "@/lib/ui/state-tones";
+
+const fr = { framing };
 
 /**
  * Where a value comes from is already implied by context (a proposed field

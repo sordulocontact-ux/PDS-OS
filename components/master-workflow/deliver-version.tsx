@@ -14,7 +14,9 @@ import {
   isAudioFile,
   MAX_FILE_BYTES,
 } from "@/lib/catalog/file-rules";
-import { fr } from "@/lib/i18n/fr";
+import { masterFinal } from "@/lib/i18n/fr/master-final";
+import { masterInHouse } from "@/lib/i18n/fr/master-inhouse";
+import { masterWorkflow } from "@/lib/i18n/fr/master-workflow";
 import {
   DELIVERY_EXTENSIONS,
   deliveryNameOk,
@@ -32,6 +34,8 @@ import {
   recordMasterDelivery,
 } from "@/lib/master-workflow/transmission-public-actions";
 import { createClient } from "@/lib/supabase/client";
+
+const fr = { masterWorkflow, masterFinal, masterInHouse };
 
 const timeFormat = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric",

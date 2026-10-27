@@ -9,7 +9,10 @@ import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { addFeedback } from "@/lib/activations/influence/content-actions";
-import { fr } from "@/lib/i18n/fr";
+import { activationInfluence } from "@/lib/i18n/fr/activation-influence";
+import { activations } from "@/lib/i18n/fr/activations";
+
+const fr = { activations, activationInfluence };
 
 const t = fr.activationInfluence.contents;
 const CATEGORIES = [

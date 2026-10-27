@@ -1,9 +1,12 @@
 import { buttonVariants } from "@/components/ui/button";
 import { VersionCard } from "@/components/ui/version-card";
-import { fr } from "@/lib/i18n/fr";
+import { productionLight } from "@/lib/i18n/fr/production-light";
+import { productionProposal } from "@/lib/i18n/fr/production-proposal";
 import type { LightVersion } from "@/lib/production/light/types";
 import type { Tone } from "@/lib/ui/state-tones";
 import { formatShortInstant } from "@/lib/utils/day";
+
+const fr = { productionProposal, productionLight };
 
 const t = fr.productionLight;
 const TONE: Partial<Record<LightVersion["status"], Tone>> = {

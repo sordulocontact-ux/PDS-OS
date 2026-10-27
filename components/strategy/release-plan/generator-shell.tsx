@@ -1,5 +1,7 @@
 import { DimensionNav } from "@/components/framing/intel/dimension-nav";
-import { fr } from "@/lib/i18n/fr";
+import { strategyReleasePlan } from "@/lib/i18n/fr/strategy-release-plan";
+
+const fr = { strategyReleasePlan };
 
 export type GeneratorStep = { name: string; href: string; done: boolean };
 

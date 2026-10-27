@@ -1,7 +1,7 @@
 "use client";
 
 import { FormDialog } from "@/components/ui/form-dialog";
-import { fr } from "@/lib/i18n/fr";
+import { productionPost } from "@/lib/i18n/fr/production-post";
 import { stepLabel } from "@/lib/production/post/labels";
 import type { PostStepKey } from "@/lib/production/post/rules";
 import type {
@@ -11,6 +11,8 @@ import type {
 } from "@/lib/production/post/types";
 
 import { StepForm } from "./step-form";
+
+const fr = { productionPost };
 
 const t = fr.productionPost;
 

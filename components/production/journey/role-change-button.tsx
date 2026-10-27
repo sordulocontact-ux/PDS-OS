@@ -9,9 +9,12 @@ import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
+import { productionProducer } from "@/lib/i18n/fr/production-producer";
 import { changeProductionRole } from "@/lib/production/role-actions";
 import type { Holder, NetworkOption } from "@/lib/production/sheet";
+
+const fr = { dialogs, productionProducer };
 
 const t = fr.productionProducer.role;
 

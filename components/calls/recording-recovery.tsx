@@ -13,7 +13,9 @@ import {
   savedMs,
   type SavedTake,
 } from "@/lib/calls/recording";
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
+
+const fr = { calls };
 
 /**
  * A recording that stopped without « Arrêter » (PROJ-BUG-01): a reload, a

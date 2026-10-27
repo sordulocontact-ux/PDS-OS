@@ -5,10 +5,12 @@ import { useState } from "react";
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { productionLink } from "@/lib/i18n/fr/production-link";
 import { setRushesByLink } from "@/lib/production/provider/rushes-link-actions";
 
 import { useLinkSubmit } from "./use-link-submit";
+
+const fr = { productionLink };
 
 const t = fr.productionLink.rushes;
 

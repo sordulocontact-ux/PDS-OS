@@ -3,8 +3,10 @@
 import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { masterBrief } from "@/lib/i18n/fr/master-brief";
 import { recordBrief } from "@/lib/master-workflow/brief-fact-actions";
+
+const fr = { masterBrief };
 
 const t = fr.masterBrief;
 

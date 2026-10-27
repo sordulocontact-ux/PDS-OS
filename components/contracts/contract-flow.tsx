@@ -22,8 +22,10 @@ import type {
   ContractRights,
   ContractState,
 } from "@/lib/contracts/types";
-import { fr } from "@/lib/i18n/fr";
+import { contracts } from "@/lib/i18n/fr/contracts";
 import { validationTone } from "@/lib/ui/state-tones";
+
+const fr = { contracts };
 
 /**
  * Where a contract stands and its next step, for whoever takes it: the owner

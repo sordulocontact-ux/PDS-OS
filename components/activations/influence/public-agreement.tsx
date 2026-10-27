@@ -10,7 +10,9 @@ import { Button } from "@/components/ui/button";
 import { CheckboxField } from "@/components/ui/checkbox-field";
 import type { PublicAgreement as Agreement } from "@/lib/activations/influence/public";
 import { answerAgreement } from "@/lib/activations/influence/public-actions";
-import { fr } from "@/lib/i18n/fr";
+import { activationInfluence } from "@/lib/i18n/fr/activation-influence";
+
+const fr = { activationInfluence };
 
 type Open = Extract<Agreement, { state: "open" }>;
 const t = fr.activationInfluence;

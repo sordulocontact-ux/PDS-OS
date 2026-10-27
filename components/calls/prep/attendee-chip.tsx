@@ -5,8 +5,10 @@ import type { Ref } from "react";
 
 import { Avatar } from "@/components/ui/avatar";
 import type { PrepPerson } from "@/lib/calls/prep/types";
-import { fr } from "@/lib/i18n/fr";
+import { callPrep } from "@/lib/i18n/fr/call-prep";
 import { cn } from "@/lib/utils";
+
+const fr = { callPrep };
 
 const howOf = (person: PrepPerson) =>
   person.invite ? fr.callPrep.how[person.invite] : "";

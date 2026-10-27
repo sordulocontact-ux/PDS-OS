@@ -1,8 +1,10 @@
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import type { JournalEntry } from "@/lib/activations/types";
-import { fr } from "@/lib/i18n/fr";
+import { activations } from "@/lib/i18n/fr/activations";
 import { formatDateTime } from "@/lib/release/format";
+
+const fr = { activations };
 
 const t = fr.activations.journal;
 

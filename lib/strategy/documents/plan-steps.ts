@@ -3,12 +3,14 @@
 // step's state. Client-safe.
 
 import { formatDay } from "@/lib/assistant/facts";
-import { fr } from "@/lib/i18n/fr";
+import { strategyReleasePlan } from "@/lib/i18n/fr/strategy-release-plan";
 import type { ReleasePlanInput } from "@/lib/strategy/documents/release-plan-build";
 import type {
   ReleasePlanConfig,
   ReleasePlanPage,
 } from "@/lib/strategy/documents/release-plan-model";
+
+const fr = { strategyReleasePlan };
 
 const join = (values: string[]) => values.slice(0, 4).join(" · ") || null;
 

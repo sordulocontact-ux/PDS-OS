@@ -13,7 +13,10 @@ import {
   normalizeIswc,
 } from "@/lib/catalog/master/rules";
 import { catalogIdSchema } from "@/lib/catalog/schemas";
-import { fr } from "@/lib/i18n/fr";
+import { auth } from "@/lib/i18n/fr/auth";
+import { masterPage } from "@/lib/i18n/fr/master-page";
+
+const fr = { auth, masterPage };
 
 // Forms of the master page. Every rule is also a check in SQL.
 const e = fr.auth.errors;

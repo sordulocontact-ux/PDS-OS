@@ -1,9 +1,11 @@
 import { Children } from "react";
 
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { productionDelivery } from "@/lib/i18n/fr/production-delivery";
 import type { DecisionState } from "@/lib/production/delivery/rules";
 import { deliveryDecisionTone } from "@/lib/ui/state-tones";
+
+const fr = { productionDelivery };
 
 const t = fr.productionDelivery.decisions;
 

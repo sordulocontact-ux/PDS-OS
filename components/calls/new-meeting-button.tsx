@@ -9,7 +9,9 @@ import { FormDialog } from "@/components/ui/form-dialog";
 import { createMeeting } from "@/lib/calls/actions";
 import type { CallContact } from "@/lib/calls/invite";
 import type { SlotInput } from "@/lib/calls/slot";
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
+
+const fr = { calls };
 
 /** What the meeting form needs, read by the server. */
 export type MeetingFormData = {

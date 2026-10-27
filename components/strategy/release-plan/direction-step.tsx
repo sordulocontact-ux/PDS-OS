@@ -9,12 +9,14 @@ import { useImageReading } from "@/components/strategy/release-plan/use-image-re
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { strategyReleasePlan } from "@/lib/i18n/fr/strategy-release-plan";
 import type { GeneratorKind } from "@/lib/strategy/documents/generator-kind";
 import {
   proposeDirection,
   type Direction,
 } from "@/lib/strategy/documents/direction";
+
+const fr = { strategyReleasePlan };
 
 /**
  * Step 5 (ticket § 11): the moodboard and the document's direction, proposed

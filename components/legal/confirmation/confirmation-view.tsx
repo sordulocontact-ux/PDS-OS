@@ -16,10 +16,12 @@ import { PageSection } from "@/components/shell/page-section";
 import { FactTable } from "@/components/ui/fact-table";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
 import type { Confirmation } from "@/lib/legal/confirmation/queries";
 import { formatInstant } from "@/lib/utils/instant";
 import { StepSection } from "@/components/shell/journey/step-section";
+
+const fr = { legal };
 
 /** Where the dossier stands, said once at the top of the État des lieux:
  * confirmed (by whom, when, and the way to the plan), or reopened by a

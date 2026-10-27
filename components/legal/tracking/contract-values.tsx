@@ -1,13 +1,15 @@
 import { ContractValueList } from "@/components/legal/contracts/contract-value-list";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
 import { isBlocking } from "@/lib/legal/contracts/completeness";
 import type {
   AgreementField,
   AgreementRow,
 } from "@/lib/legal/contracts/mapping";
 import { withReturn } from "@/lib/ui/return-to";
+
+const fr = { legal };
 
 /** Where a blocking value of a contract is fixed: at its source (JUR-10),
  * back to the person's démarche once done. Client-safe. */

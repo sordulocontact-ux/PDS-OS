@@ -18,7 +18,8 @@ import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { RowActions, type RowAction } from "@/components/ui/row-actions";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
+import { marketingReview } from "@/lib/i18n/fr/marketing-review";
 import {
   createReserveTask,
   liftReserve,
@@ -30,6 +31,8 @@ import {
   type ReserveDecision,
 } from "@/lib/marketing/closure/reserves";
 import type { WriteResult } from "@/lib/utils/write-result";
+
+const fr = { dialogs, marketingReview };
 
 const t = fr.marketingReview.closure.reserves;
 const NONE = "none";

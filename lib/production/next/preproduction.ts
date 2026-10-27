@@ -3,12 +3,15 @@
 // readiness order; a check whose work exists is confirmed by a person.
 // Client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { productionNext } from "@/lib/i18n/fr/production-next";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import type { ScheduleStep } from "@/lib/production/preprod/schedule";
 import type { CheckKey } from "@/lib/production/preprod/types";
 
 import { blank, type NextContext, type Place } from "./context";
 import type { ProductionNext } from "./types";
+
+const fr = { productionPreprod, productionNext };
 
 const t = fr.productionNext;
 const checkLabel = (key: CheckKey) =>

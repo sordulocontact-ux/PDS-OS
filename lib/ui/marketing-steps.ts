@@ -1,5 +1,7 @@
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { shell } from "@/lib/i18n/fr/shell";
+
+const fr = { shell };
 
 // The Marketing workflow (ticket « Architecture globale », 08/10/2026, § 4):
 // Stratégie, Conception, Production, Activations, Suivi & bilan. An

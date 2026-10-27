@@ -4,7 +4,9 @@
 // sortie never carries one; assertNoBudget checks the result). Client-safe.
 
 import { formatDay } from "@/lib/assistant/facts";
-import { fr } from "@/lib/i18n/fr";
+import { strategy } from "@/lib/i18n/fr/strategy";
+import { strategyCalendar } from "@/lib/i18n/fr/strategy-calendar";
+import { strategyReleasePlan } from "@/lib/i18n/fr/strategy-release-plan";
 import { dayOffset } from "@/lib/strategy/calendar";
 import {
   proposeDirection,
@@ -22,6 +24,8 @@ import {
   type ReleasePlanContent,
   type ReleasePlanPage,
 } from "@/lib/strategy/documents/release-plan-model";
+
+const fr = { strategy, strategyCalendar, strategyReleasePlan };
 
 export type ReleasePlanInput = {
   project: ReleasePlanContent["project"];

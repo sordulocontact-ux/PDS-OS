@@ -6,7 +6,10 @@ import { Button } from "@/components/ui/button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { saveSheet } from "@/lib/activations/sheet-actions";
 import type { SheetFieldKey, SheetFields } from "@/lib/activations/sheets";
-import { fr } from "@/lib/i18n/fr";
+import { activationWork } from "@/lib/i18n/fr/activation-work";
+import { activations } from "@/lib/i18n/fr/activations";
+
+const fr = { activations, activationWork };
 
 const t = fr.activationWork.sheet;
 

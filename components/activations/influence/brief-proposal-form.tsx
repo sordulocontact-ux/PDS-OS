@@ -11,7 +11,9 @@ import { CopyButton } from "@/components/ui/copy-button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { sendInfluenceBrief } from "@/lib/activations/influence/brief-actions";
 import type { BriefDefaults } from "@/lib/activations/influence/brief-message";
-import { fr } from "@/lib/i18n/fr";
+import { activationBrief } from "@/lib/i18n/fr/activation-brief";
+
+const fr = { activationBrief };
 
 const t = fr.activationBrief.brief;
 

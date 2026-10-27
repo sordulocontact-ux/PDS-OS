@@ -7,7 +7,7 @@ import { TextareaField } from "@/components/auth/textarea-field";
 import { ChoiceCards } from "@/components/ui/choice-cards";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionShoot } from "@/lib/i18n/fr/production-shoot";
 import {
   setEquipmentReturnHolder,
   setEquipmentReturnStatus,
@@ -20,6 +20,8 @@ import {
   holderValue,
 } from "@/components/production/holder-select";
 import { ShootFormActions } from "./shoot-form-actions";
+
+const fr = { productionShoot };
 
 const t = fr.productionShoot.equipment;
 

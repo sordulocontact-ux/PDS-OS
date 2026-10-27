@@ -2,13 +2,15 @@ import { PageSection } from "@/components/shell/page-section";
 import { reserveText } from "@/lib/activations/describe";
 import type { ActivationSummary } from "@/lib/activations/types";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { activations } from "@/lib/i18n/fr/activations";
 import { formatDate } from "@/lib/release/format";
 
 import {
   CloseActivationButton,
   ReopenActivationButton,
 } from "./closure-buttons";
+
+const fr = { activations };
 
 const t = fr.activations.closure;
 

@@ -6,11 +6,14 @@ import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { masterFinal } from "@/lib/i18n/fr/master-final";
+import { masterWorkflow } from "@/lib/i18n/fr/master-workflow";
 import type { FinalTitle, FinalView } from "@/lib/master-workflow/final";
 import { formatShortDay, formatShortInstant } from "@/lib/utils/day";
 
 import { DeliverableReceived } from "./deliverable-received";
+
+const fr = { masterWorkflow, masterFinal };
 
 const t = fr.masterFinal;
 const labels = fr.masterWorkflow.brief.deliverables;

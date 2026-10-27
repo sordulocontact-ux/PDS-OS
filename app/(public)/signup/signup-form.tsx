@@ -6,7 +6,9 @@ import { FormMessage } from "@/components/auth/form-message";
 import { SubmitButton } from "@/components/auth/submit-button";
 import { signUp } from "@/lib/auth/actions";
 import { idleFormState, retained } from "@/lib/auth/form-state";
-import { fr } from "@/lib/i18n/fr";
+import { auth } from "@/lib/i18n/fr/auth";
+
+const fr = { auth };
 
 export function SignUpForm({ invitedEmail }: { invitedEmail: string }) {
   const [state, action] = useActionState(signUp, idleFormState);

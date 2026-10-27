@@ -4,8 +4,10 @@ import { useTransition } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { productionProvider } from "@/lib/i18n/fr/production-provider";
 import { finishStepByLink } from "@/lib/production/provider/public-actions";
+
+const fr = { productionProvider };
 
 const t = fr.productionProvider.mission;
 

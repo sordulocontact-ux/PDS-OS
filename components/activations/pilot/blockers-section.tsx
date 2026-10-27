@@ -5,11 +5,13 @@ import { alertText } from "@/lib/activations/describe";
 import type { Alert } from "@/lib/activations/states";
 import type { BlockerRecord } from "@/lib/activations/types";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { activations } from "@/lib/i18n/fr/activations";
 import { formatDate } from "@/lib/release/format";
 import { severityTone } from "@/lib/ui/state-tones";
 
 import { AddBlockerButton, ResolveBlockerButton } from "./blocker-buttons";
+
+const fr = { activations };
 
 const t = fr.activations.blockers;
 

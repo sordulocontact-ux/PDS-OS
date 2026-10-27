@@ -1,9 +1,12 @@
-import { fr } from "@/lib/i18n/fr";
+import { masterBrief } from "@/lib/i18n/fr/master-brief";
+import { masterWorkflow } from "@/lib/i18n/fr/master-workflow";
 import {
   BRIEF_DATES,
   type MasterBrief,
 } from "@/lib/master-workflow/brief-types";
 import { formatDay } from "@/lib/utils/day";
+
+const fr = { masterWorkflow, masterBrief };
 
 const esc = (value: string) =>
   value.replace(/[&<>"']/g, (c) =>

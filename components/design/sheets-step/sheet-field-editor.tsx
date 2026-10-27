@@ -11,7 +11,9 @@ import {
   type SheetFieldType,
 } from "@/lib/design/sheet-model";
 import { formatEuros, parseEuros } from "@/lib/design/sheet-fields";
-import { fr } from "@/lib/i18n/fr";
+import { designSteps } from "@/lib/i18n/fr/design-steps";
+
+const fr = { designSteps };
 
 const t = fr.designSteps.sheets;
 

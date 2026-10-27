@@ -4,7 +4,7 @@ import { TextareaField } from "@/components/auth/textarea-field";
 import { FormMessage } from "@/components/auth/form-message";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import {
   saveTeamBrief,
   transmitTeamBrief,
@@ -19,6 +19,8 @@ import {
 
 import { ConfirmButton } from "@/components/ui/confirm-button";
 import { DialogButton } from "@/components/ui/dialog-button";
+
+const fr = { productionPreprod };
 
 const t = fr.productionPreprod.briefs;
 

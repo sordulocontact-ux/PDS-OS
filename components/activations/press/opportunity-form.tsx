@@ -13,9 +13,13 @@ import { saveOpportunity } from "@/lib/activations/press/opportunity-actions";
 import type { OpportunityRecord } from "@/lib/activations/press/queries";
 import { toParisLocalInput } from "@/lib/calls/format";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { activationPress } from "@/lib/i18n/fr/activation-press";
+import { activationWork } from "@/lib/i18n/fr/activation-work";
+import { activations } from "@/lib/i18n/fr/activations";
 
 import { MemberSelect, memberValue } from "../member-select";
+
+const fr = { activations, activationWork, activationPress };
 
 const t = fr.activationPress.opportunities;
 const TYPES = Object.keys(t.types) as (keyof typeof t.types)[];

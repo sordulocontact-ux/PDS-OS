@@ -7,8 +7,10 @@ import {
   DataTableHeader,
   DataTableRow,
 } from "@/components/ui/data-table";
-import { fr } from "@/lib/i18n/fr";
+import { marketingReview } from "@/lib/i18n/fr/marketing-review";
 import type { MetricTotal } from "@/lib/marketing/dashboard";
+
+const fr = { marketingReview };
 
 const t = fr.marketingReview.dashboard;
 const number = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 });

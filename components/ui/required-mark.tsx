@@ -1,4 +1,6 @@
-import { fr } from "@/lib/i18n/fr";
+import { core } from "@/lib/i18n/fr/core";
+
+const fr = { forms: core.forms };
 
 /**
  * The « * » after the label of a required field (docs/DESIGN.md § 4,

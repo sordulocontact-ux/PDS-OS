@@ -2,10 +2,12 @@
 
 import { DialogButton } from "@/components/ui/dialog-button";
 import { reopenActivation } from "@/lib/activations/actions";
-import { fr } from "@/lib/i18n/fr";
+import { activations } from "@/lib/i18n/fr/activations";
 
 import { ReasonForm } from "@/components/ui/reason-form";
 import { ClosureForm } from "./closure-form";
+
+const fr = { activations };
 
 const t = fr.activations.closure;
 

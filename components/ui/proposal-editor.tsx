@@ -5,7 +5,9 @@ import { useState, type ReactNode } from "react";
 import { FieldError } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { fr } from "@/lib/i18n/fr";
+import { decisions } from "@/lib/i18n/fr/decisions";
+
+const fr = { decisions };
 
 const t = fr.decisions.proposal;
 

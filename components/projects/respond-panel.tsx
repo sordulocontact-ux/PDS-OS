@@ -8,8 +8,10 @@ import { TextareaField } from "@/components/auth/textarea-field";
 import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
 import { idleFormState } from "@/lib/auth/form-state";
-import { fr } from "@/lib/i18n/fr";
+import { transmission } from "@/lib/i18n/fr/transmission";
 import { respondToAssignment } from "@/lib/projects/transmission-actions";
+
+const fr = { transmission };
 
 type Mode = "choose" | "refused" | "clarification_requested";
 

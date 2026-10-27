@@ -4,7 +4,9 @@ import { RelatedArtists } from "@/components/catalog/artist-profile/related-arti
 import { PageSection } from "@/components/shell/page-section";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getArtistProfile } from "@/lib/catalog/artist-profile";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
+
+const fr = { catalog };
 
 // Discography tab: every release, top tracks and similar artists.
 export async function ArtistDeezerDetails({ deezerId }: { deezerId: number }) {

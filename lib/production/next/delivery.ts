@@ -2,10 +2,12 @@
 // technical check, the delivery, then the transmission to Activations —
 // three distinct decisions (PROD-038). Client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { productionNext } from "@/lib/i18n/fr/production-next";
 
 import { blank, type NextContext } from "./context";
 import type { ProductionNext } from "./types";
+
+const fr = { productionNext };
 
 const t = fr.productionNext;
 

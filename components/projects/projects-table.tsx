@@ -22,7 +22,8 @@ import {
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { RecordRights } from "@/lib/archive/types";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { records } from "@/lib/i18n/fr/records";
+import { shell } from "@/lib/i18n/fr/shell";
 import { adminStatus, phaseLabel } from "@/lib/projects/list-view";
 import { formatShortDate } from "@/lib/release/format";
 import { cn } from "@/lib/utils";
@@ -35,6 +36,8 @@ import {
   doneTone,
   projectPriorityTone,
 } from "@/lib/ui/state-tones";
+
+const fr = { shell, records };
 
 export function ProjectsTable({
   projects,

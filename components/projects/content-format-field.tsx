@@ -11,8 +11,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { fr } from "@/lib/i18n/fr";
+import { shell } from "@/lib/i18n/fr/shell";
 import type { ContentFormatOption } from "@/lib/projects/types";
+
+const fr = { shell };
 
 // The PDS format a content project is an edition of ("PDS Mic"). Formats
 // are data: a missing one is created here, in a modal, and selected.

@@ -20,11 +20,15 @@ import {
 import { StatusBadge } from "@/components/ui/status-badge";
 import { DictationReview } from "@/components/voice/dictation-review";
 import { formatDateTime } from "@/lib/calls/format";
-import { fr } from "@/lib/i18n/fr";
+import { facts } from "@/lib/i18n/fr/facts";
+import { masterWorkflow } from "@/lib/i18n/fr/master-workflow";
+import { voice } from "@/lib/i18n/fr/voice";
 import type { BriefProposal } from "@/lib/master-workflow/brief-proposals";
 import type { BriefExchange } from "@/lib/master-workflow/brief-types";
 import { proposeBriefFromCall } from "@/lib/master-workflow/exchange-actions";
 import type { VoiceErrorCode } from "@/lib/voice/constants";
+
+const fr = { voice, facts, masterWorkflow };
 
 type Phase =
   | { name: "idle" }

@@ -5,8 +5,10 @@ import { useState } from "react";
 import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { CheckboxField } from "@/components/ui/checkbox-field";
-import { fr } from "@/lib/i18n/fr";
+import { legalForms } from "@/lib/i18n/fr/legal-forms";
 import type { FormField, FormRole } from "@/lib/legal/forms/definition";
+
+const fr = { legalForms };
 
 /**
  * The last step of a public fiche (JUR-14): what will be sent, once, by

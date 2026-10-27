@@ -11,7 +11,9 @@ import type { ActivationStatus } from "@/lib/activations/model";
 import type { ModuleFacts } from "@/lib/activations/module-facts";
 import { collaborationGate } from "@/lib/activations/phase";
 import type { EvidenceRecord } from "@/lib/activations/types";
-import { fr } from "@/lib/i18n/fr";
+import { activationJourney } from "@/lib/i18n/fr/activation-journey";
+
+const fr = { activationJourney };
 
 const t = fr.activationJourney;
 

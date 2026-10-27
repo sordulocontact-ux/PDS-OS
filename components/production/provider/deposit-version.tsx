@@ -9,13 +9,15 @@ import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
 import { ChoiceCards } from "@/components/ui/choice-cards";
 import { FilePickField } from "@/components/ui/file-pick-field";
-import { fr } from "@/lib/i18n/fr";
+import { productionProvider } from "@/lib/i18n/fr/production-provider";
 import { MAX_PRODUCTION_FILE_BYTES } from "@/lib/production/files/rules";
 import {
   depositProviderVersion,
   openProviderSlot,
 } from "@/lib/production/provider/public-actions";
 import { createClient } from "@/lib/supabase/client";
+
+const fr = { productionProvider };
 
 const t = fr.productionProvider.deposit;
 const e = fr.productionProvider.errors;

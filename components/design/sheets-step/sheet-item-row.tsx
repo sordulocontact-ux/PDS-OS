@@ -8,7 +8,9 @@ import { FactRowFrame } from "@/components/ui/fact-row-frame";
 import { Input } from "@/components/ui/input";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { saveSheetItem } from "@/lib/design/actions/sheet-step";
-import { fr } from "@/lib/i18n/fr";
+import { designSteps } from "@/lib/i18n/fr/design-steps";
+
+const fr = { designSteps };
 
 const t = fr.designSteps.sheets;
 

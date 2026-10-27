@@ -1,7 +1,9 @@
 import Link from "next/link";
 
-import { fr } from "@/lib/i18n/fr";
+import { decisions } from "@/lib/i18n/fr/decisions";
 import type { Proposal } from "@/lib/ui/proposal";
+
+const fr = { decisions };
 
 const t = fr.decisions.proposal;
 

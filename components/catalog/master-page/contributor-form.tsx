@@ -14,11 +14,13 @@ import {
   CONTRIBUTOR_ROLES,
   type ContributorRole,
 } from "@/lib/catalog/master/rules";
-import { fr } from "@/lib/i18n/fr";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 import type { NetworkPersonOption } from "@/lib/network/people-actions";
 
 import { ContributorPersonField } from "./contributor-person-field";
 import { MasterForm } from "./master-form";
+
+const fr = { masterPage };
 
 const isRole = (value: unknown): value is ContributorRole =>
   (CONTRIBUTOR_ROLES as readonly unknown[]).includes(value);

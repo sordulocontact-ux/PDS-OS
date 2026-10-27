@@ -4,7 +4,7 @@
 // gave. Justine corrects and approves it at once. Pure.
 
 import type { ContractState } from "@/lib/contracts/types";
-import { fr } from "@/lib/i18n/fr";
+import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
 import {
   FIELD_HOME,
   isContractField,
@@ -25,6 +25,8 @@ import type { ContractTemplate } from "@/lib/legal/contracts/templates";
 import { fieldValues, type ValueContext } from "@/lib/legal/contracts/values";
 import type { FormPerson } from "@/lib/legal/forms/people";
 import type { FormRole } from "@/lib/legal/forms/definition";
+
+const fr = { legalContracts };
 
 export type StoredNeed = {
   id: string;

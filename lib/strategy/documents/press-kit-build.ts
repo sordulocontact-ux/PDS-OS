@@ -4,7 +4,7 @@
 // no budget at all and assertNoBudget checks the result. Client-safe.
 
 import { formatDay } from "@/lib/assistant/facts";
-import { fr } from "@/lib/i18n/fr";
+import { strategyPressKit } from "@/lib/i18n/fr/strategy-press-kit";
 import { artistPresentation } from "@/lib/strategy/documents/artist-presentation";
 import {
   proposeDirection,
@@ -26,6 +26,8 @@ import {
   type DocImage,
   type DocPage,
 } from "@/lib/strategy/documents/release-plan-model";
+
+const fr = { strategyPressKit };
 
 const textBlock = (value: string | null | undefined): Block[] =>
   value && value.trim() ? [{ type: "text", text: value.trim() }] : [];

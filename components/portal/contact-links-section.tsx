@@ -1,4 +1,5 @@
-import { fr } from "@/lib/i18n/fr";
+import { contactLinks } from "@/lib/i18n/fr/contact-links";
+import { roles } from "@/lib/i18n/fr/roles";
 import {
   loadContactLinks,
   type ContactLinkRow,
@@ -6,6 +7,8 @@ import {
 import { formatDayMonth } from "@/lib/utils/instant";
 
 import { ContactLinkActions } from "./contact-link-actions";
+
+const fr = { roles, contactLinks };
 
 const t = fr.contactLinks;
 const l = fr.roles.links;

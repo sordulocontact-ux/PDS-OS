@@ -3,12 +3,22 @@
 // client-safe.
 
 import { formatEuros } from "@/lib/budget/types";
-import { fr } from "@/lib/i18n/fr";
+import { productionHistory } from "@/lib/i18n/fr/production-history";
+import { productionPost } from "@/lib/i18n/fr/production-post";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
+import { productionShoot } from "@/lib/i18n/fr/production-shoot";
 import { stepLabel } from "@/lib/production/post/labels";
 import { postStepKeyOf } from "@/lib/production/post/rules";
 import { isCheckKey } from "@/lib/production/preprod/types";
 import { isShootState } from "@/lib/production/shoot/rules";
 import { formatDate } from "@/lib/release/format";
+
+const fr = {
+  productionPreprod,
+  productionShoot,
+  productionPost,
+  productionHistory,
+};
 
 export type HistoryEvent = {
   id: string;

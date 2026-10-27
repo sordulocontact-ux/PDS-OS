@@ -7,12 +7,14 @@ import { Button } from "@/components/ui/button";
 import { ConfirmButton } from "@/components/ui/confirm-button";
 import { useShowLinks } from "@/components/ui/one-time-links";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import {
   createCallSheetLink,
   publishCallSheet,
 } from "@/lib/production/preprod/actions-call-sheet-publish";
 import type { CallSheetGap } from "@/lib/production/preprod/call-sheet-snapshot";
+
+const fr = { productionPreprod };
 
 const t = fr.productionPreprod.callSheet.publish;
 

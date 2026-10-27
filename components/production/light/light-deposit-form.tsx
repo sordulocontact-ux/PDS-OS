@@ -8,7 +8,8 @@ import { useLinkSubmit } from "@/components/production/provider/use-link-submit"
 import { Button } from "@/components/ui/button";
 import { FileDropZone } from "@/components/ui/file-drop-zone";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { productionLight } from "@/lib/i18n/fr/production-light";
+import { productionPrep } from "@/lib/i18n/fr/production-prep";
 import { depositLightVersion } from "@/lib/production/light/actions";
 import { uploadProductionFile } from "@/lib/production/files/upload";
 import { MAX_PRODUCTION_FILE_BYTES } from "@/lib/production/files/rules";
@@ -17,6 +18,8 @@ import { depositLightVersionByLink } from "@/lib/production/provider/light-link-
 import { createClient } from "@/lib/supabase/client";
 
 import { readImageSize } from "./read-image-size";
+
+const fr = { productionPrep, productionLight };
 
 const t = fr.productionLight.deposit;
 const HTTPS = /^https:\/\/\S+$/;

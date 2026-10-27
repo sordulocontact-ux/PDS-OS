@@ -7,9 +7,11 @@ import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
-import { fr } from "@/lib/i18n/fr";
+import { production } from "@/lib/i18n/fr/production";
 import { setDeliverableFinal } from "@/lib/production/actions";
 import { isHttpsLink } from "@/lib/production/rules";
+
+const fr = { production };
 
 /** « Ajouter le fichier final » / « Remplacer le fichier »: a link to the
  * exports, and a note. */

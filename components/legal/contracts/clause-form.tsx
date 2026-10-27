@@ -8,9 +8,11 @@ import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
 import { Fold } from "@/components/ui/fold";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { legalDocuments } from "@/lib/i18n/fr/legal-documents";
 import { reviseContractClause } from "@/lib/legal/contracts/clause-actions";
 import { CLAUSES, type Clause } from "@/lib/legal/contracts/clauses";
+
+const fr = { legalDocuments };
 
 const t = fr.legalDocuments.contract;
 

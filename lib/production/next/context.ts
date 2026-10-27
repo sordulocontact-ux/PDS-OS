@@ -3,7 +3,7 @@
 // (PROD-001). Client-safe.
 
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { productionNext } from "@/lib/i18n/fr/production-next";
 import type { ScheduleStep } from "@/lib/production/preprod/schedule";
 
 import type {
@@ -13,6 +13,8 @@ import type {
   NextRole,
   ProductionNext,
 } from "./types";
+
+const fr = { productionNext };
 
 export type Place = keyof typeof fr.productionNext.places;
 // A step names the schedule date it is due by, if any.

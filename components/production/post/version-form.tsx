@@ -8,7 +8,7 @@ import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
 import { ChoiceCards } from "@/components/ui/choice-cards";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionPost } from "@/lib/i18n/fr/production-post";
 import { uploadProductionFile } from "@/lib/production/files/upload";
 import type { VersionTarget } from "@/lib/production/post/rules";
 import type {
@@ -25,6 +25,8 @@ import {
   holderValue,
 } from "@/components/production/holder-select";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
+
+const fr = { productionPost };
 
 const t = fr.productionPost.versions;
 const HTTPS = /^https:\/\/\S+$/;

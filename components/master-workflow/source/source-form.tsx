@@ -7,12 +7,15 @@ import { FieldError, FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { ChoiceCards } from "@/components/ui/choice-cards";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
+import { masterSource } from "@/lib/i18n/fr/master-source";
 import { confirmSource } from "@/lib/master-workflow/source-actions";
 import type { SourceTitle } from "@/lib/master-workflow/source-step";
 import { formatDay, formatShortDay } from "@/lib/utils/day";
 
 import { SourceAudio } from "./source-audio";
+
+const fr = { catalog, masterSource };
 
 const t = fr.masterSource;
 

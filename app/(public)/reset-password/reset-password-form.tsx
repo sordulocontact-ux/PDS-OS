@@ -6,7 +6,9 @@ import { FormMessage } from "@/components/auth/form-message";
 import { SubmitButton } from "@/components/auth/submit-button";
 import { updatePassword } from "@/lib/auth/actions";
 import { idleFormState } from "@/lib/auth/form-state";
-import { fr } from "@/lib/i18n/fr";
+import { auth } from "@/lib/i18n/fr/auth";
+
+const fr = { auth };
 
 export function ResetPasswordForm() {
   const [state, action] = useActionState(updatePassword, idleFormState);

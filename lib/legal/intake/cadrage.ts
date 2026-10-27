@@ -8,9 +8,11 @@
 //     when the Cadrage settled that there is no blocker;
 //   agreements ← the Cadrage's existing agreements, or « none ».
 
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
 import { answerKey } from "@/lib/legal/intake/questions";
 import { normalizeSearch } from "@/lib/utils/search";
+
+const fr = { legal };
 
 export type CadrageLegal = {
   // Confirmed rights constraints (framing_constraints, type rights).

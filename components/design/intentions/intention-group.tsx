@@ -9,8 +9,11 @@ import type {
   ConceptionIntention,
 } from "@/lib/design/conception";
 import { DIRECTION_KEY } from "@/lib/design/intentions";
-import { fr } from "@/lib/i18n/fr";
+import { conception } from "@/lib/i18n/fr/conception";
+import { designSteps } from "@/lib/i18n/fr/design-steps";
 import type { Tone } from "@/lib/ui/state-tones";
+
+const fr = { conception, designSteps };
 
 const t = fr.designSteps.intentions;
 

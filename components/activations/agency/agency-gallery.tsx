@@ -9,10 +9,12 @@ import type {
   AgencySourceRecord,
 } from "@/lib/activations/agency/queries";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { activationAgency } from "@/lib/i18n/fr/activation-agency";
 import { formatDate } from "@/lib/release/format";
 
 import { RowButtons } from "./row-buttons";
+
+const fr = { activationAgency };
 
 const t = fr.activationAgency.gallery;
 const decisionTone = {

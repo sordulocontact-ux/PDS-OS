@@ -7,9 +7,11 @@ import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { legalForms } from "@/lib/i18n/fr/legal-forms";
 import { FORM_FIELDS } from "@/lib/legal/forms/definition";
 import { submitLegalFormComplement } from "@/lib/legal/forms/public-actions";
+
+const fr = { legalForms };
 
 const t = fr.legalForms;
 

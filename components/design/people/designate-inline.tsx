@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { designateDesignResponsible } from "@/lib/design/actions/home";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { designSteps } from "@/lib/i18n/fr/design-steps";
+
+const fr = { designSteps };
 
 /**
  * « Qui prépare la direction artistique * » / « Responsable de la fiche * »

@@ -6,7 +6,8 @@
 import { routes } from "@/lib/auth/redirects";
 import { legalDemarcheHref } from "@/lib/ui/legal-steps";
 import { contractStateOf } from "@/lib/contracts/types";
-import { fr } from "@/lib/i18n/fr";
+import { contracts } from "@/lib/i18n/fr/contracts";
+import { legal } from "@/lib/i18n/fr/legal";
 import type { InventoryRows } from "@/lib/legal/inventory-rows";
 import type { InventoryContributor } from "@/lib/legal/people-facts";
 import type { PlanItemStatus } from "@/lib/legal/plan/proposal";
@@ -14,6 +15,8 @@ import type { PlanRow } from "@/lib/legal/plan/queries";
 import type { SplitState } from "@/lib/legal/splits/queries";
 import { titlePublishingLines } from "@/lib/legal/splits/shares";
 import { normalizeSearch } from "@/lib/utils/search";
+
+const fr = { contracts, legal };
 
 export type TrackClearance = {
   id: string;

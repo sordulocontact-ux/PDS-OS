@@ -3,7 +3,7 @@
 // equipment booked — and the sheet's own sections; nothing is typed twice.
 // What is still missing is listed before it is sent. Pure, client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import type {
   Holder,
   ProductionNeed,
@@ -13,6 +13,8 @@ import type {
 import { isConfirmedEquipment } from "./equipment";
 import { teamMembers } from "./team";
 import type { CallSheet, Equipment } from "./types";
+
+const fr = { productionPreprod };
 
 export type CallSheetContent = {
   project: string;

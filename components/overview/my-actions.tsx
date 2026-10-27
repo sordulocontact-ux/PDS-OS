@@ -1,9 +1,11 @@
 import { ContentCard } from "@/components/shell/content-card";
 import { LinkRow, Rows } from "@/components/ui/rows";
-import { fr } from "@/lib/i18n/fr";
+import { projectShell } from "@/lib/i18n/fr/project-shell";
 import type { ProjectAction } from "@/lib/journey/types";
 import { actionHref } from "@/lib/ui/journey";
 import { formatShortDay } from "@/lib/utils/day";
+
+const fr = { projectShell };
 
 /**
  * The viewer's actions in a project (proto « Projet complet », `workPage`),

@@ -1,4 +1,6 @@
-import { fr } from "@/lib/i18n/fr";
+import { auth } from "@/lib/i18n/fr/auth";
+
+const fr = { auth };
 
 // Maps Supabase errors to controlled French messages.
 // A raw Supabase message never reaches the screen.

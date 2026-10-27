@@ -3,7 +3,7 @@ import { IconFile, IconLink } from "nucleo-sharp-essential";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { sectionCardClass } from "@/components/ui/section-card";
 import { formatEuros } from "@/lib/budget/types";
-import { fr } from "@/lib/i18n/fr";
+import { productionLocations } from "@/lib/i18n/fr/production-locations";
 import {
   missingOf,
   type LocationOption,
@@ -15,6 +15,8 @@ import { cn } from "@/lib/utils";
 
 import { LocationActions } from "./location-actions";
 import { LocationReviewButton } from "./location-review";
+
+const fr = { productionLocations };
 
 const t = fr.productionLocations;
 const STATUS_TONES: Record<LocationOption["status"], Tone> = {

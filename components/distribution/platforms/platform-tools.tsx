@@ -9,7 +9,9 @@ import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { checkRelease } from "@/app/(app)/app/projects/[projectId]/release/actions";
 import { saveDistributionPlatform } from "@/lib/distribution/platforms-actions";
 import { declareDistribution } from "@/lib/distribution/tracking-actions";
-import { fr } from "@/lib/i18n/fr";
+import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
+
+const fr = { distributionJourney };
 
 const t = fr.distributionJourney.platforms;
 

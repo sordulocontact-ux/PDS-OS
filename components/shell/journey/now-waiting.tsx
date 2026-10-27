@@ -2,11 +2,13 @@ import { IconAlarmClock } from "nucleo-sharp-essential";
 
 import { buttonVariants } from "@/components/ui/button";
 import { ViewLink } from "@/components/ui/view-link";
-import { fr } from "@/lib/i18n/fr";
+import { journey } from "@/lib/i18n/fr/journey";
 import { lowerFirst } from "@/lib/ui/journey";
 
 import type { NowItem } from "./now-card";
 import { initials } from "./step-waiting";
+
+const fr = { journey };
 
 const t = fr.journey;
 

@@ -8,7 +8,9 @@ import { SubmitButton } from "@/components/auth/submit-button";
 import { signIn } from "@/lib/auth/actions";
 import { idleFormState, retained } from "@/lib/auth/form-state";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { auth } from "@/lib/i18n/fr/auth";
+
+const fr = { auth };
 
 export function LoginForm({ initialError }: { initialError?: string }) {
   const [state, action] = useActionState(signIn, idleFormState);

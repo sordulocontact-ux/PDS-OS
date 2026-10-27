@@ -1,7 +1,10 @@
 import { z } from "zod";
-import { fr } from "@/lib/i18n/fr";
+import { aiUsage } from "@/lib/i18n/fr/ai-usage";
+import { auth } from "@/lib/i18n/fr/auth";
 import type { FieldErrors, FormValues } from "@/lib/auth/form-state";
 import { ORGANIZATION_ROLES } from "@/lib/auth/redirects";
+
+const fr = { aiUsage, auth };
 
 // Form validation. The database enforces its own rules (email
 // normalisation, mandatory reason…); they are anticipated here to show a

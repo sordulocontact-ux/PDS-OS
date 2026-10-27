@@ -3,8 +3,10 @@ import Link from "next/link";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { network } from "@/lib/i18n/fr/network";
 import type { NetworkKind } from "@/lib/network/types";
+
+const fr = { network };
 
 const noticeClass =
   "flex flex-wrap items-center gap-3 rounded-xl border border-border px-3 py-2.5";

@@ -1,9 +1,11 @@
 import { InfoRow, Rows } from "@/components/ui/rows";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { strategyBriefOut } from "@/lib/i18n/fr/strategy-brief-out";
 import type { DocumentReview } from "@/lib/strategy/documents/queries";
 import { strategyBriefReviewTone } from "@/lib/ui/state-tones";
 import { formatShortInstant } from "@/lib/utils/day";
+
+const fr = { strategyBriefOut };
 
 const t = fr.strategyBriefOut.validation;
 

@@ -6,7 +6,9 @@ import {
   VoiceInputButton,
   VoiceInputStatus,
 } from "@/components/voice/voice-input";
-import { fr } from "@/lib/i18n/fr";
+import { voice } from "@/lib/i18n/fr/voice";
+
+const fr = { voice };
 
 // Writes into a field as if typed, so a controlled field updates too.
 function appendTo(field: HTMLTextAreaElement | HTMLInputElement, text: string) {

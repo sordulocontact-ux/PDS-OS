@@ -6,8 +6,10 @@ import {
   requestHref,
   type BriefRequest,
 } from "@/lib/framing/brief-request-view";
-import { fr } from "@/lib/i18n/fr";
+import { briefRequests } from "@/lib/i18n/fr/brief-requests";
 import { briefRequestTone } from "@/lib/ui/state-tones";
+
+const fr = { briefRequests };
 
 const dateFormat = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric",

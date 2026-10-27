@@ -20,9 +20,12 @@ import {
 import { RowActions } from "@/components/ui/row-actions";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { fileFormat, formatFileSize } from "@/lib/catalog/file-rules";
-import { fr } from "@/lib/i18n/fr";
+import { catalogFiles } from "@/lib/i18n/fr/catalog-files";
+import { library } from "@/lib/i18n/fr/library";
 import type { LibraryFile } from "@/lib/library/queries";
 import { formatShortDate } from "@/lib/release/format";
+
+const fr = { catalogFiles, library };
 
 // Every readable file, newest first: its name opens it in a new tab; what it
 // belongs to links to that library (where it is edited and versioned); "⋯"

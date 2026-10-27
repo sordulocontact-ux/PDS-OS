@@ -11,8 +11,10 @@ import {
   DataTableRow,
 } from "@/components/ui/data-table";
 import { formatEuros } from "@/lib/budget/types";
-import { fr } from "@/lib/i18n/fr";
+import { marketingReview } from "@/lib/i18n/fr/marketing-review";
 import type { ReportComparison } from "@/lib/marketing/reports/compare";
+
+const fr = { marketingReview };
 
 const t = fr.marketingReview.reports.compare;
 const figures = fr.marketingReview.dashboard.figures;

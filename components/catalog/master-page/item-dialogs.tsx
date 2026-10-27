@@ -8,7 +8,10 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { RowActions } from "@/components/ui/row-actions";
 import { deleteMasterItem } from "@/lib/catalog/master/item-actions";
 import type { MasterItemSection } from "@/lib/catalog/master/rules";
-import { fr } from "@/lib/i18n/fr";
+import { masterPage } from "@/lib/i18n/fr/master-page";
+import { records } from "@/lib/i18n/fr/records";
+
+const fr = { masterPage, records };
 
 // What every list of the master page shares: which row is being edited or
 // deleted, the row's "⋯" (Modifier, Supprimer), and the confirmation.

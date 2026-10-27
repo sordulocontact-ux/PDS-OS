@@ -1,5 +1,7 @@
-import { fr } from "@/lib/i18n/fr";
+import { moduleFrame } from "@/lib/i18n/fr/module-frame";
 import { cn } from "@/lib/utils";
+
+const fr = { moduleFrame };
 
 /**
  * The viewer's « À vous » count (proto « Projet complet », `.mine`): a round

@@ -9,8 +9,10 @@ import { Button } from "@/components/ui/button";
 import { StartChoices } from "@/components/ui/start-choices";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import type { CallPrepDefaults } from "@/lib/calls/prep/types";
-import { fr } from "@/lib/i18n/fr";
+import { strategyJourney } from "@/lib/i18n/fr/strategy-journey";
 import { startStrategyDirect } from "@/lib/strategy/actions/add-line";
+
+const fr = { strategyJourney };
 
 /**
  * The two ways in (proto stratEntry / prepGate « strat »): « Commencer la

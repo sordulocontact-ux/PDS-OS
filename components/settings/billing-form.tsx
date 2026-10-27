@@ -7,9 +7,11 @@ import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { invoices } from "@/lib/i18n/fr/invoices";
 import type { Billing } from "@/lib/invoices/billing";
 import { saveBilling } from "@/lib/invoices/billing-actions";
+
+const fr = { invoices };
 
 const t = fr.invoices.billing;
 

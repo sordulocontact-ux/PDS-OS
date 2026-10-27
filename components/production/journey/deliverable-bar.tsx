@@ -2,9 +2,12 @@ import { ProjectFresh } from "@/components/projects/project-fresh";
 import { PickBar } from "@/components/ui/pick-bar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { productionJourney } from "@/lib/i18n/fr/production-journey";
+import { productionLight } from "@/lib/i18n/fr/production-light";
 import { loadProjectJourneys } from "@/lib/journey/project";
 import { productionDeliverables } from "@/lib/journey/production";
+
+const fr = { productionJourney, productionLight };
 
 const t = fr.productionJourney;
 

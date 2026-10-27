@@ -5,7 +5,9 @@ import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { declareAgreementSent } from "@/lib/activations/influence/negotiation-actions";
-import { fr } from "@/lib/i18n/fr";
+import { activationInfluence } from "@/lib/i18n/fr/activation-influence";
+
+const fr = { activationInfluence };
 
 const t = fr.activationInfluence.agreement;
 type Channel = keyof typeof t.channels;

@@ -6,8 +6,10 @@ import { FeedbackCard } from "@/components/feedback/feedback-card";
 import { EmptyState } from "@/components/shell/empty-state";
 import { FormMessage } from "@/components/auth/form-message";
 import type { Feedback } from "@/lib/feedback/types";
-import { fr } from "@/lib/i18n/fr";
+import { feedback } from "@/lib/i18n/fr/feedback";
 import { formatLongDay, formatTime } from "@/lib/project-history/format";
+
+const fr = { feedback };
 
 // Feedback as it was sent, newest first: kind, when, who (someone else's
 // only), the page it came from and, for the director, the topic PO filed it

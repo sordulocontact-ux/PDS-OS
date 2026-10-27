@@ -5,10 +5,12 @@ import { IconPlus } from "nucleo-sharp-essential";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { resolveBlocker } from "@/lib/activations/pilot-actions";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { activations } from "@/lib/i18n/fr/activations";
 
 import { ReasonForm } from "@/components/ui/reason-form";
 import { BlockerForm } from "./blocker-form";
+
+const fr = { activations };
 
 const t = fr.activations.blockers;
 

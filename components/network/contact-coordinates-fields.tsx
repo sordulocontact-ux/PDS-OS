@@ -1,7 +1,9 @@
 import { Field } from "@/components/auth/field";
 import type { SaveContactResult } from "@/lib/network/actions";
-import { fr } from "@/lib/i18n/fr";
+import { network } from "@/lib/i18n/fr/network";
 import type { NetworkContactValues } from "@/lib/network/types";
+
+const fr = { network };
 
 /** How to reach a contact of the Réseau: e-mail, phone, website, city. */
 export function ContactCoordinatesFields({

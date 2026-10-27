@@ -3,10 +3,12 @@
 // vérifier (incomplète ; corrections), complète à valider, validée. One
 // place for its pill, the board and the démarche. Client-safe, pure.
 
-import { fr } from "@/lib/i18n/fr";
+import { legalForms } from "@/lib/i18n/fr/legal-forms";
 import { ficheMissing } from "@/lib/legal/forms/completeness";
 import type { FormRow } from "@/lib/legal/forms/queries";
 import type { Tone } from "@/lib/ui/state-tones";
+
+const fr = { legalForms };
 
 export type FicheStatus =
   | "toCreate"

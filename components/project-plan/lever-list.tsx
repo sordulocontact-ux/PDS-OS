@@ -1,8 +1,11 @@
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { projectPlan } from "@/lib/i18n/fr/project-plan";
+import { strategy } from "@/lib/i18n/fr/strategy";
 import type { PlanLever } from "@/lib/project-plan/queries";
 import { deliverableStateTone, leverTone } from "@/lib/ui/state-tones";
 import { cn } from "@/lib/utils";
+
+const fr = { strategy, projectPlan };
 
 /** Levers of one family: state, the Brief need it answers, its deliverables. */
 export function LeverList({ levers }: { levers: PlanLever[] }) {

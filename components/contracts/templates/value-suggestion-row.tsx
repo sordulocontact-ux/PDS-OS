@@ -9,11 +9,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { fr } from "@/lib/i18n/fr";
+import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
 import {
   CONTRACT_FIELD_IDS,
   type ContractFieldId,
 } from "@/lib/legal/contracts/fields";
+
+const fr = { legalContracts };
 
 const FIELD_ITEMS = Object.fromEntries(
   CONTRACT_FIELD_IDS.map((id) => [id, fieldLabel(id)]),

@@ -8,8 +8,10 @@ import {
 import { WhoDoesWhatButton } from "@/components/shell/module/who-does-what-button";
 import type { Member } from "@/lib/framing/related";
 import type { ScopePeople } from "@/lib/design/people";
-import { fr } from "@/lib/i18n/fr";
+import { roles } from "@/lib/i18n/fr/roles";
 import { formatDayMonth } from "@/lib/utils/instant";
+
+const fr = { roles };
 
 const t = fr.roles.design;
 

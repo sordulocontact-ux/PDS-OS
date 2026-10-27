@@ -1,9 +1,11 @@
 // The facts of the Fiche Livrable as Production shows them (durations,
 // subtitles, periods): formatting only, by code. Client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { productionPrep } from "@/lib/i18n/fr/production-prep";
 import type { HandedFiche } from "@/lib/production/fiche";
 import { formatDate } from "@/lib/release/format";
+
+const fr = { productionPrep };
 
 const t = fr.productionPrep.heritage;
 

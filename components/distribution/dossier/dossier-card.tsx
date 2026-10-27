@@ -14,8 +14,11 @@ import type {
 } from "@/lib/distribution/delivery-file";
 import type { ParamKey, ParamsData } from "@/lib/distribution/params-view";
 import type { ReadinessItem } from "@/lib/distribution/readiness";
-import { fr } from "@/lib/i18n/fr";
+import { distribution } from "@/lib/i18n/fr/distribution";
+import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
 import type { Tone } from "@/lib/ui/state-tones";
+
+const fr = { distribution, distributionJourney };
 
 const t = fr.distributionJourney.dossier;
 const d = fr.distribution.dossier;

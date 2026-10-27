@@ -9,7 +9,7 @@ import { ToneCallout } from "@/components/ui/tone-callout";
 import { UrlFilters } from "@/components/ui/url-filters";
 import { routes } from "@/lib/auth/redirects";
 import { cn } from "@/lib/utils";
-import { fr } from "@/lib/i18n/fr";
+import { legalHistory } from "@/lib/i18n/fr/legal-history";
 import {
   filterHistory,
   formatMonth,
@@ -24,6 +24,8 @@ import {
 } from "@/lib/legal/history/types";
 import { viewHref } from "@/lib/ui/view-href";
 import { formatInstantFull } from "@/lib/utils/instant";
+
+const fr = { legalHistory };
 
 /**
  * The Historique du Juridique (JUR-29): every recorded event of the dossier,

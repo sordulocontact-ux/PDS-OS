@@ -7,11 +7,13 @@ import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
-import { fr } from "@/lib/i18n/fr";
+import { legalSplits } from "@/lib/i18n/fr/legal-splits";
 import type { PublicSplit as Split } from "@/lib/legal/splits/public";
 import { answerSplit } from "@/lib/legal/splits/public-actions";
 import { formatShare, unitsOf } from "@/lib/legal/splits/shares";
 import { cn } from "@/lib/utils";
+
+const fr = { legalSplits };
 
 type Open = Extract<Split, { state: "open" }>;
 

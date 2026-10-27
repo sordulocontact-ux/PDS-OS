@@ -1,4 +1,6 @@
-import { fr } from "@/lib/i18n/fr";
+import { productionNeeds } from "@/lib/i18n/fr/production-needs";
+
+const fr = { productionNeeds };
 
 const roles: Record<string, string> = fr.productionNeeds.roles;
 

@@ -1,7 +1,10 @@
 import { PageSection } from "@/components/shell/page-section";
-import { fr } from "@/lib/i18n/fr";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+import { planSteps } from "@/lib/i18n/fr/plan-steps";
 import type { PlanWorkflow } from "@/lib/plan/propose";
 import type { LaunchedItem, PlanEvent } from "@/lib/plan/queries";
+
+const fr = { framingIntel, planSteps };
 
 const dateFormat = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric",

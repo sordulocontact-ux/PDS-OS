@@ -2,9 +2,11 @@ import Link from "next/link";
 
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDay } from "@/lib/assistant/facts";
-import { fr } from "@/lib/i18n/fr";
+import { strategyDocuments } from "@/lib/i18n/fr/strategy-documents";
 import type { StrategyDocument } from "@/lib/strategy/documents/queries";
 import { strategyDocumentTone } from "@/lib/ui/state-tones";
+
+const fr = { strategyDocuments };
 
 /**
  * Every version of a document, newest first: its state, when it was

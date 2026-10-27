@@ -9,7 +9,10 @@ import { DecisionPanel } from "@/components/ui/decision-panel";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { decideFramingBrief } from "@/lib/framing/actions/brief-step";
 import { DIMENSIONS } from "@/lib/framing/dimensions";
-import { fr } from "@/lib/i18n/fr";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+import { framingJourney } from "@/lib/i18n/fr/framing-journey";
+
+const fr = { framingIntel, framingJourney };
 
 /**
  * The direction's decision on the Brief, in the step (proto frBrief):

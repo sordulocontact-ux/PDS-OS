@@ -2,9 +2,11 @@
 // AI. The owner then edits or completes it freely. Client-safe.
 
 import type { FieldState, StrategyTextField } from "@/lib/framing/brief";
-import { fr } from "@/lib/i18n/fr";
+import { strategy } from "@/lib/i18n/fr/strategy";
 import type { ChoiceValue } from "@/lib/strategy/choices";
 import { asSentence, joinList } from "@/lib/utils/sentences";
+
+const fr = { strategy };
 
 export function composeAnswer(
   field: StrategyTextField,

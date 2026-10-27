@@ -9,7 +9,7 @@ import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { FilePickField } from "@/components/ui/file-pick-field";
-import { fr } from "@/lib/i18n/fr";
+import { invoices } from "@/lib/i18n/fr/invoices";
 import { todayInParis } from "@/lib/insights/dates";
 import {
   addReceivedInvoice,
@@ -26,6 +26,8 @@ import { amountInput } from "@/lib/utils/money";
 
 import { checkInvoice, type InvoiceDraft } from "./invoice-check";
 import { InvoiceRibFields } from "./invoice-rib-fields";
+
+const fr = { invoices };
 
 const t = fr.invoices;
 

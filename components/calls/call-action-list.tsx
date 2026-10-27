@@ -8,7 +8,9 @@ import { matchByName } from "@/lib/assistant/fuzzy-name";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { CallAction } from "@/lib/calls/outcomes";
 import { createTask } from "@/lib/framing/actions/points-tasks";
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
+
+const fr = { calls };
 
 const dueFormat = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric",

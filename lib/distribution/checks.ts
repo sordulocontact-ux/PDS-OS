@@ -10,7 +10,9 @@ import {
   type Readiness,
   type ReadinessInput,
 } from "@/lib/distribution/readiness";
-import { fr } from "@/lib/i18n/fr";
+import { distribution } from "@/lib/i18n/fr/distribution";
+
+const fr = { distribution };
 
 export const CHECK_KEYS = [
   "audio",

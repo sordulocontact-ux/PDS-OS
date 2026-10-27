@@ -9,8 +9,11 @@ import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import type { LinkableProject } from "@/lib/catalog/master/project-link";
 import { linkMasterToProject } from "@/lib/catalog/master/project-link-actions";
-import { fr } from "@/lib/i18n/fr";
+import { masterPage } from "@/lib/i18n/fr/master-page";
+import { shell } from "@/lib/i18n/fr/shell";
 import { isMusicFormat } from "@/lib/projects/types";
+
+const fr = { shell, masterPage };
 
 /**
  * « Rattacher à un projet existant » (retours Catalogue 16, 64): the title

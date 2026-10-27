@@ -6,9 +6,11 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { decideSheet } from "@/lib/activations/sheet-actions";
-import { fr } from "@/lib/i18n/fr";
+import { activationWork } from "@/lib/i18n/fr/activation-work";
 
 import { ReasonForm } from "@/components/ui/reason-form";
+
+const fr = { activationWork };
 
 const t = fr.activationWork.sheet;
 

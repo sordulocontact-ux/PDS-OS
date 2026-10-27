@@ -1,8 +1,10 @@
-import { fr } from "@/lib/i18n/fr";
+import { productionCorrections } from "@/lib/i18n/fr/production-corrections";
 import { requestComments } from "@/lib/production/post/corrections";
 import type { PostVersion } from "@/lib/production/post/types";
 
 import { CommentList } from "./comment-list";
+
+const fr = { productionCorrections };
 
 const t = fr.productionCorrections;
 

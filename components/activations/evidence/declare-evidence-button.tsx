@@ -5,9 +5,11 @@ import { IconPlus } from "nucleo-sharp-essential";
 import { DialogButton } from "@/components/ui/dialog-button";
 import type { EvidenceKind, EvidenceSource } from "@/lib/activations/model";
 import type { ActivationScope } from "@/lib/activations/types";
-import { fr } from "@/lib/i18n/fr";
+import { activations } from "@/lib/i18n/fr/activations";
 
 import { EvidenceForm } from "./evidence-form";
+
+const fr = { activations };
 
 const t = fr.activations.evidence;
 

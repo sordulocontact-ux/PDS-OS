@@ -18,7 +18,9 @@ import { RowActions, type RowAction } from "@/components/ui/row-actions";
 import { deleteCatalogFile } from "@/lib/catalog/file-actions";
 import type { CatalogFile, FileOwner } from "@/lib/catalog/file-rules";
 import { uploadCatalogFile } from "@/lib/catalog/upload-file";
-import { fr } from "@/lib/i18n/fr";
+import { catalogFiles } from "@/lib/i18n/fr/catalog-files";
+
+const fr = { catalogFiles };
 
 // "⋯" of a file: open it in a new tab (the browser previews PDFs, images,
 // sounds), download it under its name, see its earlier versions, then for

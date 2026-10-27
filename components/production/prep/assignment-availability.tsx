@@ -1,6 +1,8 @@
 import { ChoiceCards } from "@/components/ui/choice-cards";
-import { fr } from "@/lib/i18n/fr";
+import { productionNeeds } from "@/lib/i18n/fr/production-needs";
 import type { Availability } from "@/lib/production/sheet";
+
+const fr = { productionNeeds };
 
 const AVAILABILITIES = ["to_confirm", "available", "unavailable"] as const;
 

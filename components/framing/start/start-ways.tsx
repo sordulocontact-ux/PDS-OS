@@ -8,7 +8,10 @@ import { Button } from "@/components/ui/button";
 import { StartChoices } from "@/components/ui/start-choices";
 import type { CallPrepDefaults } from "@/lib/calls/prep/types";
 import { startFramingWithPo } from "@/lib/framing/actions/start";
-import { fr } from "@/lib/i18n/fr";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+import { framingJourney } from "@/lib/i18n/fr/framing-journey";
+
+const fr = { framingIntel, framingJourney };
 
 /**
  * The two ways in (proto frEntry / prepGate « frame »): « Commencer le

@@ -2,7 +2,9 @@
 
 import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { productionShoot } from "@/lib/i18n/fr/production-shoot";
+
+const fr = { productionShoot };
 
 const t = fr.productionShoot;
 

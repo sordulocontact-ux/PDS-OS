@@ -1,10 +1,12 @@
 import { TemplateBody } from "@/components/contracts/templates/field-chip";
 import { TemplateSourceLink } from "@/components/contracts/templates/template-source-link";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
 import type { TemplateSeries } from "@/lib/legal/contracts/templates";
 import { templateStatusTone } from "@/lib/ui/state-tones";
 import { formatInstant } from "@/lib/utils/instant";
+
+const fr = { legalContracts };
 
 /** A template as it stands: its text, the values it injects, its versions. */
 export function TemplateView({ template }: { template: TemplateSeries }) {

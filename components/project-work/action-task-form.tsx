@@ -6,7 +6,9 @@ import { OptionSelect } from "@/components/framing/option-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { fr } from "@/lib/i18n/fr";
+import { framing } from "@/lib/i18n/fr/framing";
+
+const fr = { framing };
 
 export type ActionTaskValues = {
   assigneePersonId: string;

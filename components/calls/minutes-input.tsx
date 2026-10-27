@@ -4,7 +4,9 @@ import { useState } from "react";
 
 import { Input } from "@/components/ui/input";
 import { TOPIC_MINUTES_MAX, TOPIC_MINUTES_MIN } from "@/lib/calls/prepare";
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
+
+const fr = { calls };
 
 /**
  * The time given to a topic of the agenda, in minutes, typed in place.

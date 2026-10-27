@@ -11,10 +11,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { fr } from "@/lib/i18n/fr";
+import { labo } from "@/lib/i18n/fr/labo";
 import { requestRelease } from "@/lib/labo/client";
 import { formatMs } from "@/lib/labo/format";
 import type { ReleaseDetection } from "@/lib/release/detect";
+
+const fr = { labo };
 
 const fieldClass =
   "w-full rounded-md border border-input bg-background px-3 py-2 font-mono text-base uppercase md:text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none sm:max-w-xs";

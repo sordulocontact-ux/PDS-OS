@@ -5,9 +5,11 @@
 // Morel »). Pure, computed at each read from project_invoice_states, never
 // stored. The invoice itself: lib/invoices/.
 
-import { fr } from "@/lib/i18n/fr";
+import { legalInvoices } from "@/lib/i18n/fr/legal-invoices";
 import type { Demarche } from "@/lib/legal/demarches/build";
 import type { InvoiceStateRow } from "@/lib/invoices/states";
+
+const fr = { legalInvoices };
 
 const t = fr.legalInvoices;
 

@@ -31,7 +31,9 @@ import {
   type ArtistRelation,
   type DeezerArtistResult,
 } from "@/lib/catalog/types";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
+
+const fr = { catalog };
 
 // Second step of "Nouvel artiste": the chosen Deezer profile (or none), the
 // name as it will appear in the catalog, the relation with PDS, and notes. Only the Deezer id is

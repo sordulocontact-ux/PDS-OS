@@ -2,8 +2,10 @@ import Link from "next/link";
 
 import { StageStateBadge } from "@/components/projects/stage-state-badge";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { shell } from "@/lib/i18n/fr/shell";
 import type { ProjectDetail } from "@/lib/projects/types";
+
+const fr = { shell };
 
 /**
  * « Comment avance un projet », on the overview until the plan du projet

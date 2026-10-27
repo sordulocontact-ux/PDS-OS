@@ -12,7 +12,9 @@ import { AssistantThread } from "@/components/assistant/assistant-thread";
 import { IconArrowLeft } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { assistant } from "@/lib/i18n/fr/assistant";
+
+const fr = { assistant };
 
 /**
  * The tab's PO conversation on its own page, opened by a question from the

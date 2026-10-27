@@ -2,8 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { legalDocuments } from "@/lib/i18n/fr/legal-documents";
 import type { FieldState as State } from "@/lib/legal/formalities/field-states";
+
+const fr = { legalDocuments };
 
 const t = fr.legalDocuments.bulletin;
 const TONE = {

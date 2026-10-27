@@ -11,7 +11,8 @@ import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { RowActions, type RowAction } from "@/components/ui/row-actions";
-import { fr } from "@/lib/i18n/fr";
+import { auth } from "@/lib/i18n/fr/auth";
+import { records } from "@/lib/i18n/fr/records";
 import { memberAction } from "@/lib/members/actions";
 import {
   idleMemberActionState,
@@ -22,6 +23,8 @@ import {
 
 import { CopyLinkButton } from "./copy-link-button";
 import { MemberEditForm } from "./member-edit-form";
+
+const fr = { auth, records };
 
 type Mode = "idle" | "approve" | "reject" | "suspend";
 

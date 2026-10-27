@@ -4,7 +4,9 @@
 // Client-safe.
 
 import type { CreativeBriefContent } from "@/lib/design/brief";
-import { fr } from "@/lib/i18n/fr";
+import { conceptionDirection } from "@/lib/i18n/fr/conception-direction";
+
+const fr = { conceptionDirection };
 
 const PARTS = [
   "identity",

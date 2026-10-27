@@ -11,7 +11,9 @@ import { AssistantSuggestions } from "@/components/assistant/assistant-suggestio
 import { AssistantThread } from "@/components/assistant/assistant-thread";
 import { Button } from "@/components/ui/button";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { assistant } from "@/lib/i18n/fr/assistant";
+
+const fr = { assistant };
 
 /**
  * The PO assistant (Figma "Desktop - 11"): suggestions, then the input. On

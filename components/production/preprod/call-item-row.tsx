@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import {
   deleteCallItem,
   reviewCallItem,
@@ -19,6 +19,8 @@ import { formatDate } from "@/lib/release/format";
 import { CallItemForm } from "./call-item-form";
 import { PlanCallActionButton, type PlannedAction } from "./plan-call-action";
 import { RecordMenu } from "@/components/ui/record-menu";
+
+const fr = { productionPreprod };
 
 const t = fr.productionPreprod.call;
 

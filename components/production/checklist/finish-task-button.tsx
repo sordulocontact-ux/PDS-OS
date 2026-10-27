@@ -2,8 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { productionChecklist } from "@/lib/i18n/fr/production-checklist";
 import { finishChecklistTask } from "@/lib/production/checklist-actions";
+
+const fr = { productionChecklist };
 
 const t = fr.productionChecklist;
 

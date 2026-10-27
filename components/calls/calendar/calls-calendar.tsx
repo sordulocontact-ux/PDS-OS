@@ -11,7 +11,9 @@ import { TimeGrid } from "@/components/calls/calendar/time-grid";
 import { useReschedule } from "@/components/calls/calendar/use-reschedule";
 import { useMeetingComposer } from "@/components/calls/new-meeting-button";
 import type { CalendarEvent, CalendarMode } from "@/lib/calls/calendar";
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
+
+const fr = { calls };
 
 type Place = { day: string; start: number; end: number };
 

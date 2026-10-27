@@ -8,7 +8,9 @@ import {
   type AddDeliverableDefaults,
 } from "@/components/design/home/add-deliverable-form";
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { designSteps } from "@/lib/i18n/fr/design-steps";
+
+const fr = { designSteps };
 
 const t = fr.designSteps.home;
 

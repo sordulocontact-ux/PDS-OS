@@ -9,8 +9,10 @@ import { sectionCardClass } from "@/components/ui/section-card";
 import { routes } from "@/lib/auth/redirects";
 import type { WelcomeVariant } from "@/lib/home/welcome";
 import { dismissWelcome } from "@/lib/home/welcome-actions";
-import { fr } from "@/lib/i18n/fr";
+import { shell } from "@/lib/i18n/fr/shell";
 import { cn } from "@/lib/utils";
+
+const fr = { shell };
 
 // Where each point leads, in the order of its texts.
 const HREFS: Record<WelcomeVariant, (string | null)[]> = {

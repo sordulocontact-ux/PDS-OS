@@ -4,7 +4,7 @@ import { FactList } from "@/components/ui/fact-list";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { productionClosure } from "@/lib/i18n/fr/production-closure";
 import type { ClosureFacts } from "@/lib/production/delivery/closure-queries";
 import type { DeliveryTabData } from "@/lib/production/delivery/queries";
 import {
@@ -14,6 +14,8 @@ import {
 import { formatDate } from "@/lib/release/format";
 
 import { CloseProductionButton } from "./close-production-button";
+
+const fr = { productionClosure };
 
 const t = fr.productionClosure.closure;
 

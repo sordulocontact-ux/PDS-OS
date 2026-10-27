@@ -2,7 +2,9 @@
 
 import { Field } from "@/components/auth/field";
 import { Checkbox } from "@/components/ui/checkbox";
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
+
+const fr = { calls };
 
 /**
  * The call's video link. With Google Calendar connected, a Meet link is

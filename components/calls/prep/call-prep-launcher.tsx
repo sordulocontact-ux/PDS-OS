@@ -10,7 +10,9 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { fr } from "@/lib/i18n/fr";
+import { callPrep } from "@/lib/i18n/fr/call-prep";
+
+const fr = { callPrep };
 
 /**
  * « Préparer un échange » until the module's step holds the form itself:

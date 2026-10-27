@@ -3,7 +3,9 @@
 import { Field } from "@/components/auth/field";
 import { OptionSelect } from "@/components/projects/option-select";
 import type { PrepFormat } from "@/lib/calls/prep/types";
-import { fr } from "@/lib/i18n/fr";
+import { callPrep } from "@/lib/i18n/fr/call-prep";
+
+const fr = { callPrep };
 
 /** Date *, Heure *, Format; the link of the video when it is one. */
 export function CallPrepWhen({

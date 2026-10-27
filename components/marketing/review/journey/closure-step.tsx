@@ -4,7 +4,8 @@ import { ReturnCallout } from "@/components/ui/return-callout";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { StepWaiting } from "@/components/shell/journey/step-waiting";
-import { fr } from "@/lib/i18n/fr";
+import { reviewJourney } from "@/lib/i18n/fr/review-journey";
+import { workflowStatus } from "@/lib/i18n/fr/workflow-status";
 import type { ReviewContext } from "@/lib/marketing/review/context";
 import {
   activeClosureOf,
@@ -24,6 +25,8 @@ import {
   ReopenForm,
   RequestClosureButton,
 } from "./closure-actions";
+
+const fr = { reviewJourney, workflowStatus };
 
 const t = fr.reviewJourney.closure;
 const LABEL = {

@@ -10,7 +10,7 @@ import {
 } from "@/components/shell/module/step-tools-block";
 import { ContactLinksSection } from "@/components/portal/contact-links-section";
 import { WhoDoesWhatButton } from "@/components/shell/module/who-does-what-button";
-import { fr } from "@/lib/i18n/fr";
+import { masterJourney } from "@/lib/i18n/fr/master-journey";
 import { masterHistory } from "@/lib/master-workflow/history";
 import { masterJourneyContext } from "@/lib/master-workflow/journey-context";
 import { masterRoles } from "@/lib/master-workflow/roles";
@@ -19,6 +19,8 @@ import { projectHeaderData } from "@/lib/projects/header";
 import type { ModuleFact } from "@/lib/ui/module-frame";
 import { masterStepHref, type MasterStepKey } from "@/lib/ui/master-steps";
 import { formatDay } from "@/lib/utils/day";
+
+const fr = { masterJourney };
 
 const t = fr.masterJourney;
 

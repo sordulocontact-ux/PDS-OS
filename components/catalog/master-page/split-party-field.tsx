@@ -7,8 +7,10 @@ import type {
   SplitKind,
   SplitRole,
 } from "@/lib/catalog/master/rules";
-import { fr } from "@/lib/i18n/fr";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 import type { NetworkRole } from "@/lib/network/types";
+
+const fr = { masterPage };
 
 // The people a kind of share is about, first: the work's creators for the
 // publishing, the recording's artists and labels for the master.

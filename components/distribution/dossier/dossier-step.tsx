@@ -22,8 +22,11 @@ import {
   snapshotDrift,
   type DriftLine,
 } from "@/lib/distribution/validation";
-import { fr } from "@/lib/i18n/fr";
+import { distribution } from "@/lib/i18n/fr/distribution";
+import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
 import { formatShortInstant } from "@/lib/utils/day";
+
+const fr = { distribution, distributionJourney };
 
 const t = fr.distributionJourney.dossier;
 const k = fr.distributionJourney.checks;

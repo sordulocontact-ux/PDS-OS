@@ -1,5 +1,5 @@
 import { EmptyNote } from "@/components/shell/empty-state";
-import { fr } from "@/lib/i18n/fr";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import { CALL_ITEM_KINDS, type CallItem } from "@/lib/production/preprod/types";
 import { formatDate } from "@/lib/release/format";
 
@@ -7,6 +7,8 @@ import { CallItemRow } from "./call-item-row";
 import type { PlannedAction } from "./plan-call-action";
 import type { Member } from "@/lib/framing/related";
 import type { NetworkOption } from "@/lib/production/sheet";
+
+const fr = { productionPreprod };
 
 const t = fr.productionPreprod.call;
 

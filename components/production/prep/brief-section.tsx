@@ -3,12 +3,14 @@ import { BriefReading } from "@/components/production/prep/brief-reading";
 import { DirectorDialog } from "@/components/production/prep/director-dialog";
 import { PageSection } from "@/components/shell/page-section";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionBrief } from "@/lib/i18n/fr/production-brief";
 import type {
   NetworkOption,
   ProductionSheetData,
 } from "@/lib/production/sheet";
 import { formatDate } from "@/lib/release/format";
+
+const fr = { productionBrief };
 
 const t = fr.productionBrief;
 

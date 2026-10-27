@@ -8,8 +8,11 @@ import {
   type EngineerSuggestion,
 } from "@/lib/catalog/master/engineer-actions";
 import type { SessionKind } from "@/lib/catalog/master/rules";
-import { fr } from "@/lib/i18n/fr";
+import { masterPage } from "@/lib/i18n/fr/master-page";
+import { network } from "@/lib/i18n/fr/network";
 import type { RankedPerson } from "@/lib/network/ranked-people";
+
+const fr = { network, masterPage };
 
 type Loaded = {
   options: RankedPerson[];

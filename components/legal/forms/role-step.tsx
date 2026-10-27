@@ -2,9 +2,11 @@
 
 import { Field } from "@/components/auth/field";
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { legalForms } from "@/lib/i18n/fr/legal-forms";
 import { FORM_ROLES, type FormRole } from "@/lib/legal/forms/definition";
 import { Checkbox } from "@/components/ui/checkbox";
+
+const fr = { legalForms };
 
 /** The fiche's first question (Juridique 02): « Quel est votre rôle sur ce
  * projet ? », several choices, « Autre » with its words. */

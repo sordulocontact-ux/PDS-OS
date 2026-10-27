@@ -1,11 +1,14 @@
 import { EmptyNote } from "@/components/shell/empty-state";
-import { fr } from "@/lib/i18n/fr";
+import { marketing } from "@/lib/i18n/fr/marketing";
+import { marketingReview } from "@/lib/i18n/fr/marketing-review";
 import type { MarketingEvent } from "@/lib/marketing/queries";
 import {
   formatLongDay,
   formatTime,
   groupByDay,
 } from "@/lib/project-history/format";
+
+const fr = { marketing, marketingReview };
 
 const t = fr.marketing.events;
 

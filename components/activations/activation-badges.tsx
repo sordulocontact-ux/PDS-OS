@@ -1,12 +1,14 @@
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { ActivationStatus } from "@/lib/activations/model";
 import type { MeasureState, ProofState } from "@/lib/activations/states";
-import { fr } from "@/lib/i18n/fr";
+import { activations } from "@/lib/i18n/fr/activations";
 import {
   activationStatusTone,
   measureTone,
   proofTone,
 } from "@/lib/ui/state-tones";
+
+const fr = { activations };
 
 const t = fr.activations;
 

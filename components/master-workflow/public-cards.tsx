@@ -7,11 +7,14 @@ import {
   PublicPackageView,
 } from "@/components/master-workflow/public-package";
 import type { PortalCardItem } from "@/components/portal/portal-sections";
-import { fr } from "@/lib/i18n/fr";
+import { masterRound } from "@/lib/i18n/fr/master-round";
+import { masterWorkflow } from "@/lib/i18n/fr/master-workflow";
 import type { EngineerMessage } from "@/lib/master-workflow/engineer-messages";
 import type { LinkDeliverable } from "@/lib/master-workflow/deliverables-public";
 import type { PersonInvoices } from "@/lib/invoices/public";
 import type { PublicPackage } from "@/lib/master-workflow/transmission-public";
+
+const fr = { masterWorkflow, masterRound };
 
 const t = fr.masterWorkflow.publicPackage;
 const r = fr.masterRound;

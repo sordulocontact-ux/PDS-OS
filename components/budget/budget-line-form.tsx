@@ -26,7 +26,9 @@ import {
   type BudgetStatus,
 } from "@/lib/budget/types";
 import { uploadCatalogFile } from "@/lib/catalog/upload-file";
-import { fr } from "@/lib/i18n/fr";
+import { budget } from "@/lib/i18n/fr/budget";
+
+const fr = { budget };
 
 /**
  * A line's fields. `initial`: a new line already filled (a draft of PO).

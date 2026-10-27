@@ -1,6 +1,6 @@
 import { EmptyNote } from "@/components/shell/empty-state";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionNeeds } from "@/lib/i18n/fr/production-needs";
 import type { NeedFamily, NeedSuggestion } from "@/lib/production/roles";
 import type {
   Holder,
@@ -10,6 +10,8 @@ import type {
 
 import { NeedAddControls } from "./need-add-controls";
 import { NeedCard, needRowClass } from "./need-card";
+
+const fr = { productionNeeds };
 
 const t = fr.productionNeeds;
 

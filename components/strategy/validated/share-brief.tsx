@@ -1,7 +1,9 @@
 "use client";
 
 import { CopyButton } from "@/components/ui/copy-button";
-import { fr } from "@/lib/i18n/fr";
+import { strategyBriefOut } from "@/lib/i18n/fr/strategy-brief-out";
+
+const fr = { strategyBriefOut };
 
 /** « Partager » the Brief de sortie: its internal link, copied (never public). */
 export function ShareBrief({ path }: { path: string }) {

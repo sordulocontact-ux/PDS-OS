@@ -5,8 +5,11 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { validateMasterSplit } from "@/lib/catalog/master/rights-actions";
 import type { SplitKind } from "@/lib/catalog/master/rules";
 import type { SplitReviewState } from "@/lib/catalog/master/split-review";
-import { fr } from "@/lib/i18n/fr";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 import { splitReviewTone } from "@/lib/ui/state-tones";
+
+const fr = { dialogs, masterPage };
 
 /**
  * Next to « Complet » / « Reste x % », the validation of a split (retours

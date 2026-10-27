@@ -18,9 +18,13 @@ import {
   addManualAgencyRow,
   importAgencyMetrics,
 } from "@/lib/activations/agency/row-actions";
-import { fr } from "@/lib/i18n/fr";
+import { activationAgency } from "@/lib/i18n/fr/activation-agency";
+import { activations } from "@/lib/i18n/fr/activations";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
 
 import { SourceForm } from "./source-form";
+
+const fr = { dialogs, activations, activationAgency };
 
 const t = fr.activationAgency;
 

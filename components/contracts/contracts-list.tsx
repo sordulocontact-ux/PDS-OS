@@ -3,7 +3,9 @@
 import { ContractsTable } from "@/components/contracts/contracts-table";
 import { SearchableList } from "@/components/ui/searchable-list";
 import type { ContractRow } from "@/lib/contracts/types";
-import { fr } from "@/lib/i18n/fr";
+import { contracts } from "@/lib/i18n/fr/contracts";
+
+const fr = { contracts };
 
 // Contracts with an instant search on title, parties, project and artist.
 export function ContractsList({ contracts }: { contracts: ContractRow[] }) {

@@ -6,11 +6,14 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { fr } from "@/lib/i18n/fr";
+import { framing } from "@/lib/i18n/fr/framing";
+import { strategyPressKit } from "@/lib/i18n/fr/strategy-press-kit";
 import {
   pressContactSchema,
   type PressContact,
 } from "@/lib/strategy/documents/press-kit-model";
+
+const fr = { framing, strategyPressKit };
 
 /** A press contact to add: name, role, email, phone (only the name needed). */
 export function PressContactForm({

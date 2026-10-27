@@ -5,7 +5,9 @@ import { usePathname } from "next/navigation";
 import { FormMessage } from "@/components/auth/form-message";
 import { useCanEditProject } from "@/components/projects/edit-access";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { shell } from "@/lib/i18n/fr/shell";
+
+const fr = { shell };
 
 // The sections without a journey, where nothing else says who writes.
 const PLAIN_SECTIONS = [

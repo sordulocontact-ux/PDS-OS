@@ -3,7 +3,10 @@ import { creatorCard } from "@/components/activations/influence/creator-collabor
 import { PublicAgreement } from "@/components/activations/influence/public-agreement";
 import type { CreatorCollaboration } from "@/lib/activations/influence/creator-link";
 import type { PublicAgreement as PublicAgreementData } from "@/lib/activations/influence/public";
-import { fr } from "@/lib/i18n/fr";
+import { activationInfluence } from "@/lib/i18n/fr/activation-influence";
+import { portal } from "@/lib/i18n/fr/portal";
+
+const fr = { activationInfluence, portal };
 
 const t = fr.activationInfluence.public;
 

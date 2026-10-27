@@ -17,7 +17,11 @@ import {
   savePayment,
 } from "@/lib/activations/influence/payment-actions";
 import type { ActivationScope } from "@/lib/activations/types";
-import { fr } from "@/lib/i18n/fr";
+import { activationInfluence } from "@/lib/i18n/fr/activation-influence";
+import { activationWork } from "@/lib/i18n/fr/activation-work";
+import { activations } from "@/lib/i18n/fr/activations";
+
+const fr = { activations, activationWork, activationInfluence };
 
 const t = fr.activationInfluence.payment;
 type Payment = InfluenceData["payments"][number];

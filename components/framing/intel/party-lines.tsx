@@ -15,8 +15,10 @@ import {
   type LegalPartyBoard,
   type LegalPartyLine,
 } from "@/lib/framing/legal-parties";
-import { fr } from "@/lib/i18n/fr";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
 import { partyStatusTone } from "@/lib/ui/state-tones";
+
+const fr = { framingIntel };
 
 const day = new Intl.DateTimeFormat("fr-FR", {
   dateStyle: "long",

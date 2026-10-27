@@ -1,8 +1,10 @@
-import { fr } from "@/lib/i18n/fr";
+import { stepTools } from "@/lib/i18n/fr/step-tools";
 import { openContradictions, type StepNote } from "@/lib/step-tools/model";
 
 import { NoteGroup } from "./note-group";
 import { NoteRow } from "./note-row";
+
+const fr = { stepTools };
 
 const t = fr.stepTools.notes;
 

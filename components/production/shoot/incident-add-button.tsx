@@ -6,10 +6,12 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionShoot } from "@/lib/i18n/fr/production-shoot";
 import type { NetworkOption } from "@/lib/production/sheet";
 
 import { IncidentForm } from "./incident-form";
+
+const fr = { productionShoot };
 
 const t = fr.productionShoot.incidents;
 

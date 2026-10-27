@@ -1,7 +1,9 @@
 import { AssistantPanel } from "@/components/assistant/assistant-panel";
 import { PageContainer } from "@/components/shell/page-container";
 import { Skeleton } from "@/components/ui/skeleton";
-import { fr } from "@/lib/i18n/fr";
+import { shell } from "@/lib/i18n/fr/shell";
+
+const fr = { shell };
 
 // Frame of the home page (Figma "Desktop - 11"): centred greeting, then one
 // column holding the assistant and the cards. Shared by the page and its

@@ -7,9 +7,11 @@ import { FormMessage } from "@/components/auth/form-message";
 import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { reviewJourney } from "@/lib/i18n/fr/review-journey";
 import { arbitrateReserve } from "@/lib/marketing/closure/reserve-actions";
 import type { ReserveDecision } from "@/lib/marketing/closure/reserves";
+
+const fr = { reviewJourney };
 
 const t = fr.reviewJourney.reserves;
 const NONE = "none";

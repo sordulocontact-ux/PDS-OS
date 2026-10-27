@@ -1,5 +1,7 @@
-import { fr } from "@/lib/i18n/fr";
+import { legalForms } from "@/lib/i18n/fr/legal-forms";
 import type { FormRequester } from "@/lib/legal/forms/public";
+
+const fr = { legalForms };
 
 // « Une question ? »: whom an outside person writes to about their fiche,
 // the project's owner (UX test of 09/10/2026: the page named no one).

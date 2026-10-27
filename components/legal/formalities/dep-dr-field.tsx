@@ -3,12 +3,14 @@
 import { FieldError } from "@/components/auth/form-message";
 import { OptionSelect } from "@/components/projects/option-select";
 import { CheckboxField } from "@/components/ui/checkbox-field";
-import { fr } from "@/lib/i18n/fr";
+import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
 import type { Creator, Publisher } from "@/lib/legal/formalities/definition";
 import type { DossierErrors } from "@/lib/legal/formalities/field-errors";
 import { CURRENT_SHARING_RULE } from "@/lib/legal/formalities/sharing-rule";
 
 import { DepDrPreview } from "./dep-dr-preview";
+
+const fr = { legalFormalities };
 
 export type DepDr = { choice?: string; rule?: string; checked?: boolean };
 

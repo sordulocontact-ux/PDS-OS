@@ -1,10 +1,14 @@
 import { IconLock } from "nucleo-sharp-essential";
 
 import { Avatar } from "@/components/ui/avatar";
-import { fr } from "@/lib/i18n/fr";
+import { auth } from "@/lib/i18n/fr/auth";
+import { portal } from "@/lib/i18n/fr/portal";
+import { shell } from "@/lib/i18n/fr/shell";
 import type { PortalFrame } from "@/lib/portal/frame";
 
 import { portalCardClass } from "./portal-card";
+
+const fr = { auth, shell, portal };
 
 const t = fr.portal;
 const ROLE_LABELS: Record<string, string> = fr.auth.members.roles;

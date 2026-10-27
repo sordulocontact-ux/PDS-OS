@@ -1,8 +1,10 @@
 import { IconCheck } from "nucleo-sharp-essential";
 
-import { fr } from "@/lib/i18n/fr";
+import { journey } from "@/lib/i18n/fr/journey";
 import { cn } from "@/lib/utils";
 import { formatShortDay, formatShortInstant } from "@/lib/utils/day";
+
+const fr = { journey };
 
 /** One gesture done on a step, read from the module's journal. */
 export type StepHistoryItem = {

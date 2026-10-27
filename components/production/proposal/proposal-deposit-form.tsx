@@ -8,9 +8,11 @@ import { TextareaField } from "@/components/auth/textarea-field";
 import { useLinkSubmit } from "@/components/production/provider/use-link-submit";
 import { Button } from "@/components/ui/button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { productionProposal } from "@/lib/i18n/fr/production-proposal";
 import { depositProposal } from "@/lib/production/proposal/actions";
 import { depositProposalByLink } from "@/lib/production/provider/proposal-link-actions";
+
+const fr = { productionProposal };
 
 const t = fr.productionProposal;
 const HTTPS = /^https:\/\/\S+$/;

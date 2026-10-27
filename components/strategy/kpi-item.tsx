@@ -3,7 +3,7 @@
 import { optionClass } from "@/components/ui/option-class";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { strategyKpis } from "@/lib/i18n/fr/strategy-kpis";
 import {
   isKpiKind,
   isKpiMetric,
@@ -11,6 +11,8 @@ import {
   type KpiActual,
 } from "@/lib/strategy/kpis";
 import type { StrategyObjective } from "@/lib/strategy/queries";
+
+const fr = { strategyKpis };
 
 const number = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 });
 const dueFormat = new Intl.DateTimeFormat("fr-FR", {

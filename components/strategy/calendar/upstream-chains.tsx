@@ -3,7 +3,8 @@ import { UpstreamArbitration } from "@/components/strategy/calendar/upstream-arb
 import { UpstreamProposals } from "@/components/strategy/calendar/upstream-proposals";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { strategy } from "@/lib/i18n/fr/strategy";
+import { strategyCalendar } from "@/lib/i18n/fr/strategy-calendar";
 import { dayOffset } from "@/lib/strategy/calendar";
 import {
   UPSTREAM_STEPS,
@@ -14,6 +15,8 @@ import {
 } from "@/lib/strategy/upstream";
 import { overdueTone } from "@/lib/ui/state-tones";
 import { cn } from "@/lib/utils";
+
+const fr = { strategy, strategyCalendar };
 
 /**
  * « Échéances amont »: per deliverable linked to a milestone, the

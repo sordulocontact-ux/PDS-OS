@@ -5,9 +5,11 @@
 // report does not). Client-safe, pure.
 
 import type { MeetingLine } from "@/lib/calls/meeting/types";
-import { fr } from "@/lib/i18n/fr";
+import { strategyDimensions } from "@/lib/i18n/fr/strategy-dimensions";
 import type { StrategyModel } from "@/lib/strategy/dimension-model";
 import type { DimItem } from "@/lib/strategy/dimension-items";
+
+const fr = { strategyDimensions };
 
 const stateOf = (item: DimItem): MeetingLine["state"] => {
   const p = item.proposal;

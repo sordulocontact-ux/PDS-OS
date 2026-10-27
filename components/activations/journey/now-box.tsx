@@ -1,11 +1,13 @@
 import type { ReactNode } from "react";
 
 import type { ActivationSummary } from "@/lib/activations/types";
-import { fr } from "@/lib/i18n/fr";
+import { activationJourney } from "@/lib/i18n/fr/activation-journey";
 
 import { DerivedProofBox } from "./derived-proof-box";
 import { ModuleLine } from "./module-line";
 import { NowTools } from "./now-tools";
+
+const fr = { activationJourney };
 
 const t = fr.activationJourney.now;
 

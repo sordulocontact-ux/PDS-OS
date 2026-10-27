@@ -3,9 +3,11 @@ import { Timestamp } from "@/components/ui/timestamp";
 import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
 import { formatBriefDate } from "@/lib/framing/assess";
-import { fr } from "@/lib/i18n/fr";
+import { strategyFollowUp } from "@/lib/i18n/fr/strategy-follow-up";
 import type { SettledRecommendation } from "@/lib/strategy/settled-recommendations";
 import { recommendationLevelTone } from "@/lib/ui/state-tones";
+
+const fr = { strategyFollowUp };
 
 /**
  * The recommendations already settled (MKT-C2-02), newest first: what each

@@ -7,9 +7,11 @@ import {
 import { PageSection } from "@/components/shell/page-section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { moduleHref, type Anomaly } from "@/lib/distribution/anomalies";
-import { fr } from "@/lib/i18n/fr";
+import { distribution } from "@/lib/i18n/fr/distribution";
 import { formatShortDate } from "@/lib/release/format";
 import { anomalySeverityTone, anomalyStateTone } from "@/lib/ui/state-tones";
+
+const fr = { distribution };
 
 const t = fr.distribution.anomalies;
 

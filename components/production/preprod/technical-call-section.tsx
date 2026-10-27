@@ -2,7 +2,7 @@ import { ProductionCallList } from "@/components/production/prep/production-call
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import { CallPrepForm } from "@/components/calls/prep/call-prep-form";
 import { CallPrepLauncher } from "@/components/calls/prep/call-prep-launcher";
 import { technicalCallDefaults } from "@/lib/production/call-prep-defaults";
@@ -17,6 +17,8 @@ import { AddCallItemButton } from "./add-call-item-button";
 import type { Member } from "@/lib/framing/related";
 import type { NetworkOption } from "@/lib/production/sheet";
 import { CallItems } from "./call-items";
+
+const fr = { productionPreprod };
 
 const t = fr.productionPreprod.call;
 

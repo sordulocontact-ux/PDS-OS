@@ -9,7 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { FilterChip } from "@/components/ui/filter-chip";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { fr } from "@/lib/i18n/fr";
+import { strategyKpis } from "@/lib/i18n/fr/strategy-kpis";
 import type { ObjectiveInput } from "@/lib/strategy/actions/objectives";
 import {
   KPI_KINDS,
@@ -19,6 +19,8 @@ import {
   type KpiKind,
   type KpiMetric,
 } from "@/lib/strategy/kpis";
+
+const fr = { strategyKpis };
 
 const NO_OWNER = "none";
 

@@ -10,7 +10,9 @@ import type { DossierSection } from "@/lib/distribution/delivery-file";
 import { missingParams } from "@/lib/distribution/delivery-file";
 import type { DossierParams } from "@/lib/distribution/dossier";
 import type { Readiness } from "@/lib/distribution/readiness";
-import { fr } from "@/lib/i18n/fr";
+import { distribution } from "@/lib/i18n/fr/distribution";
+
+const fr = { distribution };
 
 export type VersionStatus = "pending" | "approved" | "rejected";
 

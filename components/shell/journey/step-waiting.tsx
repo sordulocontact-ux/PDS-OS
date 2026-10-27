@@ -1,5 +1,7 @@
-import { fr } from "@/lib/i18n/fr";
+import { journey } from "@/lib/i18n/fr/journey";
 import { lowerFirst, type JourneyStep } from "@/lib/ui/journey";
+
+const fr = { journey };
 
 /** « CM » for Claire Morel: the avatar of who is awaited. */
 export const initials = (name: string) =>

@@ -1,7 +1,9 @@
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { strategyFollowUp } from "@/lib/i18n/fr/strategy-follow-up";
 import type { FollowUpGroup } from "@/lib/strategy/follow-up";
 import { followUpTone } from "@/lib/ui/state-tones";
+
+const fr = { strategyFollowUp };
 
 /**
  * What PO watches before the release (ticket § 14): contents, influence,

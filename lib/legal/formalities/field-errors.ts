@@ -4,9 +4,11 @@
 // the value on screen answers it, so a field turns back to normal while it
 // is being fixed. Pure, client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
 import type { Creator, Publisher } from "@/lib/legal/formalities/definition";
 import { FULL, totalUnits, unitsOf } from "@/lib/legal/splits/shares";
+
+const fr = { legalFormalities };
 
 export type DossierErrors = {
   // By field key (title, duration, creators, dep_dr, dep_dr_check,

@@ -3,10 +3,12 @@
 import { DialogButton } from "@/components/ui/dialog-button";
 import type { InfluenceData } from "@/lib/activations/influence/queries";
 import { decideRights } from "@/lib/activations/influence/rights-actions";
-import { fr } from "@/lib/i18n/fr";
+import { activationInfluence } from "@/lib/i18n/fr/activation-influence";
 
 import { ReasonForm } from "@/components/ui/reason-form";
 import { RightsForm } from "./rights-form";
+
+const fr = { activationInfluence };
 
 const t = fr.activationInfluence.rights;
 

@@ -13,7 +13,9 @@ import type {
   BudgetLever,
   BudgetLine,
 } from "@/lib/budget/types";
-import { fr } from "@/lib/i18n/fr";
+import { budget } from "@/lib/i18n/fr/budget";
+
+const fr = { budget };
 
 // Side panel to add a line (line = null) or edit one. Mounted per opening,
 // so the fields always start from the saved values.

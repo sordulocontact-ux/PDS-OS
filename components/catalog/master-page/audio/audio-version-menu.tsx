@@ -14,7 +14,11 @@ import {
   type NumberedVersion,
 } from "@/lib/catalog/audio-versions";
 import { deleteCatalogFile } from "@/lib/catalog/file-actions";
-import { fr } from "@/lib/i18n/fr";
+import { catalogFiles } from "@/lib/i18n/fr/catalog-files";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
+import { masterPage } from "@/lib/i18n/fr/master-page";
+
+const fr = { dialogs, catalogFiles, masterPage };
 
 /**
  * « ⋯ » of an audio version: open, download, then for whoever writes the

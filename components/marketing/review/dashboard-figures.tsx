@@ -1,12 +1,14 @@
 import { StatTiles } from "@/components/ui/stat-tiles";
 import { formatEuros } from "@/lib/budget/types";
-import { fr } from "@/lib/i18n/fr";
+import { marketingReview } from "@/lib/i18n/fr/marketing-review";
 import {
   FIGURE_GROUPS,
   type Dashboard,
   type FigureGroup,
   type FigureKey,
 } from "@/lib/marketing/dashboard";
+
+const fr = { marketingReview };
 
 const t = fr.marketingReview.dashboard;
 const number = new Intl.NumberFormat("fr-FR");

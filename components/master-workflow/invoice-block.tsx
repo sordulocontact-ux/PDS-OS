@@ -1,11 +1,15 @@
 import { InvoicePanel } from "@/components/invoices/invoice-panel";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
-import { fr } from "@/lib/i18n/fr";
+import { budget } from "@/lib/i18n/fr/budget";
+import { invoices } from "@/lib/i18n/fr/invoices";
+import { masterInvoice } from "@/lib/i18n/fr/master-invoice";
 import type { ProjectInvoicesView } from "@/lib/invoices/types";
 import type { MasterBudgetLine } from "@/lib/master-workflow/budget-lines";
 import { budgetStatusTone } from "@/lib/ui/state-tones";
 import { formatDay, formatShortInstant } from "@/lib/utils/day";
 import { formatAmount } from "@/lib/utils/money";
+
+const fr = { budget, invoices, masterInvoice };
 
 const t = fr.invoices.team;
 const tb = fr.masterInvoice.budget;

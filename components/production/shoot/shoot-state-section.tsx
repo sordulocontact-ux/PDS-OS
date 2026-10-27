@@ -4,7 +4,7 @@ import { FactList } from "@/components/ui/fact-list";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { ViewLink } from "@/components/ui/view-link";
-import { fr } from "@/lib/i18n/fr";
+import { productionShoot } from "@/lib/i18n/fr/production-shoot";
 import {
   needsMissingSequences,
   type ShootRecord,
@@ -15,6 +15,8 @@ import { shootStateTone } from "@/lib/ui/state-tones";
 import { ShootStateDialog } from "./shoot-state-dialog";
 
 import { LaunchShootButton } from "./launch-shoot-button";
+
+const fr = { productionShoot };
 
 const t = fr.productionShoot.state;
 

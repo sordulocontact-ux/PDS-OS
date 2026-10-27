@@ -1,5 +1,8 @@
 import type { ActivityEvent } from "@/lib/catalog/activity-types";
-import { fr } from "@/lib/i18n/fr";
+import { artistActivity } from "@/lib/i18n/fr/artist-activity";
+import { catalog } from "@/lib/i18n/fr/catalog";
+
+const fr = { catalog, artistActivity };
 
 // One sentence per event, from what the trigger copied at the time.
 export function activitySentence(event: ActivityEvent): string {

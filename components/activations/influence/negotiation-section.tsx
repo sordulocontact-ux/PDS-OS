@@ -6,7 +6,7 @@ import { ToneCallout } from "@/components/ui/tone-callout";
 import { agreementContentSchema } from "@/lib/activations/influence/agreement-content";
 import type { InfluenceData } from "@/lib/activations/influence/queries";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { activationInfluence } from "@/lib/i18n/fr/activation-influence";
 import { formatDate, formatDateTime } from "@/lib/release/format";
 
 import { AgreementSendForm } from "./agreement-send-form";
@@ -17,6 +17,8 @@ import {
   PrepareAgreementButton,
   RevokeAgreementButton,
 } from "./negotiation-buttons";
+
+const fr = { activationInfluence };
 
 const t = fr.activationInfluence;
 const agreementTone = {

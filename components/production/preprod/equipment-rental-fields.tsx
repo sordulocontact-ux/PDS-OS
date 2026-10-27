@@ -2,9 +2,11 @@ import { Field } from "@/components/auth/field";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { OptionSelect } from "@/components/projects/option-select";
 import { centsToInput } from "@/lib/budget/types";
-import { fr } from "@/lib/i18n/fr";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import type { Equipment } from "@/lib/production/preprod/types";
 import type { NetworkOption } from "@/lib/production/sheet";
+
+const fr = { productionPreprod };
 
 const t = fr.productionPreprod.equipment;
 

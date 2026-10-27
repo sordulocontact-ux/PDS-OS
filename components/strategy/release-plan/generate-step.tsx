@@ -1,6 +1,9 @@
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { strategyPressKit } from "@/lib/i18n/fr/strategy-press-kit";
+import { strategyReleasePlan } from "@/lib/i18n/fr/strategy-release-plan";
 import type { GeneratorKind } from "@/lib/strategy/documents/generator-kind";
+
+const fr = { strategyReleasePlan, strategyPressKit };
 
 /**
  * Step 7 (ticket § 11): PO generates the real visual document from the

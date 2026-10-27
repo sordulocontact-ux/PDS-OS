@@ -4,9 +4,11 @@ import { CallFacts } from "@/components/calls/call-facts";
 import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import type { PrepPerson } from "@/lib/calls/prep/types";
-import { fr } from "@/lib/i18n/fr";
+import { callPrep } from "@/lib/i18n/fr/call-prep";
 
 import { AttendeeChipList } from "./attendee-chip";
+
+const fr = { callPrep };
 
 /**
  * « Récapitulatif avant création », at the same place as the form: when,

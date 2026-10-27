@@ -1,9 +1,12 @@
-import { fr } from "@/lib/i18n/fr";
+import { productionBrief } from "@/lib/i18n/fr/production-brief";
+import { productionNeeds } from "@/lib/i18n/fr/production-needs";
 import {
   isChoiceField,
   type ImportBriefField,
   type ImportNeedProposal,
 } from "@/lib/production/import-proposal";
+
+const fr = { productionBrief, productionNeeds };
 
 // Words of an imported proposal, taken from the brief's and the teams' own
 // texts (lib/i18n/fr/production-brief.ts, production-needs.ts).

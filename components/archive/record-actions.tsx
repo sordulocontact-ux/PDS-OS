@@ -16,7 +16,9 @@ import { FormDialog } from "@/components/ui/form-dialog";
 import { RowActions, type RowAction } from "@/components/ui/row-actions";
 import { setArchived } from "@/lib/archive/actions";
 import type { ArchiveKind, RecordRights } from "@/lib/archive/types";
-import { fr } from "@/lib/i18n/fr";
+import { records } from "@/lib/i18n/fr/records";
+
+const fr = { records };
 
 type Open = "none" | "edit" | "archive" | "delete";
 

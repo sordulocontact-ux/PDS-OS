@@ -12,8 +12,12 @@ import { useFramingAction } from "@/components/framing/use-framing-action";
 import { Button } from "@/components/ui/button";
 import { confirmQuestion } from "@/lib/framing/actions/questions";
 import type { FramingData } from "@/lib/framing/queries";
-import { fr } from "@/lib/i18n/fr";
+import { framingGuide } from "@/lib/i18n/fr/framing-guide";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+import { framingJourney } from "@/lib/i18n/fr/framing-journey";
 import { cn } from "@/lib/utils";
+
+const fr = { framingGuide, framingIntel, framingJourney };
 
 type Constraint = FramingData["constraints"][number];
 

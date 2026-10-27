@@ -12,8 +12,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionPrep } from "@/lib/i18n/fr/production-prep";
 import type { Holder, NetworkOption } from "@/lib/production/sheet";
+
+const fr = { productionPrep };
 
 // A select item cannot hold "": nobody is NONE on screen, "" in the form.
 const NONE = "none";

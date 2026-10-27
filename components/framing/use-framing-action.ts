@@ -4,7 +4,9 @@ import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import type { ActionResult } from "@/lib/framing/result";
-import { fr } from "@/lib/i18n/fr";
+import { framing } from "@/lib/i18n/fr/framing";
+
+const fr = { framing };
 
 /**
  * Runs a framing server action; a failure shows its translated message, in a

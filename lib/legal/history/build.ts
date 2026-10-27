@@ -3,11 +3,16 @@
 // comes from a row really recorded. Client-safe.
 
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { legalClearance } from "@/lib/i18n/fr/legal-clearance";
+import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
+import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
+import { legalHistory } from "@/lib/i18n/fr/legal-history";
 import { linkCauses } from "@/lib/legal/history/causes";
 import type { LegalEvent } from "@/lib/legal/history/types";
 import { formatDate } from "@/lib/release/format";
 import type { Database } from "@/lib/supabase/database.types";
+
+const fr = { legalClearance, legalContracts, legalFormalities, legalHistory };
 
 type Tables = Database["public"]["Tables"];
 type Row<T extends keyof Tables, K extends keyof Tables[T]["Row"]> = Pick<

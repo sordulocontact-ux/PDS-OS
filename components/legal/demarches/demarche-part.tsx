@@ -13,10 +13,12 @@ import { SplitPanel } from "@/components/legal/tracking/split-panel";
 import { Button } from "@/components/ui/button";
 import { NextCard } from "@/components/ui/next-card";
 import type { ContractProof } from "@/lib/contracts/proof";
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
 import type { Clearances } from "@/lib/legal/clearance/types";
 import type { ContractCardData } from "@/lib/legal/contracts/document-card";
 import type { BoardRow } from "@/lib/legal/plan/board";
+
+const fr = { legal };
 
 /**
  * One step of a démarche, done in place (a person's fiche, their contract,

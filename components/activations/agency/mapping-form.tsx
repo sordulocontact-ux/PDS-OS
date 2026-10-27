@@ -12,7 +12,11 @@ import {
   type AgencyField,
 } from "@/lib/activations/agency/fields";
 import { saveAgencyMapping } from "@/lib/activations/agency/source-actions";
-import { fr } from "@/lib/i18n/fr";
+import { activationAgency } from "@/lib/i18n/fr/activation-agency";
+import { activationWork } from "@/lib/i18n/fr/activation-work";
+import { activations } from "@/lib/i18n/fr/activations";
+
+const fr = { activations, activationWork, activationAgency };
 
 const t = fr.activationAgency;
 const NONE = "none";

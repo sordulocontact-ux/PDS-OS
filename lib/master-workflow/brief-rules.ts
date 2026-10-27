@@ -2,9 +2,11 @@
 // `master-v2.html`, VISION-UX rules 2 and 22). Pure and client-safe: said
 // by code, never by PO.
 
-import { fr } from "@/lib/i18n/fr";
+import { masterBrief } from "@/lib/i18n/fr/master-brief";
 
 import type { MasterBrief } from "./brief-types";
+
+const fr = { masterBrief };
 
 const t = fr.masterBrief.missing;
 

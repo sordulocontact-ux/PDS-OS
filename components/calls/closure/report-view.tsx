@@ -1,6 +1,8 @@
 import type { ReportContent } from "@/lib/calls/closure";
 import { formatBriefDate } from "@/lib/framing/assess";
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
+
+const fr = { calls };
 
 /** A closed report as it reads (PROJ-AMEL-01): never the transcription. */
 export function ReportView({ content }: { content: ReportContent }) {

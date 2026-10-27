@@ -11,10 +11,13 @@ import { collaborationGate } from "@/lib/activations/phase";
 import type { ActivationPeople } from "@/lib/activations/people";
 import { loadTargets } from "@/lib/activations/targets";
 import type { Access } from "@/lib/auth/access";
-import { fr } from "@/lib/i18n/fr";
+import { activationInfluence } from "@/lib/i18n/fr/activation-influence";
+import { activationJourney } from "@/lib/i18n/fr/activation-journey";
 import { collaborationStageTone } from "@/lib/ui/state-tones";
 
 import { ModuleLine } from "./module-line";
+
+const fr = { activationInfluence, activationJourney };
 
 const t = fr.activationJourney.influence;
 

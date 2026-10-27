@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { fr } from "@/lib/i18n/fr";
+import { strategy } from "@/lib/i18n/fr/strategy";
+import { strategyCalendar } from "@/lib/i18n/fr/strategy-calendar";
 import type { MilestoneInput } from "@/lib/strategy/actions/plan";
 import {
   addDays,
@@ -18,6 +19,8 @@ import {
   type MilestoneChannel,
 } from "@/lib/strategy/calendar";
 import type { Milestone, StrategyData } from "@/lib/strategy/queries";
+
+const fr = { strategy, strategyCalendar };
 
 const NONE = "none";
 type Kind = keyof typeof fr.strategy.calendar.kinds;

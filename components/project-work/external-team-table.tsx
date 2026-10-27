@@ -7,8 +7,10 @@ import {
   DataTableHeader,
   DataTableRow,
 } from "@/components/ui/data-table";
-import { fr } from "@/lib/i18n/fr";
+import { projectWork } from "@/lib/i18n/fr/project-work";
 import type { ExternalMember } from "@/lib/project-work/team";
+
+const fr = { projectWork };
 
 const t = fr.projectWork.team;
 

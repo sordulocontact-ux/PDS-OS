@@ -13,8 +13,10 @@ import {
   type GridPreview,
 } from "@/components/calls/calendar/use-grid-drag";
 import { dayEvents, type CalendarEvent } from "@/lib/calls/calendar";
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
 import { cn } from "@/lib/utils";
+
+const fr = { calls };
 
 const HOURS = Array.from({ length: 24 }, (_, hour) => hour);
 // Scrolled to on arrival: just before the working day, or the earliest call.

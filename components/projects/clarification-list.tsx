@@ -1,8 +1,10 @@
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDay } from "@/lib/assistant/facts";
-import { fr } from "@/lib/i18n/fr";
+import { transmission } from "@/lib/i18n/fr/transmission";
 import type { Clarification } from "@/lib/projects/clarifications";
 import { clarificationTone } from "@/lib/ui/state-tones";
+
+const fr = { transmission };
 
 /**
  * Each request for clarification of the transmission, structured (PROJ-UX-02):

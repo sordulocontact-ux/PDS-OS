@@ -26,7 +26,9 @@ import {
   reportDistributionAnomaly,
   setDistributionAnomalyState,
 } from "@/lib/distribution/anomalies-actions";
-import { fr } from "@/lib/i18n/fr";
+import { distribution } from "@/lib/i18n/fr/distribution";
+
+const fr = { distribution };
 
 const t = fr.distribution.anomalies;
 

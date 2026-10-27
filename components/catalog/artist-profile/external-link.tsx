@@ -1,6 +1,8 @@
 import { IconExternalLink } from "@/components/icons";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
 import { cn } from "@/lib/utils";
+
+const fr = { catalog };
 
 // Link to a Deezer (or Wikipedia) page, in a new tab. With `cover`, the
 // link stretches over its nearest `relative` parent: the whole row or card

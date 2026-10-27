@@ -16,7 +16,10 @@ import {
 } from "@/lib/activations/agency/report-actions";
 import { uploadActivationFile } from "@/lib/activations/files/upload";
 import type { ActivationScope } from "@/lib/activations/types";
-import { fr } from "@/lib/i18n/fr";
+import { activationAgency } from "@/lib/i18n/fr/activation-agency";
+import { activations } from "@/lib/i18n/fr/activations";
+
+const fr = { activations, activationAgency };
 
 const t = fr.activationAgency.report;
 type Decision = keyof typeof t.decide;

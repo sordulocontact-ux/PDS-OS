@@ -6,7 +6,8 @@
 // never stored. Client-safe.
 
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { strategyDimensions } from "@/lib/i18n/fr/strategy-dimensions";
+import { strategyJourney as frStrategyJourney } from "@/lib/i18n/fr/strategy-journey";
 import type {
   JourneyActor,
   JourneyPerson,
@@ -15,6 +16,8 @@ import type {
   JourneyStep,
 } from "@/lib/ui/journey";
 import { formatShortDay } from "@/lib/utils/day";
+
+const fr = { strategyDimensions, strategyJourney: frStrategyJourney };
 
 export const STRATEGY_STEPS = [
   "start",

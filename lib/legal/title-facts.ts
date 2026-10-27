@@ -14,7 +14,8 @@ import {
   type SplitKind,
 } from "@/lib/catalog/master/rules";
 import { groupOf } from "@/lib/facts/types";
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 import { formatDate } from "@/lib/release/format";
 import {
   TITLE_IDENTIFIERS,
@@ -22,6 +23,8 @@ import {
   type LegalFactStatus,
   type LegalTitleRow,
 } from "@/lib/legal/types";
+
+const fr = { legal, masterPage };
 
 export type InventoryMaster = {
   id: string;

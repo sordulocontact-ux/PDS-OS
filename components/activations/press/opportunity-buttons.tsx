@@ -10,9 +10,12 @@ import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { saveInterviewBrief } from "@/lib/activations/press/opportunity-actions";
 import type { OpportunityRecord } from "@/lib/activations/press/queries";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { activationPress } from "@/lib/i18n/fr/activation-press";
+import { activations } from "@/lib/i18n/fr/activations";
 
 import { OpportunityForm } from "./opportunity-form";
+
+const fr = { activations, activationPress };
 
 const t = fr.activationPress.opportunities;
 

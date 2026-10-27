@@ -12,7 +12,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { decideValidation, startStage } from "@/lib/framing/actions/validation";
 import type { FramingData } from "@/lib/framing/queries";
-import { fr } from "@/lib/i18n/fr";
+import { framing } from "@/lib/i18n/fr/framing";
+
+const fr = { framing };
 
 type Props = Pick<FramingData, "stage" | "pendingValidation"> & {
   projectId: string;

@@ -5,7 +5,10 @@ import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { createFromLever, deferLever } from "@/lib/activations/lever-actions";
-import { fr } from "@/lib/i18n/fr";
+import { activationJourney } from "@/lib/i18n/fr/activation-journey";
+import { activations } from "@/lib/i18n/fr/activations";
+
+const fr = { activations, activationJourney };
 
 const t = fr.activationJourney.banner;
 

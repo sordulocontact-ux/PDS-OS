@@ -1,5 +1,7 @@
 import type { BriefChange } from "@/lib/framing/brief-snapshot";
-import { fr } from "@/lib/i18n/fr";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
+
+const fr = { framingIntel };
 
 /** What changed between two versions of the Brief, item by item: before
  * struck through, then after. */

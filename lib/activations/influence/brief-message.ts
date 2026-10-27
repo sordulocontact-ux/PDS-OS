@@ -3,8 +3,10 @@
 // validated concept, the creator's platform, the project, a rate noted in
 // the Réseau — never invented (no fee without a noted rate). Client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { activationBrief } from "@/lib/i18n/fr/activation-brief";
 import { lowerFirst } from "@/lib/ui/journey";
+
+const fr = { activationBrief };
 
 const t = fr.activationBrief.brief;
 

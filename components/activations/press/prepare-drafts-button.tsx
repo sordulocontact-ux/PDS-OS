@@ -6,7 +6,11 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { prepareTargetDrafts } from "@/lib/activations/press/draft-actions";
-import { fr } from "@/lib/i18n/fr";
+import { activationPress } from "@/lib/i18n/fr/activation-press";
+import { activations } from "@/lib/i18n/fr/activations";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
+
+const fr = { dialogs, activations, activationPress };
 
 const t = fr.activationPress.template;
 

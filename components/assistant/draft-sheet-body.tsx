@@ -27,7 +27,10 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import type { DraftProposal } from "@/lib/assistant/drafts";
-import { fr } from "@/lib/i18n/fr";
+import { assistant } from "@/lib/i18n/fr/assistant";
+import { assistantRecords } from "@/lib/i18n/fr/assistant-records";
+
+const fr = { assistant, assistantRecords };
 
 // Inside the review panel, loaded only when a draft is opened
 // (next/dynamic): the real form of the draft's kind, pre-filled.

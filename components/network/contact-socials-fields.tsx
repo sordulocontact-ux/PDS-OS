@@ -1,11 +1,13 @@
 import { Field } from "@/components/auth/field";
 import { FormSection } from "@/components/ui/form-section";
-import { fr } from "@/lib/i18n/fr";
+import { network } from "@/lib/i18n/fr/network";
 import {
   deezerUrl,
   spotifyUrl,
   type ContactSocials,
 } from "@/lib/network/socials";
+
+const fr = { network };
 
 type SocialField = "tiktok" | "instagram" | "spotify" | "deezer";
 

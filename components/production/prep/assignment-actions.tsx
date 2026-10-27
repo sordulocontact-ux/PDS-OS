@@ -9,7 +9,7 @@ import { TextareaField } from "@/components/auth/textarea-field";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { RowActions } from "@/components/ui/row-actions";
-import { fr } from "@/lib/i18n/fr";
+import { productionNeeds } from "@/lib/i18n/fr/production-needs";
 import {
   removeProductionAssignment,
   setAssignmentAvailability,
@@ -19,6 +19,8 @@ import type { ProductionAssignment } from "@/lib/production/sheet";
 import { AvailabilityChoices, availabilityOf } from "./assignment-availability";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
+
+const fr = { productionNeeds };
 
 const t = fr.productionNeeds.assignment;
 

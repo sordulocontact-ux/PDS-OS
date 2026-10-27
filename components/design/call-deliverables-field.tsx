@@ -3,8 +3,11 @@
 import { FilterChip } from "@/components/ui/filter-chip";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { DesignCallDeliverable } from "@/lib/design/call-prep";
-import { fr } from "@/lib/i18n/fr";
+import { conception } from "@/lib/i18n/fr/conception";
+import { conceptionCall } from "@/lib/i18n/fr/conception-call";
 import { conceptionDeliverableTone } from "@/lib/ui/state-tones";
+
+const fr = { conception, conceptionCall };
 
 /**
  * The deliverables a creative exchange is about, one pill each; a

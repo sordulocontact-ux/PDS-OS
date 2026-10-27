@@ -8,7 +8,7 @@ import { FormMessage } from "@/components/auth/form-message";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { FileDropZone } from "@/components/ui/file-drop-zone";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import type { ProductionFile } from "@/lib/production/files/queries";
 import { uploadProductionFile } from "@/lib/production/files/upload";
 import { deleteProductionFile } from "@/lib/production/preprod/actions-files";
@@ -18,6 +18,8 @@ import { AddEquipmentButton } from "./equipment-actions";
 import { RecordMenu } from "@/components/ui/record-menu";
 
 import { QuoteImportButton } from "./quote-import";
+
+const fr = { productionPreprod };
 
 const t = fr.productionPreprod.equipment;
 

@@ -6,8 +6,11 @@ import { toast } from "sonner";
 import { usePublishResult } from "@/components/shell/module/result-banner";
 import { Button } from "@/components/ui/button";
 import { useShowLinks } from "@/components/ui/one-time-links";
-import { fr } from "@/lib/i18n/fr";
+import { productionDirector } from "@/lib/i18n/fr/production-director";
+import { productionProvider } from "@/lib/i18n/fr/production-provider";
 import { retainDirector } from "@/lib/production/director-actions";
+
+const fr = { productionProvider, productionDirector };
 
 const t = fr.productionDirector;
 

@@ -10,9 +10,12 @@ import {
 } from "@/components/ui/data-table";
 import { FactList } from "@/components/ui/fact-list";
 import { BlockerCallout } from "@/components/ui/blocker-callout";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
+import { masterWorkflow } from "@/lib/i18n/fr/master-workflow";
 import type { StepView } from "@/lib/master-workflow/transmission";
 import { formatShortDate } from "@/lib/release/format";
+
+const fr = { catalog, masterWorkflow };
 
 /**
  * What the mix engineer will receive, before it is sent (ticket § 8: "PO

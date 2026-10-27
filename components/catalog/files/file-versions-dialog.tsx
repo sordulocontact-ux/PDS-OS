@@ -12,8 +12,10 @@ import {
   formatFileSize,
   type CatalogFile,
 } from "@/lib/catalog/file-rules";
-import { fr } from "@/lib/i18n/fr";
+import { catalogFiles } from "@/lib/i18n/fr/catalog-files";
 import { formatShortDate } from "@/lib/release/format";
+
+const fr = { catalogFiles };
 
 /**
  * Every version of a file, newest first: each one opens in a new tab or

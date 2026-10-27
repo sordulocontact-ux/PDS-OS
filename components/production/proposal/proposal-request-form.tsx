@@ -6,8 +6,11 @@ import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
+import { productionProposal } from "@/lib/i18n/fr/production-proposal";
 import { requestProposalVersion } from "@/lib/production/proposal/actions";
+
+const fr = { dialogs, productionProposal };
 
 const t = fr.productionProposal.request;
 

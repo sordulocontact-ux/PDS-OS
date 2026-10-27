@@ -8,9 +8,11 @@ import { ChoiceCards } from "@/components/ui/choice-cards";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { FilePickField } from "@/components/ui/file-pick-field";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { productionLocations } from "@/lib/i18n/fr/production-locations";
 import { uploadProductionFile } from "@/lib/production/files/upload";
 import { addLocationMedia } from "@/lib/production/locations/actions";
+
+const fr = { productionLocations };
 
 const t = fr.productionLocations.media;
 const HTTPS = /^https:\/\/\S+$/;

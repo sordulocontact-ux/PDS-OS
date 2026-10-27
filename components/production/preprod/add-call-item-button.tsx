@@ -2,10 +2,12 @@
 
 import { IconPlus } from "nucleo-sharp-essential";
 
-import { fr } from "@/lib/i18n/fr";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 
 import { CallItemForm } from "./call-item-form";
 import { DialogButton } from "@/components/ui/dialog-button";
+
+const fr = { productionPreprod };
 
 const t = fr.productionPreprod.call;
 

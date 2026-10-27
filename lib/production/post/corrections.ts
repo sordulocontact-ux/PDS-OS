@@ -2,7 +2,8 @@
 // grouped by the code, by category, from the feedback still to handle. No
 // model rewrites them: the text is the reviewers' own words. Client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { productionCorrections } from "@/lib/i18n/fr/production-corrections";
+import { productionPost } from "@/lib/i18n/fr/production-post";
 import {
   COMMENT_CATEGORIES,
   isPendingCorrection,
@@ -15,6 +16,8 @@ import type {
   PostVersion,
 } from "@/lib/production/post/types";
 import { formatDate } from "@/lib/release/format";
+
+const fr = { productionPost, productionCorrections };
 
 const t = fr.productionPost;
 

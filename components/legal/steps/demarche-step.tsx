@@ -12,9 +12,11 @@ import { loadInvoiceStates } from "@/lib/invoices/states";
 import { demarcheHistory } from "@/lib/legal/demarches/history";
 import { loadLegalHistory } from "@/lib/legal/history/queries";
 import { loadContactLinks } from "@/lib/portal/contact-links";
-import { fr } from "@/lib/i18n/fr";
+import { legalDemarches } from "@/lib/i18n/fr/legal-demarches";
 import { legalJourneyContext } from "@/lib/legal/journey-context";
 import { legalRefSlug, type LegalDemarcheKind } from "@/lib/ui/legal-steps";
+
+const fr = { legalDemarches };
 
 /**
  * One démarche of the plan as a step of the Juridique (proto « Projet

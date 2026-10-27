@@ -10,7 +10,9 @@ import { DeliverableLotForm } from "@/components/strategy/deliverable-lot-form";
 import { DeliverablesBulkBar } from "@/components/strategy/deliverables-bulk-bar";
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
-import { fr } from "@/lib/i18n/fr";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
+import { strategy } from "@/lib/i18n/fr/strategy";
+import { strategyDeliverables } from "@/lib/i18n/fr/strategy-deliverables";
 import {
   addDeliverable,
   removeDeliverable,
@@ -19,6 +21,8 @@ import {
 import { updateLever } from "@/lib/strategy/actions/levers";
 import { lotForLever } from "@/lib/strategy/deliverable-lots";
 import type { StrategyData } from "@/lib/strategy/queries";
+
+const fr = { dialogs, strategy, strategyDeliverables };
 
 /**
  * « Livrables engagés »: what the selected levers commit to produce, grouped

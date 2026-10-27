@@ -3,12 +3,14 @@
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { stepTools } from "@/lib/i18n/fr/step-tools";
 import { decideStepNote } from "@/lib/step-tools/actions";
 import type { StepNote } from "@/lib/step-tools/model";
 import { noteStatusTone } from "@/lib/ui/state-tones";
 import { formatDayMonth } from "@/lib/utils/instant";
 import { cn } from "@/lib/utils";
+
+const fr = { stepTools };
 
 const t = fr.stepTools;
 

@@ -11,7 +11,10 @@ import { formatDay } from "@/lib/assistant/facts";
 import { assignDesignResponsible } from "@/lib/design/actions/people";
 import type { DesignHolder } from "@/lib/design/people";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { conceptionIntents } from "@/lib/i18n/fr/conception-intents";
+import { roles } from "@/lib/i18n/fr/roles";
+
+const fr = { conceptionIntents, roles };
 
 /**
  * The responsible of the artistic direction or of a Fiche Livrable: who

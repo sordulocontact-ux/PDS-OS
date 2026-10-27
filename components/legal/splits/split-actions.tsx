@@ -5,7 +5,8 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { useShowLinks } from "@/components/ui/one-time-links";
-import { fr } from "@/lib/i18n/fr";
+import { legalDocuments } from "@/lib/i18n/fr/legal-documents";
+import { legalSplits } from "@/lib/i18n/fr/legal-splits";
 import { mailtoHref } from "@/lib/utils/mailto";
 import {
   newSplitLink,
@@ -13,6 +14,8 @@ import {
   proposeTitleSplit,
   type SplitLink,
 } from "@/lib/legal/splits/actions";
+
+const fr = { legalDocuments, legalSplits };
 
 /** The confirmation links of a split, shown once above the page (they
  * survive its refresh). */

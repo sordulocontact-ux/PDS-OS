@@ -4,8 +4,10 @@ import type { ReactNode } from "react";
 import { startChoiceClass } from "@/components/ui/start-choice-class";
 import { StartChoiceSubmit } from "@/components/ui/start-choice-submit";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { decisions } from "@/lib/i18n/fr/decisions";
 import { cn } from "@/lib/utils";
+
+const fr = { decisions };
 
 export type StartChoice = {
   value: string;

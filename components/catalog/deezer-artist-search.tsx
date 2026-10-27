@@ -8,7 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { parseDeezerLink } from "@/lib/catalog/deezer-link";
 import type { ArtistOption, DeezerArtistResult } from "@/lib/catalog/types";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
+
+const fr = { catalog };
 
 type Search =
   | { status: "idle" }

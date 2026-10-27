@@ -2,9 +2,11 @@ import { buttonVariants } from "@/components/ui/button";
 import { Rows } from "@/components/ui/rows";
 import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { strategyBriefOut } from "@/lib/i18n/fr/strategy-brief-out";
 import type { BriefOut } from "@/lib/strategy/brief-out";
 import { formatDay } from "@/lib/utils/day";
+
+const fr = { strategyBriefOut };
 
 const t = fr.strategyBriefOut.final;
 

@@ -1,10 +1,12 @@
 import { StepSection } from "@/components/shell/journey/step-section";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
-import { fr } from "@/lib/i18n/fr";
+import { legalClearance } from "@/lib/i18n/fr/legal-clearance";
 import { rightsOf } from "@/lib/legal/clearance/matrix";
 import { rightState } from "@/lib/legal/clearance/right-states";
 import type { Clearance } from "@/lib/legal/clearance/types";
 import { rightStateTone } from "@/lib/ui/state-tones";
+
+const fr = { legalClearance };
 
 /**
  * « La demande » then « Deux autorisations distinctes » (recette Juridique

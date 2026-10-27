@@ -9,8 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createTask } from "@/lib/framing/actions/points-tasks";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { projectWork } from "@/lib/i18n/fr/project-work";
 import { cn } from "@/lib/utils";
+
+const fr = { projectWork };
 
 const t = fr.projectWork.work.add;
 // The « none » choice of the deliverable menu (a Select value is never empty).

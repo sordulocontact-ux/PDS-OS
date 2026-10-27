@@ -19,9 +19,11 @@ import {
   checkEvidence,
   withdrawEvidence,
 } from "@/lib/activations/proof-actions";
-import { fr } from "@/lib/i18n/fr";
+import { activations } from "@/lib/i18n/fr/activations";
 
 import { ReasonForm } from "@/components/ui/reason-form";
+
+const fr = { activations };
 
 const t = fr.activations.evidence;
 

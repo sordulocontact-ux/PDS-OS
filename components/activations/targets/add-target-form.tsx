@@ -16,9 +16,12 @@ import { PRIORITIES, type Priority } from "@/lib/activations/model";
 import { addTarget, targetWarnings } from "@/lib/activations/target-actions";
 import type { TargetWarning } from "@/lib/activations/targets";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { activationWork } from "@/lib/i18n/fr/activation-work";
+import { activations } from "@/lib/i18n/fr/activations";
 import { listNetworkForRole } from "@/lib/network/role-people-actions";
 import type { RankedPerson } from "@/lib/network/ranked-people";
+
+const fr = { activations, activationWork };
 
 const t = fr.activationWork.targets;
 

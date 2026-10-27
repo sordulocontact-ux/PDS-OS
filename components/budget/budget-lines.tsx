@@ -17,7 +17,9 @@ import {
   type BudgetLine,
   type BudgetStatus,
 } from "@/lib/budget/types";
-import { fr } from "@/lib/i18n/fr";
+import { budget } from "@/lib/i18n/fr/budget";
+
+const fr = { budget };
 
 // The lines, filtered in place by status (tabs with their counts). The owner adds, edits and deletes; the
 // others read (the database refuses them anyway).

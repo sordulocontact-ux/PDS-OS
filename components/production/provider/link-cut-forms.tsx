@@ -6,7 +6,8 @@ import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { DecisionPanel } from "@/components/ui/decision-panel";
-import { fr } from "@/lib/i18n/fr";
+import { productionCut } from "@/lib/i18n/fr/production-cut";
+import { productionLight } from "@/lib/i18n/fr/production-light";
 import {
   decideCutByLink,
   setFinalByLink,
@@ -14,6 +15,8 @@ import {
 import { depositProviderVersion } from "@/lib/production/provider/public-actions";
 
 import { useLinkSubmit } from "./use-link-submit";
+
+const fr = { productionLight, productionCut };
 
 const t = fr.productionCut;
 const HTTPS = /^https:\/\/\S+$/;

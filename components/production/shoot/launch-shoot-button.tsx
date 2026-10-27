@@ -1,8 +1,10 @@
 "use client";
 
 import { ConfirmButton } from "@/components/ui/confirm-button";
-import { fr } from "@/lib/i18n/fr";
+import { productionShoot } from "@/lib/i18n/fr/production-shoot";
 import { startShoot } from "@/lib/production/shoot/shoot-actions";
+
+const fr = { productionShoot };
 
 const t = fr.productionShoot.launch;
 

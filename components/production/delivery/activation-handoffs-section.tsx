@@ -1,10 +1,12 @@
 import { PageSection } from "@/components/shell/page-section";
 import type { Access } from "@/lib/auth/access";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { productionDelivery } from "@/lib/i18n/fr/production-delivery";
 import { loadActivationHandoffs } from "@/lib/production/delivery/activation-queries";
 
 import { HandoffItem } from "./handoff-item";
+
+const fr = { productionDelivery };
 
 const t = fr.productionDelivery.activations;
 

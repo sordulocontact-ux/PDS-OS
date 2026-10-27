@@ -8,8 +8,11 @@ import { Button } from "@/components/ui/button";
 import { CheckboxField } from "@/components/ui/checkbox-field";
 import { ChoiceCards } from "@/components/ui/choice-cards";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
+import { productionPlace } from "@/lib/i18n/fr/production-place";
 import { replacePlace } from "@/lib/production/place-actions";
+
+const fr = { dialogs, productionPlace };
 
 const t = fr.productionPlace.replace;
 

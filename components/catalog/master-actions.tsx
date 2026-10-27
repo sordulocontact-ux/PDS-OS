@@ -3,7 +3,9 @@
 import { RecordActions } from "@/components/archive/record-actions";
 import { MasterEditForm } from "@/components/catalog/master-edit-form";
 import type { RecordRights } from "@/lib/archive/types";
-import { fr } from "@/lib/i18n/fr";
+import { records } from "@/lib/i18n/fr/records";
+
+const fr = { records };
 
 /** "⋯" of a master: edit it (credits included), archive, restore or delete it. */
 export function MasterActions({

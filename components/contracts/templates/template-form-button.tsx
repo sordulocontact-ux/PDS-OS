@@ -6,7 +6,9 @@ import { useState } from "react";
 import { TemplateForm } from "@/components/contracts/templates/template-form";
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
-import { fr } from "@/lib/i18n/fr";
+import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
+
+const fr = { legalContracts };
 
 /** « Nouveau modèle »: the form in the wide modal. */
 export function TemplateFormButton({

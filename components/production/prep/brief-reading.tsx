@@ -1,5 +1,7 @@
-import { fr } from "@/lib/i18n/fr";
+import { productionBrief } from "@/lib/i18n/fr/production-brief";
 import type { ProductionBrief } from "@/lib/production/brief";
+
+const fr = { productionBrief };
 
 const t = fr.productionBrief;
 

@@ -26,7 +26,9 @@ import {
   type MasterFormDefaults,
   type MasterOption,
 } from "@/lib/catalog/types";
-import { fr } from "@/lib/i18n/fr";
+import { catalog } from "@/lib/i18n/fr/catalog";
+
+const fr = { catalog };
 
 // Title form (a "master" in the code). Title and main artist are required;
 // everything else is optional but at hand, for a demo just out of the studio

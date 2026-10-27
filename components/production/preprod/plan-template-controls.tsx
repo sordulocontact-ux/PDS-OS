@@ -8,13 +8,16 @@ import { Button } from "@/components/ui/button";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { productionPost } from "@/lib/i18n/fr/production-post";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import {
   applyPlanReschedule,
   proposePlanActions,
 } from "@/lib/production/preprod/actions-plan-template";
 import type { Reschedule } from "@/lib/production/preprod/plan-template";
 import { formatShortDate } from "@/lib/release/format";
+
+const fr = { productionPreprod, productionPost };
 
 const t = fr.productionPreprod.plan.template;
 

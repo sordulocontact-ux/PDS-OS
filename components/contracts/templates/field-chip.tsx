@@ -1,5 +1,7 @@
-import { fr } from "@/lib/i18n/fr";
+import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
 import { bodySegments } from "@/lib/legal/contracts/template-text";
+
+const fr = { legalContracts };
 
 /** A field of a template shown as what it is (« Nom civil »), never as
  * {{personne.nom_civil}}. Shared by the editor, which builds its chips in

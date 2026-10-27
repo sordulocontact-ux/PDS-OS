@@ -16,8 +16,10 @@ import {
   type FileView,
   type FileWriteScope,
 } from "@/lib/catalog/file-rules";
-import { fr } from "@/lib/i18n/fr";
+import { catalogFiles } from "@/lib/i18n/fr/catalog-files";
 import { viewHref } from "@/lib/ui/view-href";
+
+const fr = { catalogFiles };
 
 /**
  * Files tab of an artist, a title, a project or a contract (feedback n°6): one library, and views

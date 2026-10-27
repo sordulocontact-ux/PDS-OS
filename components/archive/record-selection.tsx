@@ -14,7 +14,9 @@ import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { RowSelection, useRowSelection } from "@/components/ui/row-selection";
 import type { ArchiveKind } from "@/lib/archive/types";
-import { fr } from "@/lib/i18n/fr";
+import { records } from "@/lib/i18n/fr/records";
+
+const fr = { records };
 
 /**
  * Selection of a main list (artists, titles, projects, network): checkboxes

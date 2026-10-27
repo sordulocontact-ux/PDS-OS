@@ -6,8 +6,10 @@ import { toast } from "sonner";
 import { EditPanel } from "@/components/archive/edit-panel";
 import { RecordActions } from "@/components/archive/record-actions";
 import type { RecordRights } from "@/lib/archive/types";
-import { fr } from "@/lib/i18n/fr";
+import { records } from "@/lib/i18n/fr/records";
 import { loadProjectEdit } from "@/lib/projects/edit-form-actions";
+
+const fr = { records };
 
 const CreateProjectForm = dynamic(() =>
   import("@/components/projects/create-project-form").then(

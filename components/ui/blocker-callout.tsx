@@ -1,9 +1,11 @@
 import { buttonVariants } from "@/components/ui/button";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { ViewLink } from "@/components/ui/view-link";
-import { fr } from "@/lib/i18n/fr";
+import { journey } from "@/lib/i18n/fr/journey";
 import type { Blocker } from "@/lib/ui/journey";
 import { cn } from "@/lib/utils";
+
+const fr = { journey };
 
 /**
  * What stops an action (retour « Néons » 05): each reason on its line, with

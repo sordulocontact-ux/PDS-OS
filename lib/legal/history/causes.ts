@@ -5,8 +5,10 @@
 // makes the signatures of the version before it void: said on the
 // generation. Pure, client-safe.
 
-import { fr } from "@/lib/i18n/fr";
+import { legalHistory } from "@/lib/i18n/fr/legal-history";
 import type { LegalEvent } from "@/lib/legal/history/types";
+
+const fr = { legalHistory };
 
 // kind → the kinds it may follow, on the same object.
 const FOLLOWS: Record<string, string[]> = {

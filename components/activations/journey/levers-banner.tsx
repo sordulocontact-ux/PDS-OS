@@ -6,9 +6,12 @@ import { ViewLink } from "@/components/ui/view-link";
 import type { LeverBoard } from "@/lib/activations/levers";
 import { kindHasMode } from "@/lib/activations/model";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { activationJourney } from "@/lib/i18n/fr/activation-journey";
+import { activations } from "@/lib/i18n/fr/activations";
 
 import { LeverRowActions } from "./lever-row-actions";
+
+const fr = { activations, activationJourney };
 
 const t = fr.activationJourney.banner;
 

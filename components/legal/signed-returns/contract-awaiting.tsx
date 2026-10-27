@@ -8,8 +8,11 @@ import { Fold } from "@/components/ui/fold";
 import { NextCard } from "@/components/ui/next-card";
 import type { ContractProof } from "@/lib/contracts/proof";
 import { todayInParis } from "@/lib/contracts/types";
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
+import { signedReturns } from "@/lib/i18n/fr/signed-returns";
 import { formatShortDay } from "@/lib/utils/day";
+
+const fr = { legal, signedReturns };
 
 const t = fr.signedReturns.team;
 

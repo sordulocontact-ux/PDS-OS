@@ -7,8 +7,10 @@ import { CopyButton } from "@/components/ui/copy-button";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { ReasonForm } from "@/components/ui/reason-form";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { fr } from "@/lib/i18n/fr";
+import { legalForms } from "@/lib/i18n/fr/legal-forms";
 import type { WriteResult } from "@/lib/utils/write-result";
+
+const fr = { legalForms };
 
 const t = fr.legalForms.page;
 

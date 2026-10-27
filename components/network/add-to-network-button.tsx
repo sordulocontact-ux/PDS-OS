@@ -5,8 +5,11 @@ import { IconPlus } from "nucleo-sharp-essential";
 import { ContactForm } from "@/components/network/contact-form";
 import { LoadedFormButton } from "@/components/ui/loaded-form-button";
 import type { CreditContactAction } from "@/lib/facts/credit-contact";
-import { fr } from "@/lib/i18n/fr";
+import { facts } from "@/lib/i18n/fr/facts";
+import { network } from "@/lib/i18n/fr/network";
 import { loadContactOptions } from "@/lib/network/actions";
+
+const fr = { network, facts };
 
 /**
  * "Ajouter au Réseau" from a workflow page (Juridique, Master): the usual

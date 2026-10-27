@@ -2,7 +2,8 @@ import { CallFacts } from "@/components/calls/call-facts";
 import { DeliverForm } from "@/components/production/delivery/deliver-form";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { productionLight } from "@/lib/i18n/fr/production-light";
+import { productionProducer } from "@/lib/i18n/fr/production-producer";
 import { recipientOptions } from "@/lib/production/delivery/recipients";
 import type { LightFacts } from "@/lib/production/light/types";
 import type { ProductionSheetData } from "@/lib/production/sheet";
@@ -13,6 +14,8 @@ import { LightControlForm } from "./light-control-form";
 import { LightDecision } from "./light-decision";
 import { LightDepositForm } from "./light-deposit-form";
 import { LightVersions } from "./light-versions";
+
+const fr = { productionLight, productionProducer };
 
 const t = fr.productionLight;
 const SENT_BACK = ["changes_requested", "refused"];

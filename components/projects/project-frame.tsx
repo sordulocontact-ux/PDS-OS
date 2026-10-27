@@ -14,11 +14,13 @@ import { ProjectLive } from "@/components/projects/project-live";
 import { BackLink } from "@/components/shell/back-link";
 import type { Access } from "@/lib/auth/access";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { shell } from "@/lib/i18n/fr/shell";
 import { projectKindLabel } from "@/lib/projects/labels";
 import { canEditProject } from "@/lib/projects/edit-access";
 import type { getProject } from "@/lib/projects/queries";
 import { DOUBLE_SIDEBAR } from "@/lib/ui/project-sections";
+
+const fr = { shell };
 
 type Project = NonNullable<Awaited<ReturnType<typeof getProject>>>;
 

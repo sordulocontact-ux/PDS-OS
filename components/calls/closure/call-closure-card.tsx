@@ -23,7 +23,9 @@ import { formatDay } from "@/lib/assistant/facts";
 import { closeCall } from "@/lib/calls/closure-actions";
 import type { CallClosure, CallShare } from "@/lib/calls/closure-queries";
 import type { Member } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
+
+const fr = { calls };
 
 export type CallOutputs = {
   transcript: boolean;

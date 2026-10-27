@@ -9,9 +9,12 @@ import { CheckboxField } from "@/components/ui/checkbox-field";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { centsToInput } from "@/lib/budget/types";
-import { fr } from "@/lib/i18n/fr";
+import { productionLocations } from "@/lib/i18n/fr/production-locations";
+import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import { saveLocationOption } from "@/lib/production/locations/actions";
 import type { LocationOption } from "@/lib/production/locations/types";
+
+const fr = { productionPreprod, productionLocations };
 
 const t = fr.productionLocations;
 const HTTPS = /^https:\/\/\S+$/;

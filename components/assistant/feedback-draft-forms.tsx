@@ -8,7 +8,9 @@ import type {
   FeedbackTopicDraft,
 } from "@/lib/assistant/drafts";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { feedback } from "@/lib/i18n/fr/feedback";
+
+const fr = { feedback };
 
 type FormProps<D> = {
   draft: D;

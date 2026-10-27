@@ -1,7 +1,9 @@
 import type { ReactNode } from "react";
 
-import { fr } from "@/lib/i18n/fr";
+import { framingIntel } from "@/lib/i18n/fr/framing-intel";
 import { PLAN_COLUMNS, type PlanColumn } from "@/lib/plan/propose";
+
+const fr = { framingIntel };
 
 /**
  * The plan's four columns (proto frPlanView `.plan4`): Focus « Ce qui

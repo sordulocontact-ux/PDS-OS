@@ -5,7 +5,9 @@ import { toast } from "sonner";
 
 import { parisInstant, type CalendarEvent } from "@/lib/calls/calendar";
 import { rescheduleCall } from "@/lib/calls/reschedule-actions";
-import { fr } from "@/lib/i18n/fr";
+import { calls } from "@/lib/i18n/fr/calls";
+
+const fr = { calls };
 
 type Place = { day: string; start: number; end: number };
 

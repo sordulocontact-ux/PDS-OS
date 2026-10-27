@@ -15,11 +15,13 @@ import {
 } from "@/components/contracts/templates/editor-dom";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { fr } from "@/lib/i18n/fr";
+import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
 import {
   CONTRACT_FIELD_GROUPS,
   type ContractFieldId,
 } from "@/lib/legal/contracts/fields";
+
+const fr = { legalContracts };
 
 export type TemplateEditorHandle = {
   /** Every `excerpt` becomes the field; the chips are returned for undo. */

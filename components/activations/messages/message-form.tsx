@@ -16,7 +16,10 @@ import {
   type MessageChannel,
   type MessageKind,
 } from "@/lib/activations/model";
-import { fr } from "@/lib/i18n/fr";
+import { activationWork } from "@/lib/i18n/fr/activation-work";
+import { activations } from "@/lib/i18n/fr/activations";
+
+const fr = { activations, activationWork };
 
 const t = fr.activationWork.messages;
 

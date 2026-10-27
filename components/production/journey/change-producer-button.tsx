@@ -11,8 +11,11 @@ import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
+import { productionProducer } from "@/lib/i18n/fr/production-producer";
 import { changeProducer } from "@/lib/production/role-actions";
+
+const fr = { dialogs, productionProducer };
 
 const t = fr.productionProducer.change;
 

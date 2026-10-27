@@ -5,7 +5,7 @@ import { IconXmark } from "nucleo-sharp-essential";
 import { PersonPickerField } from "@/components/network/person-picker-field";
 import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
+import { legalSplits } from "@/lib/i18n/fr/legal-splits";
 import type { CreatorDraft } from "@/lib/legal/splits/draft";
 import type { SplitPersonOption } from "@/lib/legal/splits/party-actions";
 import {
@@ -13,6 +13,8 @@ import {
   isCreatorRole,
   type CreatorRole,
 } from "@/lib/legal/splits/shares";
+
+const fr = { legalSplits };
 
 /** The option a row starts on: its contact, else the credit it came from. */
 const refOf = (row: CreatorDraft) =>

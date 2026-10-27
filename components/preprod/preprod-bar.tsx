@@ -12,8 +12,10 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { fr } from "@/lib/i18n/fr";
+import { preprod } from "@/lib/i18n/fr/preprod";
 import { switchPreprodAccount } from "@/lib/preprod/actions";
+
+const fr = { preprod };
 
 const t = fr.preprod;
 

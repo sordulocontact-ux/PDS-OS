@@ -6,8 +6,10 @@ import {
   type FileOwner,
 } from "@/lib/catalog/file-rules";
 import type { AudioState } from "@/lib/catalog/title-rules";
-import { fr } from "@/lib/i18n/fr";
+import { catalogFiles } from "@/lib/i18n/fr/catalog-files";
 import { createClient } from "@/lib/supabase/client";
+
+const fr = { catalogFiles };
 
 /**
  * Browser-side: uploads the file straight to the owner's private bucket

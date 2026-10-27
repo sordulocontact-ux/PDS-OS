@@ -5,9 +5,11 @@ import type { KeyboardEvent, Ref } from "react";
 
 import { Avatar } from "@/components/ui/avatar";
 import type { PrepPerson } from "@/lib/calls/prep/types";
-import { fr } from "@/lib/i18n/fr";
+import { callPrep } from "@/lib/i18n/fr/call-prep";
 
 import type { NewWho } from "./use-attendee-search";
+
+const fr = { callPrep };
 
 const ROW =
   "flex min-h-11 w-full items-center gap-2.5 px-3 py-1.5 text-left text-body-md outline-none hover:bg-[var(--surface-soft)] focus-visible:bg-[var(--surface-soft)]";

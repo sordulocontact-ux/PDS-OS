@@ -7,9 +7,11 @@ import { buttonVariants } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDay } from "@/lib/assistant/facts";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
+import { transmission } from "@/lib/i18n/fr/transmission";
 import type { ProjectDetail } from "@/lib/projects/types";
 import { projectStatusTone } from "@/lib/ui/state-tones";
+
+const fr = { transmission };
 
 // Where a project stands before launch, and the one next action for the
 // viewer: the director transmits (again), the chosen manager answers.

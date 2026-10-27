@@ -7,13 +7,16 @@ import { PersonPickerField } from "@/components/network/person-picker-field";
 import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
 import { DialogButton } from "@/components/ui/dialog-button";
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
+import { legalForms } from "@/lib/i18n/fr/legal-forms";
 import {
   addLegalProjectContact,
   listLegalContactOptions,
   removeLegalProjectContact,
   type LegalContactOption,
 } from "@/lib/legal/project-contacts/actions";
+
+const fr = { legal, legalForms };
 
 /**
  * Adds a person of the Réseau to the legal file (a lawyer, a distributor,

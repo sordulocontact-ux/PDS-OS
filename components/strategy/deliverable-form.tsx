@@ -7,8 +7,11 @@ import { labelClass } from "@/components/ui/option-class";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { fr } from "@/lib/i18n/fr";
+import { strategy } from "@/lib/i18n/fr/strategy";
+import { strategyDeliverables } from "@/lib/i18n/fr/strategy-deliverables";
 import type { DeliverableInput } from "@/lib/strategy/actions/deliverables";
+
+const fr = { strategy, strategyDeliverables };
 
 // Select values cannot be empty: "none" stands for "no assignee".
 const NONE = "none";

@@ -14,13 +14,16 @@ import { WelcomeCard } from "@/components/home/welcome-card";
 import { CardGrid } from "@/components/ui/card-grid";
 import { JourneyCardsSkeleton } from "@/components/work/journey-actions-card";
 import { can, type Access } from "@/lib/auth/access";
-import { fr } from "@/lib/i18n/fr";
+import { shell } from "@/lib/i18n/fr/shell";
+import { transmission } from "@/lib/i18n/fr/transmission";
 import { loadWelcome } from "@/lib/home/welcome";
 import { loadRecentActivity } from "@/lib/insights/activity";
 import { loadReleasesOverview } from "@/lib/insights/releases";
 import { freeTasksOf, loadMyTodo } from "@/lib/insights/todo";
 import { handoverOf } from "@/lib/projects/handover";
 import { listProjects } from "@/lib/projects/queries";
+
+const fr = { shell, transmission };
 
 // The home page cards. Streamed behind a Suspense boundary: the greeting
 // and PO show before these queries answer.

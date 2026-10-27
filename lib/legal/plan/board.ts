@@ -9,7 +9,13 @@
 // the agreement, the split, the borrowing, the bulletin). Pure: the code
 // classifies, nothing here is stored.
 
-import { fr } from "@/lib/i18n/fr";
+import { legal } from "@/lib/i18n/fr/legal";
+import { legalClearance } from "@/lib/i18n/fr/legal-clearance";
+import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
+import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
+import { legalForms } from "@/lib/i18n/fr/legal-forms";
+import { legalSplits } from "@/lib/i18n/fr/legal-splits";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 import { formatDate } from "@/lib/release/format";
 import type { Clearance } from "@/lib/legal/clearance/types";
 import type { AgreementRow } from "@/lib/legal/contracts/mapping";
@@ -27,6 +33,16 @@ import {
 } from "@/lib/ui/state-tones";
 import { formatInstant } from "@/lib/utils/instant";
 import { ficheBadge } from "@/lib/legal/forms/state";
+
+const fr = {
+  legal,
+  legalClearance,
+  legalContracts,
+  legalFormalities,
+  legalForms,
+  legalSplits,
+  masterPage,
+};
 
 export type BoardGroup = TrackGroup | "done";
 

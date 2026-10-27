@@ -6,8 +6,10 @@ import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { reviewJourney } from "@/lib/i18n/fr/review-journey";
 import { liftReserve } from "@/lib/marketing/closure/reserve-actions";
+
+const fr = { reviewJourney };
 
 const t = fr.reviewJourney.reserves;
 

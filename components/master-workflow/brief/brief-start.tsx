@@ -5,8 +5,10 @@ import { useState } from "react";
 import { FormMessage } from "@/components/auth/form-message";
 import { StartChoices } from "@/components/ui/start-choices";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { fr } from "@/lib/i18n/fr";
+import { masterBrief } from "@/lib/i18n/fr/master-brief";
 import { startBrief } from "@/lib/master-workflow/brief-fact-actions";
+
+const fr = { masterBrief };
 
 const t = fr.masterBrief.start;
 

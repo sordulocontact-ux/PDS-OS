@@ -33,10 +33,15 @@ import { deleteCatalogFile } from "@/lib/catalog/file-actions";
 import type { MasterSession, WorkItem } from "@/lib/catalog/master/rules";
 import { deleteWorkLink } from "@/lib/catalog/master/session-actions";
 import { sessionLabel } from "@/lib/catalog/master/session-label";
-import { fr } from "@/lib/i18n/fr";
+import { catalogFiles } from "@/lib/i18n/fr/catalog-files";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
+import { masterPage } from "@/lib/i18n/fr/master-page";
+import { records } from "@/lib/i18n/fr/records";
 import { workStatusFileTone } from "@/lib/ui/state-tones";
 
 import { WorkFileForm } from "./work-file-form";
+
+const fr = { dialogs, catalogFiles, masterPage, records };
 
 type Editing = { mode: "file" | "link"; item: WorkItem | null };
 

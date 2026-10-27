@@ -5,7 +5,9 @@
 // Pure, client-safe.
 
 import type { ActivationKind } from "@/lib/activations/model";
-import { fr } from "@/lib/i18n/fr";
+import { activationJourney } from "@/lib/i18n/fr/activation-journey";
+
+const fr = { activationJourney };
 
 const t = fr.activationJourney.snapshot;
 

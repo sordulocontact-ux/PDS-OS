@@ -1,6 +1,8 @@
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { fr } from "@/lib/i18n/fr";
+import { productionPost } from "@/lib/i18n/fr/production-post";
 import type { ShootAlert as Alert } from "@/lib/production/post/types";
+
+const fr = { productionPost };
 
 const t = fr.productionPost.shoot;
 
