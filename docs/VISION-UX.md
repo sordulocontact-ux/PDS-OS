@@ -123,7 +123,12 @@ actions tirées des parcours (« Module › Étape », pour quand), **Validation
 sur les actions de type *valider* (le type de l'action, jamais le verbe de son libellé),
 **Activité** le journal horodaté de tous les gestes. *(Correction du 18/10/2026, proto « Projet
 complet » : Travail n'est plus « une carte par personne » ; qui on attend se lit dans
-« Maintenant » et la Vue d'ensemble.)*
+« Maintenant » et la Vue d'ensemble.)* Le **Travail global** s'ouvre sur son propre « Maintenant » (l'action
+la plus pressée, son pourquoi, qui valide, ce qu'elle débloque), puis range les autres **par
+échéance** (en retard, cette semaine, plus tard, sans échéance), sans jamais répéter la première.
+Le **Calendrier** montre les dates que PDS OS connaît déjà dans tous les projets (sorties, dates
+du master, tournages, temps forts, calls, étapes datées) ; on n'y saisit rien, chaque date
+s'ouvre là où elle se décide. *(Sacha 27/10/2026.)*
 
 **En-tête de module** (au-dessus de « Maintenant ») : fil d'Ariane « Projet › Module ›
 [sous-module ›] Étape », pilules des sous-modules (Marketing seul), titre du module, « Qui fait

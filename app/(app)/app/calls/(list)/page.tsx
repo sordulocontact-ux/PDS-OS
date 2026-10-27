@@ -4,7 +4,6 @@ import { unstable_rethrow } from "next/navigation";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { AllCallsTable } from "@/components/calls/all-calls-table";
-import { CalendarToolbar } from "@/components/calls/calendar/calendar-toolbar";
 import { CallsCalendar } from "@/components/calls/calendar/calls-calendar";
 import {
   MeetingComposerProvider,
@@ -14,19 +13,12 @@ import { EmptyState } from "@/components/shell/empty-state";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
 import { buttonVariants } from "@/components/ui/button";
+import { CalendarToolbar } from "@/components/ui/calendar-toolbar";
 import { DataTableViews } from "@/components/ui/data-table";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
-import {
-  asCalendarMode,
-  asDay,
-  parisPlace,
-  periodOf,
-  periodRange,
-  placeCalls,
-  type CalendarMode,
-} from "@/lib/calls/calendar";
+import { placeCalls } from "@/lib/calls/calendar";
 import {
   asCallView,
   callViewOf,
@@ -40,6 +32,14 @@ import { fr } from "@/lib/i18n/fr";
 import { googleMeetConfigured } from "@/lib/integrations/google-calendar";
 import { createClient } from "@/lib/supabase/server";
 import { viewHref } from "@/lib/ui/view-href";
+import {
+  asCalendarMode,
+  asDay,
+  parisPlace,
+  periodOf,
+  periodRange,
+  type CalendarMode,
+} from "@/lib/utils/calendar-period";
 import { allInOrder } from "@/lib/utils/parallel";
 
 export const metadata = { title: `${fr.calls.all.title} · ${fr.app.name}` };

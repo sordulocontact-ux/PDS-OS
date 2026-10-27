@@ -20,6 +20,7 @@ import { assistantRecords } from "./assistant-records";
 import { auth } from "./auth";
 import { briefRequests } from "./brief-requests";
 import { budget } from "./budget";
+import { calendar } from "./calendar";
 import { calls } from "./calls";
 import { callPrep } from "./call-prep";
 import { meeting } from "./meeting";
@@ -165,6 +166,7 @@ export const fr = {
   laboCaptures,
   auth,
   shell,
+  calendar,
   calls,
   callPrep,
   meeting,

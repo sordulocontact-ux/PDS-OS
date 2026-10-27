@@ -3,14 +3,14 @@ import { IconChevronLeft, IconChevronRight } from "nucleo-sharp-essential";
 import { buttonVariants } from "@/components/ui/button";
 import { ViewLink } from "@/components/ui/view-link";
 import { ViewToggle } from "@/components/ui/view-toggle";
+import { calendar } from "@/lib/i18n/fr/calendar";
 import {
   CALENDAR_MODES,
   type CalendarMode,
   type CalendarPeriod,
-} from "@/lib/calls/calendar";
-import { calls } from "@/lib/i18n/fr/calls";
+} from "@/lib/utils/calendar-period";
 
-const fr = { calls };
+const fr = { calendar };
 
 const utc = (day: string) => new Date(`${day}T00:00:00Z`);
 const rangeDate = new Intl.DateTimeFormat("fr-FR", {
@@ -35,8 +35,9 @@ export function periodLabel(period: CalendarPeriod): string {
 }
 
 /**
- * The calendar's bar, as in Teams: « Aujourd'hui », previous and next
- * period, what is shown, and the period (Semaine, Mois). Every choice is a link: the URL holds the view.
+ * A calendar's bar, as in Teams: « Aujourd'hui », previous and next
+ * period, what is shown, and the period (Semaine, Mois). Every choice is a
+ * link: the URL holds the view. The Calls and the Calendrier.
  */
 export function CalendarToolbar({
   period,
@@ -46,7 +47,7 @@ export function CalendarToolbar({
   // The calendar's URL for a mode and a date (null: today).
   hrefOf: (mode: CalendarMode, date: string | null) => string;
 }) {
-  const t = fr.calls.calendar;
+  const t = fr.calendar.period;
   return (
     <div className="flex flex-wrap items-center gap-2">
       <ViewLink

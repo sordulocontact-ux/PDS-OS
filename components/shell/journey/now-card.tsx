@@ -99,10 +99,7 @@ export function NowCard({
       ]
     : [viewerName];
   return (
-    <section
-      aria-label={t.label}
-      className="flex flex-col gap-3.5 rounded-2xl border border-[color:var(--border-default)] bg-card p-5 shadow-elevation-card"
-    >
+    <NowFrame label={t.label}>
       <div className="flex flex-wrap items-center gap-2 text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-secondary)]">
         <StatusBadge tone={badge.tone}>{badge.label}</StatusBadge>
         <span>{eyebrow.filter(Boolean).join(" · ")}</span>
@@ -169,6 +166,25 @@ export function NowCard({
       {!overview && waiting.length > 0 && (
         <WaitingRows items={waiting.slice(0, first ? 2 : 3)} />
       )}
+    </NowFrame>
+  );
+}
+
+/** The frame of « Maintenant », raised above the page (border, card
+ * shadow): NowCard in a module, the lead of the Travail. */
+export function NowFrame({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section
+      aria-label={label}
+      className="flex flex-col gap-3.5 rounded-2xl border border-[color:var(--border-default)] bg-card p-5 shadow-elevation-card"
+    >
+      {children}
     </section>
   );
 }

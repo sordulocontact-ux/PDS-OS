@@ -3,7 +3,8 @@
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
-import { parisInstant, type CalendarEvent } from "@/lib/calls/calendar";
+import type { CalendarEvent } from "@/lib/calls/calendar";
+import { parisInstant } from "@/lib/utils/calendar-period";
 import { rescheduleCall } from "@/lib/calls/reschedule-actions";
 import { calls } from "@/lib/i18n/fr/calls";
 

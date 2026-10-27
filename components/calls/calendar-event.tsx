@@ -5,6 +5,7 @@ import { callEndOf, formatTime } from "@/lib/calls/format";
 import { calls } from "@/lib/i18n/fr/calls";
 import { hueClass, projectHue } from "@/lib/ui/category-hues";
 import { cn } from "@/lib/utils";
+import { clock } from "@/lib/utils/calendar-period";
 
 const fr = { calls };
 
@@ -37,12 +38,6 @@ export function eventClass(event: CalendarEvent): string {
     "[@media(hover:hover)]:hover:shadow-elevation-1",
     !event.upcoming && "opacity-70",
   );
-}
-
-/** "14:30" from minutes of the day. */
-export function clock(minutes: number): string {
-  const m = Math.min(minutes, 24 * 60 - 1);
-  return `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
 }
 
 /**

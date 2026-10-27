@@ -9,7 +9,7 @@ import {
   textOrNull,
 } from "@/lib/activations/result";
 import { requireApproved } from "@/lib/auth/dal";
-import { parisInstant } from "@/lib/calls/calendar";
+import { parisInstant } from "@/lib/utils/calendar-period";
 import { fr } from "@/lib/i18n/fr";
 import { createClient } from "@/lib/supabase/server";
 import type { WriteResult } from "@/lib/utils/write-result";

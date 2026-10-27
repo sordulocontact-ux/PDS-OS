@@ -2235,15 +2235,27 @@ Ce qui attend la personne vient **des parcours de chaque projet** (`docs/VISION-
   fois (`settleWithLimit`, `lib/utils/parallel.ts`) : tous ensemble, des milliers de requêtes
   partaient d'un coup et la passerelle répondait « fetch failed ». Un projet en échec est
   écarté et dit (`error`), jamais lu « rien ».
-- **Travail global** : **un seul tableau** (`WorkList`, lignes de `lib/work/rows.ts`, onglets
-  Tout / À faire / À valider / En retard) : un projet à accepter d'abord, puis les actions des
-  parcours, chacune liée par `actionHref` (la section du geste, `#a-vous` ou la facture), décisions
-  marquées « À valider » (acteur `kind: "validate"`) ; puis À retransmettre / En attente d'un chef de projet
-  (`assign_projects`, `handoverOf`), propositions de PO des projets dont on est responsable,
-  et « Mes tâches » réduite aux **tâches libres** (rattachées à aucun workflow, `free` de
-  `loadMyTodo`) : les autres sont des étapes des parcours. Retirés : « Mes projets » et sa
+- **Travail global** (refonte du 27/10/2026, `docs/VISION-UX.md` § 2) : **« Maintenant »** en
+  tête (`WorkLead`, cadre `NowFrame` partagé avec `NowCard`) = l'action la plus pressée de la
+  personne avec ses cinq réponses (l'action, « Projet · Module › Étape · avant le … », le
+  **pourquoi** de l'étape, **Validation** et **Ensuite** lus dans le parcours par `nextOf`,
+  « Ouvrir » sur le geste) ; puis toutes les autres, **jamais elle-même répétée**, en
+  **groupes par échéance** (En retard, Cette semaine jusqu'au dimanche, Plus tard, Sans
+  échéance, En attente d'un autre), chacun dans une carte de lignes (`ContentCard` + `Rows` +
+  `LinkRow`, comme le Travail d'un projet). Onglets Tout / À faire / À valider (le retard est un
+  groupe, plus un onglet). Lignes et groupes calculés par le code (`workRowsOf(work, journeys,
+  today)`, `lib/work/rows.ts`) : un projet à accepter, les actions des parcours (liées par
+  `actionHref`, la section du geste), décisions marquées « À valider » (acteur `kind:
+  "validate"`) ; À retransmettre / En attente d'un chef de projet (`assign_projects`,
+  `handoverOf`), propositions de PO des projets dont on est responsable, et les **tâches libres**
+  (rattachées à aucun workflow, `free` de `loadMyTodo`). Une ligne sans étape derrière (projet à
+  accepter, tâche) dit son pourquoi par `work.lead.why`. Retirés : « Mes projets » et sa
   prochaine action, livrables à attribuer / à concevoir, conception, décisions de conception,
-  validations d'étape (`validations`) — tous doublaient les parcours.
+  validations d'étape (`validations`) — tous doublaient les parcours. En-tête : « Voir le
+  calendrier ».
+- `loadLaunchedJourneys` (`lib/work/journeys.ts`, `cache()`) lit une fois par requête les
+  parcours de tous les projets lancés ; `loadMyJourneyWork` (Travail, accueil, compteur) et le
+  Calendrier en partent.
 - **Accueil** : PO, bienvenue, cartes gardées (projets à accepter, projets en cours,
   activité, sorties, propositions de PO) ; « Validations qui m'attendent » (les décisions des
   parcours) et « À vous » (leurs autres actions, lien « Tout le travail ») remplacent « Mes
@@ -2260,6 +2272,35 @@ Ce qui attend la personne vient **des parcours de chaque projet** (`docs/VISION-
   relit tout (l'avant/après de `withOutcome` reste juste).
 - `lib/work/next-action.ts` ne sert plus qu'à `stageHref`. L'assistant (`my_todo`) lit encore
   `loadMyTodo` : à rebrancher sur les parcours (non fait ici).
+
+### Calendrier (`/app/calendar`, 27/10/2026)
+
+Les dates que PDS OS **connaît déjà**, dans tous les projets que la personne voit, en un
+calendrier : rien ne s'y saisit, **chaque date s'ouvre là où elle se décide** (règle 1 de
+`docs/VISION-UX.md` : une seule source). Lecture `loadCalendar(period, access)`
+(`lib/calendar/queries.ts`), session de l'utilisateur (RLS), bornée à la période :
+
+| Date | Source | S'ouvre sur |
+| --- | --- | --- |
+| Sortie (musique) ou Échéance du projet | `projects.due_date` (`listProjects`, archives exclues) | le projet |
+| Mix V1 / Mix final / Mastering / Master final attendu | `master_briefs` (les quatre colonnes) | Master › Brief |
+| Tournage · livrable | `production_schedule_decisions` en vigueur, sinon `production_sheets.shoot_date` | la Production du livrable |
+| Temps fort | `milestones` (Calendrier de lancement de la Stratégie) | Stratégie › Calendrier |
+| Call ou réunion (avec l'heure) | `listAllCalls(range)` | le call |
+| Étape ouverte datée | `step.due` des parcours (`loadLaunchedJourneys`, `mine` et `waiting`) : « Valider … » si c'est à soi, « Nadia Benali : valider … » sinon | `actionHref` |
+| Tâche libre datée | `freeTasksOf(loadMyTodo)` | la tâche |
+
+- Une date d'un projet absent de la liste (archivé) est écartée. Une source en échec est dite
+  (`error`), jamais lue « rien ».
+- **Mois** par défaut (`?mode=week` pour la semaine, `?date=AAAA-MM-JJ` pour se déplacer),
+  **Tout / À vous** (`?voir=mine` : ce qui demande un geste à la personne — ses étapes, ses
+  tâches, ses calls). Téléphone : agenda par jour. Tout est rendu côté serveur, des liens
+  (`ViewLink`), aucun JavaScript client.
+- Couleur = **le projet** (`projectHue`, la même que dans les Calls) ; la nature de la date est
+  dans son libellé (« Mix V1 attendu », « Sortie » en semi-gras). Point bleu = à vous, rouge = en
+  retard ; un jour passé est atténué.
+- Jours et périodes : `lib/utils/calendar-period.ts` (sorti de `lib/calls/calendar.ts`, partagé
+  avec les Calls), barre `CalendarToolbar` (`components/ui/`), textes `lib/i18n/fr/calendar.ts`.
 
 ---
 

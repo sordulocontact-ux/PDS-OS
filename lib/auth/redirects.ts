@@ -87,6 +87,8 @@ export const routes = {
   app: "/app",
   assistant: "/app/assistant",
   work: "/app/work",
+  // Every visible project's dates, one calendar (?mode=week&date=…&voir=mine).
+  calendar: "/app/calendar",
   calls: "/app/calls",
   // An internal meeting: a call without a project.
   meeting: (callId: string) => `/app/calls/${callId}`,

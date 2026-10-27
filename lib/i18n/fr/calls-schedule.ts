@@ -72,20 +72,7 @@ export const calendar = {
     list: "Liste",
     calendar: "Calendrier",
   },
-  modes: {
-    label: "Période",
-    week: "Semaine",
-    month: "Mois",
-  },
-  today: "Aujourd'hui",
-  previous: {
-    week: "Semaine précédente",
-    month: "Mois précédent",
-  },
-  next: {
-    week: "Semaine suivante",
-    month: "Mois suivant",
-  },
+  // Aujourd'hui, previous / next, Semaine | Mois: lib/i18n/fr/calendar.ts.
   empty: "Aucun call sur cette période.",
   dayEmpty: "Aucun call",
   now: "Maintenant",

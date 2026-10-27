@@ -289,9 +289,8 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   l'agrandissement 8/7 de l'échelle (§ 2).
 - Repliée par défaut sur une page d'un projet lancé, dépliée partout ailleurs ; le
   chevron l'inverse pour la visite en cours seulement, rien n'est mémorisé.
-- Un item sans page encore (Calendrier) reste
-  visible, grisé, non cliquable (`disabled` dans `NavItem`), jamais retiré de l'ordre
-  du Figma.
+- Un item sans page encore reste visible, grisé, non cliquable (`disabled` dans `NavItem`),
+  jamais retiré de l'ordre du Figma (le Calendrier l'a été jusqu'au 27/10/2026).
 - **Sidebar contextuelle d'un projet lancé** (`components/projects/project-sidebar.tsx`,
   Figma « PDS OS » nœud 47:12056) : 200 px (`--project-nav-width`), contre la barre
   principale repliée, même géométrie (`sticky`, pleine hauteur, filet `--nav-border` à
@@ -381,11 +380,28 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
 
 ### Page Travail
 
-- `PageHeader` puis la grille des cartes de l'accueil (`ListCard`, 1 / 2 / 3 colonnes),
-  toutes les lignes affichées, avec le nombre en `CountBadge` à côté du libellé.
-- « Mes projets » (chef de projet) occupe deux colonnes : la prochaine action se lit en
-  entier. Une carte vide garde sa place avec une phrase : la page d'un poste a toujours
-  la même structure.
+Refonte du 27/10/2026, d'après `docs/VISION-UX.md` § 2 (les cinq questions) :
+
+- `PageHeader` (« Voir le calendrier » en contour à droite), puis **« Maintenant »** : le cadre de
+  `NowCard` (`NowFrame`), l'action la plus pressée — « À vous » (+ « En retard », « À valider »),
+  « Projet · Module › Étape · avant le Sam. 05/12/2026 », l'action en titre, le pourquoi, une
+  ligne « Validation : … · Ensuite : … », le bouton plein « Ouvrir » (le geste, `actionHref`).
+  Rien à faire : « Rien à faire pour vous », et la Vue d'ensemble de chaque projet dit qui on
+  attend.
+- Dessous, onglets **Tout / À faire / À valider**, puis une carte par **échéance** (En retard,
+  Cette semaine, Plus tard, Sans échéance, En attente d'un autre), titre « En retard · 2 », des
+  `LinkRow` (action, « Projet · Lieu · avant le … », pastille si utile, chevron), le même dessin
+  que le Travail d'un projet. L'action de « Maintenant » n'y est jamais répétée.
+
+### Calendrier
+
+- Page de la barre principale (27/10/2026), plus un item grisé. `PageHeader` avec **Tout / À
+  vous** en pastilles, `CalendarToolbar` comme les Calls (Mois par défaut, Semaine), puis la
+  grille : filets `--border-hairline`, jours hors du mois sur `--surface-soft`, aujourd'hui en
+  rond d'encre. Une date = une pastille de la **teinte de son projet** (comme un call), 13 px,
+  heure en chiffres tabulaires, « Sortie » en semi-gras ; point `--selection` = à vous,
+  `--error` = en retard ; jour passé à 70 %. Téléphone : agenda par jour.
+
 - **Travail et Validations d'un projet** (décision C0 du 18/10/2026, proto « Projet
   complet ») : la liste de **mes** actions tirées des parcours (`loadProjectJourneys`, une
   seule source), une ligne par action (« Module › Étape », pour quand) ; Validations = les

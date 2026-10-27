@@ -20,9 +20,10 @@ const fr = { shell };
 
 // The 8 items of the main sidebar (Figma "Devis Sordulo", node 120:47 and
 // 120:74), plus the MVP's Réseau, Contrats and Fichiers, and "Retours": one
-// source, used full-width and icon-only. "Calendrier" has no
-// organization-wide page yet — kept visible, disabled, per docs/DESIGN.md
-// § 4. "Calls" lists the calls of every visible project and the meetings.
+// source, used full-width and icon-only. "Calendrier" gathers every visible
+// project's dates (27/10/2026). "Calls" lists the calls of every visible
+// project and the meetings. `disabled` keeps an item without a page visible,
+// greyed (docs/DESIGN.md § 4).
 export type NavItem = {
   href: string;
   label: string;
@@ -37,10 +38,9 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { href: routes.work, label: fr.shell.nav.work, icon: IconBriefcase },
   { href: routes.projects, label: fr.shell.nav.projects, icon: IconFolderOpen },
   {
-    href: "#",
+    href: routes.calendar,
     label: fr.shell.nav.calendar,
     icon: IconCalendarDays,
-    disabled: true,
   },
   { href: routes.calls, label: fr.shell.nav.calls, icon: IconPhone },
   { href: routes.artists, label: fr.shell.nav.artists, icon: IconMicrophone },

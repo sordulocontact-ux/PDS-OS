@@ -3,7 +3,6 @@
 import { useEffect, useRef } from "react";
 
 import {
-  clock,
   eventClass,
   eventLabel,
   EventContent,
@@ -15,6 +14,7 @@ import {
 import { dayEvents, type CalendarEvent } from "@/lib/calls/calendar";
 import { calls } from "@/lib/i18n/fr/calls";
 import { cn } from "@/lib/utils";
+import { clock } from "@/lib/utils/calendar-period";
 
 const fr = { calls };
 

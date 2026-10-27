@@ -4,11 +4,14 @@ export const work = {
   // Keyed by position: only the wording changes, the lists follow permissions.
   descriptions: {
     general_director:
-      "Ce qui attend votre décision, projet par projet, et les projets à transmettre.",
-    project_manager: "Ce qui vous attend, projet par projet.",
-    creative_director: "Ce qui vous attend, projet par projet.",
+      "Ce qui attend votre décision dans tous les projets, le plus pressé d'abord, et les projets à transmettre.",
+    project_manager:
+      "Ce qui vous attend dans tous vos projets, le plus pressé d'abord.",
+    creative_director:
+      "Ce qui vous attend dans tous vos projets, le plus pressé d'abord.",
   } as Record<string, string>,
-  descriptionFallback: "Ce qui vous attend, projet par projet.",
+  descriptionFallback:
+    "Ce qui vous attend dans tous vos projets, le plus pressé d'abord.",
   loadError: "Impossible de charger votre travail. Rechargez la page.",
 
   // The viewer's actions read from every project's journeys (docs/VISION-UX.md
@@ -28,21 +31,24 @@ export const work = {
       "Une partie de vos projets n'a pas pu être lue. Rechargez la page.",
   },
 
-  // The global Travail's table: every action in one list, tabs by kind.
+  // The global Travail: « Maintenant » (the lead), then every action grouped
+  // by when, tabs by kind.
   table: {
     views: {
       all: "Tout",
       todo: "À faire",
       validate: "À valider",
-      overdue: "En retard",
     },
     viewsLabel: "Filtrer le travail",
-    columns: {
-      action: "Action",
-      project: "Projet",
-      due: "Échéance",
-      state: "État",
+    groups: {
+      overdue: "En retard",
+      week: "Cette semaine",
+      later: "Plus tard",
+      undated: "Sans échéance",
+      others: "En attente d'un autre",
     },
+    // « En retard · 2 », read as one title.
+    groupTitle: (label: string, count: number) => `${label} · ${count}`,
     // Rows whose wording the page writes (no step, no task behind them).
     titles: {
       accept: "Accepter le projet",
@@ -55,15 +61,43 @@ export const work = {
       deliverable: "Livrable",
     },
     todo: "À faire",
-    noDue: "Sans échéance",
     emptyTitle: "Rien ne vous attend",
     emptyBody:
       "Les actions de vos projets apparaîtront ici dès qu'elles vous reviennent.",
     viewEmpty: {
-      all: "Rien ne vous attend pour l'instant.",
-      todo: "Rien à faire pour l'instant.",
+      all: "Rien d'autre ne vous attend.",
+      todo: "Rien d'autre à faire.",
       validate: "Aucune décision ne vous attend.",
-      overdue: "Rien n'est en retard.",
+    },
+  },
+
+  // The lead of the Travail (docs/VISION-UX.md § 2): what to do now, why,
+  // who validates, what follows.
+  lead: {
+    label: "Maintenant",
+    mine: "À vous",
+    nothing: "Rien à faire pour vous",
+    allDone: "Tout ce qui vous concerne est fait",
+    othersMove:
+      "Les autres avancent : la Vue d'ensemble de chaque projet dit qui est attendu.",
+    open: "Ouvrir",
+    due: (day: string) => `avant le ${day}`,
+    validator: "Validation",
+    then: "Ensuite",
+    calendar: "Voir le calendrier",
+    // Rows with no step behind them: the sentence the page says.
+    why: {
+      task: "Une tâche qui vous est confiée dans ce projet, en dehors des étapes de ses workflows.",
+      deliverable:
+        "Un livrable de la Conception vous est confié : déposez une version pour qu'elle soit relue.",
+      accept:
+        "Le projet vous est transmis : acceptez-le, demandez une précision ou refusez-le, en voyant tout ce qui a été saisi.",
+      retransmit:
+        "Le chef de projet a refusé le projet ou demandé une précision : répondez, puis transmettez-le à nouveau.",
+      awaiting:
+        "Le projet attend la réponse du chef de projet à qui il est transmis.",
+      proposals:
+        "PO a tiré des propositions d'un échange : confirmez, modifiez ou écartez chacune.",
     },
   },
 

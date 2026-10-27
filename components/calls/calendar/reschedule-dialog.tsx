@@ -7,12 +7,12 @@ import {
   CallSlotFields,
   type SlotErrors,
 } from "@/components/calls/call-slot-fields";
-import { clock } from "@/components/calls/calendar-event";
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
 import type { CalendarEvent } from "@/lib/calls/calendar";
 import { minutesOf, slotMinutes, type SlotInput } from "@/lib/calls/slot";
 import { calls } from "@/lib/i18n/fr/calls";
+import { clock } from "@/lib/utils/calendar-period";
 
 const fr = { calls };
 

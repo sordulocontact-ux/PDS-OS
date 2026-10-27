@@ -947,3 +947,23 @@ Migrations `20261027000101` à `…000401` appliquées en pré-prod, à pousser 
 Non fait : une RPC des états de tous les workflows (Master et Juridique y recopieraient les filtres
 de leurs pages : écarté au profit des lectures partagées) ; zod côté client (415 Ko).
 
+
+## Travail repensé et Calendrier (27/10/2026, branche `pre-prod`)
+
+Demande de Sacha : refaire la page Travail selon la vision UX et coder le Calendrier, grisé jusque-là.
+Aucune migration (lectures seules, RLS). Build passé ; vérifié en `pnpm start` sur la pré-prod
+(Lina Haddad, Claire Morel), desktop et 390 px, sans erreur JavaScript.
+
+- [x] Travail : « Maintenant » en tête (l'action la plus pressée, pourquoi, Validation, Ensuite,
+      « Ouvrir » sur le geste), puis les autres actions par échéance (En retard, Cette semaine, Plus
+      tard, Sans échéance, En attente d'un autre), onglets Tout / À faire / À valider ; le tableau et
+      l'onglet « En retard » disparaissent (`docs/ARCHITECTURE.md` § 8).
+- [x] Calendrier (`/app/calendar`) : sorties, dates du Brief Mix et Master, tournages, temps forts,
+      calls, étapes datées et tâches libres de tous les projets visibles ; Mois / Semaine, Tout / À
+      vous, agenda sur téléphone ; chaque date s'ouvre là où elle se décide (`docs/ARCHITECTURE.md`
+      § 8, « Calendrier »).
+- [x] Partagé avec les Calls : jours et périodes (`lib/utils/calendar-period.ts`), barre
+      `CalendarToolbar` (`components/ui/`), `loadLaunchedJourneys` (Travail, accueil, Calendrier).
+
+Reste : la pré-prod n'a encore ni Brief Mix, ni temps fort, ni tournage, ni étape datée ; à rejouer
+quand le jeu de données en aura (`supabase/preprod/seed.sql`).

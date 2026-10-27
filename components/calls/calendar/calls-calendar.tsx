@@ -3,14 +3,14 @@
 import { useState } from "react";
 
 import { AgendaList } from "@/components/calls/calendar/agenda-list";
-import { clock } from "@/components/calls/calendar-event";
 import { EventPeek } from "@/components/calls/calendar/event-peek";
 import { MonthGrid } from "@/components/calls/calendar/month-grid";
 import { RescheduleDialog } from "@/components/calls/calendar/reschedule-dialog";
 import { TimeGrid } from "@/components/calls/calendar/time-grid";
 import { useReschedule } from "@/components/calls/calendar/use-reschedule";
 import { useMeetingComposer } from "@/components/calls/new-meeting-button";
-import type { CalendarEvent, CalendarMode } from "@/lib/calls/calendar";
+import type { CalendarEvent } from "@/lib/calls/calendar";
+import { clock, type CalendarMode } from "@/lib/utils/calendar-period";
 import { calls } from "@/lib/i18n/fr/calls";
 
 const fr = { calls };

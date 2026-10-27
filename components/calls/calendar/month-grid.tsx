@@ -2,15 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import {
-  clock,
-  eventClass,
-  eventLabel,
-} from "@/components/calls/calendar-event";
+import { eventClass, eventLabel } from "@/components/calls/calendar-event";
 import { ViewLink } from "@/components/ui/view-link";
 import type { CalendarEvent } from "@/lib/calls/calendar";
 import { calls } from "@/lib/i18n/fr/calls";
 import { cn } from "@/lib/utils";
+import { clock } from "@/lib/utils/calendar-period";
 
 const fr = { calls };
 
