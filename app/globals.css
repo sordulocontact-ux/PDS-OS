@@ -665,6 +665,27 @@
 
   --ease-standard: cubic-bezier(0.2, 0, 0.2, 1);
   --ease-out: cubic-bezier(0, 0, 0.2, 1);
+
+  /* The bar of a pending navigation (components/ui/navigation-progress.tsx):
+     shown only past 150 ms, so a fast click never flashes it. */
+  --animate-nav-reveal: nav-reveal 150ms var(--ease-out) 150ms both;
+  --animate-nav-progress: nav-progress 1.1s linear infinite;
+  @keyframes nav-reveal {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes nav-progress {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(300%);
+    }
+  }
 }
 
 /* ==========================================================================

@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
+import { LinkPendingReporter } from "@/components/ui/navigation-progress";
+
 // How long the pointer rests on a link before its view is prepared: moving
 // across a column of links (the project's navigation, a list of cards)
 // must not render every page it passes over.
@@ -23,12 +25,15 @@ const REST_MS = 150;
 // « prefetchable » was rendered again in full after every write, Next
 // prefetching the visible links once its cache is emptied (audit, 27/10).
 // A finger's intent stays: its pointer leaves before the click.
+// A click before the view is ready shows the window's navigation bar
+// (components/ui/navigation-progress.tsx).
 export function ViewLink({
   onPointerEnter,
   onPointerLeave,
   onFocus,
   onBlur,
   onTouchStart,
+  children,
   ...props
 }: React.ComponentProps<typeof Link>) {
   const [intent, setIntent] = useState(false);
@@ -68,6 +73,9 @@ export function ViewLink({
         setIntent(true);
         onTouchStart?.(event);
       }}
-    />
+    >
+      {children}
+      <LinkPendingReporter />
+    </Link>
   );
 }

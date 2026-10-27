@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { navItemActiveClass, navItemClass } from "@/components/shell/nav-item";
 import { useWorkCount } from "@/components/shell/work-count";
 import { CountBadge } from "@/components/ui/count-badge";
+import { LinkPendingReporter } from "@/components/ui/navigation-progress";
 import {
   Tooltip,
   TooltipContent,
@@ -113,6 +114,7 @@ export function NavLinks({
                   }
                 />
               )}
+              <LinkPendingReporter />
             </Link>
           );
 
