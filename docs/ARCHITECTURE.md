@@ -782,6 +782,10 @@ s'afficher sans chargement.
   20 `ViewLink` et chacun rendait sa cible en fond (40 à 250 requêtes) : la base mettait en file la
   page réellement ouverte derrière ces rendus. Un survol laisse 100 à 300 ms d'avance au rendu ;
   ne pas revenir au préchargement à l'écran tant qu'une page coûte plus de quelques requêtes.
+  **Même règle pour un enregistrement ouvert depuis une liste** (audit du 27/10) : ligne de tableau
+  (`DataTableLink`), ligne de carte (`CardRow`), projets du sélecteur (`ProjectSwitcher`). Avant, un
+  `Link` simple préchargeait à l'écran toute fiche visible : afficher la liste Projets rendait trois
+  projets à la fois (158 requêtes et 5,7 s chacun, base saturée) ; après, 2 requêtes.
 - **Cache du routeur** (`next.config.ts`, `experimental.staleTimes`) : `dynamic: 30` (page
   revisitée en moins de 30 s), `static: 60` (vue préchargée, re-préchargée au survol une
   fois expirée). Jamais périmé après une écriture : tout `revalidatePath` d'une Server
@@ -810,7 +814,8 @@ s'afficher sans chargement.
   distingue pas pour l'app ; `action` = une Server Action et la page qu'elle rend à nouveau, une
   seule ligne par requête), nombre de
   lectures demandées (avant le regroupement de `withQueryBatching`) et combien sont distinctes
-  (même URL comptée une fois), durée de bout en bout,
+  (même URL comptée une fois), combien **partent réellement** vers la base (`sent`, après le
+  regroupement : `sentFetch`, `lib/supabase/batch.ts`), durée de bout en bout,
   **profondeur** (la plus longue chaîne de requêtes faites l'une après l'autre = les allers-retours
   attendus en série) et les 5 plus lentes. Cible d'une page : quelques requêtes, profondeur ≤ 3,
   moins de 200 ms. Juger en `pnpm build && pnpm start`.
@@ -894,7 +899,11 @@ s'afficher sans chargement.
   `count=exact`) se fusionne de même, chacun comptant ses lignes ; les lectures et RPC strictement
   identiques partent une fois. **10 requêtes en vol au plus** : une lecture qui attend son tour
   continue d'agréger la même lecture des autres projets (une base chargée fusionne plus au lieu
-  d'empiler). Une lecture avec `offset`, un `limit` > 1 000, une écriture, un `single()` partent
+  d'empiler). Une lecture identique **déjà répondue** dans le même périmètre est servie de sa réponse
+  (un périmètre est un seul moment de lecture, sans écriture dedans ; une réponse en erreur n'est pas
+  gardée). **Server Actions** (27/10) : `withOutcome` lit les parcours d'avant et d'après chacun dans
+  son périmètre, puisque `cache()` de React ne fait rien dans une action (le lancement du plan
+  demandait 829 lectures pour 271 distinctes). Une lecture avec `offset`, un `limit` > 1 000, une écriture, un `single()` partent
   tels quels ; une réponse fusionnée coupée (1 000 lignes) ou une ligne impossible à replacer →
   chaque lecture repart seule. Hors de ce périmètre, le `fetch` est inchangé. Les projets se lisent
   tous ensemble (40 au plus). Piège : une requête sans `order` (ou des égalités sur la colonne

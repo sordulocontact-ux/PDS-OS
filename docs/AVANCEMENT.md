@@ -902,3 +902,22 @@ Reste : passage dans un vrai navigateur ; pousser les quatre migrations en prod 
 formulaire d'une ligne de budget ne propose pas encore l'activation (colonne en base) ; paiements des
 créateurs hors du budget par activation ; envoi réel de l'accord quand le SMTP de PO sera branché ;
 `marketing-review.test.sql` échoue déjà avant ce lot (`multiple_validators` de la pré-prod).
+
+## Navigation instantanée, lot 1 (27/10/2026, branche `pre-prod`)
+
+Mesuré en `pnpm start` sur la base de pré-prod (`PERF_TRACE=1`), parcours rejoué par Sacha.
+
+- [x] Fiches ouvertes depuis une liste préparées à l'intention (`DataTableLink`, `CardRow`,
+      `ProjectSwitcher` passent par `ViewLink`) : liste Projets 3 rendus de 158 requêtes en fond → 2
+      requêtes.
+- [x] `withOutcome` lit avant / après sous `withQueryBatching`, qui garde aussi les réponses
+      identiques d'un même périmètre (`lib/supabase/batch.ts`).
+- [x] Trace : requêtes demandées **et** envoyées (`→ N sent`).
+- [x] `design-context` gardé par version du projet (`nameOf` ajouté après le cache) : il était
+      recalculé à chaque rendu (« not plain data »).
+
+Reste (mesuré, non traité) : chaque écriture d'un projet rerend son cadre à froid (110 à 230
+requêtes, 3 à 6 s par bouton du Cadrage) ; une première entrée dans un projet coûte ~158 requêtes,
+l'Accueil 890 demandées / 310 envoyées ; Realtime (`list_changes`) = un quart du temps SQL de la
+pré-prod.
+

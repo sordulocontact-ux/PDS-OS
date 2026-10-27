@@ -116,8 +116,11 @@ export function phaseOf(f: SheetFacts): SheetPhaseView {
  * créatif, the sheets and their phase, then the journey for the person
  * looking. Null when the project cannot be read or is not launched.
  */
-export const designJourneyContext = cache(
-  byProjectVersion("design-context", async (projectId: string) => {
+// Kept per project version: plain data only, so `nameOf` (a function) is
+// added below, on every read (byProjectVersion never keeps a function).
+const readDesignContext = byProjectVersion(
+  "design-context",
+  async (projectId: string) => {
     const [access, project] = await allInOrder([
       requireApproved(),
       getProject(projectId),
@@ -223,11 +226,19 @@ export const designJourneyContext = cache(
       isValidator: people.direction.validators.some((v) => v.personId === me),
       viewerName:
         personName(access.firstName ?? "", access.lastName ?? "") || null,
-      nameOf,
       steps,
     };
-  }),
+  },
 );
+
+export const designJourneyContext = cache(async (projectId: string) => {
+  const context = await readDesignContext(projectId);
+  if (!context) return null;
+  const { members } = context.people;
+  const nameOf = (id: string | null) =>
+    id ? (members.find((m) => m.personId === id)?.name ?? "") : "";
+  return { ...context, nameOf };
+});
 
 export type DesignJourneyContext = NonNullable<
   Awaited<ReturnType<typeof designJourneyContext>>
