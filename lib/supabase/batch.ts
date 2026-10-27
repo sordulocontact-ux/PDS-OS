@@ -9,6 +9,7 @@ import {
   mergePlan,
   rowsOf,
 } from "@/lib/supabase/batch-plan";
+import { sentFetch } from "@/lib/supabase/query-trace";
 
 // Read batching for the views that read every project at once (lib/work/
 // journeys.ts, docs/ARCHITECTURE.md § 3 bis). Each project runs the very
@@ -23,7 +24,10 @@ import {
 //   A count (`head`, `count=exact`) is merged the same way, each caller
 //   counting its own rows;
 // - the very same read (a list of contacts, `workflow_is_launched` for the
-//   same project) leaves once and its answer is shared.
+//   same project) leaves once and its answer is shared, also with whoever
+//   asks it again later in the scope (a scope is one moment of reading: no
+//   write runs inside it, so the answer still holds). This is what React's
+//   `cache` cannot do in a Server Action (lib/journey/outcome.ts).
 // At most MAX_IN_FLIGHT requests at once: what waits keeps merging.
 // Anything else (a write, a page of rows) leaves as it is. Off outside
 // withQueryBatching.
@@ -68,14 +72,42 @@ const counted = (n: number) =>
     headers: { "content-range": n === 0 ? "*/0" : `0-${n - 1}/${n}` },
   });
 
+// An answer kept for the rest of the scope.
+type Kept = { body: string; response: Response };
+
 class Batcher {
   private groups = new Map<string, Group>();
   private ready: string[] = [];
   private inFlight = 0;
+  // Reads already answered in this scope, by their exact request.
+  private answered = new Map<string, Promise<Kept>>();
 
   fetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
     const key = this.keyOf(input, init);
-    if (!key) return fetch(input, init);
+    if (!key) return sentFetch(input, init);
+    let kept = this.answered.get(key.exact);
+    if (!kept) {
+      kept = this.queue(input, init, key).then(async (response) => ({
+        body: await response.text(),
+        response,
+      }));
+      this.answered.set(key.exact, kept);
+      // A failed read is asked again by whoever needs it next.
+      kept.then(
+        ({ response }) => {
+          if (!response.ok) this.answered.delete(key.exact);
+        },
+        () => this.answered.delete(key.exact),
+      );
+    }
+    return kept.then(({ body, response }) => copyOf(body, response));
+  }
+
+  private queue(
+    input: RequestInfo | URL,
+    init: RequestInit | undefined,
+    key: { key: string; plan: MergePlan | null; count: boolean },
+  ): Promise<Response> {
     return new Promise<Response>((resolve, reject) => {
       const member: Member = {
         url: String(input),
@@ -127,11 +159,8 @@ class Batcher {
     const headers = new Headers(init?.headers);
     const headerKey = JSON.stringify([...headers.entries()].sort());
     const rpc = url.pathname.includes("/rest/v1/rpc/");
-    const share = {
-      key: JSON.stringify([url.href, method, init?.body, headerKey]),
-      plan: null,
-      count: false,
-    };
+    const exact = JSON.stringify([url.href, method, init?.body, headerKey]);
+    const share = { key: exact, exact, plan: null, count: false };
     if (method === "POST" && rpc) return share;
     if (!url.pathname.includes("/rest/v1/") || rpc) return null;
     const accept = headers.get("accept");
@@ -142,13 +171,13 @@ class Batcher {
       (count || ((!accept || accept === "application/json") && !prefer)) &&
       !headers.has("range");
     const plan = plain ? mergePlan(url, headerKey, count) : null;
-    return plan ? { key: plan.key, plan, count } : share;
+    return plan ? { key: plan.key, exact, plan, count } : share;
   }
 
   // Identical requests: one leaves, each caller gets its own copy.
   private async share(members: Member[]) {
     const [first] = members;
-    const response = await fetch(first.url, first.init);
+    const response = await sentFetch(first.url, first.init);
     if (members.length === 1) return first.resolve(response);
     const body = await response.text();
     for (const member of members) member.resolve(copyOf(body, response));
@@ -156,7 +185,7 @@ class Batcher {
 
   private async alone(members: Member[]) {
     await Promise.all(
-      members.map((m) => fetch(m.url, m.init).then(m.resolve, m.reject)),
+      members.map((m) => sentFetch(m.url, m.init).then(m.resolve, m.reject)),
     );
   }
 
@@ -183,7 +212,7 @@ class Batcher {
     );
     const headers = new Headers(members[0].init?.headers);
     headers.delete("prefer");
-    const response = await fetch(url, { method: "GET", headers });
+    const response = await sentFetch(url, { method: "GET", headers });
     const body = await response.text();
     if (!response.ok) {
       for (const member of members) member.resolve(copyOf(body, response));
@@ -219,5 +248,5 @@ export function withQueryBatching<T>(fn: () => Promise<T>): Promise<T> {
  * everywhere else. */
 export const batchingFetch: typeof fetch = (input, init) => {
   const batcher = scope.getStore();
-  return batcher ? batcher.fetch(input, init) : fetch(input, init);
+  return batcher ? batcher.fetch(input, init) : sentFetch(input, init);
 };

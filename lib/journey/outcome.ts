@@ -1,5 +1,6 @@
 import "server-only";
 
+import { withQueryBatching } from "@/lib/supabase/batch";
 import { actionHref, isLocked, OPEN_STATUSES } from "@/lib/ui/journey";
 import type {
   ResultNext,
@@ -94,10 +95,17 @@ export async function withOutcome(
   write: () => Promise<WriteResult>,
   { openNext = false }: { openNext?: boolean } = {},
 ): Promise<WriteResult> {
-  const before = await readProjectJourneys(projectId, modules);
+  // Each reading in its own batching scope (lib/supabase/batch.ts): React's
+  // `cache` does nothing in a Server Action, so the loaders' common reads
+  // (the project, the access, the people) left once per loader — 829
+  // requests, 271 distinct, to launch a plan (page loads audit, 27/10). Two
+  // scopes, so « after » never reuses an answer read before the write.
+  const read = () =>
+    withQueryBatching(() => readProjectJourneys(projectId, modules));
+  const before = await read();
   const result = await write();
   if (!result.ok) return result;
-  const after = await readProjectJourneys(projectId, modules);
+  const after = await read();
   const { open, ...outcome } = outcomeOf(before, after);
   return { ...result, done, ...outcome, ...(openNext && open && { open }) };
 }
