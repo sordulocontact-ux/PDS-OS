@@ -11,6 +11,7 @@ import {
   functionReads,
   inView,
   type LiveStamps,
+  providePageScope,
   requestsOf,
   type Tables,
   tablesOfDeps,
@@ -85,6 +86,27 @@ export const projectLive = cache(
     };
   },
 );
+
+// Whether React's `cache` holds here: in a render, not in a Server Action
+// (where the stamps would be read again for every read).
+const probe = cache(() => ({}));
+const rendering = () => probe() === probe();
+
+// A page's own reads of a project are kept with its stamps and its reader,
+// as a view's (lib/projects/request-cache.ts), while rendering.
+providePageScope(async (projectId) => {
+  if (!rendering()) return null;
+  const [access, now] = await Promise.all([
+    getAccess(),
+    projectLive(projectId),
+  ]);
+  if (!now || access.state !== "approved") return null;
+  return {
+    projectId,
+    now,
+    reader: JSON.stringify([todayInParis(new Date()), access]),
+  };
+});
 
 /** The project's version for the reader (see projectLive). */
 export async function projectVersion(

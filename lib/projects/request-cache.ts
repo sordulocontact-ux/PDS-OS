@@ -4,9 +4,11 @@ import {
   currentView,
   functionReads,
   type LiveStamps,
+  pageScopeOf,
   type Tables,
   tablesOfDeps,
   unchanged,
+  type ViewScope,
 } from "@/lib/projects/live-deps";
 
 // Answers kept per read (page loads audit of 28/10/2026, docs/
@@ -18,6 +20,13 @@ import {
 // is kept here with the tables it read, and served again to the same
 // reader, for the same project, while none of them changed in the project
 // (project_live.tables): only the reads of what changed reach the database.
+//
+// A read a page sends itself, outside any view, is kept the same way when
+// it is one project's (`project_id=eq.<project>`, the project's own row, a
+// function given `p_project_id`), checked with
+// that project's stamps as the page reads them (once per render, after
+// any write of a Server Action): a project's page visited again sends only
+// what changed.
 //
 // Kept: reads only, a table (and the tables its `select` embeds) or a
 // function the database says is read-only (STABLE, live_rpc_reads), never
@@ -92,10 +101,42 @@ function remember(key: string, entry: Entry) {
 }
 
 /** The server client's fetch, serving a view's reads from the kept answers. */
+const PROJECT_ID =
+  /^eq\.([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/;
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
+// The project a page's own read is about: `project_id=eq.<id>`, the project
+// itself (`projects?id=eq.<id>`) or a function's `p_project_id`.
+function projectOf(url: URL, body: string): string | null {
+  const filter =
+    url.searchParams.get("project_id") ??
+    (url.pathname.endsWith("/projects") ? url.searchParams.get("id") : null);
+  const id = filter?.match(PROJECT_ID)?.[1];
+  if (id) return id;
+  if (!url.pathname.includes("/rpc/") || !body) return null;
+  try {
+    const arg = (JSON.parse(body) as { p_project_id?: unknown }).p_project_id;
+    return typeof arg === "string" && UUID.test(arg) ? arg : null;
+  } catch {
+    return null;
+  }
+}
+
+// The scope a read is kept in: its view's, or the page's project's.
+async function scopeOf(url: URL, body: string): Promise<ViewScope | null> {
+  const view = currentView();
+  if (view) return view;
+  // The stamps themselves are never kept (they decide the rest).
+  if (url.pathname.endsWith("/project_live")) return null;
+  const project = projectOf(url, body);
+  return project ? pageScopeOf(project) : null;
+}
+
+/** The server client's fetch, serving a view's reads from the kept answers. */
 export function cachingFetch(next: typeof fetch): typeof fetch {
   return async (input, init) => {
-    const view = currentView();
-    if (!view || typeof input !== "string") return next(input, init);
+    if (typeof input !== "string") return next(input, init);
     const method = (init?.method ?? "GET").toUpperCase();
     let url: URL;
     try {
@@ -108,10 +149,12 @@ export function cachingFetch(next: typeof fetch): typeof fetch {
     if (!tables) return next(input, init);
     const body = typeof init?.body === "string" ? init.body : "";
     if (init?.body && !body) return next(input, init);
+    const scope = await scopeOf(url, body);
+    if (!scope) return next(input, init);
 
     const key = JSON.stringify([
-      view.reader,
-      view.projectId,
+      scope.reader,
+      scope.projectId,
       method,
       input,
       body,
@@ -123,11 +166,11 @@ export function cachingFetch(next: typeof fetch): typeof fetch {
     if (
       hit &&
       Date.now() - hit.at < TTL_MS &&
-      unchanged(hit.tables, hit.seen, view.now)
+      unchanged(hit.tables, hit.seen, scope.now)
     ) {
       const stored = await hit.answer;
       if (stored) {
-        if (view.now.version > hit.seen.version) hit.seen = view.now;
+        if (scope.now.version > hit.seen.version) hit.seen = scope.now;
         return answerOf(stored);
       }
     }
@@ -135,7 +178,7 @@ export function cachingFetch(next: typeof fetch): typeof fetch {
     const response = next(input, init);
     const entry: Entry = {
       at: Date.now(),
-      seen: view.now,
+      seen: scope.now,
       tables,
       answer: response.then(
         async (res) => {

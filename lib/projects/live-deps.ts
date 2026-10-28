@@ -177,3 +177,17 @@ export const currentView = () => views.getStore() ?? null;
 export function inView<T>(scope: ViewScope, run: () => T): T {
   return views.run(scope, run);
 }
+
+// The scope of a page's own read of a project (lib/projects/request-cache.ts),
+// given by lib/projects/version-cache.ts, which reads the stamps and the
+// reader (this file cannot: it is below the server's Supabase client).
+let pageScope: ((projectId: string) => Promise<ViewScope | null>) | null = null;
+
+export function providePageScope(
+  scope: (projectId: string) => Promise<ViewScope | null>,
+) {
+  pageScope = scope;
+}
+
+export const pageScopeOf = (projectId: string) =>
+  pageScope ? pageScope(projectId) : Promise.resolve(null);
