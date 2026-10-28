@@ -37,6 +37,7 @@ export async function readProjectJourneys(
         module: journey.module,
         place: placeOf(journey),
         part: journey.part?.key,
+        partLabel: journey.part?.label,
         step,
       })),
   );

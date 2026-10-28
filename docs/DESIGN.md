@@ -389,13 +389,16 @@ Refonte du 27/10/2026, d'après `docs/VISION-UX.md` § 2 (les cinq questions) :
   Rien à faire : « Rien à faire pour vous », et la Vue d'ensemble de chaque projet dit qui on
   attend.
 - Dessous, onglets **Tout / À faire / À valider**, puis **un tableau** (`DataTable`, Sacha 28/10 :
-  « comme Asana, Plane, GitLab ») : **Action** (lieu en dessous, « Master › Mixage »), **Projet**
-  (étiquette à la teinte du projet, `projectHue`, la même que dans les Calls et le Calendrier),
-  **Échéance** (jj/mm, rouge en retard), **Validation** (qui valide, dès 1280 px), **État** (À
+  « comme Asana, Plane, GitLab ») : **Action** (l'endroit dans le module en dessous, « Mixage »,
+  « Production › Pochette »), **Projet** (étiquette à la teinte du projet, `projectHue`, la même que
+  dans les Calls et le Calendrier), **Module** (étiquette Cadrage, Marketing, Master, Juridique,
+  Distribution à sa teinte fixe, `moduleHue`, dès 1024 px ; « — » pour une tâche libre ou un projet
+  à accepter ; un livrable est au Marketing), **Échéance** (jj/mm, rouge en retard), **Validation** (qui valide, dès 1280 px), **État** (À
   faire, À valider, n propositions, statut de transmission). Les lignes sont rangées sous des
   titres de groupe par **échéance** (En retard en rouge, Cette semaine, Plus tard, Sans échéance,
   En attente d'un autre), avec leur nombre et un chevron qui replie le groupe. Sur téléphone :
-  Action (projet et lieu en dessous) et État. L'action de « Maintenant » n'y est jamais répétée.
+  Action (projet, module et lieu en dessous) et État ; sous 1024 px, le module repasse sous
+  l'action. L'action de « Maintenant » n'y est jamais répétée.
 
 ### Calendrier
 

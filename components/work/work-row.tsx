@@ -1,12 +1,13 @@
 import { StatusBadge } from "@/components/ui/status-badge";
 import { assistant } from "@/lib/i18n/fr/assistant";
+import { shell } from "@/lib/i18n/fr/shell";
 import { transmission } from "@/lib/i18n/fr/transmission";
 import { work } from "@/lib/i18n/fr/work";
 import { myValidationTone, projectStatusTone } from "@/lib/ui/state-tones";
 import { formatDay } from "@/lib/utils/day";
 import type { WorkRow } from "@/lib/work/rows";
 
-const fr = { assistant, transmission, work };
+const fr = { assistant, shell, transmission, work };
 
 const t = fr.work.table;
 
@@ -15,7 +16,11 @@ export const titleOf = (row: WorkRow) =>
   row.title ??
   (row.kind in t.titles ? t.titles[row.kind as keyof typeof t.titles] : "");
 
-/** Where the action is: « Master › Mixage », an artist, « Tâche ». */
+/** Its workflow, as the project's sidebar names it: « Master ». */
+export const moduleOf = (row: WorkRow) =>
+  row.module ? fr.shell.project.sidebar[row.module] : null;
+
+/** Where in it: « Mixage », « Production › Pochette », an artist, « Tâche ». */
 export const placeOf = (row: WorkRow) =>
   row.place ??
   (row.kind === "task" || row.kind === "deliverable"
@@ -26,7 +31,7 @@ export const placeOf = (row: WorkRow) =>
 export function whereOf(row: WorkRow): string {
   return [
     row.projectTitle,
-    placeOf(row),
+    [moduleOf(row), placeOf(row)].filter(Boolean).join(" › "),
     row.due ? fr.work.lead.due(formatDay(row.due)) : null,
   ]
     .filter(Boolean)

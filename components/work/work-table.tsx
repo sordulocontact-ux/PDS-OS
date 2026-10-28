@@ -17,25 +17,26 @@ import {
 import { StatusBadge } from "@/components/ui/status-badge";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { work } from "@/lib/i18n/fr/work";
-import { projectHue } from "@/lib/ui/category-hues";
+import { moduleHue, projectHue } from "@/lib/ui/category-hues";
 import { workStatusTone } from "@/lib/ui/state-tones";
 import { cn } from "@/lib/utils";
 import { formatShortDay } from "@/lib/utils/day";
 import type { WorkGroup, WorkRow } from "@/lib/work/rows";
 
-import { placeOf, rowBadge, titleOf } from "./work-row";
+import { moduleOf, placeOf, rowBadge, titleOf } from "./work-row";
 
 const fr = { work };
 
 const t = fr.work.table;
 
 // Every column, hidden ones included: a group's title row spans them all.
-const COLUMNS = 5;
+const COLUMNS = 6;
 
 // On a phone the state keeps only its badge's width: the action needs the rest.
 const STATE_COLUMN = "w-px whitespace-nowrap sm:w-48";
-// A date and a tag need less than the 192 px of a column.
+// A date and a module's tag need less than the 192 px of a column.
 const DUE_COLUMN = "w-28";
+const MODULE_COLUMN = "w-36";
 
 /** What the row asks: a decision, PO's proposals, a project's handover
  * status, else a gesture to do. */
@@ -91,19 +92,23 @@ function GroupRow({
 }
 
 function ActionRow({ row }: { row: WorkRow }) {
+  const moduleLabel = moduleOf(row);
   const place = placeOf(row);
+  const where = [moduleLabel, place].filter(Boolean).join(" › ");
   return (
     <DataTableRow>
       <DataTableCell fill className="max-w-0">
         <DataTableMedia
           title={<DataTableLink href={row.href}>{titleOf(row)}</DataTableLink>}
           subtitle={
-            // The project shows here once its column is hidden.
+            // The project and the module show here once their column is
+            // hidden.
             <>
               <span className="md:hidden">
-                {[row.projectTitle, place].filter(Boolean).join(" · ")}
+                {[row.projectTitle, where].filter(Boolean).join(" · ")}
               </span>
-              {place && <span className="hidden md:inline">{place}</span>}
+              <span className="hidden md:inline lg:hidden">{where}</span>
+              {place && <span className="hidden lg:inline">{place}</span>}
             </>
           }
         />
@@ -116,6 +121,21 @@ function ActionRow({ row }: { row: WorkRow }) {
         >
           <span className="truncate">{row.projectTitle}</span>
         </StatusBadge>
+      </DataTableCell>
+      <DataTableCell
+        hideBelow="lg"
+        className={cn(
+          MODULE_COLUMN,
+          !row.module && "text-[color:var(--text-tertiary)]",
+        )}
+      >
+        {row.module ? (
+          <StatusBadge tone={moduleHue[row.module]} size="sm">
+            {moduleLabel}
+          </StatusBadge>
+        ) : (
+          EMPTY_CELL
+        )}
       </DataTableCell>
       <DataTableCell
         hideBelow="sm"
@@ -144,8 +164,9 @@ function ActionRow({ row }: { row: WorkRow }) {
 
 /**
  * The global Travail as one table (Asana « My tasks », Plane, GitLab): the
- * action and where it is, its project's tag, its due date, who validates,
- * what it asks; its rows under the groups by when, each foldable.
+ * action and where it is, its project's tag, its module's tag (Master,
+ * Juridique…), its due date, who validates, what it asks; its rows under the
+ * groups by when, each foldable.
  */
 export function WorkTable({
   groups,
@@ -165,6 +186,9 @@ export function WorkTable({
       <DataTableHeader>
         <DataTableHead fill>{t.columns.action}</DataTableHead>
         <DataTableHead hideBelow="md">{t.columns.project}</DataTableHead>
+        <DataTableHead hideBelow="lg" className={MODULE_COLUMN}>
+          {t.columns.module}
+        </DataTableHead>
         <DataTableHead hideBelow="sm" className={DUE_COLUMN}>
           {t.columns.due}
         </DataTableHead>

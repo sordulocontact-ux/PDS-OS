@@ -34,6 +34,8 @@ export type ProjectAction = {
   place: string;
   // The journey's part key (« strategy », « production:<id> »), if any.
   part?: string;
+  // Its label, « Production › Pochette »: the place without the module.
+  partLabel?: string;
   step: JourneyStep;
 };
 

@@ -3,6 +3,7 @@
  * in a table (the stage a project is at, its type). A hue carries no state,
  * unlike a tone (lib/ui/state-tones.ts); the label always carries the meaning.
  */
+import type { JourneyModuleKey } from "@/lib/journey/types";
 import type { ProjectType } from "@/lib/projects/types";
 
 export type Hue =
@@ -35,6 +36,16 @@ export const projectTypeHue: Record<ProjectType, Hue> = {
   music_release: "violet",
   content: "lime",
   event: "sand",
+};
+
+/** One hue per workflow (the Travail's « Module » tag), close to its stage's
+ * hue: the Cadrage sky, the Marketing pink, the Distribution teal. */
+export const moduleHue: Record<JourneyModuleKey, Hue> = {
+  framing: "sky",
+  marketing: "pink",
+  master: "indigo",
+  legal: "sand",
+  distribution: "teal",
 };
 
 /** A project's titles in its order (Juridique): the same title keeps the same

@@ -50,6 +50,7 @@ export const work = {
     columns: {
       action: "Action",
       project: "Projet",
+      module: "Module",
       due: "Échéance",
       validator: "Validation",
       state: "État",

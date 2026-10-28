@@ -7,6 +7,7 @@ import {
   withModule,
   type JourneyStep,
 } from "@/lib/ui/journey";
+import type { JourneyModuleKey } from "@/lib/journey/types";
 import { addDays, weekStartOf } from "@/lib/utils/calendar-period";
 import type { MyJourneyWork } from "@/lib/work/journeys";
 import type { MyWork } from "@/lib/work/queries";
@@ -52,7 +53,9 @@ export type WorkRow = {
   // The action's wording, when the code already wrote it (a journey's step,
   // a task); else the page words it from `kind`.
   title: string | null;
-  // « Master › Mixage », an artist's name.
+  // Its workflow (the « Module » tag), when it has one.
+  module: JourneyModuleKey | null;
+  // Where in it, « Production › Pochette › Valider », or an artist's name.
   place: string | null;
   // Its project: the hue of its tag in the table (lib/ui/category-hues.ts).
   projectId: string;
@@ -140,7 +143,8 @@ export function workRowsOf(
         // The gesture's own section when the step shows it first.
         href: actionHref(a.step),
         title: a.step.actor?.todo ?? a.step.title,
-        place: `${a.place} › ${a.step.title}`,
+        module: a.module,
+        place: [a.partLabel, a.step.title].filter(Boolean).join(" › "),
         projectId: project.projectId,
         projectTitle: project.projectTitle,
         due: a.step.due ?? null,
@@ -155,6 +159,8 @@ export function workRowsOf(
       kind: task.kind,
       href: task.href,
       title: task.title,
+      // A deliverable is the Marketing's (its Conception).
+      module: task.kind === "deliverable" ? "marketing" : null,
       place: null,
       projectId: task.projectId,
       projectTitle: task.projectTitle,
@@ -176,6 +182,7 @@ export function workRowsOf(
         kind,
         href: routes.project(p.id),
         title: null,
+        module: null,
         place: p.artistName || null,
         projectId: p.id,
         projectTitle: p.title,
@@ -192,6 +199,7 @@ export function workRowsOf(
       kind: "proposals",
       href: p.href,
       title: null,
+      module: null,
       place: null,
       projectId: p.projectId,
       projectTitle: p.projectTitle,
