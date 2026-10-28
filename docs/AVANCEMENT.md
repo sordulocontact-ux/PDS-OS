@@ -1010,6 +1010,10 @@ prévu, à tous les modules qui en ont un (Stratégie, Conception, Production) :
   (7/7 en pré-prod), annulation de l'événement Google.
 - La grille Exécute / Coordonne / Valide / Prérequis / Ensuite reste (choix de Sacha).
 
-Reste : passage navigateur ; « Annuler l'échange » pour l'échange stratégique et créatif si on le veut ;
+- Puis (même jour) : « Enregistrer l'échange » enregistre directement dans la carte (choix de l'onglet
+  du Meet au clic), et la transcription et le compte rendu s'y lancent ; plus besoin de la page du call.
+
+Reste : passage navigateur ; l'enregistrement dans la carte pour la Stratégie, la Conception et la
+Production ; « Annuler l'échange » pour l'échange stratégique et créatif si on le veut ;
 prévenir dans l'app les participants d'un échange annulé (aujourd'hui seul Google les prévient, quand il
 est branché).

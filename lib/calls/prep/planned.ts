@@ -1,6 +1,9 @@
 import "server-only";
 
+import { asCallStatus, type CallStatus } from "@/lib/calls/constants";
 import type { PrepPerson } from "@/lib/calls/prep/types";
+import type { SavedTake } from "@/lib/calls/recording";
+import { loadCallRecording } from "@/lib/calls/recording-queries";
 import { fr } from "@/lib/i18n/fr";
 import { personName } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
@@ -97,5 +100,41 @@ export async function loadPlannedCall(
     people,
     agenda: topicsOf(data.agenda),
     held: Boolean(data.audio_path) || data.status !== "draft",
+  };
+}
+
+/** What a step's card needs to record the call and process it in place. */
+export type CallInPlace = {
+  organizationId: string;
+  status: CallStatus;
+  errorCode: string | null;
+  hasTranscript: boolean;
+  // Saved while recording and not sent yet: a reload finds them again.
+  takes: SavedTake[];
+};
+
+/**
+ * The call's recording and processing state, for a step that records it
+ * without opening the call's page (Cadrage, Sacha 28/10/2026). Read with
+ * the user's session (RLS).
+ */
+export async function loadCallInPlace(
+  callId: string,
+): Promise<CallInPlace | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("calls")
+    .select("organization_id, status, error_code, audio_path, transcripts(id)")
+    .eq("id", callId)
+    .maybeSingle();
+  if (error) console.error("[calls] call in place:", error.message);
+  if (!data) return null;
+  const recording = await loadCallRecording(supabase, callId, data.audio_path);
+  return {
+    organizationId: data.organization_id,
+    status: asCallStatus(data.status),
+    errorCode: data.error_code,
+    hasTranscript: data.transcripts.length > 0,
+    takes: recording.takes,
   };
 }

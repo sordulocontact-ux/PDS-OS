@@ -138,9 +138,6 @@ export const framingJourney = {
     choseCall: "Préparer un échange",
     chosenBy: (name: string) => `· choisi par ${name}`,
     change: "Changer",
-    openCall: "Ouvrir le call",
-    processing:
-      "L'échange est enregistré : la transcription puis le compte rendu se font sur la page du call. PO propose ensuite ce qui a été dit dans « Les 6 dimensions ».",
     meetingName: "Échange de cadrage",
     summaryNext: "Le Brief de cadrage part en validation",
   },

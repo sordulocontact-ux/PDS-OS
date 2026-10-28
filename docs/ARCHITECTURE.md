@@ -1061,6 +1061,13 @@ s'afficher sans chargement.
   l'état toutes les 5 s si un traitement tourne ailleurs) → redirection vers la relecture
   de l'échange dans le Cadrage (`?step=review&call=…`, § 6).
   Consentement **accordé par contrat** (défaut `granted`, `…260926002301`) : plus d'écran.
+- **Enregistrer sans ouvrir la page du call** (Cadrage, Sacha 28/10/2026) : dans la carte
+  « Échange de cadrage », « Enregistrer l'échange » est l'enregistreur lui-même (`ExchangeInPlace`,
+  `CallRecorder compact`) : au clic, Chrome demande l'onglet du Meet (le clic est le geste
+  utilisateur qu'exige `getDisplayMedia`), l'enregistrement se fait dans la carte, puis
+  `CallProcessing` y lance transcription et compte rendu et ouvre « Les 6 dimensions ». Les
+  autres modules mènent encore à la page du call (`#call-recording`). Garder l'onglet PDS OS
+  ouvert : quitter la page arrête l'enregistrement (ce qui est sauvé reste repris).
 - **Enregistreur dans l'app** (`components/calls/call-recorder.tsx`, `use-recorder.ts`,
   `recorder-media.ts`, `recording-live.tsx`, `recording-review.tsx`) :
   - source « onglet » (Meet, Zoom… + micro mixés) ou « micro seul » ;

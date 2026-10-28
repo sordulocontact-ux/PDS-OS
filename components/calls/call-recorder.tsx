@@ -8,21 +8,19 @@ import {
 } from "react";
 import { toast } from "sonner";
 
-import { ChoiceCards } from "@/components/ui/choice-cards";
 import {
   isRecordingSupported,
   type RecorderSource,
 } from "@/components/calls/recorder-media";
+import { RecorderStart } from "@/components/calls/recorder-start";
 import { RecordingLive } from "@/components/calls/recording-live";
 import { RecordingRecovery } from "@/components/calls/recording-recovery";
 import { RecordingReview } from "@/components/calls/recording-review";
 import { useMicDiagnosis } from "@/components/calls/use-mic-diagnosis";
 import { useRecorder } from "@/components/calls/use-recorder";
 import { useRecordingSaver } from "@/components/calls/use-recording-saver";
-import { ToneCallout } from "@/components/ui/tone-callout";
 import { useAudioMeter } from "@/components/ui/use-audio-meter";
 import { useCanEditProject } from "@/components/projects/edit-access";
-import { Button } from "@/components/ui/button";
 import type { CallErrorCode } from "@/lib/calls/constants";
 import { savedMs, type SavedTake } from "@/lib/calls/recording";
 import { discardRecording, sendRecording } from "@/lib/calls/recording-actions";
@@ -44,6 +42,7 @@ export function CallRecorder({
   saved,
   videoCall = false,
   alternative,
+  compact,
 }: {
   callId: string;
   organizationId: string;
@@ -54,6 +53,10 @@ export function CallRecorder({
   videoCall?: boolean;
   /** The file picker: shown only when nothing is being recorded. */
   alternative?: ReactNode;
+  // In a step's card (Cadrage, Sacha 28/10): one button that starts at once
+  // (« Enregistrer l'échange »), a gesture of the module beside it, and the
+  // how-to in one line under them.
+  compact?: { label: string; beside?: ReactNode };
 }) {
   const t = fr.calls.recorder;
   const canEdit = useCanEditProject();
@@ -159,47 +162,20 @@ export function CallRecorder({
   return (
     <div className="grid gap-4">
       {(rec.status === "idle" || rec.status === "requesting") && (
-        <>
-          {videoCall && tabSupported ? (
-            <p className="text-sm text-muted-foreground">
-              {t.sources.tab.hint}
-            </p>
-          ) : (
-            <ChoiceCards
-              name="recorder-source"
-              legend={t.sourceLabel}
-              value={source}
-              onChange={setChosen}
-              disabled={rec.status === "requesting"}
-              choices={[
-                {
-                  value: "tab",
-                  label: t.sources.tab.label,
-                  hint: tabSupported ? t.sources.tab.hint : t.tabUnavailable,
-                  disabled: !tabSupported,
-                },
-                {
-                  value: "mic",
-                  label: t.sources.mic.label,
-                  hint: t.sources.mic.hint,
-                },
-              ]}
-            />
-          )}
-          <p className="text-sm text-muted-foreground">{t.reminder}</p>
-          {problemText && (
-            <ToneCallout tone={rec.error ? "danger" : "warning"} role="alert">
-              {problemText}
-            </ToneCallout>
-          )}
-          <Button
-            onClick={() => void rec.start(source)}
-            disabled={rec.status === "requesting"}
-            className="justify-self-start"
-          >
-            {rec.status === "requesting" ? t.starting : t.start}
-          </Button>
-        </>
+        <RecorderStart
+          source={source}
+          onSourceChange={setChosen}
+          tabSupported={tabSupported}
+          videoCall={videoCall}
+          starting={rec.status === "requesting"}
+          problem={
+            problemText
+              ? { text: problemText, tone: rec.error ? "danger" : "warning" }
+              : null
+          }
+          onStart={() => void rec.start(source)}
+          compact={compact}
+        />
       )}
       {live && (
         <RecordingLive
