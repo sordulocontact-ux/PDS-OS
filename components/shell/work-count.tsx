@@ -3,19 +3,16 @@
 import { useEffect, useSyncExternalStore } from "react";
 
 // The viewer's « À vous » count on « Travail » in the main navigation (proto
-// « Projet complet », `.navbtn .cnt`). Inside a project: that project's
-// actions, reported by its layout. Outside: the sum over every project
+// « Projet complet », `.navbtn .cnt`): the sum over every project
 // (lib/work/journeys.ts), reported project by project by the home and the
 // Travail (which read them anyway), then kept up to date by each project
 // visited. Nothing is stored; before the home or the Travail has been seen,
-// no count shows outside a project.
+// no count shows.
 type Counts = {
-  // The project open (null outside, or before its journeys are read).
-  project: number | null;
   // Every project's count, once the home or the Travail reported them.
   byProject: Record<string, number> | null;
 };
-let counts: Counts = { project: null, byProject: null };
+let counts: Counts = { byProject: null };
 const listeners = new Set<() => void>();
 
 function set(next: Partial<Counts>) {
@@ -30,20 +27,20 @@ function subscribe(listener: () => void) {
   };
 }
 
-const NULL_COUNTS: Counts = { project: null, byProject: null };
+const NULL_COUNTS: Counts = { byProject: null };
 
-/** The count to show: the project's inside one, the sum outside. */
-export function useWorkCount(inProject: boolean): number {
+/** The count to show: the sum over every project. */
+export function useWorkCount(): number {
   const current = useSyncExternalStore(
     subscribe,
     () => counts,
     () => NULL_COUNTS,
   );
-  if (inProject) return current.project ?? 0;
   return Object.values(current.byProject ?? {}).reduce((a, b) => a + b, 0);
 }
 
-/** Rendered by the project's layout once its journeys are read. */
+/** Rendered by the project's layout once its journeys are read: keeps its
+ * share of the sum up to date. */
 export function WorkCountReporter({
   projectId,
   count,
@@ -53,13 +50,11 @@ export function WorkCountReporter({
 }) {
   useEffect(() => {
     set({
-      project: count,
       byProject: counts.byProject && {
         ...counts.byProject,
         [projectId]: count,
       },
     });
-    return () => set({ project: null });
   }, [projectId, count]);
   return null;
 }

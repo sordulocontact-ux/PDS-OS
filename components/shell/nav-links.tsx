@@ -31,14 +31,10 @@ function isActive(pathname: string, href: string, exact: boolean): boolean {
 // Hiding "Équipe" is comfort only: the page itself requires an admin.
 // Access requests waiting for a decision show as a count on "Équipe", which
 // then opens straight on them (the team page opens on approved members).
-// Outside a project, « Travail » carries the viewer's « À vous » count over
-// every project (lib/work/journeys.ts). Inside a project, it carries that
-// project's count (proto « Projet complet », reported by its layout) and
-// opens that project's Travail, where these actions are listed (proto:
-// « Travail → Travail du projet »; the global Travail does not list the
-// journeys' actions, so its count and its page disagreed — recette 19/10).
-const PROJECT_PATH = /^\/app\/projects\/([0-9a-f-]{36})(?:\/|$)/;
-
+// « Travail » always opens the global Travail (Sacha, 28/10/2026: from a
+// project too; the project's own Travail is in the project's navigation) and
+// carries the viewer's « À vous » count over every project
+// (lib/work/journeys.ts).
 export function NavLinks({
   isAdmin,
   pendingMembers = 0,
@@ -52,17 +48,13 @@ export function NavLinks({
 }) {
   const pathname = usePathname();
   const t = fr.shell.nav;
-  const projectId = PROJECT_PATH.exec(pathname)?.[1];
-  const workCount = useWorkCount(Boolean(projectId));
+  const workCount = useWorkCount();
 
   return (
     <nav aria-label={t.label}>
       <ul className="flex flex-col gap-1">
         {NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin).map((item) => {
-          const href =
-            item.href === routes.work && projectId
-              ? routes.projectWork(projectId)
-              : item.href;
+          const href = item.href;
           const active = isActive(pathname, href, item.exact ?? false);
           const Icon = item.icon;
           const mine = item.href === routes.work ? workCount : 0;
