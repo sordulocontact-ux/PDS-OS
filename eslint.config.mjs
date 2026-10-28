@@ -28,6 +28,32 @@ const eslintConfig = defineConfig([
       ],
     },
   },
+  // A read shared with React's `cache` in lib/ must record its tables for
+  // the views that await it (lib/projects/live-deps.ts, docs/ARCHITECTURE.md
+  // § 3 bis, « Cache par table »): trackedCache, same behaviour.
+  {
+    files: ["lib/**/*.ts"],
+    ignores: [
+      "lib/projects/live-deps.ts",
+      "lib/projects/version-cache.ts",
+      "lib/utils/request-memo.ts",
+    ],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "react",
+              importNames: ["cache"],
+              message:
+                "Use trackedCache from @/lib/projects/live-deps: a view kept per table must see what a shared read read.",
+            },
+          ],
+        },
+      ],
+    },
+  },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:

@@ -913,6 +913,26 @@ s'afficher sans chargement.
   de classe) n'est jamais gardé : on garde la donnée et on rajoute la fonction à chaque lecture
   (`designJourneyContext`, `distributionContext` et leur `nameOf`) ; chaque requête reçoit sa
   copie. Gardés aussi depuis le 27/10 : `strategyStepData`, `distributionContext`. Deux requêtes simultanées (préchargement au survol puis clic) partagent un seul calcul.
+- **Cache par table** (audit du 28/10, `20261028000101`/`000201`, `lib/projects/live-deps.ts`,
+  `request-cache.ts`) : une écriture ne recalcule plus tout le projet (263 requêtes après une
+  contrainte du Cadrage, 4 s sur une base chargée). `project_live.tables` donne, par projet, la
+  version à laquelle **chaque table** a changé (même déclencheur `zz_project_live` : une version et un
+  signal par transaction, chaque table écrite tamponnée). Le serveur **note ce que chaque vue lit**
+  (le `fetch` du client Supabase : la table, les tables imbriquées par son `select`, et pour une
+  fonction ses tables d'après la base, `live_rpc_reads`, avec les tables de visibilité RLS) et la
+  ressert tant qu'**aucune de ses tables** n'a changé. Les lectures partagées par `cache()` notent
+  leurs tables chez chaque appelant : **`trackedCache` remplace `cache` de React** dans `lib/`
+  (même comportement), `memoPerRequest` aussi. Parcours (`journey-<module>`) et faits des états
+  (`wf-master`, `wf-legal`, `wf-distribution`, `wf-marketing`) sont gardés **par workflow**. En
+  plus, **chaque réponse** lue pendant le calcul d'une vue, ou lue par une page sur un projet
+  (`project_id=eq.`, la ligne du projet, une fonction avec `p_project_id`), est gardée par lecteur,
+  projet et requête exacte, et resservie tant que ses tables n'ont pas changé : une vue recalculée ne
+  renvoie à la base que les lectures de ce qui a changé. Lectures seules (table, fonction `STABLE`),
+  réponses 2xx, 5 min au plus ; pas dans une Server Action pour les lectures de page (tampons relus
+  au rendu, donc après l'écriture). Mesure (pré-prod, depuis Paris) : après une contrainte, **22
+  requêtes au lieu de 263** ; une page déjà vue, **9 en moyenne** (22 au plus) au lieu de 13 à 57.
+  `PERF_TRACE=1` ajoute une ligne `[cache] <vue> computed again: changed: <tables>` par vue refaite.
+  Une fonction lue par une vue doit rester `STABLE` si elle ne fait que lire (sinon jamais gardée).
   Une Server Action relit sans cache (`readProjectJourneys`). Conséquence pour `ProjectLive` : la
   page ouverte se met à jour pour un changement d'un collègue dans **n'importe quel** workflow.
 - **Squelettes** (`loading.tsx`) pour ce qui n'est pas préchargé (première entrée dans une
