@@ -1462,7 +1462,10 @@ liste), est obligatoire ou non, accepte ou non « Rien à signaler » (`{"none":
   suivante calculée par le code (`nextAfter`), la question adaptée (« La date cible est-elle
   toujours le 20 novembre 2026 ? »), « M'aider à définir » (`lib/framing/help.ts` : jusqu'à
   trois formulations, chacune citée mot pour mot d'une source et vérifiée par le code, gardées
-  dans `<clé>_suggestions`), « Écrire moi-même », « Déjà connu » sous la carte. Les listes
+  dans `<clé>_suggestions` ; **aussi stricte que la lecture après un call** depuis le 28/10/2026 :
+  même définition de la réponse (description du champ de `framing-facts`), même contrôle par le code
+  (`answerHolds`, `lib/framing/answer-holds.ts` : chiffres repris de la citation, dépense dite engagée
+  ou payée), et rien d'ajouté à ce que dit le passage), « Écrire moi-même », « Déjà connu » sous la carte. Les listes
   reprennent les écrans d'avant (pastilles de besoins, lignes de contraintes, cartes de rôles)
   plus les échéances. `?step=brief` : ce qui reste avant le Brief, ou « Créer le Brief ».
 - **Lecture par PO** (`lib/framing/analyse.ts`, schéma plat `lib/ai/schemas/framing-facts.ts`)

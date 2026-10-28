@@ -1026,6 +1026,10 @@ prévu, à tous les modules qui en ont un (Stratégie, Conception, Production) :
   d'un échange préparé reprend ce que montre « Envoyé avec l'invitation » (objectif, ordre du jour et
   durées, documents, lignes du module), au lieu de « Call planifié depuis PDS OS. ».
 
+- Puis (même jour) : « M'aider à définir » aussi strict que la lecture après l'échange (même définition,
+  même contrôle `answerHolds`, rien d'ajouté au passage cité) : un « nouveau home studio » n'est plus
+  proposé comme dépense engagée.
+
 Reste : passage navigateur ; l'enregistrement dans la carte pour la Stratégie, la Conception et la
 Production ; « Annuler l'échange » pour l'échange stratégique et créatif si on le veut ;
 prévenir dans l'app les participants d'un échange annulé (aujourd'hui seul Google les prévient, quand il

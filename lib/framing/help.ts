@@ -7,7 +7,9 @@ import {
   type ProviderFailure,
 } from "@/lib/ai/provider-failure";
 import { locateQuote } from "@/lib/ai/provenance";
+import { framingFactsSchema } from "@/lib/ai/schemas/framing-facts";
 import { framingHelpSchema } from "@/lib/ai/schemas/framing-help";
+import { answerHolds } from "@/lib/framing/answer-holds";
 import {
   QUESTIONS,
   TEXT_QUESTION_KEYS,
@@ -125,7 +127,7 @@ export async function helpWithQuestion(
     ({ output } = await extract(
       framingHelpSchema,
       input,
-      framingHelpInstructions(question.ask, question.why),
+      framingHelpInstructions(question.ask, question.why, criterionOf(key)),
     ));
   } catch (error) {
     console.error("helpWithQuestion:", error);
@@ -141,6 +143,7 @@ export async function helpWithQuestion(
     const lower = text.toLowerCase();
     if (!source || !text || seen.has(lower)) return [];
     if (quote.split(/\s+/).length < 3) return [];
+    if (!answerHolds(key, text, quote)) return [];
     if (
       locateQuote(quote, { text: source.text, segments: [] }).status ===
       "missing"
@@ -150,6 +153,15 @@ export async function helpWithQuestion(
     return [{ text, source: source.id, sourceLabel: source.label, quote }];
   });
   return { ok: true, suggestions };
+}
+
+/** What counts as an answer, as the call reading defines it (one rule for
+ * both readings of PO): « Dépenses déjà engagées, signées ou payées… ». */
+function criterionOf(key: QuestionKey): string | null {
+  const field = (
+    framingFactsSchema.shape as Record<string, { description?: string }>
+  )[key];
+  return field?.description ?? null;
 }
 
 export const helpAvailable = (key: QuestionKey) => QUESTIONS[key].poHelp;
