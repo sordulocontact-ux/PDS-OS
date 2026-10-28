@@ -11,7 +11,9 @@ import { createClient } from "@/lib/supabase/server";
  * « Voir comme » of the pre-production bar: a real sign-in as another test
  * account, through the anon client (RLS keeps deciding what each one sees),
  * then back to the same page. Only a signed-in visitor of the pre-production
- * can switch; anywhere else this does nothing.
+ * can switch; anywhere else this does nothing. No sign-out first: the new
+ * session replaces the cookies, and a sign-out (global by default) cost one
+ * more call to Auth and closed that account's sessions everywhere else.
  */
 export async function switchPreprodAccount(
   key: string,
@@ -25,7 +27,6 @@ export async function switchPreprodAccount(
   const { data } = await supabase.auth.getClaims();
   if (!data?.claims) return;
 
-  await supabase.auth.signOut();
   const { error } = await supabase.auth.signInWithPassword({
     email: account.email,
     password,

@@ -66,7 +66,9 @@ Vercel de la branche, **et** les comptes en base (`pnpm preprod:reset`, ou la mi
 - **Voir comme** : vraie connexion à un autre compte, retour sur la même page. Ce que chacun voit
   reste décidé par le RLS. Comptes : Claire Morel (directrice générale, seule validatrice), Lina
   Haddad (cheffe de projet, responsable des projets), Tom Mercier (chef de projet, pour sentir « seul
-  le responsable écrit »), Nadia Benali (directrice créative).
+  le responsable écrit »), Nadia Benali (directrice créative). Sans déconnexion préalable : la
+  nouvelle session remplace les cookies. Compter 2 à 4 s : le nouveau compte n'a encore rien en cache
+  (les vues sont gardées par lecteur).
 - **Aller à** : un projet par moment, ouvert sur sa page ; le libellé dit qui agit. Seuls les projets
   que le compte connecté peut ouvrir sont listés.
 
