@@ -971,3 +971,19 @@ Aucune migration (lectures seules, RLS). Build passé ; vérifié en `pnpm start
 
 Reste : la pré-prod n'a encore ni Brief Mix, ni temps fort, ni tournage, ni étape datée ; à rejouer
 quand le jeu de données en aura (`supabase/preprod/seed.sql`).
+
+## Cache par table (28/10/2026, branche `pre-prod`)
+
+Audit mesuré (pré-prod, `pg_stat_statements`, 80 pages parcourues avec `PERF_TRACE=1`) : une écriture
+faisait recalculer tout le projet (263 requêtes, 1,2 à 4,5 s sur une base Micro à ~10 connexions
+PostgREST). Livré (`docs/ARCHITECTURE.md` § 3 bis, « Cache par table ») :
+
+- `20261028000101_project_live_tables.sql` : `project_live.tables`, version de chaque table par projet ;
+  `20261028000201_live_rpc_reads.sql` : tables lues et lecture seule de chaque fonction.
+- Vues et réponses gardées avec les tables qu'elles ont lues (`lib/projects/live-deps.ts`,
+  `version-cache.ts`, `request-cache.ts`), parcours et faits des états par workflow ; `trackedCache`
+  à la place de `cache` dans `lib/` (règle ESLint).
+- Bouton en cours (anneau sur le bouton cliqué) et `withOutcome` passé par le cache.
+- Mesures : après une contrainte du Cadrage, 22 requêtes au lieu de 263 ; page déjà vue, 9 en moyenne.
+- Reste : gestes d'écriture optimistes si l'attente se voit encore, base froide après une pause
+  (cache d'exécution Vercel, payant), taille de l'instance de prod (décision).
