@@ -3,10 +3,8 @@
 import { usePathname, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
-import { ContentCard } from "@/components/shell/content-card";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { DataTableViews } from "@/components/ui/data-table-views";
-import { Rows } from "@/components/ui/rows";
 import { work } from "@/lib/i18n/fr/work";
 import {
   WORK_GROUPS,
@@ -16,7 +14,7 @@ import {
   type WorkView,
 } from "@/lib/work/rows";
 
-import { WorkRowLink } from "./work-row";
+import { WorkTable } from "./work-table";
 
 const fr = { work };
 
@@ -24,11 +22,11 @@ const VIEW_PARAM = "vue";
 
 /**
  * The global Travail under its lead: tabs Tout | À faire | À valider, each
- * count being every action of the view (« Maintenant » included), then the
- * rows grouped by when — En retard, Cette semaine, Plus tard, Sans
- * échéance, and what waits for someone else. Filtered in place (the rows are already here), the tab kept
- * in the URL like the Projects page. `lead`: the row « Maintenant » shows,
- * never repeated here.
+ * count being every action of the view (« Maintenant » included), then one
+ * table whose rows are grouped by when — En retard, Cette semaine, Plus
+ * tard, Sans échéance, and what waits for someone else. Filtered in place
+ * (the rows are already here), the tab kept in the URL like the Projects
+ * page. `lead`: the row « Maintenant » shows, never repeated here.
  */
 export function WorkBrowser({
   rows,
@@ -78,20 +76,7 @@ export function WorkBrowser({
       {groups.length === 0 ? (
         <EmptyNote>{t.viewEmpty[view]}</EmptyNote>
       ) : (
-        <div className="flex flex-col gap-5">
-          {groups.map(({ group, rows: own }) => (
-            <ContentCard
-              key={group}
-              title={t.groupTitle(t.groups[group], own.length)}
-            >
-              <Rows>
-                {own.map((row) => (
-                  <WorkRowLink key={row.key} row={row} />
-                ))}
-              </Rows>
-            </ContentCard>
-          ))}
-        </div>
+        <WorkTable groups={groups} />
       )}
     </DataTableViews>
   );

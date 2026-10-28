@@ -964,6 +964,10 @@ Aucune migration (lectures seules, RLS). Build passé ; vérifié en `pnpm start
       § 8, « Calendrier »).
 - [x] Partagé avec les Calls : jours et périodes (`lib/utils/calendar-period.ts`), barre
       `CalendarToolbar` (`components/ui/`), `loadLaunchedJourneys` (Travail, accueil, Calendrier).
+- [x] 28/10, retours de Sacha : « Travail » de la barre principale ouvre toujours le Travail global,
+      même depuis un projet (compteur = tous les projets) ; sous « Maintenant », les actions
+      reviennent en **tableau** « comme Asana, Plane, GitLab » (`WorkTable` : Action, Projet en
+      étiquette de couleur, Échéance, Validation, État ; groupes par échéance repliables).
 
 Reste : la pré-prod n'a encore ni Brief Mix, ni temps fort, ni tournage, ni étape datée ; à rejouer
 quand le jeu de données en aura (`supabase/preprod/seed.sql`).

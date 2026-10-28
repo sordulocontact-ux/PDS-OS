@@ -2255,8 +2255,8 @@ Ce qui attend la personne vient **des parcours de chaque projet** (`docs/VISION-
   **pourquoi** de l'étape, **Validation** et **Ensuite** lus dans le parcours par `nextOf`,
   « Ouvrir » sur le geste) ; puis toutes les autres, **jamais elle-même répétée**, en
   **groupes par échéance** (En retard, Cette semaine jusqu'au dimanche, Plus tard, Sans
-  échéance, En attente d'un autre), chacun dans une carte de lignes (`ContentCard` + `Rows` +
-  `LinkRow`, comme le Travail d'un projet). Onglets Tout / À faire / À valider (le retard est un
+  échéance, En attente d'un autre), titres repliables d'**un seul tableau** (`WorkTable` sur
+  `DataTable`, 28/10 : Action, Projet, Échéance, Validation, État). Onglets Tout / À faire / À valider (le retard est un
   groupe, plus un onglet). Lignes et groupes calculés par le code (`workRowsOf(work, journeys,
   today)`, `lib/work/rows.ts`) : un projet à accepter, les actions des parcours (liées par
   `actionHref`, la section du geste), décisions marquées « À valider » (acteur `kind:

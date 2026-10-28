@@ -47,19 +47,16 @@ export function InfoRow({
 }
 
 /** A row that opens a page (proto `.srow`): its title in semibold 16 px,
- * where it is below (14 px), a badge if any, a chevron on the right; the
- * whole row is the link. */
+ * where it is below (14 px), a chevron on the right; the whole row is the
+ * link. */
 export function LinkRow({
   href,
   title,
   detail,
-  badge,
 }: {
   href: string;
   title: string;
   detail?: string;
-  // What the row asks (« À valider »), at its fixed width.
-  badge?: ReactNode;
 }) {
   return (
     <li>
@@ -75,7 +72,6 @@ export function LinkRow({
             </span>
           )}
         </span>
-        {badge && <span className="shrink-0">{badge}</span>}
         <IconChevronRight
           aria-hidden
           className="size-3.5 shrink-0 text-[color:var(--text-tertiary)]"

@@ -54,6 +54,8 @@ export type WorkRow = {
   title: string | null;
   // « Master › Mixage », an artist's name.
   place: string | null;
+  // Its project: the hue of its tag in the table (lib/ui/category-hues.ts).
+  projectId: string;
   projectTitle: string;
   due: string | null;
   overdue: boolean;
@@ -139,6 +141,7 @@ export function workRowsOf(
         href: actionHref(a.step),
         title: a.step.actor?.todo ?? a.step.title,
         place: `${a.place} › ${a.step.title}`,
+        projectId: project.projectId,
         projectTitle: project.projectTitle,
         due: a.step.due ?? null,
         overdue: a.step.alert === "overdue",
@@ -153,6 +156,7 @@ export function workRowsOf(
       href: task.href,
       title: task.title,
       place: null,
+      projectId: task.projectId,
       projectTitle: task.projectTitle,
       due: task.dueDate,
       overdue: task.overdue,
@@ -173,6 +177,7 @@ export function workRowsOf(
         href: routes.project(p.id),
         title: null,
         place: p.artistName || null,
+        projectId: p.id,
         projectTitle: p.title,
         due: null,
         overdue: false,
@@ -188,6 +193,7 @@ export function workRowsOf(
       href: p.href,
       title: null,
       place: null,
+      projectId: p.projectId,
       projectTitle: p.projectTitle,
       due: null,
       overdue: false,

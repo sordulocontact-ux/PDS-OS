@@ -388,10 +388,14 @@ Refonte du 27/10/2026, d'après `docs/VISION-UX.md` § 2 (les cinq questions) :
   ligne « Validation : … · Ensuite : … », le bouton plein « Ouvrir » (le geste, `actionHref`).
   Rien à faire : « Rien à faire pour vous », et la Vue d'ensemble de chaque projet dit qui on
   attend.
-- Dessous, onglets **Tout / À faire / À valider**, puis une carte par **échéance** (En retard,
-  Cette semaine, Plus tard, Sans échéance, En attente d'un autre), titre « En retard · 2 », des
-  `LinkRow` (action, « Projet · Lieu · avant le … », pastille si utile, chevron), le même dessin
-  que le Travail d'un projet. L'action de « Maintenant » n'y est jamais répétée.
+- Dessous, onglets **Tout / À faire / À valider**, puis **un tableau** (`DataTable`, Sacha 28/10 :
+  « comme Asana, Plane, GitLab ») : **Action** (lieu en dessous, « Master › Mixage »), **Projet**
+  (étiquette à la teinte du projet, `projectHue`, la même que dans les Calls et le Calendrier),
+  **Échéance** (jj/mm, rouge en retard), **Validation** (qui valide, dès 1280 px), **État** (À
+  faire, À valider, n propositions, statut de transmission). Les lignes sont rangées sous des
+  titres de groupe par **échéance** (En retard en rouge, Cette semaine, Plus tard, Sans échéance,
+  En attente d'un autre), avec leur nombre et un chevron qui replie le groupe. Sur téléphone :
+  Action (projet et lieu en dessous) et État. L'action de « Maintenant » n'y est jamais répétée.
 
 ### Calendrier
 

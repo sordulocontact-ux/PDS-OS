@@ -47,8 +47,13 @@ export const work = {
       undated: "Sans échéance",
       others: "En attente d'un autre",
     },
-    // « En retard · 2 », read as one title.
-    groupTitle: (label: string, count: number) => `${label} · ${count}`,
+    columns: {
+      action: "Action",
+      project: "Projet",
+      due: "Échéance",
+      validator: "Validation",
+      state: "État",
+    },
     // Rows whose wording the page writes (no step, no task behind them).
     titles: {
       accept: "Accepter le projet",

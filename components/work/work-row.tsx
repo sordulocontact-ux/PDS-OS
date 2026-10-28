@@ -1,4 +1,3 @@
-import { LinkRow } from "@/components/ui/rows";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { assistant } from "@/lib/i18n/fr/assistant";
 import { transmission } from "@/lib/i18n/fr/transmission";
@@ -16,16 +15,18 @@ export const titleOf = (row: WorkRow) =>
   row.title ??
   (row.kind in t.titles ? t.titles[row.kind as keyof typeof t.titles] : "");
 
+/** Where the action is: « Master › Mixage », an artist, « Tâche ». */
+export const placeOf = (row: WorkRow) =>
+  row.place ??
+  (row.kind === "task" || row.kind === "deliverable"
+    ? t.places[row.kind]
+    : null);
+
 /** « Néons · Master › Mixage · avant le Dim. 15/11/2026 ». */
 export function whereOf(row: WorkRow): string {
-  const place =
-    row.place ??
-    (row.kind === "task" || row.kind === "deliverable"
-      ? t.places[row.kind]
-      : null);
   return [
     row.projectTitle,
-    place,
+    placeOf(row),
     row.due ? fr.work.lead.due(formatDay(row.due)) : null,
   ]
     .filter(Boolean)
@@ -56,17 +57,4 @@ export function rowBadge(row: WorkRow): React.ReactNode {
       </StatusBadge>
     );
   return null;
-}
-
-/** One action of the Travail: what to do, where and for when; the row opens
- * the gesture (`actionHref`), never the top of the project. */
-export function WorkRowLink({ row }: { row: WorkRow }) {
-  return (
-    <LinkRow
-      href={row.href}
-      title={titleOf(row)}
-      detail={whereOf(row)}
-      badge={rowBadge(row)}
-    />
-  );
 }
