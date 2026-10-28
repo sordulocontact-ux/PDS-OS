@@ -1,7 +1,7 @@
 import "server-only";
 
 import { notFound } from "next/navigation";
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { projectIdSchema } from "@/lib/projects/schemas";
 import {
@@ -232,7 +232,7 @@ export async function listProjects(filter?: {
 }
 
 // Cached per request: the project layout and its pages share one query.
-export const getProject = cache(
+export const getProject = trackedCache(
   async (projectId: string): Promise<ProjectDetail | null> => {
     if (!projectIdSchema.safeParse(projectId).success) return null;
 

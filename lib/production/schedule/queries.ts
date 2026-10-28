@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { createClient } from "@/lib/supabase/server";
 
@@ -8,7 +8,7 @@ import { SCHEDULE_SOURCES, type ScheduleDecision } from "./model";
 
 /** The sheet's decisions of date and hours, newest first (the first one not
  * replaced is current). Read with the user's session, once per request. */
-export const loadScheduleDecisions = cache(
+export const loadScheduleDecisions = trackedCache(
   async (sheetId: string): Promise<ScheduleDecision[]> => {
     const supabase = await createClient();
     const { data, error } = await supabase

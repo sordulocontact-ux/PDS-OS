@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { requireApproved } from "@/lib/auth/dal";
 import {
@@ -50,7 +50,7 @@ function gather(
  * its journey into JOURNEY_LOADERS, this adds nothing), and before the plan
  * only the Cadrage's actions. Once per request.
  */
-export const loadShellJourneys = cache(
+export const loadShellJourneys = trackedCache(
   async (projectId: string): Promise<ProjectJourneys> => {
     const [access, project, all, launched] = await Promise.all([
       requireApproved(),
@@ -80,7 +80,7 @@ export const loadShellJourneys = cache(
  * journey is read (the other workflows' loaders are skipped, not
  * discarded). The same `mine` and `validations` as loadShellJourneys.
  */
-export const loadShellActions = cache(
+export const loadShellActions = trackedCache(
   async (projectId: string): Promise<ProjectJourneys> => {
     const [access, project, launched] = await Promise.all([
       requireApproved(),

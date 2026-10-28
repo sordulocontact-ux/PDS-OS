@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { canValidateMarketing } from "@/lib/activations/access";
 import type { ActionPerson } from "@/lib/activations/journey";
@@ -20,7 +20,7 @@ import { personName } from "@/lib/projects/types";
  * own, and every decision when they validate (marketing_can_validate).
  * Read once per request.
  */
-export const loadActivationPeople = cache(async (projectId: string) => {
+export const loadActivationPeople = trackedCache(async (projectId: string) => {
   const access = await requireApproved();
   const [project, members, canValidate, validators, creatives] =
     await Promise.all([

@@ -5,7 +5,7 @@ import {
   type EngineerMessage,
 } from "@/lib/master-workflow/engineer-messages";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 import { z } from "zod";
 
 import { masterPackageSchema } from "@/lib/master-workflow/transmission-types";
@@ -88,7 +88,7 @@ export type PublicPackage = z.infer<typeof publicSchema>;
 export const TOKEN = LINK_KEY;
 
 /** Null when the token is malformed or unknown. */
-export const getPublicPackage = cache(
+export const getPublicPackage = trackedCache(
   async (token: string): Promise<PublicPackage | null> => {
     if (!TOKEN.test(token)) return null;
     const supabase = await createClient();

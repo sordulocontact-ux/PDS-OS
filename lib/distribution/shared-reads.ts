@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { createClient } from "@/lib/supabase/server";
 
@@ -9,16 +9,18 @@ import { createClient } from "@/lib/supabase/server";
 // docs/ARCHITECTURE.md § 3 bis).
 
 /** The cover delivered by the Production (distribution_cover). */
-export const distributionCover = cache(async (projectId: string) => {
+export const distributionCover = trackedCache(async (projectId: string) => {
   const supabase = await createClient();
   return supabase.rpc("distribution_cover", { p_project_id: projectId });
 });
 
 /** The borrowings still to secure, readable without the Juridique
  * (distribution_legal_blockers). */
-export const distributionLegalBlockers = cache(async (projectId: string) => {
-  const supabase = await createClient();
-  return supabase.rpc("distribution_legal_blockers", {
-    p_project_id: projectId,
-  });
-});
+export const distributionLegalBlockers = trackedCache(
+  async (projectId: string) => {
+    const supabase = await createClient();
+    return supabase.rpc("distribution_legal_blockers", {
+      p_project_id: projectId,
+    });
+  },
+);

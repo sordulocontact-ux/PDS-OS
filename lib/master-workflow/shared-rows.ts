@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { createClient } from "@/lib/supabase/server";
 
@@ -14,7 +14,7 @@ import { createClient } from "@/lib/supabase/server";
 // Action reads afresh (`cache` only memoizes while rendering).
 
 /** The project's brief for the engineers (one per project), or null. */
-export const masterBriefRow = cache(async (projectId: string) => {
+export const masterBriefRow = trackedCache(async (projectId: string) => {
   const supabase = await createClient();
   return supabase
     .from("master_briefs")
@@ -28,7 +28,7 @@ export const masterBriefRow = cache(async (projectId: string) => {
 /** Every version of the project's mix and mastering rounds, newest number
  * first (one approved version at most per title and stage:
  * master_mix_versions_final_key). */
-export const masterVersionRows = cache(async (projectId: string) => {
+export const masterVersionRows = trackedCache(async (projectId: string) => {
   const supabase = await createClient();
   return supabase
     .from("master_mix_versions")
@@ -40,16 +40,18 @@ export const masterVersionRows = cache(async (projectId: string) => {
 });
 
 /** Every sending of the project's packages to an engineer, newest first. */
-export const masterTransmissionRows = cache(async (projectId: string) => {
-  const supabase = await createClient();
-  return supabase
-    .from("master_transmissions")
-    .select(
-      "id, role, contact_id, created_at, note, link_sent_at, opened_at, acknowledged_at, delivered_at, revoked_at, revoke_reason, expires_at, derogations, continues_id, contact:network_contacts!master_transmissions_contact_same_org(name), sender:people!master_transmissions_created_by_fkey(first_name, last_name)",
-    )
-    .eq("project_id", projectId)
-    .order("created_at", { ascending: false });
-});
+export const masterTransmissionRows = trackedCache(
+  async (projectId: string) => {
+    const supabase = await createClient();
+    return supabase
+      .from("master_transmissions")
+      .select(
+        "id, role, contact_id, created_at, note, link_sent_at, opened_at, acknowledged_at, delivered_at, revoked_at, revoke_reason, expires_at, derogations, continues_id, contact:network_contacts!master_transmissions_contact_same_org(name), sender:people!master_transmissions_created_by_fkey(first_name, last_name)",
+      )
+      .eq("project_id", projectId)
+      .order("created_at", { ascending: false });
+  },
+);
 
 /** The rows of a shared read that pass `keep`, in the same order, with the
  * same error: what the same read filtered in SQL returns. */

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import type { Access } from "@/lib/auth/access";
 import { can } from "@/lib/auth/access";
@@ -183,6 +183,6 @@ export async function loadContractFormOptions(
 
 /** getContract for the viewer, once per request: the contract's frame
  * answers a real 404 without it and its page reuses the read. */
-export const findContract = cache(async (id: string) =>
+export const findContract = trackedCache(async (id: string) =>
   getContract(id, await requireApproved()),
 );

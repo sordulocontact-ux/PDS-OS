@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
@@ -98,7 +98,7 @@ export type ProviderSpace = z.infer<typeof spaceSchema>;
 export type OpenProviderSpace = Extract<ProviderSpace, { state: "open" }>;
 
 /** Null for an unknown token. Read once per request. */
-export const getProviderSpace = cache(
+export const getProviderSpace = trackedCache(
   async (token: string): Promise<ProviderSpace | null> => {
     if (!TOKEN.test(token)) return null;
     const supabase = await createClient();

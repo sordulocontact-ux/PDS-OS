@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 import { z } from "zod";
 
 import { PLATFORMS } from "@/lib/release/platforms";
@@ -37,7 +37,7 @@ const ORDER = new Map<string, number>(
 );
 
 /** Null when the token is malformed, unknown or the smartlink disabled. */
-export const getSmartlink = cache(
+export const getSmartlink = trackedCache(
   async (token: string): Promise<Smartlink | null> => {
     if (!isUuid(token)) return null;
     const supabase = await createClient();

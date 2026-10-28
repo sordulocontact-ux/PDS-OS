@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 import { z } from "zod";
 
 import { agreementContentSchema } from "@/lib/activations/influence/agreement-content";
@@ -24,7 +24,7 @@ const publicSchema = z.discriminatedUnion("state", [
 
 export type PublicAgreement = z.infer<typeof publicSchema>;
 
-export const getPublicAgreement = cache(
+export const getPublicAgreement = trackedCache(
   async (token: string): Promise<PublicAgreement | null> => {
     if (!LINK_KEY.test(token)) return null;
     const supabase = await createClient();

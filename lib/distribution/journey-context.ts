@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { requireApproved } from "@/lib/auth/dal";
 import { isOpen } from "@/lib/distribution/anomalies";
@@ -31,7 +31,7 @@ const t = fr.distributionJourney;
 /** Whether the project's plan was launched: the Distribution starts then
  * (proto « Projet complet », « Au lancement du plan, … la Distribution
  * démarre »). */
-export const distributionLaunched = cache(async (projectId: string) => {
+export const distributionLaunched = trackedCache(async (projectId: string) => {
   const { data } = await projectPlanRow(projectId);
   return data !== null;
 });
@@ -290,7 +290,7 @@ const readDistributionContext = byProjectVersion(
   },
 );
 
-export const distributionContext = cache(async (projectId: string) => {
+export const distributionContext = trackedCache(async (projectId: string) => {
   const context = await readDistributionContext(projectId);
   if (!context) return null;
   const { members, ...rest } = context;

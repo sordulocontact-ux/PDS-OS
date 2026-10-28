@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { can, type Access } from "@/lib/auth/access";
 import { createClient } from "@/lib/supabase/server";
@@ -21,7 +21,7 @@ export function loadMembers(access: Access): Promise<Member[]> {
   return membersOf(can(access, "administer"));
 }
 
-const membersOf = cache(async (admin: boolean): Promise<Member[]> => {
+const membersOf = trackedCache(async (admin: boolean): Promise<Member[]> => {
   const supabase = await createClient();
   // RLS already limits a non-admin to approved members; an admin also sees
   // pending requests, which are filtered out here.
@@ -49,12 +49,14 @@ const membersOf = cache(async (admin: boolean): Promise<Member[]> => {
 });
 
 /** The rows of list_validators (holders of "validate"), once per request. */
-export const listValidatorRows = cache(async (organizationId: string) => {
-  const supabase = await createClient();
-  return supabase.rpc("list_validators", {
-    p_organization_id: organizationId,
-  });
-});
+export const listValidatorRows = trackedCache(
+  async (organizationId: string) => {
+    const supabase = await createClient();
+    return supabase.rpc("list_validators", {
+      p_organization_id: organizationId,
+    });
+  },
+);
 
 /**
  * Latest report of each call of the project, and whether it was imported into

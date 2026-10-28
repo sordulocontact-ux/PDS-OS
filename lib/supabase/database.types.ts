@@ -15739,6 +15739,7 @@ export type Database = {
           changed_by: string | null
           organization_id: string
           project_id: string
+          tables: Json
           version: number
         }
         Insert: {
@@ -15746,6 +15747,7 @@ export type Database = {
           changed_by?: string | null
           organization_id: string
           project_id: string
+          tables?: Json
           version?: number
         }
         Update: {
@@ -15753,6 +15755,7 @@ export type Database = {
           changed_by?: string | null
           organization_id?: string
           project_id?: string
+          tables?: Json
           version?: number
         }
         Relationships: [
@@ -17638,6 +17641,14 @@ export type Database = {
       }
     }
     Functions: {
+      live_rpc_tables: {
+        Args: { p_names: string[] }
+        Returns: Json
+      }
+      live_rpc_reads: {
+        Args: { p_names: string[] }
+        Returns: Json
+      }
       distribution_status_rows: {
         Args: { p_project_id: string; p_reference_platforms: string[] }
         Returns: Json

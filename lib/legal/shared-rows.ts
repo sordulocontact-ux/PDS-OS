@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { createClient } from "@/lib/supabase/server";
 
@@ -15,7 +15,7 @@ import { createClient } from "@/lib/supabase/server";
 // memoizes while rendering).
 
 /** The project's clearances, oldest first. */
-export const legalClearanceRows = cache(async (projectId: string) => {
+export const legalClearanceRows = trackedCache(async (projectId: string) => {
   const supabase = await createClient();
   return supabase
     .from("legal_clearances")
@@ -27,7 +27,7 @@ export const legalClearanceRows = cache(async (projectId: string) => {
 });
 
 /** The project's legal plan (one per project), or null. */
-export const legalPlanRow = cache(async (projectId: string) => {
+export const legalPlanRow = trackedCache(async (projectId: string) => {
   const supabase = await createClient();
   return supabase
     .from("legal_plans")
@@ -37,7 +37,7 @@ export const legalPlanRow = cache(async (projectId: string) => {
 });
 
 /** The project's legal intake (one per project), or null. */
-export const legalIntakeRow = cache(async (projectId: string) => {
+export const legalIntakeRow = trackedCache(async (projectId: string) => {
   const supabase = await createClient();
   return supabase
     .from("legal_intakes")

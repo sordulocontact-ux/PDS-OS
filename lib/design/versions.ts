@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import {
   DESIGN_FILE_BUCKET,
@@ -133,7 +133,7 @@ export async function listDesignFiles(
  * production sheet read them in one render (page loads audit,
  * docs/ARCHITECTURE.md § 3 bis), each file signed once. Shared: callers
  * never change it. */
-export const projectDesignVersions = cache(
+export const projectDesignVersions = trackedCache(
   async (projectId: string): Promise<DesignVersion[]> =>
     listDesignVersions(await createClient(), projectId),
 );

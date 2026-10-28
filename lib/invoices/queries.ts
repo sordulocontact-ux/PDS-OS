@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
@@ -29,7 +29,7 @@ const nameOf = (p: Named) => (p ? personName(p.first_name, p.last_name) : null);
 const SELECT =
   "id, origin, contact_id, contract_id, financial_need_id, requested_at, number, amount_cents, gap_reason, file_bucket, file_path, file_name, received_at, received_on, due_on, received_via, paid_on, proof_bucket, proof_path, proof_name, contact:network_contacts!project_invoices_contact_same_org(name), receiver:people!project_invoices_received_by_fkey(first_name, last_name), payer:people!project_invoices_paid_by_fkey(first_name, last_name)";
 
-export const loadProjectInvoices = cache(
+export const loadProjectInvoices = trackedCache(
   async (
     projectId: string,
     ownerPersonId: string | null,

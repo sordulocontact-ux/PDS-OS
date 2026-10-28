@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import type { Access } from "@/lib/auth/access";
 import { loadMembers } from "@/lib/framing/related";
@@ -83,7 +83,7 @@ export type MarketingStanding = {
  * workflow card, the chevrons and the whole project's closing page share it
  * within a request.
  */
-export const loadMarketingStanding = cache(
+export const loadMarketingStanding = trackedCache(
   async (projectId: string): Promise<MarketingStanding> => {
     const supabase = await createClient();
     const [activations, reports, closures, followUps] = await Promise.all([

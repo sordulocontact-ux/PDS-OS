@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { requireApproved } from "@/lib/auth/dal";
 import { loadCreativeBriefs } from "@/lib/design/brief-store";
@@ -248,7 +248,7 @@ const readDesignContext = byProjectVersion(
   },
 );
 
-export const designJourneyContext = cache(async (projectId: string) => {
+export const designJourneyContext = trackedCache(async (projectId: string) => {
   const context = await readDesignContext(projectId);
   if (!context) return null;
   const { members } = context.people;

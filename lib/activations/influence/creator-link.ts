@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
@@ -62,7 +62,7 @@ const schema = z.object({
 
 export type CreatorCollaboration = z.infer<typeof schema>;
 
-export const getCreatorCollaboration = cache(
+export const getCreatorCollaboration = trackedCache(
   async (token: string): Promise<CreatorCollaboration | null> => {
     if (!LINK_KEY.test(token)) return null;
     const supabase = await createClient();

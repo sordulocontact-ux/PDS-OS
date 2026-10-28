@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { createClient } from "@/lib/supabase/server";
 
@@ -27,7 +27,7 @@ export type OpportunityRecord = {
 };
 
 /** A press activation's opportunities and interviews. Cached per request. */
-export const loadOpportunities = cache(
+export const loadOpportunities = trackedCache(
   async (activationId: string): Promise<OpportunityRecord[]> => {
     const supabase = await createClient();
     const { data, error } = await supabase

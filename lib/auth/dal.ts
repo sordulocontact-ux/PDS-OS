@@ -1,6 +1,6 @@
 // Imported from Ibé's PO foundation (po/lib/auth/dal.ts).
 import "server-only";
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { can, fetchAccess, type Access } from "@/lib/auth/access";
@@ -16,7 +16,7 @@ import {
 // page, jamais dans un layout (un layout ne se ré-exécute pas à la
 // navigation).
 
-export const getAccess = cache(async (): Promise<Access> => {
+export const getAccess = trackedCache(async (): Promise<Access> => {
   const supabase = await createClient();
   return fetchAccess(supabase);
 });

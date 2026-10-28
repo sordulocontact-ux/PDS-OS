@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 import { z } from "zod";
 
 import { SPLIT_ROLES } from "@/lib/legal/splits/shares";
@@ -40,7 +40,7 @@ export type PublicSplit = z.infer<typeof publicSchema>;
 
 const TOKEN = LINK_KEY;
 
-export const getPublicSplit = cache(
+export const getPublicSplit = trackedCache(
   async (token: string): Promise<PublicSplit | null> => {
     if (!TOKEN.test(token)) return null;
     const supabase = await createClient();

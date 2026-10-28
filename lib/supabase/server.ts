@@ -4,6 +4,8 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
 import { getPublicEnv } from "@/lib/env-public";
+import { trackingFetch } from "@/lib/projects/live-deps";
+import { cachingFetch } from "@/lib/projects/request-cache";
 import { batchingFetch } from "@/lib/supabase/batch";
 import type { Database } from "@/lib/supabase/database.types";
 import { tracingFetch } from "@/lib/supabase/query-trace";
@@ -22,8 +24,12 @@ export async function createClient() {
     NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
       // Batched only inside withQueryBatching (lib/supabase/batch.ts);
-      // measured with PERF_TRACE=1 (lib/supabase/query-trace.ts).
-      global: { fetch: tracingFetch(batchingFetch) },
+      // measured with PERF_TRACE=1 (lib/supabase/query-trace.ts); what a
+      // kept view reads, recorded for its cache (lib/projects/live-deps.ts)
+      // and served from the answers kept (lib/projects/request-cache.ts).
+      global: {
+        fetch: trackingFetch(cachingFetch(tracingFetch(batchingFetch))),
+      },
       cookies: {
         getAll() {
           return cookieStore.getAll();

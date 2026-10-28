@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { createClient } from "@/lib/supabase/server";
 
@@ -65,7 +65,7 @@ const asRecord = <T>(v: unknown, fallback: T): T =>
 
 /** An agency activation's sources (with their last read), the preview
  * waiting for confirmation, the agency rows and the reports. */
-export const loadAgency = cache(async (activationId: string) => {
+export const loadAgency = trackedCache(async (activationId: string) => {
   const supabase = await createClient();
   const [sources, snapshots, rows, reports] = await Promise.all([
     supabase

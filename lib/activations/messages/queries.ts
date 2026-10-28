@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import type {
   MessageChannel,
@@ -32,7 +32,7 @@ export type MessageRecord = {
 };
 
 /** An activation's messages, oldest first. Cached per request. */
-export const loadMessages = cache(
+export const loadMessages = trackedCache(
   async (activationId: string): Promise<MessageRecord[]> => {
     const supabase = await createClient();
     const { data, error } = await supabase

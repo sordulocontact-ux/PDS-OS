@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { asOf, CHECK_METHODS, CHECK_RESULTS } from "@/lib/activations/model";
 import type { Reserve } from "@/lib/activations/states";
@@ -55,7 +55,7 @@ export function toActivation(r: ActivationRow): ActivationRecord {
 /** Everything the overview needs about a project's activations, read in one
  * round with the user's session (RLS decides what is visible). Cached per
  * request: the overview, a fiche's layout and its page share it. */
-export const loadActivationData = cache(async (projectId: string) => {
+export const loadActivationData = trackedCache(async (projectId: string) => {
   const supabase = await createClient();
   const [acts, targets, evidence, checks, metrics, blockers, deps, nexts] =
     await Promise.all([

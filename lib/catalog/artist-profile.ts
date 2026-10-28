@@ -1,7 +1,7 @@
 import "server-only";
 
 import { unstable_cache } from "next/cache";
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { findArtistsByDeezerIds } from "@/lib/catalog/queries";
 import type {
@@ -77,7 +77,7 @@ const loadExternal = unstable_cache(
 );
 
 /** Null when Deezer is unreachable or no longer knows the profile. */
-export const getArtistProfile = cache(
+export const getArtistProfile = trackedCache(
   async (deezerId: number): Promise<ArtistProfile | null> => {
     const external = await loadExternal(deezerId).catch((error: Error) => {
       console.error("getArtistProfile:", error.message);

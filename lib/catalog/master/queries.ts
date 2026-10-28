@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import {
   CONTRIBUTOR_ROLES,
@@ -35,7 +35,7 @@ function failed(scope: string, message: string) {
   console.error(`${scope}:`, message);
 }
 
-export const getMasterRights = cache(
+export const getMasterRights = trackedCache(
   async (masterId: string): Promise<MasterRights | null> => {
     if (!catalogIdSchema.safeParse(masterId).success) return null;
     const supabase = await createClient();

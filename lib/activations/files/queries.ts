@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { ACTIVATION_FILE_BUCKET } from "@/lib/activations/model";
 import { createClient } from "@/lib/supabase/server";
@@ -17,7 +17,7 @@ const SIGNED_URL_SECONDS = 60 * 60;
 
 /** An activation's files this session may read (restricted ones only for the
  * budget readers: RLS), each with a signed link. Cached per request. */
-export const loadActivationFiles = cache(
+export const loadActivationFiles = trackedCache(
   async (activationId: string): Promise<Map<string, ActivationFile>> => {
     const supabase = await createClient();
     const { data, error } = await supabase

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
@@ -60,7 +60,7 @@ export type ContactBulletin = ContactSignatures["bulletins"][number];
 
 const EMPTY: ContactSignatures = { contracts: [], bulletins: [] };
 
-export const getContactSignatures = cache(
+export const getContactSignatures = trackedCache(
   async (token: string): Promise<ContactSignatures> => {
     if (!/^[0-9a-f]{64}$/.test(token)) return EMPTY;
     const supabase = await createClient();

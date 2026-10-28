@@ -1,7 +1,7 @@
 import "server-only";
 
 import { notFound } from "next/navigation";
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import {
   canValidateMarketing,
@@ -14,7 +14,7 @@ import { requireLaunchedProject } from "@/lib/projects/queries";
 
 /** One activation of a launched project, with who may do what. Cached per
  * request (the layout and the page share it). 404 when not visible. */
-export const loadActivationFiche = cache(
+export const loadActivationFiche = trackedCache(
   async (projectId: string, activationId: string, access: Access) => {
     const project = await requireLaunchedProject(projectId);
     const [board, members, canValidate] = await Promise.all([

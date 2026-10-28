@@ -1,7 +1,7 @@
 import "server-only";
 
 import { notFound } from "next/navigation";
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
@@ -53,7 +53,7 @@ async function validatorName(organizationId: string | null) {
  * journey for the viewer (lib/legal/journey.ts). 404 without manage_legal,
  * like every page of the section. Read only: nothing is generated here.
  */
-export const legalJourneyContext = cache(
+export const legalJourneyContext = trackedCache(
   byProjectVersion("legal-context", async (projectId: string) => {
     const [access, project] = await allInOrder([
       requireApproved(),

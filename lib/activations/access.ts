@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import type { Access } from "@/lib/auth/access";
 import { canEditProject } from "@/lib/projects/edit-access";
@@ -25,7 +25,7 @@ export function canWriteActivation(
 
 /** « Validateur PDS » : the director or a creative director of the project,
  * read from the database once per request. */
-export const canValidateMarketing = cache(
+export const canValidateMarketing = trackedCache(
   async (projectId: string): Promise<boolean> => {
     const supabase = await createClient();
     const { data, error } = await supabase.rpc("marketing_can_validate", {

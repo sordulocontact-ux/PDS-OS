@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { PRODUCTION_FILE_BUCKET } from "@/lib/production/files/rules";
 import { versionStatusOf } from "@/lib/production/post/rules";
@@ -19,7 +19,7 @@ const PURPOSES = ["distribution", "activations", "validation"] as const;
  * drawn from the clip whether the clip's edit is validated. Read with the
  * user's session, once per request.
  */
-export const loadLightFacts = cache(
+export const loadLightFacts = trackedCache(
   async (
     sheetId: string,
     deliverableId: string,

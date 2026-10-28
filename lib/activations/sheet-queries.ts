@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import type { ActivationKind, SheetStatus } from "@/lib/activations/model";
 import {
@@ -13,7 +13,7 @@ import { formatDate } from "@/lib/release/format";
 import { createClient } from "@/lib/supabase/server";
 
 /** Every version of an activation's sheets, newest first. */
-export const loadSheets = cache(
+export const loadSheets = trackedCache(
   async (
     activationId: string,
     activationKind: ActivationKind,

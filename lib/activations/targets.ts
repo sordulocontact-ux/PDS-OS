@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { probableDuplicate } from "@/lib/activations/duplicates";
 import type { Priority, TargetOutcome } from "@/lib/activations/model";
@@ -29,7 +29,7 @@ export type TargetRecord = {
 
 /** An activation's targets with the Réseau's identity of each (name, ways to
  * reach them, accounts), read where it lives. Cached per request. */
-export const loadTargets = cache(
+export const loadTargets = trackedCache(
   async (activationId: string): Promise<TargetRecord[]> => {
     const supabase = await createClient();
     const { data, error } = await supabase

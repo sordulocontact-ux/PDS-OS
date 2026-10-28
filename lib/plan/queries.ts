@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { personName } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
@@ -51,7 +51,7 @@ const nameOf = (
  * person hidden by RLS reads as null, the plan row stays. Shared: callers
  * never change it.
  */
-export const projectPlanRow = cache(async (projectId: string) => {
+export const projectPlanRow = trackedCache(async (projectId: string) => {
   const supabase = await createClient();
   return supabase
     .from("project_plans")
@@ -127,7 +127,7 @@ export async function loadLaunchedPlan(
  * the moment the four workflows start (proto « Projet complet »). Read once
  * per request: the navigation, the overview and the locks share it.
  */
-export const planLaunchedAt = cache(
+export const planLaunchedAt = trackedCache(
   async (projectId: string): Promise<string | null> => {
     const { data, error } = await projectPlanRow(projectId);
     if (error) console.error("planLaunchedAt:", error.message);
@@ -140,7 +140,7 @@ export const planLaunchedAt = cache(
  * once per request: the navigation says why a workflow has not started
  * (left out of the plan, or waiting in it).
  */
-export const planWorkflows = cache(
+export const planWorkflows = trackedCache(
   async (projectId: string): Promise<PlanWorkflow[]> => {
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -160,7 +160,7 @@ export const planWorkflows = cache(
  * before the plan existed (workflow_is_launched, SQL), all in one call and
  * once per request (page loads audit, docs/ARCHITECTURE.md § 3 bis).
  */
-export const launchedWorkflows = cache(
+export const launchedWorkflows = trackedCache(
   async (projectId: string): Promise<ReadonlySet<string>> => {
     const supabase = await createClient();
     const { data, error } = await supabase.rpc("launched_workflows", {
@@ -172,7 +172,7 @@ export const launchedWorkflows = cache(
 );
 
 /** Whether a workflow may be worked on (see launchedWorkflows). */
-export const isWorkflowLaunched = cache(
+export const isWorkflowLaunched = trackedCache(
   async (projectId: string, workflow: PlanWorkflow): Promise<boolean> =>
     (await launchedWorkflows(projectId)).has(workflow),
 );

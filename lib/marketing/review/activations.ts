@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { loadActivationsBoard } from "@/lib/activations/board";
 import { loadActivationPeople } from "@/lib/activations/people";
@@ -14,7 +14,7 @@ import type { ReviewActivation } from "./review-activation";
  * and already read by the project's journeys), with the viewer's session
  * (RLS decides) — the same phase, proof and statistics on both screens.
  */
-export const loadReviewActivations = cache(
+export const loadReviewActivations = trackedCache(
   async (projectId: string): Promise<ReviewActivation[]> => {
     const [board, people] = await Promise.all([
       loadActivationsBoard(projectId),

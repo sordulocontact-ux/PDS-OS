@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
@@ -44,7 +44,7 @@ export type ProjectHeaderData = {
  * the project, its workflows' states and the viewer's access are already
  * cached and shared with the layout and the overview.
  */
-export const projectHeaderData = cache(
+export const projectHeaderData = trackedCache(
   async (projectId: string): Promise<ProjectHeaderData | null> => {
     const [access, project] = await allInOrder([
       requireApproved(),

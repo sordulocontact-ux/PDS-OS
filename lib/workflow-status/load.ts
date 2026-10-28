@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
@@ -333,6 +333,31 @@ async function distributionFacts(projectId: string) {
   };
 }
 
+// Each workflow's facts kept on their own, with the tables they read
+// (lib/projects/version-cache.ts): a write in the Cadrage no longer reads the
+// Master, the Juridique and the Distribution again.
+const projectOf = async (projectId: string) =>
+  (await getProject(projectId)) ?? null;
+const keptMasterFacts = byProjectVersion("wf-master", async (projectId) => {
+  const [access, project] = await Promise.all([
+    requireApproved(),
+    projectOf(projectId),
+  ]);
+  return project ? masterFacts(project, access.personId) : null;
+});
+const keptLegalFacts = byProjectVersion("wf-legal", async (projectId) => {
+  const project = await projectOf(projectId);
+  return project ? legalFacts(project) : null;
+});
+const keptDistributionFacts = byProjectVersion(
+  "wf-distribution",
+  distributionFacts,
+);
+const keptMarketingStanding = byProjectVersion(
+  "wf-marketing",
+  loadMarketingStanding,
+);
+
 /**
  * The state of each workflow of a launched project, read from the existing
  * tables with the viewer's session at each request (nothing stored: ticket
@@ -340,7 +365,7 @@ async function distributionFacts(projectId: string) {
  * indépendante des statuts »). Cached per request, so the project's layout
  * (sidebar, chevrons) and its overview share one reading.
  */
-export const loadWorkflowStates = cache(
+export const loadWorkflowStates = trackedCache(
   byProjectVersion(
     "workflow-states",
     async (projectId: string): Promise<WorkflowStates | null> => {
@@ -366,17 +391,17 @@ export const loadWorkflowStates = cache(
         marketingStanding,
         designDone,
       ] = await Promise.all([
-        has("master") ? masterFacts(project, access.personId) : null,
-        has("legal") && legalAllowed ? legalFacts(project) : null,
+        has("master") ? keptMasterFacts(project.id) : null,
+        has("legal") && legalAllowed ? keptLegalFacts(project.id) : null,
         has("marketing") ? isWorkflowLaunched(project.id, "strategy") : false,
-        has("distribution") ? distributionFacts(project.id) : null,
+        has("distribution") ? keptDistributionFacts(project.id) : null,
         supabase
           .from("framing_constraints")
           .select("id, text")
           .eq("project_id", project.id)
           .eq("type", "rights")
           .eq("review_status", "confirmed"),
-        has("marketing") ? loadMarketingStanding(project.id) : null,
+        has("marketing") ? keptMarketingStanding(project.id) : null,
         // The Conception is done when every sheet is transferred (its stage
         // is never validated as a whole, docs/ARCHITECTURE.md § 8 decies).
         has("marketing")

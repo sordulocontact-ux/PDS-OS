@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { requireApproved } from "@/lib/auth/dal";
 import { assessFraming } from "@/lib/framing/assess";
@@ -68,7 +68,7 @@ async function loadPlanLaunch(projectId: string) {
  * assessment), the framing call, the plan, and the journey for the person
  * looking. Null when the project cannot be read or is not launched.
  */
-export const framingJourneyContext = cache(
+export const framingJourneyContext = trackedCache(
   byProjectVersion("framing-context", async (projectId: string) => {
     const [access, project] = await allInOrder([
       requireApproved(),

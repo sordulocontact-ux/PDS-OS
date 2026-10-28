@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import type { Access } from "@/lib/auth/access";
 import { PROOF_BUCKET } from "@/lib/distribution/proof-rules";
@@ -27,7 +27,7 @@ export type TrackingView = {
 
 /** The deposit cycles of a project, read with the viewer's session; once
  * per request (the Suivi and the Plateformes both read it). */
-export const loadTrackingView = cache(async function loadTrackingView(
+export const loadTrackingView = trackedCache(async function loadTrackingView(
   project: ProjectDetail,
   access: Access,
 ): Promise<TrackingView> {

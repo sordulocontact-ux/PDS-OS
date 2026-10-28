@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { fr } from "@/lib/i18n/fr";
 import { loadConceptionLinks } from "@/lib/production/conception-links";
@@ -31,7 +31,7 @@ export type ProductionDeliverableRef = {
 
 /** The deliverables in Production, in the Stratégie's order, read with the
  * user's session. Cached per request: the bar and the loader share it. */
-export const productionDeliverables = cache(
+export const productionDeliverables = trackedCache(
   async (projectId: string): Promise<ProductionDeliverableRef[]> => {
     const supabase = await createClient();
     const [deliverables, sheets, versions, links, deliveries] =

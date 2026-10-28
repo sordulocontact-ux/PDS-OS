@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
@@ -26,7 +26,7 @@ import { reviewJourney } from "./journey";
  * their decisions, the reserves, the closings, the activations and the
  * journey for the person looking.
  */
-export const reviewJourneyContext = cache(
+export const reviewJourneyContext = trackedCache(
   byProjectVersion("review-context", async (projectId: string) => {
     const [access, project] = await allInOrder([
       requireApproved(),

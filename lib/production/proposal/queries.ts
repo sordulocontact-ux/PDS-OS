@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { createClient } from "@/lib/supabase/server";
 
@@ -10,7 +10,7 @@ import { extOf, sideOf, type ProposalVersion } from "./model";
  * The proposal's versions of a sheet, newest first, with who deposited and
  * who decided by name. Read with the user's session (RLS), once per request.
  */
-export const loadProposalVersions = cache(
+export const loadProposalVersions = trackedCache(
   async (sheetId: string): Promise<ProposalVersion[]> => {
     const supabase = await createClient();
     const { data, error } = await supabase

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import {
   placeOf,
@@ -64,7 +64,7 @@ export type LaunchedJourneys = {
  * home, the navigation's count and the Calendrier; once per request. A
  * project that fails is left out and said (`error`), the others still show.
  */
-export const loadLaunchedJourneys = cache(
+export const loadLaunchedJourneys = trackedCache(
   async (): Promise<LaunchedJourneys> => {
     const { projects, error } = await listProjects();
     const launched = projects.filter((p) => p.status === "launched");
@@ -92,33 +92,35 @@ export const loadLaunchedJourneys = cache(
  * § 3, « Une seule source »), from loadLaunchedJourneys. Shared by the home,
  * the global Travail and the main navigation's count; once per request.
  */
-export const loadMyJourneyWork = cache(async (): Promise<MyJourneyWork> => {
-  const { projects, error } = await loadLaunchedJourneys();
-  const works: ProjectWork[] = [];
-  const byProject: Record<string, number> = {};
-  for (const { project, journeys } of projects) {
-    byProject[project.id] = journeys.mine.length;
-    if (journeys.mine.length === 0) continue;
-    works.push({
-      projectId: project.id,
-      projectTitle: project.title,
-      mine: journeys.mine,
-      validations: journeys.validations,
-      stepsByPlace: Object.fromEntries(
-        journeys.journeys.map((j) => [placeOf(j), j.steps]),
-      ),
-    });
-  }
-  works.sort(
-    (a, b) =>
-      firstDue(a).localeCompare(firstDue(b)) ||
-      a.projectTitle.localeCompare(b.projectTitle, "fr"),
-  );
-  return {
-    projects: works,
-    count: works.reduce((n, w) => n + w.mine.length, 0),
-    byProject,
-    validationCount: works.reduce((n, w) => n + w.validations.length, 0),
-    error,
-  };
-});
+export const loadMyJourneyWork = trackedCache(
+  async (): Promise<MyJourneyWork> => {
+    const { projects, error } = await loadLaunchedJourneys();
+    const works: ProjectWork[] = [];
+    const byProject: Record<string, number> = {};
+    for (const { project, journeys } of projects) {
+      byProject[project.id] = journeys.mine.length;
+      if (journeys.mine.length === 0) continue;
+      works.push({
+        projectId: project.id,
+        projectTitle: project.title,
+        mine: journeys.mine,
+        validations: journeys.validations,
+        stepsByPlace: Object.fromEntries(
+          journeys.journeys.map((j) => [placeOf(j), j.steps]),
+        ),
+      });
+    }
+    works.sort(
+      (a, b) =>
+        firstDue(a).localeCompare(firstDue(b)) ||
+        a.projectTitle.localeCompare(b.projectTitle, "fr"),
+    );
+    return {
+      projects: works,
+      count: works.reduce((n, w) => n + w.mine.length, 0),
+      byProject,
+      validationCount: works.reduce((n, w) => n + w.validations.length, 0),
+      error,
+    };
+  },
+);

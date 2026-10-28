@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import {
   networkRelationsOf,
@@ -95,7 +95,7 @@ export type NetworkContactDetail = NetworkContactValues & {
 
 // Once per request: the contact's frame answers a real 404 without it and
 // its page reuses the read.
-export const getNetworkContact = cache(async function getNetworkContact(
+export const getNetworkContact = trackedCache(async function getNetworkContact(
   id: string,
 ): Promise<NetworkContactDetail | null> {
   const supabase = await createClient();

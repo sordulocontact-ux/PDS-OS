@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { createClient } from "@/lib/supabase/server";
 
@@ -14,7 +14,7 @@ import { createClient } from "@/lib/supabase/server";
  * computed proof need (lib/activations/modules.ts, actors.ts,
  * derived-proof.ts).
  */
-export const loadModuleFacts = cache(async (projectId: string) => {
+export const loadModuleFacts = trackedCache(async (projectId: string) => {
   const supabase = await createClient();
   const [
     targets,

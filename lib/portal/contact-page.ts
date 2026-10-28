@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
@@ -81,7 +81,7 @@ export type OpenContactPage = Extract<ContactPage, { state: "open" }>;
 const TOKEN = /^[0-9a-f]{64}$/;
 
 /** Null when the token is malformed or unknown. */
-export const getContactPage = cache(
+export const getContactPage = trackedCache(
   async (token: string): Promise<ContactPage | null> => {
     if (!TOKEN.test(token)) return null;
     const supabase = await createClient();
@@ -131,7 +131,7 @@ export type ContactCallRequests = z.infer<typeof requests>[number];
  * what it asked of them (get_contact_call_requests): never the report.
  * Keyed by call. Empty when the token is unknown or closed.
  */
-export const getContactCallRequests = cache(
+export const getContactCallRequests = trackedCache(
   async (token: string): Promise<Map<string, ContactCallRequests>> => {
     if (!TOKEN.test(token)) return new Map();
     const supabase = await createClient();

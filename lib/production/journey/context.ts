@@ -1,7 +1,7 @@
 import "server-only";
 
 import { notFound, redirect } from "next/navigation";
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
@@ -22,7 +22,7 @@ import type { StepKey } from "./types";
  * request: access, the sheet, its phase, the detailed next action (shoot,
  * post, delivery) and the journey for the viewer.
  */
-export const journeyContext = cache(
+export const journeyContext = trackedCache(
   async (projectId: string, deliverableId: string) => {
     // The sheet is read with the access check, not after it; once it is
     // known, the journey's own reads start while the phase and the next

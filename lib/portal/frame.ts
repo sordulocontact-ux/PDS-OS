@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
@@ -23,7 +23,7 @@ const schema = z.object({
 });
 export type PortalFrame = z.infer<typeof schema>;
 
-export const getPortalFrame = cache(
+export const getPortalFrame = trackedCache(
   async (kind: PortalKind, token: string): Promise<PortalFrame | null> => {
     if (!/^[0-9a-f]{64}$/.test(token)) return null;
     const supabase = await createClient();

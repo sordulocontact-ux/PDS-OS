@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import type { Access } from "@/lib/auth/access";
 import { loadDeliveryTab } from "@/lib/production/delivery/queries";
@@ -12,7 +12,7 @@ import { loadShootData } from "@/lib/production/shoot/queries";
 // Each tab's data, read once per request: the sheet's layout (its next
 // action, PROD-001) and the tab itself share it. Null without a sheet.
 
-export const preprodFor = cache(
+export const preprodFor = trackedCache(
   async (projectId: string, deliverableId: string, access: Access) => {
     const data = await loadProductionSheet(projectId, deliverableId, access);
     if (!data?.sheet) return null;
@@ -20,7 +20,7 @@ export const preprodFor = cache(
   },
 );
 
-export const shootFor = cache(
+export const shootFor = trackedCache(
   async (projectId: string, deliverableId: string, access: Access) => {
     const data = await loadProductionSheet(projectId, deliverableId, access);
     if (!data?.sheet) return null;
@@ -33,7 +33,7 @@ export const shootFor = cache(
   },
 );
 
-export const postFor = cache(
+export const postFor = trackedCache(
   async (projectId: string, deliverableId: string, access: Access) => {
     const data = await loadProductionSheet(projectId, deliverableId, access);
     if (!data?.sheet) return null;
@@ -46,7 +46,7 @@ export const postFor = cache(
   },
 );
 
-export const deliveryFor = cache(
+export const deliveryFor = trackedCache(
   async (projectId: string, deliverableId: string, access: Access) => {
     const data = await loadProductionSheet(projectId, deliverableId, access);
     if (!data?.sheet) return null;

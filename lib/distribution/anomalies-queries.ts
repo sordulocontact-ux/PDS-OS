@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import type { Access } from "@/lib/auth/access";
 import {
@@ -24,7 +24,7 @@ const isState = oneOf(ANOMALY_STATES);
 const isModule = oneOf(ANOMALY_MODULES);
 
 /** A project's anomalies, read with the viewer's session. */
-export const loadAnomalies = cache(async function loadAnomalies(
+export const loadAnomalies = trackedCache(async function loadAnomalies(
   projectId: string,
   access: Access,
 ): Promise<Anomaly[]> {

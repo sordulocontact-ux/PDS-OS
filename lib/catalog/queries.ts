@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { catalogIdSchema } from "@/lib/catalog/schemas";
 import {
@@ -259,7 +259,7 @@ export async function listMasterOptions(): Promise<MasterOption[]> {
   return masters.map(masterOption);
 }
 
-export const getMaster = cache(
+export const getMaster = trackedCache(
   async (masterId: string): Promise<MasterDetail | null> => {
     if (!catalogIdSchema.safeParse(masterId).success) return null;
     const supabase = await createClient();

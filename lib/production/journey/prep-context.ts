@@ -1,7 +1,7 @@
 import "server-only";
 
 import { notFound } from "next/navigation";
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { todayInParis } from "@/lib/insights/dates";
 import { loadProviderLinks } from "@/lib/production/post/requests";
@@ -14,7 +14,7 @@ import { journeyContext } from "./context";
 
 /** A preparation step's data: the sheet's preproduction, its overview and
  * backward schedule, the providers' links. Read once per request. */
-export const prepContext = cache(
+export const prepContext = trackedCache(
   async (projectId: string, deliverableId: string) => {
     const ctx = await journeyContext(projectId, deliverableId);
     const sheet = ctx.data.sheet;

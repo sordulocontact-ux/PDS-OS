@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { can } from "@/lib/auth/access";
 import { getAccess } from "@/lib/auth/dal";
@@ -41,7 +41,7 @@ const isModule = (v: string): v is StepModule =>
  * with the user's session (RLS: whoever sees the project). The step, the
  * chips and the dialog filter it (`sameStep`, `attentionOf`).
  */
-export const loadStepTools = cache(
+export const loadStepTools = trackedCache(
   async (projectId: string): Promise<StepTools> => {
     const supabase = await createClient();
     const access = await getAccess();

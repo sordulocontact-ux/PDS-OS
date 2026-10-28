@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import type { Member } from "@/lib/framing/related";
 import {
@@ -53,7 +53,7 @@ const nameOf = (members: Member[], id: string | null) =>
  * project's creative team (who may be asked to validate). RLS decides: a
  * reviewer reads the version sent to them.
  */
-export const loadStrategyDocuments = cache(
+export const loadStrategyDocuments = trackedCache(
   async (projectId: string, members: Member[]): Promise<StrategyDocuments> => {
     const supabase = await createClient();
     const [workspace, documents, creatives] = await Promise.all([

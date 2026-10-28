@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { createClient } from "@/lib/supabase/server";
 
@@ -9,7 +9,7 @@ import { createClient } from "@/lib/supabase/server";
  * (budget readers only : RLS returns nothing to others), rights blocks,
  * contents with their feedback, payments. Cached per request.
  */
-export const loadInfluenceData = cache(async (activationId: string) => {
+export const loadInfluenceData = trackedCache(async (activationId: string) => {
   const supabase = await createClient();
   const [proposals, agreements, rights, contents, payments] = await Promise.all(
     [

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { fr } from "@/lib/i18n/fr";
 import { personName } from "@/lib/projects/types";
@@ -28,7 +28,7 @@ const t = fr.projectDates;
  * reading per request. The release date is never typed elsewhere: it is
  * changed on the project (Lancement) and the Cadrage confirms it.
  */
-export const loadProjectDates = cache(
+export const loadProjectDates = trackedCache(
   async (projectId: string): Promise<ProjectDates> => {
     const supabase = await createClient();
     const [project, framing, brief, deadline] = await Promise.all([

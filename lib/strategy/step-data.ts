@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { requireApproved } from "@/lib/auth/dal";
 import { loadBudget } from "@/lib/budget/queries";
@@ -38,7 +38,7 @@ import { allInOrder } from "@/lib/utils/parallel";
  * Kept per project version (page loads audit, docs/ARCHITECTURE.md § 3 bis):
  * the result is plain data (no function), so byProjectVersion keeps it.
  */
-export const strategyStepData = cache(
+export const strategyStepData = trackedCache(
   byProjectVersion("strategy-context", readStrategyStepData),
 );
 

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 import { z } from "zod";
 
 import { getAccess } from "@/lib/auth/dal";
@@ -50,7 +50,7 @@ const contacts = z.array(
 const fullName = (p: { first_name: string | null; last_name: string | null }) =>
   [p.first_name, p.last_name].filter(Boolean).join(" ") || null;
 
-export const loadContactLinks = cache(
+export const loadContactLinks = trackedCache(
   async (projectId: string): Promise<ContactLinks> => {
     const supabase = await createClient();
     const [access, project, people, links] = await Promise.all([

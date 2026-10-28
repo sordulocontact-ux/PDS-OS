@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 import { z } from "zod";
 
 import { FORM_ROLES } from "@/lib/legal/forms/definition";
@@ -76,7 +76,7 @@ export type PublicForm = z.infer<typeof publicSchema>;
 const TOKEN = LINK_KEY;
 
 /** Null when the token is malformed or unknown. */
-export const getPublicForm = cache(
+export const getPublicForm = trackedCache(
   async (token: string): Promise<PublicForm | null> => {
     if (!TOKEN.test(token)) return null;
     const supabase = await createClient();

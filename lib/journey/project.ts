@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { byProjectVersion } from "@/lib/projects/version-cache";
 import { allInOrder } from "@/lib/utils/parallel";
@@ -57,7 +57,7 @@ export async function readProjectJourneys(
  * overview, Travail, Validations and the navigation's counts read it; none
  * computes its own list.
  */
-export const loadProjectJourneys = cache(
+export const loadProjectJourneys = trackedCache(
   byProjectVersion("journeys", (projectId: string) =>
     readProjectJourneys(projectId),
   ),

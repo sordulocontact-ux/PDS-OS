@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { kindOfLever } from "@/lib/activations/kind-of-lever";
 import type { ActivationKind } from "@/lib/activations/model";
@@ -30,7 +30,7 @@ export type LeverBoard = {
 /** The rows « Leviers à préparer » is computed from, once per request: they
  * do not depend on the activations, so a journey starts them with the
  * board instead of after it (page loads audit, docs/ARCHITECTURE.md § 3 bis). */
-export const loadLeverRows = cache(async (projectId: string) => {
+export const loadLeverRows = trackedCache(async (projectId: string) => {
   const supabase = await createClient();
   const [brief, levers, choices] = await Promise.all([
     supabase
@@ -64,7 +64,7 @@ export const loadLeverRows = cache(async (projectId: string) => {
  * (« Plus tard », activation_lever_choices) or it is still to prepare.
  * Computed at each read.
  */
-export const loadLevers = cache(
+export const loadLevers = trackedCache(
   async (
     projectId: string,
     activations: ActivationRecord[],
@@ -97,7 +97,7 @@ export const loadLevers = cache(
  * calendrier de lancement »): the earliest temps fort of a deliverable of
  * its lever, else the release date. Null when neither is known.
  */
-export const proposedDue = cache(
+export const proposedDue = trackedCache(
   async (
     projectId: string,
     leverId: string | null,
@@ -127,7 +127,7 @@ export const proposedDue = cache(
 /** The campaign's concept for an influence in house (proto: « Concept de
  * campagne · Brief de sortie V1 › Narratif »): the Stratégie's confirmed
  * narrative, read where it lives, never copied. */
-export const campaignConcept = cache(
+export const campaignConcept = trackedCache(
   async (projectId: string): Promise<string | null> => {
     const supabase = await createClient();
     const { data, error } = await supabase

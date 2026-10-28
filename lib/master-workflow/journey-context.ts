@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { requireApproved } from "@/lib/auth/dal";
 import { requireLaunchedProject } from "@/lib/projects/queries";
@@ -17,7 +17,7 @@ import { loadMasterJourneyFacts } from "./journey-facts";
  * project, the facts of the round and the journey for the person looking.
  * Read by whoever sees the project (RLS decides the rows).
  */
-export const masterJourneyContext = cache(
+export const masterJourneyContext = trackedCache(
   byProjectVersion("master-context", async (projectId: string) => {
     const [access, project] = await allInOrder([
       requireApproved(),
@@ -54,7 +54,7 @@ export const masterJourneyContext = cache(
 /** The direction (permission `validate`), who pays and arbitrates: the
  * first one (list_direction_people; a member reads only their own
  * membership). */
-export const loadDirectionPerson = cache(async () => {
+export const loadDirectionPerson = trackedCache(async () => {
   const access = await requireApproved();
   if (!access.organizationId) return null;
   const supabase = await createClient();

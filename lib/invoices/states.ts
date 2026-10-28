@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { createClient } from "@/lib/supabase/server";
 
@@ -22,7 +22,7 @@ export type InvoiceStateRow = {
 
 const STATES = ["asked", "rib", "to_pay", "paid"] as const;
 
-export const loadInvoiceStates = cache(
+export const loadInvoiceStates = trackedCache(
   async (projectId: string): Promise<InvoiceStateRow[]> => {
     const supabase = await createClient();
     const { data, error } = await supabase.rpc("project_invoice_states", {

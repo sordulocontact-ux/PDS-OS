@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import type { Access } from "@/lib/auth/access";
 import {
@@ -203,7 +203,7 @@ const availabilityOf = (value: string): Availability =>
  * and each repeated these reads (page loads audit, docs/ARCHITECTURE.md
  * § 3 bis). Same queries, under RLS; shared, never changed by a caller.
  */
-const sheetProjectRows = cache(async (projectId: string) => {
+const sheetProjectRows = trackedCache(async (projectId: string) => {
   const supabase = await createClient();
   return Promise.all([
     supabase
@@ -234,7 +234,7 @@ const sheetProjectRows = cache(async (projectId: string) => {
 
 /** The Réseau's active contacts (the organization's, under RLS), once per
  * request for every sheet. */
-const activeNetworkContacts = cache(async () => {
+const activeNetworkContacts = trackedCache(async () => {
   const supabase = await createClient();
   return supabase
     .from("network_contacts")
@@ -603,4 +603,4 @@ async function loadSheet(
 }
 
 /** Cached per request: the layout and the tab read it once. */
-export const loadProductionSheet = cache(loadSheet);
+export const loadProductionSheet = trackedCache(loadSheet);

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { can, type Access } from "@/lib/auth/access";
 import {
@@ -39,7 +39,7 @@ export type PlatformsView = {
 
 /** The platforms of a release and its public availability, read with the
  * viewer's session; the detection's links come as suggestions only. */
-export const loadPlatformsView = cache(async function loadPlatformsView(
+export const loadPlatformsView = trackedCache(async function loadPlatformsView(
   project: ProjectDetail,
   access: Access,
 ): Promise<PlatformsView> {

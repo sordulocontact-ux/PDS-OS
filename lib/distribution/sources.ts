@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import type { Access } from "@/lib/auth/access";
 import { variantOf } from "@/lib/catalog/title-rules";
@@ -59,7 +59,7 @@ export type DistributionSources = {
  * from the project (lib/projects/dates.ts). References, never copies. Once
  * per request.
  */
-export const loadDistributionSources = cache(async function load(
+export const loadDistributionSources = trackedCache(async function load(
   project: ProjectDetail,
   access: Access,
 ): Promise<DistributionSources> {

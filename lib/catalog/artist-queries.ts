@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import type { ArtistDetail } from "@/lib/catalog/artist-types";
 import {
@@ -24,7 +24,7 @@ import { createClient } from "@/lib/supabase/server";
 const ARTIST_SELECT = `id, organization_id, name, relation, legal_name, country_code, bio, notes, picture_url, picture_path, deezer_id, deezer_url, credits:master_artists!master_artists_artist_same_org(master:masters!master_artists_master_same_org(id, title, variant, variant_label, audio_state, isrc, duration_seconds, final_validated_at, source_master_id, archived_at, ${CREDITS_SELECT}, links:project_masters!project_masters_master_same_org(project:projects!project_masters_project_same_org(id, archived_at))))`;
 
 // Cached per request: the layout and the tab pages read the same artist.
-export const getArtist = cache(
+export const getArtist = trackedCache(
   async (artistId: string): Promise<ArtistDetail | null> => {
     if (!catalogIdSchema.safeParse(artistId).success) return null;
     const supabase = await createClient();

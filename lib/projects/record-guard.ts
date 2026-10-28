@@ -1,7 +1,7 @@
 import "server-only";
 
 import { headers } from "next/headers";
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 import { z } from "zod";
 
 import { legalRouteOf } from "@/lib/ui/legal-steps";
@@ -56,7 +56,7 @@ export function recordOfPath(
 }
 
 /** True when the page asked names a record this project does not have. */
-export const missingProjectRecord = cache(
+export const missingProjectRecord = trackedCache(
   async (projectId: string): Promise<boolean> => {
     const path = (await headers()).get(PATH_HEADER);
     if (!path) return false;

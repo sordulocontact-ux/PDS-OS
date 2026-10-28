@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
@@ -51,7 +51,7 @@ const schema = z.object({
 export type PersonInvoices = z.infer<typeof schema>;
 export type PersonInvoice = PersonInvoices["invoices"][number];
 
-export const getPersonInvoices = cache(
+export const getPersonInvoices = trackedCache(
   async (token: string): Promise<PersonInvoices | null> => {
     if (!TOKEN.test(token)) return null;
     const supabase = await createClient();

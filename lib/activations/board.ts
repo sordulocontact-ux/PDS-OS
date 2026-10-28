@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import { moduleActions } from "@/lib/activations/actors";
 import { collaborationsOf, derivedProof } from "@/lib/activations/campaign";
@@ -120,7 +120,7 @@ function nextActionOf(
 
 /** Every activation of the project with its computed states. Cached per
  * request. */
-export const loadActivationsBoard = cache(async (projectId: string) => {
+export const loadActivationsBoard = trackedCache(async (projectId: string) => {
   const [data, modules, people, kit] = await Promise.all([
     loadActivationData(projectId),
     loadModuleFacts(projectId),

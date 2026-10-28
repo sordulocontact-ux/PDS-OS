@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import type { Access } from "@/lib/auth/access";
 import type { ProductionNext } from "@/lib/production/next/types";
@@ -39,7 +39,7 @@ const QUOTE: readonly QuoteStatus[] = [
  * soon as the sheet is known (preloadJourney), while the phase and the next
  * action are read, then shared by loadJourney (one request round fewer).
  */
-const journeyRows = cache(
+const journeyRows = trackedCache(
   async (
     projectId: string,
     deliverableId: string,
@@ -109,7 +109,7 @@ export function preloadJourney(
  * who acts now, from what the sheet, its preproduction, its quotes and its
  * phase say. Read once per request.
  */
-export const loadJourney = cache(
+export const loadJourney = trackedCache(
   async (
     projectId: string,
     deliverableId: string,

@@ -1,7 +1,7 @@
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { cache } from "react";
+import { trackedCache } from "@/lib/projects/live-deps";
 
 import type { LocatedCallReport } from "@/lib/ai/call-report";
 import type { Transcript } from "@/lib/ai/schemas/transcript";
@@ -479,6 +479,6 @@ export async function loadLatestReport(
 
 /** An internal meeting (getCall without a project), once per request: its
  * frame answers a real 404 without it and its pages reuse the read. */
-export const getMeeting = cache(async (callId: string) =>
+export const getMeeting = trackedCache(async (callId: string) =>
   getCall(await createClient(), null, callId),
 );
