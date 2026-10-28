@@ -75,8 +75,18 @@ export const callPrep = {
   minutesLabel: (topic: string) => `Durée de « ${topic} », en minutes`,
   minutes: (n: number) => `${n} min`,
   total: (n: number) => `Environ ${n} min`,
-  // Sent with the invitation.
+  // Sent with the invitation: shown in the form, written in the Google
+  // event's description (lib/calls/prep/invitation.ts).
   sent: "Envoyé avec l'invitation",
+  invitation: {
+    goal: (goal: string) => `Objectif : ${goal}`,
+    agenda: (minutes: number) => `Ordre du jour (environ ${minutes} min) :`,
+    point: (n: number, topic: string, minutes: number) =>
+      `${n}. ${topic} · ${minutes} min`,
+    documents: (names: string) => `Documents : ${names}`,
+    fact: (label: string, value: string) => `${label} : ${value}`,
+    footer: "Préparé dans PDS OS.",
+  },
   goal: "Objectif",
   goalMissing: "Dites en une phrase à quoi sert l'échange.",
   editGoal: "Modifier",

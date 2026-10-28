@@ -105,6 +105,7 @@ export function useCallPrep(
           minutes,
         })),
         documentIds,
+        facts: defaults.facts.map(({ label, value }) => ({ label, value })),
         extraIds: options.extraIds,
       });
       if (!result.ok) return setError(result.error);

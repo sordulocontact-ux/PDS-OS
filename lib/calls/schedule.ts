@@ -146,6 +146,9 @@ export async function attachGoogleMeet(
     slot: Slot;
     memberIds: string[];
     guests: Guest[];
+    // What the invitation says (a prepared call: its objective, agenda and
+    // documents); else one line.
+    description?: string;
   },
 ): Promise<boolean> {
   try {
@@ -168,7 +171,7 @@ export async function attachGoogleMeet(
     const event = await createMeetEvent({
       requestId: input.callId,
       title: input.title,
-      description: fr.calls.schedule.eventDescription,
+      description: input.description ?? fr.calls.schedule.eventDescription,
       start: input.slot.start,
       end: input.slot.end,
       guests: [...invited].map(([email, name]) => ({ email, name })),

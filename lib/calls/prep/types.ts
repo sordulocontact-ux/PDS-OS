@@ -87,6 +87,9 @@ export type PreparedCallInput = {
   attendeeKeys: string[];
   agenda: Array<{ key: string | null; topic: string; minutes: number | null }>;
   documentIds: string[];
+  // The module's lines of « Envoyé avec l'invitation » (Sujets, Points
+  // ouverts…), as shown: written in the invitation's description.
+  facts: Array<{ label: string; value: string }>;
   // Extra ids of the module (the Conception's deliverables).
   extraIds: string[];
 };

@@ -17,6 +17,7 @@ import {
   type PreparedCallInput,
   type PreparedCallResult,
 } from "@/lib/calls/prep/types";
+import { invitationText } from "@/lib/calls/prep/invitation";
 import { agendaSchema, buildPreparedAgenda } from "@/lib/calls/prepare-schema";
 import { attachGoogleMeet, saveGuests } from "@/lib/calls/schedule";
 import { fr } from "@/lib/i18n/fr";
@@ -41,6 +42,14 @@ const inputSchema = z.object({
   attendeeKeys: z.array(z.string().min(3).max(330)).min(2).max(30),
   agenda: agendaSchema,
   documentIds: z.array(z.uuid()).max(30),
+  facts: z
+    .array(
+      z.object({
+        label: z.string().trim().min(1).max(80),
+        value: z.string().trim().min(1).max(1000),
+      }),
+    )
+    .max(10),
   extraIds: z.array(z.uuid()).max(50),
 });
 
@@ -144,6 +153,12 @@ export async function createPreparedCall(
       slot: { start, end: new Date(start.getTime() + minutes * 60_000) },
       memberIds: attendees.memberIds,
       guests: attendees.guests,
+      description: await invitationText({
+        goal: p.goal,
+        agenda,
+        documentIds: p.documentIds,
+        facts: p.facts,
+      }),
     });
   }
   await schedulePendingPushes();

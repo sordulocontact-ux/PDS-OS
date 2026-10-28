@@ -1274,7 +1274,11 @@ la Production (call de production et call technique) et le Master. Il remplace `
   `create_strategy_call`, `create_design_call`, `create_production_call`, `create_master_exchange`),
   invite l'équipe (`call_attendees`, notification par trigger), écrit les invités (`call_guests`), crée le
   lien Meet par Google Agenda quand il est branché (Google envoie alors l'e-mail), sinon rien ne part
-  encore par e-mail et le lien de visio se colle. `stay` : la page reste (l'étape montre
+  encore par e-mail et le lien de visio se colle. La **description de l'invitation Google** reprend
+  « Envoyé avec l'invitation » (`invitationText`, `lib/calls/prep/invitation.ts`, Sacha 28/10/2026) :
+  objectif, ordre du jour avec durées et total, documents cochés par nom, lignes du module (Sujets,
+  Points ouverts…). Les questions de PO n'y sont pas (notes de l'organisateur). Un ordre du jour modifié
+  ensuite sur la page du call ne met pas la description à jour. `stay` : la page reste (l'étape montre
   `PlannedCallFacts`) ; sinon la page du call s'ouvre.
 - **Conteneur** : tant que l'étape d'une zone ne porte pas le formulaire, `CallPrepLauncher` le pose sous son
   bouton (`inline`, cartes d'entrée) ou dans le panneau latéral (`sheet`, barres d'outils). Les zones le
