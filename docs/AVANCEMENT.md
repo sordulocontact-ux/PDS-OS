@@ -1030,6 +1030,11 @@ prévu, à tous les modules qui en ont un (Stratégie, Conception, Production) :
   même contrôle `answerHolds`, rien d'ajouté au passage cité) : un « nouveau home studio » n'est plus
   proposé comme dépense engagée.
 
+- Puis (même jour) : Brief de cadrage en un geste, la prochaine version affichée telle qu'elle partira
+  et « Envoyer en validation à X » qui la fige et l'envoie (plus de « Créer le Brief ») ; les versions
+  précédentes repliées. Dans « 06 · Cadre juridique », les parties une par ligne avec leur statut,
+  qualifiables sur place tant que la dimension est ouverte.
+
 Reste : passage navigateur ; l'enregistrement dans la carte pour la Stratégie, la Conception et la
 Production ; « Annuler l'échange » pour l'échange stratégique et créatif si on le veut ;
 prévenir dans l'app les participants d'un échange annulé (aujourd'hui seul Google les prévient, quand il

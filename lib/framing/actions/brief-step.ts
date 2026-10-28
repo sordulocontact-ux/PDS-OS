@@ -5,7 +5,7 @@ import { z } from "zod";
 
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
-import { generateBrief, sendBrief } from "@/lib/framing/actions/brief-versions";
+import { sendFramingBrief } from "@/lib/framing/actions/brief-versions";
 import { DIMENSIONS } from "@/lib/framing/dimensions";
 import { fromDatabaseError, type ActionResult } from "@/lib/framing/result";
 import { fr } from "@/lib/i18n/fr";
@@ -15,7 +15,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { WriteResult } from "@/lib/utils/write-result";
 
 // The gestures of the step « Brief de cadrage » (proto frBrief), each with
-// what follows (rule 7): create a version, send it, and the direction's
+// what follows (rule 7): send the Cadrage as a version, and the direction's
 // decision in the step — validate, or ask for a change on the dimensions
 // checked, with a comment. States move in SQL only. The viewer's next step,
 // on another page, opens by itself (lot 3 of Ibé's feedback).
@@ -27,31 +27,17 @@ const asWrite = (result: ActionResult): WriteResult =>
     ? { ok: true }
     : { ok: false, error: fr.framing.errors[result.error] };
 
-/** « Créer le Brief » / « Créer la version n » / « Mettre à jour le Brief ». */
-export async function createBriefVersion(
-  projectId: string,
-): Promise<WriteResult> {
-  return withOutcome(
-    projectId,
-    ["framing"],
-    t.briefCreated,
-    async () => asWrite(await generateBrief(projectId)),
-    { openNext: true },
-  );
-}
-
-/** « Envoyer en validation à X » (a reason when nothing changed). */
+/** « Envoyer en validation à X »: the version made and sent in one gesture
+ * (a reason when nothing changed since the last one sent). */
 export async function sendBriefVersion(
   projectId: string,
-  briefId: string,
   unchangedReason = "",
 ): Promise<WriteResult> {
   return withOutcome(
     projectId,
     ["framing"],
     t.briefSent,
-    async () =>
-      asWrite(await sendBrief(projectId, briefId, "", unchangedReason)),
+    async () => asWrite(await sendFramingBrief(projectId, unchangedReason)),
     { openNext: true },
   );
 }

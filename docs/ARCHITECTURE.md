@@ -1467,7 +1467,7 @@ liste), est obligatoire ou non, accepte ou non « Rien à signaler » (`{"none":
   (`answerHolds`, `lib/framing/answer-holds.ts` : chiffres repris de la citation, dépense dite engagée
   ou payée), et rien d'ajouté à ce que dit le passage), « Écrire moi-même », « Déjà connu » sous la carte. Les listes
   reprennent les écrans d'avant (pastilles de besoins, lignes de contraintes, cartes de rôles)
-  plus les échéances. `?step=brief` : ce qui reste avant le Brief, ou « Créer le Brief ».
+  plus les échéances. `?step=brief` : ce qui reste avant le Brief, ou son envoi en validation.
 - **Lecture par PO** (`lib/framing/analyse.ts`, schéma plat `lib/ai/schemas/framing-facts.ts`)
   : du contexte initial ou de la transcription d'un call, des propositions « à confirmer »
   pour les six dimensions. Citation introuvable = écartée ; valeur déjà confirmée ou proposée
@@ -1639,8 +1639,8 @@ l'étape qui attend la personne (`framingLanding`) et les anciennes URL (`?step=
   `lib/framing/journey-context.ts` (`framingJourneyContext`, `cache()` : connaissance, évaluation, call
   de cadrage `framing_calls`, plan) ; loader `lib/journey/framing.ts` branché dans `JOURNEY_LOADERS`
   (le relais de la Vue d'ensemble s'efface). Acteurs : le responsable du projet (« Démarrer le cadrage »,
-  « Tenir l'échange de cadrage », « Répondre à n questions de PO », « Créer le Brief de cadrage » /
-  « Créer la version n du Brief », « Envoyer le Brief en validation », « Lancer le plan du projet ») ;
+  « Tenir l'échange de cadrage », « Répondre à n questions de PO », « Envoyer le Brief en validation »
+  (un seul geste depuis le 28/10/2026), « Lancer le plan du projet ») ;
   la direction `kind: "validate"` sur « Valider le Brief de cadrage » (Validations du projet).
   Le Brief garde ses versions lisibles après une demande de modification (défaut du proto non recopié).
 - **Cadre** : `FramingStepFrame` (en-tête avec « Qui fait quoi » = responsable et validation,
@@ -1665,16 +1665,22 @@ l'étape qui attend la personne (`framingLanding`) et les anciennes URL (`?step=
   « Pourquoi ce n'est pas applicable * » / « Marquer non applicable », « À définir plus tard » →
   « À définir avant le * » / « Reporter, avec une tâche »), puis 6 cartes repliables (`DimensionCards`,
   `VersionCard`) : une ligne par information avec pastille Connu / Confirmé / À confirmer / Manquant /
-  Non applicable / À définir plus tard (tons de `framingLineTone` ; Connu vert comme Confirmé, Sacha
+  Non applicable / À définir plus tard (les parties juridiques une par ligne sous leur ligne, avec
+  leur pastille et « Qualifier / Modifier » tant que la dimension est ouverte, `PartyLines` ; tons de
+  `framingLineTone` ; Connu vert comme Confirmé, Sacha
   28/10/2026) et « Répondre » (`?q=`) ; après une demande de modification,
   « Modifier » sur les réponses connues des dimensions rouvertes. Figé pendant la relecture (callout
   cadenas). `DimensionNav` et `QuestionPager` ne servent plus au Cadrage. **Dictée gardée** : le bouton
   « Dicter » reste sur la ligne de progression (il ne gêne pas le parcours, décision du lot 2).
   **`QuestionScreen` est la référence** d'une question « une à la fois » (Cadrage juridique, lot 9).
-- **Brief de cadrage** : versions en cartes (la dernière ouverte, `BriefVersionDoc` = « 01 · Objectif »
-  puis « Libellé : valeur · source », « À revoir » sur les dimensions renvoyées), « Créer le Brief » /
-  « Créer la version n » / « Mettre à jour le Brief », « Envoyer en validation à X » (raison écrite si
-  rien n'a changé, PROJ-BUG-05) ; la direction décide **dans l'étape** (`BriefDirectionDecision` =
+- **Brief de cadrage** : versions envoyées en cartes (seule la plus récente ouverte, les précédentes
+  repliées ; `BriefVersionDoc` = « 01 · Objectif » puis « Libellé : valeur · source », « À revoir » sur
+  les dimensions renvoyées). **Un seul geste** (Sacha, 28/10/2026, écart assumé au proto qui avait
+  « Créer le Brief » puis « Envoyer ») : quand tout est complet, la prochaine version s'affiche telle
+  qu'elle partira (le Cadrage en direct, « À envoyer », ouverte) et « Envoyer en validation à X »
+  (`sendFramingBrief`) la fige (`create_framing_brief`, ou le brouillon d'avant s'il dit la même chose)
+  et l'envoie (`send_framing_brief`) ; raison écrite si rien n'a changé depuis la dernière envoyée
+  (PROJ-BUG-05). Un brouillon jamais envoyé n'est plus montré en carte ; la direction décide **dans l'étape** (`BriefDirectionDecision` =
   `DecisionPanel` + « Dimensions à revoir » ; `decideFramingBrief` → `decide_framing_brief` forme
   « commentaire + dimensions » : seules les dimensions cochées rouvrent ; « Demander des corrections
   détaillées » = l'ancien formulaire de demandes, replié). Repliés sous « Corrections détaillées,

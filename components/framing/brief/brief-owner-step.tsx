@@ -6,10 +6,7 @@ import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import {
-  createBriefVersion,
-  sendBriefVersion,
-} from "@/lib/framing/actions/brief-step";
+import { sendBriefVersion } from "@/lib/framing/actions/brief-step";
 import { briefRequests } from "@/lib/i18n/fr/brief-requests";
 import { framingIntel } from "@/lib/i18n/fr/framing-intel";
 import { framingJourney } from "@/lib/i18n/fr/framing-journey";
@@ -17,56 +14,35 @@ import { framingJourney } from "@/lib/i18n/fr/framing-journey";
 const fr = { framingIntel, briefRequests, framingJourney };
 
 /**
- * The owner's gesture on the Brief, in the step (proto frBrief): create
- * it (or its next version, or update it when the Cadrage changed since),
- * or send it to the direction. A version that says what the last one sent
- * said goes only with a written reason (PROJ-BUG-05).
+ * The owner's gesture on the Brief, in the step: « Envoyer en validation à
+ * X », which makes the version from the Cadrage shown above and sends it
+ * at once (Sacha 28/10/2026: no « Créer le Brief » before it). A version
+ * that says what the last one sent said goes only with a written reason
+ * (PROJ-BUG-05).
  */
 export function BriefOwnerStep({
   projectId,
-  action,
+  validatorName,
+  unchangedFrom,
 }: {
   projectId: string;
-  action:
-    | { kind: "create"; label: string }
-    | {
-        kind: "send";
-        briefId: string;
-        validatorName: string;
-        unchangedFrom: number | null;
-      };
+  validatorName: string;
+  unchangedFrom: number | null;
 }) {
   const tu = fr.briefRequests.unchanged;
   const [reason, setReason] = useState("");
   const [tried, setTried] = useState(false);
   const { pending, error, run } = useWriteSubmit(
     () => setReason(""),
-    action.kind === "create"
-      ? fr.framingJourney.done.briefCreated
-      : fr.framingJourney.done.briefSent,
+    fr.framingJourney.done.briefSent,
   );
-  if (action.kind === "create")
-    return (
-      <div className="flex flex-col gap-2">
-        <div>
-          <Button
-            disabled={pending}
-            aria-busy={pending || undefined}
-            onClick={() => run(() => createBriefVersion(projectId))}
-          >
-            {pending ? fr.framingJourney.brief.creating : action.label}
-          </Button>
-        </div>
-        <FormMessage kind="error">{error}</FormMessage>
-      </div>
-    );
-  const needsReason = action.unchangedFrom !== null;
+  const needsReason = unchangedFrom !== null;
   const missing = tried && needsReason && !reason.trim();
   return (
     <div className="flex flex-col gap-3">
       {needsReason && (
         <p className="text-caption text-[color:var(--text-secondary)]">
-          {tu.warning(action.unchangedFrom ?? 0)}
+          {tu.warning(unchangedFrom ?? 0)}
         </p>
       )}
       {needsReason && (
@@ -95,12 +71,12 @@ export function BriefOwnerStep({
               document.getElementById("brief-unchanged-reason")?.focus();
               return;
             }
-            run(() => sendBriefVersion(projectId, action.briefId, reason));
+            run(() => sendBriefVersion(projectId, reason));
           }}
         >
           {pending
             ? fr.framingJourney.brief.sending
-            : fr.framingJourney.brief.sendTo(action.validatorName)}
+            : fr.framingJourney.brief.sendTo(validatorName)}
         </Button>
       </div>
     </div>

@@ -30,6 +30,8 @@ const day = new Intl.DateTimeFormat("fr-FR", {
  * name, each qualified by a person — never by its role alone. A party not
  * qualified yet reads « À qualifier »; a contract found in Contrats is shown
  * as a lead, not applied. Roles nobody holds are named apart: no party.
+ * Also in the card « 06 · Cadre juridique » once the question is answered,
+ * one party per line, still qualified there while the dimension is open.
  */
 export function PartyLines({
   projectId,
@@ -45,7 +47,8 @@ export function PartyLines({
   // A free-text answer written before the qualification, kept in sight.
   legacy: string | null;
   editable: boolean;
-  nextHref: string;
+  // The question screen goes on to the next question; the card does not.
+  nextHref?: string;
 }) {
   const t = fr.framingIntel.parties;
   const { pending, run } = useFramingAction();
@@ -138,7 +141,7 @@ export function PartyLines({
           {t.unassigned(board.unassignedRoles)}
         </p>
       )}
-      {board.lines.length > 0 && board.undecided === 0 && (
+      {nextHref && board.lines.length > 0 && board.undecided === 0 && (
         <Link
           href={nextHref}
           className={buttonVariants({ size: "lg", className: "self-start" })}

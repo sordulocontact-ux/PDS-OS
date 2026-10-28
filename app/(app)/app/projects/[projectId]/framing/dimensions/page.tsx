@@ -13,6 +13,7 @@ import { routes } from "@/lib/auth/redirects";
 import { editableDimensions } from "@/lib/framing/analyse";
 import { nextAfter, type QuestionState } from "@/lib/framing/assess";
 import { linesOf } from "@/lib/framing/brief-snapshot";
+import { legalPartyBoard } from "@/lib/framing/legal-parties";
 import { isOpenRequest, requestsAt } from "@/lib/framing/brief-request-view";
 import { loadBriefRequests } from "@/lib/framing/brief-requests";
 import {
@@ -202,6 +203,7 @@ export default async function FramingDimensionsPage({
           current={question?.key ?? null}
           editable={editableIn}
           modifiable={correction}
+          parties={{ board: legalPartyBoard(k), members: k.framing.members }}
         />
       </div>
     </FramingStepFrame>

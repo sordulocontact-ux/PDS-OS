@@ -43,56 +43,47 @@ async function done(
 }
 
 /**
- * « Générer le Brief » / « Mettre à jour le Brief »: a new version from the
- * Cadrage as it stands, once every required question is known and nothing
- * is left to confirm. The snapshot is written by the server.
- */
-export async function generateBrief(projectId: string): Promise<ActionResult> {
-  if (!z.uuid().safeParse(projectId).success) return fail("invalid_input");
-  const access = await requireApproved();
-  const knowledge = await loadFramingKnowledge(projectId, access);
-  if (!knowledge) return fail("not_found");
-  if (!assessFraming(knowledge).ready) return fail("brief_incomplete");
-  const supabase = await createClient();
-  const { error } = await supabase.rpc("create_framing_brief", {
-    p_project_id: projectId,
-    p_content: buildBriefSnapshot(knowledge) as never,
-  });
-  if (error?.message?.includes("stage_locked")) return fail("stage_locked");
-  return done(projectId, error);
-}
-
-/**
- * « Envoyer en validation »: the latest version, if it is still the Cadrage.
- * A version that says exactly what the last one sent said goes only with a
+ * « Envoyer en validation à X » (Sacha 28/10/2026: one gesture, no more
+ * « Créer le Brief » before it): the Cadrage as it stands becomes a version,
+ * written by the server, and goes to the direction at once. Only once every
+ * required question is known and nothing is left to confirm. A draft
+ * version left from before that still says the same is sent as it is. A
+ * version that says exactly what the last one sent said goes only with a
  * written reason (PROJ-BUG-05), checked again by the database.
  */
-export async function sendBrief(
+export async function sendFramingBrief(
   projectId: string,
-  briefId: string,
-  note: string,
   unchangedReason = "",
 ): Promise<ActionResult> {
   const p = z
     .object({
       projectId: z.uuid(),
-      briefId: z.uuid(),
-      note: z.string().max(500),
       unchangedReason: z.string().trim().max(1000),
     })
-    .safeParse({ projectId, briefId, note, unchangedReason });
+    .safeParse({ projectId, unchangedReason });
   if (!p.success) return fail("invalid_input");
   const access = await requireApproved();
   const knowledge = await loadFramingKnowledge(projectId, access);
-  const version = knowledge?.briefs.find((b) => b.id === briefId);
-  const stored = version ? snapshotOf(version.content) : null;
-  if (!knowledge || !stored) return fail("not_found");
-  if (!snapshotMatches(stored, buildBriefSnapshot(knowledge)))
-    return fail("brief_outdated");
+  if (!knowledge) return fail("not_found");
+  if (!assessFraming(knowledge).ready) return fail("brief_incomplete");
+  const snapshot = buildBriefSnapshot(knowledge);
+  const draft = knowledge.briefs.find((b) => b.state === "pending");
+  const stored = draft ? snapshotOf(draft.content) : null;
   const supabase = await createClient();
+  let briefId =
+    draft && stored && snapshotMatches(stored, snapshot) ? draft.id : null;
+  if (!briefId) {
+    const { data, error } = await supabase.rpc("create_framing_brief", {
+      p_project_id: projectId,
+      p_content: snapshot as never,
+    });
+    if (error?.message?.includes("stage_locked")) return fail("stage_locked");
+    if (error || !data) return fromDatabaseError(error ?? {});
+    briefId = data;
+  }
   const { error } = await supabase.rpc("send_framing_brief", {
     p_brief_id: briefId,
-    p_note: note,
+    p_note: "",
     p_unchanged_reason: p.data.unchangedReason || undefined,
   });
   return done(projectId, error);

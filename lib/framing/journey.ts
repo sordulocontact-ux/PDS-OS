@@ -125,17 +125,10 @@ export function framingJourney(i: FramingJourneyInput): JourneyStep[] {
     briefActor = i.validator
       ? { ...i.validator, todo: t.todo.validate, kind: "validate" }
       : null;
-  } else if (v?.state === "pending") {
+  } else if (v || readyForBrief) {
+    // One gesture: the version is made and sent (Sacha 28/10/2026).
     briefStatus = "current";
     briefActor = readyForBrief ? owned(t.todo.send) : null;
-  } else if (v) {
-    briefStatus = "current";
-    briefActor = readyForBrief
-      ? owned(t.todo.createVersion(v.version + 1))
-      : null;
-  } else if (readyForBrief) {
-    briefStatus = "current";
-    briefActor = owned(t.todo.createBrief);
   } else briefStatus = "blocked";
   const brief: JourneyStep = {
     key: "brief",

@@ -584,7 +584,8 @@ Une seule action pleine (`variant="default"`) par carte, le reste en contour.
   toujours le bouton de l'échange qui est plein. Les en-têtes de page (à côté de
   « Dicter ») ne sont pas des cartes : l'échange y reste en contour.
 - **Brief existant** : « Voir le Brief » est plein, « Mettre à jour le Brief » en contour
-  (Sacha, 14/10/2026) ; sans Brief, « Créer le Brief » est plein.
+  (Sacha, 14/10/2026) ; Brief de cadrage : « Envoyer en validation à X » est plein, un seul geste
+  (28/10/2026).
 - **Bouton selon le statut** (retour « Néons » 04, 21/10/2026) : une action déjà faite
   n'est jamais reproposée telle quelle. Rien n'a changé depuis → plus de bouton, une ligne
   qui dit que c'est fait et comment le changer ; modifié depuis → « Enregistrer les

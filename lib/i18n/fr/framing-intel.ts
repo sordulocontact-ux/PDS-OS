@@ -332,6 +332,7 @@ export const framingIntel = {
   // The legal parties, qualified one by one (PROJ-BUG-03).
   parties: {
     undecided: "À qualifier",
+    count: (n: number) => plural(n, "partie", "parties"),
     qualify: "Qualifier",
     edit: "Modifier",
     clear: "Retirer la qualification",
@@ -566,9 +567,6 @@ export const framingIntel = {
       `Les informations nécessaires sont confirmées. ${plural(n, "information facultative reste vide", "informations facultatives restent vides")} : complétez-les si elles comptent pour ce projet.`,
     doneBody:
       "Toutes les informations nécessaires sont confirmées : le Brief peut être créé.",
-    generate: "Créer le Brief",
-    update: "Mettre à jour le Brief",
-    generating: "Création du Brief…",
     seeBrief: "Voir le Brief",
     remainingTitle: "Avant de créer le Brief",
     remaining: (n: number) =>
@@ -650,7 +648,6 @@ export const framingIntel = {
     commentLabel: "Ce qu'il faut corriger",
     dimensionsLabel: "Dimensions à rouvrir",
     submitChange: "Envoyer la demande",
-    outdated: "Le cadrage a changé depuis cette version.",
     emptyTitle: "Pas encore de Brief",
     emptyBody:
       "Le Brief se crée quand toutes les informations nécessaires sont confirmées.",

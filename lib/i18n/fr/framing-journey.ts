@@ -49,8 +49,6 @@ export const framingJourney = {
     hold: "Tenir l'échange de cadrage",
     answer: (n: number) =>
       `Répondre à ${plural(n, "question", "questions")} de PO`,
-    createBrief: "Créer le Brief de cadrage",
-    createVersion: (n: number) => `Créer la version ${n} du Brief`,
     send: "Envoyer le Brief en validation",
     validate: "Valider le Brief de cadrage",
     launch: "Lancer le plan du projet",
@@ -68,7 +66,6 @@ export const framingJourney = {
   // Gestures, for the toast and the result banner (rule 7).
   done: {
     started: "Cadrage commencé",
-    briefCreated: "Brief créé",
     briefSent: "Brief envoyé en validation",
     briefValidated: "Brief validé",
     changesRequested: "Modification demandée",
@@ -153,7 +150,7 @@ export const framingJourney = {
     complete: "Complète",
     answer: "Répondre",
     done: "Les 6 dimensions sont complètes.",
-    doneBody: "Le Brief de cadrage peut être créé.",
+    doneBody: "Le Brief de cadrage peut être envoyé en validation.",
     // The banner after an answer (lot 3 of Ibé's feedback): the verb of
     // the button, then the question's name.
     answered: (done: string, label: string) => `${done} · ${label}`,
@@ -190,11 +187,8 @@ export const framingJourney = {
       name ? `Créée par ${name} le ${when}` : `Créée le ${when}`,
     notYet: (n: number) =>
       `Le Brief se crée quand les 6 dimensions sont complètes : ${plural(n, "point", "points")} à traiter dans « Les 6 dimensions ».`,
-    create: "Créer le Brief",
-    createVersion: (n: number) => `Créer la version ${n}`,
     sendTo: (name: string) => `Envoyer en validation à ${name}`,
     // While it runs (lot 3 of Ibé's feedback).
-    creating: "Création du Brief…",
     sending: "Envoi en validation…",
     question: "Le projet est-il assez clair pour que PO organise la suite ?",
     toReview: "Dimensions à revoir",

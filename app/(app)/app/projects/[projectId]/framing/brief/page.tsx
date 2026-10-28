@@ -71,6 +71,13 @@ export default async function FramingBriefPage({
   const working = stage === "not_started" || stage === "in_progress";
   const validatorName = ctx.validator?.name ?? "—";
   const stepOf = (key: string) => ctx.steps.find((s) => s.key === key);
+  // The owner sends the Cadrage: it is shown as the next version, open.
+  const sending =
+    stage !== "validated" &&
+    latest?.state !== "sent" &&
+    canEdit &&
+    working &&
+    open === 0;
 
   // What the step offers now (proto frBrief, in this order).
   let act: React.ReactNode = null;
@@ -101,49 +108,22 @@ export default async function FramingBriefPage({
       ) : (
         <StepWaiting step={stepOf("brief")} />
       );
-  else if (canEdit && working && open === 0) {
-    const outdated =
-      latest?.state === "pending" &&
-      stored !== null &&
-      !snapshotMatches(stored, live);
-    if (latest?.state === "pending" && stored && !outdated) {
-      const lastSent = k.briefs.find(
-        (b) => b.version < latest.version && b.sent_at,
-      );
-      const lastSnap = lastSent ? snapshotOf(lastSent.content) : null;
-      act = (
-        <BriefOwnerStep
-          projectId={projectId}
-          action={{
-            kind: "send",
-            briefId: latest.id,
-            validatorName,
-            unchangedFrom:
-              lastSent && lastSnap && snapshotMatches(lastSnap, stored)
-                ? lastSent.version
-                : null,
-          }}
-        />
-      );
-    } else
-      act = (
-        <>
-          {outdated && (
-            <ToneCallout tone="warning">{ti.brief.outdated}</ToneCallout>
-          )}
-          <BriefOwnerStep
-            projectId={projectId}
-            action={{
-              kind: "create",
-              label: outdated
-                ? ti.guide.update
-                : latest
-                  ? t.createVersion(latest.version + 1)
-                  : t.create,
-            }}
-          />
-        </>
-      );
+  else if (sending) {
+    // The Cadrage as it will be sent, then one gesture that makes the
+    // version and sends it (Sacha 28/10/2026, no « Créer le Brief »).
+    const lastSent = k.briefs.find((b) => b.sent_at);
+    const lastSnap = lastSent ? snapshotOf(lastSent.content) : null;
+    act = (
+      <BriefOwnerStep
+        projectId={projectId}
+        validatorName={validatorName}
+        unchangedFrom={
+          lastSent && lastSnap && snapshotMatches(lastSnap, live)
+            ? lastSent.version
+            : null
+        }
+      />
+    );
   } else if (open > 0 && working)
     act = (
       <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
@@ -151,14 +131,35 @@ export default async function FramingBriefPage({
       </p>
     );
 
-  // The versions, latest first and open; each says who sent it back.
-  const cards = k.briefs.map((b, index) => {
+  // The versions the direction received, latest first; only the newest is
+  // open (Sacha 28/10/2026: the previous ones folded). A draft never sent,
+  // left from before the one gesture, is not a version anyone read.
+  const sent = k.briefs.filter((b) => b.sent_at);
+  const preview = sending && (
+    <VersionCard
+      key="next"
+      defaultOpen
+      title={t.versionTitle(
+        // A draft left from before that still says the same is the one sent.
+        latest?.state === "pending" && stored && snapshotMatches(stored, live)
+          ? latest.version
+          : (latest?.version ?? 0) + 1,
+      )}
+      status={{
+        tone: briefVersionTone.pending,
+        label: ti.brief.states.pending,
+      }}
+    >
+      <BriefVersionDoc snapshot={live} />
+    </VersionCard>
+  );
+  const cards = sent.map((b, index) => {
     const snap = snapshotOf(b.content);
     const state = (ti.brief.states as Record<string, string>)[b.state];
     return (
       <VersionCard
         key={b.id}
-        defaultOpen={index === 0}
+        defaultOpen={index === 0 && !sending}
         title={t.versionTitle(b.version)}
         status={{
           tone: briefVersionTone[b.state] ?? "neutral",
@@ -249,6 +250,7 @@ export default async function FramingBriefPage({
             <BriefVersionDoc snapshot={live} />
           </>
         )}
+        {preview}
         {cards}
         {act}
         {more}
