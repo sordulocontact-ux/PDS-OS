@@ -125,9 +125,11 @@ export function StepPanel({
             </StatusBadge>
           </div>
         </div>
-        <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
-          {step.why}
-        </p>
+        {step.why && (
+          <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
+            {step.why}
+          </p>
+        )}
         {/* The lead already names the viewer's own gesture. */}
         {!(lead && step.actor?.viewer) && <StepActor step={step} />}
         {lead ? (

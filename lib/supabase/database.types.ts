@@ -18708,6 +18708,7 @@ export type Database = {
         Returns: boolean
       }
       can_view_person: { Args: { target_person_id: string }; Returns: boolean }
+      cancel_framing_call: { Args: { p_call_id: string }; Returns: string }
       check_production_export: {
         Args: { p_line_id: string; p_points: Json }
         Returns: undefined

@@ -117,6 +117,24 @@ export const framingJourney = {
       name
         ? `Commencé directement par ${name} le ${when}`
         : `Commencé directement le ${when}`,
+    // « Annuler l'échange » (Sacha 28/10): back to the two ways in.
+    cancel: {
+      label: "Annuler l'échange",
+      title: "Annuler l'échange de cadrage ?",
+      body: (when: string) =>
+        `L'échange du ${when} est supprimé, avec son invitation. Vous revenez au choix : commencer le cadrage avec PO ou préparer un autre échange.`,
+      keep: "Garder l'échange",
+      pending: "Annulation…",
+      done: "Échange annulé",
+      googleFailed:
+        "Échange annulé, mais Google n'a pas pu retirer l'invitation : prévenez les participants.",
+      errors: {
+        recorded:
+          "L'échange a déjà été enregistré : il ne peut plus être annulé.",
+        forbidden: "Seul le responsable du projet peut annuler l'échange.",
+        generic: "L'échange n'a pas pu être annulé. Réessayez.",
+      },
+    },
     choseCall: "Préparer un échange",
     chosenBy: (name: string) => `· choisi par ${name}`,
     change: "Changer",

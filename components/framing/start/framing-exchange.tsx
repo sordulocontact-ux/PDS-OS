@@ -3,6 +3,7 @@ import { MeetingFacts } from "@/components/calls/meeting/meeting-facts";
 import { MeetingSummaryBlock } from "@/components/calls/meeting/meeting-summary-block";
 import { MeetingSummaryFor } from "@/components/calls/meeting/meeting-summary-for";
 import { PlannedCallFacts } from "@/components/calls/prep/planned-call-facts";
+import { CancelExchangeButton } from "@/components/framing/start/cancel-exchange-button";
 import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
 import { summaryDraft } from "@/lib/calls/meeting/draft";
@@ -106,6 +107,15 @@ export async function FramingExchange({
                   name: ownerName ?? "—",
                   what: fr.framingJourney.todo.hold.toLowerCase(),
                 }
+          }
+          secondary={
+            planned.projectId && (
+              <CancelExchangeButton
+                projectId={planned.projectId}
+                callId={call.callId}
+                when={callWhen(call.occurredAt)}
+              />
+            )
           }
         />
       );

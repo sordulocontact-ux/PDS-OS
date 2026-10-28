@@ -991,3 +991,22 @@ PostgREST). Livré (`docs/ARCHITECTURE.md` § 3 bis, « Cache par table ») :
   d'abord (un appel à Auth de moins, et les autres sessions du compte ne sont plus fermées).
 - Reste : gestes d'écriture optimistes si l'attente se voit encore, instance froide sur Vercel après
   une pause (cache d'exécution Vercel, payant), taille de l'instance de prod (décision).
+
+## Échange de cadrage selon la maquette Figma (28/10/2026, branche `pre-prod`)
+
+Maquette de Sacha (Figma PDS OS, node `282:6170`), appliquée au Cadrage et, pour le bloc de l'échange
+prévu, à tous les modules qui en ont un (Stratégie, Conception, Production) :
+
+- Un seul titre, « Échange de cadrage » ; la phrase des deux chemins disparaît une fois l'échange
+  préparé (un `why` vide n'est plus affiché), et « Départ » ne répète plus la date de l'échange prévu.
+- `PlannedCallFacts` redessiné : bloc Quand / Organisé par, lien de la visio (`LinkPill`), participants,
+  ordre du jour en liste ; le format (« Visio ») n'est plus affiché ; « Enregistrer l'échange » en
+  bouton principal ouvre la page du call sur son enregistreur (`#call-recording`).
+- « Annuler l'échange » (et non « Commencer sans appel ») : migration `20261028000301_cancel_framing_call`
+  (appliquée en pré-prod, à pousser en prod avec accord), test `supabase/tests/cancel-framing-call.test.sql`
+  (7/7 en pré-prod), annulation de l'événement Google.
+- La grille Exécute / Coordonne / Valide / Prérequis / Ensuite reste (choix de Sacha).
+
+Reste : passage navigateur ; « Annuler l'échange » pour l'échange stratégique et créatif si on le veut ;
+prévenir dans l'app les participants d'un échange annulé (aujourd'hui seul Google les prévient, quand il
+est branché).

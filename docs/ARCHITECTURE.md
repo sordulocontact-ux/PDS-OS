@@ -1167,6 +1167,12 @@ de call qui donne un lien Google Meet.
     événement Google, il suit (`moveMeetEvent`, Google prévient les invités) ; un refus de Google
     n'annule pas le déplacement, il est dit ;
   - sur téléphone, la période se lit en agenda de jours (`AgendaList`), sans geste.
+  - **« Annuler l'échange »** (Cadrage seulement, Sacha 28/10) : à côté de « Enregistrer l'échange »
+    tant que l'échange de cadrage est seulement prévu ; `cancel_framing_call` (SQL, responsable du
+    projet, rien d'enregistré : ni audio, ni prise, ni transcription, ni compte rendu) supprime le
+    call et ses invitations dans l'app, puis `cancelMeetEvent` annule l'événement Google (Google
+    prévient les invités ; un refus est dit, le call ne revient pas). Le Cadrage revient au choix
+    « Commencer le cadrage » / « Préparer un échange ».
   Non construit : annuler / supprimer un call depuis le calendrier, réunions récurrentes,
   disponibilités des participants, créer un call **de projet** depuis la grille (on crée une
   réunion interne).

@@ -109,6 +109,7 @@ export type JourneyStep = {
   key: string;
   href: string;
   title: string;
+  // Empty when nothing is left to explain (a choice already made).
   why: string;
   status: JourneyStatus;
   // The 4-column grid's Responsable and Validation (kept for the loaders

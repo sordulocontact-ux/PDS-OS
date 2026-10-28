@@ -96,7 +96,7 @@ type EventBody = {
 
 async function request(
   config: Settings,
-  method: "GET" | "POST" | "PATCH",
+  method: "GET" | "POST" | "PATCH" | "DELETE",
   path: string,
   body?: unknown,
 ): Promise<EventBody> {
@@ -117,6 +117,8 @@ async function request(
     throw new GoogleCalendarError("unreachable");
   }
   if (!response.ok) throw new GoogleCalendarError(`http_${response.status}`);
+  // A deleted event answers with no body.
+  if (response.status === 204) return {} as EventBody;
   return (await response.json()) as EventBody;
 }
 
@@ -203,4 +205,22 @@ export async function moveMeetEvent(input: {
       end: { dateTime: input.end.toISOString(), timeZone: "Europe/Paris" },
     },
   );
+}
+
+/** Cancels the event; Google tells every guest (sendUpdates). Already gone
+ * (410) counts as cancelled. */
+export async function cancelMeetEvent(eventId: string): Promise<void> {
+  const config = settings();
+  if (!config) throw new GoogleCalendarError("not_configured");
+  try {
+    await request(
+      config,
+      "DELETE",
+      `/calendars/${encodeURIComponent(config.calendarId)}/events/${encodeURIComponent(eventId)}?sendUpdates=all`,
+    );
+  } catch (error) {
+    if (error instanceof GoogleCalendarError && error.reason === "http_410")
+      return;
+    throw error;
+  }
 }

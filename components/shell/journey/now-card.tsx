@@ -120,7 +120,7 @@ export function NowCard({
               ? texts.waitingTitle
               : texts.finished}
       </h2>
-      {first && !overview && (
+      {first?.step.why && !overview && (
         <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
           {first.step.why}
         </p>

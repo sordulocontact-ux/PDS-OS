@@ -104,12 +104,11 @@ export const callPrep = {
   locked: "Cette étape est fermée : l'échange ne peut plus être préparé ici.",
   // Once created, in the step.
   planned: {
-    exchange: "Échange prévu",
-    call: "Call prévu",
-    when: (when: string, format: string | null) =>
-      format ? `${when} · ${format}` : when,
-    createdBy: (name: string, day: string) => `créé par ${name} le ${day}`,
+    when: "Quand",
+    organizer: "Organisé par",
     link: "Lien de la visio",
+    copy: "Copier le lien",
+    copied: "Lien copié",
     participants: "Participants",
     agenda: "Ordre du jour",
     note: {
@@ -117,7 +116,10 @@ export const callPrep = {
         "L'échange s'enregistre dans PDS OS. À la fin, PO propose ce qui a été dit, point par point, avec la phrase exacte.",
       call: "Le call s'enregistre dans PDS OS. À la fin, PO propose ce qui a été dit, point par point, avec la phrase exacte.",
     },
-    open: "Ouvrir le call",
+    record: {
+      exchange: "Enregistrer l'échange",
+      call: "Enregistrer le call",
+    },
     waiting: (name: string, what: string) => `En attente de ${name} : ${what}`,
   },
   // What each module computes for its call (titles, facts, notes).

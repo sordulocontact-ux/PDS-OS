@@ -25,6 +25,7 @@ export function ConfirmButton({
   body,
   confirmLabel,
   pendingLabel,
+  cancelLabel = t.cancel,
   done,
   run,
 }: {
@@ -35,6 +36,8 @@ export function ConfirmButton({
   body: string;
   confirmLabel: string;
   pendingLabel: string;
+  // Replaces « Annuler » when the action itself cancels something.
+  cancelLabel?: string;
   done: string;
   run: () => Promise<WriteResult>;
 }) {
@@ -60,7 +63,7 @@ export function ConfirmButton({
         }}
         title={title}
         description={body}
-        cancelLabel={t.cancel}
+        cancelLabel={cancelLabel}
         closeLabel={t.close}
         confirmLabel={confirmLabel}
         pendingLabel={pendingLabel}

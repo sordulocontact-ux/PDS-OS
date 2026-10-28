@@ -63,7 +63,9 @@ export function framingJourney(i: FramingJourneyInput): JourneyStep[] {
       : i.startedDirect || beyond
         ? t.steps.start.titleDirect
         : t.steps.start.title,
-    why: t.steps.start.why,
+    // Once the exchange is prepared, the choice is made: no « why » about
+    // the two ways in (Sacha 28/10).
+    why: i.call ? "" : t.steps.start.why,
     status: startDone ? "done" : "current",
     owner: null,
     validator: null,

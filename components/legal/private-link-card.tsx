@@ -3,7 +3,7 @@
 import { IconLink } from "nucleo-sharp-essential";
 
 import { Button } from "@/components/ui/button";
-import { CopyButton } from "@/components/ui/copy-button";
+import { LinkPill } from "@/components/ui/link-pill";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { ReasonForm } from "@/components/ui/reason-form";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -69,19 +69,7 @@ export function PrivateLinkCard({
       </div>
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 p-3.5">
         {url ? (
-          <span className="inline-flex max-w-full min-w-0 items-center gap-2 rounded-full bg-[var(--surface-soft)] py-1 pr-1 pl-4">
-            <code className="min-w-0 truncate text-[length:var(--type-caption)]">
-              {url}
-            </code>
-            <CopyButton
-              value={url}
-              label=""
-              copiedLabel={t.copied}
-              variant="ghost"
-              size="icon-sm"
-              ariaLabel={t.copy}
-            />
-          </span>
+          <LinkPill url={url} copyLabel={t.copy} copiedLabel={t.copied} />
         ) : (
           <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
             {t.noLink}
