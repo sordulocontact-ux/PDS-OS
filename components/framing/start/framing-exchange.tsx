@@ -57,10 +57,11 @@ function framingLines(
 
 /**
  * The framing exchange in « Démarrer le cadrage », once prepared (proto
- * prepGate « frame », then summaryBlock): « Départ · Échange de cadrage du
- * … », the planned call (recorded in PDS OS from its page), then — once
- * recorded, transcribed and filed by PO — the meeting and, when everything
- * said is settled in « Les 6 dimensions », the summary to the participants.
+ * prepGate « frame », then summaryBlock): the planned call (recorded in PDS
+ * OS from its page), then — once recorded — « Départ · Échange de cadrage
+ * du … » and, once transcribed and filed by PO, the meeting and, when
+ * everything said is settled in « Les 6 dimensions », the summary to the
+ * participants.
  */
 export async function FramingExchange({
   call,
@@ -92,23 +93,21 @@ export async function FramingExchange({
   if (!call.reported) {
     const planned = await loadPlannedCall(call.callId);
     if (!planned) return departure;
+    // The planned call already says when (« Échange prévu »): no « Départ ».
     if (!call.recorded)
       return (
-        <div className="flex flex-col gap-5">
-          {departure}
-          <PlannedCallFacts
-            call={planned}
-            noun="exchange"
-            waiting={
-              canEdit
-                ? null
-                : {
-                    name: ownerName ?? "—",
-                    what: fr.framingJourney.todo.hold.toLowerCase(),
-                  }
-            }
-          />
-        </div>
+        <PlannedCallFacts
+          call={planned}
+          noun="exchange"
+          waiting={
+            canEdit
+              ? null
+              : {
+                  name: ownerName ?? "—",
+                  what: fr.framingJourney.todo.hold.toLowerCase(),
+                }
+          }
+        />
       );
     return (
       <div className="flex flex-col gap-3">
