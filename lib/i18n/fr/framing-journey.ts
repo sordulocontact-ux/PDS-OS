@@ -203,7 +203,7 @@ export const framingJourney = {
     validated: "✓ Brief validé · ✓ Cadrage terminé.",
     validatedBody: (name: string | null, when: string) =>
       `Validé par ${name ?? "la direction"} le ${when}. PO propose maintenant le plan du projet.`,
-    more: "Corrections détaillées, comparaison et export",
+    more: "Corrections détaillées et comparaison",
     detailed: "Demander des corrections détaillées",
     openRequests: (n: number) =>
       `${plural(n, "demande obligatoire reste ouverte", "demandes obligatoires restent ouvertes")} : elle${n > 1 ? "s" : ""} empêche${n > 1 ? "nt" : ""} de valider. Levez-la${n > 1 ? "s" : ""} ou demandez une modification.`,

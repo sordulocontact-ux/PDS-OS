@@ -1,11 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { z } from "zod";
 
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { sendFramingBrief } from "@/lib/framing/actions/brief-versions";
+import { keepSentBriefPdf } from "@/lib/framing/brief-pdf-file";
 import { DIMENSIONS } from "@/lib/framing/dimensions";
 import { fromDatabaseError, type ActionResult } from "@/lib/framing/result";
 import { fr } from "@/lib/i18n/fr";
@@ -82,6 +84,9 @@ export async function decideFramingBrief(
         p_dimensions: approve ? undefined : p.data.dimensions,
       });
       if (error) return asWrite(fromDatabaseError(error));
+      // « Validée » is printed on the PDF: the validated one is kept too.
+      const validationId = p.data.validationId;
+      if (approve) after(() => keepSentBriefPdf({ validationId }));
       await schedulePendingPushes();
       revalidatePath(routes.project(projectId), "layout");
       return { ok: true };

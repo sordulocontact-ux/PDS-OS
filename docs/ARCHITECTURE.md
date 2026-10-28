@@ -1683,8 +1683,16 @@ l'étape qui attend la personne (`framingLanding`) et les anciennes URL (`?step=
   (PROJ-BUG-05). Un brouillon jamais envoyé n'est plus montré en carte ; la direction décide **dans l'étape** (`BriefDirectionDecision` =
   `DecisionPanel` + « Dimensions à revoir » ; `decideFramingBrief` → `decide_framing_brief` forme
   « commentaire + dimensions » : seules les dimensions cochées rouvrent ; « Demander des corrections
-  détaillées » = l'ancien formulaire de demandes, replié). Repliés sous « Corrections détaillées,
-  comparaison et export » : complétude, demandes, comparaison, document complet, PDF, historique.
+  détaillées » = l'ancien formulaire de demandes, replié). « Télécharger en PDF » et « Copier le lien » sur
+  **chaque carte de version** (28/10/2026) ; repliés sous « Corrections détaillées et comparaison » :
+  complétude, demandes, comparaison, document complet, historique. **PDF gardé** (bucket
+  `framing-brief-pdfs`, `lib/framing/brief-pdf-file.ts`, migration `20261028000701`) : une version
+  envoyée est imprimée une fois par état (`<id>-<state>.pdf`, « Validée » s'imprime), juste après l'envoi
+  et la validation (`after`), ou au premier téléchargement ; ensuite le fichier est relu sans navigateur.
+  Écrit seulement par le responsable ou la direction (RLS, une fois, jamais remplacé), lu par qui voit le
+  projet. La route ne lit plus tout le Cadrage pour une version (seulement s'il n'y en a pas). Police
+  Google Sans Flex intégrée au HTML (`lib/pdf/fonts/google-sans-flex.ts`, OFL) : plus d'attente de
+  Google Fonts pour ce PDF.
   Gestes en `WriteResult` avec `withOutcome` (`lib/framing/actions/brief-step.ts`).
 - **Après le plan** : tout le Cadrage se lit (étapes faites, rien de modifiable), le Brief validé reste
   consultable dans son étape.

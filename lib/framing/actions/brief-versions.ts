@@ -1,11 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { z } from "zod";
 
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { assessFraming } from "@/lib/framing/assess";
+import { keepSentBriefPdf } from "@/lib/framing/brief-pdf-file";
 import {
   buildBriefSnapshot,
   snapshotMatches,
@@ -86,6 +88,9 @@ export async function sendFramingBrief(
     p_note: "",
     p_unchanged_reason: p.data.unchangedReason || undefined,
   });
+  // Its PDF printed now, after the response: downloads read it back.
+  const sent = briefId;
+  if (!error) after(() => keepSentBriefPdf({ id: sent }));
   return done(projectId, error);
 }
 

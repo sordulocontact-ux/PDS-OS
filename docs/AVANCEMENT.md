@@ -1035,6 +1035,11 @@ prévu, à tous les modules qui en ont un (Stratégie, Conception, Production) :
   précédentes repliées. Dans « 06 · Cadre juridique », les parties une par ligne avec leur statut,
   qualifiables sur place tant que la dimension est ouverte.
 
+- Puis (même jour) : PDF du Brief gardé dans Storage (imprimé à l'envoi et à la validation, relu ensuite),
+  police intégrée, bouton « Télécharger en PDF » sur chaque carte de version. Migration
+  `20261028000701_framing_brief_pdfs` (appliquée en pré-prod, à pousser en prod avec accord), test
+  `supabase/tests/framing-brief-pdfs.test.sql` (6/6 en pré-prod).
+
 Reste : passage navigateur ; l'enregistrement dans la carte pour la Stratégie, la Conception et la
 Production ; « Annuler l'échange » pour l'échange stratégique et créatif si on le veut ;
 prévenir dans l'app les participants d'un échange annulé (aujourd'hui seul Google les prévient, quand il

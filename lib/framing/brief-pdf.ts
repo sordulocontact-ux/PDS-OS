@@ -4,6 +4,7 @@ import type { BriefSnapshot } from "@/lib/framing/brief-snapshot";
 import { summaryGroups } from "@/lib/framing/brief-snapshot";
 import { DIMENSIONS } from "@/lib/framing/dimensions";
 import { fr } from "@/lib/i18n/fr";
+import { GOOGLE_SANS_FLEX_FACES } from "@/lib/pdf/fonts/google-sans-flex";
 
 const escape = (value: string) =>
   value
@@ -80,8 +81,8 @@ export function briefHtml({
 <head>
 <meta charset="utf-8">
 <title>${escape(`${t.brief.title} · ${snapshot.project.title}`)}</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@500;600&display=block">
 <style>
+${GOOGLE_SANS_FLEX_FACES}
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: "Google Sans Flex", system-ui, sans-serif; font-weight: 500;
     color: #000000; letter-spacing: -0.02em; font-size: 14px; line-height: 20px; }

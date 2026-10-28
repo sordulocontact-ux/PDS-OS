@@ -184,6 +184,13 @@ export default async function FramingBriefPage({
             )}
           </ToneCallout>
         )}
+        {/* In sight on each version (Sacha 28/10/2026), not folded away. */}
+        <div className="flex flex-wrap justify-end gap-2">
+          <BriefActions
+            pdfHref={routes.projectFramingBriefPdf(projectId, b.version)}
+            fileName={briefFileName(project.title)}
+          />
+        </div>
       </VersionCard>
     );
   });
@@ -230,12 +237,6 @@ export default async function FramingBriefPage({
         )}
         eyebrow={<span>{t.versionTitle(latest.version)}</span>}
       />
-      <div className="flex flex-wrap justify-end gap-2">
-        <BriefActions
-          pdfHref={routes.projectFramingBriefPdf(projectId, latest.version)}
-          fileName={briefFileName(project.title)}
-        />
-      </div>
       <BriefHistory versions={k.briefs} />
     </Fold>
   );
