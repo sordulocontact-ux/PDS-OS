@@ -989,6 +989,9 @@ PostgREST). Livré (`docs/ARCHITECTURE.md` § 3 bis, « Cache par table ») :
 - Retour sur un projet après une pause (vues de plus de 5 min) : servies tout de suite et recalculées en
   arrière-plan après la réponse (1,3 s au lieu de 4,8 s mesurés). « Voir comme » ne déconnecte plus
   d'abord (un appel à Auth de moins, et les autres sessions du compte ne sont plus fermées).
+- Entrée d'un module : la barre du projet, les pilules du Marketing et le fil d'Ariane lient directement
+  l'étape d'arrivée (`lib/journey/landing.ts`) au lieu de la page qui redirige : plus de page vide puis
+  de second squelette en ouvrant un module.
 - Reste : gestes d'écriture optimistes si l'attente se voit encore, instance froide sur Vercel après
   une pause (cache d'exécution Vercel, payant), taille de l'instance de prod (décision).
 

@@ -7,7 +7,7 @@ import { ViewLink } from "@/components/ui/view-link";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
-import { productionDeliverables } from "@/lib/journey/production";
+import { productionEntry } from "@/lib/journey/landing";
 import { loadProjectJourneys } from "@/lib/journey/project";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { allInOrder } from "@/lib/utils/parallel";
@@ -29,15 +29,10 @@ export default async function ProjectProductionPage({
 }: PageProps<"/app/projects/[projectId]/production">) {
   const { projectId } = await params;
   await allInOrder([requireApproved(), requireLaunchedProject(projectId)]);
-  const [list, journeys] = await Promise.all([
-    productionDeliverables(projectId),
-    loadProjectJourneys(projectId),
-  ]);
-  const mine = list.find((d) =>
-    journeys.mine.some((a) => a.step.href.includes(`/production/${d.id}/`)),
-  );
-  const first = mine ?? list[0];
-  if (first) redirect(routes.projectProductionSheet(projectId, first.id));
+  // Straight to the deliverable's step (lib/journey/landing.ts).
+  const { journeys } = await loadProjectJourneys(projectId);
+  const entry = productionEntry(projectId, journeys);
+  if (entry) redirect(entry);
   return (
     <EmptyState
       icon={IconBox2}

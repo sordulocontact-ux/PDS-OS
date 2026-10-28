@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
+import { masterEntry } from "@/lib/journey/landing";
 import { masterJourneyContext } from "@/lib/master-workflow/journey-context";
-import { masterStepHref } from "@/lib/ui/master-steps";
 
 // The Master's entry (proto `master-v2.html`): it opens the step that waits
 // for the person looking, else the one in progress, else the Master final.
@@ -12,9 +12,5 @@ export default async function ProjectMasterPage({
 }: PageProps<"/app/projects/[projectId]/master">) {
   const { projectId } = await params;
   const { steps } = await masterJourneyContext(projectId);
-  const entry =
-    steps.find((s) => s.actor?.viewer) ??
-    steps.find((s) => s.status === "current" || s.status === "waiting") ??
-    steps[steps.length - 1];
-  redirect(masterStepHref(projectId, entry.key));
+  redirect(masterEntry(projectId, steps));
 }

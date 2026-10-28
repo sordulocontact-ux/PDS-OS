@@ -18,6 +18,9 @@ export type ProjectNavProps = ProjectNavState & {
   canSeeLegal: boolean;
   canSeeBudget?: boolean;
   workflows?: readonly string[];
+  // Where each entry opens, from the journeys (lib/journey/landing.ts):
+  // straight to its step, not through the module's redirecting page.
+  entries?: Record<string, string>;
 };
 
 // The entries of the navigation: the hidden sections (Équipe, Planning,
@@ -27,12 +30,18 @@ const navItems = ({
   canSeeLegal,
   canSeeBudget = true,
   workflows,
+  entries = {},
 }: ProjectNavProps) =>
   projectSections(projectId, {
     legal: canSeeLegal,
     budget: canSeeBudget,
     workflows,
-  }).filter((section) => !section.hidden);
+  })
+    .filter((section) => !section.hidden)
+    .map((section) => ({
+      ...section,
+      href: entries[section.key] ?? section.href,
+    }));
 
 // Contextual sidebar of a launched project, desktop only (proto « Projet
 // complet », `.projnav`; docs/DESIGN.md § 4, « Navigation du projet »): the

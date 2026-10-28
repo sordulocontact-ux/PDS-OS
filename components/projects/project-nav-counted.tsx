@@ -11,6 +11,7 @@ import { SubModuleCountsReporter } from "@/components/shell/module/sub-module-co
 import { KeptFallback, KeptView } from "@/components/shell/kept-view";
 import { WorkCountReporter } from "@/components/shell/work-count";
 import { can, type Access } from "@/lib/auth/access";
+import { moduleEntries } from "@/lib/journey/landing";
 import {
   countMarketingParts,
   countMine,
@@ -76,15 +77,20 @@ async function navOf({ access, project }: NavSource): Promise<ProjectNavProps> {
 // journeys (lib/overview/journeys.ts): until they are, the same navigation
 // as last shown, or without counts on a first visit (shell.md, sous-lot 2).
 
+// Each entry and Marketing pill also links straight to the step it opens on
+// (lib/journey/landing.ts), read from the same journeys.
+
 async function CountedSidebar(props: ProjectNavProps) {
   const all = await loadShellJourneys(props.projectId);
+  const entries = moduleEntries(props.projectId, all.journeys);
   return (
     <>
-      <ProjectSidebar {...props} counts={countMine(all)} />
+      <ProjectSidebar {...props} counts={countMine(all)} entries={entries} />
       <WorkCountReporter projectId={props.projectId} count={all.mine.length} />
       <SubModuleCountsReporter
         projectId={props.projectId}
         counts={countMarketingParts(all)}
+        hrefs={entries}
       />
     </>
   );
@@ -92,12 +98,18 @@ async function CountedSidebar(props: ProjectNavProps) {
 
 async function CountedSidebarMobile(props: ProjectNavProps) {
   const all = await loadShellJourneys(props.projectId);
+  const entries = moduleEntries(props.projectId, all.journeys);
   return (
     <>
-      <ProjectSidebarMobile {...props} counts={countMine(all)} />
+      <ProjectSidebarMobile
+        {...props}
+        counts={countMine(all)}
+        entries={entries}
+      />
       <SubModuleCountsReporter
         projectId={props.projectId}
         counts={countMarketingParts(all)}
+        hrefs={entries}
       />
     </>
   );

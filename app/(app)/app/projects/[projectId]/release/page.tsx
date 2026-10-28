@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 
 import { distributionContext } from "@/lib/distribution/journey-context";
-import { distributionStepHref } from "@/lib/ui/distribution-steps";
+import { distributionEntry } from "@/lib/journey/landing";
 import { isUuid } from "@/lib/release/uuid";
 
 // /release opens the Distribution's step that awaits the viewer, else the
@@ -12,12 +12,5 @@ export default async function ReleasePage({
   const { projectId } = await params;
   if (!isUuid(projectId)) notFound();
   const ctx = await distributionContext(projectId);
-  const steps = ctx?.steps ?? [];
-  const target =
-    steps.find((s) => s.actor?.viewer) ??
-    steps.find((s) => s.status === "current" || s.status === "waiting") ??
-    steps.at(-1);
-  redirect(
-    distributionStepHref(projectId, target ? (target.key as never) : "prep"),
-  );
+  redirect(distributionEntry(projectId, ctx?.steps ?? []));
 }

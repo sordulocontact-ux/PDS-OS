@@ -4,7 +4,10 @@ import { usePathname } from "next/navigation";
 
 import { AddExpenseButton } from "@/components/budget/add-expense-button";
 import { ReadOnlyNotice } from "@/components/projects/read-only-notice";
-import { useSubModuleCounts } from "@/components/shell/module/sub-module-counts";
+import {
+  useSubModuleCounts,
+  useModuleEntries,
+} from "@/components/shell/module/sub-module-counts";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   ModuleHeader,
@@ -75,15 +78,24 @@ export function ProjectHeaderView({
   const pathname = usePathname();
   // The viewer's actions per pill, reported by the project's navigation.
   const mine = useSubModuleCounts(data.projectId);
-  const trail = moduleTrail(
-    data.projectId,
-    pathname,
-    projectSections(data.projectId, data.sections),
-    { projectTitle: data.projectTitle, subModules: data.subModules },
+  // Where each module and pill opens (lib/journey/landing.ts).
+  const opens = useModuleEntries(data.projectId);
+  const sections = projectSections(data.projectId, data.sections);
+  const trail = moduleTrail(data.projectId, pathname, sections, {
+    projectTitle: data.projectTitle,
+    subModules: data.subModules,
+  });
+  // A crumb naming a module or a pill opens where its entry does.
+  const entryOf = new Map(
+    [...sections, ...data.subModules].flatMap((s) =>
+      opens[s.key] ? [[s.href, opens[s.key]] as const] : [],
+    ),
   );
   const step = (steps ?? data.steps).find((s) => s.href === pathname);
   const all = crumbs ?? [
-    ...trail.crumbs,
+    ...trail.crumbs.map((c) =>
+      c.href && entryOf.has(c.href) ? { ...c, href: entryOf.get(c.href) } : c,
+    ),
     ...extraCrumbs,
     ...(step ? [{ label: step.title }] : []),
   ];
@@ -104,7 +116,7 @@ export function ProjectHeaderView({
             ? data.subModules.map((s) => ({
                 key: s.key,
                 label: s.label,
-                href: s.built ? s.href : undefined,
+                href: s.built ? (opens[s.key] ?? s.href) : undefined,
                 title: s.title,
                 done: s.done,
                 current: isSubModuleAt(s, pathname),

@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
+import { reviewEntry } from "@/lib/journey/landing";
 import { reviewJourneyContext } from "@/lib/marketing/review/context";
-import { reviewStepHref } from "@/lib/ui/review-steps";
 
 // The Suivi & bilan's entry (proto « Projet complet »): the step that waits
 // for the person looking, else the one in progress, else the closing. The
@@ -11,9 +11,5 @@ export default async function MarketingReviewPage({
 }: PageProps<"/app/projects/[projectId]/review">) {
   const { projectId } = await params;
   const { steps } = await reviewJourneyContext(projectId);
-  const entry =
-    steps.find((s) => s.actor?.viewer) ??
-    steps.find((s) => s.status === "current" || s.status === "waiting") ??
-    steps[steps.length - 1];
-  redirect(reviewStepHref(projectId, entry.key));
+  redirect(reviewEntry(projectId, steps));
 }

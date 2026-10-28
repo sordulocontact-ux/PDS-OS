@@ -943,6 +943,18 @@ s'afficher sans chargement.
   Une fonction lue par une vue doit rester `STABLE` si elle ne fait que lire (sinon jamais gardée).
   Une Server Action relit sans cache (`readProjectJourneys`). Conséquence pour `ProjectLive` : la
   page ouverte se met à jour pour un changement d'un collègue dans **n'importe quel** workflow.
+- **Entrée d'un module** (28/10, `lib/journey/landing.ts`) : `/framing`, `/strategy`, `/master`,
+  `/legal`, `/release`, `/design`, `/production`, `/review`, `/activations` ne font que rediriger vers
+  l'étape qui attend le lecteur. Une redirection lancée après le début de la réponse (sous un
+  `loading.tsx`) affiche **une page vide** (`HandleRedirect` de Next rend `null`) le temps de
+  redemander l'étape, puis un second squelette (mesuré : squelette, vide, squelette, contenu). La barre
+  du projet, ses puces mobiles, les pilules du Marketing et le fil d'Ariane lient donc **directement**
+  l'étape d'arrivée, calculée par `moduleEntries` sur les parcours que la barre lit déjà pour ses
+  compteurs (aucune requête de plus), transmise aux pilules et au fil par `SubModuleCountsReporter` /
+  `useModuleEntries`. Les pages d'entrée restent pour les anciens liens (notifications, e-mails) et
+  suivent la même règle (`masterEntry`, `reviewEntry`, `distributionEntry`, `productionEntry`, qui va
+  aussi droit à l'étape du livrable). Un module sans parcours pour ce lecteur (Conception avant la
+  Stratégie validée, Activations sans action à soi) garde le lien vers sa page.
 - **Squelettes** (`loading.tsx`) pour ce qui n'est pas préchargé (première entrée dans une
   page) : une page de premier niveau a le sien (`PageLoading`), listes avec leur vrai titre,
   sections d'un projet (`ProjectSectionLoading`, sous l'en-tête et les barres qui restent),
