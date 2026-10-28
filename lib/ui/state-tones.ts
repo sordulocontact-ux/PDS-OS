@@ -283,9 +283,11 @@ export const factTone: Record<string, Tone> = {
 };
 
 /** A line of the Cadrage (proto FR_ST, lib/framing/lines.ts): Connu,
- * Confirmé, À confirmer, Manquant, Non applicable, À définir plus tard. */
+ * Confirmé, À confirmer, Manquant, Non applicable, À définir plus tard.
+ * Connu is green like Confirmé, as Manquant is red (Sacha 28/10/2026; the
+ * proto left it grey). */
 export const framingLineTone: Record<string, Tone> = {
-  known: "neutral",
+  known: "success",
   confirmed: "success",
   to_confirm: "warning",
   missing: "danger",

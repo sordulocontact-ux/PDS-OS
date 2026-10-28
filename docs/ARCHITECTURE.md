@@ -1658,7 +1658,8 @@ l'étape qui attend la personne (`framingLanding`) et les anciennes URL (`?step=
   « Pourquoi ce n'est pas applicable * » / « Marquer non applicable », « À définir plus tard » →
   « À définir avant le * » / « Reporter, avec une tâche »), puis 6 cartes repliables (`DimensionCards`,
   `VersionCard`) : une ligne par information avec pastille Connu / Confirmé / À confirmer / Manquant /
-  Non applicable / À définir plus tard et « Répondre » (`?q=`) ; après une demande de modification,
+  Non applicable / À définir plus tard (tons de `framingLineTone` ; Connu vert comme Confirmé, Sacha
+  28/10/2026) et « Répondre » (`?q=`) ; après une demande de modification,
   « Modifier » sur les réponses connues des dimensions rouvertes. Figé pendant la relecture (callout
   cadenas). `DimensionNav` et `QuestionPager` ne servent plus au Cadrage. **Dictée gardée** : le bouton
   « Dicter » reste sur la ligne de progression (il ne gêne pas le parcours, décision du lot 2).

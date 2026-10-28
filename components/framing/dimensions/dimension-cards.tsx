@@ -7,6 +7,7 @@ import { routes } from "@/lib/auth/redirects";
 import type { FramingAssessment, QuestionState } from "@/lib/framing/assess";
 import { framingIntel } from "@/lib/i18n/fr/framing-intel";
 import { framingJourney } from "@/lib/i18n/fr/framing-journey";
+import { framingLineTone } from "@/lib/ui/state-tones";
 
 const fr = { framingIntel, framingJourney };
 
@@ -66,7 +67,7 @@ export function DimensionCards({
                       {fact.value}
                     </span>
                   }
-                  state={{ tone: "neutral", label: t.states.known }}
+                  state={{ tone: framingLineTone.known, label: t.states.known }}
                 />
               ))}
               {d.questions.map((q) => (
