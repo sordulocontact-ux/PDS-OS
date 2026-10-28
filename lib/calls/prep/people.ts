@@ -1,6 +1,6 @@
 import "server-only";
 
-import { loadCallContacts, loadProjectTeam } from "@/lib/calls/invite";
+import { loadCallContacts, loadCallMembers } from "@/lib/calls/invite";
 import type { Client } from "@/lib/calls/prep/adapters/types";
 import type { PrepPerson } from "@/lib/calls/prep/types";
 import { fr } from "@/lib/i18n/fr";
@@ -9,9 +9,9 @@ import { isEmail } from "@/lib/utils/email";
 const norm = (name: string) => name.trim().toLocaleLowerCase("fr");
 
 /**
- * Who a prepared call may invite: the project's team (owner first, then its
- * creative directors: call_attendees_check allows them only), then the
- * Réseau. A contact with a private link on this project is invited there
+ * Who a prepared call may invite: the members call_attendees_check allows
+ * (owner, creative team, direction, creative directors who join the
+ * project), then the Réseau. A contact with a private link on this project is invited there
  * (`linkContactIds`), else by e-mail; one without an address cannot be
  * invited until the Réseau has it.
  */
@@ -21,15 +21,15 @@ export async function loadPrepPool(
 ): Promise<PrepPerson[]> {
   const t = fr.callPrep;
   const [team, contacts] = await Promise.all([
-    loadProjectTeam(projectId),
+    loadCallMembers(projectId),
     loadCallContacts(),
   ]);
   const links = new Set(linkContactIds);
   return [
-    ...team.map((p, index): PrepPerson => ({
+    ...team.map((p): PrepPerson => ({
       key: `m:${p.personId}`,
       name: p.name,
-      detail: index === 0 ? t.roles.owner : t.roles.team,
+      detail: t.roles[p.place],
       external: false,
       invite: "app",
       email: null,

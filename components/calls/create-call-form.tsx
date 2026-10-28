@@ -7,7 +7,7 @@ import { useCanEditProject } from "@/components/projects/edit-access";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createCall } from "@/lib/calls/actions";
-import type { CallContact } from "@/lib/calls/invite";
+import type { CallContact, TeamPerson } from "@/lib/calls/invite";
 import { calls } from "@/lib/i18n/fr/calls";
 
 const fr = { calls };
@@ -31,9 +31,10 @@ export function CreateCallForm({
   defaultOccurredAt: string;
   defaultTitle: string;
   initiallyOpen: boolean;
-  // Who can be invited in the app (the project's team, the owner left out),
-  // all proposed: each one is notified (UX test of 09/10/2026).
-  team: { personId: string; name: string }[];
+  // Who can be invited in the app (the owner left out): the project's team
+  // is proposed, each one notified (UX test of 09/10/2026); the direction
+  // and the other creative directors are only offered (Sacha 28/10/2026).
+  team: (TeamPerson & { detail: string })[];
   contacts: CallContact[];
   googleMeet: boolean;
 }) {
@@ -65,7 +66,9 @@ export function CreateCallForm({
           defaultOccurredAt={defaultOccurredAt}
           members={team}
           memberDetail={fr.calls.schedule.projectMemberDetail}
-          defaultMemberIds={team.map((p) => p.personId)}
+          defaultMemberIds={team
+            .filter((p) => p.place === "owner" || p.place === "team")
+            .map((p) => p.personId)}
           contacts={contacts}
           participantsHint={fr.calls.schedule.participantsProjectHint}
           googleMeet={googleMeet}

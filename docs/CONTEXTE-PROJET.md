@@ -183,9 +183,10 @@ Décisions prises en construisant le lot (`docs/ARCHITECTURE.md` § 8 undecies),
   ses critères). Durée exacte à valider avec le label.
 - **Dépôt de l'ingénieur** : 50 Mo au plus (limite du bucket), un WAV long la dépasse. Relever la
   limite (offre Supabase) ou accepter un lien externe ?
-- **Participants d'un call de projet** : l'équipe du projet seulement (responsable et
-  directeurs créatifs), pour qu'un invité voie toujours le projet. Inviter la direction ou un
-  autre membre demanderait de l'ajouter à l'équipe.
+- **Participants d'un call de projet** (tranché par Sacha le 28/10/2026) : l'équipe du projet, la
+  direction, et tout directeur créatif, qui **rejoint l'équipe créative du projet** en étant invité
+  (un DC oublié à la création). Un chef de projet d'un autre projet ne s'invite que par le Réseau
+  (e-mail), pour qu'un invité dans l'app voie toujours le projet.
 
 ### Points à trancher : retours BUG + UX consolidés (11/10/2026)
 

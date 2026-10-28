@@ -25,7 +25,7 @@ export const schedule = {
   participantsHint:
     "Membres de l'équipe, contacts du Réseau ou adresse e-mail de quelqu'un d'extérieur. Vous en faites partie d'office.",
   participantsProjectHint:
-    "L'équipe du projet, des contacts du Réseau ou l'adresse e-mail de quelqu'un d'extérieur. Vous en faites partie d'office.",
+    "L'équipe du projet, la direction, un directeur créatif (il rejoint le projet), des contacts du Réseau ou l'adresse e-mail de quelqu'un d'extérieur. Vous en faites partie d'office.",
   searchLabel: "Ajouter un participant",
   searchPlaceholder: "Nom ou adresse e-mail",
   inviteEmail: (email: string) => `Inviter ${email} par e-mail`,

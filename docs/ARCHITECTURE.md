@@ -1259,8 +1259,9 @@ la Production (call de production et call technique) et le Master. Il remplace `
   côté serveur), l'objectif, les faits « Envoyé avec l'invitation », la note. Builders :
   `lib/framing/call-sheet-data.ts`, `lib/strategy/call-sheet-data.ts`, `lib/design/call-sheet-data.ts`,
   `lib/production/call-prep-defaults.ts`, `lib/master-workflow/exchange-defaults.ts`.
-- **Participants** : des clés `m:<personId>` (équipe du projet : responsable puis directeurs créatifs, seuls
-  admis par `call_attendees_check`), `c:<contactId>` (Réseau), `e:<adresse>` (tapée). Un contact sans
+- **Participants** : des clés `m:<personId>` (membres admis par `call_attendees_check`, listés par
+  `list_project_call_people` / `loadCallMembers` : responsable, équipe créative, direction, puis tout
+  directeur créatif, ajouté à `project_creatives` par l'invitation, comme `design_person_check`), `c:<contactId>` (Réseau), `e:<adresse>` (tapée). Un contact sans
   e-mail ne peut pas être invité (même règle que `call_guests`) ; une adresse tapée devient une fiche du
   Réseau à la confirmation (`fileTypedGuests`). Au moins deux personnes.
 - **Ordre du jour** : la personne ordonne, reformule, retire, ajoute ; les points de PO gardent leur `key`
@@ -6121,8 +6122,9 @@ tests `supabase/tests/ux-roles.test.sql` (41).
 - **Notifications de l'équipe créative** (triggers) : `project_launched` à l'acceptation,
   `brief_approved` quand une version du Brief est validée, `call_invited` pour un call de projet.
   Un call de projet a désormais des **participants** (`call_attendees`), choisis par le
-  responsable **dans l'équipe du projet seulement** (responsable + directeurs créatifs,
-  `attendee_not_in_team`) : « Nouveau call » les propose tous cochés ; un échange préparé (Cadrage,
+  responsable parmi l'équipe du projet, la direction et les directeurs créatifs (un DC hors du
+  projet le rejoint, `design_person_check` ; migration `20261028000501`) : « Nouveau call » coche
+  l'équipe et propose les autres ; un échange préparé (Cadrage,
   Stratégie) invite les membres de l'équipe dont le nom, proposé par le code depuis cette même
   équipe, est resté dans la liste (`inviteProjectTeam`).
 - **Dépôt créatif avant la Conception** : un directeur créatif du projet écrit dans la

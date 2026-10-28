@@ -28,7 +28,8 @@ import { cn } from "@/lib/utils";
 
 const fr = { calls };
 
-type Member = { personId: string; name: string };
+// `detail`: where the member stands (« Direction »…), else `memberDetail`.
+type Member = { personId: string; name: string; detail?: string };
 
 type Errors = SlotErrors & { title?: string; link?: string };
 
@@ -110,7 +111,7 @@ export function CallPlanForm({
     ...members.map((m) => ({
       key: `m:${m.personId}`,
       name: m.name,
-      detail: memberDetail,
+      detail: m.detail ?? memberDetail,
       external: false,
       invite: "app" as const,
       email: null,

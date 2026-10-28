@@ -5,7 +5,7 @@ import { requireApproved } from "@/lib/auth/dal";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { nextRoundHourInput } from "@/lib/calls/format";
-import { loadCallContacts, loadProjectTeam } from "@/lib/calls/invite";
+import { loadCallContacts, loadCallMembers } from "@/lib/calls/invite";
 import { listCalls } from "@/lib/calls/queries";
 import { fr } from "@/lib/i18n/fr";
 import { googleMeetConfigured } from "@/lib/integrations/google-calendar";
@@ -22,10 +22,12 @@ export default async function ProjectCallsPage({
     requireApproved(),
     requireLaunchedProject(projectId),
     createClient().then((supabase) => listCalls(supabase, projectId)),
-    loadProjectTeam(projectId),
+    loadCallMembers(projectId),
     loadCallContacts(),
   ]);
-  const invitable = team.filter((p) => p.personId !== access.personId);
+  const invitable = team
+    .filter((p) => p.personId !== access.personId)
+    .map((p) => ({ ...p, detail: fr.callPrep.roles[p.place] }));
   const canEdit = canEditProject(access, project);
   const t = fr.calls.list;
   const now = new Date();

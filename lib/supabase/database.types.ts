@@ -19876,6 +19876,15 @@ export type Database = {
           person_id: string
         }[]
       }
+      list_project_call_people: {
+        Args: { p_project_id: string }
+        Returns: {
+          first_name: string
+          last_name: string
+          person_id: string
+          place: string
+        }[]
+      }
       list_member_people: {
         Args: { p_organization_id: string }
         Returns: {

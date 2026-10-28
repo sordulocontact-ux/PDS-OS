@@ -2,36 +2,37 @@ import "server-only";
 
 import { networkRolesOf, rolesText } from "@/lib/network/types";
 import { schedulePendingPushes } from "@/lib/notifications/push";
-import { listProjectCreatives } from "@/lib/projects/creatives";
 import { personName } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
 
-export type TeamPerson = { personId: string; name: string };
+// Where a member stands for the project: its owner, its creative team, the
+// direction, or a creative director who joins it by the invitation.
+export type MemberPlace = "owner" | "team" | "direction" | "creative";
+export type TeamPerson = { personId: string; name: string; place: MemberPlace };
 
-/** Who can be invited to a project call: its owner and creative directors. */
-export async function loadProjectTeam(
+const PLACES: readonly string[] = ["owner", "team", "direction", "creative"];
+
+/**
+ * Who a project call may invite in the app (list_project_call_people, the
+ * rule of call_attendees_check): the owner, the creative team, the
+ * direction, then the creative directors not yet on the project, who join
+ * its creative team when invited (Sacha 28/10/2026).
+ */
+export async function loadCallMembers(
   projectId: string,
 ): Promise<TeamPerson[]> {
   const supabase = await createClient();
-  const [{ data: project }, creatives] = await Promise.all([
-    supabase
-      .from("projects")
-      .select(
-        "owner_person_id, owner:people!projects_owner_person_id_fkey(first_name, last_name)",
-      )
-      .eq("id", projectId)
-      .maybeSingle(),
-    listProjectCreatives(projectId),
-  ]);
-  const team: TeamPerson[] = [];
-  if (project?.owner_person_id && project.owner)
-    team.push({
-      personId: project.owner_person_id,
-      name: personName(project.owner.first_name, project.owner.last_name),
-    });
-  for (const c of creatives)
-    if (!team.some((p) => p.personId === c.personId)) team.push(c);
-  return team;
+  const { data, error } = await supabase.rpc("list_project_call_people", {
+    p_project_id: projectId,
+  });
+  if (error) console.error("[calls] load members failed:", error.message);
+  return (data ?? [])
+    .filter((p) => PLACES.includes(p.place))
+    .map((p) => ({
+      personId: p.person_id,
+      name: personName(p.first_name, p.last_name),
+      place: p.place as MemberPlace,
+    }));
 }
 
 /**
@@ -49,7 +50,7 @@ export async function inviteProjectTeam(input: {
   personIds?: string[];
   names?: string[];
 }): Promise<void> {
-  const team = await loadProjectTeam(input.projectId);
+  const team = await loadCallMembers(input.projectId);
   const ids = new Set(input.personIds ?? []);
   const names = new Set(input.names ?? []);
   const invited = team.filter(

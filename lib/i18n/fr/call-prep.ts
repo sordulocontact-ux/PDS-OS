@@ -21,7 +21,13 @@ export const callPrep = {
   createContact: (name: string) => `Créer la fiche de « ${name} »`,
   createContactDetail: "dans le Réseau, puis l'inviter",
   // Who a member is, in the suggestions and the chip's tooltip.
-  roles: { owner: "Responsable du projet", team: "Équipe du projet" },
+  // A creative director not yet on the project joins it by the invitation.
+  roles: {
+    owner: "Responsable du projet",
+    team: "Équipe du projet",
+    direction: "Direction",
+    creative: "Direction créative · rejoint le projet",
+  },
   // How an external hears of the call.
   how: {
     app: "dans PDS OS",
