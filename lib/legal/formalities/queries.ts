@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { Access } from "@/lib/auth/access";
+import { can, type Access } from "@/lib/auth/access";
 import type { ContributorRole } from "@/lib/catalog/master/rules";
 import {
   SACEM_725,
@@ -138,7 +138,7 @@ export async function loadFormalities(
         ? supabase
             .from("legal_formality_signatures")
             .select(
-              "id, formality_id, document_version, signer, role, status, proof, signed_at, contact_id, via, signed_on, file_path",
+              "id, formality_id, document_version, signer, role, status, proof, signed_at, contact_id, via, signed_on, file_path, house, superseded_at",
             )
             .in("formality_id", fIds)
         : Promise.resolve(none),
@@ -282,11 +282,22 @@ export async function loadFormalities(
               status: s.status as "pending" | "signed",
               proof: s.proof,
               at: s.signed_at,
-              via: (s.via as "link" | "other" | null) ?? null,
+              via: (s.via as "link" | "other" | "house" | null) ?? null,
               signedOn: s.signed_on,
               onLink: s.contact_id !== null && linked.has(s.contact_id),
               fileUrl: urlOf.get(s.id) ?? null,
+              house: s.house,
+              superseded: s.superseded_at !== null,
             })),
+          replaced: replacedVersions(
+            (signatures.data ?? []).filter(
+              (s) =>
+                s.formality_id === f.id &&
+                current !== undefined &&
+                s.document_version < current,
+            ),
+          ),
+          canSignHouse: can(access, "validate"),
           history: (events.data ?? [])
             .filter((e) => e.formality_id === f.id)
             .map((e) => ({
@@ -354,7 +365,7 @@ async function confirmedSplits(
   );
   const { data: entries } = await supabase
     .from("legal_split_entries")
-    .select("version_id, role, share, contact_id")
+    .select("version_id, role, share, contact_id, house")
     .in("version_id", [...latest.values()]);
   const byMaster = new Map<string, SplitShare[]>();
   for (const e of entries ?? []) {
@@ -367,8 +378,32 @@ async function confirmedSplits(
         contactId: e.contact_id,
         role: e.role,
         share: exactShare(units).replace(",", "."),
+        house: e.house,
       },
     ]);
   }
   return byMaster;
+}
+
+/** The versions a newer one replaced, newest first, each with its signers
+ * and whether they had signed: kept to read, never valid (JUR-03). */
+function replacedVersions(
+  rows: Array<{
+    document_version: number;
+    signer: string;
+    status: string;
+    superseded_at: string | null;
+  }>,
+): FormalityView["replaced"] {
+  const byVersion = new Map<number, FormalityView["replaced"][number]>();
+  for (const r of rows) {
+    const v = byVersion.get(r.document_version) ?? {
+      version: r.document_version,
+      at: r.superseded_at,
+      signers: [],
+    };
+    v.signers.push({ signer: r.signer, signed: r.status === "signed" });
+    byVersion.set(r.document_version, v);
+  }
+  return [...byVersion.values()].sort((a, b) => b.version - a.version);
 }

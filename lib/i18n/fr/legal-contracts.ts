@@ -309,7 +309,7 @@ export const legalContracts = {
     revise: "Modifier une clause",
     reviseTitle: "Modifier une clause",
     reviseBody:
-      "Chaque modification crée une nouvelle version, gardée avec sa raison. Un contrat approuvé repasse en brouillon et doit être validé à nouveau.",
+      "Chaque modification crée une nouvelle version, gardée avec sa raison. Un contrat approuvé repasse en brouillon et doit être validé à nouveau ; une signature de PDS sur l'ancienne version est annulée.",
     reviseText: "Texte du contrat",
     reviseComment: "Raison de la modification",
     reviseSubmit: "Enregistrer la version",
@@ -326,6 +326,8 @@ export const legalContracts = {
       "contract_mapping.approved": "Contrats nécessaires confirmés",
       "contract.generated": "Contrat généré",
       "contract.revised": "Clause modifiée",
+      "contract.countersign_voided":
+        "Signature de PDS annulée : la version signée a été modifiée",
       "contract.submitted": "Envoyé en validation",
       "contract.approved": "Approuvé",
       "contract.changes_requested": "Modifications demandées",

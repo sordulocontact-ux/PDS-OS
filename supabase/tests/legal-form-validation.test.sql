@@ -4,7 +4,7 @@
 -- (supabase/migrations/20261024000101_legal_form_validation.sql).
 -- Run with `supabase test db`.
 begin;
-select plan(10);
+select plan(11);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -84,8 +84,13 @@ insert into links select token, form_id from public.prepare_legal_form(
 reset role;
 set local role anon;
 select is(public.submit_legal_form((select token from links), array['artist'], null,
-          '{"legal_first_name": "Maya", "legal_last_name": "Lenoir", "entity_type": "person"}'::jsonb, '{}'::jsonb, 1),
+          '{"legal_first_name": "Maya", "legal_last_name": "Lenoir", "entity_type": "person", "email": "maya@example.com"}'::jsonb, '{}'::jsonb, 1),
           'action_required', 'a received fiche waits for validation');
+reset role;
+select pg_temp.act_as(pg_temp.id_of('manager'));
+select throws_ok(
+  format('select public.review_legal_form(%L, true)', (select form from links)),
+  'P0001', 'legal_form_incomplete', 'a fiche missing its address is never validated, even called directly (JUR-06)');
 
 -- The team asks for the address ----------------------------------------------------------------
 reset role;

@@ -1,7 +1,7 @@
 -- Juridique, « le reste » (supabase/migrations/20261020030101 and after): a template asked of
 -- the direction in the Plan d'action, a clause revised in the person's step.
 begin;
-select plan(31);
+select plan(35);
 
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
 declare v_id uuid := gen_random_uuid();
@@ -115,6 +115,29 @@ select is((select comment from public.contract_documents
 select throws_ok(format($$ update public.contract_documents set clause = 'credit'
                             where contract_id = %L and version = 1 $$, pg_temp.id_of('contract')),
                  '23514', null, 'the first version changes no clause');
+
+-- 2 bis. JUR-11 (…20261028000601): PDS's signature belongs to the version it signed ---------
+select pg_temp.act_as(pg_temp.id_of('manager'));
+select public.advance_contract(pg_temp.id_of('contract'), 'submit');
+reset role;
+select pg_temp.act_as(pg_temp.id_of('director'));
+select public.advance_contract(pg_temp.id_of('contract'), 'approve');
+select public.advance_contract(pg_temp.id_of('contract'), 'countersign');
+reset role;
+select is((select pds_signed_version from public.contracts where id = pg_temp.id_of('contract')),
+          2, 'the direction signs version 2 for PDS');
+select pg_temp.act_as(pg_temp.id_of('manager'));
+select lives_ok(format($$ select public.revise_contract_clause(%L, 'credit', %L, 'Crédit corrigé.') $$,
+                       pg_temp.id_of('contract'), E'Article 1. Objet.\nArticle 2. Crédit : « Sami Kader ».'),
+                'a clause is revised after PDS signed');
+reset role;
+select ok((select pds_signed_at is null and pds_signed_by is null and pds_signed_version is null
+                  and status = 'draft'
+             from public.contracts where id = pg_temp.id_of('contract')),
+          'the revision cancels PDS''s signature: version 3 must be signed again');
+select is((select note from public.contract_events
+            where contract_id = pg_temp.id_of('contract') and kind = 'contract.countersign_voided'),
+          'v2', 'the history says which signature was cancelled');
 
 -- 3. The links of a split's confirmations, kept sealed and visible --------------------------------
 reset role;

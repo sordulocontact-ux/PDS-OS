@@ -40,6 +40,12 @@ const publisher = z.object({
   ipi: z.string().trim().max(40),
   phono: share,
   contact_id: id.optional(),
+  // Whom it publishes (JUR-22) and the contract that founds it (JUR-25):
+  // kept, or formality_missing reads « publisher_link » on every typed line.
+  represents: z.array(z.number().int().min(1).max(5)).max(5).optional(),
+  contract_id: id.optional(),
+  // PDS Éditions, signed by the direction (20261028000601).
+  house: z.boolean().optional(),
 });
 const VALUE: Record<string, z.ZodType> = {
   creators: z.array(creator).max(5),

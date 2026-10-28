@@ -4031,6 +4031,7 @@ export type Database = {
           id: string
           pds_signed_at: string | null
           pds_signed_by: string | null
+          pds_signed_version: number | null
           signature_checked_at: string | null
           signature_checked_by: string | null
           notes: string | null
@@ -4059,6 +4060,7 @@ export type Database = {
           id?: string
           pds_signed_at?: string | null
           pds_signed_by?: string | null
+          pds_signed_version?: number | null
           signature_checked_at?: string | null
           signature_checked_by?: string | null
           notes?: string | null
@@ -4087,6 +4089,7 @@ export type Database = {
           id?: string
           pds_signed_at?: string | null
           pds_signed_by?: string | null
+          pds_signed_version?: number | null
           signature_checked_at?: string | null
           signature_checked_by?: string | null
           notes?: string | null
@@ -7496,6 +7499,7 @@ export type Database = {
         Row: {
           document_version: number
           formality_id: string
+          house: boolean
           id: string
           organization_id: string
           proof: string | null
@@ -7504,6 +7508,7 @@ export type Database = {
           signed_at: string | null
           signer: string
           status: string
+          superseded_at: string | null
           contact_id: string | null
           via: string | null
           signed_on: string | null
@@ -7514,6 +7519,7 @@ export type Database = {
         Insert: {
           document_version: number
           formality_id: string
+          house?: boolean
           id?: string
           organization_id: string
           proof?: string | null
@@ -7522,6 +7528,7 @@ export type Database = {
           signed_at?: string | null
           signer: string
           status?: string
+          superseded_at?: string | null
           contact_id?: string | null
           via?: string | null
           signed_on?: string | null
@@ -7532,6 +7539,7 @@ export type Database = {
         Update: {
           document_version?: number
           formality_id?: string
+          house?: boolean
           id?: string
           organization_id?: string
           proof?: string | null
@@ -7540,6 +7548,7 @@ export type Database = {
           signed_at?: string | null
           signer?: string
           status?: string
+          superseded_at?: string | null
           contact_id?: string | null
           via?: string | null
           signed_on?: string | null
@@ -18211,6 +18220,7 @@ export type Database = {
       note_legal_form_opened:
         | { Args: { p_token: string }; Returns: undefined }
         | { Args: { p_contact_token: string; p_item_id: string }; Returns: undefined }
+      reason_only_paid: { Args: { p_reason: string }; Returns: boolean }
       reclassify_master_audio: {
         Args: { p_file_id: string; p_state: string }
         Returns: undefined
@@ -19357,6 +19367,7 @@ export type Database = {
         Args: { p_items: Json; p_project_id: string }
         Returns: string
       }
+      legal_form_missing: { Args: { p_form_id: string }; Returns: string[] }
       legal_form_same_value: {
         Args: { p_after: Json; p_before: Json; p_key: string }
         Returns: boolean
@@ -20331,6 +20342,10 @@ export type Database = {
         | { Args: { p_contact_token: string; p_done: boolean; p_item_id: string; p_key: string }; Returns: undefined }
       set_project_archived: {
         Args: { p_archived: boolean; p_project_id: string }
+        Returns: undefined
+      }
+      sign_formality_for_house: {
+        Args: { p_signature_id: string }
         Returns: undefined
       }
       sole_validator: { Args: { p_organization_id: string }; Returns: string }

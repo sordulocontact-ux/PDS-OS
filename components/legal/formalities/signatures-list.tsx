@@ -1,12 +1,15 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { ConfirmButton } from "@/components/ui/confirm-button";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
+import { Fold } from "@/components/ui/fold";
 import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
 import { signedReturns } from "@/lib/i18n/fr/signed-returns";
 import type { Creator, Publisher } from "@/lib/legal/formalities/definition";
 import type { FormalityView } from "@/lib/legal/formalities/types";
+import { signFormalityForHouse } from "@/lib/legal/signed-returns/team-actions";
 import { formatShortDay } from "@/lib/utils/day";
 
 import { SignedOtherwiseForm } from "./signed-otherwise-form";
@@ -18,8 +21,11 @@ type Signature = FormalityView["signatures"][number];
 /** « Le bulletin doit être signé par tous les ayants droit » (proto
  * « Projet complet », E10 step 2): each signer of the current version —
  * on their private link, where they deposit it signed, or « A signé
- * autrement » in a dialog, with the day and the signed bulletin scanned. Before the bulletin exists, who
- * will sign it, named (UX test of 09/10/2026). */
+ * autrement » in a dialog, with the day and the signed bulletin scanned;
+ * PDS Éditions by the direction, in PDS OS. A change to the bulletin makes
+ * them « Ne vaut plus », and the versions replaced stay folded below, with
+ * the signatures they had (JUR-03). Before the bulletin exists, who will
+ * sign it, named (UX test of 09/10/2026). */
 export function SignaturesList({
   projectId,
   f,
@@ -28,15 +34,22 @@ export function SignaturesList({
   f: FormalityView;
 }) {
   const t = fr.legalFormalities.page;
+  const r = fr.signedReturns.sacem;
   const latest = f.documents[0];
   if (f.signatures.length === 0) return <FutureSigners f={f} />;
-  const signed = f.signatures.filter((s) => s.status === "signed").length;
+  const signed = f.signatures.filter(
+    (s) => s.status === "signed" && !s.superseded,
+  ).length;
+  const superseded = f.signatures.some((s) => s.superseded);
   return (
     <section className="flex flex-col gap-2">
       <h3 className="font-medium">
         {t.signatures} · {t.version(latest?.version ?? 1)} ·{" "}
         {t.signedCount(signed, f.signatures.length)}
       </h3>
+      {superseded && (
+        <p className="text-sm text-muted-foreground">{r.supersededNote}</p>
+      )}
       <FactRows>
         {f.signatures.map((s) => (
           <SignatureRow
@@ -44,10 +57,31 @@ export function SignaturesList({
             projectId={projectId}
             formalityId={f.id}
             s={s}
-            open={f.status === "signatures_pending"}
+            open={f.status === "signatures_pending" && !s.superseded}
+            canSignHouse={f.canSignHouse}
           />
         ))}
       </FactRows>
+      {f.replaced.length > 0 && (
+        <Fold summary={r.replaced}>
+          <ul className="flex flex-col gap-1 text-sm text-muted-foreground">
+            {f.replaced.map((v) => (
+              <li key={v.version} className="break-words">
+                {r.replacedLine(
+                  v.version,
+                  v.at ? formatShortDay(v.at, { bare: true }) : "",
+                  v.signers.filter((x) => x.signed).length,
+                )}
+                {v.signers.some((x) => x.signed) &&
+                  ` : ${v.signers
+                    .filter((x) => x.signed)
+                    .map((x) => x.signer)
+                    .join(", ")}`}
+              </li>
+            ))}
+          </ul>
+        </Fold>
+      )}
     </section>
   );
 }
@@ -57,11 +91,13 @@ function SignatureRow({
   formalityId,
   s,
   open,
+  canSignHouse,
 }: {
   projectId: string;
   formalityId: string;
   s: Signature;
   open: boolean;
+  canSignHouse: boolean;
 }) {
   const t = fr.legalFormalities.page;
   const r = fr.signedReturns.sacem;
@@ -79,21 +115,27 @@ function SignatureRow({
         ? r.byLink(day(s.signedOn ?? s.at))
         : s.via === "other"
           ? r.otherwise(day(s.signedOn))
-          : (s.proof ?? t.signed(day(s.at)))
-      : s.onLink
-        ? r.onLink
-        : s.role === "publisher"
-          ? null
-          : r.noLink;
+          : s.via === "house"
+            ? r.byHouse(day(s.signedOn ?? s.at))
+            : (s.proof ?? t.signed(day(s.at)))
+      : s.house
+        ? r.houseWaits
+        : s.onLink
+          ? r.onLink
+          : s.role === "publisher"
+            ? null
+            : r.noLink;
   return (
     <FactRow
       label={role}
       value={<b className="font-semibold">{s.signer}</b>}
       source={source}
       state={
-        s.status === "signed"
-          ? { tone: "success", label: fr.signedReturns.portal.signedBadge }
-          : { tone: "warning", label: r.pending }
+        s.superseded
+          ? { tone: "neutral", label: r.superseded }
+          : s.status === "signed"
+            ? { tone: "success", label: fr.signedReturns.portal.signedBadge }
+            : { tone: "warning", label: r.pending }
       }
       side={
         s.status === "signed" ? (
@@ -106,6 +148,20 @@ function SignatureRow({
             >
               {r.viewPdf}
             </Button>
+          )
+        ) : open && s.house ? (
+          // PDS Éditions: the direction signs here, nobody else (JUR-03).
+          canSignHouse && (
+            <ConfirmButton
+              label={r.signHouse}
+              variant="outline"
+              title={r.signHouse}
+              body={r.signHouseBody}
+              confirmLabel={r.signHouse}
+              pendingLabel={r.signingHouse}
+              done={r.signedHouse}
+              run={() => signFormalityForHouse(projectId, s.id)}
+            />
           )
         ) : open ? (
           // A gesture that asks for something opens a dialog (proto v3).

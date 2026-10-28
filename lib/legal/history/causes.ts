@@ -17,6 +17,7 @@ const FOLLOWS: Record<string, string[]> = {
   "contract.approved": ["contract.submitted"],
   "contract.changes_requested": ["contract.submitted"],
   "contract.revised": ["contract.changes_requested", "contract.generated"],
+  "contract.countersign_voided": ["contract.revised"],
   "signature.requested": ["contract.approved"],
   "contract.signed": ["signature.requested", "contract.approved"],
   "contract.terminated": ["contract.signed"],

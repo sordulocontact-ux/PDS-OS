@@ -63,6 +63,23 @@ export async function sendContract(input: {
   return { ok: true };
 }
 
+/** « Signer pour PDS Éditions » (JUR-03): the direction signs the house's
+ * line of the bulletin in PDS OS — the SQL checks who (validate) and which
+ * line (the house's, current version). */
+export async function signFormalityForHouse(
+  projectId: string,
+  signatureId: string,
+) {
+  const p = z
+    .object({ projectId: z.uuid(), signatureId: z.uuid() })
+    .safeParse({ projectId, signatureId });
+  if (!p.success)
+    return { ok: false as const, error: fr.auth.errors.forbidden };
+  return run(p.data.projectId, (s) =>
+    s.rpc("sign_formality_for_house", { p_signature_id: p.data.signatureId }),
+  );
+}
+
 /** « A signé autrement » + « Signé le » + the signed bulletin scanned, in
  * the formality's folder (JUR-11): the scan is the proof. */
 export async function noteFormalitySignature(

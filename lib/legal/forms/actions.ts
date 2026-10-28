@@ -128,6 +128,9 @@ async function run(
   const supabase = await createClient();
   const { error } = await call(supabase, parsed.data.formId);
   if (error) {
+    // The database holds the fiche's completeness too (JUR-06).
+    if (error.message.includes("legal_form_incomplete"))
+      return { ok: false, error: fr.legalForms.page.incomplete };
     console.error("legal form action:", error.message);
     return { ok: false, error: fr.legalForms.page.failed };
   }

@@ -34,13 +34,26 @@ export type FormalityView = {
     at: string | null;
     // How it was signed (20261020070101): by the person's private link,
     // or « A signé autrement » with its day.
-    via: "link" | "other" | null;
+    via: "link" | "other" | "house" | null;
     signedOn: string | null;
     // The signer has an active private page on the project: they sign there.
     onLink: boolean;
     // The bulletin they deposited signed, « Voir le PDF » (one hour).
     fileUrl: string | null;
+    // PDS Éditions' line: signed by the direction in PDS OS (JUR-03).
+    house: boolean;
+    // The bulletin changed after it: kept, never valid (JUR-03).
+    superseded: boolean;
   }>;
+  // The versions a newer one replaced, with the signatures that no longer
+  // hold (JUR-03), newest first.
+  replaced: Array<{
+    version: number;
+    at: string | null;
+    signers: Array<{ signer: string; signed: boolean }>;
+  }>;
+  // The viewer may sign PDS Éditions' line: the direction (validate).
+  canSignHouse: boolean;
   history: Array<{
     id: string;
     kind: string;

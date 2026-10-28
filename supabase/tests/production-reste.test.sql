@@ -4,6 +4,51 @@
 begin;
 select plan(66);
 
+-- The preparation really ready in the database (20261028000601: the synthesis is checked
+-- there): a place chosen, a date decided, the checklist done, a quote and the direction
+-- approved. And the synthesis the code computes, every line, some not ready.
+create function pg_temp.make_ready(p_sheet uuid) returns void language plpgsql as $$
+declare s public.production_sheets%rowtype;
+begin
+  select * into s from public.production_sheets where id = p_sheet;
+  -- Only what is missing: the scenario may have chosen a place or decided a date already.
+  insert into public.production_location_options (organization_id, project_id, sheet_id, name, status)
+  select s.organization_id, s.project_id, s.id, 'Lieu prêt', 'chosen'
+   where not exists (select 1 from public.production_location_options
+                      where sheet_id = s.id and status = 'chosen');
+  insert into public.production_schedule_decisions
+    (organization_id, project_id, sheet_id, shoot_on, starts_at, ends_at, source)
+  select s.organization_id, s.project_id, s.id, current_date + 30, '09:00', '18:00', 'call'
+   where not exists (select 1 from public.production_schedule_decisions
+                      where sheet_id = s.id and replaced_at is null);
+  update public.production_plan_actions set done_at = now()
+   where sheet_id = s.id and template_key in ('checklist_crew', 'checklist_schedule', 'checklist_gear');
+  insert into public.production_plan_actions (organization_id, project_id, sheet_id, title, template_key, done_at)
+  select s.organization_id, s.project_id, s.id, 'Check-list ' || k, 'checklist_' || k, now()
+    from unnest(array['crew', 'schedule', 'gear']) k
+   where not exists (select 1 from public.production_plan_actions
+                      where sheet_id = s.id and template_key = 'checklist_' || k);
+  insert into public.production_quotes (organization_id, project_id, sheet_id, label, amount_cents, number, status)
+  values (s.organization_id, s.project_id, s.id, 'Devis prêt', 100000,
+          coalesce((select max(number) from public.production_quotes where sheet_id = s.id), 0) + 1, 'approved');
+  -- The latest proposal decided, so it is the one retained.
+  update public.production_direction_versions
+     set int_status = 'approved', ext_status = case when ext_status = 'pending' then 'approved' else ext_status end
+   where sheet_id = s.id and int_status = 'pending'
+     and number = (select max(number) from public.production_direction_versions where sheet_id = s.id);
+  update public.production_sheets
+     set direction_status = 'approved', quote_revision_at = null, quote_revision_reason = null,
+         direction_revision_at = null, direction_revision_reason = null
+   where id = s.id;
+end $$;
+create function pg_temp.ready_rows(p_not_ready text[] default '{}') returns jsonb language sql as $$
+  select jsonb_agg(jsonb_build_object('key', k, 'label', l, 'value', 'x', 'ok', not (k = any (p_not_ready))) order by n)
+    from unnest(array['place', 'date', 'crew', 'plan', 'gear', 'quote', 'direction', 'blockers', 'notes'],
+                array['Lieu retenu', 'Date et horaires', 'Équipe confirmée', 'Planning', 'Matériel', 'Devis',
+                      'Proposition', 'Blocages', 'Points à confirmer']) with ordinality u (k, l, n)
+$$;
+grant execute on function pg_temp.ready_rows(text[]) to authenticated;
+
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -298,11 +343,14 @@ select ok((select review from public.production_plan_actions where sheet_id = pg
 select is((select shoot_date from public.production_sheets where id = pg_temp.id_of('sheet')), '2026-10-23'::date,
           'the sheet''s date follows');
 
+
 -- The first change happened earlier (a test runs in one transaction: one now()).
 update public.production_sheets set schedule_changed_at = now() - interval '1 hour'
  where id = pg_temp.id_of('sheet');
+reset role;
+select pg_temp.make_ready(pg_temp.id_of('sheet'));
 select pg_temp.act_as(pg_temp.id_of('manager'));
-select lives_ok($$ select public.confirm_production_ready(pg_temp.id_of('sheet'), '[{"key":"date","label":"Date et horaires","value":"x","ok":true}]'::jsonb, null) $$,
+select lives_ok($$ select public.confirm_production_ready(pg_temp.id_of('sheet'), pg_temp.ready_rows(), null) $$,
                 'the preparation is confirmed');
 select lives_ok($$ select public.decide_production_schedule(pg_temp.id_of('sheet'), '2026-10-24', '09:00', '15:00', 'email') $$,
                 'the date changes after the confirmation');
@@ -310,7 +358,7 @@ reset role;
 select ok((select ready_at is null and ready_reopened_because = array['date'] from public.production_sheets where id = pg_temp.id_of('sheet')),
           'the preparation is reopened, to confirm again (recette 23/10, MKT-PROD-001)');
 select pg_temp.act_as(pg_temp.id_of('manager'));
-select lives_ok($$ select public.confirm_production_ready(pg_temp.id_of('sheet'), '[{"key":"date","label":"Date et horaires","value":"y","ok":true}]'::jsonb, null) $$,
+select lives_ok($$ select public.confirm_production_ready(pg_temp.id_of('sheet'), pg_temp.ready_rows(), null) $$,
                 'and is confirmed again');
 reset role;
 

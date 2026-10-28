@@ -141,5 +141,27 @@ export const signedReturns = {
       `${name} a signé hors de son lien privé : la date et le bulletin signé scanné en sont la preuve.`,
     noted: (name: string) => `Signature de ${name} notée`,
     viewPdf: "Voir le PDF",
+    // PDS Éditions' line, signed by the direction in PDS OS (JUR-03).
+    houseWaits: "À signer par la direction, dans PDS OS",
+    byHouse: (date: string) =>
+      `Signé dans PDS OS par la direction · le ${date}`,
+    signHouse: "Signer pour PDS Éditions",
+    signingHouse: "Signature…",
+    signedHouse: "Bulletin signé pour PDS Éditions",
+    signHouseBody:
+      "Signature électronique simple dans PDS OS, horodatée, liée à votre compte, sur cette version du bulletin.",
+    // A change to the bulletin after a signature (JUR-03).
+    superseded: "Ne vaut plus",
+    supersededNote:
+      "Le bulletin a changé après cette version : chacun signe la nouvelle.",
+    replaced: "Versions remplacées",
+    replacedLine: (version: number, date: string, signed: number) =>
+      `V${version}${date ? ` · remplacée le ${date}` : ""} · ${
+        signed === 0
+          ? "aucune signature reçue"
+          : signed === 1
+            ? "1 signature qui ne vaut plus"
+            : `${signed} signatures qui ne valent plus`
+      }`,
   },
 } as const;

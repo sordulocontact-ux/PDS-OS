@@ -95,6 +95,8 @@ export const productionReady = {
     planPerson: "Cette personne n'est pas membre de l'équipe.",
     pending: "Une dérogation attend déjà la décision de la direction.",
     already: "La préparation est déjà validée.",
+    stale:
+      "La préparation a changé entre-temps : rechargez la page pour revoir la synthèse avant de confirmer.",
     samePerson:
       "La dérogation est décidée par une autre personne que celle qui la demande.",
     noRequest: "Aucune dérogation n'attend de décision.",

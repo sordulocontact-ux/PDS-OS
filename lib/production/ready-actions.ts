@@ -54,6 +54,7 @@ function readyFailure(error: { code?: string; message?: string }): PrepResult {
     return { ok: false, error: e.planPerson };
   if (m.includes("request_pending")) return { ok: false, error: e.pending };
   if (m.includes("already_ready")) return { ok: false, error: e.already };
+  if (m.includes("ready_snapshot_stale")) return { ok: false, error: e.stale };
   if (m.includes("same_person")) return { ok: false, error: e.samePerson };
   if (m.includes("no_request")) return { ok: false, error: e.noRequest };
   if (m.includes("reason_required")) return { ok: false, error: e.reason };

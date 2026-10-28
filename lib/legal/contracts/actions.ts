@@ -61,6 +61,8 @@ function errorOf(message: string): string {
   if (message.includes("mapping_template_incompatible")) return t.incompatible;
   if (message.includes("agreement_already_generated")) return t.already;
   if (message.includes("mapping_reason_required")) return t.reason;
+  if (message.includes("mapping_reason_only_paid"))
+    return fr.legalContracts.agreements.plan.onlyPaid;
   return t.failed;
 }
 

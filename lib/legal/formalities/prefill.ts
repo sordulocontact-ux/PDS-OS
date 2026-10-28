@@ -28,6 +28,8 @@ export type SplitShare = {
   contactId: string | null;
   role: string;
   share: string;
+  // PDS Éditions' line (JUR-01): the team, no contact.
+  house?: boolean;
 };
 
 export type PrefillContext = {
@@ -93,16 +95,25 @@ export function prefillSacem725(ctx: PrefillContext): Prefill {
     ];
   });
   const named = new Set<string>();
+  // PDS Éditions: the publisher without a Réseau contact when the confirmed
+  // split has the house's line — signed by the direction in PDS OS (JUR-03).
+  const houseLine = ctx.splitShares?.find((s) => s.house) ?? null;
+  let houseNamed = false;
   const publishers: Publisher[] = ctx.publishers.flatMap((p) => {
     const key = p.contactId ?? p.name;
     if (named.has(key)) return [];
     named.add(key);
+    const house = !p.contactId && houseLine !== null && !houseNamed;
+    houseNamed ||= house;
     return [
       {
         name: p.name,
         ipi: p.details.ipi_coad || "",
-        phono: splitShareOf(ctx.splitShares, p.contactId, "publisher"),
+        phono: house
+          ? houseLine.share
+          : splitShareOf(ctx.splitShares, p.contactId, "publisher"),
         ...(p.contactId ? { contact_id: p.contactId } : {}),
+        ...(house ? { house: true } : {}),
       },
     ];
   });

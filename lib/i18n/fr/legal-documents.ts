@@ -73,7 +73,8 @@ export const legalDocuments = {
     resubmit: "Répondre et transmettre à nouveau",
     // « Modifier une clause » in the step.
     revise: "Modifier une clause",
-    reviseHint: "Crée une nouvelle version du document",
+    reviseHint:
+      "Crée une nouvelle version du document. Déjà signé pour PDS : la direction signera la nouvelle version.",
     clause: "Clause",
     newText: "Nouvelle rédaction",
     newTextHint:

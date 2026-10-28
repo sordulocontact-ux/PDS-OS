@@ -3,7 +3,7 @@
 -- `supabase test db`. Fixture of the ticket (« Piégée », test data only: the
 -- shares, signatures, deposit, registration and ISWC here are SIMULATED).
 begin;
-select plan(30);
+select plan(37);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -197,6 +197,42 @@ select is(public.generate_formality_document(pg_temp.id_of('f')), 2, 'the correc
 select is((select count(*)::int from public.legal_formality_signatures
             where formality_id = pg_temp.id_of('f') and document_version = 2 and status = 'pending'), 3,
           'with new signatures, version 1 kept');
+-- JUR-03 (…20261028000601): the signatures of version 1 are kept, never valid any more.
+select is((select count(*)::int from public.legal_formality_signatures
+            where formality_id = pg_temp.id_of('f') and document_version = 1
+              and status = 'signed' and superseded_at is not null), 3,
+          'version 1''s signatures are kept, marked replaced');
+savepoint changed;
+select public.save_formality_values(pg_temp.id_of('f'), jsonb_build_object(
+  'duration', jsonb_build_object('value', '3:15', 'source', 'Saisi')));
+select ok((select bool_and(superseded_at is not null) from public.legal_formality_signatures
+            where formality_id = pg_temp.id_of('f') and document_version = 2)
+          and exists (select 1 from public.legal_formality_events
+                       where formality_id = pg_temp.id_of('f') and kind = 'signatures.superseded'
+                         and note = 'v2 · 0 signature reçue'),
+          'a change to a generated bulletin cancels the signatures of its version, in the history');
+rollback to savepoint changed;
+-- JUR-03: PDS Éditions' line is signed by the direction in PDS OS.
+reset role;
+insert into public.legal_formality_signatures
+  (organization_id, formality_id, document_version, signer, role, house)
+values (pg_temp.id_of('org'), pg_temp.id_of('f'), 2, 'PDS Éditions', 'publisher', true);
+select pg_temp.act_as(pg_temp.id_of('manager'));
+select throws_ok(format($$ select public.sign_formality_for_house((select id from public.legal_formality_signatures where formality_id = %L and house)) $$, pg_temp.id_of('f')),
+                 '42501', null, 'only the direction signs for PDS Éditions');
+select throws_ok(format($$ select public.sign_formality_for_house((select id from public.legal_formality_signatures where formality_id = %L and document_version = 2 and not house limit 1)) $$, pg_temp.id_of('f')),
+                 '42501', null, 'nor anyone a line that is not the house''s');
+reset role;
+select pg_temp.act_as(pg_temp.id_of('director'));
+select throws_ok(format($$ select public.sign_formality_for_house((select id from public.legal_formality_signatures where formality_id = %L and document_version = 2 and not house limit 1)) $$, pg_temp.id_of('f')),
+                 'P0001', 'formality_signature_closed', 'the direction signs only the house''s line');
+select lives_ok(format($$ select public.sign_formality_for_house((select id from public.legal_formality_signatures where formality_id = %L and house)) $$, pg_temp.id_of('f')),
+                'the direction signs for PDS Éditions');
+reset role;
+select is((select via || ' · ' || status from public.legal_formality_signatures
+            where formality_id = pg_temp.id_of('f') and house),
+          'house · signed', 'signed in PDS OS, by the direction');
+select pg_temp.act_as(pg_temp.id_of('manager'));
 
 -- Partial declaration, processing, completion with proof ----------------------------------
 select throws_ok(format($$ select public.declare_formality_partial(%L, null) $$, pg_temp.id_of('f')),

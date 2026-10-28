@@ -146,6 +146,9 @@ export type Publisher = {
   // The project's publishing (or co-publishing) contract that founds the
   // link; none = « à obtenir » (JUR-25).
   contract_id?: string;
+  // PDS Éditions (from the confirmed split): signed by the direction in PDS
+  // OS, never on a link (20261028000601).
+  house?: boolean;
 };
 
 // What the bulletin takes of a person, from their name in the Réseau and

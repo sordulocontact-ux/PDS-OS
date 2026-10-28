@@ -2,7 +2,7 @@
 -- « Pas d'accord nécessaire » needs its reason, kept and readable by the
 -- Juridique only; a démarche handed over or moved keeps its reason.
 begin;
-select plan(11);
+select plan(13);
 
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
 declare v_id uuid := gen_random_uuid();
@@ -60,6 +60,16 @@ select throws_ok(format($$ select public.approve_contract_mapping(%L, %L::jsonb)
   jsonb_build_array(jsonb_build_object('contact_id', pg_temp.id_of('sami'), 'needed', false,
                                        'reason', '   '))),
   'P0001', 'mapping_reason_required', 'a blank reason is no reason');
+select throws_ok(format($$ select public.approve_contract_mapping(%L, %L::jsonb) $$,
+  pg_temp.id_of('project'),
+  jsonb_build_array(jsonb_build_object('contact_id', pg_temp.id_of('sami'), 'needed', false,
+                                       'reason', 'Déjà payé.'))),
+  'P0001', 'mapping_reason_only_paid', 'a payment alone assigns no right (JUR-12), in SQL too');
+select throws_ok(format($$ select public.approve_contract_mapping(%L, %L::jsonb) $$,
+  pg_temp.id_of('project'),
+  jsonb_build_array(jsonb_build_object('contact_id', pg_temp.id_of('sami'), 'needed', false,
+                                       'reason', 'Pas de contrat, déjà réglé.'))),
+  'P0001', 'mapping_reason_only_paid', '« pas de contrat » names no agreement');
 select lives_ok(format($$ select public.approve_contract_mapping(%L, %L::jsonb) $$,
   pg_temp.id_of('project'),
   jsonb_build_array(jsonb_build_object('contact_id', pg_temp.id_of('sami'), 'needed', false,

@@ -350,6 +350,8 @@ export const legalFormalities = {
     "formality.ready": "Prête à générer",
     "document.generated": "Bulletin généré",
     "signature.completed": "Signature reçue",
+    "signatures.superseded":
+      "Signatures annulées : le bulletin a changé, à signer sur la nouvelle version",
     "formality.partial": "Déclaration partielle",
     "formality.submitted": "Dépôt enregistré",
     "formality.processing": "En traitement",

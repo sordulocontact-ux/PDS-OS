@@ -82,7 +82,7 @@ insert into links select token, form_id from public.prepare_legal_form(
 reset role;
 set local role anon;
 select is(public.submit_legal_form((select token from links), array['artist'], null,
-          '{"legal_first_name": "Maya", "email": "maya.lenoir@example.com"}'::jsonb, '{}'::jsonb, 1),
+          '{"legal_first_name": "Maya", "legal_last_name": "Lenoir", "entity_type": "person", "address": "3 rue des Lilas, Paris", "email": "maya.lenoir@example.com"}'::jsonb, '{}'::jsonb, 1),
           'action_required', 'a fiche that changes the Réseau''s e-mail waits for review');
 reset role;
 select is((select corrections #>> '{email,before}' from public.legal_form_submissions
