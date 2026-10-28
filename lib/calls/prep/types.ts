@@ -38,7 +38,7 @@ export type PrepPerson = {
 export type PrepTopic = {
   key: string | null;
   topic: string;
-  // Folded under « Préparer en détail »; null = PO's estimate is kept.
+  // Null: PO's estimate is kept.
   minutes: number | null;
   questions: string[];
 };
@@ -86,7 +86,6 @@ export type PreparedCallInput = {
   goal: string;
   attendeeKeys: string[];
   agenda: Array<{ key: string | null; topic: string; minutes: number | null }>;
-  detailed: boolean;
   documentIds: string[];
   // Extra ids of the module (the Conception's deliverables).
   extraIds: string[];

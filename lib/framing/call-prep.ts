@@ -1,6 +1,6 @@
 // « Préparer un échange » (ticket § 5): PO compares what the Cadrage needs
 // with what is known and prepares only the relevant topics — one per
-// dimension still open, its questions listed for « Préparer en détail ».
+// dimension still open, its questions read in the planned exchange's card.
 // Written by code, no model (the same idea as the Master's exchange agenda).
 // Client-safe.
 

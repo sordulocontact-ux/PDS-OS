@@ -567,8 +567,9 @@ D'après le proto « Projet complet » (`docs/protos/projet.html`), qui fait foi
   `lib/utils/day.ts`, Europe/Paris) ; dans une source ou un historique, en court :
   « le 14/10 », et avec l'heure « 19/10, 11:16 » (`formatShortDay`, `formatShortInstant`).
   `Timestamp` reste pour les instants détaillés (« 11 oct. 2026 à 16:42 »).
-- **Durées et questions par point d'ordre du jour** (formulaire de call) : gardées, mais
-  **repliées** derrière « Préparer en détail ».
+- **Durées et questions par point d'ordre du jour** (formulaire de call, Sacha 28/10/2026) : la
+  durée est visible et modifiable sur chaque point ; les questions de PO ne sont pas dans le
+  formulaire, elles se lisent sous chaque point dans la carte de l'échange prévu.
 - **Page privée** : à terme **un lien par personne et par projet** (proto), construit en
   dernier ; d'abord, le même habillage pour les liens existants (`/m`, `/p`, `/f`…).
 

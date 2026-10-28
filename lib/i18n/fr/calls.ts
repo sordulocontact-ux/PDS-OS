@@ -336,8 +336,6 @@ export const calls = {
     addTopic: "Ajouter un sujet",
     topicPlaceholder: "Un sujet à aborder",
     removeTopic: (topic: string) => `Retirer « ${topic} »`,
-    detail: "Préparer en détail",
-    hideDetail: "Masquer le détail",
     minutes: (n: number) => `${n} min`,
     // The time of a topic, editable in place.
     minutesUnit: "min",

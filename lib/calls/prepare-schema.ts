@@ -13,8 +13,8 @@ const minutes = z.number().int().min(TOPIC_MINUTES_MIN).max(TOPIC_MINUTES_MAX);
 
 /**
  * The agenda as the person ordered and worded it: PO's points keep their
- * `key`, the person's own have none. Durations are optional (folded under
- * « Préparer en détail »): absent, PO's estimate stays.
+ * `key`, the person's own have none. Durations are optional: absent, PO's
+ * estimate stays.
  */
 export const agendaSchema = z
   .array(
@@ -50,14 +50,13 @@ export type StoredPoint = {
 /**
  * The agenda stored with the call, in the person's order and words. A point
  * of PO is matched by its key against what the server prepared (never
- * trusted from the browser): it keeps its questions when « Préparer en
- * détail » and its estimate unless the person gave a duration. An unknown
+ * trusted from the browser): it keeps its questions, read in the planned
+ * exchange's card, and its estimate unless the person gave a duration. An unknown
  * key is a point of the person.
  */
 export function buildPreparedAgenda(
   prepared: PreparedPoint[],
   sent: SentAgenda,
-  detailed: boolean,
 ): StoredPoint[] {
   const byKey = new Map(prepared.map((p) => [p.key, p]));
   const seen = new Set<string>();
@@ -70,9 +69,7 @@ export function buildPreparedAgenda(
         key: point.key,
         topic: item.topic,
         minutes: item.minutes ?? point.minutes,
-        ...(detailed && point.questions.length
-          ? { questions: point.questions }
-          : {}),
+        ...(point.questions.length ? { questions: point.questions } : {}),
       };
     }
     return { topic: item.topic, minutes: item.minutes ?? EXTRA_TOPIC_MINUTES };

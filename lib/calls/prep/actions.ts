@@ -40,7 +40,6 @@ const inputSchema = z.object({
   // "m:<id>", "c:<id>" or "e:<address>": checked against the pool below.
   attendeeKeys: z.array(z.string().min(3).max(330)).min(2).max(30),
   agenda: agendaSchema,
-  detailed: z.boolean(),
   documentIds: z.array(z.uuid()).max(30),
   extraIds: z.array(z.uuid()).max(50),
 });
@@ -85,7 +84,7 @@ export async function createPreparedCall(
   const attendees = resolveAttendees(pool, p.attendeeKeys);
   if (!attendees) return { ok: false, error: fr.calls.errors.invalid_input };
 
-  const agenda = buildPreparedAgenda(prepared.points, p.agenda, p.detailed);
+  const agenda = buildPreparedAgenda(prepared.points, p.agenda);
   const supabase = await createClient();
   await fileTypedGuests(supabase, access.organizationId!, attendees);
   const { callId, error } = await adapter.create(supabase, {

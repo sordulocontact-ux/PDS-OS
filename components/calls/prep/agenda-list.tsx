@@ -17,24 +17,21 @@ const fr = { callPrep };
 /**
  * The agenda of a call, one editor everywhere: points in order (drag by the
  * handle, arrow keys on it, Monter / Descendre on touch screens), edited in
- * place, removed, added. Durations and PO's questions stay folded under
- * « Préparer en détail » (decision C0 n° 6).
+ * place, removed, added, each with its duration (PROJ-UX-03) and the total.
+ * PO's questions are not edited here: they stay with their point and are
+ * read in the planned exchange's card (Sacha 28/10/2026, « Préparer en
+ * détail » removed).
  */
 export function AgendaList({
   id,
   items,
   onChange,
   onAdd,
-  detailed,
-  onDetailedChange,
 }: {
   id: string;
   items: AgendaDraftItem[];
   onChange: (items: AgendaDraftItem[]) => void;
   onAdd: (topic: string) => void;
-  // « Préparer en détail »: durations and questions shown (and sent).
-  detailed: boolean;
-  onDetailedChange: (detailed: boolean) => void;
 }) {
   const t = fr.callPrep;
   const [draft, setDraft] = useState("");
@@ -72,7 +69,7 @@ export function AgendaList({
         <h3 id={`${id}-title`} className="text-body-md font-semibold">
           {t.agenda}
         </h3>
-        {detailed && (
+        {items.length > 0 && (
           <span className="text-caption text-[color:var(--text-tertiary)] tabular-nums">
             {t.total(total)}
           </span>
@@ -90,7 +87,6 @@ export function AgendaList({
               item={{ ...item, minutes: item.minutes ?? EXTRA_TOPIC_MINUTES }}
               index={index}
               count={items.length}
-              detailed={detailed}
               rowProps={rowProps(index)}
               gripProps={gripProps(index)}
               dragging={dragging === index}
@@ -141,18 +137,6 @@ export function AgendaList({
       </div>
       {missing && (
         <FieldError id={`${id}-add-error`}>{t.pointMissing}</FieldError>
-      )}
-      {items.length > 0 && (
-        <Button
-          type="button"
-          size="sm"
-          variant="ghost"
-          className="self-start"
-          aria-expanded={detailed}
-          onClick={() => onDetailedChange(!detailed)}
-        >
-          {detailed ? t.hideDetail : t.detail}
-        </Button>
       )}
     </section>
   );

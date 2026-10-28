@@ -43,7 +43,6 @@ export function CallAgenda({
   const dimensions = fr.framingIntel.dimensions;
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState<AgendaDraftItem[]>([]);
-  const [detailed, setDetailed] = useState(true);
   const [pending, setPending] = useState(false);
   // The points as the common agenda editor holds them; questions and the
   // Cadrage dimension of each point stay with it, by id.
@@ -152,8 +151,6 @@ export function CallAgenda({
             },
           ])
         }
-        detailed={detailed}
-        onDetailedChange={setDetailed}
       />
 
       <div className="flex flex-wrap items-center gap-2">

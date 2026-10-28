@@ -46,13 +46,12 @@ function IconButton({
 /**
  * One point of the agenda: handle to drag (arrow keys too), « 1. Point »,
  * Monter / Descendre on touch screens only, Modifier in place (Enter saves,
- * Escape cancels), Retirer. Detailed: its duration and PO's questions.
+ * Escape cancels), Retirer, and its duration in minutes.
  */
 export function AgendaRow({
   item,
   index,
   count,
-  detailed,
   rowProps,
   gripProps,
   dragging,
@@ -65,7 +64,6 @@ export function AgendaRow({
   item: AgendaDraftItem;
   index: number;
   count: number;
-  detailed: boolean;
   rowProps: ComponentProps<"li">;
   gripProps: ComponentProps<"button">;
   dragging: boolean;
@@ -151,7 +149,7 @@ export function AgendaRow({
         <span className="min-w-0 flex-1 text-body-md font-medium break-words">
           {index + 1}. {item.topic}
         </span>
-        {detailed && item.minutes !== null && (
+        {item.minutes !== null && (
           <MinutesInput
             topic={item.topic}
             value={item.minutes}
@@ -188,13 +186,6 @@ export function AgendaRow({
           </IconButton>
         </span>
       </span>
-      {detailed && item.questions.length > 0 && (
-        <ul className="ml-10 flex list-disc flex-col gap-0.5 pl-5 text-caption text-[color:var(--text-secondary)]">
-          {item.questions.map((q) => (
-            <li key={q}>{q}</li>
-          ))}
-        </ul>
-      )}
     </li>
   );
 }

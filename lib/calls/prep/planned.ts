@@ -17,19 +17,33 @@ export type PlannedCall = {
   createdBy: string | null;
   meetingUrl: string | null;
   people: PrepPerson[];
-  agenda: string[];
+  // Each point, with what PO suggests asking there (an aide-mémoire for the
+  // call, Sacha 28/10/2026).
+  agenda: PlannedPoint[];
   // Held: recorded or processed (its report then takes over).
   held: boolean;
 };
 
-const topicsOf = (agenda: unknown): string[] =>
+export type PlannedPoint = { topic: string; questions: string[] };
+
+const pointsOf = (agenda: unknown): PlannedPoint[] =>
   Array.isArray(agenda)
     ? agenda.flatMap((item) =>
         item &&
         typeof item === "object" &&
         "topic" in item &&
         typeof item.topic === "string"
-          ? [item.topic]
+          ? [
+              {
+                topic: item.topic,
+                questions:
+                  "questions" in item && Array.isArray(item.questions)
+                    ? item.questions.filter(
+                        (q: unknown): q is string => typeof q === "string",
+                      )
+                    : [],
+              },
+            ]
           : [],
       )
     : [];
@@ -98,7 +112,7 @@ export async function loadPlannedCall(
     createdBy: creator,
     meetingUrl: data.meeting_url,
     people,
-    agenda: topicsOf(data.agenda),
+    agenda: pointsOf(data.agenda),
     held: Boolean(data.audio_path) || data.status !== "draft",
   };
 }

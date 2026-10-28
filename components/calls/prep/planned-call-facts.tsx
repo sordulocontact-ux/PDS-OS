@@ -36,7 +36,8 @@ function PlannedFact({
 /**
  * The call once prepared, in its step (Figma PDS OS node 282:6170, Sacha
  * 28/10/2026): in one block, when and who organizes it, the video link to
- * open or copy, the participants, the agenda one point per line; then how
+ * open or copy, the participants, the agenda one point per line with PO's
+ * questions under it, an aide-mémoire during the call; then how
  * it is recorded and « Enregistrer l'échange », which opens the call's page
  * on its recorder. `action`: the module records in place instead (the
  * Cadrage: CallRecorder `compact`, « Annuler l'échange » beside it).
@@ -79,9 +80,21 @@ export function PlannedCallFacts({
         </PlannedFact>
         <PlannedFact label={t.agenda}>
           {call.agenda.length > 0 ? (
-            <ol className="flex flex-col gap-1">
-              {call.agenda.map((topic, i) => (
-                <li key={`${i}-${topic}`}>{`${i + 1}. ${topic}`}</li>
+            <ol className="flex flex-col gap-2">
+              {call.agenda.map((point, i) => (
+                <li key={`${i}-${point.topic}`}>
+                  {`${i + 1}. ${point.topic}`}
+                  {point.questions.length > 0 && (
+                    <ul
+                      aria-label={t.questions(point.topic)}
+                      className="mt-1 flex list-disc flex-col gap-0.5 pl-9 text-caption font-normal text-[color:var(--text-secondary)]"
+                    >
+                      {point.questions.map((q) => (
+                        <li key={q}>{q}</li>
+                      ))}
+                    </ul>
+                  )}
+                </li>
               ))}
             </ol>
           ) : (

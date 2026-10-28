@@ -66,7 +66,7 @@ export async function loadMeeting(
     format: info.format ?? (planned.meetingUrl ? "video" : null),
     minutes: seconds ? Math.max(1, Math.round(Number(seconds) / 60)) : null,
     participants: planned.people,
-    agenda: planned.agenda,
+    agenda: planned.agenda.map((point) => point.topic),
     reportReady: Boolean(report.data),
     lines: items.map((item) => ({
       id: item.id,

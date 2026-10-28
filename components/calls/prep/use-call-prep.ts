@@ -50,7 +50,6 @@ export function useCallPrep(
   const [link, setLink] = useState("");
   const [ownGoal, setGoal] = useState<string | null>(null);
   const [documentIds, setDocumentIds] = useState<string[]>([]);
-  const [detailed, setDetailed] = useState(false);
   const [recap, setRecap] = useState(false);
   const [tried, setTried] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -105,7 +104,6 @@ export function useCallPrep(
           topic,
           minutes,
         })),
-        detailed,
         documentIds,
         extraIds: options.extraIds,
       });
@@ -131,8 +129,6 @@ export function useCallPrep(
     setGoal,
     documentIds,
     setDocumentIds,
-    detailed,
-    setDetailed,
     agenda,
     recap,
     setRecap,

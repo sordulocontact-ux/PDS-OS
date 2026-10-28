@@ -71,9 +71,7 @@ export const callPrep = {
   cancel: "Annuler",
   moved: (topic: string, n: number) =>
     `« ${topic} » est maintenant le point ${n}.`,
-  // « Préparer en détail »: durations and PO's questions, folded.
-  detail: "Préparer en détail",
-  hideDetail: "Masquer le détail",
+  // The duration of each point (PROJ-UX-03) and the total.
   minutesLabel: (topic: string) => `Durée de « ${topic} », en minutes`,
   minutes: (n: number) => `${n} min`,
   total: (n: number) => `Environ ${n} min`,
@@ -117,6 +115,7 @@ export const callPrep = {
     copied: "Lien copié",
     participants: "Participants",
     agenda: "Ordre du jour",
+    questions: (topic: string) => `Questions à poser sur « ${topic} »`,
     note: {
       exchange:
         "L'échange s'enregistre dans PDS OS. À la fin, PO propose ce qui a été dit, point par point, avec la phrase exacte.",

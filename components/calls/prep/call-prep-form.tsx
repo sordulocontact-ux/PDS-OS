@@ -99,8 +99,6 @@ export function CallPrepForm({
         items={s.agenda.items}
         onChange={s.agenda.change}
         onAdd={s.agenda.add}
-        detailed={s.detailed}
-        onDetailedChange={s.setDetailed}
       />
       <CallPrepSent
         defaults={defaults}

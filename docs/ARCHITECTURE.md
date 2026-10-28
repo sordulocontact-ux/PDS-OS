@@ -1267,7 +1267,7 @@ la Production (call de production et call technique) et le Master. Il remplace `
 - **Ordre du jour** : la personne ordonne, reformule, retire, ajoute ; les points de PO gardent leur `key`
   (stockée dans `calls.agenda`), le serveur recalcule les points de PO et n'en reprend que la durée et les
   questions (`buildPreparedAgenda`, `lib/calls/prepare-schema.ts`) ; une durée absente = l'estimation de PO
-  (5 min pour un point ajouté). Durées et questions repliées sous « Préparer en détail » (décision C0 n° 6).
+  (5 min pour un point ajouté). Durée de chaque point toujours visible et modifiable (PROJ-UX-03), total au-dessus ; plus de « Préparer en détail » (Sacha, 28/10/2026) : les questions de PO restent sur leur point, toujours enregistrées, et se lisent sous l'ordre du jour de la carte de l'échange prévu (`PlannedCallFacts`, aide-mémoire pendant le call).
 - **Action unique** `createPreparedCall(kind, …)` (`lib/calls/prep/actions.ts`) : vérifie le formulaire,
   recalcule les points (`lib/calls/prep/adapters/<kind>.ts`), résout les participants contre l'équipe et le
   Réseau lus avec la session, appelle la fonction SQL du module (`create_framing_call`,
@@ -3015,6 +3015,21 @@ Workflow spécialisé du projet, mené en parallèle des 7 étapes (`docs/CONTEX
 Parcours interne : État des lieux → Cadrage juridique → Confirmation → Plan d'action → Suivi
 (`lib/ui/legal-steps.ts`). Les tickets Juridique 01 à 08 du 30/09 sont livrés par lots.
 
+- **Audit des retours écrits d'Ibé (28/10/2026, migration `20261028000601_recette_p0_guards`)** : ce
+  que seuls les écrans tenaient passe en base. *Contre-signature par version* (JUR-11) :
+  `contracts.pds_signed_version` ; `revise_contract_document` (donc `revise_contract_clause`) l'efface
+  et journalise `contract.countersign_voided` ; `sign` exige la signature de PDS sur la dernière version.
+  *Signatures du bulletin remplacées* (JUR-03) : `legal_formality_signatures.superseded_at`, posé par
+  `supersede_formality_signatures` à toute modification d'un bulletin généré et à chaque nouvelle version
+  (événement `signatures.superseded`) ; l'écran les dit « Ne vaut plus » et replie les « Versions
+  remplacées ». *PDS Éditions sur le bulletin* : l'éditeur sans contact du Réseau, quand la répartition
+  confirmée a la ligne maison, porte `house` (préremplissage) ; sa ligne de signature (`house`) est signée
+  par la direction dans PDS OS (`sign_formality_for_house`, `via = 'house'`), jamais par un lien.
+  *Fiche* (JUR-06) : `review_legal_form` refuse `legal_form_incomplete` selon `legal_form_missing` (même
+  liste que `ficheMissing`). *« Déjà payé »* (JUR-12) : `approve_contract_mapping` refuse
+  `mapping_reason_only_paid` selon `reason_only_paid` (même règle que `isOnlyPaid`, « pas de contrat »
+  ne nomme aucun accord). Au passage, le schéma zod des éditeurs du bulletin garde `represents` et
+  `contract_id` (ils étaient retirés à l'enregistrement, d'où un `publisher_link` toujours manquant).
 - **Recette Juridique V1 d'Ibé (21/10/2026, JUR-01 à JUR-12, numérotation propre à cette
   recette ; proto `docs/protos/juridique-v3.html`)**, branche `retours/juridique-v1`, par lots :
   - *Lot 1, transverse* : sections d'étape (`StepSection`, règle `docs/DESIGN.md` « Sections
@@ -5282,6 +5297,13 @@ changement de date rouvre la préparation).
   p_approve, p_reason)` : direction (`administer`) ou `quote_validator_person_id`, jamais le demandeur
   (`same_person`), refus motivé ; validée : `ready_*` posés, `ready_approved_by/at`, une tâche
   `production_plan_actions` par ligne du plan (`review`, `due_date`, origine « Dérogation du … »).
+- **Synthèse revérifiée en base** (audit du 28/10, migration `20261028000601`) : `confirm_production_ready`
+  exige les sept lignes critiques dans `p_snapshot` et refuse (`ready_snapshot_stale`) toute ligne dite
+  prête que `production_ready_unmet(sheet)` sait non prête : lieu choisi, date décidée en vigueur,
+  check-list `checklist_crew|schedule|gear` faite (ou sa tâche), devis approuvé le plus récent sans
+  révision, proposition retenue la plus récente (ou direction approuvée) sans révision, aucun blocage
+  Production ouvert. Jamais plus sévère que `readySynthesis` (notes et adéquation lieu/devis restent au
+  code). Message « rechargez la page ». Tests : fixture `pg_temp.make_ready` + `pg_temp.ready_rows`.
   Notifications `production_ready_requested` (direction et validateur des devis) et
   `production_ready_decided`. Écran : `ReadyConfirmForm` + `ReadyPlanFields`, `ReadyRequestView` +
   `ReadyDecision`, gravité dans `ReadySynthesisTable` ; parcours : l'étape « Contrôle avant tournage »

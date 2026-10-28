@@ -11,6 +11,7 @@ const fr = { calls };
 /**
  * The time given to a topic of the agenda, in minutes, typed in place.
  * Emptied while typing, it comes back to the last valid value on leaving.
+ * The number is in the text colour (it is editable), only « min » is muted.
  */
 export function MinutesInput({
   topic,
@@ -24,7 +25,7 @@ export function MinutesInput({
   const t = fr.calls.prepare;
   const [draft, setDraft] = useState<string | null>(null);
   return (
-    <span className="flex shrink-0 items-center gap-1.5 text-body-md text-muted-foreground">
+    <span className="flex shrink-0 items-center gap-1.5 text-body-md">
       <Input
         type="number"
         inputMode="numeric"
@@ -44,9 +45,9 @@ export function MinutesInput({
             onChange(n);
         }}
         onBlur={() => setDraft(null)}
-        className="h-8 w-16 text-right tabular-nums"
+        className="h-8 w-16 text-right font-medium text-foreground tabular-nums"
       />
-      {t.minutesUnit}
+      <span className="text-muted-foreground">{t.minutesUnit}</span>
     </span>
   );
 }

@@ -1018,7 +1018,38 @@ prévu, à tous les modules qui en ont un (Stratégie, Conception, Production) :
   `20261028000501_call_invite_members` (appliquée en pré-prod, à pousser en prod avec accord), test
   `supabase/tests/call-invite-members.test.sql` (7/7 en pré-prod).
 
+- Puis (même jour) : « Préparer en détail » retiré de l'ordre du jour (ni demandé par Ibé ni dans son
+  proto) : la durée reste sur chaque point (PROJ-UX-03), les questions de PO sont toujours enregistrées et
+  s'affichent sous chaque point dans la carte de l'échange prévu, comme aide-mémoire.
+
 Reste : passage navigateur ; l'enregistrement dans la carte pour la Stratégie, la Conception et la
 Production ; « Annuler l'échange » pour l'échange stratégique et créatif si on le veut ;
 prévenir dans l'app les participants d'un échange annulé (aujourd'hui seul Google les prévient, quand il
 est branché).
+
+
+## Audit des retours écrits d'Ibé : les P0 (28/10/2026, branche `pre-prod`)
+
+Les quatre PDF d'Ibé (Néons 19/10, Juridique 21/10, Distribution et Marketing 23/10), le Drive et Notion
+relus contre le code ; les trous de fiabilité tenus par l'écran seul sont passés en base. Migration
+`20261028000601_recette_p0_guards` (appliquée en pré-prod, à pousser en prod avec accord). Détail :
+`docs/ARCHITECTURE.md`, « Audit des retours écrits d'Ibé » et « Synthèse revérifiée en base ».
+
+- [x] **JUR-11** : la signature de PDS d'un contrat vaut pour sa version ; une clause modifiée l'annule
+      (historique « Signature de PDS annulée »), « Marquer comme signé » l'exige sur la dernière version.
+- [x] **MKT-PROD-002** : « Confirmer : préparation validée » ne croit plus la synthèse du navigateur ; un
+      appel direct ne peut plus sauter la direction.
+- [x] **JUR-03** : une modification du bulletin annule les signatures de sa version (« Ne vaut plus »,
+      « Versions remplacées » repliées) ; « Signer pour PDS Éditions » par la direction dans PDS OS.
+- [x] **JUR-06 / JUR-12** : fiche incomplète et « déjà payé » refusés en base aussi.
+- [x] Bug trouvé en route : un éditeur du bulletin saisi à la main perdait « qui il édite » et son
+      contrat à l'enregistrement (schéma zod), le bulletin restait bloqué sur « publisher_link ».
+- Tests pgTAP (pré-prod, transaction annulée) : `legal-formalities` 37/37, `legal-reste` 35/35,
+  `legal-form-validation` 11/11, `legal-contracts-before-launch` 13/13, `production-ready-recette` 32/32,
+  `production-projet-complet` 57/57, `production-reste` 66/66 ; fixtures de ces tests et de
+  `legal-form-contact-corrections` mises en conformité (fiches complètes, préparation réellement prête).
+
+Reste : passage navigateur ; pousser la migration en prod avec accord ; les P1/P2 de l'audit (bandeau de
+suite sur les gestes du Juridique et du Brief Master, marqueur « déclaré par l'équipe » en Distribution,
+réserves de disponibilité, budget par activation…) ; la valeur juridique de la signature électronique
+simple et la signature du bulletin acceptée par la SACEM, à faire confirmer par Ibé.
