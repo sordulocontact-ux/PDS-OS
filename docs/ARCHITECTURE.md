@@ -730,8 +730,10 @@ Socle de toutes les zones (sous-lots C0 à C5 de `docs/projet-complet/commons.md
   `planWorkflows`) — avant le plan, hors du plan lancé, ou dans le plan sans être lancé.
 - **Résultat d'un geste** (règle 7). `WriteResult` (`lib/utils/write-result.ts`) accepte en plus
   `done`, `next[]`, `unlocked[]`, rétrocompatible. Une Server Action enveloppe son écriture dans
-  `withOutcome(projectId, modules, done, write)` (`lib/journey/outcome.ts`) : parcours relus
-  (`readProjectJourneys`, sans cache) avant et après, `outcomeOf` dit qui agit désormais et ce qui
+  `withOutcome(projectId, modules, done, write)` (`lib/journey/outcome.ts`) : parcours lus avant et
+  après par `loadProjectJourneys` (gardés par version : l'avant est déjà en cache, l'après est
+  réutilisé tel quel par la page que Next rejoue dans la réponse ; relu sans cache seulement si la
+  version n'a pas bougé), comparés sur `modules`, `outcomeOf` dit qui agit désormais et ce qui
   s'est ouvert. Côté client, `useWriteSubmit` / `usePublishResult` font le toast (`done` + « . »)
   et posent le bandeau dans l'étape (`StepResultProvider` de `StepPanel`). Branché : confirmation
   du Juridique (`confirmLegalIntake`), lancement du plan (`launchLegalPlan`), soumission et décision
@@ -816,6 +818,18 @@ s'afficher sans chargement.
   de la navigation principale signale sa navigation en cours (`useLinkStatus`) ; une barre fine en
   haut de la fenêtre l'indique **après 150 ms** seulement (jamais pour une vue prête), sans rien
   changer au lien (pas de décalage). Un écran ne reste plus figé sans signe.
+- **Bouton en cours** (28/10, même fichier) : un bouton qui se désactive dans les 400 ms suivant son
+  clic (ou l'envoi de son formulaire) est pris pour une écriture en cours ; lui seul passe en
+  `data-busy` (anneau qui tourne à la place de son icône après 120 ms, pas pâli, `app/globals.css`)
+  et la barre court, jusqu'à ce qu'il redevienne actif ou quitte la page (30 s au plus). Aucun des
+  366 boutons `disabled={pending}` n'a changé ; ses voisins désactivés en même temps pâlissent
+  seulement. Avant, un clic ne faisait que griser le bouton (« on sait pas si on a cliqué »).
+- **Base froide et saturée** (mesure du 28/10, `pg_stat_statements` de la pré-prod) : une lecture
+  d'une ligne prend ~1 ms seule mais 20 à 70 ms en moyenne, `get_my_access()` 70 ms,
+  `workflow_is_launched` 201 ms : PostgREST n'a que ~10 connexions, une page en lance des centaines,
+  et il **ferme ses connexions après ~35 s sans requête** ; la session neuve paie 100 à 400 ms au
+  premier appel de chaque fonction (catalogue à recharger). Chaque lecture évitée compte donc
+  double après une pause.
 - **Temps réel par diffusion** (`20261027000401_live_broadcast.sql`) : la base envoie elle-même les
   signaux (`realtime.send`) sur des canaux privés, `project:<id>` (`changed`, depuis
   `project_live_bump`) et `notifications:<personne>` (`inserted`) ; qui peut écouter est décidé par

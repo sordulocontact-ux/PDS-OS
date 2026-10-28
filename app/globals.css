@@ -768,3 +768,41 @@
   background-color: var(--tone-warning-bg);
   color: var(--tone-warning-fg);
 }
+
+/* Un bouton dont l'écriture est en cours (components/ui/navigation-progress.tsx) :
+   lui seul reste net, ses voisins désactivés pâlissent, et un anneau qui tourne
+   prend la place de son icône, après 120 ms pour ne pas clignoter sur une
+   écriture rapide. Hors couche : passe devant `disabled:opacity-40`. */
+button[data-busy] {
+  opacity: 1;
+}
+button[data-busy] svg {
+  display: none;
+}
+button[data-busy]::before {
+  content: "";
+  flex: none;
+  width: 0.875em;
+  height: 0.875em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 9999px;
+  animation:
+    busy-spin 0.7s linear infinite,
+    busy-reveal 150ms var(--ease-out) 120ms both;
+}
+@media (prefers-reduced-motion: reduce) {
+  button[data-busy]::before {
+    animation-duration: 1.6s, 0s;
+  }
+}
+@keyframes busy-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes busy-reveal {
+  from {
+    opacity: 0;
+  }
+}
