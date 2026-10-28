@@ -1,5 +1,7 @@
 import "server-only";
 
+import { AsyncLocalStorage } from "node:async_hooks";
+
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
@@ -10,12 +12,30 @@ import { batchingFetch } from "@/lib/supabase/batch";
 import type { Database } from "@/lib/supabase/database.types";
 import { tracingFetch } from "@/lib/supabase/query-trace";
 
+type CookieList = { name: string; value: string }[];
+
+// The session cookies read during the request, for a view computed again
+// once the response is sent (lib/projects/version-cache.ts): Next refuses
+// cookies() to a Server Component then.
+const kept = new AsyncLocalStorage<CookieList>();
+
+/** The request's cookies as they are now, to run something after it. */
+export async function requestCookies(): Promise<CookieList> {
+  return (await cookies()).getAll();
+}
+
+/** Runs `run` with the clients reading these cookies (never writing). */
+export function withCookies<T>(list: CookieList, run: () => T): T {
+  return kept.run(list, run);
+}
+
 /**
  * Supabase client for Server Components, Server Actions and Route Handlers.
  * Uses the anon key and the user's session cookies: RLS applies.
  */
 export async function createClient() {
-  const cookieStore = await cookies();
+  const snapshot = kept.getStore();
+  const cookieStore = snapshot ? null : await cookies();
   const { NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY } =
     getPublicEnv();
 
@@ -32,9 +52,10 @@ export async function createClient() {
       },
       cookies: {
         getAll() {
-          return cookieStore.getAll();
+          return snapshot ?? cookieStore!.getAll();
         },
         setAll(cookiesToSet) {
+          if (!cookieStore) return;
           try {
             for (const { name, value, options } of cookiesToSet) {
               cookieStore.set(name, value, options);

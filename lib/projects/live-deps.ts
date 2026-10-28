@@ -101,6 +101,12 @@ export function recordRequest(input: RequestInfo | URL) {
     record(`t:${name}`);
 }
 
+/** Runs `run` apart from the views being computed around it: a view
+ * computed again in the background records nothing for them. */
+export function apart<T>(run: () => T): T {
+  return collectors.run([], run);
+}
+
 /** Runs a read that belongs to no view (the project's stamps themselves). */
 export function untracked<T>(run: () => PromiseLike<T>): Promise<T> {
   return collectors.run([], async () => await run());

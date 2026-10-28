@@ -1,5 +1,7 @@
 import "server-only";
 
+import { AsyncLocalStorage } from "node:async_hooks";
+import { after } from "next/server";
 import { cache } from "react";
 
 import { getAccess } from "@/lib/auth/dal";
@@ -7,6 +9,7 @@ import { getServerEnv } from "@/lib/env";
 import { todayInParis } from "@/lib/contracts/types";
 import {
   addDeps,
+  apart,
   collecting,
   functionReads,
   inView,
@@ -17,9 +20,15 @@ import {
   tablesOfDeps,
   unchanged,
   untracked,
+  type ViewScope,
   VISIBILITY,
 } from "@/lib/projects/live-deps";
-import { createClient } from "@/lib/supabase/server";
+import { holdsSignedLink, isPlain } from "@/lib/projects/plain-data";
+import {
+  createClient,
+  requestCookies,
+  withCookies,
+} from "@/lib/supabase/server";
 
 // Cache of a project's computed views across requests (page loads audit,
 // docs/ARCHITECTURE.md § 3 bis, « Cache des parcours » and « Cache par
@@ -37,31 +46,54 @@ import { createClient } from "@/lib/supabase/server";
 // - the reader as the database knows them (the whole Access: account,
 //   position, permissions), since RLS and the journeys depend on who reads,
 //   and the tables RLS reads to decide what a reader sees (VISIBILITY);
-// - the day in Paris (overdue steps), and at most TTL_MS old: what is not a
+// - the day in Paris (overdue steps), and fresh for TTL_MS: what is not a
 //   table of a project (a name in the Réseau, a catalog file of a title held
-//   by no project) and the signed links (15 min at least) stay short-lived.
+//   by no project) is read again after that. Past it, and up to STALE_MS, an
+//   entry whose tables did not change is still served once while it is
+//   computed again in the background (after the response): coming back to a
+//   project after a break no longer waits for its 260 requests, only what is
+//   not a table of the project may show its state of before the break, until
+//   the next page. A view holding a signed Storage link (15 min at least)
+//   is never served past TTL_MS.
 // A reader without a version row (a project they may not see) is never
 // served from here. A view that is not plain data (a function, a class
 // instance) is never kept. Concurrent requests for the same entry (a
 // hovered link's prefetch, then the click) share one computation.
 
 const TTL_MS = 5 * 60_000;
+// A working day: the reader's key changes at midnight anyway.
+const STALE_MS = 8 * 60 * 60_000;
 const MAX_ENTRIES = 300;
+// A background computation's session must outlive it by far: a client that
+// renewed it then could not hand the new cookies back, and the browser's
+// own refresh token would be refused afterwards (rotation).
+const SESSION_MARGIN_MS = 10 * 60_000;
 
 // `kept: false`: the computation failed or is not plain data; whoever waited
 // on it computes on its own.
 type Kept =
-  | { kept: true; value: unknown; deps: string[]; tables: Tables }
+  | {
+      kept: true;
+      value: unknown;
+      deps: string[];
+      tables: Tables;
+      signed: boolean;
+    }
   | { kept: false };
 type Entry = {
   at: number;
   seen: LiveStamps;
   value: Promise<Kept>;
   settled: Kept | null;
+  // Being computed again in the background (served past its time).
+  refreshing?: boolean;
 };
 const entries = new Map<string, Entry>();
 // Views found not to be plain data: computed every time.
 const uncacheable = new Set<string>();
+// Inside a background computation: the views it reads must be fresh, or
+// it would keep their old state as new.
+const refreshing = new AsyncLocalStorage<true>();
 
 /** The project's stamps for the reader, once per request; null when the
  * reader has no row (a project they may not see) or the read failed. */
@@ -170,22 +202,6 @@ function traceMiss(name: string, entry: Entry | undefined, now: LiveStamps) {
   console.info(`[cache] ${name} computed again: ${why}`);
 }
 
-// Plain data only: what structuredClone gives back unchanged.
-function isPlain(value: unknown, seen = new Set<unknown>()): boolean {
-  if (value === null || typeof value !== "object")
-    return typeof value !== "function" && typeof value !== "symbol";
-  if (seen.has(value)) return true;
-  seen.add(value);
-  if (value instanceof Date) return true;
-  if (value instanceof Map)
-    return [...value].every(([k, v]) => isPlain(k, seen) && isPlain(v, seen));
-  if (value instanceof Set) return [...value].every((v) => isPlain(v, seen));
-  if (Array.isArray(value)) return value.every((v) => isPlain(v, seen));
-  const proto = Object.getPrototypeOf(value);
-  if (proto !== Object.prototype && proto !== null) return false;
-  return Object.values(value).every((v) => isPlain(v, seen));
-}
-
 function remember(key: string, entry: Entry) {
   entries.delete(key);
   entries.set(key, entry);
@@ -198,15 +214,142 @@ function remember(key: string, entry: Entry) {
 
 // An entry still good for the stamps read now: from the same version (also
 // while it computes), or settled and none of its tables changed since.
-function servable(entry: Entry | undefined, now: LiveStamps) {
-  if (!entry || Date.now() - entry.at >= TTL_MS) return false;
-  if (entry.seen.version === now.version) return true;
+// "stale": past TTL_MS, served while it is computed again (see above).
+function servable(
+  entry: Entry | undefined,
+  now: LiveStamps,
+): "fresh" | "stale" | null {
+  if (!entry) return null;
   const settled = entry.settled;
-  if (!settled?.kept || !unchanged(settled.tables, entry.seen, now))
-    return false;
-  // Good for this version too: later checks start from here.
-  entry.seen = now;
-  return true;
+  if (entry.seen.version !== now.version) {
+    if (!settled?.kept || !unchanged(settled.tables, entry.seen, now))
+      return null;
+    // Good for this version too: later checks start from here.
+    entry.seen = now;
+  }
+  const age = Date.now() - entry.at;
+  if (age < TTL_MS) return "fresh";
+  if (
+    !settled?.kept ||
+    settled.signed ||
+    age >= STALE_MS ||
+    refreshing.getStore()
+  )
+    return null;
+  return "stale";
+}
+
+type Computation<T> = { entry: Entry; result: Promise<T>; deps: Set<string> };
+
+// Computes a view in its scope and makes the entry that will keep it. Its
+// reads may be served from the answers kept for this project and reader
+// (lib/projects/request-cache.ts).
+function compute<T>(
+  name: string,
+  key: string,
+  scope: ViewScope,
+  read: (projectId: string) => Promise<T>,
+): Computation<T> {
+  const { result, deps } = collecting(() =>
+    inView(scope, () => read(scope.projectId)),
+  );
+  const drop = (entry: Entry) => {
+    if (entries.get(key) === entry) entries.delete(key);
+  };
+  const entry: Entry = {
+    at: Date.now(),
+    seen: scope.now,
+    settled: null,
+    value: Promise.resolve(result).then(
+      async (value): Promise<Kept> => {
+        if (!isPlain(value)) {
+          uncacheable.add(name);
+          drop(entry);
+          console.warn(`byProjectVersion: ${name} is not plain data, not kept`);
+          return { kept: false };
+        }
+        const list = [...deps];
+        return {
+          kept: true,
+          value: structuredClone(value),
+          deps: list,
+          tables: await tablesOf(list),
+          signed: holdsSignedLink(value),
+        };
+      },
+      // A failure (redirect, notFound, error) is never kept.
+      (): Kept => {
+        drop(entry);
+        return { kept: false };
+      },
+    ),
+  };
+  void entry.value.then((kept) => {
+    entry.settled = kept;
+  });
+  return { entry, result, deps };
+}
+
+// Computes a view served past its time again once the response is sent (it
+// would otherwise share the database with the page that waits): the new
+// entry replaces the old one once kept, unless another took its place. It
+// reads the session from the cookies as they were during the request: a
+// Server Component may not read them any more then.
+async function refresh<T>(
+  name: string,
+  key: string,
+  stale: Entry,
+  scope: ViewScope,
+  read: (projectId: string) => Promise<T>,
+) {
+  if (stale.refreshing) return;
+  stale.refreshing = true;
+  let jar: Awaited<ReturnType<typeof requestCookies>>;
+  try {
+    jar = await requestCookies();
+    const supabase = await createClient();
+    const { data } = await supabase.auth.getClaims();
+    const expires = (data?.claims.exp ?? 0) * 1000;
+    if (expires - Date.now() < SESSION_MARGIN_MS) throw new Error("session");
+  } catch {
+    // No session to read with safely: computed again on next read.
+    if (entries.get(key) === stale) entries.delete(key);
+    return;
+  }
+  if (process.env.PERF_TRACE === "1")
+    console.info(`[cache] ${name} served past its time, computed again`);
+  let sent = () => {};
+  const responded = new Promise<void>((resolve) => (sent = resolve));
+  const task = responded.then(() =>
+    apart(() =>
+      withCookies(jar, () =>
+        refreshing.run(true, () => {
+          const started = Date.now();
+          const { entry, result } = compute(name, key, scope, read);
+          void result.catch(() => {});
+          return entry.value.then((kept) => {
+            if (entries.get(key) !== stale) return;
+            if (kept.kept) remember(key, entry);
+            else entries.delete(key);
+            if (process.env.PERF_TRACE === "1")
+              console.info(
+                `[cache] ${name} computed again in the background, ${Date.now() - started} ms`,
+              );
+          });
+        }),
+      ),
+    ),
+  );
+  try {
+    // Keeps the server alive until it is done (Vercel).
+    after(() => {
+      sent();
+      return task;
+    });
+  } catch {
+    // Outside a request: computed right away.
+    sent();
+  }
 }
 
 /**
@@ -230,8 +373,11 @@ export function byProjectVersion<T>(
     // Who reads, and on which day (overdue steps).
     const reader = JSON.stringify([todayInParis(new Date()), access]);
     const key = JSON.stringify([name, projectId, reader]);
+    const scope: ViewScope = { projectId, now, reader };
     const hit = entries.get(key);
-    if (hit && servable(hit, now)) {
+    const state = servable(hit, now);
+    if (hit && state) {
+      if (state === "stale") void refresh(name, key, hit, scope, read);
       const found = await hit.value;
       // Each request gets its own copy: nothing it changes reaches another.
       if (found.kept) {
@@ -242,43 +388,7 @@ export function byProjectVersion<T>(
     }
 
     traceMiss(name, hit, now);
-    // In the view's scope: its reads may be served from the answers kept
-    // for this project and reader (lib/projects/request-cache.ts).
-    const { result, deps } = collecting(() =>
-      inView({ projectId, now, reader }, () => read(projectId)),
-    );
-    const entry: Entry = {
-      at: Date.now(),
-      seen: now,
-      settled: null,
-      value: Promise.resolve(result).then(
-        async (value): Promise<Kept> => {
-          if (!isPlain(value)) {
-            uncacheable.add(name);
-            entries.delete(key);
-            console.warn(
-              `byProjectVersion: ${name} is not plain data, not kept`,
-            );
-            return { kept: false };
-          }
-          const list = [...deps];
-          return {
-            kept: true,
-            value: structuredClone(value),
-            deps: list,
-            tables: await tablesOf(list),
-          };
-        },
-        // A failure (redirect, notFound, error) is never kept.
-        (): Kept => {
-          entries.delete(key);
-          return { kept: false };
-        },
-      ),
-    };
-    void entry.value.then((kept) => {
-      entry.settled = kept;
-    });
+    const { entry, result, deps } = compute(name, key, scope, read);
     remember(key, entry);
     const started = Date.now();
     const value = await result;

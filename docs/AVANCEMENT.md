@@ -986,5 +986,8 @@ PostgREST). Livré (`docs/ARCHITECTURE.md` § 3 bis, « Cache par table ») :
   à la place de `cache` dans `lib/` (règle ESLint).
 - Bouton en cours (anneau sur le bouton cliqué) et `withOutcome` passé par le cache.
 - Mesures : après une contrainte du Cadrage, 22 requêtes au lieu de 263 ; page déjà vue, 9 en moyenne.
-- Reste : gestes d'écriture optimistes si l'attente se voit encore, base froide après une pause
-  (cache d'exécution Vercel, payant), taille de l'instance de prod (décision).
+- Retour sur un projet après une pause (vues de plus de 5 min) : servies tout de suite et recalculées en
+  arrière-plan après la réponse (1,3 s au lieu de 4,8 s mesurés). « Voir comme » ne déconnecte plus
+  d'abord (un appel à Auth de moins, et les autres sessions du compte ne sont plus fermées).
+- Reste : gestes d'écriture optimistes si l'attente se voit encore, instance froide sur Vercel après
+  une pause (cache d'exécution Vercel, payant), taille de l'instance de prod (décision).

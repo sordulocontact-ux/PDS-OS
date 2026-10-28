@@ -907,8 +907,16 @@ s'afficher sans chargement.
   `project_stage_id`, `call_id`, `master_id` via `project_masters`, le projet et ses titres), une
   incrémentation par projet et par transaction ; exclus : `project_live`, `notifications`, les parties
   de l'enregistreur. **Toute nouvelle table liée à un projet** : `select public.attach_project_live();`
-  dans sa migration. Ce qui ne mène à aucun projet (un nom dans le Réseau) reste au plus 5 min en
-  cache ; les liens signés durent 15 min au moins. Pas de ligne de version (projet invisible pour le
+  dans sa migration. Ce qui ne mène à aucun projet (un nom dans le Réseau) est relu après 5 min ;
+  les liens signés durent 15 min au moins. **Après 5 min** (retour sur un projet après une pause), une
+  vue dont les tables n'ont pas changé est encore servie, au plus 8 h, et **recalculée en arrière-plan
+  une fois la réponse envoyée** (`after`) : on n'attend plus les ~260 requêtes du projet (1,3 s au lieu
+  de 4,8 s mesurés), seul ce qui n'est pas une table du projet peut montrer son état d'avant la pause
+  jusqu'à la page suivante. Jamais pour une vue qui contient un lien signé (`plain-data.ts`), ni
+  quand la session expire dans moins de 10 min. Piège : Next refuse `cookies()` à un Server Component
+  dès que `after` a commencé (pour toute la requête, pas seulement dans le rappel) ; le recalcul lit
+  donc la session dans les cookies relevés pendant le rendu (`withCookies`, `lib/supabase/server.ts`),
+  sans pouvoir réécrire une session renouvelée, d'où la marge de 10 min. Pas de ligne de version (projet invisible pour le
   lecteur) = jamais servi du cache ; un résultat qui n'est pas de la donnée pure (fonction, instance
   de classe) n'est jamais gardé : on garde la donnée et on rajoute la fonction à chaque lecture
   (`designJourneyContext`, `distributionContext` et leur `nameOf`) ; chaque requête reçoit sa
