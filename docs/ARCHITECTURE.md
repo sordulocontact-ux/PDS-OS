@@ -500,7 +500,8 @@ Migration `…004001_titles_audio_state.sql`, règles `lib/catalog/title-rules.t
   `loadDistributionState` : sortie en ligne, dépôt déclaré à The Orchard, dossier ou date de
   sortie — puis **une prochaine action** décidée par le code, `titleNextAction` : première
   version, version à examiner, version corrigée à déposer, étape suivante, projet à rattacher,
-  pièce manquante). Puis « Complétude du dossier », **repliée**, avec son compteur, ce qui
+  pièce manquante). Puis « Complétude du dossier », **toujours ouverte** (Sacha 29/10 : repliée, la
+  carte gardait la hauteur de la colonne voisine), avec son compteur, ce qui
   compte pour la sortie d'abord (« Pour la sortie ») et seulement les déclarations
   applicables ; « Master final validé » remplace « déposé ». Les cinq tuiles de compteurs
   ont disparu.

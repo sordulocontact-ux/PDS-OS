@@ -34,8 +34,8 @@ import { allInOrder } from "@/lib/utils/parallel";
 
 // Title overview (retours Catalogue 01, 11, 12 et 14): first where the title
 // stands (audio state, version of reference, project, distribution) and the
-// next action, computed by code; then the dossier's completeness, folded,
-// with its counter, what the release needs first and only the applicable
+// next action, computed by code; then the dossier's completeness, always
+// open (Sacha 29/10: folded, the card kept its height anyway), with its counter, what the release needs first and only the applicable
 // declarations; facts and performing artists; its variants (#variants) and
 // its activity (#activity).
 export default async function MasterOverviewPage({
@@ -96,11 +96,9 @@ export default async function MasterOverviewPage({
         checklist={checklist}
       />
 
-      <div className="grid gap-[var(--section-gap)] lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-6">
+      <div className="grid items-start gap-[var(--section-gap)] lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-6">
         <PageSection
           card
-          collapsible
-          defaultOpen={false}
           id="checklist"
           title={t.checklist.title}
           description={t.checklist.description}
