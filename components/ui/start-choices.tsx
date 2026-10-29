@@ -27,9 +27,9 @@ export type StartChoice = {
 
 /**
  * How to start a step (docs/projet-complet/commons.md § 3, proto `.choice`):
- * cards side by side, the recommended one on the right with its pill
- * (Sacha 29/10/2026), and under it the reason the code computed (« Il manque … : un échange ira plus vite
- * que des questions séparées. »). Clicking a card chooses and moves
+ * cards side by side, the recommended one first, on the left, with its
+ * pill (Sacha 29/10/2026), and under it the reason the code computed
+ * (« Il manque … : un échange ira plus vite que des questions séparées. »). Clicking a card chooses and moves
  * on: no radio and no « Confirmer ». Each card is a link (`href`), a client
  * call (`onChoose`), or a submit of `formAction` with `name=value` (a
  * Server Action, from a server parent). A form choice that triggers nothing
@@ -57,13 +57,10 @@ export function StartChoices({
   // wait (no second click while it runs).
   pending?: string | null;
 }) {
-  // Side by side, the recommended card ends the row; in one column it
-  // leads.
-  const last = columns === 2 ? 1 : -1;
+  // The recommended card leads (on the left, side by side).
   const ordered = [...choices].sort(
     (a, b) =>
-      last *
-      (Number(a.value === recommended) - Number(b.value === recommended)),
+      Number(b.value === recommended) - Number(a.value === recommended),
   );
   const cards = ordered.map((choice) => {
     const isRecommended = choice.value === recommended;
@@ -120,8 +117,7 @@ export function StartChoices({
     );
   });
 
-  // The reason sits under the recommended card, in its column.
-  const recommendedAt = ordered.findIndex((c) => c.value === recommended);
+  // The reason sits under the recommended card, in the first column.
   const grid: ReactNode = (
     <div
       className={cn("grid gap-3", columns === 2 && "sm:grid-cols-2")}
@@ -130,12 +126,7 @@ export function StartChoices({
     >
       {cards}
       {reason && (
-        <p
-          className={cn(
-            "text-caption text-[color:var(--text-secondary)]",
-            columns === 2 && recommendedAt === 1 && "sm:col-start-2",
-          )}
-        >
+        <p className="text-caption text-[color:var(--text-secondary)]">
           {reason}
         </p>
       )}

@@ -1657,7 +1657,7 @@ l'étape qui attend la personne (`framingLanding`) et les anciennes URL (`?step=
   informations notées `StepBlockers` / `StepToolsBlock`).
 - **Démarrer** : faits « Prise en charge » / « Projet », « Ce que le projet sait déjà » (comptes du code,
   « Voir le détail » = une ligne par information, `FramingLine`), `StartWays` = `StartChoices`
-  (« Recommandé » à droite) ; **règle retenue** (proto) : échange recommandé quand
+  (« Recommandé » à gauche) ; **règle retenue** (proto) : échange recommandé quand
   manquant + à confirmer > connu (`recommendedStart`, `lib/framing/lines.ts`), raison dite seulement
   dans ce cas. « Préparer un échange » ouvre `CallPrepForm` dans l'étape (`callSheetData` : un point par
   dimension qui a un manque ou un « à confirmer »), « Changer » revient au choix. Après création :
