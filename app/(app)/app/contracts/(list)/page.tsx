@@ -132,33 +132,32 @@ export default async function ContractsPage({
               current: view === key,
             })),
           ]}
-          action={
-            <UrlFilters
-              path={routes.contracts}
-              params={{ view }}
-              groups={filterGroups(ofView, filters)}
-            />
-          }
         >
-          {shown.length > 0 ? (
-            // Remounted per view: the search starts empty on each one.
-            <ContractsList
-              key={[view, ...Object.values(filters)].join("-")}
-              contracts={shown}
-            />
-          ) : filtering ? (
-            <EmptyState
-              icon={IconHandshake}
-              title={t.filtersEmpty}
-              body={t.filtersEmptyBody}
-            />
-          ) : (
-            <EmptyState
-              icon={IconHandshake}
-              title={t.emptyViewTitle(view ? t.views[view] : t.views.all)}
-              body={t.emptyViewBody}
-            />
-          )}
+          <ContractsList
+            contracts={shown}
+            filters={
+              <UrlFilters
+                path={routes.contracts}
+                params={{ view }}
+                groups={filterGroups(ofView, filters)}
+              />
+            }
+            empty={
+              filtering ? (
+                <EmptyState
+                  icon={IconHandshake}
+                  title={t.filtersEmpty}
+                  body={t.filtersEmptyBody}
+                />
+              ) : (
+                <EmptyState
+                  icon={IconHandshake}
+                  title={t.emptyViewTitle(view ? t.views[view] : t.views.all)}
+                  body={t.emptyViewBody}
+                />
+              )
+            }
+          />
         </DataTableViews>
       )}
     </PageContainer>

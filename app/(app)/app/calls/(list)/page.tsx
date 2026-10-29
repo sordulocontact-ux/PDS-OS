@@ -225,36 +225,31 @@ export default async function CallsPage({
                 current: view === value,
               })),
             ]}
-            action={
-              <UrlFilters
-                path={routes.calls}
-                params={{ display: "list", view }}
-                groups={filterGroups(ofView, filters)}
-              />
-            }
           >
-            {shown.length === 0 && filtering ? (
-              <EmptyState
-                icon={IconPhone}
-                title={t.filtersEmpty}
-                body={t.filtersEmptyBody}
-              />
-            ) : shown.length === 0 ? (
-              <EmptyState
-                icon={IconPhone}
-                title={
-                  view === "upcoming" ? t.emptyUpcomingTitle : t.emptyPastTitle
-                }
-                body={t.emptyViewBody}
-              />
-            ) : (
-              // Remounted per view: the search starts empty on each one.
-              <AllCallsList
-                key={[view, ...Object.values(filters)].join("-")}
-                calls={shown}
-                now={now}
-              />
-            )}
+            <AllCallsList
+              calls={shown}
+              now={now}
+              filters={
+                <UrlFilters
+                  path={routes.calls}
+                  params={{ display: "list", view }}
+                  groups={filterGroups(ofView, filters)}
+                />
+              }
+              empty={
+                <EmptyState
+                  icon={IconPhone}
+                  title={
+                    filtering
+                      ? t.filtersEmpty
+                      : view === "upcoming"
+                        ? t.emptyUpcomingTitle
+                        : t.emptyPastTitle
+                  }
+                  body={filtering ? t.filtersEmptyBody : t.emptyViewBody}
+                />
+              }
+            />
           </DataTableViews>
         )}
       </PageContainer>

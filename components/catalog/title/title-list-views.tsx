@@ -14,14 +14,14 @@ const fr = { catalog };
 // Views of the Catalogue, in the URL: where the song stands as tabs (Tous,
 // En création, En production, Finalisés, with their counts) and, for the
 // director, live or archived records at the end of the bar. Each axis keeps
-// the others' choice (the filters included). Same shape as ArtistListViews.
+// the others' choice (the filters included, which sit beside the search).
+// Same shape as ArtistListViews.
 export function TitleListViews({
   view,
   counts,
   archived,
   canArchive,
   filters,
-  filterBar,
   children,
 }: {
   view: TitleView;
@@ -30,8 +30,6 @@ export function TitleListViews({
   canArchive: boolean;
   // The active filters (?audio=, ?artist=, ?project=), kept by the tabs.
   filters: Record<string, string | null>;
-  // « Filtres » (UrlFilters), before the archive toggle.
-  filterBar: React.ReactNode;
   children: React.ReactNode;
 }) {
   const t = fr.catalog.masters.views;
@@ -51,20 +49,17 @@ export function TitleListViews({
         current: view === value,
       }))}
       action={
-        <div className="flex flex-wrap items-center gap-2">
-          {filterBar}
-          {canArchive && (
-            <ArchiveViewToggle
-              path={routes.masters}
-              archived={archived}
-              params={Object.fromEntries(
-                Object.entries({ ...filters, state }).filter(
-                  (entry): entry is [string, string] => entry[1] !== null,
-                ),
-              )}
-            />
-          )}
-        </div>
+        canArchive && (
+          <ArchiveViewToggle
+            path={routes.masters}
+            archived={archived}
+            params={Object.fromEntries(
+              Object.entries({ ...filters, state }).filter(
+                (entry): entry is [string, string] => entry[1] !== null,
+              ),
+            )}
+          />
+        )
       }
     >
       {children}

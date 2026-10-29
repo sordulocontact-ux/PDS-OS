@@ -64,6 +64,36 @@ export default async function MastersPage({
       </Link>
     ) : null;
 
+  // No row: the archive, the filters, the tab or the catalog is empty.
+  const empty =
+    archived && !filtering ? (
+      <EmptyState
+        icon={IconBoxArchive}
+        title={fr.records.archivedEmpty.master}
+        body={fr.records.archivedEmptyBody}
+      />
+    ) : filtering ? (
+      <EmptyState
+        icon={IconDisc}
+        title={t.filtersEmpty}
+        body={t.filtersEmptyBody}
+      />
+    ) : all.length > 0 && view !== "all" ? (
+      <EmptyState
+        icon={IconDisc}
+        title={t.filteredEmpty[view]}
+        body={t.filteredEmptyBody}
+        action={newMaster}
+      />
+    ) : (
+      <EmptyState
+        icon={IconDisc}
+        title={t.emptyTitle}
+        body={newMaster ? t.emptyBody : t.emptyBodyReadOnly}
+        action={newMaster}
+      />
+    );
+
   return (
     <PageContainer>
       <PageHeader
@@ -80,47 +110,9 @@ export default async function MastersPage({
           archived={archived}
           canArchive={canArchive}
           filters={{ ...filters }}
-          filterBar={
-            all.length > 0 && (
-              <UrlFilters
-                path={routes.masters}
-                params={{
-                  state: titleViewParam(view),
-                  view: archived ? "archived" : null,
-                }}
-                groups={filterGroups(ofView, filters)}
-              />
-            )
-          }
         >
-          {masters.length === 0 ? (
-            archived && !filtering ? (
-              <EmptyState
-                icon={IconBoxArchive}
-                title={fr.records.archivedEmpty.master}
-                body={fr.records.archivedEmptyBody}
-              />
-            ) : filtering ? (
-              <EmptyState
-                icon={IconDisc}
-                title={t.filtersEmpty}
-                body={t.filtersEmptyBody}
-              />
-            ) : all.length > 0 && view !== "all" ? (
-              <EmptyState
-                icon={IconDisc}
-                title={t.filteredEmpty[view]}
-                body={t.filteredEmptyBody}
-                action={newMaster}
-              />
-            ) : (
-              <EmptyState
-                icon={IconDisc}
-                title={t.emptyTitle}
-                body={newMaster ? t.emptyBody : t.emptyBodyReadOnly}
-                action={newMaster}
-              />
-            )
+          {all.length === 0 ? (
+            empty
           ) : (
             <MastersList
               masters={masters}
@@ -129,6 +121,17 @@ export default async function MastersPage({
                 canArchive,
                 archived,
               }}
+              filters={
+                <UrlFilters
+                  path={routes.masters}
+                  params={{
+                    state: titleViewParam(view),
+                    view: archived ? "archived" : null,
+                  }}
+                  groups={filterGroups(ofView, filters)}
+                />
+              }
+              empty={empty}
             />
           )}
         </TitleListViews>

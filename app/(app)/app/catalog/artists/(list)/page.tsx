@@ -47,6 +47,35 @@ export default async function ArtistsPage({
   const ofTab = relation ? all.filter((a) => a.relation === relation) : all;
   const artists = ofTab.filter((a) => hasTitles(a, titles));
   const canCreate = can(access, "manage_catalog") && !archived;
+  // No row: the archive, the filter, the tab or the roster is empty.
+  const empty =
+    archived && !titles ? (
+      <EmptyState
+        icon={IconBoxArchive}
+        title={fr.records.archivedEmpty.artist}
+        body={fr.records.archivedEmptyBody}
+      />
+    ) : titles ? (
+      <EmptyState
+        icon={IconMicrophone}
+        title={t.filtersEmpty}
+        body={t.filtersEmptyBody}
+      />
+    ) : relation ? (
+      <EmptyState
+        icon={IconMicrophone}
+        title={t.filteredEmpty[relation]}
+        body={t.filteredEmptyBody}
+        action={canCreate ? <NewArtistButton /> : null}
+      />
+    ) : (
+      <EmptyState
+        icon={IconMicrophone}
+        title={t.emptyTitle}
+        body={canCreate ? t.emptyBody : t.emptyBodyReadOnly}
+        action={canCreate ? <NewArtistButton /> : null}
+      />
+    );
 
   return (
     <PageContainer>
@@ -64,48 +93,11 @@ export default async function ArtistsPage({
           archived={archived}
           canArchive={canArchive}
           filters={{ titles }}
-          filterBar={
-            all.length > 0 && (
-              <UrlFilters
-                path={routes.artists}
-                params={{ relation, view: archived ? "archived" : null }}
-                groups={filterGroups(ofTab, titles)}
-              />
-            )
-          }
         >
-          {artists.length === 0 ? (
-            archived && !titles ? (
-              <EmptyState
-                icon={IconBoxArchive}
-                title={fr.records.archivedEmpty.artist}
-                body={fr.records.archivedEmptyBody}
-              />
-            ) : titles ? (
-              <EmptyState
-                icon={IconMicrophone}
-                title={t.filtersEmpty}
-                body={t.filtersEmptyBody}
-              />
-            ) : relation ? (
-              <EmptyState
-                icon={IconMicrophone}
-                title={t.filteredEmpty[relation]}
-                body={t.filteredEmptyBody}
-                action={canCreate ? <NewArtistButton /> : null}
-              />
-            ) : (
-              <EmptyState
-                icon={IconMicrophone}
-                title={t.emptyTitle}
-                body={canCreate ? t.emptyBody : t.emptyBodyReadOnly}
-                action={canCreate ? <NewArtistButton /> : null}
-              />
-            )
+          {all.length === 0 ? (
+            empty
           ) : (
-            // Remounted per view: the search starts empty on each one.
             <ArtistsList
-              key={`${relation}-${titles}-${archived}`}
               artists={artists}
               // Within a relation filter, it goes without saying.
               showRelation={relation === null}
@@ -114,6 +106,14 @@ export default async function ArtistsPage({
                 canArchive,
                 archived,
               }}
+              filters={
+                <UrlFilters
+                  path={routes.artists}
+                  params={{ relation, view: archived ? "archived" : null }}
+                  groups={filterGroups(ofTab, titles)}
+                />
+              }
+              empty={empty}
             />
           )}
         </ArtistListViews>

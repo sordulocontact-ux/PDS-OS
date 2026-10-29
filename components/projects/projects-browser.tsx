@@ -3,11 +3,13 @@
 import { usePathname, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 
-import { OptionSelect } from "@/components/framing/option-select";
 import { ProjectsTable } from "@/components/projects/projects-table";
-import { Button } from "@/components/ui/button";
 import { DataTableViews } from "@/components/ui/data-table-views";
-import { Label } from "@/components/ui/label";
+import {
+  FilterBar,
+  ListToolbar,
+  type FilterControl,
+} from "@/components/ui/filter-bar";
 import { SearchField } from "@/components/ui/search-field";
 import type { RecordRights } from "@/lib/archive/types";
 import { records } from "@/lib/i18n/fr/records";
@@ -34,10 +36,11 @@ const VIEW_PARAM = "vue";
 
 /**
  * The Projects page's list (PROJ-UX-01): Tous | Brouillons | Actifs |
- * Archivés with counts that are exactly the rows shown, a search over
- * project, artist and responsible, and four filters that combine (Type,
- * Responsable, Statut, Échéance). The tab and the filters stay in the URL;
- * the archive stays the server's (`?view=archived`).
+ * Archivés with counts that are exactly the rows shown, then one line
+ * (Figma 90:4972): a search over project, artist and responsible, Type,
+ * Responsable and Statut as selects, Échéance behind the filter button; all
+ * combine. The tab and the filters stay in the URL; the archive stays the
+ * server's (`?view=archived`).
  */
 export function ProjectsBrowser({
   projects,
@@ -147,12 +150,6 @@ export function ProjectsBrowser({
         : [],
     ),
   );
-  const filtered =
-    filters.query.trim() !== "" ||
-    filters.type !== ANY ||
-    filters.responsible !== ANY ||
-    filters.status !== ANY ||
-    filters.due !== ANY;
 
   const tabs = [
     ...PROJECT_VIEWS.map((key) =>
@@ -184,101 +181,70 @@ export function ProjectsBrowser({
         ]),
   ];
 
-  const select = (
-    id: string,
+  // ANY in the state is "no filter" in the bar.
+  const control = (
+    key: keyof Omit<ProjectFilters, "query">,
     label: string,
-    value: string,
-    options: Record<string, string>,
-    onChange: (value: string) => void,
-  ) => (
-    <div className="grid gap-1">
-      <Label htmlFor={id} className="text-caption">
-        {label}
-      </Label>
-      <OptionSelect
-        id={id}
-        label={label}
-        options={options}
-        value={value}
-        onChange={onChange}
-      />
-    </div>
-  );
+    allLabel: string,
+    options: [string, string][],
+  ): FilterControl => ({
+    key,
+    label,
+    allLabel,
+    options: options.map(([value, text]) => ({ value, label: text })),
+    value: filters[key] === ANY ? null : filters[key],
+    onChange: (value) =>
+      change({ [key]: value ?? ANY } as Partial<ProjectFilters>),
+  });
+  const controls = [
+    control(
+      "type",
+      f.type,
+      f.allTypes,
+      PROJECT_TYPES.map((type) => [type, fr.shell.projectTypes[type]]),
+    ),
+    control("responsible", f.responsible, f.allResponsibles, [...responsibles]),
+    control(
+      "status",
+      f.status,
+      f.allStatuses,
+      ADMIN_STATUSES.map((st) => [st, t.adminStatuses[st]]),
+    ),
+    control(
+      "due",
+      f.due,
+      f.dues[ANY],
+      DUE_FILTERS.filter((d) => d !== ANY).map((d) => [d, f.dues[d]]),
+    ),
+  ];
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-3">
-        <SearchField
-          aria-label={t.searchLabel}
-          placeholder={t.search}
-          value={filters.query}
-          onChange={(e) => change({ query: e.target.value })}
-        />
-        <div className="flex flex-wrap items-end gap-3">
-          {select(
-            "filter-type",
-            f.type,
-            filters.type,
-            {
-              [ANY]: f.any,
-              ...Object.fromEntries(
-                PROJECT_TYPES.map((type) => [
-                  type,
-                  fr.shell.projectTypes[type],
-                ]),
-              ),
-            },
-            (v) => change({ type: v as ProjectFilters["type"] }),
-          )}
-          {select(
-            "filter-responsible",
-            f.responsible,
-            filters.responsible,
-            { [ANY]: f.anyone, ...Object.fromEntries(responsibles) },
-            (v) => change({ responsible: v }),
-          )}
-          {select(
-            "filter-status",
-            f.status,
-            filters.status,
-            {
-              [ANY]: f.any,
-              ...Object.fromEntries(
-                ADMIN_STATUSES.map((s) => [s, t.adminStatuses[s]]),
-              ),
-            },
-            (v) => change({ status: v as ProjectFilters["status"] }),
-          )}
-          {select(
-            "filter-due",
-            f.due,
-            filters.due,
-            Object.fromEntries(DUE_FILTERS.map((d) => [d, f.dues[d]])),
-            (v) => change({ due: v as ProjectFilters["due"] }),
-          )}
-          {filtered && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => change(NO_FILTERS)}
-            >
-              {f.clear}
-            </Button>
-          )}
-        </div>
-      </div>
-      <DataTableViews label={fr.records.view.label} views={tabs}>
-        {rows.projects.length + rows.drafts.length === 0 ? (
-          <p className="text-body-md text-muted-foreground">{f.noMatch}</p>
-        ) : (
-          <ProjectsTable
-            selectable
-            projects={rows.projects}
-            drafts={rows.drafts}
-            rights={rights}
+    <DataTableViews label={fr.records.view.label} views={tabs}>
+      <ListToolbar
+        search={
+          <SearchField
+            aria-label={t.searchLabel}
+            placeholder={t.search}
+            value={filters.query}
+            onChange={(e) => change({ query: e.target.value })}
           />
-        )}
-      </DataTableViews>
-    </div>
+        }
+      >
+        <FilterBar
+          filters={controls}
+          onClear={() => change({ ...NO_FILTERS, query: filters.query })}
+        />
+      </ListToolbar>
+      {rows.projects.length + rows.drafts.length === 0 ? (
+        <p className="text-body-md text-muted-foreground">{f.noMatch}</p>
+      ) : (
+        <ProjectsTable
+          selectable
+          projects={rows.projects}
+          drafts={rows.drafts}
+          rights={rights}
+        />
+      )}
+    </DataTableViews>
   );
 }

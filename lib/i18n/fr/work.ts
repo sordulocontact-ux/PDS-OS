@@ -34,6 +34,19 @@ export const work = {
       validate: "À valider",
     },
     viewsLabel: "Filtrer le travail",
+    search: {
+      label: "Rechercher une action",
+      placeholder: "Action, projet, module…",
+    },
+    filters: {
+      project: "Projet",
+      allProjects: "Tous les projets",
+      module: "Module",
+      allModules: "Tous les modules",
+      due: "Échéance",
+      allDues: "Toutes les échéances",
+    },
+    noMatch: "Aucune action ne correspond à cette recherche ou à ces filtres.",
     groups: {
       overdue: "En retard",
       week: "Cette semaine",

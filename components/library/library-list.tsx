@@ -9,7 +9,15 @@ const fr = { library };
 
 // The library with an instant search on the name, precision, category and
 // what each file belongs to.
-export function LibraryList({ files }: { files: LibraryFile[] }) {
+export function LibraryList({
+  files,
+  filters,
+  empty,
+}: {
+  files: LibraryFile[];
+  filters?: React.ReactNode;
+  empty?: React.ReactNode;
+}) {
   const t = fr.library.search;
   return (
     <SearchableList
@@ -23,6 +31,8 @@ export function LibraryList({ files }: { files: LibraryFile[] }) {
       label={t.label}
       placeholder={t.placeholder}
       noResult={t.noResult}
+      filters={filters}
+      empty={empty}
     >
       {(visible) => <LibraryTable files={visible} />}
     </SearchableList>

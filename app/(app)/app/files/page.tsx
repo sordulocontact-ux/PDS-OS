@@ -100,35 +100,32 @@ export default async function FilesPage({
               current: view === source,
             })),
           ]}
-          action={
-            <UrlFilters
-              path={routes.files}
-              params={{ view }}
-              groups={filterGroups(ofView, filters)}
-            />
-          }
         >
-          {shown.length === 0 ? (
-            filtering ? (
-              <EmptyState
-                icon={IconFile}
-                title={t.filtersEmpty}
-                body={t.filtersEmptyBody}
+          <LibraryList
+            files={shown}
+            filters={
+              <UrlFilters
+                path={routes.files}
+                params={{ view }}
+                groups={filterGroups(ofView, filters)}
               />
-            ) : (
-              <EmptyState
-                icon={IconFile}
-                title={t.emptyViewTitle(view ? t.views[view] : t.views.all)}
-                body={t.emptyViewBody}
-              />
-            )
-          ) : (
-            // Remounted per view: the search starts empty on each one.
-            <LibraryList
-              key={[view, ...Object.values(filters)].join("-")}
-              files={shown}
-            />
-          )}
+            }
+            empty={
+              filtering ? (
+                <EmptyState
+                  icon={IconFile}
+                  title={t.filtersEmpty}
+                  body={t.filtersEmptyBody}
+                />
+              ) : (
+                <EmptyState
+                  icon={IconFile}
+                  title={t.emptyViewTitle(view ? t.views[view] : t.views.all)}
+                  body={t.emptyViewBody}
+                />
+              )
+            }
+          />
           {library.truncated && (
             <p className="text-sm text-muted-foreground">
               {t.truncated(LIBRARY_LIMIT)}

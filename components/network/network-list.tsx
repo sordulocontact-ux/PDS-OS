@@ -13,9 +13,14 @@ const fr = { network };
 export function NetworkList({
   contacts,
   rights,
+  filters,
+  empty,
 }: {
   contacts: NetworkContactRow[];
   rights: RecordRights;
+  // The page's filters, beside the search; what stands for no row at all.
+  filters?: React.ReactNode;
+  empty?: React.ReactNode;
 }) {
   const t = fr.network.search;
   return (
@@ -32,6 +37,8 @@ export function NetworkList({
       label={t.label}
       placeholder={t.placeholder}
       noResult={t.noResult}
+      filters={filters}
+      empty={empty}
     >
       {(visible) => <NetworkTable contacts={visible} rights={rights} />}
     </SearchableList>

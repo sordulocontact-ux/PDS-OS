@@ -13,10 +13,15 @@ export function ArtistsList({
   artists,
   showRelation,
   rights,
+  filters,
+  empty,
 }: {
   artists: ArtistListItem[];
   showRelation: boolean;
   rights: RecordRights;
+  // The page's filters, beside the search; what stands for no row at all.
+  filters?: React.ReactNode;
+  empty?: React.ReactNode;
 }) {
   const t = fr.catalog.artists.search;
   return (
@@ -26,6 +31,8 @@ export function ArtistsList({
       label={t.label}
       placeholder={t.placeholder}
       noResult={t.noResult}
+      filters={filters}
+      empty={empty}
     >
       {(visible) => (
         <ArtistsTable

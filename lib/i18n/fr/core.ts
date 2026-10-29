@@ -22,9 +22,11 @@ export const core = {
   },
   // « Filtres » of a list page (components/ui/url-filters.tsx).
   urlFilters: {
-    button: "Filtres",
-    buttonCount: (count: number) => `Filtres · ${count}`,
-    remove: "Retirer le filtre",
+    // The filter button of FilterBar: the filters beyond the first ones.
+    more: "Plus de filtres",
+    moreCount: (count: number) =>
+      `Plus de filtres, ${count} actif${count > 1 ? "s" : ""}`,
+    clear: "Effacer les filtres",
   },
   // components/ui/audio-file.tsx
   audioFile: {

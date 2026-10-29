@@ -14,9 +14,14 @@ const fr = { catalog };
 export function MastersList({
   masters,
   rights,
+  filters,
+  empty,
 }: {
   masters: MasterRow[];
   rights?: RecordRights;
+  // The page's filters, beside the search; what stands for no row at all.
+  filters?: React.ReactNode;
+  empty?: React.ReactNode;
 }) {
   const t = fr.catalog.masters.search;
   return (
@@ -26,6 +31,8 @@ export function MastersList({
       label={t.label}
       placeholder={t.placeholder}
       noResult={t.noResult}
+      filters={filters}
+      empty={empty}
     >
       {(visible) => (
         <MastersTable masters={visible} rights={rights} selectable />

@@ -72,6 +72,33 @@ export default async function NetworkPage({
   const filters = { domain, relation, city };
   const filtering = domain !== null || relation !== null || city !== null;
   const ofTab = tab ? all.filter((c) => inView(c, tab)) : all;
+  // No row: the archive, the filters, the tab or the network is empty.
+  const empty = archived ? (
+    <EmptyState
+      icon={IconBoxArchive}
+      title={fr.records.archivedEmpty.contact}
+      body={fr.records.archivedEmptyBody}
+    />
+  ) : filtering ? (
+    <EmptyState
+      icon={IconNodes}
+      title={t.emptyFilterTitle}
+      body={t.emptyFilterBody}
+    />
+  ) : tab ? (
+    <EmptyState
+      icon={IconNodes}
+      title={t.emptyViewTitle(t.views[tab])}
+      body={t.emptyViewBody}
+    />
+  ) : (
+    <EmptyState
+      icon={IconNodes}
+      title={t.emptyTitle}
+      body={t.emptyBody}
+      action={newButton}
+    />
+  );
 
   return (
     <PageContainer>
@@ -105,61 +132,37 @@ export default async function NetworkPage({
             })),
           ]}
           action={
-            <div className="flex flex-wrap items-center gap-2">
-              <UrlFilters
+            canArchive && (
+              <ArchiveViewToggle
                 path={routes.network}
-                params={{ tab, view }}
-                groups={filterGroups(ofTab, filters)}
+                archived={archived}
+                params={Object.fromEntries(
+                  Object.entries({ tab, ...filters }).filter(
+                    (entry): entry is [string, string] => entry[1] !== null,
+                  ),
+                )}
               />
-              {canArchive && (
-                <ArchiveViewToggle
-                  path={routes.network}
-                  archived={archived}
-                  params={Object.fromEntries(
-                    Object.entries({ tab, ...filters }).filter(
-                      (entry): entry is [string, string] => entry[1] !== null,
-                    ),
-                  )}
-                />
-              )}
-            </div>
+            )
           }
         >
-          {contacts.length > 0 ? (
-            // Remounted per view: the search starts empty on each one.
+          {all.length === 0 ? (
+            empty
+          ) : (
             <NetworkList
-              key={`${tab}-${view}-${domain}-${relation}-${city}`}
               contacts={contacts}
               rights={{
                 canEdit: can(access, "manage_network"),
                 canArchive,
                 archived,
               }}
-            />
-          ) : archived ? (
-            <EmptyState
-              icon={IconBoxArchive}
-              title={fr.records.archivedEmpty.contact}
-              body={fr.records.archivedEmptyBody}
-            />
-          ) : filtering ? (
-            <EmptyState
-              icon={IconNodes}
-              title={t.emptyFilterTitle}
-              body={t.emptyFilterBody}
-            />
-          ) : tab ? (
-            <EmptyState
-              icon={IconNodes}
-              title={t.emptyViewTitle(t.views[tab])}
-              body={t.emptyViewBody}
-            />
-          ) : (
-            <EmptyState
-              icon={IconNodes}
-              title={t.emptyTitle}
-              body={t.emptyBody}
-              action={newButton}
+              filters={
+                <UrlFilters
+                  path={routes.network}
+                  params={{ tab, view }}
+                  groups={filterGroups(ofTab, filters)}
+                />
+              }
+              empty={empty}
             />
           )}
         </DataTableViews>

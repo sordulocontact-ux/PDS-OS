@@ -8,7 +8,15 @@ import { contracts } from "@/lib/i18n/fr/contracts";
 const fr = { contracts };
 
 // Contracts with an instant search on title, parties, project and artist.
-export function ContractsList({ contracts }: { contracts: ContractRow[] }) {
+export function ContractsList({
+  contracts,
+  filters,
+  empty,
+}: {
+  contracts: ContractRow[];
+  filters?: React.ReactNode;
+  empty?: React.ReactNode;
+}) {
   const t = fr.contracts.search;
   return (
     <SearchableList
@@ -24,6 +32,8 @@ export function ContractsList({ contracts }: { contracts: ContractRow[] }) {
       label={t.label}
       placeholder={t.placeholder}
       noResult={t.noResult}
+      filters={filters}
+      empty={empty}
     >
       {(visible) => <ContractsTable contracts={visible} />}
     </SearchableList>

@@ -2,6 +2,7 @@
 
 import { useDeferredValue, useState } from "react";
 
+import { ListToolbar } from "@/components/ui/filter-bar";
 import { SearchField } from "@/components/ui/search-field";
 import { normalizeSearch } from "@/lib/utils/search";
 
@@ -9,6 +10,9 @@ import { normalizeSearch } from "@/lib/utils/search";
  * A list with an instant search above it (titles, library, network): each
  * item is found by the text `searchText` gives it, case, accents and
  * separators ignored. Nothing found says so in place of the list.
+ * `filters`: the page's filters on the search's line (`UrlFilters`);
+ * `empty`: what stands for a list with no item at all (filters that keep
+ * nothing), under the same line so a filter can still be removed.
  */
 export function SearchableList<T>({
   items,
@@ -16,6 +20,8 @@ export function SearchableList<T>({
   label,
   placeholder,
   noResult,
+  filters,
+  empty,
   children,
 }: {
   items: T[];
@@ -24,6 +30,8 @@ export function SearchableList<T>({
   label: string;
   placeholder: string;
   noResult: (query: string) => string;
+  filters?: React.ReactNode;
+  empty?: React.ReactNode;
   children: (visible: T[]) => React.ReactNode;
 }) {
   const [query, setQuery] = useState("");
@@ -38,14 +46,22 @@ export function SearchableList<T>({
 
   return (
     <div className="flex flex-col gap-4">
-      <SearchField
-        aria-label={label}
-        placeholder={placeholder}
-        maxLength={100}
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-      />
-      {visible.length > 0 ? (
+      <ListToolbar
+        search={
+          <SearchField
+            aria-label={label}
+            placeholder={placeholder}
+            maxLength={100}
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+          />
+        }
+      >
+        {filters}
+      </ListToolbar>
+      {items.length === 0 && empty ? (
+        empty
+      ) : visible.length > 0 ? (
         children(visible)
       ) : (
         <p

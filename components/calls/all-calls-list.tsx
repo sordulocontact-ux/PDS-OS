@@ -11,9 +11,14 @@ const fr = { calls };
 export function AllCallsList({
   calls,
   now,
+  filters,
+  empty,
 }: {
   calls: CallListItem[];
   now: Date;
+  // The page's filters, beside the search; what stands for no row at all.
+  filters?: React.ReactNode;
+  empty?: React.ReactNode;
 }) {
   const t = fr.calls.all.search;
   return (
@@ -23,6 +28,8 @@ export function AllCallsList({
       label={t.label}
       placeholder={t.placeholder}
       noResult={t.noResult}
+      filters={filters}
+      empty={empty}
     >
       {(visible) => <AllCallsTable calls={visible} now={now} />}
     </SearchableList>
