@@ -1,14 +1,8 @@
 import {
-  DataTable,
-  DataTableBody,
-  DataTableCell,
-  DataTableHead,
-  DataTableHeader,
-  DataTableLink,
-  DataTableMedia,
-  DataTableRow,
-} from "@/components/ui/data-table";
-import { ListCard } from "@/components/ui/list-card";
+  HomeListNote,
+  HomeRow,
+  HomeSection,
+} from "@/components/home/home-list";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { routes } from "@/lib/auth/redirects";
 import type { HomeProject } from "@/lib/home/feed";
@@ -17,10 +11,23 @@ import { transmission } from "@/lib/i18n/fr/transmission";
 import { todayInParis } from "@/lib/insights/dates";
 import { projectFormatLabel } from "@/lib/projects/labels";
 import { projectStatusTone } from "@/lib/ui/state-tones";
+import { cn } from "@/lib/utils";
 import { daysBetween } from "@/lib/utils/calendar-period";
 import { formatDay } from "@/lib/utils/day";
 
 const fr = { shell, transmission };
+
+const caption =
+  "text-[length:var(--type-caption)] leading-[var(--type-caption-lh)]";
+
+// Projet · Responsable · Échéance · Pour vous; one column of text and the
+// badge on a phone, the due date then under the title.
+const columns = {
+  withResponsible:
+    "md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_minmax(0,1.2fr)_7rem]",
+  withoutResponsible: "md:grid-cols-[minmax(0,2.6fr)_minmax(0,1.2fr)_7rem]",
+};
+const grid = "grid flex-1 grid-cols-[minmax(0,1fr)_auto] items-center gap-4";
 
 /** What the project asks of the viewer: its handover status before it is
  * launched, else their moves in it, else « Suivi ». */
@@ -65,87 +72,104 @@ export function HomeProjects({
   const responsible = projects.some(
     ({ project }) => project.responsiblePersonId !== viewerId,
   );
+  const cols = responsible
+    ? columns.withResponsible
+    : columns.withoutResponsible;
   return (
-    <ListCard
+    <HomeSection
       title={t.title}
       count={projects.length}
-      list={false}
-      empty={projects.length ? undefined : t.empty}
       action={
         projects.length === 0 && newProjectHref
           ? { label: fr.shell.projects.newProject, href: newProjectHref }
           : undefined
       }
     >
-      <div className="px-2">
-        <DataTable>
-          <DataTableHeader>
-            <DataTableHead fill>{t.columns.title}</DataTableHead>
-            {responsible && (
-              <DataTableHead hideBelow="md">
-                {t.columns.responsible}
-              </DataTableHead>
-            )}
-            <DataTableHead hideBelow="sm">{t.columns.due}</DataTableHead>
-            <DataTableHead className="w-28" align="end">
-              {t.columns.mine}
-            </DataTableHead>
-          </DataTableHeader>
-          <DataTableBody>
-            {projects.map((row) => {
-              const { project } = row;
-              const due = project.dueDate;
-              return (
-                <DataTableRow key={project.id}>
-                  <DataTableCell fill>
-                    <DataTableMedia
-                      title={
-                        <DataTableLink href={routes.project(project.id)}>
-                          {project.title}
-                        </DataTableLink>
-                      }
-                      subtitle={[
-                        projectFormatLabel(project),
-                        project.artistName,
-                      ]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    />
-                    {/* Narrow screens: the due date under the title. */}
-                    {due && (
-                      <span className="text-caption text-[color:var(--text-tertiary)] tabular-nums sm:hidden">
-                        {t.columns.due} {formatDay(due)}
-                      </span>
+      {projects.length === 0 ? (
+        <HomeListNote>{t.empty}</HomeListNote>
+      ) : (
+        <li
+          aria-hidden
+          className={cn(
+            caption,
+            "hidden items-center gap-3 px-4 py-2 text-[color:var(--text-tertiary)] md:flex",
+          )}
+        >
+          <span className={cn(grid, cols)}>
+            <span>{t.columns.title}</span>
+            {responsible && <span>{t.columns.responsible}</span>}
+            <span>{t.columns.due}</span>
+            <span className="text-right">{t.columns.mine}</span>
+          </span>
+          {/* The chevron's place. */}
+          <span className="size-4 shrink-0" />
+        </li>
+      )}
+      {projects.map((row) => {
+        const { project } = row;
+        const due = project.dueDate;
+        const sub = [projectFormatLabel(project), project.artistName]
+          .filter(Boolean)
+          .join(" · ");
+        return (
+          <HomeRow key={project.id} href={routes.project(project.id)}>
+            <span className={cn(grid, cols)}>
+              <span className="flex min-w-0 flex-col gap-0.5">
+                <span className="font-semibold break-words">
+                  {project.title}
+                </span>
+                {sub && (
+                  <span
+                    className={cn(
+                      caption,
+                      "break-words text-[color:var(--text-secondary)]",
                     )}
-                  </DataTableCell>
-                  {responsible && (
-                    <DataTableCell hideBelow="md">
-                      {project.responsibleName ?? "—"}
-                    </DataTableCell>
-                  )}
-                  <DataTableCell hideBelow="sm" className="tabular-nums">
-                    {due ? (
-                      <span className="flex flex-col">
-                        <span>{formatDay(due)}</span>
-                        <span className="text-caption text-[color:var(--text-tertiary)]">
-                          {t.inDays(daysBetween(today, due))}
-                        </span>
-                      </span>
-                    ) : (
-                      <span className="text-[color:var(--text-secondary)]">
-                        {t.noDue}
-                      </span>
+                  >
+                    {sub}
+                  </span>
+                )}
+                {due && (
+                  <span
+                    className={cn(
+                      caption,
+                      "text-[color:var(--text-secondary)] tabular-nums md:hidden",
                     )}
-                  </DataTableCell>
-                  <DataTableCell className="w-28" align="end">
-                    <ForYou {...row} />
-                  </DataTableCell>
-                </DataTableRow>
-              );
-            })}
-          </DataTableBody>
-        </DataTable>
-      </div>
-    </ListCard>
+                  >
+                    {t.columns.due} {formatDay(due)}
+                  </span>
+                )}
+              </span>
+              {responsible && (
+                <span className="hidden min-w-0 break-words md:block">
+                  {project.responsibleName ?? "—"}
+                </span>
+              )}
+              <span className="hidden flex-col tabular-nums md:flex">
+                {due ? (
+                  <>
+                    <span>{formatDay(due)}</span>
+                    <span
+                      className={cn(
+                        caption,
+                        "text-[color:var(--text-secondary)]",
+                      )}
+                    >
+                      {t.inDays(daysBetween(today, due))}
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-[color:var(--text-secondary)]">
+                    {t.noDue}
+                  </span>
+                )}
+              </span>
+              <span className="flex justify-end">
+                <ForYou {...row} />
+              </span>
+            </span>
+          </HomeRow>
+        );
+      })}
+    </HomeSection>
   );
 }

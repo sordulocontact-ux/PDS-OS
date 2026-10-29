@@ -17,7 +17,6 @@ export function ListCard({
   empty,
   error,
   className,
-  list = true,
   children,
 }: {
   title: string;
@@ -29,8 +28,6 @@ export function ListCard({
   error?: string;
   // Grid placement only (a wider card), never a restyle.
   className?: string;
-  // False: the children are not rows but one block (a DataTable).
-  list?: boolean;
   children?: ReactNode;
 }) {
   const counted = count !== undefined && count > 0;
@@ -66,10 +63,8 @@ export function ListCard({
         </p>
       ) : empty ? (
         <p className="text-body-md text-muted-foreground">{empty}</p>
-      ) : list ? (
-        <ul className="grid gap-1">{children}</ul>
       ) : (
-        children
+        <ul className="grid gap-1">{children}</ul>
       )}
     </section>
   );

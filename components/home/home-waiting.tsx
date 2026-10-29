@@ -1,4 +1,11 @@
-import { CardRow, ListCard } from "@/components/ui/list-card";
+import {
+  HomeAvatar,
+  HomeListNote,
+  HomeRow,
+  HomeRowText,
+  HomeSection,
+} from "@/components/home/home-list";
+import { initials } from "@/components/shell/journey/step-waiting";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { WaitingItem } from "@/lib/home/feed";
 import { journey } from "@/lib/i18n/fr/journey";
@@ -12,53 +19,67 @@ const fr = { journey, shell, work };
 
 const MAX = 4;
 
-/** « En attente de Karim Haddou (lien privé) : déposer le Mix V2 ». */
-function waitingLine(item: WaitingItem): string {
-  const who = item.who
-    ? `${fr.journey.now.waitFor(item.who)}${
-        item.viaLink ? ` (${fr.journey.privateLink})` : ""
-      }`
-    : fr.shell.home.waiting.nobody;
-  return `${who} : ${lowerFirst(item.todo)}`;
+/** « En attente de **Karim Haddou** (lien privé) : déposer le Mix V2 ». */
+function WaitingLine({ item }: { item: WaitingItem }) {
+  const todo = ` : ${lowerFirst(item.todo)}`;
+  if (!item.who)
+    return (
+      <>
+        {fr.shell.home.waiting.nobody}
+        {todo}
+      </>
+    );
+  return (
+    <>
+      {fr.journey.now.waitingOfName(item.who)}
+      <b className="font-semibold">{item.who}</b>
+      {item.viaLink && ` (${fr.journey.privateLink})`}
+      {todo}
+    </>
+  );
 }
 
 /**
  * « Ce que vous attendez » (proto `docs/protos/accueil.html`): who the
- * viewer waits for, on what, in which project and for when, the late ones
- * first; each row opens the step. Four rows, then how many more: the
- * overview of each project says the rest.
+ * viewer waits for (their initials), on what, in which project and for
+ * when, the late ones first; each row opens the step. Four rows, then how
+ * many more: the overview of each project says the rest.
  */
 export function HomeWaiting({ items }: { items: WaitingItem[] }) {
   if (items.length === 0) return null;
   const t = fr.shell.home.waiting;
   return (
-    <ListCard title={t.title} count={items.length}>
+    <HomeSection title={t.title} count={items.length}>
       {items.slice(0, MAX).map((item) => (
-        <CardRow
+        <HomeRow
           key={item.key}
           href={item.href}
-          main={waitingLine(item)}
-          sub={[
-            item.projectTitle,
-            item.place,
-            item.due ? fr.work.lead.due(formatDay(item.due)) : null,
-          ]
-            .filter(Boolean)
-            .join(" · ")}
-          badge={
+          leading={
+            <HomeAvatar initials={item.who ? initials(item.who) : "?"} />
+          }
+          badges={
             item.overdue ? (
               <StatusBadge tone={overdueTone} size="sm">
                 {fr.work.journeys.overdue}
               </StatusBadge>
             ) : undefined
           }
-        />
+        >
+          <HomeRowText
+            main={<WaitingLine item={item} />}
+            sub={[
+              item.projectTitle,
+              item.place,
+              item.due ? fr.work.lead.due(formatDay(item.due)) : null,
+            ]
+              .filter(Boolean)
+              .join(" · ")}
+          />
+        </HomeRow>
       ))}
       {items.length > MAX && (
-        <li className="text-caption text-[color:var(--text-secondary)]">
-          {t.more(items.length - MAX)}
-        </li>
+        <HomeListNote>{t.more(items.length - MAX)}</HomeListNote>
       )}
-    </ListCard>
+    </HomeSection>
   );
 }

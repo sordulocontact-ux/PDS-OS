@@ -379,10 +379,14 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   pilules à contour, saisie de PO sur fond teinté `--surface-tint` (micro en carré
   blanc, envoi en carré noir, 32 px), puis le fil de l'accueil (29/10/2026, proto
   `docs/protos/accueil.html`) : « Maintenant » (`WorkLead`, le cadre de `NowFrame`) suivi à
-  16 px de « Aussi à vous » (trois lignes), puis à 40 px « Ce que vous attendez » (quatre lignes)
-  et « Vos projets » (`DataTable` dans une `ListCard` : Projet avec format et artiste,
-  Responsable seulement s'il n'est pas toujours la personne, Échéance avec « dans n jours »,
-  Pour vous en pastille). Une seule colonne, plus de grille de cartes.
+  16 px de « Aussi à vous » (trois lignes), puis à 40 px « Ce que vous attendez » (quatre lignes,
+  initiales en disque gris, seul le nom en gras) et « Vos projets » (en-tête Projet, Responsable
+  seulement s'il n'est pas toujours la personne, Échéance avec « dans n jours », Pour vous en
+  pastille). Une seule colonne, 40 px entre les blocs, plus de grille de cartes.
+- Liste de l'accueil (`HomeSection`) : titre `caption` semi-gras gris au-dessus, nombre en gris
+  clair, lien souligné à droite ; liste encadrée `--border-default`, rayon 12, filets
+  `--border-hairline` entre les lignes ; ligne de 12 × 16 px entièrement cliquable, titre
+  `body-md` semi-gras, détail `caption` gris, pastilles puis chevron à droite.
 - Sous la salutation, le sous-titre compte ce qui attend la personne (`HomeSummary`) ; la
   phrase « Suivez chaque sortie, du cadrage au bilan » le remplace pendant la lecture.
 - Une question ouvre la **page de conversation** (d'après Midday) : en-tête avec retour

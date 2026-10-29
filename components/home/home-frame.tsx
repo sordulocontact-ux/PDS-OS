@@ -5,8 +5,9 @@ import { shell } from "@/lib/i18n/fr/shell";
 
 const fr = { shell };
 
-// Frame of the home page (Figma "Desktop - 11"): centred greeting, then one
-// column holding the assistant and the feed. Shared by the page and its
+// Frame of the home page (Figma "Desktop - 11", spacing of the proto
+// `docs/protos/accueil.html`: 40 px between blocks): centred greeting, then
+// one column holding the assistant and the feed. Shared by the page and its
 // loading state, so PO can be typed into before the feed has arrived.
 export function HomeFrame({
   title,
@@ -20,7 +21,7 @@ export function HomeFrame({
   children: React.ReactNode;
 }) {
   return (
-    <PageContainer className="items-center gap-10 py-10 md:py-20 xl:gap-21 xl:py-33">
+    <PageContainer className="items-center gap-10 py-10 md:py-24">
       <header className="flex flex-col items-center gap-3 text-center">
         {title ? (
           <h1 className="font-display text-display-xl text-foreground">
@@ -34,7 +35,7 @@ export function HomeFrame({
         </p>
       </header>
 
-      <div className="flex w-full max-w-4xl flex-col gap-10 md:gap-16">
+      <div className="flex w-full max-w-4xl flex-col gap-10">
         <AssistantPanel />
         {children}
       </div>
