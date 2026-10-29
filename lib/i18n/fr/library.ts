@@ -22,7 +22,7 @@ export const library = {
     name: "Nom",
     owner: "Rattaché à",
     category: "Catégorie",
-    addedAt: "Ajouté le",
+    addedAt: "Ajouté",
     actions: "Actions",
   },
   search: {

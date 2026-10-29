@@ -37,8 +37,8 @@ export function LibraryTable({ files }: { files: LibraryFile[] }) {
     <DataTable>
       <DataTableHeader>
         <DataTableHead>{t.columns.name}</DataTableHead>
-        <DataTableHead hideBelow="md">{t.columns.owner}</DataTableHead>
         <DataTableHead hideBelow="sm">{t.columns.category}</DataTableHead>
+        <DataTableHead hideBelow="md">{t.columns.owner}</DataTableHead>
         <DataTableHead hideBelow="lg" fill>
           {t.columns.addedAt}
         </DataTableHead>
@@ -69,7 +69,6 @@ export function LibraryTable({ files }: { files: LibraryFile[] }) {
                       {[
                         file.versionCount > 1 &&
                           fr.catalogFiles.versions.badge(file.version),
-                        file.description,
                         fileFormat(file.fileName, file.mime),
                         formatFileSize(file.bytes),
                       ]
@@ -79,27 +78,34 @@ export function LibraryTable({ files }: { files: LibraryFile[] }) {
                   }
                 />
               </DataTableCell>
+              <DataTableCell hideBelow="sm">
+                <StatusBadge tone="neutral" size="sm">
+                  {file.categoryLabel}
+                </StatusBadge>
+              </DataTableCell>
               <DataTableCell hideBelow="md">
                 <Link
                   href={file.ownerHref}
                   aria-label={t.openOwner(source, file.ownerLabel)}
                   className="relative z-10 flex min-w-0 flex-col rounded-md outline-none hover:underline focus-visible:underline"
                 >
-                  <span className="text-xs text-muted-foreground">
-                    {source}
-                  </span>
                   <span className="truncate">
                     {file.ownerLabel || EMPTY_CELL}
                   </span>
+                  <span className="text-sm text-muted-foreground">
+                    {source}
+                  </span>
                 </Link>
               </DataTableCell>
-              <DataTableCell hideBelow="sm">
-                <StatusBadge tone="neutral" size="sm">
-                  {file.categoryLabel}
-                </StatusBadge>
-              </DataTableCell>
               <DataTableCell hideBelow="lg" fill>
-                {formatShortDate(file.createdAt)}
+                <span className="flex min-w-0 flex-col">
+                  <span>{formatShortDate(file.createdAt)}</span>
+                  {file.authorName && (
+                    <span className="truncate text-sm text-muted-foreground">
+                      {file.authorName}
+                    </span>
+                  )}
+                </span>
               </DataTableCell>
               <DataTableActionsCell>
                 <RowActions
