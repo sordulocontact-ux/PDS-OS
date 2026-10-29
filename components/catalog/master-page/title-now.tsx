@@ -15,7 +15,7 @@ import { myValidationTone } from "@/lib/ui/state-tones";
 import { cn } from "@/lib/utils";
 
 import { DossierAction } from "./dossier-action";
-import { dossierTarget, dossierVerb } from "./title-dossier";
+import { dossierTarget, dossierVerb } from "./dossier-targets";
 
 const fr = { catalog, masterPage };
 
