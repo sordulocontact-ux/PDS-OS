@@ -137,6 +137,8 @@ export type ContractParty = {
   name: string;
   kind: "person" | "organization";
   role: string | null;
+  // Their address in the Réseau: where the contract is sent for signature.
+  email: string | null;
 };
 
 export type ContractDetail = ContractRow & {

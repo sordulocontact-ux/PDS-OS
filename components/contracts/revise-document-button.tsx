@@ -39,7 +39,7 @@ export function ReviseDocumentButton({
 
   return (
     <>
-      <Button variant="outline" size="lg" onClick={() => setOpen(true)}>
+      <Button variant="ghost" size="sm" onClick={() => setOpen(true)}>
         {t.revise}
       </Button>
       <FormDialog

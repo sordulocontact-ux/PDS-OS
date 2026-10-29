@@ -26,7 +26,8 @@ export function DialogButton({
   label: string;
   icon?: ComponentType<{ "aria-hidden"?: boolean; "data-icon"?: string }>;
   variant?: "default" | "outline" | "ghost";
-  size?: "sm" | "lg" | "xs";
+  // `default`: the main action of « Maintenant ».
+  size?: "sm" | "default" | "lg" | "xs";
   title: string;
   description: string;
   wide?: boolean;

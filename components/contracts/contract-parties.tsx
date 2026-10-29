@@ -18,16 +18,19 @@ const fr = { contracts };
 
 /**
  * Who the contract binds: contacts of the network with their role in it,
- * each one opening its network page. Its writer adds one (`AddPartyForm`)
- * or removes one.
+ * who signs and their address, each one opening its network page. Its
+ * writer adds one (`AddPartyForm`) or removes one.
  */
 export function ContractParties({
   contractId,
   parties,
+  signerId = null,
   canEdit,
 }: {
   contractId: string;
   parties: ContractParty[];
+  // The party who signs (« Envoyer pour signature » goes to them).
+  signerId?: string | null;
   canEdit: boolean;
 }) {
   const t = fr.contracts.parties;
@@ -42,6 +45,7 @@ export function ContractParties({
 
   return (
     <PageSection
+      card
       id="contract-parties"
       title={t.title}
       description={t.description}
@@ -68,9 +72,17 @@ export function ContractParties({
                   <span className="truncate text-sm font-medium">
                     {party.name}
                   </span>
-                  {party.role && (
+                  {(party.role ||
+                    party.email ||
+                    party.contactId === signerId) && (
                     <span className="truncate text-sm text-muted-foreground">
-                      {party.role}
+                      {[
+                        party.role,
+                        party.contactId === signerId ? t.signs : null,
+                        party.email,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
                     </span>
                   )}
                 </Link>

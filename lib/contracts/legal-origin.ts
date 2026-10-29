@@ -4,7 +4,13 @@ import { routes } from "@/lib/auth/redirects";
 import { createClient } from "@/lib/supabase/server";
 
 export type LegalOrigin =
-  | { kind: "agreement"; projectId: string; href: string }
+  // The person the agreement is for: the one who signs.
+  | {
+      kind: "agreement";
+      projectId: string;
+      contactId: string | null;
+      href: string;
+    }
   | { kind: "clearance"; element: string; href: string };
 
 /**
@@ -19,7 +25,7 @@ export async function legalOriginOf(
   const [need, clearance] = await Promise.all([
     supabase
       .from("legal_agreement_needs")
-      .select("project_id")
+      .select("project_id, contact_id")
       .eq("contract_id", contractId)
       .limit(1)
       .maybeSingle(),
@@ -34,6 +40,7 @@ export async function legalOriginOf(
     return {
       kind: "agreement",
       projectId: need.data.project_id,
+      contactId: need.data.contact_id,
       href: routes.projectLegalStep(need.data.project_id, "tracking"),
     };
   const clearanceId = clearance.data?.clearance_id;

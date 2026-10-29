@@ -160,6 +160,7 @@ export const contracts = {
     submit: "Ajouter",
     pending: "Ajout…",
     remove: (name: string) => `Retirer ${name} des parties`,
+    signs: "signe",
     // Who the picker offers first, under each name.
     groups: {
       artist: "Artiste du contrat",
@@ -172,38 +173,161 @@ export const contracts = {
       "Une partie est un contact du Réseau : choisissez-la, ou ajoutez-la au Réseau.",
     failed: "La partie n'a pas pu être enregistrée. Réessayez.",
   },
-  // The status card: where the contract stands and the next step.
-  flow: {
-    title: "Validation et signature",
-    steps: {
+  // « Maintenant » of a contract (proto « Contrats », 29/10/2026): what it
+  // asks of the viewer, or who it waits for, from its state.
+  now: {
+    label: "Maintenant",
+    mine: "À vous",
+    nothing: "Rien à faire pour vous",
+    toValidate: "À valider",
+    direction: "la direction",
+    titles: {
+      decide: "Valider le contrat",
+      submit: "Soumettre à la direction",
+      resubmit: "Reprendre le contrat et le soumettre à nouveau",
+      send: "Envoyer le contrat pour signature",
+      countersign: "Signer le contrat pour PDS",
+      mark_signed: "Marquer le contrat comme signé",
+    },
+    waiting: (who: string, todo: string, viaLink: boolean) =>
+      `En attente de ${who}${viaLink ? " (lien privé)" : ""} : ${todo}`,
+    todos: {
+      decide: "valider le contrat",
+      submit: "soumettre le contrat à la direction",
+      send: "envoyer le contrat pour signature",
+      signer: "signer et renvoyer le contrat",
+      countersign: "signer le contrat pour PDS",
+      mark_signed: "vérifier la signature et marquer le contrat comme signé",
+    },
+    greeting: (name: string | null) => (name ? `Bonjour ${name},` : "Bonjour,"),
+    // The party who signs, when none is named yet.
+    theParty: "la partie qui signe",
+    why: {
       draft:
         "Le responsable prépare le contrat, puis le soumet à la direction.",
       in_review:
         "La direction relit le contrat : elle le valide ou demande des modifications.",
       approved:
-        "Validé par la direction : envoyez-le pour signature, ou enregistrez directement la signature.",
-      sent: "Envoyé pour signature : enregistrez la date dès qu'il est signé.",
+        "Validé par la direction : il part à la partie qui signe, avec son lien privé quand elle en a un.",
+      sent: "Envoyé pour signature : il revient signé par le lien privé de la partie, ou autrement.",
+      returned:
+        "Revenu signé : la direction signe pour PDS, et le contrat est conclu.",
+      mark_signed:
+        "Signé par les deux parties : vérifiez la signature, puis marquez-le comme signé.",
       signed: "Signé. Il pourra être résilié s'il prend fin avant son terme.",
       expired: "Signé, et sa date de fin est passée.",
       terminated: "Résilié : le contrat est figé.",
     },
+    signedTitle: (date: string) => `Signé le ${date}`,
+    expiredTitle: (date: string) => `Expiré le ${date}`,
+    terminatedTitle: "Résilié",
+    facts: {
+      then: "Ensuite",
+      thenSend: (owner: string) => `Envoi pour signature par ${owner}`,
+      validation: "Validation",
+      sentTo: "Envoyé à",
+      sentToValue: (name: string, email: string | null) =>
+        `${name} · ${email ?? "adresse manquante"}`,
+      noParty: "aucune partie : ajoutez-la dans « Parties »",
+      sentOn: "Envoyé le",
+      sentOnValue: (date: string, by: string) =>
+        by ? `${date} par ${by}` : date,
+      how: "Comment",
+      opened: "Lien ouvert",
+      notOpened: "pas encore",
+    },
     submit: "Soumettre à la direction",
-    approve: "Valider",
-    requestChanges: "Demander des modifications",
-    send: "Marquer comme envoyé",
+    decide: {
+      approve: "Valider",
+      requestChanges: "Demander des modifications",
+      comment: "Commentaire",
+      commentHint: "Il revient en tête du contrat, chez le responsable.",
+      commentPlaceholder: "Ce qui doit changer, et pourquoi",
+      commentRequired: "Expliquez les modifications attendues.",
+    },
+    send: {
+      button: "Envoyer pour signature",
+      description:
+        "Le contrat validé part à la partie qui signe. L'envoi et sa date font preuve : ils restent dans le journal.",
+      legend: "Comment l'envoyer ?",
+      byMail: "Envoyer par e-mail",
+      byMailHint:
+        "Préparé par PDS OS, envoyé depuis votre messagerie : l'e-mail et sa date font preuve.",
+      otherwise: "Je l'ai remis autrement",
+      otherwiseHint: "Main propre, outil de signature… avec sa date.",
+      markSent: "Marquer comme envoyé",
+      sent: "Contrat envoyé pour signature.",
+      subject: (title: string) => `À signer : ${title}`,
+      body: (
+        greeting: string,
+        title: string,
+        link: string | null,
+        me: string,
+      ) =>
+        `${greeting}\n\nVoici le contrat « ${title} », validé par PDS. ${
+          link
+            ? `Vous pouvez le relire et le signer depuis votre lien privé, sans compte :\n${link}`
+            : "Vous le trouverez en pièce jointe : merci de nous le renvoyer signé."
+        }\n\nBien à vous,\n${me} pour PDS`,
+      // The attached file, before « .pdf »: « Licence — clip v2 ».
+      fileName: (title: string, version: number) => `${title} v${version}`,
+      pdf: "Voir le PDF",
+      pdfPending: "Préparation du PDF…",
+      pdfFailed: "Le PDF n'a pas pu être préparé.",
+    },
+    // The prepared e-mail (PDS OS sends none itself, lib/utils/mailto.ts).
+    mail: {
+      to: "À",
+      toSource: "Fiche Réseau",
+      noAddress: "adresse manquante : ajoutez-la dans sa fiche Réseau",
+      subject: "Objet",
+      attachment: "Pièce jointe",
+      message: "Message",
+      link: "Lien privé",
+      open: "Ouvrir dans ma messagerie",
+      copy: "Copier le message",
+      copied: "Message copié",
+      note: "PDS OS n'envoie pas encore l'e-mail lui-même : ouvrez-le dans votre messagerie ou copiez-le.",
+    },
+    remind: {
+      button: "Relancer",
+      title: (name: string) => `Relancer ${name}`,
+      description: "Le rappel est prêt : il part de votre messagerie.",
+      subject: (title: string) =>
+        `Rappel : signer et renvoyer le contrat — ${title}`,
+      body: (
+        greeting: string,
+        title: string,
+        due: string | null,
+        link: string | null,
+        me: string,
+      ) =>
+        `${greeting}\n\nPetit rappel : signer et renvoyer le contrat « ${title} »${
+          due ? `, attendu le ${due}` : ""
+        }.${link ? ` Tout se fait depuis votre lien, sans compte :\n${link}` : ""}\n\nMerci !\n${me} pour PDS`,
+    },
+    copyLink: "Copier le lien",
+    linkCopied: "Lien copié",
+    countersign: {
+      button: "Signer pour PDS",
+      title: "Signer pour PDS ?",
+      body: (person: string, version: number | null) =>
+        `${person} a signé le contrat${version ? ` v${version}` : ""}. Votre signature conclut le contrat ; il ne se modifie plus ensuite.`,
+      done: "Contrat signé pour PDS.",
+    },
+    // A contract back signed outside its link, or one already signed.
+    signedBack: "Le contrat vous est déjà revenu signé ?",
     sign: "Enregistrer la signature",
-    terminate: "Résilier",
-    commentLabel: "Commentaire",
-    commentHint: "Obligatoire pour demander des modifications.",
     signedOnLabel: "Date de signature",
     signedOnHint: "Aujourd'hui ou avant.",
+    signedOnMissing:
+      "Indiquez le jour de la signature, aujourd'hui au plus tard.",
+    terminate: "Résilier",
     confirmTerminateTitle: "Résilier ce contrat ?",
     confirmTerminateBody:
       "Il restera consultable, mais ne pourra plus être modifié.",
     cancel: "Annuler",
     close: "Fermer",
-    lastReview: (who: string, date: string) => `Relu par ${who} le ${date}`,
-    changesRequested: "Modifications demandées",
     done: {
       submit: "Contrat soumis à la direction.",
       approve: "Contrat validé.",
@@ -213,6 +337,19 @@ export const contracts = {
       sign: "Signature enregistrée.",
       terminate: "Contrat résilié.",
     },
+  },
+  // The generated document in head of the page.
+  document: {
+    name: (title: string, version: number) => `${title} · v${version}`,
+    draftLine: "Projet de contrat",
+    signedLine: (name: string) => `Signé par ${name}, reçu par son lien privé`,
+    toDecide: "à décider",
+  },
+  // « Déjà fait »: versions and journal, folded.
+  journal: {
+    title: "Déjà fait",
+    summary: (n: number) => `Versions et journal (${n})`,
+    empty: "Rien encore dans le journal.",
   },
   errors: {
     invalid: "Vérifiez le titre, le type et les dates.",

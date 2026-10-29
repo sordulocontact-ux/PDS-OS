@@ -31,7 +31,7 @@ const SELECT = `id, title, type, status, due_on, ends_on, starts_on, signed_on,
   reviewer:people!contracts_reviewed_by_fkey(first_name, last_name),
   project:projects!contracts_project_same_org(title),
   artist:artists!contracts_artist_same_org(name),
-  contract_parties(contact_id, role, contact:network_contacts!contract_parties_contact_same_org(name, kind))`;
+  contract_parties(contact_id, role, contact:network_contacts!contract_parties_contact_same_org(name, kind, email))`;
 
 type Client = Awaited<ReturnType<typeof createClient>>;
 
@@ -125,6 +125,7 @@ export async function getContract(
                     ? ("organization" as const)
                     : ("person" as const),
                 role: party.role,
+                email: party.contact.email,
               },
             ]
           : [],
