@@ -1185,3 +1185,29 @@ puis le coder.
       (aussi pour le Cadrage juridique : le domaine seul au-dessus de la question).
 - Reste : passage navigateur des trois étapes, en responsable puis en direction.
 
+
+## Réseau, Contrats, Fichiers, Calls, Artistes refaits (29/10/2026, branche `pre-prod`)
+
+Proto `docs/protos/pages.html` (test `docs/protos/tests/pages.cjs`), retours de Sacha du 29/10 :
+**une page liste n'est qu'une liste** (règle écrite dans `docs/VISION-UX.md`), pas de ligne de
+faits grise sous un titre (l'état à côté du titre, le reste dans « Informations »).
+
+- **Réseau** : colonne « Avec PDS » (projets du contact), colonnes de même largeur. Fiche en
+  cartes titrées : « Ce qu'on attend de X » (« Relancer » = e-mail prêt), « Dans les projets »,
+  contrats, crédits, calls, personnes associées, campagnes, relevés ; à droite coordonnées et
+  fiches de renseignements ; « Modifier » dans l'en-tête. Migration
+  `20261029100101_contact_projects.sql` (pré-prod faite, **prod avec accord**).
+- **Contrats** : fiche avec « Maintenant » selon le rôle (valider / modifications avec motif,
+  soumettre, envoyer pour signature par sa messagerie ou « remis autrement », relancer, signer
+  pour PDS), le document en tête, parties, « Déjà fait ».
+- **Fichiers** : colonnes Nom (coupé, entier au survol), Catégorie, Rattaché à, Ajouté.
+- **Calls** : calendrier ou liste seuls, blocs colorés par état ; fiche d'un call avec l'état
+  à côté du titre, « Maintenant » de l'enregistrement à la clôture, tâches avec responsable et
+  échéance obligatoires, résumé préparé.
+- **Artistes** : liste avec « En cours » et « Prochaine sortie » ; fiche avec « Maintenant »
+  pour une proposition d'identité ; Vue d'ensemble : chiffres et dernières sorties d'abord,
+  « En cours » plus bas. **Titre** : son état audio, sa version de référence, ses projets et sa
+  distribution passent dans « Informations ».
+- Reste : aucun envoi d'e-mail par PDS OS (SMTP à brancher), une relance n'est pas
+  enregistrée ; pas d'aperçu de fichier au clic ; la page Modèles de contrat n'a pas de
+  « Maintenant » (à trancher).
