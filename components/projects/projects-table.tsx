@@ -71,11 +71,13 @@ export function ProjectsTable({
       <DataTableHeader>
         {withSelection && <SelectAllHead label={selection.all} />}
         <DataTableHead>{t.columns.title}</DataTableHead>
-        <DataTableHead hideBelow="md">{t.columns.responsible}</DataTableHead>
-        <DataTableHead hideBelow="lg">{t.columns.type}</DataTableHead>
+        <DataTableHead hideBelow="md">{t.columns.artist}</DataTableHead>
+        <DataTableHead hideBelow="2xl">{t.columns.responsible}</DataTableHead>
+        <DataTableHead hideBelow="2xl">{t.columns.type}</DataTableHead>
         <DataTableHead hideBelow="sm">{t.columns.due}</DataTableHead>
         <DataTableHead>{t.columns.status}</DataTableHead>
-        <DataTableHead hideBelow="lg" fill>
+        <DataTableHead hideBelow="lg">{t.columns.priority}</DataTableHead>
+        <DataTableHead hideBelow="xl" fill>
           {t.columns.phase}
         </DataTableHead>
         {withActions && <DataTableActionsHead label={fr.records.menu.column} />}
@@ -97,7 +99,8 @@ export function ProjectsTable({
                 </DataTableLink>
               </DataTableCell>
               <DataTableCell hideBelow="md">{EMPTY_CELL}</DataTableCell>
-              <DataTableCell hideBelow="lg">
+              <DataTableCell hideBelow="2xl">{EMPTY_CELL}</DataTableCell>
+              <DataTableCell hideBelow="2xl">
                 {draft.kind ? (
                   <ProjectKindBadge kind={draft.kind} />
                 ) : (
@@ -115,7 +118,8 @@ export function ProjectsTable({
                   {t.draft}
                 </StatusBadge>
               </DataTableCell>
-              <DataTableCell hideBelow="lg" fill>
+              <DataTableCell hideBelow="lg">{EMPTY_CELL}</DataTableCell>
+              <DataTableCell hideBelow="xl" fill>
                 {EMPTY_CELL}
               </DataTableCell>
               {withActions && (
@@ -140,33 +144,22 @@ export function ProjectsTable({
                 withSelection && <SelectEmptyCell />
               )}
               <DataTableCell>
-                <span className="flex flex-col gap-0.5">
-                  <span className="flex flex-wrap items-center gap-2">
-                    <DataTableLink
-                      href={
-                        rights?.archived ? null : routes.project(project.id)
-                      }
-                    >
-                      {project.title}
-                    </DataTableLink>
-                    {project.priority === "high" && (
-                      <StatusBadge tone={projectPriorityTone.high} size="sm">
-                        {fr.shell.highPriority}
-                      </StatusBadge>
-                    )}
-                  </span>
-                  {/* The artist under a musical project's name. */}
-                  {project.type === "music_release" && project.artistName && (
-                    <span className="text-caption text-[color:var(--text-secondary)]">
-                      {project.artistName}
-                    </span>
-                  )}
-                </span>
+                <DataTableLink
+                  href={rights?.archived ? null : routes.project(project.id)}
+                >
+                  {project.title}
+                </DataTableLink>
               </DataTableCell>
+              {/* Its own column (Sacha 29/10), no longer under the name. */}
               <DataTableCell hideBelow="md">
+                {project.type === "music_release" && project.artistName
+                  ? project.artistName
+                  : EMPTY_CELL}
+              </DataTableCell>
+              <DataTableCell hideBelow="2xl">
                 {project.responsibleName ?? EMPTY_CELL}
               </DataTableCell>
-              <DataTableCell hideBelow="lg">
+              <DataTableCell hideBelow="2xl">
                 <ProjectKindBadge kind={project} />
               </DataTableCell>
               <DataTableCell
@@ -183,8 +176,20 @@ export function ProjectsTable({
                   {t.adminStatuses[status]}
                 </StatusBadge>
               </DataTableCell>
+              <DataTableCell hideBelow="lg">
+                {project.priority ? (
+                  <StatusBadge
+                    tone={projectPriorityTone[project.priority]}
+                    size="sm"
+                  >
+                    {fr.shell.priorities[project.priority]}
+                  </StatusBadge>
+                ) : (
+                  EMPTY_CELL
+                )}
+              </DataTableCell>
               {/* Where it stands, in the words of its workflows, in its hue. */}
-              <DataTableCell hideBelow="lg" fill>
+              <DataTableCell hideBelow="xl" fill>
                 {phase && project.currentStage ? (
                   <StatusBadge
                     tone={stageHue(project.currentStage.key)}

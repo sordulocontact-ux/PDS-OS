@@ -466,7 +466,8 @@ Refonte du 27/10/2026, d'après `docs/VISION-UX.md` § 2 (les cinq questions) :
   onglets, **une seule ligne** (`ListToolbar`) : la recherche, puis les filtres principaux en
   listes déroulantes de même largeur (3 au plus, « Tous les … » quand rien n'est choisi), puis
   le bouton carré des **filtres avancés** pour les autres ; « Effacer les filtres » au bout
-  dès qu'un filtre est posé. Jamais les filtres principaux cachés derrière un bouton. En
+  dès qu'un filtre est posé. Recherche et listes déroulantes **dessinées comme les champs** (Sacha
+  29/10) : contour, fond, coins `rounded-lg`, texte 16 px ; jamais en pilule. Jamais les filtres principaux cachés derrière un bouton. En
   place : Projets, Travail, Artistes, Catalogue, Réseau, Contrats, Fichiers, Calls (liste).
 - **Tableaux** (`DataTable`, Sacha 29/10/2026) : une carte comme les listes de l'accueil,
   contour, fond, en-tête sur bande douce, filet entre les lignes. Dans une carte de section,

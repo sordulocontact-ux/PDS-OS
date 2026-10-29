@@ -1139,4 +1139,7 @@ Reste : passage navigateur sur la pré-prod avec les quatre rôles.
 - [x] **Travail** : recherche (action, projet, module) + Projet, Module, Échéance, dans l'URL.
 - [x] **Tableaux en carte** partout (`DataTable`) : contour, fond, en-tête sur bande, filet entre les
       lignes ; sans cadre dans une carte de section (règle du 04/10).
+- [x] Recherche et filtres en champs du système (16 px, contour, `rounded-lg`, plus de pilule).
+- [x] Tableau des projets : **Artiste** et **Priorité** dans leurs colonnes, plus sous le nom ;
+      Responsable et Type ne s'affichent qu'en très grand écran (filtrables au-dessus).
 - Reste : passage navigateur (session requise).

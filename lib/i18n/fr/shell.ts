@@ -204,7 +204,6 @@ export const shell = {
   },
 
   priorities: { low: "Basse", normal: "Normale", high: "Haute" },
-  highPriority: "Priorité haute",
 
   stageStates: {
     not_started: "À venir",
@@ -224,6 +223,7 @@ export const shell = {
       type: "Type",
       due: "Échéance",
       status: "Statut",
+      priority: "Priorité",
       phase: "Phase",
       stage: "Où en est le projet",
     },

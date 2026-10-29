@@ -20,7 +20,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { FIELD_CONTROL } from "@/components/ui/search-field";
 import { core } from "@/lib/i18n/fr/core";
+import { cn } from "@/lib/utils";
 
 const fr = { urlFilters: core.urlFilters };
 
@@ -78,7 +80,7 @@ export function FilterBar({
                 variant="outline"
                 size="icon"
                 aria-label={activeMore > 0 ? t.moreCount(activeMore) : t.more}
-                className="relative size-11 shrink-0 rounded-pill"
+                className="relative shrink-0 border-input bg-[var(--control-bg)]"
               >
                 <IconFilter aria-hidden />
                 {activeMore > 0 && (
@@ -151,7 +153,10 @@ function FilterSelect({ filter }: { filter: FilterControl }) {
       >
         <SelectTrigger
           aria-label={filter.label}
-          className="h-11 w-full rounded-pill border-transparent bg-[var(--surface-soft)] pr-4 pl-5 text-[length:var(--type-body-lg)] font-medium data-[size=default]:h-11"
+          className={cn(
+            FIELD_CONTROL,
+            "w-full px-3 data-[size=default]:h-[var(--density-control-h)]",
+          )}
         >
           <SelectValue />
         </SelectTrigger>
