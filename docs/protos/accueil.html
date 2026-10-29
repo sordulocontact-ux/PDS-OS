@@ -1,0 +1,509 @@
+<title>Accueil PDS OS</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@500;600;700&display=swap">
+<style>
+/* Tokens recopiés de app/globals.css (docs/DESIGN.md). Coquille : barre latérale collée au bord,
+   page blanche, colonne de 896 px pour l'accueil. */
+:root{
+  --text-primary:#000;--text-secondary:#5e5e5e;--text-tertiary:#767676;--text-muted:#afafaf;
+  --surface-app:#fbfbfb;--surface-page:#fff;--surface-raised:#fff;--surface-soft:#f4f4f4;--surface-sunken:#ececec;
+  --surface-pressed:#e2e2e2;--surface-tint:rgb(64 64 64 / .06);
+  --border-hairline:#ececec;--border-default:#d4d4d4;--border-hover:#afafaf;
+  --nav-bg:#fff;--nav-fg:#000;--nav-fg-muted:#767676;--nav-item-hover-bg:#f4f4f4;--nav-item-active-bg:#ececec;--nav-border:rgb(0 0 0 / .08);
+  --nav-brand-bg:#000;--nav-brand-fg:#fff;
+  --tone-neutral-bg:#ececec;--tone-neutral-fg:#111;--tone-info-bg:#e2eefc;--tone-info-fg:#0b3d8c;
+  --tone-warning-bg:#fcefd2;--tone-warning-fg:#6e4300;--tone-success-bg:#daf3e2;--tone-success-fg:#0d5226;
+  --tone-danger-bg:#fce1df;--tone-danger-fg:#9a1b1b;--tone-action-bg:#ececec;--tone-action-fg:#111;
+  --selection:#155dfc;--selection-bg:rgb(21 93 252 / .07);
+  --primary-bg:#000;--primary-fg:#fff;--primary-hover:#282828;--control-hover:#f4f4f4;
+  --shadow-card:0 1px 2px rgb(0 0 0 / .04),0 2px 8px rgb(0 0 0 / .04);
+  --glass:rgb(20 20 20 / .82);--glass-fg:#fff;--glass-2:#b5b5b5;
+  --font:"Google Sans Flex",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --ease:cubic-bezier(.23,1,.32,1);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --text-primary:#ededed;--text-secondary:#a8a8a8;--text-tertiary:#8f8f8f;--text-muted:#5e5e5e;
+  --surface-app:#0a0a0a;--surface-page:#0f0f0f;--surface-raised:#161616;--surface-soft:rgb(255 255 255 / .05);--surface-sunken:rgb(255 255 255 / .08);
+  --surface-pressed:rgb(255 255 255 / .12);--surface-tint:rgb(255 255 255 / .06);
+  --border-hairline:rgb(255 255 255 / .08);--border-default:rgb(255 255 255 / .12);--border-hover:rgb(255 255 255 / .28);
+  --nav-bg:#0f0f0f;--nav-fg:#ededed;--nav-fg-muted:#8f8f8f;--nav-item-hover-bg:rgb(255 255 255 / .05);--nav-item-active-bg:rgb(255 255 255 / .09);--nav-border:rgb(255 255 255 / .08);
+  --nav-brand-bg:#ededed;--nav-brand-fg:#000;
+  --tone-neutral-bg:#262626;--tone-neutral-fg:#d4d4d4;--tone-info-bg:#12233d;--tone-info-fg:#9ec5ff;
+  --tone-warning-bg:#33260c;--tone-warning-fg:#f5c869;--tone-success-bg:#0f2e1c;--tone-success-fg:#7fdca0;
+  --tone-danger-bg:#3a1616;--tone-danger-fg:#ff9b94;--tone-action-bg:#262626;--tone-action-fg:#ededed;
+  --selection:#4d8bff;--selection-bg:rgb(77 139 255 / .12);
+  --primary-bg:#ededed;--primary-fg:#000;--primary-hover:#d4d4d4;--control-hover:rgb(255 255 255 / .05);
+  --shadow-card:0 0 0 1px rgb(255 255 255 / .02);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --text-primary:#ededed;--text-secondary:#a8a8a8;--text-tertiary:#8f8f8f;--text-muted:#5e5e5e;
+  --surface-app:#0a0a0a;--surface-page:#0f0f0f;--surface-raised:#161616;--surface-soft:rgb(255 255 255 / .05);--surface-sunken:rgb(255 255 255 / .08);
+  --surface-pressed:rgb(255 255 255 / .12);--surface-tint:rgb(255 255 255 / .06);
+  --border-hairline:rgb(255 255 255 / .08);--border-default:rgb(255 255 255 / .12);--border-hover:rgb(255 255 255 / .28);
+  --nav-bg:#0f0f0f;--nav-fg:#ededed;--nav-fg-muted:#8f8f8f;--nav-item-hover-bg:rgb(255 255 255 / .05);--nav-item-active-bg:rgb(255 255 255 / .09);--nav-border:rgb(255 255 255 / .08);
+  --nav-brand-bg:#ededed;--nav-brand-fg:#000;
+  --tone-neutral-bg:#262626;--tone-neutral-fg:#d4d4d4;--tone-info-bg:#12233d;--tone-info-fg:#9ec5ff;
+  --tone-warning-bg:#33260c;--tone-warning-fg:#f5c869;--tone-success-bg:#0f2e1c;--tone-success-fg:#7fdca0;
+  --tone-danger-bg:#3a1616;--tone-danger-fg:#ff9b94;--tone-action-bg:#262626;--tone-action-fg:#ededed;
+  --selection:#4d8bff;--selection-bg:rgb(77 139 255 / .12);
+  --primary-bg:#ededed;--primary-fg:#000;--primary-hover:#d4d4d4;--control-hover:rgb(255 255 255 / .05);
+  --shadow-card:0 0 0 1px rgb(255 255 255 / .02);
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--surface-app);color:var(--text-primary);font-family:var(--font);font-weight:500;font-size:16px;line-height:24px;letter-spacing:-.02em;-webkit-font-smoothing:antialiased}
+button,input,textarea,select{font:inherit;letter-spacing:inherit;color:inherit}
+h1,h2,h3,p{margin:0}
+:focus-visible{outline:2px solid var(--selection);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+
+/* Coquille */
+.shell{display:flex;min-height:100%}
+.side{position:sticky;top:0;height:100dvh;width:218px;flex-shrink:0;display:flex;flex-direction:column;justify-content:space-between;gap:24px;padding:8px;background:var(--nav-bg);border-right:1px solid var(--nav-border);overflow-y:auto}
+.side-top{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 0}
+.brand{width:60px;height:60px;border-radius:16px;background:var(--nav-brand-bg);color:var(--nav-brand-fg);display:grid;place-items:center;font-weight:700;font-size:18px;letter-spacing:-.02em}
+.iconbtn{width:40px;height:40px;border-radius:10px;border:0;background:none;display:grid;place-items:center;cursor:pointer;color:var(--nav-fg)}
+.nav{list-style:none;margin:24px 0 0;padding:0;display:flex;flex-direction:column;gap:2px}
+.nav a{display:flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:8px;color:var(--nav-fg);text-decoration:none}
+.nav a[aria-current="page"]{background:var(--nav-item-active-bg)}
+.nav a[aria-disabled="true"]{cursor:default}
+.nav .count{margin-left:auto;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--primary-bg);color:var(--primary-fg);font-size:13px;line-height:20px;text-align:center;font-weight:600}
+.side-foot{display:flex;align-items:center;gap:8px;border-top:1px solid var(--nav-border);padding-top:8px}
+.me{display:flex;align-items:center;gap:8px;padding:6px 8px;flex:1;min-width:0}
+.me span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:15px}
+.av{width:28px;height:28px;border-radius:50%;background:var(--surface-sunken);color:var(--text-primary);display:inline-grid;place-items:center;font-size:12px;font-weight:600;letter-spacing:0;flex-shrink:0}
+.main{flex:1;min-width:0;background:var(--surface-page)}
+.topbar{display:none}
+
+/* Accueil */
+.home{max-width:896px;margin:0 auto;padding-block:96px 160px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:40px}
+.greet{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
+.greet h1{font-size:46px;line-height:52px;letter-spacing:-.04em;font-weight:500;text-wrap:balance}
+.greet p{font-size:22px;line-height:30px;color:var(--text-secondary);text-wrap:balance}
+.po{display:flex;flex-direction:column;gap:12px}
+.sugg{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.pill-btn{height:32px;padding:0 14px;border-radius:999px;border:1px solid var(--border-default);background:none;font-size:14px;cursor:pointer}
+.composer{display:flex;align-items:flex-end;gap:8px;padding:16px;border-radius:12px;background:var(--surface-tint)}
+.composer textarea{flex:1;min-width:0;border:0;background:none;resize:none;outline:none;padding:4px;font-size:16px;line-height:24px;height:80px}
+.composer textarea::placeholder{color:var(--text-tertiary)}
+.sq{width:32px;height:32px;border-radius:8px;border:0;display:grid;place-items:center;cursor:pointer}
+.sq.light{background:var(--surface-raised);color:var(--text-primary)}
+.sq.dark{background:var(--primary-bg);color:var(--primary-fg)}
+
+.stack{display:flex;flex-direction:column;gap:16px}
+.now{display:flex;flex-direction:column;gap:14px;padding:20px;border-radius:16px;border:1px solid var(--border-default);background:var(--surface-raised);box-shadow:var(--shadow-card)}
+.eyebrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:14px;line-height:20px;color:var(--text-secondary)}
+.now h2{font-size:20px;line-height:28px;letter-spacing:-.04em;font-weight:500;text-wrap:balance}
+.why{font-size:15px;line-height:22px;color:var(--text-secondary);text-wrap:pretty;max-width:68ch}
+.facts{display:flex;flex-wrap:wrap;gap:4px 24px;margin:0;font-size:15px;line-height:22px;color:var(--text-secondary)}
+.facts div{display:flex;gap:6px}.facts dd{margin:0;color:var(--text-primary);font-weight:600}
+.badge{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;font-size:13px;line-height:18px;font-weight:600;white-space:nowrap}
+.badge.sm{height:20px;padding:0 8px}
+.t-info{background:var(--tone-info-bg);color:var(--tone-info-fg)}.t-neutral{background:var(--tone-neutral-bg);color:var(--tone-neutral-fg)}
+.t-warn{background:var(--tone-warning-bg);color:var(--tone-warning-fg)}.t-danger{background:var(--tone-danger-bg);color:var(--tone-danger-fg)}
+.t-ok{background:var(--tone-success-bg);color:var(--tone-success-fg)}.t-act{background:var(--tone-action-bg);color:var(--tone-action-fg)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:40px;padding:0 16px;border-radius:10px;border:1px solid transparent;background:var(--primary-bg);color:var(--primary-fg);cursor:pointer;font-weight:500;text-decoration:none;white-space:nowrap;transition:transform 140ms var(--ease),background-color 150ms ease}
+.btn:active{transform:scale(.97)}
+.btn.outline{background:var(--surface-page);color:var(--text-primary);border-color:var(--border-default)}
+.btn.ghost{background:none;color:var(--text-primary)}
+.btn.sm{height:32px;padding:0 14px;font-size:14px}
+.link{background:none;border:0;padding:0;cursor:pointer;color:var(--text-primary);text-decoration:underline;text-decoration-color:var(--border-hover);text-underline-offset:3px;font-size:14px}
+
+.sec{display:flex;flex-direction:column;gap:8px}
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:0 4px}
+.sec-head h2{font-size:14px;line-height:20px;font-weight:600;color:var(--text-secondary);letter-spacing:-.01em}
+.sec-head .n{color:var(--text-tertiary);font-weight:500;margin-left:6px}
+.list{border:1px solid var(--border-default);border-radius:12px;overflow:hidden;background:var(--surface-raised)}
+.row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid var(--border-hairline);width:100%;text-align:left;background:none;border-left:0;border-right:0;border-bottom:0;cursor:pointer}
+.row:first-child{border-top:0}
+.row .grow{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.row .title{font-size:16px;line-height:24px;font-weight:600;overflow-wrap:anywhere}
+.row .cap{font-size:14px;line-height:20px;color:var(--text-secondary);overflow-wrap:anywhere}
+.row .side-r{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.chev{color:var(--text-tertiary);flex-shrink:0}
+.more{padding:10px 16px;border-top:1px solid var(--border-hairline);font-size:14px;color:var(--text-secondary)}
+
+.proj{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1.2fr) 112px;align-items:center;gap:16px}
+.proj.nolead{grid-template-columns:minmax(0,2.6fr) minmax(0,1.2fr) 112px}
+.proj.nolead .c-lead{display:none}
+.proj .side-r{justify-content:flex-end}
+.proj .cell{min-width:0;display:flex;flex-direction:column}
+.head-row{cursor:default;padding-block:8px;font-size:14px;line-height:20px;color:var(--text-tertiary)}
+
+.welcome{display:flex;flex-direction:column;gap:12px;padding:20px;border-radius:16px;border:1px solid var(--border-default)}
+.welcome ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;color:var(--text-secondary)}
+.welcome li b{color:var(--text-primary);font-weight:600}
+.empty{padding:20px 16px;color:var(--text-secondary);font-size:15px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+
+/* Étape ouverte (repère de destination) */
+.page{max-width:1180px;margin:0 auto;padding-block:32px 160px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:20px}
+.crumbs{display:flex;flex-wrap:wrap;gap:6px;font-size:14px;color:var(--text-secondary)}
+.crumbs b{color:var(--text-primary);font-weight:500}
+.page h1{font-size:30px;line-height:36px;letter-spacing:-.04em;font-weight:500}
+.panel{display:flex;flex-direction:column;gap:16px;padding:24px;border-radius:16px;border:1px solid var(--border-default);background:var(--surface-raised)}
+.grid4{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;padding:16px 0;border-block:1px solid var(--border-hairline)}
+.grid4 .k{font-size:13px;line-height:18px;color:var(--text-tertiary)}
+.grid4 .v{font-size:15px;line-height:22px}
+.lead{display:flex;flex-direction:column;gap:12px;padding:16px;border-radius:12px;background:var(--selection-bg);border:1px solid color-mix(in srgb,var(--selection) 30%,transparent)}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.banner{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:12px;background:var(--tone-success-bg);color:var(--tone-success-fg);font-size:15px;line-height:22px}
+.banner.info{background:var(--tone-info-bg);color:var(--tone-info-fg)}
+.wait{padding:12px 14px;border-radius:12px;background:var(--surface-soft);font-size:15px;color:var(--text-secondary)}
+.wait b{color:var(--text-primary);font-weight:600}
+label.fl{font-size:14px;font-weight:600}
+textarea.field{width:100%;min-height:88px;padding:10px 12px;border-radius:10px;border:1px solid var(--border-default);background:var(--surface-page);resize:vertical}
+textarea.field[aria-invalid="true"]{border-color:var(--tone-danger-fg)}
+.err{color:var(--tone-danger-fg);font-size:14px}
+.quote{font-size:15px;color:var(--text-secondary);border-left:2px solid var(--border-default);padding-left:10px}
+.groups{display:flex;flex-direction:column;gap:24px}
+
+/* Barre du proto et toast : hors du produit */
+.proto{position:fixed;left:0;right:0;margin-inline:auto;width:fit-content;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:50;background:var(--glass);color:var(--glass-fg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:16px;padding:8px 10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;max-width:calc(100% - 32px);box-shadow:0 10px 30px rgb(0 0 0 / .25)}
+.proto .lbl{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--glass-2);padding:0 6px}
+.proto label{font-size:13px;color:var(--glass-2)}
+.proto select{height:34px;border-radius:10px;border:1px solid rgb(255 255 255 / .18);background:rgb(255 255 255 / .08);color:var(--glass-fg);padding:0 10px;font-size:14px;max-width:260px}
+.proto select option{color:#000;background:#fff}
+.proto button{height:34px;border-radius:10px;border:1px solid rgb(255 255 255 / .18);background:none;color:var(--glass-fg);padding:0 12px;font-size:14px;cursor:pointer}
+.toast{position:fixed;right:20px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:60;background:var(--primary-bg);color:var(--primary-fg);padding:12px 16px;border-radius:12px;font-size:15px;max-width:min(420px,calc(100% - 40px));transition:opacity 180ms ease,transform 180ms var(--ease)}
+.toast.off{opacity:0;transform:translateY(8px);pointer-events:none}
+
+@media (hover:hover) and (pointer:fine){
+  .nav a:not([aria-current="page"]):not([aria-disabled="true"]):hover,.iconbtn:hover{background:var(--nav-item-hover-bg)}
+  .row:not(.head-row):hover{background:var(--control-hover)}
+  .btn:hover{background:var(--primary-hover)}
+  .btn.outline:hover,.btn.ghost:hover{background:var(--control-hover);border-color:var(--border-hover)}
+  .pill-btn:hover{border-color:var(--border-hover);background:var(--control-hover)}
+}
+@media (max-width:860px){
+  .side{display:none}
+  .side.open{display:flex;position:fixed;inset:0 auto 0 0;z-index:40;box-shadow:0 10px 40px rgb(0 0 0 / .3)}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:8px max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--nav-border);background:var(--nav-bg);position:sticky;top:env(safe-area-inset-top,0px);z-index:30}
+  .topbar .brand{width:40px;height:40px;border-radius:12px;font-size:13px}
+  .home{padding-block:40px 160px;gap:32px}
+  .greet h1{font-size:36px;line-height:42px}.greet p{font-size:18px;line-height:26px}
+  .proj{grid-template-columns:minmax(0,1fr) auto}
+  .proj .c-lead,.proj .c-rel{display:none}
+  .proj .c-rel-m{display:block}
+  .head-row{display:none}
+  .grid4{grid-template-columns:minmax(0,1fr)}
+}
+.c-rel-m{display:none}
+@media (prefers-reduced-motion:reduce){*{transition-duration:1ms!important}}
+</style>
+
+<div class="shell">
+  <aside class="side" id="side" aria-label="Navigation principale"></aside>
+  <div class="main">
+    <div class="topbar"><span class="brand">PDS</span><button class="iconbtn" type="button" id="menuBtn" aria-label="Ouvrir le menu" aria-expanded="false"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 5.5h14M3 10h14M3 14.5h14"/></svg></button></div>
+    <main id="app"></main>
+  </div>
+</div>
+<div class="toast off" id="toast" role="status" aria-live="polite"></div>
+<div class="proto" role="region" aria-label="Commandes du prototype">
+  <span class="lbl">Proto</span>
+  <label for="roleSel">Voir comme</label><select id="roleSel"></select>
+  <label for="scenSel">Aller à</label>
+  <select id="scenSel">
+    <option value="day">Un jour ordinaire</option>
+    <option value="handover">Un projet vient d'être transmis</option>
+    <option value="clear">Tout est fait pour vous</option>
+    <option value="first">Premier jour dans PDS OS</option>
+  </select>
+  <button type="button" id="resetBtn">Recommencer</button>
+</div>
+
+<script>
+(function(){
+"use strict";
+const I={
+  home:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 9l7-6 7 6v8H3z"/></svg>',
+  work:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="2.5" y="6" width="15" height="10.5" rx="2"/><path d="M7 6V4.5h6V6"/></svg>',
+  folder:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M2.5 5.5h5l2 2h8v8.5h-15z"/></svg>',
+  cal:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="4.5" width="14" height="12.5" rx="2"/><path d="M3 8.5h14M7 2.5v3M13 2.5v3"/></svg>',
+  phone:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M5 3h3l1.5 4-2 1.5a9 9 0 004 4l1.5-2 4 1.5v3a1.5 1.5 0 01-1.5 1.5A13.5 13.5 0 013.5 4.5 1.5 1.5 0 015 3z"/></svg>',
+  mic:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="7.5" y="2.5" width="5" height="10" rx="2.5"/><path d="M4.5 10a5.5 5.5 0 0011 0M10 15.5v2"/></svg>',
+  disc:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10" cy="10" r="7.5"/><circle cx="10" cy="10" r="2"/></svg>',
+  nodes:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="5" cy="5" r="2"/><circle cx="15" cy="7" r="2"/><circle cx="8" cy="15" r="2"/><path d="M6.7 6l6.4.6M14 8.8l-4.5 4.8M5.5 7l2 6"/></svg>',
+  hand:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 10l4-4 3 2 3-2 4 4-5 5-2-1.5L7.5 15z"/></svg>',
+  file:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M5 2.5h6l4 4v11H5z"/><path d="M11 2.5v4h4"/></svg>',
+  msgs:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 4h11v8H7l-4 3zM14 7h3v8l-3-2h-5"/></svg>',
+  sidebar:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="2.5" y="3.5" width="15" height="13" rx="2"/><path d="M8 3.5v13"/></svg>',
+  bell:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M5 14V9a5 5 0 0110 0v5l1.5 1.5h-13zM8.5 17.5h3"/></svg>',
+  send:'<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><path d="M10 16V4M5 9l5-5 5 5"/></svg>',
+  chev:'<svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5L10.5 8 6 12.5"/></svg>',
+  back:'<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3.5L5.5 8l4.5 4.5"/></svg>',
+  check:'<svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg>'
+};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const lowerFirst=s=>s.charAt(0).toLowerCase()+s.slice(1);
+
+/* Le jour du proto : Jeu. 29/10/2026. */
+const TODAY=new Date(2026,9,29);
+const DAYS=["Dim.","Lun.","Mar.","Mer.","Jeu.","Ven.","Sam."];
+const toDate=iso=>{const [y,m,d]=iso.split("-").map(Number);return new Date(y,m-1,d);};
+const pad=n=>String(n).padStart(2,"0");
+const fmtDay=iso=>{const d=toDate(iso);return `${DAYS[d.getDay()]} ${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;};
+const daysFrom=iso=>Math.round((toDate(iso)-TODAY)/864e5);
+const overdue=s=>s.due&&daysFrom(s.due)<0;
+
+/* Personnes : comptes de PDS et externes par lien privé. */
+const P={
+  dg:{name:"Claire Morel",role:"Directrice générale",ini:"CM"},
+  cp:{name:"Lina Haddad",role:"Cheffe de projet",ini:"LH"},
+  da:{name:"Nadia Benali",role:"Directrice créative",ini:"NB"},
+  charge:{name:"Tom Mercier",role:"Chargé de production",ini:"TM"},
+  mix:{name:"Karim Haddou",role:"Ingénieur mix et mastering",ini:"KH",link:true},
+  collab:{name:"Sami Kader",role:"Compositeur, co-auteur",ini:"SK",link:true}
+};
+const ROLES=["dg","cp","da","charge"];
+const who=k=>P[k].name+(P[k].link?" (lien privé)":"");
+
+const PROJECTS={
+  neons:{title:"Néons",kind:"Single",artist:"Mona Lys",lead:"cp",release:"2026-12-05"},
+  ressac:{title:"Ressac",kind:"EP",artist:"Ilan",lead:"cp",release:"2027-01-22"},
+  mic:{title:"PDS Mic #12",kind:"Format PDS",artist:"Contenu",lead:"cp",release:"2026-11-20"},
+  lueur:{title:"Lueur",kind:"Album",artist:"Mona Lys",lead:"cp",release:"2027-03-12",handover:true}
+};
+
+/* Les étapes ouvertes ou à venir des projets : tout l'accueil en est tiré.
+   pre = étape qui doit être faite avant ; kind validate = une décision. */
+const STEPS=[
+  {id:"n5",p:"neons",place:["Juridique","Contrats"],title:"Valider le contrat de Sami Kader",kind:"validate",by:"dg",due:"2026-10-28",
+   why:"Le contrat de co-édition est rempli avec ce que sa fiche de renseignements a recueilli : la direction le valide avant l'envoi.",
+   then:"Envoyer le contrat à Sami Kader",done:"Contrat de Sami Kader validé",alt:{by:"cp",title:"Corriger le contrat de Sami Kader"}},
+  {id:"n6",p:"neons",place:["Juridique","Contrats"],title:"Envoyer le contrat à Sami Kader",kind:"do",by:"cp",pre:"n5",due:"2026-11-04",
+   why:"PDS OS l'envoie à l'adresse de sa fiche, avec son lien privé pour le relire et le signer.",then:"Signature de Sami Kader",done:"Contrat envoyé à Sami Kader"},
+  {id:"n6b",p:"neons",place:["Juridique","Contrats"],title:"Signer le contrat",kind:"do",by:"collab",pre:"n6",due:"2026-11-11",
+   why:"Sami Kader signe par son lien privé ; le contrat signé revient dans l'étape.",then:"Bulletin SACEM",done:"Contrat signé"},
+  {id:"n1",p:"neons",place:["Master","Mixage"],title:"Valider le Mix V1",kind:"validate",by:"da",due:"2026-11-02",
+   why:"Écoutez le Mix V1 déposé par Karim Haddou : validé, il devient la base du Mix final ; sinon, vos retours partent à Karim.",
+   then:"Mix final",done:"Mix V1 validé",alt:{by:"mix",title:"Déposer le Mix V2"}},
+  {id:"n2",p:"neons",place:["Master","Mixage"],title:"Déposer le Mix final",kind:"do",by:"mix",pre:"n1",due:"2026-11-17",validator:"da",
+   why:"Karim Haddou dépose le Mix final par son lien privé.",then:"Mastering",done:"Mix final déposé"},
+  {id:"n3",p:"neons",place:["Marketing","Conception","Pochette"],title:"Déposer une version de la pochette",kind:"do",by:"da",due:"2026-11-06",validator:"dg",
+   why:"La pochette part de l'intention validée en Conception ; la version déposée est relue par la direction.",then:"Validation de la pochette",done:"Version de la pochette déposée"},
+  {id:"n4",p:"neons",place:["Marketing","Conception","Pochette"],title:"Valider la pochette",kind:"validate",by:"dg",pre:"n3",due:"2026-11-09",
+   why:"La pochette validée part à la Distribution avec le master final.",then:"Distribution",done:"Pochette validée",alt:{by:"da",title:"Déposer une nouvelle version de la pochette"}},
+  {id:"n7",p:"neons",place:["Distribution","Paramètres"],title:"Confirmer les paramètres de distribution",kind:"do",by:"cp",due:"2026-11-09",
+   why:"Date, territoires et prix sont pré-remplis depuis le projet ; confirmés, ils partent avec le dépôt chez The Orchard.",then:"Dépôt chez The Orchard",done:"Paramètres de distribution confirmés"},
+  {id:"r3",p:"ressac",place:["Marketing","Stratégie"],title:"Valider la Stratégie",kind:"validate",by:"dg",due:"2026-10-30",
+   why:"La Stratégie dit à qui parle la sortie et avec quels moyens ; validée, elle ouvre la Conception.",then:"Conception",done:"Stratégie validée",alt:{by:"cp",title:"Reprendre la Stratégie"}},
+  {id:"r4",p:"ressac",place:["Marketing","Conception"],title:"Préparer l'échange créatif",kind:"do",by:"cp",pre:"r3",due:"2026-11-06",
+   why:"L'ordre du jour part de la Stratégie validée ; Nadia Benali y présente ses premières pistes.",then:"Échange créatif",done:"Échange créatif préparé"},
+  {id:"r1",p:"ressac",place:["Master","Mixage"],title:"Déposer le Mix V2",kind:"do",by:"mix",due:"2026-11-03",validator:"da",
+   why:"Karim Haddou corrige le Mix V1 d'après la demande de Nadia Benali et dépose le Mix V2 par son lien privé.",then:"Validation du Mix V2",done:"Mix V2 déposé"},
+  {id:"r2",p:"ressac",place:["Master","Mixage"],title:"Valider le Mix V2",kind:"validate",by:"da",pre:"r1",due:"2026-11-05",
+   why:"Écoutez le Mix V2 : il répond à votre demande sur le Mix V1.",then:"Mix final",done:"Mix V2 validé",alt:{by:"mix",title:"Déposer le Mix V3"}},
+  {id:"p1",p:"mic",place:["Marketing","Production","Épisode 12"],title:"Diffuser la feuille de service",kind:"do",by:"charge",due:"2026-11-02",
+   why:"Lieu, horaires et équipe sont confirmés ; diffusée, la feuille part à chacun avant le tournage du Mer. 04/11/2026.",then:"Tournage",done:"Feuille de service diffusée"},
+  {id:"p2",p:"mic",place:["Marketing","Production","Épisode 12"],title:"Confirmer la fin du tournage",kind:"do",by:"charge",pre:"p1",due:"2026-11-04",
+   why:"Le tournage terminé ouvre la postproduction.",then:"Postproduction",done:"Fin du tournage confirmée"},
+  {id:"l1",p:"lueur",place:["Lancement","Acceptation"],title:"Accepter le projet",kind:"do",by:"cp",first:true,
+   why:"Le projet vous est transmis : acceptez-le, demandez une précision ou refusez-le, en voyant tout ce qui a été saisi.",
+   then:"Cadrage",done:"Projet accepté",alt:{by:"dg",title:"Répondre et transmettre à nouveau",label:"Demander une précision"}},
+  {id:"l2",p:"lueur",place:["Cadrage","Préparer l'échange"],title:"Préparer l'échange de cadrage",kind:"do",by:"cp",pre:"l1",
+   why:"L'ordre du jour est calculé d'après ce que le Lancement a laissé ouvert ; on y invite l'artiste et la direction.",then:"Échange de cadrage",done:"Échange de cadrage préparé"}
+];
+
+/* État : ce que les gens ont fait, jamais un statut. */
+let S;
+function fresh(){return {role:"cp",view:"home",step:null,done:{},extra:[],hidden:{lueur:true},empty:false,flash:null,altOpen:false,altErr:false,menu:false};}
+const allSteps=()=>STEPS.concat(S.extra);
+const byId=id=>allSteps().find(s=>s.id===id);
+const isDone=id=>!!S.done[id];
+const isOpen=s=>!isDone(s.id)&&(!s.pre||isDone(s.pre))&&!allSteps().some(x=>x.blocks===s.id&&!isDone(x.id));
+const visibleProject=(k,role)=>{const p=PROJECTS[k];if(S.empty||S.hidden[k])return false;if(role==="dg"||p.lead===role)return true;return allSteps().some(s=>s.p===k&&(s.by===role||s.validator===role));};
+const live=role=>allSteps().filter(s=>visibleProject(s.p,role)&&isOpen(s));
+const rank=s=>(s.first?-1e7:0)+(overdue(s)?0:1)*1e6+(s.due?daysFrom(s.due)+1000:999999);
+const mineOf=role=>live(role).filter(s=>s.by===role).sort((a,b)=>rank(a)-rank(b));
+/* Ce que la personne attend : ce que les autres font dans ses projets, ce qu'elle validera ensuite. */
+const waitingOf=role=>live(role).filter(s=>s.by!==role&&(role==="dg"||PROJECTS[s.p].lead===role||s.validator===role||allSteps().some(n=>n.pre===s.id&&n.by===role))).sort((a,b)=>rank(a)-rank(b));
+const where=s=>[PROJECTS[s.p].title,s.place.join(" › ")].join(" · ");
+const nextOf=s=>allSteps().find(n=>n.pre===s.id&&!isDone(n.id));
+
+function badges(s){
+  return (overdue(s)?`<span class="badge sm t-danger">En retard</span>`:"")+(s.kind==="validate"?`<span class="badge sm t-act">À valider</span>`:"");
+}
+function dueText(s){return s.due?(overdue(s)?`attendu le ${fmtDay(s.due)}`:`avant le ${fmtDay(s.due)}`):"";}
+
+/* ---------- Coquille ---------- */
+function side(){
+  const n=mineOf(S.role).length;
+  const items=[["home",I.home,"Accueil"],["work",I.work,"Travail"],["projects",I.folder,"Projets"],["cal",I.cal,"Calendrier"],["calls",I.phone,"Calls"],["artists",I.mic,"Artistes"],["masters",I.disc,"Catalogue"],["network",I.nodes,"Réseau"],["contracts",I.hand,"Contrats"],["files",I.file,"Fichiers"],["feedback",I.msgs,"Retours"]];
+  const on=S.view==="step"?"":S.view;
+  return `<div><div class="side-top"><a class="brand" href="#" data-act="go" data-v="home" style="text-decoration:none">PDS</a><button class="iconbtn" type="button" aria-label="Réduire la navigation">${I.sidebar}</button></div>
+  <ul class="nav">${items.map(([k,ic,l])=>{const live=k==="home"||k==="work";const c=k==="work"&&n?`<span class="count num" aria-hidden="true">${n}</span>`:"";
+    return `<li><a href="#" ${live?`data-act="go" data-v="${k}"`:'aria-disabled="true"'} ${on===k?'aria-current="page"':""} aria-label="${l}${k==="work"&&n?`, ${n} action${n>1?"s":""} à vous`:""}">${ic}${l}${c}</a></li>`;}).join("")}</ul></div>
+  <div class="side-foot"><span class="me"><span class="av">${P[S.role].ini}</span><span>${esc(P[S.role].name)}</span></span><button class="iconbtn" type="button" aria-label="Notifications">${I.bell}</button></div>`;
+}
+
+/* ---------- Accueil ---------- */
+function home(){
+  const me=P[S.role], mine=mineOf(S.role), waiting=waitingOf(S.role);
+  const [first,...more]=mine;
+  const toValidate=mine.filter(s=>s.kind==="validate").length;
+  const sub=mine.length
+    ?toValidate===mine.length?(mine.length===1?"Une validation vous attend":`${mine.length} validations vous attendent`)
+    :`${mine.length===1?"Une action vous attend":`${mine.length} actions vous attendent`}${toValidate?`, dont ${toValidate===1?"une":toValidate} à valider`:""}`
+    :"Rien ne vous attend pour l'instant";
+  return `<div class="home">
+  <header class="greet"><h1>Bonjour ${esc(me.name.split(" ")[0])}</h1><p>${sub}</p></header>
+  <section class="po" aria-label="Demander à PO">
+    <div class="sugg">${["Qu'est-ce qu'il me reste à faire ?","Qu'est-ce qui a avancé cette semaine ?","Quels projets sont en cours ?"].map(q=>`<button class="pill-btn" type="button" data-act="ask" data-q="${esc(q)}">${esc(q)}</button>`).join("")}</div>
+    <div class="composer"><textarea id="poInput" rows="3" placeholder="Comment je peux t'aider ?" aria-label="Votre question"></textarea>
+      <button class="sq light" type="button" aria-label="Dicter">${I.mic.replace('width="20" height="20"','width="16" height="16"')}</button><button class="sq dark" type="button" aria-label="Envoyer">${I.send}</button></div>
+  </section>
+  ${S.empty&&!S.welcomeGone?welcome():""}
+  <div class="stack">
+    ${nowCard(first)}
+    ${more.length?`<section class="sec" aria-labelledby="h-also"><div class="sec-head"><h2 id="h-also">Aussi à vous<span class="n num">${more.length}</span></h2>${more.length>3?`<button class="link" type="button" data-act="go" data-v="work">Tout voir dans Travail</button>`:""}</div>
+      <div class="list">${more.slice(0,3).map(actionRow).join("")}${more.length>3?`<div class="more">et ${more.length-3} autre${more.length-3>1?"s":""} dans Travail</div>`:""}</div></section>`:""}
+  </div>
+  ${waiting.length?`<section class="sec" aria-labelledby="h-wait"><div class="sec-head"><h2 id="h-wait">Ce que vous attendez<span class="n num">${waiting.length}</span></h2></div>
+    <div class="list">${waiting.slice(0,4).map(waitRow).join("")}${waiting.length>4?`<div class="more">et ${waiting.length-4} autre${waiting.length-4>1?"s":""} : la Vue d'ensemble de chaque projet dit qui est attendu</div>`:""}</div></section>`:""}
+  ${projectsBlock()}
+  </div>`;
+}
+function nowCard(s){
+  if(!s){
+    const w=waitingOf(S.role)[0];
+    return `<section class="now" aria-label="Maintenant"><div class="eyebrow"><span class="badge t-neutral">Rien à faire pour vous</span></div>
+      <h2>${S.empty?"Ce qui vous attend arrivera ici":"Tout ce qui vous concerne est fait"}</h2>
+      <p class="why">${S.empty?"Chaque action, avec son pourquoi, qui valide et ce qu'elle débloque, et un bouton qui ouvre le geste.":w?`Les autres avancent : en attente de <b>${esc(who(w.by))}</b>, ${esc(lowerFirst(w.title))} (${esc(PROJECTS[w.p].title)}).`:"Les autres avancent : la Vue d'ensemble de chaque projet dit qui est attendu."}</p></section>`;
+  }
+  const facts=[s.validator?["Validation",P[s.validator].name]:null,s.then?["Ensuite",s.then]:null].filter(Boolean);
+  return `<section class="now" aria-label="Maintenant">
+    <div class="eyebrow"><span class="badge t-info">À vous</span>${badges(s)}<span>${esc(where(s))}${s.due?" · "+esc(dueText(s)):""}</span></div>
+    <h2>${esc(s.title)}</h2>
+    <p class="why">${esc(s.why)}</p>
+    ${facts.length?`<dl class="facts">${facts.map(([k,v])=>`<div><dt>${k} :</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>`:""}
+    <div><button class="btn" type="button" data-act="open" data-id="${s.id}">Ouvrir</button></div></section>`;
+}
+function actionRow(s){
+  return `<button class="row" type="button" data-act="open" data-id="${s.id}"><span class="grow"><span class="title">${esc(s.title)}</span><span class="cap">${esc(where(s))}${s.due?" · "+esc(dueText(s)):""}</span></span><span class="side-r">${badges(s)}${I.chev}</span></button>`;
+}
+function waitRow(s){
+  return `<button class="row" type="button" data-act="open" data-id="${s.id}"><span class="av" aria-hidden="true">${P[s.by].ini}</span><span class="grow"><span class="title" style="font-weight:500">En attente de <b>${esc(who(s.by))}</b> : ${esc(lowerFirst(s.title))}</span><span class="cap">${esc(where(s))}${s.due?" · "+esc(dueText(s)):""}</span></span><span class="side-r">${overdue(s)?`<span class="badge sm t-danger">En retard</span>`:""}${I.chev}</span></button>`;
+}
+function projectsBlock(){
+  const keys=Object.keys(PROJECTS).filter(k=>visibleProject(k,S.role)).sort((a,b)=>daysFrom(PROJECTS[a].release)-daysFrom(PROJECTS[b].release));
+  if(!keys.length) return `<section class="sec" aria-labelledby="h-proj"><div class="sec-head"><h2 id="h-proj">Vos projets</h2></div>
+    <div class="list"><div class="empty"><span>Aucun projet pour l'instant.</span>${S.role==="dg"?`<button class="btn outline sm" type="button">Nouveau projet</button>`:""}</div></div></section>`;
+  const nolead=keys.every(k=>PROJECTS[k].lead===S.role)?" nolead":"";
+  return `<section class="sec" aria-labelledby="h-proj"><div class="sec-head"><h2 id="h-proj">Vos projets<span class="n num">${keys.length}</span></h2></div>
+    <div class="list"><div class="row proj${nolead} head-row" aria-hidden="true"><span>Projet</span><span class="c-lead">Responsable</span><span class="c-rel">Sortie</span><span>Pour vous</span></div>
+    ${keys.map(k=>{const p=PROJECTS[k];const mine=live(S.role).filter(s=>s.p===k&&s.by===S.role);const first=mine.sort((a,b)=>rank(a)-rank(b))[0]||live(S.role).filter(s=>s.p===k).sort((a,b)=>rank(a)-rank(b))[0];
+      const d=daysFrom(p.release);const rel=`${fmtDay(p.release)}`;const rel2=d===0?"aujourd'hui":`dans ${d} jour${d>1?"s":""}`;
+      const pill=p.handover&&!isDone("l1")?`<span class="badge sm t-warn">${S.role===p.lead?"À accepter":"Transmis"}</span>`:mine.length?`<span class="badge sm t-info">${mine.length} à vous</span>`:`<span class="badge sm t-neutral">Suivi</span>`;
+      return `<button class="row proj${nolead}" type="button" ${first?`data-act="open" data-id="${first.id}"`:""}><span class="cell"><span class="title">${esc(p.title)}</span><span class="cap">${esc(p.kind)} · ${esc(p.artist)}</span><span class="cap c-rel-m num">Sortie ${esc(rel)}</span></span>
+        <span class="cell c-lead"><span>${esc(P[p.lead].name)}</span></span>
+        <span class="cell c-rel num"><span>${esc(rel)}</span><span class="cap">${rel2}</span></span>
+        <span class="side-r">${pill}${I.chev}</span></button>`;}).join("")}</div></section>`;
+}
+function welcome(){
+  const pts={
+    dg:[["Créez un projet","et transmettez-le à un chef de projet."],["Validez les étapes","qu'on vous soumet : elles arrivent ici, dans « Maintenant »."],["Lisez les retours","de l'équipe sur l'app."]],
+    cp:[["Acceptez les projets","qu'on vous transmet : ils arrivent ici, en tête."],["Menez le Cadrage","puis la Stratégie et les workflows d'un projet lancé."],["Travail rassemble","tout ce qui vous attend, par échéance."]],
+    da:[["Vos validations","(mix, pochette, propositions) arrivent ici, en tête."],["Déposez vos versions","dans la Conception d'un projet lancé."],["Une question ?","Demandez à PO, ici ou partout avec Espace Espace."]],
+    charge:[["Vos tournages","et leurs étapes arrivent ici, en tête."],["Les sociétés de production","agissent par leur lien privé : vous suivez ce qu'elles déposent."],["Travail rassemble","tout ce qui vous attend, par échéance."]]
+  }[S.role];
+  return `<section class="welcome" aria-label="Bienvenue dans PDS OS"><h2 style="font-size:20px;line-height:28px;font-weight:500;letter-spacing:-.04em">Bienvenue dans PDS OS</h2><ol>${pts.map(([b,t])=>`<li><b>${esc(b)}</b> ${esc(t)}</li>`).join("")}</ol><div><button class="btn outline sm" type="button" data-act="dismiss">J'ai compris</button></div></section>`;
+}
+
+/* ---------- Travail (lien « Tout voir ») ---------- */
+function work(){
+  const mine=mineOf(S.role),[first,...rest]=mine;
+  const g={late:[],week:[],later:[],none:[]};
+  rest.forEach(s=>{if(!s.due)g.none.push(s);else if(overdue(s))g.late.push(s);else if(daysFrom(s.due)<=3)g.week.push(s);else g.later.push(s);});
+  const block=(t,l)=>l.length?`<section class="sec"><div class="sec-head"><h2>${t}<span class="n num">${l.length}</span></h2></div><div class="list">${l.map(actionRow).join("")}</div></section>`:"";
+  return `<div class="page" style="max-width:896px"><h1>Travail</h1><p class="why">Ce qui vous attend dans tous vos projets, calculé depuis leurs parcours.</p>
+    ${nowCard(first)}<div class="groups">${block("En retard",g.late)}${block("Cette semaine",g.week)}${block("Plus tard",g.later)}${block("Sans échéance",g.none)}</div></div>`;
+}
+
+/* ---------- Étape ouverte : là où « Ouvrir » mène ---------- */
+function step(){
+  const s=byId(S.step),p=PROJECTS[s.p],mineNow=isOpen(s)&&s.by===S.role,done=isDone(s.id);
+  const nx=nextOf(s);
+  const flash=S.flash?`<div class="banner ${S.flash.info?"info":""}" role="status">${I.check}<span>${S.flash.html}</span></div>`:"";
+  let body;
+  if(mineNow){
+    body=`<div class="lead"><div class="eyebrow"><span class="badge t-info">À vous</span>${badges(s)}${s.due?`<span>${esc(dueText(s))}</span>`:""}</div>
+      <h2 style="font-size:20px;line-height:28px;font-weight:500;letter-spacing:-.04em">${esc(s.title)}</h2>
+      ${s.quote?`<p class="quote">${esc(s.quote)}</p>`:""}
+      ${flash}
+      ${S.altOpen?`<div style="display:flex;flex-direction:column;gap:6px"><label class="fl" for="altNote">Motif *</label><textarea class="field" id="altNote" ${S.altErr?'aria-invalid="true" aria-describedby="altErr"':""} placeholder="Ce qui doit changer, et pourquoi"></textarea>${S.altErr?`<p class="err" id="altErr">Dites ce qui doit changer : le motif est obligatoire.</p>`:""}
+        <div class="actions"><button class="btn" type="button" data-act="altSend">${esc(s.alt.label||"Demander une modification")}</button><button class="btn ghost" type="button" data-act="altCancel">Annuler</button></div></div>`
+      :`<div class="actions"><button class="btn" type="button" data-act="do">${esc(s.title)}</button>${s.alt?`<button class="btn outline" type="button" data-act="altOpen">${esc(s.alt.label||"Demander une modification")}</button>`:""}</div>`}</div>`;
+  } else if(done){
+    body=`${flash}<div class="wait">${I.check} ${esc(s.done)}.${nx?` Ensuite : <b>${esc(who(nx.by))}</b>, ${esc(lowerFirst(nx.title))}.`:""}</div>`;
+  } else {
+    body=`${flash}<div class="wait">En attente de <b>${esc(who(s.by))}</b> : ${esc(lowerFirst(s.title))}${s.due?`, ${esc(dueText(s))}`:""}.</div>`;
+  }
+  return `<div class="page"><div><button class="btn ghost sm" type="button" data-act="go" data-v="${S.from||"home"}">${I.back}${S.from==="work"?"Travail":"Accueil"}</button></div>
+    <nav class="crumbs" aria-label="Fil d'Ariane"><span>${esc(p.title)}</span>${s.place.map((x,i)=>`<span aria-hidden="true">›</span>${i===s.place.length-1?`<b>${esc(x)}</b>`:`<span>${esc(x)}</span>`}`).join("")}</nav>
+    <h1>${esc(s.place[s.place.length-1])}</h1>
+    <section class="panel" aria-label="Étape ouverte">
+      <p class="why">${esc(s.why)}</p>
+      <div class="grid4"><div><div class="k">Responsable</div><div class="v">${esc(who(s.by))}</div></div>
+        <div><div class="k">Validation</div><div class="v">${s.validator?esc(P[s.validator].name):s.kind==="validate"?esc(P[s.by].name):"Aucune"}</div></div>
+        <div><div class="k">Ensuite</div><div class="v">${esc(s.then||"—")}</div></div></div>
+      ${body}
+    </section></div>`;
+}
+
+/* ---------- Rendu et gestes ---------- */
+function render(){
+  document.getElementById("side").innerHTML=side();
+  document.getElementById("side").classList.toggle("open",S.menu);
+  document.getElementById("menuBtn").setAttribute("aria-expanded",String(S.menu));
+  document.getElementById("app").innerHTML=S.view==="step"?step():S.view==="work"?work():home();
+  document.getElementById("roleSel").innerHTML=ROLES.map(k=>`<option value="${k}" ${k===S.role?"selected":""}>${esc(P[k].name)} · ${esc(P[k].role)}</option>`).join("");
+}
+let tt;
+function toast(t){const el=document.getElementById("toast");el.textContent=t;el.classList.remove("off");clearTimeout(tt);tt=setTimeout(()=>el.classList.add("off"),3200);}
+
+function complete(s){
+  S.done[s.id]=true;
+  const nx=nextOf(s);
+  toast(s.done);
+  if(nx&&nx.by===S.role){S.step=nx.id;S.flash={info:true,html:`${esc(s.done)}. Étape ouverte pour vous : <b>${esc(nx.title)}</b>.`};}
+  else S.flash={html:`${esc(s.done)}.${nx?` En attente de <b>${esc(who(nx.by))}</b> : ${esc(lowerFirst(nx.title))}.`:""}`};
+}
+function sendAlt(s,note){
+  const id=s.id+"-r"+S.extra.length;
+  S.extra.push({id,p:s.p,place:s.place,title:s.alt.title,kind:"do",by:s.alt.by,due:s.due,blocks:s.id,quote:`${P[S.role].name} (${lowerFirst(s.alt.label||"Demander une modification")}) : « ${note} »`,
+    why:`${P[S.role].name} demande une reprise avant de décider. Une fois fait, la décision lui revient.`,then:s.title,done:"Reprise envoyée"});
+  S.altOpen=false;S.altErr=false;
+  const label=(s.alt.label||"Demander une modification");
+  toast(label==="Demander une précision"?"Précision demandée":"Modification demandée");
+  S.flash={html:`${label==="Demander une précision"?"Précision demandée":"Modification demandée"}. En attente de <b>${esc(who(s.alt.by))}</b> : ${esc(lowerFirst(s.alt.title))}.`};
+}
+
+document.addEventListener("click",e=>{
+  const t=e.target.closest("[data-act]");if(!t)return;
+  const a=t.dataset.act;
+  if(t.tagName==="A")e.preventDefault();
+  if(a==="go"){S.view=t.dataset.v;S.flash=null;S.menu=false;S.altOpen=false;render();window.scrollTo({top:0});}
+  else if(a==="open"){S.from=S.view==="work"?"work":"home";S.view="step";S.step=t.dataset.id;S.flash=null;S.altOpen=false;S.altErr=false;render();window.scrollTo({top:0});}
+  else if(a==="do"){const s=byId(S.step);complete(s);render();}
+  else if(a==="altOpen"){S.altOpen=true;S.altErr=false;render();document.getElementById("altNote").focus();}
+  else if(a==="altCancel"){S.altOpen=false;S.altErr=false;render();}
+  else if(a==="altSend"){const v=document.getElementById("altNote").value.trim();if(!v){S.altErr=true;render();document.getElementById("altNote").focus();return;}sendAlt(byId(S.step),v);render();}
+  else if(a==="ask"){const el=document.getElementById("poInput");el.value=t.dataset.q;el.focus();}
+  else if(a==="dismiss"){S.welcomeGone=true;render();}
+});
+document.getElementById("menuBtn").addEventListener("click",()=>{S.menu=!S.menu;render();});
+document.getElementById("roleSel").addEventListener("change",e=>{S.role=e.target.value;S.view="home";S.flash=null;S.menu=false;render();window.scrollTo({top:0});});
+document.getElementById("scenSel").addEventListener("change",e=>{const role=S.role;S=fresh();S.role=role;const v=e.target.value;
+  if(v==="handover")S.hidden={};
+  if(v==="first"){S.empty=true;}
+  if(v==="clear"){let guard=0;while(mineOf(S.role).length&&guard++<50)mineOf(S.role).forEach(s=>S.done[s.id]=true);}
+  render();window.scrollTo({top:0});});
+document.getElementById("resetBtn").addEventListener("click",()=>{S=fresh();document.getElementById("scenSel").value="day";render();window.scrollTo({top:0});});
+S=fresh();render();
+})();
+</script>

@@ -2319,8 +2319,8 @@ Spécification : `docs/ASSISTANT.md` (à modifier avant le code).
   et liens écrits par le modèle retirés à l'affichage.
 - **Jamais la date du jour dans le contexte du modèle** (il ajoutait des années et jugeait
   les retards) ; retards écrits par le code (« EN RETARD » / « dans les temps »).
-- Accueil : `AssistantPanel` + cartes (`components/home/*`) alimentées par `lib/insights/`
-  (todo, activité, sorties), les mêmes requêtes que l'assistant.
+- Accueil : `AssistantPanel` puis le fil de `lib/home/feed.ts` (même source que Travail,
+  ci-dessous).
 
 ### Page Travail (`/app/work`) et accueil : une seule source (finitions, 19/10/2026)
 
@@ -2356,10 +2356,16 @@ Ce qui attend la personne vient **des parcours de chaque projet** (`docs/VISION-
 - `loadLaunchedJourneys` (`lib/work/journeys.ts`, `cache()`) lit une fois par requête les
   parcours de tous les projets lancés ; `loadMyJourneyWork` (Travail, accueil, compteur) et le
   Calendrier en partent.
-- **Accueil** : PO, bienvenue, cartes gardées (projets à accepter, projets en cours,
-  activité, sorties, propositions de PO) ; « Validations qui m'attendent » (les décisions des
-  parcours) et « À vous » (leurs autres actions, lien « Tout le travail ») remplacent « Mes
-  tâches » et l'ancienne carte des validations d'étape (`HomeJourneyCards`, en streaming).
+- **Accueil** (refonte du 29/10/2026, proto `docs/protos/accueil.html`) : `loadHomeFeed`
+  (`lib/home/feed.ts`, une fois par requête) reprend **les lignes du Travail** (`workRowsOf`) :
+  « Maintenant » = `leadOf` (le même que Travail : projet à accepter ou à retransmettre d'abord,
+  puis la première action), « Aussi à vous » = les suivantes. « Ce que vous attendez » = le
+  `waiting` des parcours (`loadLaunchedJourneys`) : tous les projets pour la direction
+  (`assign_projects`), sinon ceux qu'on mène et les étapes qu'on valide (nom du valideur égal au
+  nom du compte : les étapes ne portent pas d'id de personne), plus les projets en attente
+  d'acceptation. « Vos projets » : tout pour la direction, sinon ceux qu'on porte, où l'on a une
+  action ou que l'on attend ; triés par échéance. `HomeSummary` (sous la salutation) relit le même
+  cache. Plus d'activité, de sorties ni de cartes séparées (`home-cards`, `CardGrid` retirés).
 - **Compteur de « Travail »** dans la barre principale (`components/shell/work-count.tsx`) :
   dans un projet, celui du projet (son layout) ; hors d'un projet, la **somme des projets**,
   déclarée projet par projet par l'accueil et le Travail, puis tenue à jour par chaque projet

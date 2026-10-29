@@ -377,12 +377,20 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
 
 - Salutation et sous-titre centrés, puis une colonne de 896 px : suggestions en
   pilules à contour, saisie de PO sur fond teinté `--surface-tint` (micro en carré
-  blanc, envoi en carré noir, 32 px), puis les cartes, trois par ligne.
+  blanc, envoi en carré noir, 32 px), puis le fil de l'accueil (29/10/2026, proto
+  `docs/protos/accueil.html`) : « Maintenant » (`WorkLead`, le cadre de `NowFrame`) suivi à
+  16 px de « Aussi à vous » (trois lignes), puis à 40 px « Ce que vous attendez » (quatre lignes)
+  et « Vos projets » (`DataTable` dans une `ListCard` : Projet avec format et artiste,
+  Responsable seulement s'il n'est pas toujours la personne, Échéance avec « dans n jours »,
+  Pour vous en pastille). Une seule colonne, plus de grille de cartes.
+- Sous la salutation, le sous-titre compte ce qui attend la personne (`HomeSummary`) ; la
+  phrase « Suivez chaque sortie, du cadrage au bilan » le remplace pendant la lecture.
 - Une question ouvre la **page de conversation** (d'après Midday) : en-tête avec retour
   et « + » en boutons carrés à contour, titre centré (la première question, tronquée) ;
   fil de 896 px qui défile seul, saisie teintée collée en bas avec la mention de PO.
-- Carte de l'accueil : contour `--border-default`, ni fond ni ombre, marge intérieure
-  12 px, libellé `caption` gris, lignes en `body-md` (titre semi-gras, détail medium).
+- Carte de l'accueil (`ListCard`) : contour `--border-default`, ni fond ni ombre, marge
+  intérieure 12 px, libellé `caption` gris, lignes en `body-md` (titre semi-gras, détail
+  medium) ; au-delà des lignes montrées, une ligne `caption` grise dit combien il en reste.
 
 ### Page Travail
 

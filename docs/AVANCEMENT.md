@@ -1105,3 +1105,24 @@ l'URL, pastilles qui retirent le filtre), recherche instantanée (`SearchableLis
   contrats (quelques modèles), Retours (rangés par sujet par PO).
 
 Reste : passage navigateur.
+
+
+## Accueil refait selon la vision produit (29/10/2026, branche `pre-prod`)
+
+Demande de Sacha : refaire l'accueil avec `docs/VISION-UX.md`. Proto validé d'abord
+(`docs/protos/accueil.html`, test `docs/protos/tests/accueil.cjs`), puis le code, sans nouvelle requête :
+l'accueil lit les lignes du Travail et les parcours (`lib/home/feed.ts`).
+
+- [x] Sous la salutation, ce qui attend la personne, compté par le code (« 2 validations vous attendent »).
+- [x] **Maintenant** : la même action que Travail (`leadOf` : projet à accepter ou à retransmettre d'abord,
+      puis le retard, puis l'échéance), son pourquoi, qui valide, ce qu'elle débloque, « Ouvrir ».
+- [x] **Aussi à vous** : les trois suivantes, puis « Tout voir dans Travail ».
+- [x] **Ce que vous attendez** : qui, sur quoi, pour quand, en retard d'abord (tout pour la direction ; sinon
+      ses projets et les étapes qu'on validera), et les projets en attente d'acceptation.
+- [x] **Vos projets** : par échéance, avec ce que chacun demande (statut de transmission, « n à vous », « Suivi »).
+- [x] Retirés : la grille de cartes (`CardGrid`, `home-cards`, `JourneyActionsCard`), l'Activité et les Sorties
+      de l'accueil, et leurs textes ; la saisie de PO garde sa hauteur Figma (déjà plus haute que le proto).
+- Décision prise faute de règle : « les étapes que je validerai » sont reconnues au nom du valideur, les étapes
+  ne portant pas l'id de la personne.
+
+Reste : passage navigateur sur la pré-prod avec les quatre rôles.

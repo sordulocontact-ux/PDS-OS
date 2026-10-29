@@ -6,14 +6,17 @@ import { shell } from "@/lib/i18n/fr/shell";
 const fr = { shell };
 
 // Frame of the home page (Figma "Desktop - 11"): centred greeting, then one
-// column holding the assistant and the cards. Shared by the page and its
-// loading state, so PO can be typed into before the cards have arrived.
+// column holding the assistant and the feed. Shared by the page and its
+// loading state, so PO can be typed into before the feed has arrived.
 export function HomeFrame({
   title,
+  subtitle,
   children,
 }: {
   // Null while the viewer is not known yet: a placeholder line instead.
   title: string | null;
+  // What waits for the viewer (HomeSummary); the app's line until then.
+  subtitle?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
@@ -27,7 +30,7 @@ export function HomeFrame({
           <Skeleton className="h-13 w-72 max-w-full" />
         )}
         <p className="text-body-xl text-[color:var(--text-secondary)]">
-          {fr.shell.home.body}
+          {subtitle ?? fr.shell.home.body}
         </p>
       </header>
 

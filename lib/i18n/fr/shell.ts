@@ -58,8 +58,56 @@ export const shell = {
   home: {
     welcome: (firstName: string) => `Bonjour ${firstName}`,
     welcomeAnonymous: "Bonjour",
+    // Under the greeting: what waits, counted by code (docs/VISION-UX.md § 2).
     body: "Suivez chaque sortie, du cadrage au bilan",
-    toProjects: "Voir les projets",
+    summary: (mine: number, toValidate: number) => {
+      if (mine === 0) return "Rien ne vous attend pour l'instant";
+      if (toValidate === mine)
+        return mine === 1
+          ? "Une validation vous attend"
+          : `${mine} validations vous attendent`;
+      const head =
+        mine === 1
+          ? "Une action vous attend"
+          : `${mine} actions vous attendent`;
+      if (toValidate === 0) return head;
+      return `${head}, dont ${toValidate === 1 ? "une" : toValidate} à valider`;
+    },
+    // Nothing yet for a new member: what « Maintenant » will hold.
+    firstTitle: "Ce qui vous attend arrivera ici",
+    firstBody:
+      "Chaque action, avec son pourquoi, qui valide et ce qu'elle débloque, et un bouton qui ouvre le geste.",
+    also: "Aussi à vous",
+    allWork: "Tout voir dans Travail",
+    moreInWork: (n: number) => `Et ${n} autre${n > 1 ? "s" : ""} dans Travail`,
+    waiting: {
+      title: "Ce que vous attendez",
+      // « En attente de Lina Haddad : accepter le projet » (Lancement).
+      accept: "Accepter le projet",
+      launch: "Lancement › Acceptation",
+      nobody: "Personne de désigné",
+      more: (n: number) =>
+        `Et ${n} autre${n > 1 ? "s" : ""} : la Vue d'ensemble de chaque projet dit qui est attendu`,
+    },
+    projects: {
+      title: "Vos projets",
+      columns: {
+        title: "Projet",
+        responsible: "Responsable",
+        due: "Échéance",
+        mine: "Pour vous",
+      },
+      inDays: (days: number) =>
+        days === 0
+          ? "aujourd'hui"
+          : days > 0
+            ? `dans ${days} jour${days > 1 ? "s" : ""}`
+            : `il y a ${-days} jour${days < -1 ? "s" : ""}`,
+      mine: (n: number) => `${n} à vous`,
+      followed: "Suivi",
+      noDue: "Non définie",
+      empty: "Aucun projet pour l'instant.",
+    },
     // First visits (UX test of 09/10/2026): three points by what the
     // member may do, never by the position's name.
     welcomeCard: {
@@ -98,7 +146,7 @@ export const shell = {
       ],
       creative: [
         {
-          text: "Vos livrables s'affichent dans Mes tâches et dans Travail.",
+          text: "Vos livrables et vos validations arrivent en tête de l'accueil, et dans Travail.",
           link: "Travail",
         },
         {

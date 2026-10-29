@@ -134,6 +134,7 @@ node docs/protos/tests/production.cjs   # proto Production, interne et externe
 node docs/protos/tests/production-v2.cjs # externe selon Ibé (15/10) : rôles, devis versionné, lieu remplacé, décisions, blocages, contrôle, livraison
 node docs/protos/tests/distribution.cjs  # Distribution : paramètres, contrôles, V1 refusée, corrections de The Orchard, plateformes, clôture avec réserves (PROTO=… pour une copie)
 node docs/protos/tests/marketing.cjs     # Marketing complet : Stratégie, Conception, Production, Activations, Suivi & bilan jusqu'à la clôture
+node docs/protos/tests/accueil.cjs       # Accueil (29/10) : quatre rôles, moments, valider puis voir l'accueil suivant, motif obligatoire, mobile, sombre
 node docs/protos/tests/projet.cjs        # Projet complet : Cadrage puis Master, Juridique, Marketing, Distribution dans une seule coquille, moments du projet, rôles, pages privées réunies
 ```
 

@@ -18,15 +18,9 @@ export const work = {
   // § 3, « Une seule source »): one card per project on the Travail, one card
   // « À vous » and one for the decisions on the home.
   journeys: {
-    mine: "À vous",
-    mineEmpty: "Rien ne vous attend pour l'instant.",
-    validations: "Validations qui m'attendent",
-    validationsEmpty: "Aucune validation ne vous attend.",
-    allWork: "Tout le travail",
     toValidate: "À valider",
     overdue: "En retard",
-    due: (day: string) => `avant le ${day}`,
-    // A project's journeys could not be read: its card is missing.
+    // A project's journeys could not be read: its rows are missing.
     partial:
       "Une partie de vos projets n'a pas pu être lue. Rechargez la page.",
   },

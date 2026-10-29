@@ -101,9 +101,6 @@ export const needTone: Record<string, Tone> = {
   committed: "info",
 };
 
-export const onlineTone = (online: boolean): Tone =>
-  online ? "success" : "neutral";
-
 /** A deliverable on its way to « Livré » (lib/production/rules.ts). */
 export const productionDeliveryTone: Record<
   "no_file" | "to_approve" | "to_check" | "to_deliver" | "delivered",

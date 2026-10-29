@@ -128,7 +128,14 @@ la plus pressée, son pourquoi, qui valide, ce qu'elle débloque), puis range le
 échéance** (en retard, cette semaine, plus tard, sans échéance), sans jamais répéter la première.
 Le **Calendrier** montre les dates que PDS OS connaît déjà dans tous les projets (sorties, dates
 du master, tournages, temps forts, calls, étapes datées) ; on n'y saisit rien, chaque date
-s'ouvre là où elle se décide. *(Sacha 27/10/2026.)*
+s'ouvre là où elle se décide. *(Sacha 27/10/2026.)* L'**Accueil** répond aux mêmes questions pour
+toute la personne : sous la salutation, ce qui l'attend compté (« 3 actions vous attendent, dont une
+à valider ») ; puis le même « Maintenant » que Travail (un projet à accepter passe avant tout, puis
+le retard, puis l'échéance), trois actions « Aussi à vous » et le lien vers Travail ; **« Ce que vous
+attendez »** (qui, sur quoi, pour quand : tout pour la direction, sinon ses projets et ce qu'on
+validera ensuite) ; **« Vos projets »** par échéance avec ce que chacun demande (« 2 à vous »,
+« Suivi », statut de transmission). Plus d'activité ni de cartes juxtaposées. *(Sacha 29/10/2026,
+proto `docs/protos/accueil.html`.)*
 
 **En-tête de module** (au-dessus de « Maintenant ») : fil d'Ariane « Projet › Module ›
 [sous-module ›] Étape », pilules des sous-modules (Marketing seul), titre du module, « Qui fait

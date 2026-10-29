@@ -20,9 +20,16 @@ const secondary =
  * « Maintenant » of the Travail (docs/VISION-UX.md § 2): the most pressing of
  * the viewer's actions, answering the five questions — the action, why, who
  * validates, what it unlocks — and « Ouvrir » on the gesture. The list below
- * never repeats it. With nothing to do: « Rien à faire pour vous ».
+ * never repeats it. With nothing to do: « Rien à faire pour vous », and
+ * `empty` says what else (the home of a new member: what will arrive here).
  */
-export function WorkLead({ row }: { row: WorkRow | null }) {
+export function WorkLead({
+  row,
+  empty,
+}: {
+  row: WorkRow | null;
+  empty?: { title: string; body: string };
+}) {
   if (!row)
     return (
       <NowFrame label={t.label}>
@@ -30,9 +37,11 @@ export function WorkLead({ row }: { row: WorkRow | null }) {
           <StatusBadge tone="neutral">{t.nothing}</StatusBadge>
         </div>
         <h2 className="text-[length:var(--type-display-sm)] leading-[var(--type-display-sm-lh)] font-medium tracking-[var(--type-display-tracking)] text-balance">
-          {t.allDone}
+          {empty?.title ?? t.allDone}
         </h2>
-        <p className={secondary}>{t.othersMove}</p>
+        <p className={cn(secondary, "text-pretty")}>
+          {empty?.body ?? t.othersMove}
+        </p>
       </NowFrame>
     );
 

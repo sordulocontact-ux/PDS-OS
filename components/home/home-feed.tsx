@@ -1,100 +1,63 @@
-import { Suspense } from "react";
-
-import {
-  ActivityCard,
-  HandoverCard,
-  ProjectsCard,
-  ProposalsCard,
-  ReleasesCard,
-  TasksCard,
-} from "@/components/home/home-cards";
+import { FormMessage } from "@/components/auth/form-message";
 import { PageSuggestions } from "@/components/assistant/assistant-suggestions";
-import { HomeJourneyCards } from "@/components/home/home-journey-cards";
+import { HomeAlso } from "@/components/home/home-also";
+import { HomeProjects } from "@/components/home/home-projects";
+import { HomeWaiting } from "@/components/home/home-waiting";
 import { WelcomeCard } from "@/components/home/welcome-card";
-import { CardGrid } from "@/components/ui/card-grid";
-import { JourneyCardsSkeleton } from "@/components/work/journey-actions-card";
+import { GlobalWorkCountReporter } from "@/components/shell/work-count";
+import { WorkLead } from "@/components/work/work-lead";
 import { can, type Access } from "@/lib/auth/access";
-import { shell } from "@/lib/i18n/fr/shell";
-import { transmission } from "@/lib/i18n/fr/transmission";
+import { routes } from "@/lib/auth/redirects";
+import { loadHomeFeed } from "@/lib/home/feed";
 import { loadWelcome } from "@/lib/home/welcome";
-import { loadRecentActivity } from "@/lib/insights/activity";
-import { loadReleasesOverview } from "@/lib/insights/releases";
-import { freeTasksOf, loadMyTodo } from "@/lib/insights/todo";
-import { handoverOf } from "@/lib/projects/handover";
-import { listProjects } from "@/lib/projects/queries";
+import { shell } from "@/lib/i18n/fr/shell";
+import { work } from "@/lib/i18n/fr/work";
+import { loadMyJourneyWork } from "@/lib/work/journeys";
 
-const fr = { shell, transmission };
+const fr = { shell, work };
 
-// The home page cards. Streamed behind a Suspense boundary: the greeting
-// and PO show before these queries answer.
-// A read that fails is said on its card, never shown as an empty list
-// (UX test of 09/10/2026: « Aucun projet » on a database timeout).
-// What waits for the person comes from the projects' journeys (lib/work/
-// journeys.ts, docs/VISION-UX.md § 3): « Validations qui m'attendent » are
-// their decisions, « À vous » their other actions (HomeJourneyCards, streamed
-// on their own); only the tasks tied to no workflow keep a card of their own.
+// The home under PO (docs/VISION-UX.md § 2, proto `docs/protos/accueil.html`),
+// streamed behind a Suspense boundary: the greeting and PO show first.
+// « Maintenant » (the Travail's lead), « Aussi à vous », « Ce que vous
+// attendez », « Vos projets »: all read from the projects' journeys and the
+// Travail's rows (lib/home/feed.ts), never from a list of their own.
 export async function HomeFeed({ access }: { access: Access }) {
-  const [todo, events, { projects, error: projectsError }, releases, welcome] =
-    await Promise.all([
-      loadMyTodo(access),
-      loadRecentActivity({ days: 7, limit: 5 }).then(
-        (rows) => ({ rows, error: false }),
-        (error: unknown) => {
-          console.error("HomeFeed activity:", error);
-          return { rows: [], error: true };
-        },
-      ),
-      listProjects(),
-      loadReleasesOverview().then(
-        (rows) => ({ rows, error: false }),
-        (error: unknown) => {
-          console.error("HomeFeed releases:", error);
-          return { rows: [], error: true };
-        },
-      ),
-      loadWelcome(access),
-    ]);
-  const freeTasks = freeTasksOf(todo);
-  const { toAccept, toRetransmit } = handoverOf(projects, access);
-  // « En cours »: launched projects only (accepted, with their stages).
-  const running = projects.filter((p) => p.status === "launched");
+  const t = fr.shell.home;
+  const [feed, journeys, welcome] = await Promise.all([
+    loadHomeFeed(access),
+    loadMyJourneyWork(),
+    loadWelcome(access),
+  ]);
+  const { lead } = feed;
+  // Nothing anywhere yet: « Maintenant » says what will arrive.
+  const first = !lead && feed.projects.length === 0 && !feed.error;
 
   return (
-    <>
-      {/* A project to accept comes first: PO offers to present it. */}
-      <PageSuggestions
-        items={toAccept
-          .slice(0, 1)
-          .map((p) => fr.shell.home.presentProject(p.title))}
-      />
+    <div className="flex flex-col gap-10">
+      {/* A project to accept is « Maintenant »: PO offers to present it. */}
+      {lead?.kind === "accept" && (
+        <PageSuggestions items={[t.presentProject(lead.projectTitle)]} />
+      )}
+      {feed.error && (
+        <FormMessage kind="error">{fr.work.journeys.partial}</FormMessage>
+      )}
       {welcome && <WelcomeCard variant={welcome} />}
-      <CardGrid>
-        {toAccept.length > 0 && (
-          <HandoverCard
-            title={fr.transmission.cards.toAccept}
-            projects={toAccept}
-          />
-        )}
-        {toRetransmit.length > 0 && (
-          <HandoverCard
-            title={fr.transmission.cards.toRetransmit}
-            projects={toRetransmit}
-          />
-        )}
-        <Suspense fallback={<JourneyCardsSkeleton />}>
-          <HomeJourneyCards access={access} />
-        </Suspense>
-        {(freeTasks.length > 0 || todo.error) && (
-          <TasksCard tasks={freeTasks} error={todo.error} />
-        )}
-        <ProjectsCard projects={running} error={Boolean(projectsError)} />
-        {can(access, "pilot_projects") &&
-          (todo.proposals.length > 0 || todo.error) && (
-            <ProposalsCard proposals={todo.proposals} error={todo.error} />
-          )}
-        <ActivityCard events={events.rows} error={events.error} />
-        <ReleasesCard releases={releases.rows} error={releases.error} />
-      </CardGrid>
-    </>
+      <div className="flex flex-col gap-4">
+        <WorkLead
+          row={lead}
+          empty={first ? { title: t.firstTitle, body: t.firstBody } : undefined}
+        />
+        <HomeAlso rows={feed.also} />
+      </div>
+      <HomeWaiting items={feed.waiting} />
+      <HomeProjects
+        projects={feed.projects}
+        viewerId={access.personId}
+        newProjectHref={
+          can(access, "assign_projects") ? routes.projectsNew : null
+        }
+      />
+      <GlobalWorkCountReporter byProject={journeys.byProject} />
+    </div>
   );
 }

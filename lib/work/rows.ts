@@ -91,6 +91,14 @@ export const inView = (row: WorkRow, view: WorkView) =>
 /** The viewer's own move (not a project waiting for someone else). */
 export const isMine = (row: WorkRow) => row.kind !== "awaiting";
 
+/** « Maintenant » of the Travail and the home: a project handed over to the
+ * viewer (to accept, or to transmit again) before anything else — nothing
+ * starts without it — then the first of their moves in the list's order. */
+export const leadOf = (rows: WorkRow[]): WorkRow | null =>
+  rows.find((row) => row.kind === "accept" || row.kind === "retransmit") ??
+  rows.find(isMine) ??
+  null;
+
 /** Late, this week (to Sunday), later, undated; others' moves apart. */
 function groupOf(
   row: Pick<WorkRow, "kind" | "due" | "overdue">,

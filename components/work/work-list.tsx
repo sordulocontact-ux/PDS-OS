@@ -10,7 +10,7 @@ import { work } from "@/lib/i18n/fr/work";
 import { todayInParis } from "@/lib/insights/dates";
 import { loadMyJourneyWork } from "@/lib/work/journeys";
 import { loadMyWork } from "@/lib/work/queries";
-import { isMine, workRowsOf } from "@/lib/work/rows";
+import { leadOf, workRowsOf } from "@/lib/work/rows";
 
 const fr = { work };
 
@@ -26,7 +26,7 @@ export async function WorkList({ access }: { access: Access }) {
     loadMyJourneyWork(),
   ]);
   const rows = workRowsOf(work, journeys, todayInParis());
-  const lead = rows.find(isMine) ?? null;
+  const lead = leadOf(rows);
   // A read that failed is said, never shown as « nothing ».
   const error = work.error
     ? t.loadError

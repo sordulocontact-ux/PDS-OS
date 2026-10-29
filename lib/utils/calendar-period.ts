@@ -40,6 +40,11 @@ export function addDays(day: string, count: number): string {
   return dayOf(utcOf(day) + count * DAY_MS);
 }
 
+/** Days from one "YYYY-MM-DD" to another (negative when `to` is before). */
+export function daysBetween(from: string, to: string): number {
+  return Math.round((utcOf(to) - utcOf(from)) / DAY_MS);
+}
+
 /** The Monday of a day's week. */
 export function weekStartOf(day: string): string {
   const weekday = (new Date(utcOf(day)).getUTCDay() + 6) % 7;
