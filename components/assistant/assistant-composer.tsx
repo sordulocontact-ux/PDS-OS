@@ -124,7 +124,8 @@ export function AssistantComposer({
           placeholder={listening ? fr.voice.input.listening : placeholder}
           rows={1}
           maxLength={MAX_LENGTH}
-          className="max-h-60 min-h-0 grow resize-none rounded-none border-0 p-0 text-base font-medium focus-visible:ring-0 md:text-base"
+          // The box is the field: no fill of its own, in dark mode too.
+          className="max-h-60 min-h-0 grow resize-none rounded-none border-0 p-0 text-base font-medium focus-visible:ring-0 md:text-base dark:bg-transparent"
           // Read-only, not disabled: it takes the focus back with the text.
           readOnly={voice.phase === "transcribing"}
           autoFocus={autoFocus}

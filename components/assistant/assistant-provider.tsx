@@ -37,9 +37,6 @@ type AssistantContextValue = {
   markSaved: (toolCallId: string, link: SavedLink) => void;
   launcherOpen: boolean;
   setLauncherOpen: (open: boolean) => void;
-  /** Questions the open page adds to the suggestions (a project to accept). */
-  pageSuggestions: string[];
-  setPageSuggestions: (suggestions: string[]) => void;
   /** The page the conversation was opened from, if any. */
   origin: PoOrigin | null;
   setOrigin: (origin: PoOrigin | null) => void;
@@ -71,7 +68,6 @@ export function AssistantProvider({
   useEffect(() => () => keepChat(null), []);
   const [saved, setSaved] = useState<Record<string, SavedLink>>({});
   const [launcherOpen, setLauncherOpen] = useState(false);
-  const [pageSuggestions, setPageSuggestions] = useState<string[]>([]);
   const [origin, setOrigin] = useState<PoOrigin | null>(null);
   const [reviewing, setReviewing] = useState<{
     toolCallId: string;
@@ -83,8 +79,6 @@ export function AssistantProvider({
       saved,
       launcherOpen,
       setLauncherOpen,
-      pageSuggestions,
-      setPageSuggestions,
       origin,
       setOrigin,
       review(toolCallId, proposal) {
@@ -96,7 +90,7 @@ export function AssistantProvider({
         setSaved((previous) => ({ ...previous, [toolCallId]: link }));
       },
     }),
-    [saved, launcherOpen, pageSuggestions, origin],
+    [saved, launcherOpen, origin],
   );
 
   // The draft after `toolCallId` in the same answer, not saved yet: an

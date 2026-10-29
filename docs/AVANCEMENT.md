@@ -1144,6 +1144,9 @@ Reste : passage navigateur sur la pré-prod avec les quatre rôles.
       Responsable et Type ne s'affichent qu'en très grand écran (filtrables au-dessus).
 - [x] Projets : colonne **Phase** retirée (Responsable revient dès 1280 px) ; filtre **Artiste** ;
       sur la ligne Artiste, Type, Responsable, et **Statut + Échéance** dans le bouton des filtres avancés.
+- [x] Saisie de PO (accueil, fenêtre Espace Espace, conversation) : en sombre, la zone de texte
+      n'a plus son propre fond dans la boîte teintée ; **pilules de suggestions retirées** (Sacha,
+      « pour l'instant », en attendant une meilleure présentation).
 - Reste : passage navigateur (session requise).
 
 

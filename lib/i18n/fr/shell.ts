@@ -173,8 +173,6 @@ export const shell = {
         },
       ],
     },
-    // PO's suggestion when a project waits for the viewer's answer.
-    presentProject: (title: string) => `Présente-moi le projet « ${title} »`,
   },
 
   // One name for a project's date (UX test of 09/10/2026: « Date de sortie

@@ -6254,8 +6254,8 @@ tests `supabase/tests/ux-roles.test.sql` (41).
   moins de 30 jours, trois repères choisis **par permission** (`welcomeVariantOf`), fermée en base
   (`member_welcomes`). PO : `my_todo` commence par les projets à accepter et liste les livrables,
   `find_projects` dit `status` et `waitingForYourAnswer`, `project_status` présente un projet non
-  lancé (contexte initial, échéance) ; la première suggestion de l'accueil devient « Présente-moi
-  le projet « X » » (`PageSuggestions`).
+  lancé (contexte initial, échéance). (La suggestion « Présente-moi le projet « X » » de l'accueil
+  est partie avec les pilules de suggestions, retirées le 29/10.)
 - **Confidentialité d'une transmission** : `note` et `response` de `project_assignments` ne sont
   plus lisibles directement (droits colonne) ; `project_assignment_messages()` les rend à la
   personne transmise, à celle qui a transmis et aux membres `assign_projects`. Les autres voient

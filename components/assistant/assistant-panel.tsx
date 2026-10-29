@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 
 import { AssistantComposer } from "@/components/assistant/assistant-composer";
 import { sharedChat } from "@/components/assistant/shared-chat";
-import { AssistantSuggestions } from "@/components/assistant/assistant-suggestions";
 import { AssistantThread } from "@/components/assistant/assistant-thread";
 import { Button } from "@/components/ui/button";
 import { routes } from "@/lib/auth/redirects";
@@ -16,7 +15,7 @@ import { assistant } from "@/lib/i18n/fr/assistant";
 const fr = { assistant };
 
 /**
- * The PO assistant (Figma "Desktop - 11"): suggestions, then the input. On
+ * The PO assistant (Figma "Desktop - 11"): the input. On
  * the home page a question opens the conversation page, where the tab's
  * shared conversation goes on (docs/ASSISTANT.md § 2). The Espace Espace
  * window passes its own `chat` (a new conversation), shows it in place, is
@@ -78,10 +77,6 @@ export function AssistantPanel({
         >
           {t.conversation.resume}
         </Button>
-      )}
-
-      {(!inline || messages.length === 0) && (
-        <AssistantSuggestions onAsk={ask} disabled={busy} filled={compact} />
       )}
 
       <AssistantComposer

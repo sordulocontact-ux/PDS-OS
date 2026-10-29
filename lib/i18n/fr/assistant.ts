@@ -9,11 +9,6 @@ export const assistant = {
   stop: "Arrêter",
   clear: "Nouvelle conversation",
   thinking: "PO consulte les données…",
-  suggestions: [
-    "Qu'est-ce qu'il me reste à faire ?",
-    "Qu'est-ce qui a avancé cette semaine ?",
-    "Quels projets sont en cours ?",
-  ],
   tools: {
     find_projects: "Recherche du projet",
     project_status: "Lecture de l'état du projet",

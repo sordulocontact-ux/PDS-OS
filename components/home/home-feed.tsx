@@ -1,5 +1,4 @@
 import { FormMessage } from "@/components/auth/form-message";
-import { PageSuggestions } from "@/components/assistant/assistant-suggestions";
 import { HomeAlso } from "@/components/home/home-also";
 import { HomeProjects } from "@/components/home/home-projects";
 import { HomeWaiting } from "@/components/home/home-waiting";
@@ -34,10 +33,6 @@ export async function HomeFeed({ access }: { access: Access }) {
 
   return (
     <div className="flex flex-col gap-10">
-      {/* A project to accept is « Maintenant »: PO offers to present it. */}
-      {lead?.kind === "accept" && (
-        <PageSuggestions items={[t.presentProject(lead.projectTitle)]} />
-      )}
       {feed.error && (
         <FormMessage kind="error">{fr.work.journeys.partial}</FormMessage>
       )}

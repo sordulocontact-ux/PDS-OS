@@ -7,7 +7,6 @@ import Link from "next/link";
 import { AssistantComposer } from "@/components/assistant/assistant-composer";
 import { useAssistant } from "@/components/assistant/assistant-provider";
 import { sharedChat } from "@/components/assistant/shared-chat";
-import { AssistantSuggestions } from "@/components/assistant/assistant-suggestions";
 import { AssistantThread } from "@/components/assistant/assistant-thread";
 import { IconArrowLeft } from "@/components/icons";
 import { Button } from "@/components/ui/button";
@@ -85,17 +84,13 @@ export function AssistantConversation() {
       </header>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 md:px-[var(--page-gutter)]">
-        {messages.length > 0 ? (
+        {messages.length > 0 && (
           <AssistantThread
             messages={messages}
             status={status}
             error={error}
             className="mx-auto w-full max-w-4xl py-6"
           />
-        ) : (
-          <div className="mx-auto flex h-full w-full max-w-4xl items-end justify-center pb-6">
-            <AssistantSuggestions onAsk={ask} disabled={busy} />
-          </div>
         )}
       </div>
 
