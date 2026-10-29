@@ -5,7 +5,11 @@ import { z } from "zod";
 
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
-import { assessFraming, findQuestion } from "@/lib/framing/assess";
+import {
+  assessFraming,
+  findQuestion,
+  type QuestionState,
+} from "@/lib/framing/assess";
 import {
   confirmLines,
   confirmedRow,
@@ -13,16 +17,21 @@ import {
 } from "@/lib/framing/confirm";
 import {
   QUESTIONS,
+  isDimension,
   isQuestionKey,
   type QuestionKey,
 } from "@/lib/framing/dimensions";
-import { loadFramingKnowledge } from "@/lib/framing/knowledge";
+import {
+  loadFramingKnowledge,
+  type FramingKnowledge,
+} from "@/lib/framing/knowledge";
 import {
   fail,
   fromDatabaseError,
   ok,
   type ActionResult,
 } from "@/lib/framing/result";
+import { toVerify } from "@/lib/framing/verify";
 import { parseEurosToCents } from "@/lib/projects/schemas";
 import { createClient } from "@/lib/supabase/server";
 
@@ -161,7 +170,45 @@ export async function confirmQuestion(
   const access = await requireApproved();
   const knowledge = await loadFramingKnowledge(projectId, access);
   if (!knowledge) return fail("not_found");
-  const state = findQuestion(assessFraming(knowledge), key);
+  return confirmState(
+    projectId,
+    knowledge,
+    findQuestion(assessFraming(knowledge), key),
+  );
+}
+
+/**
+ * « Confirmer les n » of a dimension (Sacha 29/10/2026): every proposal of
+ * that dimension checked in the list (lib/framing/verify.ts), each confirmed
+ * as its own « Confirmer » would. A question (missing, a contradiction, a
+ * legal party, a sentence to precise) never is.
+ */
+export async function confirmDimension(
+  projectId: string,
+  dimension: string,
+): Promise<ActionResult> {
+  if (!isDimension(dimension) || !projectId_.safeParse(projectId).success)
+    return fail("invalid_input");
+  const access = await requireApproved();
+  const knowledge = await loadFramingKnowledge(projectId, access);
+  if (!knowledge) return fail("not_found");
+  const states = toVerify(assessFraming(knowledge), knowledge).filter(
+    (q) => q.dimension === dimension,
+  );
+  if (states.length === 0) return fail("invalid_transition");
+  for (const state of states) {
+    const result = await confirmState(projectId, knowledge, state);
+    if (!result.ok) return result;
+  }
+  return ok;
+}
+
+async function confirmState(
+  projectId: string,
+  knowledge: FramingKnowledge,
+  state: QuestionState,
+): Promise<ActionResult> {
+  const key = state.key;
   if (state.status !== "to_confirm") return fail("invalid_transition");
   const kind = QUESTIONS[key].kind;
 

@@ -668,11 +668,7 @@ export function assessFraming(k: FramingKnowledge): FramingAssessment {
     dimensions,
     counts: countsOf(all),
     total: all.length,
-    next:
-      all.find(
-        (q) =>
-          q.status !== "known" && !(q.dismissed && !QUESTIONS[q.key].required),
-      ) ?? null,
+    next: all.find(needsSomeone) ?? null,
     // Never over a contradiction: a person resolves it first (PROJ-BUG-04).
     ready: blocking.length === 0 && conflicts.length === 0,
     conflicts,
@@ -685,6 +681,10 @@ export function assessFraming(k: FramingKnowledge): FramingAssessment {
   };
 }
 
+/** Not known yet, and not an optional question a person set aside. */
+export const needsSomeone = (q: QuestionState) =>
+  q.status !== "known" && !(q.dismissed && !QUESTIONS[q.key].required);
+
 /** The question after `key` that still needs someone, in order. */
 export function nextAfter(
   assessment: FramingAssessment,
@@ -692,10 +692,10 @@ export function nextAfter(
 ): QuestionState | null {
   const all = assessment.dimensions.flatMap((d) => d.questions);
   const from = all.findIndex((q) => q.key === key);
-  const open = (q: QuestionState) =>
-    q.status !== "known" && !(q.dismissed && !QUESTIONS[q.key].required);
   return (
-    all.slice(from + 1).find(open) ?? all.slice(0, from).find(open) ?? null
+    all.slice(from + 1).find(needsSomeone) ??
+    all.slice(0, from).find(needsSomeone) ??
+    null
   );
 }
 

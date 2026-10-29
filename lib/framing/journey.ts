@@ -31,7 +31,14 @@ export type FramingJourneyInput = {
   startedDirect: boolean;
   // Framing stage state (project_stages).
   stage: string;
-  dimensions: { open: number; ready: boolean; confirmed: number };
+  // open: the questions of the box; verify: PO's proposals checked in the
+  // list (lib/framing/verify.ts).
+  dimensions: {
+    open: number;
+    verify: number;
+    ready: boolean;
+    confirmed: number;
+  };
   // The latest version of the Brief.
   brief: { version: number; state: string } | null;
   plan: { launchedAt: string } | null;
@@ -107,8 +114,8 @@ export function framingJourney(i: FramingJourneyInput): JourneyStep[] {
     prereq: ["start"],
     next: ["brief"],
     actor:
-      dimsStatus === "current" && i.dimensions.open > 0
-        ? owned(t.todo.answer(i.dimensions.open))
+      dimsStatus === "current" && i.dimensions.open + i.dimensions.verify > 0
+        ? owned(t.todo.answer(i.dimensions.open, i.dimensions.verify))
         : null,
     summary:
       dimsStatus === "done"

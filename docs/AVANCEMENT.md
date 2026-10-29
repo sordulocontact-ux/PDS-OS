@@ -1186,6 +1186,11 @@ puis le coder.
       « Modifier » par ligne, « Lancer le plan » qui dit ce qu'il démarre, sans modale.
 - [x] Composant commun `SunkCard` (filet pleine largeur sous l'en-tête, Sacha 29/10) ; `PoQuestion` refait
       (aussi pour le Cadrage juridique : le domaine seul au-dessus de la question).
+- [x] **Vérifier en bloc** (Sacha 29/10, proto à deux variantes) : la boîte ne pose que ce qui manque ; les
+      propositions de PO se lisent « À vérifier » dans leur dimension et se confirment par dimension
+      (« Confirmer les n », `confirmDimension`, `lib/framing/verify.ts`) ; une ligne s'ouvre d'un clic dessus,
+      sans « Répondre » / « Modifier ». Parties juridiques, contradictions et phrases à structurer restent
+      des questions. Version de base (une à une) : `df67b396`. Pas de migration.
 - Reste : passage navigateur des trois étapes, en responsable puis en direction.
 
 

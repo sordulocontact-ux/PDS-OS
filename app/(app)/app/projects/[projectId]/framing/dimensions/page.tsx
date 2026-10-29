@@ -10,7 +10,7 @@ import { QuestionScreen } from "@/components/framing/intel/question-screen";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
 import { editableDimensions } from "@/lib/framing/analyse";
-import { nextAfter, type QuestionState } from "@/lib/framing/assess";
+import { needsSomeone, type QuestionState } from "@/lib/framing/assess";
 import { linesOf } from "@/lib/framing/brief-snapshot";
 import { legalPartyBoard } from "@/lib/framing/legal-parties";
 import { isOpenRequest, requestsAt } from "@/lib/framing/brief-request-view";
@@ -29,10 +29,12 @@ const first = (value: string | string[] | undefined) =>
 
 /**
  * Cadrage › Les 6 dimensions (proto « Suite du Cadrage », Sacha 29/10/2026;
- * ticket § 4 and § 6): for the one who answers, PO's one question (the next
- * one, or the one opened with « Répondre » / « Modifier » or the arrows,
- * ?q=), then the six dimensions folded under it, the dictation beside
- * them. How many are left is said once, in the step's « À vous » line.
+ * ticket § 4 and § 6): for the one who answers, PO's one question — only
+ * what nobody can confirm at a glance, the arrows walking those — or the
+ * line opened from the list (?q=); then the six dimensions, where PO's
+ * proposals are checked and confirmed a dimension at a time
+ * (lib/framing/verify.ts), the dictation beside them. How many are left is
+ * said once, in the step's « À vous » line.
  * Frozen while the direction reads the Brief; a correction reopens only
  * the dimensions it names (framing_dimension_editable).
  */
@@ -47,7 +49,7 @@ export default async function FramingDimensionsPage({
     loadBriefRequests(projectId),
   ]);
   if (!ctx) notFound();
-  const { k, assessment, stage, canEdit } = ctx;
+  const { k, assessment, stage, canEdit, verify } = ctx;
   const t = fr.framingJourney.dimensions;
   const ti = fr.framingIntel;
   const working = stage === "not_started" || stage === "in_progress";
@@ -58,25 +60,43 @@ export default async function FramingDimensionsPage({
   const latest = k.briefs[0];
   const correction = latest?.state === "changes_requested";
 
-  // The questions the viewer may open, in order: the arrows walk them.
+  // The lines the viewer may open, in order; PO's proposals are checked in
+  // the list, the arrows walk the rest.
   const reachable = assessment.dimensions
     .flatMap((d) => d.questions)
     .filter((q) => editableIn(q.dimension));
+  const checked = verify.filter((q) => editableIn(q.dimension));
+  const verified = new Set(checked.map((q) => q.key));
+  const questions = reachable.filter((q) => !verified.has(q.key));
   const asked = first(sp.q);
   const question: QuestionState | null =
     (isQuestionKey(asked) && reachable.find((q) => q.key === asked)) ||
-    (assessment.next && editableIn(assessment.next.dimension)
-      ? assessment.next
-      : null);
-  const at = question ? reachable.indexOf(question) : -1;
+    questions.find(needsSomeone) ||
+    null;
+  const at = question ? questions.indexOf(question) : -1;
   const hrefOf = (q: QuestionState | undefined) =>
     q ? routes.projectFramingQuestion(projectId, q.dimension, q.key) : null;
+  // After a gesture: the next question; else the list while proposals are
+  // left to check; else the Brief.
   const nextHref = (q: QuestionState) => {
-    const next = nextAfter(assessment, q.key);
-    return next
-      ? routes.projectFramingQuestion(projectId, next.dimension, next.key)
+    const from = questions.indexOf(q);
+    const next = [...questions.slice(from + 1), ...questions.slice(0, from)]
+      .filter((x) => x !== q)
+      .find(needsSomeone);
+    if (next) return hrefOf(next)!;
+    return checked.some((x) => x !== q)
+      ? routes.projectFramingStep(projectId, "dimensions")
       : routes.projectFramingStep(projectId, "brief");
   };
+  // Confirming a dimension's proposals ends the step when they are all
+  // that is left.
+  const dimensionsLeft = new Set(checked.map((q) => q.dimension));
+  const lastDimension =
+    dimensionsLeft.size === 1 &&
+    !questions.some(needsSomeone) &&
+    assessment.conflicts.length === 0
+      ? checked[0].dimension
+      : null;
   const lines = Object.fromEntries(
     Object.keys(QUESTIONS).map((key) => [key, linesOf(key, k)]),
   );
@@ -122,12 +142,16 @@ export default async function FramingDimensionsPage({
           projectId={projectId}
           question={question}
           eyebrow={ti.dimensions[question.dimension]}
-          nav={{
-            position: at + 1,
-            total: reachable.length,
-            previous: hrefOf(reachable[at - 1]),
-            next: hrefOf(reachable[at + 1]),
-          }}
+          nav={
+            at >= 0
+              ? {
+                  position: at + 1,
+                  total: questions.length,
+                  previous: hrefOf(questions[at - 1]),
+                  next: hrefOf(questions[at + 1]),
+                }
+              : undefined
+          }
           editable
           nextHref={nextHref(question)}
           suggestions={suggestions}
@@ -196,6 +220,9 @@ export default async function FramingDimensionsPage({
           current={question?.key ?? null}
           editable={editableIn}
           parties={{ board: legalPartyBoard(k), members: k.framing.members }}
+          verify={checked.map((q) => q.key)}
+          openFirst={asked ? null : (checked[0]?.dimension ?? null)}
+          lastDimension={lastDimension}
           header={
             canEdit && working && !correction ? (
               <FramingDictation projectId={projectId}>

@@ -12,9 +12,11 @@ const fr = { framingIntel, framingJourney };
 /**
  * One information of the Cadrage (proto `.irow`): « **Libellé** · valeur »
  * (« Pas encore connu » when nothing is), its source, its state pill, and
- * an action on the right (« Répondre »). `eyebrow`: the dimension, in
- * « Voir le détail ». `current`: the question asked above, said once there
- * (« Question en cours » here, never its value twice).
+ * an action on the right. `eyebrow`: the dimension, in « Voir le détail ».
+ * `current`: the question asked above, said once there (« Question en
+ * cours » here, never its value twice). `verify`: a proposal of PO checked
+ * in the list, « À vérifier » (lib/framing/verify.ts). `href`: the whole
+ * line opens it in the question box (Sacha 29/10/2026).
  */
 export function FramingLine({
   question,
@@ -22,6 +24,9 @@ export function FramingLine({
   eyebrow,
   side,
   current = false,
+  verify = false,
+  href,
+  hrefLabel,
 }: {
   question: QuestionState;
   // The lines of a list question, in words.
@@ -29,6 +34,9 @@ export function FramingLine({
   eyebrow?: string;
   side?: ReactNode;
   current?: boolean;
+  verify?: boolean;
+  href?: string | null;
+  hrefLabel?: string;
 }) {
   const t = fr.framingJourney.dimensions;
   const state = lineStateOf(question);
@@ -67,8 +75,13 @@ export function FramingLine({
         </span>
       }
       source={current ? undefined : lineSourceOf(question)}
-      state={{ tone: framingLineTone[state], label: t.states[state] }}
+      state={{
+        tone: framingLineTone[state],
+        label: verify ? t.states.to_verify : t.states[state],
+      }}
       side={side}
+      href={href}
+      hrefLabel={hrefLabel}
     />
   );
 }

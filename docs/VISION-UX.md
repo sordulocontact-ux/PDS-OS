@@ -313,6 +313,10 @@ valent partout, dans l'app comme dans les protos.
     ce dont personne n'a parlé se voit (« Rien n'a été dit pendant l'échange »). « Ajouter » est
     dans l'en-tête du groupe. Le call est une **source** des étapes, pas une étape à confirmer.
     *(Sacha 18/10, proto Marketing)*
+    **Exception, le Cadrage** *(Sacha 29/10, proto « Suite du Cadrage »)* : PO ne pose en question que
+    ce qui manque ; ce qu'il a compris se lit « À vérifier » dans sa dimension, rien de coché d'avance,
+    et se confirme **une dimension à la fois** (« Confirmer les n », après lecture) ; une ligne se
+    corrige d'un clic dessus. Les parties juridiques et les contradictions restent une par une.
 22. **Pas d'onglets sous les chevrons.** Une information notée (appel, WhatsApp, e-mail) s'affiche
     dans l'étape qu'elle concerne, avec « Noter une information » à côté de « Signaler un blocage » ;
     la liste complète s'ouvre dans la modale depuis la pastille « n informations à confirmer ». Les

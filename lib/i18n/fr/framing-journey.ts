@@ -31,7 +31,7 @@ export const framingJourney = {
     },
     dimensions: {
       title: "Les 6 dimensions",
-      why: "Ce que le projet sait déjà, ce qui reste à confirmer, ce qui manque. PO pose une question à la fois et ne redemande jamais ce qui est connu.",
+      why: "Ce que le projet sait déjà, ce que PO a compris de l'échange, ce qui manque. PO ne pose que ce qui manque ; le reste se vérifie dimension par dimension.",
     },
     brief: {
       title: "Brief de cadrage",
@@ -46,8 +46,19 @@ export const framingJourney = {
     start: "Choisir comment démarrer",
     hold: "Tenir l'échange de cadrage",
     holdOn: (day: string) => `Tenir l'échange du ${day}`,
-    answer: (n: number) =>
-      `Répondre à ${plural(n, "question", "questions")} de PO`,
+    // The box's questions, then PO's proposals checked in the list (Sacha
+    // 29/10/2026).
+    answer: (questions: number, verify: number) =>
+      [
+        questions
+          ? `Répondre à ${plural(questions, "question", "questions")} de PO`
+          : "",
+        verify
+          ? `${questions ? "vérifier" : "Vérifier"} ${plural(verify, "information proposée", "informations proposées")}`
+          : "",
+      ]
+        .filter(Boolean)
+        .join(" et "),
     send: "Envoyer le Brief en validation",
     validate: "Valider le Brief de cadrage",
     launch: "Lancer le plan du projet",
@@ -139,8 +150,18 @@ export const framingJourney = {
     missing: "Information manquante",
     toConfirm: "À confirmer",
     toTreat: (n: number) => `${n} à traiter`,
+    toVerify: (n: number) => `${n} à vérifier`,
+    questions: (n: number) => plural(n, "question", "questions"),
+    // Under a dimension's proposals (Sacha 29/10/2026).
+    confirmAll: (n: number) => (n > 1 ? `Confirmer les ${n}` : "Confirmer"),
+    confirmAllHint: (n: number) =>
+      n > 1
+        ? "Tout est juste ? Confirmez-les ensemble, ou cliquez sur une ligne pour la corriger."
+        : "C'est juste ? Confirmez-le, ou cliquez sur la ligne pour la corriger.",
+    confirmedAll: (n: number, dimension: string) =>
+      `${plural(n, "information confirmée", "informations confirmées")} · ${dimension}`,
+    open: (label: string) => `Ouvrir : ${label}`,
     complete: "Complète",
-    answer: "Répondre",
     currentQuestion: "Question en cours",
     listTitle: "Les 6 dimensions",
     done: "Les 6 dimensions sont complètes.",
@@ -162,6 +183,7 @@ export const framingJourney = {
       known: "Connu",
       confirmed: "Confirmé",
       to_confirm: "À confirmer",
+      to_verify: "À vérifier",
       missing: "Manquant",
       na: "Non applicable",
       later: "À définir plus tard",

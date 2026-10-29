@@ -9,6 +9,19 @@ const { chromium } = require(process.cwd() + "/node_modules/playwright-core");
   const p=await b.newPage({viewport:{width:1440,height:1000},colorScheme:"dark"}); p.setDefaultTimeout(5000);
   const errs=[]; p.on("pageerror",e=>errs.push(e.message));
   await p.goto("file://"+file+"#dims");
+  // « Vérifier en bloc » (the variant kept, Sacha 29/10): questions for what is missing only.
+  const bactor=async()=>(await p.locator(".actor").textContent());
+  console.log("bloc 1 "+await bactor()+" | nav: "+await p.locator("#question .qnav .cap").textContent());
+  await p.click('button.line:has-text("Critère de réussite")');
+  await p.fill("#ians","400 000 écoutes cumulées le premier mois");
+  await p.click('button[data-act="isave"]');
+  await p.click('button[data-act="bulk"][data-v="objective"]');
+  console.log("bloc flash: "+await p.locator('.callout[role="status"]').textContent());
+  for(let i=0;i<10;i++){ if(!(await p.locator("#question textarea#ans").count())) break; await p.fill("#ans","Rien de prévu"); await p.click('#question button:has-text("Confirmer")'); }
+  for(let i=0;i<10;i++){ const bt=p.locator('button[data-act="bulk"]').first(); if(!(await bt.count())) break; await bt.click(); }
+  console.log("bloc end: "+await p.locator("#stepTitle").textContent());
+  // The base version, everything one by one (« Aujourd'hui »), kept for comparison.
+  await p.click('#vset button[data-variant="une"]'); await p.selectOption("#momSel","dims");
   const log={push:(s)=>console.log(s),join:()=>""}; const title=async()=>(await p.locator("#stepTitle").textContent());
   const actor=async()=>(await p.locator(".actor").count()?await p.locator(".actor").textContent():"—");
   log.push("1 "+await title()+" | "+await actor());

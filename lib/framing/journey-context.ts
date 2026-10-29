@@ -6,6 +6,7 @@ import { requireApproved } from "@/lib/auth/dal";
 import { assessFraming } from "@/lib/framing/assess";
 import { framingJourney } from "@/lib/framing/journey";
 import { framingStarted, loadFramingKnowledge } from "@/lib/framing/knowledge";
+import { toVerify } from "@/lib/framing/verify";
 import { projectPlanRow } from "@/lib/plan/queries";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { getProject } from "@/lib/projects/queries";
@@ -85,6 +86,9 @@ export const framingJourneyContext = trackedCache(
     ]);
     if (!k) return null;
     const assessment = assessFraming(k);
+    // PO's proposals checked in the list, apart from the box's questions.
+    const verify = toVerify(assessment, k);
+    const verified = new Set(verify.map((q) => q.key));
     const stage = k.framing.stage?.state ?? "not_started";
     const canEdit = canEditProject(access, project);
     const viewerName =
@@ -114,7 +118,10 @@ export const framingJourneyContext = trackedCache(
       startedDirect: framingStarted(k),
       stage,
       dimensions: {
-        open: assessment.blocking.length + assessment.conflicts.length,
+        open:
+          assessment.blocking.filter((q) => !verified.has(q.key)).length +
+          assessment.conflicts.length,
+        verify: verified.size,
         ready: assessment.ready,
         confirmed: assessment.counts.known,
       },
@@ -126,6 +133,7 @@ export const framingJourneyContext = trackedCache(
       project,
       k,
       assessment,
+      verify,
       stage,
       canEdit,
       viewerName,

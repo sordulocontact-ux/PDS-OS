@@ -1676,7 +1676,7 @@ l'étape qui attend la personne (`framingLanding`) et les anciennes URL (`?step=
   de cadrage `framing_calls`, plan) ; loader `lib/journey/framing.ts` branché dans `JOURNEY_LOADERS`
   (le relais de la Vue d'ensemble s'efface). La 1re étape s'appelle toujours « Démarrer le cadrage », quel
   que soit le chemin (Sacha 29/10/2026 : un nom qui change perd le repère) ; le chemin se lit dans sa ligne.
-  Acteurs : le responsable du projet (« Choisir comment démarrer », « Tenir l'échange du JJ/MM », « Répondre à n questions de PO », « Envoyer le Brief en validation »
+  Acteurs : le responsable du projet (« Choisir comment démarrer », « Tenir l'échange du JJ/MM », « Répondre à n questions de PO et vérifier m informations proposées », « Envoyer le Brief en validation »
   (un seul geste depuis le 28/10/2026), « Lancer le plan du projet ») ;
   la direction `kind: "validate"` sur « Valider le Brief de cadrage » (Validations du projet).
   Le Brief garde ses versions lisibles après une demande de modification (défaut du proto non recopié).
@@ -1697,16 +1697,26 @@ l'étape qui attend la personne (`framingLanding`) et les anciennes URL (`?step=
   L'écran `?step=review` est supprimé : les propositions de l'échange sont dans « Les 6 dimensions ».
 - **Les 6 dimensions** (proto `docs/protos/cadrage-suite.html`, Sacha 29/10/2026) : pour qui répond,
   la question d'abord (`QuestionScreen` dans `PoQuestion`) : **le domaine seul** au-dessus (« Temporalité »),
-  flèches vers la question d'avant et d'après (toutes celles que la personne peut ouvrir, dans l'ordre,
-  `?q=`), champ « Votre réponse * » ouvert d'emblée pour une information manquante, « M'aider à
+  flèches vers la question d'avant et d'après (celles que la personne peut ouvrir, dans l'ordre, sauf
+  les propositions vérifiées dans la liste, `?q=`), champ « Votre réponse * » ouvert d'emblée pour une information manquante, « M'aider à
   définir », Confirmer / Modifier ; « Non applicable », « À définir plus tard », « Rien à signaler »,
   « Écarter », « Passer » repliés sous « Autre réponse ». Une réponse confirmée **se modifie** tant que
-  l'étape est en cours (« Modifier » sur sa ligne, ou les flèches). Dessous, « Les 6 dimensions » et la
+  l'étape est en cours (un clic sur sa ligne, ou les flèches). **Vérifier en bloc** (Sacha 29/10/2026,
+  `lib/framing/verify.ts`) : la boîte ne pose que ce qui manque ; une proposition de PO (échange, dictée,
+  valeur enregistrée ailleurs) se lit « À vérifier » dans la liste et se confirme **par dimension**
+  (« Confirmer les n » sous la dimension, `ConfirmDimension` → `confirmDimension`, chaque ligne
+  confirmée comme son propre « Confirmer », relue côté serveur, source gardée). Restent des questions :
+  les parties juridiques (qualifiées une par une), une phrase à structurer (`shape`), une question prise
+  dans une contradiction, les échéances tant qu'une proposée n'a pas de date. La première dimension à
+  vérifier est ouverte ; confirmer la dernière chose qui reste ouvre le Brief. Une ligne s'ouvre dans la
+  boîte d'**un clic sur toute la ligne** (`FactRow href`), sans « Répondre » ni « Modifier » à côté.
+  Version de base (tout confirmer une à une) : commit `df67b396`. Dessous, « Les 6 dimensions » et la
   dictée à côté, puis **une ligne par dimension dans un seul cadre** (`DimensionRows`, `<details>`),
   repliées sauf celle de la question : une ligne par information avec sa pastille (les parties
   juridiques une par ligne sous leur ligne, `PartyLines` ; tons de `framingLineTone`), « Question en
   cours » à la place de la valeur de la question posée. Plus de ligne « Confirmation humaine » : ce
-  qui reste se dit une fois, dans « À vous : répondre à n questions de PO ». Les autres comptes ne
+  qui reste se dit une fois, dans « À vous : répondre à n questions de PO et vérifier m informations
+  proposées ». Les autres comptes ne
   voient pas l'encadré (la ligne de l'acteur dit qui on attend). Figé pendant la relecture (callout
   cadenas) ; après une demande de modification, seules les dimensions rouvertes s'ouvrent.
   **`QuestionScreen` est la référence** d'une question « une à la fois » (Cadrage juridique, lot 9).

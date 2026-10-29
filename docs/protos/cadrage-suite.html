@@ -181,6 +181,17 @@ select.in{min-height:40px;padding:0 10px}
 .line .val .none{color:var(--text-tertiary)}
 .line .end{display:flex;align-items:center;gap:6px}
 .line.cur{background:var(--selection-bg)}
+.line.editing{background:var(--surface-raised)}
+.line.editing .field{grid-column:2/-1}
+.line .lk{font-size:14px;line-height:20px;color:var(--selection-fg)}
+.dfoot{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:12px 16px;border-top:1px solid var(--border-hairline)}
+.dfoot .cap{flex:1;min-width:200px}
+.halo{animation:halo 1.5s var(--ease)}
+@keyframes halo{0%,40%{box-shadow:0 0 0 3px var(--selection)}100%{box-shadow:0 0 0 3px transparent}}
+.proto .vset{display:flex;gap:4px;padding:2px;border-radius:12px;background:rgb(255 255 255 / .06)}
+.proto .vset button{height:30px;border:0;border-radius:9px;padding:0 10px;font-size:13px}
+.proto .vset button[aria-pressed="true"]{background:var(--glass-fg);color:#000}
+.proto .vhint{font-size:13px;color:var(--glass-2);max-width:300px;line-height:17px}
 .line.cur .val{color:var(--selection-fg)}
 button.line{width:100%;border:0;background:none;text-align:left;cursor:pointer;font:inherit}
 
@@ -252,11 +263,13 @@ details.fold[open] > summary .chev{transform:rotate(90deg)}
   .meta{grid-template-columns:repeat(2,minmax(0,1fr))}
   .line,.dl{grid-template-columns:minmax(0,1fr)}
   .line .end{justify-content:flex-start}
+  .line.editing .field{grid-column:1/-1}
   .prow{grid-template-columns:minmax(0,1fr) auto}
   .prow .who{grid-column:1/-1;grid-row:2}
   .pedit{grid-template-columns:minmax(0,1fr)}
   .proto label{display:none}
   .proto select{max-width:150px}
+  .proto .vhint{display:none}
 }
 @media (prefers-reduced-motion:reduce){*{transition-duration:1ms!important}}
 </style>
@@ -292,6 +305,11 @@ details.fold[open] > summary .chev{transform:rotate(90deg)}
     <option value="lance">Plan lancé</option>
   </select>
   <button type="button" id="resetBtn">Recommencer</button>
+  <span class="vset" role="group" aria-label="Façon de traiter les réponses de PO" id="vset">
+    <button type="button" data-variant="une" aria-pressed="false">Aujourd'hui</button>
+    <button type="button" data-variant="bloc" aria-pressed="true">Vérifier en bloc</button>
+  </span>
+  <span class="vhint" id="vhint"></span>
 </div>
 
 <script>
@@ -368,6 +386,12 @@ const Q0=()=>[
  {k:"blockers",d:"legal",label:"Blocages connus",ask:"Y a-t-il des blocages juridiques connus ?",conf:"Ces blocages sont-ils justes ?",why:"Un blocage connu passe en premier dans le plan.",st:"confirm",v:"L'échantillon de « Night Lights » n'est pas encore autorisé",said:"Tant que Night Lights n'est pas autorisé, on ne sort rien"},
 ];
 const OPEN=["confirm","missing","review"];
+/* Variante comparée (Sacha 29/10/2026) : « une » = chaque proposition de PO est une question ;
+   « bloc » = PO ne pose que ce qui manque, ce qu'il a compris se vérifie par dimension. */
+let V="bloc";
+const VHINT={une:"Chaque proposition de PO passe par la boîte de question, une à une.",bloc:"PO ne pose que ce qui manque. Ce qu'il a compris de l'échange se vérifie dans la liste, une dimension d'un clic."};
+const asked=x=>V==="une"||x.q;
+const toVerify=d=>V==="bloc"?S.items.filter(x=>x.st==="confirm"&&editable(x)&&(!d||x.d===d)):[];
 const isOpen=x=>OPEN.includes(x.st);
 
 /* Plan proposé (proto « Projet complet », FR_PLAN) */
@@ -385,7 +409,7 @@ const startsNow=r=>r.col==="focus"||r.col==="along";
 
 /* État : ce que les gens ont fait. Tout le reste est calculé à chaque rendu. */
 let S;
-function fresh(){return {role:"lina",sel:null,items:Q0(),cur:null,mode:null,more:false,open:{},versions:[],decide:{mode:null,dims:[],note:""},plan:{rows:PLAN0(),launched:null,editing:null},flash:null,err:{},menu:false};}
+function fresh(){return {role:"lina",sel:null,edit:null,items:Q0().map(x=>({...x,q:x.st==="missing"})),cur:null,mode:null,more:false,open:{},versions:[],decide:{mode:null,dims:[],note:""},plan:{rows:PLAN0(),launched:null,editing:null},flash:null,err:{},menu:false};}
 
 const last=()=>S.versions[S.versions.length-1];
 const openItems=()=>S.items.filter(isOpen);
@@ -412,7 +436,10 @@ const stepOf=id=>STEPS.find(s=>s.id===id);
 function actorOf(id){
   const st=stepStatus(id);
   if(st==="done"||st==="locked") return null;
-  if(id==="dims"){const n=openItems().length;return {who:"lina",todo:st==="rework"?`Revoir ${plural(n,"réponse","réponses")}`:`Répondre à ${plural(n,"question","questions")} de PO`};}
+  if(id==="dims"){const n=openItems().length;if(st==="rework") return {who:"lina",todo:`Revoir ${plural(n,"réponse","réponses")}`};
+    if(V==="une") return {who:"lina",todo:`Répondre à ${plural(n,"question","questions")} de PO`};
+    const a=navItems().filter(isOpen).length,v=toVerify().length;
+    return {who:"lina",todo:[a?`Répondre à ${plural(a,"question","questions")} de PO`:"",v?`${a?"vérifier":"Vérifier"} ${plural(v,"information proposée","informations proposées")}`:""].filter(Boolean).join(" et ")};}
   if(id==="brief") return st==="waiting"?{who:"claire",todo:"Valider le Brief de cadrage"}:{who:"lina",todo:last()&&last().n>1?`Envoyer la version ${last().n} en validation`:"Envoyer le Brief en validation"};
   if(id==="plan") return {who:"lina",todo:"Lancer le plan du projet"};
 }
@@ -477,7 +504,7 @@ function panel(){
   const prev=STEPS[STEPS.indexOf(s)-1];
   return `<section class="panel" aria-labelledby="stepTitle">
     <div class="intro"><div class="ptop"><h2 id="stepTitle">${esc(s.title)}</h2><span class="badge ${BADGE[st][0]}">${BADGE[st][1]}</span></div>
-    <p class="why">${esc(s.why)}</p></div>
+    <p class="why">${esc(s.id==="dims"&&V==="bloc"?"Ce que le projet sait déjà, ce que PO a compris de l'échange, ce qui manque. PO ne pose que ce qui manque ; le reste se vérifie dimension par dimension.":s.why)}</p></div>
     ${actor}${metaOf(s.id)}
     ${locked?`<div class="callout t-neutral">${I.lockl}<span>S'ouvre quand ${esc(prev.title)} est fait.</span></div>`:""}
     ${flashHere()}
@@ -502,12 +529,13 @@ function editable(x){
   if(S.role!=="lina"||frozen()||b==="ok") return false;
   return b!=="changes"||last().req.dims.includes(x.d);
 }
+const navItems=()=>S.items.filter(x=>editable(x)&&asked(x));
 function current(){
-  const nav=S.items.filter(editable);
+  const nav=navItems();
   if(S.cur){const c=nav.find(x=>x.k===S.cur);if(c) return c;}
   return nav.find(isOpen)||null;
 }
-function nextOpenAfter(x){const nav=S.items.filter(editable),i=nav.indexOf(x);return [...nav.slice(i+1),...nav.slice(0,i)].find(isOpen)||null;}
+function nextOpenAfter(x){const nav=navItems(),i=nav.indexOf(x);return [...nav.slice(i+1),...nav.slice(0,i)].find(isOpen)||null;}
 function sourceOf(x){
   if(x.st==="ok") return x.edited?`Modifié par Lina Haddad · ${x.day||DAY.dims}`:`Confirmé par Lina Haddad · ${x.day||DAY.dims}`;
   if(x.st==="na") return `Non applicable · « ${x.reason} »`;
@@ -525,10 +553,10 @@ function dimsBody(){
     top=`<div class="callout t-warn">${I.warn}<span><b>Claire Morel demande une modification</b> · ${esc(r.at)}<span class="q">« ${esc(r.note)} »</span><span class="q">Rouvert : ${esc(r.dims.map(dimName).join(", "))}. Le reste du cadrage ne bouge pas.</span></span></div>`;}
   const q=cur?question(cur):"";
   const done=dimsDone()&&!frozen()&&b!=="ok"&&!cur&&S.role==="lina"?`<div class="callout t-ok">${I.ok}<span><b>Les 6 dimensions sont complètes.</b> Le Brief de cadrage est prêt. <button class="btn ghost sm" type="button" data-act="sel" data-v="brief">Ouvrir le Brief</button></span></div>`:"";
-  return `${top}${q}${done}<section class="pgroup" aria-labelledby="dimsH"><div class="bhead"><h3 class="h3" id="dimsH">Les 6 dimensions</h3>${lina&&!dimsDone()&&!frozen()?`<button class="btn ghost sm" type="button" data-act="noop">${I.mic.replace('width="20" height="20"','width="16" height="16"')} Dicter plusieurs réponses</button>`:""}</div>${dimList(cur)}</section>`;
+  return `${top}${q&&S.halo?q.replace('class="sunk"','class="sunk halo"'):q}${done}<section class="pgroup" aria-labelledby="dimsH"><div class="bhead"><h3 class="h3" id="dimsH">Les 6 dimensions</h3>${lina&&!dimsDone()&&!frozen()?`<button class="btn ghost sm" type="button" data-act="noop">${I.mic.replace('width="20" height="20"','width="16" height="16"')} Dicter plusieurs réponses</button>`:""}</div>${dimList(cur)}</section>`;
 }
 function question(x){
-  const nav=S.items.filter(editable),i=nav.indexOf(x),f=S.mode,e=S.err;
+  const nav=navItems(),i=nav.indexOf(x),f=S.mode,e=S.err;
   const missing=x.st==="missing",open=isOpen(x),editing=missing||f==="edit";
   const arrow=(to,label,cls)=>`<button type="button" ${to?`data-act="pick" data-v="${to.k}"`:"disabled"} aria-label="${label}"${to?` title="${esc(to.label)}"`:""}><span class="${cls}">${I.chev}</span></button>`;
   const head=`<div class="bhead"><span class="eyebrow">${esc(dimName(x.d))}</span><span class="qnav">${arrow(nav[i-1],"Question précédente","back")}<span class="cap num">${i+1} sur ${nav.length}</span>${arrow(nav[i+1],"Question suivante","")}</span></div>`;
@@ -552,16 +580,30 @@ function otherWays(){
    :`<button class="btn ghost sm quiet push" type="button" data-act="more" aria-expanded="false">Autre réponse</button>`;
 }
 function dimList(cur){
-  return `<div class="dims">${DIMS.map(([d,name])=>{
-    const it=S.items.filter(x=>x.d===d),o=it.filter(isOpen).length,rev=it.some(x=>x.st==="review");
-    const exp=S.open[d]!==undefined?S.open[d]:(cur&&cur.d===d);
-    const pill=o?`<span class="badge sm ${rev?"t-warn":"t-info"} num">${rev?"À revoir":`${o} à traiter`}</span>`:`<span class="badge sm t-ok">Complète</span>`;
+  const bloc=V==="bloc",firstV=bloc?(toVerify()[0]||{}).d:null;
+  return `<div class="dims${S.halo?" halo":""}">${DIMS.map(([d,name])=>{
+    const it=S.items.filter(x=>x.d===d),rev=it.some(x=>x.st==="review");
+    const v=toVerify(d).length,o=bloc?it.filter(x=>isOpen(x)&&x.st!=="confirm").length:it.filter(isOpen).length;
+    const exp=S.open[d]!==undefined?S.open[d]:((cur&&cur.d===d)||(bloc&&firstV===d&&!(cur&&cur.d!==d&&S.cur)));
+    const pills=[v?`<span class="badge sm t-info num">${v} à vérifier</span>`:"",o?`<span class="badge sm ${rev?"t-warn":bloc?"t-warn":"t-info"} num">${rev?"À revoir":bloc?`${plural(o,"question","questions")}`:`${o} à traiter`}</span>`:""].join("")||`<span class="badge sm t-ok">Complète</span>`;
     const lines=it.map(x=>{
       const isCur=x===cur;
+      if(bloc&&S.edit===x.k) return inlineEdit(x);
       const val=isCur?`<span>Question en cours</span>`:x.st==="missing"?`<span class="none">Pas encore connu</span>`:`<span>${esc(x.st==="na"?"—":x.v)}</span><span class="src">${esc(sourceOf(x))}</span>`;
-      const inner=`<span class="lab">${esc(x.label)}</span><span class="val">${val}</span><span class="end"><span class="badge sm ${ST[x.st][0]}">${ST[x.st][1]}</span></span>`;
-      return editable(x)&&!isCur?`<button class="line" type="button" data-act="pick" data-v="${x.k}" aria-label="${isOpen(x)?"Répondre":"Modifier"} : ${esc(x.label)}">${inner}</button>`:`<div class="line${isCur?" cur":""}">${inner}</div>`;}).join("");
-    return `<div><button class="drow" type="button" data-act="dim" data-v="${d}" aria-expanded="${exp}"><span class="grow">${esc(name)}</span>${pill}<span class="chev">${I.chev}</span></button>${exp?`<div class="lines">${lines}</div>`:""}</div>`;}).join("")}</div>`;
+      const verify=bloc&&x.st==="confirm"&&editable(x);
+      const badge=verify?`<span class="badge sm t-info">À vérifier</span>`:`<span class="badge sm ${ST[x.st][0]}">${ST[x.st][1]}</span>`;
+      const inner=`<span class="lab">${esc(x.label)}</span><span class="val">${val}</span><span class="end">${badge}</span>`;
+      const act=bloc&&!asked(x)?"edit":"pick";
+      return editable(x)&&!isCur?`<button class="line" type="button" data-act="${act}" data-v="${x.k}" aria-label="${isOpen(x)&&!verify?"Répondre":"Modifier"} : ${esc(x.label)}">${inner}</button>`:`<div class="line${isCur?" cur":""}">${inner}</div>`;}).join("");
+    const foot=v&&!S.edit?`<div class="dfoot"><button class="btn sm" type="button" data-act="bulk" data-v="${d}">${v>1?`Confirmer les ${v}`:"Confirmer"}</button><span class="cap">${v>1?"Tout est juste ? Confirmez-les ensemble, ou cliquez sur une ligne pour la corriger.":"C'est juste ? Confirmez-le, ou cliquez sur la ligne pour la corriger."}</span></div>`:"";
+    return `<div><button class="drow" type="button" data-act="dim" data-v="${d}" aria-expanded="${exp}"><span class="grow">${esc(name)}</span>${pills}<span class="chev">${I.chev}</span></button>${exp?`<div class="lines">${lines}${foot}</div>`:""}</div>`;}).join("")}</div>`;
+}
+function inlineEdit(x){
+  const e=S.err.ians,open=isOpen(x);
+  return `<div class="line editing"><span class="lab">${esc(x.label)}</span><div class="field"><label class="sr" for="ians">${esc(x.label)}</label>
+   <textarea class="in" id="ians" rows="2" ${e?'aria-invalid="true" aria-describedby="iansE"':""}>${esc(x.st==="missing"?"":x.v||"")}</textarea>${e?`<span class="err" id="iansE">${e}</span>`:""}
+   ${x.v?`<span class="src">${open?"Proposé":"Actuellement"} : ${esc(x.v)} · ${esc(sourceOf(x))}</span>`:""}
+   <div class="actions"><button class="btn sm" type="button" data-act="isave">${open?"Corriger et confirmer":"Enregistrer"}</button><button class="btn outline sm" type="button" data-act="edit" data-v="">Annuler</button></div></div></div>`;
 }
 
 /* Brief de cadrage : un seul document, la décision dessous */
@@ -630,23 +672,30 @@ function row(r,editable){
 
 /* Gestes */
 function reopen(dims,note){const v=last();v.status="changes";v.req={note,dims,at:DAY.decided};
-  S.items.forEach(x=>{if(dims.includes(x.d)){x.prevSrc=sourceOf(x);x.st="review";}});}
+  S.items.forEach(x=>{if(dims.includes(x.d)){x.prevSrc=sourceOf(x);x.st="review";x.q=true;}});}
 function toast(msg){const t=$("toast");t.textContent=msg;t.classList.remove("off");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.add("off"),2600);}
 function flash(step,title,body,tone){S.flash={step,title,body,tone};}
 function snap(){return S.items.map(x=>({k:x.k,d:x.d,label:x.label,v:x.st==="na"?"Non applicable":x.st==="later"?`À définir avant le ${x.when}`:x.v,src:sourceOf(x)}));}
 function makeVersion(at){S.versions.push({n:S.versions.length+1,status:"draft",at,snap:snap()});}
-function answered(x,verb,wasOpen){
-  S.mode=null;S.more=false;S.err={};S.open={};
-  const next=nextOpenAfter(x);S.cur=next?next.k:null;
+function remaining(){
+  const a=navItems().filter(isOpen).length,v=toVerify().length;
+  return `Reste ${[a?plural(a,"question","questions"):"",v?`${plural(v,"information","informations")} à vérifier dans la liste`:""].filter(Boolean).join(" et ")}.`;
+}
+function progressed(title,wasOpen,rest){
   if(dimsDone()&&!wasOpen&&last()&&last().status==="draft"){
     last().snap=snap();
-    flash("dims",`${verb} · ${x.label}.`,`Le Brief à envoyer est mis à jour.`);toast(verb);
+    flash("dims",title,`Le Brief à envoyer est mis à jour.`);toast(title);
   } else if(dimsDone()){
     makeVersion(last()?DAY.resent:DAY.dims);
     S.sel="brief";
     flash("brief","Les 6 dimensions sont complètes.",`Étape ouverte pour vous : le Brief de cadrage, version ${last().n}, est prêt à envoyer.`);
-    toast(`${verb} · ${x.label}`);
-  } else {flash("dims",`${verb} · ${x.label}.`,`Question suivante : ${next.label}.`);toast(`${verb}`);}
+    toast(title);
+  } else {flash("dims",title,rest);toast(title);}
+}
+function answered(x,verb,wasOpen){
+  S.mode=null;S.more=false;S.err={};S.open={};S.edit=null;
+  const next=nextOpenAfter(x);S.cur=next?next.k:null;
+  progressed(`${verb} · ${x.label}.`,wasOpen,next?`Question suivante : ${next.label}.`:remaining());
 }
 const fullFromIso=v=>{const d=new Date(v+"T12:00:00");const j=["Dim.","Lun.","Mar.","Mer.","Jeu.","Ven.","Sam."][d.getDay()];return `${j} ${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;};
 
@@ -657,7 +706,17 @@ const ACT={
   copy(){toast("Lien copié");},
   more(){S.more=true;},
   mode(v){S.mode=v||null;S.err={};if(!v) S.more=false;},
-  pick(v){S.cur=v;S.mode=null;S.more=false;S.err={};S.flash=null;setTimeout(()=>{const q=$("question");if(q) q.scrollIntoView({block:"nearest"});},0);},
+  edit(v){S.edit=v||null;S.err={};S.flash=null;if(v) setTimeout(()=>{const t=$("ians");if(t){t.focus();t.closest(".line").scrollIntoView({block:"nearest"});}},0);},
+  isave(){const x=S.items.find(y=>y.k===S.edit),val=$("ians").value.trim();
+    if(!val){S.err={ians:"Écrivez la bonne valeur, ou annulez."};return;}
+    const wasOpen=isOpen(x),changed=val!==x.v;
+    if(!wasOpen&&!changed){S.edit=null;return;}
+    x.v=val;x.st="ok";x.edited=x.edited||changed;x.day=DAY.dims;S.edit=null;S.err={};
+    progressed(`${changed?"Corrigé":"Confirmé"} · ${x.label}.`,wasOpen,remaining());},
+  bulk(d){const xs=toVerify(d);xs.forEach(x=>{x.st="ok";x.edited=false;x.day=DAY.dims;});
+    S.edit=null;S.open={};S.open[d]=false;const nx=toVerify()[0];if(nx) S.open[nx.d]=true;
+    progressed(`${plural(xs.length,"information confirmée","informations confirmées")} · ${dimName(d)}.`,true,remaining());},
+  pick(v){S.cur=v;S.mode=null;S.more=false;S.err={};S.flash=null;S.edit=null;setTimeout(()=>{const q=$("question");if(q) q.scrollIntoView({block:"nearest"});},0);},
   dim(v){const exp=S.open[v]!==undefined?S.open[v]:(current()&&current().d===v);S.open[v]=!exp;},
   confirm(){const x=current();x.st="ok";x.edited=false;x.day=DAY.dims;answered(x,"Réponse confirmée",true);},
   save(){const x=current(),val=$("ans").value.trim();
@@ -701,15 +760,25 @@ document.addEventListener("click",e=>{
   const b=e.target.closest("[data-act]");if(!b) return;
   const f=ACT[b.dataset.act];if(!f) return;
   e.preventDefault();f(b.dataset.v);render();
-  if(["confirm","save","na","later","send","approve","request","launch"].includes(b.dataset.act)){const fl=document.querySelector('.callout[role="status"]');if(fl) fl.scrollIntoView({block:"nearest"});}
+  if(["confirm","save","na","later","send","approve","request","launch","bulk","isave"].includes(b.dataset.act)){const fl=document.querySelector('.callout[role="status"]');if(fl) fl.scrollIntoView({block:"nearest"});}
 });
 $("menuBtn").addEventListener("click",()=>{S.menu=!S.menu;renderNav();});
 $("scrim").addEventListener("click",()=>{S.menu=false;renderNav();});
 $("roleSel").addEventListener("change",e=>{S.role=e.target.value;S.sel=null;S.flash=null;S.mode=null;S.decide={mode:null,dims:[],note:""};S.err={};render();});
 $("momSel").addEventListener("change",e=>{location.hash=e.target.value;go(e.target.value);});
 $("resetBtn").addEventListener("click",()=>go($("momSel").value));
+function setVariant(v,show){V=v;try{localStorage.setItem("pds-cadrage-variante",v);}catch(e){}
+  document.querySelectorAll("#vset button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.variant===v)));
+  $("vhint").textContent=VHINT[v];
+  if(!S) return;
+  S.cur=null;S.edit=null;S.open={};S.mode=null;S.more=false;S.err={};S.flash=null;
+  if(show){S.halo=true;render();S.halo=false;setTimeout(()=>document.querySelectorAll(".halo").forEach(el=>el.classList.remove("halo")),1600);}
+  else render();}
+$("vset").addEventListener("click",e=>{const b=e.target.closest("[data-variant]");if(b) setVariant(b.dataset.variant,true);});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&S.menu){S.menu=false;renderNav();}});
 
+try{const sv=localStorage.getItem("pds-cadrage-variante");if(sv==="une"||sv==="bloc") V=sv;}catch(e){}
+setVariant(V,false);
 let first=(location.hash||"").slice(1);
 if(!MOM[first]){try{first=localStorage.getItem("pds-cadrage-moment")||"dims";}catch(e){first="dims";}}
 go(first);
