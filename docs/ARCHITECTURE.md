@@ -135,11 +135,21 @@ Principes :
   (trigger avant écriture), suppression du principal → promotion du plus ancien. Piège :
   dans une policy `storage.objects`, écrire `objects.name` dans une sous-requête sur une
   table qui a aussi une colonne `name` (sinon c'est elle qui est lue).
-- **Onglets de la fiche artiste** : Vue d'ensemble, Masters, Projets, Fichiers, Activité,
-  Discographie (Deezer seul). Masters et Projets réutilisent les tableaux des pages de liste
-  (`listMasters({ ids })`, `listProjects({ ids })` ; `ArtistDetail.projectIds` = projets
-  vivants des masters de l'artiste, RLS de visibilité), ouverts aussi par les tuiles
-  chiffrées (`StatTiles` `href`). **Fichiers** (`artist_files`, bucket privé `artist-files`,
+- **Onglets de la fiche artiste** : Vue d'ensemble, Titres, Projets, Identité, Fichiers,
+  Activité, Discographie (Deezer seul). Titres et Projets réutilisent les tableaux des pages
+  de liste (`listMasters({ ids })`, `listProjects({ ids })` ; `ArtistDetail.projectIds` =
+  projets vivants des masters de l'artiste **et** projets de contenu qui le nomment
+  (`projects.artist_id`), RLS de visibilité). **Refonte du 29/10** (proto
+  `docs/protos/pages.html`, « Artistes ») : la **liste** n'est qu'une liste — Nom, Relation,
+  Titres, **En cours** (chaque projet lancé et l'endroit de son étape ouverte), **Prochaine
+  sortie** (date la plus proche à venir d'un projet musical lancé, « dans N jours ») ; où en
+  est chaque projet vient de `loadLaunchedJourneys` (une lecture pour tous les artistes,
+  `loadRosterProgress`, `lib/catalog/artist-progress*.ts`), jamais une lecture par artiste.
+  La **fiche** n'a plus de tuiles chiffrées ni de ligne de faits : « Maintenant » au-dessus
+  des onglets seulement quand la direction a une proposition d'identité à trancher
+  (`identityToDecide`, Approuver / Refuser avec motif obligatoire sur place) ; la Vue
+  d'ensemble = « En cours » (projet, où il en est, qui est attendu, `loadArtistProgress` sur
+  les seuls projets de l'artiste), Titres, Bio, Notes | Identité, Contacts. **Fichiers** (`artist_files`, bucket privé `artist-files`,
   50 Mo, `<org>/<artist>/<uuid>[.<ext>]`) : catégories presse / photo / contrat / audio /
   autre ; tout membre lit, **contrats lus seulement avec `manage_catalog`** (ligne et objet) ;
   `manage_catalog` ajoute, modifie et supprime. Le navigateur envoie l'objet puis

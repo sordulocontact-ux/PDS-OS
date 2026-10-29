@@ -79,6 +79,35 @@ export function toMasterListItem(row: RawMaster): MasterListItem {
   };
 }
 
+type RawArtistProjects = {
+  credits: Array<{
+    master: {
+      archived_at: string | null;
+      links: Array<{
+        project: { id: string; archived_at: string | null } | null;
+      }>;
+    } | null;
+  }>;
+  named: Array<{ id: string; archived_at: string | null }>;
+};
+
+// Live projects of the artist: those holding one of its live masters, and
+// the content projects naming it; each once.
+function artistProjectIds(row: RawArtistProjects): string[] {
+  const live = (p: { id: string; archived_at: string | null } | null) =>
+    p && !p.archived_at ? [p.id] : [];
+  return [
+    ...new Set([
+      ...row.credits.flatMap((c) =>
+        c.master && !c.master.archived_at
+          ? c.master.links.flatMap((l) => live(l.project))
+          : [],
+      ),
+      ...row.named.flatMap(live),
+    ]),
+  ];
+}
+
 /** Live artists by name; `archived` lists the archive instead. */
 export async function listArtists(filter?: { archived?: boolean }): Promise<{
   artists: ArtistListItem[];
@@ -88,7 +117,7 @@ export async function listArtists(filter?: { archived?: boolean }): Promise<{
   const query = supabase
     .from("artists")
     .select(
-      "id, name, notes, relation, picture_url, picture_path, credits:master_artists!master_artists_artist_same_org(master:masters!master_artists_master_same_org(archived_at))",
+      "id, name, notes, relation, picture_url, picture_path, credits:master_artists!master_artists_artist_same_org(master:masters!master_artists_master_same_org(archived_at, links:project_masters!project_masters_master_same_org(project:projects!project_masters_project_same_org(id, archived_at)))), named:projects!projects_artist_same_org(id, archived_at)",
     );
   const { data, error } = await (
     filter?.archived
@@ -113,6 +142,7 @@ export async function listArtists(filter?: { archived?: boolean }): Promise<{
         (row.picture_path && signed.get(row.picture_path)) || row.picture_url,
       masterCount: row.credits.filter((c) => c.master && !c.master.archived_at)
         .length,
+      projectIds: artistProjectIds(row),
     })),
     error: false,
   };

@@ -3,7 +3,7 @@
 import { ArtistsTable } from "@/components/catalog/artists-table";
 import { SearchableList } from "@/components/ui/searchable-list";
 import type { RecordRights } from "@/lib/archive/types";
-import type { ArtistListItem } from "@/lib/catalog/types";
+import type { ArtistRow } from "@/lib/catalog/artist-progress";
 import { catalog } from "@/lib/i18n/fr/catalog";
 
 const fr = { catalog };
@@ -16,7 +16,7 @@ export function ArtistsList({
   filters,
   empty,
 }: {
-  artists: ArtistListItem[];
+  artists: ArtistRow[];
   showRelation: boolean;
   rights: RecordRights;
   // The page's filters, beside the search; what stands for no row at all.

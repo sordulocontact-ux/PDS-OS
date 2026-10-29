@@ -31,6 +31,7 @@ type Editing = { contact: ArtistContact | null } | null;
 
 // Contacts of the artist (manager, booker…), primary first. Rendered only
 // for manage_catalog: the database hides the contacts from anyone else.
+// On its own card, in the overview's side column.
 export function ArtistContacts({
   artistId,
   contacts,
@@ -44,6 +45,7 @@ export function ArtistContacts({
 
   return (
     <PageSection
+      card
       id="contacts"
       title={t.title}
       action={

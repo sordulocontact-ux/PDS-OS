@@ -12,6 +12,10 @@ import { isArchivedView } from "@/lib/archive/types";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
+import {
+  loadRosterProgress,
+  rosterProgressOf,
+} from "@/lib/catalog/artist-progress-load";
 import { listArtists } from "@/lib/catalog/queries";
 import { isArtistRelation, type ArtistListItem } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
@@ -34,8 +38,12 @@ export default async function ArtistsPage({
   // No filter = every artist ("Tous").
   const relation = isArtistRelation(params.relation) ? params.relation : null;
   const titles = TITLE_FILTERS.find((value) => value === params.titles) ?? null;
-  // One read for the tab counts and the rows: the roster stays small.
-  const { artists: all, error } = await listArtists({ archived });
+  // One read for the tab counts and the rows: the roster stays small. Where
+  // the projects stand: every launched project's journeys, read once.
+  const [{ artists: all, error }, roster] = await Promise.all([
+    listArtists({ archived }),
+    loadRosterProgress(),
+  ]);
   // The tabs count what the filters keep.
   const filtered = all.filter((a) => hasTitles(a, titles));
   const counts = {
@@ -45,7 +53,9 @@ export default async function ArtistsPage({
       .length,
   };
   const ofTab = relation ? all.filter((a) => a.relation === relation) : all;
-  const artists = ofTab.filter((a) => hasTitles(a, titles));
+  const artists = ofTab
+    .filter((a) => hasTitles(a, titles))
+    .map((a) => ({ ...a, ...rosterProgressOf(a.projectIds, roster) }));
   const canCreate = can(access, "manage_catalog") && !archived;
   // No row: the archive, the filter, the tab or the roster is empty.
   const empty =
@@ -87,36 +97,41 @@ export default async function ArtistsPage({
       {error ? (
         <FormMessage kind="error">{t.loadError}</FormMessage>
       ) : (
-        <ArtistListViews
-          relation={relation}
-          counts={counts}
-          archived={archived}
-          canArchive={canArchive}
-          filters={{ titles }}
-        >
-          {all.length === 0 ? (
-            empty
-          ) : (
-            <ArtistsList
-              artists={artists}
-              // Within a relation filter, it goes without saying.
-              showRelation={relation === null}
-              rights={{
-                canEdit: can(access, "manage_catalog"),
-                canArchive,
-                archived,
-              }}
-              filters={
-                <UrlFilters
-                  path={routes.artists}
-                  params={{ relation, view: archived ? "archived" : null }}
-                  groups={filterGroups(ofTab, titles)}
-                />
-              }
-              empty={empty}
-            />
+        <>
+          {roster.error && (
+            <FormMessage kind="error">{t.progressError}</FormMessage>
           )}
-        </ArtistListViews>
+          <ArtistListViews
+            relation={relation}
+            counts={counts}
+            archived={archived}
+            canArchive={canArchive}
+            filters={{ titles }}
+          >
+            {all.length === 0 ? (
+              empty
+            ) : (
+              <ArtistsList
+                artists={artists}
+                // Within a relation filter, it goes without saying.
+                showRelation={relation === null}
+                rights={{
+                  canEdit: can(access, "manage_catalog"),
+                  canArchive,
+                  archived,
+                }}
+                filters={
+                  <UrlFilters
+                    path={routes.artists}
+                    params={{ relation, view: archived ? "archived" : null }}
+                    groups={filterGroups(ofTab, titles)}
+                  />
+                }
+                empty={empty}
+              />
+            )}
+          </ArtistListViews>
+        </>
       )}
     </PageContainer>
   );

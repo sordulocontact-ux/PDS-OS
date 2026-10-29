@@ -113,7 +113,8 @@ export async function decideArtistIdentity(
     p_comment: p.data.comment,
   });
   if (error) return failed(error);
-  revalidatePath(routes.artistIdentity(p.data.artistId));
+  // The whole artist: its « Maintenant » (the layout) and the Identité tab.
+  revalidatePath(routes.artist(p.data.artistId), "layout");
   return { ok: true };
 }
 

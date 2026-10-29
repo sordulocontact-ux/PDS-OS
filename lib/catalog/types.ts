@@ -34,6 +34,9 @@ export type ArtistListItem = {
   relation: ArtistRelation;
   // Live masters crediting the artist.
   masterCount: number;
+  // Live projects holding one of them, or naming the artist (content), among
+  // those the viewer may see (RLS).
+  projectIds: string[];
 };
 
 export type Credit = { artistId: string; name: string; role: CreditRole };

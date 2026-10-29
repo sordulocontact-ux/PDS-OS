@@ -1,11 +1,13 @@
 import { IconPlus } from "nucleo-sharp-essential";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
 import { ArtistActions } from "@/components/catalog/artist-actions";
 import { Avatar } from "@/components/ui/avatar";
 import { ArtistEditDialog } from "@/components/catalog/artist-page/artist-edit-dialog";
 import { ArtistTabs } from "@/components/catalog/artist-page/artist-tabs";
+import { ArtistIdentityNow } from "@/components/catalog/artist-page/identity-now";
 import { ExternalLink } from "@/components/catalog/artist-profile/external-link";
 import { BackLink } from "@/components/shell/back-link";
 import { PageContainer } from "@/components/shell/page-container";
@@ -19,7 +21,9 @@ import { countryName } from "@/lib/catalog/countries";
 import { fr } from "@/lib/i18n/fr";
 import { allInOrder } from "@/lib/utils/parallel";
 
-// Artist frame: header (picture, name, actions) and section tabs. Pages
+// Artist frame: header (picture, name, actions), « Maintenant » when the
+// direction has a proposal of identity to decide (streamed: the header does
+// not wait for it), and section tabs. Pages
 // below check access themselves (a layout does not re-run on client
 // navigation); getArtist is cached per request, so they reuse it.
 export default async function ArtistLayout({
@@ -96,6 +100,10 @@ export default async function ArtistLayout({
           </ExternalLink>
         )}
       </div>
+
+      <Suspense fallback={null}>
+        <ArtistIdentityNow artistId={artist.id} artistName={artist.name} />
+      </Suspense>
 
       <ArtistTabs artistId={artist.id} hasDeezer={artist.deezerId !== null} />
       <div className="-mt-2 flex flex-col gap-[var(--section-gap)]">

@@ -17,19 +17,39 @@ import {
 import { SelectAllHead, SelectRowCell } from "@/components/ui/row-selection";
 import type { RecordRights } from "@/lib/archive/types";
 import { routes } from "@/lib/auth/redirects";
-import type { ArtistListItem } from "@/lib/catalog/types";
+import type { ArtistRow } from "@/lib/catalog/artist-progress";
 import { catalog } from "@/lib/i18n/fr/catalog";
 import { records } from "@/lib/i18n/fr/records";
+import { formatShortDate } from "@/lib/release/format";
 
 const fr = { catalog, records };
 
+const secondary = "text-[color:var(--text-secondary)]";
+const sub =
+  "block text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-secondary)]";
+
+/** A value and, under it, what it says more (proto `.sub`). */
+function Lines({ main, under }: { main: string; under?: string | null }) {
+  return (
+    <span className="block">
+      <span className="block break-words">{main}</span>
+      {under && <span className={sub}>{under}</span>}
+    </span>
+  );
+}
+
+/**
+ * The artists list (proto `docs/protos/pages.html`, « Artistes », Sacha
+ * 29/10: only the list): name, relation, titles, each launched project and
+ * where it stands, the next release and how far.
+ */
 export function ArtistsTable({
   artists,
   showRelation = false,
   rights,
   selectable = false,
 }: {
-  artists: ArtistListItem[];
+  artists: ArtistRow[];
   // "Signé" / "Collaboration" as plain text, when the list mixes both.
   showRelation?: boolean;
   // Row actions ("⋯"); none when the viewer may neither edit nor archive.
@@ -51,9 +71,10 @@ export function ArtistsTable({
         {showRelation && (
           <DataTableHead hideBelow="sm">{t.relation}</DataTableHead>
         )}
-        <DataTableHead>{t.masters}</DataTableHead>
+        <DataTableHead hideBelow="sm">{t.masters}</DataTableHead>
+        <DataTableHead>{t.ongoing}</DataTableHead>
         <DataTableHead hideBelow="md" fill>
-          {t.notes}
+          {t.nextRelease}
         </DataTableHead>
         {withActions && <DataTableActionsHead label={fr.records.menu.column} />}
       </DataTableHeader>
@@ -85,22 +106,42 @@ export function ArtistsTable({
               />
             </DataTableCell>
             {showRelation && (
-              <DataTableCell
-                hideBelow="sm"
-                className="text-[color:var(--text-secondary)]"
-              >
+              <DataTableCell hideBelow="sm" className={secondary}>
                 {relationLabels[artist.relation]}
               </DataTableCell>
             )}
-            <DataTableCell className="tabular-nums">
+            <DataTableCell hideBelow="sm" className="tabular-nums">
               {artist.masterCount}
             </DataTableCell>
-            <DataTableCell
-              hideBelow="md"
-              fill
-              className="max-w-md truncate text-[color:var(--text-secondary)]"
-            >
-              {artist.notes || EMPTY_CELL}
+            <DataTableCell>
+              {artist.ongoing.length > 0 ? (
+                <span className="flex flex-col gap-1.5">
+                  {artist.ongoing.map((project) => (
+                    <Lines
+                      key={project.projectId}
+                      main={project.title}
+                      under={project.place}
+                    />
+                  ))}
+                </span>
+              ) : (
+                <span className={secondary}>
+                  {fr.catalog.artists.noOngoing}
+                </span>
+              )}
+            </DataTableCell>
+            <DataTableCell hideBelow="md" fill className="tabular-nums">
+              {artist.next ? (
+                <Lines
+                  main={formatShortDate(artist.next.date)}
+                  under={fr.catalog.artists.nextRelease(
+                    artist.next.projectTitle,
+                    artist.next.days,
+                  )}
+                />
+              ) : (
+                <span className={secondary}>{EMPTY_CELL}</span>
+              )}
             </DataTableCell>
             {withActions && (
               <DataTableActionsCell>

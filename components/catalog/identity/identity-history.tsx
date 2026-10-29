@@ -13,18 +13,22 @@ const fr = { artistIdentity };
  * The versions of the artist's identity, newest first (MKT-C2-04): status,
  * who wrote it and when, how long it was in force, what changed, the
  * decision; each folded to its line, unfolded on demand. A proposal waiting
- * shows « Approuver » / « Refuser » to a validator who did not write it.
+ * shows « Approuver » / « Refuser » to a validator who did not write it,
+ * except the one decided in the artist's « Maintenant » (`nowId`): said
+ * once, there.
  */
 export function IdentityHistory({
   artistId,
   versions,
   canDecide,
   meId,
+  nowId = null,
 }: {
   artistId: string;
   versions: IdentityVersion[];
   canDecide: boolean;
   meId: string | null;
+  nowId?: string | null;
 }) {
   const t = fr.artistIdentity;
   return (
@@ -76,6 +80,10 @@ export function IdentityHistory({
                 (v.createdBy === meId ? (
                   <p className="text-caption text-muted-foreground">
                     {t.ownProposal}
+                  </p>
+                ) : v.id === nowId ? (
+                  <p className="text-caption text-muted-foreground">
+                    {t.now.decideAbove}
                   </p>
                 ) : (
                   <IdentityDecision artistId={artistId} versionId={v.id} />

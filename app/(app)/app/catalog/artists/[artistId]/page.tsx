@@ -2,40 +2,47 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import { ArtistContacts } from "@/components/catalog/artist-page/artist-contacts";
+import { ArtistOngoing } from "@/components/catalog/artist-page/artist-ongoing";
+import { ArtistTitles } from "@/components/catalog/artist-page/artist-titles";
 import {
   ArtistAutoBio,
   ArtistAutoBioSkeleton,
 } from "@/components/catalog/artist-profile/artist-auto-bio";
 import { ArtistBio } from "@/components/catalog/artist-profile/artist-bio";
-import {
-  ArtistHighlights,
-  ArtistHighlightsSkeleton,
-} from "@/components/catalog/artist-profile/artist-highlights";
 import { PageSection } from "@/components/shell/page-section";
 import { FactList } from "@/components/ui/fact-list";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
+import { loadArtistProgress } from "@/lib/catalog/artist-progress-load";
 import { getArtist, listArtistContacts } from "@/lib/catalog/artist-queries";
 import { countryName } from "@/lib/catalog/countries";
+import { listMasters } from "@/lib/catalog/queries";
 import { fr } from "@/lib/i18n/fr";
 import { allInOrder } from "@/lib/utils/parallel";
 
-// Artist overview: key figures, identity, contacts (manage_catalog only:
-// the database hides them from everyone else), biography, notes. Masters
-// and projects have their own tabs, opened from the figures.
+// Artist overview (proto `docs/protos/pages.html`, « Artistes », Sacha
+// 29/10): « En cours » — each launched project, where it stands and who it
+// waits for —, its titles and their audio state, the biography and the
+// notes; beside them its identity and contacts (manage_catalog only: the
+// database hides them from everyone else). No line of figures: the tabs
+// hold the titles and the projects, the Discographie what Deezer says.
 export default async function ArtistOverviewPage({
   params,
 }: PageProps<"/app/catalog/artists/[artistId]">) {
   const { artistId } = await params;
   const accessPromise = requireApproved();
-  // Contacts are read only with manage_catalog (RLS agrees): fetched as soon
-  // as access is known, alongside the artist.
-  const [access, artist, contacts] = await allInOrder([
+  const artistPromise = getArtist(artistId);
+  // Everything read at once, as soon as what it needs is known.
+  const [access, artist, contacts, titles, progress] = await allInOrder([
     accessPromise,
-    getArtist(artistId),
+    artistPromise,
     accessPromise.then((known) =>
       can(known, "manage_catalog") ? listArtistContacts(artistId) : [],
     ),
+    artistPromise.then((found) =>
+      listMasters({ ids: found ? found.masters.map((m) => m.id) : [] }),
+    ),
+    artistPromise.then((found) => loadArtistProgress(found?.projectIds ?? [])),
   ]);
   if (!artist) notFound();
   const canEdit = can(access, "manage_catalog");
@@ -43,18 +50,45 @@ export default async function ArtistOverviewPage({
   const p = fr.catalog.artistPage;
 
   return (
-    <>
-      <Suspense fallback={<ArtistHighlightsSkeleton />}>
-        <ArtistHighlights
-          deezerId={artist.deezerId}
+    <div className="grid items-start gap-[var(--section-gap)] lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-6">
+      <div className="flex min-w-0 flex-col gap-[var(--section-gap)] lg:gap-6">
+        <ArtistOngoing projects={progress.ongoing} error={progress.error} />
+        <ArtistTitles
           artistId={artist.id}
-          masterCount={artist.masters.length}
-          projectCount={artist.projectIds.length}
+          masters={titles.masters}
+          error={titles.error}
+          canEdit={canEdit}
         />
-      </Suspense>
+        <PageSection card id="bio" title={fr.catalog.deezerProfile.bio.title}>
+          {artist.bio ? (
+            <ArtistBio
+              bio={{
+                text: artist.bio,
+                source: "manual",
+                author: null,
+                url: null,
+                lang: "fr",
+              }}
+            />
+          ) : artist.deezerId !== null ? (
+            <Suspense fallback={<ArtistAutoBioSkeleton />}>
+              <ArtistAutoBio deezerId={artist.deezerId} />
+            </Suspense>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              {fr.catalog.deezerProfile.bio.none}
+            </p>
+          )}
+        </PageSection>
+        {artist.notes && (
+          <PageSection card id="notes" title={t.notes}>
+            <p className="text-sm whitespace-pre-line">{artist.notes}</p>
+          </PageSection>
+        )}
+      </div>
 
-      <div className="grid gap-[var(--section-gap)] lg:grid-cols-2 lg:gap-6">
-        <PageSection id="identity" title={p.identity}>
+      <div className="flex min-w-0 flex-col gap-[var(--section-gap)] lg:gap-6">
+        <PageSection card id="identity" title={p.identity}>
           <FactList
             emptyLabel={fr.catalog.notProvided}
             facts={[
@@ -70,36 +104,6 @@ export default async function ArtistOverviewPage({
         </PageSection>
         {canEdit && <ArtistContacts artistId={artist.id} contacts={contacts} />}
       </div>
-
-      <PageSection id="bio" title={fr.catalog.deezerProfile.bio.title}>
-        {artist.bio ? (
-          <ArtistBio
-            bio={{
-              text: artist.bio,
-              source: "manual",
-              author: null,
-              url: null,
-              lang: "fr",
-            }}
-          />
-        ) : artist.deezerId !== null ? (
-          <Suspense fallback={<ArtistAutoBioSkeleton />}>
-            <ArtistAutoBio deezerId={artist.deezerId} />
-          </Suspense>
-        ) : (
-          <p className="text-sm text-muted-foreground">
-            {fr.catalog.deezerProfile.bio.none}
-          </p>
-        )}
-      </PageSection>
-
-      <PageSection id="notes" title={t.notes}>
-        <p
-          className={`text-sm whitespace-pre-line ${artist.notes ? "" : "text-muted-foreground"}`}
-        >
-          {artist.notes ?? t.noNotes}
-        </p>
-      </PageSection>
-    </>
+    </div>
   );
 }

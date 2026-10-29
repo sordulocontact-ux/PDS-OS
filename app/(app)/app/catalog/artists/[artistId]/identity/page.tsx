@@ -8,7 +8,10 @@ import { PageSection } from "@/components/shell/page-section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
-import { loadArtistIdentity } from "@/lib/catalog/artist-identity";
+import {
+  identityToDecide,
+  loadArtistIdentity,
+} from "@/lib/catalog/artist-identity";
 import { getArtist } from "@/lib/catalog/artist-queries";
 import { loadMembers } from "@/lib/framing/related";
 import { fr } from "@/lib/i18n/fr";
@@ -43,6 +46,10 @@ export default async function ArtistIdentityPage({
     can(access, "manage_catalog") || can(access, "creative_work");
   const current = identity.current;
   const pending = identity.versions.filter((v) => v.status === "proposed");
+  // Decided in the artist's « Maintenant », above the tabs.
+  const nowId = validates
+    ? (identityToDecide(identity, access.personId)?.id ?? null)
+    : null;
 
   return (
     <div className="flex flex-col gap-8">
@@ -93,6 +100,7 @@ export default async function ArtistIdentityPage({
             versions={pending}
             canDecide={validates}
             meId={access.personId}
+            nowId={nowId}
           />
         </PageSection>
       )}

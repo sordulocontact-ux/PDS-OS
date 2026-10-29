@@ -25,8 +25,8 @@ export type ArtistDetail = {
   deezerId: number | null;
   deezerUrl: string | null;
   masters: MasterOption[];
-  // Live projects linked to the artist's masters, among those the viewer
-  // may see (RLS); a project holding two of them counts once.
+  // Live projects linked to the artist's masters, or naming the artist (a
+  // content project), among those the viewer may see (RLS); each once.
   projectIds: string[];
 };
 

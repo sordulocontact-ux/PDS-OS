@@ -11,8 +11,9 @@ import { fr } from "@/lib/i18n/fr";
 import { listProjects } from "@/lib/projects/queries";
 import { allInOrder } from "@/lib/utils/parallel";
 
-// Projects tab: live projects holding one of the artist's masters, among
-// those the viewer may see (RLS), in the same table as the Projects page.
+// Projects tab: live projects holding one of the artist's masters or naming
+// it (content), among those the viewer may see (RLS), in the same table as
+// the Projects page.
 export default async function ArtistProjectsPage({
   params,
 }: PageProps<"/app/catalog/artists/[artistId]/projects">) {

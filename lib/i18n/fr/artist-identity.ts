@@ -81,6 +81,24 @@ export const artistIdentity = {
   rejected: "Version refusée.",
   decision: (comment: string) => `Motif : ${comment}`,
   ownProposal: "Vous l'avez proposée : un autre valideur la décide.",
+  // « Maintenant » of the artist: the direction decides a proposal.
+  now: {
+    toValidate: "À valider",
+    eyebrow: (artist: string) => `${artist} · Identité`,
+    title: (n: number) => `Décider de la proposition d'identité V${n}`,
+    why: (who: string | null, day: string, what: string | null) =>
+      `${who ?? "Un membre de l'équipe"} propose le ${day}${what ? ` : ${what}` : "."}`,
+    inForce: "En vigueur",
+    inForceValue: (n: number, day: string) => `V${n}, approuvée le ${day}`,
+    noneInForce: "Aucune version approuvée",
+    approve: (n: number) => `Approuver la V${n}`,
+    refuse: "Refuser",
+    reason: "Motif",
+    reasonHint: (who: string | null) =>
+      who ? `Il revient à ${who}.` : "Il revient à son auteur.",
+    refuseSubmit: "Refuser la proposition",
+    decideAbove: "À décider dans « Maintenant », en haut de la fiche.",
+  },
   errors: {
     forbidden: "Vous n'avez pas le droit de faire cela sur cette identité.",
     invalid_identity: "Une valeur n'est pas valable (lien https, longueur).",

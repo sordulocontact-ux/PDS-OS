@@ -5,6 +5,7 @@ import {
   type IdentityFields,
 } from "@/lib/catalog/identity-fields";
 import type { Member } from "@/lib/framing/related";
+import { trackedCache } from "@/lib/projects/live-deps";
 import { createClient } from "@/lib/supabase/server";
 
 // The artist's identity (MKT-C2-04): versions kept on the artist, newest
@@ -33,7 +34,24 @@ export type ArtistIdentity = {
   current: IdentityVersion | null;
 };
 
-export async function loadArtistIdentity(
+// Once per request: the artist's « Maintenant » (its layout) and the
+// Identité tab read the same versions (`members` is itself read once).
+export const loadArtistIdentity = trackedCache(readArtistIdentity);
+
+/** The proposal « Maintenant » asks a validator to decide: the newest one
+ * someone else wrote (nobody decides their own). */
+export function identityToDecide(
+  identity: ArtistIdentity,
+  meId: string | null,
+): IdentityVersion | null {
+  return (
+    identity.versions.find(
+      (v) => v.status === "proposed" && v.createdBy !== meId,
+    ) ?? null
+  );
+}
+
+async function readArtistIdentity(
   artistId: string,
   members: Member[],
 ): Promise<ArtistIdentity> {

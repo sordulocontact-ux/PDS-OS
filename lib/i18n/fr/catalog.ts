@@ -25,14 +25,21 @@ export const catalog = {
   artists: {
     title: "Artistes",
     subtitle:
-      "Les artistes du label, tels qu'ils apparaissent sur les plateformes.",
+      "Les artistes du label, tels qu'ils apparaissent sur les plateformes, et où en sont leurs projets.",
     newArtist: "Nouvel artiste",
     columns: {
       name: "Nom",
       relation: "Relation",
       masters: "Titres",
-      notes: "Notes",
+      ongoing: "En cours",
+      nextRelease: "Prochaine sortie",
     },
+    noOngoing: "Aucun projet en cours",
+    // « Néons · dans 37 jours » under the date.
+    nextRelease: (project: string, days: number) =>
+      `${project} · ${days === 0 ? "aujourd'hui" : `dans ${days} jour${days > 1 ? "s" : ""}`}`,
+    progressError:
+      "Où en sont les projets n'a pas pu être lu pour tous les artistes. Rechargez la page.",
     emptyTitle: "Aucun artiste pour l'instant",
     emptyBody: "Ajoutez un artiste pour pouvoir lui créditer des titres.",
     emptyBodyReadOnly: "Les artistes apparaîtront ici dès qu'ils seront créés.",
@@ -64,7 +71,6 @@ export const catalog = {
     backTo: (name: string) => `Retour à ${name}`,
     newMaster: "Nouveau titre",
     notes: "Notes",
-    noNotes: "Aucune note.",
     masters: "Titres crédités",
     noMasters: "Aucun titre ne crédite cet artiste pour l'instant.",
     openDeezer: "Voir sur Deezer",
@@ -91,12 +97,28 @@ export const catalog = {
     relation: "Relation avec PDS",
     legalName: "Nom civil",
     country: "Pays d'origine",
-    summary: "En bref",
-    mastersCount: "Titres",
-    projectsCount: "Projets",
-    fansCount: "Fans sur Deezer",
     noDeezer: "Pas de profil Deezer : discographie et chiffres indisponibles.",
     bioManual: "Rédigée par l'équipe",
+    // « En cours » of the overview: each launched project, where it stands.
+    ongoing: {
+      title: "En cours",
+      description:
+        "Les projets de l'artiste, où ils en sont et qui est attendu.",
+      none: "Aucun projet en cours.",
+      error:
+        "Où en sont les projets n'a pas pu être lu entièrement. Rechargez la page.",
+      release: (day: string) => `Sortie ${day}`,
+      due: (day: string) => `Échéance ${day}`,
+      mine: (todo: string) => `À vous : ${todo}`,
+      nobody: (todo: string) => `Personne de désigné : ${todo}`,
+      nothing: "Rien en attente",
+    },
+    titles: {
+      title: "Titres",
+      description: "Les titres qui le créditent, avec leur état audio.",
+      projects: (titles: string) => `Projet ${titles}`,
+      noProject: "Aucun projet",
+    },
   },
 
   profileForm: {
