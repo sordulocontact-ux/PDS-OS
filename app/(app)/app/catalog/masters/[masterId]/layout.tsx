@@ -59,7 +59,9 @@ export default async function MasterLayout({
             {can(access, "create_projects") && (
               <Link
                 href={routes.projectsNewFromMaster(master.id)}
-                className={buttonVariants({ size: "lg" })}
+                // Secondary: the title's next action is « Maintenant »
+                // (proto docs/protos/titre.html, one primary per view).
+                className={buttonVariants({ size: "lg", variant: "outline" })}
               >
                 <IconPlus aria-hidden data-icon="inline-start" />
                 {t.createProject}

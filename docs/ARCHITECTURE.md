@@ -299,7 +299,7 @@ bloc ; `routes.masterSessions` & co. donnent directement l'onglet + l'ancre.
 
 - **Vue d'ensemble** : tuiles cliquables (fichiers audio, variantes, sessions,
   contributeurs, projets), **dossier du titre** (ISRC, ISWC, titulaire ℗, contributeurs,
-  splits à 100 %, déclarations déposées, fichier audio au stade Master final) calculé par le code (`masterChecklist`), faits,
+  splits à 100 %, déclarations déposées, Master final validé) calculé par le code (`loadTitleDossier`), faits,
   artistes interprètes.
 - **Sessions & pistes** : `master_sessions` (enregistrement, production, mixage, mastering,
   autre ; date, lieu, ingénieur, notes) et `master_tracks` (piste du multipiste,
@@ -494,17 +494,22 @@ Migration `…004001_titles_audio_state.sql`, règles `lib/catalog/title-rules.t
     le sélecteur, le contrôle avant envoi, le serveur (`recordCatalogFile`) et l'aide ; 50 Mo
     par fichier (limite du bucket), dit avant le dépôt et en cas de dépassement. Les gros
     fichiers de travail (ZIP, stems) relèvent des fichiers de travail (à venir).
-- **Vue d'ensemble d'un titre** (retours 01, 11, 12) : d'abord « Où en est le titre »
-  (`TitleStatusCard` : état audio, version de référence, projet associé, **distribution
+- **Vue d'ensemble d'un titre** (retours 01, 11, 12 ; refaite le 29/10/2026 d'après le proto
+  `docs/protos/titre.html`) : d'abord la ligne de faits (`ModuleFacts` : état audio, version de
+  référence, projet, **distribution
   séparée de l'audio** — Non préparée / En préparation / Livrée / Disponible,
   `loadDistributionState` : sortie en ligne, dépôt déclaré à The Orchard, dossier ou date de
-  sortie — puis **une prochaine action** décidée par le code, `titleNextAction` : première
-  version, version à examiner, version corrigée à déposer, étape suivante, projet à rattacher,
-  pièce manquante). Puis « Complétude du dossier », **toujours ouverte** (Sacha 29/10 : repliée, la
-  carte gardait la hauteur de la colonne voisine), avec son compteur, ce qui
-  compte pour la sortie d'abord (« Pour la sortie ») et seulement les déclarations
-  applicables ; « Master final validé » remplace « déposé ». Les cinq tuiles de compteurs
-  ont disparu.
+  sortie), puis **« Maintenant »** (`TitleNow`, le cadre de `NowFrame`) : la prochaine action
+  décidée par le code, `titleNextAction` (première version, version à examiner, version
+  corrigée à déposer, étape suivante, projet à rattacher, pièce manquante), son pourquoi et ce
+  qui suit. Puis le **« Dossier du titre »** (`loadTitleDossier`, `lib/catalog/master/dossier.ts`,
+  seule source, la prochaine action lit ses manques via `missingOf`) : une ligne par pièce avec
+  sa valeur (ISRC, ℗, parts, contributeurs, résumé des déclarations), « Pour la sortie » puis
+  « Ensuite », seulement les déclarations applicables, « Master final » verrouillé jusqu'à sa
+  validation dans Audio ; chaque manque se remplit **sur place** (`DossierAction` ouvre la
+  fenêtre de l'onglet : `MasterEditForm`, `RightsForm`, `ContributorForm`, `SplitForm`), les
+  déclarations et l'audio mènent à leur onglet. Les identifiants ne sont plus répétés dans
+  « Informations » (variante, durée, artistes). « Créer un projet » est secondaire dans l'en-tête.
 - **Création automatique depuis Studio (à venir)** : elle devra appeler `create_master`,
   seule porte d'entrée, avec l'état `demo` et le fichier rattaché comme ci-dessus, sans
   inventer titre, artiste, crédits, splits ni ISRC : même objet qu'une création manuelle.

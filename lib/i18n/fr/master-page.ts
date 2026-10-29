@@ -36,18 +36,16 @@ export const masterPage = {
   overview: {
     facts: "Informations",
     artists: "Artistes",
-    // The head of the overview (retour Catalogue 11): where the title
-    // stands and what to do next.
+    // The head of the overview (retour Catalogue 11), in the line of facts
+    // under the title: where the title stands.
     status: {
-      title: "Où en est le titre",
       audio: "État audio",
+      noAudio: "Aucun son",
       reference: "Version de référence",
-      noReference: "Aucune version validée",
-      projects: "Projet associé",
+      noReference: "Aucune",
+      projects: "Projet",
       noProject: "Aucun",
       distribution: "Distribution",
-      next: "Prochaine action",
-      open: "Y aller",
     },
     distributionStates: {
       not_prepared: "Non préparée",
@@ -55,6 +53,8 @@ export const masterPage = {
       delivered: "Livrée",
       available: "Disponible",
     },
+    // « Maintenant » of the title (proto `docs/protos/titre.html`): the one
+    // next action, computed by code (titleNextAction), why and what follows.
     nextActions: {
       add_first_version: "Ajouter une première version audio",
       review: (label: string) => `Examiner ${label}`,
@@ -64,35 +64,84 @@ export const masterPage = {
         `Déposer la version corrigée de ${label}`,
       deposit_next: (state: string) => `Déposer une version « ${state} »`,
       link_project: "Créer ou rattacher un projet pour ce titre",
-      complete: (label: string) => `Compléter : ${label}`,
-      none: "Rien à faire pour l'instant : le dossier est complet.",
     },
-    checklist: {
-      title: "Complétude du dossier",
-      // « Complet » is not « validé » (retour 12).
-      description:
-        "Ce qui manque pour sortir le titre d'abord. Un dossier complet n'est pas un dossier validé juridiquement.",
+    now: {
+      label: "Maintenant",
+      mine: "À vous",
+      toValidate: "À valider",
+      nothing: "Rien à faire pour vous",
+      open: "Ouvrir",
+      then: "Ensuite",
+      where: (title: string, place: string) => `${title} · ${place}`,
+      // A reader: who is awaited, on what.
+      waiting: (todo: string) => `En attente de l'équipe catalogue : ${todo}`,
+      doneTitle: "Le dossier est complet",
+      doneBody:
+        "Le titre a son master final et tout ce qu'il faut pour sortir. La suite se joue dans son projet.",
+      why: {
+        add_first_version:
+          "Le titre n'a encore aucun son : la première version (maquette, mise à plat…) ouvre son suivi audio ; validée, elle devient la version de référence.",
+        review: (label: string) =>
+          `${label} a été déposée : écoutez-la, puis validez-la ou demandez des corrections.`,
+        deposit_correction: (label: string) =>
+          `Des corrections ont été demandées sur ${label} : la version corrigée reprend la même étape.`,
+        deposit_next: (next: string) =>
+          `L'étape suivante du son est ${next} : la version déposée s'examine ensuite dans Audio.`,
+        link_project:
+          "Le master final est validé : un projet porte maintenant sa sortie.",
+        release: "Il manque au dossier pour sortir le titre.",
+        later: "Il complète le dossier du titre.",
+      },
+      thenOf: {
+        first: "Version de référence",
+        review: "Version suivante",
+        project: "Sortie du projet",
+        others: (n: number) =>
+          n === 0
+            ? "Dossier complet"
+            : `${n} autre${n > 1 ? "s" : ""} au dossier`,
+      },
+    },
+    // The dossier, one row per piece with its value (proto, 29/10/2026).
+    // « Complet » is not « validé » (retour 12).
+    dossier: {
+      title: "Dossier du titre",
       count: (done: number, total: number) => `${done} sur ${total}`,
-      high: "Pour la sortie",
-      done: "Fait",
-      todo: "À compléter",
-      isrc: "ISRC renseigné",
-      iswc: "ISWC de l'œuvre renseigné",
-      rightsHolder: "Titulaire du ℗ renseigné",
-      contributors: "Au moins un contributeur crédité",
-      masterSplits: "Splits du master complets (100 %)",
-      publishingSplits: "Splits de l'édition complets (100 %)",
-      // Only the applicable declarations count (retour 14).
-      declarations: (done: number, applicable: number, toQualify: number) =>
-        [
-          `Déclarations faites (${done} sur ${applicable} applicable${applicable > 1 ? "s" : ""})`,
+      countLabel: (done: number, total: number) =>
+        `${done} pièces sur ${total} au dossier`,
+      release: "Pour la sortie",
+      later: "Ensuite",
+      left: (n: number) => `${n} à faire`,
+      allDone: "fait",
+      missing: "À renseigner",
+      edit: "Modifier",
+      legal: "Un dossier complet n'est pas un dossier validé juridiquement.",
+      remaining: (share: string) => `Reste ${share}`,
+      masterFileDone: "Validé",
+      masterFileLocked: "Se valide dans Audio, après le Master",
+      labels: {
+        isrc: "ISRC",
+        rightsHolder: "Titulaire du ℗",
+        masterSplits: "Splits du master",
+        publishingSplits: "Splits de l'édition",
+        masterFile: "Master final",
+        iswc: "ISWC de l'œuvre",
+        contributors: "Contributeurs",
+        declarations: "Déclarations",
+      },
+      verbs: {
+        isrc: "Renseigner l'ISRC",
+        rightsHolder: "Renseigner le titulaire",
+        masterSplits: "Répartir le master",
+        publishingSplits: "Répartir l'édition",
+        masterFile: "Ouvrir l'audio",
+        iswc: "Renseigner l'ISWC",
+        contributors: "Créditer",
+        declarations: (toQualify: number) =>
           toQualify > 0
-            ? `${toQualify} organisme${toQualify > 1 ? "s" : ""} à qualifier`
-            : null,
-        ]
-          .filter(Boolean)
-          .join(" · "),
-      masterFile: "Master final validé",
+            ? `Qualifier ${toQualify} organisme${toQualify > 1 ? "s" : ""}`
+            : "Mettre à jour",
+      },
     },
   },
 

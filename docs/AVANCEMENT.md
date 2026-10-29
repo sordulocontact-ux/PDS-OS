@@ -1145,3 +1145,21 @@ Reste : passage navigateur sur la pré-prod avec les quatre rôles.
 - [x] Projets : colonne **Phase** retirée (Responsable revient dès 1280 px) ; filtre **Artiste** ;
       sur la ligne Artiste, Type, Responsable, et **Statut + Échéance** dans le bouton des filtres avancés.
 - Reste : passage navigateur (session requise).
+
+
+## Vue d'ensemble d'un titre du Catalogue refaite (29/10/2026, branche `pre-prod`)
+
+Demande de Sacha : retirer le chevron de « Complétude du dossier », puis un audit et un proto
+(`docs/protos/titre.html`, les six onglets, test `docs/protos/tests/titre.cjs`), puis le code.
+
+- [x] La complétude toujours ouverte (le chevron ne cachait rien : la carte gardait la hauteur de sa voisine).
+- [x] Ligne de faits sous les onglets : état audio, version de référence, projet, distribution.
+- [x] « Maintenant » du titre (`NowFrame`) : la prochaine action calculée, son pourquoi, ce qui suit, « Ouvrir ».
+- [x] « Dossier du titre » : une ligne par pièce avec sa valeur, « Pour la sortie » puis « Ensuite », le Master
+      final verrouillé jusqu'à sa validation ; chaque manque se remplit sur place avec la fenêtre de son onglet.
+- [x] Informations sans les identifiants (plus de doublon), artistes en simple liste ; « Créer un projet » secondaire.
+- Écart assumé avec le proto : les parts s'ajoutent une à une (la fenêtre « Nouvelle part » existante) et
+  les déclarations mènent à l'onglet Droits, au lieu des fenêtres groupées du proto ; pas de source
+  « Modifié par » sur chaque valeur (l'app ne garde pas l'auteur de chaque champ).
+
+Reste : passage navigateur avec un titre rempli et un compte en lecture seule.

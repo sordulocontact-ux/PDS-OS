@@ -1,0 +1,660 @@
+<title>Titre du Catalogue</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@500;600;700&display=swap">
+<style>
+
+/* Tokens recopiés de app/globals.css (docs/DESIGN.md). Coquille : barre latérale collée au bord,
+   page blanche, colonne de 896 px pour l'accueil. */
+:root{
+  --text-primary:#000;--text-secondary:#5e5e5e;--text-tertiary:#767676;--text-muted:#afafaf;
+  --surface-app:#fbfbfb;--surface-page:#fff;--surface-raised:#fff;--surface-soft:#f4f4f4;--surface-sunken:#ececec;
+  --surface-pressed:#e2e2e2;--surface-tint:rgb(64 64 64 / .06);
+  --border-hairline:#ececec;--border-default:#d4d4d4;--border-hover:#afafaf;
+  --nav-bg:#fff;--nav-fg:#000;--nav-fg-muted:#767676;--nav-item-hover-bg:#f4f4f4;--nav-item-active-bg:#ececec;--nav-border:rgb(0 0 0 / .08);
+  --nav-brand-bg:#000;--nav-brand-fg:#fff;
+  --tone-neutral-bg:#ececec;--tone-neutral-fg:#111;--tone-info-bg:#e2eefc;--tone-info-fg:#0b3d8c;
+  --tone-warning-bg:#fcefd2;--tone-warning-fg:#6e4300;--tone-success-bg:#daf3e2;--tone-success-fg:#0d5226;
+  --tone-danger-bg:#fce1df;--tone-danger-fg:#9a1b1b;--tone-action-bg:#ececec;--tone-action-fg:#111;
+  --selection:#155dfc;--selection-bg:rgb(21 93 252 / .07);
+  --primary-bg:#000;--primary-fg:#fff;--primary-hover:#282828;--control-hover:#f4f4f4;
+  --shadow-card:0 1px 2px rgb(0 0 0 / .04),0 2px 8px rgb(0 0 0 / .04);
+  --glass:rgb(20 20 20 / .82);--glass-fg:#fff;--glass-2:#b5b5b5;
+  --font:"Google Sans Flex",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --ease:cubic-bezier(.23,1,.32,1);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --text-primary:#ededed;--text-secondary:#a8a8a8;--text-tertiary:#8f8f8f;--text-muted:#5e5e5e;
+  --surface-app:#0a0a0a;--surface-page:#0f0f0f;--surface-raised:#161616;--surface-soft:rgb(255 255 255 / .05);--surface-sunken:rgb(255 255 255 / .08);
+  --surface-pressed:rgb(255 255 255 / .12);--surface-tint:rgb(255 255 255 / .06);
+  --border-hairline:rgb(255 255 255 / .08);--border-default:rgb(255 255 255 / .12);--border-hover:rgb(255 255 255 / .28);
+  --nav-bg:#0f0f0f;--nav-fg:#ededed;--nav-fg-muted:#8f8f8f;--nav-item-hover-bg:rgb(255 255 255 / .05);--nav-item-active-bg:rgb(255 255 255 / .09);--nav-border:rgb(255 255 255 / .08);
+  --nav-brand-bg:#ededed;--nav-brand-fg:#000;
+  --tone-neutral-bg:#262626;--tone-neutral-fg:#d4d4d4;--tone-info-bg:#12233d;--tone-info-fg:#9ec5ff;
+  --tone-warning-bg:#33260c;--tone-warning-fg:#f5c869;--tone-success-bg:#0f2e1c;--tone-success-fg:#7fdca0;
+  --tone-danger-bg:#3a1616;--tone-danger-fg:#ff9b94;--tone-action-bg:#262626;--tone-action-fg:#ededed;
+  --selection:#4d8bff;--selection-bg:rgb(77 139 255 / .12);
+  --primary-bg:#ededed;--primary-fg:#000;--primary-hover:#d4d4d4;--control-hover:rgb(255 255 255 / .05);
+  --shadow-card:0 0 0 1px rgb(255 255 255 / .02);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --text-primary:#ededed;--text-secondary:#a8a8a8;--text-tertiary:#8f8f8f;--text-muted:#5e5e5e;
+  --surface-app:#0a0a0a;--surface-page:#0f0f0f;--surface-raised:#161616;--surface-soft:rgb(255 255 255 / .05);--surface-sunken:rgb(255 255 255 / .08);
+  --surface-pressed:rgb(255 255 255 / .12);--surface-tint:rgb(255 255 255 / .06);
+  --border-hairline:rgb(255 255 255 / .08);--border-default:rgb(255 255 255 / .12);--border-hover:rgb(255 255 255 / .28);
+  --nav-bg:#0f0f0f;--nav-fg:#ededed;--nav-fg-muted:#8f8f8f;--nav-item-hover-bg:rgb(255 255 255 / .05);--nav-item-active-bg:rgb(255 255 255 / .09);--nav-border:rgb(255 255 255 / .08);
+  --nav-brand-bg:#ededed;--nav-brand-fg:#000;
+  --tone-neutral-bg:#262626;--tone-neutral-fg:#d4d4d4;--tone-info-bg:#12233d;--tone-info-fg:#9ec5ff;
+  --tone-warning-bg:#33260c;--tone-warning-fg:#f5c869;--tone-success-bg:#0f2e1c;--tone-success-fg:#7fdca0;
+  --tone-danger-bg:#3a1616;--tone-danger-fg:#ff9b94;--tone-action-bg:#262626;--tone-action-fg:#ededed;
+  --selection:#4d8bff;--selection-bg:rgb(77 139 255 / .12);
+  --primary-bg:#ededed;--primary-fg:#000;--primary-hover:#d4d4d4;--control-hover:rgb(255 255 255 / .05);
+  --shadow-card:0 0 0 1px rgb(255 255 255 / .02);
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--surface-app);color:var(--text-primary);font-family:var(--font);font-weight:500;font-size:16px;line-height:24px;letter-spacing:-.02em;-webkit-font-smoothing:antialiased}
+button,input,textarea,select{font:inherit;letter-spacing:inherit;color:inherit}
+h1,h2,h3,p{margin:0}
+:focus-visible{outline:2px solid var(--selection);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+
+/* Coquille */
+.shell{display:flex;min-height:100%}
+.side{position:sticky;top:0;height:100dvh;width:218px;flex-shrink:0;display:flex;flex-direction:column;justify-content:space-between;gap:24px;padding:8px;background:var(--nav-bg);border-right:1px solid var(--nav-border);overflow-y:auto}
+.side-top{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 0}
+.brand{width:60px;height:60px;border-radius:16px;background:var(--nav-brand-bg);color:var(--nav-brand-fg);display:grid;place-items:center;font-weight:700;font-size:18px;letter-spacing:-.02em}
+.iconbtn{width:40px;height:40px;border-radius:10px;border:0;background:none;display:grid;place-items:center;cursor:pointer;color:var(--nav-fg)}
+.nav{list-style:none;margin:24px 0 0;padding:0;display:flex;flex-direction:column;gap:2px}
+.nav a{display:flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:8px;color:var(--nav-fg);text-decoration:none}
+.nav a[aria-current="page"]{background:var(--nav-item-active-bg)}
+.nav a[aria-disabled="true"]{cursor:default}
+.nav .count{margin-left:auto;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--primary-bg);color:var(--primary-fg);font-size:13px;line-height:20px;text-align:center;font-weight:600}
+.side-foot{display:flex;align-items:center;gap:8px;border-top:1px solid var(--nav-border);padding-top:8px}
+.me{display:flex;align-items:center;gap:8px;padding:6px 8px;flex:1;min-width:0}
+.me span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:15px}
+.av{width:28px;height:28px;border-radius:50%;background:var(--surface-sunken);color:var(--text-primary);display:inline-grid;place-items:center;font-size:12px;font-weight:600;letter-spacing:0;flex-shrink:0}
+.main{flex:1;min-width:0;background:var(--surface-page)}
+.topbar{display:none}
+.badge{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;font-size:13px;line-height:18px;font-weight:600;white-space:nowrap}
+.badge.sm{height:20px;padding:0 8px}
+.t-info{background:var(--tone-info-bg);color:var(--tone-info-fg)}.t-neutral{background:var(--tone-neutral-bg);color:var(--tone-neutral-fg)}
+.t-warn{background:var(--tone-warning-bg);color:var(--tone-warning-fg)}.t-danger{background:var(--tone-danger-bg);color:var(--tone-danger-fg)}
+.t-ok{background:var(--tone-success-bg);color:var(--tone-success-fg)}.t-act{background:var(--tone-action-bg);color:var(--tone-action-fg)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:40px;padding:0 16px;border-radius:10px;border:1px solid transparent;background:var(--primary-bg);color:var(--primary-fg);cursor:pointer;font-weight:500;text-decoration:none;white-space:nowrap;transition:transform 140ms var(--ease),background-color 150ms ease}
+.btn:active{transform:scale(.97)}
+.btn.outline{background:var(--surface-page);color:var(--text-primary);border-color:var(--border-default)}
+.btn.ghost{background:none;color:var(--text-primary)}
+.btn.sm{height:32px;padding:0 14px;font-size:14px}
+.link{background:none;border:0;padding:0;cursor:pointer;color:var(--text-primary);text-decoration:underline;text-decoration-color:var(--border-hover);text-underline-offset:3px;font-size:14px}
+.btn.lg{height:44px;padding:0 18px}
+.btn.icon{width:44px;padding:0}
+.btn.ghost.icon{width:36px;height:36px}
+
+/* Page d'un titre */
+.page{max-width:1152px;margin:0 auto;padding-block:32px 160px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:24px}
+.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--text-secondary);text-decoration:none;width:fit-content}
+.head{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:16px}
+.head h1{font-size:36px;line-height:42px;letter-spacing:-.04em;font-weight:500;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.head .sub{font-size:16px;color:var(--text-secondary);margin-top:4px}
+.head .acts{display:flex;gap:8px}
+.factline{display:flex;flex-wrap:wrap;gap:6px 24px;font-size:15px;line-height:22px;color:var(--text-secondary)}
+.factline b{color:var(--text-primary);font-weight:600}
+.factline a{color:var(--text-primary);text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--border-hover)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--border-hairline);overflow-x:auto}
+.tabs a{padding:10px 8px;font-size:15px;color:var(--text-secondary);text-decoration:none;border-bottom:2px solid transparent;white-space:nowrap}
+.tabs a[aria-current="page"]{color:var(--text-primary);border-color:var(--text-primary)}
+.tabs a[aria-disabled="true"]{cursor:default}
+
+.now{display:flex;flex-direction:column;gap:14px;padding:20px;border-radius:16px;border:1px solid var(--border-default);background:var(--surface-raised);box-shadow:var(--shadow-card)}
+.eyebrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:14px;line-height:20px;color:var(--text-secondary)}
+.now h2{font-size:20px;line-height:28px;letter-spacing:-.04em;font-weight:500;text-wrap:balance}
+.why{font-size:15px;line-height:22px;color:var(--text-secondary);text-wrap:pretty;max-width:72ch}
+.facts{display:flex;flex-wrap:wrap;gap:4px 24px;margin:0;font-size:15px;line-height:22px;color:var(--text-secondary)}
+.facts div{display:flex;gap:6px}.facts dd{margin:0;color:var(--text-primary);font-weight:600}
+.banner{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:12px;background:var(--tone-success-bg);color:var(--tone-success-fg);font-size:15px;line-height:22px}
+
+.cols{display:grid;grid-template-columns:minmax(0,1fr) 20rem;gap:24px;align-items:start}
+.card{display:flex;flex-direction:column;gap:16px;padding:20px;border-radius:16px;border:1px solid var(--border-default);background:var(--surface-raised)}
+.card-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 16px}
+.card-head h2{font-size:20px;line-height:28px;letter-spacing:-.04em;font-weight:500}
+.card-head .note{font-size:14px;line-height:20px;color:var(--text-secondary)}
+.meter{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--text-secondary)}
+.meter .track{width:120px;height:6px;border-radius:999px;background:var(--surface-sunken);overflow:hidden}
+.meter .fill{display:block;height:100%;background:var(--text-primary);border-radius:999px;transition:width 240ms var(--ease)}
+.group{display:flex;flex-direction:column}
+.group h3{font-size:14px;line-height:20px;font-weight:600;color:var(--text-secondary);padding:4px 0 6px;display:flex;gap:6px}
+.group h3 .n{color:var(--text-tertiary);font-weight:500}
+.drow{display:grid;grid-template-columns:minmax(0,11rem) minmax(0,1fr) auto;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--border-hairline)}
+.drow .k{font-size:15px;line-height:22px;color:var(--text-secondary);display:flex;align-items:center;gap:8px}
+.drow .v{font-size:16px;line-height:24px;min-width:0;overflow-wrap:anywhere;display:flex;flex-direction:column}
+.drow .v .src{font-size:13px;line-height:18px;color:var(--text-tertiary)}
+.drow .v.missing{color:var(--text-tertiary)}
+.drow .v.locked{color:var(--text-tertiary);font-size:15px}
+.ok{color:var(--tone-success-fg);display:inline-grid;place-items:center}
+.dot{width:8px;height:8px;border-radius:50%;border:1.5px dashed var(--text-muted);display:inline-block}
+.lock{color:var(--text-tertiary);display:inline-grid}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:15px}
+.legal{font-size:13px;line-height:18px;color:var(--text-tertiary)}
+
+.info{display:flex;flex-direction:column;gap:12px}
+.info dl{margin:0;display:flex;flex-direction:column;gap:12px}
+.info dt{font-size:14px;line-height:20px;color:var(--text-secondary)}
+.info dd{margin:0;font-size:16px;line-height:24px}
+.artist{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.artist a{color:var(--text-primary);text-decoration:none}
+.sec{display:flex;flex-direction:column;gap:12px}
+.sec h2{font-size:20px;line-height:28px;letter-spacing:-.04em;font-weight:500}
+.act-row{display:grid;grid-template-columns:56px minmax(0,1fr);gap:12px;padding:8px 0;font-size:15px}
+.act-row .t{color:var(--text-tertiary);font-variant-numeric:tabular-nums}
+.act-row .by{font-size:14px;color:var(--text-secondary)}
+
+/* Modale « verre » */
+.scrim{position:fixed;inset:0;z-index:70;background:rgb(0 0 0 / .35);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:grid;place-items:center;padding:16px}
+.dialog{width:min(520px,100%);max-height:calc(100dvh - 32px);overflow:auto;border-radius:16px;background:color-mix(in srgb,var(--surface-raised) 92%,transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--border-default);box-shadow:0 20px 60px rgb(0 0 0 / .3);padding:24px;display:flex;flex-direction:column;gap:16px}
+.dialog h2{font-size:20px;line-height:28px;letter-spacing:-.04em;font-weight:500}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:14px;font-weight:600}
+.field .hint{font-size:14px;line-height:20px;color:var(--text-secondary)}
+.field input,.field select{height:40px;border-radius:10px;border:1px solid var(--border-default);background:var(--surface-page);padding:0 12px;font-size:16px;min-width:0}
+.field input[aria-invalid="true"]{border-color:var(--tone-danger-fg)}
+.err{color:var(--tone-danger-fg);font-size:14px;line-height:20px}
+.split{display:grid;grid-template-columns:minmax(0,1fr) 96px;gap:10px;align-items:center}
+.split .who{display:flex;flex-direction:column}
+.split .who small{font-size:13px;color:var(--text-tertiary)}
+.split input{text-align:right}
+.org{display:grid;grid-template-columns:minmax(0,1fr) 170px;gap:10px;align-items:center;padding:6px 0;border-top:1px solid var(--border-hairline)}
+.org small{display:block;font-size:13px;color:var(--text-tertiary)}
+.player{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:var(--surface-soft)}
+.player .bar{flex:1;height:4px;border-radius:999px;background:var(--surface-sunken)}
+.dfoot{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+textarea.fieldarea{width:100%;min-height:80px;border-radius:10px;border:1px solid var(--border-default);background:var(--surface-page);padding:10px 12px;resize:vertical}
+textarea.fieldarea[aria-invalid="true"]{border-color:var(--tone-danger-fg)}
+
+@media (hover:hover) and (pointer:fine){
+  .nav a:not([aria-current="page"]):not([aria-disabled="true"]):hover,.iconbtn:hover{background:var(--nav-item-hover-bg)}
+  .btn:hover{background:var(--primary-hover)}
+  .btn.outline:hover,.btn.ghost:hover{background:var(--control-hover);border-color:var(--border-hover)}
+}
+@media (max-width:860px){
+  .side{display:none}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:8px max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--nav-border);background:var(--nav-bg);position:sticky;top:env(safe-area-inset-top,0px);z-index:30}
+  .topbar .brand{width:40px;height:40px;border-radius:12px;font-size:13px}
+  .cols{grid-template-columns:minmax(0,1fr)}
+  .drow{grid-template-columns:minmax(0,1fr) auto}
+  .drow .v{grid-column:1/-1;grid-row:2}
+  .head h1{font-size:28px;line-height:34px}
+}
+@media (prefers-reduced-motion:reduce){*{transition-duration:1ms!important}}
+/* Barre du proto et toast : hors du produit */
+.proto{position:fixed;left:0;right:0;margin-inline:auto;width:fit-content;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:50;background:var(--glass);color:var(--glass-fg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:16px;padding:8px 10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;max-width:calc(100% - 32px);box-shadow:0 10px 30px rgb(0 0 0 / .25)}
+.proto .lbl{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--glass-2);padding:0 6px}
+.proto label{font-size:13px;color:var(--glass-2)}
+.proto select{height:34px;border-radius:10px;border:1px solid rgb(255 255 255 / .18);background:rgb(255 255 255 / .08);color:var(--glass-fg);padding:0 10px;font-size:14px;max-width:260px}
+.proto select option{color:#000;background:#fff}
+.proto button{height:34px;border-radius:10px;border:1px solid rgb(255 255 255 / .18);background:none;color:var(--glass-fg);padding:0 12px;font-size:14px;cursor:pointer}
+.toast{position:fixed;right:20px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:60;background:var(--primary-bg);color:var(--primary-fg);padding:12px 16px;border-radius:12px;font-size:15px;max-width:min(420px,calc(100% - 40px));transition:opacity 180ms ease,transform 180ms var(--ease)}
+.toast.off{opacity:0;transform:translateY(8px);pointer-events:none}
+
+/* Onglets : les cartes et tableaux de l'app (PageSection card, DataTable). */
+.tabs a{cursor:pointer}
+.stack{display:flex;flex-direction:column;gap:24px}
+.sc{display:flex;flex-direction:column;gap:16px;padding:20px 24px;border-radius:16px;border:1px solid var(--border-default);background:var(--surface-raised);min-width:0}
+.sc-head{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:12px}
+.sc-head h2{font-size:20px;line-height:28px;letter-spacing:-.04em;font-weight:500}
+.sc-head p{font-size:15px;line-height:22px;color:var(--text-secondary);max-width:80ch}
+.sc-acts{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.empty-line{font-size:15px;color:var(--text-secondary)}
+.cap{font-size:14px;line-height:20px;color:var(--text-secondary)}
+.tw{overflow-x:auto}
+table.dt{width:100%;border-collapse:collapse;font-size:16px;line-height:24px}
+/* DataTable dans une carte de section (29/10) : pas de cadre ni de filets entre les lignes, un filet sous l'en-tête de 44 px, 12 px autour de chaque ligne. */
+table.dt th{text-align:left;font-weight:500;color:var(--text-secondary);height:44px;padding:0 20px 0 0;border-bottom:1px solid var(--border-hairline);white-space:nowrap;vertical-align:middle}
+table.dt td{padding:12px 20px 12px 0;vertical-align:middle}
+table.dt td.r,table.dt th.r{text-align:right;padding-right:0}
+table.dt .sub{display:block;font-size:14px;line-height:20px;color:var(--text-tertiary)}
+table.dt .mut{color:var(--text-secondary)}
+.factgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 20px}
+.factgrid dt{font-size:14px;color:var(--text-secondary)}.factgrid dd{margin:0}
+.ver{display:flex;flex-direction:column;gap:10px;padding:16px 0;border-top:1px solid var(--border-hairline)}
+.ver:first-child{border-top:0;padding-top:0}
+.ver h3{font-size:16px;line-height:24px;font-weight:600;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ver .meta{font-size:14px;line-height:20px;color:var(--text-secondary)}
+.ver .decided{font-size:15px}
+.ver .decided b{font-weight:600}
+.callout{padding:12px 14px;border-radius:12px;font-size:15px;line-height:22px}
+.callout.warn{background:var(--tone-warning-bg);color:var(--tone-warning-fg)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--border-default);background:none;cursor:pointer;font-size:14px}
+.chip[aria-pressed="true"]{border-color:var(--selection);background:var(--selection-bg);color:var(--text-primary)}
+.checks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 12px;font-size:15px}
+.checks label{display:flex;gap:8px;align-items:center;font-weight:500}
+.ftabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--border-hairline)}
+.ftabs button{background:none;border:0;border-bottom:2px solid transparent;padding:8px;font-size:15px;color:var(--text-secondary);cursor:pointer}
+.ftabs button[aria-pressed="true"]{color:var(--text-primary);border-color:var(--text-primary)}
+.drop{border:1px dashed var(--border-default);border-radius:12px;padding:32px 16px;text-align:center;color:var(--text-secondary);font-size:15px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.drop b{color:var(--text-primary);font-weight:600}
+details.hist summary{cursor:pointer;font-size:15px;color:var(--text-secondary)}
+details.hist ul{margin:8px 0 0;padding-left:18px;font-size:14px;color:var(--text-secondary)}
+.field textarea{width:100%;min-height:72px;border-radius:10px;border:1px solid var(--border-default);background:var(--surface-page);padding:10px 12px;resize:vertical}
+.field textarea[aria-invalid="true"],.field select[aria-invalid="true"]{border-color:var(--tone-danger-fg)}
+@media (max-width:860px){.factgrid{grid-template-columns:repeat(2,minmax(0,1fr))}.sc{padding:16px}}
+</style>
+
+<div class="shell">
+  <aside class="side" id="side" aria-label="Navigation principale"></aside>
+  <div class="main">
+    <div class="topbar"><span class="brand">PDS</span></div>
+    <main id="app"></main>
+  </div>
+</div>
+<div id="modal"></div>
+<div class="toast off" id="toast" role="status" aria-live="polite"></div>
+<div class="proto" role="region" aria-label="Commandes du prototype">
+  <span class="lbl">Proto</span>
+  <label for="roleSel">Voir comme</label><select id="roleSel"></select>
+  <label for="scenSel">Aller à</label>
+  <select id="scenSel">
+    <option value="new">Titre créé, rien dans le dossier</option>
+    <option value="mix">En mix, dossier à moitié</option>
+    <option value="ready">Master final validé, reste les déclarations</option>
+  </select>
+  <button type="button" id="resetBtn">Recommencer</button>
+</div>
+
+<script>
+(function(){
+"use strict";
+const I={
+  home:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 9l7-6 7 6v8H3z"/></svg>',
+  work:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="2.5" y="6" width="15" height="10.5" rx="2"/><path d="M7 6V4.5h6V6"/></svg>',
+  folder:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M2.5 5.5h5l2 2h8v8.5h-15z"/></svg>',
+  cal:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="4.5" width="14" height="12.5" rx="2"/><path d="M3 8.5h14M7 2.5v3M13 2.5v3"/></svg>',
+  phone:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M5 3h3l1.5 4-2 1.5a9 9 0 004 4l1.5-2 4 1.5v3a1.5 1.5 0 01-1.5 1.5A13.5 13.5 0 013.5 4.5 1.5 1.5 0 015 3z"/></svg>',
+  mic:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="7.5" y="2.5" width="5" height="10" rx="2.5"/><path d="M4.5 10a5.5 5.5 0 0011 0M10 15.5v2"/></svg>',
+  disc:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10" cy="10" r="7.5"/><circle cx="10" cy="10" r="2"/></svg>',
+  nodes:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="5" cy="5" r="2"/><circle cx="15" cy="7" r="2"/><circle cx="8" cy="15" r="2"/><path d="M6.7 6l6.4.6M14 8.8l-4.5 4.8M5.5 7l2 6"/></svg>',
+  hand:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 10l4-4 3 2 3-2 4 4-5 5-2-1.5L7.5 15z"/></svg>',
+  file:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M5 2.5h6l4 4v11H5z"/><path d="M11 2.5v4h4"/></svg>',
+  msgs:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 4h11v8H7l-4 3zM14 7h3v8l-3-2h-5"/></svg>',
+  sidebar:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="2.5" y="3.5" width="15" height="13" rx="2"/><path d="M8 3.5v13"/></svg>',
+  bell:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M5 14V9a5 5 0 0110 0v5l1.5 1.5h-13zM8.5 17.5h3"/></svg>',
+  send:'<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><path d="M10 16V4M5 9l5-5 5 5"/></svg>',
+  chev:'<svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5L10.5 8 6 12.5"/></svg>',
+  back:'<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3.5L5.5 8l4.5 4.5"/></svg>',
+  check:'<svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg>'
+};
+I.lock='<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3.5" y="7" width="9" height="6.5" rx="1.5"/><path d="M5.5 7V5.5a2.5 2.5 0 015 0V7"/></svg>';
+I.dots='<svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor" aria-hidden="true"><circle cx="4" cy="9" r="1.4"/><circle cx="9" cy="9" r="1.4"/><circle cx="14" cy="9" r="1.4"/></svg>';
+I.plus='<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>';
+I.play='<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M5 3.2v9.6L13 8z"/></svg>';
+I.clip='<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M10.5 4.5l-5 5a1.8 1.8 0 002.5 2.5l5.5-5.5a3 3 0 00-4.2-4.2L3.8 7.8"/></svg>';
+I.pen='<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M3 13l1-3.5L10.5 3l2.5 2.5L6.5 12z"/></svg>';
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const lowerFirst=s=>s.charAt(0).toLowerCase()+s.slice(1);
+const MONTHS=["janv.","févr.","mars","avr.","mai","juin","juil.","août","sept.","oct.","nov.","déc."];
+const short=iso=>{if(!iso)return "—";const [y,m,d]=iso.split("-").map(Number);return `${d} ${MONTHS[m-1]} ${y}`;};
+const TODAY="2026-10-29";
+
+const P={
+  dg:{name:"Claire Morel",role:"Directrice générale",ini:"CM",edit:true},
+  da:{name:"Nadia Benali",role:"Directrice créative",ini:"NB",edit:false}
+};
+const me=()=>P[S.role];
+const AUDIO=["Maquette","Mise à plat","Mix","Master","Master final"];
+const NETWORK=["Zéphyr Vega","Karim Haddou","Sami Kader","PDS Records","PDS Éditions","Studio Ressac"];
+const ROLES=["Compositeur·rice","Auteur·rice (paroles)","Arrangeur·se","Réalisateur·rice","Coréalisateur·rice","Ingé son (enregistrement)","Ingé son (mixage)","Ingé son (mastering)","Musicien·ne","Autre"];
+const MASTER_ROLES=["Label","Artiste","Producteur (phonographique)","Coproducteur (phonographique)","Autre"];
+const PUB_ROLES=["Auteur·rice (paroles)","Compositeur·rice","Éditeur","Autre"];
+const SESSION_KINDS=["Enregistrement","Production","Mixage","Mastering","Autre"];
+const SESSION_STATES=["Prévue","Réalisée","Annulée"];
+const ORGS=[["sacem","SACEM","Œuvre : auteurs, compositeurs, éditeurs"],["scpp","SCPP","Phonogramme : producteurs"],["sppf","SPPF","Phonogramme : producteurs indépendants"],["adami","ADAMI","Artistes interprètes principaux"],["spedidam","SPEDIDAM","Musiciens et artistes d'accompagnement"]];
+const ORG_STATES=[["to_verify","À vérifier"],["to_do","À effectuer"],["submitted","Déposée"],["confirmed","Confirmée"],["to_correct","À corriger"],["rejected","Refusée"],["not_applicable","Non applicable"]];
+const ORG_LABEL=Object.fromEntries(ORG_STATES);
+const ORG_TONE={to_verify:"t-neutral",to_do:"t-warn",submitted:"t-info",confirmed:"t-ok",to_correct:"t-warn",rejected:"t-danger",not_applicable:"t-neutral"};
+const FILE_CATS=[["all","Tous"],["work","Fichiers de travail"],["cover","Pochettes"],["contract","Contrats"],["other","Autres"]];
+const CAT_LABEL={work:"Fichier de travail",cover:"Pochette",contract:"Contrat",other:"Autre"};
+
+/* L'état : ce qui a été fait, jamais un statut. */
+let S;
+function fresh(){return {role:"dg",tab:"overview",clock:0,versions:[],sessions:[],workFiles:[],files:[],contributors:[],
+  masterSplits:[],pubSplits:[],review:{master:null,pub:null},isrc:null,holder:null,iswc:null,
+  orgs:Object.fromEntries(ORGS.map(([k])=>[k,null])),projects:[{title:"Mirage",artist:"Zéphyr Vega",lead:"Lina Haddad",kind:"Single",due:"2027-01-22",status:"En cours",priority:"Normale",target:"2027-01-22"}],
+  log:[{w:"Projet « Mirage » créé avec ce titre",b:"Claire Morel",t:"12:08"},{w:"Titre créé",b:"Claire Morel",t:"12:08"}],
+  flash:null,modal:null,ctx:{},err:{},edits:{},fcat:"all",draft:null,draftKey:null,picked:false,altOpen:false};}
+const sum=a=>Math.round(a.reduce((n,p)=>n+p.pct,0)*100)/100;
+const reference=()=>[...S.versions].reverse().find(v=>v.status==="validated")||null;
+const audioState=()=>{const r=reference();return r?r.state:null;};
+const reached=()=>{const v=S.versions;if(!v.length)return null;return AUDIO[Math.max(...v.map(x=>AUDIO.indexOf(x.state)))];};
+const finalValidated=()=>S.versions.some(v=>v.status==="validated"&&v.state==="Master final");
+const orgState=k=>S.orgs[k]?S.orgs[k].status:"to_verify";
+const toQualify=()=>ORGS.filter(([k])=>orgState(k)==="to_verify").length;
+const declDone=()=>toQualify()===0&&ORGS.filter(([k])=>orgState(k)!=="not_applicable").every(([k])=>["submitted","confirmed"].includes(orgState(k)));
+function declSummary(){const by={};ORGS.forEach(([k])=>{const s=orgState(k);by[s]=(by[s]||0)+1;});
+  return ORG_STATES.filter(([k])=>by[k]).map(([k])=>`${by[k]} ${lowerFirst(ORG_LABEL[k])}`).join(" · ");}
+
+/* Le dossier, dans l'ordre : ce qui compte pour la sortie d'abord. */
+function items(){
+  return [
+    {key:"isrc",group:"release",label:"ISRC",done:!!S.isrc,value:S.isrc&&`<span class="mono">${esc(S.isrc)}</span>`,verb:"Renseigner l'ISRC",where:"Titre"},
+    {key:"holder",group:"release",label:"Titulaire du ℗",done:!!S.holder,value:S.holder&&`℗ ${esc(S.holder.year)} ${esc(S.holder.name)}`,verb:"Renseigner le titulaire",where:"Droits"},
+    {key:"masterSplits",group:"release",label:"Splits du master",done:sum(S.masterSplits)===100,partial:S.masterSplits.length>0,value:S.masterSplits.map(p=>`${esc(p.name)} ${p.pct} %`).join(" · ")||null,verb:"Répartir le master",where:"Crédits"},
+    {key:"pubSplits",group:"release",label:"Splits de l'édition",done:sum(S.pubSplits)===100,partial:S.pubSplits.length>0,value:S.pubSplits.map(p=>`${esc(p.name)} ${p.pct} %`).join(" · ")||null,verb:"Répartir l'édition",where:"Crédits"},
+    {key:"master",group:"release",label:"Master final",done:finalValidated(),value:finalValidated()&&"Validé",locked:!finalValidated(),lockText:"Se valide dans Audio, après le Master",where:"Audio"},
+    {key:"iswc",group:"later",label:"ISWC de l'œuvre",done:!!S.iswc,value:S.iswc&&`<span class="mono">${esc(S.iswc)}</span>`,verb:"Renseigner l'ISWC",where:"Droits"},
+    {key:"contributors",group:"later",label:"Contributeurs",done:S.contributors.length>0,value:S.contributors.map(c=>`${esc(c.name)} · ${esc(c.roles.join(", "))}`).join(" ; ")||null,verb:"Créditer",where:"Crédits"},
+    {key:"decl",group:"later",label:"Déclarations",done:declDone(),partial:toQualify()<5,value:toQualify()<5?declSummary():null,verb:toQualify()?`Qualifier ${toQualify()} organisme${toQualify()>1?"s":""}`:"Mettre à jour",where:"Droits"}
+  ];
+}
+
+/* La prochaine action, décidée par le code (titleNextAction). */
+function next(){
+  const v=S.versions,last=v[v.length-1];
+  if(!v.length)return {kind:"add",title:"Ajouter une première version audio",why:"Le titre n'a encore aucun son : la première version (maquette, mise à plat…) ouvre son suivi audio ; validée, elle devient la version de référence.",then:"Version de référence",where:"Audio"};
+  if(last.status==="pending")return {kind:"review",v:last,title:`Examiner ${last.state} V${last.n}`,why:`${last.state} V${last.n} a été déposée : écoutez-la, puis validez-la ou demandez des corrections.`,then:last.state==="Master final"?"Master final du dossier":"Version suivante",where:"Audio",validate:true};
+  if(last.status==="rejected")return {kind:"add",title:`Déposer la version corrigée de ${last.state} V${last.n}`,why:`Corrections demandées : « ${last.note} ».`,then:`${last.state} V${last.n+1}`,where:"Audio",state:last.state};
+  const nextState=AUDIO[AUDIO.indexOf(last.state)+1];
+  if(nextState)return {kind:"add",title:`Déposer une version « ${nextState} »`,why:`La version de référence est ${last.state} V${last.n} ; l'étape suivante du son est ${lowerFirst(nextState)}.`,then:nextState,where:"Audio",state:nextState};
+  const missing=items().filter(i=>!i.done&&!i.locked);
+  if(missing.length)return {kind:"item",item:missing[0],title:missing[0].verb,why:missing[0].group==="release"?"Il manque au dossier pour sortir le titre.":"Il complète le dossier du titre.",then:missing.length>1?`${missing.length-1} autre${missing.length>2?"s":""} au dossier`:"Dossier complet",where:missing[0].where};
+  return null;
+}
+
+/* ---------- Coquille ---------- */
+const TABS=[["overview","Vue d'ensemble"],["audio","Audio"],["credits","Crédits"],["rights","Droits"],["projects","Projets & sorties"],["files","Fichiers"]];
+function side(){
+  const items=[["home",I.home,"Accueil"],["work",I.work,"Travail"],["projects",I.folder,"Projets"],["cal",I.cal,"Calendrier"],["calls",I.phone,"Calls"],["artists",I.mic,"Artistes"],["masters",I.disc,"Catalogue"],["network",I.nodes,"Réseau"],["contracts",I.hand,"Contrats"],["files",I.file,"Fichiers"],["feedback",I.msgs,"Retours"]];
+  return `<div><div class="side-top"><span class="brand">PDS</span><button class="iconbtn" type="button" aria-label="Réduire la navigation">${I.sidebar}</button></div>
+  <ul class="nav">${items.map(([k,ic,l])=>`<li><a href="#" aria-disabled="true" ${k==="masters"?'aria-current="page"':""}>${ic}${l}</a></li>`).join("")}</ul></div>
+  <div class="side-foot"><span class="me"><span class="av">${me().ini}</span><span>${esc(me().name)}</span></span><button class="iconbtn" type="button" aria-label="Notifications">${I.bell}</button></div>`;
+}
+function page(){
+  const st=reached(), ref=reference();
+  const body={overview,audio:audioTab,credits:creditsTab,rights:rightsTab,projects:projectsTab,files:filesTab}[S.tab]();
+  return `<div class="page">
+  <a class="back" href="#" aria-disabled="true">${I.back} Tout le catalogue</a>
+  <header class="head"><div><h1>Mirage ${st?`<span class="badge ${st==="Maquette"?"t-neutral":"t-info"}">${esc(st)}</span>`:""}</h1><p class="sub">Zéphyr Vega</p></div>
+    <div class="acts">${me().edit?`<button class="btn outline lg" type="button">${I.plus} Créer un projet</button>`:""}<button class="btn outline icon lg" type="button" aria-label="Plus d'actions">${I.dots}</button></div></header>
+  ${S.tab==="overview"?`<div class="factline"><span>État audio <b>${ref?esc(ref.state):"Aucun son"}</b></span><span>Version de référence <b>${ref?`${esc(ref.state)} V${ref.n}`:"aucune"}</b></span><span>Projet <a href="#" data-act="tab" data-t="projects">Mirage</a></span><span>Distribution <b>Non préparée</b></span></div>`:""}
+  <nav class="tabs" aria-label="Sections du titre">${TABS.map(([k,l])=>`<a href="#" data-act="tab" data-t="${k}" ${S.tab===k?'aria-current="page"':""}>${l}</a>`).join("")}</nav>
+  ${body}</div>`;
+}
+function card(title,desc,acts,inner){
+  return `<section class="sc"><div class="sc-head"><div><h2>${title}</h2>${desc?`<p>${desc}</p>`:""}</div>${acts?`<div class="sc-acts">${acts}</div>`:""}</div>${inner}</section>`;
+}
+const addBtn=(label,act,extra="")=>me().edit?`<button class="btn outline sm" type="button" data-act="${act}" ${extra}>${I.plus} ${label}</button>`:"";
+const plainBtn=(label,act,extra="")=>me().edit?`<button class="btn outline sm" type="button" data-act="${act}" ${extra}>${label}</button>`:"";
+const table=(heads,rows)=>`<div class="tw"><table class="dt"><thead><tr>${heads.map(h=>`<th class="${h.r?"r":""}">${h.t??h}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody></table></div>`;
+
+/* ---------- Vue d'ensemble (refaite) ---------- */
+function overview(){
+  const list=items(),done=list.filter(i=>i.done).length;
+  return `${nowCard()}
+  <div class="cols">
+    <section class="card" aria-labelledby="h-dossier">
+      <div class="card-head"><h2 id="h-dossier">Dossier du titre</h2>
+        <span class="meter num"><span class="track" aria-hidden="true"><span class="fill" style="width:${Math.round(done/list.length*100)}%"></span></span>${done} sur ${list.length}</span></div>
+      ${group("Pour la sortie",list.filter(i=>i.group==="release"))}
+      ${group("Ensuite",list.filter(i=>i.group==="later"))}
+      <p class="legal">Un dossier complet n'est pas un dossier validé juridiquement.</p>
+    </section>
+    <section class="card" aria-labelledby="h-info"><h2 id="h-info" style="font-size:20px;line-height:28px;letter-spacing:-.04em;font-weight:500">Informations</h2>
+      <div class="info"><dl><div><dt>Variante</dt><dd>Original</dd></div><div><dt>Durée</dt><dd class="num">2:40</dd></div>
+      <div><dt>Artistes</dt><dd class="artist"><a href="#">Zéphyr Vega</a><span class="badge sm t-neutral">Principal</span></dd></div></dl></div></section>
+  </div>
+  ${card("Variantes","La famille du titre : l'original et ses variantes (acoustique, instrumentale, remix, live…), reliées à lui. Chacune garde ses fichiers, ses crédits et son ISRC.",addBtn("Nouvelle variante","noop"),`<p class="empty-line">Créez une variante pour une radio edit, une instrumentale ou un remix.</p>`)}
+  ${card("Activité","","",`<div>${S.log.slice().reverse().map(l=>`<div class="act-row"><span class="t">${esc(l.t)}</span><span>${esc(l.w)}<br><span class="by">Par ${esc(l.b)}</span></span></div>`).join("")}</div>`)}`;
+}
+function nowCard(){
+  const n=next();
+  const flash=S.flash?`<div class="banner" role="status">${I.check}<span>${S.flash}</span></div>`:"";
+  if(!n)return `<section class="now" aria-label="Maintenant"><div class="eyebrow"><span class="badge t-neutral">Rien à faire pour vous</span><span>Mirage</span></div><h2>Le dossier est complet</h2><p class="why">Le titre a son master final et tout ce qu'il faut pour sortir. La suite se joue dans son projet.</p>${flash}</section>`;
+  if(!me().edit)return `<section class="now" aria-label="Maintenant"><div class="eyebrow"><span class="badge t-neutral">Rien à faire pour vous</span><span>Mirage · ${esc(n.where)}</span></div><h2>En attente de l'équipe catalogue : ${esc(lowerFirst(n.title))}</h2><p class="why">${esc(n.why)}</p>${flash}</section>`;
+  return `<section class="now" aria-label="Maintenant"><div class="eyebrow"><span class="badge t-info">À vous</span>${n.validate?`<span class="badge sm t-act">À valider</span>`:""}<span>Mirage · ${esc(n.where)}</span></div>
+    <h2>${esc(n.title)}</h2><p class="why">${esc(n.why)}</p>
+    <dl class="facts"><div><dt>Ensuite :</dt><dd>${esc(n.then)}</dd></div></dl>${flash}
+    <div><button class="btn" type="button" data-act="now">Ouvrir</button></div></section>`;
+}
+function group(title,list){const left=list.filter(i=>!i.done).length;
+  return `<div class="group"><h3>${title}<span class="n num">${left?`${left} à faire`:"fait"}</span></h3>${list.map(row).join("")}</div>`;}
+function row(i){
+  const mark=i.done?`<span class="ok">${I.check}</span>`:i.locked?`<span class="lock">${I.lock}</span>`:`<span class="dot" aria-hidden="true"></span>`;
+  const src=S.edits[i.key];
+  const val=(i.done||i.partial)&&i.value?`<span class="v">${i.value}${src?`<span class="src">${esc(src)}</span>`:""}</span>`
+    :i.locked?`<span class="v locked">${esc(i.lockText)}</span>`:`<span class="v missing">À renseigner</span>`;
+  const btn=!me().edit||i.locked?"":i.done?`<button class="btn ghost sm" type="button" data-act="edit" data-k="${i.key}" aria-label="Modifier : ${esc(i.label)}">Modifier</button>`
+    :`<button class="btn outline sm" type="button" data-act="edit" data-k="${i.key}">${esc(i.verb)}</button>`;
+  return `<div class="drow" id="row-${i.key}"><span class="k">${mark}${esc(i.label)}</span>${val}<span>${btn}</span></div>`;
+}
+
+/* ---------- Audio (comme l'app) ---------- */
+const VSTATUS={validated:["Validée","t-ok"],rejected:["Corrections demandées","t-warn"],pending:["En attente de validation","t-act"],superseded:["Non examinée","t-neutral"]};
+function audioTab(){
+  const v=S.versions,lastDep=v[v.length-1],lastVal=reference();
+  const list=[...v].sort((a,b)=>AUDIO.indexOf(b.state)-AUDIO.indexOf(a.state)||b.n-a.n);
+  const summary=v.length?`<dl class="factgrid" style="grid-template-columns:repeat(3,minmax(0,1fr))"><div><dt>Étape atteinte</dt><dd><span class="badge sm t-info">${esc(reached())}</span></dd></div><div><dt>Dernière version déposée</dt><dd>${esc(lastDep.state)} V${lastDep.n} · ${short(lastDep.date)}</dd></div><div><dt>Dernière version validée</dt><dd>${lastVal?`${esc(lastVal.state)} V${lastVal.n} · ${short(lastVal.decidedOn)}`:"Aucune"}</dd></div></dl>`:"";
+  const versions=v.length?`<div>${list.map(ver).join("")}</div>`:`<p class="empty-line">Déposez la maquette, puis les mises à plat et les masters : ils restent tous rattachés à ce titre.</p>`;
+  return `<div class="stack">
+  ${card("Versions audio","Chaque version garde son étape et son numéro. Déposer fait avancer l'étape atteinte, jamais la validation : une version se valide ici.","",`${me().edit?`<div>${addBtn("Ajouter un fichier audio","addAudio")}</div>`:""}${summary}${versions}`)}
+  ${card("Sessions","Enregistrement, production, mixage, mastering : où et avec qui le titre a été fait.",`${plainBtn("Rattacher une session","attachSession")}${addBtn("Ajouter une session","addSession")}`,
+    S.sessions.length?table(["Type de session","Statut","Studio ou lieu","Ingénieur du son"],S.sessions.map(s=>`<tr><td><b style="font-weight:600">${esc(s.kind)}</b><span class="sub">${s.date?short(s.date):"Date à préciser"}${s.also?` · Aussi sur ${esc(s.also)}`:""}</span></td><td><span class="badge sm ${s.status==="Réalisée"?"t-ok":s.status==="Annulée"?"t-neutral":"t-info"}">${esc(s.status)}</span></td><td>${esc(s.studio||"—")}</td><td>${esc(s.engineer||"—")}</td></tr>`))
+    :`<p class="empty-line">Notez les sessions d'enregistrement, de mixage et de mastering.</p>`)}
+  ${card("Fichiers de travail","Dossiers de session, ZIP, projets Pro Tools ou Logic, multipistes, stems : le contenu réel des séances, versionné, rattaché au titre et, si vous la connaissez, à une session.","",
+    `${me().edit?`<div class="sc-acts">${plainBtn("Ajouter un lien","addLink")}${plainBtn("Déposer un fichier","addWorkFile")}</div>`:""}
+    ${S.workFiles.length?table(["Fichier","Session","Statut","Déposé"],S.workFiles.map(f=>`<tr><td><b style="font-weight:600">${esc(f.name)}</b><span class="sub">${f.link?"Lien":"v1"}${f.desc?` · ${esc(f.desc)}`:""}</span></td><td class="${f.session?"":"mut"}">${esc(f.session||"Sans session")}</td><td>${f.status?`<span class="badge sm t-neutral">${esc(f.status)}</span>`:"—"}</td><td>${short(f.date)} par ${esc(f.by)}</td></tr>`)):`<p class="empty-line">Aucun fichier de travail pour l'instant.</p>`}
+    <p class="cap">50 Mo au plus par fichier déposé (limite du stockage). Au-delà, ajoutez un lien vers l'endroit où il est partagé : il n'est jamais copié.</p>`)}
+  </div>`;
+}
+function ver(v){
+  const [lab,tone]=VSTATUS[v.status];const prev=S.versions.filter(x=>x!==v&&(AUDIO.indexOf(x.state)<AUDIO.indexOf(v.state)||(x.state===v.state&&x.n<v.n))).pop();
+  return `<div class="ver" id="ver-${esc(v.state)}-${v.n}"><h3>${esc(v.state)} V${v.n} <span class="badge sm ${tone}">${lab}</span></h3>
+    <span class="meta">${esc(v.file)} · ${esc(v.size)}</span>
+    <span class="meta">Déposée par ${esc(v.by)} le ${short(v.date)}${prev?` · Suit ${esc(prev.state)} V${prev.n}`:""}</span>
+    ${v.status==="validated"||v.status==="rejected"?`<span class="decided"><b>${lab}</b> · ${esc(v.reviewer)}, le ${short(v.decidedOn)}${v.note?`<br><span class="mut">${esc(v.note)}</span>`:""}</span>`:""}
+    <div class="player"><button class="btn sm" type="button" aria-label="Écouter ${esc(v.state)} V${v.n}">${I.play}</button><span class="bar"></span><span class="num" style="font-size:14px;color:var(--text-secondary)">0:00 / 2:40</span></div>
+    ${v.status==="pending"&&me().edit?`<div class="sc-acts"><button class="btn outline sm" type="button" data-act="askFix" data-v="${S.versions.indexOf(v)}">Demander des corrections</button><button class="btn sm" type="button" data-act="validateV" data-v="${S.versions.indexOf(v)}">Valider cette version</button></div>`:""}
+  </div>`;
+}
+
+/* ---------- Crédits (comme l'app) ---------- */
+function creditsTab(){
+  return `<div class="stack">
+  ${card("Artistes interprètes","Crédités sur la pochette et les plateformes. On les change dans « Modifier ».","",table(["Artiste","Rôle"],[`<tr><td>Zéphyr Vega</td><td><span class="badge sm t-neutral">Principal</span></td></tr>`]))}
+  ${card("Contributeurs","Auteurs, compositeurs, producteurs, ingénieurs, musiciens : tous les crédits du titre.",addBtn("Ajouter un contributeur","addContrib"),
+    S.contributors.length?table(["Nom","Rôles","Précision"],S.contributors.map(c=>`<tr><td>${esc(c.name)}</td><td>${esc(c.roles.join(", "))}</td><td class="mut">${esc(c.precision||"—")}</td></tr>`)):`<p class="empty-line">Créditez les auteurs, compositeurs, producteurs et musiciens.</p>`)}
+  ${splitCard("master")}${splitCard("pub")}</div>`;
+}
+function splitCard(t){
+  const parts=t==="master"?S.masterSplits:S.pubSplits, total=sum(parts), rv=S.review[t];
+  const totalBadge=!parts.length?`<span class="badge sm t-warn">À répartir</span>`:total<100?`<span class="badge sm t-warn">Reste ${Math.round((100-total)*100)/100} %</span>`:`<span class="badge sm t-ok">Complet</span>`;
+  const rvBadge=rv&&rv.state==="validated"?`<span class="badge sm t-ok">Validée</span>`:rv&&rv.state==="changed"?`<span class="badge sm t-warn">Modifiée depuis la validation</span>`:`<span class="badge sm t-neutral">En préparation</span>`;
+  const acts=`${totalBadge}${rvBadge}${me().edit&&total===100&&!(rv&&rv.state==="validated")?`<button class="btn sm" type="button" data-act="validateSplit" data-t="${t}">Valider la répartition</button>`:""}${total<100?addBtn("Ajouter une part","addPart",`data-t="${t}"`):""}`;
+  const head=rv&&rv.state==="validated"?`<p class="cap">Validée par ${esc(rv.by)} le ${short(rv.on)}</p>`:rv&&rv.state==="changed"?`<div class="callout warn">Les parts ont changé depuis la validation de ${esc(rv.by)}. La version validée reste celle-ci tant que la nouvelle n'est pas validée : ${esc(rv.snapshot)} (${short(rv.on)})</div>`:"";
+  return card(t==="master"?"Master":"Édition",t==="master"?"Propriété de l'enregistrement : label, artiste, producteur.":"Droits sur l'œuvre : auteurs, compositeurs, éditeurs.",acts,
+    `${head}${parts.length?table(["Ayant droit","Rôle",{t:"Part",r:true}],parts.map(p=>`<tr><td>${esc(p.name)}</td><td>${esc(p.role)}</td><td class="r num">${p.pct} %</td></tr>`)):`<p class="empty-line">Aucune part pour l'instant.</p>`}<p class="cap num">Total : ${total} %</p>`);
+}
+
+/* ---------- Droits (comme l'app) ---------- */
+function rightsTab(){
+  const h=S.holder;
+  return `<div class="stack">
+  ${card("Droits","L'œuvre et le titulaire des droits sur l'enregistrement.",me().edit?`<button class="btn outline sm" type="button" data-act="edit" data-k="rights">${I.pen} Modifier</button>`:"",
+    `<dl class="factgrid"><div><dt>ISWC</dt><dd class="${S.iswc?"mono":"mut"}">${S.iswc?esc(S.iswc):"non renseigné"}</dd></div><div><dt>Titulaire du ℗</dt><dd class="${h?"":"mut"}">${h?esc(h.name):"non renseigné"}</dd></div><div><dt>Année du ℗</dt><dd class="${h?"":"mut"}">${h?esc(h.year):"non renseigné"}</dd></div><div><dt>Mention ℗</dt><dd class="${h?"":"mut"}">${h?`℗ ${esc(h.year)} ${esc(h.name)}`:"non renseigné"}</dd></div></dl>
+    ${h?`<p class="cap">${h.confirmed?`Confirmé le ${short(h.confirmed.on)} par ${esc(h.confirmed.by)}`:"Proposé, à confirmer selon les accords"}</p>${!h.confirmed&&me().edit?`<div><button class="btn outline sm" type="button" data-act="confirmHolder">Confirmer le titulaire du ℗</button></div>`:""}`:""}`)}
+  ${card("Déclarations","Dépôts auprès des sociétés de gestion collective. Qualifiez chaque organisme : à vérifier, à effectuer ou non applicable ; seules les démarches applicables comptent dans le dossier.","",
+    table(["Organisme","Statut","Référence","Déposée le",""],ORGS.map(([k,l,d])=>{const o=S.orgs[k],st=orgState(k);
+      return `<tr><td>${l}<span class="sub">${d}</span></td><td><span class="badge sm ${ORG_TONE[st]}">${ORG_LABEL[st]}</span>${o&&o.by?`<span class="sub">Suivie par ${esc(o.by)}</span>`:""}</td><td class="mono">${esc(o&&o.ref||"—")}</td><td>${o&&o.date?short(o.date):"—"}</td><td class="r">${me().edit?`<button class="btn outline sm" type="button" data-act="qualify" data-o="${k}">${o?"Modifier":"Qualifier"}</button>`:""}</td></tr>`;}))
+    +`<details class="hist"><summary>Historique (${S.log.filter(l=>l.decl).length})</summary>${S.log.filter(l=>l.decl).length?`<ul>${S.log.filter(l=>l.decl).map(l=>`<li>${esc(l.w)} · ${esc(l.b)}</li>`).join("")}</ul>`:`<ul><li>Aucun changement enregistré.</li></ul>`}</details>`)}
+  </div>`;
+}
+
+/* ---------- Projets & sorties (comme l'app) ---------- */
+function projectsTab(){
+  return `<div class="stack">
+  ${card("Projets","",me().edit?`<button class="btn outline sm" type="button" data-act="attachProject">${I.clip} Rattacher à un projet existant</button>${addBtn("Créer un projet","noop")}`:"",
+    table(["Projet","Artiste","Responsable","Échéance","Statut","Priorité"],S.projects.map(p=>`<tr><td>${esc(p.title)}</td><td>${esc(p.artist)}</td><td>${esc(p.lead)}</td><td class="${p.due?"":"mut"}">${p.due?short(p.due):"Non définie"}</td><td><span class="badge sm ${p.status==="En cours"?"t-info":"t-warn"}">${esc(p.status)}</span></td><td>${p.priority?`<span class="badge sm t-info">${esc(p.priority)}</span>`:"—"}</td></tr>`)))}
+  ${card("Dates de sortie","La date visée du projet, la date confirmée de sa sortie, la date où elle a été vue en ligne : chacune garde sa valeur.","",
+    table(["Projet","Visée","Confirmée","Effective"],S.projects.map(p=>`<tr><td>${esc(p.title)}</td><td>${p.target?short(p.target):"—"}</td><td>—</td><td>—</td></tr>`)))}
+  ${card("Distribution","Les sorties des projets qui portent ce titre. On les modifie dans la Sortie du projet.","",`<p class="empty-line">Les projets de ce titre n'ont pas encore de sortie. Elle apparaîtra ici dès qu'elle sera créée dans leur Sortie.</p>`)}
+  </div>`;
+}
+
+/* ---------- Fichiers (comme l'app) ---------- */
+function filesTab(){
+  const all=[...S.workFiles.filter(f=>!f.link).map(f=>({name:f.name,cat:"work",by:f.by,date:f.date,sub:f.desc})),...S.files];
+  const count=c=>c==="all"?all.length:all.filter(f=>f.cat===c).length;
+  const shown=S.fcat==="all"?all:all.filter(f=>f.cat===S.fcat);
+  return `<section class="sc"><div class="sc-head"><div class="ftabs" role="group" aria-label="Catégories">${FILE_CATS.map(([k,l])=>`<button type="button" data-act="fcat" data-c="${k}" aria-pressed="${S.fcat===k}">${l} <span class="num" style="color:var(--text-tertiary)">(${count(k)})</span></button>`).join("")}</div>
+    ${me().edit?`<button class="btn sm" type="button" data-act="addFile">${I.clip} Ajouter un fichier</button>`:""}</div>
+    ${shown.length?table(["Nom","Catégorie","Ajouté par","Ajouté le"],shown.map(f=>`<tr><td><a href="#" style="color:var(--text-primary)">${esc(f.name)}</a><span class="sub">${esc(f.sub||"")}</span></td><td><span class="badge sm t-neutral">${CAT_LABEL[f.cat]}</span></td><td>${esc(f.by)}</td><td>${short(f.date)}</td></tr>`))
+    :`<div class="drop"><b>Aucun fichier pour l'instant</b>Glissez un fichier ici, ou cliquez pour le choisir : stems, pochette, contrats. Les fichiers audio successifs sont dans l'onglet Audio.</div>`}</section>`;
+}
+
+/* ---------- Fenêtres ---------- */
+const foot=(label,cancel="Annuler")=>`<div class="dfoot"><button class="btn ghost" type="button" data-act="close">${cancel}</button><button class="btn" type="button" data-act="save">${label}</button></div>`;
+const fld=(id,label,input,hint,req=true)=>{const e=S.err[id];return `<div class="field"><label for="${id}">${label}${req?" *":""}</label>${input.replace("<input",`<input id="${id}" ${e?`aria-invalid="true" aria-describedby="e-${id}"`:""}`).replace("<select",`<select id="${id}" ${e?`aria-invalid="true" aria-describedby="e-${id}"`:""}`).replace("<textarea",`<textarea id="${id}"`)}${hint?`<p class="hint">${hint}</p>`:""}${e?`<p class="err" id="e-${id}">${e}</p>`:""}</div>`;};
+const opts=(list,sel)=>list.map(o=>`<option ${o===sel?"selected":""}>${esc(o)}</option>`).join("");
+const sample=(label)=>`<button class="btn outline" type="button" data-act="sample" style="background:var(--glass);color:var(--glass-fg);border-color:transparent">Proto : ${label}</button>${S.picked?`<p class="why">${esc(S.picked)}</p>`:""}${S.err.file?`<p class="err">${S.err.file}</p>`:""}`;
+function modal(){
+  const m=S.modal,c=S.ctx;if(!m)return "";let b="";
+  if(m==="isrc")b=`<h2>ISRC</h2>${fld("f1","ISRC",`<input value="${esc(S.isrc||"")}" placeholder="FR-Z03-26-00001">`,"Code de l'enregistrement, à ajouter quand il est attribué (jamais inventé). Différent de l'ISWC, qui identifie l'œuvre.")}${foot("Enregistrer")}`;
+  if(m==="iswc")b=`<h2>ISWC de l'œuvre</h2>${fld("f1","ISWC",`<input value="${esc(S.iswc||"")}" placeholder="T-034.524.680-1">`,"Attribué par la SACEM après la déclaration de l'œuvre. Ce n'est pas l'ISRC.")}${foot("Enregistrer")}`;
+  if(m==="holder"||m==="rights"){const sug=S.masterSplits.find(p=>p.role==="Label");
+    b=`<h2>${m==="rights"?"Modifier les droits":"Titulaire du ℗"}</h2>${m==="rights"?`<p class="why">Ces informations servent aux déclarations et à la distribution.</p>${fld("f3","ISWC",`<input value="${esc(S.iswc||"")}" placeholder="T-034.524.680-1">`,"Facultatif : le code de l'œuvre, attribué par la SACEM après la déclaration, par exemple T-034.524.680-1. Ce n'est pas l'ISRC, qui identifie l'enregistrement.",false)}`:""}
+    ${fld("f1","Titulaire du ℗",`<input value="${esc(S.holder?S.holder.name:sug?sug.name:"")}">`,sug&&!S.holder?"Proposé d'après la répartition master du titre (label).":"Le producteur phonographique.",m==="holder")}
+    ${fld("f2","Année du ℗",`<input inputmode="numeric" value="${esc(S.holder?S.holder.year:"")}">`,"Année de première publication de l'enregistrement : elle ne suit pas les dates de sortie d'un projet, et une réédition garde la sienne.",m==="holder")}${foot("Enregistrer")}`;}
+  if(m==="masterSplits"||m==="pubSplits"){
+    const cur=(S.draftKey===m&&S.draft)||(S[m].length?S[m].map(p=>({...p})):(m==="masterSplits"?[{name:"PDS Records",role:"Label",what:"Label · Réseau",pct:""},{name:"Zéphyr Vega",role:"Artiste",what:"Artiste principal · Artistes du titre",pct:""}]:[{name:"Zéphyr Vega",role:"Compositeur·rice",what:"Compositeur·rice · Crédits du titre",pct:""},{name:"PDS Éditions",role:"Éditeur",what:"Éditeur · Réseau",pct:""}]));
+    S.draft=cur;S.draftKey=m;
+    b=`<h2>${m==="masterSplits"?"Splits du master":"Splits de l'édition"}</h2><p class="why">Les parties sont reprises des crédits du titre et du Réseau ; seules les parts sont à saisir.</p>
+    ${cur.map((p,i)=>`<div class="split"><span class="who">${esc(p.name)}<small>${esc(p.what||p.role)}</small></span><div class="field"><input id="p${i}" inputmode="decimal" aria-label="Part de ${esc(p.name)} (%)" value="${p.pct}" ${S.err.sum?'aria-invalid="true" aria-describedby="esum"':""}></div></div>`).join("")}
+    ${S.err.sum?`<p class="err" id="esum">${S.err.sum}</p>`:""}${foot("Enregistrer la répartition")}`;}
+  if(m==="contributors"||m==="addContrib"){const pre=m==="contributors";
+    b=`<h2>Nouveau contributeur</h2><p class="why">Le nom tel qu'il doit apparaître dans les crédits.</p>
+    ${fld("f1","Personne",`<select><option value="">Choisir dans le Réseau</option>${opts(NETWORK,pre?"Zéphyr Vega":"")}</select>`,pre?"Proposé d'après les artistes du titre.":"")}
+    <fieldset class="field" style="border:0;padding:0;margin:0"><legend style="font-size:14px;font-weight:600;margin-bottom:6px">Rôles *</legend><div class="checks">${ROLES.map((r,i)=>`<label><input type="checkbox" id="r${i}" ${pre&&(r==="Compositeur·rice"||r==="Auteur·rice (paroles)")?"checked":""}> ${r}</label>`).join("")}</div>${S.err.roles?`<p class="err">${S.err.roles}</p>`:""}</fieldset>
+    ${fld("f2","Précision",`<input>`,"Instrument ou détail : « guitare », « production additionnelle ».",false)}${foot("Ajouter")}`;}
+  if(m==="decl"||m==="qualify"){const k=c.o||"sacem",o=S.orgs[k]||{};
+    if(m==="decl")b=`<h2>Déclarations</h2><p class="why">Qualifiez chaque organisme : seules les démarches applicables comptent dans le dossier.</p>${ORGS.map(([k,l,d])=>`<div class="org"><span>${l}<small>${d}</small></span><div class="field"><select id="o-${k}" aria-label="${l}">${ORG_STATES.map(([sk,sl])=>`<option value="${sk}" ${orgState(k)===sk?"selected":""}>${sl}</option>`).join("")}</select></div></div>`).join("")}${foot("Enregistrer")}`;
+    else b=`<h2>Déclaration ${ORGS.find(x=>x[0]===k)[1]}</h2><p class="why">Notez où en est la démarche. Un statut renseigné n'est pas une preuve : joignez le justificatif quand l'organisme confirme.</p>
+      ${fld("f1","Statut",`<select>${ORG_STATES.map(([sk,sl])=>`<option value="${sk}" ${orgState(k)===sk?"selected":""}>${sl}</option>`).join("")}</select>`,"")}
+      ${fld("f2","Suivie par un tiers",`<input value="${esc(o.by||"")}">`,"Le nom de la personne ou de la structure qui fait la démarche, quand ce n'est pas l'équipe.",false)}
+      ${fld("f3","Référence du dépôt",`<input value="${esc(o.ref||"")}">`,"",false)}${fld("f4","Date du dépôt",`<input type="date" value="${esc(o.date||"")}">`,"",false)}${foot("Enregistrer")}`;}
+  if(m==="addAudio"){const n=next(),def=c.state||(n&&n.state)||reached()||"Maquette";
+    b=`<h2>Ajouter un fichier</h2><p class="why">À quel état du morceau correspond-il ?</p>${sample("choisir un fichier d'exemple (Mirage.wav)")}
+    <fieldset style="border:0;padding:0;margin:0"><legend style="font-size:14px;font-weight:600;margin-bottom:8px">État audio du fichier</legend><div class="chips">${AUDIO.map(a=>`<button type="button" class="chip" data-act="chip" data-s="${a}" aria-pressed="${(S.chip||def)===a}">${a}</button>`).join("")}</div></fieldset>
+    <p class="hint" style="font-size:14px;color:var(--text-secondary)">WAV, AIFF, FLAC, MP3, M4A, AAC ou OGG, 50 Mo au plus par fichier. La durée est lue quand le navigateur le peut.</p>${foot("Ajouter")}`;}
+  if(m==="askFix"){const v=S.versions[c.v];b=`<h2>Demander des corrections sur ${esc(v.state)} V${v.n}</h2>${fld("note","Ce qu'il faut corriger",`<textarea placeholder="Ce qui doit changer, et pourquoi"></textarea>`,"")}${foot("Demander des corrections")}`;}
+  if(m==="validateV"){const v=S.versions[c.v];b=`<h2>Valider ${esc(v.state)} V${v.n} ?</h2><p class="why">La validation est attachée à ce fichier précis et ne se reprend pas. Pour changer d'avis, déposez une nouvelle version.</p><div class="player"><button class="btn sm" type="button" aria-label="Écouter">${I.play}</button><span class="bar"></span><span class="num" style="font-size:14px;color:var(--text-secondary)">0:00 / 2:40</span></div>${foot("Valider cette version")}`;}
+  if(m==="addSession")b=`<h2>Nouvelle session</h2><p class="why">Seuls le type et la date servent au classement.</p>${fld("f1","Type de session",`<select>${opts(SESSION_KINDS,"Enregistrement")}</select>`,"")}${fld("f2","Statut",`<select>${opts(SESSION_STATES,"Réalisée")}</select>`,"")}${fld("f3","Date",`<input type="date">`,"",false)}${fld("f4","Studio ou lieu",`<input>`,"",false)}${fld("f5","Ingénieur du son",`<select><option value="">—</option>${opts(NETWORK,S.contributors.some(x=>x.name==="Karim Haddou")?"Karim Haddou":"")}</select>`,S.contributors.some(x=>x.name==="Karim Haddou")?"Karim Haddou est proposé d'après les crédits du titre.":"",false)}${foot("Enregistrer")}`;
+  if(m==="attachSession")b=`<h2>Rattacher une session</h2><p class="why">Une session déjà notée sur un autre titre : elle sera aussi sur celui-ci.</p>${fld("f1","Session",`<select><option value="">Choisir une session</option><option>Enregistrement · 14 oct. 2026 · Studio Ressac (Ciel bas)</option><option>Mixage · 22 oct. 2026 · Studio Ressac (Néons)</option></select>`,"")}${foot("Rattacher")}`;
+  if(m==="addLink")b=`<h2>Ajouter un lien vers un fichier de travail</h2><p class="why">La session est facultative : un fichier peut rester sur le titre seul.</p>${fld("f1","Nom du lien",`<input>`,"")}${fld("f2","Adresse du lien",`<input placeholder="https://">`,"Une adresse https (WeTransfer, Drive, Dropbox…).")}${fld("f3","Ce que c'est",`<input>`,"« Session Pro Tools du 3 octobre », « Stems V2 »…",false)}${fld("f4","Session",`<select><option>Aucune</option>${S.sessions.map(s=>`<option>${esc(s.kind)} · ${short(s.date)}</option>`).join("")}</select>`,"",false)}${fld("f5","Statut",`<select><option>Provisoire</option><option>Définitif</option></select>`,"",false)}${foot("Ajouter")}`;
+  if(m==="addWorkFile")b=`<h2>Déposer un fichier de travail</h2><p class="why">La session est facultative : un fichier peut rester sur le titre seul.</p>${sample("choisir un fichier d'exemple (Mirage_stems.zip)")}${fld("f3","Ce que c'est",`<input>`,"« Session Pro Tools du 3 octobre », « Stems V2 »…",false)}${fld("f4","Session",`<select><option>Aucune</option>${S.sessions.map(s=>`<option>${esc(s.kind)} · ${short(s.date)}</option>`).join("")}</select>`,"",false)}${fld("f5","Statut",`<select><option>Provisoire</option><option>Définitif</option></select>`,"",false)}${foot("Déposer")}`;
+  if(m==="addPart"){const t=c.t,parts=t==="master"?S.masterSplits:S.pubSplits,avail=Math.round((100-sum(parts))*100)/100;
+    b=`<h2>Nouvelle part</h2><p class="why">Le total d'un type ne peut pas dépasser 100 %.</p>${fld("f1","Ayant droit",`<select><option value="">Choisir</option><optgroup label="Crédité sur le titre">${S.contributors.map(x=>`<option>${esc(x.name)}</option>`).join("")}</optgroup><optgroup label="Artiste du titre"><option>Zéphyr Vega</option></optgroup><optgroup label="Réseau">${opts(NETWORK.filter(n=>n!=="Zéphyr Vega"))}</optgroup></select>`,"")}${fld("f2","Rôle",`<select>${opts(t==="master"?MASTER_ROLES:PUB_ROLES)}</select>`,"")}${fld("f3","Part",`<input inputmode="decimal">`,`En pourcentage, deux décimales au plus. Disponible : ${avail} %.`)}${foot("Ajouter")}`;}
+  if(m==="validateSplit")b=`<h2>Valider la répartition ${c.t==="master"?"Master":"Édition"} ?</h2><p class="why">La répartition telle qu'elle est maintenant devient la version validée. Une modification ensuite sera signalée jusqu'à une nouvelle validation.</p>${foot("Valider la répartition")}`;
+  if(m==="attachProject")b=`<h2>Rattacher à un projet existant</h2>${fld("f1","Projet",`<select><option value="">Choisir un projet</option><option>Lueur · Album · Mona Lys</option><option>Ressac · EP · Ilan</option></select>`,"")}${foot("Rattacher")}`;
+  if(m==="addFile")b=`<h2>Ajouter un fichier</h2>${sample("choisir un fichier d'exemple (Mirage_pochette.png)")}${fld("f1","Catégorie",`<select><option value="cover">Pochette</option><option value="contract">Contrat</option><option value="other">Autre</option></select>`,"")}${fld("f2","Précision",`<input>`,"",false)}${foot("Ajouter")}`;
+  return `<div class="scrim" data-act="scrim"><div class="dialog" role="dialog" aria-modal="true">${b}</div></div>`;
+}
+
+function render(){
+  document.getElementById("side").innerHTML=side();
+  document.getElementById("app").innerHTML=page();
+  document.getElementById("modal").innerHTML=modal();
+  document.getElementById("roleSel").innerHTML=Object.keys(P).map(k=>`<option value="${k}" ${k===S.role?"selected":""}>${esc(P[k].name)} · ${esc(P[k].role)}</option>`).join("");
+}
+let tt;
+function toast(t){const el=document.getElementById("toast");el.textContent=t;el.classList.remove("off");clearTimeout(tt);tt=setTimeout(()=>el.classList.add("off"),3200);}
+const hhmm=()=>`12:${String(8+S.clock).padStart(2,"0")}`;
+function did(what,flash,extra){S.clock++;S.log.push({w:what,b:me().name,t:hhmm(),...(extra||{})});toast(what);S.flash=flash||null;closeModal();}
+function closeModal(){S.modal=null;S.ctx={};S.err={};S.picked=false;S.chip=null;S.draft=null;S.draftKey=null;}
+const by=()=>`Modifié par ${me().name}`;
+const val=id=>{const el=document.getElementById(id);return el?el.value:"";};
+function splitsChanged(t){const r=S.review[t];if(r&&r.state==="validated")S.review[t]={...r,state:"changed"};}
+
+function save(){
+  const m=S.modal,c=S.ctx,e={};
+  if(m==="isrc"){const v=val("f1").replace(/[\s-]/g,"").toUpperCase();if(!/^[A-Z]{2}[A-Z0-9]{3}\d{7}$/.test(v))e.f1="ISRC invalide : 12 caractères, par exemple FR-Z03-26-00001.";else{S.isrc=`${v.slice(0,2)}-${v.slice(2,5)}-${v.slice(5,7)}-${v.slice(7)}`;S.edits.isrc=by();return did("ISRC renseigné");}}
+  if(m==="iswc"){const v=val("f1").replace(/[\s.-]/g,"").toUpperCase();if(!/^T\d{10}$/.test(v))e.f1="ISWC invalide : T suivi de 10 chiffres, par exemple T-034.524.680-1.";else{S.iswc=`T-${v.slice(1,4)}.${v.slice(4,7)}.${v.slice(7,10)}-${v.slice(10)}`;S.edits.iswc=by();return did("ISWC renseigné");}}
+  if(m==="holder"||m==="rights"){const n=val("f1").trim(),y=val("f2").trim(),w=m==="rights"?val("f3").replace(/[\s.-]/g,"").toUpperCase():"";
+    if(m==="holder"&&!n)e.f1="Indiquez le titulaire du ℗.";
+    if((n||m==="holder")&&!/^(19|20)\d\d$/.test(y))e.f2="Année invalide : entre 1900 et 2100.";
+    if(w&&!/^T\d{10}$/.test(w))e.f3="ISWC invalide : T suivi de 10 chiffres, par exemple T-034.524.680-1.";
+    if(!Object.keys(e).length){if(n){S.holder={name:n,year:y,confirmed:S.holder&&S.holder.confirmed};S.edits.holder=by();}if(w){S.iswc=`T-${w.slice(1,4)}.${w.slice(4,7)}.${w.slice(7,10)}-${w.slice(10)}`;S.edits.iswc=by();}return did(m==="rights"?"Droits modifiés":"Titulaire du ℗ renseigné");}}
+  if(m==="masterSplits"||m==="pubSplits"){const parts=S.draft.map((p,i)=>({...p,pct:Number(String(val("p"+i)).replace(",","."))||0})),total=sum(parts);
+    if(total!==100){e.sum=`La répartition doit faire 100 % (actuellement ${total} %).`;S.draft=parts;}else{S[m]=parts.map(({name,role,pct})=>({name,role,pct}));S.edits[m]=by();splitsChanged(m==="masterSplits"?"master":"pub");return did(m==="masterSplits"?"Splits du master enregistrés":"Splits de l'édition enregistrés");}}
+  if(m==="contributors"||m==="addContrib"){const n=val("f1"),roles=ROLES.filter((r,i)=>document.getElementById("r"+i).checked);
+    if(!n)e.f1="Choisissez une personne.";if(!roles.length)e.roles="Choisissez au moins un rôle.";
+    if(!Object.keys(e).length){S.contributors.push({name:n,roles,precision:val("f2").trim()});S.edits.contributors=by();return did(`${n} crédité`);}}
+  if(m==="decl"){ORGS.forEach(([k])=>{const v=val("o-"+k);if(v)S.orgs[k]={...(S.orgs[k]||{}),status:v};});S.edits.decl=by();return did("Déclarations mises à jour",null,{decl:true});}
+  if(m==="qualify"){const k=c.o;S.orgs[k]={status:val("f1"),by:val("f2").trim(),ref:val("f3").trim(),date:val("f4")};S.edits.decl=by();return did(`Déclaration ${ORGS.find(x=>x[0]===k)[1]} : ${lowerFirst(ORG_LABEL[val("f1")])}`,null,{decl:true});}
+  if(m==="addAudio"){if(!S.picked)e.file="Choisissez un fichier audio.";else{const st=S.chip||c.state||(next()&&next().state)||reached()||"Maquette";const n=S.versions.filter(v=>v.state===st).length+1;
+    S.versions.filter(v=>v.status==="pending").forEach(v=>v.status="superseded");
+    S.versions.push({state:st,n,status:"pending",file:"Mirage.wav",size:"31,2 Mo",by:me().name,date:TODAY});return did(`${st} V${n} ajoutée`,`${st} V${n} ajoutée. Elle attend d'être examinée.`);}}
+  if(m==="askFix"){const note=val("note").trim();if(!note)e.note="Dites ce qui doit changer : le motif est obligatoire.";else{const v=S.versions[c.v];Object.assign(v,{status:"rejected",note,reviewer:me().name,decidedOn:TODAY});return did("Corrections demandées",`Corrections demandées sur ${v.state} V${v.n}.`);}}
+  if(m==="validateV"){const v=S.versions[c.v];Object.assign(v,{status:"validated",reviewer:me().name,decidedOn:TODAY});return did(`${v.state} V${v.n} validée`,`${v.state} V${v.n} validée : c'est la version de référence.`);}
+  if(m==="addSession"){S.sessions.push({kind:val("f1"),status:val("f2"),date:val("f3")||null,studio:val("f4").trim(),engineer:val("f5")});return did("Session ajoutée");}
+  if(m==="attachSession"){const v=val("f1");if(!v)e.f1="Choisissez une session.";else{const [kind,d,studio]=v.split(" · ");S.sessions.push({kind,status:"Réalisée",date:d.includes("14")?"2026-10-14":"2026-10-22",studio:studio.replace(/ \(.*/,""),engineer:"Karim Haddou",also:v.match(/\((.*)\)/)[1]});return did("Session rattachée");}}
+  if(m==="addLink"){const n=val("f1").trim(),u=val("f2").trim();if(!n)e.f1="Donnez un nom au lien.";if(!/^https:\/\/\S+\.\S+/.test(u))e.f2="Une adresse https complète, par exemple https://wetransfer.com/…";
+    if(!Object.keys(e).length){S.workFiles.push({name:n,link:true,desc:val("f3").trim(),session:val("f4")==="Aucune"?"":val("f4"),status:val("f5"),date:TODAY,by:me().name});return did("Lien ajouté");}}
+  if(m==="addWorkFile"){if(!S.picked)e.file="Choisissez un fichier.";else{S.workFiles.push({name:"Mirage_stems.zip",link:false,desc:val("f3").trim(),session:val("f4")==="Aucune"?"":val("f4"),status:val("f5"),date:TODAY,by:me().name});return did("Fichier de travail déposé");}}
+  if(m==="addPart"){const t=c.t,parts=t==="master"?S.masterSplits:S.pubSplits,avail=Math.round((100-sum(parts))*100)/100,n=val("f1"),p=Number(val("f3").replace(",","."));
+    if(!n)e.f1="Choisissez l'ayant droit.";if(!(p>0)||!/^\d+([.,]\d{1,2})?$/.test(val("f3").trim()))e.f3="Une part en pourcentage, deux décimales au plus.";else if(p>avail)e.f3=`La part dépasse le disponible : ${avail} %.`;
+    if(!Object.keys(e).length){parts.push({name:n,role:val("f2"),pct:p});S.edits[t==="master"?"masterSplits":"pubSplits"]=by();splitsChanged(t);return did(`${n} ajouté à ${p} %`);}}
+  if(m==="validateSplit"){const t=c.t,parts=t==="master"?S.masterSplits:S.pubSplits;S.review[t]={state:"validated",by:me().name,on:TODAY,snapshot:parts.map(p=>`${p.name} ${p.pct} %`).join(" · ")};return did(`Répartition ${t==="master"?"Master":"Édition"} validée`);}
+  if(m==="attachProject"){const v=val("f1");if(!v)e.f1="Choisissez un projet.";else{const [title,kind,artist]=v.split(" · ");S.projects.push({title,kind,artist,lead:"Lina Haddad",due:null,status:"En cours",priority:null,target:null});return did(`Titre rattaché à ${title}`);}}
+  if(m==="addFile"){if(!S.picked)e.file="Choisissez un fichier.";else{S.files.push({name:"Mirage_pochette.png",cat:val("f1"),by:me().name,date:TODAY,sub:[val("f2").trim(),"PNG · 2,4 Mo"].filter(Boolean).join(" · ")});return did("Fichier ajouté");}}
+  S.err=e;
+}
+
+document.addEventListener("click",ev=>{
+  const t=ev.target.closest("[data-act]");if(!t)return;const a=t.dataset.act;
+  if(t.tagName==="A")ev.preventDefault();
+  if(a==="scrim"&&ev.target!==t)return;
+  const open=(k,ctx)=>{S.modal=k;S.ctx=ctx||{};S.err={};S.flash=null;render();const el=document.querySelector(".dialog input,.dialog select,.dialog textarea,.dialog .dfoot .btn:last-child");if(el)el.focus();};
+  if(a==="tab"){S.tab=t.dataset.t;S.flash=null;render();window.scrollTo({top:0});}
+  else if(a==="now"){const n=next();if(n.kind==="review")open("validateV",{v:S.versions.indexOf(n.v)});else if(n.kind==="item")open(n.item.key);else open("addAudio",{state:n.state});}
+  else if(a==="edit")open(t.dataset.k);
+  else if(["addAudio","addSession","attachSession","addLink","addWorkFile","addContrib","attachProject","addFile"].includes(a))open(a);
+  else if(a==="askFix"||a==="validateV")open(a,{v:+t.dataset.v});
+  else if(a==="addPart"||a==="validateSplit")open(a,{t:t.dataset.t});
+  else if(a==="qualify")open("qualify",{o:t.dataset.o});
+  else if(a==="confirmHolder"){S.holder.confirmed={by:me().name,on:TODAY};did("Titulaire du ℗ confirmé");render();}
+  else if(a==="close"||a==="scrim"){closeModal();render();}
+  else if(a==="save"){
+    // What was typed stays when a field is refused: the dialog is redrawn.
+    const typed=[...document.querySelectorAll(".dialog input,.dialog select,.dialog textarea")].map(el=>[el.id,el.type==="checkbox"?el.checked:el.value]);
+    save();render();
+    if(S.modal){typed.forEach(([id,v])=>{const el=id&&document.getElementById(id);if(!el)return;if(el.type==="checkbox")el.checked=v;else el.value=v;});
+      const el=document.querySelector('.dialog [aria-invalid="true"]');if(el)el.focus();}}
+  else if(a==="sample"){S.picked=S.modal==="addAudio"?"Mirage.wav · 2:40 · 31,2 Mo":S.modal==="addWorkFile"?"Mirage_stems.zip · 48 Mo":"Mirage_pochette.png · 2,4 Mo";S.err={};render();}
+  else if(a==="chip"){S.chip=t.dataset.s;render();}
+  else if(a==="fcat"){S.fcat=t.dataset.c;render();}
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&S.modal){closeModal();render();}});
+document.getElementById("roleSel").addEventListener("change",e=>{S.role=e.target.value;S.flash=null;closeModal();render();});
+function scenario(v){
+  const role=S.role,tab=S.tab;S=fresh();S.role=role;S.tab=tab;
+  if(v==="new")return;
+  const V=(state,n,status,date,dec,note)=>({state,n,status,file:`Mirage_${state.toLowerCase().replace(/ /g,"_").normalize("NFD").replace(/[̀-ͯ]/g,"")}_v${n}.wav`,size:"30,8 Mo",by:"Claire Morel",date,reviewer:dec?"Nadia Benali":null,decidedOn:dec,note});
+  S.versions=[V("Maquette",1,"validated","2026-10-02","2026-10-03"),V("Mise à plat",1,"validated","2026-10-09","2026-10-10"),V("Mix",1,"rejected","2026-10-16","2026-10-17","Voix trop en retrait au refrain"),V("Mix",2,"validated","2026-10-21","2026-10-22")];
+  S.isrc="FR-Z03-26-00012";S.edits.isrc="Titre · 21/10";
+  S.masterSplits=[{name:"PDS Records",role:"Label",pct:70},{name:"Zéphyr Vega",role:"Artiste",pct:30}];S.edits.masterSplits="Crédits · 22/10";S.review.master={state:"validated",by:"Claire Morel",on:"2026-10-22",snapshot:"PDS Records 70 % · Zéphyr Vega 30 %"};
+  S.contributors=[{name:"Zéphyr Vega",roles:["Compositeur·rice","Auteur·rice (paroles)"],precision:""},{name:"Karim Haddou",roles:["Ingé son (mixage)"],precision:""}];S.edits.contributors="Crédits · 21/10";
+  S.sessions=[{kind:"Enregistrement",status:"Réalisée",date:"2026-10-08",studio:"Studio Ressac",engineer:"Karim Haddou"},{kind:"Mixage",status:"Réalisée",date:"2026-10-20",studio:"Studio Ressac",engineer:"Karim Haddou"}];
+  S.workFiles=[{name:"Session Pro Tools du 8 octobre",link:true,desc:"Prises voix et guitares",session:"Enregistrement · 8 oct. 2026",status:"Définitif",date:"2026-10-08",by:"Karim Haddou"}];
+  S.log.push({w:"Mix V2 validée",b:"Nadia Benali",t:"10:42"});
+  if(v==="ready"){S.versions.push(V("Master",1,"validated","2026-10-25","2026-10-26"),V("Master final",1,"validated","2026-10-27","2026-10-28"));
+    S.holder={name:"PDS Records",year:"2026",confirmed:{by:"Claire Morel",on:"2026-10-26"}};S.edits.holder="Droits · 26/10";
+    S.pubSplits=[{name:"Zéphyr Vega",role:"Compositeur·rice",pct:50},{name:"PDS Éditions",role:"Éditeur",pct:50}];S.edits.pubSplits="Crédits · 26/10";
+    S.iswc="T-034.524.680-1";S.edits.iswc="Droits · 27/10";S.files=[{name:"Mirage_pochette_finale.png",cat:"cover",by:"Nadia Benali",date:"2026-10-24",sub:"PNG · 2,4 Mo"}];}
+}
+document.getElementById("scenSel").addEventListener("change",e=>{scenario(e.target.value);render();window.scrollTo({top:0});});
+document.getElementById("resetBtn").addEventListener("click",()=>{S=fresh();document.getElementById("scenSel").value="new";render();});
+S=fresh();render();
+})();
+</script>

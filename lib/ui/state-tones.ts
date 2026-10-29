@@ -568,10 +568,6 @@ export const briefQuestionTone: Record<string, Tone> = {
   done: "success",
 };
 
-/** An item of the master's file (overview checklist). */
-export const checklistTone = (done: boolean): Tone =>
-  done ? "success" : "warning";
-
 /** State of a contract (lib/contracts/types.ts): being prepared, waiting for
  * the director, to be signed, signed, past its end date, terminated. */
 export const contractStateTone: Record<string, Tone> = {
