@@ -462,6 +462,15 @@ Refonte du 27/10/2026, d'après `docs/VISION-UX.md` § 2 (les cinq questions) :
   normale, comme les onglets des fiches. En place : Artistes (relation), Masters et
   Projets (Actifs / Archivés, DG), Membres (statut), Budget (statut).
 - **Pastilles** (`FilterChip`, `ViewToggle`) : filtres secondaires ou qui se combinent.
+- **Recherche et filtres d'une liste** (Figma Projets 90:4972, Sacha 29/10/2026) : sous les
+  onglets, **une seule ligne** (`ListToolbar`) : la recherche, puis les filtres principaux en
+  listes déroulantes de même largeur (3 au plus, « Tous les … » quand rien n'est choisi), puis
+  le bouton carré des **filtres avancés** pour les autres ; « Effacer les filtres » au bout
+  dès qu'un filtre est posé. Jamais les filtres principaux cachés derrière un bouton. En
+  place : Projets, Travail, Artistes, Catalogue, Réseau, Contrats, Fichiers, Calls (liste).
+- **Tableaux** (`DataTable`, Sacha 29/10/2026) : une carte comme les listes de l'accueil,
+  contour, fond, en-tête sur bande douce, filet entre les lignes. Dans une carte de section,
+  la règle « rien d'encadré dans une carte » prime : le tableau y perd cadre et filets.
 
 ### Sélection et formulaires en étapes
 

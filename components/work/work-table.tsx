@@ -13,6 +13,7 @@ import {
   DataTableMedia,
   DataTableRow,
   EMPTY_CELL,
+  ROW_INSET,
 } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { TableCell, TableRow } from "@/components/ui/table";
@@ -64,8 +65,13 @@ function GroupRow({
   onToggle: () => void;
 }) {
   return (
-    <TableRow className="border-0 hover:bg-transparent has-aria-expanded:bg-transparent">
-      <TableCell colSpan={COLUMNS} className="px-0 pt-5 pb-1">
+    <TableRow
+      className={cn(
+        "border-0 bg-[var(--surface-soft)] hover:bg-[var(--surface-soft)] has-aria-expanded:bg-[var(--surface-soft)]",
+        ROW_INSET,
+      )}
+    >
+      <TableCell colSpan={COLUMNS} className="px-0 py-2">
         <button
           type="button"
           aria-expanded={open}

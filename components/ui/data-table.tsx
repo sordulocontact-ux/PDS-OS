@@ -9,10 +9,14 @@ import {
 import { ViewLink } from "@/components/ui/view-link";
 import { cn } from "@/lib/utils";
 
-// DataTable: the list design of the Masters page, shared by every list page.
-// A single hairline under the header, airy rows without rules, fixed columns
-// of 192 px (20 px gap) and a last column taking the rest. Built on the
-// shadcn Table primitives.
+// DataTable: every table of the app, as a card like the home's lists and the
+// Projets wireframe (Figma 90:4972): outlined, on the card surface, the header
+// on a soft band, a hairline between rows, 16 px inside the frame. Fixed
+// columns of 192 px (20 px gap) and a last column taking the rest. Built on
+// the shadcn Table primitives. Inside a section card nothing is framed
+// (docs/DESIGN.md, « Rien d'encadré dans une carte »): the table loses its
+// frame, its band and its rules there, and only a hairline stays under the
+// header.
 
 type Hide = "sm" | "md" | "lg" | "xl" | "2xl";
 
@@ -47,13 +51,26 @@ export { DataTableViews } from "@/components/ui/data-table-views";
 export const EMPTY_CELL = "—";
 
 export function DataTable({ children }: { children: React.ReactNode }) {
-  return <Table>{children}</Table>;
+  return (
+    <div className="overflow-hidden rounded-xl border border-[color:var(--border-default)] bg-card in-[.section-card]:rounded-none in-[.section-card]:border-0 in-[.section-card]:bg-transparent">
+      <Table>{children}</Table>
+    </div>
+  );
 }
+
+// 16 px from the frame on both ends of every row (header, body, groups).
+export const ROW_INSET =
+  "[&>*:first-child]:pl-4 [&>*:last-child]:pr-4 in-[.section-card]:[&>*:first-child]:pl-0 in-[.section-card]:[&>*:last-child]:pr-0";
 
 export function DataTableHeader({ children }: { children: React.ReactNode }) {
   return (
     <TableHeader>
-      <TableRow className="border-[color:var(--border-hairline)] hover:bg-transparent">
+      <TableRow
+        className={cn(
+          "border-[color:var(--border-default)] bg-[var(--surface-soft)] hover:bg-[var(--surface-soft)] in-[.section-card]:border-[color:var(--border-hairline)] in-[.section-card]:bg-transparent in-[.section-card]:hover:bg-transparent",
+          ROW_INSET,
+        )}
+      >
         {children}
       </TableRow>
     </TableHeader>
@@ -68,7 +85,7 @@ export function DataTableHead({
   return (
     <TableHead
       className={cn(
-        "h-auto px-0 pr-5 pb-2 text-[length:var(--type-body-md)] font-medium text-[color:var(--text-secondary)]",
+        "h-11 px-0 pr-5 text-[length:var(--type-body-md)] font-medium text-[color:var(--text-secondary)]",
         column(columnProps),
         className,
       )}
@@ -78,10 +95,10 @@ export function DataTableHead({
   );
 }
 
-// 18 px between the header rule and the first row, 16 px between rows.
+// A hairline between rows, none under the last (the frame closes it).
 export function DataTableBody({ children }: { children: React.ReactNode }) {
   return (
-    <TableBody className="[&>tr:first-child>td]:pt-[18px]">
+    <TableBody className="[&>tr+tr]:border-t [&>tr+tr]:border-[color:var(--border-hairline)] in-[.section-card]:[&>tr+tr]:border-transparent">
       {children}
     </TableBody>
   );
@@ -90,6 +107,7 @@ export function DataTableBody({ children }: { children: React.ReactNode }) {
 // `relative`: a DataTableLink inside covers the whole row. Safari (26.3 still)
 // ignores `relative` on a <tr>: every link then covers the whole table and the
 // last row catches every click. A transform makes the row the containing block.
+// Only a row with a DataTableLink lights up under the pointer: it opens.
 export function DataTableRow({
   children,
   className,
@@ -100,7 +118,8 @@ export function DataTableRow({
   return (
     <TableRow
       className={cn(
-        "relative [transform:translate(0)] border-0 hover:bg-transparent",
+        "relative [transform:translate(0)] border-0 hover:bg-transparent has-[[data-row-link]]:hover:bg-[var(--control-bg-hover)]",
+        ROW_INSET,
         className,
       )}
     >
@@ -117,7 +136,7 @@ export function DataTableCell({
   return (
     <TableCell
       className={cn(
-        "px-0 py-2 pr-5 text-[length:var(--type-body-md)] font-medium",
+        "px-0 py-3 pr-5 text-[length:var(--type-body-md)] font-medium",
         column(columnProps),
         className,
       )}
@@ -143,6 +162,7 @@ export function DataTableLink({
   children: React.ReactNode;
 }) {
   if (href === null) return <span className="truncate">{children}</span>;
+  const link = { "data-row-link": "" };
   const className =
     "truncate outline-none after:absolute after:inset-0 hover:underline focus-visible:underline";
   if (newTab)
@@ -152,12 +172,13 @@ export function DataTableLink({
         target="_blank"
         rel="noopener noreferrer"
         className={className}
+        {...link}
       >
         {children}
       </a>
     );
   return (
-    <ViewLink href={href} className={className}>
+    <ViewLink href={href} className={className} {...link}>
       {children}
     </ViewLink>
   );
@@ -207,7 +228,7 @@ export function DataTableIcon({
 // Last column: the row's "⋯" menu (RowActions), as narrow as its button.
 export function DataTableActionsHead({ label }: { label: string }) {
   return (
-    <TableHead className="h-auto w-8 px-0 pb-2">
+    <TableHead className="h-11 w-12 px-0">
       <span className="sr-only">{label}</span>
     </TableHead>
   );
@@ -218,5 +239,5 @@ export function DataTableActionsCell({
 }: {
   children: React.ReactNode;
 }) {
-  return <TableCell className="w-8 px-0 py-2 text-right">{children}</TableCell>;
+  return <TableCell className="w-12 px-0 py-3 text-right">{children}</TableCell>;
 }

@@ -1128,3 +1128,15 @@ l'accueil lit les lignes du Travail et les parcours (`lib/home/feed.ts`).
   ne portant pas l'id de la personne.
 
 Reste : passage navigateur sur la pré-prod avec les quatre rôles.
+
+### Suite du 29/10 : la barre du wireframe Projets, Travail, tableaux en carte
+
+- [x] **Une ligne recherche + filtres** sous les onglets (Figma 90:4972, `ListToolbar` + `FilterBar`) :
+      3 filtres principaux en listes déroulantes, les autres derrière le bouton « Plus de filtres ».
+      Projets (Type, Responsable, Statut ; Échéance en avancé), Contrats (Type, Projet, Artiste ;
+      Responsable en avancé), Catalogue, Réseau, Fichiers, Artistes, Calls ; le bouton « Filtres »
+      d'avant disparaît.
+- [x] **Travail** : recherche (action, projet, module) + Projet, Module, Échéance, dans l'URL.
+- [x] **Tableaux en carte** partout (`DataTable`) : contour, fond, en-tête sur bande, filet entre les
+      lignes ; sans cadre dans une carte de section (règle du 04/10).
+- Reste : passage navigateur (session requise).
