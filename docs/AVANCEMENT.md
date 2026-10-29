@@ -1088,3 +1088,20 @@ Reste : passage navigateur ; pousser la migration en prod avec accord ; les P1/P
 suite sur les gestes du Juridique et du Brief Master, marqueur « déclaré par l'équipe » en Distribution,
 réserves de disponibilité, budget par activation…) ; la valeur juridique de la signature électronique
 simple et la signature du bulletin acceptée par la SACEM, à faire confirmer par Ibé.
+
+
+## Recherche et filtres sur les pages de liste (29/10/2026, branche `pre-prod`)
+
+Demande de Sacha : une recherche et des filtres sur la plupart des pages pour trouver plus vite. Même
+forme partout que Catalogue et Réseau : onglets, bouton « Filtres » (`UrlFilters`, choix gardés dans
+l'URL, pastilles qui retirent le filtre), recherche instantanée (`SearchableList`) au-dessus du tableau.
+
+- [x] **Artistes** : recherche (nom, notes) + filtre Titres (avec / sans).
+- [x] **Fichiers** : filtres Catégorie, Type de fichier (audio, image, document), Ajouté par (la recherche existait).
+- [x] **Contrats** : filtres Type, Projet, Artiste, Responsable (la recherche existait).
+- [x] **Calls**, vue liste : recherche (titre, projet) + filtres Projet (dont « Réunion interne ») et Traitement.
+- Déjà en place : Projets (recherche + Type, Responsable, Statut, Échéance), Catalogue, Réseau.
+- Non ajouté, volontairement : Équipe (3 à 5 comptes, les onglets par statut suffisent), Modèles de
+  contrats (quelques modèles), Retours (rangés par sujet par PO).
+
+Reste : passage navigateur.

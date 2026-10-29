@@ -45,6 +45,19 @@ export const calls = {
       "Un call se crée depuis la page Calls d'un projet lancé ; une réunion interne, hors projet, avec « Nouvelle réunion ». Tous apparaîtront ici.",
     // Subtitle of a call without a project.
     internal: "Réunion interne",
+    search: {
+      label: "Rechercher un call",
+      placeholder: "Titre, projet…",
+      noResult: (query: string) => `Aucun call ne correspond à « ${query} ».`,
+    },
+    filters: {
+      projectLabel: "Projet",
+      projectAll: "Tous les projets",
+      statusLabel: "Traitement",
+      statusAll: "Tous les états",
+    },
+    filtersEmpty: "Aucun call ne correspond à ces filtres.",
+    filtersEmptyBody: "Retirez un filtre pour élargir la liste.",
     emptyUpcomingTitle: "Aucun call à venir",
     emptyPastTitle: "Aucun call passé",
     emptyViewBody: "Les autres calls restent visibles dans l'onglet « Tous ».",

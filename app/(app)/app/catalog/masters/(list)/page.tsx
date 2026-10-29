@@ -27,6 +27,7 @@ import {
 } from "@/lib/catalog/title-views";
 import type { MasterRow } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
+import { filterParam, optionsByName } from "@/lib/ui/filter-options";
 
 // Catalogue ("masters" in the code, retours Catalogue 01, 02 et 04): tabs by
 // where the song stands (Tous, En création, En production, Finalisés), the
@@ -42,11 +43,10 @@ export default async function MastersPage({
   // The archive is the director's: anyone else always sees live titles.
   const archived = canArchive && isArchivedView(params.view);
   const view = titleViewOf(params.state);
-  const one = (value: unknown) => (typeof value === "string" ? value : null);
   const filters: TitleFilters = {
     audio: audioFilterOf(params.audio),
-    artist: one(params.artist),
-    project: one(params.project),
+    artist: filterParam(params.artist),
+    project: filterParam(params.project),
   };
   // One read for the tab counts and the rows: the catalog stays small.
   const { masters: all, error } = await listMasters({ archived });
@@ -144,10 +144,6 @@ function filterGroups(
   current: TitleFilters,
 ): UrlFilterGroup[] {
   const t = fr.catalog.masters.filters;
-  const byName = (map: Map<string, string>) =>
-    [...map.entries()]
-      .sort((a, b) => a[1].localeCompare(b[1], "fr"))
-      .map(([value, label]) => ({ value, label }));
   const artists = new Map<string, string>();
   const projects = new Map<string, string>();
   for (const title of titles) {
@@ -171,14 +167,14 @@ function filterGroups(
       key: "artist",
       label: t.artistLabel,
       allLabel: t.artistAll,
-      options: byName(artists),
+      options: optionsByName(artists),
       current: current.artist,
     },
     {
       key: "project",
       label: t.projectLabel,
       allLabel: t.projectAll,
-      options: byName(projects),
+      options: optionsByName(projects),
       current: current.project,
     },
   ];

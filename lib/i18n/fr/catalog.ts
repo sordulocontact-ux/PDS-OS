@@ -43,6 +43,19 @@ export const catalog = {
     },
     filteredEmptyBody:
       "La relation avec PDS se choisit à la création et se modifie depuis la fiche de l'artiste.",
+    search: {
+      label: "Rechercher un artiste",
+      placeholder: "Nom, notes…",
+      noResult: (query: string) =>
+        `Aucun artiste ne correspond à « ${query} ».`,
+    },
+    filters: {
+      titlesLabel: "Titres",
+      titlesAll: "Avec ou sans titre",
+      titles: { with: "Avec des titres", without: "Sans titre" },
+    },
+    filtersEmpty: "Aucun artiste ne correspond à ces filtres.",
+    filtersEmptyBody: "Retirez un filtre pour élargir la liste.",
     loadError: "Impossible de charger les artistes. Rechargez la page.",
   },
 

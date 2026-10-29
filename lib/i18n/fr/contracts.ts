@@ -46,6 +46,18 @@ export const contracts = {
     placeholder: "Titre, partie, projet, artiste…",
     noResult: (query: string) => `Aucun contrat ne correspond à « ${query} ».`,
   },
+  filters: {
+    typeLabel: "Type",
+    typeAll: "Tous les types",
+    projectLabel: "Projet",
+    projectAll: "Tous les projets",
+    artistLabel: "Artiste",
+    artistAll: "Tous les artistes",
+    ownerLabel: "Responsable",
+    ownerAll: "Tous les responsables",
+  },
+  filtersEmpty: "Aucun contrat ne correspond à ces filtres.",
+  filtersEmptyBody: "Retirez un filtre pour élargir la liste.",
   emptyTitle: "Aucun contrat pour l'instant",
   emptyBody:
     "Créez un contrat, nommez ses parties depuis le Réseau et déposez ses versions : il sera validé par la direction puis signé.",

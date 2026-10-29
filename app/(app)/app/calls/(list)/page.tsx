@@ -3,7 +3,7 @@ import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
 
 import { FormMessage } from "@/components/auth/form-message";
-import { AllCallsTable } from "@/components/calls/all-calls-table";
+import { AllCallsList } from "@/components/calls/all-calls-list";
 import { CallsCalendar } from "@/components/calls/calendar/calls-calendar";
 import {
   MeetingComposerProvider,
@@ -15,10 +15,12 @@ import { PageHeader } from "@/components/shell/page-header";
 import { buttonVariants } from "@/components/ui/button";
 import { CalendarToolbar } from "@/components/ui/calendar-toolbar";
 import { DataTableViews } from "@/components/ui/data-table";
+import { UrlFilters, type UrlFilterGroup } from "@/components/ui/url-filters";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { placeCalls } from "@/lib/calls/calendar";
+import { CALL_STATUSES } from "@/lib/calls/constants";
 import {
   asCallView,
   callViewOf,
@@ -31,6 +33,7 @@ import { loadMembers } from "@/lib/framing/related";
 import { fr } from "@/lib/i18n/fr";
 import { googleMeetConfigured } from "@/lib/integrations/google-calendar";
 import { createClient } from "@/lib/supabase/server";
+import { filterParam, optionsByName } from "@/lib/ui/filter-options";
 import { viewHref } from "@/lib/ui/view-href";
 import {
   asCalendarMode,
@@ -43,6 +46,15 @@ import {
 import { allInOrder } from "@/lib/utils/parallel";
 
 export const metadata = { title: `${fr.calls.all.title} · ${fr.app.name}` };
+
+// The project filter's value for the meetings outside any project.
+const INTERNAL = "internal";
+
+type CallFilters = { project: string | null; status: string | null };
+
+const matches = (call: CallListItem, filters: CallFilters) =>
+  (!filters.project || (call.projectId ?? INTERNAL) === filters.project) &&
+  (!filters.status || call.status === filters.status);
 
 async function loadCalls(range?: {
   from: Date;
@@ -60,7 +72,8 @@ async function loadCalls(range?: {
 
 /**
  * Every call one may see, as a calendar by default (Teams: Semaine, Mois; ?mode=…&date=YYYY-MM-DD) or as a list
- * (?display=list, Tous / À venir / Passés).
+ * (?display=list, Tous / À venir / Passés, « Filtres » by project and
+ * processing, an instant search).
  */
 export default async function CallsPage({
   searchParams,
@@ -88,8 +101,13 @@ export default async function CallsPage({
       mode: mode === "week" ? null : mode,
       date: date === today.day ? null : date,
     });
-  const listHref = (value: string | null) =>
-    viewHref(routes.calls, { display: "list", view: value });
+  const filters: CallFilters = {
+    project: filterParam(params.project),
+    status: filterParam(params.status),
+  };
+  const filtering = Object.values(filters).some((value) => value !== null);
+  const listHref = (value: string | null, kept: Partial<CallFilters> = {}) =>
+    viewHref(routes.calls, { ...kept, display: "list", view: value });
   const header = (
     <PageHeader
       title={t.title}
@@ -157,12 +175,18 @@ export default async function CallsPage({
     );
   }
 
+  // The tabs count what the filters keep; the filters offer what the tab
+  // holds.
+  const filtered = calls.filter((call) => matches(call, filters));
   const counts = { upcoming: 0, past: 0 };
-  for (const call of calls) counts[callViewOf(call, now)] += 1;
-  // Planned calls read soonest first; the others, latest first.
-  const shown = view
+  for (const call of filtered) counts[callViewOf(call, now)] += 1;
+  const ofView = view
     ? calls.filter((call) => callViewOf(call, now) === view)
     : calls;
+  // Planned calls read soonest first; the others, latest first.
+  const shown = view
+    ? filtered.filter((call) => callViewOf(call, now) === view)
+    : filtered;
   if (view === "upcoming") shown.reverse();
 
   return (
@@ -189,20 +213,33 @@ export default async function CallsPage({
             label={t.views.label}
             views={[
               {
-                href: listHref(null),
+                href: listHref(null, filters),
                 label: t.views.all,
-                count: calls.length,
+                count: filtered.length,
                 current: view === null,
               },
               ...CALL_VIEWS.map((value) => ({
-                href: listHref(value),
+                href: listHref(value, filters),
                 label: t.views[value],
                 count: counts[value],
                 current: view === value,
               })),
             ]}
+            action={
+              <UrlFilters
+                path={routes.calls}
+                params={{ display: "list", view }}
+                groups={filterGroups(ofView, filters)}
+              />
+            }
           >
-            {shown.length === 0 ? (
+            {shown.length === 0 && filtering ? (
+              <EmptyState
+                icon={IconPhone}
+                title={t.filtersEmpty}
+                body={t.filtersEmptyBody}
+              />
+            ) : shown.length === 0 ? (
               <EmptyState
                 icon={IconPhone}
                 title={
@@ -211,11 +248,52 @@ export default async function CallsPage({
                 body={t.emptyViewBody}
               />
             ) : (
-              <AllCallsTable calls={shown} now={now} />
+              // Remounted per view: the search starts empty on each one.
+              <AllCallsList
+                key={[view, ...Object.values(filters)].join("-")}
+                calls={shown}
+                now={now}
+              />
             )}
           </DataTableViews>
         )}
       </PageContainer>
     </MeetingComposerProvider>
   );
+}
+
+// Only what some call of the tab holds; the meetings outside any project
+// last.
+function filterGroups(
+  calls: CallListItem[],
+  current: CallFilters,
+): UrlFilterGroup[] {
+  const t = fr.calls.all;
+  const projects = new Map<string, string>();
+  for (const call of calls)
+    if (call.projectId && call.projectTitle)
+      projects.set(call.projectId, call.projectTitle);
+  return [
+    {
+      key: "project",
+      label: t.filters.projectLabel,
+      allLabel: t.filters.projectAll,
+      options: [
+        ...optionsByName(projects),
+        ...(calls.some((call) => !call.projectId)
+          ? [{ value: INTERNAL, label: t.internal }]
+          : []),
+      ],
+      current: current.project,
+    },
+    {
+      key: "status",
+      label: t.filters.statusLabel,
+      allLabel: t.filters.statusAll,
+      options: CALL_STATUSES.filter((status) =>
+        calls.some((call) => call.status === status),
+      ).map((status) => ({ value: status, label: fr.calls.status[status] })),
+      current: current.status,
+    },
+  ];
 }

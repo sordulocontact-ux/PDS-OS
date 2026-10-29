@@ -30,6 +30,17 @@ export const library = {
     placeholder: "Nom, précision, artiste, titre, projet…",
     noResult: (query: string) => `Aucun fichier ne correspond à « ${query} ».`,
   },
+  filters: {
+    categoryLabel: "Catégorie",
+    categoryAll: "Toutes les catégories",
+    kindLabel: "Type de fichier",
+    kindAll: "Tous les types",
+    kinds: { audio: "Audio", image: "Image", document: "Document" },
+    authorLabel: "Ajouté par",
+    authorAll: "Tout le monde",
+  },
+  filtersEmpty: "Aucun fichier ne correspond à ces filtres.",
+  filtersEmptyBody: "Retirez un filtre pour élargir la liste.",
   versions: (count: number) => `${count} versions`,
   openOwner: (source: string, label: string) =>
     `Ouvrir les fichiers de ${source.toLowerCase()} « ${label} »`,
