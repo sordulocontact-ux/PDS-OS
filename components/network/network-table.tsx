@@ -56,9 +56,9 @@ export function NetworkTable({
         <DataTableHead hideBelow="md">{t.columns.roles}</DataTableHead>
         <DataTableHead hideBelow="sm">{t.columns.projects}</DataTableHead>
         <DataTableHead hideBelow="lg">{t.columns.contact}</DataTableHead>
-        <DataTableHead hideBelow="sm" fill>
-          {t.columns.city}
-        </DataTableHead>
+        {/* No column takes the rest: the width is shared evenly (Sacha,
+            29/10). */}
+        <DataTableHead hideBelow="sm">{t.columns.city}</DataTableHead>
         <DataTableActionsHead label={t.columns.actions} />
       </DataTableHeader>
       <DataTableBody>
@@ -135,7 +135,7 @@ export function NetworkTable({
                 )}
               </span>
             </DataTableCell>
-            <DataTableCell hideBelow="sm" fill>
+            <DataTableCell hideBelow="sm">
               {contact.city ?? EMPTY_CELL}
             </DataTableCell>
             <DataTableActionsCell>
