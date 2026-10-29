@@ -628,7 +628,7 @@ composant par motif, dans `components/ui/` (`docs/COMPOSANTS.md`) :
 
 - **Départ d'une étape = `StartChoices`** : cartes entières cliquables, au fond de la page
   (`--surface-page`) dans la carte de l'étape ; la carte « Recommandé » (choisie par le code) est
-  placée **en premier, à gauche** (Sacha, 29/10/2026) et la raison, calculée par le code, est écrite **sous elle, dans sa colonne**. Le Cadrage dessine
+  placée **en premier, à gauche** (Sacha, 29/10/2026) et la raison, calculée par le code, est écrite **sous les cartes, sur toute la largeur**. Le Cadrage dessine
   en plus un bouton au pied de chaque carte (`action`, Figma 304:20801) : plein sur la recommandée,
   contour sur l'autre ; c'est un dessin, la carte entière reste la seule cible. La règle « l'échange est toujours plein » ci-dessus
   vaut pour les cartes à bouton qui restent ; une entrée migrée vers `StartChoices` n'a plus de

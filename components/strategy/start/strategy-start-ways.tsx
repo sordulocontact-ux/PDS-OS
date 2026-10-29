@@ -16,7 +16,7 @@ const fr = { strategyJourney };
  * The two ways in (proto stratEntry / prepGate « strat »): « Commencer la
  * stratégie » (straight on the 8 dimensions) and « Préparer un échange »
  * (the common call form, in the step). « Recommandé » on the one the code
- * chose, its reason under it. The form's « Revenir au choix » goes back to
+ * chose, its reason under the cards. The form's « Revenir au choix » goes back to
  * the cards until the exchange is created (as the Cadrage, Sacha 29/10).
  */
 export function StrategyStartWays({

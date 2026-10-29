@@ -28,7 +28,7 @@ export type StartChoice = {
 /**
  * How to start a step (docs/projet-complet/commons.md § 3, proto `.choice`):
  * cards side by side, the recommended one first, on the left, with its
- * pill (Sacha 29/10/2026), and under it the reason the code computed
+ * pill (Sacha 29/10/2026), and under the cards the reason the code computed
  * (« Il manque … : un échange ira plus vite que des questions séparées. »). Clicking a card chooses and moves
  * on: no radio and no « Confirmer ». Each card is a link (`href`), a client
  * call (`onChoose`), or a submit of `formAction` with `name=value` (a
@@ -117,7 +117,7 @@ export function StartChoices({
     );
   });
 
-  // The reason sits under the recommended card, in the first column.
+  // The reason sits under the cards, across the row (Sacha 29/10/2026).
   const grid: ReactNode = (
     <div
       className={cn("grid gap-3", columns === 2 && "sm:grid-cols-2")}
@@ -126,7 +126,7 @@ export function StartChoices({
     >
       {cards}
       {reason && (
-        <p className="text-caption text-[color:var(--text-secondary)]">
+        <p className="col-span-full text-caption text-[color:var(--text-secondary)]">
           {reason}
         </p>
       )}

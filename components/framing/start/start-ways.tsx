@@ -16,7 +16,7 @@ const fr = { framingIntel, framingJourney };
  * cadrage » (PO reads the initial context, then asks one question at a
  * time) and « Préparer un échange » (the common call form, in the step).
  * « Recommandé » on the one the code chose, on the left, its reason under
- * it (Figma PDS OS 304:20801). The form's « Revenir au choix »
+ * the cards (Figma PDS OS 304:20801). The form's « Revenir au choix »
  * goes back to the cards until the call is created.
  */
 export function StartWays({
