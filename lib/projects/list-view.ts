@@ -1,13 +1,8 @@
 // The Projects page made to steer 30 to 50 projects (PROJ-UX-01): which tab
-// a project belongs to, its administrative status apart from its phase,
-// the filters and the search. Decided by code (rule 6). Client-safe.
+// a project belongs to, its administrative status, the filters and the search. Decided by code (rule 6). Client-safe.
 
-import { shell } from "@/lib/i18n/fr/shell";
-import { progressLabel } from "@/lib/projects/progress";
 import type { ProjectListItem, ProjectType } from "@/lib/projects/types";
 import { normalizeSearch } from "@/lib/utils/search";
-
-const fr = { shell };
 
 /** Tous excludes the archives; Brouillons = not handed over yet; Actifs =
  * handed over, to accept or running. */
@@ -33,23 +28,14 @@ export function adminStatus(p: ProjectListItem): AdminStatus {
 export const isDraftProject = (p: ProjectListItem) =>
   p.status === "not_transmitted";
 
-/**
- * Where it stands in its workflows, apart from its status; null before the
- * launch. A Contenu or an Événement never reads the music's words.
- */
-export function phaseLabel(p: ProjectListItem): string | null {
-  if (p.status !== "launched") return null;
-  if (p.currentStage?.key === "delivery" && p.type !== "music_release")
-    return fr.shell.projects.phases.delivery;
-  return progressLabel(p.currentStage);
-}
-
 export const DUE_FILTERS = ["any", "next30", "overdue", "none"] as const;
 export type DueFilter = (typeof DUE_FILTERS)[number];
 
 export type ProjectFilters = {
   query: string;
   type: ProjectType | "any";
+  // The artist by name: the list carries no id (Contrats does the same).
+  artist: string | "any";
   responsible: string | "any";
   status: AdminStatus | "any";
   due: DueFilter;
@@ -58,6 +44,7 @@ export type ProjectFilters = {
 export const NO_FILTERS: ProjectFilters = {
   query: "",
   type: "any",
+  artist: "any",
   responsible: "any",
   status: "any",
   due: "any",
@@ -77,6 +64,7 @@ export function matchesFilters(
   today: string,
 ): boolean {
   if (f.type !== "any" && p.type !== f.type) return false;
+  if (f.artist !== "any" && p.artistName !== f.artist) return false;
   if (f.responsible !== "any" && p.responsiblePersonId !== f.responsible)
     return false;
   if (f.status !== "any" && adminStatus(p) !== f.status) return false;
@@ -100,7 +88,12 @@ export function draftMatches(
   draft: { title: string },
   f: ProjectFilters,
 ): boolean {
-  if (f.type !== "any" || f.responsible !== "any" || f.due !== "any")
+  if (
+    f.type !== "any" ||
+    f.artist !== "any" ||
+    f.responsible !== "any" ||
+    f.due !== "any"
+  )
     return false;
   if (f.status !== "any" && f.status !== "draft") return false;
   const q = normalizeSearch(f.query.trim());

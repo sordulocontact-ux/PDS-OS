@@ -24,16 +24,14 @@ import type { RecordRights } from "@/lib/archive/types";
 import { routes } from "@/lib/auth/redirects";
 import { records } from "@/lib/i18n/fr/records";
 import { shell } from "@/lib/i18n/fr/shell";
-import { adminStatus, phaseLabel } from "@/lib/projects/list-view";
+import { adminStatus } from "@/lib/projects/list-view";
 import { formatShortDate } from "@/lib/release/format";
 import { cn } from "@/lib/utils";
 import type { ProjectDraftItem } from "@/lib/projects/drafts";
 import type { ProjectListItem } from "@/lib/projects/types";
-import { stageHue } from "@/lib/ui/category-hues";
 import {
   adminStatusTone,
   draftTone,
-  doneTone,
   projectPriorityTone,
 } from "@/lib/ui/state-tones";
 
@@ -72,13 +70,12 @@ export function ProjectsTable({
         {withSelection && <SelectAllHead label={selection.all} />}
         <DataTableHead>{t.columns.title}</DataTableHead>
         <DataTableHead hideBelow="md">{t.columns.artist}</DataTableHead>
-        <DataTableHead hideBelow="2xl">{t.columns.responsible}</DataTableHead>
+        <DataTableHead hideBelow="xl">{t.columns.responsible}</DataTableHead>
         <DataTableHead hideBelow="2xl">{t.columns.type}</DataTableHead>
         <DataTableHead hideBelow="sm">{t.columns.due}</DataTableHead>
         <DataTableHead>{t.columns.status}</DataTableHead>
-        <DataTableHead hideBelow="lg">{t.columns.priority}</DataTableHead>
-        <DataTableHead hideBelow="xl" fill>
-          {t.columns.phase}
+        <DataTableHead hideBelow="lg" fill>
+          {t.columns.priority}
         </DataTableHead>
         {withActions && <DataTableActionsHead label={fr.records.menu.column} />}
       </DataTableHeader>
@@ -99,7 +96,7 @@ export function ProjectsTable({
                 </DataTableLink>
               </DataTableCell>
               <DataTableCell hideBelow="md">{EMPTY_CELL}</DataTableCell>
-              <DataTableCell hideBelow="2xl">{EMPTY_CELL}</DataTableCell>
+              <DataTableCell hideBelow="xl">{EMPTY_CELL}</DataTableCell>
               <DataTableCell hideBelow="2xl">
                 {draft.kind ? (
                   <ProjectKindBadge kind={draft.kind} />
@@ -118,8 +115,7 @@ export function ProjectsTable({
                   {t.draft}
                 </StatusBadge>
               </DataTableCell>
-              <DataTableCell hideBelow="lg">{EMPTY_CELL}</DataTableCell>
-              <DataTableCell hideBelow="xl" fill>
+              <DataTableCell hideBelow="lg" fill>
                 {EMPTY_CELL}
               </DataTableCell>
               {withActions && (
@@ -132,7 +128,6 @@ export function ProjectsTable({
         })}
         {projects.map((project) => {
           const status = adminStatus(project);
-          const phase = phaseLabel(project);
           return (
             <DataTableRow key={project.id}>
               {canSelectProjects ? (
@@ -156,7 +151,7 @@ export function ProjectsTable({
                   ? project.artistName
                   : EMPTY_CELL}
               </DataTableCell>
-              <DataTableCell hideBelow="2xl">
+              <DataTableCell hideBelow="xl">
                 {project.responsibleName ?? EMPTY_CELL}
               </DataTableCell>
               <DataTableCell hideBelow="2xl">
@@ -176,30 +171,13 @@ export function ProjectsTable({
                   {t.adminStatuses[status]}
                 </StatusBadge>
               </DataTableCell>
-              <DataTableCell hideBelow="lg">
+              <DataTableCell hideBelow="lg" fill>
                 {project.priority ? (
                   <StatusBadge
                     tone={projectPriorityTone[project.priority]}
                     size="sm"
                   >
                     {fr.shell.priorities[project.priority]}
-                  </StatusBadge>
-                ) : (
-                  EMPTY_CELL
-                )}
-              </DataTableCell>
-              {/* Where it stands, in the words of its workflows, in its hue. */}
-              <DataTableCell hideBelow="xl" fill>
-                {phase && project.currentStage ? (
-                  <StatusBadge
-                    tone={stageHue(project.currentStage.key)}
-                    size="sm"
-                  >
-                    {phase}
-                  </StatusBadge>
-                ) : phase ? (
-                  <StatusBadge tone={doneTone} size="sm">
-                    {phase}
                   </StatusBadge>
                 ) : (
                   EMPTY_CELL

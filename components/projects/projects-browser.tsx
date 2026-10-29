@@ -15,6 +15,7 @@ import type { RecordRights } from "@/lib/archive/types";
 import { records } from "@/lib/i18n/fr/records";
 import { shell } from "@/lib/i18n/fr/shell";
 import { todayInParis } from "@/lib/insights/dates";
+import { optionsOfNames } from "@/lib/ui/filter-options";
 import type { ProjectDraftItem } from "@/lib/projects/drafts";
 import {
   ADMIN_STATUSES,
@@ -37,9 +38,9 @@ const VIEW_PARAM = "vue";
 /**
  * The Projects page's list (PROJ-UX-01): Tous | Brouillons | Actifs |
  * Archivés with counts that are exactly the rows shown, then one line
- * (Figma 90:4972): a search over project, artist and responsible, Type,
- * Responsable and Statut as selects, Échéance behind the filter button; all
- * combine. The tab and the filters stay in the URL; the archive stays the
+ * (Figma 90:4972): a search over project, artist and responsible, Artiste,
+ * Responsable and Type as selects, Statut and Échéance behind the filter
+ * button; all combine. The tab and the filters stay in the URL; the archive stays the
  * server's (`?view=archived`).
  */
 export function ProjectsBrowser({
@@ -78,6 +79,7 @@ export function ProjectsBrowser({
     )
       ? (params.get("type") as ProjectFilters["type"])
       : ANY,
+    artist: params.get("artiste") ?? ANY,
     responsible: params.get("responsable") ?? ANY,
     status: (ADMIN_STATUSES as readonly string[]).includes(
       params.get("statut") ?? "",
@@ -100,6 +102,7 @@ export function ProjectsBrowser({
     set(VIEW_PARAM, nextView, "all");
     set("q", next.query.trim(), "");
     set("type", next.type, ANY);
+    set("artiste", next.artist, ANY);
     set("responsable", next.responsible, ANY);
     set("statut", next.status, ANY);
     set("echeance", next.due, ANY);
@@ -196,14 +199,23 @@ export function ProjectsBrowser({
     onChange: (value) =>
       change({ [key]: value ?? ANY } as Partial<ProjectFilters>),
   });
+  // Artiste, Responsable, Type on the line; Statut and Échéance behind the
+  // filter button (Sacha 29/10).
+  const artists = optionsOfNames(projects.map((p) => p.artistName));
   const controls = [
+    control(
+      "artist",
+      f.artist,
+      f.allArtists,
+      artists.map((option) => [option.value, option.label]),
+    ),
+    control("responsible", f.responsible, f.allResponsibles, [...responsibles]),
     control(
       "type",
       f.type,
       f.allTypes,
       PROJECT_TYPES.map((type) => [type, fr.shell.projectTypes[type]]),
     ),
-    control("responsible", f.responsible, f.allResponsibles, [...responsibles]),
     control(
       "status",
       f.status,
