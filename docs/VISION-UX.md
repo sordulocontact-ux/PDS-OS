@@ -69,6 +69,13 @@ l'UX : le code dit où on en est, personne ne le coche.
 vous » de la barre latérale et les cartes de la Vue d'ensemble sont tirés des mêmes parcours. On
 n'ajoute jamais une liste de tâches à part.
 
+**Une page liste n'est qu'une liste.** Réseau, Contrats, Fichiers, Calls, Artistes, Catalogue :
+onglets, recherche et filtres, tableau. Ni « Maintenant », ni « Aussi à vous », ni « Ce que vous
+attendez », ni pastille « n attendus » dans une colonne : le travail vit dans l'Accueil, Travail
+et la fiche de l'objet, qui garde son « Maintenant ». En tête d'une fiche, l'état se met à côté
+du titre et le reste dans « Informations », pas dans une ligne de faits grise. *(Sacha, 29/10,
+proto des pages : « On est là pour juste regarder la liste. »)*
+
 ## 4. Le patron d'écran unique
 
 Tous les modules (Lancement, Cadrage, Master, Juridique, chaque chevron du Marketing,
@@ -370,6 +377,7 @@ Erreurs trouvées en testant, chacune corrigée le 14/10 :
 | « Modifier » sur les informations d'un autre | Celui qui accepte réécrirait ce que le DG a transmis | Demander une précision ou refuser |
 | Un refus sans motif, ou pas d'issue « Refuser » | La personne ne sait pas quoi corriger | Règle 6 |
 | « Maintenant » qui répète l'étape affichée, avec « Ouvrir l'étape » vers la page où on est déjà | Bruit, et un bouton qui ne mène nulle part | La carte disparaît ; « Aussi à vous » pour une autre action |
+| « Maintenant » et « Ce que vous attendez » en tête de la liste du Réseau ou des Contrats (29/10) | On vient regarder la liste ; le travail y est en double | La liste seule ; le travail dans Accueil, Travail et la fiche |
 | Un encadré PO qui affirme des faits avant toute réponse, avec un « 40 % » inventé | On ne sait pas d'où ça vient, et l'IA ne produit pas de chiffre | Question, réponse, « Ce que PO a compris » avec citations (règle 12) |
 | « Déposer le Mix V1 » comme simple bouton | Ce qui se livre, c'est un fichier audio qu'on écoute | Dépôt audio et versions écoutables (règle 13) |
 | Une action ou « Modifier » sur une étape verrouillée | On prépare sur des prérequis pas faits | Lecture seule et « Se débloque quand… » |

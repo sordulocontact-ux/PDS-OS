@@ -36,9 +36,12 @@ const fr = { network, records };
 // deletes it, checkboxes delete several at once (director).
 export function NetworkTable({
   contacts,
+  projects,
   rights,
 }: {
   contacts: NetworkContactRow[];
+  // Each contact's projects, by title.
+  projects: Record<string, string[]>;
   rights: RecordRights;
 }) {
   const t = fr.network;
@@ -51,6 +54,7 @@ export function NetworkTable({
         {withSelection && <SelectAllHead label={selection.all} />}
         <DataTableHead>{t.columns.name}</DataTableHead>
         <DataTableHead hideBelow="md">{t.columns.roles}</DataTableHead>
+        <DataTableHead hideBelow="sm">{t.columns.projects}</DataTableHead>
         <DataTableHead hideBelow="lg">{t.columns.contact}</DataTableHead>
         <DataTableHead hideBelow="sm" fill>
           {t.columns.city}
@@ -110,6 +114,11 @@ export function NetworkTable({
                     {relationsText(contact.relations)}
                   </span>
                 )}
+              </span>
+            </DataTableCell>
+            <DataTableCell hideBelow="sm">
+              <span className="line-clamp-2 whitespace-normal">
+                {projects[contact.id]?.join(", ") || EMPTY_CELL}
               </span>
             </DataTableCell>
             <DataTableCell hideBelow="lg">

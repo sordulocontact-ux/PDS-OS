@@ -17921,6 +17921,8 @@ export type Database = {
       mark_contact_link_sent: { Args: { p_link_id: string }; Returns: undefined }
       note_contact_link_opened: { Args: { p_token: string }; Returns: undefined }
       project_link_contacts: { Args: { p_project_id: string }; Returns: Json }
+      network_contact_projects: { Args: never; Returns: Json }
+      contact_projects: { Args: { p_contact_id: string }; Returns: Json }
       revoke_contact_link: { Args: { p_link_id: string; p_reason: string }; Returns: undefined }
       set_production_rushes_by_link:
         | { Args: { p_token: string; p_url: string }; Returns: undefined }

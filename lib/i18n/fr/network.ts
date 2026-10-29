@@ -91,6 +91,8 @@ export const network = {
   columns: {
     name: "Nom",
     roles: "Métier ou activité",
+    // The projects the contact is in (proto des pages, 29/10).
+    projects: "Avec PDS",
     contact: "Coordonnées",
     city: "Ville",
     actions: "Actions",
@@ -237,6 +239,41 @@ export const network = {
     contractsDescription:
       "Les contrats où ce contact est partie, parmi ceux que vous pouvez lire.",
     contractsEmpty: "Aucun contrat visible avec ce contact.",
+    // Proto des pages (29/10): what waits for the contact, what they do in
+    // each project, their credits and calls, known elsewhere in the app.
+    awaited: (name: string) => `Ce qu'on attend de ${name}`,
+    awaitedTodo: {
+      mix: "Prendre en charge le dossier de mix",
+      mastering: "Prendre en charge le dossier de mastering",
+      listen: "Écouter les versions du mix",
+      form: "Remplir sa fiche de renseignements",
+      split: "Confirmer la répartition de l'édition",
+      influence: "Donner son accord de collaboration",
+      provider: "Répondre sur son espace de prestataire",
+    } as Record<string, string>,
+    awaitedDue: (day: string) => `attendu le ${day}`,
+    linkSent: (day: string) => `lien envoyé le ${day}`,
+    linkOpened: (day: string) => `ouvert le ${day}`,
+    linkNotOpened: "pas encore ouvert",
+    remind: "Relancer",
+    remindLabel: (todo: string) => `Relancer : ${todo}`,
+    remindSubject: (todo: string, project: string) =>
+      `Rappel : ${todo.charAt(0).toLowerCase()}${todo.slice(1)} — ${project}`,
+    remindBody: (
+      name: string,
+      todo: string,
+      project: string,
+      due: string | null,
+    ) =>
+      `Bonjour ${name},\n\nPetit rappel : ${todo.charAt(0).toLowerCase()}${todo.slice(1)} pour ${project}${due ? `, attendu le ${due}` : ""}. Tout se fait depuis votre lien PDS, sans compte.\n\nMerci !\nL'équipe PDS`,
+    projects: "Dans les projets",
+    projectsEmpty: "Rien dans un projet que vous pouvez voir.",
+    projectAwaited: (n: number) => `${n} en attente`,
+    invitedToCall: "Invité à un call",
+    credits: "Crédits",
+    creditsEmpty: "Aucun crédit sur un titre du catalogue.",
+    calls: "Calls",
+    callsEmpty: "Invité à aucun call.",
     archived: "Ce contact est archivé : il n'apparaît plus dans le réseau.",
     // Marketing › Activations: the campaigns a profile took part in, and
     // its dated observations (tickets Influence and RP, « Capitalisation »).

@@ -9,14 +9,16 @@ import { rolesText, type NetworkContactRow } from "@/lib/network/types";
 const fr = { network };
 
 // The network with an instant search on name, roles, organization, city,
-// e-mail and TikTok handle.
+// e-mail, TikTok handle and projects.
 export function NetworkList({
   contacts,
+  projects,
   rights,
   filters,
   empty,
 }: {
   contacts: NetworkContactRow[];
+  projects: Record<string, string[]>;
   rights: RecordRights;
   // The page's filters, beside the search; what stands for no row at all.
   filters?: React.ReactNode;
@@ -33,6 +35,7 @@ export function NetworkList({
         c.city,
         c.email,
         c.tiktok,
+        ...(projects[c.id] ?? []),
       ]}
       label={t.label}
       placeholder={t.placeholder}
@@ -40,7 +43,9 @@ export function NetworkList({
       filters={filters}
       empty={empty}
     >
-      {(visible) => <NetworkTable contacts={visible} rights={rights} />}
+      {(visible) => (
+        <NetworkTable contacts={visible} projects={projects} rights={rights} />
+      )}
     </SearchableList>
   );
 }

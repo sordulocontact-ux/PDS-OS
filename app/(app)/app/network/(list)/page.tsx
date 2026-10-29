@@ -14,6 +14,7 @@ import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
+import { loadContactProjectTitles } from "@/lib/network/contact-projects";
 import { listNetworkContacts } from "@/lib/network/queries";
 import {
   asNetworkDomain,
@@ -49,7 +50,13 @@ export default async function NetworkPage({
   const domain = asNetworkDomain(params.domain);
   const relation = asNetworkRelation(params.relation);
   const city = typeof params.city === "string" ? params.city : null;
-  const all = await listNetworkContacts(archived);
+  const [all, projectsOf] = await Promise.all([
+    listNetworkContacts(archived),
+    loadContactProjectTitles(),
+  ]);
+  const projects = Object.fromEntries(
+    [...projectsOf].map(([id, list]) => [id, list.map((p) => p.title)]),
+  );
   const canWrite = can(access, "manage_network") && !archived;
   const newButton = canWrite ? <NewContactButton /> : null;
 
@@ -150,6 +157,7 @@ export default async function NetworkPage({
           ) : (
             <NetworkList
               contacts={contacts}
+              projects={projects}
               rights={{
                 canEdit: can(access, "manage_network"),
                 canArchive,

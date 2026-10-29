@@ -4,7 +4,9 @@ import { notFound } from "next/navigation";
 
 import { ContractStateBadge } from "@/components/contracts/contract-state-badge";
 import { ContactActions } from "@/components/network/contact-actions";
+import { ContactHistory } from "@/components/network/contact-history";
 import { ContactMarketing } from "@/components/network/contact-marketing";
+import { ContactProjects } from "@/components/network/contact-projects";
 import { BackLink } from "@/components/shell/back-link";
 import { ReturnBanner } from "@/components/shell/return-banner";
 import { PageContainer } from "@/components/shell/page-container";
@@ -19,6 +21,8 @@ import { asContractStatus } from "@/lib/contracts/types";
 import { fr } from "@/lib/i18n/fr";
 import { todayInParis } from "@/lib/insights/dates";
 import { loadContactMarketing } from "@/lib/network/campaigns";
+import { loadContactHistory } from "@/lib/network/contact-history";
+import { loadContactProjects } from "@/lib/network/contact-projects";
 import { getNetworkContact } from "@/lib/network/queries";
 import { socialLinksOf } from "@/lib/network/socials";
 import { relationsText, rolesText } from "@/lib/network/types";
@@ -33,19 +37,23 @@ const linkClass =
  * reach it, its organization and catalog artist (a person), or the people
  * of the network associated with it (an organization), and
  * the contracts it is a party to, among those the viewer may read ; its
- * Marketing campaigns and dated observations (influencers, media).
+ * Marketing campaigns and dated observations (influencers, media). First
+ * what waits for it and what it does in each project, then its credits and
+ * calls (proto des pages, 29/10/2026).
  */
 export default async function NetworkContactPage({
   params,
 }: PageProps<"/app/network/[contactId]">) {
   const access = await requireApproved();
   const { contactId } = await params;
-  const [contact, marketing] = await Promise.all([
+  const [contact, marketing, projects, history] = await Promise.all([
     getNetworkContact(contactId),
     loadContactMarketing(contactId, {
       target: routes.projectActivationTarget,
       activation: routes.projectActivation,
     }),
+    loadContactProjects(contactId),
+    loadContactHistory(contactId),
   ]);
   if (!contact) notFound();
   const t = fr.network;
@@ -80,6 +88,11 @@ export default async function NetworkContactPage({
       {contact.archived && <ToneCallout>{p.archived}</ToneCallout>}
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
         <div className="flex min-w-0 flex-col gap-4">
+          <ContactProjects
+            name={contact.name}
+            email={contact.email}
+            projects={projects}
+          />
           {contact.kind === "organization" && (
             <ListCard
               title={p.members}
@@ -117,6 +130,7 @@ export default async function NetworkContactPage({
               />
             ))}
           </ListCard>
+          <ContactHistory credits={history.credits} calls={history.calls} />
           <ContactMarketing
             contactId={contact.id}
             campaigns={marketing.campaigns}

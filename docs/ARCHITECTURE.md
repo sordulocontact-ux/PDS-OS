@@ -2967,6 +2967,18 @@ utile et le **transmet** avec une priorité à l'équipe qui construit l'outil.
 Ajouts du MVP du 15 octobre (`…260929000101` à `…000301`, tests
 `supabase/tests/network-contracts-meetings.test.sql`).
 
+**Proto des pages (29/10/2026, `docs/protos/pages.html`)** : la liste reste une liste (pas de
+« Maintenant » ni de « Ce que vous attendez »), avec une colonne **« Avec PDS »** : les projets du
+contact (`network_contact_projects()`). La fiche ouvre sur **« Ce qu'on attend de X »** (ses
+éléments à faire, avec « Relancer », un e-mail prêt en `mailto:`) et **« Dans les projets »** (ce
+qu'il y fait), puis contrats, **Crédits** (`master_contributors`) et **Calls** (`call_guests`),
+`lib/network/contact-projects.ts` et `contact-history.ts`. `contact_projects(p_contact_id)`
+rend, projet par projet, ses rôles d'équipe, les éléments de sa page privée
+(`contact_page_items`) et son lien ; les deux fonctions lisent les mêmes sources que
+`project_link_contacts` (lot 11) plus `project_team_members`, par `contact_project_pairs()`
+(interne, `security definer`, refusée aux rôles) et ne gardent que les projets que l'on voit
+(`can_see_project`). Migration `20261029100101_contact_projects.sql`.
+
 - **Permissions** : `manage_network` (tous les postes) et `manage_contracts` (DG et chefs de
   projet), dans `role_permissions` comme les autres.
 - **Réseau** `/app/network` (`network_contacts`, `lib/network/`, `components/network/`) :
