@@ -6,10 +6,11 @@ import { PLAN_COLUMNS, type PlanColumn } from "@/lib/plan/propose";
 const fr = { framingIntel };
 
 /**
- * The plan's four columns (proto frPlanView `.plan4`): Focus « Ce qui
- * commence maintenant », Ensuite, Pendant ce temps, À anticiper, two by two
- * from a tablet on, « — » when a column is empty. The cards come from the
- * caller: the proposal being edited (PlanBoard) or the launched plan.
+ * The plan's four groups, one under the other (proto « Suite du Cadrage »,
+ * Sacha 29/10/2026): « Focus · Ce qui commence maintenant », Ensuite,
+ * Pendant ce temps, À anticiper, a rule between them; an empty group is
+ * not shown. The rows come from the caller: the proposal being edited
+ * (PlanBoard) or the launched plan.
  */
 export function PlanColumns({
   cards,
@@ -18,28 +19,27 @@ export function PlanColumns({
 }) {
   const t = fr.framingIntel.plan;
   return (
-    <div className="grid gap-3 md:grid-cols-2">
-      {PLAN_COLUMNS.map((column) => (
-        <section
-          key={column}
-          aria-labelledby={`plan-${column}`}
-          className="flex min-w-0 flex-col gap-2.5 rounded-2xl bg-[var(--surface-tint)] p-3"
-        >
-          <header className="flex flex-col gap-1">
-            <h3 id={`plan-${column}`} className="text-body-md font-semibold">
-              {t.columns[column]}
-            </h3>
-            <p className="text-caption text-[color:var(--text-secondary)]">
-              {t.columnHints[column]}
-            </p>
-          </header>
-          {cards[column].length === 0 ? (
-            <p className="text-caption text-[color:var(--text-secondary)]">—</p>
-          ) : (
-            <ul className="flex flex-col gap-2">{cards[column]}</ul>
-          )}
-        </section>
-      ))}
+    <div className="flex flex-col">
+      {PLAN_COLUMNS.filter((column) => cards[column].length > 0).map(
+        (column) => (
+          <section
+            key={column}
+            aria-labelledby={`plan-${column}`}
+            className="flex min-w-0 flex-col border-t border-[color:var(--border-hairline)] pt-3.5 first:border-t-0 first:pt-0 [&:not(:last-child)]:pb-2"
+          >
+            <h4
+              id={`plan-${column}`}
+              className="flex flex-wrap items-baseline gap-x-2"
+            >
+              <span className="font-semibold">{t.columns[column]}</span>
+              <span className="text-caption text-[color:var(--text-secondary)]">
+                {t.columnHints[column]}
+              </span>
+            </h4>
+            <ul className="flex flex-col">{cards[column]}</ul>
+          </section>
+        ),
+      )}
     </div>
   );
 }

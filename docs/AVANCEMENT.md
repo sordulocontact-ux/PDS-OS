@@ -1163,3 +1163,25 @@ Demande de Sacha : retirer le chevron de « Complétude du dossier », puis un a
   « Modifié par » sur chaque valeur (l'app ne garde pas l'auteur de chaque champ).
 
 Reste : passage navigateur avec un titre rempli et un compte en lecture seule.
+
+
+## Suite du Cadrage plus claire (29/10/2026, branche `pre-prod`)
+
+Demande de Sacha : penser la suite du Cadrage dans l'esprit de la maquette du début (une information
+dite une fois, le geste en tête, les fonds qui font la hiérarchie), en proto (`docs/protos/cadrage-suite.html`),
+puis le coder.
+
+- [x] **Les 6 dimensions** : plus de ligne « Confirmation humaine » ; la question sans son statut (le domaine
+      seul), flèches vers la question d'avant et d'après, le reste replié sous « Autre réponse » ; une réponse
+      confirmée se modifie ; les 6 dimensions en lignes dans un seul cadre, seule celle de la question ouverte,
+      « Question en cours » au lieu de sa valeur ; la dictée à côté du titre ; l'encadré n'est plus montré
+      à qui ne répond pas.
+- [x] **Brief de cadrage** : un seul document (plus de comparaison, document complet, historique ni complétude
+      en double), « Changé depuis la version n », les versions d'avant repliées ; la direction décide sous le
+      document et marque les dimensions à revoir dans le document.
+- [x] **Plan du projet** : une carte « Organisation du projet » avec sa source, les groupes l'un sous l'autre,
+      « Modifier » par ligne, « Lancer le plan » qui dit ce qu'il démarre, sans modale.
+- [x] Composant commun `SunkCard` (filet pleine largeur sous l'en-tête, Sacha 29/10) ; `PoQuestion` refait
+      (aussi pour le Cadrage juridique : le domaine seul au-dessus de la question).
+- Reste : passage navigateur des trois étapes, en responsable puis en direction.
+

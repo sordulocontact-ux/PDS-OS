@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { Avatar } from "@/components/ui/avatar";
 import { StatusDot } from "@/components/ui/status-dot";
 import { framingIntel } from "@/lib/i18n/fr/framing-intel";
 import { workflowStatus } from "@/lib/i18n/fr/workflow-status";
@@ -14,11 +15,11 @@ const fr = { framingIntel, workflowStatus };
 export const stepAnchor = (key: string) => `plan-step-${key}`;
 
 /**
- * A step of the plan in its column (proto frPlanView `.pcard`, PROJ-UX-07):
- * « **Stratégie** · Marketing », why it is there, « pilote · échéance »,
- * its real state once it runs, and what does not hold. `actions`: the
- * editing controls; `below`: the column and pilot menus of « Modifier le
- * plan ».
+ * A step of the plan, one row of its group (proto « Suite du Cadrage »,
+ * Sacha 29/10/2026; PROJ-UX-07): « **Stratégie** · Marketing », why it is
+ * there, its real state once it runs and what does not hold; its pilot and
+ * due date beside it; `actions` on the right (« Modifier », « Lancer
+ * maintenant »); `below`: the row's editor.
  */
 export function PlanStepCard({
   stepKey,
@@ -54,58 +55,72 @@ export function PlanStepCard({
   return (
     <li
       id={stepAnchor(stepKey)}
-      className="flex scroll-mt-24 flex-col gap-1 rounded-xl border border-[color:var(--border-hairline)] bg-card p-3"
+      className="grid scroll-mt-24 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 py-2.5 md:grid-cols-[minmax(0,1fr)_minmax(0,14rem)_auto]"
     >
-      <p className="break-words">
-        <span className="text-body-md font-semibold">{title}</span>
-        {group && (
-          <span className="text-caption text-[color:var(--text-secondary)]">
-            {" "}
-            · {group}
-          </span>
-        )}
-      </p>
-      {why && (
-        <p className="text-caption text-[color:var(--text-secondary)]">{why}</p>
-      )}
-      {!muted && (
-        <p className="text-caption text-[color:var(--text-secondary)]">
-          {[pilot ?? tp.noOwner, dueDate ? formatDay(dueDate) : null]
-            .filter(Boolean)
-            .join(" · ")}
+      <div className="flex min-w-0 flex-col gap-0.5">
+        <p className="break-words">
+          <span className="font-semibold">{title}</span>
+          {group && (
+            <span className="text-caption text-[color:var(--text-secondary)]">
+              {" "}
+              · {group}
+            </span>
+          )}
         </p>
-      )}
-      {specialized && (
-        <p className="text-caption">{tp.specialized(specialized)}</p>
-      )}
-      {status && (
-        <StatusDot
-          tone={workflowStatusTone[status]}
-          label={fr.workflowStatus.statuses[status]}
-          showLabel
-          className="text-caption text-[color:var(--text-secondary)]"
-        />
-      )}
-      {issues.length > 0 && (
-        <ul className="flex flex-col gap-1 rounded-lg bg-[var(--tone-warning-bg)] px-3 py-2 text-caption text-[color:var(--tone-warning-fg)]">
-          {issues.map((issue) => (
-            <li key={issue.text}>
-              {issue.href ? (
-                <Link
-                  href={issue.href}
-                  className="underline underline-offset-4"
-                >
-                  {issue.text}
-                </Link>
-              ) : (
-                issue.text
+        {why && (
+          <p className="text-caption text-[color:var(--text-secondary)]">
+            {why}
+          </p>
+        )}
+        {specialized && (
+          <p className="text-caption">{tp.specialized(specialized)}</p>
+        )}
+        {status && (
+          <StatusDot
+            tone={workflowStatusTone[status]}
+            label={fr.workflowStatus.statuses[status]}
+            showLabel
+            className="text-caption text-[color:var(--text-secondary)]"
+          />
+        )}
+        {issues.length > 0 && (
+          <ul className="mt-1 flex flex-col gap-1 rounded-lg bg-[var(--tone-warning-bg)] px-3 py-2 text-caption text-[color:var(--tone-warning-fg)]">
+            {issues.map((issue) => (
+              <li key={issue.text}>
+                {issue.href ? (
+                  <Link
+                    href={issue.href}
+                    className="underline underline-offset-4"
+                  >
+                    {issue.text}
+                  </Link>
+                ) : (
+                  issue.text
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+      <div className="col-start-1 row-start-2 flex min-w-0 items-center gap-2 md:col-start-auto md:row-start-auto">
+        {!muted && (
+          <>
+            <Avatar name={pilot ?? tp.noOwner} pictureUrl={null} />
+            <span className="flex min-w-0 flex-col text-body-sm">
+              <span className="truncate">{pilot ?? tp.noOwner}</span>
+              {dueDate && (
+                <span className="text-caption text-[color:var(--text-secondary)]">
+                  {formatDay(dueDate)}
+                </span>
               )}
-            </li>
-          ))}
-        </ul>
-      )}
-      {below}
-      {actions && <div className="flex flex-wrap gap-1">{actions}</div>}
+            </span>
+          </>
+        )}
+      </div>
+      <div className="col-start-2 row-span-2 row-start-1 flex flex-wrap justify-end gap-1 md:col-start-auto md:row-span-1 md:row-start-auto">
+        {actions}
+      </div>
+      {below && <div className="col-span-full">{below}</div>}
     </li>
   );
 }

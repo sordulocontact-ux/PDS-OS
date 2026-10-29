@@ -6,9 +6,10 @@
 export const poQuestion = {
   box: "Question de PO",
   rank: (n: number, total: number) => `${n} sur ${total}`,
-  // Domain · state, in capitals (« PARTICIPANTS · INFORMATION MANQUANTE »).
-  eyebrow: (domain: string, state: "missing" | "confirm") =>
-    `${domain} · ${state === "missing" ? "Information manquante" : "À confirmer"}`,
+  // The arrows of the Cadrage's question (Sacha 29/10/2026).
+  nav: "Parcourir les questions",
+  previous: "Question précédente",
+  next: "Question suivante",
   reading: {
     title: "Ce que PO a compris",
     hint: "Retirez ce qui est faux, puis enregistrez. Rien n'est gardé avant.",

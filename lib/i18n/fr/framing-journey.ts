@@ -135,16 +135,14 @@ export const framingJourney = {
     summaryNext: "Le Brief de cadrage part en validation",
   },
   dimensions: {
-    progress: (confirmed: number, total: number) =>
-      `Confirmation humaine · ${confirmed}/${total}`,
-    complete6: (n: number) =>
-      ` · ${plural(n, "dimension complète", "dimensions complètes")} sur 6`,
     question: "Question de PO",
     missing: "Information manquante",
     toConfirm: "À confirmer",
     toTreat: (n: number) => `${n} à traiter`,
     complete: "Complète",
     answer: "Répondre",
+    currentQuestion: "Question en cours",
+    listTitle: "Les 6 dimensions",
     done: "Les 6 dimensions sont complètes.",
     doneBody: "Le Brief de cadrage peut être envoyé en validation.",
     // The banner after an answer (lot 3 of Ibé's feedback): the verb of
@@ -187,34 +185,52 @@ export const framingJourney = {
     // While it runs (lot 3 of Ibé's feedback).
     sending: "Envoi en validation…",
     question: "Le projet est-il assez clair pour que PO organise la suite ?",
-    toReview: "Dimensions à revoir",
-    comment: "Commentaire",
-    commentHint: "Obligatoire pour demander une modification",
     approve: "Valider le Brief",
     requestChange: "Demander une modification",
-    dimsRequired: "Cochez au moins une dimension à revoir.",
+    // The direction marks the dimensions in the document it reads (Sacha
+    // 29/10/2026).
+    mark: "Marquer à revoir",
+    marked: "À revoir",
+    markHint:
+      "Marquez dans le Brief les dimensions à revoir : seules celles-là se rouvrent.",
+    markedList: (names: string) =>
+      `À revoir : ${names}. Seules ces dimensions se rouvrent.`,
+    whatChanges: "Ce qui doit changer",
+    sendRequest: "Envoyer la demande",
+    dimsRequired: "Marquez au moins une dimension à revoir dans le Brief.",
     commentRequired: "Dites ce qui doit changer.",
     returned: (name: string, comment: string, dims: string) =>
       `Retour de ${name} : « ${comment} » · ${dims}`,
-    validated: "✓ Brief validé · ✓ Cadrage terminé.",
-    validatedBody: (name: string | null, when: string) =>
-      `Validé par ${name ?? "la direction"} le ${when}. PO propose maintenant le plan du projet.`,
-    more: "Corrections détaillées et comparaison",
+    validatedMeta: (name: string | null, when: string) =>
+      `validée par ${name ?? "la direction"} le ${when}`,
+    // The version to send, made from the 6 dimensions at the gesture.
+    draftMeta: "Faite depuis les 6 dimensions, créée à l'envoi",
+    changedSince: (version: number, list: string) =>
+      `Changé depuis la version ${version} : ${list}`,
+    change: (label: string, before: string, after: string) =>
+      `${label}, ${before} → ${after}`,
+    previous: (n: number) =>
+      n > 1 ? `Versions précédentes (${n})` : "Version précédente",
     detailed: "Demander des corrections détaillées",
     openRequests: (n: number) =>
       `${plural(n, "demande obligatoire reste ouverte", "demandes obligatoires restent ouvertes")} : elle${n > 1 ? "s" : ""} empêche${n > 1 ? "nt" : ""} de valider. Levez-la${n > 1 ? "s" : ""} ou demandez une modification.`,
   },
   plan: {
-    po: "PO propose l'organisation à partir du Brief validé. Modifiez-la si besoin : rien ne démarre avant « Lancer le plan ».",
-    launched: (name: string | null, when: string) =>
-      `par ${name ?? "—"} le ${when}. Les workflows du plan ont démarré.`,
-    launchedStrong: "Plan lancé",
+    // The proposal, in one card (proto « Suite du Cadrage », Sacha 29/10/2026).
+    title: "Organisation du projet",
+    proposedFrom: (version: number | null) =>
+      version
+        ? `Proposée par PO à partir du Brief de cadrage · version ${version}`
+        : "Proposée par PO à partir du Brief de cadrage",
+    launchedMeta: (name: string | null, when: string) =>
+      `Lancée par ${name ?? "—"} le ${when}`,
+    starts: (list: string) =>
+      `Lancer le plan démarre : ${list}. Chaque pilote voit son étape dans Travail.`,
+    moreSettings: "Autres réglages",
+    modifyStep: (name: string) => `Modifier ${name}`,
     group: "Marketing",
     columnOf: (name: string) => `Colonne de ${name}`,
     pilotOf: (name: string) => `Pilote de ${name}`,
-    save: "Enregistrer le plan",
-    saved: "Plan enregistré.",
-    cancel: "Annuler",
     details: "Détail de chaque étape, ajouts et revue",
     stepsTitle: "Étapes du plan et historique",
   },

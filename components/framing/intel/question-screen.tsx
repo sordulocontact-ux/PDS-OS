@@ -21,7 +21,7 @@ import { ChoiceCards } from "@/components/ui/choice-cards";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PoQuestion } from "@/components/ui/po-question";
+import { PoQuestion, type PoQuestionNav } from "@/components/ui/po-question";
 import { Textarea } from "@/components/ui/textarea";
 import { answerEnvelope } from "@/lib/framing/actions/answers";
 import {
@@ -64,13 +64,16 @@ function titleOf(q: QuestionState): string {
  * dimension, the question adapted to what is known, and the ways to answer
  * — confirm, modify, « M'aider à définir », « Écrire moi-même ». A list
  * question brings its own lines (`children`) and keeps the common answers
- * (« Rien à signaler », « Passer »). In the box every question of PO uses
- * (PoQuestion, shared with the Cadrage juridique).
+ * (« Non applicable », « Rien à signaler », « Passer »…), folded under
+ * « Autre réponse » (Sacha 29/10/2026). In the box every question of PO
+ * uses (PoQuestion, shared with the Cadrage juridique), with the arrows to
+ * the question before and after (`nav`).
  */
 export function QuestionScreen({
   projectId,
   question,
   eyebrow,
+  nav,
   editable,
   nextHref,
   suggestions = [],
@@ -81,6 +84,7 @@ export function QuestionScreen({
   projectId: string;
   question: QuestionState;
   eyebrow: string;
+  nav?: PoQuestionNav;
   editable: boolean;
   nextHref: string;
   suggestions?: HelpSuggestion[];
@@ -103,6 +107,7 @@ export function QuestionScreen({
   // A PO suggestion picked: it opens the answer, editable, never saved as
   // is (« M'aider à définir » proposes, a person decides; PROJ-UX-04).
   const [picked, setPicked] = useState<string | null>(null);
+  const [more, setMore] = useState(false);
   const goNext = useNextQuestion(nextHref, question.key);
   const g = fr.framingJourney.dimensions.gesture;
   // After a gesture: its confirmation, then the next question (or the
@@ -133,9 +138,15 @@ export function QuestionScreen({
         toast.message(t.helpEmpty);
     });
 
-  const secondary = editable && (
+  const canSetAside = question.status !== "known" && def.kind !== "parties";
+  const hasSecondary =
+    editable &&
+    (canSetAside ||
+      (question.status === "missing" && (def.allowNone || !def.required)) ||
+      (question.status === "to_confirm" && isField));
+  const secondary = hasSecondary && (
     <>
-      {question.status !== "known" && def.kind !== "parties" && (
+      {canSetAside && (
         <>
           <Button
             size="sm"
@@ -259,7 +270,7 @@ export function QuestionScreen({
       : null;
 
   return (
-    <PoQuestion eyebrow={eyebrow} title={titleOf(question)}>
+    <PoQuestion eyebrow={eyebrow} nav={nav} title={titleOf(question)}>
       {isField && question.display && mode === "view" && (
         <div className="flex flex-col gap-1">
           <p className="text-body-md font-semibold break-words whitespace-pre-line">
@@ -378,7 +389,21 @@ export function QuestionScreen({
 
       {children}
       {(mode === "view" || missingWrite) && secondary && (
-        <div className="flex flex-wrap gap-1">{secondary}</div>
+        <div className="flex flex-wrap gap-1">
+          {more ? (
+            secondary
+          ) : (
+            <Button
+              size="sm"
+              variant="ghost"
+              aria-expanded={false}
+              className="text-[color:var(--text-secondary)]"
+              onClick={() => setMore(true)}
+            >
+              {t.otherAnswer}
+            </Button>
+          )}
+        </div>
       )}
     </PoQuestion>
   );

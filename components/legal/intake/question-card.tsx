@@ -11,7 +11,6 @@ import { ToneCallout } from "@/components/ui/tone-callout";
 import { VoiceFieldControl } from "@/components/voice/voice-field-control";
 import { auth } from "@/lib/i18n/fr/auth";
 import { legal } from "@/lib/i18n/fr/legal";
-import { poQuestion } from "@/lib/i18n/fr/po-question";
 import { factLabel } from "@/lib/legal/intake/labels";
 import {
   interpretLegalAnswer,
@@ -23,7 +22,7 @@ import {
   type ProposedFact,
 } from "@/lib/legal/intake/types";
 
-const fr = { auth, poQuestion, legal };
+const fr = { auth, legal };
 
 const FIELD_ID = "legal-answer";
 const NONE_FACT: ProposedFact = { kind: "none", value: {}, quote: null };
@@ -121,10 +120,7 @@ export function QuestionCard({
 
   return (
     <PoQuestion
-      eyebrow={fr.poQuestion.eyebrow(
-        t.domains[question.key],
-        from ? "confirm" : "missing",
-      )}
+      eyebrow={t.domains[question.key]}
       rank={{ position, total }}
       title={ask(question.title ?? "")}
       why={why}

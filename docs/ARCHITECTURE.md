@@ -1591,10 +1591,7 @@ Migration `…20261011500101_brief_requests_plan_steps.sql`, tests
   Décision prise sans le ticket : une demande facultative ne bloque rien.
 - **Écrans** : page du Brief = demandes (onglets Ouvertes / Toutes, `?demandes=toutes`), chaque
   demande avec son ancre (lien qui ouvre la question), auteur, date, version, statut, résolution ;
-  les demandes aussi **à leur place dans le document** ; « Comparer les versions »
-  (`BriefCompare`, par défaut avec la dernière version envoyée, `?comparer=n`) ; complétude
-  (`framingReadiness`) : « Cadrage complet » ≠ prérequis opérationnels satisfaits (éléments
-  Terminé ou Existe de la question Prérequis). Page du Cadrage : les demandes ouvertes en tête,
+  ce qui a changé se lit en tête du document (« Changé depuis la version n », 29/10/2026). Page du Cadrage : les demandes ouvertes en tête,
   et sur la question visée. Les deux comptes lisent la même table (RLS : le projet ou le valideur).
 - **Export PDF** (PROJ-BUG-05, cause trouvée et vérifiée sur la trace du build) : les clés de
   `outputFileTracingIncludes` sont des globs **picomatch** : `/api/projects/[projectId]/…` non
@@ -1673,34 +1670,36 @@ l'étape qui attend la personne (`framingLanding`) et les anciennes URL (`?step=
   (confirmé, écarté, à confirmer ; budget interne), puis le résumé aux participants quand tout est
   tranché (`MeetingSummaryBlock`, prochaine étape « Le Brief de cadrage part en validation »).
   L'écran `?step=review` est supprimé : les propositions de l'échange sont dans « Les 6 dimensions ».
-- **Les 6 dimensions** : « Confirmation humaine · x/y · n dimensions complètes sur 6 », encadré
-  « Question de PO » (`QuestionScreen`, refait sur le proto : capitale « OBJECTIF · INFORMATION
-  MANQUANTE », champ « Votre réponse * » ouvert d'emblée pour une information manquante — il **est**
-  « Écrire moi-même » —, « M'aider à définir » au-dessus, Confirmer / Modifier, « Non applicable » →
-  « Pourquoi ce n'est pas applicable * » / « Marquer non applicable », « À définir plus tard » →
-  « À définir avant le * » / « Reporter, avec une tâche »), puis 6 cartes repliables (`DimensionCards`,
-  `VersionCard`) : une ligne par information avec pastille Connu / Confirmé / À confirmer / Manquant /
-  Non applicable / À définir plus tard (les parties juridiques une par ligne sous leur ligne, avec
-  leur pastille et « Qualifier / Modifier » tant que la dimension est ouverte, `PartyLines` ; tons de
-  `framingLineTone` ; Connu vert comme Confirmé, Sacha
-  28/10/2026) et « Répondre » (`?q=`) ; après une demande de modification,
-  « Modifier » sur les réponses connues des dimensions rouvertes. Figé pendant la relecture (callout
-  cadenas). `DimensionNav` et `QuestionPager` ne servent plus au Cadrage. **Dictée gardée** : le bouton
-  « Dicter » reste sur la ligne de progression (il ne gêne pas le parcours, décision du lot 2).
+- **Les 6 dimensions** (proto `docs/protos/cadrage-suite.html`, Sacha 29/10/2026) : pour qui répond,
+  la question d'abord (`QuestionScreen` dans `PoQuestion`) : **le domaine seul** au-dessus (« Temporalité »),
+  flèches vers la question d'avant et d'après (toutes celles que la personne peut ouvrir, dans l'ordre,
+  `?q=`), champ « Votre réponse * » ouvert d'emblée pour une information manquante, « M'aider à
+  définir », Confirmer / Modifier ; « Non applicable », « À définir plus tard », « Rien à signaler »,
+  « Écarter », « Passer » repliés sous « Autre réponse ». Une réponse confirmée **se modifie** tant que
+  l'étape est en cours (« Modifier » sur sa ligne, ou les flèches). Dessous, « Les 6 dimensions » et la
+  dictée à côté, puis **une ligne par dimension dans un seul cadre** (`DimensionRows`, `<details>`),
+  repliées sauf celle de la question : une ligne par information avec sa pastille (les parties
+  juridiques une par ligne sous leur ligne, `PartyLines` ; tons de `framingLineTone`), « Question en
+  cours » à la place de la valeur de la question posée. Plus de ligne « Confirmation humaine » : ce
+  qui reste se dit une fois, dans « À vous : répondre à n questions de PO ». Les autres comptes ne
+  voient pas l'encadré (la ligne de l'acteur dit qui on attend). Figé pendant la relecture (callout
+  cadenas) ; après une demande de modification, seules les dimensions rouvertes s'ouvrent.
   **`QuestionScreen` est la référence** d'une question « une à la fois » (Cadrage juridique, lot 9).
-- **Brief de cadrage** : versions envoyées en cartes (seule la plus récente ouverte, les précédentes
-  repliées ; `BriefVersionDoc` = « 01 · Objectif » puis « Libellé : valeur · source », « À revoir » sur
-  les dimensions renvoyées). **Un seul geste** (Sacha, 28/10/2026, écart assumé au proto qui avait
-  « Créer le Brief » puis « Envoyer ») : quand tout est complet, la prochaine version s'affiche telle
-  qu'elle partira (le Cadrage en direct, « À envoyer », ouverte) et « Envoyer en validation à X »
-  (`sendFramingBrief`) la fige (`create_framing_brief`, ou le brouillon d'avant s'il dit la même chose)
-  et l'envoie (`send_framing_brief`) ; raison écrite si rien n'a changé depuis la dernière envoyée
-  (PROJ-BUG-05). Un brouillon jamais envoyé n'est plus montré en carte ; la direction décide **dans l'étape** (`BriefDirectionDecision` =
-  `DecisionPanel` + « Dimensions à revoir » ; `decideFramingBrief` → `decide_framing_brief` forme
-  « commentaire + dimensions » : seules les dimensions cochées rouvrent ; « Demander des corrections
-  détaillées » = l'ancien formulaire de demandes, replié). « Télécharger en PDF » et « Copier le lien » sur
-  **chaque carte de version** (28/10/2026) ; repliés sous « Corrections détaillées et comparaison » :
-  complétude, demandes, comparaison, document complet, historique. **PDF gardé** (bucket
+- **Brief de cadrage** (proto « Suite du Cadrage », Sacha 29/10/2026) : **un seul document**
+  (`SunkCard` + `BriefVersionDoc` : une section par dimension, « libellé | valeur », source dessous,
+  « À revoir » sur les dimensions renvoyées) : la version à envoyer, sinon la dernière envoyée ; en tête
+  « Copier le lien » et le PDF, puis « Changé depuis la version n : … » (`briefChanges`). **Un seul
+  geste** (Sacha, 28/10/2026) : quand tout est complet, la prochaine version s'affiche telle qu'elle
+  partira et « Envoyer en validation à X » (`sendFramingBrief`) la fige (`create_framing_brief`, ou le
+  brouillon d'avant s'il dit la même chose) et l'envoie (`send_framing_brief`) ; raison écrite si rien n'a
+  changé depuis la dernière envoyée (PROJ-BUG-05). La direction décide **sous le document**
+  (`BriefReview`) : « Valider le Brief » ou « Demander une modification », qui fait **marquer les
+  dimensions dans le document** et dire ce qui doit changer (`decideFramingBrief` →
+  `decide_framing_brief` : seules les dimensions marquées rouvrent) ; « Demander des corrections
+  détaillées » reste replié dessous. Les versions d'avant sont repliées (« Versions précédentes »),
+  avec le retour de la direction ; les demandes de correction (`BriefRequestsSection`) ne s'affichent
+  que s'il y en a. Comparaison, document complet, historique et complétude ne sont plus affichés
+  (doublons du document, retirés le 29/10). **PDF gardé** (bucket
   `framing-brief-pdfs`, `lib/framing/brief-pdf-file.ts`, migration `20261028000701`) : une version
   envoyée est imprimée une fois par état (`<id>-<state>.pdf`, « Validée » s'imprime), juste après l'envoi
   et la validation (`after`), ou au premier téléchargement ; ensuite le fichier est relu sans navigateur.
@@ -2242,13 +2241,15 @@ Cadrage › Plan du projet `app/(app)/app/projects/[projectId]/framing/plan`, `l
 - Mon Travail : un projet au Cadrage validé et sans plan a pour prochaine action
   « Construire et lancer le plan du projet ».
 - **Le plan est l'étape 4 du Cadrage** (lot 2 « Projet complet », 19/10/2026, remplace la décision du
-  07/10) : `/framing/plan` (`routes.projectPlan`), plus rien sur la Vue d'ensemble. Avant lancement :
-  encadré PO, `PlanBoard` en 4 colonnes deux par deux (`PlanColumns`), cartes du proto (`PlanStepCard` :
-  « **Stratégie** · Marketing », raison, « pilote · échéance »), « Modifier le plan » = menus « Colonne
-  de X » / « Pilote de X » sous chaque carte + la modale détaillée (exécutant, échéance, dépendances),
-  ordre, retrait, ajout, « Enregistrer le plan » / « Annuler » ; « Lancer le plan » garde la revue
-  (`PlanLaunchReview`) et passe par `launchProjectPlan` (`withOutcome`, tous les parcours). Lancé :
-  « Plan lancé par X le … », colonnes en lecture, « Lancer » d'un workflow resté en attente (plans lancés
+  07/10) : `/framing/plan` (`routes.projectPlan`), plus rien sur la Vue d'ensemble. Avant lancement
+  (proto « Suite du Cadrage », 29/10/2026) : une `SunkCard` « Organisation du projet », sa source en tête
+  (« Proposée par PO à partir du Brief de cadrage · version n », plus d'encadré PO), « Ajouter une étape »
+  dans l'en-tête, les 4 groupes l'un sous l'autre (`PlanColumns`), une ligne par étape (`PlanStepCard` :
+  « **Stratégie** · Marketing », raison, pilote et échéance), son « Modifier » ouvre la ligne
+  (`PlanRowEditor` : Colonne, Pilote, « Autres réglages » = la modale détaillée, monter / descendre,
+  retirer) ; rien n'est enregistré avant « Lancer le plan », qui dit à côté ce qu'il démarre et passe par
+  `launchProjectPlan` (`withOutcome`, tous les parcours ; plus de modale de revue). Lancé : la même carte,
+  « Lancée par X le … », lignes en lecture avec leur statut réel, « Lancer » d'un workflow resté en attente (plans lancés
   avant ce lot) et « Hors du plan », puis `PlanStepsSection` et l'historique repliés.
 - **Huit workflows** (migration `20261019020101_plan_all_workflows.sql`, tests
   `plan-all-workflows.test.sql`) : `strategy`, `design`, `production`, `activations`, `review` (le
@@ -2279,9 +2280,9 @@ Cadrage › Plan du projet `app/(app)/app/projects/[projectId]/framing/plan`, `l
   date cible ou avant celle d'une dépendance, blocage (dépendance des workflows, lien),
   **« À revoir »** quand le Cadrage a changé depuis le Brief validé (dimensions → workflows
   nourris, `workflowsToReview`). Avant le lancement : modifier (`PlanStepForm`), monter /
-  descendre, retirer, **ajouter une étape** (sans workflow, rien n'est lancé par elle), puis une
-  **revue** avant « Lancer le plan » (`PlanLaunchReview` : ce qui démarre, ce qui attend, ce qui
-  suit son étape, les ajouts, les retraits, le nombre d'incohérences). Après : « Étapes du plan »
+  descendre, retirer, **ajouter une étape** (sans workflow, rien n'est lancé par elle), puis
+  « Lancer le plan », ce qu'il démarre et le nombre d'incohérences écrits à côté (la modale de revue
+  `PlanLaunchReview` est retirée le 29/10/2026). Après : « Étapes du plan »
   sous la Vue d'ensemble (`PlanStepsSection`, onglets par statut), modifier / ajouter / déplacer
   / marquer faite une étape ajoutée (`update_project_plan_item`, `add_project_plan_item`,
   `move_project_plan_item`, `set_project_plan_item_done`, responsable seul), **historique du
@@ -4100,7 +4101,7 @@ Remplace l'étape « Suivi » et les pages de branche (`docs/projet-complet/lega
   table ni donnée touchée).
 
 - **Cadrage juridique comme le Cadrage (J2)** : la question vit dans `PoQuestion`
-  (`components/ui/po-question.tsx`, encadré « Question de PO », surtitre domaine · état, rang) et
+  (`components/ui/po-question.tsx`, surtitre du domaine seul depuis le 29/10/2026, rang) et
   la lecture de PO dans `PoReading` (« ✦ Ce que PO a compris », citations, « Retirer ») — deux
   briques communes prévues pour être reprises par le Cadrage (lot 2), qui garde ses propres
   issues (Confirmer / Modifier, Non applicable, À définir plus tard). Les faits gardés portent

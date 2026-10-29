@@ -52,16 +52,8 @@ export const planSteps = {
   missingTitle: "Donnez un nom à l'étape.",
   dueInvalid: "Date invalide.",
   review: {
-    title: "Lancer le plan ?",
-    body: "Relisez ce qui démarre. Le lancement est enregistré à votre nom, avec la date.",
-    starts: "Démarrent maintenant",
-    steps: "Autres étapes",
-    removed: "Retirés du plan",
     issues: (n: number) =>
       `${n} ${n === 1 ? "incohérence signalée" : "incohérences signalées"} : vous pouvez lancer quand même, ou corriger d'abord.`,
-    none: "Rien",
-    line: (title: string, pilot: string, due: string | null) =>
-      `${title} · ${pilot}${due ? ` · ${due}` : ""}`,
   },
   launchOne: {
     title: (name: string) => `Lancer ${name} ?`,

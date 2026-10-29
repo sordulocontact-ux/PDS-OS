@@ -1,28 +1,24 @@
 "use client";
 
-import {
-  IconChevronDown,
-  IconChevronUp,
-  IconPlus,
-} from "nucleo-sharp-essential";
+import { IconPlus } from "nucleo-sharp-essential";
 import { useRef, useState } from "react";
-import { toast } from "sonner";
 
-import { OptionSelect } from "@/components/framing/option-select";
+import { FormMessage } from "@/components/auth/form-message";
 import { PlanColumns } from "@/components/plan/plan-columns";
-import { PlanLaunchReview } from "@/components/plan/plan-launch-review";
+import { PlanRowEditor } from "@/components/plan/plan-row-editor";
 import { PlanStepCard } from "@/components/plan/plan-step-card";
 import { PlanStepForm } from "@/components/plan/plan-step-form";
 import { Button } from "@/components/ui/button";
 import { DialogButton } from "@/components/ui/dialog-button";
-import { FormDialog } from "@/components/ui/form-dialog";
+import { SunkCard } from "@/components/ui/sunk-card";
+import { ToneCallout } from "@/components/ui/tone-callout";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { dialogs } from "@/lib/i18n/fr/dialogs";
 import { framingIntel } from "@/lib/i18n/fr/framing-intel";
 import { framingJourney } from "@/lib/i18n/fr/framing-journey";
 import { planSteps } from "@/lib/i18n/fr/plan-steps";
 import { launchProjectPlan } from "@/lib/plan/actions";
 import {
+  LAUNCHABLE,
   MARKETING_PARTS,
   PLAN_COLUMNS,
   type PlanColumn,
@@ -37,7 +33,7 @@ import type {
   WorkflowState,
 } from "@/lib/workflow-status/rules";
 
-const fr = { dialogs, framingIntel, planSteps, framingJourney };
+const fr = { framingIntel, planSteps, framingJourney };
 
 type Draft = ProposedItem & {
   removed: boolean;
@@ -54,11 +50,12 @@ export type PlanContext = {
 };
 
 /**
- * The plan PO proposes (ticket § 9, PROJ-UX-07), in its four columns, each
- * step with its real state, pilot, executor, due date, dependencies and
- * what does not hold. « Modifier le plan » lets the owner change a step,
- * reorder it, take it out or add one; « Lancer le plan » shows what starts
- * before recording it. Nothing is launched before.
+ * The plan PO proposes (ticket § 9, PROJ-UX-07; proto « Suite du Cadrage »,
+ * Sacha 29/10/2026), in one card: « Proposée par PO à partir du Brief… »,
+ * « Ajouter une étape » in its head, the four groups one under the other,
+ * each step with its pilot, due date and what does not hold. Its own
+ * « Modifier » opens a step in place; under the plan, what « Lancer le
+ * plan » starts, said before the gesture. Nothing is recorded before it.
  */
 export function PlanBoard({
   projectId,
@@ -66,23 +63,25 @@ export function PlanBoard({
   members,
   editable,
   context,
+  title,
+  meta,
 }: {
   projectId: string;
   items: ProposedItem[];
   members: Array<{ personId: string; name: string }>;
   editable: boolean;
   context: PlanContext;
+  title: string;
+  meta: string;
 }) {
   const t = fr.framingIntel.plan;
   const tj = fr.framingJourney.plan;
   const ts = fr.planSteps;
-  const [confirming, setConfirming] = useState(false);
-  const { pending, run, error, setError } = useWriteSubmit(() => {
-    setConfirming(false);
-  }, fr.framingJourney.done.planLaunched);
-  const [editing, setEditing] = useState(false);
-  // « Annuler » brings back the plan as it was before « Modifier le plan ».
-  const [saved, setSaved] = useState<Draft[] | null>(null);
+  const { pending, run, error } = useWriteSubmit(
+    undefined,
+    fr.framingJourney.done.planLaunched,
+  );
+  const [editing, setEditing] = useState<string | null>(null);
   const nextAdded = useRef(1);
   const [drafts, setDrafts] = useState<Draft[]>(() =>
     items.map((item, index) => ({
@@ -147,9 +146,131 @@ export function PlanBoard({
     return Promise.resolve({ ok: true as const });
   };
   const removed = drafts.filter((d) => d.removed);
+  // Every workflow of the plan starts (migration 20261019020101).
+  const starting = kept
+    .filter((d) => d.workflow !== null && LAUNCHABLE.includes(d.workflow))
+    .sort(
+      (a, b) =>
+        PLAN_COLUMNS.indexOf(a.column) - PLAN_COLUMNS.indexOf(b.column) ||
+        a.order - b.order,
+    )
+    .map((d) => d.title);
+
+  const launch = () =>
+    run(() =>
+      launchProjectPlan(
+        projectId,
+        drafts
+          .filter((d) => !d.added)
+          .map((d) => ({
+            key: d.key,
+            column: d.column,
+            removed: d.removed,
+            ownerPersonId: d.ownerPersonId,
+            executorPersonId: d.executorPersonId,
+            dueDate: d.dueDate,
+            dependsOn: d.dependsOn,
+            order: d.order,
+          })),
+        drafts
+          .filter((d) => d.added)
+          .map((d) => ({
+            key: d.key,
+            title: d.title,
+            column: d.column,
+            removed: d.removed,
+            ownerPersonId: d.ownerPersonId,
+            executorPersonId: d.executorPersonId,
+            dueDate: d.dueDate,
+            dependsOn: d.dependsOn,
+            order: d.order,
+          })),
+      ),
+    );
+
+  const add = (
+    <DialogButton
+      label={ts.add}
+      icon={IconPlus}
+      variant="ghost"
+      title={ts.addTitle}
+      description={ts.addBody}
+    >
+      {(close) => (
+        <PlanStepForm
+          initial={{
+            column: "meanwhile",
+            title: "",
+            ownerPersonId: null,
+            executorPersonId: null,
+            dueDate: null,
+            dependsOn: [],
+          }}
+          workflow={null}
+          members={members}
+          withTitle
+          submitLabel={ts.add}
+          doneMessage={ts.addedToast}
+          run={(v) => {
+            const key = `added-${nextAdded.current++}`;
+            setDrafts((all) => [
+              ...all,
+              {
+                key,
+                column: v.column,
+                workflow: null,
+                title: v.title ?? "",
+                why: "",
+                dependsOn: (v.dependsOn ?? []) as PlanWorkflow[],
+                specialized: null,
+                ownerPersonId: v.ownerPersonId ?? null,
+                executorPersonId: v.executorPersonId ?? null,
+                dueDate: v.dueDate ?? null,
+                removed: false,
+                order: all.length,
+                added: true,
+              },
+            ]);
+            return Promise.resolve({ ok: true as const });
+          }}
+          onDone={close}
+        />
+      )}
+    </DialogButton>
+  );
+
+  const footer = editable && (
+    <>
+      {issueCount > 0 && (
+        <ToneCallout tone="warning">{ts.review.issues(issueCount)}</ToneCallout>
+      )}
+      <FormMessage kind="error">{error}</FormMessage>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+        <Button
+          size="lg"
+          disabled={pending}
+          aria-busy={pending || undefined}
+          onClick={launch}
+        >
+          {pending ? t.launching : t.launch}
+        </Button>
+        {starting.length > 0 && (
+          <p className="min-w-0 flex-1 text-caption text-[color:var(--text-secondary)]">
+            {tj.starts(starting.join(", "))}
+          </p>
+        )}
+      </div>
+    </>
+  );
 
   return (
-    <div className="flex flex-col gap-6">
+    <SunkCard
+      id="project-plan"
+      title={title}
+      meta={meta}
+      actions={editable && add}
+      footer={footer}
+    >
       <PlanColumns
         cards={
           Object.fromEntries(
@@ -158,6 +279,7 @@ export function PlanBoard({
               inColumn(column).map((d, index, list) => {
                 const step = asSteps.find((x) => x.key === d.key)!;
                 const note = d.workflow === null && !d.added;
+                const open = editing === d.key;
                 return (
                   <PlanStepCard
                     key={d.key}
@@ -180,83 +302,41 @@ export function PlanBoard({
                     dueDate={d.dueDate}
                     issues={issuesOf(step)}
                     muted={note}
-                    below={
-                      editing &&
-                      !note && (
-                        <div className="grid gap-2 pt-1 sm:grid-cols-2">
-                          <OptionSelect
-                            id={`plan-column-${d.key}`}
-                            label={tj.columnOf(d.title)}
-                            options={t.columns}
-                            value={d.column}
-                            onChange={(v) =>
-                              update(d.key, { column: v as PlanColumn })
-                            }
-                          />
-                          <OptionSelect
-                            id={`plan-pilot-${d.key}`}
-                            label={tj.pilotOf(d.title)}
-                            options={Object.fromEntries(
-                              members.map((m) => [m.personId, m.name]),
-                            )}
-                            value={d.ownerPersonId ?? ""}
-                            onChange={(v) =>
-                              update(d.key, { ownerPersonId: v || null })
-                            }
-                          />
-                        </div>
+                    actions={
+                      editable &&
+                      !open && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          aria-label={tj.modifyStep(d.title)}
+                          onClick={() => setEditing(d.key)}
+                        >
+                          {fr.framingIntel.guide.modify}
+                        </Button>
                       )
                     }
-                    actions={
-                      editing && (
-                        <>
-                          {!note && (
-                            <DialogButton
-                              label={ts.edit}
-                              title={ts.editTitle}
-                              description={ts.editBodyDraft}
-                              size="xs"
-                            >
-                              {(close) => (
-                                <PlanStepForm
-                                  initial={valuesOf(d)}
-                                  workflow={d.workflow}
-                                  members={members}
-                                  withTitle={d.added}
-                                  submitLabel={ts.save}
-                                  doneMessage={ts.saved}
-                                  run={(v) => apply(d.key, v)}
-                                  onDone={close}
-                                />
-                              )}
-                            </DialogButton>
-                          )}
-                          <Button
-                            size="icon-xs"
-                            variant="ghost"
-                            aria-label={ts.moveUp}
-                            disabled={index === 0}
-                            onClick={() => move(d, -1)}
-                          >
-                            <IconChevronUp aria-hidden />
-                          </Button>
-                          <Button
-                            size="icon-xs"
-                            variant="ghost"
-                            aria-label={ts.moveDown}
-                            disabled={index === list.length - 1}
-                            onClick={() => move(d, 1)}
-                          >
-                            <IconChevronDown aria-hidden />
-                          </Button>
-                          <Button
-                            size="xs"
-                            variant="ghost"
-                            onClick={() => update(d.key, { removed: true })}
-                          >
-                            {t.remove}
-                          </Button>
-                        </>
+                    below={
+                      open && (
+                        <PlanRowEditor
+                          title={d.title}
+                          column={d.column}
+                          ownerPersonId={d.ownerPersonId}
+                          workflow={d.workflow}
+                          values={valuesOf(d)}
+                          withTitle={d.added}
+                          members={members}
+                          first={index === 0}
+                          last={index === list.length - 1}
+                          note={note}
+                          onChange={(change) => update(d.key, change)}
+                          onApply={(v) => apply(d.key, v)}
+                          onMove={(offset) => move(d, offset)}
+                          onRemove={() => {
+                            update(d.key, { removed: true });
+                            setEditing(null);
+                          }}
+                          onClose={() => setEditing(null)}
+                        />
                       )
                     }
                   />
@@ -268,10 +348,13 @@ export function PlanBoard({
       />
 
       {removed.length > 0 && (
-        <section aria-labelledby="plan-removed" className="flex flex-col gap-2">
-          <h3 id="plan-removed" className="text-body-md font-semibold">
+        <section
+          aria-labelledby="plan-removed"
+          className="flex flex-col gap-2 border-t border-[color:var(--border-hairline)] pt-3.5"
+        >
+          <h4 id="plan-removed" className="font-semibold">
             {t.removedTitle}
-          </h3>
+          </h4>
           <ul className="flex flex-wrap gap-2">
             {removed.map((d) => (
               <li key={d.key} className="flex items-center gap-2 text-body-md">
@@ -290,154 +373,6 @@ export function PlanBoard({
           </ul>
         </section>
       )}
-
-      {editable && (
-        <div className="flex flex-wrap gap-2">
-          {editing ? (
-            <>
-              <Button
-                onClick={() => {
-                  setEditing(false);
-                  setSaved(null);
-                  toast.success(tj.saved);
-                }}
-              >
-                {tj.save}
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  if (saved) setDrafts(saved);
-                  setSaved(null);
-                  setEditing(false);
-                }}
-              >
-                {tj.cancel}
-              </Button>
-              <DialogButton
-                label={ts.add}
-                icon={IconPlus}
-                variant="ghost"
-                title={ts.addTitle}
-                description={ts.addBody}
-              >
-                {(close) => (
-                  <PlanStepForm
-                    initial={{
-                      column: "meanwhile",
-                      title: "",
-                      ownerPersonId: null,
-                      executorPersonId: null,
-                      dueDate: null,
-                      dependsOn: [],
-                    }}
-                    workflow={null}
-                    members={members}
-                    withTitle
-                    submitLabel={ts.add}
-                    doneMessage={ts.addedToast}
-                    run={(v) => {
-                      const key = `added-${nextAdded.current++}`;
-                      setDrafts((all) => [
-                        ...all,
-                        {
-                          key,
-                          column: v.column,
-                          workflow: null,
-                          title: v.title ?? "",
-                          why: "",
-                          dependsOn: (v.dependsOn ?? []) as PlanWorkflow[],
-                          specialized: null,
-                          ownerPersonId: v.ownerPersonId ?? null,
-                          executorPersonId: v.executorPersonId ?? null,
-                          dueDate: v.dueDate ?? null,
-                          removed: false,
-                          order: all.length,
-                          added: true,
-                        },
-                      ]);
-                      return Promise.resolve({ ok: true as const });
-                    }}
-                    onDone={close}
-                  />
-                )}
-              </DialogButton>
-            </>
-          ) : (
-            <>
-              <Button onClick={() => setConfirming(true)}>{t.launch}</Button>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setSaved(drafts);
-                  setEditing(true);
-                }}
-              >
-                {t.edit}
-              </Button>
-            </>
-          )}
-        </div>
-      )}
-      <FormDialog
-        open={confirming}
-        onOpenChange={(open) => {
-          setError(null);
-          setConfirming(open);
-        }}
-        title={ts.review.title}
-        description={ts.review.body}
-        closeLabel={fr.dialogs.close}
-      >
-        <PlanLaunchReview
-          steps={drafts.map((d) => ({
-            key: d.key,
-            title: d.title,
-            workflow: d.workflow,
-            column: d.column,
-            removed: d.removed,
-            pilot: nameOf(d.ownerPersonId) ?? t.noOwner,
-            dueDate: d.dueDate,
-            note: d.workflow === null && !d.added,
-          }))}
-          issueCount={issueCount}
-          pending={pending}
-          error={error}
-          onCancel={() => setConfirming(false)}
-          onConfirm={() =>
-            run(() =>
-              launchProjectPlan(
-                projectId,
-                drafts
-                  .filter((d) => !d.added)
-                  .map((d) => ({
-                    key: d.key,
-                    column: d.column,
-                    removed: d.removed,
-                    ownerPersonId: d.ownerPersonId,
-                    executorPersonId: d.executorPersonId,
-                    dueDate: d.dueDate,
-                    dependsOn: d.dependsOn,
-                    order: d.order,
-                  })),
-                drafts
-                  .filter((d) => d.added)
-                  .map((d) => ({
-                    key: d.key,
-                    title: d.title,
-                    column: d.column,
-                    removed: d.removed,
-                    ownerPersonId: d.ownerPersonId,
-                    executorPersonId: d.executorPersonId,
-                    dueDate: d.dueDate,
-                    dependsOn: d.dependsOn,
-                    order: d.order,
-                  })),
-              ),
-            )
-          }
-        />
-      </FormDialog>
-    </div>
+    </SunkCard>
   );
 }

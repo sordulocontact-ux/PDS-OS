@@ -7,10 +7,8 @@ import { PlanBoard } from "@/components/plan/plan-board";
 import { PlanColumns } from "@/components/plan/plan-columns";
 import { PlanStepCard } from "@/components/plan/plan-step-card";
 import { PlanStepsSection } from "@/components/plan/plan-steps-section";
-import { StepWaiting } from "@/components/shell/journey/step-waiting";
 import { Fold } from "@/components/ui/fold";
-import { PoCallout } from "@/components/ui/po-callout";
-import { ToneCallout } from "@/components/ui/tone-callout";
+import { SunkCard } from "@/components/ui/sunk-card";
 import { briefDrift } from "@/lib/framing/brief-drift";
 import { framingJourneyContext } from "@/lib/framing/journey-context";
 import { fr } from "@/lib/i18n/fr";
@@ -27,12 +25,13 @@ import { loadWorkflowStates } from "@/lib/workflow-status/load";
 import { applicableWorkflows } from "@/lib/workflow-status/rules";
 
 /**
- * Cadrage › Plan du projet (proto frPlanView, ticket § 9): PO proposes the
- * organisation from the validated Brief — Focus, Ensuite, Pendant ce temps,
- * À anticiper, one card per workflow — the owner changes it (column and
- * pilot in place, the rest in each step's form) and « Lancer le plan »
- * starts every workflow. Launched, the plan stays here, readable, with its
- * steps and history folded.
+ * Cadrage › Plan du projet (proto « Suite du Cadrage », Sacha 29/10/2026;
+ * ticket § 9): PO's proposal in one card, its source said in its head —
+ * Focus, Ensuite, Pendant ce temps, À anticiper, one row per workflow — the
+ * owner opens a row to change it and « Lancer le plan » starts every
+ * workflow, said under it before the gesture. Launched, the same card says
+ * who launched it and each row its real state; the steps' table and
+ * history stay folded.
  */
 export default async function FramingPlanPage({
   params,
@@ -54,28 +53,26 @@ export default async function FramingPlanPage({
     (r) => r.field_key === "target_date" && r.status === "confirmed",
   );
   const target = typeof targetRow?.value === "string" ? targetRow.value : null;
+  const briefVersion =
+    k.briefs.find((b) => b.state === "approved")?.version ?? null;
 
   let body: React.ReactNode = null;
   if (validated && flows && !plan)
     body = (
-      <>
-        <PoCallout>{t.po}</PoCallout>
-        <PlanBoard
-          projectId={projectId}
-          items={proposePlan(k)}
-          members={k.framing.members}
-          editable={canEdit}
-          context={{
-            states: flows.states,
-            targetDate: target,
-            review: Object.fromEntries(workflowsToReview(drift)),
-            dependencies: flows.dependencies,
-          }}
-        />
-        {!canEdit && (
-          <StepWaiting step={ctx.steps.find((s) => s.key === "plan")} />
-        )}
-      </>
+      <PlanBoard
+        projectId={projectId}
+        items={proposePlan(k)}
+        members={k.framing.members}
+        editable={canEdit}
+        title={t.title}
+        meta={t.proposedFrom(briefVersion)}
+        context={{
+          states: flows.states,
+          targetDate: target,
+          review: Object.fromEntries(workflowsToReview(drift)),
+          dependencies: flows.dependencies,
+        }}
+      />
     );
   else if (plan && flows) {
     // Stratégie, Master, Juridique left out of the plan wait until added
@@ -129,16 +126,16 @@ export default async function FramingPlanPage({
     ) as Record<PlanColumn, React.ReactNode[]>;
     body = (
       <>
-        <ToneCallout tone="success">
-          <span>
-            <b>{t.launchedStrong}</b>{" "}
-            {t.launched(
-              plan.launchedByName,
-              formatShortInstant(plan.launchedAt),
-            )}
-          </span>
-        </ToneCallout>
-        <PlanColumns cards={cards} />
+        <SunkCard
+          id="project-plan"
+          title={t.title}
+          meta={t.launchedMeta(
+            plan.launchedByName,
+            formatShortInstant(plan.launchedAt),
+          )}
+        >
+          <PlanColumns cards={cards} />
+        </SunkCard>
         {absent.length > 0 && (
           <section className="flex flex-col gap-2">
             <h3 className="text-body-md font-semibold">

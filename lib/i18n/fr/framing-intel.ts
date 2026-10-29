@@ -521,9 +521,6 @@ export const framingIntel = {
   guide: {
     eyebrow: (number: string, dimension: string) => `${number} · ${dimension}`,
     knownTitle: "Déjà connu",
-    // The capital line above the question (proto frQuestion).
-    capital: (dimension: string, missing: boolean) =>
-      `${dimension} · ${missing ? "Information manquante" : "À confirmer"}`,
     help: "M'aider à définir",
     helping: "PO cherche…",
     write: "Écrire moi-même",
@@ -532,6 +529,8 @@ export const framingIntel = {
     modify: "Modifier",
     skip: "Passer",
     dismiss: "Écarter",
+    // The ways to answer other than the value, folded (Sacha 29/10/2026).
+    otherAnswer: "Autre réponse",
     save: "Enregistrer",
     cancel: "Annuler",
     choose: "Choisir",
@@ -571,7 +570,6 @@ export const framingIntel = {
     remainingTitle: "Avant de créer le Brief",
     remaining: (n: number) =>
       `${plural(n, "information", "informations")} à confirmer ou à compléter.`,
-    locked: "Dimension fermée : le valideur n'a pas demandé de la modifier.",
     lockedAll: "Le cadrage n'est plus modifiable.",
     correction: (comment: string, dimensions: string) =>
       `Le valideur demande une modification : « ${comment} ». Rouvert : ${dimensions}.`,
@@ -712,9 +710,6 @@ export const framingIntel = {
     removedTitle: "Retiré du plan",
     launch: "Lancer le plan",
     launching: "Lancement…",
-    launchConfirmTitle: "Lancer le plan ?",
-    launchConfirmBody:
-      "Tous les workflows du plan démarrent maintenant ; la colonne dit l'ordre de priorité.",
     launched: (date: string, name: string | null) =>
       name ? `Lancé le ${date} par ${name}` : `Lancé le ${date}`,
     launchNow: "Lancer maintenant",

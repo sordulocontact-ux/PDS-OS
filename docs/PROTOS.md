@@ -136,6 +136,7 @@ node docs/protos/tests/distribution.cjs  # Distribution : paramètres, contrôle
 node docs/protos/tests/marketing.cjs     # Marketing complet : Stratégie, Conception, Production, Activations, Suivi & bilan jusqu'à la clôture
 node docs/protos/tests/titre.cjs         # Titre du Catalogue (29/10) : six onglets, dossier rempli sur place, parts à 100 %, motif obligatoire, lecteur seul, mobile
 node docs/protos/tests/accueil.cjs       # Accueil (29/10) : quatre rôles, moments, valider puis voir l'accueil suivant, motif obligatoire, mobile, sombre
+node docs/protos/tests/cadrage-suite.cjs # Suite du Cadrage (29/10) : 6 dimensions (flèches, modifier une réponse), Brief envoyé, modification marquée dans le document, version 2, plan modifié puis lancé, mobile
 node docs/protos/tests/projet.cjs        # Projet complet : Cadrage puis Master, Juridique, Marketing, Distribution dans une seule coquille, moments du projet, rôles, pages privées réunies
 ```
 

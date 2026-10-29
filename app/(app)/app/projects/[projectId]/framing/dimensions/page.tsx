@@ -3,11 +3,10 @@ import { IconLock } from "nucleo-sharp-essential";
 
 import { FramingDictation } from "@/components/framing/framing-dictation";
 import { FramingStepFrame } from "@/components/framing/framing-step-frame";
-import { DimensionCards } from "@/components/framing/dimensions/dimension-cards";
+import { DimensionRows } from "@/components/framing/dimensions/dimension-rows";
 import { FramingReturn } from "@/components/framing/dimensions/framing-return";
 import { QuestionLines } from "@/components/framing/dimensions/question-lines";
 import { QuestionScreen } from "@/components/framing/intel/question-screen";
-import { StepWaiting } from "@/components/shell/journey/step-waiting";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
 import { editableDimensions } from "@/lib/framing/analyse";
@@ -29,11 +28,13 @@ const first = (value: string | string[] | undefined) =>
   Array.isArray(value) ? value[0] : value;
 
 /**
- * Cadrage › Les 6 dimensions (proto frDims, ticket § 4 and § 6): the human
- * confirmation so far, PO's one question (the next one, or the one chosen
- * with « Répondre », ?q=), then the six dimensions at a glance. Frozen
- * while the direction reads the Brief; a correction reopens only the
- * dimensions it names (framing_dimension_editable).
+ * Cadrage › Les 6 dimensions (proto « Suite du Cadrage », Sacha 29/10/2026;
+ * ticket § 4 and § 6): for the one who answers, PO's one question (the next
+ * one, or the one opened with « Répondre » / « Modifier » or the arrows,
+ * ?q=), then the six dimensions folded under it, the dictation beside
+ * them. How many are left is said once, in the step's « À vous » line.
+ * Frozen while the direction reads the Brief; a correction reopens only
+ * the dimensions it names (framing_dimension_editable).
  */
 export default async function FramingDimensionsPage({
   params,
@@ -57,12 +58,19 @@ export default async function FramingDimensionsPage({
   const latest = k.briefs[0];
   const correction = latest?.state === "changes_requested";
 
-  const all = assessment.dimensions.flatMap((d) => d.questions);
+  // The questions the viewer may open, in order: the arrows walk them.
+  const reachable = assessment.dimensions
+    .flatMap((d) => d.questions)
+    .filter((q) => editableIn(q.dimension));
   const asked = first(sp.q);
-  const question: QuestionState | null = frozen
-    ? null
-    : (isQuestionKey(asked) && all.find((q) => q.key === asked)) ||
-      assessment.next;
+  const question: QuestionState | null =
+    (isQuestionKey(asked) && reachable.find((q) => q.key === asked)) ||
+    (assessment.next && editableIn(assessment.next.dimension)
+      ? assessment.next
+      : null);
+  const at = question ? reachable.indexOf(question) : -1;
+  const hrefOf = (q: QuestionState | undefined) =>
+    q ? routes.projectFramingQuestion(projectId, q.dimension, q.key) : null;
   const nextHref = (q: QuestionState) => {
     const next = nextAfter(assessment, q.key);
     return next
@@ -72,13 +80,9 @@ export default async function FramingDimensionsPage({
   const lines = Object.fromEntries(
     Object.keys(QUESTIONS).map((key) => [key, linesOf(key, k)]),
   );
-  const complete = assessment.dimensions.filter(
-    (d) => d.status === "known",
-  ).length;
 
   let box: React.ReactNode = null;
   if (question) {
-    const editable = editableIn(question.dimension);
     // A list question brings its lines; a single value opens its field.
     const kind = QUESTIONS[question.key].kind;
     const hasLines =
@@ -117,11 +121,14 @@ export default async function FramingDimensionsPage({
           key={`${question.key}-${question.status}-${question.display ?? ""}`}
           projectId={projectId}
           question={question}
-          eyebrow={ti.guide.capital(
-            ti.dimensions[question.dimension],
-            question.status === "missing",
-          )}
-          editable={editable}
+          eyebrow={ti.dimensions[question.dimension]}
+          nav={{
+            position: at + 1,
+            total: reachable.length,
+            previous: hrefOf(reachable[at - 1]),
+            next: hrefOf(reachable[at + 1]),
+          }}
+          editable
           nextHref={nextHref(question)}
           suggestions={suggestions}
           itemPresets={[
@@ -139,14 +146,11 @@ export default async function FramingDimensionsPage({
               projectId={projectId}
               question={question}
               k={k}
-              editable={editable}
+              editable
               nextHref={nextHref(question)}
             />
           )}
         </QuestionScreen>
-        {canEdit && working && !editable && (
-          <ToneCallout tone="neutral">{ti.guide.locked}</ToneCallout>
-        )}
       </>
     );
   } else if (!frozen && assessment.ready)
@@ -158,13 +162,10 @@ export default async function FramingDimensionsPage({
       </ToneCallout>
     );
 
-  const progress = (
-    <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)] tabular-nums">
-      <b className="font-semibold text-foreground">
-        {t.progress(assessment.counts.known, assessment.total)}
-      </b>
-      {t.complete6(complete)}
-    </p>
+  const heading = (
+    <h3 id="dimension-rows" className="text-body-lg font-semibold">
+      {t.listTitle}
+    </h3>
   );
 
   return (
@@ -187,23 +188,23 @@ export default async function FramingDimensionsPage({
             {t.frozen(ctx.validator?.name ?? "—")}
           </ToneCallout>
         )}
-        {canEdit && working && !correction ? (
-          <FramingDictation projectId={projectId}>{progress}</FramingDictation>
-        ) : (
-          progress
-        )}
-        {!canEdit && working && question && (
-          <StepWaiting step={ctx.steps.find((s) => s.key === "dimensions")} />
-        )}
         {box}
-        <DimensionCards
+        <DimensionRows
           projectId={projectId}
           assessment={assessment}
           lines={lines}
           current={question?.key ?? null}
           editable={editableIn}
-          modifiable={correction}
           parties={{ board: legalPartyBoard(k), members: k.framing.members }}
+          header={
+            canEdit && working && !correction ? (
+              <FramingDictation projectId={projectId}>
+                {heading}
+              </FramingDictation>
+            ) : (
+              heading
+            )
+          }
         />
       </div>
     </FramingStepFrame>

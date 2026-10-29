@@ -13,19 +13,22 @@ const fr = { framingIntel, framingJourney };
  * One information of the Cadrage (proto `.irow`): « **Libellé** · valeur »
  * (« Pas encore connu » when nothing is), its source, its state pill, and
  * an action on the right (« Répondre »). `eyebrow`: the dimension, in
- * « Voir le détail ».
+ * « Voir le détail ». `current`: the question asked above, said once there
+ * (« Question en cours » here, never its value twice).
  */
 export function FramingLine({
   question,
   lines,
   eyebrow,
   side,
+  current = false,
 }: {
   question: QuestionState;
   // The lines of a list question, in words.
   lines: string[];
   eyebrow?: string;
   side?: ReactNode;
+  current?: boolean;
 }) {
   const t = fr.framingJourney.dimensions;
   const state = lineStateOf(question);
@@ -49,7 +52,11 @@ export function FramingLine({
               {fr.framingIntel.questions[question.key].label}
             </span>
             {" · "}
-            {value ? (
+            {current ? (
+              <span className="text-[color:var(--selection)]">
+                {t.currentQuestion}
+              </span>
+            ) : value ? (
               <span className="whitespace-pre-line">{value}</span>
             ) : (
               <span className="text-caption text-muted-foreground">
@@ -59,7 +66,7 @@ export function FramingLine({
           </span>
         </span>
       }
-      source={lineSourceOf(question)}
+      source={current ? undefined : lineSourceOf(question)}
       state={{ tone: framingLineTone[state], label: t.states[state] }}
       side={side}
     />
