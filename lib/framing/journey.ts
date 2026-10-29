@@ -53,16 +53,13 @@ export function framingJourney(i: FramingJourneyInput): JourneyStep[] {
   const validated = i.stage === "validated";
   const beyond = frozen || validated;
 
-  // 1. Démarrer le cadrage → « Échange de cadrage » or « Départ ».
+  // 1. Démarrer le cadrage: one name whichever way in (Sacha 29/10/2026);
+  // the way chosen shows in its line (« Tenir l'échange du 26/10 »).
   const startDone = beyond || Boolean(i.call?.held) || i.startedDirect;
   const start: JourneyStep = {
     key: "start",
     href: href("start"),
-    title: i.call
-      ? t.steps.start.titleCall
-      : i.startedDirect || beyond
-        ? t.steps.start.titleDirect
-        : t.steps.start.title,
+    title: t.steps.start.title,
     // Once the exchange is prepared, the choice is made: no « why » about
     // the two ways in (Sacha 28/10).
     why: i.call ? "" : t.steps.start.why,
@@ -72,7 +69,13 @@ export function framingJourney(i: FramingJourneyInput): JourneyStep[] {
     roles: exec,
     prereq: [],
     next: ["dimensions"],
-    actor: startDone ? null : owned(i.call ? t.todo.hold : t.todo.start),
+    actor: startDone
+      ? null
+      : owned(
+          i.call
+            ? t.todo.holdOn(formatShortDay(i.call.occurredAt, { bare: true }))
+            : t.todo.start,
+        ),
     summary: startDone
       ? i.call?.held
         ? t.summary.exchange(formatShortDay(i.call.occurredAt, { bare: true }))

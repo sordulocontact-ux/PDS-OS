@@ -1039,6 +1039,10 @@ prévu, à tous les modules qui en ont un (Stratégie, Conception, Production) :
   police intégrée, bouton « Télécharger en PDF » sur chaque carte de version. Migration
   `20261028000701_framing_brief_pdfs` (appliquée en pré-prod, à pousser en prod avec accord), test
   `supabase/tests/framing-brief-pdfs.test.sql` (6/6 en pré-prod).
+- 29/10 : la 1re étape garde son nom, « Démarrer le cadrage » (et « Démarrer la stratégie »), quel que soit
+  le chemin : plus de « Échange de cadrage » ni de « Départ » comme titre (Sacha : un nom qui change perd le
+  repère). Sa ligne dit le chemin : « À vous · choisir comment démarrer », puis « Tenir l'échange du JJ/MM »,
+  puis « Échange du JJ/MM » ou « Commencé directement ».
 
 Reste : passage navigateur ; l'enregistrement dans la carte pour la Stratégie, la Conception et la
 Production ; « Annuler l'échange » pour l'échange stratégique et créatif si on le veut ;

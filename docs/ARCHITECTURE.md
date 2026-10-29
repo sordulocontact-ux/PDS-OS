@@ -1638,8 +1638,9 @@ l'étape qui attend la personne (`framingLanding`) et les anciennes URL (`?step=
   Stratégie › Démarrer la stratégie ») ; données lues une fois par requête dans
   `lib/framing/journey-context.ts` (`framingJourneyContext`, `cache()` : connaissance, évaluation, call
   de cadrage `framing_calls`, plan) ; loader `lib/journey/framing.ts` branché dans `JOURNEY_LOADERS`
-  (le relais de la Vue d'ensemble s'efface). Acteurs : le responsable du projet (« Démarrer le cadrage »,
-  « Tenir l'échange de cadrage », « Répondre à n questions de PO », « Envoyer le Brief en validation »
+  (le relais de la Vue d'ensemble s'efface). La 1re étape s'appelle toujours « Démarrer le cadrage », quel
+  que soit le chemin (Sacha 29/10/2026 : un nom qui change perd le repère) ; le chemin se lit dans sa ligne.
+  Acteurs : le responsable du projet (« Choisir comment démarrer », « Tenir l'échange du JJ/MM », « Répondre à n questions de PO », « Envoyer le Brief en validation »
   (un seul geste depuis le 28/10/2026), « Lancer le plan du projet ») ;
   la direction `kind: "validate"` sur « Valider le Brief de cadrage » (Validations du projet).
   Le Brief garde ses versions lisibles après une demande de modification (défaut du proto non recopié).
@@ -1962,7 +1963,7 @@ en accordéon, la grille de choix, « Tout accepter », la page `/strategy/brief
 d'exécution décrits plus haut** (tables et fonctions gardées).
 
 - **Parcours** (`lib/strategy/journey.ts`, pur ; contexte `lib/strategy/step-data.ts`, `cache()`) :
-  `start` Démarrer la stratégie (titre « Échange stratégique » ou « Départ ») · `dimensions` Les 8
+  `start` Démarrer la stratégie (nom fixe, Sacha 29/10/2026 ; « Tenir l'échange du JJ/MM » dans sa ligne) · `dimensions` Les 8
   dimensions · `validation` Validation du Brief de sortie · `validated` Stratégie validée. Prérequis
   externe « Cadrage › Plan du projet » (`isWorkflowLaunched`), statuts et acteurs calculés (« Confirmer
   ou écarter n propositions de PO », « Arbitrer : … », « Compléter : … », « Valider le Brief de sortie »

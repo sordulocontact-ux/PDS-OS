@@ -27,8 +27,6 @@ export const framingJourney = {
   steps: {
     start: {
       title: "Démarrer le cadrage",
-      titleCall: "Échange de cadrage",
-      titleDirect: "Départ",
       why: "Commencer directement avec PO, ou préparer un échange : les deux chemins mènent au même Brief de cadrage.",
     },
     dimensions: {
@@ -45,8 +43,9 @@ export const framingJourney = {
     },
   },
   todo: {
-    start: "Démarrer le cadrage",
+    start: "Choisir comment démarrer",
     hold: "Tenir l'échange de cadrage",
+    holdOn: (day: string) => `Tenir l'échange du ${day}`,
     answer: (n: number) =>
       `Répondre à ${plural(n, "question", "questions")} de PO`,
     send: "Envoyer le Brief en validation",

@@ -62,8 +62,6 @@ export const strategyJourney = {
   steps: {
     start: {
       title: "Démarrer la stratégie",
-      titleCall: "Échange stratégique",
-      titleDirect: "Départ",
       why: "Commencer directement, ou préparer un échange avec l'équipe ; ce qui y sera dit deviendra des propositions, dimension par dimension.",
     },
     dimensions: {
@@ -81,8 +79,9 @@ export const strategyJourney = {
     },
   },
   todo: {
-    start: "Démarrer la stratégie",
+    start: "Choisir comment démarrer",
     hold: "Tenir l'échange stratégique",
+    holdOn: (day: string) => `Tenir l'échange du ${day}`,
     confirm: (n: number) =>
       `Confirmer ou écarter ${plural(n, "proposition", "propositions")} de PO`,
     arbitrate: (dimension: string) => `Arbitrer : ${lcFirst(dimension)}`,

@@ -81,17 +81,14 @@ export function strategyJourney(i: StrategyJourneyInput): JourneyStep[] {
   const returned = i.brief?.state === "changes_requested";
   const beyond = validated || sent || i.stage === "awaiting_validation";
 
-  // 1. Démarrer la stratégie → « Échange stratégique » or « Départ ».
+  // 1. Démarrer la stratégie: one name whichever way in (Sacha 29/10/2026);
+  // the way chosen shows in its line (« Tenir l'échange du 26/10 »).
   const startDone =
     beyond || i.started || Boolean(i.call?.held) || Boolean(i.approved);
   const start: JourneyStep = {
     key: "start",
     href: href("start"),
-    title: i.call
-      ? t.steps.start.titleCall
-      : startDone
-        ? t.steps.start.titleDirect
-        : t.steps.start.title,
+    title: t.steps.start.title,
     why: t.steps.start.why,
     status: !i.plan.launched ? "blocked" : startDone ? "done" : "current",
     owner: null,
@@ -112,7 +109,11 @@ export function strategyJourney(i: StrategyJourneyInput): JourneyStep[] {
     next: ["dimensions"],
     actor:
       i.plan.launched && !startDone
-        ? owned(i.call ? t.todo.hold : t.todo.start)
+        ? owned(
+            i.call
+              ? t.todo.holdOn(formatShortDay(i.call.occurredAt, { bare: true }))
+              : t.todo.start,
+          )
         : null,
     summary: startDone
       ? i.call?.held
