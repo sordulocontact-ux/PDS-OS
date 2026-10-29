@@ -101,23 +101,14 @@ export function StepPanel({
         aria-labelledby="journey-step-title"
         className="flex min-w-0 flex-col gap-3.5 rounded-2xl border border-[color:var(--border-hairline)] bg-card p-5"
       >
-        {/* Title and « why » in one column, the state beside them at the
-            top (Figma 307:4789). */}
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex min-w-0 flex-col gap-2">
-            <h2
-              id="journey-step-title"
-              className="text-[length:var(--type-figure-lg)] leading-[var(--type-figure-lg-lh)] font-medium tracking-[var(--type-display-tracking)] text-balance"
-            >
-              {step.title}
-            </h2>
-            {step.why && (
-              <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-pretty text-[color:var(--text-secondary)]">
-                {step.why}
-              </p>
-            )}
-          </div>
-          <div className="flex shrink-0 flex-wrap items-center justify-end gap-2.5">
+        <div className="flex flex-wrap items-center justify-between gap-2.5">
+          <h2
+            id="journey-step-title"
+            className="text-[length:var(--type-figure-lg)] leading-[var(--type-figure-lg-lh)] font-medium tracking-[var(--type-display-tracking)] text-balance"
+          >
+            {step.title}
+          </h2>
+          <div className="flex flex-wrap items-center gap-2.5">
             {step.due && step.status !== "done" && (
               <span
                 className={cn(
@@ -134,6 +125,11 @@ export function StepPanel({
             </StatusBadge>
           </div>
         </div>
+        {step.why && (
+          <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
+            {step.why}
+          </p>
+        )}
         {/* The lead already names the viewer's own gesture. */}
         {!(lead && step.actor?.viewer) && <StepActor step={step} />}
         {lead ? (
