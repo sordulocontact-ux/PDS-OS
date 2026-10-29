@@ -105,7 +105,6 @@ export default async function StrategyStartPage({
               data,
               ctx.budget.lines,
             )}
-            ownerName={project.ownerName}
           />
         ) : (
           step.status === "current" && (

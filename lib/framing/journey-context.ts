@@ -18,6 +18,8 @@ export type FramingCallInfo = {
   callId: string;
   occurredAt: string;
   createdAt: string;
+  // Its objective (framing_calls.purpose), in the planned call's block.
+  goal: string;
   // Recorded or processed: its page carries the pipeline.
   recorded: boolean;
   // Its report exists: PO proposed what was said.
@@ -32,7 +34,7 @@ async function loadFramingCall(
   const { data, error } = await supabase
     .from("framing_calls")
     .select(
-      "created_at, call:calls!inner(id, occurred_at, status, audio_path, call_reports(id))",
+      "created_at, purpose, call:calls!inner(id, occurred_at, status, audio_path, call_reports(id))",
     )
     .eq("project_id", projectId)
     .order("created_at", { ascending: false })
@@ -44,6 +46,7 @@ async function loadFramingCall(
     callId: data.call.id,
     occurredAt: data.call.occurred_at,
     createdAt: data.created_at,
+    goal: data.purpose,
     recorded: Boolean(data.call.audio_path) || data.call.status !== "draft",
     reported: (data.call.call_reports ?? []).length > 0,
   };

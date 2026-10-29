@@ -71,7 +71,7 @@ export function RecorderStart({
         {choice}
         {callout}
         <div className="flex flex-wrap items-center gap-2">
-          <Button size="sm" onClick={onStart} disabled={starting}>
+          <Button size="lg" onClick={onStart} disabled={starting}>
             {starting ? t.starting : compact.label}
           </Button>
           {compact.beside}

@@ -25,6 +25,7 @@ export function CancelExchangeButton({
   const t = fr.framingJourney.start.cancel;
   return (
     <ConfirmButton
+      size="lg"
       label={t.label}
       title={t.title}
       body={t.body(when)}

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { buttonVariants } from "@/components/ui/button";
 import { startChoiceClass } from "@/components/ui/start-choice-class";
 import { StartChoiceSubmit } from "@/components/ui/start-choice-submit";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -14,6 +15,10 @@ export type StartChoice = {
   title: string;
   // What the choice does, in one or two sentences.
   body: string;
+  // The gesture, drawn as a button at the foot of the card (Figma PDS OS
+  // 304:20801, the Cadrage): filled on the recommended card. Only a
+  // drawing: the whole card stays the one target.
+  action?: string;
   // The card is a link (a page that starts this way).
   href?: string;
   // The card runs this (from a client parent).
@@ -23,8 +28,8 @@ export type StartChoice = {
 /**
  * How to start a step (docs/projet-complet/commons.md § 3, proto `.choice`):
  * cards side by side, the recommended one first with its pill, and under
- * the grid the reason the code computed (« Il manque … : un échange ira plus
- * vite que des questions séparées. »). Clicking a card chooses and moves
+ * it the reason the code computed (« Il manque … : un échange ira plus vite
+ * que des questions séparées. »). Clicking a card chooses and moves
  * on: no radio and no « Confirmer ». Each card is a link (`href`), a client
  * call (`onChoose`), or a submit of `formAction` with `name=value` (a
  * Server Action, from a server parent). A form choice that triggers nothing
@@ -63,11 +68,12 @@ export function StartChoices({
           Number(b.value === recommended) - Number(a.value === recommended),
       );
   const cards = ordered.map((choice) => {
+    const isRecommended = choice.value === recommended;
     const inner = (
       <>
         <span className="flex flex-wrap items-center gap-2">
           <span className="text-body-md font-semibold">{choice.title}</span>
-          {choice.value === recommended && (
+          {isRecommended && (
             <StatusBadge tone="info" size="sm">
               {fr.decisions.start.recommended}
             </StatusBadge>
@@ -76,6 +82,18 @@ export function StartChoices({
         <span className="text-caption text-[color:var(--text-secondary)]">
           {choice.body}
         </span>
+        {choice.action && (
+          <span className="mt-auto pt-5">
+            <span
+              aria-hidden
+              className={buttonVariants({
+                variant: isRecommended ? "default" : "outline",
+              })}
+            >
+              {choice.action}
+            </span>
+          </span>
+        )}
       </>
     );
     if (choice.href)
@@ -104,6 +122,8 @@ export function StartChoices({
     );
   });
 
+  // The reason sits under the recommended card, in its column.
+  const recommendedAt = ordered.findIndex((c) => c.value === recommended);
   const grid: ReactNode = (
     <div
       className={cn("grid gap-3", columns === 2 && "sm:grid-cols-2")}
@@ -111,6 +131,16 @@ export function StartChoices({
       aria-label={legend}
     >
       {cards}
+      {reason && (
+        <p
+          className={cn(
+            "text-caption text-[color:var(--text-secondary)]",
+            columns === 2 && recommendedAt === 1 && "sm:col-start-2",
+          )}
+        >
+          {reason}
+        </p>
+      )}
     </div>
   );
   return (
@@ -121,11 +151,6 @@ export function StartChoices({
         </p>
       )}
       {formAction ? <form action={formAction}>{grid}</form> : grid}
-      {reason && (
-        <p className="text-caption text-[color:var(--text-secondary)]">
-          {reason}
-        </p>
-      )}
     </div>
   );
 }

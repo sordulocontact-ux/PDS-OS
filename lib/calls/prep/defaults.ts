@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { PreparedPoint } from "@/lib/calls/prepare-schema";
+import { requireApproved } from "@/lib/auth/dal";
 import { nextRoundHourInputs } from "@/lib/calls/prep/dates";
 import { loadPrepPool, proposedKeys } from "@/lib/calls/prep/people";
 import {
@@ -33,13 +34,18 @@ export async function callPrepDefaults(args: {
   note?: string;
   formats?: readonly PrepFormat[];
 }): Promise<CallPrepDefaults> {
-  const people = await loadPrepPool(args.projectId, args.linkContactIds);
+  const [access, people] = await Promise.all([
+    requireApproved(),
+    loadPrepPool(args.projectId, args.linkContactIds),
+  ]);
   const { date, time } = nextRoundHourInputs(new Date());
   return {
     kind: args.kind,
     projectId: args.projectId,
     noun: args.noun,
     title: args.title,
+    organizer:
+      people.find((p) => p.key === `m:${access.personId}`)?.name ?? null,
     target: args.target ?? {},
     people,
     attendeeKeys: proposedKeys(people, args.proposal),

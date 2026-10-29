@@ -109,7 +109,6 @@ export default async function FramingStartPage({
                 : null
             }
             callDefaults={await callSheetData(k, assessment)}
-            ownerName={project.ownerName}
           />
         ) : (
           <p className="text-caption text-[color:var(--text-tertiary)]">

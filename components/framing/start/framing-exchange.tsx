@@ -97,6 +97,7 @@ export async function FramingExchange({
     const inPlace = (
       <ExchangeInPlace
         planned={planned}
+        goal={call.goal}
         state={state}
         recorded={call.recorded}
         canEdit={canEdit}

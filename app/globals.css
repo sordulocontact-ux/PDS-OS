@@ -238,6 +238,10 @@
      retouché à la demande de Sacha le 27/09/2026 : 200 px au lieu des 258 px
      du Figma, jugés trop larges). */
   --project-nav-width: 200px;
+  /* Barre du haut d'une page de projet, qui porte le fil d'Ariane (Figma PDS OS,
+     nœud 304:20801, Sacha 29/10/2026) : alignée sur la ligne du sélecteur de
+     projet (8 + 40 + 6 px, plus son filet). */
+  --project-bar-height: 55px;
   /* Marge entre le bord de l'écran et les barres latérales : nulle depuis le
      07/10/2026, elles sont collées au bord et pleine hauteur (Figma « PDS OS »,
      nœud 47:12047). */

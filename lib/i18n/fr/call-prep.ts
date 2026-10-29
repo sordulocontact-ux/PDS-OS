@@ -75,9 +75,7 @@ export const callPrep = {
   minutesLabel: (topic: string) => `Durée de « ${topic} », en minutes`,
   minutes: (n: number) => `${n} min`,
   total: (n: number) => `Environ ${n} min`,
-  // Sent with the invitation: shown in the form, written in the Google
-  // event's description (lib/calls/prep/invitation.ts).
-  sent: "Envoyé avec l'invitation",
+  // Written in the Google event's description (lib/calls/prep/invitation.ts).
   invitation: {
     goal: (goal: string) => `Objectif : ${goal}`,
     agenda: (minutes: number) => `Ordre du jour (environ ${minutes} min) :`,
@@ -87,24 +85,21 @@ export const callPrep = {
     fact: (label: string, value: string) => `${label} : ${value}`,
     footer: "Préparé dans PDS OS.",
   },
-  goal: "Objectif",
+  // « Objectif de l'échange », not to be mixed up with the Cadrage's
+  // dimension « Objectif » in the agenda (Figma PDS OS 304:20801).
+  goal: "Objectif de l'échange",
   goalMissing: "Dites en une phrase à quoi sert l'échange.",
-  editGoal: "Modifier",
   documents: "Documents",
-  noDocuments: "Aucun document",
   // Buttons.
   review: "Voir le récapitulatif",
+  back: "Revenir au choix",
   startDirectly: "Commencer directement plutôt",
   missingCount: (n: number) =>
     n > 1 ? `${n} champs à compléter.` : "Un champ à compléter.",
   // The summary, at the same place.
+  // Its title is the call's name, its block the planned call's.
   recap: {
-    heading: "Récapitulatif avant création",
-    when: "Quand",
     whenValue: (when: string, format: string) => `${when} · ${format}`,
-    participants: "Participants",
-    agenda: "Ordre du jour",
-    goal: "Objectif",
     invitations: "Les invitations partent à la confirmation.",
     invitationsExternal: (names: string, many: boolean) =>
       `Les invitations partent à la confirmation : ${names} ${many ? "sont externes" : "est externe"}.`,
@@ -125,7 +120,6 @@ export const callPrep = {
     copied: "Lien copié",
     participants: "Participants",
     agenda: "Ordre du jour",
-    questions: (topic: string) => `Questions à poser sur « ${topic} »`,
     note: {
       exchange:
         "L'échange s'enregistre dans PDS OS. À la fin, PO propose ce qui a été dit, point par point, avec la phrase exacte.",

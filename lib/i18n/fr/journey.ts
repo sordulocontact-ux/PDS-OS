@@ -22,6 +22,8 @@ export const journey = {
   },
   after: (titles: string) => `Après : ${titles}`,
   me: "À vous",
+  // « À vous : choisir comment démarrer » (Figma PDS OS 304:20801).
+  joinTodo: (who: string, todo: string) => `${who} : ${todo}`,
   waitingFor: (who: string) => `En attente ${de(who)}`,
   rework: "À revoir",
   alert: {

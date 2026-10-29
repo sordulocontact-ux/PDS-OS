@@ -20,12 +20,14 @@ const fr = { callPrep, framingJourney };
  */
 export function ExchangeInPlace({
   planned,
+  goal,
   state,
   recorded,
   canEdit,
   ownerName,
 }: {
   planned: PlannedCall;
+  goal: string;
   state: CallInPlace;
   recorded: boolean;
   canEdit: boolean;
@@ -45,6 +47,7 @@ export function ExchangeInPlace({
     <PlannedCallFacts
       call={planned}
       noun="exchange"
+      goal={goal}
       waiting={
         canEdit
           ? null

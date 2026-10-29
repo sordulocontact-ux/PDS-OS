@@ -1043,6 +1043,19 @@ prévu, à tous les modules qui en ont un (Stratégie, Conception, Production) :
   le chemin : plus de « Échange de cadrage » ni de « Départ » comme titre (Sacha : un nom qui change perd le
   repère). Sa ligne dit le chemin : « À vous · choisir comment démarrer », puis « Tenir l'échange du JJ/MM »,
   puis « Échange du JJ/MM » ou « Commencé directement ».
+- 29/10 : **début du Cadrage selon la maquette Figma** (PDS OS, section 304:20801, 5 écrans) :
+  - **fil d'Ariane** dans une barre du haut de 55 px, « Module / Étape » sans le projet, sur toutes les pages d'un
+    projet ; plus de ligne de faits du projet par défaut ; Vue d'ensemble : le nom seul (ni état ni faits) ;
+  - parcours et cartes : « À vous : … » (deux-points au lieu du point médian) ; « Avant les workflows » : « Après :
+    étape attendue », sans « Ouvrir le Cadrage » ;
+  - départ : bouton dessiné au pied de chaque carte (plein sur la recommandée), raison sous elle, « Un échange avec
+    la direction » ;
+  - formulaire : titre au-dessus d'un bloc, « Objectif de l'échange * » toujours modifiable, plus de « Envoyé avec
+    l'invitation » à l'écran (les Sujets ne vont que dans l'invitation Google), « Revenir au choix » au lieu de la
+    ligne « Départ … Changer » et de « Commencer directement plutôt » (Cadrage et Stratégie) ;
+  - récapitulatif et échange prévu dans le même bloc (`CallPlanBlock`) : titre du call, Quand / Organisé par,
+    lien (une fois créé), participants, ordre du jour à côté de l'objectif ; plus de questions de PO sous les
+    points ; « Enregistrer l'échange » et « Annuler l'échange » en boutons pleine taille.
 
 Reste : passage navigateur ; l'enregistrement dans la carte pour la Stratégie, la Conception et la
 Production ; « Annuler l'échange » pour l'échange stratégique et créatif si on le veut ;

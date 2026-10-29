@@ -52,14 +52,13 @@ export const projectShell = {
         later: "Après l'étape précédente",
       },
       badge: { done: "Fait", current: "En cours", later: "À venir" },
-      open: "Ouvrir le Cadrage",
     },
     workflows: {
       title: "Les workflows",
       stepOf: (n: number, total: number, title: string) =>
         `Étape ${n} sur ${total} · ${title}`,
-      mine: (todo: string) => `À vous · ${todo}`,
-      other: (who: string, todo: string) => `${who} · ${todo}`,
+      mine: (todo: string) => `À vous : ${todo}`,
+      other: (who: string, todo: string) => `${who} : ${todo}`,
       nothing: "Rien en attente",
       restricted: "Réservé à la direction et aux chefs de projet",
       progress: (done: number, total: number) =>

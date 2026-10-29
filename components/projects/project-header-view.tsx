@@ -34,7 +34,7 @@ export type ProjectHeaderOverrides = Partial<
 };
 
 // Before a page's first header is read (components/projects/project-
-// header.tsx): the trail, the title and the facts as rows. Like the header,
+// header.tsx): the trail and the title as rows. Like the header,
 // the default one steps aside when the page has its own.
 export function ProjectHeaderSkeleton({
   isDefault = false,
@@ -50,9 +50,11 @@ export function ProjectHeaderSkeleton({
         isDefault && "group-has-[[data-project-header=page]]/project:hidden",
       )}
     >
-      <Skeleton className="h-5 w-56 max-w-full" />
+      {/* The trail, in the page's top bar like ModuleHeader's. */}
+      <div className="absolute inset-x-0 top-0 flex h-[var(--project-bar-height)] items-center px-6">
+        <Skeleton className="h-5 w-56 max-w-full" />
+      </div>
       <Skeleton className="h-9 w-64 max-w-full" />
-      <Skeleton className="h-5 w-96 max-w-full" />
     </div>
   );
 }
@@ -82,7 +84,6 @@ export function ProjectHeaderView({
   const opens = useModuleEntries(data.projectId);
   const sections = projectSections(data.projectId, data.sections);
   const trail = moduleTrail(data.projectId, pathname, sections, {
-    projectTitle: data.projectTitle,
     subModules: data.subModules,
   });
   // A crumb naming a module or a pill opens where its entry does.
@@ -124,7 +125,9 @@ export function ProjectHeaderView({
               }))
             : undefined
         }
-        facts={facts ?? data.facts}
+        // Only a module's own facts: the project's line is gone from the
+        // head (Figma PDS OS 304:20801, Sacha 29/10/2026).
+        facts={facts}
         actions={
           actions || data.canAddExpense ? (
             <>

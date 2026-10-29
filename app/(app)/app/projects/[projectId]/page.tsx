@@ -15,7 +15,6 @@ import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { workflowCards } from "@/lib/overview/cards";
 import { overviewDependencies } from "@/lib/overview/dependencies";
-import { overviewHead } from "@/lib/overview/head";
 import { loadShellJourneys } from "@/lib/overview/journeys";
 import { planLaunchedAt } from "@/lib/plan/queries";
 import {
@@ -23,14 +22,14 @@ import {
   listProjectCreatives,
 } from "@/lib/projects/creatives";
 import { canEditProject } from "@/lib/projects/edit-access";
-import { projectHeaderData } from "@/lib/projects/header";
 import { getProject, listAssignablePeople } from "@/lib/projects/queries";
 import { allInOrder } from "@/lib/utils/parallel";
 import { loadWorkflowStates } from "@/lib/workflow-status/load";
 
 /**
  * Where a project opens (proto « Projet complet », host.js `overview()`):
- * its name and state, its facts, « Maintenant » (every action of the
+ * its name alone (Figma PDS OS 304:20801, Sacha 29/10/2026: no state, no
+ * facts line), « Maintenant » (every action of the
  * viewer, the Cadrage first), then before « Lancer le plan » where the
  * Cadrage stands, after it the workflows and what one hands another.
  * Everything read from the journeys and the workflows (docs/ARCHITECTURE.md
@@ -77,14 +76,11 @@ export default async function ProjectOverviewPage({
     );
   }
 
-  const [all, flows, launchedAt, header] = await Promise.all([
+  const [all, flows, launchedAt] = await Promise.all([
     loadShellJourneys(project.id),
     loadWorkflowStates(project.id),
     planLaunchedAt(project.id),
-    projectHeaderData(project.id),
   ]);
-  if (!header) notFound();
-  const head = overviewHead(project, header, flows, launchedAt);
   const framing =
     all.journeys.find((journey) => journey.module === "framing")?.steps ?? [];
   const deps =
@@ -95,8 +91,6 @@ export default async function ProjectOverviewPage({
       <ProjectHeader
         projectId={project.id}
         title={project.title}
-        status={head.status}
-        facts={head.facts}
         actions={
           // The whole project's closing (ticket « Suivi & bilan »), apart
           // from the Marketing's: not in the proto, kept reachable here.
@@ -131,7 +125,7 @@ export default async function ProjectOverviewPage({
       ) : (
         <>
           {/* The Plan du projet is the Cadrage's fourth step (lot 2). */}
-          <BeforeWorkflows projectId={project.id} steps={framing} />
+          <BeforeWorkflows steps={framing} />
         </>
       )}
     </div>

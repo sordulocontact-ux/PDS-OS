@@ -70,7 +70,7 @@ export function AgendaList({
           {t.agenda}
         </h3>
         {items.length > 0 && (
-          <span className="text-caption text-[color:var(--text-tertiary)] tabular-nums">
+          <span className="text-body-md text-[color:var(--text-secondary)] tabular-nums">
             {t.total(total)}
           </span>
         )}

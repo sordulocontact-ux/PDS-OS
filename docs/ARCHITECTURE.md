@@ -707,6 +707,14 @@ Socle de toutes les zones (sous-lots C0 à C5 de `docs/projet-complet/commons.md
   Distribution n'ont **plus de chevrons** (décision C0) : leur étape finit le fil (`steps` par
   défaut de `projectHeaderData`) en attendant leur parcours. `ProjectPageTitle`, `SectionSteps`
   et `ProcessSteps` sont supprimés ; `masterSteps` / `distributionSteps` restent (listes d'étapes).
+  **Barre du haut** (Figma PDS OS 304:20801, Sacha 29/10/2026) : `ProjectFrame` dessine une barre vide de
+  `--project-bar-height` avec son filet au-dessus de la colonne, et `ModuleHeader` pose son fil en
+  `absolute` dedans, la colonne (`relative`) étant la boîte positionnée la plus proche. Ainsi le fil reste
+  rendu au serveur avec l'en-tête qui le porte, et s'efface avec lui quand une page rend le sien (ni
+  portail ni contexte, qui ne l'afficheraient qu'après l'hydratation). **Piège** : aucune boîte
+  positionnée (`relative`, `sticky`, `transform`…) entre la colonne et `ModuleHeader`, sinon le fil
+  quitte la barre. Le fil commence au module (plus de segment projet, `moduleTrail`) ; la ligne de
+  faits du projet n'est plus affichée par défaut, seulement les `facts` qu'un module donne.
 - **Parcours** (`lib/ui/journey.ts`). `JourneyStep` : statuts `done | current | waiting | rework |
   blocked | upcoming | obsolete` (calculés, jamais stockés), `roles` (`exec`/`coord`/`valid`/`owner`
   → grille 5 ou 4 colonnes), `prereq` (clés du même parcours) + `external` (`{key, label, done,
@@ -2447,10 +2455,9 @@ pour l'écran, les lots 1 et 4 ci-dessous (la logique `lib/workflow-status/` res
   `lib/overview/framing-steps.ts` : étape `framing` de `project_stages`, validation en attente, `project_plans`) ;
   **avant « Lancer le plan », seules les actions du Cadrage comptent** (un workflow commencé avant le plan garde sa
   page mais ses actions attendent le plan). Lu par la navigation, la Vue d'ensemble, Travail, Validations.
-- **Vue d'ensemble** (`app/(app)/app/projects/[projectId]/page.tsx`) : `ProjectHeader` avec le nom du projet, son
-  état calculé (`overviewHead`, `lib/overview/head.ts` : Non démarré avant le plan, Terminé si tous les workflows
-  lisibles le sont, sinon En cours) et ses faits (artiste · format, Budget, Responsable, Master final du Brief
-  Mix/Master après le plan, Sortie) ; « Bilan & clôture du projet » (page `closure`, hors proto) en action
+- **Vue d'ensemble** (`app/(app)/app/projects/[projectId]/page.tsx`) : `ProjectHeader` avec le nom du projet seul
+  (Figma PDS OS 304:20801, Sacha 29/10/2026 : plus d'état ni de ligne de faits, `overviewHead` supprimé) ; « Bilan &
+  clôture du projet » (page `closure`, hors proto) en action
   `ghost` de la tête. `NowCard variant="overview"` (toutes mes actions, deux nommées). Avant le plan :
   `BeforeWorkflows` seul (le Plan du projet est l'étape 4 du Cadrage depuis le lot 2, `/framing/plan`, § 6 ter). Après : `WorkflowCards` (`lib/overview/cards.ts` : parcours du workflow s'il
   en a un, sinon ses chevrons ; « À vous · » / « Nom · » depuis `mine` / `waiting`) et `DependencyRows`

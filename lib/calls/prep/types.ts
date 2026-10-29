@@ -54,6 +54,8 @@ export type CallPrepDefaults = {
   noun: "exchange" | "call";
   // The call's name, computed (the proto asks none).
   title: string;
+  // Who prepares it, as the summary names them (« Organisé par »).
+  organizer: string | null;
   // What the module needs back (a production sheet, deliverables…).
   target: Record<string, string>;
   people: PrepPerson[];

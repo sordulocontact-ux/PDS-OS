@@ -135,9 +135,6 @@ export const strategyJourney = {
       name
         ? `Commencée directement par ${name} le ${when}`
         : `Commencée directement le ${when}`,
-    choseCall: "Préparer un échange",
-    chosenBy: (name: string) => `· choisi par ${name}`,
-    change: "Changer",
     openCall: "Ouvrir le call",
     processing:
       "L'échange est enregistré : la transcription puis le compte rendu se font sur la page du call. PO propose ensuite ce qui a été dit dans « Les 8 dimensions ».",

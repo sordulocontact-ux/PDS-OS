@@ -100,7 +100,7 @@ export const framingJourney = {
       },
       call: {
         title: "Préparer un échange",
-        body: "Un call avec le management ; PO en tire des propositions, chacune avec la phrase exacte.",
+        body: "Un échange avec la direction ; PO en tire des propositions, chacune avec la phrase exacte.",
       },
     },
     // Only when the exchange is recommended (proto).
@@ -131,9 +131,6 @@ export const framingJourney = {
         generic: "L'échange n'a pas pu être annulé. Réessayez.",
       },
     },
-    choseCall: "Préparer un échange",
-    chosenBy: (name: string) => `· choisi par ${name}`,
-    change: "Changer",
     meetingName: "Échange de cadrage",
     summaryNext: "Le Brief de cadrage part en validation",
   },

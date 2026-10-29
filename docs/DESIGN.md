@@ -315,9 +315,12 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
 - **En-tête de module** (`ModuleHeader`, `components/shell/module/`, décision C0 du
   18/10/2026, proto « Projet complet ») : remplace le titre de section (`ProjectPageTitle`, 28 px,
   fil dans le h1) et les chevrons (`SectionSteps`). De haut en bas :
-  1. **fil d'Ariane** sur sa ligne, 14 px `--text-tertiary`, séparateur « › » :
-     « Projet › Module › [sous-module ›] Étape » ; chaque segment sauf le dernier est un lien,
-     le dernier (`aria-current="page"`) en `--text-primary` ;
+  1. **fil d'Ariane dans la barre du haut** (Figma PDS OS 304:20801, Sacha 29/10/2026) : une barre
+     de `--project-bar-height` (55 px, alignée sur la ligne du sélecteur de projet) avec un filet
+     dessous, sur toute la largeur de la colonne ; le fil à 24 px du bord, 16 px medium
+     `--text-tertiary`, séparateur « / » : « Module / [sous-module /] Étape », **sans le projet**
+     (la barre latérale du projet le nomme) ; chaque segment sauf le dernier est un lien, le
+     dernier (`aria-current="page"`) en `--text-primary` ;
   2. **pilules des sous-modules**, Marketing seul (Stratégie · Conception · Production ·
      Activations · Suivi & bilan) : pilule 36 px, fond `--surface-soft`, texte
      `--text-secondary` 15 px ; active = encre pleine (`--surface-inverse`) ; sous-module fait =
@@ -325,9 +328,12 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   3. **ligne de titre** : h1 du module à **30 px** (`text-display-module`), pastille de statut
      facultative à côté (Distribution), actions à droite (« Qui fait quoi » en `ghost sm`,
      « Ajouter une dépense » du Budget) ;
-  4. **ligne de faits** (`ModuleFacts`) : 15 px `--text-secondary`, valeurs en semi-gras
-     `--text-primary` (« Néons · Mona Lys · Single », « Budget **25 000 € HT** », « Sortie
-     **Sam. 05/12/2026** »), dates toujours par `formatDay`.
+  4. **ligne de faits** (`ModuleFacts`), seulement quand le module donne les siens (Master,
+     Distribution, fiche de Production…) : 15 px `--text-secondary`, valeurs en semi-gras
+     `--text-primary` (« Master final **Ven. 20/11/2026** », « Sortie **Sam. 05/12/2026** »), dates
+     toujours par `formatDay`. La ligne du projet par défaut (« Néons · Mona Lys · Single »,
+     Budget, Responsable, Sortie) n'est plus affichée (Figma 304:20801), ni l'état et les faits de
+     la Vue d'ensemble, qui garde son nom seul.
   Le **Master et la Distribution n'ont plus de chevrons** (leurs étapes sont dans le parcours),
   ni le Juridique ni le Cadrage. Le layout du projet rend un en-tête par défaut, tiré de l'URL ;
   une section qui a ses propres faits ou actions rend son `ModuleHeader` en tête de page, et
@@ -606,9 +612,11 @@ Une seule action pleine (`variant="default"`) par carte, le reste en contour.
 Rendu du proto « Projet complet » (`docs/projet-complet/commons.md` § 3, 6, 7, 10), un seul
 composant par motif, dans `components/ui/` (`docs/COMPOSANTS.md`) :
 
-- **Départ d'une étape = `StartChoices`** : cartes entières cliquables, sans bouton dedans ;
-  la carte « Recommandé » (choisie par le code) est placée **en premier** et la raison, calculée
-  par le code, est écrite **sous la grille**. La règle « l'échange est toujours plein » ci-dessus
+- **Départ d'une étape = `StartChoices`** : cartes entières cliquables ; la carte
+  « Recommandé » (choisie par le code) est placée **en premier** (ou garde sa place, `fixedOrder`)
+  et la raison, calculée par le code, est écrite **sous elle, dans sa colonne**. Le Cadrage dessine
+  en plus un bouton au pied de chaque carte (`action`, Figma 304:20801) : plein sur la recommandée,
+  contour sur l'autre ; c'est un dessin, la carte entière reste la seule cible. La règle « l'échange est toujours plein » ci-dessus
   vaut pour les cartes à bouton qui restent ; une entrée migrée vers `StartChoices` n'a plus de
   bouton. Un choix de formulaire qui ne déclenche rien = `ChoiceCards variant="list"`.
 - **Proposition = `ProposalRow`** : rien de coché d'avance ; « Confirmer » (contour),

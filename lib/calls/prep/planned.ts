@@ -11,6 +11,8 @@ import { createClient } from "@/lib/supabase/server";
 /** A prepared call before it is held, as the step shows it. */
 export type PlannedCall = {
   callId: string;
+  // Its name (« Échange de cadrage »), the title above its block.
+  title: string;
   projectId: string | null;
   occurredAt: string;
   createdAt: string;
@@ -60,7 +62,7 @@ export async function loadPlannedCall(
   const { data, error } = await supabase
     .from("calls")
     .select(
-      "id, project_id, occurred_at, created_at, meeting_url, agenda, status, audio_path, creator:people!calls_created_by_fkey(id, first_name, last_name), call_attendees(person_id, person:people!call_attendees_person_id_fkey(first_name, last_name)), call_guests(email, name, contact_id)",
+      "id, title, project_id, occurred_at, created_at, meeting_url, agenda, status, audio_path, creator:people!calls_created_by_fkey(id, first_name, last_name), call_attendees(person_id, person:people!call_attendees_person_id_fkey(first_name, last_name)), call_guests(email, name, contact_id)",
     )
     .eq("id", callId)
     .maybeSingle();
@@ -106,6 +108,7 @@ export async function loadPlannedCall(
   ];
   return {
     callId: data.id,
+    title: data.title,
     projectId: data.project_id,
     occurredAt: data.occurred_at,
     createdAt: data.created_at,

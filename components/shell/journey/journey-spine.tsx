@@ -200,15 +200,14 @@ function StepSub({
   let tone: "me" | "warn" | null = null;
   if (s.status === "done") text = s.summary;
   else if (s.status === "waiting") {
-    text = [t.waitingFor(s.actor?.name ?? "—"), todo]
-      .filter(Boolean)
-      .join(" · ");
+    const who = t.waitingFor(s.actor?.name ?? "—");
+    text = todo ? t.joinTodo(who, todo) : who;
     tone = "warn";
   } else if (s.status === "rework") {
-    text = [t.rework, todo].filter(Boolean).join(" · ");
+    text = todo ? t.joinTodo(t.rework, todo) : t.rework;
     tone = "warn";
   } else if (s.status === "current" && s.actor) {
-    text = mine ? `${t.me} · ${todo}` : `${s.actor.name} · ${todo}`;
+    text = t.joinTodo(mine ? t.me : s.actor.name, todo ?? "");
     tone = mine ? "me" : null;
   } else if (s.status === "current") text = s.summary;
   else if (isLocked(s.status)) {

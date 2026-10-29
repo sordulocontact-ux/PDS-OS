@@ -1,26 +1,20 @@
 import { ContentCard } from "@/components/shell/content-card";
-import { buttonVariants } from "@/components/ui/button";
 import { InfoRow, Rows } from "@/components/ui/rows";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { ViewLink } from "@/components/ui/view-link";
-import { routes } from "@/lib/auth/redirects";
+import { journey } from "@/lib/i18n/fr/journey";
 import { projectShell } from "@/lib/i18n/fr/project-shell";
-import type { JourneyStep } from "@/lib/ui/journey";
+import { type JourneyStep, prereqsOf, withModule } from "@/lib/ui/journey";
 
-const fr = { projectShell };
+const fr = { journey, projectShell };
 
 /**
  * « Avant les workflows » (proto « Projet complet »): before « Lancer le
  * plan », the order the project follows and where the Cadrage's steps stand
- * — Fait, En cours, À venir — then « Ouvrir le Cadrage ».
+ * — Fait, En cours, À venir, a step to come naming the one it waits for
+ * (« Après : Brief de cadrage », as the journey says it). « Maintenant »
+ * above already opens the Cadrage (Figma PDS OS 304:20801, Sacha 29/10).
  */
-export function BeforeWorkflows({
-  projectId,
-  steps,
-}: {
-  projectId: string;
-  steps: JourneyStep[];
-}) {
+export function BeforeWorkflows({ steps }: { steps: JourneyStep[] }) {
   const t = fr.projectShell.overview.before;
   return (
     <ContentCard title={t.title}>
@@ -37,11 +31,18 @@ export function BeforeWorkflows({
                   step.status === "rework"
                 ? "current"
                 : "later";
+          const waitsFor = prereqsOf(step, steps)
+            .filter((p) => !p.done)
+            .map(withModule);
           return (
             <InfoRow
               key={step.key}
               title={step.title}
-              detail={t.sub[state]}
+              detail={
+                state === "later" && waitsFor.length > 0
+                  ? fr.journey.after(waitsFor.join(", "))
+                  : t.sub[state]
+              }
               badge={
                 <StatusBadge
                   tone={
@@ -59,14 +60,6 @@ export function BeforeWorkflows({
           );
         })}
       </Rows>
-      <div>
-        <ViewLink
-          href={routes.projectFraming(projectId)}
-          className={buttonVariants({ variant: "outline" })}
-        >
-          {t.open}
-        </ViewLink>
-      </div>
     </ContentCard>
   );
 }

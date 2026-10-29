@@ -273,7 +273,7 @@ export const isSubModuleAt = (step: SubModuleStep, pathname: string) =>
 
 // The head of a launched project's page (proto « Projet complet »,
 // docs/DESIGN.md § 4, « En-tête de module »): the trail starts with the
-// project, then the section (the module), then — in the Marketing — the
+// section (the module), then — in the Marketing — the
 // sub-module, then the sub-pages projectTrail knows. The h1 is the module:
 // the section's name, or the Marketing's sub-module. A page adds its step
 // (the last crumb) itself (components/projects/project-header.tsx).
@@ -281,14 +281,10 @@ export function moduleTrail(
   projectId: string,
   pathname: string,
   sections: ProjectSection[],
-  {
-    projectTitle,
-    subModules = [],
-  }: { projectTitle: string; subModules?: SubModuleStep[] },
+  { subModules = [] }: { subModules?: SubModuleStep[] },
 ): { crumbs: ProjectCrumb[]; title: string } {
   const section = sections.find((item) => item.match(pathname));
   if (!section) return { crumbs: [], title: "" };
-  const project = { label: projectTitle, href: routes.project(projectId) };
   const head = { label: section.label, href: section.href };
   let rest = projectTrail(projectId, pathname, sections).slice(1);
   let title = section.label;
@@ -298,5 +294,6 @@ export function moduleTrail(
     if (rest[0]?.label !== sub.label)
       rest = [{ label: sub.label, href: sub.href }, ...rest];
   }
-  return { crumbs: [project, head, ...rest], title };
+  // No project crumb: the project's sidebar names it (Figma, Sacha 29/10).
+  return { crumbs: [head, ...rest], title };
 }
