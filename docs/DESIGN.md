@@ -463,8 +463,8 @@ Refonte du 27/10/2026, d'après `docs/VISION-UX.md` § 2 (les cinq questions) :
   Projets (Actifs / Archivés, DG), Membres (statut), Budget (statut).
 - **Pastilles** (`FilterChip`, `ViewToggle`) : filtres secondaires ou qui se combinent.
 - **Recherche et filtres d'une liste** (Figma Projets 90:4972, Sacha 29/10/2026) : sous les
-  onglets, **une seule ligne** (`ListToolbar`) : la recherche, puis les filtres principaux en
-  listes déroulantes de même largeur (3 au plus, « Tous les … » quand rien n'est choisi), puis
+  onglets, **une seule ligne** (`ListToolbar`) : la recherche, **deux fois plus large qu'un filtre**
+  (Sacha 29/10), puis les filtres principaux en listes déroulantes de même largeur (3 au plus, « Tous les … » quand rien n'est choisi), puis
   le bouton carré des **filtres avancés** pour les autres ; « Effacer les filtres » au bout
   dès qu'un filtre est posé. Recherche et listes déroulantes **dessinées comme les champs** (Sacha
   29/10) : contour, fond, coins `rounded-lg`, texte 16 px ; jamais en pilule. Jamais les filtres principaux cachés derrière un bouton. En

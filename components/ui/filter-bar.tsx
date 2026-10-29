@@ -182,7 +182,8 @@ export function ListToolbar({
 }) {
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <div className="min-w-0 flex-[1_1_14rem]">{search}</div>
+      {/* Twice a filter's share: the search is the first way in. */}
+      <div className="min-w-0 flex-[2_1_18rem]">{search}</div>
       {children}
     </div>
   );

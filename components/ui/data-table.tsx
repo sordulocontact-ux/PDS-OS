@@ -95,10 +95,12 @@ export function DataTableHead({
   );
 }
 
-// A hairline between rows, none under the last (the frame closes it).
+// A hairline between rows, none under the last (the frame closes it). On the
+// cells: the shadcn body strips every border of its last row, the one above
+// it included.
 export function DataTableBody({ children }: { children: React.ReactNode }) {
   return (
-    <TableBody className="[&>tr+tr]:border-t [&>tr+tr]:border-[color:var(--border-hairline)] in-[.section-card]:[&>tr+tr]:border-transparent">
+    <TableBody className="[&>tr+tr>td]:border-t [&>tr+tr>td]:border-[color:var(--border-hairline)] in-[.section-card]:[&>tr+tr>td]:border-transparent">
       {children}
     </TableBody>
   );
