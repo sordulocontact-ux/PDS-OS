@@ -68,6 +68,7 @@ export function EventPeek({
             <CallStatusBadge
               status={event.call.status}
               upcoming={event.upcoming}
+              closed={event.call.closed}
             />
           </div>
           {event.call.meetingUrl && (

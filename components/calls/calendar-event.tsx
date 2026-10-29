@@ -1,9 +1,9 @@
 import Link from "next/link";
 
 import type { CalendarEvent } from "@/lib/calls/calendar";
-import { callEndOf, formatTime } from "@/lib/calls/format";
+import { callEndOf, callStateKey, formatTime } from "@/lib/calls/format";
 import { calls } from "@/lib/i18n/fr/calls";
-import { hueClass, projectHue } from "@/lib/ui/category-hues";
+import { callCalendarTone, type Tone } from "@/lib/ui/state-tones";
 import { cn } from "@/lib/utils";
 import { clock } from "@/lib/utils/calendar-period";
 
@@ -30,10 +30,30 @@ export function eventLabel(event: CalendarEvent): string {
   );
 }
 
-/** The block's surface: its project's hue, quieter once over. */
+// The surface of each tone (lib/ui/state-tones.ts), as StatusBadge paints it.
+const toneSurface: Record<Tone, string> = {
+  neutral: "bg-[var(--tone-neutral-bg)] text-[color:var(--tone-neutral-fg)]",
+  info: "bg-[var(--tone-info-bg)] text-[color:var(--tone-info-fg)]",
+  warning: "bg-[var(--tone-warning-bg)] text-[color:var(--tone-warning-fg)]",
+  success: "bg-[var(--tone-success-bg)] text-[color:var(--tone-success-fg)]",
+  danger: "bg-[var(--tone-danger-bg)] text-[color:var(--tone-danger-fg)]",
+  action: "bg-[var(--tone-action-bg)] text-[color:var(--tone-action-fg)]",
+};
+
+/** The state a block is painted with (its legend: CallsCalendar). */
+const eventTone = (event: CalendarEvent): Tone =>
+  callCalendarTone[
+    callStateKey(event.call.status, {
+      upcoming: event.upcoming,
+      closed: event.call.closed,
+    })
+  ];
+
+/** The block's surface: the call's state (proto `docs/protos/pages.html`:
+ * report ready, to come, to record), quieter once over. */
 export function eventClass(event: CalendarEvent): string {
   return cn(
-    hueClass[projectHue(event.call.projectId)],
+    toneSurface[eventTone(event)],
     "flex min-w-0 flex-col overflow-hidden rounded-md px-2 py-1 text-left text-xs transition-shadow duration-150 ease-out focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
     "[@media(hover:hover)]:hover:shadow-elevation-1",
     !event.upcoming && "opacity-70",

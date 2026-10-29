@@ -59,6 +59,7 @@ export function AllCallsTable({
                 <CallStatusBadge
                   status={call.status}
                   upcoming={isUpcoming(call, now)}
+                  closed={call.closed}
                 />
                 {call.meetingUrl && isUpcoming(call, now) && (
                   <JoinCallLink

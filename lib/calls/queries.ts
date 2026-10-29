@@ -139,6 +139,8 @@ export type CallListItem = CallSummary & {
   href: string;
   // Who works on it: the project's owner, or the meeting's creator.
   ownerPersonId: string | null;
+  // Its report was closed at least once (call_closures).
+  closed: boolean;
 };
 
 // Most recent first; a team of 3 to 5 people stays far below this.
@@ -157,7 +159,7 @@ export async function listAllCalls(
   let query = supabase
     .from("calls")
     .select(
-      "id, title, occurred_at, ends_at, duration_minutes, status, meeting_url, project_id, created_by, project:projects!calls_project_same_org(title, owner_person_id)",
+      "id, title, occurred_at, ends_at, duration_minutes, status, meeting_url, project_id, created_by, project:projects!calls_project_same_org(title, owner_person_id), closures:call_closures!call_closures_call_same_org(id)",
     );
   if (range)
     query = query
@@ -183,6 +185,7 @@ export async function listAllCalls(
     ownerPersonId: row.project_id
       ? (row.project?.owner_person_id ?? null)
       : row.created_by,
+    closed: row.closures.length > 0,
   }));
 }
 

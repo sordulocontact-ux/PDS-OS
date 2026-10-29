@@ -78,6 +78,8 @@ export const calendar = {
   now: "Maintenant",
   internal: "Réunion interne",
   hint: "Cliquez ou glissez sur une plage libre pour créer une réunion. Glissez un de vos calls pour le déplacer, son bord bas pour le rallonger.",
+  // The colours of the blocks, beside the hint.
+  legend: "Légende des couleurs",
   hintMonth:
     "Cliquez sur un jour pour y créer une réunion. Glissez un de vos calls vers un autre jour pour le déplacer.",
   // The slot being drawn.
@@ -107,29 +109,20 @@ export const calendar = {
     "Horaire modifié, mais Google n'a pas prévenu les invités : prévenez-les.",
 } as const;
 
-/** The details of a call on its page, as Teams shows a meeting. */
+/** A call's page: its video link, participants and sheet (call-side,
+ * call-sheet-menu, lib/calls/sheet.ts). */
 export const details = {
-  title: "Détails",
-  when: "Quand",
-  where: "Rattachement",
-  organizer: "Organisé par",
-  link: "Lien de la visio",
   noLink: "Pas encore de lien de visio.",
   copy: "Copier le lien",
   copied: "Lien copié.",
   copyFailed: "Copie impossible : sélectionnez le lien à la main.",
-  participants: (count: number) => `Participants (${count})`,
   nobody: "Personne d'autre n'est invité.",
   member: "Équipe PDS",
   guest: "Invité par e-mail",
-  // The call's sheet, shared with people outside the label.
-  share: "Partager avec l'extérieur",
-  shareHint:
-    "La fiche reprend l'horaire, la durée, l'ordre du jour et le lien de la visio. PDS OS n'envoie rien lui-même.",
+  // The call's sheet, shared with people outside the label (« ⋯ »).
   shareCopy: "Copier la fiche du call",
   shareCopied: "Fiche du call copiée.",
   shareCopyFailed: "Copie impossible : votre navigateur l'a refusée.",
-  shareEmail: "Envoyer par e-mail",
   sheet: {
     agenda: "Ordre du jour",
     agendaItem: (position: number, topic: string, minutes: number) =>
@@ -138,7 +131,7 @@ export const details = {
     link: (url: string) => `Lien de la visio : ${url}`,
     noLink: "Lien de la visio : à venir",
   },
-  // The recording, folded until the call's time comes.
+  // The recording of a call to come another day, folded.
   recordTitle: "Enregistrer le call",
   recordLater:
     "À ouvrir au moment du call : PDS OS enregistre l'onglet de la visio et votre micro.",

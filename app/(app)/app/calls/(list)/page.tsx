@@ -20,7 +20,6 @@ import { ViewToggle } from "@/components/ui/view-toggle";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { placeCalls } from "@/lib/calls/calendar";
-import { CALL_STATUSES } from "@/lib/calls/constants";
 import {
   asCallView,
   callViewOf,
@@ -50,11 +49,10 @@ export const metadata = { title: `${fr.calls.all.title} · ${fr.app.name}` };
 // The project filter's value for the meetings outside any project.
 const INTERNAL = "internal";
 
-type CallFilters = { project: string | null; status: string | null };
+type CallFilters = { project: string | null };
 
 const matches = (call: CallListItem, filters: CallFilters) =>
-  (!filters.project || (call.projectId ?? INTERNAL) === filters.project) &&
-  (!filters.status || call.status === filters.status);
+  !filters.project || (call.projectId ?? INTERNAL) === filters.project;
 
 async function loadCalls(range?: {
   from: Date;
@@ -72,8 +70,9 @@ async function loadCalls(range?: {
 
 /**
  * Every call one may see, as a calendar by default (Teams: Semaine, Mois; ?mode=…&date=YYYY-MM-DD) or as a list
- * (?display=list, Tous / À venir / Passés, « Filtres » by project and
- * processing, an instant search).
+ * (?display=list, Tous / À venir / Passés, an instant search and the
+ * project filter) — and nothing else: a list page is only a list
+ * (docs/VISION-UX.md, proto `docs/protos/pages.html`).
  */
 export default async function CallsPage({
   searchParams,
@@ -103,7 +102,6 @@ export default async function CallsPage({
     });
   const filters: CallFilters = {
     project: filterParam(params.project),
-    status: filterParam(params.status),
   };
   const filtering = Object.values(filters).some((value) => value !== null);
   const listHref = (value: string | null, kept: Partial<CallFilters> = {}) =>
@@ -257,8 +255,8 @@ export default async function CallsPage({
   );
 }
 
-// Only what some call of the tab holds; the meetings outside any project
-// last.
+// The projects some call of the tab belongs to; the meetings outside any
+// project last.
 function filterGroups(
   calls: CallListItem[],
   current: CallFilters,
@@ -280,15 +278,6 @@ function filterGroups(
           : []),
       ],
       current: current.project,
-    },
-    {
-      key: "status",
-      label: t.filters.statusLabel,
-      allLabel: t.filters.statusAll,
-      options: CALL_STATUSES.filter((status) =>
-        calls.some((call) => call.status === status),
-      ).map((status) => ({ value: status, label: fr.calls.status[status] })),
-      current: current.status,
     },
   ];
 }

@@ -1,90 +1,33 @@
 import { AudioUploadFold } from "@/components/calls/audio-upload-fold";
-import { CallProcessing } from "@/components/calls/call-processing";
 import { CallRecorder } from "@/components/calls/call-recorder";
 import type { CallDetail } from "@/lib/calls/queries";
-import { formatMegabytes } from "@/lib/calls/format";
-import { calls } from "@/lib/i18n/fr/calls";
 
-const fr = { calls };
-
-/** Record (or drop a file) when there is no audio yet, then the automatic processing. */
+/**
+ * Record a call from its page: the recorder (one button that starts at
+ * once with `compact`, the how-to under it), an existing file folded under
+ * it, a recording interrupted earlier found again.
+ */
 export function CallRecording({
   call,
-  audioUrls,
-  hasTranscript,
+  compact,
 }: {
   call: CallDetail;
-  audioUrls: Array<string | null>;
-  hasTranscript: boolean;
+  compact?: { label: string; beside?: React.ReactNode };
 }) {
-  if (!call.audioPath) {
-    // Recording in the app first; an existing file is the fallback, folded.
-    return (
-      <CallRecorder
-        callId={call.id}
-        organizationId={call.organizationId}
-        saved={call.recording.takes}
-        videoCall={call.meetingUrl !== null}
-        alternative={
-          <AudioUploadFold
-            callId={call.id}
-            organizationId={call.organizationId}
-          />
-        }
-      />
-    );
-  }
-
   return (
-    <div className="grid gap-6">
-      <CallProcessing
-        projectId={call.projectId}
-        callId={call.id}
-        status={call.status}
-        errorCode={call.errorCode}
-        hasTranscript={hasTranscript}
-      />
-      <CallAudio call={call} audioUrls={audioUrls} />
-    </div>
-  );
-}
-
-/** The stored recording, to listen back: each take in order when in parts. */
-export function CallAudio({
-  call,
-  audioUrls,
-}: {
-  call: CallDetail;
-  audioUrls: Array<string | null>;
-}) {
-  const t = fr.calls.audio;
-  const parts = audioUrls.length > 1;
-  return (
-    <div className="grid gap-2 border-t border-[color:var(--border-hairline)] pt-4">
-      {audioUrls.length === 0 || audioUrls.some((url) => url === null) ? (
-        <p className="text-sm text-muted-foreground">{t.playerUnavailable}</p>
-      ) : (
-        audioUrls.map((url, i) => (
-          <div key={url} className="grid gap-1">
-            {parts && (
-              <p className="text-xs text-muted-foreground">{t.part(i + 1)}</p>
-            )}
-            <audio
-              controls
-              preload="metadata"
-              src={url ?? undefined}
-              className="w-full"
-            >
-              <track kind="captions" />
-            </audio>
-          </div>
-        ))
-      )}
-      {call.audioBytes !== null && (
-        <p className="text-xs text-muted-foreground">
-          {call.audioMime} · {t.size(formatMegabytes(call.audioBytes))}
-        </p>
-      )}
-    </div>
+    <CallRecorder
+      callId={call.id}
+      organizationId={call.organizationId}
+      saved={call.recording.takes}
+      // A call with a video link is held in visio: nothing to choose.
+      videoCall={call.meetingUrl !== null}
+      compact={compact}
+      alternative={
+        <AudioUploadFold
+          callId={call.id}
+          organizationId={call.organizationId}
+        />
+      }
+    />
   );
 }

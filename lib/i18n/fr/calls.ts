@@ -1,5 +1,6 @@
 /** Calls, audio upload, transcripts and reports (step 4). */
 import { calendar, details, schedule } from "./calls-schedule";
+import { callPage } from "./calls-page";
 import { microphoneErrors } from "./microphone";
 
 export const calls = {
@@ -53,8 +54,6 @@ export const calls = {
     filters: {
       projectLabel: "Projet",
       projectAll: "Tous les projets",
-      statusLabel: "Traitement",
-      statusAll: "Tous les états",
     },
     filtersEmpty: "Aucun call ne correspond à ces filtres.",
     filtersEmptyBody: "Retirez un filtre pour élargir la liste.",
@@ -125,6 +124,8 @@ export const calls = {
     extracting: "Extraction…",
     ready: "Compte rendu prêt",
     failed: "Échec",
+    // Display only: its report was closed (call_closures).
+    closed: "Clôturé",
   },
   audio: {
     title: "Enregistrement",
@@ -238,41 +239,8 @@ export const calls = {
     done: "Compte rendu prêt.",
     briefFilled: "Brief pré-rempli depuis le call. Relisez et confirmez.",
   },
-  page: {
-    record: {
-      title: "Enregistrer le call",
-      description:
-        "Lancez l'enregistrement au début du call et arrêtez-le à la fin. La suite est automatique.",
-    },
-    processing: {
-      title: "Traitement en cours",
-      description:
-        "Transcription puis compte rendu. Le Brief sera pré-rempli avec ce qui s'est dit.",
-    },
-    done: {
-      title: "Compte rendu prêt",
-      description:
-        "Ce qui s'est dit est proposé dans le Cadrage, à relire et confirmer.",
-      toFraming: "Ouvrir le Cadrage",
-    },
-  },
-  // The same steps for an internal meeting: no Brief to fill.
-  meetingPage: {
-    record: {
-      title: "Enregistrer la réunion",
-      description:
-        "Lancez l'enregistrement au début et arrêtez-le à la fin. La suite est automatique.",
-    },
-    processing: {
-      title: "Traitement en cours",
-      description:
-        "Transcription puis compte rendu : décisions et actions à transformer en tâches.",
-    },
-    done: {
-      title: "Compte rendu prêt",
-      description: "Écoutez l'enregistrement ; le compte rendu est plus bas.",
-    },
-  },
+  // A call's page: « Maintenant », its cards, its windows.
+  page: callPage,
   agenda: {
     title: "Ordre du jour",
     total: (minutes: number) => `Durée totale estimée : environ ${minutes} min`,
@@ -306,7 +274,7 @@ export const calls = {
   outcomes: {
     title: "Décisions et actions",
     description:
-      "Relevées dans le compte rendu. Une action devient une tâche dès que vous choisissez son responsable et son échéance.",
+      "Ce qui a été décidé, et les actions dites pendant l'échange, chacune avec sa phrase.",
     decisionsTitle: "Décisions",
     decisionsEmpty: "Aucune décision relevée dans ce call.",
     actionsTitle: "Actions",
@@ -422,25 +390,6 @@ export const calls = {
   },
   // PROJ-AMEL-01: what a call produced, its closing and its sharing.
   closure: {
-    title: "Compte rendu et clôture",
-    description:
-      "Les cinq sorties du call, puis sa clôture : le compte rendu figé, partageable sans la transcription ni l'audio.",
-    outputs: {
-      transcript: "Transcription",
-      summary: "Résumé",
-      decisions: (n: number) =>
-        n === 0 ? "Aucune décision" : n === 1 ? "1 décision" : `${n} décisions`,
-      actions: (n: number, tasks: number) =>
-        n === 0
-          ? "Aucune action"
-          : `${n === 1 ? "1 action" : `${n} actions`}, ${tasks === n ? "toutes en tâches" : `${tasks} en tâche${tasks > 1 ? "s" : ""}`}`,
-      proposals: (n: number, pending: number) =>
-        n === 0
-          ? "Aucune proposition de cadrage"
-          : `${n === 1 ? "1 proposition de cadrage" : `${n} propositions de cadrage`}${pending ? `, ${pending} à revoir` : ", toutes revues"}`,
-      ready: "Prêt",
-      missing: "Pas encore",
-    },
     close: "Clôturer le call",
     correct: "Corriger le compte rendu",
     closeTitle: "Clôturer le call ?",
@@ -463,7 +412,6 @@ export const calls = {
     closed: "Call clôturé.",
     closedOn: (version: number, date: string, name: string) =>
       `Version ${version}, clôturée le ${date} par ${name}`,
-    leftToReview: (text: string) => `À la clôture : ${text}`,
     share: "Partager le compte rendu",
     shareTitle: "Partager le compte rendu",
     shareBody:

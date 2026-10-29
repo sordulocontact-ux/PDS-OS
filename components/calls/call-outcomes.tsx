@@ -1,21 +1,15 @@
 import { CallActionList } from "@/components/calls/call-action-list";
 import { EmptyNote } from "@/components/shell/empty-state";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { PageSection } from "@/components/shell/page-section";
 import type { CallOutcomes as Outcomes } from "@/lib/calls/outcomes";
 import { calls } from "@/lib/i18n/fr/calls";
 
 const fr = { calls };
 
 /**
- * What a call decided and the actions it left, under its recording. An
- * action becomes a task in place (CallActionList); the decisions are read
- * as they were said.
+ * « Décisions et actions » of a call: what it decided, read as it was said,
+ * and the actions it left, each becoming a task in its window
+ * (CallActionList). « Créer les tâches » of « Maintenant » leads here.
  */
 export function CallOutcomes({
   outcomes,
@@ -36,12 +30,13 @@ export function CallOutcomes({
 }) {
   const t = fr.calls.outcomes;
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t.title}</CardTitle>
-        <CardDescription>{t.description}</CardDescription>
-      </CardHeader>
-      <CardContent className="grid gap-6">
+    <PageSection
+      id="call-outcomes"
+      title={t.title}
+      description={t.description}
+      card
+    >
+      <div className="grid gap-6">
         <section aria-labelledby="call-decisions" className="grid gap-3">
           <h3 id="call-decisions" className="text-sm font-medium">
             {t.decisionsTitle}
@@ -72,7 +67,7 @@ export function CallOutcomes({
           )}
         </section>
         <section aria-labelledby="call-actions" className="grid gap-3">
-          <h3 id="call-actions" className="text-sm font-medium">
+          <h3 id="call-actions" className="scroll-mt-24 text-sm font-medium">
             {t.actionsTitle}
           </h3>
           {outcomes.actions.length === 0 ? (
@@ -87,7 +82,7 @@ export function CallOutcomes({
             />
           )}
         </section>
-      </CardContent>
-    </Card>
+      </div>
+    </PageSection>
   );
 }

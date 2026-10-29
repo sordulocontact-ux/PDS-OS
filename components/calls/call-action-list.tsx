@@ -1,13 +1,7 @@
-"use client";
-
-import { toast } from "sonner";
-
-import { useFramingAction } from "@/components/framing/use-framing-action";
-import { ActionTaskForm } from "@/components/project-work/action-task-form";
-import { matchByName } from "@/lib/assistant/fuzzy-name";
+import { ActionTaskButton } from "@/components/calls/action-task-dialog";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { matchByName } from "@/lib/assistant/fuzzy-name";
 import type { CallAction } from "@/lib/calls/outcomes";
-import { createTask } from "@/lib/framing/actions/points-tasks";
 import { calls } from "@/lib/i18n/fr/calls";
 
 const fr = { calls };
@@ -19,8 +13,9 @@ const dueFormat = new Intl.DateTimeFormat("fr-FR", {
 });
 
 /**
- * The actions of a call: those already turned into a task say so (who, when,
- * which project); the others offer the task form to whoever may create it.
+ * The actions of a call (proto `docs/protos/pages.html`): each with the
+ * sentence it comes from; one turned into a task says who and for when, the
+ * others offer « Créer la tâche » to whoever may create it.
  */
 export function CallActionList({
   actions,
@@ -37,86 +32,76 @@ export function CallActionList({
   deliverableId?: string | null;
 }) {
   const t = fr.calls.outcomes;
-  const { pending, run } = useFramingAction();
+  const p = fr.calls.page.task;
   const canConvert = projects.length > 0;
 
   return (
-    <ul className="grid gap-3">
-      {actions.map((action) => {
-        if (action.task) {
-          const { task } = action;
-          return (
-            <li key={action.id} className="grid gap-1 text-sm">
-              <ActionText action={action} />
-              <span className="flex flex-wrap items-center gap-2 text-muted-foreground">
-                <StatusBadge tone={task.done ? "success" : "info"} size="sm">
-                  {task.done ? t.taskDone : t.taskCreated}
+    <ul className="flex flex-col">
+      {actions.map((action) => (
+        <li
+          key={action.id}
+          className="flex flex-col gap-2 border-b border-[var(--border-hairline)] py-3 last:border-b-0 sm:flex-row sm:items-start sm:justify-between"
+        >
+          <span className="flex min-w-0 flex-col gap-0.5">
+            <b className="text-body-md font-semibold break-words">
+              {action.what}
+              {action.who && (
+                <span className="font-medium text-[color:var(--text-secondary)]">
+                  {" "}
+                  — {action.who}
+                </span>
+              )}
+            </b>
+            {action.quote && (
+              <span className="text-caption text-[color:var(--text-secondary)]">
+                {p.why(action.quote)}
+              </span>
+            )}
+            {action.task ? (
+              <span className="flex flex-wrap items-center gap-2 text-caption text-[color:var(--text-secondary)]">
+                <StatusBadge
+                  tone={action.task.done ? "success" : "info"}
+                  size="sm"
+                >
+                  {action.task.done ? t.taskDone : t.taskCreated}
                 </StatusBadge>
-                {t.task(
-                  task.assigneeName,
-                  dueFormat.format(new Date(`${task.dueDate}T12:00:00`)),
+                {p.line(
+                  action.task.assigneeName,
+                  dueFormat.format(new Date(`${action.task.dueDate}T12:00:00`)),
                   // The project is only worth naming outside it.
-                  projectId ? "" : task.projectTitle,
+                  projectId ? "" : action.task.projectTitle,
                 )}
               </span>
-            </li>
-          );
-        }
-        if (!canConvert)
-          return (
-            <li key={action.id} className="grid gap-0.5 text-sm">
-              <ActionText action={action} />
-              <span className="text-muted-foreground">
-                {projectId ? t.notConverted : t.noProject}
-              </span>
-            </li>
-          );
-        return (
-          <li key={action.id}>
-            <ActionTaskForm
-              item={action}
-              members={members}
-              // The person named in the call when it clearly is a member
-              // (« Yannis » → Yanis Roche); otherwise nobody, chosen by hand
-              // (UX test of 09/10/2026: pre-assigned to whoever opened it).
-              defaultAssigneeId={
-                action.who
-                  ? (matchByName(members, action.who, (m) => m.name)
-                      ?.personId ?? "")
-                  : ""
-              }
-              projectId={projectId ?? undefined}
-              projects={projectId ? undefined : projects}
-              pending={pending}
-              onSubmit={(values) =>
-                run(
-                  () =>
-                    createTask(values.projectId, {
-                      title: action.what,
-                      assigneePersonId: values.assigneePersonId,
-                      dueDate: values.dueDate,
-                      sourceReportItemId: action.id,
-                      deliverableId,
-                    }),
-                  () => toast.success(t.created),
-                )
-              }
-            />
-          </li>
-        );
-      })}
+            ) : (
+              !canConvert && (
+                <span className="text-caption text-[color:var(--text-secondary)]">
+                  {projectId ? t.notConverted : t.noProject}
+                </span>
+              )
+            )}
+          </span>
+          {!action.task && canConvert && (
+            <span className="shrink-0 self-start">
+              <ActionTaskButton
+                action={action}
+                members={members}
+                // The person named in the call when it clearly is a member
+                // (« Yannis » → Yanis Roche); otherwise nobody, chosen by
+                // hand (UX test of 09/10/2026).
+                defaultAssigneeId={
+                  action.who
+                    ? (matchByName(members, action.who, (m) => m.name)
+                        ?.personId ?? "")
+                    : ""
+                }
+                projectId={projectId}
+                projects={projects}
+                deliverableId={deliverableId}
+              />
+            </span>
+          )}
+        </li>
+      ))}
     </ul>
-  );
-}
-
-// What the action is, and who said it would do it.
-function ActionText({ action }: { action: CallAction }) {
-  return (
-    <span>
-      {action.what}
-      {action.who && (
-        <span className="text-muted-foreground"> — {action.who}</span>
-      )}
-    </span>
   );
 }

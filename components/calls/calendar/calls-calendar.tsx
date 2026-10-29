@@ -9,13 +9,18 @@ import { RescheduleDialog } from "@/components/calls/calendar/reschedule-dialog"
 import { TimeGrid } from "@/components/calls/calendar/time-grid";
 import { useReschedule } from "@/components/calls/calendar/use-reschedule";
 import { useMeetingComposer } from "@/components/calls/new-meeting-button";
+import { StatusBadge } from "@/components/ui/status-badge";
 import type { CalendarEvent } from "@/lib/calls/calendar";
 import { clock, type CalendarMode } from "@/lib/utils/calendar-period";
 import { calls } from "@/lib/i18n/fr/calls";
+import { callCalendarTone } from "@/lib/ui/state-tones";
 
 const fr = { calls };
 
 type Place = { day: string; start: number; end: number };
+
+// What the blocks' colours say (proto `docs/protos/pages.html`).
+const LEGEND = ["ready", "upcoming", "draft"] as const;
 
 /**
  * The Calls page's calendar, as in Teams: the week's time grid or the month, where a click or a drag on a free slot opens « Nouvelle
@@ -60,11 +65,25 @@ export function CallsCalendar({
 
   return (
     <>
-      <p className="hidden text-xs text-muted-foreground md:block">
-        {mode === "month"
-          ? fr.calls.calendar.hintMonth
-          : fr.calls.calendar.hint}
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <p className="hidden text-xs text-muted-foreground md:block">
+          {mode === "month"
+            ? fr.calls.calendar.hintMonth
+            : fr.calls.calendar.hint}
+        </p>
+        <ul
+          aria-label={fr.calls.calendar.legend}
+          className="flex flex-wrap items-center gap-1.5"
+        >
+          {LEGEND.map((key) => (
+            <li key={key}>
+              <StatusBadge tone={callCalendarTone[key]} size="sm">
+                {fr.calls.status[key]}
+              </StatusBadge>
+            </li>
+          ))}
+        </ul>
+      </div>
       <div className="hidden md:block">
         {mode === "month" ? (
           <MonthGrid

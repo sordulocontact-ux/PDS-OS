@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { AgendaList } from "@/components/calls/prep/agenda-list";
+import { PageSection } from "@/components/shell/page-section";
 import type { AgendaDraftItem } from "@/components/calls/prep/use-agenda-draft";
 import { Button } from "@/components/ui/button";
 import { updateCallAgenda } from "@/lib/calls/actions";
@@ -68,14 +69,18 @@ export function CallAgenda({
 
   if (!editing) {
     return (
-      <div className="grid gap-3 rounded-lg border border-border p-4">
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h3 className="text-sm font-medium">{t.title}</h3>
-          {canEdit && (
+      <PageSection
+        id="call-agenda"
+        title={t.title}
+        description={
+          durationMinutes !== null ? t.total(durationMinutes) : undefined
+        }
+        action={
+          canEdit && (
             <Button
               type="button"
               size="sm"
-              variant="ghost"
+              variant="outline"
               onClick={() => {
                 setDraft(toDraft());
                 setEditing(true);
@@ -83,13 +88,10 @@ export function CallAgenda({
             >
               {t.edit}
             </Button>
-          )}
-        </div>
-        {durationMinutes !== null && (
-          <p className="text-xs text-muted-foreground">
-            {t.total(durationMinutes)}
-          </p>
-        )}
+          )
+        }
+        card
+      >
         {edited && (
           <p className="text-xs text-muted-foreground">
             {t.edited(edited.by, day.format(new Date(edited.at)))}
@@ -121,7 +123,7 @@ export function CallAgenda({
             </li>
           ))}
         </ol>
-      </div>
+      </PageSection>
     );
   }
 
@@ -134,7 +136,7 @@ export function CallAgenda({
   };
 
   return (
-    <div className="grid gap-3 rounded-lg border border-border p-4">
+    <PageSection id="call-agenda" title={t.title} card>
       <AgendaList
         id={`agenda-${callId}`}
         items={draft}
@@ -168,6 +170,6 @@ export function CallAgenda({
           {pending ? t.saving : t.save}
         </Button>
       </div>
-    </div>
+    </PageSection>
   );
 }

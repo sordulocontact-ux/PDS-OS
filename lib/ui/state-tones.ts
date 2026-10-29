@@ -54,6 +54,14 @@ export const callStatusTone: Record<string, Tone> = {
   extracting: "info",
   ready: "success",
   failed: "danger",
+  closed: "neutral",
+};
+
+/** A call's block in the Calls calendar: a call left to record stands out
+ * (proto `docs/protos/pages.html`, legend « À enregistrer »). */
+export const callCalendarTone: Record<string, Tone> = {
+  ...callStatusTone,
+  draft: "warning",
 };
 
 export const membershipTone: Record<string, Tone> = {

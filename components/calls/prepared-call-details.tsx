@@ -1,3 +1,4 @@
+import { PageSection } from "@/components/shell/page-section";
 import { calls } from "@/lib/i18n/fr/calls";
 import { conceptionCall } from "@/lib/i18n/fr/conception-call";
 import { framingIntel } from "@/lib/i18n/fr/framing-intel";
@@ -58,22 +59,27 @@ export function PreparedCallDetails({
   ].filter((row) => row !== false && row !== null);
 
   return (
-    <div className="grid gap-2 rounded-lg border border-border p-4 text-sm">
-      <h3 className="font-medium">
-        {isProduction
+    <PageSection
+      id="call-prepared"
+      title={
+        isProduction
           ? fr.productionCall.detailsTitle
           : isDesign
             ? design.detailsTitle
             : isStrategy
               ? strategy.detailsTitle
-              : framing.detailsTitle}
-      </h3>
-      {rows.map((row) => (
-        <p key={row.label}>
-          <span className="text-muted-foreground">{row.label} : </span>
-          {row.value}
-        </p>
-      ))}
-    </div>
+              : framing.detailsTitle
+      }
+      card
+    >
+      <div className="grid gap-2 text-sm">
+        {rows.map((row) => (
+          <p key={row.label}>
+            <span className="text-muted-foreground">{row.label} : </span>
+            {row.value}
+          </p>
+        ))}
+      </div>
+    </PageSection>
   );
 }

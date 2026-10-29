@@ -1,179 +1,168 @@
-import Link from "next/link";
-import { IconChevronLeft } from "nucleo-sharp-essential";
-
 import { CallAgenda } from "@/components/calls/call-agenda";
-import { CallStatusBadge } from "@/components/calls/call-badges";
-import { CallAudio, CallRecording } from "@/components/calls/call-recording";
-import { CallResults } from "@/components/calls/call-results";
-import { CallDetails } from "@/components/calls/call-details";
-import { PreparedCallDetails } from "@/components/calls/prepared-call-details";
+import { CallHeader } from "@/components/calls/call-header";
+import { CallNow } from "@/components/calls/call-now";
+import { CallOutcomes } from "@/components/calls/call-outcomes";
+import { CallRecording } from "@/components/calls/call-recording";
+import {
+  CallReportCard,
+  CallTranscriptCard,
+} from "@/components/calls/call-report-card";
+import { CallSide } from "@/components/calls/call-side";
 import { PageSection } from "@/components/shell/page-section";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { isUpcoming } from "@/lib/calls/format";
-import type {
-  CallDetail,
-  StoredReport,
-  StoredTranscript,
-} from "@/lib/calls/queries";
+import {
+  callStage,
+  callTodos,
+  recordsToday,
+  type CallModule,
+} from "@/lib/calls/now";
+import type { CallPageData } from "@/lib/calls/page-data";
+import type { CallDetail, StoredTranscript } from "@/lib/calls/queries";
+import type { Member } from "@/lib/framing/related";
 import { calls } from "@/lib/i18n/fr/calls";
 
 const fr = { calls };
 
-type StepTexts = { title: string; description: string };
-
-// The recording opens by itself from this long before the call.
-const RECORD_OPEN_MS = 15 * 60_000;
-
 /**
- * One call's page: first its details, as Teams shows a meeting (when, what it
- * belongs to, the video link written out, who takes part), then its agenda,
- * then one step at a time: record it (folded until the call's time comes),
- * the processing that runs by itself, its report, decisions and actions.
- * Shared by a project's call and an internal meeting; the page gives what
- * differs (way back, what it belongs to, organizer, step texts, what follows
- * the report).
+ * One call's page (proto `docs/protos/pages.html`, « Calls »), shared by a
+ * project's call and an internal meeting: its head (state beside the title,
+ * « projet · quand · organisé par X »), « Maintenant » by state and role,
+ * then « Décisions et actions », the report, the agenda and the folded
+ * transcript; on the side, the participants, the recording and the video
+ * link. The page gives what differs (way back, where it belongs, the
+ * module its proposals are settled in, where its tasks may go).
  */
 export function CallWorkspace({
   call,
   transcript,
-  report,
   audioUrls,
   canEdit,
   back,
   where,
   organizer,
-  steps,
-  doneAction,
-  outcomes,
+  module = null,
+  data,
+  members,
+  mePersonId,
+  taskProjects,
+  deliverableId = null,
   meetFailed = false,
 }: {
   call: CallDetail;
   transcript: StoredTranscript | null;
-  report: StoredReport | null;
   // One per take when the call was recorded in parts.
   audioUrls: Array<string | null>;
   // Whoever works on the call: the project's owner, the meeting's creator.
   canEdit: boolean;
   back: { href: string; label: string };
-  // The project (a link) or « Réunion interne ».
-  where: React.ReactNode;
+  // The project (with its link) or « Réunion interne ».
+  where: { label: string; href: string | null };
   organizer: string | null;
-  steps: { record: StepTexts; processing: StepTexts; done: StepTexts };
-  // Under the recording once the report is ready (the project's framing).
-  doneAction?: React.ReactNode;
-  // Decisions and actions of the report.
-  outcomes?: React.ReactNode;
+  module?: CallModule | null;
+  data: CallPageData;
+  // Who a task may be given to, and the report shared with.
+  members: Member[];
+  mePersonId: string | null;
+  // Where a task may go: the call's project when the reader owns it, else
+  // (meeting) the launched projects they own. Empty: read only.
+  taskProjects: { id: string; title: string }[];
+  // The deliverable a creative exchange is about: its tasks point to it.
+  deliverableId?: string | null;
   // Google gave no Meet link at creation (?meet=failed): said until a link
   // is added.
   meetFailed?: boolean;
 }) {
-  const step = !call.audioPath ? "record" : report ? "done" : "processing";
   const now = new Date();
+  const closed = data.closures.length > 0;
   const upcoming = isUpcoming(call, now);
-  // A strategy call held on site or by phone takes no video link.
+  const stage = callStage(call, closed, now);
+  const actionsLeft = (data.outcomes?.actions ?? []).filter((a) => !a.task);
+  const todos = callTodos({
+    stage,
+    owner: canEdit,
+    today: recordsToday(call, now),
+    interrupted: call.recording.takes.some((take) => take.pieces > 0),
+    pendingProposals: module ? data.pendingProposals : 0,
+    tasksLeft: taskProjects.length > 0 ? actionsLeft.length : 0,
+    summarySent: data.summarySent,
+    recipients: data.summary?.recipients.length ?? 0,
+  });
+  // A call held on site or by phone takes no video link.
   const linkable =
     canEdit &&
     !call.audioPath &&
     (!call.prepared?.format || call.prepared.format === "video");
-  const recordOpen =
-    new Date(call.occurredAt).getTime() - now.getTime() < RECORD_OPEN_MS;
 
   return (
-    <div className="grid w-full max-w-3xl gap-6">
-      <header className="grid gap-3">
-        <Link
-          href={back.href}
-          className="-ml-1 inline-flex min-h-10 w-fit items-center gap-1 rounded-md px-1 text-sm text-muted-foreground hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
-        >
-          <IconChevronLeft aria-hidden className="size-4" />
-          {back.label}
-        </Link>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold break-words">{call.title}</h2>
-          <CallStatusBadge status={call.status} upcoming={upcoming} />
-        </div>
-        {meetFailed && !call.meetingUrl && (
-          <ToneCallout tone="warning">
-            {fr.calls.schedule.meetFailed}
-          </ToneCallout>
-        )}
-      </header>
-
-      <CallDetails
+    <div className="flex w-full flex-col gap-6">
+      <CallHeader
         call={call}
+        back={back}
         where={where}
         organizer={organizer}
-        canEditLink={linkable}
+        upcoming={upcoming}
+        closed={closed}
       />
-      {call.prepared && <PreparedCallDetails prepared={call.prepared} />}
-      {step === "record" && call.agenda && (
-        <CallAgenda
-          callId={call.id}
-          agenda={call.agenda}
-          durationMinutes={call.durationMinutes}
-          canEdit={canEdit}
-          edited={call.agendaEdited}
-        />
+      {meetFailed && !call.meetingUrl && (
+        <ToneCallout tone="warning">{fr.calls.schedule.meetFailed}</ToneCallout>
       )}
-
-      {step === "record" ? (
-        canEdit && (
-          <PageSection
-            id="call-recording"
-            title={fr.calls.details.recordTitle}
-            description={
-              recordOpen
-                ? steps.record.description
-                : fr.calls.details.recordLater
-            }
-            card
-            collapsible
-            // A recording interrupted earlier is never hidden.
-            defaultOpen={
-              recordOpen || call.recording.takes.some((t) => t.pieces > 0)
-            }
-          >
-            <CallRecording
-              call={call}
-              audioUrls={audioUrls}
-              hasTranscript={transcript !== null}
+      <CallNow
+        call={call}
+        stage={stage}
+        todos={todos}
+        canEdit={canEdit}
+        hasTranscript={transcript !== null}
+        ownerName={organizer}
+        where={where.label}
+        module={module}
+        data={data}
+        members={members.filter((m) => m.personId !== mePersonId)}
+      />
+      {canEdit && stage === "planned" && todos.length === 0 && (
+        // Another day: nothing to do now, but a module's « Enregistrer
+        // l'échange » lands here (#call-recording), folded.
+        <PageSection
+          id="call-recording"
+          title={fr.calls.details.recordTitle}
+          description={fr.calls.details.recordLater}
+          card
+          collapsible
+          defaultOpen={false}
+        >
+          <CallRecording call={call} />
+        </PageSection>
+      )}
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+        <div className="flex min-w-0 flex-col gap-6">
+          {data.outcomes && (
+            <CallOutcomes
+              outcomes={data.outcomes}
+              members={members}
+              projectId={call.projectId}
+              projects={taskProjects}
+              deliverableId={deliverableId}
             />
-          </PageSection>
-        )
-      ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle>{steps[step].title}</CardTitle>
-            <CardDescription>{steps[step].description}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {step === "done" ? (
-              <div className="grid gap-6">
-                {doneAction}
-                <CallAudio call={call} audioUrls={audioUrls} />
-              </div>
-            ) : (
-              <CallRecording
-                call={call}
-                audioUrls={audioUrls}
-                hasTranscript={transcript !== null}
-              />
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      {step === "done" && outcomes}
-      {step === "done" && (
-        <CallResults transcript={transcript} report={report} />
-      )}
+          )}
+          {data.meeting && <CallReportCard meeting={data.meeting} />}
+          {call.agenda && (
+            <CallAgenda
+              callId={call.id}
+              agenda={call.agenda}
+              durationMinutes={call.durationMinutes}
+              canEdit={canEdit && !call.audioPath}
+              edited={call.agendaEdited}
+            />
+          )}
+          {transcript && <CallTranscriptCard transcript={transcript} />}
+        </div>
+        <CallSide
+          call={call}
+          audioUrls={audioUrls}
+          upcoming={upcoming}
+          canEditLink={linkable}
+        />
+      </div>
     </div>
   );
 }

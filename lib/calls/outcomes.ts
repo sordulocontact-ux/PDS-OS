@@ -19,6 +19,8 @@ export type CallAction = {
   id: string;
   what: string;
   who: string | null;
+  // The sentence it was taken from, quoted as said.
+  quote: string | null;
   // The task it became, when it did (and the viewer can read it).
   task: {
     assigneeName: string;
@@ -76,6 +78,7 @@ export async function loadCallOutcomes(
         id: item.id,
         what: item.what,
         who: item.who,
+        quote: item.quote,
         // A call's task always has a date (only the Juridique's may not).
         task: task?.due_date
           ? {

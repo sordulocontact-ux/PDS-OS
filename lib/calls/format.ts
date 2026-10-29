@@ -1,5 +1,7 @@
 /** Display formats for calls. The team works on Paris time. */
 
+import type { CallStatus } from "@/lib/calls/constants";
+
 const dateTime = new Intl.DateTimeFormat("fr-FR", {
   dateStyle: "medium",
   timeStyle: "short",
@@ -109,4 +111,16 @@ export function nextRoundHourInput(now: Date): string {
   next.setMinutes(0, 0, 0);
   next.setHours(next.getHours() + 1);
   return toParisLocalInput(next);
+}
+
+/** What a call's state reads as: closed first, then a draft still to come
+ * (« À venir », not « À enregistrer »), else its processing. */
+export function callStateKey(
+  status: CallStatus,
+  {
+    upcoming = false,
+    closed = false,
+  }: { upcoming?: boolean; closed?: boolean },
+): CallStatus | "upcoming" | "closed" {
+  return closed ? "closed" : upcoming ? "upcoming" : status;
 }

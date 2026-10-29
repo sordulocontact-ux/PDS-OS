@@ -1139,11 +1139,25 @@ s'afficher sans chargement.
   porte `briefFilled`, qui déclenche la redirection.
 - Groq : `lib/ai/groq-tolerant-fetch.ts` complète les champs de segment nuls renvoyés sur de
   vrais enregistrements (sinon « Invalid JSON response »). Limite 25 Mo (gratuit) / 100 Mo.
-- **Page commune** `CallWorkspace` (`components/calls/call-workspace.tsx`) : en-tête (retour,
-  date, état, **« Rejoindre »** si un lien de visio est posé et que rien n'est enregistré,
-  « Ajouter / Modifier le lien de visio » pour qui travaille sur le call), ordre du jour,
-  enregistrement, traitement, puis **Décisions et actions** et le compte rendu. Utilisée par
-  le call d'un projet et par la réunion interne.
+- **Page commune** `CallWorkspace` (`components/calls/call-workspace.tsx`, refaite selon le proto
+  `docs/protos/pages.html` le 29/10/2026), pour le call d'un projet et la réunion interne :
+  en-tête (retour, titre et état à côté, « projet · quand · organisé par X », « Rejoindre » tant
+  qu'il est à venir, « ⋯ » = fiche du call), puis **« Maintenant »** calculé par le code
+  (`lib/calls/now.ts`) selon l'état et le rôle, dans l'ordre : enregistrer le call (le jour même ou
+  15 min avant, enregistreur `compact` en place, ancre `#call-recording`) → déposer un
+  enregistrement manquant (créneau passé) → traitement (pour tous) → trancher les propositions
+  (lien vers le module : Cadrage, Stratégie, Conception, Production) → créer les tâches (ancre
+  `#call-actions`) → envoyer le résumé → clôturer ; « Ensuite » liste la suite ; un autre lit
+  « En attente de X » ; un call clôturé dit « Clôturé le … » avec partage, PDF, correction et
+  historique. Ensuite Décisions et actions, Compte rendu (lignes du rapport, citations, état donné
+  par la clôture), Ordre du jour, Transcription repliée (`<details>` : un lien `#t-…` l'ouvre) ; à
+  côté Participants, préparation, Enregistrement, Visio. Données lues par `loadCallPage`
+  (`lib/calls/page-data.ts`). Un call d'un autre jour garde son enregistreur replié
+  (« Enregistrer le call ») pour le « Enregistrer l'échange » des modules. **Résumé avant la
+  clôture** (proto) : sur la page du call, son brouillon (`summaryDraft`) reprend ce que la clôture
+  a gardé, sinon les décisions telles que dites et les actions devenues tâches (qui, échéance),
+  jamais les points à arbitrer ; relu par le responsable avant l'envoi ; les invités extérieurs
+  reçoivent le même texte en `mailto:` depuis la messagerie de l'utilisateur.
 - **Lien de visio** `calls.meeting_url` (https seulement, vérifié en SQL et en zod) : saisi à
   la création ou ensuite (`updateCallLink`), ouvert dans un nouvel onglet ; l'enregistrement
   reste celui de l'app (`…260929000301`).
@@ -1160,15 +1174,14 @@ s'afficher sans chargement.
   fonction, et `insert … returning` vérifie cette politique (même piège sur `contracts`).
 - **Décisions et actions** (`lib/calls/outcomes.ts`, `components/calls/call-outcomes.tsx`) :
   sous chaque call traité, les `report_items` `decided` (lus tels quels) et `next_action`,
-  chacune avec la tâche qui en est née (`tasks.source_report_item_id`) ou le formulaire
-  `ActionTaskForm` (responsable + échéance choisis par une personne, jamais par PO), partagé
-  avec le Cadrage. Call de projet : son responsable crée la tâche dans le projet. Réunion
+  chacune avec sa phrase et la tâche qui en est née (`tasks.source_report_item_id`) ou
+  « Créer la tâche » (`ActionTaskButton`, fenêtre : responsable et échéance obligatoires, choisis
+  par une personne, jamais par PO ; rouges avec leur raison au premier essai). Call de projet : son responsable crée la tâche dans le projet. Réunion
   interne : la tâche va dans un projet lancé **dont le lecteur est responsable**
   (`listOwnedProjects`) — la RLS de `tasks` ne laisse créer que le responsable.
-- **Clôture et partage d'un call** (PROJ-AMEL-01, lot 10, migration `…20261012101701`) : sous les
-  décisions et actions, « Compte rendu et clôture » distingue les **cinq sorties** (transcription,
-  résumé, décisions, actions avec combien en tâches, propositions de cadrage avec combien à revoir)
-  et ce qui reste à revoir. « Clôturer le call » fige le compte rendu en une **version**
+- **Clôture et partage d'un call** (PROJ-AMEL-01, lot 10, migration `…20261012101701`) : depuis le
+  proto du 29/10, dans « Maintenant » (dernier geste, puis « Clôturé le … » ; la carte des cinq
+  sorties a disparu, ce qui reste à revoir est dit dans la fenêtre). « Clôturer le call » fige le compte rendu en une **version**
   (`call_closures` : résumé, décisions, actions avec responsable et échéance de leur tâche, points
   ouverts, titre et date du call, et ce qui restait à revoir), écrit par le code (`lib/calls/closure.ts`) ;
   « Corriger le compte rendu » en fait la suivante, les précédentes restent. Seul le propriétaire du
@@ -1196,7 +1209,7 @@ de call qui donne un lien Google Meet.
     période précédente / suivante ; dans le mois, le numéro d'un jour et « n autres » ouvrent sa
     semaine ;
   - grille de 24 h défilante, arrivée sur 7 h 30 (ou le premier call), trait de l'heure actuelle,
-    calls côte à côte quand ils se chevauchent (`dayEvents`), teinte du projet (`projectHue`) ;
+    calls côte à côte quand ils se chevauchent (`dayEvents`), teinte de l'état depuis le proto du 29/10 (`callCalendarTone` : compte rendu prêt, à venir, à enregistrer ; légende à côté de l'aide) ; la liste n'a plus que le filtre Projet ;
   - **clic ou glisser sur une plage libre** → « Nouvelle réunion » sur ce créneau (pas de 30 min,
     un clic = 30 min ; Mois : un clic sur un jour = 9 h) ; un seul formulaire pour le bouton et la
     grille (`MeetingComposerProvider`) ;
@@ -1220,15 +1233,15 @@ de call qui donne un lien Google Meet.
   disponibilités des participants, créer un call **de projet** depuis la grille (on crée une
   réunion interne).
 - **Page d'un call = ses détails d'abord** (retour de Sacha, 10/10 : « quand je clique sur le
-  call, les informations avec le lien Google Meet ») : `CallDetails` en tête de `CallWorkspace`
-  (quand, rattachement, organisateur, **lien de visio écrit en clair** avec « Rejoindre » et
-  « Copier le lien », participants membres et invités). L'enregistrement passe dessous, replié
-  jusqu'à 15 min avant le call, réservé à qui y travaille ; un call qui a un lien de visio ne
+  call, les informations avec le lien Google Meet ») : depuis le proto du 29/10, quand et
+  rattachement dans la ligne sous le titre, **lien de visio écrit en clair** dans la carte
+  « Visio » (« Rejoindre », « Copier le lien »), participants dans leur carte (`CallSide`) ; un
+  call qui a un lien de visio ne
   demande plus « visio ou sur place » (`videoCall` de `CallRecorder`). La fiche du calendrier
   (`EventPeek`) montre aussi le lien et « Copier le lien ».
 - **Fiche du call pour l'extérieur** (retour du 10/10 : « partager le call à des personnes
-  extérieures… heure, plan du call, durée et le lien ») : en bas de `CallDetails`, « Copier la
-  fiche du call » et « Envoyer par e-mail » (`mailto:` adressé aux invités par e-mail, rien
+  extérieures… heure, plan du call, durée et le lien ») : dans « ⋯ » de l'en-tête, « Copier la
+  fiche du call » et « Envoyer la fiche par e-mail » (`mailto:` adressé aux invités, rien
   n'est envoyé par PDS OS). Le texte est écrit par le code (`lib/calls/sheet.ts`) : titre, jour,
   début – fin et durée (sans fin : durée estimée de l'ordre du jour), ordre du jour avec les
   minutes, lien de visio. Rien sur le projet ni l'équipe, et les questions préparées d'un point
@@ -1313,7 +1326,7 @@ reçoit l'ordre du jour du call avec la transcription (« p1 : … », données,
 décision, question ouverte et action nomme sa clé, le code la vérifie et recopie les mots du point
 (`toReportItemRows`) ; une clé inconnue = « dit en dehors de l'ordre du jour ». `loadMeeting`
 (`lib/calls/meeting/queries.ts`) lit le call et son dernier compte rendu ; **l'état de chaque ligne vient
-du module** (`states`, par id de ligne), jamais du compte rendu. Sur la page du call (`CallMeetingSection`),
+du module** (`states`, par id de ligne), jamais du compte rendu. Sur la page du call (`CallReportCard`),
 faute d'étape, ce que la clôture a gardé se lit « Confirmé par » qui a clôturé.
 
 **Résumé aux participants** : table `call_summaries` (version, texte, destinataires, `recipient_person_ids`,
