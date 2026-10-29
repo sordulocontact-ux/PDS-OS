@@ -36,7 +36,7 @@ const said = z
 export function proposeArtistTool({ access, verbatim }: ProposeContext) {
   return tool({
     description:
-      "Prépare la création d'un artiste, ou la modification / le complément de la fiche d'un artiste existant (nom, relation avec PDS, nom civil, pays, biographie, notes, contacts). N'enregistre RIEN : l'utilisateur relit le formulaire pré-rempli et enregistre lui-même. Ne remplis que ce que l'utilisateur a dit.",
+      "Prépare la création d'un artiste, ou la modification / le complément de la fiche d'un artiste existant (nom, relation avec PDS, nom civil, pays, biographie, notes, contacts). N'enregistre RIEN : l'utilisateur relit le formulaire pré-rempli et enregistre lui-même. Ne remplis que ce que l'utilisateur a dit. Pour un nouvel artiste, le formulaire s'ouvre sur une recherche Deezer déjà lancée sur le nom : l'utilisateur y choisit le profil (ou colle le lien de sa page Deezer), et l'application reprend d'elle-même sa photo, son lien et ses fans.",
     inputSchema: z.object({
       existingArtist: z
         .string()

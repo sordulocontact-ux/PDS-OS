@@ -178,6 +178,9 @@ Le parcours :
    le **vrai formulaire** de l'app, pré-rempli, dans un panneau latéral. L'humain corrige
    et enregistre avec sa session : RLS, droits et validations habituels. Artiste : création
    (Deezer d'abord), puis identité et biographie, puis chaque contact, une étape à la fois.
+   PO le sait (description de `propose_artist` et consignes) : à « crée-le avec Deezer », il
+   renvoie à la recherche Deezer du formulaire, il ne choisit jamais le profil lui-même
+   (homonymes) et ne propose pas de lien Deezer en contact ou en note (retour du 29/10/2026).
 5. Une fois enregistrée, la carte passe à « Enregistré » avec le lien ; la proposition de PO
    reste lisible, repliée : les valeurs gardées sont celles du formulaire.
 6. **Création en chaîne** (artiste → titres → projet dans la même réponse) : un artiste ou
