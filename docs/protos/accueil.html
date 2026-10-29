@@ -127,10 +127,14 @@ h1,h2,h3,p{margin:0}
 .chev{color:var(--text-tertiary);flex-shrink:0}
 .more{padding:10px 16px;border-top:1px solid var(--border-hairline);font-size:14px;color:var(--text-secondary)}
 
-.proj{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1.2fr) 112px;align-items:center;gap:16px}
-.proj.nolead{grid-template-columns:minmax(0,2.6fr) minmax(0,1.2fr) 112px}
+.proj{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1.5fr) 16px;align-items:center;gap:16px}
+.proj.nolead{grid-template-columns:minmax(0,1.8fr) minmax(0,1fr) minmax(0,1.6fr) 16px}
+.foryou{display:flex;flex-direction:column;min-width:0;font-size:15px;line-height:22px}
+.foryou .act{font-weight:600;overflow-wrap:anywhere}
+.foryou .cap{font-size:14px;line-height:20px}
+.c-act-m{display:none}
 .proj.nolead .c-lead{display:none}
-.proj .side-r{justify-content:flex-end}
+.proj .side-r{justify-content:flex-start}
 .proj .cell{min-width:0;display:flex;flex-direction:column}
 .head-row{cursor:default;padding-block:8px;font-size:14px;line-height:20px;color:var(--text-tertiary)}
 
@@ -185,9 +189,9 @@ textarea.field[aria-invalid="true"]{border-color:var(--tone-danger-fg)}
   .topbar .brand{width:40px;height:40px;border-radius:12px;font-size:13px}
   .home{padding-block:40px 160px;gap:32px}
   .greet h1{font-size:36px;line-height:42px}.greet p{font-size:18px;line-height:26px}
-  .proj{grid-template-columns:minmax(0,1fr) auto}
-  .proj .c-lead,.proj .c-rel{display:none}
-  .proj .c-rel-m{display:block}
+  .proj,.proj.nolead{grid-template-columns:minmax(0,1fr) auto 16px}
+  .proj .c-lead,.proj .c-rel,.proj .foryou{display:none}
+  .proj .c-rel-m,.proj .c-act-m{display:block}
   .head-row{display:none}
   .grid4{grid-template-columns:minmax(0,1fr)}
 }
@@ -395,14 +399,17 @@ function projectsBlock(){
     <div class="list"><div class="empty"><span>Aucun projet pour l'instant.</span>${S.role==="dg"?`<button class="btn outline sm" type="button">Nouveau projet</button>`:""}</div></div></section>`;
   const nolead=keys.every(k=>PROJECTS[k].lead===S.role)?" nolead":"";
   return `<section class="sec" aria-labelledby="h-proj"><div class="sec-head"><h2 id="h-proj">Vos projets<span class="n num">${keys.length}</span></h2></div>
-    <div class="list"><div class="row proj${nolead} head-row" aria-hidden="true"><span>Projet</span><span class="c-lead">Responsable</span><span class="c-rel">Sortie</span><span>Pour vous</span></div>
+    <div class="list"><div class="row proj${nolead} head-row" aria-hidden="true"><span>Projet</span><span class="c-lead">Responsable</span><span class="c-rel">Échéance</span><span>Pour vous</span><span></span></div>
     ${keys.map(k=>{const p=PROJECTS[k];const mine=live(S.role).filter(s=>s.p===k&&s.by===S.role);const first=mine.sort((a,b)=>rank(a)-rank(b))[0]||live(S.role).filter(s=>s.p===k).sort((a,b)=>rank(a)-rank(b))[0];
       const d=daysFrom(p.release);const rel=`${fmtDay(p.release)}`;const rel2=d===0?"aujourd'hui":`dans ${d} jour${d>1?"s":""}`;
-      const pill=p.handover&&!isDone("l1")?`<span class="badge sm t-warn">${S.role===p.lead?"À accepter":"Transmis"}</span>`:mine.length?`<span class="badge sm t-info">${mine.length} à vous</span>`:`<span class="badge sm t-neutral">Suivi</span>`;
-      return `<button class="row proj${nolead}" type="button" ${first?`data-act="open" data-id="${first.id}"`:""}><span class="cell"><span class="title">${esc(p.title)}</span><span class="cap">${esc(p.kind)} · ${esc(p.artist)}</span><span class="cap c-rel-m num">Sortie ${esc(rel)}</span></span>
+      const next=mine[0];
+      const act=next?`${esc(next.title)}${mine.length>1?` <span class="cap">+${mine.length-1}</span>`:""}`:"";
+      const pill=next?`<span class="foryou"><span class="act">${act}</span>${overdue(next)?`<span class="cap" style="color:var(--tone-danger-fg)">En retard</span>`:next.due?`<span class="cap">${esc(dueText(next))}</span>`:""}</span>`
+        :p.handover&&!isDone("l1")?`<span class="side-r"><span class="badge sm t-warn">Transmis</span></span>`:`<span class="side-r"><span class="badge sm t-neutral">Suivi</span></span>`;
+      return `<button class="row proj${nolead}" type="button" ${first?`data-act="open" data-id="${first.id}"`:""}><span class="cell"><span class="title">${esc(p.title)}</span><span class="cap">${esc(p.kind)} · ${esc(p.artist)}</span><span class="cap c-rel-m num">Échéance ${esc(rel)}</span>${next?`<span class="cap c-act-m">À vous : <b style="color:var(--text-primary)">${act}</b></span>`:""}</span>
         <span class="cell c-lead"><span>${esc(P[p.lead].name)}</span></span>
         <span class="cell c-rel num"><span>${esc(rel)}</span><span class="cap">${rel2}</span></span>
-        <span class="side-r">${pill}${I.chev}</span></button>`;}).join("")}</div></section>`;
+        ${pill}${I.chev}</button>`;}).join("")}</div></section>`;
 }
 function welcome(){
   const pts={

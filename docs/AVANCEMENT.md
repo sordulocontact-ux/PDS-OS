@@ -1119,7 +1119,9 @@ l'accueil lit les lignes du Travail et les parcours (`lib/home/feed.ts`).
 - [x] **Aussi à vous** : les trois suivantes, puis « Tout voir dans Travail ».
 - [x] **Ce que vous attendez** : qui, sur quoi, pour quand, en retard d'abord (tout pour la direction ; sinon
       ses projets et les étapes qu'on validera), et les projets en attente d'acceptation.
-- [x] **Vos projets** : par échéance, avec ce que chacun demande (statut de transmission, « n à vous », « Suivi »).
+- [x] **Vos projets** : par échéance, avec ce que chacun demande : l'action la plus pressée (« Valider le Mix V1
+      +3 »), que la ligne ouvre, sinon le statut de transmission ou « Suivi » (un compte « 2 à vous » ne disait
+      rien, Sacha 29/10).
 - [x] Retirés : la grille de cartes (`CardGrid`, `home-cards`, `JourneyActionsCard`), l'Activité et les Sorties
       de l'accueil, et leurs textes ; la saisie de PO garde sa hauteur Figma (déjà plus haute que le proto).
 - Décision prise faute de règle : « les étapes que je validerai » sont reconnues au nom du valideur, les étapes

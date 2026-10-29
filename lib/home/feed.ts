@@ -26,9 +26,13 @@ export type WaitingItem = {
   href: string;
 };
 
-/** One line of « Vos projets », with the viewer's own moves in it (the
- * same rows as Travail). */
-export type HomeProject = { project: ProjectListItem; mine: number };
+/** One line of « Vos projets »: the most pressing of the viewer's moves in
+ * it (`leadOf`, the same rows as Travail) and how many there are. */
+export type HomeProject = {
+  project: ProjectListItem;
+  next: WorkRow | null;
+  mine: number;
+};
 
 export type HomeFeed = {
   // « Maintenant » (the same choice as the Travail's lead).
@@ -115,12 +119,12 @@ export const loadHomeFeed = trackedCache(
     // « Vos projets »: every project for the direction; else those the
     // viewer answers for, acts in or waits on. Drafts never transmitted
     // stay in Projets.
-    const mineByProject = new Map<string, number>();
+    const mineByProject = new Map<string, WorkRow[]>();
     for (const row of mine)
-      mineByProject.set(
-        row.projectId,
-        (mineByProject.get(row.projectId) ?? 0) + 1,
-      );
+      mineByProject.set(row.projectId, [
+        ...(mineByProject.get(row.projectId) ?? []),
+        row,
+      ]);
     const waitedIn = new Set(
       launched.projects
         .filter(({ journeys: j }) =>
@@ -144,10 +148,10 @@ export const loadHomeFeed = trackedCache(
           mineByProject.has(p.id) ||
           waitedIn.has(p.id),
       )
-      .map((project) => ({
-        project,
-        mine: mineByProject.get(project.id) ?? 0,
-      }))
+      .map((project) => {
+        const own = mineByProject.get(project.id) ?? [];
+        return { project, next: leadOf(own), mine: own.length };
+      })
       .sort(
         (a, b) =>
           (a.project.dueDate ?? "9999").localeCompare(

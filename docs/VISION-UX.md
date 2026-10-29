@@ -133,8 +133,8 @@ toute la personne : sous la salutation, ce qui l'attend compté (« 3 actions vo
 à valider ») ; puis le même « Maintenant » que Travail (un projet à accepter passe avant tout, puis
 le retard, puis l'échéance), trois actions « Aussi à vous » et le lien vers Travail ; **« Ce que vous
 attendez »** (qui, sur quoi, pour quand : tout pour la direction, sinon ses projets et ce qu'on
-validera ensuite) ; **« Vos projets »** par échéance avec ce que chacun demande (« 2 à vous »,
-« Suivi », statut de transmission). Plus d'activité ni de cartes juxtaposées. *(Sacha 29/10/2026,
+validera ensuite) ; **« Vos projets »** par échéance avec ce que chacun demande : l'action la plus
+pressée (« Valider le Mix V1 +3 »), jamais un simple compte, sinon le statut de transmission ou « Suivi ». Plus d'activité ni de cartes juxtaposées. *(Sacha 29/10/2026,
 proto `docs/protos/accueil.html`.)*
 
 **En-tête de module** (au-dessus de « Maintenant ») : fil d'Ariane « Projet › Module ›

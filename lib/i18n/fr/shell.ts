@@ -103,7 +103,10 @@ export const shell = {
           : days > 0
             ? `dans ${days} jour${days > 1 ? "s" : ""}`
             : `il y a ${-days} jour${days < -1 ? "s" : ""}`,
-      mine: (n: number) => `${n} à vous`,
+      // The most pressing move, then how many follow (« Valider le Mix V1 +3 »).
+      more: (n: number) => `+${n}`,
+      // Before it under the title on a phone.
+      mineLabel: "À vous : ",
       followed: "Suivi",
       noDue: "Non définie",
       empty: "Aucun projet pour l'instant.",

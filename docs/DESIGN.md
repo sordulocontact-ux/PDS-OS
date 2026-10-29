@@ -381,8 +381,10 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   `docs/protos/accueil.html`) : « Maintenant » (`WorkLead`, le cadre de `NowFrame`) suivi à
   16 px de « Aussi à vous » (trois lignes), puis à 40 px « Ce que vous attendez » (quatre lignes,
   initiales en disque gris, seul le nom en gras) et « Vos projets » (en-tête Projet, Responsable
-  seulement s'il n'est pas toujours la personne, Échéance avec « dans n jours », Pour vous en
-  pastille). Une seule colonne, 40 px entre les blocs, plus de grille de cartes.
+  seulement s'il n'est pas toujours la personne, Échéance avec « dans n jours », Pour vous =
+  **l'action la plus pressée** en semi-gras, « +n » s'il y en a d'autres, son échéance ou « En
+  retard » dessous, et la ligne ouvre ce geste ; sinon « Transmis… » ou « Suivi » en pastille.
+  Jamais un compte seul : « 2 à vous » ne disait rien, Sacha 29/10). Une seule colonne, 40 px entre les blocs, plus de grille de cartes.
 - Liste de l'accueil (`HomeSection`) : titre `caption` semi-gras gris au-dessus, nombre en gris
   clair, lien souligné à droite ; liste encadrée `--border-default`, rayon 12, filets
   `--border-hairline` entre les lignes ; ligne de 12 × 16 px entièrement cliquable, titre
