@@ -52,6 +52,8 @@ const item = z.object({
   step: z.string(),
   state: z.enum(["todo", "waiting", "done"]),
   due: text,
+  // When the item was made (sent to the person).
+  at: z.string(),
 });
 export type ContactProjectItem = z.infer<typeof item>;
 

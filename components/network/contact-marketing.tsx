@@ -1,5 +1,8 @@
+import { EmptyNote } from "@/components/shell/empty-state";
+import { PageSection } from "@/components/shell/page-section";
+import { SectionRow, SectionRows } from "@/components/ui/section-rows";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { CardRow, ListCard } from "@/components/ui/list-card";
+import { ViewLink } from "@/components/ui/view-link";
 import { formatMetric } from "@/lib/activations/totals";
 import { activationAgency } from "@/lib/i18n/fr/activation-agency";
 import { activationWork } from "@/lib/i18n/fr/activation-work";
@@ -46,45 +49,70 @@ export function ContactMarketing({
         : null;
   return (
     <>
-      <ListCard
-        title={t.campaigns}
-        count={campaigns.length}
-        empty={campaigns.length === 0 ? t.campaignsEmpty : undefined}
-      >
-        {campaigns.map((c) => (
-          <CardRow
-            key={c.key}
-            href={c.href}
-            main={c.title}
-            sub={`${c.projectTitle} · ${c.via === "agency" ? t.campaignAgency : t.campaignTarget}`}
-            badge={
-              stateLabel(c) ? (
-                <StatusBadge size="sm" tone="neutral">
-                  {stateLabel(c)}
-                </StatusBadge>
-              ) : undefined
-            }
-          />
-        ))}
-      </ListCard>
-      <div className="flex flex-col gap-2">
-        <ListCard
-          title={t.observations}
-          count={observations.length}
-          empty={observations.length === 0 ? t.observationsEmpty : undefined}
+      {campaigns.length > 0 && (
+        <PageSection
+          card
+          id="campaigns"
+          title={t.campaigns}
+          description={t.campaignsDescription}
         >
-          {observations.map((o) => (
-            <div
-              key={o.id}
-              className={
-                o.invalidatedAt
-                  ? "flex items-start justify-between gap-2 opacity-60"
-                  : "flex items-start justify-between gap-2"
-              }
-            >
-              <CardRow
-                main={`${t.observationKinds[o.kind]} · ${o.kind === "category" ? o.textValue : formatMetric(o.value ?? 0, (o.unit ?? "count") as "count")}`}
-                sub={[
+          <SectionRows label={t.campaigns}>
+            {campaigns.map((c) => (
+              <SectionRow
+                key={c.key}
+                title={
+                  <ViewLink
+                    href={c.href}
+                    className="font-semibold no-underline hover:underline"
+                  >
+                    {c.title}
+                  </ViewLink>
+                }
+                detail={`${c.projectTitle} · ${c.via === "agency" ? t.campaignAgency : t.campaignTarget}`}
+                badge={
+                  stateLabel(c) ? (
+                    <StatusBadge size="sm" tone="neutral">
+                      {stateLabel(c)}
+                    </StatusBadge>
+                  ) : undefined
+                }
+              />
+            ))}
+          </SectionRows>
+        </PageSection>
+      )}
+      <PageSection
+        card
+        id="observations"
+        title={t.observations}
+        description={t.observationsHint}
+        action={
+          canWrite && (
+            <AddObservationButton contactId={contactId} today={today} />
+          )
+        }
+      >
+        {observations.length === 0 ? (
+          <EmptyNote>{t.observationsEmpty}</EmptyNote>
+        ) : (
+          <SectionRows label={t.observations}>
+            {observations.map((o) => (
+              <SectionRow
+                key={o.id}
+                title={
+                  <span className={o.invalidatedAt ? "opacity-60" : undefined}>
+                    {t.observationKinds[o.kind]} ·{" "}
+                    <span className="font-semibold">
+                      {o.kind === "category"
+                        ? o.textValue
+                        : formatMetric(
+                            o.value ?? 0,
+                            (o.unit ?? "count") as "count",
+                          )}
+                    </span>
+                  </span>
+                }
+                detail={[
                   o.platform,
                   formatDate(o.observedOn),
                   t.observationSources[
@@ -96,23 +124,20 @@ export function ContactMarketing({
                 ]
                   .filter(Boolean)
                   .join(" · ")}
+                badge={
+                  canWrite &&
+                  !o.invalidatedAt && (
+                    <InvalidateObservationButton
+                      contactId={contactId}
+                      observationId={o.id}
+                    />
+                  )
+                }
               />
-              {canWrite && !o.invalidatedAt && (
-                <InvalidateObservationButton
-                  contactId={contactId}
-                  observationId={o.id}
-                />
-              )}
-            </div>
-          ))}
-        </ListCard>
-        <p className="text-xs text-muted-foreground">{t.observationsHint}</p>
-        {canWrite && (
-          <div>
-            <AddObservationButton contactId={contactId} today={today} />
-          </div>
+            ))}
+          </SectionRows>
         )}
-      </div>
+      </PageSection>
     </>
   );
 }

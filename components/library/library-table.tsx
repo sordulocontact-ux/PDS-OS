@@ -57,7 +57,14 @@ export function LibraryTable({ files }: { files: LibraryFile[] }) {
                       <span className="sr-only">
                         {fr.catalogFiles.open(file.fileName)}
                       </span>
-                      <span aria-hidden>{file.fileName}</span>
+                      {/* A long name is cut (Sacha, 29/10); the whole name on hover. */}
+                      <span
+                        aria-hidden
+                        title={file.fileName}
+                        className="block max-w-80 truncate"
+                      >
+                        {file.fileName}
+                      </span>
                     </DataTableLink>
                   }
                   subtitle={

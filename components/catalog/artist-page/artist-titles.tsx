@@ -12,7 +12,7 @@ import { variantText } from "@/lib/catalog/title-rules";
 import type { MasterRow } from "@/lib/catalog/types";
 import { catalog } from "@/lib/i18n/fr/catalog";
 
-import { SectionRow, SectionRows } from "./section-rows";
+import { SectionRow, SectionRows } from "@/components/ui/section-rows";
 
 const fr = { catalog };
 

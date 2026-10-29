@@ -13,7 +13,7 @@ import { journey } from "@/lib/i18n/fr/journey";
 import { lowerFirst } from "@/lib/ui/journey";
 import { formatShortDay } from "@/lib/utils/day";
 
-import { SectionRow, SectionRows } from "./section-rows";
+import { SectionRow, SectionRows } from "@/components/ui/section-rows";
 
 const fr = { catalog, journey };
 

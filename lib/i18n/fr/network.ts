@@ -267,6 +267,20 @@ export const network = {
     ) =>
       `Bonjour ${name},\n\nPetit rappel : ${todo.charAt(0).toLowerCase()}${todo.slice(1)} pour ${project}${due ? `, attendu le ${due}` : ""}. Tout se fait depuis votre lien PDS, sans compte.\n\nMerci !\nL'équipe PDS`,
     projects: "Dans les projets",
+    projectsDescription:
+      "Ce que cette personne fait dans chaque projet, et ce qu'on attend d'elle.",
+    awaitedDescription:
+      "Ce qu'elle doit faire par son lien privé, du plus urgent au moins urgent.",
+    creditsDescription: "Les titres où son nom est crédité.",
+    callsDescription: "Les échanges où ce contact était invité.",
+    campaignsDescription: "Marketing › Activations.",
+    coordinates: "Coordonnées",
+    fiche: "Fiche de renseignements",
+    ficheDescription:
+      "Ses réponses complètent cette fiche : on ne lui redemande que ce qui manque.",
+    ficheSentOn: (day: string) => `Envoyée le ${day}`,
+    ficheDone: "Rendue",
+    ficheTodo: "Envoyée, pas encore rendue",
     projectsEmpty: "Rien dans un projet que vous pouvez voir.",
     projectAwaited: (n: number) => `${n} en attente`,
     invitedToCall: "Invité à un call",
