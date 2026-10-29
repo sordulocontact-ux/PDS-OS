@@ -21,8 +21,16 @@ export function DataTableViews({
   if (views.length < 2 && !action) return children;
   return (
     <div className="flex flex-col gap-[var(--stack-loose)]">
-      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
-        {views.length > 1 ? <TabBar label={label} items={views} /> : <span />}
+      {/* The tabs' rule runs the whole width, under the action too (Sacha,
+          29/10). */}
+      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between sm:shadow-[inset_0_-1px_0_var(--border-hairline)]">
+        {views.length > 1 ? (
+          <div className="min-w-0 flex-1">
+            <TabBar label={label} items={views} />
+          </div>
+        ) : (
+          <span />
+        )}
         {action && <div className="shrink-0">{action}</div>}
       </div>
       {children}
