@@ -620,9 +620,9 @@ Une seule action pleine (`variant="default"`) par carte, le reste en contour.
 Rendu du proto « Projet complet » (`docs/projet-complet/commons.md` § 3, 6, 7, 10), un seul
 composant par motif, dans `components/ui/` (`docs/COMPOSANTS.md`) :
 
-- **Départ d'une étape = `StartChoices`** : cartes entières cliquables ; la carte
-  « Recommandé » (choisie par le code) est placée **en premier** (ou garde sa place, `fixedOrder`)
-  et la raison, calculée par le code, est écrite **sous elle, dans sa colonne**. Le Cadrage dessine
+- **Départ d'une étape = `StartChoices`** : cartes entières cliquables, au fond de la page
+  (`--surface-page`) dans la carte de l'étape ; la carte « Recommandé » (choisie par le code) est
+  placée **à droite** (Sacha, 29/10/2026 ; en tête sur une seule colonne) et la raison, calculée par le code, est écrite **sous elle, dans sa colonne**. Le Cadrage dessine
   en plus un bouton au pied de chaque carte (`action`, Figma 304:20801) : plein sur la recommandée,
   contour sur l'autre ; c'est un dessin, la carte entière reste la seule cible. La règle « l'échange est toujours plein » ci-dessus
   vaut pour les cartes à bouton qui restent ; une entrée migrée vers `StartChoices` n'a plus de

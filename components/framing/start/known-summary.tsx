@@ -24,7 +24,7 @@ export function KnownSummary({
   return (
     <section
       aria-labelledby="framing-known"
-      className="flex flex-col gap-2 rounded-2xl border border-[color:var(--border-hairline)] p-4"
+      className="flex flex-col gap-2 rounded-2xl border border-[color:var(--border-hairline)] bg-[var(--surface-page)] p-4"
     >
       <h3 id="framing-known" className="text-body-md font-semibold">
         {t.knownTitle}

@@ -27,8 +27,8 @@ export type StartChoice = {
 
 /**
  * How to start a step (docs/projet-complet/commons.md § 3, proto `.choice`):
- * cards side by side, the recommended one first with its pill, and under
- * it the reason the code computed (« Il manque … : un échange ira plus vite
+ * cards side by side, the recommended one on the right with its pill
+ * (Sacha 29/10/2026), and under it the reason the code computed (« Il manque … : un échange ira plus vite
  * que des questions séparées. »). Clicking a card chooses and moves
  * on: no radio and no « Confirmer ». Each card is a link (`href`), a client
  * call (`onChoose`), or a submit of `formAction` with `name=value` (a
@@ -43,7 +43,6 @@ export function StartChoices({
   name = "choice",
   legend,
   columns = 2,
-  fixedOrder = false,
   pending = null,
 }: {
   choices: StartChoice[];
@@ -54,19 +53,18 @@ export function StartChoices({
   // The question above the cards (« Comment voulez-vous remplir le Brief ? »).
   legend?: string;
   columns?: 1 | 2;
-  // Keep the cards in the given order (the Cadrage's proto: the pill moves,
-  // never the cards).
-  fixedOrder?: boolean;
   // The client choice running (`onChoose`): its card is busy, the others
   // wait (no second click while it runs).
   pending?: string | null;
 }) {
-  const ordered = fixedOrder
-    ? choices
-    : [...choices].sort(
-        (a, b) =>
-          Number(b.value === recommended) - Number(a.value === recommended),
-      );
+  // Side by side, the recommended card ends the row; in one column it
+  // leads.
+  const last = columns === 2 ? 1 : -1;
+  const ordered = [...choices].sort(
+    (a, b) =>
+      last *
+      (Number(a.value === recommended) - Number(b.value === recommended)),
+  );
   const cards = ordered.map((choice) => {
     const isRecommended = choice.value === recommended;
     const inner = (

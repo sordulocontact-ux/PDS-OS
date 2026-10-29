@@ -15,8 +15,8 @@ const fr = { framingIntel, framingJourney };
  * The two ways in (proto frEntry / prepGate « frame »): « Commencer le
  * cadrage » (PO reads the initial context, then asks one question at a
  * time) and « Préparer un échange » (the common call form, in the step).
- * Cards in a fixed order, « Recommandé » on the one the code chose, its
- * reason under it (Figma PDS OS 304:20801). The form's « Revenir au choix »
+ * « Recommandé » on the one the code chose, on the right, its reason under
+ * it (Figma PDS OS 304:20801). The form's « Revenir au choix »
  * goes back to the cards until the call is created.
  */
 export function StartWays({
@@ -43,7 +43,6 @@ export function StartWays({
   return (
     <div className="flex flex-col gap-2" aria-busy={starting || undefined}>
       <StartChoices
-        fixedOrder
         recommended={recommended}
         reason={reason}
         choices={[

@@ -82,7 +82,6 @@ export function DesignStartWays({
     <DesignBlock title={t.title}>
       <div aria-busy={pending || undefined}>
         <StartChoices
-          fixedOrder
           recommended="call"
           reason={reason}
           choices={[
