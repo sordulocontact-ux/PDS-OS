@@ -14,9 +14,17 @@ const fr = { catalog, masterPage };
  * « Informations » of a title (proto `docs/protos/titre.html`): what is not
  * a piece of the dossier — its variant, its duration, its artists in a
  * plain list (one or two names do not make a table). The identifiers are
- * in the dossier, never twice.
+ * in the dossier, never twice. `status`: where the title stands (audio,
+ * reference version, projects, distribution), here rather than in a line
+ * under the title (Sacha, 29/10/2026).
  */
-export function TitleInfo({ master }: { master: MasterDetail }) {
+export function TitleInfo({
+  master,
+  status,
+}: {
+  master: MasterDetail;
+  status: { label: string; value: string }[];
+}) {
   const t = fr.masterPage.overview;
   const m = fr.catalog.master;
   return (
@@ -25,6 +33,7 @@ export function TitleInfo({ master }: { master: MasterDetail }) {
         <FactList
           emptyLabel={fr.catalog.notProvided}
           facts={[
+            ...status,
             {
               label: m.variant,
               value: variantText(master) ?? fr.catalog.variants.original,

@@ -6,7 +6,6 @@ import { TitleInfo } from "@/components/catalog/master-page/title-info";
 import { TitleNow } from "@/components/catalog/master-page/title-now";
 import { VariantsSection } from "@/components/catalog/master-page/variants-section";
 import { versionLabel } from "@/components/catalog/master-page/audio/audio-version-list";
-import { ModuleFacts } from "@/components/shell/module/module-facts";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import {
@@ -68,34 +67,6 @@ export default async function MasterOverviewPage({
 
   return (
     <>
-      <ModuleFacts
-        facts={[
-          {
-            key: "audio",
-            label: t.status.audio,
-            value: master.audioState
-              ? fr.catalog.audioStates[master.audioState]
-              : t.status.noAudio,
-          },
-          {
-            key: "reference",
-            label: t.status.reference,
-            value: reference ? versionLabel(reference) : t.status.noReference,
-          },
-          {
-            key: "projects",
-            label: t.status.projects,
-            value:
-              master.projects.map((p) => p.title).join(", ") ||
-              t.status.noProject,
-          },
-          {
-            key: "distribution",
-            label: t.status.distribution,
-            value: t.distributionStates[distribution],
-          },
-        ]}
-      />
       <TitleNow
         masterId={masterId}
         title={master.title}
@@ -118,7 +89,31 @@ export default async function MasterOverviewPage({
           rights={rights}
           canEdit={canEdit}
         />
-        <TitleInfo master={master} />
+        <TitleInfo
+          master={master}
+          status={[
+            {
+              label: t.status.audio,
+              value: master.audioState
+                ? fr.catalog.audioStates[master.audioState]
+                : t.status.noAudio,
+            },
+            {
+              label: t.status.reference,
+              value: reference ? versionLabel(reference) : t.status.noReference,
+            },
+            {
+              label: t.status.projects,
+              value:
+                master.projects.map((p) => p.title).join(", ") ||
+                t.status.noProject,
+            },
+            {
+              label: t.status.distribution,
+              value: t.distributionStates[distribution],
+            },
+          ]}
+        />
       </div>
 
       <VariantsSection

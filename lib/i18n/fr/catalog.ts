@@ -99,6 +99,10 @@ export const catalog = {
     country: "Pays d'origine",
     noDeezer: "Pas de profil Deezer : discographie et chiffres indisponibles.",
     bioManual: "Rédigée par l'équipe",
+    // The overview's figures, first (Sacha, 29/10).
+    mastersCount: "Titres",
+    projectsCount: "Projets",
+    fansCount: "Fans sur Deezer",
     // « En cours » of the overview: each launched project, where it stands.
     ongoing: {
       title: "En cours",

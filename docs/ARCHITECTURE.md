@@ -145,11 +145,13 @@ Principes :
   sortie** (date la plus proche à venir d'un projet musical lancé, « dans N jours ») ; où en
   est chaque projet vient de `loadLaunchedJourneys` (une lecture pour tous les artistes,
   `loadRosterProgress`, `lib/catalog/artist-progress*.ts`), jamais une lecture par artiste.
-  La **fiche** n'a plus de tuiles chiffrées ni de ligne de faits : « Maintenant » au-dessus
-  des onglets seulement quand la direction a une proposition d'identité à trancher
-  (`identityToDecide`, Approuver / Refuser avec motif obligatoire sur place) ; la Vue
-  d'ensemble = « En cours » (projet, où il en est, qui est attendu, `loadArtistProgress` sur
-  les seuls projets de l'artiste), Titres, Bio, Notes | Identité, Contacts. **Fichiers** (`artist_files`, bucket privé `artist-files`,
+  La **fiche** n'a pas de ligne de faits : « Maintenant » au-dessus des onglets seulement
+  quand la direction a une proposition d'identité à trancher (`identityToDecide`, Approuver /
+  Refuser avec motif obligatoire sur place) ; la Vue d'ensemble montre d'abord l'artiste
+  (Sacha, 29/10 : « c'est pas ça qu'on vient voir en prio ») — chiffres (`ArtistHighlights` :
+  titres, projets, fans et sorties Deezer) et dernières sorties —, puis Bio, Titres, « En
+  cours » (projet, où il en est, qui est attendu, `loadArtistProgress` sur les seuls projets
+  de l'artiste), Notes | Identité, Contacts. **Fichiers** (`artist_files`, bucket privé `artist-files`,
   50 Mo, `<org>/<artist>/<uuid>[.<ext>]`) : catégories presse / photo / contrat / audio /
   autre ; tout membre lit, **contrats lus seulement avec `manage_catalog`** (ligne et objet) ;
   `manage_catalog` ajoute, modifie et supprime. Le navigateur envoie l'objet puis
