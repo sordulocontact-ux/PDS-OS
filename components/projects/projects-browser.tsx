@@ -39,7 +39,7 @@ const VIEW_PARAM = "vue";
  * The Projects page's list (PROJ-UX-01): Tous | Brouillons | Actifs |
  * Archivés with counts that are exactly the rows shown, then one line
  * (Figma 90:4972): a search over project, artist and responsible, Artiste,
- * Responsable and Type as selects, Statut and Échéance behind the filter
+ * Type and Responsable as selects, Statut and Échéance behind the filter
  * button; all combine. The tab and the filters stay in the URL; the archive stays the
  * server's (`?view=archived`).
  */
@@ -199,7 +199,7 @@ export function ProjectsBrowser({
     onChange: (value) =>
       change({ [key]: value ?? ANY } as Partial<ProjectFilters>),
   });
-  // Artiste, Responsable, Type on the line; Statut and Échéance behind the
+  // Artiste, Type, Responsable on the line; Statut and Échéance behind the
   // filter button (Sacha 29/10).
   const artists = optionsOfNames(projects.map((p) => p.artistName));
   const controls = [
@@ -209,13 +209,13 @@ export function ProjectsBrowser({
       f.allArtists,
       artists.map((option) => [option.value, option.label]),
     ),
-    control("responsible", f.responsible, f.allResponsibles, [...responsibles]),
     control(
       "type",
       f.type,
       f.allTypes,
       PROJECT_TYPES.map((type) => [type, fr.shell.projectTypes[type]]),
     ),
+    control("responsible", f.responsible, f.allResponsibles, [...responsibles]),
     control(
       "status",
       f.status,

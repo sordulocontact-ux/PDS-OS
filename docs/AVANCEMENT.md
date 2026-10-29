@@ -1143,5 +1143,5 @@ Reste : passage navigateur sur la pré-prod avec les quatre rôles.
 - [x] Tableau des projets : **Artiste** et **Priorité** dans leurs colonnes, plus sous le nom ;
       Responsable et Type ne s'affichent qu'en très grand écran (filtrables au-dessus).
 - [x] Projets : colonne **Phase** retirée (Responsable revient dès 1280 px) ; filtre **Artiste** ;
-      sur la ligne Artiste, Responsable, Type, et **Statut + Échéance** dans le bouton des filtres avancés.
+      sur la ligne Artiste, Type, Responsable, et **Statut + Échéance** dans le bouton des filtres avancés.
 - Reste : passage navigateur (session requise).
