@@ -50,5 +50,6 @@ export async function decideTemplateRequest(
   await schedulePendingPushes();
   revalidatePath(routes.projectLegal(ids.data.projectId), "layout");
   revalidatePath(routes.contractTemplates);
+  revalidatePath(routes.contracts);
   return { ok: true, done: kind === "approve" ? t.validated : t.refused };
 }

@@ -139,7 +139,7 @@ export function proposeContractTemplateTool({
           : t.titles.createTemplate(values.name ?? ""),
         changes,
         warnings,
-        source: { label: t.templatesLink, href: routes.contractTemplates },
+        source: { label: t.templatesLink, href: routes.contractTemplateList },
       });
     },
   });

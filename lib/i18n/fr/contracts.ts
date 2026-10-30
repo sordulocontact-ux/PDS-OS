@@ -46,7 +46,15 @@ export const contracts = {
     placeholder: "Titre, partie, projet, artiste…",
     noResult: (query: string) => `Aucun contrat ne correspond à « ${query} ».`,
   },
+  // Contracts and templates, one page (Sacha, 30/10/2026).
+  tabs: {
+    label: "Contrats ou modèles",
+    contracts: "Contrats",
+    templates: "Modèles",
+  },
   filters: {
+    stateLabel: "État",
+    stateAll: "Tous les états",
     typeLabel: "Type",
     typeAll: "Tous les types",
     projectLabel: "Projet",

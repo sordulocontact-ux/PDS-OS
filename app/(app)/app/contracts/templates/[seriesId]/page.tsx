@@ -36,7 +36,7 @@ export default async function ContractTemplatePage({
 
   return (
     <PageContainer>
-      <BackLink href={routes.contractTemplates}>{t.backToLibrary}</BackLink>
+      <BackLink href={routes.contractTemplateList}>{t.backToLibrary}</BackLink>
       <PageHeader
         title={`${template.name} · ${t.version(template.version)}`}
         description={[fr.contracts.types[template.type], template.usage]

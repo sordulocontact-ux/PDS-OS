@@ -62,7 +62,7 @@ export function ContractTemplateDraftForm({
       onDone={() =>
         onSaved({
           label: fr.assistantRecords.templatesLink,
-          href: routes.contractTemplates,
+          href: routes.contractTemplateList,
         })
       }
     />

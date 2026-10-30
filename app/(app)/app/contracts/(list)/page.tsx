@@ -1,50 +1,43 @@
-import { IconHandshake } from "nucleo-sharp-essential";
-import Link from "next/link";
+import { IconFile, IconHandshake } from "nucleo-sharp-essential";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { ContractsList } from "@/components/contracts/contracts-list";
 import { NewContractButton } from "@/components/contracts/new-contract-button";
+import { TemplateFormButton } from "@/components/contracts/templates/template-form-button";
+import { TemplatesList } from "@/components/contracts/templates/templates-list";
 import { EmptyState } from "@/components/shell/empty-state";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
-import { buttonVariants } from "@/components/ui/button";
 import { DataTableViews } from "@/components/ui/data-table";
-import { UrlFilters, type UrlFilterGroup } from "@/components/ui/url-filters";
+import { UrlFilters } from "@/components/ui/url-filters";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
-import { listContracts } from "@/lib/contracts/queries";
 import {
-  asContractView,
-  CONTRACT_TYPES,
-  CONTRACT_VIEW_KEYS,
-  inContractView,
-  type ContractRow,
-} from "@/lib/contracts/types";
+  contractFilterGroups,
+  matchesContract,
+  matchesTemplate,
+  templateFilterGroups,
+  type ContractFilters,
+  type TemplateFilters,
+} from "@/lib/contracts/list-filters";
+import { listContracts } from "@/lib/contracts/queries";
+import { asContractView } from "@/lib/contracts/types";
 import { fr } from "@/lib/i18n/fr";
-import { filterParam, optionsOfNames } from "@/lib/ui/filter-options";
+import { listTemplateSeries } from "@/lib/legal/contracts/templates";
+import { filterParam } from "@/lib/ui/filter-options";
 import { viewHref } from "@/lib/ui/view-href";
 import { allInOrder } from "@/lib/utils/parallel";
 
 export const metadata = { title: `${fr.contracts.title} · ${fr.app.name}` };
 
-type ContractFilters = {
-  type: string | null;
-  project: string | null;
-  artist: string | null;
-  owner: string | null;
-};
-
-const matches = (contract: ContractRow, filters: ContractFilters) =>
-  (!filters.type || contract.type === filters.type) &&
-  (!filters.project || contract.projectTitle === filters.project) &&
-  (!filters.artist || contract.artistName === filters.artist) &&
-  (!filters.owner || contract.ownerName === filters.owner);
-
 /**
- * Contracts (MVP "Contrats uniquement"): those the viewer follows, the
- * direction's all, and those of the projects they own. Tabs by state,
- * « Filtres » by type, project, artist and owner, an instant search.
+ * Contracts and their templates, one page (Sacha, 30/10/2026): two tabs,
+ * Contrats and Modèles (manage_legal, ?tab=templates). Contracts: the ones
+ * the viewer follows, the direction's all, those of the projects they own;
+ * « Filtres » by state (?view=, the former tabs), type, project, artist and
+ * owner. Templates (ticket Juridique 03): by state and type. Each with an
+ * instant search.
  */
 export default async function ContractsPage({
   searchParams,
@@ -55,25 +48,11 @@ export default async function ContractsPage({
     searchParams,
   ]);
   const t = fr.contracts;
-  const view = asContractView(params.view);
-  const filters: ContractFilters = {
-    type: filterParam(params.type),
-    project: filterParam(params.project),
-    artist: filterParam(params.artist),
-    owner: filterParam(params.owner),
-  };
-  const filtering = Object.values(filters).some((value) => value !== null);
+  const canTemplates = can(access, "manage_legal") && !!access.organizationId;
+  const organizationId = access.organizationId ?? "";
+  const templates = canTemplates ? await listTemplateSeries(access) : [];
+  const onTemplates = canTemplates && params.tab === "templates";
   const canCreate = can(access, "manage_contracts");
-  const newButton = canCreate ? <NewContractButton /> : null;
-  // The template library (Juridique 03), beside the button.
-  const templatesLink = can(access, "manage_legal") ? (
-    <Link
-      href={routes.contractTemplates}
-      className={buttonVariants({ variant: "outline", size: "lg" })}
-    >
-      {fr.legalContracts.templates.open}
-    </Link>
-  ) : null;
 
   if (!all)
     return (
@@ -83,123 +62,114 @@ export default async function ContractsPage({
       </PageContainer>
     );
 
-  // The tabs count what the filters keep; the filters offer what the tab
-  // holds.
-  const filtered = all.filter((contract) => matches(contract, filters));
-  const ofView = view
-    ? all.filter((contract) => inContractView(contract.state, view))
-    : all;
-  const shown = view
-    ? filtered.filter((contract) => inContractView(contract.state, view))
-    : filtered;
+  const filters: ContractFilters = {
+    view: asContractView(params.view),
+    type: filterParam(params.type),
+    project: filterParam(params.project),
+    artist: filterParam(params.artist),
+    owner: filterParam(params.owner),
+  };
+  const tFilters: TemplateFilters = {
+    state: filterParam(params.tstate),
+    type: filterParam(params.ttype),
+  };
+  const shown = all.filter((c) => matchesContract(c, filters));
+  const shownTemplates = templates.filter((x) => matchesTemplate(x, tFilters));
+  const filtering = Object.values(filters).some((v) => v !== null);
+  const action = onTemplates ? (
+    <TemplateFormButton organizationId={organizationId} />
+  ) : canCreate ? (
+    <NewContractButton />
+  ) : null;
+
+  const contractsBody =
+    all.length === 0 ? (
+      <EmptyState
+        icon={IconHandshake}
+        title={t.emptyTitle}
+        body={canCreate ? t.emptyBody : t.emptyBodyReadOnly}
+        action={action}
+      />
+    ) : (
+      <ContractsList
+        contracts={shown}
+        filters={
+          <UrlFilters
+            path={routes.contracts}
+            params={{}}
+            groups={contractFilterGroups(all, filters)}
+          />
+        }
+        empty={
+          <EmptyState
+            icon={IconHandshake}
+            title={filtering ? t.filtersEmpty : t.emptyViewTitle(t.views.all)}
+            body={filtering ? t.filtersEmptyBody : t.emptyViewBody}
+          />
+        }
+      />
+    );
+
+  const l = fr.legalContracts.templates;
+  const templatesBody =
+    templates.length === 0 ? (
+      <EmptyState
+        icon={IconFile}
+        title={l.empty}
+        body={l.emptyBody}
+        action={action}
+      />
+    ) : (
+      <TemplatesList
+        templates={shownTemplates}
+        organizationId={organizationId}
+        filters={
+          <UrlFilters
+            path={routes.contracts}
+            params={{ tab: "templates" }}
+            groups={templateFilterGroups(templates, tFilters)}
+          />
+        }
+        empty={
+          <EmptyState
+            icon={IconFile}
+            title={l.filtersEmpty}
+            body={t.filtersEmptyBody}
+          />
+        }
+      />
+    );
 
   return (
     <PageContainer>
       <PageHeader
         title={t.title}
-        description={t.description}
-        action={
-          templatesLink || all.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {templatesLink}
-              {all.length > 0 && newButton}
-            </div>
-          ) : null
-        }
+        description={onTemplates ? l.description : t.description}
+        action={all.length > 0 || templates.length > 0 ? action : null}
       />
-      {all.length === 0 ? (
-        <EmptyState
-          icon={IconHandshake}
-          title={t.emptyTitle}
-          body={canCreate ? t.emptyBody : t.emptyBodyReadOnly}
-          action={newButton}
-        />
-      ) : (
-        <DataTableViews
-          label={t.viewsLabel}
-          views={[
-            {
-              href: viewHref(routes.contracts, filters),
-              label: t.views.all,
-              count: filtered.length,
-              current: view === null,
-            },
-            ...CONTRACT_VIEW_KEYS.map((key) => ({
-              href: viewHref(routes.contracts, { ...filters, view: key }),
-              label: t.views[key],
-              count: filtered.filter((c) => inContractView(c.state, key))
-                .length,
-              current: view === key,
-            })),
-          ]}
-        >
-          <ContractsList
-            contracts={shown}
-            filters={
-              <UrlFilters
-                path={routes.contracts}
-                params={{ view }}
-                groups={filterGroups(ofView, filters)}
-              />
-            }
-            empty={
-              filtering ? (
-                <EmptyState
-                  icon={IconHandshake}
-                  title={t.filtersEmpty}
-                  body={t.filtersEmptyBody}
-                />
-              ) : (
-                <EmptyState
-                  icon={IconHandshake}
-                  title={t.emptyViewTitle(view ? t.views[view] : t.views.all)}
-                  body={t.emptyViewBody}
-                />
-              )
-            }
-          />
-        </DataTableViews>
-      )}
+      <DataTableViews
+        label={t.tabs.label}
+        views={
+          canTemplates
+            ? [
+                {
+                  href: routes.contracts,
+                  label: t.tabs.contracts,
+                  count: all.length,
+                  current: !onTemplates,
+                },
+                {
+                  href: viewHref(routes.contracts, { tab: "templates" }),
+                  label: t.tabs.templates,
+                  count: templates.length,
+                  current: onTemplates,
+                },
+              ]
+            : []
+        }
+      >
+        {onTemplates ? templatesBody : contractsBody}
+      </DataTableViews>
     </PageContainer>
   );
-}
-
-// Only what some contract of the tab holds.
-function filterGroups(
-  contracts: ContractRow[],
-  current: ContractFilters,
-): UrlFilterGroup[] {
-  const t = fr.contracts;
-  return [
-    {
-      key: "type",
-      label: t.filters.typeLabel,
-      allLabel: t.filters.typeAll,
-      options: CONTRACT_TYPES.filter((type) =>
-        contracts.some((c) => c.type === type),
-      ).map((type) => ({ value: type, label: t.types[type] })),
-      current: current.type,
-    },
-    {
-      key: "project",
-      label: t.filters.projectLabel,
-      allLabel: t.filters.projectAll,
-      options: optionsOfNames(contracts.map((c) => c.projectTitle)),
-      current: current.project,
-    },
-    {
-      key: "artist",
-      label: t.filters.artistLabel,
-      allLabel: t.filters.artistAll,
-      options: optionsOfNames(contracts.map((c) => c.artistName)),
-      current: current.artist,
-    },
-    {
-      key: "owner",
-      label: t.filters.ownerLabel,
-      allLabel: t.filters.ownerAll,
-      options: optionsOfNames(contracts.map((c) => c.ownerName)),
-      current: current.owner,
-    },
-  ];
 }

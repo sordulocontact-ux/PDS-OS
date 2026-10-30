@@ -87,7 +87,7 @@ export function ContractCreation({
           size="lg"
           className="self-end"
           nativeButton={false}
-          render={<Link href={routes.contractTemplates} />}
+          render={<Link href={routes.contractTemplateList} />}
         >
           {t.openTemplates}
         </Button>

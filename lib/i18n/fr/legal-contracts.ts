@@ -73,6 +73,19 @@ export const legalContracts = {
     view: "Voir le modèle",
     validate: "Valider",
     retire: "Retirer",
+    // The Modèles tab of the Contrats page: search and filters.
+    search: {
+      label: "Rechercher un modèle",
+      placeholder: "Nom, usage…",
+      noResult: (q: string) => `Aucun modèle ne correspond à « ${q} ».`,
+    },
+    filters: {
+      stateLabel: "État",
+      stateAll: "Tous les états",
+      typeLabel: "Type",
+      typeAll: "Tous les types",
+    },
+    filtersEmpty: "Aucun modèle ne correspond à ces filtres.",
     empty: "Aucun modèle pour l'instant.",
     emptyBody:
       "Collez le texte d'un modèle déjà relu par votre juriste. PO n'écrit ni modèle ni clause.",

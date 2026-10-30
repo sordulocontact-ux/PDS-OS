@@ -180,13 +180,16 @@ async function createTemplates(access: Access, count: number) {
     }
     facts.push(t.templateCreated(made.name));
   }
-  if (facts.length) revalidatePath(routes.contractTemplates);
+  if (facts.length) {
+    revalidatePath(routes.contractTemplates);
+    revalidatePath(routes.contracts);
+  }
   return {
     facts,
     sources: [
       {
         label: fr.assistantRecords.templatesLink,
-        href: routes.contractTemplates,
+        href: routes.contractTemplateList,
       },
     ],
   };

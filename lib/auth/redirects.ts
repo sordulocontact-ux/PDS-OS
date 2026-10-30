@@ -105,6 +105,8 @@ export const routes = {
   contracts: "/app/contracts",
   contract: (id: string) => `/app/contracts/${id}`,
   contractTemplates: "/app/contracts/templates",
+  // The Modèles tab of the Contrats page, where every link to the templates goes.
+  contractTemplateList: "/app/contracts?tab=templates",
   // One template, its own page (JUR-19), by its series.
   contractTemplate: (seriesId: string) =>
     `/app/contracts/templates/${seriesId}`,

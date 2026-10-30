@@ -97,6 +97,7 @@ export async function createContractTemplate(
     revalidatePath(routes.projectLegal(request.projectId), "layout");
   }
   revalidatePath(routes.contractTemplates);
+  revalidatePath(routes.contracts);
   return { ok: true };
 }
 
@@ -124,5 +125,6 @@ export async function setContractTemplateStatus(
     return { ok: false, error: t.failed };
   }
   revalidatePath(routes.contractTemplates);
+  revalidatePath(routes.contracts);
   return { ok: true };
 }
