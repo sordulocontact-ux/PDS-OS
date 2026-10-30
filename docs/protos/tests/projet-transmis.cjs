@@ -28,7 +28,7 @@ const { chromium } = require(process.cwd() + "/node_modules/playwright-core");
   await p.fill("#msg","Oui, le clip est dedans.");await p.click('button[data-act="transmit"]');
   await p.selectOption("#roleSel","lina");await p.click('button[data-act="accept"]');
   console.log("6",await actor(),"|",await p.locator('.callout[role="status"]').textContent());
-  await p.click("details.fold summary");console.log("hist:",(await p.locator(".hist li").allTextContents()).length);
+  console.log("history fold:",await p.locator("details.fold").count());
   await p.click('button[data-act="modal"]');console.log("modal:",await p.locator(".dialog h2").textContent());await p.keyboard.press("Escape");
   await p.selectOption("#momSel","incomplet");console.log("missing:",await p.locator(".pf .none").count());
   await p.screenshot({path:out+"/acc-incomplet.png",fullPage:true});

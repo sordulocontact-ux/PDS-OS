@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import { AssignmentHistory } from "@/components/projects/assignment-history";
 import { HandoverFacts } from "@/components/projects/handover-facts";
 import { RespondPanel } from "@/components/projects/respond-panel";
 import { TransmitDialog } from "@/components/projects/transmit-dialog";
@@ -12,7 +11,6 @@ import {
   FactBlockRow,
   factBlockTitleClass,
 } from "@/components/ui/fact-block";
-import { Fold } from "@/components/ui/fold";
 import { NameChip, NameChips } from "@/components/ui/name-chip";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { formatDay } from "@/lib/assistant/facts";
@@ -31,8 +29,8 @@ const fr = { shell, transmission };
  * block of facts (`HandoverFacts`) with the only gesture under it (the
  * direction transmits, answers or hands it to someone else; the chosen
  * manager accepts, asks or refuses). No « À vous » line: the block and its
- * buttons say it (Sacha 30/10/2026). The transmissions are folded in « Déjà
- * fait ». No step, no section.
+ * buttons say it (Sacha 30/10/2026). No history either: it is only the
+ * transmission, said in the block (it stays in Équipe). No step, no section.
  */
 export function UnlaunchedOverview({
   project,
@@ -199,12 +197,6 @@ export function UnlaunchedOverview({
             </div>
           ))}
       </section>
-
-      {project.assignments.length > 0 && (
-        <Fold summary={t.done(project.assignments.length)}>
-          <AssignmentHistory assignments={project.assignments} />
-        </Fold>
-      )}
     </div>
   );
 }

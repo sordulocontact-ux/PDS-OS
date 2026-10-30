@@ -457,7 +457,7 @@ function render(){
   $("crumbs").innerHTML=`<li><button type="button" data-act="noop">Projets</button></li><li aria-hidden="true">/</li><li aria-current="page">Néons</li>`;
   $("app").className="content";
   $("app").innerHTML=`<div class="headrow"><h1>Néons</h1><button class="btn ghost sm" type="button" data-act="modal">Qui fait quoi</button></div>
-   ${flashAny()}${S.status==="pending"?acceptBody():S.status==="accepted"?framingBody():transmitBody()}${S.hist.length>1?doneFold():""}`;
+   ${flashAny()}${S.status==="pending"?acceptBody():S.status==="accepted"?framingBody():transmitBody()}`;
   renderModal();
 }
 function renderRail(){

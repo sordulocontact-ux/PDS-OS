@@ -38,7 +38,6 @@ export const transmission = {
     },
     acceptHint:
       "En acceptant, vous devenez responsable du projet et le Cadrage s'ouvre : ce qui est transmis y sera proposé à confirmer, rien n'est à ressaisir.",
-    done: (n: number) => `Déjà fait · ${n}`,
     roles: {
       direction: "Direction",
       directionWhat: "Transmet le projet et répond aux précisions",

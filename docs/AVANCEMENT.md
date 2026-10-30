@@ -1204,7 +1204,7 @@ cadrage, sans parcours (un seul geste à la fois). Proto `docs/protos/projet-tra
       la précision ou le refus reçus en encadré.
 - [x] « Ce que vous acceptez » en un seul bloc de faits (`HandoverFacts`, `FactBlock` sorti de `CallPlanBlock`) :
       plus de statut répété, de résumé « Transmis : … / Manque : … » ni de colonne « Informations » ;
-      un manque dit sur sa ligne. Le geste dessous ; l'historique replié dans « Déjà fait ».
+      un manque dit sur sa ligne. Le geste dessous ; pas d'historique (seulement la transmission, déjà dans le bloc ; il reste dans Équipe).
 - Pas de migration. Reste : passage navigateur en direction puis en chef de projet.
 
 
