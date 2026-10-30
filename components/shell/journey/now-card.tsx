@@ -170,8 +170,8 @@ export function NowCard({
   );
 }
 
-/** The frame of « Maintenant », raised above the page (border, card
- * shadow): NowCard in a module, the lead of the Travail. */
+/** The frame of « Maintenant »: a bordered card, no shadow (Sacha,
+ * 30/10/2026): NowCard in a module, the lead of the Travail. */
 export function NowFrame({
   label,
   children,
@@ -182,7 +182,7 @@ export function NowFrame({
   return (
     <section
       aria-label={label}
-      className="flex flex-col gap-3.5 rounded-2xl border border-[color:var(--border-default)] bg-card p-5 shadow-elevation-card"
+      className="flex flex-col gap-3.5 rounded-2xl border border-[color:var(--border-default)] bg-card p-5"
     >
       {children}
     </section>
