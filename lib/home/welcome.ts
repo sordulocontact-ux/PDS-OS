@@ -5,11 +5,11 @@ import { createClient } from "@/lib/supabase/server";
 
 export type WelcomeVariant = "direction" | "pilot" | "creative" | "member";
 
-// A member approved this recently sees the card until they close it.
+// A member approved this recently sees the presentation until they end it.
 const NEW_MEMBER_DAYS = 30;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-/** Which three points the member reads first: by permission, never by name. */
+/** Which presentation the member reads: by permission, never by name. */
 export function welcomeVariantOf(access: Access): WelcomeVariant {
   if (can(access, "assign_projects")) return "direction";
   if (can(access, "pilot_projects")) return "pilot";
@@ -18,8 +18,8 @@ export function welcomeVariantOf(access: Access): WelcomeVariant {
 }
 
 /**
- * The « Bienvenue » card of the home (UX test of 09/10/2026), or null: shown
- * to a member approved less than 30 days ago who has not closed it.
+ * The presentation of the first connection (UX test of 09/10/2026), or null:
+ * shown to a member approved less than 30 days ago who has not ended it.
  */
 export async function loadWelcome(
   access: Access,

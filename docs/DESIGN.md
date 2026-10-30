@@ -373,6 +373,49 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   toujours visible au-dessus du bouton de dépliage ; « Travail » porte le nombre de mes actions
   du projet ouvert (`CountBadge size="sm"` 16 px au coin de l'icône).
 
+### Écran d'entrée
+
+Une seule fois par onglet, en arrivant sur `/`, `/login`, `/signup` ou `/app…` ; jamais sur
+une page partagée par lien, ni au rechargement, ni en naviguant dans l'app. Demande de Sacha
+d'après une vidéo de référence (30/10/2026), dont les temps de mouvement sont mesurés image
+par image.
+
+- Fond noir (`--po-black`, comme l'icône de l'app, quel que soit le thème), monogramme blanc de
+  72 px au centre, qui apparaît en 150 ms (opacité + flou de 8 px). Il reste 1 s au total :
+  raccourci par rapport à la vidéo (2,4 s), puisqu'on le voit chaque jour et qu'il ne fait
+  pas attendre plus que le chargement.
+- Le logo rejoint **le logo de la page à sa place et à sa taille** (carré de la barre latérale,
+  en-tête mobile ou écran de connexion) en 370 ms (`--ease-entry`), sans rotation, sa couleur
+  allant vers celle du logo d'arrivée. À 160 ms, le noir s'efface et le contenu (`main`) monte de
+  24 px en 250 ms. Dès ce départ, la page reçoit les clics.
+- Page lente : le logo attend celui de la page ; au bout de 3 s sans lui, l'écran s'efface
+  sur place. Sans JavaScript ou si le script échoue, la page revient seule à 8 s (CSS).
+- Mouvement réduit : ni flou ni trajet, 400 ms puis fondu.
+- `components/shell/entry-splash.tsx` : décision avant le premier affichage (script en ligne,
+  `sessionStorage`, préférence d'affichage et non donnée métier), `entryLanding` sur `PdsLogo` =
+  logo d'arrivée ; tokens `--duration-entry-*`, `--delay-entry-reveal`, `--ease-entry`.
+
+### Présentation de la première connexion
+
+D'après la maquette HTML du 30/10/2026. Quatre écrans dans la modale de l'app, large :
+qui vous êtes ici, chaque projet est un parcours, ce qui est à vous vient à vous (avec
+l'activation des notifications du navigateur), PO prépare et vous décidez. Remplace la carte
+« Bienvenue » de l'accueil.
+
+- **Quand** : à l'arrivée sur l'accueil d'un membre approuvé depuis moins de 30 jours qui ne l'a
+  pas terminée (`member_welcomes`), après l'écran d'entrée. Terminée ou passée, elle ne
+  revient plus. Fermeture : « Passer », « C'est parti » ou Échap, jamais un clic à côté.
+- **Revoir** : « Revoir la présentation » dans le menu du compte et le tiroir mobile, sur place,
+  sans rien écrire.
+- **Texte** choisi par permission (`welcomeVariantOf`), jamais par le nom ; le poste est dit
+  avec le libellé de l'app (« Votre poste : Chef de projet »), jamais accordé à une personne.
+- **Visuels** : le nom et le poste de la personne sont les vrais. Le reste est un projet
+  inventé, marqué « Exemple » ; ses dates sont calculées depuis aujourd'hui pour ne pas vieillir.
+- **Mouvement** : le texte glisse dans le sens de la lecture (260 ms), le parcours avance seul
+  en boucle. Mouvement réduit : fondu, parcours immobile.
+- **À la fermeture**, « Maintenant » s'allume une fois (1,8 s) quand la page en a un.
+- Clavier : ← →, Échap ; le focus reste sur le bouton principal.
+
 ### Accueil
 
 - Salutation et sous-titre centrés, puis une colonne de 896 px : suggestions en

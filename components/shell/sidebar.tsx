@@ -59,7 +59,7 @@ export function Sidebar({
               collapsed ? "size-10 rounded-xl" : "size-15 rounded-2xl",
             )}
           >
-            <PdsLogo className={collapsed ? "w-6" : "w-9"} />
+            <PdsLogo entryLanding className={collapsed ? "w-6" : "w-9"} />
           </Link>
           <Button
             variant="ghost"

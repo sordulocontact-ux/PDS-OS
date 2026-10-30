@@ -134,6 +134,7 @@ import { distributionJourney } from "./distribution-journey";
 import { projectDates } from "./project-dates";
 import { marketing } from "./marketing";
 import { marketingReview } from "./marketing-review";
+import { onboarding } from "./onboarding";
 import { shell } from "./shell";
 import { strategy } from "./strategy";
 import { strategyBrief } from "./strategy-brief";
@@ -166,6 +167,7 @@ export const fr = {
   laboCaptures,
   auth,
   shell,
+  onboarding,
   calendar,
   calls,
   callPrep,

@@ -5,6 +5,7 @@ import { AccessWatcher } from "@/components/auth/access-watcher";
 import { FeedbackProvider } from "@/components/feedback/feedback-provider";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { NotificationListener } from "@/components/notifications/notification-listener";
+import { OnboardingProvider } from "@/components/onboarding/onboarding-provider";
 import { PreprodSlot } from "@/components/preprod/preprod-slot";
 import { MobileNav } from "@/components/shell/mobile-nav";
 import { PdsLogo } from "@/components/shell/pds-logo";
@@ -17,6 +18,7 @@ import { can } from "@/lib/auth/access";
 import { getAccess } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { getPublicEnv } from "@/lib/env-public";
+import { welcomeVariantOf } from "@/lib/home/welcome";
 import { fr } from "@/lib/i18n/fr";
 import { countPendingMemberships } from "@/lib/members/queries";
 import { loadNotifications } from "@/lib/notifications/queries";
@@ -94,7 +96,7 @@ export default async function AppLayout({
 
   const brand = (
     <Link href={routes.app} aria-label={fr.shell.brand}>
-      <PdsLogo className="w-8" />
+      <PdsLogo entryLanding className="w-8" />
     </Link>
   );
 
@@ -104,45 +106,63 @@ export default async function AppLayout({
       personId={signedIn ? access.personId : null}
       direct={signedIn && can(access, "read_feedback")}
     >
-      <AssistantProvider launcher={signedIn}>
-        <CollapsedNavProvider>
-          <OneTimeLinksProvider>
-            <div className="flex flex-1 bg-[var(--surface-app)] md:p-[var(--shell-inset)]">
-              <NavigationProgress />
-              <AccessWatcher
-                current={access.state}
-                role={access.role}
-                intervalMs={60_000}
-              />
-              {signedIn && access.personId && (
-                <NotificationListener personId={access.personId} />
-              )}
+      <OnboardingProvider
+        profile={
+          signedIn
+            ? {
+                variant: welcomeVariantOf(access),
+                firstName: access.firstName,
+                name,
+                roleLabel: access.role
+                  ? fr.auth.members.roles[access.role]
+                  : null,
+                pushKey: vapidPublicKey,
+              }
+            : null
+        }
+      >
+        <AssistantProvider launcher={signedIn}>
+          <CollapsedNavProvider>
+            <OneTimeLinksProvider>
+              <div className="flex flex-1 bg-[var(--surface-app)] md:p-[var(--shell-inset)]">
+                <NavigationProgress />
+                <AccessWatcher
+                  current={access.state}
+                  role={access.role}
+                  intervalMs={60_000}
+                />
+                {signedIn && access.personId && (
+                  <NotificationListener personId={access.personId} />
+                )}
 
-              <CountedSidebar
-                isAdmin={isAdmin}
-                pending={pendingMembers}
-                bell={bell("nav")}
-                name={name}
-                email={access.email}
-              />
+                <CountedSidebar
+                  isAdmin={isAdmin}
+                  pending={pendingMembers}
+                  bell={bell("nav")}
+                  name={name}
+                  email={access.email}
+                />
 
-              <div className="flex min-w-0 flex-1 flex-col">
-                <header className="sticky top-0 z-40 flex h-14 items-center gap-2 border-b border-[color:var(--border-hairline)] bg-background px-2 md:hidden">
-                  <CountedMobileNav
-                    isAdmin={isAdmin}
-                    pending={pendingMembers}
-                    footer={userPanel}
-                  />
-                  {brand}
-                  <div className="ml-auto">{bell("ghost")}</div>
-                </header>
-                <main className="flex min-w-0 flex-1 flex-col">{children}</main>
+                <div className="flex min-w-0 flex-1 flex-col">
+                  <header className="sticky top-0 z-40 flex h-14 items-center gap-2 border-b border-[color:var(--border-hairline)] bg-background px-2 md:hidden">
+                    <CountedMobileNav
+                      isAdmin={isAdmin}
+                      pending={pendingMembers}
+                      footer={userPanel}
+                    />
+                    {brand}
+                    <div className="ml-auto">{bell("ghost")}</div>
+                  </header>
+                  <main className="flex min-w-0 flex-1 flex-col">
+                    {children}
+                  </main>
+                </div>
+                {signedIn && <PreprodSlot email={access.email} />}
               </div>
-              {signedIn && <PreprodSlot email={access.email} />}
-            </div>
-          </OneTimeLinksProvider>
-        </CollapsedNavProvider>
-      </AssistantProvider>
+            </OneTimeLinksProvider>
+          </CollapsedNavProvider>
+        </AssistantProvider>
+      </OnboardingProvider>
     </FeedbackProvider>
   );
 }

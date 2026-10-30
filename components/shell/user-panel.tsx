@@ -2,6 +2,7 @@ import { IconGauge3 } from "nucleo-sharp-essential";
 import Link from "next/link";
 
 import { SignOutButton } from "@/components/auth/sign-out-button";
+import { ReplayOnboardingButton } from "@/components/onboarding/replay-onboarding-button";
 import { FeedbackNavButton } from "@/components/shell/feedback-nav-button";
 import { navItemClass } from "@/components/shell/nav-item";
 import { ThemeChips } from "@/components/shell/theme-chips";
@@ -30,6 +31,7 @@ export function UserPanel({
         )}
       </div>
       <FeedbackNavButton />
+      <ReplayOnboardingButton />
       <Link href={routes.settings} data-close-nav className={navItemClass}>
         <IconGauge3 className="size-5 shrink-0" aria-hidden />
         {fr.aiUsage.settings.navLink}

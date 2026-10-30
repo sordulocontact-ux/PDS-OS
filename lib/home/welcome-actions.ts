@@ -3,7 +3,7 @@
 import { requireApproved } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
 
-/** « J'ai compris »: the card is closed for good (kept in the database). */
+/** End of the presentation, read or skipped: not shown again (kept in the database). */
 export async function dismissWelcome(): Promise<{ ok: boolean }> {
   const access = await requireApproved();
   if (!access.personId || !access.organizationId) return { ok: false };

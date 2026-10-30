@@ -6262,9 +6262,9 @@ tests `supabase/tests/ux-roles.test.sql` (41).
   projet et son e-mail) pour tout jeton connu ; la page dit qui demande, à qui écrire
   (`RequesterNote`), à quoi servent les données (`DataUseNote`, RGPD art. 13 : finalités,
   destinataires, conservation, droits art. 15 à 17) et, après l'envoi, la suite.
-- **Recrue** : carte « Bienvenue » sur l'accueil (`WelcomeCard`) pour un membre approuvé depuis
-  moins de 30 jours, trois repères choisis **par permission** (`welcomeVariantOf`), fermée en base
-  (`member_welcomes`). PO : `my_todo` commence par les projets à accepter et liste les livrables,
+- **Recrue** : présentation de la première connexion (`components/onboarding/`, `docs/DESIGN.md` § 4)
+  pour un membre approuvé depuis moins de 30 jours, texte choisi **par permission**
+  (`welcomeVariantOf`), fermée en base (`member_welcomes`). PO : `my_todo` commence par les projets à accepter et liste les livrables,
   `find_projects` dit `status` et `waitingForYourAnswer`, `project_status` présente un projet non
   lancé (contexte initial, échéance). (La suggestion « Présente-moi le projet « X » » de l'accueil
   est partie avec les pilules de suggestions, retirées le 29/10.)

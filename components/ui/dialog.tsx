@@ -28,9 +28,12 @@ function DialogContent({
   className,
   children,
   closeLabel,
+  showClose = true,
   ...props
 }: DialogPrimitive.Popup.Props & {
   closeLabel: string;
+  // False when the content has its own way out (the presentation's « Passer »).
+  showClose?: boolean;
 }) {
   return (
     <DialogPrimitive.Portal>
@@ -54,18 +57,20 @@ function DialogContent({
         {...props}
       >
         {children}
-        <DialogPrimitive.Close
-          render={
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="absolute top-3 right-3"
-            />
-          }
-        >
-          <IconXmark aria-hidden />
-          <span className="sr-only">{closeLabel}</span>
-        </DialogPrimitive.Close>
+        {showClose && (
+          <DialogPrimitive.Close
+            render={
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="absolute top-3 right-3"
+              />
+            }
+          >
+            <IconXmark aria-hidden />
+            <span className="sr-only">{closeLabel}</span>
+          </DialogPrimitive.Close>
+        )}
       </DialogPrimitive.Popup>
     </DialogPrimitive.Portal>
   );

@@ -3,9 +3,20 @@ import { cn } from "@/lib/utils";
 // The PDS OS monogram (Logo.svg, 30/10/2026), in the current text colour so
 // it follows the theme. Decorative: the link or title around it names it.
 // Same drawing as app/icon.svg, app/favicon.ico and the PNG icons.
-export function PdsLogo({ className }: { className?: string }) {
+// `entryLanding`: the logo of the page on which the entry splash lands.
+export function PdsLogo({
+  className,
+  entryLanding,
+  ref,
+}: {
+  className?: string;
+  entryLanding?: boolean;
+  ref?: React.Ref<SVGSVGElement>;
+}) {
   return (
     <svg
+      ref={ref}
+      data-entry-logo={entryLanding ? "" : undefined}
       viewBox="0 0 78 52"
       fill="currentColor"
       aria-hidden

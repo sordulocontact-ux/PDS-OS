@@ -182,6 +182,7 @@ export function NowFrame({
   return (
     <section
       aria-label={label}
+      data-now-card
       className="flex flex-col gap-3.5 rounded-2xl border border-[color:var(--border-hairline)] bg-card p-5"
     >
       {children}

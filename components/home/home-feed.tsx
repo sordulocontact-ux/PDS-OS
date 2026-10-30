@@ -2,7 +2,7 @@ import { FormMessage } from "@/components/auth/form-message";
 import { HomeAlso } from "@/components/home/home-also";
 import { HomeProjects } from "@/components/home/home-projects";
 import { HomeWaiting } from "@/components/home/home-waiting";
-import { WelcomeCard } from "@/components/home/welcome-card";
+import { OnboardingAutoOpen } from "@/components/onboarding/onboarding-provider";
 import { GlobalWorkCountReporter } from "@/components/shell/work-count";
 import { WorkLead } from "@/components/work/work-lead";
 import { can, type Access } from "@/lib/auth/access";
@@ -36,7 +36,7 @@ export async function HomeFeed({ access }: { access: Access }) {
       {feed.error && (
         <FormMessage kind="error">{fr.work.journeys.partial}</FormMessage>
       )}
-      {welcome && <WelcomeCard variant={welcome} />}
+      {welcome && <OnboardingAutoOpen />}
       <div className="flex flex-col gap-4">
         <WorkLead
           row={lead}

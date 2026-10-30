@@ -25,7 +25,7 @@ export function AuthFrame({
           href={routes.home}
           className="flex items-center gap-2 rounded-md text-sm font-semibold tracking-tight outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
         >
-          <PdsLogo className="w-6" />
+          <PdsLogo entryLanding className="w-6" />
           {fr.app.name}
         </Link>
 

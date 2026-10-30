@@ -9,6 +9,8 @@ import Link from "next/link";
 import { useTransition } from "react";
 
 import { useOpenFeedback } from "@/components/feedback/feedback-provider";
+import { IconPlay } from "@/components/icons";
+import { useOnboarding } from "@/components/onboarding/onboarding-provider";
 import { navItemClass } from "@/components/shell/nav-item";
 import { useThemeChoice } from "@/components/shell/use-theme-choice";
 import { Avatar } from "@/components/ui/avatar";
@@ -27,10 +29,11 @@ import { routes } from "@/lib/auth/redirects";
 import { aiUsage } from "@/lib/i18n/fr/ai-usage";
 import { auth } from "@/lib/i18n/fr/auth";
 import { feedback } from "@/lib/i18n/fr/feedback";
+import { onboarding } from "@/lib/i18n/fr/onboarding";
 import { shell } from "@/lib/i18n/fr/shell";
 import { cn } from "@/lib/utils";
 
-const fr = { aiUsage, auth, shell, feedback };
+const fr = { aiUsage, auth, shell, feedback, onboarding };
 
 // Bottom of the desktop sidebar (Figma "PDS OS", node 47:12055): the signed-in
 // person's avatar and name, opening a menu with who they are, "Envoyer un
@@ -47,6 +50,7 @@ export function AccountMenu({
   collapsed: boolean;
 }) {
   const openFeedback = useOpenFeedback();
+  const presentation = useOnboarding();
   const [signingOut, startSignOut] = useTransition();
   const theme = useThemeChoice();
   const t = fr.shell.account;
@@ -82,6 +86,12 @@ export function AccountMenu({
           <IconGauge3 aria-hidden />
           {fr.aiUsage.settings.navLink}
         </DropdownMenuItem>
+        {presentation && (
+          <DropdownMenuItem onClick={presentation.replay}>
+            <IconPlay aria-hidden />
+            {fr.onboarding.replay}
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuRadioGroup
           value={theme.value}

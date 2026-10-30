@@ -278,6 +278,16 @@
   /* Ce qui glisse d'un élément à l'autre (indicateur d'onglet, fond du menu du
      Cadrage) : un peu plus long. */
   --duration-slide: 240ms;
+  /* Écran d'entrée (docs/DESIGN.md § 4), mesures de la vidéo de référence :
+     apparition du logo, trajet, arrivée de la page, retard de cette arrivée. */
+  --duration-entry-in: 150ms;
+  --duration-entry-flight: 370ms;
+  --duration-entry-reveal: 250ms;
+  --delay-entry-reveal: 160ms;
+  --ease-entry: cubic-bezier(0.4, 0.1, 0.55, 0.95);
+  /* Présentation (docs/DESIGN.md § 4) : vue une fois, elle peut prendre son temps. */
+  --duration-onboarding-step: 260ms;
+  --duration-onboarding-rise: 420ms;
   --transition-control:
     background-color var(--duration-fast) var(--ease-standard),
     border-color var(--duration-fast) var(--ease-standard),
@@ -809,4 +819,204 @@ button[data-busy]::before {
   from {
     opacity: 0;
   }
+}
+
+/* Écran d'entrée (docs/DESIGN.md § 4, components/shell/entry-splash.tsx).
+   Toujours noir, comme l'icône de l'app, quel que soit le thème.
+   Si le JavaScript ne suit pas, entry-failsafe rend la page au bout de 8 s. */
+.entry-splash {
+  display: none;
+}
+@media screen {
+  html[data-entry] .entry-splash {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    display: grid;
+    place-items: center;
+    animation: entry-failsafe 0s 8s forwards;
+  }
+  html[data-entry] [data-entry-logo] {
+    visibility: hidden;
+    animation: entry-failsafe-show 0s 8s forwards;
+  }
+  .entry-splash-backdrop {
+    position: absolute;
+    inset: 0;
+    background: var(--po-black);
+  }
+  .entry-splash-logo {
+    position: relative;
+    width: 4.5rem;
+    color: var(--po-white);
+    animation: entry-logo-in var(--duration-entry-in) var(--ease-out) backwards;
+  }
+  html[data-entry="leaving"] .entry-splash {
+    pointer-events: none;
+    animation: none;
+  }
+  /* Des animations, pas des transitions : next-themes coupe toutes les
+     transitions à l'hydratation, et le logo sauterait à l'arrivée. */
+  html[data-entry="leaving"] .entry-splash-backdrop {
+    animation: entry-fade var(--duration-entry-reveal) var(--ease-standard)
+      var(--delay-entry-reveal) forwards;
+  }
+  html[data-entry="leaving"] .entry-splash-logo {
+    animation: entry-flight var(--duration-entry-flight) var(--ease-entry)
+      forwards;
+  }
+  html[data-entry="leaving"] main {
+    animation: entry-rise var(--duration-entry-reveal) var(--ease-out)
+      var(--delay-entry-reveal) backwards;
+  }
+}
+@media screen and (prefers-reduced-motion: reduce) {
+  html[data-entry] .entry-splash-logo {
+    animation: none;
+  }
+  html[data-entry="leaving"] .entry-splash-logo {
+    animation: entry-fade var(--duration-entry-reveal) var(--ease-standard)
+      forwards;
+  }
+  html[data-entry="leaving"] main {
+    animation: none;
+  }
+}
+@keyframes entry-logo-in {
+  from {
+    opacity: 0;
+    filter: blur(8px);
+  }
+}
+/* Sans logo d'arrivée, --entry-opacity manque : le logo s'efface sur place. */
+@keyframes entry-flight {
+  /* Blanc tant qu'il survole la page : en thème sombre, sa couleur d'arrivée
+     le rendrait invisible avant d'atteindre son carré. */
+  65% {
+    color: var(--po-white);
+  }
+  to {
+    color: var(--entry-color, var(--po-white));
+    opacity: var(--entry-opacity, 0);
+    transform: translate(var(--entry-x, 0), var(--entry-y, 0))
+      scale(var(--entry-scale, 1));
+  }
+}
+@keyframes entry-fade {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes entry-rise {
+  from {
+    transform: translateY(1.5rem);
+  }
+}
+@keyframes entry-failsafe {
+  to {
+    visibility: hidden;
+  }
+}
+@keyframes entry-failsafe-show {
+  to {
+    visibility: visible;
+  }
+}
+
+/* Présentation de la première connexion (docs/DESIGN.md § 4, components/onboarding/). */
+.onboarding-step {
+  animation: onboarding-step-in var(--duration-onboarding-step) var(--ease-out)
+    both;
+}
+.onboarding-step-back {
+  animation: onboarding-step-back var(--duration-onboarding-step)
+    var(--ease-out) both;
+}
+.onboarding-rise {
+  animation: onboarding-rise var(--duration-onboarding-rise) var(--ease-out)
+    both;
+  animation-delay: calc(
+    var(--stagger-start, 0ms) + var(--stagger-step, 0ms) *
+      var(--stagger-index, 0)
+  );
+}
+.onboarding-stagger > :nth-child(2) {
+  --stagger-index: 1;
+}
+.onboarding-stagger > :nth-child(3) {
+  --stagger-index: 2;
+}
+.onboarding-notification {
+  animation: onboarding-drop var(--duration-onboarding-rise) var(--ease-out)
+    900ms both;
+}
+.onboarding-pop {
+  animation: onboarding-pop var(--duration-base) var(--ease-out);
+}
+.onboarding-press {
+  animation: onboarding-press 380ms var(--ease-out) 1500ms both;
+}
+@keyframes onboarding-step-in {
+  from {
+    opacity: 0;
+    transform: translateX(14px);
+  }
+}
+@keyframes onboarding-step-back {
+  from {
+    opacity: 0;
+    transform: translateX(-14px);
+  }
+}
+@keyframes onboarding-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+@keyframes onboarding-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+  }
+}
+@keyframes onboarding-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+@keyframes onboarding-press {
+  40% {
+    transform: scale(0.96);
+  }
+}
+@keyframes onboarding-fade {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-step,
+  .onboarding-step-back,
+  .onboarding-rise,
+  .onboarding-notification {
+    animation-name: onboarding-fade;
+    animation-delay: 0ms;
+  }
+  .onboarding-pop,
+  .onboarding-press {
+    animation: none;
+  }
+}
+
+/* « Maintenant » s'allume une fois après la présentation : c'est par là qu'on commence. */
+[data-now-card] {
+  transition:
+    border-color 600ms ease,
+    box-shadow 600ms ease;
+}
+.now-spot {
+  border-color: var(--selection);
+  box-shadow: 0 0 0 4px var(--selection-bg);
 }
