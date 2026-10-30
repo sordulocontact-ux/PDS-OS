@@ -270,7 +270,7 @@ export const network = {
     projectsDescription:
       "Ce que cette personne fait dans chaque projet, et ce qu'on attend d'elle.",
     awaitedDescription:
-      "Ce qu'elle doit faire par son lien privé, du plus urgent au moins urgent.",
+      "Ce que cette personne doit faire par son lien privé, du plus urgent au moins urgent.",
     creditsDescription: "Les titres où son nom est crédité.",
     callsDescription: "Les échanges où ce contact était invité.",
     campaignsDescription: "Marketing › Activations.",

@@ -109,6 +109,27 @@ dans le jeu de données ; les dates sont relatives au jour de la remise à zéro
 temps : un retard se prépare avec des dates passées). Moments à ajouter ensuite : Stratégie à valider,
 Master (mix V1 à valider), Juridique (fiches, SACEM), Conception, Distribution.
 
+## 5 bis. Le jeu de démonstration
+
+`supabase/preprod/showcase.sql` (Sacha, 30/10/2026) remplit les pages hors parcours, liées aux
+projets et titres du jeu de données : trois membres de plus (Inès Garnier et Yanis Belkacem, chefs
+de projet ; Chloé Martin, directrice créative ; même mot de passe) et une demande en attente
+(Hugo Lefèvre) ; 18 contacts du Réseau (studio, production, éditeur, distributeur, agence, média,
+label, et leurs personnes) ; un premier titre pour chaque artiste qui n'en a pas ; des crédits ;
+« Qui fait quoi » ; des fiches de renseignements envoyées ou rendues ; des liens privés (par
+`issue_contact_link`) envoyés, ouverts ou non ; neuf contrats dans tous les états avec leurs
+parties ; des fichiers d'artiste, de projet et de contrat ; des invités du Réseau sur un call et
+deux calls à venir. Il **ajoute seulement** et ne se joue qu'une fois (il s'arrête si « Studio
+Ressac » existe). `pnpm preprod:reset` le joue après le seed ; sur une base déjà utilisée :
+
+```bash
+{ printf "\\set pw '%s'\n" "$PREPROD_PASSWORD"; cat supabase/preprod/showcase.sql; } \
+  | /opt/homebrew/opt/libpq/bin/psql "$PREPROD_DB_URL" -q -v ON_ERROR_STOP=1
+```
+
+Les fichiers n'ont pas de contenu (pas de Storage dans le jeu de données) : la liste et les fiches
+les montrent, les ouvrir échoue.
+
 ## 6. Développer sur la base de pré-prod (sans Docker)
 
 Décision du 26/10/2026 : la stack Supabase locale prend trop de mémoire, et personne d'autre que nous ne
