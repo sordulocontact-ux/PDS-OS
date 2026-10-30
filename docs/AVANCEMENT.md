@@ -1216,6 +1216,10 @@ faits grise sous un titre (l'état à côté du titre, le reste dans « Informat
   pour une proposition d'identité ; Vue d'ensemble : chiffres et dernières sorties d'abord,
   « En cours » plus bas. **Titre** : son état audio, sa version de référence, ses projets et sa
   distribution passent dans « Informations ».
+- **Contrats (30/10)** : Contrats et Modèles en deux onglets, l'état en filtre ; le document d'un
+  contrat généré comme le proto ; **seul le responsable soumet et envoie** un contrat, la direction
+  valide (migration `20261030100101_contract_owner_submits.sql`, pré-prod faite, **prod avec
+  accord**).
 - Reste : aucun envoi d'e-mail par PDS OS (SMTP à brancher), une relance n'est pas
   enregistrée ; pas d'aperçu de fichier au clic ; la page Modèles de contrat n'a pas de
   « Maintenant » (à trancher).

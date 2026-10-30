@@ -98,6 +98,10 @@ export async function getContract(
     can(access, "manage_contracts") &&
     (row.owner_person_id === access.personId ||
       can(access, "view_all_projects"));
+  // Submitting and sending are the owner's (VISION-UX rule 9, Sacha
+  // 30/10/2026): the direction validates, it never submits for him.
+  const owner =
+    can(access, "manage_contracts") && row.owner_person_id === access.personId;
   const status = base.status;
   return {
     ...base,
@@ -133,9 +137,9 @@ export async function getContract(
       .sort((a, b) => a.name.localeCompare(b.name, "fr")),
     can: {
       edit: writer && !["in_review", "terminated"].includes(status),
-      submit: writer && status === "draft",
+      submit: owner && status === "draft",
       decide: can(access, "validate") && status === "in_review",
-      send: writer && status === "approved",
+      send: owner && status === "approved",
       sign: writer && (status === "approved" || status === "sent"),
       terminate: writer && status === "signed",
     },
