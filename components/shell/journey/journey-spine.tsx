@@ -221,10 +221,13 @@ function StepSub({
       </span>
     );
   if (!text) return null;
+  const clip = s.clipSummary && text === s.summary;
   return (
     <span
+      title={clip ? text : undefined}
       className={cn(
         "text-[length:var(--type-caption)] leading-snug text-[color:var(--text-secondary)]",
+        clip && "truncate",
         tone === "me" && "font-semibold text-[color:var(--selection)]",
         tone === "warn" && "text-[color:var(--tone-warning-fg)]",
       )}

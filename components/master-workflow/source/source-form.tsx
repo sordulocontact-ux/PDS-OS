@@ -60,7 +60,7 @@ export function SourceForm({
   return (
     <form
       noValidate
-      className="flex flex-col gap-4"
+      className="flex flex-col gap-9"
       onSubmit={(event) => {
         event.preventDefault();
         setTried(true);
@@ -167,20 +167,22 @@ export function SourceForm({
         </>
       )}
 
-      <FormMessage kind="error">{submit.error}</FormMessage>
-      <div className="flex flex-wrap gap-2">
-        <Button
-          type="submit"
-          disabled={submit.pending}
-          aria-busy={submit.pending || undefined}
-        >
-          {submit.pending ? t.submitting : t.submit}
-        </Button>
-        {onCancel && (
-          <Button type="button" variant="ghost" onClick={onCancel}>
-            {t.current.cancel}
+      <div className="flex flex-col gap-3">
+        <FormMessage kind="error">{submit.error}</FormMessage>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="submit"
+            disabled={submit.pending}
+            aria-busy={submit.pending || undefined}
+          >
+            {submit.pending ? t.submitting : t.submit}
           </Button>
-        )}
+          {onCancel && (
+            <Button type="button" variant="ghost" onClick={onCancel}>
+              {t.current.cancel}
+            </Button>
+          )}
+        </div>
       </div>
     </form>
   );

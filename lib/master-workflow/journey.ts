@@ -185,6 +185,9 @@ export function masterJourney(input: MasterJourneyInput): MasterJourneyStep[] {
   const allDeclared =
     inFlow.length > 0 &&
     inFlow.every((x) => approved(x.id, "mix")?.declared ?? false);
+  // One title in the flow: the summary names its file.
+  const sourceNamesFile =
+    facts.titles.length > 0 && inFlow.length > 0 && !several;
   const sourceSummary =
     facts.titles.length === 0
       ? t.summary.noTitle
@@ -519,6 +522,7 @@ export function masterJourney(input: MasterJourneyInput): MasterJourneyStep[] {
           ? actor
           : null,
       summary: summaryOf[key],
+      clipSummary: key === "source" && sourceNamesFile,
     };
   });
 }

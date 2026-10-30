@@ -128,6 +128,9 @@ export type JourneyStep = {
   actor: JourneyActor | null;
   // What a done step gave (« Échange du 05/10 »).
   summary: string | null;
+  // The summary is a file name: cut on one line in the journey, the full
+  // name on hover (it is not worth two lines of the spine).
+  clipSummary?: boolean;
   // Intertitle of the journey this step sits under (« Dossier »).
   group?: string;
   // Red subtitle in the journey: a missed due date, a decision required,
