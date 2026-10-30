@@ -1,0 +1,1203 @@
+<title>Carte Maintenant</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@500;600;700&display=swap">
+<style>/* Tokens recopiés de app/globals.css (docs/DESIGN.md). Coquille : barre latérale collée au bord,
+   page blanche, colonne de 896 px pour l'accueil. */
+:root{
+  --text-primary:#000;--text-secondary:#5e5e5e;--text-tertiary:#767676;--text-muted:#afafaf;
+  --surface-app:#fbfbfb;--surface-page:#fff;--surface-raised:#fff;--surface-soft:#f4f4f4;--surface-sunken:#ececec;
+  --surface-pressed:#e2e2e2;--surface-tint:rgb(64 64 64 / .06);
+  --border-hairline:#ececec;--border-default:#d4d4d4;--border-hover:#afafaf;
+  --nav-bg:#fff;--nav-fg:#000;--nav-fg-muted:#767676;--nav-item-hover-bg:#f4f4f4;--nav-item-active-bg:#ececec;--nav-border:rgb(0 0 0 / .08);
+  --nav-brand-bg:#000;--nav-brand-fg:#fff;
+  --tone-neutral-bg:#ececec;--tone-neutral-fg:#111;--tone-info-bg:#e2eefc;--tone-info-fg:#0b3d8c;
+  --tone-warning-bg:#fcefd2;--tone-warning-fg:#6e4300;--tone-success-bg:#daf3e2;--tone-success-fg:#0d5226;
+  --tone-danger-bg:#fce1df;--tone-danger-fg:#9a1b1b;--tone-action-bg:#ececec;--tone-action-fg:#111;
+  --selection:#155dfc;--selection-bg:rgb(21 93 252 / .07);
+  --primary-bg:#000;--primary-fg:#fff;--primary-hover:#282828;--control-hover:#f4f4f4;
+  --shadow-card:0 1px 2px rgb(0 0 0 / .04),0 2px 8px rgb(0 0 0 / .04);
+  --glass:rgb(20 20 20 / .82);--glass-fg:#fff;--glass-2:#b5b5b5;
+  --font:"Google Sans Flex",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --ease:cubic-bezier(.23,1,.32,1);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --text-primary:#ededed;--text-secondary:#a8a8a8;--text-tertiary:#8f8f8f;--text-muted:#5e5e5e;
+  --surface-app:#0a0a0a;--surface-page:#0f0f0f;--surface-raised:#161616;--surface-soft:rgb(255 255 255 / .05);--surface-sunken:rgb(255 255 255 / .08);
+  --surface-pressed:rgb(255 255 255 / .12);--surface-tint:rgb(255 255 255 / .06);
+  --border-hairline:rgb(255 255 255 / .08);--border-default:rgb(255 255 255 / .12);--border-hover:rgb(255 255 255 / .28);
+  --nav-bg:#0f0f0f;--nav-fg:#ededed;--nav-fg-muted:#8f8f8f;--nav-item-hover-bg:rgb(255 255 255 / .05);--nav-item-active-bg:rgb(255 255 255 / .09);--nav-border:rgb(255 255 255 / .08);
+  --nav-brand-bg:#ededed;--nav-brand-fg:#000;
+  --tone-neutral-bg:#262626;--tone-neutral-fg:#d4d4d4;--tone-info-bg:#12233d;--tone-info-fg:#9ec5ff;
+  --tone-warning-bg:#33260c;--tone-warning-fg:#f5c869;--tone-success-bg:#0f2e1c;--tone-success-fg:#7fdca0;
+  --tone-danger-bg:#3a1616;--tone-danger-fg:#ff9b94;--tone-action-bg:#262626;--tone-action-fg:#ededed;
+  --selection:#4d8bff;--selection-bg:rgb(77 139 255 / .12);
+  --primary-bg:#ededed;--primary-fg:#000;--primary-hover:#d4d4d4;--control-hover:rgb(255 255 255 / .05);
+  --shadow-card:0 0 0 1px rgb(255 255 255 / .02);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --text-primary:#ededed;--text-secondary:#a8a8a8;--text-tertiary:#8f8f8f;--text-muted:#5e5e5e;
+  --surface-app:#0a0a0a;--surface-page:#0f0f0f;--surface-raised:#161616;--surface-soft:rgb(255 255 255 / .05);--surface-sunken:rgb(255 255 255 / .08);
+  --surface-pressed:rgb(255 255 255 / .12);--surface-tint:rgb(255 255 255 / .06);
+  --border-hairline:rgb(255 255 255 / .08);--border-default:rgb(255 255 255 / .12);--border-hover:rgb(255 255 255 / .28);
+  --nav-bg:#0f0f0f;--nav-fg:#ededed;--nav-fg-muted:#8f8f8f;--nav-item-hover-bg:rgb(255 255 255 / .05);--nav-item-active-bg:rgb(255 255 255 / .09);--nav-border:rgb(255 255 255 / .08);
+  --nav-brand-bg:#ededed;--nav-brand-fg:#000;
+  --tone-neutral-bg:#262626;--tone-neutral-fg:#d4d4d4;--tone-info-bg:#12233d;--tone-info-fg:#9ec5ff;
+  --tone-warning-bg:#33260c;--tone-warning-fg:#f5c869;--tone-success-bg:#0f2e1c;--tone-success-fg:#7fdca0;
+  --tone-danger-bg:#3a1616;--tone-danger-fg:#ff9b94;--tone-action-bg:#262626;--tone-action-fg:#ededed;
+  --selection:#4d8bff;--selection-bg:rgb(77 139 255 / .12);
+  --primary-bg:#ededed;--primary-fg:#000;--primary-hover:#d4d4d4;--control-hover:rgb(255 255 255 / .05);
+  --shadow-card:0 0 0 1px rgb(255 255 255 / .02);
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--surface-app);color:var(--text-primary);font-family:var(--font);font-weight:500;font-size:16px;line-height:24px;letter-spacing:-.02em;-webkit-font-smoothing:antialiased}
+button,input,textarea,select{font:inherit;letter-spacing:inherit;color:inherit}
+h1,h2,h3,p{margin:0}
+:focus-visible{outline:2px solid var(--selection);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+
+/* Coquille */
+.shell{display:flex;min-height:100%}
+.side{position:sticky;top:0;height:100dvh;width:218px;flex-shrink:0;display:flex;flex-direction:column;justify-content:space-between;gap:24px;padding:8px;background:var(--nav-bg);border-right:1px solid var(--nav-border);overflow-y:auto}
+.side-top{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 0}
+.brand{width:60px;height:60px;border-radius:16px;background:var(--nav-brand-bg);color:var(--nav-brand-fg);display:grid;place-items:center;font-weight:700;font-size:18px;letter-spacing:-.02em}
+.iconbtn{width:40px;height:40px;border-radius:10px;border:0;background:none;display:grid;place-items:center;cursor:pointer;color:var(--nav-fg)}
+.nav{list-style:none;margin:24px 0 0;padding:0;display:flex;flex-direction:column;gap:2px}
+.nav a{display:flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:8px;color:var(--nav-fg);text-decoration:none}
+.nav a[aria-current="page"]{background:var(--nav-item-active-bg)}
+.nav a[aria-disabled="true"]{cursor:default}
+.nav .count{margin-left:auto;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--primary-bg);color:var(--primary-fg);font-size:13px;line-height:20px;text-align:center;font-weight:600}
+.side-foot{display:flex;align-items:center;gap:8px;border-top:1px solid var(--nav-border);padding-top:8px}
+.me{display:flex;align-items:center;gap:8px;padding:6px 8px;flex:1;min-width:0}
+.me span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:15px}
+.av{width:28px;height:28px;border-radius:50%;background:var(--surface-sunken);color:var(--text-primary);display:inline-grid;place-items:center;font-size:12px;font-weight:600;letter-spacing:0;flex-shrink:0}
+.main{flex:1;min-width:0;background:var(--surface-page)}
+.topbar{display:none}.badge{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;font-size:13px;line-height:18px;font-weight:600;white-space:nowrap}
+.badge.sm{height:20px;padding:0 8px}
+.t-info{background:var(--tone-info-bg);color:var(--tone-info-fg)}.t-neutral{background:var(--tone-neutral-bg);color:var(--tone-neutral-fg)}
+.t-warn{background:var(--tone-warning-bg);color:var(--tone-warning-fg)}.t-danger{background:var(--tone-danger-bg);color:var(--tone-danger-fg)}
+.t-ok{background:var(--tone-success-bg);color:var(--tone-success-fg)}.t-act{background:var(--tone-action-bg);color:var(--tone-action-fg)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:40px;padding:0 16px;border-radius:10px;border:1px solid transparent;background:var(--primary-bg);color:var(--primary-fg);cursor:pointer;font-weight:500;text-decoration:none;white-space:nowrap;transition:transform 140ms var(--ease),background-color 150ms ease}
+.btn:active{transform:scale(.97)}
+.btn.outline{background:var(--surface-page);color:var(--text-primary);border-color:var(--border-default)}
+.btn.ghost{background:none;color:var(--text-primary)}
+.btn.sm{height:32px;padding:0 14px;font-size:14px}
+.link{background:none;border:0;padding:0;cursor:pointer;color:var(--text-primary);text-decoration:underline;text-decoration-color:var(--border-hover);text-underline-offset:3px;font-size:14px}/* Briques communes des pages (app du 29/10/2026) */
+.btn.lg{height:44px;padding:0 18px}
+.btn.icon{width:40px;padding:0}
+.btn:disabled{opacity:.5;cursor:default}
+.page{max-width:1180px;margin:0 auto;padding-block:32px 160px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:24px}
+.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--text-secondary);text-decoration:none;width:fit-content;cursor:pointer;background:none;border:0;padding:0}
+.ph{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:16px}
+.ph h1{font-size:36px;line-height:42px;letter-spacing:-.04em;font-weight:500;display:flex;align-items:center;gap:12px;flex-wrap:wrap;text-wrap:balance}
+.ph .desc{font-size:16px;line-height:24px;color:var(--text-secondary);margin-top:4px;max-width:80ch}
+.ph .acts{display:flex;flex-wrap:wrap;gap:8px}
+.ph .who{display:flex;align-items:center;gap:16px}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--surface-sunken);display:inline-grid;place-items:center;font-size:13px;font-weight:600;flex-shrink:0;color:var(--text-primary)}
+.avatar.lg{width:72px;height:72px;font-size:22px}
+.avatar.sq{border-radius:10px}
+.factline{display:flex;flex-wrap:wrap;gap:6px 18px;margin:0;padding:0;list-style:none;font-size:15px;line-height:22px;color:var(--text-secondary)}
+.factline b{color:var(--text-primary);font-weight:600}
+.factline .red{color:var(--tone-danger-fg);font-weight:600}
+
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--border-hairline);overflow-x:auto}
+.tabs button{background:none;border:0;border-bottom:2px solid transparent;padding:10px 8px;font-size:15px;color:var(--text-secondary);cursor:pointer;white-space:nowrap}
+.tabs button[aria-pressed="true"]{color:var(--text-primary);border-color:var(--text-primary)}
+.tabs .n{color:var(--text-tertiary);margin-left:4px;font-variant-numeric:tabular-nums}
+.seg{display:inline-flex;gap:4px}
+.seg button{height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--border-default);background:none;cursor:pointer;font-size:14px}
+.seg button[aria-pressed="true"]{background:var(--primary-bg);color:var(--primary-fg);border-color:transparent}
+
+/* Ligne de recherche et de filtres (ListToolbar) */
+.toolbar{display:grid;grid-template-columns:minmax(0,1.6fr) repeat(var(--nf,2),minmax(0,1fr));gap:8px}
+.search{display:flex;align-items:center;gap:8px;height:40px;border-radius:10px;border:1px solid var(--border-default);background:var(--surface-page);padding:0 12px;color:var(--text-tertiary)}
+.search input{border:0;background:none;outline:none;flex:1;min-width:0;font-size:15px;color:var(--text-primary)}
+.toolbar select{height:40px;border-radius:10px;border:1px solid var(--border-default);background:var(--surface-page);padding:0 10px;font-size:15px;min-width:0}
+
+/* DataTable : une carte (contour, en-tête sur bande douce, filet entre les lignes) */
+.tbl{border:1px solid var(--border-default);border-radius:12px;overflow:hidden;background:var(--surface-raised)}
+.tbl .tw{overflow-x:auto}
+.tbl table{width:100%;border-collapse:collapse;font-size:16px;line-height:24px}
+.tbl th{text-align:left;font-weight:500;color:var(--text-secondary);height:44px;padding:0 20px 0 0;background:var(--surface-soft);border-bottom:1px solid var(--border-default);white-space:nowrap}
+.tbl td{padding:12px 20px 12px 0;vertical-align:middle}
+.tbl th:first-child,.tbl td:first-child{padding-left:16px}
+.tbl th:last-child,.tbl td:last-child{padding-right:16px}
+.tbl tbody tr+tr td{border-top:1px solid var(--border-hairline)}
+.tbl tr.go{cursor:pointer}
+.tbl .sub{display:block;font-size:14px;line-height:20px;color:var(--text-secondary)}
+.tbl .mut{color:var(--text-secondary)}
+.tbl .name{font-weight:600}
+.tbl .r{text-align:right}
+.cellrow{display:flex;align-items:center;gap:12px;min-width:0}
+.empty{padding:32px 16px;text-align:center;color:var(--text-secondary);font-size:15px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.empty b{color:var(--text-primary);font-weight:600}
+
+/* Blocs « Maintenant » et listes de l'accueil */
+.now{display:flex;flex-direction:column;gap:14px;padding:20px;border-radius:16px;border:1px solid var(--border-default);background:var(--surface-raised);box-shadow:var(--shadow-card)}
+.eyebrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:14px;line-height:20px;color:var(--text-secondary)}
+.now h2{font-size:20px;line-height:28px;letter-spacing:-.04em;font-weight:500;text-wrap:balance}
+.why{font-size:15px;line-height:22px;color:var(--text-secondary);text-wrap:pretty;max-width:76ch}
+.facts{display:flex;flex-wrap:wrap;gap:4px 24px;margin:0;font-size:15px;line-height:22px;color:var(--text-secondary)}
+.facts div{display:flex;gap:6px}.facts dd{margin:0;color:var(--text-primary);font-weight:600}
+.acts-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.banner{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:12px;background:var(--tone-success-bg);color:var(--tone-success-fg);font-size:15px;line-height:22px}
+.banner.info{background:var(--tone-info-bg);color:var(--tone-info-fg)}
+.callout{padding:12px 14px;border-radius:12px;font-size:15px;line-height:22px}
+.callout.warn{background:var(--tone-warning-bg);color:var(--tone-warning-fg)}
+.callout.bad{background:var(--tone-danger-bg);color:var(--tone-danger-fg)}
+.callout.soft{background:var(--surface-soft);color:var(--text-secondary)}
+.callout b{font-weight:600}
+
+.hs{display:flex;flex-direction:column;gap:8px}
+.hs-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:0 4px}
+.hs-head h2{font-size:14px;line-height:20px;font-weight:600;color:var(--text-secondary);letter-spacing:-.01em}
+.hs-head .n{color:var(--text-tertiary);font-weight:500;margin-left:6px}
+.hl{list-style:none;margin:0;padding:0;border:1px solid var(--border-default);border-radius:12px;overflow:hidden;background:var(--surface-raised)}
+.hl>li+li{border-top:1px solid var(--border-hairline)}
+.hrow{display:flex;align-items:center;gap:12px;padding:12px 16px;width:100%;text-align:left;background:none;border:0;cursor:pointer}
+.hrow.static{cursor:default}
+.hrow .grow{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.hrow .t{font-size:16px;line-height:24px;overflow-wrap:anywhere}
+.hrow .t b{font-weight:600}
+.hrow .c{font-size:14px;line-height:20px;color:var(--text-secondary);overflow-wrap:anywhere}
+.hrow .rside{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:8px;flex-shrink:0}
+.hnote{padding:10px 16px;font-size:14px;color:var(--text-secondary)}
+.chev{color:var(--text-tertiary);flex-shrink:0}
+
+/* Cartes de section (rien d'encadré dedans) */
+.cols{display:grid;grid-template-columns:minmax(0,1fr) 20rem;gap:24px;align-items:start}
+.colstack{display:flex;flex-direction:column;gap:24px;min-width:0}
+.sc{display:flex;flex-direction:column;gap:16px;padding:20px 24px;border-radius:16px;border:1px solid var(--border-hairline);background:var(--surface-raised);min-width:0}
+.sc-head{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:12px}
+.sc-head h2{font-size:20px;line-height:28px;letter-spacing:-.04em;font-weight:500;display:flex;gap:8px;align-items:center}
+.sc-head h2 .n{font-size:15px;color:var(--text-tertiary);font-weight:500;letter-spacing:0}
+.sc-head p{font-size:15px;line-height:22px;color:var(--text-secondary);max-width:80ch}
+.sc dl.fl{margin:0;display:flex;flex-direction:column;gap:12px}
+.sc dl.fl dt{font-size:14px;line-height:20px;color:var(--text-secondary)}
+.sc dl.fl dd{margin:0;font-size:16px;line-height:24px;overflow-wrap:anywhere}
+.sc dl.fl dd.mut{color:var(--text-tertiary)}
+.sc dl.fl dd .src{display:block;font-size:13px;line-height:18px;color:var(--text-tertiary)}
+.rows{list-style:none;margin:0;padding:0}
+.rows>li{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--border-hairline)}
+.rows>li:first-child{border-top:0;padding-top:0}
+.rows .grow{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.rows .t{font-size:16px;line-height:24px}
+.rows .t b{font-weight:600}
+.rows .c{font-size:14px;line-height:20px;color:var(--text-secondary)}
+.rows a,.lnk{color:var(--text-primary);text-decoration:underline;text-decoration-color:var(--border-hover);text-underline-offset:3px;cursor:pointer;background:none;border:0;padding:0;font-size:inherit}
+.src{font-size:13px;line-height:18px;color:var(--text-tertiary)}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:15px}
+details.fold summary{cursor:pointer;font-size:15px;color:var(--text-secondary);list-style:none}
+details.fold summary::before{content:"▸ ";color:var(--text-tertiary)}
+details.fold[open] summary::before{content:"▾ "}
+
+/* Document en tête (VISION-UX règle 18) */
+.doc{display:flex;align-items:center;gap:14px;padding:14px;border-radius:12px;border:1px solid var(--border-default);background:var(--surface-soft)}
+.doc .ic{width:40px;height:48px;border-radius:6px;background:var(--surface-raised);border:1px solid var(--border-default);display:grid;place-items:center;font-size:11px;font-weight:700;color:var(--text-secondary)}
+.doc .grow{flex:1;min-width:0}
+.doc b{font-weight:600}
+.vals{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.vals li{display:grid;grid-template-columns:minmax(0,12rem) minmax(0,1fr);gap:12px;padding:10px 0;border-top:1px solid var(--border-hairline);font-size:15px}
+.vals li:first-child{border-top:0}
+.vals .k{color:var(--text-secondary)}
+.vals .src{display:block}
+
+/* Calendrier */
+.cal{border:1px solid var(--border-default);border-radius:12px;overflow:hidden;background:var(--surface-raised)}
+.cal-head{display:grid;grid-template-columns:56px repeat(7,minmax(0,1fr));border-bottom:1px solid var(--border-default);background:var(--surface-soft)}
+.cal-head div{padding:8px 4px;text-align:center;font-size:13px;color:var(--text-secondary)}
+.cal-head b{display:block;font-size:16px;color:var(--text-primary);font-weight:600}
+.cal-head .today b{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--primary-bg);color:var(--primary-fg)}
+.cal-body{display:grid;grid-template-columns:56px repeat(7,minmax(0,1fr));position:relative;height:520px;overflow-y:auto}
+.cal-hours div{height:48px;font-size:12px;color:var(--text-tertiary);text-align:right;padding-right:6px;transform:translateY(-7px)}
+.cal-day{position:relative;border-left:1px solid var(--border-hairline);background-image:repeating-linear-gradient(to bottom,transparent 0,transparent 47px,var(--border-hairline) 47px,var(--border-hairline) 48px)}
+.ev{position:absolute;left:3px;right:3px;border-radius:8px;padding:4px 6px;font-size:12px;line-height:16px;overflow:hidden;cursor:pointer;border:0;text-align:left}
+.ev b{display:block;font-weight:600;font-size:12.5px}
+.ev.t-info{background:var(--tone-info-bg);color:var(--tone-info-fg)}
+.ev.t-ok{background:var(--tone-success-bg);color:var(--tone-success-fg)}
+.ev.t-neutral{background:var(--tone-neutral-bg);color:var(--tone-neutral-fg)}
+.ev.t-warn{background:var(--tone-warning-bg);color:var(--tone-warning-fg)}
+.nowline{position:absolute;left:0;right:0;height:2px;background:var(--selection)}
+
+/* Transcription, propositions */
+.quote{font-size:15px;line-height:22px;color:var(--text-secondary);border-left:2px solid var(--border-default);padding-left:10px}
+.prop{display:flex;flex-direction:column;gap:8px;padding:14px 0;border-top:1px solid var(--border-hairline)}
+.prop:first-child{border-top:0;padding-top:0}
+.prop .top{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.prop .t{font-size:16px;line-height:24px}
+
+/* Modale « verre » et champs */
+.scrim{position:fixed;inset:0;z-index:70;background:rgb(0 0 0 / .35);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:grid;place-items:center;padding:16px}
+.dialog{width:min(560px,100%);max-height:calc(100dvh - 32px);overflow:auto;border-radius:16px;background:color-mix(in srgb,var(--surface-raised) 92%,transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--border-default);box-shadow:0 20px 60px rgb(0 0 0 / .3);padding:24px;display:flex;flex-direction:column;gap:16px}
+.dialog h2{font-size:20px;line-height:28px;letter-spacing:-.04em;font-weight:500}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field label,.field .lbl{font-size:14px;font-weight:600}
+.field .hint{font-size:14px;line-height:20px;color:var(--text-secondary)}
+.field input,.field select,.field textarea{min-height:40px;border-radius:10px;border:1px solid var(--border-default);background:var(--surface-page);padding:8px 12px;font-size:16px;min-width:0;width:100%}
+.field textarea{min-height:96px;resize:vertical;line-height:22px}
+.field [aria-invalid="true"]{border-color:var(--tone-danger-fg)}
+.err{color:var(--tone-danger-fg);font-size:14px;line-height:20px}
+.dfoot{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.mail{border:1px solid var(--border-default);border-radius:12px;overflow:hidden}
+.mail .mh{padding:10px 12px;background:var(--surface-soft);font-size:14px;line-height:22px;color:var(--text-secondary)}
+.mail .mh b{color:var(--text-primary);font-weight:600}
+.mail .mlink{padding:10px 12px;border-top:1px solid var(--border-hairline);font-size:14px;color:var(--text-secondary)}
+.mail .mlink code{color:var(--text-primary)}
+.choice{display:flex;flex-direction:column;gap:8px}
+.choice label{display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:12px;border:1px solid var(--border-default);cursor:pointer;font-weight:500}
+.choice label:has(input:checked){border-color:var(--selection);background:var(--selection-bg)}
+.choice small{display:block;color:var(--text-secondary);font-size:14px;font-weight:500}
+.player{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:var(--surface-soft)}
+.player .bar{flex:1;height:4px;border-radius:999px;background:var(--surface-sunken)}
+.preview{display:grid;place-items:center;height:160px;border-radius:12px;background:var(--surface-soft);color:var(--text-tertiary);font-size:14px}
+.preview.cover{background:linear-gradient(135deg,var(--tone-info-bg),var(--tone-warning-bg))}
+
+@media (hover:hover) and (pointer:fine){
+  .nav a:not([aria-current="page"]):not([aria-disabled="true"]):hover,.iconbtn:hover{background:var(--nav-item-hover-bg)}
+  .btn:hover{background:var(--primary-hover)}
+  .btn.outline:hover,.btn.ghost:hover{background:var(--control-hover);border-color:var(--border-hover)}
+  .tbl tr.go:hover td,.hrow:not(.static):hover{background:var(--control-hover)}
+  .tabs button:hover{color:var(--text-primary)}
+}
+@media (max-width:860px){
+  .side{display:none}
+  .side.open{display:flex;position:fixed;inset:0 auto 0 0;z-index:40;box-shadow:0 10px 40px rgb(0 0 0 / .3)}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:8px max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--nav-border);background:var(--nav-bg);position:sticky;top:env(safe-area-inset-top,0px);z-index:30}
+  .topbar .brand{width:40px;height:40px;border-radius:12px;font-size:13px}
+  .cols{grid-template-columns:minmax(0,1fr)}
+  .toolbar{grid-template-columns:minmax(0,1fr)}
+  .ph h1{font-size:28px;line-height:34px}
+  .hide-m{display:none}
+  .vals li{grid-template-columns:minmax(0,1fr)}
+  .cal-body,.cal-head{grid-template-columns:40px repeat(7,minmax(44px,1fr))}
+  .cal{overflow-x:auto}
+}
+@media (prefers-reduced-motion:reduce){*{transition-duration:1ms!important}}
+/* Carte « Maintenant » proposée (30/10) : qui ou quoi à gauche, un titre court, une ligne de faits, les actions à droite. */
+.now2{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;padding:20px;border:1px solid var(--border-hairline);border-radius:16px;background:var(--surface-raised)}
+.now2 .lead{padding-top:2px}
+.now2 .lead .avatar{width:40px;height:40px;font-size:14px}
+.now2 .nicon{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--tone-info-bg);color:var(--tone-info-fg)}
+.now2 .nicon.ok{background:var(--tone-success-bg);color:var(--tone-success-fg)}
+.now2 .nicon.neutral{background:var(--surface-sunken);color:var(--text-secondary)}
+.now2 .nicon svg{width:20px;height:20px}
+.now2 .body{display:flex;flex-direction:column;gap:6px;min-width:0}
+.now2 .top{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:12px 16px}
+.now2 .tt{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 280px}
+.now2 .eb{font-size:14px;line-height:20px;color:var(--text-secondary)}
+.now2 h2{font-size:18px;line-height:26px;letter-spacing:-.03em;font-weight:500;text-wrap:balance}
+.now2 .acts{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.now2 .meta{font-size:14px;line-height:20px;color:var(--text-secondary);display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px}
+.now2 .meta .sep{color:var(--text-tertiary)}
+.now2 .quote{font-size:15px;line-height:22px;color:var(--text-primary);border-left:2px solid var(--tone-danger-fg);padding-left:10px;margin-top:4px}
+.now2 .steps{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-top:8px;font-size:14px;line-height:20px;color:var(--text-tertiary);list-style:none;padding:0}
+.now2 .steps li{display:flex;align-items:center;gap:6px}
+.now2 .steps li+li::before{content:"";width:16px;height:1px;background:var(--border-default);margin-right:4px}
+.now2 .steps .dot{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--border-hover);flex-shrink:0}
+.now2 .steps .done{color:var(--text-secondary)}
+.now2 .steps .done .dot{background:var(--text-secondary);border-color:var(--text-secondary)}
+.now2 .steps .cur{color:var(--text-primary);font-weight:600}
+.now2 .steps .cur .dot{background:var(--tone-info-fg);border-color:var(--tone-info-fg);box-shadow:0 0 0 3px var(--tone-info-bg)}
+.now2 .fix{grid-column:2;display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.more{position:relative}
+.more summary{list-style:none;cursor:pointer;width:40px;height:40px;border-radius:999px;border:1px solid var(--border-default);display:grid;place-items:center}
+.more summary::-webkit-details-marker{display:none}
+.more .menu{position:absolute;right:0;top:44px;z-index:20;min-width:240px;padding:6px;border-radius:12px;border:1px solid var(--border-default);background:var(--surface-raised);box-shadow:var(--shadow-card);display:flex;flex-direction:column}
+.more .menu button{background:none;border:0;text-align:left;padding:10px 12px;border-radius:8px;font-size:15px;cursor:pointer;color:var(--text-primary)}
+@media (hover:hover){.more .menu button:hover{background:var(--control-hover)}}
+@media (max-width:640px){.now2{grid-template-columns:1fr}.now2 .lead{display:none}.now2 .fix{grid-column:1}}
+/* Barre du proto et toast : hors du produit */
+.proto{position:fixed;left:0;right:0;margin-inline:auto;width:fit-content;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:50;background:var(--glass);color:var(--glass-fg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:16px;padding:8px 10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;max-width:calc(100% - 32px);box-shadow:0 10px 30px rgb(0 0 0 / .25)}
+.proto .lbl{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--glass-2);padding:0 6px}
+.proto label{font-size:13px;color:var(--glass-2)}
+.proto select{height:34px;border-radius:10px;border:1px solid rgb(255 255 255 / .18);background:rgb(255 255 255 / .08);color:var(--glass-fg);padding:0 10px;font-size:14px;max-width:260px}
+.proto select option{color:#000;background:#fff}
+.proto button{height:34px;border-radius:10px;border:1px solid rgb(255 255 255 / .18);background:none;color:var(--glass-fg);padding:0 12px;font-size:14px;cursor:pointer}
+.toast{position:fixed;right:20px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:60;background:var(--primary-bg);color:var(--primary-fg);padding:12px 16px;border-radius:12px;font-size:15px;max-width:min(420px,calc(100% - 40px));transition:opacity 180ms ease,transform 180ms var(--ease)}
+.toast.off{opacity:0;transform:translateY(8px);pointer-events:none}</style>
+<div class="shell">
+  <aside class="side" id="side" aria-label="Navigation principale"></aside>
+  <div class="main">
+    <div class="topbar"><span class="brand">PDS</span></div>
+    <main id="app"></main>
+  </div>
+</div>
+<div id="modal"></div>
+<div class="toast off" id="toast" role="status" aria-live="polite"></div>
+<div class="proto" role="region" aria-label="Commandes du prototype">
+  <span class="lbl">Proto</span>
+  <label for="roleSel">Voir comme</label><select id="roleSel"></select>
+  <label for="ctrSel">Contrat</label><select id="ctrSel"><option value="k1">Co-édition · à valider</option><option value="k3">Licence · modifications demandées</option><option value="k6">Prestation Ressac · à envoyer</option><option value="k2">Prestation Karim · envoyé</option><option value="k4">Contrat d'artiste · signé</option><option value="k7">Droit à l'image · résilié</option></select>
+  <label for="cardSel">Carte</label><select id="cardSel"><option value="new">Proposée</option><option value="old">Actuelle</option></select>
+  <select id="pageSel" hidden><option value="contracts">Contrats</option></select>
+  <button type="button" id="resetBtn">Recommencer</button>
+</div>
+<script>
+(function(){
+const I={
+  home:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 9l7-6 7 6v8H3z"/></svg>',
+  work:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="2.5" y="6" width="15" height="10.5" rx="2"/><path d="M7 6V4.5h6V6"/></svg>',
+  folder:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M2.5 5.5h5l2 2h8v8.5h-15z"/></svg>',
+  cal:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="4.5" width="14" height="12.5" rx="2"/><path d="M3 8.5h14M7 2.5v3M13 2.5v3"/></svg>',
+  phone:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M5 3h3l1.5 4-2 1.5a9 9 0 004 4l1.5-2 4 1.5v3a1.5 1.5 0 01-1.5 1.5A13.5 13.5 0 013.5 4.5 1.5 1.5 0 015 3z"/></svg>',
+  mic:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="7.5" y="2.5" width="5" height="10" rx="2.5"/><path d="M4.5 10a5.5 5.5 0 0011 0M10 15.5v2"/></svg>',
+  disc:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10" cy="10" r="7.5"/><circle cx="10" cy="10" r="2"/></svg>',
+  nodes:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="5" cy="5" r="2"/><circle cx="15" cy="7" r="2"/><circle cx="8" cy="15" r="2"/><path d="M6.7 6l6.4.6M14 8.8l-4.5 4.8M5.5 7l2 6"/></svg>',
+  hand:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 10l4-4 3 2 3-2 4 4-5 5-2-1.5L7.5 15z"/></svg>',
+  file:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M5 2.5h6l4 4v11H5z"/><path d="M11 2.5v4h4"/></svg>',
+  msgs:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 4h11v8H7l-4 3zM14 7h3v8l-3-2h-5"/></svg>',
+  sidebar:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="2.5" y="3.5" width="15" height="13" rx="2"/><path d="M8 3.5v13"/></svg>',
+  bell:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M5 14V9a5 5 0 0110 0v5l1.5 1.5h-13zM8.5 17.5h3"/></svg>',
+  send:'<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><path d="M10 16V4M5 9l5-5 5 5"/></svg>',
+  chev:'<svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5L10.5 8 6 12.5"/></svg>',
+  back:'<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3.5L5.5 8l4.5 4.5"/></svg>',
+  check:'<svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg>'
+};"use strict";
+I.lock='<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3.5" y="7" width="9" height="6.5" rx="1.5"/><path d="M5.5 7V5.5a2.5 2.5 0 015 0V7"/></svg>';
+I.dots='<svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor" aria-hidden="true"><circle cx="4" cy="9" r="1.4"/><circle cx="9" cy="9" r="1.4"/><circle cx="14" cy="9" r="1.4"/></svg>';
+I.plus='<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>';
+I.play='<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M5 3.2v9.6L13 8z"/></svg>';
+I.search='<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>';
+I.person='<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="8" cy="5.5" r="2.5"/><path d="M3 14c.5-2.8 2.5-4.2 5-4.2s4.5 1.4 5 4.2"/></svg>';
+I.org='<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="2.5" width="10" height="11" rx="1"/><path d="M6 5.5h1M9 5.5h1M6 8h1M9 8h1M7 13.5v-2.5h2v2.5"/></svg>';
+I.audio='<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3 6.5v3M6 4.5v7M9 3v10M12 6v4"/></svg>';
+I.image='<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="2.5" y="3" width="11" height="10" rx="1.5"/><circle cx="6" cy="6.5" r="1.2"/><path d="M3 12l3.5-3.5 2.5 2.5 2-2 2.5 2.5"/></svg>';
+I.doc='<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 2.5h5l3 3v8H4z"/><path d="M9 2.5v3h3M6 9h4M6 11h4"/></svg>';
+I.mail='<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="2" y="3.5" width="12" height="9" rx="1.5"/><path d="M2.5 4.5L8 9l5.5-4.5"/></svg>';
+I.link='<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M7 9a3 3 0 004.2 0l2-2a3 3 0 00-4.2-4.2l-.8.8M9 7a3 3 0 00-4.2 0l-2 2a3 3 0 004.2 4.2l.8-.8"/></svg>';
+
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const lowerFirst=s=>s?s.charAt(0).toLowerCase()+s.slice(1):"";
+const plural=(n,one,many)=>`${n} ${n>1?many:one}`;
+const initials=n=>n.split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join("");
+const norm=s=>String(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+
+/* Le jour du proto : Jeu. 29/10/2026, 11:20. */
+const TODAY="2026-10-29";
+const DAYS=["Dim.","Lun.","Mar.","Mer.","Jeu.","Ven.","Sam."];
+const MONTHS=["janv.","févr.","mars","avr.","mai","juin","juil.","août","sept.","oct.","nov.","déc."];
+const dOf=iso=>{const [y,m,d]=iso.split("-").map(Number);return new Date(y,m-1,d);};
+const pad=n=>String(n).padStart(2,"0");
+const fmtDay=iso=>{const d=dOf(iso);return `${DAYS[d.getDay()]} ${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;};
+const fmtShort=iso=>{if(!iso)return "—";const d=dOf(iso);return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;};
+const ddmm=iso=>{const d=dOf(iso);return `${pad(d.getDate())}/${pad(d.getMonth()+1)}`;};
+const daysFrom=iso=>Math.round((dOf(iso)-dOf(TODAY))/864e5);
+
+/* Les personnes qui ont un compte. */
+const TEAM={
+  dg:{name:"Claire Morel",role:"Directrice générale",direction:true},
+  cp:{name:"Lina Haddad",role:"Cheffe de projet",direction:false}
+};
+const me=()=>TEAM[S.role];
+const isDir=()=>me().direction;
+
+const PROJECTS={
+  neons:{title:"Néons",artist:"Mona Lys",kind:"Single",due:"2026-12-05"},
+  ressac:{title:"Ressac",artist:"Ilan",kind:"EP",due:"2027-01-22"},
+  mirage:{title:"Mirage",artist:"Zéphyr Vega",kind:"Single",due:"2027-01-22"},
+  mic:{title:"PDS Mic #12",artist:"Contenu",kind:"Format PDS",due:"2026-11-20"}
+};
+
+/* ---------- État et navigation ---------- */
+let S;
+const PAGES={};      // page key → {render, nav}
+const MODALS={};     // modal key → {render(ctx), save(ctx) → true when done}
+const SEEDS=[];      // each page adds its data to the fresh state
+function fresh(){const s={role:"dg",page:"network",id:null,sub:null,ui:{},modal:null,ctx:{},err:{},flash:null,clock:0,log:[]};SEEDS.forEach(f=>f(s));return s;}
+function go(page,id,sub){S.page=page;S.id=id||null;S.sub=sub||null;S.flash=null;closeModal();render();window.scrollTo({top:0});}
+const ui=(k,v)=>{if(v===undefined)return S.ui[k];S.ui[k]=v;};
+
+/* ---------- Briques ---------- */
+const badge=(tone,label,sm=true)=>`<span class="badge ${sm?"sm ":""}${tone}">${esc(label)}</span>`;
+const btn=(label,act,attrs="",cls="")=>`<button class="btn ${cls}" type="button" data-act="${act}" ${attrs}>${label}</button>`;
+function pageHead({back,title,desc,actions,lead}){
+  return `${back?`<button class="back" type="button" data-act="go" data-p="${back[0]}">${I.back} ${esc(back[1])}</button>`:""}
+  <header class="ph"><div class="who">${lead||""}<div><h1>${title}</h1>${desc?`<p class="desc">${desc}</p>`:""}</div></div>${actions?`<div class="acts">${actions}</div>`:""}</header>`;
+}
+const factLine=list=>`<ul class="factline" aria-label="Faits">${list.filter(Boolean).map(([k,v,cls])=>`<li>${k?`${esc(k)} `:""}<b class="${cls||""}">${v}</b></li>`).join("")}</ul>`;
+function tabs(key,list){const cur=ui(key)||list[0][0];
+  return `<div class="tabs" role="group" aria-label="Onglets">${list.map(([k,l,n])=>`<button type="button" data-act="ui" data-k="${key}" data-v="${k}" aria-pressed="${cur===k}">${esc(l)}${n!==undefined?`<span class="n">(${n})</span>`:""}</button>`).join("")}</div>`;}
+function toolbar(key,placeholder,filters){
+  return `<div class="toolbar" style="--nf:${filters.length}"><label class="search">${I.search}<input type="search" data-search="${key}" aria-label="Rechercher" placeholder="${esc(placeholder)}" value="${esc(ui(key+":q")||"")}"></label>
+  ${filters.map(f=>`<select aria-label="${esc(f.label)}" data-filter="${key}:${f.k}"><option value="">${esc(f.all)}</option>${f.options.map(o=>`<option ${ui(key+":"+f.k)===o?"selected":""}>${esc(o)}</option>`).join("")}</select>`).join("")}</div>`;
+}
+const filterVal=(key,k)=>ui(key+":"+k)||"";
+const matchQ=(key,text)=>{const q=norm(ui(key+":q"));return !q||norm(text).includes(q);};
+function table(heads,rows,empty){
+  return `<div class="tbl"><div class="tw"><table><thead><tr>${heads.map(h=>`<th class="${h.cls||""}">${esc(h.t??h)}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody></table></div>${rows.length?"":`<div class="empty">${empty}</div>`}</div>`;
+}
+function hsection(title,count,rows,action){
+  return `<section class="hs" aria-label="${esc(title)}"><div class="hs-head"><h2>${esc(title)}${count?`<span class="n">${count}</span>`:""}</h2>${action||""}</div><ul class="hl">${rows.join("")}</ul></section>`;
+}
+const hrow=({act,attrs="",lead="",t,c,side="",chev=true})=>`<li><${act?"button":"div"} class="hrow ${act?"":"static"}" ${act?`type="button" data-act="${act}" ${attrs}`:""}>${lead}<span class="grow"><span class="t">${t}</span>${c?`<span class="c">${c}</span>`:""}</span><span class="rside">${side}${act&&chev?I.chev:""}</span></${act?"button":"div"}></li>`;
+function nowCard({label="Maintenant",tone="t-info",badgeText="À vous",extra="",eyebrow,title,why,facts=[],actions="",flash}){
+  return `<section class="now" aria-label="${esc(label)}"><div class="eyebrow">${badge(tone,badgeText,false)}${extra}<span>${eyebrow||""}</span></div>
+    <h2>${title}</h2>${why?`<p class="why">${why}</p>`:""}
+    ${facts.length?`<dl class="facts">${facts.map(([k,v])=>`<div><dt>${esc(k)} :</dt><dd>${v}</dd></div>`).join("")}</dl>`:""}
+    ${flash?`<div class="banner" role="status">${I.check}<span>${flash}</span></div>`:""}
+    ${actions?`<div class="acts-row">${actions}</div>`:""}</section>`;
+}
+const card=(title,desc,acts,inner,count)=>`<section class="sc"><div class="sc-head"><div><h2>${title}${count!==undefined?`<span class="n">${count}</span>`:""}</h2>${desc?`<p>${desc}</p>`:""}</div>${acts?`<div class="acts-row">${acts}</div>`:""}</div>${inner}</section>`;
+const factList=list=>`<dl class="fl">${list.map(([k,v,src])=>`<div><dt>${esc(k)}</dt><dd class="${v?"":"mut"}">${v||"non renseigné"}${src?`<span class="src">${esc(src)}</span>`:""}</dd></div>`).join("")}</dl>`;
+const avatar=(name,cls="")=>`<span class="avatar ${cls}" aria-hidden="true">${esc(initials(name))}</span>`;
+
+/* ---------- Fenêtres ---------- */
+const foot=(label,cancel="Annuler")=>`<div class="dfoot"><button class="btn ghost" type="button" data-act="close">${cancel}</button><button class="btn" type="button" data-act="save">${label}</button></div>`;
+function fld(id,label,input,hint,req){const e=S.err[id];
+  const attr=`id="${id}" ${e?`aria-invalid="true" aria-describedby="e-${id}"`:""}`;
+  return `<div class="field"><label for="${id}">${label}${req?" *":""}</label>${input.replace(/<(input|select|textarea)/,`<$1 ${attr}`)}${hint?`<p class="hint">${hint}</p>`:""}${e?`<p class="err" id="e-${id}">${e}</p>`:""}</div>`;}
+const val=id=>{const el=document.getElementById(id);return el?el.value.trim():"";};
+function open(key,ctx){S.modal=key;S.ctx=ctx||{};S.err={};render();const el=document.querySelector(".dialog input:not([type=radio]),.dialog select,.dialog textarea,.dialog .dfoot .btn:last-child");if(el)el.focus();}
+function closeModal(){S.modal=null;S.ctx={};S.err={};}
+/* « Ce que PDS OS sait envoyer, il l'envoie » (VISION-UX règle 19) : l'e-mail
+   tel qu'il partira, le lien privé dans un bloc fixe. */
+function mailPreview({to,toSrc,subject,attach,message,link}){
+  return `<div class="mail"><div class="mh">À <b>${esc(to)}</b> <span class="src">${esc(toSrc)}</span><br>Objet <b>${esc(subject)}</b>${attach?`<br>Pièce jointe <b>${esc(attach)}</b>`:""}</div>
+  <div class="field" style="padding:12px"><label for="m-msg">Message</label><textarea id="m-msg">${esc(message)}</textarea></div>
+  ${link?`<div class="mlink">${I.link} Lien privé : <code>${esc(link)}</code></div>`:""}</div>`;
+}
+
+let tt;
+function toast(t){const el=document.getElementById("toast");el.textContent=t;el.classList.remove("off");clearTimeout(tt);tt=setTimeout(()=>el.classList.add("off"),3200);}
+function did(text,flash){S.clock++;S.log.push({t:text,by:me().name,at:`11:${pad(20+S.clock)}`});toast(text);S.flash=flash||null;closeModal();}
+
+/* ---------- Coquille ---------- */
+const NAV=[["home",I.home,"Accueil"],["work",I.work,"Travail"],["projects",I.folder,"Projets"],["cal",I.cal,"Calendrier"],["calls",I.phone,"Calls"],["artists",I.mic,"Artistes"],["catalog",I.disc,"Catalogue"],["network",I.nodes,"Réseau"],["contracts",I.hand,"Contrats"],["files",I.file,"Fichiers"],["feedback",I.msgs,"Retours"]];
+function side(){
+  const cur=(PAGES[S.page]||{}).nav||S.page;
+  return `<div><div class="side-top"><span class="brand">PDS</span><button class="iconbtn" type="button" aria-label="Réduire la navigation">${I.sidebar}</button></div>
+  <ul class="nav">${NAV.map(([k,ic,l])=>{const live=!!PAGES[k];return `<li><a href="#" ${live?`data-act="go" data-p="${k}"`:'aria-disabled="true"'} ${cur===k?'aria-current="page"':""}>${ic}${l}</a></li>`;}).join("")}</ul></div>
+  <div class="side-foot"><span class="me"><span class="av">${initials(me().name)}</span><span>${esc(me().name)}</span></span><button class="iconbtn" type="button" aria-label="Notifications">${I.bell}</button></div>`;
+}
+function render(){
+  document.getElementById("side").innerHTML=side();
+  const p=PAGES[S.page];
+  document.getElementById("app").innerHTML=`<div class="page">${p.render()}</div>`;
+  const m=S.modal&&MODALS[S.modal];
+  document.getElementById("modal").innerHTML=m?`<div class="scrim" data-act="scrim"><div class="dialog" role="dialog" aria-modal="true">${m.render(S.ctx)}</div></div>`:"";
+  document.getElementById("roleSel").innerHTML=Object.keys(TEAM).map(k=>`<option value="${k}" ${k===S.role?"selected":""}>${esc(TEAM[k].name)} · ${esc(TEAM[k].role)}</option>`).join("");
+  const pageSel=document.getElementById("pageSel");pageSel.value=(PAGES[S.page]||{}).nav||S.page;
+}
+
+/* ---------- Gestes ---------- */
+const ACTS={};   // act → handler(el, event)
+ACTS.go=el=>go(el.dataset.p,el.dataset.id,el.dataset.sub);
+ACTS.ui=el=>{ui(el.dataset.k,el.dataset.v);render();};
+ACTS.close=()=>{closeModal();render();};
+ACTS.scrim=(el,ev)=>{if(ev.target!==el)return;closeModal();render();};
+/* What was typed in a dialog stays when it is redrawn (a refused field, a
+   switch of type). */
+function keepTyped(fn){
+  const typed=[...document.querySelectorAll(".dialog input,.dialog select,.dialog textarea")].map(e=>[e.id,e.type==="checkbox"||e.type==="radio"?e.checked:e.multiple?[...e.selectedOptions].map(o=>o.value):e.value]);
+  fn();render();
+  if(S.modal)typed.forEach(([id,v])=>{const e=id&&document.getElementById(id);if(!e)return;if(e.type==="checkbox"||e.type==="radio")return;if(e.multiple)[...e.options].forEach(o=>o.selected=v.includes(o.value));else e.value=v;});
+}
+ACTS.save=()=>{
+  keepTyped(()=>{S.err={};MODALS[S.modal].save(S.ctx);});
+  const e=document.querySelector('.dialog [aria-invalid="true"]');if(e)e.focus();
+};
+ACTS.open=el=>open(el.dataset.m,{...el.dataset});
+ACTS.noop=()=>{};
+document.addEventListener("click",ev=>{
+  const t=ev.target.closest("[data-act]");if(!t)return;
+  if(t.tagName==="A")ev.preventDefault();
+  const h=ACTS[t.dataset.act];if(h)h(t,ev);
+});
+document.addEventListener("input",ev=>{
+  const s=ev.target.closest("[data-search]");if(!s)return;
+  ui(s.dataset.search+":q",s.value);const pos=s.selectionStart;render();
+  const again=document.querySelector(`[data-search="${s.dataset.search}"]`);if(again){again.focus();again.setSelectionRange(pos,pos);}
+});
+document.addEventListener("change",ev=>{
+  const f=ev.target.closest("[data-filter]");if(f){ui(f.dataset.filter,f.value);render();}
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&S.modal){closeModal();render();}});
+/* ================= RÉSEAU ================= */
+const ROLES_PERSON=["Artiste","Beatmaker","Musicien·ne","Auteur·rice-compositeur·rice","Ingé son","Réalisateur·rice","Directeur·rice artistique","Vidéaste","Photographe","Graphiste","Avocat·e","Journaliste","Influenceur·se","Management","Autre"];
+const ROLES_ORG=["Label","Studio","Agence","Société de production","Éditeur","Distributeur","Média","Management","Entreprise","Autre"];
+const RELATIONS=["Client","Prestataire","Partenaire","Fournisseur"];
+const DOMAINS={"Musique":["Artiste","Beatmaker","Musicien·ne","Auteur·rice-compositeur·rice","Ingé son","Réalisateur·rice","Studio","Label","Éditeur","Distributeur"],"Image & vidéo":["Directeur·rice artistique","Vidéaste","Photographe","Graphiste","Société de production"],"Presse & influence":["Média","Journaliste","Influenceur·se","Agence"],"Affaires & conseil":["Management","Avocat·e","Entreprise"],"Autres":["Autre"]};
+
+SEEDS.push(s=>{
+  s.contacts=[
+    {id:"sami",kind:"person",name:"Sami Kader",roles:["Auteur·rice-compositeur·rice"],relations:["Partenaire"],email:"sami.kader@gmail.com",phone:"06 41 22 73 18",city:"Lyon",notes:"Co-auteur de Néons et de Ressac. Préfère les échanges par e-mail.",
+      projects:[["neons","Co-auteur","Juridique › Fiches et contrats"],["ressac","Co-auteur","Juridique › Fiches et contrats"]],credits:[["Néons","Compositeur·rice, Auteur·rice (paroles)"]],
+      fiches:[["neons","returned","2026-10-22"],["ressac","sent","2026-10-24"]]},
+    {id:"karim",kind:"person",name:"Karim Haddou",roles:["Ingé son"],relations:["Prestataire"],org:"ressac-studio",email:"karim@studioressac.fr",phone:"06 12 88 40 05",city:"Paris",notes:"Mix et mastering. Tarif connu : 450 € HT par titre (mix).",
+      projects:[["neons","Mixeur","Master › Mixage"],["ressac","Mixeur","Master › Mixage"],["mirage","Ingé son","Sessions d'enregistrement"]],credits:[["Mirage","Ingé son (mixage)"]],fiches:[]},
+    {id:"ressac-studio",kind:"organization",name:"Studio Ressac",roles:["Studio","Société de production"],relations:["Prestataire"],email:"contact@studioressac.fr",phone:"01 43 55 20 10",city:"Paris",website:"https://studioressac.fr",notes:"Tournages et studio d'enregistrement à Pantin.",
+      projects:[["mic","Société de production","Marketing › Production › Épisode 12"]],credits:[],fiches:[]},
+    {id:"ines",kind:"person",name:"Inès Morel",roles:["Avocat·e"],relations:["Prestataire"],email:"i.morel@avocats-morel.fr",phone:"01 42 60 11 90",city:"Paris",notes:"Relit les contrats d'artiste et les licences.",projects:[],credits:[],fiches:[]},
+    {id:"editions",kind:"organization",name:"PDS Éditions",roles:["Éditeur"],relations:["Partenaire"],email:"editions@pds.fr",city:"Paris",projects:[["neons","Éditeur","Juridique › Répartitions"]],credits:[],fiches:[]},
+    {id:"orchard",kind:"organization",name:"The Orchard",roles:["Distributeur"],relations:["Partenaire"],email:"label-care@theorchard.com",city:"Paris",projects:[["neons","Distributeur","Distribution"]],credits:[],fiches:[]},
+    {id:"julie",kind:"person",name:"Julie Caron",roles:["Influenceur·se"],relations:["Prestataire"],tiktok:"@juliecaron",email:"julie@satellite-agency.fr",city:"Marseille",org:"satellite",
+      projects:[["neons","Créatrice","Marketing › Activations"]],credits:[],fiches:[],
+      campaigns:[["Activation TikTok de Néons","Néons · Proposé par une agence","Retenue"]],
+      readings:[["Abonnés","182 k","TikTok","2026-10-12","Agence",""],["Tarif connu","1 200 € HT","TikTok","2026-10-12","Agence","Pour une vidéo"]]},
+    {id:"satellite",kind:"organization",name:"Agence Satellite",roles:["Agence"],relations:["Partenaire"],email:"hello@satellite-agency.fr",city:"Paris",projects:[["neons","Agence d'influence","Marketing › Activations"]],credits:[],fiches:[]},
+    {id:"lumen",kind:"person",name:"DJ Lumen",roles:["Artiste","Beatmaker"],relations:[],tiktok:"@djlumen",city:"Lille",notes:"Repéré sur TikTok le 14/10 (Labo).",projects:[],credits:[],fiches:[]},
+    {id:"lea",kind:"person",name:"Léa Fontaine",roles:["Journaliste"],relations:["Partenaire"],org:"tsugi",email:"lea.fontaine@tsugi.fr",city:"Paris",projects:[],credits:[],fiches:[]},
+    {id:"tsugi",kind:"organization",name:"Tsugi",roles:["Média"],relations:["Partenaire"],email:"redaction@tsugi.fr",city:"Paris",projects:[],credits:[],fiches:[]}
+  ];
+  /* Ce qu'on attend de personnes du Réseau par leur lien privé (tiré des
+     parcours des projets) ; les signatures de contrat viennent des contrats. */
+  s.waits=[
+    {id:"w-karim-mix",who:"karim",todo:"Déposer le Mix final",project:"neons",place:"Master › Mixage",link:"pds.app/m/7Kq2…",sentOn:"2026-10-21",sentBy:"Lina Haddad",openedOn:"2026-10-28",due:"2026-11-17",relances:[]},
+    {id:"w-studio-devis",who:"ressac-studio",todo:"Déposer le devis du tournage",project:"mic",place:"Marketing › Production › Épisode 12",link:"pds.app/p/R4m9…",sentOn:"2026-10-23",sentBy:"Lina Haddad",openedOn:null,due:"2026-10-28",relances:[]},
+    {id:"w-sami-fiche",who:"sami",todo:"Remplir sa fiche de renseignements",project:"ressac",place:"Juridique › Fiches et contrats",link:"pds.app/f/c81B…",sentOn:"2026-10-24",sentBy:"Lina Haddad",openedOn:null,due:"2026-11-02",relances:[]},
+    {id:"w-julie-pub",who:"julie",todo:"Confirmer la publication de sa vidéo",project:"neons",place:"Marketing › Activations",link:"pds.app/a/Zt0p…",sentOn:"2026-10-28",sentBy:"Lina Haddad",openedOn:"2026-10-28",due:"2026-11-04",relances:[]}
+  ];
+});
+const contact=id=>S.contacts.find(c=>c.id===id);
+const contactLabel=c=>c.kind==="person"?"Personne":"Organisation";
+/* Every awaited move of a contact: its private link, or a contract it has to sign. */
+function allWaits(){
+  const fromContracts=(S.contracts||[]).filter(k=>k.state==="sent").flatMap(k=>k.parties.filter(p=>p.signs).map(p=>({id:"w-"+k.id+"-"+p.who,who:p.who,todo:`Signer et renvoyer le ${lowerFirst(k.kindLabel)}`,project:k.project,place:"Contrats",link:k.link,sentOn:k.sentOn,sentBy:k.sentBy,openedOn:k.openedOn,due:k.due,relances:k.relances||[],contract:k.id})));
+  return [...S.waits,...fromContracts].sort((a,b)=>(a.due||"9999").localeCompare(b.due||"9999"));
+}
+function waitLine(w,withName=true){
+  const c=contact(w.who),p=PROJECTS[w.project];
+  const late=w.due&&daysFrom(w.due)<0;
+  const last=w.relances[w.relances.length-1];
+  return {
+    t:`${withName?`En attente de <b>${esc(c.name)}</b> (lien privé) : `:""}${esc(withName?lowerFirst(w.todo):w.todo)}`,
+    c:[`${esc(p.title)} · ${esc(w.place)}`,`envoyé le ${ddmm(w.sentOn)}${w.openedOn?`, ouvert le ${ddmm(w.openedOn)}`:", pas encore ouvert"}`,last?`relancé le ${ddmm(last.on)}`:null,w.due?`${late?"attendu le":"pour le"} ${fmtDay(w.due)}`:null].filter(Boolean).join(" · "),
+    late
+  };
+}
+function waitRow(w,withName=true){
+  const l=waitLine(w,withName);
+  return hrow({lead:withName?avatar(contact(w.who).name):"",t:l.t,c:l.c,
+    side:`${l.late?badge("t-danger","En retard"):""}<button class="btn outline sm" type="button" data-act="open" data-m="relance" data-w="${w.id}">Relancer</button>${withName?`<button class="btn ghost sm" type="button" data-act="go" data-p="contact" data-id="${w.who}">Voir</button>`:""}`});
+}
+MODALS.relance={
+  render(ctx){const w=allWaits().find(x=>x.id===ctx.w),c=contact(w.who),p=PROJECTS[w.project];
+    return `<h2>Relancer ${esc(c.name)}</h2><p class="why">PDS OS envoie ce rappel depuis l'adresse de PO ; la relance reste dans l'historique de ${w.contract?"du contrat":"l'étape"}.</p>
+    ${mailPreview({to:c.email||"adresse manquante",toSrc:"Fiche Réseau",subject:`Rappel : ${lowerFirst(w.todo)} — ${p.title}`,attach:w.contract?`${S.contracts.find(k=>k.id===w.contract).title} · v2.pdf`:null,
+      message:`Bonjour ${c.name.split(" ")[0]},\n\nPetit rappel : ${lowerFirst(w.todo)} pour ${p.title}${w.due?`, attendu le ${fmtDay(w.due)}`:""}. Tout se fait depuis votre lien, sans compte.\n\nMerci !\n${me().name} pour PDS`,link:w.link})}
+    ${foot("Envoyer la relance")}`;},
+  save(ctx){const w=allWaits().find(x=>x.id===ctx.w);
+    const target=w.contract?S.contracts.find(k=>k.id===w.contract):S.waits.find(x=>x.id===w.id);
+    target.relances=[...(target.relances||[]),{on:TODAY,by:me().name}];
+    did(`Relance envoyée à ${contact(w.who).name}`);return true;}
+};
+
+PAGES.network={nav:"network",render(){
+  const q="net",tab=ui("netTab")||"all";
+  const scouted=c=>c.kind==="person"&&c.roles.some(r=>r==="Artiste"||r==="Beatmaker")&&!c.artistId;
+  const inTab=c=>tab==="all"||(tab==="person"&&c.kind==="person")||(tab==="org"&&c.kind==="organization")||(tab==="scouted"&&scouted(c));
+  const dom=filterVal(q,"dom"),rel=filterVal(q,"rel"),city=filterVal(q,"city");
+  const list=S.contacts.filter(inTab).filter(c=>(!dom||c.roles.some(r=>DOMAINS[dom].includes(r)))&&(!rel||c.relations.includes(rel.replace(/s$/,"")))&&(!city||c.city===city)&&matchQ(q,[c.name,c.roles.join(" "),c.city,c.email,c.tiktok,c.org&&contact(c.org).name].join(" ")));
+  const rows=list.map(c=>{const projs=[...new Set(c.projects.map(p=>PROJECTS[p[0]].title))];
+    return `<tr class="go" data-act="go" data-p="contact" data-id="${c.id}"><td><span class="cellrow"><span class="avatar" aria-hidden="true">${c.kind==="person"?I.person:I.org}</span><span><span class="name">${esc(c.name)}</span><span class="sub">${contactLabel(c)}${c.org?` · chez ${esc(contact(c.org).name)}`:""}</span></span></span></td>
+      <td class="hide-m">${esc(c.roles.join(", "))||"—"}${c.relations.length?`<span class="sub">${esc(c.relations.join(", "))}</span>`:""}</td>
+      <td>${projs.length?esc(projs.join(", ")):`<span class="mut">—</span>`}</td>
+      <td class="hide-m">${c.email?esc(c.email):c.phone?esc(c.phone):c.tiktok?esc(c.tiktok):"—"}${c.email&&c.phone?`<span class="sub">${esc(c.phone)}</span>`:""}</td>
+      <td class="hide-m">${esc(c.city||"—")}</td></tr>`;});
+  const count=k=>S.contacts.filter(c=>k==="all"||(k==="person"&&c.kind==="person")||(k==="org"&&c.kind==="organization")||(k==="scouted"&&scouted(c))).length;
+  return `${pageHead({title:"Réseau",desc:"Les personnes et les organisations avec qui PDS travaille : artistes, techniciens, labels, studios, médias, prestataires…",actions:btn(`${I.plus} Nouveau contact`,"open",'data-m="newContact"',"lg")})}
+  <div class="colstack" style="gap:12px">
+  ${tabs("netTab",[["all","Tous",count("all")],["person","Personnes",count("person")],["org","Organisations",count("org")],["scouted","Artistes repérés",count("scouted")]])}
+  ${toolbar(q,"Nom, métier, organisation, ville…",[{k:"dom",label:"Métier",all:"Tous les métiers",options:Object.keys(DOMAINS)},{k:"rel",label:"Type de relation",all:"Toutes les relations",options:["Clients","Prestataires","Partenaires","Fournisseurs"]},{k:"city",label:"Ville",all:"Toutes les villes",options:[...new Set(S.contacts.map(c=>c.city).filter(Boolean))].sort()}])}
+  ${table([{t:"Nom"},{t:"Métier ou activité",cls:"hide-m"},{t:"Avec PDS"},{t:"Coordonnées",cls:"hide-m"},{t:"Ville",cls:"hide-m"}],rows,ui(q+":q")?`<b>Personne ne correspond à « ${esc(ui(q+":q"))} » dans le réseau.</b>`:`<b>Aucun contact pour ce filtre</b>Changez de métier ou de type de relation.`)}
+  </div>`;
+}};
+
+const FICHE_STATE={returned:["t-ok","Rendue"],sent:["t-act","Envoyée, pas encore rendue"]};
+PAGES.contact={nav:"network",render(){
+  const c=contact(S.id),person=c.kind==="person";
+  const waits=allWaits().filter(w=>w.who===c.id);
+  const contracts=(S.contracts||[]).filter(k=>k.parties.some(p=>p.who===c.id));
+  const calls=(S.calls||[]).filter(k=>k.people&&k.people.includes(c.id));
+  const people=S.contacts.filter(x=>x.org===c.id);
+  const first=c.name.split(" ")[0];
+  const main=[
+    waits.length?hsection(`Ce que vous attendez de ${c.name}`,waits.length,waits.map(w=>waitRow(w,false))):"",
+    card("Dans les projets","Ce que cette personne fait dans chaque projet, et par où elle agit.","",
+      c.projects.length?`<ul class="rows">${c.projects.map(([p,role,place])=>`<li><span class="grow"><span class="t"><b>${esc(PROJECTS[p].title)}</b> · ${esc(role)}</span><span class="c">${esc(place)}${person?" · par son lien privé":""}</span></span>${badge("t-neutral",PROJECTS[p].artist)}</li>`).join("")}</ul>`:`<p class="why">Dans aucun projet pour l'instant.</p>`,c.projects.length),
+    contracts.length||person||c.kind==="organization"?card("Contrats","Les contrats où ce contact est partie, parmi ceux que vous pouvez lire.","",
+      contracts.length?`<ul class="rows">${contracts.map(k=>`<li><span class="grow"><span class="t"><button class="lnk" type="button" data-act="go" data-p="contract" data-id="${k.id}">${esc(k.title)}</button></span><span class="c">${esc(k.parties.find(p=>p.who===c.id).role)}</span></span>${contractBadge(k)}</li>`).join("")}</ul>`:`<p class="why">Aucun contrat visible avec ce contact.</p>`,contracts.length):"",
+    c.credits.length?card("Crédits","Les titres où son nom est crédité.","",`<ul class="rows">${c.credits.map(([t,r])=>`<li><span class="grow"><span class="t"><b>${esc(t)}</b></span><span class="c">${esc(r)}</span></span></li>`).join("")}</ul>`,c.credits.length):"",
+    calls.length?card("Calls","Les échanges où ce contact était invité.","",`<ul class="rows">${calls.map(k=>`<li><span class="grow"><span class="t"><button class="lnk" type="button" data-act="go" data-p="call" data-id="${k.id}">${esc(k.title)}</button></span><span class="c">${esc(PROJECTS[k.project]?PROJECTS[k.project].title:"Réunion interne")} · ${fmtDay(k.day)}</span></span>${callBadge(k)}</li>`).join("")}</ul>`,calls.length):"",
+    !person?card("Personnes associées","Les personnes du réseau qui y travaillent.","",people.length?`<ul class="rows">${people.map(x=>`<li><span class="grow"><span class="t"><button class="lnk" type="button" data-act="go" data-p="contact" data-id="${x.id}">${esc(x.name)}</button></span><span class="c">${esc(x.roles.join(", "))}</span></span></li>`).join("")}</ul>`:`<p class="why">Aucune personne du réseau rattachée à cette organisation.</p>`,people.length):"",
+    c.campaigns?card("Campagnes","Marketing › Activations.","",`<ul class="rows">${c.campaigns.map(([t,s,st])=>`<li><span class="grow"><span class="t"><b>${esc(t)}</b></span><span class="c">${esc(s)}</span></span>${badge("t-ok",st)}</li>`).join("")}</ul>`,c.campaigns.length):"",
+    c.readings?card("Relevés datés","Chaque relevé garde sa date et sa source ; un nouveau n'écrase jamais l'ancien. Une performance passée ne garantit rien.",btn("Noter un relevé","open",`data-m="reading" data-c="${c.id}"`,"outline sm"),
+      `<ul class="rows">${c.readings.slice().reverse().map(([k,v,pl,d,src,note])=>`<li><span class="grow"><span class="t">${esc(k)} · <b>${esc(v)}</b></span><span class="c">${esc(pl)} · observé le ${fmtDay(d)} · source : ${esc(src)}${note?` · ${esc(note)}`:""}</span></span></li>`).join("")}</ul>`,c.readings.length):""
+  ];
+  const sideCards=[
+    card("Coordonnées","","",factList([["E-mail",c.email&&esc(c.email)],["Téléphone",c.phone&&esc(c.phone)],["Site web",c.website&&esc(c.website)],["Ville",c.city&&esc(c.city)],["Réseaux",c.tiktok&&`TikTok · ${esc(c.tiktok)}`],...(person?[["Organisation associée",c.org&&`<button class="lnk" type="button" data-act="go" data-p="contact" data-id="${c.org}">${esc(contact(c.org).name)}</button>`]]:[]),["Notes",c.notes&&esc(c.notes)]])),
+    person&&c.fiches.length?card("Fiche de renseignements","Ses réponses complètent cette fiche : on ne lui redemande que ce qui manque.","",
+      `<ul class="rows">${c.fiches.map(([p,st,d])=>`<li><span class="grow"><span class="t"><b>${esc(PROJECTS[p].title)}</b></span><span class="c">${st==="returned"?`Rendue le ${fmtDay(d)}`:`Envoyée le ${fmtDay(d)}`}</span></span>${badge(FICHE_STATE[st][0],FICHE_STATE[st][1])}</li>`).join("")}</ul>`):""
+  ];
+  return `${pageHead({back:["network","Tout le réseau"],lead:`<span class="avatar lg" aria-hidden="true">${person?esc(initials(c.name)):I.org}</span>`,title:esc(c.name),desc:`${contactLabel(c)}${c.roles.length?" · "+esc(c.roles.join(", ")):""}${c.org?` · chez ${esc(contact(c.org).name)}`:""}`,
+    actions:`${btn("Modifier","open",`data-m="newContact" data-edit="${c.id}"`,"outline lg")}${btn(I.dots,"noop",'aria-label="Plus d\'actions"',"outline icon lg")}`})}
+  ${S.flash?`<div class="banner" role="status">${I.check}<span>${S.flash}</span></div>`:""}
+  <div class="cols"><div class="colstack">${main.filter(Boolean).join("")}</div><div class="colstack">${sideCards.filter(Boolean).join("")}</div></div>`;
+}};
+
+MODALS.newContact={
+  render(ctx){const c=ctx.edit?contact(ctx.edit):null,kind=ctx.kind||(c?c.kind:"person"),roles=kind==="person"?ROLES_PERSON:ROLES_ORG;
+    const dup=ctx.dupName;
+    return `<h2>${c?"Modifier le contact":"Nouveau contact"}</h2><p class="why">${c?"Rôles, coordonnées et notes.":"Une personne ou une organisation : elle sera partagée avec toute l'équipe."}</p>
+    <div class="field"><span class="lbl">Type *</span><div class="seg" role="group">${[["person","Personne"],["organization","Organisation"]].map(([k,l])=>`<button type="button" data-act="ctxset" data-k="kind" data-v="${k}" aria-pressed="${kind===k}">${l}</button>`).join("")}</div></div>
+    ${fld("n-name",kind==="person"?"Nom ou nom professionnel":"Nom",`<input value="${esc(c?c.name:"")}" placeholder="${kind==="person"?"Ex. Inès Morel, ou DJ Lumen":"Ex. Studio Lumière"}">`,kind==="person"?"Le nom sous lequel la personne travaille. Ses nom et prénom civils ne sont demandés que pour un contrat ou une fiche de renseignements.":"",true)}
+    ${dup?`<div class="callout warn">Un contact du Réseau porte déjà ce nom. <button class="lnk" type="button" data-act="go" data-p="contact" data-id="${dup}">Ouvrir la fiche</button> pour le réutiliser, ou continuez si c'est quelqu'un d'autre.</div>`:""}
+    ${fld("n-roles",kind==="person"?"Métiers":"Activités",`<select multiple size="5">${roles.map(r=>`<option ${c&&c.roles.includes(r)?"selected":""}>${r}</option>`).join("")}</select>`,"")}
+    ${fld("n-rel","Type de relation",`<select multiple size="4">${RELATIONS.map(r=>`<option ${c&&c.relations.includes(r)?"selected":""}>${r}</option>`).join("")}</select>`,"Comment PDS travaille avec ce contact.")}
+    ${kind==="person"?fld("n-org","Organisation associée",`<select><option value="">Aucune</option>${S.contacts.filter(x=>x.kind==="organization").map(o=>`<option value="${o.id}" ${c&&c.org===o.id?"selected":""}>${esc(o.name)}</option>`).join("")}</select>`,""):""}
+    ${fld("n-mail","E-mail",`<input type="email" value="${esc(c&&c.email||"")}">`,"")}
+    ${fld("n-phone","Téléphone",`<input value="${esc(c&&c.phone||"")}">`,"")}
+    ${fld("n-city","Ville",`<input value="${esc(c&&c.city||"")}">`,"")}
+    ${fld("n-notes","Notes",`<textarea placeholder="Tarifs, disponibilités, dernier projet ensemble…">${esc(c&&c.notes||"")}</textarea>`,"")}
+    ${foot(c?"Enregistrer":"Ajouter au réseau")}`;},
+  save(ctx){const name=val("n-name"),mail=val("n-mail");
+    if(!name)S.err["n-name"]="Indiquez un nom.";
+    if(mail&&!/^\S+@\S+\.\S+$/.test(mail))S.err["n-mail"]="Adresse e-mail invalide.";
+    if(Object.keys(S.err).length)return false;
+    const dup=S.contacts.find(x=>norm(x.name)===norm(name)&&x.id!==ctx.edit);
+    if(dup&&ctx.dupName!==dup.id){ctx.dupName=dup.id;return false;}
+    const sel=id=>[...document.getElementById(id).selectedOptions].map(o=>o.value);
+    const kind=ctx.kind||(ctx.edit?contact(ctx.edit).kind:"person");
+    const data={kind,name,roles:sel("n-roles"),relations:sel("n-rel"),org:kind==="person"?val("n-org")||null:null,email:mail,phone:val("n-phone"),city:val("n-city"),notes:val("n-notes")};
+    if(ctx.edit){Object.assign(contact(ctx.edit),data);did("Contact enregistré");}
+    else{const id="c"+Date.now();S.contacts.push({id,...data,projects:[],credits:[],fiches:[]});did(`${name} ajouté au réseau`);S.page="contact";S.id=id;}
+    return true;}
+};
+ACTS.ctxset=el=>keepTyped(()=>{S.ctx[el.dataset.k]=el.dataset.v;});
+MODALS.reading={
+  render(){return `<h2>Noter un relevé</h2><p class="why">Il garde sa date et sa source ; un relevé plus récent n'efface jamais celui-ci.</p>
+    ${fld("r-k","Relevé",`<select><option>Abonnés</option><option>Taux d'engagement</option><option>Tarif connu</option><option>Catégorie</option></select>`,"",true)}
+    ${fld("r-v","Valeur",`<input placeholder="Ex. 190 k">`,"",true)}
+    ${fld("r-p","Plateforme",`<select><option>TikTok</option><option>Instagram</option><option>YouTube</option></select>`,"",true)}
+    ${fld("r-d","Observé le",`<input type="date" value="${TODAY}">`,"Aujourd'hui ou avant.",true)}
+    ${fld("r-s","Source",`<select><option>Agence</option><option>Le créateur</option><option>Relevé interne</option><option>Plateforme</option><option>Vérification indépendante</option></select>`,"",true)}
+    ${fld("r-n","Note",`<input>`,"")}${foot("Noter le relevé")}`;},
+  save(ctx){const v=val("r-v"),d=val("r-d");
+    if(!v)S.err["r-v"]="Indiquez la valeur relevée.";
+    if(!d||d>TODAY)S.err["r-d"]="La date doit être aujourd'hui ou avant.";
+    if(Object.keys(S.err).length)return false;
+    contact(ctx.c).readings.push([val("r-k"),v,val("r-p"),d,val("r-s"),val("r-n")]);did("Relevé noté");return true;}
+};
+/* ================= CONTRATS ================= */
+const C_STATES={draft:["En préparation","t-neutral"],in_review:["À valider","t-act"],approved:["Validé, à signer","t-info"],sent:["Envoyé pour signature","t-info"],returned:["Signé par la partie, à signer pour PDS","t-warn"],signed:["Signé","t-ok"],terminated:["Résilié","t-neutral"]};
+const C_STEP={draft:"Le responsable prépare le contrat, puis le soumet à la direction.",in_review:"La direction relit le contrat : elle le valide ou demande des modifications.",approved:"Validé par la direction : PDS OS l'envoie à la partie qui signe, avec son lien privé.",sent:"Envoyé pour signature : il revient signé par le lien privé de la partie.",returned:"Revenu signé : la direction signe pour PDS, et le contrat est conclu.",signed:"Signé. Il pourra être résilié s'il prend fin avant son terme.",terminated:"Résilié : le contrat est figé."};
+const C_TYPES=["Contrat d'artiste","Licence","Distribution","Édition","Coproduction","Droit à l'image","Prestation","Partenariat","Autre"];
+const contractBadge=k=>badge(C_STATES[k.state][1],C_STATES[k.state][0]);
+
+SEEDS.push(s=>{
+  s.contacts.push({id:"monalys",kind:"person",name:"Mona Lys",roles:["Artiste"],relations:["Client"],artistId:"monalys",email:"management@monalys.fr",city:"Paris",projects:[["neons","Artiste","Tout le projet"]],credits:[["Néons","Interprète principale"]],fiches:[["neons","returned","2026-10-19"]]});
+  const J=(t,by,on)=>({t,by,on});
+  s.contracts=[
+    {id:"k1",title:"Contrat de co-édition — Sami Kader",kindLabel:"Contrat de co-édition",type:"Édition",project:"neons",artist:"Mona Lys",owner:"Lina Haddad",state:"in_review",due:"2026-10-28",
+      parties:[{who:"sami",role:"Co-auteur",signs:true},{who:"editions",role:"Éditeur"}],origin:"Contrat préparé dans le Juridique du projet « Néons ».",
+      doc:{template:"Contrat de co-édition",tv:2,version:2,changed:"Part de composition 50 % → 40 % (Lina Haddad, 23/10)",
+        values:[["Nom civil","Sami Kader","Fiche de renseignements · 22/10"],["Adresse postale","14 rue des Capucins, 69001 Lyon","Fiche de renseignements · 22/10"],["Numéro IPI / COAD","00731245562","Fiche de renseignements · 22/10"],["Titres concernés","Néons","Crédits des titres"],["Part de composition","40 %","Répartitions du Juridique · confirmée par Lina Haddad"],["Nom de la structure","PDS Éditions","Structure"]]},
+      link:"pds.app/f/c81B…",journal:[J("Contrats nécessaires confirmés","Claire Morel","2026-10-20"),J("Contrat généré depuis le modèle v2","Lina Haddad","2026-10-22"),J("Clause modifiée : part de composition","Lina Haddad","2026-10-23"),J("Envoyé en validation","Lina Haddad","2026-10-27")]},
+    {id:"k2",title:"Contrat de prestation — Karim Haddou (mix de Néons)",kindLabel:"Contrat de prestation",type:"Prestation",project:"neons",artist:"Mona Lys",owner:"Lina Haddad",state:"sent",due:"2026-11-05",
+      parties:[{who:"karim",role:"Prestataire",signs:true}],origin:"Contrat préparé dans le Juridique du projet « Néons ».",
+      doc:{template:"Contrat de prestation technique",tv:1,version:1,values:[["Nom civil","Karim Haddou","Réseau"],["Prestation","Mix de Néons, deux allers-retours","Brief Mix et Master"],["Rémunération","450 € HT","Réseau · tarif connu"],["Titres concernés","Néons","Crédits des titres"]]},
+      link:"pds.app/m/7Kq2…",sentOn:"2026-10-26",sentBy:"Lina Haddad",openedOn:null,relances:[],review:{by:"Claire Morel",on:"2026-10-25"},
+      journal:[J("Contrat généré depuis le modèle v1","Lina Haddad","2026-10-21"),J("Envoyé en validation","Lina Haddad","2026-10-22"),J("Approuvé","Claire Morel","2026-10-25"),J("Envoyé en signature par e-mail à karim@studioressac.fr","Lina Haddad","2026-10-26")]},
+    {id:"k3",title:"Licence de synchronisation — clip de Néons",kindLabel:"Licence de synchronisation",type:"Licence",project:"neons",artist:"Mona Lys",owner:"Lina Haddad",state:"draft",due:"2026-11-12",
+      parties:[{who:"ressac-studio",role:"Licencié",signs:true}],review:{by:"Claire Morel",on:"2026-10-27",comment:"Préciser la durée de la licence (5 ans ?) et les territoires."},
+      doc:{template:"Licence de synchronisation",tv:1,version:1,values:[["Raison sociale","Studio Ressac SAS","Réseau"],["Titres concernés","Néons","Crédits des titres"],["Durée","—","à décider"]]},
+      link:null,journal:[J("Contrat généré depuis le modèle v1","Lina Haddad","2026-10-24"),J("Envoyé en validation","Lina Haddad","2026-10-26"),J("Modifications demandées","Claire Morel","2026-10-27")]},
+    {id:"k6",title:"Contrat de prestation — Studio Ressac (tournage PDS Mic #12)",kindLabel:"Contrat de prestation",type:"Prestation",project:"mic",artist:null,owner:"Lina Haddad",state:"approved",due:"2026-11-02",
+      parties:[{who:"ressac-studio",role:"Prestataire",signs:true}],review:{by:"Claire Morel",on:"2026-10-28"},
+      doc:{template:"Contrat de prestation technique",tv:1,version:1,values:[["Raison sociale","Studio Ressac SAS","Réseau"],["Prestation","Tournage de l'épisode 12, une journée","Devis validé · 27/10"],["Rémunération","3 800 € HT","Devis validé · 27/10"]]},
+      link:"pds.app/p/R4m9…",journal:[J("Contrat généré depuis le modèle v1","Lina Haddad","2026-10-27"),J("Envoyé en validation","Lina Haddad","2026-10-27"),J("Approuvé","Claire Morel","2026-10-28")]},
+    {id:"k4",title:"Contrat d'artiste — Mona Lys",kindLabel:"Contrat d'artiste",type:"Contrat d'artiste",project:null,artist:"Mona Lys",owner:"Claire Morel",state:"signed",due:null,start:"2025-03-14",end:"2028-03-13",signedOn:"2025-03-14",
+      parties:[{who:"monalys",role:"Artiste",signs:true}],files:["Contrat d'artiste — Mona Lys (signé).pdf","Preuve de signature.pdf"],journal:[J("Signature enregistrée","Claire Morel","2025-03-14")]},
+    {id:"k5",title:"Contrat de distribution — The Orchard",kindLabel:"Contrat de distribution",type:"Distribution",project:null,artist:null,owner:"Claire Morel",state:"signed",due:"2029-01-09",start:"2026-01-10",end:"2029-01-09",signedOn:"2026-01-10",
+      parties:[{who:"orchard",role:"Distributeur",signs:true}],files:["Distribution agreement — The Orchard (signed).pdf"],journal:[J("Signature enregistrée","Claire Morel","2026-01-10")]},
+    {id:"k7",title:"Cession de droit à l'image — tournage 2025",kindLabel:"Cession de droit à l'image",type:"Droit à l'image",project:null,artist:null,owner:"Lina Haddad",state:"terminated",due:null,start:"2025-06-01",end:"2025-12-31",signedOn:"2025-06-02",
+      parties:[{who:"ressac-studio",role:"Cédant"}],files:["Cession droit à l'image (signé).pdf"],journal:[J("Signature enregistrée","Lina Haddad","2025-06-02"),J("Résilié","Claire Morel","2025-12-15")]}
+  ];
+  s.templates=[
+    {name:"Contrat de co-édition",v:2,type:"Édition",for:"Co-auteur, Compositeur",state:"Validé",by:"Claire Morel",on:"2026-10-12"},
+    {name:"Contrat de prestation technique",v:1,type:"Prestation",for:"Ingé son, Société de production",state:"Validé",by:"Claire Morel",on:"2026-10-08"},
+    {name:"Licence de synchronisation",v:1,type:"Licence",for:"Licencié",state:"Validé",by:"Claire Morel",on:"2026-10-20"},
+    {name:"Cession de droit à l'image",v:2,type:"Droit à l'image",for:"Cédant",state:"À valider",by:null,on:null},
+    {name:"Contrat d'artiste (ancien)",v:1,type:"Contrat d'artiste",for:"Artiste",state:"Retiré",by:null,on:null}
+  ];
+});
+const ctr=id=>S.contracts.find(k=>k.id===id);
+const signer=k=>{const p=k.parties.find(x=>x.signs);return p?contact(p.who):null;};
+const partiesText=k=>k.parties.map(p=>contact(p.who).name).join(", ");
+const isOwner=k=>k.owner===me().name;
+/* What a contract asks of the person looking (computed from its state). */
+function contractTodo(k){
+  if(k.state==="in_review"&&isDir())return {title:"Valider le contrat",validate:true};
+  if(k.state==="returned"&&isDir())return {title:"Signer le contrat pour PDS"};
+  if(k.state==="draft"&&isOwner(k))return {title:k.review&&k.review.comment?"Reprendre le contrat et le soumettre à nouveau":"Soumettre à la direction"};
+  if(k.state==="approved"&&isOwner(k))return {title:"Envoyer le contrat pour signature"};
+  return null;
+}
+/* Who it waits for otherwise. */
+function contractWait(k){
+  if(k.state==="in_review"&&!isDir())return {who:"Claire Morel",todo:"valider le contrat"};
+  if(k.state==="returned"&&!isDir())return {who:"Claire Morel",todo:"signer le contrat pour PDS"};
+  if((k.state==="draft"||k.state==="approved")&&!isOwner(k))return {who:k.owner,todo:k.state==="draft"?"soumettre le contrat à la direction":"envoyer le contrat pour signature"};
+  if(k.state==="sent"){const c=signer(k);return {who:c.name,link:true,todo:"signer et renvoyer le contrat",contact:c.id};}
+  return null;
+}
+const dueCell=k=>k.due?`${fmtShort(k.due)}${k.due<=TODAY&&!["signed","terminated"].includes(k.state)?`<span class="sub">${badge("t-danger","Échéance passée")}</span>`:""}`:`<span class="mut">—</span>`;
+
+PAGES.contracts={nav:"contracts",render(){
+  const q="ctr",tab=ui("ctrTab")||"all";
+  const VIEW={all:()=>true,draft:k=>k.state==="draft",review:k=>k.state==="in_review",sign:k=>["approved","sent","returned"].includes(k.state),signed:k=>k.state==="signed",terminated:k=>k.state==="terminated"};
+  const type=filterVal(q,"type"),proj=filterVal(q,"proj"),owner=filterVal(q,"owner");
+  const list=S.contracts.filter(VIEW[tab]).filter(k=>(!type||k.type===type)&&(!proj||(k.project&&PROJECTS[k.project].title===proj))&&(!owner||k.owner===owner)&&matchQ(q,[k.title,k.type,k.project&&PROJECTS[k.project].title,k.artist,k.owner,partiesText(k)].join(" ")));
+  return `${pageHead({title:"Contrats",desc:"Chaque contrat avec ses parties, son responsable et ses versions, de la rédaction à la signature.",actions:`${btn("Modèles","go",'data-p="templates"',"outline lg")}${btn(`${I.plus} Nouveau contrat`,"open",'data-m="newContract"',"lg")}`})}
+  <div class="colstack" style="gap:12px">
+  ${tabs("ctrTab",[["all","Tous",S.contracts.length],["draft","En préparation",S.contracts.filter(VIEW.draft).length],["review","À valider",S.contracts.filter(VIEW.review).length],["sign","À signer",S.contracts.filter(VIEW.sign).length],["signed","Signés",S.contracts.filter(VIEW.signed).length],["terminated","Résiliés",S.contracts.filter(VIEW.terminated).length]])}
+  ${toolbar(q,"Titre, partie, projet, artiste…",[{k:"type",label:"Type",all:"Tous les types",options:[...new Set(S.contracts.map(k=>k.type))]},{k:"proj",label:"Projet",all:"Tous les projets",options:[...new Set(S.contracts.filter(k=>k.project).map(k=>PROJECTS[k.project].title))]},{k:"owner",label:"Responsable",all:"Tous les responsables",options:[...new Set(S.contracts.map(k=>k.owner))]}])}
+  ${table([{t:"Contrat"},{t:"État"},{t:"Parties",cls:"hide-m"},{t:"Échéance",cls:"hide-m"},{t:"Responsable",cls:"hide-m"}],list.map(k=>`<tr class="go" data-act="go" data-p="contract" data-id="${k.id}"><td><span class="name">${esc(k.title)}</span><span class="sub">${esc([k.type,k.project&&PROJECTS[k.project].title,k.artist].filter(Boolean).join(" · "))}</span></td><td>${contractBadge(k)}</td><td class="hide-m">${esc(partiesText(k))}</td><td class="hide-m">${dueCell(k)}</td><td class="hide-m">${esc(k.owner)}</td></tr>`),
+    `<b>Aucun contrat ne correspond à ces filtres.</b>Retirez un filtre pour élargir la liste.`)}
+  </div>`;
+}};
+
+PAGES.contract={nav:"contracts",render(){
+  const k=ctr(S.id),todo=contractTodo(k),wait=contractWait(k),editable=["draft","approved"].includes(k.state)&&(isOwner(k)||isDir());
+  const flash=S.flash;
+  let now;
+  if(todo){
+    let actions="";
+    if(k.state==="in_review")actions=S.ctx.fix?`<div class="field" style="width:100%">${fld("fix-note","Commentaire",`<textarea placeholder="Ce qui doit changer, et pourquoi"></textarea>`,"Il revient en tête du contrat, chez le responsable.",true)}</div>${btn("Demander des modifications","fixSend",`data-id="${k.id}"`)}${btn("Annuler","fixCancel","","ghost")}`
+      :`${btn("Valider","validateC",`data-id="${k.id}"`)}${btn("Demander des modifications","fixOpen","","outline")}`;
+    if(k.state==="draft")actions=btn("Soumettre à la direction","submitC",`data-id="${k.id}"`);
+    if(k.state==="approved")actions=btn("Envoyer pour signature","open",`data-m="sendC" data-id="${k.id}"`);
+    if(k.state==="returned")actions=btn("Signer pour PDS","open",`data-m="countersign" data-id="${k.id}"`);
+    now=nowCard({extra:todo.validate?badge("t-act","À valider"):"",eyebrow:esc(k.title),title:esc(todo.title),why:esc(C_STEP[k.state]),
+      facts:[k.state==="approved"?["Envoyé à",`${esc(signer(k).name)} · ${esc(signer(k).email||"adresse manquante")}`]:null,k.state==="in_review"?["Ensuite","Envoi pour signature par "+esc(k.owner)]:null,k.state==="draft"?["Validation","Claire Morel"]:null].filter(Boolean),
+      actions,flash});
+  } else if(wait){
+    now=nowCard({tone:"t-neutral",badgeText:"Rien à faire pour vous",eyebrow:esc(k.title),title:`En attente de ${esc(wait.who)}${wait.link?" (lien privé)":""} : ${esc(wait.todo)}`,why:esc(C_STEP[k.state]),
+      facts:k.state==="sent"?[["Envoyé le",`${fmtDay(k.sentOn)} par ${esc(k.sentBy)}`],["Ouvert",k.openedOn?fmtDay(k.openedOn):"pas encore"],k.relances.length?["Relancé le",fmtDay(k.relances[k.relances.length-1].on)]:null].filter(Boolean):[],
+      actions:k.state==="sent"?`${isOwner(k)?btn("Relancer","open",`data-m="relance" data-w="w-${k.id}-${wait.contact}"`,"outline"):""}${btn("Copier le lien","copyLink","","ghost")}<button class="btn" type="button" data-act="returnSigned" data-id="${k.id}" style="background:var(--glass);color:var(--glass-fg)">Proto : faire revenir le contrat signé</button>`:"",flash});
+  } else now=nowCard({tone:k.state==="signed"?"t-ok":"t-neutral",badgeText:C_STATES[k.state][0],eyebrow:esc(k.title),title:k.state==="signed"?`Signé le ${fmtDay(k.signedOn)}`:"Résilié",why:esc(C_STEP[k.state]),flash});
+  const review=k.review&&k.review.comment&&k.state==="draft"?`<div class="callout bad"><b>Modifications demandées</b> par ${esc(k.review.by)} le ${fmtDay(k.review.on)} : « ${esc(k.review.comment)} »</div>`:"";
+  const doc=k.doc?card("Document",`Généré depuis le modèle « ${esc(k.doc.template)} » v${k.doc.tv}. Le modèle n'est pas modifié.`,"",
+    `<div class="doc"><span class="ic">PDF</span><span class="grow"><b>${esc(k.kindLabel)} · v${k.doc.version}</b><br><span class="src">${k.state==="returned"||k.state==="signed"?`Signé par ${esc(signer(k)?signer(k).name:"")}, reçu par son lien privé`:"Projet de contrat"}</span></span>${btn("Voir le PDF","noop","","outline sm")}${editable?btn("Modifier une clause","open",`data-m="clause" data-id="${k.id}"`,"ghost sm"):""}</div>
+    ${k.doc.changed?`<p class="why">Changé depuis la v${k.doc.version-1} : ${esc(k.doc.changed)}</p>`:""}
+    <ul class="vals">${k.doc.values.map(([l,v,s])=>`<li><span class="k">${esc(l)}</span><span>${v==="—"?`<span class="mut">à décider</span>`:esc(v)}<span class="src">${esc(s)}</span></span></li>`).join("")}</ul>`)
+    :card("Fichiers","Projets de contrat, exemplaire signé et sa preuve, annexes.","",`<ul class="rows">${(k.files||[]).map(f=>`<li><span class="avatar sq" aria-hidden="true">${I.doc}</span><span class="grow"><span class="t">${esc(f)}</span></span>${btn("Ouvrir","noop","","ghost sm")}</li>`).join("")}</ul>`);
+  const parties=card("Parties","Les personnes et structures du Réseau engagées par le contrat.",editable?btn(`${I.plus} Ajouter une partie`,"noop","","outline sm"):"",
+    `<ul class="rows">${k.parties.map(p=>{const c=contact(p.who);return `<li>${avatar(c.name)}<span class="grow"><span class="t"><button class="lnk" type="button" data-act="go" data-p="contact" data-id="${c.id}">${esc(c.name)}</button></span><span class="c">${esc(p.role)}${p.signs?" · signe":""}${c.email?` · ${esc(c.email)}`:""}</span></span></li>`;}).join("")}</ul>`);
+  const journal=card("Déjà fait","","",`<details class="fold" ${k.journal.length<4?"open":""}><summary>Versions et journal (${k.journal.length})</summary><ul class="rows" style="margin-top:8px">${k.journal.slice().reverse().map(j=>`<li><span class="grow"><span class="t">${esc(j.t)}</span><span class="c">${esc(j.by)} · ${fmtDay(j.on)}</span></span></li>`).join("")}</ul></details>`);
+  return `${pageHead({back:["contracts","Tous les contrats"],title:`${esc(k.title)} ${contractBadge(k)}`,desc:`${esc(k.type)} · ${esc(partiesText(k))}`,actions:`${editable?btn("Modifier","noop","","outline lg"):""}${btn(I.dots,"noop",'aria-label="Plus d\'actions"',"outline icon lg")}`})}
+  ${k.origin?`<div class="banner info">${esc(k.origin)} <button class="lnk" type="button" data-act="noop">Revenir au Suivi</button></div>`:""}
+  ${review}${now}
+  <div class="cols"><div class="colstack">${doc}${parties}${journal}</div>
+  <div class="colstack">${card("Informations","","",factList([["Type",esc(k.type)],["Responsable",esc(k.owner)],["Projet",k.project&&esc(PROJECTS[k.project].title)],["Artiste",k.artist&&esc(k.artist)],["Échéance",k.due&&fmtDay(k.due)],["Période",k.start&&`du ${fmtShort(k.start)} au ${fmtShort(k.end)}`],["Signé le",k.signedOn&&fmtDay(k.signedOn)]]))}</div></div>`;
+}};
+
+const log=(k,t)=>k.journal.push({t,by:me().name,on:TODAY});
+ACTS.fixOpen=()=>{S.ctx.fix=true;S.flash=null;render();document.getElementById("fix-note").focus();};
+ACTS.fixCancel=()=>{S.ctx.fix=false;S.err={};render();};
+ACTS.fixSend=el=>{const note=val("fix-note");if(!note){S.err={"fix-note":"Expliquez les modifications attendues."};render();document.getElementById("fix-note").focus();return;}
+  const k=ctr(el.dataset.id);k.state="draft";k.review={by:me().name,on:TODAY,comment:note};log(k,"Modifications demandées");S.ctx={};S.err={};did("Modifications demandées au responsable.",`Modifications demandées. En attente de ${k.owner} : reprendre le contrat.`);render();};
+ACTS.validateC=el=>{const k=ctr(el.dataset.id);k.state="approved";k.review={by:me().name,on:TODAY};log(k,"Approuvé");did("Contrat validé.",`Contrat validé. En attente de ${k.owner} : l'envoyer pour signature.`);render();};
+ACTS.submitC=el=>{const k=ctr(el.dataset.id);k.state="in_review";log(k,"Envoyé en validation");did("Contrat soumis à la direction.","Contrat soumis. En attente de Claire Morel : le valider.");render();};
+ACTS.returnSigned=el=>{const k=ctr(el.dataset.id);k.state="returned";k.journal.push({t:`Contrat signé reçu par son lien privé (${signer(k).name})`,by:signer(k).name,on:TODAY});did("Le contrat signé est revenu");render();};
+ACTS.copyLink=()=>{try{navigator.clipboard.writeText("https://pds.app/l/…").catch(()=>{});}catch(e){}toast("Lien copié");};
+MODALS.sendC={
+  render(ctx){const k=ctr(ctx.id),c=signer(k),how=ctx.how||"mail";
+    return `<h2>Envoyer pour signature</h2><p class="why">PDS OS envoie le contrat à la partie qui signe, avec son lien privé : l'envoi est la preuve, gardée dans le journal.</p>
+    <div class="choice"><label><input type="radio" name="how" data-act="ctxset" data-k="how" data-v="mail" ${how==="mail"?"checked":""}> <span>Envoyer par PDS OS<small>Recommandé : l'e-mail et sa date font preuve.</small></span></label>
+    <label><input type="radio" name="how" data-act="ctxset" data-k="how" data-v="other" ${how==="other"?"checked":""}> <span>Je l'ai remis autrement<small>Main propre, outil de signature… avec sa date.</small></span></label></div>
+    ${how==="mail"?mailPreview({to:c.email||"adresse manquante",toSrc:"Fiche Réseau",subject:`${k.kindLabel} à signer — ${k.project?PROJECTS[k.project].title:"PDS"}`,attach:`${k.kindLabel} · v${k.doc?k.doc.version:1}.pdf`,message:`Bonjour ${c.name.split(" ")[0]},\n\nVoici le ${lowerFirst(k.kindLabel)} validé par PDS. Vous pouvez le relire et le signer depuis votre lien privé, sans compte.\n\nBien à vous,\n${me().name} pour PDS`,link:k.link||"créé à l'envoi"})
+      :`${fld("s-how","Comment l'avez-vous remis ?",`<input placeholder="Canal, destinataire">`,"Canal, destinataire, date : c'est la preuve d'envoi.",true)}${fld("s-date","Remis le",`<input type="date" value="${TODAY}">`,"",true)}`}
+    ${foot(how==="mail"?"Envoyer":"Marquer comme envoyé")}`;},
+  save(ctx){const k=ctr(ctx.id),how=ctx.how||"mail";
+    if(how==="other"&&!val("s-how")){S.err["s-how"]="Dites comment il a été remis.";return false;}
+    k.state="sent";k.sentOn=how==="other"?val("s-date"):TODAY;k.sentBy=me().name;k.openedOn=null;k.relances=[];k.link=k.link||"pds.app/l/Ws3x…";
+    log(k,how==="mail"?`Envoyé en signature par e-mail à ${signer(k).email}`:`Remis autrement : ${val("s-how")}`);
+    did("Contrat envoyé pour signature.",`Envoyé. En attente de ${signer(k).name} (lien privé) : signer et renvoyer le contrat.`);return true;}
+};
+MODALS.countersign={
+  render(ctx){const k=ctr(ctx.id);return `<h2>Signer pour PDS ?</h2><p class="why">${esc(signer(k).name)} a signé le ${lowerFirst(k.kindLabel)} v${k.doc?k.doc.version:1} par son lien privé. Votre signature conclut le contrat ; il ne se modifie plus ensuite.</p>
+    <div class="doc"><span class="ic">PDF</span><span class="grow"><b>${esc(k.kindLabel)} · v${k.doc?k.doc.version:1}</b><br><span class="src">Signé par ${esc(signer(k).name)} le ${fmtDay(TODAY)}</span></span>${btn("Voir le PDF","noop","","outline sm")}</div>${foot("Signer pour PDS")}`;},
+  save(ctx){const k=ctr(ctx.id);k.state="signed";k.signedOn=TODAY;log(k,"Signé pour PDS");did("Contrat signé pour PDS.","Contrat signé : il est conclu.");return true;}
+};
+MODALS.clause={
+  render(ctx){const k=ctr(ctx.id);return `<h2>Modifier une clause</h2><p class="why">Chaque modification crée une nouvelle version, gardée avec sa raison. Un contrat validé repasse en préparation et doit être validé à nouveau.</p>
+    ${fld("cl-text","Texte du contrat",`<textarea style="min-height:140px">Article 4 — Durée. La présente licence est consentie pour une durée de cinq (5) ans à compter de sa signature, pour le monde entier.</textarea>`,"",true)}
+    ${fld("cl-why","Raison de la modification",`<input placeholder="Ex. durée précisée à la demande de la direction">`,"",true)}${foot("Enregistrer la version")}`;},
+  save(ctx){const why=val("cl-why");if(!why){S.err["cl-why"]="Donnez la raison de la modification.";return false;}
+    const k=ctr(ctx.id);k.doc.version++;k.doc.changed=`${why} (${me().name}, ${ddmm(TODAY)})`;k.doc.values=k.doc.values.map(v=>v[0]==="Durée"?["Durée","5 ans, monde entier","Clause modifiée · "+ddmm(TODAY)]:v);
+    if(k.state==="approved")k.state="draft";log(k,`Clause modifiée : ${why}`);did(`Version ${k.doc.version} enregistrée`);return true;}
+};
+MODALS.newContract={
+  render(ctx){if(!ctx.way)return `<h2>Nouveau contrat</h2><p class="why">Que voulez-vous faire ?</p>
+    <div class="choice"><label><input type="radio" name="way" data-act="ctxset" data-k="way" data-v="existing"> <span>Enregistrer un contrat qui existe déjà<small>Signé ou en cours, rédigé hors de PDS OS : décrivez-le, ajoutez ses parties, déposez son fichier.</small></span></label>
+    <label><input type="radio" name="way" data-act="ctxset" data-k="way" data-v="template"> <span>Le générer depuis un modèle<small>Il se prépare dans le Juridique d'un projet, pré-rempli par ce que PDS OS sait.</small></span></label>
+    <label><input type="radio" name="way" data-act="ctxset" data-k="way" data-v="model"> <span>Créer un modèle réutilisable<small>Dans les modèles de contrat, validés par la direction.</small></span></label></div>
+    <div class="dfoot"><button class="btn ghost" type="button" data-act="close">Annuler</button></div>`;
+    if(ctx.way!=="existing")return `<h2>${ctx.way==="template"?"Le générer depuis un modèle":"Créer un modèle réutilisable"}</h2><p class="why">${ctx.way==="template"?"Choisissez le projet : ses contrats à prévoir sont dans son Juridique, avec les modèles proposés d'après le rôle de chaque personne.":"Collez le texte d'un modèle déjà relu par votre juriste ; il sera validé par la direction avant de servir."}</p>
+      <div class="dfoot"><button class="btn ghost" type="button" data-act="ctxset" data-k="way" data-v="">Retour</button>${ctx.way==="model"?btn("Ouvrir les modèles de contrat","go",'data-p="templates"'):btn("Ouvrir les contrats du projet","noop")}</div>`;
+    return `<h2>Nouveau contrat</h2><p class="why">Il commence en préparation : vous ajouterez ensuite ses parties et ses fichiers.</p>
+    ${fld("nc-title","Titre",`<input placeholder="Ex. Licence de synchronisation — clip de Nova">`,"",true)}
+    ${fld("nc-type","Type",`<select>${C_TYPES.map(t=>`<option>${t}</option>`).join("")}</select>`,"",true)}
+    ${fld("nc-owner","Responsable",`<select>${Object.values(TEAM).map(t=>`<option ${t.name===me().name?"selected":""}>${t.name}</option>`).join("")}</select>`,"La personne qui suit le contrat jusqu'à sa signature.",true)}
+    ${fld("nc-proj","Projet",`<select><option value="">Aucun</option>${Object.entries(PROJECTS).map(([k,p])=>`<option value="${k}">${p.title}</option>`).join("")}</select>`,"")}
+    ${fld("nc-due","Échéance",`<input type="date">`,"La date clé : signature attendue, renouvellement, délai.")}
+    ${foot("Créer le contrat")}`;},
+  save(ctx){const t=val("nc-title");if(!t){S.err["nc-title"]="Donnez un titre au contrat.";return false;}
+    const id="k"+Date.now();S.contracts.push({id,title:t,kindLabel:val("nc-type"),type:val("nc-type"),project:val("nc-proj")||null,artist:null,owner:val("nc-owner"),state:"draft",due:val("nc-due")||null,parties:[],files:[],journal:[{t:"Contrat créé",by:me().name,on:TODAY}]});
+    did("Contrat créé");S.page="contract";S.id=id;return true;}
+};
+
+PAGES.templates={nav:"contracts",render(){
+  const tone={"Validé":"t-ok","À valider":"t-act","Retiré":"t-neutral"};
+  const pending=S.templates.filter(t=>t.state==="À valider");
+  return `${pageHead({back:["contracts","Tous les contrats"],title:"Modèles de contrat",desc:"Les modèles validés servent à générer les contrats. Un modèle validé ne change jamais : une correction est une nouvelle version, à valider à son tour.",actions:btn(`${I.plus} Nouveau modèle`,"noop","","lg")})}
+  ${pending.length&&isDir()?nowCard({extra:badge("t-act","À valider"),eyebrow:"Modèles de contrat",title:`Valider le modèle « ${esc(pending[0].name)} » v${pending[0].v}`,why:"Tant qu'il n'est pas validé, ce modèle n'est proposé pour aucun contrat. Une fois validé, il ne se modifie plus.",actions:`${btn("Valider","validateT",`data-n="${esc(pending[0].name)}"`)}${btn("Refuser","noop","","outline")}`,flash:S.flash}):""}
+  ${table([{t:"Modèle"},{t:"Type",cls:"hide-m"},{t:"Pour",cls:"hide-m"},{t:"État"}],S.templates.map(t=>`<tr><td><span class="name">${esc(t.name)} · v${t.v}</span>${t.by?`<span class="sub">Validé par ${esc(t.by)} le ${fmtShort(t.on)}</span>`:""}</td><td class="hide-m">${esc(t.type)}</td><td class="hide-m">${esc(t.for)}</td><td>${badge(tone[t.state],t.state)}</td></tr>`),"")}`;
+}};
+ACTS.validateT=el=>{const t=S.templates.find(x=>x.name===el.dataset.n);t.state="Validé";t.by=me().name;t.on=TODAY;did("Modèle validé.");render();};
+/* ================= FICHIERS ================= */
+const F_KIND={audio:["Audio",I.audio],image:["Image",I.image],doc:["Document",I.doc]};
+SEEDS.push(s=>{
+  const F=(id,name,type,cat,att,attKind,by,on,meta,v,usedIn,attPage)=>({id,name,type,cat,att,attKind,by,on,meta,v:v||1,usedIn:usedIn||null,attPage:attPage||null});
+  s.files=[
+    F("f1","Neons_mix_v1.wav","audio","Audio","Néons","Titre","Karim Haddou","2026-10-27","WAV · 48,2 Mo · 3:12",1,"Master › Mixage · Mix V1, à valider"),
+    F("f2","Neons_pochette_v3.png","image","Pochette","Néons","Titre","Nadia Benali","2026-10-28","PNG · 4,1 Mo",3,"Marketing › Conception › Pochette · version déposée"),
+    F("f3","Contrat de co-édition — Sami Kader v2.pdf","doc","Projet de contrat","Contrat de co-édition — Sami Kader","Contrat","Lina Haddad","2026-10-23","PDF · 220 Ko",2,"Contrat à valider par la direction",["contract","k1"]),
+    F("f4","Devis Studio Ressac — épisode 12.pdf","doc","Contrat","PDS Mic #12","Projet","Studio Ressac","2026-10-27","PDF · 310 Ko",1,"Production › Épisode 12 · devis validé le 27/10"),
+    F("f5","Dossier de presse Mona Lys 2026.pdf","doc","Presse","Mona Lys","Artiste","Lina Haddad","2026-10-15","PDF · 6,8 Mo",1,null,["artist","monalys"]),
+    F("f6","Mona Lys — portrait studio.jpg","image","Photo","Mona Lys","Artiste","Nadia Benali","2026-10-12","JPG · 3,2 Mo",1,null,["artist","monalys"]),
+    F("f7","Brief de cadrage — Néons.pdf","doc","Brief","Néons","Projet","Lina Haddad","2026-10-20","PDF · 180 Ko",1,"Cadrage › Brief validé le 20/10"),
+    F("f8","Ressac_maquette_v2.wav","audio","Audio","Ressac","Titre","Lina Haddad","2026-10-19","WAV · 39,7 Mo · 2:58",2,"Master › Source · version confirmée"),
+    F("f9","Contrat d'artiste — Mona Lys (signé).pdf","doc","Signé","Contrat d'artiste — Mona Lys","Contrat","Claire Morel","2025-03-14","PDF · 1,1 Mo",1,null,["contract","k4"]),
+    F("f10","Moodboard clip Néons.pdf","doc","Visuel","Néons","Projet","Nadia Benali","2026-10-24","PDF · 12,3 Mo",1,"Marketing › Production › Clip · référence")
+  ];
+});
+PAGES.files={nav:"files",render(){
+  const q="fil",tab=ui("filTab")||"all";
+  const TABS={all:"Tous",Artiste:"Artistes",Titre:"Titres",Projet:"Projets",Contrat:"Contrats"};
+  const cat=filterVal(q,"cat"),type=filterVal(q,"type"),by=filterVal(q,"by");
+  const list=S.files.filter(f=>(tab==="all"||f.attKind===tab)&&(!cat||f.cat===cat)&&(!type||F_KIND[f.type][0]===type)&&(!by||f.by===by)&&matchQ(q,[f.name,f.cat,f.att].join(" "))).sort((a,b)=>b.on.localeCompare(a.on));
+  return `${pageHead({title:"Fichiers",desc:"Tous les fichiers que vous pouvez ouvrir, dans leur dernière version : artistes, titres, projets et contrats."})}
+  <div class="colstack" style="gap:12px">
+  ${tabs("filTab",Object.entries(TABS).map(([k,l])=>[k,l,S.files.filter(f=>k==="all"||f.attKind===k).length]))}
+  ${toolbar(q,"Nom, précision, artiste, titre, projet…",[{k:"cat",label:"Catégorie",all:"Toutes les catégories",options:[...new Set(S.files.map(f=>f.cat))].sort()},{k:"type",label:"Type de fichier",all:"Tous les types",options:["Audio","Image","Document"]},{k:"by",label:"Ajouté par",all:"Tout le monde",options:[...new Set(S.files.map(f=>f.by))].sort()}])}
+  ${table([{t:"Nom"},{t:"Catégorie"},{t:"Rattaché à",cls:"hide-m"},{t:"Ajouté",cls:"hide-m"}],list.map(f=>`<tr class="go" data-act="open" data-m="file" data-id="${f.id}"><td><span class="cellrow"><span class="avatar sq" aria-hidden="true">${F_KIND[f.type][1]}</span><span><span class="name">${esc(f.name)}</span>${f.v>1?` ${badge("t-neutral","v"+f.v)}`:""}<span class="sub">${esc(f.meta)}</span></span></span></td>
+    <td>${esc(f.cat)}</td><td class="hide-m">${esc(f.att)}<span class="sub">${esc(f.attKind)}</span></td><td class="hide-m">${fmtShort(f.on)}<span class="sub">${esc(f.by)}</span></td></tr>`),
+    ui(q+":q")?`<b>Aucun fichier ne correspond à « ${esc(ui(q+":q"))} ».</b>`:`<b>Aucun fichier ne correspond à ces filtres.</b>Retirez un filtre pour élargir la liste.`)}
+  <p class="src">Un fichier s'ajoute dans la bibliothèque d'un artiste, d'un titre, d'un projet ou d'un contrat, ou dans l'étape qui en a besoin : il apparaît aussi ici.</p>
+  </div>`;
+}};
+/* L'aperçu d'un fichier : l'écouter ou le voir sans le télécharger, ses versions, à quoi il sert. */
+MODALS.file={
+  render(ctx){const f=S.files.find(x=>x.id===ctx.id);
+    const prev=f.type==="audio"?`<div class="player"><button class="btn sm" type="button" aria-label="Écouter">${I.play}</button><span class="bar"></span><span class="num src">0:00 / ${esc(f.meta.split(" · ").pop())}</span></div>`
+      :f.type==="image"?`<div class="preview cover">${esc(f.name)}</div>`:`<div class="preview">${I.doc} Aperçu du PDF</div>`;
+    const versions=Array.from({length:f.v},(_,i)=>f.v-i);
+    return `<h2>${esc(f.name)}</h2>${prev}
+    <dl class="facts" style="flex-direction:column"><div><dt>Rattaché à :</dt><dd>${esc(f.attKind)} · ${f.attPage?`<button class="lnk" type="button" data-act="go" data-p="${f.attPage[0]}" data-id="${f.attPage[1]}">${esc(f.att)}</button>`:esc(f.att)}</dd></div>${f.usedIn?`<div><dt>Sert à :</dt><dd>${esc(f.usedIn)}</dd></div>`:""}<div><dt>Catégorie :</dt><dd>${esc(f.cat)}</dd></div></dl>
+    <details class="fold" ${f.v>1?"open":""}><summary>Versions (${f.v})</summary><ul class="rows" style="margin-top:8px">${versions.map(n=>`<li><span class="grow"><span class="t">${n===f.v?"Actuelle":"Version "+n}</span><span class="c">${esc(f.by)} · ${fmtShort(f.on)}</span></span>${btn("Ouvrir","noop","","ghost sm")}</li>`).join("")}</ul></details>
+    <div class="dfoot"><button class="btn ghost" type="button" data-act="close">Fermer</button>${btn("Nouvelle version","newVersion",`data-id="${f.id}"`,"outline")}${btn("Télécharger","noop","","outline")}${btn("Ouvrir","noop")}</div>`;},
+  save(){return true;}
+};
+ACTS.newVersion=el=>{const f=S.files.find(x=>x.id===el.dataset.id);f.v++;f.on=TODAY;f.by=me().name;toast(`Version ${f.v} ajoutée.`);render();};
+/* ================= CALLS ================= */
+const CALL_ST={upcoming:["À venir","t-info"],draft:["À enregistrer","t-neutral"],processing:["Transcription…","t-info"],ready:["Compte rendu prêt","t-ok"],closed:["Clôturé","t-neutral"]};
+const NOW_MIN=11*60+20;
+SEEDS.push(s=>{
+  s.calls=[
+    {id:"cl1",title:"Échange de cadrage",project:"ressac",day:"2026-10-28",start:"20:00",end:"21:24",status:"ready",owner:"Lina Haddad",team:["Lina Haddad","Claire Morel"],people:["sami"],guests:["Ilan"],
+      module:"Cadrage",agenda:[["L'artiste et l'intention",15],["Le public visé",10],["L'équipe et les co-auteurs",15],["Le calendrier et le budget",20]],
+      decisions:["Sortie de l'EP visée en janvier 2027, avant la tournée.","Sami Kader co-écrit deux titres de l'EP."],
+      actions:[{t:"Envoyer à Sami Kader sa fiche de renseignements",why:"« On lui envoie sa fiche cette semaine pour le contrat. »",task:{who:"Lina Haddad",due:"2026-10-30"}},{t:"Demander trois devis de mix",why:"« Il faudrait comparer au moins trois ingés pour le mix. »",task:null},{t:"Bloquer une date de tournage pour le teaser",why:"« Un teaser tourné avant décembre, ce serait l'idéal. »",task:null}],
+      report:[["Décision","Sortie de l'EP visée en janvier 2027.","« On vise janvier, avant la tournée. »","Confirmé par Lina Haddad"],["Hypothèse","Le public cœur : 18-25 ans, scène indie française.","« Le cœur c'est les 18-25 qui écoutent de l'indie. »","À confirmer"],["Point à arbitrer","Budget du clip : 12 000 € ou 18 000 € ?","« Entre 12 et 18, il faut trancher. »","À confirmer"],["Action proposée","Envoyer sa fiche de renseignements à Sami Kader.","« On lui envoie sa fiche cette semaine. »","Devenue une tâche"]],
+      pending:3,summarySent:false,closedOn:null,transcript:[["00:02:14","Ilan","On vise janvier, avant la tournée."],["00:11:40","Lina Haddad","Le cœur c'est les 18-25 qui écoutent de l'indie ?"],["00:31:05","Claire Morel","Entre 12 et 18 pour le clip, il faut trancher."]]},
+    {id:"cl2",title:"Échange stratégique",project:"neons",day:"2026-10-29",start:"15:00",end:"16:00",status:"upcoming",owner:"Lina Haddad",team:["Lina Haddad","Claire Morel","Nadia Benali"],people:["monalys"],guests:[],
+      module:"Stratégie",meet:"meet.google.com/pds-neo-str",agenda:[["Ce que la sortie doit changer pour Mona Lys",10],["Les publics et les territoires",15],["Les leviers : clip, TikTok, presse",20],["Le budget marketing",15]]},
+    {id:"cl3",title:"Échange de cadrage",project:"mirage",day:"2026-10-26",start:"21:00",end:"22:13",status:"draft",owner:"Lina Haddad",team:["Lina Haddad","Claire Morel"],people:[],guests:["Zéphyr Vega"],module:"Cadrage",agenda:[["L'artiste et l'intention",15],["Le calendrier",15]]},
+    {id:"cl4",title:"Call de production",project:"mic",day:"2026-10-30",start:"10:00",end:"11:00",status:"upcoming",owner:"Lina Haddad",team:["Lina Haddad","Tom Mercier"],people:["ressac-studio"],guests:[],module:"Production",meet:"meet.google.com/pds-mic-12",agenda:[["Le lieu et les horaires",20],["L'équipe technique",20],["Le matériel",20]]},
+    {id:"cl5",title:"Point hebdo de l'équipe",project:null,day:"2026-10-26",start:"10:00",end:"10:45",status:"closed",owner:"Claire Morel",team:["Claire Morel","Lina Haddad","Nadia Benali","Tom Mercier"],people:[],guests:[],agenda:[["Les sorties de novembre",20],["Les retours d'Ibé",25]],closedOn:"2026-10-26"},
+    {id:"cl6",title:"Échange créatif",project:"neons",day:"2026-10-27",start:"14:00",end:"15:00",status:"closed",owner:"Lina Haddad",team:["Lina Haddad","Nadia Benali"],people:["monalys"],guests:[],module:"Conception",agenda:[["La pochette",30],["Le clip",30]],closedOn:"2026-10-27"},
+    {id:"cl7",title:"Écoute du Mix V1",project:"neons",day:"2026-10-31",start:"11:00",end:"11:30",status:"upcoming",owner:"Lina Haddad",team:["Lina Haddad","Nadia Benali"],people:["karim"],guests:[],module:"Master",meet:"meet.google.com/pds-neo-mix",agenda:[["Les retours sur le Mix V1",30]]}
+  ];
+});
+const call=id=>S.calls.find(c=>c.id===id);
+const mins=h=>{const [a,b]=h.split(":").map(Number);return a*60+b;};
+const isPast=c=>c.day<TODAY||(c.day===TODAY&&mins(c.end)<=NOW_MIN);
+const callBadge=c=>{const k=c.status==="upcoming"&&isPast(c)?"draft":c.status;return badge(CALL_ST[k][1],CALL_ST[k][0]);};
+const callWhere=c=>c.project?PROJECTS[c.project].title:"Réunion interne";
+const when=c=>`${fmtDay(c.day)}, ${c.start} – ${c.end}`;
+const tasksLeft=c=>(c.actions||[]).filter(a=>!a.task).length;
+const MODULE_OF={Cadrage:"le Cadrage","Stratégie":"la Stratégie",Conception:"la Conception",Production:"la Production",Master:"le Master"};
+const TODO_RANK={record:0,upload:1,props:2,tasks:3,summary:4,close:5};
+/* What a call asks of its owner, in order (lib/calls: record, process, tasks, proposals, summary, close). */
+function callTodos(c){
+  if(c.owner!==me().name)return [];
+  const out=[];
+  if(c.status==="upcoming"&&c.day===TODAY)out.push({t:`Enregistrer l'${lowerFirst(c.title)}`,why:`Aujourd'hui à ${c.start} : ouvrez le call au moment de l'échange, PDS OS enregistre la visio et votre micro.`,act:"record"});
+  if((c.status==="draft"||(c.status==="upcoming"&&isPast(c))))out.push({t:"Déposer l'enregistrement",why:`Le call du ${fmtDay(c.day)} n'a pas été enregistré dans PDS OS : déposez le fichier audio pour avoir sa transcription et son compte rendu.`,act:"upload"});
+  if(c.status==="ready"){
+    if(c.pending)out.push({t:`Trancher ${c.pending} proposition${c.pending>1?"s":""} dans ${MODULE_OF[c.module]}`,why:"PO a rangé ce qui a été dit là où ça sert, chaque phrase avec sa citation : confirmez, modifiez ou écartez.",act:"props"});
+    if(tasksLeft(c))out.push({t:`Créer ${tasksLeft(c)>1?"les "+tasksLeft(c)+" tâches":"la tâche"} des actions décidées`,why:"Chaque action relevée devient une tâche avec un responsable et une échéance, choisis par vous.",act:"tasks"});
+    if(!c.summarySent)out.push({t:"Envoyer le résumé aux participants",why:"PO a préparé le résumé ; relisez-le avant qu'il parte.",act:"summary"});
+    if(!c.pending&&!tasksLeft(c)&&c.summarySent)out.push({t:"Clôturer le call",why:"Tout ce qui est sorti de l'échange a sa place : la clôture fige le compte rendu.",act:"close"});
+  }
+  return out;
+}
+
+PAGES.calls={nav:"calls",render(){
+  const mode=ui("callMode")||"cal";
+  const head=pageHead({title:"Calls",desc:"Tous les échanges enregistrés ou planifiés, sur l'ensemble de vos projets.",actions:`<div class="seg" role="group" aria-label="Affichage">${[["cal","Calendrier"],["list","Liste"]].map(([k,l])=>`<button type="button" data-act="ui" data-k="callMode" data-v="${k}" aria-pressed="${mode===k}">${l}</button>`).join("")}</div>${btn(`${I.plus} Nouvelle réunion`,"open",'data-m="newMeeting"',"lg")}`});
+  return `${head}${mode==="cal"?calendar():callList()}`;
+}};
+function calendar(){
+  const days=["2026-10-26","2026-10-27","2026-10-28","2026-10-29","2026-10-30","2026-10-31","2026-11-01"];
+  const H0=8,PX=48;
+  const ev=c=>{const top=(mins(c.start)-H0*60)/60*PX,h=Math.max(28,(mins(c.end)-mins(c.start))/60*PX);
+    const k=c.status==="upcoming"&&isPast(c)?"draft":c.status;const tone=k==="ready"?"t-ok":k==="upcoming"?"t-info":k==="draft"?"t-warn":"t-neutral";
+    return `<button class="ev ${tone}" type="button" data-act="go" data-p="call" data-id="${c.id}" style="top:${top}px;height:${h}px"><b>${esc(c.title)}</b>${esc(callWhere(c))} · ${c.start}</button>`;};
+  return `<div class="acts-row"><button class="btn outline sm" type="button">Aujourd'hui</button><span style="font-weight:600;font-size:18px">26 octobre – 1 novembre 2026</span><span class="src" style="margin-left:auto">${badge("t-ok","Compte rendu prêt")} ${badge("t-info","À venir")} ${badge("t-warn","À enregistrer")}</span></div>
+  <div class="cal"><div class="cal-head"><div></div>${days.map(d=>{const x=dOf(d);return `<div class="${d===TODAY?"today":""}">${DAYS[x.getDay()].replace(".","").toLowerCase()}.<b>${x.getDate()}</b></div>`;}).join("")}</div>
+  <div class="cal-body"><div class="cal-hours">${Array.from({length:16},(_,i)=>`<div>${pad(H0+i)}:00</div>`).join("")}</div>
+  ${days.map(d=>`<div class="cal-day" style="height:${16*PX}px">${d===TODAY?`<span class="nowline" style="top:${(NOW_MIN-H0*60)/60*PX}px"></span>`:""}${S.calls.filter(c=>c.day===d).map(ev).join("")}</div>`).join("")}</div></div>
+  <p class="src">Cliquez ou glissez sur une plage libre pour créer une réunion. Glissez un de vos calls pour le déplacer, son bord bas pour le rallonger.</p>`;
+}
+function callList(){
+  const q="cll",tab=ui("cllTab")||"all";
+  const up=c=>c.status==="upcoming"&&!isPast(c);
+  const list=S.calls.filter(c=>tab==="all"||(tab==="up"?up(c):!up(c))).filter(c=>(!filterVal(q,"proj")||callWhere(c)===filterVal(q,"proj"))&&matchQ(q,c.title+" "+callWhere(c))).sort((a,b)=>(b.day+b.start).localeCompare(a.day+a.start));
+  return `<div class="colstack" style="gap:12px">${tabs("cllTab",[["all","Tous",S.calls.length],["up","À venir",S.calls.filter(up).length],["past","Passés",S.calls.filter(c=>!up(c)).length]])}
+  ${toolbar(q,"Titre, projet…",[{k:"proj",label:"Projet",all:"Tous les projets",options:[...new Set(S.calls.map(callWhere))]}])}
+  ${table([{t:"Call"},{t:"Date",cls:"hide-m"},{t:"Traitement"}],list.map(c=>`<tr class="go" data-act="go" data-p="call" data-id="${c.id}"><td><span class="cellrow"><span class="avatar" aria-hidden="true">${I.phone.replace(/20/g,"16")}</span><span><span class="name">${esc(c.title)}</span><span class="sub">${esc(callWhere(c))}</span></span></span></td><td class="hide-m">${fmtShort(c.day)}, ${c.start} – ${c.end}</td><td>${callBadge(c)}${up(c)&&c.meet?` <span class="src">Rejoindre</span>`:""}</td></tr>`),`<b>Aucun call ne correspond à ces filtres.</b>`)}</div>`;
+}
+
+PAGES.call={nav:"calls",render(){
+  const c=call(S.id),todos=callTodos(c),owner=c.owner===me().name;
+  const [t]=todos;
+  const people=[...c.team.map(n=>[n,"Équipe PDS"]),...c.people.map(id=>[contact(id).name,"Réseau"]),...c.guests.map(n=>[n,"Invité par e-mail"])];
+  let now="";
+  if(t){
+    const a={record:`${btn("Commencer l'enregistrement","recordCall",`data-id="${c.id}"`)}${c.meet?btn("Rejoindre","noop","","outline"):""}`,upload:btn("Déposer l'enregistrement","recordCall",`data-id="${c.id}"`),
+      props:`${btn(`Ouvrir ${MODULE_OF[c.module]}`,"noop")}<button class="btn" type="button" data-act="propsDone" data-id="${c.id}" style="background:var(--glass);color:var(--glass-fg)">Proto : propositions tranchées</button>`,tasks:btn("Créer les tâches","scrollTo",'data-to="actions"'),summary:btn("Relire et envoyer","open",`data-m="summary" data-id="${c.id}"`),close:btn("Clôturer le call","closeCall",`data-id="${c.id}"`)}[t.act];
+    now=nowCard({eyebrow:`${esc(c.title)} · ${esc(callWhere(c))}`,title:esc(t.t),why:esc(t.why),facts:todos.length>1?[["Ensuite",esc(todos.slice(1).map(x=>lowerFirst(x.t)).join(" · "))]]:[],actions:a,flash:S.flash});
+  } else if(c.status==="processing")now=nowCard({tone:"t-info",badgeText:"Traitement en cours",eyebrow:esc(c.title),title:"Transcription, puis compte rendu",why:"Enregistrement reçu. PO transcrit l'échange, range ce qui a été dit dans l'ordre du jour, puis pré-remplit l'étape.",actions:`<button class="btn" type="button" data-act="processCall" data-id="${c.id}" style="background:var(--glass);color:var(--glass-fg)">Proto : terminer le traitement</button>`,flash:S.flash});
+  else if(!owner&&c.status!=="closed")now=nowCard({tone:"t-neutral",badgeText:"Rien à faire pour vous",eyebrow:esc(c.title),title:`En attente de ${esc(c.owner)} : ${c.status==="ready"?"traiter le compte rendu":"enregistrer le call"}`,why:"Le responsable du projet enregistre, traite et clôture le call ; vous lisez son compte rendu.",flash:S.flash});
+  else if(c.status==="closed")now=nowCard({tone:"t-neutral",badgeText:"Clôturé",eyebrow:esc(c.title),title:`Clôturé le ${fmtDay(c.closedOn)}`,why:"Le compte rendu est figé ; une correction en fait une nouvelle version.",flash:S.flash});
+  const agenda=card("Ordre du jour",`Durée totale estimée : environ ${c.agenda.reduce((n,a)=>n+a[1],0)} min.`,owner&&["upcoming","draft"].includes(c.status)?btn(`${I.plus} Ajouter un point`,"noop","","outline sm"):"",`<ul class="rows">${c.agenda.map(([p,m],i)=>`<li><span class="avatar" style="width:28px;height:28px;font-size:12px">${i+1}</span><span class="grow"><span class="t">${esc(p)}</span></span><span class="src">${m} min</span></li>`).join("")}</ul>`);
+  const ready=c.status==="ready"||c.status==="closed";
+  const actions=ready&&c.actions?card("Décisions et actions","Ce qui a été décidé, et les actions dites pendant l'échange, chacune avec sa phrase.","",
+    `<h3 class="src" style="font-size:14px;font-weight:600">Décisions</h3><ul class="rows">${c.decisions.map(d=>`<li><span class="grow"><span class="t">${esc(d)}</span></span></li>`).join("")}</ul>
+    <h3 id="actions" class="src" style="font-size:14px;font-weight:600;margin-top:8px">Actions</h3><ul class="rows">${c.actions.map((a,i)=>`<li><span class="grow"><span class="t"><b>${esc(a.t)}</b></span><span class="c">Pourquoi : ${esc(a.why)}</span>${a.task?`<span class="c">${badge("t-ok","Tâche créée")} ${esc(a.task.who)} · pour le ${fmtDay(a.task.due)}</span>`:""}</span>${!a.task&&owner?btn("Créer la tâche","open",`data-m="task" data-id="${c.id}" data-i="${i}"`,"outline sm"):""}</li>`).join("")}</ul>`):"";
+  const report=ready&&c.report?card("Compte rendu","Les phrases sont citées telles quelles. Ce qui fait foi, ce sont les décisions confirmées dans l'étape.","",`<div>${c.report.map(([k,txt,q,st])=>`<div class="prop"><div class="top">${badge(k==="Décision"?"t-ok":k==="Point à arbitrer"?"t-warn":"t-neutral",k)}<span class="src">${esc(st)}</span></div><span class="t">${esc(txt)}</span><span class="quote">${esc(q)}</span></div>`).join("")}</div>`):"";
+  const transcript=ready&&c.transcript?card("Transcription","","",`<details class="fold"><summary>Extraits minutés (${c.transcript.length})</summary><ul class="rows" style="margin-top:8px">${c.transcript.map(([at,who,txt])=>`<li><span class="src mono">${at}</span><span class="grow"><span class="t"><b>${esc(who)}</b> · ${esc(txt)}</span></span></li>`).join("")}</ul></details>`):"";
+  const record=c.audio?card("Enregistrement","","",`<div class="player"><button class="btn sm" type="button" aria-label="Écouter">${I.play}</button><span class="bar"></span><span class="src num">0:00 / 1:24:10</span></div>`):"";
+  return `${pageHead({back:["calls","Tous les calls"],title:`${esc(c.title)} ${callBadge(c)}`,desc:`${esc(callWhere(c))} · ${when(c)} · organisé par ${esc(c.owner)}`,actions:`${c.meet&&!isPast(c)?btn("Rejoindre","noop","","outline lg"):""}${btn(I.dots,"noop",'aria-label="Plus d\'actions"',"outline icon lg")}`})}
+  ${now}
+  <div class="cols"><div class="colstack">${actions}${report}${agenda}${transcript}</div>
+  <div class="colstack">${card("Participants","","",`<ul class="rows">${people.map(([n,src])=>`<li>${avatar(n)}<span class="grow"><span class="t">${esc(n)}</span><span class="c">${src}</span></span></li>`).join("")}</ul>`,people.length)}${record}
+  ${c.meet?card("Visio","","",`<p class="mono">${esc(c.meet)}</p><div class="acts-row">${btn("Rejoindre","noop","","outline sm")}${btn("Copier le lien","copyLink","","ghost sm")}</div>`):""}</div></div>`;
+}};
+ACTS.recordCall=el=>{const c=call(el.dataset.id);c.status="processing";did("Enregistrement envoyé","Enregistrement reçu : transcription en cours.");render();};
+ACTS.processCall=el=>{const c=call(el.dataset.id);c.status="ready";c.audio=true;
+  c.decisions=c.decisions||["Le clip reste le levier principal de la sortie."];
+  c.actions=c.actions||[{t:"Demander trois devis de clip",why:"« Il nous faut trois devis avant la fin du mois. »",task:null},{t:"Préparer un planning TikTok de quatre semaines",why:"« Quatre semaines de TikTok avant la sortie. »",task:null}];
+  c.report=c.report||[["Décision","Le clip reste le levier principal.","« Le clip, c'est vraiment le cœur. »","À confirmer"],["Hypothèse","Le public cœur : 18-25 ans en France et en Belgique.","« La France et la Belgique d'abord. »","À confirmer"]];
+  c.pending=c.pending||2;c.summarySent=false;c.transcript=c.transcript||[["00:04:10","Mona Lys","Le clip, c'est vraiment le cœur."],["00:22:31","Lina Haddad","La France et la Belgique d'abord."]];
+  did("Compte rendu prêt","Compte rendu prêt : PO a rangé ce qui a été dit, chaque phrase avec sa citation.");render();};
+ACTS.closeCall=el=>{const c=call(el.dataset.id);c.status="closed";c.closedOn=TODAY;did("Call clôturé");render();};
+ACTS.scrollTo=el=>{const t=document.getElementById(el.dataset.to);if(t)t.scrollIntoView({behavior:"smooth",block:"center"});};
+MODALS.task={
+  render(ctx){const a=call(ctx.id).actions[+ctx.i];return `<h2>Créer la tâche</h2><p class="why"><b>${esc(a.t)}</b></p><p class="quote">${esc(a.why)}</p>
+    ${fld("t-who","Responsable",`<select><option value="">Choisir</option>${["Lina Haddad","Claire Morel","Nadia Benali","Tom Mercier"].map(n=>`<option>${n}</option>`).join("")}</select>`,"PO ne choisit ni le responsable ni l'échéance.",true)}
+    ${fld("t-due","Échéance",`<input type="date">`,"",true)}${foot("Créer la tâche")}`;},
+  save(ctx){const who=val("t-who"),due=val("t-due");if(!who)S.err["t-who"]="Choisissez qui s'en charge.";if(!due)S.err["t-due"]="Choisissez une échéance.";else if(due<TODAY)S.err["t-due"]="L'échéance doit être aujourd'hui ou après.";
+    if(Object.keys(S.err).length)return false;call(ctx.id).actions[+ctx.i].task={who,due};did("Tâche créée");return true;}
+};
+MODALS.summary={
+  render(ctx){const c=call(ctx.id);const to=[...c.people.map(id=>contact(id).name),...c.guests,...c.team.filter(n=>n!==me().name)].join(", ");
+    return `<h2>Résumé pour les participants</h2><p class="why">Préparé par PO à partir du compte rendu. Relisez et corrigez avant d'envoyer ; ni la transcription ni l'audio ne partent.</p>
+    ${mailPreview({to,toSrc:"Participants du call",subject:`Résumé · ${c.title} — ${callWhere(c)}`,message:`Bonjour à tous,\n\nMerci pour l'échange d'hier. Ce qui a été décidé :\n${(c.decisions||[]).map(d=>"– "+d).join("\n")}\n\nLes prochaines étapes :\n${(c.actions||[]).map(a=>"– "+a.t).join("\n")}\n\n${me().name}`})}
+    ${foot("Envoyer aux participants")}`;},
+  save(ctx){call(ctx.id).summarySent=true;did("Résumé envoyé aux participants");return true;}
+};
+MODALS.newMeeting={
+  render(){return `<h2>Nouvelle réunion</h2><p class="why">Une réunion interne, hors projet. Seuls vous et les participants la verrez ; elle s'enregistre et se transcrit comme un call.</p>
+    ${fld("m-name","Nom du call",`<input placeholder="Ex. Point hebdo de l'équipe">`,"",true)}
+    ${fld("m-who","Participants",`<select multiple size="4">${["Claire Morel","Lina Haddad","Nadia Benali","Tom Mercier"].filter(n=>n!==me().name).map(n=>`<option>${n}</option>`).join("")}</select>`,"Vous en faites partie d'office.")}
+    ${fld("m-day","Date",`<input type="date" value="2026-10-30">`,"",true)}
+    ${fld("m-start","Début",`<input type="time" value="12:00">`,"",true)}
+    ${fld("m-end","Fin",`<input type="time" value="12:30">`,"",true)}
+    <div class="choice"><label><input type="radio" name="visio" checked> <span>Créer un lien Google Meet<small>Google envoie l'invitation aux participants.</small></span></label></div>
+    ${foot("Créer la réunion")}`;},
+  save(){const n=val("m-name"),d=val("m-day"),a=val("m-start"),b=val("m-end");
+    if(!n)S.err["m-name"]="Donnez un nom au call.";if(d&&d<TODAY)S.err["m-day"]="Ce créneau est déjà passé.";if(a&&b&&b<=a)S.err["m-end"]="La fin doit suivre le début.";
+    if(Object.keys(S.err).length)return false;
+    S.calls.push({id:"cl"+Date.now(),title:n,project:null,day:d,start:a,end:b,status:"upcoming",owner:me().name,team:[me().name,...[...document.getElementById("m-who").selectedOptions].map(o=>o.value)],people:[],guests:[],agenda:[],meet:"meet.google.com/pds-new"});
+    did("Réunion créée");return true;}
+};
+ACTS.propsDone=el=>{const c=call(el.dataset.id);c.pending=0;c.report=c.report.map(r=>r[3]==="À confirmer"?[r[0],r[1],r[2],"Confirmé par "+me().name]:r);did("Propositions tranchées");render();};
+/* ================= ARTISTES ================= */
+SEEDS.push(s=>{
+  const A=(id,name,rel,country,titles,projects,extra)=>Object.assign({id,name,rel,country,titles,projects},extra||{});
+  s.artists=[
+    A("monalys","Mona Lys","Signé","France",[["Néons","Mix","Néons"],["Velours","Maquette",null],["Ciel ouvert","Maquette","Néons"],["Marée basse","Maquette",null],["Minuit pile","Maquette",null]],
+      [["neons","Single","Master › Mixage","En attente de Karim Haddou (lien privé) : déposer le Mix final"]],
+      {fans:"12,4 k",civil:"Mona Lysiak",deezer:true,contacts:[["Paul Lys","Manager","management@monalys.fr",true]],
+       bio:"Autrice-compositrice et interprète née à Lille, Mona Lys mêle pop électronique et écriture intime. Signée chez PDS en mars 2025.",
+       identity:{current:{v:2,on:"2026-09-02",by:"Claire Morel",manifesto:"Une pop de nuit, lumineuse et sans esbroufe.",palette:"Bleu nuit, néon rose, blanc cassé"},
+         proposal:{v:3,by:"Nadia Benali",on:"2026-10-27",what:"Palette : ajout d'un orange sodium ; typographie : passage à une grotesque étroite pour les titres.",state:"pending"}},
+       next:["Néons","2026-12-05"],activity:[["Pochette V3 déposée sur Néons","Nadia Benali","2026-10-28"],["Proposition d'identité V3","Nadia Benali","2026-10-27"],["Dossier de presse ajouté","Lina Haddad","2026-10-15"]]}),
+    A("ilan","Ilan","Signé","Belgique",[["Ressac","Maquette","Ressac"],["Écume","Maquette","Ressac"],["Large","Maquette","Ressac"]],[["ressac","EP","Cadrage › Brief de cadrage","À vous : trancher 3 propositions de l'échange de cadrage"]],{fans:"3,1 k",deezer:true,next:["Ressac","2027-01-22"],contacts:[],activity:[]}),
+    A("zephyr","Zéphyr Vega","Signé","France",[["Mirage","Mise à plat","Mirage"]],[["mirage","Single","Cadrage › Échange de cadrage","À vous : déposer l'enregistrement du call du 26/10"]],{next:["Mirage","2027-01-22"],contacts:[],activity:[]}),
+    A("selene","Sélène Vega","Signé","France",[["Ciel bas","Maquette","Ciel bas"]],[],{contacts:[],activity:[]}),
+    A("mako","Mako Rouge","Collaboration","France",[],[["mic","Format PDS","Marketing › Production › Épisode 12","En attente de Studio Ressac (lien privé) : déposer le devis du tournage"]],{contacts:[],activity:[]}),
+    A("nahel","Nahel Nuit","Collaboration","France",[],[],{contacts:[],activity:[]}),
+    A("rivo","Rivo Blanc","Collaboration","Canada",[],[],{contacts:[],activity:[]})
+  ];
+});
+const artist=id=>S.artists.find(a=>a.id===id);
+const idTodo=a=>a.identity&&a.identity.proposal&&a.identity.proposal.state==="pending"&&isDir()?a.identity.proposal:null;
+
+PAGES.artists={nav:"artists",render(){
+  const q="art",tab=ui("artTab")||"all",tf=filterVal(q,"titles");
+  const list=S.artists.filter(a=>(tab==="all"||a.rel===tab)&&(!tf||(tf==="Avec des titres"?a.titles.length:!a.titles.length))&&matchQ(q,a.name+" "+(a.bio||"")));
+  return `${pageHead({title:"Artistes",desc:"Les artistes du label, tels qu'ils apparaissent sur les plateformes, et où en sont leurs projets.",actions:btn(`${I.plus} Nouvel artiste`,"noop","","lg")})}
+  <div class="colstack" style="gap:12px">
+  ${tabs("artTab",[["all","Tous",S.artists.length],["Signé","Signés",S.artists.filter(a=>a.rel==="Signé").length],["Collaboration","Collaborations",S.artists.filter(a=>a.rel==="Collaboration").length]])}
+  ${toolbar(q,"Nom, notes…",[{k:"titles",label:"Titres",all:"Avec ou sans titre",options:["Avec des titres","Sans titre"]}])}
+  ${table([{t:"Nom"},{t:"Relation",cls:"hide-m"},{t:"Titres",cls:"hide-m"},{t:"En cours"},{t:"Prochaine sortie",cls:"hide-m"}],list.map(a=>`<tr class="go" data-act="go" data-p="artist" data-id="${a.id}"><td><span class="cellrow">${avatar(a.name)}<span class="name">${esc(a.name)}</span></span></td><td class="hide-m">${esc(a.rel)}</td><td class="hide-m num">${a.titles.length}</td>
+    <td>${a.projects.length?a.projects.map(([p,,place])=>`${esc(PROJECTS[p].title)}<span class="sub">${esc(place)}</span>`).join(""):`<span class="mut">Aucun projet en cours</span>`}</td><td class="hide-m">${a.next?`${fmtShort(a.next[1])}<span class="sub">${esc(a.next[0])} · dans ${daysFrom(a.next[1])} jours</span>`:`<span class="mut">—</span>`}</td></tr>`),
+    `<b>Aucun artiste ne correspond à ces filtres.</b>Retirez un filtre pour élargir la liste.`)}
+  </div>`;
+}};
+
+PAGES.artist={nav:"artists",render(){
+  const a=artist(S.id),sub=S.sub||"overview",prop=idTodo(a);
+  const TABS=[["overview","Vue d'ensemble"],["titles","Titres"],["projects","Projets"],["identity","Identité"],["files","Fichiers"],["activity","Activité"],...(a.deezer?[["disco","Discographie"]]:[])];
+  let now="";
+  if(prop)now=nowCard({extra:badge("t-act","À valider"),eyebrow:`${esc(a.name)} · Identité`,title:`Décider de la proposition d'identité V${prop.v}`,why:`${esc(prop.by)} propose le ${fmtDay(prop.on)} : ${esc(prop.what)}`,facts:[["En vigueur",`V${a.identity.current.v}, approuvée le ${fmtDay(a.identity.current.on)}`]],
+    actions:S.ctx.refuse?`<div class="field" style="width:100%">${fld("id-why","Motif",`<textarea placeholder="Ce qui ne va pas, pour la prochaine version"></textarea>`,"Il revient à "+esc(prop.by)+".",true)}</div>${btn("Refuser la proposition","idRefuse",`data-id="${a.id}"`)}${btn("Annuler","idCancel","","ghost")}`:`${btn("Approuver la V"+prop.v,"idApprove",`data-id="${a.id}"`)}${btn("Refuser","idRefuseOpen","","outline")}`,flash:S.flash});
+  else if(S.flash)now=`<div class="banner" role="status">${I.check}<span>${S.flash}</span></div>`;
+  const body={
+    overview:()=>`<div class="cols"><div class="colstack">
+      ${card("En cours","Les projets de l'artiste, où ils en sont et qui est attendu.","",a.projects.length?`<ul class="rows">${a.projects.map(([p,kind,place,wait])=>`<li><span class="grow"><span class="t"><b>${esc(PROJECTS[p].title)}</b> · ${esc(kind)}</span><span class="c">${esc(place)} · ${esc(wait)}</span></span>${badge("t-neutral","Sortie "+ddmm(PROJECTS[p].due))}</li>`).join("")}</ul>`:`<p class="why">Aucun projet en cours.</p>`,a.projects.length)}
+      ${card("Titres","Les titres qui le créditent, avec leur état audio.",btn(`${I.plus} Nouveau titre`,"noop","","outline sm"),a.titles.length?`<ul class="rows">${a.titles.map(([t,st,p])=>`<li><span class="grow"><span class="t"><b>${esc(t)}</b></span><span class="c">${p?"Projet "+esc(p):"Aucun projet"}</span></span>${badge(st==="Mix"||st==="Mise à plat"?"t-info":"t-neutral",st)}</li>`).join("")}</ul>`:`<p class="why">Aucun titre ne crédite cet artiste pour l'instant.</p>`,a.titles.length)}
+      ${a.bio?card("Biographie","","",`<p class="why">${esc(a.bio)}</p><span class="src">Rédigée par l'équipe</span>`):""}
+    </div><div class="colstack">
+      ${card("Identité","","",factList([["Nom d'artiste",esc(a.name)],["Relation avec PDS",esc(a.rel)],["Nom civil",a.civil&&esc(a.civil)],["Pays d'origine",esc(a.country)]]))}
+      ${card("Contacts","",btn(`${I.plus} Ajouter`,"noop","","ghost sm"),a.contacts.length?`<ul class="rows">${a.contacts.map(([n,r,m,p])=>`<li>${avatar(n)}<span class="grow"><span class="t">${esc(n)} ${p?badge("t-neutral","Principal"):""}</span><span class="c">${esc(r)} · ${esc(m)}</span></span></li>`).join("")}</ul>`:`<p class="why">Aucun contact pour l'instant.</p>`)}
+    </div></div>`,
+    titles:()=>table([{t:"Titre"},{t:"État audio"},{t:"Projet"}],a.titles.map(([t,st,p])=>`<tr><td class="name">${esc(t)}</td><td>${badge("t-neutral",st)}</td><td>${p?esc(p):`<span class="mut">—</span>`}</td></tr>`),"<b>Aucun titre ne crédite cet artiste pour l'instant.</b>"),
+    projects:()=>table([{t:"Projet"},{t:"Où il en est"},{t:"Sortie",cls:"hide-m"}],a.projects.map(([p,kind,place,wait])=>`<tr><td><span class="name">${esc(PROJECTS[p].title)}</span><span class="sub">${esc(kind)}</span></td><td>${esc(place)}<span class="sub">${esc(wait)}</span></td><td class="hide-m">${fmtShort(PROJECTS[p].due)}</td></tr>`),"<b>Aucun projet visible pour cet artiste.</b>"),
+    identity:()=>a.identity?`${card(`Identité en vigueur · V${a.identity.current.v}`,`Approuvée par ${esc(a.identity.current.by)} le ${fmtDay(a.identity.current.on)}.`,"",factList([["Manifeste",esc(a.identity.current.manifesto)],["Palette",esc(a.identity.current.palette)]]))}
+      ${a.identity.proposal?card(`Proposition V${a.identity.proposal.v}`,`Par ${esc(a.identity.proposal.by)} le ${fmtDay(a.identity.proposal.on)}.`,"",`<p class="why">${esc(a.identity.proposal.what)}</p>${badge(a.identity.proposal.state==="pending"?"t-act":a.identity.proposal.state==="approved"?"t-ok":"t-danger",a.identity.proposal.state==="pending"?"À décider":a.identity.proposal.state==="approved"?"Approuvée":"Refusée")}${a.identity.proposal.why?`<p class="quote">${esc(a.identity.proposal.why)}</p>`:""}`):""}`
+      :card("Identité artistique","","",`<p class="why">Aucune identité écrite pour cet artiste.</p>${btn("Écrire l'identité","noop","","outline sm")}`),
+    files:()=>table([{t:"Nom"},{t:"Catégorie"},{t:"Ajouté",cls:"hide-m"}],S.files.filter(f=>f.att===a.name).map(f=>`<tr class="go" data-act="open" data-m="file" data-id="${f.id}"><td class="name">${esc(f.name)}</td><td>${badge("t-neutral",f.cat)}</td><td class="hide-m">${fmtShort(f.on)}<span class="sub">${esc(f.by)}</span></td></tr>`),"<b>Aucun fichier pour l'instant.</b>"),
+    activity:()=>card("Activité","","",a.activity.length?`<ul class="rows">${a.activity.map(([t,by,on])=>`<li><span class="grow"><span class="t">${esc(t)}</span><span class="c">Par ${esc(by)} · ${fmtDay(on)}</span></span></li>`).join("")}</ul>`:`<p class="why">Aucune activité pour l'instant.</p>`),
+    disco:()=>card("Discographie","Lue sur Deezer.","",`<ul class="rows"><li><span class="grow"><span class="t"><b>Néons</b> · Single</span><span class="c">À paraître · Sam. 05/12/2026</span></span>${badge("t-info","Au catalogue")}</li><li><span class="grow"><span class="t"><b>Lumière froide</b> · EP</span><span class="c">2024</span></span></li></ul>`)
+  }[sub]();
+  return `${pageHead({back:["artists","Tous les artistes"],lead:avatar(a.name,"lg"),title:esc(a.name),desc:`Artiste · ${esc(a.country)}`,actions:`${btn("Modifier","noop","","outline lg")}${btn(`${I.plus} Nouveau titre`,"noop","","outline lg")}${btn(I.dots,"noop",'aria-label="Plus d\'actions"',"outline icon lg")}`})}
+  ${now}
+  <div class="tabs" role="group" aria-label="Sections de l'artiste">${TABS.map(([k,l])=>`<button type="button" data-act="go" data-p="artist" data-id="${a.id}" data-sub="${k}" aria-pressed="${sub===k}">${l}</button>`).join("")}</div>
+  ${body}`;
+}};
+ACTS.idApprove=el=>{const a=artist(el.dataset.id),p=a.identity.proposal;p.state="approved";a.identity.current={v:p.v,on:TODAY,by:me().name,manifesto:a.identity.current.manifesto,palette:a.identity.current.palette+", orange sodium"};a.activity.unshift([`Identité V${p.v} approuvée`,me().name,TODAY]);did(`Identité V${p.v} approuvée`,`Identité V${p.v} approuvée : elle est en vigueur pour les prochains livrables.`);render();};
+ACTS.idRefuseOpen=()=>{S.ctx.refuse=true;render();document.getElementById("id-why").focus();};
+ACTS.idCancel=()=>{S.ctx.refuse=false;S.err={};render();};
+ACTS.idRefuse=el=>{const why=val("id-why");if(!why){S.err={"id-why":"Dites ce qui ne va pas : le motif est obligatoire."};render();document.getElementById("id-why").focus();return;}
+  const a=artist(el.dataset.id);a.identity.proposal.state="refused";a.identity.proposal.why=why;a.activity.unshift([`Proposition d'identité V${a.identity.proposal.v} refusée`,me().name,TODAY]);S.ctx={};did("Proposition refusée",`Proposition refusée. En attente de ${a.identity.proposal.by} : une nouvelle version.`);render();};
+/* ================= CARTE « MAINTENANT » PROPOSÉE (30/10) =================
+   Qui agit se voit avant de lire : l'avatar de la personne qu'on attend, ou
+   une icône teintée quand c'est à vous. Un titre court (la personne en
+   sujet), une ligne de faits en temps relatif, les actions à droite, les
+   gestes rares dans « ⋯ », la frise des étapes du contrat. */
+I.todo='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h10M10 5l5 5-5 5"/></svg>';
+I.done='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 10.5l3.5 3.5 7.5-8"/></svg>';
+I.off='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="M6 10h8"/></svg>';
+
+const ago=iso=>{const n=-daysFrom(iso);return n<=0?"aujourd'hui":n===1?"hier":`il y a ${n} jours`;};
+const sep='<span class="sep" aria-hidden="true">·</span>';
+const moreMenu=items=>items.length?`<details class="more"><summary aria-label="Plus d'actions">${I.dots}</summary><div class="menu">${items.join("")}</div></details>`:"";
+const late=k=>k.due&&k.due<=TODAY&&!["signed","terminated"].includes(k.state);
+
+/* The contract's road: where it stands, without a sentence. */
+function contractSteps(k){
+  const order=["draft","in_review","approved","sent","returned","signed"];
+  const at=k.state==="terminated"?order.length:order.indexOf(k.state);
+  const L=[["Préparation",0],["Validation",1],["Envoi",2],[`Signature de ${signer(k)?signer(k).name:"la partie"}`,3],["Signature PDS",4]];
+  return `<ol class="steps" aria-label="Étapes du contrat">${L.map(([l,i])=>{const st=i<at?"done":i===at?"cur":"";return `<li class="${st}"><span class="dot" aria-hidden="true"></span>${esc(l)}</li>`;}).join("")}</ol>`;
+}
+
+function newNowCard({mine,who,icon,iconTone="",eyebrow,title,meta=[],quote,actions="",more=[],extra="",steps="",flash}){
+  const lead=who?avatar(who):`<span class="nicon ${iconTone}">${icon||I.todo}</span>`;
+  return `<section class="now2 ${mine?"mine":""}" aria-label="Maintenant"><div class="lead">${lead}</div>
+  <div class="body"><div class="top"><div class="tt">${eyebrow?`<span class="eb">${eyebrow}</span>`:""}<h2>${title}</h2></div><div class="acts">${actions}${moreMenu(more)}</div></div>
+  ${meta.length?`<p class="meta">${meta.filter(Boolean).join(sep)}</p>`:""}${quote||""}${steps}
+  ${flash?`<div class="banner" role="status">${I.check}<span>${flash}</span></div>`:""}</div>${extra}</section>`;
+}
+
+function contractNow(k){
+  const todo=contractTodo(k),wait=contractWait(k),flash=S.flash,steps=contractSteps(k);
+  const due=k.due?`échéance ${fmtDay(k.due)}`:null,lateBadge=late(k)?badge("t-danger","Échéance passée"):"";
+  const last=k.journal[k.journal.length-1];
+  if(k.state==="in_review"){
+    const fix=S.ctx.fix?`<div class="fix">${fld("fix-note","Ce qui doit changer, et pourquoi",`<textarea></textarea>`,"Il revient en tête du contrat, chez le responsable.",true)}<div class="acts-row">${btn("Envoyer la demande","fixSend",`data-id="${k.id}"`)}${btn("Annuler","fixCancel","","ghost")}</div></div>`:"";
+    if(todo)return newNowCard({mine:true,title:"Validez le contrat",meta:[`soumis par ${esc(k.owner)} ${ago(last.on)}`,due,lateBadge],
+      actions:S.ctx.fix?"":`${btn("Valider","validateC",`data-id="${k.id}"`)}${btn("Demander des modifications","fixOpen","","outline")}`,extra:fix,steps,flash});
+    return newNowCard({who:"Claire Morel",title:"Claire Morel doit valider le contrat",meta:[`soumis ${ago(last.on)}`,due,lateBadge],steps,flash});
+  }
+  if(k.state==="draft"){
+    const r=k.review&&k.review.comment;
+    const quote=r?`<p class="quote">« ${esc(r)} »</p>`:"";
+    if(todo)return newNowCard({mine:true,title:r?"Reprenez le contrat, puis soumettez-le à nouveau":"Soumettez le contrat à la direction",
+      meta:[r?`modifications demandées par ${esc(k.review.by)} ${ago(k.review.on)}`:null,due,lateBadge],quote,
+      actions:btn("Soumettre à la direction","submitC",`data-id="${k.id}"`)+btn("Modifier une clause","open",`data-m="clause" data-id="${k.id}"`,"outline"),steps,flash});
+    return newNowCard({who:k.owner,title:`${esc(k.owner)} prépare le contrat`,meta:[r?"modifications demandées":null,due,lateBadge],quote,steps,flash});
+  }
+  if(k.state==="approved"){
+    const c=signer(k);
+    if(todo)return newNowCard({mine:true,title:"Envoyez le contrat pour signature",meta:[k.review&&k.review.on?`validé par Claire Morel ${ago(k.review.on)}`:"validé par Claire Morel",`à ${esc(c.name)}`,due,lateBadge],
+      actions:btn("Envoyer pour signature","open",`data-m="sendC" data-id="${k.id}"`),steps,flash});
+    return newNowCard({who:k.owner,title:`${esc(k.owner)} doit envoyer le contrat`,meta:[k.review&&k.review.on?`validé ${ago(k.review.on)}`:"validé",due,lateBadge],steps,flash});
+  }
+  if(k.state==="sent"){
+    const c=signer(k),rel=k.relances.length?`relancé ${ago(k.relances[k.relances.length-1].on)}`:null;
+    return newNowCard({who:c.name,title:`${esc(c.name)} doit signer le contrat`,
+      meta:[`envoyé ${ago(k.sentOn)} par ${esc(k.sentBy)}`,k.openedOn?`ouvert ${ago(k.openedOn)}`:"pas encore ouvert",rel,due,lateBadge],
+      actions:isOwner(k)?btn("Relancer","open",`data-m="relance" data-w="w-${k.id}-${wait.contact}"`,"outline"):"",
+      more:[`<button type="button" data-act="copyLink">Copier son lien privé</button>`,`<button type="button" data-act="noop">Le contrat est revenu signé autrement</button>`],
+      extra:`<div class="fix"><div><button class="btn" type="button" data-act="returnSigned" data-id="${k.id}" style="background:var(--glass);color:var(--glass-fg)">Proto : faire revenir le contrat signé</button></div></div>`,steps,flash});
+  }
+  if(k.state==="returned"){
+    const c=signer(k);
+    if(todo)return newNowCard({mine:true,title:"Signez le contrat pour PDS",meta:[`signé par ${esc(c.name)} ${ago(k.returnedOn||TODAY)}, par son lien privé`,due,lateBadge],
+      actions:btn("Signer pour PDS","open",`data-m="countersign" data-id="${k.id}"`),steps,flash});
+    return newNowCard({who:"Claire Morel",title:"Claire Morel doit signer pour PDS",meta:[`signé par ${esc(c.name)} ${ago(k.returnedOn||TODAY)}`],steps,flash});
+  }
+  if(k.state==="signed")return newNowCard({icon:I.done,iconTone:"ok",title:`Signé le ${fmtDay(k.signedOn)}`,
+    meta:[k.end?`court jusqu'au ${fmtDay(k.end)}`:null,k.pdsSignedBy?`signé pour PDS par ${esc(k.pdsSignedBy)}`:null],more:[`<button type="button" data-act="noop">Résilier le contrat</button>`],flash});
+  return newNowCard({icon:I.off,iconTone:"neutral",title:"Résilié",meta:[k.journal.length?`le ${fmtDay(last.on)} par ${esc(last.by)}`:null],flash});
+}
+
+/* The contract page with the chosen card; the old one stays to compare. */
+const oldContractRender=PAGES.contract.render;
+PAGES.contract.render=function(){
+  const html=oldContractRender();
+  if(S.cardStyle==="old")return html;
+  const k=ctr(S.id);
+  return html.replace(/<div class="callout bad"><b>Modifications demandées<\/b>[\s\S]*?<\/div>/,"")
+    .replace(/<section class="now" aria-label="Maintenant">[\s\S]*?<\/section>/,contractNow(k));
+};
+
+document.getElementById("roleSel").addEventListener("change",e=>{S.role=e.target.value;S.flash=null;closeModal();render();});
+document.getElementById("pageSel").addEventListener("change",e=>go(e.target.value));
+document.getElementById("resetBtn").addEventListener("click",()=>{const st=S.cardStyle;S=fresh();S.cardStyle=st;S.page="contract";S.id=document.getElementById("ctrSel").value;render();});
+document.getElementById("ctrSel").addEventListener("change",e=>go("contract",e.target.value));
+document.getElementById("cardSel").addEventListener("change",e=>{S.cardStyle=e.target.value;render();});
+S=fresh();S.page="contract";S.id="k2";render();
+})();
+</script>
