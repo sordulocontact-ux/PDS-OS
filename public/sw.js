@@ -13,7 +13,7 @@ self.addEventListener("push", (event) => {
       body: data.body || "",
       tag: data.tag,
       data: { url: data.url || "/app" },
-      icon: "/favicon.ico",
+      icon: "/icon-192.png",
     }),
   );
 });

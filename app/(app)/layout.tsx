@@ -7,6 +7,7 @@ import { NotificationBell } from "@/components/notifications/notification-bell";
 import { NotificationListener } from "@/components/notifications/notification-listener";
 import { PreprodSlot } from "@/components/preprod/preprod-slot";
 import { MobileNav } from "@/components/shell/mobile-nav";
+import { PdsLogo } from "@/components/shell/pds-logo";
 import { Sidebar } from "@/components/shell/sidebar";
 import { CollapsedNavProvider } from "@/components/shell/use-collapsed-nav";
 import { UserPanel } from "@/components/shell/user-panel";
@@ -91,14 +92,9 @@ export default async function AppLayout({
       />
     ) : null;
 
-  // Trimmed to its cap height as in the Figma, so the navigation starts 24 px
-  // below the letters, not below the line box.
   const brand = (
-    <Link
-      href={routes.app}
-      className="text-base font-bold no-underline [text-box:trim-both_cap_alphabetic]"
-    >
-      {fr.shell.brand}
+    <Link href={routes.app} aria-label={fr.shell.brand}>
+      <PdsLogo className="w-8" />
     </Link>
   );
 

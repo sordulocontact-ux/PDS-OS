@@ -4,6 +4,7 @@ import { IconMenu } from "@/components/icons";
 import { useState } from "react";
 
 import { NavLinks } from "@/components/shell/nav-links";
+import { PdsLogo } from "@/components/shell/pds-logo";
 import { Button } from "@/components/ui/button";
 import { CountBadge } from "@/components/ui/count-badge";
 import {
@@ -62,8 +63,9 @@ export function MobileNav({
         className="w-72 gap-6 border-none bg-sidebar px-6 py-4 text-sidebar-foreground"
       >
         <SheetHeader className="p-0 pt-1.5">
-          <SheetTitle className="font-sans text-base font-bold text-[color:var(--nav-fg)]">
-            {fr.shell.brand}
+          <SheetTitle className="text-[color:var(--nav-fg)]">
+            <PdsLogo className="w-8" />
+            <span className="sr-only">{fr.shell.brand}</span>
           </SheetTitle>
         </SheetHeader>
         <div className="flex flex-1 flex-col justify-between gap-6">

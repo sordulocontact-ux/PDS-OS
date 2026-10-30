@@ -11,7 +11,7 @@ export const shell = {
     collapse: (title: string) => `Replier « ${title} »`,
     expand: (title: string) => `Déplier « ${title} »`,
   },
-  brand: "PDS",
+  brand: "PDS OS",
   nav: {
     label: "Navigation principale",
     home: "Accueil",

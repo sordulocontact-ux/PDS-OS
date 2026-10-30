@@ -276,8 +276,8 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   carte flottante à 16 px du bord, `--shell-inset` vaut désormais 0). Largeur
   `--nav-width` (218 px) ou `--nav-width-collapsed` (68 px), marge intérieure 8 px.
   `components/shell/sidebar.tsx`.
-- En haut, « PDS » dans un carré noir de 60 px arrondi 12 px (`--nav-brand-bg`, masqué
-  repliée) et le bouton pour replier / déplier (icône 20 px). Dessous, la navigation
+- En haut, le monogramme PDS OS (`PdsLogo`, `Logo.svg` du 30/10/2026, 36 px de large, couleur
+  `--nav-brand-fg`) dans un carré noir de 60 px arrondi 16 px (`--nav-brand-bg`) et le bouton pour replier / déplier (icône 20 px). Dessous, la navigation
   (`lib/ui/nav-items.ts`) : éléments de 40 px, icône 20 px, fond `--nav-item-active-bg`
   sur la page ouverte, `--nav-item-hover-bg` au survol. Repliée : icônes seules,
   centrées, libellé en `Tooltip`. En bas, sur un filet : l'avatar (initiales) et le nom
@@ -369,7 +369,7 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
 - Mobile : même navigation (pleine largeur) dans un tiroir blanc, ouvert depuis l'en-tête ;
   la navigation du projet y est la rangée de puces (`ProjectNavChips`, ci-dessus), toutes ses
   entrées (Validations, Activité et Budget compris, pour qu'aucune page ne soit sans accès).
-- Barre principale repliée (dans un projet) : le carré **PDS** (40 px, rayon 10) reste
+- Barre principale repliée (dans un projet) : le carré du logo (40 px, rayon 12, monogramme 24 px) reste
   toujours visible au-dessus du bouton de dépliage ; « Travail » porte le nombre de mes actions
   du projet ouvert (`CountBadge size="sm"` 16 px au coin de l'icône).
 

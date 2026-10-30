@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { PdsLogo } from "@/components/shell/pds-logo";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { routes } from "@/lib/auth/redirects";
 import { core } from "@/lib/i18n/fr/core";
@@ -22,8 +23,9 @@ export function AuthFrame({
       <div className="flex w-full max-w-sm flex-col items-center gap-6">
         <Link
           href={routes.home}
-          className="rounded-md text-sm font-semibold tracking-tight outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+          className="flex items-center gap-2 rounded-md text-sm font-semibold tracking-tight outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
         >
+          <PdsLogo className="w-6" />
           {fr.app.name}
         </Link>
 

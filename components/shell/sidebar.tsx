@@ -5,6 +5,7 @@ import Link from "next/link";
 import { IconSidebar } from "@/components/icons";
 import { AccountMenu } from "@/components/shell/account-menu";
 import { NavLinks } from "@/components/shell/nav-links";
+import { PdsLogo } from "@/components/shell/pds-logo";
 import { useCollapsedNav } from "@/components/shell/use-collapsed-nav";
 import { Button } from "@/components/ui/button";
 import { routes } from "@/lib/auth/redirects";
@@ -52,15 +53,13 @@ export function Sidebar({
               ink square); full width, the larger square of the Figma. */}
           <Link
             href={routes.app}
-            aria-label={collapsed ? fr.shell.brand : undefined}
+            aria-label={fr.shell.brand}
             className={cn(
-              "flex items-center justify-center bg-[var(--nav-brand-bg)] font-bold text-[color:var(--nav-brand-fg)] no-underline",
-              collapsed
-                ? "size-10 rounded-xl text-[length:var(--type-micro)] leading-none"
-                : "size-15 rounded-2xl text-[length:var(--type-body-lg)] leading-[var(--type-body-lg-lh)]",
+              "flex items-center justify-center bg-[var(--nav-brand-bg)] text-[color:var(--nav-brand-fg)]",
+              collapsed ? "size-10 rounded-xl" : "size-15 rounded-2xl",
             )}
           >
-            {fr.shell.brand}
+            <PdsLogo className={collapsed ? "w-6" : "w-9"} />
           </Link>
           <Button
             variant="ghost"
