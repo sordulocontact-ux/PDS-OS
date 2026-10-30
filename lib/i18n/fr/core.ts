@@ -1,4 +1,6 @@
 export const core = {
+  // The mark of a document's file on its tile (DocumentCard `flat`).
+  documentCard: { pdf: "PDF" },
   // Shared by every form (docs/DESIGN.md § 4, « Champs obligatoires »).
   forms: {
     required: "obligatoire",

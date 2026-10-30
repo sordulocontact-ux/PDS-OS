@@ -352,6 +352,9 @@ export const contracts = {
     draftLine: "Projet de contrat",
     signedLine: (name: string) => `Signé par ${name}, reçu par son lien privé`,
     toDecide: "à décider",
+    // « Changé depuis la v1 : Part 50 % → 40 % (Lina Haddad, 30/10) ».
+    changed: (version: number, what: string, by: string, day: string) =>
+      `Changé depuis la v${version - 1} : ${what} (${by}, ${day})`,
   },
   // « Déjà fait »: versions and journal, folded.
   journal: {
