@@ -7,11 +7,14 @@ import { NewArtistButton } from "@/components/catalog/new-artist-button";
 import { EmptyState } from "@/components/shell/empty-state";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
+import { LiveViewLink } from "@/components/archive/live-view-link";
 import { UrlFilters, type UrlFilterGroup } from "@/components/ui/url-filters";
+import { archiveFilterGroup } from "@/lib/archive/filter";
 import { isArchivedView } from "@/lib/archive/types";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
+import { viewHref } from "@/lib/ui/view-href";
 import {
   loadRosterProgress,
   rosterProgressOf,
@@ -64,6 +67,7 @@ export default async function ArtistsPage({
         icon={IconBoxArchive}
         title={fr.records.archivedEmpty.artist}
         body={fr.records.archivedEmptyBody}
+        action={<LiveViewLink href={viewHref(routes.artists, { relation })} />}
       />
     ) : titles ? (
       <EmptyState
@@ -105,7 +109,6 @@ export default async function ArtistsPage({
             relation={relation}
             counts={counts}
             archived={archived}
-            canArchive={canArchive}
             filters={{ titles }}
           >
             {all.length === 0 ? (
@@ -123,8 +126,11 @@ export default async function ArtistsPage({
                 filters={
                   <UrlFilters
                     path={routes.artists}
-                    params={{ relation, view: archived ? "archived" : null }}
-                    groups={filterGroups(ofTab, titles)}
+                    params={{ relation }}
+                    groups={[
+                      ...filterGroups(ofTab, titles),
+                      ...(canArchive ? [archiveFilterGroup(archived)] : []),
+                    ]}
                   />
                 }
                 empty={empty}

@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { MastersList } from "@/components/catalog/masters-list";
+import { LiveViewLink } from "@/components/archive/live-view-link";
 import { TitleListViews } from "@/components/catalog/title/title-list-views";
 import { IconDisc } from "@/components/icons";
 import { EmptyState } from "@/components/shell/empty-state";
@@ -10,10 +11,12 @@ import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
 import { buttonVariants } from "@/components/ui/button";
 import { UrlFilters, type UrlFilterGroup } from "@/components/ui/url-filters";
+import { archiveFilterGroup } from "@/lib/archive/filter";
 import { isArchivedView } from "@/lib/archive/types";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
+import { viewHref } from "@/lib/ui/view-href";
 import { listMasters } from "@/lib/catalog/queries";
 import {
   AUDIO_FILTERS,
@@ -71,6 +74,11 @@ export default async function MastersPage({
         icon={IconBoxArchive}
         title={fr.records.archivedEmpty.master}
         body={fr.records.archivedEmptyBody}
+        action={
+          <LiveViewLink
+            href={viewHref(routes.masters, { state: titleViewParam(view) })}
+          />
+        }
       />
     ) : filtering ? (
       <EmptyState
@@ -108,7 +116,6 @@ export default async function MastersPage({
           view={view}
           counts={countTitleViews(filtered)}
           archived={archived}
-          canArchive={canArchive}
           filters={{ ...filters }}
         >
           {all.length === 0 ? (
@@ -124,11 +131,11 @@ export default async function MastersPage({
               filters={
                 <UrlFilters
                   path={routes.masters}
-                  params={{
-                    state: titleViewParam(view),
-                    view: archived ? "archived" : null,
-                  }}
-                  groups={filterGroups(ofView, filters)}
+                  params={{ state: titleViewParam(view) }}
+                  groups={[
+                    ...filterGroups(ofView, filters),
+                    ...(canArchive ? [archiveFilterGroup(archived)] : []),
+                  ]}
                 />
               }
               empty={empty}

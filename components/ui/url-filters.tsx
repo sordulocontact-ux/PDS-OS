@@ -13,6 +13,8 @@ export type UrlFilterGroup = {
   // Only the values some row of the tab holds.
   options: { value: string; label: string }[];
   current: string | null;
+  // Behind the filter button only (Actifs / Archivés).
+  menuOnly?: boolean;
 };
 
 /**
@@ -50,6 +52,7 @@ export function UrlFilters({
         allLabel: group.allLabel,
         options: group.options,
         value: group.current,
+        menuOnly: group.menuOnly,
         onChange: (value) => go({ ...current, [group.key]: value }),
       }))}
       onClear={() => go({})}

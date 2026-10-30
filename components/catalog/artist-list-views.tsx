@@ -1,4 +1,3 @@
-import { ArchiveViewToggle } from "@/components/archive/archive-view-toggle";
 import { DataTableViews } from "@/components/ui/data-table";
 import { routes } from "@/lib/auth/redirects";
 import { ARTIST_RELATIONS, type ArtistRelation } from "@/lib/catalog/types";
@@ -10,22 +9,19 @@ const fr = { catalog };
 export type RelationCounts = Record<ArtistRelation | "all", number>;
 
 // Views of the artist list, in the URL: the relation with PDS as tabs
-// (Tous, Signés, Collaborations, with their counts) and, for the director,
-// live or archived records at the end of the bar. Each axis
-// keeps the others' choice.
+// (Tous, Signés, Collaborations, with their counts); live or archived
+// records sit behind the filter button. Each axis keeps the others' choice.
 export function ArtistListViews({
   relation,
   counts,
   archived,
-  canArchive,
   filters,
   children,
 }: {
   relation: ArtistRelation | null;
   counts: RelationCounts;
   archived: boolean;
-  canArchive: boolean;
-  // The active filters (?titles=), kept by the tabs and the archive toggle.
+  // The active filters (?titles=), kept by the tabs.
   filters: Record<string, string | null>;
   children: React.ReactNode;
 }) {
@@ -49,19 +45,6 @@ export function ArtistListViews({
           current: relation === value,
         })),
       ]}
-      action={
-        canArchive && (
-          <ArchiveViewToggle
-            path={routes.artists}
-            archived={archived}
-            params={Object.fromEntries(
-              Object.entries<string | null>({ ...filters, relation }).filter(
-                (entry): entry is [string, string] => entry[1] !== null,
-              ),
-            )}
-          />
-        )
-      }
     >
       {children}
     </DataTableViews>

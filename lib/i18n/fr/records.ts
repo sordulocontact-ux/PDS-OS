@@ -41,6 +41,7 @@ export const records = {
     label: "Affichage",
     live: "Actifs",
     archived: "Archivés",
+    showLive: "Voir les actifs",
   },
   archivedEmpty: {
     artist: "Aucun artiste archivé.",

@@ -34,6 +34,8 @@ export type FilterControl = {
   options: { value: string; label: string }[];
   value: string | null;
   onChange: (value: string | null) => void;
+  // Always behind the filter button, never a select (Actifs / Archivés).
+  menuOnly?: boolean;
 };
 
 // "all" in a select: no filter on that axis.
@@ -62,8 +64,12 @@ export function FilterBar({
   const offered = filters.filter(
     (filter) => filter.options.length > 0 || filter.value !== null,
   );
-  const shown = offered.slice(0, inline);
-  const more = offered.slice(inline);
+  const selects = offered.filter((filter) => !filter.menuOnly);
+  const shown = selects.slice(0, inline);
+  const more = [
+    ...selects.slice(inline),
+    ...offered.filter((filter) => filter.menuOnly),
+  ];
   const activeMore = more.filter((filter) => filter.value !== null).length;
   const active = offered.some((filter) => filter.value !== null);
 

@@ -1,6 +1,6 @@
 import { IconBoxArchive, IconNodes } from "nucleo-sharp-essential";
 
-import { ArchiveViewToggle } from "@/components/archive/archive-view-toggle";
+import { LiveViewLink } from "@/components/archive/live-view-link";
 import { FormMessage } from "@/components/auth/form-message";
 import { UrlFilters, type UrlFilterGroup } from "@/components/ui/url-filters";
 import { NetworkList } from "@/components/network/network-list";
@@ -9,6 +9,7 @@ import { EmptyState } from "@/components/shell/empty-state";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
 import { DataTableViews } from "@/components/ui/data-table";
+import { archiveFilterGroup } from "@/lib/archive/filter";
 import { isArchivedView } from "@/lib/archive/types";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
@@ -85,6 +86,9 @@ export default async function NetworkPage({
       icon={IconBoxArchive}
       title={fr.records.archivedEmpty.contact}
       body={fr.records.archivedEmptyBody}
+      action={
+        <LiveViewLink href={viewHref(routes.network, { tab, ...filters })} />
+      }
     />
   ) : filtering ? (
     <EmptyState
@@ -138,19 +142,6 @@ export default async function NetworkPage({
               current: tab === key,
             })),
           ]}
-          action={
-            canArchive && (
-              <ArchiveViewToggle
-                path={routes.network}
-                archived={archived}
-                params={Object.fromEntries(
-                  Object.entries({ tab, ...filters }).filter(
-                    (entry): entry is [string, string] => entry[1] !== null,
-                  ),
-                )}
-              />
-            )
-          }
         >
           {all.length === 0 ? (
             empty
@@ -166,8 +157,11 @@ export default async function NetworkPage({
               filters={
                 <UrlFilters
                   path={routes.network}
-                  params={{ tab, view }}
-                  groups={filterGroups(ofTab, filters)}
+                  params={{ tab }}
+                  groups={[
+                    ...filterGroups(ofTab, filters),
+                    ...(canArchive ? [archiveFilterGroup(archived)] : []),
+                  ]}
                 />
               }
               empty={empty}
