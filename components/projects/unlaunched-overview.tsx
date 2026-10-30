@@ -27,11 +27,12 @@ const fr = { shell, transmission };
 /**
  * A project not launched yet (Sacha 30/10/2026: one gesture, the page like
  * the others): the module's head (« Projets / Néons », « Qui fait quoi »),
- * the one gesture expected and from whom (the direction transmits, answers
- * a question or hands it to someone else; the chosen manager accepts, asks
- * or refuses), the question or the refusal received, then what is
- * transmitted in one block of facts (`HandoverFacts`) with the gesture under
- * it. The transmissions are folded in « Déjà fait ». No step, no section.
+ * the question or the refusal received, then what is transmitted in one
+ * block of facts (`HandoverFacts`) with the only gesture under it (the
+ * direction transmits, answers or hands it to someone else; the chosen
+ * manager accepts, asks or refuses). No « À vous » line: the block and its
+ * buttons say it (Sacha 30/10/2026). The transmissions are folded in « Déjà
+ * fait ». No step, no section.
  */
 export function UnlaunchedOverview({
   project,
@@ -60,23 +61,6 @@ export function UnlaunchedOverview({
     (status === "not_transmitted" ||
       status === "refused" ||
       status === "clarification_requested");
-
-  const todo =
-    status === "pending"
-      ? t.todo.accept
-      : status === "clarification_requested"
-        ? t.todo.answer(name)
-        : status === "refused"
-          ? t.todo.reassign
-          : t.todo.transmit;
-  const actor =
-    status === "pending"
-      ? isAssignee
-        ? t.mine(todo)
-        : t.waiting(name, todo)
-      : canTransmit
-        ? t.mine(todo)
-        : t.waiting(t.direction, todo);
 
   const received =
     latest?.response &&
@@ -150,8 +134,6 @@ export function UnlaunchedOverview({
           />
         }
       />
-
-      <p className="font-semibold">{actor}</p>
 
       {received && (
         <ToneCallout tone="warning" as="div">

@@ -1472,8 +1472,9 @@ liste), est obligatoire ou non, accepte ou non « Rien à signaler » (`{"none":
   citation) est **reproposée** si l'enregistrement a changé depuis, tant que le Cadrage est
   ouvert (une personne ajoutée à l'équipe après coup) ; une valeur écrite à la main, jamais.
 - **Transmission** (PROJ-UX-02, 11/10/2026, `…20261011400401`) : avant d'accepter,
-  « Ce que vous acceptez » (Sacha 30/10/2026 : `UnlaunchedOverview` = `ModuleHeader`, le seul geste
-  attendu, puis un bloc de faits `HandoverFacts` où un manque se dit sur sa ligne, calculé par le code) ;
+  « Ce que vous acceptez » (Sacha 30/10/2026 : `UnlaunchedOverview` = `ModuleHeader`, puis un bloc de
+  faits `HandoverFacts` où un manque se dit sur sa ligne, calculé par le code, et le geste dessous ; pas
+  de ligne « À vous ») ;
   une demande de précision porte un **sujet** (`project_assignments.clarification_subject`,
   `respond_to_assignment(…, p_subject)`) et l'historique la montre structurée (auteur, date,
   sujet, question, réponse de la direction, statut : `clarificationsOf`, `ClarificationList`),

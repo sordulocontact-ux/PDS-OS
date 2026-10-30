@@ -1200,7 +1200,7 @@ Demande de Sacha : la page d'acceptation était différente des autres ; la rapp
 cadrage, sans parcours (un seul geste à la fois). Proto `docs/protos/projet-transmis.html`.
 
 - [x] En-tête commun (`ModuleHeader`, « Projets / Néons » dans la barre du haut, « Qui fait quoi » : direction,
-      chef de projet, direction créative gérée là) ; « À vous : accepter le projet » / « En attente de … » ;
+      chef de projet, direction créative gérée là) ; pas de ligne « À vous » (Sacha 30/10 : le bloc et ses boutons le disent) ;
       la précision ou le refus reçus en encadré.
 - [x] « Ce que vous acceptez » en un seul bloc de faits (`HandoverFacts`, `FactBlock` sorti de `CallPlanBlock`) :
       plus de statut répété, de résumé « Transmis : … / Manque : … » ni de colonne « Informations » ;

@@ -8,7 +8,7 @@ const { chromium } = require(process.cwd() + "/node_modules/playwright-core");
   const b=await chromium.launch({channel:"chrome",headless:true});
   const p=await b.newPage({viewport:{width:1440,height:1000},colorScheme:"dark"});p.setDefaultTimeout(5000);
   const errs=[];p.on("pageerror",e=>errs.push(e.message));
-  const actor=async()=>(await p.locator(".actor").count()?await p.locator(".actor").textContent():"—");
+  const actor=async()=>(await p.locator(".actor").count()?"LIGNE À VOUS PRÉSENTE":"pas de ligne À vous");
   const h=async()=>(await p.locator(".bt").first().textContent());
   await p.goto("file://"+file+"#transmettre");
   console.log("1",await actor(),"|",await h());

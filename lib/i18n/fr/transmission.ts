@@ -12,15 +12,6 @@ export const transmission = {
   // The page of a project not launched yet (Sacha 30/10/2026): one gesture
   // at a time, what is transmitted in one block of facts.
   page: {
-    todo: {
-      transmit: "transmettre le projet à un chef de projet",
-      answer: (name: string) => `répondre à la précision de ${name}`,
-      reassign: "transmettre le projet à quelqu'un d'autre",
-      accept: "accepter le projet",
-    },
-    mine: (todo: string) => `À vous : ${todo}.`,
-    waiting: (who: string, todo: string) => `En attente de ${who} : ${todo}.`,
-    direction: "la direction",
     asked: (name: string, subject: string) =>
       `${name} demande une précision · ${subject}`,
     refused: (name: string) => `${name} a refusé le projet`,
