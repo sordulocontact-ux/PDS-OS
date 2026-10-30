@@ -1,148 +1,228 @@
 import Link from "next/link";
 
 import { AssignmentHistory } from "@/components/projects/assignment-history";
-import { TransmissionPanel } from "@/components/projects/transmission-panel";
+import { HandoverFacts } from "@/components/projects/handover-facts";
+import { RespondPanel } from "@/components/projects/respond-panel";
+import { TransmitDialog } from "@/components/projects/transmit-dialog";
+import { ModuleHeader } from "@/components/shell/module/module-header";
+import { WhoDoesWhatButton } from "@/components/shell/module/who-does-what-button";
+import { buttonVariants } from "@/components/ui/button";
+import {
+  BlockFact,
+  FactBlockRow,
+  factBlockTitleClass,
+} from "@/components/ui/fact-block";
+import { Fold } from "@/components/ui/fold";
+import { NameChip, NameChips } from "@/components/ui/name-chip";
+import { ToneCallout } from "@/components/ui/tone-callout";
+import { formatDay } from "@/lib/assistant/facts";
 import { routes } from "@/lib/auth/redirects";
-import { masterLabel } from "@/lib/catalog/types";
 import { shell } from "@/lib/i18n/fr/shell";
-import { projectDateLabel, projectKindLabel } from "@/lib/projects/labels";
+import { transmission } from "@/lib/i18n/fr/transmission";
+import type { CreativeMember } from "@/lib/projects/creatives";
 import type { ProjectDetail } from "@/lib/projects/types";
-import { FactList } from "@/components/ui/fact-list";
 
-const fr = { shell };
+const fr = { shell, transmission };
 
-const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-});
-
-const euroFormatter = new Intl.NumberFormat("fr-FR", {
-  style: "currency",
-  currency: "EUR",
-  maximumFractionDigits: 2,
-  minimumFractionDigits: 0,
-});
-
-// Overview of a project not launched yet: its handover status and next
-// action, what was entered at creation, its masters. No stage, no section.
+/**
+ * A project not launched yet (Sacha 30/10/2026: one gesture, the page like
+ * the others): the module's head (« Projets / Néons », « Qui fait quoi »),
+ * the one gesture expected and from whom (the direction transmits, answers
+ * a question or hands it to someone else; the chosen manager accepts, asks
+ * or refuses), the question or the refusal received, then what is
+ * transmitted in one block of facts (`HandoverFacts`) with the gesture under
+ * it. The transmissions are folded in « Déjà fait ». No step, no section.
+ */
 export function UnlaunchedOverview({
   project,
   viewerPersonId,
   canTransmit,
   people,
+  creatives,
   creativeTeam,
 }: {
   project: ProjectDetail;
   viewerPersonId: string | null;
   canTransmit: boolean;
   people: Array<{ personId: string; name: string }>;
+  creatives: CreativeMember[];
+  // The creative directors' list, managed in « Qui fait quoi ».
   creativeTeam: React.ReactNode;
 }) {
-  const t = fr.shell.project.overview;
-  const facts: Array<[string, string | null, boolean?]> = [
-    [
-      t.type,
-      projectKindLabel({
-        type: project.type,
-        musicFormat: project.musicFormat,
-        contentFormatName: project.contentFormat?.name ?? null,
-      }),
-    ],
-    ...(project.type === "content"
-      ? [[t.artist, project.artistName || null] as [string, string | null]]
-      : []),
-    [
-      projectDateLabel(project.type),
-      project.dueDate
-        ? dateFormatter.format(new Date(`${project.dueDate}T00:00:00`))
-        : null,
-    ],
-    [
-      t.budget,
-      project.budgetCents !== null
-        ? euroFormatter.format(project.budgetCents / 100)
-        : null,
-      true,
-    ],
-    [
-      t.priority,
-      project.priority ? fr.shell.priorities[project.priority] : null,
-    ],
-    [t.createdAt, dateFormatter.format(new Date(project.createdAt))],
-  ];
+  const t = fr.transmission.page;
+  const latest = project.assignments[0] ?? null;
+  const status = project.status;
+  const name = latest?.assigneeName ?? "";
+  const isAssignee =
+    status === "pending" && latest?.assigneePersonId === viewerPersonId;
+  const mayTransmit =
+    canTransmit &&
+    (status === "not_transmitted" ||
+      status === "refused" ||
+      status === "clarification_requested");
+
+  const todo =
+    status === "pending"
+      ? t.todo.accept
+      : status === "clarification_requested"
+        ? t.todo.answer(name)
+        : status === "refused"
+          ? t.todo.reassign
+          : t.todo.transmit;
+  const actor =
+    status === "pending"
+      ? isAssignee
+        ? t.mine(todo)
+        : t.waiting(name, todo)
+      : canTransmit
+        ? t.mine(todo)
+        : t.waiting(t.direction, todo);
+
+  const received =
+    latest?.response &&
+    (status === "refused" || status === "clarification_requested")
+      ? {
+          title:
+            status === "refused"
+              ? t.refused(name)
+              : t.asked(
+                  name,
+                  latest.subject
+                    ? fr.transmission.subjects[latest.subject]
+                    : fr.transmission.subjects.other,
+                ),
+          text: latest.response,
+        }
+      : null;
+
+  const title = isAssignee
+    ? t.titles.accept
+    : status === "not_transmitted"
+      ? mayTransmit
+        ? t.titles.transmit
+        : t.titles.project
+      : t.titles.sent;
+  // Who transmitted it, to the one who receives it; to whom, to the others.
+  const sent = status === "pending" && latest;
+  const head = sent && (
+    <FactBlockRow>
+      <BlockFact
+        label={isAssignee ? t.facts.transmittedBy : t.facts.transmittedTo}
+      >
+        <NameChips>
+          <NameChip
+            name={isAssignee ? latest.assignedByName : latest.assigneeName}
+            person
+          />
+        </NameChips>
+      </BlockFact>
+      <BlockFact label={t.facts.on}>{formatDay(latest.createdAt)}</BlockFact>
+    </FactBlockRow>
+  );
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
-      <div className="flex min-w-0 flex-col gap-8">
-        <TransmissionPanel
-          project={project}
-          viewerPersonId={viewerPersonId}
-          canTransmit={canTransmit}
-          people={people}
-        />
+    <div className="flex flex-col gap-5">
+      <ModuleHeader
+        crumbs={[
+          { label: fr.shell.nav.projects, href: routes.projects },
+          { label: project.title },
+        ]}
+        title={project.title}
+        actions={
+          <WhoDoesWhatButton
+            roles={[
+              {
+                key: "direction",
+                label: t.roles.direction,
+                kind: "exec",
+                holder: latest ? { name: latest.assignedByName } : null,
+                what: t.roles.directionWhat,
+              },
+              {
+                key: "manager",
+                label: t.roles.manager,
+                kind: "exec",
+                holder: latest && status !== "refused" ? { name } : null,
+                what: t.roles.managerWhat,
+              },
+            ]}
+            personLinks={creativeTeam}
+          />
+        }
+      />
 
-        {project.type === "music_release" && (
-          <section
-            aria-labelledby="masters-title"
-            className="flex flex-col gap-3"
-          >
-            <h2 id="masters-title" className="text-base font-medium">
-              {t.masters}
-            </h2>
-            {project.masters.length === 0 ? (
-              <p className="text-sm text-muted-foreground">{t.noMasters}</p>
-            ) : (
-              <ul className="divide-y divide-border rounded-xl border border-border">
-                {project.masters.map((master) => (
-                  <li key={master.id} className="relative px-4 py-3">
-                    <Link
-                      href={routes.master(master.id)}
-                      className="text-sm font-medium no-underline after:absolute after:inset-0 hover:underline"
-                    >
-                      {masterLabel(master)}
-                    </Link>
-                    <p className="text-xs text-muted-foreground">
-                      {master.artists}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-        )}
+      <p className="font-semibold">{actor}</p>
 
-        {project.initialContext && (
-          <section
-            aria-labelledby="notes-title"
-            className="flex flex-col gap-3"
-          >
-            <h2 id="notes-title" className="text-base font-medium">
-              {t.initialContext}
-            </h2>
-            <p className="text-sm whitespace-pre-line">
-              {project.initialContext}
-            </p>
-          </section>
-        )}
+      {received && (
+        <ToneCallout tone="warning" as="div">
+          <span className="flex flex-col gap-1">
+            <span className="font-semibold">{received.title}</span>
+            <span className="whitespace-pre-line">« {received.text} »</span>
+          </span>
+        </ToneCallout>
+      )}
 
-        {creativeTeam}
-        <AssignmentHistory assignments={project.assignments} />
-      </div>
-
-      <section aria-labelledby="facts-title" className="flex flex-col gap-3">
-        <h2 id="facts-title" className="text-base font-medium">
-          {t.facts}
+      <section
+        aria-labelledby="handover-title"
+        className="flex flex-col gap-3.5"
+      >
+        <h2 id="handover-title" className={factBlockTitleClass}>
+          {title}
         </h2>
-        <FactList
-          facts={facts.map(([label, value, figure]) => ({
-            label,
-            value,
-            valueClassName: figure ? "tabular-nums" : undefined,
-          }))}
-          emptyLabel={t.notProvided}
+        <HandoverFacts
+          project={project}
+          creatives={creatives}
+          head={head}
+          note={
+            sent && latest.note
+              ? { by: latest.assignedByName, text: latest.note }
+              : null
+          }
         />
+        {isAssignee && latest && (
+          <>
+            <p className="max-w-[72ch] text-caption text-[color:var(--text-secondary)]">
+              {t.acceptHint}
+            </p>
+            <RespondPanel assignmentId={latest.id} />
+          </>
+        )}
+        {mayTransmit &&
+          (people.length > 0 ? (
+            <div>
+              <TransmitDialog
+                projectId={project.id}
+                people={people}
+                mode={
+                  status === "clarification_requested"
+                    ? "answer"
+                    : status === "refused"
+                      ? "reassign"
+                      : "first"
+                }
+                defaultAssigneeId={latest?.assigneePersonId}
+              />
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-caption text-[color:var(--text-secondary)]">
+                {fr.transmission.panel.noManager}
+              </p>
+              <Link
+                href={routes.members}
+                className={buttonVariants({ variant: "outline", size: "lg" })}
+              >
+                {fr.transmission.panel.toMembers}
+              </Link>
+            </div>
+          ))}
       </section>
+
+      {project.assignments.length > 0 && (
+        <Fold summary={t.done(project.assignments.length)}>
+          <AssignmentHistory assignments={project.assignments} />
+        </Fold>
+      )}
     </div>
   );
 }

@@ -80,16 +80,17 @@ export function ProjectFrame({
           positioned box. Then, as in the proto (`.content`, `.wrap`), 28 /
           40 px around a column of 1180 px at most, blocks 20 px apart. */}
       <div className="relative flex min-w-0 flex-1 flex-col">
-        {project.stages.length > 0 && (
-          <div
-            aria-hidden
-            className="h-[var(--project-bar-height)] shrink-0 border-b border-[color:var(--border-hairline)]"
-          />
-        )}
+        {/* Before launch too: the page's ModuleHeader lays its trail in it
+            (« Projets / Néons », Sacha 30/10/2026). */}
+        <div
+          aria-hidden
+          className="h-[var(--project-bar-height)] shrink-0 border-b border-[color:var(--border-hairline)]"
+        />
         <div className="flex flex-1 flex-col px-4 pt-5 md:px-10 md:pt-7">
           <div className="group/project mx-auto flex w-full max-w-[var(--content-width)] flex-1 flex-col gap-5">
             {project.stages.length === 0 && (
-              <header className="flex flex-col gap-1">
+              // Dropped when the page has its own head (the overview's).
+              <header className="flex flex-col gap-1 group-has-[[data-module-header]]/project:hidden">
                 {/* No sidebar before launch, so no switcher either: the only
                 way back to the list (retour du 11/10/2026). */}
                 <BackLink href={routes.projects}>

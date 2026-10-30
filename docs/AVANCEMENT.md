@@ -1194,6 +1194,20 @@ puis le coder.
 - Reste : passage navigateur des trois étapes, en responsable puis en direction.
 
 
+## Page d'un projet pas encore lancé refaite (30/10/2026, branche `pre-prod`)
+
+Demande de Sacha : la page d'acceptation était différente des autres ; la rapprocher du bloc de l'échange de
+cadrage, sans parcours (un seul geste à la fois). Proto `docs/protos/projet-transmis.html`.
+
+- [x] En-tête commun (`ModuleHeader`, « Projets / Néons » dans la barre du haut, « Qui fait quoi » : direction,
+      chef de projet, direction créative gérée là) ; « À vous : accepter le projet » / « En attente de … » ;
+      la précision ou le refus reçus en encadré.
+- [x] « Ce que vous acceptez » en un seul bloc de faits (`HandoverFacts`, `FactBlock` sorti de `CallPlanBlock`) :
+      plus de statut répété, de résumé « Transmis : … / Manque : … » ni de colonne « Informations » ;
+      un manque dit sur sa ligne. Le geste dessous ; l'historique replié dans « Déjà fait ».
+- Pas de migration. Reste : passage navigateur en direction puis en chef de projet.
+
+
 ## Réseau, Contrats, Fichiers, Calls, Artistes refaits (29/10/2026, branche `pre-prod`)
 
 Proto `docs/protos/pages.html` (test `docs/protos/tests/pages.cjs`), retours de Sacha du 29/10 :

@@ -4,6 +4,7 @@ import { IconXmark } from "nucleo-sharp-essential";
 import type { Ref } from "react";
 
 import { Avatar } from "@/components/ui/avatar";
+import { chipClass } from "@/components/ui/name-chip";
 import type { PrepPerson } from "@/lib/calls/prep/types";
 import { callPrep } from "@/lib/i18n/fr/call-prep";
 import { cn } from "@/lib/utils";
@@ -31,7 +32,7 @@ export function AttendeeChip({
   return (
     <span
       title={t.tooltip(person.detail, howOf(person))}
-      className="inline-flex h-[1.875rem] max-w-full items-center gap-1.5 rounded-full bg-[var(--surface-sunken)] pr-1 pl-[3px] text-caption font-medium"
+      className={cn(chipClass, "pr-1 pl-[3px]")}
     >
       <Avatar
         name={person.name}

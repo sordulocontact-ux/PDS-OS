@@ -33,8 +33,8 @@ import { loadWorkflowStates } from "@/lib/workflow-status/load";
  * viewer, the Cadrage first), then before « Lancer le plan » where the
  * Cadrage stands, after it the workflows and what one hands another.
  * Everything read from the journeys and the workflows (docs/ARCHITECTURE.md
- * § 3 ter, § 8 ter), nothing stored. A project not accepted yet keeps its
- * handover page.
+ * § 3 ter, § 8 ter), nothing stored. A project not accepted yet shows its
+ * one gesture and what is transmitted (UnlaunchedOverview).
  */
 export default async function ProjectOverviewPage({
   params,
@@ -64,6 +64,7 @@ export default async function ProjectOverviewPage({
         viewerPersonId={access.personId}
         canTransmit={canTransmit}
         people={people}
+        creatives={creatives}
         creativeTeam={
           <CreativeTeam
             projectId={project.id}

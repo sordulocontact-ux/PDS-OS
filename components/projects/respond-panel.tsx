@@ -42,7 +42,12 @@ export function RespondPanel({ assignmentId }: { assignmentId: string }) {
           >
             {t.clarify}
           </Button>
-          <Button variant="ghost" size="lg" onClick={() => setMode("refused")}>
+          <Button
+            variant="ghost"
+            size="lg"
+            className="text-[color:var(--text-secondary)] sm:ml-auto"
+            onClick={() => setMode("refused")}
+          >
             {t.refuse}
           </Button>
         </div>

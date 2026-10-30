@@ -1,0 +1,652 @@
+<title>Acceptation d'un projet</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@500;600;700&display=swap">
+<style>
+/* Tokens recopiés de app/globals.css (thème sombre d'abord, comme la maquette Figma 304:20801).
+   Coquille : rail d'icônes, navigation du projet, barre du haut de 55 px avec le fil, puis
+   « Parcours · Cadrage » à gauche et l'étape ouverte à droite. */
+:root{
+  --text-primary:#ededed;--text-secondary:#a8a8a8;--text-tertiary:#8f8f8f;--text-muted:#5e5e5e;
+  --surface-app:#0a0a0a;--surface-page:#0a0a0a;--surface-raised:#161616;--surface-soft:rgb(255 255 255 / .05);
+  --surface-sunken:rgb(255 255 255 / .08);--surface-inset:#0a0a0a;--surface-pressed:rgb(255 255 255 / .12);
+  --border-hairline:rgb(255 255 255 / .08);--border-default:rgb(255 255 255 / .12);--border-hover:rgb(255 255 255 / .28);
+  --border-field:rgb(255 255 255 / .14);
+  --nav-bg:#0f0f0f;--nav-fg:#ededed;--nav-fg-muted:#8f8f8f;--nav-item-hover-bg:rgb(255 255 255 / .05);
+  --nav-item-active-bg:rgb(255 255 255 / .09);--nav-border:rgb(255 255 255 / .08);--nav-brand-bg:#ededed;--nav-brand-fg:#000;
+  --tone-neutral-bg:#262626;--tone-neutral-fg:#d4d4d4;--tone-info-bg:#12233d;--tone-info-fg:#9ec5ff;
+  --tone-warning-bg:#33260c;--tone-warning-fg:#f5c869;--tone-success-bg:#0f2e1c;--tone-success-fg:#7fdca0;
+  --tone-danger-bg:#3a1616;--tone-danger-fg:#ff9b94;
+  --selection:#3b7bff;--selection-fg:#6f9dff;--selection-bg:rgb(59 123 255 / .16);
+  --primary-bg:#ededed;--primary-fg:#000;--primary-hover:#d4d4d4;--control-hover:rgb(255 255 255 / .06);
+  --glass:rgb(28 28 28 / .86);--glass-fg:#fff;--glass-2:#b5b5b5;
+  --font:"Google Sans Flex",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --bar:55px;--ease:cubic-bezier(.23,1,.32,1);
+  color-scheme:dark;
+}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){
+  --text-primary:#000;--text-secondary:#5e5e5e;--text-tertiary:#767676;--text-muted:#afafaf;
+  --surface-app:#fbfbfb;--surface-page:#fff;--surface-raised:#fff;--surface-soft:#f4f4f4;--surface-sunken:#ececec;
+  --surface-inset:#fbfbfb;--surface-pressed:#e2e2e2;
+  --border-hairline:#ececec;--border-default:#d4d4d4;--border-hover:#afafaf;--border-field:#dcdcdc;
+  --nav-bg:#fff;--nav-fg:#000;--nav-fg-muted:#767676;--nav-item-hover-bg:#f4f4f4;--nav-item-active-bg:#ececec;
+  --nav-border:rgb(0 0 0 / .08);--nav-brand-bg:#000;--nav-brand-fg:#fff;
+  --tone-neutral-bg:#ececec;--tone-neutral-fg:#111;--tone-info-bg:#e2eefc;--tone-info-fg:#0b3d8c;
+  --tone-warning-bg:#fcefd2;--tone-warning-fg:#6e4300;--tone-success-bg:#daf3e2;--tone-success-fg:#0d5226;
+  --tone-danger-bg:#fce1df;--tone-danger-fg:#9a1b1b;
+  --selection:#155dfc;--selection-fg:#155dfc;--selection-bg:rgb(21 93 252 / .07);
+  --primary-bg:#000;--primary-fg:#fff;--primary-hover:#282828;--control-hover:#f4f4f4;
+  color-scheme:light}}
+:root[data-theme="light"]{
+  --text-primary:#000;--text-secondary:#5e5e5e;--text-tertiary:#767676;--text-muted:#afafaf;
+  --surface-app:#fbfbfb;--surface-page:#fff;--surface-raised:#fff;--surface-soft:#f4f4f4;--surface-sunken:#ececec;
+  --surface-inset:#fbfbfb;--surface-pressed:#e2e2e2;
+  --border-hairline:#ececec;--border-default:#d4d4d4;--border-hover:#afafaf;--border-field:#dcdcdc;
+  --nav-bg:#fff;--nav-fg:#000;--nav-fg-muted:#767676;--nav-item-hover-bg:#f4f4f4;--nav-item-active-bg:#ececec;
+  --nav-border:rgb(0 0 0 / .08);--nav-brand-bg:#000;--nav-brand-fg:#fff;
+  --tone-neutral-bg:#ececec;--tone-neutral-fg:#111;--tone-info-bg:#e2eefc;--tone-info-fg:#0b3d8c;
+  --tone-warning-bg:#fcefd2;--tone-warning-fg:#6e4300;--tone-success-bg:#daf3e2;--tone-success-fg:#0d5226;
+  --tone-danger-bg:#fce1df;--tone-danger-fg:#9a1b1b;
+  --selection:#155dfc;--selection-fg:#155dfc;--selection-bg:rgb(21 93 252 / .07);
+  --primary-bg:#000;--primary-fg:#fff;--primary-hover:#282828;--control-hover:#f4f4f4;
+  color-scheme:light}
+
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0;background:var(--surface-page);color:var(--text-primary);font-family:var(--font);font-weight:500;font-size:16px;line-height:24px;letter-spacing:-.02em;-webkit-font-smoothing:antialiased}
+button,input,textarea,select{font:inherit;letter-spacing:inherit;color:inherit}
+h1,h2,h3,h4,p,dl,dd,ol,ul{margin:0}
+ol,ul{padding:0;list-style:none}
+:focus-visible{outline:2px solid var(--selection);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* Coquille */
+.shell{display:flex;min-height:100dvh}
+.rail{position:sticky;top:0;height:100dvh;width:68px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0 12px;background:var(--nav-bg);border-right:1px solid var(--nav-border)}
+.brand{width:40px;height:40px;border-radius:12px;background:var(--nav-brand-bg);color:var(--nav-brand-fg);display:grid;place-items:center;font-weight:700;font-size:13px;letter-spacing:-.02em}
+.ri{width:40px;height:36px;border-radius:10px;display:grid;place-items:center;color:var(--nav-fg);border:0;background:none}
+.ri[aria-current="page"]{background:var(--nav-item-active-bg)}
+.rail .sep{flex:1}
+.av{width:28px;height:28px;border-radius:50%;background:var(--surface-sunken);color:var(--text-primary);display:inline-grid;place-items:center;font-size:12px;font-weight:600;letter-spacing:0;flex-shrink:0}
+.pnav{position:sticky;top:0;height:100dvh;width:196px;flex-shrink:0;display:flex;flex-direction:column;background:var(--nav-bg);border-right:1px solid var(--nav-border);overflow-y:auto}
+.pswitch{display:flex;align-items:center;justify-content:space-between;height:var(--bar);padding:0 12px 0 18px;border-bottom:1px solid var(--nav-border);font-weight:500}
+.pnav ul{display:flex;flex-direction:column;gap:2px;padding:10px 8px}
+.pnav .grp{padding:14px 10px 4px;font-size:13px;line-height:18px;color:var(--nav-fg-muted)}
+.pnav a{display:flex;align-items:center;gap:10px;height:38px;padding:0 10px;border-radius:8px;color:var(--nav-fg);text-decoration:none;cursor:default}
+.pnav a[aria-current="page"]{background:var(--nav-item-active-bg)}
+.pnav .dot{width:6px;height:6px;border-radius:50%;background:var(--text-muted);flex-shrink:0}
+.pnav .dot.on{background:var(--selection)}
+.pnav .count{margin-left:auto;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--selection);color:#fff;font-size:12px;line-height:20px;text-align:center;font-weight:600}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;height:var(--bar);display:flex;align-items:center;gap:10px;padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px));border-bottom:1px solid var(--border-hairline);background:var(--surface-page)}
+.menu{display:none}
+.crumbs{display:flex;align-items:center;gap:8px;min-width:0;color:var(--text-tertiary)}
+.crumbs li{white-space:nowrap}
+.crumbs li:last-child{color:var(--text-primary);overflow:hidden;text-overflow:ellipsis}
+.crumbs button{border:0;background:none;padding:0;color:inherit;cursor:pointer}
+.content{padding-block:28px 140px;padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:20px;max-width:1180px}
+.headrow{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.headrow h1{font-size:30px;line-height:36px;letter-spacing:-.04em;font-weight:500}
+.cols{display:grid;grid-template-columns:300px minmax(0,1fr);gap:24px;align-items:start}
+
+/* Parcours */
+.spine{border:1px solid var(--border-hairline);border-radius:16px;background:var(--surface-raised);padding:14px 10px 10px}
+.spine h2{font-size:15px;line-height:22px;font-weight:500;color:var(--text-secondary);padding:0 10px 8px}
+.srow{position:relative;display:flex;gap:12px;width:100%;padding:8px 10px;border:0;border-radius:10px;background:none;text-align:left;cursor:pointer}
+.srow[aria-current="step"]{background:var(--surface-soft)}
+.srow:not(:last-child)::after{content:"";position:absolute;left:21px;top:34px;bottom:-6px;width:1px;background:var(--border-default)}
+.sic{width:22px;height:22px;flex-shrink:0;display:grid;place-items:center;border-radius:50%;margin-top:1px;position:relative;z-index:1;background:var(--surface-raised)}
+.sic.cur{background:var(--selection);box-shadow:0 0 0 3px var(--selection-bg)}
+.sic.cur::after{content:"";width:8px;height:8px;border-radius:50%;background:#fff}
+.sic.done{background:var(--tone-success-bg);color:var(--tone-success-fg)}
+.sic.lock{border:1px dashed var(--border-hover);color:var(--text-tertiary)}
+.sic.warn{background:var(--tone-warning-bg);color:var(--tone-warning-fg)}
+.stx{display:flex;flex-direction:column;min-width:0}
+.stx b{font-weight:500}
+.stx span{font-size:15px;line-height:20px;color:var(--text-secondary)}
+.stx span.mine{color:var(--selection-fg)}
+.srow.locked .stx b{color:var(--text-secondary)}
+
+/* Étape ouverte */
+.panel{min-width:0;display:flex;flex-direction:column;gap:20px;padding:20px;border:1px solid var(--border-hairline);border-radius:16px;background:var(--surface-raised)}
+.ptop{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
+.ptop h2{font-size:22px;line-height:28px;letter-spacing:-.04em;font-weight:500;text-wrap:balance}
+.why{font-size:16px;line-height:24px;color:var(--text-secondary);text-wrap:pretty;max-width:72ch}
+.intro{display:flex;flex-direction:column;gap:6px}
+.actor{font-weight:600}
+.meta{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px 16px;padding:14px 16px;border-radius:12px;background:var(--surface-soft)}
+.meta dt{font-size:14px;line-height:20px;color:var(--text-tertiary)}
+.meta dd{font-size:15px;line-height:22px;overflow-wrap:anywhere}
+.meta dd small{display:block;font-size:14px;line-height:20px;color:var(--text-secondary)}
+.inert{opacity:.6;pointer-events:none}
+.badge{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;font-size:13px;line-height:18px;font-weight:600;white-space:nowrap}
+.badge.sm{height:20px;padding:0 8px;font-size:12px}
+.t-info{background:var(--tone-info-bg);color:var(--tone-info-fg)}.t-neutral{background:var(--tone-neutral-bg);color:var(--tone-neutral-fg)}
+.t-warn{background:var(--tone-warning-bg);color:var(--tone-warning-fg)}.t-ok{background:var(--tone-success-bg);color:var(--tone-success-fg)}
+.t-danger{background:var(--tone-danger-bg);color:var(--tone-danger-fg)}
+.callout{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:12px;font-size:15px;line-height:22px}
+.callout svg{flex-shrink:0;margin-top:2px}
+.callout b{font-weight:600}
+.callout .q{display:block;margin-top:2px}
+.tools{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:4px}
+
+/* Blocs enfoncés (fond de la page dans la carte de l'étape) */
+.sunk{display:flex;flex-direction:column;gap:14px;padding:18px;border-radius:12px;background:var(--surface-inset);border:1px solid var(--border-hairline)}
+.bhead{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+.bhead.rule{margin-inline:-18px;padding:0 18px 14px;border-bottom:1px solid var(--border-hairline)}
+@media (max-width:760px){.bhead.rule{margin-inline:-14px;padding-inline:14px}}
+.h3{font-size:18px;line-height:26px;font-weight:600;letter-spacing:-.02em}
+.cap{font-size:14px;line-height:20px;color:var(--text-secondary)}
+.tert{color:var(--text-tertiary)}
+.eyebrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:14px;line-height:20px;color:var(--text-secondary)}
+.ask{font-size:20px;line-height:28px;letter-spacing:-.03em;font-weight:500;text-wrap:balance}
+.proposal{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:10px;background:var(--surface-soft)}
+.proposal b{font-weight:600}
+.src{font-size:14px;line-height:20px;color:var(--text-tertiary);overflow-wrap:anywhere}
+.actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.actions .push{margin-left:auto}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label,.field .lbl{font-size:14px;font-weight:600}
+.req{color:var(--text-tertiary)}
+.in{width:100%;min-height:44px;padding:10px 12px;border-radius:10px;border:1px solid var(--border-field);background:var(--surface-raised);resize:vertical;line-height:22px}
+.in[aria-invalid="true"]{border-color:var(--tone-danger-fg)}
+select.in{min-height:40px;padding:0 10px}
+.err{color:var(--tone-danger-fg);font-size:14px;line-height:20px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:44px;padding:0 20px;border-radius:999px;border:1px solid transparent;background:var(--primary-bg);color:var(--primary-fg);cursor:pointer;font-weight:600;white-space:nowrap;transition:transform 140ms var(--ease),background-color 150ms ease,border-color 150ms ease}
+.btn:active{transform:scale(.97)}
+.btn.outline{background:none;color:var(--text-primary);border-color:var(--border-default)}
+.btn.ghost{background:none;color:var(--text-primary);font-weight:500}
+.btn.sm{height:32px;padding:0 14px;font-size:14px}
+.btn.quiet{color:var(--text-secondary)}
+
+/* Les 6 dimensions */
+.dims{border:1px solid var(--border-hairline);border-radius:12px;overflow:hidden;background:var(--surface-inset)}
+.drow{display:flex;align-items:center;gap:12px;width:100%;padding:12px 16px;border:0;border-top:1px solid var(--border-hairline);background:none;text-align:left;cursor:pointer}
+.dims > div:first-child .drow{border-top:0}
+.drow .grow{flex:1;min-width:0}
+.qnav{display:flex;align-items:center;gap:4px}
+.qnav button{width:32px;height:32px;border-radius:999px;border:1px solid var(--border-default);background:none;display:grid;place-items:center;cursor:pointer;color:var(--text-primary)}
+.qnav button:disabled{opacity:.35;cursor:default}
+.qnav .back{transform:rotate(180deg)}
+.chev{color:var(--text-tertiary);transition:transform 160ms var(--ease);flex-shrink:0}
+.drow[aria-expanded="true"] .chev{transform:rotate(90deg)}
+.lines{display:flex;flex-direction:column;border-top:1px solid var(--border-hairline);background:var(--surface-soft)}
+.line{display:grid;grid-template-columns:minmax(0,190px) minmax(0,1fr) auto;gap:4px 16px;align-items:start;padding:12px 16px}
+.line + .line{border-top:1px solid var(--border-hairline)}
+.line .lab{font-size:15px;line-height:22px;color:var(--text-secondary)}
+.line .val{display:flex;flex-direction:column;gap:2px;min-width:0;font-size:15px;line-height:22px;overflow-wrap:anywhere}
+.line .val .none{color:var(--text-tertiary)}
+.line .end{display:flex;align-items:center;gap:6px}
+.line.cur{background:var(--selection-bg)}
+.line.editing{background:var(--surface-raised)}
+.line.editing .field{grid-column:2/-1}
+.line .lk{font-size:14px;line-height:20px;color:var(--selection-fg)}
+.dfoot{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:12px 16px;border-top:1px solid var(--border-hairline)}
+.dfoot .cap{flex:1;min-width:200px}
+.halo{animation:halo 1.5s var(--ease)}
+@keyframes halo{0%,40%{box-shadow:0 0 0 3px var(--selection)}100%{box-shadow:0 0 0 3px transparent}}
+.proto .vset{display:flex;gap:4px;padding:2px;border-radius:12px;background:rgb(255 255 255 / .06)}
+.proto .vset button{height:30px;border:0;border-radius:9px;padding:0 10px;font-size:13px}
+.proto .vset button[aria-pressed="true"]{background:var(--glass-fg);color:#000}
+.proto .vhint{font-size:13px;color:var(--glass-2);max-width:300px;line-height:17px}
+.line.cur .val{color:var(--selection-fg)}
+button.line{width:100%;border:0;background:none;text-align:left;cursor:pointer;font:inherit}
+
+/* Brief */
+.doc{display:flex;flex-direction:column;gap:0}
+.dsec{display:flex;flex-direction:column;gap:6px;padding:14px 0;border-top:1px solid var(--border-hairline)}
+.dsec:first-child{border-top:0;padding-top:4px}
+.dsec.marked{margin-inline:-10px;padding-inline:10px;border-radius:10px;background:color-mix(in srgb,var(--tone-warning-bg) 70%,transparent)}
+.dsec-h{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+.dsec-h h4{font-size:15px;line-height:22px;font-weight:600}
+.dl{display:grid;grid-template-columns:minmax(0,190px) minmax(0,1fr);gap:6px 16px}
+.dl dt{font-size:15px;line-height:22px;color:var(--text-secondary)}
+.dl dd{font-size:15px;line-height:22px;overflow-wrap:anywhere}
+.dl dd .src{display:block}
+.changed{padding:10px 12px;border-radius:10px;background:var(--surface-soft);font-size:15px;line-height:22px}
+.toggle{height:28px;padding:0 10px;border-radius:999px;border:1px solid var(--border-default);background:none;font-size:13px;cursor:pointer}
+.toggle[aria-pressed="true"]{background:var(--tone-warning-bg);color:var(--tone-warning-fg);border-color:transparent}
+.decide{display:flex;flex-direction:column;gap:14px;padding-top:16px;border-top:1px solid var(--border-hairline)}
+details.fold > summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:15px;color:var(--text-secondary)}
+details.fold > summary::-webkit-details-marker{display:none}
+details.fold[open] > summary .chev{transform:rotate(90deg)}
+.old{display:flex;flex-direction:column;gap:4px;margin-top:10px;padding:12px 14px;border-radius:10px;border:1px solid var(--border-hairline)}
+
+/* Plan */
+.pgroup{display:flex;flex-direction:column;gap:6px}
+.pgroup + .pgroup{padding-top:14px;border-top:1px solid var(--border-hairline)}
+.pgh{display:flex;align-items:baseline;gap:8px}
+.pgh b{font-weight:600}
+.prow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,190px) auto;gap:4px 16px;align-items:center;padding:8px 0}
+.prow .who{display:flex;align-items:center;gap:8px;font-size:15px;min-width:0}
+.prow .who > span:last-child{display:flex;flex-direction:column;min-width:0}
+.pedit{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px;border-radius:10px;background:var(--surface-soft);margin-bottom:6px}
+.pedit .actions{grid-column:1/-1}
+
+/* Barre du proto et toast : hors du produit */
+.proto{position:fixed;left:0;right:0;margin-inline:auto;width:fit-content;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:50;background:var(--glass);color:var(--glass-fg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:16px;padding:8px 10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;max-width:calc(100% - 32px);box-shadow:0 10px 30px rgb(0 0 0 / .35);border:1px solid rgb(255 255 255 / .1)}
+.proto .tag{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--glass-2);padding:0 6px}
+.proto label{font-size:13px;color:var(--glass-2)}
+.proto select{height:34px;border-radius:10px;border:1px solid rgb(255 255 255 / .18);background:rgb(255 255 255 / .08);color:var(--glass-fg);padding:0 10px;font-size:14px;max-width:280px}
+.proto select option{color:#000;background:#fff}
+.proto button{height:34px;border-radius:10px;border:1px solid rgb(255 255 255 / .18);background:none;color:var(--glass-fg);padding:0 12px;font-size:14px;cursor:pointer}
+.toast{position:fixed;right:20px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:60;background:var(--primary-bg);color:var(--primary-fg);padding:12px 16px;border-radius:12px;font-size:15px;max-width:min(420px,calc(100% - 40px));transition:opacity 180ms ease,transform 180ms var(--ease)}
+.toast.off{opacity:0;transform:translateY(8px);pointer-events:none}
+.scrim{display:none}
+
+@media (hover:hover) and (pointer:fine){
+  .srow:not([aria-current="step"]):hover,.drow:hover,button.line:hover{background:var(--control-hover)}
+  .btn:hover{background:var(--primary-hover)}
+  .btn.outline:hover,.btn.ghost:hover{background:var(--control-hover);border-color:var(--border-hover)}
+  .btn.ghost:hover{border-color:transparent}
+  .qnav button:not(:disabled):hover{background:var(--control-hover);border-color:var(--border-hover)}
+  .toggle:hover{border-color:var(--border-hover)}
+  .crumbs button:hover{color:var(--text-primary)}
+}
+@media (max-width:1100px){.meta{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:980px){
+  .cols{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:760px){
+  .rail{display:none}
+  .pnav{display:none}
+  .pnav.open{display:flex;position:fixed;inset:0 auto 0 0;z-index:40;box-shadow:0 10px 40px rgb(0 0 0 / .4)}
+  .scrim.open{display:block;position:fixed;inset:0;z-index:35;background:rgb(0 0 0 / .4)}
+  .menu{display:grid;margin-left:-8px}
+  .topbar,.content{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .content{padding-top:20px}
+  .panel{padding:16px}
+  .sunk{padding:14px}
+  .meta{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .line,.dl{grid-template-columns:minmax(0,1fr)}
+  .line .end{justify-content:flex-start}
+  .line.editing .field{grid-column:1/-1}
+  .prow{grid-template-columns:minmax(0,1fr) auto}
+  .prow .who{grid-column:1/-1;grid-row:2}
+  .pedit{grid-template-columns:minmax(0,1fr)}
+  .proto label{display:none}
+  .proto select{max-width:150px}
+  .proto .vhint{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition-duration:1ms!important}}
+</style>
+<style>
+/* Acceptation : ce qui s'ajoute au patron commun */
+.quote{padding:12px 14px;border-radius:10px;background:var(--surface-soft);font-size:15px;line-height:22px;white-space:pre-line}
+.quote .who{display:block;margin-bottom:2px;font-size:14px;line-height:20px;color:var(--text-tertiary)}
+.dl .none{color:var(--text-tertiary)}
+/* Bloc de faits, comme l'échange de cadrage (CallPlanBlock, Figma 304:20801) */
+.blk{display:flex;flex-direction:column;gap:14px}
+.bt{font-size:18px;line-height:26px;font-weight:600;letter-spacing:-.02em}
+.plan{display:flex;flex-direction:column;padding:0 24px;border-radius:12px;border:1px solid var(--border-hairline);background:var(--surface-page)}
+.plan > dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;padding:16px 0}
+.plan > dl + dl{border-top:1px solid var(--border-hairline)}
+.plan > dl.one{grid-template-columns:minmax(0,1fr)}
+.pf{display:flex;flex-direction:column;gap:8px;min-width:0}
+.pf dt{font-size:14px;line-height:20px;color:var(--text-secondary)}
+.pf dd{font-size:16px;line-height:24px;font-weight:500;overflow-wrap:anywhere}
+.pf .none{color:var(--text-tertiary)}
+.pf .src{display:block;margin-top:2px}
+.chiplist{display:flex;flex-wrap:wrap;gap:8px}
+.pill{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:999px;background:var(--surface-sunken);font-size:14px;line-height:20px}
+.pill.person{padding-left:3px}
+.pill .av{width:24px;height:24px;font-size:11px;background:var(--surface-raised)}
+.blk > .cap{max-width:72ch}
+@media (max-width:600px){.plan{padding:0 16px}.plan > dl{grid-template-columns:minmax(0,1fr)}}
+.meta.m4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:1100px){.meta.m4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.titles{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.titles li{padding:2px 10px;border-radius:999px;background:var(--surface-soft);font-size:14px;line-height:22px}
+.linkish{border:0;background:none;padding:0;color:var(--selection-fg);cursor:pointer;font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--border-default);background:none;cursor:pointer;font-size:14px}
+.chip[aria-pressed="true"]{background:var(--selection-bg);border-color:var(--selection);color:var(--selection-fg)}
+.chips[aria-invalid="true"] .chip{border-color:var(--tone-danger-fg)}
+.hist{display:flex;flex-direction:column;margin-top:10px;border:1px solid var(--border-hairline);border-radius:12px;overflow:hidden}
+.hist li{display:grid;grid-template-columns:150px minmax(0,1fr);gap:4px 16px;padding:12px 14px;font-size:15px;line-height:22px}
+.hist li + li{border-top:1px solid var(--border-hairline)}
+.hist .when{color:var(--text-tertiary)}
+.hist .q{display:block;color:var(--text-secondary)}
+.modal{position:fixed;inset:0;z-index:70;display:grid;place-items:center;padding:16px;background:rgb(0 0 0 / .45)}
+.dialog{width:min(520px,100%);display:flex;flex-direction:column;gap:16px;padding:22px;border-radius:18px;background:var(--glass);color:var(--glass-fg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgb(255 255 255 / .1)}
+.dialog h2{font-size:20px;line-height:28px;font-weight:500;letter-spacing:-.03em}
+.dialog .cap{color:var(--glass-2)}
+.roles{display:flex;flex-direction:column}
+.roles li{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid rgb(255 255 255 / .1)}
+.roles li:first-child{border-top:0}
+.roles .grow{flex:1;min-width:0;display:flex;flex-direction:column}
+.roles small{font-size:14px;color:var(--glass-2)}
+.dialog .btn.outline,.dialog .btn.ghost{color:var(--glass-fg);border-color:rgb(255 255 255 / .2)}
+.dialog select.in{background:rgb(255 255 255 / .08);border-color:rgb(255 255 255 / .2);color:var(--glass-fg)}
+.dialog select.in option{color:#000;background:#fff}
+/* « Aujourd'hui » : la page telle qu'elle est dans l'app */
+.old-page{display:flex;flex-direction:column;gap:20px;max-width:1180px;padding-block:20px 140px;padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px));font-size:14px;line-height:20px}
+.old-page .back{color:var(--text-secondary);font-size:14px}
+.old-page h1{font-size:24px;line-height:32px;font-weight:600;letter-spacing:-.03em}
+.old-page h2{font-size:16px;font-weight:500}
+.old-grid{display:grid;grid-template-columns:minmax(0,1fr) 18rem;gap:32px}
+.old-col{display:flex;flex-direction:column;gap:32px;min-width:0}
+.old-box{display:flex;flex-direction:column;gap:16px;padding:16px;border-radius:12px;border:1px solid var(--border-default)}
+.old-list{border:1px solid var(--border-default);border-radius:12px}
+.old-list li{padding:12px 16px}
+.old-list li + li{border-top:1px solid var(--border-default)}
+.old-q{border-left:2px solid var(--text-primary);padding-left:12px;white-space:pre-line}
+.old-facts{display:flex;flex-direction:column;gap:10px}
+.old-facts dt{font-size:12px;color:var(--text-secondary)}
+.muted{color:var(--text-secondary)}
+@media (max-width:980px){.old-grid{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:760px){.hist li{grid-template-columns:minmax(0,1fr)}.old-page{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}}
+</style>
+
+<div class="shell">
+  <nav class="rail" aria-label="Navigation principale" id="rail"></nav>
+  <div class="main">
+    <header class="topbar" id="topbar">
+      <nav aria-label="Fil d'Ariane"><ol class="crumbs" id="crumbs"></ol></nav>
+    </header>
+    <main id="app"></main>
+  </div>
+</div>
+<div id="modalRoot"></div>
+<div class="toast off" id="toast" role="status" aria-live="polite"></div>
+<div class="proto" role="region" aria-label="Commandes du prototype">
+  <span class="tag">Proto</span>
+  <label for="roleSel">Voir comme</label>
+  <select id="roleSel">
+    <option value="claire">Claire Morel · direction</option>
+    <option value="lina">Lina Haddad · chef de projet</option>
+    <option value="hugo">Hugo Lambert · chef de projet</option>
+  </select>
+  <label for="momSel">Aller à</label>
+  <select id="momSel">
+    <option value="transmettre">Projet à transmettre</option>
+    <option value="accepter">Transmis, à accepter</option>
+    <option value="incomplet">Transmis sans date ni budget</option>
+    <option value="precision">Précision demandée</option>
+    <option value="refus">Projet refusé</option>
+    <option value="accepte">Projet accepté</option>
+  </select>
+  <button type="button" id="resetBtn">Recommencer</button>
+  <span class="vset" role="group" aria-label="Version de la page" id="vset">
+    <button type="button" data-variant="old" aria-pressed="false">Aujourd'hui</button>
+    <button type="button" data-variant="new" aria-pressed="true">Redesign</button>
+  </span>
+  <span class="vhint" id="vhint"></span>
+</div>
+
+<script>
+(function(){
+"use strict";
+const svg=(d,s)=>`<svg width="${s||20}" height="${s||20}" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const I={
+  side:svg('<rect x="2.5" y="3.5" width="15" height="13" rx="2"/><path d="M8 3.5v13"/>'),
+  home:svg('<path d="M3 9l7-6 7 6v8H3z"/>'),
+  work:svg('<rect x="2.5" y="6" width="15" height="10.5" rx="2"/><path d="M7 6V4.5h6V6"/>'),
+  folder:svg('<path d="M2.5 5.5h5l2 2h8v8.5h-15z"/>'),
+  cal:svg('<rect x="3" y="4.5" width="14" height="12.5" rx="2"/><path d="M3 8.5h14M7 2.5v3M13 2.5v3"/>'),
+  phone:svg('<path d="M5 3h3l1.5 4-2 1.5a9 9 0 004 4l1.5-2 4 1.5v3a1.5 1.5 0 01-1.5 1.5A13.5 13.5 0 013.5 4.5 1.5 1.5 0 015 3z"/>'),
+  mic:svg('<rect x="7.5" y="2.5" width="5" height="10" rx="2.5"/><path d="M4.5 10a5.5 5.5 0 0011 0M10 15.5v2"/>'),
+  disc:svg('<circle cx="10" cy="10" r="7.5"/><circle cx="10" cy="10" r="2"/>'),
+  nodes:svg('<circle cx="5" cy="5" r="2"/><circle cx="15" cy="7" r="2"/><circle cx="8" cy="15" r="2"/><path d="M6.7 6l6.4.6M14 8.8l-4.5 4.8M5.5 7l2 6"/>'),
+  hand:svg('<path d="M3 10l4-4 3 2 3-2 4 4-5 5-2-1.5L7.5 15z"/>'),
+  file:svg('<path d="M5 2.5h6l4 4v11H5z"/><path d="M11 2.5v4h4"/>'),
+  bell:svg('<path d="M5 14V9a5 5 0 0110 0v5l1.5 1.5h-13zM8.5 17.5h3"/>'),
+  chev:svg('<path d="M8 5l5 5-5 5"/>',16),
+  check:svg('<path d="M5.5 10.5l3 3 6-7"/>',14),
+  lock:svg('<rect x="5" y="9" width="10" height="7.5" rx="1.5"/><path d="M7 9V7a3 3 0 016 0v2"/>',13),
+  lockl:svg('<rect x="5" y="9" width="10" height="7.5" rx="1.5"/><path d="M7 9V7a3 3 0 016 0v2"/>',16),
+  ok:svg('<circle cx="10" cy="10" r="7.5"/><path d="M6.8 10.3l2.2 2.2 4.2-4.6"/>',16),
+  info:svg('<circle cx="10" cy="10" r="7.5"/><path d="M10 9v4.5M10 6.5v.2"/>',16),
+  back:svg('<path d="M9 5L4 10l5 5M4 10h12"/>',16),
+  warn:svg('<path d="M10 3l7.5 13h-15z"/><path d="M10 8v3.5M10 14v.2"/>',16),
+};
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const lowerFirst=s=>s.charAt(0).toLowerCase()+s.slice(1);
+
+/* Personnes, jours, projet (cohérents avec le proto « Suite du Cadrage ») */
+const P={
+  claire:{name:"Claire Morel",ini:"CM",role:"Direction"},
+  lina:{name:"Lina Haddad",ini:"LH",role:"Chef de projet"},
+  hugo:{name:"Hugo Lambert",ini:"HL",role:"Chef de projet"},
+  nadia:{name:"Nadia Benali",ini:"NB",role:"Direction créative"},
+  yanis:{name:"Yanis Ferhat",ini:"YF",role:"Direction créative"},
+};
+const MANAGERS=["lina","hugo"],CREATIVES=["nadia","yanis"];
+const DAY={created:"Mar. 27/10/2026",sent:"Mer. 28/10/2026",asked:"Jeu. 29/10/2026",today:"Ven. 30/10/2026"};
+const short=d=>d.slice(5,10);
+const TITLES=["Néons","Night Lights","Minuit pile","Chrome","Boulevard","Lune basse","Velours","Fièvre douce","Dernier métro","Retour"];
+const SUBJECTS={budget:"Le budget",timing:"Les dates",scope:"Le périmètre (titres, livrables)",team:"L'équipe",other:"Autre chose"};
+const CONTEXT="Premier album de Mona Lys après le single « Néons ». On veut l'installer comme une voix de la nouvelle pop française. Clip principal envisagé avec Nadia Benali.";
+const NOTE="Sortie début décembre. Le sample de « Night Lights » n'est pas encore autorisé : à suivre de près.";
+
+/* État : ce que les gens ont fait ; tout le reste est calculé à chaque rendu */
+let S,V="new";
+function fresh(){return {role:"claire",sel:null,status:"not_transmitted",to:null,note:"",due:"Sam. 05/12/2026",budget:"25 000 € HT",creatives:["nadia"],
+  hist:[{at:DAY.created,text:"Claire Morel a créé le projet"}],ask:null,refusal:null,mode:null,subject:null,err:{},flash:null,modal:false,form:{to:"",note:""}};}
+const assignee=()=>S.to;
+
+/* Le parcours de la prise en charge */
+const STEPS=[
+ {id:"transmit",title:"Transmettre le projet",why:"La direction choisit le chef de projet qui le prendra en charge, avec un message s'il faut du contexte."},
+ {id:"accept",title:"Accepter le projet",why:"Ce que la direction transmet, ce qui manque. En acceptant, le chef de projet devient responsable du projet et le Cadrage s'ouvre : rien n'est à ressaisir."},
+ {id:"framing",title:"Démarrer le cadrage",why:"Commencer directement avec PO, ou préparer un échange : les deux chemins mènent au même Brief de cadrage."}];
+const stepOf=id=>STEPS.find(s=>s.id===id);
+function stepStatus(id){
+  const st=S.status;
+  if(id==="transmit") return st==="not_transmitted"?"open":st==="clarification"||st==="refused"?"rework":"done";
+  if(id==="accept") return st==="pending"?"open":st==="accepted"?"done":"locked";
+  return st==="accepted"?"open":"locked";
+}
+function actorOf(id){
+  const st=stepStatus(id);
+  if(st==="done"||st==="locked") return null;
+  if(id==="transmit") return {who:"claire",todo:S.status==="clarification"?`Répondre à la précision de ${P[S.to].name}`:S.status==="refused"?"Transmettre le projet à quelqu'un d'autre":"Transmettre le projet à un chef de projet"};
+  if(id==="accept") return {who:S.to,todo:"Accepter le projet"};
+  return {who:S.to,todo:"Choisir comment démarrer"};
+}
+/* Rendu */
+const $=id=>document.getElementById(id);
+function render(){
+  renderRail();
+  $("roleSel").value=S.role;
+  $("topbar").hidden=V==="old";
+  if(V==="old"){$("app").innerHTML=oldPage();$("app").className="";renderModal();return;}
+  $("crumbs").innerHTML=`<li><button type="button" data-act="noop">Projets</button></li><li aria-hidden="true">/</li><li aria-current="page">Néons</li>`;
+  $("app").className="content";
+  $("app").innerHTML=`<div class="headrow"><h1>Néons</h1><button class="btn ghost sm" type="button" data-act="modal">Qui fait quoi</button></div>
+   ${actorLine()}${flashAny()}${S.status==="pending"?acceptBody():S.status==="accepted"?framingBody():transmitBody()}${S.hist.length>1?doneFold():""}`;
+  renderModal();
+}
+function renderRail(){
+  const me=P[S.role];
+  $("rail").innerHTML=`<span class="brand">PDS</span><span class="ri">${I.side}</span>
+   ${[["home","Accueil"],["work","Travail"],["folder","Projets"],["cal","Calendrier"],["phone","Calls"],["mic","Enregistrer"],["disc","Catalogue"],["nodes","Réseau"],["hand","Contrats"],["file","Documents"]].map(([k,l])=>`<span class="ri" title="${l}" ${k==="folder"?'aria-current="page"':""}>${I[k]}<span class="sr">${l}</span></span>`).join("")}
+   <span class="sep"></span><span class="ri" title="Notifications">${I.bell}<span class="sr">Notifications</span></span><span class="av" title="${esc(me.name)}">${me.ini}</span>`;
+}
+/* Le seul geste attendu, et de qui (Sacha 30/10 : pas de parcours, une page) */
+function actorLine(){
+  const id=S.status==="pending"?"accept":S.status==="accepted"?"framing":"transmit",a=actorOf(id);
+  if(!a) return "";
+  return `<p class="actor">${a.who===S.role?`À vous : ${esc(lowerFirst(a.todo))}.`:`En attente de ${a.who==="claire"?"la direction":esc(P[a.who].name)} : ${esc(lowerFirst(a.todo))}.`}</p>`;
+}
+function flashAny(){const f=S.flash;if(!f) return "";
+  return `<div class="callout ${f.tone==="info"?"t-info":"t-ok"}" role="status">${f.tone==="info"?I.info:I.ok}<span><b>${esc(f.title)}</b>${f.body?` ${esc(f.body)}`:""}</span></div>`;}
+
+/* Ce que le projet sait, dit une seule fois, dans le bloc de faits de l'échange de cadrage :
+   l'intitulé au-dessus de la valeur, deux par rangée, un filet entre les rangées */
+const fact=(label,value)=>`<div class="pf"><dt>${esc(label)}</dt><dd>${value}</dd></div>`;
+const plan=rows=>`<div class="plan">${rows.map(r=>`<dl${r.length===1?' class="one"':""}>${r.join("")}</dl>`).join("")}</div>`;
+const person=k=>`<li class="pill person"><span class="av">${P[k].ini}</span>${esc(P[k].name)}</li>`;
+const blk=(title,body,after)=>`<div class="blk"><h3 class="bt">${esc(title)}</h3>${body}${after||""}</div>`;
+function factRows(head,withNote){
+  const missing=`<span class="none">Pas encore renseigné</span><span class="src">Le Cadrage le demandera${S.to&&S.role!==S.to?` à ${esc(P[S.to].name)}`:""}</span>`;
+  return [
+    ...(head?[head]:[]),
+    ...(withNote&&S.note?[[fact("Message de Claire Morel",esc(S.note))]]:[]),
+    [fact("Type","Album · Mona Lys"),fact("Sortie visée",S.due?esc(S.due):missing)],
+    [fact("Budget prévisionnel",S.budget?`<span class="num">${esc(S.budget)}</span>`:missing),fact("Priorité","Haute")],
+    [fact("Titres rattachés",`<ul class="chiplist">${TITLES.map(t=>`<li class="pill">${esc(t)}</li>`).join("")}</ul>`)],
+    [fact("Direction créative",S.creatives.length?`<ul class="chiplist">${S.creatives.map(person).join("")}</ul>`:`<span class="none">Personne pour l'instant</span>`)],
+    [fact("Contexte initial",esc(CONTEXT))]];
+}
+
+/* 1. Transmettre (la direction) */
+function transmitBody(){
+  const st=stepStatus("transmit"),claire=S.role==="claire";
+  if(st==="done") return blk("Transmis",plan([[fact("Transmis à",`<ul class="chiplist">${person(S.to)}</ul>`),fact("Le",esc(S.sentAt))],[fact("Message de Claire Morel",S.note?esc(S.note):'<span class="none">Sans message</span>')]]));
+  let top="";
+  if(S.status==="clarification") top=`<div class="callout t-warn">${I.warn}<span><b>${esc(P[S.to].name)} demande une précision</b> · ${esc(SUBJECTS[S.ask.subject])} · ${esc(S.ask.at)}<span class="q">« ${esc(S.ask.text)} »</span></span></div>`;
+  if(S.status==="refused") top=`<div class="callout t-warn">${I.warn}<span><b>${esc(P[S.refusal.by].name)} a refusé le projet</b> · ${esc(S.refusal.at)}<span class="q">« ${esc(S.refusal.text)} »</span></span></div>`;
+  const e=S.err,f=S.form,answer=S.status==="clarification";
+  const opts=MANAGERS.map(k=>`<option value="${k}" ${f.to===k?"selected":""}>${esc(P[k].name)}${S.refusal&&S.refusal.by===k?" · a refusé":""}</option>`).join("");
+  const footer=claire?`<div class="field" style="max-width:420px"><label for="to">Chef de projet <span class="req">*</span></label><select class="in" id="to" ${e.to?'aria-invalid="true" aria-describedby="toE"':""}><option value="">Choisir un chef de projet</option>${opts}</select>${e.to?`<span class="err" id="toE">${e.to}</span>`:""}</div>
+     <div class="field"><label for="msg">${answer?`Votre réponse <span class="req">*</span>`:"Message"}</label><textarea class="in" id="msg" rows="3" ${e.msg?'aria-invalid="true" aria-describedby="msgE"':""}>${esc(f.note)}</textarea>${e.msg?`<span class="err" id="msgE">${e.msg}</span>`:`<span class="src">${answer?"PO la lira avec le contexte initial au démarrage du Cadrage.":"Contexte, point d'attention… Le chef de projet pourra accepter, refuser ou demander une précision."}</span>`}</div>
+     <div class="actions"><button class="btn" type="button" data-act="transmit">${answer?"Répondre et transmettre":"Transmettre"}</button></div>`:"";
+  return `${top}${blk(claire?"Ce que vous transmettez":"Le projet",plan(factRows([fact("Créé par","Claire Morel"),fact("Le",esc(DAY.created))],false)),footer)}`;
+}
+
+/* 2. Accepter (le chef de projet choisi) */
+function acceptBody(){
+  const st=stepStatus("accept"),mine=S.role===S.to&&st==="open";
+  if(st==="locked") return blk("Ce qui sera transmis",plan(factRows([fact("Créé par","Claire Morel"),fact("Le",esc(DAY.created))],false)));
+  const head=st==="done"?[fact("Accepté par",`<ul class="chiplist">${person(S.to)}</ul>`),fact("Le",esc(DAY.today))]:[fact(S.role===S.to?"Transmis par":"Transmis à",`<ul class="chiplist">${person(S.role===S.to?"claire":S.to)}</ul>`),fact("Le",esc(S.sentAt))];
+  return blk(mine?"Ce que vous acceptez":"Ce qui est transmis",plan(factRows(head,true)),mine?decision():"");
+}
+function decision(){
+  const e=S.err,m=S.mode;
+  if(m==="clarify") return `<div class="field" style="max-width:640px"><span class="lbl" id="subjL">Elle porte sur <span class="req">*</span></span><div class="chips" role="group" aria-labelledby="subjL" ${e.subject?'aria-invalid="true"':""}>${Object.entries(SUBJECTS).map(([k,l])=>`<button class="chip" type="button" data-act="subject" data-v="${k}" aria-pressed="${S.subject===k}">${esc(l)}</button>`).join("")}</div>${e.subject?`<span class="err">${e.subject}</span>`:""}</div>
+    <div class="field" style="max-width:640px"><label for="resp">Votre question <span class="req">*</span></label><textarea class="in" id="resp" rows="3" ${e.resp?'aria-invalid="true" aria-describedby="respE"':""}></textarea>${e.resp?`<span class="err" id="respE">${e.resp}</span>`:`<span class="src">Elle part à Claire Morel. Le projet vous sera transmis à nouveau avec sa réponse.</span>`}</div>
+    <div class="actions"><button class="btn" type="button" data-act="clarify">Envoyer la question</button><button class="btn outline" type="button" data-act="mode" data-v="">Annuler</button></div>`;
+  if(m==="refuse") return `<div class="field" style="max-width:640px"><label for="resp">Motif du refus <span class="req">*</span></label><textarea class="in" id="resp" rows="3" ${e.resp?'aria-invalid="true" aria-describedby="respE"':""}></textarea>${e.resp?`<span class="err" id="respE">${e.resp}</span>`:`<span class="src">Il part à Claire Morel, qui transmettra le projet à quelqu'un d'autre.</span>`}</div>
+    <div class="actions"><button class="btn" type="button" data-act="refuse">Refuser le projet</button><button class="btn outline" type="button" data-act="mode" data-v="">Annuler</button></div>`;
+  return `<p class="cap">En acceptant, vous devenez responsable du projet et le Cadrage s'ouvre : ce qui est transmis y sera proposé à confirmer, rien n'est à ressaisir.</p>
+    <div class="actions"><button class="btn" type="button" data-act="accept">Accepter et lancer le projet</button><button class="btn outline" type="button" data-act="mode" data-v="clarify">Demander une précision</button><button class="btn ghost sm quiet push" type="button" data-act="mode" data-v="refuse">Refuser</button></div>`;
+}
+
+/* Accepté : dans l'app, le projet est lancé et sa vue d'ensemble prend la place */
+function framingBody(){
+  return blk("Le Cadrage est ouvert",plan([[fact("Responsable du projet",`<ul class="chiplist">${person(S.to)}</ul>`),fact("Depuis le",esc(DAY.today))]]),
+   `<p class="cap">PO a lu ce qui est transmis : ${5+(S.due?1:0)+(S.budget?1:0)} informations connues, rien n'est à ressaisir.</p><div class="actions"><button class="btn" type="button" data-act="toast" data-v="Ouverture du Cadrage">Ouvrir le Cadrage</button></div>`);
+}
+
+/* Déjà fait : l'historique, replié, une seule fois */
+function doneFold(){
+  return `<details class="fold"><summary><span class="chev">${I.chev}</span>Déjà fait · ${S.hist.length}</summary><ol class="hist">${S.hist.slice().reverse().map(h=>`<li><span class="when num">${esc(h.at)}</span><span>${esc(h.text)}${h.q?`<span class="q">« ${esc(h.q)} »</span>`:""}</span></li>`).join("")}</ol></details>`;
+}
+
+/* Qui fait quoi : les rôles, et la direction créative qui voit le projet sans écrire */
+function renderModal(){
+  if(!S.modal){$("modalRoot").innerHTML="";return;}
+  const can=S.role==="claire";
+  const avail=CREATIVES.filter(k=>!S.creatives.includes(k));
+  $("modalRoot").innerHTML=`<div class="modal" data-act="close"><div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dlgT">
+    <h2 id="dlgT">Qui fait quoi</h2>
+    <ul class="roles">
+      <li><span class="av">CM</span><span class="grow">Claire Morel<small>Direction · transmet le projet, répond aux précisions</small></span></li>
+      <li><span class="av">${S.to?P[S.to].ini:"?"}</span><span class="grow">${S.to?esc(P[S.to].name):"Pas encore choisi"}<small>Chef de projet · ${S.status==="accepted"?"responsable du projet":"accepte le projet, en devient responsable"}</small></span></li>
+      ${S.creatives.map(k=>`<li><span class="av">${P[k].ini}</span><span class="grow">${esc(P[k].name)}<small>Direction créative · voit le projet sans écrire</small></span>${can?`<button class="btn ghost sm" type="button" data-act="uncreative" data-v="${k}">Retirer</button>`:""}</li>`).join("")}
+    </ul>
+    ${can&&avail.length?`<div class="actions"><select class="in" id="newCreative" aria-label="Directeur créatif" style="flex:1;min-width:0">${avail.map(k=>`<option value="${k}">${esc(P[k].name)}</option>`).join("")}</select><button class="btn outline sm" type="button" data-act="addcreative">Ajouter</button></div>`:""}
+    <div class="actions" style="justify-content:flex-end"><button class="btn sm" type="button" data-act="close">Fermer</button></div>
+  </div></div>`;
+}
+
+/* « Aujourd'hui » : la page actuelle de l'app (UnlaunchedOverview), pour comparer */
+function oldPage(){
+  const st=S.status,a=assignee(),isA=st==="pending"&&a===S.role,claire=S.role==="claire";
+  const statusLabel={not_transmitted:"Non transmis",pending:"Transmis, à accepter",refused:"Refusé",clarification:"Précision demandée",accepted:"Lancé"}[st];
+  const body={not_transmitted:"Le projet sera lancé, avec ses étapes, une fois accepté par un chef de projet.",pending:a?`Transmis à ${P[a].name} le ${S.sentAt}. Le projet sera lancé à son acceptation.`:"",refused:a?`${P[a].name} a refusé le projet.`:"",clarification:a?`${P[a].name} demande une précision.`:"",accepted:"Projet lancé."}[st];
+  const known=[],missing=[];(S.due?known:missing).push("la date");(S.budget?known:missing).push("le budget");known.push("les titres","l'artiste","le contexte initial");
+  const may=claire&&["not_transmitted","refused","clarification"].includes(st);
+  const facts=[["Type","Album"],["Date de sortie",S.due||"non renseigné"],["Budget prévisionnel",S.budget||"non renseigné"],["Priorité","Haute"],["Créé le","27 octobre 2026"]];
+  return `<div class="old-page"><span class="back">← Projets</span><div><h1>Néons</h1><p class="muted">Mona Lys · Album</p></div>
+   <div class="old-grid"><div class="old-col">
+    <section class="old-box"><div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:center"><div><div style="display:flex;gap:8px;align-items:center"><h2 style="font-size:14px">${isA?"Ce projet vous est transmis":"Statut"}</h2><span class="badge sm t-info">${statusLabel}</span></div><p class="muted">${isA?`Par Claire Morel, le ${S.sentAt}.`:esc(body)}</p></div>${may?`<button class="btn outline sm" type="button" data-act="toast" data-v="Ouvre la fenêtre « Transmettre à un chef de projet »">${st==="clarification"?"Répondre et transmettre":st==="refused"?"Transmettre à quelqu'un d'autre":"Transmettre à un chef de projet"}</button>`:""}</div>
+     ${(st==="refused"||st==="clarification")?`<p class="old-q"><span class="muted" style="display:block;font-size:12px">${st==="refused"?"Motif":"Question"}</span>${esc(st==="refused"?S.refusal.text:S.ask.text)}</p>`:""}
+     ${isA?`${S.note?`<p class="old-q">${esc(S.note)}</p>`:""}<div><p style="font-weight:500">Ce que vous acceptez</p><p>Transmis : ${known.join(", ")}.</p>${missing.length?`<p class="muted">Manque : ${missing.join(", ")}. Le Cadrage vous le demandera.</p>`:""}<p class="muted">En acceptant, vous devenez responsable du projet et le Cadrage s'ouvre : ce qui est transmis y sera proposé à confirmer, rien n'est à ressaisir. Une question avant ? « Demander une précision ».</p></div>
+     <div class="actions"><button class="btn" type="button" data-act="accept">Accepter et lancer le projet</button><button class="btn outline" type="button" data-act="toast" data-v="Ouvre le formulaire de question">Demander une précision</button><button class="btn ghost" type="button" data-act="toast" data-v="Ouvre le formulaire de refus">Refuser</button></div>`:""}
+    </section>
+    <section style="display:flex;flex-direction:column;gap:12px"><h2>Titres rattachés</h2><ul class="old-list">${TITLES.map(t=>`<li><b style="font-weight:500">${esc(t)}</b><br><span class="muted" style="font-size:12px">Mona Lys</span></li>`).join("")}</ul></section>
+    <section style="display:flex;flex-direction:column;gap:12px"><h2>Contexte initial</h2><p>${esc(CONTEXT)}</p></section>
+    <section style="display:flex;flex-direction:column;gap:12px"><h2>Directeurs créatifs</h2><p>${esc(S.creatives.map(k=>P[k].name).join(", ")||"Aucun")}</p></section>
+    ${S.to?`<section style="display:flex;flex-direction:column;gap:12px"><h2>Historique des transmissions</h2><ol class="old-list"><li><b style="font-weight:500">Claire Morel → ${esc(P[S.to].name)}</b> <span class="muted">${esc(S.sentAt)}</span>${S.note?`<p class="muted">${esc(S.note)}</p>`:""}<p><b style="font-weight:500">${st==="pending"?"En attente":st==="accepted"?"Accepté":st==="refused"?"Refusé":"Précision demandée"}</b></p></li></ol></section>`:""}
+   </div>
+   <section style="display:flex;flex-direction:column;gap:12px"><h2>Informations</h2><dl class="old-facts">${facts.map(([d,v])=>`<div><dt>${d}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl></section></div></div>`;
+}
+
+/* Gestes */
+function toast(msg){const t=$("toast");t.textContent=msg;t.classList.remove("off");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.add("off"),2600);}
+function flash(step,title,body,tone){S.flash={step,title,body,tone};}
+const ACT={
+  noop(){},
+  toast(v){toast(v);},
+  modal(){S.modal=true;},
+  close(){S.modal=false;},
+  addcreative(){const k=$("newCreative").value;S.creatives.push(k);toast(`${P[k].name} ajouté à la direction créative`);},
+  uncreative(v){S.creatives=S.creatives.filter(k=>k!==v);toast(`${P[v].name} retiré`);},
+  mode(v){S.mode=v||null;S.err={};S.subject=null;},
+  subject(v){S.subject=v;S.err={...S.err,subject:null};},
+  transmit(){
+    const to=$("to").value,msg=$("msg").value.trim(),answer=S.status==="clarification",e={};
+    S.form={to,note:msg};
+    if(!to) e.to="Choisissez un chef de projet.";
+    if(answer&&!msg) e.msg="Écrivez la réponse pour le chef de projet.";
+    if(e.to||e.msg){S.err=e;return;}
+    if(answer){S.ask.answer=msg;S.hist.push({at:DAY.today,text:`Réponse de Claire Morel`,q:msg});}
+    S.to=to;S.note=answer?S.note:msg;S.sentAt=answer||S.status==="refused"?DAY.today:DAY.sent;S.status="pending";S.err={};S.form={to:"",note:""};
+    S.hist.push({at:S.sentAt,text:`Transmis à ${P[to].name}`,q:answer?null:(msg||null)});
+    flash("accept",`Projet transmis à ${P[to].name}.`,S.role==="claire"?"Sa réponse vous sera notifiée.":"","info");toast(`Transmis à ${P[to].name}`);},
+  accept(){S.status="accepted";S.mode=null;S.hist.push({at:DAY.today,text:`${P[S.to].name} a accepté le projet`});
+    flash("framing","Projet accepté.",`${P[S.to].name} est responsable du projet ; le Cadrage s'ouvre.`);toast("Projet accepté");},
+  clarify(){const r=$("resp").value.trim(),e={};if(!S.subject) e.subject="Choisissez sur quoi porte la question.";if(!r) e.resp="Écrivez votre question pour la direction.";
+    if(e.subject||e.resp){S.err=e;return;}
+    S.ask={subject:S.subject,text:r,at:DAY.asked};S.status="clarification";S.mode=null;S.subject=null;S.err={};S.form={to:S.to,note:""};
+    S.hist.push({at:DAY.asked,text:`${P[S.to].name} demande une précision · ${SUBJECTS[S.ask.subject]}`,q:r});
+    flash("transmit","Question envoyée à Claire Morel.","Le projet vous sera transmis à nouveau avec sa réponse, et une notification vous préviendra.","info");toast("Question envoyée");},
+  refuse(){const r=$("resp").value.trim();if(!r){S.err={resp:"Dites pourquoi vous refusez le projet."};return;}
+    S.refusal={by:S.to,text:r,at:DAY.asked};S.status="refused";S.mode=null;S.err={};S.form={to:"",note:""};
+    S.hist.push({at:DAY.asked,text:`${P[S.to].name} a refusé le projet`,q:r});
+    flash("transmit","Refus envoyé à Claire Morel.","Le projet ne vous est plus transmis.","info");toast("Refus envoyé");},
+};
+
+/* Moments, construits en jouant les vrais gestes */
+function sendTo(k,note){S.to=k;S.note=note;S.sentAt=DAY.sent;S.status="pending";S.hist.push({at:DAY.sent,text:`Transmis à ${P[k].name}`,q:note});}
+const MOM={
+  transmettre(){S.role="claire";},
+  accepter(){sendTo("lina",NOTE);S.role="lina";},
+  incomplet(){S.due=null;S.budget=null;sendTo("lina",NOTE);S.role="lina";},
+  precision(){sendTo("lina",NOTE);S.ask={subject:"budget",text:"Les 25 000 € HT comprennent-ils le clip, ou est-ce un budget à part ?",at:DAY.asked};S.status="clarification";S.form={to:"lina",note:""};
+    S.hist.push({at:DAY.asked,text:"Lina Haddad demande une précision · Le budget",q:S.ask.text});S.role="claire";},
+  refus(){sendTo("lina",NOTE);S.refusal={by:"lina",text:"Je suis sur la tournée de Kael jusqu'à mi-novembre : je ne pourrai pas tenir la sortie du 5 décembre.",at:DAY.asked};S.status="refused";
+    S.hist.push({at:DAY.asked,text:"Lina Haddad a refusé le projet",q:S.refusal.text});S.role="claire";},
+  accepte(){sendTo("lina",NOTE);S.status="accepted";S.hist.push({at:DAY.today,text:"Lina Haddad a accepté le projet"});S.role="lina";},
+};
+function go(m){S=fresh();(MOM[m]||MOM.accepter)();$("momSel").value=MOM[m]?m:"accepter";try{localStorage.setItem("pds-accept-moment",m);}catch(e){}render();}
+function setVariant(v){V=v;try{localStorage.setItem("pds-accept-variant",v);}catch(e){}
+  document.querySelectorAll("#vset button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.variant===v)));
+  $("vhint").textContent=v==="old"?"La page de l'app aujourd'hui : statut, résumé et informations dits chacun à part.":"Une seule page : le geste attendu, puis ce qui est transmis dans un bloc de faits, comme l'échange de cadrage.";
+  if(S) render();}
+
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-act]");if(!b) return;
+  if(b.dataset.act==="close"&&b.classList.contains("modal")&&e.target!==b) return;
+  const f=ACT[b.dataset.act];if(!f) return;
+  e.preventDefault();f(b.dataset.v);render();
+  if(["transmit","accept","clarify","refuse"].includes(b.dataset.act)){const fl=document.querySelector('.callout[role="status"]');if(fl) fl.scrollIntoView({block:"nearest"});}
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&S.modal){S.modal=false;render();}});
+$("roleSel").addEventListener("change",e=>{S.role=e.target.value;S.mode=null;S.err={};S.flash=null;render();});
+$("momSel").addEventListener("change",e=>{location.hash=e.target.value;go(e.target.value);});
+$("resetBtn").addEventListener("click",()=>go($("momSel").value));
+$("vset").addEventListener("click",e=>{const b=e.target.closest("[data-variant]");if(b) setVariant(b.dataset.variant);});
+
+try{const sv=localStorage.getItem("pds-accept-variant");if(sv==="old"||sv==="new") V=sv;}catch(e){}
+setVariant(V);
+let first=(location.hash||"").slice(1);
+if(!MOM[first]){try{first=localStorage.getItem("pds-accept-moment")||"accepter";}catch(e){first="accepter";}}
+go(first);
+})();
+</script>
