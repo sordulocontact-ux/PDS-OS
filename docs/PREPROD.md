@@ -130,6 +130,14 @@ Ressac » existe). `pnpm preprod:reset` le joue après le seed ; sur une base d�
 Les fichiers n'ont pas de contenu (pas de Storage dans le jeu de données) : la liste et les fiches
 les montrent, les ouvrir échoue.
 
+`supabase/preprod/showcase-contracts.sql` (joué après, une fois) ajoute ce que seule la section
+« Document » d'un contrat montre : cinq modèles (prestation technique, co-édition en v2, droit à
+l'image, et un brouillon « réalisation de clip » à valider) écrits et validés par Claire, quatre
+contrats **générés** depuis eux par les vrais gestes (`legal_agreement_needs`,
+`generate_legal_contract`, chaque valeur avec sa source ; `revise_contract_document` pour une v2 ;
+`advance_contract`) : à valider (Sami, v2), modifications demandées (Julie), validé à envoyer
+(Maxime), en préparation (Bastien). Il remplace les deux contrats écrits à la main de Sami et Julie.
+
 ## 6. Développer sur la base de pré-prod (sans Docker)
 
 Décision du 26/10/2026 : la stack Supabase locale prend trop de mémoire, et personne d'autre que nous ne

@@ -47,5 +47,7 @@ supabase db reset --db-url "$PREPROD_DB_URL" --no-seed --yes
   printf "\\set pw '%s'\n" "$PREPROD_PASSWORD"
   cat supabase/preprod/showcase.sql
 } | "$PSQL" "$PREPROD_DB_URL" -q -v ON_ERROR_STOP=1 >/dev/null
+# Contracts generated from templates, with their documents.
+"$PSQL" "$PREPROD_DB_URL" -q -v ON_ERROR_STOP=1 -f supabase/preprod/showcase-contracts.sql >/dev/null
 
 echo "Pré-prod remise à zéro : comptes de test et moments prêts."
