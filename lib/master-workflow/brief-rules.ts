@@ -13,8 +13,11 @@ const t = fr.masterBrief.missing;
 /** « l'ingénieur du mix », « la direction artistique »… in this order. */
 export function briefMissing(brief: MasterBrief): string[] {
   return [
-    ...(brief.mixContactId ? [] : [t.mix]),
-    ...(!brief.masteringSameEngineer && !brief.masteringContactId
+    // A contact of the Réseau, or a member of PDS (in-house engineer).
+    ...(brief.mixContactId || brief.mixPersonId ? [] : [t.mix]),
+    ...(!brief.masteringSameEngineer &&
+    !brief.masteringContactId &&
+    !brief.masteringPersonId
       ? [t.mastering]
       : []),
     ...(brief.direction || brief.references || brief.constraints

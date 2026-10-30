@@ -182,12 +182,12 @@ export async function loadBriefStep(
     changedBy,
     designations: {
       mix: designation(
-        brief.mixContactId,
+        brief.mixContactId ?? brief.mixPersonId,
         teamOf("mix_engineer"),
         view.brief.mixContactId && !saved ? "credited" : "chosen",
       ),
       mastering: designation(
-        brief.masteringContactId,
+        brief.masteringContactId ?? brief.masteringPersonId,
         teamOf("mastering_engineer"),
         "chosen",
       ),
