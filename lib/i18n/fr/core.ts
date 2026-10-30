@@ -30,9 +30,14 @@ export const core = {
       `Plus de filtres, ${count} actif${count > 1 ? "s" : ""}`,
     clear: "Effacer les filtres",
   },
-  // components/ui/audio-file.tsx
+  // components/ui/audio-file.tsx, components/ui/audio-player.tsx
   audioFile: {
     download: "Télécharger",
+    // `label` names the file: « Écouter la V2 ».
+    pause: (label: string) => `Pause · ${label}`,
+    position: (label: string) => `Position · ${label}`,
+    at: (time: string, total: string) => `${time} sur ${total}`,
+    unavailable: "Lecture impossible",
   },
   app: {
     name: "PDS OS",

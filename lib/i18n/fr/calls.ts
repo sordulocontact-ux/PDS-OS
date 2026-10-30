@@ -137,9 +137,12 @@ export const calls = {
     size: (mb: string) => `${mb} Mo`,
     playerUnavailable: "Lecture impossible pour le moment.",
     part: (n: number) => `Partie ${n}`,
+    listen: "Écouter l'enregistrement",
+    listenPart: (n: number) => `Écouter la partie ${n}`,
   },
   recorder: {
     title: "Enregistrer depuis l'application",
+    listen: "Réécouter l'enregistrement",
     reminder: "Prévenez les participants avant de lancer l'enregistrement.",
     sourceLabel: "Que faut-il enregistrer ?",
     sources: {

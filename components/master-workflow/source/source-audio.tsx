@@ -1,9 +1,10 @@
+import { AudioPlayer } from "@/components/ui/audio-player";
 import { masterSource } from "@/lib/i18n/fr/master-source";
 
 const fr = { masterSource };
 
 /** A version to listen to before choosing (proto: the play button of each
- * row): the browser's player, nothing without a signed link. */
+ * row): PDS OS's player, nothing without a signed link. */
 export function SourceAudio({
   name,
   url,
@@ -13,12 +14,10 @@ export function SourceAudio({
 }) {
   if (!url) return null;
   return (
-    <audio
-      controls
-      preload="none"
+    <AudioPlayer
       src={url}
-      aria-label={fr.masterSource.listen(name)}
-      className="h-9 w-full max-w-64 sm:w-64"
+      label={fr.masterSource.listen(name)}
+      className="w-full max-w-64 sm:w-64"
     />
   );
 }

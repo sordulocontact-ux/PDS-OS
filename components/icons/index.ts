@@ -15,6 +15,8 @@ export { IconDownload } from "./download";
 export { IconExternalLink } from "./external-link";
 export { IconGrip } from "./grip";
 export { IconMenu } from "./menu";
+export { IconPause } from "./pause";
+export { IconPlay } from "./play";
 export { IconRefresh } from "./refresh";
 export { IconSidebar } from "./sidebar";
 export { IconStop } from "./stop";

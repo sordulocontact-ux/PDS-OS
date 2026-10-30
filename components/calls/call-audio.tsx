@@ -1,3 +1,4 @@
+import { AudioPlayer } from "@/components/ui/audio-player";
 import type { CallDetail } from "@/lib/calls/queries";
 import { formatMegabytes } from "@/lib/calls/format";
 import { calls } from "@/lib/i18n/fr/calls";
@@ -24,14 +25,12 @@ export function CallAudio({
             {parts && (
               <p className="text-xs text-muted-foreground">{t.part(i + 1)}</p>
             )}
-            <audio
-              controls
-              preload="metadata"
-              src={url ?? undefined}
-              className="w-full"
-            >
-              <track kind="captions" />
-            </audio>
+            {url && (
+              <AudioPlayer
+                src={url}
+                label={parts ? t.listenPart(i + 1) : t.listen}
+              />
+            )}
           </div>
         ))
       )}

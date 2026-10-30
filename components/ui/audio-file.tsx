@@ -1,4 +1,5 @@
 import { IconDownload } from "@/components/icons";
+import { AudioPlayer } from "@/components/ui/audio-player";
 import { core } from "@/lib/i18n/fr/core";
 
 const fr = { audioFile: core.audioFile };
@@ -6,7 +7,7 @@ const fr = { audioFile: core.audioFile };
 /**
  * An audio file to listen to and download where it is shown (a version of
  * the mix, the master final in the Master and the Distribution): the
- * browser's player, then « Télécharger ». Nothing without a signed link.
+ * PDS OS's player, then « Télécharger ». Nothing without a signed link.
  */
 export function AudioFile({
   label,
@@ -21,13 +22,7 @@ export function AudioFile({
   if (!listenUrl) return null;
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <audio
-        controls
-        preload="none"
-        src={listenUrl}
-        aria-label={label}
-        className="h-9 max-w-full"
-      />
+      <AudioPlayer src={listenUrl} label={label} className="w-80 max-w-full" />
       {downloadUrl && (
         <a
           href={downloadUrl}

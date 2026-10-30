@@ -7,6 +7,7 @@ import { GapList } from "@/components/calls/recording-recovery";
 import { QUIET_RATIO, type Recording } from "@/components/calls/use-recorder";
 import { MetaList } from "@/components/labo/meta-list";
 import { useCanEditProject } from "@/components/projects/edit-access";
+import { AudioPlayer } from "@/components/ui/audio-player";
 import { Button } from "@/components/ui/button";
 import { useObjectUrl } from "@/components/ui/use-object-url";
 import { formatClock, formatMegabytes } from "@/lib/calls/format";
@@ -53,9 +54,13 @@ export function RecordingReview({
   return (
     <div className="grid gap-3 rounded-lg border border-border p-4">
       <p className="text-sm">{t.review}</p>
-      <audio controls src={url} className="w-full">
-        <track kind="captions" />
-      </audio>
+      {url && (
+        <AudioPlayer
+          src={url}
+          label={t.listen}
+          duration={recording.durationSeconds}
+        />
+      )}
       <MetaList
         items={[
           [t.duration, formatClock(recording.durationSeconds)],

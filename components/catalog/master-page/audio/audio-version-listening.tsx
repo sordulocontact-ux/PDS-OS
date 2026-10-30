@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 
 import { AudioCommentForm } from "@/components/catalog/master-page/audio/audio-comment-form";
 import { IconDownload } from "@/components/icons";
+import { AudioPlayer } from "@/components/ui/audio-player";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { Timestamp } from "@/components/ui/timestamp";
 import {
@@ -69,13 +70,11 @@ export function AudioVersionListening({
     <div className="flex flex-col gap-3">
       {listenUrl && (
         <div className="flex flex-wrap items-center gap-3">
-          <audio
+          <AudioPlayer
             ref={player}
-            controls
-            preload="none"
             src={listenUrl}
-            aria-label={t.listen(label)}
-            className="h-9 max-w-full"
+            label={t.listen(label)}
+            className="w-80 max-w-full"
           />
           {downloadUrl && (
             <a

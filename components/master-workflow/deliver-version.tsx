@@ -4,6 +4,7 @@ import { IconVolumeUp } from "nucleo-sharp-essential";
 import { useState, useTransition } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
+import { AudioPlayer } from "@/components/ui/audio-player";
 import { Button } from "@/components/ui/button";
 import { FileDropZone } from "@/components/ui/file-drop-zone";
 import { useObjectUrl } from "@/components/ui/use-object-url";
@@ -174,13 +175,7 @@ export function DeliverVersion({
             </span>
           </p>
           {preview && (
-            <audio
-              controls
-              preload="metadata"
-              src={preview}
-              aria-label={t.listen(chosen.name)}
-              className="h-9 w-full"
-            />
+            <AudioPlayer src={preview} label={t.listen(chosen.name)} />
           )}
           <p className="text-caption text-[color:var(--text-secondary)]">
             {deliverable ? d.confirm : t.confirmHint[role]}

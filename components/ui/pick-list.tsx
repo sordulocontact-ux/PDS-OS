@@ -1,8 +1,9 @@
 "use client";
 
-import { useId, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
+import { AudioPlayer } from "@/components/ui/audio-player";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,7 +38,9 @@ export type PickGroup = { label?: string; options: PickOption[] };
  * one row per option — avatar, name in bold, its detail, a player when it
  * is a file — and « Choisir » on the right, or the pill « Choisie » for
  * the current one. `searchable`: a search field first (accents and case
- * ignored), groups without a match hidden. `footer(query)`: what to do
+ * ignored), groups without a match hidden; the list opens only when the
+ * field is clicked, typed in or ↓ pressed, and closes on Échap or a click
+ * elsewhere (Sacha, 30/10/2026). `footer(query)`: what to do
  * when nothing fits (« Créer un contact », « Garder seulement le nom »).
  * Once chosen, it closes the place it opened in (`PickListDoneContext`).
  */
@@ -65,6 +68,11 @@ export function PickList({
   onDone?: () => void;
 }) {
   const searchId = useId();
+  const listId = useId();
+  const root = useRef<HTMLDivElement>(null);
+  // Without a search field, the list is the whole picker.
+  const [listOpen, setListOpen] = useState(!searchable);
+  const shownList = !searchable || listOpen;
   const closeHost = usePickListDone();
   const [query, setQuery] = useState("");
   const [choosing, setChoosing] = useState<string | null>(null);
@@ -73,6 +81,16 @@ export function PickList({
     onDone?.();
     closeHost();
   }, done);
+
+  // A click outside the picker folds the list back.
+  useEffect(() => {
+    if (!searchable || !listOpen) return;
+    const away = (event: PointerEvent) => {
+      if (!root.current?.contains(event.target as Node)) setListOpen(false);
+    };
+    document.addEventListener("pointerdown", away);
+    return () => document.removeEventListener("pointerdown", away);
+  }, [searchable, listOpen]);
 
   const key = normalizeSearch(query);
   const shown = groups
@@ -87,7 +105,7 @@ export function PickList({
     .filter((group) => group.options.length > 0);
 
   return (
-    <div className="flex flex-col gap-3">
+    <div ref={root} className="flex flex-col gap-3">
       {searchable && (
         <div className="flex flex-col gap-1.5">
           <label htmlFor={searchId} className="text-body-sm font-medium">
@@ -97,14 +115,32 @@ export function PickList({
             id={searchId}
             autoFocus
             autoComplete="off"
+            aria-expanded={listOpen}
+            aria-controls={listId}
             value={query}
             placeholder={searchPlaceholder}
-            onChange={(e) => setQuery(e.target.value)}
+            onClick={() => setListOpen(true)}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setListOpen(true);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "ArrowDown") {
+                e.preventDefault();
+                setListOpen(true);
+              } else if (e.key === "Escape" && listOpen) {
+                // Folds the list only; the next Échap closes the host.
+                e.stopPropagation();
+                setListOpen(false);
+              }
+            }}
             className="h-10"
           />
         </div>
       )}
       <div
+        id={listId}
+        hidden={!shownList}
         className={cn(
           "flex flex-col overflow-auto overscroll-contain rounded-xl border border-[color:var(--border-hairline)]",
           searchable && "max-h-75",
@@ -141,12 +177,10 @@ export function PickList({
                   )}
                 </span>
                 {option.audioUrl && (
-                  <audio
-                    controls
-                    preload="none"
+                  <AudioPlayer
                     src={option.audioUrl}
-                    aria-label={t.listen(option.label)}
-                    className="h-9 w-full max-w-72 sm:w-auto"
+                    label={t.listen(option.label)}
+                    className="w-full max-w-72 sm:w-64"
                   />
                 )}
                 {option.id === selectedId ? (
