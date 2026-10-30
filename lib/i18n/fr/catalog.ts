@@ -35,6 +35,8 @@ export const catalog = {
       nextRelease: "Prochaine sortie",
     },
     noOngoing: "Aucun projet en cours",
+    // One project in the row, the others counted (Sacha, 29/10).
+    ongoingMore: (n: number) => `+ ${n} autre${n > 1 ? "s" : ""}`,
     // « Néons · dans 37 jours » under the date.
     nextRelease: (project: string, days: number) =>
       `${project} · ${days === 0 ? "aujourd'hui" : `dans ${days} jour${days > 1 ? "s" : ""}`}`,

@@ -114,15 +114,27 @@ export function ArtistsTable({
               {artist.masterCount}
             </DataTableCell>
             <DataTableCell>
+              {/* One project, the others counted: a row stays one row. Their
+                  names on hover. */}
               {artist.ongoing.length > 0 ? (
-                <span className="flex flex-col gap-1.5">
-                  {artist.ongoing.map((project) => (
-                    <Lines
-                      key={project.projectId}
-                      main={project.title}
-                      under={project.place}
-                    />
-                  ))}
+                <span
+                  className="block"
+                  title={artist.ongoing.map((p) => p.title).join(", ")}
+                >
+                  <span className="block break-words">
+                    {artist.ongoing[0]!.title}
+                    {artist.ongoing.length > 1 && (
+                      <span className={secondary}>
+                        {" "}
+                        {fr.catalog.artists.ongoingMore(
+                          artist.ongoing.length - 1,
+                        )}
+                      </span>
+                    )}
+                  </span>
+                  {artist.ongoing[0]!.place && (
+                    <span className={sub}>{artist.ongoing[0]!.place}</span>
+                  )}
                 </span>
               ) : (
                 <span className={secondary}>
