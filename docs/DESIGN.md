@@ -351,8 +351,8 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   colonne de contenu de **1180 px** au plus, blocs espacés de **20 px** ; parcours et étape
   en grille `[300 px | 1fr]` (écart 24 px, une colonne sous 900 px). Toute l'étape ouverte est
   **dans une carte** (rayon 12, filet `--border-hairline`, padding 20, écart 14). La carte
-  « Maintenant » (et toute section « À vous » / tête du Travail) a le filet `--border-default`,
-  **sans ombre** (Sacha, 30/10/2026).
+  « Maintenant » (et toute section « À vous » / tête du Travail) a le même filet que les autres
+  cartes, `--border-hairline`, **sans ombre** (Sacha, 30/10/2026).
 - **Sidebar ou onglets : un seul interrupteur**, `DOUBLE_SIDEBAR` dans
   `lib/ui/project-sections.ts` (liste des sections partagée par les deux). `true` : la
   sidebar contextuelle ci-dessus, la barre principale repliée. `false` : une seule
