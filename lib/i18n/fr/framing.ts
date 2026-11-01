@@ -241,6 +241,9 @@ export const framing = {
       "Chaque réserve a un texte, un responsable de l'équipe et une échéance à venir.",
     deliverable_not_planned:
       "Un livrable sans responsable ni échéance ne devient pas une tâche : planifiez-le d'abord.",
+    // PO could not read the initial context (lib/framing/actions/start.ts).
+    context_unread:
+      "PO n'a pas pu lire le contexte. Réessayez dans un instant.",
     generic: "Une erreur est survenue. Réessayez.",
   },
 } as const;

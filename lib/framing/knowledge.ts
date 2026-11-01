@@ -372,14 +372,19 @@ export async function loadFramingKnowledge(
 }
 
 /**
- * The Cadrage has really begun: its stage is in progress and PO has read
- * the initial context, if there is one. Until then the entry offers
- * « Commencer le cadrage » (which runs that reading), not « Reprendre ».
+ * The Cadrage has begun: its stage is in progress. PO's reading of the
+ * initial context is not required: a failed call to the model must not
+ * leave « Démarrer le cadrage » open and the six dimensions locked (Sacha
+ * 01/11/2026); the dimensions offer to read it again (contextUnread).
  */
 export function framingStarted(k: FramingKnowledge): boolean {
-  const stage = k.framing.stage?.state ?? "not_started";
-  const contextRead =
-    !k.project.initialContext?.trim() ||
-    k.framing.briefRows.some((r) => r.field_key === "context_analysis");
-  return stage !== "not_started" && contextRead;
+  return (k.framing.stage?.state ?? "not_started") !== "not_started";
+}
+
+/** The project has an initial context PO has not read yet. */
+export function contextUnread(k: FramingKnowledge): boolean {
+  return (
+    Boolean(k.project.initialContext?.trim()) &&
+    !k.framing.briefRows.some((r) => r.field_key === "context_analysis")
+  );
 }
