@@ -164,6 +164,11 @@ export const framingJourney = {
     complete: "Complète",
     currentQuestion: "Question en cours",
     listTitle: "Les 6 dimensions",
+    // PO's reading of the initial context failed at the start.
+    contextUnread:
+      "PO n'a pas encore lu le contexte initial : ses propositions n'apparaissent pas.",
+    reread: "Relire le contexte",
+    rereading: "PO lit le contexte…",
     done: "Les 6 dimensions sont complètes.",
     doneBody: "Le Brief de cadrage peut être envoyé en validation.",
     // The banner after an answer (lot 3 of Ibé's feedback): the verb of

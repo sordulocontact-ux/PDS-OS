@@ -50,6 +50,7 @@ export type FramingErrorCode =
   | "deliverable_not_planned"
   | "recommendation_settled"
   | "task_exists"
+  | "context_unread"
   | "generic";
 
 export type ActionResult =

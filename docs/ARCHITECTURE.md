@@ -1497,8 +1497,11 @@ liste), est obligatoire ou non, accepte ou non « Rien à signaler » (`{"none":
 - **Entrée** (`FramingEntry`, Vue d'ensemble et Cadrage) : « ✓ Prise en charge acceptée »,
   l'analyse par dimension, « Commencer le cadrage » (`startFramingWithPo` : ouvre le Cadrage
   sans call, démarre l'étape, PO lit **une fois** le contexte initial, marqueur
-  `context_analysis`) et « Préparer un échange ». « Reprendre » n'apparaît qu'une fois
-  l'étape démarrée et le contexte lu (`framingStarted`).
+  `context_analysis`) et « Préparer un échange ». « Démarrer le cadrage » est fait dès que
+  l'étape est démarrée (`framingStarted`), **même si la lecture du contexte a échoué** (modèle
+  indisponible, quota) : sinon « Les 6 dimensions » restait verrouillée (01/11/2026). Dans ce
+  cas les dimensions affichent « Relire le contexte » (`ContextReread`,
+  `rereadFramingContext`, `contextUnread`).
 - **Parcours direct** (`?step=<dimension>&q=<question>`) : une question à la fois, la
   suivante calculée par le code (`nextAfter`), la question adaptée (« La date cible est-elle
   toujours le 20 novembre 2026 ? »), « M'aider à définir » (`lib/framing/help.ts` : jusqu'à

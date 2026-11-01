@@ -3,6 +3,7 @@ import { IconLock } from "nucleo-sharp-essential";
 
 import { FramingDictation } from "@/components/framing/framing-dictation";
 import { FramingStepFrame } from "@/components/framing/framing-step-frame";
+import { ContextReread } from "@/components/framing/dimensions/context-reread";
 import { DimensionRows } from "@/components/framing/dimensions/dimension-rows";
 import { FramingReturn } from "@/components/framing/dimensions/framing-return";
 import { QuestionLines } from "@/components/framing/dimensions/question-lines";
@@ -22,6 +23,7 @@ import {
 } from "@/lib/framing/dimensions";
 import type { HelpSuggestion } from "@/lib/framing/help";
 import { framingJourneyContext } from "@/lib/framing/journey-context";
+import { contextUnread } from "@/lib/framing/knowledge";
 import { fr } from "@/lib/i18n/fr";
 
 const first = (value: string | string[] | undefined) =>
@@ -211,6 +213,9 @@ export default async function FramingDimensionsPage({
           <ToneCallout tone="info" icon={<IconLock />}>
             {t.frozen(ctx.validator?.name ?? "—")}
           </ToneCallout>
+        )}
+        {canEdit && stage === "in_progress" && contextUnread(k) && (
+          <ContextReread projectId={projectId} />
         )}
         {box}
         <DimensionRows
