@@ -1506,7 +1506,9 @@ liste), est obligatoire ou non, accepte ou non « Rien à signaler » (`{"none":
   toujours changer (`StartWays started`, 01/11/2026) ; un échange prévu s'annule par
   « Annuler l'échange ».
 - **Parcours direct** (`?step=<dimension>&q=<question>`) : une question à la fois, la
-  suivante calculée par le code (`nextAfter`), la question adaptée (« La date cible est-elle
+  suivante calculée par le code (`nextAfter`) **au moment où on y va** (`?after=<question>`,
+  `routes.projectFramingAfter`) : une page préchargée au survol, rendue avant les dernières
+  réponses, renvoyait sur une question déjà répondue (boucle du 01/11/2026), la question adaptée (« La date cible est-elle
   toujours le 20 novembre 2026 ? »), « M'aider à définir » (`lib/framing/help.ts` : jusqu'à
   trois formulations, chacune citée mot pour mot d'une source et vérifiée par le code, gardées
   dans `<clé>_suggestions` ; **aussi stricte que la lecture après un call** depuis le 28/10/2026 :

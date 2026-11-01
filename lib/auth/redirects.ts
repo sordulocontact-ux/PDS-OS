@@ -172,6 +172,11 @@ export const routes = {
   // asked in « Les 6 dimensions ».
   projectFramingQuestion: (id: string, _dimension: string, key: string) =>
     `/app/projects/${id}/framing/dimensions?q=${key}`,
+  // The question after `key` that still needs someone, chosen by the server
+  // when the page is asked for: never a render made before the last answers
+  // (a prefetched page sent back to a question already answered, 01/11/2026).
+  projectFramingAfter: (id: string, key: string) =>
+    `/app/projects/${id}/framing/dimensions?after=${key}`,
   // What PO understood from a framing call: its proposals, with their
   // sentence, in « Les 6 dimensions ».
   projectFramingReview: (id: string) =>

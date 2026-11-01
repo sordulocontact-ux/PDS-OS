@@ -71,25 +71,34 @@ export default async function FramingDimensionsPage({
   const verified = new Set(checked.map((q) => q.key));
   const questions = reachable.filter((q) => !verified.has(q.key));
   const asked = first(sp.q);
+  const after = first(sp.after);
+  // The questions after `key`, in order, the first ones last.
+  const following = (key: string) => {
+    const from = questions.findIndex((q) => q.key === key);
+    return [
+      ...questions.slice(from + 1),
+      ...questions.slice(0, Math.max(from, 0)),
+    ].filter((q) => q.key !== key);
+  };
+  // `?after=` (an answer just given): the next question is chosen now, from
+  // what the project holds at this request (projectFramingAfter).
   const question: QuestionState | null =
     (isQuestionKey(asked) && reachable.find((q) => q.key === asked)) ||
-    questions.find(needsSomeone) ||
+    (isQuestionKey(after)
+      ? following(after).find(needsSomeone)
+      : questions.find(needsSomeone)) ||
     null;
   const at = question ? questions.indexOf(question) : -1;
   const hrefOf = (q: QuestionState | undefined) =>
     q ? routes.projectFramingQuestion(projectId, q.dimension, q.key) : null;
-  // After a gesture: the next question; else the list while proposals are
-  // left to check; else the Brief.
-  const nextHref = (q: QuestionState) => {
-    const from = questions.indexOf(q);
-    const next = [...questions.slice(from + 1), ...questions.slice(0, from)]
-      .filter((x) => x !== q)
-      .find(needsSomeone);
-    if (next) return hrefOf(next)!;
-    return checked.some((x) => x !== q)
-      ? routes.projectFramingStep(projectId, "dimensions")
+  // After a gesture: the next question, or the list while proposals are
+  // left to check, both chosen by the server once the answer is recorded
+  // (`?after=`: this render may be a prefetch made before the last answers);
+  // else the Brief.
+  const nextHref = (q: QuestionState) =>
+    following(q.key).some(needsSomeone) || checked.some((x) => x !== q)
+      ? routes.projectFramingAfter(projectId, q.key)
       : routes.projectFramingStep(projectId, "brief");
-  };
   // Confirming a dimension's proposals ends the step when they are all
   // that is left.
   const dimensionsLeft = new Set(checked.map((q) => q.dimension));
