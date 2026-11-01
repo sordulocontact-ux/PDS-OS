@@ -49,12 +49,16 @@ export async function GET(request: NextRequest) {
     }
     isRecovery = type === "recovery";
   } else if (code) {
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (error) {
       console.error("exchangeCodeForSession:", error.code, error.message);
       return invalidLink(target);
     }
-    isRecovery = type === "recovery";
+    // Supabase's default template sends `?code=` alone, without `type`: a
+    // recovery is told by the session's own authentication method.
+    isRecovery =
+      type === "recovery" ||
+      (await openedByRecovery(supabase, data.session.access_token));
   } else {
     return invalidLink(target);
   }
@@ -67,6 +71,17 @@ export async function GET(request: NextRequest) {
   const access = await fetchAccess(supabase);
   target.pathname = destinationFor(access.state);
   return NextResponse.redirect(target);
+}
+
+async function openedByRecovery(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  accessToken: string,
+): Promise<boolean> {
+  const { data } = await supabase.auth.getClaims(accessToken);
+  return (data?.claims.amr ?? []).some(
+    (entry) =>
+      (typeof entry === "string" ? entry : entry.method) === "recovery",
+  );
 }
 
 function invalidLink(target: URL) {
