@@ -17,23 +17,30 @@ const fr = { framingIntel, framingJourney };
  * time) and « Préparer un échange » (the common call form, in the step).
  * « Recommandé » on the one the code chose, on the left, its reason under
  * the cards (Figma PDS OS 304:20801). The form's « Revenir au choix »
- * goes back to the cards until the call is created.
+ * goes back to the cards until the call is created. Once started with PO
+ * (`started`), the cards stay: « Reprendre avec PO » or an exchange after
+ * all — the way in can always change (Sacha 01/11/2026).
  */
 export function StartWays({
   projectId,
   recommended,
   reason,
   callDefaults,
+  started = false,
 }: {
   projectId: string;
   recommended: "call" | "po";
   reason: string | null;
   callDefaults: CallPrepDefaults;
+  started?: boolean;
 }) {
   const t = fr.framingJourney.start;
   const [way, setWay] = useState<"call" | null>(null);
   const [starting, start] = useTransition();
+  // Idempotent: once started, it reopens the questions (and reads the
+  // context PO could not read the first time).
   const startDirectly = () => start(() => startFramingWithPo(projectId));
+  const po = started ? t.choices.resume : t.choices.po;
 
   if (way === "call")
     return (
@@ -43,14 +50,15 @@ export function StartWays({
   return (
     <div className="flex flex-col gap-2" aria-busy={starting || undefined}>
       <StartChoices
+        legend={started ? t.changeLegend : undefined}
         recommended={recommended}
         reason={reason}
         choices={[
           {
             value: "po",
-            title: t.choices.po.title,
-            body: t.choices.po.body,
-            action: t.choices.po.title,
+            title: po.title,
+            body: po.body,
+            action: po.title,
             onChoose: starting ? undefined : startDirectly,
           },
           {

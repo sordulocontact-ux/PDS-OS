@@ -18,7 +18,8 @@ import { formatDay, formatShortInstant } from "@/lib/utils/day";
  * Cadrage › Démarrer le cadrage (proto frEntry, ticket § 1 and § 5): the
  * acceptance and the project, what it already knows, then the two ways in;
  * once chosen, « Départ » — started with PO, or the framing exchange from
- * its preparation to its summary to the participants.
+ * its preparation to its summary to the participants. Started with PO, the
+ * two ways in stay offered: the start can always change.
  */
 export default async function FramingStartPage({
   params,
@@ -46,19 +47,32 @@ export default async function FramingStartPage({
   else if (chosen) {
     const started = project.stages.find((s) => s.key === "framing");
     body = (
-      <CallFacts
-        facts={[
-          {
-            label: t.departure,
-            value: t.departureDirect(
-              project.ownerName,
-              started?.stateChangedAt
-                ? formatShortInstant(started.stateChangedAt)
-                : "—",
-            ),
-          },
-        ]}
-      />
+      <>
+        <CallFacts
+          facts={[
+            {
+              label: t.departure,
+              value: t.departureDirect(
+                project.ownerName,
+                started?.stateChangedAt
+                  ? formatShortInstant(started.stateChangedAt)
+                  : "—",
+              ),
+            },
+          ]}
+        />
+        {/* The way in can still change while the Cadrage is worked on
+            (Sacha 01/11/2026): an exchange after all, or back to PO. */}
+        {canEdit && ctx.stage === "in_progress" && (
+          <StartWays
+            projectId={projectId}
+            recommended={recommendedStart(assessment.counts)}
+            reason={null}
+            callDefaults={await callSheetData(k, assessment)}
+            started
+          />
+        )}
+      </>
     );
   } else {
     const lines = Object.fromEntries(

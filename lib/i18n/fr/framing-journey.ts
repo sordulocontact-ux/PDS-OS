@@ -113,7 +113,13 @@ export const framingJourney = {
         title: "Préparer un échange",
         body: "Un échange avec la direction ; PO en tire des propositions, chacune avec la phrase exacte.",
       },
+      // Once started with PO, the way in can still change (Sacha 01/11/2026).
+      resume: {
+        title: "Reprendre avec PO",
+        body: "PO reprend ses questions où vous en êtes : rien de ce qui est déjà répondu n'est perdu.",
+      },
     },
+    changeLegend: "Continuer ou changer de départ",
     // Only when the exchange is recommended (proto).
     reason: (missing: number, toConfirm: number) =>
       `Il manque ${plural(missing, "information", "informations")} et ${toConfirm} ${toConfirm > 1 ? "sont" : "est"} à confirmer : un échange ira plus vite que des questions une à une.`,

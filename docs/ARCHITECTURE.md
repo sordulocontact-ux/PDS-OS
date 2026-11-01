@@ -1501,7 +1501,10 @@ liste), est obligatoire ou non, accepte ou non « Rien à signaler » (`{"none":
   l'étape est démarrée (`framingStarted`), **même si la lecture du contexte a échoué** (modèle
   indisponible, quota) : sinon « Les 6 dimensions » restait verrouillée (01/11/2026). Dans ce
   cas les dimensions affichent « Relire le contexte » (`ContextReread`,
-  `rereadFramingContext`, `contextUnread`).
+  `rereadFramingContext`, `contextUnread`). Une fois commencé avec PO, « Démarrer le cadrage »
+  garde les deux cartes (« Reprendre avec PO », « Préparer un échange ») : le départ peut
+  toujours changer (`StartWays started`, 01/11/2026) ; un échange prévu s'annule par
+  « Annuler l'échange ».
 - **Parcours direct** (`?step=<dimension>&q=<question>`) : une question à la fois, la
   suivante calculée par le code (`nextAfter`), la question adaptée (« La date cible est-elle
   toujours le 20 novembre 2026 ? »), « M'aider à définir » (`lib/framing/help.ts` : jusqu'à
