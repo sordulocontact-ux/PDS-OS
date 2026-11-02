@@ -1,6 +1,6 @@
 import "server-only";
 
-import { chromium as playwright, type Browser } from "playwright-core";
+import type { Browser } from "playwright-core";
 
 /**
  * Single entry point for PDF exports (CLAUDE.md, stack: Playwright). The HTML
@@ -9,8 +9,12 @@ import { chromium as playwright, type Browser } from "playwright-core";
  *
  * On Vercel, a Chromium built for serverless functions (@sparticuz/chromium);
  * elsewhere (local dev), the Chrome installed on the machine.
+ * Playwright is loaded here, when a PDF is printed, never when a module that
+ * may print one is imported: a missing file of the package made « Envoyer
+ * en validation » fail before anything was sent (01/11/2026).
  */
 async function launch(): Promise<Browser> {
+  const { chromium: playwright } = await import("playwright-core");
   if (process.env.VERCEL) {
     const { default: chromium } = await import("@sparticuz/chromium");
     return playwright.launch({

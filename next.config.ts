@@ -4,6 +4,12 @@ import type { NextConfig } from "next";
 const CHROMIUM_BIN =
   "./node_modules/.pnpm/@sparticuz+chromium@*/node_modules/@sparticuz/chromium/bin/**";
 
+// Read by playwright-core when it loads (require of a computed path): file
+// tracing misses it, and every route that loaded Playwright then failed on
+// Vercel (« Cannot find module …/browsers.json », 01/11/2026).
+const PLAYWRIGHT_BROWSERS =
+  "./node_modules/.pnpm/playwright-core@*/node_modules/playwright-core/browsers.json";
+
 // A route path as the picomatch glob `outputFileTracingIncludes` expects.
 const routeGlob = (route: string) => route.replace(/[[\]]/g, "\\$&");
 
@@ -13,6 +19,9 @@ const nextConfig: NextConfig = {
   // which file tracing cannot see on its own.
   serverExternalPackages: ["playwright-core", "@sparticuz/chromium"],
   outputFileTracingIncludes: {
+    // Every route: a few bytes, and a Server Action may print after its
+    // response (the Brief sent, kept as a PDF).
+    "/**": [PLAYWRIGHT_BROWSERS],
     // Every route that prints a PDF (PROJ-BUG-05, export failed on Vercel).
     // The keys are picomatch globs: `[projectId]` unescaped is a character
     // class and matched no route, so nothing was ever included. The files:
