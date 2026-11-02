@@ -30,7 +30,13 @@ export type PickOption = {
   audioUrl?: string | null;
 };
 
-export type PickGroup = { label?: string; options: PickOption[] };
+export type PickGroup = {
+  label?: string;
+  options: PickOption[];
+  // Listed only once something is typed (the rest of the Réseau under the
+  // engineers): a long list never buries the options that fit.
+  searchOnly?: boolean;
+};
 
 /**
  * A choice in a list, saved at once (docs/VISION-UX.md rule 3, proto
@@ -102,7 +108,9 @@ export function PickList({
           )
         : group.options,
     }))
-    .filter((group) => group.options.length > 0);
+    .filter(
+      (group) => group.options.length > 0 && (!group.searchOnly || key),
+    );
 
   return (
     <div ref={root} className="flex flex-col gap-3">

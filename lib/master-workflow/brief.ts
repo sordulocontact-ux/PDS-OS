@@ -15,7 +15,10 @@ import { masterExchangeAgenda } from "@/lib/master-workflow/exchange-agenda";
 import { loadFramingDefaults } from "@/lib/master-workflow/framing-defaults";
 import { hasMasterFinal } from "@/lib/master-workflow/audio-source";
 import { readMasterRows } from "@/lib/master-workflow/inventory-rows";
-import { networkEngineers } from "@/lib/master-workflow/network-engineers";
+import {
+  networkEngineers,
+  networkOthers,
+} from "@/lib/master-workflow/network-engineers";
 import { materialFacts, sourceFacts } from "@/lib/master-workflow/source-facts";
 import type { EngineerRole } from "@/lib/master-workflow/types";
 import { listProjectCreatives } from "@/lib/projects/creatives";
@@ -167,6 +170,7 @@ export async function loadMasterBrief(
     engineers: rows.failed.network
       ? []
       : networkEngineers(rows.contacts, rows.linkedCredits),
+    others: rows.failed.network ? [] : networkOthers(rows.contacts),
     validators,
     members: (members.data ?? []).map((m) => ({
       personId: m.person_id,

@@ -4,13 +4,15 @@
 
 import { routes } from "@/lib/auth/redirects";
 import { masterWorkflow } from "@/lib/i18n/fr/master-workflow";
+import { network } from "@/lib/i18n/fr/network";
 import type {
   EngineerRole,
   NetworkEngineer,
+  NetworkOther,
 } from "@/lib/master-workflow/types";
 import type { NetworkRole } from "@/lib/network/types";
 
-const fr = { masterWorkflow };
+const fr = { masterWorkflow, network };
 
 export type FlowContact = {
   id: string;
@@ -81,4 +83,16 @@ export function networkEngineers(
         a.engineer.name.localeCompare(b.engineer.name, "fr"),
     )
     .map(({ engineer }) => engineer);
+}
+
+/** The rest of the Réseau (no engineer role), by name, with their roles. */
+export function networkOthers(contacts: FlowContact[]): NetworkOther[] {
+  return contacts
+    .filter((contact) => !contact.roles.includes("engineer"))
+    .map((contact) => ({
+      id: contact.id,
+      name: contact.name,
+      detail:
+        contact.roles.map((role) => fr.network.roles[role]).join(", ") || null,
+    }));
 }

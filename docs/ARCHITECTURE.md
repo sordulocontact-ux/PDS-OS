@@ -4808,6 +4808,15 @@ lots, chacun utile seul.
   les règles du stockage décident). Le **dépôt** de l'ingénieur refuse un fichier dont le format
   ou le nom n'est pas celui d'un fichier audio, avec un message précis
   (`lib/master-workflow/delivery-rules.ts`, mêmes règles en SQL : `master_delivery_name_ok`).
+- **Ingénieur du Brief choisi dans tout le Réseau, ou créé sur place** (Sacha, 02/11/2026) :
+  « Changer » sur l'ingénieur du mix ou du mastering ouvre `EngineerPickList` : les contacts au
+  rôle Ingénieur d'abord (avec ce que PDS a fait avec eux), les membres de PDS (ingénieur maison),
+  puis, **dès qu'un nom est tapé**, le reste du Réseau (`networkOthers`, groupe `searchOnly` de
+  `PickList`). Un contact choisi pour mixer ou masteriser **reçoit le rôle Ingénieur**
+  (`lib/network/add-role.ts`, appelé par `saveBriefFact` avec la session : RLS `manage_network`).
+  « Ajouter « X » au Réseau » ouvre la fiche Réseau (`CreateContactDialog`, rôle Ingénieur coché,
+  nom tapé repris) puis choisit le nouveau contact. Pas de « Garder seulement le nom » : le
+  dossier part vers une fiche avec ses coordonnées.
 - **Brief et transmission lisibles** (retours du 11/10/2026, PROJ-UX-08 et PROJ-UX-09, migration
   `…20261011500301_brief_transmission_ux.sql`) : la page du Brief dit **à quoi il sert et ce qu'il
   produit** (le dossier de l'ingénieur), puis cinq sections : **Conditions de prestation**

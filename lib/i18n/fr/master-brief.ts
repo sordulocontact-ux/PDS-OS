@@ -118,6 +118,11 @@ export const masterBrief = {
     team: "Équipe du projet",
     // A member of PDS with an account: the in-house engineer.
     members: "Membres de PDS (ingénieur maison)",
+    // Listed once a name is typed; chosen, they get the engineer role.
+    others: "Reste du Réseau · devient ingénieur une fois choisi",
+    create: (name: string) =>
+      name ? `Ajouter « ${name} » au Réseau` : "Ajouter un ingénieur au Réseau",
+    createTitle: "Nouvel ingénieur dans le Réseau",
     none: "Aucun ingénieur dans le Réseau.",
   },
   record: "Enregistrer le Brief",

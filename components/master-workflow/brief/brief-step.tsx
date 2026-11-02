@@ -172,7 +172,9 @@ export function BriefStep({
               canSeeBudget={view.canSeeBudget}
               brief={view.brief}
               engineers={view.engineers}
+              others={view.others}
               members={view.members}
+              canAddContact={view.canAddContact}
               validators={view.validators}
               designations={step.designations}
               changedBy={step.changedBy}

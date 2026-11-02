@@ -1237,3 +1237,10 @@ faits grise sous un titre (l'état à côté du titre, le reste dans « Informat
 - Reste : aucun envoi d'e-mail par PDS OS (SMTP à brancher), une relance n'est pas
   enregistrée ; pas d'aperçu de fichier au clic ; la page Modèles de contrat n'a pas de
   « Maintenant » (à trancher).
+
+## Ingénieur du Brief : tout le Réseau, création sur place (02/11/2026, branche `pre-prod`)
+
+- « Changer » l'ingénieur du mix ou du mastering : ingénieurs du Réseau, membres de PDS, puis le
+  reste du Réseau dès qu'un nom est tapé ; un musicien choisi devient ingénieur (rôle ajouté).
+- « Ajouter « X » au Réseau » crée la fiche (rôle Ingénieur coché, nom tapé repris) sans quitter
+  le Brief et la choisit. Aucune migration.

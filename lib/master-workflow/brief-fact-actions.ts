@@ -16,6 +16,7 @@ import {
 } from "@/lib/master-workflow/brief-types";
 import { calendarInOrder, isIsoDate } from "@/lib/master-workflow/calendar";
 import { missingSentence } from "@/lib/master-workflow/brief-rules";
+import { addContactRole } from "@/lib/network/add-role";
 import { getProject } from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
 import { formatShortDay } from "@/lib/utils/day";
@@ -190,6 +191,9 @@ export async function saveBriefFact(
                 : t.errors.failed,
     };
   }
+  // Someone of the Réseau chosen to mix or master is an engineer from now on.
+  for (const contactId of [p.mixContactId, p.masteringContactId])
+    if (contactId) await addContactRole(supabase, contactId, "engineer");
   refresh(id.data);
   return { ok: true };
 }

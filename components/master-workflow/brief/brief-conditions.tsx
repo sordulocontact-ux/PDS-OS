@@ -9,9 +9,14 @@ import type {
   BriefPerson,
   MasterBrief,
 } from "@/lib/master-workflow/brief-types";
-import type { NetworkEngineer } from "@/lib/master-workflow/types";
+import type {
+  NetworkEngineer,
+  NetworkOther,
+} from "@/lib/master-workflow/types";
 import { parseEurosToCents } from "@/lib/projects/schemas";
 import { amountInput, formatAmount } from "@/lib/utils/money";
+
+import { EngineerPickList } from "./engineer-pick-list";
 
 const fr = { masterBrief };
 
@@ -23,7 +28,9 @@ export type BriefFactsProps = {
   canSeeBudget: boolean;
   brief: MasterBrief;
   engineers: NetworkEngineer[];
+  others: NetworkOther[];
   members: BriefPerson[];
+  canAddContact: boolean;
   validators: BriefPerson[];
   designations: {
     mix: BriefDesignation | null;
@@ -53,8 +60,8 @@ function sourceOf(
 
 /**
  * « Conditions de prestation » (proto): the engineers, chosen from the
- * Réseau with « Changer », whether the mix engineer masters too, the
- * revisions, who validates the versions, and the internal rates (the owner
+ * Réseau with « Changer » (`EngineerPickList`, or added to it there),
+ * whether the mix engineer masters too, the revisions, who validates the versions, and the internal rates (the owner
  * and the direction only). Each change is saved at once.
  */
 export function BriefConditions(props: BriefFactsProps) {
@@ -64,28 +71,10 @@ export function BriefConditions(props: BriefFactsProps) {
   // A contact of the Réseau, or a member of PDS (in-house engineer).
   const engineer = (id: string | null, personId: string | null = null) =>
     props.engineers.find((e) => e.id === id) ??
+    props.others.find((o) => o.id === id) ??
     (personId
       ? { name: props.members.find((m) => m.personId === personId)?.name ?? "" }
       : null);
-  const groups = [
-    {
-      label: t.picker.network,
-      options: props.engineers.map((e) => ({
-        id: e.id,
-        label: e.name,
-        detail: [e.structure, e.city, e.history].filter(Boolean).join(" · "),
-        avatar: { pictureUrl: null },
-      })),
-    },
-    {
-      label: t.picker.members,
-      options: props.members.map((m) => ({
-        id: `person:${m.personId}`,
-        label: m.name,
-        avatar: { pictureUrl: null },
-      })),
-    },
-  ];
   const pick = (
     field: "mixContactId" | "masteringContactId",
     selected: string | null,
@@ -93,12 +82,12 @@ export function BriefConditions(props: BriefFactsProps) {
     canEdit
       ? {
           list: (
-            <PickList
-              groups={groups}
+            <EngineerPickList
+              engineers={props.engineers}
+              others={props.others}
+              members={props.members}
               selectedId={selected}
-              searchable
-              searchLabel={t.picker.search}
-              done={t.changed}
+              canAddContact={props.canAddContact}
               onChoose={(id) =>
                 save(
                   id.startsWith("person:")

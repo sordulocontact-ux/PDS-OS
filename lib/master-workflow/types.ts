@@ -93,6 +93,15 @@ export type NetworkEngineer = {
   history: string | null;
 };
 
+/** A contact of the Réseau without the engineer role, offered in the Brief
+ * once a name is typed: chosen, they become an engineer. */
+export type NetworkOther = {
+  id: string;
+  name: string;
+  // Their roles in the Réseau (« Musicien, Compositeur »).
+  detail: string | null;
+};
+
 export type MasterInventory = {
   // No title attached to the project: nothing to follow.
   hasTitles: boolean;

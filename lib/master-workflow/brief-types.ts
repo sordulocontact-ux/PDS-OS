@@ -5,7 +5,11 @@
 import type { BudgetStatus } from "@/lib/budget/types";
 import type { CallStatus } from "@/lib/calls/constants";
 import type { AgendaItem } from "@/lib/calls/first-call-agenda";
-import type { MasterFact, NetworkEngineer } from "@/lib/master-workflow/types";
+import type {
+  MasterFact,
+  NetworkEngineer,
+  NetworkOther,
+} from "@/lib/master-workflow/types";
 
 /** What the engineers deliver (ticket § 3): chosen, never all imposed. */
 export const BRIEF_DELIVERABLES = [
@@ -98,6 +102,8 @@ export type BriefView = {
   allFinal: boolean;
   sourcesFailed: boolean;
   engineers: NetworkEngineer[];
+  // The rest of the Réseau: chosen as an engineer, they get the role.
+  others: NetworkOther[];
   // The members of PDS who may be the in-house engineer.
   members: BriefPerson[];
   validators: BriefPerson[];
