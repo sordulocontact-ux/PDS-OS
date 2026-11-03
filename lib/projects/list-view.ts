@@ -1,8 +1,13 @@
 // The Projects page made to steer 30 to 50 projects (PROJ-UX-01): which tab
-// a project belongs to, its administrative status, the filters and the search. Decided by code (rule 6). Client-safe.
+// a project belongs to, its administrative status, its current step, the
+// filters and the search. Decided by code (rule 6). Client-safe.
 
+import { shell } from "@/lib/i18n/fr/shell";
+import { progressLabel } from "@/lib/projects/progress";
 import type { ProjectListItem, ProjectType } from "@/lib/projects/types";
 import { normalizeSearch } from "@/lib/utils/search";
+
+const fr = { shell };
 
 /** Tous excludes the archives; Brouillons = not handed over yet; Actifs =
  * handed over, to accept or running. */
@@ -27,6 +32,17 @@ export function adminStatus(p: ProjectListItem): AdminStatus {
 
 export const isDraftProject = (p: ProjectListItem) =>
   p.status === "not_transmitted";
+
+/**
+ * Its current step, in the words of its workflows; null before the launch.
+ * A Contenu or an Événement never reads the music's words.
+ */
+export function phaseLabel(p: ProjectListItem): string | null {
+  if (p.status !== "launched") return null;
+  if (p.currentStage?.key === "delivery" && p.type !== "music_release")
+    return fr.shell.projects.phases.delivery;
+  return progressLabel(p.currentStage);
+}
 
 export const DUE_FILTERS = ["any", "next30", "overdue", "none"] as const;
 export type DueFilter = (typeof DUE_FILTERS)[number];

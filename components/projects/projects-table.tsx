@@ -24,11 +24,12 @@ import type { RecordRights } from "@/lib/archive/types";
 import { routes } from "@/lib/auth/redirects";
 import { records } from "@/lib/i18n/fr/records";
 import { shell } from "@/lib/i18n/fr/shell";
-import { adminStatus } from "@/lib/projects/list-view";
+import { adminStatus, phaseLabel } from "@/lib/projects/list-view";
 import { formatShortDate } from "@/lib/release/format";
 import { cn } from "@/lib/utils";
 import type { ProjectDraftItem } from "@/lib/projects/drafts";
 import type { ProjectListItem } from "@/lib/projects/types";
+import { stageHue } from "@/lib/ui/category-hues";
 import {
   adminStatusTone,
   draftTone,
@@ -74,6 +75,7 @@ export function ProjectsTable({
         <DataTableHead hideBelow="2xl">{t.columns.type}</DataTableHead>
         <DataTableHead hideBelow="sm">{t.columns.due}</DataTableHead>
         <DataTableHead>{t.columns.status}</DataTableHead>
+        <DataTableHead hideBelow="lg">{t.columns.step}</DataTableHead>
         <DataTableHead hideBelow="lg" fill>
           {t.columns.priority}
         </DataTableHead>
@@ -115,6 +117,7 @@ export function ProjectsTable({
                   {t.draft}
                 </StatusBadge>
               </DataTableCell>
+              <DataTableCell hideBelow="lg">{EMPTY_CELL}</DataTableCell>
               <DataTableCell hideBelow="lg" fill>
                 {EMPTY_CELL}
               </DataTableCell>
@@ -128,6 +131,7 @@ export function ProjectsTable({
         })}
         {projects.map((project) => {
           const status = adminStatus(project);
+          const phase = phaseLabel(project);
           return (
             <DataTableRow key={project.id}>
               {canSelectProjects ? (
@@ -170,6 +174,20 @@ export function ProjectsTable({
                 <StatusBadge tone={adminStatusTone[status]} size="sm">
                   {t.adminStatuses[status]}
                 </StatusBadge>
+              </DataTableCell>
+              {/* Its current step, in its workflow's hue (back, Sacha 03/11);
+                  a finished project says so once, in Statut. */}
+              <DataTableCell hideBelow="lg">
+                {phase && project.currentStage ? (
+                  <StatusBadge
+                    tone={stageHue(project.currentStage.key)}
+                    size="sm"
+                  >
+                    {phase}
+                  </StatusBadge>
+                ) : (
+                  EMPTY_CELL
+                )}
               </DataTableCell>
               <DataTableCell hideBelow="lg" fill>
                 {project.priority ? (

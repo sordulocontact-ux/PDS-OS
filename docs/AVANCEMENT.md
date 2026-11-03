@@ -1280,3 +1280,9 @@ faits grise sous un titre (l'état à côté du titre, le reste dans « Informat
 - La fenêtre de PO (Espace Espace) s'ouvre sans transition (`DialogContent instant`) : un raccourci
   clavier ne doit pas attendre. Le contenu replié (`Fold`) reste sans animation, par choix.
 - Proto de décision : `~/Desktop/Protos PDS OS/PDS OS - Mouvement des popups.html`. Aucune migration.
+
+## Projets : l'étape en cours revient (03/11/2026, branche `pre-prod`)
+
+- [x] Colonne **Étape** remise dans la liste des projets (Sacha, 03/11), après Statut, dès 1024 px :
+      l'étape en cours dans la teinte de son workflow (`phaseLabel`, « Diffusion » pour un Contenu ou un
+      Événement) ; vide pour un brouillon, un projet pas encore lancé ou terminé (Statut le dit déjà).

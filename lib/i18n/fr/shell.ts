@@ -160,6 +160,7 @@ export const shell = {
       due: "Échéance",
       status: "Statut",
       priority: "Priorité",
+      step: "Étape",
       stage: "Où en est le projet",
     },
     // PROJ-UX-01: steer 30 to 50 projects.
@@ -194,6 +195,8 @@ export const shell = {
       running: "En cours",
       done: "Terminé",
     },
+    // A Contenu or an Événement is « diffused », not distributed.
+    phases: { delivery: "Diffusion" },
     allValidated: "Terminé",
     draft: "Brouillon",
     noStage: "—",
