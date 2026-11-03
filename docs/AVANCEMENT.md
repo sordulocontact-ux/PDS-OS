@@ -1264,6 +1264,10 @@ faits grise sous un titre (l'état à côté du titre, le reste dans « Informat
 - La ligne « À vous : … » / « En attente de X : … » sous le pourquoi est retirée aussi : le Parcours
   à gauche dit déjà qui agit et sur quoi. Restent l'encadré « À vous · … » quand on a un geste, le
   cadenas « Se débloque quand… », `StepWaiting` dans le contenu et « Qui fait quoi » dans l'en-tête.
+- La pastille d'état à droite du titre (« En cours », « Fait »…) est retirée aussi : l'icône et le
+  sous-titre du Parcours, puis le contenu de la carte (action, cadenas, « En attente de… », motif,
+  « Déjà fait ») disent l'état. Restent l'échéance et la pastille propre à un module quand elle dit
+  plus (Distribution : « Prêt pour contrôle », « Clôturée avec réserves (n) »).
 - `StepMeta` supprimé, prop `rootPrereq` retirée (Juridique, Distribution). Proto de décision :
   `~/Desktop/Protos PDS OS/PDS OS - En-tête des étapes.html`. Aucune migration.
 - [x] Toasts maison (03/11/2026) : `sonner` retiré, `components/ui/toast.ts` (même API) + `Toaster` (pile dépliable au survol, pause au survol et onglet caché, balayage, Échap, dédoublonnage) ; règles `docs/DESIGN.md` § 4

@@ -89,9 +89,9 @@ Titre du module                                   [chevrons des sous-modules]
 │ Pourquoi, en une phrase.                       [Ouvrir l'étape]           │
 │ En attente de Nadia Benali : valider la pochette                          │
 └────────────────────────────────────────────────────────────────────────────┘
-┌ Parcours ────────┐ ┌ Étape ouverte ───────────────────────────── [En cours] ┐
+┌ Parcours ────────┐ ┌ Étape ouverte ───────────────────────────── avant le … ┐
 │ ✓ Source         │ │ Pourquoi                                                │
-│   Version confir.│ │ Responsable │ Validation │ Prérequis ✓/○ │ Ensuite      │
+│   Version confir.│ │ [À vous · action] en tête, si la personne a un geste    │
 │ ● Brief Mix…     │ │ [PO] ce que PO a pré-rempli et d'où                     │
 │   À vous · …     │ │ Faits pré-remplis, avec source        [Modifier/Changer]│
 │ ◌ Mixage         │ │ [Action principale] [Issue avec motif]                  │
@@ -108,11 +108,11 @@ Titre du module                                   [chevrons des sous-modules]
   sur cercle pointillé (verrouillée). Le sous-titre dit le **résultat** si c'est fait, **« Personne ·
   action »** si c'est en cours, **« Après : X »** si c'est verrouillé. « À vous · » en couleur de
   sélection sur ses propres étapes.
-- **Étape ouverte** (à droite). Titre et pastille d'état, pourquoi, puis, dans cet ordre et
+- **Étape ouverte** (à droite). Titre et échéance, pourquoi, puis, dans cet ordre et
   seulement s'ils existent : « Se débloque quand X est fait », le motif d'un retour, l'encadré PO, les faits, ce
   qui manque encore, l'action (ou « En attente de X (lien privé) : … »), le résultat final, et
   **tout en bas l'historique « Déjà fait »** : ce qui est fait ferme l'étape, sous tout ce qui
-  compte encore *(Sacha 17/10)*. **Ni grille « Exécute / Coordonne / Valide / Prérequis /
+  compte encore *(Sacha 17/10)*. **Ni pastille d'état (« En cours », « Fait »…), ni grille « Exécute / Coordonne / Valide / Prérequis /
   Ensuite », ni ligne « À vous : … » sous le pourquoi** : Ibé trouvait que ça faisait trop de
   bruit (cases vides, redites). Le Parcours dit déjà qui agit et sur quoi, « Qui fait quoi »
   donne les rôles, le cadenas dit ce qu'une étape attend, et l'encadré « À vous · … » en tête

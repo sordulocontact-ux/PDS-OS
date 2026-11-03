@@ -11,15 +11,6 @@ export const journey = {
   title: "Parcours",
   // « Parcours · Stratégie » (Marketing, Cadrage).
   titleOf: (module: string) => `Parcours · ${module}`,
-  status: {
-    done: "Fait",
-    current: "En cours",
-    waiting: "En attente d'un retour",
-    rework: "À revoir",
-    blocked: "Plus tard",
-    upcoming: "Plus tard",
-    obsolete: "Obsolète",
-  },
   after: (titles: string) => `Après : ${titles}`,
   me: "À vous",
   // « À vous : choisir comment démarrer » (Figma PDS OS 304:20801).

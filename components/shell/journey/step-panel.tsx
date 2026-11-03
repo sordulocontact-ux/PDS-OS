@@ -14,7 +14,7 @@ import {
   prereqsOf,
   withModule,
 } from "@/lib/ui/journey";
-import { journeyStatusTone, type Tone } from "@/lib/ui/state-tones";
+import type { Tone } from "@/lib/ui/state-tones";
 import { formatDay } from "@/lib/utils/day";
 import { cn } from "@/lib/utils";
 
@@ -53,7 +53,7 @@ export type StepSlots = {
 
 /**
  * One step of the journey, as the right side of a module, all in one card
- * (proto « Projet complet »): its title and state, why it matters, then its
+ * (proto « Projet complet »): its title and due date, why it matters, then its
  * slots. No grid of who does what nor « À vous : … » line (Ibé, 03/11/2026:
  * too much noise): the journey beside it already says who acts and on what,
  * the lead names the viewer's gesture. A locked step says what unlocks it
@@ -69,8 +69,10 @@ export function StepPanel({
 }: StepSlots & {
   step: JourneyStep;
   steps: JourneyStep[];
-  // Replaces the state's pill when the module says more (Distribution:
-  // « Prêt pour contrôle », « Clôturée avec réserves (3) »).
+  // A pill when the module says more than the state (Distribution:
+  // « Prêt pour contrôle », « Clôturée avec réserves (3) »). The state
+  // itself has no pill: the journey and the card already say it (Ibé,
+  // 03/11/2026).
   badge?: { tone: Tone; label: string };
   // Replaces « Se débloque quand … » (Marketing: « S'ouvre quand … »).
   blockedLabel?: (prereqs: string) => string;
@@ -110,9 +112,9 @@ export function StepPanel({
                 {t.meta.due(formatDay(step.due))}
               </span>
             )}
-            <StatusBadge tone={badge?.tone ?? journeyStatusTone[step.status]}>
-              {badge?.label ?? t.status[step.status]}
-            </StatusBadge>
+            {badge && (
+              <StatusBadge tone={badge.tone}>{badge.label}</StatusBadge>
+            )}
           </div>
         </div>
         {step.why && (
