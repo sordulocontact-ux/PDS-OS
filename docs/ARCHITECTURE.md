@@ -780,8 +780,9 @@ Socle de toutes les zones (sous-lots C0 à C5 de `docs/projet-complet/commons.md
   (avatar + « En attente de **X** : … », pris sur l'acteur de l'étape), jamais une ligne grise.
   **Action en tête, lien direct** (lot 4 des retours d'Ibé, 22/10/2026) : `StepPanel` a un slot
   `lead` — le geste du lecteur, juste sous le « pourquoi », dans un encadré « À vous · *action de
-  l'étape* » ancré `#a-vous` (`LEAD_ANCHOR`) ; le bandeau de résultat passe au-dessus et la grille
-  `StepMeta` se replie dessous (« Qui fait quoi, prérequis et suite »). Le parcours qui donne un
+  l'étape* » ancré `#a-vous` (`LEAD_ANCHOR`) ; le bandeau de résultat passe au-dessus. La grille
+  `StepMeta` et la ligne « À vous : … » sous le pourquoi ont été retirées le 03/11/2026 (Ibé : trop
+  de bruit) ; le Parcours et « Qui fait quoi » disent qui agit. Le parcours qui donne un
   `lead` met sur l'acteur `href` = `leadHref(page de l'étape)` ; Travail (global et du projet),
   l'Accueil, « Maintenant », la Vue d'ensemble, les sources de PO et `open` de `withOutcome` lisent
   `actionHref(step)` (= `actor.href ?? step.href`) : un clic ouvre la section, jamais le haut de

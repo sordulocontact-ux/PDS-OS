@@ -65,10 +65,10 @@ export const actionHref = (step: Pick<JourneyStep, "href" | "actor">) =>
   step.actor?.href ?? step.href;
 
 /**
- * A role on a step, for the grid of the open step: Exécute / Coordonne /
- * Valide (Cadrage, Marketing: 5 columns), or Responsable / Validation
- * (Master, Juridique, Distribution: 4 columns). The grid is deduced from
- * the kinds present: any `exec` or `coord` → 5 columns.
+ * A role on a step: Exécute / Coordonne / Valide (Cadrage, Marketing), or
+ * Responsable / Validation (Master, Juridique, Distribution). The open step
+ * no longer shows them as a grid (Ibé, 03/11/2026); « Qui fait quoi » and
+ * the journey say who acts.
  */
 export type JourneyRole = {
   kind: "exec" | "coord" | "valid" | "owner";

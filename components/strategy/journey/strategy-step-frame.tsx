@@ -29,8 +29,8 @@ const t = fr.strategyJourney;
  * complet »): the module's head (« Projet › Marketing › Stratégie › Étape »,
  * the Marketing's pills, h1 « Stratégie », the project's facts, « Qui fait
  * quoi »), « Maintenant » for the person looking, « Parcours · Stratégie »
- * on the left, the open step on the right — grid Exécute / Coordonne /
- * Valide / Prérequis / Ensuite, then the step's content. A locked step stays
+ * on the left, the open step on the right — its why, then the step's
+ * content. A locked step stays
  * readable (StepPanel makes it inert).
  */
 export async function StrategyStepFrame({

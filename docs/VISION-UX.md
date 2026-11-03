@@ -108,12 +108,15 @@ Titre du module                                   [chevrons des sous-modules]
   sur cercle pointillé (verrouillée). Le sous-titre dit le **résultat** si c'est fait, **« Personne ·
   action »** si c'est en cours, **« Après : X »** si c'est verrouillé. « À vous · » en couleur de
   sélection sur ses propres étapes.
-- **Étape ouverte** (à droite). Titre et pastille d'état, pourquoi, les quatre colonnes
-  Responsable / Validation / Prérequis / Ensuite, puis, dans cet ordre et seulement s'ils
-  existent : « Se débloque quand X est fait », le motif d'un retour, l'encadré PO, les faits, ce
+- **Étape ouverte** (à droite). Titre et pastille d'état, pourquoi, puis, dans cet ordre et
+  seulement s'ils existent : « Se débloque quand X est fait », le motif d'un retour, l'encadré PO, les faits, ce
   qui manque encore, l'action (ou « En attente de X (lien privé) : … »), le résultat final, et
   **tout en bas l'historique « Déjà fait »** : ce qui est fait ferme l'étape, sous tout ce qui
-  compte encore *(Sacha 17/10)*.
+  compte encore *(Sacha 17/10)*. **Ni grille « Exécute / Coordonne / Valide / Prérequis /
+  Ensuite », ni ligne « À vous : … » sous le pourquoi** : Ibé trouvait que ça faisait trop de
+  bruit (cases vides, redites). Le Parcours dit déjà qui agit et sur quoi, « Qui fait quoi »
+  donne les rôles, le cadenas dit ce qu'une étape attend, et l'encadré « À vous · … » en tête
+  reste quand la personne a un geste à faire *(Ibé et Sacha, 03/11/2026)*.
 - **On arrive au bon endroit.** Ouvrir un module ouvre l'étape qui attend la personne, sinon
   l'étape en cours. Quand la personne a un geste à faire, **il passe en tête de l'étape**
   (« À vous · Valider le Mix V1 » : la version, ses retours et la décision ; ou la question qu'on

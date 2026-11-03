@@ -53,7 +53,6 @@ export function DistributionStep({
     <StepPanel
       step={step}
       steps={ctx.steps}
-      rootPrereq={t.rootPrereq}
       badge={badge}
       returned={locked ? undefined : returned}
       history={<StepHistory items={stepHistory(ctx, stepKey)} />}

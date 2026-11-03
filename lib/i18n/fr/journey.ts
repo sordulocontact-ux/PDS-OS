@@ -34,30 +34,11 @@ export const journey = {
   },
   reported: "Blocage signalé",
   resolveBlocker: "Résoudre le blocage",
-  // Under the open step's why: who acts on it now, and what (retour
-  // « Néons » 10). The todo comes lower-cased.
-  actor: {
-    mine: (todo: string) => `À vous : ${todo}.`,
-    other: (who: string, todo: string) => `${who} : ${todo}.`,
-    waiting: (who: string, todo: string) => `En attente ${de(who)} : ${todo}.`,
-  },
   // « Ensuite » names who takes over (« Mixage · Karim »).
   nextBy: (step: string, who: string) => `${step} · ${who}`,
   viaLink: "sur son lien privé",
   privateLink: "lien privé",
   meta: {
-    owner: "Responsable",
-    validation: "Validation",
-    exec: "Exécute",
-    coord: "Coordonne",
-    valid: "Valide",
-    prereq: "Prérequis",
-    next: "Ensuite",
-    none: "Aucune",
-    noValidation: "Aucune validation",
-    toAppoint: "À désigner",
-    noPrereq: "Aucun",
-    more: (n: number) => `et ${n} autre${n > 1 ? "s" : ""}`,
     due: (day: string) => `avant le ${day}`,
   },
   // A locked step: what it waits for, joined by « et ».
@@ -66,11 +47,6 @@ export const journey = {
       ? `Se débloque quand ${titles} sont faits.`
       : `Se débloque quand ${titles} est fait.`,
   history: "Déjà fait",
-  // The viewer's gesture at the head of the step (lot 4 of Ibé's
-  // feedback), the step's grid folded under it.
-  lead: {
-    meta: "Qui fait quoi, prérequis et suite",
-  },
   historyAfter: (cause: string) => `suite à : ${cause}`,
   now: {
     label: "Maintenant",

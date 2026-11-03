@@ -4,7 +4,6 @@ import {
   ResultBanner,
   StepResultProvider,
 } from "@/components/shell/module/result-banner";
-import { Fold } from "@/components/ui/fold";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { journey } from "@/lib/i18n/fr/journey";
@@ -12,16 +11,12 @@ import {
   isLocked,
   type JourneyStep,
   LEAD_ANCHOR,
-  lowerFirst,
-  OPEN_STATUSES,
   prereqsOf,
   withModule,
 } from "@/lib/ui/journey";
 import { journeyStatusTone, type Tone } from "@/lib/ui/state-tones";
 import { formatDay } from "@/lib/utils/day";
 import { cn } from "@/lib/utils";
-
-import { StepMeta } from "./step-meta";
 
 const fr = { journey };
 
@@ -41,8 +36,7 @@ const t = fr.journey;
  * (lot 4 of Ibé's feedback: « l'action attendue en tête de page, les
  * informations secondaires repliées »). It comes right under the « why »,
  * named by the step's action (« À vous · Valider le Mix V1 ») and anchored
- * (`#a-vous`, where Travail opens it); the result banner moves above it and
- * the grid folds under it.
+ * (`#a-vous`, where Travail opens it); the result banner moves above it.
  */
 export type StepSlots = {
   lead?: React.ReactNode;
@@ -59,16 +53,15 @@ export type StepSlots = {
 
 /**
  * One step of the journey, as the right side of a module, all in one card
- * (proto « Projet complet »): its title and state, why it matters, the grid
- * (who executes, coordinates, validates — or who is responsible — what it
- * needs, even in another module, and what follows), then its slots. A
- * locked step says what unlocks it and shows its content read-only (inert):
- * nothing to do there yet.
+ * (proto « Projet complet »): its title and state, why it matters, then its
+ * slots. No grid of who does what nor « À vous : … » line (Ibé, 03/11/2026:
+ * too much noise): the journey beside it already says who acts and on what,
+ * the lead names the viewer's gesture. A locked step says what unlocks it
+ * and shows its content read-only (inert): nothing to do there yet.
  */
 export function StepPanel({
   step,
   steps,
-  rootPrereq,
   blockedLabel = t.blocked,
   badge,
   children,
@@ -79,8 +72,6 @@ export function StepPanel({
   // Replaces the state's pill when the module says more (Distribution:
   // « Prêt pour contrôle », « Clôturée avec réserves (3) »).
   badge?: { tone: Tone; label: string };
-  // Shown when the step needs nothing before it.
-  rootPrereq?: string;
   // Replaces « Se débloque quand … » (Marketing: « S'ouvre quand … »).
   blockedLabel?: (prereqs: string) => string;
   children?: React.ReactNode;
@@ -93,7 +84,6 @@ export function StepPanel({
   // pay never waits for the mastering).
   const lead =
     slots.lead && (!locked || step.actor?.viewer) ? slots.lead : null;
-  const meta = <StepMeta step={step} steps={steps} rootPrereq={rootPrereq} />;
   const banner = slots.flash ?? <ResultBanner />;
   return (
     <StepResultProvider>
@@ -130,9 +120,7 @@ export function StepPanel({
             {step.why}
           </p>
         )}
-        {/* The lead already names the viewer's own gesture. */}
-        {!(lead && step.actor?.viewer) && <StepActor step={step} />}
-        {lead ? (
+        {lead && (
           <>
             {banner}
             <section
@@ -155,10 +143,7 @@ export function StepPanel({
               </div>
               {lead}
             </section>
-            <Fold summary={t.lead.meta}>{meta}</Fold>
           </>
-        ) : (
-          meta
         )}
         {locked && missing.length > 0 && (
           <ToneCallout tone="info" icon={<IconLock />}>
@@ -186,22 +171,5 @@ export function StepPanel({
         {slots.history}
       </section>
     </StepResultProvider>
-  );
-}
-
-/** Who acts on the open step now, and what (retour « Néons » 10): the
- * viewer, someone else, or whom the step waits for. */
-function StepActor({ step }: { step: JourneyStep }) {
-  const actor = step.actor;
-  if (!actor || !OPEN_STATUSES.includes(step.status)) return null;
-  const todo = lowerFirst(actor.todo);
-  return (
-    <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] font-semibold">
-      {actor.viewer
-        ? t.actor.mine(todo)
-        : step.status === "waiting"
-          ? t.actor.waiting(actor.name, todo)
-          : t.actor.other(actor.name, todo)}
-    </p>
   );
 }

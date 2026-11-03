@@ -30,8 +30,7 @@ const t = fr.designJourney;
  * complet »): the Marketing's head (« Projet › Marketing › Conception ›
  * Étape », its pills, h1 « Conception », « Qui fait quoi »), « Maintenant »
  * for the person looking, « Parcours · Conception » on the left, the open
- * step on the right — grid Exécute / Coordonne / Valide / Prérequis /
- * Ensuite, then the step's content and its tools. A locked step stays
+ * step on the right — its why, then the step's content and its tools. A locked step stays
  * readable (StepPanel makes it inert).
  */
 export async function DesignStepFrame({

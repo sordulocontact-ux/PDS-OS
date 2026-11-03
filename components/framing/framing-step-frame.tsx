@@ -27,9 +27,8 @@ const t = fr.framingJourney;
  * The frame of a Cadrage step (docs/VISION-UX.md § 4, proto « Projet
  * complet »): the module's head (« Projet › Cadrage › Étape », h1
  * « Cadrage », the project's facts), « Maintenant » for the person looking,
- * « Parcours · Cadrage » on the left, the open step on the right — grid
- * Exécute / Coordonne / Valide / Prérequis / Ensuite, then the step's
- * content. A locked step stays readable (StepPanel makes it inert).
+ * « Parcours · Cadrage » on the left, the open step on the right — its
+ * why, then the step's content. A locked step stays readable (StepPanel makes it inert).
  */
 export async function FramingStepFrame({
   projectId,

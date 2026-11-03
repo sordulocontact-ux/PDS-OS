@@ -1255,3 +1255,14 @@ faits grise sous un titre (l'état à côté du titre, le reste dans « Informat
   reste du Réseau dès qu'un nom est tapé ; un musicien choisi devient ingénieur (rôle ajouté).
 - « Ajouter « X » au Réseau » crée la fiche (rôle Ingénieur coché, nom tapé repris) sans quitter
   le Brief et la choisit. Aucune migration.
+
+## En-tête des étapes allégé (03/11/2026, branche `pre-prod`)
+
+- Retour d'Ibé : la grille « Exécute / Coordonne / Valide / Prérequis / Ensuite » faisait trop de
+  bruit (sur « Départ », trois cases vides et une redite). Elle est retirée de `StepPanel`, donc de
+  tous les modules, avec son repli « Qui fait quoi, prérequis et suite » sous le geste en tête.
+- La ligne « À vous : … » / « En attente de X : … » sous le pourquoi est retirée aussi : le Parcours
+  à gauche dit déjà qui agit et sur quoi. Restent l'encadré « À vous · … » quand on a un geste, le
+  cadenas « Se débloque quand… », `StepWaiting` dans le contenu et « Qui fait quoi » dans l'en-tête.
+- `StepMeta` supprimé, prop `rootPrereq` retirée (Juridique, Distribution). Proto de décision :
+  `~/Desktop/Protos PDS OS/PDS OS - En-tête des étapes.html`. Aucune migration.

@@ -8,7 +8,6 @@ export const legalJourney = {
     name: "La direction",
     role: "Contrats et conditions d'utilisation",
   },
-  rootPrereq: "Dossier ouvert",
   // What a gesture did, for the result banner and its toast (rule 7).
   done: {
     confirmed: "Dossier confirmé",

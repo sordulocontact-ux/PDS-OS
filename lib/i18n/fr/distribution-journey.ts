@@ -625,7 +625,6 @@ export const distributionJourney = {
   ownerRole: "Cheffe ou chef de projet",
   validatorRole: "Validateur Distribution",
   toAppoint: "À désigner",
-  rootPrereq: "Projet lancé",
   nextOf: {
     prep: "Soumission du dossier",
     platforms: "Clôture normale",

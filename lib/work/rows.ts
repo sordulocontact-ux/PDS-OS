@@ -123,7 +123,7 @@ function validatorOf(step: JourneyStep): string | null {
   return names.length > 0 ? names.join(", ") : (step.validator?.name ?? null);
 }
 
-/** What the step unlocks, « Mastering · Karim Haddou » (StepMeta's words). */
+/** What the step unlocks, « Mastering · Karim Haddou ». */
 function thenOf(step: JourneyStep, steps: JourneyStep[]): string[] {
   return nextOf(step, steps).map((n) =>
     n.who ? fr.journey.nextBy(withModule(n), n.who) : withModule(n),
