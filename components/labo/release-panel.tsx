@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { Button } from "@/components/ui/button";
 import {

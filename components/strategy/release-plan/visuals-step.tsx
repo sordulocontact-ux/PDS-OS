@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { useDraftSave } from "@/components/strategy/release-plan/use-draft-save";
 import { VisualTile } from "@/components/strategy/release-plan/visual-tile";

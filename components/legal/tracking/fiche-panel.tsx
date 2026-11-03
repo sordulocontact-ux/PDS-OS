@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useTransition } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { NextCard } from "@/components/ui/next-card";
 import { usePublishResult } from "@/components/shell/module/result-banner";

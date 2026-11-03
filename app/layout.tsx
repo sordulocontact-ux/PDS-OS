@@ -3,7 +3,7 @@ import { Geist_Mono, Google_Sans_Flex } from "next/font/google";
 
 import { EntrySplash } from "@/components/shell/entry-splash";
 import { ThemeProvider } from "@/components/shell/theme-provider";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/toaster";
 import { fr } from "@/lib/i18n/fr";
 
 import "./globals.css";

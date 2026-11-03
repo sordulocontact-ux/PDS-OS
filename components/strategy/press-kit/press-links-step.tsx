@@ -2,7 +2,7 @@
 
 import { IconTrash } from "nucleo-sharp-essential";
 import { useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { PressContactForm } from "@/components/strategy/press-kit/press-contact-form";
 import { useDraftSave } from "@/components/strategy/release-plan/use-draft-save";

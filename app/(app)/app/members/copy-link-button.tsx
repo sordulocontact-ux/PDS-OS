@@ -1,7 +1,7 @@
 "use client";
 
 import { IconCopy } from "@/components/icons";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { Button } from "@/components/ui/button";
 import { auth } from "@/lib/i18n/fr/auth";

@@ -9,7 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { AssistantLauncher } from "@/components/assistant/assistant-launcher";
 import { keepChat, keptChat } from "@/components/assistant/chat-registry";

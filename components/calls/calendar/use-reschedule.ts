@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import type { CalendarEvent } from "@/lib/calls/calendar";
 import { parisInstant } from "@/lib/utils/calendar-period";

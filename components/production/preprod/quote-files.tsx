@@ -2,7 +2,7 @@
 
 import { IconFile } from "nucleo-sharp-essential";
 import { useState, useTransition } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { EmptyNote } from "@/components/shell/empty-state";

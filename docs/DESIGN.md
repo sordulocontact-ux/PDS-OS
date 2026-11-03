@@ -239,7 +239,7 @@ Demande de Sacha du 10/10/2026 : toute l'application existe en clair et en sombr
 
 - **Choix** : menu du compte (pied de la barre latérale) et tiroir mobile, « Thème » :
   **Système** (défaut, suit le réglage de l'ordinateur), Clair, Sombre. `next-themes`
-  (déjà installé pour les toasts) pose la classe `.dark` sur `<html>` avant le premier
+  pose la classe `.dark` sur `<html>` avant le premier
   affichage, sans éclair blanc. Le choix est une préférence d'affichage du navigateur,
   pas une donnée métier : il reste dans le stockage de `next-themes` (clé `pds-theme`),
   pas dans Supabase. Le changement est instantané (transitions coupées pendant la bascule).
@@ -633,9 +633,19 @@ D'après le proto « Projet complet » (`docs/protos/projet.html`), qui fait foi
   `sm` garde 20 px pour les lignes denses.
 - **Encart** (`ToneCallout`) : rayon 10, padding 12/14, 15 px, **icône du ton à gauche**
   (info, alerte, stop, coche ; un cadenas pour une étape verrouillée, prop `icon`).
-- **Toast** (sonner) : **fond encre** (`--surface-inverse`), texte `--text-on-dark`, rayon
-  12, 15 px, sans filet, en bas à droite ; il reprend le verbe du bouton (« Confirmer » →
-  « Proposition confirmée. »).
+- **Toast** (maison depuis le 03/11/2026, `components/ui/toast.ts`, plus de `sonner`) : **fond
+  encre** (`--toast-bg` = `--surface-inverse`, clair en thème sombre), rayon 12, 15 px, filet
+  à peine visible, en bas à droite, 380 px ; il reprend le verbe du bouton (« Confirmer » →
+  « Proposition confirmée. »). Icône du ton à gauche (succès, erreur, alerte, info ; aucune
+  pour un message neutre), seconde ligne en 14 px secondaire (`description`), un geste au
+  plus (`action`, pilule, ferme le toast). **Pile** : le plus récent devant, les autres
+  dépassent de 10 px au-dessus, trois au plus ; survol ou focus = la pile s'ouvre en colonne
+  et toutes les minuteries s'arrêtent (aussi quand l'onglet est caché). Durées : 4 s
+  (succès, neutre), 5 s (info), 6 s (alerte), 8 s (erreur, ou avec un geste). Le même message
+  encore affiché revient devant au lieu d'être doublé. Fermer : croix au survol ou au
+  clavier, Échap, balayage vers la droite. Entrée par le bas (320 ms,
+  `--toast-ease`), sortie par le bas plus vite (220 ms) ; mouvement réduit = fondu seul.
+  Une erreur est annoncée en `role="alert"`, le reste en `status`.
 - **Dates** : une date de fait se dit en entier, « Sam. 05/12/2026 » (`formatDay`,
   `lib/utils/day.ts`, Europe/Paris) ; dans une source ou un historique, en court :
   « le 14/10 », et avec l'heure « 19/10, 11:16 » (`formatShortDay`, `formatShortInstant`).

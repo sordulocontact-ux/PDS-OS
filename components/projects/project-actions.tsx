@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { EditPanel } from "@/components/archive/edit-panel";
 import { RecordActions } from "@/components/archive/record-actions";

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { notifications } from "@/lib/i18n/fr/notifications";
 import { getNotification } from "@/lib/notifications/actions";

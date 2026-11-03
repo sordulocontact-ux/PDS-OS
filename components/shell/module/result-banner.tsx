@@ -10,7 +10,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { Button } from "@/components/ui/button";
 import { moduleFrame } from "@/lib/i18n/fr/module-frame";

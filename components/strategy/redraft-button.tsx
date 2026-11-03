@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { Button } from "@/components/ui/button";
 import { framing } from "@/lib/i18n/fr/framing";

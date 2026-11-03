@@ -2,7 +2,7 @@
 
 import { IconPaperclip } from "nucleo-sharp-essential";
 import { useTransition } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { Button } from "@/components/ui/button";
 import { legalContracts } from "@/lib/i18n/fr/legal-contracts";

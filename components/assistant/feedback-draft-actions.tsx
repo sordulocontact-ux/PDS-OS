@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { useAssistant } from "@/components/assistant/assistant-provider";
 import { useOpenFeedback } from "@/components/feedback/feedback-provider";

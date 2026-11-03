@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { FieldError } from "@/components/auth/form-message";
 import { useFramingAction } from "@/components/framing/use-framing-action";

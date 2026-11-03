@@ -2,7 +2,7 @@
 
 import { IconPenWriting2, IconTrash } from "nucleo-sharp-essential";
 import { useState, useTransition, type ReactNode } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { FormDialog } from "@/components/ui/form-dialog";

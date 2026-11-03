@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { BriefFieldCard } from "@/components/framing/brief-field-card";
 import { useCanEditProject } from "@/components/projects/edit-access";

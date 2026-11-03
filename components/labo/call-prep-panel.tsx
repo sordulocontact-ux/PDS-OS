@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { MetaList } from "@/components/labo/meta-list";
 import { Button } from "@/components/ui/button";

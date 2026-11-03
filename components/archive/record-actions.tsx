@@ -8,7 +8,7 @@ import {
 } from "nucleo-sharp-essential";
 import { useRouter } from "next/navigation";
 import { useState, useTransition, type ReactNode } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { useDeleteRecords } from "@/components/archive/use-delete-records";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";

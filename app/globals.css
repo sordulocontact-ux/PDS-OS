@@ -1020,3 +1020,210 @@ button[data-busy]::before {
   border-color: var(--selection);
   box-shadow: 0 0 0 4px var(--selection-bg);
 }
+
+/* Toasts maison (components/ui/toaster.tsx, toast-card.tsx ; docs/DESIGN.md § 4, « Toast »).
+   Fond encre, en bas à droite, empilés : le plus récent devant, les autres
+   dépassent de 10 px au-dessus ; survol ou focus = la pile s'ouvre en colonne.
+   Seuls transform, opacity et clip-path bougent. */
+:root {
+  --toast-width: 380px;
+  --toast-gap: 8px;
+  --toast-peek: 10px;
+  --toast-ease: cubic-bezier(0.23, 1, 0.32, 1);
+  --toast-bg: var(--surface-inverse);
+  --toast-fg: var(--control-primary-fg);
+  --toast-fg-secondary: rgb(255 255 255 / 0.66);
+  --toast-border: rgb(255 255 255 / 0.08);
+  --toast-control: rgb(255 255 255 / 0.12);
+  --toast-control-hover: rgb(255 255 255 / 0.2);
+  --toast-success: #7fdca0;
+  --toast-error: #ff9b94;
+  --toast-warning: #f5c869;
+  --toast-info: #9ec5ff;
+  --toast-shadow: 0 2px 6px rgb(0 0 0 / 0.08), 0 16px 40px rgb(0 0 0 / 0.18);
+}
+:root.dark {
+  --toast-fg-secondary: rgb(10 10 10 / 0.62);
+  --toast-border: rgb(0 0 0 / 0.06);
+  --toast-control: rgb(0 0 0 / 0.07);
+  --toast-control-hover: rgb(0 0 0 / 0.13);
+  --toast-success: #15703a;
+  --toast-error: #b3261e;
+  --toast-warning: #8a5600;
+  --toast-info: #1f5fbf;
+  --toast-shadow: 0 2px 6px rgb(0 0 0 / 0.4), 0 16px 40px rgb(0 0 0 / 0.55);
+}
+
+.toaster {
+  position: fixed;
+  z-index: 100;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  width: min(var(--toast-width), calc(100vw - 2rem));
+}
+.toaster-list {
+  position: relative;
+  height: var(--toaster-height, 0px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.toast {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  /* Le haut d'un toast plié reste fixe : il dépasse de 10 px, pas plus. */
+  transform-origin: 50% var(--toast-cut);
+  transform: translateY(var(--toast-y)) scale(var(--toast-scale));
+  /* Déplié : rien n'est coupé (marges larges pour garder l'ombre). */
+  clip-path: inset(-48px -100vw -48px -100vw);
+  touch-action: pan-y;
+  transition:
+    transform 320ms var(--toast-ease),
+    clip-path 320ms var(--toast-ease),
+    opacity 200ms ease;
+}
+.toast[data-folded] {
+  clip-path: inset(var(--toast-cut) 0 0 0 round var(--radius-2xl));
+}
+.toast[data-exit] {
+  pointer-events: none;
+}
+.toast-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 10px 12px 14px;
+  border: 1px solid var(--toast-border);
+  border-radius: var(--radius-2xl);
+  background: var(--toast-bg);
+  background-clip: padding-box;
+  box-shadow: var(--toast-shadow);
+  color: var(--toast-fg);
+  font-size: var(--type-body-sm);
+  line-height: var(--type-body-sm-lh);
+  font-weight: 500;
+  text-wrap: pretty;
+  translate: var(--toast-swipe, 0px) 0;
+  transition:
+    translate 320ms var(--toast-ease),
+    opacity 200ms ease;
+}
+.toast-card > * {
+  transition: opacity 200ms ease;
+}
+.toast[data-folded] .toast-card > * {
+  opacity: 0;
+}
+/* Entrée : monte du bas. Sortie : redescend (devant), file à droite
+   (balayé) ou s'efface (derrière) — plus vite qu'à l'entrée. */
+.toast-card[data-state="entering"] {
+  translate: 0 calc(100% + 16px);
+  opacity: 0;
+  transition: none;
+}
+.toast[data-exit] .toast-card {
+  opacity: 0;
+  transition-duration: 220ms, 180ms;
+}
+.toast[data-exit="fall"] .toast-card {
+  translate: 0 calc(100% + 16px);
+}
+.toast[data-exit="swipe"] .toast-card {
+  translate: calc(100% + 32px) 0;
+}
+.toast-card[data-dragging] {
+  cursor: grabbing;
+  user-select: none;
+  transition: none;
+}
+.toast-icon {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+}
+.toast-icon[data-tone="success"] {
+  color: var(--toast-success);
+}
+.toast-icon[data-tone="error"] {
+  color: var(--toast-error);
+}
+.toast-icon[data-tone="warning"] {
+  color: var(--toast-warning);
+}
+.toast-icon[data-tone="info"] {
+  color: var(--toast-info);
+}
+.toast-description {
+  color: var(--toast-fg-secondary);
+  font-size: var(--type-caption);
+  line-height: var(--type-caption-lh);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+.toast-action,
+.toast-close {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  color: var(--toast-fg);
+  transition:
+    background-color 150ms ease,
+    opacity 150ms ease,
+    scale 140ms var(--ease-out);
+}
+.toast-action {
+  height: 28px;
+  padding-inline: 12px;
+  margin-top: -3px;
+  background: var(--toast-control);
+  font-size: var(--type-caption);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.toast-close {
+  width: 28px;
+  height: 28px;
+  margin-top: -3px;
+  margin-left: -4px;
+  color: var(--toast-fg-secondary);
+}
+.toast-action:active,
+.toast-close:active {
+  scale: 0.96;
+}
+.toast-action:focus-visible,
+.toast-close:focus-visible {
+  outline: 2px solid var(--toast-fg);
+  outline-offset: 2px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .toast-action:hover {
+    background: var(--toast-control-hover);
+  }
+  .toast-close:hover {
+    background: var(--toast-control);
+    color: var(--toast-fg);
+  }
+  /* La croix n'apparaît qu'au survol ou au clavier : le texte respire. */
+  .toast-close {
+    opacity: 0;
+  }
+  .toast-card:hover .toast-close,
+  .toast-close:focus-visible {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .toast,
+  .toast-card {
+    transition-property: opacity;
+  }
+  .toast-card[data-state="entering"],
+  .toast[data-exit] .toast-card {
+    translate: none;
+  }
+}

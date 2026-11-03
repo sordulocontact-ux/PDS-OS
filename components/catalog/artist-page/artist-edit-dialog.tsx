@@ -2,7 +2,7 @@
 
 import { IconPenWriting2 } from "nucleo-sharp-essential";
 import { useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { ArtistPictureField } from "@/components/catalog/artist-page/artist-picture-field";
 import { ArtistProfileForm } from "@/components/catalog/artist-page/artist-profile-form";

@@ -7,7 +7,7 @@ import {
   IconTrash,
 } from "nucleo-sharp-essential";
 import { useState, useTransition } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import type { RowAction } from "@/components/ui/row-actions";
 import { FormDialog } from "@/components/ui/form-dialog";

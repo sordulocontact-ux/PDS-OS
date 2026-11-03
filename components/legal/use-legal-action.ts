@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { usePublishResult } from "@/components/shell/module/result-banner";
 import type { WriteResult } from "@/lib/utils/write-result";

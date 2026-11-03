@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { FilterChip } from "@/components/ui/filter-chip";

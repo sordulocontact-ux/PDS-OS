@@ -1266,3 +1266,4 @@ faits grise sous un titre (l'état à côté du titre, le reste dans « Informat
   cadenas « Se débloque quand… », `StepWaiting` dans le contenu et « Qui fait quoi » dans l'en-tête.
 - `StepMeta` supprimé, prop `rootPrereq` retirée (Juridique, Distribution). Proto de décision :
   `~/Desktop/Protos PDS OS/PDS OS - En-tête des étapes.html`. Aucune migration.
+- [x] Toasts maison (03/11/2026) : `sonner` retiré, `components/ui/toast.ts` (même API) + `Toaster` (pile dépliable au survol, pause au survol et onglet caché, balayage, Échap, dédoublonnage) ; règles `docs/DESIGN.md` § 4

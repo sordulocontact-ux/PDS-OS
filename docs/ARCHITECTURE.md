@@ -2483,7 +2483,7 @@ calendrier : rien ne s'y saisit, **chaque date s'ouvre là où elle se décide**
   (panneau ouvert à droite) et l'en-tête mobile (dessous), données chargées par
   `app/(app)/layout.tsx`.
 - **Realtime** (`notification-listener.tsx`) : à chaque insertion pour la personne
-  connectée → `router.refresh()` (la page se met à jour sans recharger) + toast `sonner`
+  connectée → `router.refresh()` (la page se met à jour sans recharger) + toast
   (écart au design system, à valider avec Ibé). `supabase.realtime.setAuth()` **avant**
   `subscribe()`, sinon la socket est anonyme et la RLS ne laisse rien passer.
 - **Web Push** : `public/sw.js` (écrit à la main, sans next-pwa), bouton d'activation

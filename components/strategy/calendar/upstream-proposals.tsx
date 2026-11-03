@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { formatMilestoneDate } from "@/components/strategy/calendar/milestone-row";

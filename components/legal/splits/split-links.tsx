@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { useShowSplitLinks } from "@/components/legal/splits/split-actions";
 import { PrivateLinkCard } from "@/components/legal/private-link-card";

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { useCanEditProject } from "@/components/projects/edit-access";
 import { Button } from "@/components/ui/button";

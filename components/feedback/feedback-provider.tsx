@@ -10,7 +10,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { useCaptureShortcut } from "@/components/feedback/use-capture-shortcut";
 import { FormDialog } from "@/components/ui/form-dialog";

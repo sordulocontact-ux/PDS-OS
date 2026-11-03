@@ -1,7 +1,7 @@
 "use client";
 
 import { IconClipboard, IconPaperPlane2 } from "nucleo-sharp-essential";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { RowActions } from "@/components/ui/row-actions";
 import { calls } from "@/lib/i18n/fr/calls";

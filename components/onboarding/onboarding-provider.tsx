@@ -10,7 +10,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import type { WelcomeVariant } from "@/lib/home/welcome";
 import { dismissWelcome } from "@/lib/home/welcome-actions";

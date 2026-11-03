@@ -1,6 +1,6 @@
 "use client";
 
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { IconCopy } from "@/components/icons";
 import { Button } from "@/components/ui/button";

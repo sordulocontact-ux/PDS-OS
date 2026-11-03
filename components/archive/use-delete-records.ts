@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import type { SelectableRow } from "@/components/ui/row-selection";
 import { deleteRecords } from "@/lib/archive/delete-actions";
@@ -58,7 +58,6 @@ export function useDeleteRecords(kind: ArchiveKind) {
         else
           toast.error(t.partial(kind, failed.length), {
             description: [...new Set(lines)].join("\n"),
-            classNames: { description: "whitespace-pre-line" },
             duration: 10_000,
           });
       }

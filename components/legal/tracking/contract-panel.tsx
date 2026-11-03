@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useTransition, type ReactNode } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { ClauseForm } from "@/components/legal/contracts/clause-form";
 import { ContractDocumentCard } from "@/components/legal/contracts/contract-document-card";

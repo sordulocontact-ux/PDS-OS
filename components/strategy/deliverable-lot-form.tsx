@@ -14,7 +14,7 @@ import { strategy } from "@/lib/i18n/fr/strategy";
 import { strategyDeliverables } from "@/lib/i18n/fr/strategy-deliverables";
 import { addDeliverableLot } from "@/lib/strategy/actions/deliverables";
 import type { LotItem } from "@/lib/strategy/deliverable-lots";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 const fr = { dialogs, strategy, strategyDeliverables };
 

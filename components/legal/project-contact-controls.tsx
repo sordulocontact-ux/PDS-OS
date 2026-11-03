@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition, type FormEvent } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { PersonPickerField } from "@/components/network/person-picker-field";
 import { OptionSelect } from "@/components/projects/option-select";

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { ContractValueList } from "@/components/legal/contracts/contract-value-list";
 import { Button } from "@/components/ui/button";

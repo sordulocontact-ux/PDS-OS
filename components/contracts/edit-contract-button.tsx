@@ -1,7 +1,7 @@
 "use client";
 
 import { IconPenWriting2 } from "nucleo-sharp-essential";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { ContractForm } from "@/components/contracts/contract-form";

@@ -12,6 +12,11 @@ export const core = {
     close: "Fermer",
     saving: "Enregistrement…",
   },
+  // The toasts (components/ui/toaster.tsx, toast-card.tsx).
+  toast: {
+    region: "Notifications",
+    close: "Fermer",
+  },
   // « Exporter en PDF » (components/ui/pdf-export-button.tsx): the
   // generation and the download fail separately (PROJ-BUG-05).
   pdf: {

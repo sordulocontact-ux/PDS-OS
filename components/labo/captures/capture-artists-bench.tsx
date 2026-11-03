@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { CaptureCard } from "@/components/labo/captures/capture-card";
 import {

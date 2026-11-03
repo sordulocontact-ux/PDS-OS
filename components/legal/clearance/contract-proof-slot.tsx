@@ -2,7 +2,7 @@
 
 import { IconCheck, IconFile } from "nucleo-sharp-essential";
 import { useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { FileDropZone } from "@/components/ui/file-drop-zone";
 import { uploadCatalogFile } from "@/lib/catalog/upload-file";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import type { SelectableRow } from "@/components/ui/row-selection";
 import { setManyArchived } from "@/lib/archive/actions";
@@ -44,7 +44,6 @@ export function useArchiveRecords(kind: ArchiveKind, archived: boolean) {
         else
           toast.error(words.partial(kind, failed.length), {
             description: [...new Set(lines)].join("\n"),
-            classNames: { description: "whitespace-pre-line" },
             duration: 10_000,
           });
       }

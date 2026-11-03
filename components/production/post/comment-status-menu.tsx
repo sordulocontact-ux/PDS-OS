@@ -2,7 +2,7 @@
 
 import { IconCheck } from "nucleo-sharp-essential";
 import { useTransition } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { RowActions } from "@/components/ui/row-actions";
 import { productionPost } from "@/lib/i18n/fr/production-post";

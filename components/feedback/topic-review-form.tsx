@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { ChoiceCards } from "@/components/ui/choice-cards";
 import { FormMessage } from "@/components/auth/form-message";

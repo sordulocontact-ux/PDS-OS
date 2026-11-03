@@ -1,6 +1,6 @@
 "use client";
 
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 import { ConfirmButton } from "@/components/ui/confirm-button";
 import { cancelFramingCall } from "@/lib/framing/actions/cancel-call";
