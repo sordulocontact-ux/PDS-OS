@@ -2,6 +2,7 @@
 
 import type { FieldErrors, FormValues } from "@/lib/auth/form-state";
 import type { MasterOption } from "@/lib/catalog/types";
+import type { WorkflowKey } from "@/lib/workflow-status/rules";
 
 // Three families (feedback n°2): music (stored `music_release`), content,
 // event. A partnership is not a project. Event exists but is closed in V1:
@@ -191,7 +192,13 @@ export type ProjectListItem = {
   responsibleName: string | null;
   responsiblePersonId: string | null;
   dueDate: string | null;
+  // Launched: the workflows it moves or waits at, side by side (Étape
+  // column, lib/overview/workflow-progress.ts); absent where not read.
+  activeWorkflows?: ActiveWorkflow[];
 };
+
+/** A workflow a launched project is at, and its current step's title. */
+export type ActiveWorkflow = { workflow: WorkflowKey; step: string };
 
 export type ProjectDetail = {
   id: string;

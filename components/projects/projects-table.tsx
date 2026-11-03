@@ -2,6 +2,7 @@ import { RecordSelection } from "@/components/archive/record-selection";
 import { DraftRowActions } from "@/components/projects/draft-row-actions";
 import { ProjectActions } from "@/components/projects/project-actions";
 import { ProjectKindBadge } from "@/components/projects/project-kind-badge";
+import { ProjectStepCell } from "@/components/projects/project-step-cell";
 import {
   DataTable,
   DataTableActionsCell,
@@ -24,12 +25,11 @@ import type { RecordRights } from "@/lib/archive/types";
 import { routes } from "@/lib/auth/redirects";
 import { records } from "@/lib/i18n/fr/records";
 import { shell } from "@/lib/i18n/fr/shell";
-import { adminStatus, phaseLabel } from "@/lib/projects/list-view";
+import { adminStatus } from "@/lib/projects/list-view";
 import { formatShortDate } from "@/lib/release/format";
 import { cn } from "@/lib/utils";
 import type { ProjectDraftItem } from "@/lib/projects/drafts";
 import type { ProjectListItem } from "@/lib/projects/types";
-import { stageHue } from "@/lib/ui/category-hues";
 import {
   adminStatusTone,
   draftTone,
@@ -131,7 +131,6 @@ export function ProjectsTable({
         })}
         {projects.map((project) => {
           const status = adminStatus(project);
-          const phase = phaseLabel(project);
           return (
             <DataTableRow key={project.id}>
               {canSelectProjects ? (
@@ -175,19 +174,8 @@ export function ProjectsTable({
                   {t.adminStatuses[status]}
                 </StatusBadge>
               </DataTableCell>
-              {/* Its current step, in its workflow's hue (back, Sacha 03/11);
-                  a finished project says so once, in Statut. */}
               <DataTableCell hideBelow="lg">
-                {phase && project.currentStage ? (
-                  <StatusBadge
-                    tone={stageHue(project.currentStage.key)}
-                    size="sm"
-                  >
-                    {phase}
-                  </StatusBadge>
-                ) : (
-                  EMPTY_CELL
-                )}
+                <ProjectStepCell project={project} />
               </DataTableCell>
               <DataTableCell hideBelow="lg" fill>
                 {project.priority ? (

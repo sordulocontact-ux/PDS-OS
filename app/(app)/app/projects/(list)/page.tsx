@@ -23,6 +23,7 @@ import { fr } from "@/lib/i18n/fr";
 import { viewHref } from "@/lib/ui/view-href";
 import { listProjectDrafts } from "@/lib/projects/drafts";
 import { listProjects } from "@/lib/projects/queries";
+import { withActiveWorkflows } from "@/lib/overview/workflow-progress";
 
 export default async function ProjectsPage({
   searchParams,
@@ -33,12 +34,15 @@ export default async function ProjectsPage({
   // The archive is the director's: anyone else always sees live projects.
   const archived = canArchive && isArchivedView((await searchParams).view);
   const canCreate = can(access, "create_projects") && !archived;
-  const [{ projects, error }, counts, drafts] = await Promise.all([
-    listProjects({ archived }),
-    canArchive ? countRecords("project") : null,
-    // Drafts belong with the live projects of whoever may create them.
-    canCreate ? listProjectDrafts() : [],
-  ]);
+  const [{ projects: listedProjects, error }, counts, drafts] =
+    await Promise.all([
+      listProjects({ archived }),
+      canArchive ? countRecords("project") : null,
+      // Drafts belong with the live projects of whoever may create them.
+      canCreate ? listProjectDrafts() : [],
+    ]);
+  // Launched: the workflows each project is at (Étape column, 03/11/2026).
+  const projects = await withActiveWorkflows(listedProjects);
   const listed = projects.length + drafts.length > 0;
 
   const newProject = canCreate ? (

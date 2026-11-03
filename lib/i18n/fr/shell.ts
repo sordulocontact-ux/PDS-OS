@@ -199,6 +199,8 @@ export const shell = {
     },
     // A Contenu or an Événement is « diffused », not distributed.
     phases: { delivery: "Diffusion" },
+    // A launched project at one of its workflows (« Master · Brief »).
+    workflowStep: (workflow: string, step: string) => `${workflow} · ${step}`,
     allValidated: "Terminé",
     draft: "Brouillon",
     noStage: "—",

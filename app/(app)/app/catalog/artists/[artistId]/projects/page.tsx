@@ -8,6 +8,7 @@ import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { getArtist } from "@/lib/catalog/artist-queries";
 import { fr } from "@/lib/i18n/fr";
+import { withActiveWorkflows } from "@/lib/overview/workflow-progress";
 import { listProjects } from "@/lib/projects/queries";
 import { allInOrder } from "@/lib/utils/parallel";
 
@@ -38,7 +39,7 @@ export default async function ArtistProjectsPage({
   }
   return (
     <ProjectsTable
-      projects={projects}
+      projects={await withActiveWorkflows(projects)}
       rights={{
         canEdit: can(access, "create_projects"),
         canArchive: can(access, "archive_records"),
