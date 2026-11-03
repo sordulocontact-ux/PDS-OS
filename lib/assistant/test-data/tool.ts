@@ -6,6 +6,10 @@ import { z } from "zod";
 
 import { pageRecord } from "@/lib/assistant/page-context";
 import type { Source } from "@/lib/assistant/sources";
+import {
+  advanceTestProject,
+  TEST_PROJECT_STAGES,
+} from "@/lib/assistant/test-data/advance-project";
 import { mastersFor } from "@/lib/assistant/test-data/fake";
 import { insertTemplate } from "@/lib/assistant/test-data/fake-template";
 import {
@@ -60,7 +64,7 @@ async function pageCatalog(pagePath: string | null) {
 export function createTestDataTool(access: Access, pagePath: string | null) {
   return tool({
     description:
-      "MODE DÉVELOPPEMENT. Crée tout de suite, sans formulaire, de NOUVEAUX éléments de test fictifs : artiste, titre, projet (musical : avec ses titres ; contenu ponctuel) ou modèle de contrat (contractTemplate : texte fictif écrit par l'application, à valider par le directeur général). Par défaut sur la page ouverte : un titre créé depuis la fiche d'un artiste lui est crédité, un projet créé depuis la fiche d'un titre porte ce titre. Noms, dates et montants tirés par l'application. Pour compléter la page ouverte elle-même, utiliser fill_page_test_data.",
+      "MODE DÉVELOPPEMENT. Crée tout de suite, sans formulaire, de NOUVEAUX éléments de test fictifs : artiste, titre, projet (musical : avec ses titres ; contenu ponctuel) ou modèle de contrat (contractTemplate : texte fictif écrit par l'application, à valider par le directeur général). Par défaut sur la page ouverte : un titre créé depuis la fiche d'un artiste lui est crédité, un projet créé depuis la fiche d'un titre porte ce titre. Noms, dates et montants tirés par l'application. Projet avec son Cadrage (« et remplis / complète le Cadrage ») : stage = framing ; projet prêt pour ses étapes (« je veux être directement aux étapes, au Master, au Juridique ») : stage = launched (Cadrage rempli, Brief validé, plan lancé). Pour compléter la page ouverte elle-même (pas un nouvel élément), utiliser fill_page_test_data.",
     inputSchema: z.object({
       kind: z.enum(["artist", "master", "project", "contractTemplate"]),
       count: z.number().int().min(1).max(5).default(1),
@@ -72,8 +76,14 @@ export function createTestDataTool(access: Access, pagePath: string | null) {
         .enum(MUSIC_FORMATS)
         .optional()
         .describe("Projet musical : single (défaut), ep, album…"),
+      stage: z
+        .enum(TEST_PROJECT_STAGES)
+        .optional()
+        .describe(
+          "Projet : framing = Cadrage rempli ; launched = jusqu'aux étapes (Brief validé, plan lancé)",
+        ),
     }),
-    execute: async ({ kind, count, projectType, musicFormat }) => {
+    execute: async ({ kind, count, projectType, musicFormat, stage }) => {
       const t = fr.assistant.testData;
       const organizationId = access.organizationId;
       if (kind === "contractTemplate") return createTemplates(access, count);
@@ -153,6 +163,15 @@ export function createTestDataTool(access: Access, pagePath: string | null) {
           break;
         }
         facts.push(t.projectCreated(project.title, project.kind, manager.name));
+        if (stage)
+          facts.push(
+            ...(await advanceTestProject(
+              supabase,
+              access,
+              { id: project.id, manager },
+              stage,
+            )),
+          );
         sources.push({
           label: project.title,
           href: routes.project(project.id),

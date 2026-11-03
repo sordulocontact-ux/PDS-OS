@@ -249,6 +249,29 @@ fictif » et n'utilisant que des champs connus ; créé en brouillon par
 `create_contract_template`, le DG le valide pour essayer « Générer le contrat ». Le modèle
 n'écrit toujours aucune clause (§ 1).
 
+**Projet de test jusqu'aux étapes** (`create_test_data`, `stage`, 03/11/2026 : « crée un faux
+projet, complète tout le Cadrage, je veux être directement aux étapes Master, Juridique »).
+PO avait rempli la page ouverte au lieu de créer le projet : `fill_page_test_data` ne vise
+que la page ouverte (choisie par le code), il ne peut pas remplir un projet qu'il vient de
+créer. Un nouveau projet passe donc toujours par `create_test_data`, avec :
+- `stage: framing` : le projet est **accepté** par l'utilisateur (`respond_to_assignment`),
+  puis son Cadrage est rempli par le code de `fill_page_test_data` (`fillFraming`) ;
+- `stage: launched` : en plus, le Brief est **envoyé** (`sendFramingBrief`), **validé**
+  (`decide_framing_brief`) et le **plan lancé tel que proposé** (`launchPlan`, aucun choix) :
+  les workflows (Stratégie, Juridique, Master…) sont ouverts.
+
+Chaque geste est celui de l'écran, avec la session de l'utilisateur (`advance-project.ts`).
+Seule exception à « PO ne décide jamais » : en données de test, à la demande explicite, et
+**seulement si l'utilisateur est lui-même chef de projet et validateur** (sinon PO s'arrête au
+geste qu'il ne peut pas faire et le dit : projet transmis à un autre, Brief chez le DG). Le
+premier geste refusé arrête la suite ; le résultat nomme ce qui est fait et où ça s'est arrêté.
+PO ne demande jamais de confirmation pour des données de test.
+
+Routage (même jour, « Néons est à quelle étape ? » depuis l'accueil) : un projet nommé passe
+toujours par `find_projects` (qui donne l'étape actuelle) puis `project_status`, quelle que
+soit la page ; `step_status` ne lit que la page ouverte, et son fait « pas une page d'étape »
+renvoie vers `find_projects`.
+
 ## 4. Règles de rédaction
 
 - Répondre en français, court, concret. Pas de Markdown (texte simple, listes « - »).

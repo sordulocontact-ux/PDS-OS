@@ -45,6 +45,31 @@ export const assistant = {
       `Modèle de contrat de test « ${name} » créé en brouillon (texte fictif écrit par l'application, sans valeur juridique) : le directeur général peut le valider pour essayer « Générer le contrat ».`,
     projectCreated: (title: string, kind: string, manager: string) =>
       `Projet de test « ${title} » créé (${kind}), transmis à ${manager}.`,
+    // A test project taken past its Cadrage (create_test_data, stage).
+    advance: {
+      accepted: "Projet accepté : vous en êtes le responsable.",
+      notYours: (manager: string) =>
+        `Le projet est transmis à ${manager} : c'est à cette personne de l'accepter et de remplir son Cadrage, rien de plus n'a été fait.`,
+      framingFilled:
+        "Cadrage rempli avec des réponses fictives (six dimensions).",
+      stopsAtFraming:
+        "Le Brief n'est pas encore envoyé : « Envoyer en validation » se fait depuis la page Cadrage.",
+      briefSent: "Brief envoyé en validation au directeur général.",
+      waitsForValidator:
+        "La suite (validation du Brief, plan, étapes Master, Juridique…) attend la décision du directeur général : vous n'êtes pas le validateur.",
+      briefValidated: "Brief validé (données de test).",
+      planLaunched:
+        "Plan du projet lancé tel que proposé : ses étapes (Stratégie, Juridique, Master…) sont ouvertes.",
+      failed: (step: string, reason = "") =>
+        `Arrêté à l'étape « ${step} »${reason ? ` : ${reason}` : ""}. Ce qui précède est fait.`,
+      steps: {
+        accept: "accepter le projet",
+        framing: "remplir le Cadrage",
+        send: "envoyer le Brief",
+        validate: "valider le Brief",
+        launch: "lancer le plan",
+      },
+    },
     // Filling the open page (fill_page_test_data).
     noPage:
       "Aucune fiche de titre, d'artiste ou de projet n'est ouverte : rien à compléter ici.",
@@ -302,7 +327,7 @@ export const assistant = {
   // step-status.ts). PO relays these sentences, it never deduces a state.
   stepStatus: {
     noProjectPage:
-      "La page ouverte n'est pas celle d'une étape de projet : pour l'état d'un projet, utiliser project_status.",
+      "La page ouverte n'est pas celle d'une étape de projet. Si un projet est nommé dans la question, appelle maintenant find_projects avec ce nom (il donne l'étape actuelle de chaque projet), puis project_status ; ne demande pas à l'utilisateur sur quelle page il est.",
     projectNotFound: "Ce projet n'est pas visible pour vous.",
     noStep:
       "La page ouverte ne correspond à aucune étape des parcours du projet (le workflow n'est peut-être pas encore lancé par le Plan du projet).",
