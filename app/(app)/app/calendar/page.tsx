@@ -2,10 +2,9 @@ import { Suspense } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { CalendarAgenda } from "@/components/calendar/calendar-agenda";
-import {
-  CalendarMonth,
-  CalendarWeek,
-} from "@/components/calendar/calendar-board";
+import { CalendarMonth } from "@/components/calendar/calendar-board";
+import { CallsCalendar } from "@/components/calls/calendar/calls-calendar";
+import { MeetingComposerProvider } from "@/components/calls/new-meeting-button";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
@@ -16,6 +15,8 @@ import type { Access } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { loadCalendar } from "@/lib/calendar/queries";
+import { placeCalls } from "@/lib/calls/calendar";
+import { loadMeetingFormData } from "@/lib/calls/invite";
 import { fr } from "@/lib/i18n/fr";
 import { viewHref } from "@/lib/ui/view-href";
 import {
@@ -26,6 +27,7 @@ import {
   type CalendarMode,
   type CalendarPeriod,
 } from "@/lib/utils/calendar-period";
+import { allInOrder } from "@/lib/utils/parallel";
 
 export const metadata = {
   title: `${fr.calendar.page.title} · ${fr.app.name}`,
@@ -37,14 +39,17 @@ const MINE = "mine";
 /**
  * The Calendrier (docs/ARCHITECTURE.md § 8, « Calendrier »): the dates PDS OS already
  * knows in every project one sees, the month by default (?mode=week for the
- * week, ?date=YYYY-MM-DD to move), « Tout » or « À vous ». Read only: each
- * date opens where it is decided. Phones read the period as an agenda.
+ * week, ?date=YYYY-MM-DD to move), « Tout » or « À vous ». Each date opens
+ * where it is decided; the week shows the hours, as in Teams, where a free
+ * slot opens « Nouvelle réunion » and one's calls move. Phones read the
+ * period as an agenda.
  */
 export default async function CalendarPage({
   searchParams,
 }: PageProps<"/app/calendar">) {
   const params = await searchParams;
-  const today = parisPlace(new Date()).day;
+  const now = parisPlace(new Date());
+  const today = now.day;
   const period = periodOf(
     asCalendarMode(params.mode, "month"),
     asDay(params.date) ?? today,
@@ -102,7 +107,7 @@ export default async function CalendarPage({
           <CalendarBody
             access={access}
             period={period}
-            today={today}
+            now={now}
             mine={mine}
             weekHref={(day) => hrefOf("week", day)}
           />
@@ -117,19 +122,28 @@ export default async function CalendarPage({
 async function CalendarBody({
   access,
   period,
-  today,
+  now,
   mine,
   weekHref,
 }: {
   access: Access;
   period: CalendarPeriod;
-  today: string;
+  now: { day: string; minute: number };
   mine: boolean;
   weekHref: (day: string) => string;
 }) {
   const t = fr.calendar.page;
-  const { items: all, error } = await loadCalendar(period, access);
+  const today = now.day;
+  // The meeting form is read beside the dates, not after them.
+  const [{ items: all, calls, error }, meeting] = await allInOrder([
+    loadCalendar(period, access),
+    period.mode === "week" ? loadMeetingFormData(access, new Date()) : null,
+  ]);
   const items = mine ? all.filter((item) => item.mine) : all;
+  // The calls the dates kept (« À vous », an archived project's left out).
+  const shown = new Set(
+    items.filter((item) => item.kind === "call").map((item) => item.key),
+  );
   const board =
     period.mode === "month" ? (
       <CalendarMonth
@@ -140,7 +154,22 @@ async function CalendarBody({
         weekHref={weekHref}
       />
     ) : (
-      <CalendarWeek days={period.days} items={items} today={today} />
+      meeting && (
+        <MeetingComposerProvider data={meeting}>
+          <CallsCalendar
+            mode="week"
+            days={period.days}
+            month={period.date.slice(0, 7)}
+            events={placeCalls(
+              calls.filter((call) => shown.has(`call|${call.id}`)),
+              new Date(),
+              access.personId,
+            )}
+            items={items.filter((item) => item.kind !== "call")}
+            today={now}
+          />
+        </MeetingComposerProvider>
+      )
     );
   return (
     <>

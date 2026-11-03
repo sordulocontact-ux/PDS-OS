@@ -1238,6 +1238,17 @@ faits grise sous un titre (l'état à côté du titre, le reste dans « Informat
   enregistrée ; pas d'aperçu de fichier au clic ; la page Modèles de contrat n'a pas de
   « Maintenant » (à trancher).
 
+## Calls en liste, semaine du Calendrier aux heures (01/11/2026, branche `pre-prod`)
+
+- **Calls** : la liste par défaut (Tous / À venir / Passés, filtre Projet, « Nouvelle réunion ») ;
+  le calendrier reste en second affichage (`?display=calendar`), sans la ligne d'aide ni la
+  légende des couleurs.
+- **Calendrier, Semaine** : le même calendrier que les Calls (24 h, arrivée 7 h 30, trait de
+  l'heure, créer une réunion sur une plage libre, glisser ses calls, fiche d'un call), avec les
+  tournages à leur heure et les dates sans heure (sorties, master, temps forts, étapes, tâches)
+  dans une rangée sous les jours. Le mois reste en lecture ; téléphone : agenda.
+- Retiré : `CalendarWeek` (7 colonnes sans heures). Aucune migration.
+
 ## Ingénieur du Brief : tout le Réseau, création sur place (02/11/2026, branche `pre-prod`)
 
 - « Changer » l'ingénieur du mix ou du mastering : ingénieurs du Réseau, membres de PDS, puis le

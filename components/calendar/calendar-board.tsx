@@ -152,30 +152,3 @@ export function CalendarMonth({
     </div>
   );
 }
-
-/** The week: seven columns, every date of each day in reading order. */
-export function CalendarWeek({ days, items, today }: BoardProps) {
-  return (
-    <div className={frame}>
-      <Weekdays days={days} />
-      <ol className="grid grid-cols-7">
-        {days.map((day) => (
-          <li
-            key={day}
-            className={cn(
-              "flex min-h-72 min-w-0 flex-col gap-1.5 border-l border-[color:var(--border-hairline)] p-1.5 first:border-l-0",
-              day === today && "bg-[var(--surface-soft)]",
-            )}
-          >
-            <DayNumber day={day} today={today} />
-            {items
-              .filter((item) => item.day === day)
-              .map((item) => (
-                <CalendarEntry key={item.key} item={item} past={day < today} />
-              ))}
-          </li>
-        ))}
-      </ol>
-    </div>
-  );
-}

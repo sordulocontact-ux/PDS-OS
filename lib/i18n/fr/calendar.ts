@@ -1,5 +1,5 @@
-/** The Calendrier of the main navigation, and the bar of every calendar
- * (Calls, Calendrier): the period, today, previous and next. */
+/** The Calendrier of the main navigation, and its bar: the period, today,
+ * previous and next. */
 export const calendar = {
   // components/ui/calendar-toolbar.tsx
   period: {

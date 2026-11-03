@@ -2,7 +2,7 @@ import "server-only";
 
 import type { Access } from "@/lib/auth/access";
 import { routes } from "@/lib/auth/redirects";
-import { listAllCalls } from "@/lib/calls/queries";
+import { listAllCalls, type CallListItem } from "@/lib/calls/queries";
 import {
   sortItems,
   type CalendarItem,
@@ -26,6 +26,8 @@ const t = fr.calendar.kinds;
 
 export type CalendarData = {
   items: CalendarItem[];
+  // The calls themselves, for the week's hours (moved, opened in a card).
+  calls: CallListItem[];
   // A source could not be read: said, never shown as an empty month.
   error: boolean;
 };
@@ -234,6 +236,7 @@ export async function loadCalendar(
 
   return {
     items: sortItems(items),
+    calls: calls ?? [],
     error:
       Boolean(failed) ||
       calls === null ||

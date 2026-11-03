@@ -34,6 +34,10 @@ const dayNumber = new Intl.DateTimeFormat("fr-FR", {
 
 type Place = { day: string; start: number; end: number };
 
+/** A date with an hour that is not a call (a shoot): drawn on its slot,
+ * opened by its own link. */
+export type TimeMark = Place & { key: string; node: React.ReactNode };
+
 // The hours' column, then the seven days.
 const columnsClass =
   "grid grid-cols-[var(--calendar-gutter)_repeat(7,minmax(0,1fr))]";
@@ -43,14 +47,16 @@ const at = (minute: number) => `calc(${minute / 60} * var(--calendar-hour))`;
 
 /**
  * The calendar's week, as in Teams: 24 hours scrolled to the working day,
- * a column per day,
- * the calls side by side where they overlap, today's line. Click or drag on
- * a free slot to create; drag a call to move it, its bottom edge to stretch
- * it; click a call to open its card.
+ * a column per day, the dates without an hour above (`allDay`), the calls
+ * and the other dates with an hour (`marks`) side by side where they
+ * overlap, today's line. Click or drag on a free slot to create; drag a call
+ * to move it, its bottom edge to stretch it; click a call to open its card.
  */
 export function TimeGrid({
   days,
   events,
+  marks = [],
+  allDay,
   today,
   onCreate,
   onMove,
@@ -58,6 +64,8 @@ export function TimeGrid({
 }: {
   days: string[];
   events: CalendarEvent[];
+  marks?: TimeMark[];
+  allDay?: (day: string) => React.ReactNode;
   today: { day: string; minute: number };
   onCreate: (place: Place) => void;
   onMove: (event: CalendarEvent, place: Place) => void;
@@ -77,7 +85,10 @@ export function TimeGrid({
   });
 
   // On arrival and on each new period: the working day in view.
-  const earliest = Math.min(ARRIVAL_MINUTE, ...events.map((e) => e.start - 30));
+  const earliest = Math.min(
+    ARRIVAL_MINUTE,
+    ...[...events, ...marks].map((e) => e.start - 30),
+  );
   useEffect(() => {
     if (scroller.current)
       scroller.current.scrollTop = (Math.max(0, earliest) / 60) * hourPx();
@@ -92,6 +103,22 @@ export function TimeGrid({
       ? { ...e, day: preview.day, start: preview.start, end: preview.end }
       : e,
   );
+  const slots = [
+    ...placed.map((event) => ({
+      day: event.day,
+      start: event.start,
+      end: event.end,
+      event,
+      mark: null,
+    })),
+    ...marks.map((mark) => ({
+      day: mark.day,
+      start: mark.start,
+      end: mark.end,
+      event: null,
+      mark,
+    })),
+  ];
 
   return (
     <div
@@ -132,6 +159,22 @@ export function TimeGrid({
               </span>
             </div>
           ))}
+          {allDay && (
+            <>
+              <span
+                aria-hidden
+                className="border-t border-[color:var(--border-hairline)]"
+              />
+              {days.map((day) => (
+                <div
+                  key={day}
+                  className="flex max-h-32 min-h-9 min-w-0 flex-col gap-1 overflow-y-auto overscroll-contain border-t border-l border-[color:var(--border-hairline)] p-1"
+                >
+                  {allDay(day)}
+                </div>
+              ))}
+            </>
+          )}
         </div>
         <div className={columnsClass}>
           <div aria-hidden>
@@ -167,34 +210,39 @@ export function TimeGrid({
                 />
               ))}
               <ol className="pointer-events-none absolute inset-0">
-                {dayEvents(placed, day).map((event) => (
+                {dayEvents(slots, day).map(({ event, mark, ...slot }) => (
                   <li
-                    key={event.call.id}
+                    key={event ? event.call.id : mark.key}
                     className={cn(
                       "pointer-events-auto absolute px-0.5",
-                      preview?.kind !== "draw" &&
+                      event &&
+                        preview?.kind !== "draw" &&
                         preview?.callId === event.call.id &&
                         "z-10",
                     )}
                     style={{
-                      top: at(event.start),
-                      height: at(event.end - event.start),
-                      left: `${(event.column / event.columns) * 100}%`,
-                      width: `${100 / event.columns}%`,
+                      top: at(slot.start),
+                      height: at(slot.end - slot.start),
+                      left: `${(slot.column / slot.columns) * 100}%`,
+                      width: `${100 / slot.columns}%`,
                     }}
                   >
-                    <GridEvent
-                      event={event}
-                      dragging={
-                        preview?.kind !== "draw" &&
-                        preview?.callId === event.call.id
-                      }
-                      onPointerDown={(e) => drag.pressEvent(event, e)}
-                      onClick={(e) => {
-                        if (!drag.consumeDragClick())
-                          onOpen(event, e.currentTarget);
-                      }}
-                    />
+                    {mark ? (
+                      mark.node
+                    ) : (
+                      <GridEvent
+                        event={event}
+                        dragging={
+                          preview?.kind !== "draw" &&
+                          preview?.callId === event.call.id
+                        }
+                        onPointerDown={(e) => drag.pressEvent(event, e)}
+                        onClick={(e) => {
+                          if (!drag.consumeDragClick())
+                            onOpen(event, e.currentTarget);
+                        }}
+                      />
+                    )}
                   </li>
                 ))}
               </ol>

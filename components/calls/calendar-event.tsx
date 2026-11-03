@@ -40,7 +40,7 @@ const toneSurface: Record<Tone, string> = {
   action: "bg-[var(--tone-action-bg)] text-[color:var(--tone-action-fg)]",
 };
 
-/** The state a block is painted with (its legend: CallsCalendar). */
+/** The state a block is painted with. */
 const eventTone = (event: CalendarEvent): Tone =>
   callCalendarTone[
     callStateKey(event.call.status, {

@@ -1199,22 +1199,27 @@ s'afficher sans chargement.
 
 ## 4 bis. Calls planifiés comme sur Teams (10/10/2026)
 
-Demande de Sacha : « un call comme sur Teams ». Deux vues de la page Calls, et une création
-de call qui donne un lien Google Meet.
+Demande de Sacha : « un call comme sur Teams ». Deux vues de la page Calls, la même grille dans
+la semaine du Calendrier, et une création de call qui donne un lien Google Meet.
 
-- **Deux vues** de `/app/calls`, choisies dans l'URL (`ViewToggle` dans l'en-tête) :
-  **Calendrier par défaut** (demande de Sacha, 10/10) et **Liste** (`?display=list`, Tous /
-  À venir / Passés). Le calendrier (`components/calls/calendar/`, places calculées par le
-  serveur sur l'heure de Paris, `lib/calls/calendar.ts`) reprend Teams :
+- **Deux vues** de `/app/calls`, choisies dans l'URL (`ViewToggle` dans l'en-tête) : **Liste par
+  défaut** (Sacha, 01/11/2026 ; Tous / À venir / Passés, filtre Projet) et **Calendrier**
+  (`?display=calendar`, défaut du 10/10 au 01/11). Le même calendrier (`CallsCalendar`, avec
+  `items`) fait la **semaine du Calendrier** (`/app/calendar?mode=week`), les autres dates autour.
+  Pas de ligne d'aide ni de légende des couleurs au-dessus (retirées le 01/11). Le calendrier
+  (`components/calls/calendar/`, places calculées par le serveur sur l'heure de Paris,
+  `lib/calls/calendar.ts`) reprend Teams :
   - périodes **Semaine (défaut) et Mois** (`?mode=month&date=AAAA-MM-JJ`, sans `date` =
     aujourd'hui ; Jour et Semaine de travail retirés à la demande de Sacha, 10/10), « Aujourd'hui »,
     période précédente / suivante ; dans le mois, le numéro d'un jour et « n autres » ouvrent sa
     semaine ;
-  - grille de 24 h défilante, arrivée sur 7 h 30 (ou le premier call), trait de l'heure actuelle,
-    calls côte à côte quand ils se chevauchent (`dayEvents`), teinte de l'état depuis le proto du 29/10 (`callCalendarTone` : compte rendu prêt, à venir, à enregistrer ; légende à côté de l'aide) ; la liste n'a plus que le filtre Projet ;
+  - grille de 24 h défilante, arrivée sur 7 h 30 (ou la première date), trait de l'heure actuelle,
+    calls et dates à l'heure côte à côte quand ils se chevauchent (`dayEvents`, générique), teinte
+    de l'état depuis le proto du 29/10 (`callCalendarTone` : compte rendu prêt, à venir, à
+    enregistrer) ;
   - **clic ou glisser sur une plage libre** → « Nouvelle réunion » sur ce créneau (pas de 30 min,
-    un clic = 30 min ; Mois : un clic sur un jour = 9 h) ; un seul formulaire pour le bouton et la
-    grille (`MeetingComposerProvider`) ;
+    un clic = 30 min ; Mois : un clic sur un jour = 9 h) ; un seul formulaire pour le bouton et la grille
+    (`MeetingComposerProvider`, données `loadMeetingFormData`, `lib/calls/invite.ts`) ;
   - **glisser un de ses calls** pour le déplacer (autre jour compris, pas de 15 min), **son bord
     bas** pour le rallonger, Échap annule ; affiché aussitôt puis enregistré
     (`rescheduleCall`, remis en place si refusé) ; Mois : glisser vers un autre jour, même heure ;
@@ -1224,7 +1229,8 @@ de call qui donne un lien Google Meet.
     RLS `is_call_owner`), et seulement avant tout enregistrement (`audio_path` nul) ; s'il a un
     événement Google, il suit (`moveMeetEvent`, Google prévient les invités) ; un refus de Google
     n'annule pas le déplacement, il est dit ;
-  - sur téléphone, la période se lit en agenda de jours (`AgendaList`), sans geste.
+  - sur téléphone, la période se lit en agenda de jours (`AgendaList` ; `CalendarAgenda` dans le
+    Calendrier), sans geste.
   - **« Annuler l'échange »** (Cadrage seulement, Sacha 28/10) : à côté de « Enregistrer l'échange »
     tant que l'échange de cadrage est seulement prévu ; `cancel_framing_call` (SQL, responsable du
     projet, rien d'enregistré : ni audio, ni prise, ni transcription, ni compte rendu) supprime le
@@ -2452,8 +2458,14 @@ calendrier : rien ne s'y saisit, **chaque date s'ouvre là où elle se décide**
   (`error`), jamais lue « rien ».
 - **Mois** par défaut (`?mode=week` pour la semaine, `?date=AAAA-MM-JJ` pour se déplacer),
   **Tout / À vous** (`?voir=mine` : ce qui demande un geste à la personne — ses étapes, ses
-  tâches, ses calls). Téléphone : agenda par jour. Tout est rendu côté serveur, des liens
-  (`ViewLink`), aucun JavaScript client.
+  tâches, ses calls). Téléphone : agenda par jour. Le mois est rendu côté serveur, des liens
+  (`ViewLink`).
+- **Semaine = les heures** (Sacha, 01/11/2026 : « sur la semaine on voit les heures, le même
+  calendrier que dans Call ») : le calendrier des Calls (`CallsCalendar` en semaine, avec
+  `items`, § 4 bis) ; les calls sur leur créneau (création, déplacement, fiche), une date à l'heure sans
+  fin (tournage) sur une heure, les dates sans heure dans la rangée sous les jours (`allDay`).
+  `loadCalendar` rend aussi les calls bruts (`calls`), réduits à ceux que les dates gardent
+  (archives, « À vous ») ; le formulaire de réunion est lu en même temps (`loadMeetingFormData`).
 - Couleur = **le projet** (`projectHue`, la même que dans les Calls) ; la nature de la date est
   dans son libellé (« Mix V1 attendu », « Sortie » en semi-gras). Point bleu = à vous, rouge = en
   retard ; un jour passé est atténué.

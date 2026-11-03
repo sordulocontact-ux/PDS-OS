@@ -20,17 +20,10 @@ import { ViewToggle } from "@/components/ui/view-toggle";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { placeCalls } from "@/lib/calls/calendar";
-import {
-  asCallView,
-  callViewOf,
-  CALL_VIEWS,
-  nextRoundHourInput,
-} from "@/lib/calls/format";
-import { loadCallContacts } from "@/lib/calls/invite";
+import { asCallView, callViewOf, CALL_VIEWS } from "@/lib/calls/format";
+import { loadMeetingFormData } from "@/lib/calls/invite";
 import { listAllCalls, type CallListItem } from "@/lib/calls/queries";
-import { loadMembers } from "@/lib/framing/related";
 import { fr } from "@/lib/i18n/fr";
-import { googleMeetConfigured } from "@/lib/integrations/google-calendar";
 import { createClient } from "@/lib/supabase/server";
 import { filterParam, optionsByName } from "@/lib/ui/filter-options";
 import { viewHref } from "@/lib/ui/view-href";
@@ -45,6 +38,9 @@ import {
 import { allInOrder } from "@/lib/utils/parallel";
 
 export const metadata = { title: `${fr.calls.all.title} · ${fr.app.name}` };
+
+// ?display= of the calendar; the list is the page's default.
+const CALENDAR = "calendar";
 
 // The project filter's value for the meetings outside any project.
 const INTERNAL = "internal";
@@ -69,34 +65,34 @@ async function loadCalls(range?: {
 }
 
 /**
- * Every call one may see, as a calendar by default (Teams: Semaine, Mois; ?mode=…&date=YYYY-MM-DD) or as a list
- * (?display=list, Tous / À venir / Passés, an instant search and the
- * project filter) — and nothing else: a list page is only a list
- * (docs/VISION-UX.md, proto `docs/protos/pages.html`).
+ * Every call one may see, as a list by default (Tous / À venir / Passés, an
+ * instant search and the project filter; Sacha, 01/11/2026) or as a calendar
+ * (?display=calendar, Teams: Semaine, Mois; ?mode=…&date=YYYY-MM-DD) — and
+ * nothing else: a list page is only a list (docs/VISION-UX.md, proto
+ * `docs/protos/pages.html`).
  */
 export default async function CallsPage({
   searchParams,
 }: PageProps<"/app/calls">) {
   const params = await searchParams;
   const now = new Date();
-  const list = params.display === "list";
+  const list = params.display !== CALENDAR;
   const today = parisPlace(now);
   const period = periodOf(
     asCalendarMode(params.mode),
     asDay(params.date) ?? today.day,
   );
-  const [access, calls, contacts] = await allInOrder([
-    requireApproved(),
+  const approved = requireApproved();
+  const [access, calls, composer] = await allInOrder([
+    approved,
     loadCalls(list ? undefined : periodRange(period)),
-    loadCallContacts(),
+    approved.then((access) => loadMeetingFormData(access, now)),
   ]);
   const t = fr.calls.all;
   const view = asCallView(params.view);
-  const members = (await loadMembers(access)).filter(
-    (member) => member.personId !== access.personId,
-  );
   const calendarHref = (mode: CalendarMode, date: string | null) =>
     viewHref(routes.calls, {
+      display: CALENDAR,
       mode: mode === "week" ? null : mode,
       date: date === today.day ? null : date,
     });
@@ -105,7 +101,7 @@ export default async function CallsPage({
   };
   const filtering = Object.values(filters).some((value) => value !== null);
   const listHref = (value: string | null, kept: Partial<CallFilters> = {}) =>
-    viewHref(routes.calls, { ...kept, display: "list", view: value });
+    viewHref(routes.calls, { ...kept, view: value });
   const header = (
     <PageHeader
       title={t.title}
@@ -117,13 +113,13 @@ export default async function CallsPage({
             options={[
               {
                 href: routes.calls,
-                label: fr.calls.calendar.displays.calendar,
-                current: !list,
-              },
-              {
-                href: listHref(null),
                 label: fr.calls.calendar.displays.list,
                 current: list,
+              },
+              {
+                href: calendarHref("week", null),
+                label: fr.calls.calendar.displays.calendar,
+                current: !list,
               },
             ]}
           />
@@ -132,12 +128,6 @@ export default async function CallsPage({
       }
     />
   );
-  const composer = {
-    members,
-    contacts,
-    googleMeet: googleMeetConfigured(),
-    defaultOccurredAt: nextRoundHourInput(now),
-  };
 
   if (!calls) {
     return (
@@ -230,7 +220,7 @@ export default async function CallsPage({
               filters={
                 <UrlFilters
                   path={routes.calls}
-                  params={{ display: "list", view }}
+                  params={{ view }}
                   groups={filterGroups(ofView, filters)}
                 />
               }

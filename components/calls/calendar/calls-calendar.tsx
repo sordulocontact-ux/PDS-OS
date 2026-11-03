@@ -2,31 +2,31 @@
 
 import { useState } from "react";
 
+import { CalendarEntry } from "@/components/calendar/calendar-item";
 import { AgendaList } from "@/components/calls/calendar/agenda-list";
 import { EventPeek } from "@/components/calls/calendar/event-peek";
 import { MonthGrid } from "@/components/calls/calendar/month-grid";
 import { RescheduleDialog } from "@/components/calls/calendar/reschedule-dialog";
-import { TimeGrid } from "@/components/calls/calendar/time-grid";
+import { TimeGrid, type TimeMark } from "@/components/calls/calendar/time-grid";
 import { useReschedule } from "@/components/calls/calendar/use-reschedule";
 import { useMeetingComposer } from "@/components/calls/new-meeting-button";
-import { StatusBadge } from "@/components/ui/status-badge";
+import type { CalendarItem } from "@/lib/calendar/items";
 import type { CalendarEvent } from "@/lib/calls/calendar";
 import { clock, type CalendarMode } from "@/lib/utils/calendar-period";
-import { calls } from "@/lib/i18n/fr/calls";
-import { callCalendarTone } from "@/lib/ui/state-tones";
-
-const fr = { calls };
 
 type Place = { day: string; start: number; end: number };
 
-// What the blocks' colours say (proto `docs/protos/pages.html`).
-const LEGEND = ["ready", "upcoming", "draft"] as const;
+// A date with an hour but no end (a shoot) takes an hour of the grid.
+const MARK_MINUTES = 60;
 
 /**
- * The Calls page's calendar, as in Teams: the week's time grid or the month, where a click or a drag on a free slot opens « Nouvelle
- * réunion » on it, a drag moves or stretches one of your calls (saved at
- * once, put back if refused), a click opens the call's card. Phones read the
- * period as an agenda. Places and permissions come from the server
+ * The calendar of the calls, as in Teams: the week's time grid or the month,
+ * where a click or a drag on a free slot opens « Nouvelle réunion » on it, a
+ * drag moves or stretches one of your calls (saved at once, put back if
+ * refused), a click opens the call's card. In the Calendrier's week, the
+ * other dates come along (`items`): those with an hour (a shoot) on their
+ * slot, the others above the hours; each opens where it is decided. Phones
+ * read the period as an agenda. Places and permissions come from the server
  * (lib/calls/calendar.ts).
  */
 export function CallsCalendar({
@@ -34,16 +34,19 @@ export function CallsCalendar({
   days,
   month,
   events,
+  items = [],
   today,
-  weekHrefs,
+  weekHrefs = {},
 }: {
   mode: CalendarMode;
   days: string[];
   month: string;
   events: CalendarEvent[];
+  // The week's other dates (Calendrier).
+  items?: CalendarItem[];
   today: { day: string; minute: number };
   // The week view around each day of a month (its number, « n autres »).
-  weekHrefs: Record<string, string>;
+  weekHrefs?: Record<string, string>;
 }) {
   const composer = useMeetingComposer();
   const { shown, move } = useReschedule(events);
@@ -62,28 +65,32 @@ export function CallsCalendar({
   const open = (event: CalendarEvent, anchor: HTMLElement) =>
     setPeek({ event, anchor });
   const weekHref = (day: string) => weekHrefs[day] ?? "";
+  const entry = (item: CalendarItem, className?: string) => (
+    <CalendarEntry
+      key={item.key}
+      item={item}
+      past={item.day < today.day}
+      compact
+      className={className}
+    />
+  );
+  const marks: TimeMark[] = items.flatMap((item) =>
+    item.minute === null
+      ? []
+      : [
+          {
+            key: item.key,
+            day: item.day,
+            start: item.minute,
+            end: Math.min(24 * 60, item.minute + MARK_MINUTES),
+            node: entry(item, "h-full overflow-hidden"),
+          },
+        ],
+  );
+  const dayLong = items.filter((item) => item.minute === null);
 
   return (
     <>
-      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-        <p className="hidden text-xs text-muted-foreground md:block">
-          {mode === "month"
-            ? fr.calls.calendar.hintMonth
-            : fr.calls.calendar.hint}
-        </p>
-        <ul
-          aria-label={fr.calls.calendar.legend}
-          className="flex flex-wrap items-center gap-1.5"
-        >
-          {LEGEND.map((key) => (
-            <li key={key}>
-              <StatusBadge tone={callCalendarTone[key]} size="sm">
-                {fr.calls.status[key]}
-              </StatusBadge>
-            </li>
-          ))}
-        </ul>
-      </div>
       <div className="hidden md:block">
         {mode === "month" ? (
           <MonthGrid
@@ -100,6 +107,15 @@ export function CallsCalendar({
           <TimeGrid
             days={days}
             events={shown}
+            marks={marks}
+            allDay={
+              dayLong.length > 0
+                ? (day) =>
+                    dayLong
+                      .filter((item) => item.day === day)
+                      .map((item) => entry(item))
+                : undefined
+            }
             today={today}
             onCreate={create}
             onMove={move}

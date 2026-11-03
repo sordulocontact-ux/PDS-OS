@@ -1,5 +1,10 @@
 import "server-only";
 
+import type { MeetingFormData } from "@/components/calls/new-meeting-button";
+import type { Access } from "@/lib/auth/access";
+import { nextRoundHourInput } from "@/lib/calls/format";
+import { loadMembers } from "@/lib/framing/related";
+import { googleMeetConfigured } from "@/lib/integrations/google-calendar";
 import { networkRolesOf, rolesText } from "@/lib/network/types";
 import { schedulePendingPushes } from "@/lib/notifications/push";
 import { personName } from "@/lib/projects/types";
@@ -95,4 +100,23 @@ export async function loadCallContacts(): Promise<CallContact[]> {
     email: c.email,
     roles: rolesText(networkRolesOf(c.roles)),
   }));
+}
+
+/** What « Nouvelle réunion » needs (Calls, the Calendrier's week): the other
+ * members, the Réseau's contacts, whether Google Meet is connected, and the
+ * next round hour as its default time. */
+export async function loadMeetingFormData(
+  access: Access,
+  now: Date,
+): Promise<MeetingFormData> {
+  const [members, contacts] = await Promise.all([
+    loadMembers(access),
+    loadCallContacts(),
+  ]);
+  return {
+    members: members.filter((member) => member.personId !== access.personId),
+    contacts,
+    googleMeet: googleMeetConfigured(),
+    defaultOccurredAt: nextRoundHourInput(now),
+  };
 }

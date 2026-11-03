@@ -1,5 +1,5 @@
 /**
- * The week calendar of the Calls page, computed by code on Paris time (the
+ * The week's time grid of the Calendrier, computed by code on Paris time (the
  * team's zone, lib/utils/calendar-period.ts): which day and minute each call
  * falls on, and how overlapping calls share a day's width.
  */
@@ -16,10 +16,13 @@ export type CalendarEvent = {
   upcoming: boolean;
   // Whoever works on it may move it: its owner, and nothing recorded yet.
   editable: boolean;
-  // Side by side when several overlap: this one's column, out of `columns`.
-  column: number;
-  columns: number;
 };
+
+/** Anything drawn on a day's hours: its Paris day and minutes. */
+type Slot = { day: string; start: number; end: number };
+
+/** Side by side when several overlap: its column, out of `columns`. */
+export type Laid<T> = T & { column: number; columns: number };
 
 // Shortest block drawn, so a 5-minute call stays readable.
 const MIN_BLOCK = 20;
@@ -44,17 +47,13 @@ export function placeCalls(
         mePersonId !== null &&
         call.ownerPersonId === mePersonId &&
         call.status === "draft",
-      column: 0,
-      columns: 1,
     };
   });
 }
 
-/** One day's events, laid out side by side where they overlap. */
-export function dayEvents(
-  events: CalendarEvent[],
-  day: string,
-): CalendarEvent[] {
+/** One day's events (calls and dates with an hour), laid out side by side
+ * where they overlap. */
+export function dayEvents<T extends Slot>(events: T[], day: string): Laid<T>[] {
   const own = events
     .filter((e) => e.day === day)
     .map((e) => ({ ...e, column: 0, columns: 1 }));
@@ -64,9 +63,9 @@ export function dayEvents(
 
 /** Overlapping events share the width: each group of overlaps gets as many
  * columns as it needs, each event the first one free. */
-function layOut(events: CalendarEvent[]): void {
+function layOut(events: Laid<Slot>[]): void {
   events.sort((a, b) => a.start - b.start || b.end - a.end);
-  let group: CalendarEvent[] = [];
+  let group: Laid<Slot>[] = [];
   let groupEnd = -1;
   const close = () => {
     const columns = Math.max(1, ...group.map((e) => e.column + 1));

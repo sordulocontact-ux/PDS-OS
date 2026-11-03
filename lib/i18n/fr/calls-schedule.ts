@@ -1,4 +1,5 @@
-/** A call planned like a Teams meeting, and the Calls page's calendar. */
+/** A call planned like a Teams meeting, and the calendar of the Calls and of
+ * the Calendrier's week. */
 
 // "30 min", "1 h", "1 h 30".
 const duration = (minutes: number) => {
@@ -77,11 +78,6 @@ export const calendar = {
   dayEmpty: "Aucun call",
   now: "Maintenant",
   internal: "Réunion interne",
-  hint: "Cliquez ou glissez sur une plage libre pour créer une réunion. Glissez un de vos calls pour le déplacer, son bord bas pour le rallonger.",
-  // The colours of the blocks, beside the hint.
-  legend: "Légende des couleurs",
-  hintMonth:
-    "Cliquez sur un jour pour y créer une réunion. Glissez un de vos calls vers un autre jour pour le déplacer.",
   // The slot being drawn.
   newSlot: (time: string) => `Nouvelle réunion · ${time}`,
   // Screen readers: one event of the grid.

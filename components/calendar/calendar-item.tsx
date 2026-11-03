@@ -49,17 +49,20 @@ function MineDot({ item }: { item: CalendarItem }) {
 /**
  * One date of the Calendrier, on its project's hue (the same as in the
  * Calls), opening where it is decided. `compact`: one truncated line in a
- * month's cell; otherwise the label wraps and the project goes below (week,
- * agenda). A release stands out in semibold; a past day is quieter.
+ * month's cell; otherwise the label wraps and the project goes below (the
+ * week's hours, agenda). A release stands out in semibold; a past day is quieter.
  */
 export function CalendarEntry({
   item,
   past,
   compact = false,
+  className,
 }: {
   item: CalendarItem;
   past: boolean;
   compact?: boolean;
+  // Its place in a grid (the week's hours: the slot's whole height).
+  className?: string;
 }) {
   const time = item.minute !== null ? clock(item.minute) : null;
   return (
@@ -71,6 +74,7 @@ export function CalendarEntry({
         "flex min-w-0 gap-1.5 rounded-md px-1.5 py-0.5 text-[length:var(--type-micro)] leading-[var(--type-micro-lh)] font-medium no-underline transition-shadow duration-150 ease-out focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none [@media(hover:hover)]:hover:shadow-elevation-1",
         !compact && "py-1",
         past && "opacity-70",
+        className,
       )}
     >
       <MineDot item={item} />
