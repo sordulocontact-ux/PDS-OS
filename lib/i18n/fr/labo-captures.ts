@@ -1,8 +1,9 @@
-/** Labo page of the app: artists read on TikTok screenshots. */
+/** Repérage page of the app (route /app/labo): artists read on TikTok
+ * screenshots. Named « Repérage » by Sacha on 03/11/2026. */
 export const laboCaptures = {
-  title: "Labo",
+  title: "Repérage",
   description:
-    "Fonctions en essai avant d'entrer dans l'app. Rien n'est enregistré sans votre clic.",
+    "Retrouvez les artistes repérés sur TikTok à partir d'une capture. Rien n'est enregistré sans votre clic.",
   section: "Artistes depuis des captures TikTok",
   sectionDescription:
     "PO lit chaque capture et regroupe les noms d'une même personne ; le code retrouve son profil TikTok, son compte Deezer et ses réseaux. « Ajouter au Réseau » l'enregistre dans l'onglet Artistes du Réseau.",
@@ -120,7 +121,7 @@ export const laboCaptures = {
     add: "Ajouter au Réseau",
     title: "Ajouter au Réseau",
     description:
-      "Tout ce que le Labo a trouvé est déjà rempli : relisez, corrigez, puis enregistrez. Le contact rejoint l'onglet Artistes du Réseau.",
+      "Tout ce qui a été trouvé est déjà rempli : relisez, corrigez, puis enregistrez. Le contact rejoint l'onglet Artistes du Réseau.",
     inNetwork: "Dans le Réseau",
     added: "Ajouté au Réseau",
     open: (name: string) => `Ouvrir ${name} dans le Réseau`,

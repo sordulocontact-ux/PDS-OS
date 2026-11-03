@@ -3054,7 +3054,7 @@ rend, projet par projet, ses rôles d'équipe, les éléments de sa page privée
   supprimé**, par le DG (`set_network_contact_archived`, refusé tant qu'un contrat non résilié
   le nomme). Recherche instantanée, Archivés pour le DG ; onglets et filtres ci-dessous. **Onglet « Artistes »** (Sacha, 10/10/2026) :
   rôles Artiste et Beatmaker, les artistes à contacter un jour, ni signés ni en collaboration
-  (ceux-là sont au Catalogue), repérés sur TikTok depuis le Labo (§ 10 bis) ou ajoutés à la
+  (ceux-là sont au Catalogue), repérés sur TikTok depuis le Repérage (§ 10 bis) ou ajoutés à la
   main ; « Musique » garde musicien·ne, auteur·rice, ingé son, réalisateur·rice. **Réseaux**
   (`…20261010008001_network_socials.sql`, `lib/network/socials.ts`, test
   `network-socials.test.sql`) : pseudo TikTok et Instagram (minuscules), id d'artiste Spotify et
@@ -6726,7 +6726,10 @@ Banc de test local sans authentification (404 en production, `lib/labo/guard.ts`
 transcription, compte rendu, préparation de call, détection ISRC. Faux call :
 `docs/labo/faux-call.m4a` (+ `.txt`). Interface jetable ; la logique vit dans `lib/`.
 
-### 10 bis. Labo de l'app (`/app/labo`) : artistes depuis des captures TikTok
+### 10 bis. Repérage (`/app/labo`) : artistes depuis des captures TikTok
+
+Appelée **Repérage** à l'écran depuis le 03/11/2026 (Sacha), icône `IconUserSearch` ; la route et le
+code gardent `labo`. Le Labo IA local (`/labo`, § 10) ne change pas.
 
 Demande d'Ibé (10/10/2026) : retrouver les artistes qu'il repère sur TikTok. Page de la
 navigation principale, **pour tout membre approuvé, en production aussi** (contrairement à
@@ -6791,7 +6794,7 @@ sans un clic : « Ajouter au Réseau » (ci-dessous).
   **PO compare** (`extract`, `lib/ai/schemas/capture-choice.ts`) la bio TikTok, le lien de la
   bio et l'Instagram avec les bios Deezer, quelques titres et les fans, et **penche** pour un
   compte ou ne tranche pas, en deux phrases ; jamais un état : le statut reste « Plusieurs
-  comptes ». La personne **choisit** dans le Labo (`DeezerChooser`) : les homonymes avec leur
+  comptes ». La personne **choisit** dans le Repérage (`DeezerChooser`) : les homonymes avec leur
   bio et leurs preuves, celui de PO en tête, ou **un autre lien Deezer collé** (page artiste ou
   lien de partage `link.deezer.com`), relu sur Deezer par le serveur (`chooseCaptureDeezer`,
   seul l'id vient du navigateur, rien n'est enregistré) → « Choisi par vous », réseaux du compte
@@ -6810,7 +6813,7 @@ sans un clic : « Ajouter au Réseau » (ci-dessous).
   Beatmaker, e-mail, lien de la bio en site web, TikTok, Instagram, Spotify, Deezer si « Compte
   trouvé » ou « À vérifier », fiche du catalogue si ce compte Deezer y est déjà) et des notes
   écrites par le code (date du repérage, place sur la capture, abonnés TikTok, fans Deezer, bio
-  citée) ; une personne relit et enregistre (`manage_network`), on reste sur le Labo et le
+  citée) ; une personne relit et enregistre (`manage_network`), on reste sur le Repérage et le
   bouton devient « Ajouté au Réseau ». Déjà dans le Réseau = même compte TikTok, Instagram ou
   Deezer (`findContactsByAccounts`), **jamais par le nom** : « Dans le Réseau » mène au contact.
   Le contact rejoint l'onglet **Artistes repérés** du Réseau (§ 8 quinquies).

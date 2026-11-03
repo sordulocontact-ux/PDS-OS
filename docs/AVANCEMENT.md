@@ -1286,3 +1286,9 @@ faits grise sous un titre (l'état à côté du titre, le reste dans « Informat
 - [x] Colonne **Étape** remise dans la liste des projets (Sacha, 03/11), après Statut, dès 1024 px :
       l'étape en cours dans la teinte de son workflow (`phaseLabel`, « Diffusion » pour un Contenu ou un
       Événement) ; vide pour un brouillon, un projet pas encore lancé ou terminé (Statut le dit déjà).
+
+## Le Labo de l'app devient « Repérage » (03/11/2026, branche `pre-prod`)
+
+- [x] Menu, titre et textes de `/app/labo` : **Repérage** (Sacha, 03/11), icône `IconUserSearch` ; la
+      description dit ce que fait la page (artistes repérés sur TikTok). Route et code inchangés (`labo`) ;
+      le Labo IA local (`/labo`) garde son nom.

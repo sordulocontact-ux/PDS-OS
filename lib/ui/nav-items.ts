@@ -4,11 +4,11 @@ import {
   IconFolderOpen,
   IconHandshake,
   IconHouse2,
-  IconLightbulbSparkle,
   IconMicrophone,
   IconMsgs,
   IconNodes,
   IconPhone,
+  IconUserSearch,
   IconUsers2,
 } from "nucleo-sharp-essential";
 
@@ -61,6 +61,6 @@ export const NAV_ITEMS: readonly NavItem[] = [
   // Not in the Figma: the feedback page (the director's inbox, everyone
   // else's own feedback). Sending opens the feedback window instead.
   { href: routes.feedback, label: fr.shell.nav.feedback, icon: IconMsgs },
-  // Features on trial before they enter the app (TikTok screenshots → artists).
-  { href: routes.labo, label: fr.shell.nav.labo, icon: IconLightbulbSparkle },
+  // Repérage (Sacha 03/11): artists spotted on TikTok, read from a screenshot.
+  { href: routes.labo, label: fr.shell.nav.labo, icon: IconUserSearch },
 ] as const;
