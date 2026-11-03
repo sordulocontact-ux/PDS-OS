@@ -4,7 +4,8 @@ import type { ProjectAction, ProjectJourneys } from "@/lib/journey/types";
 
 const fr = { assistant };
 
-const lineOf = (action: ProjectAction, mine: boolean) => {
+/** « À vous : « … » (Master › Mixage) »: one action, as PO reads it. */
+export const actionLine = (action: ProjectAction, mine: boolean) => {
   const t = fr.assistant.myWork;
   const step = action.step;
   return t.projectAction({
@@ -22,7 +23,7 @@ const lineOf = (action: ProjectAction, mine: boolean) => {
  * (lib/overview/journeys.ts), never from a list of its own. */
 export function journeyFacts(journeys: ProjectJourneys): string[] {
   return [
-    ...journeys.mine.map((a) => lineOf(a, true)),
-    ...journeys.waiting.map((a) => lineOf(a, false)),
+    ...journeys.mine.map((a) => actionLine(a, true)),
+    ...journeys.waiting.map((a) => actionLine(a, false)),
   ];
 }

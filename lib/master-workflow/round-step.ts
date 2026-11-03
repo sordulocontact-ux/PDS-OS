@@ -18,6 +18,8 @@ import {
 } from "@/lib/master-workflow/transmission";
 import { canSeeProjectBudget } from "@/lib/projects/edit-access";
 import { createClient } from "@/lib/supabase/server";
+import type { Blocker } from "@/lib/ui/journey";
+import { masterStepHref } from "@/lib/ui/master-steps";
 
 type Stage = "mix" | "mastering";
 
@@ -56,8 +58,10 @@ export type RoundStepView = {
   // The Brief is recorded, unchanged since; or why not.
   brief: "ready" | "dirty" | "never";
   briefChangedSinceSent: boolean;
-  // The mix waits for the final vocals (« Attendre »).
-  vocalsAwaited: boolean;
+  // What prevents the package from leaving, worded, with the step where it
+  // is lifted: the final vocals awaited (« Attendre »), then the view's own.
+  // Read by the page and by PO (step_status), so both say the same thing.
+  blockers: Blocker[];
   // The mix existed and was declared Mix final (« Non nécessaire »).
   notNeeded: Array<{
     title: string;
@@ -164,14 +168,32 @@ export async function loadRoundStep(
     fr.masterWorkflow.mix.blockers.engineer,
     fr.masterWorkflow.mix.blockers.masteringEngineer,
   ] as string[];
+  const shown = inHousePerson
+    ? {
+        ...view,
+        blockers: view.blockers.filter((b) => !noContact.includes(b.text)),
+      }
+    : view;
+  const awaited =
+    stage === "mix" &&
+    facts.titles.some(
+      (t) =>
+        vocalsAwaited(t.sources[0] ?? null) && t.sources[0]?.plan === "wait",
+    );
   return {
     stage,
-    view: inHousePerson
-      ? {
-          ...view,
-          blockers: view.blockers.filter((b) => !noContact.includes(b.text)),
-        }
-      : view,
+    view: shown,
+    blockers: [
+      ...(awaited
+        ? [
+            {
+              text: fr.masterRound.blockers.vocals,
+              href: masterStepHref(projectId, "source"),
+            },
+          ]
+        : []),
+      ...shown.blockers,
+    ],
     versions,
     extras,
     link: live
@@ -188,12 +210,6 @@ export async function loadRoundStep(
     briefChangedSinceSent: Boolean(
       live && brief && brief.contentChangedAt > live.createdAt,
     ),
-    vocalsAwaited:
-      stage === "mix" &&
-      facts.titles.some(
-        (t) =>
-          vocalsAwaited(t.sources[0] ?? null) && t.sources[0]?.plan === "wait",
-      ),
     notNeeded: mixVersions.flatMap((v) =>
       v.declared
         ? [

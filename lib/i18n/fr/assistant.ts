@@ -273,14 +273,64 @@ export const assistant = {
       framing: "Cadrage",
       calls: "Calls",
       strategy: "Stratégie",
-      release: "Sortie",
+      release: "Distribution",
+      master: "Master",
+      legal: "Juridique",
+      production: "Production",
+      design: "Conception",
+      activations: "Activations",
+      review: "Suivi & bilan",
+      work: "Travail",
+      team: "Équipe",
+      deliverables: "Livrables",
+      files: "Fichiers",
+      planning: "Planning",
+      budget: "Budget",
+      validations: "Validations",
+      activity: "Activité",
     } as Record<string, string>,
+    // « Master › Mixage »: the module, then the step open in it.
+    sectionStep: (section: string, step: string) => `${section} › ${step}`,
     artists: "la liste des artistes",
     masters: "la liste des titres",
     projects: "la liste des projets",
     feedback:
       "la page Retours (les retours de l'équipe sur l'application PDS OS)",
     work: "sa page Travail (ce qui l'attend, projet par projet)",
+  },
+  // step_status: the step of the open page, worded by code (lib/assistant/
+  // step-status.ts). PO relays these sentences, it never deduces a state.
+  stepStatus: {
+    noProjectPage:
+      "La page ouverte n'est pas celle d'une étape de projet : pour l'état d'un projet, utiliser project_status.",
+    projectNotFound: "Ce projet n'est pas visible pour vous.",
+    noStep:
+      "La page ouverte ne correspond à aucune étape des parcours du projet (le workflow n'est peut-être pas encore lancé par le Plan du projet).",
+    page: (place: string) => `Page ouverte : ${place}.`,
+    state: (place: string, state: string) => `Étape « ${place} » : ${state}.`,
+    states: {
+      done: "faite",
+      current: "en cours",
+      waiting: "en attente d'un retour",
+      rework: "à revoir après un changement ailleurs",
+      blocked: "verrouillée, ses prérequis ne sont pas tous faits",
+      upcoming: "pas encore ouverte",
+      obsolete: "plus nécessaire",
+    },
+    why: (text: string) => `Ce que dit l'étape : « ${text} »`,
+    summary: (text: string) => `Ce qu'elle a donné : « ${text} ».`,
+    prereqMissing: (label: string, source: string | null) =>
+      `Prérequis pas encore fait : « ${label} »${source ? ` (${source})` : ""}.`,
+    prereqsDone: "Tous ses prérequis sont faits.",
+    reported: "Un blocage a été signalé sur cette étape.",
+    nobody: "Personne n'a d'action à faire sur cette étape pour l'instant.",
+    next: (labels: string) => `Une fois faite, elle ouvre : ${labels}.`,
+    blocker: (round: string, text: string) =>
+      `Ce qui empêche d'envoyer le dossier ${round} : ${text}`,
+    noBlocker: (round: string) =>
+      `Rien n'empêche d'envoyer le dossier ${round}.`,
+    rounds: { mix: "au mixeur", mastering: "au mastering" },
+    lift: "Où le lever",
   },
   launcher: {
     title: "PO",

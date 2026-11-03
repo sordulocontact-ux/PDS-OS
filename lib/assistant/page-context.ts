@@ -5,6 +5,7 @@ import { getMaster } from "@/lib/catalog/queries";
 import { masterLabel } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
 import { getProject } from "@/lib/projects/queries";
+import { isMasterStepKey } from "@/lib/ui/master-steps";
 
 /**
  * The page PO was opened from (Espace Espace), as one sentence written by
@@ -17,7 +18,9 @@ import { getProject } from "@/lib/projects/queries";
 const UUID = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
 const ARTIST = new RegExp(`^/app/catalog/artists/(${UUID})(?:/|$)`);
 const MASTER = new RegExp(`^/app/catalog/masters/(${UUID})(?:/|$)`);
-const PROJECT = new RegExp(`^/app/projects/(${UUID})(?:/([a-z-]+))?`);
+const PROJECT = new RegExp(
+  `^/app/projects/(${UUID})(?:/([a-z-]+))?(?:/([a-z-]+))?`,
+);
 
 /**
  * The record a page shows, read from its path only (no database access);
@@ -41,6 +44,16 @@ export function pageRecord(path: string | null | undefined): PageRecord | null {
     : null;
 }
 
+/** « Master › Mixage »: the section, and the Master's step open in it. */
+function sectionOf(section?: string, step?: string): string | undefined {
+  const t = fr.assistant.pageContext;
+  const label = section ? t.sections[section] : undefined;
+  if (!label) return undefined;
+  return section === "master" && step && isMasterStepKey(step)
+    ? t.sectionStep(label, fr.masterJourney.steps[step].title)
+    : label;
+}
+
 export async function pageContext(
   path: string | undefined,
 ): Promise<string | null> {
@@ -61,8 +74,7 @@ export async function pageContext(
   if (project) {
     const found = await getProject(project[1]);
     if (!found) return null;
-    const section = project[2] ? t.sections[project[2]] : undefined;
-    return t.project(found.title, found.id, section);
+    return t.project(found.title, found.id, sectionOf(project[2], project[3]));
   }
   if (path.startsWith("/app/catalog/artists")) return t.artists;
   if (path.startsWith("/app/catalog/masters")) return t.masters;

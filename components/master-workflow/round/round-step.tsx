@@ -10,7 +10,6 @@ import { invoices } from "@/lib/i18n/fr/invoices";
 import { masterInHouse } from "@/lib/i18n/fr/master-inhouse";
 import { masterRound } from "@/lib/i18n/fr/master-round";
 import type { RoundStepView } from "@/lib/master-workflow/round-step";
-import { masterStepHref } from "@/lib/ui/master-steps";
 import { formatDay, formatShortDay, formatShortInstant } from "@/lib/utils/day";
 
 import { LinkPanel } from "./link-panel";
@@ -63,17 +62,7 @@ export function RoundStep({
   const noStems = view.titles.filter((x) => x.stems === 0).map((x) => x.title);
   const sameEngineer =
     stage === "mastering" && view.brief?.masteringSameEngineer === true;
-  const blockers = [
-    ...(round.vocalsAwaited
-      ? [
-          {
-            text: t.blockers.vocals,
-            href: masterStepHref(view.projectId, "source"),
-          },
-        ]
-      : []),
-    ...view.blockers,
-  ];
+  const { blockers } = round;
   const lead = (leadIds?.size ?? 0) > 0;
   const rest = (
     <>

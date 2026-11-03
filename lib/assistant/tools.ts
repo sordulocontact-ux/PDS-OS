@@ -12,6 +12,7 @@ import {
 import { activityLine } from "@/lib/assistant/facts";
 import { myWorkFacts } from "@/lib/assistant/my-work";
 import { projectStatus } from "@/lib/assistant/project-status";
+import { stepStatus } from "@/lib/assistant/step-status";
 import { proposeArtistTool } from "@/lib/assistant/propose/artist";
 import { proposeContractTool } from "@/lib/assistant/propose/contract";
 import { proposeContractTemplateTool } from "@/lib/assistant/propose/contract-template";
@@ -183,6 +184,13 @@ export function createAssistantTools(
         "État complet d'un projet : étapes, Brief, besoins, équipe, points ouverts, tâches (retards calculés), validation en attente, sortie. Appeler find_projects d'abord pour obtenir projectId.",
       inputSchema: z.object({ projectId: z.uuid() }),
       execute: async ({ projectId }) => projectStatus(projectId, access),
+    }),
+
+    step_status: tool({
+      description:
+        "L'étape de la page ouverte, lue par l'application (sans paramètre) : son état, ses prérequis pas encore faits, qui doit agir et quoi, ce qu'elle ouvre ensuite, et ce qui empêche d'avancer (blocages affichés sur la page, ex. l'envoi du dossier au mixeur).",
+      inputSchema: z.object({}),
+      execute: async () => stepStatus(pagePath),
     }),
 
     my_todo: tool({
