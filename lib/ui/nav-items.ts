@@ -8,6 +8,7 @@ import {
   IconMsgs,
   IconNodes,
   IconPhone,
+  IconSparkle3,
   IconUserSearch,
   IconUsers2,
 } from "nucleo-sharp-essential";
@@ -23,7 +24,8 @@ const fr = { shell };
 // source, used full-width and icon-only. "Calendrier" gathers every visible
 // project's dates (27/10/2026). "Calls" lists the calls of every visible
 // project and the meetings. `disabled` keeps an item without a page visible,
-// greyed (docs/DESIGN.md § 4).
+// greyed (docs/DESIGN.md § 4). « PO », the assistant's page and the history
+// of one's conversations with it (03/11/2026).
 export type NavItem = {
   href: string;
   label: string;
@@ -35,6 +37,7 @@ export type NavItem = {
 
 export const NAV_ITEMS: readonly NavItem[] = [
   { href: routes.app, label: fr.shell.nav.home, icon: IconHouse2, exact: true },
+  { href: routes.assistant, label: fr.shell.nav.po, icon: IconSparkle3 },
   { href: routes.work, label: fr.shell.nav.work, icon: IconBriefcase },
   { href: routes.projects, label: fr.shell.nav.projects, icon: IconFolderOpen },
   {

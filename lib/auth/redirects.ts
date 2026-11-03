@@ -86,6 +86,7 @@ export const routes = {
   unavailable: "/unavailable",
   app: "/app",
   assistant: "/app/assistant",
+  assistantConversation: (id: string) => `/app/assistant/${id}`,
   work: "/app/work",
   // Every visible project's dates, one calendar (?mode=week&date=…&voir=mine).
   calendar: "/app/calendar",

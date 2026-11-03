@@ -8,6 +8,7 @@ import {
 } from "ai";
 import { z } from "zod";
 
+import { saveConversation } from "@/lib/assistant/conversations";
 import { pageContext } from "@/lib/assistant/page-context";
 import { isTestDataEnabled } from "@/lib/assistant/test-data/tool";
 import { createAssistantTools } from "@/lib/assistant/tools";
@@ -15,11 +16,14 @@ import { getAccess } from "@/lib/auth/dal";
 import { assistantInstructions } from "@/lib/ai/instructions/assistant";
 import { getChatModel } from "@/lib/ai/llm";
 import { isAiQuotaExceeded, takeAiRequest } from "@/lib/ai/quota";
+import { createClient } from "@/lib/supabase/server";
 
 export const maxDuration = 60;
 
-// Bounds on what a client may send: the conversation lives in the tab only.
+// Bounds on what a client may send. The tab holds the conversation; its id
+// (a uuid) is where the turns are saved in the viewer's history.
 const bodySchema = z.object({
+  id: z.string().optional(),
   messages: z
     .array(
       z
@@ -91,7 +95,25 @@ export async function POST(request: Request) {
     stopWhen: isStepCount(5),
   });
 
+  // Saved after every answer, with the member's session (client made now,
+  // while the request's cookies are readable): the history (§ 2 ter).
+  const conversationId = z.uuid().safeParse(parsed.data.id);
+  const organizationId = access.organizationId;
+  const supabase = await createClient();
+
   return createUIMessageStreamResponse({
-    stream: toUIMessageStream({ stream: result.stream }),
+    stream: toUIMessageStream({
+      stream: result.stream,
+      originalMessages: messages,
+      onEnd: async ({ messages: turns }) => {
+        if (!conversationId.success || !organizationId) return;
+        await saveConversation(supabase, {
+          id: conversationId.data,
+          organizationId,
+          pagePath: parsed.data.page ?? null,
+          messages: turns,
+        });
+      },
+    }),
   });
 }

@@ -15,6 +15,8 @@ export const shell = {
   nav: {
     label: "Navigation principale",
     home: "Accueil",
+    // The assistant's page: the conversation and its history.
+    po: "PO",
     work: "Travail",
     projects: "Projets",
     calendar: "Calendrier",

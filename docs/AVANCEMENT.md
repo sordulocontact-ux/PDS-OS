@@ -1292,3 +1292,15 @@ faits grise sous un titre (l'état à côté du titre, le reste dans « Informat
 - [x] Menu, titre et textes de `/app/labo` : **Repérage** (Sacha, 03/11), icône `IconUserSearch` ; la
       description dit ce que fait la page (artistes repérés sur TikTok). Route et code inchangés (`labo`) ;
       le Labo IA local (`/labo`) garde son nom.
+
+## PO dans la barre latérale, historique des conversations (03/11/2026, branche `pre-prod`)
+
+- [x] Entrée **PO** sous Accueil → `/app/assistant` : la conversation et la colonne « Historique »
+      (tiroir sur téléphone), par jour ; une conversation se rouvre où elle s'était arrêtée
+      (`/app/assistant/[id]`) et se supprime (« ⋯ », confirmé). `docs/ASSISTANT.md` § 2 ter.
+- [x] Enregistrement par `/api/assistant` à la fin de chaque réponse, accueil, page et fenêtre Espace
+      Espace compris ; « Nouvelle conversation » démarre une vraie nouvelle conversation (avant, elle
+      vidait la même).
+- [x] Table `assistant_conversations` (migration `20261103100101`), privée à la personne (même le DG
+      ne la lit pas), gardée jusqu'à sa suppression ; 13 tests pgTAP joués sur la pré-prod.
+- [ ] Migration à pousser en prod (avec accord) au prochain passage de `pre-prod` dans `main`.

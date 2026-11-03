@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { AssistantComposer } from "@/components/assistant/assistant-composer";
-import { sharedChat } from "@/components/assistant/shared-chat";
+import { useSharedChat } from "@/components/assistant/shared-chat";
 import { AssistantThread } from "@/components/assistant/assistant-thread";
 import { Button } from "@/components/ui/button";
 import { routes } from "@/lib/auth/redirects";
@@ -23,17 +23,21 @@ const fr = { assistant };
  */
 export function AssistantPanel({
   chat: ownChat,
+  onNew,
   compact = false,
   voiceFirst = false,
 }: {
   chat?: Chat<UIMessage>;
+  // The window's « Nouvelle conversation »: a new Chat, the last one saved.
+  onNew?: () => void;
   compact?: boolean;
   voiceFirst?: boolean;
 }) {
   const t = fr.assistant;
   const router = useRouter();
-  const { messages, sendMessage, status, stop, error, setMessages } = useChat({
-    chat: ownChat ?? sharedChat(),
+  const shared = useSharedChat();
+  const { messages, sendMessage, status, stop, error } = useChat({
+    chat: ownChat ?? shared,
   });
   const busy = status === "submitted" || status === "streaming";
   // Only the window shows the conversation here; home has its own page.
@@ -52,7 +56,7 @@ export function AssistantPanel({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setMessages([])}
+            onClick={onNew}
             disabled={busy}
             className="self-end"
           >

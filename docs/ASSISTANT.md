@@ -73,9 +73,9 @@ Pas d'index vectoriel (RAG) : des fonctions typées au-dessus de Postgres
 comptes rendus et transcriptions, recherche tolérante aux fautes sur les noms de projets
 et d'artistes.
 
-La conversation n'est pas enregistrée : elle vit dans l'onglet et disparaît au
-rechargement (`components/assistant/assistant-provider.tsx`). La fenêtre Espace Espace
-a la sienne (§ 2 bis).
+La conversation de l'onglet vit dans `components/assistant/shared-chat.ts` ; elle est
+**enregistrée dans l'historique** de la personne après chaque réponse (§ 2 ter). La fenêtre
+Espace Espace a la sienne (§ 2 bis).
 
 **Page de conversation** (`/app/assistant`, `assistant-conversation.tsx`, d'après Midday) :
 une question posée depuis l'accueil (saisie ou suggestion) ouvre cette page, où la
@@ -85,6 +85,36 @@ conversation (qui reste sur la page, suggestions au-dessus de la saisie). Le tit
 conversation : l'accueil propose « Reprendre la conversation », et une nouvelle question
 posée depuis l'accueil **la prolonge** (rien n'étant enregistré, en démarrer une autre
 d'office la ferait perdre sans prévenir) ; seul « + » repart de zéro.
+
+## 2 ter. L'historique des conversations (03/11/2026)
+
+Demande de Sacha : « je veux l'IA dans la barre latérale pour sauvegarder l'historique ».
+
+- **« PO » dans la barre latérale**, juste sous Accueil (`lib/ui/nav-items.ts`, icône
+  `IconSparkle3`, celle de l'encadré PO) → `/app/assistant`.
+- **Page** : la conversation, et à sa gauche la colonne « Historique » (tiroir ouvert par un
+  bouton de l'en-tête sur téléphone), par jour (`DayGroups`), la plus récente en haut, 100 au
+  plus. Une ligne rouvre la conversation là où elle s'était arrêtée (`/app/assistant/[id]`) ;
+  « ⋯ » → Supprimer, confirmé. La conversation en cours apparaît en tête dès la première
+  question, avant d'être relue du serveur. Après la première réponse, l'adresse devient
+  `/app/assistant/<id>` (rechargement, favori).
+- **Enregistrement** : `/api/assistant` enregistre les tours à la fin de chaque réponse
+  (`onEnd` de `toUIMessageStream`, `saveConversation`, `lib/assistant/conversations.ts`), avec
+  la session du membre. L'id est celui du `Chat` de l'onglet (un uuid, envoyé par le SDK dans
+  `id`) : **une nouvelle conversation = un nouveau `Chat`**, jamais un `Chat` vidé (il
+  écraserait l'enregistrée) → `startSharedChat()` (« + », `AskPoButton`), `onNew` dans la
+  fenêtre Espace Espace. Les conversations de la fenêtre sont enregistrées aussi (avec leur
+  page). Un appel d'outil interrompu (réponse arrêtée) n'est pas enregistré : il tournerait à
+  la réouverture et le modèle refuserait la question suivante. Un échec d'écriture est
+  journalisé, jamais montré : la réponse est déjà donnée.
+- **Titre** = la première question telle quelle, coupée à 120 caractères
+  (`conversationTitle`), jamais rédigé par le modèle ; il ne change plus.
+- **Décisions** : une conversation est **privée** (RLS : la personne seule la lit, la
+  continue, la supprime ; même le DG n'y a pas accès, c'est un brouillon de travail) ; elle
+  est **gardée jusqu'à ce que la personne la supprime**, et part avec la personne
+  (`on delete cascade`). Supprimer une conversation ne touche à rien de ce que PO a aidé à
+  créer. Table `assistant_conversations` (migration `20261103100101`, tests
+  `supabase/tests/assistant-conversations.test.sql`).
 
 ## 2 bis. La fenêtre Espace Espace
 

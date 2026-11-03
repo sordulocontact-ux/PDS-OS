@@ -382,6 +382,18 @@ export const assistant = {
     reply: "Répondre…",
     resume: "Reprendre la conversation",
   },
+  // The saved conversations, beside the conversation (docs/ASSISTANT.md § 2 ter).
+  history: {
+    title: "Historique",
+    open: "Afficher l'historique",
+    empty: "Vos conversations avec PO s'enregistrent ici.",
+    actions: (title: string) => `Actions pour « ${title} »`,
+    deleteTitle: "Supprimer cette conversation ?",
+    deleteBody:
+      "Elle disparaît de votre historique. Ce que PO vous a aidé à créer reste en place.",
+    deleted: "Conversation supprimée",
+    deleteFailed: "La conversation n'a pas pu être supprimée.",
+  },
   facts: "Données utilisées",
   sources: "Sources",
   you: "Vous",

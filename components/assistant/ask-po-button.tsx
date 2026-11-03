@@ -7,7 +7,10 @@ import {
   useAssistant,
   type PoOrigin,
 } from "@/components/assistant/assistant-provider";
-import { sharedChat } from "@/components/assistant/shared-chat";
+import {
+  startSharedChat,
+  useSharedChat,
+} from "@/components/assistant/shared-chat";
 import { Button } from "@/components/ui/button";
 import { routes } from "@/lib/auth/redirects";
 
@@ -32,7 +35,7 @@ export function AskPoButton({
 }) {
   const router = useRouter();
   const { setOrigin } = useAssistant();
-  const { sendMessage, setMessages, status } = useChat({ chat: sharedChat() });
+  const { status } = useChat({ chat: useSharedChat() });
   const busy = status === "submitted" || status === "streaming";
   return (
     <Button
@@ -41,9 +44,10 @@ export function AskPoButton({
       variant={variant}
       disabled={busy}
       onClick={() => {
-        setMessages([]);
+        // A new conversation, saved apart from the one before.
+        const chat = startSharedChat();
         setOrigin(origin ?? null);
-        void sendMessage({ text: question });
+        void chat.sendMessage({ text: question });
         router.push(routes.assistant);
       }}
     >
