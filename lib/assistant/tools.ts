@@ -12,6 +12,7 @@ import {
 import { activityLine } from "@/lib/assistant/facts";
 import { myWorkFacts } from "@/lib/assistant/my-work";
 import { projectStatus } from "@/lib/assistant/project-status";
+import { workflowLines } from "@/lib/assistant/project-workflows";
 import { stepStatus } from "@/lib/assistant/step-status";
 import { proposeArtistTool } from "@/lib/assistant/propose/artist";
 import { proposeContractTool } from "@/lib/assistant/propose/contract";
@@ -84,7 +85,7 @@ export function createAssistantTools(
 
     find_projects: tool({
       description:
-        "Liste les projets (sorties) visibles, avec artiste, type et étape actuelle. Recherche tolérante aux fautes si un texte est donné.",
+        "Liste les projets (sorties) visibles, avec artiste, type, étape actuelle et, pour un projet lancé, chacun de ses workflows (Master, Juridique, Marketing, Distribution) avec son état et son étape : ils avancent en parallèle, un projet est « au Master » quand son workflow Master est en cours, même si currentStage dit autre chose. Recherche tolérante aux fautes si un texte est donné.",
       inputSchema: z.object({
         query: z
           .string()
@@ -106,11 +107,16 @@ export function createAssistantTools(
             .sort((a, b) => order.get(a.id)! - order.get(b.id)!);
         }
         const found = list.slice(0, 20);
+        const workflows = await Promise.all(
+          found.map((p) =>
+            p.status === "launched" ? workflowLines(p.id) : null,
+          ),
+        );
         const waiting = new Set(
           handoverOf(projects, access).toAccept.map((p) => p.id),
         );
         return {
-          projects: found.map((p) => ({
+          projects: found.map((p, i) => ({
             projectId: p.id,
             title: p.title,
             artist: p.artistName,
@@ -121,6 +127,8 @@ export function createAssistantTools(
             currentStage: p.currentStage
               ? `${progressLabel(p.currentStage)} (${p.currentStage.state})`
               : null,
+            // Launched: every workflow side by side (Master, Juridique…).
+            workflows: workflows[i],
           })),
           sources: found.map((p): Source => ({
             label: p.title,

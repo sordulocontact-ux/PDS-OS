@@ -323,6 +323,14 @@ export const assistant = {
       "la page Retours (les retours de l'équipe sur l'application PDS OS)",
     work: "sa page Travail (ce qui l'attend, projet par projet)",
   },
+  // find_projects: one workflow of a launched project (project-workflows.ts).
+  workflowLine: (
+    workflow: string,
+    status: string,
+    index: number,
+    total: number,
+    step: string,
+  ) => `${workflow} : ${status}, étape ${index} sur ${total} (${step})`,
   // step_status: the step of the open page, worded by code (lib/assistant/
   // step-status.ts). PO relays these sentences, it never deduces a state.
   stepStatus: {
