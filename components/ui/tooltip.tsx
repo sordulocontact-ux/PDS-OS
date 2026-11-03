@@ -2,11 +2,12 @@
 
 import { Tooltip as TooltipPrimitive } from "@base-ui/react/tooltip";
 
+import { tooltipMotion } from "@/components/ui/popup-motion";
 import { cn } from "@/lib/utils";
 
-// Tooltip of the design system (docs/DESIGN.md § 5): elevation 1, small
-// radius, hairline border, no motion (§ 6). Used for the collapsed sidebar,
-// where an icon-only item still needs its label on hover/focus.
+// Tooltip of the design system: elevation 1, small radius, hairline border,
+// a short fade (popup-motion.ts). Used for the collapsed sidebar, where an
+// icon-only item still needs its label on hover/focus.
 
 const TooltipProvider = TooltipPrimitive.Provider;
 const Tooltip = TooltipPrimitive.Root;
@@ -36,6 +37,7 @@ function TooltipContent({
         <TooltipPrimitive.Popup
           className={cn(
             "rounded-[var(--radius-md)] border border-border bg-popover px-2.5 py-1.5 text-caption text-popover-foreground shadow-elevation-1 outline-none",
+            tooltipMotion,
             className,
           )}
           {...props}

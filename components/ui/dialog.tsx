@@ -20,6 +20,10 @@ const fade =
 // The panel also grows from .97 when motion is allowed.
 const pop =
   "motion-safe:transition-[opacity,scale] motion-safe:data-starting-style:scale-[.97] motion-reduce:transition-opacity";
+// The blur itself rises with the panel: switched on at once, the whole page
+// seemed to reload before the modal appeared.
+const scrimMotion =
+  "transition-[opacity,backdrop-filter] data-starting-style:backdrop-blur-[0px] data-ending-style:backdrop-blur-[0px]";
 
 const Dialog = DialogPrimitive.Root;
 const DialogTrigger = DialogPrimitive.Trigger;
@@ -29,28 +33,31 @@ function DialogContent({
   children,
   closeLabel,
   showClose = true,
+  instant = false,
   ...props
 }: DialogPrimitive.Popup.Props & {
   closeLabel: string;
   // False when the content has its own way out (the presentation's « Passer »).
   showClose?: boolean;
+  // Opened by a keyboard shortcut (PO's Espace Espace): no motion, it must
+  // be there the moment the keys are pressed.
+  instant?: boolean;
 }) {
   return (
     <DialogPrimitive.Portal>
       <DialogPrimitive.Backdrop
         className={cn(
-          // The blur itself rises with the panel: switched on at once, the
-          // whole page seemed to reload before the modal appeared.
-          "fixed inset-0 z-50 bg-[var(--glass-scrim)] backdrop-blur-[var(--glass-blur)] transition-[opacity,backdrop-filter] data-starting-style:backdrop-blur-[0px] data-ending-style:backdrop-blur-[0px]",
-          fade,
+          "fixed inset-0 z-50 bg-[var(--glass-scrim)] backdrop-blur-[var(--glass-blur)]",
+          !instant && scrimMotion,
+          !instant && fade,
         )}
       />
       <DialogPrimitive.Popup
         data-slot="dialog-content"
         className={cn(
           "fixed inset-x-0 bottom-0 z-50 flex max-h-[calc(100dvh-2rem)] flex-col gap-5 overflow-y-auto p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] text-foreground shadow-elevation-modal outline-none sm:inset-x-auto sm:top-1/2 sm:bottom-auto sm:left-1/2 sm:w-[calc(100%-2rem)] sm:max-w-[var(--dialog-width)] sm:-translate-x-1/2 sm:-translate-y-1/2",
-          pop,
-          fade,
+          !instant && pop,
+          !instant && fade,
           "surface-glass rounded-t-3xl border border-[color:var(--border-default)] bg-[var(--surface-glass)] backdrop-blur-[var(--glass-panel-blur)] sm:rounded-3xl",
           className,
         )}

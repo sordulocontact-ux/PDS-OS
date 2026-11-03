@@ -2,10 +2,11 @@
 
 import { Popover as PopoverPrimitive } from "@base-ui/react/popover";
 
+import { popupMotion } from "@/components/ui/popup-motion";
 import { cn } from "@/lib/utils";
 
-// Popover of the design system (docs/DESIGN.md § 5): elevation 1, 10 px
-// radius, hairline border, no motion (§ 6).
+// Popover of the design system: elevation 1, 10 px radius, hairline border,
+// grows from its trigger (popup-motion.ts).
 
 const Popover = PopoverPrimitive.Root;
 const PopoverTrigger = PopoverPrimitive.Trigger;
@@ -39,6 +40,7 @@ function PopoverContent({
         <PopoverPrimitive.Popup
           className={cn(
             "flex max-h-[min(32rem,var(--available-height))] w-[min(24rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-[var(--radius-xl)] border border-border bg-popover text-popover-foreground shadow-elevation-1 outline-none",
+            popupMotion,
             className,
           )}
           {...props}

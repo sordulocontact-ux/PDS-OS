@@ -1267,3 +1267,12 @@ faits grise sous un titre (l'état à côté du titre, le reste dans « Informat
 - `StepMeta` supprimé, prop `rootPrereq` retirée (Juridique, Distribution). Proto de décision :
   `~/Desktop/Protos PDS OS/PDS OS - En-tête des étapes.html`. Aucune migration.
 - [x] Toasts maison (03/11/2026) : `sonner` retiré, `components/ui/toast.ts` (même API) + `Toaster` (pile dépliable au survol, pause au survol et onglet caché, balayage, Échap, dédoublonnage) ; règles `docs/DESIGN.md` § 4
+
+## Mouvement des popups (03/11/2026, branche `pre-prod`)
+
+- `DropdownMenu` et `Popover` (menus « ⋯ », cloche, sélecteurs de personnes) sortent de leur bouton :
+  opacité et `scale(.97)` en 120 ms, sortie en 80 ms ; `Tooltip` en fondu de 120 ms, instantané d'une
+  voisine à l'autre. Une seule recette : `components/ui/popup-motion.ts`.
+- La fenêtre de PO (Espace Espace) s'ouvre sans transition (`DialogContent instant`) : un raccourci
+  clavier ne doit pas attendre. Le contenu replié (`Fold`) reste sans animation, par choix.
+- Proto de décision : `~/Desktop/Protos PDS OS/PDS OS - Mouvement des popups.html`. Aucune migration.

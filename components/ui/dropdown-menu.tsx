@@ -3,11 +3,12 @@
 import { Menu as MenuPrimitive } from "@base-ui/react/menu";
 import { IconCheck } from "nucleo-sharp-essential";
 
+import { popupMotion } from "@/components/ui/popup-motion";
 import { cn } from "@/lib/utils";
 
 // Menu of the design system, on Base UI (keyboard, focus, typeahead): same
-// surface as the Popover (elevation 1, 10 px radius, hairline border), rows
-// of 8 px radius, no motion (docs/DESIGN.md § 5, § 6).
+// surface and motion as the Popover (elevation 1, 10 px radius, hairline
+// border), rows of 8 px radius.
 
 const DropdownMenu = MenuPrimitive.Root;
 const DropdownMenuTrigger = MenuPrimitive.Trigger;
@@ -36,6 +37,7 @@ function DropdownMenuContent({
         <MenuPrimitive.Popup
           className={cn(
             "flex min-w-44 flex-col rounded-[var(--radius-xl)] border border-border bg-popover p-1 text-popover-foreground shadow-elevation-1 outline-none",
+            popupMotion,
             className,
           )}
           {...props}

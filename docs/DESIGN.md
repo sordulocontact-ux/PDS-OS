@@ -738,7 +738,15 @@ n'a plus de variante. Toute nouvelle modale passe par `Dialog` / `FormDialog` /
   portail (`Select`, `DropdownMenu`, `Popover`, `Tooltip`).
 - **Entrée** : opacité et `scale(.97 → 1)` en `--duration-base` (180 ms) `--ease-out`, le flou
   de la page monte avec le panneau ; sortie en opacité, `--duration-fast`. Mouvement réduit :
-  opacité seule.
+  opacité seule. **Sauf une modale ouverte au clavier** (la fenêtre de PO, Espace Espace) :
+  `DialogContent instant`, aucune transition, elle est là dès la touche (Sacha, 03/11/2026).
+- **Menus, popovers et info-bulles** (`DropdownMenu`, `Popover`, `Tooltip`, Sacha 03/11/2026,
+  `components/ui/popup-motion.ts`) : ouverts des dizaines de fois par jour, donc presque rien.
+  Menu et popover sortent de leur bouton (`transform-origin` = `--transform-origin` de Base UI) :
+  opacité et `scale(.97 → 1)` en `--duration-fast` (120 ms) `--ease-out`, sortie en opacité,
+  `--duration-instant` (80 ms). Info-bulle : fondu de 120 ms, aucun quand elle s'ouvre aussitôt
+  depuis une voisine (`data-instant`). Mouvement réduit : opacité seule. Le contenu replié
+  (`Fold`) reste sans animation (choix du 03/11/2026).
 - **Boutons d'une modale ou d'une décision** (décision C0) : le **principal d'abord, à
   gauche**, puis les secondaires (« Annuler » en dernier), comme le proto. Un seul endroit :
   `DialogFormActions` et `ReasonForm` ; aucune modale ne range ses boutons à la main.
