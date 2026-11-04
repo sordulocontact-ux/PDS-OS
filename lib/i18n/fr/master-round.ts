@@ -20,6 +20,8 @@ export const masterRound = {
     stemsCount: (n: number) =>
       n > 1 ? `${n} fichiers de pistes` : "1 fichier de pistes",
     stemsNone: (titles: string) => `Aucune piste pour ${titles}`,
+    stemsAdd: (title: string) =>
+      `Ajouter les pistes séparées de ${title} : choisir les fichiers`,
     mixV1: (day: string) => `Mix V1 attendu le ${day}`,
     mastering: (day: string) => `Mastering attendu le ${day}`,
   },

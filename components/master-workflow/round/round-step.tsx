@@ -18,6 +18,7 @@ import { InHouseDeposit } from "./inhouse-deposit";
 import { RateBlock } from "./rate-block";
 import { RoundVersions } from "./round-versions";
 import { SendForm } from "./send-form";
+import { MissingStemsRow } from "./stems-row";
 
 const fr = { invoices, masterRound, masterInHouse };
 
@@ -125,23 +126,27 @@ export function RoundStep({
                   : { tone: "warning", label: t.before.toRecord }
               }
             />
-            {stage === "mix" && (
-              <FactRow
-                label={t.before.stems}
-                value={
-                  noStems.length
-                    ? t.before.stemsNone(noStems.join(", "))
-                    : t.before.stemsCount(
-                        view.titles.reduce((s, x) => s + x.stems, 0),
-                      )
-                }
-                state={
-                  noStems.length
-                    ? { tone: "warning", label: t.before.missing }
-                    : { tone: "success", label: t.before.ready }
-                }
-              />
-            )}
+            {stage === "mix" &&
+              (noStems.length ? (
+                view.titles
+                  .filter((x) => x.stems === 0)
+                  .map((x) => (
+                    <MissingStemsRow
+                      key={x.id}
+                      organizationId={view.organizationId}
+                      masterId={x.id}
+                      title={x.title}
+                    />
+                  ))
+              ) : (
+                <FactRow
+                  label={t.before.stems}
+                  value={t.before.stemsCount(
+                    view.titles.reduce((s, x) => s + x.stems, 0),
+                  )}
+                  state={{ tone: "success", label: t.before.ready }}
+                />
+              ))}
             {view.brief?.dates.mixV1Due && stage === "mix" && (
               <FactRow
                 label={t.before.dates}

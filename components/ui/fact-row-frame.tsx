@@ -55,9 +55,10 @@ export type FactRowProps = {
   changedBy?: string | null;
   // Full width under the row.
   below?: ReactNode;
-  // The whole row opens this view (its words, for a screen reader, in
-  // `hrefLabel`), never with a button beside it.
+  // The whole row opens this view, or runs `onClick` (its words, for a
+  // screen reader, in `hrefLabel`), never with a button beside it.
   href?: string | null;
+  onClick?: () => void;
   hrefLabel?: string;
 };
 
@@ -108,16 +109,20 @@ export function FactRowFrame({
   changedBy,
   below,
   href,
+  onClick,
   hrefLabel,
   sourceNode,
 }: FactRowProps & { sourceNode?: ReactNode }) {
+  const action = Boolean(href || onClick);
   const empty = value === undefined || value === null || value === "";
   const frame =
     "grid grid-cols-1 items-start gap-x-3 gap-y-1 border-b border-[color:var(--border-hairline)] px-3.5 py-2.75 text-body-sm last:border-b-0 md:grid-cols-[minmax(0,1fr)_auto]";
   const content = (
     <>
       <div className="flex min-w-0 flex-col gap-0.5">
-        {href && hrefLabel && <span className="sr-only">{hrefLabel}</span>}
+        {action && hrefLabel && (
+          <span className="sr-only">{hrefLabel}</span>
+        )}
         {label && (
           <span className="text-caption text-muted-foreground">{label}</span>
         )}
@@ -146,14 +151,22 @@ export function FactRowFrame({
       {below && <div className="flex flex-col gap-2 md:col-span-2">{below}</div>}
     </>
   );
+  const actionFrame = cn(
+    frame,
+    "outline-none hover:bg-[var(--control-bg-hover)] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[color:var(--focus-ring)]",
+  );
+  if (onClick)
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className={cn(actionFrame, "w-full cursor-pointer text-left")}
+      >
+        {content}
+      </button>
+    );
   return href ? (
-    <ViewLink
-      href={href}
-      className={cn(
-        frame,
-        "outline-none hover:bg-[var(--control-bg-hover)] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[color:var(--focus-ring)]",
-      )}
-    >
+    <ViewLink href={href} className={actionFrame}>
       {content}
     </ViewLink>
   ) : (
