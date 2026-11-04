@@ -1,6 +1,6 @@
 "use client";
 
-import { IconLink } from "nucleo-sharp-essential";
+import { IconCheck, IconLink } from "nucleo-sharp-essential";
 import { useState, useSyncExternalStore } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
@@ -60,8 +60,9 @@ const useOrigin = () =>
 /**
  * « Lien de Karim Haddou » (Figma 378-6581, Sacha 04/11): the engineer's
  * page by project, opened on the package — one link for all PDS expects
- * from them. Its state (sent, opened), the link to copy, « Relancer »,
- * « Nouveau lien », and in « ⋯ » « Retirer le dossier de mixage » (the page
+ * from them. Its state (sent, opened), the link with its copy button,
+ * « Relancer », « Nouveau lien », and in « ⋯ » « Marquer comme envoyé »
+ * (only when PDS OS could not send the e-mail), « Retirer le dossier de mixage » (the page
  * stays) or « Révoquer le lien » (the whole page stops), each with why.
  * Under it, until when the package and the link open. A package withdrawn
  * or closed: why, and « Renvoyer le dossier ».
@@ -135,34 +136,22 @@ export function LinkPanel(props: LinkPanelProps) {
             {link ? (
               <div className="flex flex-wrap items-center gap-2">
                 {url && (
-                  <code className="min-w-0 rounded-full bg-[var(--surface-soft)] px-4 py-1.5 text-[length:var(--type-caption)] break-all">
-                    {url}
-                  </code>
-                )}
-                {url && (
-                  <CopyButton
-                    value={url}
-                    label={t.copy}
-                    copiedLabel={t.copied}
-                    variant="ghost"
-                    size="sm"
-                  />
+                  <span className="flex min-w-0 items-center gap-2 rounded-full bg-[var(--surface-soft)] py-1 pr-1 pl-4">
+                    <code className="min-w-0 font-mono text-[length:var(--type-body-sm)] break-all">
+                      {url}
+                    </code>
+                    <CopyButton
+                      value={url}
+                      label=""
+                      ariaLabel={t.copy}
+                      copiedLabel={t.copied}
+                      variant="ghost"
+                      size="icon-xs"
+                      className="rounded-full"
+                    />
+                  </span>
                 )}
                 <span className="ml-auto flex flex-wrap items-center gap-1">
-                  {!sent && !tr.continued && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={write.pending}
-                      onClick={() =>
-                        write.run(() =>
-                          markRoundSent(props.projectId, stage, tr.id, link.id),
-                        )
-                      }
-                    >
-                      {t.markSent}
-                    </Button>
-                  )}
                   {url && (
                     <a
                       className={buttonVariants({
@@ -196,6 +185,25 @@ export function LinkPanel(props: LinkPanelProps) {
                   <RowActions
                     label={t.more(engineer)}
                     actions={[
+                      // Only when PDS OS could not send the e-mail itself.
+                      ...(!sent && !tr.continued
+                        ? [
+                            {
+                              key: "sent",
+                              label: t.markSent,
+                              icon: IconCheck,
+                              onSelect: () =>
+                                write.run(() =>
+                                  markRoundSent(
+                                    props.projectId,
+                                    stage,
+                                    tr.id,
+                                    link.id,
+                                  ),
+                                ),
+                            },
+                          ]
+                        : []),
                       {
                         key: "withdraw",
                         label: t.withdraw(stage),
