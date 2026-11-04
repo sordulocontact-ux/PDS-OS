@@ -36,6 +36,7 @@ export const core = {
   // components/ui/audio-file.tsx, components/ui/audio-player.tsx
   audioFile: {
     download: "Télécharger",
+    downloadOf: (label: string) => `Télécharger · ${label}`,
     // `label` names the file: « Écouter la V2 ».
     pause: (label: string) => `Pause · ${label}`,
     position: (label: string) => `Position · ${label}`,

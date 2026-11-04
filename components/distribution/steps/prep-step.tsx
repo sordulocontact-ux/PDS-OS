@@ -130,6 +130,7 @@ function PrepRow({ item }: { item: ReadinessItem }) {
         item.media ? (
           <AudioFile
             label={t.listen(item.media.fileName)}
+            name={item.media.fileName}
             listenUrl={item.media.listenUrl}
             downloadUrl={item.media.downloadUrl}
           />

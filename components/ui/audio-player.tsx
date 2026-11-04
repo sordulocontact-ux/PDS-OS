@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { IconPause, IconPlay } from "@/components/icons";
 import { formatTimecode } from "@/lib/catalog/audio-versions";
@@ -18,14 +18,46 @@ const BUSY_AFTER_MS = 400;
 
 const finite = (seconds: number) => (Number.isFinite(seconds) ? seconds : 0);
 
+// The waveform's bars, and under which height a bar is drawn as a dot.
+const BARS = 40;
+const DOT = 0.22;
+
+/**
+ * The waveform's shape for a file: drawn from its path (the signed query
+ * changes, the file does not), the same every time. A picture of the
+ * sound, not its measure: no peak is computed from the audio.
+ */
+function barsOf(src: string): number[] {
+  const path = src.split("?")[0] ?? src;
+  let seed = 2166136261;
+  for (let i = 0; i < path.length; i++)
+    seed = Math.imul(seed ^ path.charCodeAt(i), 16777619);
+  const next = () => {
+    seed = Math.imul(seed ^ (seed >>> 15), 2246822507);
+    seed = Math.imul(seed ^ (seed >>> 13), 3266489909);
+    return ((seed ^= seed >>> 16) >>> 0) / 4294967296;
+  };
+  let level = 0.5;
+  return Array.from({ length: BARS }, (_, i) => {
+    level = Math.min(1, Math.max(0.08, level * 0.55 + next() * 0.6));
+    // Quiet at both ends, like a sound that starts and stops.
+    const edge = Math.min(1, (i + 1) / 5, (BARS - i) / 5);
+    return level * edge;
+  });
+}
+
 // One sound at a time on the page: starting one pauses the other.
 let playing: HTMLAudioElement | null = null;
 
+// The played part of the waveform: the ink layer, cut at the position.
+const played = (ratio: number) =>
+  `inset(0 ${(1 - Math.min(1, Math.max(0, ratio))) * 100}% 0 0)`;
+
 /**
- * PDS OS's audio player (proto `master-v2.html`, `.play` and `.wave`): a
- * round play button in ink (selection blue while it plays), a thin bar
- * that fills in blue and moves the sound on click, drag or arrow keys, the
- * time and the length. One sound plays at a time; buffering longer than
+ * PDS OS's audio player (Sacha's model, 04/11/2026): a round play button
+ * in ink, a waveform of bars (dots where it is quiet) that turns ink as it
+ * plays and moves the sound on click, drag or arrow keys, then the time
+ * once listened to. One sound plays at a time; buffering longer than
  * 400 ms shows the spinner in the button; a link that no longer answers
  * says « Lecture impossible ». `ref` reaches the `<audio>` (a listening
  * note moves the sound to its moment).
@@ -57,6 +89,7 @@ export function AudioPlayer({
   const [time, setTime] = useState(0);
   const [reported, setReported] = useState(0);
   const length = reported || duration || 0;
+  const bars = useMemo(() => barsOf(src), [src]);
 
   // The bar follows the sound every frame while it plays (timeupdate only
   // fires four times a second), written straight to the style.
@@ -66,7 +99,7 @@ export function AudioPlayer({
     const tick = () => {
       const el = audio.current;
       if (el && fill.current && length > 0)
-        fill.current.style.transform = `scaleX(${Math.min(1, el.currentTime / length)})`;
+        fill.current.style.clipPath = played(el.currentTime / length);
       frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
@@ -96,7 +129,7 @@ export function AudioPlayer({
   function sync(el: HTMLAudioElement) {
     setTime(el.currentTime);
     if (fill.current && length > 0)
-      fill.current.style.transform = `scaleX(${Math.min(1, el.currentTime / length)})`;
+      fill.current.style.clipPath = played(el.currentTime / length);
   }
 
   function toggle() {
@@ -117,7 +150,7 @@ export function AudioPlayer({
   const known = length > 0;
   return (
     <div
-      className={cn("flex h-9 min-w-0 items-center gap-2.5", className)}
+      className={cn("flex h-10 min-w-0 items-center gap-3", className)}
     >
       <audio
         ref={bind}
@@ -155,14 +188,13 @@ export function AudioPlayer({
         aria-label={paused ? label : t.pause(label)}
         aria-pressed={!paused}
         className={cn(
-          "grid size-9 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground transition-[background-color,scale] duration-[var(--duration-fast)] ease-[var(--ease-out)] focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none motion-safe:active:scale-[.94] disabled:opacity-40",
-          !paused && "bg-[var(--selection)] text-white",
+          "grid size-10 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground transition-[scale] duration-[var(--duration-fast)] ease-[var(--ease-out)] focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none motion-safe:active:scale-[.94] disabled:opacity-40",
         )}
       >
         {paused ? (
-          <IconPlay aria-hidden className="size-3.5" />
+          <IconPlay aria-hidden className="size-4" />
         ) : (
-          <IconPause aria-hidden className="size-3.5" />
+          <IconPause aria-hidden className="size-4" />
         )}
       </button>
       {failed ? (
@@ -172,14 +204,17 @@ export function AudioPlayer({
       ) : (
         <>
           <span className="group relative flex h-full min-w-12 flex-1 items-center">
-            <span className="relative h-1 w-full overflow-hidden rounded-full bg-[var(--border-default)]">
-              <span
-                ref={fill}
-                className="absolute inset-0 origin-left rounded-full bg-[var(--selection)]"
-                style={{
-                  transform: `scaleX(${known ? Math.min(1, time / length) : 0})`,
-                }}
-              />
+            <Wave
+              bars={bars}
+              className="text-[color:var(--text-tertiary)]"
+            />
+            <span
+              ref={fill}
+              aria-hidden
+              className="absolute inset-0 flex items-center text-foreground"
+              style={{ clipPath: played(known ? time / length : 0) }}
+            >
+              <Wave bars={bars} />
             </span>
             {/* The real control, invisible over the bar: click, drag,
                 arrow keys and screen readers. */}
@@ -214,12 +249,35 @@ export function AudioPlayer({
               className="pointer-events-none absolute inset-x-0 -inset-y-1 rounded-md peer-focus-visible:ring-3 peer-focus-visible:ring-ring/50"
             />
           </span>
-          <span className="shrink-0 text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-secondary)] tabular-nums">
-            {formatTimecode(time)}
-            {known && ` / ${formatTimecode(length)}`}
-          </span>
+          {(time > 0 || !paused) && (
+            <span className="shrink-0 text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-secondary)] tabular-nums">
+              {formatTimecode(time)}
+              {known && ` / ${formatTimecode(length)}`}
+            </span>
+          )}
         </>
       )}
     </div>
+  );
+}
+
+/** The bars, in the current color: a dot where the sound is quiet. */
+function Wave({ bars, className }: { bars: number[]; className?: string }) {
+  return (
+    <span
+      aria-hidden
+      className={cn("flex h-8 w-full items-center justify-between", className)}
+    >
+      {bars.map((level, i) => (
+        <span
+          key={i}
+          className={cn(
+            "w-[3px] shrink-0 rounded-full bg-current",
+            level < DOT && "h-[3px]",
+          )}
+          style={level < DOT ? undefined : { height: `${level * 100}%` }}
+        />
+      ))}
+    </span>
   );
 }
