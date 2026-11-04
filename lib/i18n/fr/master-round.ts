@@ -64,6 +64,27 @@ export const masterRound = {
     message: "Message",
     noEmail: "Pas d'adresse dans le Réseau",
     link: "Ajouté à la fin : Ouvrir votre dossier — lien privé créé à l'envoi, sans compte.",
+    // PDS OS sends it itself (EMAIL_SMTP_*, lib/email/send.ts).
+    sendTitle: "L'e-mail que PDS OS enverra",
+    from: "De",
+    fromValue: "L'adresse de PO, en votre nom · les réponses vous reviennent",
+    sendHint:
+      "Gardé dans l'historique : c'est la preuve d'envoi. Si l'e-mail ne part pas, le lien reste à copier.",
+    defaultMessage: (
+      engineer: string,
+      title: string,
+      stage: "mix" | "mastering",
+    ) =>
+      stage === "mix"
+        ? `Bonjour ${first(engineer)}, voici le dossier du mix de « ${title} ». Tout est sur votre lien privé : les fichiers, le Brief et les dates.`
+        : `Bonjour ${first(engineer)}, le mix final de « ${title} » est validé : le dossier du mastering est sur votre lien.`,
+    signature: (sender: string) => `${sender}, PDS`,
+    open: "Ouvrir votre dossier :",
+    validity: (day: string) =>
+      `Lien privé, sans compte, valable jusqu'au ${day}.`,
+    sent: (name: string) => `Dossier envoyé par e-mail à ${name}`,
+    failed:
+      "Le dossier est prêt, mais l'e-mail n'est pas parti : copiez le lien ci-dessous et envoyez-le vous-même.",
   },
   stems: {
     missing:

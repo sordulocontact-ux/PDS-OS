@@ -3984,8 +3984,14 @@ la personne (`/c/`). Migration `20261020070101_signed_returns.sql`, pgTAP `signe
   après la dernière échéance de ses dépendances, même au-delà de la sortie (`planDueDates`, aussi
   pour une action ajoutée après le lancement, qui part des échéances du plan).
 - **E-mail** : « Envoyer par e-mail » (`mailto:`, `lib/utils/mailto.ts`) à côté de chaque lien à
-  copier (fiche, répartition, dossier du mixeur), adressé au contact du Réseau. PDS OS n'envoie
-  aucun e-mail lui-même (pas de fournisseur : point à trancher).
+  copier (fiche, répartition, dossier du mixeur), adressé au contact du Réseau. **Envoi par PDS OS**
+  (04/11/2026, choix de Sacha : pas de domaine, donc le Gmail de PO plutôt que Resend) : un seul point
+  d'entrée `lib/email/send.ts` (nodemailer, `smtp.gmail.com`, `EMAIL_SMTP_USER` = po@pdsrecords.com,
+  `EMAIL_SMTP_PASSWORD` = mot de passe d'application), expéditeur « <membre> · PDS », réponses au
+  membre, texte seul. Branché d'abord sur l'envoi du dossier du Mixage/Mastering
+  (`transmission-email.ts` : message écrit dans l'étape, gardé comme note du dossier, lien privé à la
+  fin, puis `mark_master_transmission_sent`). Sans les variables, ou sans adresse au Réseau, l'envoi
+  reste déclaré (« Marquer comme envoyé ») ; un e-mail refusé laisse le dossier créé et le lien à copier.
 
 ### Synchronisation, horodatage et historique (retours Juridique du 11/10/2026, lot 2)
 

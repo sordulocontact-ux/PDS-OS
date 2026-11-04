@@ -12,10 +12,16 @@ import type { MasterPackage } from "@/lib/master-workflow/transmission-types";
 import { getProject } from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
 
+// Who it went to and for which project, for the e-mail (sendRound).
+type Sent = {
+  project: string;
+  engineer: { name: string; email: string | null };
+};
+
 export type TransmitResult =
   // `continued`: added to the mix link of the same engineer, no new link.
-  | { ok: true; token: string; continued: false }
-  | { ok: true; token: null; continued: true }
+  | ({ ok: true; token: string; continued: false } & Sent)
+  | ({ ok: true; token: null; continued: true } & Sent)
   | { ok: false; error: string };
 
 /**
@@ -190,9 +196,13 @@ export async function transmitPackage(
     };
   }
   revalidatePath(routes.projectMasterStep(project.id, input.data.role));
+  const sent: Sent = {
+    project: project.title,
+    engineer: { name: view.engineer.name, email: view.engineer.email },
+  };
   return token === "continued"
-    ? { ok: true, token: null, continued: true }
-    : { ok: true, token, continued: false };
+    ? { ok: true, token: null, continued: true, ...sent }
+    : { ok: true, token, continued: false, ...sent };
 }
 
 const transmissionId = z.object({ projectId: z.uuid(), id: z.uuid() });

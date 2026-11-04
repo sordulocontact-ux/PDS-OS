@@ -76,6 +76,11 @@ export const serverEnvSchema = z
      * (32 bytes, base64: `openssl rand -base64 32`). Optional: without it,
      * a link is shown once, then only its state. */
     LEGAL_LINK_KEY: optionalSecret,
+    /** E-mail sent by PDS OS (lib/email/send.ts): the Google account of
+     * PO (po@pdsrecords.com) and one of its app passwords. Optional:
+     * without them, each sending is declared (« Marquer comme envoyé »). */
+    EMAIL_SMTP_USER: z.preprocess(blankToUndefined, z.email().optional()),
+    EMAIL_SMTP_PASSWORD: optionalSecret,
     /** Web Push: optional, browser notifications are off without them. */
     VAPID_PRIVATE_KEY: optionalSecret,
     /** Same value as the Vault secret push_claim_secret: pushes are off without it. */

@@ -65,6 +65,8 @@ export function RoundStep({
     stage === "mastering" && view.brief?.masteringSameEngineer === true;
   const { blockers } = round;
   const lead = (leadIds?.size ?? 0) > 0;
+  // PDS OS sends the e-mail itself: configured, and an address to write to.
+  const mailed = round.emailEnabled && Boolean(view.engineer?.email);
   const rest = (
     <>
       {sent && (
@@ -207,7 +209,23 @@ export function RoundStep({
         view.engineer &&
         (!sent || round.briefChangedSinceSent) && (
           <>
-            {!sent && (
+            {!sent && mailed && (
+              <section className="flex flex-col gap-2.5">
+                <h3 className={h3}>{t.email.sendTitle}</h3>
+                <FactRows>
+                  <FactRow
+                    label={t.email.to}
+                    value={`${view.engineer.name} <${view.engineer.email}>`}
+                  />
+                  <FactRow label={t.email.from} value={t.email.fromValue} />
+                  <FactRow
+                    label={t.email.subject}
+                    value={t.email.subjectValue(projectTitle, stage)}
+                  />
+                </FactRows>
+              </section>
+            )}
+            {!sent && !mailed && (
               <FactRows>
                 <FactRow
                   label={t.email.to}
@@ -225,7 +243,7 @@ export function RoundStep({
                 />
               </FactRows>
             )}
-            {!sent && (
+            {!sent && !mailed && (
               <p className="text-[length:var(--type-caption)] text-[color:var(--text-secondary)]">
                 {t.email.hint}
               </p>
@@ -247,8 +265,25 @@ export function RoundStep({
                       ? t.send.sameEngineer
                       : t.send.to(view.engineer.name)
                 }
-                done={sent ? t.send.resent : t.send.done(view.engineer.name)}
+                done={
+                  sent
+                    ? t.send.resent
+                    : mailed
+                      ? t.email.sent(view.engineer.name)
+                      : t.send.done(view.engineer.name)
+                }
                 withoutStems={stage === "mix" && noStems.length > 0}
+                mail={
+                  mailed && !sent
+                    ? {
+                        defaultMessage: t.email.defaultMessage(
+                          view.engineer.name,
+                          projectTitle,
+                          stage,
+                        ),
+                      }
+                    : null
+                }
               />
             )}
           </>

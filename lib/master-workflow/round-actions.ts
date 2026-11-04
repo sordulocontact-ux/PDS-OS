@@ -7,7 +7,9 @@ import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { withOutcome } from "@/lib/journey/outcome";
+import { emailEnabled } from "@/lib/email/send";
 import { transmitPackage } from "@/lib/master-workflow/transmission-actions";
+import { emailTransmission } from "@/lib/master-workflow/transmission-email";
 import { createClient } from "@/lib/supabase/server";
 import type { WriteResult } from "@/lib/utils/write-result";
 
@@ -20,7 +22,10 @@ const refresh = (projectId: string) =>
  * « Envoyer à Karim Haddou » (or « Transmettre au mastering », « Renvoyer
  * le dossier »): the package recomputed and signed on the server
  * (transmitPackage), sent with the written reason when stems are missing.
- * The link is then readable again in the step by the owner.
+ * `email`: PDS OS also sends the e-mail (the owner's message, kept as the
+ * package's note, then the link) when it can (EMAIL_SMTP_*, an address in
+ * the Réseau); otherwise the link is readable again in the step by the
+ * owner, to copy and mark as sent.
  */
 export async function sendRound(
   projectId: string,
@@ -28,6 +33,7 @@ export async function sendRound(
   note: string,
   withoutStemsReason: string | null,
   done: string,
+  email = false,
 ): Promise<WriteResult> {
   const s = stageSchema.safeParse(stage);
   if (!s.success)
@@ -40,6 +46,24 @@ export async function sendRound(
       withoutStemsReason,
     );
     if (!result.ok) return result;
+    const to = result.engineer.email;
+    if (email && to && emailEnabled()) {
+      const access = await requireApproved();
+      const sender =
+        [access.firstName, access.lastName].filter(Boolean).join(" ") ||
+        (access.email ?? "");
+      const sent = await emailTransmission({
+        projectId,
+        role: s.data,
+        project: result.project,
+        engineer: { name: result.engineer.name, email: to },
+        message: note,
+        sender: { name: sender, email: access.email },
+      });
+      refresh(projectId);
+      if (sent === "failed") return { ok: false, error: t.email.failed };
+      return { ok: true };
+    }
     refresh(projectId);
     return { ok: true };
   });

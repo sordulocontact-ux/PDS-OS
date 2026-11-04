@@ -1,5 +1,6 @@
 import "server-only";
 
+import { emailEnabled } from "@/lib/email/send";
 import { isBudgetStatus, type BudgetStatus } from "@/lib/budget/types";
 import { fr } from "@/lib/i18n/fr";
 import { liveTransmission } from "@/lib/master-workflow/journey";
@@ -49,6 +50,9 @@ export type RoundRate = {
 
 export type RoundStepView = {
   stage: Stage;
+  // PDS OS sends the e-mail itself (EMAIL_SMTP_*, lib/email/send.ts);
+  // otherwise the sending is declared (« Marquer comme envoyé »).
+  emailEnabled: boolean;
   view: StepView;
   versions: MixVersionsView;
   extras: Record<string, RoundVersionExtra>;
@@ -182,6 +186,7 @@ export async function loadRoundStep(
     );
   return {
     stage,
+    emailEnabled: emailEnabled(),
     view: shown,
     blockers: [
       ...(awaited
