@@ -18,7 +18,11 @@ const fr = { core };
  * shows of it. The same card at every step that follows the document.
  * `flat` (inside a section card, proto « Contrats », Sacha 30/10/2026): no
  * frame around it all; the file alone on a soft tile with a « PDF » mark,
- * what changed as a plain line, the values under it.
+ * what changed as a plain line, the values under it. `joined` (proto
+ * `.doccard` of the Master: « Dossier pour le mixeur », « L'e-mail que PDS OS
+ * enverra »): the head on a soft strip with a hairline under it, the body
+ * flush against the frame — its `FactRows` take `className="rounded-none
+ * border-0"`, other content its own padding.
  */
 export function DocumentCard({
   name,
@@ -28,6 +32,7 @@ export function DocumentCard({
   children,
   className,
   flat = false,
+  joined = false,
   icon: Icon = IconFile,
 }: {
   name: string;
@@ -38,6 +43,7 @@ export function DocumentCard({
   children?: ReactNode;
   className?: string;
   flat?: boolean;
+  joined?: boolean;
   // A file by default; an envelope for an e-mail about to leave.
   icon?: React.ComponentType<IconProps>;
 }) {
@@ -45,9 +51,11 @@ export function DocumentCard({
     <div
       className={cn(
         "flex flex-wrap gap-3",
-        flat ? "items-center" : "items-start",
+        flat || joined ? "items-center" : "items-start",
         flat &&
           "rounded-xl border border-[color:var(--border-default)] bg-[var(--surface-soft)] p-3.5",
+        joined &&
+          "border-b border-[color:var(--border-hairline)] bg-[var(--surface-soft)] p-3.5",
       )}
     >
       {flat ? (
@@ -60,18 +68,26 @@ export function DocumentCard({
       ) : (
         <Icon
           aria-hidden
-          className="mt-0.5 size-5 shrink-0 text-[color:var(--text-secondary)]"
+          className={cn(
+            "size-5 shrink-0",
+            joined ? "text-foreground" : "mt-0.5 text-[color:var(--text-secondary)]",
+          )}
         />
       )}
       <span className="flex min-w-0 flex-1 flex-col">
-        <b className={cn("font-semibold", flat ? "break-words" : "break-all")}>
+        <b
+          className={cn(
+            "font-semibold",
+            flat || joined ? "break-words" : "break-all",
+          )}
+        >
           {name}
         </b>
         {line && (
           <span
             className={cn(
               "text-[color:var(--text-secondary)]",
-              flat
+              flat || joined
                 ? "text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)]"
                 : "text-[length:var(--type-micro)] leading-[var(--type-micro-lh)]",
             )}
@@ -83,6 +99,19 @@ export function DocumentCard({
       {action}
     </div>
   );
+
+  if (joined)
+    return (
+      <section
+        className={cn(
+          "flex min-w-0 flex-col overflow-hidden rounded-xl border border-[color:var(--border-hairline)] bg-card",
+          className,
+        )}
+      >
+        {head}
+        {children}
+      </section>
+    );
 
   if (flat)
     return (

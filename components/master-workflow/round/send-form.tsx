@@ -99,11 +99,12 @@ export function SendForm({
       )}
       {mail && (
         <DocumentCard
+          joined
           name={mail.title}
           line={mail.line}
           icon={IconEnvelopeOpen}
         >
-          <FactRows>
+          <FactRows className="rounded-none border-0">
             <FactRow
               label={t.email.to}
               value={mail.to}
@@ -111,23 +112,25 @@ export function SendForm({
             />
             <FactRow label={t.email.subject} value={mail.subject} />
           </FactRows>
-          <TextareaField
-            name={`mail-message-${stage}`}
-            label={t.email.message}
-            rows={3}
-            maxLength={2000}
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-          />
-          <p className="flex flex-col gap-0.5 rounded-lg bg-[var(--surface-soft)] px-3 py-2.5 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] break-words">
-            <span className="text-[color:var(--text-secondary)]">
-              {mail.added}
-            </span>
-            <span>{mail.open}</span>
-            <span className="text-[length:var(--type-caption)] text-[color:var(--text-secondary)]">
-              {mail.validity}
-            </span>
-          </p>
+          <div className="flex flex-col gap-3 px-3.5 pt-1 pb-3.5">
+            <TextareaField
+              name={`mail-message-${stage}`}
+              label={t.email.message}
+              rows={3}
+              maxLength={2000}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+            />
+            <p className="flex flex-col gap-1 rounded-lg bg-[var(--surface-soft)] px-3 py-2.5 break-words">
+              <span className="text-[color:var(--text-secondary)]">
+                {mail.added}
+              </span>
+              <span>
+                {t.email.openLabel} <i>{mail.open}</i>
+              </span>
+              <span>{mail.validity}</span>
+            </p>
+          </div>
         </DocumentCard>
       )}
       <FormMessage kind="error">{submit.error}</FormMessage>

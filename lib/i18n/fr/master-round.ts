@@ -103,8 +103,9 @@ export const masterRound = {
     added: "Ajouté automatiquement à la fin de l'e-mail :",
     addedSame:
       "Ajouté automatiquement à la fin de l'e-mail, avec le même lien que pour le mix :",
-    openNew: "Ouvrir votre dossier : lien privé créé à l'envoi",
-    openSame: "Ouvrir votre dossier : le lien qu'il a déjà pour le mix",
+    openLabel: "Ouvrir votre dossier :",
+    openNew: "lien privé créé à l'envoi",
+    openSame: "le lien qu'il a déjà pour le mix",
     linkValidity: (day: string) =>
       `Lien privé, sans compte · valable jusqu'au ${day}`,
     defaultMessage: (

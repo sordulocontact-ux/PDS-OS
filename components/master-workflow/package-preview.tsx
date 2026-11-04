@@ -48,10 +48,11 @@ export function PackagePreview({ view }: { view: StepView }) {
 
   return (
     <DocumentCard
+      joined
       name={t.package.title[role]}
       line={view.engineer ? d.line(view.engineer.name) : d.lineNoEngineer}
     >
-      <FactRows>
+      <FactRows className="rounded-none border-0">
         {view.titles.map((title) => (
           <TitleRows key={title.id} title={title} view={view} />
         ))}
@@ -60,13 +61,21 @@ export function PackagePreview({ view }: { view: StepView }) {
             label={d.direction}
             value={
               groups.length ? (
-                <span className="flex flex-col gap-1">
+                <span className="flex flex-col gap-1.5">
                   {groups.map((g) => (
-                    <span key={g.key} className="flex flex-col">
+                    <span key={g.key} className="flex flex-col gap-0.5">
                       <span className="text-caption text-muted-foreground">
                         {d.directionGroups[g.key]}
                       </span>
-                      <span className="whitespace-pre-line">{g.text}</span>
+                      <ul className="list-disc pl-5">
+                        {g.text
+                          .split("\n")
+                          .map((line) => line.trim())
+                          .filter(Boolean)
+                          .map((line) => (
+                            <li key={line}>{line}</li>
+                          ))}
+                      </ul>
                     </span>
                   ))}
                 </span>
