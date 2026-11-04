@@ -11,10 +11,13 @@ const fr = { dialogs };
 export function DialogFormActions({
   pending,
   submitLabel,
+  pendingLabel,
   onCancel,
 }: {
   pending: boolean;
   submitLabel: string;
+  // While pending, instead of « Enregistrement… » (« Envoi 2/3… »).
+  pendingLabel?: string;
   onCancel: () => void;
 }) {
   const t = fr.dialogs;
@@ -26,7 +29,7 @@ export function DialogFormActions({
         disabled={pending}
         aria-busy={pending || undefined}
       >
-        {pending ? t.saving : submitLabel}
+        {pending ? (pendingLabel ?? t.saving) : submitLabel}
       </Button>
       <Button type="button" variant="ghost" size="lg" onClick={onCancel}>
         {t.cancel}

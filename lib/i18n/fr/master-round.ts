@@ -20,8 +20,19 @@ export const masterRound = {
     stemsCount: (n: number) =>
       n > 1 ? `${n} fichiers de pistes` : "1 fichier de pistes",
     stemsNone: (titles: string) => `Aucune piste pour ${titles}`,
-    stemsAdd: (title: string) =>
-      `Ajouter les pistes séparées de ${title} : choisir les fichiers`,
+    stemsAdd: (title: string) => `Ajouter les pistes séparées de ${title}`,
+    stemsDialog: {
+      title: (title: string) => `Ajouter les pistes séparées · ${title}`,
+      description:
+        "Une piste par instrument ou par voix (voix, batterie, basse…), exportée depuis la session du titre par le producteur. L'ingénieur du mix en a besoin pour travailler chaque élément séparément.",
+      drop: "Déposez les fichiers ici, ou cliquez pour les choisir",
+      formats: "ZIP, WAV, AIFF ou FLAC · 50 Mo au plus par fichier",
+      noFile: "Choisissez au moins un fichier de pistes.",
+      wrongFormat: (names: string) =>
+        `Seuls les fichiers ZIP, WAV, AIFF ou FLAC sont acceptés : ${names}.`,
+      precision: "Précision",
+      placeholder: "Ex. Export du 3 novembre",
+    },
     mixV1: (day: string) => `Mix V1 attendu le ${day}`,
     mastering: (day: string) => `Mastering attendu le ${day}`,
   },

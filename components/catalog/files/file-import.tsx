@@ -203,13 +203,6 @@ export function FileImportButton({
   );
 }
 
-/** Opens the file picker of the enclosing FileImport (a whole row that
- * adds files, like the Master's « Pistes séparées »). */
-export function useFileImportPick(): () => void {
-  const context = use(ImportContext);
-  return () => context?.pick();
-}
-
 /** The empty library's frame: click anywhere in it to pick a file. */
 export function FileImportEmpty({
   title,

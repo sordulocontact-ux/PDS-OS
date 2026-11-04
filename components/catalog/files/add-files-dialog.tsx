@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { FileDetailsFields } from "@/components/catalog/files/file-details-fields";
 import { PendingFiles } from "@/components/catalog/files/pending-files";
+import { useCatalogUpload } from "@/components/catalog/files/use-catalog-upload";
 import { Button } from "@/components/ui/button";
 import { ChipChoice } from "@/components/ui/chip-choice";
 import { FormDialog } from "@/components/ui/form-dialog";
@@ -15,7 +16,6 @@ import {
   type FileOwner,
 } from "@/lib/catalog/file-rules";
 import { AUDIO_STATES, type AudioState } from "@/lib/catalog/title-rules";
-import { uploadCatalogFile } from "@/lib/catalog/upload-file";
 import { catalog } from "@/lib/i18n/fr/catalog";
 import { catalogFiles } from "@/lib/i18n/fr/catalog-files";
 import { masterPage } from "@/lib/i18n/fr/master-page";
@@ -108,8 +108,7 @@ function AddFilesForm({
   const [description, setDescription] = useState("");
   const [categoryError, setCategoryError] = useState<string>();
   const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState(0);
-  const [pending, startTransition] = useTransition();
+  const { run, pending, done } = useCatalogUpload();
 
   function submit(event: React.FormEvent) {
     event.preventDefault();
@@ -119,40 +118,30 @@ function AddFilesForm({
     }
     if (notAudio) return;
     setError(null);
-    startTransition(async () => {
-      const failed: File[] = [];
-      let lastError: string | null = null;
-      setDone(0);
-      // One after the other: each upload is its own request, and the
-      // progress reads "Envoi 2/3…".
-      for (const file of remaining) {
-        const result = await uploadCatalogFile(
-          audio
-            ? {
-                organizationId,
-                owner,
-                category,
-                file,
-                audioState,
-                durationSeconds: await readAudioDuration(file),
-              }
-            : { organizationId, owner, category, description, file },
-        );
-        if (!result.ok) {
-          failed.push(file);
-          lastError = result.error;
+    run(
+      remaining,
+      async (file) =>
+        audio
+          ? {
+              organizationId,
+              owner,
+              category,
+              file,
+              audioState,
+              durationSeconds: await readAudioDuration(file),
+            }
+          : { organizationId, owner, category, description, file },
+      (failed, lastError) => {
+        if (failed.length === 0) {
+          onAdded(category);
+          return;
         }
-        setDone((value) => value + 1);
-      }
-      if (failed.length === 0) {
-        onAdded(category);
-        return;
-      }
-      setRemaining(failed);
-      setError(
-        remaining.length === 1 ? lastError : t.add.partial(failed.length),
-      );
-    });
+        setRemaining(failed);
+        setError(
+          remaining.length === 1 ? lastError : t.add.partial(failed.length),
+        );
+      },
+    );
   }
 
   return (

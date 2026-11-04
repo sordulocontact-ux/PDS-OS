@@ -1,11 +1,9 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-import {
-  FileImport,
-  useFileImportPick,
-} from "@/components/catalog/files/file-import";
 import { FactRowFrame } from "@/components/ui/fact-row-frame";
 import { masterRound } from "@/lib/i18n/fr/master-round";
 
@@ -13,11 +11,16 @@ const fr = { masterRound };
 
 const t = fr.masterRound.before;
 
+// The modal is loaded on the first click only.
+const StemsDialog = dynamic(() =>
+  import("./stems-dialog").then((m) => m.StemsDialog),
+);
+
 /**
  * « Pistes séparées · Manquant » for one title, before the mix is sent:
- * the whole row picks files and files them as the title's stems in the
- * Catalogue (« Fichiers de travail »), no button beside it. Without
- * manage_catalog (`organizationId` null), the row only says what is missing.
+ * the whole row opens « Ajouter les pistes séparées » (StemsDialog), no
+ * button beside it. Without manage_catalog (`organizationId` null), the row
+ * only says what is missing.
  */
 export function MissingStemsRow({
   organizationId,
@@ -29,34 +32,42 @@ export function MissingStemsRow({
   title: string;
 }) {
   const router = useRouter();
-  if (!organizationId) return <Row title={title} />;
-  return (
-    <FileImport
-      organizationId={organizationId}
-      owner={{ kind: "master", id: masterId }}
-      view="stems"
-      categories={["stems"]}
-      basePath={`/app/catalog/masters/${masterId}/files`}
-      onAdded={() => router.refresh()}
-    >
-      <PickRow title={title} />
-    </FileImport>
-  );
-}
-
-function PickRow({ title }: { title: string }) {
-  const pick = useFileImportPick();
-  return <Row title={title} onClick={pick} />;
-}
-
-function Row({ title, onClick }: { title: string; onClick?: () => void }) {
-  return (
+  const [open, setOpen] = useState(false);
+  // Mounted from the first click on, so that it can close with its exit.
+  const [loaded, setLoaded] = useState(false);
+  const row = (
     <FactRowFrame
       label={t.stems}
       value={t.stemsNone(title)}
       state={{ tone: "warning", label: t.missing }}
-      onClick={onClick}
-      hrefLabel={onClick ? t.stemsAdd(title) : undefined}
+      onClick={
+        organizationId
+          ? () => {
+              setLoaded(true);
+              setOpen(true);
+            }
+          : undefined
+      }
+      hrefLabel={organizationId ? t.stemsAdd(title) : undefined}
     />
+  );
+  if (!organizationId) return row;
+  return (
+    <>
+      {row}
+      {loaded && (
+        <StemsDialog
+          open={open}
+          onOpenChange={setOpen}
+          organizationId={organizationId}
+          masterId={masterId}
+          title={title}
+          onAdded={() => {
+            setOpen(false);
+            router.refresh();
+          }}
+        />
+      )}
+    </>
   );
 }
