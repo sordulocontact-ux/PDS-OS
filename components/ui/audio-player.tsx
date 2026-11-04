@@ -19,7 +19,7 @@ const BUSY_AFTER_MS = 400;
 const finite = (seconds: number) => (Number.isFinite(seconds) ? seconds : 0);
 
 // The waveform's bars, and under which height a bar is drawn as a dot.
-const BARS = 36;
+const BARS = 48;
 const DOT = 0.22;
 
 /**
@@ -54,7 +54,7 @@ const played = (ratio: number) =>
   `inset(0 ${(1 - Math.min(1, Math.max(0, ratio))) * 100}% 0 0)`;
 
 /**
- * PDS OS's audio player (Sacha's model, 04/11/2026): a round play button
+ * PDS OS's audio player (Sacha's model, 04/11/2026): a 32 px round play button
  * in ink, a waveform of bars (dots where it is quiet) that turns ink as it
  * plays and moves the sound on click, drag or arrow keys; between the
  * button and the wave, the length (« 1:29 »), then the position once
@@ -151,7 +151,7 @@ export function AudioPlayer({
   const known = length > 0;
   return (
     <div
-      className={cn("flex h-10 min-w-0 items-center gap-3", className)}
+      className={cn("flex h-8 min-w-0 items-center gap-3", className)}
     >
       <audio
         ref={bind}
@@ -189,7 +189,7 @@ export function AudioPlayer({
         aria-label={paused ? label : t.pause(label)}
         aria-pressed={!paused}
         className={cn(
-          "grid size-10 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground transition-[scale] duration-[var(--duration-fast)] ease-[var(--ease-out)] focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none motion-safe:active:scale-[.94] disabled:opacity-40",
+          "grid size-8 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground transition-[scale] duration-[var(--duration-fast)] ease-[var(--ease-out)] focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none motion-safe:active:scale-[.94] disabled:opacity-40",
         )}
       >
         {paused ? (
@@ -277,8 +277,8 @@ function Wave({ bars, className }: { bars: number[]; className?: string }) {
         <span
           key={i}
           className={cn(
-            "w-[3px] shrink-0 rounded-full bg-current",
-            level < DOT && "h-[3px]",
+            "w-[1.5px] shrink-0 rounded-full bg-current",
+            level < DOT && "h-[1.5px]",
           )}
           style={level < DOT ? undefined : { height: `${level * 100}%` }}
         />
