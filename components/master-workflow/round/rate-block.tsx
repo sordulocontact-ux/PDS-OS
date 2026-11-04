@@ -44,6 +44,7 @@ export function RateBlock({
         <DocumentCard
           key={r.stage}
           name={`${t.title} · ${t.line(r.stage, engineer)}`}
+          line={r.status === "proposed" ? t.note : undefined}
           icon={IconMoneyBillCoin}
           action={
             <StatusBadge tone={budgetStatusTone[r.status] ?? "neutral"}>
@@ -80,11 +81,6 @@ export function RateBlock({
           </div>
         </DocumentCard>
       ))}
-      {rates.some((r) => r.status === "proposed") && (
-        <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
-          {t.note}
-        </p>
-      )}
       <FormMessage kind="error">{submit.error}</FormMessage>
     </section>
   );

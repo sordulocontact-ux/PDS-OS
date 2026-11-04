@@ -64,7 +64,7 @@ const useOrigin = () =>
  * « Relancer », « Nouveau lien », and in « ⋯ » « Marquer comme envoyé »
  * (only when PDS OS could not send the e-mail), « Retirer le dossier de mixage » (the page
  * stays) or « Révoquer le lien » (the whole page stops), each with why.
- * Under it, until when the package and the link open. A package withdrawn
+ * Under its name, until when the package and the link open. A package withdrawn
  * or closed: why, and « Renvoyer le dossier ».
  */
 export function LinkPanel(props: LinkPanelProps) {
@@ -131,7 +131,11 @@ export function LinkPanel(props: LinkPanelProps) {
       )}
       <DocumentCard
         name={t.title(engineer)}
-        line={t.line(stage)}
+        line={t.dates(
+          stage,
+          formatDay(tr.expiresAt),
+          link ? formatDay(link.expiresAt) : null,
+        )}
         icon={IconLink}
         action={<StatusBadge tone={tone}>{label}</StatusBadge>}
       >
@@ -276,13 +280,6 @@ export function LinkPanel(props: LinkPanelProps) {
           </div>
         )}
       </DocumentCard>
-      <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
-        {t.dates(
-          stage,
-          formatDay(tr.expiresAt),
-          link ? formatDay(link.expiresAt) : null,
-        )}
-      </p>
     </section>
   );
 }

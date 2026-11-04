@@ -155,8 +155,6 @@ export const masterRound = {
   // Sacha 04/11): one link for all PDS expects from them.
   link: {
     title: (name: string) => `Lien de ${name}`,
-    line: (stage: "mix" | "mastering") =>
-      `Sa page du projet, ouverte sur le dossier de ${dossierOf(stage)}`,
     states: {
       notSent: "Pas encore envoyé",
       sent: "Envoyé",
@@ -164,7 +162,7 @@ export const masterRound = {
       none: "Pas de lien",
     },
     dates: (stage: "mix" | "mastering", dossier: string, link: string | null) =>
-      `Dossier de ${dossierOf(stage)} ouvert jusqu'au ${dossier}${link ? ` · lien valable jusqu'au ${link}` : ""}`,
+      `Dossier de ${dossierOf(stage)} accessible jusqu'au ${dossier}${link ? ` · lien valable jusqu'au ${link}` : ""}`,
     noLink: (name: string) =>
       `${first(name)} n'a plus de lien : le dossier reste sur sa page dès qu'un nouveau lien est créé.`,
     copy: "Copier le lien",
