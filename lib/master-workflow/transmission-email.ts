@@ -8,13 +8,18 @@ import { formatDay } from "@/lib/utils/day";
 
 const t = masterRound.email;
 
+// The package's card on the person's page (masterPortalCards).
+export const PACKAGE_ANCHOR = "ps-package";
+
 /**
  * The e-mail of a package just sent (proto `master-v2.html`, « L'e-mail que
- * PDS OS enverra »): the message written by the owner, then the private
- * link, from PO's address in the owner's name. A new link is then marked as
- * sent (mark_master_transmission_sent); a mastering added to the mix link
- * reuses that link, already marked. « failed »: the package left, the
- * e-mail did not — the link stays to copy, « Marquer comme envoyé » too.
+ * PDS OS enverra »): the message written by the owner, then the engineer's
+ * page by project opened on the package (`link`, lot 11: one link for all
+ * PDS expects from them), from PO's address in the owner's name. Without
+ * that page, the package's own link. Both are then marked as sent; a
+ * mastering added to the mix link reuses that link, already marked.
+ * « failed »: the package left, the e-mail did not — the link stays to
+ * copy, « Marquer comme envoyé » too.
  */
 export async function emailTransmission(input: {
   projectId: string;
@@ -23,6 +28,7 @@ export async function emailTransmission(input: {
   engineer: { name: string; email: string };
   message: string;
   sender: { name: string; email: string | null };
+  link: { id: string; token: string } | null;
 }): Promise<"sent" | "failed"> {
   const supabase = await createClient();
   const { data: row } = await supabase
@@ -35,12 +41,18 @@ export async function emailTransmission(input: {
     .limit(1)
     .maybeSingle();
   if (!row) return "failed";
-  const { data: token } = await supabase.rpc("master_transmission_link", {
-    p_transmission_id: row.continues_id ?? row.id,
-  });
-  if (!token) return "failed";
+  const site = getPublicEnv().NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
+  let url = input.link
+    ? `${site}/c/${input.link.token}#${PACKAGE_ANCHOR}`
+    : null;
+  if (!url) {
+    const { data: token } = await supabase.rpc("master_transmission_link", {
+      p_transmission_id: row.continues_id ?? row.id,
+    });
+    if (!token) return "failed";
+    url = `${site}/m/${token}`;
+  }
 
-  const url = `${getPublicEnv().NEXT_PUBLIC_SITE_URL.replace(/\/$/, "")}/m/${token}`;
   const message =
     input.message.trim() ||
     t.defaultMessage(input.engineer.name, input.project, input.role);
@@ -51,12 +63,22 @@ export async function emailTransmission(input: {
     sender: input.sender,
   });
   if (!sent.ok) return "failed";
-  if (!row.continues_id) {
-    const { error } = await supabase.rpc("mark_master_transmission_sent", {
-      p_transmission_id: row.id,
-    });
-    if (error)
-      console.error("emailTransmission mark:", error.code, error.message);
-  }
+  const marks = await Promise.all([
+    row.continues_id
+      ? null
+      : supabase.rpc("mark_master_transmission_sent", {
+          p_transmission_id: row.id,
+        }),
+    input.link
+      ? supabase.rpc("mark_contact_link_sent", { p_link_id: input.link.id })
+      : null,
+  ]);
+  for (const mark of marks)
+    if (mark?.error)
+      console.error(
+        "emailTransmission mark:",
+        mark.error.code,
+        mark.error.message,
+      );
   return "sent";
 }

@@ -18,6 +18,8 @@ import {
   loadStepView,
   type StepView,
 } from "@/lib/master-workflow/transmission";
+import { PACKAGE_ANCHOR } from "@/lib/master-workflow/transmission-email";
+import { loadContactLinks } from "@/lib/portal/contact-links";
 import { canSeeProjectBudget } from "@/lib/projects/edit-access";
 import { createClient } from "@/lib/supabase/server";
 import type { Blocker } from "@/lib/ui/journey";
@@ -63,6 +65,19 @@ export type RoundStepView = {
   extras: Record<string, RoundVersionExtra>;
   link:
     (JourneyTransmission & { path: string | null; daysLeft: number }) | null;
+  // The engineer's page by project (lot 11), which carries the package:
+  // the link sent, opened on the package (`path` for the owner only), or
+  // why there is none.
+  page: {
+    link: {
+      id: string;
+      sentAt: string | null;
+      openedAt: string | null;
+      expiresAt: string;
+      path: string | null;
+    } | null;
+    revoked: { at: string; reason: string } | null;
+  } | null;
   rates: RoundRate[];
   // The Brief is recorded, unchanged since; or why not.
   brief: "ready" | "dirty" | "never";
@@ -108,7 +123,7 @@ export async function loadRoundStep(
   const { access, project, facts } = await masterJourneyContext(projectId);
   const supabase = await createClient();
   const live = liveTransmission(facts, stage);
-  const [view, versions, budget, token, direction] = await Promise.all([
+  const [view, versions, budget, token, direction, pages] = await Promise.all([
     loadStepView(project, access, stage),
     loadMixVersions(project, access.personId, stage),
     supabase
@@ -122,6 +137,7 @@ export async function loadRoundStep(
         })
       : Promise.resolve({ data: null }),
     loadDirectionPerson(),
+    live ? loadContactLinks(projectId) : null,
   ]);
 
   const extras: Record<string, RoundVersionExtra> = {};
@@ -183,6 +199,23 @@ export async function loadRoundStep(
         blockers: view.blockers.filter((b) => !noContact.includes(b.text)),
       }
     : view;
+  const pageRow = pages?.rows.find((r) => r.contactId === view.engineer?.id);
+  const page = pageRow
+    ? {
+        link: pageRow.link
+          ? {
+              id: pageRow.link.id,
+              sentAt: pageRow.link.sentAt,
+              openedAt: pageRow.link.openedAt,
+              expiresAt: pageRow.link.expiresAt,
+              path: pageRow.link.path
+                ? `${pageRow.link.path}#${PACKAGE_ANCHOR}`
+                : null,
+            }
+          : null,
+        revoked: pageRow.revoked,
+      }
+    : null;
   const awaited =
     stage === "mix" &&
     facts.titles.some(
@@ -226,6 +259,7 @@ export async function loadRoundStep(
           ),
         }
       : null,
+    page,
     rates,
     brief: !brief?.recordedAt ? "never" : brief.dirty ? "dirty" : "ready",
     briefChangedSinceSent: Boolean(

@@ -15,7 +15,8 @@ import { createClient } from "@/lib/supabase/server";
 // Who it went to and for which project, for the e-mail (sendRound).
 type Sent = {
   project: string;
-  engineer: { name: string; email: string | null };
+  // `id`: the engineer's Réseau contact, whose page by project carries it.
+  engineer: { id: string; name: string; email: string | null };
 };
 
 export type TransmitResult =
@@ -198,7 +199,11 @@ export async function transmitPackage(
   revalidatePath(routes.projectMasterStep(project.id, input.data.role));
   const sent: Sent = {
     project: project.title,
-    engineer: { name: view.engineer.name, email: view.engineer.email },
+    engineer: {
+      id: view.engineer.id,
+      name: view.engineer.name,
+      email: view.engineer.email,
+    },
   };
   return token === "continued"
     ? { ok: true, token: null, continued: true, ...sent }

@@ -3,6 +3,8 @@
 // the decision and the reopening.
 
 const first = (name: string) => name.split(" ")[0] ?? name;
+const dossierOf = (stage: "mix" | "mastering") =>
+  stage === "mix" ? "mixage" : "mastering";
 
 export const masterRound = {
   before: {
@@ -149,44 +151,59 @@ export const masterRound = {
       `Ingénieur du mastering : ${name}, qui reçoit son propre lien : il ne voit que le mastering.`,
     choose: "Choisissez l'ingénieur du mastering dans le Brief.",
   },
+  // The engineer's page by project, opened on the package (Figma 378-6581,
+  // Sacha 04/11): one link for all PDS expects from them.
   link: {
-    title: (name: string) => `Lien privé de ${first(name)}`,
-    steps: {
-      created: "Créé",
+    title: (name: string) => `Lien de ${name}`,
+    line: (stage: "mix" | "mastering") =>
+      `Sa page du projet, ouverte sur le dossier de ${dossierOf(stage)}`,
+    states: {
+      notSent: "Pas encore envoyé",
       sent: "Envoyé",
       opened: "Ouvert",
-      taken: "Pris en charge",
-      received: "Fichier reçu",
+      none: "Pas de lien",
     },
+    dates: (stage: "mix" | "mastering", dossier: string, link: string | null) =>
+      `Dossier de ${dossierOf(stage)} ouvert jusqu'au ${dossier}${link ? ` · lien valable jusqu'au ${link}` : ""}`,
+    noLink: (name: string) =>
+      `${first(name)} n'a plus de lien : le dossier reste sur sa page dès qu'un nouveau lien est créé.`,
     copy: "Copier le lien",
     copied: "Lien copié",
     remind: "Relancer",
     remindSubject: (title: string) =>
       `« ${title} » : votre dossier vous attend`,
-    renew: "Renouveler le lien",
-    renewed: "Lien renouvelé",
-    revoke: "Révoquer le lien",
-    revokeReason: "Pourquoi vous le révoquez",
-    revoked: "Lien révoqué",
-    revokedLine: (
+    create: "Créer le lien",
+    created: "Lien créé",
+    renew: "Nouveau lien",
+    renewed: "Nouveau lien créé",
+    renewHint:
+      "Un nouveau lien remplace l'ancien, qui cesse de marcher ; ce qui a été déposé reste.",
+    more: (name: string) => `Autres actions sur le lien de ${name}`,
+    withdraw: (stage: "mix" | "mastering") =>
+      `Retirer le dossier de ${dossierOf(stage)}`,
+    withdrawReason: "Pourquoi vous retirez le dossier",
+    withdrawn: "Dossier retiré",
+    withdrawnLine: (
       day: string,
       by: string | null,
       reason: string,
       name: string,
     ) =>
-      `Lien révoqué ${day}${by ? ` par ${by}` : ""} : « ${reason} ». ${name} ne peut plus l'ouvrir ; ce qu'il a déposé reste.`,
+      `Dossier retiré ${day}${by ? ` par ${by}` : ""} : « ${reason} ». ${first(name)} ne le voit plus sur sa page ; ce qu'il a déposé reste.`,
+    resend: "Renvoyer le dossier",
+    resent: "Dossier renvoyé",
+    revoke: "Révoquer le lien",
+    revokeHint:
+      "Le lien cesse de marcher tout de suite, pour tout le projet ; ce qui a été déposé reste.",
+    revokeReason: "Pourquoi vous révoquez le lien",
+    revoked: "Lien révoqué",
     markSent: "Marquer comme envoyé",
     marked: "Lien marqué comme envoyé",
-    footer: (name: string, day: string, email: string | null) =>
-      `Lien privé de ${name} · valable jusqu'au ${day}${email ? ` · à envoyer à ${email}` : ""}`,
     expires: (name: string, days: number, day: string) =>
-      `Le lien de ${first(name)} expire dans ${days} jour${days > 1 ? "s" : ""} (${day}).`,
-    expired: (day: string) => `Le lien a expiré ${day}.`,
-    shownOnce:
-      "Ce lien a été créé avant le 19/10/2026 : il n'a été affiché qu'une fois. Renouvelez-le pour le retrouver ici.",
-    continued: (name: string) =>
-      `Même lien que pour le mix : ${first(name)} retrouve le mastering sur son lien.`,
+      `Le dossier de ${first(name)} se ferme dans ${days} jour${days > 1 ? "s" : ""} (${day}).`,
+    expired: (day: string) => `Le dossier s'est fermé ${day}.`,
   },
+
   rate: {
     title: "Tarif",
     line: (stage: "mix" | "mastering", name: string) =>

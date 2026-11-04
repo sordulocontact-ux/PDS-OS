@@ -3989,8 +3989,15 @@ la personne (`/c/`). Migration `20261020070101_signed_returns.sql`, pgTAP `signe
   d'entrée `lib/email/send.ts` (nodemailer, `smtp.gmail.com`, `EMAIL_SMTP_USER` = po@pdsrecords.com,
   `EMAIL_SMTP_PASSWORD` = mot de passe d'application), expéditeur « <membre> · PDS », réponses au
   membre, texte seul. Branché d'abord sur l'envoi du dossier du Mixage/Mastering
-  (`transmission-email.ts` : message écrit dans l'étape, gardé comme note du dossier, lien privé à la
-  fin, puis `mark_master_transmission_sent`). Sans les variables, ou sans adresse au Réseau, l'envoi
+  (`transmission-email.ts` : message écrit dans l'étape, gardé comme note du dossier, lien à la fin,
+  puis `mark_master_transmission_sent` et `mark_contact_link_sent`). **Le lien envoyé est la page par
+  personne** (Sacha, 04/11/2026, Figma 378-6581) : `sendRound` la crée au besoin
+  (`lib/portal/ensure-contact-link.ts`), le lien s'ouvre sur la carte du dossier (`/c/<jeton>#ps-package`) ;
+  le lien `/m/` ne sert plus que de repli et pour les envois antérieurs. Dans l'étape, la carte « Lien de
+  Karim Haddou » (`LinkPanel`) : état (Pas encore envoyé, Envoyé, Ouvert), copier, Relancer, Nouveau lien,
+  « ⋯ » Retirer le dossier de mixage (`revoke_master_transmission`, la page reste) ou Révoquer le lien
+  (`revoke_contact_link`, toute la page), dates du dossier et du lien ; le tarif au-dessus en carte document
+  (`RateBlock`). Sans les variables, ou sans adresse au Réseau, l'envoi
   reste déclaré (« Marquer comme envoyé ») ; un e-mail refusé laisse le dossier créé et le lien à copier.
 
 ### Synchronisation, horodatage et historique (retours Juridique du 11/10/2026, lot 2)
@@ -4406,8 +4413,8 @@ est la préparation », modale de transmission, `BriefForm` : retirés de l'écr
     politique storage anon tant que la version est en écoute et l'artiste a un lien ouvert), « Minutage »
     + « Votre retour ». Le retour est un commentaire de la version (`master_mix_comments.contact_id`), lu
     par l'équipe « Mona Lys (lien privé) » ; **l'ingénieur ne reçoit que ce que la validatrice transmet ou
-    décide** (règle 21). La validatrice est notifiée (`master_listen_feedback`). Le lien se crée dans le
-    Mixage (`ListenLinkOffer`).
+    décide** (règle 21). La validatrice est notifiée (`master_listen_feedback`). Le lien se crée dans
+    « Qui fait quoi › Liens privés » (retiré de l'étape Mixage le 04/11/2026, Sacha).
   - **Escalade d'un retard** (`20261020010301`) : statut `escalated` (« Chez la direction »), `outcome`
     (`applied` / `kept` / `refused`). Le responsable : « Appliquer ces dates », « Garder les dates »
     (réponse obligatoire, lue sur le lien), ou « Envoyer à la direction » quand le master final passerait

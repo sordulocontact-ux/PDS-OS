@@ -1,7 +1,11 @@
 "use client";
 
+import { IconMoneyBillCoin } from "nucleo-sharp-essential";
+
+import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
-import { FactRow, FactRows } from "@/components/ui/fact-row";
+import { DocumentCard } from "@/components/ui/document-card";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { budget } from "@/lib/i18n/fr/budget";
 import { masterRound } from "@/lib/i18n/fr/master-round";
@@ -15,8 +19,12 @@ const fr = { budget, masterRound };
 
 const t = fr.masterRound.rate;
 
-/** « Tarif » (proto `master:v1`): the rate the engineer proposed when
- * taking the package, « Accepter le tarif » for the owner. */
+/**
+ * « Tarif » (proto `master:v1`, Figma 378-6581): one document card per
+ * rate the engineer proposed when taking the package — « Tarif · Mix ·
+ * Karim Haddou » with its state, the amount, who proposed it and when, and
+ * « Accepter le tarif » for the owner. Above the engineer's link.
+ */
 export function RateBlock({
   projectId,
   engineer,
@@ -31,57 +39,53 @@ export function RateBlock({
   const submit = useWriteSubmit(() => undefined, t.accepted);
   if (rates.length === 0) return null;
   return (
-    <section className="flex flex-col gap-2.5">
-      <h3 className="text-[length:var(--type-body-md)] leading-[var(--type-body-md-lh)] font-semibold">
-        {t.title}
-      </h3>
-      <FactRows>
-        {rates.map((r) => (
-          <FactRow
-            key={r.stage}
-            label={t.line(r.stage, engineer)}
-            value={formatAmount(r.amountCents)}
-            source={
-              r.status === "proposed"
-                ? t.proposedBy(
-                    engineer,
-                    formatShortInstant(r.updatedAt),
-                    r.estimateCents === r.amountCents,
-                  )
-                : r.note
-            }
-            state={{
-              tone: budgetStatusTone[r.status] ?? "neutral",
-              // Invoiced, then paid, once the engineer's invoice came in.
-              label: fr.budget.statuses[r.status],
-            }}
-            side={
-              canEdit &&
-              r.status === "proposed" && (
-                <Button
-                  size="sm"
-                  disabled={submit.pending}
-                  onClick={() =>
-                    submit.run(() => acceptRate(projectId, r.stage))
-                  }
-                >
-                  {t.accept}
-                </Button>
-              )
-            }
-          />
-        ))}
-      </FactRows>
+    <section className="flex flex-col gap-2" aria-label={t.title}>
+      {rates.map((r) => (
+        <DocumentCard
+          key={r.stage}
+          name={`${t.title} · ${t.line(r.stage, engineer)}`}
+          icon={IconMoneyBillCoin}
+          action={
+            <StatusBadge tone={budgetStatusTone[r.status] ?? "neutral"}>
+              {fr.budget.statuses[r.status]}
+            </StatusBadge>
+          }
+        >
+          <div className="flex flex-wrap items-center gap-3 p-3.5">
+            <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+              <b className="text-[length:var(--type-body-lg)] leading-[var(--type-body-lg-lh)] font-semibold tabular-nums">
+                {formatAmount(r.amountCents)}
+              </b>
+              {(r.status === "proposed" || r.note) && (
+                <span className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
+                  {r.status === "proposed"
+                    ? t.proposedBy(
+                        engineer,
+                        formatShortInstant(r.updatedAt),
+                        r.estimateCents === r.amountCents,
+                      )
+                    : r.note}
+                </span>
+              )}
+            </span>
+            {canEdit && r.status === "proposed" && (
+              <Button
+                size="sm"
+                disabled={submit.pending}
+                onClick={() => submit.run(() => acceptRate(projectId, r.stage))}
+              >
+                {t.accept}
+              </Button>
+            )}
+          </div>
+        </DocumentCard>
+      ))}
       {rates.some((r) => r.status === "proposed") && (
-        <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
+        <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
           {t.note}
         </p>
       )}
-      {submit.error && (
-        <p role="alert" className="text-sm text-error">
-          {submit.error}
-        </p>
-      )}
+      <FormMessage kind="error">{submit.error}</FormMessage>
     </section>
   );
 }

@@ -1,9 +1,7 @@
 import { IconLock } from "nucleo-sharp-essential";
 
 import { EngineerThreadSection } from "@/components/master-workflow/engineer-thread-section";
-import { ListenLinkOffer } from "@/components/master-workflow/listen/listen-link-offer";
 import { PackagePreview } from "@/components/master-workflow/package-preview";
-import { ContactLinkOffer } from "@/components/portal/contact-links-section";
 import { BlockerCallout } from "@/components/ui/blocker-callout";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { Fold } from "@/components/ui/fold";
@@ -72,7 +70,6 @@ export function RoundStep({
     <>
       {sent && (
         <>
-          <ListenLinkOffer projectId={view.projectId} />
           {inHouse?.isViewer && inHouse.assignedAt && (
             <InHouseDeposit round={round} />
           )}
@@ -214,28 +211,22 @@ export function RoundStep({
         <LinkPanel
           projectId={view.projectId}
           stage={stage}
-          id={link.id}
           engineer={link.contactName}
+          contactId={view.engineer?.id ?? null}
           email={view.engineer?.email ?? null}
           title={projectTitle}
-          path={link.path}
-          continued={link.continued}
-          createdAt={link.createdAt}
-          linkSentAt={link.linkSentAt}
-          openedAt={link.openedAt}
-          acknowledgedAt={link.acknowledgedAt}
-          deliveredAt={link.deliveredAt}
-          revokedAt={link.revokedAt}
-          revokeReason={link.revokeReason}
-          expiresAt={link.expiresAt}
-          daysLeft={link.daysLeft}
+          transmission={{
+            id: link.id,
+            continued: link.continued,
+            linkSentAt: link.linkSentAt,
+            openedAt: link.openedAt,
+            revokedAt: link.revokedAt,
+            revokeReason: link.revokeReason,
+            expiresAt: link.expiresAt,
+            daysLeft: link.daysLeft,
+          }}
+          page={round.page}
           canEdit={viewerIsOwner}
-        />
-      )}
-      {link && (
-        <ContactLinkOffer
-          projectId={view.projectId}
-          contactId={view.engineer?.id ?? null}
         />
       )}
       <EngineerThreadSection

@@ -10,6 +10,7 @@ import { withOutcome } from "@/lib/journey/outcome";
 import { emailEnabled } from "@/lib/email/send";
 import { transmitPackage } from "@/lib/master-workflow/transmission-actions";
 import { emailTransmission } from "@/lib/master-workflow/transmission-email";
+import { ensureContactLink } from "@/lib/portal/ensure-contact-link";
 import { createClient } from "@/lib/supabase/server";
 import type { WriteResult } from "@/lib/utils/write-result";
 
@@ -22,8 +23,10 @@ const refresh = (projectId: string) =>
  * « Envoyer à Karim Haddou » (or « Transmettre au mastering », « Renvoyer
  * le dossier »): the package recomputed and signed on the server
  * (transmitPackage), sent with the written reason when stems are missing.
+ * The engineer's page by project (lot 11) is made if needed: that one link
+ * carries the package and all else PDS expects from them (Sacha, 04/11).
  * `email`: PDS OS also sends the e-mail (the owner's message, kept as the
- * package's note, then the link) when it can (EMAIL_SMTP_*, an address in
+ * package's note, then that link) when it can (EMAIL_SMTP_*, an address in
  * the Réseau); otherwise the link is readable again in the step by the
  * owner, to copy and mark as sent.
  */
@@ -46,6 +49,7 @@ export async function sendRound(
       withoutStemsReason,
     );
     if (!result.ok) return result;
+    const link = await ensureContactLink(projectId, result.engineer.id);
     const to = result.engineer.email;
     if (email && to && emailEnabled()) {
       const access = await requireApproved();
@@ -59,6 +63,7 @@ export async function sendRound(
         engineer: { name: result.engineer.name, email: to },
         message: note,
         sender: { name: sender, email: access.email },
+        link,
       });
       refresh(projectId);
       if (sent === "failed") return { ok: false, error: t.email.failed };
@@ -67,6 +72,52 @@ export async function sendRound(
     refresh(projectId);
     return { ok: true };
   });
+}
+
+/**
+ * « Marquer comme envoyé »: the owner sent the engineer's link themself
+ * (no e-mail by PDS OS); the package and the page are both marked.
+ */
+export async function markRoundSent(
+  projectId: string,
+  stage: string,
+  transmissionId: string,
+  contactLinkId: string | null,
+): Promise<WriteResult> {
+  const input = z
+    .object({
+      projectId: z.uuid(),
+      stage: stageSchema,
+      transmissionId: z.uuid(),
+      contactLinkId: z.uuid().nullable(),
+    })
+    .safeParse({ projectId, stage, transmissionId, contactLinkId });
+  await requireApproved();
+  if (!input.success)
+    return { ok: false, error: fr.masterWorkflow.mix.errors.failed };
+  const v = input.data;
+  const supabase = await createClient();
+  const [transmission, link] = await Promise.all([
+    supabase.rpc("mark_master_transmission_sent", {
+      p_transmission_id: v.transmissionId,
+    }),
+    v.contactLinkId
+      ? supabase.rpc("mark_contact_link_sent", { p_link_id: v.contactLinkId })
+      : null,
+  ]);
+  const error = transmission.error ?? link?.error;
+  if (error) {
+    console.error("markRoundSent:", error.code, error.message);
+    return {
+      ok: false,
+      error:
+        error.code === "42501"
+          ? fr.masterWorkflow.mix.errors.forbidden
+          : fr.masterWorkflow.mix.errors.failed,
+    };
+  }
+  refresh(v.projectId);
+  return { ok: true };
 }
 
 /** « Accepter le tarif »: the proposed amount is committed. */
