@@ -281,6 +281,9 @@ export const legal = {
     confirm: "Confirmer et générer le plan d'action",
     confirmAgain: "Confirmer à nouveau le dossier",
     correct: "Corriger une réponse",
+    // A line's way back to its question (ticket Juridique 01).
+    actions: { answer: "Répondre", correct: "Corriger" },
+    confirmedTitle: "Le dossier confirmé",
     preview: {
       title: "Le plan d'action qui sera généré",
       empty: "Aucune démarche à prévoir avec le dossier tel qu'il est.",
@@ -302,6 +305,8 @@ export const legal = {
         formality: (n: number) =>
           n === 1 ? "1 déclaration SACEM" : `${n} déclarations SACEM`,
       },
+      // JUR-06: what stays open after confirming.
+      then: "Vous gardez ou retirez chaque action, et choisissez responsables et échéances avant de lancer le plan. Rien n'est envoyé à personne.",
     },
     confirming: "Confirmation…",
     confirmed: (date: string, name: string | null) =>

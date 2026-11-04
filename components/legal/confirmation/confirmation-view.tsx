@@ -4,14 +4,19 @@ import { ConfirmButton } from "@/components/legal/confirmation/confirm-button";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { StepSection } from "@/components/shell/journey/step-section";
 import { StepWaiting } from "@/components/shell/journey/step-waiting";
+import { SynthesisAction } from "@/components/legal/confirmation/synthesis-action";
 import { Button } from "@/components/ui/button";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
+import { Fold } from "@/components/ui/fold";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
 import { legal } from "@/lib/i18n/fr/legal";
 import type { Confirmation } from "@/lib/legal/confirmation/queries";
-import type { SynthesisFact } from "@/lib/legal/confirmation/synthesis";
+import type {
+  SynthesisFact,
+  SynthesisSection,
+} from "@/lib/legal/confirmation/synthesis";
 import type { PlanItemKind } from "@/lib/legal/plan/proposal";
 import { factTone } from "@/lib/ui/state-tones";
 import type { JourneyStep } from "@/lib/ui/journey";
@@ -33,20 +38,24 @@ const PLAN_KINDS: PlanItemKind[] = [
  * by part (Personnes, Éléments repris, Contrats, Éditeurs), each line its
  * role, the person or thing in bold, its source and its state; then, for
  * whoever confirms, what confirming is not, the plan it will generate and
- * the one decision beside « Corriger une réponse ». Others read the dossier
- * under who is awaited. Once confirmed: who confirmed and when, the way to
- * the plan.
+ * the one decision beside « Corriger une réponse ». Anyone holding
+ * `manage_legal` may confirm (JUR-04, as `confirm_legal_intake`), each line
+ * keeping its « Corriger » / « Répondre » (ticket Juridique 01). Once
+ * confirmed: who confirmed and when, the way to the plan, the dossier folded.
  */
 export function ConfirmationView({
   projectId,
   confirmation: c,
   step,
+  canAct,
   tagged,
   planPreview,
 }: {
   projectId: string;
   confirmation: Confirmation;
   step: JourneyStep | undefined;
+  // `manage_legal`: may confirm and correct (JUR-04).
+  canAct: boolean;
   // Several titles: each line says which (the title's tag).
   tagged: boolean;
   // The kinds of the démarches the plan will hold, one per action (JUR-06).
@@ -55,39 +64,40 @@ export function ConfirmationView({
   const t = fr.legal.confirmation;
   if (c.status === "confirmed" && c.confirmedAt)
     return (
-      <ToneCallout tone="success">
-        {t.confirmed(formatInstant(c.confirmedAt), c.confirmedBy)}{" "}
-        {t.confirmedNote}{" "}
-        <Link
-          href={routes.projectLegalStep(projectId, "plan")}
-          className="underline underline-offset-4"
-        >
-          {t.openPlan}
-        </Link>
-      </ToneCallout>
+      <>
+        <ToneCallout tone="success">
+          {t.confirmed(formatInstant(c.confirmedAt), c.confirmedBy)}{" "}
+          {t.confirmedNote}{" "}
+          <Link
+            href={routes.projectLegalStep(projectId, "plan")}
+            className="underline underline-offset-4"
+          >
+            {t.openPlan}
+          </Link>
+        </ToneCallout>
+        <Fold summary={t.confirmedTitle}>
+          <div className="flex flex-col gap-3.5 pt-3">
+            <SynthesisSections
+              sections={c.sections}
+              tagged={tagged}
+              canAct={canAct}
+            />
+          </div>
+        </Fold>
+      </>
     );
   if (c.status === "not_started" || c.openQuestions > 0) return null;
-  // The project's owner confirms (proto: read-only for anyone else).
-  const mine = step?.actor ? step.actor.viewer : true;
 
   return (
     <>
       {c.reopened && <ToneCallout tone="warning">{t.reopened}</ToneCallout>}
-      {!mine && <StepWaiting step={step} />}
-      {c.sections.map((section) => (
-        <StepSection key={section.key} title={t.sections[section.key]}>
-          {section.facts.length === 0 ? (
-            <EmptyNote>{t.empty}</EmptyNote>
-          ) : (
-            <FactRows>
-              {section.facts.map((fact) => (
-                <SynthesisRow key={fact.key} fact={fact} tagged={tagged} />
-              ))}
-            </FactRows>
-          )}
-        </StepSection>
-      ))}
-      {mine && (
+      {!canAct && <StepWaiting step={step} />}
+      <SynthesisSections
+        sections={c.sections}
+        tagged={tagged}
+        canAct={canAct}
+      />
+      {canAct && (
         <>
           <ToneCallout tone="info">{t.notice}</ToneCallout>
           {/* What confirming creates, said before (JUR-06). */}
@@ -112,6 +122,9 @@ export function ConfirmationView({
                 )}
               </ul>
             )}
+            <p className="text-caption text-muted-foreground">
+              {t.preview.then}
+            </p>
           </StepSection>
           <ConfirmButton
             projectId={projectId}
@@ -133,15 +146,50 @@ export function ConfirmationView({
   );
 }
 
-/** One line of the dossier (proto `fact(role, <b>name</b>, source)`): the
- * whole line opens where it can be corrected (its question, its record). */
+/** Personnes, Éléments repris, Contrats, Éditeurs: one section each. */
+function SynthesisSections({
+  sections,
+  tagged,
+  canAct,
+}: {
+  sections: SynthesisSection[];
+  tagged: boolean;
+  canAct: boolean;
+}) {
+  const t = fr.legal.confirmation;
+  return sections.map((section) => (
+    <StepSection key={section.key} title={t.sections[section.key]}>
+      {section.facts.length === 0 ? (
+        <EmptyNote>{t.empty}</EmptyNote>
+      ) : (
+        <FactRows>
+          {section.facts.map((fact) => (
+            <SynthesisRow
+              key={fact.key}
+              fact={fact}
+              tagged={tagged}
+              canAct={canAct}
+            />
+          ))}
+        </FactRows>
+      )}
+    </StepSection>
+  ));
+}
+
+/** One line of the dossier (proto `fact(role, <b>name</b>, source)`): an
+ * answer keeps its « Corriger » / « Répondre » back to its question; any
+ * other line opens its record. */
 function SynthesisRow({
   fact,
   tagged,
+  canAct,
 }: {
   fact: SynthesisFact;
   tagged: boolean;
+  canAct: boolean;
 }) {
+  const action = canAct ? fact.action : undefined;
   return (
     <FactRow
       label={fact.detail ?? undefined}
@@ -154,19 +202,24 @@ function SynthesisRow({
         label: fact.statusLabel,
       }}
       side={
-        tagged &&
-        fact.group && (
-          <StatusBadge
-            size="sm"
-            tone={fact.group.hue}
-            title={fact.group.artists || undefined}
-            className="max-w-48 truncate"
-          >
-            {fact.group.title}
-          </StatusBadge>
+        ((tagged && fact.group) || action) && (
+          <>
+            {tagged && fact.group && (
+              <StatusBadge
+                size="sm"
+                tone={fact.group.hue}
+                title={fact.group.artists || undefined}
+                className="max-w-48 truncate"
+              >
+                {fact.group.title}
+              </StatusBadge>
+            )}
+            {action && <SynthesisAction action={action} />}
+          </>
         )
       }
-      href={fact.action?.href ?? fact.href}
+      // A row with a button never opens a view itself (FactRow).
+      href={action ? null : fact.href}
     />
   );
 }

@@ -1,5 +1,6 @@
 import { ConfirmationView } from "@/components/legal/confirmation/confirmation-view";
 import { LegalStepFrame } from "@/components/legal/legal-step-frame";
+import { can } from "@/lib/auth/access";
 import { legalJourneyContext } from "@/lib/legal/journey-context";
 import { proposeLegalPlan } from "@/lib/legal/plan/queries";
 
@@ -18,6 +19,7 @@ export async function ConfirmationStep({ projectId }: { projectId: string }) {
         projectId={projectId}
         confirmation={confirmation}
         step={steps.find((s) => s.key === "confirmation")}
+        canAct={can(access, "manage_legal")}
         tagged={project.masters.length > 1}
         planPreview={preview.map((item) => item.kind)}
       />
