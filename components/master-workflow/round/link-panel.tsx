@@ -48,6 +48,8 @@ export type LinkPanelProps = {
   };
   page: RoundStepView["page"];
   canEdit: boolean;
+  // The owner and the direction: the address to copy (read only).
+  canSeeLink: boolean;
 };
 
 const useOrigin = () =>
@@ -139,7 +141,7 @@ export function LinkPanel(props: LinkPanelProps) {
         icon={IconLink}
         action={<StatusBadge tone={tone}>{label}</StatusBadge>}
       >
-        {props.canEdit && (
+        {(props.canEdit || (props.canSeeLink && url)) && (
           <div className="flex flex-col gap-3 p-3.5">
             {link ? (
               <div className="flex flex-wrap items-center gap-2">
@@ -162,74 +164,79 @@ export function LinkPanel(props: LinkPanelProps) {
                     />
                   </span>
                 )}
-                <span className="ml-auto flex flex-wrap items-center gap-1">
-                  {url && (
-                    <a
-                      className={buttonVariants({
-                        variant: "ghost",
-                        size: "sm",
-                      })}
-                      href={`mailto:${props.email ?? ""}?subject=${encodeURIComponent(
-                        t.remindSubject(props.title),
-                      )}&body=${encodeURIComponent(url)}`}
-                    >
-                      {t.remind}
-                    </a>
-                  )}
-                  {props.contactId && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      title={t.renewHint}
-                      disabled={write.pending}
-                      onClick={() =>
-                        write.run(
-                          () =>
-                            issueContactLink(props.projectId, props.contactId!),
-                          t.renewed,
-                        )
-                      }
-                    >
-                      {t.renew}
-                    </Button>
-                  )}
-                  <RowActions
-                    label={t.more(engineer)}
-                    actions={[
-                      // Only when PDS OS could not send the e-mail itself.
-                      ...(!sent && !tr.continued
-                        ? [
-                            {
-                              key: "sent",
-                              label: t.markSent,
-                              icon: IconCheck,
-                              onSelect: () =>
-                                write.run(() =>
-                                  markRoundSent(
-                                    props.projectId,
-                                    stage,
-                                    tr.id,
-                                    link.id,
+                {props.canEdit && (
+                  <span className="ml-auto flex flex-wrap items-center gap-1">
+                    {url && (
+                      <a
+                        className={buttonVariants({
+                          variant: "ghost",
+                          size: "sm",
+                        })}
+                        href={`mailto:${props.email ?? ""}?subject=${encodeURIComponent(
+                          t.remindSubject(props.title),
+                        )}&body=${encodeURIComponent(url)}`}
+                      >
+                        {t.remind}
+                      </a>
+                    )}
+                    {props.contactId && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        title={t.renewHint}
+                        disabled={write.pending}
+                        onClick={() =>
+                          write.run(
+                            () =>
+                              issueContactLink(
+                                props.projectId,
+                                props.contactId!,
+                              ),
+                            t.renewed,
+                          )
+                        }
+                      >
+                        {t.renew}
+                      </Button>
+                    )}
+                    <RowActions
+                      label={t.more(engineer)}
+                      actions={[
+                        // Only when PDS OS could not send the e-mail itself.
+                        ...(!sent && !tr.continued
+                          ? [
+                              {
+                                key: "sent",
+                                label: t.markSent,
+                                icon: IconCheck,
+                                onSelect: () =>
+                                  write.run(() =>
+                                    markRoundSent(
+                                      props.projectId,
+                                      stage,
+                                      tr.id,
+                                      link.id,
+                                    ),
                                   ),
-                                ),
-                            },
-                          ]
-                        : []),
-                      {
-                        key: "withdraw",
-                        label: t.withdraw(stage),
-                        icon: IconCircleXmark,
-                        onSelect: () => setAsking("withdraw"),
-                      },
-                      {
-                        key: "revoke",
-                        label: t.revoke,
-                        icon: IconBan,
-                        onSelect: () => setAsking("revoke"),
-                      },
-                    ]}
-                  />
-                </span>
+                              },
+                            ]
+                          : []),
+                        {
+                          key: "withdraw",
+                          label: t.withdraw(stage),
+                          icon: IconCircleXmark,
+                          onSelect: () => setAsking("withdraw"),
+                        },
+                        {
+                          key: "revoke",
+                          label: t.revoke,
+                          icon: IconBan,
+                          onSelect: () => setAsking("revoke"),
+                        },
+                      ]}
+                    />
+                  </span>
+                )}
               </div>
             ) : (
               <div className="flex flex-wrap items-center justify-between gap-3">

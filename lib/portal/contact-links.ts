@@ -3,6 +3,7 @@ import "server-only";
 import { trackedCache } from "@/lib/projects/live-deps";
 import { z } from "zod";
 
+import { can } from "@/lib/auth/access";
 import { getAccess } from "@/lib/auth/dal";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { createClient } from "@/lib/supabase/server";
@@ -10,8 +11,8 @@ import { createClient } from "@/lib/supabase/server";
 // « Liens privés » of « Qui fait quoi » (lot 11): the people outside the
 // team who have something in this project, and each one's page by project
 // (project_contact_links). The token is read back for the project's owner
-// only (contact_link_token); everyone else sees when it was made, sent and
-// opened.
+// and the direction (contact_link_token, 04/11/2026); everyone else sees
+// when it was made, sent and opened.
 
 export type ContactLinkRow = {
   contactId: string;
@@ -28,7 +29,7 @@ export type ContactLinkRow = {
     sentAt: string | null;
     openedAt: string | null;
     expiresAt: string;
-    // « /c/<token> », for the owner only.
+    // « /c/<token> », for the owner and the direction only.
     path: string | null;
   } | null;
   // The last revocation by hand, when no link is active.
@@ -86,7 +87,9 @@ export const loadContactLinks = trackedCache(
       : { data: [] };
     const nameOf = new Map((names ?? []).map((p) => [p.id, fullName(p)]));
     const active = rowsOf.filter((l) => l.revoked_at === null);
-    const tokens = canEdit
+    // The owner, and the direction who may copy it (read only).
+    const canRead = canEdit || can(access, "validate");
+    const tokens = canRead
       ? await Promise.all(
           active.map(async (l) => {
             const { data } = await supabase.rpc("contact_link_token", {

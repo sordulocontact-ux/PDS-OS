@@ -227,6 +227,7 @@ export function RoundStep({
           }}
           page={round.page}
           canEdit={viewerIsOwner}
+          canSeeLink={viewerIsOwner || round.isDirection}
         />
       )}
       <EngineerThreadSection
