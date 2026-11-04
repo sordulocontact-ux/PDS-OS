@@ -34,12 +34,12 @@ export function DayGroups<T extends { at: string }>({
         : formatLongDay(at);
 
   return (
-    <div className="grid gap-8">
+    <div className="grid grid-cols-1 gap-8">
       {groupByDay(items).map((group) => (
         <section
           key={group.day}
           aria-labelledby={`${idPrefix}-${group.day}`}
-          className="grid gap-3"
+          className="grid grid-cols-1 gap-3"
         >
           <h3
             id={`${idPrefix}-${group.day}`}
@@ -47,7 +47,7 @@ export function DayGroups<T extends { at: string }>({
           >
             {dayTitle(group.day, group.events[0].at)}
           </h3>
-          <ol className="grid gap-1">
+          <ol className="grid grid-cols-1 gap-1">
             {group.events.map((item, i) => (
               <li key={keyOf(item, i)}>{children(item)}</li>
             ))}

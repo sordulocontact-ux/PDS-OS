@@ -376,7 +376,6 @@ export const assistant = {
   // Conversation page, opened by a question from the home page.
   conversation: {
     pageTitle: "Conversation avec PO",
-    back: "Retour à l'accueil",
     backTo: "Retour au projet",
     new: "Nouvelle conversation",
     reply: "Répondre…",
@@ -398,7 +397,8 @@ export const assistant = {
   sources: "Sources",
   you: "Vous",
   po: "PO",
-  error: "PO n'a pas pu répondre. Réessayez dans un instant.",
+  error: "PO n'a pas pu répondre.",
+  retry: "Réessayer",
   tooLong: "Question trop longue (2000 caractères maximum).",
   activityKinds: {
     call_created: "call créé",

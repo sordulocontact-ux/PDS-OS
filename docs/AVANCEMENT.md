@@ -1304,3 +1304,21 @@ faits grise sous un titre (l'état à côté du titre, le reste dans « Informat
 - [x] Table `assistant_conversations` (migration `20261103100101`), privée à la personne (même le DG
       ne la lit pas), gardée jusqu'à sa suppression ; 13 tests pgTAP joués sur la pré-prod.
 - [ ] Migration à pousser en prod (avec accord) au prochain passage de `pre-prod` dans `main`.
+
+## Page de PO refaite (04/11/2026, branche `pre-prod`)
+
+Demande de Sacha : « redesign mieux la page ia, il y a bcp de problèmes ». Relevé sur captures
+(ordinateur et téléphone, compte de test de la pré-prod) puis corrigé :
+
+- [x] Nouvelle conversation : « Demander à PO » et la saisie **au milieu** de la page (avant : page
+      vide, saisie collée en bas) ; pas de pilules de suggestions (retirées par Sacha le 29/10).
+- [x] Plus de flèche « Retour à l'accueil » ni de « + » grisé dans l'en-tête : **« Nouvelle
+      conversation » en tête de l'historique** (bouton « + » de l'en-tête sur téléphone) ; ouverte
+      depuis une page, un petit lien au-dessus du titre y ramène.
+- [x] Historique : les titres longs **débordaient** de la colonne et cachaient « ⋯ » (`DayGroups` ne
+      laisse plus une ligne dépasser) ; colonne ramenée à 256 px.
+- [x] Fil : colonne de lecture de 768 px, titre aligné dessus ; **listes** de PO en vraies puces
+      (`AnswerText`) ; une recherche (« Recherche du projet ») **ne tourne plus après une erreur** ou
+      un arrêt ; **« Réessayer »** sous une réponse en échec (page et fenêtre Espace Espace) ; saisie
+      du pied plus basse (`compact`).
+- [x] Chargement au gabarit de la page (historique + saisie), plus le squelette générique.

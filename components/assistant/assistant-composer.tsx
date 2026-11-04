@@ -108,8 +108,9 @@ export function AssistantComposer({
       <form
         onSubmit={onSubmit}
         className={cn(
-          "flex flex-col gap-4 rounded-2xl border border-transparent bg-[var(--surface-tint)] p-6 transition-[border-color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] has-[textarea:focus-visible]:border-ring",
-          compact ? "min-h-32" : "min-h-51",
+          "flex flex-col rounded-2xl border border-transparent bg-[var(--surface-tint)] transition-[border-color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] has-[textarea:focus-visible]:border-ring",
+          // Compact: at the foot of a conversation, where the answers need the room.
+          compact ? "min-h-28 gap-3 p-4" : "min-h-51 gap-4 p-6",
         )}
       >
         <label htmlFor="assistant-input" className="sr-only">

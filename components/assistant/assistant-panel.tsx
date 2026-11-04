@@ -36,7 +36,7 @@ export function AssistantPanel({
   const t = fr.assistant;
   const router = useRouter();
   const shared = useSharedChat();
-  const { messages, sendMessage, status, stop, error } = useChat({
+  const { messages, sendMessage, regenerate, status, stop, error } = useChat({
     chat: ownChat ?? shared,
   });
   const busy = status === "submitted" || status === "streaming";
@@ -66,6 +66,7 @@ export function AssistantPanel({
             messages={messages}
             status={status}
             error={error}
+            onRetry={() => void regenerate()}
             className="max-h-[45dvh] overflow-y-auto pr-1"
           />
         </>

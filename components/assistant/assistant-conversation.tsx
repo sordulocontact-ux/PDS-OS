@@ -1,20 +1,20 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import { IconPlus, IconUnorderedList } from "nucleo-sharp-essential";
-import Link from "next/link";
+import { IconPlus } from "nucleo-sharp-essential";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { AssistantComposer } from "@/components/assistant/assistant-composer";
 import { useAssistant } from "@/components/assistant/assistant-provider";
 import { AssistantThread } from "@/components/assistant/assistant-thread";
+import { ConversationHeader } from "@/components/assistant/conversation-header";
 import { ConversationHistory } from "@/components/assistant/conversation-history";
+import { ConversationStart } from "@/components/assistant/conversation-start";
 import {
   startSharedChat,
   useConversationChat,
 } from "@/components/assistant/shared-chat";
-import { IconArrowLeft } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -33,12 +33,12 @@ import { assistant } from "@/lib/i18n/fr/assistant";
 const fr = { assistant };
 
 /**
- * PO's page (« PO » in the sidebar): the conversation, and beside it the
- * history of the viewer's conversations (a drawer on a phone). Opened on
- * the tab's conversation, or on `saved`, reopened from the history. Back
- * where it was opened from, with that page's trail under the title
- * (MKT-C2-02), else to home; the title is the first question; « + », a new
- * conversation (docs/ASSISTANT.md § 2 and § 2 ter).
+ * PO's page (« PO » in the sidebar): the history of the viewer's
+ * conversations beside the conversation (a drawer on a phone), « Nouvelle
+ * conversation » at its top. A new conversation starts with the question box
+ * in the middle (ConversationStart); once asked, its title (the first
+ * question) heads the page. Opened from a page, a link goes back to it, with
+ * that page's trail (MKT-C2-02) (docs/ASSISTANT.md § 2 and § 2 ter).
  */
 export function AssistantConversation({
   conversations,
@@ -52,7 +52,9 @@ export function AssistantConversation({
   const pathname = usePathname();
   const { origin, setOrigin } = useAssistant();
   const chat = useConversationChat(saved);
-  const { messages, sendMessage, status, stop, error } = useChat({ chat });
+  const { messages, sendMessage, regenerate, status, stop, error } = useChat({
+    chat,
+  });
   const busy = status === "submitted" || status === "streaming";
   const title =
     conversationTitle(messages) ?? saved?.title ?? t.conversation.new;
@@ -112,87 +114,69 @@ export function AssistantConversation({
     <div className="flex h-[calc(100dvh-3.5rem)] animate-in duration-[var(--duration-fast)] fade-in-0 motion-reduce:animate-none md:h-[calc(100dvh-2*var(--shell-inset))]">
       <aside
         aria-labelledby="po-history-title"
-        className="hidden w-72 shrink-0 flex-col gap-4 overflow-y-auto overscroll-contain border-r px-3 py-6 md:flex"
+        className="hidden w-64 shrink-0 flex-col border-r md:flex"
       >
-        <h2 id="po-history-title" className="px-4 text-body-md font-medium">
-          {t.history.title}
-        </h2>
-        {history("po-history")}
+        <div className="px-3 pt-6 pb-4">
+          <Button
+            variant="outline"
+            onClick={restart}
+            disabled={!started}
+            className="w-full justify-start"
+          >
+            <IconPlus aria-hidden className="size-5" />
+            {t.conversation.new}
+          </Button>
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-6">
+          <h2 id="po-history-title" className="sr-only">
+            {t.history.title}
+          </h2>
+          {history("po-history")}
+        </div>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 px-4 py-4 md:px-[var(--page-gutter)] md:py-6">
-          <Button
-            variant="outline"
-            size="icon"
-            nativeButton={false}
-            render={<Link href={origin?.href ?? routes.app} />}
-            aria-label={origin ? t.conversation.backTo : t.conversation.back}
-          >
-            <IconArrowLeft aria-hidden className="size-5" />
-          </Button>
-          <div className="flex min-w-0 flex-col items-center gap-0.5">
-            <h1 className="w-full truncate text-center text-body-lg font-medium">
-              {title}
-            </h1>
-            {origin && (
-              <Link
-                href={origin.href}
-                className="max-w-full truncate rounded-sm text-caption text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
-              >
-                <span className="sr-only">{t.conversation.backTo} : </span>
-                {origin.trail.join(" › ")}
-              </Link>
-            )}
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setHistoryOpen(true)}
-              aria-label={t.history.open}
-              className="md:hidden"
-            >
-              <IconUnorderedList aria-hidden className="size-5" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={restart}
-              disabled={!started}
-              aria-label={t.conversation.new}
-            >
-              <IconPlus aria-hidden className="size-5" />
-            </Button>
-          </div>
-        </header>
+        <ConversationHeader
+          title={started ? title : null}
+          origin={origin}
+          onHistory={() => setHistoryOpen(true)}
+          onNew={restart}
+        />
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-4 md:px-[var(--page-gutter)]">
-          {started && (
-            <AssistantThread
-              messages={messages}
-              status={status}
-              error={error}
-              className="mx-auto w-full max-w-4xl py-6"
-            />
-          )}
-        </div>
-
-        <div className="px-4 pb-4 md:px-[var(--page-gutter)] md:pb-6">
-          <div className="mx-auto flex w-full max-w-4xl flex-col gap-3">
-            <AssistantComposer
-              onAsk={ask}
-              onStop={() => void stop()}
-              busy={busy}
-              compact
-              autoFocus
-              placeholder={started ? t.conversation.reply : t.placeholder}
-            />
-            <p className="text-center text-caption text-muted-foreground">
-              {t.disclaimer}
-            </p>
-          </div>
-        </div>
+        {started ? (
+          <>
+            <div className="min-h-0 flex-1 overflow-y-auto px-4 md:px-[var(--page-gutter)]">
+              <AssistantThread
+                messages={messages}
+                status={status}
+                error={error}
+                onRetry={() => void regenerate()}
+                className="mx-auto w-full max-w-3xl pt-2 pb-8"
+              />
+            </div>
+            <div className="px-4 pb-4 md:px-[var(--page-gutter)] md:pb-6">
+              <div className="mx-auto flex w-full max-w-3xl flex-col gap-2">
+                <AssistantComposer
+                  onAsk={ask}
+                  onStop={() => void stop()}
+                  busy={busy}
+                  compact
+                  autoFocus
+                  placeholder={t.conversation.reply}
+                />
+                <p className="text-center text-caption text-muted-foreground">
+                  {t.disclaimer}
+                </p>
+              </div>
+            </div>
+          </>
+        ) : (
+          <ConversationStart
+            onAsk={ask}
+            onStop={() => void stop()}
+            busy={busy}
+          />
+        )}
       </div>
 
       <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>

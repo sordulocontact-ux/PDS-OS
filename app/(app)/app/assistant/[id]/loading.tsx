@@ -1,8 +1,7 @@
-import { PageLoading } from "@/components/shell/page-loading";
+import { ConversationLoading } from "@/components/assistant/conversation-loading";
 
-// The page frame at once. One loading.tsx per segment, none above a
-// record's frame, so a missing record answers 404 (docs/ARCHITECTURE.md
-// § 3 bis).
+// PO's frame at once. One loading.tsx per segment, none above a record's
+// frame, so a missing record answers 404 (docs/ARCHITECTURE.md § 3 bis).
 export default function Loading() {
-  return <PageLoading />;
+  return <ConversationLoading reopened />;
 }

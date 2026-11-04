@@ -1,9 +1,11 @@
 "use client";
 
 import type { ChatStatus, UIMessage } from "ai";
+import { IconLoader } from "nucleo-sharp-essential";
 import { useEffect, useRef } from "react";
 
 import { AssistantMessage } from "@/components/assistant/assistant-message";
+import { Button } from "@/components/ui/button";
 import { aiUsage } from "@/lib/i18n/fr/ai-usage";
 import { assistant } from "@/lib/i18n/fr/assistant";
 import { cn } from "@/lib/utils";
@@ -31,16 +33,19 @@ function quotaLimit(error: Error): number | null {
   return null;
 }
 
-/** The turns of a PO conversation, kept scrolled to the latest one. */
+/** The turns of a PO conversation, kept scrolled to the latest one. A
+ * failed answer offers `onRetry` (the same question asked again). */
 export function AssistantThread({
   messages,
   status,
   error,
+  onRetry,
   className,
 }: {
   messages: UIMessage[];
   status: ChatStatus;
   error: Error | undefined;
+  onRetry?: () => void;
   className?: string;
 }) {
   const t = fr.assistant;
@@ -56,16 +61,35 @@ export function AssistantThread({
       className={cn("grid content-start gap-4", className)}
       aria-live="polite"
     >
-      {messages.map((m) => (
-        <AssistantMessage key={m.id} message={m} />
+      {messages.map((m, i) => (
+        <AssistantMessage
+          key={m.id}
+          message={m}
+          live={status === "streaming" && i === messages.length - 1}
+        />
       ))}
       {status === "submitted" && (
-        <p className="text-xs text-muted-foreground">{t.thinking}</p>
+        <p className="flex items-center gap-2 text-xs text-muted-foreground">
+          <IconLoader
+            aria-hidden
+            className="size-3.5 animate-spin motion-reduce:animate-none"
+          />
+          {t.thinking}
+        </p>
       )}
       {error && (
-        <p role="alert" className="text-sm text-error">
-          {reachedLimit === null ? t.error : fr.aiUsage.exceeded(reachedLimit)}
-        </p>
+        <div className="flex flex-wrap items-center gap-3">
+          <p role="alert" className="text-sm text-error">
+            {reachedLimit === null
+              ? t.error
+              : fr.aiUsage.exceeded(reachedLimit)}
+          </p>
+          {reachedLimit === null && onRetry && (
+            <Button variant="outline" size="sm" onClick={onRetry}>
+              {t.retry}
+            </Button>
+          )}
+        </div>
       )}
       <div ref={endRef} />
     </div>

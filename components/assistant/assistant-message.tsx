@@ -2,8 +2,9 @@ import type { UIMessage } from "ai";
 import { IconLoader } from "nucleo-sharp-essential";
 import Link from "next/link";
 
+import { AnswerText } from "@/components/assistant/answer-text";
 import { DraftCard } from "@/components/assistant/draft-card";
-import { evidenceOf, plainText } from "@/components/assistant/tool-output";
+import { evidenceOf } from "@/components/assistant/tool-output";
 import { proposalOf } from "@/lib/assistant/drafts";
 import { assistant } from "@/lib/i18n/fr/assistant";
 
@@ -15,8 +16,16 @@ const isToolPart = (
 ): part is Extract<Part, { toolCallId: string }> =>
   part.type.startsWith("tool-") && "toolCallId" in part;
 
-/** One turn. Assistant turns show the model's text, then the facts and links found by code. */
-export function AssistantMessage({ message }: { message: UIMessage }) {
+/** One turn. Assistant turns show the model's text, then the facts and links
+ * found by code. `live`: the turn being answered, the only one whose
+ * unfinished lookups still spin (a stopped or failed answer shows none). */
+export function AssistantMessage({
+  message,
+  live = false,
+}: {
+  message: UIMessage;
+  live?: boolean;
+}) {
   const t = fr.assistant;
   const text = message.parts
     .map((p) => (p.type === "text" ? p.text : ""))
@@ -32,9 +41,11 @@ export function AssistantMessage({ message }: { message: UIMessage }) {
   }
 
   const tools = message.parts.filter(isToolPart);
-  const running = tools.filter(
-    (p) => p.state !== "output-available" && p.state !== "output-error",
-  );
+  const running = live
+    ? tools.filter(
+        (p) => p.state !== "output-available" && p.state !== "output-error",
+      )
+    : [];
   const done = tools.filter((p) => p.state === "output-available");
   // Drafts show as cards; their facts would only repeat the card.
   const drafts = done.flatMap((p) => {
@@ -66,11 +77,7 @@ export function AssistantMessage({ message }: { message: UIMessage }) {
           {t.tools[p.type.replace(/^tool-/, "")] ?? t.thinking}
         </p>
       ))}
-      {text && (
-        <p className="text-sm leading-relaxed whitespace-pre-wrap">
-          {plainText(text)}
-        </p>
-      )}
+      {text && <AnswerText text={text} />}
       {drafts.map((d) => (
         <DraftCard key={d.toolCallId} {...d} />
       ))}

@@ -79,8 +79,11 @@ Espace Espace a la sienne (§ 2 bis).
 
 **Page de conversation** (`/app/assistant`, `assistant-conversation.tsx`, d'après Midday) :
 une question posée depuis l'accueil (saisie ou suggestion) ouvre cette page, où la
-conversation continue. En-tête : retour à l'accueil, titre, « + » pour une nouvelle
-conversation (qui reste sur la page, suggestions au-dessus de la saisie). Le titre est la
+conversation continue. Refaite le 04/11/2026 (§ 2 ter) : plus de flèche de retour (PO est
+une entrée de la barre latérale) ; « Nouvelle conversation » en tête de l'historique ; une
+nouvelle conversation montre « Demander à PO » et la saisie au milieu de la page, comme
+l'accueil, sans pilules de suggestions (retirées par Sacha le 29/10) ; ouverte depuis une
+page, un lien au-dessus du titre y ramène. Le titre est la
 **première question telle quelle**, jamais rédigé par le modèle. Le retour garde la
 conversation : l'accueil propose « Reprendre la conversation », et une nouvelle question
 posée depuis l'accueil **la prolonge** (rien n'étant enregistré, en démarrer une autre
