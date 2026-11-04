@@ -98,6 +98,10 @@ export const masterBrief = {
     chosen: "Choisi dans le Brief",
     nobody: "Personne n'est désigné au Cadrage ni crédité sur le titre",
     typed: "Saisi dans le Brief",
+    usualRevisions: (project: string) =>
+      project
+        ? `Réseau · leurs conditions habituelles (Brief de « ${project} »)`
+        : "Réseau · leurs conditions habituelles",
     rate: "Interne : jamais dans le dossier de l'ingénieur",
     estimated: "Estimé",
     fixed: "Mix final et Master final : toujours livrés.",

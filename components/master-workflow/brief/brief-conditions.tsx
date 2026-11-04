@@ -13,6 +13,7 @@ import type {
   NetworkEngineer,
   NetworkOther,
 } from "@/lib/master-workflow/types";
+import type { UsualRevisions } from "@/lib/master-workflow/usual-revisions";
 import { parseEurosToCents } from "@/lib/projects/schemas";
 import { amountInput, formatAmount } from "@/lib/utils/money";
 
@@ -38,6 +39,7 @@ export type BriefFactsProps = {
     validator: BriefDesignation | null;
   };
   changedBy: Partial<Record<string, string>>;
+  usualRevisions: UsualRevisions | null;
 };
 
 /** Where a designation comes from, as the row says it (rule 22). */
@@ -66,6 +68,7 @@ function sourceOf(
  */
 export function BriefConditions(props: BriefFactsProps) {
   const { brief, canEdit, projectId, changedBy } = props;
+  const usual = props.usualRevisions;
   const save = (patch: Parameters<typeof saveBriefFact>[1]) =>
     saveBriefFact(projectId, patch);
   // A contact of the Réseau, or a member of PDS (in-house engineer).
@@ -178,13 +181,28 @@ export function BriefConditions(props: BriefFactsProps) {
       <FactRow
         label={t.fields.revisions}
         value={brief.revisions === null ? null : t.revisions(brief.revisions)}
-        source={t.sources.typed}
+        source={
+          brief.revisions === null
+            ? null
+            : usual && brief.revisions === usual.value
+              ? t.sources.usualRevisions(usual.project)
+              : t.sources.typed
+        }
         changedBy={changedBy.revisions}
         edit={
           canEdit
             ? {
                 kind: "number",
-                value: brief.revisions === null ? "" : String(brief.revisions),
+                value:
+                  brief.revisions !== null
+                    ? String(brief.revisions)
+                    : usual
+                      ? String(usual.value)
+                      : "",
+                proposal:
+                  brief.revisions === null && usual
+                    ? `${t.revisions(usual.value)} · ${t.sources.usualRevisions(usual.project)}`
+                    : undefined,
                 optional: true,
                 done: t.changed,
                 onSave: async (value) => {

@@ -15,6 +15,10 @@ import { listProjectCreatives } from "@/lib/projects/creatives";
 import { personName } from "@/lib/projects/types";
 import { masterBriefRow } from "@/lib/master-workflow/shared-rows";
 import { createClient } from "@/lib/supabase/server";
+import {
+  loadUsualRevisions,
+  type UsualRevisions,
+} from "@/lib/master-workflow/usual-revisions";
 
 import { briefMissing, type BriefDesignation } from "./brief-rules";
 
@@ -42,6 +46,9 @@ export type BriefStepView = {
   // The mix package left already (its date): changing the Brief changes
   // nothing for the engineer until it is sent again.
   sentAt: string | null;
+  // The mix engineer's revisions in their latest other Brief (proto:
+  // « Réseau · leurs conditions habituelles »).
+  usualRevisions: UsualRevisions | null;
 };
 
 const TEAM_ROLES = [
@@ -126,6 +133,14 @@ export async function loadBriefStep(
     if (creative && view.validators.some((v) => v.personId === creative))
       brief.validatorPersonId = creative;
   }
+  const usualRevisions = await loadUsualRevisions(project.id, {
+    contactId: brief.mixContactId,
+    personId: brief.mixPersonId,
+  });
+  // Before the first save, the engineer's usual revisions are pre-filled
+  // (written with the rest of the Brief at its first change).
+  if (!saved && brief.revisions === null && usualRevisions)
+    brief.revisions = usualRevisions.value;
   const designation = (
     contactOrPerson: string | null,
     member: (typeof rows)[number] | undefined | null,
@@ -203,5 +218,6 @@ export async function loadBriefStep(
       dates.masterFinalDue.value === framing.masterFinalDue,
     missing: briefMissing(brief),
     sentAt,
+    usualRevisions,
   };
 }

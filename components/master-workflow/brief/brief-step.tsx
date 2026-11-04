@@ -179,6 +179,7 @@ export function BriefStep({
               validators={view.validators}
               designations={step.designations}
               changedBy={step.changedBy}
+              usualRevisions={step.usualRevisions}
             />
           </section>
           <BriefContent
