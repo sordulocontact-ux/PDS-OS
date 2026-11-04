@@ -6,6 +6,7 @@ import type { MixVersion } from "@/lib/master-workflow/mix-types";
 import type { RoundStepView } from "@/lib/master-workflow/round-step";
 import { masterStepHref } from "@/lib/ui/master-steps";
 
+import { RoundVersionCard } from "./round-version-card";
 import { VersionDecision } from "./version-decision";
 import { VersionFeedback } from "./version-feedback";
 
@@ -14,17 +15,20 @@ const fr = { masterJourney, masterRound };
 const t = fr.masterRound;
 
 /**
- * Under the latest version, still undecided: the feedback, then the
- * validator's decision, or who is awaited.
+ * The latest version, still undecided: its card with the team's feedback
+ * inside, then the validator's decision, or who is awaited.
  */
 export function PendingVersion({
   round,
   version,
+  previous,
   engineer,
   viewerIsOwner,
 }: {
   round: RoundStepView;
   version: MixVersion;
+  // The version before it, whose request this one answers.
+  previous: MixVersion | null;
   engineer: string;
   viewerIsOwner: boolean;
 }) {
@@ -32,6 +36,26 @@ export function PendingVersion({
   const extra = round.extras[version.id];
   return (
     <>
+      <RoundVersionCard
+        round={round}
+        version={version}
+        previous={previous}
+        engineer={engineer}
+        pending
+      >
+        <VersionFeedback
+          projectId={round.view.projectId}
+          label={label}
+          version={version}
+          engineer={engineer}
+          validator={round.validator ?? "—"}
+          canTransmit={
+            viewerIsOwner &&
+            !round.versions.canDecide &&
+            !version.feedbackSentAt
+          }
+        />
+      </RoundVersionCard>
       {extra?.working && (
         <>
           <ToneCallout tone="warning">
@@ -50,16 +74,6 @@ export function PendingVersion({
           />
         </>
       )}
-      <VersionFeedback
-        projectId={round.view.projectId}
-        label={label}
-        version={version}
-        engineer={engineer}
-        validator={round.validator ?? "—"}
-        canTransmit={
-          viewerIsOwner && !round.versions.canDecide && !version.feedbackSentAt
-        }
-      />
       {round.versions.canDecide ? (
         <VersionDecision
           projectId={round.view.projectId}

@@ -229,7 +229,6 @@ export const masterRound = {
   versions: {
     title: (label: string, n: number) =>
       `${label} · ${n > 1 ? `${n} versions` : "1 version"}`,
-    hint: "Chacune s'écoute avant de décider",
     none: (name: string) =>
       `Aucune version pour l'instant : ${first(name)} dépose la première sur son lien.`,
     previous: (n: number) => `Versions précédentes (${n})`,
@@ -274,10 +273,10 @@ export const masterRound = {
     title: (label: string, n: number) => `Retours sur le ${label} V${n}`,
     empty: "Aucun retour pour l'instant.",
     timecode: "Minutage",
-    timecodeHint: "Par exemple 0:42",
+    timecodeHint: "0:42",
     timecodeError: "Un minutage comme 1:23.",
     body: "Mon retour",
-    add: "Ajouter mon retour",
+    add: "Ajouter",
     added: "Retour ajouté",
     teamOnly: (engineer: string, validator: string) =>
       `Visible par l'équipe seulement : ${engineer} reçoit la demande de modification décidée par ${validator}, ou les retours que vous lui transmettez.`,

@@ -35,10 +35,11 @@ const feedbackText = (version: MixVersion) =>
     .join("\n");
 
 /**
- * « Retours sur le Mix V1 » (proto, rule 21): the feedback with its
- * timecode, who and when, « Ajouter mon retour » for every member, the
- * reminder that it stays in the team, and for the owner who is not the
- * validator « Transmettre les retours sans décider ».
+ * « Retours sur le Mix V1 » (proto, rule 21), at the bottom of the
+ * version's card: the feedback with its timecode, who and when, under one
+ * line saying it stays in the team; « Minutage », « Mon retour » and
+ * « Ajouter » on one row; for the owner who is not the validator
+ * « Transmettre les retours sans décider », folded, flush with the card.
  */
 export function VersionFeedback({
   projectId,
@@ -69,61 +70,62 @@ export function VersionFeedback({
   const [tried, setTried] = useState(false);
   const send = useWriteSubmit(() => undefined, t.transmit.done);
   return (
-    <section className="flex flex-col gap-3">
-      <VersionComments
-        comments={version.comments}
-        engineer={engineer}
-        title={t.feedback.title(label, version.number)}
-      />
-      <form
-        noValidate
-        className="grid gap-3 sm:grid-cols-[8rem_minmax(0,1fr)]"
-        onSubmit={(event) => {
-          event.preventDefault();
-          const seconds = parseTimecode(timecode);
-          if (Number.isNaN(seconds))
-            return setTimecodeError(t.feedback.timecodeError);
-          setTimecodeError(undefined);
-          if (!body.trim()) return;
-          add.run(() =>
-            addMixComment(projectId, version.id, body, seconds, key),
-          );
-        }}
-      >
-        <Field
-          name={`timecode-${version.id}`}
-          label={t.feedback.timecode}
-          placeholder={t.feedback.timecodeHint}
-          value={timecode}
-          error={timecodeError}
-          onChange={(e) => setTimecode(e.target.value)}
+    <>
+      <section className="flex flex-col gap-3 border-t border-[color:var(--border-hairline)] p-3.5">
+        <VersionComments
+          comments={version.comments}
+          engineer={engineer}
+          title={t.feedback.title(label, version.number)}
+          hint={t.feedback.teamOnly(engineer, validator)}
         />
-        <Field
-          name={`comment-${version.id}`}
-          label={t.feedback.body}
-          value={body}
-          maxLength={2000}
-          onChange={(e) => setBody(e.target.value)}
-        />
-        <div className="flex flex-col gap-2 sm:col-span-2">
-          <FormMessage kind="error">{add.error}</FormMessage>
+        <form
+          noValidate
+          className="grid items-end gap-2 sm:grid-cols-[6rem_minmax(0,1fr)_auto]"
+          onSubmit={(event) => {
+            event.preventDefault();
+            const seconds = parseTimecode(timecode);
+            if (Number.isNaN(seconds))
+              return setTimecodeError(t.feedback.timecodeError);
+            setTimecodeError(undefined);
+            if (!body.trim()) return;
+            add.run(() =>
+              addMixComment(projectId, version.id, body, seconds, key),
+            );
+          }}
+        >
+          <Field
+            name={`timecode-${version.id}`}
+            label={t.feedback.timecode}
+            placeholder={t.feedback.timecodeHint}
+            value={timecode}
+            error={timecodeError}
+            onChange={(e) => setTimecode(e.target.value)}
+          />
+          <Field
+            name={`comment-${version.id}`}
+            label={t.feedback.body}
+            value={body}
+            maxLength={2000}
+            onChange={(e) => setBody(e.target.value)}
+          />
           <Button
             type="submit"
             variant="outline"
-            className="self-start"
+            className="self-start sm:self-end"
             disabled={add.pending}
           >
             {t.feedback.add}
           </Button>
-        </div>
-      </form>
-      <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
-        {t.feedback.teamOnly(engineer, validator)}
-      </p>
+          <FormMessage kind="error" className="sm:col-span-3">
+            {add.error}
+          </FormMessage>
+        </form>
+      </section>
       {canTransmit && (
         <VersionCard
           title={t.transmit.title}
           meta={t.transmit.meta(engineer, validator)}
+          className="rounded-none border-0 border-t"
         >
           <form
             noValidate
@@ -157,6 +159,6 @@ export function VersionFeedback({
           </form>
         </VersionCard>
       )}
-    </section>
+    </>
   );
 }

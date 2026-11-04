@@ -1,6 +1,9 @@
+import type { ReactNode } from "react";
+
+import { IconDisc } from "@/components/icons";
 import { AudioFile } from "@/components/ui/audio-file";
-import { ToneCallout } from "@/components/ui/tone-callout";
-import { VersionCard } from "@/components/ui/version-card";
+import { DocumentCard } from "@/components/ui/document-card";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { masterJourney } from "@/lib/i18n/fr/master-journey";
 import { masterRound } from "@/lib/i18n/fr/master-round";
 import type { MixVersion } from "@/lib/master-workflow/mix-types";
@@ -30,83 +33,88 @@ function statusOf(
 }
 
 /**
- * One version of a round (proto), its feedback grouped with it (lot 7 of
- * Ibé's feedback): what it corrects (« Corrections reçues : répond à la
- * demande sur le Mix V1 »), the file listened to, who deposited it, when
- * and on which source, what the engineer received about it (SentRequest),
- * and the team's internal feedback with its timecodes (VersionComments) —
- * under the version still in listening, VersionFeedback shows them.
+ * One version of a round, in the document card design (Sacha, 04/11): the
+ * head « Mix V1 », who deposited it, when and on which source, its state;
+ * what it corrects on the info strip (« Corrections reçues : répond à la
+ * demande sur le Mix V1 »); then the file (its name in the player's
+ * border), what the engineer received about it (SentRequest) and the
+ * team's feedback. `children`: under the version in listening, its
+ * feedback form (VersionFeedback), inside the same card.
  */
 export function RoundVersionCard({
   round,
   version: v,
   previous = null,
   engineer,
-  open,
   pending = false,
+  children,
 }: {
   round: RoundStepView;
   version: MixVersion;
   // The version before it: its request is what this one corrects.
   previous?: MixVersion | null;
   engineer: string;
-  open: boolean;
-  // Undecided and listened to now: its feedback comes with its form below.
+  // Undecided and listened to now: its feedback comes in `children`.
   pending?: boolean;
+  children?: ReactNode;
 }) {
   const label = fr.masterJourney.versionLabel[round.stage];
   const x = round.extras[v.id];
   const by = v.createdBy ?? engineer;
   const asked = previous ? sentOf(previous) : null;
+  const status = statusOf(v, Boolean(x?.reopenedAt), round.stage);
   return (
-    <VersionCard
-      title={`${t.versions.name(label, v.number)} · ${v.fileName}`}
-      status={statusOf(v, Boolean(x?.reopenedAt), round.stage)}
-      defaultOpen={open}
-    >
-      {asked && previous && (
-        <ToneCallout tone="info">
+    <DocumentCard
+      name={t.versions.name(label, v.number)}
+      line={t.versions.meta(
+        t.versions.deposited(
+          by,
+          x?.viaLink ?? false,
+          formatShortInstant(v.createdAt),
+        ),
+        "",
+        x?.source ?? null,
+      )}
+      icon={IconDisc}
+      action={<StatusBadge tone={status.tone}>{status.label}</StatusBadge>}
+      change={
+        asked && previous ? (
           <span className="flex flex-col gap-1">
             <b className="font-semibold">
               {t.chain.answers(
-                fr.masterJourney.versionLabel[round.stage],
+                label,
                 previous.number,
                 formatShortDay(asked.at),
               )}
             </b>
             <span className="whitespace-pre-wrap">« {asked.text} »</span>
           </span>
-        </ToneCallout>
-      )}
-      <AudioFile
-        label={t.versions.name(label, v.number)}
-        listenUrl={v.openUrl}
-        downloadUrl={v.downloadUrl}
-      />
-      <p className="text-[length:var(--type-caption)] text-[color:var(--text-secondary)]">
-        {t.versions.meta(
-          t.versions.deposited(
-            by,
-            x?.viaLink ?? false,
-            formatShortInstant(v.createdAt),
-          ),
-          "",
-          x?.source ?? null,
+        ) : null
+      }
+    >
+      <div className="flex flex-col gap-3 p-3.5">
+        <AudioFile
+          label={t.versions.name(label, v.number)}
+          name={v.fileName}
+          listenUrl={v.openUrl}
+          downloadUrl={v.downloadUrl}
+          className="max-w-none"
+        />
+        <SentRequest version={v} engineer={engineer} />
+        {x?.reopenedAt && (
+          <p className="text-[length:var(--type-body-sm)]">
+            {t.versions.reopenedNote(
+              null,
+              formatShortDay(x.reopenedAt),
+              x.reopenReason ?? "",
+            )}
+          </p>
         )}
-      </p>
-      <SentRequest version={v} engineer={engineer} />
-      {x?.reopenedAt && (
-        <p className="text-[length:var(--type-body-sm)]">
-          {t.versions.reopenedNote(
-            null,
-            formatShortDay(x.reopenedAt),
-            x.reopenReason ?? "",
-          )}
-        </p>
-      )}
-      {!pending && v.comments.length > 0 && (
-        <VersionComments comments={v.comments} engineer={engineer} />
-      )}
-    </VersionCard>
+        {!pending && v.comments.length > 0 && (
+          <VersionComments comments={v.comments} engineer={engineer} />
+        )}
+      </div>
+      {children}
+    </DocumentCard>
   );
 }

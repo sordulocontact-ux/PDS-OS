@@ -3,7 +3,6 @@ import type { MixVersion } from "@/lib/master-workflow/mix-types";
 import type { RoundStepView } from "@/lib/master-workflow/round-step";
 
 import { PendingVersion } from "./pending-version";
-import { RoundVersionCard } from "./round-version-card";
 
 const fr = { masterRound };
 
@@ -55,17 +54,10 @@ export function RoundLead({
                 {fr.masterRound.lead.title(title.title)}
               </p>
             )}
-            <RoundVersionCard
-              round={round}
-              version={version}
-              previous={title?.versions[1] ?? null}
-              engineer={engineer}
-              open
-              pending
-            />
             <PendingVersion
               round={round}
               version={version}
+              previous={title?.versions[1] ?? null}
               engineer={engineer}
               viewerIsOwner={viewerIsOwner}
             />

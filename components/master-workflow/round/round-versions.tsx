@@ -54,17 +54,16 @@ export function RoundVersions({
         const extra = round.extras[latest.id];
         const approved = title.versions.find((v) => v.decision === "approved");
         // Newest first: the one after a version in the list came before it.
-        const card = (v: (typeof older)[number], open: boolean) => (
+        const previousOf = (v: (typeof older)[number]) =>
+          title.versions[title.versions.indexOf(v) + 1] ?? null;
+        const pending = latest.decision === null && !extra?.reopenedAt;
+        const card = (v: (typeof older)[number]) => (
           <RoundVersionCard
             key={v.id}
             round={round}
             version={v}
-            previous={title.versions[title.versions.indexOf(v) + 1] ?? null}
+            previous={previousOf(v)}
             engineer={engineer}
-            open={open}
-            pending={
-              v.id === latest.id && v.decision === null && !extra?.reopenedAt
-            }
           />
         );
         return (
@@ -73,13 +72,20 @@ export function RoundVersions({
               {several ? `« ${title.title} » · ` : ""}
               {t.versions.title(label, title.versions.length)}
             </h3>
-            <p className="-mt-2 text-[length:var(--type-caption)] text-[color:var(--text-secondary)]">
-              {t.versions.hint}
-            </p>
-            {!inLead && card(latest, true)}
+            {!inLead && !approved && pending ? (
+              <PendingVersion
+                round={round}
+                version={latest}
+                previous={previousOf(latest)}
+                engineer={engineer}
+                viewerIsOwner={viewerIsOwner}
+              />
+            ) : (
+              !inLead && card(latest)
+            )}
             {older.length > 0 && (
               <VersionCard title={t.versions.previous(older.length)}>
-                {older.map((v) => card(v, v.id === approved?.id))}
+                {older.map((v) => card(v))}
               </VersionCard>
             )}
             {inLead ? null : approved ? (
@@ -95,13 +101,6 @@ export function RoundVersions({
                   />
                 )}
               </>
-            ) : latest.decision === null && !extra?.reopenedAt ? (
-              <PendingVersion
-                round={round}
-                version={latest}
-                engineer={engineer}
-                viewerIsOwner={viewerIsOwner}
-              />
             ) : null}
           </section>
         );

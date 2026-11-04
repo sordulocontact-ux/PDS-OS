@@ -19,25 +19,30 @@ export function VersionComments({
   comments,
   engineer,
   title,
+  hint,
 }: {
   comments: MixComment[];
   engineer: string;
+  // Who reads what, when it says more than « Jamais envoyés tels quels ».
+  hint?: string;
   // « Retours sur le Mix V1 » under the latest version; « Retours de
   // l'équipe » inside an older one.
   title?: string;
 }) {
   return (
     <section className="flex flex-col gap-2">
-      <div className="flex flex-wrap items-center gap-2">
-        <h4 className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] font-semibold">
-          {title ?? t.chain.internal}
-        </h4>
-        <StatusBadge tone="neutral" size="sm">
-          {t.chain.internalBadge}
-        </StatusBadge>
-        <span className="text-[length:var(--type-caption)] text-[color:var(--text-secondary)]">
-          {t.chain.internalHint(engineer)}
-        </span>
+      <div className="flex flex-col gap-0.5">
+        <div className="flex flex-wrap items-center gap-2">
+          <h4 className="text-[length:var(--type-body-md)] leading-[var(--type-body-md-lh)] font-semibold">
+            {title ?? t.chain.internal}
+          </h4>
+          <StatusBadge tone="neutral" size="sm">
+            {t.chain.internalBadge}
+          </StatusBadge>
+        </div>
+        <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
+          {hint ?? t.chain.internalHint(engineer)}
+        </p>
       </div>
       {comments.length === 0 ? (
         <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
