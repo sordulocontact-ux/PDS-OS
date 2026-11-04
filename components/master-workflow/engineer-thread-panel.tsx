@@ -220,7 +220,8 @@ export function EngineerThreadPanel({
           })}
         </ol>
       )}
-      {canEdit && replyTo && (
+      {/* A reply answers something: only once the engineer wrote. */}
+      {canEdit && replyTo && messages.some((m) => m.author === "engineer") && (
         <form
           noValidate
           className="flex flex-col gap-3"
