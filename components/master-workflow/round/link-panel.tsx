@@ -75,6 +75,10 @@ export function LinkPanel(props: LinkPanelProps) {
   const write = useWriteSubmit(() => undefined, t.marked);
   const link = page?.link ?? null;
   const url = link?.path && origin ? `${origin}${link.path}` : null;
+  // Shown short (« pds-os.app/c/k7h2m9… »): the copy button gives it whole.
+  const shortUrl = url
+    ? `${new URL(url).host}${link!.path!.split("#")[0]!.slice(0, 9)}…`
+    : null;
   const resendButton = props.canEdit && (
     <Button
       variant="outline"
@@ -137,8 +141,11 @@ export function LinkPanel(props: LinkPanelProps) {
               <div className="flex flex-wrap items-center gap-2">
                 {url && (
                   <span className="flex min-w-0 items-center gap-2 rounded-full bg-[var(--surface-soft)] py-1 pr-1 pl-4">
-                    <code className="min-w-0 font-mono text-[length:var(--type-body-sm)] break-all">
-                      {url}
+                    <code
+                      className="min-w-0 truncate font-mono text-[length:var(--type-body-sm)]"
+                      title={url}
+                    >
+                      {shortUrl}
                     </code>
                     <CopyButton
                       value={url}
