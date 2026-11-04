@@ -1,12 +1,16 @@
+import { IconLock } from "nucleo-sharp-essential";
+
 import { EngineerThreadSection } from "@/components/master-workflow/engineer-thread-section";
 import { ListenLinkOffer } from "@/components/master-workflow/listen/listen-link-offer";
 import { PackagePreview } from "@/components/master-workflow/package-preview";
 import { ContactLinkOffer } from "@/components/portal/contact-links-section";
+import { BlockerCallout } from "@/components/ui/blocker-callout";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { Fold } from "@/components/ui/fold";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { VersionCard } from "@/components/ui/version-card";
 import { invoices } from "@/lib/i18n/fr/invoices";
+import { masterWorkflow } from "@/lib/i18n/fr/master-workflow";
 import { masterInHouse } from "@/lib/i18n/fr/master-inhouse";
 import { masterRound } from "@/lib/i18n/fr/master-round";
 import type { RoundStepView } from "@/lib/master-workflow/round-step";
@@ -18,13 +22,10 @@ import { InHouseDeposit } from "./inhouse-deposit";
 import { RateBlock } from "./rate-block";
 import { RoundVersions } from "./round-versions";
 import { SendForm } from "./send-form";
-import { MissingStemsRow } from "./stems-row";
 
-const fr = { invoices, masterRound, masterInHouse };
+const fr = { invoices, masterRound, masterInHouse, masterWorkflow };
 
 const t = fr.masterRound;
-const h3 =
-  "text-[length:var(--type-body-md)] leading-[var(--type-body-md-lh)] font-semibold";
 
 /**
  * The Mixage or the Mastering step (proto `master-v2.html`): before the
@@ -96,89 +97,28 @@ export function RoundStep({
       )}
 
       {!sent && (
-        <section className="flex flex-col gap-2.5">
-          <h3 className={h3}>{t.before.title}</h3>
-          <FactRows>
-            <FactRow
-              label={t.before.source[stage]}
-              value={
-                view.titles.every((x) => x.source)
-                  ? view.titles.map((x) => x.source?.fileName).join(", ")
-                  : null
-              }
-              missing={!view.titles.every((x) => x.source)}
-              state={
-                view.titles.length > 0 && view.titles.every((x) => x.source)
-                  ? { tone: "success", label: t.before.ready }
-                  : { tone: "warning", label: t.before.missing }
-              }
-            />
-            <FactRow
-              label={t.before.brief}
-              value={
-                round.brief === "ready"
-                  ? t.before.briefReady
-                  : round.brief === "dirty"
-                    ? t.before.briefDirty
-                    : t.before.briefNever
-              }
-              state={
-                round.brief === "ready"
-                  ? { tone: "success", label: t.before.ready }
-                  : { tone: "warning", label: t.before.toRecord }
-              }
-            />
-            {stage === "mix" &&
-              (noStems.length ? (
-                view.titles
-                  .filter((x) => x.stems === 0)
-                  .map((x) => (
-                    <MissingStemsRow
-                      key={x.id}
-                      organizationId={view.organizationId}
-                      masterId={x.id}
-                      title={x.title}
-                    />
-                  ))
-              ) : (
-                <FactRow
-                  label={t.before.stems}
-                  value={t.before.stemsCount(
-                    view.titles.reduce((s, x) => s + x.stems, 0),
-                  )}
-                  state={{ tone: "success", label: t.before.ready }}
-                />
-              ))}
-            {view.brief?.dates.mixV1Due && stage === "mix" && (
-              <FactRow
-                label={t.before.dates}
-                value={t.before.mixV1(formatDay(view.brief.dates.mixV1Due))}
-              />
-            )}
-            {view.brief?.dates.masteringDue && stage === "mastering" && (
-              <FactRow
-                label={t.before.dates}
-                value={t.before.mastering(
-                  formatDay(view.brief.dates.masteringDue),
-                )}
-              />
-            )}
-          </FactRows>
-        </section>
+        <>
+          <BlockerCallout
+            blockers={blockers}
+            title={fr.masterWorkflow.mix.blockers.title}
+          />
+          <PackagePreview view={view} />
+          <ToneCallout
+            tone="info"
+            icon={<IconLock aria-hidden className="size-4" />}
+          >
+            {t.dossier.internal}
+            {view.reusesMixLink && engineer ? t.dossier.sameLink(engineer) : ""}
+          </ToneCallout>
+        </>
       )}
 
-      {(!sent || round.briefChangedSinceSent) && (
+      {sent && round.briefChangedSinceSent && (
         <VersionCard
           title={t.package.title[stage]}
-          defaultOpen={!sent}
-          meta={sent ? formatShortInstant(link!.createdAt) : undefined}
+          meta={formatShortInstant(link!.createdAt)}
         >
-          {engineer && (
-            <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
-              {t.package.note(engineer)}
-            </p>
-          )}
-          <PackagePreview view={{ ...view, blockers }} />
+          <PackagePreview view={view} />
         </VersionCard>
       )}
 
@@ -209,45 +149,6 @@ export function RoundStep({
         view.engineer &&
         (!sent || round.briefChangedSinceSent) && (
           <>
-            {!sent && mailed && (
-              <section className="flex flex-col gap-2.5">
-                <h3 className={h3}>{t.email.sendTitle}</h3>
-                <FactRows>
-                  <FactRow
-                    label={t.email.to}
-                    value={`${view.engineer.name} <${view.engineer.email}>`}
-                  />
-                  <FactRow label={t.email.from} value={t.email.fromValue} />
-                  <FactRow
-                    label={t.email.subject}
-                    value={t.email.subjectValue(projectTitle, stage)}
-                  />
-                </FactRows>
-              </section>
-            )}
-            {!sent && !mailed && (
-              <FactRows>
-                <FactRow
-                  label={t.email.to}
-                  value={`${view.engineer.name}${view.engineer.email ? ` <${view.engineer.email}>` : ""}`}
-                  source={view.engineer.email ? null : t.email.noEmail}
-                />
-                <FactRow
-                  label={t.email.subject}
-                  value={t.email.subjectValue(projectTitle, stage)}
-                />
-                <FactRow
-                  label={t.email.message}
-                  value={view.brief?.message ?? null}
-                  source={t.email.link}
-                />
-              </FactRows>
-            )}
-            {!sent && !mailed && (
-              <p className="text-[length:var(--type-caption)] text-[color:var(--text-secondary)]">
-                {t.email.hint}
-              </p>
-            )}
             {sent && round.briefChangedSinceSent && (
               <ToneCallout tone="warning">
                 {t.send.briefChanged(engineer)}
@@ -274,15 +175,35 @@ export function RoundStep({
                 }
                 withoutStems={stage === "mix" && noStems.length > 0}
                 mail={
-                  mailed && !sent
-                    ? {
+                  sent
+                    ? null
+                    : {
+                        sends: mailed,
+                        title: mailed
+                          ? t.email.sendTitle
+                          : t.email.declaredTitle,
+                        line: mailed
+                          ? t.email.sendLine(round.senderName)
+                          : t.email.declaredLine,
+                        to: view.engineer.email
+                          ? `${view.engineer.name} <${view.engineer.email}>`
+                          : `${view.engineer.name} · ${t.email.noEmail}`,
+                        subject: t.email.subjectValue(projectTitle, stage),
                         defaultMessage: t.email.defaultMessage(
                           view.engineer.name,
                           projectTitle,
                           stage,
                         ),
+                        added: view.reusesMixLink
+                          ? t.email.addedSame
+                          : t.email.added,
+                        open: view.reusesMixLink
+                          ? t.email.openSame
+                          : t.email.openNew,
+                        validity: t.email.linkValidity(
+                          formatDay(round.linkUntil),
+                        ),
                       }
-                    : null
                 }
               />
             )}

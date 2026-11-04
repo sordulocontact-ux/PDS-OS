@@ -1,10 +1,13 @@
 "use client";
 
+import { IconEnvelopeOpen } from "nucleo-sharp-essential";
 import { useState } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
+import { DocumentCard } from "@/components/ui/document-card";
+import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { masterRound } from "@/lib/i18n/fr/master-round";
@@ -14,11 +17,26 @@ const fr = { masterRound };
 
 const t = fr.masterRound;
 
+/** The e-mail before it leaves (proto « L'e-mail que PDS OS enverra »). */
+export type SendMail = {
+  // PDS OS sends it itself; otherwise the sending is declared after.
+  sends: boolean;
+  title: string;
+  line: string;
+  to: string;
+  subject: string;
+  defaultMessage: string;
+  // « Ajouté automatiquement à la fin de l'e-mail : … » and its validity.
+  added: string;
+  open: string;
+  validity: string;
+};
+
 /**
- * The sending gesture (proto): « Envoyer à Karim Haddou », with the written
- * waiver when stems are missing (« Pourquoi envoyer quand même * »). `mail`:
- * PDS OS sends the e-mail itself, its message written here (kept as the
- * package's note), the private link added at the end.
+ * The sending gesture (proto): the written waiver when stems are missing
+ * (« Pourquoi envoyer quand même * »), then `mail`, the e-mail card (À,
+ * Objet, the message written here — kept as the package's note — and the
+ * private link added at the end), then « Envoyer à Karim Haddou ».
  */
 export function SendForm({
   projectId,
@@ -37,7 +55,7 @@ export function SendForm({
   done: string;
   // Titles without stems: the waiver is needed.
   withoutStems: boolean;
-  mail?: { defaultMessage: string } | null;
+  mail?: SendMail | null;
 }) {
   const [reason, setReason] = useState("");
   const [message, setMessage] = useState(mail?.defaultMessage ?? "");
@@ -59,7 +77,7 @@ export function SendForm({
             mail ? message : "",
             withoutStems ? reason : null,
             done,
-            Boolean(mail),
+            Boolean(mail?.sends),
           ),
         );
       }}
@@ -80,15 +98,37 @@ export function SendForm({
         </>
       )}
       {mail && (
-        <TextareaField
-          name={`mail-message-${stage}`}
-          label={t.email.message}
-          rows={3}
-          maxLength={2000}
-          value={message}
-          hint={`${t.email.link} ${t.email.sendHint}`}
-          onChange={(e) => setMessage(e.target.value)}
-        />
+        <DocumentCard
+          name={mail.title}
+          line={mail.line}
+          icon={IconEnvelopeOpen}
+        >
+          <FactRows>
+            <FactRow
+              label={t.email.to}
+              value={mail.to}
+              source={t.email.toSource}
+            />
+            <FactRow label={t.email.subject} value={mail.subject} />
+          </FactRows>
+          <TextareaField
+            name={`mail-message-${stage}`}
+            label={t.email.message}
+            rows={3}
+            maxLength={2000}
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+          />
+          <p className="flex flex-col gap-0.5 rounded-lg bg-[var(--surface-soft)] px-3 py-2.5 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] break-words">
+            <span className="text-[color:var(--text-secondary)]">
+              {mail.added}
+            </span>
+            <span>{mail.open}</span>
+            <span className="text-[length:var(--type-caption)] text-[color:var(--text-secondary)]">
+              {mail.validity}
+            </span>
+          </p>
+        </DocumentCard>
       )}
       <FormMessage kind="error">{submit.error}</FormMessage>
       <Button

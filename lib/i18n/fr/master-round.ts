@@ -6,17 +6,8 @@ const first = (name: string) => name.split(" ")[0] ?? name;
 
 export const masterRound = {
   before: {
-    title: "Avant d'envoyer",
-    source: { mix: "Source confirmée", mastering: "Mix final validé" },
-    brief: "Brief enregistré",
     stems: "Pistes séparées",
-    dates: "Dates à venir",
-    ready: "Prêt",
-    toRecord: "À enregistrer",
     missing: "Manquant",
-    briefReady: "Prêt à transmettre",
-    briefDirty: "Des modifications ne sont pas enregistrées",
-    briefNever: "Pas encore enregistré",
     stemsCount: (n: number) =>
       n > 1 ? `${n} fichiers de pistes` : "1 fichier de pistes",
     stemsNone: (titles: string) => `Aucune piste pour ${titles}`,
@@ -33,8 +24,48 @@ export const masterRound = {
       precision: "Précision",
       placeholder: "Ex. Export du 3 novembre",
     },
-    mixV1: (day: string) => `Mix V1 attendu le ${day}`,
-    mastering: (day: string) => `Mastering attendu le ${day}`,
+  },
+  // The package as the engineer will get it (proto « Dossier pour le
+  // mixeur »): one fact per line, each with where it comes from.
+  dossier: {
+    line: (name: string) =>
+      `Calculé à partir du Brief et des fichiers confirmés : c'est exactement ce que ${first(name)} recevra.`,
+    lineNoEngineer:
+      "Calculé à partir du Brief et des fichiers confirmés : c'est exactement ce que l'ingénieur recevra.",
+    title: { mix: "Titre à mixer", mastering: "Titre à masteriser" },
+    titleValue: (title: string, artists: string) =>
+      artists ? `« ${title} » · ${artists}` : `« ${title} »`,
+    source: { mix: "Source", mastering: "Mix final à masteriser" },
+    sourceMissing: {
+      mix: "Source à confirmer",
+      mastering: "Mix final à valider",
+    },
+    stems: "Pistes séparées",
+    direction: "Direction artistique",
+    directionGroups: {
+      direction: "Direction",
+      references: "Références",
+      constraints: "Contraintes",
+    },
+    deliverables: "Livrables",
+    formats: "Formats de livraison",
+    dates: "Échéances",
+    release: (day: string) => `Sortie prévue le ${day}`,
+    revisions: "Révisions incluses",
+    message: {
+      mix: "Message pour le mixeur",
+      mastering: "Message pour l'ingénieur mastering",
+    },
+    from: {
+      catalog: "Catalogue",
+      source: "Étape Source",
+      mixFinal: "Mix final validé",
+      stems: "Catalogue › Fichiers de travail",
+      brief: "Brief",
+    },
+    internal: "Les tarifs restent internes : ils ne sont pas dans le dossier.",
+    sameLink: (name: string) =>
+      ` Le dossier s'ajoute au lien de ${first(name)} : aucun nouveau lien n'est créé.`,
   },
   blockers: {
     briefDirty: (name: string) =>
@@ -53,8 +84,6 @@ export const masterRound = {
       `Calculé à partir du Brief et des fichiers confirmés : c'est exactement ce que ${first(name)} recevra. Les tarifs restent internes.`,
   },
   email: {
-    title: "L'e-mail à envoyer",
-    hint: "PDS OS n'envoie pas encore d'e-mail : il crée le lien privé ; copiez-le ou écrivez l'e-mail, puis « Marquer comme envoyé ».",
     to: "À",
     subject: "Objet",
     subjectValue: (title: string, stage: "mix" | "mastering") =>
@@ -63,13 +92,21 @@ export const masterRound = {
         : `« ${title} » : le mastering peut commencer`,
     message: "Message",
     noEmail: "Pas d'adresse dans le Réseau",
-    link: "Ajouté à la fin : Ouvrir votre dossier — lien privé créé à l'envoi, sans compte.",
     // PDS OS sends it itself (EMAIL_SMTP_*, lib/email/send.ts).
     sendTitle: "L'e-mail que PDS OS enverra",
-    from: "De",
-    fromValue: "L'adresse de PO, en votre nom · les réponses vous reviennent",
-    sendHint:
-      "Gardé dans l'historique : c'est la preuve d'envoi. Si l'e-mail ne part pas, le lien reste à copier.",
+    declaredTitle: "L'e-mail à envoyer",
+    sendLine: (sender: string) =>
+      `De : l'adresse de PO, au nom de ${sender} · gardé dans l'historique, c'est la preuve d'envoi`,
+    declaredLine:
+      "PDS OS crée le lien privé : copiez-le ou écrivez l'e-mail depuis votre messagerie, puis « Marquer comme envoyé ».",
+    toSource: "Réseau",
+    added: "Ajouté automatiquement à la fin de l'e-mail :",
+    addedSame:
+      "Ajouté automatiquement à la fin de l'e-mail, avec le même lien que pour le mix :",
+    openNew: "Ouvrir votre dossier : lien privé créé à l'envoi",
+    openSame: "Ouvrir votre dossier : le lien qu'il a déjà pour le mix",
+    linkValidity: (day: string) =>
+      `Lien privé, sans compte · valable jusqu'au ${day}`,
     defaultMessage: (
       engineer: string,
       title: string,

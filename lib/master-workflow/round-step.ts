@@ -1,6 +1,7 @@
 import "server-only";
 
 import { emailEnabled } from "@/lib/email/send";
+import { transmissionExpiry } from "@/lib/master-workflow/link-expiry";
 import { isBudgetStatus, type BudgetStatus } from "@/lib/budget/types";
 import { fr } from "@/lib/i18n/fr";
 import { liveTransmission } from "@/lib/master-workflow/journey";
@@ -53,6 +54,10 @@ export type RoundStepView = {
   // PDS OS sends the e-mail itself (EMAIL_SMTP_*, lib/email/send.ts);
   // otherwise the sending is declared (« Marquer comme envoyé »).
   emailEnabled: boolean;
+  // The e-mail before it leaves (proto « L'e-mail que PDS OS enverra »):
+  // in whose name, and until when the link it carries will open.
+  senderName: string;
+  linkUntil: string;
   view: StepView;
   versions: MixVersionsView;
   extras: Record<string, RoundVersionExtra>;
@@ -187,6 +192,17 @@ export async function loadRoundStep(
   return {
     stage,
     emailEnabled: emailEnabled(),
+    senderName:
+      [access.firstName, access.lastName].filter(Boolean).join(" ") ||
+      (access.email ?? ""),
+    linkUntil: transmissionExpiry(
+      new Date(),
+      stage === "mix"
+        ? (shown.brief?.dates.mixFinalDue ?? null)
+        : (shown.brief?.dates.masterFinalDue ??
+            shown.brief?.dates.masteringDue ??
+            null),
+    ).toISOString(),
     view: shown,
     blockers: [
       ...(awaited

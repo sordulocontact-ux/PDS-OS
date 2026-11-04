@@ -1,4 +1,8 @@
-import { IconCircleInfo, IconFile } from "nucleo-sharp-essential";
+import {
+  IconCircleInfo,
+  IconFile,
+  type IconProps,
+} from "nucleo-sharp-essential";
 import type { ReactNode } from "react";
 
 import { core } from "@/lib/i18n/fr/core";
@@ -24,6 +28,7 @@ export function DocumentCard({
   children,
   className,
   flat = false,
+  icon: Icon = IconFile,
 }: {
   name: string;
   line?: ReactNode;
@@ -33,6 +38,8 @@ export function DocumentCard({
   children?: ReactNode;
   className?: string;
   flat?: boolean;
+  // A file by default; an envelope for an e-mail about to leave.
+  icon?: React.ComponentType<IconProps>;
 }) {
   const head = (
     <div
@@ -51,7 +58,7 @@ export function DocumentCard({
           {fr.core.documentCard.pdf}
         </span>
       ) : (
-        <IconFile
+        <Icon
           aria-hidden
           className="mt-0.5 size-5 shrink-0 text-[color:var(--text-secondary)]"
         />

@@ -1,116 +1,180 @@
-import { EmptyNote } from "@/components/shell/empty-state";
-import {
-  DataTable,
-  DataTableBody,
-  DataTableCell,
-  DataTableHead,
-  DataTableHeader,
-  DataTableMedia,
-  DataTableRow,
-} from "@/components/ui/data-table";
-import { FactList } from "@/components/ui/fact-list";
-import { BlockerCallout } from "@/components/ui/blocker-callout";
-import { catalog } from "@/lib/i18n/fr/catalog";
+import { MissingStemsRow } from "@/components/master-workflow/round/stems-row";
+import { DocumentCard } from "@/components/ui/document-card";
+import { FactRow, FactRows } from "@/components/ui/fact-row";
+import { masterRound } from "@/lib/i18n/fr/master-round";
 import { masterWorkflow } from "@/lib/i18n/fr/master-workflow";
 import type { StepView } from "@/lib/master-workflow/transmission";
-import { formatShortDate } from "@/lib/release/format";
+import { formatDay } from "@/lib/utils/day";
 
-const fr = { catalog, masterWorkflow };
+const fr = { masterRound, masterWorkflow };
+
+const t = fr.masterRound;
 
 /**
- * What the mix engineer will receive, before it is sent (ticket § 8: "PO
- * montre précisément le package"): the titles to mix with their confirmed
- * source and stems, then what the brief asks. What blocks the sending comes
- * first.
+ * The package exactly as the engineer will get it, before it leaves (proto
+ * « Dossier pour le mixeur », a document card): each title with its source
+ * and its stems, then what the Brief asks, one fact per line with where it
+ * comes from. A title without stems: its row adds them (MissingStemsRow).
+ * The rates never appear: they stay internal.
  */
 export function PackagePreview({ view }: { view: StepView }) {
-  const t = fr.masterWorkflow.mix;
-  const p = t.package;
+  const d = t.dossier;
+  const role = view.role;
   const brief = view.brief;
-  const date = (value: string | null | undefined) =>
-    value ? formatShortDate(value) : null;
+  const groups = brief
+    ? (["direction", "references", "constraints"] as const).flatMap((key) =>
+        brief[key] ? [{ key, text: brief[key] }] : [],
+      )
+    : [];
+  const dates = brief
+    ? (role === "mix"
+        ? ([
+            "mixV1Due",
+            "mixFinalDue",
+            "masteringDue",
+            "masterFinalDue",
+          ] as const)
+        : (["masteringDue", "masterFinalDue"] as const)
+      ).flatMap((key) =>
+        brief.dates[key]
+          ? [
+              `${fr.masterWorkflow.mix.package[key]} ${formatDay(brief.dates[key])}`,
+            ]
+          : [],
+      )
+    : [];
+  if (role === "mix" && view.releaseDue)
+    dates.push(d.release(formatDay(view.releaseDue)));
+
   return (
-    <div className="grid gap-6">
-      <BlockerCallout blockers={view.blockers} title={t.blockers.title} />
-      <FactList
-        emptyLabel={p.none}
-        facts={[
-          {
-            label: p.to,
-            value: view.engineer
-              ? [view.engineer.name, view.engineer.email]
-                  .filter(Boolean)
-                  .join(" · ")
-              : null,
-          },
-          // Every date of the Brief leaves, each with its meaning
-          // (PROJ-BUG-07), and the planned release.
-          { label: p.mixV1Due, value: date(brief?.dates.mixV1Due) },
-          { label: p.mixFinalDue, value: date(brief?.dates.mixFinalDue) },
-          { label: p.masteringDue, value: date(brief?.dates.masteringDue) },
-          { label: p.masterFinalDue, value: date(brief?.dates.masterFinalDue) },
-          { label: p.releaseDue, value: date(view.releaseDue) },
-          { label: p.formats, value: brief?.formats ?? null },
-          {
-            label: p.revisions,
-            value: brief?.revisions == null ? null : String(brief.revisions),
-          },
-          {
-            label: p.deliverables,
-            value:
-              brief?.deliverables
-                .map((key) => fr.masterWorkflow.brief.deliverables[key])
-                .join(", ") || null,
-          },
-          { label: p.direction, value: brief?.direction ?? null },
-          { label: p.references, value: brief?.references ?? null },
-          { label: p.constraints, value: brief?.constraints ?? null },
-        ]}
-      />
-      {view.titles.length === 0 ? (
-        <EmptyNote>{t.blockers.noTitle}</EmptyNote>
-      ) : (
-        <DataTable>
-          <DataTableHeader>
-            <DataTableHead fill>{p.titles[view.role]}</DataTableHead>
-            <DataTableHead>{p.source[view.role]}</DataTableHead>
-            {view.role === "mix" && (
-              <DataTableHead hideBelow="sm" align="end">
-                {fr.masterWorkflow.inventory.facts.stems}
-              </DataTableHead>
-            )}
-          </DataTableHeader>
-          <DataTableBody>
-            {view.titles.map((title) => (
-              <DataTableRow key={title.id}>
-                <DataTableCell fill className="max-w-0">
-                  <DataTableMedia
-                    title={title.title}
-                    subtitle={title.artists}
-                  />
-                </DataTableCell>
-                <DataTableCell className="max-w-64 truncate">
-                  {title.source
-                    ? `${fr.catalog.audioStates[title.source.audioState]} · ${title.source.fileName}`
-                    : p.missing[view.role]}
-                </DataTableCell>
-                {view.role === "mix" && (
-                  <DataTableCell
-                    hideBelow="sm"
-                    align="end"
-                    className="text-[color:var(--text-secondary)]"
-                  >
-                    {p.stems(title.stems)}
-                  </DataTableCell>
-                )}
-              </DataTableRow>
-            ))}
-          </DataTableBody>
-        </DataTable>
+    <DocumentCard
+      name={t.package.title[role]}
+      line={view.engineer ? d.line(view.engineer.name) : d.lineNoEngineer}
+    >
+      <FactRows>
+        {view.titles.map((title) => (
+          <TitleRows key={title.id} title={title} view={view} />
+        ))}
+        {role === "mix" && (
+          <FactRow
+            label={d.direction}
+            value={
+              groups.length ? (
+                <span className="flex flex-col gap-1">
+                  {groups.map((g) => (
+                    <span key={g.key} className="flex flex-col">
+                      <span className="text-caption text-muted-foreground">
+                        {d.directionGroups[g.key]}
+                      </span>
+                      <span className="whitespace-pre-line">{g.text}</span>
+                    </span>
+                  ))}
+                </span>
+              ) : null
+            }
+            missing={groups.length === 0}
+            source={groups.length ? d.from.brief : null}
+          />
+        )}
+        {role === "mix" && brief && brief.deliverables.length > 0 && (
+          <FactRow
+            label={d.deliverables}
+            value={brief.deliverables
+              .map((key) => fr.masterWorkflow.brief.deliverables[key])
+              .join(", ")}
+            source={d.from.brief}
+          />
+        )}
+        {brief?.formats && (
+          <FactRow
+            label={d.formats}
+            value={brief.formats}
+            source={d.from.brief}
+          />
+        )}
+        {dates.length > 0 && (
+          <FactRow
+            label={d.dates}
+            value={
+              <span className="flex flex-col">
+                {dates.map((line) => (
+                  <span key={line}>{line}</span>
+                ))}
+              </span>
+            }
+            source={d.from.brief}
+          />
+        )}
+        {role === "mix" && brief?.revisions != null && (
+          <FactRow
+            label={d.revisions}
+            value={String(brief.revisions)}
+            source={d.from.brief}
+          />
+        )}
+        {brief?.message && (
+          <FactRow
+            label={d.message[role]}
+            value={<span className="whitespace-pre-line">{brief.message}</span>}
+            source={d.from.brief}
+          />
+        )}
+      </FactRows>
+    </DocumentCard>
+  );
+}
+
+function TitleRows({
+  title,
+  view,
+}: {
+  title: StepView["titles"][number];
+  view: StepView;
+}) {
+  const d = t.dossier;
+  const role = view.role;
+  return (
+    <>
+      {role === "mix" && (
+        <FactRow
+          label={d.title.mix}
+          value={d.titleValue(title.title, title.artists)}
+          source={d.from.catalog}
+        />
       )}
-      <p className="text-caption text-[color:var(--text-secondary)]">
-        {p.notSent}
-      </p>
-    </div>
+      <FactRow
+        label={d.source[role]}
+        value={
+          title.source
+            ? role === "mastering"
+              ? d.titleValue(title.title, title.source.fileName)
+              : title.source.fileName
+            : null
+        }
+        missing={!title.source}
+        missingLabel={d.sourceMissing[role]}
+        source={
+          title.source
+            ? role === "mix"
+              ? d.from.source
+              : d.from.mixFinal
+            : null
+        }
+      />
+      {role === "mix" &&
+        (title.stems > 0 ? (
+          <FactRow
+            label={d.stems}
+            value={t.before.stemsCount(title.stems)}
+            source={d.from.stems}
+          />
+        ) : (
+          <MissingStemsRow
+            organizationId={view.organizationId}
+            masterId={title.id}
+            title={title.title}
+          />
+        ))}
+    </>
   );
 }

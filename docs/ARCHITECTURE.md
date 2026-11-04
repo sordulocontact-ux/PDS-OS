@@ -4359,8 +4359,12 @@ est la préparation », modale de transmission, `BriefForm` : retirés de l'écr
   et l'envoi est bloqué tant que le Brief n'est pas enregistré tel quel (blocage côté code). « Modifié
   par … » : `changed_by` écrit par trigger.
 - **Mixage / Mastering** (`round-step.ts`, `round-actions.ts`, `components/master-workflow/round/`,
-  migrations `20261019080301` et `080401`) : avant l'envoi, « Avant d'envoyer », dossier, e-mail à
-  écrire (PDS OS n'envoie pas d'e-mail : lien + « Copier » + « Marquer comme envoyé »), dérogation sans
+  migrations `20261019080301` et `080401`) : avant l'envoi, comme le proto (Sacha, 04/11/2026) : ce qui
+  bloque, puis « Dossier pour le mixeur » ouvert (`PackagePreview`, `DocumentCard` : chaque titre, sa
+  source, ses pistes — ligne cliquable si elles manquent —, direction, livrables, formats, échéances et
+  sortie, révisions, message, chacun avec sa source), « Les tarifs restent internes », la carte de
+  l'e-mail (À, Objet, message modifiable gardé comme note du dossier, lien ajouté à la fin et sa
+  validité) envoyé par PDS OS si `EMAIL_SMTP_*`, sinon déclaré (« Marquer comme envoyé »), dérogation sans
   pistes **écrite** (`withoutStemsReason`, refusée sans) ; le jeton est gardé **chiffré**
   (`token_secret`, clé Vault `master_link_key`) et relu par le responsable seul
   (`master_transmission_link`) : lien visible, « Relancer » (mailto), « Renouveler », « Révoquer » avec
