@@ -771,8 +771,10 @@ Socle de toutes les zones (sous-lots C0 à C5 de `docs/projet-complet/commons.md
   (`router.push`) si elle est sur une autre page, et le résultat la suit (variable de module
   `carried`, lue par le `StepResultProvider` de la page d'arrivée) → « Étape ouverte pour vous :
   Cadrage › Brief de cadrage ». Activé seulement sur le Cadrage (Brief : créer, envoyer, décider ;
-  dernière réponse des 6 dimensions, `useNextQuestion`), le plan (`launchProjectPlan`) et le Brief
-  Master (`startBrief`, `recordBrief`) ; ailleurs le bandeau dit la suite sans naviguer. Les
+  dernière réponse des 6 dimensions, `useNextQuestion`), le plan (`launchProjectPlan`), le Juridique
+  (`lib/legal/outcome.ts`) et tout le Master (04/11/2026, Sacha) : Brief (`startBrief`, `recordBrief`),
+  Source (`confirmSource`, `declareExistingMix`), envoi (`sendRound`), décision d'une version
+  (`decideRound` : Mix validé → Mastering, Master validé → Master final), ingénieur interne ; ailleurs le bandeau dit la suite sans naviguer. Les
   réponses aux 6 dimensions n'ont pas de toast (des dizaines par Cadrage) : « Réponse confirmée ·
   Date cible » dans le bandeau, au-dessus de la question suivante. Pendant le geste, le bouton dit
   ce qui se passe (« Envoi en validation… », « Validation en cours… » sur l'issue cliquée de

@@ -41,37 +41,43 @@ export async function sendRound(
   const s = stageSchema.safeParse(stage);
   if (!s.success)
     return { ok: false, error: fr.masterWorkflow.mix.errors.failed };
-  return withOutcome(projectId, ["master"], done, async () => {
-    const result = await transmitPackage(
-      projectId,
-      s.data,
-      note,
-      withoutStemsReason,
-    );
-    if (!result.ok) return result;
-    const link = await ensureContactLink(projectId, result.engineer.id);
-    const to = result.engineer.email;
-    if (email && to && emailEnabled()) {
-      const access = await requireApproved();
-      const sender =
-        [access.firstName, access.lastName].filter(Boolean).join(" ") ||
-        (access.email ?? "");
-      const sent = await emailTransmission({
+  return withOutcome(
+    projectId,
+    ["master"],
+    done,
+    async () => {
+      const result = await transmitPackage(
         projectId,
-        role: s.data,
-        project: result.project,
-        engineer: { name: result.engineer.name, email: to },
-        message: note,
-        sender: { name: sender, email: access.email },
-        link,
-      });
+        s.data,
+        note,
+        withoutStemsReason,
+      );
+      if (!result.ok) return result;
+      const link = await ensureContactLink(projectId, result.engineer.id);
+      const to = result.engineer.email;
+      if (email && to && emailEnabled()) {
+        const access = await requireApproved();
+        const sender =
+          [access.firstName, access.lastName].filter(Boolean).join(" ") ||
+          (access.email ?? "");
+        const sent = await emailTransmission({
+          projectId,
+          role: s.data,
+          project: result.project,
+          engineer: { name: result.engineer.name, email: to },
+          message: note,
+          sender: { name: sender, email: access.email },
+          link,
+        });
+        refresh(projectId);
+        if (sent === "failed") return { ok: false, error: t.email.failed };
+        return { ok: true };
+      }
       refresh(projectId);
-      if (sent === "failed") return { ok: false, error: t.email.failed };
       return { ok: true };
-    }
-    refresh(projectId);
-    return { ok: true };
-  });
+    },
+    { openNext: true },
+  );
 }
 
 /**
@@ -205,33 +211,39 @@ export async function decideRound(
   await requireApproved();
   if (!input.success) return { ok: false, error: t.decision.errors.failed };
   const v = input.data;
-  return withOutcome(v.projectId, ["master"], done, async () => {
-    const supabase = await createClient();
-    const { error } = await supabase.rpc("decide_mix_version", {
-      p_version_id: v.versionId,
-      p_decision: v.decision,
-      p_note: v.note,
-    });
-    if (error) {
-      console.error("decideRound:", error.code, error.message);
-      const refused = fr.masterWorkflow.mixVersions.errors.decisionRefused;
-      const known = (Object.keys(refused) as Array<keyof typeof refused>).find(
-        (code) => error.message.includes(code),
-      );
-      return {
-        ok: false,
-        error: error.message.includes("working_source")
-          ? t.decision.errors.working
-          : error.code === "42501"
-            ? fr.masterWorkflow.mixVersions.errors.forbidden
-            : known
-              ? refused[known]
-              : t.decision.errors.failed,
-      };
-    }
-    refresh(v.projectId);
-    return { ok: true };
-  });
+  return withOutcome(
+    v.projectId,
+    ["master"],
+    done,
+    async () => {
+      const supabase = await createClient();
+      const { error } = await supabase.rpc("decide_mix_version", {
+        p_version_id: v.versionId,
+        p_decision: v.decision,
+        p_note: v.note,
+      });
+      if (error) {
+        console.error("decideRound:", error.code, error.message);
+        const refused = fr.masterWorkflow.mixVersions.errors.decisionRefused;
+        const known = (
+          Object.keys(refused) as Array<keyof typeof refused>
+        ).find((code) => error.message.includes(code));
+        return {
+          ok: false,
+          error: error.message.includes("working_source")
+            ? t.decision.errors.working
+            : error.code === "42501"
+              ? fr.masterWorkflow.mixVersions.errors.forbidden
+              : known
+                ? refused[known]
+                : t.decision.errors.failed,
+        };
+      }
+      refresh(v.projectId);
+      return { ok: true };
+    },
+    { openNext: true },
+  );
 }
 
 /** « Rouvrir le mix » with its reason (the owner, before the mastering). */

@@ -96,7 +96,7 @@ function only(
  * `modules` read before and after, `done` the gesture in the past
  * participle, used by ResultBanner and the toast. `openNext`: the
  * viewer's next step, when it is on another page, opens by itself (the
- * Cadrage, its plan and the Master's Brief, lot 3 of Ibé's feedback);
+ * Cadrage, its plan, the Juridique and the Master, lot 3 of Ibé's feedback);
  * elsewhere the banner only says it.
  *
  *   return withOutcome(projectId, ["legal"], t.done.confirmed, async () => {
