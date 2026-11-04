@@ -18,16 +18,20 @@ const BUSY_AFTER_MS = 400;
 
 const finite = (seconds: number) => (Number.isFinite(seconds) ? seconds : 0);
 
-// The waveform's bars, and under which height a bar is drawn as a dot.
-const BARS = 48;
+// The waveform: one bar of 1.5 px every PITCH px, as many as the width
+// holds (ElevenLabs: the wave fills the room it has); under DOT a bar is
+// drawn as a dot. The shape is kept at RES points and read at any width.
+const PITCH = 4;
+const RES = 256;
 const DOT = 0.22;
 
 /**
  * The waveform's shape for a file: drawn from its path (the signed query
- * changes, the file does not), the same every time. A picture of the
- * sound, not its measure: no peak is computed from the audio.
+ * changes, the file does not), the same every time and at every width. A
+ * picture of the sound, not its measure: no peak is computed from the
+ * audio.
  */
-function barsOf(src: string): number[] {
+function shapeOf(src: string): number[] {
   const path = src.split("?")[0] ?? src;
   let seed = 2166136261;
   for (let i = 0; i < path.length; i++)
@@ -38,11 +42,21 @@ function barsOf(src: string): number[] {
     return ((seed ^= seed >>> 16) >>> 0) / 4294967296;
   };
   let level = 0.5;
-  return Array.from({ length: BARS }, (_, i) => {
-    level = Math.min(1, Math.max(0.08, level * 0.55 + next() * 0.6));
-    // Quiet at both ends, like a sound that starts and stops.
-    const edge = Math.min(1, (i + 1) / 5, (BARS - i) / 5);
-    return level * edge;
+  return Array.from({ length: RES }, () => {
+    level = Math.min(1, Math.max(0.08, level * 0.7 + next() * 0.45));
+    return level;
+  });
+}
+
+/** `count` bars from the shape: the loudest point of each slice, quiet at
+ * both ends like a sound that starts and stops. */
+function barsOf(shape: number[], count: number): number[] {
+  return Array.from({ length: count }, (_, i) => {
+    const from = Math.floor((i * RES) / count);
+    const to = Math.max(from + 1, Math.floor(((i + 1) * RES) / count));
+    const peak = Math.max(...shape.slice(from, to));
+    const edge = Math.min(1, (i + 1) / 5, (count - i) / 5);
+    return peak * edge;
   });
 }
 
@@ -90,7 +104,22 @@ export function AudioPlayer({
   const [time, setTime] = useState(0);
   const [reported, setReported] = useState(0);
   const length = reported || duration || 0;
-  const bars = useMemo(() => barsOf(src), [src]);
+  const wave = useRef<HTMLSpanElement>(null);
+  const [count, setCount] = useState(48);
+  const shape = useMemo(() => shapeOf(src), [src]);
+  const bars = useMemo(() => barsOf(shape, count), [shape, count]);
+
+  // As many bars as the wave's width holds, again when it changes.
+  useEffect(() => {
+    const el = wave.current;
+    if (!el) return;
+    const fit = () =>
+      setCount(Math.max(12, Math.floor(el.clientWidth / PITCH)));
+    fit();
+    const observer = new ResizeObserver(fit);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [failed]);
 
   // The bar follows the sound every frame while it plays (timeupdate only
   // fires four times a second), written straight to the style.
@@ -214,7 +243,10 @@ export function AudioPlayer({
                 ? formatTimecode(length)
                 : ""}
           </span>
-          <span className="group relative flex h-full max-w-48 min-w-12 flex-1 items-center">
+          <span
+            ref={wave}
+            className="group relative flex h-full min-w-12 flex-1 items-center"
+          >
             <Wave
               bars={bars}
               className="text-[color:var(--text-tertiary)]"
