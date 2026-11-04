@@ -243,27 +243,13 @@ export const legal = {
   },
   confirmation: {
     title: "Confirmation",
-    description:
-      "Le dossier tel que PO l'a compris, ligne par ligne avec sa source. Corrigez ce qui est faux, puis confirmez-le.",
     notice:
       "Confirmer le dossier ne vaut ni signature, ni autorisation, ni dépôt.",
     sections: {
-      people: {
-        title: "Personnes",
-        description: "Qui a participé à chaque titre, et à quel titre.",
-      },
-      third_party: {
-        title: "Éléments repris",
-        description: "Ce que les titres reprennent d'œuvres existantes.",
-      },
-      agreements: {
-        title: "Contrats",
-        description: "Les contrats du projet et ceux déclarés au cadrage.",
-      },
-      publishers: {
-        title: "Éditeurs",
-        description: "L'éditeur de chaque œuvre, s'il y en a un.",
-      },
+      people: "Personnes",
+      third_party: "Éléments repris",
+      agreements: "Contrats",
+      publishers: "Éditeurs",
     },
     empty: "Rien dans cette partie pour l'instant.",
     sources: { intake: "Cadrage juridique" },
@@ -281,7 +267,6 @@ export const legal = {
         missing: "Manquant",
       },
     },
-    actions: { answer: "Répondre", correct: "Corriger" },
     notStarted: {
       title: "Le cadrage juridique n'a pas encore commencé",
       body: "Répondez d'abord aux questions de PO : le dossier se construit à partir de vos réponses.",
@@ -294,6 +279,8 @@ export const legal = {
     resume: "Reprendre le cadrage",
     // JUR-06: the button says what it does.
     confirm: "Confirmer et générer le plan d'action",
+    confirmAgain: "Confirmer à nouveau le dossier",
+    correct: "Corriger une réponse",
     preview: {
       title: "Le plan d'action qui sera généré",
       empty: "Aucune démarche à prévoir avec le dossier tel qu'il est.",
@@ -303,17 +290,18 @@ export const legal = {
             ? "1 fiche de renseignements à recueillir"
             : `${n} fiches de renseignements à recueillir`,
         contract: (n: number) =>
-          n === 1 ? "1 contrat à préparer" : `${n} contrats à préparer`,
+          n === 1 ? "1 contrat à prévoir" : `${n} contrats à prévoir`,
         splits: (n: number) =>
           n === 1
             ? "1 répartition de l'édition à faire confirmer"
             : `${n} répartitions de l'édition à faire confirmer`,
         clearance: (n: number) =>
-          n === 1 ? "1 autorisation à obtenir" : `${n} autorisations à obtenir`,
+          n === 1
+            ? "1 autorisation d'utilisation à obtenir"
+            : `${n} autorisations d'utilisation à obtenir`,
         formality: (n: number) =>
           n === 1 ? "1 déclaration SACEM" : `${n} déclarations SACEM`,
       },
-      then: "Vous gardez ou retirez chaque action, et choisissez responsables et échéances avant de lancer le plan. Rien n'est envoyé à personne.",
     },
     confirming: "Confirmation…",
     confirmed: (date: string, name: string | null) =>
@@ -323,8 +311,6 @@ export const legal = {
     confirmedNote:
       "Corriger une réponse le rouvrira : il faudra le confirmer à nouveau.",
     openPlan: "Passer au plan d'action",
-    toConfirmTitle: "Le dossier à confirmer",
-    confirmedTitle: "Le dossier confirmé",
     reopened:
       "Une réponse a changé depuis la dernière confirmation : relisez le dossier et confirmez-le à nouveau.",
     errors: {

@@ -18,12 +18,19 @@ import type {
   QuestionKey,
 } from "@/lib/legal/intake/types";
 import type { InventoryMaster } from "@/lib/legal/title-facts";
+import type { Tone } from "@/lib/ui/state-tones";
 
 const fr = { contracts, legal, masterPage };
 
 /** A row's link back to the conversation: answer it, or correct it. */
 export type SynthesisAction = { kind: "answer" | "correct"; href: string };
-export type SynthesisFact = Fact<SynthesisAction>;
+// `quote`: the words of the answer it was read from (« Cadrage juridique ·
+// « … » », proto Juridique v3 `synth()`). `tone`: the proto's pill for an
+// answer (« Déclaré » in info, « À vérifier » in warning), else the status's.
+export type SynthesisFact = Fact<SynthesisAction> & {
+  quote?: string | null;
+  tone?: Tone;
+};
 
 export const SYNTHESIS_SECTION_KEYS = [
   "people",
@@ -44,6 +51,8 @@ export type AnswerFact = {
   fact: FactValue;
   // legal_facts.status: the ticket's seven statuses.
   status: string;
+  // legal_facts.source_quote: the words it was read from.
+  quote: string | null;
 };
 
 const t = fr.legal.confirmation;
@@ -122,7 +131,11 @@ export function buildSynthesis(b: Build): SynthesisSection[] {
         detail: null,
         group: master ? groupOf(master) : undefined,
         source: t.sources.intake,
+        quote: a.quote,
         status: ANSWER_STATUS[a.status] ?? "to_confirm",
+        ...((ANSWER_STATUS[a.status] ?? "to_confirm") === "to_confirm" && {
+          tone: a.status === "to_verify" ? "warning" : "info",
+        }),
         statusLabel:
           t.states.answer[a.status as keyof typeof t.states.answer] ??
           t.states.answer.declared,
@@ -188,8 +201,9 @@ export function buildSynthesis(b: Build): SynthesisSection[] {
       const state = contractStateOf(c, b.today);
       return {
         key: `contract-${c.id}`,
-        label: c.title,
-        detail: c.parties.length > 0 ? c.parties.join(", ") : null,
+        // Who it binds in bold, the contract above (proto `synth()`).
+        label: c.parties.length > 0 ? c.parties.join(", ") : c.title,
+        detail: c.parties.length > 0 ? c.title : null,
         source: fr.legal.inventory.sources.contracts,
         status: state === "signed" ? "known" : "to_confirm",
         statusLabel: fr.contracts.states[state],

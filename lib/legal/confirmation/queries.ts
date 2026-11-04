@@ -54,7 +54,7 @@ export async function loadConfirmation(
     legalIntakeRow(project.id),
     supabase
       .from("legal_facts")
-      .select("question_key, master_id, kind, value, status")
+      .select("question_key, master_id, kind, value, status, source_quote")
       .eq("project_id", project.id)
       .is("superseded_by_answer_id", null)
       .order("created_at"),
@@ -77,6 +77,7 @@ export async function loadConfirmation(
             masterId: row.master_id,
             fact: parsed.data,
             status: row.status,
+            quote: row.source_quote,
           },
         ]
       : [];
