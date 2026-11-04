@@ -1,8 +1,10 @@
 import { BriefExchanges } from "@/components/master-workflow/brief-exchanges";
 import { BriefQuestions } from "@/components/master-workflow/brief-questions";
+import { DocumentCard } from "@/components/ui/document-card";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { Fold } from "@/components/ui/fold";
 import { PdfExportButton } from "@/components/ui/pdf-export-button";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { StepWaiting } from "@/components/shell/journey/step-waiting";
 import type { CallPrepDefaults } from "@/lib/calls/prep/types";
@@ -107,6 +109,35 @@ export function BriefStep({
           <StepWaiting who={ownerName} todo={t.ownerTodo} />
         )}
 
+      {!choosing && (
+        <DocumentCard
+          name={t.pdf.fileName(projectTitle)}
+          line={
+            step.recordedAt
+              ? `${t.document.saved(formatShortDay(step.recordedAt), step.recordedBy)}${step.dirty ? ` · ${t.document.dirty}` : ""}`
+              : t.document.notSaved
+          }
+          action={
+            <div className="flex flex-wrap items-center gap-2">
+              <StatusBadge tone={STATE_TONE[state]} size="sm">
+                {t.document.states[state]}
+              </StatusBadge>
+              {step.saved && (
+                <PdfExportButton
+                  href={`/api/projects/${view.projectId}/master-brief`}
+                  fileName={t.pdf.fileName(projectTitle)}
+                  label={t.pdf.export}
+                  pendingLabel={t.pdf.exporting}
+                  failedLabel={t.pdf.failed}
+                  variant="outline"
+                  size="sm"
+                />
+              )}
+            </div>
+          }
+        />
+      )}
+
       {step.startMode === "exchange" &&
         view.exchanges.length === 0 &&
         exchange && (
@@ -128,36 +159,6 @@ export function BriefStep({
 
       {!choosing && (
         <>
-          <FactRows>
-            <FactRow
-              label={t.document.title}
-              value={
-                step.recordedAt
-                  ? t.document.saved(
-                      formatShortDay(step.recordedAt),
-                      step.recordedBy,
-                    )
-                  : t.document.notSaved
-              }
-              source={step.dirty && step.recordedAt ? t.document.dirty : null}
-              state={{
-                tone: STATE_TONE[state],
-                label: t.document.states[state],
-              }}
-              side={
-                step.saved && (
-                  <PdfExportButton
-                    href={`/api/projects/${view.projectId}/master-brief`}
-                    fileName={t.pdf.fileName(projectTitle)}
-                    label={t.pdf.export}
-                    pendingLabel={t.pdf.exporting}
-                    failedLabel={t.pdf.failed}
-                    variant="outline"
-                  />
-                )
-              }
-            />
-          </FactRows>
           {missing && <ToneCallout tone="warning">{missing}</ToneCallout>}
           {step.sentAt && (
             <ToneCallout tone="info">

@@ -58,7 +58,7 @@ export function TemplateRequestCard({
           </Button>
         }
       >
-        <FactRows>
+        <FactRows className="rounded-none border-0">
           <FactRow
             label={t.appliesTo}
             value={request.roles.join(", ")}

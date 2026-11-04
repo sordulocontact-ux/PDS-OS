@@ -51,11 +51,12 @@ export const masterBrief = {
   missingSentence: (list: string) => `Il manque ${list}.`,
   // « Exporter en PDF » (lib/master-workflow/brief-html.ts).
   pdf: {
-    export: "Exporter en PDF",
+    export: "Voir le PDF",
     exporting: "Préparation du PDF…",
     failed: "Le PDF n'a pas pu être préparé. Réessayez.",
     title: (project: string) => `Brief Mix/Master · ${project}`,
-    fileName: (project: string) => `Brief Mix-Master - ${project}.pdf`,
+    fileName: (project: string) =>
+      `Brief_Mix_Master_${project.replace(/\s+/g, "_")}.pdf`,
     recorded: "Brief enregistré",
     draft: "Brouillon, pas encore enregistré",
     none: "Non renseigné",

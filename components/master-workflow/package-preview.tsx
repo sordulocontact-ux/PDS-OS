@@ -48,7 +48,6 @@ export function PackagePreview({ view }: { view: StepView }) {
 
   return (
     <DocumentCard
-      joined
       name={t.package.title[role]}
       line={view.engineer ? d.line(view.engineer.name) : d.lineNoEngineer}
     >

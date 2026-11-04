@@ -18,7 +18,7 @@ export function SourcedValues({
     value: string;
     source: string | null;
   }>;
-  // « rounded-none border-0 » inside a joined DocumentCard.
+  // « rounded-none border-0 » inside a DocumentCard.
   className?: string;
 }) {
   return (

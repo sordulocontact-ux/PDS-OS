@@ -96,7 +96,6 @@ export function ContractDocumentSection({
       }
     >
       <DocumentCard
-        joined
         name={d.name(title, latest.version)}
         line={signedBy ? d.signedLine(signedBy) : d.draftLine}
         action={

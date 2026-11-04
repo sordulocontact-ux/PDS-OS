@@ -89,11 +89,13 @@ export function ContractDocumentCard({
         )
       }
     >
-      <ContractValueList
-        fields={row.fields}
-        personName={row.name}
-        fixHref={fixHref}
-      />
+      <div className="px-3.5">
+        <ContractValueList
+          fields={row.fields}
+          personName={row.name}
+          fixHref={fixHref}
+        />
+      </div>
     </DocumentCard>
   );
 }

@@ -99,7 +99,6 @@ export function SendForm({
       )}
       {mail && (
         <DocumentCard
-          joined
           name={mail.title}
           line={mail.line}
           icon={IconEnvelopeOpen}
