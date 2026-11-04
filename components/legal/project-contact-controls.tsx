@@ -2,6 +2,7 @@
 
 import { useState, useTransition, type FormEvent } from "react";
 import { toast } from "@/components/ui/toast";
+import { IconPlus } from "nucleo-sharp-essential";
 
 import { PersonPickerField } from "@/components/network/person-picker-field";
 import { OptionSelect } from "@/components/projects/option-select";
@@ -131,7 +132,12 @@ export function RemoveProjectContactButton({
 export function AddProjectContactButton({ projectId }: { projectId: string }) {
   const t = fr.legal.projectContacts;
   return (
-    <DialogButton label={t.add} title={t.add} description={t.addDescription}>
+    <DialogButton
+      label={t.add}
+      icon={IconPlus}
+      title={t.add}
+      description={t.addDescription}
+    >
       {(close) => (
         <AddProjectContactForm projectId={projectId} onDone={close} />
       )}

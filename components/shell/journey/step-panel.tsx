@@ -133,7 +133,9 @@ export function StepPanel({
               {...(step.actor?.viewer
                 ? { "aria-labelledby": "journey-step-lead" }
                 : { "aria-label": t.now.mine })}
-              className="flex scroll-mt-24 flex-col gap-3.5 rounded-xl border border-[color:var(--selection-border)] bg-[color:var(--selection-bg)] p-4"
+              // No frame of its own (Sacha, 04/11/2026: « le fond bleu
+              // non »): the pill and the gesture's name say it is yours.
+              className="flex scroll-mt-24 flex-col gap-3.5"
             >
               <div className="flex flex-wrap items-center gap-2">
                 <StatusBadge tone="info">{t.now.mine}</StatusBadge>

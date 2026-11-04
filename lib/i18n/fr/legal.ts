@@ -29,6 +29,17 @@ export const legal = {
     },
     // Source of an intervenant non crédité.
     contactSource: "Réseau",
+    // One section per domain (proto Juridique v3, `inv()`).
+    sections: {
+      titles: "Titres",
+      people: "Personnes",
+      splits: "Répartitions",
+      agreements: "Contrats",
+      declarations: "Déclarations",
+      flags: "Points signalés au cadrage",
+      contacts: "Intervenants non crédités",
+    },
+    note: "Une information se complète là où elle vit (fiche du titre, Réseau, contrat) ou par les démarches du plan : cette liste se relit seule.",
     facts: {
       isrc: "ISRC",
       iswc: "ISWC",
