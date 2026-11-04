@@ -3038,6 +3038,10 @@ export type Database = {
           note: string | null
           organization_id: string
           project_id: string
+          refusal_reason: string | null
+          refused_at: string | null
+          refused_by: string | null
+          refused_cents: number | null
           status: string
           updated_at: string
         }
@@ -3059,6 +3063,10 @@ export type Database = {
           note?: string | null
           organization_id: string
           project_id: string
+          refusal_reason?: string | null
+          refused_at?: string | null
+          refused_by?: string | null
+          refused_cents?: number | null
           status?: string
           updated_at?: string
         }
@@ -3080,6 +3088,10 @@ export type Database = {
           note?: string | null
           organization_id?: string
           project_id?: string
+          refusal_reason?: string | null
+          refused_at?: string | null
+          refused_by?: string | null
+          refused_cents?: number | null
           status?: string
           updated_at?: string
         }
@@ -18030,6 +18042,16 @@ export type Database = {
         Args: { p_project_id: string; p_role: string }
         Returns: undefined
       }
+      refuse_master_rate: {
+        Args: { p_project_id: string; p_reason: string; p_role: string }
+        Returns: undefined
+      }
+      master_rate_refusals:
+        | { Args: { p_token: string }; Returns: Json }
+        | { Args: { p_contact_token: string; p_item_id: string }; Returns: Json }
+      propose_master_rate:
+        | { Args: { p_cents: number; p_role: string; p_token: string }; Returns: undefined }
+        | { Args: { p_cents: number; p_contact_token: string; p_item_id: string; p_role: string }; Returns: undefined }
       take_master_transmission:
         | { Args: { p_mastering_cents?: number | null; p_mix_cents?: number | null; p_token: string }; Returns: string }
         | { Args: { p_contact_token: string; p_item_id: string; p_mastering_cents: number | null; p_mix_cents: number | null }; Returns: string }

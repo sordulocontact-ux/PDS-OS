@@ -126,6 +126,47 @@ export async function markRoundSent(
   return { ok: true };
 }
 
+/**
+ * « Refuser » a proposed rate, with why (rule 6): the line goes back to
+ * the Brief's estimate, the engineer reads the reason on their link and
+ * proposes another amount (refuse_master_rate, the owner only).
+ */
+export async function refuseRate(
+  projectId: string,
+  stage: string,
+  reason: string,
+): Promise<WriteResult> {
+  const input = z
+    .object({
+      projectId: z.uuid(),
+      stage: stageSchema,
+      reason: z.string().trim().min(1).max(1000),
+    })
+    .safeParse({ projectId, stage, reason });
+  await requireApproved();
+  if (!input.success) return { ok: false, error: fr.dialogs.reasonRequired };
+  const v = input.data;
+  return withOutcome(v.projectId, ["master"], t.rate.refused, async () => {
+    const supabase = await createClient();
+    const { error } = await supabase.rpc("refuse_master_rate", {
+      p_project_id: v.projectId,
+      p_role: v.stage,
+      p_reason: v.reason,
+    });
+    if (error) {
+      console.error("refuseRate:", error.code, error.message);
+      return {
+        ok: false,
+        error: error.message.includes("reason_required")
+          ? fr.dialogs.reasonRequired
+          : fr.masterBrief.errors.failed,
+      };
+    }
+    refresh(v.projectId);
+    return { ok: true };
+  });
+}
+
 /** « Accepter le tarif »: the proposed amount is committed. */
 export async function acceptRate(
   projectId: string,

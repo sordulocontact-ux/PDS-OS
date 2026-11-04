@@ -213,6 +213,20 @@ export const masterRound = {
       `Proposé par ${name} ${day}${same ? " · c'est le tarif estimé" : ""}`,
     accept: "Accepter le tarif",
     accepted: "Tarif accepté : le montant est engagé",
+    // Refused with why (Sacha, 04/11): the engineer proposes another amount
+    // on their link; work goes on meanwhile.
+    refuse: "Refuser",
+    refuseReason: "Pourquoi vous refusez ce tarif",
+    refuseHint: (engineer: string) =>
+      `${first(engineer)} lit votre motif sur son lien et propose un autre montant ; il peut continuer à travailler en attendant.`,
+    refused: "Tarif refusé",
+    refusedState: "Refusé",
+    refusedLine: (amount: string, day: string, reason: string) =>
+      `${amount} refusé ${day} : « ${reason} »`,
+    awaiting: (engineer: string) =>
+      `En attente d'un nouveau montant de ${first(engineer)}`,
+    refusedBefore: (amount: string, reason: string) =>
+      `Après refus de ${amount} : « ${reason} »`,
     note: "Un montant proposé ne consomme pas le budget : il ne compte qu'une fois accepté.",
   },
   // The validator's decision at the head of the step (lot 4 of Ibé's
@@ -364,10 +378,18 @@ export const masterRound = {
     doneHint: (owner: string) =>
       `Votre tarif est envoyé à ${owner} : le label le valide avant de l'engager.`,
     taken: (day: string) => `Pris en charge le ${day}. Merci !`,
+    // After the label refused the rate.
+    refusedNotice: (amount: string, reason: string) =>
+      `PDS n'a pas retenu votre tarif de ${amount} : « ${reason} ». Proposez un autre montant ; vous pouvez continuer à travailler en attendant.`,
+    counter: "Proposer ce montant",
+    countered: "Montant proposé",
+    counterPending: (stage: "mix" | "mastering", amount: string) =>
+      `${stage === "mix" ? "Mix" : "Mastering"} · ${amount} proposé, en attente de PDS.`,
     errors: {
       amount: "Un montant en euros, par exemple 800.",
       choice: "Confirmez le tarif ou proposez le vôtre.",
       failed: "La prise en charge n'a pas pu être enregistrée. Réessayez.",
+      counterFailed: "Le montant n'a pas pu être envoyé. Réessayez.",
     },
   },
   portal: {

@@ -4379,7 +4379,11 @@ est la préparation », modale de transmission, `BriefForm` : retirés de l'écr
   (`master_transmission_link`) : lien visible, « Relancer » (mailto), « Renouveler », « Révoquer » avec
   motif. Sur `/m/` « Prendre en charge le dossier » avec le tarif confirmé ou proposé
   (`take_master_transmission` : ligne de budget `proposed`, notification `master_rate_proposed`) puis
-  « Accepter le tarif » (`accept_master_rate` → `committed`). Versions en `VersionCard`, retours minutés
+  « Accepter le tarif » (`accept_master_rate` → `committed`) ou **« Refuser »** avec motif (04/11/2026,
+  `20261104120101`, `refuse_master_rate` : la ligne revient à l'estimation, `refused_cents`,
+  `refusal_reason`, `refused_at`, `refused_by` gardés) ; l'ingénieur lit le motif sur son lien
+  (`master_rate_refusals`) et « Proposer ce montant » (`propose_master_rate`, de nouveau `proposed`,
+  notification `master_rate_proposed`). Le travail continue pendant ce temps (choix de Sacha). Versions en `VersionCard`, retours minutés
   (équipe seulement), « Transmettre les retours sans décider » (texte écrit par le code, chaque ligne
   avec son auteur), décision `DecisionPanel` (motif **toujours** obligatoire pour une modification),
   « Rouvrir le mix » (responsable, motif, refusé si le mastering est parti : décision `reopened`).

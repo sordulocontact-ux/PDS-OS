@@ -20,6 +20,7 @@ import { getPublicListen } from "@/lib/master-workflow/listen-public";
 import {
   getEngineerThread,
   getPublicPackage,
+  getRateRefusals,
   noteOpened,
 } from "@/lib/master-workflow/transmission-public";
 import {
@@ -110,15 +111,17 @@ async function cardsOf(
       if (!data || (data.state !== "open" && data.state !== "received"))
         return [];
       await noteOpened(key);
-      const [thread, deliverables] = await Promise.all([
+      const [thread, deliverables, refusals] = await Promise.all([
         getEngineerThread(key),
         getLinkDeliverables(key),
+        getRateRefusals(key),
       ]);
       return masterPortalCards({
         linkKey: key,
         data,
         thread,
         deliverables,
+        refusals,
       });
     }
     case "listen": {

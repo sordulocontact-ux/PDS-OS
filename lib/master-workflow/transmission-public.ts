@@ -106,6 +106,42 @@ export const getPublicPackage = trackedCache(
   },
 );
 
+const refusalSchema = z.object({
+  refusedCents: z.number(),
+  reason: z.string(),
+  refusedAt: z.string(),
+  // Still waiting for another amount from the engineer.
+  open: z.boolean(),
+  // The amount proposed since, once answered.
+  proposedCents: z.number().nullable(),
+});
+
+export type RateRefusals = Partial<
+  Record<"mix" | "mastering", z.infer<typeof refusalSchema>>
+>;
+
+/**
+ * The rates the label refused on this link's roles, with why, and the
+ * amount proposed since (master_rate_refusals): nothing else of the
+ * budget. Empty when none, or when the link no longer opens.
+ */
+export async function getRateRefusals(token: string): Promise<RateRefusals> {
+  if (!TOKEN.test(token)) return {};
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("master_rate_refusals", {
+    ...linkKeyArgs(token),
+  });
+  if (error) {
+    console.error("getRateRefusals:", error.message);
+    return {};
+  }
+  const parsed = z
+    .object({ mix: refusalSchema, mastering: refusalSchema })
+    .partial()
+    .safeParse(data);
+  return parsed.success ? parsed.data : {};
+}
+
 /**
  * The engineer opened their link (PROJ-UX-09): noted once by the database,
  * never read as a taking charge. A failure only loses that mark.

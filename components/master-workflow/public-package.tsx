@@ -1,4 +1,5 @@
 import { DeliverVersion } from "@/components/master-workflow/deliver-version";
+import { RateCounterForm } from "@/components/master-workflow/rate-counter-form";
 import { TakeChargeForm } from "@/components/master-workflow/take-charge-form";
 import { PublicRefresh } from "@/components/master-workflow/public-refresh";
 import { PublicVersions } from "@/components/master-workflow/public-versions";
@@ -9,7 +10,11 @@ import { Fold } from "@/components/ui/fold";
 import { sectionCardClass } from "@/components/ui/section-card";
 import { masterRound } from "@/lib/i18n/fr/master-round";
 import { masterWorkflow } from "@/lib/i18n/fr/master-workflow";
-import type { PublicPackage } from "@/lib/master-workflow/transmission-public";
+import type {
+  PublicPackage,
+  RateRefusals,
+} from "@/lib/master-workflow/transmission-public";
+import { formatAmount } from "@/lib/utils/money";
 import { cn } from "@/lib/utils";
 import { formatShortDate } from "@/lib/release/format";
 
@@ -135,16 +140,41 @@ export function PublicPackageView({ data }: { data: Open }) {
 export function PackageTakeCharge({
   token,
   data,
+  refusals = {},
 }: {
   token: string;
   data: Open;
+  // The rates the label refused, why, and what was proposed since.
+  refusals?: RateRefusals;
 }) {
   const pack = data.package;
+  const t = fr.masterRound.take;
   if (data.state === "received" && data.acknowledgedAt)
     return (
-      <p className="text-sm font-medium">
-        {fr.masterRound.take.taken(formatShortDate(data.acknowledgedAt))}
-      </p>
+      <div className="flex flex-col gap-3">
+        <p className="text-sm font-medium">
+          {t.taken(formatShortDate(data.acknowledgedAt))}
+        </p>
+        {(["mix", "mastering"] as const).map((role) => {
+          const r = refusals[role];
+          if (!r) return null;
+          return r.open ? (
+            <div key={role} className="flex flex-col gap-3">
+              <ToneCallout tone="warning">
+                {t.refusedNotice(formatAmount(r.refusedCents), r.reason)}
+              </ToneCallout>
+              <RateCounterForm token={token} role={role} />
+            </div>
+          ) : r.proposedCents !== null ? (
+            <p
+              key={role}
+              className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]"
+            >
+              {t.counterPending(role, formatAmount(r.proposedCents))}
+            </p>
+          ) : null;
+        })}
+      </div>
     );
   return (
     <TakeChargeForm

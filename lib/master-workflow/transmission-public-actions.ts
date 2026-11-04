@@ -69,6 +69,38 @@ export async function takeMasterPackage(
   return { ok: true };
 }
 
+/**
+ * « Proposer ce montant », by the engineer after the label refused their
+ * rate: the line is proposed again and the owner notified.
+ */
+export async function proposeMasterRate(
+  token: string,
+  role: "mix" | "mastering",
+  cents: number,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const t = fr.masterRound.take;
+  const input = z
+    .object({
+      role: z.enum(["mix", "mastering"]),
+      cents: z.number().int().min(0).max(100_000_000),
+    })
+    .safeParse({ role, cents });
+  if (!TOKEN.test(token)) return { ok: false, error: t.errors.counterFailed };
+  if (!input.success) return { ok: false, error: t.errors.amount };
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("propose_master_rate", {
+    ...linkKeyArgs(token),
+    p_role: input.data.role,
+    p_cents: input.data.cents,
+  });
+  if (error) {
+    console.error("proposeMasterRate:", error.message);
+    return { ok: false, error: t.errors.counterFailed };
+  }
+  revalidatePath(linkKeyPath("m", token));
+  return { ok: true };
+}
+
 export type DeliveryResult =
   { ok: true; path: string } | { ok: false; error: string };
 

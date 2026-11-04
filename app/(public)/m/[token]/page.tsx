@@ -14,6 +14,7 @@ import { getPortalFrame } from "@/lib/portal/frame";
 import {
   getEngineerThread,
   getPublicPackage,
+  getRateRefusals,
   noteOpened,
 } from "@/lib/master-workflow/transmission-public";
 
@@ -49,6 +50,7 @@ export default async function MasterPackagePage({
     thread: await getEngineerThread(token),
     invoices: await getPersonInvoices(token),
     deliverables: await getLinkDeliverables(token),
+    refusals: await getRateRefusals(token),
   });
   return (
     <PortalShell

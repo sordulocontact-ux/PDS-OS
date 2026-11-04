@@ -49,6 +49,8 @@ export type RoundRate = {
   updatedAt: string;
   // The estimate of the Brief, to say « c'est le tarif estimé ».
   estimateCents: number | null;
+  // The last amount the owner refused, why and when (refuse_master_rate).
+  refusal: { cents: number; reason: string; at: string } | null;
 };
 
 export type RoundStepView = {
@@ -128,7 +130,9 @@ export async function loadRoundStep(
     loadMixVersions(project, access.personId, stage),
     supabase
       .from("budget_lines")
-      .select("master_role, amount_cents, status, note, updated_at")
+      .select(
+        "master_role, amount_cents, status, note, updated_at, refused_cents, refusal_reason, refused_at",
+      )
       .eq("project_id", projectId)
       .not("master_role", "is", null),
     live
@@ -175,6 +179,14 @@ export async function loadRoundStep(
             note: row.note,
             updatedAt: row.updated_at,
             estimateCents: estimate(row.master_role) ?? null,
+            refusal:
+              row.refused_at && row.refused_cents !== null
+                ? {
+                    cents: row.refused_cents,
+                    reason: row.refusal_reason ?? "",
+                    at: row.refused_at,
+                  }
+                : null,
           },
         ]
       : [],

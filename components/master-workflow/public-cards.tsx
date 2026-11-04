@@ -12,7 +12,10 @@ import { masterWorkflow } from "@/lib/i18n/fr/master-workflow";
 import type { EngineerMessage } from "@/lib/master-workflow/engineer-messages";
 import type { LinkDeliverable } from "@/lib/master-workflow/deliverables-public";
 import type { PersonInvoices } from "@/lib/invoices/public";
-import type { PublicPackage } from "@/lib/master-workflow/transmission-public";
+import type {
+  PublicPackage,
+  RateRefusals,
+} from "@/lib/master-workflow/transmission-public";
 
 const fr = { masterWorkflow, masterRound };
 
@@ -39,10 +42,13 @@ export function masterPortalCards({
   thread,
   invoices = null,
   deliverables = [],
+  refusals = {},
 }: {
   linkKey: string;
   data: OpenPackage;
   thread: EngineerMessage[];
+  // The rates the label refused on this link (master_rate_refusals).
+  refusals?: RateRefusals;
   // « Votre facture », once PDS asked for one (the Master final validated,
   // a paid contract signed): on the link /m only; the person's page /c
   // reads them by its own token, once for the whole page.
@@ -56,6 +62,8 @@ export function masterPortalCards({
   });
   const role = data.package.role;
   const taken = data.state === "received";
+  // A refused rate waits for another amount: the package card asks again.
+  const counter = Object.values(refusals).some((r) => r?.open);
   // Per title, the latest version and whether a new one is expected.
   const latestOf = (masterId: string | null) =>
     data.versions.find(
@@ -95,9 +103,13 @@ export function masterPortalCards({
     {
       id: "ps-package",
       title: r.portal.package,
-      state: taken ? "done" : "todo",
-      action: taken ? null : { label: r.take.title, due: null },
-      lead: !taken,
+      state: taken && !counter ? "done" : "todo",
+      action: !taken
+        ? { label: r.take.title, due: null }
+        : counter
+          ? { label: r.take.counter, due: null }
+          : null,
+      lead: !taken || counter,
       order: 1,
       workflow: "master",
       body: (
@@ -105,7 +117,7 @@ export function masterPortalCards({
           <p className="text-muted-foreground">
             {t.intro[role](data.package.project, data.package.engineer)}
           </p>
-          <PackageTakeCharge token={linkKey} data={data} />
+          <PackageTakeCharge token={linkKey} data={data} refusals={refusals} />
           <PublicPackageView data={data} />
         </>
       ),
