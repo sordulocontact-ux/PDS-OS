@@ -19,7 +19,7 @@ const BUSY_AFTER_MS = 400;
 const finite = (seconds: number) => (Number.isFinite(seconds) ? seconds : 0);
 
 // The waveform's bars, and under which height a bar is drawn as a dot.
-const BARS = 40;
+const BARS = 36;
 const DOT = 0.22;
 
 /**
@@ -56,8 +56,8 @@ const played = (ratio: number) =>
 /**
  * PDS OS's audio player (Sacha's model, 04/11/2026): a round play button
  * in ink, a waveform of bars (dots where it is quiet) that turns ink as it
- * plays and moves the sound on click, drag or arrow keys, then the time
- * once listened to. One sound plays at a time; buffering longer than
+ * plays and moves the sound on click, drag or arrow keys, then its length
+ * (« 1:29 »), the position too once listening began (« 0:43 / 1:29 »). One sound plays at a time; buffering longer than
  * 400 ms shows the spinner in the button; a link that no longer answers
  * says « Lecture impossible ». `ref` reaches the `<audio>` (a listening
  * note moves the sound to its moment).
@@ -203,7 +203,7 @@ export function AudioPlayer({
         </span>
       ) : (
         <>
-          <span className="group relative flex h-full min-w-12 flex-1 items-center">
+          <span className="group relative flex h-full max-w-48 min-w-12 flex-1 items-center">
             <Wave
               bars={bars}
               className="text-[color:var(--text-tertiary)]"
@@ -249,10 +249,12 @@ export function AudioPlayer({
               className="pointer-events-none absolute inset-x-0 -inset-y-1 rounded-md peer-focus-visible:ring-3 peer-focus-visible:ring-ring/50"
             />
           </span>
-          {(time > 0 || !paused) && (
+          {/* The length at rest, the position once listening began. */}
+          {(known || time > 0) && (
             <span className="shrink-0 text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-secondary)] tabular-nums">
-              {formatTimecode(time)}
-              {known && ` / ${formatTimecode(length)}`}
+              {time > 0 || !paused
+                ? `${formatTimecode(time)}${known ? ` / ${formatTimecode(length)}` : ""}`
+                : formatTimecode(length)}
             </span>
           )}
         </>
