@@ -1,5 +1,6 @@
 import { NowFrame } from "@/components/shell/journey/now-card";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { TitleBlock } from "@/components/ui/title-block";
 import type { Tone } from "@/lib/ui/state-tones";
 import { cn } from "@/lib/utils";
 
@@ -35,10 +36,12 @@ export function CallNowBlock({
         <StatusBadge tone={badge.tone}>{badge.text}</StatusBadge>
         <span>{eyebrow}</span>
       </div>
-      <h2 className="text-[length:var(--type-display-sm)] leading-[var(--type-display-sm-lh)] font-medium tracking-[var(--type-display-tracking)] text-balance">
-        {title}
-      </h2>
-      <p className={cn(secondary, "text-pretty")}>{why}</p>
+      <TitleBlock>
+        <h2 className="text-[length:var(--type-display-sm)] leading-[var(--type-display-sm-lh)] font-medium tracking-[var(--type-display-tracking)] text-balance">
+          {title}
+        </h2>
+        <p className={cn(secondary, "text-pretty")}>{why}</p>
+      </TitleBlock>
       {then && (
         <dl className={cn(secondary, "flex flex-wrap gap-1.5")}>
           <dt>{then.label} :</dt>

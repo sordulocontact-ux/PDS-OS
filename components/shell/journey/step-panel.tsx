@@ -5,6 +5,7 @@ import {
   StepResultProvider,
 } from "@/components/shell/module/result-banner";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { TitleBlock } from "@/components/ui/title-block";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { journey } from "@/lib/i18n/fr/journey";
 import {
@@ -93,35 +94,37 @@ export function StepPanel({
         aria-labelledby="journey-step-title"
         className="flex min-w-0 flex-col gap-3.5 rounded-2xl border border-[color:var(--border-hairline)] bg-card p-5"
       >
-        <div className="flex flex-wrap items-center justify-between gap-2.5">
-          <h2
-            id="journey-step-title"
-            className="text-[length:var(--type-figure-lg)] leading-[var(--type-figure-lg-lh)] font-medium tracking-[var(--type-display-tracking)] text-balance"
-          >
-            {step.title}
-          </h2>
-          <div className="flex flex-wrap items-center gap-2.5">
-            {step.due && step.status !== "done" && (
-              <span
-                className={cn(
-                  "text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-secondary)]",
-                  step.alert === "overdue" &&
-                    "font-semibold text-[color:var(--tone-danger-fg)]",
-                )}
-              >
-                {t.meta.due(formatDay(step.due))}
-              </span>
-            )}
-            {badge && (
-              <StatusBadge tone={badge.tone}>{badge.label}</StatusBadge>
-            )}
+        <TitleBlock>
+          <div className="flex flex-wrap items-center justify-between gap-2.5">
+            <h2
+              id="journey-step-title"
+              className="text-[length:var(--type-figure-lg)] leading-[var(--type-figure-lg-lh)] font-medium tracking-[var(--type-display-tracking)] text-balance"
+            >
+              {step.title}
+            </h2>
+            <div className="flex flex-wrap items-center gap-2.5">
+              {step.due && step.status !== "done" && (
+                <span
+                  className={cn(
+                    "text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-secondary)]",
+                    step.alert === "overdue" &&
+                      "font-semibold text-[color:var(--tone-danger-fg)]",
+                  )}
+                >
+                  {t.meta.due(formatDay(step.due))}
+                </span>
+              )}
+              {badge && (
+                <StatusBadge tone={badge.tone}>{badge.label}</StatusBadge>
+              )}
+            </div>
           </div>
-        </div>
-        {step.why && (
-          <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
-            {step.why}
-          </p>
-        )}
+          {step.why && (
+            <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
+              {step.why}
+            </p>
+          )}
+        </TitleBlock>
         {lead && (
           <>
             {banner}

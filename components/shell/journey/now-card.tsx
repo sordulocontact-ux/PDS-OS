@@ -1,5 +1,6 @@
 import { buttonVariants } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { TitleBlock } from "@/components/ui/title-block";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { ViewLink } from "@/components/ui/view-link";
 import { journey } from "@/lib/i18n/fr/journey";
@@ -104,32 +105,34 @@ export function NowCard({
         <StatusBadge tone={badge.tone}>{badge.label}</StatusBadge>
         <span>{eyebrow.filter(Boolean).join(" · ")}</span>
       </div>
-      <h2
-        className={cn(
-          "font-medium tracking-[var(--type-display-tracking)] text-balance",
-          overview
-            ? "text-[length:var(--type-display-sm)] leading-[var(--type-display-sm-lh)]"
-            : "text-[length:var(--type-figure-lg)] leading-[var(--type-figure-lg-lh)]",
+      <TitleBlock>
+        <h2
+          className={cn(
+            "font-medium tracking-[var(--type-display-tracking)] text-balance",
+            overview
+              ? "text-[length:var(--type-display-sm)] leading-[var(--type-display-sm-lh)]"
+              : "text-[length:var(--type-figure-lg)] leading-[var(--type-figure-lg-lh)]",
+          )}
+        >
+          {first
+            ? first.step.actor?.todo
+            : overview
+              ? t.allDone
+              : waiting.length > 0
+                ? texts.waitingTitle
+                : texts.finished}
+        </h2>
+        {first?.step.why && !overview && (
+          <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
+            {first.step.why}
+          </p>
         )}
-      >
-        {first
-          ? first.step.actor?.todo
-          : overview
-            ? t.allDone
-            : waiting.length > 0
-              ? texts.waitingTitle
-              : texts.finished}
-      </h2>
-      {first?.step.why && !overview && (
-        <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
-          {first.step.why}
-        </p>
-      )}
-      {!first && overview && (
-        <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
-          {t.othersMove}
-        </p>
-      )}
+        {!first && overview && (
+          <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
+            {t.othersMove}
+          </p>
+        )}
+      </TitleBlock>
       {first && (
         <div className="flex flex-wrap items-center gap-3">
           <ViewLink href={actionHref(first.step)} className={buttonVariants()}>
