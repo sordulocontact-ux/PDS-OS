@@ -22,7 +22,8 @@ const fr = { core };
  * `.doccard` of the Master: « Dossier pour le mixeur », « L'e-mail que PDS OS
  * enverra »): the head on a soft strip with a hairline under it, the body
  * flush against the frame — its `FactRows` take `className="rounded-none
- * border-0"`, other content its own padding.
+ * border-0"`, other content its own padding; what changed since the v1
+ * on an info strip under the head (proto `.docchg`).
  */
 export function DocumentCard({
   name,
@@ -109,6 +110,12 @@ export function DocumentCard({
         )}
       >
         {head}
+        {change && (
+          <p className="flex items-start gap-2.5 border-b border-[color:var(--border-hairline)] bg-[var(--tone-info-bg)] px-3.5 py-2.5 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--tone-info-fg)]">
+            <IconCircleInfo aria-hidden className="mt-0.5 size-4 shrink-0" />
+            <span className="min-w-0">{change}</span>
+          </p>
+        )}
         {children}
       </section>
     );

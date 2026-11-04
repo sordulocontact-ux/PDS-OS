@@ -1,4 +1,5 @@
 import { contracts } from "@/lib/i18n/fr/contracts";
+import { cn } from "@/lib/utils";
 
 const fr = { contracts };
 
@@ -9,6 +10,7 @@ const fr = { contracts };
  */
 export function SourcedValues({
   values,
+  className,
 }: {
   values: Array<{
     id: string;
@@ -16,9 +18,16 @@ export function SourcedValues({
     value: string;
     source: string | null;
   }>;
+  // « rounded-none border-0 » inside a joined DocumentCard.
+  className?: string;
 }) {
   return (
-    <dl className="flex flex-col rounded-xl border border-[color:var(--border-hairline)] px-4 [&>div+div]:border-t [&>div+div]:border-[color:var(--border-hairline)]">
+    <dl
+      className={cn(
+        "flex flex-col rounded-xl border border-[color:var(--border-hairline)] px-4 [&>div+div]:border-t [&>div+div]:border-[color:var(--border-hairline)]",
+        className,
+      )}
+    >
       {values.map((v) => (
         <div
           key={v.id}

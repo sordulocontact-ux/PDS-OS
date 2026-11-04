@@ -96,7 +96,7 @@ export function ContractDocumentSection({
       }
     >
       <DocumentCard
-        flat
+        joined
         name={d.name(title, latest.version)}
         line={signedBy ? d.signedLine(signedBy) : d.draftLine}
         action={
@@ -120,7 +120,10 @@ export function ContractDocumentSection({
         }
         change={change}
       >
-        <SourcedValues values={values} />
+        <SourcedValues
+          values={values}
+          className="rounded-none border-0 px-3.5"
+        />
       </DocumentCard>
     </PageSection>
   );
