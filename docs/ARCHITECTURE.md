@@ -1787,8 +1787,9 @@ l'étape qui attend la personne (`framingLanding`) et les anciennes URL (`?step=
   (`BriefDocument` = la `DocumentCard` commune au Master et au Juridique, Sacha 05/11/2026 « c'est un
   document » ; corps `BriefVersionDoc` : une section par dimension, « libellé | valeur », source dessous,
   « À revoir » sur les dimensions renvoyées) : la version à envoyer, sinon la dernière envoyée ; dans la
-  tête l'état, « Copier le lien » et « Voir le PDF », puis « Changé depuis la version n : … » sur le
-  bandeau d'info (`briefChanges`) ; le geste (envoyer, décider) sous la carte. **Un seul
+  tête l'état, « Copier le lien » et « Télécharger le PDF », puis « Changé depuis la version n : … » sur
+  le bandeau d'info (`briefChanges`) ; « Créée par … · validée par … » en petit sous la carte (Sacha
+  05/11, secondaire), puis le geste (envoyer, décider). **Un seul
   geste** (Sacha, 28/10/2026) : quand tout est complet, la prochaine version s'affiche telle qu'elle
   partira et « Envoyer en validation à X » (`sendFramingBrief`) la fige (`create_framing_brief`, ou le
   brouillon d'avant s'il dit la même chose) et l'envoie (`send_framing_brief`) ; raison écrite si rien n'a
