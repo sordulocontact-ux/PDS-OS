@@ -77,6 +77,7 @@ function performerFact(
     status: "known",
     statusLabel: t.states.catalogArtist,
     href: routes.artist(performer.artistId),
+    peek: { kind: "artist", id: performer.artistId },
   };
 }
 

@@ -7,6 +7,7 @@
 // Réseau", "Relier") links every unlinked credit of that name, said in the
 // interface, never a credit already linked elsewhere.
 
+import type { PeekTarget } from "@/lib/peek/types";
 import { routes } from "@/lib/auth/redirects";
 import type { FactStatus } from "@/lib/facts/types";
 import { facts } from "@/lib/i18n/fr/facts";
@@ -94,6 +95,8 @@ export type CreditContactState = {
   statusLabel: string;
   href: string;
   action?: CreditContactAction;
+  // The Réseau's person, previewed on the page (RecordPeekDialog).
+  peek?: PeekTarget;
 };
 
 /**
@@ -121,6 +124,7 @@ export function creditContactState(
       status: "known",
       statusLabel: t.inNetwork,
       href: routes.networkContact(credit.contactId),
+      peek: { kind: "contact", id: credit.contactId },
     };
   const key = normalizeSearch(credit.name);
   const links = sameName?.get(key) ?? [

@@ -25,7 +25,6 @@ export const legal = {
       organism: "Organisme",
       allDeclared: "Tous les organismes sont déjà déclarés pour ce titre.",
       complete: "Compléter",
-      view: "Voir",
     },
     // Source of an intervenant non crédité.
     contactSource: "Réseau",

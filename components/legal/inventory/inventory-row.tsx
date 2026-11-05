@@ -1,22 +1,22 @@
 import { InventoryEditRow } from "@/components/legal/inventory/inventory-edit-row";
-import { buttonVariants, ButtonRoll } from "@/components/ui/button";
+import { RecordPeekRow } from "@/components/shell/record-peek-row";
 import { FactRow } from "@/components/ui/fact-row";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { ViewLink } from "@/components/ui/view-link";
 import type { FactGroup, FactStatus } from "@/lib/facts/types";
-import { legal } from "@/lib/i18n/fr/legal";
 import type { LegalRowEdit } from "@/lib/legal/types";
+import type { PeekTarget } from "@/lib/peek/types";
 import { factTone } from "@/lib/ui/state-tones";
-
-const fr = { legal };
 
 /**
  * One fact of the État des lieux, as every fact of a step (`FactRow`, proto
  * Juridique v3 `fact()`): what it is, what it concerns and its source under
- * it, its state as a pill and its action on the right. The title is a tag
- * only when the project has several (`group`), never repeated in the line.
- * `edit`: the whole row opens its form in a modal on the page (Sacha,
- * 05/11/2026), as the Master edits a fact where it is read.
+ * it, its state as a pill. The title is a tag only when the project has
+ * several (`group`), never repeated in the line. As in the Master, a click
+ * on the whole row does what the row offers, with no « Voir » / « Compléter »
+ * written on it (Sacha, 05/11/2026): `edit` opens its form in a modal of the
+ * page; else `peek` previews its record in a modal; else `href` opens its
+ * page. A row with its own buttons (`children`: « Ajouter au Réseau »,
+ * « Lier ») is not clickable itself.
  */
 export function InventoryRow({
   label,
@@ -27,6 +27,7 @@ export function InventoryRow({
   href,
   group,
   edit,
+  peek,
   children,
 }: {
   label: string;
@@ -38,10 +39,9 @@ export function InventoryRow({
   href: string | null;
   group?: FactGroup;
   edit?: LegalRowEdit;
-  // The row's own controls; replace the default « Compléter » / « Voir ».
+  peek?: PeekTarget;
   children?: React.ReactNode;
 }) {
-  const t = fr.legal.inventory.actions;
   const tag = group && (
     <StatusBadge
       size="sm"
@@ -52,46 +52,42 @@ export function InventoryRow({
       {group.title}
     </StatusBadge>
   );
-  const sourceLine = [detail, source].filter(Boolean).join(" · ");
-  const state = statusLabel
-    ? { tone: factTone[status], label: statusLabel }
-    : null;
+  const row = {
+    value: label,
+    source: [detail, source].filter(Boolean).join(" · "),
+    state: statusLabel ? { tone: factTone[status], label: statusLabel } : null,
+  };
+  if (children)
+    return (
+      <FactRow
+        {...row}
+        side={
+          <>
+            {tag}
+            {children}
+          </>
+        }
+      />
+    );
   if (edit)
     return (
       <InventoryEditRow
+        {...row}
         action={edit}
         missing={status === "missing"}
-        label={undefined}
         hrefLabel={label}
-        value={label}
-        source={sourceLine}
-        state={state}
         side={tag}
       />
     );
-  const action =
-    children ??
-    (href && (
-      <ViewLink
-        href={href}
-        className={buttonVariants({ variant: "ghost", size: "sm" })}
-      >
-        <ButtonRoll>{status === "known" ? t.view : t.complete}</ButtonRoll>
-      </ViewLink>
-    ));
-  return (
-    <FactRow
-      value={label}
-      source={sourceLine}
-      state={state}
-      side={
-        (tag || action) && (
-          <>
-            {tag}
-            {action}
-          </>
-        )
-      }
-    />
-  );
+  if (peek)
+    return (
+      <RecordPeekRow
+        {...row}
+        target={peek}
+        name={label}
+        hrefLabel={label}
+        side={tag}
+      />
+    );
+  return <FactRow {...row} side={tag} href={href} hrefLabel={label} />;
 }

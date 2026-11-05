@@ -3182,6 +3182,12 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
   contrats, répartitions, SACEM, autorisations, Prêt pour la sortie, délégation) ; `withOutcome` et
   `legalOutcome` sont génériques et gardent le `data` d'un résultat ; `advanceContract` et
   `sendContractForSignature` n'enveloppent qu'un contrat rattaché à un projet.
+  *Règle des lignes (Sacha, 05/11)* : comme au Master, **aucun « Voir » / « Compléter » / « Modifier »
+  écrit** sur une ligne qui ouvre quelque chose : toute la ligne est cliquable ; elle ouvre son formulaire
+  si on peut écrire, sinon un **aperçu** de la fiche (`Fact.peek` → `RecordPeekDialog` : artiste interprète,
+  personne du Réseau d'un crédit lié, contrat ; « Voir la fiche » pour la page), sinon sa page. Un bouton
+  reste pour l'édition sur place (« Modifier » d'un rôle, « Changer ») et les vrais gestes (« Ajouter au
+  Réseau », « Lier », « Retirer ») ; une ligne qui en porte un n'est pas cliquable elle-même.
 
 - **Audit des retours écrits d'Ibé (28/10/2026, migration `20261028000601_recette_p0_guards`)** : ce
   que seuls les écrans tenaient passe en base. *Contre-signature par version* (JUR-11) :

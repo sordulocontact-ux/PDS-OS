@@ -2,6 +2,7 @@
 // Master's État du master): what a project already knows, each fact
 // classified by code and displayed as is. Client-safe.
 
+import type { PeekTarget } from "@/lib/peek/types";
 import type { Hue } from "@/lib/ui/category-hues";
 import { titleHue } from "@/lib/ui/category-hues";
 
@@ -35,6 +36,9 @@ export type Fact<Action> = {
   href: string | null;
   // What can be done right from the row, when the viewer may.
   action?: Action;
+  // A record the row previews in a modal instead of leaving the page
+  // (RecordPeekDialog), when there is nothing to edit from it.
+  peek?: PeekTarget;
   group?: FactGroup;
 };
 

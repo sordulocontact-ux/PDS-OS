@@ -83,6 +83,7 @@ export function LegalInventory({
                     href={fact.href}
                     group={tagged ? fact.group : undefined}
                     edit={isRowEdit(fact.action) ? fact.action : undefined}
+                    peek={fact.peek}
                   >
                     {fact.action && !isRowEdit(fact.action) && (
                       <FactAction action={fact.action} />

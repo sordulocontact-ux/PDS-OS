@@ -63,7 +63,8 @@ export function agreementFacts(
         source: t.sources.contracts,
         status: "missing",
         statusLabel: t.states.noContract,
-        href: routes.contracts,
+        // « Nouveau contrat » under the section adds one, on the page.
+        href: null,
       },
     ];
   return contracts.map((contract) => {
@@ -76,6 +77,7 @@ export function agreementFacts(
       status: CONTRACT_STATUS[state],
       statusLabel: fr.contracts.states[state],
       href: routes.contract(contract.id),
+      peek: { kind: "contract", id: contract.id },
     };
   });
 }

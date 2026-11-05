@@ -1355,5 +1355,7 @@ directement », l'ISWC depuis une modale de la page, sans aller au catalogue. D�
 - [x] **Bulletin SACEM** : chaque valeur en ligne de faits, enregistrement toujours en bloc.
 - [x] **JUR-04 terminé** : tous les gestes d'équipe du Juridique disent la suite et ouvrent l'étape
       suivante du lecteur.
+- [x] **Lignes sans bouton « Voir » / « Compléter »** (comme au Master) et **aperçu en modale** d'un artiste,
+      d'une personne du Réseau et d'un contrat, « Voir la fiche » pour aller sur sa page.
 - [ ] Migration `20261105140101` à pousser en prod (avec accord) ; passage navigateur des trois écrans.
 
