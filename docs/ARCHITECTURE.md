@@ -1085,6 +1085,39 @@ s'afficher sans chargement.
 
 ## 4. Calls, audio, transcription (étape 4 + enregistreur)
 
+- **Deux portes vers les mêmes calls** (Sacha, 05/11/2026 ; `lib/calls/door.ts`, `CallDoor`), comme
+  Travail : **Calls** de la barre principale (`/app/calls`, tous les calls visibles) et **Calls**
+  du projet, dans Pilotage à côté de Travail (`/app/projects/<p>/calls`, plus caché). Un call
+  s'ouvre **dans la porte d'où on vient** : depuis Calls, `/app/calls/<id>` (`routes.call`, ex-
+  `routes.meeting`) sert désormais **tout call visible**, réunion interne ou call de projet
+  (`getVisibleCall` = `getCall(…, "any", …)`, la barre reste sur Calls, « Projet : X › » mène au
+  projet) ; depuis le projet, `/app/projects/<p>/calls/<id>` (dans le cadre du projet, fil
+  « Calls / titre », le titre du call en h1 de l'en-tête de module). Les URLs existantes ne
+  changent pas, rien à rediriger ; le calendrier des Calls ouvre aussi dans Calls, le Calendrier
+  (« là où ça se décide ») garde le lien du projet (`CallListItem.href`). **Un composant par
+  pièce** : la liste (`CallsListView` → `CallsList` → `CallsTable`, lignes de `listAllCalls`,
+  filtré par `projectId` pour un projet) et la page (`CallPage` : lectures, droits, module,
+  projets des tâches, puis `CallWorkspace` ; `CallHeader` dessiné selon la porte) ; seuls le
+  retour, le fil et la navigation allumée diffèrent. `CallPage` met l'`EditAccessProvider` hors
+  d'un projet (le cadre du projet le fait dedans). Le compte rendu partagé
+  (`/app/calls/<id>/report`) reste hors du garde 404 du call (`[callId]/(call)/layout.tsx`) : un
+  membre à qui il est partagé le lit sans voir le call.
+- **Liste des calls** (les deux portes) : onglets Tous / À venir / Passés, recherche, filtre Projet
+  (Calls seul) ; les prochains d'abord, le plus proche en haut, puis les passés, titrés « À venir »
+  / « Passés » sous « Tous » ; Projet à la teinte du projet (comme Travail), « Rejoindre » et « ⋯ »
+  en bout de ligne. Le « ⋯ » d'une ligne est **le même menu** que celui de la page
+  (`CallSheetMenu` : lien de la visio, fiche copiée ou écrite en e-mail, « Supprimer la réunion »
+  pour la direction, `delete_call`), visible au survol à la souris (`RowActions reveal`), toujours
+  sur écran tactile ; la fiche s'écrit au clic depuis la ligne (`agenda`, `guestEmails` lus par
+  `listAllCalls`). « Nouveau call » d'un projet : bouton de l'en-tête (modale, comme « Nouvelle
+  réunion ») ; formulaire sur place quand le projet n'a aucun call.
+- **E-mails d'un call** (`lib/email/`) : `CallPageData.emailEnabled` (= `emailEnabled()`, calculé au
+  serveur) décide de l'écran. Résumé aux participants : les invités extérieurs avec adresse (et sans
+  lien privé) le reçoivent de PDS OS, nommés avant l'envoi et dans le toast (« … et par e-mail à X,
+  Y ») ; « Écrire l'e-mail aux invités » (`mailto:`) ne reste que pour les autres, ou pour tous
+  quand l'e-mail est coupé. Partage du compte rendu : `shareCallReport` rend `unreached` (adresses
+  non atteintes : e-mail coupé, erreur) ; le toast dit à qui il est parti, le `mailto:` ne vise que
+  `unreached`.
 - Page d'un call, **une étape à la fois** : enregistrer (fichier en repli, replié) →
   traitement **automatique** dès l'envoi (`CallProcessing` : transcription puis compte
   rendu, suivi `ProcessingSteps`, « Réessayer » seulement en cas d'échec, relecture de
@@ -2454,7 +2487,7 @@ calendrier : rien ne s'y saisit, **chaque date s'ouvre là où elle se décide**
 | Mix V1 / Mix final / Mastering / Master final attendu | `master_briefs` (les quatre colonnes) | Master › Brief |
 | Tournage · livrable | `production_schedule_decisions` en vigueur, sinon `production_sheets.shoot_date` | la Production du livrable |
 | Temps fort | `milestones` (Calendrier de lancement de la Stratégie) | Stratégie › Calendrier |
-| Call ou réunion (avec l'heure) | `listAllCalls(range)` | le call |
+| Call ou réunion (avec l'heure) | `listAllCalls({ range })` | le call (dans son projet) |
 | Étape ouverte datée | `step.due` des parcours (`loadLaunchedJourneys`, `mine` et `waiting`) : « Valider … » si c'est à soi, « Nadia Benali : valider … » sinon | `actionHref` |
 | Tâche libre datée | `freeTasksOf(loadMyTodo)` | la tâche |
 

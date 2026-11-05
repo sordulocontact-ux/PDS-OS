@@ -341,9 +341,11 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   lancé : son titre et son type restent l'en-tête.
 - **Navigation du projet** (décision C0, construite au lot « coquille ») : celle du proto —
   Vue d'ensemble, Cadrage, **Workflows** (Master, Juridique, Marketing, Distribution),
-  **Pilotage** (Travail, Validations, Activité, **Budget**, ticket MKT-S1-15). Équipe, Planning,
-  Calls, Livrables et Fichiers sortent de la barre : leurs routes restent, joignables depuis
-  leurs étapes. **Mobile** : la navigation du projet en **puces horizontales** défilantes
+  **Pilotage** (Travail, **Calls**, Validations, Activité, **Budget**, ticket MKT-S1-15). Calls y
+  revient le 05/11/2026 (Sacha) : seconde porte vers les mêmes calls, comme Travail (un call
+  ouvert là reste dans le projet, fil « Calls / titre » ; ouvert depuis Calls de la barre
+  principale, il reste dans Calls avec « Projet : X › »). Équipe, Planning, Livrables et Fichiers
+  sortent de la barre : leurs routes restent, joignables depuis leurs étapes. **Mobile** : la navigation du projet en **puces horizontales** défilantes
   au-dessus du contenu. Exception assumée à « une pastille = un filtre » (§ « Onglets et
   filtres ») : ces puces sont des liens de navigation, signalés comme tels (`nav`,
   `aria-current`), jamais mêlées à des filtres sur la même ligne.

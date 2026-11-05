@@ -1322,3 +1322,20 @@ Demande de Sacha : « redesign mieux la page ia, il y a bcp de problèmes ». Re
       un arrêt ; **« Réessayer »** sous une réponse en échec (page et fenêtre Espace Espace) ; saisie
       du pied plus basse (`compact`).
 - [x] Chargement au gabarit de la page (historique + saisie), plus le squelette générique.
+
+## Calls : deux portes, liste refaite, actions de ligne (05/11/2026, branche `pre-prod`)
+
+- [x] **Deux portes** (`lib/calls/door.ts`, `docs/ARCHITECTURE.md` § 4) : depuis Calls, tout call
+      s'ouvre dans Calls (`/app/calls/<id>`, la barre reste sur Calls, « Projet : X › ») ; **Calls**
+      revient dans la barre du projet (Pilotage, à côté de Travail), ses calls s'ouvrent dans le
+      projet (fil « Calls / titre », plus de second titre ni de « Tous les calls » sous l'en-tête).
+      Une liste (`CallsListView`) et une page (`CallPage`) pour les deux ; URLs inchangées.
+- [x] **Liste** : prochains calls d'abord (le plus proche en haut), puis les passés, titrés sous
+      « Tous » ; projet à sa teinte ; « État » au lieu de « Traitement » ; « Rejoindre » et « ⋯ » en
+      bout de ligne ; même liste (onglets, recherche) dans le projet ; « Nouveau call » sur la ligne
+      du titre, en modale.
+- [x] **« ⋯ » au survol** de chaque ligne, le même menu que la page (`CallSheetMenu` : lien de la
+      visio, fiche copiée ou en e-mail, « Supprimer la réunion » pour la direction).
+- [x] **E-mails** : résumé aux participants et partage du compte rendu disent à qui PDS OS a écrit ;
+      le `mailto:` ne reste que pour qui n'a pas d'adresse, n'a pas été atteint, ou e-mail coupé.
+- [x] Le compte rendu partagé (`/app/calls/<id>/report`) n'est plus bloqué par le 404 du call.
