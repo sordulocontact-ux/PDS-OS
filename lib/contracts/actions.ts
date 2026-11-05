@@ -7,6 +7,10 @@ import { z } from "zod";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
+import {
+  emailInvoiceRequest,
+  justAskedInvoices,
+} from "@/lib/email/invoice-email";
 import { getContract, loadContractFormOptions } from "@/lib/contracts/queries";
 import {
   CONTRACT_ACTIONS,
@@ -27,7 +31,8 @@ export type ContractResult =
   | { ok: true; id: string }
   | { ok: false; error: string; field?: "title" | "endsOn" };
 
-type Result = { ok: true } | { ok: false; error: string };
+type Result =
+  { ok: true; done?: string; notice?: string } | { ok: false; error: string };
 
 const optionalDate = z
   .union([z.iso.date(), z.literal("")])
@@ -288,5 +293,32 @@ export async function advanceContract(input: {
   // The director or the owner is notified (written by advance_contract).
   await schedulePendingPushes();
   refresh(contractId);
-  return { ok: true };
+  return action === "countersign" || action === "sign"
+    ? emailAskedInvoice(contractId)
+    : { ok: true };
+}
+
+/** A paid contract just signed asks the person for their invoice (SQL):
+ * PDS OS tells them by e-mail when it can (Sacha, 05/11/2026). */
+async function emailAskedInvoice(contractId: string): Promise<Result> {
+  const t = fr.invoices.requestEmail;
+  const supabase = await createClient();
+  const { data: contract } = await supabase
+    .from("contracts")
+    .select("project_id")
+    .eq("id", contractId)
+    .maybeSingle();
+  if (!contract?.project_id) return { ok: true };
+  const asked = await justAskedInvoices(contract.project_id, { contractId });
+  const contactId = asked[0];
+  if (!contactId) return { ok: true };
+  const sent = await emailInvoiceRequest(contract.project_id, contactId);
+  if (sent === "failed") return { ok: true, notice: t.failed };
+  if (sent === "disabled") return { ok: true };
+  const { data: person } = await supabase
+    .from("network_contacts")
+    .select("name")
+    .eq("id", contactId)
+    .maybeSingle();
+  return { ok: true, done: t.sent(person?.name ?? "") };
 }

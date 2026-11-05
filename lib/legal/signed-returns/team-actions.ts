@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { requireApproved } from "@/lib/auth/dal";
+import { emailOutcome } from "@/lib/email/outcome";
+import { emailContractSigner } from "@/lib/contracts/signer-email";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { run } from "@/lib/legal/formalities/run";
@@ -60,7 +62,13 @@ export async function sendContract(input: {
   }
   revalidatePath(routes.project(v.data.projectId), "layout");
   revalidatePath(routes.contract(v.data.contractId));
-  return { ok: true };
+  if (v.data.via !== "link") return { ok: true };
+  // On their private link: PDS OS e-mails the signer itself when it can.
+  const sent = await emailContractSigner(v.data.contractId, "send");
+  return emailOutcome(sent, {
+    sent: fr.contracts.now.auto.sendDone,
+    failed: fr.contracts.now.auto.sendFailed,
+  });
 }
 
 /** « Signer pour PDS Éditions » (JUR-03): the direction signs the house's

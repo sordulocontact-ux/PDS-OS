@@ -5,6 +5,9 @@ import { z } from "zod";
 
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
+import { emailContact } from "@/lib/email/contact-email";
+import { projectTitleOf } from "@/lib/email/outcome";
+import { emailEnabled } from "@/lib/email/send";
 import { routes } from "@/lib/auth/redirects";
 import { siteUrl } from "@/lib/auth/site-url";
 import { listMasterSplits } from "@/lib/catalog/master/queries";
@@ -34,6 +37,9 @@ export type SplitLink = {
   email: string | null;
   // Kept sealed: the link stays visible in the step (rule 19).
   sealed: boolean;
+  // What PDS OS did itself: « sent » (e-mailed, marked sent), « failed »
+  // (copy the link), « disabled » (no SMTP or no address: by hand).
+  emailed: "sent" | "failed" | "disabled";
 };
 export type SplitResult<T = undefined> =
   | ({ ok: true } & (T extends undefined ? object : { data: T }))
@@ -213,6 +219,11 @@ async function sendVersion(
       row.token ? [{ entryId: row.entry_id, token: row.token }] : [],
     ),
   );
+  const emailed = await emailConfirmations(
+    projectId,
+    versionId,
+    (entries ?? []).map((e) => ({ entryId: e.id, contactId: e.contact_id })),
+  );
   await schedulePendingPushes();
   revalidatePath(routes.projectLegal(projectId), "layout");
   return {
@@ -224,6 +235,7 @@ async function sendVersion(
       email: emailOf.get(row.entry_id) ?? null,
       // A carried link (no token) was sealed with its first version.
       sealed: !row.token || sealed.has(row.entry_id),
+      emailed: emailed.get(row.entry_id) ?? "disabled",
     })),
   };
 }
@@ -233,7 +245,12 @@ export async function newSplitLink(
   projectId: string,
   entryId: string,
 ): Promise<
-  SplitResult<{ url: string; email: string | null; sealed: boolean }>
+  SplitResult<{
+    url: string;
+    email: string | null;
+    sealed: boolean;
+    emailed: "sent" | "failed" | "disabled";
+  }>
 > {
   const ids = z.object({
     projectId: catalogIdSchema,
@@ -260,15 +277,98 @@ export async function newSplitLink(
     contactEmails(supabase, entry?.contact_id ? [entry.contact_id] : []),
     sealSplitLinks(supabase, [{ entryId: parsed.data.entryId, token: data }]),
   ]);
+  const emailed = await emailConfirmations(
+    parsed.data.projectId,
+    null,
+    [{ entryId: parsed.data.entryId, contactId: entry?.contact_id ?? null }],
+    parsed.data.entryId,
+  );
   revalidatePath(routes.projectLegal(parsed.data.projectId), "layout");
   return {
     ok: true,
     data: {
+      emailed: emailed.get(parsed.data.entryId) ?? "disabled",
       url: `${siteUrl()}${routes.legalSplit(data)}`,
       email: entry?.contact_id ? (emails.get(entry.contact_id) ?? null) : null,
       sealed: sealed.has(parsed.data.entryId),
     },
   };
+}
+
+/**
+ * E-mails each rights-holder their page, where the confirmation is asked
+ * (one e-mail per person, even with two lines), and marks their
+ * confirmation sent; never fails the gesture (Sacha, 05/11/2026). Nothing
+ * for a line without a contact, an address or SMTP: by hand, as before.
+ */
+async function emailConfirmations(
+  projectId: string,
+  versionId: string | null,
+  lines: Array<{ entryId: string; contactId: string | null }>,
+  singleEntryId?: string,
+): Promise<Map<string, "sent" | "failed" | "disabled">> {
+  const outcome = new Map<string, "sent" | "failed" | "disabled">();
+  if (!emailEnabled()) return outcome;
+  const supabase = await createClient();
+  const { data: entry } = await supabase
+    .from("legal_split_entries")
+    .select("version_id")
+    .eq("id", singleEntryId ?? lines[0]?.entryId ?? "")
+    .maybeSingle();
+  const version = versionId ?? entry?.version_id ?? null;
+  const { data: v } = version
+    ? await supabase
+        .from("legal_split_versions")
+        .select("sheet_id")
+        .eq("id", version)
+        .maybeSingle()
+    : { data: null };
+  const { data: sheet } = v
+    ? await supabase
+        .from("legal_split_sheets")
+        .select("master_id")
+        .eq("id", v.sheet_id)
+        .maybeSingle()
+    : { data: null };
+  const { data: master } = sheet
+    ? await supabase
+        .from("masters")
+        .select("title")
+        .eq("id", sheet.master_id)
+        .maybeSingle()
+    : { data: null };
+  const title = master?.title ?? (await projectTitleOf(projectId));
+  const t = fr.legalSplits.links.emailed;
+  const byContact = new Map<string, "sent" | "failed" | "disabled">();
+  for (const line of lines) {
+    if (!line.contactId) continue;
+    let sent = byContact.get(line.contactId);
+    if (!sent) {
+      sent = await emailContact({
+        projectId,
+        contactId: line.contactId,
+        subject: t.subject(title),
+        body: t.body(title),
+        open: t.open,
+      });
+      byContact.set(line.contactId, sent);
+    }
+    outcome.set(line.entryId, sent);
+    if (sent !== "sent") continue;
+    const { data: confirmation } = await supabase
+      .from("legal_split_confirmations")
+      .select("id")
+      .eq("entry_id", line.entryId)
+      .is("revoked_at", null)
+      .eq("status", "pending")
+      .maybeSingle();
+    if (!confirmation) continue;
+    const { error } = await supabase.rpc("mark_split_confirmation_sent", {
+      p_confirmation_id: confirmation.id,
+    });
+    if (error) console.error("emailConfirmations mark:", error.message);
+  }
+  return outcome;
 }
 
 // The Réseau addresses of some contacts, for a ready e-mail.

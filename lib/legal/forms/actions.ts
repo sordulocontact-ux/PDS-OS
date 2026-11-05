@@ -5,6 +5,8 @@ import { z } from "zod";
 
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
+import { emailContact } from "@/lib/email/contact-email";
+import { projectTitleOf } from "@/lib/email/outcome";
 import { routes } from "@/lib/auth/redirects";
 import { siteUrl } from "@/lib/auth/site-url";
 import { sealLinkToken } from "@/lib/legal/forms/link-seal";
@@ -30,7 +32,16 @@ import type { WriteResult } from "@/lib/utils/write-result";
 export type PrepareResult =
   // `email`: the person's Réseau address, for a ready e-mail; `project`:
   // the project's title, for its subject.
-  | { ok: true; url: string; email: string | null; project: string }
+  // `emailed`: what PDS OS did itself: « sent » (the fiche left by e-mail
+  // and is marked sent), « failed » (copy the link), « disabled » (no SMTP
+  // or no address: the manual way, as before).
+  | {
+      ok: true;
+      url: string;
+      email: string | null;
+      project: string;
+      emailed: "sent" | "failed" | "disabled";
+    }
   | { ok: false; error: string };
 
 /**
@@ -98,13 +109,54 @@ export async function prepareLegalForm(
         .eq("id", person.contactId)
         .maybeSingle()
     : { data: null };
+  const emailed = await emailFiche(project.id, data[0].form_id, project.title);
   revalidatePath(routes.projectLegal(project.id), "layout");
   return {
     ok: true,
     url: `${siteUrl()}${routes.legalForm(token)}`,
     email: contact?.email ?? null,
     project: project.title,
+    emailed,
   };
+}
+
+/** The contact a fiche was made for. */
+async function formContactId(formId: string): Promise<string | null> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("legal_forms")
+    .select("contact_id")
+    .eq("id", formId)
+    .maybeSingle();
+  return data?.contact_id ?? null;
+}
+
+/** E-mails the person their page (the fiche is on it) and marks the fiche
+ * sent; never fails the gesture (Sacha, 05/11/2026). */
+async function emailFiche(
+  projectId: string,
+  formId: string,
+  title: string,
+): Promise<"sent" | "failed" | "disabled"> {
+  const t = fr.legalForms.page.emailed;
+  const contactId = await formContactId(formId);
+  if (!contactId) return "disabled";
+  const sent = await emailContact({
+    projectId,
+    contactId,
+    subject: t.subject(title),
+    body: t.body,
+    open: t.open,
+  });
+  if (sent === "sent") {
+    const supabase = await createClient();
+    const { error } = await supabase.rpc("set_legal_form_state", {
+      p_form_id: formId,
+      p_state: "sent",
+    });
+    if (error) console.error("emailFiche mark:", error.message);
+  }
+  return sent;
 }
 
 const formAction = z.object({
@@ -230,13 +282,33 @@ export async function requestLegalFormComplement(
   const submission = await submissionOf(parsed.data.formId);
   const fields = submission ? ficheMissing(submission) : [];
   if (fields.length === 0) return { ok: false, error: t.failed };
-  return legalOutcome(parsed.data.projectId, t.complementAsked, () =>
-    run({ projectId, formId }, (supabase, id) =>
-      supabase.rpc("request_legal_form_complement", {
-        p_form_id: id,
-        p_fields: fields,
-        p_note: note.trim().slice(0, 2000) || null,
-      }),
-    ),
+  const result = await legalOutcome(
+    parsed.data.projectId,
+    t.complementAsked,
+    () =>
+      run({ projectId, formId }, (supabase, id) =>
+        supabase.rpc("request_legal_form_complement", {
+          p_form_id: id,
+          p_fields: fields,
+          p_note: note.trim().slice(0, 2000) || null,
+        }),
+      ),
   );
+  if (!result.ok) return result;
+  // The message goes to the person by e-mail when PDS OS can send it.
+  const contactId = await formContactId(parsed.data.formId);
+  if (!contactId) return result;
+  const title = await projectTitleOf(parsed.data.projectId);
+  const sent = await emailContact({
+    projectId: parsed.data.projectId,
+    contactId,
+    subject: t.emailed.complementSubject(title),
+    body: t.emailed.complementBody(note.trim().slice(0, 2000)),
+    open: t.emailed.open,
+  });
+  return sent === "sent"
+    ? { ...result, done: t.emailed.complementSent }
+    : sent === "failed"
+      ? { ...result, notice: t.emailed.complementFailed }
+      : result;
 }

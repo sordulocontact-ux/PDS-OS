@@ -22,7 +22,22 @@ const fr = { legalDocuments, legalSplits };
 export function useShowSplitLinks() {
   const show = useShowLinks();
   const t = fr.legalSplits.links;
-  return (title: string, links: SplitLink[]) =>
+  // `done`: said when nothing is left to copy (everything e-mailed, or
+  // sealed in the step, rule 19); without it, the links are always shown.
+  return (title: string, all: SplitLink[], done?: string) => {
+    // PDS OS e-mailed these itself: nothing to copy for them.
+    const emailed = all.filter((l) => l.emailed === "sent");
+    const links = all.filter((l) => l.emailed !== "sent");
+    const failed = links.filter((l) => l.emailed === "failed");
+    if (emailed.length > 0)
+      toast.success(t.emailed.sent(emailed.map((l) => l.name)));
+    if (failed.length > 0)
+      toast.warning(t.emailed.failed(failed.map((l) => l.name)));
+    if (done !== undefined && links.every((l) => l.sealed)) {
+      if (emailed.length === 0) toast.success(done);
+      return;
+    }
+    if (links.length === 0) return;
     show({
       title: t.title(title),
       description: t.body,
@@ -47,6 +62,7 @@ export function useShowSplitLinks() {
       copiedLabel: t.copied,
       closeLabel: t.close,
     });
+  };
 }
 
 /** « Envoyer pour confirmation »: the draft (or the split of the title's
@@ -65,13 +81,8 @@ export function ProposeSplitButton({
   const [pending, startTransition] = useTransition();
   const showLinks = useShowSplitLinks();
   // Sealed, the links stay in the step (rule 19): nothing to show once.
-  const setLinks = (links: SplitLink[]) => {
-    if (links.every((l) => l.sealed)) {
-      toast.success(`${fr.legalDocuments.split.proposed}.`);
-      return;
-    }
-    showLinks(title, links);
-  };
+  const setLinks = (links: SplitLink[]) =>
+    showLinks(title, links, `${fr.legalDocuments.split.proposed}.`);
   return (
     <Button
       size="sm"
@@ -107,13 +118,8 @@ export function NewSplitLinkButton({
 }) {
   const [pending, startTransition] = useTransition();
   const showLinks = useShowSplitLinks();
-  const setLinks = (links: SplitLink[]) => {
-    if (links.every((l) => l.sealed)) {
-      toast.success(`${fr.legalDocuments.split.renewed}.`);
-      return;
-    }
-    showLinks(title, links);
-  };
+  const setLinks = (links: SplitLink[]) =>
+    showLinks(title, links, `${fr.legalDocuments.split.renewed}.`);
   return (
     <Button
       variant="outline"

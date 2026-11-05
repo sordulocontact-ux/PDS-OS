@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { requireApproved } from "@/lib/auth/dal";
+import { emailContact } from "@/lib/email/contact-email";
+import { emailOutcome, projectTitleOf } from "@/lib/email/outcome";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { createClient } from "@/lib/supabase/server";
@@ -29,10 +31,26 @@ function failed(where: string, error: { code?: string; message: string }) {
   };
 }
 
-/** « Créer le lien » / « Nouveau lien »: the former stops working. */
+async function personName(contactId: string): Promise<string> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("network_contacts")
+    .select("name")
+    .eq("id", contactId)
+    .maybeSingle();
+  return data?.name ?? "";
+}
+
+/**
+ * « Créer le lien » / « Nouveau lien »: the former stops working. PDS OS
+ * then e-mails the link itself when it can (SMTP and an address in the
+ * Réseau) and marks it sent; else « Copier le lien » and « Marquer comme
+ * envoyé » stay the way (Sacha, 05/11/2026).
+ */
 export async function issueContactLink(
   projectId: string,
   contactId: string,
+  renewed = false,
 ): Promise<WriteResult> {
   const input = z
     .object({ projectId: z.uuid(), contactId: z.uuid() })
@@ -45,11 +63,49 @@ export async function issueContactLink(
     p_contact_id: input.data.contactId,
   });
   if (error) return failed("issueContactLink", error);
+  const title = await projectTitleOf(input.data.projectId);
+  const sent = await emailContact({
+    projectId: input.data.projectId,
+    contactId: input.data.contactId,
+    subject: t.email.subject(title),
+    body: renewed ? t.email.renewedBody : t.email.body,
+    open: t.email.open,
+  });
   revalidatePath(routes.project(input.data.projectId), "layout");
-  return { ok: true };
+  const name = await personName(input.data.contactId);
+  return emailOutcome(sent, {
+    sent: (renewed ? t.email.renewedSent : t.email.sent)(name),
+    failed: t.email.failed,
+  });
 }
 
-/** « Marquer comme envoyé »: PDS OS sends no e-mail itself. */
+/** « Relancer »: the same link, e-mailed again with a short reminder. */
+export async function remindContactLink(
+  projectId: string,
+  contactId: string,
+): Promise<WriteResult> {
+  const input = z
+    .object({ projectId: z.uuid(), contactId: z.uuid() })
+    .safeParse({ projectId, contactId });
+  if (!input.success) return { ok: false, error: t.errors.failed };
+  await requireApproved();
+  const title = await projectTitleOf(input.data.projectId);
+  const sent = await emailContact({
+    projectId: input.data.projectId,
+    contactId: input.data.contactId,
+    subject: t.email.remindSubject(title),
+    body: t.email.remindBody,
+    open: t.email.open,
+  });
+  if (sent === "disabled") return { ok: false, error: t.noAddress };
+  revalidatePath(routes.project(input.data.projectId), "layout");
+  return emailOutcome(sent, {
+    sent: t.reminded,
+    failed: t.email.remindFailed,
+  });
+}
+
+/** « Marquer comme envoyé »: the way when PDS OS cannot e-mail it. */
 export async function markContactLinkSent(
   projectId: string,
   id: string,

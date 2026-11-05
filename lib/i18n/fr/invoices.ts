@@ -87,6 +87,15 @@ export const invoices = {
     missingCount: (n: number) =>
       n > 1 ? `${n} champs à compléter.` : "Un champ à compléter.",
   },
+  // The e-mail asking for the invoice (lib/email/invoice-email.ts).
+  requestEmail: {
+    subject: (title: string) => `« ${title} » : votre facture`,
+    body: "Votre travail est terminé : vous pouvez maintenant déposer votre facture sur votre page, avec votre RIB si ce n'est pas déjà fait.",
+    open: "Déposer votre facture :",
+    sent: (name: string) => `Facture demandée par e-mail à ${name}`,
+    failed:
+      "La facture est demandée, mais l'e-mail n'est pas parti : prévenez la personne, elle dépose sa facture sur son lien privé.",
+  },
   // In the team's step (Master final, the person's step in the Juridique).
   team: {
     title: "Facture et paiement",
@@ -103,6 +112,9 @@ export const invoices = {
     },
     noEmail: (name: string) =>
       `PDS OS n'envoie pas d'e-mail : prévenez ${first(name)} que sa facture se dépose sur son lien privé.`,
+    // PDS OS e-mails the person itself (lib/email/invoice-email.ts).
+    emailed: (name: string) =>
+      `PDS OS prévient ${first(name)} par e-mail : sa facture se dépose sur sa page privée.`,
     other: "Ajouter une facture reçue autrement",
     otherHint: "Par e-mail, en main propre…",
     add: "Ajouter la facture",

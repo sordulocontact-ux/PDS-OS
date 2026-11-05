@@ -1,3 +1,4 @@
+import { emailEnabled } from "@/lib/email/send";
 import { contactLinks } from "@/lib/i18n/fr/contact-links";
 import { roles } from "@/lib/i18n/fr/roles";
 import {
@@ -52,7 +53,13 @@ function Row({
           {linkLine(row)}
         </span>
       </span>
-      {canEdit && <ContactLinkActions projectId={projectId} row={row} />}
+      {canEdit && (
+        <ContactLinkActions
+          projectId={projectId}
+          row={row}
+          canEmail={emailEnabled() && !!row.email}
+        />
+      )}
     </li>
   );
 }
@@ -117,7 +124,13 @@ export async function ContactLinkOffer({
           {linkLine(row)}
         </span>
       </span>
-      {canEdit && <ContactLinkActions projectId={projectId} row={row} />}
+      {canEdit && (
+        <ContactLinkActions
+          projectId={projectId}
+          row={row}
+          canEmail={emailEnabled() && !!row.email}
+        />
+      )}
     </div>
   );
 }

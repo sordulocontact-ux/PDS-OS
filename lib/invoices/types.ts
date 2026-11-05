@@ -29,6 +29,8 @@ export type ProjectInvoice = {
   origin: InvoiceOrigin;
   contactId: string;
   contactName: string;
+  // PDS OS can e-mail this person itself (SMTP set, address in the Réseau).
+  canEmail: boolean;
   // A contract's invoice: the contract and its title.
   contractId: string | null;
   contractTitle: string | null;

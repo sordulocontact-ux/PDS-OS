@@ -11,6 +11,7 @@ import { DocumentCard } from "@/components/ui/document-card";
 import { Fold } from "@/components/ui/fold";
 import { PdfExportButton } from "@/components/ui/pdf-export-button";
 import { routes } from "@/lib/auth/redirects";
+import { emailEnabled } from "@/lib/email/send";
 import { contractMails } from "@/lib/contracts/mail";
 import type { ContractPageData } from "@/lib/contracts/page-data";
 import { todayInParis, type ContractDetail } from "@/lib/contracts/types";
@@ -36,6 +37,9 @@ export function ContractNowActions({
   const person = signer?.name ?? t.theParty;
   const direction = data.direction ?? t.direction;
   const link = signer?.link?.url ?? null;
+  // E-mailed by PDS OS itself: SMTP set, the signer's address, their link.
+  const smtp = emailEnabled();
+  const auto = smtp && !!signer?.email && link !== null;
   const mails = contractMails({
     title: contract.title,
     dueOn: contract.dueOn,
@@ -109,6 +113,8 @@ export function ContractNowActions({
                 ...mails.send,
                 attachment,
                 viaLink: signer?.link != null,
+                auto,
+                smtp,
               }}
             />
           </div>
@@ -123,7 +129,9 @@ export function ContractNowActions({
               {contract.can.sign && (
                 <ContractRemindDialog
                   name={person}
-                  mail={{ ...mails.remind, attachment }}
+                  contractId={contract.id}
+                  projectId={contract.projectId}
+                  mail={{ ...mails.remind, attachment, auto, smtp }}
                 />
               )}
               {link && (

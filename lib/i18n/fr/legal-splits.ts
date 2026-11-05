@@ -150,6 +150,19 @@ export const legalSplits = {
     close: "Fermer",
     email: "Envoyer par e-mail",
     emailSubject: (title: string) => `Répartition à confirmer · ${title}`,
+    // The e-mail PDS OS sends itself (lib/email/contact-email.ts).
+    emailed: {
+      subject: (title: string) => `« ${title} » : votre part à confirmer`,
+      body: (title: string) =>
+        `La répartition des droits de « ${title} » est prête : nous vous demandons de la relire, puis de la confirmer ou de la contester.`,
+      open: "Voir la répartition :",
+      sent: (names: string[]) =>
+        names.length === 1
+          ? `Confirmation envoyée par e-mail à ${names[0]}`
+          : `Confirmation envoyée par e-mail à ${names.join(", ")}`,
+      failed: (names: string[]) =>
+        `L'e-mail n'est pas parti pour ${names.join(", ")} : envoyez-leur le lien vous-même.`,
+    },
     emailBody: (name: string, title: string, url: string) =>
       `Bonjour ${name},\n\nVoici la répartition des droits de « ${title} » à relire et confirmer (ou contester), sans compte :\n${url}\n\nMerci !`,
   },

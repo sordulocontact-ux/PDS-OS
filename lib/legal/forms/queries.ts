@@ -6,6 +6,7 @@ import { readInventoryRows } from "@/lib/legal/inventory-rows";
 import { unsealLinkToken } from "@/lib/legal/forms/link-seal";
 import { routes } from "@/lib/auth/redirects";
 import { siteUrl } from "@/lib/auth/site-url";
+import { emailEnabled } from "@/lib/email/send";
 import { createClient } from "@/lib/supabase/server";
 
 // The project's fiches de renseignements, read with the viewer's session
@@ -46,6 +47,8 @@ export type FormRow = FormPerson & {
     sentBy: string | null;
     expiresAt: string;
   } | null;
+  // PDS OS can e-mail this person itself (SMTP set, address in the Réseau).
+  canEmail: boolean;
   // Why the access was revoked, when it was.
   revokedReason: string | null;
   submission: FormSubmission | null;
@@ -145,8 +148,22 @@ export async function loadForms(
     ]),
   );
 
+  const people_ = formPeople(rows);
+  const contactIds = people_.flatMap((p) => (p.contactId ? [p.contactId] : []));
+  const { data: addresses } =
+    emailEnabled() && contactIds.length > 0
+      ? await supabase
+          .from("network_contacts")
+          .select("id, email")
+          .in("id", contactIds)
+      : { data: [] };
+  const withEmail = new Set(
+    (addresses ?? []).flatMap((c) => (c.email ? [c.id] : [])),
+  );
+
   const now = new Date().toISOString();
-  return formPeople(rows).map((person): FormRow => {
+  return people_.map((person): FormRow => {
+    const canEmail = person.contactId ? withEmail.has(person.contactId) : false;
     const form = person.contactId ? latest.get(person.contactId) : undefined;
     if (!form)
       return {
@@ -156,6 +173,7 @@ export async function loadForms(
         since: null,
         openedAt: null,
         link: null,
+        canEmail,
         revokedReason: null,
         submission: null,
         complement: null,
@@ -191,6 +209,7 @@ export async function loadForms(
               expiresAt: form.expires_at,
             }
           : null,
+      canEmail,
       revokedReason: form.status === "revoked" ? form.revoked_reason : null,
       submission: submissionOf.get(form.id) ?? null,
       complement:

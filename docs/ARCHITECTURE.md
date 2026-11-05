@@ -4001,6 +4001,14 @@ la personne (`/c/`). Migration `20261020070101_signed_returns.sql`, pgTAP `signe
   (`revoke_contact_link`, toute la page), dates du dossier et du lien ; le tarif au-dessus en carte document
   (`RateBlock`). Sans les variables, ou sans adresse au Réseau, l'envoi
   reste déclaré (« Marquer comme envoyé ») ; un e-mail refusé laisse le dossier créé et le lien à copier.
+  **Lot 2 (05/11/2026), même schéma partout** (`emailContact`, un e-mail par personne et par geste, jamais
+  d'échec du geste) : page par personne (« Créer le lien » / « Nouveau lien » l'envoient, « Relancer »
+  `remindContactLink`), fiche de renseignements (`prepareLegalForm` l'envoie et la marque envoyée, le
+  complément demandé part avec son message), confirmations de répartition (`emailConfirmations`),
+  contrat sur le lien privé (`lib/contracts/signer-email.ts`, envoi et relance), demande de facture
+  (`lib/email/invoice-email.ts` : fusionnée au « validé » de l'ingénieur au dernier Master final, ou
+  envoyée à la signature d'un contrat payant). Résultat `emailOutcome` (`lib/email/outcome.ts`) : envoyé =
+  toast, échec = avertissement, désactivé = voie manuelle inchangée ; `canEmail` (SMTP + adresse) vient du serveur.
 
 ### Synchronisation, horodatage et historique (retours Juridique du 11/10/2026, lot 2)
 

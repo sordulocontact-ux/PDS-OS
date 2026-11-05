@@ -204,6 +204,24 @@ export const legalForms = {
     emailBody: (name: string, project: string, url: string) =>
       `Bonjour ${name},\n\nPour le projet « ${project} », pouvez-vous remplir votre fiche de renseignements ? Cela prend quelques minutes, sans compte :\n${url}\n\nMerci !`,
     markSent: "Marquer comme envoyée",
+    // The e-mail PDS OS sends itself when it can (lib/email/contact-email.ts).
+    emailed: {
+      sent: (name: string) => `Fiche envoyée par e-mail à ${name}`,
+      sentHere: "Fiche envoyée par e-mail",
+      failed:
+        "La fiche est prête, mais l'e-mail n'est pas parti : copiez le lien et envoyez-le vous-même.",
+      subject: (project: string) =>
+        `« ${project} » : votre fiche de renseignements`,
+      body: "Pour ce projet, nous avons besoin de quelques informations vous concernant. Cela prend quelques minutes, sans compte.",
+      open: "Remplir votre fiche :",
+      complementSent: "Complément demandé, e-mail envoyé",
+      complementFailed:
+        "Le complément est demandé, mais l'e-mail n'est pas parti : prévenez la personne avec « Relancer ».",
+      complementSubject: (project: string) =>
+        `« ${project} » : il manque quelques informations à votre fiche`,
+      complementBody: (note: string) =>
+        `${note}\n\nVotre fiche est sur votre page, au même endroit qu'avant.`,
+    },
     revoke: "Révoquer",
     // The private link kept visible (lot 9 J4, rule 19).
     revokeAccess: "Révoquer l'accès",
@@ -241,6 +259,9 @@ export const legalForms = {
       `Bonjour ${first}, il manque à votre fiche : ${fields}. Complétez-la depuis votre lien privé, le même qu'avant.`,
     askHint:
       "Sur son lien privé, la personne ne verra que ce qui manque. Prévenez-la ensuite : « Relancer » prépare l'e-mail avec ce message.",
+    // When PDS OS e-mails the message itself.
+    askHintEmailed:
+      "Sur son lien privé, la personne ne verra que ce qui manque. PDS OS lui envoie ce message par e-mail.",
     ask: "Redemander ce qui manque",
     complementWaiting: (at: string, fields: string) =>
       `Complément demandé le ${at} : ${fields}.`,

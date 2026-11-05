@@ -19,9 +19,9 @@ const caption =
 /**
  * An e-mail prepared by PDS OS (proto `mailPreview`): to whom — their
  * address in the Réseau, with its source —, the subject, the attachment,
- * the message (editable) and the private link. PDS OS sends no e-mail
- * itself (lib/utils/mailto.ts): « Ouvrir dans ma messagerie » or « Copier
- * le message ».
+ * the message (editable) and the private link. Sent by the
+ * person when PDS OS cannot (lib/utils/mailto.ts): « Ouvrir dans ma
+ * messagerie » or « Copier le message ».
  */
 export function ContractMailDraft({
   to,
@@ -29,6 +29,7 @@ export function ContractMailDraft({
   attachment,
   link,
   message: initial,
+  smtp = false,
 }: {
   to: { contactId: string; email: string | null } | null;
   subject: string;
@@ -36,6 +37,8 @@ export function ContractMailDraft({
   attachment?: ReactNode;
   link: string | null;
   message: string;
+  // PDS OS can send e-mails (SMTP set), though not this one.
+  smtp?: boolean;
 }) {
   const t = fr.contracts.now.mail;
   const [message, setMessage] = useState(initial);
@@ -91,7 +94,7 @@ export function ContractMailDraft({
           </p>
         )}
       </div>
-      <p className={caption}>{t.note}</p>
+      <p className={caption}>{smtp ? t.noteSmtp : t.note}</p>
       <div className="flex flex-wrap gap-2">
         <Button
           variant="outline"

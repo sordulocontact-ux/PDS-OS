@@ -18,6 +18,28 @@ export const contactLinks = {
   renewed: "Nouveau lien créé",
   renewHint:
     "Un nouveau lien remplace l'ancien, qui cesse de marcher ; ce qui a été déposé reste.",
+  remind: "Relancer",
+  remindHint: "Renvoie le lien par e-mail, avec un petit rappel.",
+  reminded: "Rappel envoyé par e-mail",
+  noAddress: "Cette personne n'a pas d'adresse e-mail dans le Réseau.",
+  // The e-mail PDS OS sends itself (lib/email/contact-email.ts).
+  email: {
+    sent: (name: string) => `Lien créé et envoyé par e-mail à ${name}`,
+    renewedSent: (name: string) =>
+      `Nouveau lien créé et envoyé par e-mail à ${name}`,
+    failed:
+      "Le lien est créé, mais l'e-mail n'est pas parti : copiez le lien et envoyez-le vous-même.",
+    remindFailed:
+      "Le rappel n'est pas parti : copiez le lien et envoyez-le vous-même.",
+    subject: (title: string) => `« ${title} » : votre page`,
+    body: "Tout ce que nous attendons de vous sur ce projet est réuni sur votre page.",
+    renewedBody:
+      "Voici votre nouveau lien : l'ancien ne fonctionne plus. Tout ce que nous attendons de vous sur ce projet est sur votre page.",
+    remindSubject: (title: string) => `« ${title} » : votre page vous attend`,
+    remindBody:
+      "Petit rappel : ce que nous attendons de vous sur ce projet est sur votre page.",
+    open: "Ouvrir votre page :",
+  },
   revoke: "Révoquer",
   revokeTitle: (name: string) => `Révoquer le lien de ${name}`,
   revokeDescription:

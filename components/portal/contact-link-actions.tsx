@@ -11,6 +11,7 @@ import { contactLinks } from "@/lib/i18n/fr/contact-links";
 import {
   issueContactLink,
   markContactLinkSent,
+  remindContactLink,
   revokeContactLink,
 } from "@/lib/portal/contact-link-actions";
 import type { ContactLinkRow } from "@/lib/portal/contact-links";
@@ -34,13 +35,17 @@ const useOrigin = () =>
 export function ContactLinkActions({
   projectId,
   row,
+  canEmail = false,
 }: {
   projectId: string;
   row: ContactLinkRow;
+  // PDS OS can e-mail this person (SMTP set, address in the Réseau).
+  canEmail?: boolean;
 }) {
   const origin = useOrigin();
   const issue = useWriteSubmit(() => undefined, t.created);
   const sent = useWriteSubmit(() => undefined, t.marked);
+  const remind = useWriteSubmit(() => undefined, t.reminded);
   const l = row.link;
   if (!l)
     return (
@@ -65,6 +70,20 @@ export function ContactLinkActions({
           size="sm"
         />
       )}
+      {canEmail && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          title={t.remindHint}
+          disabled={remind.pending}
+          onClick={() =>
+            remind.run(() => remindContactLink(projectId, row.contactId))
+          }
+        >
+          {t.remind}
+        </Button>
+      )}
       {!l.sentAt && (
         <Button
           type="button"
@@ -83,7 +102,10 @@ export function ContactLinkActions({
         title={t.renewHint}
         disabled={issue.pending}
         onClick={() =>
-          issue.run(() => issueContactLink(projectId, row.contactId), t.renewed)
+          issue.run(
+            () => issueContactLink(projectId, row.contactId, true),
+            t.renewed,
+          )
         }
       >
         {t.renew}
@@ -104,9 +126,9 @@ export function ContactLinkActions({
           />
         )}
       </DialogButton>
-      {(issue.error ?? sent.error) && (
+      {(issue.error ?? sent.error ?? remind.error) && (
         <span className="w-full text-[length:var(--type-caption)] text-[color:var(--tone-danger-fg)]">
-          {issue.error ?? sent.error}
+          {issue.error ?? sent.error ?? remind.error}
         </span>
       )}
     </span>

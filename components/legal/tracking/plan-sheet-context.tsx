@@ -13,13 +13,14 @@ import { toast } from "@/components/ui/toast";
 import { useShowSplitLinks } from "@/components/legal/splits/split-actions";
 import { advanceContract } from "@/lib/contracts/actions";
 import { legal } from "@/lib/i18n/fr/legal";
+import { legalForms } from "@/lib/i18n/fr/legal-forms";
 import { generateLegalContract } from "@/lib/legal/contracts/actions";
 import { openFormality } from "@/lib/legal/formalities/actions";
 import { prepareLegalForm, setLegalFormState } from "@/lib/legal/forms/actions";
 import type { RowAction } from "@/lib/legal/plan/board";
 import { proposeSplit } from "@/lib/legal/splits/actions";
 
-const fr = { legal };
+const fr = { legal, legalForms };
 
 /** A fiche's link just prepared: shown once, in its panel. */
 export type PreparedLink = {
@@ -116,7 +117,13 @@ export function PlanSheetProvider({
                 action.personKey,
               );
               if (!result.ok) return failed(result.error);
-              setLink(action.personKey, result);
+              if (result.emailed === "sent")
+                toast.success(fr.legalForms.page.emailed.sentHere);
+              else {
+                if (result.emailed === "failed")
+                  toast.warning(fr.legalForms.page.emailed.failed);
+                setLink(action.personKey, result);
+              }
               break;
             }
             case "markSent": {

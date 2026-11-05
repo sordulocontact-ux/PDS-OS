@@ -83,6 +83,10 @@ export function FichePanel({
     startTransition(async () => {
       const result = await prepareLegalForm(projectId, row.key);
       if (!result.ok) return void toast.error(result.error);
+      // E-mailed by PDS OS: nothing to copy, the fiche is marked sent.
+      if (result.emailed === "sent")
+        return void toast.success(t.emailed.sent(row.name));
+      if (result.emailed === "failed") toast.warning(t.emailed.failed);
       setLink(result);
     });
   const copy = async () => {
@@ -309,6 +313,7 @@ export function FichePanel({
               name={row.name}
               missing={missing}
               pending={pending}
+              emailed={row.canEmail}
               onAsk={(note) =>
                 decide(() =>
                   requestLegalFormComplement(projectId, row.formId!, note),

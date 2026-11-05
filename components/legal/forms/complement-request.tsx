@@ -23,11 +23,14 @@ export function ComplementRequest({
   missing,
   pending,
   onAsk,
+  emailed = false,
 }: {
   name: string;
   missing: string[];
   pending: boolean;
   onAsk: (note: string) => void;
+  // PDS OS e-mails the message itself.
+  emailed?: boolean;
 }) {
   const labels = missingLabels(missing);
   const [note, setNote] = useState(() =>
@@ -40,7 +43,7 @@ export function ComplementRequest({
         id="complement-note"
         name="complement-note"
         label={t.askMessage}
-        hint={t.askHint}
+        hint={emailed ? t.askHintEmailed : t.askHint}
         rows={3}
         maxLength={2000}
         value={note}

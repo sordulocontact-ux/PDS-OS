@@ -160,6 +160,11 @@ export const masterRound = {
       body: (version: string, by: string) =>
         `${by} a validé le ${version} : c'est la version finale. Merci pour votre travail !`,
     },
+    // The last Master final also asks for the invoice: one e-mail, not two.
+    approvedInvoice: {
+      body: (version: string, by: string) =>
+        `${by} a validé le ${version} : c'est la version finale. Merci pour votre travail ! Vous pouvez maintenant déposer votre facture sur votre page, avec votre RIB si ce n'est pas déjà fait.`,
+    },
     changes: {
       subject: (title: string, version: string) =>
         `« ${title} » : modifications demandées sur le ${version}`,

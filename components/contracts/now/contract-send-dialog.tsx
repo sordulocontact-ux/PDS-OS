@@ -28,6 +28,10 @@ export type SendMail = {
   // The person's private link: sent there when it is active.
   link: string | null;
   viaLink: boolean;
+  // PDS OS e-mails the signer itself on their link (SMTP, address, link).
+  auto?: boolean;
+  // PDS OS can send e-mails at all (SMTP set), though not this one.
+  smtp?: boolean;
 };
 
 /**
@@ -132,7 +136,13 @@ function SendForm({
         value={way}
         onChange={setWay}
         choices={[
-          { value: "mail", label: t.send.byMail, hint: t.send.byMailHint },
+          mail.auto
+            ? {
+                value: "mail",
+                label: t.auto.byMailAuto,
+                hint: t.auto.byMailAutoHint,
+              }
+            : { value: "mail", label: t.send.byMail, hint: t.send.byMailHint },
           {
             value: "other",
             label: t.send.otherwise,
@@ -140,13 +150,14 @@ function SendForm({
           },
         ]}
       />
-      {way === "mail" ? (
+      {way === "mail" && mail.auto ? null : way === "mail" ? (
         <ContractMailDraft
           to={mail.to}
           subject={mail.subject}
           attachment={mail.attachment}
           link={mail.link}
           message={mail.message}
+          smtp={mail.smtp}
         />
       ) : (
         <>
@@ -176,7 +187,9 @@ function SendForm({
       <FormMessage kind="error">{submit.error}</FormMessage>
       <DialogFormActions
         pending={submit.pending}
-        submitLabel={t.send.markSent}
+        submitLabel={
+          way === "mail" && mail.auto ? t.auto.sendButton : t.send.markSent
+        }
         onCancel={onDone}
       />
     </form>

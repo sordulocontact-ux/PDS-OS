@@ -11,7 +11,7 @@ type Stage = "mix" | "mastering";
 
 /** The engineer of a round: the contact of its latest live sending, or of
  * the mix link that carries the mastering too. */
-async function engineerOf(
+export async function engineerOf(
   projectId: string,
   stage: Stage,
 ): Promise<string | null> {

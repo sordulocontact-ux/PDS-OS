@@ -4,6 +4,7 @@ import { trackedCache } from "@/lib/projects/live-deps";
 
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
+import { emailEnabled } from "@/lib/email/send";
 import { withDownloadName } from "@/lib/catalog/file-rules";
 import { loadDirectionPerson } from "@/lib/master-workflow/journey-context";
 import { personName } from "@/lib/projects/types";
@@ -27,7 +28,7 @@ type Named = { first_name: string; last_name: string | null } | null;
 const nameOf = (p: Named) => (p ? personName(p.first_name, p.last_name) : null);
 
 const SELECT =
-  "id, origin, contact_id, contract_id, financial_need_id, requested_at, number, amount_cents, gap_reason, file_bucket, file_path, file_name, received_at, received_on, due_on, received_via, paid_on, proof_bucket, proof_path, proof_name, contact:network_contacts!project_invoices_contact_same_org(name), receiver:people!project_invoices_received_by_fkey(first_name, last_name), payer:people!project_invoices_paid_by_fkey(first_name, last_name)";
+  "id, origin, contact_id, contract_id, financial_need_id, requested_at, number, amount_cents, gap_reason, file_bucket, file_path, file_name, received_at, received_on, due_on, received_via, paid_on, proof_bucket, proof_path, proof_name, contact:network_contacts!project_invoices_contact_same_org(name, email), receiver:people!project_invoices_received_by_fkey(first_name, last_name), payer:people!project_invoices_paid_by_fkey(first_name, last_name)";
 
 export const loadProjectInvoices = trackedCache(
   async (
@@ -156,6 +157,7 @@ export const loadProjectInvoices = trackedCache(
         origin: r.origin === "contract" ? "contract" : "master",
         contactId: r.contact_id,
         contactName: r.contact?.name ?? "",
+        canEmail: emailEnabled() && !!r.contact?.email,
         contractId: r.contract_id,
         contractTitle: r.contract_id
           ? (titleOf.get(r.contract_id) ?? null)

@@ -53,7 +53,7 @@ export function InvoicePanel({
           />
         </FactRows>
         <p className="text-[length:var(--type-caption)] text-[color:var(--text-secondary)]">
-          {t.noEmail(i.contactName)}
+          {i.canEmail ? t.emailed(i.contactName) : t.noEmail(i.contactName)}
         </p>
         {view.canAdd && (
           // A gesture that asks for something opens a dialog (proto v3).

@@ -7,9 +7,17 @@ import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { withOutcome } from "@/lib/journey/outcome";
+import {
+  emailInvoiceRequest,
+  justAskedInvoices,
+} from "@/lib/email/invoice-email";
 import { emailEnabled } from "@/lib/email/send";
 import { transmitPackage } from "@/lib/master-workflow/transmission-actions";
-import { emailEngineer, versionOf } from "@/lib/master-workflow/engineer-email";
+import {
+  emailEngineer,
+  engineerOf,
+  versionOf,
+} from "@/lib/master-workflow/engineer-email";
 import { emailTransmission } from "@/lib/master-workflow/transmission-email";
 import { ensureContactLink } from "@/lib/portal/ensure-contact-link";
 import { createClient } from "@/lib/supabase/server";
@@ -334,12 +342,28 @@ export async function decideRound(
       refresh(v.projectId);
       const version = await versionOf(v.versionId);
       const n = t.notify[v.decision === "approved" ? "approved" : "changes"];
+      // The last Master final asks the engineers for their invoice (SQL):
+      // the engineer of this round gets it in the « validé » e-mail, the
+      // others in their own, one e-mail per person.
+      const asked =
+        version?.stage === "mastering" && v.decision === "approved"
+          ? await justAskedInvoices(v.projectId, { origin: "master" })
+          : [];
+      const engineer = version
+        ? await engineerOf(v.projectId, version.stage)
+        : null;
+      const invoiceToo = engineer !== null && asked.includes(engineer);
       if (version)
         await emailEngineer(v.projectId, version.stage, (title) => ({
           subject: n.subject(title, version.name),
-          body: n.body(version.name, nameOf(access)),
+          body: (invoiceToo ? t.notify.approvedInvoice : n).body(
+            version.name,
+            nameOf(access),
+          ),
           anchor: "ps-versions",
         }));
+      for (const contactId of asked.filter((id) => id !== engineer))
+        await emailInvoiceRequest(v.projectId, contactId);
       return { ok: true };
     },
     { openNext: true },

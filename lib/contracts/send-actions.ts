@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { requireApproved } from "@/lib/auth/dal";
+import { emailOutcome } from "@/lib/email/outcome";
+import { emailContractSigner } from "@/lib/contracts/signer-email";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { createClient } from "@/lib/supabase/server";
@@ -12,8 +14,9 @@ import type { WriteResult } from "@/lib/utils/write-result";
 // « Envoyer pour signature » from a contract's page (send_contract, SQL,
 // 20261020070101): on the person's private link when the contract comes
 // from the Juridique and they have one, else how it went and the day. PDS
-// OS sends no e-mail itself: the person sends the prepared one from their
-// own mail app, and this records that it went (the proof of sending).
+// OS e-mails the signer itself on their link when it can (lib/contracts/
+// signer-email.ts); else the person sends the prepared one from their own
+// mail app, and this records that it went (the proof of sending).
 
 const input = z.object({
   contractId: z.uuid(),
@@ -56,5 +59,35 @@ export async function sendContractForSignature(
   revalidatePath(routes.contracts);
   revalidatePath(routes.contract(contractId));
   if (projectId) revalidatePath(routes.project(projectId), "layout");
-  return { ok: true };
+  return via === "link" ? emailSigned(contractId) : { ok: true };
+}
+
+/** On their private link, PDS OS e-mails the signer itself when it can. */
+async function emailSigned(contractId: string): Promise<WriteResult> {
+  const auto = fr.contracts.now.auto;
+  const sent = await emailContractSigner(contractId, "send");
+  return emailOutcome(sent, {
+    sent: auto.sendDone,
+    failed: auto.sendFailed,
+  });
+}
+
+/** « Relancer »: the reminder goes by e-mail, with the link of their page. */
+export async function remindContractSigner(
+  contractId: string,
+  projectId: string | null,
+): Promise<WriteResult> {
+  const auto = fr.contracts.now.auto;
+  const id = z.uuid().safeParse(contractId);
+  if (!id.success)
+    return { ok: false, error: fr.signedReturns.team.errors.failed };
+  await requireApproved();
+  const sent = await emailContractSigner(id.data, "remind");
+  if (sent === "disabled") return { ok: false, error: auto.noAddress };
+  if (projectId) revalidatePath(routes.project(projectId), "layout");
+  revalidatePath(routes.contract(id.data));
+  return emailOutcome(sent, {
+    sent: auto.remindDone,
+    failed: auto.remindFailed,
+  });
 }

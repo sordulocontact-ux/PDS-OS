@@ -57,7 +57,7 @@ export const signedReturns = {
   team: {
     sendTo: (name: string) => `Envoyer à ${name}`,
     sendNote: (name: string) =>
-      `Le contrat validé est mis sur la page privée de ${name} : il y déposera le contrat signé. PDS OS n'envoie pas encore l'e-mail : copiez son lien et envoyez-le-lui.`,
+      `Le contrat validé est mis sur la page privée de ${name} : il y déposera le contrat signé. PDS OS lui envoie l'e-mail quand il le peut ; sinon, copiez son lien (carte ci-dessous) et envoyez-le-lui.`,
     noLink: (name: string) =>
       `${name} n'a pas encore de lien privé sur ce projet : créez-le, puis envoyez-lui le contrat : il le signera et le déposera sur sa page.`,
     createLink: "Créer son lien privé",

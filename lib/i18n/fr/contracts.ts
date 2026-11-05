@@ -283,7 +283,31 @@ export const contracts = {
       pdfPending: "Préparation du PDF…",
       pdfFailed: "Le PDF n'a pas pu être préparé.",
     },
-    // The prepared e-mail (PDS OS sends none itself, lib/utils/mailto.ts).
+    // The e-mail PDS OS sends itself on the person's private link.
+    auto: {
+      sendSubject: (title: string) => `« ${title} » : un contrat à signer`,
+      sendBody: (title: string) =>
+        `Le contrat « ${title} » est prêt. Vous pouvez le relire, le signer et nous le renvoyer depuis votre page, sans compte.`,
+      remindSubject: (title: string) => `« ${title} » : le contrat vous attend`,
+      remindBody: (title: string, due: string | null) =>
+        `Petit rappel : le contrat « ${title} » attend votre signature${due ? `, attendu le ${due}` : ""}. Tout se fait depuis votre page.`,
+      open: "Ouvrir le contrat :",
+      byMailAuto: "PDS OS envoie l'e-mail avec son lien privé",
+      byMailAutoHint:
+        "Le contrat est sur sa page privée : il le relit, le signe et nous le renvoie. L'e-mail et sa date font preuve.",
+      sendButton: "Envoyer le contrat",
+      sendFailed:
+        "Le contrat est marqué envoyé, mais l'e-mail n'est pas parti : copiez le lien de sa page et envoyez-le vous-même.",
+      sendDone: "Contrat envoyé par e-mail",
+      remindDone: "Rappel envoyé par e-mail",
+      remindFailed:
+        "Le rappel n'est pas parti : copiez le lien de sa page et envoyez-le vous-même.",
+      remindDescription:
+        "PDS OS envoie le rappel par e-mail, avec le lien de sa page.",
+      remindSend: "Envoyer le rappel",
+      noAddress: "Cette personne n'a pas d'adresse e-mail dans le Réseau.",
+    },
+    // The prepared e-mail, when PDS OS does not send it itself.
     mail: {
       to: "À",
       toSource: "Fiche Réseau",
@@ -296,6 +320,9 @@ export const contracts = {
       copy: "Copier le message",
       copied: "Message copié",
       note: "PDS OS n'envoie pas encore l'e-mail lui-même : ouvrez-le dans votre messagerie ou copiez-le.",
+      // PDS OS can send e-mails, but not this one (no private link or address).
+      noteSmtp:
+        "Cet e-mail ne peut pas partir tout seul ici : ouvrez-le dans votre messagerie ou copiez-le.",
     },
     remind: {
       button: "Relancer",

@@ -89,14 +89,11 @@ export function SplitLinks({
                   startTransition(async () => {
                     const result = await newSplitLink(projectId, line.id!);
                     if (!result.ok) return void toast.error(result.error);
-                    if (result.data.sealed) return;
-                    showLinks(title, [
-                      {
-                        entryId: line.id!,
-                        name: line.name,
-                        ...result.data,
-                      },
-                    ]);
+                    showLinks(
+                      title,
+                      [{ entryId: line.id!, name: line.name, ...result.data }],
+                      "",
+                    );
                   })
                 }
                 revoke={(reason) =>
