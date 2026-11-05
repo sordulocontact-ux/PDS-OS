@@ -189,13 +189,14 @@ export function FactRowFrame({
           )}
           {side}
           {hoverAction && (
-            // Folded at rest (the pill stays against the edge); on hover it
-            // opens and gently pushes the pill aside while the word slides in
-            // from the right, with the button's duration (--duration-roll) and a curve
-            // that does not drag at the end (--ease-push, Sacha, 05/11/2026); no slide when motion is reduced.
-            <span className="-ml-2 grid grid-cols-[0fr] opacity-0 transition-[grid-template-columns,opacity] duration-[var(--duration-roll)] ease-[var(--ease-push)] group-hover/fact:grid-cols-[1fr] group-hover/fact:opacity-100 group-focus-visible/fact:grid-cols-[1fr] group-focus-visible/fact:opacity-100 motion-reduce:transition-none">
+            // Folded at rest (the pill stays against the edge). On hover the
+            // verb comes out from the row's edge glued to the pill and pushes
+            // it: one motion, one speed (Sacha, 05/11/2026). A hover done
+            // dozens of times a day: --duration-slide in, faster out, with
+            // the curve of what moves on screen; no slide when motion is reduced.
+            <span className="-ml-2 grid grid-cols-[0fr] transition-[grid-template-columns] duration-[var(--duration-base)] ease-[var(--ease-standard)] group-hover/fact:grid-cols-[1fr] group-hover/fact:duration-[var(--duration-slide)] group-focus-visible/fact:grid-cols-[1fr] motion-reduce:transition-none">
               <span className="min-w-0 overflow-hidden">
-                <span className="block translate-x-full px-2 text-body-sm font-medium whitespace-nowrap transition-transform duration-[var(--duration-roll)] ease-[var(--ease-push)] group-hover/fact:translate-x-0 group-focus-visible/fact:translate-x-0 motion-reduce:translate-x-0 motion-reduce:transition-none">
+                <span className="block px-2 text-body-sm font-medium whitespace-nowrap opacity-0 transition-opacity duration-[var(--duration-fast)] group-hover/fact:opacity-100 group-focus-visible/fact:opacity-100">
                   {hoverAction}
                 </span>
               </span>
@@ -208,7 +209,7 @@ export function FactRowFrame({
   );
   const actionFrame = cn(
     frame,
-    "outline-none hover:bg-[var(--control-bg-hover)] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[color:var(--focus-ring)]",
+    "outline-none [transition:var(--transition-control)] hover:bg-[var(--control-bg-hover)] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[color:var(--focus-ring)]",
   );
   if (onClick)
     return (
