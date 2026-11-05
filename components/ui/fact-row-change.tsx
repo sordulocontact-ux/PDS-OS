@@ -21,18 +21,23 @@ const t = fr.decisions.fact;
  * A fact chosen from a list (docs/VISION-UX.md rule 3): « Changer » opens
  * the module's `PickList` under the row, or in a modal when `dialogTitle`
  * is set. Missing, the list is open from the start (« À choisir » in red
- * above it). A choice made closes it.
+ * above it), or folded behind « Choisir » with `missingAs="badge"`. A
+ * choice made closes it.
  */
 export function FactRowChangeable({
   change,
   ...row
 }: FactRowProps & { change: FactChange }) {
-  const [open, setOpen] = useState(change.defaultOpen ?? Boolean(row.missing));
+  // `missingAs="badge"`: folded behind « Choisir » even when missing.
+  const pill = row.missingAs === "badge";
+  const [open, setOpen] = useState(
+    change.defaultOpen ?? (Boolean(row.missing) && !pill),
+  );
   const close = () => setOpen(false);
-  const hasValue = !row.missing;
+  const hasValue = !row.missing || pill;
   const changeButton = (
     <Button variant="ghost" size="sm" onClick={() => setOpen(true)}>
-      {t.change}
+      {row.missing && pill ? t.choose : t.change}
     </Button>
   );
 

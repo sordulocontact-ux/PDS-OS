@@ -71,6 +71,7 @@ export const decisions = {
   fact: {
     edit: "Modifier",
     change: "Changer",
+    choose: "Choisir",
     save: "Enregistrer",
     cancel: "Annuler",
     missing: "À choisir",

@@ -52,6 +52,11 @@ export type FactRowProps = {
   // Nobody chosen yet: the value in red, « À choisir » when empty.
   missing?: boolean;
   missingLabel?: string;
+  // `badge` (Sacha, 05/11/2026, the Master's Brief first): no red before
+  // any attempt, the row keeps its label and source, « À choisir » is a
+  // warning pill on the right (unless the row has its own state), and a
+  // `change` list stays folded behind « Choisir ».
+  missingAs?: "text" | "badge";
   // « Modifié par … » in the selection colour, instead of the source.
   changedBy?: string | null;
   // A field in place of the value (a form that saves as a whole, such as
@@ -112,6 +117,7 @@ export function FactRowFrame({
   side,
   missing,
   missingLabel = t.missing,
+  missingAs = "text",
   changedBy,
   control,
   required,
@@ -123,6 +129,9 @@ export function FactRowFrame({
 }: FactRowProps & { sourceNode?: ReactNode }) {
   const action = Boolean(href || onClick);
   const empty = value === undefined || value === null || value === "";
+  const pill = missing && missingAs === "badge";
+  const shownState =
+    state ?? (pill ? { tone: "warning" as const, label: missingLabel } : null);
   const frame =
     "grid grid-cols-1 items-start gap-x-3 gap-y-1 border-b border-[color:var(--border-hairline)] px-3.5 py-2.75 text-body-sm last:border-b-0 md:grid-cols-[minmax(0,1fr)_auto]";
   const content = (
@@ -141,21 +150,21 @@ export function FactRowFrame({
           <span
             className={cn(
               "break-words [overflow-wrap:anywhere]",
-              missing && "font-semibold text-error",
+              missing && !pill && "font-semibold text-error",
             )}
           >
-            {missing && empty ? missingLabel : value}
+            {missing && empty && !pill ? missingLabel : value}
           </span>
         )}
         {sourceNode ?? (
           <FactSourceText source={source} changedBy={changedBy} />
         )}
       </div>
-      {(state || side) && (
+      {(shownState || side) && (
         <div className="flex flex-wrap items-center gap-2 md:justify-end">
-          {state && (
-            <StatusBadge tone={state.tone} size="sm">
-              {state.label}
+          {shownState && (
+            <StatusBadge tone={shownState.tone} size="sm">
+              {shownState.label}
             </StatusBadge>
           )}
           {side}

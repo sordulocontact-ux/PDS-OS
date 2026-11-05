@@ -158,6 +158,7 @@ export function BriefPeople(props: BriefFactsProps) {
       <FactRow
         label={t.fields.mix}
         value={mix?.name ?? null}
+        missingAs="badge"
         missing={!mix}
         source={mix ? sourceOf(props.designations.mix) : t.sources.nobody}
         changedBy={changedBy.mix_contact_id}
@@ -187,6 +188,7 @@ export function BriefPeople(props: BriefFactsProps) {
         <FactRow
           label={t.fields.mastering}
           value={mastering?.name ?? null}
+          missingAs="badge"
           missing={!mastering}
           source={
             mastering
@@ -206,6 +208,7 @@ export function BriefPeople(props: BriefFactsProps) {
       <FactRow
         label={t.fields.validator}
         value={validator?.name ?? null}
+        missingAs="badge"
         missing={!validator}
         source={sourceOf(props.designations.validator, true)}
         changedBy={changedBy.validator_person_id}

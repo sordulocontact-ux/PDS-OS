@@ -140,6 +140,8 @@ export const masterBrief = {
   nothingChanged: (day: string) =>
     `Rien à enregistrer : le Brief n'a pas changé depuis ${day}.`,
   changed: "Brief mis à jour",
+  // A text or a date of the Brief still empty (pill, not red).
+  toFill: "À renseigner",
   // « En attente de X : remplir le Brief » (StepWaiting).
   ownerTodo: "Remplir le Brief",
   errors: {

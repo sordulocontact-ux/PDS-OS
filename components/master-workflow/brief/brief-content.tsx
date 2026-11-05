@@ -73,6 +73,8 @@ export function BriefContent(props: Props) {
               key={f}
               label={t.fields[f]}
               value={brief[f]}
+              missingAs="badge"
+              missingLabel={t.toFill}
               missing={
                 !brief.direction &&
                 !brief.references &&
@@ -110,6 +112,8 @@ export function BriefContent(props: Props) {
                 key={key}
                 label={t.fields[key]}
                 value={d.value ? formatDay(d.value) : null}
+                missingAs="badge"
+                missingLabel={t.toFill}
                 missing={!d.value && key === "masterFinalDue"}
                 source={
                   key === "masterFinalDue"
