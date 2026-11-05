@@ -226,6 +226,7 @@ export function RoundStep({
             daysLeft: link.daysLeft,
           }}
           page={round.page}
+          mailed={mailed}
           canEdit={viewerIsOwner}
           canSeeLink={viewerIsOwner || round.isDirection}
         />

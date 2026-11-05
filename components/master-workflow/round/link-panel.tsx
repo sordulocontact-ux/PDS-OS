@@ -14,7 +14,11 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { masterRound } from "@/lib/i18n/fr/master-round";
-import { markRoundSent, sendRound } from "@/lib/master-workflow/round-actions";
+import {
+  markRoundSent,
+  remindEngineer,
+  sendRound,
+} from "@/lib/master-workflow/round-actions";
 import type { RoundStepView } from "@/lib/master-workflow/round-step";
 import { revokeTransmission } from "@/lib/master-workflow/transmission-actions";
 import {
@@ -47,6 +51,8 @@ export type LinkPanelProps = {
     daysLeft: number;
   };
   page: RoundStepView["page"];
+  // PDS OS e-mails the reminder itself (EMAIL_SMTP_*, an address).
+  mailed: boolean;
   canEdit: boolean;
   // The owner and the direction: the address to copy (read only).
   canSeeLink: boolean;
@@ -166,18 +172,33 @@ export function LinkPanel(props: LinkPanelProps) {
                 )}
                 {props.canEdit && (
                   <span className="ml-auto flex flex-wrap items-center gap-1">
-                    {url && (
-                      <a
-                        className={buttonVariants({
-                          variant: "ghost",
-                          size: "sm",
-                        })}
-                        href={`mailto:${props.email ?? ""}?subject=${encodeURIComponent(
-                          t.remindSubject(props.title),
-                        )}&body=${encodeURIComponent(url)}`}
+                    {props.mailed ? (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={write.pending}
+                        onClick={() =>
+                          write.run(() =>
+                            remindEngineer(props.projectId, stage, engineer),
+                          )
+                        }
                       >
                         {t.remind}
-                      </a>
+                      </Button>
+                    ) : (
+                      url && (
+                        <a
+                          className={buttonVariants({
+                            variant: "ghost",
+                            size: "sm",
+                          })}
+                          href={`mailto:${props.email ?? ""}?subject=${encodeURIComponent(
+                            t.remindSubject(props.title),
+                          )}&body=${encodeURIComponent(url)}`}
+                        >
+                          {t.remind}
+                        </a>
+                      )
                     )}
                     {props.contactId && (
                       <Button

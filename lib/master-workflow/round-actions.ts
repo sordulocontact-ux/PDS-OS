@@ -9,13 +9,19 @@ import { fr } from "@/lib/i18n/fr";
 import { withOutcome } from "@/lib/journey/outcome";
 import { emailEnabled } from "@/lib/email/send";
 import { transmitPackage } from "@/lib/master-workflow/transmission-actions";
+import { emailEngineer, versionOf } from "@/lib/master-workflow/engineer-email";
 import { emailTransmission } from "@/lib/master-workflow/transmission-email";
 import { ensureContactLink } from "@/lib/portal/ensure-contact-link";
 import { createClient } from "@/lib/supabase/server";
+import { formatAmount } from "@/lib/utils/money";
 import type { WriteResult } from "@/lib/utils/write-result";
 
 const t = fr.masterRound;
 const stageSchema = z.enum(["mix", "mastering"]);
+// Who acts, as the engineer reads it (« Nadia Benali a validé… »).
+const nameOf = (access: Awaited<ReturnType<typeof requireApproved>>) =>
+  [access.firstName, access.lastName].filter(Boolean).join(" ") || "PDS";
+
 const refresh = (projectId: string) =>
   revalidatePath(routes.projectMaster(projectId), "layout");
 
@@ -127,6 +133,30 @@ export async function markRoundSent(
 }
 
 /**
+ * « Relancer » the engineer from the link card: PDS OS e-mails them their
+ * page, opened on the package. Without SMTP, the card keeps its mailto.
+ */
+export async function remindEngineer(
+  projectId: string,
+  stage: string,
+  name: string,
+): Promise<WriteResult> {
+  const s = stageSchema.safeParse(stage);
+  const id = z.uuid().safeParse(projectId);
+  await requireApproved();
+  if (!s.success || !id.success)
+    return { ok: false, error: fr.masterWorkflow.mix.errors.failed };
+  const sent = await emailEngineer(id.data, s.data, (title) => ({
+    subject: t.notify.remind.subject(title),
+    body: t.notify.remind.body,
+    anchor: "ps-package",
+  }));
+  return sent === "sent"
+    ? { ok: true, done: t.notify.reminded(name) }
+    : { ok: false, error: t.email.failed };
+}
+
+/**
  * « Refuser » a proposed rate, with why (rule 6): the line goes back to
  * the Brief's estimate, the engineer reads the reason on their link and
  * proposes another amount (refuse_master_rate, the owner only).
@@ -163,6 +193,20 @@ export async function refuseRate(
       };
     }
     refresh(v.projectId);
+    const { data: line } = await supabase
+      .from("budget_lines")
+      .select("refused_cents")
+      .eq("project_id", v.projectId)
+      .eq("master_role", v.stage)
+      .maybeSingle();
+    await emailEngineer(v.projectId, v.stage, (title) => ({
+      subject: t.notify.rate.subject(title),
+      body: t.notify.rate.body(
+        formatAmount(line?.refused_cents ?? 0),
+        v.reason,
+      ),
+      anchor: "ps-package",
+    }));
     return { ok: true };
   });
 }
@@ -231,6 +275,13 @@ export async function transmitFeedback(
       return { ok: false, error: fr.masterWorkflow.mixVersions.errors.send };
     }
     refresh(v.projectId);
+    const version = await versionOf(v.versionId);
+    if (version)
+      await emailEngineer(v.projectId, version.stage, (title) => ({
+        subject: t.notify.feedback.subject(title, version.name),
+        body: t.notify.feedback.body(version.name),
+        anchor: "ps-versions",
+      }));
     return { ok: true };
   });
 }
@@ -249,7 +300,7 @@ export async function decideRound(
       note: z.string().max(2000),
     })
     .safeParse({ projectId, versionId, decision, note });
-  await requireApproved();
+  const access = await requireApproved();
   if (!input.success) return { ok: false, error: t.decision.errors.failed };
   const v = input.data;
   return withOutcome(
@@ -281,6 +332,14 @@ export async function decideRound(
         };
       }
       refresh(v.projectId);
+      const version = await versionOf(v.versionId);
+      const n = t.notify[v.decision === "approved" ? "approved" : "changes"];
+      if (version)
+        await emailEngineer(v.projectId, version.stage, (title) => ({
+          subject: n.subject(title, version.name),
+          body: n.body(version.name, nameOf(access)),
+          anchor: "ps-versions",
+        }));
       return { ok: true };
     },
     { openNext: true },
@@ -319,6 +378,11 @@ export async function reopenMix(
       };
     }
     refresh(v.projectId);
+    await emailEngineer(v.projectId, stage, (title) => ({
+      subject: t.notify.reopened.subject(title),
+      body: t.notify.reopened.body(v.reason),
+      anchor: "ps-versions",
+    }));
     return { ok: true };
   });
 }

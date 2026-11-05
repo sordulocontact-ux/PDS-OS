@@ -34,6 +34,13 @@ export const core = {
     clear: "Effacer les filtres",
   },
   // components/ui/audio-file.tsx, components/ui/audio-player.tsx
+  // Every e-mail PDS OS sends with a private link (lib/email/link-email.ts).
+  linkEmail: {
+    signature: (sender: string) => `${sender}, PDS`,
+    validity: (day: string) =>
+      `Lien privé, sans compte, valable jusqu'au ${day}.`,
+    greeting: (name: string) => `Bonjour ${name.split(" ")[0] ?? name},`,
+  },
   audioFile: {
     download: "Télécharger",
     downloadOf: (label: string) => `Télécharger · ${label}`,

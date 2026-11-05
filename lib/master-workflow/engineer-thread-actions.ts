@@ -8,6 +8,8 @@ import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { todayInParis } from "@/lib/insights/dates";
 import { delayImpact } from "@/lib/master-workflow/delay-impact";
+import { emailEngineer } from "@/lib/master-workflow/engineer-email";
+import { masterRound } from "@/lib/i18n/fr/master-round";
 import { createClient } from "@/lib/supabase/server";
 
 // The team's side of the thread with the engineer (PROJ-AMEL-02): answer,
@@ -67,6 +69,12 @@ export async function replyToEngineer(
     };
   }
   refresh(projectId);
+  const stage = sending.role === "mastering" ? "mastering" : "mix";
+  await emailEngineer(projectId, stage, (title) => ({
+    subject: masterRound.notify.reply.subject(title),
+    body: masterRound.notify.reply.body,
+    anchor: "ps-thread",
+  }));
   return { ok: true };
 }
 
@@ -154,7 +162,9 @@ export async function applyDelayDates(
     p_dates: moved,
     p_reply: reply.trim() || null,
   });
-  return done(projectId, error, "applyDelayDates");
+  const result = done(projectId, error, "applyDelayDates");
+  if (result.ok) await emailDelayAnswer(projectId, messageId);
+  return result;
 }
 
 function done(
@@ -213,5 +223,27 @@ export async function keepDelayDates(
     p_message_id: messageId,
     p_reply: reply.trim().slice(0, 2000),
   });
-  return done(projectId, error, "keepDelayDates");
+  const result = done(projectId, error, "keepDelayDates");
+  if (result.ok) await emailDelayAnswer(projectId, messageId);
+  return result;
+}
+
+/** The engineer learns by e-mail that their delay was answered. */
+async function emailDelayAnswer(projectId: string, messageId: string) {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("master_engineer_messages")
+    .select("stage")
+    .eq("id", messageId)
+    .maybeSingle();
+  if (!data) return;
+  await emailEngineer(
+    projectId,
+    data.stage === "mastering" ? "mastering" : "mix",
+    (title) => ({
+      subject: masterRound.notify.delay.subject(title),
+      body: masterRound.notify.delay.body,
+      anchor: "ps-thread",
+    }),
+  );
 }

@@ -151,6 +151,53 @@ export const masterRound = {
       `Ingénieur du mastering : ${name}, qui reçoit son propre lien : il ne voit que le mastering.`,
     choose: "Choisissez l'ingénieur du mastering dans le Brief.",
   },
+  // The e-mails to the engineer after a gesture of the team (Sacha,
+  // 05/11/2026: « l'e-mail automatique partout »), with their page's link.
+  notify: {
+    approved: {
+      subject: (title: string, version: string) =>
+        `« ${title} » : ${version} validé`,
+      body: (version: string, by: string) =>
+        `${by} a validé le ${version} : c'est la version finale. Merci pour votre travail !`,
+    },
+    changes: {
+      subject: (title: string, version: string) =>
+        `« ${title} » : modifications demandées sur le ${version}`,
+      body: (version: string, by: string) =>
+        `${by} demande des modifications sur le ${version}. Le détail est sur votre page, déposez la version suivante au même endroit.`,
+    },
+    feedback: {
+      subject: (title: string, version: string) =>
+        `« ${title} » : retours sur le ${version}`,
+      body: (version: string) =>
+        `Des retours sur le ${version} vous attendent sur votre page. Ce n'est pas encore une décision : la version reste en écoute.`,
+    },
+    reopened: {
+      subject: (title: string) => `« ${title} » : le mix est rouvert`,
+      body: (reason: string) =>
+        `Le mix validé est rouvert : « ${reason} ». Déposez une nouvelle version sur votre page.`,
+    },
+    reply: {
+      subject: (title: string) => `« ${title} » : le label vous a répondu`,
+      body: "Le label vous a répondu sur votre page.",
+    },
+    rate: {
+      subject: (title: string) => `« ${title} » : votre tarif`,
+      body: (amount: string, reason: string) =>
+        `Votre tarif de ${amount} n'a pas été retenu : « ${reason} ». Proposez un autre montant sur votre page ; vous pouvez continuer à travailler en attendant.`,
+    },
+    remind: {
+      subject: (title: string) => `« ${title} » : votre dossier vous attend`,
+      body: "Petit rappel : votre dossier vous attend sur votre page.",
+    },
+    delay: {
+      subject: (title: string) =>
+        `« ${title} » : réponse à votre demande de délai`,
+      body: "Le label a répondu à votre demande de délai : le détail est sur votre page.",
+    },
+    open: "Ouvrir votre page :",
+    reminded: (name: string) => `Relance envoyée à ${name}`,
+  },
   // The engineer's page by project, opened on the package (Figma 378-6581,
   // Sacha 04/11): one link for all PDS expects from them.
   link: {
