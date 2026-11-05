@@ -4,8 +4,9 @@ import type { CaptureArtistsError } from "@/lib/catalog/capture-artist-types";
 import { readCaptureArtists } from "@/lib/catalog/capture-artists";
 import { IntegrationError } from "@/lib/integrations/http";
 
-// Screenshots are a few hundred kilobytes; a photo of a screen, a few MB.
-const MAX_BYTES = 8 * 1024 * 1024;
+// The browser shrinks each screenshot first (lib/images/shrink-image.ts):
+// a few hundred kilobytes. Vercel refuses a body over 4.5 MB anyway.
+const MAX_BYTES = 4 * 1024 * 1024;
 const TYPES = ["image/png", "image/jpeg", "image/webp"];
 
 const fail = (error: CaptureArtistsError, status: number) =>

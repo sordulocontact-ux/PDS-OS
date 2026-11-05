@@ -1,4 +1,5 @@
 import { MAX_SCREENSHOT_BYTES } from "@/lib/feedback/screenshot-rules";
+import { canvasToBlob } from "@/lib/images/shrink-image";
 
 // Browser-side: a picture of a zone of the page, as the user sees it. A web
 // page cannot read the screen without asking for it each time, so the page
@@ -131,12 +132,6 @@ const keep = (node: Node) =>
   !(node instanceof Element) ||
   (!node.hasAttribute(CAPTURE_IGNORE) && node.localName !== "nextjs-portal");
 
-function toBlob(canvas: HTMLCanvasElement, type: string, quality?: number) {
-  return new Promise<Blob | null>((resolve) =>
-    canvas.toBlob(resolve, type, quality),
-  );
-}
-
 /** A zone of the viewport (CSS pixels), as a PNG (JPEG if too heavy). */
 export async function captureRegion(region: Region): Promise<File> {
   const { domToCanvas } = await import("modern-screenshot");
@@ -181,9 +176,9 @@ export async function captureRegion(region: Region): Promise<File> {
     crop.height,
   );
 
-  let blob = await toBlob(crop, "image/png");
+  let blob = await canvasToBlob(crop, "image/png");
   if (blob && blob.size > MAX_SCREENSHOT_BYTES)
-    blob = await toBlob(crop, "image/jpeg", 0.9);
+    blob = await canvasToBlob(crop, "image/jpeg", 0.9);
   if (!blob) throw new Error("capture_failed");
   const ext = blob.type === "image/png" ? "png" : "jpg";
   return new File([blob], `capture.${ext}`, {

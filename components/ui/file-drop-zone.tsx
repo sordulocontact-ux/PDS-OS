@@ -22,7 +22,7 @@ export function FileDropZone({
   onFiles,
 }: {
   label: string;
-  hint?: string;
+  hint?: React.ReactNode;
   accept?: string;
   multiple?: boolean;
   disabled?: boolean;

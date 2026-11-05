@@ -6,23 +6,36 @@ import type {
   CaptureArtistsError,
   CaptureArtistsResult,
 } from "@/lib/catalog/capture-artist-types";
+import { shrinkImage } from "@/lib/images/shrink-image";
 
 export type CaptureItem = {
   id: string;
   file: File;
   status: "queued" | "reading" | "done" | "failed";
   result?: CaptureArtistsResult;
-  error?: CaptureArtistsError | "network";
+  error?: CaptureArtistsError | "network" | "timeout";
 };
 
 export const CAPTURE_TYPES = ["image/png", "image/jpeg", "image/webp"];
 // Two at a time: Mistral's free tier and Deezer (50 requests / 5 s) both
 // refuse a burst.
 const PARALLEL = 2;
+// Vercel refuses a body over 4.5 MB before the route runs (no JSON, no log):
+// past this, even once shrunk, the image is not sent.
+const SEND_LIMIT = 4 * 1024 * 1024;
+
+// A refusal that did not come from the route (no JSON body), by its status.
+function errorOf(status: number): CaptureItem["error"] {
+  if (status === 413) return "file_too_large";
+  if (status === 408 || status === 504) return "timeout";
+  return "provider_error";
+}
 
 let seq = 0;
 
-/** Screenshots read one by one by the server, two at a time, in order. */
+/** Screenshots read one by one by the server, two at a time, in order;
+ * each shrunk by the browser first (shrinkImage), the original kept for
+ * the thumbnail and a new reading. */
 export function useCaptureQueue() {
   const [items, setItems] = useState<CaptureItem[]>([]);
   const running = useRef(new Set<string>());
@@ -37,9 +50,14 @@ export function useCaptureQueue() {
     async (item: CaptureItem) => {
       running.current.add(item.id);
       update(item.id, { status: "reading", error: undefined });
-      const body = new FormData();
-      body.set("file", item.file);
       try {
+        const file = await shrinkImage(item.file);
+        if (file.size > SEND_LIMIT) {
+          update(item.id, { status: "failed", error: "file_too_large" });
+          return;
+        }
+        const body = new FormData();
+        body.set("file", file);
         const response = await fetch("/api/catalog/capture-artists", {
           method: "POST",
           body,
@@ -55,7 +73,7 @@ export function useCaptureQueue() {
             status: "failed",
             error:
               (json as { error?: CaptureArtistsError } | null)?.error ??
-              "provider_error",
+              errorOf(response.status),
           });
       } catch {
         update(item.id, { status: "failed", error: "network" });

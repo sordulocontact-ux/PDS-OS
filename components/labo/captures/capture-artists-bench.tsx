@@ -48,7 +48,12 @@ export function CaptureArtistsBench({
     <div className="grid gap-4">
       <FileDropZone
         label={t.drop}
-        hint={t.dropHint}
+        hint={
+          <>
+            <span className="hidden pointer-fine:inline">{t.pasteHint} </span>
+            {t.dropHint}
+          </>
+        }
         accept={CAPTURE_TYPES.join(",")}
         multiple
         onFiles={addFiles}

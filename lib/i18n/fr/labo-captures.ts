@@ -8,7 +8,9 @@ export const laboCaptures = {
   sectionDescription:
     "PO lit chaque capture et regroupe les noms d'une même personne ; le code retrouve son profil TikTok, son compte Deezer et ses réseaux. « Ajouter au Réseau » l'enregistre dans l'onglet Artistes du Réseau.",
   drop: "Glissez vos captures ici, ou cliquez pour les choisir",
-  dropHint: "Ou collez une capture (⌘ V). PNG, JPEG ou WebP, 8 Mo au plus.",
+  dropHint: "PNG, JPEG ou WebP.",
+  // Shown only with a mouse or a trackpad: a phone has no ⌘ V.
+  pasteHint: "Ou collez une capture (⌘ V).",
   empty: "Aucune capture pour l'instant.",
   remove: (name: string) => `Retirer ${name}`,
   retry: "Relire la capture",
@@ -150,10 +152,13 @@ export const laboCaptures = {
   errors: {
     unauthorized: "Votre session a expiré. Reconnectez-vous.",
     no_file: "Aucune image reçue.",
-    file_too_large: "Image trop lourde : 8 Mo au plus.",
+    file_too_large:
+      "Image trop lourde, même réduite : envoyez une capture d'écran plutôt qu'une photo.",
     unsupported_type: "Format non pris en charge : PNG, JPEG ou WebP.",
     provider_error:
-      "Mistral n'a pas pu lire l'image (quota, clé ou panne). Relisez-la dans un instant.",
+      "La lecture de la capture a échoué. Relisez-la dans un instant.",
+    timeout:
+      "La lecture a pris trop de temps. Relisez la capture dans un instant.",
     // The member's daily limit of requests to PO (lib/ai/quota.ts).
     ai_quota:
       "Limite du jour de requêtes à PO atteinte : le compteur repart à zéro à minuit ; le directeur général peut l'augmenter dans Équipe.",

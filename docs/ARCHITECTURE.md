@@ -6916,8 +6916,15 @@ sans un clic : « Ajouter au Réseau » (ci-dessous).
   bouton devient « Ajouté au Réseau ». Déjà dans le Réseau = même compte TikTok, Instagram ou
   Deezer (`findContactsByAccounts`), **jamais par le nom** : « Dans le Réseau » mène au contact.
   Le contact rejoint l'onglet **Artistes repérés** du Réseau (§ 8 quinquies).
-- Deux captures lues à la fois (palier gratuit Mistral, Deezer 50 requêtes / 5 s), 8 Mo
-  au plus, PNG / JPEG / WebP, collées (⌘V) ou déposées. Un artefact claude.ai ne peut pas
+- Deux captures lues à la fois (palier gratuit Mistral, Deezer 50 requêtes / 5 s), PNG / JPEG /
+  WebP, collées (⌘V, rappel affiché seulement avec une souris) ou déposées. **Réduites par le
+  navigateur avant l'envoi** (`lib/images/shrink-image.ts`, 05/11/2026) : 2 000 px au plus sur le
+  grand côté, en JPEG, quelques centaines de Ko. Vercel refuse un envoi de plus de 4,5 Mo avant
+  même d'exécuter la route (413 sans JSON ni journal), et une capture PNG d'iPhone pèse 3 à 6 Mo :
+  c'était l'échec d'Ibé du 05/11, affiché comme une erreur du modèle. L'original reste pour la
+  vignette et « Relire ». Au-delà de 4 Mo une fois réduite, rien n'est envoyé. Une réponse sans
+  JSON est traduite par son code (413 trop lourde, 504 trop longue) ; les messages ne nomment
+  plus de fournisseur. Un artefact claude.ai ne peut pas
   servir de banc : il n'atteint ni Mistral ni l'API Deezer (réseau bloqué).
 
 ---
