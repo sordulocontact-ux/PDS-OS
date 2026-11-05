@@ -1402,3 +1402,9 @@ directement », l'ISWC depuis une modale de la page, sans aller au catalogue. D�
 - [x] Stratégie › Démarrer sans lignes Projet / Sortie / Statut ; Les 8 dimensions sans « Départ » quand elle
       a commencé sans échange, pourquoi raccourci.
 - [ ] Passage navigateur ; Juridique › Confirmation (« améliorer le visu ») reste au lot 4.
+
+## Titres en double dans « Voir le détail » du Cadrage (05/11/2026, branche `pre-prod`)
+
+- [x] Cadrage › Démarrer › « Ce que le projet sait déjà › Voir le détail » : les informations regroupées sous
+      un seul titre par dimension (Objectif, Temporalité…), au lieu du nom de la dimension répété sur chaque
+      ligne (retour d'Ibé du 01/11, « Titres en double dans l'outil »). `FramingLine` perd sa prop `eyebrow`.

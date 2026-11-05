@@ -12,7 +12,7 @@ const fr = { framingIntel, framingJourney };
 /**
  * One information of the Cadrage (proto `.irow`): « **Libellé** · valeur »
  * (« Pas encore connu » when nothing is), its source, its state pill, and
- * an action on the right. `eyebrow`: the dimension, in « Voir le détail ».
+ * an action on the right.
  * `current`: the question asked above, said once there (« Question en
  * cours » here, never its value twice). `verify`: a proposal of PO checked
  * in the list, « À vérifier » (lib/framing/verify.ts). `href`: the whole
@@ -21,7 +21,6 @@ const fr = { framingIntel, framingJourney };
 export function FramingLine({
   question,
   lines,
-  eyebrow,
   side,
   current = false,
   verify = false,
@@ -31,7 +30,6 @@ export function FramingLine({
   question: QuestionState;
   // The lines of a list question, in words.
   lines: string[];
-  eyebrow?: string;
   side?: ReactNode;
   current?: boolean;
   verify?: boolean;
@@ -49,29 +47,22 @@ export function FramingLine({
   return (
     <FactRow
       value={
-        <span className="flex flex-col">
-          {eyebrow && (
-            <span className="text-[length:var(--type-micro)] leading-[var(--type-micro-lh)] font-semibold tracking-wide text-[color:var(--text-tertiary)] uppercase">
-              {eyebrow}
+        <span>
+          <span className="font-semibold">
+            {fr.framingIntel.questions[question.key].label}
+          </span>
+          {" · "}
+          {current ? (
+            <span className="text-[color:var(--selection)]">
+              {t.currentQuestion}
+            </span>
+          ) : value ? (
+            <span className="whitespace-pre-line">{value}</span>
+          ) : (
+            <span className="text-caption text-muted-foreground">
+              {fr.framingJourney.start.notKnown}
             </span>
           )}
-          <span>
-            <span className="font-semibold">
-              {fr.framingIntel.questions[question.key].label}
-            </span>
-            {" · "}
-            {current ? (
-              <span className="text-[color:var(--selection)]">
-                {t.currentQuestion}
-              </span>
-            ) : value ? (
-              <span className="whitespace-pre-line">{value}</span>
-            ) : (
-              <span className="text-caption text-muted-foreground">
-                {fr.framingJourney.start.notKnown}
-              </span>
-            )}
-          </span>
         </span>
       }
       source={current ? undefined : lineSourceOf(question)}

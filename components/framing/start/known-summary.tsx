@@ -9,8 +9,9 @@ const fr = { framingIntel, framingJourney };
 
 /**
  * « Ce que le projet sait déjà » (proto frEntry): the counts read by code,
- * then « Voir le détail », one line per information with its dimension,
- * value or « Pas encore connu », source and state.
+ * then « Voir le détail », the informations grouped under their dimension
+ * (its name said once, Ibé 01/11/2026), each with its value or « Pas encore
+ * connu », source and state.
  */
 export function KnownSummary({
   assessment,
@@ -33,18 +34,33 @@ export function KnownSummary({
         {t.known(counts.known, counts.to_confirm, counts.missing)}
       </p>
       <Fold summary={t.detail}>
-        <FactRows>
-          {assessment.dimensions.flatMap((d) =>
-            d.questions.map((q) => (
-              <FramingLine
-                key={q.key}
-                question={q}
-                lines={lines[q.key] ?? []}
-                eyebrow={fr.framingIntel.dimensions[d.dimension]}
-              />
-            )),
-          )}
-        </FactRows>
+        <div className="flex flex-col gap-4">
+          {assessment.dimensions
+            .filter((d) => d.questions.length > 0)
+            .map((d) => (
+              <section
+                key={d.dimension}
+                aria-labelledby={`framing-known-${d.dimension}`}
+                className="flex flex-col gap-1.5"
+              >
+                <h4
+                  id={`framing-known-${d.dimension}`}
+                  className="text-caption font-semibold text-[color:var(--text-secondary)]"
+                >
+                  {fr.framingIntel.dimensions[d.dimension]}
+                </h4>
+                <FactRows>
+                  {d.questions.map((q) => (
+                    <FramingLine
+                      key={q.key}
+                      question={q}
+                      lines={lines[q.key] ?? []}
+                    />
+                  ))}
+                </FactRows>
+              </section>
+            ))}
+        </div>
       </Fold>
     </section>
   );
