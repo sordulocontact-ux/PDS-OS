@@ -3546,6 +3546,11 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
   - **Correction** : « Corriger » repose la question, la nouvelle réponse remplace les faits
     actifs (`superseded_by_answer_id`) sans les effacer, et un point à sécuriser encore
     intact part avec son fait. La liste des questions se recalcule.
+  - **Enchaînement** (Sacha, 05/11/2026) : la dernière question ouverte enregistrée (ou une
+    correction quand aucune ne reste) ouvre la Confirmation (`IntakeWorkspace`, `router.push`) ;
+    à la Confirmation, « Corriger » / « Répondre » d'une ligne ouvre sa question dans une
+    `FormDialog` (`SynthesisAction` + `QuestionCard`) sans quitter le dossier, qui se relit
+    après l'enregistrement. Le dossier, lui, ne se confirme jamais seul (geste du responsable).
   - **Panneau « Le dossier »** : l'État des lieux résumé par domaine, les éléments tiers,
     les responsables (désignés au plan d'action).
   - Statuts : les 7 du ticket sont stockés (CONNU … SIMULÉ en anglais) ; l'écran les

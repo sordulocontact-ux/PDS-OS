@@ -12,6 +12,7 @@ import { legal } from "@/lib/i18n/fr/legal";
 import { masterPage } from "@/lib/i18n/fr/master-page";
 import type { InventoryRows } from "@/lib/legal/inventory-rows";
 import { factLabel } from "@/lib/legal/intake/labels";
+import { answerKey } from "@/lib/legal/intake/questions";
 import type {
   FactValue,
   IntakeQuestion,
@@ -22,8 +23,14 @@ import type { Tone } from "@/lib/ui/state-tones";
 
 const fr = { contracts, legal, masterPage };
 
-/** A row's link back to the conversation: answer it, or correct it. */
-export type SynthesisAction = { kind: "answer" | "correct"; href: string };
+/** A row's way back to its question: answer it, or correct it. The
+ * question opens in a modal on the Confirmation (`question` = its
+ * answerKey); `href` stays the way to the Cadrage juridique. */
+export type SynthesisAction = {
+  kind: "answer" | "correct";
+  href: string;
+  question: string;
+};
 // `quote`: the words of the answer it was read from (« Cadrage juridique ·
 // « … » », proto Juridique v3 `synth()`). `tone`: the proto's pill for an
 // answer (« Déclaré » in info, « À vérifier » in warning), else the status's.
@@ -109,7 +116,11 @@ export function buildSynthesis(b: Build): SynthesisSection[] {
             status: "missing",
             statusLabel: t.states.unanswered,
             href: href(q, master?.id ?? null),
-            action: { kind: "answer", href: href(q, master?.id ?? null) },
+            action: {
+              kind: "answer",
+              href: href(q, master?.id ?? null),
+              question: answerKey(q, master?.id ?? null),
+            },
           },
         ]
       : [];
@@ -140,7 +151,11 @@ export function buildSynthesis(b: Build): SynthesisSection[] {
           t.states.answer[a.status as keyof typeof t.states.answer] ??
           t.states.answer.declared,
         href: href(q, master?.id ?? null),
-        action: { kind: "correct", href: href(q, master?.id ?? null) },
+        action: {
+          kind: "correct",
+          href: href(q, master?.id ?? null),
+          question: answerKey(q, master?.id ?? null),
+        },
       }));
 
   const people = b.rows.titles.flatMap((master): SynthesisFact[] => {

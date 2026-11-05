@@ -281,6 +281,19 @@ export const legal = {
     correct: "Corriger une réponse",
     // A line's way back to its question (ticket Juridique 01).
     actions: { answer: "Répondre", correct: "Corriger" },
+    // The question opened in a modal from its line (Sacha, 05/11/2026).
+    questionDialog: {
+      title: {
+        answer: "Répondre à la question",
+        correct: "Corriger la réponse",
+      },
+      description: {
+        answer:
+          "PO lit votre réponse, vous l'enregistrez, et le dossier se met à jour ici.",
+        correct:
+          "Votre nouvelle réponse remplace l'ancienne, et le dossier se met à jour ici.",
+      },
+    },
     confirmedTitle: "Le dossier confirmé",
     preview: {
       title: "Le plan d'action qui sera généré",

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { IconCheck } from "nucleo-sharp-essential";
 import { useState } from "react";
 
@@ -26,7 +27,8 @@ const keyOf = (q: IntakeQuestion) => answerKey(q.key, q.masterId);
  * « Corriger »); then every question at a glance and the ones PO does not
  * ask.
  * The server sends the questions again after each save, so the next one
- * comes by itself.
+ * comes by itself; once none is left, the Confirmation opens (Sacha,
+ * 05/11/2026), where an answer can still be corrected.
  */
 export function IntakeWorkspace({
   projectId,
@@ -51,6 +53,15 @@ export function IntakeWorkspace({
     ? questions.find((q) => keyOf(q) === correcting)
     : undefined;
   const active = corrected ?? questions.find((q) => !q.answered);
+  const router = useRouter();
+  const confirmationHref = routes.projectLegalStep(projectId, "confirmation");
+  // Saved: the last open question answered (or a correction while none is
+  // open) → the dossier to confirm; else the next question.
+  const saved = (q: IntakeQuestion) => {
+    setCorrecting(null);
+    if (questions.every((other) => other.answered || other === q))
+      router.push(confirmationHref);
+  };
 
   return (
     <div className="flex min-w-0 flex-col gap-6">
@@ -64,7 +75,7 @@ export function IntakeWorkspace({
           total={questions.length}
           correcting={corrected?.answered ?? false}
           onCancel={() => setCorrecting(null)}
-          onSaved={() => setCorrecting(null)}
+          onSaved={() => saved(active)}
         />
       ) : (
         // Every question answered: the next step, never a dead end.
@@ -75,11 +86,7 @@ export function IntakeWorkspace({
           action={
             <Button
               nativeButton={false}
-              render={
-                <Link
-                  href={routes.projectLegalStep(projectId, "confirmation")}
-                />
-              }
+              render={<Link href={confirmationHref} />}
             >
               {t.done.action}
             </Button>

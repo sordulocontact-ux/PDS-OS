@@ -17,6 +17,8 @@ import type {
   SynthesisFact,
   SynthesisSection,
 } from "@/lib/legal/confirmation/synthesis";
+import { answerKey } from "@/lib/legal/intake/questions";
+import type { IntakeQuestion } from "@/lib/legal/intake/types";
 import type { PlanItemKind } from "@/lib/legal/plan/proposal";
 import { factTone } from "@/lib/ui/state-tones";
 import type { JourneyStep } from "@/lib/ui/journey";
@@ -50,6 +52,7 @@ export function ConfirmationView({
   canAct,
   tagged,
   planPreview,
+  questions,
 }: {
   projectId: string;
   confirmation: Confirmation;
@@ -60,8 +63,12 @@ export function ConfirmationView({
   tagged: boolean;
   // The kinds of the démarches the plan will hold, one per action (JUR-06).
   planPreview: PlanItemKind[];
+  // The Cadrage juridique's questions: « Corriger » / « Répondre » opens
+  // its question in a modal.
+  questions: IntakeQuestion[];
 }) {
   const t = fr.legal.confirmation;
+  const ask: Ask = { projectId, questions };
   if (c.status === "confirmed" && c.confirmedAt)
     return (
       <>
@@ -81,6 +88,7 @@ export function ConfirmationView({
               sections={c.sections}
               tagged={tagged}
               canAct={canAct}
+              ask={ask}
             />
           </div>
         </Fold>
@@ -96,6 +104,7 @@ export function ConfirmationView({
         sections={c.sections}
         tagged={tagged}
         canAct={canAct}
+        ask={ask}
       />
       {canAct && (
         <>
@@ -146,15 +155,20 @@ export function ConfirmationView({
   );
 }
 
+/** What a line needs to open its question in a modal. */
+type Ask = { projectId: string; questions: IntakeQuestion[] };
+
 /** Personnes, Éléments repris, Contrats, Éditeurs: one section each. */
 function SynthesisSections({
   sections,
   tagged,
   canAct,
+  ask,
 }: {
   sections: SynthesisSection[];
   tagged: boolean;
   canAct: boolean;
+  ask: Ask;
 }) {
   const t = fr.legal.confirmation;
   return sections.map((section) => (
@@ -169,6 +183,7 @@ function SynthesisSections({
               fact={fact}
               tagged={tagged}
               canAct={canAct}
+              ask={ask}
             />
           ))}
         </FactRows>
@@ -178,18 +193,25 @@ function SynthesisSections({
 }
 
 /** One line of the dossier (proto `fact(role, <b>name</b>, source)`): an
- * answer keeps its « Corriger » / « Répondre » back to its question; any
- * other line opens its record. */
+ * answer keeps its « Corriger » / « Répondre », which opens its question in
+ * a modal; any other line opens its record. */
 function SynthesisRow({
   fact,
   tagged,
   canAct,
+  ask,
 }: {
   fact: SynthesisFact;
   tagged: boolean;
   canAct: boolean;
+  ask: Ask;
 }) {
   const action = canAct ? fact.action : undefined;
+  const question = action
+    ? ask.questions.find(
+        (q) => answerKey(q.key, q.masterId) === action.question,
+      )
+    : undefined;
   return (
     <FactRow
       label={fact.detail ?? undefined}
@@ -214,7 +236,15 @@ function SynthesisRow({
                 {fact.group.title}
               </StatusBadge>
             )}
-            {action && <SynthesisAction action={action} />}
+            {action && (
+              <SynthesisAction
+                projectId={ask.projectId}
+                action={action}
+                question={question}
+                position={question ? ask.questions.indexOf(question) + 1 : 0}
+                total={ask.questions.length}
+              />
+            )}
           </>
         )
       }

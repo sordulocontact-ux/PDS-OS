@@ -6,7 +6,7 @@ import { proposeLegalPlan } from "@/lib/legal/plan/queries";
 
 /** Confirmation: the dossier written by the code, confirmed by a person. */
 export async function ConfirmationStep({ projectId }: { projectId: string }) {
-  const { project, access, confirmation, steps } =
+  const { project, access, confirmation, steps, intake } =
     await legalJourneyContext(projectId);
   // JUR-06: before confirming, the démarches the plan will hold.
   const preview =
@@ -22,6 +22,7 @@ export async function ConfirmationStep({ projectId }: { projectId: string }) {
         canAct={can(access, "manage_legal")}
         tagged={project.masters.length > 1}
         planPreview={preview.map((item) => item.kind)}
+        questions={intake.questions}
       />
     </LegalStepFrame>
   );
