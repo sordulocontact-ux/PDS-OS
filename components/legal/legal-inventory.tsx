@@ -33,9 +33,18 @@ export function LegalInventory({
   state: FactStatus | null;
 }) {
   const t = fr.legal.inventory;
+  // No title yet: the per-title sections are empty, but the project's
+  // contracts and intervenants are still read and added here.
+  const noTitles = inventory.titles.length === 0;
   // « Points signalés au cadrage » are what the Cadrage juridique asks about.
   const sections = filterFactSections(inventory.sections, state).filter(
-    (s) => s.key !== "flags" && (s.failed || s.facts.length > 0 || !state),
+    (s) =>
+      s.key !== "flags" &&
+      (s.failed ||
+        s.facts.length > 0 ||
+        (!state &&
+          (!noTitles ||
+            (s.key === "agreements" && inventory.canCreateContract)))),
   );
   // The title as a tag only when there are several to tell apart.
   const tagged = inventory.titles.length > 1;
@@ -47,13 +56,14 @@ export function LegalInventory({
     if (fact.group && !firstOfTitle.has(fact.group.key))
       firstOfTitle.set(fact.group.key, fact.key);
 
-  if (inventory.titles.length === 0 && !sections.some((s) => s.failed))
-    return <EmptyNote>{fr.facts.noMasters}</EmptyNote>;
   if (state && sections.length === 0)
     return <EmptyNote>{t.filterEmpty[state]}</EmptyNote>;
 
   return (
     <>
+      {noTitles && !state && !sections.some((s) => s.failed) && (
+        <EmptyNote>{fr.facts.noMasters}</EmptyNote>
+      )}
       {sections.map((section) => (
         <InventorySection
           key={section.key}
