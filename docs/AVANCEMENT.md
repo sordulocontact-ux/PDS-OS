@@ -1437,3 +1437,13 @@ directement », l'ISWC depuis une modale de la page, sans aller au catalogue. D�
       mêmes cellules que la page Fichiers (date et auteur réunis, nom tronqué), image montrée en miniature à
       la place de son icône, « Ajouter un fichier » en petit bouton (il touchait la ligne des onglets).
 - [ ] Passage navigateur.
+
+## Noms d'onglet et tableau des fichiers (05/11/2026, branche `pre-prod`)
+
+- [x] Toutes les pages ont un nom d'onglet : « Titre · Section · PDS OS » pour un titre et un artiste (comme
+      un projet), « Catalogue · PDS OS », « Travail · PDS OS », « Connexion · PDS OS »… ; seules restaient
+      « PDS OS ».
+- [x] Onglet Fichiers d'un titre, d'un artiste, d'un projet, d'un contrat : recherche comme les autres listes,
+      mêmes cellules que la page Fichiers (date et auteur réunis, nom tronqué), image montrée en miniature à
+      la place de son icône, « Ajouter un fichier » en petit bouton (il touchait la ligne des onglets).
+- [ ] Passage navigateur.
