@@ -8,9 +8,11 @@ import type {
 } from "@/lib/catalog/capture-artist-types";
 import { shrinkImage } from "@/lib/images/shrink-image";
 
+/** A screenshot (`file`) or a shared TikTok / Instagram link (`link`). */
 export type CaptureItem = {
   id: string;
-  file: File;
+  file: File | null;
+  link: string | null;
   status: "queued" | "reading" | "done" | "failed";
   result?: CaptureArtistsResult;
   error?: CaptureArtistsError | "network" | "timeout";
@@ -24,6 +26,9 @@ const PARALLEL = 2;
 // past this, even once shrunk, the image is not sent.
 const SEND_LIMIT = 4 * 1024 * 1024;
 
+// A link and the few words a share sheet adds around it.
+const MAX_LINK_LENGTH = 2000;
+
 // A refusal that did not come from the route (no JSON body), by its status.
 function errorOf(status: number): CaptureItem["error"] {
   if (status === 413) return "file_too_large";
@@ -33,9 +38,18 @@ function errorOf(status: number): CaptureItem["error"] {
 
 let seq = 0;
 
-/** Screenshots read one by one by the server, two at a time, in order;
- * each shrunk by the browser first (shrinkImage), the original kept for
- * the thumbnail and a new reading. */
+// The screenshot, shrunk by the browser first (shrinkImage); null when it is
+// still too heavy to be sent. The original stays for the thumbnail.
+async function sendFile(original: File): Promise<Response | null> {
+  const file = await shrinkImage(original);
+  if (file.size > SEND_LIMIT) return null;
+  const body = new FormData();
+  body.set("file", file);
+  return fetch("/api/catalog/capture-artists", { method: "POST", body });
+}
+
+/** Screenshots and links read one by one by the server, two at a time, in
+ * order. */
 export function useCaptureQueue() {
   const [items, setItems] = useState<CaptureItem[]>([]);
   const running = useRef(new Set<string>());
@@ -51,17 +65,17 @@ export function useCaptureQueue() {
       running.current.add(item.id);
       update(item.id, { status: "reading", error: undefined });
       try {
-        const file = await shrinkImage(item.file);
-        if (file.size > SEND_LIMIT) {
+        const response = item.file
+          ? await sendFile(item.file)
+          : await fetch("/api/catalog/link-artist", {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({ url: item.link }),
+            });
+        if (!response) {
           update(item.id, { status: "failed", error: "file_too_large" });
           return;
         }
-        const body = new FormData();
-        body.set("file", file);
-        const response = await fetch("/api/catalog/capture-artists", {
-          method: "POST",
-          body,
-        });
         const json: unknown = await response.json().catch(() => null);
         if (response.ok)
           update(item.id, {
@@ -100,10 +114,30 @@ export function useCaptureQueue() {
       ...images.map((file) => ({
         id: `capture-${++seq}`,
         file,
+        link: null,
         status: "queued" as const,
       })),
     ]);
     return files.length - images.length;
+  }, []);
+
+  // A link already in the queue is not read twice (a share sent again).
+  const addLink = useCallback((text: string) => {
+    const link = text.trim().slice(0, MAX_LINK_LENGTH);
+    if (!link) return;
+    setItems((all) =>
+      all.some((i) => i.link === link)
+        ? all
+        : [
+            ...all,
+            {
+              id: `capture-${++seq}`,
+              file: null,
+              link,
+              status: "queued" as const,
+            },
+          ],
+    );
   }, []);
 
   const remove = useCallback(
@@ -115,5 +149,5 @@ export function useCaptureQueue() {
     [update],
   );
 
-  return { items, add, remove, retry };
+  return { items, add, addLink, remove, retry };
 }

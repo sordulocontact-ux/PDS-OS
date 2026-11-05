@@ -49,7 +49,7 @@ export async function confirmTikTok(person: Person): Promise<Person> {
       : page && { handle: page.handle, displayName: page.displayName };
   if (profile === null) return person;
   if (profile === undefined)
-    return { ...person, tiktok: handleLink("tiktok", handle, "capture") };
+    return { ...person, tiktok: handleLink("tiktok", handle, person.readFrom) };
   const known = person.names.some(
     (n) => n.toLowerCase() === profile.displayName.toLowerCase(),
   );
@@ -121,7 +121,7 @@ export async function withSocials(person: Matched): Promise<CaptureArtist> {
   const found: Record<Network, SocialLink | null> = {
     tiktok: artist.tiktok,
     instagram: read.instagram
-      ? link("instagram", read.instagram, "capture")
+      ? link("instagram", read.instagram, person.readFrom)
       : person.bioInstagram
         ? link("instagram", person.bioInstagram, "bio")
         : null,

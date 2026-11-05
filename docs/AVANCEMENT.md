@@ -1359,3 +1359,16 @@ directement », l'ISWC depuis une modale de la page, sans aller au catalogue. D�
       d'une personne du Réseau et d'un contrat, « Voir la fiche » pour aller sur sa page.
 - [ ] Migration `20261105140101` à pousser en prod (avec accord) ; passage navigateur des trois écrans.
 
+
+### Repérage : captures réduites, liens et raccourci iPhone (05/11/2026)
+
+- [x] **Capture réduite par le navigateur** avant l'envoi (2 000 px, JPEG) : l'échec d'Ibé en prod
+      était la limite de 4,5 Mo de Vercel (capture PNG d'iPhone), affiché comme une erreur Mistral ;
+      messages d'erreur sans fournisseur, 413 et 504 traduits.
+- [x] **Liens TikTok et Instagram** lus sans modèle (profil, vidéo, lien court, story Instagram),
+      champ « Lien TikTok ou Instagram », lien collé hors d'un champ, `?url=` et `?coller=1`, bouton
+      « Coller une capture ou un lien » sur téléphone ; la connexion ramène à la page demandée.
+- [x] **Raccourci iPhone** « Repérer dans PDS OS » : guide de création et de partage par lien
+      iCloud (`docs/RACCOURCI-REPERAGE.md`).
+- [ ] Créer le raccourci sur l'iPhone de Sacha et partager le lien iCloud, après la mise en prod ;
+      passage navigateur sur iPhone (partage TikTok, capture collée, connexion depuis un lien).

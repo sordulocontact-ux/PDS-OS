@@ -12,7 +12,14 @@ import { auth } from "@/lib/i18n/fr/auth";
 
 const fr = { auth };
 
-export function LoginForm({ initialError }: { initialError?: string }) {
+// `next`: the page of the app asked for before signing in (proxy).
+export function LoginForm({
+  initialError,
+  next,
+}: {
+  initialError?: string;
+  next?: string;
+}) {
   const [state, action] = useActionState(signIn, idleFormState);
   const errors = state.status === "error" ? (state.fieldErrors ?? {}) : {};
   const formError = state.status === "error" ? state.formError : initialError;
@@ -20,6 +27,7 @@ export function LoginForm({ initialError }: { initialError?: string }) {
 
   return (
     <form action={action} noValidate className="flex flex-col gap-4">
+      {next && <input type="hidden" name="next" value={next} />}
       <Field
         name="email"
         type="email"

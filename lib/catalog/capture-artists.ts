@@ -46,7 +46,21 @@ export async function readCaptureArtists(image: {
     image,
     CAPTURE_READING_INSTRUCTIONS,
   );
-  const people = checkedPeople(reading.output);
+  const artists = await findArtists(checkedPeople(reading.output));
+  return {
+    isTikTok: reading.output.isTikTok,
+    analysis: reading.output.analysis,
+    artists,
+    model: reading.model,
+    durationMs: reading.durationMs,
+  };
+}
+
+/**
+ * People read on a screenshot or in a shared link → their TikTok profile,
+ * Deezer account, proofs and networks, flagged when already known.
+ */
+export async function findArtists(people: Person[]): Promise<CaptureArtist[]> {
   const artists = await Promise.all(
     people.map((person) =>
       confirmTikTok(person)
@@ -56,13 +70,7 @@ export async function readCaptureArtists(image: {
     ),
   );
   await Promise.all([flagExisting(artists), flagInNetwork(artists)]);
-  return {
-    isTikTok: reading.output.isTikTok,
-    analysis: reading.output.analysis,
-    artists,
-    model: reading.model,
-    durationMs: reading.durationMs,
-  };
+  return artists;
 }
 
 const unique = (values: string[]) => [
@@ -126,6 +134,7 @@ export function checkedPeople(reading: CaptureReading): Person[] {
       clues: account ? linkClues(links) : [],
       links: account ? links : [],
       read,
+      readFrom: "capture",
       bioInstagram: null,
       email:
         account && writtenEmail

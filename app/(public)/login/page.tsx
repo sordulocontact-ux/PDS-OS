@@ -13,6 +13,8 @@ export default async function LoginPage({
   await requireAnonymous();
   const params = await searchParams;
   const linkInvalid = params.error === "link_invalid";
+  // Checked again by the sign-in action (safeReturnPath).
+  const next = typeof params.next === "string" ? params.next : undefined;
 
   return (
     <AuthFrame
@@ -26,6 +28,7 @@ export default async function LoginPage({
     >
       <LoginForm
         initialError={linkInvalid ? fr.auth.errors.linkInvalid : undefined}
+        next={next}
       />
     </AuthFrame>
   );

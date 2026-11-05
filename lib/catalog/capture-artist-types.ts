@@ -53,12 +53,18 @@ export type DeezerAccount = {
 };
 
 /**
- * Where a social link comes from: read on the screenshot, confirmed by
- * TikTok, written in the TikTok bio, on the artist's Linktree, or linked to
- * the Deezer profile by MusicBrainz / Wikidata.
+ * Where a social link comes from: read on the screenshot, in a shared link,
+ * confirmed by TikTok, written in the TikTok bio, on the artist's Linktree,
+ * or linked to the Deezer profile by MusicBrainz / Wikidata.
  */
 export type SocialSource =
-  "capture" | "tiktok" | "bio" | "linktree" | "musicbrainz" | "wikidata";
+  | "capture"
+  | "link"
+  | "tiktok"
+  | "bio"
+  | "linktree"
+  | "musicbrainz"
+  | "wikidata";
 
 // `label`: "@huntrill" for a handle, the artist's name for Spotify.
 export type SocialLink = { label: string; url: string; source: SocialSource };
@@ -129,4 +135,8 @@ export type CaptureArtistsError =
   | "unsupported_type"
   | "provider_error"
   | "ai_quota"
-  | "deezer_unavailable";
+  | "deezer_unavailable"
+  // A shared link (lib/catalog/link-artist.ts).
+  | "invalid_link"
+  | "instagram_post"
+  | "link_unreadable";

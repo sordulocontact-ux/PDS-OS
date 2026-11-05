@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { fetchAccess } from "@/lib/auth/access";
 import { authErrorMessage, isEmailNotConfirmed } from "@/lib/auth/errors";
 import type { FormState } from "@/lib/auth/form-state";
-import { destinationFor, routes } from "@/lib/auth/redirects";
+import { destinationFor, routes, safeReturnPath } from "@/lib/auth/redirects";
 import {
   emailOnlySchema,
   parseForm,
@@ -129,7 +129,13 @@ export async function signIn(
   }
 
   const access = await fetchAccess(supabase);
-  redirect(destinationFor(access.state));
+  // Back to the page asked for before signing in (proxy), when approved.
+  const next = formData.get("next");
+  redirect(
+    access.state === "approved" && next
+      ? safeReturnPath(next)
+      : destinationFor(access.state),
+  );
 }
 
 export async function signOut(): Promise<void> {

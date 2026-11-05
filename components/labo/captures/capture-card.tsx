@@ -1,6 +1,6 @@
 "use client";
 
-import { IconXmark } from "nucleo-sharp-essential";
+import { IconLink, IconXmark } from "nucleo-sharp-essential";
 
 import { CaptureArtistRow } from "@/components/labo/captures/capture-artist-row";
 import type { CaptureItem } from "@/components/labo/captures/use-capture-queue";
@@ -13,7 +13,20 @@ import { cn } from "@/lib/utils";
 
 const fr = { laboCaptures };
 
-/** A screenshot, its reading state, and the people read on it. */
+// "tiktok.com/@huntrill" for a shared link: what a person recognizes.
+function shortLink(text: string): string {
+  const raw = /https?:\/\/[^\s<>"']+/i.exec(text)?.[0];
+  if (!raw) return text;
+  try {
+    const url = new URL(raw);
+    return `${url.hostname.replace(/^www\./, "")}${url.pathname.replace(/\/$/, "")}`;
+  } catch {
+    return raw;
+  }
+}
+
+/** A screenshot or a shared link, its reading state, and the people read
+ * on it. */
 export function CaptureCard({
   item,
   canAddToNetwork,
@@ -28,6 +41,7 @@ export function CaptureCard({
   const t = fr.laboCaptures;
   const preview = useObjectUrl(item.file);
   const { result } = item;
+  const name = item.file?.name ?? shortLink(item.link ?? "");
 
   const badge =
     item.status === "done" && result && !result.isTikTok ? (
@@ -56,6 +70,11 @@ export function CaptureCard({
       )}
       aria-busy={item.status === "reading"}
     >
+      {item.link && (
+        <div className="flex aspect-square w-full items-center justify-center self-start rounded-lg border border-[var(--border-hairline)] bg-[var(--surface-sunken)]">
+          <IconLink aria-hidden className="size-6 text-muted-foreground" />
+        </div>
+      )}
       {preview && (
         // A local preview of the file: next/image has nothing to optimize.
         // eslint-disable-next-line @next/next/no-img-element
@@ -68,13 +87,13 @@ export function CaptureCard({
       <div className="grid min-w-0 content-start gap-3">
         <div className="flex min-w-0 items-center gap-2">
           <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
-            {item.file.name}
+            {name}
           </span>
           {badge}
           <Button
             variant="ghost"
             size="icon-sm"
-            aria-label={t.remove(item.file.name)}
+            aria-label={t.remove(name)}
             onClick={onRemove}
           >
             <IconXmark aria-hidden className="size-4" />
@@ -87,7 +106,7 @@ export function CaptureCard({
               {t.errors[item.error ?? "provider_error"]}
             </p>
             <Button variant="outline" size="sm" onClick={onRetry}>
-              {t.retry}
+              {item.link ? t.retryLink : t.retry}
             </Button>
           </div>
         )}
@@ -108,7 +127,9 @@ export function CaptureCard({
               </ul>
             )}
             <p className="text-sm text-muted-foreground tabular-nums">
-              {t.meta(result.model, (result.durationMs / 1000).toFixed(1))}
+              {result.model
+                ? t.meta(result.model, (result.durationMs / 1000).toFixed(1))
+                : t.metaLink((result.durationMs / 1000).toFixed(1))}
             </p>
           </>
         )}

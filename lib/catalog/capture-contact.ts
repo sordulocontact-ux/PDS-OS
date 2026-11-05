@@ -32,7 +32,12 @@ export function captureContact(
     asHandle(label?.replace(/^@/, ""))?.toLowerCase() ?? null;
 
   const notes = [
-    t.spotted(formatDate(today.toISOString()), t.role[artist.role]),
+    t.spotted(
+      // A shared Instagram link: spotted on Instagram, not on TikTok.
+      artist.instagram?.source === "link" ? "Instagram" : "TikTok",
+      formatDate(today.toISOString()),
+      t.role[artist.role],
+    ),
     profile &&
       (profile.followers !== null || profile.videos !== null) &&
       t.tiktok(

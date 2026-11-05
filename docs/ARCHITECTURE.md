@@ -6839,7 +6839,7 @@ sans un clic : « Ajouter au Réseau » (ci-dessous).
   la Research API est réservée aux chercheurs, sans usage commercial ; les scrapers violent
   les conditions de TikTok. Une capture ne porte de toute façon aucun identifiant. Piste
   gardée pour plus tard : un **lien** de vidéo collé → oEmbed public
-  (`tiktok.com/oembed?url=…`, sans clé) donne le compte.
+  (`tiktok.com/oembed?url=…`, sans clé) donne le compte (fait le 05/11 : « Liens » ci-dessous).
 - **Lecture** (`lib/catalog/capture-artists.ts`, route `POST /api/catalog/capture-artists`) :
   l'image part seule au modèle (`extractFromImage` de `lib/ai/llm.ts`, ministral-14b lit les
   images), donnée jamais consigne. Le modèle **regroupe les noms d'une même personne** (nom
@@ -6926,6 +6926,22 @@ sans un clic : « Ajouter au Réseau » (ci-dessous).
   JSON est traduite par son code (413 trop lourde, 504 trop longue) ; les messages ne nomment
   plus de fournisseur. Un artefact claude.ai ne peut pas
   servir de banc : il n'atteint ni Mistral ni l'API Deezer (réseau bloqué).
+- **Liens** (05/11/2026, demande de Sacha : partager au Repérage depuis le téléphone,
+  `lib/catalog/link-artist.ts`, route `POST /api/catalog/link-artist`, champ `CaptureLinkForm`) :
+  un lien TikTok ou Instagram donne directement le compte, **sans modèle** (aucune requête de PO
+  sauf le départage des homonymes) : `tiktok.com/@x` et ses vidéos ; un lien court
+  (`vm.tiktok.com`, `vt.tiktok.com`, `tiktok.com/t/`) suivi par ses redirections, vers TikTok
+  seulement ; une vidéo sans pseudo (`/@/video/<id>`) demandée à l'oEmbed ; `instagram.com/<x>`
+  et ses stories. Un reel ou une publication Instagram ne dit pas qui l'a publié (l'oEmbed
+  d'Instagram exige une application Meta et un jeton) : message clair, capture conseillée. Le
+  compte suit ensuite la même chaîne qu'une capture (`findArtists`), source « dans le lien
+  partagé » ; nom affiché = celui du profil TikTok ; « Ajouter au Réseau » note « Repéré sur
+  Instagram » pour un lien Instagram. Un lien collé hors d'un champ (⌘V) est lu aussi.
+  `?url=<lien>` lit le lien à l'ouverture et `?coller=1` met en tête `ClipboardPasteButton`
+  (lecture du presse-papiers sur un geste, seule voie sur iPhone) : c'est ce qu'ouvre le
+  **raccourci iPhone** (`docs/RACCOURCI-REPERAGE.md`). Sur téléphone, ce bouton remplace le
+  rappel ⌘ V. La connexion garde la page demandée (`?next=` posé par le proxy,
+  `safeReturnPath`, pages `/app/…` seulement) : un partage reçu déconnecté ne se perd pas.
 
 ---
 

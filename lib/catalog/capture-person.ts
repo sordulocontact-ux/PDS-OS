@@ -15,8 +15,10 @@ export type Person = Pick<
   clues: string[];
   // Links written on the screenshot, as read (account only).
   links: string[];
-  // Handles as read on the screenshot, before any check.
+  // Handles as read on the screenshot (or in a shared link), before any check.
   read: { tiktok: string | null; instagram: string | null };
+  // Where those handles come from.
+  readFrom: "capture" | "link";
   // An Instagram written in the TikTok bio ("Ig: …"), read by the code.
   bioInstagram: string | null;
   // The first e-mail written on the screenshot (account only), then in the

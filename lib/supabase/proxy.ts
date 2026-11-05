@@ -78,7 +78,12 @@ export async function updateSession(request: NextRequest) {
   if (!data?.claims?.sub && isProtected(pathname)) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = routes.login;
+    // The page asked for, kept to come back to it once signed in (a link
+    // shared to the Repérage: /app/labo?url=…). Pages of the app only.
+    const asked = `${pathname}${request.nextUrl.search}`;
     loginUrl.search = "";
+    if (pathname.startsWith(`${routes.app}/`))
+      loginUrl.searchParams.set("next", asked);
     const redirection = NextResponse.redirect(loginUrl);
     // Carry over cookies set during getClaims(): when a token became invalid,
     // Supabase asks to delete them; without this the browser would keep

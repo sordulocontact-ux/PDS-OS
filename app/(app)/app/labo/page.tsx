@@ -13,8 +13,15 @@ export const metadata = { title: `${fr.laboCaptures.title} · ${fr.app.name}` };
  * artists read on TikTok screenshots and found on Deezer, saved to the
  * Réseau by a person (« Ajouter au Réseau »).
  */
-export default async function LaboPage() {
-  const access = await requireApproved();
+export default async function LaboPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ url?: string | string[]; coller?: string }>;
+}) {
+  const [access, params] = await Promise.all([requireApproved(), searchParams]);
+  // ?url=… and ?coller=1: sent by the iPhone Raccourci (docs/ARCHITECTURE.md
+  // § 10 bis); the link is only data, read by the link route.
+  const sharedLink = typeof params.url === "string" ? params.url : null;
   const t = fr.laboCaptures;
 
   return (
@@ -25,7 +32,11 @@ export default async function LaboPage() {
         title={t.section}
         description={t.sectionDescription}
       >
-        <CaptureArtistsBench canAddToNetwork={can(access, "manage_network")} />
+        <CaptureArtistsBench
+          canAddToNetwork={can(access, "manage_network")}
+          sharedLink={sharedLink}
+          paste={params.coller === "1"}
+        />
       </PageSection>
     </PageContainer>
   );

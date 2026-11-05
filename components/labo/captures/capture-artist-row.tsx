@@ -105,10 +105,15 @@ export function CaptureArtistRow({
         onChosen={(chosen) => setArtist((current) => choose(current, chosen))}
       />
 
-      <details className="text-sm text-muted-foreground">
-        <summary className="cursor-pointer select-none">{t.reasoning}</summary>
-        <p className="mt-1">{artist.reasoning}</p>
-      </details>
+      {/* A shared link has no reading by PO, hence no reasoning. */}
+      {artist.reasoning && (
+        <details className="text-sm text-muted-foreground">
+          <summary className="cursor-pointer select-none">
+            {t.reasoning}
+          </summary>
+          <p className="mt-1">{artist.reasoning}</p>
+        </details>
+      )}
     </li>
   );
 }
