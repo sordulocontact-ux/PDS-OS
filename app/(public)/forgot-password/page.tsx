@@ -5,6 +5,10 @@ import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { ForgotPasswordForm } from "./forgot-password-form";
 
+export const metadata = {
+  title: `${fr.auth.forgotPassword.title} · ${fr.app.name}`,
+};
+
 export default async function ForgotPasswordPage() {
   await requireAnonymous();
 

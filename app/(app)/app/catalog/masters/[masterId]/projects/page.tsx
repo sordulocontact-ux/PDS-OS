@@ -25,6 +25,8 @@ import Link from "next/link";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { routes } from "@/lib/auth/redirects";
 
+export const metadata = { title: fr.masterPage.tabs.projects };
+
 // Projects & releases tab: live projects carrying the title, among those the
 // viewer may see (RLS), in the same table as the Projects page, with « Créer
 // un projet » and « Rattacher à un projet existant » (retours 16, 64); their

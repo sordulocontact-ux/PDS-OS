@@ -18,9 +18,8 @@ import { fr } from "@/lib/i18n/fr";
 import { formatInstantDay } from "@/lib/utils/instant";
 import { allInOrder } from "@/lib/utils/parallel";
 
-export const metadata = {
-  title: `${fr.artistIdentity.title} · ${fr.app.name}`,
-};
+// Under the artist's template (« Nova · Identité · PDS OS »).
+export const metadata = { title: fr.artistIdentity.tab };
 
 /**
  * The artist's identity (MKT-C2-04): the version in force, read by every

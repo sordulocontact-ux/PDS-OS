@@ -1,4 +1,5 @@
 import { IconPlus } from "nucleo-sharp-essential";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -20,6 +21,22 @@ import { getMaster } from "@/lib/catalog/queries";
 import { variantText } from "@/lib/catalog/title-rules";
 import { fr } from "@/lib/i18n/fr";
 import { allInOrder } from "@/lib/utils/parallel";
+
+// The tab names the title and the section, as a project's pages do
+// (« Nuit blanche · Fichiers · PDS OS »).
+export async function generateMetadata({
+  params,
+}: LayoutProps<"/app/catalog/masters/[masterId]">): Promise<Metadata> {
+  const { masterId } = await params;
+  const master = await getMaster(masterId).catch(() => null);
+  if (!master) return {};
+  return {
+    title: {
+      template: `${master.title} · %s · ${fr.app.name}`,
+      default: `${master.title} · ${fr.app.name}`,
+    },
+  };
+}
 
 // Title frame ("master" in the code): header (cover, title, audio state,
 // artists, variant, actions) and section tabs. Pages

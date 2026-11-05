@@ -4,21 +4,14 @@
 // version of the cover; the previous ones stay in the Files tab.
 // Client-safe.
 
-// Images a browser shows: a PSD or a TIFF stays a file, never the cover.
-const COVER_MIMES = new Set([
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/gif",
-  "image/avif",
-]);
+import { isShownImage, SHOWN_IMAGE_ACCEPT } from "@/lib/catalog/file-rules";
 
 /** The file picker of the cover offers what the cover can show. */
-export const COVER_ACCEPT = [...COVER_MIMES].join(",");
+export const COVER_ACCEPT = SHOWN_IMAGE_ACCEPT;
 
 /** A file that can be shown as the title's cover. */
 export function isCoverImage(file: { category: string; mime: string }) {
-  return file.category === "artwork" && COVER_MIMES.has(file.mime);
+  return file.category === "artwork" && isShownImage(file.mime);
 }
 
 /**

@@ -28,6 +28,8 @@ import { getMaster } from "@/lib/catalog/queries";
 import { fr } from "@/lib/i18n/fr";
 import { allInOrder } from "@/lib/utils/parallel";
 
+export const metadata = { title: fr.masterPage.tabs.audio };
+
 // Audio tab (retours Catalogue 10, 13, 18 à 26): the step reached, the last
 // version deposited and the last validated, then every version numbered in
 // its step (Mix V2), with its validation, its player and its comments.

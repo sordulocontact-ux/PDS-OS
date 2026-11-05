@@ -25,6 +25,10 @@ import { listProjectDrafts } from "@/lib/projects/drafts";
 import { listProjects } from "@/lib/projects/queries";
 import { withActiveWorkflows } from "@/lib/overview/workflow-progress";
 
+export const metadata = {
+  title: `${fr.shell.projects.title} · ${fr.app.name}`,
+};
+
 export default async function ProjectsPage({
   searchParams,
 }: PageProps<"/app/projects">) {

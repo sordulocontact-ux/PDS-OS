@@ -4,6 +4,10 @@ import { SignOutButton } from "@/components/auth/sign-out-button";
 import { requireState } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
 
+export const metadata = {
+  title: `${fr.auth.accessDenied.tab} · ${fr.app.name}`,
+};
+
 // Rejected, suspended or disabled. The text depends on the state read on the
 // server, never on the URL. The internal reason is not shown.
 export default async function AccessDeniedPage() {

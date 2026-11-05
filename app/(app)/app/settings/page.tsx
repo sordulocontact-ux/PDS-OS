@@ -11,6 +11,10 @@ import { loadBilling } from "@/lib/invoices/billing";
 
 import { AiUsageMeter } from "./ai-usage-meter";
 
+export const metadata = {
+  title: `${fr.aiUsage.settings.title} · ${fr.app.name}`,
+};
+
 // Each member's settings: how many requests to PO they used today, against
 // the daily limit the general director sets in Équipe.
 export default async function SettingsPage() {

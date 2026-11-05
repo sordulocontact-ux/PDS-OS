@@ -82,6 +82,8 @@ export const auth = {
   },
 
   accessDenied: {
+    // Name of the browser tab, whatever the reason.
+    tab: "Accès impossible",
     rejected: {
       title: "Accès refusé",
       body: "Votre demande d'accès n'a pas été acceptée.",

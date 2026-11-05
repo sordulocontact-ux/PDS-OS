@@ -5,6 +5,8 @@ import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { SignUpForm } from "./signup-form";
 
+export const metadata = { title: `${fr.auth.signup.title} · ${fr.app.name}` };
+
 export default async function SignUpPage({
   searchParams,
 }: PageProps<"/signup">) {

@@ -4,6 +4,8 @@ import { SignOutButton } from "@/components/auth/sign-out-button";
 import { requireState } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
 
+export const metadata = { title: `${fr.auth.pending.title} · ${fr.app.name}` };
+
 // Email confirmed, access not decided yet. The decision is taken elsewhere,
 // so polling is frequent here.
 export default async function PendingPage() {

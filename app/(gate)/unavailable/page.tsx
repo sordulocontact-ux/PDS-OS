@@ -9,6 +9,10 @@ import { getAccess, requireState } from "@/lib/auth/dal";
 import { safeReturnPath, unavailableFrom } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 
+export const metadata = {
+  title: `${fr.auth.unavailable.title} · ${fr.app.name}`,
+};
+
 // The database did not answer. Access stays closed, but the screen tells the
 // truth: an outage, not an account problem. Reloading is enough once it is
 // back, and « Réessayer » goes back to the page the person was on (`next`).

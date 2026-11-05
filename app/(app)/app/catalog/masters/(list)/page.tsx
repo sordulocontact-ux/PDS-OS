@@ -34,6 +34,10 @@ import { fr } from "@/lib/i18n/fr";
 import { filterParam, optionsByName } from "@/lib/ui/filter-options";
 import { allInOrder } from "@/lib/utils/parallel";
 
+export const metadata = {
+  title: `${fr.catalog.masters.title} · ${fr.app.name}`,
+};
+
 // Catalogue ("masters" in the code, retours Catalogue 01, 02 et 04): tabs by
 // where the song stands (Tous, En création, En production, Finalisés), the
 // audio step, artist and project as combinable filters, all in the URL

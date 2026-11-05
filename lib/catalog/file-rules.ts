@@ -150,6 +150,23 @@ export function fileFormat(fileName: string, mime: string): string {
     : "";
 }
 
+// Images every browser shows: a PSD, a TIFF or a HEIC keeps the icon.
+const SHOWN_IMAGES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "image/avif",
+]);
+
+/** An image the browser can show as a thumbnail (or as a title's cover). */
+export function isShownImage(mime: string): boolean {
+  return SHOWN_IMAGES.has(mime);
+}
+
+/** The thumbnail picker's `accept`: what `isShownImage` takes. */
+export const SHOWN_IMAGE_ACCEPT = [...SHOWN_IMAGES].join(",");
+
 /** What the file's icon shows. */
 export function fileKind(file: {
   fileName: string;
@@ -282,4 +299,7 @@ export type CatalogFile = {
   // under the original name.
   openUrl: string | null;
   downloadUrl: string | null;
+  // A small copy shown in place of its icon (an image's own URL, or a
+  // title cover's 320 px copy); null when it is not a shown image.
+  previewUrl: string | null;
 };

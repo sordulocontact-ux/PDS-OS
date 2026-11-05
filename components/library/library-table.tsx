@@ -3,7 +3,10 @@
 import Link from "next/link";
 
 import { fileOpenActions } from "@/components/catalog/files/file-open-actions";
-import { FileTypeIcon } from "@/components/catalog/files/file-type-icon";
+import {
+  FileAdded,
+  FileNameMedia,
+} from "@/components/catalog/files/file-cells";
 import {
   DataTable,
   DataTableActionsCell,
@@ -12,8 +15,6 @@ import {
   DataTableCell,
   DataTableHead,
   DataTableHeader,
-  DataTableLink,
-  DataTableMedia,
   DataTableRow,
   EMPTY_CELL,
 } from "@/components/ui/data-table";
@@ -23,7 +24,6 @@ import { fileFormat, formatFileSize } from "@/lib/catalog/file-rules";
 import { catalogFiles } from "@/lib/i18n/fr/catalog-files";
 import { library } from "@/lib/i18n/fr/library";
 import type { LibraryFile } from "@/lib/library/queries";
-import { formatShortDate } from "@/lib/release/format";
 
 const fr = { catalogFiles, library };
 
@@ -50,23 +50,9 @@ export function LibraryTable({ files }: { files: LibraryFile[] }) {
           return (
             <DataTableRow key={file.id}>
               <DataTableCell>
-                <DataTableMedia
-                  visual={<FileTypeIcon file={file} />}
-                  title={
-                    <DataTableLink href={file.openUrl} newTab>
-                      <span className="sr-only">
-                        {fr.catalogFiles.open(file.fileName)}
-                      </span>
-                      {/* A long name is cut (Sacha, 29/10); the whole name on hover. */}
-                      <span
-                        aria-hidden
-                        title={file.fileName}
-                        className="block max-w-80 truncate"
-                      >
-                        {file.fileName}
-                      </span>
-                    </DataTableLink>
-                  }
+                <FileNameMedia
+                  file={file}
+                  previewUrl={file.openUrl}
                   subtitle={
                     <>
                       {/* The owner column is hidden under md. */}
@@ -105,14 +91,10 @@ export function LibraryTable({ files }: { files: LibraryFile[] }) {
                 </Link>
               </DataTableCell>
               <DataTableCell hideBelow="lg" fill>
-                <span className="flex min-w-0 flex-col">
-                  <span>{formatShortDate(file.createdAt)}</span>
-                  {file.authorName && (
-                    <span className="truncate text-sm text-muted-foreground">
-                      {file.authorName}
-                    </span>
-                  )}
-                </span>
+                <FileAdded
+                  createdAt={file.createdAt}
+                  authorName={file.authorName}
+                />
               </DataTableCell>
               <DataTableActionsCell>
                 <RowActions

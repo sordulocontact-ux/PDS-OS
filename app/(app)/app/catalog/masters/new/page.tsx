@@ -8,6 +8,10 @@ import { routes } from "@/lib/auth/redirects";
 import { getMaster, listArtistOptions } from "@/lib/catalog/queries";
 import { fr } from "@/lib/i18n/fr";
 
+export const metadata = {
+  title: `${fr.catalog.masterForm.title} · ${fr.app.name}`,
+};
+
 // ?artist=<id>: opened from an artist page — that artist is already credited
 // as main artist. ?variantOf=<id>: a new variant of that title — its name
 // and credits are copied, and it is linked to the family's original (a

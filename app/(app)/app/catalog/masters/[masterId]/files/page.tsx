@@ -12,6 +12,8 @@ import { getMaster } from "@/lib/catalog/queries";
 import { fr } from "@/lib/i18n/fr";
 import { allInOrder } from "@/lib/utils/parallel";
 
+export const metadata = { title: fr.masterPage.tabs.files };
+
 // Files tab: stems, artwork, contracts… everything but the audio versions,
 // which have their own tab. The same library as the artist's (views by
 // category, ?category=). Everyone reads it (contracts only with

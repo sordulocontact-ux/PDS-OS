@@ -7,6 +7,8 @@ import { HomeSummary } from "@/components/home/home-summary";
 import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
 
+export const metadata = { title: `${fr.shell.nav.home} · ${fr.app.name}` };
+
 export default async function AppHomePage() {
   const access = await requireApproved();
   const t = fr.shell.home;

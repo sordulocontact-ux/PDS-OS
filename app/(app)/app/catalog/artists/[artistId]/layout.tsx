@@ -1,4 +1,5 @@
 import { IconPlus } from "nucleo-sharp-essential";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -26,6 +27,21 @@ import { allInOrder } from "@/lib/utils/parallel";
 // not wait for it), and section tabs. Pages
 // below check access themselves (a layout does not re-run on client
 // navigation); getArtist is cached per request, so they reuse it.
+// The tab names the artist and the section, as a project's pages do.
+export async function generateMetadata({
+  params,
+}: LayoutProps<"/app/catalog/artists/[artistId]">): Promise<Metadata> {
+  const { artistId } = await params;
+  const artist = await getArtist(artistId).catch(() => null);
+  if (!artist) return {};
+  return {
+    title: {
+      template: `${artist.name} · %s · ${fr.app.name}`,
+      default: `${artist.name} · ${fr.app.name}`,
+    },
+  };
+}
+
 export default async function ArtistLayout({
   children,
   params,

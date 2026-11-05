@@ -1,8 +1,10 @@
 import "server-only";
 
+import { coverThumbPath, isCoverImage } from "@/lib/catalog/cover-rules";
 import {
   FILE_BUCKETS,
   isFileCategory,
+  isShownImage,
   withDownloadName,
   type CatalogFile,
   type CatalogFileVersion,
@@ -91,17 +93,26 @@ export async function listCatalogFiles(
   // query parameter beside the token (as storage-js adds it), so the same
   // signature serves both opening and downloading.
   const supabase = await createClient();
+  // A title's covers have a small copy beside them (cover-rules.ts),
+  // signed in the same request; one filed before has none.
+  const thumbOf = (row: { category: string; mime: string; path: string }) =>
+    owner.kind === "master" && isCoverImage(row)
+      ? coverThumbPath(row.path)
+      : null;
+  const thumbs = rows.flatMap((row) => thumbOf(row) ?? []);
   const signed = await supabase.storage
     .from(FILE_BUCKETS[owner.kind])
     .createSignedUrls(
-      rows.map((row) => row.path),
+      [...rows.map((row) => row.path), ...thumbs],
       SIGNED_URL_SECONDS,
     );
   if (signed.error)
     console.error("listCatalogFiles (sign):", signed.error.message);
   const urlOf = new Map(
     (signed.data ?? []).flatMap((entry) =>
-      entry.path && entry.signedUrl ? [[entry.path, entry.signedUrl]] : [],
+      entry.path && entry.signedUrl && !entry.error
+        ? [[entry.path, entry.signedUrl]]
+        : [],
     ),
   );
 
@@ -161,6 +172,9 @@ export async function listCatalogFiles(
         authorPersonId: row.created_by,
         openUrl: latest.openUrl,
         downloadUrl: latest.downloadUrl,
+        previewUrl: isShownImage(row.mime)
+          ? (urlOf.get(thumbOf(row) ?? "") ?? latest.openUrl)
+          : null,
       };
     });
   return { files, error: false };

@@ -16,6 +16,8 @@ import { listMasters } from "@/lib/catalog/queries";
 import { fr } from "@/lib/i18n/fr";
 import { allInOrder } from "@/lib/utils/parallel";
 
+export const metadata = { title: fr.catalog.artistPage.tabs.masters };
+
 // Masters tab: every live master crediting the artist, in the same table
 // as the Masters page (ISRC, release, date, status).
 export default async function ArtistMastersPage({

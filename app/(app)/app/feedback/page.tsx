@@ -17,6 +17,8 @@ import { isTopicStatus } from "@/lib/feedback/types";
 import { fr } from "@/lib/i18n/fr";
 import { notionMissingSettings } from "@/lib/integrations/notion";
 
+export const metadata = { title: `${fr.feedback.title} · ${fr.app.name}` };
+
 // Feedback about the app. Everyone sends through the feedback window and
 // reads their own here; the director (read_feedback) reviews the team's,
 // grouped by PO, and sends what matters with a priority.

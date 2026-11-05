@@ -12,6 +12,10 @@ import { listCreativePeople } from "@/lib/projects/creatives";
 import { draftDefaults, getProjectDraft } from "@/lib/projects/drafts";
 import { listAssignablePeople } from "@/lib/projects/queries";
 
+export const metadata = {
+  title: `${fr.shell.newProject.title} · ${fr.app.name}`,
+};
+
 // ?master=<id>: opened from a master page — that master is linked, the
 // project is a music single and the title is the master's. Everything stays
 // editable.

@@ -5,6 +5,10 @@ import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { ResendForm } from "./resend-form";
 
+export const metadata = {
+  title: `${fr.auth.verifyEmail.title} · ${fr.app.name}`,
+};
+
 // The address is never put in the URL: the person types it again to get a
 // new email.
 export default async function VerifyEmailPage() {

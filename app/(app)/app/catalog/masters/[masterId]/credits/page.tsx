@@ -18,6 +18,8 @@ import { fr } from "@/lib/i18n/fr";
 import { confirmedSplitOf } from "@/lib/legal/splits/title-split";
 import { allInOrder } from "@/lib/utils/parallel";
 
+export const metadata = { title: fr.masterPage.tabs.credits };
+
 // Credits: the performing artists (edited in "Modifier"), every other credit
 // of the title, then the splits of the master and of the publishing
 // (#splits-master), read and written with manage_catalog only (RLS agrees):

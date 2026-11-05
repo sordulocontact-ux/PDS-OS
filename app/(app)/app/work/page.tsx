@@ -15,6 +15,8 @@ import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 
+export const metadata = { title: `${fr.work.title} · ${fr.app.name}` };
+
 // Everyone's work, each list gated by a permission (docs/CONTEXTE-PROJET.md
 // § 12): the director decides, the project manager runs, the creative
 // director designs. « Maintenant » then every action by when

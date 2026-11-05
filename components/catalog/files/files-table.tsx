@@ -1,5 +1,8 @@
 import { FileActions } from "@/components/catalog/files/file-actions";
-import { FileTypeIcon } from "@/components/catalog/files/file-type-icon";
+import {
+  FileAdded,
+  FileNameMedia,
+} from "@/components/catalog/files/file-cells";
 import {
   DataTable,
   DataTableActionsCell,
@@ -8,10 +11,7 @@ import {
   DataTableCell,
   DataTableHead,
   DataTableHeader,
-  DataTableLink,
-  DataTableMedia,
   DataTableRow,
-  EMPTY_CELL,
 } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
@@ -24,13 +24,14 @@ import {
 } from "@/lib/catalog/file-rules";
 import { formatDuration } from "@/lib/catalog/types";
 import { catalogFiles } from "@/lib/i18n/fr/catalog-files";
-import { formatShortDate } from "@/lib/release/format";
 
 const fr = { catalogFiles };
 
-// Files of an artist or a title, newest first: name (opens the file in a new
-// tab), precision, format and size, category, author, date, then "⋯". A
-// title's audio versions have their own list (AudioVersionList).
+// Files of an artist, a title, a project or a contract, newest first: the
+// same cells as the global library (file-cells.tsx): picture or icon, name
+// (opens the file in a new tab), precision, format and size, category, date
+// and author, then "⋯". A title's audio versions have their own list
+// (AudioVersionList).
 export function FilesTable({
   owner,
   files,
@@ -55,9 +56,8 @@ export function FilesTable({
       <DataTableHeader>
         <DataTableHead>{t.columns.name}</DataTableHead>
         <DataTableHead hideBelow="sm">{t.columns.category}</DataTableHead>
-        <DataTableHead hideBelow="lg">{t.columns.addedBy}</DataTableHead>
         <DataTableHead hideBelow="md" fill>
-          {t.columns.addedAt}
+          {t.columns.added}
         </DataTableHead>
         <DataTableActionsHead label={t.columns.actions} />
       </DataTableHeader>
@@ -67,14 +67,9 @@ export function FilesTable({
           return (
             <DataTableRow key={file.id}>
               <DataTableCell>
-                <DataTableMedia
-                  visual={<FileTypeIcon file={file} />}
-                  title={
-                    <DataTableLink href={file.openUrl} newTab>
-                      <span className="sr-only">{t.open(file.fileName)}</span>
-                      <span aria-hidden>{file.fileName}</span>
-                    </DataTableLink>
-                  }
+                <FileNameMedia
+                  file={file}
+                  previewUrl={file.previewUrl}
                   subtitle={
                     <>
                       {/* The category column is hidden on phones. */}
@@ -100,11 +95,11 @@ export function FilesTable({
                   {labels[file.category] ?? labels.other}
                 </StatusBadge>
               </DataTableCell>
-              <DataTableCell hideBelow="lg">
-                {file.authorName || EMPTY_CELL}
-              </DataTableCell>
               <DataTableCell hideBelow="md" fill>
-                {formatShortDate(file.createdAt)}
+                <FileAdded
+                  createdAt={file.createdAt}
+                  authorName={file.authorName}
+                />
               </DataTableCell>
               <DataTableActionsCell>
                 <FileActions

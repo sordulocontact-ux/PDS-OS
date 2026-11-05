@@ -8,6 +8,10 @@ import { fr } from "@/lib/i18n/fr";
 
 import { InviteMemberForm } from "./invite-member-form";
 
+export const metadata = {
+  title: `${fr.auth.newMember.title} · ${fr.app.name}`,
+};
+
 // Account creation by the general director, with the position chosen up front.
 export default async function NewMemberPage() {
   await requireAdmin();

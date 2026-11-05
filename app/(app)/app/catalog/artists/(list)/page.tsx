@@ -23,6 +23,10 @@ import { listArtists } from "@/lib/catalog/queries";
 import { isArtistRelation, type ArtistListItem } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
 
+export const metadata = {
+  title: `${fr.catalog.artists.title} · ${fr.app.name}`,
+};
+
 const TITLE_FILTERS = ["with", "without"] as const;
 type TitleFilter = (typeof TITLE_FILTERS)[number];
 

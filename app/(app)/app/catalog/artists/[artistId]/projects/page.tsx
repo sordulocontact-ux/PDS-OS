@@ -12,6 +12,8 @@ import { withActiveWorkflows } from "@/lib/overview/workflow-progress";
 import { listProjects } from "@/lib/projects/queries";
 import { allInOrder } from "@/lib/utils/parallel";
 
+export const metadata = { title: fr.catalog.artistPage.tabs.projects };
+
 // Projects tab: live projects holding one of the artist's masters or naming
 // it (content), among those the viewer may see (RLS), in the same table as
 // the Projects page.

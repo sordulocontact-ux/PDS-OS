@@ -21,6 +21,8 @@ import { cn } from "@/lib/utils";
 
 import { MembersTable } from "../members-table";
 
+export const metadata = { title: `${fr.auth.members.title} · ${fr.app.name}` };
+
 // Team screen: accounts created ahead, access requests and members, with
 // the decisions taken there. General director only.
 export default async function MembersPage({

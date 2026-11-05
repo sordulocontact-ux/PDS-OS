@@ -10,6 +10,8 @@ import { getArtist } from "@/lib/catalog/artist-queries";
 import { fr } from "@/lib/i18n/fr";
 import { allInOrder } from "@/lib/utils/parallel";
 
+export const metadata = { title: fr.catalog.artistPage.tabs.activity };
+
 const LIMIT = 200;
 
 // Activity tab: what happened around the artist, written by the database

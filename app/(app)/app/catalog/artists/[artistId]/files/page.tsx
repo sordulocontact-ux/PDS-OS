@@ -11,6 +11,8 @@ import { listCatalogFiles } from "@/lib/catalog/files";
 import { fr } from "@/lib/i18n/fr";
 import { allInOrder } from "@/lib/utils/parallel";
 
+export const metadata = { title: fr.catalog.artistPage.tabs.files };
+
 // Files tab: the artist's document library, filtered by category in the
 // URL (?category=). Everyone reads it (contracts only with manage_catalog,
 // RLS); manage_catalog adds, edits, reclassifies and deletes.

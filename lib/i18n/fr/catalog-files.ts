@@ -53,7 +53,14 @@ export const catalogFiles = {
     audioState: "État",
     addedBy: "Ajouté par",
     addedAt: "Ajouté le",
+    // Date, and who under it (as the global library).
+    added: "Ajouté",
     actions: "Actions",
+  },
+  search: {
+    label: "Rechercher un fichier",
+    placeholder: "Nom, précision, catégorie, auteur…",
+    noResult: (query: string) => `Aucun fichier ne correspond à « ${query} ».`,
   },
   categories: {
     artist: {

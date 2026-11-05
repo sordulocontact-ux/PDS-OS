@@ -6,7 +6,7 @@ import {
   FileImportButton,
   FileImportEmpty,
 } from "@/components/catalog/files/file-import";
-import { FilesTable } from "@/components/catalog/files/files-table";
+import { FilesList } from "@/components/catalog/files/files-list";
 import { EmptyState } from "@/components/shell/empty-state";
 import { DataTableViews } from "@/components/ui/data-table";
 import {
@@ -81,12 +81,14 @@ export function FileLibrary({
         count: inView(category).length,
         current: category === view,
       }))}
-      action={canEdit && <FileImportButton />}
+      // Small, as every action of a tab bar (Plan): the large one touched
+      // the tabs' rule (Sacha, 05/11).
+      action={canEdit && <FileImportButton compact />}
     >
       {canEdit ? (
         <FileDropArea>
           {visible.length > 0 ? (
-            <FilesTable
+            <FilesList
               owner={owner}
               files={visible}
               canEdit
@@ -98,7 +100,7 @@ export function FileLibrary({
           )}
         </FileDropArea>
       ) : visible.length > 0 ? (
-        <FilesTable owner={owner} files={visible} canEdit={false} />
+        <FilesList owner={owner} files={visible} canEdit={false} />
       ) : (
         <EmptyState icon={IconFile} title={title} body={body} />
       )}

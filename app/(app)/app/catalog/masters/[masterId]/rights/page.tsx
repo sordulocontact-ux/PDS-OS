@@ -15,6 +15,8 @@ import { suggestRightsHolder } from "@/lib/catalog/master/rights-holder-actions"
 import { fr } from "@/lib/i18n/fr";
 import { allInOrder } from "@/lib/utils/parallel";
 
+export const metadata = { title: fr.masterPage.tabs.rights };
+
 // Rights & declarations: ISWC and ℗ of the master, then its filing with
 // each collecting society. Everyone reads; manage_catalog writes.
 export default async function MasterRightsPage({
