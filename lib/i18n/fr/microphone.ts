@@ -4,7 +4,7 @@
  */
 export const microphoneErrors = {
   unsupported:
-    "Votre navigateur ne permet pas d'enregistrer. Utilisez Chrome ou Edge sur ordinateur.",
+    "Votre navigateur ne permet pas d'enregistrer le son. Mettez-le à jour (Chrome, Edge, Firefox et Safari récents fonctionnent), ou ouvrez PDS OS en HTTPS dans l'un d'eux.",
   permission_denied:
     "Vous n'avez pas autorisé le micro. Relancez et choisissez « Autoriser » quand le navigateur le demande.",
   permission_blocked:
@@ -12,7 +12,7 @@ export const microphoneErrors = {
   system_blocked:
     "Votre ordinateur bloque le micro pour ce navigateur. Sur Mac : Réglages Système › Confidentialité et sécurité › Microphone, autorisez le navigateur, puis relancez-le.",
   no_device:
-    "Aucun micro détecté. Branchez un micro ou un casque, puis réessayez.",
+    "Aucun micro détecté. Branchez un micro ou un casque, vérifiez dans les réglages de l'ordinateur qu'il est bien choisi comme entrée, puis réessayez.",
   device_busy:
     "Le micro ne répond pas : il est peut-être utilisé par une autre application. Fermez-la, ou débranchez et rebranchez le micro, puis réessayez.",
   tab_cancelled:

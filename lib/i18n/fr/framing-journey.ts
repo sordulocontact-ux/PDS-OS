@@ -191,13 +191,14 @@ export const framingJourney = {
     frozen: (name: string) =>
       `Le cadrage est figé pendant la relecture du Brief par ${name}.`,
     states: {
-      known: "Connu",
-      confirmed: "Confirmé",
-      to_confirm: "À confirmer",
+      // Plain states (Ibé, 02/11/2026): to do, to check, done.
+      known: "Fait",
+      confirmed: "Fait",
+      to_confirm: "À vérifier",
       to_verify: "À vérifier",
-      missing: "Manquant",
+      missing: "À faire",
       na: "Non applicable",
-      later: "À définir plus tard",
+      later: "Plus tard",
       toReview: "À revoir",
     },
     confirmedBy: (name: string) => `Confirmé par ${name}`,

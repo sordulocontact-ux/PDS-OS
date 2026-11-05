@@ -19136,6 +19136,7 @@ export type Database = {
         Returns: undefined
       }
       delete_artist_row: { Args: { p_artist_id: string }; Returns: undefined }
+      delete_call: { Args: { p_call_id: string }; Returns: undefined }
       delete_contact_row: { Args: { p_contact_id: string }; Returns: undefined }
       delete_master_row: { Args: { p_master_id: string }; Returns: undefined }
       delete_project_row: { Args: { p_project_id: string }; Returns: undefined }

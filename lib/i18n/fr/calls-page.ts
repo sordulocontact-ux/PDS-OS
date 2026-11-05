@@ -7,6 +7,22 @@ export const callPage = {
   organizedBy: (name: string) => `organisé par ${name}`,
   more: (title: string) => `Plus d'actions pour « ${title} »`,
   sheetEmail: "Envoyer la fiche par e-mail",
+  // « Supprimer la réunion » (DG only; Ibé, tests of 31/10-02/11/2026).
+  delete: {
+    action: "Supprimer la réunion",
+    title: (title: string) => `Supprimer « ${title} » ?`,
+    body: "La réunion est supprimée avec ses invités, son enregistrement, sa transcription et son compte rendu. C'est définitif.",
+    confirm: "Supprimer définitivement",
+    pending: "Suppression…",
+    done: "Réunion supprimée.",
+    errors: {
+      forbidden: "Seule la direction peut supprimer une réunion.",
+      not_found: "Cette réunion n'existe plus.",
+      in_use:
+        "Cette réunion est encore utilisée : des tâches, des points ou un Brief Master viennent de son compte rendu. Supprimez-les d'abord.",
+      generic: "La réunion n'a pas pu être supprimée. Réessayez.",
+    },
+  },
   // The module a call's proposals are settled in.
   modules: {
     framing: "le Cadrage",

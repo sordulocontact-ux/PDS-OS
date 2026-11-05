@@ -43,7 +43,7 @@ export const journey = {
     label: "Maintenant",
     mine: "À vous",
     alsoMine: "Aussi à vous",
-    elsewhere: "À vous, ailleurs",
+    elsewhere: "À vous, dans un autre module",
     nothing: "Rien à faire pour vous",
     blocker: "Blocage à lever",
     waitingTitle: "Le parcours avance sans vous pour l'instant",
@@ -51,7 +51,7 @@ export const journey = {
     // Vue d'ensemble.
     allDone: "Tout ce qui vous concerne est fait",
     othersMove: "Les autres avancent ; la Vue d'ensemble dit qui est attendu.",
-    open: "Ouvrir l'étape",
+    open: "Aller à l'étape",
     openShort: "Ouvrir",
     others: (n: number, list: string) =>
       `Et ${n} autre${n > 1 ? "s" : ""} : ${list}`,

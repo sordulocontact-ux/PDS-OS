@@ -4,6 +4,8 @@ import { IconChevronLeft } from "nucleo-sharp-essential";
 import { CallStatusBadge } from "@/components/calls/call-badges";
 import { CallSheetMenu } from "@/components/calls/call-sheet-menu";
 import { JoinCallLink } from "@/components/calls/join-call-link";
+import { can } from "@/lib/auth/access";
+import { requireApproved } from "@/lib/auth/dal";
 import type { CallDetail } from "@/lib/calls/queries";
 import { callSheetSubject, callSheetText, callWhen } from "@/lib/calls/sheet";
 import { calls } from "@/lib/i18n/fr/calls";
@@ -18,7 +20,7 @@ const fr = { calls };
  * it — no grey line of facts — and on the right « Rejoindre » while it is
  * to come, « ⋯ » for its sheet.
  */
-export function CallHeader({
+export async function CallHeader({
   call,
   back,
   where,
@@ -36,6 +38,7 @@ export function CallHeader({
 }) {
   // A meeting's page has no other title; a project's call sits under the
   // project's own header.
+  const deletable = can(await requireApproved(), "archive_records");
   const Heading = call.projectId ? "h2" : "h1";
   const sheet = callSheetText(call);
   return (
@@ -85,6 +88,9 @@ export function CallHeader({
             <JoinCallLink url={call.meetingUrl} title={call.title} />
           )}
           <CallSheetMenu
+            callId={call.id}
+            deletable={deletable}
+            afterDeleteHref={back.href}
             title={call.title}
             sheet={sheet}
             mailto={mailtoHref(

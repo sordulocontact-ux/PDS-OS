@@ -11,6 +11,8 @@ export type RecorderSource = "mic" | "tab";
 const MIME_CANDIDATES: Array<[mime: string, base: string, ext: string]> = [
   ["audio/webm;codecs=opus", "audio/webm", "webm"],
   ["audio/webm", "audio/webm", "webm"],
+  // Safari (before 18.4) and iOS record in MP4/AAC only.
+  ["audio/mp4;codecs=mp4a.40.2", "audio/mp4", "m4a"],
   ["audio/mp4", "audio/mp4", "m4a"],
 ];
 
@@ -65,10 +67,15 @@ export async function micPermission(): Promise<PermissionState | null> {
   }
 }
 
-/** Whether any audio input is plugged in, read without prompting. */
+/**
+ * Whether any audio input is plugged in, read without prompting. Safari (and
+ * Firefox in some settings) list nothing until the microphone is allowed: an
+ * empty list says nothing, never « no microphone » (null).
+ */
 export async function hasAudioInput(): Promise<boolean | null> {
   try {
     const devices = await navigator.mediaDevices.enumerateDevices();
+    if (devices.length === 0) return null;
     return devices.some((d) => d.kind === "audioinput");
   } catch {
     return null;
@@ -114,6 +121,11 @@ export type Capture = {
 /** Opens the microphone (and the shared tab), mixes them into one stream. */
 export async function openCapture(source: RecorderSource): Promise<Capture> {
   const streams: MediaStream[] = [];
+  // Created before the first await, still inside the click: Safari (and
+  // Firefox) only let a context start from a user gesture, which the
+  // permission prompt below would otherwise consume.
+  const context = new AudioContext();
+  void context.resume().catch(() => undefined);
   try {
     const mic = await navigator.mediaDevices.getUserMedia({
       audio: { echoCancellation: true, noiseSuppression: true },
@@ -136,13 +148,11 @@ export async function openCapture(source: RecorderSource): Promise<Capture> {
       if (tab.getAudioTracks().length === 0) throw new NoTabAudioError();
     }
 
-    const context = new AudioContext();
-    // Created after a permission prompt, the context often starts suspended:
-    // nothing would reach the recorder. Resume it explicitly.
+    // Often suspended after a permission prompt: nothing would reach the
+    // recorder. Resume it explicitly.
     if (context.state === "suspended") await context.resume();
     // Still not running: nothing would be recorded, never pretend otherwise.
     if (context.state !== "running") {
-      void context.close().catch(() => undefined);
       throw new DOMException("audio context not running", "NotReadableError");
     }
     const destination = context.createMediaStreamDestination();
@@ -173,6 +183,7 @@ export async function openCapture(source: RecorderSource): Promise<Capture> {
     };
   } catch (error) {
     streams.forEach((s) => s.getTracks().forEach((t) => t.stop()));
+    void context.close().catch(() => undefined);
     throw error;
   }
 }
