@@ -683,6 +683,10 @@
 
   --ease-standard: cubic-bezier(0.2, 0, 0.2, 1);
   --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  /* A word that opens and pushes its neighbour (FactRow's hover verb): starts
+     at once, keeps its speed and brakes only at the very end, so no long tail
+     (90 % reached at 82 % of the time, against 60 % with --ease-out). */
+  --ease-push: cubic-bezier(0.2, 0.3, 0.7, 0.9);
 
   /* The bar of a pending navigation (components/ui/navigation-progress.tsx):
      shown only past 150 ms, so a fast click never flashes it. */
