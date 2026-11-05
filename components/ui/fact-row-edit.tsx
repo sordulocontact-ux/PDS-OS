@@ -48,6 +48,21 @@ export function FactRowEditable({
     edit.done ?? t.saved,
   );
 
+  const open = () => {
+    setError(null);
+    setMissing(false);
+    setEditing(true);
+  };
+  if (!editing && row.openOnRow)
+    return (
+      <FactRowFrame
+        {...row}
+        onClick={open}
+        hrefLabel={`${t.edit} · ${row.label ?? ""}`}
+        chevron
+        buttonRef={editButton}
+      />
+    );
   if (!editing)
     return (
       <FactRowFrame
@@ -59,11 +74,7 @@ export function FactRowEditable({
               ref={editButton}
               variant="ghost"
               size="sm"
-              onClick={() => {
-                setError(null);
-                setMissing(false);
-                setEditing(true);
-              }}
+              onClick={open}
             >
               {t.edit}
             </Button>

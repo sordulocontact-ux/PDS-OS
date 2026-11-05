@@ -41,6 +41,38 @@ export function FactRowChangeable({
     </Button>
   );
 
+  // A click on the whole row opens the list under it; once open, the row
+  // is a plain frame again (no button around the list).
+  if (row.openOnRow && !change.dialogTitle)
+    return (
+      <FactRowFrame
+        {...row}
+        {...(open
+          ? {
+              below: (
+                <>
+                  <PickListDoneContext.Provider value={close}>
+                    {change.list}
+                  </PickListDoneContext.Provider>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="self-start"
+                    onClick={close}
+                  >
+                    {t.cancel}
+                  </Button>
+                </>
+              ),
+            }
+          : {
+              onClick: () => setOpen(true),
+              hrefLabel: `${row.missing ? t.choose : t.change} · ${row.label ?? ""}`,
+              chevron: true,
+            })}
+      />
+    );
+
   if (change.dialogTitle)
     return (
       <>

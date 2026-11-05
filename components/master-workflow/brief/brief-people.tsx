@@ -156,6 +156,7 @@ export function BriefPeople(props: BriefFactsProps) {
   return (
     <FactRows>
       <FactRow
+        openOnRow
         label={t.fields.mix}
         value={mix?.name ?? null}
         missingAs="badge"
@@ -169,6 +170,7 @@ export function BriefPeople(props: BriefFactsProps) {
         )}
       />
       <FactRow
+        openOnRow
         label={t.fields.same}
         value={same ? t.fields.yes : t.fields.no}
         changedBy={changedBy.mastering_same_engineer}
@@ -186,6 +188,7 @@ export function BriefPeople(props: BriefFactsProps) {
       />
       {!same && (
         <FactRow
+          openOnRow
           label={t.fields.mastering}
           value={mastering?.name ?? null}
           missingAs="badge"
@@ -206,6 +209,7 @@ export function BriefPeople(props: BriefFactsProps) {
         />
       )}
       <FactRow
+        openOnRow
         label={t.fields.validator}
         value={validator?.name ?? null}
         missingAs="badge"

@@ -70,6 +70,7 @@ export function BriefContent(props: Props) {
         <FactRows>
           {(["direction", "references", "constraints"] as const).map((f) => (
             <FactRow
+              openOnRow
               key={f}
               label={t.fields[f]}
               value={brief[f]}
@@ -93,6 +94,7 @@ export function BriefContent(props: Props) {
         <Deliverables {...props} />
         <FactRows>
           <FactRow
+            openOnRow
             label={t.fields.formats}
             value={brief.formats}
             source={null}
@@ -109,6 +111,7 @@ export function BriefContent(props: Props) {
             const d = props.dates[key];
             return (
               <FactRow
+                openOnRow
                 key={key}
                 label={t.fields[key]}
                 value={d.value ? formatDay(d.value) : null}
@@ -145,6 +148,7 @@ export function BriefContent(props: Props) {
         <h3 className={sectionTitle}>{t.sections.message}</h3>
         <FactRows>
           <FactRow
+            openOnRow
             label={t.fields.message}
             value={brief.message}
             edit={textEdit("message")}

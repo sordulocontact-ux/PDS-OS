@@ -43,6 +43,7 @@ export function BriefConditions(props: BriefFactsProps) {
   return (
     <FactRows>
       <FactRow
+        openOnRow
         label={t.fields.revisions}
         value={brief.revisions === null ? null : t.revisions(brief.revisions)}
         source={
@@ -87,6 +88,7 @@ export function BriefConditions(props: BriefFactsProps) {
       {props.canSeeBudget && (
         <>
           <FactRow
+            openOnRow
             label={mix ? `${t.fields.mixRate} · ${mix.name}` : t.fields.mixRate}
             value={rateValue(brief.mixRateCents)}
             state={
@@ -98,6 +100,7 @@ export function BriefConditions(props: BriefFactsProps) {
             edit={rateEdit("mixRateCents")}
           />
           <FactRow
+            openOnRow
             label={t.fields.masteringRate}
             value={rateValue(brief.masteringRateCents)}
             state={

@@ -1,5 +1,6 @@
+import { IconChevronRight } from "nucleo-sharp-essential";
 import Link from "next/link";
-import type { ReactNode } from "react";
+import type { ReactNode, Ref } from "react";
 
 import { RequiredMark } from "@/components/ui/required-mark";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -57,6 +58,10 @@ export type FactRowProps = {
   // warning pill on the right (unless the row has its own state), and a
   // `change` list stays folded behind « Choisir ».
   missingAs?: "text" | "badge";
+  // `edit` / `change` open from a click on the whole row (Sacha, 05/11/2026,
+  // as on the Juridique and the Source): no « Modifier » / « Changer »
+  // written, a tint and a chevron on hover say it.
+  openOnRow?: boolean;
   // « Modifié par … » in the selection colour, instead of the source.
   changedBy?: string | null;
   // A field in place of the value (a form that saves as a whole, such as
@@ -126,10 +131,19 @@ export function FactRowFrame({
   onClick,
   hrefLabel,
   sourceNode,
-}: FactRowProps & { sourceNode?: ReactNode }) {
+  chevron = false,
+  buttonRef,
+}: FactRowProps & {
+  sourceNode?: ReactNode;
+  // `openOnRow`: the chevron shown on hover, the row's button for the focus.
+  chevron?: boolean;
+  buttonRef?: Ref<HTMLButtonElement>;
+}) {
   const action = Boolean(href || onClick);
   const empty = value === undefined || value === null || value === "";
   const pill = missing && missingAs === "badge";
+  // Nothing chosen yet: the label reads as the title, its source under it.
+  const titleOnly = pill && empty && !control;
   const shownState =
     state ?? (pill ? { tone: "warning" as const, label: missingLabel } : null);
   const frame =
@@ -141,12 +155,17 @@ export function FactRowFrame({
           <span className="sr-only">{hrefLabel}</span>
         )}
         {label && (
-          <span className="text-caption text-muted-foreground">
+          <span
+            className={
+              titleOnly ? "font-medium" : "text-caption text-muted-foreground"
+            }
+          >
             {label}
             {required && <RequiredMark />}
           </span>
         )}
-        {control ?? (
+        {control ??
+          (titleOnly ? null : (
           <span
             className={cn(
               "break-words [overflow-wrap:anywhere]",
@@ -155,12 +174,12 @@ export function FactRowFrame({
           >
             {missing && empty && !pill ? missingLabel : value}
           </span>
-        )}
+          ))}
         {sourceNode ?? (
           <FactSourceText source={source} changedBy={changedBy} />
         )}
       </div>
-      {(shownState || side) && (
+      {(shownState || side || chevron) && (
         <div className="flex flex-wrap items-center gap-2 md:justify-end">
           {shownState && (
             <StatusBadge tone={shownState.tone} size="sm">
@@ -168,6 +187,12 @@ export function FactRowFrame({
             </StatusBadge>
           )}
           {side}
+          {chevron && (
+            <IconChevronRight
+              aria-hidden
+              className="size-4 text-muted-foreground opacity-0 transition-opacity duration-[var(--duration-fast)] group-hover/fact:opacity-100 group-focus-visible/fact:opacity-100"
+            />
+          )}
         </div>
       )}
       {below && <div className="flex flex-col gap-2 md:col-span-2">{below}</div>}
@@ -180,9 +205,10 @@ export function FactRowFrame({
   if (onClick)
     return (
       <button
+        ref={buttonRef}
         type="button"
         onClick={onClick}
-        className={cn(actionFrame, "w-full cursor-pointer text-left")}
+        className={cn(actionFrame, "group/fact w-full cursor-pointer text-left")}
       >
         {content}
       </button>
