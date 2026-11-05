@@ -61,7 +61,9 @@ function sourceOf(
     ? t.sources.credited
     : d.kind === "owner"
       ? t.sources.owner
-      : t.sources.chosen;
+      : // Chosen here: the Brief does not cite itself (Ibé 02/11/2026,
+        // « beaucoup de bruit pour rien »); « Modifié par » says who.
+        null;
 }
 
 /** A contact of the Réseau, or a member of PDS (in-house engineer). */

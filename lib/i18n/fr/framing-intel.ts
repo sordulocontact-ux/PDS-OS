@@ -401,6 +401,10 @@ export const framingIntel = {
     contracts: "Contrats du projet",
     legal: "Juridique",
     timingSaid: (said: string) => `Dit : « ${said} »`,
+    // Under « Y a-t-il des échéances imposées ? » (Ibé 01/11/2026: « la date
+    // de sortie en rappel, si c'est un rétroplanning »).
+    releaseReminder: (day: string) =>
+      `Sortie visée le ${day} : les échéances se placent avant elle.`,
   },
   records: {
     commitment: (label: string, amount: string, status: string) =>

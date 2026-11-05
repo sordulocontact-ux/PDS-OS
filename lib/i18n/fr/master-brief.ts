@@ -98,9 +98,7 @@ export const masterBrief = {
     credited: "Crédité sur le titre au Catalogue",
     owner: "Responsable du projet",
     creative: "Directrice ou directeur créatif du projet",
-    chosen: "Choisi dans le Brief",
     nobody: "Personne n'est désigné au Cadrage ni crédité sur le titre",
-    typed: "Saisi dans le Brief",
     usualRevisions: (project: string) =>
       project
         ? `Réseau · leurs conditions habituelles (Brief de « ${project} »)`

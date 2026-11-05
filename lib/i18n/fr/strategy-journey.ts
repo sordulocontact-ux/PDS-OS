@@ -66,7 +66,7 @@ export const strategyJourney = {
     },
     dimensions: {
       title: "Les 8 dimensions",
-      why: "Ce que l'échange a fait dire, rangé par dimension. On confirme, on corrige ou on écarte, on ajoute ce qui manque : plus rien « à arbitrer » ni « à compléter ».",
+      why: "Ce que l'échange a fait dire, rangé par dimension : confirmez, corrigez ou écartez, puis complétez ce qui manque.",
     },
     validation: {
       title: "Validation du Brief de sortie",
@@ -104,15 +104,6 @@ export const strategyJourney = {
   },
   // Démarrer la stratégie (proto stratEntry, prepGate « strat »).
   start: {
-    project: "Projet",
-    projectValue: (title: string, kind: string, artist: string | null) =>
-      artist
-        ? `« ${title} » · ${kind.toLowerCase()} de ${artist}`
-        : `« ${title} » · ${kind.toLowerCase()}`,
-    release: "Sortie",
-    noRelease: "Pas encore fixée",
-    status: "Statut",
-    notStarted: "Stratégie non commencée",
     choices: {
       po: {
         title: "Commencer la stratégie",

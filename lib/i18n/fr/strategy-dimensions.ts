@@ -82,9 +82,6 @@ export const strategyDimensions = {
   // Facts at the head of the step.
   exchange: "Échange stratégique",
   report: "Compte rendu",
-  departure: "Départ",
-  departureDirect:
-    "Commencée directement, sans échange : ajoutez ce que vous savez dans chaque dimension",
   // Sources of a line.
   saidIn: (day: string) => `Échange stratégique du ${day}`,
   typedBy: (name: string) => `Saisi par ${name}`,

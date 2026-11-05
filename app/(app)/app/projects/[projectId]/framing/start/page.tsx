@@ -11,12 +11,12 @@ import { QUESTIONS } from "@/lib/framing/dimensions";
 import { framingJourneyContext } from "@/lib/framing/journey-context";
 import { recommendedStart } from "@/lib/framing/lines";
 import { fr } from "@/lib/i18n/fr";
-import { projectKindLabel } from "@/lib/projects/labels";
-import { formatDay, formatShortInstant } from "@/lib/utils/day";
+import { formatShortInstant } from "@/lib/utils/day";
 
 /**
- * Cadrage › Démarrer le cadrage (proto frEntry, ticket § 1 and § 5): the
- * acceptance and the project, what it already knows, then the two ways in;
+ * Cadrage › Démarrer le cadrage (proto frEntry, ticket § 1 and § 5): what
+ * the project already knows, then the two ways in (the project's facts are
+ * in the module's head, its acceptance in Activité: Ibé 01/11/2026);
  * once chosen, « Départ » — started with PO, or the framing exchange from
  * its preparation to its summary to the participants. Started with PO, the
  * two ways in stay offered: the start can always change.
@@ -81,47 +81,12 @@ export default async function FramingStartPage({
     const reco = recommendedStart(assessment.counts);
     body = (
       <>
-        <CallFacts
-          facts={[
-            ...(k.acceptedAt
-              ? [
-                  {
-                    label: t.accepted,
-                    value: t.acceptedValue(
-                      formatDay(k.acceptedAt),
-                      project.ownerName,
-                    ),
-                  },
-                ]
-              : []),
-            {
-              label: t.project,
-              value: t.projectValue(
-                project.title,
-                projectKindLabel({
-                  type: project.type,
-                  musicFormat: project.musicFormat,
-                  contentFormatName: project.contentFormat?.name ?? null,
-                }),
-                project.artistName || null,
-                project.dueDate ? formatDay(project.dueDate) : null,
-              ),
-            },
-          ]}
-        />
         <KnownSummary assessment={assessment} lines={lines} />
         {canEdit ? (
           <StartWays
             projectId={projectId}
             recommended={reco}
-            reason={
-              reco === "call"
-                ? t.reason(
-                    assessment.counts.missing,
-                    assessment.counts.to_confirm,
-                  )
-                : null
-            }
+            reason={reco === "call" ? t.reason : null}
             callDefaults={await callSheetData(k, assessment)}
           />
         ) : (

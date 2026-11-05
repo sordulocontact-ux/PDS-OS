@@ -79,7 +79,7 @@ export function BriefContent(props: Props) {
                 !brief.constraints &&
                 f === "direction"
               }
-              source={brief[f] ? t.sources.typed : null}
+              source={null}
               edit={textEdit(f)}
             />
           ))}
@@ -93,7 +93,7 @@ export function BriefContent(props: Props) {
           <FactRow
             label={t.fields.formats}
             value={brief.formats}
-            source={brief.formats ? t.sources.typed : null}
+            source={null}
             changedBy={changedBy.delivery_formats}
             edit={textEdit("formats")}
           />
@@ -115,7 +115,7 @@ export function BriefContent(props: Props) {
                   key === "masterFinalDue"
                     ? props.masterFinalFromFraming
                       ? t.sources.dates.masterFinalDue
-                      : t.sources.typed
+                      : null
                     : t.sources.dates[key]
                 }
                 changedBy={changedBy[COLUMN[key]]}

@@ -25,6 +25,7 @@ import type { HelpSuggestion } from "@/lib/framing/help";
 import { framingJourneyContext } from "@/lib/framing/journey-context";
 import { contextUnread } from "@/lib/framing/knowledge";
 import { fr } from "@/lib/i18n/fr";
+import { formatDay } from "@/lib/utils/day";
 
 const first = (value: string | string[] | undefined) =>
   Array.isArray(value) ? value[0] : value;
@@ -54,7 +55,13 @@ export default async function FramingDimensionsPage({
   const { k, assessment, stage, canEdit, verify } = ctx;
   const t = fr.framingJourney.dimensions;
   const ti = fr.framingIntel;
-  const working = stage === "not_started" || stage === "in_progress";
+  // Locked until « Démarrer le cadrage » is done: the dimensions stay
+  // readable, but no question is asked yet (Ibé 01/11/2026: an answer field
+  // under the lock read as the step being open).
+  const locked =
+    ctx.steps.find((s) => s.key === "dimensions")?.status === "blocked";
+  const working =
+    !locked && (stage === "not_started" || stage === "in_progress");
   const frozen = stage === "awaiting_validation";
   const open = editableDimensions(k);
   const editableIn = (d: string) => canEdit && working && open(d as Dimension);
@@ -173,7 +180,9 @@ export default async function FramingDimensionsPage({
           hint={
             question.key === "target_date" && timingSaid
               ? ti.sources.timingSaid(timingSaid)
-              : null
+              : question.key === "deadlines" && ctx.project.dueDate
+                ? ti.sources.releaseReminder(formatDay(ctx.project.dueDate))
+                : null
           }
         >
           {hasLines && (

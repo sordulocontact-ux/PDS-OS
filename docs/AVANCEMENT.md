@@ -1387,3 +1387,18 @@ directement », l'ISWC depuis une modale de la page, sans aller au catalogue. D�
 - [x] « Qui valide les versions du master » choisi à la création d'une sortie musicale, repris par le Brief
       (`20261105170101`).
 - [ ] Migrations à pousser en prod avec le reste ; passage navigateur.
+
+## Lot 3 des retours d'Ibé : moins de bruit (05/11/2026, branche `pre-prod`)
+
+- [x] Cadrage › Démarrer : plus de lignes « Prise en charge » ni « Projet » (en-tête et Activité les disent) ;
+      « Ce que le projet sait déjà » sans « PO ne redemandera pas… » (la carte de PO le dit), raison de
+      l'échange sans recompter les manques.
+- [x] Cadrage › Les 6 dimensions verrouillée : les dimensions restent lisibles, mais aucune question ni champ
+      de réponse tant que « Démarrer le cadrage » n'est pas fait.
+- [x] « Y a-t-il des échéances imposées ? » rappelle la sortie visée (« les échéances se placent avant elle »).
+- [x] Master › Brief : plus de « Saisi dans le Brief » / « Choisi dans le Brief » en source sur le Brief lui-même.
+- [x] « Ce que PO a compris » : « Retirez ce qui est faux, puis enregistrez. » (sans « Rien n'est gardé
+      avant ») ; Juridique › participants : pourquoi raccourci.
+- [x] Stratégie › Démarrer sans lignes Projet / Sortie / Statut ; Les 8 dimensions sans « Départ » quand elle
+      a commencé sans échange, pourquoi raccourci.
+- [ ] Passage navigateur ; Juridique › Confirmation (« améliorer le visu ») reste au lot 4.

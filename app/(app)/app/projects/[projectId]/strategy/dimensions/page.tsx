@@ -70,38 +70,36 @@ export default async function StrategyDimensionsPage({
     >
       <EditAccessProvider canEdit={canEdit}>
         <div className="flex flex-col gap-4">
-          <CallFacts
-            facts={
-              meeting && call
-                ? [
-                    {
-                      label: t.exchange,
-                      value: fr.meeting.facts(
-                        callWhen(meeting.occurredAt),
-                        meeting.format
-                          ? fr.callPrep.formats[meeting.format]
-                          : null,
-                        meeting.participants.map((p) => p.name).join(", "),
-                      ),
-                    },
-                    {
-                      label: t.report,
-                      value: (
-                        <MeetingReportDialog
-                          meeting={{
-                            ...meeting,
-                            lines: strategyMeetingLines(
-                              model,
-                              routes.projectCall(projectId, call.callId),
-                            ),
-                          }}
-                        />
-                      ),
-                    },
-                  ]
-                : [{ label: t.departure, value: t.departureDirect }]
-            }
-          />
+          {/* Started directly, the step says nothing of it: « Départ » is
+              the first step's (Ibé 02/11/2026, « bruit à nettoyer »). */}
+          {meeting && call && (
+            <CallFacts
+              facts={[
+                {
+                  label: t.exchange,
+                  value: fr.meeting.facts(
+                    callWhen(meeting.occurredAt),
+                    meeting.format ? fr.callPrep.formats[meeting.format] : null,
+                    meeting.participants.map((p) => p.name).join(", "),
+                  ),
+                },
+                {
+                  label: t.report,
+                  value: (
+                    <MeetingReportDialog
+                      meeting={{
+                        ...meeting,
+                        lines: strategyMeetingLines(
+                          model,
+                          routes.projectCall(projectId, call.callId),
+                        ),
+                      }}
+                    />
+                  ),
+                },
+              ]}
+            />
+          )}
           <p className="text-body-sm font-semibold">
             {t.counter(
               count("complete"),

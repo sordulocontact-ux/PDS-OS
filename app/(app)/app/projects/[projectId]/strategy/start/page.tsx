@@ -5,15 +5,15 @@ import { StrategyStepFrame } from "@/components/strategy/journey/strategy-step-f
 import { StrategyExchange } from "@/components/strategy/start/strategy-exchange";
 import { StrategyStartWays } from "@/components/strategy/start/strategy-start-ways";
 import { fr } from "@/lib/i18n/fr";
-import { projectFormatLabel, projectKindLabel } from "@/lib/projects/labels";
 import { strategySheetData } from "@/lib/strategy/call-sheet-data";
 import { knownAtStart } from "@/lib/strategy/start-reco";
 import { strategyStepData } from "@/lib/strategy/step-data";
-import { formatDay, formatShortInstant } from "@/lib/utils/day";
+import { formatShortInstant } from "@/lib/utils/day";
 
 /**
- * Stratégie › Démarrer la stratégie (proto stratEntry, ticket § 1): the
- * project, its release and the status, then the two ways in; once chosen,
+ * Stratégie › Démarrer la stratégie (proto stratEntry, ticket § 1): the two
+ * ways in, the project and its release being in the module's head (Ibé
+ * 02/11/2026, « bruit à nettoyer »); once chosen,
  * « Départ » — started directly, or the strategy exchange from its
  * preparation to its summary to the participants.
  */
@@ -57,11 +57,6 @@ export default async function StrategyStartPage({
       />
     );
   } else {
-    const kind = {
-      type: project.type,
-      musicFormat: project.musicFormat,
-      contentFormatName: project.contentFormat?.name ?? null,
-    };
     const known = knownAtStart({
       openNeeds: data.openNeeds.length,
       referenceDate: data.referenceDate,
@@ -72,25 +67,6 @@ export default async function StrategyStartPage({
     const recommended = missing > known ? "call" : "po";
     body = (
       <>
-        <CallFacts
-          facts={[
-            {
-              label: t.project,
-              value: t.projectValue(
-                project.title,
-                projectFormatLabel(kind) ?? projectKindLabel(kind),
-                project.artistName || null,
-              ),
-            },
-            {
-              label: t.release,
-              value: data.referenceDate
-                ? formatDay(data.referenceDate)
-                : t.noRelease,
-            },
-            { label: t.status, value: t.notStarted },
-          ]}
-        />
         {isOwner && step.status === "current" ? (
           <StrategyStartWays
             projectId={projectId}

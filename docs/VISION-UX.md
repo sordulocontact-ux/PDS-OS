@@ -125,7 +125,8 @@ Titre du module                                   [chevrons des sous-modules]
   ni celle du projet. *(Ibé, lot 4 « l'action principale en haut », 22/10)* Une page qui n'a plus de raison d'être (ancienne fiche à onglets) redirige
   vers cette étape.
 - **Les étapes verrouillées sont visibles et lisibles**, jamais cachées : on voit ce qui vient. On
-  ne peut rien y faire : ni action, ni « Modifier ».
+  ne peut rien y faire : ni action, ni « Modifier », ni question posée avec son champ de réponse
+  (Ibé 01/11/2026 : sous le cadenas, il se croyait dans l'étape).
 
 Les écrans transverses reprennent les mêmes briques : la **Vue d'ensemble** a une carte par
 workflow (statut, barre, « Étape n sur N », qui fait quoi), **Travail** la liste de **mes**
@@ -162,6 +163,10 @@ valent partout, dans l'app comme dans les protos.
    ou la citation exacte du call (« « 18 pour le clip » »). L'action principale est alors de
    **confirmer**, pas de remplir. *(Ibé 13/10 ; CLAUDE.md « Formulaires : ne jamais faire
    retaper »)*
+   Une valeur saisie ou choisie **dans l'étape même** ne cite pas l'étape (« Saisi dans le Brief »
+   sur le Brief) : « Modifié par … » suffit. Une étape ne répète pas non plus les faits de l'en-tête
+   (projet, sortie) ni l'historique (prise en charge, départ). *(Ibé, « beaucoup de bruit pour
+   rien », 01-02/11/2026)*
 2. **Corriger reste toujours possible** : « Modifier » sur chaque valeur pré-remplie. Le champ
    s'ouvre sur place, la proposition et sa source restent écrites dessous pour comparer, Entrée
    enregistre, Échap annule. Une fois corrigée, la ligne dit **« Modifié par Lina Haddad »** à la

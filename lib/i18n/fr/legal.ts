@@ -104,7 +104,7 @@ export const legal = {
         // Some people are already known (known-people.ts): ask for the rest.
         askKnown: (title: string) => `Qui d'autre a participé à « ${title} » ?`,
         whyKnown:
-          "PDS OS connaît déjà les personnes ci-dessous. Il manque qui a composé, écrit, arrangé, produit ou joué : c'est ce que demandent les contrats et la déclaration SACEM.",
+          "Il manque qui a composé, écrit, arrangé, produit ou joué : les contrats et la déclaration SACEM en ont besoin.",
       },
       third_party: {
         ask: (title: string) =>
@@ -185,8 +185,7 @@ export const legal = {
     read: "Lire ma réponse",
     reading: "PO lit votre réponse…",
     reviewTitle: "Ce que PO a compris",
-    reviewHint:
-      "Retirez ce qui est faux, puis enregistrez. Rien n'est gardé avant.",
+    reviewHint: "Retirez ce qui est faux, puis enregistrez.",
     nothingFound:
       "PO n'a rien relevé dans cette réponse. Reformulez, ou précisez les noms tels qu'ils doivent être écrits.",
     nothingFoundNone: (label: string) =>

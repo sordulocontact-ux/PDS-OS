@@ -83,25 +83,9 @@ export const framingJourney = {
     planLaunched: "Plan lancé",
   },
   start: {
-    accepted: "Prise en charge",
-    acceptedValue: (day: string, name: string | null) =>
-      name ? `Acceptée le ${day} par ${name}` : `Acceptée le ${day}`,
-    project: "Projet",
-    projectValue: (
-      title: string,
-      kind: string,
-      artist: string | null,
-      day: string | null,
-    ) =>
-      [
-        `« ${title} » · ${kind.toLowerCase()}${artist ? ` de ${artist}` : ""}`,
-        day ? `sortie visée le ${day}` : null,
-      ]
-        .filter(Boolean)
-        .join(" · "),
     knownTitle: "Ce que le projet sait déjà",
     known: (known: number, toConfirm: number, missing: number) =>
-      `${plural(known, "information connue", "informations connues")} · ${toConfirm} à confirmer · ${plural(missing, "manquante", "manquantes")}. PO ne redemandera pas ce qui est connu.`,
+      `${plural(known, "information connue", "informations connues")} · ${toConfirm} à confirmer · ${plural(missing, "manquante", "manquantes")}`,
     detail: "Voir le détail",
     notKnown: "Pas encore connu",
     choices: {
@@ -120,9 +104,10 @@ export const framingJourney = {
       },
     },
     changeLegend: "Continuer ou changer de départ",
-    // Only when the exchange is recommended (proto).
-    reason: (missing: number, toConfirm: number) =>
-      `Il manque ${plural(missing, "information", "informations")} et ${toConfirm} ${toConfirm > 1 ? "sont" : "est"} à confirmer : un échange ira plus vite que des questions une à une.`,
+    // Only when the exchange is recommended (proto); the counts are just
+    // above, in « Ce que le projet sait déjà » (Ibé 01/11/2026).
+    reason:
+      "Avec autant de manques, un échange ira plus vite que des questions une à une.",
     waiting: (name: string) => `En attente de ${name} : démarrer le cadrage`,
     departure: "Départ",
     departureCall: (when: string) => `Échange de cadrage du ${when}`,

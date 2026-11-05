@@ -50,7 +50,7 @@ export function BriefConditions(props: BriefFactsProps) {
             ? null
             : usual && brief.revisions === usual.value
               ? t.sources.usualRevisions(usual.project)
-              : t.sources.typed
+              : null
         }
         changedBy={changedBy.revisions}
         below={

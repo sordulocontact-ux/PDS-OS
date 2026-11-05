@@ -12,7 +12,7 @@ export const poQuestion = {
   next: "Question suivante",
   reading: {
     title: "Ce que PO a compris",
-    hint: "Retirez ce qui est faux, puis enregistrez. Rien n'est gardé avant.",
+    hint: "Retirez ce qui est faux, puis enregistrez.",
     remove: "Retirer",
     removeLabel: (label: string) => `Retirer ${label}`,
     dropped: (n: number) =>
