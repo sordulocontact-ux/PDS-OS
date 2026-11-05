@@ -1,4 +1,3 @@
-import { IconChevronRight } from "nucleo-sharp-essential";
 import Link from "next/link";
 import type { ReactNode, Ref } from "react";
 
@@ -60,7 +59,7 @@ export type FactRowProps = {
   missingAs?: "text" | "badge";
   // `edit` / `change` open from a click on the whole row (Sacha, 05/11/2026,
   // as on the Juridique and the Source): no « Modifier » / « Changer »
-  // written, a tint and a chevron on hover say it.
+  // written at rest, the row's tint and its verb on hover say it.
   openOnRow?: boolean;
   // « Modifié par … » in the selection colour, instead of the source.
   changedBy?: string | null;
@@ -131,12 +130,14 @@ export function FactRowFrame({
   onClick,
   hrefLabel,
   sourceNode,
-  chevron = false,
+  hoverAction,
   buttonRef,
 }: FactRowProps & {
   sourceNode?: ReactNode;
-  // `openOnRow`: the chevron shown on hover, the row's button for the focus.
-  chevron?: boolean;
+  // `openOnRow`: the verb of the click (« Choisir », « Changer »,
+  // « Modifier »), shown on hover in its reserved place (no shift), read
+  // by a screen reader with the row; the row's button for the focus.
+  hoverAction?: string;
   buttonRef?: Ref<HTMLButtonElement>;
 }) {
   const action = Boolean(href || onClick);
@@ -179,7 +180,7 @@ export function FactRowFrame({
           <FactSourceText source={source} changedBy={changedBy} />
         )}
       </div>
-      {(shownState || side || chevron) && (
+      {(shownState || side || hoverAction) && (
         <div className="flex flex-wrap items-center gap-2 md:justify-end">
           {shownState && (
             <StatusBadge tone={shownState.tone} size="sm">
@@ -187,11 +188,10 @@ export function FactRowFrame({
             </StatusBadge>
           )}
           {side}
-          {chevron && (
-            <IconChevronRight
-              aria-hidden
-              className="size-4 text-muted-foreground opacity-0 transition-opacity duration-[var(--duration-fast)] group-hover/fact:opacity-100 group-focus-visible/fact:opacity-100"
-            />
+          {hoverAction && (
+            <span className="px-2 text-body-sm font-medium opacity-0 transition-opacity duration-[var(--duration-fast)] group-hover/fact:opacity-100 group-focus-visible/fact:opacity-100">
+              {hoverAction}
+            </span>
           )}
         </div>
       )}

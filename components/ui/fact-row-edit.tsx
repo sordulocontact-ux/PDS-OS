@@ -58,8 +58,7 @@ export function FactRowEditable({
       <FactRowFrame
         {...row}
         onClick={open}
-        hrefLabel={`${t.edit} · ${row.label ?? ""}`}
-        chevron
+        hoverAction={t.edit}
         buttonRef={editButton}
       />
     );
