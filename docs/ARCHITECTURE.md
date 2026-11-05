@@ -53,6 +53,7 @@ service role n'est utilisée que par le cron (`lib/supabase/admin.ts`).
 | `…260926000201_team_roles_invitations` | Postes (renommés en `…000401`), statut `invited`, `invite_member(...)`, T10 réécrit pour ouvrir une invitation à la confirmation d'email. |
 | `…260927000701_archive_records` | Archivage (§ 2 quater) : permission `archive_records` (DG), `set_artist_archived` / `set_master_archived` / `set_project_archived` (SECURITY DEFINER, seul chemin d'écriture de `archived_at`, grant colonne retiré), refus `*_in_use` / `project_launched` / `*_uses_archived` / `artist_name_taken` ; ligne archivée non modifiable (politiques d'UPDATE), transmission d'un projet archivé gelée (trigger `b_guard_archived`). |
 | `…20261006000301_delete_records` (numéroté `000101` à l'origine, en double avec le Cadrage intelligent) | Suppression définitive (§ 2 quater) : `delete_records(kind, ids[])` (SECURITY DEFINER, `archive_records`, 200 lignes au plus) renvoie une ligne par id (`error` nul = supprimée, sinon `not_found` / `forbidden` / `*_in_use` / `generic`), chaque id dans son sous-bloc ; un projet part avec tout son contenu (`delete_project_row`, enfants avant parents), un master / artiste / contact seulement s'il n'est plus utilisé ; crédits et parts d'un contact supprimé gardent le nom sans lien. Tests : `delete-records.test.sql`. |
+| `…20261105170101_project_master_validator` (**non appliquée**) | Qui fait les retours sur le mix, choisi à la création (retour d'Ibé, 02/11/2026, § 8 septies) : `projects.master_validator_person_id` (droits insert/update comme les autres colonnes, RLS « avant lancement »), `create_project(…, p_master_validator_person_id)` (sortie musicale seulement). Règle du Brief vérifiée **au commit** (`z_check_master_validator`, différé : les directeurs créatifs sont ajoutés après l'insert) : responsable, personne à qui le projet est transmis (en attente) ou directeur créatif, sinon `invalid_master_validator`. Trigger `a_default_validator` (before insert de `master_briefs`) : un Brief créé sans validateur prend celui du projet s'il est encore responsable ou directeur créatif, sinon le responsable ; `apply_master_question` ne pose plus le responsable lui-même. |
 | `…20261105110101_delete_call` (**non appliquée**) | Suppression d'une réunion / d'un call (retour d'Ibé, 02/11/2026) : `delete_call(p_call_id)` (SECURITY DEFINER, `archive_records` = DG, `can_see_call`) supprime l'appel avec ses invités, prises d'enregistrement, transcriptions et comptes rendus ; refus `call_in_use` si une tâche, un besoin ou un Brief Master en dépend. UI : « Supprimer la réunion » dans le « ⋯ » de la page (`CallSheetMenu`), action `lib/calls/delete-actions.ts`. Les objets audio du bucket restent à nettoyer. |
 | `…260927001101_framing_team_roles`, `…001201_framing_constraints`, `…001401_framing_guided_review` | Cadrage en relecture guidée (§ 6) : `project_team_members.role_key` (rôle fixe, au plus une ligne par rôle ; une personne peut cumuler plusieurs rôles, une ligne chacun, et « Attribuer » propose aussi les directeurs créatifs, du projet puis de l'organisation pour la direction artistique ou créative, `assignRole` avec `personId` : Sacha, 10/10/2026), table `framing_constraints` (une ligne par contrainte typée, provenance, relue comme les besoins), source `voice` et changement de type autorisés, droits colonne sur `role_key`, lignes figées une fois le Cadrage soumis (`framing_is_editable`). |
 | `…260927001101_security_audit_fixes` | Correctifs de l'audit back du 27/09 : lecture des objets `artist-files` en **positif** (`manage_catalog`, ou une ligne `artist_files` visible — les contrats restent cachés) ; **Cadrage figé une fois soumis** (`framing_is_editable` : Brief, besoins, équipe écrits seulement en `not_started` / `in_progress`, policies restrictives insert + update) ; `project_masters` modifiable seulement avant lancement, sur un projet et un master non archivés (`project_masters_editable`) ; Web Push protégé par un secret serveur (§ 8 bis). Tests : `security-audit.test.sql`. |
@@ -4462,7 +4463,8 @@ est la préparation », modale de transmission, `BriefForm` : retirés de l'écr
   notification `master_rate_proposed`). Le travail continue pendant ce temps (choix de Sacha). Versions en `VersionCard`, retours minutés
   (équipe seulement), « Transmettre les retours sans décider » (texte écrit par le code, chaque ligne
   avec son auteur), décision `DecisionPanel` (motif **toujours** obligatoire pour une modification),
-  « Rouvrir le mix » (responsable, motif, refusé si le mastering est parti : décision `reopened`).
+  « Rouvrir le mix » (responsable, motif, refusé dès qu'une version masterisée est revenue sur le titre :
+  décision `reopened`).
 - **Master final** (`components/master-workflow/final/`) : fichier au Catalogue, ISRC, filiation, « Ce
   que ça débloque » (durée lue sur le titre), livrables attendus / reçus (notés par le responsable).
 - **Page privée `/m/`** : `PortalShell`, cartes « Votre dossier », « Mix » / « Mastering » (versions et
@@ -4523,6 +4525,20 @@ est la préparation », modale de transmission, `BriefForm` : retirés de l'écr
     le Mix V1 » est dans son Maintenant et son Travail (parcours) ; il dépose dans l'app
     (`open_` / `record_master_member_delivery`, sans `manage_catalog`) ; pas de lien, pas de tarif, pas de
     facture (« Ingénieur maison · Pas de facture : interne »).
+  - **Assignation automatique et rôles corrigés par le DG** (retours d'Ibé du 04/11, `20261105160101`) :
+    l'ingénieur maison reçoit son tour **sans clic** (`_master_auto_assign`, triggers sur `master_briefs`,
+    `master_flow_sources`, `master_mix_versions`) : le mix dès que le Brief est enregistré (voix non
+    attendues en « Attendre »), le mastering dès qu'un mix est validé ; « Assigner à … » ne reste qu'en
+    secours. Ingénieur **externe** qui masterise aussi : à chaque mix validé, `decideRound` envoie seul le
+    dossier du mastering sur son lien (`continueToMastering`, e-mail `notify.approvedNext`, à la place du
+    « validé ») ; refusé tant qu'un titre attend son mix final, ou si le valideur n'est pas le responsable
+    (le geste « Transmettre au mastering » reste alors). Le **DG** corrige l'ingénieur du mix, du mastering
+    et le valideur depuis le bloc « Personnes » du Brief (`setMasterPerson` →
+    `direction_set_master_person`, permission `validate`), tant qu'aucune version de ce tour n'est validée.
+    « Rouvrir le mix » n'est plus fermé par le dossier du mastering envoyé, seulement par une version
+    masterisée déposée sur le titre (`20261105160201`). Un tour validé ne montre que la version finale
+    (« Validée par … », « Rouvrir » dans son « ⋯ », `ReopenMenu`) ; tarif, lien, fil et ingénieur sont repliés
+    sous « Détails du mixage / mastering ».
 
 
 Workflow spécialisé du projet, mené en parallèle des 7 étapes et du Juridique
@@ -4666,8 +4682,11 @@ lots, chacun utile seul.
 
   **Avant le premier enregistrement**, le Brief part de ce que le projet sait : l'ingénieur
   de mix (ou de mastering) relié sur les crédits, s'il est le même sur tous les titres (et
-  « même ingénieur » s'il fait les deux), le chef de projet comme validateur, Mix final et
-  Master final comme livrables. Enregistrement : mise à jour, sinon création
+  « même ingénieur » s'il fait les deux), comme validateur la personne choisie à la création du
+  projet (« Qui valide les versions du master », `projects.master_validator_person_id`, retour
+  d'Ibé du 02/11/2026) si elle est encore responsable ou directeur créatif, sinon le chef de projet
+  (`loadMasterBrief` ; en base, `default_master_brief_validator` pour un Brief créé ailleurs,
+  dictée ou réponse appliquée), Mix final et Master final comme livrables. Enregistrement : mise à jour, sinon création
   (`saveMasterBrief`) ; pas d'upsert, qui réécrirait `project_id` et `organization_id`,
   colonnes que personne ne peut modifier (droits colonne par colonne).
   Pas encore : la transmission au mixeur (package, suivi, relances, § 8), le Budget à

@@ -17,8 +17,20 @@ export function masterRoles(
   owner: string | null,
 ): { roles: RoleRow[]; links: PrivateLinkRow[] } {
   const b = facts.brief;
-  const mix = b?.mixContact ?? null;
-  const mastering = b?.masteringSame ? mix : (b?.masteringContact ?? null);
+  // A contact of the Réseau (through their link) or a member of PDS
+  // (in-house engineer, in the app).
+  const mixHolder = b?.mixContact
+    ? { name: b.mixContact.name, viaLink: true }
+    : b?.mixPerson
+      ? { name: b.mixPerson.name }
+      : null;
+  const masteringHolder = b?.masteringSame
+    ? mixHolder
+    : b?.masteringContact
+      ? { name: b.masteringContact.name, viaLink: true }
+      : b?.masteringPerson
+        ? { name: b.masteringPerson.name }
+        : null;
   const validator = b?.validatorName ?? owner;
   const roles: RoleRow[] = [
     {
@@ -32,14 +44,14 @@ export function masterRoles(
       key: "mix",
       label: t.mix,
       kind: "exec",
-      holder: mix ? { name: mix.name, viaLink: true } : null,
+      holder: mixHolder,
       what: t.mixWhat,
     },
     {
       key: "mastering",
       label: t.mastering,
       kind: "exec",
-      holder: mastering ? { name: mastering.name, viaLink: true } : null,
+      holder: masteringHolder,
       what: t.masteringWhat,
     },
     {

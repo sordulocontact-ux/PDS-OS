@@ -59,39 +59,82 @@ export async function sendRound(
     projectId,
     ["master"],
     done,
-    async () => {
-      const result = await transmitPackage(
-        projectId,
-        s.data,
-        note,
-        withoutStemsReason,
-      );
-      if (!result.ok) return result;
-      const link = await ensureContactLink(projectId, result.engineer.id);
-      const to = result.engineer.email;
-      if (email && to && emailEnabled()) {
-        const access = await requireApproved();
-        const sender =
-          [access.firstName, access.lastName].filter(Boolean).join(" ") ||
-          (access.email ?? "");
-        const sent = await emailTransmission({
-          projectId,
-          role: s.data,
-          project: result.project,
-          engineer: { name: result.engineer.name, email: to },
-          message: note,
-          sender: { name: sender, email: access.email },
-          link,
-        });
-        refresh(projectId);
-        if (sent === "failed") return { ok: false, error: t.email.failed };
-        return { ok: true };
-      }
-      refresh(projectId);
-      return { ok: true };
-    },
+    () => deliverRound(projectId, s.data, note, withoutStemsReason, email),
     { openNext: true },
   );
+}
+
+/** The sending itself, shared by « Envoyer à … » and the mastering that
+ * follows the validated mix by itself. */
+async function deliverRound(
+  projectId: string,
+  stage: "mix" | "mastering",
+  note: string,
+  withoutStemsReason: string | null,
+  email: boolean,
+): Promise<WriteResult> {
+  const result = await transmitPackage(
+    projectId,
+    stage,
+    note,
+    withoutStemsReason,
+  );
+  if (!result.ok) return result;
+  const link = await ensureContactLink(projectId, result.engineer.id);
+  const to = result.engineer.email;
+  if (email && to && emailEnabled()) {
+    const access = await requireApproved();
+    const sender =
+      [access.firstName, access.lastName].filter(Boolean).join(" ") ||
+      (access.email ?? "");
+    const sent = await emailTransmission({
+      projectId,
+      role: stage,
+      project: result.project,
+      engineer: { name: result.engineer.name, email: to },
+      message: note,
+      sender: { name: sender, email: access.email },
+      link,
+    });
+    refresh(projectId);
+    if (sent === "failed") return { ok: false, error: t.email.failed };
+    return { ok: true };
+  }
+  refresh(projectId);
+  return { ok: true };
+}
+
+/**
+ * The mix validated, the engineer of the Réseau who masters too gets the
+ * mastering at once on their link (Ibé, 04/11/2026: « quand le mix est
+ * validé, ça passe automatiquement au master »): no « Transmettre au
+ * mastering » click. Each validated mix sends the package again (a mix
+ * reopened then validated, a second title), as « Renvoyer le dossier »;
+ * nothing while a title still waits for its mix final (transmitPackage
+ * refuses). An in-house engineer is given it by the database; another
+ * engineer gets a first sending from the owner. True: sent.
+ */
+async function continueToMastering(
+  projectId: string,
+  message: string,
+): Promise<boolean> {
+  const supabase = await createClient();
+  const { data: brief } = await supabase
+    .from("master_briefs")
+    .select("mastering_same_engineer, mix_contact_id")
+    .eq("project_id", projectId)
+    .maybeSingle();
+  if (!brief?.mastering_same_engineer || !brief.mix_contact_id) return false;
+  const result = await deliverRound(
+    projectId,
+    "mastering",
+    message,
+    null,
+    true,
+  );
+  // A title still in mix, a blocker, someone else than the owner: the
+  // step keeps « Transmettre au mastering ».
+  return result.ok;
 }
 
 /**
@@ -353,7 +396,16 @@ export async function decideRound(
         ? await engineerOf(v.projectId, version.stage)
         : null;
       const invoiceToo = engineer !== null && asked.includes(engineer);
-      if (version)
+      // The validated mix carries the mastering to the same engineer: the
+      // mastering e-mail says both.
+      const continued =
+        version?.stage === "mix" &&
+        v.decision === "approved" &&
+        (await continueToMastering(
+          v.projectId,
+          t.notify.approvedNext(version.name, nameOf(access)),
+        ));
+      if (version && !continued)
         await emailEngineer(v.projectId, version.stage, (title) => ({
           subject: n.subject(title, version.name),
           body: (invoiceToo ? t.notify.approvedInvoice : n).body(

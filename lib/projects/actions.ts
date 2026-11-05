@@ -55,6 +55,7 @@ export async function createProject(
     p_music_format: input.musicFormat ?? undefined,
     p_content_format_id: input.contentFormatId ?? undefined,
     p_artist_id: input.artistId ?? undefined,
+    p_master_validator_person_id: input.masterValidatorPersonId ?? undefined,
   });
 
   if (error || !projectId) {
@@ -65,6 +66,13 @@ export async function createProject(
       return {
         status: "error",
         fieldErrors: { assigneePersonId: pe.invalidManager },
+        values,
+      };
+    }
+    if (error?.message.includes("invalid_master_validator")) {
+      return {
+        status: "error",
+        fieldErrors: { masterValidatorPersonId: pe.invalidMasterValidator },
         values,
       };
     }

@@ -146,6 +146,9 @@ export const createProjectSchema = z
     // Transmitted at creation: the project always starts with its manager.
     assigneePersonId: z.uuid({ error: pe.managerRequired }),
     creativePersonIds: uuidListSchema(pe.invalidCreatives, 20),
+    // Who validates the Master's versions (retour d'Ibé du 02/11/2026): the
+    // manager or a creative director chosen here, the database checks it too.
+    masterValidatorPersonId: optionalUuid(pe.invalidMasterValidator),
   })
   .superRefine((data, ctx) => {
     // The event branch is closed in V1.
@@ -156,8 +159,25 @@ export const createProjectSchema = z
         message: pe.typeUnavailable,
       });
     checkShape(data, ctx);
+    const validator = data.masterValidatorPersonId;
+    if (
+      data.type === "music_release" &&
+      validator &&
+      validator !== data.assigneePersonId &&
+      !data.creativePersonIds.includes(validator)
+    )
+      ctx.addIssue({
+        code: "custom",
+        path: ["masterValidatorPersonId"],
+        message: pe.invalidMasterValidator,
+      });
   })
-  .transform(normalize);
+  // Only a music release has a Master (it works on the titles it links).
+  .transform((data) => ({
+    ...normalize(data),
+    masterValidatorPersonId:
+      data.type === "music_release" ? data.masterValidatorPersonId : null,
+  }));
 
 // Before launch only; the team changes by transmission, not here.
 export const updateProjectSchema = z

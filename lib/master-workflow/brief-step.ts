@@ -68,6 +68,7 @@ export async function loadBriefStep(
     id: string;
     ownerPersonId: string | null;
     ownerName: string | null;
+    masterValidatorPersonId?: string | null;
     masters: Array<{ id: string; title: string; artists: string }>;
   },
   access: Access,

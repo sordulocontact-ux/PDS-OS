@@ -2,13 +2,16 @@
 
 import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
+import { IconRefresh } from "@/components/icons";
 import { DecisionPanel } from "@/components/ui/decision-panel";
+import { FormDialog } from "@/components/ui/form-dialog";
 import { ReasonForm } from "@/components/ui/reason-form";
+import { RowActions } from "@/components/ui/row-actions";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
 import { masterRound } from "@/lib/i18n/fr/master-round";
 import { decideRound, reopenMix } from "@/lib/master-workflow/round-actions";
 
-const fr = { masterRound };
+const fr = { dialogs, masterRound };
 
 const t = fr.masterRound;
 
@@ -64,9 +67,12 @@ export function VersionDecision({
   );
 }
 
-/** « Rouvrir le mix » (the owner, before the mastering) or « Rouvrir le
- * master » (before the Distribution delivered), its reason said. */
-export function ReopenMix({
+/**
+ * « Rouvrir le mix / le master » in the « ⋯ » of the validated version
+ * (Ibé, 04/11/2026: the validated mix's page keeps only the essential),
+ * its reason asked in a modal (rule 6).
+ */
+export function ReopenMenu({
   projectId,
   versionId,
   stage = "mix",
@@ -77,24 +83,34 @@ export function ReopenMix({
 }) {
   const [open, setOpen] = useState(false);
   const r = stage === "mix" ? t.reopen : t.reopen.master;
-  if (!open)
-    return (
-      <Button
-        variant="outline"
-        className="self-start"
-        onClick={() => setOpen(true)}
-      >
-        {r.button}
-      </Button>
-    );
   return (
-    <ReasonForm
-      label={r.reason}
-      hint={r.hint}
-      submitLabel={r.button}
-      doneMessage={r.done}
-      run={(reason) => reopenMix(projectId, versionId, reason, stage)}
-      onDone={() => setOpen(false)}
-    />
+    <>
+      <RowActions
+        label={t.reopen.menu}
+        actions={[
+          {
+            key: "reopen",
+            label: r.button,
+            icon: IconRefresh,
+            onSelect: () => setOpen(true),
+          },
+        ]}
+      />
+      <FormDialog
+        open={open}
+        onOpenChange={setOpen}
+        title={r.button}
+        description={r.hint}
+        closeLabel={fr.dialogs.close}
+      >
+        <ReasonForm
+          label={r.reason}
+          submitLabel={r.button}
+          doneMessage={r.done}
+          run={(reason) => reopenMix(projectId, versionId, reason, stage)}
+          onDone={() => setOpen(false)}
+        />
+      </FormDialog>
+    </>
   );
 }

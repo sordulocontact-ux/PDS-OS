@@ -41,6 +41,9 @@ export type NowCardProps = {
   // Catalogue ».
   labels?: { waitingTitle: string; finished: string };
   variant?: "module" | "overview";
+  // Module variant: where « N choses à faire ailleurs » leads (the project's
+  // Travail).
+  workHref?: string;
 };
 
 /**
@@ -62,26 +65,33 @@ export function NowCard({
   blockers = [],
   labels,
   variant = "module",
+  workHref,
 }: NowCardProps) {
   const overview = variant === "overview";
   const all = nowOf(steps);
   const here = all.mine.filter((s) => s.key !== shownKey);
   const also = here.length < all.mine.length;
+  // A module's card shows this module's gesture only; the rest is a line.
   const mine: NowItem[] = [
     ...here.map((step) => ({ step, place: moduleLabel })),
-    ...elsewhere,
+    ...(overview ? elsewhere : []),
   ];
+  if (!overview && mine.length === 0 && blockers.length === 0) {
+    if (elsewhere.length > 0)
+      return <ElsewhereLine count={elsewhere.length} href={workHref} />;
+    if (also) return null;
+  }
   const waiting: NowItem[] = [
     ...all.waiting.map((step) => ({ step, place: moduleLabel })),
     ...waitingElsewhere,
   ];
-  if (also && mine.length === 0 && blockers.length === 0) return null;
+  if (overview && also && mine.length === 0 && blockers.length === 0)
+    return null;
   const [first, ...more] = mine;
-  const away = Boolean(first) && here.length === 0 && !overview;
   const badge = first
     ? {
         tone: "info" as const,
-        label: away ? t.elsewhere : also ? t.alsoMine : t.mine,
+        label: also ? t.alsoMine : t.mine,
       }
     : blockers.length > 0
       ? { tone: "danger" as const, label: t.blocker }
@@ -136,15 +146,9 @@ export function NowCard({
       {first && (
         <div className="flex flex-wrap items-center gap-3">
           <ViewLink href={actionHref(first.step)} className={buttonVariants()}>
-            <ButtonRoll>
-              {overview
-                ? t.openShort
-                : away && first.place
-                  ? t.goTo(first.place)
-                  : t.open}
-            </ButtonRoll>
+            <ButtonRoll>{overview ? t.openShort : t.open}</ButtonRoll>
           </ViewLink>
-          {more.length > 0 && (
+          {overview && more.length > 0 && (
             <span className="text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-secondary)]">
               {t.others(
                 more.length,
@@ -176,6 +180,26 @@ export function NowCard({
         <WaitingRows items={waiting.slice(0, first ? 2 : 3)} />
       )}
     </NowFrame>
+  );
+}
+
+/** A module with nothing for the viewer: one quiet line, not the big card. */
+function ElsewhereLine({ count, href }: { count: number; href?: string }) {
+  return (
+    <p
+      data-now-card
+      className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]"
+    >
+      {t.nothingHere(count)}{" "}
+      {href && (
+        <ViewLink
+          href={href}
+          className="font-medium text-[color:var(--text-primary)] underline underline-offset-2"
+        >
+          {t.seeWork}
+        </ViewLink>
+      )}
+    </p>
   );
 }
 

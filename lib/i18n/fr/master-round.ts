@@ -67,7 +67,12 @@ export const masterRound = {
     },
     internal: "Les tarifs restent internes : ils ne sont pas dans le dossier.",
     sameLink: (name: string) =>
-      ` Le dossier s'ajoute au lien de ${first(name)} : aucun nouveau lien n'est créé.`,
+      `Le dossier s'ajoute au lien de ${first(name)} : aucun nouveau lien n'est créé.`,
+  },
+  // A validated round keeps only its final version in view (Ibé, 04/11).
+  finished: {
+    more: (stage: "mix" | "mastering") =>
+      stage === "mix" ? "Détails du mixage" : "Détails du mastering",
   },
   blockers: {
     briefDirty: (name: string) =>
@@ -160,6 +165,10 @@ export const masterRound = {
       body: (version: string, by: string) =>
         `${by} a validé le ${version} : c'est la version finale. Merci pour votre travail !`,
     },
+    // The validated mix, and the mastering added to the same engineer's
+    // link: one message, the package's note.
+    approvedNext: (version: string, by: string) =>
+      `${by} a validé le ${version} : c'est le mix final. Le mastering vous est confié, son dossier est sur votre lien.`,
     // The last Master final also asks for the invoice: one e-mail, not two.
     approvedInvoice: {
       body: (version: string, by: string) =>
@@ -395,10 +404,11 @@ export const masterRound = {
     button: "Rouvrir le mix",
     reason: "Pourquoi rouvrir le mix",
     done: "Mix rouvert",
-    hint: "Possible tant que le mastering n'est pas parti : la décision reste dans l'historique, l'ingénieur peut déposer une nouvelle version.",
+    hint: "Possible tant qu'aucun master n'est revenu sur ce titre : la décision reste dans l'historique, l'ingénieur peut déposer une nouvelle version.",
+    menu: "Actions sur la version validée",
     errors: {
       started:
-        "Le mastering est parti sur ce mix : il ne peut plus être rouvert.",
+        "Un master est déjà revenu sur ce mix : il ne peut plus être rouvert.",
       failed: "Le mix n'a pas pu être rouvert. Réessayez.",
     },
     // « Rouvrir le master »: same rule, until the Distribution delivered.

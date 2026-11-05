@@ -264,7 +264,10 @@ par les tickets ou laissé « à confirmer », donc décidé provisoirement ou r
 - Retours transmis sans décider : texte écrit par le code avec l'auteur de chaque ligne, sans PO.
 - Validatrice par défaut : la direction créative désignée au Cadrage › Équipe, sinon celle du projet,
   sinon le responsable. Même ingénieur pour le mastering par défaut quand un seul est connu.
-- Rouvrir une décision : le mix seulement, tant que le mastering n'est pas parti.
+- Rouvrir une décision : le mix tant qu'aucune version masterisée n'est revenue sur le titre (le dossier du
+  mastering part seul avec le mix validé, 05/11/2026) ; le master tant que la Distribution n'a pas livré.
+- Personnes du Master (ingénieurs, valideur) : le responsable dans le Brief, le DG pour corriger une erreur,
+  tant qu'aucune version du tour n'est validée (Ibé, 04/11/2026).
 - Le lien privé du Master est gardé chiffré et relisible par le responsable (règle 19).
 
 ### Finances unifiées : décisions du 20/10/2026 (branche `pc/f1-finance`)
@@ -312,6 +315,16 @@ Prises sans tickets plus précis, cohérentes avec le proto `master-v2.html` ; �
 - **Rouvrir le master** : refusé une fois la sortie livrée par la Distribution (`delivered_on`).
 - **Un livrable déposé** est un fichier du titre (catégorie « autre », ou « pistes » pour les stems),
   jamais une version audio.
+
+### Master : qui fait les retours sur le mix (retour d'Ibé, 02/11/2026)
+
+- « Pouvoir désigner, lors de la création d'un projet, la personne qui fait les retours sur le mix » :
+  champ « Qui valide les versions du master » du formulaire « Nouveau projet », pour une sortie musicale
+  seulement (le seul type qui a un Master), choisi parmi le chef de projet et les directeurs créatifs
+  choisis au-dessus, **le chef de projet par défaut**. Même règle que le validateur du Brief.
+- Le Brief Mix/Master le reprend à sa création et reste l'endroit où il change ensuite. Décision prise
+  sans le ticket : si la personne n'est plus dans l'équipe du projet à ce moment-là (transmission
+  refusée puis faite à un autre, directeur créatif retiré), le Brief part du responsable du projet.
 
 ### Vocabulaire fixé
 

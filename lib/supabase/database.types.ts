@@ -15848,6 +15848,7 @@ export type Database = {
           due_date: string | null
           id: string
           initial_context: string | null
+          master_validator_person_id: string | null
           music_format: string | null
           organization_id: string
           owner_person_id: string | null
@@ -15866,6 +15867,7 @@ export type Database = {
           due_date?: string | null
           id?: string
           initial_context?: string | null
+          master_validator_person_id?: string | null
           music_format?: string | null
           organization_id: string
           owner_person_id?: string | null
@@ -15884,6 +15886,7 @@ export type Database = {
           due_date?: string | null
           id?: string
           initial_context?: string | null
+          master_validator_person_id?: string | null
           music_format?: string | null
           organization_id?: string
           owner_person_id?: string | null
@@ -15910,6 +15913,13 @@ export type Database = {
           {
             foreignKeyName: "projects_created_by_fkey"
             columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_master_validator_person_id_fkey"
+            columns: ["master_validator_person_id"]
             isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
@@ -18046,6 +18056,10 @@ export type Database = {
         Args: { p_project_id: string; p_reason: string; p_role: string }
         Returns: undefined
       }
+      direction_set_master_person: {
+        Args: { p_field: string; p_project_id: string; p_value: string }
+        Returns: undefined
+      }
       master_rate_refusals:
         | { Args: { p_token: string }; Returns: Json }
         | { Args: { p_contact_token: string; p_item_id: string }; Returns: Json }
@@ -19014,6 +19028,7 @@ export type Database = {
           p_due_date?: string
           p_initial_context?: string
           p_master_ids?: string[]
+          p_master_validator_person_id?: string
           p_music_format?: string
           p_organization_id: string
           p_priority?: string

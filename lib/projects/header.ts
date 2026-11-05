@@ -9,7 +9,6 @@ import {
   canEditProject,
   canSeeProjectBudget,
 } from "@/lib/projects/edit-access";
-import { projectKindLabel } from "@/lib/projects/labels";
 import { getProject } from "@/lib/projects/queries";
 import { distributionSteps } from "@/lib/ui/distribution-steps";
 import { marketingSteps } from "@/lib/ui/marketing-steps";
@@ -61,17 +60,7 @@ export const projectHeaderData = trackedCache(
     const facts: ModuleFact[] = [
       {
         key: "project",
-        value: [
-          project.title,
-          project.artistName,
-          projectKindLabel({
-            type: project.type,
-            musicFormat: project.musicFormat,
-            contentFormatName: project.contentFormat?.name ?? null,
-          }),
-        ]
-          .filter(Boolean)
-          .join(" · "),
+        value: [project.title, project.artistName].filter(Boolean).join(" · "),
       },
     ];
     if (budget && project.budgetCents !== null)

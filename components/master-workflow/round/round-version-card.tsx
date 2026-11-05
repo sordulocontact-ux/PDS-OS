@@ -47,6 +47,7 @@ export function RoundVersionCard({
   previous = null,
   engineer,
   pending = false,
+  menu = null,
   children,
 }: {
   round: RoundStepView;
@@ -56,6 +57,8 @@ export function RoundVersionCard({
   engineer: string;
   // Undecided and listened to now: its feedback comes in `children`.
   pending?: boolean;
+  // The validated version's « ⋯ » (« Rouvrir le mix »).
+  menu?: ReactNode;
   children?: ReactNode;
 }) {
   const label = fr.masterJourney.versionLabel[round.stage];
@@ -76,7 +79,12 @@ export function RoundVersionCard({
         x?.source ?? null,
       )}
       icon={IconDisc}
-      action={<StatusBadge tone={status.tone}>{status.label}</StatusBadge>}
+      action={
+        <span className="flex items-center gap-1.5">
+          <StatusBadge tone={status.tone}>{status.label}</StatusBadge>
+          {menu}
+        </span>
+      }
       change={
         asked && previous ? (
           <span className="flex flex-col gap-1">
@@ -100,6 +108,15 @@ export function RoundVersionCard({
           downloadUrl={v.downloadUrl}
           className="max-w-none"
         />
+        {v.decision === "approved" && !x?.reopenedAt && (
+          <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
+            {t.versions.approvedNote(
+              label,
+              v.decidedBy,
+              v.decidedAt ? formatShortDay(v.decidedAt) : "",
+            )}
+          </p>
+        )}
         <SentRequest version={v} engineer={engineer} />
         {x?.reopenedAt && (
           <p className="text-[length:var(--type-body-sm)]">

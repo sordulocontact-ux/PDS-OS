@@ -42,6 +42,7 @@ export type ProjectFormDefaults = {
   masterIds: string[];
   assigneePersonId?: string | null;
   creativePersonIds?: string[];
+  masterValidatorPersonId?: string | null;
   dueDate?: string;
   budget?: string;
   priority?: Priority | null;
@@ -230,6 +231,12 @@ export function CreateProjectForm({
               values.creativePersonIds
                 ? parseIds(values.creativePersonIds)
                 : (defaults.creativePersonIds ?? [])
+            }
+            withMasterValidator={music}
+            defaultMasterValidatorId={
+              values.masterValidatorPersonId ||
+              defaults.masterValidatorPersonId ||
+              null
             }
             errors={errors}
           />

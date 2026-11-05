@@ -212,6 +212,9 @@ export type ProjectDetail = {
   artistName: string;
   ownerName: string | null;
   ownerPersonId: string | null;
+  // Who validates the Master's versions, chosen at creation (the Brief
+  // takes it over; retour d'Ibé du 02/11/2026).
+  masterValidatorPersonId: string | null;
   status: ProjectStatus;
   // Newest first.
   assignments: Assignment[];

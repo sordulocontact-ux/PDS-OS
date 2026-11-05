@@ -55,48 +55,72 @@ function creditedContact(
 /**
  * The Brief Mix/Master of a project, ready to display: the saved brief, or
  * a first version from what the project already knows (credited engineers,
- * owner as validator, the two masters as deliverables); the sources of the
- * titles; the engineers of the Réseau; who may validate.
+ * the validator chosen at creation if still in the team, else the owner, the
+ * two masters as deliverables); the sources of the titles; the engineers of
+ * the Réseau; who may validate.
  */
 export async function loadMasterBrief(
   project: {
     id: string;
     ownerPersonId: string | null;
     ownerName: string | null;
+    masterValidatorPersonId?: string | null;
     masters: Array<{ id: string; title: string; artists: string }>;
   },
   access: Access,
 ): Promise<BriefView> {
   const supabase = await createClient();
-  const [rows, saved, creatives, exchanges, budget, framing, members] =
-    await Promise.all([
-      readMasterRows(project.id, project.masters),
-      // Shared with the Master's other loaders in the same render.
-      masterBriefRow(project.id),
-      listProjectCreatives(project.id),
-      supabase
-        .from("master_brief_calls")
-        .select(
-          "call:calls!master_brief_calls_call_same_org(id, title, occurred_at, status)",
-        )
-        .eq("project_id", project.id)
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("budget_lines")
-        .select("master_role, amount_cents, status")
-        .eq("project_id", project.id)
-        .not("master_role", "is", null),
-      loadFramingDefaults(project.id),
-      access.organizationId
-        ? supabase.rpc("list_member_people", {
-            p_organization_id: access.organizationId,
-          })
-        : Promise.resolve({ data: [] }),
-    ]);
+  const [
+    rows,
+    saved,
+    creatives,
+    exchanges,
+    budget,
+    framing,
+    members,
+    validated,
+  ] = await Promise.all([
+    readMasterRows(project.id, project.masters),
+    // Shared with the Master's other loaders in the same render.
+    masterBriefRow(project.id),
+    listProjectCreatives(project.id),
+    supabase
+      .from("master_brief_calls")
+      .select(
+        "call:calls!master_brief_calls_call_same_org(id, title, occurred_at, status)",
+      )
+      .eq("project_id", project.id)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("budget_lines")
+      .select("master_role, amount_cents, status")
+      .eq("project_id", project.id)
+      .not("master_role", "is", null),
+    loadFramingDefaults(project.id),
+    access.organizationId
+      ? supabase.rpc("list_member_people", {
+          p_organization_id: access.organizationId,
+        })
+      : Promise.resolve({ data: [] }),
+    // A validated round keeps its engineer (the DG's corrections).
+    supabase
+      .from("master_mix_versions")
+      .select("stage")
+      .eq("project_id", project.id)
+      .eq("decision", "approved"),
+  ]);
   if (exchanges.error)
     console.error("loadMasterBrief exchanges:", exchanges.error.message);
   if (saved.error) console.error("loadMasterBrief:", saved.error.message);
   const canEdit = canEditProject(access, project);
+  // The DG corrects the people of the Master (Ibé, 04/11/2026), the owner
+  // writes the whole Brief.
+  const peopleEditor = canEdit
+    ? ("owner" as const)
+    : can(access, "validate")
+      ? ("direction" as const)
+      : null;
+  const stages = new Set((validated.data ?? []).map((v) => v.stage));
   const canSeeBudget = canSeeProjectBudget(access, project);
   const canEditCatalog = can(access, "manage_catalog");
 
@@ -112,18 +136,6 @@ export async function loadMasterBrief(
     null;
   const sameCredited =
     mixCredited !== null && mixCredited === masteringCredited;
-  const brief: MasterBrief = row
-    ? briefFromRow(row)
-    : {
-        ...emptyBrief(project.ownerPersonId),
-        mixContactId: mixCredited,
-        masteringSameEngineer: sameCredited,
-        masteringContactId: sameCredited ? null : masteringCredited,
-        dates: {
-          ...emptyBrief(project.ownerPersonId).dates,
-          masterFinalDue: framing.masterFinalDue,
-        },
-      };
 
   const validators: BriefPerson[] = [
     ...(project.ownerPersonId
@@ -133,6 +145,25 @@ export async function loadMasterBrief(
       (creative) => creative.personId !== project.ownerPersonId,
     ),
   ];
+  // Chosen at creation, as long as the person is still in the team (the
+  // database's default_master_brief_validator does the same on insert).
+  const chosenValidator = validators.some(
+    (person) => person.personId === project.masterValidatorPersonId,
+  )
+    ? (project.masterValidatorPersonId ?? null)
+    : project.ownerPersonId;
+  const brief: MasterBrief = row
+    ? briefFromRow(row)
+    : {
+        ...emptyBrief(chosenValidator),
+        mixContactId: mixCredited,
+        masteringSameEngineer: sameCredited,
+        masteringContactId: sameCredited ? null : masteringCredited,
+        dates: {
+          ...emptyBrief(chosenValidator).dates,
+          masterFinalDue: framing.masterFinalDue,
+        },
+      };
 
   const sources = rows.titles.flatMap((title) => [
     ...sourceFacts(
@@ -204,6 +235,11 @@ export async function loadMasterBrief(
         : [],
     ),
     canEdit,
+    peopleEditor,
+    validatedRounds: {
+      mix: stages.has("mix"),
+      mastering: stages.has("mastering"),
+    },
     canAddContact: can(access, "manage_network"),
     organizationId: canEditCatalog ? access.organizationId : null,
   };

@@ -1,10 +1,13 @@
 "use client";
 
+import { useState } from "react";
+
 import { FactRow, FactRows, type FactSource } from "@/components/ui/fact-row";
 import { PickList } from "@/components/ui/pick-list";
 import { masterBrief } from "@/lib/i18n/fr/master-brief";
 import type { BriefDesignation } from "@/lib/master-workflow/brief-rules";
 import { saveBriefFact } from "@/lib/master-workflow/brief-fact-actions";
+import { setMasterPerson } from "@/lib/master-workflow/people-actions";
 import type {
   BriefPerson,
   MasterBrief,
@@ -24,6 +27,9 @@ const t = fr.masterBrief;
 export type BriefFactsProps = {
   projectId: string;
   canEdit: boolean;
+  // Who changes the people: the owner, or the DG (corrections).
+  peopleEditor: "owner" | "direction" | null;
+  validatedRounds: { mix: boolean; mastering: boolean };
   canSeeBudget: boolean;
   brief: MasterBrief;
   engineers: NetworkEngineer[];
@@ -81,14 +87,48 @@ export function engineerOf(
  * saved at once.
  */
 export function BriefPeople(props: BriefFactsProps) {
-  const { brief, canEdit, projectId, changedBy } = props;
-  const save = (patch: Parameters<typeof saveBriefFact>[1]) =>
-    saveBriefFact(projectId, patch);
-  const pick = (
-    field: "mixContactId" | "masteringContactId",
-    selected: string | null,
-  ) =>
-    canEdit
+  const { brief, projectId, changedBy, peopleEditor, validatedRounds } = props;
+  const direction = peopleEditor === "direction";
+  // « Oui, il masterise aussi » hides the mastering engineer at once, back
+  // if the saving fails (Ibé, 02/11/2026).
+  const [sameShown, setSameShown] = useState<{
+    base: boolean;
+    value: boolean;
+  } | null>(null);
+  const same =
+    sameShown && sameShown.base === brief.masteringSameEngineer
+      ? sameShown.value
+      : brief.masteringSameEngineer;
+  const saveSame = async (value: boolean) => {
+    setSameShown({ base: brief.masteringSameEngineer, value });
+    const result = direction
+      ? await setMasterPerson(projectId, "same", value ? "yes" : "no")
+      : await saveBriefFact(projectId, { masteringSame: value });
+    if (!result.ok) setSameShown(null);
+    return result;
+  };
+  const chooseEngineer = (field: "mix" | "mastering", id: string) => {
+    const person = id.startsWith("person:");
+    if (direction)
+      return setMasterPerson(projectId, field, person ? id : `contact:${id}`);
+    const personId = id.slice("person:".length);
+    return saveBriefFact(
+      projectId,
+      field === "mix"
+        ? person
+          ? { mixPersonId: personId }
+          : { mixContactId: id }
+        : person
+          ? { masteringPersonId: personId }
+          : { masteringContactId: id },
+    );
+  };
+  const chooseValidator = (id: string) =>
+    direction
+      ? setMasterPerson(projectId, "validator", id)
+      : saveBriefFact(projectId, { validatorPersonId: id });
+  const pick = (field: "mix" | "mastering", selected: string | null) =>
+    peopleEditor && !validatedRounds[field]
       ? {
           list: (
             <EngineerPickList
@@ -97,17 +137,7 @@ export function BriefPeople(props: BriefFactsProps) {
               members={props.members}
               selectedId={selected}
               canAddContact={props.canAddContact}
-              onChoose={(id) =>
-                save(
-                  id.startsWith("person:")
-                    ? {
-                        [field === "mixContactId"
-                          ? "mixPersonId"
-                          : "masteringPersonId"]: id.slice("person:".length),
-                      }
-                    : { [field]: id },
-                )
-              }
+              onChoose={(id) => chooseEngineer(field, id)}
             />
           ),
         }
@@ -130,28 +160,28 @@ export function BriefPeople(props: BriefFactsProps) {
         source={mix ? sourceOf(props.designations.mix) : t.sources.nobody}
         changedBy={changedBy.mix_contact_id}
         change={pick(
-          "mixContactId",
+          "mix",
           brief.mixContactId ??
             (brief.mixPersonId ? `person:${brief.mixPersonId}` : null),
         )}
       />
       <FactRow
         label={t.fields.same}
-        value={brief.masteringSameEngineer ? t.fields.yes : t.fields.no}
+        value={same ? t.fields.yes : t.fields.no}
         changedBy={changedBy.mastering_same_engineer}
         edit={
-          canEdit
+          peopleEditor && !validatedRounds.mastering
             ? {
                 kind: "select",
-                value: brief.masteringSameEngineer ? "yes" : "no",
+                value: same ? "yes" : "no",
                 options: { yes: t.fields.yes, no: t.fields.no },
                 done: t.changed,
-                onSave: (value) => save({ masteringSame: value === "yes" }),
+                onSave: (value) => saveSame(value === "yes"),
               }
             : null
         }
       />
-      {!brief.masteringSameEngineer && (
+      {!same && (
         <FactRow
           label={t.fields.mastering}
           value={mastering?.name ?? null}
@@ -163,7 +193,7 @@ export function BriefPeople(props: BriefFactsProps) {
           }
           changedBy={changedBy.mastering_contact_id}
           change={pick(
-            "masteringContactId",
+            "mastering",
             brief.masteringContactId ??
               (brief.masteringPersonId
                 ? `person:${brief.masteringPersonId}`
@@ -178,7 +208,7 @@ export function BriefPeople(props: BriefFactsProps) {
         source={sourceOf(props.designations.validator, true)}
         changedBy={changedBy.validator_person_id}
         change={
-          canEdit
+          peopleEditor
             ? {
                 list: (
                   <PickList
@@ -194,7 +224,7 @@ export function BriefPeople(props: BriefFactsProps) {
                     ]}
                     selectedId={brief.validatorPersonId}
                     done={t.changed}
-                    onChoose={(id) => save({ validatorPersonId: id })}
+                    onChoose={chooseValidator}
                   />
                 ),
               }

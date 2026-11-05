@@ -53,6 +53,9 @@ export const journey = {
     othersMove: "Les autres avancent ; la Vue d'ensemble dit qui est attendu.",
     open: "Aller à l'étape",
     openShort: "Ouvrir",
+    nothingHere: (n: number) =>
+      `Rien à faire ici · ${n} chose${n > 1 ? "s" : ""} à faire ailleurs.`,
+    seeWork: "Voir le travail du projet",
     goTo: (place: string) => `Aller à ${place}`,
     others: (n: number, list: string) =>
       `Et ${n} autre${n > 1 ? "s" : ""} : ${list}`,

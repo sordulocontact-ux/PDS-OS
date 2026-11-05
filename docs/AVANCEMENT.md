@@ -1372,3 +1372,18 @@ directement », l'ISWC depuis une modale de la page, sans aller au catalogue. D�
       iCloud (`docs/RACCOURCI-REPERAGE.md`).
 - [ ] Créer le raccourci sur l'iPhone de Sacha et partager le lien iCloud, après la mise en prod ;
       passage navigateur sur iPhone (partage TikTok, capture collée, connexion depuis un lien).
+
+## Master : retours d'Ibé du 04/11 (05/11/2026, branche `pre-prod`)
+
+- [x] Ingénieur maison assigné sans clic (mix au Brief enregistré, mastering au mix validé) ; ingénieur externe
+      qui masterise aussi : dossier du mastering envoyé seul avec le mix validé (`20261105160101`).
+- [x] Le DG corrige ingénieurs et valideur dans le Brief tant que le tour n'a pas de version validée.
+- [x] « Rouvrir le mix » possible jusqu'au premier master déposé (`20261105160201`).
+- [x] Tour validé épuré : la version finale seule, « Rouvrir » dans le « ⋯ », le reste replié ; dossier
+      avant envoi sans encadré en double ; « Qui fait quoi » montre l'ingénieur maison.
+- [x] En-tête des modules : la carte « Maintenant » ne montre que le geste du module (sinon une ligne vers
+      Travail), plus de « Et N autres », méta sans type ni format.
+- [x] « Oui, il masterise aussi » masque l'ingénieur du mastering au clic.
+- [x] « Qui valide les versions du master » choisi à la création d'une sortie musicale, repris par le Brief
+      (`20261105170101`).
+- [ ] Migrations à pousser en prod avec le reste ; passage navigateur.

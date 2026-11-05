@@ -90,9 +90,9 @@ export async function applyBriefProposals(
   if (fields.mastering_contact_id) fields.mastering_same_engineer = false;
   // Nothing readable to write (an amount the code cannot read): no-op.
   if (Object.keys(fields).length === 0) return { ok: true };
-  // A brief created by this first write starts like the form's: the owner
-  // (the only one who may write it) validates the versions.
-  if (!row) fields.validator_person_id = access.personId;
+  // A brief created by this first write starts like the form's: the
+  // database gives it the validator chosen at creation, else the owner
+  // (default_master_brief_validator).
 
   const error = await writeBrief(
     supabase,

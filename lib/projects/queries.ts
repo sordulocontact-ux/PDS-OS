@@ -241,7 +241,7 @@ export const getProject = trackedCache(
       supabase
         .from("projects")
         .select(
-          `id, title, type, music_format, artist_id, created_at, due_date, budget_cents, priority, initial_context, owner_person_id, artist:artists!projects_artist_same_org(name), owner:people!projects_owner_person_id_fkey(first_name, last_name), ${FORMAT_SELECT}, ${MASTERS_SELECT}, ${STAGES_SELECT}, ${ASSIGNMENTS_SELECT}`,
+          `id, title, type, music_format, artist_id, created_at, due_date, budget_cents, priority, initial_context, owner_person_id, master_validator_person_id, artist:artists!projects_artist_same_org(name), owner:people!projects_owner_person_id_fkey(first_name, last_name), ${FORMAT_SELECT}, ${MASTERS_SELECT}, ${STAGES_SELECT}, ${ASSIGNMENTS_SELECT}`,
         )
         .eq("id", projectId)
         .is("archived_at", null)
@@ -283,6 +283,7 @@ export const getProject = trackedCache(
       artistName: artistNameOf(masters, data.artist),
       ownerName: owner || null,
       ownerPersonId: data.owner_person_id,
+      masterValidatorPersonId: data.master_validator_person_id,
       status: projectStatusOf(stages.length, assignments[0] ?? null),
       assignments,
       dueDate: data.due_date,

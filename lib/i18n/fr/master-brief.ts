@@ -152,5 +152,7 @@ export const masterBrief = {
     tooLong: "Ce texte est trop long.",
     date: "Une date, par exemple 15/11/2026.",
     validator: "Cette personne ne peut pas valider les versions de ce projet.",
+    roundValidated:
+      "Une version de cette étape est déjà validée : son ingénieur ne change plus.",
   },
 } as const;

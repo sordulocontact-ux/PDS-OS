@@ -1,5 +1,6 @@
 import { ProjectFresh } from "@/components/projects/project-fresh";
 import { Skeleton } from "@/components/ui/skeleton";
+import { routes } from "@/lib/auth/redirects";
 import { elsewhereOf, loadProjectJourneys } from "@/lib/journey/project";
 
 import { NowCard, type NowCardProps } from "./now-card";
@@ -15,11 +16,12 @@ type Props = Omit<NowCardProps, "elsewhere"> & {
 
 async function WithElsewhere({ projectId, here, byPath, ...props }: Props) {
   const journeys = await loadProjectJourneys(projectId);
+  const workHref = routes.projectWork(projectId);
   const elsewhere = elsewhereOf(journeys, here ?? props.steps);
   return byPath ? (
-    <PathNowCard {...props} elsewhere={elsewhere} />
+    <PathNowCard {...props} elsewhere={elsewhere} workHref={workHref} />
   ) : (
-    <NowCard {...props} elsewhere={elsewhere} />
+    <NowCard {...props} elsewhere={elsewhere} workHref={workHref} />
   );
 }
 

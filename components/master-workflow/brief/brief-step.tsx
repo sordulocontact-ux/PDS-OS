@@ -83,6 +83,8 @@ export function BriefStep({
   const facts: BriefFactsProps = {
     projectId: view.projectId,
     canEdit,
+    peopleEditor: view.peopleEditor,
+    validatedRounds: view.validatedRounds,
     canSeeBudget: view.canSeeBudget,
     brief: view.brief,
     engineers: view.engineers,

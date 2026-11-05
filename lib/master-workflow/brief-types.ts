@@ -113,6 +113,11 @@ export type BriefView = {
   nextAgenda: AgendaItem[];
   // The project's owner: the only one who writes the brief.
   canEdit: boolean;
+  // Who may change the engineers and the validator: the owner (in the
+  // Brief), the DG (direction_set_master_person), nobody else.
+  peopleEditor: "owner" | "direction" | null;
+  // A validated round keeps its engineer.
+  validatedRounds: { mix: boolean; mastering: boolean };
   // The owner and the direction: the rates and the budget section are
   // theirs (UX test of 09/10/2026); for anyone else the rates are null.
   canSeeBudget: boolean;

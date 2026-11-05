@@ -15,6 +15,7 @@ export function PeoplePicker({
   defaultSelectedIds,
   error,
   summary,
+  onChange,
 }: {
   name: string;
   label: string;
@@ -26,6 +27,8 @@ export function PeoplePicker({
   defaultSelectedIds: string[];
   error?: string;
   summary?: (names: string[]) => string;
+  // Optional: lets the form react to the choice; the value is still submitted.
+  onChange?: (personIds: string[]) => void;
 }) {
   return (
     <ChipMultiChoice
@@ -41,6 +44,7 @@ export function PeoplePicker({
       }))}
       defaultValue={defaultSelectedIds}
       summary={summary}
+      onChange={onChange}
     />
   );
 }

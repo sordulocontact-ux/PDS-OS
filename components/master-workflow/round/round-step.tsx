@@ -1,5 +1,3 @@
-import { IconLock } from "nucleo-sharp-essential";
-
 import { EngineerThreadSection } from "@/components/master-workflow/engineer-thread-section";
 import { PackagePreview } from "@/components/master-workflow/package-preview";
 import { BlockerCallout } from "@/components/ui/blocker-callout";
@@ -24,6 +22,8 @@ import { SendForm } from "./send-form";
 const fr = { invoices, masterRound, masterInHouse, masterWorkflow };
 
 const t = fr.masterRound;
+const caption =
+  "text-[length:var(--type-caption)] text-[color:var(--text-secondary)]";
 
 /**
  * The Mixage or the Mastering step (proto `master-v2.html`): before the
@@ -64,6 +64,14 @@ export function RoundStep({
     stage === "mastering" && view.brief?.masteringSameEngineer === true;
   const { blockers } = round;
   const lead = (leadIds?.size ?? 0) > 0;
+  // Every title has its final version: the step shows it, the rest
+  // (rate, link, thread, engineer) folds (Ibé, 04/11/2026: « que
+  // l'essentiel sur la page du mix validé »).
+  const finished =
+    round.versions.titles.length > 0 &&
+    round.versions.titles.every((x) =>
+      x.versions.some((v) => v.decision === "approved"),
+    );
   // PDS OS sends the e-mail itself: configured, and an address to write to.
   const mailed = round.emailEnabled && Boolean(view.engineer?.email);
   const rest = (
@@ -99,14 +107,11 @@ export function RoundStep({
             blockers={blockers}
             title={fr.masterWorkflow.mix.blockers.title}
           />
+          {/* The card's line already says the rates stay internal. */}
           <PackagePreview view={view} />
-          <ToneCallout
-            tone="info"
-            icon={<IconLock aria-hidden className="size-4" />}
-          >
-            {t.dossier.internal}
-            {view.reusesMixLink && engineer ? t.dossier.sameLink(engineer) : ""}
-          </ToneCallout>
+          {view.reusesMixLink && engineer && (
+            <p className={caption}>{t.dossier.sameLink(engineer)}</p>
+          )}
         </>
       )}
 
@@ -121,9 +126,7 @@ export function RoundStep({
 
       {inHouse && !inHouse.assignedAt && (
         <>
-          <ToneCallout tone="info">
-            {fr.masterInHouse.note(inHouse.name)}
-          </ToneCallout>
+          <p className={caption}>{fr.masterInHouse.note(inHouse.name)}</p>
           {viewerIsOwner && blockers.length === 0 && (
             <AssignRound
               projectId={view.projectId}
@@ -134,7 +137,7 @@ export function RoundStep({
         </>
       )}
       {inHouse?.assignedAt && (
-        <p className="text-[length:var(--type-caption)] text-[color:var(--text-secondary)]">
+        <p className={caption}>
           {fr.masterInHouse.assignedLine(
             inHouse.name,
             formatShortDay(inHouse.assignedAt, { bare: true }),
@@ -256,7 +259,13 @@ export function RoundStep({
           leadIds={leadIds}
         />
       )}
-      {lead ? <Fold summary={t.lead.more(engineer)}>{rest}</Fold> : rest}
+      {lead ? (
+        <Fold summary={t.lead.more(engineer)}>{rest}</Fold>
+      ) : finished ? (
+        <Fold summary={t.finished.more(stage)}>{rest}</Fold>
+      ) : (
+        rest
+      )}
     </div>
   );
 }

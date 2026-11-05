@@ -265,6 +265,11 @@ export const shell = {
           ? "Aucun directeur créatif choisi."
           : `Choisi${names.length > 1 ? "s" : ""} : ${names.join(", ")}.`,
       creativesNone: "Aucun directeur créatif dans l'organisation.",
+      // Retour d'Ibé du 02/11/2026: who gives the feedback on the mix.
+      masterValidator: "Qui valide les versions du master",
+      masterValidatorHint:
+        "Fait les retours sur le mix et le mastering : le chef de projet ou un directeur créatif choisi ci-dessus. Modifiable ensuite dans le Brief du Master.",
+      masterValidatorPlaceholder: "Choisissez d'abord le chef de projet",
     },
     contentFormatPicker: {
       searchLabel: "Choisir un format PDS",
@@ -343,6 +348,8 @@ export const shell = {
         "Cette personne n'est plus chef de projet. Choisissez-en un autre.",
       invalidCreatives:
         "Un directeur créatif sélectionné n'est plus disponible. Retirez-le.",
+      invalidMasterValidator:
+        "Choisissez le chef de projet ou un des directeurs créatifs du projet.",
     },
   },
 

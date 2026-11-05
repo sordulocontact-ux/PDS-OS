@@ -1,4 +1,3 @@
-import { ToneCallout } from "@/components/ui/tone-callout";
 import { VersionCard } from "@/components/ui/version-card";
 import { masterInHouse } from "@/lib/i18n/fr/master-inhouse";
 import { masterJourney } from "@/lib/i18n/fr/master-journey";
@@ -7,7 +6,7 @@ import type { RoundStepView } from "@/lib/master-workflow/round-step";
 
 import { PendingVersion } from "./pending-version";
 import { RoundVersionCard } from "./round-version-card";
-import { ReopenMix } from "./version-decision";
+import { ReopenMenu } from "./version-decision";
 
 const fr = { masterJourney, masterRound, masterInHouse };
 
@@ -57,15 +56,29 @@ export function RoundVersions({
         const previousOf = (v: (typeof older)[number]) =>
           title.versions[title.versions.indexOf(v) + 1] ?? null;
         const pending = latest.decision === null && !extra?.reopenedAt;
-        const card = (v: (typeof older)[number]) => (
+        const card = (
+          v: (typeof older)[number],
+          menu: React.ReactNode = null,
+        ) => (
           <RoundVersionCard
             key={v.id}
             round={round}
             version={v}
             previous={previousOf(v)}
             engineer={engineer}
+            menu={menu}
           />
         );
+        // The validated version says who validated it; reopening it is in
+        // its « ⋯ » (Ibé, 04/11/2026: only the essential once validated).
+        const reopen =
+          viewerIsOwner && approved?.id === latest.id ? (
+            <ReopenMenu
+              projectId={round.view.projectId}
+              versionId={latest.id}
+              stage={round.stage}
+            />
+          ) : null;
         return (
           <section key={title.masterId} className="flex flex-col gap-3">
             <h3 className="text-[length:var(--type-body-md)] leading-[var(--type-body-md-lh)] font-semibold">
@@ -81,27 +94,13 @@ export function RoundVersions({
                 viewerIsOwner={viewerIsOwner}
               />
             ) : (
-              !inLead && card(latest)
+              !inLead && card(latest, reopen)
             )}
             {older.length > 0 && (
               <VersionCard title={t.versions.previous(older.length)}>
                 {older.map((v) => card(v))}
               </VersionCard>
             )}
-            {inLead ? null : approved ? (
-              <>
-                <ToneCallout tone="success">
-                  {t.decision.final(label, approved.number, approved.decidedBy)}
-                </ToneCallout>
-                {viewerIsOwner && approved.id === latest.id && (
-                  <ReopenMix
-                    projectId={round.view.projectId}
-                    versionId={latest.id}
-                    stage={round.stage}
-                  />
-                )}
-              </>
-            ) : null}
           </section>
         );
       })}
