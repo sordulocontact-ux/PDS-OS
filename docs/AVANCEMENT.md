@@ -1417,3 +1417,13 @@ directement », l'ISWC depuis une modale de la page, sans aller au catalogue. D�
       plus des streams »).
 - [x] Stratégie › KPIs : chaque mesure du Cadrage proposée comme KPI (« Préparer ce KPI »), sauf celles dont
       le chiffre est déjà un KPI.
+
+## Pochette d'un titre, versionnée (05/11/2026, branche `pre-prod`)
+
+- [x] Retour d'Ibé du 01/11 (« Ajouter une cover avec versions mises à jour ») : la pochette d'un titre est la
+      dernière image « Pochette » de ses fichiers ; en tête de la page du titre (ajouter, nouvelle version,
+      voir en grand, toutes les versions dans l'onglet Fichiers, glisser une image dessus) et en vignette dans
+      la liste des titres et l'onglet Titres d'un artiste. Miniature JPEG de 320 px faite au dépôt.
+- [x] Migration `20261105190101_master_cover_thumbs` (lecture de la miniature) appliquée en pré-prod ;
+      **reste à pousser en prod** avec le reste.
+- [ ] Passage navigateur ; reprise automatique de la pochette validée en Conception (lot suivant, point 3).

@@ -13,11 +13,14 @@ const fr = { catalog };
 // (separators ignored: "fr-xxx" finds "FRXXX…").
 export function MastersList({
   masters,
+  covers,
   rights,
   filters,
   empty,
 }: {
   masters: MasterRow[];
+  // Each title's cover (small copy), by title id.
+  covers?: Record<string, string>;
   rights?: RecordRights;
   // The page's filters, beside the search; what stands for no row at all.
   filters?: React.ReactNode;
@@ -35,7 +38,12 @@ export function MastersList({
       empty={empty}
     >
       {(visible) => (
-        <MastersTable masters={visible} rights={rights} selectable />
+        <MastersTable
+          masters={visible}
+          covers={covers}
+          rights={rights}
+          selectable
+        />
       )}
     </SearchableList>
   );

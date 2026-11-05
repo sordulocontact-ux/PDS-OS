@@ -175,7 +175,15 @@ Principes :
   l'archivage reste réservé aux artistes, titres et projets (§ 2 quater) ; un fichier se
   supprime (`manage_catalog`, confirmé). Même bibliothèque sur l'onglet Fichiers d'un titre
   (hors fichiers audio, qui gardent leur onglet) et sur la page Fichiers d'un projet lancé
-  (§ 8 ter), prête pour un call ou une activation (`FileOwner`). **Activité**
+  (§ 8 ter), prête pour un call ou une activation (`FileOwner`). **Pochette d'un titre**
+  (retour d'Ibé du 01/11/2026, `lib/catalog/cover-rules.ts`, `covers.ts`) : pas de table, c'est la
+  dernière image (JPG, PNG, WebP, GIF, AVIF) de catégorie « Pochette » (`artwork`) de ses fichiers ;
+  « Nouvelle version » sur la pochette = nouvelle version de ce fichier, les anciennes restent dans
+  l'onglet Fichiers. Au dépôt, le navigateur envoie à côté une copie JPEG de 320 px
+  (`<path>.thumb.jpg`, `cover-thumb.ts`) que montrent la liste des titres, l'onglet Titres d'un artiste
+  et l'en-tête du titre (`TitleCover`) ; une pochette déposée avant n'en a pas, l'original est montré.
+  La copie est lisible par qui lit le fichier (migration `20261105190101`) et supprimée avec lui.
+  **Activité**
   (`activity_events`) : journal écrit **par triggers seuls** (création / modification de
   l'artiste, contacts, fichiers, masters, projets liés, transmissions), `detail` copié au
   moment de l'événement, historique antérieur reconstitué par la migration ; lecture filtrée

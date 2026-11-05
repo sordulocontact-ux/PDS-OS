@@ -1,3 +1,5 @@
+import { coverThumbPath, isCoverImage } from "@/lib/catalog/cover-rules";
+import { makeCoverThumb } from "@/lib/catalog/cover-thumb";
 import { recordCatalogFile } from "@/lib/catalog/file-actions";
 import {
   FILE_BUCKETS,
@@ -52,6 +54,7 @@ export async function uploadCatalogFile(input: {
     console.error("[catalog] file upload failed:", error.message);
     return { ok: false, error: t.failed };
   }
+  const thumb = await uploadCoverThumb(bucket, input, path, mime);
 
   const result = await recordCatalogFile({
     owner: input.owner,
@@ -68,6 +71,35 @@ export async function uploadCatalogFile(input: {
     workStatus: input.workStatus,
   });
   // Not recorded: the object would be orphaned, remove it.
-  if (!result.ok) await bucket.remove([path]);
+  if (!result.ok) await bucket.remove(thumb ? [path, thumb] : [path]);
   return result;
+}
+
+/**
+ * The small copy of a title's cover (lib/catalog/cover-rules.ts), sent
+ * beside it. Best effort: without it the original is shown.
+ */
+async function uploadCoverThumb(
+  bucket: ReturnType<ReturnType<typeof createClient>["storage"]["from"]>,
+  input: { owner: FileOwner; category: string; file: File },
+  path: string,
+  mime: string,
+): Promise<string | null> {
+  if (
+    input.owner.kind !== "master" ||
+    !isCoverImage({ category: input.category, mime })
+  )
+    return null;
+  const blob = await makeCoverThumb(input.file);
+  if (!blob) return null;
+  const thumb = coverThumbPath(path);
+  const { error } = await bucket.upload(thumb, blob, {
+    contentType: "image/jpeg",
+    upsert: false,
+  });
+  if (error) {
+    console.error("[catalog] cover thumbnail upload failed:", error.message);
+    return null;
+  }
+  return thumb;
 }

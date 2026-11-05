@@ -418,6 +418,22 @@ export const catalog = {
     linkedProjects: "Projets liés",
     noLinkedProjects: "Aucun projet ne rattache ce titre pour l'instant.",
     createProject: "Créer un projet",
+    // The title's cover, in the head of its page (lib/catalog/cover-rules.ts).
+    cover: {
+      add: "Ajouter une pochette",
+      // Under the icon of the empty square.
+      short: "Pochette",
+      menu: (title: string) => `Pochette de « ${title} »`,
+      open: "Voir en grand",
+      newVersion: "Nouvelle version",
+      versions: (version: number) =>
+        version > 1 ? `Toutes les versions (${version})` : "Dans les fichiers",
+      sending: "Envoi de la pochette…",
+      notImage:
+        "La pochette doit être une image JPG, PNG, WebP, GIF ou AVIF. Les autres fichiers vont dans l'onglet Fichiers.",
+      added: "Pochette ajoutée",
+      versionAdded: (version: number) => `Pochette mise à jour (V${version})`,
+    },
   },
 
   masterForm: {

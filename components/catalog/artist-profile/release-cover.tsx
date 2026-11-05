@@ -1,7 +1,8 @@
 import { IconDisc } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
-// Square cover from Deezer's CDN, or a disc on grey when there is none.
+// Square cover (Deezer's CDN for an artist's releases, a signed URL of the
+// title's own cover in the Catalogue), or a disc on grey when there is none.
 // Decorative: the title always sits next to it.
 export function ReleaseCover({
   coverUrl,
@@ -21,7 +22,8 @@ export function ReleaseCover({
     >
       <IconDisc className="size-6" />
       {coverUrl && (
-        // Plain <img>, as in Avatar: Deezer's CDN is the only source.
+        // Plain <img>, as in Avatar: no optimisation pipeline for a few
+        // thumbnails (the title's cover is already a small copy).
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={coverUrl}

@@ -1,4 +1,5 @@
 import { RecordSelection } from "@/components/archive/record-selection";
+import { ReleaseCover } from "@/components/catalog/artist-profile/release-cover";
 import { MasterActions } from "@/components/catalog/master-actions";
 import { TitleAudioState } from "@/components/catalog/title/title-audio-state";
 import { IconDisc } from "@/components/icons";
@@ -32,11 +33,15 @@ const fr = { catalog, records };
 
 export function MastersTable({
   masters,
+  covers,
   rights,
   selectable = false,
   family = false,
 }: {
   masters: MasterRow[];
+  // Each title's cover (small copy), by title id: a square, the disc on
+  // grey when it has none. Without it, the round disc of every row.
+  covers?: Record<string, string>;
   // Row actions ("⋯"); none when the viewer may neither edit nor archive.
   rights?: RecordRights;
   // Checkboxes to delete several at once (main list, director only).
@@ -74,7 +79,16 @@ export function MastersTable({
             )}
             <DataTableCell>
               <DataTableMedia
-                visual={<DataTableIcon icon={IconDisc} />}
+                visual={
+                  covers ? (
+                    <ReleaseCover
+                      coverUrl={covers[master.id] ?? null}
+                      className="size-9 rounded-md"
+                    />
+                  ) : (
+                    <DataTableIcon icon={IconDisc} />
+                  )
+                }
                 title={
                   <DataTableLink
                     href={rights?.archived ? null : routes.master(master.id)}

@@ -18,6 +18,7 @@ import {
   type FileOwner,
 } from "@/lib/catalog/file-rules";
 import { audioDeleteBlock, audioReviewOf } from "@/lib/catalog/audio-versions";
+import { coverThumbPath } from "@/lib/catalog/cover-rules";
 import { WORK_STATUSES } from "@/lib/catalog/master/rules";
 import { catalogIdSchema } from "@/lib/catalog/schemas";
 import { AUDIO_STATES } from "@/lib/catalog/title-rules";
@@ -150,8 +151,10 @@ function refresh(owner: FileOwner) {
       revalidatePath(routes.artistActivity(owner.id));
       return;
     case "master":
-      // Every tab of the master: the overview counts the master file.
+      // Every tab of the master: the overview counts the master file. The
+      // list shows the title's cover.
       revalidatePath(routes.master(owner.id), "layout");
+      revalidatePath(routes.masters);
       return;
     case "project":
       revalidatePath(routes.projectFiles(owner.id));
@@ -310,9 +313,14 @@ export async function deleteCatalogFile(
     if (error) console.error("deleteCatalogFile:", error.message);
     return { ok: false, error: t.deleteFailed };
   }
+  // A title's cover may have a small copy beside it (cover-rules.ts).
   const removed = await supabase.storage
     .from(FILE_BUCKETS[owner.kind])
-    .remove([data.path]);
+    .remove(
+      owner.kind === "master"
+        ? [data.path, coverThumbPath(data.path)]
+        : [data.path],
+    );
   if (removed.error)
     console.error("deleteCatalogFile (object):", removed.error.message);
   refresh(owner);

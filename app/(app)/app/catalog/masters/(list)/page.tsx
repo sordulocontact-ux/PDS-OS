@@ -17,6 +17,7 @@ import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { viewHref } from "@/lib/ui/view-href";
+import { listMasterCoverThumbs } from "@/lib/catalog/covers";
 import { listMasters } from "@/lib/catalog/queries";
 import {
   AUDIO_FILTERS,
@@ -31,6 +32,7 @@ import {
 import type { MasterRow } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
 import { filterParam, optionsByName } from "@/lib/ui/filter-options";
+import { allInOrder } from "@/lib/utils/parallel";
 
 // Catalogue ("masters" in the code, retours Catalogue 01, 02 et 04): tabs by
 // where the song stands (Tous, En création, En production, Finalisés), the
@@ -51,8 +53,12 @@ export default async function MastersPage({
     artist: filterParam(params.artist),
     project: filterParam(params.project),
   };
-  // One read for the tab counts and the rows: the catalog stays small.
-  const { masters: all, error } = await listMasters({ archived });
+  // One read for the tab counts and the rows: the catalog stays small. The
+  // covers are read beside it.
+  const [{ masters: all, error }, covers] = await allInOrder([
+    listMasters({ archived }),
+    listMasterCoverThumbs(),
+  ]);
   // The tabs count what the filters keep; the filters offer what the tab
   // holds.
   const filtered = all.filter((master) => matchesTitleFilters(master, filters));
@@ -125,6 +131,7 @@ export default async function MastersPage({
           ) : (
             <MastersList
               masters={masters}
+              covers={covers}
               rights={{
                 canEdit: can(access, "manage_catalog"),
                 canArchive,

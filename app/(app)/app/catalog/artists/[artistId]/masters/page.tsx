@@ -11,6 +11,7 @@ import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { getArtist } from "@/lib/catalog/artist-queries";
+import { listMasterCoverThumbs } from "@/lib/catalog/covers";
 import { listMasters } from "@/lib/catalog/queries";
 import { fr } from "@/lib/i18n/fr";
 import { allInOrder } from "@/lib/utils/parallel";
@@ -26,9 +27,10 @@ export default async function ArtistMastersPage({
     getArtist(artistId),
   ]);
   if (!artist) notFound();
-  const { masters, error } = await listMasters({
-    ids: artist.masters.map((m) => m.id),
-  });
+  const [{ masters, error }, covers] = await allInOrder([
+    listMasters({ ids: artist.masters.map((m) => m.id) }),
+    listMasterCoverThumbs(),
+  ]);
   const t = fr.catalog.artist;
 
   if (error) {
@@ -61,6 +63,7 @@ export default async function ArtistMastersPage({
   return (
     <MastersTable
       masters={masters}
+      covers={covers}
       rights={{
         canEdit: can(access, "manage_catalog"),
         canArchive: can(access, "archive_records"),
