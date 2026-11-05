@@ -13,6 +13,7 @@ import {
   loadAgreementsGenerated,
 } from "@/lib/legal/contracts/auto-generate";
 import { loadAgreements } from "@/lib/legal/contracts/queries";
+import { legalOutcome } from "@/lib/legal/outcome";
 import { getProject } from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
 import { isOnlyPaid } from "@/lib/legal/contracts/no-deal";
@@ -97,36 +98,42 @@ export async function approveContractMapping(
       },
     ];
   });
-  const supabase = await createClient();
-  const { error } = await supabase.rpc("approve_contract_mapping", {
-    p_project_id: loaded.project.id,
-    p_items: items,
-  });
-  if (error) {
-    console.error("approveContractMapping:", error.message);
-    return { ok: false, error: errorOf(error.message) };
-  }
-  // An agreement unchecked here is not needed: its action of the Plan
-  // d'action and its task are retired (UX test of 09/10/2026: « Faire
-  // signer un contrat à … » stayed in Travail). Same key as the plan's
-  // (lib/legal/plan/proposal.ts, `contract:<person>`).
-  const notNeeded = parsed.data.items.flatMap((item) =>
-    item.needed ? [] : [`contract:${item.key}`],
+  return legalOutcome(
+    loaded.project.id,
+    fr.legalContracts.agreements.plan.done,
+    async () => {
+      const supabase = await createClient();
+      const { error } = await supabase.rpc("approve_contract_mapping", {
+        p_project_id: loaded.project.id,
+        p_items: items,
+      });
+      if (error) {
+        console.error("approveContractMapping:", error.message);
+        return { ok: false, error: errorOf(error.message) };
+      }
+      // An agreement unchecked here is not needed: its action of the Plan
+      // d'action and its task are retired (UX test of 09/10/2026: « Faire
+      // signer un contrat à … » stayed in Travail). Same key as the plan's
+      // (lib/legal/plan/proposal.ts, `contract:<person>`).
+      const notNeeded = parsed.data.items.flatMap((item) =>
+        item.needed ? [] : [`contract:${item.key}`],
+      );
+      if (notNeeded.length > 0) {
+        const { error: retireError } = await supabase.rpc(
+          "retire_legal_plan_items",
+          { p_project_id: loaded.project.id, p_keys: notNeeded },
+        );
+        if (retireError)
+          console.error("approveContractMapping retire:", retireError.message);
+      }
+      // The agreements whose values are all there are generated at once.
+      await loadAgreementsGenerated(loaded.project, loaded.access);
+      revalidatePath(routes.projectLegal(loaded.project.id), "layout");
+      revalidatePath(routes.contracts, "layout");
+      revalidatePath(routes.projectWork(loaded.project.id));
+      return { ok: true };
+    },
   );
-  if (notNeeded.length > 0) {
-    const { error: retireError } = await supabase.rpc(
-      "retire_legal_plan_items",
-      { p_project_id: loaded.project.id, p_keys: notNeeded },
-    );
-    if (retireError)
-      console.error("approveContractMapping retire:", retireError.message);
-  }
-  // The agreements whose values are all there are generated at once.
-  await loadAgreementsGenerated(loaded.project, loaded.access);
-  revalidatePath(routes.projectLegal(loaded.project.id), "layout");
-  revalidatePath(routes.contracts, "layout");
-  revalidatePath(routes.projectWork(loaded.project.id));
-  return { ok: true };
 }
 
 /** « Générer le contrat » by hand: the automatic generation
@@ -146,18 +153,24 @@ export async function generateLegalContract(
   if (row.state !== "ready_to_generate")
     return { ok: false, error: errorOf("contract_fields_missing") };
 
-  const supabase = await createClient();
-  const { data, error } = await supabase.rpc("generate_legal_contract", {
-    p_need_id: need.data,
-    p_fields: contractFieldsOf(row),
-  });
-  if (error || !data) {
-    if (error) console.error("generateLegalContract:", error.message);
-    return { ok: false, error: errorOf(error?.message ?? "") };
-  }
-  revalidatePath(routes.projectLegal(loaded.project.id), "layout");
-  revalidatePath(routes.contracts, "layout");
-  return { ok: true, contractId: data };
+  return legalOutcome(
+    loaded.project.id,
+    fr.legalJourney.done.contract.generated,
+    async () => {
+      const supabase = await createClient();
+      const { data, error } = await supabase.rpc("generate_legal_contract", {
+        p_need_id: need.data,
+        p_fields: contractFieldsOf(row),
+      });
+      if (error || !data) {
+        if (error) console.error("generateLegalContract:", error.message);
+        return { ok: false, error: errorOf(error?.message ?? "") };
+      }
+      revalidatePath(routes.projectLegal(loaded.project.id), "layout");
+      revalidatePath(routes.contracts, "layout");
+      return { ok: true, contractId: data };
+    },
+  );
 }
 
 const reviseSchema = z.object({

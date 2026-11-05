@@ -4,19 +4,17 @@ import {
   sectionButton,
   type InventorySectionKey,
 } from "@/components/legal/inventory/section-buttons";
-import { TitleRightsButton } from "@/components/legal/inventory/title-rights-button";
-import { RemoveProjectContactButton } from "@/components/legal/project-contact-controls";
+import { ProjectContactRow } from "@/components/legal/inventory/contact-row";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { StepSection } from "@/components/shell/journey/step-section";
 import { FactRows } from "@/components/ui/fact-row";
 import { facts } from "@/lib/i18n/fr/facts";
 import { legal } from "@/lib/i18n/fr/legal";
-import { legalForms } from "@/lib/i18n/fr/legal-forms";
 import type { FactStatus } from "@/lib/facts/types";
 import { filterFactSections } from "@/lib/facts/views";
-import type { LegalFact, LegalInventory as Inventory } from "@/lib/legal/types";
+import { isRowEdit, type LegalInventory as Inventory } from "@/lib/legal/types";
 
-const fr = { facts, legal, legalForms };
+const fr = { facts, legal };
 
 /**
  * Juridique's first step: what the project already knows, one section per
@@ -50,11 +48,6 @@ export function LegalInventory({
   const tagged = inventory.titles.length > 1;
   // A single title is the project itself: never repeated on its rows.
   const titleNames = new Set(inventory.titles.map((row) => row.title));
-  // « Modifier les droits » sits on a title's first row of the Titres section.
-  const firstOfTitle = new Map<string, string>();
-  for (const fact of sections.find((s) => s.key === "titles")?.facts ?? [])
-    if (fact.group && !firstOfTitle.has(fact.group.key))
-      firstOfTitle.set(fact.group.key, fact.key);
 
   if (state && sections.length === 0)
     return <EmptyNote>{t.filterEmpty[state]}</EmptyNote>;
@@ -89,8 +82,11 @@ export function LegalInventory({
                     status={fact.status}
                     href={fact.href}
                     group={tagged ? fact.group : undefined}
+                    edit={isRowEdit(fact.action) ? fact.action : undefined}
                   >
-                    {rowAction(fact, inventory, firstOfTitle)}
+                    {fact.action && !isRowEdit(fact.action) && (
+                      <FactAction action={fact.action} />
+                    )}
                   </InventoryRow>
                 ))}
               </FactRows>
@@ -104,21 +100,11 @@ export function LegalInventory({
           {inventory.projectContacts.length > 0 && (
             <FactRows>
               {inventory.projectContacts.map((contact) => (
-                <InventoryRow
+                <ProjectContactRow
                   key={contact.id}
-                  label={contact.name}
-                  statusLabel={null}
-                  detail={fr.legalForms.roles[contact.role]}
-                  source={t.contactSource}
-                  status="known"
-                  href={null}
-                >
-                  <RemoveProjectContactButton
-                    projectId={inventory.projectId}
-                    rowId={contact.id}
-                    name={contact.name}
-                  />
-                </InventoryRow>
+                  projectId={inventory.projectId}
+                  contact={contact}
+                />
               ))}
             </FactRows>
           )}
@@ -154,28 +140,5 @@ function InventorySection({
       {children}
       {button && <div className="flex flex-wrap gap-2">{button}</div>}
     </StepSection>
-  );
-}
-
-// The row's own controls: its action, plus the rights on a title's first row;
-// null falls back to « Compléter » / « Voir ».
-function rowAction(
-  fact: LegalFact,
-  inventory: Inventory,
-  firstOfTitle: Map<string, string>,
-) {
-  const first = fact.group && firstOfTitle.get(fact.group.key) === fact.key;
-  const title =
-    first && inventory.canEditCatalog
-      ? inventory.titles.find((row) => row.masterId === fact.group?.key)
-      : undefined;
-  if (!fact.action && !title) return null;
-  return (
-    <>
-      {fact.action && <FactAction action={fact.action} />}
-      {title && (
-        <TitleRightsButton masterId={title.masterId} rights={title.rights} />
-      )}
-    </>
   );
 }

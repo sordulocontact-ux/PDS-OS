@@ -74,12 +74,15 @@ export async function openFormality(projectId: string, masterId: string) {
     .safeParse({ projectId, masterId });
   if (!p.success)
     return { ok: false as const, error: fr.auth.errors.forbidden };
-  return run(p.data.projectId, (s) =>
-    s.rpc("open_formality", {
-      p_project_id: p.data.projectId,
-      p_master_id: p.data.masterId,
-      p_key: SACEM_725,
-    }),
+  return run(
+    p.data.projectId,
+    (s) =>
+      s.rpc("open_formality", {
+        p_project_id: p.data.projectId,
+        p_master_id: p.data.masterId,
+        p_key: SACEM_725,
+      }),
+    fr.legalJourney.done.formality.opened,
   );
 }
 
@@ -121,10 +124,13 @@ export async function saveFormalityValues(
       return { ok: false as const, error: fr.legalFormalities.errors.failed };
     out[key] = { value: parsed.data, source: "Saisi" };
   }
-  return run(p.data.projectId, (s) =>
-    s.rpc("save_formality_values", {
-      p_formality_id: p.data.formalityId,
-      p_values: out as Json,
-    }),
+  return run(
+    p.data.projectId,
+    (s) =>
+      s.rpc("save_formality_values", {
+        p_formality_id: p.data.formalityId,
+        p_values: out as Json,
+      }),
+    fr.legalJourney.done.formality.valuesSaved,
   );
 }

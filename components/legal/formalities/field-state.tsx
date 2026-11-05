@@ -1,7 +1,9 @@
 "use client";
 
+import type { ReactNode } from "react";
+
 import { Button } from "@/components/ui/button";
-import { StatusBadge } from "@/components/ui/status-badge";
+import { FactRowFrame } from "@/components/ui/fact-row-frame";
 import { legalDocuments } from "@/lib/i18n/fr/legal-documents";
 import type { FieldState as State } from "@/lib/legal/formalities/field-states";
 
@@ -14,35 +16,60 @@ const TONE = {
   confirmed: "success",
 } as const;
 
-/** Where a value of the bulletin stands, on its line (JUR-02): « Confirmé »,
- * « Proposé » with its source and « Confirmer », « Manquant » with why. An
- * optional value left empty says nothing. */
-export function FieldStateLine({
-  state,
+/** One value of the bulletin as a fact row (JUR-02, proto `vfact`): its
+ * label, the field (or the words) as value, where it comes from under it
+ * (« Proposé » with its source, « Manquant » with why), and its state on the
+ * right: « Confirmé », « Proposé » with « Confirmer », « Manquant ». An
+ * optional value left empty passes no `state` and says nothing. The bulletin
+ * saves as a whole: the field is never saved on its own. */
+export function BulletinRow({
   label,
+  required,
+  control,
+  value,
+  state,
   reason,
   onConfirm,
+  side,
+  below,
 }: {
-  state: Exclude<State, "optional"> | "confirmed";
-  // A miss that no field answers names itself.
   label?: string;
+  required?: boolean;
+  control?: ReactNode;
+  value?: ReactNode;
+  state?: Exclude<State, "optional"> | "confirmed" | null;
   reason?: string;
   onConfirm?: () => void;
+  // Another action of the row (« Ouvrir l'autorisation »…).
+  side?: ReactNode;
+  below?: ReactNode;
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-      <StatusBadge tone={TONE[state]} size="sm">
-        {t.states[state]}
-      </StatusBadge>
-      {label && <span className="font-medium break-words">{label}</span>}
-      {reason && (
-        <span className="text-caption text-muted-foreground">{reason}</span>
-      )}
-      {onConfirm && (
-        <Button type="button" variant="outline" size="xs" onClick={onConfirm}>
-          {t.confirm}
-        </Button>
-      )}
-    </div>
+    <FactRowFrame
+      label={label}
+      required={required}
+      control={control}
+      value={value}
+      source={reason}
+      state={state ? { tone: TONE[state], label: t.states[state] } : null}
+      side={
+        onConfirm || side ? (
+          <>
+            {onConfirm && (
+              <Button
+                type="button"
+                variant="outline"
+                size="xs"
+                onClick={onConfirm}
+              >
+                {t.confirm}
+              </Button>
+            )}
+            {side}
+          </>
+        ) : undefined
+      }
+      below={below}
+    />
   );
 }

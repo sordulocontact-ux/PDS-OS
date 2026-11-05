@@ -15,7 +15,7 @@ import { planItemPayload } from "@/lib/legal/plan/payload";
 import { proposeLegalPlan } from "@/lib/legal/plan/queries";
 import { getProject } from "@/lib/projects/queries";
 import { schedulePendingPushes } from "@/lib/notifications/push";
-import { withOutcome } from "@/lib/journey/outcome";
+import { legalOutcome } from "@/lib/legal/outcome";
 import type { WriteResult } from "@/lib/utils/write-result";
 import { createClient } from "@/lib/supabase/server";
 
@@ -74,44 +74,39 @@ export async function launchLegalPlan(
   );
 
   // Said after the gesture: who acts now, what opened (rule 7).
-  return withOutcome(
-    id.data,
-    ["legal"],
-    fr.legalJourney.done.launched,
-    async () => {
-      const supabase = await createClient();
-      const { error } = await supabase.rpc("launch_legal_plan", {
-        p_project_id: id.data,
-        p_items: items,
-      });
-      if (error) {
-        console.error("launchLegalPlan:", error.message);
-        if (error.message.includes("legal_intake_not_confirmed"))
-          return { ok: false, error: t.notConfirmed };
-        if (error.message.includes("legal_plan_already_launched"))
-          return { ok: false, error: t.already };
-        return { ok: false, error: t.failed };
-      }
-      // What was removed is remembered: never « apparu depuis le lancement »
-      // nor re-created by « Ajouter au plan » (UX test of 09/10/2026).
-      const dismissed = proposal
-        .filter((item) => !keys.has(item.key))
-        .map((item) => item.key);
-      if (dismissed.length > 0) {
-        const { error: dismissError } = await supabase.rpc(
-          "dismiss_legal_plan_keys",
-          { p_project_id: id.data, p_keys: dismissed },
-        );
-        if (dismissError)
-          console.error("launchLegalPlan dismissed:", dismissError.message);
-      }
-      // The tasks' people are notified by a trigger; the pushes leave now.
-      await schedulePendingPushes();
-      revalidatePath(routes.projectLegal(id.data), "layout");
-      revalidatePath(routes.projectWork(id.data));
-      return { ok: true };
-    },
-  );
+  return legalOutcome(id.data, fr.legalJourney.done.launched, async () => {
+    const supabase = await createClient();
+    const { error } = await supabase.rpc("launch_legal_plan", {
+      p_project_id: id.data,
+      p_items: items,
+    });
+    if (error) {
+      console.error("launchLegalPlan:", error.message);
+      if (error.message.includes("legal_intake_not_confirmed"))
+        return { ok: false, error: t.notConfirmed };
+      if (error.message.includes("legal_plan_already_launched"))
+        return { ok: false, error: t.already };
+      return { ok: false, error: t.failed };
+    }
+    // What was removed is remembered: never « apparu depuis le lancement »
+    // nor re-created by « Ajouter au plan » (UX test of 09/10/2026).
+    const dismissed = proposal
+      .filter((item) => !keys.has(item.key))
+      .map((item) => item.key);
+    if (dismissed.length > 0) {
+      const { error: dismissError } = await supabase.rpc(
+        "dismiss_legal_plan_keys",
+        { p_project_id: id.data, p_keys: dismissed },
+      );
+      if (dismissError)
+        console.error("launchLegalPlan dismissed:", dismissError.message);
+    }
+    // The tasks' people are notified by a trigger; the pushes leave now.
+    await schedulePendingPushes();
+    revalidatePath(routes.projectLegal(id.data), "layout");
+    revalidatePath(routes.projectWork(id.data));
+    return { ok: true };
+  });
 }
 
 /**

@@ -21,7 +21,7 @@ import { knownContactOf } from "@/lib/legal/intake/known-people";
 import { loadKnownPeople } from "@/lib/legal/intake/known-queries";
 import { loadIntake } from "@/lib/legal/intake/queries";
 import { getProject } from "@/lib/projects/queries";
-import { withOutcome } from "@/lib/journey/outcome";
+import { legalOutcome } from "@/lib/legal/outcome";
 import type { WriteResult } from "@/lib/utils/write-result";
 import { createClient } from "@/lib/supabase/server";
 
@@ -142,21 +142,16 @@ export async function confirmLegalIntake(
     return { ok: false, error: t.openQuestions };
 
   // Said after the gesture: who acts now, what opened (rule 7).
-  return withOutcome(
-    id.data,
-    ["legal"],
-    fr.legalJourney.done.confirmed,
-    async () => {
-      const supabase = await createClient();
-      const { error } = await supabase.rpc("confirm_legal_intake", {
-        p_project_id: id.data,
-      });
-      if (error) {
-        console.error("confirmLegalIntake:", error.message);
-        return { ok: false, error: t.failed };
-      }
-      revalidatePath(routes.projectLegal(id.data), "layout");
-      return { ok: true };
-    },
-  );
+  return legalOutcome(id.data, fr.legalJourney.done.confirmed, async () => {
+    const supabase = await createClient();
+    const { error } = await supabase.rpc("confirm_legal_intake", {
+      p_project_id: id.data,
+    });
+    if (error) {
+      console.error("confirmLegalIntake:", error.message);
+      return { ok: false, error: t.failed };
+    }
+    revalidatePath(routes.projectLegal(id.data), "layout");
+    return { ok: true };
+  });
 }

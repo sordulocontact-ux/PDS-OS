@@ -38,6 +38,7 @@ export async function openFormalityProof(
 }
 
 const id = catalogIdSchema;
+const done = fr.legalJourney.done.formality;
 const KEYS = SACEM_725_FIELDS.map((f) => f.key);
 
 export async function generateFormality(
@@ -49,8 +50,11 @@ export async function generateFormality(
     .safeParse({ projectId, formalityId });
   if (!p.success)
     return { ok: false as const, error: fr.auth.errors.forbidden };
-  return run(projectId, (s) =>
-    s.rpc("generate_formality_document", { p_formality_id: formalityId }),
+  return run(
+    projectId,
+    (s) =>
+      s.rpc("generate_formality_document", { p_formality_id: formalityId }),
+    done.generated,
   );
 }
 
@@ -72,28 +76,37 @@ export async function formalityStep(
     .safeParse({ projectId, formalityId, text, file });
   if (!p.success)
     return { ok: false as const, error: fr.auth.errors.forbidden };
-  return run(projectId, (s) =>
-    action === "partial"
-      ? s.rpc("declare_formality_partial", {
-          p_formality_id: formalityId,
-          p_reason: p.data.text,
-        })
-      : action === "submit"
-        ? s.rpc("submit_formality", {
+  return run(
+    projectId,
+    (s) =>
+      action === "partial"
+        ? s.rpc("declare_formality_partial", {
             p_formality_id: formalityId,
-            p_proof: p.data.text,
-            p_file: p.data.file,
+            p_reason: p.data.text,
           })
-        : action === "reject"
-          ? s.rpc("reject_formality", {
+        : action === "submit"
+          ? s.rpc("submit_formality", {
               p_formality_id: formalityId,
-              p_reason: p.data.text,
+              p_proof: p.data.text,
+              p_file: p.data.file,
             })
-          : action === "restart"
-            ? s.rpc("restart_formality", { p_formality_id: formalityId })
-            : s.rpc("mark_formality_processing", {
+          : action === "reject"
+            ? s.rpc("reject_formality", {
                 p_formality_id: formalityId,
-              }),
+                p_reason: p.data.text,
+              })
+            : action === "restart"
+              ? s.rpc("restart_formality", { p_formality_id: formalityId })
+              : s.rpc("mark_formality_processing", {
+                  p_formality_id: formalityId,
+                }),
+    {
+      partial: done.partial,
+      submit: done.submitted,
+      processing: done.processing,
+      reject: done.rejected,
+      restart: done.restarted,
+    }[action],
   );
 }
 
@@ -113,12 +126,15 @@ export async function requireFormalityAction(
     .safeParse({ projectId, formalityId, fields, note });
   if (!p.success)
     return { ok: false as const, error: fr.legalFormalities.errors.reason };
-  return run(projectId, (s) =>
-    s.rpc("require_formality_action", {
-      p_formality_id: formalityId,
-      p_fields: p.data.fields,
-      p_note: p.data.note,
-    }),
+  return run(
+    projectId,
+    (s) =>
+      s.rpc("require_formality_action", {
+        p_formality_id: formalityId,
+        p_fields: p.data.fields,
+        p_note: p.data.note,
+      }),
+    done.actionRequired,
   );
 }
 
@@ -142,13 +158,16 @@ export async function completeFormality(
     .safeParse({ projectId, formalityId, proof, externalId, iswc, file });
   if (!p.success)
     return { ok: false as const, error: fr.auth.errors.forbidden };
-  return run(projectId, (s) =>
-    s.rpc("complete_formality", {
-      p_formality_id: formalityId,
-      p_proof: p.data.proof,
-      p_external_id: p.data.externalId || null,
-      p_iswc: p.data.iswc || null,
-      p_file: p.data.file,
-    }),
+  return run(
+    projectId,
+    (s) =>
+      s.rpc("complete_formality", {
+        p_formality_id: formalityId,
+        p_proof: p.data.proof,
+        p_external_id: p.data.externalId || null,
+        p_iswc: p.data.iswc || null,
+        p_file: p.data.file,
+      }),
+    done.completed,
   );
 }

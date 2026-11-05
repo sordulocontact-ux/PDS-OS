@@ -19,6 +19,7 @@ import {
   type Scope,
 } from "@/lib/legal/clearance/matrix";
 import { run, type ClearanceResult } from "@/lib/legal/clearance/run";
+import { legalOutcome } from "@/lib/legal/outcome";
 import { createClient } from "@/lib/supabase/server";
 
 // The borrowing in three moments (Demander · Négocier · Signer, Sacha's
@@ -33,6 +34,20 @@ const failed = (): ClearanceResult => ({
   ok: false,
   error: fr.legalClearance.errors.failed,
 });
+
+const done = fr.legalJourney.done.clearance;
+
+// Every gesture says what follows (JUR-04): who acts now, what opened, and
+// the viewer's next step opened for them (lib/legal/outcome.ts).
+async function gesture<I extends { projectId: string }>(
+  input: I,
+  message: string,
+  flow: (input: I) => Promise<ClearanceResult>,
+): Promise<ClearanceResult> {
+  const projectId = catalogIdSchema.safeParse(input.projectId);
+  if (!projectId.success) return failed();
+  return legalOutcome(projectId.data, message, () => flow(input));
+}
 
 // Only forward: a state already passed is never moved back to.
 async function moveForward(
@@ -82,6 +97,12 @@ const requestSchema = z.object({
 /** « J'ai envoyé la demande »: what is taken, who holds each right, the
  * request logged as sent; the borrowing waits for their answer. */
 export async function requestClearance(input: z.input<typeof requestSchema>) {
+  return gesture(input, done.requested, requestClearanceFlow);
+}
+
+async function requestClearanceFlow(
+  input: z.input<typeof requestSchema>,
+): Promise<ClearanceResult> {
   const p = requestSchema.safeParse(input);
   if (!p.success || p.data.scope === "none") return failed();
   const { projectId, clearanceId, scope, usage, holders } = p.data;
@@ -138,6 +159,12 @@ const nothingSchema = z.object({
 export async function declareNothingToSecure(
   input: z.input<typeof nothingSchema>,
 ) {
+  return gesture(input, done.nothingToSecure, declareNothingToSecureFlow);
+}
+
+async function declareNothingToSecureFlow(
+  input: z.input<typeof nothingSchema>,
+): Promise<ClearanceResult> {
   const p = nothingSchema.safeParse(input);
   if (!p.success)
     return { ok: false as const, error: fr.legalClearance.errors.reason };
@@ -183,6 +210,12 @@ const replySchema = z.object({
  * conditions read in it (and corrected by the person) proposed to the
  * direction — proposed only, nothing binds PDS before its validation. */
 export async function submitClearanceReply(input: z.input<typeof replySchema>) {
+  return gesture(input, done.replied, submitClearanceReplyFlow);
+}
+
+async function submitClearanceReplyFlow(
+  input: z.input<typeof replySchema>,
+): Promise<ClearanceResult> {
   const p = replySchema.safeParse(input);
   if (!p.success) return failed();
   const { projectId, clearanceId, body, terms } = p.data;
@@ -237,6 +270,12 @@ const refusalSchema = z.object({
 export async function recordClearanceRefusal(
   input: z.input<typeof refusalSchema>,
 ) {
+  return gesture(input, done.refused, recordClearanceRefusalFlow);
+}
+
+async function recordClearanceRefusalFlow(
+  input: z.input<typeof refusalSchema>,
+): Promise<ClearanceResult> {
   const p = refusalSchema.safeParse(input);
   if (!p.success) return failed();
   const logged = await run(p.data.projectId, (s) =>
@@ -276,6 +315,12 @@ const termsSchema = z.object({
 export async function validateClearanceTerms(
   input: z.input<typeof termsSchema>,
 ) {
+  return gesture(input, done.termsValidated, validateClearanceTermsFlow);
+}
+
+async function validateClearanceTermsFlow(
+  input: z.input<typeof termsSchema>,
+): Promise<ClearanceResult> {
   const p = termsSchema.safeParse(input);
   if (!p.success) return failed();
   const { projectId, clearanceId, termsIds } = p.data;
@@ -397,6 +442,12 @@ export async function validateClearanceTerms(
 export async function counterClearanceTerms(
   input: z.input<typeof termsSchema>,
 ) {
+  return gesture(input, done.countered, counterClearanceTermsFlow);
+}
+
+async function counterClearanceTermsFlow(
+  input: z.input<typeof termsSchema>,
+): Promise<ClearanceResult> {
   const p = termsSchema.safeParse(input);
   if (!p.success) return failed();
   for (const termsId of p.data.termsIds) {
@@ -435,6 +486,12 @@ const sendSchema = z.object({
 /** « Envoyé par e-mail » (or another way): the way it went is its proof of
  * sending; the borrowing then waits for the signed copy. */
 export async function sendClearanceContract(input: z.input<typeof sendSchema>) {
+  return gesture(input, done.contractSent, sendClearanceContractFlow);
+}
+
+async function sendClearanceContractFlow(
+  input: z.input<typeof sendSchema>,
+): Promise<ClearanceResult> {
   const p = sendSchema.safeParse(input);
   if (!p.success) return failed();
   await requireApproved();
@@ -466,6 +523,16 @@ export async function secureClearanceFlow(
   projectId: string,
   clearanceId: string,
 ) {
+  return gesture({ projectId, clearanceId }, done.secured, secureFlow);
+}
+
+async function secureFlow({
+  projectId,
+  clearanceId,
+}: {
+  projectId: string;
+  clearanceId: string;
+}): Promise<ClearanceResult> {
   const p = z.object(ids).safeParse({ projectId, clearanceId });
   if (!p.success) return failed();
   await requireApproved();

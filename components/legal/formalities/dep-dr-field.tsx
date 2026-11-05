@@ -41,6 +41,7 @@ export function DepDrField({
       <OptionSelect
         name={`${id}-dep-dr`}
         label={label}
+        hideLabel
         required
         hint={t.notes.dep_dr}
         error={errors?.fields.dep_dr}

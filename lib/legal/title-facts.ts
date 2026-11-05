@@ -65,8 +65,11 @@ export function titleRow(master: InventoryMaster): LegalTitleRow {
   };
 }
 
-/** The same identifiers as facts, so the counts include them. */
-export function titleFacts(row: LegalTitleRow): LegalFact[] {
+/** The same identifiers as facts, so the counts include them. Who may edit
+ * the catalog changes each one right from its row, in a modal on the page:
+ * the ISRC in the title's form, the ISWC and the ℗ in its rights' form;
+ * the others read it on the title's page. */
+export function titleFacts(row: LegalTitleRow, canEdit: boolean): LegalFact[] {
   return TITLE_IDENTIFIERS.map((identifier) => ({
     key: `${identifier}-${row.masterId}`,
     label: t.facts[identifier],
@@ -75,6 +78,16 @@ export function titleFacts(row: LegalTitleRow): LegalFact[] {
     status: row.cells[identifier].status,
     statusLabel: row.cells[identifier].statusLabel,
     href: row.href,
+    action: !canEdit
+      ? undefined
+      : identifier === "isrc"
+        ? { kind: "edit_title", masterId: row.masterId, title: row.title }
+        : {
+            kind: "edit_rights",
+            masterId: row.masterId,
+            title: row.title,
+            rights: row.rights,
+          },
   }));
 }
 

@@ -9,7 +9,6 @@ import {
 import { SplitForm } from "@/components/catalog/master-page/split-form";
 import { SplitsTable } from "@/components/catalog/master-page/splits-table";
 import { EmptyNote } from "@/components/shell/empty-state";
-import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
 import {
   formatShare,
@@ -23,19 +22,23 @@ import type { LegalFactAction } from "@/lib/legal/types";
 const fr = { legal, masterPage };
 
 /**
- * "Répartir" / "Modifier" on a title's shares of one kind: one modal holding
- * the list of shares (as on the title's Splits) and, in its place, the share
- * form. Every write refreshes the page, so the list and the row's state
- * follow; the total never passes 100 % (checked in SQL).
+ * A title's shares of one kind, opened by a click on its row of the État
+ * des lieux: one modal holding the list of shares (as on the title's
+ * Splits) and, in its place, the share form. Every write refreshes the
+ * page, so the list and the row's state follow; the total never passes
+ * 100 % (checked in SQL).
  */
-export function SplitsEditorButton({
+export function SplitsEditorDialog({
   action,
+  open,
+  onOpenChange,
 }: {
   action: Extract<LegalFactAction, { kind: "edit_splits" }>;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }) {
   const t = fr.masterPage.splits;
   const l = fr.legal.inventory.actions;
-  const [open, setOpen] = useState(false);
   const [form, setForm] = useState<{ split: MasterSplit | null } | null>(null);
   const [deleting, setDeleting] = useState<MasterSplit | null>(null);
 
@@ -49,19 +52,10 @@ export function SplitsEditorButton({
 
   return (
     <>
-      <Button
-        variant="outline"
-        size="xs"
-        // Above the row's stretched link.
-        className="relative z-10"
-        onClick={() => setOpen(true)}
-      >
-        {rows.length === 0 ? l.distribute : l.editShares}
-      </Button>
       <FormDialog
         open={open}
         onOpenChange={(next) => {
-          setOpen(next);
+          onOpenChange(next);
           if (!next) setForm(null);
         }}
         title={

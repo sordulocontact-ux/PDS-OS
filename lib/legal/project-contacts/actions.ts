@@ -84,6 +84,12 @@ const addSchema = z.object({
   role: z.enum(FORM_ROLES),
 });
 
+const roleSchema = z.object({
+  projectId: z.uuid(),
+  rowId: z.uuid(),
+  role: z.enum(FORM_ROLES),
+});
+
 const ERRORS: Record<string, string> = {
   legal_contact_credited: fr.legal.projectContacts.errors.credited,
   legal_contact_already_added: fr.legal.projectContacts.errors.alreadyAdded,
@@ -138,5 +144,34 @@ export async function removeLegalProjectContact(
     return { ok: false, error: errorOf(error.message) };
   }
   revalidatePath(routes.projectLegal(projectId), "layout");
+  return { ok: true };
+}
+
+/** Changes an intervenant's role on its row (set_legal_project_contact_role),
+ * unless a contract was already mapped for that role. */
+export async function setLegalProjectContactRole(input: {
+  projectId: string;
+  rowId: string;
+  role: string;
+}): Promise<Result> {
+  await requireApproved();
+  const parsed = roleSchema.safeParse(input);
+  if (!parsed.success)
+    return { ok: false, error: fr.legal.projectContacts.errors.failed };
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("set_legal_project_contact_role", {
+    p_id: parsed.data.rowId,
+    p_role: parsed.data.role,
+  });
+  if (error) {
+    console.error("setLegalProjectContactRole:", error.message);
+    return {
+      ok: false,
+      error: error.message.includes("legal_contact_in_use")
+        ? fr.legal.projectContacts.errors.roleInUse
+        : fr.legal.projectContacts.errors.failed,
+    };
+  }
+  revalidatePath(routes.projectLegal(parsed.data.projectId), "layout");
   return { ok: true };
 }

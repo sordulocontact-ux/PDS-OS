@@ -7,6 +7,7 @@ import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { catalogIdSchema } from "@/lib/catalog/schemas";
 import { fr } from "@/lib/i18n/fr";
+import { legalOutcome } from "@/lib/legal/outcome";
 import { CLAUSES } from "@/lib/legal/contracts/clauses";
 import { createClient } from "@/lib/supabase/server";
 import type { WriteResult } from "@/lib/utils/write-result";
@@ -32,25 +33,27 @@ export async function reviseContractClause(
   const parsed = schema.safeParse(input);
   await requireApproved();
   if (!parsed.success) return { ok: false, error: t.missingWhy };
-  const supabase = await createClient();
-  const { error } = await supabase.rpc("revise_contract_clause", {
-    p_contract_id: parsed.data.contractId,
-    p_clause: parsed.data.clause,
-    p_body: parsed.data.body,
-    p_reason: parsed.data.reason,
+  return legalOutcome(parsed.data.projectId, t.created, async () => {
+    const supabase = await createClient();
+    const { error } = await supabase.rpc("revise_contract_clause", {
+      p_contract_id: parsed.data.contractId,
+      p_clause: parsed.data.clause,
+      p_body: parsed.data.body,
+      p_reason: parsed.data.reason,
+    });
+    if (error) {
+      const message = error.message ?? "";
+      if (message.includes("contract_body_unchanged"))
+        return { ok: false, error: t.missingText };
+      if (message.includes("contract_wrong_status"))
+        return { ok: false, error: fr.contracts.errors.status };
+      if (error.code === "42501")
+        return { ok: false, error: fr.auth.errors.forbidden };
+      console.error("reviseContractClause:", message);
+      return { ok: false, error: fr.legalContracts.agreements.errors.failed };
+    }
+    revalidatePath(routes.projectLegal(parsed.data.projectId), "layout");
+    revalidatePath(routes.contract(parsed.data.contractId));
+    return { ok: true, done: t.created };
   });
-  if (error) {
-    const message = error.message ?? "";
-    if (message.includes("contract_body_unchanged"))
-      return { ok: false, error: t.missingText };
-    if (message.includes("contract_wrong_status"))
-      return { ok: false, error: fr.contracts.errors.status };
-    if (error.code === "42501")
-      return { ok: false, error: fr.auth.errors.forbidden };
-    console.error("reviseContractClause:", message);
-    return { ok: false, error: fr.legalContracts.agreements.errors.failed };
-  }
-  revalidatePath(routes.projectLegal(parsed.data.projectId), "layout");
-  revalidatePath(routes.contract(parsed.data.contractId));
-  return { ok: true, done: t.created };
 }

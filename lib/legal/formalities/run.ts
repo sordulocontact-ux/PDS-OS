@@ -7,12 +7,14 @@ import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { formalityMissingLabel } from "@/lib/legal/formalities/definition";
+import { legalOutcome } from "@/lib/legal/outcome";
 import { createClient } from "@/lib/supabase/server";
+import type { WriteResult } from "@/lib/utils/write-result";
 
 // The common path of every formality action: manage_legal, the SQL
 // function, its refusal in words, the refresh.
 
-export type FormalityResult = { ok: true } | { ok: false; error: string };
+export type FormalityResult = WriteResult;
 
 type DbError = { message: string; details?: string };
 
@@ -46,7 +48,23 @@ function errorOf(error: DbError) {
   return t.failed;
 }
 
+/**
+ * `done`: the gesture in the past participle, for the actions that move the
+ * formality on; the result then says what follows and opens the viewer's
+ * next step (`legalOutcome`, JUR-04). Without it, a plain write.
+ */
 export async function run(
+  projectId: string,
+  call: (
+    supabase: Awaited<ReturnType<typeof createClient>>,
+  ) => PromiseLike<{ error: DbError | null }>,
+  done?: string,
+): Promise<FormalityResult> {
+  const write = () => runWrite(projectId, call);
+  return done ? legalOutcome(projectId, done, write) : write();
+}
+
+async function runWrite(
   projectId: string,
   call: (
     supabase: Awaited<ReturnType<typeof createClient>>,

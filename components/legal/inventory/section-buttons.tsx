@@ -1,6 +1,6 @@
 import { NewContractButton } from "@/components/contracts/new-contract-button";
 import { AddContributorButton } from "@/components/legal/add-contributor-button";
-import { DeclareButton } from "@/components/legal/declare-button";
+import { DeclareButton } from "@/components/legal/inventory/declare-dialog";
 import { AddProjectContactButton } from "@/components/legal/project-contact-controls";
 import type { LegalInventory } from "@/lib/legal/types";
 

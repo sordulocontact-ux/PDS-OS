@@ -8,6 +8,7 @@ import { emailOutcome } from "@/lib/email/outcome";
 import { emailContractSigner } from "@/lib/contracts/signer-email";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
+import { legalOutcome } from "@/lib/legal/outcome";
 import { run } from "@/lib/legal/formalities/run";
 import { createClient } from "@/lib/supabase/server";
 import type { WriteResult } from "@/lib/utils/write-result";
@@ -41,34 +42,40 @@ export async function sendContract(input: {
   if (v.data.via === "other" && !v.data.on)
     return { ok: false, error: t.errors.date };
   await requireApproved();
-  const supabase = await createClient();
-  const { error } = await supabase.rpc("send_contract", {
-    p_contract_id: v.data.contractId,
-    p_via: v.data.via,
-    p_how: v.data.via === "other" ? (v.data.how ?? null) : null,
-    p_on: v.data.via === "other" ? (v.data.on ?? null) : null,
-  });
-  if (error) {
-    const m = error.message ?? "";
-    console.error("sendContract:", error.code, m);
-    if (m.includes("contact_link_missing"))
-      return { ok: false, error: t.errors.noLink };
-    if (error.code === "23514") return { ok: false, error: t.errors.date };
-    if (error.code === "42501" || m.includes("contract_not_allowed"))
-      return { ok: false, error: fr.contracts.errors.forbidden };
-    if (m.includes("contract_wrong_status"))
-      return { ok: false, error: fr.contracts.errors.status };
-    return { ok: false, error: t.errors.failed };
-  }
-  revalidatePath(routes.project(v.data.projectId), "layout");
-  revalidatePath(routes.contract(v.data.contractId));
-  if (v.data.via !== "link") return { ok: true };
-  // On their private link: PDS OS e-mails the signer itself when it can.
-  const sent = await emailContractSigner(v.data.contractId, "send");
-  return emailOutcome(sent, {
-    sent: fr.contracts.now.auto.sendDone,
-    failed: fr.contracts.now.auto.sendFailed,
-  });
+  return legalOutcome(
+    v.data.projectId,
+    fr.legalJourney.done.contract.sent,
+    async () => {
+      const supabase = await createClient();
+      const { error } = await supabase.rpc("send_contract", {
+        p_contract_id: v.data.contractId,
+        p_via: v.data.via,
+        p_how: v.data.via === "other" ? (v.data.how ?? null) : null,
+        p_on: v.data.via === "other" ? (v.data.on ?? null) : null,
+      });
+      if (error) {
+        const m = error.message ?? "";
+        console.error("sendContract:", error.code, m);
+        if (m.includes("contact_link_missing"))
+          return { ok: false, error: t.errors.noLink };
+        if (error.code === "23514") return { ok: false, error: t.errors.date };
+        if (error.code === "42501" || m.includes("contract_not_allowed"))
+          return { ok: false, error: fr.contracts.errors.forbidden };
+        if (m.includes("contract_wrong_status"))
+          return { ok: false, error: fr.contracts.errors.status };
+        return { ok: false, error: t.errors.failed };
+      }
+      revalidatePath(routes.project(v.data.projectId), "layout");
+      revalidatePath(routes.contract(v.data.contractId));
+      if (v.data.via !== "link") return { ok: true };
+      // On their private link: PDS OS e-mails the signer itself when it can.
+      const sent = await emailContractSigner(v.data.contractId, "send");
+      return emailOutcome(sent, {
+        sent: fr.contracts.now.auto.sendDone,
+        failed: fr.contracts.now.auto.sendFailed,
+      });
+    },
+  );
 }
 
 /** « Signer pour PDS Éditions » (JUR-03): the direction signs the house's
@@ -83,8 +90,11 @@ export async function signFormalityForHouse(
     .safeParse({ projectId, signatureId });
   if (!p.success)
     return { ok: false as const, error: fr.auth.errors.forbidden };
-  return run(p.data.projectId, (s) =>
-    s.rpc("sign_formality_for_house", { p_signature_id: p.data.signatureId }),
+  return run(
+    p.data.projectId,
+    (s) =>
+      s.rpc("sign_formality_for_house", { p_signature_id: p.data.signatureId }),
+    fr.legalJourney.done.formality.signedForHouse,
   );
 }
 
@@ -111,11 +121,14 @@ export async function noteFormalitySignature(
       ok: false as const,
       error: fr.signedReturns.sacem.signedOnMissing,
     };
-  return run(projectId, (s) =>
-    s.rpc("note_formality_signature", {
-      p_signature_id: p.data.signatureId,
-      p_signed_on: p.data.signedOn,
-      p_file: p.data.file,
-    }),
+  return run(
+    projectId,
+    (s) =>
+      s.rpc("note_formality_signature", {
+        p_signature_id: p.data.signatureId,
+        p_signed_on: p.data.signedOn,
+        p_file: p.data.file,
+      }),
+    fr.legalJourney.done.formality.signedOtherwise,
   );
 }

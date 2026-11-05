@@ -1,5 +1,5 @@
 import { DemarchePart } from "@/components/legal/demarches/demarche-part";
-import { DelegateButton } from "@/components/legal/tracking/delegate-button";
+import { DemarcheOwner } from "@/components/legal/demarches/demarche-owner";
 import { PlanSheetProvider } from "@/components/legal/tracking/plan-sheet-context";
 import { StepSection } from "@/components/shell/journey/step-section";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -32,6 +32,7 @@ export function DemarcheBody({
   direction,
   owner,
   people,
+  ownerChangedBy,
 }: {
   projectId: string;
   projectTitle: string;
@@ -47,6 +48,8 @@ export function DemarcheBody({
   owner: string;
   // Who may answer for it (delegation).
   people: Array<{ personId: string; name: string }>;
+  // Who last changed its responsible or due date (plan journal).
+  ownerChangedBy: string | null;
 }) {
   const { parts, current, own } = demarche;
   const part = (row: BoardRow) => (
@@ -89,20 +92,19 @@ export function DemarcheBody({
           </StepSection>
         ))}
       {own && demarche.step.status !== "done" && (
-        <div className="flex flex-wrap items-center gap-2 border-t border-[color:var(--border-hairline)] pt-3.5 text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
-          <span>
-            {fr.legalDemarches.responsible} ·{" "}
-            {own.responsibleName ?? fr.legal.plan.noResponsible}
-          </span>
-          <DelegateButton
-            projectId={projectId}
-            itemId={own.id}
-            label={demarche.step.title}
-            responsibleId={own.responsibleId}
-            dueOn={own.dueOn}
-            people={people}
-          />
-        </div>
+        <DemarcheOwner
+          owner={{
+            projectId,
+            itemId: own.id,
+            label: demarche.step.title,
+            responsibleId: own.responsibleId,
+            responsibleName: own.responsibleName,
+            dueOn: own.dueOn,
+            people,
+          }}
+          changedBy={ownerChangedBy}
+          overdue={demarche.step.alert === "overdue"}
+        />
       )}
     </PlanSheetProvider>
   );

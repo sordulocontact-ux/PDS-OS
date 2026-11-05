@@ -72,7 +72,10 @@ export async function loadLegalInventory(
   );
 
   const sections: LegalSection[] = [
-    section("titles", titles.flatMap(titleFacts)),
+    section(
+      "titles",
+      titles.flatMap((row) => titleFacts(row, canEditCatalog)),
+    ),
     section(
       "people",
       perTitle((master) =>

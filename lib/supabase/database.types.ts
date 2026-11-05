@@ -20151,6 +20151,10 @@ export type Database = {
         Args: { p_form_id: string; p_state: string }
         Returns: undefined
       }
+      set_legal_project_contact_role: {
+        Args: { p_id: string; p_role: string }
+        Returns: undefined
+      }
       share_strategy_document: {
         Args: { p_document_id: string }
         Returns: string

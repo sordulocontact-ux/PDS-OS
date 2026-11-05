@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { toast } from "@/components/ui/toast";
 
+import { usePublishResult } from "@/components/shell/module/result-banner";
 import { FormMessage } from "@/components/auth/form-message";
 import {
   MappingRow,
@@ -72,6 +72,7 @@ export function MappingForm({
   const [tried, setTried] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const publish = usePublishResult();
   const set = (key: string, change: Partial<MappingChoice>) =>
     setChoices((all) => ({ ...all, [key]: { ...all[key], ...change } }));
 
@@ -133,7 +134,7 @@ export function MappingForm({
       setError(null);
       const result = await approveContractMapping({ projectId, items });
       if (!result.ok) return setError(result.error);
-      toast.success(t.plan.done);
+      publish(result, t.plan.done);
       onDone();
     });
   }

@@ -1,15 +1,16 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { toast } from "@/components/ui/toast";
 
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { OptionSelect } from "@/components/projects/option-select";
+import { usePublishResult } from "@/components/shell/module/result-banner";
 import { Button } from "@/components/ui/button";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { FormDialog } from "@/components/ui/form-dialog";
+import { toast } from "@/components/ui/toast";
 import { legal } from "@/lib/i18n/fr/legal";
 import { masterPage } from "@/lib/i18n/fr/master-page";
 import { delegateLegalPlanItem } from "@/lib/legal/tracking/actions";
@@ -18,36 +19,77 @@ const fr = { legal, masterPage };
 
 const NONE = "none";
 
-/** « Changer »: hand a démarche to someone else or move its due date, with
- * its reason (« Pourquoi * »), kept in the plan's journal; the person who
- * takes it over is told (Juridique 07, proto « Projet complet »). */
-export function DelegateButton({
-  projectId,
-  itemId,
-  label,
-  responsibleId,
-  dueOn,
-  people,
-  triggerLabel,
-}: {
+type Delegation = {
   projectId: string;
   itemId: string;
   label: string;
   responsibleId: string | null;
   dueOn: string | null;
   people: Array<{ personId: string; name: string }>;
+};
+
+/** « Changer »: hand a démarche to someone else or move its due date, with
+ * its reason (« Pourquoi * »), kept in the plan's journal; the person who
+ * takes it over is told (Juridique 07, proto « Projet complet »). In the
+ * plan's list, a modal; on the démarche itself, `DelegateForm` in place. */
+export function DelegateButton({
+  triggerLabel,
+  ...delegation
+}: Delegation & {
   // « Modifier » in the plan's list, « Changer » in the démarche.
   triggerLabel?: string;
 }) {
   const t = fr.legal.tracking;
-  const p = fr.legal.plan;
   const [open, setOpen] = useState(false);
+  return (
+    <>
+      <Button
+        type="button"
+        variant="outline"
+        size="xs"
+        aria-label={`${triggerLabel ?? t.delegate} · ${delegation.label}`}
+        onClick={() => setOpen(true)}
+      >
+        {triggerLabel ?? t.delegate}
+      </Button>
+      <FormDialog
+        open={open}
+        onOpenChange={setOpen}
+        title={t.delegateTitle}
+        description={t.delegateDescription}
+        closeLabel={fr.masterPage.form.close}
+      >
+        <DelegateForm {...delegation} onDone={() => setOpen(false)} showLabel />
+      </FormDialog>
+    </>
+  );
+}
+
+/** The delegation's form: responsible, due date and why, wherever it opens
+ * (a modal, or under the démarche's « Responsable » / « Échéance » row). */
+export function DelegateForm({
+  projectId,
+  itemId,
+  label,
+  responsibleId,
+  dueOn,
+  people,
+  onDone,
+  showLabel = false,
+}: Delegation & {
+  onDone: () => void;
+  // The démarche's name above the fields (in a modal, where it is not seen).
+  showLabel?: boolean;
+}) {
+  const t = fr.legal.tracking;
+  const p = fr.legal.plan;
   const [responsible, setResponsible] = useState(responsibleId);
   const [due, setDue] = useState(dueOn);
   const [reason, setReason] = useState("");
   const [tried, setTried] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const publish = usePublishResult();
   const missing = reason.trim() === "";
 
   const save = (event: React.FormEvent) => {
@@ -67,71 +109,53 @@ export function DelegateButton({
         reason,
       });
       if (!result.ok) return setError(result.error);
-      toast.success(t.delegated);
-      setOpen(false);
+      // What follows, when the action says it (legalOutcome); else the
+      // change said once.
+      if (result.done) publish(result);
+      else toast.success(t.delegated);
       setReason("");
       setTried(false);
+      onDone();
     });
   };
 
   return (
-    <>
-      <Button
-        type="button"
-        variant="outline"
-        size="xs"
-        aria-label={`${triggerLabel ?? t.delegate} · ${label}`}
-        onClick={() => setOpen(true)}
-      >
-        {triggerLabel ?? t.delegate}
-      </Button>
-      <FormDialog
-        open={open}
-        onOpenChange={setOpen}
-        title={t.delegateTitle}
-        description={t.delegateDescription}
-        closeLabel={fr.masterPage.form.close}
-      >
-        <form className="flex flex-col gap-5" onSubmit={save} noValidate>
-          <p className="font-medium break-words">{label}</p>
-          <OptionSelect
-            name={`delegate-${itemId}`}
-            label={p.responsible}
-            items={{
-              [NONE]: p.noResponsible,
-              ...Object.fromEntries(people.map((x) => [x.personId, x.name])),
-            }}
-            defaultValue={responsibleId ?? NONE}
-            onValueChange={(value) =>
-              setResponsible(value === NONE ? null : value)
-            }
-          />
-          <Field
-            name={`delegate-due-${itemId}`}
-            type="date"
-            label={p.due}
-            defaultValue={dueOn ?? ""}
-            onChange={(event) => setDue(event.target.value || null)}
-          />
-          <TextareaField
-            id={`delegate-why-${itemId}`}
-            name="reason"
-            label={t.delegateWhy}
-            required
-            rows={2}
-            maxLength={1000}
-            value={reason}
-            onChange={(event) => setReason(event.target.value)}
-            error={tried && missing ? t.delegateWhyMissing : undefined}
-          />
-          {error && <FormMessage kind="error">{error}</FormMessage>}
-          <DialogFormActions
-            pending={pending}
-            submitLabel={t.save}
-            onCancel={() => setOpen(false)}
-          />
-        </form>
-      </FormDialog>
-    </>
+    <form className="flex flex-col gap-5" onSubmit={save} noValidate>
+      {showLabel && <p className="font-medium break-words">{label}</p>}
+      <OptionSelect
+        name={`delegate-${itemId}`}
+        label={p.responsible}
+        items={{
+          [NONE]: p.noResponsible,
+          ...Object.fromEntries(people.map((x) => [x.personId, x.name])),
+        }}
+        defaultValue={responsibleId ?? NONE}
+        onValueChange={(value) => setResponsible(value === NONE ? null : value)}
+      />
+      <Field
+        name={`delegate-due-${itemId}`}
+        type="date"
+        label={p.due}
+        defaultValue={dueOn ?? ""}
+        onChange={(event) => setDue(event.target.value || null)}
+      />
+      <TextareaField
+        id={`delegate-why-${itemId}`}
+        name="reason"
+        label={t.delegateWhy}
+        required
+        rows={2}
+        maxLength={1000}
+        value={reason}
+        onChange={(event) => setReason(event.target.value)}
+        error={tried && missing ? t.delegateWhyMissing : undefined}
+      />
+      {error && <FormMessage kind="error">{error}</FormMessage>}
+      <DialogFormActions
+        pending={pending}
+        submitLabel={t.save}
+        onCancel={onDone}
+      />
+    </form>
   );
 }

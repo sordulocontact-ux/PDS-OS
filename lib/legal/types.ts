@@ -9,6 +9,7 @@ import type {
   Organism,
   SplitKind,
 } from "@/lib/catalog/master/rules";
+import type { ContributorGroup } from "@/lib/catalog/master/contributor-groups";
 import type { CreditContactAction } from "@/lib/facts/credit-contact";
 import type { FormRole } from "@/lib/legal/forms/definition";
 import {
@@ -49,7 +50,44 @@ export type LegalFactAction =
       kind: "edit_declaration";
       masterId: string;
       declaration: MasterDeclaration;
+    }
+  // The title itself (its ISRC): the catalog's « Modifier le titre » form.
+  | { kind: "edit_title"; masterId: string; title: string }
+  // The work's ISWC and the ℗: the title page's « Droits » form.
+  | {
+      kind: "edit_rights";
+      masterId: string;
+      title: string;
+      rights: MasterRights;
+    }
+  // A credited person: their roles and detail, the title's Crédits form.
+  | {
+      kind: "edit_credit";
+      masterId: string;
+      title: string;
+      contributor: ContributorGroup;
     };
+
+/** The actions a click on the whole row opens (a form in a modal on the
+ * page, Sacha 05/11/2026: « quand on clique sur quelque chose, on puisse la
+ * modifier directement »); the others are a button beside the row. */
+export const ROW_EDIT_KINDS = [
+  "edit_splits",
+  "declare",
+  "edit_declaration",
+  "edit_title",
+  "edit_rights",
+  "edit_credit",
+] as const;
+export type LegalRowEdit = Extract<
+  LegalFactAction,
+  { kind: (typeof ROW_EDIT_KINDS)[number] }
+>;
+export const isRowEdit = (
+  action: LegalFactAction | undefined,
+): action is LegalRowEdit =>
+  action !== undefined &&
+  (ROW_EDIT_KINDS as readonly string[]).includes(action.kind);
 
 // Order of the ticket's side panel: release, people, rights, agreements,
 // formalities, then what the Cadrage flagged.

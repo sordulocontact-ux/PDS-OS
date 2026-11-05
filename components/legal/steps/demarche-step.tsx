@@ -102,6 +102,16 @@ export async function DemarcheStep({
           fr.legalDemarches.direction
         }
         people={ctx.tracking.state === "tracking" ? ctx.tracking.people : []}
+        ownerChangedBy={
+          // The plan journal's last change of who or when (« Modifié par »).
+          history.events
+            .filter(
+              (e) =>
+                demarche.own !== null &&
+                e.object === `plan-item:${demarche.own.id}`,
+            )
+            .sort((a, b) => b.at.localeCompare(a.at))[0]?.by ?? null
+        }
       />
     </LegalStepFrame>
   );

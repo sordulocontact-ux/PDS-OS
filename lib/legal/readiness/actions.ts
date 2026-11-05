@@ -9,6 +9,7 @@ import { routes } from "@/lib/auth/redirects";
 import { catalogIdSchema } from "@/lib/catalog/schemas";
 import { fr } from "@/lib/i18n/fr";
 import { legalJourneyContext } from "@/lib/legal/journey-context";
+import { legalOutcome } from "@/lib/legal/outcome";
 import { createClient } from "@/lib/supabase/server";
 import type { WriteResult } from "@/lib/utils/write-result";
 
@@ -33,6 +34,12 @@ function done(projectId: string, message: string): WriteResult {
   return { ok: true, done: message };
 }
 
+function revalidated(projectId: string): WriteResult {
+  revalidatePath(routes.projectLegal(projectId), "layout");
+  revalidatePath(routes.projectRelease(projectId));
+  return { ok: true };
+}
+
 const waiverSchema = z.object({
   projectId: catalogIdSchema,
   controlKey: z.string().min(1).max(120),
@@ -51,23 +58,25 @@ export async function grantReleaseWaiver(
     (c) => c.key === parsed.data.controlKey && c.status === "open" && !c.final,
   );
   if (!control) return { ok: false, error: t.errors.failed };
-  const supabase = await createClient();
-  const { error } = await supabase.rpc("grant_release_waiver", {
-    p_project_id: parsed.data.projectId,
-    p_control_key: control.key,
-    p_control_label: control.label,
-    p_reason: parsed.data.reason,
+  return legalOutcome(parsed.data.projectId, t.waiver.done, async () => {
+    const supabase = await createClient();
+    const { error } = await supabase.rpc("grant_release_waiver", {
+      p_project_id: parsed.data.projectId,
+      p_control_key: control.key,
+      p_control_label: control.label,
+      p_reason: parsed.data.reason,
+    });
+    if (error) {
+      console.error("grantReleaseWaiver:", error.message);
+      return {
+        ok: false,
+        error: error.message.includes("release_already_validated")
+          ? t.errors.already
+          : t.errors.failed,
+      };
+    }
+    return revalidated(parsed.data.projectId);
   });
-  if (error) {
-    console.error("grantReleaseWaiver:", error.message);
-    return {
-      ok: false,
-      error: error.message.includes("release_already_validated")
-        ? t.errors.already
-        : t.errors.failed,
-    };
-  }
-  return done(parsed.data.projectId, t.waiver.done);
 }
 
 /** The label's policy: does a SACEM declaration not filed block? */
@@ -97,29 +106,31 @@ export async function validateRelease(projectId: string): Promise<WriteResult> {
   if (!ctx) return { ok: false, error: fr.auth.errors.forbidden };
   if (ctx.readiness.verdict === "no")
     return { ok: false, error: t.validate.blocked };
-  const supabase = await createClient();
-  const { error } = await supabase.rpc("validate_release", {
-    p_project_id: projectId,
-    p_snapshot: ctx.readiness.controls
-      .filter((c) => !c.final)
-      .map((c) => ({
-        key: c.key,
-        label: c.label,
-        domain: c.domain,
-        blocking: c.blocking,
-        status: c.status,
-        reason: c.reason,
-        waiver: c.waiver?.reason ?? null,
-      })),
+  return legalOutcome(projectId, t.validate.done, async () => {
+    const supabase = await createClient();
+    const { error } = await supabase.rpc("validate_release", {
+      p_project_id: projectId,
+      p_snapshot: ctx.readiness.controls
+        .filter((c) => !c.final)
+        .map((c) => ({
+          key: c.key,
+          label: c.label,
+          domain: c.domain,
+          blocking: c.blocking,
+          status: c.status,
+          reason: c.reason,
+          waiver: c.waiver?.reason ?? null,
+        })),
+    });
+    if (error) {
+      console.error("validateRelease:", error.message);
+      return {
+        ok: false,
+        error: error.message.includes("release_already_validated")
+          ? t.errors.already
+          : t.errors.failed,
+      };
+    }
+    return revalidated(projectId);
   });
-  if (error) {
-    console.error("validateRelease:", error.message);
-    return {
-      ok: false,
-      error: error.message.includes("release_already_validated")
-        ? t.errors.already
-        : t.errors.failed,
-    };
-  }
-  return done(projectId, t.validate.done);
 }

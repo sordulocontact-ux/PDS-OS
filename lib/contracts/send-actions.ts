@@ -8,6 +8,7 @@ import { emailOutcome } from "@/lib/email/outcome";
 import { emailContractSigner } from "@/lib/contracts/signer-email";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
+import { legalOutcome } from "@/lib/legal/outcome";
 import { createClient } from "@/lib/supabase/server";
 import type { WriteResult } from "@/lib/utils/write-result";
 
@@ -37,29 +38,35 @@ export async function sendContractForSignature(
   if (via === "other" && !how) return { ok: false, error: t.errors.how };
   if (via === "other" && !on) return { ok: false, error: t.errors.date };
   await requireApproved();
-  const supabase = await createClient();
-  const { error } = await supabase.rpc("send_contract", {
-    p_contract_id: contractId,
-    p_via: via,
-    p_how: via === "other" ? (how ?? null) : null,
-    p_on: via === "other" ? (on ?? null) : null,
-  });
-  if (error) {
-    const m = error.message ?? "";
-    console.error("sendContractForSignature:", error.code, m);
-    if (m.includes("contact_link_missing"))
-      return { ok: false, error: t.errors.noLink };
-    if (error.code === "23514") return { ok: false, error: t.errors.date };
-    if (error.code === "42501" || m.includes("contract_not_allowed"))
-      return { ok: false, error: fr.contracts.errors.forbidden };
-    if (m.includes("contract_wrong_status"))
-      return { ok: false, error: fr.contracts.errors.status };
-    return { ok: false, error: t.errors.failed };
-  }
-  revalidatePath(routes.contracts);
-  revalidatePath(routes.contract(contractId));
-  if (projectId) revalidatePath(routes.project(projectId), "layout");
-  return via === "link" ? emailSigned(contractId) : { ok: true };
+  const write = async (): Promise<WriteResult> => {
+    const supabase = await createClient();
+    const { error } = await supabase.rpc("send_contract", {
+      p_contract_id: contractId,
+      p_via: via,
+      p_how: via === "other" ? (how ?? null) : null,
+      p_on: via === "other" ? (on ?? null) : null,
+    });
+    if (error) {
+      const m = error.message ?? "";
+      console.error("sendContractForSignature:", error.code, m);
+      if (m.includes("contact_link_missing"))
+        return { ok: false, error: t.errors.noLink };
+      if (error.code === "23514") return { ok: false, error: t.errors.date };
+      if (error.code === "42501" || m.includes("contract_not_allowed"))
+        return { ok: false, error: fr.contracts.errors.forbidden };
+      if (m.includes("contract_wrong_status"))
+        return { ok: false, error: fr.contracts.errors.status };
+      return { ok: false, error: t.errors.failed };
+    }
+    revalidatePath(routes.contracts);
+    revalidatePath(routes.contract(contractId));
+    if (projectId) revalidatePath(routes.project(projectId), "layout");
+    return via === "link" ? emailSigned(contractId) : { ok: true };
+  };
+  // From the Juridique (a project known): says what follows (JUR-04).
+  return projectId
+    ? legalOutcome(projectId, fr.legalJourney.done.contract.sent, write)
+    : write();
 }
 
 /** On their private link, PDS OS e-mails the signer itself when it can. */

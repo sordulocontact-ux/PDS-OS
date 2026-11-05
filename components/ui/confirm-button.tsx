@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { toast } from "@/components/ui/toast";
 
+import { usePublishResult } from "@/components/shell/module/result-banner";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { dialogs } from "@/lib/i18n/fr/dialogs";
@@ -44,6 +44,7 @@ export function ConfirmButton({
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const publish = usePublishResult();
   return (
     <>
       <Button
@@ -73,7 +74,8 @@ export function ConfirmButton({
           startTransition(async () => {
             const result = await run();
             if (!result.ok) return setError(result.error);
-            toast.success(done);
+            // Says what follows when the action does (legalOutcome…).
+            publish(result, done);
             setOpen(false);
           })
         }

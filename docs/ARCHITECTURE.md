@@ -3164,6 +3164,25 @@ Workflow spécialisé du projet, mené en parallèle des 7 étapes (`docs/CONTEX
 Parcours interne : État des lieux → Cadrage juridique → Confirmation → Plan d'action → Suivi
 (`lib/ui/legal-steps.ts`). Les tickets Juridique 01 à 08 du 30/09 sont livrés par lots.
 
+- **Modifier comme au Master (Sacha, 05/11/2026)** : « quand on clique sur quelque chose, on puisse la
+  modifier directement », sans passer par le catalogue. *État des lieux* : une action de ligne de
+  `ROW_EDIT_KINDS` (`lib/legal/types.ts` : `edit_title` pour l'ISRC, `edit_rights` pour l'ISWC et le ℗,
+  `edit_credit`, `edit_splits`, `declare`, `edit_declaration`) rend toute la ligne cliquable
+  (`InventoryEditRow` → `FactRowDialog`) et ouvre le formulaire de la fiche du titre dans une modale de la
+  page (`MasterEditForm`, `RightsForm`, `ContributorForm`, `SplitsEditorDialog`, `DeclareDialog`,
+  `DeclarationDialog` avec « Supprimer la déclaration ») ; seuls « Ajouter au Réseau » / « Lier » restent un
+  bouton à côté de la ligne (`FactAction`). Le rôle d'un intervenant non crédité se change sur sa ligne
+  (`FactRow edit`, `set_legal_project_contact_role`, migration `20261105140101`, refusé comme le retrait si
+  un contrat est déjà prévu pour lui). *Démarche* : « Responsable et échéance » est une ligne `FactRow
+  change` (`DemarcheOwner`) qui ouvre `DelegateForm` sous elle, avec « Modifié par … » lu du journal du plan
+  (`legal_plan_events`) ; la modale `DelegateButton` ne reste que dans la liste du plan lancé. *Bulletin
+  SACEM* : chaque valeur est une ligne de faits (`BulletinRow`, `FactRowFrame control`) mais le bulletin
+  s'enregistre toujours en bloc (une version annule les signatures, JUR-03). *Après un geste* (fin de
+  JUR-04) : tous les gestes d'équipe qui font avancer une démarche passent par `legalOutcome` (plan, dossier,
+  contrats, répartitions, SACEM, autorisations, Prêt pour la sortie, délégation) ; `withOutcome` et
+  `legalOutcome` sont génériques et gardent le `data` d'un résultat ; `advanceContract` et
+  `sendContractForSignature` n'enveloppent qu'un contrat rattaché à un projet.
+
 - **Audit des retours écrits d'Ibé (28/10/2026, migration `20261028000601_recette_p0_guards`)** : ce
   que seuls les écrans tenaient passe en base. *Contre-signature par version* (JUR-11) :
   `contracts.pds_signed_version` ; `revise_contract_document` (donc `revise_contract_clause`) l'efface

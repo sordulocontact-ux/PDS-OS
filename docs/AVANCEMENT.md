@@ -1339,3 +1339,21 @@ Demande de Sacha : « redesign mieux la page ia, il y a bcp de problèmes ». Re
 - [x] **E-mails** : résumé aux participants et partage du compte rendu disent à qui PDS OS a écrit ;
       le `mailto:` ne reste que pour qui n'a pas d'adresse, n'a pas été atteint, ou e-mail coupé.
 - [x] Le compte rendu partagé (`/app/calls/<id>/report`) n'est plus bloqué par le 404 du call.
+
+## Juridique : modifier comme au Master (05/11/2026, branche `pre-prod`)
+
+Demande de Sacha : « comme le master, quand on clique sur quelque chose, on puisse la modifier
+directement », l'ISWC depuis une modale de la page, sans aller au catalogue. Détail :
+`docs/ARCHITECTURE.md` § 8 sexies, « Modifier comme au Master ».
+
+- [x] **État des lieux** : un clic sur une ligne ouvre son formulaire sur la page (ISRC, ISWC et ℗,
+      crédit, parts, déclaration nouvelle ou existante) ; rôle d'un intervenant non crédité modifiable
+      sur sa ligne (migration `20261105140101`, appliquée en pré-prod) ; contrats et intervenants
+      visibles avant tout titre.
+- [x] **Démarche** : « Responsable et échéance » en ligne de faits, formulaire sous la ligne, « Modifié
+      par … ».
+- [x] **Bulletin SACEM** : chaque valeur en ligne de faits, enregistrement toujours en bloc.
+- [x] **JUR-04 terminé** : tous les gestes d'équipe du Juridique disent la suite et ouvrent l'étape
+      suivante du lecteur.
+- [ ] Migration `20261105140101` à pousser en prod (avec accord) ; passage navigateur des trois écrans.
+

@@ -20,6 +20,7 @@ import {
   type ContractValues,
 } from "@/lib/contracts/types";
 import { fr } from "@/lib/i18n/fr";
+import { legalOutcome } from "@/lib/legal/outcome";
 import { schedulePendingPushes } from "@/lib/notifications/push";
 import { createClient } from "@/lib/supabase/server";
 
@@ -245,6 +246,17 @@ const advanceSchema = z.object({
   checked: z.boolean().optional(),
 });
 
+// What each gesture is called once done (the banner and the toast).
+const ACTION_DONE = {
+  submit: "submitted",
+  approve: "approved",
+  request_changes: "changesRequested",
+  send: "sent",
+  sign: "signed",
+  countersign: "countersigned",
+  terminate: "terminated",
+} as const satisfies Record<string, keyof typeof fr.legalJourney.done.contract>;
+
 /** Moves a contract one step (SQL advance_contract decides). */
 export async function advanceContract(input: {
   contractId: string;
@@ -261,41 +273,58 @@ export async function advanceContract(input: {
   if (action === "request_changes" && !comment)
     return { ok: false, error: t.comment };
 
+  // A contract of a project (the Juridique's, JUR-04) says what follows its
+  // gesture; a contract without one stays a plain write.
   const supabase = await createClient();
-  const { error } = await supabase.rpc("advance_contract", {
-    p_contract_id: contractId,
-    p_action: action,
-    p_comment: comment || undefined,
-    p_signed_on: signedOn,
-    p_checked: checked === true,
-  });
-  if (error) {
-    const message = error.message ?? "";
-    if (message.includes("contract_comment_required"))
-      return { ok: false, error: t.comment };
-    if (message.includes("contract_signed_on_invalid"))
-      return { ok: false, error: t.signedOn };
-    if (message.includes("contract_wrong_status"))
-      return { ok: false, error: t.status };
-    // A generated contract (Juridique 03): sent and signed with a proof.
-    if (message.includes("contract_send_proof_required"))
-      return { ok: false, error: fr.legalContracts.document.sendLabel };
-    if (message.includes("contract_proof_missing"))
-      return { ok: false, error: fr.legalContracts.document.proofMissing };
-    if (message.includes("contract_countersign_missing"))
-      return { ok: false, error: fr.signedReturns.team.countersignMissing };
-    if (message.includes("contract_signature_unchecked"))
-      return { ok: false, error: fr.signedReturns.team.checkMissing };
-    if (error.code === "42501") return { ok: false, error: t.forbidden };
-    console.error("advanceContract:", message);
-    return { ok: false, error: t.failed };
-  }
-  // The director or the owner is notified (written by advance_contract).
-  await schedulePendingPushes();
-  refresh(contractId);
-  return action === "countersign" || action === "sign"
-    ? emailAskedInvoice(contractId)
-    : { ok: true };
+  const { data: owner } = await supabase
+    .from("contracts")
+    .select("project_id")
+    .eq("id", contractId)
+    .maybeSingle();
+  const write = async (): Promise<Result> => {
+    const { error } = await supabase.rpc("advance_contract", {
+      p_contract_id: contractId,
+      p_action: action,
+      p_comment: comment || undefined,
+      p_signed_on: signedOn,
+      p_checked: checked === true,
+    });
+    if (error) {
+      const message = error.message ?? "";
+      if (message.includes("contract_comment_required"))
+        return { ok: false, error: t.comment };
+      if (message.includes("contract_signed_on_invalid"))
+        return { ok: false, error: t.signedOn };
+      if (message.includes("contract_wrong_status"))
+        return { ok: false, error: t.status };
+      // A generated contract (Juridique 03): sent and signed with a proof.
+      if (message.includes("contract_send_proof_required"))
+        return { ok: false, error: fr.legalContracts.document.sendLabel };
+      if (message.includes("contract_proof_missing"))
+        return { ok: false, error: fr.legalContracts.document.proofMissing };
+      if (message.includes("contract_countersign_missing"))
+        return { ok: false, error: fr.signedReturns.team.countersignMissing };
+      if (message.includes("contract_signature_unchecked"))
+        return { ok: false, error: fr.signedReturns.team.checkMissing };
+      if (error.code === "42501") return { ok: false, error: t.forbidden };
+      console.error("advanceContract:", message);
+      return { ok: false, error: t.failed };
+    }
+    // The director or the owner is notified (written by advance_contract).
+    await schedulePendingPushes();
+    refresh(contractId);
+    return action === "countersign" || action === "sign"
+      ? emailAskedInvoice(contractId)
+      : { ok: true };
+  };
+  const projectId = owner?.project_id;
+  return projectId
+    ? legalOutcome(
+        projectId,
+        fr.legalJourney.done.contract[ACTION_DONE[action]],
+        write,
+      )
+    : write();
 }
 
 /** A paid contract just signed asks the person for their invoice (SQL):

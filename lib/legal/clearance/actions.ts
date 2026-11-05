@@ -9,6 +9,7 @@ import {
   CLEARANCE_PATH,
 } from "@/lib/legal/clearance/matrix";
 import { run } from "@/lib/legal/clearance/run";
+import { legalOutcome } from "@/lib/legal/outcome";
 import { addLegalPlanItems } from "@/lib/legal/plan/actions";
 import { schedulePendingPushes } from "@/lib/notifications/push";
 
@@ -40,12 +41,17 @@ export async function advanceClearance(input: z.input<typeof advanceSchema>) {
   const p = advanceSchema.safeParse(input);
   if (!p.success)
     return { ok: false as const, error: fr.legalClearance.errors.failed };
-  return run(p.data.projectId, (s) =>
-    s.rpc("advance_clearance", {
-      p_clearance_id: p.data.clearanceId,
-      p_status: p.data.status,
-      p_note: p.data.note || null,
-    }),
+  return legalOutcome(
+    p.data.projectId,
+    fr.legalJourney.done.clearance.advanced,
+    () =>
+      run(p.data.projectId, (s) =>
+        s.rpc("advance_clearance", {
+          p_clearance_id: p.data.clearanceId,
+          p_status: p.data.status,
+          p_note: p.data.note || null,
+        }),
+      ),
   );
 }
 
@@ -61,14 +67,20 @@ export async function withdrawClearance(input: z.input<typeof decideSchema>) {
   const p = decideSchema.safeParse(input);
   if (!p.success)
     return { ok: false as const, error: fr.legalClearance.errors.note };
-  const result = await run(p.data.projectId, (s) =>
-    s.rpc("withdraw_clearance", {
-      p_clearance_id: p.data.clearanceId,
-      p_reason: p.data.text,
-    }),
+  return legalOutcome(
+    p.data.projectId,
+    fr.legalJourney.done.clearance.withdrawn,
+    async () => {
+      const result = await run(p.data.projectId, (s) =>
+        s.rpc("withdraw_clearance", {
+          p_clearance_id: p.data.clearanceId,
+          p_reason: p.data.text,
+        }),
+      );
+      if (result.ok) await schedulePendingPushes();
+      return result;
+    },
   );
-  if (result.ok) await schedulePendingPushes();
-  return result;
 }
 
 /** « Remplacer et redemander »: a new borrowing for what replaces the
@@ -77,12 +89,18 @@ export async function replaceClearance(input: z.input<typeof decideSchema>) {
   const p = decideSchema.safeParse(input);
   if (!p.success)
     return { ok: false as const, error: fr.legalClearance.errors.note };
-  const result = await run(p.data.projectId, (s) =>
-    s.rpc("replace_clearance", {
-      p_clearance_id: p.data.clearanceId,
-      p_what: p.data.text,
-    }),
+  return legalOutcome(
+    p.data.projectId,
+    fr.legalJourney.done.clearance.replaced,
+    async () => {
+      const result = await run(p.data.projectId, (s) =>
+        s.rpc("replace_clearance", {
+          p_clearance_id: p.data.clearanceId,
+          p_what: p.data.text,
+        }),
+      );
+      if (result.ok) await addLegalPlanItems(p.data.projectId);
+      return result;
+    },
   );
-  if (result.ok) await addLegalPlanItems(p.data.projectId);
-  return result;
 }

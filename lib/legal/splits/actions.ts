@@ -13,6 +13,7 @@ import { siteUrl } from "@/lib/auth/site-url";
 import { listMasterSplits } from "@/lib/catalog/master/queries";
 import { catalogIdSchema } from "@/lib/catalog/schemas";
 import { fr } from "@/lib/i18n/fr";
+import { legalOutcome } from "@/lib/legal/outcome";
 import { schedulePendingPushes } from "@/lib/notifications/push";
 import { sealSplitLinks } from "@/lib/legal/splits/link-seal";
 import {
@@ -185,7 +186,18 @@ export async function proposeTitleSplit(
   return sendVersion(parsed.data.projectId, versionId);
 }
 
-async function sendVersion(
+// « Envoyer pour confirmation » says what follows (JUR-04): the people
+// awaited, the viewer's next step. The links stay in `data`.
+function sendVersion(
+  projectId: string,
+  versionId: string,
+): Promise<SplitResult<SplitLink[]>> {
+  return legalOutcome(projectId, fr.legalJourney.done.split.proposed, () =>
+    sendVersionNow(projectId, versionId),
+  );
+}
+
+async function sendVersionNow(
   projectId: string,
   versionId: string,
 ): Promise<SplitResult<SplitLink[]>> {

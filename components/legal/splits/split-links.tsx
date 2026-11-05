@@ -5,6 +5,7 @@ import { toast } from "@/components/ui/toast";
 
 import { useShowSplitLinks } from "@/components/legal/splits/split-actions";
 import { PrivateLinkCard } from "@/components/legal/private-link-card";
+import { usePublishResult } from "@/components/shell/module/result-banner";
 import { StepSection } from "@/components/shell/journey/step-section";
 import { legalDocuments } from "@/lib/i18n/fr/legal-documents";
 import { legalSplits } from "@/lib/i18n/fr/legal-splits";
@@ -16,6 +17,7 @@ import {
 import { roleOfLine } from "@/lib/legal/splits/draft";
 import type { SplitLine } from "@/lib/legal/splits/queries";
 import { mailtoHref } from "@/lib/utils/mailto";
+import type { WriteResult } from "@/lib/utils/write-result";
 
 const fr = { legalDocuments, legalSplits };
 
@@ -39,13 +41,15 @@ export function SplitLinks({
 }) {
   const [pending, startTransition] = useTransition();
   const showLinks = useShowSplitLinks();
+  const publish = usePublishResult();
   const waiting = lines.filter((l) => l.id && l.confirmation.link);
   if (waiting.length === 0) return null;
 
-  const run = (task: () => Promise<{ ok: boolean; error?: string }>) =>
+  const run = (task: () => Promise<WriteResult>) =>
     startTransition(async () => {
       const result = await task();
       if (!result.ok) return void toast.error(result.error);
+      publish(result);
     });
 
   return (

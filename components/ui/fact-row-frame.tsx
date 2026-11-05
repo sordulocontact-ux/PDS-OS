@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { RequiredMark } from "@/components/ui/required-mark";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ViewLink } from "@/components/ui/view-link";
 import { decisions } from "@/lib/i18n/fr/decisions";
@@ -53,6 +54,11 @@ export type FactRowProps = {
   missingLabel?: string;
   // « Modifié par … » in the selection colour, instead of the source.
   changedBy?: string | null;
+  // A field in place of the value (a form that saves as a whole, such as
+  // the SACEM bulletin): the row label stays visible, the field carries its
+  // own hidden one, and `required` adds the « * ».
+  control?: ReactNode;
+  required?: boolean;
   // Full width under the row.
   below?: ReactNode;
   // The whole row opens this view, or runs `onClick` (its words, for a
@@ -107,6 +113,8 @@ export function FactRowFrame({
   missing,
   missingLabel = t.missing,
   changedBy,
+  control,
+  required,
   below,
   href,
   onClick,
@@ -124,16 +132,21 @@ export function FactRowFrame({
           <span className="sr-only">{hrefLabel}</span>
         )}
         {label && (
-          <span className="text-caption text-muted-foreground">{label}</span>
+          <span className="text-caption text-muted-foreground">
+            {label}
+            {required && <RequiredMark />}
+          </span>
         )}
-        <span
-          className={cn(
-            "break-words [overflow-wrap:anywhere]",
-            missing && "font-semibold text-error",
-          )}
-        >
-          {missing && empty ? missingLabel : value}
-        </span>
+        {control ?? (
+          <span
+            className={cn(
+              "break-words [overflow-wrap:anywhere]",
+              missing && "font-semibold text-error",
+            )}
+          >
+            {missing && empty ? missingLabel : value}
+          </span>
+        )}
         {sourceNode ?? (
           <FactSourceText source={source} changedBy={changedBy} />
         )}

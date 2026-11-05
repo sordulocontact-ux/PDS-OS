@@ -19,6 +19,7 @@ export function Field({
   error,
   hint,
   suffix,
+  hideLabel = false,
   ...inputProps
 }: React.ComponentProps<"input"> & {
   name: string;
@@ -26,13 +27,19 @@ export function Field({
   error?: string;
   hint?: string;
   suffix?: string;
+  // The label is read by screen readers only (a row already shows it).
+  hideLabel?: boolean;
 }) {
   const id = inputProps.id ?? name;
   const describedBy = error ? `${id}-error` : hint ? `${id}-hint` : undefined;
 
   return (
     <div className="flex flex-col gap-1.5">
-      <Label htmlFor={id} required={isRequired(inputProps)}>
+      <Label
+        htmlFor={id}
+        required={isRequired(inputProps)}
+        className={hideLabel ? "sr-only" : undefined}
+      >
         {label}
       </Label>
       <div className="relative">

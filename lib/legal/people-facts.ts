@@ -3,6 +3,10 @@
 // code from rows already read.
 
 import { routes } from "@/lib/auth/redirects";
+import {
+  groupContributors,
+  type ContributorGroup,
+} from "@/lib/catalog/master/contributor-groups";
 import type { ContributorRole } from "@/lib/catalog/master/rules";
 import {
   creditContactState,
@@ -82,7 +86,16 @@ function contributorFact(
   network: NetworkIndex,
   rights: PeopleRights,
   sameName: Map<string, CreditLink[]>,
+  // The person with all their roles on the title: what « Modifier » edits.
+  person: ContributorGroup | undefined,
 ): LegalFact {
+  const state = creditContactState(
+    { ...contributor, masterId: master.id },
+    network,
+    rights,
+    NETWORK_ROLE_OF[contributor.role],
+    sameName,
+  );
   return {
     key: `person-${contributor.id}`,
     label: contributor.name,
@@ -91,13 +104,19 @@ function contributorFact(
       .join(" · "),
     group: groupOf(master),
     source: t.sources.credits,
-    ...creditContactState(
-      { ...contributor, masterId: master.id },
-      network,
-      rights,
-      NETWORK_ROLE_OF[contributor.role],
-      sameName,
-    ),
+    ...state,
+    // Its Réseau gesture first (add, link); else, for who may edit the
+    // catalog, the credit itself opens on the row.
+    action:
+      state.action ??
+      (rights.link && person
+        ? {
+            kind: "edit_credit",
+            masterId: master.id,
+            title: master.title,
+            contributor: person,
+          }
+        : undefined),
   };
 }
 
@@ -128,10 +147,15 @@ export function peopleFacts(
         href: routes.masterCredits(master.id),
       },
     ];
+  const personOf = new Map(
+    groupContributors(contributors).flatMap((group) =>
+      group.itemIds.map((id) => [id, group] as const),
+    ),
+  );
   return [
     ...performers.map((p) => performerFact(master, p)),
     ...contributors.map((c) =>
-      contributorFact(master, c, network, rights, sameName),
+      contributorFact(master, c, network, rights, sameName, personOf.get(c.id)),
     ),
   ];
 }

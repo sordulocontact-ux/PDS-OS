@@ -12,6 +12,7 @@ import {
   ContractValues,
   contractFixHref,
 } from "@/components/legal/tracking/contract-values";
+import { usePublishResult } from "@/components/shell/module/result-banner";
 import { Button } from "@/components/ui/button";
 import { DecisionPanel } from "@/components/ui/decision-panel";
 import { NextCard } from "@/components/ui/next-card";
@@ -27,6 +28,7 @@ import { legalDocuments } from "@/lib/i18n/fr/legal-documents";
 import { generateLegalContract } from "@/lib/legal/contracts/actions";
 import type { ContractCardData } from "@/lib/legal/contracts/document-card";
 import { formatFee } from "@/lib/legal/contracts/fields";
+import type { WriteResult } from "@/lib/utils/write-result";
 import type { AgreementRow } from "@/lib/legal/contracts/mapping";
 
 const fr = { legal, legalContracts, legalDemarches, legalDocuments };
@@ -76,10 +78,12 @@ export function ContractPanel({
   const [pending, startTransition] = useTransition();
   const contractId = row.contract?.id ?? null;
 
-  const run = (action: () => Promise<{ ok: boolean; error?: string }>) =>
+  const publish = usePublishResult();
+  const run = (action: () => Promise<WriteResult>) =>
     startTransition(async () => {
       const result = await action();
       if (!result.ok) return void toast.error(result.error ?? t.failed);
+      publish(result);
     });
   const advance = (
     action: "submit" | "send" | "sign" | "countersign",
@@ -219,8 +223,9 @@ export function ContractPanel({
                 action: kind === "approve" ? "approve" : "request_changes",
                 comment: comment || undefined,
               });
+              // Kept whole: what follows is said by the panel.
               return result.ok
-                ? { ok: true }
+                ? result
                 : { ok: false, error: result.error ?? t.failed };
             }}
           />

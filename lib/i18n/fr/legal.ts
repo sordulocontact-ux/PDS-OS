@@ -13,8 +13,9 @@ export const legal = {
       missing: "Aucune information manquante.",
     },
     actions: {
-      distribute: "Répartir",
-      editShares: "Modifier",
+      // A row that opens its form in a modal on the page (Sacha, 05/11).
+      edit: "Modifier",
+      removeDeclaration: "Supprimer la déclaration",
       splitsTitle: (kind: string, title: string) => `${kind} · ${title}`,
       declare: "Déclarer",
       declareTitle: "Nouvelle déclaration",
@@ -23,7 +24,6 @@ export const legal = {
       title: "Titre",
       organism: "Organisme",
       allDeclared: "Tous les organismes sont déjà déclarés pour ce titre.",
-      editRights: "Modifier les droits",
       complete: "Compléter",
       view: "Voir",
     },
@@ -39,7 +39,7 @@ export const legal = {
       flags: "Points signalés au cadrage",
       contacts: "Intervenants non crédités",
     },
-    note: "Une information se complète là où elle vit (fiche du titre, Réseau, contrat) ou par les démarches du plan : cette liste se relit seule.",
+    note: "Une ligne se complète ou se modifie ici, d'un clic. Un contrat s'ouvre sur sa page ; le reste avance avec les démarches du plan.",
     facts: {
       isrc: "ISRC",
       iswc: "ISWC",
@@ -814,12 +814,15 @@ export const legal = {
     contactRequired: "Choisis une personne du Réseau.",
     remove: (name: string) => `Retirer ${name}`,
     removeShort: "Retirer",
+    roleSaved: "Rôle modifié",
     errors: {
       credited:
         "Cette personne est déjà créditée sur un titre du projet : elle est connue par son crédit.",
       alreadyAdded: "Cette personne est déjà dans le dossier.",
       inUse:
         "Un contrat est prévu pour cette personne dans les contrats à prévoir : retirez-le d'abord.",
+      roleInUse:
+        "Un contrat est déjà prévu pour cette personne avec ce rôle : retirez-le des contrats à prévoir pour changer son rôle.",
       failed: "L'intervenant n'a pas pu être enregistré. Réessaie.",
     },
   },

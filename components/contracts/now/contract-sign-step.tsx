@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { toast } from "@/components/ui/toast";
 
 import { Field } from "@/components/auth/field";
+import { usePublishResult } from "@/components/shell/module/result-banner";
 import { Button } from "@/components/ui/button";
 import { ContractSign } from "@/components/legal/tracking/contract-sign";
 import { SignatureGate } from "@/components/legal/signed-returns/signature-gate";
@@ -46,6 +47,7 @@ export function ContractSignStep({
   signedOn: string;
 }) {
   const [pending, startTransition] = useTransition();
+  const publish = usePublishResult();
   const advance = (
     action: "sign" | "countersign",
     extra?: { signedOn?: string; checked?: boolean },
@@ -53,7 +55,7 @@ export function ContractSignStep({
     startTransition(async () => {
       const result = await advanceContract({ contractId, action, ...extra });
       if (!result.ok) return void toast.error(result.error);
-      toast.success(t.done[action]);
+      publish(result, t.done[action]);
     });
 
   if (!generated)

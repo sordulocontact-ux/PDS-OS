@@ -5,7 +5,7 @@ import { legalClearance } from "@/lib/i18n/fr/legal-clearance";
 import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
 import type { TitleFormality } from "@/lib/legal/formalities/types";
 
-import { FieldStateLine } from "./field-state";
+import { BulletinRow } from "./field-state";
 
 const fr = { legalClearance, legalFormalities };
 
@@ -24,29 +24,29 @@ export function BorrowingLine({
   const t = fr.legalFormalities.page;
   const open = borrowings.some((b) => !SECURED.includes(b.status));
   return (
-    <div className="flex min-w-0 flex-col gap-1.5 sm:col-span-2">
-      <FieldStateLine
-        state={open ? "missing" : "confirmed"}
-        label={t.borrowings}
-        reason={
-          borrowings.length === 0
-            ? t.noBorrowing
-            : borrowings
-                .map(
-                  (b) =>
-                    `« ${b.work} » · ${fr.legalClearance.statuses[b.status]}`,
-                )
-                .join(" · ")
-        }
-      />
-      {open && (
-        <Link
-          href={routes.projectLegalStep(projectId, "clearances")}
-          className="self-start text-sm underline underline-offset-4"
-        >
-          {t.openClearances}
-        </Link>
-      )}
-    </div>
+    <BulletinRow
+      state={open ? "missing" : "confirmed"}
+      label={t.borrowings}
+      value={
+        borrowings.length === 0
+          ? t.noBorrowing
+          : borrowings
+              .map(
+                (b) =>
+                  `« ${b.work} » · ${fr.legalClearance.statuses[b.status]}`,
+              )
+              .join(" · ")
+      }
+      side={
+        open ? (
+          <Link
+            href={routes.projectLegalStep(projectId, "clearances")}
+            className="text-sm underline underline-offset-4"
+          >
+            {t.openClearances}
+          </Link>
+        ) : undefined
+      }
+    />
   );
 }

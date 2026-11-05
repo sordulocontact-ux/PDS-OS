@@ -4,6 +4,7 @@ import { useTransition } from "react";
 import { toast } from "@/components/ui/toast";
 
 import { Button } from "@/components/ui/button";
+import { usePublishResult } from "@/components/shell/module/result-banner";
 import { useShowLinks } from "@/components/ui/one-time-links";
 import { legalDocuments } from "@/lib/i18n/fr/legal-documents";
 import { legalSplits } from "@/lib/i18n/fr/legal-splits";
@@ -80,6 +81,7 @@ export function ProposeSplitButton({
   const t = fr.legalSplits.page;
   const [pending, startTransition] = useTransition();
   const showLinks = useShowSplitLinks();
+  const publish = usePublishResult();
   // Sealed, the links stay in the step (rule 19): nothing to show once.
   const setLinks = (links: SplitLink[]) =>
     showLinks(title, links, `${fr.legalDocuments.split.proposed}.`);
@@ -94,8 +96,11 @@ export function ProposeSplitButton({
             "versionId" in target
               ? await proposeSplit(projectId, target.versionId)
               : await proposeTitleSplit(projectId, target.masterId);
-          if (result.ok) setLinks(result.data);
-          else toast.error(result.error);
+          if (!result.ok) return void toast.error(result.error);
+          setLinks(result.data);
+          // What follows, and the viewer's next step (the toasts above
+          // already said what was e-mailed).
+          publish(result, undefined, { toast: false });
         })
       }
     >

@@ -9,10 +9,23 @@ import type { WriteResult } from "@/lib/utils/write-result";
  * viewer's own next step, on another page, opened for them with the banner
  * (ResultBanner, « Étape ouverte pour vous »). Code only (lib/journey/outcome).
  */
-export function legalOutcome(
+export function legalOutcome<R extends WriteResult>(
   projectId: string,
   done: string,
-  write: () => Promise<WriteResult>,
-): Promise<WriteResult> {
-  return withOutcome(projectId, ["legal"], done, write, { openNext: true });
+  write: () => Promise<R>,
+): Promise<R> {
+  // A write that already says something more precise (« Contrat envoyé par
+  // e-mail », « Facture demandée à Claire ») keeps its own sentence.
+  let own: string | undefined;
+  return withOutcome(
+    projectId,
+    ["legal"],
+    done,
+    async () => {
+      const result = await write();
+      if (result.ok) own = result.done;
+      return result;
+    },
+    { openNext: true },
+  ).then((result) => (result.ok && own ? { ...result, done: own } : result));
 }

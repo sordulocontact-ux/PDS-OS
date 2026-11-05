@@ -35,6 +35,7 @@ export function ArrangementField({
       <OptionSelect
         name={`${id}-arrangement`}
         label={label}
+        hideLabel
         required={required}
         items={{
           all: t.arrangementScopes.all,

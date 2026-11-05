@@ -104,13 +104,13 @@ function only(
  *     return error ? { ok: false, error: t.failed } : { ok: true };
  *   });
  */
-export async function withOutcome(
+export async function withOutcome<R extends WriteResult>(
   projectId: string,
   modules: readonly JourneyModuleKey[],
   done: string,
-  write: () => Promise<WriteResult>,
+  write: () => Promise<R>,
   { openNext = false }: { openNext?: boolean } = {},
-): Promise<WriteResult> {
+): Promise<R> {
   // Both readings go through the journeys kept per project version
   // (loadProjectJourneys): « before » is the version the page on screen was
   // just rendered at, so it is kept already; « after » is the new version,
@@ -139,5 +139,11 @@ export async function withOutcome(
     only(before, modules),
     only(after, modules),
   );
-  return { ...result, done, ...outcome, ...(openNext && open && { open }) };
+  // The write's own data (a link, an id) is kept: only the outcome is added.
+  return {
+    ...result,
+    done,
+    ...outcome,
+    ...(openNext && open && { open }),
+  } as R;
 }
