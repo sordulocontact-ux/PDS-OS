@@ -14,10 +14,6 @@ import { loadContactDetails } from "@/lib/production/preprod/reads";
 import { formatDateTime } from "@/lib/release/format";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata = {
-  title: `${fr.productionJourney.steps["call-sheet"].title} · ${fr.app.name}`,
-};
-
 /** The call sheet composed from what is validated — place, team, gear,
  * schedule —, what it lacks, then its dated versions for the team (PROD-016). */
 export default async function ProductionCallSheetStepPage({

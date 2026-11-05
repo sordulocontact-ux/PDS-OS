@@ -15,10 +15,6 @@ import { formatDay, formatShortInstant } from "@/lib/utils/day";
 
 const t = fr.designSteps.home;
 
-export const metadata = {
-  title: `${fr.designJourney.module} · ${fr.app.name}`,
-};
-
 /**
  * Conception › Accueil (proto de0, ticket § 1 to 3): the project, its
  * release and the Brief de sortie it starts from, the deliverables received

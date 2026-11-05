@@ -711,6 +711,12 @@ Migration `20261010002101_credits_at_creation.sql`, 11 tests pgTAP
 
 ## 3 ter. Cadre d'écran commun (patron de module, proto « Projet complet », 18/10/2026)
 
+**Titre de l'onglet** *(Sacha 05/11/2026)* : « Projet · Module · PDS OS » (« Piégé · Cadrage · PDS OS »).
+Le layout du projet (`projects/[projectId]/layout.tsx`, `generateMetadata`) pose le modèle ; chaque
+module donne son nom dans son layout (`metadata.title`, layouts `framing/` et `strategy/` créés pour
+ça) et ses pages n'en déclarent pas ; une page hors module (Budget, Travail, Calls…) donne le sien,
+**sans** « · PDS OS ».
+
 Socle de toutes les zones (sous-lots C0 à C5 de `docs/projet-complet/commons.md` § 13). Rendu :
 `docs/DESIGN.md` § 4 ; composants : `docs/COMPOSANTS.md`.
 

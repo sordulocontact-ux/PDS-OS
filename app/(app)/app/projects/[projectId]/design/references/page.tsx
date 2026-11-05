@@ -21,10 +21,6 @@ import { fr } from "@/lib/i18n/fr";
 const t = fr.designSteps.references;
 const k = fr.conceptionKinds;
 
-export const metadata = {
-  title: `${fr.designJourney.steps.references.title} · ${fr.app.name}`,
-};
-
 /**
  * Conception › Références (proto deR, ticket § 6): one group for the
  * release's direction, one per deliverable, then « À rattacher »; a

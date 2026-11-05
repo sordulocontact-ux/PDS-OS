@@ -25,8 +25,6 @@ import { allInOrder } from "@/lib/utils/parallel";
 
 const t = fr.productionPost;
 
-export const metadata = { title: `${t.title} · ${fr.app.name}` };
-
 /**
  * Marketing › Production › one deliverable › Postproduction (ticket
  * « Workflow Production complet », parcours 14 à 18): the references of the

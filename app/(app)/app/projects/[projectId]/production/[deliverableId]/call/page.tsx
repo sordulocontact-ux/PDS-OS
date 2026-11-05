@@ -17,10 +17,6 @@ import {
 import { isChecklistAction } from "@/lib/production/preprod/types";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata = {
-  title: `${fr.productionJourney.steps.call.title} · ${fr.app.name}`,
-};
-
 /**
  * « Call de production » / « Préparation avec PO » / « Organisation
  * importée » (proto prepGate, BODY_MK.kickoff): the call prepared in the

@@ -7,17 +7,12 @@ import { FramingStep } from "@/components/legal/steps/framing-step";
 import { InventoryStep } from "@/components/legal/steps/inventory-step";
 import { PlanStep } from "@/components/legal/steps/plan-step";
 import { ReadyStep } from "@/components/legal/steps/ready-step";
-import { fr } from "@/lib/i18n/fr";
 import { demarcheTarget, entryHref } from "@/lib/legal/demarches/where";
 import { isMonth } from "@/lib/legal/history/filter";
 import { loadLegalHistory } from "@/lib/legal/history/queries";
 import { isHistoryBranch } from "@/lib/legal/history/types";
 import { legalJourneyContext } from "@/lib/legal/journey-context";
 import { legalRouteOf } from "@/lib/ui/legal-steps";
-
-export const metadata = {
-  title: `${fr.shell.project.sidebar.legal} · ${fr.app.name}`,
-};
 
 // The Juridique as a journey (docs/VISION-UX.md § 4, proto « Projet
 // complet »): /legal redirects to the step that awaits the viewer; the

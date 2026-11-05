@@ -8,7 +8,7 @@ import { allInOrder } from "@/lib/utils/parallel";
 
 const t = fr.projectHistory.validations;
 
-export const metadata = { title: `${t.title} · ${fr.app.name}` };
+export const metadata = { title: t.title };
 
 // The decisions waiting for the viewer in the project (proto « Projet
 // complet »): their actions whose kind is « validate » (never found by the

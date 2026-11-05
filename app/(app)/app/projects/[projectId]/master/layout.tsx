@@ -3,6 +3,11 @@ import { requireApproved } from "@/lib/auth/dal";
 import { isWorkflowLaunched, workflowGate } from "@/lib/plan/queries";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { allInOrder } from "@/lib/utils/parallel";
+import { masterJourney } from "@/lib/i18n/fr/master-journey";
+
+// The tab says the project and the module (Sacha 05/11/2026): « Piégé ·
+// Module · PDS OS » through the project layout's template.
+export const metadata = { title: masterJourney.module };
 
 // The Master waits for the Plan du Projet (docs/ARCHITECTURE.md § 6 ter):
 // launched from the plan, or already begun before it existed. Every step

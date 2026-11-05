@@ -18,7 +18,7 @@ import { requireLaunchedProject } from "@/lib/projects/queries";
 import { allInOrder } from "@/lib/utils/parallel";
 
 export const metadata = {
-  title: `${fr.projectWork.team.title} · ${fr.app.name}`,
+  title: fr.projectWork.team.title,
 };
 
 // Who works on the project and how loaded they are (same counts as the

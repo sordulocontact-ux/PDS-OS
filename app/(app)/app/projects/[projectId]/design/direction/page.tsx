@@ -16,10 +16,6 @@ import { formatShortInstant } from "@/lib/utils/day";
 
 const t = fr.designSteps.direction;
 
-export const metadata = {
-  title: `${fr.designJourney.steps.direction.title} · ${fr.app.name}`,
-};
-
 /**
  * Conception › Direction artistique (proto de2, ticket § 7): the release's
  * direction from the confirmed intentions — a point nobody said written on

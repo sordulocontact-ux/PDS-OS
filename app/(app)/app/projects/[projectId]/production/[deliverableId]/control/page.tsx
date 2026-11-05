@@ -1,12 +1,7 @@
 import { LightControlStep } from "@/components/production/light/light-steps";
 import { ProductionStepPanel } from "@/components/production/journey/production-step-panel";
-import { fr } from "@/lib/i18n/fr";
 import { stepContext } from "@/lib/production/journey/context";
 import { loadLightFacts } from "@/lib/production/light/queries";
-
-export const metadata = {
-  title: `${fr.productionLight.steps.control.title} · ${fr.app.name}`,
-};
 
 /** « Contrôle technique » of a cover or of teasers drawn from the clip
  * (proto lightBody control, PR-13): the validated version is not yet

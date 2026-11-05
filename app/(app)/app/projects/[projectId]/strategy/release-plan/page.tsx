@@ -37,10 +37,6 @@ import {
 import { loadStrategy } from "@/lib/strategy/queries";
 import { allInOrder } from "@/lib/utils/parallel";
 
-export const metadata = {
-  title: `${fr.strategyReleasePlan.title} · ${fr.app.name}`,
-};
-
 /**
  * The Plan de sortie generator (ticket Stratégie § 11): eight steps, one at
  * a time (?step=n). PO starts from the validated strategy and asks only for

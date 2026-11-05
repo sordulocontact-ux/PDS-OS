@@ -1,8 +1,5 @@
 import { filterOf } from "@/components/activations/journey/activation-list";
 import { ActivationsFrame } from "@/components/activations/journey/activations-frame";
-import { fr } from "@/lib/i18n/fr";
-
-export const metadata = { title: `${fr.activations.title} · ${fr.app.name}` };
 
 /** One activation open on the right of the list (proto actPage): its
  * frieze, « Maintenant », its module, « Informations » (docs/ARCHITECTURE.md

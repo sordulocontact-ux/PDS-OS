@@ -24,10 +24,6 @@ import { createClient } from "@/lib/supabase/server";
 
 const r = fr.productionReady;
 
-export const metadata = {
-  title: `${fr.productionJourney.steps.readiness.title} · ${fr.app.name}`,
-};
-
 /** « Contrôle avant tournage »: in external, the synthesis of what is
  * really ready, confirmed explicitly (with a reason when lines are not
  * ready), then kept as it was (proto, Artefact § 13); in internal, every

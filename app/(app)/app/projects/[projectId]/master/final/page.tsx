@@ -12,10 +12,6 @@ import { loadMasterBudgetLines } from "@/lib/master-workflow/budget-lines";
 import { loadFinalView } from "@/lib/master-workflow/final";
 import { masterJourneyContext } from "@/lib/master-workflow/journey-context";
 
-export const metadata = {
-  title: `${fr.masterWorkflow.final.title} · ${fr.app.name}`,
-};
-
 // Master, last step: each title's validated Master final, its place in the
 // Catalogue and the other deliverables of the brief.
 export default async function ProjectMasterFinalPage({

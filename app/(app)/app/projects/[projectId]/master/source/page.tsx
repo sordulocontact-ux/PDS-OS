@@ -1,12 +1,7 @@
 import { MasterStepFrame } from "@/components/master-workflow/master-step-frame";
 import { SourceStep } from "@/components/master-workflow/source/source-step";
-import { fr } from "@/lib/i18n/fr";
 import { masterJourneyContext } from "@/lib/master-workflow/journey-context";
 import { loadSourceStep } from "@/lib/master-workflow/source-step";
-
-export const metadata = {
-  title: `${fr.masterJourney.steps.source.title} · ${fr.app.name}`,
-};
 
 // Master, Source: the version each title's mix starts from, confirmed by
 // the owner, its final vocals awaited or anticipated (ticket § 1 and § 2).

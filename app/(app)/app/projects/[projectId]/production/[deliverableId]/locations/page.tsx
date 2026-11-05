@@ -21,10 +21,6 @@ const t = fr.productionPlace;
 // One shoot day until another is decided (proto shootDays).
 const SHOOT_DAYS = 1;
 
-export const metadata = {
-  title: `${fr.productionJourney.steps.locations.title} · ${fr.app.name}`,
-};
-
 /** « Lieux » (proto BODY.locs): proposed (by the company through its link
  * in external), given opinions by role, one retained by the project's
  * side — its price against what the quote plans for the places —, then

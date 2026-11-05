@@ -1,11 +1,6 @@
 import { ClosureStep } from "@/components/marketing/review/journey/closure-step";
 import { ReviewStepFrame } from "@/components/marketing/review/journey/review-step-frame";
-import { fr } from "@/lib/i18n/fr";
 import { reviewJourneyContext } from "@/lib/marketing/review/context";
-
-export const metadata = {
-  title: `${fr.reviewJourney.steps.closure.title} · ${fr.app.name}`,
-};
 
 /**
  * Marketing › Suivi & bilan › Clôture du Marketing (proto `bi3`): asked by

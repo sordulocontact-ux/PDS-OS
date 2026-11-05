@@ -16,10 +16,6 @@ import { formatDay } from "@/lib/utils/day";
 
 const t = fr.designSteps.intentions;
 
-export const metadata = {
-  title: `${fr.designJourney.steps.intentions.title} · ${fr.app.name}`,
-};
-
 /** The launch calendar's milestones, for « Temps forts ». */
 async function loadMilestones(projectId: string) {
   const supabase = await createClient();

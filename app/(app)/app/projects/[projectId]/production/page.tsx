@@ -14,8 +14,6 @@ import { allInOrder } from "@/lib/utils/parallel";
 
 const t = fr.productionJourney.empty;
 
-export const metadata = { title: `${fr.production.title} · ${fr.app.name}` };
-
 /**
  * Marketing › Production (proto « Projet complet »): no list of its own —
  * it opens on the deliverable where the viewer has something to do, else

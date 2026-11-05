@@ -16,7 +16,7 @@ import { allInOrder } from "@/lib/utils/parallel";
 
 const t = fr.projectPlan.planning;
 
-export const metadata = { title: `${t.title} · ${fr.app.name}` };
+export const metadata = { title: t.title };
 
 // Everything dated in the project, merged by code: milestones entered by
 // hand, deliverable and task due dates, the release and the project's due

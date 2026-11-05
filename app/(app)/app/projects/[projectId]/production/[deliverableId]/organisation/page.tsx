@@ -30,10 +30,6 @@ import { formatDay, formatShortDay } from "@/lib/utils/day";
 
 const t = fr.productionProducer;
 
-export const metadata = {
-  title: `${fr.productionJourney.steps.organisation.title} · ${fr.app.name}`,
-};
-
 /**
  * « Qui produit ? », the first step of a deliverable's production (proto
  * « Projet complet » pqBody): what was transferred and when it is due, then

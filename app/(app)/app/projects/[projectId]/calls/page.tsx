@@ -13,7 +13,7 @@ import { requireLaunchedProject } from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
 import { allInOrder } from "@/lib/utils/parallel";
 
-export const metadata = { title: `${fr.calls.list.title} · ${fr.app.name}` };
+export const metadata = { title: fr.calls.list.title };
 
 /**
  * A project's Calls (Pilotage, next to Travail): the same list as the Calls

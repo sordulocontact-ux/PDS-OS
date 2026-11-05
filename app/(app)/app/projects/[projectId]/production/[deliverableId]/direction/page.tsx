@@ -10,10 +10,6 @@ import { stepContext } from "@/lib/production/journey/context";
 import { formatDate } from "@/lib/release/format";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata = {
-  title: `${fr.productionJourney.steps.direction.title} · ${fr.app.name}`,
-};
-
 /** The director's proposal — intention, découpage, references — written in
  * the app or on the director's link, then validated by the creative side
  * (Ibé, 14/10: « un échange entre le réalisateur et la partie créative »). */

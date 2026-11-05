@@ -26,8 +26,6 @@ import { allInOrder } from "@/lib/utils/parallel";
 
 const t = fr.productionShoot;
 
-export const metadata = { title: `${t.title} · ${fr.app.name}` };
-
 /**
  * Marketing › Production › one deliverable › Tournage (ticket « Workflow
  * Production complet », parcours 11 to 13): the shoot's state, the

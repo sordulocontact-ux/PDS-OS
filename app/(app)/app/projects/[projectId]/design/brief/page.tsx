@@ -19,10 +19,6 @@ import { formatDay, formatShortInstant } from "@/lib/utils/day";
 
 const t = fr.designSteps.brief;
 
-export const metadata = {
-  title: `${fr.designJourney.steps.brief.title} · ${fr.app.name}`,
-};
-
 /**
  * Conception › Brief créatif (proto deB, ticket § 8): the common frame of
  * every deliverable, assembled by code from what is validated — never

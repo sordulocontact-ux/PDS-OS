@@ -7,7 +7,7 @@ import { requireLaunchedProject } from "@/lib/projects/queries";
 import { allInOrder } from "@/lib/utils/parallel";
 
 export const metadata = {
-  title: `${fr.projectWork.work.title} · ${fr.app.name}`,
+  title: fr.projectWork.work.title,
 };
 
 // The viewer's work in the project (proto « Projet complet »): their actions

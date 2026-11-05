@@ -13,7 +13,7 @@ import { canSeeProjectBudget } from "@/lib/projects/edit-access";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { allInOrder } from "@/lib/utils/parallel";
 
-export const metadata = { title: `${fr.budget.title} · ${fr.app.name}` };
+export const metadata = { title: fr.budget.title };
 
 // Envelope and spending of a launched project. Totals are computed by code
 // from the lines; only the owner writes, the owner and the direction read

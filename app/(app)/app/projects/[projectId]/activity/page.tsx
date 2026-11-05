@@ -9,7 +9,7 @@ import { allInOrder } from "@/lib/utils/parallel";
 
 const t = fr.projectHistory.activity;
 
-export const metadata = { title: `${t.title} · ${fr.app.name}` };
+export const metadata = { title: t.title };
 
 // What happened in the project (proto « Projet complet »): the journals of
 // the project and of its workflows, gathered by date (lib/overview/

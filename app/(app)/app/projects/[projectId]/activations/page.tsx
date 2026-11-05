@@ -5,11 +5,8 @@ import { ActivationsFrame } from "@/components/activations/journey/activations-f
 import { loadActivationsBoard } from "@/lib/activations/board";
 import { filtersOf } from "@/lib/activations/journey";
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { viewHref } from "@/lib/ui/view-href";
-
-export const metadata = { title: `${fr.activations.title} · ${fr.app.name}` };
 
 /**
  * Marketing › Activations (proto « Projet complet », 18/10): one page, the

@@ -14,8 +14,6 @@ import { allInOrder } from "@/lib/utils/parallel";
 
 const t = fr.productionHistory;
 
-export const metadata = { title: `${t.title} · ${fr.app.name}` };
-
 /**
  * Marketing › Production › one deliverable › Historique (PROD-002,
  * PROD-008): who did what and when — statuses, responsibles, due dates,

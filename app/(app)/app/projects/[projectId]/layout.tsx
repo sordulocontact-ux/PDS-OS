@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
@@ -5,6 +6,7 @@ import { ProjectFrame } from "@/components/projects/project-frame";
 import { PageLoading } from "@/components/shell/page-loading";
 import { requireApproved } from "@/lib/auth/dal";
 import { planLaunchedAt, planWorkflows } from "@/lib/plan/queries";
+import { core } from "@/lib/i18n/fr/core";
 import { getProject } from "@/lib/projects/queries";
 import { missingProjectRecord } from "@/lib/projects/record-guard";
 import { allInOrder } from "@/lib/utils/parallel";
@@ -13,6 +15,26 @@ import { loadWorkflowStates } from "@/lib/workflow-status/load";
 // Swallows the rejection of a read started early: whoever awaits it later
 // still gets it (the reads are cached per request).
 const started = (promise: Promise<unknown>) => void promise.catch(() => {});
+
+/**
+ * The tab names the project, then the module, then the app (Sacha
+ * 05/11/2026): « Piégé · Cadrage · PDS OS ». Each module's layout gives
+ * its name (`title`), the pages outside a module theirs (« Budget »); the
+ * project query is cached per request, shared with the frame.
+ */
+export async function generateMetadata({
+  params,
+}: LayoutProps<"/app/projects/[projectId]">): Promise<Metadata> {
+  const { projectId } = await params;
+  const project = await getProject(projectId);
+  if (!project) return {};
+  return {
+    title: {
+      template: `${project.title} · %s · ${core.app.name}`,
+      default: `${project.title} · ${core.app.name}`,
+    },
+  };
+}
 
 /**
  * A project's frame. A project that does not exist (or that RLS hides)

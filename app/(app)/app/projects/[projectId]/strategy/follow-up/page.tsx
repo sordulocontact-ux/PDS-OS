@@ -18,10 +18,6 @@ import { loadFollowUp } from "@/lib/strategy/follow-up-data";
 import { loadStrategy } from "@/lib/strategy/queries";
 import { allInOrder } from "@/lib/utils/parallel";
 
-export const metadata = {
-  title: `${fr.strategyFollowUp.title} · ${fr.app.name}`,
-};
-
 /**
  * Follow-up of a validated strategy (ticket Stratégie § 14): before the
  * release, what is Prêt, En cours, En attente or Bloqué; after it, each KPI

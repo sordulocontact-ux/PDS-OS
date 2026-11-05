@@ -1,14 +1,9 @@
 import { ProductionStepPanel } from "@/components/production/journey/production-step-panel";
 import { BudgetBlock } from "@/components/production/preprod/budget-block";
 import { QuotesSection } from "@/components/production/quotes/quotes-section";
-import { fr } from "@/lib/i18n/fr";
 import { stepContext } from "@/lib/production/journey/context";
 import { prepContext } from "@/lib/production/journey/prep-context";
 import { loadQuotes } from "@/lib/production/quotes/queries";
-
-export const metadata = {
-  title: `${fr.productionQuotes.title} · ${fr.app.name}`,
-};
 
 /** The quotes of the production, checked by the line producer then decided
  * by their validator (Ibé, 14/10); in internal, the budget lines follow. */

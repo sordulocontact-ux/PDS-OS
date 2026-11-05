@@ -4,6 +4,11 @@ import { requireApproved } from "@/lib/auth/dal";
 import { isWorkflowLaunched, workflowGate } from "@/lib/plan/queries";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { allInOrder } from "@/lib/utils/parallel";
+import { shell } from "@/lib/i18n/fr/shell";
+
+// The tab says the project and the module (Sacha 05/11/2026): « Piégé ·
+// Module · PDS OS » through the project layout's template.
+export const metadata = { title: shell.project.sidebar.legal };
 
 // The Juridique waits for the Plan du Projet (docs/ARCHITECTURE.md § 6 ter):
 // launched from the plan, or already begun before it existed. Every step

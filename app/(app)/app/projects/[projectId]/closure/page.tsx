@@ -15,7 +15,7 @@ import { loadWorkflowStates } from "@/lib/workflow-status/load";
 
 const t = fr.projectReview;
 
-export const metadata = { title: `${t.title} · ${fr.app.name}` };
+export const metadata = { title: t.title };
 
 /**
  * Vue d'ensemble › Clôture du projet: where each workflow stands, the review

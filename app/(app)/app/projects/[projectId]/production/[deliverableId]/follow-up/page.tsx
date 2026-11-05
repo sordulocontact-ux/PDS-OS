@@ -1,13 +1,8 @@
 import { ChecklistSection } from "@/components/production/checklist/checklist-section";
 import { ProductionStepPanel } from "@/components/production/journey/production-step-panel";
 import { EquipmentSection } from "@/components/production/preprod/equipment-section";
-import { fr } from "@/lib/i18n/fr";
 import { stepContext } from "@/lib/production/journey/context";
 import { prepContext } from "@/lib/production/journey/prep-context";
-
-export const metadata = {
-  title: `${fr.productionJourney.steps["follow-up"].title} · ${fr.app.name}`,
-};
 
 /** « Préproduction » of an external production (proto BODY.prep): the
  * company organises, PDS follows its checklist — tasks, due dates,

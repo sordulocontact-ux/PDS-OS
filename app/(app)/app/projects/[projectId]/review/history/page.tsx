@@ -8,8 +8,6 @@ import { reviewStepHref } from "@/lib/ui/review-steps";
 
 const t = fr.reviewJourney.history;
 
-export const metadata = { title: `${t.title} · ${fr.app.name}` };
-
 /** « Historique » at the foot of the journey: the Marketing's audit, one
  * block per day, written by the database's triggers. */
 export default async function ReviewHistoryPage({

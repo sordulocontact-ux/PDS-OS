@@ -39,10 +39,6 @@ import {
 import { loadStrategy } from "@/lib/strategy/queries";
 import { allInOrder } from "@/lib/utils/parallel";
 
-export const metadata = {
-  title: `${fr.strategyPressKit.title} · ${fr.app.name}`,
-};
-
 /**
  * The Dossier de presse generator (ticket Stratégie § 12): the same eight
  * screens as the Plan de sortie, one at a time (?step=n), its own contents

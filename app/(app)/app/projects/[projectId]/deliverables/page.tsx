@@ -14,7 +14,7 @@ import { allInOrder } from "@/lib/utils/parallel";
 
 const t = fr.projectPlan.deliverables;
 
-export const metadata = { title: `${t.title} · ${fr.app.name}` };
+export const metadata = { title: t.title };
 
 export default async function ProjectDeliverablesPage({
   params,

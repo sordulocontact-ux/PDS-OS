@@ -4,13 +4,8 @@ import {
   RoundLead,
 } from "@/components/master-workflow/round/round-lead";
 import { RoundStep } from "@/components/master-workflow/round/round-step";
-import { fr } from "@/lib/i18n/fr";
 import { masterJourneyContext } from "@/lib/master-workflow/journey-context";
 import { loadRoundStep } from "@/lib/master-workflow/round-step";
-
-export const metadata = {
-  title: `${fr.masterJourney.steps.mix.title} · ${fr.app.name}`,
-};
 
 // Master, Mixage: the package sent to the engineer, the private link, the
 // rate, the versions, their feedback and the validator's decision.

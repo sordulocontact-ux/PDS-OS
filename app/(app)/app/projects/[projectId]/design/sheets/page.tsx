@@ -6,12 +6,7 @@ import { DesignWaits } from "@/components/design/waiting-row";
 import { sheetAction } from "@/lib/design/journey";
 import { designJourneyContext } from "@/lib/design/journey-context";
 import { loadSheetViews } from "@/lib/design/sheet-views";
-import { fr } from "@/lib/i18n/fr";
 import { isLocked } from "@/lib/ui/journey";
-
-export const metadata = {
-  title: `${fr.designJourney.steps.sheets.title} · ${fr.app.name}`,
-};
 
 /**
  * Conception › Fiches Livrables (proto de3, ticket § 9 to 13): one card per

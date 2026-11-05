@@ -12,10 +12,6 @@ import { shootReport } from "@/lib/production/shoot/report";
 import { shootFor } from "@/lib/production/tab-data";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata = {
-  title: `${fr.productionJourney.steps.rushes.title} · ${fr.app.name}`,
-};
-
 /**
  * Rushes (proto « Projet complet », external production): the rushes'
  * link, their reception and the verified backup, declared apart from the

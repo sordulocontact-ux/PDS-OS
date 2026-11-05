@@ -4,15 +4,10 @@ import {
 } from "@/components/master-workflow/brief/brief-step";
 import { QuestionList } from "@/components/master-workflow/brief-questions";
 import { MasterStepFrame } from "@/components/master-workflow/master-step-frame";
-import { fr } from "@/lib/i18n/fr";
 import { loadBriefStep } from "@/lib/master-workflow/brief-step";
 import { masterExchangeDefaults } from "@/lib/master-workflow/exchange-defaults";
 import { liveTransmission } from "@/lib/master-workflow/journey";
 import { masterJourneyContext } from "@/lib/master-workflow/journey-context";
-
-export const metadata = {
-  title: `${fr.masterJourney.steps.brief.title} · ${fr.app.name}`,
-};
 
 // Master, Brief: what the engineers will receive, as a document whose facts
 // are changed in place, then recorded by the project's owner.

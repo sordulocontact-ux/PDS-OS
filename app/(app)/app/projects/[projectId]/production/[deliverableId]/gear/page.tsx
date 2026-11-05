@@ -1,13 +1,8 @@
 import { ProductionStepPanel } from "@/components/production/journey/production-step-panel";
 import { ProductionNeedsSection } from "@/components/production/prep/needs-section";
 import { EquipmentSection } from "@/components/production/preprod/equipment-section";
-import { fr } from "@/lib/i18n/fr";
 import { stepContext } from "@/lib/production/journey/context";
 import { prepContext } from "@/lib/production/journey/prep-context";
-
-export const metadata = {
-  title: `${fr.productionJourney.steps.gear.title} · ${fr.app.name}`,
-};
 
 /** Internal production: the positions to fill and the gear — the director of
  * photography's list arrives here through his link, as needs to price. */

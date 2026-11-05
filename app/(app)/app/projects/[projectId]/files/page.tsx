@@ -22,7 +22,7 @@ import { allInOrder } from "@/lib/utils/parallel";
 
 const t = fr.projectHistory.files;
 
-export const metadata = { title: `${t.title} · ${fr.app.name}` };
+export const metadata = { title: t.title };
 
 // The project's documents: the same library as an artist's (views by
 // category, ?category=), written by the owner, and by its creative directors

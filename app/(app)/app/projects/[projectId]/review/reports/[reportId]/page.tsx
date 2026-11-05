@@ -22,10 +22,6 @@ import { allInOrder } from "@/lib/utils/parallel";
 
 const t = fr.marketingReview.reports;
 
-export const metadata = {
-  title: `${fr.reviewJourney.steps.bilan.title} · ${fr.app.name}`,
-};
-
 /**
  * One version of the Marketing report (écran 2), its direct link: frozen,
  * read from its snapshot, with its fingerprint, its rules version and the
