@@ -1,27 +1,36 @@
-import { CallList } from "@/components/calls/call-list";
+import { CallsListView } from "@/components/calls/calls-list-view";
 import { CreateCallForm } from "@/components/calls/create-call-form";
-import { ProjectPageActions } from "@/components/projects/project-page-actions";
+import { ProjectHeader } from "@/components/projects/project-header";
+import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
-import { canEditProject } from "@/lib/projects/edit-access";
-import { requireLaunchedProject } from "@/lib/projects/queries";
-import { nextRoundHourInput } from "@/lib/calls/format";
+import { asCallView, nextRoundHourInput } from "@/lib/calls/format";
 import { loadCallContacts, loadCallMembers } from "@/lib/calls/invite";
-import { listCalls } from "@/lib/calls/queries";
+import { listAllCalls } from "@/lib/calls/queries";
 import { fr } from "@/lib/i18n/fr";
 import { googleMeetConfigured } from "@/lib/integrations/google-calendar";
+import { canEditProject } from "@/lib/projects/edit-access";
+import { requireLaunchedProject } from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
 import { allInOrder } from "@/lib/utils/parallel";
 
 export const metadata = { title: `${fr.calls.list.title} · ${fr.app.name}` };
 
+/**
+ * A project's Calls (Pilotage, next to Travail): the same list as the Calls
+ * section, its calls opening inside the project (lib/calls/door.ts).
+ * « Nouveau call » on the title's line for the owner; a project without a
+ * call shows the form in place, its only action.
+ */
 export default async function ProjectCallsPage({
   params,
+  searchParams,
 }: PageProps<"/app/projects/[projectId]/calls">) {
   const { projectId } = await params;
+  const { view } = await searchParams;
   const [access, project, calls, team, contacts] = await allInOrder([
     requireApproved(),
     requireLaunchedProject(projectId),
-    createClient().then((supabase) => listCalls(supabase, projectId)),
+    createClient().then((supabase) => listAllCalls(supabase, { projectId })),
     loadCallMembers(projectId),
     loadCallContacts(),
   ]);
@@ -31,45 +40,47 @@ export default async function ProjectCallsPage({
   const canEdit = canEditProject(access, project);
   const t = fr.calls.list;
   const now = new Date();
-  const empty = calls.length === 0;
+  const form = {
+    projectId,
+    defaultOccurredAt: nextRoundHourInput(now),
+    team: invitable,
+    contacts,
+    googleMeet: googleMeetConfigured(),
+  };
 
   return (
-    <div className="grid gap-6">
-      <ProjectPageActions>
-        {!empty && (
-          <CreateCallForm
-            projectId={projectId}
-            defaultOccurredAt={nextRoundHourInput(now)}
-            defaultTitle=""
-            initiallyOpen={false}
-            team={invitable}
-            contacts={contacts}
-            googleMeet={googleMeetConfigured()}
-          />
-        )}
-      </ProjectPageActions>
-
-      {empty ? (
-        <section className="grid gap-4">
-          <div className="grid max-w-prose gap-1">
-            <h3 className="text-base font-medium">{t.emptyTitle}</h3>
-            <p className="text-sm text-muted-foreground">
-              {canEdit ? t.emptyBody : t.emptyBodyReadOnly}
-            </p>
-          </div>
-          <CreateCallForm
-            projectId={projectId}
-            defaultOccurredAt={nextRoundHourInput(now)}
-            defaultTitle={t.firstCallTitle}
-            initiallyOpen
-            team={invitable}
-            contacts={contacts}
-            googleMeet={googleMeetConfigured()}
-          />
-        </section>
-      ) : (
-        <CallList projectId={projectId} calls={calls} now={now} />
-      )}
+    <div className="flex flex-col gap-6">
+      <ProjectHeader
+        projectId={projectId}
+        actions={
+          calls.length > 0 && (
+            <CreateCallForm {...form} defaultTitle="" initiallyOpen={false} />
+          )
+        }
+      />
+      <CallsListView
+        calls={calls}
+        now={now}
+        door={{ kind: "project", projectId }}
+        view={asCallView(view)}
+        project={null}
+        deletable={can(access, "archive_records")}
+        empty={
+          <section className="flex flex-col gap-4">
+            <div className="flex max-w-prose flex-col gap-1">
+              <h2 className="text-base font-medium">{t.emptyTitle}</h2>
+              <p className="text-sm text-muted-foreground">
+                {canEdit ? t.emptyBody : t.emptyBodyReadOnly}
+              </p>
+            </div>
+            <CreateCallForm
+              {...form}
+              defaultTitle={t.firstCallTitle}
+              initiallyOpen
+            />
+          </section>
+        }
+      />
     </div>
   );
 }

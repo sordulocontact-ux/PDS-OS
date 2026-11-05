@@ -3,8 +3,8 @@ import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
 
 import { FormMessage } from "@/components/auth/form-message";
-import { AllCallsList } from "@/components/calls/all-calls-list";
 import { CallsCalendar } from "@/components/calls/calendar/calls-calendar";
+import { CallsListView } from "@/components/calls/calls-list-view";
 import {
   MeetingComposerProvider,
   NewMeetingButton,
@@ -14,18 +14,17 @@ import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { CalendarToolbar } from "@/components/ui/calendar-toolbar";
-import { DataTableViews } from "@/components/ui/data-table";
-import { UrlFilters, type UrlFilterGroup } from "@/components/ui/url-filters";
 import { ViewToggle } from "@/components/ui/view-toggle";
+import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { placeCalls } from "@/lib/calls/calendar";
-import { asCallView, callViewOf, CALL_VIEWS } from "@/lib/calls/format";
+import { asCallView } from "@/lib/calls/format";
 import { loadMeetingFormData } from "@/lib/calls/invite";
 import { listAllCalls, type CallListItem } from "@/lib/calls/queries";
 import { fr } from "@/lib/i18n/fr";
 import { createClient } from "@/lib/supabase/server";
-import { filterParam, optionsByName } from "@/lib/ui/filter-options";
+import { filterParam } from "@/lib/ui/filter-options";
 import { viewHref } from "@/lib/ui/view-href";
 import {
   asCalendarMode,
@@ -42,20 +41,14 @@ export const metadata = { title: `${fr.calls.all.title} · ${fr.app.name}` };
 // ?display= of the calendar; the list is the page's default.
 const CALENDAR = "calendar";
 
-// The project filter's value for the meetings outside any project.
-const INTERNAL = "internal";
-
-type CallFilters = { project: string | null };
-
-const matches = (call: CallListItem, filters: CallFilters) =>
-  !filters.project || (call.projectId ?? INTERNAL) === filters.project;
-
 async function loadCalls(range?: {
   from: Date;
   to: Date;
 }): Promise<CallListItem[] | null> {
   try {
-    return await listAllCalls(await createClient(), range);
+    const calls = await listAllCalls(await createClient(), { range });
+    // Opened here, the navigation staying on Calls (lib/calls/door.ts).
+    return calls.map((call) => ({ ...call, href: routes.call(call.id) }));
   } catch (error) {
     // Next's own signals (dynamic rendering, redirects) are not failures.
     unstable_rethrow(error);
@@ -69,7 +62,8 @@ async function loadCalls(range?: {
  * instant search and the project filter; Sacha, 01/11/2026) or as a calendar
  * (?display=calendar, Teams: Semaine, Mois; ?mode=…&date=YYYY-MM-DD) — and
  * nothing else: a list page is only a list (docs/VISION-UX.md, proto
- * `docs/protos/pages.html`).
+ * `docs/protos/pages.html`). Every call opens here, even a project's
+ * (lib/calls/door.ts).
  */
 export default async function CallsPage({
   searchParams,
@@ -89,19 +83,12 @@ export default async function CallsPage({
     approved.then((access) => loadMeetingFormData(access, now)),
   ]);
   const t = fr.calls.all;
-  const view = asCallView(params.view);
   const calendarHref = (mode: CalendarMode, date: string | null) =>
     viewHref(routes.calls, {
       display: CALENDAR,
       mode: mode === "week" ? null : mode,
       date: date === today.day ? null : date,
     });
-  const filters: CallFilters = {
-    project: filterParam(params.project),
-  };
-  const filtering = Object.values(filters).some((value) => value !== null);
-  const listHref = (value: string | null, kept: Partial<CallFilters> = {}) =>
-    viewHref(routes.calls, { ...kept, view: value });
   const header = (
     <PageHeader
       title={t.title}
@@ -163,113 +150,37 @@ export default async function CallsPage({
     );
   }
 
-  // The tabs count what the filters keep; the filters offer what the tab
-  // holds.
-  const filtered = calls.filter((call) => matches(call, filters));
-  const counts = { upcoming: 0, past: 0 };
-  for (const call of filtered) counts[callViewOf(call, now)] += 1;
-  const ofView = view
-    ? calls.filter((call) => callViewOf(call, now) === view)
-    : calls;
-  // Planned calls read soonest first; the others, latest first.
-  const shown = view
-    ? filtered.filter((call) => callViewOf(call, now) === view)
-    : filtered;
-  if (view === "upcoming") shown.reverse();
-
   return (
     <MeetingComposerProvider data={composer}>
       <PageContainer>
         {header}
-        {calls.length === 0 ? (
-          <EmptyState
-            icon={IconPhone}
-            title={t.emptyTitle}
-            body={t.emptyBody}
-            action={
-              <Link
-                href={routes.projects}
-                className={buttonVariants({ variant: "outline" })}
-              >
-                <ButtonRoll>
-                  <IconFolderOpen aria-hidden data-icon="inline-start" />
-                  {t.openProjects}
-                </ButtonRoll>
-              </Link>
-            }
-          />
-        ) : (
-          <DataTableViews
-            label={t.views.label}
-            views={[
-              {
-                href: listHref(null, filters),
-                label: t.views.all,
-                count: filtered.length,
-                current: view === null,
-              },
-              ...CALL_VIEWS.map((value) => ({
-                href: listHref(value, filters),
-                label: t.views[value],
-                count: counts[value],
-                current: view === value,
-              })),
-            ]}
-          >
-            <AllCallsList
-              calls={shown}
-              now={now}
-              filters={
-                <UrlFilters
-                  path={routes.calls}
-                  params={{ view }}
-                  groups={filterGroups(ofView, filters)}
-                />
-              }
-              empty={
-                <EmptyState
-                  icon={IconPhone}
-                  title={
-                    filtering
-                      ? t.filtersEmpty
-                      : view === "upcoming"
-                        ? t.emptyUpcomingTitle
-                        : t.emptyPastTitle
-                  }
-                  body={filtering ? t.filtersEmptyBody : t.emptyViewBody}
-                />
+        <CallsListView
+          calls={calls}
+          now={now}
+          door={{ kind: "calls" }}
+          view={asCallView(params.view)}
+          project={filterParam(params.project)}
+          deletable={can(access, "archive_records")}
+          empty={
+            <EmptyState
+              icon={IconPhone}
+              title={t.emptyTitle}
+              body={t.emptyBody}
+              action={
+                <Link
+                  href={routes.projects}
+                  className={buttonVariants({ variant: "outline" })}
+                >
+                  <ButtonRoll>
+                    <IconFolderOpen aria-hidden data-icon="inline-start" />
+                    {t.openProjects}
+                  </ButtonRoll>
+                </Link>
               }
             />
-          </DataTableViews>
-        )}
+          }
+        />
       </PageContainer>
     </MeetingComposerProvider>
   );
-}
-
-// The projects some call of the tab belongs to; the meetings outside any
-// project last.
-function filterGroups(
-  calls: CallListItem[],
-  current: CallFilters,
-): UrlFilterGroup[] {
-  const t = fr.calls.all;
-  const projects = new Map<string, string>();
-  for (const call of calls)
-    if (call.projectId && call.projectTitle)
-      projects.set(call.projectId, call.projectTitle);
-  return [
-    {
-      key: "project",
-      label: t.filters.projectLabel,
-      allLabel: t.filters.projectAll,
-      options: [
-        ...optionsByName(projects),
-        ...(calls.some((call) => !call.projectId)
-          ? [{ value: INTERNAL, label: t.internal }]
-          : []),
-      ],
-      current: current.project,
-    },
-  ];
 }

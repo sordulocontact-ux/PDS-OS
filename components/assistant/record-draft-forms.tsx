@@ -192,7 +192,7 @@ export function MeetingDraftForm({
           onSaved={(id) =>
             onSaved({
               label: fr.assistant.drafts.savedLabels.meeting,
-              href: routes.meeting(id),
+              href: routes.call(id),
             })
           }
         />

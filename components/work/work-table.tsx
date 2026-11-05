@@ -7,16 +7,15 @@ import {
   DataTable,
   DataTableBody,
   DataTableCell,
+  DataTableGroupRow,
   DataTableHead,
   DataTableHeader,
   DataTableLink,
   DataTableMedia,
   DataTableRow,
   EMPTY_CELL,
-  ROW_INSET,
 } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { TableCell, TableRow } from "@/components/ui/table";
 import { work } from "@/lib/i18n/fr/work";
 import { moduleHue, projectHue } from "@/lib/ui/category-hues";
 import { workStatusTone } from "@/lib/ui/state-tones";
@@ -65,35 +64,28 @@ function GroupRow({
   onToggle: () => void;
 }) {
   return (
-    <TableRow
-      className={cn(
-        "border-0 bg-[var(--surface-soft)] hover:bg-[var(--surface-soft)] has-aria-expanded:bg-[var(--surface-soft)]",
-        ROW_INSET,
-      )}
-    >
-      <TableCell colSpan={COLUMNS} className="px-0 py-2">
-        <button
-          type="button"
-          aria-expanded={open}
-          onClick={onToggle}
-          className="-ml-1 flex items-center gap-2 rounded-sm px-1 text-[length:var(--type-body-md)] font-semibold text-[color:var(--text-primary)] focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none [@media(hover:hover)]:hover:text-[color:var(--text-secondary)]"
-        >
-          <IconChevronDown
-            aria-hidden
-            className={cn(
-              "size-3.5 text-[color:var(--text-tertiary)] transition-transform duration-[var(--duration-fast)] ease-[var(--ease-standard)] motion-reduce:transition-none",
-              !open && "-rotate-90",
-            )}
-          />
-          <span className={cn(group === "overdue" && "text-error")}>
-            {t.groups[group]}
-          </span>
-          <span className="font-medium text-[color:var(--text-tertiary)] tabular-nums">
-            {count}
-          </span>
-        </button>
-      </TableCell>
-    </TableRow>
+    <DataTableGroupRow columns={COLUMNS}>
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={onToggle}
+        className="-ml-1 flex items-center gap-2 rounded-sm px-1 text-[length:var(--type-body-md)] font-semibold text-[color:var(--text-primary)] focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none [@media(hover:hover)]:hover:text-[color:var(--text-secondary)]"
+      >
+        <IconChevronDown
+          aria-hidden
+          className={cn(
+            "size-3.5 text-[color:var(--text-tertiary)] transition-transform duration-[var(--duration-fast)] ease-[var(--ease-standard)] motion-reduce:transition-none",
+            !open && "-rotate-90",
+          )}
+        />
+        <span className={cn(group === "overdue" && "text-error")}>
+          {t.groups[group]}
+        </span>
+        <span className="font-medium text-[color:var(--text-tertiary)] tabular-nums">
+          {count}
+        </span>
+      </button>
+    </DataTableGroupRow>
   );
 }
 

@@ -110,6 +110,7 @@ export function DataTableBody({ children }: { children: React.ReactNode }) {
 // ignores `relative` on a <tr>: every link then covers the whole table and the
 // last row catches every click. A transform makes the row the containing block.
 // Only a row with a DataTableLink lights up under the pointer: it opens.
+// `group/row`: what shows only on a hovered row (RowActions `reveal`).
 export function DataTableRow({
   children,
   className,
@@ -120,7 +121,7 @@ export function DataTableRow({
   return (
     <TableRow
       className={cn(
-        "relative [transform:translate(0)] border-0 hover:bg-transparent has-[[data-row-link]]:hover:bg-[var(--control-bg-hover)]",
+        "group/row relative [transform:translate(0)] border-0 hover:bg-transparent has-[[data-row-link]]:hover:bg-[var(--control-bg-hover)]",
         ROW_INSET,
         className,
       )}
@@ -224,6 +225,30 @@ export function DataTableIcon({
     >
       <Icon className="size-5" />
     </span>
+  );
+}
+
+// A group's title across every column (« En retard 2 », « À venir 3 »), on
+// the soft band: Travail folds its rows from it, the calls list only names
+// them. `columns`: every column, hidden ones included.
+export function DataTableGroupRow({
+  columns,
+  children,
+}: {
+  columns: number;
+  children: React.ReactNode;
+}) {
+  return (
+    <TableRow
+      className={cn(
+        "border-0 bg-[var(--surface-soft)] hover:bg-[var(--surface-soft)] has-aria-expanded:bg-[var(--surface-soft)]",
+        ROW_INSET,
+      )}
+    >
+      <TableCell colSpan={columns} className="px-0 py-2">
+        {children}
+      </TableCell>
+    </TableRow>
   );
 }
 

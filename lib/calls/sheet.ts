@@ -12,7 +12,7 @@ const longDay = new Intl.DateTimeFormat("fr-FR", {
   timeZone: "Europe/Paris",
 });
 
-type SheetCall = Pick<
+export type SheetCall = Pick<
   CallDetail,
   | "title"
   | "occurredAt"

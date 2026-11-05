@@ -5,7 +5,13 @@
  */
 export const callPage = {
   organizedBy: (name: string) => `organisé par ${name}`,
+  // The module header's fact on a project's call page.
+  organizer: "Organisé par",
+  // The call's project, a link from its page opened in Calls.
+  project: (title: string) => `Projet : ${title}`,
+  projectLink: (title: string) => `Ouvrir le projet « ${title} »`,
   more: (title: string) => `Plus d'actions pour « ${title} »`,
+  copyMeetingLink: "Copier le lien de la visio",
   sheetEmail: "Envoyer la fiche par e-mail",
   // « Supprimer la réunion » (DG only; Ibé, tests of 31/10-02/11/2026).
   delete: {

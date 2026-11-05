@@ -60,10 +60,7 @@ export function ContactHistory({
               <SectionRow
                 key={call.id}
                 title={
-                  <ViewLink
-                    href={routes.meeting(call.id)}
-                    className={linkClass}
-                  >
+                  <ViewLink href={routes.call(call.id)} className={linkClass}>
                     {call.title}
                   </ViewLink>
                 }

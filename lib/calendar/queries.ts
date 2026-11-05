@@ -92,10 +92,12 @@ export async function loadCalendar(
         .select("id, project_id, title, occurs_on")
         .gte("occurs_on", first)
         .lte("occurs_on", last),
-      listAllCalls(supabase, periodRange(period)).catch((error: unknown) => {
-        console.error("loadCalendar: calls", error);
-        return null;
-      }),
+      listAllCalls(supabase, { range: periodRange(period) }).catch(
+        (error: unknown) => {
+          console.error("loadCalendar: calls", error);
+          return null;
+        },
+      ),
       loadMyTodo(access),
     ]);
 

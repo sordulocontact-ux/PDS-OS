@@ -18,13 +18,9 @@ export const calls = {
       "Les calls apparaîtront ici dès que le chef de projet responsable les aura enregistrés.",
     emptyBody:
       "Le cadrage part d'un call. Planifiez le premier échange, ou enregistrez-le maintenant : sa transcription et son compte rendu pré-rempliront le Brief.",
-    columns: {
-      title: "Call",
-      date: "Date",
-      status: "Traitement",
-    },
   },
-  // Calls page of the main navigation: every visible project's calls.
+  // Calls page of the main navigation: every visible project's calls. The
+  // same list serves a project's Calls page (lib/calls/door.ts).
   all: {
     title: "Calls",
     description:
@@ -38,8 +34,10 @@ export const calls = {
     },
     columns: {
       title: "Call",
+      project: "Projet",
       date: "Date",
-      status: "Traitement",
+      status: "État",
+      actions: "Actions",
     },
     emptyTitle: "Aucun call pour l'instant",
     emptyBody:
@@ -49,6 +47,8 @@ export const calls = {
     search: {
       label: "Rechercher un call",
       placeholder: "Titre, projet…",
+      // A project's Calls: no project to search.
+      placeholderProject: "Titre du call…",
       noResult: (query: string) => `Aucun call ne correspond à « ${query} ».`,
     },
     filters: {
@@ -64,6 +64,8 @@ export const calls = {
   },
   create: {
     title: "Nouveau call",
+    description:
+      "Un call du projet, planifié comme sur Teams : les participants choisis sont prévenus.",
     fieldTitle: "Titre",
     titlePlaceholder: "Ex. Cadrage avec l'équipe de Nova Kessel",
     fieldDate: "Date et heure du call",

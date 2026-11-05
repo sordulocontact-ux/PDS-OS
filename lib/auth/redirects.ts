@@ -91,8 +91,9 @@ export const routes = {
   // Every visible project's dates, one calendar (?mode=week&date=…&voir=mine).
   calendar: "/app/calendar",
   calls: "/app/calls",
-  // An internal meeting: a call without a project.
-  meeting: (callId: string) => `/app/calls/${callId}`,
+  // A call opened from the Calls section, the navigation staying on Calls:
+  // an internal meeting or a project's call (its project linked from it).
+  call: (callId: string) => `/app/calls/${callId}`,
   // PROJ-AMEL-01: a call's closed report, as a recipient reads it.
   callReport: (callId: string) => `/app/calls/${callId}/report`,
   callReportPdf: (callId: string, version: number, scope: string) =>

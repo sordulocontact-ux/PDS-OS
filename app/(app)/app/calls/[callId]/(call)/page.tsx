@@ -1,80 +1,41 @@
 import { notFound } from "next/navigation";
 
-import { CallWorkspace } from "@/components/calls/call-workspace";
-import { EditAccessProvider } from "@/components/projects/edit-access";
+import { CallPage } from "@/components/calls/call-page";
 import { PageContainer } from "@/components/shell/page-container";
-import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
-import { routes } from "@/lib/auth/redirects";
-import { listOwnedProjects } from "@/lib/calls/outcomes";
-import { loadCallPage } from "@/lib/calls/page-data";
-import {
-  getCallAudioUrls,
-  getMeeting,
-  loadLatestReport,
-  loadLatestTranscript,
-} from "@/lib/calls/queries";
-import { loadMembers } from "@/lib/framing/related";
+import { getVisibleCall } from "@/lib/calls/queries";
 import { fr } from "@/lib/i18n/fr";
-import { createClient } from "@/lib/supabase/server";
+import { getProject } from "@/lib/projects/queries";
+import { allInOrder } from "@/lib/utils/parallel";
 
 export const metadata = { title: `${fr.calls.all.title} · ${fr.app.name}` };
 
 /**
- * An internal meeting (a call without a project): seen by its creator and
- * its attendees, recorded and processed by its creator, like a project's
- * call without the Brief. Its actions become tasks of a project the viewer
- * owns.
+ * A call opened from the Calls section: an internal meeting or a project's
+ * call, the navigation staying on Calls; « Projet : X » leads to the
+ * project (lib/calls/door.ts). The same page as inside the project.
  */
-export default async function MeetingPage({
+export default async function CallsCallPage({
   params,
   searchParams,
 }: PageProps<"/app/calls/[callId]">) {
-  const access = await requireApproved();
   const { callId } = await params;
   const { meet } = await searchParams;
-  const supabase = await createClient();
-
-  const call = await getMeeting(callId);
-  if (!call) notFound();
-  const [transcript, report, audioUrls, members, projects] = await Promise.all([
-    loadLatestTranscript(supabase, callId),
-    loadLatestReport(supabase, callId),
-    getCallAudioUrls(supabase, call),
-    loadMembers(access),
-    can(access, "pilot_projects")
-      ? listOwnedProjects(supabase, access.personId)
-      : [],
+  const [, call] = await allInOrder([
+    requireApproved(),
+    getVisibleCall(callId),
   ]);
-  const canEdit =
-    access.personId !== null && call.createdBy === access.personId;
-  const organizer =
-    members.find((m) => m.personId === call.createdBy)?.name ?? null;
-  const data = await loadCallPage(supabase, {
-    call,
-    report,
-    mePersonId: access.personId,
-    ownerName: organizer,
-  });
+  if (!call) notFound();
+  const project = call.projectId ? await getProject(call.projectId) : null;
 
   return (
     <PageContainer>
-      <EditAccessProvider canEdit={canEdit}>
-        <CallWorkspace
-          call={call}
-          transcript={transcript}
-          audioUrls={audioUrls}
-          canEdit={canEdit}
-          back={{ href: routes.calls, label: fr.calls.back }}
-          where={{ label: fr.calls.all.internal, href: null }}
-          organizer={organizer}
-          data={data}
-          members={members}
-          mePersonId={access.personId}
-          taskProjects={projects}
-          meetFailed={meet === "failed"}
-        />
-      </EditAccessProvider>
+      <CallPage
+        call={call}
+        project={project}
+        door={{ kind: "calls" }}
+        meetFailed={meet === "failed"}
+      />
     </PageContainer>
   );
 }

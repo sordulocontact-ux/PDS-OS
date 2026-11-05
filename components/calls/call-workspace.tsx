@@ -1,5 +1,4 @@
 import { CallAgenda } from "@/components/calls/call-agenda";
-import { CallHeader } from "@/components/calls/call-header";
 import { CallNow } from "@/components/calls/call-now";
 import { CallOutcomes } from "@/components/calls/call-outcomes";
 import { CallRecording } from "@/components/calls/call-recording";
@@ -26,19 +25,19 @@ const fr = { calls };
 
 /**
  * One call's page (proto `docs/protos/pages.html`, « Calls »), shared by a
- * project's call and an internal meeting: its head (state beside the title,
- * « projet · quand · organisé par X »), « Maintenant » by state and role,
- * then « Décisions et actions », the report, the agenda and the folded
+ * project's call and an internal meeting, opened from Calls or from its
+ * project (CallPage): its head (`CallHeader`), « Maintenant » by state and
+ * role, then « Décisions et actions », the report, the agenda and the folded
  * transcript; on the side, the participants, the recording and the video
- * link. The page gives what differs (way back, where it belongs, the
- * module its proposals are settled in, where its tasks may go).
+ * link. CallPage gives what differs (the head of its door, where it
+ * belongs, the module its proposals are settled in, where its tasks may go).
  */
 export function CallWorkspace({
   call,
+  header,
   transcript,
   audioUrls,
   canEdit,
-  back,
   where,
   organizer,
   module = null,
@@ -50,14 +49,15 @@ export function CallWorkspace({
   meetFailed = false,
 }: {
   call: CallDetail;
+  // CallHeader, as the door it was opened from draws it.
+  header: React.ReactNode;
   transcript: StoredTranscript | null;
   // One per take when the call was recorded in parts.
   audioUrls: Array<string | null>;
   // Whoever works on the call: the project's owner, the meeting's creator.
   canEdit: boolean;
-  back: { href: string; label: string };
-  // The project (with its link) or « Réunion interne ».
-  where: { label: string; href: string | null };
+  // The project's title or « Réunion interne » (the summary's subject).
+  where: string;
   organizer: string | null;
   module?: CallModule | null;
   data: CallPageData;
@@ -96,14 +96,7 @@ export function CallWorkspace({
 
   return (
     <div className="flex w-full flex-col gap-6">
-      <CallHeader
-        call={call}
-        back={back}
-        where={where}
-        organizer={organizer}
-        upcoming={upcoming}
-        closed={closed}
-      />
+      {header}
       {meetFailed && !call.meetingUrl && (
         <ToneCallout tone="warning">{fr.calls.schedule.meetFailed}</ToneCallout>
       )}
@@ -114,7 +107,7 @@ export function CallWorkspace({
         canEdit={canEdit}
         hasTranscript={transcript !== null}
         ownerName={organizer}
-        where={where.label}
+        where={where}
         module={module}
         data={data}
         members={members.filter((m) => m.personId !== mePersonId)}

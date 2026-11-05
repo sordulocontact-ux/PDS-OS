@@ -108,35 +108,16 @@ export type StoredReport = {
   count: number;
 };
 
-export async function listCalls(
-  supabase: Client,
-  projectId: string,
-): Promise<CallSummary[]> {
-  const { data, error } = await supabase
-    .from("calls")
-    .select(
-      "id, title, occurred_at, ends_at, duration_minutes, status, meeting_url",
-    )
-    .eq("project_id", projectId)
-    .order("occurred_at", { ascending: false });
-  if (error) throw new Error(`listCalls: ${error.message}`);
-  return data.map((row) => ({
-    id: row.id,
-    title: row.title,
-    occurredAt: row.occurred_at,
-    status: asCallStatus(row.status),
-    meetingUrl: row.meeting_url,
-    endsAt: row.ends_at,
-    durationMinutes: row.duration_minutes,
-  }));
-}
-
 export type CallListItem = CallSummary & {
   // Null for an internal meeting.
   projectId: string | null;
   projectTitle: string | null;
-  // The call's own page: inside its project, or the meeting's page.
+  // Where the Calendrier opens it: inside its project, or in Calls for a
+  // meeting. A list of calls links by its door (CallsTable), not by this.
   href: string;
+  // What its sheet needs (« ⋯ » of a row: copied or e-mailed).
+  agenda: AgendaItem[] | null;
+  guestEmails: string[];
   // Who works on it: the project's owner, or the meeting's creator.
   ownerPersonId: string | null;
   // Its report was closed at least once (call_closures).
@@ -149,18 +130,26 @@ const ALL_CALLS_LIMIT = 500;
 /**
  * Every call the user may see (Calls page of the main navigation): those of
  * visible projects and the internal meetings they created or were invited
- * to. RLS decides (can_see_call).
+ * to. RLS decides (can_see_call). `projectId`: one project's calls (its
+ * Calls page), the same rows.
  */
 export async function listAllCalls(
   supabase: Client,
-  // The calendar's week: the calls that start within it.
-  range?: { from: Date; to: Date },
+  {
+    range,
+    projectId,
+  }: {
+    // The calendar's week: the calls that start within it.
+    range?: { from: Date; to: Date };
+    projectId?: string;
+  } = {},
 ): Promise<CallListItem[]> {
   let query = supabase
     .from("calls")
     .select(
-      "id, title, occurred_at, ends_at, duration_minutes, status, meeting_url, project_id, created_by, project:projects!calls_project_same_org(title, owner_person_id), closures:call_closures!call_closures_call_same_org(id)",
+      "id, title, occurred_at, ends_at, duration_minutes, status, meeting_url, project_id, created_by, agenda, project:projects!calls_project_same_org(title, owner_person_id), closures:call_closures!call_closures_call_same_org(id), call_guests(email)",
     );
+  if (projectId) query = query.eq("project_id", projectId);
   if (range)
     query = query
       .gte("occurred_at", range.from.toISOString())
@@ -181,7 +170,9 @@ export async function listAllCalls(
     projectTitle: row.project?.title ?? null,
     href: row.project_id
       ? routes.projectCall(row.project_id, row.id)
-      : routes.meeting(row.id),
+      : routes.call(row.id),
+    agenda: toAgenda(row.agenda),
+    guestEmails: row.call_guests.map((g) => g.email),
     ownerPersonId: row.project_id
       ? (row.project?.owner_person_id ?? null)
       : row.created_by,
@@ -215,12 +206,12 @@ function toAgenda(value: unknown): AgendaItem[] | null {
 }
 
 /**
- * One call: of this project, or (`projectId` null) an internal meeting —
- * a project call is never read through the meeting page, nor the reverse.
+ * One call: of this project, (`projectId` null) an internal meeting, or
+ * (`"any"`) whichever the viewer sees — the Calls section opens both.
  */
 export async function getCall(
   supabase: Client,
-  projectId: string | null,
+  projectId: string | null | "any",
   callId: string,
 ): Promise<CallDetail | null> {
   const query = supabase
@@ -230,7 +221,11 @@ export async function getCall(
     )
     .eq("id", callId);
   const { data } = await (
-    projectId ? query.eq("project_id", projectId) : query.is("project_id", null)
+    projectId === "any"
+      ? query
+      : projectId
+        ? query.eq("project_id", projectId)
+        : query.is("project_id", null)
   ).maybeSingle();
   if (!data) return null;
   const [prepared, recording] = await Promise.all([
@@ -480,8 +475,9 @@ export async function loadLatestReport(
   };
 }
 
-/** An internal meeting (getCall without a project), once per request: its
- * frame answers a real 404 without it and its pages reuse the read. */
-export const getMeeting = trackedCache(async (callId: string) =>
-  getCall(await createClient(), null, callId),
+/** A call of the Calls section (a meeting or a project's call), once per
+ * request: its frame answers a real 404 without it and its page reuses the
+ * read. */
+export const getVisibleCall = trackedCache(async (callId: string) =>
+  getCall(await createClient(), "any", callId),
 );

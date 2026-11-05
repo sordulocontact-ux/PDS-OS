@@ -52,7 +52,7 @@ export type ProjectSection = {
   tabParent?: string;
   // Out of the navigation (decision C0, proto « Projet complet »): the page
   // keeps its route and its trail, reached from the steps that use it
-  // (Équipe, Planning, Calls, Livrables, Fichiers).
+  // (Équipe, Planning, Livrables, Fichiers).
   hidden?: boolean;
 };
 
@@ -139,9 +139,11 @@ export function projectSections(
       routes.projectRelease(projectId),
       "workflows",
     ),
-    // Pilotage (proto): Travail, Validations, Activité, then the Budget
-    // (ticket MKT-S1-15).
+    // Pilotage (proto): Travail, the project's Calls (the second door to
+    // them, like Travail; Sacha 05/11/2026), Validations, Activité, then the
+    // Budget (ticket MKT-S1-15).
     section("work", t.work, routes.projectWork(projectId), "steering"),
+    section("calls", t.calls, routes.projectCalls(projectId), "steering"),
     section(
       "validations",
       t.validations,
@@ -172,7 +174,6 @@ export function projectSections(
       [
         ["team", t.team, routes.projectTeam(projectId)],
         ["planning", t.planning, routes.projectPlanning(projectId)],
-        ["calls", t.calls, routes.projectCalls(projectId)],
         ["deliverables", t.deliverables, routes.projectDeliverables(projectId)],
         ["files", t.files, routes.projectFiles(projectId)],
       ] as const

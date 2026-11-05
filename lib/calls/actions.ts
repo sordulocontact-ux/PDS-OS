@@ -65,7 +65,7 @@ export async function createMeeting(
   if (!result.ok) return result;
   // `stay`: created from PO's panel, which shows the link itself.
   if (form.get("stay") === "1") return { ok: true, id: result.id };
-  redirect(withMeetNotice(routes.meeting(result.id), result.meetFailed));
+  redirect(withMeetNotice(routes.call(result.id), result.meetFailed));
 }
 
 /** The video link of a call, added or changed before or after the fact. */

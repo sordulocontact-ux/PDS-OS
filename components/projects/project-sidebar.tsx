@@ -24,7 +24,7 @@ export type ProjectNavProps = ProjectNavState & {
 };
 
 // The entries of the navigation: the hidden sections (Équipe, Planning,
-// Calls, Livrables, Fichiers) keep their routes, not an entry (decision C0).
+// Livrables, Fichiers) keep their routes, not an entry (decision C0).
 const navItems = ({
   projectId,
   canSeeLegal,

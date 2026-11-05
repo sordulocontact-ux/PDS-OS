@@ -228,7 +228,7 @@ export function notificationHref(
 ): string {
   if (kind.startsWith("contract_") && subjectId)
     return routes.contract(subjectId);
-  if (kind === "meeting_invited" && subjectId) return routes.meeting(subjectId);
+  if (kind === "meeting_invited" && subjectId) return routes.call(subjectId);
   // A call's report shared with a member: that report only (PROJ-AMEL-01).
   if (kind === "call_report_shared" && subjectId)
     return routes.callReport(subjectId);
