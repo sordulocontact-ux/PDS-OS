@@ -5,10 +5,9 @@ import { useState } from "react";
 import { FieldError, FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { BriefDetailedRequest } from "@/components/framing/brief/brief-detailed-request";
-import { BriefChanges } from "@/components/framing/brief/brief-changes";
+import { BriefDocument } from "@/components/framing/brief/brief-document";
 import { BriefVersionDoc } from "@/components/framing/brief/brief-version-doc";
 import { Button } from "@/components/ui/button";
-import { SunkCard } from "@/components/ui/sunk-card";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { decideFramingBrief } from "@/lib/framing/actions/brief-step";
@@ -153,19 +152,18 @@ export function BriefReview({
   );
 
   return (
-    <SunkCard
-      id="brief-version"
+    <BriefDocument
       title={card.title}
       meta={card.meta}
       status={card.status}
       actions={card.actions}
+      changes={card.changes}
       footer={footer}
     >
-      {card.changes && <BriefChanges>{card.changes}</BriefChanges>}
       <BriefVersionDoc
         snapshot={snapshot}
         marking={asking ? { marked, onToggle: toggle } : undefined}
       />
-    </SunkCard>
+    </BriefDocument>
   );
 }

@@ -1784,9 +1784,11 @@ l'étape qui attend la personne (`framingLanding`) et les anciennes URL (`?step=
   cadenas) ; après une demande de modification, seules les dimensions rouvertes s'ouvrent.
   **`QuestionScreen` est la référence** d'une question « une à la fois » (Cadrage juridique, lot 9).
 - **Brief de cadrage** (proto « Suite du Cadrage », Sacha 29/10/2026) : **un seul document**
-  (`SunkCard` + `BriefVersionDoc` : une section par dimension, « libellé | valeur », source dessous,
-  « À revoir » sur les dimensions renvoyées) : la version à envoyer, sinon la dernière envoyée ; en tête
-  « Copier le lien » et le PDF, puis « Changé depuis la version n : … » (`briefChanges`). **Un seul
+  (`BriefDocument` = la `DocumentCard` commune au Master et au Juridique, Sacha 05/11/2026 « c'est un
+  document » ; corps `BriefVersionDoc` : une section par dimension, « libellé | valeur », source dessous,
+  « À revoir » sur les dimensions renvoyées) : la version à envoyer, sinon la dernière envoyée ; dans la
+  tête l'état, « Copier le lien » et « Voir le PDF », puis « Changé depuis la version n : … » sur le
+  bandeau d'info (`briefChanges`) ; le geste (envoyer, décider) sous la carte. **Un seul
   geste** (Sacha, 28/10/2026) : quand tout est complet, la prochaine version s'affiche telle qu'elle
   partira et « Envoyer en validation à X » (`sendFramingBrief`) la fige (`create_framing_brief`, ou le
   brouillon d'avant s'il dit la même chose) et l'envoie (`send_framing_brief`) ; raison écrite si rien n'a
@@ -1805,6 +1807,19 @@ l'étape qui attend la personne (`framingLanding`) et les anciennes URL (`?step=
   projet. La route ne lit plus tout le Cadrage pour une version (seulement s'il n'y en a pas). Police
   Google Sans Flex intégrée au HTML (`lib/pdf/fonts/google-sans-flex.ts`, OFL) : plus d'attente de
   Google Fonts pour ce PDF.
+  **Mise en page du PDF** (retour d'Ibé du 02/11, `lib/framing/brief-pdf.ts` + `brief-pdf-style.ts`) :
+  bandeau PDS OS, titre du projet, bande Version / État / Envoyée le / Validée le, Synthèse en encadré,
+  dimensions numérotées (libellé à gauche, valeur à droite, source dessous), sources en pied, numéros de
+  page. Les fichiers gardés portent la mise en page dans leur nom (`<id>-<state>-l2.pdf`, migration
+  `20261105180201`, l'ancien nom reste lisible) : changer la mise en page = changer `LAYOUT`.
+  **Lien de partage** (Sacha 05/11 : « toujours vers la dernière version ») : « Copier le lien »
+  (`shareFramingBrief` → `share_framing_brief`, responsable ou direction, une version envoyée) copie
+  `/b/<jeton>`, un lien par projet (`share_links`, scope `framing_brief`), créé une fois puis redonné ;
+  la page publique (`app/(public)/b/[token]/route.ts`, sans session, `get_shared_framing_brief` pour
+  anon) imprime à chaque ouverture le PDF de la **dernière version envoyée**, quel que soit son état,
+  affiché dans le navigateur. Le Brief contient l'enveloppe budgétaire : le lien la montre. Pas encore de
+  révocation dans l'interface (`revoked_at` est lu). Migration `20261105180101`, tests
+  `framing-brief-share.test.sql`.
   Gestes en `WriteResult` avec `withOutcome` (`lib/framing/actions/brief-step.ts`).
 - **Après le plan** : tout le Cadrage se lit (étapes faites, rien de modifiable), le Brief validé reste
   consultable dans son étape.

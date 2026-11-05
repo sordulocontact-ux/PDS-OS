@@ -15,22 +15,37 @@ export type BriefVersionRow = {
   version: number;
   state: string;
   sent_at: string | null;
+  decided_at?: string | null;
   content: unknown;
 };
 
-const pathOf = (brief: BriefVersionRow) => `${brief.id}-${brief.state}.pdf`;
+// What the PDF's head says of the version.
+type PrintedVersion = Pick<
+  BriefVersionRow,
+  "version" | "state" | "sent_at" | "decided_at"
+>;
+
+// The layout of the kept files: a new one (05/11/2026, retour d'Ibé) is
+// printed again instead of reading a file of the old one
+// (…20261105180201_framing_brief_pdf_layout).
+const LAYOUT = "l2";
+const pathOf = (brief: BriefVersionRow) =>
+  `${brief.id}-${brief.state}-${LAYOUT}.pdf`;
 
 /** A version (or the Cadrage as it stands) printed now. */
 export function printBriefPdf(
   snapshot: BriefSnapshot,
-  brief: BriefVersionRow | null,
+  brief: PrintedVersion | null,
 ): Promise<Uint8Array> {
   return htmlToPdf(
     briefHtml({
       snapshot,
       version: brief?.version ?? null,
       state: brief?.state ?? null,
+      sentAt: brief?.sent_at ?? null,
+      decidedAt: brief?.decided_at ?? null,
     }),
+    { pageNumbers: true },
   );
 }
 
@@ -71,7 +86,7 @@ export async function keepSentBriefPdf(
     const supabase = await createClient();
     const query = supabase
       .from("framing_briefs")
-      .select("id, version, state, sent_at, content");
+      .select("id, version, state, sent_at, decided_at, content");
     const { data: brief } = await (
       "id" in by
         ? query.eq("id", by.id)

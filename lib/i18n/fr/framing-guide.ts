@@ -171,12 +171,18 @@ export const framingGuide = {
       calls.length ? calls.join(" · ") : "Saisi sans call",
     callTitle: (title: string) => `Call « ${title} »`,
     back: "Retour au récapitulatif",
-    print: "Télécharger en PDF",
+    print: "Voir le PDF",
     exporting: "Préparation du PDF…",
     pdfFailed: "Le PDF n'a pas pu être préparé. Réessayez.",
     share: "Copier le lien",
+    sharing: "Création du lien…",
+    // The link opens the PDF of the latest version sent, without an
+    // account (Sacha 05/11/2026).
     copied:
-      "Lien copié. Il ne s'ouvre que pour les membres qui voient ce projet.",
+      "Lien copié. Il ouvre le PDF de la dernière version du Brief, sans compte.",
+    shareFailed: "Le lien n'a pas pu être créé. Réessayez.",
+    // The browser refused the clipboard: the link, to copy by hand.
+    shareManual: (url: string) => `Lien du Brief : ${url}`,
   },
   poBadge: "PO",
   unknownCall: "Un call",

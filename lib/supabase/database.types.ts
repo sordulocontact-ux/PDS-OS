@@ -19410,6 +19410,7 @@ export type Database = {
       get_production_provider_space:
         | { Args: { p_token: string }; Returns: Json }
         | { Args: { p_contact_token: string; p_item_id: string }; Returns: Json }
+      get_shared_framing_brief: { Args: { p_token: string }; Returns: Json }
       get_shared_strategy_document: { Args: { p_token: string }; Returns: Json }
       get_smartlink: { Args: { p_token: string }; Returns: Json }
       get_split_confirmation:
@@ -20170,6 +20171,7 @@ export type Database = {
         Args: { p_id: string; p_role: string }
         Returns: undefined
       }
+      share_framing_brief: { Args: { p_project_id: string }; Returns: string }
       share_strategy_document: {
         Args: { p_document_id: string }
         Returns: string

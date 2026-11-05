@@ -1,15 +1,15 @@
 import { notFound } from "next/navigation";
 
 import { BriefActions } from "@/components/framing/guide/brief-actions";
+import { BriefDocument } from "@/components/framing/brief/brief-document";
 import { BriefOwnerStep } from "@/components/framing/brief/brief-owner-step";
 import { BriefReview } from "@/components/framing/brief/brief-review";
-import { BriefChanges } from "@/components/framing/brief/brief-changes";
 import { BriefVersionDoc } from "@/components/framing/brief/brief-version-doc";
 import { FramingStepFrame } from "@/components/framing/framing-step-frame";
 import { BriefRequestsSection } from "@/components/framing/requests/brief-requests-section";
 import { Fold } from "@/components/ui/fold";
-import { SunkCard } from "@/components/ui/sunk-card";
 import { ToneCallout } from "@/components/ui/tone-callout";
+import { can } from "@/lib/auth/access";
 import { routes } from "@/lib/auth/redirects";
 import { briefFileName } from "@/lib/framing/brief-pdf";
 import { blocksValidation } from "@/lib/framing/brief-request-view";
@@ -86,8 +86,7 @@ export default async function FramingBriefPage({
     const stored = latest ? snapshotOf(latest.content) : null;
     const changes = changesFrom(live);
     doc = (
-      <SunkCard
-        id="brief-version"
+      <BriefDocument
         title={t.versionTitle(
           // A draft left from before that still says the same is the one sent.
           latest?.state === "pending" && stored && snapshotMatches(stored, live)
@@ -110,10 +109,10 @@ export default async function FramingBriefPage({
             }
           />
         }
+        changes={changes}
       >
-        {changes && <BriefChanges>{changes}</BriefChanges>}
         <BriefVersionDoc snapshot={live} />
-      </SunkCard>
+      </BriefDocument>
     );
   } else if (shownSent) {
     const snap = snapshotOf(shownSent.content);
@@ -134,8 +133,11 @@ export default async function FramingBriefPage({
       },
       actions: (
         <BriefActions
+          projectId={projectId}
           pdfHref={routes.projectFramingBriefPdf(projectId, shownSent.version)}
           fileName={briefFileName(project.title)}
+          // The public link is made by those who send and validate it.
+          canShare={canEdit || can(access, "validate")}
         />
       ),
       changes: snap ? changesFrom(snap) : null,
@@ -155,14 +157,13 @@ export default async function FramingBriefPage({
           card={card}
         />
       ) : (
-        <SunkCard
-          id="brief-version"
+        <BriefDocument
           title={card.title}
           meta={card.meta}
           status={card.status}
           actions={card.actions}
+          changes={card.changes}
         >
-          {card.changes && <BriefChanges>{card.changes}</BriefChanges>}
           <BriefVersionDoc
             snapshot={snap}
             reopened={
@@ -171,7 +172,7 @@ export default async function FramingBriefPage({
                 : []
             }
           />
-        </SunkCard>
+        </BriefDocument>
       ));
   }
 

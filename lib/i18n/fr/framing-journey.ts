@@ -232,6 +232,18 @@ export const framingJourney = {
     previous: (n: number) =>
       n > 1 ? `Versions précédentes (${n})` : "Version précédente",
     detailed: "Demander des corrections détaillées",
+    // The PDF's head (lib/framing/brief-pdf.ts).
+    pdf: {
+      eyebrow: "Brief de cadrage",
+      version: "Version",
+      draft: "Brouillon",
+      state: "État",
+      notSent: "Pas encore envoyée",
+      sentAt: "Envoyée le",
+      approvedAt: "Validée le",
+    },
+    // The shared link opened when no version can be read any more.
+    unavailable: "Ce Brief n'est plus partagé.",
     openRequests: (n: number) =>
       `${plural(n, "demande obligatoire reste ouverte", "demandes obligatoires restent ouvertes")} : elle${n > 1 ? "s" : ""} empêche${n > 1 ? "nt" : ""} de valider. Levez-la${n > 1 ? "s" : ""} ou demandez une modification.`,
   },

@@ -40,7 +40,7 @@ export async function GET(
     supabase.from("projects").select("title").eq("id", projectId).maybeSingle(),
     supabase
       .from("framing_briefs")
-      .select("id, version, state, sent_at, content")
+      .select("id, version, state, sent_at, decided_at, content")
       .eq("project_id", projectId)
       .order("version", { ascending: false }),
   ]);

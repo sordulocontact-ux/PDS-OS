@@ -226,6 +226,8 @@ export const routes = {
     `/app/projects/${id}/strategy/press-kit${step ? `?step=${step}` : ""}`,
   // A shared external document of the Stratégie, read without an account.
   sharedDocument: (token: string) => `/d/${token}`,
+  // The Brief de cadrage's PDF, latest version sent, read without an account.
+  sharedFramingBrief: (token: string) => `/b/${token}`,
   // A dimension of the Stratégie, in « Les 8 dimensions ».
   projectStrategyDimension: (id: string, dimension: string) =>
     `/app/projects/${id}/strategy/dimensions#dim-${dimension}`,
