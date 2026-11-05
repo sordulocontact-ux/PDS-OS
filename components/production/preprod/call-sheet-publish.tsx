@@ -52,10 +52,23 @@ export function CallSheetPublish({
 
   async function link() {
     setPending(true);
-    const result = await createCallSheetLink({ projectId, sheetId });
+    const result = await createCallSheetLink({
+      projectId,
+      sheetId,
+      deliverableId,
+    });
     setPending(false);
     if (!result.ok) return void toast.error(result.error);
     const url = `${window.location.origin}/fs/${result.token}`;
+    // PDS OS e-mailed the crew itself: the link is shown only for those who
+    // did not get it (no address, or the e-mail did not leave).
+    const attempted = result.emailed.length + result.unsent.length > 0;
+    const left = attempted
+      ? emails.filter((address) => !result.emailed.includes(address))
+      : emails;
+    if (result.emailed.length > 0)
+      toast.success(t.emailed.sent(result.emailed.length));
+    if (result.unsent.length > 0) toast.warning(t.emailed.failed);
     showLinks({
       title: t.linkTitle,
       description: t.linkDescription,
@@ -64,10 +77,10 @@ export function CallSheetPublish({
           key: "call-sheet",
           label: t.linkLabel,
           url,
-          ...(emails.length > 0
+          ...(left.length > 0
             ? {
                 email: {
-                  href: `mailto:${emails.join(",")}?subject=${encodeURIComponent(
+                  href: `mailto:${left.join(",")}?subject=${encodeURIComponent(
                     t.emailSubject(deliverableTitle),
                   )}&body=${encodeURIComponent(url)}`,
                   label: t.email,

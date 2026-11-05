@@ -418,7 +418,7 @@ export const calls = {
     share: "Partager le compte rendu",
     shareTitle: "Partager le compte rendu",
     shareBody:
-      "Les membres choisis sont prévenus et lisent ce compte rendu seulement. Pour les autres, PDS OS prépare un e-mail que vous envoyez de votre messagerie, avec le PDF.",
+      "Les membres choisis sont prévenus et lisent ce compte rendu seulement. Les adresses extérieures reçoivent le compte rendu par e-mail, envoyé par PDS OS ; le PDF reste à joindre vous-même si besoin.",
     scope: "Ce qui est partagé",
     scopes: {
       full: "Le compte rendu complet",
@@ -437,6 +437,15 @@ export const calls = {
       `« ${email} » n'est pas une adresse e-mail.`,
     shared: "Compte rendu partagé.",
     mailto: "Écrire l'e-mail",
+    // PDS OS e-mails the outside addresses itself (lib/calls/closure-actions.ts).
+    emailed: {
+      sent: (n: number) =>
+        n === 1
+          ? "Compte rendu envoyé par e-mail à 1 adresse extérieure"
+          : `Compte rendu envoyé par e-mail à ${n} adresses extérieures`,
+      partial: (n: number) =>
+        `Compte rendu partagé, envoyé par e-mail à ${n} adresse${n > 1 ? "s" : ""} seulement : écrivez aux autres vous-même.`,
+    },
     pdf: "Télécharger le PDF",
     history: "Historique",
     sharedLine: (

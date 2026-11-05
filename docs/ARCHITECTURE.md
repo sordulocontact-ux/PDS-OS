@@ -4009,6 +4009,15 @@ la personne (`/c/`). Migration `20261020070101_signed_returns.sql`, pgTAP `signe
   (`lib/email/invoice-email.ts` : fusionnée au « validé » de l'ingénieur au dernier Master final, ou
   envoyée à la signature d'un contrat payant). Résultat `emailOutcome` (`lib/email/outcome.ts`) : envoyé =
   toast, échec = avertissement, désactivé = voie manuelle inchangée ; `canEmail` (SMTP + adresse) vient du serveur.
+  **Lot 3 (05/11/2026)** : `emailMessage` (`lib/email/link-email.ts`) envoie un message sans lien ; `emailProviderLink`
+  (`lib/email/provider-email.ts`) envoie l'espace `/p` pendant que le jeton est en main. Production : lien
+  prestataire et réalisateur retenu (envoyés à la création), demande de corrections (`sendCorrections`, texte
+  envoyé au contact du Réseau), feuille de service (`createCallSheetLink` : un e-mail par adresse de l'équipe, les
+  adresses non atteintes gardent le mailto). Activations : lien d'accord (`prepareAgreement` l'envoie et déclare
+  l'envoi « e-mail »), brief et récap agence (e-mail **avant** la déclaration ; s'il ne part pas rien n'est marqué
+  et le formulaire propose « Je l'ai envoyé moi-même », `manual`), messages validés (`emailActivationMessage`,
+  seulement sans dossier de presse joint). Calls : résumé aux invités extérieurs (`sendMeetingSummary`) et compte rendu
+  partagé (`shareCallReport`) envoyés par le serveur à l'envoi.
 
 ### Synchronisation, horodatage et historique (retours Juridique du 11/10/2026, lot 2)
 

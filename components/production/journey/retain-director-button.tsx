@@ -39,8 +39,12 @@ export function RetainDirectorButton({
         start(async () => {
           const result = await retainDirector({ projectId, proposalId, name });
           if (!result.ok) return void toast.error(result.error);
-          publish(result, t.done(name));
-          if (result.token)
+          const emailed = result.emailed === "sent";
+          publish(
+            emailed ? { ...result, done: t.email.sent(name) } : result,
+            t.done(name),
+          );
+          if (result.token && !emailed)
             showLinks({
               title: t.linkTitle(name),
               description: t.linkDescription,

@@ -38,10 +38,7 @@ export async function emailLink(
   mail: LinkEmail,
 ): Promise<"sent" | "failed" | "disabled"> {
   if (!emailEnabled() || !mail.to.email) return "disabled";
-  const access = await requireApproved();
-  const sender =
-    [access.firstName, access.lastName].filter(Boolean).join(" ") ||
-    (access.email ?? "PDS");
+  const { sender, email } = await currentSender();
   const sent = await sendEmail({
     to: { name: mail.to.name, email: mail.to.email },
     subject: mail.subject,
@@ -54,7 +51,54 @@ export async function emailLink(
       t.signature(sender),
       "",
     ].join("\n"),
-    sender: { name: sender, email: access.email },
+    sender: { name: sender, email },
   });
+  return outcomeOf(sent);
+}
+
+/** The member who sends: their name, and the address replies go back to. */
+async function currentSender(): Promise<{
+  sender: string;
+  email: string | null;
+}> {
+  const access = await requireApproved();
+  return {
+    sender:
+      [access.firstName, access.lastName].filter(Boolean).join(" ") ||
+      (access.email ?? "PDS"),
+    email: access.email,
+  };
+}
+
+function outcomeOf(
+  sent: Awaited<ReturnType<typeof sendEmail>>,
+): "sent" | "failed" | "disabled" {
   return sent.ok ? "sent" : sent.reason === "disabled" ? "disabled" : "failed";
+}
+
+export type MessageEmail = {
+  to: { name: string; email: string | null };
+  subject: string;
+  // The whole message, as the member wrote or approved it (no link added).
+  text: string;
+};
+
+/**
+ * An e-mail that carries a message and no link (a brief, a recap, a call
+ * summary, a press pitch): the text itself, then the member's signature,
+ * same sender as `emailLink`. « disabled »: no SMTP or no address, the
+ * manual way stays.
+ */
+export async function emailMessage(
+  mail: MessageEmail,
+): Promise<"sent" | "failed" | "disabled"> {
+  if (!emailEnabled() || !mail.to.email) return "disabled";
+  const { sender, email } = await currentSender();
+  const sent = await sendEmail({
+    to: { name: mail.to.name, email: mail.to.email },
+    subject: mail.subject,
+    text: [mail.text.trim(), "", t.signature(sender), ""].join("\n"),
+    sender: { name: sender, email },
+  });
+  return outcomeOf(sent);
 }

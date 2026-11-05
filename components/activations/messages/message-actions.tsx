@@ -10,6 +10,7 @@ import { CopyButton } from "@/components/ui/copy-button";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { advanceMessage } from "@/lib/activations/messages/actions";
+import { emailActivationMessage } from "@/lib/activations/messages/email-actions";
 import type { MessageRecord } from "@/lib/activations/messages/queries";
 import type { MessageKind } from "@/lib/activations/model";
 import { activationWork } from "@/lib/i18n/fr/activation-work";
@@ -99,6 +100,7 @@ export function MessageActions({
   defaults,
   pressKitId,
   email,
+  canEmail = false,
   today,
 }: {
   projectId: string;
@@ -108,9 +110,12 @@ export function MessageActions({
   defaults: MessageDefaults;
   pressKitId: string | null;
   email: string | null;
+  // PDS OS can e-mail this message itself (SMTP set, address in the Réseau).
+  canEmail?: boolean;
   today: string;
 }) {
   const [pending, startTransition] = useTransition();
+  const mail = useWriteSubmit(undefined, "");
   const act = (action: "submit" | "validate" | "cancel", done: string) =>
     startTransition(async () => {
       const r = await advanceMessage({
@@ -200,6 +205,20 @@ export function MessageActions({
       )}
       {m.status === "validated" && (
         <>
+          {canEmail && (
+            <Button
+              type="button"
+              size="xs"
+              disabled={mail.pending}
+              onClick={() =>
+                mail.run(() =>
+                  emailActivationMessage({ projectId, messageId: m.id }),
+                )
+              }
+            >
+              {t.email.send}
+            </Button>
+          )}
           <CopyButton
             value={text}
             label={t.copy}
@@ -232,6 +251,7 @@ export function MessageActions({
           </DialogButton>
         </>
       )}
+      {mail.error && <FormMessage kind="error">{mail.error}</FormMessage>}
       {m.status !== "sent_declared" && m.status !== "cancelled" && (
         <Button
           type="button"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
@@ -25,15 +25,20 @@ export function RecapForm({
   agency,
   subject,
   body,
+  canEmail = false,
 }: {
   projectId: string;
   activationId: string;
   agency: string;
   subject: string;
   body: string;
+  // PDS OS can e-mail the agency's contact (SMTP set, address in the Réseau).
+  canEmail?: boolean;
 }) {
   const message = useRef<HTMLTextAreaElement>(null);
   const { pending, error, run } = useWriteSubmit(undefined, t.done);
+  // The e-mail did not leave: the owner sends it, then declares it.
+  const [manual, setManual] = useState(false);
   return (
     <form
       noValidate
@@ -43,9 +48,17 @@ export function RecapForm({
         const text = String(
           new FormData(event.currentTarget).get("body") ?? "",
         );
-        run(() =>
-          sendAgencyRecap({ projectId, activationId, subject, body: text }),
-        );
+        run(async () => {
+          const result = await sendAgencyRecap({
+            projectId,
+            activationId,
+            subject,
+            body: text,
+            manual,
+          });
+          if (!result.ok && "emailFailed" in result) setManual(true);
+          return result;
+        });
       }}
     >
       <h3 className="text-[length:var(--type-body-sm)] font-semibold">
@@ -62,7 +75,7 @@ export function RecapForm({
       />
       <div className="flex flex-wrap gap-2">
         <Button type="submit" size="sm" disabled={pending}>
-          {t.send}
+          {canEmail && !manual ? t.sendByEmail : manual ? t.sendManual : t.send}
         </Button>
         <CopyButton
           value={() => message.current?.value ?? body}

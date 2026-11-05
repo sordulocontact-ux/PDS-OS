@@ -24,6 +24,7 @@ import { loadSheets, versionsOf } from "@/lib/activations/sheet-queries";
 import { sheetFieldKeys, type SheetFields } from "@/lib/activations/sheets";
 import type { TargetRecord } from "@/lib/activations/targets";
 import type { Access } from "@/lib/auth/access";
+import { emailEnabled } from "@/lib/email/send";
 import { activationInfluence } from "@/lib/i18n/fr/activation-influence";
 import { activationJourney } from "@/lib/i18n/fr/activation-journey";
 import { activationWork } from "@/lib/i18n/fr/activation-work";
@@ -118,6 +119,7 @@ export async function InfluenceCollaboration({
           projectId={project.id}
           targetId={target.id}
           defaults={briefForm}
+          canEmail={emailEnabled() && Boolean(target.contactEmail)}
         />
       ),
     ],

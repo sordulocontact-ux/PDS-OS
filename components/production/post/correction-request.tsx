@@ -77,7 +77,13 @@ export function CorrectionRequestBlock({
       toast.error(fr.productionPost.errors.generic);
       return;
     }
-    send.run(() => sendCorrections({ projectId, requestId: request.id }));
+    send.run(() =>
+      sendCorrections({
+        projectId,
+        requestId: request.id,
+        text: requestText(version, request),
+      }),
+    );
   }
 
   return (

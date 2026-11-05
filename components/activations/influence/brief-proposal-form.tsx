@@ -30,14 +30,21 @@ export function BriefProposalForm({
   projectId,
   targetId,
   defaults,
+  canEmail = false,
 }: {
   projectId: string;
   targetId: string;
   defaults: BriefDefaults;
+  // PDS OS can e-mail the creator (SMTP set, address in the Réseau).
+  canEmail?: boolean;
 }) {
   const message = useRef<HTMLTextAreaElement>(null);
   const [ads, setAds] = useState<Ads>("none");
   const [missing, setMissing] = useState<Missing | null>(null);
+  const [channel, setChannel] = useState("email");
+  // The e-mail did not leave: the person sends it, then declares it.
+  const [manual, setManual] = useState(false);
+  const auto = canEmail && channel === "email" && !manual;
   const { pending, error, run } = useWriteSubmit(undefined, t.done);
   return (
     <form
@@ -57,8 +64,8 @@ export function BriefProposalForm({
               : null;
         setMissing(gap);
         if (gap) return;
-        run(() =>
-          sendInfluenceBrief({
+        run(async () => {
+          const result = await sendInfluenceBrief({
             projectId,
             targetId,
             fee: text("fee"),
@@ -67,8 +74,11 @@ export function BriefProposalForm({
             ads: ads === "extra" ? t.adsExtraValue(extra) : t.adsOptions[ads],
             body: text("body"),
             channel: text("channel") as "email" | "dm" | "whatsapp",
-          }),
-        );
+            manual,
+          });
+          if (!result.ok && "emailFailed" in result) setManual(true);
+          return result;
+        });
       }}
     >
       <h3 className="text-[length:var(--type-body-sm)] font-semibold">
@@ -135,11 +145,12 @@ export function BriefProposalForm({
             whatsapp: t.channels.whatsapp,
           }}
           defaultValue="email"
+          onValueChange={setChannel}
         />
       </div>
       <div className="flex flex-wrap gap-2">
         <Button type="submit" size="sm" disabled={pending}>
-          {t.send}
+          {auto ? t.sendByEmail : manual ? t.sendManual : t.send}
         </Button>
         <CopyButton
           value={() => message.current?.value ?? defaults.body}

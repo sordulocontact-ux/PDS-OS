@@ -4,6 +4,7 @@ import { IconPlus } from "nucleo-sharp-essential";
 import { useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/toast";
 import { ConfirmButton } from "@/components/ui/confirm-button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { DialogButton } from "@/components/ui/dialog-button";
@@ -109,6 +110,10 @@ export function PrepareAgreementButton({
             });
             if (!result.ok) return setError(result.error);
             setOpen(false);
+            // PDS OS e-mailed the creator and declared it sent.
+            if (result.emailed === "sent")
+              return void toast.success(a.email.sent);
+            if (result.emailed === "failed") toast.warning(a.email.failed);
             showLinks({
               title: a.linkTitle,
               description: a.linkDescription,

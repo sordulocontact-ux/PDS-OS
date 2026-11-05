@@ -4,7 +4,14 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { requireApproved } from "@/lib/auth/dal";
-import { buildReportContent, REPORT_SCOPES } from "@/lib/calls/closure";
+import { emailMessage } from "@/lib/email/link-email";
+import {
+  buildReportContent,
+  reportContentOf,
+  reportText,
+  REPORT_SCOPES,
+  scopedReport,
+} from "@/lib/calls/closure";
 import { loadCallOutcomes } from "@/lib/calls/outcomes";
 import { loadLatestReport } from "@/lib/calls/queries";
 import { fr } from "@/lib/i18n/fr";
@@ -16,7 +23,8 @@ import { createClient } from "@/lib/supabase/server";
 // the code; sharing it keeps who, when, which scope and to whom. RLS
 // decides who closes and shares (the call's owner).
 
-type Result = { ok: true } | { ok: false; error: string };
+type Result =
+  { ok: true; notice?: string; done?: string } | { ok: false; error: string };
 
 const id = z.uuid();
 const e = fr.calls.closure.errors;
@@ -139,7 +147,7 @@ export async function shareCallReport(
   const [{ data: call }, { data: people }] = await Promise.all([
     supabase
       .from("calls")
-      .select("organization_id")
+      .select("organization_id, title, occurred_at")
       .eq("id", v.callId)
       .maybeSingle(),
     v.personIds.length
@@ -174,5 +182,28 @@ export async function shareCallReport(
   }
   await schedulePendingPushes();
   refresh();
-  return { ok: true };
+  if (v.emails.length === 0) return { ok: true };
+  const { data: closure } = await supabase
+    .from("call_closures")
+    .select("content")
+    .eq("id", v.closureId)
+    .maybeSingle();
+  const content = reportContentOf(closure?.content);
+  if (!content) return { ok: true };
+  const text = reportText(scopedReport(content, v.scope), {
+    title: call.title,
+    occurredAt: call.occurred_at,
+  });
+  let reached = 0;
+  for (const address of v.emails) {
+    const sent = await emailMessage({
+      to: { name: address, email: address },
+      subject: fr.calls.closure.report.subject(call.title),
+      text,
+    });
+    if (sent === "sent") reached += 1;
+  }
+  const t = fr.calls.closure.emailed;
+  if (reached === v.emails.length) return { ok: true, done: t.sent(reached) };
+  return { ok: true, ...(reached > 0 ? { notice: t.partial(reached) } : {}) };
 }

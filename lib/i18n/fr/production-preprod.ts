@@ -699,6 +699,22 @@ export const productionPreprod = {
       email: "Écrire à l'équipe",
       emailSubject: (deliverable: string) =>
         `Feuille de service — ${deliverable}`,
+      // Sent by PDS OS itself to each crew address (lib/production/preprod/actions-call-sheet-publish.ts).
+      emailed: {
+        sent: (n: number) =>
+          n === 1
+            ? "Lien envoyé par e-mail à 1 personne de l'équipe"
+            : `Lien envoyé par e-mail à ${n} personnes de l'équipe`,
+        failed:
+          "Certains e-mails ne sont pas partis : envoyez-leur le lien vous-même.",
+      },
+      mail: {
+        subject: (project: string, deliverable: string) =>
+          `« ${project} » : feuille de service ${deliverable}`,
+        body: (deliverable: string, day: string | null) =>
+          `Voici la feuille de service de « ${deliverable} »${day ? ` (tournage le ${day})` : ""}. Le lien montre toujours la dernière version diffusée.`,
+        open: "Ouvrir la feuille de service :",
+      },
       copy: "Copier le lien",
       copied: "Lien copié.",
       close: "Fermer",

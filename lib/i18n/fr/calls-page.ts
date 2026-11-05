@@ -126,7 +126,7 @@ export const callPage = {
     send: "Envoyer aux participants",
     sent: "Résumé envoyé aux participants.",
     externals:
-      "L'équipe le reçoit dans PDS OS. Pour les invités extérieurs, PDS OS prépare l'e-mail avec ce message : envoyez-le de votre messagerie.",
+      "L'équipe le reçoit dans PDS OS. Les invités extérieurs dont PDS OS a l'adresse le reçoivent aussi par e-mail, à l'envoi ; pour les autres, écrivez-leur de votre messagerie.",
     mailto: "Écrire l'e-mail aux invités",
   },
 } as const;

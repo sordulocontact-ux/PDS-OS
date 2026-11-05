@@ -76,10 +76,11 @@ export const activationInfluence = {
     prepare: "Préparer le lien d'accord",
     prepareTitle: "Préparer le lien d'accord",
     prepareBody:
-      "Le lien montre les conditions validées et les droits proposés. Un nouveau lien révoque le précédent. Il s'affiche une seule fois : copiez-le.",
+      "Le lien montre les conditions validées et les droits proposés. Un nouveau lien révoque le précédent. PDS OS l'envoie par e-mail au créateur quand il a son adresse ; sinon il s'affiche une seule fois : copiez-le.",
     prepared: "Lien d'accord prêt.",
     linkTitle: "Lien d'accord du créateur",
-    linkDescription: "Affiché une seule fois. PDS OS ne l'envoie pas.",
+    linkDescription:
+      "Affiché une seule fois : copiez-le et envoyez-le, puis marquez-le envoyé.",
     revoke: "Révoquer le lien",
     revoked: "Lien révoqué.",
     states: {
@@ -113,6 +114,16 @@ export const activationInfluence = {
     marked: "Accord marqué envoyé.",
     preview: "Aperçu de la page du créateur",
     needsTerms: "Validez d'abord les conditions de la dernière position.",
+    // The e-mail PDS OS sends itself (lib/activations/influence/negotiation-actions.ts).
+    email: {
+      subject: (project: string, campaign: string) =>
+        `« ${project} » : votre accord pour ${campaign}`,
+      body: "Voici le récapitulatif de notre collaboration. Vous pouvez donner votre accord ou demander une modification sur la page ci-dessous.",
+      open: "Voir l'accord :",
+      sent: "Lien d'accord envoyé par e-mail au créateur et marqué envoyé",
+      failed:
+        "Le lien est prêt, mais l'e-mail n'est pas parti : copiez le lien et envoyez-le vous-même.",
+    },
     mailSubject: (campaign: string) => `Accord pour la campagne ${campaign}`,
     mailBody: (link: string) =>
       `Bonjour,\n\nVoici le récapitulatif de notre collaboration. Vous pouvez donner votre accord ou demander une modification ici :\n${link}\n\nMerci !`,

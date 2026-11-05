@@ -23,7 +23,7 @@ export const activationBrief = {
     adsExtraValue: (amount: string) => `Spark Ads · 30 jours · +${amount} € HT`,
     message: "Message",
     messageSource:
-      "Repris du concept validé. PDS OS ne l'envoie pas : copiez-le, puis indiquez qu'il est parti.",
+      "Repris du concept validé. PDS OS l'envoie par e-mail quand le créateur a une adresse dans le Réseau ; sinon copiez-le, puis indiquez qu'il est parti.",
     greeting: (first: string) => `Bonjour ${first},`,
     release: (artist: string, title: string, day: string | null) =>
       `${artist ? `${artist} sort « ${title} »` : `« ${title} » sort`}${day ? ` le ${day}` : ""}.`,
@@ -38,6 +38,11 @@ export const activationBrief = {
       whatsapp: "WhatsApp",
     },
     send: "Marquer le brief comme envoyé",
+    sendByEmail: "Envoyer le brief par e-mail",
+    // After an e-mail that did not leave, once the person sent it themselves.
+    sendManual: "Je l'ai envoyé moi-même : marquer comme envoyé",
+    sentByEmail: "Brief envoyé par e-mail",
+    emailSubject: (project: string) => `« ${project} » : brief et proposition`,
     copy: "Copier le message",
     copied: "Message copié.",
     done: "Brief envoyé",
@@ -47,6 +52,8 @@ export const activationBrief = {
       message: "Le message envoyé.",
       conceptNotValidated:
         "Le concept doit être validé avant d'envoyer le brief.",
+      emailFailed:
+        "L'e-mail n'est pas parti : rien n'est marqué envoyé. Réessayez, ou copiez le message, envoyez-le vous-même, puis marquez-le envoyé.",
       alreadySent:
         "Le brief et la proposition sont déjà partis : répondez dans la négociation.",
     },
@@ -55,8 +62,11 @@ export const activationBrief = {
     title: (agency: string) => `Récapitulatif pour ${agency}`,
     message: "Message",
     source:
-      "Écrit à partir de vos décisions, sans les notes internes. PDS OS ne l'envoie pas : copiez-le, puis indiquez qu'il est parti.",
+      "Écrit à partir de vos décisions, sans les notes internes. PDS OS l'envoie par e-mail quand l'agence a une adresse dans le Réseau ; sinon copiez-le, puis indiquez qu'il est parti.",
     send: "Marquer comme envoyé",
+    sendByEmail: "Envoyer par e-mail",
+    sendManual: "Je l'ai envoyé moi-même : marquer comme envoyé",
+    sentByEmail: "Récapitulatif envoyé par e-mail",
     copy: "Copier le message",
     copied: "Message copié.",
     done: "Récapitulatif envoyé",
@@ -77,6 +87,10 @@ export const activationBrief = {
     },
     agency: "l'agence",
     thanks: (name: string) => `Merci, ${name}`,
-    errors: { message: "Le message envoyé." },
+    errors: {
+      message: "Le message envoyé.",
+      emailFailed:
+        "L'e-mail n'est pas parti : rien n'est marqué envoyé. Réessayez, ou copiez le message, envoyez-le vous-même, puis marquez-le envoyé.",
+    },
   },
 };

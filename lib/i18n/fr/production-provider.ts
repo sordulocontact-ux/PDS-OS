@@ -16,6 +16,15 @@ export const productionProvider = {
   notOpened: "pas encore ouvert",
   expired: "Lien expiré",
   failed: "Le lien n'a pas pu être créé. Réessayez.",
+  // The e-mail PDS OS sends itself with the link (lib/email/provider-email.ts).
+  email: {
+    subject: (title: string) => `« ${title} » : votre espace`,
+    body: "Voici votre espace pour ce projet : vous y retrouvez votre mission, les références et les corrections qui vous sont adressées, et vous y déposez vos versions et vos exports.",
+    open: "Ouvrir votre espace :",
+    sent: (name: string) => `Lien créé et envoyé par e-mail à ${name}`,
+    failed:
+      "Le lien est créé, mais l'e-mail n'est pas parti : copiez le lien et envoyez-le vous-même.",
+  },
   notAProvider:
     "Ce contact ne tient aucune étape ni demande de corrections de ce livrable.",
 

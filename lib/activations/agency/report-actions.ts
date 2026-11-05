@@ -13,6 +13,8 @@ import {
   textOrNull,
 } from "@/lib/activations/result";
 import { requireApproved } from "@/lib/auth/dal";
+import { emailMessage } from "@/lib/email/link-email";
+import { emailEnabled } from "@/lib/email/send";
 import { fr } from "@/lib/i18n/fr";
 import { withOutcome } from "@/lib/journey/outcome";
 import { createClient } from "@/lib/supabase/server";
@@ -99,17 +101,26 @@ export async function decideAgencyReport(
   return error ? activationFailure(error) : activationDone(v.projectId);
 }
 
+// The refusal when the e-mail did not leave: the form then offers to declare
+// the sending by hand.
+export type RecapResult =
+  WriteResult | { ok: false; error: string; emailFailed: true };
+
 /**
- * « Marquer comme envoyé » (proto `agsent`): the recap written by code from
- * the PDS decisions, read (and perhaps edited) by the owner, declared sent
- * at once — PDS OS sends nothing (send_agency_recap).
+ * « Envoyer » / « Marquer comme envoyé » (proto `agsent`): the recap written
+ * by code from the PDS decisions, read (and perhaps edited) by the owner.
+ * PDS OS e-mails it to the agency's contact itself when it can (SMTP, an
+ * address in the Réseau; Sacha, 05/11/2026) and declares it sent only if it
+ * left; else the owner sends it and declares it (send_agency_recap).
  */
 export async function sendAgencyRecap(input: {
   projectId: string;
   activationId: string;
   subject: string;
   body: string;
-}): Promise<WriteResult> {
+  // After an e-mail that did not leave: the owner sent it themselves.
+  manual?: boolean;
+}): Promise<RecapResult> {
   await requireApproved();
   const parsed = z
     .object({
@@ -117,15 +128,27 @@ export async function sendAgencyRecap(input: {
       activationId: z.uuid(),
       subject: z.string().max(300),
       body: z.string().max(20000),
+      manual: z.boolean().optional(),
     })
     .safeParse(input);
   if (!parsed.success) return invalid();
   const v = parsed.data;
   if (!v.body.trim()) return invalid(fr.activationBrief.recap.errors.message);
+  const emailed = v.manual
+    ? "disabled"
+    : await emailRecap(v.activationId, v.subject, v.body);
+  if (emailed === "failed")
+    return {
+      ok: false,
+      error: fr.activationBrief.recap.errors.emailFailed,
+      emailFailed: true,
+    };
   return withOutcome(
     v.projectId,
     ["marketing"],
-    fr.activationBrief.recap.done,
+    emailed === "sent"
+      ? fr.activationBrief.recap.sentByEmail
+      : fr.activationBrief.recap.done,
     async () => {
       const supabase = await createClient();
       const { error } = await supabase.rpc("send_agency_recap", {
@@ -136,4 +159,30 @@ export async function sendAgencyRecap(input: {
       return error ? activationFailure(error) : activationDone(v.projectId);
     },
   );
+}
+
+/** The recap, e-mailed to the agency's contact in the Réseau. */
+async function emailRecap(
+  activationId: string,
+  subject: string,
+  body: string,
+): Promise<"sent" | "failed" | "disabled"> {
+  if (!emailEnabled()) return "disabled";
+  const agency = await loadAgency(activationId);
+  const contactId = agency.sources.find(
+    (s) => s.agencyContactId,
+  )?.agencyContactId;
+  if (!contactId) return "disabled";
+  const supabase = await createClient();
+  const { data: contact } = await supabase
+    .from("network_contacts")
+    .select("name, email")
+    .eq("id", contactId)
+    .maybeSingle();
+  if (!contact?.email) return "disabled";
+  return emailMessage({
+    to: { name: contact.name, email: contact.email },
+    subject,
+    text: body,
+  });
 }

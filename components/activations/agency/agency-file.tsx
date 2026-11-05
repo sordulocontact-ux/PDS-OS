@@ -13,6 +13,7 @@ import {
 import type { ActivationFiche } from "@/lib/activations/fiche";
 import { loadMessages } from "@/lib/activations/messages/queries";
 import type { Access } from "@/lib/auth/access";
+import { emailEnabled } from "@/lib/email/send";
 import { activationAgency } from "@/lib/i18n/fr/activation-agency";
 import { activationBrief } from "@/lib/i18n/fr/activation-brief";
 import { createClient } from "@/lib/supabase/server";
@@ -61,9 +62,10 @@ export async function AgencyFile({
   const source = agency.sources.find(
     (s) => s.agencyContactId || s.agencyPerson,
   );
-  const agencyName = pending
-    ? await agencyNameOf(source?.agencyContactId ?? null)
+  const agencyContact = pending
+    ? await agencyContactOf(source?.agencyContactId ?? null)
     : null;
+  const agencyName = agencyContact?.name ?? null;
   const nameOf = (id: string | null) =>
     members.find((m) => m.personId === id)?.name ?? "—";
 
@@ -129,6 +131,7 @@ export async function AgencyFile({
             source?.agencyPerson ??
             fr.activationBrief.recap.agency
           }
+          canEmail={emailEnabled() && Boolean(agencyContact?.email)}
           subject={t.recap.subject(a.title)}
           body={agencyRecapText({
             rows,
@@ -144,14 +147,16 @@ export async function AgencyFile({
   );
 }
 
-/** The agency's name in the Réseau (« Agence Halo »), if linked. */
-async function agencyNameOf(contactId: string | null): Promise<string | null> {
+/** The agency's name (« Agence Halo ») and address in the Réseau, if linked. */
+async function agencyContactOf(
+  contactId: string | null,
+): Promise<{ name: string; email: string | null } | null> {
   if (!contactId) return null;
   const supabase = await createClient();
   const { data } = await supabase
     .from("network_contacts")
-    .select("name")
+    .select("name, email")
     .eq("id", contactId)
     .maybeSingle();
-  return data?.name ?? null;
+  return data;
 }

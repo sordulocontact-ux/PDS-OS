@@ -106,7 +106,7 @@ export const activationWork = {
   messages: {
     title: "Messages",
     description:
-      "Un brouillon n'est ni validé ni envoyé. PDS OS n'envoie rien : l'envoi se fait hors de l'app, puis se déclare ici.",
+      "Un brouillon n'est ni validé ni envoyé. Un message validé part par e-mail depuis PDS OS quand le destinataire a une adresse dans le Réseau ; sinon l'envoi se fait hors de l'app, puis se déclare ici.",
     kinds: {
       brief: "Brief",
       proposal: "Réponse de négociation",
@@ -161,6 +161,17 @@ export const activationWork = {
     copy: "Copier le message",
     copied: "Message copié.",
     mailto: "Ouvrir dans la messagerie",
+    // « Envoyer par e-mail »: PDS OS sends it itself (lib/activations/messages/email-actions.ts).
+    email: {
+      send: "Envoyer par e-mail",
+      sent: (name: string) => `Message envoyé par e-mail à ${name}`,
+      subject: (project: string) => `« ${project} » : message`,
+      noAddress: "Ce message ne peut pas partir par e-mail : copiez-le.",
+      failed:
+        "L'e-mail n'est pas parti : rien n'est marqué envoyé. Copiez le message et envoyez-le vous-même.",
+      declareFailed:
+        "L'e-mail est parti, mais l'envoi n'a pas pu être enregistré : déclarez-le avec « Déclarer l'envoi ».",
+    },
     validatedBy: (who: string, date: string) => `validé par ${who} le ${date}`,
     sentBy: (who: string, date: string) =>
       `envoi déclaré par ${who}, parti le ${date}`,

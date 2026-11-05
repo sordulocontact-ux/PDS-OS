@@ -5,6 +5,8 @@ import { z } from "zod";
 
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
+import { emailMessage } from "@/lib/email/link-email";
+import { projectTitleOf } from "@/lib/email/outcome";
 import { loadPlannedCall } from "@/lib/calls/prep/planned";
 import { fr } from "@/lib/i18n/fr";
 import { schedulePendingPushes } from "@/lib/notifications/push";
@@ -15,14 +17,18 @@ const inputSchema = z.object({
   text: z.string().trim().min(1).max(10000),
 });
 
-type SendResult = { ok: true; notice?: string } | { ok: false; error: string };
+type SendResult =
+  { ok: true; notice?: string; done?: string } | { ok: false; error: string };
 
 /**
  * « Envoyer aux participants »: the message as the owner corrected it,
  * sent as the call's next version (send_call_summary). The recipients are
  * the call's participants as the server reads them, never a list from the
  * browser: the members are told in PDS OS (trigger), the others are kept
- * with their address — the e-mail itself is not wired yet, said as a notice.
+ * with their address. The outside guests with an address are e-mailed the
+ * message by PDS OS itself (Sacha, 05/11/2026), one e-mail each; those it
+ * cannot reach (no address, error) are said as a notice, the message to be
+ * sent by hand (« Écrire l'e-mail »).
  */
 export async function sendMeetingSummary(input: {
   callId: string;
@@ -67,7 +73,28 @@ export async function sendMeetingSummary(input: {
   await schedulePendingPushes();
   if (planned.projectId)
     revalidatePath(routes.project(planned.projectId), "layout");
-  return recipients.some((r) => r.how !== "app")
-    ? { ok: true, notice: t.emailNotWired }
-    : { ok: true };
+  const outside = recipients.filter((r) => r.how !== "app");
+  if (outside.length === 0) return { ok: true };
+  const title = planned.projectId
+    ? await projectTitleOf(planned.projectId)
+    : planned.title;
+  let reached = 0;
+  for (const r of outside) {
+    // « link »: their private page, not an e-mail of the summary itself.
+    const sent =
+      r.how === "email" && r.email
+        ? await emailMessage({
+            to: { name: r.name, email: r.email },
+            subject: t.emailSubject(title, planned.title),
+            text: parsed.data.text,
+          })
+        : "disabled";
+    if (sent === "sent") reached += 1;
+  }
+  if (reached === outside.length)
+    return { ok: true, done: t.emailSent(reached) };
+  return {
+    ok: true,
+    notice: reached > 0 ? t.emailPartial(reached) : t.emailNotWired,
+  };
 }

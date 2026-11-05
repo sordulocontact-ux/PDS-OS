@@ -51,7 +51,16 @@ export const productionCorrections = {
   copyHint:
     "Le texte est copié dans le presse-papiers : collez-le dans votre message.",
   copyHintProvider:
-    "Le texte est copié dans le presse-papiers. Envoyez-lui aussi son lien : il y retrouve ces corrections et dépose lui-même la version suivante ; la demande passe « Consultée » quand il l'ouvre.",
+    "PDS OS envoie le texte par e-mail quand le contact a une adresse dans le Réseau ; il est aussi copié dans le presse-papiers. Envoyez-lui aussi son lien : il y retrouve ces corrections et dépose lui-même la version suivante ; la demande passe « Consultée » quand il l'ouvre.",
+  // The e-mail PDS OS sends itself to a Réseau contact (lib/production/post/correction-actions.ts).
+  email: {
+    subject: (title: string) => `« ${title} » : corrections à apporter`,
+    intro:
+      "Voici les corrections à apporter. Répondez simplement à cet e-mail pour toute question.",
+    sent: (name: string) => `Demande envoyée par e-mail à ${name}`,
+    failed:
+      "La demande est transmise, mais l'e-mail n'est pas parti : le texte est copié, envoyez-le vous-même.",
+  },
   // On the next version: what it had to correct (PROD-032).
   answersTitle: (n: number) => `Corrections demandées sur la V${n}`,
   answersHint:

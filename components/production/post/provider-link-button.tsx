@@ -52,6 +52,9 @@ export function ProviderLinkButton({
       toast.error(result.error);
       return;
     }
+    if (result.emailed === "sent")
+      return void toast.success(t.email.sent(holder.name));
+    if (result.emailed === "failed") toast.warning(t.email.failed);
     showLinks({
       title: t.linkTitle(holder.name),
       description: t.linkDescription,

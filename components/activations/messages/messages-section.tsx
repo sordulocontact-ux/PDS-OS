@@ -3,6 +3,7 @@ import { PageSection } from "@/components/shell/page-section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { MessageRecord } from "@/lib/activations/messages/queries";
 import type { MessageKind } from "@/lib/activations/model";
+import { emailEnabled } from "@/lib/email/send";
 import type { Member } from "@/lib/framing/related";
 import { activationWork } from "@/lib/i18n/fr/activation-work";
 import { formatDate } from "@/lib/release/format";
@@ -150,6 +151,13 @@ export function MessagesSection({
                   defaults={defaults}
                   pressKitId={pressKitId}
                   email={email}
+                  canEmail={
+                    emailEnabled() &&
+                    Boolean(email) &&
+                    m.channel === "email" &&
+                    !m.pressKitDocumentId &&
+                    Boolean(m.targetId)
+                  }
                   today={today}
                 />
               )}

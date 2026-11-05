@@ -9,6 +9,11 @@ import {
   textOrNull,
 } from "@/lib/activations/result";
 import { requireApproved } from "@/lib/auth/dal";
+import { emailLink } from "@/lib/email/link-email";
+import { projectTitleOf } from "@/lib/email/outcome";
+import { emailEnabled } from "@/lib/email/send";
+import { core } from "@/lib/i18n/fr/core";
+import { formatDay } from "@/lib/utils/day";
 import { routes } from "@/lib/auth/redirects";
 import { siteUrl } from "@/lib/auth/site-url";
 import { fr } from "@/lib/i18n/fr";
@@ -84,10 +89,19 @@ export async function acceptTerms(
 }
 
 export type AgreementLinkResult =
-  { ok: true; url: string } | { ok: false; error: string };
+  | {
+      ok: true;
+      url: string;
+      // What PDS OS did itself: « sent » (e-mailed to the creator and
+      // declared sent by e-mail), « failed » (copy the link), « disabled »
+      // (no SMTP or no address: the manual way, as before).
+      emailed: "sent" | "failed" | "disabled";
+    }
+  | { ok: false; error: string };
 
-/** « Préparer le lien d'accord » : the token is returned once, its hash kept ;
- * the link is shown to be copied, never sent by PDS OS. */
+/** « Préparer le lien d'accord » : the token is returned once, its hash kept.
+ * PDS OS e-mails it to the creator when it can and declares it sent by
+ * e-mail (Sacha, 05/11/2026) ; else the link is shown to be copied. */
 export async function prepareAgreement(
   input: z.input<typeof idSchema>,
 ): Promise<AgreementLinkResult> {
@@ -100,7 +114,80 @@ export async function prepareAgreement(
   });
   if (error || !data) return activationFailure(error ?? {});
   activationDone(parsed.data.projectId);
-  return { ok: true, url: `${siteUrl()}${routes.influenceAgreement(data)}` };
+  const url = `${siteUrl()}${routes.influenceAgreement(data)}`;
+  const emailed = await emailAgreement(
+    parsed.data.projectId,
+    parsed.data.id,
+    url,
+  );
+  return { ok: true, url, emailed };
+}
+
+/** E-mails the creator the agreement page just prepared, then declares it
+ * sent by e-mail. Never fails the gesture. */
+async function emailAgreement(
+  projectId: string,
+  proposalId: string,
+  url: string,
+): Promise<"sent" | "failed" | "disabled"> {
+  if (!emailEnabled()) return "disabled";
+  const supabase = await createClient();
+  const { data: proposal } = await supabase
+    .from("influence_proposals")
+    .select("target_id, activation_id")
+    .eq("id", proposalId)
+    .maybeSingle();
+  if (!proposal) return "disabled";
+  const [{ data: target }, { data: activation }, { data: agreement }] =
+    await Promise.all([
+      supabase
+        .from("activation_targets")
+        .select("contact_id")
+        .eq("id", proposal.target_id)
+        .maybeSingle(),
+      supabase
+        .from("marketing_activations")
+        .select("title")
+        .eq("id", proposal.activation_id)
+        .maybeSingle(),
+      supabase
+        .from("influence_agreements")
+        .select("id, expires_at")
+        .eq("target_id", proposal.target_id)
+        .eq("status", "pending")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    ]);
+  if (!target || !agreement) return "disabled";
+  const { data: contact } = await supabase
+    .from("network_contacts")
+    .select("name, email")
+    .eq("id", target.contact_id)
+    .maybeSingle();
+  if (!contact?.email) return "disabled";
+  const t = fr.activationInfluence.agreement.email;
+  const sent = await emailLink({
+    to: { name: contact.name, email: contact.email },
+    subject: t.subject(
+      await projectTitleOf(projectId),
+      activation?.title ?? "",
+    ),
+    message: `${core.linkEmail.greeting(contact.name)}\n\n${t.body}`,
+    open: t.open,
+    url,
+    validity: agreement.expires_at
+      ? core.linkEmail.validity(formatDay(agreement.expires_at))
+      : null,
+  });
+  if (sent === "sent") {
+    const { error } = await supabase.rpc("declare_influence_agreement_sent", {
+      p_agreement_id: agreement.id,
+      p_channel: "email",
+    });
+    if (error) console.error("emailAgreement declare:", error.message);
+  }
+  return sent;
 }
 
 export async function revokeAgreement(

@@ -76,8 +76,17 @@ export const meeting = {
       `Envoyé par ${name} le ${day} à ${count} participant${count > 1 ? "s" : ""}${older ? " · versions précédentes gardées" : ""}.`,
     correct: "Corriger et renvoyer",
     done: "Résumé envoyé",
+    // PDS OS e-mails the outside guests itself when it has their address.
     emailNotWired:
-      "Résumé envoyé dans PDS OS. L'envoi par e-mail n'est pas encore branché : copiez le message pour les externes.",
+      "Résumé envoyé dans PDS OS, mais pas par e-mail aux invités extérieurs : copiez le message pour eux.",
+    emailPartial: (n: number) =>
+      `Résumé envoyé dans PDS OS et par e-mail à ${n} invité${n > 1 ? "s" : ""} extérieur${n > 1 ? "s" : ""} ; pour les autres, copiez le message.`,
+    emailSent: (n: number) =>
+      `Résumé envoyé dans PDS OS et par e-mail à ${n} invité${n > 1 ? "s" : ""} extérieur${n > 1 ? "s" : ""}`,
+    emailSubject: (project: string, call: string) =>
+      project === call
+        ? `« ${project} » : résumé`
+        : `« ${project} » : résumé de « ${call} »`,
     waiting: (name: string) =>
       `En attente de ${name} : envoyer le résumé de la réunion`,
     failed: "Le résumé n'a pas pu être envoyé. Réessayez.",
