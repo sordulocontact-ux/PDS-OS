@@ -177,7 +177,11 @@ function AddFilesForm({
         />
       )}
       <p className="text-xs text-muted-foreground">
-        {audio ? a.hint(AUDIO_FORMAT_LIST) : t.hint}
+        {audio
+          ? a.hint(AUDIO_FORMAT_LIST)
+          : owner.kind === "master"
+            ? t.hintMaster
+            : t.hint}
       </p>
       {notAudio && (
         <FormMessage kind="error">{a.notAudio(AUDIO_FORMAT_LIST)}</FormMessage>

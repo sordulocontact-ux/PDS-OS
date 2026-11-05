@@ -8,7 +8,7 @@ import { FormMessage } from "@/components/auth/form-message";
 import { OptionSelect } from "@/components/projects/option-select";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { FilePickField } from "@/components/ui/file-pick-field";
-import { MAX_FILE_BYTES } from "@/lib/catalog/file-rules";
+import { MAX_MASTER_FILE_BYTES } from "@/lib/catalog/file-rules";
 import {
   WORK_STATUSES,
   type MasterSession,
@@ -68,7 +68,7 @@ export function WorkFileForm({
     mode === "file" && !item
       ? !file
         ? t.fileRequired
-        : file.size > MAX_FILE_BYTES
+        : file.size > MAX_MASTER_FILE_BYTES
           ? t.tooLarge
           : null
       : null;

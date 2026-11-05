@@ -128,7 +128,10 @@ export function FactRowEditable({
       sourceNode={
         <span id={`${id}-hint`} className="text-caption text-muted-foreground">
           {t.proposal(
-            edit.proposal ?? edit.value,
+            edit.proposal ??
+              (edit.kind === "select"
+                ? (edit.options?.[edit.value] ?? edit.value)
+                : edit.value),
             row.changedBy
               ? t.changedBy(row.changedBy)
               : factSourceWords(row.source),

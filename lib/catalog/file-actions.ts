@@ -9,7 +9,8 @@ import { routes } from "@/lib/auth/redirects";
 import {
   FILE_BUCKETS,
   MAX_DESCRIPTION_LENGTH,
-  MAX_FILE_BYTES,
+  maxFileBytes,
+  MAX_MASTER_FILE_BYTES,
   isAudioFile,
   isCatalogFilePath,
   isFileCategory,
@@ -81,7 +82,7 @@ const recordSchema = z
     description: descriptionSchema,
     fileName: fileNameSchema,
     mime: z.string().trim().min(1).max(255),
-    bytes: z.number().int().positive().max(MAX_FILE_BYTES),
+    bytes: z.number().int().positive().max(MAX_MASTER_FILE_BYTES),
     // A new version of this file (same owner, the database checks).
     replacesId: z.uuid().nullish(),
     // An audio version of a title: the state it stands for, and the
@@ -98,6 +99,7 @@ const recordSchema = z
       (input.owner.kind === "master" && input.category === "stems"),
   )
   .refine((input) => isFileCategory(input.owner.kind, input.category))
+  .refine((input) => input.bytes <= maxFileBytes(input.owner.kind))
   .refine(
     (input) =>
       (input.category === "audio" && input.owner.kind === "master") ===

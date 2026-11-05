@@ -153,6 +153,7 @@ export const catalogFiles = {
     },
   },
   hint: "50 Mo au plus par fichier.",
+  hintMaster: "500 Mo au plus par fichier.",
   edit: {
     title: "Modifier le fichier",
     description:
@@ -197,6 +198,7 @@ export const catalogFiles = {
   close: "Fermer",
   empty: "Ce fichier est vide.",
   tooLarge: "Fichier trop lourd : 50 Mo au plus.",
+  tooLargeMaster: "Fichier trop lourd : 500 Mo au plus.",
   failed: "Le fichier n'a pas pu être envoyé. Réessayez.",
   deleteFailed: "Le fichier n'a pas pu être supprimé. Réessayez.",
   updateFailed: "Le fichier n'a pas pu être modifié. Réessayez.",

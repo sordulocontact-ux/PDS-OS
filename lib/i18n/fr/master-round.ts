@@ -19,7 +19,7 @@ export const masterRound = {
       description:
         "Une piste par instrument ou par voix (voix, batterie, basse…), exportée depuis la session du titre par le producteur. L'ingénieur du mix en a besoin pour travailler chaque élément séparément.",
       drop: "Déposez les fichiers ici, ou cliquez pour les choisir",
-      formats: "ZIP, WAV, AIFF ou FLAC · 50 Mo au plus par fichier",
+      formats: "ZIP, WAV, AIFF ou FLAC · 500 Mo au plus par fichier",
       noFile: "Choisissez au moins un fichier de pistes.",
       wrongFormat: (names: string) =>
         `Seuls les fichiers ZIP, WAV, AIFF ou FLAC sont acceptés : ${names}.`,
@@ -53,7 +53,7 @@ export const masterRound = {
     formats: "Formats de livraison",
     dates: "Échéances",
     release: (day: string) => `Sortie prévue le ${day}`,
-    revisions: "Révisions incluses",
+    revisions: "Allers-retours inclus dans le tarif",
     message: {
       mix: "Message pour le mixeur",
       mastering: "Message pour l'ingénieur mastering",

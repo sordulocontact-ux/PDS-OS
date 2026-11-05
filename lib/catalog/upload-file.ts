@@ -1,7 +1,7 @@
 import { recordCatalogFile } from "@/lib/catalog/file-actions";
 import {
   FILE_BUCKETS,
-  MAX_FILE_BYTES,
+  maxFileBytes,
   fileExtension,
   type FileOwner,
 } from "@/lib/catalog/file-rules";
@@ -34,7 +34,11 @@ export async function uploadCatalogFile(input: {
 }): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
   const t = fr.catalogFiles;
   if (input.file.size === 0) return { ok: false, error: t.empty };
-  if (input.file.size > MAX_FILE_BYTES) return { ok: false, error: t.tooLarge };
+  if (input.file.size > maxFileBytes(input.owner.kind))
+    return {
+      ok: false,
+      error: input.owner.kind === "master" ? t.tooLargeMaster : t.tooLarge,
+    };
 
   const ext = fileExtension(input.file.name);
   const path = `${input.organizationId}/${input.owner.id}/${crypto.randomUUID()}${ext ? `.${ext}` : ""}`;

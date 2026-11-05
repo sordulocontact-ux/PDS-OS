@@ -235,7 +235,7 @@ export const masterPage = {
     empty: "Aucun fichier de travail pour l'instant.",
     emptyReadOnly: "Les fichiers de travail du titre apparaîtront ici.",
     limit:
-      "50 Mo au plus par fichier déposé (limite du stockage). Au-delà, ajoutez un lien vers l'endroit où il est partagé : il n'est jamais copié.",
+      "500 Mo au plus par fichier déposé (limite du stockage). Au-delà, ajoutez un lien vers l'endroit où il est partagé : il n'est jamais copié.",
     columns: {
       name: "Fichier",
       session: "Session",
@@ -276,7 +276,7 @@ export const masterPage = {
     urlInvalid: "Saisissez une adresse qui commence par https://.",
     fileRequired: "Choisissez un fichier.",
     tooLarge:
-      "Fichier trop lourd : 50 Mo au plus. Ajoutez plutôt un lien vers l'endroit où il est partagé.",
+      "Fichier trop lourd : 500 Mo au plus. Ajoutez plutôt un lien vers l'endroit où il est partagé.",
     legacyTitle: "Anciennes pistes",
     legacyDescription:
       "Notées une par une avant les fichiers de travail, gardées pour l'historique.",
@@ -328,7 +328,7 @@ export const masterPage = {
     stateLabel: "État audio du fichier",
     // `formats` = AUDIO_FORMAT_LIST, the same list the server accepts.
     hint: (formats: string) =>
-      `${formats}, 50 Mo au plus par fichier. La durée est lue quand le navigateur le peut.`,
+      `${formats}, 500 Mo au plus par fichier. La durée est lue quand le navigateur le peut.`,
     notAudio: (formats: string) =>
       `Ce format n'est pas accepté : choisissez un fichier ${formats}.`,
     dialog: {

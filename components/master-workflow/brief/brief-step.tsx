@@ -17,6 +17,7 @@ import type { BriefStepView } from "@/lib/master-workflow/brief-step";
 import { formatShortDay } from "@/lib/utils/day";
 
 import { BriefConditions } from "./brief-conditions";
+import { BriefPeople, type BriefFactsProps } from "./brief-people";
 import { BriefContent } from "./brief-content";
 import { BriefExchange } from "./brief-exchange";
 import { BriefRecord } from "./brief-record";
@@ -79,6 +80,27 @@ export function BriefStep({
   const others = lead
     ? step.questions.questions.filter((q) => !isOpenForViewer(q))
     : step.questions.questions;
+  const facts: BriefFactsProps = {
+    projectId: view.projectId,
+    canEdit,
+    canSeeBudget: view.canSeeBudget,
+    brief: view.brief,
+    engineers: view.engineers,
+    others: view.others,
+    members: view.members,
+    canAddContact: view.canAddContact,
+    validators: view.validators,
+    designations: step.designations,
+    changedBy: step.changedBy,
+    usualRevisions: step.usualRevisions,
+  };
+  // The people first, as soon as the Master opens (Ibé, 02/11/2026).
+  const people = (
+    <section className="flex flex-col gap-2.5">
+      <h3 className={sectionTitle}>{t.sections.people}</h3>
+      <BriefPeople {...facts} />
+    </section>
+  );
   const body = (
     <>
       {choosing && (
@@ -90,6 +112,7 @@ export function BriefStep({
               source={t.prefilled.source}
             />
           </FactRows>
+          {people}
           <BriefStart
             projectId={view.projectId}
             validator={
@@ -138,6 +161,8 @@ export function BriefStep({
         />
       )}
 
+      {!choosing && people}
+
       {step.startMode === "exchange" &&
         view.exchanges.length === 0 &&
         exchange && (
@@ -167,20 +192,7 @@ export function BriefStep({
           )}
           <section className="flex flex-col gap-2.5">
             <h3 className={sectionTitle}>{t.sections.conditions}</h3>
-            <BriefConditions
-              projectId={view.projectId}
-              canEdit={canEdit}
-              canSeeBudget={view.canSeeBudget}
-              brief={view.brief}
-              engineers={view.engineers}
-              others={view.others}
-              members={view.members}
-              canAddContact={view.canAddContact}
-              validators={view.validators}
-              designations={step.designations}
-              changedBy={step.changedBy}
-              usualRevisions={step.usualRevisions}
-            />
+            <BriefConditions {...facts} />
           </section>
           <BriefContent
             projectId={view.projectId}

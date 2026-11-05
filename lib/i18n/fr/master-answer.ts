@@ -9,9 +9,8 @@ export const masterAnswer = {
     "Ce que vous voulez entendre, vos références, ce qu'il ne faut pas faire…",
   read: "Lire ma réponse",
   reading: "PO lit votre réponse…",
-  understood: "Ce que PO a compris",
-  understoodHint:
-    "Retirez ce qui est faux, puis envoyez. Rien n'est gardé avant.",
+  understood: "Ce qui ira dans le Brief",
+  understoodHint: "Retirez ce qui est faux, puis envoyez.",
   groups: {
     direction: "Direction",
     references: "Références",
@@ -21,8 +20,7 @@ export const masterAnswer = {
   removeLabel: (label: string) => `Retirer « ${label} »`,
   send: "Envoyer la réponse",
   back: "Modifier ma réponse",
-  nothing:
-    "PO n'a rien trouvé à reprendre mot pour mot : votre réponse partira telle quelle.",
+  nothing: "Votre réponse sera envoyée telle quelle.",
   readFailed: "PO n'a pas pu lire votre réponse. Réessayez, ou modifiez-la.",
   notVerbatim:
     "Un élément ne se retrouve plus mot pour mot dans votre réponse : relisez-la avec PO.",

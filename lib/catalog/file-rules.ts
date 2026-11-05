@@ -7,6 +7,14 @@
 import type { AudioState } from "@/lib/catalog/title-rules";
 
 export const MAX_FILE_BYTES = 50 * 1024 * 1024;
+// A title's files (stems, audio versions, deliveries) are big: 500 Mo, as the
+// production files. The master-files bucket and its bytes check say the same.
+export const MAX_MASTER_FILE_BYTES = 500 * 1024 * 1024;
+
+/** The size limit of a file of this owner (the bucket enforces the same). */
+export function maxFileBytes(kind: FileOwnerKind): number {
+  return kind === "master" ? MAX_MASTER_FILE_BYTES : MAX_FILE_BYTES;
+}
 
 /** What a file is attached to. */
 export type FileOwnerKind = "artist" | "master" | "project" | "contract";

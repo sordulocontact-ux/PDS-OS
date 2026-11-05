@@ -62,6 +62,7 @@ export const masterBrief = {
     none: "Non renseigné",
   },
   sections: {
+    people: "Qui fait quoi sur ce master",
     conditions: "Conditions de prestation",
     direction: "Direction artistique",
     deliverables: "Livrables et formats",
@@ -74,7 +75,9 @@ export const masterBrief = {
     yes: "Oui",
     no: "Non",
     mastering: "Ingénieur du mastering",
-    revisions: "Révisions incluses",
+    revisions: "Allers-retours inclus dans le tarif",
+    revisionsHint:
+      "Le nombre de corrections que l'ingénieur fait sans frais en plus.",
     validator: "Qui valide les versions",
     mixRate: "Tarif (interne) · Mix",
     masteringRate: "Tarif (interne) · Mastering",
@@ -102,7 +105,6 @@ export const masterBrief = {
       project
         ? `Réseau · leurs conditions habituelles (Brief de « ${project} »)`
         : "Réseau · leurs conditions habituelles",
-    rate: "Interne : jamais dans le dossier de l'ingénieur",
     estimated: "Estimé",
     fixed: "Mix final et Master final : toujours livrés.",
     dates: {
@@ -113,7 +115,8 @@ export const masterBrief = {
         "Brief de cadrage › Temporalité · la date dont tout le reste dépend",
     },
   },
-  revisions: (n: number) => (n > 1 ? `${n} révisions` : `${n} révision`),
+  revisions: (n: number) =>
+    n > 1 ? `${n} allers-retours` : `${n} aller-retour`,
   orderError:
     "Les dates doivent se suivre : Mix V1, Mix final, Mastering, puis Master final.",
   picker: {

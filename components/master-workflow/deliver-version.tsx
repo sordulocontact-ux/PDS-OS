@@ -13,7 +13,7 @@ import {
   fileExtension,
   formatFileSize,
   isAudioFile,
-  MAX_FILE_BYTES,
+  MAX_MASTER_FILE_BYTES,
 } from "@/lib/catalog/file-rules";
 import { masterFinal } from "@/lib/i18n/fr/master-final";
 import { masterInHouse } from "@/lib/i18n/fr/master-inhouse";
@@ -86,7 +86,7 @@ export function DeliverVersion({
     const extension = fileExtension(file.name);
     const zip = zipOk && extension === "zip";
     const refusal = zip
-      ? file.size > MAX_FILE_BYTES
+      ? file.size > MAX_MASTER_FILE_BYTES
         ? t.tooLarge
         : null
       : !isAudioFile(file)
@@ -97,7 +97,7 @@ export function DeliverVersion({
           ? t.errors.invalid_extension
           : !deliveryNameOk(file.name)
             ? t.errors.invalid_file_name
-            : file.size > MAX_FILE_BYTES
+            : file.size > MAX_MASTER_FILE_BYTES
               ? t.tooLarge
               : null;
     if (refusal) {

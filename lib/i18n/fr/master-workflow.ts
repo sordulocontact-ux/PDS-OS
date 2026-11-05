@@ -185,8 +185,9 @@ export const masterWorkflow = {
       mixRate: "Tarif estimé du mix",
       masteringRate: "Tarif estimé du mastering",
       rateHint: "En euros.",
-      revisions: "Révisions incluses",
-      revisionsHint: "Le nombre d'allers-retours prévus avec l'ingénieur.",
+      revisions: "Allers-retours inclus dans le tarif",
+      revisionsHint:
+        "Le nombre de corrections que l'ingénieur fait sans frais en plus.",
       validator: "Qui valide les versions",
       validatorHint: "Le chef de projet ou un directeur créatif du projet.",
       references: "Références",
@@ -284,7 +285,7 @@ export const masterWorkflow = {
     },
     agenda: {
       engineers: "Qui mixe, qui masterise, et si c'est la même personne",
-      rates: "Tarifs du mix et du mastering, révisions incluses",
+      rates: "Tarifs du mix et du mastering, allers-retours inclus",
       direction:
         "Direction artistique : références, ce que le son doit être, contraintes",
       deliverables:
@@ -334,7 +335,7 @@ export const masterWorkflow = {
       references: "Références",
       constraints: "Contraintes",
       deliverables: "Livrables",
-      revisions: "Révisions incluses",
+      revisions: "Allers-retours inclus dans le tarif",
       mixV1Due: "Mix V1 attendu le",
       mixFinalDue: "Mix final attendu le",
       masteringDue: "Mastering attendu le",
@@ -856,7 +857,7 @@ export const masterWorkflow = {
       notAudio:
         "Ce format n'est pas accepté : déposez un fichier WAV, AIFF, FLAC, MP3, M4A, AAC ou OGG.",
       tooLarge:
-        "Ce fichier dépasse 50 Mo : envoyez-le par un autre moyen au label.",
+        "Ce fichier dépasse 500 Mo : envoyez-le par un autre moyen au label.",
       errors: {
         invalid_extension:
           "Ce format n'est pas accepté : déposez un fichier WAV, AIFF, FLAC, MP3, M4A, AAC ou OGG.",
@@ -986,8 +987,7 @@ export const masterWorkflow = {
   },
   questions: {
     title: "Questions à l'équipe",
-    description:
-      "Ce que le Brief ne dit pas encore, demandé à qui le sait : la question arrive dans son Travail, sa réponse revient ici.",
+    description: "Ce qu'il manque au Brief, demandé à ceux qui le savent.",
     dimensions: {
       direction: "Direction artistique",
       deliverables: "Autres livrables",
@@ -1026,8 +1026,6 @@ export const masterWorkflow = {
     apply: "Ajouter au Brief",
     applying: "Ajout…",
     appliedToast: "Réponse ajoutée au Brief.",
-    applyHint:
-      "La direction s'ajoute à ce qui est déjà écrit ; les livrables cochés rejoignent ceux du Brief.",
     errors: {
       forbidden:
         "Seul le chef de projet responsable pose les questions et les reporte au Brief.",

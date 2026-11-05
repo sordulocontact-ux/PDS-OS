@@ -129,12 +129,7 @@ function QuestionItem({
         <Answer question={question} />
       )}
       {state === "answered" && canApply && (
-        <div className="grid justify-items-start gap-1">
-          <ApplyAnswerButton projectId={projectId} questionId={question.id} />
-          <p className="text-caption text-[color:var(--text-secondary)]">
-            {t.applyHint}
-          </p>
-        </div>
+        <ApplyAnswerButton projectId={projectId} questionId={question.id} />
       )}
     </li>
   );
