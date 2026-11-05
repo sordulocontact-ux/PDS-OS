@@ -8,7 +8,7 @@ import { HeritageSection } from "@/components/production/prep/heritage-section";
 import { ScheduleSection } from "@/components/production/preprod/schedule-section";
 import { EmptyState } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
@@ -63,7 +63,7 @@ export default async function ProductionOrganisationPage({
             href={routes.projectDesign(projectId)}
             className={buttonVariants({ variant: "outline" })}
           >
-            {fr.productionPrep.toConception}
+            <ButtonRoll>{fr.productionPrep.toConception}</ButtonRoll>
           </ViewLink>
         }
       />

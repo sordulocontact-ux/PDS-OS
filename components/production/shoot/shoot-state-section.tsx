@@ -1,5 +1,5 @@
 import { PageSection } from "@/components/shell/page-section";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { FactList } from "@/components/ui/fact-list";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
@@ -76,7 +76,7 @@ export function ShootStateSection({
               href={preproductionHref}
               className={buttonVariants({ variant: "outline", size: "sm" })}
             >
-              {t.toPreproduction}
+              <ButtonRoll>{t.toPreproduction}</ButtonRoll>
             </ViewLink>
           </div>
         )}

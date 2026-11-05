@@ -6,7 +6,7 @@ import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { PlatformConfirm } from "@/components/distribution/platforms/platform-confirm";
 import { PlatformProblem } from "@/components/distribution/platforms/platform-problem";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { saveDistributionPlatform } from "@/lib/distribution/platforms-actions";
@@ -178,7 +178,7 @@ export function PlatformRow({
                 rel="noreferrer"
                 className={buttonVariants({ variant: "ghost", size: "sm" })}
               >
-                {t.open}
+                <ButtonRoll>{t.open}</ButtonRoll>
               </a>
               {ask ? (
                 <>

@@ -1,18 +1,21 @@
 import { Button as ButtonPrimitive } from "@base-ui/react/button"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "cn"
+import type { ReactNode } from "react"
 
 // Adapted to docs/DESIGN.md § 4 (« Boutons… », C0 of 18/10/2026, proto
 // « Projet complet »): 40 px, 15 px semi-bold pills (sm 32 px, 14 px);
 // primary = black pill, outline = border, ghost = grey text and soft hover.
-// A press scales to .97, unless motion is reduced; no shadow.
+// Hover (taken from Raw Studio): the button grows to 1.05 and its label rolls
+// up while a copy comes in from below (ButtonRoll); a press scales to .97.
+// Both are cut when motion is reduced; no shadow.
 // rounded-full, not rounded-pill: Tailwind sorts radius utilities by name, so
 // only rounded-full lets the icon sizes' rounded-lg win. Each variant sets its
 // own border colour (never the base): buttonVariants() is also used raw on
 // links, without cn(), and a base border-transparent sorted after
 // border-border erased every outline (recette, 19/10/2026).
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center rounded-full border bg-clip-padding text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] font-semibold whitespace-nowrap no-underline transition-[background-color,border-color,color,scale] duration-[var(--duration-fast)] ease-[var(--ease-out)] outline-none motion-safe:active:scale-[.97] select-none disabled:pointer-events-none disabled:opacity-40 aria-invalid:border-[color:var(--border-strong)] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "group/button inline-flex shrink-0 items-center justify-center rounded-full border bg-clip-padding text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] font-semibold whitespace-nowrap no-underline [transition:background-color_var(--duration-fast)_var(--ease-out),border-color_var(--duration-fast)_var(--ease-out),color_var(--duration-fast)_var(--ease-out),scale_var(--duration-grow)_var(--ease-out)] outline-none motion-safe:hover:scale-[1.05] motion-safe:active:scale-[.97] select-none disabled:pointer-events-none disabled:opacity-40 aria-invalid:border-[color:var(--border-strong)] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
@@ -47,19 +50,54 @@ const buttonVariants = cva(
   }
 )
 
+const rollLayer =
+  "inline-flex w-full min-w-0 items-center [gap:inherit] [justify-content:inherit] transition-transform duration-[var(--duration-roll)] ease-[var(--ease-out)]"
+
+// The label of a button rolls up on hover and a copy comes in from below.
+// Wraps the content of every Button with text, and the content of an element
+// styled with buttonVariants() (a link): the parent must carry group/button.
+// It grows to fill a full-width button and inherits its gap and alignment, so
+// the button lays out as before; the copy is hidden from assistive tech.
+function ButtonRoll({ children }: { children: ReactNode }) {
+  return (
+    <span
+      data-slot="button-roll"
+      className="relative inline-flex min-w-0 grow items-center overflow-hidden [gap:inherit] [justify-content:inherit]"
+    >
+      <span className={cn(rollLayer, "motion-safe:group-hover/button:-translate-y-full")}>
+        {children}
+      </span>
+      <span
+        aria-hidden
+        className={cn(
+          rollLayer,
+          "absolute inset-0 translate-y-full motion-safe:group-hover/button:translate-y-0 motion-reduce:hidden"
+        )}
+      >
+        {children}
+      </span>
+    </span>
+  )
+}
+
 function Button({
   className,
   variant = "default",
   size = "default",
+  children,
   ...props
 }: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+  // An icon alone does not roll (Raw Studio rolls labels only).
+  const rolls = !size?.startsWith("icon")
   return (
     <ButtonPrimitive
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
-    />
+    >
+      {rolls ? <ButtonRoll>{children}</ButtonRoll> : children}
+    </ButtonPrimitive>
   )
 }
 
-export { Button, buttonVariants }
+export { Button, ButtonRoll, buttonVariants }

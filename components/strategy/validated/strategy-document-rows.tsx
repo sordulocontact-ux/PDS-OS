@@ -1,5 +1,5 @@
 import { ShareBrief } from "@/components/strategy/validated/share-brief";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { InfoRow, Rows } from "@/components/ui/rows";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ViewLink } from "@/components/ui/view-link";
@@ -53,7 +53,7 @@ export function StrategyDocumentRows({
               href={href}
               className={buttonVariants({ variant: "ghost", size: "sm" })}
             >
-              {doc ? t.open : t.generate}
+              <ButtonRoll>{doc ? t.open : t.generate}</ButtonRoll>
             </ViewLink>
           </span>
         }
@@ -84,7 +84,7 @@ export function StrategyDocumentRows({
                 rel="noreferrer"
                 className={buttonVariants({ variant: "ghost", size: "sm" })}
               >
-                {t.see}
+                <ButtonRoll>{t.see}</ButtonRoll>
               </a>
               <ShareBrief path={briefPath} />
             </span>

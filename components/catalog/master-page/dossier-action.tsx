@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { MasterEditForm } from "@/components/catalog/master-edit-form";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { ViewLink } from "@/components/ui/view-link";
 import type { MasterRights, SplitKind } from "@/lib/catalog/master/rules";
@@ -51,7 +51,7 @@ export function DossierAction({
         href={target.href}
         className={buttonVariants({ variant, size })}
       >
-        {label}
+        <ButtonRoll>{label}</ButtonRoll>
       </ViewLink>
     );
 

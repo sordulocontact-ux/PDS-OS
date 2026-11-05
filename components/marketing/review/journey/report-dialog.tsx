@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants, ButtonRoll } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -72,7 +72,7 @@ export default function ReportDialog({
                   href={compareHref}
                   className={buttonVariants({ variant: "ghost" })}
                 >
-                  {r.compare.choose}
+                  <ButtonRoll>{r.compare.choose}</ButtonRoll>
                 </Link>
               )}
             </div>

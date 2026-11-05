@@ -6,7 +6,7 @@ import { FormMessage } from "@/components/auth/form-message";
 import { MastersTable } from "@/components/catalog/masters-table";
 import { IconDisc } from "@/components/icons";
 import { EmptyState } from "@/components/shell/empty-state";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
@@ -48,8 +48,10 @@ export default async function ArtistMastersPage({
               href={routes.mastersNewForArtist(artist.id)}
               className={buttonVariants({ size: "lg" })}
             >
-              <IconPlus aria-hidden data-icon="inline-start" />
-              {t.newMaster}
+              <ButtonRoll>
+                <IconPlus aria-hidden data-icon="inline-start" />
+                {t.newMaster}
+              </ButtonRoll>
             </Link>
           ) : null
         }

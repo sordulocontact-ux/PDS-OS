@@ -5,7 +5,7 @@ import Link from "next/link";
 import { FormMessage } from "@/components/auth/form-message";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { DataTableViews } from "@/components/ui/data-table";
 import { requireAdmin } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
@@ -48,8 +48,10 @@ export default async function MembersPage({
             href={routes.membersNew}
             className={cn(buttonVariants({ size: "lg" }), "gap-2")}
           >
-            <IconUserPlus className="size-4" aria-hidden />
-            {t.create}
+            <ButtonRoll>
+              <IconUserPlus className="size-4" aria-hidden />
+              {t.create}
+            </ButtonRoll>
           </Link>
         }
       />

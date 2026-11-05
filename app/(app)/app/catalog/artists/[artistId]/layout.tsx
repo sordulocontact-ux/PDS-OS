@@ -12,7 +12,7 @@ import { ExternalLink } from "@/components/catalog/artist-profile/external-link"
 import { BackLink } from "@/components/shell/back-link";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
@@ -70,8 +70,10 @@ export default async function ArtistLayout({
                       href={routes.mastersNewForArtist(artist.id)}
                       className={buttonVariants({ size: "lg" })}
                     >
-                      <IconPlus aria-hidden data-icon="inline-start" />
-                      {t.newMaster}
+                      <ButtonRoll>
+                        <IconPlus aria-hidden data-icon="inline-start" />
+                        {t.newMaster}
+                      </ButtonRoll>
                     </Link>
                   </>
                 )}

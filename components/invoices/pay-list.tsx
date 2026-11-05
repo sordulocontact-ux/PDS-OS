@@ -1,5 +1,5 @@
 import { PageSection } from "@/components/shell/page-section";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { ViewLink } from "@/components/ui/view-link";
 import { todayInParis } from "@/lib/insights/dates";
@@ -79,7 +79,7 @@ export function PayList({
                     href={invoiceHref(projectId, i)}
                     className={buttonVariants({ variant: "ghost", size: "sm" })}
                   >
-                    {t.payList.open}
+                    <ButtonRoll>{t.payList.open}</ButtonRoll>
                   </ViewLink>
                 ) : undefined
               }

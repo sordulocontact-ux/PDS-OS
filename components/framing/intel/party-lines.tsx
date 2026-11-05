@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import { PartyDialog } from "@/components/framing/intel/party-dialog";
 import { useFramingAction } from "@/components/framing/use-framing-action";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { clearLegalParty } from "@/lib/framing/actions/legal-parties";
@@ -146,7 +146,7 @@ export function PartyLines({
           href={nextHref}
           className={buttonVariants({ size: "lg", className: "self-start" })}
         >
-          {fr.framingIntel.guide.next}
+          <ButtonRoll>{fr.framingIntel.guide.next}</ButtonRoll>
         </Link>
       )}
       {editing && (

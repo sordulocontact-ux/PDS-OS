@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { EmptyState } from "@/components/shell/empty-state";
 import { PageContainer } from "@/components/shell/page-container";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 
@@ -21,13 +21,13 @@ export default function AppNotFound() {
         action={
           <div className="flex flex-wrap gap-2">
             <Link href={routes.app} className={buttonVariants()}>
-              {t.home}
+              <ButtonRoll>{t.home}</ButtonRoll>
             </Link>
             <Link
               href={routes.projects}
               className={buttonVariants({ variant: "outline" })}
             >
-              {t.projects}
+              <ButtonRoll>{t.projects}</ButtonRoll>
             </Link>
           </div>
         }

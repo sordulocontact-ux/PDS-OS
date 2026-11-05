@@ -5,7 +5,7 @@ import { FormMessage } from "@/components/auth/form-message";
 import { MastersTable } from "@/components/catalog/masters-table";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import type { RecordRights } from "@/lib/archive/types";
 import { routes } from "@/lib/auth/redirects";
 import type { MasterRow } from "@/lib/catalog/types";
@@ -41,8 +41,10 @@ export function VariantsSection({
             href={routes.mastersNewVariantOf(masterId)}
             className={buttonVariants({ variant: "outline", size: "sm" })}
           >
-            <IconPlus aria-hidden data-icon="inline-start" />
-            {t.add}
+            <ButtonRoll>
+              <IconPlus aria-hidden data-icon="inline-start" />
+              {t.add}
+            </ButtonRoll>
           </Link>
         )
       }

@@ -1,4 +1,4 @@
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { ViewLink } from "@/components/ui/view-link";
 import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
 import { routes } from "@/lib/auth/redirects";
@@ -17,7 +17,7 @@ export function JourneyBack({ projectId }: { projectId: string }) {
         className: "self-start",
       })}
     >
-      {fr.distributionJourney.back}
+      <ButtonRoll>{fr.distributionJourney.back}</ButtonRoll>
     </ViewLink>
   );
 }

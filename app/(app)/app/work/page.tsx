@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { FormMessage } from "@/components/auth/form-message";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import {
   LoadingRegion,
   Skeleton,
@@ -44,7 +44,7 @@ export default async function WorkPage({
             href={routes.calendar}
             className={buttonVariants({ variant: "outline", size: "sm" })}
           >
-            {t.lead.calendar}
+            <ButtonRoll>{t.lead.calendar}</ButtonRoll>
           </ViewLink>
         }
       />

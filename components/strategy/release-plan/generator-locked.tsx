@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
 import { strategyReleasePlan } from "@/lib/i18n/fr/strategy-release-plan";
@@ -32,7 +32,7 @@ export function GeneratorLocked({
         href={routes.projectStrategy(projectId)}
         className={buttonVariants({ variant: "outline" })}
       >
-        {t.toStrategy}
+        <ButtonRoll>{t.toStrategy}</ButtonRoll>
       </Link>
     </section>
   );

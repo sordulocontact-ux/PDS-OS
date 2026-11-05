@@ -1,6 +1,6 @@
 import { DelegateButton } from "@/components/legal/tracking/delegate-button";
 import { StepSection } from "@/components/shell/journey/step-section";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ViewLink } from "@/components/ui/view-link";
 import { journey } from "@/lib/i18n/fr/journey";
@@ -142,7 +142,7 @@ function Row({
           href={step.href}
           className={buttonVariants({ variant: "outline", size: "xs" })}
         >
-          {fr.journey.now.openShort}
+          <ButtonRoll>{fr.journey.now.openShort}</ButtonRoll>
         </ViewLink>
       </div>
     </li>

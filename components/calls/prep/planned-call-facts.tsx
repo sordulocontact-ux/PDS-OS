@@ -1,4 +1,4 @@
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
 import { callWhen } from "@/lib/calls/prep/dates";
@@ -64,7 +64,7 @@ export function PlannedCallFacts({
             href={`${routes.projectCall(call.projectId, call.callId)}#${RECORDER_ANCHOR}`}
             className={buttonVariants({ size: "sm", className: "self-start" })}
           >
-            {t.record[noun]}
+            <ButtonRoll>{t.record[noun]}</ButtonRoll>
           </ViewLink>
         )
       )}

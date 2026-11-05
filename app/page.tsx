@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { connection } from "next/server";
 
 import { AuthFrame } from "@/components/auth/auth-frame";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -50,13 +50,13 @@ export default async function Home({ searchParams }: PageProps<"/">) {
       <p className="text-sm text-muted-foreground">{t.entry.body}</p>
       <div className="flex flex-col gap-2">
         <Link href={routes.login} className={buttonVariants({ size: "lg" })}>
-          {t.common.signIn}
+          <ButtonRoll>{t.common.signIn}</ButtonRoll>
         </Link>
         <Link
           href={routes.signup}
           className={buttonVariants({ variant: "outline", size: "lg" })}
         >
-          {t.common.signUp}
+          <ButtonRoll>{t.common.signUp}</ButtonRoll>
         </Link>
       </div>
     </AuthFrame>

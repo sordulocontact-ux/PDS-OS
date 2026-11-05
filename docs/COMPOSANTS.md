@@ -20,7 +20,7 @@ contrôles `--control-*` · erreur de saisie `--error` (le seul rouge : champ ma
 
 | Composant | Fichier | Variantes / usage |
 | --- | --- | --- |
-| `Button` | `ui/button.tsx` | variant : default, outline, secondary, ghost, destructive, link · size : default, xs, sm, lg (pilule), icon, icon-xs, icon-sm, icon-lg (carré arrondi 8 px) ; proto « Projet complet » (C0) : 40 px, 15 px semi-gras, `sm` 32 px / 14 px, `lg` = default, `ghost` en gris secondaire, appui `scale(.97)` sauf mouvement réduit |
+| `Button` | `ui/button.tsx` | variant : default, outline, secondary, ghost, destructive, link · size : default, xs, sm, lg (pilule), icon, icon-xs, icon-sm, icon-lg (carré arrondi 8 px) ; proto « Projet complet » (C0) : 40 px, 15 px semi-gras, `sm` 32 px / 14 px, `lg` = default, `ghost` en gris secondaire, survol `scale(1.05)` + libellé qui roule (`ButtonRoll`, aussi à mettre dans tout lien stylé par `buttonVariants()`, pas sur un bouton-icône), appui `scale(.97)`, les deux coupés si mouvement réduit |
 | `Badge` | `ui/badge.tsx` | variant : default, secondary, destructive, outline, ghost, link |
 | `StatusBadge` | `ui/status-badge.tsx` | tone : neutral, info, warning, success, danger, action, ou une teinte de catégorie (sky, indigo, violet, pink, orange, yellow, lime, teal, sand, slate) · size : sm, md ; 24 px, 13 px semi-gras (`text-micro`), `sm` 20 px |
 | `TitleBlock` | `ui/title-block.tsx` | le titre d'une carte et sa phrase dessous lus comme un seul bloc (6 px entre eux, l'écart de la carte seulement autour de la paire, Sacha 04/11/2026) ; utilisé par `StepPanel`, `NowCard`, `CallNowBlock` : **tout** titre + phrase d'une carte passe par lui |

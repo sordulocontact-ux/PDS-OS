@@ -1,7 +1,7 @@
 import { IconCheck } from "nucleo-sharp-essential";
 import Link from "next/link";
 
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { FactList } from "@/components/ui/fact-list";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { strategyReleasePlan } from "@/lib/i18n/fr/strategy-release-plan";
@@ -77,7 +77,7 @@ export function PlanIntro({
           href={startHref}
           className={buttonVariants({ size: "lg", className: "self-start" })}
         >
-          {t.start}
+          <ButtonRoll>{t.start}</ButtonRoll>
         </Link>
       )}
     </section>

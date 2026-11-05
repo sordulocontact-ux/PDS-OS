@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { GenerateDialog } from "@/components/legal/contracts/generate-dialog";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { routes } from "@/lib/auth/redirects";
 import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
@@ -75,7 +75,7 @@ export function AgreementList({
                 href={routes.contract(row.contract.id)}
                 className={buttonVariants({ variant: "outline", size: "xs" })}
               >
-                {t.open}
+                <ButtonRoll>{t.open}</ButtonRoll>
               </Link>
             ) : (
               <GenerateDialog projectId={projectId} row={row} />

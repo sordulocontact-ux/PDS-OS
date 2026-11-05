@@ -1,5 +1,5 @@
 import { NowFrame } from "@/components/shell/journey/now-card";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ViewLink } from "@/components/ui/view-link";
 import { work } from "@/lib/i18n/fr/work";
@@ -80,7 +80,7 @@ export function WorkLead({
       )}
       <div>
         <ViewLink href={row.href} className={buttonVariants()}>
-          {t.open}
+          <ButtonRoll>{t.open}</ButtonRoll>
         </ViewLink>
       </div>
     </NowFrame>

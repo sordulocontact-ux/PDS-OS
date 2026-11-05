@@ -11,7 +11,7 @@ import { ProjectDraftControls } from "@/components/projects/project-draft-contro
 import { ProjectKindFields } from "@/components/projects/project-kind-fields";
 import { ProjectTeamFields } from "@/components/projects/project-team-fields";
 import { useProjectDraft } from "@/components/projects/use-project-draft";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { ChipChoice } from "@/components/ui/chip-choice";
 import { FormSection } from "@/components/ui/form-section";
 import { routes } from "@/lib/auth/redirects";
@@ -264,7 +264,7 @@ export function CreateProjectForm({
             href={routes.projects}
             className={buttonVariants({ variant: "ghost", size: "lg" })}
           >
-            {t.cancel}
+            <ButtonRoll>{t.cancel}</ButtonRoll>
           </Link>
         )}
         {projectId ? (

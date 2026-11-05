@@ -12,7 +12,7 @@ import { ProjectsBrowser } from "@/components/projects/projects-browser";
 import { EmptyState } from "@/components/shell/empty-state";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { DataTableViews } from "@/components/ui/data-table";
 import { countRecords } from "@/lib/archive/queries";
 import { isArchivedView } from "@/lib/archive/types";
@@ -47,8 +47,10 @@ export default async function ProjectsPage({
 
   const newProject = canCreate ? (
     <Link href={routes.projectsNew} className={buttonVariants({ size: "lg" })}>
-      <IconPlus aria-hidden data-icon="inline-start" />
-      {t.newProject}
+      <ButtonRoll>
+        <IconPlus aria-hidden data-icon="inline-start" />
+        {t.newProject}
+      </ButtonRoll>
     </Link>
   ) : null;
 

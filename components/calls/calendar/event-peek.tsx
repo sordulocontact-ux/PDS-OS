@@ -5,7 +5,7 @@ import Link from "next/link";
 import { CallStatusBadge } from "@/components/calls/call-badges";
 import { eventTime } from "@/components/calls/calendar-event";
 import { JoinCallLink } from "@/components/calls/join-call-link";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/copy-button";
 import { Popover, PopoverContent, PopoverTitle } from "@/components/ui/popover";
 import type { CalendarEvent } from "@/lib/calls/calendar";
@@ -104,7 +104,7 @@ export function EventPeek({
               href={event.call.href}
               className={buttonVariants({ variant: "outline", size: "sm" })}
             >
-              {t.peek.open}
+              <ButtonRoll>{t.peek.open}</ButtonRoll>
             </Link>
             {event.editable && (
               <Button

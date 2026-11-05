@@ -6,7 +6,7 @@ import {
 } from "@/components/framing/requests/request-actions";
 import { RequestCard } from "@/components/framing/requests/request-card";
 import { PageSection } from "@/components/shell/page-section";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { FilterChipLink } from "@/components/ui/filter-chip";
 import {
   isOpenRequest,
@@ -100,7 +100,7 @@ export function BriefRequestsSection({
                                 variant: "outline",
                               })}
                             >
-                              {t.correct}
+                              <ButtonRoll>{t.correct}</ButtonRoll>
                             </Link>
                             <ResolveRequestButton
                               projectId={projectId}

@@ -278,6 +278,10 @@
   /* Ce qui glisse d'un élément à l'autre (indicateur d'onglet, fond du menu du
      Cadrage) : un peu plus long. */
   --duration-slide: 240ms;
+  /* Survol d'un bouton, repris de Raw Studio (docs/DESIGN.md § 4) : le libellé
+     roule vers le haut, le bouton grossit un peu. */
+  --duration-roll: 500ms;
+  --duration-grow: 200ms;
   /* Écran d'entrée (docs/DESIGN.md § 4), mesures de la vidéo de référence :
      apparition du logo, trajet, arrivée de la page, retard de cette arrivée. */
   --duration-entry-in: 150ms;

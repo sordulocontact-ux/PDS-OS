@@ -4,7 +4,7 @@ import { DocumentHistory } from "@/components/strategy/documents/document-histor
 import { ReviewPanel } from "@/components/strategy/documents/review-panel";
 import { SendForValidation } from "@/components/strategy/documents/send-for-validation";
 import { ShareButton } from "@/components/strategy/release-plan/share-button";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { FilterChipLink } from "@/components/ui/filter-chip";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
@@ -116,7 +116,7 @@ export function PreviewStep({
             href={href(6)}
             className={buttonVariants({ size: "sm", variant: "outline" })}
           >
-            {t.edit}
+            <ButtonRoll>{t.edit}</ButtonRoll>
           </Link>
         )}
         {canEdit && (
@@ -127,7 +127,7 @@ export function PreviewStep({
           download
           className={buttonVariants({ size: "sm", variant: "outline" })}
         >
-          {t.pdf}
+          <ButtonRoll>{t.pdf}</ButtonRoll>
         </a>
         {canEdit && current.state === "pending" && (
           <SendForValidation

@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 import { Rows } from "@/components/ui/rows";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { VersionCard } from "@/components/ui/version-card";
 import { formatEuros } from "@/lib/budget/types";
 import { strategyBriefOut } from "@/lib/i18n/fr/strategy-brief-out";
@@ -82,7 +82,7 @@ export function BriefOutDoc({
               rel="noreferrer"
               className={buttonVariants({ variant: "ghost", size: "sm" })}
             >
-              {t.pdf}
+              <ButtonRoll>{t.pdf}</ButtonRoll>
             </a>
           )}
         </span>

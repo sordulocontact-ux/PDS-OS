@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
 import { network } from "@/lib/i18n/fr/network";
@@ -79,7 +79,7 @@ export function DuplicateNotice({
             rel={newTab ? "noopener noreferrer" : undefined}
             className={buttonVariants({ variant: "outline", size: "sm" })}
           >
-            {t.openContact}
+            <ButtonRoll>{t.openContact}</ButtonRoll>
           </Link>
         </div>
       ))}

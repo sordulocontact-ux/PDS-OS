@@ -2,7 +2,7 @@
 
 import { CloseCallButton } from "@/components/calls/closure/close-call-button";
 import { ShareReportForm } from "@/components/calls/closure/share-report-form";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { routes } from "@/lib/auth/redirects";
 import type { Unreviewed } from "@/lib/calls/closure";
@@ -59,7 +59,7 @@ export function ClosureActions({
         href={routes.callReportPdf(call.id, latest.version, "full")}
         className={buttonVariants({ variant: "outline" })}
       >
-        {t.pdf}
+        <ButtonRoll>{t.pdf}</ButtonRoll>
       </a>
       {canEdit && (
         <CloseCallButton callId={call.id} unreviewed={unreviewed} closed />

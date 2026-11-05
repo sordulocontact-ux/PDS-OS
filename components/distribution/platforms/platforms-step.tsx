@@ -7,7 +7,7 @@ import {
   PlatformRow,
   type PlatformLine,
 } from "@/components/distribution/platforms/platform-row";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { ViewLink } from "@/components/ui/view-link";
@@ -157,7 +157,7 @@ export function PlatformsStep({ ctx }: { ctx: DistributionContext }) {
               href={distributionViewHref(ctx.project.id, "anomalies")}
               className={buttonVariants({ variant: "link", size: "sm" })}
             >
-              {t.allAnomalies}
+              <ButtonRoll>{t.allAnomalies}</ButtonRoll>
             </ViewLink>
           </div>
           <FactRows>

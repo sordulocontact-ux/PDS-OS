@@ -627,8 +627,15 @@ D'après le proto « Projet complet » (`docs/protos/projet.html`), qui fait foi
 
 - **Bouton** (`Button`) : 40 px, padding 18, **15 px semi-gras (600)**, pilule ; `sm` 32 px,
   padding 14, 14 px ; `ghost` en `--text-secondary`, encre au survol. À l'appui,
-  `scale(.97)` (140 ms, `--ease-out`), coupé quand le mouvement est réduit. Les autres
+  `scale(.97)` (`--ease-out`), coupé quand le mouvement est réduit. Les autres
   variantes ne changent pas.
+- **Survol d'un bouton** (repris du site Raw Studio, Sacha, 04/11/2026) : le bouton grossit
+  à `scale(1.05)` (`--duration-grow`, 200 ms) et son libellé **roule** : il monte et sort par
+  le haut pendant qu'une copie entre par le bas (`--duration-roll`, 500 ms, `--ease-out`).
+  C'est `ButtonRoll` (`ui/button.tsx`) : `Button` l'applique seul, sauf aux boutons-icônes ;
+  un lien stylé par `buttonVariants()` enveloppe son contenu dans `<ButtonRoll>`. La copie
+  est `aria-hidden` ; tout est coupé quand le mouvement est réduit (seules les couleurs
+  changent).
 - **Pastille** (`StatusBadge`) : 24 px, padding 10, **13 px semi-gras** (`--type-micro`) ;
   `sm` garde 20 px pour les lignes denses.
 - **Encart** (`ToneCallout`) : rayon 10, padding 12/14, 15 px, **icône du ton à gauche**

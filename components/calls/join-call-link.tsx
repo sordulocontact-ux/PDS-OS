@@ -1,6 +1,6 @@
 import { IconUserLaptop } from "nucleo-sharp-essential";
 
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { calls } from "@/lib/i18n/fr/calls";
 import { cn } from "@/lib/utils";
 
@@ -36,8 +36,10 @@ export function JoinCallLink({
         inRow && "relative z-10",
       )}
     >
-      <IconUserLaptop aria-hidden data-icon="inline-start" />
-      {t.action}
+      <ButtonRoll>
+        <IconUserLaptop aria-hidden data-icon="inline-start" />
+        {t.action}
+      </ButtonRoll>
     </a>
   );
 }

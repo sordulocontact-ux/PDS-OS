@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { AccessWatcher } from "@/components/auth/access-watcher";
 import { AuthFrame } from "@/components/auth/auth-frame";
 import { SignOutButton } from "@/components/auth/sign-out-button";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { getAccess, requireState } from "@/lib/auth/dal";
 import { safeReturnPath, unavailableFrom } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
@@ -36,7 +36,7 @@ export default async function UnavailablePage({
           href={unavailableFrom(returnTo)}
           className={buttonVariants({ size: "lg" })}
         >
-          {fr.auth.unavailable.retry}
+          <ButtonRoll>{fr.auth.unavailable.retry}</ButtonRoll>
         </Link>
         <SignOutButton variant="ghost" />
       </div>

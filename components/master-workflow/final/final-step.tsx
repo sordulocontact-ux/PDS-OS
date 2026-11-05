@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { AudioFile } from "@/components/ui/audio-file";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
@@ -146,7 +146,7 @@ function TitleFinal({
                   href={routes.projectRelease(view.projectId)}
                   className={buttonVariants({ variant: "outline", size: "sm" })}
                 >
-                  {t.toDistribution}
+                  <ButtonRoll>{t.toDistribution}</ButtonRoll>
                 </Link>
               }
             />

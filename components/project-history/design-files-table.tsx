@@ -1,7 +1,7 @@
 import { IconLink, IconPaperclip } from "nucleo-sharp-essential";
 
 import { IconArrowDown, IconExternalLink } from "@/components/icons";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import {
   DataTable,
   DataTableBody,
@@ -97,12 +97,14 @@ export function DesignFilesTable({
                     className: "relative z-10",
                   })}
                 >
-                  {file.kind === "file" ? (
-                    <IconArrowDown aria-hidden />
-                  ) : (
-                    <IconExternalLink aria-hidden />
-                  )}
-                  {file.kind === "file" ? v.download : v.open}
+                  <ButtonRoll>
+                    {file.kind === "file" ? (
+                      <IconArrowDown aria-hidden />
+                    ) : (
+                      <IconExternalLink aria-hidden />
+                    )}
+                    {file.kind === "file" ? v.download : v.open}
+                  </ButtonRoll>
                 </a>
               ) : (
                 <span className="text-[color:var(--text-tertiary)]">

@@ -1,6 +1,6 @@
 import { versionLabel } from "@/components/catalog/master-page/audio/audio-version-list";
 import { NowFrame } from "@/components/shell/journey/now-card";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
@@ -193,7 +193,7 @@ export function TitleNow({
             ) : (
               lead.href && (
                 <ViewLink href={lead.href} className={buttonVariants()}>
-                  {t.open}
+                  <ButtonRoll>{t.open}</ButtonRoll>
                 </ViewLink>
               )
             )}

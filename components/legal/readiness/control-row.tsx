@@ -1,5 +1,5 @@
 import { WaiverButton } from "@/components/legal/readiness/readiness-gestures";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ViewLink } from "@/components/ui/view-link";
 import { legalReadiness } from "@/lib/i18n/fr/legal-readiness";
@@ -75,7 +75,7 @@ export function ControlRow({
               href={c.href}
               className={buttonVariants({ variant: "outline", size: "sm" })}
             >
-              {t.open}
+              <ButtonRoll>{t.open}</ButtonRoll>
             </ViewLink>
           )}
           {canDecide && c.status === "open" && !c.final && (

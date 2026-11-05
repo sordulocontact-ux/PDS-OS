@@ -1,6 +1,6 @@
 import { IconAlarmClock } from "nucleo-sharp-essential";
 
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { ViewLink } from "@/components/ui/view-link";
 import { journey } from "@/lib/i18n/fr/journey";
 import { lowerFirst } from "@/lib/ui/journey";
@@ -51,7 +51,7 @@ export function WaitingRows({ items }: { items: NowItem[] }) {
               href={step.href}
               className={buttonVariants({ variant: "ghost", size: "sm" })}
             >
-              {t.now.see}
+              <ButtonRoll>{t.now.see}</ButtonRoll>
             </ViewLink>
           </li>
         );

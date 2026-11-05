@@ -1,6 +1,6 @@
 import { IconChevronLeft, IconChevronRight } from "nucleo-sharp-essential";
 
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { ViewLink } from "@/components/ui/view-link";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { calendar } from "@/lib/i18n/fr/calendar";
@@ -54,7 +54,7 @@ export function CalendarToolbar({
         href={hrefOf(period.mode, null)}
         className={buttonVariants({ variant: "outline", size: "sm" })}
       >
-        {t.today}
+        <ButtonRoll>{t.today}</ButtonRoll>
       </ViewLink>
       <ViewLink
         href={hrefOf(period.mode, period.previous)}

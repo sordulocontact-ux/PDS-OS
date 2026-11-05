@@ -1,4 +1,4 @@
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { ViewLink } from "@/components/ui/view-link";
 import { moduleHref, type AnomalyModule } from "@/lib/distribution/anomalies";
@@ -60,7 +60,9 @@ export function DossierReturn({
               href={moduleHref(m, { projectId, firstMasterId })}
               className={buttonVariants({ variant: "outline", size: "sm" })}
             >
-              {fr.distributionJourney.prep.correctIn(name(m))}
+              <ButtonRoll>
+                {fr.distributionJourney.prep.correctIn(name(m))}
+              </ButtonRoll>
             </ViewLink>
           ))}
         </span>

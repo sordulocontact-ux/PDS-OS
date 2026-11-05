@@ -11,7 +11,7 @@ import {
   PrepareNext,
   SubmitDossier,
 } from "@/components/distribution/dossier/dossier-gestures";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { VersionCard } from "@/components/ui/version-card";
 import { ViewLink } from "@/components/ui/view-link";
@@ -153,7 +153,9 @@ export function DossierStep({ ctx }: { ctx: DistributionContext }) {
                 href={b.href}
                 className={buttonVariants({ variant: "outline", size: "sm" })}
               >
-                {t.blockerButton(b.label, fr.distribution.modules[b.module])}
+                <ButtonRoll>
+                  {t.blockerButton(b.label, fr.distribution.modules[b.module])}
+                </ButtonRoll>
               </ViewLink>
             ))}
           </span>

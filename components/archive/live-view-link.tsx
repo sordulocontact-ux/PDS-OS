@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { records } from "@/lib/i18n/fr/records";
 
 const fr = { records };
@@ -10,7 +10,7 @@ const fr = { records };
 export function LiveViewLink({ href }: { href: string }) {
   return (
     <Link href={href} className={buttonVariants({ variant: "outline" })}>
-      {fr.records.view.showLive}
+      <ButtonRoll>{fr.records.view.showLive}</ButtonRoll>
     </Link>
   );
 }

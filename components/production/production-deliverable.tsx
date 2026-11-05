@@ -1,6 +1,6 @@
 import { DeliveryStepButton } from "@/components/production/delivery-step-button";
 import { FinalFileButton } from "@/components/production/final-file-button";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
@@ -125,9 +125,11 @@ export function ProductionDeliverableItem({
               variant: d.prepared ? "outline" : "default",
             })}
           >
-            {d.prepared
-              ? fr.productionPrep.openPrep
-              : fr.productionPrep.prepare}
+            <ButtonRoll>
+              {d.prepared
+                ? fr.productionPrep.openPrep
+                : fr.productionPrep.prepare}
+            </ButtonRoll>
           </ViewLink>
         )}
       </div>

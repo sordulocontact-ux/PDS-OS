@@ -1,4 +1,4 @@
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { TitleBlock } from "@/components/ui/title-block";
 import { ToneCallout } from "@/components/ui/tone-callout";
@@ -136,7 +136,7 @@ export function NowCard({
       {first && (
         <div className="flex flex-wrap items-center gap-3">
           <ViewLink href={actionHref(first.step)} className={buttonVariants()}>
-            {overview ? t.openShort : t.open}
+            <ButtonRoll>{overview ? t.openShort : t.open}</ButtonRoll>
           </ViewLink>
           {more.length > 0 && (
             <span className="text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-secondary)]">

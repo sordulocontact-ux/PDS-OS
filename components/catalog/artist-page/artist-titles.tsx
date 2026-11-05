@@ -5,7 +5,7 @@ import { FormMessage } from "@/components/auth/form-message";
 import { TitleAudioState } from "@/components/catalog/title/title-audio-state";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
 import { variantText } from "@/lib/catalog/title-rules";
@@ -45,8 +45,10 @@ export function ArtistTitles({
             href={routes.mastersNewForArtist(artistId)}
             className={buttonVariants({ variant: "outline", size: "sm" })}
           >
-            <IconPlus aria-hidden data-icon="inline-start" />
-            {fr.catalog.artist.newMaster}
+            <ButtonRoll>
+              <IconPlus aria-hidden data-icon="inline-start" />
+              {fr.catalog.artist.newMaster}
+            </ButtonRoll>
           </Link>
         )
       }

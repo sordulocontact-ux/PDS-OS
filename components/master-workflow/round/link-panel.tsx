@@ -5,7 +5,7 @@ import { useState, useSyncExternalStore } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { IconBan, IconCircleXmark } from "@/components/icons";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/copy-button";
 import { DocumentCard } from "@/components/ui/document-card";
 import { ReasonForm } from "@/components/ui/reason-form";
@@ -196,7 +196,7 @@ export function LinkPanel(props: LinkPanelProps) {
                             t.remindSubject(props.title),
                           )}&body=${encodeURIComponent(url)}`}
                         >
-                          {t.remind}
+                          <ButtonRoll>{t.remind}</ButtonRoll>
                         </a>
                       )
                     )}

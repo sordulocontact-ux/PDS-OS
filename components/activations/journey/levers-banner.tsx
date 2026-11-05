@@ -1,6 +1,6 @@
 import { IconChevronDown } from "nucleo-sharp-essential";
 
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ViewLink } from "@/components/ui/view-link";
 import type { LeverBoard } from "@/lib/activations/levers";
@@ -82,7 +82,7 @@ export function LeversBanner({
                   href={routes.projectActivation(projectId, l.activationId)}
                   className={buttonVariants({ variant: "ghost", size: "sm" })}
                 >
-                  {t.open}
+                  <ButtonRoll>{t.open}</ButtonRoll>
                 </ViewLink>
               </span>
             ) : canCreate ? (

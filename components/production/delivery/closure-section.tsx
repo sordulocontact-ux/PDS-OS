@@ -1,5 +1,5 @@
 import { PageSection } from "@/components/shell/page-section";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { FactList } from "@/components/ui/fact-list";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { ViewLink } from "@/components/ui/view-link";
@@ -129,7 +129,9 @@ export function ClosureSection({
                 size: "sm",
               })}
             >
-              {facts.activationId ? t.activation : t.activations}
+              <ButtonRoll>
+                {facts.activationId ? t.activation : t.activations}
+              </ButtonRoll>
             </ViewLink>
           )}
         </div>

@@ -1,4 +1,4 @@
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { invoices } from "@/lib/i18n/fr/invoices";
 import type { InvoiceExpected, ProjectInvoice } from "@/lib/invoices/types";
@@ -107,7 +107,7 @@ export function InvoiceCard({ invoice: i }: { invoice: ProjectInvoice }) {
             rel="noreferrer"
             className={buttonVariants({ variant: "outline", size: "sm" })}
           >
-            {t.pdf}
+            <ButtonRoll>{t.pdf}</ButtonRoll>
           </a>
         )}
       </div>
@@ -160,7 +160,7 @@ export function InvoiceCard({ invoice: i }: { invoice: ProjectInvoice }) {
                 rel="noreferrer"
                 className={buttonVariants({ variant: "ghost", size: "sm" })}
               >
-                {t.proofLink}
+                <ButtonRoll>{t.proofLink}</ButtonRoll>
               </a>
             ) : undefined
           }

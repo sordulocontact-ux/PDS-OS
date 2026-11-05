@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 
@@ -16,7 +16,7 @@ export default function NotFound() {
         href={routes.app}
         className={buttonVariants({ className: "justify-self-center" })}
       >
-        {t.home}
+        <ButtonRoll>{t.home}</ButtonRoll>
       </Link>
     </main>
   );

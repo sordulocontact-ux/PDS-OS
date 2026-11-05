@@ -1,6 +1,6 @@
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { SectionRow, SectionRows } from "@/components/ui/section-rows";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ViewLink } from "@/components/ui/view-link";
@@ -87,7 +87,7 @@ export function ContactAwaited({
                       size: "sm",
                     })}
                   >
-                    {p.remind}
+                    <ButtonRoll>{p.remind}</ButtonRoll>
                   </a>
                 )
               }

@@ -7,7 +7,7 @@ import { CreativeTeam } from "@/components/projects/creative-team";
 import { ProjectHeader } from "@/components/projects/project-header";
 import { UnlaunchedOverview } from "@/components/projects/unlaunched-overview";
 import { NowCard } from "@/components/shell/journey/now-card";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { ViewLink } from "@/components/ui/view-link";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
@@ -100,7 +100,7 @@ export default async function ProjectOverviewPage({
               href={routes.projectClosure(project.id)}
               className={buttonVariants({ variant: "ghost", size: "sm" })}
             >
-              {fr.projectReview.stage}
+              <ButtonRoll>{fr.projectReview.stage}</ButtonRoll>
             </ViewLink>
           ) : undefined
         }

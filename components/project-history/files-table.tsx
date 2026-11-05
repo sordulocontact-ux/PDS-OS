@@ -1,7 +1,7 @@
 import { IconMicrophone } from "nucleo-sharp-essential";
 
 import { IconArrowDown } from "@/components/icons";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import {
   DataTable,
   DataTableBody,
@@ -85,8 +85,10 @@ export function FilesTable({
                     className: "relative z-10",
                   })}
                 >
-                  <IconArrowDown aria-hidden />
-                  {t.download}
+                  <ButtonRoll>
+                    <IconArrowDown aria-hidden />
+                    {t.download}
+                  </ButtonRoll>
                 </a>
               ) : (
                 <span className="text-[color:var(--text-tertiary)]">

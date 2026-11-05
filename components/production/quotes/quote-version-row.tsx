@@ -1,5 +1,5 @@
 import { StatusBadge } from "@/components/ui/status-badge";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { formatEuros } from "@/lib/budget/types";
 import { shortStamp } from "@/lib/calls/prep/dates";
 import { productionQuotes } from "@/lib/i18n/fr/production-quotes";
@@ -85,7 +85,7 @@ export function QuoteVersionRow({ q }: { q: QuoteVersionView }) {
             rel="noopener noreferrer"
             className={buttonVariants({ variant: "ghost", size: "sm" })}
           >
-            {t.open}
+            <ButtonRoll>{t.open}</ButtonRoll>
           </a>
         )}
       </span>

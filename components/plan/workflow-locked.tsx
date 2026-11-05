@@ -2,7 +2,7 @@ import { IconLock } from "nucleo-sharp-essential";
 
 import { ProjectHeader } from "@/components/projects/project-header";
 import { ContentCard } from "@/components/shell/content-card";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
 import { projectShell } from "@/lib/i18n/fr/project-shell";
@@ -57,7 +57,9 @@ export function WorkflowLocked({
             }
             className={buttonVariants({ variant: "outline" })}
           >
-            {inPlan ? t.locked.openPlan : t.locked.open}
+            <ButtonRoll>
+              {inPlan ? t.locked.openPlan : t.locked.open}
+            </ButtonRoll>
           </ViewLink>
         </div>
       </ContentCard>

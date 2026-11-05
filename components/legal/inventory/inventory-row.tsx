@@ -1,4 +1,4 @@
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { FactRow } from "@/components/ui/fact-row";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ViewLink } from "@/components/ui/view-link";
@@ -43,7 +43,7 @@ export function InventoryRow({
         href={href}
         className={buttonVariants({ variant: "ghost", size: "sm" })}
       >
-        {status === "known" ? t.view : t.complete}
+        <ButtonRoll>{status === "known" ? t.view : t.complete}</ButtonRoll>
       </ViewLink>
     ));
   return (

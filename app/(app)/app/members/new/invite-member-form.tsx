@@ -8,7 +8,7 @@ import { ChoiceCards } from "@/components/ui/choice-cards";
 import { Field } from "@/components/auth/field";
 import { FieldError, FormMessage } from "@/components/auth/form-message";
 import { SubmitButton } from "@/components/auth/submit-button";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { ORGANIZATION_ROLES, routes } from "@/lib/auth/redirects";
 import { auth } from "@/lib/i18n/fr/auth";
 import { inviteMember } from "@/lib/members/actions";
@@ -73,7 +73,7 @@ export function InviteMemberForm() {
             href={`${routes.members}?status=${state.ready ? "approved" : "invited"}`}
             className={buttonVariants({ size: "lg" })}
           >
-            {t.toTeam}
+            <ButtonRoll>{t.toTeam}</ButtonRoll>
           </Link>
         </div>
       </div>
@@ -151,7 +151,7 @@ export function InviteMemberForm() {
           href={routes.members}
           className={buttonVariants({ variant: "ghost", size: "lg" })}
         >
-          {t.cancel}
+          <ButtonRoll>{t.cancel}</ButtonRoll>
         </Link>
         <SubmitButton pendingLabel={t.submitting}>{t.submit}</SubmitButton>
       </div>

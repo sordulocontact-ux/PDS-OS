@@ -1,7 +1,7 @@
 "use client";
 
 import { FormMessage } from "@/components/auth/form-message";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { attachProof } from "@/lib/distribution/declare-actions";
 import { removeProof, uploadProof } from "@/lib/distribution/upload-proof";
@@ -33,28 +33,34 @@ export function AddProof({
         })}
         aria-busy={pending || undefined}
       >
-        {t.addProof}
-        <input
-          type="file"
-          className="sr-only"
-          disabled={pending}
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (!file) return;
-            run(async () => {
-              const up = await uploadProof({ organizationId, projectId, file });
-              if ("error" in up) return { ok: false, error: up.error };
-              const result = await attachProof({
-                projectId,
-                declarationId,
-                proofPath: up.path,
-                proofName: up.name,
+        <ButtonRoll>
+          {t.addProof}
+          <input
+            type="file"
+            className="sr-only"
+            disabled={pending}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              run(async () => {
+                const up = await uploadProof({
+                  organizationId,
+                  projectId,
+                  file,
+                });
+                if ("error" in up) return { ok: false, error: up.error };
+                const result = await attachProof({
+                  projectId,
+                  declarationId,
+                  proofPath: up.path,
+                  proofName: up.name,
+                });
+                if (!result.ok) await removeProof(up.path);
+                return result;
               });
-              if (!result.ok) await removeProof(up.path);
-              return result;
-            });
-          }}
-        />
+            }}
+          />
+        </ButtonRoll>
       </label>
       <FormMessage kind="error">{error}</FormMessage>
     </span>

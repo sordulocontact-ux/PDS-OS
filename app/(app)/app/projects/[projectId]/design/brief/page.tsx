@@ -5,7 +5,7 @@ import { DesignBlock } from "@/components/design/design-block";
 import { DesignStepFrame } from "@/components/design/design-step-frame";
 import { EstablishBriefButton } from "@/components/design/brief-step/establish-brief-button";
 import { DesignWaits } from "@/components/design/waiting-row";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { PoCallout } from "@/components/ui/po-callout";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
@@ -85,7 +85,7 @@ export default async function DesignBriefPage({
               rel="noreferrer"
               className={buttonVariants({ variant: "ghost", size: "sm" })}
             >
-              {t.pdf}
+              <ButtonRoll>{t.pdf}</ButtonRoll>
             </a>
           )
         }

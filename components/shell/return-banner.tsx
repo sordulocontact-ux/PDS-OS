@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore } from "react";
 
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { shell } from "@/lib/i18n/fr/shell";
 import { RETURN_PARAM, safeReturn } from "@/lib/ui/return-to";
 
@@ -58,7 +58,7 @@ export function ReturnBanner({ scope }: { scope: string }) {
       <span>{t.body}</span>
       <span className="flex gap-2">
         <Link href={back} className={buttonVariants({ size: "sm" })}>
-          {t.back}
+          <ButtonRoll>{t.back}</ButtonRoll>
         </Link>
         <button
           type="button"
@@ -72,7 +72,7 @@ export function ReturnBanner({ scope }: { scope: string }) {
             setDismissed(true);
           }}
         >
-          {t.dismiss}
+          <ButtonRoll>{t.dismiss}</ButtonRoll>
         </button>
       </span>
     </div>

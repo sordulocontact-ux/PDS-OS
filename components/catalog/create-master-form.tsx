@@ -15,7 +15,7 @@ import {
 } from "@/components/catalog/title/credit-rows-field";
 import { TitleDetailsFields } from "@/components/catalog/title/title-details-fields";
 import { useTitleAudioUpload } from "@/components/catalog/title/use-title-audio-upload";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { routes } from "@/lib/auth/redirects";
 import { createMaster } from "@/lib/catalog/actions";
 import { updateMaster } from "@/lib/catalog/master-edit-actions";
@@ -113,13 +113,13 @@ export function CreateMasterForm({
             href={routes.master(createdMaster.id)}
             className={buttonVariants({ variant: "ghost", size: "lg" })}
           >
-            {t.openTitle}
+            <ButtonRoll>{t.openTitle}</ButtonRoll>
           </Link>
           <Link
             href={routes.masterAudio(createdMaster.id)}
             className={buttonVariants({ size: "lg" })}
           >
-            {t.addFileAgain}
+            <ButtonRoll>{t.addFileAgain}</ButtonRoll>
           </Link>
         </div>
       </div>
@@ -219,7 +219,7 @@ export function CreateMasterForm({
             href={routes.masters}
             className={buttonVariants({ variant: "ghost", size: "lg" })}
           >
-            {t.cancel}
+            <ButtonRoll>{t.cancel}</ButtonRoll>
           </Link>
         )}
         {masterId ? (

@@ -1,4 +1,4 @@
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { VersionCard } from "@/components/ui/version-card";
 import { productionProposal } from "@/lib/i18n/fr/production-proposal";
@@ -84,7 +84,7 @@ export function ProposalVersions({
                     rel="noopener noreferrer"
                     className={buttonVariants({ variant: "ghost", size: "sm" })}
                   >
-                    {t.open}
+                    <ButtonRoll>{t.open}</ButtonRoll>
                   </a>
                 </li>
               ))}

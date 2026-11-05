@@ -3,7 +3,7 @@ import { CallRecording } from "@/components/calls/call-recording";
 import { CallSummaryButton } from "@/components/calls/call-summary-button";
 import { CloseCallButton } from "@/components/calls/closure/close-call-button";
 import { JoinCallLink } from "@/components/calls/join-call-link";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { ViewLink } from "@/components/ui/view-link";
 import type { Unreviewed } from "@/lib/calls/closure";
 import type { CallModule, CallTodo } from "@/lib/calls/now";
@@ -58,14 +58,14 @@ export function CallNowAction({
       return (
         module && (
           <ViewLink href={module.href} className={buttonVariants()}>
-            {t.proposals.open(module.name)}
+            <ButtonRoll>{t.proposals.open(module.name)}</ButtonRoll>
           </ViewLink>
         )
       );
     case "tasks":
       return (
         <a href="#call-actions" className={buttonVariants()}>
-          {t.tasks.action(unreviewed.actions)}
+          <ButtonRoll>{t.tasks.action(unreviewed.actions)}</ButtonRoll>
         </a>
       );
     case "summary":

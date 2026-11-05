@@ -1,4 +1,4 @@
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { Rows } from "@/components/ui/rows";
 import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
@@ -39,7 +39,7 @@ function Feed({
           href={href}
           className={buttonVariants({ variant: "ghost", size: "sm" })}
         >
-          {t.open}
+          <ButtonRoll>{t.open}</ButtonRoll>
         </ViewLink>
       )}
     </li>

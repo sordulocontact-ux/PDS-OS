@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { ContactForm } from "@/components/network/contact-form";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { LoadedFormButton } from "@/components/ui/loaded-form-button";
 import { routes } from "@/lib/auth/redirects";
 import type { CaptureArtist } from "@/lib/catalog/capture-artist-types";
@@ -41,8 +41,10 @@ export function CaptureNetworkAction({
         className={buttonVariants({ variant: "outline", size: "sm" })}
         aria-label={t.open(contact.name)}
       >
-        <IconCheck aria-hidden data-icon="inline-start" />
-        {added ? t.added : t.inNetwork}
+        <ButtonRoll>
+          <IconCheck aria-hidden data-icon="inline-start" />
+          {added ? t.added : t.inNetwork}
+        </ButtonRoll>
       </Link>
     );
   if (!canAdd) return null;

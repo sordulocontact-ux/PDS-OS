@@ -7,7 +7,7 @@ import { toast } from "@/components/ui/toast";
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { AttendeeChipList } from "@/components/calls/prep/attendee-chip";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { sendMeetingSummary } from "@/lib/calls/meeting/actions";
@@ -132,7 +132,7 @@ function SummaryForm({
             href={mailtoHref(emails.join(","), subject, text)}
             className={buttonVariants({ variant: "outline", size: "sm" })}
           >
-            {t.mailto}
+            <ButtonRoll>{t.mailto}</ButtonRoll>
           </a>
         </div>
       )}

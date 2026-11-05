@@ -1,7 +1,7 @@
 import { IconCircleInfo } from "nucleo-sharp-essential";
 
 import { IconStop } from "@/components/icons";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { AudioFile } from "@/components/ui/audio-file";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { ToneCallout } from "@/components/ui/tone-callout";
@@ -86,7 +86,7 @@ export function PrepStep({
                         size: "sm",
                       })}
                     >
-                      {t.see}
+                      <ButtonRoll>{t.see}</ButtonRoll>
                     </ViewLink>
                   }
                 />
@@ -122,7 +122,9 @@ function PrepRow({ item }: { item: ReadinessItem }) {
             href={item.href}
             className={buttonVariants({ variant: "outline", size: "sm" })}
           >
-            {j.correctIn(fr.distribution.modules[item.module])}
+            <ButtonRoll>
+              {j.correctIn(fr.distribution.modules[item.module])}
+            </ButtonRoll>
           </ViewLink>
         ) : null
       }

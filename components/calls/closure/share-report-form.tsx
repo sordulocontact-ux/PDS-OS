@@ -5,7 +5,7 @@ import { toast } from "@/components/ui/toast";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { CheckboxField } from "@/components/ui/checkbox-field";
 import { ChoiceCards } from "@/components/ui/choice-cards";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
@@ -76,14 +76,14 @@ export function ShareReportForm({
               )}
               className={buttonVariants({ size: "lg" })}
             >
-              {t.mailto}
+              <ButtonRoll>{t.mailto}</ButtonRoll>
             </a>
           )}
           <a
             href={routes.callReportPdf(call.id, closure.version, scope)}
             className={buttonVariants({ size: "lg", variant: "outline" })}
           >
-            {t.pdf}
+            <ButtonRoll>{t.pdf}</ButtonRoll>
           </a>
         </div>
       </div>

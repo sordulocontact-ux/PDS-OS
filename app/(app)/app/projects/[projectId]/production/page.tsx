@@ -2,7 +2,7 @@ import { IconBox2 } from "nucleo-sharp-essential";
 import { redirect } from "next/navigation";
 
 import { EmptyState } from "@/components/shell/empty-state";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { ViewLink } from "@/components/ui/view-link";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
@@ -43,7 +43,7 @@ export default async function ProjectProductionPage({
           href={routes.projectDesign(projectId)}
           className={buttonVariants({ variant: "outline" })}
         >
-          {t.action}
+          <ButtonRoll>{t.action}</ButtonRoll>
         </ViewLink>
       }
     />

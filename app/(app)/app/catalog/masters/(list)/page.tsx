@@ -9,7 +9,7 @@ import { IconDisc } from "@/components/icons";
 import { EmptyState } from "@/components/shell/empty-state";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { UrlFilters, type UrlFilterGroup } from "@/components/ui/url-filters";
 import { archiveFilterGroup } from "@/lib/archive/filter";
 import { isArchivedView } from "@/lib/archive/types";
@@ -62,8 +62,10 @@ export default async function MastersPage({
   const newMaster =
     can(access, "manage_catalog") && !archived ? (
       <Link href={routes.mastersNew} className={buttonVariants({ size: "lg" })}>
-        <IconPlus aria-hidden data-icon="inline-start" />
-        {t.newMaster}
+        <ButtonRoll>
+          <IconPlus aria-hidden data-icon="inline-start" />
+          {t.newMaster}
+        </ButtonRoll>
       </Link>
     ) : null;
 

@@ -2,7 +2,7 @@ import { ReportView } from "@/components/calls/closure/report-view";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { formatDay } from "@/lib/assistant/facts";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
@@ -59,7 +59,7 @@ export default async function CallReportPage({
             href={routes.callReportPdf(callId, closure.version, scope)}
             className={buttonVariants({ size: "lg", variant: "outline" })}
           >
-            {t.pdf}
+            <ButtonRoll>{t.pdf}</ButtonRoll>
           </a>
         }
       />

@@ -10,7 +10,7 @@ import { BackLink } from "@/components/shell/back-link";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
 import { ReturnBanner } from "@/components/shell/return-banner";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
@@ -63,8 +63,10 @@ export default async function MasterLayout({
                 // (proto docs/protos/titre.html, one primary per view).
                 className={buttonVariants({ size: "lg", variant: "outline" })}
               >
-                <IconPlus aria-hidden data-icon="inline-start" />
-                {t.createProject}
+                <ButtonRoll>
+                  <IconPlus aria-hidden data-icon="inline-start" />
+                  {t.createProject}
+                </ButtonRoll>
               </Link>
             )}
             <MasterActions

@@ -5,7 +5,7 @@ import { RespondPanel } from "@/components/projects/respond-panel";
 import { TransmitDialog } from "@/components/projects/transmit-dialog";
 import { ModuleHeader } from "@/components/shell/module/module-header";
 import { WhoDoesWhatButton } from "@/components/shell/module/who-does-what-button";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import {
   BlockFact,
   FactBlockRow,
@@ -192,7 +192,7 @@ export function UnlaunchedOverview({
                 href={routes.members}
                 className={buttonVariants({ variant: "outline", size: "lg" })}
               >
-                {fr.transmission.panel.toMembers}
+                <ButtonRoll>{fr.transmission.panel.toMembers}</ButtonRoll>
               </Link>
             </div>
           ))}

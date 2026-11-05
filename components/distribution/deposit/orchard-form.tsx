@@ -6,7 +6,7 @@ import { useState } from "react";
 import { FormMessage } from "@/components/auth/form-message";
 import { ProofChip } from "@/components/distribution/deposit/proof-chip";
 import { OptionSelect } from "@/components/projects/option-select";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
@@ -185,16 +185,18 @@ export function OrchardForm({
                         size: "sm",
                       })}
                     >
-                      <IconPaperclip aria-hidden />
-                      {t.attach}
-                      <input
-                        type="file"
-                        className="sr-only"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) setOwn((o) => ({ ...o, [k]: file }));
-                        }}
-                      />
+                      <ButtonRoll>
+                        <IconPaperclip aria-hidden />
+                        {t.attach}
+                        <input
+                          type="file"
+                          className="sr-only"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) setOwn((o) => ({ ...o, [k]: file }));
+                          }}
+                        />
+                      </ButtonRoll>
                     </label>
                   )}
                 </span>

@@ -1,7 +1,7 @@
 import { DeliveryStepButton } from "@/components/production/delivery-step-button";
 import { FinalFileButton } from "@/components/production/final-file-button";
 import { PageSection } from "@/components/shell/page-section";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
 import { productionDelivery } from "@/lib/i18n/fr/production-delivery";
@@ -98,7 +98,7 @@ export function DecisionsSection({
             )}
             className={buttonVariants({ size: "sm", variant: "outline" })}
           >
-            {t.creative.open}
+            <ButtonRoll>{t.creative.open}</ButtonRoll>
           </ViewLink>
           {d?.approvedAt && version?.href && (
             <a
@@ -107,7 +107,7 @@ export function DecisionsSection({
               rel="noopener noreferrer"
               className={buttonVariants({ size: "sm", variant: "ghost" })}
             >
-              {t.creative.openVersion}
+              <ButtonRoll>{t.creative.openVersion}</ButtonRoll>
             </a>
           )}
         </DecisionCard>
@@ -162,7 +162,7 @@ export function DecisionsSection({
               rel="noopener noreferrer"
               className={buttonVariants({ size: "sm", variant: "outline" })}
             >
-              {t.delivery.final}
+              <ButtonRoll>{t.delivery.final}</ButtonRoll>
             </a>
           )}
           {canOrganize &&

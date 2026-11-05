@@ -22,7 +22,7 @@ import { allInOrder } from "@/lib/utils/parallel";
 import { IconPlus } from "nucleo-sharp-essential";
 import Link from "next/link";
 
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { routes } from "@/lib/auth/redirects";
 
 // Projects & releases tab: live projects carrying the title, among those the
@@ -62,8 +62,10 @@ export default async function MasterProjectsPage({
                 href={routes.projectsNewFromMaster(master.id)}
                 className={buttonVariants({ variant: "outline", size: "sm" })}
               >
-                <IconPlus aria-hidden data-icon="inline-start" />
-                {t.create}
+                <ButtonRoll>
+                  <IconPlus aria-hidden data-icon="inline-start" />
+                  {t.create}
+                </ButtonRoll>
               </Link>
             </div>
           )

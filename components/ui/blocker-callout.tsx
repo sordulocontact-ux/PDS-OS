@@ -1,4 +1,4 @@
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { ViewLink } from "@/components/ui/view-link";
 import { journey } from "@/lib/i18n/fr/journey";
@@ -36,7 +36,7 @@ export function BlockerCallout({
               href={b.href}
               className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
             >
-              {fr.journey.resolveBlocker}
+              <ButtonRoll>{fr.journey.resolveBlocker}</ButtonRoll>
             </ViewLink>
           )}
         </span>

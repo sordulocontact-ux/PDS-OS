@@ -12,7 +12,7 @@ import {
 import { EmptyState } from "@/components/shell/empty-state";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { CalendarToolbar } from "@/components/ui/calendar-toolbar";
 import { DataTableViews } from "@/components/ui/data-table";
 import { UrlFilters, type UrlFilterGroup } from "@/components/ui/url-filters";
@@ -191,8 +191,10 @@ export default async function CallsPage({
                 href={routes.projects}
                 className={buttonVariants({ variant: "outline" })}
               >
-                <IconFolderOpen aria-hidden data-icon="inline-start" />
-                {t.openProjects}
+                <ButtonRoll>
+                  <IconFolderOpen aria-hidden data-icon="inline-start" />
+                  {t.openProjects}
+                </ButtonRoll>
               </Link>
             }
           />

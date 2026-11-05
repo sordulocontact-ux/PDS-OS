@@ -1,4 +1,4 @@
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { VersionCard } from "@/components/ui/version-card";
 import { productionLight } from "@/lib/i18n/fr/production-light";
 import { productionProposal } from "@/lib/i18n/fr/production-proposal";
@@ -54,7 +54,7 @@ export function LightVersions({ versions }: { versions: LightVersion[] }) {
               href={v.file.href ?? undefined}
               className={buttonVariants({ variant: "ghost", size: "sm" })}
             >
-              {v.file.name}
+              <ButtonRoll>{v.file.name}</ButtonRoll>
             </a>
           ) : v.url ? (
             <a
