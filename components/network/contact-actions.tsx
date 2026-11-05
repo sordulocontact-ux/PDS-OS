@@ -17,11 +17,13 @@ export function ContactActions({
   rights,
   leaveTo,
   size,
+  reveal,
 }: {
   contact: { id: string; name: string };
   rights: RecordRights;
   leaveTo?: string;
   size?: "icon-sm" | "icon-lg";
+  reveal?: boolean;
 }) {
   return (
     <RecordActions
@@ -31,6 +33,7 @@ export function ContactActions({
       rights={rights}
       leaveTo={leaveTo}
       size={size}
+      reveal={reveal}
       edit={(close) => (
         <EditPanel load={() => loadContactEdit(contact.id)}>
           {({ contact: values, options }) => (

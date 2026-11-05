@@ -123,7 +123,7 @@ export function ProjectsTable({
               </DataTableCell>
               {withActions && (
                 <DataTableActionsCell>
-                  <DraftRowActions draftId={draft.id} name={name} />
+                  <DraftRowActions draftId={draft.id} name={name} reveal />
                 </DataTableActionsCell>
               )}
             </DataTableRow>
@@ -199,6 +199,7 @@ export function ProjectsTable({
                         launched: project.stageCount > 0,
                       }}
                       rights={rights}
+                      reveal
                     />
                   )}
                 </DataTableActionsCell>

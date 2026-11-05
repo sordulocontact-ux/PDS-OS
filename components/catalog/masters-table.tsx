@@ -134,7 +134,7 @@ export function MastersTable({
             </DataTableCell>
             {withActions && (
               <DataTableActionsCell>
-                <MasterActions master={master} rights={rights} />
+                <MasterActions master={master} rights={rights} reveal />
               </DataTableActionsCell>
             )}
           </DataTableRow>

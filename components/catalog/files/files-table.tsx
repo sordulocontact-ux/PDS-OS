@@ -114,6 +114,7 @@ export function FilesTable({
                   canDelete={writable}
                   organizationId={writable ? organizationId : null}
                   categories={scope?.categories}
+                  reveal
                 />
               </DataTableActionsCell>
             </DataTableRow>

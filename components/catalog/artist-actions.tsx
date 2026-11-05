@@ -23,11 +23,13 @@ export function ArtistActions({
   rights,
   leaveTo,
   size,
+  reveal,
 }: {
   artist: { id: string; name: string; masterCount: number };
   rights: RecordRights;
   leaveTo?: string;
   size?: "icon-sm" | "icon-lg";
+  reveal?: boolean;
 }) {
   return (
     <RecordActions
@@ -37,6 +39,7 @@ export function ArtistActions({
       rights={rights}
       leaveTo={leaveTo}
       size={size}
+      reveal={reveal}
       blockedReason={
         artist.masterCount > 0
           ? fr.records.archive.blocked.artistHasMasters(artist.masterCount)

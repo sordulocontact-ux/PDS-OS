@@ -33,6 +33,7 @@ export function FileActions({
   canDelete,
   organizationId,
   categories,
+  reveal = false,
 }: {
   owner: FileOwner;
   file: CatalogFile;
@@ -42,6 +43,8 @@ export function FileActions({
   categories?: readonly string[];
   // The writer's organization: where a new version is uploaded.
   organizationId: string | null;
+  // On a list row: the button shows on hover (RowActions `reveal`).
+  reveal?: boolean;
 }) {
   const t = fr.catalogFiles;
   const [editing, setEditing] = useState(false);
@@ -128,7 +131,11 @@ export function FileActions({
 
   return (
     <>
-      <RowActions label={t.menu.label(file.fileName)} actions={actions} />
+      <RowActions
+        label={t.menu.label(file.fileName)}
+        actions={actions}
+        reveal={reveal}
+      />
       {canVersion && (
         <input
           ref={picker}

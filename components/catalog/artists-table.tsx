@@ -157,7 +157,7 @@ export function ArtistsTable({
             </DataTableCell>
             {withActions && (
               <DataTableActionsCell>
-                <ArtistActions artist={artist} rights={rights} />
+                <ArtistActions artist={artist} rights={rights} reveal />
               </DataTableActionsCell>
             )}
           </DataTableRow>

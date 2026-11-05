@@ -20,9 +20,11 @@ const fr = { shell };
 export function DraftRowActions({
   draftId,
   name,
+  reveal = false,
 }: {
   draftId: string;
   name: string;
+  reveal?: boolean;
 }) {
   const t = fr.shell.newProject.draft;
   const router = useRouter();
@@ -46,6 +48,7 @@ export function DraftRowActions({
     <>
       <RowActions
         label={t.actions(name)}
+        reveal={reveal}
         actions={[
           {
             key: "resume",

@@ -13,11 +13,13 @@ export function MasterActions({
   rights,
   leaveTo,
   size,
+  reveal,
 }: {
   master: { id: string; title: string; projectCount: number };
   rights: RecordRights;
   leaveTo?: string;
   size?: "icon-sm" | "icon-lg";
+  reveal?: boolean;
 }) {
   return (
     <RecordActions
@@ -27,6 +29,7 @@ export function MasterActions({
       rights={rights}
       leaveTo={leaveTo}
       size={size}
+      reveal={reveal}
       blockedReason={
         master.projectCount > 0
           ? fr.records.archive.blocked.masterHasProjects(master.projectCount)

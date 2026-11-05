@@ -36,6 +36,7 @@ export function RecordActions({
   edit,
   leaveTo,
   size,
+  reveal,
 }: {
   kind: ArchiveKind;
   id: string;
@@ -48,6 +49,8 @@ export function RecordActions({
   // Detail page: where to go once the record is archived or deleted.
   leaveTo?: string;
   size?: "icon-sm" | "icon-lg";
+  // On a list row: the button shows on hover (RowActions `reveal`).
+  reveal?: boolean;
 }) {
   const t = fr.records;
   const router = useRouter();
@@ -107,7 +110,12 @@ export function RecordActions({
 
   return (
     <>
-      <RowActions label={t.menu.label(name)} actions={actions} size={size} />
+      <RowActions
+        label={t.menu.label(name)}
+        actions={actions}
+        size={size}
+        reveal={reveal}
+      />
 
       {edit && (
         <FormDialog

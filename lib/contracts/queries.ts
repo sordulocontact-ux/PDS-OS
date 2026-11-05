@@ -4,6 +4,7 @@ import { trackedCache } from "@/lib/projects/live-deps";
 
 import type { Access } from "@/lib/auth/access";
 import { can } from "@/lib/auth/access";
+import { getAccess } from "@/lib/auth/dal";
 import {
   asContractStatus,
   asContractType,
@@ -46,7 +47,16 @@ type Row = NonNullable<
   Awaited<ReturnType<typeof readContracts>>["data"]
 >[number];
 
-function toRow(row: Row, today: string): ContractRow {
+// Comfort only: advance_contract and RLS decide (can_edit_contract).
+function isWriter(row: Row, access: Access): boolean {
+  return (
+    can(access, "manage_contracts") &&
+    (row.owner_person_id === access.personId ||
+      can(access, "view_all_projects"))
+  );
+}
+
+function toRow(row: Row, today: string, access: Access): ContractRow {
   const status = asContractStatus(row.status);
   return {
     id: row.id,
@@ -65,19 +75,22 @@ function toRow(row: Row, today: string): ContractRow {
     parties: row.contract_parties
       .flatMap((party) => (party.contact ? [party.contact.name] : []))
       .sort((a, b) => a.localeCompare(b, "fr")),
+    canEdit:
+      isWriter(row, access) && !["in_review", "terminated"].includes(status),
   };
 }
 
 /** Contracts the viewer may read, newest first. Null on failure. */
 export async function listContracts(): Promise<ContractRow[] | null> {
-  const supabase = await createClient();
+  // Cached for the request: read in parallel with the page's own access.
+  const [access, supabase] = await Promise.all([getAccess(), createClient()]);
   const { data, error } = await readContracts(supabase);
   if (error) {
     console.error("listContracts:", error.message);
     return null;
   }
   const today = todayInParis(new Date());
-  return data.map((row) => toRow(row, today));
+  return data.map((row) => toRow(row, today, access));
 }
 
 /** One contract with its parties and what the viewer may do on it. */
@@ -91,13 +104,8 @@ export async function getContract(
   const row = data?.[0];
   if (!row) return null;
   const today = todayInParis(new Date());
-  const base = toRow(row, today);
-
-  // Comfort only: advance_contract and RLS decide (can_edit_contract).
-  const writer =
-    can(access, "manage_contracts") &&
-    (row.owner_person_id === access.personId ||
-      can(access, "view_all_projects"));
+  const base = toRow(row, today, access);
+  const writer = isWriter(row, access);
   // Submitting and sending are the owner's (VISION-UX rule 9, Sacha
   // 30/10/2026): the direction validates, it never submits for him.
   const owner =
@@ -136,7 +144,7 @@ export async function getContract(
       )
       .sort((a, b) => a.name.localeCompare(b.name, "fr")),
     can: {
-      edit: writer && !["in_review", "terminated"].includes(status),
+      edit: base.canEdit,
       submit: owner && status === "draft",
       decide: can(access, "validate") && status === "in_review",
       send: owner && status === "approved",

@@ -139,7 +139,7 @@ export function NetworkTable({
               {contact.city ?? EMPTY_CELL}
             </DataTableCell>
             <DataTableActionsCell>
-              <ContactActions contact={contact} rights={rights} />
+              <ContactActions contact={contact} rights={rights} reveal />
             </DataTableActionsCell>
           </DataTableRow>
         ))}

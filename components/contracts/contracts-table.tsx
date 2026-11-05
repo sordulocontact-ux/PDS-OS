@@ -1,8 +1,11 @@
 import { IconHandshake } from "nucleo-sharp-essential";
 
+import { ContractRowActions } from "@/components/contracts/contract-row-actions";
 import { ContractStateBadge } from "@/components/contracts/contract-state-badge";
 import {
   DataTable,
+  DataTableActionsCell,
+  DataTableActionsHead,
   DataTableBody,
   DataTableCell,
   DataTableHead,
@@ -17,16 +20,18 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { routes } from "@/lib/auth/redirects";
 import type { ContractRow } from "@/lib/contracts/types";
 import { contracts } from "@/lib/i18n/fr/contracts";
+import { records } from "@/lib/i18n/fr/records";
 import { formatShortDate } from "@/lib/release/format";
 import { overdueTone } from "@/lib/ui/state-tones";
 
-const fr = { contracts };
+const fr = { contracts, records };
 
 // Contracts, newest first: the row opens the contract; its type and what it
 // is about read under the title; its state, its parties, its due date (past
 // ones flagged) and who follows it.
 export function ContractsTable({ contracts }: { contracts: ContractRow[] }) {
   const t = fr.contracts;
+  const withActions = contracts.some((c) => c.canEdit);
   return (
     <DataTable>
       <DataTableHeader>
@@ -37,6 +42,7 @@ export function ContractsTable({ contracts }: { contracts: ContractRow[] }) {
         <DataTableHead hideBelow="lg" fill>
           {t.columns.owner}
         </DataTableHead>
+        {withActions && <DataTableActionsHead label={fr.records.menu.column} />}
       </DataTableHeader>
       <DataTableBody>
         {contracts.map((contract) => (
@@ -91,6 +97,11 @@ export function ContractsTable({ contracts }: { contracts: ContractRow[] }) {
             <DataTableCell hideBelow="lg" fill>
               {contract.ownerName || EMPTY_CELL}
             </DataTableCell>
+            {withActions && (
+              <DataTableActionsCell>
+                <ContractRowActions contract={contract} reveal />
+              </DataTableActionsCell>
+            )}
           </DataTableRow>
         ))}
       </DataTableBody>

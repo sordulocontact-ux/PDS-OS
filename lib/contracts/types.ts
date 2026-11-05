@@ -120,6 +120,8 @@ export type ContractRow = {
   artistName: string | null;
   // Names of its parties (network contacts).
   parties: string[];
+  // The viewer may edit it (comfort only: the database decides).
+  canEdit: boolean;
 };
 
 /** What the viewer may do on a contract, decided by the server. */

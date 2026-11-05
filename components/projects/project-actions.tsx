@@ -26,11 +26,13 @@ export function ProjectActions({
   rights,
   leaveTo,
   size,
+  reveal,
 }: {
   project: { id: string; title: string; launched: boolean };
   rights: RecordRights;
   leaveTo?: string;
   size?: "icon-sm" | "icon-lg";
+  reveal?: boolean;
 }) {
   return (
     <RecordActions
@@ -40,6 +42,7 @@ export function ProjectActions({
       rights={rights}
       leaveTo={leaveTo}
       size={size}
+      reveal={reveal}
       blockedReason={
         project.launched
           ? fr.records.archive.blocked.projectLaunched
