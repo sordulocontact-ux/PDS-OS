@@ -10,6 +10,8 @@ import type {
 import { masterStepHref } from "@/lib/ui/master-steps";
 import { formatShortDay } from "@/lib/utils/day";
 
+import { MissingStemsRow } from "@/components/master-workflow/round/stems-row";
+
 import { ReplaceSourceButton } from "./newer-source";
 import { SourceAudio } from "./source-audio";
 import { SourceChooser } from "./source-chooser";
@@ -106,16 +108,24 @@ function TitleSource({
             label: t.mix.state[title.mix],
           }}
         />
-        <FactRow
-          label={t.stems.label}
-          value={t.stems.value(title.stems.count, title.stems.latest)}
-          source={t.stems.source}
-          state={
-            title.stems.count > 0
-              ? { tone: "success", label: t.stems.ready }
-              : { tone: "warning", label: t.stems.missing }
-          }
-        />
+        {title.stems.count > 0 ? (
+          <FactRow
+            label={t.stems.label}
+            value={t.stems.value(title.stems.count, title.stems.latest)}
+            source={t.stems.source}
+            state={{ tone: "success", label: t.stems.ready }}
+          />
+        ) : (
+          // Missing: the row adds them (Ibé's feedback of 02/11).
+          <MissingStemsRow
+            organizationId={view.organizationId}
+            masterId={title.id}
+            title={title.title}
+            value={t.stems.value(0, null)}
+            source={t.stems.source}
+            missingLabel={t.stems.missing}
+          />
+        )}
         {current && current.vocalsFinal !== null && (
           <FactRow
             label={t.vocals.label}

@@ -17,19 +17,26 @@ const StemsDialog = dynamic(() =>
 );
 
 /**
- * « Pistes séparées · Manquant » for one title, before the mix is sent:
- * the whole row opens « Ajouter les pistes séparées » (StemsDialog), no
- * button beside it. Without manage_catalog (`organizationId` null), the row
- * only says what is missing.
+ * « Pistes séparées · Manquant » for one title, at the Source and before
+ * the mix is sent: the whole row opens « Ajouter les pistes séparées »
+ * (StemsDialog), no button beside it. Without manage_catalog
+ * (`organizationId` null), the row only says what is missing. `value`,
+ * `source`, `missingLabel`: the wording of the step it sits in.
  */
 export function MissingStemsRow({
   organizationId,
   masterId,
   title,
+  value,
+  source,
+  missingLabel,
 }: {
   organizationId: string | null;
   masterId: string;
   title: string;
+  value?: string;
+  source?: string;
+  missingLabel?: string;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -38,8 +45,9 @@ export function MissingStemsRow({
   const row = (
     <FactRowFrame
       label={t.stems}
-      value={t.stemsNone(title)}
-      state={{ tone: "warning", label: t.missing }}
+      value={value ?? t.stemsNone(title)}
+      source={source}
+      state={{ tone: "warning", label: missingLabel ?? t.missing }}
       onClick={
         organizationId
           ? () => {
