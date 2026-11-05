@@ -72,7 +72,9 @@ export async function StepToolsBlock({
   const tools = await loadStepTools(stepRef.projectId);
   const notes = tools.notes.filter((n) => sameStep(n, stepRef));
   return (
-    <div className="flex flex-col gap-4">
+    // `mt-6`: the footer sits well apart from the step's content (like
+    // StepPanel's footer group); nothing to show, nothing taking room.
+    <div className="mt-6 flex flex-col gap-4 empty:hidden">
       <StepNotes
         projectId={stepRef.projectId}
         notes={notes}

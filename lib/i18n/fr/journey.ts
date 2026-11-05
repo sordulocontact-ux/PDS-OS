@@ -53,6 +53,7 @@ export const journey = {
     othersMove: "Les autres avancent ; la Vue d'ensemble dit qui est attendu.",
     open: "Aller à l'étape",
     openShort: "Ouvrir",
+    goTo: (place: string) => `Aller à ${place}`,
     others: (n: number, list: string) =>
       `Et ${n} autre${n > 1 ? "s" : ""} : ${list}`,
     waitFor: (who: string) => `En attente ${de(who)}`,

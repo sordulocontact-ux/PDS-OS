@@ -14,6 +14,7 @@ import {
   ContactContracts,
   ContactMembers,
 } from "@/components/network/contact-relations";
+import { emailEnabled } from "@/lib/email/send";
 import { EditContactButton } from "@/components/network/edit-contact-button";
 import { BackLink } from "@/components/shell/back-link";
 import { ReturnBanner } from "@/components/shell/return-banner";
@@ -105,6 +106,8 @@ export default async function NetworkContactPage({
           <ContactAwaited
             name={contact.name}
             email={contact.email}
+            contactId={contact.id}
+            canEmail={emailEnabled()}
             projects={projects}
           />
           <ContactInProjects projects={projects} />

@@ -1,3 +1,4 @@
+import { RemindContactButton } from "@/components/network/remind-contact-button";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
@@ -25,16 +26,22 @@ const linkClass = "font-semibold no-underline hover:underline";
 
 /**
  * What waits for a contact across PDS's projects (proto des pages,
- * 29/10/2026), soonest first, each with « Relancer » (a ready e-mail).
+ * 29/10/2026), soonest first, each with « Relancer » (the link e-mailed again, else a ready e-mail).
  * Nothing waits: no card.
  */
 export function ContactAwaited({
   name,
   email,
+  contactId,
+  canEmail,
   projects,
 }: {
   name: string;
   email: string | null;
+  contactId: string;
+  // PDS OS can e-mail the contact itself (`emailEnabled()`, read on the
+  // server): « Relancer » then re-sends the project link; else a mailto.
+  canEmail: boolean;
   projects: ContactProject[];
 }) {
   const p = fr.network.page;
@@ -74,7 +81,14 @@ export function ContactAwaited({
                 .filter(Boolean)
                 .join(" · ")}
               badge={
-                email && (
+                canEmail && email ? (
+                  <RemindContactButton
+                    projectId={project.projectId}
+                    contactId={contactId}
+                    label={p.remind}
+                    ariaLabel={p.remindLabel(todo)}
+                  />
+                ) : email ? (
                   <a
                     href={mailtoHref(
                       email,
@@ -89,7 +103,7 @@ export function ContactAwaited({
                   >
                     <ButtonRoll>{p.remind}</ButtonRoll>
                   </a>
-                )
+                ) : null
               }
             />
           );

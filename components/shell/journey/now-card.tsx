@@ -136,7 +136,13 @@ export function NowCard({
       {first && (
         <div className="flex flex-wrap items-center gap-3">
           <ViewLink href={actionHref(first.step)} className={buttonVariants()}>
-            <ButtonRoll>{overview ? t.openShort : t.open}</ButtonRoll>
+            <ButtonRoll>
+              {overview
+                ? t.openShort
+                : away && first.place
+                  ? t.goTo(first.place)
+                  : t.open}
+            </ButtonRoll>
           </ViewLink>
           {more.length > 0 && (
             <span className="text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-secondary)]">

@@ -173,9 +173,13 @@ export function StepPanel({
             children
           ))}
         {slots.result}
-        {slots.notes}
-        {!locked && slots.tools}
-        {slots.history}
+        {/* The rarely used footer (notes, « Signaler un blocage » / « Noter
+            une information », « Déjà fait »): well apart from the content. */}
+        <div className="mt-6 flex flex-col gap-3.5 empty:hidden">
+          {slots.notes}
+          {!locked && slots.tools}
+          {slots.history}
+        </div>
       </section>
     </StepResultProvider>
   );
