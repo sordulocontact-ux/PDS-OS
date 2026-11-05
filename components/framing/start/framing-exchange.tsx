@@ -145,7 +145,7 @@ export async function FramingExchange({
   );
   return (
     <div className="flex flex-col gap-5">
-      {departure}
+      {/* The report's card says when: no « Départ » above it (05/11). */}
       <MeetingFacts meeting={meeting} />
       {canEdit ? (
         (settled || summaries.length > 0) && (

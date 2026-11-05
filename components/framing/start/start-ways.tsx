@@ -8,6 +8,7 @@ import type { CallPrepDefaults } from "@/lib/calls/prep/types";
 import { startFramingWithPo } from "@/lib/framing/actions/start";
 import { framingIntel } from "@/lib/i18n/fr/framing-intel";
 import { framingJourney } from "@/lib/i18n/fr/framing-journey";
+import { cn } from "@/lib/utils";
 
 const fr = { framingIntel, framingJourney };
 
@@ -27,12 +28,16 @@ export function StartWays({
   reason,
   callDefaults,
   started = false,
+  startedOn = null,
 }: {
   projectId: string;
   recommended: "call" | "po";
   reason: string | null;
   callDefaults: CallPrepDefaults;
   started?: boolean;
+  // « 28/10 »: when the Cadrage was started with PO, said on its card
+  // instead of a « Départ » line (Sacha 05/11/2026).
+  startedOn?: string | null;
 }) {
   const t = fr.framingJourney.start;
   const [way, setWay] = useState<"call" | null>(null);
@@ -48,7 +53,12 @@ export function StartWays({
     );
 
   return (
-    <div className="flex flex-col gap-2" aria-busy={starting || undefined}>
+    <div
+      // Started, « Continuer ou changer de départ » is a new section: set
+      // apart from the step's title and why (Sacha 05/11/2026).
+      className={cn("flex flex-col gap-2", started && "pt-6")}
+      aria-busy={starting || undefined}
+    >
       <StartChoices
         legend={started ? t.changeLegend : undefined}
         recommended={recommended}
@@ -59,6 +69,9 @@ export function StartWays({
             title: po.title,
             body: po.body,
             action: po.title,
+            badge: startedOn
+              ? t.choices.resume.startedOn(startedOn)
+              : undefined,
             onChoose: starting ? undefined : startDirectly,
           },
           {

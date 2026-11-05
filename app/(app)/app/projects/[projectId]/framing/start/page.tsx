@@ -11,7 +11,7 @@ import { QUESTIONS } from "@/lib/framing/dimensions";
 import { framingJourneyContext } from "@/lib/framing/journey-context";
 import { recommendedStart } from "@/lib/framing/lines";
 import { fr } from "@/lib/i18n/fr";
-import { formatShortInstant } from "@/lib/utils/day";
+import { formatShortDay, formatShortInstant } from "@/lib/utils/day";
 
 /**
  * Cadrage › Démarrer le cadrage (proto frEntry, ticket § 1 and § 5): what
@@ -46,33 +46,32 @@ export default async function FramingStartPage({
     );
   else if (chosen) {
     const started = project.stages.find((s) => s.key === "framing");
-    body = (
-      <>
-        <CallFacts
-          facts={[
-            {
-              label: t.departure,
-              value: t.departureDirect(
-                project.ownerName,
-                started?.stateChangedAt
-                  ? formatShortInstant(started.stateChangedAt)
-                  : "—",
-              ),
-            },
-          ]}
-        />
-        {/* The way in can still change while the Cadrage is worked on
-            (Sacha 01/11/2026): an exchange after all, or back to PO. */}
-        {canEdit && ctx.stage === "in_progress" && (
-          <StartWays
-            projectId={projectId}
-            recommended={recommendedStart(assessment.counts)}
-            reason={null}
-            callDefaults={await callSheetData(k, assessment)}
-            started
-          />
-        )}
-      </>
+    const at = started?.stateChangedAt ?? null;
+    // The cards still offered: when it started is a pill on « Reprendre
+    // avec PO », not a « Départ » line (Sacha 05/11/2026); the line stays
+    // for whoever reads without the cards.
+    const ways = canEdit && ctx.stage === "in_progress";
+    body = ways ? (
+      <StartWays
+        projectId={projectId}
+        recommended={recommendedStart(assessment.counts)}
+        reason={null}
+        callDefaults={await callSheetData(k, assessment)}
+        started
+        startedOn={at ? formatShortDay(at, { bare: true }) : null}
+      />
+    ) : (
+      <CallFacts
+        facts={[
+          {
+            label: t.departure,
+            value: t.departureDirect(
+              project.ownerName,
+              at ? formatShortInstant(at) : "—",
+            ),
+          },
+        ]}
+      />
     );
   } else {
     const lines = Object.fromEntries(

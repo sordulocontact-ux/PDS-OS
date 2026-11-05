@@ -23,6 +23,8 @@ export type StartChoice = {
   href?: string;
   // The card runs this (from a client parent).
   onChoose?: () => void;
+  // A fact of the way, beside its title (« Commencé le 28/10 »).
+  badge?: string;
 };
 
 /**
@@ -71,6 +73,11 @@ export function StartChoices({
           {isRecommended && (
             <StatusBadge tone="info" size="sm">
               {fr.decisions.start.recommended}
+            </StatusBadge>
+          )}
+          {choice.badge && (
+            <StatusBadge tone="neutral" size="sm">
+              {choice.badge}
             </StatusBadge>
           )}
         </span>

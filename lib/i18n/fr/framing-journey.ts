@@ -101,6 +101,7 @@ export const framingJourney = {
       resume: {
         title: "Reprendre avec PO",
         body: "PO reprend ses questions où vous en êtes : rien de ce qui est déjà répondu n'est perdu.",
+        startedOn: (day: string) => `Commencé le ${day}`,
       },
     },
     changeLegend: "Continuer ou changer de départ",
