@@ -1,38 +1,50 @@
+import { IconEnvelopeOpen } from "nucleo-sharp-essential";
+
+import { DocumentCard } from "@/components/ui/document-card";
+import { routes } from "@/lib/auth/redirects";
 import type { SummaryVersion } from "@/lib/calls/meeting/types";
 import { shortStamp } from "@/lib/calls/prep/dates";
 import { meeting } from "@/lib/i18n/fr/meeting";
+
+import { SummaryPdfButton } from "./summary-pdf-button";
 
 const fr = { meeting };
 
 /**
  * What a participant reads of a meeting (proto `summaryFor`): the last
- * version of the summary sent to them, who sent it and when.
+ * version of the summary sent to them, as the card of a document — who
+ * sent it and when on its line, « Voir le PDF » when they are in the app
+ * (`callId`; a private link has no session for it), the message below.
  */
 export function MeetingSummaryFor({
   summary,
+  callId,
 }: {
   summary: SummaryVersion | null;
+  callId?: string;
 }) {
   if (!summary) return null;
   const t = fr.meeting.summaryFor;
   return (
-    <section
-      aria-labelledby="meeting-summary-for"
-      className="flex flex-col gap-2"
+    <DocumentCard
+      name={t.heading}
+      line={t.sentBy(
+        summary.sentBy ?? "—",
+        shortStamp(summary.sentAt),
+        summary.version,
+      )}
+      icon={IconEnvelopeOpen}
+      action={
+        callId ? (
+          <SummaryPdfButton
+            href={routes.callSummaryPdf(callId, summary.version)}
+          />
+        ) : null
+      }
     >
-      <h3 id="meeting-summary-for" className="text-body-md font-semibold">
-        {t.heading}
-      </h3>
-      <p className="text-body-md leading-[1.55] whitespace-pre-line">
+      <p className="px-3.5 py-3 text-body-md leading-[1.55] whitespace-pre-line">
         {summary.text}
       </p>
-      <p className="text-caption text-[color:var(--text-tertiary)]">
-        {t.sentBy(
-          summary.sentBy ?? "—",
-          shortStamp(summary.sentAt),
-          summary.version,
-        )}
-      </p>
-    </section>
+    </DocumentCard>
   );
 }

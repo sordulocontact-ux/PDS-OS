@@ -65,6 +65,19 @@ export const meeting = {
     },
     send: "Envoyer aux participants",
     sending: "Envoi…",
+    // The summary as a PDF (Sacha 05/11/2026): attached to the e-mail of the
+    // outside guests, « Voir le PDF » in the app.
+    pdf: {
+      name: "Compte rendu",
+      when: "Date",
+      participants: "Participants",
+      sentBy: (name: string, day: string, version: number | null) =>
+        `Envoyé par ${name} le ${day}${version && version > 1 ? ` · version ${version}` : ""}`,
+      view: "Voir le PDF",
+      preparing: "Préparation du PDF…",
+      failed: "Le PDF n'a pas pu être préparé. Réessayez.",
+    },
+    attached: "Le compte rendu en PDF est joint à l'e-mail.",
     cancel: "Annuler",
     sent: "Résumé envoyé aux participants",
     sentBadge: (n: number) => `Envoyé · version ${n}`,

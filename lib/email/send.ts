@@ -23,6 +23,14 @@ export type OutgoingEmail = {
   text: string;
   // The member who sends: shown as the sender's name, and the reply-to.
   sender: { name: string; email: string | null };
+  // Files joined to the e-mail (a meeting's report as a PDF).
+  attachments?: EmailAttachment[];
+};
+
+export type EmailAttachment = {
+  filename: string;
+  content: Uint8Array;
+  contentType: string;
 };
 
 export async function sendEmail(
@@ -44,6 +52,11 @@ export async function sendEmail(
       replyTo: mail.sender.email ?? undefined,
       subject: mail.subject,
       text: mail.text,
+      attachments: mail.attachments?.map((a) => ({
+        filename: a.filename,
+        content: Buffer.from(a.content),
+        contentType: a.contentType,
+      })),
     });
     return { ok: true };
   } catch (error) {

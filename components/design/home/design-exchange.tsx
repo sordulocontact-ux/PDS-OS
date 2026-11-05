@@ -152,7 +152,10 @@ export async function DesignExchange({ ctx }: { ctx: DesignJourneyContext }) {
           />
         )
       ) : (
-        <MeetingSummaryFor summary={summaries[0] ?? null} />
+        <MeetingSummaryFor
+          summary={summaries[0] ?? null}
+          callId={call.callId}
+        />
       )}
     </div>
   );

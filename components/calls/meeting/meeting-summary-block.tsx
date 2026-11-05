@@ -18,6 +18,9 @@ import { shortStamp } from "@/lib/calls/prep/dates";
 import type { PrepPerson } from "@/lib/calls/prep/types";
 import { meeting } from "@/lib/i18n/fr/meeting";
 import { meetingSummaryTone } from "@/lib/ui/state-tones";
+import { routes } from "@/lib/auth/redirects";
+
+import { SummaryPdfButton } from "./summary-pdf-button";
 
 const fr = { meeting };
 
@@ -68,6 +71,8 @@ export function MeetingSummaryBlock({
           .join(", "),
       )
     : t.teamOnly;
+  // The report's PDF goes with the e-mail (Sacha 05/11/2026).
+  const byEmail = externals.some((p) => p.invite !== "link");
 
   if (!last && !canSend)
     return (
@@ -98,7 +103,7 @@ export function MeetingSummaryBlock({
                   t.recipientsNone
                 )
               }
-              source={howLine}
+              source={byEmail ? `${howLine} ${t.attached}` : howLine}
             />
           </FactRows>
           <div className="flex flex-col gap-1.5 px-3.5 pt-1 pb-3.5">
@@ -157,9 +162,14 @@ export function MeetingSummaryBlock({
       )}
       icon={IconEnvelopeOpen}
       action={
-        <StatusBadge tone={meetingSummaryTone} size="sm">
-          {t.sentBadge(last.version)}
-        </StatusBadge>
+        <span className="flex flex-wrap items-center gap-2">
+          <StatusBadge tone={meetingSummaryTone} size="sm">
+            {t.sentBadge(last.version)}
+          </StatusBadge>
+          <SummaryPdfButton
+            href={routes.callSummaryPdf(callId, last.version)}
+          />
+        </span>
       }
     >
       <div className="flex flex-col gap-3 px-3.5 py-3">

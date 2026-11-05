@@ -7,7 +7,9 @@ import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { emailMessage } from "@/lib/email/link-email";
 import { projectTitleOf } from "@/lib/email/outcome";
+import { summaryPdf } from "@/lib/calls/meeting/summary-pdf";
 import { loadPlannedCall } from "@/lib/calls/prep/planned";
+import type { EmailAttachment } from "@/lib/email/send";
 import { fr } from "@/lib/i18n/fr";
 import { schedulePendingPushes } from "@/lib/notifications/push";
 import { createClient } from "@/lib/supabase/server";
@@ -78,6 +80,19 @@ export async function sendMeetingSummary(input: {
   const title = planned.projectId
     ? await projectTitleOf(planned.projectId)
     : planned.title;
+  // The report as a PDF, joined to each e-mail (Sacha 05/11/2026); made
+  // once, and the e-mails still leave if it cannot be made.
+  const attachments = await summaryAttachment(supabase, {
+    project: planned.projectId ? title : null,
+    call: planned.title,
+    occurredAt: planned.occurredAt,
+    participants: planned.people.map((p) => p.name),
+    text: parsed.data.text,
+    sentBy:
+      [access.firstName, access.lastName].filter(Boolean).join(" ") || null,
+    callId: parsed.data.callId,
+    needed: outside.some((r) => r.how === "email" && r.email),
+  });
   const reached: string[] = [];
   for (const r of outside) {
     // « link »: their private page, not an e-mail of the summary itself.
@@ -87,6 +102,7 @@ export async function sendMeetingSummary(input: {
             to: { name: r.name, email: r.email },
             subject: t.emailSubject(title, planned.title),
             text: parsed.data.text,
+            attachments,
           })
         : "disabled";
     if (sent === "sent") reached.push(r.name);
@@ -97,4 +113,42 @@ export async function sendMeetingSummary(input: {
     ok: true,
     notice: reached.length > 0 ? t.emailPartial(reached) : t.emailNotWired,
   };
+}
+
+/** The PDF of the summary just sent, as an attachment (or none). */
+async function summaryAttachment(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  input: {
+    project: string | null;
+    call: string;
+    occurredAt: string;
+    participants: string[];
+    text: string;
+    sentBy: string | null;
+    callId: string;
+    needed: boolean;
+  },
+): Promise<EmailAttachment[] | undefined> {
+  if (!input.needed) return undefined;
+  const { data } = await supabase
+    .from("call_summaries")
+    .select("version, sent_at")
+    .eq("call_id", input.callId)
+    .order("version", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  try {
+    const { name, pdf } = await summaryPdf({
+      ...input,
+      sentAt: data?.sent_at ?? new Date().toISOString(),
+      version: data?.version ?? null,
+    });
+    return [{ filename: name, content: pdf, contentType: "application/pdf" }];
+  } catch (error) {
+    console.error(
+      "sendMeetingSummary pdf:",
+      error instanceof Error ? error.message.slice(0, 200) : "unknown",
+    );
+    return undefined;
+  }
 }

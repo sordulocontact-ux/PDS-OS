@@ -96,6 +96,9 @@ export const routes = {
   call: (callId: string) => `/app/calls/${callId}`,
   // PROJ-AMEL-01: a call's closed report, as a recipient reads it.
   callReport: (callId: string) => `/app/calls/${callId}/report`,
+  // A sent summary of a meeting as a PDF (the e-mail's attachment).
+  callSummaryPdf: (callId: string, version: number) =>
+    `/api/calls/${callId}/summary?v=${version}`,
   callReportPdf: (callId: string, version: number, scope: string) =>
     `/api/calls/${callId}/report?v=${version}&scope=${scope}`,
   // Every file the viewer may read, across artists, titles, projects, contracts.

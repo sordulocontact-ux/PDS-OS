@@ -1,7 +1,11 @@
 import "server-only";
 
 import { requireApproved } from "@/lib/auth/dal";
-import { emailEnabled, sendEmail } from "@/lib/email/send";
+import {
+  type EmailAttachment,
+  emailEnabled,
+  sendEmail,
+} from "@/lib/email/send";
 import { getPublicEnv } from "@/lib/env";
 import { core } from "@/lib/i18n/fr/core";
 
@@ -81,6 +85,7 @@ export type MessageEmail = {
   subject: string;
   // The whole message, as the member wrote or approved it (no link added).
   text: string;
+  attachments?: EmailAttachment[];
 };
 
 /**
@@ -99,6 +104,7 @@ export async function emailMessage(
     subject: mail.subject,
     text: [mail.text.trim(), "", t.signature(sender), ""].join("\n"),
     sender: { name: sender, email },
+    attachments: mail.attachments,
   });
   return outcomeOf(sent);
 }

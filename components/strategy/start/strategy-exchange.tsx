@@ -133,7 +133,10 @@ export async function StrategyExchange({
             />
           )
         : summaries.length > 0 && (
-            <MeetingSummaryFor summary={summaries[0] ?? null} />
+            <MeetingSummaryFor
+              summary={summaries[0] ?? null}
+              callId={call.callId}
+            />
           )}
       <MeetingFacts meeting={meeting} />
     </div>

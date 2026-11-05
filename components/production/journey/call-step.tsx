@@ -150,7 +150,10 @@ export async function CallStepSummary({
   ]);
   if (!meeting) return null;
   const settled = items.every((i) => i.status !== "proposed");
-  if (!canOrganize) return <MeetingSummaryFor summary={summaries[0] ?? null} />;
+  if (!canOrganize)
+    return (
+      <MeetingSummaryFor summary={summaries[0] ?? null} callId={call.callId} />
+    );
   if (!settled && summaries.length === 0) return null;
   return (
     <MeetingSummaryBlock

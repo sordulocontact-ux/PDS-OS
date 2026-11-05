@@ -159,7 +159,10 @@ export async function FramingExchange({
           />
         )
       ) : (
-        <MeetingSummaryFor summary={summaries[0] ?? null} />
+        <MeetingSummaryFor
+          summary={summaries[0] ?? null}
+          callId={call.callId}
+        />
       )}
     </div>
   );
