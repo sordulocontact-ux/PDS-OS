@@ -195,6 +195,9 @@ export type ProjectListItem = {
   // Launched: the workflows it moves or waits at, side by side (Étape
   // column, lib/overview/workflow-progress.ts); absent where not read.
   activeWorkflows?: ActiveWorkflow[];
+  // Before « Lancer le plan »: the Cadrage's current step, short label
+  // (Étape column); absent once launched or where not read.
+  framingStep?: string;
 };
 
 /** A workflow a launched project is at, and its current step's title. */

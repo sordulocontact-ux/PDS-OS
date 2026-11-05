@@ -125,6 +125,14 @@ export const shell = {
   progress: {
     framing: "Cadrage",
     plan: "Plan du projet",
+    // The Cadrage's step in the list's « Étape » column (Sacha 05/11/2026),
+    // after « Cadrage · »: short, the journey's titles repeat « cadrage ».
+    framingSteps: {
+      start: "Démarrage",
+      dimensions: "6 dimensions",
+      brief: "Brief de cadrage",
+      plan: "Plan du projet",
+    } as Record<string, string>,
   },
   projectTypes: {
     music_release: "Musical",

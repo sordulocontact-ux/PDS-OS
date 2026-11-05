@@ -11,8 +11,8 @@ const fr = { shell };
  * The « Étape » of a project in the list. Launched, it is at several
  * workflows at once (Master, Juridique, Marketing side by side, Sacha
  * 03/11/2026): one pill each, « Workflow · step », in the workflow's hue.
- * Before the plan, its one step (the Cadrage). A finished project says so
- * once, in Statut.
+ * Before the plan, the Cadrage and its step, the same way. A finished
+ * project says so once, in Statut.
  */
 export function ProjectStepCell({ project }: { project: ProjectListItem }) {
   const active = project.activeWorkflows ?? [];
@@ -30,6 +30,16 @@ export function ProjectStepCell({ project }: { project: ProjectListItem }) {
           </li>
         ))}
       </ul>
+    );
+  // Before the plan: « Cadrage · Brief de cadrage » (Sacha 05/11/2026).
+  if (project.framingStep)
+    return (
+      <StatusBadge tone={moduleHue.framing} size="sm">
+        {fr.shell.projects.workflowStep(
+          fr.shell.project.sidebar.framing,
+          project.framingStep,
+        )}
+      </StatusBadge>
     );
   const phase = phaseLabel(project);
   if (!phase || !project.currentStage) return EMPTY_CELL;
