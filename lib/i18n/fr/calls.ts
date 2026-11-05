@@ -421,6 +421,9 @@ export const calls = {
     shareTitle: "Partager le compte rendu",
     shareBody:
       "Les membres choisis sont prévenus et lisent ce compte rendu seulement. Les adresses extérieures reçoivent le compte rendu par e-mail, envoyé par PDS OS ; le PDF reste à joindre vous-même si besoin.",
+    // No SMTP: the outside addresses by hand.
+    shareBodyManual:
+      "Les membres choisis sont prévenus et lisent ce compte rendu seulement. Pour les autres, PDS OS prépare un e-mail que vous envoyez de votre messagerie, avec le PDF.",
     scope: "Ce qui est partagé",
     scopes: {
       full: "Le compte rendu complet",
@@ -438,15 +441,16 @@ export const calls = {
     emailInvalid: (email: string) =>
       `« ${email} » n'est pas une adresse e-mail.`,
     shared: "Compte rendu partagé.",
+    // The outside addresses PDS OS did not e-mail.
+    byHand: (addresses: string[]) =>
+      `À envoyer de votre messagerie : ${addresses.join(", ")}.`,
     mailto: "Écrire l'e-mail",
     // PDS OS e-mails the outside addresses itself (lib/calls/closure-actions.ts).
     emailed: {
-      sent: (n: number) =>
-        n === 1
-          ? "Compte rendu envoyé par e-mail à 1 adresse extérieure"
-          : `Compte rendu envoyé par e-mail à ${n} adresses extérieures`,
-      partial: (n: number) =>
-        `Compte rendu partagé, envoyé par e-mail à ${n} adresse${n > 1 ? "s" : ""} seulement : écrivez aux autres vous-même.`,
+      sent: (addresses: string[]) =>
+        `Compte rendu envoyé par e-mail à ${addresses.join(", ")}`,
+      partial: (addresses: string[]) =>
+        `Compte rendu partagé, envoyé par e-mail à ${addresses.join(", ")} seulement : écrivez aux autres vous-même.`,
     },
     pdf: "Télécharger le PDF",
     history: "Historique",

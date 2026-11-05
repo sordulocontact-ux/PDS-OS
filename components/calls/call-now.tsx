@@ -137,6 +137,7 @@ export function CallNow({
           canEdit={canEdit}
           members={members}
           guestEmails={call.guests.map((g) => g.email)}
+          emailEnabled={data.emailEnabled}
         />
         <ClosureHistory closures={data.closures} shares={data.shares} />
       </CallNowBlock>

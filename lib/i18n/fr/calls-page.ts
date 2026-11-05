@@ -147,8 +147,15 @@ export const callPage = {
     messageMissing: "Écrivez le message à envoyer.",
     send: "Envoyer aux participants",
     sent: "Résumé envoyé aux participants.",
+    // PDS OS e-mails the outside guests it has an address for (SMTP set).
+    emailedTo: (names: string[]) =>
+      `L'équipe le reçoit dans PDS OS ; ${names.join(", ")} ${names.length > 1 ? "le reçoivent" : "le reçoit"} aussi par e-mail, envoyé par PDS OS à l'envoi.`,
+    // Guests it cannot e-mail (no address, a private link): by hand.
+    byHand: (names: string[]) =>
+      `PDS OS n'envoie pas ce résumé à ${names.join(", ")} : écrivez-${names.length > 1 ? "leur" : "lui"} de votre messagerie.`,
+    // No SMTP: every outside guest by hand.
     externals:
-      "L'équipe le reçoit dans PDS OS. Les invités extérieurs dont PDS OS a l'adresse le reçoivent aussi par e-mail, à l'envoi ; pour les autres, écrivez-leur de votre messagerie.",
+      "L'équipe le reçoit dans PDS OS. Pour les invités extérieurs, PDS OS prépare l'e-mail avec ce message : envoyez-le de votre messagerie.",
     mailto: "Écrire l'e-mail aux invités",
   },
 } as const;

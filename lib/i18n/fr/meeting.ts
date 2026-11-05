@@ -79,10 +79,11 @@ export const meeting = {
     // PDS OS e-mails the outside guests itself when it has their address.
     emailNotWired:
       "Résumé envoyé dans PDS OS, mais pas par e-mail aux invités extérieurs : copiez le message pour eux.",
-    emailPartial: (n: number) =>
-      `Résumé envoyé dans PDS OS et par e-mail à ${n} invité${n > 1 ? "s" : ""} extérieur${n > 1 ? "s" : ""} ; pour les autres, copiez le message.`,
-    emailSent: (n: number) =>
-      `Résumé envoyé dans PDS OS et par e-mail à ${n} invité${n > 1 ? "s" : ""} extérieur${n > 1 ? "s" : ""}`,
+    // The outside guests PDS OS e-mailed, by name.
+    emailPartial: (names: string[]) =>
+      `Résumé envoyé dans PDS OS et par e-mail à ${names.join(", ")} ; pour les autres, copiez le message.`,
+    emailSent: (names: string[]) =>
+      `Résumé envoyé dans PDS OS et par e-mail à ${names.join(", ")}`,
     emailSubject: (project: string, call: string) =>
       project === call
         ? `« ${project} » : résumé`

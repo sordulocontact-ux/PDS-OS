@@ -14,6 +14,7 @@ import { loadCallOutcomes, type CallOutcomes } from "@/lib/calls/outcomes";
 import { shortDay } from "@/lib/calls/prep/dates";
 import type { PrepPerson } from "@/lib/calls/prep/types";
 import type { CallDetail, StoredReport } from "@/lib/calls/queries";
+import { emailEnabled } from "@/lib/email/send";
 import type { Database } from "@/lib/supabase/database.types";
 
 // The report items that propose something to a module (Cadrage, Stratégie).
@@ -42,9 +43,12 @@ export type CallPageData = {
   meeting: MeetingData | null;
   // The summary to the participants, drafted by code (never the model).
   summary: { draft: string; recipients: PrepPerson[] } | null;
+  // PDS OS sends e-mails itself (SMTP set): the summary and the shared
+  // report reach the outside guests without a hand-written e-mail.
+  emailEnabled: boolean;
 };
 
-const EMPTY: CallPageData = {
+const EMPTY: Omit<CallPageData, "emailEnabled"> = {
   outcomes: null,
   closures: [],
   shares: [],
@@ -72,7 +76,7 @@ export async function loadCallPage(
     ownerName: string | null;
   },
 ): Promise<CallPageData> {
-  if (!report) return EMPTY;
+  if (!report) return { ...EMPTY, emailEnabled: emailEnabled() };
   const proposalIds = report.items
     .filter((item) => PROPOSAL_KINDS.includes(item.kind))
     .map((item) => item.id);
@@ -110,6 +114,7 @@ export async function loadCallPage(
   };
 
   return {
+    emailEnabled: emailEnabled(),
     outcomes,
     closures,
     shares,

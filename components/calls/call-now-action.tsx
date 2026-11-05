@@ -76,6 +76,7 @@ export function CallNowAction({
             subject={fr.calls.page.summary.subjectOf(call.title, where)}
             draft={data.summary.draft}
             recipients={data.summary.recipients}
+            emailEnabled={data.emailEnabled}
           />
         )
       );

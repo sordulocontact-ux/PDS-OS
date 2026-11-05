@@ -29,8 +29,11 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 /**
  * « Partager le compte rendu » (PROJ-AMEL-01): the whole report or its
  * summary, never the transcription nor the audio; members chosen are told
- * and read it in the app; outside addresses get the e-mail the user writes
- * from their own mailbox, the PDF beside. The share is kept in the history.
+ * and read it in the app; outside addresses are e-mailed by PDS OS itself
+ * (shareCallReport), said in the toast (« … envoyé par e-mail à a, b »).
+ * Only the addresses it could not reach (e-mail off, an error) get the
+ * e-mail the user writes from their own mailbox, the PDF beside. The share
+ * is kept in the history.
  */
 export function ShareReportForm({
   call,
@@ -61,11 +64,12 @@ export function ShareReportForm({
   const invalid = emails.find((e) => !EMAIL.test(e));
   const none = people.size === 0 && emails.length === 0;
 
-  // After sharing: the e-mail to write and the PDF, for the outside people.
+  // After sharing: the e-mail to write and the PDF, for the outside
+  // addresses PDS OS did not reach.
   if (sent)
     return (
       <div className="flex flex-col gap-4">
-        <FormMessage kind="info">{t.shared}</FormMessage>
+        <FormMessage kind="info">{t.byHand(sent)}</FormMessage>
         <div className="flex flex-wrap gap-2">
           {sent.length > 0 && (
             <a
@@ -107,9 +111,11 @@ export function ShareReportForm({
           });
           if (!result.ok) return setError(result.error);
           setError(null);
-          toast.success(t.shared);
-          if (emails.length === 0) return onDone();
-          setSent(emails);
+          if (result.notice) toast.warning(result.notice);
+          else toast.success(result.done ?? t.shared);
+          const unreached = result.unreached ?? [];
+          if (unreached.length === 0) return onDone();
+          setSent(unreached);
         });
       }}
     >

@@ -1,6 +1,6 @@
 /**
- * A ready e-mail (`mailto:`), opened in the person's own mail app: PDS OS
- * sends no e-mail itself (no mail provider, docs/CONTEXTE-PROJET.md).
+ * A ready e-mail (`mailto:`), opened in the person's own mail app: what
+ * PDS OS does not send itself (no SMTP, no address, lib/email/send.ts).
  * Several addresses: separated by commas, kept as such (RFC 6068).
  */
 export function mailtoHref(to: string, subject: string, body: string): string {

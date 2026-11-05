@@ -24,7 +24,15 @@ import { createClient } from "@/lib/supabase/server";
 // decides who closes and shares (the call's owner).
 
 type Result =
-  { ok: true; notice?: string; done?: string } | { ok: false; error: string };
+  | {
+      ok: true;
+      notice?: string;
+      done?: string;
+      // The outside addresses PDS OS could not e-mail (no SMTP, an error):
+      // the screen offers to write to them by hand.
+      unreached?: string[];
+    }
+  | { ok: false; error: string };
 
 const id = z.uuid();
 const e = fr.calls.closure.errors;
@@ -189,21 +197,26 @@ export async function shareCallReport(
     .eq("id", v.closureId)
     .maybeSingle();
   const content = reportContentOf(closure?.content);
-  if (!content) return { ok: true };
+  if (!content) return { ok: true, unreached: v.emails };
   const text = reportText(scopedReport(content, v.scope), {
     title: call.title,
     occurredAt: call.occurred_at,
   });
-  let reached = 0;
+  const reached: string[] = [];
   for (const address of v.emails) {
     const sent = await emailMessage({
       to: { name: address, email: address },
       subject: fr.calls.closure.report.subject(call.title),
       text,
     });
-    if (sent === "sent") reached += 1;
+    if (sent === "sent") reached.push(address);
   }
   const t = fr.calls.closure.emailed;
-  if (reached === v.emails.length) return { ok: true, done: t.sent(reached) };
-  return { ok: true, ...(reached > 0 ? { notice: t.partial(reached) } : {}) };
+  const unreached = v.emails.filter((address) => !reached.includes(address));
+  if (unreached.length === 0) return { ok: true, done: t.sent(reached) };
+  return {
+    ok: true,
+    unreached,
+    ...(reached.length > 0 ? { notice: t.partial(reached) } : {}),
+  };
 }

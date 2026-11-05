@@ -14,8 +14,9 @@ const fr = { calls };
 
 /**
  * What follows a closed call (PROJ-AMEL-01), in its « Maintenant »: share
- * the frozen report (members told, an e-mail written from one's own mailbox
- * for the others), its PDF, and « Corriger le compte rendu » (next version).
+ * the frozen report (members told; outside addresses e-mailed by PDS OS when
+ * its e-mail is on, else written from one's own mailbox), its PDF, and
+ * « Corriger le compte rendu » (next version).
  */
 export function ClosureActions({
   call,
@@ -24,6 +25,7 @@ export function ClosureActions({
   canEdit,
   members,
   guestEmails,
+  emailEnabled,
 }: {
   call: { id: string; title: string; occurredAt: string };
   latest: CallClosure;
@@ -31,6 +33,7 @@ export function ClosureActions({
   canEdit: boolean;
   members: Member[];
   guestEmails: string[];
+  emailEnabled: boolean;
 }) {
   const t = fr.calls.closure;
   return (
@@ -41,7 +44,7 @@ export function ClosureActions({
           variant="default"
           size="default"
           title={t.shareTitle}
-          description={t.shareBody}
+          description={emailEnabled ? t.shareBody : t.shareBodyManual}
           wide
         >
           {(close) => (

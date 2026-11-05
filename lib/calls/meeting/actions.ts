@@ -78,7 +78,7 @@ export async function sendMeetingSummary(input: {
   const title = planned.projectId
     ? await projectTitleOf(planned.projectId)
     : planned.title;
-  let reached = 0;
+  const reached: string[] = [];
   for (const r of outside) {
     // « link »: their private page, not an e-mail of the summary itself.
     const sent =
@@ -89,12 +89,12 @@ export async function sendMeetingSummary(input: {
             text: parsed.data.text,
           })
         : "disabled";
-    if (sent === "sent") reached += 1;
+    if (sent === "sent") reached.push(r.name);
   }
-  if (reached === outside.length)
+  if (reached.length === outside.length)
     return { ok: true, done: t.emailSent(reached) };
   return {
     ok: true,
-    notice: reached > 0 ? t.emailPartial(reached) : t.emailNotWired,
+    notice: reached.length > 0 ? t.emailPartial(reached) : t.emailNotWired,
   };
 }
