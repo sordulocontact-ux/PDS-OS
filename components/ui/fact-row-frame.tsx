@@ -135,8 +135,8 @@ export function FactRowFrame({
 }: FactRowProps & {
   sourceNode?: ReactNode;
   // `openOnRow`: the verb of the click (« Choisir », « Changer »,
-  // « Modifier »), shown on hover in its reserved place (no shift), read
-  // by a screen reader with the row; the row's button for the focus.
+  // « Modifier »), opening on hover, read by a screen reader with the row;
+  // the row's button for the focus.
   hoverAction?: string;
   buttonRef?: Ref<HTMLButtonElement>;
 }) {
@@ -189,8 +189,15 @@ export function FactRowFrame({
           )}
           {side}
           {hoverAction && (
-            <span className="px-2 text-body-sm font-medium opacity-0 transition-opacity duration-[var(--duration-fast)] group-hover/fact:opacity-100 group-focus-visible/fact:opacity-100">
-              {hoverAction}
+            // Folded at rest (the pill stays against the edge); on hover it
+            // opens and gently pushes the pill aside: in 150 ms, out faster,
+            // no slide when motion is reduced (Sacha, 05/11/2026).
+            <span className="-ml-2 grid grid-cols-[0fr] opacity-0 transition-[grid-template-columns,opacity] duration-[var(--duration-instant)] ease-[var(--ease-out)] group-hover/fact:grid-cols-[1fr] group-hover/fact:opacity-100 group-hover/fact:duration-[var(--duration-entry-in)] group-focus-visible/fact:grid-cols-[1fr] group-focus-visible/fact:opacity-100 motion-reduce:transition-none">
+              <span className="min-w-0 overflow-hidden">
+                <span className="block px-2 text-body-sm font-medium whitespace-nowrap">
+                  {hoverAction}
+                </span>
+              </span>
             </span>
           )}
         </div>
