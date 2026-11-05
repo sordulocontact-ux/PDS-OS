@@ -1211,3 +1211,11 @@ export const rightStateTone: Record<string, Tone> = {
   authorized: "success",
   refused: "danger",
 };
+
+/** A maquette (retour d'Ibé du 05/11/2026): validated is artistic, not a release. */
+export const demoStatusTone: Record<string, Tone> = {
+  draft: "neutral",
+  developing: "info",
+  validated: "success",
+  abandoned: "neutral",
+};

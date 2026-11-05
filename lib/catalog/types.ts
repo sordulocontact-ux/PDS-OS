@@ -1,6 +1,7 @@
 // Catalog types and pure helpers. Client-safe.
 
 import type { FieldErrors, FormValues } from "@/lib/auth/form-state";
+import type { DemoStatus } from "@/lib/catalog/demo-rules";
 import type { MasterRelease } from "@/lib/catalog/master-release";
 import {
   variantText,
@@ -63,6 +64,9 @@ export type MasterListItem = MasterOption & {
   // The original a variant was created from (retour 08); null for an
   // original.
   sourceMasterId: string | null;
+  // A maquette's status; null for an official master (docs/ARCHITECTURE.md
+  // § 2 sexies bis).
+  demoStatus: DemoStatus | null;
 };
 
 /** A row of the masters list: the master and the release shown for it. */

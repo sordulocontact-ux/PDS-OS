@@ -21,7 +21,7 @@ import { createClient } from "@/lib/supabase/server";
 // Artist page queries, with the user's session: RLS decides what is visible
 // (contacts only with manage_catalog, projects only those the viewer sees).
 
-const ARTIST_SELECT = `id, organization_id, name, relation, legal_name, country_code, bio, notes, picture_url, picture_path, deezer_id, deezer_url, credits:master_artists!master_artists_artist_same_org(master:masters!master_artists_master_same_org(id, title, variant, variant_label, audio_state, isrc, duration_seconds, final_validated_at, source_master_id, archived_at, ${CREDITS_SELECT}, links:project_masters!project_masters_master_same_org(project:projects!project_masters_project_same_org(id, archived_at)))), named:projects!projects_artist_same_org(id, archived_at)`;
+const ARTIST_SELECT = `id, organization_id, name, relation, legal_name, country_code, bio, notes, picture_url, picture_path, deezer_id, deezer_url, credits:master_artists!master_artists_artist_same_org(master:masters!master_artists_master_same_org(id, title, variant, variant_label, audio_state, isrc, duration_seconds, final_validated_at, source_master_id, demo_status, archived_at, ${CREDITS_SELECT}, links:project_masters!project_masters_master_same_org(project:projects!project_masters_project_same_org(id, archived_at)))), named:projects!projects_artist_same_org(id, archived_at)`;
 
 // Cached per request: the layout and the tab pages read the same artist.
 export const getArtist = trackedCache(
@@ -39,8 +39,11 @@ export const getArtist = trackedCache(
     if (error) throw new Error(`getArtist: ${error.message}`);
     if (!data) return null;
 
+    // Its masters: the maquettes are apart (the Catalogue's Maquettes).
     const liveMasters = data.credits.flatMap((c) =>
-      c.master && !c.master.archived_at ? [c.master] : [],
+      c.master && !c.master.archived_at && !c.master.demo_status
+        ? [c.master]
+        : [],
     );
     const masters = liveMasters
       .map((m) => toMasterListItem(m as RawMaster))

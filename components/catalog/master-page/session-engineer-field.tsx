@@ -35,7 +35,8 @@ export function SessionEngineerField({
   defaultRef = null,
   error,
 }: {
-  masterId: string;
+  // Null: a session without a title (Sessions studio).
+  masterId: string | null;
   kind: SessionKind;
   // The saved or typed name, "" when none.
   defaultName: string;

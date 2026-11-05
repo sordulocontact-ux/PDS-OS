@@ -152,7 +152,12 @@ export async function readMasterRows(
       audioState: stateOf.get(master.id) ?? null,
     })),
     ...filesByTitle(files.data ?? []),
-    sessionsOf: sessionsByTitle(sessions.data ?? []),
+    // A session listed by title has one (.in("master_id")).
+    sessionsOf: sessionsByTitle(
+      (sessions.data ?? []).flatMap((s) =>
+        s.master_id === null ? [] : [{ ...s, master_id: s.master_id }],
+      ),
+    ),
     creditsOf: creditsByTitle(credits.data ?? []),
     sourceOf: currentSources(sources.data ?? []),
     framingEngineers: framingEngineersOf(team.data ?? [], network),

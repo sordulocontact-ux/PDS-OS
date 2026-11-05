@@ -22,6 +22,8 @@ import { briefRequests } from "./brief-requests";
 import { budget } from "./budget";
 import { calendar } from "./calendar";
 import { calls } from "./calls";
+import { sessions } from "./sessions";
+import { demos } from "./demos";
 import { callPrep } from "./call-prep";
 import { meeting } from "./meeting";
 import { catalog } from "./catalog";
@@ -170,6 +172,8 @@ export const fr = {
   onboarding,
   calendar,
   calls,
+  sessions,
+  demos,
   callPrep,
   meeting,
   catalog,

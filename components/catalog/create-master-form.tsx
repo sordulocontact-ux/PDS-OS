@@ -43,6 +43,7 @@ export function CreateMasterForm({
   defaults,
   masterId,
   variantOf,
+  demo = false,
   onCreated,
   onCancel,
   onArtistCreated,
@@ -55,6 +56,8 @@ export function CreateMasterForm({
   masterId?: string;
   // « Nouvelle variante »: the original it is created from (retour 08).
   variantOf?: { id: string; title: string };
+  // « Nouvelle maquette »: created in the Catalogue's Maquettes.
+  demo?: boolean;
   onCreated?: (master: MasterOption) => void;
   onCancel?: () => void;
   onArtistCreated?: (artist: ArtistOption) => void;
@@ -145,6 +148,7 @@ export function CreateMasterForm({
     >
       <input type="hidden" name="intent" value={intent} />
       {masterId && <input type="hidden" name="masterId" value={masterId} />}
+      {demo && <input type="hidden" name="demo" value="1" />}
       {variantOf && (
         <input type="hidden" name="variantOf" value={variantOf.id} />
       )}

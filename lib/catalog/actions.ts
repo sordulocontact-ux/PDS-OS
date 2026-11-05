@@ -180,6 +180,7 @@ export async function createMaster(
     p_audio_state: input.audioState ?? undefined,
     p_isrc: input.isrc ?? undefined,
     p_duration_seconds: input.duration ?? undefined,
+    p_demo_status: input.demo ? "draft" : undefined,
     p_contributors: input.contributors.map((c) => ({
       name: c.name,
       contact_id: c.contactId,

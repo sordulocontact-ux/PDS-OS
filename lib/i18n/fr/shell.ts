@@ -21,6 +21,7 @@ export const shell = {
     projects: "Projets",
     calendar: "Calendrier",
     calls: "Calls",
+    sessions: "Sessions studio",
     artists: "Artistes",
     // The list of titles ("masters" in the code), named Catalogue (04/10/2026).
     masters: "Catalogue",
@@ -408,6 +409,7 @@ export const shell = {
       restricted: "Réservé à la direction et aux chefs de projet",
       work: "Travail",
       calls: "Calls",
+      sessions: "Sessions studio",
       team: "Équipe",
       deliverables: "Livrables",
       files: "Fichiers",

@@ -85,6 +85,7 @@ export const catalog = {
       overview: "Vue d'ensemble",
       masters: "Titres",
       projects: "Projets",
+      sessions: "Sessions",
       files: "Fichiers",
       activity: "Activité",
       discography: "Discographie",

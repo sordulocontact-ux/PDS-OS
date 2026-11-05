@@ -436,7 +436,57 @@ Migration `…20261012101601_sessions_work_files`.
   et offre Supabase), dite avant le dépôt ; au-delà, un **lien** vers l'endroit où le fichier est
   partagé (`master_work_links`, https), jamais une copie.
 - **Hors périmètre, à cadrer** (retours 27, 28, 34) : fiche Session unique, participants, artistes
-  et projets d'une session, lien au Calendrier : ticket Sessions Studio séparé.
+  et projets d'une session, lien au Calendrier : ticket Sessions Studio séparé. **Fait** le
+  05/11/2026, § 2 sexies bis.
+
+### 2 sexies bis. Sessions studio et Maquettes (retours d'Ibé du 01/11/2026)
+
+Retours « Sessions studio accessibles depuis la barre de menu, jusqu'au master » et « Importer et
+stocker des fichiers rattachés aux sessions, artistes et projets », réponses d'Ibé du 05/11/2026.
+Migration `20261105220101_studio_sessions.sql`, test `supabase/tests/studio-sessions.test.sql`.
+
+- **Une session sans titre.** `master_sessions.master_id` (le titre d'origine) devient facultatif ;
+  une session est liée à des artistes (`master_session_artists`), des projets
+  (`master_session_projects`, dans `project_live`, cascade à la suppression du projet) et des
+  titres (`master_session_titles`, existant). Une seule ligne vue de partout : page
+  `/app/sessions/[id]`, entrée « Sessions studio » du menu (`/app/sessions`, onglets À venir /
+  Passées / Toutes en `?vue=`), onglet « Sessions » de l'artiste, section « Sessions studio » du
+  Pilotage d'un projet, bloc Sessions de l'onglet Audio d'un titre (lien vers la page). Une liste
+  d'artiste ou de projet reprend aussi les sessions de **ses titres** (`sessionIdsOf`).
+  Détacher le dernier titre d'une session encore liée à un artiste ou un projet la garde
+  (`master_session_anchored`) ; un titre supprimé lui laisse la vie de même.
+- **Permission `manage_sessions`** (DG et chefs de projet, `role_permissions`) : créer, modifier,
+  supprimer une session et ses liens (RLS de toutes ces tables). « Gérer dans les rôles qui crée
+  des sessions » (Ibé) = le poste : il n'existe pas d'écran pour donner une permission à la
+  carte. Une session n'appartient pas à un projet : « seul le responsable écrit » ne s'y applique
+  pas (comme le Catalogue).
+- **Participants** (`master_session_attendees`) : membres (`person_id`) et contacts du Réseau
+  (`contact_id`), choisis avec `AttendeeChips` ; une adresse tapée n'est pas gardée.
+- **Compte rendu** : `report_notes` (« Informations importantes »), `reported_at` /
+  `reported_by` posés par trigger ; l'enregistrer marque la session Réalisée et confirme les
+  présents (les participants, pré-remplis). **Responsable calculé** (Ibé) : le chef de projet du
+  premier projet lié, sinon qui a créé la session ; il voit « À vous · Rédiger le compte rendu »
+  en tête de la page, les autres « À rédiger par … ». État du compte rendu calculé
+  (`reportStateOf` : Rédigé, À rédiger dès que la séance est passée ou réalisée, Après la séance,
+  Annulée), jamais stocké.
+- **Rushs et gros fichiers : des liens** (`master_session_links`, https), décision d'Ibé du
+  05/11 (coût du stockage vidéo) ; l'import direct depuis PO vers Google Drive reste à faire
+  (connexion Google de po@pdsrecords.com).
+- **Calendrier** : type `session` (`lib/calendar/queries.ts`), annulées exclues, « mine » pour un
+  participant. L'invitation Google Agenda de l'équipe interne n'est **pas encore** faite (même
+  connexion Google à finir ; il faudra garder `google_event_id` sur la session).
+- **Maquettes** : `masters.demo_status` (Brouillon, En développement, Validée, Abandonnée ; null =
+  master officiel). Validée = **validation artistique** (`set_demo_status` : DG ou directeur
+  créatif ; les autres statuts aussi avec `manage_catalog`), **pas** une décision de sortie.
+  « Passer au catalogue des masters » (`promote_demo`, DG seul, maquette validée) renomme si
+  besoin et fait de la **même ligne** un master (`promoted_at`, `promoted_by`) : sessions,
+  fichiers, crédits, journal restent. Aucune mise à jour directe de `demo_status` (pas de droit
+  de colonne). Une maquette se crée par « Nouvelle maquette » (Catalogue, `?maquette=1` sur la
+  page Nouveau titre ; `create_master(p_demo_status => 'draft')`) ou depuis une session
+  (`createSessionDemo`, artiste principal, état audio Maquette). `listMasters` les écarte par
+  défaut (`demos: true` pour elles) : ni dans le Catalogue des masters, ni dans les sélecteurs
+  d'un projet, ni dans les titres d'un artiste. Dernier onglet du Catalogue « Maquettes »
+  (`/app/catalog/demos`, filtre Statut, « En cours » sans les abandonnées).
 
 ### 2 septies. Titre, état audio, variante (retour n°5)
 

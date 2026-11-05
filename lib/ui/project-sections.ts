@@ -144,6 +144,13 @@ export function projectSections(
     // Budget (ticket MKT-S1-15).
     section("work", t.work, routes.projectWork(projectId), "steering"),
     section("calls", t.calls, routes.projectCalls(projectId), "steering"),
+    // The project's studio sessions (retour d'Ibé du 01/11/2026).
+    section(
+      "sessions",
+      t.sessions,
+      routes.projectSessions(projectId),
+      "steering",
+    ),
     section(
       "validations",
       t.validations,

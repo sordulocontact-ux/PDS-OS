@@ -8,6 +8,7 @@ import {
   IconMsgs,
   IconNodes,
   IconPhone,
+  IconSliders,
   IconSparkle3,
   IconUserSearch,
   IconUsers2,
@@ -46,6 +47,8 @@ export const NAV_ITEMS: readonly NavItem[] = [
     icon: IconCalendarDays,
   },
   { href: routes.calls, label: fr.shell.nav.calls, icon: IconPhone },
+  // Studio sessions, planned and reported (retour d'Ibé du 01/11/2026).
+  { href: routes.sessions, label: fr.shell.nav.sessions, icon: IconSliders },
   { href: routes.artists, label: fr.shell.nav.artists, icon: IconMicrophone },
   { href: routes.masters, label: fr.shell.nav.masters, icon: IconDisc },
   { href: routes.network, label: fr.shell.nav.network, icon: IconNodes },

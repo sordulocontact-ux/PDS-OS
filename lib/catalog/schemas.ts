@@ -167,6 +167,11 @@ export const createMasterSchema = z.object({
     .pipe(z.enum(VARIANTS, { error: me.variantInvalid })),
   // Only kept for "Autre": create_master drops it otherwise.
   variantLabel: optionalText(100),
+  // « Nouvelle maquette » (?maquette=1): created as a maquette, a draft.
+  demo: z
+    .string()
+    .optional()
+    .transform((value) => value === "1"),
   // « Nouvelle variante »: the original it is a variant of (retour 08).
   variantOf: z
     .string()

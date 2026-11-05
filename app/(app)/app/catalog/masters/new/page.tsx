@@ -22,7 +22,9 @@ export default async function NewMasterPage({
 }: PageProps<"/app/catalog/masters/new">) {
   const access = await requirePermission("manage_catalog");
   const t = fr.catalog.masterForm;
-  const { artist: artistParam, variantOf } = await searchParams;
+  const { artist: artistParam, variantOf, maquette } = await searchParams;
+  // « Nouvelle maquette » (the Catalogue's Maquettes): no variant then.
+  const demo = maquette === "1" && typeof variantOf !== "string";
   const [artists, original] = await Promise.all([
     listArtistOptions(),
     typeof variantOf === "string" ? getMaster(variantOf) : null,
@@ -40,22 +42,30 @@ export default async function NewMasterPage({
             ? routes.masterVariants(original.id)
             : fromArtist
               ? routes.artist(fromArtist.id)
-              : routes.masters
+              : demo
+                ? routes.demos
+                : routes.masters
         }
       >
         {original
           ? fr.catalog.master.backTo(original.title)
           : fromArtist
             ? fr.catalog.artist.backTo(fromArtist.name)
-            : fr.catalog.master.back}
+            : demo
+              ? fr.demos.back
+              : fr.catalog.master.back}
       </BackLink>
-      <PageHeader title={t.title} description={t.subtitle} />
+      <PageHeader
+        title={demo ? fr.demos.newDemo : t.title}
+        description={demo ? fr.demos.createHint : t.subtitle}
+      />
       <Card>
         <CardContent>
           <CreateMasterForm
             artists={artists}
             organizationId={access.organizationId}
             defaults={original ? { title: original.title } : undefined}
+            demo={demo}
             variantOf={
               original
                 ? {

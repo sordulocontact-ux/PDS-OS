@@ -59,10 +59,12 @@ export default async function MastersPage({
   };
   // One read for the tab counts and the rows: the catalog stays small. The
   // covers are read beside it.
-  const [{ masters: all, error }, covers] = await allInOrder([
-    listMasters({ archived }),
-    listMasterCoverThumbs(),
-  ]);
+  const [{ masters: all, error }, covers, { masters: demoRows }] =
+    await allInOrder([
+      listMasters({ archived }),
+      listMasterCoverThumbs(),
+      listMasters({ demos: true }),
+    ]);
   // The tabs count what the filters keep; the filters offer what the tab
   // holds.
   const filtered = all.filter((master) => matchesTitleFilters(master, filters));
@@ -127,6 +129,9 @@ export default async function MastersPage({
         <TitleListViews
           view={view}
           counts={countTitleViews(filtered)}
+          demoCount={
+            demoRows.filter((d) => d.demoStatus !== "abandoned").length
+          }
           archived={archived}
           filters={{ ...filters }}
         >

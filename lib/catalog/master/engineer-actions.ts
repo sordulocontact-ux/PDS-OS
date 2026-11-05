@@ -54,11 +54,19 @@ function creditedFirst(credits: Credit[], credited: string) {
  * and, per kind of session, who to propose: the credit of that work, else
  * the engineer chosen in a Brief Mix/Master of the title's projects.
  */
-export async function listSessionEngineers(masterId: string): Promise<{
+export async function listSessionEngineers(masterId: string | null): Promise<{
   options: RankedPerson[];
   suggested: Partial<Record<SessionKind, EngineerSuggestion>>;
 }> {
   await requireApproved();
+  // A session without a title (Sessions studio): the Réseau's engineers.
+  if (masterId === null) {
+    const supabase = await createClient();
+    return {
+      options: await rankedNetwork(supabase, "engineer"),
+      suggested: {},
+    };
+  }
   const id = z.uuid().safeParse(masterId);
   if (!id.success) return { options: [], suggested: {} };
   const supabase = await createClient();

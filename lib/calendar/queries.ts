@@ -8,7 +8,9 @@ import {
   type CalendarItem,
   type CalendarItemKind,
 } from "@/lib/calendar/items";
+import { SESSION_KINDS, oneOf } from "@/lib/catalog/master/rules";
 import { calendar } from "@/lib/i18n/fr/calendar";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 import { freeTasksOf, loadMyTodo } from "@/lib/insights/todo";
 import { listProjects } from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
@@ -20,7 +22,9 @@ import {
 } from "@/lib/utils/calendar-period";
 import { loadLaunchedJourneys } from "@/lib/work/journeys";
 
-const fr = { calendar };
+const fr = { calendar, masterPage };
+
+const sessionKindOf = (kind: string) => oneOf(SESSION_KINDS, kind, "other");
 
 const t = fr.calendar.kinds;
 
@@ -67,41 +71,61 @@ export async function loadCalendar(
     day !== null && day >= first && day <= last;
   const me = access.personId;
 
-  const [listed, launched, briefs, decisions, sheets, milestones, calls, todo] =
-    await Promise.all([
-      listProjects(),
-      loadLaunchedJourneys(),
-      supabase
-        .from("master_briefs")
-        .select(
-          "project_id, mix_v1_due, mix_final_due, mastering_due, master_final_due",
-        ),
-      supabase
-        .from("production_schedule_decisions")
-        .select("sheet_id, project_id, shoot_on, starts_at")
-        .is("replaced_at", null)
-        .gte("shoot_on", first)
-        .lte("shoot_on", last),
-      supabase
-        .from("production_sheets")
-        .select(
-          "id, project_id, deliverable_id, shoot_date, deliverable:strategy_deliverables!production_sheets_deliverable_same_org(title)",
-        ),
-      supabase
-        .from("milestones")
-        .select("id, project_id, title, occurs_on")
-        .gte("occurs_on", first)
-        .lte("occurs_on", last),
-      listAllCalls(supabase, { range: periodRange(period) }).catch(
-        (error: unknown) => {
-          console.error("loadCalendar: calls", error);
-          return null;
-        },
+  const [
+    listed,
+    launched,
+    briefs,
+    decisions,
+    sheets,
+    milestones,
+    calls,
+    todo,
+    sessions,
+  ] = await Promise.all([
+    listProjects(),
+    loadLaunchedJourneys(),
+    supabase
+      .from("master_briefs")
+      .select(
+        "project_id, mix_v1_due, mix_final_due, mastering_due, master_final_due",
       ),
-      loadMyTodo(access),
-    ]);
+    supabase
+      .from("production_schedule_decisions")
+      .select("sheet_id, project_id, shoot_on, starts_at")
+      .is("replaced_at", null)
+      .gte("shoot_on", first)
+      .lte("shoot_on", last),
+    supabase
+      .from("production_sheets")
+      .select(
+        "id, project_id, deliverable_id, shoot_date, deliverable:strategy_deliverables!production_sheets_deliverable_same_org(title)",
+      ),
+    supabase
+      .from("milestones")
+      .select("id, project_id, title, occurs_on")
+      .gte("occurs_on", first)
+      .lte("occurs_on", last),
+    listAllCalls(supabase, { range: periodRange(period) }).catch(
+      (error: unknown) => {
+        console.error("loadCalendar: calls", error);
+        return null;
+      },
+    ),
+    loadMyTodo(access),
+    // Studio sessions (retour d'Ibé du 01/11/2026), cancelled ones left out.
+    supabase
+      .from("master_sessions")
+      .select(
+        "id, kind, studio, session_date, starts_at, projects:master_session_projects(project_id, linked_at), attendees:master_session_attendees(person_id)",
+      )
+      .neq("status", "cancelled")
+      .gte("session_date", first)
+      .lte("session_date", last),
+  ]);
 
-  const failed = [briefs, decisions, sheets, milestones].find((r) => r.error);
+  const failed = [briefs, decisions, sheets, milestones, sessions].find(
+    (r) => r.error,
+  );
   if (failed) console.error("loadCalendar:", failed.error?.message);
 
   // Only the projects the list shows (RLS, archive left out) lend their dates.
@@ -199,6 +223,26 @@ export async function loadCalendar(
       projectId: call.projectId,
       mine: me !== null && call.ownerPersonId === me,
       href: call.href,
+    });
+  }
+
+  for (const session of sessions.data ?? []) {
+    if (!session.session_date) continue;
+    const [hour, minute] = (session.starts_at ?? "").split(":").map(Number);
+    add("session", {
+      key: `session|${session.id}`,
+      day: session.session_date,
+      minute: session.starts_at ? hour * 60 + minute : null,
+      label: fr.calendar.session(
+        session.studio ??
+          fr.masterPage.sessions.kinds[sessionKindOf(session.kind)],
+      ),
+      projectId:
+        session.projects.toSorted((a, b) =>
+          a.linked_at.localeCompare(b.linked_at),
+        )[0]?.project_id ?? null,
+      mine: me !== null && session.attendees.some((a) => a.person_id === me),
+      href: routes.session(session.id),
     });
   }
 

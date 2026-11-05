@@ -77,10 +77,10 @@ export async function loadKnownPeople(
           ]
         : [],
     ),
-    sessions: (sessions.data ?? []).map((row) => ({
-      masterId: row.master_id,
-      kind: row.kind,
-      engineer: row.engineer,
-    })),
+    sessions: (sessions.data ?? []).flatMap((row) =>
+      row.master_id === null
+        ? []
+        : [{ masterId: row.master_id, kind: row.kind, engineer: row.engineer }],
+    ),
   });
 }

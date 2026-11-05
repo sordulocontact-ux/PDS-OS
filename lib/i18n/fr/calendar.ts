@@ -53,6 +53,8 @@ export const calendar = {
     masterFinal: "Master final attendu",
     shoot: (deliverable: string) => `Tournage · ${deliverable}`,
   },
+  // A studio session, by its studio (else its kind).
+  session: (what: string) => `Session studio · ${what}`,
   // « Lina Haddad : valider le Mix V1 », on someone else's action.
   someone: (who: string, todo: string) => `${who} : ${todo}`,
 } as const;

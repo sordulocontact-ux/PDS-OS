@@ -66,27 +66,37 @@ const optionalTime = z
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+// The fields of a session, shared by the title's form and the Sessions
+// studio form (lib/sessions/schemas.ts).
+export const sessionFieldsShape = {
+  kind: z.enum(SESSION_KINDS, { error: e.required }),
+  status: z.enum(SESSION_STATUSES).optional().default("done"),
+  date: optionalDate,
+  startsAt: optionalTime,
+  endsAt: optionalTime,
+  studio: optionalText(200),
+  engineer: optionalText(200),
+  // The Réseau contact picked (retour 31): "" when only a name is kept.
+  engineerRef: z
+    .string()
+    .optional()
+    .transform((value) => (value && UUID.test(value) ? value : null)),
+  notes: optionalText(2000),
+};
+
+/** A session ends after it starts. */
+export const sessionTimesOk = (v: {
+  startsAt: string | null;
+  endsAt: string | null;
+}) => !v.startsAt || !v.endsAt || v.endsAt > v.startsAt;
+export const sessionTimesIssue = () => ({
+  error: t.sessions.endsBeforeStart,
+  path: ["endsAt"],
+});
+
 export const sessionSchema = z
-  .object({
-    ...base,
-    kind: z.enum(SESSION_KINDS, { error: e.required }),
-    status: z.enum(SESSION_STATUSES).optional().default("done"),
-    date: optionalDate,
-    startsAt: optionalTime,
-    endsAt: optionalTime,
-    studio: optionalText(200),
-    engineer: optionalText(200),
-    // The Réseau contact picked (retour 31): "" when only a name is kept.
-    engineerRef: z
-      .string()
-      .optional()
-      .transform((value) => (value && UUID.test(value) ? value : null)),
-    notes: optionalText(2000),
-  })
-  .refine((v) => !v.startsAt || !v.endsAt || v.endsAt > v.startsAt, {
-    error: t.sessions.endsBeforeStart,
-    path: ["endsAt"],
-  });
+  .object({ ...base, ...sessionFieldsShape })
+  .refine(sessionTimesOk, sessionTimesIssue());
 
 export const trackSchema = z.object({
   ...base,

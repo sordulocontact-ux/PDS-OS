@@ -7,11 +7,19 @@
  * - shoot: a deliverable's shoot (Production);
  * - milestone: a temps fort of the Stratégie's Calendrier de lancement;
  * - call: a call or an internal meeting;
+ * - session: a studio session (Sessions studio), unless cancelled;
  * - step: an open step of a journey with a due date (mine or someone's);
  * - task: one of the viewer's tasks tied to no workflow.
  */
 export type CalendarItemKind =
-  "release" | "master" | "shoot" | "milestone" | "call" | "step" | "task";
+  | "release"
+  | "master"
+  | "shoot"
+  | "milestone"
+  | "call"
+  | "session"
+  | "step"
+  | "task";
 
 /** Same day: the release first, then what prepares it, then the actions. */
 export const KIND_ORDER: Record<CalendarItemKind, number> = {
@@ -20,8 +28,9 @@ export const KIND_ORDER: Record<CalendarItemKind, number> = {
   shoot: 2,
   milestone: 3,
   call: 4,
-  step: 5,
-  task: 6,
+  session: 5,
+  step: 6,
+  task: 7,
 };
 
 export type CalendarItem = {

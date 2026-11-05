@@ -22,6 +22,8 @@ export function ArtistTabs({
         { href: routes.artist(artistId), label: t.tabs.overview, exact: true },
         { href: routes.artistMasters(artistId), label: t.tabs.masters },
         { href: routes.artistProjects(artistId), label: t.tabs.projects },
+        // Its studio sessions (retour d'Ibé du 01/11/2026).
+        { href: routes.artistSessions(artistId), label: t.tabs.sessions },
         { href: routes.artistIdentity(artistId), label: fr.artistIdentity.tab },
         { href: routes.artistFiles(artistId), label: t.tabs.files },
         { href: routes.artistActivity(artistId), label: t.tabs.activity },

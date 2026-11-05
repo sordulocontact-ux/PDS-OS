@@ -2,6 +2,7 @@ import "server-only";
 
 import { trackedCache } from "@/lib/projects/live-deps";
 
+import { demoStatusOf } from "@/lib/catalog/demo-rules";
 import { catalogIdSchema } from "@/lib/catalog/schemas";
 import {
   artistRelationOf,
@@ -49,7 +50,7 @@ export function toCredits(raw: RawCredit[]): Credit[] {
 
 // The columns of a title every list reads.
 export const MASTER_COLUMNS =
-  "id, title, variant, variant_label, audio_state, isrc, duration_seconds, final_validated_at, source_master_id";
+  "id, title, variant, variant_label, audio_state, isrc, duration_seconds, final_validated_at, source_master_id, demo_status";
 
 export type RawMaster = {
   id: string;
@@ -61,6 +62,7 @@ export type RawMaster = {
   duration_seconds: number | null;
   final_validated_at: string | null;
   source_master_id: string | null;
+  demo_status: string | null;
   credits: RawCredit[];
 };
 
@@ -76,6 +78,7 @@ export function toMasterListItem(row: RawMaster): MasterListItem {
     durationSeconds: row.duration_seconds,
     finalValidatedAt: row.final_validated_at,
     sourceMasterId: row.source_master_id,
+    demoStatus: demoStatusOf(row.demo_status),
   };
 }
 
@@ -205,11 +208,13 @@ const LAST_EVENT_SELECT =
 
 /**
  * Live masters, newest first; `ids` narrows to those (an artist's),
- * `archived` lists the archive instead.
+ * `archived` lists the archive instead. The maquettes are apart (`demos`):
+ * not in the Catalogue's masters, nor in what a project picks.
  */
 export async function listMasters(filter?: {
   ids?: string[];
   archived?: boolean;
+  demos?: boolean;
 }): Promise<{
   masters: MasterRow[];
   error: boolean;
@@ -228,6 +233,9 @@ export async function listMasters(filter?: {
     ? select.not("archived_at", "is", null)
     : select.is("archived_at", null);
   if (filter?.ids) query = query.in("id", filter.ids);
+  query = filter?.demos
+    ? query.not("demo_status", "is", null)
+    : query.is("demo_status", null);
   const { data, error } = await query.order("created_at", {
     ascending: false,
   });

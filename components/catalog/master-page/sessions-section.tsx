@@ -15,6 +15,7 @@ import {
   DataTableCell,
   DataTableHead,
   DataTableHeader,
+  DataTableLink,
   DataTableMedia,
   DataTableRow,
   EMPTY_CELL,
@@ -22,6 +23,7 @@ import {
 import { FormDialog } from "@/components/ui/form-dialog";
 import { RowActions } from "@/components/ui/row-actions";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { routes } from "@/lib/auth/redirects";
 import type { MasterSession } from "@/lib/catalog/master/rules";
 import {
   deleteSession,
@@ -119,7 +121,12 @@ export function SessionsSection({
                 <DataTableRow key={session.id}>
                   <DataTableCell>
                     <DataTableMedia
-                      title={t.kinds[session.kind]}
+                      title={
+                        // Its own page (Sessions studio): report, maquettes, rushes.
+                        <DataTableLink href={routes.session(session.id)}>
+                          {t.kinds[session.kind]}
+                        </DataTableLink>
+                      }
                       subtitle={[
                         session.date
                           ? formatShortDate(session.date)

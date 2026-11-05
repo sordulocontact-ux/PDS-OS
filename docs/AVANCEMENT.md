@@ -1447,3 +1447,27 @@ directement », l'ISWC depuis une modale de la page, sans aller au catalogue. D�
       mêmes cellules que la page Fichiers (date et auteur réunis, nom tronqué), image montrée en miniature à
       la place de son icône, « Ajouter un fichier » en petit bouton (il touchait la ligne des onglets).
 - [ ] Passage navigateur.
+
+## Sessions studio et Maquettes (05/11/2026, branche `pre-prod`)
+
+Retours d'Ibé du 01/11 (« Sessions studio accessibles depuis la barre de menu, jusqu'au master »,
+« Importer et stocker des fichiers rattachés aux sessions, artistes et projets ») et ses réponses du
+05/11. Migration `20261105220101_studio_sessions.sql` (appliquée à la pré-prod), test
+`studio-sessions.test.sql` (16/16), `docs/ARCHITECTURE.md` § 2 sexies bis.
+
+- [x] Session indépendante d'un titre, liée à des artistes, projets et titres ; page `/app/sessions/[id]`,
+      entrée « Sessions studio » du menu, onglet « Sessions » de l'artiste, section du projet, lien depuis
+      l'onglet Audio d'un titre.
+- [x] Permission `manage_sessions` (DG, chefs de projet).
+- [x] Participants (équipe et Réseau), compte rendu (présents, maquettes, informations importantes) avec
+      son responsable calculé (chef de projet, sinon créateur) et « À vous » en tête.
+- [x] Rushs : liens Drive sur la session.
+- [x] Maquettes : statuts Brouillon / En développement / Validée / Abandonnée, onglet « Maquettes » du
+      Catalogue, « Nouvelle maquette » (Catalogue et session), « Passer au catalogue des masters » (DG,
+      maquette validée, même fiche).
+- [x] Sessions dans le Calendrier.
+- [ ] Invitation Google Agenda de l'équipe interne et import direct vers Drive : après la connexion Google
+      de po@pdsrecords.com.
+- [ ] « Rédiger le compte rendu » dans Travail et l'Accueil (aujourd'hui sur la page de la session seule).
+- [ ] Production : `supabase db push` de la migration (avec accord), passage navigateur.
+

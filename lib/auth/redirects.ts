@@ -62,6 +62,8 @@ export const PERMISSIONS = [
   "manage_contracts",
   // Sees and runs a project's Juridique (the direction and project managers).
   "manage_legal",
+  // Creates and runs the studio sessions (the direction and project managers).
+  "manage_sessions",
 ] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 
@@ -132,6 +134,14 @@ export const routes = {
   artistFiles: (id: string) => `/app/catalog/artists/${id}/files`,
   artistActivity: (id: string) => `/app/catalog/artists/${id}/activity`,
   artistIdentity: (id: string) => `/app/catalog/artists/${id}/identity`,
+  artistSessions: (id: string) => `/app/catalog/artists/${id}/sessions`,
+  // Studio sessions: their own page, seen from each artist, project and
+  // title they concern (retour d'Ibé du 01/11/2026).
+  sessions: "/app/sessions",
+  session: (id: string) => `/app/sessions/${id}`,
+  // The Catalogue's maquettes: titles not yet decided for a release.
+  demos: "/app/catalog/demos",
+  demosNew: "/app/catalog/masters/new?maquette=1",
   masters: "/app/catalog/masters",
   mastersNew: "/app/catalog/masters/new",
   master: (id: string) => `/app/catalog/masters/${id}`,
@@ -265,6 +275,7 @@ export const routes = {
   projectDesignDeliverable: (id: string, deliverableId: string) =>
     `/app/projects/${id}/design/home#deliverable-${deliverableId}`,
   projectCalls: (id: string) => `/app/projects/${id}/calls`,
+  projectSessions: (id: string) => `/app/projects/${id}/sessions`,
   projectCall: (id: string, callId: string) =>
     `/app/projects/${id}/calls/${callId}`,
   projectRelease: (id: string) => `/app/projects/${id}/release`,
