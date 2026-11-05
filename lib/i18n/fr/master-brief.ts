@@ -51,7 +51,7 @@ export const masterBrief = {
   missingSentence: (list: string) => `Il manque ${list}.`,
   // « Exporter en PDF » (lib/master-workflow/brief-html.ts).
   pdf: {
-    export: "Voir le PDF",
+    export: "Télécharger le PDF",
     exporting: "Préparation du PDF…",
     failed: "Le PDF n'a pas pu être préparé. Réessayez.",
     title: (project: string) => `Brief Mix/Master · ${project}`,

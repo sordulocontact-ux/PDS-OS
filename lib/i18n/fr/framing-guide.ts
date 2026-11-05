@@ -171,7 +171,7 @@ export const framingGuide = {
       calls.length ? calls.join(" · ") : "Saisi sans call",
     callTitle: (title: string) => `Call « ${title} »`,
     back: "Retour au récapitulatif",
-    print: "Voir le PDF",
+    print: "Télécharger le PDF",
     exporting: "Préparation du PDF…",
     pdfFailed: "Le PDF n'a pas pu être préparé. Réessayez.",
     share: "Copier le lien",

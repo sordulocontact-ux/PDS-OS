@@ -279,7 +279,7 @@ export const contracts = {
         }\n\nBien à vous,\n${me} pour PDS`,
       // The attached file, before « .pdf »: « Licence — clip v2 ».
       fileName: (title: string, version: number) => `${title} v${version}`,
-      pdf: "Voir le PDF",
+      pdf: "Télécharger le PDF",
       pdfPending: "Préparation du PDF…",
       pdfFailed: "Le PDF n'a pas pu être préparé.",
     },

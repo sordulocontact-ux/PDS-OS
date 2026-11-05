@@ -47,7 +47,7 @@ export const legalDocuments = {
       `Contrat_${person}_${project}_v${version}.pdf`,
     generated: (blocking: number, total: number) =>
       `Généré depuis les valeurs ci-dessous · ${plural(blocking, "bloquante", "bloquantes")} sur ${total} · chaque valeur se corrige à sa source`,
-    pdf: "Voir le PDF",
+    pdf: "Télécharger le PDF",
     pdfPending: "Préparation du PDF…",
     pdfFailed: "Le PDF n'a pas pu être préparé.",
     changedSince: "Changé depuis la v1",
