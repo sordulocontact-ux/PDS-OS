@@ -190,12 +190,12 @@ export function FactRowFrame({
           {side}
           {hoverAction && (
             // Folded at rest (the pill stays against the edge); on hover it
-            // opens and gently pushes the pill aside while the word rolls up,
-            // with the button's timing (--duration-roll, --ease-out, Sacha,
+            // opens and gently pushes the pill aside while the word slides in
+            // from the right, with the button's timing (--duration-roll, --ease-out, Sacha,
             // 05/11/2026); no slide when motion is reduced.
             <span className="-ml-2 grid grid-cols-[0fr] opacity-0 transition-[grid-template-columns,opacity] duration-[var(--duration-roll)] ease-[var(--ease-out)] group-hover/fact:grid-cols-[1fr] group-hover/fact:opacity-100 group-focus-visible/fact:grid-cols-[1fr] group-focus-visible/fact:opacity-100 motion-reduce:transition-none">
               <span className="min-w-0 overflow-hidden">
-                <span className="block translate-y-full px-2 text-body-sm font-medium whitespace-nowrap transition-transform duration-[var(--duration-roll)] ease-[var(--ease-out)] group-hover/fact:translate-y-0 group-focus-visible/fact:translate-y-0 motion-reduce:translate-y-0 motion-reduce:transition-none">
+                <span className="block translate-x-full px-2 text-body-sm font-medium whitespace-nowrap transition-transform duration-[var(--duration-roll)] ease-[var(--ease-out)] group-hover/fact:translate-x-0 group-focus-visible/fact:translate-x-0 motion-reduce:translate-x-0 motion-reduce:transition-none">
                   {hoverAction}
                 </span>
               </span>

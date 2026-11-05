@@ -183,6 +183,9 @@ Principes :
   (`<path>.thumb.jpg`, `cover-thumb.ts`) que montrent la liste des titres, l'onglet Titres d'un artiste
   et l'en-tête du titre (`TitleCover`) ; une pochette déposée avant n'en a pas, l'original est montré.
   La copie est lisible par qui lit le fichier (migration `20261105190101`) et supprimée avec lui.
+  **Tableaux de fichiers** (Sacha, 05/11) : l'onglet Fichiers (`FilesList`, recherche comme partout) et
+  la page Fichiers partagent leurs cellules (`file-cells.tsx`) ; une image que le navigateur montre est
+  sa propre miniature (`previewUrl` : la copie de 320 px d'une pochette, sinon l'image signée).
   **Activité**
   (`activity_events`) : journal écrit **par triggers seuls** (création / modification de
   l'artiste, contacts, fichiers, masters, projets liés, transmissions), `detail` copié au
@@ -723,7 +726,10 @@ Migration `20261010002101_credits_at_creation.sql`, 11 tests pgTAP
 Le layout du projet (`projects/[projectId]/layout.tsx`, `generateMetadata`) pose le modèle ; chaque
 module donne son nom dans son layout (`metadata.title`, layouts `framing/` et `strategy/` créés pour
 ça) et ses pages n'en déclarent pas ; une page hors module (Budget, Travail, Calls…) donne le sien,
-**sans** « · PDS OS ».
+**sans** « · PDS OS ». Même modèle pour un titre et un artiste du Catalogue (« Nuit blanche · Fichiers ·
+PDS OS », `generateMetadata` de leur layout, onglets sans « · PDS OS ») ; toute autre page déclare
+`metadata.title` complet (« Catalogue · PDS OS », « Connexion · PDS OS »). **Une nouvelle page déclare
+son titre** : sans lui l'onglet n'affiche que « PDS OS ».
 
 Socle de toutes les zones (sous-lots C0 à C5 de `docs/projet-complet/commons.md` § 13). Rendu :
 `docs/DESIGN.md` § 4 ; composants : `docs/COMPOSANTS.md`.
