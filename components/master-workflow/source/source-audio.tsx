@@ -21,6 +21,7 @@ export function SourceAudioFile({
       label={fr.masterSource.listen(name)}
       listenUrl={listenUrl}
       downloadUrl={downloadUrl}
+      className="max-w-none"
     />
   );
 }

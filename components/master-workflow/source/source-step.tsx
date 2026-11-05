@@ -1,3 +1,5 @@
+import { IconDisc } from "@/components/icons";
+import { DocumentCard } from "@/components/ui/document-card";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { FilterChipLink } from "@/components/ui/filter-chip";
 import { ToneCallout } from "@/components/ui/tone-callout";
@@ -164,20 +166,19 @@ function TitleSource({
             )}
             )
           </ToneCallout>
-          <FactRows>
-            <FactRow
-              label={t.newer.proposed}
-              value={title.newer.fileName}
-              source={t.stems.value(title.stems.count, title.stems.latest)}
-              below={
-                <SourceAudioFile
-                  name={title.newer.fileName}
-                  listenUrl={title.newer.listenUrl}
-                  downloadUrl={title.newer.downloadUrl}
-                />
-              }
-            />
-          </FactRows>
+          <DocumentCard
+            name={t.newer.proposed}
+            line={t.stems.value(title.stems.count, title.stems.latest)}
+            icon={IconDisc}
+          >
+            <div className="p-3.5 empty:hidden">
+              <SourceAudioFile
+                name={title.newer.fileName}
+                listenUrl={title.newer.listenUrl}
+                downloadUrl={title.newer.downloadUrl}
+              />
+            </div>
+          </DocumentCard>
           {view.engineer && (
             <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
               {t.newer.engineer(view.engineer)}
@@ -200,31 +201,34 @@ function TitleSource({
       )}
 
       {current && (
-        <FactRows>
-          <FactRow
-            label={t.current.label}
-            value={current.fileName}
-            source={t.current.source(
-              current.confirmedBy,
-              formatShortDay(current.confirmedAt),
-              working,
-            )}
-            below={
-              <SourceAudioFile
-                name={current.fileName}
-                listenUrl={current.version?.listenUrl ?? null}
-                downloadUrl={current.version?.downloadUrl ?? null}
-              />
-            }
-          />
-          {current.plan && (
-            <FactRow
-              label={t.plan.chosen}
-              value={current.plan === "wait" ? t.plan.wait : t.plan.anticipate}
-              source={t.plan.decidedBy(current.confirmedBy)}
-            />
+        <DocumentCard
+          name={t.current.label}
+          line={t.current.source(
+            current.confirmedBy,
+            formatShortDay(current.confirmedAt),
+            working,
           )}
-        </FactRows>
+          icon={IconDisc}
+        >
+          <div className="p-3.5 empty:hidden">
+            <SourceAudioFile
+              name={current.fileName}
+              listenUrl={current.version?.listenUrl ?? null}
+              downloadUrl={current.version?.downloadUrl ?? null}
+            />
+          </div>
+          {current.plan && (
+            <FactRows className="rounded-none border-0 border-t">
+              <FactRow
+                label={t.plan.chosen}
+                value={
+                  current.plan === "wait" ? t.plan.wait : t.plan.anticipate
+                }
+                source={t.plan.decidedBy(current.confirmedBy)}
+              />
+            </FactRows>
+          )}
+        </DocumentCard>
       )}
 
       {!inForm && checked}
