@@ -107,7 +107,6 @@ export const designSteps = {
         [day, format, minutes ? `${minutes} min` : null]
           .filter(Boolean)
           .join(" · "),
-      report: "Compte rendu",
       roles: "Rôle des livrables",
       audiences: "Publics",
       narrative: "Narratif",

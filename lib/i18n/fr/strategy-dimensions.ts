@@ -80,8 +80,6 @@ export const strategyDimensions = {
   nothingYet: "Rien de renseigné pour l'instant.",
   nothingSaidMeta: "rien de dit",
   // Facts at the head of the step.
-  exchange: "Échange stratégique",
-  report: "Compte rendu",
   // Sources of a line.
   saidIn: (day: string) => `Échange stratégique du ${day}`,
   typedBy: (name: string) => `Saisi par ${name}`,

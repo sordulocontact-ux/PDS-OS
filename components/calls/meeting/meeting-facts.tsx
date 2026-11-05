@@ -1,4 +1,4 @@
-import { CallFacts } from "@/components/calls/call-facts";
+import { DocumentCard } from "@/components/ui/document-card";
 import type { MeetingData } from "@/lib/calls/meeting/types";
 import { callWhen } from "@/lib/calls/prep/dates";
 import { callPrep } from "@/lib/i18n/fr/call-prep";
@@ -9,34 +9,30 @@ import { MeetingReportDialog } from "./meeting-report-dialog";
 const fr = { callPrep, meeting };
 
 /**
- * A meeting held, in its step: « Échange stratégique · Lun. 05/10/2026 à
- * 14:00 · Visio · participants », then « Lire le compte rendu » once the
- * report is there.
+ * A meeting held, in its step: its report as a document (DocumentCard,
+ * the card of every document in a step, Sacha 05/11/2026) — « Compte rendu
+ * · Échange de cadrage », when, format and who on its line, « Lire le
+ * compte rendu » on the right once the report is there.
  */
 export function MeetingFacts({ meeting }: { meeting: MeetingData }) {
   const t = fr.meeting;
   return (
-    <CallFacts
-      facts={[
-        {
-          label: meeting.name,
-          value: t.facts(
-            callWhen(meeting.occurredAt),
-            meeting.format ? fr.callPrep.formats[meeting.format] : null,
-            meeting.participants.map((p) => p.name).join(", "),
-          ),
-        },
-        {
-          label: t.report,
-          value: meeting.reportReady ? (
-            <MeetingReportDialog meeting={meeting} />
-          ) : (
-            <span className="text-caption text-[color:var(--text-tertiary)]">
-              {t.noReport}
-            </span>
-          ),
-        },
-      ]}
-    />
+    <DocumentCard
+      name={t.reportName(meeting.name)}
+      line={t.facts(
+        callWhen(meeting.occurredAt),
+        meeting.format ? fr.callPrep.formats[meeting.format] : null,
+        meeting.participants.map((p) => p.name).join(", "),
+      )}
+      action={
+        meeting.reportReady ? <MeetingReportDialog meeting={meeting} /> : null
+      }
+    >
+      {!meeting.reportReady && (
+        <p className="px-3.5 py-3 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
+          {t.noReport}
+        </p>
+      )}
+    </DocumentCard>
   );
 }

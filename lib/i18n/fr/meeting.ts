@@ -7,8 +7,8 @@
 export const meeting = {
   // The section of a call's page that holds them.
   section: "La réunion",
-  // MeetingFacts.
-  report: "Compte rendu",
+  // MeetingFacts: the report as a document of its step.
+  reportName: (name: string) => `Compte rendu · ${name}`,
   readReport: "Lire le compte rendu",
   noReport:
     "Le compte rendu arrive après l'enregistrement et sa transcription.",
@@ -17,20 +17,16 @@ export const meeting = {
   // MeetingReportDialog.
   title: (name: string) => `Compte rendu · ${name}`,
   close: "Fermer",
-  date: "Date",
-  format: "Format",
   formatValue: (format: string | null, minutes: number | null) =>
     [format, minutes ? `${minutes} min` : null].filter(Boolean).join(" · ") ||
     "—",
-  participants: "Participants",
   participantOf: (fn: string | null, name: string) =>
     fn ? `${fn} : ${name}` : name,
-  agenda: "Ordre du jour",
-  source: "Source",
   sourceValue: "Enregistré dans PDS OS, transcrit, puis rangé par PO",
-  nothingSaid: "Rien n'a été dit sur ce point.",
+  // The agenda points nobody spoke of, on one line (Sacha 05/11/2026).
+  notDiscussed: (topics: string) => `Pas abordé : ${topics}.`,
+  nothingAtAll: "Rien de ce qui a été dit n'a été retenu dans ce compte rendu.",
   loose: "Dit en dehors de l'ordre du jour",
-  looseEmpty: "Rien d'autre n'a été dit.",
   added: "Ajouté après la réunion",
   footer:
     "Les phrases sont citées telles quelles. Ce qui fait foi, ce sont les décisions confirmées dans l'étape.",
@@ -54,7 +50,7 @@ export const meeting = {
     heading: "Résumé pour les participants",
     headingVersion: (n: number) =>
       `Résumé pour les participants · version ${n}`,
-    note: "Préparé par PO à partir de ce qui a été tranché, sans les phrases citées ni ce qui a été écarté. Relisez et corrigez avant d'envoyer.",
+    note: "Préparé par PO à partir de ce qui a été tranché. Relisez avant d'envoyer.",
     message: "Message",
     messageMissing: "Écrivez le message à envoyer.",
     recipients: "Destinataires",

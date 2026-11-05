@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { CallFacts } from "@/components/calls/call-facts";
-import { MeetingReportDialog } from "@/components/calls/meeting/meeting-report-dialog";
+import { MeetingFacts } from "@/components/calls/meeting/meeting-facts";
 import { DesignStepFrame } from "@/components/design/design-step-frame";
 import { IntentionGroup } from "@/components/design/intentions/intention-group";
 import { DesignWaits } from "@/components/design/waiting-row";
@@ -72,14 +72,6 @@ export default async function DesignIntentionsPage({
             meeting?.minutes ?? null,
           ),
         },
-        ...(meeting
-          ? [
-              {
-                label: t.facts.report,
-                value: <MeetingReportDialog meeting={meeting} />,
-              },
-            ]
-          : []),
       ]
     : [
         {
@@ -116,7 +108,12 @@ export default async function DesignIntentionsPage({
         ) : undefined
       }
     >
-      <CallFacts facts={facts} />
+      {/* The exchange's report as a document (Sacha 05/11/2026). */}
+      {meeting ? (
+        <MeetingFacts meeting={meeting} />
+      ) : (
+        <CallFacts facts={facts} />
+      )}
       {canEdit && start.path === "direct" && (
         <div className="flex justify-end">
           <ImportBriefDialog projectId={projectId} />

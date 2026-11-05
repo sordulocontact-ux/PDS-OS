@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { CallFacts } from "@/components/calls/call-facts";
-import { MeetingReportDialog } from "@/components/calls/meeting/meeting-report-dialog";
+import { MeetingFacts } from "@/components/calls/meeting/meeting-facts";
 import { EditAccessProvider } from "@/components/projects/edit-access";
 import { DimensionWork } from "@/components/strategy/dimension-work";
 import { DimensionGroup } from "@/components/strategy/dimensions/dimension-group";
@@ -13,7 +12,6 @@ import { StrategyStepFrame } from "@/components/strategy/journey/strategy-step-f
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
 import { loadMeeting } from "@/lib/calls/meeting/queries";
-import { callWhen } from "@/lib/calls/prep/dates";
 import { fr } from "@/lib/i18n/fr";
 import { strategyMeetingLines } from "@/lib/strategy/meeting-lines";
 import { strategyStepData } from "@/lib/strategy/step-data";
@@ -73,31 +71,16 @@ export default async function StrategyDimensionsPage({
           {/* Started directly, the step says nothing of it: « Départ » is
               the first step's (Ibé 02/11/2026, « bruit à nettoyer »). */}
           {meeting && call && (
-            <CallFacts
-              facts={[
-                {
-                  label: t.exchange,
-                  value: fr.meeting.facts(
-                    callWhen(meeting.occurredAt),
-                    meeting.format ? fr.callPrep.formats[meeting.format] : null,
-                    meeting.participants.map((p) => p.name).join(", "),
-                  ),
-                },
-                {
-                  label: t.report,
-                  value: (
-                    <MeetingReportDialog
-                      meeting={{
-                        ...meeting,
-                        lines: strategyMeetingLines(
-                          model,
-                          routes.projectCall(projectId, call.callId),
-                        ),
-                      }}
-                    />
-                  ),
-                },
-              ]}
+            <MeetingFacts
+              meeting={{
+                ...meeting,
+                // Its lines are the dimensions' proposals: always there.
+                reportReady: true,
+                lines: strategyMeetingLines(
+                  model,
+                  routes.projectCall(projectId, call.callId),
+                ),
+              }}
             />
           )}
           <p className="text-body-sm font-semibold">
