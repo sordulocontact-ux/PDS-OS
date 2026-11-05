@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { FilterChip } from "@/components/ui/filter-chip";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { answerItems, answerMeasure } from "@/lib/framing/actions/answers";
+import { answerItems } from "@/lib/framing/actions/answers";
 import type { QuestionState } from "@/lib/framing/assess";
 import {
   ITEM_STATES,
@@ -21,7 +21,7 @@ import { framingIntel } from "@/lib/i18n/fr/framing-intel";
 
 const fr = { framingIntel };
 
-type Props = {
+export type StructuredAnswerProps = {
   projectId: string;
   question: QuestionState;
   // A sentence to start from: a proposal, or the suggestion picked.
@@ -33,7 +33,7 @@ type Props = {
   onDone: () => void;
 };
 
-function Actions({
+export function StructuredActions({
   pending,
   onCancel,
 }: {
@@ -74,7 +74,7 @@ export function ItemsAnswer({
   presets = [],
   onCancel,
   onDone,
-}: Props) {
+}: StructuredAnswerProps) {
   const t = fr.framingIntel.items;
   const states = fr.framingIntel.itemStates;
   const { pending, run } = useFramingAction();
@@ -194,140 +194,7 @@ export function ItemsAnswer({
       <FieldError id={`${question.key}-items-error`}>
         {tried ? (errors.list ?? errors.labels) : undefined}
       </FieldError>
-      <Actions pending={pending} onCancel={onCancel} />
-    </form>
-  );
-}
-
-const number = (text: string) => {
-  const digits = text.replace(/[\s  ]/g, "").match(/\d+(?:[.,]\d+)?/);
-  return digits ? digits[0].replace(",", ".") : "";
-};
-
-/**
- * A measurable objective (PROJ-UX-04): metric, target and period are all
- * required — « 500 000 streams le premier mois » is stored as such. What
- * was said stays in sight; only the target is read from it, by code.
- */
-export function MeasureAnswer({
-  projectId,
-  question,
-  draft,
-  keepSource,
-  onCancel,
-  onDone,
-}: Props) {
-  const t = fr.framingIntel.measure;
-  const { pending, run } = useFramingAction();
-  const current =
-    question.answer?.kind === "text" ? question.answer.measure : undefined;
-  const said =
-    draft ??
-    (question.answer?.kind === "text" && !current
-      ? question.answer.text
-      : null);
-  const [metric, setMetric] = useState(current?.metric ?? "");
-  const [target, setTarget] = useState(
-    current ? String(current.target) : said ? number(said) : "",
-  );
-  const [period, setPeriod] = useState(current?.period ?? "");
-  const [source, setSource] = useState(current?.source ?? "");
-  const [tried, setTried] = useState(false);
-  const value = Number(target.replace(",", ".").replace(/\s/g, ""));
-  const errors = {
-    metric: metric.trim() ? undefined : t.metricRequired,
-    target:
-      target.trim() && Number.isFinite(value) && value >= 0
-        ? undefined
-        : t.targetRequired,
-    period: period.trim() ? undefined : t.periodRequired,
-  };
-  const shown = (e?: string) => (tried ? e : undefined);
-  const field = (
-    id: string,
-    label: string,
-    v: string,
-    on: (v: string) => void,
-    placeholder: string,
-    error?: string,
-    required = true,
-  ) => (
-    <div className="grid gap-1.5">
-      <Label htmlFor={id} required={required}>
-        {label}
-      </Label>
-      <Input
-        id={id}
-        value={v}
-        placeholder={placeholder}
-        maxLength={100}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={error ? `${id}-error` : undefined}
-        onChange={(e) => on(e.target.value)}
-      />
-      <FieldError id={`${id}-error`}>{error}</FieldError>
-    </div>
-  );
-
-  return (
-    <form
-      className="flex flex-col gap-4"
-      noValidate
-      onSubmit={(event) => {
-        event.preventDefault();
-        setTried(true);
-        if (errors.metric || errors.target || errors.period) return;
-        run(
-          () =>
-            answerMeasure(
-              projectId,
-              question.key,
-              { metric, target: value, period, source },
-              keepSource,
-            ),
-          onDone,
-        );
-      }}
-    >
-      {said && (
-        <p className="text-caption text-muted-foreground">{t.said(said)}</p>
-      )}
-      <div className="grid gap-4 sm:grid-cols-3">
-        {field(
-          "measure-target",
-          t.target,
-          target,
-          setTarget,
-          t.targetPlaceholder,
-          shown(errors.target),
-        )}
-        {field(
-          "measure-metric",
-          t.metric,
-          metric,
-          setMetric,
-          t.metricPlaceholder,
-          shown(errors.metric),
-        )}
-        {field(
-          "measure-period",
-          t.period,
-          period,
-          setPeriod,
-          t.periodPlaceholder,
-          shown(errors.period),
-        )}
-      </div>
-      {field(
-        "measure-source",
-        t.source,
-        source,
-        setSource,
-        t.sourcePlaceholder,
-        undefined,
-        false,
-      )}
-      <Actions pending={pending} onCancel={onCancel} />
+      <StructuredActions pending={pending} onCancel={onCancel} />
     </form>
   );
 }

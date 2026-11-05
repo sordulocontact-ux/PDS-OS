@@ -35,8 +35,9 @@ const fr = { framingGuide, framingIntel, budget, contracts };
 export type QuestionStatus = "known" | "to_confirm" | "missing";
 
 export type Answer =
-  // `items` / `measure`: the structured form of a text answer (PROJ-UX-04/05).
-  | { kind: "text"; text: string; items?: AnswerItem[]; measure?: Measure }
+  // `items` / `measures`: the structured form of a text answer (PROJ-UX-04/05;
+  // several measures, Ibé 01/11/2026).
+  | { kind: "text"; text: string; items?: AnswerItem[]; measures?: Measure[] }
   | { kind: "date"; date: string }
   // `certainty`: the envelope is confirmed or only estimated (PROJ-UX-05).
   | { kind: "money"; cents: number; certainty?: "confirmed" | "estimated" }
@@ -132,8 +133,9 @@ export function answerOf(key: QuestionKey, value: unknown): Answer | null {
       return value.trim() !== "" ? { kind: "text", text: value } : null;
     const items = itemsOf(o?.items);
     if (items?.length) return { kind: "text", text: itemsText(items), items };
-    const measure = measureOf(o?.measure);
-    if (measure) return { kind: "text", text: measureText(measure), measure };
+    const measures = measuresOf(o);
+    if (measures.length)
+      return { kind: "text", text: measuresText(measures), measures };
   }
   return null;
 }
@@ -148,6 +150,12 @@ function itemsOf(value: unknown): AnswerItem[] | null {
       ? [{ label: i.label.trim(), state: i.state as AnswerItem["state"] }]
       : [];
   });
+}
+
+// `{ measures: [...] }`, or `{ measure }` as stored before 05/11/2026.
+function measuresOf(o: Record<string, unknown> | null): Measure[] {
+  const list = Array.isArray(o?.measures) ? o.measures : [o?.measure];
+  return list.flatMap((m: unknown) => measureOf(m) ?? []);
 }
 
 function measureOf(value: unknown): Measure | null {
@@ -189,14 +197,18 @@ export const measureText = (m: Measure) =>
     m.source,
   );
 
+/** One measure per line. */
+export const measuresText = (measures: Measure[]) =>
+  measures.map(measureText).join("\n");
+
 /** An answer as a Brief row stores it (field_values.value). */
 export function storedValue(answer: Answer): unknown {
   switch (answer.kind) {
     case "text":
       return answer.items
         ? { items: answer.items }
-        : answer.measure
-          ? { measure: answer.measure }
+        : answer.measures
+          ? { measures: answer.measures }
           : answer.text;
     case "date":
       return answer.date;

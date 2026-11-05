@@ -35,7 +35,7 @@ export function toVerify(
         def.shape &&
         q.answer?.kind === "text" &&
         !q.answer.items &&
-        !q.answer.measure
+        !q.answer.measures
       );
     });
 }

@@ -1597,9 +1597,12 @@ liste), est obligatoire ou non, accepte ou non « Rien à signaler » (`{"none":
   (`lib/framing/brief-pdf.ts`). L'instantané est écrit par le serveur avec la session du
   responsable : c'est ce que le valideur lit, donc ce qu'il valide.
 - **Réponses structurées et états** (PROJ-UX-04 et UX-05, 11/10/2026) :
-  - **objectif mesurable** (`success_criteria`, `shape: "measure"`) : métrique, cible,
-    période, source (`{ measure }` dans `field_values.value`), tous obligatoires sauf la
-    source ; la cible est lue par le code dans la phrase dite, jamais par PO ;
+  - **objectif mesurable** (`success_criteria`, `shape: "measure"`) : **une à six mesures**
+    (Ibé 01/11/2026 : streams, vues, abonnés…), chacune métrique, cible, période, source
+    (`{ measures: [...] }` dans `field_values.value` ; l'ancien `{ measure }` se lit encore comme
+    une liste d'une mesure), tout obligatoire sauf la source ; une mesure par ligne à l'affichage ;
+    la cible est lue par le code dans la phrase dite, jamais par PO ; la Stratégie propose chaque
+    mesure comme KPI (« Préparer ce KPI »), sauf celle dont le chiffre est déjà un KPI ;
   - **éléments à états** (`prerequisites`, `existing_elements`, `work_started`,
     `shape: "items"`) : plusieurs éléments, chacun Existe / En cours / Terminé / Décidé /
     Prévu (`{ items }`), suggestions en un clic, pré-remplis depuis le Catalogue (étape audio

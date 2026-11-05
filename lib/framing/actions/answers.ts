@@ -8,6 +8,7 @@ import { routes } from "@/lib/auth/redirects";
 import { storedValue, type BriefRow } from "@/lib/framing/confirm";
 import {
   ITEM_STATES,
+  MAX_MEASURES,
   QUESTIONS,
   isQuestionKey,
   type QuestionKey,
@@ -114,31 +115,39 @@ export async function answerItems(
   );
 }
 
-const measureInput = z.object({
-  metric: z.string().trim().min(1).max(100),
-  target: z.number().finite().nonnegative(),
-  period: z.string().trim().min(1).max(100),
-  source: z
-    .string()
-    .trim()
-    .max(100)
-    .transform((v) => v || null),
-});
+const measuresInput = z
+  .array(
+    z.object({
+      metric: z.string().trim().min(1).max(100),
+      target: z.number().finite().nonnegative(),
+      period: z.string().trim().min(1).max(100),
+      source: z
+        .string()
+        .trim()
+        .max(100)
+        .transform((v) => v || null),
+    }),
+  )
+  .min(1)
+  .max(MAX_MEASURES);
 
-/** A measurable objective: metric, target and horizon are all required. */
-export async function answerMeasure(
+/**
+ * Measurable objectives, one or several (Ibé 01/11/2026: streams, views,
+ * followers…): metric, target and horizon are all required for each.
+ */
+export async function answerMeasures(
   projectId: string,
   key: string,
-  measure: z.input<typeof measureInput>,
+  measures: z.input<typeof measuresInput>,
   keepSource = false,
 ): Promise<ActionResult> {
   const question = shaped(key, "measure");
-  const p = measureInput.safeParse(measure);
+  const p = measuresInput.safeParse(measures);
   if (!question || !p.success) return fail("invalid_input");
   return append(
     projectId,
     question,
-    storedValue({ kind: "text", text: "", measure: p.data }),
+    storedValue({ kind: "text", text: "", measures: p.data }),
     keepSource,
   );
 }

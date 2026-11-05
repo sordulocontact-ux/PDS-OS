@@ -143,6 +143,9 @@ export const ITEM_STATES = [
 ] as const;
 export type ItemState = (typeof ITEM_STATES)[number];
 export type AnswerItem = { label: string; state: ItemState };
+/** The measures of one success criterion, at most (Ibé 01/11/2026). */
+export const MAX_MEASURES = 6;
+
 /** A measurable objective: metric, target and horizon, its source if any. */
 export type Measure = {
   metric: string;

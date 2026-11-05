@@ -1408,3 +1408,12 @@ directement », l'ISWC depuis une modale de la page, sans aller au catalogue. D�
 - [x] Cadrage › Démarrer › « Ce que le projet sait déjà › Voir le détail » : les informations regroupées sous
       un seul titre par dimension (Objectif, Temporalité…), au lieu du nom de la dimension répété sur chaque
       ligne (retour d'Ibé du 01/11, « Titres en double dans l'outil »). `FramingLine` perd sa prop `eyebrow`.
+
+## Plusieurs métriques dans le critère de réussite (05/11/2026, branche `pre-prod`)
+
+- [x] Cadrage › Critère de réussite : une à six mesures (cible, métrique, période, source), « Ajouter une
+      métrique », chacune retirable ; enregistré en `{ measures }`, l'ancien `{ measure }` relu tel quel ; une
+      mesure par ligne dans les lignes et le Brief (retour d'Ibé du 01/11, « Ajouter d'autres métriques en
+      plus des streams »).
+- [x] Stratégie › KPIs : chaque mesure du Cadrage proposée comme KPI (« Préparer ce KPI »), sauf celles dont
+      le chiffre est déjà un KPI.

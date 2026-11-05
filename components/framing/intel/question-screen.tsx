@@ -11,10 +11,8 @@ import {
   LaterForm,
   NotApplicableForm,
 } from "@/components/framing/intel/answer-states";
-import {
-  ItemsAnswer,
-  MeasureAnswer,
-} from "@/components/framing/intel/structured-answer";
+import { MeasureAnswer } from "@/components/framing/intel/measure-answer";
+import { ItemsAnswer } from "@/components/framing/intel/structured-answer";
 import { useNextQuestion } from "@/components/framing/dimensions/use-next-question";
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { ChoiceCards } from "@/components/ui/choice-cards";
@@ -121,7 +119,7 @@ export function QuestionScreen({
     !!def.shape &&
     question.answer?.kind === "text" &&
     !question.answer.items &&
-    !question.answer.measure;
+    !question.answer.measures;
 
   const help = () =>
     startHelp(async () => {

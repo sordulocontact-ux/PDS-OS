@@ -58,7 +58,8 @@ export type StrategyAudience = Tables["strategy_audiences"]["Row"];
 // when it was said measurably, the metric, the target and the horizon.
 export type FramingObjective = {
   text: string | null;
-  measure: { metric: string; target: number; period: string } | null;
+  // The success criterion's measures, one KPI each (Ibé 01/11/2026).
+  measures: { metric: string; target: number; period: string }[];
 };
 export type OpenNeed = { id: string; label: string; family: string };
 export type LegalDependency = {
@@ -297,14 +298,14 @@ export async function loadStrategy(
       return {
         text:
           objective?.kind === "text" && objective.text ? objective.text : null,
-        measure:
-          criteria?.kind === "text" && criteria.measure
-            ? {
-                metric: criteria.measure.metric,
-                target: criteria.measure.target,
-                period: criteria.measure.period,
-              }
-            : null,
+        measures:
+          criteria?.kind === "text"
+            ? (criteria.measures ?? []).map((m) => ({
+                metric: m.metric,
+                target: m.target,
+                period: m.period,
+              }))
+            : [],
       };
     })(),
     strategicObjective: (() => {

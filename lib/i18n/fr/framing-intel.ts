@@ -281,6 +281,10 @@ export const framingIntel = {
     metricRequired: "Dites ce qui se mesure.",
     targetRequired: "Donnez une cible chiffrée.",
     periodRequired: "Dites sur quelle période.",
+    // Several measures (Ibé 01/11/2026).
+    add: "Ajouter une métrique",
+    nth: (n: number) => `Mesure ${n}`,
+    remove: (n: number) => `Retirer la mesure ${n}`,
   },
   // Answered without a value (PROJ-UX-04).
   answerStates: {

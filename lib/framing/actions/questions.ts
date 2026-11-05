@@ -217,7 +217,7 @@ async function confirmState(
     QUESTIONS[key].shape &&
     state.answer?.kind === "text" &&
     !state.answer.items &&
-    !state.answer.measure
+    !state.answer.measures
   )
     return fail("invalid_transition");
   if (kind === "text" || kind === "date" || kind === "money") {

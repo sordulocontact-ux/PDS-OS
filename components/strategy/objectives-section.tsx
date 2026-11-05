@@ -68,12 +68,11 @@ export function ObjectivesSection({
   const [prefill, setPrefill] = useState<ObjectiveInput | undefined>();
   const nameOf = (personId: string | null) =>
     members.find((m) => m.personId === personId)?.name ?? null;
-  const measure = framingObjective.measure;
-  const measureText = measure
-    ? `${new Intl.NumberFormat("fr-FR").format(measure.target)} ${measure.metric} · ${measure.period}`
-    : null;
-  const kpiFromCadrageExists =
-    measure !== null && objectives.some((o) => o.target === measure.target);
+  // The Cadrage's measures not yet a KPI (same figure), each one offered.
+  const fromCadrage = framingObjective.measures.filter(
+    (m) => !objectives.some((o) => o.target === m.target),
+  );
+  const number = new Intl.NumberFormat("fr-FR");
 
   return (
     <div className="flex flex-col gap-8">
@@ -167,24 +166,27 @@ export function ObjectivesSection({
         )}
         {canEdit &&
           editing === null &&
-          measureText &&
-          !kpiFromCadrageExists &&
-          !prefill && (
-            <p className="flex flex-wrap items-center gap-2 text-sm text-[color:var(--text-secondary)]">
-              {t.fromFraming.kpi(measureText)}
+          !prefill &&
+          fromCadrage.map((m) => (
+            <p
+              key={`${m.target}-${m.metric}-${m.period}`}
+              className="flex flex-wrap items-center gap-2 text-sm text-[color:var(--text-secondary)]"
+            >
+              {t.fromFraming.kpi(
+                `${number.format(m.target)} ${m.metric} · ${m.period}`,
+              )}
               <Button
                 size="xs"
                 variant="outline"
                 onClick={() => {
-                  if (!measure) return;
-                  setPrefill(kpiFromFraming(measure, referenceDate));
+                  setPrefill(kpiFromFraming(m, referenceDate));
                   setFormKey((k) => k + 1);
                 }}
               >
                 {t.fromFraming.useKpi}
               </Button>
             </p>
-          )}
+          ))}
         {canEdit && editing === null && (
           <ObjectiveForm
             key={formKey}
