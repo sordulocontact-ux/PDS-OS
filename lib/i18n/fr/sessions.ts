@@ -131,6 +131,7 @@ export const sessions = {
     attached: "Titre rattaché",
     demoCreated: "Maquette créée",
     master: "Master",
+    columns: { title: "Titre", status: "Statut" },
   },
   links: {
     title: "Rushs et fichiers",
@@ -141,6 +142,7 @@ export const sessions = {
     label: "Nom",
     labelPlaceholder: "Rushs VHS, photos de la séance…",
     url: "Lien",
+    column: "Lien",
     urlHint: "L'adresse du dossier ou du fichier partagé (https).",
     urlInvalid: "Collez une adresse qui commence par https://",
     empty: "Aucun lien pour l'instant.",

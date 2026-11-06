@@ -50,9 +50,25 @@ export { DataTableViews } from "@/components/ui/data-table-views";
 // Shown in a cell that has no value.
 export const EMPTY_CELL = "—";
 
-export function DataTable({ children }: { children: React.ReactNode }) {
+// `framed`: keeps its frame, band and inset inside a section card too. The
+// pages outside a project (Catalogue, Sessions studio, Réseau) ask for it
+// (Sacha, 06/11/2026); a project's pages keep the bare table for now.
+// Without it the table is marked `table-flat` and its rows read that mark.
+export function DataTable({
+  children,
+  framed = false,
+}: {
+  children: React.ReactNode;
+  framed?: boolean;
+}) {
   return (
-    <div className="overflow-hidden rounded-xl border border-[color:var(--border-default)] bg-card in-[.section-card]:rounded-none in-[.section-card]:border-0 in-[.section-card]:bg-transparent">
+    <div
+      className={cn(
+        "overflow-hidden rounded-xl border border-[color:var(--border-default)] bg-card",
+        !framed &&
+          "table-flat in-[.section-card]:rounded-none in-[.section-card]:border-0 in-[.section-card]:bg-transparent",
+      )}
+    >
       <Table>{children}</Table>
     </div>
   );
@@ -60,14 +76,14 @@ export function DataTable({ children }: { children: React.ReactNode }) {
 
 // 16 px from the frame on both ends of every row (header, body, groups).
 export const ROW_INSET =
-  "[&>*:first-child]:pl-4 [&>*:last-child]:pr-4 in-[.section-card]:[&>*:first-child]:pl-0 in-[.section-card]:[&>*:last-child]:pr-0";
+  "[&>*:first-child]:pl-4 [&>*:last-child]:pr-4 in-[.section-card_.table-flat]:[&>*:first-child]:pl-0 in-[.section-card_.table-flat]:[&>*:last-child]:pr-0";
 
 export function DataTableHeader({ children }: { children: React.ReactNode }) {
   return (
     <TableHeader>
       <TableRow
         className={cn(
-          "border-[color:var(--border-default)] bg-[var(--surface-soft)] hover:bg-[var(--surface-soft)] in-[.section-card]:border-[color:var(--border-hairline)] in-[.section-card]:bg-transparent in-[.section-card]:hover:bg-transparent",
+          "border-[color:var(--border-default)] bg-[var(--surface-soft)] hover:bg-[var(--surface-soft)] in-[.section-card_.table-flat]:border-[color:var(--border-hairline)] in-[.section-card_.table-flat]:bg-transparent in-[.section-card_.table-flat]:hover:bg-transparent",
           ROW_INSET,
         )}
       >
@@ -100,7 +116,7 @@ export function DataTableHead({
 // it included.
 export function DataTableBody({ children }: { children: React.ReactNode }) {
   return (
-    <TableBody className="[&>tr+tr>td]:border-t [&>tr+tr>td]:border-[color:var(--border-hairline)] in-[.section-card]:[&>tr+tr>td]:border-transparent">
+    <TableBody className="[&>tr+tr>td]:border-t [&>tr+tr>td]:border-[color:var(--border-hairline)] in-[.section-card_.table-flat]:[&>tr+tr>td]:border-transparent">
       {children}
     </TableBody>
   );

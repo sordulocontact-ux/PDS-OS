@@ -20,7 +20,7 @@ const fr = { catalog, masterPage };
 export function MasterArtists({ credits }: { credits: Credit[] }) {
   const t = fr.masterPage.artistsTable;
   return (
-    <DataTable>
+    <DataTable framed>
       <DataTableHeader>
         <DataTableHead>{t.artist}</DataTableHead>
         <DataTableHead fill>{t.role}</DataTableHead>

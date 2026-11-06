@@ -67,7 +67,7 @@ export function SessionsTable({
 }) {
   const t = fr.sessions.columns;
   return (
-    <DataTable>
+    <DataTable framed>
       <DataTableHeader>
         <DataTableHead>{t.date}</DataTableHead>
         <DataTableHead>{t.session}</DataTableHead>

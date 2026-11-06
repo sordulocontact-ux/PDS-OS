@@ -74,7 +74,7 @@ export function DeclarationsSection({
       title={t.title}
       description={t.description}
     >
-      <DataTable>
+      <DataTable framed>
         <DataTableHeader>
           <DataTableHead>{t.columns.organism}</DataTableHead>
           <DataTableHead>{t.columns.status}</DataTableHead>

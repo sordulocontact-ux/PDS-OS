@@ -1,8 +1,18 @@
 import { FormMessage } from "@/components/auth/form-message";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
+import {
+  DataTable,
+  DataTableBody,
+  DataTableCell,
+  DataTableHead,
+  DataTableHeader,
+  DataTableLink,
+  DataTableMedia,
+  DataTableRow,
+  EMPTY_CELL,
+} from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
 import type {
   ProjectProgress,
@@ -12,8 +22,6 @@ import { catalog } from "@/lib/i18n/fr/catalog";
 import { journey } from "@/lib/i18n/fr/journey";
 import { lowerFirst } from "@/lib/ui/journey";
 import { formatShortDay } from "@/lib/utils/day";
-
-import { SectionRow, SectionRows } from "@/components/ui/section-rows";
 
 const fr = { catalog, journey };
 
@@ -48,34 +56,43 @@ export function ArtistOngoing({
       {projects.length === 0 ? (
         !error && <EmptyNote>{t.none}</EmptyNote>
       ) : (
-        <SectionRows label={t.title}>
-          {projects.map((p) => (
-            <SectionRow
-              key={p.projectId}
-              title={
-                <>
-                  <ViewLink
-                    href={routes.project(p.projectId)}
-                    className="font-semibold no-underline hover:underline"
-                  >
-                    {p.title}
-                  </ViewLink>
-                  {p.format && ` · ${p.format}`}
-                </>
-              }
-              detail={[p.place, waitText(p.wait)].filter(Boolean).join(" · ")}
-              badge={
-                p.dueDate && (
-                  <StatusBadge tone="neutral" size="sm">
-                    {(p.music ? t.release : t.due)(
-                      formatShortDay(p.dueDate, { bare: true }),
-                    )}
-                  </StatusBadge>
-                )
-              }
-            />
-          ))}
-        </SectionRows>
+        <DataTable framed>
+          <DataTableHeader>
+            <DataTableHead>{t.columns.project}</DataTableHead>
+            <DataTableHead hideBelow="sm">{t.columns.date}</DataTableHead>
+            <DataTableHead fill>{t.columns.status}</DataTableHead>
+          </DataTableHeader>
+          <DataTableBody>
+            {projects.map((p) => (
+              <DataTableRow key={p.projectId}>
+                <DataTableCell>
+                  <DataTableMedia
+                    title={
+                      <DataTableLink href={routes.project(p.projectId)}>
+                        {p.title}
+                      </DataTableLink>
+                    }
+                    subtitle={p.format}
+                  />
+                </DataTableCell>
+                <DataTableCell hideBelow="sm">
+                  {p.dueDate ? (
+                    <StatusBadge tone="neutral" size="sm">
+                      {(p.music ? t.release : t.due)(
+                        formatShortDay(p.dueDate, { bare: true }),
+                      )}
+                    </StatusBadge>
+                  ) : (
+                    EMPTY_CELL
+                  )}
+                </DataTableCell>
+                <DataTableCell fill className="break-words">
+                  {[p.place, waitText(p.wait)].filter(Boolean).join(" · ")}
+                </DataTableCell>
+              </DataTableRow>
+            ))}
+          </DataTableBody>
+        </DataTable>
       )}
     </PageSection>
   );

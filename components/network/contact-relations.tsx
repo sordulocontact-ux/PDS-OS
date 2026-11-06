@@ -1,8 +1,16 @@
 import { ContractStateBadge } from "@/components/contracts/contract-state-badge";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
-import { SectionRow, SectionRows } from "@/components/ui/section-rows";
-import { ViewLink } from "@/components/ui/view-link";
+import {
+  DataTable,
+  DataTableBody,
+  DataTableCell,
+  DataTableHead,
+  DataTableHeader,
+  DataTableLink,
+  DataTableRow,
+  EMPTY_CELL,
+} from "@/components/ui/data-table";
 import { routes } from "@/lib/auth/redirects";
 import { asContractStatus } from "@/lib/contracts/types";
 import { network } from "@/lib/i18n/fr/network";
@@ -10,8 +18,6 @@ import type { NetworkContactDetail } from "@/lib/network/queries";
 import { rolesText } from "@/lib/network/types";
 
 const fr = { network };
-
-const linkClass = "font-semibold no-underline hover:underline";
 
 /** The contracts a contact is a party to, among those one may read. */
 export function ContactContracts({
@@ -30,25 +36,32 @@ export function ContactContracts({
       {contracts.length === 0 ? (
         <EmptyNote>{p.contractsEmpty}</EmptyNote>
       ) : (
-        <SectionRows label={p.contracts}>
-          {contracts.map((contract) => (
-            <SectionRow
-              key={contract.id}
-              title={
-                <ViewLink
-                  href={routes.contract(contract.id)}
-                  className={linkClass}
-                >
-                  {contract.title}
-                </ViewLink>
-              }
-              detail={contract.role}
-              badge={
-                <ContractStateBadge state={asContractStatus(contract.status)} />
-              }
-            />
-          ))}
-        </SectionRows>
+        <DataTable framed>
+          <DataTableHeader>
+            <DataTableHead>{p.columns.contract}</DataTableHead>
+            <DataTableHead hideBelow="sm">{p.columns.role}</DataTableHead>
+            <DataTableHead fill>{p.columns.state}</DataTableHead>
+          </DataTableHeader>
+          <DataTableBody>
+            {contracts.map((contract) => (
+              <DataTableRow key={contract.id}>
+                <DataTableCell>
+                  <DataTableLink href={routes.contract(contract.id)}>
+                    {contract.title}
+                  </DataTableLink>
+                </DataTableCell>
+                <DataTableCell hideBelow="sm" className="break-words">
+                  {contract.role || EMPTY_CELL}
+                </DataTableCell>
+                <DataTableCell fill>
+                  <ContractStateBadge
+                    state={asContractStatus(contract.status)}
+                  />
+                </DataTableCell>
+              </DataTableRow>
+            ))}
+          </DataTableBody>
+        </DataTable>
       )}
     </PageSection>
   );
@@ -71,22 +84,26 @@ export function ContactMembers({
       {members.length === 0 ? (
         <EmptyNote>{p.membersEmpty}</EmptyNote>
       ) : (
-        <SectionRows label={p.members}>
-          {members.map((member) => (
-            <SectionRow
-              key={member.id}
-              title={
-                <ViewLink
-                  href={routes.networkContact(member.id)}
-                  className={linkClass}
-                >
-                  {member.name}
-                </ViewLink>
-              }
-              detail={rolesText(member.roles) || null}
-            />
-          ))}
-        </SectionRows>
+        <DataTable framed>
+          <DataTableHeader>
+            <DataTableHead>{p.columns.name}</DataTableHead>
+            <DataTableHead fill>{p.columns.roles}</DataTableHead>
+          </DataTableHeader>
+          <DataTableBody>
+            {members.map((member) => (
+              <DataTableRow key={member.id}>
+                <DataTableCell>
+                  <DataTableLink href={routes.networkContact(member.id)}>
+                    {member.name}
+                  </DataTableLink>
+                </DataTableCell>
+                <DataTableCell fill className="break-words">
+                  {rolesText(member.roles) || EMPTY_CELL}
+                </DataTableCell>
+              </DataTableRow>
+            ))}
+          </DataTableBody>
+        </DataTable>
       )}
     </PageSection>
   );

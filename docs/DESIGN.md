@@ -242,6 +242,13 @@ sorties de la Distribution), le dossier du titre une liste sans filet. Les pièc
 perdent leur cadre dans une carte par la variante `in-[.section-card]:` (classe posée par
 `sectionCardClass`) : `FactList` passe en grille sans contour (faits côte à côte tant que la
 largeur le permet), `EmptyNote` en simple ligne grise, le journal sans traits.
+**Exception, les tableaux hors projet** (Sacha, 06/11/2026) : sur les pages hors d'un projet
+(fiche titre et fiche artiste du Catalogue, page de session studio, fiche contact du Réseau), un
+tableau dans une carte **garde son cadre, sa bande d'en-tête et sa marge de 16 px**
+(`DataTable framed`), exactement comme la liste des projets : sans marge, le survol d'une ligne
+collait au texte, et sans en-tête on ne savait plus ce que disait chaque colonne. Leurs listes
+de lignes (`SectionRows`, supprimé) sont devenues ces tableaux. Les pages d'un projet gardent le
+tableau sans cadre pour l'instant : Sacha les reprend à part.
 **Tuiles qui filtrent** (État du master) : une tuile de chiffres peut être le filtre de sa page
 (`StatTiles` `view`) ; active, elle passe à l'encre (contour `foreground`, fond `muted`), comme
 une pastille de filtre active, et un nouveau clic la retire.

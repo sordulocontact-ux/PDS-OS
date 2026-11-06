@@ -116,7 +116,7 @@ export function WorkFilesSection({
       {items.length === 0 ? (
         <EmptyNote>{canEdit ? t.empty : t.emptyReadOnly}</EmptyNote>
       ) : (
-        <DataTable>
+        <DataTable framed>
           <DataTableHeader>
             <DataTableHead>{t.columns.name}</DataTableHead>
             <DataTableHead hideBelow="sm">{t.columns.session}</DataTableHead>

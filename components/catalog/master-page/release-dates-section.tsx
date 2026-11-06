@@ -36,7 +36,7 @@ export function ReleaseDatesSection({
       {error ? (
         <FormMessage kind="error">{fr.masterPage.loadError}</FormMessage>
       ) : (
-        <DataTable>
+        <DataTable framed>
           <DataTableHeader>
             <DataTableHead>{t.project}</DataTableHead>
             <DataTableHead>{t.target}</DataTableHead>

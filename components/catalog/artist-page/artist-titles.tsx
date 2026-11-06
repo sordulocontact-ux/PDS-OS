@@ -6,13 +6,21 @@ import { TitleAudioState } from "@/components/catalog/title/title-audio-state";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
-import { ViewLink } from "@/components/ui/view-link";
+import {
+  DataTable,
+  DataTableBody,
+  DataTableCell,
+  DataTableHead,
+  DataTableHeader,
+  DataTableLink,
+  DataTableMedia,
+  DataTableRow,
+  EMPTY_CELL,
+} from "@/components/ui/data-table";
 import { routes } from "@/lib/auth/redirects";
 import { variantText } from "@/lib/catalog/title-rules";
 import type { MasterRow } from "@/lib/catalog/types";
 import { catalog } from "@/lib/i18n/fr/catalog";
-
-import { SectionRow, SectionRows } from "@/components/ui/section-rows";
 
 const fr = { catalog };
 
@@ -60,35 +68,38 @@ export function ArtistTitles({
       ) : masters.length === 0 ? (
         <EmptyNote>{fr.catalog.artist.noMasters}</EmptyNote>
       ) : (
-        <SectionRows label={t.title}>
-          {masters.map((m) => {
-            const variant = variantText(m);
-            return (
-              <SectionRow
-                key={m.id}
-                title={
-                  <ViewLink
-                    href={routes.master(m.id)}
-                    className="font-semibold no-underline hover:underline"
-                  >
-                    {variant ? `${m.title} (${variant})` : m.title}
-                  </ViewLink>
-                }
-                detail={
-                  m.projects.length > 0
-                    ? t.projects(m.projects.map((p) => p.title).join(", "))
-                    : t.noProject
-                }
-                badge={
+        <DataTable framed>
+          <DataTableHeader>
+            <DataTableHead>{t.columns.title}</DataTableHead>
+            <DataTableHead hideBelow="sm">{t.columns.audio}</DataTableHead>
+            <DataTableHead fill>{t.columns.projects}</DataTableHead>
+          </DataTableHeader>
+          <DataTableBody>
+            {masters.map((m) => (
+              <DataTableRow key={m.id}>
+                <DataTableCell>
+                  <DataTableMedia
+                    title={
+                      <DataTableLink href={routes.master(m.id)}>
+                        {m.title}
+                      </DataTableLink>
+                    }
+                    subtitle={variantText(m)}
+                  />
+                </DataTableCell>
+                <DataTableCell hideBelow="sm">
                   <TitleAudioState
                     state={m.audioState}
                     validated={m.finalValidatedAt !== null}
                   />
-                }
-              />
-            );
-          })}
-        </SectionRows>
+                </DataTableCell>
+                <DataTableCell fill className="break-words">
+                  {m.projects.map((p) => p.title).join(", ") || EMPTY_CELL}
+                </DataTableCell>
+              </DataTableRow>
+            ))}
+          </DataTableBody>
+        </DataTable>
       )}
     </PageSection>
   );

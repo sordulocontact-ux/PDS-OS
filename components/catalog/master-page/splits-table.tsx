@@ -32,7 +32,7 @@ export function SplitsTable({
 }) {
   const t = fr.masterPage.splits;
   return (
-    <DataTable>
+    <DataTable framed>
       <DataTableHeader>
         <DataTableHead>{t.columns.party}</DataTableHead>
         <DataTableHead hideBelow="sm">{t.columns.role}</DataTableHead>

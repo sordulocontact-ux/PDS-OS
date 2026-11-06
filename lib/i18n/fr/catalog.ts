@@ -119,12 +119,12 @@ export const catalog = {
       mine: (todo: string) => `À vous : ${todo}`,
       nobody: (todo: string) => `Personne de désigné : ${todo}`,
       nothing: "Rien en attente",
+      columns: { project: "Projet", date: "Date", status: "Où il en est" },
     },
     titles: {
       title: "Titres",
       description: "Les titres qui le créditent, avec leur état audio.",
-      projects: (titles: string) => `Projet ${titles}`,
-      noProject: "Aucun projet",
+      columns: { title: "Titre", audio: "Audio", projects: "Projets" },
     },
   },
 

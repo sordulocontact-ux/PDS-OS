@@ -2,9 +2,18 @@ import { RemindContactButton } from "@/components/network/remind-contact-button"
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
-import { SectionRow, SectionRows } from "@/components/ui/section-rows";
+import {
+  DataTable,
+  DataTableBody,
+  DataTableCell,
+  DataTableHead,
+  DataTableHeader,
+  DataTableLink,
+  DataTableMedia,
+  DataTableRow,
+  EMPTY_CELL,
+} from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
 import { network } from "@/lib/i18n/fr/network";
 import {
@@ -21,8 +30,6 @@ const fr = { network };
 // The key of an item, as its role and its awaited gesture are named.
 const keyOf = (i: ContactProjectItem) =>
   i.kind === "master" ? i.step : i.kind;
-
-const linkClass = "font-semibold no-underline hover:underline";
 
 /**
  * What waits for a contact across PDS's projects (proto des pages,
@@ -45,6 +52,7 @@ export function ContactAwaited({
   projects: ContactProject[];
 }) {
   const p = fr.network.page;
+  const c = p.columns;
   const first = name.split(/\s+/)[0] ?? name;
   const awaited = projects
     .flatMap((project) =>
@@ -60,55 +68,74 @@ export function ContactAwaited({
       title={p.awaited(name)}
       description={p.awaitedDescription}
     >
-      <SectionRows label={p.awaited(name)}>
-        {awaited.map(({ project, item }) => {
-          const todo = p.awaitedTodo[keyOf(item)] ?? keyOf(item);
-          const due = item.due ? formatDate(item.due) : null;
-          const link = project.link;
-          return (
-            <SectionRow
-              key={`${item.kind}-${item.id}`}
-              title={<span className="font-semibold">{todo}</span>}
-              detail={[
-                project.title,
-                due && p.awaitedDue(due),
-                link?.sentAt && p.linkSent(formatDate(link.sentAt)),
-                link?.sentAt &&
-                  (link.openedAt
-                    ? p.linkOpened(formatDate(link.openedAt))
-                    : p.linkNotOpened),
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-              badge={
-                canEmail && email ? (
-                  <RemindContactButton
-                    projectId={project.projectId}
-                    contactId={contactId}
-                    label={p.remind}
-                    ariaLabel={p.remindLabel(todo)}
-                  />
-                ) : email ? (
-                  <a
-                    href={mailtoHref(
-                      email,
-                      p.remindSubject(todo, project.title),
-                      p.remindBody(first, todo, project.title, due),
-                    )}
-                    aria-label={p.remindLabel(todo)}
-                    className={buttonVariants({
-                      variant: "outline",
-                      size: "sm",
-                    })}
-                  >
-                    <ButtonRoll>{p.remind}</ButtonRoll>
-                  </a>
-                ) : null
-              }
-            />
-          );
-        })}
-      </SectionRows>
+      <DataTable framed>
+        <DataTableHeader>
+          <DataTableHead>{c.todo}</DataTableHead>
+          <DataTableHead hideBelow="sm">{c.project}</DataTableHead>
+          <DataTableHead hideBelow="md">{c.due}</DataTableHead>
+          <DataTableHead hideBelow="lg">{c.link}</DataTableHead>
+          <DataTableHead fill align="end">
+            <span className="sr-only">{c.actions}</span>
+          </DataTableHead>
+        </DataTableHeader>
+        <DataTableBody>
+          {awaited.map(({ project, item }) => {
+            const todo = p.awaitedTodo[keyOf(item)] ?? keyOf(item);
+            const due = item.due ? formatDate(item.due) : null;
+            const link = project.link;
+            return (
+              <DataTableRow key={`${item.kind}-${item.id}`}>
+                <DataTableCell className="break-words">{todo}</DataTableCell>
+                <DataTableCell hideBelow="sm" className="break-words">
+                  {project.title}
+                </DataTableCell>
+                <DataTableCell hideBelow="md" className="tabular-nums">
+                  {due ?? EMPTY_CELL}
+                </DataTableCell>
+                <DataTableCell hideBelow="lg">
+                  {link?.sentAt ? (
+                    <DataTableMedia
+                      title={p.linkSentOn(formatDate(link.sentAt))}
+                      subtitle={
+                        link.openedAt
+                          ? p.linkOpened(formatDate(link.openedAt))
+                          : p.linkNotOpened
+                      }
+                    />
+                  ) : (
+                    EMPTY_CELL
+                  )}
+                </DataTableCell>
+                <DataTableCell fill align="end">
+                  {canEmail && email ? (
+                    <RemindContactButton
+                      projectId={project.projectId}
+                      contactId={contactId}
+                      label={p.remind}
+                      ariaLabel={p.remindLabel(todo)}
+                    />
+                  ) : email ? (
+                    <a
+                      href={mailtoHref(
+                        email,
+                        p.remindSubject(todo, project.title),
+                        p.remindBody(first, todo, project.title, due),
+                      )}
+                      aria-label={p.remindLabel(todo)}
+                      className={buttonVariants({
+                        variant: "outline",
+                        size: "sm",
+                      })}
+                    >
+                      <ButtonRoll>{p.remind}</ButtonRoll>
+                    </a>
+                  ) : null}
+                </DataTableCell>
+              </DataTableRow>
+            );
+          })}
+        </DataTableBody>
+      </DataTable>
     </PageSection>
   );
 }
@@ -130,46 +157,49 @@ export function ContactInProjects({
       {projects.length === 0 ? (
         <EmptyNote>{p.projectsEmpty}</EmptyNote>
       ) : (
-        <SectionRows label={p.projects}>
-          {projects.map((project) => {
-            const waiting = project.items.filter(isAwaited).length;
-            const roles = [
-              ...project.team,
-              contactRoleLine(
-                project.items.filter((i) => i.kind !== "call").map(keyOf),
-              ),
-            ].filter(Boolean);
-            if (
-              roles.length === 0 &&
-              project.items.some((i) => i.kind === "call")
-            )
-              roles.push(p.invitedToCall);
-            return (
-              <SectionRow
-                key={project.projectId}
-                title={
-                  <>
-                    <ViewLink
-                      href={routes.project(project.projectId)}
-                      className={linkClass}
-                    >
-                      {project.title}
-                    </ViewLink>
-                    {roles.length > 0 && ` · ${roles.join(", ")}`}
-                  </>
-                }
-                detail={waiting > 0 ? p.projectAwaited(waiting) : null}
-                badge={
-                  project.artist && (
-                    <StatusBadge tone="neutral" size="sm">
-                      {project.artist}
-                    </StatusBadge>
-                  )
-                }
-              />
-            );
-          })}
-        </SectionRows>
+        <DataTable framed>
+          <DataTableHeader>
+            <DataTableHead>{p.columns.project}</DataTableHead>
+            <DataTableHead hideBelow="sm">{p.columns.artist}</DataTableHead>
+            <DataTableHead fill>{p.columns.role}</DataTableHead>
+          </DataTableHeader>
+          <DataTableBody>
+            {projects.map((project) => {
+              const waiting = project.items.filter(isAwaited).length;
+              const roles = [
+                ...project.team,
+                contactRoleLine(
+                  project.items.filter((i) => i.kind !== "call").map(keyOf),
+                ),
+              ].filter(Boolean);
+              if (
+                roles.length === 0 &&
+                project.items.some((i) => i.kind === "call")
+              )
+                roles.push(p.invitedToCall);
+              return (
+                <DataTableRow key={project.projectId}>
+                  <DataTableCell>
+                    <DataTableMedia
+                      title={
+                        <DataTableLink href={routes.project(project.projectId)}>
+                          {project.title}
+                        </DataTableLink>
+                      }
+                      subtitle={waiting > 0 ? p.projectAwaited(waiting) : null}
+                    />
+                  </DataTableCell>
+                  <DataTableCell hideBelow="sm" className="break-words">
+                    {project.artist ?? EMPTY_CELL}
+                  </DataTableCell>
+                  <DataTableCell fill className="break-words">
+                    {roles.join(", ") || EMPTY_CELL}
+                  </DataTableCell>
+                </DataTableRow>
+              );
+            })}
+          </DataTableBody>
+        </DataTable>
       )}
     </PageSection>
   );
@@ -192,23 +222,33 @@ export function ContactFiches({ projects }: { projects: ContactProject[] }) {
       title={p.fiche}
       description={p.ficheDescription}
     >
-      <SectionRows label={p.fiche}>
-        {fiches.map(({ project, item }) => (
-          <SectionRow
-            key={item.id}
-            title={<span className="font-semibold">{project.title}</span>}
-            detail={p.ficheSentOn(formatDate(item.at))}
-            badge={
-              <StatusBadge
-                tone={item.state === "done" ? "success" : "info"}
-                size="sm"
-              >
-                {item.state === "done" ? p.ficheDone : p.ficheTodo}
-              </StatusBadge>
-            }
-          />
-        ))}
-      </SectionRows>
+      <DataTable framed>
+        <DataTableHeader>
+          <DataTableHead>{p.columns.project}</DataTableHead>
+          <DataTableHead hideBelow="sm">{p.columns.sentOn}</DataTableHead>
+          <DataTableHead fill>{p.columns.state}</DataTableHead>
+        </DataTableHeader>
+        <DataTableBody>
+          {fiches.map(({ project, item }) => (
+            <DataTableRow key={item.id}>
+              <DataTableCell className="break-words">
+                {project.title}
+              </DataTableCell>
+              <DataTableCell hideBelow="sm" className="tabular-nums">
+                {formatDate(item.at)}
+              </DataTableCell>
+              <DataTableCell fill>
+                <StatusBadge
+                  tone={item.state === "done" ? "success" : "info"}
+                  size="sm"
+                >
+                  {item.state === "done" ? p.ficheDone : p.ficheTodo}
+                </StatusBadge>
+              </DataTableCell>
+            </DataTableRow>
+          ))}
+        </DataTableBody>
+      </DataTable>
     </PageSection>
   );
 }

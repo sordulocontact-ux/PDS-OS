@@ -12,8 +12,11 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   DataTable,
   DataTableActionsCell,
+  DataTableActionsHead,
   DataTableBody,
   DataTableCell,
+  DataTableHead,
+  DataTableHeader,
   DataTableLink,
   DataTableRow,
 } from "@/components/ui/data-table";
@@ -147,7 +150,12 @@ export function TitlesSection({
       {session.titles.length === 0 ? (
         <EmptyNote>{t.empty}</EmptyNote>
       ) : (
-        <DataTable>
+        <DataTable framed>
+          <DataTableHeader>
+            <DataTableHead fill>{t.columns.title}</DataTableHead>
+            <DataTableHead>{t.columns.status}</DataTableHead>
+            {canEdit && <DataTableActionsHead label={fr.records.menu.column} />}
+          </DataTableHeader>
           <DataTableBody>
             {session.titles.map((title) => (
               <DataTableRow key={title.id}>

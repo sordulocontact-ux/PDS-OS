@@ -103,7 +103,7 @@ export function SessionsSection({
       {sessions.length === 0 ? (
         <EmptyNote>{canEdit ? t.emptyBody : t.emptyBodyReadOnly}</EmptyNote>
       ) : (
-        <DataTable>
+        <DataTable framed>
           <DataTableHeader>
             <DataTableHead>{t.fields.kind}</DataTableHead>
             <DataTableHead hideBelow="sm">{t.fields2.status}</DataTableHead>

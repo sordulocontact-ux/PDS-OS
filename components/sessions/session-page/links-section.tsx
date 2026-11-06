@@ -11,8 +11,11 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   DataTable,
   DataTableActionsCell,
+  DataTableActionsHead,
   DataTableBody,
   DataTableCell,
+  DataTableHead,
+  DataTableHeader,
   DataTableLink,
   DataTableMedia,
   DataTableRow,
@@ -114,7 +117,11 @@ export function LinksSection({
       {links.length === 0 ? (
         <EmptyNote>{t.empty}</EmptyNote>
       ) : (
-        <DataTable>
+        <DataTable framed>
+          <DataTableHeader>
+            <DataTableHead fill>{t.column}</DataTableHead>
+            {canEdit && <DataTableActionsHead label={fr.records.menu.column} />}
+          </DataTableHeader>
           <DataTableBody>
             {links.map((link) => (
               <DataTableRow key={link.id}>

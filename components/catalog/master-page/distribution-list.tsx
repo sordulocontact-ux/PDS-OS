@@ -31,7 +31,7 @@ export function DistributionList({
   const t = fr.masterPage.distribution;
   const platforms: Record<string, string> = fr.release.platforms;
   return (
-    <DataTable>
+    <DataTable framed>
       <DataTableHeader>
         <DataTableHead>{t.columns.release}</DataTableHead>
         <DataTableHead hideBelow="sm">{t.columns.status}</DataTableHead>

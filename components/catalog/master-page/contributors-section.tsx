@@ -57,7 +57,7 @@ export function ContributorsSection({
       {people.length === 0 ? (
         <EmptyNote>{canEdit ? t.emptyBody : t.emptyBodyReadOnly}</EmptyNote>
       ) : (
-        <DataTable>
+        <DataTable framed>
           <DataTableHeader>
             <DataTableHead>{t.columns.name}</DataTableHead>
             <DataTableHead>{t.columns.role}</DataTableHead>

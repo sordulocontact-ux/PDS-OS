@@ -59,7 +59,7 @@ export function TracksSection({
       {tracks.length === 0 ? (
         <EmptyNote>{t.empty}</EmptyNote>
       ) : (
-        <DataTable>
+        <DataTable framed>
           <DataTableHeader>
             <DataTableHead>{t.columns.name}</DataTableHead>
             <DataTableHead hideBelow="sm">{t.columns.performer}</DataTableHead>

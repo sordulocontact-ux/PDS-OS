@@ -1,8 +1,17 @@
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
-import { SectionRow, SectionRows } from "@/components/ui/section-rows";
+import {
+  DataTable,
+  DataTableBody,
+  DataTableCell,
+  DataTableHead,
+  DataTableHeader,
+  DataTableLink,
+  DataTableMedia,
+  DataTableRow,
+  EMPTY_CELL,
+} from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { ViewLink } from "@/components/ui/view-link";
 import { formatMetric } from "@/lib/activations/totals";
 import { activationAgency } from "@/lib/i18n/fr/activation-agency";
 import { activationWork } from "@/lib/i18n/fr/activation-work";
@@ -56,29 +65,38 @@ export function ContactMarketing({
           title={t.campaigns}
           description={t.campaignsDescription}
         >
-          <SectionRows label={t.campaigns}>
-            {campaigns.map((c) => (
-              <SectionRow
-                key={c.key}
-                title={
-                  <ViewLink
-                    href={c.href}
-                    className="font-semibold no-underline hover:underline"
-                  >
-                    {c.title}
-                  </ViewLink>
-                }
-                detail={`${c.projectTitle} · ${c.via === "agency" ? t.campaignAgency : t.campaignTarget}`}
-                badge={
-                  stateLabel(c) ? (
-                    <StatusBadge size="sm" tone="neutral">
-                      {stateLabel(c)}
-                    </StatusBadge>
-                  ) : undefined
-                }
-              />
-            ))}
-          </SectionRows>
+          <DataTable framed>
+            <DataTableHeader>
+              <DataTableHead>{t.columns.campaign}</DataTableHead>
+              <DataTableHead hideBelow="sm">{t.columns.project}</DataTableHead>
+              <DataTableHead hideBelow="md">{t.columns.via}</DataTableHead>
+              <DataTableHead fill>{t.columns.state}</DataTableHead>
+            </DataTableHeader>
+            <DataTableBody>
+              {campaigns.map((c) => (
+                <DataTableRow key={c.key}>
+                  <DataTableCell>
+                    <DataTableLink href={c.href}>{c.title}</DataTableLink>
+                  </DataTableCell>
+                  <DataTableCell hideBelow="sm" className="break-words">
+                    {c.projectTitle}
+                  </DataTableCell>
+                  <DataTableCell hideBelow="md">
+                    {c.via === "agency" ? t.campaignAgency : t.campaignTarget}
+                  </DataTableCell>
+                  <DataTableCell fill>
+                    {stateLabel(c) ? (
+                      <StatusBadge size="sm" tone="neutral">
+                        {stateLabel(c)}
+                      </StatusBadge>
+                    ) : (
+                      EMPTY_CELL
+                    )}
+                  </DataTableCell>
+                </DataTableRow>
+              ))}
+            </DataTableBody>
+          </DataTable>
         </PageSection>
       )}
       <PageSection
@@ -95,47 +113,60 @@ export function ContactMarketing({
         {observations.length === 0 ? (
           <EmptyNote>{t.observationsEmpty}</EmptyNote>
         ) : (
-          <SectionRows label={t.observations}>
-            {observations.map((o) => (
-              <SectionRow
-                key={o.id}
-                title={
-                  <span className={o.invalidatedAt ? "opacity-60" : undefined}>
-                    {t.observationKinds[o.kind]} ·{" "}
-                    <span className="font-semibold">
-                      {o.kind === "category"
-                        ? o.textValue
-                        : formatMetric(
-                            o.value ?? 0,
-                            (o.unit ?? "count") as "count",
-                          )}
-                    </span>
-                  </span>
-                }
-                detail={[
-                  o.platform,
-                  formatDate(o.observedOn),
-                  t.observationSources[
-                    o.source as keyof typeof t.observationSources
-                  ],
-                  o.invalidatedAt
-                    ? `${t.invalidatedLabel} : ${o.invalidationReason}`
-                    : o.note,
-                ]
-                  .filter(Boolean)
-                  .join(" · ")}
-                badge={
-                  canWrite &&
-                  !o.invalidatedAt && (
-                    <InvalidateObservationButton
-                      contactId={contactId}
-                      observationId={o.id}
+          <DataTable framed>
+            <DataTableHeader>
+              <DataTableHead>{t.columns.observation}</DataTableHead>
+              <DataTableHead hideBelow="sm">{t.columns.date}</DataTableHead>
+              <DataTableHead hideBelow="md">{t.columns.source}</DataTableHead>
+              <DataTableHead hideBelow="lg">{t.columns.note}</DataTableHead>
+              <DataTableHead fill align="end">
+                <span className="sr-only">{t.columns.actions}</span>
+              </DataTableHead>
+            </DataTableHeader>
+            <DataTableBody>
+              {observations.map((o) => (
+                <DataTableRow
+                  key={o.id}
+                  className={o.invalidatedAt ? "opacity-60" : undefined}
+                >
+                  <DataTableCell>
+                    <DataTableMedia
+                      title={`${t.observationKinds[o.kind]} · ${
+                        o.kind === "category"
+                          ? o.textValue
+                          : formatMetric(
+                              o.value ?? 0,
+                              (o.unit ?? "count") as "count",
+                            )
+                      }`}
+                      subtitle={o.platform}
                     />
-                  )
-                }
-              />
-            ))}
-          </SectionRows>
+                  </DataTableCell>
+                  <DataTableCell hideBelow="sm" className="tabular-nums">
+                    {formatDate(o.observedOn)}
+                  </DataTableCell>
+                  <DataTableCell hideBelow="md">
+                    {t.observationSources[
+                      o.source as keyof typeof t.observationSources
+                    ] ?? EMPTY_CELL}
+                  </DataTableCell>
+                  <DataTableCell hideBelow="lg" className="break-words">
+                    {(o.invalidatedAt
+                      ? `${t.invalidatedLabel} : ${o.invalidationReason}`
+                      : o.note) || EMPTY_CELL}
+                  </DataTableCell>
+                  <DataTableCell fill align="end">
+                    {canWrite && !o.invalidatedAt && (
+                      <InvalidateObservationButton
+                        contactId={contactId}
+                        observationId={o.id}
+                      />
+                    )}
+                  </DataTableCell>
+                </DataTableRow>
+              ))}
+            </DataTableBody>
+          </DataTable>
         )}
       </PageSection>
     </>
