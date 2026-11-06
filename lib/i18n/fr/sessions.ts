@@ -96,7 +96,6 @@ export const sessions = {
       "Qui était là, les maquettes réalisées et ce qu'il faut retenir.",
     write: "Rédiger le compte rendu",
     edit: "Modifier le compte rendu",
-    lead: "À vous",
     why: "La séance a eu lieu : racontez-la pendant que tout est frais.",
     waitingFor: (name: string) => `À rédiger par ${name}`,
     notYet: "Le compte rendu se rédige après la séance.",

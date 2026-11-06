@@ -9,7 +9,6 @@ import { MasterForm } from "@/components/catalog/master-page/master-form";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { LoadedFormButton } from "@/components/ui/loaded-form-button";
-import { StatusBadge } from "@/components/ui/status-badge";
 import { Timestamp } from "@/components/ui/timestamp";
 import type { PrepPerson } from "@/lib/calls/prep/types";
 import { sessions } from "@/lib/i18n/fr/sessions";
@@ -88,7 +87,6 @@ export function ReportSection({
         <div className="flex flex-col items-start gap-3">
           {mine ? (
             <>
-              <StatusBadge tone="action">{t.lead}</StatusBadge>
               <p>{t.why}</p>
               {write(true)}
             </>
