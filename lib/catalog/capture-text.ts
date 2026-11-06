@@ -14,6 +14,20 @@ export const captureKey = (text: string) =>
 // "dj" or "jo" would match half of any discography.
 export const MIN_CLUE_KEY = 4;
 
+/**
+ * The names PO proposed that are a piece of a written one (« Theodora » in
+ * « theodorabosslady »), trimmed: a name it would have made up is dropped.
+ */
+export function piecesOf(proposed: string[], written: string[]): string[] {
+  return proposed
+    .map((n) => n.trim())
+    .filter(
+      (n) =>
+        captureKey(n).length >= MIN_CLUE_KEY &&
+        written.some((w) => captureKey(w).includes(captureKey(n))),
+    );
+}
+
 // Parts of a link that say nothing about the artist.
 const NOISE = new Set([
   "www",

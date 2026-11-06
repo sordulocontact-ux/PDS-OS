@@ -84,7 +84,10 @@ export const laboCaptures = {
     use: "Utiliser ce lien",
     pending: "Lecture sur Deezer…",
     open: "Pas le bon compte Deezer ?",
+    // No account found: nothing to call "not the right one".
+    openNone: "Indiquer son compte Deezer",
     close: "Garder ce compte",
+    closeNone: "Fermer",
     errors: {
       invalid_link:
         "Ce n'est pas le lien d'une page artiste Deezer (deezer.com/artist/…).",

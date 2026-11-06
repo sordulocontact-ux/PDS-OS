@@ -3,7 +3,7 @@ import "server-only";
 import { z } from "zod";
 
 import { fetchJson, IntegrationError } from "@/lib/integrations/http";
-import { wikidataItem } from "@/lib/integrations/wikipedia";
+import { wikidataItem, wikidataItemWith } from "@/lib/integrations/wikipedia";
 import {
   asHandle,
   instagramUrl,
@@ -165,11 +165,10 @@ const claimsSchema = z.object({
   ),
 });
 
-// Wikidata: P2003 = Instagram username, P7085 = TikTok username, P1902 =
-// Spotify artist id.
-async function fromWikidata(deezerId: number): Promise<SocialHandles> {
-  const item = await wikidataItem(deezerId);
-  if (!item) return NONE;
+// The first value of each property of a Wikidata item, as text.
+async function wikidataClaims(
+  item: string,
+): Promise<(property: string) => string | null> {
   const url = new URL("https://www.wikidata.org/w/api.php");
   url.search = new URLSearchParams({
     action: "wbgetentities",
@@ -179,16 +178,42 @@ async function fromWikidata(deezerId: number): Promise<SocialHandles> {
   }).toString();
   const parsed = claimsSchema.safeParse(await fetchJson("wikidata", url));
   const claims = parsed.success ? parsed.data.entities[item]?.claims : null;
-  const first = (property: string) => {
+  return (property) => {
     const value = claims?.[property]?.[0]?.mainsnak.datavalue?.value;
     return typeof value === "string" ? value : null;
   };
+}
+
+// Wikidata: P2003 = Instagram username, P7085 = TikTok username, P1902 =
+// Spotify artist id.
+async function fromWikidata(deezerId: number): Promise<SocialHandles> {
+  const item = await wikidataItem(deezerId);
+  if (!item) return NONE;
+  const first = await wikidataClaims(item);
   const spotify = first("P1902");
   return {
     tiktok: asHandle(first("P7085")),
     instagram: asHandle(first("P2003")),
     spotify: spotify && isSpotifyId(spotify) ? spotify : null,
   };
+}
+
+const HANDLE_PROPERTY = { tiktok: "P7085", instagram: "P2003" } as const;
+
+/**
+ * The Deezer profile Wikidata links to a TikTok or Instagram account: the
+ * other way round from `socialsOfDeezerArtist`, by the account, never by
+ * name (Labo: @theodorabosslady → Theodora, whatever the handle says).
+ * Null when no item, or several, hold that account.
+ */
+export async function deezerIdOfAccount(
+  network: "tiktok" | "instagram",
+  handle: string,
+): Promise<number | null> {
+  const item = await wikidataItemWith(HANDLE_PROPERTY[network], handle);
+  if (!item) return null;
+  const id = (await wikidataClaims(item))("P2722");
+  return id && /^\d{1,12}$/.test(id) ? Number(id) : null;
 }
 
 export type LinkedSocials = Record<

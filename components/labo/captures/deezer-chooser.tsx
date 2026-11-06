@@ -28,7 +28,8 @@ type Chosen = Extract<ChosenDeezer, { ok: true }>;
  * Choosing a person's Deezer account by hand (Labo): the homonyms, PO's lean
  * first with its reasoning, each with its Deezer bio and proofs, then any
  * other artist page pasted as a link. Open when the code could not decide;
- * otherwise behind « Pas le bon compte Deezer ? ».
+ * otherwise behind « Pas le bon compte Deezer ? » (« Indiquer son compte
+ * Deezer » when none was found), a secondary button.
  */
 export function DeezerChooser({
   artist,
@@ -65,12 +66,12 @@ export function DeezerChooser({
     return (
       <Button
         type="button"
-        variant="ghost"
+        variant="secondary"
         size="sm"
         className="justify-self-start"
         onClick={() => setOpen(true)}
       >
-        {t.open}
+        {artist.account ? t.open : t.openNone}
       </Button>
     );
 
@@ -151,7 +152,7 @@ export function DeezerChooser({
           className="justify-self-start"
           onClick={() => setOpen(false)}
         >
-          {t.close}
+          {artist.account ? t.close : t.closeNone}
         </Button>
       )}
     </section>

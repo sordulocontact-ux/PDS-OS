@@ -43,17 +43,29 @@ const summarySchema = z.object({
   content_urls: z.object({ desktop: z.object({ page: z.url() }) }),
 });
 
-export async function wikidataItem(deezerId: number): Promise<string | null> {
+export function wikidataItem(deezerId: number): Promise<string | null> {
+  return wikidataItemWith("P2722", String(deezerId));
+}
+
+/**
+ * The one Wikidata item holding `value` for `property` (P2722 Deezer artist
+ * id, P2003 Instagram username, P7085 TikTok username); null when none or
+ * several claim it.
+ */
+export async function wikidataItemWith(
+  property: string,
+  value: string,
+): Promise<string | null> {
   const url = new URL(WIKIDATA);
   url.search = new URLSearchParams({
     action: "query",
     list: "search",
-    srsearch: `haswbstatement:P2722=${deezerId}`,
+    srsearch: `haswbstatement:${property}=${value}`,
     srprop: "",
     format: "json",
   }).toString();
   const parsed = searchSchema.safeParse(await fetchJson("wikidata", url));
-  // Several items claiming the same profile: ambiguous, better nothing.
+  // Several items claiming the same value: ambiguous, better nothing.
   if (!parsed.success || parsed.data.query.search.length !== 1) return null;
   return parsed.data.query.search[0].title;
 }

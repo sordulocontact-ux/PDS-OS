@@ -2,6 +2,11 @@ import "server-only";
 
 import { fetchText } from "@/lib/integrations/http";
 import {
+  instagramPicture,
+  socialImageUrl,
+  tiktokAvatar,
+} from "@/lib/integrations/social-page";
+import {
   MAX_NETWORK_PICTURE_BYTES,
   NETWORK_PICTURE_EXTENSIONS,
 } from "@/lib/network/picture-rules";
@@ -18,47 +23,6 @@ import { instagramUrl, tiktokUrl } from "@/lib/network/socials";
  */
 
 export type SocialPicture = { bytes: Uint8Array; type: string };
-
-// Only the platforms' own image hosts are downloaded from.
-const IMAGE_HOSTS = [
-  /\.tiktokcdn(-[a-z]+)?\.com$/,
-  /\.cdninstagram\.com$/,
-  /\.fbcdn\.net$/,
-];
-
-function imageUrl(value: string): URL | null {
-  try {
-    const url = new URL(value);
-    return url.protocol === "https:" &&
-      IMAGE_HOSTS.some((host) => host.test(url.hostname))
-      ? url
-      : null;
-  } catch {
-    return null;
-  }
-}
-
-// "https://…" as written in TikTok's page data.
-function unescapeJson(value: string): string {
-  return value.replace(/\\u([0-9a-f]{4})/gi, (_, code: string) =>
-    String.fromCharCode(parseInt(code, 16)),
-  );
-}
-
-function tiktokAvatar(html: string): string | null {
-  // 720 px is plenty for an avatar; the 1080 px one as a fallback.
-  for (const key of ["avatarMedium", "avatarLarger", "avatarThumb"]) {
-    const match = new RegExp(`"${key}":"([^"]+)"`).exec(html);
-    if (match) return unescapeJson(match[1]);
-  }
-  return null;
-}
-
-function instagramAvatar(html: string): string | null {
-  const tag = /<meta[^>]+property="og:image"[^>]*>/i.exec(html)?.[0];
-  const content = tag && /content="([^"]+)"/i.exec(tag)?.[1];
-  return content ? content.replace(/&amp;/g, "&") : null;
-}
 
 async function download(url: URL): Promise<SocialPicture | null> {
   let response: Response;
@@ -98,7 +62,7 @@ export async function socialPicture(
     return null;
   }
   const found =
-    platform === "tiktok" ? tiktokAvatar(html) : instagramAvatar(html);
-  const url = found ? imageUrl(found) : null;
+    platform === "tiktok" ? tiktokAvatar(html) : instagramPicture(html);
+  const url = socialImageUrl(found);
   return url ? download(url) : null;
 }

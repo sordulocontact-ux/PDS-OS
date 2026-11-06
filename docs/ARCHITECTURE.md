@@ -7079,20 +7079,43 @@ sans un clic : « Ajouter au Réseau » (ci-dessous).
   servir de banc : il n'atteint ni Mistral ni l'API Deezer (réseau bloqué).
 - **Liens** (05/11/2026, demande de Sacha : partager au Repérage depuis le téléphone,
   `lib/catalog/link-artist.ts`, route `POST /api/catalog/link-artist`, champ `CaptureLinkForm`) :
-  un lien TikTok ou Instagram donne directement le compte, **sans modèle** (aucune requête de PO
-  sauf le départage des homonymes) : `tiktok.com/@x` et ses vidéos ; un lien court
+  un lien TikTok ou Instagram donne directement le compte, **sans modèle** (PO ne sert ensuite
+  qu'au nom d'artiste caché dans le pseudo et au départage des homonymes, voir plus bas) : `tiktok.com/@x` et ses vidéos ; un lien court
   (`vm.tiktok.com`, `vt.tiktok.com`, `tiktok.com/t/`) suivi par ses redirections, vers TikTok
   seulement ; une vidéo sans pseudo (`/@/video/<id>`) demandée à l'oEmbed ; `instagram.com/<x>`
   et ses stories. Un reel ou une publication Instagram ne dit pas qui l'a publié (l'oEmbed
   d'Instagram exige une application Meta et un jeton) : message clair, capture conseillée. Le
   compte suit ensuite la même chaîne qu'une capture (`findArtists`), source « dans le lien
-  partagé » ; nom affiché = celui du profil TikTok ; « Ajouter au Réseau » note « Repéré sur
+  partagé » ; « Ajouter au Réseau » note « Repéré sur
   Instagram » pour un lien Instagram. Un lien collé hors d'un champ (⌘V) est lu aussi.
   `?url=<lien>` lit le lien à l'ouverture et `?coller=1` met en tête `ClipboardPasteButton`
   (lecture du presse-papiers sur un geste, seule voie sur iPhone) : c'est ce qu'ouvre le
   **raccourci iPhone** (`docs/RACCOURCI-REPERAGE.md`). Sur téléphone, ce bouton remplace le
   rappel ⌘ V. La connexion garde la page demandée (`?next=` posé par le proxy,
   `safeReturnPath`, pages `/app/…` seulement) : un partage reçu déconnecté ne se perd pas.
+- **Nom d'artiste et photo d'un lien** (06/11/2026, Sacha : « theodora est quand même ultra
+  connue », lien `instagram.com/theodorabosslady` resté « Pas sur Deezer ») : le pseudo seul ne
+  porte pas le nom d'artiste. Trois ajouts, dans cet ordre :
+  1. `confirmAccounts` = `confirmTikTok` puis `confirmInstagram` (`lib/catalog/capture-socials.ts`) :
+     sans photo TikTok, la page publique Instagram (`lib/integrations/instagram-profile.ts`, balises
+     Open Graph, parseurs purs `lib/integrations/social-page.ts` partagés avec `social-picture.ts`)
+     donne le **nom affiché** (« Theodora Miss KITOKO », ajouté aux noms) et la **photo de profil**.
+     `CaptureArtist.pictureUrl` = avatar TikTok, sinon Instagram : lien signé de l'hébergeur d'images
+     de la plateforme (liste fermée, `socialImageUrl`), affiché, jamais enregistré (la fiche du Réseau
+     copie toujours son fichier à l'enregistrement). Carte d'un lien : la photo remplace l'icône de
+     lien (initiales sans photo) ; personnes d'une capture : avatar 40 px devant le nom.
+  2. **PO propose le nom d'artiste** d'un lien (`lib/ai/instructions/link-names.ts`, schéma
+     `link-names.ts`, une requête du quota) à partir du pseudo et des noms affichés, passés en
+     données ; le code ne garde qu'un **morceau d'un nom reçu** (`piecesOf`, même règle que les
+     `searchNames` d'une capture). Sans PO (quota, fournisseur), la recherche continue sur les noms
+     lus. La personne s'affiche sous ce nom, sinon le nom affiché, sinon le pseudo.
+  3. **Recherche inverse Wikidata** (`deezerIdOfAccount`, `lib/integrations/artist-socials.ts`) dans
+     `matchOnDeezer`, pour une capture comme pour un lien : le compte Deezer (P2722) de l'élément qui
+     porte ce TikTok (P7085) ou cet Instagram (P2003). Candidat prouvé d'emblée (`accountMatch`,
+     « Compte trouvé »), jamais coupé par le tri aux fans, quel que soit son nom.
+  Boutons de la carte : « Ajouter au Réseau » est l'action principale (noir), « Pas le bon compte
+  Deezer ? » secondaire (gris) ; sans compte trouvé il devient « Indiquer son compte Deezer » (et
+  « Fermer » au lieu de « Garder ce compte »).
 
 ---
 

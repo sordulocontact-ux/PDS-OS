@@ -13,11 +13,15 @@ import type {
 import { matchOnDeezer } from "@/lib/catalog/capture-deezer";
 import { withProofs } from "@/lib/catalog/capture-proofs";
 import type { Person } from "@/lib/catalog/capture-person";
-import { confirmTikTok, withSocials } from "@/lib/catalog/capture-socials";
+import {
+  confirmInstagram,
+  confirmTikTok,
+  withSocials,
+} from "@/lib/catalog/capture-socials";
 import {
   captureKey as key,
   linkClues,
-  MIN_CLUE_KEY,
+  piecesOf,
 } from "@/lib/catalog/capture-text";
 import { findArtistsByDeezerIds } from "@/lib/catalog/queries";
 import { findContactsByAccounts } from "@/lib/network/queries";
@@ -61,12 +65,18 @@ export async function readCaptureArtists(image: {
  * Deezer account, proofs and networks, flagged when already known.
  */
 export async function findArtists(people: Person[]): Promise<CaptureArtist[]> {
+  return matchPeople(await Promise.all(people.map(confirmAccounts)));
+}
+
+/** The handles read, asked to TikTok then Instagram (names, picture, bio). */
+export const confirmAccounts = (person: Person): Promise<Person> =>
+  confirmTikTok(person).then(confirmInstagram);
+
+/** People whose accounts are confirmed → Deezer, proofs, networks, flags. */
+export async function matchPeople(people: Person[]): Promise<CaptureArtist[]> {
   const artists = await Promise.all(
     people.map((person) =>
-      confirmTikTok(person)
-        .then(matchOnDeezer)
-        .then(withProofs)
-        .then(withSocials),
+      matchOnDeezer(person).then(withProofs).then(withSocials),
     ),
   );
   await Promise.all([flagExisting(artists), flagInNetwork(artists)]);
@@ -94,15 +104,10 @@ export function checkedPeople(reading: CaptureReading): Person[] {
     ).slice(0, MAX_NAMES);
     if (names.length === 0) continue;
     // A proposed artist name must be a piece of a written name.
-    const searchNames = unique(
-      (raw.searchNames ?? [])
-        .map((n) => n.trim())
-        .filter(
-          (n) =>
-            key(n).length >= MIN_CLUE_KEY &&
-            names.some((written) => key(written).includes(key(n))),
-        ),
-    ).slice(0, MAX_SEARCH_NAMES);
+    const searchNames = unique(piecesOf(raw.searchNames ?? [], names)).slice(
+      0,
+      MAX_SEARCH_NAMES,
+    );
     const read = {
       tiktok: written(raw.tiktokHandle),
       instagram: written(raw.instagram),
@@ -130,6 +135,7 @@ export function checkedPeople(reading: CaptureReading): Person[] {
       reasoning: raw.reasoning.trim(),
       tiktok: null,
       profile: null,
+      pictureUrl: null,
       searchNames,
       clues: account ? linkClues(links) : [],
       links: account ? links : [],

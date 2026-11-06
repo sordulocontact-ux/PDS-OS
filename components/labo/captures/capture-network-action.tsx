@@ -53,7 +53,6 @@ export function CaptureNetworkAction({
     <LoadedFormButton
       label={t.add}
       icon={IconPlus}
-      variant="outline"
       size="sm"
       title={t.title}
       description={t.description}

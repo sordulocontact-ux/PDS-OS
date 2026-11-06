@@ -3,6 +3,7 @@ import "server-only";
 import { z } from "zod";
 
 import { fetchText, IntegrationError } from "@/lib/integrations/http";
+import { socialImageUrl, tiktokAvatar } from "@/lib/integrations/social-page";
 import { asHandle } from "@/lib/network/socials";
 
 /**
@@ -22,6 +23,8 @@ export type TikTokProfile = {
   followers: number | null;
   videos: number | null;
   verified: boolean;
+  // Signed link, valid a few days: shown, never stored.
+  avatar: string | null;
 };
 
 const count = z.coerce.number().int().nonnegative().nullish();
@@ -100,5 +103,6 @@ export async function readTikTokProfile(
     followers: info.stats?.followerCount ?? null,
     videos: info.stats?.videoCount ?? null,
     verified: info.user.verified ?? false,
+    avatar: socialImageUrl(tiktokAvatar(html))?.href ?? null,
   };
 }

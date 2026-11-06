@@ -6,7 +6,13 @@ import type {
 /** A person read on a screenshot, on its way to the browser (Labo). */
 export type Person = Pick<
   CaptureArtist,
-  "names" | "artistName" | "role" | "reasoning" | "tiktok" | "profile"
+  | "names"
+  | "artistName"
+  | "role"
+  | "reasoning"
+  | "tiktok"
+  | "profile"
+  | "pictureUrl"
 > & {
   // Artist names PO found inside a written name ("Theodora" in
   // "theodorabossladyy"): searched, never shown as read.
@@ -32,3 +38,15 @@ export type Person = Pick<
 
 export type Matched = Person &
   Pick<CaptureArtist, "status" | "account" | "others" | "suggestion">;
+
+/** The person's TikTok and Instagram handles, in lower case. */
+export function handlesOf(person: Person): {
+  tiktok: string | null;
+  instagram: string | null;
+} {
+  return {
+    tiktok: person.tiktok?.label.replace(/^@/, "").toLowerCase() ?? null,
+    instagram:
+      (person.read.instagram ?? person.bioInstagram)?.toLowerCase() ?? null,
+  };
+}

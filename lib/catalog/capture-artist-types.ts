@@ -109,6 +109,9 @@ export type CaptureArtist = {
   instagram: SocialLink | null;
   spotify: SocialLink | null;
   profile: CaptureTikTokProfile | null;
+  // Their TikTok, else Instagram, profile picture (a signed link of the
+  // platform's image host, shown, never stored); null when unread.
+  pictureUrl: string | null;
   email: CaptureEmail | null;
   activity: CaptureActivity;
   // Homonyms left undecided by the code: the one PO leans for (null when it

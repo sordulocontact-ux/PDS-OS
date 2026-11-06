@@ -8,7 +8,11 @@ import type {
   SocialSource,
 } from "@/lib/catalog/capture-artist-types";
 import type { Matched, Person } from "@/lib/catalog/capture-person";
-import { linkClues, linktreeSlug } from "@/lib/catalog/capture-text";
+import {
+  captureKey as key,
+  linkClues,
+  linktreeSlug,
+} from "@/lib/catalog/capture-text";
 import {
   instagramUrl,
   socialsOfDeezerArtist,
@@ -17,6 +21,7 @@ import {
   tiktokUrl,
   type SocialHandles,
 } from "@/lib/integrations/artist-socials";
+import { readInstagramProfile } from "@/lib/integrations/instagram-profile";
 import { linktreeSocials } from "@/lib/integrations/linktree";
 import { readTikTokProfile } from "@/lib/integrations/tiktok-profile";
 import { asHandle } from "@/lib/network/socials";
@@ -71,6 +76,7 @@ export async function confirmTikTok(person: Person): Promise<Person> {
           verified: page.verified,
         }
       : null,
+    pictureUrl: page?.avatar ?? person.pictureUrl,
     links: bioLink ? [...person.links, bioLink] : person.links,
     clues: bioLink
       ? [...new Set([...person.clues, ...linkClues([bioLink])])]
@@ -81,6 +87,27 @@ export async function confirmTikTok(person: Person): Promise<Person> {
       (page && emailsIn(page.bio)[0]
         ? { value: emailsIn(page.bio)[0], source: "tiktok" }
         : null),
+  };
+}
+
+/**
+ * The Instagram read on the screenshot, in a shared link or in the TikTok
+ * bio, asked to Instagram when TikTok gave no picture: its public page gives
+ * the profile picture and the name shown, which joins the names (a link
+ * gives only the handle: « Theodora Miss KITOKO » behind @theodorabosslady).
+ * A page that cannot be read changes nothing.
+ */
+export async function confirmInstagram(person: Person): Promise<Person> {
+  const handle = person.read.instagram ?? person.bioInstagram;
+  if (!handle || person.pictureUrl) return person;
+  const page = await readInstagramProfile(handle);
+  if (!page) return person;
+  const name = page.displayName;
+  const known = !name || person.names.some((n) => key(n) === key(name));
+  return {
+    ...person,
+    names: known ? person.names : [...person.names, name],
+    pictureUrl: page.pictureUrl,
   };
 }
 
@@ -107,6 +134,7 @@ export async function withSocials(person: Matched): Promise<CaptureArtist> {
     others: person.others,
     suggestion: person.suggestion,
     profile: person.profile,
+    pictureUrl: person.pictureUrl,
     activity: activityOf(person),
     // Looked up afterwards, with the viewer's session.
     contact: null,

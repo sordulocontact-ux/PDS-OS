@@ -1,7 +1,14 @@
 import "server-only";
 
-import type { DeezerAccount } from "@/lib/catalog/capture-artist-types";
-import type { Matched, Person } from "@/lib/catalog/capture-person";
+import type {
+  AccountMatch,
+  DeezerAccount,
+} from "@/lib/catalog/capture-artist-types";
+import {
+  handlesOf,
+  type Matched,
+  type Person,
+} from "@/lib/catalog/capture-person";
 import { captureKey as key, MIN_CLUE_KEY } from "@/lib/catalog/capture-text";
 import {
   findArtistIdsByTrackTitle,
@@ -10,13 +17,15 @@ import {
   type DeezerArtist,
 } from "@/lib/integrations/deezer";
 import { listArtistReleases } from "@/lib/integrations/deezer-artist";
+import { deezerIdOfAccount } from "@/lib/integrations/artist-socials";
 
 /**
  * The Deezer account of a person read on a screenshot (Labo), decided by the
- * code. Candidates: artists named exactly after a written name or a name PO
- * found inside one, and artists of a song titled like a written name. Proof:
- * a release whose title matches another clue of the screenshot (a name, a
- * bio link word).
+ * code. Candidates: the Deezer profile Wikidata links to the person's
+ * TikTok or Instagram (proven at once, whatever its name), artists named
+ * exactly after a written name or a name PO found inside one, and artists of
+ * a song titled like a written name. Proof: that link, or a release whose
+ * title matches another clue of the screenshot (a name, a bio link word).
  */
 
 const MAX_ACCOUNTS = 5;
@@ -29,7 +38,8 @@ export async function matchOnDeezer(person: Person): Promise<Matched> {
   const queries = [...new Set([...person.names, ...person.searchNames])];
   const queryKeys = new Set(queries.map(key));
 
-  const [byName, byTrack] = await Promise.all([
+  const [byAccount, byName, byTrack] = await Promise.all([
+    accountsLinkedTo(person),
     Promise.all(queries.map((q) => searchArtists(q, 25))),
     Promise.all(
       person.names
@@ -45,8 +55,13 @@ export async function matchOnDeezer(person: Person): Promise<Matched> {
   ]);
   // Each candidate with the clue that found it: that clue proves nothing.
   const candidates = new Map<number, { artist: DeezerArtist; via: string }>();
+  const linked = new Map<number, AccountMatch>();
+  byAccount.forEach(({ artist, match }) => {
+    candidates.set(artist.id, { artist, via: key(artist.name) });
+    linked.set(artist.id, match);
+  });
   byName.flat().forEach((artist) => {
-    if (queryKeys.has(key(artist.name)))
+    if (queryKeys.has(key(artist.name)) && !candidates.has(artist.id))
       candidates.set(artist.id, { artist, via: key(artist.name) });
   });
   const byTitle = new Map<number, string>();
@@ -61,16 +76,54 @@ export async function matchOnDeezer(person: Person): Promise<Matched> {
       candidates.set(artist.id, { artist, via: byTitle.get(artist.id)! });
   });
 
+  const byFans = (a: { artist: DeezerArtist }, b: { artist: DeezerArtist }) =>
+    b.artist.fans - a.artist.fans;
+  // A linked profile is never cut, however small its audience.
   const homonyms = [...candidates.values()]
-    .sort((a, b) => b.artist.fans - a.artist.fans)
-    .slice(0, MAX_ACCOUNTS);
+    .sort(
+      (a, b) =>
+        Number(linked.has(b.artist.id)) - Number(linked.has(a.artist.id)) ||
+        byFans(a, b),
+    )
+    .slice(0, MAX_ACCOUNTS)
+    .sort(byFans);
   const clues = [...person.names.map(key), ...person.clues].filter(
     (k) => k.length >= MIN_CLUE_KEY,
   );
   const accounts = await Promise.all(
-    homonyms.map(({ artist, via }) => withEvidence(artist, via, clues)),
+    homonyms.map(async ({ artist, via }) => ({
+      ...(await withEvidence(artist, via, clues)),
+      accountMatch: linked.get(artist.id) ?? null,
+    })),
   );
   return { ...person, ...decide(accounts), suggestion: null };
+}
+
+// The Deezer profiles Wikidata links to the person's TikTok or Instagram. A
+// source that fails only loses this proof.
+async function accountsLinkedTo(
+  person: Person,
+): Promise<Array<{ artist: DeezerArtist; match: AccountMatch }>> {
+  const handles = handlesOf(person);
+  const found = await Promise.all(
+    (["tiktok", "instagram"] as const).map(async (network) => {
+      const handle = handles[network];
+      if (!handle) return null;
+      const id = await deezerIdOfAccount(network, handle).catch(() => null);
+      const artist = id ? await getDeezerArtist(id).catch(() => null) : null;
+      return artist
+        ? { artist, match: { network, handle, source: "wikidata" as const } }
+        : null;
+    }),
+  );
+  const unique = new Map<
+    number,
+    { artist: DeezerArtist; match: AccountMatch }
+  >();
+  found.forEach(
+    (f) => f && !unique.has(f.artist.id) && unique.set(f.artist.id, f),
+  );
+  return [...unique.values()];
 }
 
 /**

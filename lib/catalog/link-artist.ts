@@ -2,22 +2,32 @@ import "server-only";
 
 import { z } from "zod";
 
+import { LINK_NAMES_INSTRUCTIONS } from "@/lib/ai/instructions/link-names";
+import { extract } from "@/lib/ai/llm";
+import { linkNamesSchema } from "@/lib/ai/schemas/link-names";
 import type {
   CaptureArtistsError,
   CaptureArtistsResult,
 } from "@/lib/catalog/capture-artist-types";
-import { findArtists } from "@/lib/catalog/capture-artists";
+import { confirmAccounts, matchPeople } from "@/lib/catalog/capture-artists";
 import type { Person } from "@/lib/catalog/capture-person";
+import { piecesOf } from "@/lib/catalog/capture-text";
 import { fetchJson } from "@/lib/integrations/http";
 import { asHandle } from "@/lib/network/socials";
 
 /**
  * A TikTok or Instagram link shared to the Repérage (a phone's share sheet,
  * the Raccourci, a pasted link) → the account behind it, then the same
- * search as a screenshot (findArtists). No model reads anything: the handle
- * is in the link, or TikTok's public oEmbed gives it (docs/ARCHITECTURE.md
- * § 10 bis).
+ * search as a screenshot. The handle is in the link, or TikTok's public
+ * oEmbed gives it; TikTok and Instagram give the names shown and the
+ * picture; PO then proposes the artist name hidden in those names
+ * (« theodorabosslady » → « Theodora »), kept by the code only if it is a
+ * piece of one (docs/ARCHITECTURE.md § 10 bis).
  */
+
+// A person has a handful of artist names.
+const MAX_SEARCH_NAMES = 3;
+const REASONING_MAX = 500;
 
 type Target = { network: "tiktok" | "instagram"; handle: string };
 type LinkError = Extract<
@@ -82,15 +92,43 @@ export async function readLinkArtist(
   }
   if (typeof target === "string") return target;
 
-  const [artist] = await findArtists([personOf(target)]);
-  // The display name TikTok gave is a better name than the handle.
-  const shown = artist.profile?.displayName?.trim();
+  const confirmed = await confirmAccounts(personOf(target));
+  const named = await withArtistNames(confirmed);
+  const [artist] = await matchPeople([named]);
   return {
     isTikTok: true,
     analysis: "",
-    artists: [shown ? { ...artist, artistName: shown } : artist],
+    artists: [artist],
     model: "",
     durationMs: Math.round(performance.now() - startedAt),
+  };
+}
+
+/**
+ * PO's artist names for the account, searched on Deezer; the person is
+ * shown under the first one, else under the name a platform shows, else
+ * the handle. Without PO (quota, provider down) the search still runs on
+ * the names read.
+ */
+async function withArtistNames(person: Person): Promise<Person> {
+  const [handle, ...shown] = person.names;
+  const reading = await extract(
+    linkNamesSchema,
+    JSON.stringify({ pseudo: handle, nomsAffiches: shown }),
+    LINK_NAMES_INSTRUCTIONS,
+  ).catch((error: unknown) => {
+    console.error("link-artist:", error);
+    return null;
+  });
+  const searchNames = piecesOf(
+    reading?.output.searchNames ?? [],
+    person.names,
+  ).slice(0, MAX_SEARCH_NAMES);
+  return {
+    ...person,
+    searchNames,
+    artistName: searchNames[0] ?? shown[0] ?? handle,
+    reasoning: reading?.output.reasoning.trim().slice(0, REASONING_MAX) ?? "",
   };
 }
 
@@ -102,6 +140,7 @@ function personOf({ network, handle }: Target): Person {
     reasoning: "",
     tiktok: null,
     profile: null,
+    pictureUrl: null,
     searchNames: [],
     clues: [],
     links: [],

@@ -8,7 +8,7 @@ import type {
   DeezerAccount,
 } from "@/lib/catalog/capture-artist-types";
 import { decide } from "@/lib/catalog/capture-deezer";
-import type { Matched } from "@/lib/catalog/capture-person";
+import { handlesOf, type Matched } from "@/lib/catalog/capture-person";
 import { captureKey as key, MIN_CLUE_KEY } from "@/lib/catalog/capture-text";
 import { htmlToText } from "@/lib/catalog/artist-profile";
 import { socialsOfDeezerArtist } from "@/lib/integrations/artist-socials";
@@ -46,11 +46,7 @@ export async function withProofs(person: Matched): Promise<Matched> {
   const pool = person.status === "single" ? byFans.slice(0, 1) : byFans;
   const contenders = pool.slice(0, MAX_CONTENDERS);
 
-  const handles = {
-    tiktok: person.tiktok?.label.replace(/^@/, "").toLowerCase() ?? null,
-    instagram:
-      (person.read.instagram ?? person.bioInstagram)?.toLowerCase() ?? null,
-  };
+  const handles = handlesOf(person);
   // What a Deezer biography may cite, as written on the screenshot.
   const words = [
     ...(handles.tiktok ? [`@${handles.tiktok}`] : []),
@@ -112,7 +108,8 @@ async function prove(
       ]
     : [];
 
-  let accountMatch: AccountMatch | null = null;
+  // Already found from the account itself (capture-deezer.ts) stays.
+  let accountMatch: AccountMatch | null = account.accountMatch;
   for (const network of ["tiktok", "instagram"] as const) {
     const found = linked?.[network];
     if (

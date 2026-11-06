@@ -8,6 +8,7 @@ import { DeezerChooser } from "@/components/labo/captures/deezer-chooser";
 import { proofSentences } from "@/components/labo/captures/deezer-proofs";
 import { SocialLinks } from "@/components/labo/captures/social-links";
 import { TikTokProfileFacts } from "@/components/labo/captures/tiktok-profile-facts";
+import { Avatar } from "@/components/ui/avatar";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { ChosenDeezer } from "@/lib/catalog/capture-actions";
 import type {
@@ -31,16 +32,19 @@ const MATCH_TONE = {
 /**
  * One person read on a screenshot: the names PO grouped and why, what they
  * do (artist, beatmaker), their TikTok profile, the Deezer account the code
- * found and its proofs, their networks and e-mail; then « Ajouter au
+ * found and its proofs, their networks and e-mail, their profile picture
+ * (`withPicture`, for a screenshot's people); then « Ajouter au
  * Réseau ». Homonyms left undecided are chosen here (`DeezerChooser`): the
  * choice is kept in the page, and the form to the Réseau takes it.
  */
 export function CaptureArtistRow({
   artist: read,
   canAddToNetwork,
+  withPicture,
 }: {
   artist: CaptureArtist;
   canAddToNetwork: boolean;
+  withPicture: boolean;
 }) {
   const t = fr.laboCaptures;
   const [artist, setArtist] = useState(read);
@@ -55,6 +59,13 @@ export function CaptureArtistRow({
   return (
     <li className="grid gap-3 border-t border-[var(--border-hairline)] pt-3 first:border-t-0 first:pt-0">
       <div className="flex flex-wrap items-center gap-2">
+        {withPicture && artist.pictureUrl && (
+          <Avatar
+            name={shownName}
+            pictureUrl={artist.pictureUrl}
+            className="size-10"
+          />
+        )}
         <span className="text-lg font-semibold">{shownName}</span>
         <StatusBadge tone="neutral" size="sm">
           {t.role[artist.role]}
@@ -105,7 +116,7 @@ export function CaptureArtistRow({
         onChosen={(chosen) => setArtist((current) => choose(current, chosen))}
       />
 
-      {/* A shared link has no reading by PO, hence no reasoning. */}
+      {/* Empty when PO did not answer (quota, provider down). */}
       {artist.reasoning && (
         <details className="text-sm text-muted-foreground">
           <summary className="cursor-pointer select-none">

@@ -3,6 +3,7 @@
 import { IconLink, IconXmark } from "nucleo-sharp-essential";
 
 import { CaptureArtistRow } from "@/components/labo/captures/capture-artist-row";
+import { Avatar } from "@/components/ui/avatar";
 import type { CaptureItem } from "@/components/labo/captures/use-capture-queue";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -26,7 +27,8 @@ function shortLink(text: string): string {
 }
 
 /** A screenshot or a shared link, its reading state, and the people read
- * on it. */
+ * on it. A link read shows its account's profile picture in place of the
+ * link icon (initials when the platform gave none). */
 export function CaptureCard({
   item,
   canAddToNetwork,
@@ -42,6 +44,9 @@ export function CaptureCard({
   const preview = useObjectUrl(item.file);
   const { result } = item;
   const name = item.file?.name ?? shortLink(item.link ?? "");
+  // A link names one account: its picture heads the card.
+  const linked =
+    item.link && item.status === "done" ? result?.artists[0] : undefined;
 
   const badge =
     item.status === "done" && result && !result.isTikTok ? (
@@ -70,10 +75,18 @@ export function CaptureCard({
       )}
       aria-busy={item.status === "reading"}
     >
-      {item.link && (
-        <div className="flex aspect-square w-full items-center justify-center self-start rounded-lg border border-[var(--border-hairline)] bg-[var(--surface-sunken)]">
-          <IconLink aria-hidden className="size-6 text-muted-foreground" />
-        </div>
+      {linked ? (
+        <Avatar
+          name={linked.account?.name ?? linked.artistName}
+          pictureUrl={linked.pictureUrl}
+          className="aspect-square h-auto w-full self-start text-[length:var(--type-body-xl)]"
+        />
+      ) : (
+        item.link && (
+          <div className="flex aspect-square w-full items-center justify-center self-start rounded-lg border border-[var(--border-hairline)] bg-[var(--surface-sunken)]">
+            <IconLink aria-hidden className="size-6 text-muted-foreground" />
+          </div>
+        )
       )}
       {preview && (
         // A local preview of the file: next/image has nothing to optimize.
@@ -122,6 +135,8 @@ export function CaptureCard({
                     key={artist.names.join("|")}
                     artist={artist}
                     canAddToNetwork={canAddToNetwork}
+                    // The link's card already shows it.
+                    withPicture={!item.link}
                   />
                 ))}
               </ul>
