@@ -19,6 +19,7 @@ import {
   formRolesOf,
 } from "@/lib/legal/forms/people";
 import { readInventoryRows } from "@/lib/legal/inventory-rows";
+import { ensureContactLink } from "@/lib/portal/ensure-contact-link";
 import { getProject } from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
 import { ficheMissing } from "@/lib/legal/forms/completeness";
@@ -117,6 +118,12 @@ export async function prepareLegalForm(
     options.send === false
       ? "disabled"
       : await emailFiche(project.id, data[0].form_id, project.title, message);
+  // Not e-mailed: the person's page is the link to send by hand (one link
+  // per person, Sacha 06/11/2026); the fiche is on it.
+  if (emailed !== "sent") {
+    const contactId = await formContactId(data[0].form_id);
+    if (contactId) await ensureContactLink(project.id, contactId);
+  }
   revalidatePath(routes.projectLegal(project.id), "layout");
   return {
     ok: true,
@@ -210,6 +217,28 @@ export async function setLegalFormState(
   return run({ projectId, formId }, (supabase, id) =>
     supabase.rpc("set_legal_form_state", { p_form_id: id, p_state: state }),
   );
+}
+
+/** « Marquer la fiche comme envoyée »: sent by the person's usual channel
+ * with their page's link, which is marked sent too (it holds the fiche). */
+export async function markFicheSent(
+  projectId: string,
+  formId: string,
+): Promise<FormActionResult> {
+  const result = await setLegalFormState(projectId, formId, "sent");
+  if (!result.ok) return result;
+  const contactId = await formContactId(formId);
+  const link = contactId ? await ensureContactLink(projectId, contactId) : null;
+  if (link) {
+    const supabase = await createClient();
+    const { error } = await supabase.rpc("mark_contact_link_sent", {
+      p_link_id: link.id,
+    });
+    if (error && error.code !== "42501")
+      console.error("markFicheSent link:", error.code, error.message);
+  }
+  revalidatePath(routes.projectLegal(projectId), "layout");
+  return result;
 }
 
 /** « Révoquer l'accès », with why (proto « Projet complet »): the link

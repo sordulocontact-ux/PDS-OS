@@ -637,8 +637,11 @@ export const legal = {
       createLink: "Créer le lien de la fiche",
       sendYourself: (name: string) =>
         `Envoyez ce lien à ${name} par votre canal habituel, puis marquez la fiche comme envoyée.`,
-      sent: (date: string) =>
-        date ? `Envoyée le ${date}, sans réponse.` : "Envoyée, sans réponse.",
+      markSent: "Marquer la fiche comme envoyée",
+      // Who is awaited, in the Master's blue (Sacha, 06/11/2026).
+      waiting: (name: string) => `En attente de ${name} : remplir sa fiche.`,
+      waitingComplement: (name: string, fields: string, at: string) =>
+        `En attente de ${name} : compléter sa fiche (${fields}), demandé le ${at}.`,
       answers: (name: string) => `Ce que ${name} a rempli`,
       corrections: "Corrections à vérifier",
       fromFiche: (name: string) => `Fournie par ${name}, dans sa fiche`,

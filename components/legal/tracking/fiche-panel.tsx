@@ -1,16 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import type React from "react";
 import { useState, useTransition } from "react";
 
 import { ComplementRequest } from "@/components/legal/forms/complement-request";
-import { FicheLinkCard } from "@/components/legal/forms/fiche-link-card";
 import { FicheAnswers } from "@/components/legal/tracking/fiche-answers";
 import { FicheSend } from "@/components/legal/tracking/fiche-send";
-import {
-  usePlanSheet,
-  type PreparedLink,
-} from "@/components/legal/tracking/plan-sheet-context";
 import { AddToNetworkButton } from "@/components/network/add-to-network-button";
 import { StepSection } from "@/components/shell/journey/step-section";
 import { usePublishResult } from "@/components/shell/module/result-banner";
@@ -25,9 +21,9 @@ import { legalForms } from "@/lib/i18n/fr/legal-forms";
 import { masterPage } from "@/lib/i18n/fr/master-page";
 import {
   prepareLegalForm,
+  markFicheSent,
   requestLegalFormComplement,
   reviewLegalForm,
-  setLegalFormState,
 } from "@/lib/legal/forms/actions";
 import { ficheMissing } from "@/lib/legal/forms/completeness";
 import type { FormRow } from "@/lib/legal/forms/queries";
@@ -52,20 +48,18 @@ export function FichePanel({
   projectId,
   projectTitle = "",
   row,
+  personLink,
 }: {
   projectId: string;
   // The e-mail's subject.
   projectTitle?: string;
   row: FormRow;
+  // The person's page, THE link of the démarche (`PersonLink`, read on the
+  // server): shown while the fiche is to send by hand or awaited.
+  personLink?: React.ReactNode;
 }) {
   const t = fr.legalForms.page;
   const p = fr.legal.panels.fiche;
-  // Kept by the plan, not here: the panel may remount after the refresh.
-  const sheet = usePlanSheet();
-  const link = sheet.links[row.key] ?? null;
-  const setLink = (next: PreparedLink | null) => sheet.setLink(row.key, next);
-  // Just prepared, or kept sealed by the server (rule 19).
-  const url = link?.url ?? row.link?.url ?? null;
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<string>(t.emailed.body);
   const publish = usePublishResult();
@@ -93,15 +87,13 @@ export function FichePanel({
       if (result.emailed === "sent")
         return void toast.success(t.emailed.sent(row.name));
       if (result.emailed === "failed") toast.warning(t.emailed.failed);
-      setLink(result);
     });
   const markSent = () =>
-    act(async () => {
-      if (!row.formId) return { ok: false };
-      const result = await setLegalFormState(projectId, row.formId, "sent");
-      if (result.ok) setLink(null);
-      return result;
-    });
+    act(() =>
+      row.formId
+        ? markFicheSent(projectId, row.formId)
+        : Promise.resolve({ ok: false }),
+    );
 
   // A featured artist not in the Réseau yet: added there, linked to the
   // artist page, before any fiche.
@@ -135,28 +127,28 @@ export function FichePanel({
       </ToneCallout>
     );
 
-  // A link to send by hand: just created, or created and not marked sent.
-  if (url && (link || row.state === "link_generated"))
+  // Created, to send by hand: the person's page, then « Marquer la fiche
+  // comme envoyée » (the page holds the fiche).
+  if (row.state === "link_generated")
     return (
       <div className="flex flex-col gap-3">
         <p className={muted}>{p.sendYourself(row.name)}</p>
-        <FicheLinkCard
-          projectId={projectId}
-          projectTitle={projectTitle}
-          row={row}
-          url={url}
-          pending={pending}
-          onRenew={() => prepare(false)}
-          onMarkSent={markSent}
-        />
+        {personLink}
+        <Button
+          className="self-start"
+          disabled={pending}
+          aria-busy={pending || undefined}
+          onClick={markSent}
+        >
+          {p.markSent}
+        </Button>
       </div>
     );
 
   if (
     row.state === "none" ||
     row.state === "expired" ||
-    row.state === "revoked" ||
-    row.state === "link_generated"
+    row.state === "revoked"
   )
     return (
       <div className="flex flex-col gap-3.5">
@@ -180,23 +172,13 @@ export function FichePanel({
       </div>
     );
 
-  const linkCard = (
-    <FicheLinkCard
-      projectId={projectId}
-      projectTitle={projectTitle}
-      row={row}
-      pending={pending}
-      onRenew={() => prepare(false)}
-    />
-  );
-
+  // Awaited, said as the Master says it (Sacha, 06/11/2026), then the
+  // link; when it was sent is in « Déjà fait ».
   if (row.state === "sent")
     return (
       <div className="flex flex-col gap-3">
-        <p className={muted}>
-          {p.sent(row.since ? formatInstant(row.since) : "")}
-        </p>
-        {linkCard}
+        <ToneCallout tone="info">{p.waiting(row.name)}</ToneCallout>
+        {personLink}
       </div>
     );
 
@@ -204,13 +186,14 @@ export function FichePanel({
   if (row.state === "action_required" && row.complement)
     return (
       <div className="flex flex-col gap-3.5">
-        <p className={muted}>
-          {t.complementWaiting(
-            formatInstant(row.complement.at),
+        <ToneCallout tone="info">
+          {p.waitingComplement(
+            row.name,
             missingLabels(row.complement.fields),
+            formatInstant(row.complement.at),
           )}
-        </p>
-        {linkCard}
+        </ToneCallout>
+        {personLink}
         <FicheAnswers row={row} />
       </div>
     );

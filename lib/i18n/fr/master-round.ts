@@ -216,28 +216,15 @@ export const masterRound = {
   // Sacha 04/11): one link for all PDS expects from them.
   link: {
     title: (name: string) => `Lien de ${name}`,
-    states: {
-      notSent: "Pas encore envoyé",
-      sent: "Envoyé",
-      opened: "Ouvert",
-      none: "Pas de lien",
-    },
     dates: (stage: "mix" | "mastering", dossier: string, link: string | null) =>
       `Dossier de ${dossierOf(stage)} accessible jusqu'au ${dossier}${link ? ` · lien valable jusqu'au ${link}` : ""}`,
     noLink: (name: string) =>
       `${first(name)} n'a plus de lien : le dossier reste sur sa page dès qu'un nouveau lien est créé.`,
-    copy: "Copier le lien",
-    copied: "Lien copié",
-    remind: "Relancer",
     remindSubject: (title: string) =>
       `« ${title} » : votre dossier vous attend`,
     create: "Créer le lien",
     created: "Lien créé",
-    renew: "Nouveau lien",
     renewed: "Nouveau lien créé",
-    renewHint:
-      "Un nouveau lien remplace l'ancien, qui cesse de marcher ; ce qui a été déposé reste.",
-    more: (name: string) => `Autres actions sur le lien de ${name}`,
     withdraw: (stage: "mix" | "mastering") =>
       `Retirer le dossier de ${dossierOf(stage)}`,
     withdrawReason: "Pourquoi vous retirez le dossier",

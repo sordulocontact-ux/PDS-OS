@@ -308,7 +308,9 @@ valent partout, dans l'app comme dans les protos.
     preuve) ; coller la réponse reste le recours. Cela suppose l'accès en lecture à la boîte de
     PO (Gmail, OAuth), pas seulement l'envoi. Si PDS OS n'a pas l'adresse (c'est la fiche de
     renseignements qui la recueille), on crée le lien, on le copie, puis « Marquer comme
-    envoyée » : l'étape ne passe en attente qu'à ce moment. **Un lien privé reste visible dans
+    envoyée » : l'étape ne passe en attente qu'à ce moment. **Un seul lien par personne : sa page du projet** (`/c/…`, la carte `PersonLinkCard`, la même au Master et
+    au Juridique), jamais celui d'un workflow à côté ; **attendre quelqu'un s'écrit en bleu** (« En attente de X :
+    remplir sa fiche. », comme « … : valider le Mix V1 ») *(Sacha, 06/11/2026)*. **Un lien privé reste visible dans
     son étape** (lien, « Copier le lien », « Relancer », « Nouveau lien » qui révoque l'ancien,
     créé et envoyé quand et par qui), jamais seulement dans un bandeau qu'on ferme : là où il
     sert (dans l'attente de la personne, ou pendant qu'on l'envoie), sinon en référence sous

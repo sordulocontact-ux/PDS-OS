@@ -46,6 +46,11 @@ export const contactLinks = {
     "Le lien cesse de marcher tout de suite ; ce que la personne a déposé reste. Ses liens de chaque workflow ne changent pas.",
   revokeReason: "Pourquoi révoquer ce lien",
   revoked: "Lien révoqué",
+  // The card of the person's page in a démarche (PersonLinkCard).
+  validUntil: (day: string) =>
+    `Sa page du projet · lien valable jusqu'au ${day}`,
+  noLink: (name: string) =>
+    `${name} n'a pas de lien actif : tout ce que PDS attend reste sur sa page dès qu'un nouveau lien est créé.`,
   // Next to a workflow's own link.
   offer: (name: string) =>
     `Sa page du projet : tout ce que PDS attend de ${name}, en un seul lien.`,

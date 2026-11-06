@@ -5,7 +5,7 @@ import {
   ContractInvoice,
   type ContractInvoices,
 } from "@/components/invoices/contract-invoice";
-import { ContactLinkOffer } from "@/components/portal/contact-links-section";
+import { PersonLink } from "@/components/portal/person-link";
 import { FormalityCard } from "@/components/legal/formalities/formality-card";
 import { ContractPanel } from "@/components/legal/tracking/contract-panel";
 import { FichePanel } from "@/components/legal/tracking/fiche-panel";
@@ -53,19 +53,18 @@ export function DemarchePart({
   switch (panel.kind) {
     case "fiche":
       return (
-        <>
-          <FichePanel
-            projectId={projectId}
-            projectTitle={projectTitle}
-            row={panel.row}
-          />
-          {panel.row.link && (
-            <ContactLinkOffer
+        <FichePanel
+          projectId={projectId}
+          projectTitle={projectTitle}
+          row={panel.row}
+          personLink={
+            <PersonLink
               projectId={projectId}
+              projectTitle={projectTitle}
               contactId={panel.row.contactId}
             />
-          )}
-        </>
+          }
+        />
       );
     case "contract": {
       const contractId = panel.row.contract?.id;
@@ -99,8 +98,9 @@ export function DemarchePart({
             ["ready_for_signature", "signature_pending"].includes(
               panel.row.state,
             ) && (
-              <ContactLinkOffer
+              <PersonLink
                 projectId={projectId}
+                projectTitle={projectTitle}
                 contactId={panel.row.contactId}
               />
             )

@@ -1,16 +1,13 @@
 "use client";
 
-import { IconCheck, IconLink } from "nucleo-sharp-essential";
+import { IconCheck } from "nucleo-sharp-essential";
 import { useState, useSyncExternalStore } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { IconBan, IconCircleXmark } from "@/components/icons";
-import { Button, buttonVariants, ButtonRoll } from "@/components/ui/button";
-import { CopyButton } from "@/components/ui/copy-button";
-import { DocumentCard } from "@/components/ui/document-card";
+import { Button } from "@/components/ui/button";
+import { PersonLinkCard } from "@/components/ui/person-link-card";
 import { ReasonForm } from "@/components/ui/reason-form";
-import { RowActions } from "@/components/ui/row-actions";
-import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { masterRound } from "@/lib/i18n/fr/master-round";
@@ -83,10 +80,6 @@ export function LinkPanel(props: LinkPanelProps) {
   const write = useWriteSubmit(() => undefined, t.marked);
   const link = page?.link ?? null;
   const url = link?.path && origin ? `${origin}${link.path}` : null;
-  // Shown short (« pds-os.app/c/k7h2m9… »): the copy button gives it whole.
-  const shortUrl = url
-    ? `${new URL(url).host}${link!.path!.split("#")[0]!.slice(0, 9)}…`
-    : null;
   const resendButton = props.canEdit && (
     <Button
       variant="outline"
@@ -122,13 +115,8 @@ export function LinkPanel(props: LinkPanelProps) {
 
   const sent = link?.sentAt ?? tr.linkSentAt;
   const opened = tr.openedAt ?? link?.openedAt ?? null;
-  const [tone, label] = !link
-    ? (["neutral", t.states.none] as const)
-    : opened
-      ? (["success", t.states.opened] as const)
-      : sent
-        ? (["info", t.states.sent] as const)
-        : (["warning", t.states.notSent] as const);
+  const state = !link ? "none" : opened ? "opened" : sent ? "sent" : "notSent";
+  const editable = props.canEdit && link;
 
   return (
     <section className="flex flex-col gap-2" aria-label={t.title(engineer)}>
@@ -137,177 +125,124 @@ export function LinkPanel(props: LinkPanelProps) {
           {t.expires(engineer, tr.daysLeft, formatDay(tr.expiresAt))}
         </ToneCallout>
       )}
-      <DocumentCard
-        name={t.title(engineer)}
+      <PersonLinkCard
+        name={engineer}
         line={t.dates(
           stage,
           formatDay(tr.expiresAt),
           link ? formatDay(link.expiresAt) : null,
         )}
-        icon={IconLink}
-        action={<StatusBadge tone={tone}>{label}</StatusBadge>}
-      >
-        {(props.canEdit || (props.canSeeLink && url)) && (
-          <div className="flex flex-col gap-3 p-3.5">
-            {link ? (
-              <div className="flex flex-wrap items-center gap-2">
-                {url && (
-                  <span className="flex min-w-0 items-center gap-2 rounded-full bg-[var(--surface-soft)] py-1 pr-1 pl-4">
-                    <code
-                      className="min-w-0 truncate font-mono text-[length:var(--type-body-sm)]"
-                      title={url}
-                    >
-                      {shortUrl}
-                    </code>
-                    <CopyButton
-                      value={url}
-                      label=""
-                      ariaLabel={t.copy}
-                      copiedLabel={t.copied}
-                      variant="ghost"
-                      size="icon-xs"
-                      className="rounded-full"
-                    />
-                  </span>
-                )}
-                {props.canEdit && (
-                  <span className="ml-auto flex flex-wrap items-center gap-1">
-                    {props.mailed ? (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        disabled={write.pending}
-                        onClick={() =>
+        state={state}
+        url={props.canEdit || props.canSeeLink ? url : null}
+        pending={write.pending}
+        onRemind={
+          editable && props.mailed
+            ? () =>
+                write.run(() =>
+                  remindEngineer(props.projectId, stage, engineer),
+                )
+            : undefined
+        }
+        remindHref={
+          editable && !props.mailed && url
+            ? `mailto:${props.email ?? ""}?subject=${encodeURIComponent(
+                t.remindSubject(props.title),
+              )}&body=${encodeURIComponent(url)}`
+            : null
+        }
+        onRenew={
+          editable && props.contactId
+            ? () =>
+                write.run(
+                  () => issueContactLink(props.projectId, props.contactId!),
+                  t.renewed,
+                )
+            : undefined
+        }
+        actions={
+          editable
+            ? [
+                // Only when PDS OS could not send the e-mail itself.
+                ...(!sent && !tr.continued
+                  ? [
+                      {
+                        key: "sent",
+                        label: t.markSent,
+                        icon: IconCheck,
+                        onSelect: () =>
                           write.run(() =>
-                            remindEngineer(props.projectId, stage, engineer),
-                          )
-                        }
-                      >
-                        {t.remind}
-                      </Button>
-                    ) : (
-                      url && (
-                        <a
-                          className={buttonVariants({
-                            variant: "ghost",
-                            size: "sm",
-                          })}
-                          href={`mailto:${props.email ?? ""}?subject=${encodeURIComponent(
-                            t.remindSubject(props.title),
-                          )}&body=${encodeURIComponent(url)}`}
-                        >
-                          <ButtonRoll>{t.remind}</ButtonRoll>
-                        </a>
-                      )
-                    )}
-                    {props.contactId && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        title={t.renewHint}
-                        disabled={write.pending}
-                        onClick={() =>
-                          write.run(
-                            () =>
-                              issueContactLink(
-                                props.projectId,
-                                props.contactId!,
-                              ),
-                            t.renewed,
-                          )
-                        }
-                      >
-                        {t.renew}
-                      </Button>
-                    )}
-                    <RowActions
-                      label={t.more(engineer)}
-                      actions={[
-                        // Only when PDS OS could not send the e-mail itself.
-                        ...(!sent && !tr.continued
-                          ? [
-                              {
-                                key: "sent",
-                                label: t.markSent,
-                                icon: IconCheck,
-                                onSelect: () =>
-                                  write.run(() =>
-                                    markRoundSent(
-                                      props.projectId,
-                                      stage,
-                                      tr.id,
-                                      link.id,
-                                    ),
-                                  ),
-                              },
-                            ]
-                          : []),
-                        {
-                          key: "withdraw",
-                          label: t.withdraw(stage),
-                          icon: IconCircleXmark,
-                          onSelect: () => setAsking("withdraw"),
-                        },
-                        {
-                          key: "revoke",
-                          label: t.revoke,
-                          icon: IconBan,
-                          onSelect: () => setAsking("revoke"),
-                        },
-                      ]}
-                    />
-                  </span>
-                )}
-              </div>
-            ) : (
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <span className="text-[color:var(--text-secondary)]">
-                  {t.noLink(engineer)}
-                </span>
-                {props.contactId && (
-                  <Button
-                    size="sm"
-                    disabled={write.pending}
-                    onClick={() =>
-                      write.run(
-                        () =>
-                          issueContactLink(props.projectId, props.contactId!),
-                        t.created,
-                      )
-                    }
-                  >
-                    {t.create}
-                  </Button>
-                )}
-              </div>
-            )}
-            {asking === "withdraw" && (
-              <ReasonForm
-                label={t.withdrawReason}
-                submitLabel={t.withdraw(stage)}
-                doneMessage={t.withdrawn}
-                run={(reason) =>
-                  revokeTransmission(props.projectId, tr.id, stage, reason)
+                            markRoundSent(
+                              props.projectId,
+                              stage,
+                              tr.id,
+                              link.id,
+                            ),
+                          ),
+                      },
+                    ]
+                  : []),
+                {
+                  key: "withdraw",
+                  label: t.withdraw(stage),
+                  icon: IconCircleXmark,
+                  onSelect: () => setAsking("withdraw"),
+                },
+                {
+                  key: "revoke",
+                  label: t.revoke,
+                  icon: IconBan,
+                  onSelect: () => setAsking("revoke"),
+                },
+              ]
+            : []
+        }
+        empty={
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span className="text-[color:var(--text-secondary)]">
+              {t.noLink(engineer)}
+            </span>
+            {props.canEdit && props.contactId && (
+              <Button
+                size="sm"
+                disabled={write.pending}
+                onClick={() =>
+                  write.run(
+                    () => issueContactLink(props.projectId, props.contactId!),
+                    t.created,
+                  )
                 }
-                onDone={() => setAsking(null)}
-              />
+              >
+                {t.create}
+              </Button>
             )}
-            {asking === "revoke" && link && (
-              <ReasonForm
-                label={t.revokeReason}
-                hint={t.revokeHint}
-                submitLabel={t.revoke}
-                doneMessage={t.revoked}
-                run={(reason) =>
-                  revokeContactLink(props.projectId, link.id, reason)
-                }
-                onDone={() => setAsking(null)}
-              />
-            )}
-            <FormMessage kind="error">{write.error}</FormMessage>
           </div>
+        }
+      >
+        {asking === "withdraw" && (
+          <ReasonForm
+            label={t.withdrawReason}
+            submitLabel={t.withdraw(stage)}
+            doneMessage={t.withdrawn}
+            run={(reason) =>
+              revokeTransmission(props.projectId, tr.id, stage, reason)
+            }
+            onDone={() => setAsking(null)}
+          />
         )}
-      </DocumentCard>
+        {asking === "revoke" && link && (
+          <ReasonForm
+            label={t.revokeReason}
+            hint={t.revokeHint}
+            submitLabel={t.revoke}
+            doneMessage={t.revoked}
+            run={(reason) =>
+              revokeContactLink(props.projectId, link.id, reason)
+            }
+            onDone={() => setAsking(null)}
+          />
+        )}
+        <FormMessage kind="error">{write.error}</FormMessage>
+      </PersonLinkCard>
     </section>
   );
 }

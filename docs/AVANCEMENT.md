@@ -1583,3 +1583,10 @@ Proto « Plan d'action de Néons » (artefact du 06/11, copie `~/Desktop/Protos 
 - [x] `MailCard` extraite de `SendForm` du Master, partagée (`components/ui/mail-card.tsx`) ;
       `prepareLegalForm(…, { send, message })`, `FormRow.email`.
 - [ ] Passage navigateur ; les autres démarches (contrat, autorisation, répartition, SACEM) au même patron.
+- [x] Un seul lien par personne dans une démarche : sa page du projet (`/c/…`) dans la carte du Master,
+      devenue commune (`PersonLinkCard` ; Master `LinkPanel`, Juridique `ContactLinkCard` par `PersonLink`).
+      Plus de carte du lien `/f/` (`FicheLinkCard` supprimé) ni de bloc « Sa page du projet » ; fiche créée
+      sans e-mail : la page de la personne est créée (`ensureContactLink`) et « Marquer la fiche comme
+      envoyée » marque aussi son lien (`markFicheSent`). Contrat à signer : la même carte.
+- [x] L'attente en bleu comme au Master : « En attente de X : remplir sa fiche. » au lieu de « Envoyée le
+      …, sans réponse » (la date est dans « Déjà fait »).
