@@ -20,10 +20,13 @@ const factsOf = (values: Record<string, string>) =>
 export function FicheAnswers({
   row,
   aside,
+  omit = [],
 }: {
   row: FormRow;
   // Beside the title: where the fiche stands (« Reçue, à vérifier »).
   aside?: ReactNode;
+  // Fields said elsewhere (a correction to check).
+  omit?: string[];
 }) {
   const p = fr.legal.panels.fiche;
   const submission = row.submission;
@@ -31,7 +34,7 @@ export function FicheAnswers({
   const facts = [
     ...factsOf(submission.person),
     ...factsOf(submission.contribution),
-  ];
+  ].filter((fact) => !omit.includes(fact.id));
   if (facts.length === 0) return null;
   return (
     <StepSection title={p.answers(row.name)} aside={aside}>

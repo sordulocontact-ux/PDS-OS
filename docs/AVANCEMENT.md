@@ -1595,3 +1595,7 @@ Proto « Plan d'action de Néons » (artefact du 06/11, copie `~/Desktop/Protos 
       envoi en signature avec l'e-mail montré avant qu'il parte (`MailCard`, `contractSignerDraft`, message
       gardé dans l'e-mail par `sendContract`), la page de la personne créée au besoin (plus de « Créer son
       lien privé » d'abord). Textes de la carte e-mail partagés (`lib/i18n/fr/mail.ts`).
+- [x] Fiche publique : ce que le contrat exige est obligatoire (« * », erreur à l'envoi) : adresse pour une
+      personne ; raison sociale, SIRET et adresse de facturation pour une société ; IPI/COAD pour un auteur,
+      compositeur ou arrangeur (`ficheNeeded`, même liste que la vérification de l'équipe) ; plus de fiche
+      reçue « incomplète » pour ça. Fiche reçue : une seule pastille d'état, une valeur corrigée dite une fois.

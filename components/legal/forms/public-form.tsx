@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
+import { ficheNeeded } from "@/lib/legal/forms/completeness";
 import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
 import { legalForms } from "@/lib/i18n/fr/legal-forms";
@@ -124,6 +125,11 @@ export function PublicForm({
     );
 
   const fields = fieldsFor(roles);
+  // Required: the fiche's own, and what the contract needs (an address for
+  // a person, the company's details for a company, the IPI for a creator).
+  const needed = new Set(ficheNeeded(roles, answers));
+  const isRequired = (id: string, base?: boolean) =>
+    Boolean(base) || needed.has(id);
   if (step === "review")
     return (
       <FormReview
@@ -160,7 +166,7 @@ export function PublicForm({
                   .filter(Boolean)
                   .join(" ") || undefined;
               const err = flagged.includes(field.id)
-                ? field.required && !answers[field.id]
+                ? isRequired(field.id, field.required) && !answers[field.id]
                   ? t.public.required
                   : t.public.invalid
                 : undefined;
@@ -172,7 +178,7 @@ export function PublicForm({
                     key={field.id}
                     name={field.id}
                     label={label}
-                    required={field.required}
+                    required={isRequired(field.id, field.required)}
                     items={t.options[field.id] ?? {}}
                     defaultValue={answers[field.id] ?? null}
                     hint={hint}
@@ -186,7 +192,9 @@ export function PublicForm({
                     key={field.id}
                     name={field.id}
                     label={label}
-                    aria-required={field.required || undefined}
+                    aria-required={
+                      isRequired(field.id, field.required) || undefined
+                    }
                     hint={hint}
                     error={err}
                     rows={3}
@@ -201,7 +209,9 @@ export function PublicForm({
                   name={field.id}
                   type={field.type}
                   label={label}
-                  aria-required={field.required || undefined}
+                  aria-required={
+                    isRequired(field.id, field.required) || undefined
+                  }
                   hint={hint}
                   error={err}
                   maxLength={300}

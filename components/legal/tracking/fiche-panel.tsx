@@ -12,7 +12,6 @@ import { StepSection } from "@/components/shell/journey/step-section";
 import { usePublishResult } from "@/components/shell/module/result-banner";
 import { Button } from "@/components/ui/button";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
-import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "@/components/ui/toast";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
@@ -27,7 +26,7 @@ import {
 } from "@/lib/legal/forms/actions";
 import { ficheMissing } from "@/lib/legal/forms/completeness";
 import type { FormRow } from "@/lib/legal/forms/queries";
-import { ficheBadge, missingLabels } from "@/lib/legal/forms/state";
+import { missingLabels } from "@/lib/legal/forms/state";
 import { formatInstant } from "@/lib/utils/instant";
 import type { WriteResult } from "@/lib/utils/write-result";
 
@@ -203,7 +202,6 @@ export function FichePanel({
   if (row.state === "action_required" && row.submission) {
     const missing = ficheMissing(row.submission);
     const corrections = Object.entries(row.submission.corrections);
-    const badge = ficheBadge(row);
     const validate = (accept: boolean) =>
       decide(() => reviewLegalForm(projectId, row.formId!, accept));
     return (
@@ -222,14 +220,9 @@ export function FichePanel({
             </FactRows>
           </StepSection>
         )}
-        <FicheAnswers
-          row={row}
-          aside={
-            <StatusBadge tone={badge.tone} size="sm">
-              {badge.label}
-            </StatusBadge>
-          }
-        />
+        {/* The fiche's state is the pill of its title; a corrected value
+            is said once, in « Corrections à vérifier ». */}
+        <FicheAnswers row={row} omit={corrections.map(([id]) => id)} />
         {missing.length > 0 ? (
           <ComplementRequest
             key={missing.join(",")}

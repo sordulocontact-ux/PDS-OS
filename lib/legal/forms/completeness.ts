@@ -13,19 +13,28 @@ const CREATORS = new Set(["author", "composer", "arranger"]);
 const filled = (values: Record<string, string>, id: string) =>
   (values[id] ?? "").trim() !== "";
 
+/** What the contract needs from this person, in the fiche's order: the
+ * fields the public fiche asks as required (« * », Sacha 06/11/2026: no
+ * fiche sent without what the contract needs) and the team checks. */
+export function ficheNeeded(
+  roles: readonly string[],
+  person: Record<string, string>,
+): string[] {
+  return [
+    "legal_first_name",
+    "legal_last_name",
+    "email",
+    ...(person.entity_type === "company"
+      ? ["company_name", "siret", "billing"]
+      : ["address"]),
+    ...(roles.some((r) => CREATORS.has(r)) ? ["ipi_coad"] : []),
+  ];
+}
+
 /** The fields still missing for the contract, in the fiche's order. */
 export function ficheMissing(
   submission: Pick<FormSubmission, "roles" | "person">,
 ): string[] {
   const p = submission.person;
-  const needed = [
-    "legal_first_name",
-    "legal_last_name",
-    "email",
-    ...(p.entity_type === "company"
-      ? ["company_name", "siret", "billing"]
-      : ["address"]),
-    ...(submission.roles.some((r) => CREATORS.has(r)) ? ["ipi_coad"] : []),
-  ];
-  return needed.filter((id) => !filled(p, id));
+  return ficheNeeded(submission.roles, p).filter((id) => !filled(p, id));
 }

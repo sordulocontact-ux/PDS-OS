@@ -3,6 +3,7 @@
 // bounded, required ones present, emails well formed, choices among the
 // options. Splits them into the person's and the contribution's. Pure.
 
+import { ficheNeeded } from "@/lib/legal/forms/completeness";
 import { z } from "zod";
 
 import {
@@ -34,6 +35,8 @@ const email = z.email();
 
 export function checkSubmission(input: SubmissionInput): CheckedSubmission {
   const fields = fieldsFor(input.roles);
+  // What the contract needs is required too (the same list as the team's).
+  const needed = new Set(ficheNeeded(input.roles, input.answers));
   const missing: string[] = [];
   const invalid: string[] = [];
   const person: Record<string, string> = {};
@@ -42,7 +45,7 @@ export function checkSubmission(input: SubmissionInput): CheckedSubmission {
   for (const field of fields) {
     const value = (input.answers[field.id] ?? "").trim();
     if (!value) {
-      if (field.required) missing.push(field.id);
+      if (field.required || needed.has(field.id)) missing.push(field.id);
       continue;
     }
     if (field.type === "email" && !email.safeParse(value).success)
