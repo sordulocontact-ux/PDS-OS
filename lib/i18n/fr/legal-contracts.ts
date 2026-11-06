@@ -263,8 +263,6 @@ export const legalContracts = {
       choiceMissing: (name: string) =>
         `Choisissez un contrat pour ${name}, créez un modèle, ou « Pas d'accord nécessaire ».`,
       remaining: "Il reste des contrats à régler avant de confirmer.",
-      confirmedBy: (name: string, date: string) =>
-        `Confirmés par ${name} le ${date} : ce n'est ni valider leur contenu, ni les générer.`,
       launchFirst: "Confirmez d'abord les contrats à prévoir.",
       done: "Contrats nécessaires confirmés",
     },

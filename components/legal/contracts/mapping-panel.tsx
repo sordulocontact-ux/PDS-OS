@@ -8,7 +8,6 @@ import type { RequestState } from "@/components/legal/contracts/mapping-row";
 import { Button } from "@/components/ui/button";
 import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
 import type { AgreementRow } from "@/lib/legal/contracts/mapping";
-import { formatShortInstant } from "@/lib/utils/day";
 
 const fr = { legalContracts };
 
@@ -52,24 +51,21 @@ export function MappingPanel({
         }}
       />
     );
+  // Who confirmed and when is in the history, not repeated here (Sacha,
+  // 06/11/2026); « Modifier » under the table, where « Confirmer » was.
   return (
     <div className="flex flex-col gap-4">
-      {approval && (
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
-            {t.plan.confirmedBy(approval.by, formatShortInstant(approval.at))}
-          </p>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => setEditing(true)}
-          >
-            {t.editMapping}
-          </Button>
-        </div>
-      )}
       <AgreementList projectId={projectId} rows={rows} />
+      {approval && (
+        <Button
+          type="button"
+          variant="outline"
+          className="self-start"
+          onClick={() => setEditing(true)}
+        >
+          {t.editMapping}
+        </Button>
+      )}
     </div>
   );
 }
