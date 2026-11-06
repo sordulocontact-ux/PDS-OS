@@ -59,10 +59,10 @@ export function CaptureArtistRow({
   return (
     <li className="grid gap-3 border-t border-[var(--border-hairline)] pt-3 first:border-t-0 first:pt-0">
       <div className="flex flex-wrap items-center gap-2">
-        {withPicture && artist.pictureUrl && (
+        {withPicture && artist.picture && (
           <Avatar
             name={shownName}
-            pictureUrl={artist.pictureUrl}
+            pictureUrl={artist.picture.url}
             className="size-10"
           />
         )}
@@ -158,5 +158,12 @@ function choose(
     instagram: ownLink(current.instagram) ?? chosen.socials.instagram,
     spotify: ownLink(current.spotify) ?? chosen.socials.spotify,
     contact: current.contact ?? chosen.contact,
+    // A picture of the previous account goes with it.
+    picture:
+      chosen.picture ??
+      (current.picture?.source === "tiktok" ||
+      current.picture?.source === "instagram"
+        ? current.picture
+        : null),
   };
 }

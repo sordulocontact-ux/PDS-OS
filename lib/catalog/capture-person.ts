@@ -12,7 +12,7 @@ export type Person = Pick<
   | "reasoning"
   | "tiktok"
   | "profile"
-  | "pictureUrl"
+  | "picture"
 > & {
   // Artist names PO found inside a written name ("Theodora" in
   // "theodorabossladyy"): searched, never shown as read.

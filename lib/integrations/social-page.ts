@@ -11,6 +11,9 @@ const IMAGE_HOSTS = [
   /\.tiktokcdn(-[a-z]+)?\.com$/,
   /\.cdninstagram\.com$/,
   /\.fbcdn\.net$/,
+  /\.spotifycdn\.com$/,
+  /^i\.scdn\.co$/,
+  /\.dzcdn\.net$/,
 ];
 
 /** A picture address, kept only on a platform's image host, over https. */

@@ -200,8 +200,12 @@ export async function saveNetworkContact(
     organizationId: access.organizationId,
     contactId: data.id,
     before,
-    tiktok: values.tiktok,
-    instagram: values.instagram,
+    accounts: {
+      spotify: values.spotify,
+      deezer: values.deezer?.toString() ?? null,
+      tiktok: values.tiktok,
+      instagram: values.instagram,
+    },
     upload: picture,
     remove: form.get("pictureRemove") === "1",
   });

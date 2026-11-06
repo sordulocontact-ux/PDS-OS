@@ -57,6 +57,8 @@ export function CaptureNetworkAction({
       title={t.title}
       description={t.description}
       closeLabel={fr.network.form.close}
+      // As wide as the Réseau's other contact dialogs (Sacha, 06/11/2026).
+      dialogSize="medium"
       load={loadContactOptions}
     >
       {(options, close) => {

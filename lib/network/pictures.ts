@@ -1,12 +1,14 @@
 import "server-only";
 
-import { socialPicture } from "@/lib/integrations/social-picture";
+import { profilePicture } from "@/lib/integrations/social-picture";
 import {
   MAX_UPLOADED_PICTURE_BYTES,
   NETWORK_PICTURE_BUCKET,
   NETWORK_PICTURE_EXTENSIONS,
   networkPictureSourceOf,
+  PROFILE_PICTURE_SOURCES,
   type NetworkPictureSource,
+  type ProfilePictureSource,
 } from "@/lib/network/picture-rules";
 import { createClient } from "@/lib/supabase/server";
 
@@ -50,11 +52,14 @@ export function pictureFileOf(form: FormData): File | null | "invalid" {
     : "invalid";
 }
 
+// A contact's accounts a picture may come from: Spotify and Deezer artist
+// ids, TikTok and Instagram handles.
+export type PictureAccounts = Record<ProfilePictureSource, string | null>;
+
 export type PictureState = {
   path: string | null;
   source: NetworkPictureSource | null;
-  tiktok: string | null;
-  instagram: string | null;
+  accounts: PictureAccounts;
 };
 
 /** What decides a contact's picture, read before it is saved. */
@@ -64,15 +69,21 @@ export async function pictureStateOf(
 ): Promise<PictureState | null> {
   const { data } = await supabase
     .from("network_contacts")
-    .select("picture_path, picture_source, tiktok_handle, instagram_handle")
+    .select(
+      "picture_path, picture_source, spotify_artist_id, deezer_artist_id, tiktok_handle, instagram_handle",
+    )
     .eq("id", id)
     .maybeSingle();
   return data
     ? {
         path: data.picture_path,
         source: networkPictureSourceOf(data.picture_source),
-        tiktok: data.tiktok_handle,
-        instagram: data.instagram_handle,
+        accounts: {
+          spotify: data.spotify_artist_id,
+          deezer: data.deezer_artist_id?.toString() ?? null,
+          tiktok: data.tiktok_handle,
+          instagram: data.instagram_handle,
+        },
       }
     : null;
 }
@@ -80,15 +91,15 @@ export async function pictureStateOf(
 const NONE: PictureState = {
   path: null,
   source: null,
-  tiktok: null,
-  instagram: null,
+  accounts: { spotify: null, deezer: null, tiktok: null, instagram: null },
 };
 
 /**
  * After a contact is saved, its picture. A file chosen by hand always wins
  * and stays until replaced or removed; « Retirer » is remembered ('none').
- * Otherwise the picture of its TikTok, else Instagram, profile is copied
- * here: when it has none yet, when the account it came from changed, or
+ * Otherwise the picture of its first profile that has one is copied here,
+ * in the order of PROFILE_PICTURE_SOURCES (an artist's Spotify, Deezer,
+ * then TikTok, Instagram): when it has none yet, when the account it came from changed, or
  * after a removal once an account changes. A picture whose account is gone
  * and no other profile gives one is dropped. False: the file chosen by hand
  * could not be stored (a profile's picture failing is never an error).
@@ -100,8 +111,7 @@ export async function updateContactPicture(
     contactId: string;
     // Null: a new contact.
     before: PictureState | null;
-    tiktok: string | null;
-    instagram: string | null;
+    accounts: PictureAccounts;
     upload: File | null;
     remove: boolean;
   },
@@ -143,24 +153,25 @@ export async function updateContactPicture(
     return store("upload", { bytes: input.upload, type: input.upload.type });
   if (input.remove) return before.source === "none" || store("none", null);
 
-  const tiktokChanged = input.tiktok !== before.tiktok;
-  const instagramChanged = input.instagram !== before.instagram;
-  const stale =
-    (before.source === "tiktok" && tiktokChanged) ||
-    (before.source === "instagram" && instagramChanged);
+  const changed = (source: ProfilePictureSource) =>
+    input.accounts[source] !== before.accounts[source];
+  const current = before.source;
+  const fromProfile = PROFILE_PICTURE_SOURCES.find((s) => s === current);
+  const stale = fromProfile !== undefined && changed(fromProfile);
   const refetch =
-    before.source === null ||
+    current === null ||
     stale ||
-    (before.source === "none" &&
-      ((tiktokChanged && !!input.tiktok) ||
-        (instagramChanged && !!input.instagram)));
+    (current === "none" &&
+      PROFILE_PICTURE_SOURCES.some(
+        (source) => changed(source) && !!input.accounts[source],
+      ));
   if (!refetch) return true;
 
-  for (const platform of ["tiktok", "instagram"] as const) {
-    const handle = input[platform];
-    const picture = handle ? await socialPicture(platform, handle) : null;
+  for (const source of PROFILE_PICTURE_SOURCES) {
+    const account = input.accounts[source];
+    const picture = account ? await profilePicture(source, account) : null;
     if (picture) {
-      await store(platform, picture);
+      await store(source, picture);
       return true;
     }
   }

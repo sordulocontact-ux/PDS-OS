@@ -63,6 +63,10 @@ export function captureContact(
     instagram: handle(artist.instagram?.label),
     spotifyId: artist.spotify ? parseSpotifyId(artist.spotify.url) : null,
     deezerId: sure && account ? account.deezerId : null,
+    // Shown in the form; the server takes it again from these accounts on
+    // saving, in the same order (lib/network/pictures.ts).
+    pictureUrl: artist.picture?.url ?? null,
+    pictureSource: artist.picture?.source ?? null,
     // The catalog artist already on that Deezer profile, if any.
     ...(sure && account?.existing ? { artistId: account.existing.id } : {}),
   };

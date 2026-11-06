@@ -47,8 +47,9 @@ const fr = { network };
  * is linked to it, said on screen and removable (UX test of 09/10/2026), and
  * contacts of the same name are said, never blocking. A change of kind of a
  * saved contact says what goes with it before saving. Its picture is chosen
- * here or taken from its TikTok or Instagram on saving (retour d'Ibé du
- * 01/11/2026). One column; the details the contact does not have yet are
+ * here or taken on saving from its Spotify, Deezer, TikTok or Instagram
+ * (retour d'Ibé du 01/11/2026; an artist's Spotify first, Sacha 06/11/2026),
+ * shown before saving when `initial` brings it (the Repérage). One column; the details the contact does not have yet are
  * « + » buttons under the fields (ContactDetailsFields, Sacha 05/11/2026:
  * « trop d'informations d'un coup »). No helper text under the fields.
  */
@@ -140,8 +141,8 @@ export function ContactForm({
       <ContactPictureField
         name={name}
         kind={kind}
-        pictureUrl={contact?.pictureUrl ?? null}
-        pictureSource={contact?.pictureSource ?? null}
+        pictureUrl={contact?.pictureUrl ?? initial?.pictureUrl ?? null}
+        pictureSource={contact?.pictureSource ?? initial?.pictureSource ?? null}
         error={error?.field === "picture" ? error.error : undefined}
       >
         <Field

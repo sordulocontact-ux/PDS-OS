@@ -135,7 +135,7 @@ export function checkedPeople(reading: CaptureReading): Person[] {
       reasoning: raw.reasoning.trim(),
       tiktok: null,
       profile: null,
-      pictureUrl: null,
+      picture: null,
       searchNames,
       clues: account ? linkClues(links) : [],
       links: account ? links : [],

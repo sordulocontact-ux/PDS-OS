@@ -172,17 +172,20 @@ export const network = {
       kept: "contrats, crédits, projets et historique restent liés au contact.",
     },
     // The contact's picture (retour d'Ibé du 01/11/2026): chosen by hand, or
-    // taken from its TikTok or Instagram profile on saving.
+    // taken on saving from its Spotify, Deezer, TikTok or Instagram profile
+    // (Sacha, 06/11/2026: an artist's Spotify first, else Deezer).
     picture: {
       add: { person: "Ajouter une photo", organization: "Ajouter un logo" },
       replace: "Changer l'image",
       remove: "Retirer",
       undo: "Annuler",
       reading: "Préparation…",
+      fromSpotify: "Reprise du profil Spotify",
+      fromDeezer: "Reprise du profil Deezer",
       fromTiktok: "Reprise du profil TikTok",
       fromInstagram: "Reprise du profil Instagram",
       // Without a picture: where it will come from on saving.
-      auto: "Sinon, celle de TikTok ou d'Instagram",
+      auto: "Sinon, celle de Spotify, Deezer, TikTok ou Instagram",
       removed: "Retirée à l'enregistrement",
       unreadable: "Image illisible : choisissez un JPEG, un PNG ou un WebP.",
     },

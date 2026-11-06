@@ -3231,10 +3231,14 @@ rend, projet par projet, ses rôles d'équipe, les éléments de sa page privée
 - **Photo d'un contact** (retour d'Ibé du 01/11/2026, `…20261105200101_network_contact_pictures.sql`,
   `lib/network/pictures.ts`, `lib/integrations/social-picture.ts`) : `picture_path` dans le bucket privé
   `network-pictures` (`<org>/<contact>/<uuid>.<ext>`, lecture membres, écriture `manage_network`, URL
-  signée 1 h) et `picture_source` (`upload`, `tiktok`, `instagram`, `none` = retirée à la main). Une image
+  signée 1 h) et `picture_source` (`upload`, `spotify`, `deezer`, `tiktok`, `instagram`, `none` = retirée
+  à la main ; `spotify`/`deezer` ajoutés par `…20261106120101_network_picture_artist_sources.sql`). Une image
   choisie est recadrée en carré de 512 px dans le navigateur et part avec le formulaire (champ `picture`,
-  `pictureRemove`) ; elle prime toujours. Sinon, à l'enregistrement, le serveur copie la photo du profil
-  public TikTok (données de la page, `avatarMedium`), à défaut Instagram (`og:image`, 150 px) : quand le
+  `pictureRemove`) ; elle prime toujours. Sinon, à l'enregistrement, le serveur copie la photo du premier
+  profil qui en a une, dans l'ordre `PROFILE_PICTURE_SOURCES` (Sacha, 06/11/2026 : « vu que c'est une
+  artiste, récupère la photo de Spotify, sinon Deezer ») : **Spotify** (oEmbed public, sans clé, 320 px),
+  **Deezer** (API, 500 px), puis TikTok (données de la page, `avatarMedium`), Instagram (`og:image`,
+  150 px) : quand le
   contact n'en a pas encore, quand le compte d'origine change, ou après un retrait si un compte change.
   Lue comme un visiteur avec le client identifié de l'app (`fetchText`), téléchargée seulement depuis les
   CDN des deux plateformes (sans redirection), copiée chez nous car leurs liens expirent en quelques
@@ -7115,9 +7119,12 @@ sans un clic : « Ajouter au Réseau » (ci-dessous).
      sans photo TikTok, la page publique Instagram (`lib/integrations/instagram-profile.ts`, balises
      Open Graph, parseurs purs `lib/integrations/social-page.ts` partagés avec `social-picture.ts`)
      donne le **nom affiché** (« Theodora Miss KITOKO », ajouté aux noms) et la **photo de profil**.
-     `CaptureArtist.pictureUrl` = avatar TikTok, sinon Instagram : lien signé de l'hébergeur d'images
-     de la plateforme (liste fermée, `socialImageUrl`), affiché, jamais enregistré (la fiche du Réseau
-     copie toujours son fichier à l'enregistrement). Carte d'un lien : la photo remplace l'icône de
+     `CaptureArtist.picture` (`lib/catalog/capture-picture.ts`) suit l'ordre du Réseau : Spotify de
+     l'artiste, sinon le Deezer retenu (`linked`/`single`, ou choisi : `ChosenDeezer.picture`), sinon
+     l'avatar TikTok, sinon Instagram ; lien de l'hébergeur d'images de la plateforme (liste fermée,
+     `socialImageUrl`), affiché, jamais enregistré. « Ajouter au Réseau » l'affiche déjà dans la modale
+     (`initial.pictureUrl` / `pictureSource`, « Reprise du profil Spotify ») ; le serveur la reprend
+     des mêmes comptes à l'enregistrement. Modale `medium` comme les autres fiches du Réseau. Carte d'un lien : la photo remplace l'icône de
      lien (initiales sans photo) ; personnes d'une capture : avatar 40 px devant le nom.
   2. **PO propose le nom d'artiste** d'un lien (`lib/ai/instructions/link-names.ts`, schéma
      `link-names.ts`, une requête du quota) à partir du pseudo et des noms affichés, passés en

@@ -78,7 +78,7 @@ export function CaptureCard({
       {linked ? (
         <Avatar
           name={linked.account?.name ?? linked.artistName}
-          pictureUrl={linked.pictureUrl}
+          pictureUrl={linked.picture?.url ?? null}
           className="aspect-square h-auto w-full self-start text-[length:var(--type-body-xl)]"
         />
       ) : (

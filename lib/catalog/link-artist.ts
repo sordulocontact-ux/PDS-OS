@@ -140,7 +140,7 @@ function personOf({ network, handle }: Target): Person {
     reasoning: "",
     tiktok: null,
     profile: null,
-    pictureUrl: null,
+    picture: null,
     searchNames: [],
     clues: [],
     links: [],

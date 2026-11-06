@@ -23,7 +23,9 @@ const fr = { network };
  * picture is cropped square in the browser and sent with « Enregistrer »
  * (`picture`), or removed (`pictureRemove`); never written before the form
  * is saved, so « Annuler » leaves it as it was. Without one, the server takes
- * the picture of the TikTok or Instagram profile (retour d'Ibé, 01/11/2026).
+ * the picture of its Spotify, Deezer, TikTok or Instagram profile, in that
+ * order (retour d'Ibé, 01/11/2026; Sacha 06/11/2026); a new contact filled
+ * by the Repérage already shows the one it will take.
  */
 export function ContactPictureField({
   name,
@@ -78,17 +80,23 @@ export function ContactPictureField({
 
   const shown = preview ?? (removed ? null : pictureUrl);
   // Where the picture shown comes from, said only when it is not obvious.
+  const fromProfile = {
+    spotify: t.fromSpotify,
+    deezer: t.fromDeezer,
+    tiktok: t.fromTiktok,
+    instagram: t.fromInstagram,
+    upload: null,
+    none: null,
+  } as const;
   const source = chosen
     ? null
     : removed
       ? t.removed
-      : pictureUrl && pictureSource === "tiktok"
-        ? t.fromTiktok
-        : pictureUrl && pictureSource === "instagram"
-          ? t.fromInstagram
-          : !shown
-            ? t.auto
-            : null;
+      : pictureUrl && pictureSource
+        ? fromProfile[pictureSource]
+        : !shown
+          ? t.auto
+          : null;
   const message = unreadable ? t.unreadable : error;
 
   return (

@@ -8,6 +8,7 @@ import type {
   SocialSource,
 } from "@/lib/catalog/capture-artist-types";
 import type { Matched, Person } from "@/lib/catalog/capture-person";
+import { artistPicture } from "@/lib/catalog/capture-picture";
 import {
   captureKey as key,
   linkClues,
@@ -76,7 +77,9 @@ export async function confirmTikTok(person: Person): Promise<Person> {
           verified: page.verified,
         }
       : null,
-    pictureUrl: page?.avatar ?? person.pictureUrl,
+    picture: page?.avatar
+      ? { url: page.avatar, source: "tiktok" }
+      : person.picture,
     links: bioLink ? [...person.links, bioLink] : person.links,
     clues: bioLink
       ? [...new Set([...person.clues, ...linkClues([bioLink])])]
@@ -99,7 +102,7 @@ export async function confirmTikTok(person: Person): Promise<Person> {
  */
 export async function confirmInstagram(person: Person): Promise<Person> {
   const handle = person.read.instagram ?? person.bioInstagram;
-  if (!handle || person.pictureUrl) return person;
+  if (!handle || person.picture) return person;
   const page = await readInstagramProfile(handle);
   if (!page) return person;
   const name = page.displayName;
@@ -107,7 +110,9 @@ export async function confirmInstagram(person: Person): Promise<Person> {
   return {
     ...person,
     names: known ? person.names : [...person.names, name],
-    pictureUrl: page.pictureUrl,
+    picture: page.pictureUrl
+      ? { url: page.pictureUrl, source: "instagram" }
+      : null,
   };
 }
 
@@ -134,7 +139,6 @@ export async function withSocials(person: Matched): Promise<CaptureArtist> {
     others: person.others,
     suggestion: person.suggestion,
     profile: person.profile,
-    pictureUrl: person.pictureUrl,
     activity: activityOf(person),
     // Looked up afterwards, with the viewer's session.
     contact: null,
@@ -185,7 +189,12 @@ export async function withSocials(person: Matched): Promise<CaptureArtist> {
         found[network] = link(network, value.handle, value.source);
     }
   }
-  return { ...artist, ...found, email };
+  const picture = await artistPicture(
+    found.spotify,
+    sure ? artist.account!.pictureUrl : null,
+    person.picture,
+  );
+  return { ...artist, ...found, email, picture };
 }
 
 // Words that say "beatmaker", read by the code in the bio or on the

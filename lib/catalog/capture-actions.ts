@@ -4,9 +4,11 @@ import { z } from "zod";
 
 import { requireApproved } from "@/lib/auth/dal";
 import type {
+  CapturePicture,
   DeezerAccount,
   SocialLink,
 } from "@/lib/catalog/capture-artist-types";
+import { artistPicture } from "@/lib/catalog/capture-picture";
 import { deezerAccountOf } from "@/lib/catalog/capture-deezer";
 import { parseDeezerLink } from "@/lib/catalog/deezer-link";
 import { findArtistsByDeezerIds } from "@/lib/catalog/queries";
@@ -41,6 +43,8 @@ export type ChosenDeezer =
         spotify: SocialLink | null;
       };
       contact: { id: string; name: string } | null;
+      // Its Spotify, else Deezer, picture (null: keep the one shown).
+      picture: CapturePicture | null;
     }
   | { ok: false; error: "invalid_link" | "not_found" | "unavailable" };
 
@@ -91,8 +95,14 @@ export async function chooseCaptureDeezer(
             source: found.source,
           };
     };
+    const spotify = link("spotify");
     return {
       ok: true,
+      picture: await artistPicture(
+        spotify,
+        artist.pictureBig ?? artist.pictureMedium,
+        null,
+      ),
       account: {
         ...deezerAccountOf(artist),
         existing: existing.get(artist.id) ?? null,
@@ -100,7 +110,7 @@ export async function chooseCaptureDeezer(
       socials: {
         tiktok: link("tiktok"),
         instagram: link("instagram"),
-        spotify: link("spotify"),
+        spotify,
       },
       contact: contacts.deezer.get(artist.id) ?? null,
     };

@@ -1,3 +1,5 @@
+import type { ProfilePictureSource } from "@/lib/network/picture-rules";
+
 /**
  * Artists read on a TikTok screenshot (Labo), as sent to the browser. The
  * names come from the model, checked against the text it read; the Deezer
@@ -82,6 +84,8 @@ export type CaptureActivity = {
   clue: { text: string; source: "capture" | "tiktok" } | null;
 };
 
+export type CapturePicture = { url: string; source: ProfilePictureSource };
+
 /** The public TikTok profile, read on its page (null when unread). */
 export type CaptureTikTokProfile = {
   displayName: string;
@@ -109,9 +113,10 @@ export type CaptureArtist = {
   instagram: SocialLink | null;
   spotify: SocialLink | null;
   profile: CaptureTikTokProfile | null;
-  // Their TikTok, else Instagram, profile picture (a signed link of the
-  // platform's image host, shown, never stored); null when unread.
-  pictureUrl: string | null;
+  // Their picture: an artist's Spotify, else Deezer (account found), else
+  // TikTok, else Instagram profile picture; a link of the platform's image
+  // host, shown, never stored (the Réseau copies its own on saving).
+  picture: CapturePicture | null;
   email: CaptureEmail | null;
   activity: CaptureActivity;
   // Homonyms left undecided by the code: the one PO leans for (null when it
