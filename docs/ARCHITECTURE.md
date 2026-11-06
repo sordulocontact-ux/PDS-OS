@@ -3823,10 +3823,12 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
     - **Plans déjà lancés** : la migration crée les tâches manquantes, retrouve les crédits
       des contrats par le nom (même comparaison que `lib/utils/search.ts`, accents français)
       et coche ce qui est déjà fait.
-  - **Lecture groupée** (retour du 05/10 « beaucoup de répétitions ») : dans le Plan et le
-    Suivi, les actions d'une même nature forment un groupe (`groupActions`) qui dit une
-    fois son nom, sa raison et ce qu'il attend, avec un seul bouton quand toutes se font
-    au même endroit ; chaque ligne ne garde que son sujet.
+  - **Une ligne par démarche** (Sacha, 06/11/2026, remplace la « lecture groupée » par nature
+    du 05/10) : avant le lancement, le Plan montre chaque démarche sous le nom qu'elle aura dans
+    le Parcours (`demarcheOfItem`, `lib/legal/demarches/build.ts`) : une personne = son item
+    « contrat » (fiche puis contrat), l'item « fiches » commun n'a pas de ligne et reste gardé
+    tant qu'une démarche qui en dépend l'est. Responsable et échéance se lisent ; un clic les
+    change. Les contrats à prévoir sont un tableau, une ligne par personne (`ContractTable`).
   - **Dossiers** : les pages des branches (Fiches de renseignements, Contrats) sont en
     pastilles sous les étapes du Juridique, ouvertes à tout moment.
   - **Pas encore** (dit à l'écran, comme le demande le ticket) : l'envoi en signature,

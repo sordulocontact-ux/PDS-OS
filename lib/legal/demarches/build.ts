@@ -310,6 +310,16 @@ export function launchedDemarches(input: {
   return withNext(built);
 }
 
+/** The démarche a plan item becomes, named as the journey will name it
+ * (« Sami Kader · fiche et contrat »); none for the shared fiches. */
+export function demarcheOfItem(
+  item: Pick<PlanItem, "key" | "subject" | "label">,
+): { kind: LegalDemarcheKind; title: string } | null {
+  const kind = kindOfPart(item.key);
+  if (!kind) return null;
+  return { kind, title: t.titles[kind](bare(item.subject ?? item.label)) };
+}
+
 /** The démarches the code proposes while the plan is not launched: locked,
  * each waiting for the Plan d'action. */
 export function proposedDemarches(input: {
@@ -318,14 +328,15 @@ export function proposedDemarches(input: {
 }): Demarche[] {
   const { ctx } = input;
   const built = input.items.flatMap((item): Demarche[] => {
-    const kind = kindOfPart(item.key);
-    if (!kind) return [];
+    const demarche = demarcheOfItem(item);
+    if (!demarche) return [];
+    const { kind, title } = demarche;
     const ref = refOf(item.key);
     const subject = bare(item.subject ?? item.label);
     const step: JourneyStep = {
       key: legalDemarcheKey(kind, ref),
       href: legalDemarcheHref(ctx.projectId, kind, ref),
-      title: t.titles[kind](subject),
+      title,
       why: t.why[kind],
       status: "blocked",
       owner: { name: ctx.owner.name ?? "—", role: fr.legalJourney.owner },

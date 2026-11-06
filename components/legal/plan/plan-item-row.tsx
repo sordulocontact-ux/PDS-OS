@@ -2,12 +2,14 @@
 
 import { Field } from "@/components/auth/field";
 import { OptionSelect } from "@/components/projects/option-select";
+import { Button } from "@/components/ui/button";
+import { FactRowFrame } from "@/components/ui/fact-row-frame";
 import { legal } from "@/lib/i18n/fr/legal";
-import type { PlanRow } from "@/lib/legal/plan/queries";
-import { cn } from "@/lib/utils";
-import { Checkbox } from "@/components/ui/checkbox";
+import { legalDemarches } from "@/lib/i18n/fr/legal-demarches";
+import type { LegalDemarcheKind } from "@/lib/ui/legal-steps";
+import { formatDay } from "@/lib/utils/day";
 
-const fr = { legal };
+const fr = { legal, legalDemarches };
 
 export type PlanChoice = {
   include: boolean;
@@ -18,100 +20,119 @@ export type PlanChoice = {
 const NONE = "none";
 
 /**
- * One action of the proposed plan: keep it or not (« Justine valide ou
- * corrige la cartographie », Juridique 03), what it waits for, who answers
- * for it and by when (« responsabilités, dépendances et calendrier », 07).
+ * One démarche of the proposed plan, as the journey will name it (Sacha,
+ * 06/11/2026: « Sami Kader · fiche et contrat »): what it holds or waits
+ * for under it, who answers for it and by when on the right, read without
+ * a field. A click on the row opens why it exists, its responsible and its
+ * due date (« responsabilités, dépendances et calendrier », Juridique 07),
+ * and « Retirer du plan » (« Justine valide ou corrige », Juridique 03).
+ * The choices are sent with « Lancer le plan d'action ».
  */
 export function PlanItemRow({
-  item,
-  line,
+  itemKey,
+  kind,
+  title,
+  source,
   choice,
   people,
+  open,
+  onToggle,
   onChange,
 }: {
-  item: PlanRow;
-  // What this line says on its own, the rest being said by its group.
-  line: {
-    title: string;
-    detail: string | null;
-    why: string | null;
-    after: string[];
-  };
+  itemKey: string;
+  kind: LegalDemarcheKind;
+  title: string;
+  source: string | null;
   choice: PlanChoice;
   people: Array<{ personId: string; name: string }>;
+  open: boolean;
+  onToggle: () => void;
   onChange: (choice: PlanChoice) => void;
 }) {
   const t = fr.legal.plan;
-  const id = `plan-${item.key.replace(/[^a-z0-9-]/gi, "-")}`;
+  const d = t.demarches;
+  const id = `plan-${itemKey.replace(/[^a-z0-9-]/gi, "-")}`;
+  const nameOf = (personId: string | null) =>
+    people.find((p) => p.personId === personId)?.name ?? t.noResponsible;
+  const row = {
+    value: choice.include ? (
+      title
+    ) : (
+      <span className="text-[color:var(--text-tertiary)] line-through">
+        {title}
+      </span>
+    ),
+    source: choice.include ? source : d.removedNote,
+    state: choice.include
+      ? null
+      : { tone: "neutral" as const, label: d.removed },
+    side: choice.include ? (
+      <span className="flex flex-col md:items-end">
+        <span>{nameOf(choice.responsibleId)}</span>
+        {choice.dueOn && (
+          <span className="text-caption text-[color:var(--text-secondary)] tabular-nums">
+            {formatDay(choice.dueOn)}
+          </span>
+        )}
+      </span>
+    ) : null,
+  };
+  if (!open)
+    return (
+      <FactRowFrame {...row} onClick={onToggle} hrefLabel={d.edit(title)} />
+    );
   return (
-    <li
-      className={cn(
-        "flex flex-col gap-3 py-3 sm:flex-row sm:items-start sm:gap-4",
-        !choice.include && "opacity-60",
-      )}
-    >
-      <label className="flex min-w-0 flex-1 items-start gap-3">
-        <Checkbox
-          className="mt-1 shrink-0"
-          checked={choice.include}
-          aria-label={t.include(item.label)}
-          onChange={(event) =>
-            onChange({ ...choice, include: event.target.checked })
-          }
-        />
-        <span className="flex min-w-0 flex-col gap-0.5">
-          <span className="font-medium break-words">{line.title}</span>
-          {line.detail && (
-            <span className="text-sm break-words text-muted-foreground">
-              {line.detail}
-            </span>
-          )}
-          {line.why && (
-            <span className="text-sm break-words text-muted-foreground">
-              {line.why}
-            </span>
-          )}
-          {line.after.length > 0 && (
-            <span className="text-sm text-muted-foreground">
-              {t.after(line.after.join(", "))}
-            </span>
-          )}
-        </span>
-      </label>
-      {/* Kept mounted when the action is left out (inert), so its choices
-          come back as they were if it is kept again. */}
-      <div
-        inert={!choice.include}
-        className="grid gap-3 sm:w-[22rem] sm:shrink-0 sm:grid-cols-2"
-      >
-        <OptionSelect
-          id={`${id}-responsible`}
-          name={`${id}-responsible`}
-          label={t.responsible}
-          items={{
-            [NONE]: t.noResponsible,
-            ...Object.fromEntries(people.map((p) => [p.personId, p.name])),
-          }}
-          // The initial value: these fields remount when it changes.
-          defaultValue={item.responsibleId ?? NONE}
-          onValueChange={(value) =>
-            onChange({
-              ...choice,
-              responsibleId: value === NONE ? null : value,
-            })
-          }
-        />
-        <Field
-          id={`${id}-due`}
-          name={`${id}-due`}
-          type="date"
-          label={t.due}
-          defaultValue={item.dueOn ?? ""}
-          onChange={(event) =>
-            onChange({ ...choice, dueOn: event.target.value || null })
-          }
-        />
+    <>
+      <FactRowFrame {...row} />
+      <div className="flex flex-col gap-3.5 border-b border-[color:var(--border-hairline)] bg-[var(--surface-soft)] px-3.5 py-3.5 last:border-b-0">
+        <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
+          {fr.legalDemarches.why[kind]}
+        </p>
+        {choice.include && (
+          <div className="grid gap-3 sm:grid-cols-2">
+            <OptionSelect
+              id={`${id}-responsible`}
+              name={`${id}-responsible`}
+              label={t.responsible}
+              items={{
+                [NONE]: t.noResponsible,
+                ...Object.fromEntries(people.map((p) => [p.personId, p.name])),
+              }}
+              defaultValue={choice.responsibleId ?? NONE}
+              onValueChange={(value) =>
+                onChange({
+                  ...choice,
+                  responsibleId: value === NONE ? null : value,
+                })
+              }
+            />
+            <Field
+              id={`${id}-due`}
+              name={`${id}-due`}
+              type="date"
+              label={t.due}
+              defaultValue={choice.dueOn ?? ""}
+              onChange={(event) =>
+                onChange({ ...choice, dueOn: event.target.value || null })
+              }
+            />
+          </div>
+        )}
+        <div className="flex flex-wrap items-center gap-2">
+          <Button type="button" size="sm" variant="outline" onClick={onToggle}>
+            {d.close}
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            className="ml-auto"
+            onClick={() => onChange({ ...choice, include: !choice.include })}
+          >
+            {choice.include ? d.remove : d.restore}
+          </Button>
+        </div>
       </div>
-    </li>
+    </>
   );
 }

@@ -1543,3 +1543,20 @@ Retours d'Ibé du 01/11 (« Sessions studio accessibles depuis la barre de menu,
 - [x] « Maintenant » d'un module : quand l'étape affichée est au lecteur, la ligne dit « 2 autres choses à
       faire ailleurs » et plus « Rien à faire ici » (qui contredisait « À vous » juste dessous).
 - [ ] Passage navigateur.
+
+## Plan d'action du Juridique refait (06/11/2026, branche `pre-prod`)
+
+Proto « Plan d'action de Néons » (artefact du 06/11, copie `~/Desktop/Protos PDS OS/PDS OS - Plan d'action.html`).
+
+- [x] Démarches : une ligne par démarche, nommée comme dans le Parcours une fois le plan lancé
+      (« Sami Kader · fiche et contrat », `demarcheOfItem`), au lieu des actions rangées par nature sur
+      trois niveaux ; dessous ce qu'elle contient ou attend (« Après : … »), à droite le responsable et
+      l'échéance lus sans champ ; un clic ouvre le pourquoi, Responsable, Échéance, « Retirer du plan ».
+      Les fiches communes (item `onboarding`) n'ont pas de ligne : gardées tant qu'une démarche qui en
+      dépend l'est (décision du lot, pour garder une ligne = une étape du Parcours).
+- [x] Contrats à prévoir en tableau (Personne · Contrat · Rémunération · État), provenance dite une fois,
+      une 2e ligne seulement pour une exception ; un clic ouvre les champs sous la ligne ; même tableau
+      une fois confirmés (`AgreementList`).
+- [x] Retirés : la vue « plan lancé » de `PlanView` (jamais affichée), `ActionGroup`, `groupActions`,
+      `groupAction` et les textes devenus inutiles.
+- [ ] Passage navigateur ; le responsable des fiches communes reste celui proposé par le code.

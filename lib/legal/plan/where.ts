@@ -30,16 +30,3 @@ export const isPlanItemKind = (value: string): value is PlanItemKind =>
   ["onboarding", "contract", "splits", "clearance", "formality"].includes(
     value,
   );
-
-/** The button of a group: one place for all its actions, else none (each
- * line then carries its own). */
-export function groupAction(
-  projectId: string,
-  items: Array<{ kind: PlanItemKind }>,
-): { href: string; label: string } | null {
-  const hrefs = new Set(
-    items.map((item) => legalActionHref(projectId, item.kind)),
-  );
-  if (items.length === 0 || hrefs.size !== 1) return null;
-  return { href: [...hrefs][0], label: legalActionLabel(items[0].kind) };
-}

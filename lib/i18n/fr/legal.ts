@@ -341,22 +341,6 @@ export const legal = {
     title: "Plan d'action",
     description:
       "Ce qu'il faut faire à partir du dossier confirmé : ce qui peut commencer maintenant, ce qui est en cours, ce qui viendra ensuite. Choisissez les responsables, puis lancez le plan.",
-    columns: {
-      now: {
-        title: "À lancer maintenant",
-        description:
-          "Rien ne les retient. Chacune devient une tâche dans le Travail de son responsable, qui est prévenu.",
-      },
-      ongoing: {
-        title: "En cours",
-        description: "Déjà commencé, en attente d'un retour.",
-      },
-      later: {
-        title: "À venir",
-        description:
-          "Débloquées dès que ce dont elles dépendent est fait. Leur tâche attend déjà dans Travail.",
-      },
-    },
     // Plain words (Sacha, 04/10/2026: « je comprends pas ») : what to do,
     // then why it exists.
     items: {
@@ -380,7 +364,6 @@ export const legal = {
       formalityWhy:
         "La déclaration ouvre les droits d'auteur. Elle attend les informations des créateurs, la répartition, les autorisations d'œuvres existantes et le master final.",
     },
-    after: (labels: string) => `Prérequis : ${labels}`,
     // JUR-05: immediate actions apart from dependent ones.
     sections: {
       immediate: {
@@ -393,6 +376,24 @@ export const legal = {
       },
     },
     noPrereq: "Aucun prérequis",
+    // One line per démarche, named as the journey will name it (Sacha,
+    // 06/11/2026): what it holds, who answers for it and by when.
+    demarches: {
+      intro:
+        "Chacune devient une étape du Parcours, sous ce nom, et une tâche dans le Travail de son responsable.",
+      person: (withFiche: boolean) =>
+        withFiche
+          ? "Sa fiche de renseignements, puis son contrat"
+          : "Son contrat",
+      fiches: "les fiches de renseignements",
+      after: (labels: string) => `Après : ${labels}`,
+      removed: "Retirée",
+      removedNote: "Retirée du plan : rien ne sera créé pour elle.",
+      remove: "Retirer du plan",
+      restore: "Remettre dans le plan",
+      close: "Fermer",
+      edit: (title: string) => `Modifier « ${title} »`,
+    },
     // What launching makes, said once before it happens (JUR-05).
     creates: {
       title: "Ce que le lancement crée",
@@ -428,23 +429,17 @@ export const legal = {
       clearance: "Ouvrir l'autorisation",
       formality: "Déclarer",
     },
-    empty: "Rien dans cette colonne.",
-    include: (label: string) => `Garder « ${label} » dans le plan`,
     responsible: "Responsable",
     noResponsible: "À désigner",
     due: "Échéance",
     launch: "Lancer le plan d'action",
     launching: "Lancement…",
-    notice:
-      "Lancer le plan d'action crée une tâche par action dans Travail ; chacune se coche d'elle-même quand sa source dit que c'est fait. Rien n'est envoyé à l'extérieur et aucun contrat n'est créé.",
     nothing: "Le dossier ne demande aucune action pour l'instant.",
     needsConfirmation: {
       title: "Le dossier n'est pas encore confirmé",
       body: "Le plan d'action part du dossier confirmé : relisez-le et confirmez-le d'abord.",
       action: "Aller à la confirmation",
     },
-    launched: (date: string, name: string | null) =>
-      name ? `Plan lancé le ${date} par ${name}.` : `Plan lancé le ${date}.`,
     status: {
       action_now: "À lancer",
       waiting_external: "En attente d'un retour",

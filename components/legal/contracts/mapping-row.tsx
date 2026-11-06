@@ -2,18 +2,16 @@
 
 import { Field } from "@/components/auth/field";
 import { TextareaField } from "@/components/auth/textarea-field";
+import { rolesOf } from "@/components/legal/contracts/contract-table";
 import { NewTemplateButton } from "@/components/legal/contracts/new-template-button";
 import { OptionSelect } from "@/components/projects/option-select";
 import { ReturnCallout } from "@/components/ui/return-callout";
-import { StatusBadge } from "@/components/ui/status-badge";
 import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
 import { legalDocuments } from "@/lib/i18n/fr/legal-documents";
-import { legalForms } from "@/lib/i18n/fr/legal-forms";
-import { masterPage } from "@/lib/i18n/fr/master-page";
 import { agreementTone, type Tone } from "@/lib/ui/state-tones";
 import type { AgreementRow } from "@/lib/legal/contracts/mapping";
 
-const fr = { legalContracts, legalDocuments, legalForms, masterPage };
+const fr = { legalContracts, legalDocuments };
 
 export const NO_DEAL = "none";
 
@@ -31,13 +29,35 @@ export type MappingChoice = {
   reason: string;
 };
 
+/** Where a person stands while the contracts are chosen (JUR-12). */
+export function mappingPill(
+  row: AgreementRow,
+  value: MappingChoice,
+  request: RequestState | null,
+): { tone: Tone; label: string } | null {
+  const t = fr.legalContracts.agreements;
+  const c = t.choiceStates;
+  if (!row.contactId) return null;
+  if (row.contract)
+    return { tone: agreementTone[row.state], label: t.states[row.state] };
+  if (row.existing && value.choice === null)
+    return { tone: "success", label: c.existing };
+  if (value.choice === NO_DEAL) return { tone: "neutral", label: c.notNeeded };
+  if (row.compatible.length === 0)
+    return request?.pending
+      ? { tone: "warning", label: c.pendingTemplate }
+      : { tone: "danger", label: c.missingTemplate };
+  return { tone: "info", label: c.needed };
+}
+
 /**
- * One person of « Contrats à prévoir » (proto « Projet complet »): name and
- * roles, the contract to provide for (validated templates for these roles,
- * or « Pas d'accord nécessaire » with why), the fee, where the proposal
- * comes from, and « Nouveau modèle de contrat » when no template fits.
+ * The fields of one person of « Contrats à prévoir », opened from their
+ * line of the table (proto « Projet complet »): the contract to provide for
+ * (validated templates for these roles, or « Pas d'accord nécessaire » with
+ * why), the fee, where the proposal comes from, and « Nouveau modèle de
+ * contrat » when no template fits.
  */
-export function MappingRow({
+export function MappingEditor({
   row,
   value,
   onChange,
@@ -60,121 +80,80 @@ export function MappingRow({
   const d = fr.legalDocuments.template;
   const t = fr.legalContracts.agreements;
   const p = t.plan;
-  const roles = row.creditRoles.map((r) => fr.masterPage.credits.roles[r]);
-  const roleLabel = roles.join(", ") || fr.legalForms.roles.performer;
-  // Where this person stands while the contracts are chosen (JUR-12).
-  const c = t.choiceStates;
-  const pill: { tone: Tone; label: string } | null = !row.contactId
-    ? null
-    : row.contract
-      ? { tone: agreementTone[row.state], label: t.states[row.state] }
-      : row.existing && value.choice === null
-        ? { tone: "success", label: c.existing }
-        : value.choice === NO_DEAL
-          ? { tone: "neutral", label: c.notNeeded }
-          : row.compatible.length === 0
-            ? request?.pending
-              ? { tone: "warning", label: c.pendingTemplate }
-              : { tone: "danger", label: c.missingTemplate }
-            : { tone: "info", label: c.needed };
+  const roleLabel = rolesOf(row);
   return (
-    <li className="flex flex-col gap-3 py-4 first:pt-0">
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <span className="font-semibold break-words">{row.name}</span>
-          <span className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
-            {roleLabel}
-          </span>
-        </div>
-        {pill && (
-          <StatusBadge tone={pill.tone} size="sm">
-            {pill.label}
-          </StatusBadge>
+    <div className="flex flex-col gap-3">
+      <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem]">
+        <OptionSelect
+          id={`contract-${row.key}`}
+          name={`contract-${row.key}`}
+          label={p.contract}
+          required
+          placeholder={p.choose}
+          items={{
+            ...Object.fromEntries(row.compatible.map((o) => [o.id, o.label])),
+            [NO_DEAL]: p.noDeal,
+          }}
+          defaultValue={value.choice}
+          onValueChange={(choice) => onChange({ choice })}
+          error={errors.choice}
+        />
+        {value.choice && value.choice !== NO_DEAL && (
+          <Field
+            name={`fee-${row.key}`}
+            label={
+              row.proposal.feeFromFiche
+                ? `${t.columns.fee} · ${t.feeFromFiche}`
+                : t.columns.fee
+            }
+            aria-label={t.feeLabel(row.name)}
+            inputMode="decimal"
+            suffix="€"
+            value={value.fee}
+            onChange={(event) => onChange({ fee: event.target.value })}
+          />
         )}
       </div>
-      {!row.contactId ? (
-        <span className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
-          {t.noContact}
-        </span>
-      ) : row.contract ? null : (
-        <div className="flex flex-col gap-3">
-          <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem]">
-            <OptionSelect
-              id={`contract-${row.key}`}
-              name={`contract-${row.key}`}
-              label={p.contract}
-              required
-              placeholder={p.choose}
-              items={{
-                ...Object.fromEntries(
-                  row.compatible.map((o) => [o.id, o.label]),
-                ),
-                [NO_DEAL]: p.noDeal,
-              }}
-              defaultValue={value.choice}
-              onValueChange={(choice) => onChange({ choice })}
-              error={errors.choice}
-            />
-            {value.choice && value.choice !== NO_DEAL && (
-              <Field
-                name={`fee-${row.key}`}
-                label={
-                  row.proposal.feeFromFiche
-                    ? `${t.columns.fee} · ${t.feeFromFiche}`
-                    : t.columns.fee
-                }
-                aria-label={t.feeLabel(row.name)}
-                inputMode="decimal"
-                suffix="€"
-                value={value.fee}
-                onChange={(event) => onChange({ fee: event.target.value })}
-              />
-            )}
-          </div>
-          {value.choice === NO_DEAL && (
-            <TextareaField
-              id={`no-deal-${row.key}`}
-              name={`no-deal-${row.key}`}
-              label={p.noDealWhy}
-              hint={p.noDealHint}
-              required
-              rows={2}
-              maxLength={1000}
-              value={value.reason}
-              onChange={(event) => onChange({ reason: event.target.value })}
-              error={errors.reason}
-            />
-          )}
-          <span className="text-[length:var(--type-micro)] leading-[var(--type-micro-lh)] text-[color:var(--text-secondary)]">
-            {row.compatible.length > 0
-              ? p.proposedFrom(roleLabel)
-              : request?.pending
-                ? d.pending(request.name, direction)
-                : p.noTemplateSource}
-          </span>
-          {row.existing && (
-            <span className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
-              {t.existing(row.existing.title)}
-            </span>
-          )}
-          {row.compatible.length === 0 && request?.refusal && (
-            <ReturnCallout
-              by={request.refusal.by}
-              outcome={d.refuseVerb}
-              note={request.refusal.reason}
-            />
-          )}
-          {row.compatible.length === 0 &&
-            organizationId &&
-            !request?.pending && (
-              <NewTemplateButton
-                organizationId={organizationId}
-                roles={row.formRoles}
-                request={{ projectId, key: row.key, name: row.name }}
-              />
-            )}
-        </div>
+      {value.choice === NO_DEAL && (
+        <TextareaField
+          id={`no-deal-${row.key}`}
+          name={`no-deal-${row.key}`}
+          label={p.noDealWhy}
+          hint={p.noDealHint}
+          required
+          rows={2}
+          maxLength={1000}
+          value={value.reason}
+          onChange={(event) => onChange({ reason: event.target.value })}
+          error={errors.reason}
+        />
       )}
-    </li>
+      <span className="text-[length:var(--type-micro)] leading-[var(--type-micro-lh)] text-[color:var(--text-secondary)]">
+        {row.compatible.length > 0
+          ? p.proposedFrom(roleLabel)
+          : request?.pending
+            ? d.pending(request.name, direction)
+            : p.noTemplateSource}
+      </span>
+      {row.existing && (
+        <span className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
+          {t.existing(row.existing.title)}
+        </span>
+      )}
+      {row.compatible.length === 0 && request?.refusal && (
+        <ReturnCallout
+          by={request.refusal.by}
+          outcome={d.refuseVerb}
+          note={request.refusal.reason}
+        />
+      )}
+      {row.compatible.length === 0 && organizationId && !request?.pending && (
+        <NewTemplateButton
+          organizationId={organizationId}
+          roles={row.formRoles}
+          request={{ projectId, key: row.key, name: row.name }}
+        />
+      )}
+    </div>
   );
 }
