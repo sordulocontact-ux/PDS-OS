@@ -38,8 +38,8 @@ const t = fr.journey;
  * informations secondaires repliées »). It comes right under the « why »,
  * named by the step's action (« À vous · Valider le Mix V1 ») and anchored
  * (`#a-vous`, where Travail opens it); the result banner moves above it.
- * `leadTitle={false}` when the whole step is the gesture (a form, PO's
- * question: Plan d'action, Cadrage juridique): no « À vous · … » line,
+ * `leadTitle={false}` when the whole step is the gesture (the Juridique,
+ * whose content comes first when the viewer acts): no « À vous · … » line,
  * which would only repeat the journey and the gesture's own button (Sacha,
  * 06/11/2026).
  */

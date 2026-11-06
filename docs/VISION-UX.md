@@ -116,10 +116,11 @@ Titre du module                                   [chevrons des sous-modules]
   Ensuite », ni ligne « À vous : … » sous le pourquoi** : Ibé trouvait que ça faisait trop de
   bruit (cases vides, redites). Le Parcours dit déjà qui agit et sur quoi, « Qui fait quoi »
   donne les rôles, le cadenas dit ce qu'une étape attend, et l'encadré « À vous · … » en tête
-  reste quand la personne a un geste à faire *(Ibé et Sacha, 03/11/2026)* — sans cadre ni fond bleu : la pastille « À vous » et le nom du geste suffisent *(Sacha, 04/11/2026)*. **Sauf quand toute l'étape est le geste** (un formulaire, la question de PO : Plan d'action,
-  Cadrage juridique) : la ligne « À vous · … » ne ferait que répéter le Parcours et le bouton du geste ;
-  le contenu garde sa place en tête et son ancre `#a-vous`, sans titre *(Sacha, 06/11/2026 ;
-  `StepPanel leadTitle={false}`, `LegalStepFrame gestureIsStep`)*.
+  reste quand la personne a un geste à faire *(Ibé et Sacha, 03/11/2026)* — sans cadre ni fond bleu : la pastille « À vous » et le nom du geste suffisent *(Sacha, 04/11/2026)*. **Sauf quand toute l'étape est le geste** (tout le Juridique : quand c'est à la personne, le
+  contenu entier de l'étape passe en tête, question de PO, plan, demande d'autorisation…) : la ligne
+  « À vous · … » ne ferait que répéter le Parcours et la section du geste avec son bouton ; le contenu
+  garde sa place en tête et son ancre `#a-vous`, sans titre *(Sacha, 06/11/2026 ;
+  `StepPanel leadTitle={false}`, posé par `LegalStepFrame`)*.
 - **On arrive au bon endroit.** Ouvrir un module ouvre l'étape qui attend la personne, sinon
   l'étape en cours. Quand la personne a un geste à faire, **il passe en tête de l'étape**
   (« À vous · Valider le Mix V1 » : la version, ses retours et la décision ; ou la question qu'on

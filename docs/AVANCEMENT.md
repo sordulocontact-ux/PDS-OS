@@ -1568,6 +1568,6 @@ Proto « Plan d'action de Néons » (artefact du 06/11, copie `~/Desktop/Protos 
 - [x] Retirés : la vue « plan lancé » de `PlanView` (jamais affichée), `ActionGroup`, `groupActions`,
       `groupAction` et les textes devenus inutiles.
 - [ ] Passage navigateur ; le responsable des fiches communes reste celui proposé par le code.
-- [x] Pas de ligne « À vous · … » quand toute l'étape est le geste (Plan d'action, Cadrage juridique) :
-      `StepPanel leadTitle={false}` par `LegalStepFrame gestureIsStep` ; règle écrite dans
-      `docs/VISION-UX.md` § 4.
+- [x] Pas de ligne « À vous · … » quand toute l'étape est le geste : tout le Juridique, dont le contenu
+      entier passe en tête quand c'est au lecteur (`StepPanel leadTitle={false}` posé par
+      `LegalStepFrame`) ; règle écrite dans `docs/VISION-UX.md` § 4.

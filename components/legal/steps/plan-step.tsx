@@ -70,7 +70,7 @@ export async function PlanStep({ projectId }: { projectId: string }) {
       </StepSection>
     );
   return (
-    <LegalStepFrame projectId={projectId} stepKey="plan" gestureIsStep>
+    <LegalStepFrame projectId={projectId} stepKey="plan">
       {plan.state === "launched" ? (
         <div className="flex flex-col gap-5">
           <ToneCallout tone="success">
