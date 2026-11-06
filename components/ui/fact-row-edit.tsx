@@ -53,15 +53,10 @@ export function FactRowEditable({
     setMissing(false);
     setEditing(true);
   };
+  // A click on the whole row: no verb written, its tint on hover says it
+  // (as the Juridique's rows, Sacha 06/11/2026).
   if (!editing && row.openOnRow)
-    return (
-      <FactRowFrame
-        {...row}
-        onClick={open}
-        hoverAction={t.edit}
-        buttonRef={editButton}
-      />
-    );
+    return <FactRowFrame {...row} onClick={open} buttonRef={editButton} />;
   if (!editing)
     return (
       <FactRowFrame

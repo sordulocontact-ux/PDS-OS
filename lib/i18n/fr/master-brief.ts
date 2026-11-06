@@ -147,6 +147,7 @@ export const masterBrief = {
   changed: "Brief mis à jour",
   // A text or a date of the Brief still empty (pill, not red).
   toFill: "À renseigner",
+  toConfirm: "À confirmer",
   directionAsked: (person: string) => `Demandée à ${person}`,
   directionAnswered: (person: string) => `Réponse de ${person} à ajouter`,
   // « En attente de X : remplir le Brief » (StepWaiting).

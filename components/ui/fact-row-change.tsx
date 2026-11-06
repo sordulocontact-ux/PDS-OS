@@ -65,10 +65,7 @@ export function FactRowChangeable({
                 </>
               ),
             }
-          : {
-              onClick: () => setOpen(true),
-              hoverAction: row.missing ? t.choose : t.change,
-            })}
+          : { onClick: () => setOpen(true) })}
       />
     );
 
