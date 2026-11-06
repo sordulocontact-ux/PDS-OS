@@ -1,6 +1,6 @@
 // Where an artist's projects stand (proto `docs/protos/pages.html`,
-// « Artistes »): each launched project, the place of its open step and who
-// it waits for, read from the project's journeys (loadShellActions, the
+// « Artistes »): each launched project and the place of its open step (the
+// Artistes list), read from the project's journeys (loadShellActions, the
 // source of Travail and the home); the next release. Computed by code,
 // never stored. Client-safe: the list's table reads it.
 
@@ -9,11 +9,6 @@ import type { ProjectAction, ProjectJourneys } from "@/lib/journey/types";
 import { projectFormatLabel } from "@/lib/projects/labels";
 import type { ProjectListItem } from "@/lib/projects/types";
 import { daysBetween } from "@/lib/utils/calendar-period";
-
-/** Who the project waits for at its open step. */
-export type ProjectWait =
-  | { mine: true; todo: string }
-  | { mine: false; who: string | null; viaLink: boolean; todo: string };
 
 /** One launched project of the artist and where it stands. */
 export type ProjectProgress = {
@@ -24,7 +19,6 @@ export type ProjectProgress = {
   // « Master › Mixage »: the journey's place and the open step; null when
   // no step asks anything of anyone.
   place: string | null;
-  wait: ProjectWait | null;
   // The release a musical project aims for, the due date of another.
   dueDate: string | null;
   music: boolean;
@@ -52,22 +46,11 @@ export function progressOf(
   const mine = journeys.mine[0];
   const other = mine ? undefined : [...journeys.waiting].sort(byUrgency)[0];
   const action = mine ?? other;
-  const todo = action ? (action.step.actor?.todo ?? action.step.title) : "";
   return {
     projectId: project.id,
     title: project.title,
     format: projectFormatLabel(project),
     place: action ? `${action.place} › ${action.step.title}` : null,
-    wait: mine
-      ? { mine: true, todo }
-      : other
-        ? {
-            mine: false,
-            who: other.step.actor?.name ?? null,
-            viaLink: other.step.actor?.viaLink ?? false,
-            todo,
-          }
-        : null,
     dueDate: project.dueDate,
     music: project.type === "music_release",
   };

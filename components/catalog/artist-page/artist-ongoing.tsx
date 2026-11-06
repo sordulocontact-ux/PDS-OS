@@ -8,39 +8,22 @@ import {
   DataTableHead,
   DataTableHeader,
   DataTableLink,
-  DataTableMedia,
   DataTableRow,
   EMPTY_CELL,
 } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { routes } from "@/lib/auth/redirects";
-import type {
-  ProjectProgress,
-  ProjectWait,
-} from "@/lib/catalog/artist-progress";
+import type { ProjectProgress } from "@/lib/catalog/artist-progress";
 import { catalog } from "@/lib/i18n/fr/catalog";
-import { journey } from "@/lib/i18n/fr/journey";
-import { lowerFirst } from "@/lib/ui/journey";
 import { formatShortDay } from "@/lib/utils/day";
 
-const fr = { catalog, journey };
-
-/** « À vous : … », « En attente de Karim Haddou (lien privé) : … ». */
-function waitText(wait: ProjectWait | null): string {
-  const t = fr.catalog.artistPage.ongoing;
-  if (!wait) return t.nothing;
-  const todo = lowerFirst(wait.todo);
-  if (wait.mine) return t.mine(todo);
-  if (!wait.who) return t.nobody(todo);
-  const via = wait.viaLink ? ` (${fr.journey.privateLink})` : "";
-  return `${fr.journey.now.waitFor(wait.who)}${via} : ${todo}`;
-}
+const fr = { catalog };
 
 /**
  * « En cours » of the artist's overview (proto `docs/protos/pages.html`):
- * each launched project, its format, its date and who it waits for (the
- * project's journeys, as Travail and the home); not its current step (Sacha,
- * 06/11/2026). The project's name opens it.
+ * each launched project, its type (Single, Album…) and its date; neither its
+ * current step nor who it waits for (Sacha, 06/11/2026). The project's name
+ * opens it.
  */
 export function ArtistOngoing({
   projects,
@@ -59,23 +42,21 @@ export function ArtistOngoing({
         <DataTable framed>
           <DataTableHeader>
             <DataTableHead>{t.columns.project}</DataTableHead>
-            <DataTableHead hideBelow="sm">{t.columns.date}</DataTableHead>
-            <DataTableHead fill>{t.columns.awaited}</DataTableHead>
+            <DataTableHead hideBelow="sm">{t.columns.type}</DataTableHead>
+            <DataTableHead fill>{t.columns.date}</DataTableHead>
           </DataTableHeader>
           <DataTableBody>
             {projects.map((p) => (
               <DataTableRow key={p.projectId}>
                 <DataTableCell>
-                  <DataTableMedia
-                    title={
-                      <DataTableLink href={routes.project(p.projectId)}>
-                        {p.title}
-                      </DataTableLink>
-                    }
-                    subtitle={p.format}
-                  />
+                  <DataTableLink href={routes.project(p.projectId)}>
+                    {p.title}
+                  </DataTableLink>
                 </DataTableCell>
                 <DataTableCell hideBelow="sm">
+                  {p.format ?? EMPTY_CELL}
+                </DataTableCell>
+                <DataTableCell fill>
                   {p.dueDate ? (
                     <StatusBadge tone="neutral" size="sm">
                       {(p.music ? t.release : t.due)(
@@ -85,9 +66,6 @@ export function ArtistOngoing({
                   ) : (
                     EMPTY_CELL
                   )}
-                </DataTableCell>
-                <DataTableCell fill className="break-words">
-                  {waitText(p.wait)}
                 </DataTableCell>
               </DataTableRow>
             ))}

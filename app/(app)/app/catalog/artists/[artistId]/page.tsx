@@ -92,6 +92,10 @@ export default async function ArtistOverviewPage({
               <p className="text-sm whitespace-pre-line">{artist.notes}</p>
             </PageSection>
           )}
+          {/* Under the bio, not under the identity (Sacha, 06/11/2026). */}
+          {canEdit && (
+            <ArtistContacts artistId={artist.id} contacts={contacts} />
+          )}
         </div>
 
         <div className="flex min-w-0 flex-col gap-[var(--section-gap)] lg:gap-6">
@@ -109,9 +113,6 @@ export default async function ArtistOverviewPage({
               ]}
             />
           </PageSection>
-          {canEdit && (
-            <ArtistContacts artistId={artist.id} contacts={contacts} />
-          )}
         </div>
       </div>
       {/* The tables take the page's whole width, under the identity column

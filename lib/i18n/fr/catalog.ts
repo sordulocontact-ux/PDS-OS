@@ -109,16 +109,13 @@ export const catalog = {
     // « En cours » of the overview: each launched project, where it stands.
     ongoing: {
       title: "En cours",
-      description: "Les projets de l'artiste et qui est attendu.",
+      description: "Les projets lancés de l'artiste et leur date.",
       none: "Aucun projet en cours.",
       error:
-        "Où en sont les projets n'a pas pu être lu entièrement. Rechargez la page.",
+        "Les projets n'ont pas pu être lus entièrement. Rechargez la page.",
       release: (day: string) => `Sortie ${day}`,
       due: (day: string) => `Échéance ${day}`,
-      mine: (todo: string) => `À vous : ${todo}`,
-      nobody: (todo: string) => `Personne de désigné : ${todo}`,
-      nothing: "Rien en attente",
-      columns: { project: "Projet", date: "Date", awaited: "Attendu" },
+      columns: { project: "Projet", type: "Type", date: "Date" },
     },
     titles: {
       title: "Titres",
