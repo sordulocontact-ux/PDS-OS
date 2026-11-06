@@ -49,6 +49,15 @@ export const callPage = {
         `Aujourd'hui à ${time} : ouvrez le call au moment de l'échange, PDS OS enregistre la visio et votre micro.`,
       start: "Commencer l'enregistrement",
     },
+    // The call's Meet was transcribed by Meet (lib/calls/meet-transcript.ts).
+    meet: {
+      title: "Transcription du Meet",
+      why: (day: string) =>
+        `Le call du ${day} s'est tenu sur Meet : PDS OS reprend ce que Meet a transcrit, puis écrit le compte rendu.`,
+      fetching: "Récupération de la transcription du Meet…",
+      retry: "Réessayer",
+      instead: "Déposer l'enregistrement à la place",
+    },
     upload: {
       title: "Déposer l'enregistrement",
       why: (day: string) =>
@@ -86,6 +95,7 @@ export const callPage = {
     thenOf: {
       record: "enregistrer le call",
       upload: "déposer l'enregistrement",
+      meet: "reprendre la transcription du Meet",
       proposals: "trancher les propositions",
       tasks: "créer les tâches",
       summary: "envoyer le résumé",

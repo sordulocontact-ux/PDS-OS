@@ -10,6 +10,8 @@ export const transcriptSchema = z.object({
       start: z.number().nonnegative(),
       end: z.number().nonnegative(),
       text: z.string(),
+      // Who spoke, when the source knows it (a Meet transcript, not Whisper).
+      speaker: z.string().optional(),
     }),
   ),
 });

@@ -16,6 +16,10 @@ const HTTP_STATUS: Partial<Record<CallErrorCode, number>> = {
   ai_quota: 429,
   provider_error: 502,
   audio_unavailable: 502,
+  meet_pending: 409,
+  meet_no_conference: 409,
+  meet_no_transcript: 409,
+  meet_unavailable: 502,
 };
 
 // A step may add facts to its success (the extraction says if the Brief or

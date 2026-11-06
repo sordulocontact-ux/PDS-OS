@@ -3,6 +3,7 @@ import { CallRecording } from "@/components/calls/call-recording";
 import { CallSummaryButton } from "@/components/calls/call-summary-button";
 import { CloseCallButton } from "@/components/calls/closure/close-call-button";
 import { JoinCallLink } from "@/components/calls/join-call-link";
+import { MeetTranscriptFetch } from "@/components/calls/meet-transcript-fetch";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { ViewLink } from "@/components/ui/view-link";
 import type { Unreviewed } from "@/lib/calls/closure";
@@ -52,6 +53,16 @@ export function CallNowAction({
               organizationId={call.organizationId}
             />
           )}
+        </div>
+      );
+    case "meet":
+      return (
+        <div id="call-recording" className="scroll-mt-24">
+          <MeetTranscriptFetch
+            callId={call.id}
+            organizationId={call.organizationId}
+            errorCode={call.errorCode}
+          />
         </div>
       );
     case "proposals":

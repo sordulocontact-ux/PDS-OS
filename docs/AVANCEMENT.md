@@ -1490,3 +1490,15 @@ Retours d'Ibé du 01/11 (« Sessions studio accessibles depuis la barre de menu,
 - [ ] « Rédiger le compte rendu » dans Travail et l'Accueil (aujourd'hui sur la page de la session seule).
 - [ ] Production : `supabase db push` de la migration (avec accord), passage navigateur.
 
+## Transcription des calls par Meet (06/11/2026, branche `pre-prod`)
+
+- [x] Chaque call dont PDS OS crée le Meet (Calendar, au nom de po@) a sa transcription automatique activée
+      (Meet REST API, `lib/integrations/google-meet.ts`) ; jeton Google partagé Calendar / Meet
+      (`google-oauth.ts`), script de jeton à 4 portées (Calendar, Drive, Meet réglages et lecture).
+- [x] Une fois le call fini, « Maintenant » reprend seul la transcription du Meet (`MeetTranscriptFetch`,
+      `lib/calls/meet-transcript.ts`, `google-meet-transcript.ts`) : qui parle sur chaque ligne, enregistrée
+      comme toute transcription (`provider = google_meet`), puis le compte rendu suit le chemin habituel.
+      Pas encore prête : « Réessayer » ; pas transcrite ou Google non connecté : déposer l'enregistrement.
+- [ ] Nouveau jeton avec les portées Meet (passage avec Ibé, po@) ; offre Workspace qui transcrit
+      (Business Standard ou plus) à confirmer ; essai sur un vrai Meet. Avec le jeton actuel, Google
+      refuse (403) : les calls gardent leur lien et le dépôt de l'enregistrement.

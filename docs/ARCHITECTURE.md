@@ -1415,8 +1415,22 @@ la semaine du Calendrier, et une création de call qui donne un lien Google Meet
   organise le Meet (Calendar le crée en son nom). Exige la portée `meetings.space.settings` et une
   offre Workspace qui transcrit (Business Standard ou plus) : sinon Google répond 403, journalisé
   (`[calls] meet auto transcription not turned on`), le call garde son lien. Jeton partagé
-  Calendar / Meet : `lib/integrations/google-oauth.ts`. Rapatrier la transcription dans la page du
-  call (à la place de l'enregistreur) : non construit.
+  Calendar / Meet : `lib/integrations/google-oauth.ts`.
+- **Transcription du Meet reprise dans la page du call** (06/11/2026) : un call dont PDS OS a créé le
+  Meet (`CallDetail.ownMeet` = `google_event_id` + lien meet.google.com + Google configuré,
+  `lib/calls/own-meet.ts`) et sans enregistrement passe, une fois fini, par le geste `meet` de
+  « Maintenant » (`callTodos`, avant `upload`) : `MeetTranscriptFetch` appelle seul
+  `POST /api/calls/[id]/meet-transcript` (`runMeetTranscription`, session de l'utilisateur, RLS ;
+  `claim(…, { needsAudio: false })`). `fetchMeetTranscript` (`google-meet-transcript.ts`, portée
+  `meetings.space.readonly`) lit toutes les conférences de l'espace (`conferenceRecords?filter=space.name`),
+  leurs transcriptions, leurs entrées et le nom des participants ; segments en secondes depuis le début
+  de la première conférence, avec `speaker` (champ facultatif du schéma `Transcript`, affiché par
+  `TranscriptPanel`), texte « Nom : phrase » par ligne pour que le compte rendu sache qui a dit quoi.
+  Enregistrée dans `transcripts` (`provider = google_meet`) ; `callStage` compte une transcription sans
+  audio comme enregistrée, puis `CallProcessing fromMeet` lance le compte rendu (`runExtraction`, qui ne
+  demande plus d'audio). Erreurs : `meet_pending` (réunion en cours ou fichier pas encore écrit :
+  « Réessayer », le dépôt reste replié), `meet_no_conference`, `meet_no_transcript`, `meet_unavailable`
+  (403 : jeton sans portée, offre sans transcription) → le dépôt de l'enregistrement devient le geste.
 
 ---
 

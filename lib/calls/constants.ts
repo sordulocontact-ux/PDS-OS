@@ -72,6 +72,11 @@ export type CallErrorCode =
   | "ai_quota"
   | "provider_error"
   | "transcript_empty"
+  // The transcript taken from the call's Meet (lib/calls/meet-transcript.ts).
+  | "meet_pending"
+  | "meet_no_conference"
+  | "meet_no_transcript"
+  | "meet_unavailable"
   | "save_failed"
   | "unknown";
 

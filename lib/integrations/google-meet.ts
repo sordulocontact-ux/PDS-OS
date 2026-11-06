@@ -36,11 +36,12 @@ export function meetingCodeOf(meetUrl: string): string | null {
   return match ? match[1].toLowerCase() : null;
 }
 
-async function request(
+/** One call to the Meet API with the organizer's token (google-oauth.ts). */
+export async function meetRequest<T>(
   method: "GET" | "PATCH",
   path: string,
   body?: unknown,
-): Promise<{ name?: string }> {
+): Promise<T> {
   const config = googleSettings();
   if (!config) throw new GoogleMeetError("not_configured");
   const token = await googleAccessToken(config);
@@ -60,7 +61,17 @@ async function request(
     throw new GoogleMeetError("unreachable");
   }
   if (!response.ok) throw new GoogleMeetError(`http_${response.status}`);
-  return (await response.json()) as { name?: string };
+  return (await response.json()) as T;
+}
+
+/** The lasting name (`spaces/…`) of the Meet of this link, found by its code. */
+export async function spaceNameOf(meetUrl: string): Promise<string> {
+  const code = meetingCodeOf(meetUrl);
+  if (!code) throw new GoogleMeetError("not_a_meet_link");
+  const space = await meetRequest<{ name?: string }>("GET", `spaces/${code}`);
+  if (!space.name?.startsWith("spaces/"))
+    throw new GoogleMeetError("space_missing");
+  return space.name;
 }
 
 /**
@@ -69,14 +80,10 @@ async function request(
  * (`spaces/…`), the only name `patch` accepts.
  */
 export async function turnOnAutoTranscription(meetUrl: string): Promise<void> {
-  const code = meetingCodeOf(meetUrl);
-  if (!code) throw new GoogleMeetError("not_a_meet_link");
-  const space = await request("GET", `spaces/${code}`);
-  if (!space.name?.startsWith("spaces/"))
-    throw new GoogleMeetError("space_missing");
-  await request(
+  const space = await spaceNameOf(meetUrl);
+  await meetRequest(
     "PATCH",
-    `${space.name}?updateMask=config.artifactConfig.transcriptionConfig.autoTranscriptionGeneration`,
+    `${space}?updateMask=config.artifactConfig.transcriptionConfig.autoTranscriptionGeneration`,
     {
       config: {
         artifactConfig: {

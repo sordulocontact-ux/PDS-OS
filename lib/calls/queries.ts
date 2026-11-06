@@ -11,6 +11,7 @@ import {
   type CallStatus,
 } from "@/lib/calls/constants";
 import type { AgendaItem } from "@/lib/calls/first-call-agenda";
+import { hasOwnMeet } from "@/lib/calls/own-meet";
 import {
   loadCallRecording,
   type CallRecordingState,
@@ -58,6 +59,9 @@ export type CallDetail = CallSummary & {
   // People outside the team, invited by e-mail.
   guests: Array<{ email: string; name: string | null }>;
   audioPath: string | null;
+  // Its Meet was made by PDS OS (po@ organizes it): the transcript may be
+  // read back from Google (lib/calls/meet-transcript.ts).
+  ownMeet: boolean;
   audioMime: string | null;
   audioBytes: number | null;
   // Saved while recording in the app (PROJ-BUG-01): unsent takes, or the
@@ -256,6 +260,10 @@ export async function getCall(
         (a.name ?? a.email).localeCompare(b.name ?? b.email, "fr"),
       ),
     audioPath: data.audio_path,
+    ownMeet: hasOwnMeet({
+      meetingUrl: data.meeting_url,
+      googleEventId: data.google_event_id,
+    }),
     audioMime: data.audio_mime,
     audioBytes: data.audio_bytes,
     errorCode: data.error_code,
@@ -409,11 +417,18 @@ function toSegments(value: unknown): Segment[] {
   if (!Array.isArray(value)) return [];
   return value.flatMap((item: unknown) => {
     if (typeof item !== "object" || item === null) return [];
-    const { start, end, text } = item as Record<string, unknown>;
+    const { start, end, text, speaker } = item as Record<string, unknown>;
     return typeof start === "number" &&
       typeof end === "number" &&
       typeof text === "string"
-      ? [{ start, end, text }]
+      ? [
+          {
+            start,
+            end,
+            text,
+            ...(typeof speaker === "string" && speaker && { speaker }),
+          },
+        ]
       : [];
   });
 }

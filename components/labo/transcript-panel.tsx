@@ -40,7 +40,13 @@ export function TranscriptPanel({ transcript }: { transcript: Transcript }) {
           <span className="pt-0.5 font-mono text-xs text-muted-foreground">
             {formatTimestamp(segment.start)}
           </span>
-          <span>{segment.text}</span>
+          <span>
+            {/* Who spoke, when the source knows it (a Meet transcript). */}
+            {segment.speaker && (
+              <span className="font-semibold">{segment.speaker} : </span>
+            )}
+            {segment.text}
+          </span>
         </li>
       ))}
     </ol>

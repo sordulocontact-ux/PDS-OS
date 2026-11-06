@@ -76,13 +76,18 @@ export function CallWorkspace({
   const now = new Date();
   const closed = data.closures.length > 0;
   const upcoming = isUpcoming(call, now);
-  const stage = callStage(call, closed, now);
+  const stage = callStage(
+    { ...call, hasTranscript: transcript !== null },
+    closed,
+    now,
+  );
   const actionsLeft = (data.outcomes?.actions ?? []).filter((a) => !a.task);
   const todos = callTodos({
     stage,
     owner: canEdit,
     today: recordsToday(call, now),
     interrupted: call.recording.takes.some((take) => take.pieces > 0),
+    ownMeet: call.ownMeet,
     pendingProposals: module ? data.pendingProposals : 0,
     tasksLeft: taskProjects.length > 0 ? actionsLeft.length : 0,
     summarySent: data.summarySent,
@@ -92,6 +97,7 @@ export function CallWorkspace({
   const linkable =
     canEdit &&
     !call.audioPath &&
+    !transcript &&
     (!call.prepared?.format || call.prepared.format === "video");
 
   return (
@@ -106,6 +112,7 @@ export function CallWorkspace({
         todos={todos}
         canEdit={canEdit}
         hasTranscript={transcript !== null}
+        fromMeet={transcript?.provider === "google_meet"}
         ownerName={organizer}
         where={where}
         module={module}
@@ -143,7 +150,7 @@ export function CallWorkspace({
               callId={call.id}
               agenda={call.agenda}
               durationMinutes={call.durationMinutes}
-              canEdit={canEdit && !call.audioPath}
+              canEdit={canEdit && !call.audioPath && !transcript}
               edited={call.agendaEdited}
             />
           )}

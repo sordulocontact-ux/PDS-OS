@@ -34,19 +34,24 @@ type Claimed = {
   audio_path: string | null;
 };
 
-/** Moves the call to `status` unless another job holds it. */
-async function claim(
+/** Moves the call to `status` unless another job holds it. Transcribing the
+ * app's recording needs its audio; reading a Meet transcript or writing the
+ * report from a transcript does not (`needsAudio: false`). */
+export async function claim(
   supabase: Client,
   callId: string,
   status: CallStatus,
+  { needsAudio = true }: { needsAudio?: boolean } = {},
 ): Promise<Claimed | CallErrorCode> {
   const staleBefore = new Date(Date.now() - STALE_AFTER_MS).toISOString();
-  const { data, error } = await supabase
+  const base = supabase
     .from("calls")
     .update({ status, error_code: null })
     .eq("id", callId)
-    .eq("consent", "granted")
-    .not("audio_path", "is", null)
+    .eq("consent", "granted");
+  const { data, error } = await (
+    needsAudio ? base.not("audio_path", "is", null) : base
+  )
     .or(
       `status.not.in.(transcribing,extracting),updated_at.lt."${staleBefore}"`,
     )
@@ -63,10 +68,10 @@ async function claim(
     .eq("id", callId)
     .maybeSingle();
   if (!call) return "not_found";
-  return call.audio_path ? "busy" : "audio_missing";
+  return call.audio_path || !needsAudio ? "busy" : "audio_missing";
 }
 
-async function finish(
+export async function finish(
   supabase: Client,
   callId: string,
   outcome: { status: CallStatus } | { error: CallErrorCode },
@@ -161,7 +166,10 @@ export async function runExtraction(
   const stored = await loadLatestTranscript(supabase, callId);
   if (!stored) return { ok: false, error: "no_transcript" };
 
-  const call = await claim(supabase, callId, "extracting");
+  // A Meet transcript has no audio in PDS OS: the transcript is what counts.
+  const call = await claim(supabase, callId, "extracting", {
+    needsAudio: false,
+  });
   if (typeof call === "string") return { ok: false, error: call };
   const fail = (error: CallErrorCode) => finish(supabase, callId, { error });
 

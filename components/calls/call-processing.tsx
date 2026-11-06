@@ -57,12 +57,15 @@ export function CallProcessing({
   status,
   errorCode,
   hasTranscript,
+  fromMeet = false,
 }: {
   projectId: string | null;
   callId: string;
   status: CallStatus;
   errorCode: string | null;
   hasTranscript: boolean;
+  // Taken from the call's Meet: no recording, the transcript came first.
+  fromMeet?: boolean;
 }) {
   const t = fr.calls.process;
   const router = useRouter();
@@ -150,12 +153,16 @@ export function CallProcessing({
         label={t.title}
         doneLabel={t.stepDone}
         steps={[
-          { key: "audio", label: t.steps.audio, state: "done" },
-          {
-            key: "transcript",
-            label: t.steps.transcript,
-            state: state(transcribed, transcribing),
-          },
+          ...(fromMeet
+            ? [{ key: "meet", label: t.steps.meet, state: "done" as const }]
+            : [
+                { key: "audio", label: t.steps.audio, state: "done" as const },
+                {
+                  key: "transcript",
+                  label: t.steps.transcript,
+                  state: state(transcribed, transcribing),
+                },
+              ]),
           {
             key: "report",
             label: t.steps.report,

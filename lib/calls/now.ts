@@ -6,7 +6,8 @@ import { callEndOf } from "@/lib/calls/format";
 import { parisPlace } from "@/lib/utils/calendar-period";
 
 /** planned: nothing recorded, not over · to_record: over, nothing recorded ·
- * processing: recorded, report not ready · ready · closed. */
+ * processing: recorded (or its Meet transcript taken), report not ready ·
+ * ready · closed. */
 export type CallStage =
   "planned" | "to_record" | "processing" | "ready" | "closed";
 
@@ -14,7 +15,7 @@ export type CallStage =
 export type CallModule = { href: string; name: string };
 
 export type CallTodo =
-  "record" | "upload" | "proposals" | "tasks" | "summary" | "close";
+  "record" | "meet" | "upload" | "proposals" | "tasks" | "summary" | "close";
 
 // The recording opens from this long before the call.
 const RECORD_OPEN_MS = 15 * 60_000;
@@ -25,6 +26,8 @@ type StageCall = {
   occurredAt: string;
   endsAt: string | null;
   durationMinutes: number | null;
+  // A transcript without audio: taken from the call's Meet.
+  hasTranscript?: boolean;
 };
 
 export function callStage(
@@ -33,7 +36,7 @@ export function callStage(
   now: Date,
 ): CallStage {
   if (closed) return "closed";
-  if (!call.audioPath)
+  if (!call.audioPath && !call.hasTranscript)
     return new Date(callEndOf(call)) > now ? "planned" : "to_record";
   return call.status === "ready" ? "ready" : "processing";
 }
@@ -49,7 +52,7 @@ export function recordsToday(call: StageCall, now: Date): boolean {
 
 /**
  * What the call asks of its owner, in the proto's order: record it (today),
- * drop a missing recording, settle the proposals in their module, turn the
+ * take its Meet transcript back, or else drop a missing recording, settle the proposals in their module, turn the
  * actions into tasks, send the summary, close it. Nothing for anyone else.
  */
 export function callTodos(input: {
@@ -58,6 +61,8 @@ export function callTodos(input: {
   today: boolean;
   // A recording interrupted earlier: never hidden.
   interrupted: boolean;
+  // Its Meet was made by PDS OS, which may read its transcript back.
+  ownMeet: boolean;
   pendingProposals: number;
   tasksLeft: number;
   summarySent: boolean;
@@ -68,7 +73,8 @@ export function callTodos(input: {
   if (!input.owner) return [];
   if (stage === "planned")
     return input.today || input.interrupted ? ["record"] : [];
-  if (stage === "to_record") return [input.interrupted ? "record" : "upload"];
+  if (stage === "to_record")
+    return [input.interrupted ? "record" : input.ownMeet ? "meet" : "upload"];
   if (stage !== "ready") return [];
   const todos: CallTodo[] = [];
   if (input.pendingProposals > 0) todos.push("proposals");

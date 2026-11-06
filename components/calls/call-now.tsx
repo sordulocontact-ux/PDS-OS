@@ -27,6 +27,7 @@ export function CallNow({
   todos,
   canEdit,
   hasTranscript,
+  fromMeet,
   ownerName,
   where,
   module,
@@ -38,6 +39,8 @@ export function CallNow({
   todos: CallTodo[];
   canEdit: boolean;
   hasTranscript: boolean;
+  // The transcript was taken from the call's Meet, not recorded.
+  fromMeet: boolean;
   ownerName: string | null;
   where: string;
   module: CallModule | null;
@@ -58,6 +61,10 @@ export function CallNow({
       record: [
         t.record.title(call.title),
         t.record.why(formatTime(call.occurredAt)),
+      ],
+      meet: [
+        t.meet.title,
+        t.meet.why(formatShortDay(call.occurredAt, { bare: true })),
       ],
       upload: [
         t.upload.title,
@@ -116,6 +123,7 @@ export function CallNow({
           status={call.status}
           errorCode={call.errorCode}
           hasTranscript={hasTranscript}
+          fromMeet={fromMeet}
         />
       </CallNowBlock>
     );

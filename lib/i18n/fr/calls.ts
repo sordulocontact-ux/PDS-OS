@@ -232,6 +232,7 @@ export const calls = {
     title: "Traitement du call",
     steps: {
       audio: "Enregistrement reçu",
+      meet: "Transcription du Meet",
       transcript: "Transcription",
       report: "Compte rendu",
       brief: "Brief pré-rempli",
@@ -390,6 +391,14 @@ export const calls = {
     transcript_empty:
       "Rien d'exploitable dans l'enregistrement : aucune parole n'a été entendue (micro coupé ?). Aucun compte rendu n'a été fait : réenregistrez, ou importez un autre fichier.",
     save_failed: "Le résultat n'a pas pu être enregistré. Réessayez.",
+    meet_pending:
+      "La transcription du Meet n'est pas encore prête : Google la termine quelques minutes après la fin du call. Réessayez dans un moment.",
+    meet_no_conference:
+      "Personne n'a rejoint le Meet de ce call : il n'y a rien à transcrire.",
+    meet_no_transcript:
+      "Ce Meet n'a pas été transcrit. Déposez l'enregistrement du call à la place.",
+    meet_unavailable:
+      "PDS OS ne peut pas encore lire les transcriptions Meet (connexion Google à compléter). Déposez l'enregistrement du call à la place.",
     network: "Le serveur ne répond pas.",
     unknown: "Une erreur inattendue est survenue.",
   },
