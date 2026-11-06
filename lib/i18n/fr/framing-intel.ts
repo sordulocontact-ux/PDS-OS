@@ -1,6 +1,9 @@
 /** Cadrage intelligent: six dimensions, one question at a time, the Brief. */
 const plural = (n: number, one: string, many: string) =>
   `${n} ${n > 1 ? many : one}`;
+// The project's artist in an example, « l'artiste » when none is known yet
+// (retour d'Ibé du 05/11/2026: the examples speak of the artist at hand).
+const artistOr = (artist: string) => artist.trim() || "l'artiste";
 
 export const framingIntel = {
   dimensions: {
@@ -47,7 +50,8 @@ export const framingIntel = {
       ask: "Quel résultat recherchez-vous avec ce projet ?",
       confirm: "Est-ce bien le résultat recherché ?",
       why: "Tout le reste du cadrage en découle.",
-      placeholder: "Ex. installer Dioo comme la voix pop de la rentrée",
+      placeholder: (artist: string) =>
+        `Ex. installer ${artistOr(artist)} comme la voix pop de la rentrée`,
     },
     success_criteria: {
       label: "Critère de réussite",
@@ -91,7 +95,8 @@ export const framingIntel = {
       ask: "Des contraintes de calendrier à respecter ?",
       confirm: "Ces contraintes calendaires sont-elles justes ?",
       why: "Tournée, indisponibilités, périodes à éviter…",
-      placeholder: "Ex. l'artiste est en tournée du 2 au 15 novembre",
+      placeholder: (artist: string) =>
+        `Ex. ${artistOr(artist)} est en tournée du 2 au 15 novembre`,
       none: "Aucune contrainte calendaire",
     },
     prerequisites: {
@@ -139,7 +144,8 @@ export const framingIntel = {
       ask: "Qui décide sur ce projet ?",
       confirm: "Est-ce bien ainsi que se prennent les décisions ?",
       why: "Pour savoir à qui demander quand un choix se pose.",
-      placeholder: "Ex. le chef de projet décide, l'artiste valide la cover",
+      placeholder: (artist: string) =>
+        `Ex. le chef de projet décide, ${artistOr(artist)} valide la cover`,
     },
     missing_skills: {
       label: "Ressources manquantes",
@@ -185,7 +191,8 @@ export const framingIntel = {
       ask: "Qui est impliqué juridiquement ?",
       confirm: "Qualifiez chaque partie",
       why: "Pour chacun, le document qu'il faut. Travailler sur le projet ne fait pas d'un intervenant une partie au contrat.",
-      placeholder: "Ex. Dioo (interprète, autrice), Jo (compositeur)",
+      placeholder: (artist: string) =>
+        `Ex. ${artistOr(artist)} (interprète), Jo (compositeur)`,
       none: "Personne en dehors de PDS",
     },
     legal_agreements: {

@@ -160,6 +160,7 @@ export default async function FramingDimensionsPage({
           projectId={projectId}
           question={question}
           eyebrow={ti.dimensions[question.dimension]}
+          artist={ctx.project.artistName}
           nav={
             at >= 0
               ? {

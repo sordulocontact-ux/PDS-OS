@@ -57,6 +57,13 @@ function titleOf(q: QuestionState): string {
   return t.label;
 }
 
+/** The example in the answer field, with the project's artist when it names one. */
+function placeholderOf(q: QuestionState, artist: string): string {
+  const example = fr.framingIntel.questions[q.key].placeholder as
+    string | ((artist: string) => string);
+  return typeof example === "function" ? example(artist) : example;
+}
+
 /**
  * One question of the Cadrage intelligent, one at a time (ticket § 4): the
  * dimension, the question adapted to what is known, and the ways to answer
@@ -77,6 +84,7 @@ export function QuestionScreen({
   suggestions = [],
   hint,
   itemPresets = [],
+  artist = "",
   children,
 }: {
   projectId: string;
@@ -90,6 +98,8 @@ export function QuestionScreen({
   hint?: string | null;
   // Items to pick in one click for a structured list (PROJ-UX-05).
   itemPresets?: string[];
+  // The project's artist, named in the answer's example (retour d'Ibé 05/11).
+  artist?: string;
   children?: React.ReactNode;
 }) {
   const t = fr.framingIntel.guide;
@@ -356,6 +366,7 @@ export function QuestionScreen({
             projectId={projectId}
             question={question}
             picked={picked}
+            artist={artist}
             onCancel={
               question.status === "missing" && !picked
                 ? undefined
@@ -473,6 +484,7 @@ function AnswerForm({
   projectId,
   question,
   picked,
+  artist,
   onCancel,
   onDone,
 }: {
@@ -480,6 +492,7 @@ function AnswerForm({
   question: QuestionState;
   // A PO suggestion to start from, saved with its source if kept or edited.
   picked: string | null;
+  artist: string;
   onCancel?: () => void;
   onDone: () => void;
 }) {
@@ -531,7 +544,7 @@ function AnswerForm({
             value={value}
             rows={3}
             maxLength={2000}
-            placeholder={fr.framingIntel.questions[question.key].placeholder}
+            placeholder={placeholderOf(question, artist)}
             onChange={(e) => setValue(e.target.value)}
             autoFocus
           />
@@ -541,7 +554,7 @@ function AnswerForm({
             type={kind === "date" ? "date" : "text"}
             inputMode={kind === "money" ? "decimal" : undefined}
             value={value}
-            placeholder={fr.framingIntel.questions[question.key].placeholder}
+            placeholder={placeholderOf(question, artist)}
             onChange={(e) => setValue(e.target.value)}
             className="h-10 w-fit min-w-48"
             autoFocus
