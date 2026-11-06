@@ -232,9 +232,13 @@ export async function getCall(
         : query.is("project_id", null)
   ).maybeSingle();
   if (!data) return null;
-  const [prepared, recording] = await Promise.all([
+  const [prepared, recording, ownMeet] = await Promise.all([
     preparedOfCall(supabase, data.id),
     loadCallRecording(supabase, data.id, data.audio_path),
+    hasOwnMeet({
+      meetingUrl: data.meeting_url,
+      googleEventId: data.google_event_id,
+    }),
   ]);
   return {
     id: data.id,
@@ -260,10 +264,7 @@ export async function getCall(
         (a.name ?? a.email).localeCompare(b.name ?? b.email, "fr"),
       ),
     audioPath: data.audio_path,
-    ownMeet: hasOwnMeet({
-      meetingUrl: data.meeting_url,
-      googleEventId: data.google_event_id,
-    }),
+    ownMeet,
     audioMime: data.audio_mime,
     audioBytes: data.audio_bytes,
     errorCode: data.error_code,

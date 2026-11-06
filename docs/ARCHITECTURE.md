@@ -1417,8 +1417,9 @@ la semaine du Calendrier, et une création de call qui donne un lien Google Meet
   (`[calls] meet auto transcription not turned on`), le call garde son lien. Jeton partagé
   Calendar / Meet : `lib/integrations/google-oauth.ts`.
 - **Transcription du Meet reprise dans la page du call** (06/11/2026) : un call dont PDS OS a créé le
-  Meet (`CallDetail.ownMeet` = `google_event_id` + lien meet.google.com + Google configuré,
-  `lib/calls/own-meet.ts`) et sans enregistrement passe, une fois fini, par le geste `meet` de
+  Meet (`CallDetail.ownMeet` = `google_event_id` + lien meet.google.com + jeton qui a la portée
+  `meetings.space.readonly`, lue dans la réponse de rafraîchissement, `googleHasScope`,
+  `lib/calls/own-meet.ts` ; un jeton plus ancien laisse le call demander son enregistrement comme avant) et sans enregistrement passe, une fois fini, par le geste `meet` de
   « Maintenant » (`callTodos`, avant `upload`) : `MeetTranscriptFetch` appelle seul
   `POST /api/calls/[id]/meet-transcript` (`runMeetTranscription`, session de l'utilisateur, RLS ;
   `claim(…, { needsAudio: false })`). `fetchMeetTranscript` (`google-meet-transcript.ts`, portée

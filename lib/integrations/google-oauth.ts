@@ -37,8 +37,10 @@ export function googleSettings(): GoogleSettings | null {
   };
 }
 
-// An access token lasts about an hour: kept by the server instance.
-let cached: { token: string; expiresAt: number } | null = null;
+// An access token lasts about an hour: kept by the server instance, with
+// the scopes the account granted (Google says them on every refresh).
+let cached: { token: string; expiresAt: number; scopes: string[] } | null =
+  null;
 
 export async function googleAccessToken(
   config: GoogleSettings,
@@ -66,12 +68,27 @@ export async function googleAccessToken(
   const body = (await response.json()) as {
     access_token?: string;
     expires_in?: number;
+    scope?: string;
   };
   if (!body.access_token)
     throw new IntegrationError("google_oauth", "token_missing");
   cached = {
     token: body.access_token,
     expiresAt: Date.now() + (body.expires_in ?? 3600) * 1000,
+    scopes: body.scope?.split(" ") ?? [],
   };
   return cached.token;
+}
+
+/** Whether the organizer's token was granted this scope (a token made
+ * before a scope was added to the script lacks it). Never throws. */
+export async function googleHasScope(scope: string): Promise<boolean> {
+  const config = googleSettings();
+  if (!config) return false;
+  try {
+    await googleAccessToken(config);
+  } catch {
+    return false;
+  }
+  return cached?.scopes.includes(scope) ?? false;
 }

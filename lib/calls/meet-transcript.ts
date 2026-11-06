@@ -48,10 +48,10 @@ export async function runMeetTranscription(
     .maybeSingle();
   if (!row) return { ok: false, error: "not_found" };
   if (
-    !hasOwnMeet({
+    !(await hasOwnMeet({
       meetingUrl: row.meeting_url,
       googleEventId: row.google_event_id,
-    })
+    }))
   )
     return { ok: false, error: "meet_unavailable" };
   // Read twice (two tabs): the first one wins, the second has nothing to do.
