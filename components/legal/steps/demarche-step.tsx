@@ -11,7 +11,6 @@ import { loadProjectInvoices } from "@/lib/invoices/queries";
 import { loadInvoiceStates } from "@/lib/invoices/states";
 import { demarcheHistory } from "@/lib/legal/demarches/history";
 import { loadLegalHistory } from "@/lib/legal/history/queries";
-import { loadContactLinks } from "@/lib/portal/contact-links";
 import { legalDemarches } from "@/lib/i18n/fr/legal-demarches";
 import { legalJourneyContext } from "@/lib/legal/journey-context";
 import { legalRefSlug, type LegalDemarcheKind } from "@/lib/ui/legal-steps";
@@ -56,15 +55,15 @@ export async function DemarcheStep({
       ? [p.panel.row.contract.id]
       : [],
   );
-  const [proof, history, cards, invoiceView, invoiceStates, links] =
-    await Promise.all([
+  const [proof, history, cards, invoiceView, invoiceStates] = await Promise.all(
+    [
       contractProofOf(contractIds),
       loadLegalHistory(ctx.project, ctx.access),
       loadContractCards(contractIds),
       loadProjectInvoices(projectId, ctx.project.ownerPersonId),
       loadInvoiceStates(projectId),
-      contractIds.length > 0 ? loadContactLinks(projectId) : null,
-    ]);
+    ],
+  );
   // A contract's invoice: read by the owner and the direction, where it
   // stands for the Juridique (one invoice system, 20/10/2026).
   const byContract = Object.fromEntries(
@@ -92,9 +91,6 @@ export async function DemarcheStep({
         proof={Object.fromEntries(proof)}
         cards={cards}
         invoices={{ byContract, view: invoiceView }}
-        linkedContacts={(links?.rows ?? []).flatMap((r) =>
-          r.link ? [r.contactId] : [],
-        )}
         direction={ctx.direction ?? fr.legalDemarches.direction}
         owner={
           demarche.own?.responsibleName ??

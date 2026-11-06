@@ -28,10 +28,12 @@ export function MailCard({
   name,
   added,
 }: {
-  title: string;
+  // Default « L'e-mail que PDS OS enverra ».
+  title?: string;
   // Under the title: from whom, kept as the proof of sending.
-  line: string;
+  line?: string;
   to: string;
+  // Default « Réseau ».
   toSource?: FactSource | null;
   subject: string;
   message: string;
@@ -40,13 +42,21 @@ export function MailCard({
   name: string;
   // « Ajouté automatiquement à la fin de l'e-mail : », « Ouvrir votre
   // dossier : » + the link (or « lien privé créé à l'envoi »), its validity.
-  added: { intro: string; open: string; link: string; validity: string };
+  added: { intro?: string; open: string; link?: string; validity?: string };
 }) {
   const t = fr.mail;
   return (
-    <DocumentCard name={title} line={line} icon={IconEnvelopeOpen}>
+    <DocumentCard
+      name={title ?? t.title}
+      line={line ?? t.line}
+      icon={IconEnvelopeOpen}
+    >
       <FactRows className="rounded-none border-0">
-        <FactRow label={t.to} value={to} source={toSource ?? null} />
+        <FactRow
+          label={t.to}
+          value={to}
+          source={toSource === undefined ? t.fromNetwork : toSource}
+        />
         <FactRow label={t.subject} value={subject} />
       </FactRows>
       <div className="flex flex-col gap-3 px-3.5 pt-1 pb-3.5">
@@ -60,12 +70,12 @@ export function MailCard({
         />
         <p className="flex flex-col gap-1 rounded-lg bg-[var(--surface-soft)] px-3 py-2.5 break-words">
           <span className="text-[color:var(--text-secondary)]">
-            {added.intro}
+            {added.intro ?? t.added}
           </span>
           <span>
-            {added.open} <i>{added.link}</i>
+            {added.open} <i>{added.link ?? t.pageLink}</i>
           </span>
-          <span>{added.validity}</span>
+          <span>{added.validity ?? t.validity}</span>
         </p>
       </div>
     </DocumentCard>

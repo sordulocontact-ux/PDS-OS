@@ -623,12 +623,6 @@ export const legal = {
       fromCredits: "Crédits du titre",
       fromArtist: "Page artiste",
       fromNetwork: "Réseau",
-      mailTitle: "L'e-mail que PDS OS enverra",
-      mailLine:
-        "De : l'adresse de PO · gardé dans l'historique, c'est la preuve d'envoi",
-      added: "Ajouté automatiquement à la fin de l'e-mail :",
-      newLink: "lien privé créé à l'envoi",
-      validity: "Lien privé, sans compte",
       send: (name: string) => `Envoyer la fiche à ${name}`,
       sending: "Envoi…",
       linkInstead: "Copier le lien plutôt",
@@ -650,35 +644,25 @@ export const legal = {
       completeBody: "Ses données permanentes sont sur son contact du Réseau.",
     },
     contract: {
-      next: "Prochaine action",
-      decision: "Décision de la direction",
-      waiting: "En attente d'un retour",
-      atDirection: "Chez la direction",
       notNeeded:
         "Pas de contrat prévu pour cette personne dans les contrats à prévoir.",
       unmapped: "Les contrats à prévoir sont à valider d'abord.",
-      needsInfo: "Il manque des informations pour générer le contrat",
+      toMapping: "Aller au Plan d'action",
+      // Who is awaited, in the Master's blue (Sacha, 06/11/2026).
+      waitingDirection: (direction: string) =>
+        `En attente de ${direction} : valider le contrat.`,
       needsInfoBody:
         "Chaque valeur se complète à sa source (la fiche de renseignements, le Réseau, le projet) : le contrat se génère tout seul dès que tout est là.",
       generate: "Générer le contrat",
       submit: "Relire, puis soumettre à la direction",
-      submitBody:
-        "Généré depuis son modèle validé. Une clause modifiée crée une nouvelle version, avec sa raison, sur la page du contrat.",
       submitAction: "Soumettre à la direction",
       review: "Valider le document rempli",
-      reviewBody: "Valider ce document précis autorise son envoi.",
-      reviewWait: "Le document attend la validation de la direction",
-      reviewWaitBody:
-        "Rien à faire de votre côté : vous serez notifié de sa décision.",
       approve: "Valider le document",
       requestChanges: "Demander des modifications",
       changesLabel: "Ce qu'il faut changer",
       changesMissing: "Dites ce qu'il faut changer.",
       sendChanges: "Envoyer la demande",
       send: "Envoyer en signature",
-      sendBody:
-        "La signature électronique n'est pas intégrée : envoyez le PDF par votre canal habituel, puis dites comment. C'est la preuve d'envoi.",
-      deposit: "Quand le signé revient, déposez-le ici avec sa preuve",
       markSigned: "Marquer comme signé",
       signed: "Signé, avec sa preuve",
       openContract: "Ouvrir le contrat",

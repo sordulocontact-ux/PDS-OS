@@ -10,6 +10,7 @@ import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { legalOutcome } from "@/lib/legal/outcome";
 import { run } from "@/lib/legal/formalities/run";
+import { ensureContactLink } from "@/lib/portal/ensure-contact-link";
 import { createClient } from "@/lib/supabase/server";
 import type { WriteResult } from "@/lib/utils/write-result";
 
@@ -26,6 +27,8 @@ export async function sendContract(input: {
   via: "link" | "other";
   how?: string;
   on?: string;
+  // The e-mail's message, written in the step (MailCard).
+  message?: string;
 }): Promise<WriteResult> {
   const v = z
     .object({
@@ -34,6 +37,7 @@ export async function sendContract(input: {
       via: z.enum(["link", "other"]),
       how: z.string().trim().max(200).optional(),
       on: day.optional(),
+      message: z.string().trim().max(2000).optional(),
     })
     .safeParse(input);
   if (!v.success) return { ok: false, error: t.errors.failed };
@@ -47,6 +51,17 @@ export async function sendContract(input: {
     fr.legalJourney.done.contract.sent,
     async () => {
       const supabase = await createClient();
+      // On their page: made first when they have none yet, so « Envoyer à
+      // … » never stops at « Créer son lien privé ».
+      if (v.data.via === "link") {
+        const { data: need } = await supabase
+          .from("legal_agreement_needs")
+          .select("contact_id")
+          .eq("contract_id", v.data.contractId)
+          .maybeSingle();
+        if (need?.contact_id)
+          await ensureContactLink(v.data.projectId, need.contact_id);
+      }
       const { error } = await supabase.rpc("send_contract", {
         p_contract_id: v.data.contractId,
         p_via: v.data.via,
@@ -69,7 +84,11 @@ export async function sendContract(input: {
       revalidatePath(routes.contract(v.data.contractId));
       if (v.data.via !== "link") return { ok: true };
       // On their private link: PDS OS e-mails the signer itself when it can.
-      const sent = await emailContractSigner(v.data.contractId, "send");
+      const sent = await emailContractSigner(
+        v.data.contractId,
+        "send",
+        v.data.message || null,
+      );
       return emailOutcome(sent, {
         sent: fr.contracts.now.auto.sendDone,
         failed: fr.contracts.now.auto.sendFailed,

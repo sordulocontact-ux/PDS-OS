@@ -52,20 +52,12 @@ export function FicheSend({
   return (
     <>
       <MailCard
-        title={p.mailTitle}
-        line={p.mailLine}
         to={`${row.name} <${row.email}>`}
-        toSource={p.fromNetwork}
         subject={t.subject(projectTitle)}
         message={message}
         onMessage={onMessage}
         name={`fiche-message-${row.key}`}
-        added={{
-          intro: p.added,
-          open: t.open,
-          link: p.newLink,
-          validity: p.validity,
-        }}
+        added={{ open: t.open }}
       />
       <div className="flex flex-wrap gap-2">
         <Button

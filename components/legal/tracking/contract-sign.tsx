@@ -5,7 +5,6 @@ import { useState } from "react";
 import { FormMessage } from "@/components/auth/form-message";
 import { ContractProofSlot } from "@/components/legal/clearance/contract-proof-slot";
 import { SignatureGate } from "@/components/legal/signed-returns/signature-gate";
-import { NextCard } from "@/components/ui/next-card";
 import type { ContractProof } from "@/lib/contracts/proof";
 import { legal } from "@/lib/i18n/fr/legal";
 import { legalClearance } from "@/lib/i18n/fr/legal-clearance";
@@ -42,7 +41,6 @@ export function ContractSign({
   onCountersign: () => void;
   extra?: React.ReactNode;
 }) {
-  const t = fr.legal.panels.contract;
   const f = fr.legalClearance.flow;
   const s = fr.legalClearance.stages.sign;
   const [tried, setTried] = useState(false);
@@ -51,7 +49,9 @@ export function ContractSign({
     ...(proof?.evidence ? [] : [f.evidenceMissing]),
   ];
   return (
-    <NextCard kind="wait" label={t.waiting} title={t.deposit}>
+    // Under « Le signé vous est parvenu autrement ? », which names it: no
+    // card of its own.
+    <div className="flex flex-col gap-3">
       {organizationId && (
         <div className="grid gap-2 sm:grid-cols-2">
           <ContractProofSlot
@@ -91,6 +91,6 @@ export function ContractSign({
         onBlocked={() => setTried(true)}
         extra={extra}
       />
-    </NextCard>
+    </div>
   );
 }

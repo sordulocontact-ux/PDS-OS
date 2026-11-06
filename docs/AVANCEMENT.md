@@ -1590,3 +1590,8 @@ Proto « Plan d'action de Néons » (artefact du 06/11, copie `~/Desktop/Protos 
       envoyée » marque aussi son lien (`markFicheSent`). Contrat à signer : la même carte.
 - [x] L'attente en bleu comme au Master : « En attente de X : remplir sa fiche. » au lieu de « Envoyée le
       …, sans réponse » (la date est dans « Déjà fait »).
+- [x] Contrat de la démarche sur le patron du Master : plus de `NextCard` ; ce qui manque en phrase sous le
+      titre ; rémunération en ligne avec sa source ; l'attente de la direction et de la signature en bleu ;
+      envoi en signature avec l'e-mail montré avant qu'il parte (`MailCard`, `contractSignerDraft`, message
+      gardé dans l'e-mail par `sendContract`), la page de la personne créée au besoin (plus de « Créer son
+      lien privé » d'abord). Textes de la carte e-mail partagés (`lib/i18n/fr/mail.ts`).

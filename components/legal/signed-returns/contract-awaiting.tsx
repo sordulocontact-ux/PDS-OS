@@ -5,12 +5,11 @@ import type { ReactNode } from "react";
 import { ContractReceived } from "@/components/legal/signed-returns/contract-received";
 import { ContractSign } from "@/components/legal/tracking/contract-sign";
 import { Fold } from "@/components/ui/fold";
-import { NextCard } from "@/components/ui/next-card";
+import { ToneCallout } from "@/components/ui/tone-callout";
 import type { ContractProof } from "@/lib/contracts/proof";
 import { todayInParis } from "@/lib/contracts/types";
 import { legal } from "@/lib/i18n/fr/legal";
 import { signedReturns } from "@/lib/i18n/fr/signed-returns";
-import { formatShortDay } from "@/lib/utils/day";
 
 const fr = { legal, signedReturns };
 
@@ -65,23 +64,11 @@ export function ContractAwaiting({
         extra={extra}
       />
     );
-  const sent = proof?.sent;
-  const on = sent ? formatShortDay(sent.on, { bare: true }) : "";
+  // Who is awaited, in the Master's blue; how and when it was sent is in
+  // « Déjà fait » (Sacha, 06/11/2026).
   return (
     <>
-      <NextCard
-        kind="wait"
-        label={fr.legal.panels.contract.waiting}
-        title={t.waiting(person)}
-      >
-        {sent && (
-          <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
-            {sent.via === "other" && sent.how
-              ? t.sentOther(sent.how, on)
-              : t.sentLink(on)}
-          </p>
-        )}
-      </NextCard>
+      <ToneCallout tone="info">{t.waiting(person)}</ToneCallout>
       {personLink}
       <Fold summary={t.otherwise}>
         <ContractSign

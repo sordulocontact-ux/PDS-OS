@@ -7,7 +7,10 @@ import { toast } from "@/components/ui/toast";
 import { ClauseForm } from "@/components/legal/contracts/clause-form";
 import { ContractDocumentCard } from "@/components/legal/contracts/contract-document-card";
 import { ContractAwaiting } from "@/components/legal/signed-returns/contract-awaiting";
-import { ContractSend } from "@/components/legal/signed-returns/contract-send";
+import {
+  ContractSend,
+  type ContractMailDraft,
+} from "@/components/legal/signed-returns/contract-send";
 import {
   ContractValues,
   contractFixHref,
@@ -15,7 +18,7 @@ import {
 import { usePublishResult } from "@/components/shell/module/result-banner";
 import { Button } from "@/components/ui/button";
 import { DecisionPanel } from "@/components/ui/decision-panel";
-import { NextCard } from "@/components/ui/next-card";
+import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { ReturnCallout } from "@/components/ui/return-callout";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
@@ -52,7 +55,7 @@ export function ContractPanel({
   card,
   owner,
   invoice,
-  hasLink = false,
+  draft = null,
   personLink,
   direction = fr.legalDemarches.direction,
 }: {
@@ -67,8 +70,9 @@ export function ContractPanel({
   owner: string;
   // The invoice block, once the contract is signed (J10).
   invoice?: ReactNode;
-  // The person's private page (/c/): sent there, deposited signed there.
-  hasLink?: boolean;
+  // The e-mail « Envoyer à … » will send (null: PDS OS cannot e-mail them).
+  draft?: ContractMailDraft | null;
+  // The person's page (/c/), THE link of the démarche: deposited signed there.
   personLink?: ReactNode;
   // Who signs for PDS (« Claire Morel », else « la direction »).
   direction?: string;
@@ -101,18 +105,25 @@ export function ContractPanel({
       {t.openContract}
     </Button>
   );
+  // The fee as a fact with its source (JUR-15), as the Master's rates.
   const fee = (
-    <p className="text-sm">
-      <span className="text-muted-foreground">{t.financial.title} · </span>
-      {row.proposal.feeCents
-        ? t.financial.amount(
-            formatFee(row.proposal.feeCents),
-            row.proposal.feeFromFiche
+    <FactRows>
+      <FactRow
+        label={t.financial.title}
+        value={
+          row.proposal.feeCents
+            ? formatFee(row.proposal.feeCents)
+            : t.financial.none
+        }
+        source={
+          row.proposal.feeCents
+            ? row.proposal.feeFromFiche
               ? t.financial.fromFiche
-              : t.financial.fromMapping,
-          )
-        : t.financial.none}
-    </p>
+              : t.financial.fromMapping
+            : null
+        }
+      />
+    </FactRows>
   );
   // The document in head, from its generation on (rule 18).
   const documentCard = card && (
@@ -128,32 +139,36 @@ export function ContractPanel({
     case "not_needed":
       return <ToneCallout tone="neutral">{t.notNeeded}</ToneCallout>;
     case "unmapped":
-      return <ToneCallout tone="info">{t.unmapped}</ToneCallout>;
-    case "needs_info":
       return (
-        <>
-          <NextCard kind="act" label={t.next} title={t.needsInfo}>
-            <p className="text-sm text-muted-foreground">{t.needsInfoBody}</p>
-          </NextCard>
-          <ContractValues row={row} open projectId={projectId} />
-        </>
+        <ToneCallout tone="info">
+          {t.unmapped}{" "}
+          <Link
+            href={routes.projectLegalStep(projectId, "plan")}
+            className="underline underline-offset-4"
+          >
+            {t.toMapping}
+          </Link>
+        </ToneCallout>
       );
+    // What is missing, each value at its source (the sentence under the
+    // step's title, `contractLead`).
+    case "needs_info":
+      return <ContractValues row={row} open projectId={projectId} />;
     case "ready_to_generate":
       return (
         <>
-          <NextCard kind="act" label={t.next} title={t.generate}>
-            {fee}
-            <Button
-              className="self-start"
-              disabled={pending}
-              onClick={() =>
-                run(() => generateLegalContract(projectId, row.needId!))
-              }
-            >
-              {fr.legalContracts.agreements.generate}
-            </Button>
-          </NextCard>
+          {fee}
           <ContractValues row={row} open={false} projectId={projectId} />
+          <Button
+            className="self-start"
+            disabled={pending}
+            aria-busy={pending || undefined}
+            onClick={() =>
+              run(() => generateLegalContract(projectId, row.needId!))
+            }
+          >
+            {fr.legalContracts.agreements.generate}
+          </Button>
         </>
       );
     case "draft":
@@ -188,11 +203,10 @@ export function ContractPanel({
         return (
           <>
             {documentCard}
-            <NextCard kind="wait" label={t.atDirection} title={t.reviewWait}>
-              <p className="text-sm text-muted-foreground">
-                {t.reviewWaitBody}
-              </p>
-            </NextCard>
+            {/* Who is awaited, in the Master's blue. */}
+            <ToneCallout tone="info">
+              {t.waitingDirection(direction)}
+            </ToneCallout>
           </>
         );
       return (
@@ -235,18 +249,14 @@ export function ContractPanel({
       return (
         <>
           {documentCard}
-          <NextCard kind="act" label={t.next} title={t.send}>
-            {contractId && (
-              <ContractSend
-                projectId={projectId}
-                contractId={contractId}
-                contactId={row.contactId}
-                person={row.name}
-                hasLink={hasLink}
-              />
-            )}
-          </NextCard>
-          {personLink}
+          {contractId && (
+            <ContractSend
+              projectId={projectId}
+              contractId={contractId}
+              person={row.name}
+              draft={draft}
+            />
+          )}
           {open}
         </>
       );

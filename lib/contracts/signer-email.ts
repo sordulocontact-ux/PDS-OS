@@ -1,6 +1,7 @@
 import "server-only";
 
 import { emailContact } from "@/lib/email/contact-email";
+import { emailEnabled } from "@/lib/email/send";
 import { contracts } from "@/lib/i18n/fr/contracts";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "@/lib/release/format";
@@ -19,6 +20,8 @@ const t = contracts.now.auto;
 export async function emailContractSigner(
   contractId: string,
   kind: "send" | "remind",
+  // The message written in the step (MailCard), else the usual one.
+  message: string | null = null,
 ): Promise<"sent" | "failed" | "disabled"> {
   const supabase = await createClient();
   const { data: need } = await supabase
@@ -42,11 +45,48 @@ export async function emailContractSigner(
         : t.remindSubject(contract.title),
     body:
       kind === "send"
-        ? t.sendBody(contract.title)
+        ? (message ?? t.sendBody(contract.title))
         : t.remindBody(
             contract.title,
             contract.due_on ? formatDate(contract.due_on) : null,
           ),
     open: t.open,
   });
+}
+
+/** The e-mail « Envoyer à … » will send, shown before it leaves (MailCard,
+ * Sacha 06/11/2026): the signer's address in the Réseau, the subject and
+ * the usual message. Null when PDS OS cannot e-mail them (no SMTP, no
+ * address, a contract outside a project's Juridique). */
+export async function contractSignerDraft(contractId: string): Promise<{
+  email: string;
+  subject: string;
+  message: string;
+} | null> {
+  if (!emailEnabled()) return null;
+  const supabase = await createClient();
+  const [{ data: need }, { data: contract }] = await Promise.all([
+    supabase
+      .from("legal_agreement_needs")
+      .select("contact_id")
+      .eq("contract_id", contractId)
+      .maybeSingle(),
+    supabase
+      .from("contracts")
+      .select("title")
+      .eq("id", contractId)
+      .maybeSingle(),
+  ]);
+  if (!need?.contact_id || !contract) return null;
+  const { data: contact } = await supabase
+    .from("network_contacts")
+    .select("email")
+    .eq("id", need.contact_id)
+    .maybeSingle();
+  if (!contact?.email) return null;
+  return {
+    email: contact.email,
+    subject: t.sendSubject(contract.title),
+    message: t.sendBody(contract.title),
+  };
 }

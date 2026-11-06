@@ -57,7 +57,7 @@ export const signedReturns = {
   team: {
     sendTo: (name: string) => `Envoyer à ${name}`,
     sendNote: (name: string) =>
-      `Le contrat validé est mis sur la page privée de ${name} : il y déposera le contrat signé. PDS OS lui envoie l'e-mail quand il le peut ; sinon, copiez son lien (carte ci-dessous) et envoyez-le-lui.`,
+      `PDS OS n'a pas l'adresse de ${name} : le contrat validé est mis sur sa page privée, où il le signera et le déposera. Copiez ensuite le lien de sa page et envoyez-le-lui.`,
     noLink: (name: string) =>
       `${name} n'a pas encore de lien privé sur ce projet : créez-le, puis envoyez-lui le contrat : il le signera et le déposera sur sa page.`,
     createLink: "Créer son lien privé",
@@ -76,7 +76,7 @@ export const signedReturns = {
     sent: (name: string) => `Contrat envoyé à ${name}`,
     noted: "Remise notée",
     waiting: (name: string) =>
-      `En attente de ${name} (lien privé) : signer et renvoyer le contrat`,
+      `En attente de ${name} : signer et renvoyer son contrat.`,
     sentLink: (date: string) => `mis sur son lien privé le ${date}`,
     sentOther: (how: string, date: string) => `${how.toLowerCase()} le ${date}`,
     otherwise: "Le signé vous est parvenu autrement ?",

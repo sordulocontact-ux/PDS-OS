@@ -1,3 +1,4 @@
+import { contractLead } from "@/lib/legal/contracts/lead";
 import { ficheLead } from "@/lib/legal/forms/state";
 import { DemarchePart } from "@/components/legal/demarches/demarche-part";
 import { DemarcheOwner } from "@/components/legal/demarches/demarche-owner";
@@ -29,7 +30,6 @@ export function DemarcheBody({
   proof,
   cards,
   invoices,
-  linkedContacts,
   direction,
   owner,
   people,
@@ -42,8 +42,6 @@ export function DemarcheBody({
   proof: Record<string, ContractProof>;
   cards: Record<string, ContractCardData>;
   invoices: ContractInvoices;
-  // The people with an active private link on this project (/c/).
-  linkedContacts: string[];
   direction: string;
   // Who answers for it (« Revient signé en tête de l'étape de … »).
   owner: string;
@@ -62,7 +60,6 @@ export function DemarcheBody({
       proof={proof}
       cards={cards}
       invoices={invoices}
-      linkedContacts={linkedContacts}
       direction={direction}
       owner={owner}
     />
@@ -71,6 +68,13 @@ export function DemarcheBody({
   // object at work, then « Contrat · <modèle> »; what was done before is in
   // « Déjà fait ». A done démarche shows its last part.
   const shown = current ?? parts[parts.length - 1] ?? null;
+  // The sentence under the part's title, when its state asks for one.
+  const leadOf = (row: BoardRow) =>
+    row.panel.kind === "fiche"
+      ? ficheLead(row.panel.row)
+      : row.panel.kind === "contract"
+        ? contractLead(row.panel.row)
+        : null;
   const titleOf = (row: BoardRow) =>
     row.panel.kind === "contract" && row.panel.row.template
       ? `${fr.legal.board.steps.contract} · ${row.panel.row.template.name}`
@@ -80,9 +84,9 @@ export function DemarcheBody({
       {shown &&
         (parts.length === 1 ? (
           <div className="flex flex-col gap-4">
-            {shown.panel.kind === "fiche" && ficheLead(shown.panel.row) && (
+            {leadOf(shown) && (
               <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
-                {ficheLead(shown.panel.row)}
+                {leadOf(shown)}
               </p>
             )}
             {part(shown)}
@@ -90,9 +94,7 @@ export function DemarcheBody({
         ) : (
           <StepSection
             title={titleOf(shown)}
-            description={
-              shown.panel.kind === "fiche" ? ficheLead(shown.panel.row) : null
-            }
+            description={leadOf(shown)}
             aside={
               <StatusBadge tone={shown.badge.tone} size="sm">
                 {shown.badge.label}

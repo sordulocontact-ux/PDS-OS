@@ -6,6 +6,7 @@ import {
   type ContractInvoices,
 } from "@/components/invoices/contract-invoice";
 import { PersonLink } from "@/components/portal/person-link";
+import { contractSignerDraft } from "@/lib/contracts/signer-email";
 import { FormalityCard } from "@/components/legal/formalities/formality-card";
 import { ContractPanel } from "@/components/legal/tracking/contract-panel";
 import { FichePanel } from "@/components/legal/tracking/fiche-panel";
@@ -25,7 +26,7 @@ const fr = { legal };
  * a borrowing, a title's split, its SACEM bulletin): the panel the Suivi
  * used to open beside its line, now the body of the démarche's step.
  */
-export function DemarchePart({
+export async function DemarchePart({
   projectId,
   projectTitle,
   row,
@@ -33,7 +34,6 @@ export function DemarchePart({
   proof,
   cards,
   invoices,
-  linkedContacts,
   direction,
   owner,
 }: {
@@ -45,7 +45,6 @@ export function DemarchePart({
   proof: Record<string, ContractProof>;
   cards: Record<string, ContractCardData>;
   invoices: ContractInvoices;
-  linkedContacts: string[];
   direction: string;
   owner: string;
 }) {
@@ -68,6 +67,11 @@ export function DemarchePart({
       );
     case "contract": {
       const contractId = panel.row.contract?.id;
+      // The e-mail « Envoyer à … » will send, shown before it leaves.
+      const draft =
+        contractId && panel.row.state === "ready_for_signature"
+          ? await contractSignerDraft(contractId)
+          : null;
       const invoice = contractId ? invoices.byContract[contractId] : undefined;
       return (
         <ContractPanel
@@ -89,10 +93,7 @@ export function DemarchePart({
           canValidate={clearances.canValidate}
           organizationId={clearances.organizationId}
           direction={direction}
-          hasLink={
-            panel.row.contactId !== null &&
-            linkedContacts.includes(panel.row.contactId)
-          }
+          draft={draft}
           personLink={
             panel.row.contract &&
             ["ready_for_signature", "signature_pending"].includes(

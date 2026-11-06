@@ -8,70 +8,81 @@ import { Button } from "@/components/ui/button";
 import { ChoiceCards } from "@/components/ui/choice-cards";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
+import { MailCard } from "@/components/ui/mail-card";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { todayInParis } from "@/lib/contracts/types";
-import { contactLinks } from "@/lib/i18n/fr/contact-links";
+import { contracts } from "@/lib/i18n/fr/contracts";
 import { signedReturns } from "@/lib/i18n/fr/signed-returns";
 import { sendContract } from "@/lib/legal/signed-returns/team-actions";
-import { issueContactLink } from "@/lib/portal/contact-link-actions";
 
-const fr = { signedReturns, contactLinks };
+const fr = { signedReturns, contracts };
 
 const t = fr.signedReturns.team;
 
+/** The e-mail « Envoyer à … » sends, read on the server
+ * (`contractSignerDraft`); null when PDS OS cannot e-mail the person. */
+export type ContractMailDraft = {
+  email: string;
+  subject: string;
+  message: string;
+};
+
 /**
- * « Envoyer le contrat » (proto « Projet complet », E6 step 6): « Envoyer à
- * … » puts the validated version on the person's private page, where they
- * deposit it signed; « Je l'ai remis autrement », in a dialog, keeps how
- * and the day. PDS
- * OS sends no e-mail yet: the person's link is copied from the card below.
+ * « Envoyer le contrat », as the Master sends its package (Sacha,
+ * 06/11/2026): with an address, the e-mail PDS OS will send (`MailCard`:
+ * to, subject, the message written here, the person's page added at the
+ * end), then « Envoyer à … », which puts the validated version on their
+ * page (made if need be) and e-mails them; without one, the page alone and
+ * its link to copy. « Je l'ai remis autrement », in a dialog, keeps how and
+ * the day.
  */
 export function ContractSend({
   projectId,
   contractId,
-  contactId,
   person,
-  hasLink,
+  draft,
 }: {
   projectId: string;
   contractId: string;
-  contactId: string | null;
   person: string;
-  // An active private link: « Envoyer à … » works; otherwise create it.
-  hasLink: boolean;
+  draft: ContractMailDraft | null;
 }) {
   const submit = useWriteSubmit(undefined, t.sent(person));
+  const [message, setMessage] = useState(draft?.message ?? "");
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
-        {hasLink ? t.sendNote(person) : t.noLink(person)}
-      </p>
+      {draft ? (
+        <MailCard
+          to={`${person} <${draft.email}>`}
+          subject={draft.subject}
+          message={message}
+          onMessage={setMessage}
+          name={`contract-message-${contractId}`}
+          added={{ open: fr.contracts.now.auto.open }}
+        />
+      ) : (
+        <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
+          {t.sendNote(person)}
+        </p>
+      )}
       <FormMessage kind="error">{submit.error}</FormMessage>
       <div className="flex flex-wrap gap-2">
-        {hasLink || !contactId ? (
-          <Button
-            disabled={submit.pending}
-            onClick={() =>
-              submit.run(() =>
-                sendContract({ projectId, contractId, via: "link" }),
-              )
-            }
-          >
-            {t.sendTo(person)}
-          </Button>
-        ) : (
-          <Button
-            disabled={submit.pending}
-            onClick={() =>
-              submit.run(
-                () => issueContactLink(projectId, contactId),
-                fr.contactLinks.created,
-              )
-            }
-          >
-            {t.createLink}
-          </Button>
-        )}
+        <Button
+          disabled={submit.pending}
+          aria-busy={submit.pending || undefined}
+          onClick={() =>
+            submit.run(() =>
+              sendContract({
+                projectId,
+                contractId,
+                via: "link",
+                message: draft ? message : undefined,
+              }),
+            )
+          }
+        >
+          {t.sendTo(person)}
+        </Button>
         {/* A gesture that asks for something opens a dialog (proto v3). */}
         <DialogButton
           label={t.other}
