@@ -1,7 +1,7 @@
 import { IconDisc } from "@/components/icons";
 import { DocumentCard } from "@/components/ui/document-card";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
-import { FilterChipLink } from "@/components/ui/filter-chip";
+import { SegmentedLinks } from "@/components/ui/segmented-control";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { catalog } from "@/lib/i18n/fr/catalog";
 import { masterSource } from "@/lib/i18n/fr/master-source";
@@ -51,17 +51,16 @@ export function SourceStep({
   return (
     <div className="flex flex-col gap-5">
       {view.titles.length > 1 && (
-        <nav aria-label={t.titles} className="flex flex-wrap gap-2">
-          {view.titles.map((x) => (
-            <FilterChipLink
-              key={x.id}
-              href={`${base}?titre=${x.id}`}
-              current={x.id === title.id}
-            >
-              {x.title}
-            </FilterChipLink>
-          ))}
-        </nav>
+        <SegmentedLinks
+          label={t.titles}
+          className="self-start"
+          options={view.titles.map((x) => ({
+            key: x.id,
+            href: `${base}?titre=${x.id}`,
+            current: x.id === title.id,
+            label: x.title,
+          }))}
+        />
       )}
       <TitleSource view={view} title={title} ownerName={ownerName} />
     </div>

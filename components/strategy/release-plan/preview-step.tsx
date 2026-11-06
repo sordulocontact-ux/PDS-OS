@@ -5,7 +5,7 @@ import { ReviewPanel } from "@/components/strategy/documents/review-panel";
 import { SendForValidation } from "@/components/strategy/documents/send-for-validation";
 import { ShareButton } from "@/components/strategy/release-plan/share-button";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
-import { FilterChipLink } from "@/components/ui/filter-chip";
+import { SegmentedLinks } from "@/components/ui/segmented-control";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
@@ -95,18 +95,16 @@ export function PreviewStep({
           </p>
         </div>
         {versions.length > 1 && (
-          <nav aria-label={t.versions} className="flex flex-wrap gap-2">
-            {versions.map((v) => (
-              <FilterChipLink
-                key={v.id}
-                variant="soft"
-                current={v.id === current.id}
-                href={`${href(8)}&v=${v.version}`}
-              >
-                {t.version(v.version)}
-              </FilterChipLink>
-            ))}
-          </nav>
+          <SegmentedLinks
+            label={t.versions}
+            className="self-start"
+            options={versions.map((v) => ({
+              key: v.id,
+              current: v.id === current.id,
+              href: `${href(8)}&v=${v.version}`,
+              label: t.version(v.version),
+            }))}
+          />
         )}
       </div>
 

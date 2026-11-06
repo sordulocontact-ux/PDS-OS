@@ -1,4 +1,4 @@
-import { FilterChipLink } from "@/components/ui/filter-chip";
+import { SegmentedLinks } from "@/components/ui/segmented-control";
 import { PhaseStrip } from "@/components/ui/phase-strip";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ViewLink } from "@/components/ui/view-link";
@@ -61,30 +61,28 @@ export function ActivationList({
       <h2 className="px-2 pt-1 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
         {t.listTitle}
       </h2>
-      <div
-        role="group"
-        aria-label={t.filters.label}
-        className="mb-1.5 flex flex-wrap gap-1.5 px-1 pt-1"
-      >
-        {ACTIVATION_FILTERS.map((f) => (
-          <FilterChipLink
-            key={f}
-            variant="soft"
-            current={f === filter}
-            href={viewHref(
-              openId
-                ? routes.projectActivation(projectId, openId)
-                : routes.projectActivations(projectId),
-              { vue: vue(f) },
-            )}
-          >
-            {t.filters[f]}
-            <span className="text-[color:var(--text-tertiary)]">
-              {rows.filter((a) => filtersOf(a, a.actions).includes(f)).length}
-            </span>
-          </FilterChipLink>
-        ))}
-      </div>
+      <SegmentedLinks
+        label={t.filters.label}
+        className="mx-1 mb-1.5"
+        options={ACTIVATION_FILTERS.map((f) => ({
+          key: f,
+          current: f === filter,
+          href: viewHref(
+            openId
+              ? routes.projectActivation(projectId, openId)
+              : routes.projectActivations(projectId),
+            { vue: vue(f) },
+          ),
+          label: (
+            <>
+              {t.filters[f]}
+              <span className="text-[color:var(--text-tertiary)]">
+                {rows.filter((a) => filtersOf(a, a.actions).includes(f)).length}
+              </span>
+            </>
+          ),
+        }))}
+      />
       {shown.length === 0 && (
         <p className="px-2 py-2 text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
           {t.noneHere}

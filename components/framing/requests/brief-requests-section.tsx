@@ -7,7 +7,7 @@ import {
 import { RequestCard } from "@/components/framing/requests/request-card";
 import { PageSection } from "@/components/shell/page-section";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
-import { FilterChipLink } from "@/components/ui/filter-chip";
+import { SegmentedLinks } from "@/components/ui/segmented-control";
 import {
   isOpenRequest,
   requestChanged,
@@ -62,14 +62,22 @@ export function BriefRequestsSection({
   return (
     <PageSection id="demandes" title={t.title} description={t.description}>
       <div className="flex flex-col gap-4">
-        <div className="flex flex-wrap gap-2">
-          <FilterChipLink href={hrefOf(false)} current={!showAll}>
-            {t.views.open} ({open.length})
-          </FilterChipLink>
-          <FilterChipLink href={hrefOf(true)} current={showAll}>
-            {t.views.all} ({requests.length})
-          </FilterChipLink>
-        </div>
+        <SegmentedLinks
+          label={t.title}
+          className="self-start"
+          options={[
+            {
+              href: hrefOf(false),
+              current: !showAll,
+              label: `${t.views.open} (${open.length})`,
+            },
+            {
+              href: hrefOf(true),
+              current: showAll,
+              label: `${t.views.all} (${requests.length})`,
+            },
+          ]}
+        />
         {shown.length === 0 ? (
           <p className="text-body-md text-muted-foreground">{t.emptyOpen}</p>
         ) : (

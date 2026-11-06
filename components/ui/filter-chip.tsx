@@ -1,5 +1,4 @@
 
-import { ViewLink } from "@/components/ui/view-link";
 import { cn } from "@/lib/utils";
 
 // FilterChip (docs/DESIGN.md § 7): pill, rest / hover / active. Active is
@@ -51,31 +50,5 @@ export function FilterChip({
     >
       {children}
     </button>
-  );
-}
-
-// The same pill as a link, when the filter is in the URL: `current` is
-// announced as the current page.
-export function FilterChipLink({
-  href,
-  current,
-  variant,
-  className,
-  children,
-}: {
-  href: string;
-  current: boolean;
-  variant?: "ink" | "soft";
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <ViewLink
-      href={href}
-      aria-current={current ? "page" : undefined}
-      className={chipClass(current, className, variant)}
-    >
-      {children}
-    </ViewLink>
   );
 }

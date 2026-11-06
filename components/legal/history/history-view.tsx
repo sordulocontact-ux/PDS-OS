@@ -3,7 +3,7 @@ import Link from "next/link";
 import { HistoryCsvButton } from "@/components/legal/history/history-csv-button";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { DayGroups } from "@/components/ui/day-groups";
-import { FilterChipLink } from "@/components/ui/filter-chip";
+import { SegmentedLinks } from "@/components/ui/segmented-control";
 import { Timestamp } from "@/components/ui/timestamp";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { UrlFilters } from "@/components/ui/url-filters";
@@ -55,20 +55,21 @@ export function HistoryView({
     <div className="flex flex-col gap-6">
       <p className="text-body-md text-muted-foreground">{t.description}</p>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <nav aria-label={t.filtersLabel} className="flex flex-wrap gap-1.5">
-          <FilterChipLink href={viewHref(base, kept)} current={branch === null}>
-            {t.branches.all}
-          </FilterChipLink>
-          {HISTORY_BRANCHES.map((key) => (
-            <FilterChipLink
-              key={key}
-              href={viewHref(base, { ...kept, branche: key })}
-              current={branch === key}
-            >
-              {t.branches[key]}
-            </FilterChipLink>
-          ))}
-        </nav>
+        <SegmentedLinks
+          label={t.filtersLabel}
+          options={[
+            {
+              href: viewHref(base, kept),
+              current: branch === null,
+              label: t.branches.all,
+            },
+            ...HISTORY_BRANCHES.map((key) => ({
+              href: viewHref(base, { ...kept, branche: key }),
+              current: branch === key,
+              label: t.branches[key],
+            })),
+          ]}
+        />
         <HistoryCsvButton
           events={shown}
           fileName={t.csv.fileName(

@@ -5,14 +5,16 @@ import { useId, useState } from "react";
 import { FieldError } from "@/components/auth/form-message";
 import { FilterChip } from "@/components/ui/filter-chip";
 import { RequiredMark } from "@/components/ui/required-mark";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 
 export type ChipOption<V extends string> = { value: V; label: string };
 
 /**
- * One choice among a few, as a row of FilterChip pills (format of a project,
- * priority): the active one in ink. Controlled by the parent, submitted under
- * `name` through a hidden input (empty when nothing is chosen).
- * `deselectable`: a second click on the active pill clears the choice.
+ * One choice among a few (type of a contact, format of a project,
+ * priority), as a `SegmentedControl` (Sacha, 05/11/2026: no more pills for a
+ * single choice). Controlled by the parent, submitted under `name` through a
+ * hidden input (empty when nothing is chosen). `deselectable`: a second click
+ * on the chosen segment clears the choice. `fill`: the whole width.
  */
 export function ChipChoice<V extends string>({
   name,
@@ -22,6 +24,7 @@ export function ChipChoice<V extends string>({
   value,
   onChange,
   deselectable = false,
+  fill = false,
   hint,
   error,
 }: {
@@ -33,6 +36,7 @@ export function ChipChoice<V extends string>({
   value: V | null;
   onChange: (value: V | null) => void;
   deselectable?: boolean;
+  fill?: boolean;
   hint?: string;
   error?: string;
 }) {
@@ -40,32 +44,22 @@ export function ChipChoice<V extends string>({
   const describedBy = error ? `${id}-error` : hint ? `${id}-hint` : undefined;
 
   return (
-    <div
-      role="group"
-      aria-labelledby={`${id}-label`}
-      aria-describedby={describedBy}
-      className="flex flex-col gap-1.5"
-    >
+    <div className="flex flex-col gap-1.5">
       <span id={`${id}-label`} className="text-sm leading-none font-medium">
         {legend}
         {required && <RequiredMark announce />}
       </span>
       <input type="hidden" name={name} value={value ?? ""} />
-      <div className="flex flex-wrap gap-2 pt-1">
-        {options.map((option) => {
-          const active = option.value === value;
-          return (
-            <FilterChip
-              key={option.value}
-              pressed={active}
-              onClick={() =>
-                onChange(active && deselectable ? null : option.value)
-              }
-            >
-              {option.label}
-            </FilterChip>
-          );
-        })}
+      <div className="pt-1">
+        <SegmentedControl
+          aria-labelledby={`${id}-label`}
+          aria-describedby={describedBy}
+          options={options}
+          value={value}
+          onChange={onChange}
+          deselectable={deselectable}
+          fill={fill}
+        />
       </div>
       {error ? (
         <FieldError id={`${id}-error`}>{error}</FieldError>

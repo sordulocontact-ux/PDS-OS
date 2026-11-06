@@ -3,7 +3,7 @@ import { masterFacts } from "@/components/master-workflow/master-step-frame";
 import { ProjectHeader } from "@/components/projects/project-header";
 import { ProjectNowCard } from "@/components/shell/journey/project-now-card";
 import { StepHistory } from "@/components/shell/journey/step-history";
-import { FilterChipLink } from "@/components/ui/filter-chip";
+import { SegmentedLinks } from "@/components/ui/segmented-control";
 import { ViewLink } from "@/components/ui/view-link";
 import { masterJourney } from "@/lib/i18n/fr/master-journey";
 import { historyPeople, masterHistory } from "@/lib/master-workflow/history";
@@ -67,20 +67,18 @@ export async function MasterHistory({
           {t.description}
         </p>
         {people.length > 1 && (
-          <nav aria-label={t.filterLabel} className="flex flex-wrap gap-2">
-            <FilterChipLink href={base} current={!who}>
-              {t.everyone}
-            </FilterChipLink>
-            {people.map((p) => (
-              <FilterChipLink
-                key={p}
-                href={`${base}?par=${encodeURIComponent(p)}`}
-                current={who === p}
-              >
-                {p}
-              </FilterChipLink>
-            ))}
-          </nav>
+          <SegmentedLinks
+            label={t.filterLabel}
+            className="self-start"
+            options={[
+              { href: base, current: !who, label: t.everyone },
+              ...people.map((p) => ({
+                href: `${base}?par=${encodeURIComponent(p)}`,
+                current: who === p,
+                label: p,
+              })),
+            ]}
+          />
         )}
         {items.length === 0 ? (
           <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">

@@ -1,7 +1,7 @@
-import { FilterChipLink } from "@/components/ui/filter-chip";
+import { SegmentedLinks } from "@/components/ui/segmented-control";
 
-// Views of one list as pills whose choice lives in the URL (?view=…):
-// shareable, and the back button works.
+// Views of one list as a segmented bar whose choice lives in the URL
+// (?view=…): shareable, and the back button works.
 export function ViewToggle({
   label,
   options,
@@ -9,17 +9,5 @@ export function ViewToggle({
   label: string;
   options: Array<{ href: string; label: string; current: boolean }>;
 }) {
-  return (
-    <nav aria-label={label} className="flex flex-wrap gap-1.5">
-      {options.map((option) => (
-        <FilterChipLink
-          key={option.href}
-          href={option.href}
-          current={option.current}
-        >
-          {option.label}
-        </FilterChipLink>
-      ))}
-    </nav>
-  );
+  return <SegmentedLinks label={label} options={options} />;
 }
