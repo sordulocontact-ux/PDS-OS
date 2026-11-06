@@ -6,6 +6,14 @@
 // Opens a sign-in link; once the organizer's account has accepted, Google
 // redirects to this local server, which trades the code for the refresh token
 // and prints it. Nothing is written to disk.
+//
+// The link may be opened on another computer (the account's owner signs in
+// there): the browser then lands on an unreachable http://127.0.0.1:<port>/?code=…
+// page; paste that whole address in a browser here while this script runs.
+//
+// Scopes: calendar.events (Meet links of the calls) and drive.file (files PDS OS
+// itself puts in the account's Drive, e.g. a session's rushes; it never sees
+// the rest of the Drive). One sign-in covers both.
 import { createServer } from "node:http";
 
 const [clientId, clientSecret] = process.argv.slice(2);
@@ -16,7 +24,10 @@ if (!clientId || !clientSecret) {
   process.exit(1);
 }
 
-const SCOPE = "https://www.googleapis.com/auth/calendar.events";
+const SCOPE = [
+  "https://www.googleapis.com/auth/calendar.events",
+  "https://www.googleapis.com/auth/drive.file",
+].join(" ");
 
 const server = createServer(async (request, response) => {
   const url = new URL(request.url ?? "/", "http://127.0.0.1");

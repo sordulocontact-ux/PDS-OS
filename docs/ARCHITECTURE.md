@@ -1397,7 +1397,14 @@ la semaine du Calendrier, et une création de call qui donne un lien Google Meet
   Calendar, client OAuth « Desktop app », puis
   `node scripts/google-calendar-token.mjs <client id> <client secret>` connecté avec le
   compte qui organisera les calls (celui de l'agence) → `GOOGLE_CALENDAR_REFRESH_TOKEN`.
-  Portée demandée : `calendar.events` seulement.
+  Portées demandées (06/11/2026) : `calendar.events` et `drive.file` (fichiers que PDS OS dépose
+  lui-même dans le Drive du compte, pour l'import des rushs à venir ; jamais le reste du Drive),
+  en une seule connexion : activer aussi l'API Google Drive. Compte organisateur :
+  **po@pdsrecords.com**, que seul Ibé ouvre : le lien du script peut être ouvert sur son
+  ordinateur, il renvoie alors l'adresse `http://127.0.0.1:<port>/?code=…` (page inaccessible)
+  à coller ici pendant que le script tourne. Écran de consentement « Externe » : publier
+  l'application, sinon Google invalide le jeton au bout de 7 jours. La variable garde son nom
+  `GOOGLE_CALENDAR_REFRESH_TOKEN`.
 
 ---
 
