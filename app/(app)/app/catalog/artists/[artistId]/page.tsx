@@ -87,13 +87,6 @@ export default async function ArtistOverviewPage({
               </p>
             )}
           </PageSection>
-          <ArtistTitles
-            artistId={artist.id}
-            masters={titles.masters}
-            error={titles.error}
-            canEdit={canEdit}
-          />
-          <ArtistOngoing projects={progress.ongoing} error={progress.error} />
           {artist.notes && (
             <PageSection card id="notes" title={t.notes}>
               <p className="text-sm whitespace-pre-line">{artist.notes}</p>
@@ -121,6 +114,15 @@ export default async function ArtistOverviewPage({
           )}
         </div>
       </div>
+      {/* The tables take the page's whole width, under the identity column
+          (Sacha, 06/11/2026: the side column squeezed them). */}
+      <ArtistTitles
+        artistId={artist.id}
+        masters={titles.masters}
+        error={titles.error}
+        canEdit={canEdit}
+      />
+      <ArtistOngoing projects={progress.ongoing} error={progress.error} />
     </>
   );
 }

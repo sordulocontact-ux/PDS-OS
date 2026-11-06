@@ -43,6 +43,7 @@ export function ProjectsTable({
   drafts = [],
   rights,
   selectable = false,
+  withStep = true,
 }: {
   projects: ProjectListItem[];
   // The viewer's drafts of the new project form, listed first: a click
@@ -53,6 +54,8 @@ export function ProjectsTable({
   // Checkboxes to delete several at once (main list): projects for the
   // director, drafts for their author.
   selectable?: boolean;
+  // The current step column; an artist's page leaves it out (Sacha, 06/11).
+  withStep?: boolean;
 }) {
   const t = fr.shell.projects;
   const projectActions = Boolean(
@@ -75,7 +78,9 @@ export function ProjectsTable({
         <DataTableHead hideBelow="2xl">{t.columns.type}</DataTableHead>
         <DataTableHead hideBelow="sm">{t.columns.due}</DataTableHead>
         <DataTableHead>{t.columns.status}</DataTableHead>
-        <DataTableHead hideBelow="lg">{t.columns.step}</DataTableHead>
+        {withStep && (
+          <DataTableHead hideBelow="lg">{t.columns.step}</DataTableHead>
+        )}
         <DataTableHead hideBelow="lg" fill>
           {t.columns.priority}
         </DataTableHead>
@@ -117,7 +122,9 @@ export function ProjectsTable({
                   {t.draft}
                 </StatusBadge>
               </DataTableCell>
-              <DataTableCell hideBelow="lg">{EMPTY_CELL}</DataTableCell>
+              {withStep && (
+                <DataTableCell hideBelow="lg">{EMPTY_CELL}</DataTableCell>
+              )}
               <DataTableCell hideBelow="lg" fill>
                 {EMPTY_CELL}
               </DataTableCell>
@@ -174,9 +181,11 @@ export function ProjectsTable({
                   {t.adminStatuses[status]}
                 </StatusBadge>
               </DataTableCell>
-              <DataTableCell hideBelow="lg">
-                <ProjectStepCell project={project} />
-              </DataTableCell>
+              {withStep && (
+                <DataTableCell hideBelow="lg">
+                  <ProjectStepCell project={project} />
+                </DataTableCell>
+              )}
               <DataTableCell hideBelow="lg" fill>
                 {project.priority ? (
                   <StatusBadge

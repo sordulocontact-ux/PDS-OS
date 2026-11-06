@@ -38,9 +38,9 @@ function waitText(wait: ProjectWait | null): string {
 
 /**
  * « En cours » of the artist's overview (proto `docs/protos/pages.html`):
- * each launched project, its format, where it stands and who it waits for
- * (the project's journeys, as Travail and the home), its date on the right;
- * the project's name opens it.
+ * each launched project, its format, its date and who it waits for (the
+ * project's journeys, as Travail and the home); not its current step (Sacha,
+ * 06/11/2026). The project's name opens it.
  */
 export function ArtistOngoing({
   projects,
@@ -60,7 +60,7 @@ export function ArtistOngoing({
           <DataTableHeader>
             <DataTableHead>{t.columns.project}</DataTableHead>
             <DataTableHead hideBelow="sm">{t.columns.date}</DataTableHead>
-            <DataTableHead fill>{t.columns.status}</DataTableHead>
+            <DataTableHead fill>{t.columns.awaited}</DataTableHead>
           </DataTableHeader>
           <DataTableBody>
             {projects.map((p) => (
@@ -87,7 +87,7 @@ export function ArtistOngoing({
                   )}
                 </DataTableCell>
                 <DataTableCell fill className="break-words">
-                  {[p.place, waitText(p.wait)].filter(Boolean).join(" · ")}
+                  {waitText(p.wait)}
                 </DataTableCell>
               </DataTableRow>
             ))}

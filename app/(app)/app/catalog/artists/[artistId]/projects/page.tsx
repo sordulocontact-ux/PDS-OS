@@ -41,6 +41,7 @@ export default async function ArtistProjectsPage({
   }
   return (
     <ProjectsTable
+      withStep={false}
       projects={await withActiveWorkflows(projects)}
       rights={{
         canEdit: can(access, "create_projects"),
