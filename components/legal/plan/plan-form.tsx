@@ -117,9 +117,6 @@ export function PlanForm({
     const s = immediate ? t.sections.immediate : t.sections.dependent;
     return (
       <StepSection title={s.title(rows.filter((x) => kept(x.item.key)).length)}>
-        <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
-          {s.body}
-        </p>
         <FactRows>
           {rows.map(({ item, kind, title }) => (
             <PlanItemRow
@@ -151,9 +148,6 @@ export function PlanForm({
 
   return (
     <div className="flex flex-col gap-3.5">
-      <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
-        {d.intro}
-      </p>
       {section(true)}
       {section(false)}
       <Fold

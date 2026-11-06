@@ -40,24 +40,17 @@ export function MappingPanel({
 
   if (editing)
     return (
-      <div className="flex flex-col gap-4">
-        <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
-          {t.plan.intro}
-        </p>
-        <MappingForm
-          projectId={projectId}
-          rows={rows}
-          organizationId={organizationId}
-          requests={requests}
-          direction={direction}
-          onCancel={
-            approval && !undecided ? () => setEditing(false) : undefined
-          }
-          onDone={() => {
-            setEditing(false);
-          }}
-        />
-      </div>
+      <MappingForm
+        projectId={projectId}
+        rows={rows}
+        organizationId={organizationId}
+        requests={requests}
+        direction={direction}
+        onCancel={approval && !undecided ? () => setEditing(false) : undefined}
+        onDone={() => {
+          setEditing(false);
+        }}
+      />
     );
   return (
     <div className="flex flex-col gap-4">

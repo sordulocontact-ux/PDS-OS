@@ -4,7 +4,7 @@ import { LaunchedDemarches } from "@/components/legal/demarches/launched-demarch
 import { LegalStepFrame } from "@/components/legal/legal-step-frame";
 import { PlanView } from "@/components/legal/plan/plan-view";
 import { AddedActions } from "@/components/legal/tracking/added-actions";
-import { PageSection } from "@/components/shell/page-section";
+import { StepSection } from "@/components/shell/journey/step-section";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
 import { legalDemarches } from "@/lib/i18n/fr/legal-demarches";
@@ -55,10 +55,9 @@ export async function PlanStep({ projectId }: { projectId: string }) {
   );
   const contracts = agreements.rows.length > 0 &&
     plan.state !== "needs_confirmation" && (
-      <PageSection
+      <StepSection
         id="legal-contracts"
         title={fr.legalContracts.agreements.mappingTitle}
-        card={false}
       >
         <MappingPanel
           projectId={projectId}
@@ -68,7 +67,7 @@ export async function PlanStep({ projectId }: { projectId: string }) {
           requests={requests}
           direction={direction ?? fr.legalDemarches.direction}
         />
-      </PageSection>
+      </StepSection>
     );
   return (
     <LegalStepFrame projectId={projectId} stepKey="plan">
@@ -90,7 +89,8 @@ export async function PlanStep({ projectId }: { projectId: string }) {
           />
         </div>
       ) : (
-        <div className="flex flex-col gap-6">
+        // 28 px between sections, as between the plan's own (StepSection).
+        <div className="flex flex-col gap-7">
           {decisions}
           {contracts}
           <PlanView projectId={projectId} plan={plan} />

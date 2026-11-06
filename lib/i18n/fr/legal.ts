@@ -375,19 +375,15 @@ export const legal = {
     sections: {
       immediate: {
         title: (n: number) => `Démarches immédiates · ${n}`,
-        body: "Aucun prérequis : elles démarrent en parallèle dès le lancement.",
       },
       dependent: {
         title: (n: number) => `Démarches dépendantes · ${n}`,
-        body: "Elles s'ouvrent seules quand leur prérequis est fait.",
       },
     },
     noPrereq: "Aucun prérequis",
     // One line per démarche, named as the journey will name it (Sacha,
     // 06/11/2026): what it holds, who answers for it and by when.
     demarches: {
-      intro:
-        "Chacune devient une étape du Parcours, sous ce nom, et une tâche dans le Travail de son responsable.",
       person: (withFiche: boolean) =>
         withFiche
           ? "Sa fiche de renseignements, puis son contrat"

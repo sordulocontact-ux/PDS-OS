@@ -239,10 +239,6 @@ export const legalContracts = {
     noContact: "Fiche à préparer d'abord",
     // The proto's « Contrats à prévoir », before the launch (lot 9 J3).
     plan: {
-      // Where the proposals come from, said once above the table (Sacha,
-      // 06/11/2026); the exceptions under their line.
-      intro:
-        "Un contrat par personne, proposé d'après son rôle depuis la bibliothèque validée par la direction. Vous les confirmez ensemble : ce n'est ni valider leur contenu, ni les générer.",
       editOf: (name: string) => `Modifier le contrat de ${name}`,
       close: "Fermer",
       contract: "Contrat",
