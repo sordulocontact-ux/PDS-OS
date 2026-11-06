@@ -99,9 +99,9 @@ export const legalDocuments = {
     values: "Les valeurs du bulletin",
     // JUR-02: each value says where it stands, on its line.
     states: {
-      confirmed: "Confirmé",
-      proposed: "Proposé",
-      missing: "Manquant",
+      confirmed: "Fait",
+      proposed: "À vérifier",
+      missing: "À faire",
     },
     required: "Obligatoire pour la SACEM : sans lui, pas de version à signer",
     proposed: (source: string) =>

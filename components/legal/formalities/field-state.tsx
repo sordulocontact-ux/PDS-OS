@@ -11,8 +11,8 @@ const fr = { legalDocuments };
 
 const t = fr.legalDocuments.bulletin;
 const TONE = {
-  missing: "danger",
-  proposed: "warning",
+  missing: "warning",
+  proposed: "info",
   confirmed: "success",
 } as const;
 

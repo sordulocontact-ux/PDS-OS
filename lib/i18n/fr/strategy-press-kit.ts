@@ -64,7 +64,7 @@ export const strategyPressKit = {
       deezer: "Bio Deezer",
       wikipedia: "Résumé Wikipédia",
     },
-    missing: "À compléter",
+    missing: "À faire",
     hide: "Ne pas inclure",
     include: "Inclure",
     excluded: "Non inclus",

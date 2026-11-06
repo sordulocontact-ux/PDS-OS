@@ -113,7 +113,7 @@ export const masterPage = {
       later: "Ensuite",
       left: (n: number) => `${n} à faire`,
       allDone: "fait",
-      missing: "À renseigner",
+      missing: "À faire",
       edit: "Modifier",
       legal: "Un dossier complet n'est pas un dossier validé juridiquement.",
       remaining: (share: string) => `Reste ${share}`,

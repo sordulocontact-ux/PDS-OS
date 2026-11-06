@@ -115,9 +115,9 @@ export const designSteps = {
     formats: { video: "Visio", in_person: "Sur place" },
     direction: "Direction de la sortie",
     state: {
-      toConfirm: "À confirmer",
+      toConfirm: "À vérifier",
       confirmed: "Confirmé",
-      toComplete: "À compléter",
+      toComplete: "À faire",
       inherits: "Hérite de la direction",
     },
     emptyDirection: "Rien n'a encore été dit sur la direction de la sortie.",
@@ -298,7 +298,7 @@ export const designSteps = {
     validation: (name: string, version: number) =>
       `Validation : ${name} · V${version}`,
     toQualify: (source: string) => `À qualifier · ${source}`,
-    toFill: "À renseigner",
+    toFill: "À faire",
     notFilled: "Non renseigné",
     edit: "Modifier",
     save: "Enregistrer",

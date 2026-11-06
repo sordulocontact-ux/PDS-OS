@@ -19,7 +19,7 @@ export const decisions = {
     textLabel: "Texte",
     textRequired: "Écrivez le texte avant d'enregistrer.",
     states: {
-      proposed: "À confirmer",
+      proposed: "À vérifier",
       kept: "Confirmé",
       discarded: "Écarté",
     },
@@ -31,7 +31,7 @@ export const decisions = {
     confirmed: "Confirmé.",
     discarded: "Écarté.",
     saved: "Modifié et confirmé.",
-    toConfirm: (n: number) => `${n} à confirmer`,
+    toConfirm: (n: number) => `${n} à vérifier`,
     nothingSaid: "Rien n'a été dit pendant l'échange.",
     add: "Ajouter",
   },

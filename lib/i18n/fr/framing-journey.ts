@@ -85,7 +85,7 @@ export const framingJourney = {
   start: {
     knownTitle: "Ce que le projet sait déjà",
     known: (known: number, toConfirm: number, missing: number) =>
-      `${plural(known, "information connue", "informations connues")} · ${toConfirm} à confirmer · ${plural(missing, "manquante", "manquantes")}`,
+      `${plural(known, "information faite", "informations faites")} · ${toConfirm} à vérifier · ${missing} à faire`,
     detail: "Voir le détail",
     notKnown: "Pas encore connu",
     choices: {
@@ -140,7 +140,7 @@ export const framingJourney = {
   dimensions: {
     question: "Question de PO",
     missing: "Information manquante",
-    toConfirm: "À confirmer",
+    toConfirm: "À vérifier",
     toTreat: (n: number) => `${n} à traiter`,
     toVerify: (n: number) => `${n} à vérifier`,
     questions: (n: number) => plural(n, "question", "questions"),

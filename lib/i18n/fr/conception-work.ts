@@ -115,7 +115,7 @@ export const conceptionWork = {
   // dimensions (lib/design/intention-choices.ts).
   topicsLabel: "Questions de la conception",
   topicStates: {
-    to_complete: "À compléter",
+    to_complete: "À faire",
     complete: "Complété",
   },
   // One sentence atop an unfolded question: what it decides.

@@ -31,7 +31,7 @@ export const strategyPilot = {
     objectives: "Ce que l'on mesure et le chiffre à atteindre.",
   },
   states: {
-    to_complete: "À compléter",
+    to_complete: "À faire",
     in_progress: "En cours",
     to_decide: "À arbitrer",
     complete: "Complété",

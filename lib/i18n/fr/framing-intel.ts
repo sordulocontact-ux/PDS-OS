@@ -17,15 +17,15 @@ export const framingIntel = {
   dimensionNumber: (index: number) => String(index + 1).padStart(2, "0"),
   dimensionsLabel: "Dimensions du cadrage",
   statuses: {
-    known: "Connu",
-    to_confirm: "À confirmer",
-    missing: "Manquant",
+    known: "Fait",
+    to_confirm: "À vérifier",
+    missing: "À faire",
   },
   dimensionLine: (known: number, toConfirm: number, missing: number) =>
     [
-      known > 0 && plural(known, "connue", "connues"),
-      toConfirm > 0 && `${toConfirm} à confirmer`,
-      missing > 0 && plural(missing, "manquante", "manquantes"),
+      known > 0 && `${known} fait${known > 1 ? "s" : ""}`,
+      toConfirm > 0 && `${toConfirm} à vérifier`,
+      missing > 0 && `${missing} à faire`,
     ]
       .filter(Boolean)
       .join(" · "),
@@ -492,7 +492,7 @@ export const framingIntel = {
       `Prise en charge acceptée le ${date}${name ? ` par ${name}` : ""}`,
     analysisTitle: "Ce que le projet sait déjà",
     analysis: (known: number, toConfirm: number, missing: number) =>
-      `${plural(known, "information connue", "informations connues")} · ${toConfirm} à confirmer · ${plural(missing, "manquante", "manquantes")}`,
+      `Fait : ${known} · À vérifier : ${toConfirm} · À faire : ${missing}`,
     nextAttention: "Prochaine attention : le cadrage",
     nextAttentionBody:
       "Complétez seulement ce qui manque, pendant un échange ou directement avec PO. Les deux mènent au même Brief.",

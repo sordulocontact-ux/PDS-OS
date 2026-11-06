@@ -15,9 +15,9 @@ export const legalFormalities = {
     toRecap: "Voir le récapitulatif",
     states: {
       confirmed: "Confirmé",
-      proposed: "Proposé, à vérifier",
+      proposed: "À vérifier",
       toVerify: "À vérifier (SACEM)",
-      missing: "Manquant",
+      missing: "À faire",
       empty: "Non renseigné",
     },
   },

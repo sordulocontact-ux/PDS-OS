@@ -48,12 +48,12 @@ export function IntentionGroup({
     (i) => mine(i) && i.status === "confirmed",
   );
   const status: { tone: Tone; label: string } = proposed.length
-    ? { tone: "warning", label: t.state.toConfirm }
+    ? { tone: "info", label: t.state.toConfirm }
     : confirmed.length
       ? { tone: "success", label: t.state.confirmed }
       : deliverableId
         ? { tone: "neutral", label: t.state.inherits }
-        : { tone: "neutral", label: t.state.toComplete };
+        : { tone: "warning", label: t.state.toComplete };
   const topics = deliverableId
     ? fr.conception.topics
     : fr.conception.directionTopics;

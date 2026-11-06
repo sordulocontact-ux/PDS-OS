@@ -141,11 +141,17 @@ export function buildSynthesis(b: Build): SynthesisSection[] {
         label: factLabel(a.fact, q),
         detail: null,
         group: master ? groupOf(master) : undefined,
-        source: t.sources.intake,
+        // The provenance the plain state no longer says.
+        source:
+          a.status === "declared"
+            ? t.sources.declared
+            : a.status === "deduced"
+              ? t.sources.deduced
+              : t.sources.intake,
         quote: a.quote,
         status: ANSWER_STATUS[a.status] ?? "to_confirm",
         ...((ANSWER_STATUS[a.status] ?? "to_confirm") === "to_confirm" && {
-          tone: a.status === "to_verify" ? "warning" : "info",
+          tone: "info",
         }),
         statusLabel:
           t.states.answer[a.status as keyof typeof t.states.answer] ??

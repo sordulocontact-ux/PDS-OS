@@ -208,7 +208,7 @@ export const conception = {
   },
   intentionsStates: {
     draft: "Brouillon",
-    to_confirm: "À confirmer",
+    to_confirm: "À vérifier",
     confirmed: "Confirmées",
     to_revise: "À réviser",
   },

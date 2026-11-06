@@ -281,19 +281,19 @@ export const partyStatusTone: Record<string, Tone> = {
 
 export const factTone: Record<string, Tone> = {
   known: "success",
-  to_confirm: "warning",
-  missing: "neutral",
+  to_confirm: "info",
+  missing: "warning",
 };
 
-/** A line of the Cadrage (proto FR_ST, lib/framing/lines.ts): Connu,
- * Confirmé, À confirmer, Manquant, Non applicable, À définir plus tard.
- * Connu is green like Confirmé, as Manquant is red (Sacha 28/10/2026; the
- * proto left it grey). */
+/** A line of the Cadrage (proto FR_ST, lib/framing/lines.ts): Fait, À vérifier,
+ * À faire, Non applicable, À définir plus tard. Three states everywhere
+ * (Sacha 06/11/2026): a missing information is work to do (orange), not an
+ * error; red stays for errors, refusals and blocks. */
 export const framingLineTone: Record<string, Tone> = {
   known: "success",
   confirmed: "success",
-  to_confirm: "warning",
-  missing: "danger",
+  to_confirm: "info",
+  missing: "warning",
   na: "neutral",
   later: "info",
 };
@@ -336,7 +336,7 @@ export const recommendationLevelTone: Record<string, Tone> = {
 /** A dimension of the Stratégie's pilotage (lib/strategy/dimensions.ts):
  * nothing yet, started, a proposal or choice waiting for a decision, done. */
 export const strategyDimensionTone: Record<string, Tone> = {
-  to_complete: "neutral",
+  to_complete: "warning",
   in_progress: "info",
   to_decide: "warning",
   complete: "success",
@@ -655,7 +655,7 @@ export const conceptionStateTone: Record<string, Tone> = {
  * owner, confirmed, or changed since their confirmation. */
 export const intentionsStateTone: Record<string, Tone> = {
   draft: "neutral",
-  to_confirm: "warning",
+  to_confirm: "info",
   confirmed: "success",
   to_revise: "warning",
 };
@@ -1183,7 +1183,7 @@ export const noteStatusTone: Record<
   Tone
 > = {
   information: "neutral",
-  to_confirm: "warning",
+  to_confirm: "info",
   pending_decision: "info",
   decided: "success",
 };

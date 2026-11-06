@@ -64,7 +64,7 @@ export const stepTools = {
   },
   statuses: {
     information: "Information",
-    to_confirm: "À confirmer",
+    to_confirm: "À vérifier",
     pending_decision: "En attente de décision",
     decided: "Décidé",
   },
@@ -80,7 +80,7 @@ export const stepTools = {
       "Les deux restent ; celle qui fait foi est visible partout, l'autre reste dans l'historique. Tant que rien n'est tranché, c'est un blocage.",
     groups: {
       pending_decision: "En attente de décision",
-      to_confirm: "À confirmer",
+      to_confirm: "À vérifier",
       decided: "Décidé",
       information: "Informations",
     },

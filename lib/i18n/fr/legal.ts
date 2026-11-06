@@ -57,9 +57,9 @@ export const legal = {
     declarationOn: (date: string) => `déposée le ${date}`,
     declarationNoDate: "date du dépôt non renseignée",
     states: {
-      filled: "Renseigné",
+      filled: "Fait",
       catalogArtist: "Artiste du catalogue",
-      empty: "À renseigner",
+      empty: "À faire",
       noContributor: "Aucun contributeur",
       noContract: "Aucun contrat rattaché au projet",
       noDeclaration: "Aucune déclaration déposée",
@@ -253,19 +253,26 @@ export const legal = {
       publishers: "Éditeurs",
     },
     empty: "Rien dans cette partie pour l'instant.",
-    sources: { intake: "Cadrage juridique" },
+    sources: {
+      intake: "Cadrage juridique",
+      // What « À vérifier » no longer says (Sacha 06/11/2026).
+      declared: "Cadrage juridique · déclaré, pas encore prouvé",
+      deduced: "Cadrage juridique · déduit par PO",
+    },
     states: {
       credited: "Crédité",
       inSplit: "Dans le split édition",
       unanswered: "Sans réponse",
       answer: {
-        known: "Connu",
-        confirmed: "Confirmé",
-        declared: "Déclaré",
-        deduced: "Déduit",
+        // Plain states (Ibé 01/11, Sacha 06/11/2026): the provenance
+        // (declared, deduced…) stays in the source line under the value.
+        known: "Fait",
+        confirmed: "Fait",
+        declared: "À vérifier",
+        deduced: "À vérifier",
         to_verify: "À vérifier",
         simulated: "Simulé",
-        missing: "Manquant",
+        missing: "À faire",
       },
     },
     notStarted: {

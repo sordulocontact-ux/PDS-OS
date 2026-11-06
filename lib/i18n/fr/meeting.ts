@@ -43,7 +43,7 @@ export const meeting = {
     confirmed: (name: string) => `Confirmé par ${name}`,
     corrected: (name: string) => `Corrigé et confirmé par ${name}`,
     discarded: (name: string) => `Écarté par ${name}`,
-    pending: "À confirmer",
+    pending: "À vérifier",
   },
   // MeetingSummaryBlock.
   summary: {

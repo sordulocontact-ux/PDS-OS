@@ -81,7 +81,7 @@ export const distributionJourney = {
       saved: "Distribution · paramètres",
     },
     preorderSource: (title: string) => `Stratégie › Temps forts · « ${title} »`,
-    toFill: "À renseigner",
+    toFill: "À faire",
     none: "Aucune",
     noCover: "Aucune Fiche Livrable de pochette",
     noValidator: "Personne ne peut valider : à désigner",
@@ -167,7 +167,7 @@ export const distributionJourney = {
         `Master final V${n}, validé dans le workflow Master`,
       audioBefore: "Master final du Catalogue, antérieur au workflow",
     },
-    missing: "Manquant",
+    missing: "À faire",
     copy: "Copier",
     copied: (value: string) => `Copié : ${value}`,
     driftApproved: (n: number, lines: string) =>

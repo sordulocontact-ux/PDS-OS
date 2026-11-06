@@ -164,6 +164,16 @@ Le ton `action` est **gris** (fond `--tone-neutral-bg`, texte encre) depuis le 1
 blanc, gris, sans violet ») : il garde son nom et son sens, sa pastille ne se distingue plus
 par la couleur mais par son libellé (« À valider », « ✦ PO »).
 
+- **État d'une information** (un fait, un champ, une dimension, une valeur) : trois mots et
+  trois tons, les mêmes dans tous les modules (Ibé, 01/11 : « « à faire » serait plus
+  compréhensible » ; Sacha, 06/11/2026) : **À faire** (`warning`, il manque quelque chose),
+  **À vérifier** (`info`, connu mais pas encore confirmé par une personne : proposé, déduit,
+  déclaré, noté), **Fait** (`success`). « Plus tard », « Non applicable » en `neutral`.
+  Plus de « Manquant », « Connu », « À renseigner », « À compléter », « À confirmer » comme
+  état d'une ligne ; la provenance (déclaré, déduit…) se dit dans la source sous la valeur.
+  **Une information manquante n'est jamais rouge** : `danger` reste aux refus, échecs et
+  blocages, et au champ manquant après un essai d'enregistrement (§ 4). Les cycles de vie
+  d'un objet (versions, plans, déclarations, matériel…) gardent leurs propres mots.
 - La correspondance état → ton vit **uniquement** dans `lib/ui/state-tones.ts`. Un écran
   n'écrit jamais une couleur, il passe `tone={…Tone[état]}`.
 - Le libellé porte toujours le sens : la couleur ne fait que le renforcer

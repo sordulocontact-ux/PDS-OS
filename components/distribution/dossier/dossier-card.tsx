@@ -164,7 +164,7 @@ function DossierRow({
       label={label}
       value={value ?? undefined}
       source={source}
-      state={missing ? { tone: "danger", label: t.missing } : null}
+      state={missing ? { tone: "warning", label: t.missing } : null}
       side={
         props.mode === "copy" &&
         value &&

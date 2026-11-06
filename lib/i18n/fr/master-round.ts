@@ -9,7 +9,7 @@ const dossierOf = (stage: "mix" | "mastering") =>
 export const masterRound = {
   before: {
     stems: "Pistes séparées",
-    missing: "Manquant",
+    missing: "À faire",
     stemsCount: (n: number) =>
       n > 1 ? `${n} fichiers de pistes` : "1 fichier de pistes",
     stemsNone: (titles: string) => `Aucune piste pour ${titles}`,

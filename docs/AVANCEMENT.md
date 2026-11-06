@@ -1373,6 +1373,14 @@ directement », l'ISWC depuis une modale de la page, sans aller au catalogue. D�
 - [ ] Créer le raccourci sur l'iPhone de Sacha et partager le lien iCloud, après la mise en prod ;
       passage navigateur sur iPhone (partage TikTok, capture collée, connexion depuis un lien).
 
+## États d'une information unifiés (06/11/2026, branche `pre-prod`)
+
+- [x] Trois états partout (Cadrage, Juridique, Master, Distribution, Conception, Stratégie, informations
+      notées, propositions de PO) : À faire (orange), À vérifier (bleu), Fait (vert) ; plus de rouge pour
+      un manque ; provenance déclaré / déduit dans la source au Juridique (`docs/DESIGN.md` § 3).
+- [x] Brief du Master : lignes ouvertes d'un clic, sans verbe au survol ; date proposée « À vérifier ».
+- [ ] Passage navigateur.
+
 ## Master : ce qui restait du ticket et du proto (06/11/2026, branche `pre-prod`)
 
 Audit des retours et du ticket Master contre le code (06/11) : trois points encore demandés par le proto.

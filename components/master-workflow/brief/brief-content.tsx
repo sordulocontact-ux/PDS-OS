@@ -141,9 +141,7 @@ export function BriefContent(props: Props) {
                 missingLabel={t.toFill}
                 missing={!d.value && key === "masterFinalDue"}
                 // Proposed by the code, not yet in the Brief.
-                state={
-                  d.proposed ? { tone: "warning", label: t.toConfirm } : null
-                }
+                state={d.proposed ? { tone: "info", label: t.toConfirm } : null}
                 source={
                   key === "masterFinalDue"
                     ? props.masterFinalFromFraming

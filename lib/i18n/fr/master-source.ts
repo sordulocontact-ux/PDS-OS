@@ -48,7 +48,7 @@ export const masterSource = {
         : `${n > 1 ? `${n} fichiers` : "1 fichier"}${latest ? ` · ${latest}` : ""}`,
     source: "Lu par le code · fichiers du titre",
     ready: "Prêtes",
-    missing: "Manquantes",
+    missing: "À faire",
   },
   vocals: {
     label: "Voix définitives",
