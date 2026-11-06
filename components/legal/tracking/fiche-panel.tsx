@@ -131,8 +131,8 @@ export function FichePanel({
   // comme envoyée » (the page holds the fiche).
   if (row.state === "link_generated")
     return (
+      // The sentence that says it is under the step's title (`ficheLead`).
       <div className="flex flex-col gap-3">
-        <p className={muted}>{p.sendYourself(row.name)}</p>
         {personLink}
         <Button
           className="self-start"

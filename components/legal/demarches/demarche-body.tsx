@@ -1,3 +1,4 @@
+import { ficheLead } from "@/lib/legal/forms/state";
 import { DemarchePart } from "@/components/legal/demarches/demarche-part";
 import { DemarcheOwner } from "@/components/legal/demarches/demarche-owner";
 import { PlanSheetProvider } from "@/components/legal/tracking/plan-sheet-context";
@@ -78,10 +79,20 @@ export function DemarcheBody({
     <PlanSheetProvider projectId={projectId} initialOpen={null} actionable={[]}>
       {shown &&
         (parts.length === 1 ? (
-          <div className="flex flex-col gap-4">{part(shown)}</div>
+          <div className="flex flex-col gap-4">
+            {shown.panel.kind === "fiche" && ficheLead(shown.panel.row) && (
+              <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
+                {ficheLead(shown.panel.row)}
+              </p>
+            )}
+            {part(shown)}
+          </div>
         ) : (
           <StepSection
             title={titleOf(shown)}
+            description={
+              shown.panel.kind === "fiche" ? ficheLead(shown.panel.row) : null
+            }
             aside={
               <StatusBadge tone={shown.badge.tone} size="sm">
                 {shown.badge.label}

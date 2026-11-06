@@ -3,12 +3,13 @@
 // vérifier (incomplète ; corrections), complète à valider, validée. One
 // place for its pill, the board and the démarche. Client-safe, pure.
 
+import { legal } from "@/lib/i18n/fr/legal";
 import { legalForms } from "@/lib/i18n/fr/legal-forms";
 import { ficheMissing } from "@/lib/legal/forms/completeness";
 import type { FormRow } from "@/lib/legal/forms/queries";
 import type { Tone } from "@/lib/ui/state-tones";
 
-const fr = { legalForms };
+const fr = { legal, legalForms };
 
 export type FicheStatus =
   | "toCreate"
@@ -70,6 +71,14 @@ export function ficheStatusOf(row: FicheInput): FicheStatus {
 export function ficheBadge(row: FicheInput): { label: string; tone: Tone } {
   const status = ficheStatusOf(row);
   return { label: fr.legalForms.page.status[status], tone: TONE[status] };
+}
+
+/** The sentence under the fiche's title in its démarche, when its state
+ * asks for one (a link to send by hand). */
+export function ficheLead(row: Pick<FormRow, "state" | "name">): string | null {
+  return row.state === "link_generated"
+    ? fr.legal.panels.fiche.sendYourself(row.name)
+    : null;
 }
 
 /** The labels of what is missing, for a sentence. */
