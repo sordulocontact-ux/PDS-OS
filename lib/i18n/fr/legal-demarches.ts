@@ -102,6 +102,7 @@ export const legalDemarches = {
   },
   summary: {
     person: "Contrat signé",
+    ficheOnly: "Fiche validée",
     noDeal: "Pas d'accord nécessaire",
     clearance: "Autorisation obtenue",
     split: "Confirmée par tous",

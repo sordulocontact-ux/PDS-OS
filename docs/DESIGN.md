@@ -662,6 +662,11 @@ D'après le proto « Projet complet » (`docs/protos/projet.html`), qui fait foi
   padding 14, 14 px ; `ghost` en `--text-secondary`, encre au survol. À l'appui,
   `scale(.97)` (`--ease-out`), coupé quand le mouvement est réduit. Les autres
   variantes ne changent pas.
+- **Bouton secondaire** (Sacha, 06/11/2026) : un geste secondaire est en **contour** (`outline`),
+  jamais en texte seul, tant qu'aucun autre secondaire plus important n'est à côté ; `ghost` est réservé
+  au troisième niveau (un geste de plus à côté d'un secondaire déjà en contour, « Annuler », un geste
+  dans une ligne ou un menu). Appliqué d'abord à « Modifier mes rôles » (fiche publique) ; à reprendre
+  écran par écran.
 - **Survol d'un bouton** (repris du site Raw Studio, Sacha, 04/11/2026) : le bouton grossit
   à `scale(1.05)` (`--duration-grow`, 200 ms) et son libellé **roule** : il monte et sort par
   le haut pendant qu'une copie entre par le bas (`--duration-roll`, 500 ms, `--ease-out`).

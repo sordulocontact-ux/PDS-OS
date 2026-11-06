@@ -1609,3 +1609,8 @@ Proto « Plan d'action de Néons » (artefact du 06/11, copie `~/Desktop/Protos 
 - [x] Contrat dans sa démarche : « Voir le PDF » l'ouvre dans un nouvel onglet (`?view=1`, `inline`), la
       démarche reste ; « Fiche du contrat » (module Contrats, JUR-17) en lien secondaire sur la carte ; plus
       de bouton « Ouvrir le contrat » sous la carte.
+- [x] Parcours du Juridique : une décision n'est plus rouge (« Décision requise » retiré) ; la sienne est « À
+      vous » en bleu, celle de la direction pour les autres est une attente en jaune ; le rouge reste pour
+      l'échéance dépassée. Démarche d'une personne terminée sans contrat dans le plan : « Fiche validée »,
+      plus « Contrat signé ». Fiche publique : « Modifier mes rôles » en contour (règle des boutons secondaires,
+      `docs/DESIGN.md`).

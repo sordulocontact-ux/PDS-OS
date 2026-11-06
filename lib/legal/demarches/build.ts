@@ -142,8 +142,10 @@ function subjectOf(parts: BoardRow[]): string | null {
 function doneSummary(kind: LegalDemarcheKind, parts: BoardRow[]) {
   if (kind !== "person") return t.summary[kind];
   const contract = parts.find((p) => p.panel.kind === "contract");
-  return contract?.panel.kind === "contract" &&
-    contract.panel.row.state === "not_needed"
+  // No contract in the démarche (not in the plan yet): only the fiche is
+  // done, never « Contrat signé » (Sacha, 06/11/2026, Inès Robin).
+  if (contract?.panel.kind !== "contract") return t.summary.ficheOnly;
+  return contract.panel.row.state === "not_needed"
     ? t.summary.noDeal
     : t.summary.person;
 }
@@ -184,10 +186,13 @@ function stateOf(
   const expected = expectedOf(current);
   const overdue = own?.overdue ? ("overdue" as const) : undefined;
   if (!expected) return { status: "current", actor: null, alert: overdue };
+  // A decision is never red (Sacha, 06/11/2026): the direction's own is its
+  // « À vous » (blue), anyone else waits for it (« En attente de … »,
+  // yellow, as for a fiche); red stays for a due date passed.
   if (expected.who === "direction")
     return {
-      status: "current",
-      alert: overdue ?? "decision",
+      status: ctx.viewer.canValidate ? "current" : "waiting",
+      alert: overdue,
       actor: {
         name: ctx.viewer.canValidate
           ? (ctx.viewer.name ?? t.direction)
@@ -212,7 +217,7 @@ function stateOf(
   const responsibleId = own?.responsibleId ?? ctx.owner.personId;
   return {
     status: "current",
-    alert: overdue ?? (current.group === "decision" ? "decision" : undefined),
+    alert: overdue,
     actor: {
       name: own?.responsibleName ?? ctx.owner.name ?? "—",
       viewer: Boolean(responsibleId) && responsibleId === ctx.viewer.personId,

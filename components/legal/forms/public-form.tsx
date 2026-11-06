@@ -225,9 +225,11 @@ export function PublicForm({
       ))}
       {error && <FormMessage kind="error">{error}</FormMessage>}
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
+        {/* The only secondary gesture: outlined, never text alone (Sacha,
+            06/11/2026, docs/DESIGN.md « Bouton secondaire »). */}
         <Button
           type="button"
-          variant="ghost"
+          variant="outline"
           size="lg"
           disabled={pending}
           onClick={() => setStep("roles")}
