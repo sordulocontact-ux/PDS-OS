@@ -140,6 +140,61 @@ export async function saveBriefFact(
   if (p.masteringContactId) changes.mastering_person_id = null;
   if (p.masteringPersonId) changes.mastering_contact_id = null;
 
+  // A new engineer brings his usual rate from the Réseau, when the Brief
+  // has none or had the previous engineer's (ticket § 4, proto « tarif
+  // habituel »); a rate typed by hand stays.
+  const usual = step.view.usualRates;
+  const mixAfter =
+    p.mixContactId !== undefined
+      ? p.mixContactId
+      : p.mixPersonId
+        ? null
+        : b.mixContactId;
+  const sameAfter =
+    p.masteringSame !== undefined
+      ? p.masteringSame
+      : p.masteringContactId || p.masteringPersonId
+        ? false
+        : b.masteringSameEngineer;
+  const masteringAfter = sameAfter
+    ? mixAfter
+    : p.masteringContactId !== undefined
+      ? p.masteringContactId
+      : p.masteringPersonId
+        ? null
+        : b.masteringContactId;
+  const masteringBefore = b.masteringSameEngineer
+    ? b.mixContactId
+    : b.masteringContactId;
+  const takeUsual = (
+    role: "mix" | "mastering",
+    before: string | null,
+    after: string | null,
+    current: number | null,
+  ) => {
+    if (after === before || !after) return undefined;
+    const next = usual[after]?.[role] ?? null;
+    const previous = before ? (usual[before]?.[role] ?? null) : null;
+    return next !== null && (current === null || current === previous)
+      ? next
+      : undefined;
+  };
+  const mixRate =
+    p.mixRateCents === undefined
+      ? takeUsual("mix", b.mixContactId, mixAfter, b.mixRateCents)
+      : undefined;
+  if (mixRate !== undefined) changes.mix_rate_cents = mixRate;
+  const masteringRate =
+    p.masteringRateCents === undefined
+      ? takeUsual(
+          "mastering",
+          masteringBefore,
+          masteringAfter,
+          b.masteringRateCents,
+        )
+      : undefined;
+  if (masteringRate !== undefined) changes.mastering_rate_cents = masteringRate;
+
   const fields = step.saved
     ? changes
     : {
@@ -200,15 +255,15 @@ export async function saveBriefFact(
 
 /**
  * « Commencer directement » / « Préparer un échange »: the choice is kept;
- * starting directly asks the validator the artistic direction when the
- * Brief does not have it (a task in their Travail).
+ * starting directly asks the project's creative directors the artistic
+ * direction when the Brief does not have it (a task in their Travail).
  */
 export async function startBrief(
   projectId: string,
   mode: "direct" | "exchange",
 ): Promise<WriteResult> {
   const id = z.uuid().safeParse(projectId);
-  const access = await requireApproved();
+  await requireApproved();
   if (!id.success) return { ok: false, error: t.errors.failed };
   const done = mode === "direct" ? t.start.started : t.start.exchangeChosen;
   return withOutcome(
@@ -216,32 +271,9 @@ export async function startBrief(
     ["master"],
     done,
     async () => {
-      const saved = await saveBriefFact(id.data, { startMode: mode });
-      if (!saved.ok || mode === "exchange") return saved;
-      const project = await getProject(id.data);
-      if (!project) return { ok: false, error: t.errors.failed };
-      const step = await loadBriefStep(project, access, null);
-      const validator = step.view.brief.validatorPersonId;
-      const creative = step.questions.toAsk.some(
-        (q) =>
-          q.dimension === "direction" &&
-          q.people.some((x) => x.personId === validator),
-      );
-      if (!validator || !creative) return { ok: true };
-      const supabase = await createClient();
-      const { error } = await supabase.rpc("ask_master_brief_questions", {
-        p_project_id: id.data,
-        p_items: [
-          {
-            dimension: "direction",
-            person_id: validator,
-            task_title: fr.masterWorkflow.questions.taskTitle.direction,
-          },
-        ],
-      });
-      if (error) console.error("startBrief ask:", error.message);
-      refresh(id.data);
-      return { ok: true };
+      // « Directement »: the database asks the artistic direction to the
+      // project's creative directors (_master_ask_direction, 06/11/2026).
+      return saveBriefFact(id.data, { startMode: mode });
     },
     { openNext: true },
   );

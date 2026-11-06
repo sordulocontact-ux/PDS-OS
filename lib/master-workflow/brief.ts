@@ -4,11 +4,13 @@ import { can, type Access } from "@/lib/auth/access";
 import { routes } from "@/lib/auth/redirects";
 import { isBudgetStatus } from "@/lib/budget/types";
 import { asCallStatus } from "@/lib/calls/constants";
+import { loadDistributionFormats } from "@/lib/distribution/requirements";
 import { briefFromRow, emptyBrief } from "@/lib/master-workflow/brief-row";
 import type {
   BriefPerson,
   BriefView,
   MasterBrief,
+  UsualRates,
 } from "@/lib/master-workflow/brief-types";
 import type { FlowCredit } from "@/lib/master-workflow/engineer-facts";
 import { masterExchangeAgenda } from "@/lib/master-workflow/exchange-agenda";
@@ -79,6 +81,8 @@ export async function loadMasterBrief(
     framing,
     members,
     validated,
+    distributionFormats,
+    rates,
   ] = await Promise.all([
     readMasterRows(project.id, project.masters),
     // Shared with the Master's other loaders in the same render.
@@ -108,7 +112,21 @@ export async function loadMasterBrief(
       .select("stage")
       .eq("project_id", project.id)
       .eq("decision", "approved"),
+    access.organizationId
+      ? loadDistributionFormats(access.organizationId)
+      : Promise.resolve(null),
+    // RLS: only those who see a project's budget read rates.
+    supabase
+      .from("network_engineer_rates")
+      .select("contact_id, mix_rate_cents, mastering_rate_cents"),
   ]);
+  if (rates.error) console.error("loadMasterBrief rates:", rates.error.message);
+  const usualRates: Record<string, UsualRates> = Object.fromEntries(
+    (rates.data ?? []).map((r) => [
+      r.contact_id,
+      { mix: r.mix_rate_cents, mastering: r.mastering_rate_cents },
+    ]),
+  );
   if (exchanges.error)
     console.error("loadMasterBrief exchanges:", exchanges.error.message);
   if (saved.error) console.error("loadMasterBrief:", saved.error.message);
@@ -152,6 +170,7 @@ export async function loadMasterBrief(
   )
     ? (project.masterValidatorPersonId ?? null)
     : project.ownerPersonId;
+  const masteringEngineer = sameCredited ? mixCredited : masteringCredited;
   const brief: MasterBrief = row
     ? briefFromRow(row)
     : {
@@ -159,6 +178,13 @@ export async function loadMasterBrief(
         mixContactId: mixCredited,
         masteringSameEngineer: sameCredited,
         masteringContactId: sameCredited ? null : masteringCredited,
+        // What PDS usually pays them (Réseau, ticket § 4).
+        mixRateCents: mixCredited
+          ? (usualRates[mixCredited]?.mix ?? null)
+          : null,
+        masteringRateCents: masteringEngineer
+          ? (usualRates[masteringEngineer]?.mastering ?? null)
+          : null,
         dates: {
           ...emptyBrief(chosenValidator).dates,
           masterFinalDue: framing.masterFinalDue,
@@ -221,6 +247,8 @@ export async function loadMasterBrief(
           ]
         : [],
     ),
+    distributionFormats,
+    usualRates: canSeeBudget ? usualRates : {},
     nextAgenda: masterExchangeAgenda(brief, sourcesOpen),
     budget: (budget.data ?? []).flatMap((row) =>
       (row.master_role === "mix" || row.master_role === "mastering") &&

@@ -1373,6 +1373,18 @@ directement », l'ISWC depuis une modale de la page, sans aller au catalogue. D�
 - [ ] Créer le raccourci sur l'iPhone de Sacha et partager le lien iCloud, après la mise en prod ;
       passage navigateur sur iPhone (partage TikTok, capture collée, connexion depuis un lien).
 
+## Master : ce qui restait du ticket et du proto (06/11/2026, branche `pre-prod`)
+
+Audit des retours et du ticket Master contre le code (06/11) : trois points encore demandés par le proto.
+
+- [x] Direction artistique demandée aux directeurs créatifs du projet, valideurs ou non, par la base ;
+      Briefs déjà commencés rattrapés ; ligne « Demandée à … » (`20261106130101`).
+- [x] Formats de livraison exigés par The Orchard réglés dans Réglages › Distribution, repris par le Brief,
+      le dossier et le PDF (`20261106130201`).
+- [x] Tarif habituel de l'ingénieur appris à « Accepter le tarif », pré-rempli au choix de l'ingénieur
+      (`20261106130301`).
+- [ ] Migrations à pousser en prod avec le reste ; passage navigateur ; remplir les formats de The Orchard.
+
 ## Master : retours d'Ibé du 04/11 (05/11/2026, branche `pre-prod`)
 
 - [x] Ingénieur maison assigné sans clic (mix au Brief enregistré, mastering au mix validé) ; ingénieur externe

@@ -11711,6 +11711,39 @@ export type Database = {
           },
         ]
       }
+      network_engineer_rates: {
+        Row: {
+          contact_id: string
+          mastering_at: string | null
+          mastering_project_id: string | null
+          mastering_rate_cents: number | null
+          mix_at: string | null
+          mix_project_id: string | null
+          mix_rate_cents: number | null
+          organization_id: string
+        }
+        Insert: {
+          contact_id: string
+          mastering_at?: string | null
+          mastering_project_id?: string | null
+          mastering_rate_cents?: number | null
+          mix_at?: string | null
+          mix_project_id?: string | null
+          mix_rate_cents?: number | null
+          organization_id: string
+        }
+        Update: {
+          contact_id?: string
+          mastering_at?: string | null
+          mastering_project_id?: string | null
+          mastering_rate_cents?: number | null
+          mix_at?: string | null
+          mix_project_id?: string | null
+          mix_rate_cents?: number | null
+          organization_id?: string
+        }
+        Relationships: []
+      }
       network_contacts: {
         Row: {
           archived_at: string | null
@@ -12083,6 +12116,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      organization_distribution: {
+        Row: {
+          audio_formats: string | null
+          organization_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          audio_formats?: string | null
+          organization_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          audio_formats?: string | null
+          organization_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
       }
       organizations: {
         Row: {

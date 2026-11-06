@@ -18,12 +18,12 @@ const t = fr.masterBrief.start;
  */
 export function BriefStart({
   projectId,
-  validator,
+  creatives,
   missing,
 }: {
   projectId: string;
-  // The creative director PO asks the direction, when there is one.
-  validator: string | null;
+  // The creative directors PO asks the direction, when there are some.
+  creatives: string | null;
   missing: string[];
 }) {
   const submit = useWriteSubmit(() => undefined, t.started);
@@ -46,7 +46,7 @@ export function BriefStart({
           {
             value: "direct",
             title: t.direct,
-            body: t.directBody(validator),
+            body: t.directBody(creatives),
             onChoose: choose("direct"),
           },
           {

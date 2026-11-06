@@ -15,9 +15,9 @@ export const masterBrief = {
   start: {
     legend: "Comment voulez-vous remplir le Brief ?",
     direct: "Commencer directement",
-    directBody: (validator: string | null) =>
-      validator
-        ? `Tout ce qui est connu est déjà là. PO pose à ${validator} la question de la direction artistique ; vous complétez le reste.`
+    directBody: (creatives: string | null) =>
+      creatives
+        ? `Tout ce qui est connu est déjà là. PO pose à ${creatives} la question de la direction artistique ; vous complétez le reste.`
         : "Tout ce qui est connu est déjà là ; vous complétez le reste.",
     exchange: "Préparer un échange",
     exchangeBody:
@@ -99,6 +99,11 @@ export const masterBrief = {
     owner: "Responsable du projet",
     creative: "Directrice ou directeur créatif du projet",
     nobody: "Personne n'est désigné au Cadrage ni crédité sur le titre",
+    formatsDistribution: "Distribution › exigences de The Orchard",
+    usualRate: (engineer: string) =>
+      engineer
+        ? `Réseau · tarif habituel de ${engineer}`
+        : "Réseau · tarif habituel",
     usualRevisions: (project: string) =>
       project
         ? `Réseau · leurs conditions habituelles (Brief de « ${project} »)`
@@ -142,6 +147,8 @@ export const masterBrief = {
   changed: "Brief mis à jour",
   // A text or a date of the Brief still empty (pill, not red).
   toFill: "À renseigner",
+  directionAsked: (person: string) => `Demandée à ${person}`,
+  directionAnswered: (person: string) => `Réponse de ${person} à ajouter`,
   // « En attente de X : remplir le Brief » (StepWaiting).
   ownerTodo: "Remplir le Brief",
   errors: {

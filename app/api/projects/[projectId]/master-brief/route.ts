@@ -36,7 +36,10 @@ export async function GET(
     project: project.title,
     titles: project.masters.map((m) => m.title),
     state: step.recordedAt ? t.pdf.recorded : t.pdf.draft,
-    brief: step.view.brief,
+    brief: {
+      ...step.view.brief,
+      formats: step.view.brief.formats ?? step.view.distributionFormats,
+    },
     dates: Object.fromEntries(
       BRIEF_DATES.map((key) => [key, step.dates[key].value]),
     ) as Record<BriefDate, string | null>,

@@ -7,6 +7,7 @@ import {
   hasMasterFinal,
   type FlowAudio,
 } from "@/lib/master-workflow/audio-source";
+import { loadDistributionFormats } from "@/lib/distribution/requirements";
 import { briefFromRow } from "@/lib/master-workflow/brief-row";
 import type { MasterBrief } from "@/lib/master-workflow/brief-types";
 import { readMasterRows } from "@/lib/master-workflow/inventory-rows";
@@ -102,17 +103,22 @@ async function readStepView(
   role: PackageRole,
 ): Promise<StepView> {
   const supabase = await createClient();
-  const [rows, briefRow, history, finals, recorded] = await Promise.all([
-    readMasterRows(project.id, project.masters),
-    // The brief, the sendings and the versions are read once per render
-    // for every loader of the Master (lib/master-workflow/shared-rows.ts).
-    masterBriefRow(project.id),
-    whereRows(masterTransmissionRows(project.id), (t) => t.role === role),
-    // The validated Mix final of each title: what the mastering works from.
-    whereRows(masterVersionRows(project.id), (v) => v.stage === "mix"),
-    // Recorded and unchanged since: what the engineer will receive.
-    masterBriefRow(project.id),
-  ]);
+  const [rows, briefRow, history, finals, recorded, distributionFormats] =
+    await Promise.all([
+      readMasterRows(project.id, project.masters),
+      // The brief, the sendings and the versions are read once per render
+      // for every loader of the Master (lib/master-workflow/shared-rows.ts).
+      masterBriefRow(project.id),
+      whereRows(masterTransmissionRows(project.id), (t) => t.role === role),
+      // The validated Mix final of each title: what the mastering works from.
+      whereRows(masterVersionRows(project.id), (v) => v.stage === "mix"),
+      // Recorded and unchanged since: what the engineer will receive.
+      masterBriefRow(project.id),
+      // What the Distribution asks of the audio, when the Brief says nothing.
+      access.organizationId
+        ? loadDistributionFormats(access.organizationId)
+        : Promise.resolve(null),
+    ]);
   // Every version of the mix round, for where each title stands (PROJ-BUG-06).
   const mixVersions = finals.data ?? [];
   const mixFinal = new Set(
@@ -121,7 +127,10 @@ async function readStepView(
       .map((row) => row.master_id),
   );
   if (history.error) console.error("loadMixView:", history.error.message);
-  const brief = briefRow.data ? briefFromRow(briefRow.data) : null;
+  const saved = briefRow.data ? briefFromRow(briefRow.data) : null;
+  const brief = saved
+    ? { ...saved, formats: saved.formats ?? distributionFormats }
+    : null;
   const engineerId =
     role === "mix" || brief?.masteringSameEngineer
       ? brief?.mixContactId

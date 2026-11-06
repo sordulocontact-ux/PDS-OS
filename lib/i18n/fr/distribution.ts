@@ -1,6 +1,19 @@
 /** Distribution (ticket « Distribution », docs/ARCHITECTURE.md § 8 octies):
  * PDS OS prepares, checks and follows a manual deposit at The Orchard. */
 export const distribution = {
+  // What the distributor asks of the audio files, set in /app/settings and
+  // read by the Master's Brief (lib/distribution/requirements.ts).
+  requirements: {
+    title: "Distribution",
+    description:
+      "Ce que The Orchard exige des fichiers audio. Le Brief Mix/Master le reprend pour les ingénieurs.",
+    audioFormats: "Formats audio exigés par The Orchard",
+    audioFormatsHint:
+      "Par exemple : WAV 24 bits / 44,1 kHz, stéréo, sans limiteur.",
+    save: "Enregistrer",
+    saved: "Exigences de distribution enregistrées",
+    failed: "Les exigences n'ont pas pu être enregistrées. Réessayez.",
+  },
   // A required note left empty (components/distribution/note-form.tsx).
   noteRequired: "Dites pourquoi.",
   // Said wherever an action could be read as a sending (§ 12 of the ticket).

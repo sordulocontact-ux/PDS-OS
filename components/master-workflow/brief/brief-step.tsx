@@ -14,6 +14,8 @@ import {
   missingSentence,
 } from "@/lib/master-workflow/brief-rules";
 import type { BriefStepView } from "@/lib/master-workflow/brief-step";
+import { questionStateOf } from "@/lib/master-workflow/question-types";
+import { briefQuestionTone } from "@/lib/ui/state-tones";
 import { formatShortDay } from "@/lib/utils/day";
 
 import { BriefConditions } from "./brief-conditions";
@@ -31,6 +33,11 @@ const STATE_TONE = {
   draft: "neutral",
   ready: "success",
 } as const;
+
+const NAMES = new Intl.ListFormat("fr-FR", {
+  style: "long",
+  type: "conjunction",
+});
 
 const sectionTitle =
   "text-[length:var(--type-body-md)] leading-[var(--type-body-md-lh)] font-semibold";
@@ -67,15 +74,27 @@ export function BriefStep({
     !step.startMode &&
     !asked &&
     view.exchanges.length === 0;
-  const validator = view.validators.find(
-    (v) => v.personId === view.brief.validatorPersonId,
-  );
   const state = briefStateOf(
     step.missing,
     step.recordedAt !== null,
     step.dirty,
   );
   const missing = missingSentence(step.missing);
+  // Who PO asks the artistic direction (the creative directors, whoever
+  // validates: _master_ask_direction), and where that question stands.
+  const directionAsk = step.questions.toAsk.find(
+    (q) => q.dimension === "direction",
+  );
+  const creatives = directionAsk
+    ? NAMES.format(directionAsk.people.map((p) => p.name))
+    : null;
+  const directionQuestion =
+    step.questions.questions.find(
+      (q) => q.dimension === "direction" && !q.answeredAt,
+    ) ??
+    step.questions.questions.find(
+      (q) => q.dimension === "direction" && !q.appliedAt,
+    );
   // The questions left once the viewer's open ones went to the head.
   const others = lead
     ? step.questions.questions.filter((q) => !isOpenForViewer(q))
@@ -95,6 +114,7 @@ export function BriefStep({
     designations: step.designations,
     changedBy: step.changedBy,
     usualRevisions: step.usualRevisions,
+    usualRates: view.usualRates,
   };
   // The people first, as soon as the Master opens (Ibé, 02/11/2026).
   const people = (
@@ -117,11 +137,7 @@ export function BriefStep({
           {people}
           <BriefStart
             projectId={view.projectId}
-            validator={
-              validator && step.designations.validator?.kind !== "owner"
-                ? validator.name
-                : null
-            }
+            creatives={creatives}
             missing={step.missing}
           />
         </>
@@ -202,6 +218,17 @@ export function BriefStep({
             brief={view.brief}
             dates={step.dates}
             masterFinalFromFraming={step.masterFinalFromFraming}
+            distributionFormats={view.distributionFormats}
+            directionState={
+              directionQuestion
+                ? {
+                    tone: briefQuestionTone[questionStateOf(directionQuestion)],
+                    label: directionQuestion.answeredAt
+                      ? t.directionAnswered(directionQuestion.askedTo.name)
+                      : t.directionAsked(directionQuestion.askedTo.name),
+                  }
+                : null
+            }
             changedBy={step.changedBy}
           />
           {canEdit && (

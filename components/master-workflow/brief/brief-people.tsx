@@ -11,6 +11,7 @@ import { setMasterPerson } from "@/lib/master-workflow/people-actions";
 import type {
   BriefPerson,
   MasterBrief,
+  UsualRates,
 } from "@/lib/master-workflow/brief-types";
 import type {
   NetworkEngineer,
@@ -44,6 +45,8 @@ export type BriefFactsProps = {
   };
   changedBy: Partial<Record<string, string>>;
   usualRevisions: UsualRevisions | null;
+  // Each engineer's usual rates (Réseau), for those who see the budget.
+  usualRates: Record<string, UsualRates>;
 };
 
 /** Where a designation comes from, as the row says it (rule 22). */

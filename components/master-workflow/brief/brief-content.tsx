@@ -14,6 +14,7 @@ import {
   type BriefDate,
   type MasterBrief,
 } from "@/lib/master-workflow/brief-types";
+import type { Tone } from "@/lib/ui/state-tones";
 import { formatDay } from "@/lib/utils/day";
 
 const fr = { masterWorkflow, masterBrief };
@@ -32,6 +33,11 @@ type Props = {
   brief: MasterBrief;
   dates: Record<BriefDate, { value: string | null; proposed: boolean }>;
   masterFinalFromFraming: boolean;
+  // What the Distribution asks of the audio (/app/settings).
+  distributionFormats: string | null;
+  // The question of the direction to a creative director, while it is
+  // not in the Brief: « Demandée à … », then « Réponse de … à ajouter ».
+  directionState?: { tone: Tone; label: string } | null;
   changedBy: Partial<Record<string, string>>;
 };
 
@@ -50,10 +56,12 @@ const COLUMN: Record<BriefDate, string> = {
  */
 export function BriefContent(props: Props) {
   const { brief, canEdit, projectId, changedBy } = props;
+  // The Brief's own formats, else what the Distribution asks (ticket § 14).
+  const formats = brief.formats ?? props.distributionFormats;
   const save = (patch: Parameters<typeof saveBriefFact>[1]) =>
     saveBriefFact(projectId, patch);
   const textEdit = (
-    field: "direction" | "references" | "constraints" | "formats" | "message",
+    field: "direction" | "references" | "constraints" | "message",
   ) =>
     canEdit
       ? {
@@ -76,6 +84,7 @@ export function BriefContent(props: Props) {
               value={brief[f]}
               missingAs="badge"
               missingLabel={t.toFill}
+              state={f === "direction" ? props.directionState : null}
               missing={
                 !brief.direction &&
                 !brief.references &&
@@ -96,10 +105,23 @@ export function BriefContent(props: Props) {
           <FactRow
             openOnRow
             label={t.fields.formats}
-            value={brief.formats}
-            source={null}
+            value={formats}
+            source={
+              !brief.formats && props.distributionFormats
+                ? t.sources.formatsDistribution
+                : null
+            }
             changedBy={changedBy.delivery_formats}
-            edit={textEdit("formats")}
+            edit={
+              canEdit
+                ? {
+                    value: formats ?? "",
+                    optional: true,
+                    done: t.changed,
+                    onSave: (value: string) => save({ formats: value || null }),
+                  }
+                : null
+            }
           />
         </FactRows>
       </section>

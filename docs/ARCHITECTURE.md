@@ -5042,6 +5042,21 @@ lots, chacun utile seul.
     (créé avec ses valeurs par défaut s'il n'existait pas). Le formulaire est remonté à chaque
     enregistrement (`key = savedAt`) et repart du Brief à jour.
   - Lecture : quiconque voit le projet ; aucune écriture directe sur `master_brief_questions`.
+  - **06/11/2026** (`…20261106130101_master_direction_question_to_creatives`) : la question de la
+    direction est posée **par la base** (`_master_ask_direction`, triggers `z_master_ask_direction_brief`
+    sur `start_mode = 'direct'` et `z_master_ask_direction_creative` sur `project_creatives`, rattrapage des
+    Briefs déjà commencés) à chaque DC du projet, plus seulement au valideur s'il est DC. `startBrief`
+    n'enregistre plus que le choix. Ligne « Direction » du Brief : `directionState` (« Demandée à … »,
+    « Réponse de … à ajouter »).
+  - **Formats de livraison lus dans la Distribution** (`…130201_distribution_audio_requirements`) :
+    `organization_distribution.audio_formats` (administration, Réglages › Distribution,
+    `DistributionForm`, `lib/distribution/requirements.ts`). `BriefView.distributionFormats` ; le dossier
+    (`transmission.ts`) et le PDF prennent `brief.formats ?? distributionFormats`.
+  - **Tarif habituel** (`…130301_network_engineer_usual_rates`) : `network_engineer_rates` (une ligne par
+    contact, RLS `view_all_projects` ou `pilot_projects`), écrite par le trigger `z_learn_engineer_rate` quand
+    une ligne de budget du Master passe `committed` (+ rattrapage). `BriefView.usualRates` ; Brief jamais
+    enregistré et `saveBriefFact` au choix d'un ingénieur : le tarif vient de là s'il est vide ou était celui
+    de l'ingénieur précédent.
 - **Compléter depuis la page**, toujours avec le formulaire d'origine (`MasterFactAction`) :
   « Ajouter l'audio » (import audio du titre, état demandé), « Ajouter les pistes » (import
   de la bibliothèque, catégorie stems), « Ajouter une session » (`SessionForm`),

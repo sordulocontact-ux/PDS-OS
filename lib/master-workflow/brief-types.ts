@@ -89,6 +89,9 @@ export type BriefExchange = {
 };
 
 /** Everything the Brief page shows, read in one round. */
+/** An engineer's usual rates, in cents (Réseau, ticket § 4). */
+export type UsualRates = { mix: number | null; mastering: number | null };
+
 export type BriefView = {
   projectId: string;
   brief: MasterBrief;
@@ -109,6 +112,12 @@ export type BriefView = {
   validators: BriefPerson[];
   exchanges: BriefExchange[];
   budget: BriefBudgetLine[];
+  // Each engineer's usual rates (network_engineer_rates: what PDS last
+  // engaged with them), for those who see the budget; empty for the others.
+  usualRates: Record<string, UsualRates>;
+  // What the Distribution asks of the audio (/app/settings): the formats
+  // of the Brief when it says none (ticket § 14, proto master-v2).
+  distributionFormats: string | null;
   // The agenda a new exchange would get (what the brief still lacks).
   nextAgenda: AgendaItem[];
   // The project's owner: the only one who writes the brief.

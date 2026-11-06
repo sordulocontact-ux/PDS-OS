@@ -23,11 +23,42 @@ export function BriefConditions(props: BriefFactsProps) {
   const save = (patch: Parameters<typeof saveBriefFact>[1]) =>
     saveBriefFact(projectId, patch);
   const mix = engineerOf(props, brief.mixContactId, brief.mixPersonId);
+  const masteringId = brief.masteringSameEngineer
+    ? brief.mixContactId
+    : brief.masteringContactId;
+  const mastering = engineerOf(
+    props,
+    masteringId,
+    brief.masteringSameEngineer ? brief.mixPersonId : brief.masteringPersonId,
+  );
+  // What PDS usually pays this engineer (Réseau, ticket § 4).
+  const usualRate = {
+    mixRateCents: brief.mixContactId
+      ? (props.usualRates[brief.mixContactId]?.mix ?? null)
+      : null,
+    masteringRateCents: masteringId
+      ? (props.usualRates[masteringId]?.mastering ?? null)
+      : null,
+  };
+  const who = { mixRateCents: mix, masteringRateCents: mastering };
+  const rateSource = (field: "mixRateCents" | "masteringRateCents") =>
+    brief[field] !== null && brief[field] === usualRate[field]
+      ? t.sources.usualRate(who[field]?.name ?? "")
+      : null;
   const rateEdit = (field: "mixRateCents" | "masteringRateCents") =>
     canEdit
       ? {
           kind: "text" as const,
-          value: brief[field] === null ? "" : amountInput(brief[field]!),
+          value:
+            brief[field] !== null
+              ? amountInput(brief[field]!)
+              : usualRate[field] !== null
+                ? amountInput(usualRate[field]!)
+                : "",
+          proposal:
+            brief[field] === null && usualRate[field] !== null
+              ? `${formatAmount(usualRate[field]!)} · ${t.sources.usualRate(who[field]?.name ?? "")}`
+              : undefined,
           optional: true,
           done: t.changed,
           onSave: async (value: string) => {
@@ -91,6 +122,7 @@ export function BriefConditions(props: BriefFactsProps) {
             openOnRow
             label={mix ? `${t.fields.mixRate} · ${mix.name}` : t.fields.mixRate}
             value={rateValue(brief.mixRateCents)}
+            source={rateSource("mixRateCents")}
             state={
               brief.mixRateCents === null
                 ? null
@@ -101,8 +133,13 @@ export function BriefConditions(props: BriefFactsProps) {
           />
           <FactRow
             openOnRow
-            label={t.fields.masteringRate}
+            label={
+              mastering
+                ? `${t.fields.masteringRate} · ${mastering.name}`
+                : t.fields.masteringRate
+            }
             value={rateValue(brief.masteringRateCents)}
+            source={rateSource("masteringRateCents")}
             state={
               brief.masteringRateCents === null
                 ? null

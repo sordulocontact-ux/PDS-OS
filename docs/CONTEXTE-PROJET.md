@@ -269,6 +269,20 @@ par les tickets ou laissé « à confirmer », donc décidé provisoirement ou r
 - Personnes du Master (ingénieurs, valideur) : le responsable dans le Brief, le DG pour corriger une erreur,
   tant qu'aucune version du tour n'est validée (Ibé, 04/11/2026).
 - Le lien privé du Master est gardé chiffré et relisible par le responsable (règle 19).
+- **Direction artistique** : demandée par la base aux directeurs créatifs du projet dès que le Brief démarre
+  « directement » sans elle, qu'ils valident les versions ou non (ticket § 6, proto `master-v2` ; avant le
+  06/11 elle ne partait que si le valideur était un DC, et le valideur est le chef de projet par défaut
+  depuis le 02/11). Aussi pour un DC ajouté ensuite ; jamais au responsable, jamais deux fois à la même
+  personne, plus une fois un mix revenu ou le projet archivé. La ligne du Brief dit « Demandée à … » puis
+  « Réponse de … à ajouter ».
+- **Formats de livraison** : propriété de la Distribution (ticket § 14), réglés par la direction dans
+  Réglages › Distribution (une ligne par organisation : un seul distributeur en V1). Le Brief, le dossier
+  de l'ingénieur et le PDF les reprennent quand le Brief n'en dit pas d'autres, source « Distribution ›
+  exigences de The Orchard ». Décision du 06/11 : Distribution n'avait aucune exigence audio à lire.
+- **Tarif habituel d'un ingénieur** (ticket § 4, proto) : ce que PDS a engagé la dernière fois avec lui pour ce
+  rôle, appris par la base à « Accepter le tarif » (`network_engineer_rates`), jamais saisi ni deviné. Choisir
+  l'ingénieur dans le Brief le pré-remplit (sauf tarif tapé à la main), source « Réseau · tarif habituel de … ».
+  Lisible seulement par ceux qui voient un budget (chefs de projet, direction), pas sur la fiche du contact.
 
 ### Finances unifiées : décisions du 20/10/2026 (branche `pc/f1-finance`)
 
