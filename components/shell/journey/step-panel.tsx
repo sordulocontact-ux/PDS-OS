@@ -38,6 +38,10 @@ const t = fr.journey;
  * informations secondaires repliées »). It comes right under the « why »,
  * named by the step's action (« À vous · Valider le Mix V1 ») and anchored
  * (`#a-vous`, where Travail opens it); the result banner moves above it.
+ * `leadTitle={false}` when the whole step is the gesture (a form, PO's
+ * question: Plan d'action, Cadrage juridique): no « À vous · … » line,
+ * which would only repeat the journey and the gesture's own button (Sacha,
+ * 06/11/2026).
  */
 export type StepSlots = {
   lead?: React.ReactNode;
@@ -65,6 +69,7 @@ export function StepPanel({
   steps,
   blockedLabel = t.blocked,
   badge,
+  leadTitle = true,
   children,
   ...slots
 }: StepSlots & {
@@ -75,6 +80,8 @@ export function StepPanel({
   // itself has no pill: the journey and the card already say it (Ibé,
   // 03/11/2026).
   badge?: { tone: Tone; label: string };
+  // False when the step is the gesture itself: the lead without its line.
+  leadTitle?: boolean;
   // Replaces « Se débloque quand … » (Marketing: « S'ouvre quand … »).
   blockedLabel?: (prereqs: string) => string;
   children?: React.ReactNode;
@@ -130,24 +137,26 @@ export function StepPanel({
             {banner}
             <section
               id={LEAD_ANCHOR}
-              {...(step.actor?.viewer
+              {...(step.actor?.viewer && leadTitle
                 ? { "aria-labelledby": "journey-step-lead" }
-                : { "aria-label": t.now.mine })}
+                : { "aria-label": step.actor?.todo ?? t.now.mine })}
               // No frame of its own (Sacha, 04/11/2026: « le fond bleu
               // non »): the pill and the gesture's name say it is yours.
               className="flex scroll-mt-24 flex-col gap-3.5"
             >
-              <div className="flex flex-wrap items-center gap-2">
-                <StatusBadge tone="info">{t.now.mine}</StatusBadge>
-                {step.actor?.viewer && (
-                  <h3
-                    id="journey-step-lead"
-                    className="text-[length:var(--type-body-md)] leading-[var(--type-body-md-lh)] font-semibold"
-                  >
-                    {step.actor.todo}
-                  </h3>
-                )}
-              </div>
+              {leadTitle && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <StatusBadge tone="info">{t.now.mine}</StatusBadge>
+                  {step.actor?.viewer && (
+                    <h3
+                      id="journey-step-lead"
+                      className="text-[length:var(--type-body-md)] leading-[var(--type-body-md-lh)] font-semibold"
+                    >
+                      {step.actor.todo}
+                    </h3>
+                  )}
+                </div>
+              )}
               {lead}
             </section>
           </>

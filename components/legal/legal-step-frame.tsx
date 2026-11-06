@@ -28,15 +28,19 @@ const fr = { shell, journey, legalDemarches, legalHistory, legalJourney };
  * left (Dossier, Suivi with one step per démarche, Sortie), the open step
  * on the right with its slots (« Déjà fait » at the bottom). `stepKey`: a
  * step of the Dossier, a démarche (« person:<ref> ») or « ready ».
+ * `gestureIsStep`: the step's content is the viewer's gesture itself (PO's
+ * question, the plan to launch): no « À vous · … » line above it.
  */
 export async function LegalStepFrame({
   projectId,
   stepKey,
+  gestureIsStep = false,
   children,
   ...slots
 }: StepSlots & {
   projectId: string;
   stepKey: string;
+  gestureIsStep?: boolean;
   children: React.ReactNode;
 }) {
   const { steps, viewerName } = await legalJourneyContext(projectId);
@@ -83,6 +87,7 @@ export async function LegalStepFrame({
           step={step}
           steps={steps}
           blockedLabel={fr.legalJourney.blocked}
+          leadTitle={!gestureIsStep}
           {...slots}
           {...(asLead && { lead: children })}
         >

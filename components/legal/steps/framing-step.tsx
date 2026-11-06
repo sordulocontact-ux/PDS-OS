@@ -13,7 +13,7 @@ export async function FramingStep({
 }) {
   const { intake } = await legalJourneyContext(projectId);
   return (
-    <LegalStepFrame projectId={projectId} stepKey="framing">
+    <LegalStepFrame projectId={projectId} stepKey="framing" gestureIsStep>
       <IntakeWorkspace
         // « Corriger » from the dossier reopens its question: a new
         // workspace for it.
