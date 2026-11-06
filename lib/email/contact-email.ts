@@ -20,6 +20,10 @@ export type ContactEmail = {
   open: string;
   // The card of their page to open on (« ps-package », « ps-versions »…).
   anchor?: string;
+  // An address the person gave themselves and not yet in the Réseau (their
+  // fiche's correction, waiting for its check): used instead (Sacha,
+  // 06/11/2026: « j'ai remplacé le mail … mais j'ai rien reçu »).
+  email?: string | null;
 };
 
 /**
@@ -40,7 +44,8 @@ export async function emailContact(
     .select("name, email")
     .eq("id", mail.contactId)
     .maybeSingle();
-  if (!contact?.email) return "disabled";
+  const to = mail.email?.trim() || contact?.email;
+  if (!contact || !to) return "disabled";
   const link = await ensureContactLink(mail.projectId, mail.contactId);
   if (!link) return "disabled";
   const { data: row } = await supabase
@@ -49,7 +54,7 @@ export async function emailContact(
     .eq("id", link.id)
     .maybeSingle();
   const sent = await emailLink({
-    to: { name: contact.name, email: contact.email },
+    to: { name: contact.name, email: to },
     subject: mail.subject,
     message: `${t.greeting(contact.name)}\n\n${mail.body}`,
     open: mail.open,

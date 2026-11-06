@@ -340,6 +340,8 @@ export async function requestLegalFormComplement(
   const sent = await emailContact({
     projectId: parsed.data.projectId,
     contactId,
+    // The address they wrote in their fiche, when they corrected it.
+    email: submission?.person.email ?? null,
     subject: t.emailed.complementSubject(title),
     body: t.emailed.complementBody(note.trim().slice(0, 2000)),
     open: t.emailed.open,

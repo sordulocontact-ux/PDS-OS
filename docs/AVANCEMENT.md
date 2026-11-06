@@ -1599,3 +1599,5 @@ Proto « Plan d'action de Néons » (artefact du 06/11, copie `~/Desktop/Protos 
       personne ; raison sociale, SIRET et adresse de facturation pour une société ; IPI/COAD pour un auteur,
       compositeur ou arrangeur (`ficheNeeded`, même liste que la vérification de l'équipe) ; plus de fiche
       reçue « incomplète » pour ça. Fiche reçue : une seule pastille d'état, une valeur corrigée dite une fois.
+- [x] La demande de complément d'une fiche part à l'adresse que la personne a écrite dans sa fiche (correction
+      pas encore validée), plus à l'ancienne adresse du Réseau (`emailContact({ email })`).
