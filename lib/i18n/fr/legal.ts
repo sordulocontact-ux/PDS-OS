@@ -143,7 +143,6 @@ export const legal = {
     },
     answersOf: (answered: number, total: number) =>
       `${answered} réponse${answered > 1 ? "s" : ""} sur ${total}`,
-    toAnswer: "Pas encore répondu",
     answer: "Répondre",
     questionOf: (n: number, total: number) => `Question ${n} sur ${total}`,
     answerLabel: "Votre réponse",
@@ -200,7 +199,11 @@ export const legal = {
     editAnswer: "Modifier ma réponse",
     cancel: "Annuler",
     answers: "Réponses",
-    correct: "Corriger",
+    // A row of « Réponses »: its words for a screen reader (« Répondre »
+    // for an open one), its pill while unanswered or open in PO's box.
+    edit: "Modifier la réponse",
+    toAnswerPill: "À répondre",
+    inTheBox: "Question en cours",
     correcting: "Correction d'une réponse",
     lastAnswer: (text: string) => `Votre réponse : « ${text} »`,
     facts: {

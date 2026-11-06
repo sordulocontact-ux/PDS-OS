@@ -75,6 +75,9 @@ export type FactRowProps = {
   href?: string | null;
   onClick?: () => void;
   hrefLabel?: string;
+  // The row whose item is open elsewhere on the page (the question in
+  // PO's box): tinted in the selection colour, `aria-current`.
+  current?: boolean;
 };
 
 /** The source line under the value (« Modifié par … » once changed). */
@@ -129,6 +132,7 @@ export function FactRowFrame({
   href,
   onClick,
   hrefLabel,
+  current,
   sourceNode,
   hoverAction,
   buttonRef,
@@ -209,7 +213,10 @@ export function FactRowFrame({
   );
   const actionFrame = cn(
     frame,
-    "outline-none [transition:var(--transition-control)] hover:bg-[var(--control-bg-hover)] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[color:var(--focus-ring)]",
+    "outline-none [transition:var(--transition-control)] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[color:var(--focus-ring)]",
+    current
+      ? "bg-[var(--selection-bg)]"
+      : "hover:bg-[var(--control-bg-hover)]",
   );
   if (onClick)
     return (
@@ -217,6 +224,7 @@ export function FactRowFrame({
         ref={buttonRef}
         type="button"
         onClick={onClick}
+        aria-current={current || undefined}
         className={cn(actionFrame, "group/fact w-full cursor-pointer text-left")}
       >
         {content}

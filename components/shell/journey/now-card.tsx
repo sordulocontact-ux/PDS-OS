@@ -78,7 +78,14 @@ export function NowCard({
   ];
   if (!overview && mine.length === 0 && blockers.length === 0) {
     if (elsewhere.length > 0)
-      return <ElsewhereLine count={elsewhere.length} href={workHref} />;
+      return (
+        <ElsewhereLine
+          count={elsewhere.length}
+          href={workHref}
+          // The step shown is the viewer's: never « Rien à faire ici ».
+          also={also}
+        />
+      );
     if (also) return null;
   }
   const waiting: NowItem[] = [
@@ -183,14 +190,24 @@ export function NowCard({
   );
 }
 
-/** A module with nothing for the viewer: one quiet line, not the big card. */
-function ElsewhereLine({ count, href }: { count: number; href?: string }) {
+/** A module with nothing else for the viewer: one quiet line, not the big
+ * card (« Rien à faire ici », or only the count when the step shown is
+ * theirs). */
+function ElsewhereLine({
+  count,
+  href,
+  also,
+}: {
+  count: number;
+  href?: string;
+  also: boolean;
+}) {
   return (
     <p
       data-now-card
       className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]"
     >
-      {t.nothingHere(count)}{" "}
+      {also ? t.alsoElsewhere(count) : t.nothingHere(count)}{" "}
       {href && (
         <ViewLink
           href={href}

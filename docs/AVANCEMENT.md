@@ -1514,3 +1514,19 @@ Retours d'Ibé du 01/11 (« Sessions studio accessibles depuis la barre de menu,
 - [ ] Nouveau jeton avec les portées Meet (passage avec Ibé, po@) ; offre Workspace qui transcrit
       (Business Standard ou plus) à confirmer ; essai sur un vrai Meet. Avec le jeton actuel, Google
       refuse (403) : les calls gardent leur lien et le dépôt de l'enregistrement.
+
+## Cadrage juridique : flèches et lignes cliquables (06/11/2026, branche `pre-prod`)
+
+- [x] L'encadré de PO a ses flèches « ‹ 2 sur 3 › » (`PoQuestion nav`, qui accepte maintenant une action
+      en plus d'un lien) sur toutes les questions ; une question répondue revient avec sa réponse à modifier.
+- [x] « Réponses » au patron du Brief du Master (commit `041f5dbf`) : une `FactRowFrame` par question, faits
+      retenus, citations en source dessous, pastille « À répondre » ; toute la ligne rouvre sa question dans
+      l'encadré, sans verbe écrit (la teinte au survol le dit ; la page remonte, focus sur le champ) ; la
+      question ouverte est la ligne teintée « Question en cours » (`current`, nouveau sur `FactRowFrame`).
+      Plus de « Corriger » réservé au moment où tout est répondu, plus d'« Annuler » dans l'étape (gardé
+      dans la modale de la Confirmation).
+- [x] Décision : la ligne n'édite pas sur place comme au Master, parce qu'une réponse passe par la lecture
+      de PO ; un seul endroit pour répondre.
+- [x] « Maintenant » d'un module : quand l'étape affichée est au lecteur, la ligne dit « 2 autres choses à
+      faire ailleurs » et plus « Rien à faire ici » (qui contredisait « À vous » juste dessous).
+- [ ] Passage navigateur.

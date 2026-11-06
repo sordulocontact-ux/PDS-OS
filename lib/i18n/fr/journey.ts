@@ -55,6 +55,8 @@ export const journey = {
     openShort: "Ouvrir",
     nothingHere: (n: number) =>
       `Rien à faire ici · ${n} chose${n > 1 ? "s" : ""} à faire ailleurs.`,
+    alsoElsewhere: (n: number) =>
+      `${n === 1 ? "Une autre chose" : `${n} autres choses`} à faire ailleurs.`,
     seeWork: "Voir le travail du projet",
     goTo: (place: string) => `Aller à ${place}`,
     others: (n: number, list: string) =>

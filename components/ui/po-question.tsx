@@ -32,7 +32,7 @@ export function PoQuestion({
 }: {
   eyebrow: string;
   rank?: { position: number; total: number };
-  // The arrows to the question before and after (Cadrage).
+  // The arrows to the question before and after (Cadrage, Cadrage juridique).
   nav?: PoQuestionNav;
   title: string;
   why?: React.ReactNode;
@@ -84,11 +84,15 @@ export function PoQuestion({
   );
 }
 
+// A link (Cadrage: one URL per question), or an action when the questions
+// live in one page's state (Cadrage juridique); null at the ends.
+type NavTarget = string | (() => void) | null;
+
 export type PoQuestionNav = {
   position: number;
   total: number;
-  previous: string | null;
-  next: string | null;
+  previous: NavTarget;
+  next: NavTarget;
 };
 
 const arrowClass =
@@ -96,11 +100,20 @@ const arrowClass =
 
 /** « ‹ 8 sur 23 › »: links to the question before and after, faded at the ends. */
 function QuestionArrows({ nav }: { nav: PoQuestionNav }) {
-  const arrow = (href: string | null, label: string, icon: React.ReactNode) =>
-    href ? (
-      <ViewLink href={href} aria-label={label} className={arrowClass}>
+  const arrow = (to: NavTarget, label: string, icon: React.ReactNode) =>
+    typeof to === "string" ? (
+      <ViewLink href={to} aria-label={label} className={arrowClass}>
         {icon}
       </ViewLink>
+    ) : to ? (
+      <button
+        type="button"
+        onClick={to}
+        aria-label={label}
+        className={cn(arrowClass, "cursor-pointer")}
+      >
+        {icon}
+      </button>
     ) : (
       <span aria-hidden className={cn(arrowClass, "opacity-35")}>
         {icon}

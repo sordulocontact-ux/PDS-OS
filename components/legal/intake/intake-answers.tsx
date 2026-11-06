@@ -1,6 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { FactRows } from "@/components/ui/fact-row";
+import { FactRowFrame } from "@/components/ui/fact-row-frame";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { legal } from "@/lib/i18n/fr/legal";
 import { poQuestion } from "@/lib/i18n/fr/po-question";
@@ -14,12 +15,14 @@ import { StepSection } from "@/components/shell/journey/step-section";
 const fr = { poQuestion, legal };
 
 /**
- * Under « Question de PO », every question at a glance (proto « Projet
- * complet », Cadrage juridique): « n réponses sur N », each answer with what
- * was kept and the words it came from; an open question can be answered
- * now (« Répondre »), an answer corrected once every question has one
- * (« Corriger »: the new answer supersedes, the history stays). Then the
- * questions PO does not ask, settled by reliable data, with their source.
+ * Under PO's box, every question at a glance (proto « Projet complet »,
+ * Cadrage juridique), as the Master's Brief shows its facts: « n réponses
+ * sur N », one row per question, what was kept and, under it, the words it
+ * came from; « À répondre » on the right while unanswered. A click on the
+ * whole row opens its question in the box above, no verb written, the
+ * row's tint on hover says it (Sacha 06/11/2026, as the Brief); the
+ * question open there is the tinted row, « Question en cours ». Then the questions PO does not
+ * ask, settled by reliable data, with their source.
  */
 export function IntakeAnswers({
   questions,
@@ -30,14 +33,13 @@ export function IntakeAnswers({
 }: {
   questions: IntakeQuestion[];
   notAsked: NotAskedQuestion[];
-  // The question shown above (not repeated as an action).
+  // The question open in the box above.
   activeKey: string | null;
   keyOf: (q: IntakeQuestion) => string;
   onOpen: (q: IntakeQuestion) => void;
 }) {
   const t = fr.legal.intake;
   const answered = questions.filter((q) => q.answered).length;
-  const done = answered === questions.length;
   const where = (title: string | null) => title ?? t.project;
   return (
     <div className="flex flex-col gap-4">
@@ -50,61 +52,30 @@ export function IntakeAnswers({
             </span>
           }
         >
-          <ul className="flex flex-col divide-y divide-[color:var(--border-hairline)] rounded-xl border border-[color:var(--border-hairline)]">
+          <FactRows>
             {questions.map((q) => {
               const key = keyOf(q);
-              const active = key === activeKey;
+              const current = key === activeKey;
               return (
-                <li
+                <FactRowFrame
                   key={key}
-                  className="flex flex-wrap items-start justify-between gap-3 px-3.5 py-2.5"
-                >
-                  <div className="flex min-w-0 flex-col gap-1">
-                    <span className="text-[length:var(--type-body-sm)] font-semibold">
-                      {t.questions[q.key].short} · {where(q.title)}
-                    </span>
-                    {q.answered ? (
-                      <ul className="flex flex-col gap-0.5">
-                        {(q.facts.length > 0 ? q.facts : []).map((fact, i) => (
-                          <li
-                            key={i}
-                            className="text-[length:var(--type-body-sm)] break-words"
-                          >
-                            {factLabel(fact, q.key)}
-                            {fact.quote && (
-                              <span className="text-[length:var(--type-micro)] text-[color:var(--text-secondary)]">
-                                {" "}
-                                · « {fact.quote} »
-                              </span>
-                            )}
-                          </li>
-                        ))}
-                        {q.facts.length === 0 && q.lastAnswer && (
-                          <li className="text-[length:var(--type-body-sm)] break-words text-[color:var(--text-secondary)]">
-                            {t.lastAnswer(q.lastAnswer)}
-                          </li>
-                        )}
-                      </ul>
-                    ) : (
-                      <span className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
-                        {t.toAnswer}
-                      </span>
-                    )}
-                  </div>
-                  {!active && (q.answered ? done : true) && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onOpen(q)}
-                    >
-                      {q.answered ? t.correct : t.answer}
-                    </Button>
-                  )}
-                </li>
+                  label={`${t.questions[q.key].short} · ${where(q.title)}`}
+                  value={answerOf(q)}
+                  source={quotesOf(q)}
+                  // Not answered: « À répondre » on the right, as the
+                  // Master's « À renseigner »; the question in the box:
+                  // « Question en cours ».
+                  missing={!q.answered}
+                  missingAs="badge"
+                  missingLabel={t.toAnswerPill}
+                  state={current ? { tone: "info", label: t.inTheBox } : null}
+                  current={current}
+                  onClick={() => onOpen(q)}
+                  hrefLabel={q.answered ? t.edit : t.answer}
+                />
               );
             })}
-          </ul>
+          </FactRows>
         </StepSection>
       )}
       {notAsked.length > 0 && (
@@ -141,4 +112,25 @@ export function IntakeAnswers({
       )}
     </div>
   );
+}
+
+/** What an answer kept, one fact a line (or the words, when PO kept none). */
+function answerOf(q: IntakeQuestion) {
+  const t = fr.legal.intake;
+  if (!q.answered) return null;
+  if (q.facts.length === 0)
+    return q.lastAnswer ? t.lastAnswer(q.lastAnswer) : null;
+  return (
+    <span className="flex flex-col gap-0.5">
+      {q.facts.map((fact, i) => (
+        <span key={i}>{factLabel(fact, q.key)}</span>
+      ))}
+    </span>
+  );
+}
+
+/** The words the facts came from, under the value (the row's source). */
+function quotesOf(q: IntakeQuestion) {
+  const quotes = q.facts.flatMap((f) => (f.quote ? [`« ${f.quote} »`] : []));
+  return quotes.length > 0 ? quotes.join(" · ") : null;
 }

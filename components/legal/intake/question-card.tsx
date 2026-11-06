@@ -5,7 +5,7 @@ import { useState, useTransition } from "react";
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
-import { PoQuestion } from "@/components/ui/po-question";
+import { PoQuestion, type PoQuestionNav } from "@/components/ui/po-question";
 import { PoReading } from "@/components/ui/po-reading";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { VoiceFieldControl } from "@/components/voice/voice-field-control";
@@ -24,7 +24,9 @@ import {
 
 const fr = { auth, legal };
 
-const FIELD_ID = "legal-answer";
+// The answer's field: focused when a question is opened from its row.
+export const LEGAL_ANSWER_FIELD = "legal-answer";
+const FIELD_ID = LEGAL_ANSWER_FIELD;
 const NONE_FACT: ProposedFact = { kind: "none", value: {}, quote: null };
 
 /**
@@ -42,6 +44,7 @@ export function QuestionCard({
   question,
   position,
   total,
+  nav,
   correcting,
   onCancel,
   onSaved,
@@ -51,9 +54,12 @@ export function QuestionCard({
   // 1-based place of this question among those of the step.
   position: number;
   total: number;
-  // Opened from « Corriger »: the previous answer comes back to edit.
+  // The arrows to the question before and after (the step's page).
+  nav?: PoQuestionNav;
+  // An answered question: the previous answer comes back to edit.
   correcting: boolean;
-  onCancel: () => void;
+  // « Annuler » (the Confirmation's dialog); none when arrows lead away.
+  onCancel?: () => void;
   onSaved: () => void;
 }) {
   const t = fr.legal.intake;
@@ -122,6 +128,7 @@ export function QuestionCard({
     <PoQuestion
       eyebrow={t.domains[question.key]}
       rank={{ position, total }}
+      nav={nav}
       title={ask(question.title ?? "")}
       why={why}
     >
@@ -212,7 +219,7 @@ export function QuestionCard({
                 {noneLabel}
               </Button>
             )}
-            {correcting && (
+            {correcting && onCancel && (
               <Button
                 type="button"
                 variant="ghost"
