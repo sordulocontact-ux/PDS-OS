@@ -34,6 +34,7 @@ export function RecordActions({
   blockedReason,
   deleteBlockedReason,
   edit,
+  editSize = "default",
   leaveTo,
   size,
   reveal,
@@ -46,6 +47,8 @@ export function RecordActions({
   deleteBlockedReason?: string;
   // Body of the edit modal; absent = not editable here.
   edit?: (close: () => void) => ReactNode;
+  // `wide`: a long edit form laid out in two columns (a contact).
+  editSize?: "default" | "medium" | "wide";
   // Detail page: where to go once the record is archived or deleted.
   leaveTo?: string;
   size?: "icon-sm" | "icon-lg";
@@ -120,6 +123,7 @@ export function RecordActions({
       {edit && (
         <FormDialog
           open={open === "edit"}
+          size={editSize}
           onOpenChange={(next) => !next && close()}
           title={t.edit.title[kind]}
           description={t.edit.description[kind]}

@@ -159,6 +159,8 @@
   /* Colonne de contenu d'une page de projet (proto « Projet complet »). */
   --content-width: 1180px;
   --dialog-width-wide: 900px;
+  /* Un formulaire d'une colonne qui garde de l'air (contact du Réseau). */
+  --dialog-width-medium: 640px;
   --surface-glass: color-mix(in srgb, var(--surface-raised) 88%, transparent);
 
   /* --- Graisses : medium au minimum, jamais de regular (DESIGN.md § 2) ---- */

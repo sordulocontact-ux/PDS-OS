@@ -31,6 +31,7 @@ export function AddToNetworkButton({
   const t = fr.network.form;
   return (
     <LoadedFormButton
+      dialogSize="medium"
       label={label}
       icon={header ? IconPlus : undefined}
       variant="outline"

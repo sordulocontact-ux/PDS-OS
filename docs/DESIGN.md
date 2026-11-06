@@ -190,8 +190,9 @@ pâle). Classes Tailwind `accent-selection`, `outline-ring`, `border-ring`. Il h
 
 À changer dans `app/globals.css` seulement (la modale, en verre clair, garde le même
 `--selection-bg`). Ce n'est pas un ton d'état (§ 3) : le bleu `info` reste réservé à
-« en cours ». Les pastilles `FilterChip` (filtres, et `ChipChoice` qui s'en sert) restent
-en encre pleine : un filtre actif n'est pas une sélection de formulaire.
+« en cours ». Les pastilles `FilterChip` (filtres qui se combinent) restent en encre pleine :
+un filtre actif n'est pas une sélection de formulaire. Un choix unique (`ChipChoice`) est un
+`SegmentedControl` gris (§ 4, « Onglets et filtres de liste »).
 
 ## 3 ter. Teintes de catégorie
 
@@ -211,7 +212,13 @@ lancement le statut de transmission (« Transmis, à accepter »…).
 
 Formulaire long en **blocs titrés** (`FormSection`) : une carte blanche à filet par groupe
 (« Le projet », « Informations initiales », « Équipe »), sans la carte dans une modale ou un
-panneau latéral.
+panneau latéral. **Fiche à beaucoup de champs facultatifs en modale** (contact du Réseau, Sacha
+05/11/2026 : « trop d'informations d'un coup » ; Attio, Linear) : une colonne (`FormDialog
+size="medium"`, 640 px), l'essentiel toujours affiché, les autres champs affichés seulement s'ils
+ont une valeur, les vides réduits à des boutons « + E-mail », « + TikTok »… sous les champs, qui
+ouvrent le champ et y mettent le focus ; un champ refusé par le serveur reste ouvert. Pas de texte
+d'aide sous un champ dont le libellé suffit. Essayés puis écartés le même jour : deux colonnes, puis
+blocs titrés avec le titre à gauche (toujours trop de champs à la fois).
 
 **Cartes de section** (`sectionCardClass`, `components/ui/section-card.ts`) : fond `bg-card`,
 filet `--border-hairline`, `rounded-xl`, marge intérieure 16 px puis 24 px dès `md`. Les
@@ -506,7 +513,14 @@ Refonte du 27/10/2026, d'après `docs/VISION-UX.md` § 2 (les cinq questions) :
   pastilles (Actifs / Archivés sur Artistes). Une seule vue : pas d'onglets. Casse
   normale, comme les onglets des fiches. En place : Artistes (relation), Masters et
   Projets (Actifs / Archivés, DG), Membres (statut), Budget (statut).
-- **Pastilles** (`FilterChip`, `ViewToggle`) : filtres secondaires ou qui se combinent.
+- **Contrôle segmenté** (`SegmentedControl`, `SegmentedLinks`, référence de Sacha « Spans | Traces »
+  du 05/11/2026) : **tout choix unique parmi quelques-uns**, dans un formulaire (`ChipChoice` : type
+  d'un contact, format, priorité) comme pour une vue de page dans l'URL (`ViewToggle`, historiques,
+  versions). Un cadre à filet `border` sur `--control-bg`, rayon `--radius-xl`, 4 px de marge ;
+  segments 36 px, 14 px medium, encre secondaire ; le choisi en encre pleine sur `--control-bg-soft`,
+  rayon `--radius-md`, fond qui **glisse** d'un segment à l'autre (`clip-path`, `--duration-slide`,
+  `--ease-standard`, posé d'un coup si le mouvement est réduit). Remplace les pastilles pour ces cas.
+- **Pastilles** (`FilterChip`) : seulement des filtres ou des choix **qui se combinent**.
 - **Recherche et filtres d'une liste** (Figma Projets 90:4972, Sacha 29/10/2026) : sous les
   onglets, **une seule ligne** (`ListToolbar`) : la recherche, **deux fois plus large qu'un filtre**
   (Sacha 29/10), puis les filtres principaux en listes déroulantes de même largeur (3 au plus, « Tous les … » quand rien n'est choisi), puis

@@ -125,11 +125,6 @@ export const network = {
       person: "Nom ou nom professionnel",
       organization: "Nom",
     },
-    nameHint: {
-      person:
-        "Le nom sous lequel la personne travaille. Ses nom et prénom civils ne sont demandés que pour un contrat ou une fiche de renseignements.",
-      organization: "",
-    },
     namePlaceholder: {
       person: "Ex. Inès Morel, ou DJ Lumen",
       organization: "Ex. Studio Lumière",
@@ -142,7 +137,6 @@ export const network = {
     },
     relations: "Type de relation",
     relationsPlaceholder: "Client, prestataire, partenaire…",
-    relationsHint: "Comment PDS travaille avec ce contact.",
     parent: "Organisation associée",
     // « Garder seulement le nom » on the organization: a name is not a link.
     artist: "Artiste du catalogue",
@@ -177,6 +171,34 @@ export const network = {
           : "une personne y est rattachée : détachez-la d'abord de sa fiche.",
       kept: "contrats, crédits, projets et historique restent liés au contact.",
     },
+    // The contact's picture (retour d'Ibé du 01/11/2026): chosen by hand, or
+    // taken from its TikTok or Instagram profile on saving.
+    picture: {
+      add: { person: "Ajouter une photo", organization: "Ajouter un logo" },
+      replace: "Changer l'image",
+      remove: "Retirer",
+      undo: "Annuler",
+      reading: "Préparation…",
+      fromTiktok: "Reprise du profil TikTok",
+      fromInstagram: "Reprise du profil Instagram",
+      // Without a picture: where it will come from on saving.
+      auto: "Sinon, celle de TikTok ou d'Instagram",
+      removed: "Retirée à l'enregistrement",
+      unreadable: "Image illisible : choisissez un JPEG, un PNG ou un WebP.",
+    },
+    // An empty detail of the contact, opened by its « + » button.
+    addDetail: "Ajouter",
+    details: {
+      email: "E-mail",
+      phone: "Téléphone",
+      website: "Site web",
+      city: "Ville",
+      tiktok: "TikTok",
+      instagram: "Instagram",
+      spotify: "Spotify",
+      deezer: "Deezer",
+      notes: "Note",
+    },
     email: "E-mail",
     phone: "Téléphone",
     website: "Site web",
@@ -185,7 +207,6 @@ export const network = {
     notes: "Notes",
     notesPlaceholder: "Tarifs, disponibilités, dernier projet ensemble…",
     // An artist's accounts: a handle, or the profile link pasted as is.
-    accounts: "Réseaux",
     tiktok: "TikTok",
     tiktokPlaceholder: "@pseudo ou lien du profil",
     instagram: "Instagram",
@@ -216,6 +237,8 @@ export const network = {
     members:
       "Des personnes sont rattachées à cette organisation : détachez-les avant d'en faire une personne.",
     failed: "Le contact n'a pas pu être enregistré. Réessayez.",
+    picture:
+      "L'image n'a pas pu être enregistrée. Réessayez avec un JPEG, un PNG ou un WebP.",
   },
   page: {
     back: "Tout le réseau",

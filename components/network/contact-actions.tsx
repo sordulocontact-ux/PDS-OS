@@ -34,6 +34,7 @@ export function ContactActions({
       leaveTo={leaveTo}
       size={size}
       reveal={reveal}
+      editSize="medium"
       edit={(close) => (
         <EditPanel load={() => loadContactEdit(contact.id)}>
           {({ contact: values, options }) => (

@@ -11728,6 +11728,8 @@ export type Database = {
           organization_id: string
           parent_id: string | null
           phone: string | null
+          picture_path: string | null
+          picture_source: string | null
           relations: string[]
           roles: string[]
           spotify_artist_id: string | null
@@ -11751,6 +11753,8 @@ export type Database = {
           organization_id: string
           parent_id?: string | null
           phone?: string | null
+          picture_path?: string | null
+          picture_source?: string | null
           relations?: string[]
           roles: string[]
           spotify_artist_id?: string | null
@@ -11774,6 +11778,8 @@ export type Database = {
           organization_id?: string
           parent_id?: string | null
           phone?: string | null
+          picture_path?: string | null
+          picture_source?: string | null
           relations?: string[]
           roles?: string[]
           spotify_artist_id?: string | null

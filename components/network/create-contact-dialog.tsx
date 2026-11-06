@@ -70,6 +70,7 @@ export function CreateContactDialog({
   const t = fr.network.form;
   return (
     <FormDialog
+      size="medium"
       open={open}
       onOpenChange={onOpenChange}
       title={title ?? t.createTitle}

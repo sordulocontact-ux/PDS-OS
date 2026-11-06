@@ -20,6 +20,7 @@ export function LoadedFormButton<T>({
   variant = "default",
   size = "lg",
   className,
+  dialogSize = "default",
   title,
   description,
   closeLabel,
@@ -33,6 +34,8 @@ export function LoadedFormButton<T>({
   // row's stretched link).
   size?: "lg" | "sm" | "xs";
   className?: string;
+  // `wide`: a long form laid out in two columns (the contact form).
+  dialogSize?: "default" | "medium" | "wide";
   title: string;
   description: string;
   closeLabel: string;
@@ -57,6 +60,7 @@ export function LoadedFormButton<T>({
       <FormDialog
         open={open}
         onOpenChange={setOpen}
+        size={dialogSize}
         title={title}
         description={description}
         closeLabel={closeLabel}

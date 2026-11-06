@@ -29,7 +29,8 @@ export function FormDialog({
   // A DialogTrigger, when the modal opens from its own button.
   trigger?: React.ReactNode;
   // `wide`: a longer form laid out wider rather than taller (feedback).
-  size?: "default" | "wide";
+  // `medium`: one column with room to breathe (a contact of the Réseau).
+  size?: "default" | "medium" | "wide";
   children: React.ReactNode;
 }) {
   return (
@@ -38,7 +39,11 @@ export function FormDialog({
       <DialogContent
         closeLabel={closeLabel}
         className={
-          size === "wide" ? "sm:max-w-[var(--dialog-width-wide)]" : undefined
+          size === "wide"
+            ? "sm:max-w-[var(--dialog-width-wide)]"
+            : size === "medium"
+              ? "sm:max-w-[var(--dialog-width-medium)]"
+              : undefined
         }
       >
         <DialogHeader>

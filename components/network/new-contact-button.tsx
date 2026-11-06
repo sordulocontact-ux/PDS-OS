@@ -15,6 +15,7 @@ export function NewContactButton() {
   const t = fr.network.form;
   return (
     <LoadedFormButton
+      dialogSize="medium"
       label={fr.network.new}
       icon={IconPlus}
       title={t.createTitle}

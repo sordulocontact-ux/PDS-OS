@@ -1,6 +1,7 @@
 // Network contacts (supabase/migrations/20260929000101_network_contacts.sql).
 // Client-safe: the lists mirror the database checks.
 
+import type { NetworkPictureSource } from "@/lib/network/picture-rules";
 import { network } from "@/lib/i18n/fr/network";
 import type { ContactSocials } from "@/lib/network/socials";
 
@@ -227,6 +228,9 @@ export type NetworkContactValues = {
   website: string | null;
   city: string | null;
   notes: string | null;
+  // Its picture, read for its page and its form (signed, short-lived).
+  pictureUrl?: string | null;
+  pictureSource?: NetworkPictureSource | null;
 } & ContactSocials;
 
 /** Choices of the contact form: organizations and catalog artists, and

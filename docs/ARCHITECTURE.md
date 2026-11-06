@@ -186,9 +186,6 @@ Principes :
   **Tableaux de fichiers** (Sacha, 05/11) : l'onglet Fichiers (`FilesList`, recherche comme partout) et
   la page Fichiers partagent leurs cellules (`file-cells.tsx`) ; une image que le navigateur montre est
   sa propre miniature (`previewUrl` : la copie de 320 px d'une pochette, sinon l'image signée).
-  **Tableaux de fichiers** (Sacha, 05/11) : l'onglet Fichiers (`FilesList`, recherche comme partout) et
-  la page Fichiers partagent leurs cellules (`file-cells.tsx`) ; une image que le navigateur montre est
-  sa propre miniature (`previewUrl` : la copie de 320 px d'une pochette, sinon l'image signée).
   **Activité**
   (`activity_events`) : journal écrit **par triggers seuls** (création / modification de
   l'artiste, contacts, fichiers, masters, projets liés, transmissions), `detail` copié au
@@ -786,9 +783,6 @@ Le layout du projet (`projects/[projectId]/layout.tsx`, `generateMetadata`) pose
 module donne son nom dans son layout (`metadata.title`, layouts `framing/` et `strategy/` créés pour
 ça) et ses pages n'en déclarent pas ; une page hors module (Budget, Travail, Calls…) donne le sien,
 **sans** « · PDS OS ». Même modèle pour un titre et un artiste du Catalogue (« Nuit blanche · Fichiers ·
-PDS OS », `generateMetadata` de leur layout, onglets sans « · PDS OS ») ; toute autre page déclare
-`metadata.title` complet (« Catalogue · PDS OS », « Connexion · PDS OS »). **Une nouvelle page déclare
-son titre** : sans lui l'onglet n'affiche que « PDS OS ». Même modèle pour un titre et un artiste du Catalogue (« Nuit blanche · Fichiers ·
 PDS OS », `generateMetadata` de leur layout, onglets sans « · PDS OS ») ; toute autre page déclare
 `metadata.title` complet (« Catalogue · PDS OS », « Connexion · PDS OS »). **Une nouvelle page déclare
 son titre** : sans lui l'onglet n'affiche que « PDS OS ».
@@ -3200,6 +3194,19 @@ rend, projet par projet, ses rôles d'équipe, les éléments de sa page privée
   accepte « @pseudo » ou le lien collé, la fiche affiche les liens, la liste montre le TikTok
   quand il n'y a ni e-mail ni téléphone. Les contacts d'artiste (`artist_contacts`) et
   les intervenants cités restent à part : pas de fusion automatique en V1.
+- **Photo d'un contact** (retour d'Ibé du 01/11/2026, `…20261105200101_network_contact_pictures.sql`,
+  `lib/network/pictures.ts`, `lib/integrations/social-picture.ts`) : `picture_path` dans le bucket privé
+  `network-pictures` (`<org>/<contact>/<uuid>.<ext>`, lecture membres, écriture `manage_network`, URL
+  signée 1 h) et `picture_source` (`upload`, `tiktok`, `instagram`, `none` = retirée à la main). Une image
+  choisie est recadrée en carré de 512 px dans le navigateur et part avec le formulaire (champ `picture`,
+  `pictureRemove`) ; elle prime toujours. Sinon, à l'enregistrement, le serveur copie la photo du profil
+  public TikTok (données de la page, `avatarMedium`), à défaut Instagram (`og:image`, 150 px) : quand le
+  contact n'en a pas encore, quand le compte d'origine change, ou après un retrait si un compte change.
+  Lue comme un visiteur avec le client identifié de l'app (`fetchText`), téléchargée seulement depuis les
+  CDN des deux plateformes (sans redirection), copiée chez nous car leurs liens expirent en quelques
+  jours. Profil privé, absent ou refus de la plateforme : pas de photo, jamais une erreur. Un contact
+  existant prend la sienne au prochain « Modifier › Enregistrer ». Fichiers d'un contact supprimé non
+  effacés (politique Storage à faire).
 - **Personnes et organisations** (ticket « Retour PO / Réseau » du 11/10/2026 et retour
   Notion « Restructuration et enrichissement de la page Réseau » du 10/10,
   `…20261011200101_network_kinds_relations.sql`, test `network-kinds-relations.test.sql`) :

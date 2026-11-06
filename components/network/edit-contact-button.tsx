@@ -16,6 +16,7 @@ export function EditContactButton({ contactId }: { contactId: string }) {
   const t = fr.records.edit;
   return (
     <LoadedFormButton
+      dialogSize="medium"
       label={fr.records.menu.edit}
       icon={IconPenWriting2}
       variant="outline"

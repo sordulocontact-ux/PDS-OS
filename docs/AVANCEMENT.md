@@ -1438,15 +1438,34 @@ directement », l'ISWC depuis une modale de la page, sans aller au catalogue. D�
       la place de son icône, « Ajouter un fichier » en petit bouton (il touchait la ligne des onglets).
 - [ ] Passage navigateur.
 
-## Noms d'onglet et tableau des fichiers (05/11/2026, branche `pre-prod`)
+## Modale de contact large, recherche en surimpression, photo de profil (05/11/2026, branche `pre-prod`)
 
-- [x] Toutes les pages ont un nom d'onglet : « Titre · Section · PDS OS » pour un titre et un artiste (comme
-      un projet), « Catalogue · PDS OS », « Travail · PDS OS », « Connexion · PDS OS »… ; seules restaient
-      « PDS OS ».
-- [x] Onglet Fichiers d'un titre, d'un artiste, d'un projet, d'un contrat : recherche comme les autres listes,
-      mêmes cellules que la page Fichiers (date et auteur réunis, nom tronqué), image montrée en miniature à
-      la place de son icône, « Ajouter un fichier » en petit bouton (il touchait la ligne des onglets).
-- [ ] Passage navigateur.
+- [x] « Modifier le contact » / « Nouveau contact » en modale large (900 px), formulaire en deux colonnes
+      (Type | Photo, Métiers | Type de relation, Organisation associée | Artiste du catalogue), titre
+      « Coordonnées » ; une colonne dans les modales étroites (Labo, PO, fiche artiste).
+- [x] `SearchPicker` (organisation associée, `PersonPickerField`, artistes, masters) : la liste flotte au-dessus
+      des champs suivants au lieu de les pousser, aussi dans une modale.
+- [x] Retour d'Ibé du 01/11 (« Photo de profil automatique depuis TikTok ou Instagram ») : photo choisie à la
+      main ou reprise du profil TikTok, à défaut Instagram, à l'enregistrement ; affichée en tête de la fiche.
+      Migration `20261105200101_network_contact_pictures` appliquée en pré-prod ; **reste à pousser en prod**.
+- [ ] Passage navigateur (extension Chrome non connectée pendant le lot).
+
+## Modale de contact refaite, contrôle segmenté partout (05/11/2026, branche `pre-prod`)
+
+- [x] Retour de Sacha sur la première version (« incompréhensible, trop d'informations d'un coup ») :
+      références Mobbin (folk, Attio, Jobber, Plain, Homerun, Workable, SoundCloud). Type en contrôle
+      segmenté en tête, photo cliquable à gauche du nom, puis blocs Profil · Coordonnées · Réseaux · Notes,
+      titre à gauche et champs à droite, filet entre eux ; textes d'aide retirés (nom, type de relation).
+- [x] `SegmentedControl` / `SegmentedLinks` (référence « Spans | Traces »), fond qui glisse : remplace les
+      pastilles de tout choix unique (`ChipChoice`, 19 formulaires) et des vues dans l'URL (`ViewToggle` :
+      Calls, Calendrier, Retours ; historiques Master et Juridique, versions du plan de sortie, demandes du
+      Brief, activations, titres de la Source). `FilterChipLink` supprimé ; `FilterChip` garde les filtres.
+- [x] Second retour (« c'est mieux, mais toujours pas ça ») : les champs vides sont repliés. L'essentiel
+      reste affiché (type, photo, nom, métiers, relation, organisation, artiste), puis coordonnées, comptes
+      et notes seulement s'ils ont une valeur ; les vides deviennent des boutons « + Téléphone »… qui ouvrent
+      le champ (`ContactDetailsFields`). Une colonne, modale 640 px (`FormDialog size="medium"`) ;
+      `FormSection aside`, `ContactCoordinatesFields` et `ContactSocialsFields` supprimés.
+- [ ] Passage navigateur (extension Chrome non connectée).
 
 ## Sessions studio et Maquettes (05/11/2026, branche `pre-prod`)
 

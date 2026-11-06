@@ -4,14 +4,13 @@ import { useActionState, useEffect, useState } from "react";
 
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
-import { TextareaField } from "@/components/auth/textarea-field";
 import {
   ArtistNamesake,
   DuplicateNotice,
   KindChangeNotice,
 } from "@/components/network/contact-form-notices";
-import { ContactCoordinatesFields } from "@/components/network/contact-coordinates-fields";
-import { ContactSocialsFields } from "@/components/network/contact-socials-fields";
+import { ContactDetailsFields } from "@/components/network/contact-details-fields";
+import { ContactPictureField } from "@/components/network/contact-picture-field";
 import { ParentOrganizationField } from "@/components/network/parent-organization-field";
 import { useKindRoles } from "@/components/network/use-kind-roles";
 import { OptionSelect } from "@/components/projects/option-select";
@@ -47,7 +46,11 @@ const fr = { network };
  * neither. At creation, a person named exactly as an artist of the catalog
  * is linked to it, said on screen and removable (UX test of 09/10/2026), and
  * contacts of the same name are said, never blocking. A change of kind of a
- * saved contact says what goes with it before saving.
+ * saved contact says what goes with it before saving. Its picture is chosen
+ * here or taken from its TikTok or Instagram on saving (retour d'Ibé du
+ * 01/11/2026). One column; the details the contact does not have yet are
+ * « + » buttons under the fields (ContactDetailsFields, Sacha 05/11/2026:
+ * « trop d'informations d'un coup »). No helper text under the fields.
  */
 export function ContactForm({
   contact,
@@ -134,18 +137,25 @@ export function ContactForm({
           memberCount={contact?.memberCount ?? 0}
         />
       )}
-      <Field
-        name="name"
-        label={t.nameLabel[kind]}
-        hint={t.nameHint[kind] || undefined}
-        required
-        maxLength={200}
-        autoComplete="off"
-        placeholder={t.namePlaceholder[kind]}
-        value={name}
-        onChange={(event) => setName(event.target.value)}
-        error={error?.field === "name" ? error.error : undefined}
-      />
+      <ContactPictureField
+        name={name}
+        kind={kind}
+        pictureUrl={contact?.pictureUrl ?? null}
+        pictureSource={contact?.pictureSource ?? null}
+        error={error?.field === "picture" ? error.error : undefined}
+      >
+        <Field
+          name="name"
+          label={t.nameLabel[kind]}
+          required
+          maxLength={200}
+          autoComplete="off"
+          placeholder={t.namePlaceholder[kind]}
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+          error={error?.field === "name" ? error.error : undefined}
+        />
+      </ContactPictureField>
       {duplicates.length > 0 && (
         <DuplicateNotice matches={duplicates} newTab={stay} />
       )}
@@ -174,7 +184,6 @@ export function ContactForm({
         name="relations"
         label={t.relations}
         placeholder={t.relationsPlaceholder}
-        hint={t.relationsHint}
         items={Object.fromEntries(
           NETWORK_RELATIONS.map((value) => [
             value,
@@ -190,14 +199,6 @@ export function ContactForm({
           defaultId={contact?.parentId ?? initial?.parentId ?? null}
         />
       )}
-      {/* Creation never lists the catalog's artists (Sacha, 10/10/2026): a
-          link found by PO's draft is kept as is, the rest is set by editing. */}
-      {!contact && kind === "person" && initial?.artistId && (
-        <input type="hidden" name="artistId" value={initial.artistId} />
-      )}
-      {namesake && !unlinked && (
-        <input type="hidden" name="artistId" value={namesake.id} />
-      )}
       {contact && kind === "person" && options.artists.length > 0 && (
         <OptionSelect
           name="artistId"
@@ -209,20 +210,19 @@ export function ContactForm({
           defaultValue={contact?.artistId ?? initial?.artistId ?? "none"}
         />
       )}
-      <ContactCoordinatesFields values={contact ?? initial} error={error} />
-      <ContactSocialsFields values={contact ?? initial} error={error} />
-      <TextareaField
-        name="notes"
-        label={t.notes}
-        maxLength={2000}
-        rows={3}
-        placeholder={t.notesPlaceholder}
-        defaultValue={contact?.notes ?? initial?.notes ?? ""}
-      />
+      {/* Creation never lists the catalog's artists (Sacha, 10/10/2026): a
+          link found by PO's draft is kept as is, the rest is set by editing. */}
+      {!contact && kind === "person" && initial?.artistId && (
+        <input type="hidden" name="artistId" value={initial.artistId} />
+      )}
+      {namesake && !unlinked && (
+        <input type="hidden" name="artistId" value={namesake.id} />
+      )}
+      <ContactDetailsFields values={contact ?? initial} error={error} />
       {error && !error.field && (
         <FormMessage kind="error">{error.error}</FormMessage>
       )}
-      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+      <div className="flex flex-col-reverse gap-2 border-t border-[color:var(--border-hairline)] pt-5 sm:flex-row sm:justify-end">
         <Button type="button" variant="ghost" size="lg" onClick={onCancel}>
           {t.cancel}
         </Button>

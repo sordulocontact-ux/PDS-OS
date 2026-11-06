@@ -7,12 +7,15 @@ import { cn } from "@/lib/utils";
 // Multi-line sibling of Field: label above, textarea, hint or error below.
 // `addon`: a control laid in the textarea's bottom row (the microphone).
 // The « * » follows `required` or `aria-required`, as in Field.
+// `hideLabel`: the label is only read aloud, a section title already says
+// it on screen (the contact's « Notes »).
 export function TextareaField({
   name,
   label,
   error,
   hint,
   addon,
+  hideLabel = false,
   className,
   ...textareaProps
 }: React.ComponentProps<"textarea"> & {
@@ -21,13 +24,18 @@ export function TextareaField({
   error?: string;
   hint?: string;
   addon?: React.ReactNode;
+  hideLabel?: boolean;
 }) {
   const id = textareaProps.id ?? name;
   const describedBy = error ? `${id}-error` : hint ? `${id}-hint` : undefined;
 
   return (
     <div className="flex flex-col gap-1.5">
-      <Label htmlFor={id} required={isRequired(textareaProps)}>
+      <Label
+        htmlFor={id}
+        required={isRequired(textareaProps)}
+        className={hideLabel ? "sr-only" : undefined}
+      >
         {label}
       </Label>
       <div className="relative">

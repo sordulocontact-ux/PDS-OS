@@ -21,6 +21,11 @@ import {
 } from "@/lib/network/types";
 import { linkCreditsOfNewContact } from "@/lib/network/link-credits";
 import {
+  pictureFileOf,
+  pictureStateOf,
+  updateContactPicture,
+} from "@/lib/network/pictures";
+import {
   parseDeezerId,
   parseHandle,
   parseSpotifyId,
@@ -36,7 +41,7 @@ export type SaveContactResult =
   | {
       ok: false;
       error: string;
-      field?: SocialField | "name" | "roles" | "email" | "website";
+      field?: SocialField | "name" | "roles" | "email" | "website" | "picture";
     };
 
 // Blank means none (null), as the database wants it.
@@ -143,6 +148,9 @@ export async function saveNetworkContact(
     if (social) return { ok: false, error: t.accounts[social], field: social };
     return { ok: false, error: t.invalid };
   }
+  const picture = pictureFileOf(form);
+  if (picture === "invalid")
+    return { ok: false, error: t.picture, field: "picture" };
   const { id, kind, ...values } = parsed.data;
   const row = {
     kind,
@@ -165,6 +173,7 @@ export async function saveNetworkContact(
   };
 
   const supabase = await createClient();
+  const before = id ? await pictureStateOf(supabase, id) : null;
   const { data, error } = id
     ? await supabase
         .from("network_contacts")
@@ -185,6 +194,18 @@ export async function saveNetworkContact(
     if (error) console.error("saveNetworkContact:", error.message);
     return { ok: false, error: t.failed };
   }
+  // Its picture, once it exists: a failed file of an existing contact is
+  // said (a new one opens anyway; « Modifier » adds it again).
+  const pictured = await updateContactPicture(supabase, {
+    organizationId: access.organizationId,
+    contactId: data.id,
+    before,
+    tiktok: values.tiktok,
+    instagram: values.instagram,
+    upload: picture,
+    remove: form.get("pictureRemove") === "1",
+  });
+  if (!pictured && id) return { ok: false, error: t.picture, field: "picture" };
   // A new contact takes the unlinked credits of its exact name.
   if (!id)
     await linkCreditsOfNewContact(supabase, access, {

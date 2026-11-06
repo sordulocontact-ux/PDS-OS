@@ -72,7 +72,7 @@ export default async function NetworkContactPage({
         leading={
           <Avatar
             name={contact.name}
-            pictureUrl={null}
+            pictureUrl={contact.pictureUrl ?? null}
             className="size-16 text-[length:var(--type-body-lg)]"
           />
         }

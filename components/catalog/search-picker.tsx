@@ -1,9 +1,10 @@
 "use client";
 
 import { IconMagnifier, IconPlus } from "nucleo-sharp-essential";
-import { useId, useMemo, useState } from "react";
+import { useId, useMemo, useRef, useState } from "react";
 
 import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 export type PickerOption = { id: string; label: string; detail?: string };
@@ -12,8 +13,10 @@ export type PickerOption = { id: string; label: string; detail?: string };
 // pickers. Picking adds to the selection kept by the parent; the last row is
 // always the "create" shortcut, so a missing item never blocks the form.
 // `suggestedIds`: the only options listed before anything is typed (the
-// people who fit); typing searches them all. Inside a modal the list sits in
-// the flow, so the modal grows instead of clipping it. `clearOnCreate`: the
+// people who fit); typing searches them all. The list floats over what is
+// below (a portal popover anchored to the field, as a select's menu), so
+// nothing moves while searching, and a modal never clips it (Sacha,
+// 05/11/2026). The focus stays in the field. `clearOnCreate`: the
 // shortcut adds at once (an e-mail address), so the field empties, unless
 // `onCreate` returns false (nothing added: the query stays to be fixed).
 export function SearchPicker({
@@ -60,6 +63,7 @@ export function SearchPicker({
   };
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
+  const anchor = useRef<HTMLDivElement>(null);
 
   const available = useMemo(
     () => options.filter((o) => !excludedIds.has(o.id)),
@@ -130,7 +134,7 @@ export function SearchPicker({
       : null;
 
   return (
-    <div className="relative flex flex-col">
+    <div ref={anchor} className="relative flex flex-col">
       <label htmlFor={id} className="sr-only">
         {label}
       </label>
@@ -160,8 +164,19 @@ export function SearchPicker({
         onKeyDown={onKeyDown}
         className="h-10 pl-9 text-base md:text-sm"
       />
-      {open && (
-        <div className="absolute inset-x-0 top-full z-20 mt-1 overflow-hidden rounded-lg border border-border bg-popover shadow-elevation-1 in-[[data-slot=dialog-content]]:static">
+      {/* Opened and closed by the field alone (focus, typing, Escape, blur):
+          the popover's own dismissal is ignored, so a click in the field
+          never closes it. */}
+      <Popover open={open} onOpenChange={() => {}}>
+        <PopoverContent
+          anchor={anchor}
+          side="bottom"
+          align="start"
+          sideOffset={4}
+          initialFocus={false}
+          finalFocus={false}
+          className="w-(--anchor-width) overflow-y-auto rounded-lg"
+        >
           {emptyMessage && (
             <p className="px-3 py-2 text-sm text-muted-foreground">
               {emptyMessage}
@@ -212,8 +227,8 @@ export function SearchPicker({
               {createLabel(query.trim())}
             </li>
           </ul>
-        </div>
-      )}
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }

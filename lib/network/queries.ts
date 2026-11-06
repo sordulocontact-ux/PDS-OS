@@ -10,6 +10,8 @@ import {
   type NetworkFormOptions,
   type NetworkKind,
 } from "@/lib/network/types";
+import { networkPictureSourceOf } from "@/lib/network/picture-rules";
+import { signNetworkPictures } from "@/lib/network/pictures";
 import { asHandle } from "@/lib/network/socials";
 import { createClient } from "@/lib/supabase/server";
 
@@ -122,7 +124,10 @@ export const getNetworkContact = trackedCache(async function getNetworkContact(
   if (contact.error) console.error("getNetworkContact:", contact.error.message);
   const row = contact.data;
   if (!row) return null;
-  const parents = await parentNames(supabase, [row.parent_id]);
+  const [parents, pictures] = await Promise.all([
+    parentNames(supabase, [row.parent_id]),
+    signNetworkPictures(row.picture_path ? [row.picture_path] : []),
+  ]);
   return {
     id: row.id,
     kind: kindOf(row.kind),
@@ -140,6 +145,10 @@ export const getNetworkContact = trackedCache(async function getNetworkContact(
     instagram: row.instagram_handle,
     spotifyId: row.spotify_artist_id,
     deezerId: row.deezer_artist_id,
+    pictureUrl: row.picture_path
+      ? (pictures.get(row.picture_path) ?? null)
+      : null,
+    pictureSource: networkPictureSourceOf(row.picture_source),
     archived: row.archived_at !== null,
     parentName: row.parent_id ? (parents.get(row.parent_id) ?? null) : null,
     artistName: row.artist?.name ?? null,
