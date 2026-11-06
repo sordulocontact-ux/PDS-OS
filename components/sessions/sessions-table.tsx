@@ -9,10 +9,10 @@ import {
   DataTableRow,
   EMPTY_CELL,
 } from "@/components/ui/data-table";
-import { routes } from "@/lib/auth/redirects";
 import { masterPage } from "@/lib/i18n/fr/master-page";
 import { sessions } from "@/lib/i18n/fr/sessions";
 import { formatShortDate } from "@/lib/release/format";
+import { sessionHref, type SessionDoor } from "@/lib/sessions/door";
 import type {
   SessionReportState,
   StudioSessionRow,
@@ -57,9 +57,12 @@ export function sessionHours(
  */
 export function SessionsTable({
   sessions: rows,
+  door,
   hide,
 }: {
   sessions: StudioSessionRow[];
+  // Where a row opens (inside a project, back to an artist…).
+  door: SessionDoor;
   hide?: "artists" | "projects";
 }) {
   const t = fr.sessions.columns;
@@ -93,7 +96,7 @@ export function SessionsTable({
               </DataTableCell>
               <DataTableCell>
                 <span className="block">
-                  <DataTableLink href={routes.session(session.id)}>
+                  <DataTableLink href={sessionHref(door, session.id)}>
                     {sessionName(session)}
                   </DataTableLink>
                   {session.engineer && (

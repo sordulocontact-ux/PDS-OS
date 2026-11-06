@@ -276,6 +276,9 @@ export const routes = {
     `/app/projects/${id}/design/home#deliverable-${deliverableId}`,
   projectCalls: (id: string) => `/app/projects/${id}/calls`,
   projectSessions: (id: string) => `/app/projects/${id}/sessions`,
+  // A session opened inside the project (lib/sessions/door.ts).
+  projectSession: (id: string, sessionId: string) =>
+    `/app/projects/${id}/sessions/${sessionId}`,
   projectCall: (id: string, callId: string) =>
     `/app/projects/${id}/calls/${callId}`,
   projectRelease: (id: string) => `/app/projects/${id}/release`,

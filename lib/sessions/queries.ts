@@ -150,11 +150,19 @@ function toRow(
   };
 }
 
-/** The ids of the sessions of an artist or a project, or of their titles. */
+/** The ids of the sessions of an artist or a project (or of their titles),
+ * or of one title. */
 async function sessionIdsOf(
   supabase: Client,
-  scope: { artistId?: string; projectId?: string },
+  scope: { artistId?: string; projectId?: string; masterId?: string },
 ): Promise<string[]> {
+  if (scope.masterId) {
+    const { data } = await supabase
+      .from("master_session_titles")
+      .select("session_id")
+      .eq("master_id", scope.masterId);
+    return (data ?? []).map((l) => l.session_id);
+  }
   const direct = scope.artistId
     ? supabase
         .from("master_session_artists")
@@ -192,15 +200,16 @@ async function sessionIdsOf(
 /**
  * Studio sessions, the latest first (those without a date on top: still to
  * be fixed); `artistId` / `projectId` narrow to theirs, those of their
- * titles included.
+ * titles included; `masterId` to the title's own.
  */
 export async function listStudioSessions(scope?: {
   artistId?: string;
   projectId?: string;
+  masterId?: string;
 }): Promise<{ sessions: StudioSessionRow[]; error: boolean }> {
   const supabase = await createClient();
   let ids: string[] | null = null;
-  if (scope?.artistId || scope?.projectId) {
+  if (scope?.artistId || scope?.projectId || scope?.masterId) {
     ids = await sessionIdsOf(supabase, scope);
     if (ids.length === 0) return { sessions: [], error: false };
   }

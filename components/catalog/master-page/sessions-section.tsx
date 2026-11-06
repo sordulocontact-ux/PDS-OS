@@ -23,7 +23,6 @@ import {
 import { FormDialog } from "@/components/ui/form-dialog";
 import { RowActions } from "@/components/ui/row-actions";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { routes } from "@/lib/auth/redirects";
 import type { MasterSession } from "@/lib/catalog/master/rules";
 import {
   deleteSession,
@@ -34,6 +33,7 @@ import { framing } from "@/lib/i18n/fr/framing";
 import { masterPage } from "@/lib/i18n/fr/master-page";
 import { records } from "@/lib/i18n/fr/records";
 import { formatShortDate } from "@/lib/release/format";
+import { sessionHref } from "@/lib/sessions/door";
 import { sessionStatusTone } from "@/lib/ui/state-tones";
 
 import { AttachSessionButton } from "./attach-session-button";
@@ -123,7 +123,12 @@ export function SessionsSection({
                     <DataTableMedia
                       title={
                         // Its own page (Sessions studio): report, maquettes, rushes.
-                        <DataTableLink href={routes.session(session.id)}>
+                        <DataTableLink
+                          href={sessionHref(
+                            { kind: "title", masterId },
+                            session.id,
+                          )}
+                        >
                           {t.kinds[session.kind]}
                         </DataTableLink>
                       }

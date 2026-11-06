@@ -5,6 +5,7 @@ import { TitleDossier } from "@/components/catalog/master-page/title-dossier";
 import { TitleInfo } from "@/components/catalog/master-page/title-info";
 import { TitleNow } from "@/components/catalog/master-page/title-now";
 import { VariantsSection } from "@/components/catalog/master-page/variants-section";
+import { TitleSessionsSection } from "@/components/sessions/title-sessions-section";
 import { versionLabel } from "@/components/catalog/master-page/audio/audio-version-list";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
@@ -21,6 +22,7 @@ import { listMasterVariantIds } from "@/lib/catalog/master/related";
 import { titleNextAction } from "@/lib/catalog/master/title-status";
 import { getMaster, listMasters } from "@/lib/catalog/queries";
 import { fr } from "@/lib/i18n/fr";
+import { listStudioSessions } from "@/lib/sessions/queries";
 import { allInOrder } from "@/lib/utils/parallel";
 
 // Title overview (retours Catalogue 01, 11, 12 et 14; proto
@@ -33,12 +35,13 @@ export default async function MasterOverviewPage({
   params,
 }: PageProps<"/app/catalog/masters/[masterId]">) {
   const { masterId } = await params;
-  const [access, master, rights, activity, audio] = await allInOrder([
+  const [access, master, rights, activity, audio, studio] = await allInOrder([
     requireApproved(),
     getMaster(masterId),
     getMasterRights(masterId),
     listMasterActivity(masterId),
     listAudioVersions(masterId),
+    listStudioSessions({ masterId }),
   ]);
   if (!master || !rights) notFound();
   const canEdit = can(access, "manage_catalog");
@@ -116,6 +119,11 @@ export default async function MasterOverviewPage({
         />
       </div>
 
+      <TitleSessionsSection
+        masterId={masterId}
+        rows={studio.sessions}
+        error={studio.error}
+      />
       <VariantsSection
         masterId={masterId}
         masters={variants.masters}

@@ -453,6 +453,12 @@ Migration `20261105220101_studio_sessions.sql`, test `supabase/tests/studio-sess
   Passées / Toutes en `?vue=`), onglet « Sessions » de l'artiste, section « Sessions studio » du
   Pilotage d'un projet, bloc Sessions de l'onglet Audio d'un titre (lien vers la page). Une liste
   d'artiste ou de projet reprend aussi les sessions de **ses titres** (`sessionIdsOf`).
+  **Portes** (`lib/sessions/door.ts`, comme `lib/calls/door.ts`, Sacha 06/11) : depuis un projet, la
+  session s'ouvre **dans le projet** (`/app/projects/[id]/sessions/[sessionId]`, en-tête et fil
+  d'Ariane du projet) ; depuis un artiste ou un titre, sur sa page avec `?depuis=a.<id>` /
+  `t.<id>` pour le retour (« ← Retour à J4y ») : pas de troisième cadre, une fiche artiste ou titre
+  n'a pas de navigation à garder. Même composant de page (`SessionPageView`). La **Vue
+  d'ensemble d'un titre** liste ses sessions (`TitleSessionsSection`), l'onglet Audio les modifie.
   Détacher le dernier titre d'une session encore liée à un artiste ou un projet la garde
   (`master_session_anchored`) ; un titre supprimé lui laisse la vie de même.
 - **Permission `manage_sessions`** (DG et chefs de projet, `role_permissions`) : créer, modifier,

@@ -8,7 +8,6 @@ import { SessionFormButton } from "@/components/sessions/session-form-button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { RowActions } from "@/components/ui/row-actions";
 import { toast } from "@/components/ui/toast";
-import { routes } from "@/lib/auth/redirects";
 import { masterPage } from "@/lib/i18n/fr/master-page";
 import { sessions } from "@/lib/i18n/fr/sessions";
 import { deleteStudioSession } from "@/lib/sessions/actions";
@@ -17,7 +16,14 @@ import type { StudioSession } from "@/lib/sessions/types";
 const fr = { masterPage, sessions };
 
 /** « Modifier » and « ⋯ » › « Supprimer la session », in the page's head. */
-export function SessionHeaderActions({ session }: { session: StudioSession }) {
+export function SessionHeaderActions({
+  session,
+  afterDeleteHref,
+}: {
+  session: StudioSession;
+  // The list of the door it was opened from.
+  afterDeleteHref: string;
+}) {
   const t = fr.sessions;
   const router = useRouter();
   const [deleting, setDeleting] = useState(false);
@@ -57,7 +63,7 @@ export function SessionHeaderActions({ session }: { session: StudioSession }) {
             const result = await deleteStudioSession(session.id);
             if (!result.ok) return setError(result.error);
             toast.success(t.delete.done);
-            router.push(routes.sessions);
+            router.push(afterDeleteHref);
           })
         }
       />

@@ -93,6 +93,13 @@ export function SessionsView({
       ) : (
         <SessionsList
           sessions={visible}
+          door={
+            scope
+              ? "artistId" in scope
+                ? { kind: "artist", artistId: scope.artistId }
+                : { kind: "project", projectId: scope.projectId }
+              : { kind: "sessions" }
+          }
           hide={
             scope ? ("artistId" in scope ? "artists" : "projects") : undefined
           }

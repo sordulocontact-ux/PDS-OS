@@ -59,6 +59,12 @@ export const sessions = {
     anchorRequired: "Choisissez au moins un artiste ou un projet.",
     teamDetail: "Équipe PDS",
   },
+  // The block of a title's Vue d'ensemble.
+  onTitle: {
+    description: "Les séances où ce morceau a été travaillé.",
+    empty:
+      "Aucune session rattachée à ce titre. On rattache un titre depuis la page de la session (« Maquettes et titres »).",
+  },
   page: {
     back: "Toutes les sessions",
     infoTitle: "Informations",
