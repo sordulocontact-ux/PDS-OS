@@ -1,5 +1,6 @@
 import "server-only";
 
+import { REQUEST_KINDS } from "@/lib/notifications/families";
 import {
   isNotificationKind,
   notificationHref,
@@ -95,10 +96,16 @@ function toItem(
   const actor = row.actor
     ? personName(row.actor.first_name, row.actor.last_name)
     : null;
+  const project = row.project?.title ?? null;
+  const text = notificationText(row.kind, actor, project);
+  const named = actor !== null && text.startsWith(`${actor} `);
   return {
     id: row.id,
     kind: row.kind,
-    text: notificationText(row.kind, actor, row.project?.title ?? null),
+    text,
+    headline: named ? actor : project,
+    action: named ? text.slice(actor.length + 1) : text,
+    actor,
     href:
       target ??
       notificationHref(row.kind, row.project_id, stageKey, row.subject_id),
@@ -107,30 +114,43 @@ function toItem(
   };
 }
 
+// The latest notifications, and the latest requests read on their own so
+// the « Demandes » tab is whole even under many others; the unread counts
+// come from the database, not from what is loaded.
 export async function loadNotifications(limit = 20): Promise<{
   items: NotificationItem[];
   unreadCount: number;
+  requestCount: number;
 }> {
   const supabase = await createClient();
-  const [list, unread] = await Promise.all([
+  const latest = () =>
     supabase
       .from("notifications")
       .select(SELECT)
       .order("created_at", { ascending: false })
-      .limit(limit),
+      .limit(limit);
+  const unreadOf = () =>
     supabase
       .from("notifications")
       .select("id", { count: "exact", head: true })
-      .is("read_at", null),
+      .is("read_at", null);
+  const [list, requests, unread, unreadRequests] = await Promise.all([
+    latest(),
+    latest().in("kind", [...REQUEST_KINDS]),
+    unreadOf(),
+    unreadOf().in("kind", [...REQUEST_KINDS]),
   ]);
-  if (list.error || unread.error) {
-    console.error(
-      "loadNotifications:",
-      list.error?.message ?? unread.error?.message,
-    );
-    return { items: [], unreadCount: 0 };
+  const failed = [list, requests, unread, unreadRequests].find(
+    (result) => result.error,
+  );
+  if (failed) {
+    console.error("loadNotifications:", failed.error?.message);
+    return { items: [], unreadCount: 0, requestCount: 0 };
   }
-  const rows = (list.data ?? []) as Row[];
+  const seen = new Set<string>();
+  const rows = ([...(list.data ?? []), ...(requests.data ?? [])] as Row[])
+    .filter((row) => !seen.has(row.id) && seen.add(row.id))
+    .sort((a, b) => b.created_at.localeCompare(a.created_at));
   const validationIds = rows
     .filter((r) => r.kind.startsWith("validation_") && r.subject_id)
     .map((r) => r.subject_id!);
@@ -148,6 +168,7 @@ export async function loadNotifications(limit = 20): Promise<{
         ) ?? [],
     ),
     unreadCount: unread.count ?? 0,
+    requestCount: unreadRequests.count ?? 0,
   };
 }
 

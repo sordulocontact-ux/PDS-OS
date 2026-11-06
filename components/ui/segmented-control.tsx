@@ -17,15 +17,20 @@ import { cn } from "@/lib/utils";
  * chosen ground slides from one segment to the next (`useSegmentIndicator`).
  */
 
-const frameClass = (fill: boolean) =>
+// `bare`: the segments alone, without the frame (a menu's tabs, Figma's
+// notifications: « All · Requests · Unread »).
+const frameClass = (fill: boolean, bare = false) =>
   cn(
-    "group/segments relative max-w-full flex-wrap gap-1 rounded-[var(--radius-xl)] border border-border bg-[var(--control-bg)] p-1",
+    "group/segments relative max-w-full flex-wrap gap-1 rounded-[var(--radius-xl)]",
+    !bare && "border border-border bg-[var(--control-bg)] p-1",
     fill ? "flex w-full" : "inline-flex",
   );
 
-const segmentClass = (active: boolean, fill: boolean) =>
+const segmentClass = (active: boolean, fill: boolean, bare = false) =>
   cn(
-    "relative inline-flex min-h-9 items-center justify-center gap-1.5 rounded-[var(--radius-md)] px-4 text-sm font-medium whitespace-nowrap no-underline transition-[background-color,color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-40",
+    "relative inline-flex items-center justify-center gap-1.5 rounded-[var(--radius-md)] font-medium whitespace-nowrap no-underline transition-[background-color,color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-40",
+    // Bare: a menu's tabs, smaller (the notifications, Sacha 06/11/2026).
+    bare ? "min-h-7 px-2.5 text-xs" : "min-h-9 px-4 text-sm",
     fill && "flex-1",
     // Its own ground until the sliding one is measured (server HTML).
     active
@@ -50,6 +55,7 @@ export type SegmentOption<V extends string> = { value: V; label: ReactNode };
  * A choice of a form, as a radio group: arrows move the choice, Tab enters
  * on the chosen segment. `deselectable`: a second click on the chosen
  * segment clears it. `fill`: the bar takes the whole width, segments shared.
+ * `bare`: no frame around the segments.
  */
 export function SegmentedControl<V extends string>({
   options,
@@ -57,6 +63,7 @@ export function SegmentedControl<V extends string>({
   onChange,
   deselectable = false,
   fill = false,
+  bare = false,
   className,
   ...aria
 }: {
@@ -65,6 +72,7 @@ export function SegmentedControl<V extends string>({
   onChange: (value: V | null) => void;
   deselectable?: boolean;
   fill?: boolean;
+  bare?: boolean;
   className?: string;
   "aria-labelledby"?: string;
   "aria-describedby"?: string;
@@ -95,7 +103,7 @@ export function SegmentedControl<V extends string>({
       }}
       role="radiogroup"
       {...aria}
-      className={cn(frameClass(fill), className)}
+      className={cn(frameClass(fill, bare), className)}
     >
       <Ground groundRef={groundRef} />
       {options.map((option, index) => {
@@ -116,7 +124,7 @@ export function SegmentedControl<V extends string>({
               onChange(active && deselectable ? null : option.value)
             }
             onKeyDown={(event) => onKeyDown(event, index)}
-            className={segmentClass(active, fill)}
+            className={segmentClass(active, fill, bare)}
           >
             {option.label}
           </button>

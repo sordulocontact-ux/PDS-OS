@@ -33,13 +33,18 @@ async function AppBell({
   ...props
 }: Omit<
   React.ComponentProps<typeof NotificationBell>,
-  "items" | "unreadCount"
+  "items" | "unreadCount" | "requestCount"
 > & {
   notifications: Promise<Notifications>;
 }) {
-  const { items, unreadCount } = await notifications;
+  const { items, unreadCount, requestCount } = await notifications;
   return (
-    <NotificationBell items={items} unreadCount={unreadCount} {...props} />
+    <NotificationBell
+      items={items}
+      unreadCount={unreadCount}
+      requestCount={requestCount}
+      {...props}
+    />
   );
 }
 
@@ -78,7 +83,7 @@ export default async function AppLayout({
   // Access requests waiting for a decision: counted on "Équipe" for admins.
   const notifications = signedIn
     ? loadNotifications()
-    : Promise.resolve({ items: [], unreadCount: 0 });
+    : Promise.resolve({ items: [], unreadCount: 0, requestCount: 0 });
   const pendingMembers =
     isAdmin && access.organizationId
       ? countPendingMemberships(access.organizationId)

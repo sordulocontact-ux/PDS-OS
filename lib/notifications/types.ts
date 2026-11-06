@@ -172,7 +172,15 @@ export function isNotificationKind(value: unknown): value is NotificationKind {
 export type NotificationItem = {
   id: string;
   kind: NotificationKind;
+  // The whole sentence (toast, browser notification).
   text: string;
+  // The menu's two lines: who (the actor, or the project without one), then
+  // what, the sentence without the actor's name in front.
+  headline: string | null;
+  action: string;
+  // The member who did it (their initials on the avatar); none for an
+  // engineer or a provider through their link.
+  actor: string | null;
   href: string;
   createdAt: string;
   read: boolean;

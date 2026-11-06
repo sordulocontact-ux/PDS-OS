@@ -1477,6 +1477,8 @@ Audit des retours et du ticket Master contre le code (06/11) : trois points enco
       et notes seulement s'ils ont une valeur ; les vides deviennent des boutons « + Téléphone »… qui ouvrent
       le champ (`ContactDetailsFields`). Une colonne, modale 640 px (`FormDialog size="medium"`) ;
       `FormSection aside`, `ContactCoordinatesFields` et `ContactSocialsFields` supprimés.
+- [x] La photo du contact dans la liste du Réseau (`NetworkTable`, URL signée avec la liste,
+      `listNetworkContacts`) ; sans photo, l'icône personne / organisation reste.
 - [ ] Passage navigateur (extension Chrome non connectée).
 
 ## Sessions studio et Maquettes (05/11/2026, branche `pre-prod`)
@@ -1514,6 +1516,17 @@ Retours d'Ibé du 01/11 (« Sessions studio accessibles depuis la barre de menu,
 - [ ] Nouveau jeton avec les portées Meet (passage avec Ibé, po@) ; offre Workspace qui transcrit
       (Business Standard ou plus) à confirmer ; essai sur un vrai Meet. Avec le jeton actuel, Google
       refuse (403) : les calls gardent leur lien et le dépôt de l'enregistrement.
+
+## Menu des notifications d'après Figma (06/11/2026, branche `pre-prod`)
+
+- [x] Capture Figma de Sacha : titre + roue (notifications du navigateur), onglets Toutes · Demandes (n) ·
+      Non lues (n) en `SegmentedControl bare`, « Tout marquer comme lu », groupes Aujourd'hui / 7 derniers
+      jours / Plus ancien, ligne = avatar de l'auteur + pastille du type, nom, « il y a 5 min », point bleu,
+      action en dessous (`NotificationPanel`, `NotificationRow`, `lib/notifications/families.ts`, `when.ts`).
+- [x] « Demandes » = ce qui attend une décision ou une réponse du lecteur (`REQUEST_KINDS`), lues par une
+      requête à part ; comptes des non lues pris en base.
+- [ ] Pas de boutons Accepter / Refuser dans le menu (une décision se prend sur sa page) ; pas de photo des
+      membres (initiales) ; passage navigateur.
 
 ## Cadrage juridique : flèches et lignes cliquables (06/11/2026, branche `pre-prod`)
 

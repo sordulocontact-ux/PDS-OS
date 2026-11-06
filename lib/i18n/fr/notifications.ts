@@ -8,6 +8,28 @@ export const notifications = {
   title: "Notifications",
   empty: "Aucune notification pour l'instant.",
   markAllRead: "Tout marquer comme lu",
+  // The menu's tabs (Figma: All, Requests, Unread), with their counts.
+  tabs: {
+    label: "Notifications à afficher",
+    all: "Toutes",
+    requests: "Demandes",
+    unread: "Non lues",
+  },
+  emptyRequests: "Aucune demande en attente.",
+  emptyUnread: "Tout est lu.",
+  groups: {
+    today: "Aujourd'hui",
+    week: "7 derniers jours",
+    older: "Plus ancien",
+  },
+  unreadDot: "Non lue",
+  ago: {
+    now: "à l'instant",
+    minutes: (count: number) => `il y a ${count} min`,
+    hours: (count: number) => `il y a ${count} h`,
+  },
+  settings: "Réglages des notifications",
+  pdsOs: "PDS OS",
   someone: "Quelqu'un",
   aProject: "un projet",
   texts: {
