@@ -27,10 +27,13 @@ export async function DemarcheStep({
   projectId,
   kind,
   slug,
+  part = null,
 }: {
   projectId: string;
   kind: LegalDemarcheKind;
   slug: string;
+  // « fiche »: the person's fiche shown instead of the part at work.
+  part?: string | null;
 }) {
   const ctx = await legalJourneyContext(projectId);
   const demarche = ctx.demarches.find(
@@ -87,6 +90,7 @@ export async function DemarcheStep({
         projectId={projectId}
         projectTitle={ctx.project.title}
         demarche={demarche}
+        focus={part === "fiche" ? "fiche" : null}
         clearances={ctx.clearances}
         proof={Object.fromEntries(proof)}
         cards={cards}

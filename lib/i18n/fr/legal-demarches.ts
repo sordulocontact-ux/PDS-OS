@@ -24,6 +24,8 @@ export const legalDemarches = {
       obsolete: "Obsolète",
     },
   },
+  // From a contract's value to the person's fiche, and back (JUR-10).
+  backToContract: "Retour au contrat",
   groups: {
     dossier: "Dossier",
     tracking: "Suivi",

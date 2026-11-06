@@ -1601,3 +1601,8 @@ Proto « Plan d'action de Néons » (artefact du 06/11, copie `~/Desktop/Protos 
       reçue « incomplète » pour ça. Fiche reçue : une seule pastille d'état, une valeur corrigée dite une fois.
 - [x] La demande de complément d'une fiche part à l'adresse que la personne a écrite dans sa fiche (correction
       pas encore validée), plus à l'ancienne adresse du Réseau (`emailContact({ email })`).
+- [x] Contrat avant génération : la même carte document qu'après (proto juridique-v3), les valeurs en lignes
+      de faits en gardant JUR-16 (« * » si obligatoire, état, source ou qui fournit, geste de correction) ;
+      « Compléter » ne recharge plus la page : « Voir sa fiche » ouvre la démarche sur la fiche avec « Retour
+      au contrat » (JUR-10), Réseau et État des lieux à leur place, rémunération modifiée sur sa ligne
+      (`saveAgreementFee`). `ContractValueList` et `ContractValues` supprimés.

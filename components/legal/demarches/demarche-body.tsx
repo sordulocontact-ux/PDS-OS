@@ -5,6 +5,7 @@ import { DemarcheOwner } from "@/components/legal/demarches/demarche-owner";
 import { PlanSheetProvider } from "@/components/legal/tracking/plan-sheet-context";
 import { StepSection } from "@/components/shell/journey/step-section";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { ViewLink } from "@/components/ui/view-link";
 import type { ContractProof } from "@/lib/contracts/proof";
 import { legal } from "@/lib/i18n/fr/legal";
 import { legalDemarches } from "@/lib/i18n/fr/legal-demarches";
@@ -26,6 +27,7 @@ export function DemarcheBody({
   projectId,
   projectTitle,
   demarche,
+  focus = null,
   clearances,
   proof,
   cards,
@@ -38,6 +40,8 @@ export function DemarcheBody({
   projectId: string;
   projectTitle: string;
   demarche: Demarche;
+  // « fiche » (`?partie=fiche`, JUR-10): the person's fiche, with a way back.
+  focus?: "fiche" | null;
   clearances: Clearances;
   proof: Record<string, ContractProof>;
   cards: Record<string, ContractCardData>;
@@ -67,7 +71,19 @@ export function DemarcheBody({
   // One title at a time (proto Juridique v3): the fiche while it is the
   // object at work, then « Contrat · <modèle> »; what was done before is in
   // « Déjà fait ». A done démarche shows its last part.
-  const shown = current ?? parts[parts.length - 1] ?? null;
+  const atWork = current ?? parts[parts.length - 1] ?? null;
+  const fiche = parts.find((p) => p.panel.kind === "fiche") ?? null;
+  const shown = focus === "fiche" && fiche ? fiche : atWork;
+  // Opened on the fiche while the contract is at work: back to it.
+  const back =
+    shown !== atWork && atWork ? (
+      <ViewLink
+        href={demarche.step.href}
+        className="self-start text-[length:var(--type-body-sm)] font-medium underline underline-offset-4"
+      >
+        {fr.legalDemarches.backToContract}
+      </ViewLink>
+    ) : null;
   // The sentence under the part's title, when its state asks for one.
   const leadOf = (row: BoardRow) =>
     row.panel.kind === "fiche"
@@ -89,6 +105,7 @@ export function DemarcheBody({
                 {leadOf(shown)}
               </p>
             )}
+            {back}
             {part(shown)}
           </div>
         ) : (
@@ -101,6 +118,7 @@ export function DemarcheBody({
               </StatusBadge>
             }
           >
+            {back}
             {part(shown)}
           </StepSection>
         ))}

@@ -676,7 +676,7 @@ export const legal = {
       },
       // Which fiche is awaited, for which contract (JUR-10).
       missingFromFiche: (name: string, fields: string) =>
-        `Il manque les renseignements de ${name} pour préparer son contrat : ${fields}. Ils arrivent avec sa fiche de renseignements, à l'étape 1 ci-dessus.`,
+        `Il manque les renseignements de ${name} pour préparer son contrat : ${fields}. Ils arrivent avec sa fiche de renseignements.`,
       complete: "Compléter",
       values: (total: number, missing: number) =>
         missing > 0

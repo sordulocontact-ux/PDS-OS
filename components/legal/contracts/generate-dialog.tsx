@@ -4,7 +4,8 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "@/components/ui/toast";
 
-import { ContractValueList } from "@/components/legal/contracts/contract-value-list";
+import { ContractValueRows } from "@/components/legal/contracts/contract-value-rows";
+import { contractFix } from "@/lib/legal/contracts/fix";
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { routes } from "@/lib/auth/redirects";
@@ -65,16 +66,10 @@ export function GenerateDialog({
         size="wide"
       >
         <div className="flex flex-col gap-5">
-          <ContractValueList
+          <ContractValueRows
             fields={row.fields}
             personName={row.name}
-            fixHref={(field) =>
-              field.home === "fiche"
-                ? routes.projectLegalStep(projectId, "forms")
-                : field.home === "credits"
-                  ? routes.projectLegalStep(projectId, "inventory")
-                  : null
-            }
+            fix={contractFix(row, projectId)}
           />
           {ready && (
             <Button

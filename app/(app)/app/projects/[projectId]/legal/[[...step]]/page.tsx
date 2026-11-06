@@ -42,7 +42,13 @@ export default async function ProjectLegalPage({
 
   if (route.type === "demarche")
     return (
-      <DemarcheStep projectId={projectId} kind={route.kind} slug={route.slug} />
+      <DemarcheStep
+        projectId={projectId}
+        kind={route.kind}
+        slug={route.slug}
+        // « Voir sa fiche » from a contract's value (JUR-10).
+        part={one("partie")}
+      />
     );
   if (route.type === "ready") return <ReadyStep projectId={projectId} />;
   if (route.type === "step") {

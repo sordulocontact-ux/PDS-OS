@@ -17,6 +17,8 @@ import { legalOutcome } from "@/lib/legal/outcome";
 import { getProject } from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
 import { isOnlyPaid } from "@/lib/legal/contracts/no-deal";
+import { feeCentsOf } from "@/lib/legal/contracts/fields";
+import type { WriteResult } from "@/lib/utils/write-result";
 
 // The project's side of the agreements (ticket Juridique 03). People,
 // roles and values are found again on the server from the project's
@@ -65,6 +67,31 @@ function errorOf(message: string): string {
   if (message.includes("mapping_reason_only_paid"))
     return fr.legalContracts.agreements.plan.onlyPaid;
   return t.failed;
+}
+
+/** The fee of one person's contract, changed on its line in their
+ * démarche before it is generated (Sacha, 06/11/2026), as « Contrats à
+ * prévoir » records it: the same need confirmed again, with this fee. */
+export async function saveAgreementFee(
+  projectId: string,
+  key: string,
+  fee: string,
+): Promise<WriteResult> {
+  const cents = fee.trim() ? feeCentsOf(fee.trim()) : null;
+  if (fee.trim() && cents === null)
+    return { ok: false, error: fr.legalContracts.agreements.errors.fee };
+  const loaded = await loadFor(projectId);
+  const row = loaded?.agreements.rows.find((r) => r.key === key);
+  const templateId = row?.template?.id ?? row?.proposal.templateId ?? null;
+  if (!row || row.contract || !templateId)
+    return { ok: false, error: fr.auth.errors.forbidden };
+  const result = await approveContractMapping({
+    projectId,
+    items: [{ key, needed: true, templateId, feeCents: cents, reason: null }],
+  });
+  return result.ok
+    ? { ok: true, done: fr.legalContracts.checklist.feeSaved }
+    : result;
 }
 
 /** « Justine valide ou corrige la cartographie en une fois ». */

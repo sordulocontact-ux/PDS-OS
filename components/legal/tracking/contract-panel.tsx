@@ -11,10 +11,6 @@ import {
   ContractSend,
   type ContractMailDraft,
 } from "@/components/legal/signed-returns/contract-send";
-import {
-  ContractValues,
-  contractFixHref,
-} from "@/components/legal/tracking/contract-values";
 import { usePublishResult } from "@/components/shell/module/result-banner";
 import { Button } from "@/components/ui/button";
 import { DecisionPanel } from "@/components/ui/decision-panel";
@@ -28,7 +24,12 @@ import { legal } from "@/lib/i18n/fr/legal";
 import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
 import { legalDemarches } from "@/lib/i18n/fr/legal-demarches";
 import { legalDocuments } from "@/lib/i18n/fr/legal-documents";
-import { generateLegalContract } from "@/lib/legal/contracts/actions";
+import {
+  generateLegalContract,
+  saveAgreementFee,
+} from "@/lib/legal/contracts/actions";
+import { contractFix, ficheOfDemarche } from "@/lib/legal/contracts/fix";
+import { amountInput } from "@/lib/utils/money";
 import type { ContractCardData } from "@/lib/legal/contracts/document-card";
 import { formatFee } from "@/lib/legal/contracts/fields";
 import type { WriteResult } from "@/lib/utils/write-result";
@@ -105,8 +106,9 @@ export function ContractPanel({
       {t.openContract}
     </Button>
   );
-  // The fee as a fact with its source (JUR-15), as the Master's rates.
-  const fee = (
+  // The fee as a fact with its source (JUR-15), as the Master's rates —
+  // only when the template does not show it among its values.
+  const fee = !row.fields.some((f) => f.id === "remuneration") && (
     <FactRows>
       <FactRow
         label={t.financial.title}
@@ -125,14 +127,55 @@ export function ContractPanel({
       />
     </FactRows>
   );
+  const fix = contractFix(row, projectId);
   // The document in head, from its generation on (rule 18).
   const documentCard = card && (
     <ContractDocumentCard
       row={row}
       data={card}
       projectTitle={projectTitle}
-      fixHref={contractFixHref(row, projectId)}
+      fix={fix}
     />
+  );
+  // Before generation, the same card: the file to come, its values, the
+  // fee changed on its line; what the person's fiche will bring said once
+  // (JUR-10: « Il manque les renseignements de X pour préparer … »).
+  const fromFiche = row.fields.filter(
+    (f) => f.status === "missing" && f.home === "fiche",
+  );
+  const toGenerate = (
+    <>
+      {fromFiche.length > 0 && (
+        <ToneCallout tone="warning">
+          {t.missingFromFiche(
+            row.name,
+            fromFiche.map((f) => f.label).join(", "),
+          )}{" "}
+          <Link
+            href={ficheOfDemarche(projectId, row.key)}
+            className="underline underline-offset-4"
+          >
+            {fr.legalContracts.checklist.fixAt.fiche}
+          </Link>
+        </ToneCallout>
+      )}
+      <ContractDocumentCard
+        row={row}
+        data={null}
+        projectTitle={projectTitle}
+        fix={fix}
+        fee={
+          row.contract
+            ? undefined
+            : {
+                value: row.proposal.feeCents
+                  ? amountInput(row.proposal.feeCents)
+                  : "",
+                onSave: (value) => saveAgreementFee(projectId, row.key, value),
+              }
+        }
+      />
+    </>
   );
 
   switch (row.state) {
@@ -153,12 +196,11 @@ export function ContractPanel({
     // What is missing, each value at its source (the sentence under the
     // step's title, `contractLead`).
     case "needs_info":
-      return <ContractValues row={row} open projectId={projectId} />;
+      return toGenerate;
     case "ready_to_generate":
       return (
         <>
-          {fee}
-          <ContractValues row={row} open={false} projectId={projectId} />
+          {toGenerate}
           <Button
             className="self-start"
             disabled={pending}

@@ -45,6 +45,11 @@ export const legalDocuments = {
   contract: {
     fileName: (person: string, project: string, version: number) =>
       `Contrat_${person}_${project}_v${version}.pdf`,
+    // Before generation (the same card, Sacha 06/11/2026).
+    toGenerate: (blocking: number, total: number) =>
+      blocking > 0
+        ? `À générer · ${plural(blocking, "valeur bloque", "valeurs bloquent")} sur ${total} · il se génère dès que tout est là`
+        : `Prêt à générer · ${total} valeurs remplies, chacune avec sa source`,
     generated: (blocking: number, total: number) =>
       `Généré depuis les valeurs ci-dessous · ${plural(blocking, "bloquante", "bloquantes")} sur ${total} · chaque valeur se corrige à sa source`,
     pdf: "Télécharger le PDF",

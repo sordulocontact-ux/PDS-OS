@@ -52,6 +52,13 @@ export const legalContracts = {
       direction: "Fournie par la direction",
     },
     fix: "Compléter",
+    // The gesture beside a value to fix (lib/legal/contracts/fix.ts).
+    fixAt: {
+      fiche: "Voir sa fiche",
+      network: "Compléter dans le Réseau",
+      credits: "Compléter dans l'État des lieux",
+    },
+    feeSaved: "Rémunération enregistrée",
   },
   // Where a missing value is filled.
   fillIn: {

@@ -1,4 +1,4 @@
-import { ContractValueList } from "@/components/legal/contracts/contract-value-list";
+import { ContractValueRows } from "@/components/legal/contracts/contract-value-rows";
 import { DocumentCard } from "@/components/ui/document-card";
 import { PdfExportButton } from "@/components/ui/pdf-export-button";
 import { routes } from "@/lib/auth/redirects";
@@ -6,6 +6,8 @@ import { legalDocuments } from "@/lib/i18n/fr/legal-documents";
 import { isBlocking } from "@/lib/legal/contracts/completeness";
 import type { ContractCardData } from "@/lib/legal/contracts/document-card";
 import { fileNamePart } from "@/lib/utils/file-name-part";
+import type { ValueFix } from "@/lib/legal/contracts/fix";
+import type { WriteResult } from "@/lib/utils/write-result";
 import type {
   AgreementField,
   AgreementRow,
@@ -39,39 +41,52 @@ export function contractFileName(
  * complet », rule 18): « Contrat_Kader_Neons_v1.pdf », generated from the
  * values below (how many still block), « Voir le PDF », what changed since
  * the v1 (clause, who, version, the words), then every value with its
- * source, fixed where it lives. The same card at every step that follows.
+ * source, fixed where it lives. The same card at every step that follows —
+ * and before it is generated (`data` null: the file to come, how many
+ * values still block, no PDF; Sacha, 06/11/2026: « pourquoi le contrat
+ * ressemble pas à ça »), where the fee is changed on its line (`fee`).
  */
 export function ContractDocumentCard({
   row,
   data,
   projectTitle,
-  fixHref,
+  fix,
+  fee,
 }: {
   row: AgreementRow;
-  data: ContractCardData;
+  // Null before generation.
+  data: ContractCardData | null;
   projectTitle: string;
-  fixHref?: (field: AgreementField) => string | null;
+  fix?: (field: AgreementField) => ValueFix;
+  fee?: { value: string; onSave: (value: string) => Promise<WriteResult> };
 }) {
-  const contractId = row.contract?.id;
-  if (!contractId) return null;
+  const contractId = row.contract?.id ?? null;
   const blocking = row.fields.filter((f) => isBlocking(f.status)).length;
-  const name = contractFileName(row.name, projectTitle, data.version);
+  const name = contractFileName(row.name, projectTitle, data?.version ?? 1);
   return (
     <DocumentCard
       name={name}
-      line={t.generated(blocking, row.fields.length)}
+      line={
+        data
+          ? t.generated(blocking, row.fields.length)
+          : t.toGenerate(blocking, row.fields.length)
+      }
       action={
-        <PdfExportButton
-          href={routes.contractDocumentPdf(contractId)}
-          fileName={name}
-          label={t.pdf}
-          pendingLabel={t.pdfPending}
-          failedLabel={t.pdfFailed}
-          variant="outline"
-          size="sm"
-        />
+        data &&
+        contractId && (
+          <PdfExportButton
+            href={routes.contractDocumentPdf(contractId)}
+            fileName={name}
+            label={t.pdf}
+            pendingLabel={t.pdfPending}
+            failedLabel={t.pdfFailed}
+            variant="outline"
+            size="sm"
+          />
+        )
       }
       change={
+        data &&
         data.changes.length > 0 && (
           <>
             <b className="font-semibold">{t.changedSince}</b> :{" "}
@@ -89,13 +104,13 @@ export function ContractDocumentCard({
         )
       }
     >
-      <div className="px-3.5">
-        <ContractValueList
-          fields={row.fields}
-          personName={row.name}
-          fixHref={fixHref}
-        />
-      </div>
+      <ContractValueRows
+        fields={row.fields}
+        personName={row.name}
+        fix={fix}
+        fee={fee}
+        className="rounded-none border-0"
+      />
     </DocumentCard>
   );
 }
