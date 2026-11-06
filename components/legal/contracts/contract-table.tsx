@@ -15,10 +15,15 @@ export const rolesOf = (row: Pick<AgreementRow, "creditRoles">) =>
   row.creditRoles.map((r) => fr.masterPage.credits.roles[r]).join(", ") ||
   fr.legalForms.roles.performer;
 
-// Person · Contract · Fee · State on a wide screen; on a phone the person
-// and the state share the first line, the rest goes under.
-const grid =
-  "grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-0.5 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1.5fr)_7rem_minmax(9rem,auto)] md:items-center";
+// One grid for the whole table on a wide screen (Person · Contract · Fee ·
+// State), each line taking its columns (subgrid): the header and every line
+// share the same widths whatever a state holds (Sacha, 06/11/2026). On a
+// phone each line is its own grid: the person and the state share the first
+// line, the rest goes under.
+const table =
+  "flex flex-col md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_auto_auto] md:gap-x-4";
+const line =
+  "grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-0.5 md:col-span-full md:grid-cols-subgrid md:items-center";
 
 /**
  * « Contrats à prévoir » as a table (Sacha, 06/11/2026: « les 3 lignes font
@@ -29,11 +34,16 @@ const grid =
 export function ContractTable({ children }: { children: ReactNode }) {
   const t = fr.legalContracts.agreements;
   return (
-    <div className="flex flex-col overflow-hidden rounded-xl border border-[color:var(--border-hairline)]">
+    <div
+      className={cn(
+        table,
+        "overflow-hidden rounded-xl border border-[color:var(--border-hairline)]",
+      )}
+    >
       <div
         aria-hidden
         className={cn(
-          grid,
+          line,
           "hidden border-b border-[color:var(--border-hairline)] bg-[var(--surface-soft)] px-3.5 py-2 text-caption text-[color:var(--text-tertiary)] md:grid",
         )}
       >
@@ -119,7 +129,7 @@ export function ContractTableRow({
     </>
   );
   const frame = cn(
-    grid,
+    line,
     "w-full border-b border-[color:var(--border-hairline)] px-3.5 py-2.75 text-left text-body-sm last:border-b-0",
     open && "bg-[var(--selection-bg)]",
   );
@@ -144,7 +154,7 @@ export function ContractTableRow({
 /** The fields of an open row, under it, in the same frame. */
 export function ContractTableEditor({ children }: { children: ReactNode }) {
   return (
-    <div className="flex flex-col gap-3.5 border-b border-[color:var(--border-hairline)] bg-[var(--surface-soft)] px-3.5 py-3.5 last:border-b-0">
+    <div className="flex flex-col gap-3.5 border-b border-[color:var(--border-hairline)] bg-[var(--surface-soft)] px-3.5 py-3.5 last:border-b-0 md:col-span-full">
       {children}
     </div>
   );
