@@ -50,11 +50,14 @@ export type PrepareResult =
  * is linked first with « Relier », never here), a new link (the
  * previous one revoked). The person is found again on the server from the
  * project's credits, never taken from the browser. The link is returned
- * once: only its hash is kept.
+ * once: only its hash is kept. `send`: PDS OS e-mails it with `message`
+ * (the e-mail shown before it leaves, Sacha 06/11/2026); false = only the
+ * link, sent by the person's usual channel (« Copier le lien plutôt »).
  */
 export async function prepareLegalForm(
   projectId: string,
   personKey: string,
+  options: { send?: boolean; message?: string } = {},
 ): Promise<PrepareResult> {
   const t = fr.legalForms.page;
   const id = catalogIdSchema.safeParse(projectId);
@@ -109,7 +112,11 @@ export async function prepareLegalForm(
         .eq("id", person.contactId)
         .maybeSingle()
     : { data: null };
-  const emailed = await emailFiche(project.id, data[0].form_id, project.title);
+  const message = options.message?.trim().slice(0, 2000) || null;
+  const emailed =
+    options.send === false
+      ? "disabled"
+      : await emailFiche(project.id, data[0].form_id, project.title, message);
   revalidatePath(routes.projectLegal(project.id), "layout");
   return {
     ok: true,
@@ -137,6 +144,8 @@ async function emailFiche(
   projectId: string,
   formId: string,
   title: string,
+  // The message written in the step, else the usual one.
+  message: string | null = null,
 ): Promise<"sent" | "failed" | "disabled"> {
   const t = fr.legalForms.page.emailed;
   const contactId = await formContactId(formId);
@@ -145,7 +154,7 @@ async function emailFiche(
     projectId,
     contactId,
     subject: t.subject(title),
-    body: t.body,
+    body: message ?? t.body,
     open: t.open,
   });
   if (sent === "sent") {

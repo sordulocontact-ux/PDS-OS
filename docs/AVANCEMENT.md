@@ -1571,3 +1571,15 @@ Proto « Plan d'action de Néons » (artefact du 06/11, copie `~/Desktop/Protos 
 - [x] Pas de ligne « À vous · … » quand toute l'étape est le geste : tout le Juridique, dont le contenu
       entier passe en tête quand c'est au lecteur (`StepPanel leadTitle={false}` posé par
       `LegalStepFrame`) ; règle écrite dans `docs/VISION-UX.md` § 4.
+
+## Fiche de renseignements sur le patron du Master (06/11/2026, branche `pre-prod`)
+
+- [x] « Déjà connu, pré-rempli dans sa fiche » en lignes de faits avec leur source ; l'e-mail que PDS OS
+      enverra en `MailCard` (À avec l'adresse du Réseau, Objet, message modifiable gardé dans l'e-mail,
+      lien ajouté à l'envoi), « Envoyer la fiche à X » / « Copier le lien plutôt » ; sans adresse, la raison
+      et « Créer le lien de la fiche » ; le lien à envoyer soi-même dans `FicheLinkCard` (copier, marquer
+      comme envoyée, nouveau lien, révoquer) au lieu d'un lien brut et d'un bouton mailto.
+- [x] Fiche reçue : corrections et réponses en lignes de faits (« Fournie par X, dans sa fiche »).
+- [x] `MailCard` extraite de `SendForm` du Master, partagée (`components/ui/mail-card.tsx`) ;
+      `prepareLegalForm(…, { send, message })`, `FormRow.email`.
+- [ ] Passage navigateur ; les autres démarches (contrat, autorisation, répartition, SACEM) au même patron.

@@ -49,6 +49,8 @@ export type FormRow = FormPerson & {
   } | null;
   // PDS OS can e-mail this person itself (SMTP set, address in the Réseau).
   canEmail: boolean;
+  // That address, shown in the e-mail before it leaves (rule 19).
+  email: string | null;
   // Why the access was revoked, when it was.
   revokedReason: string | null;
   submission: FormSubmission | null;
@@ -157,13 +159,18 @@ export async function loadForms(
           .select("id, email")
           .in("id", contactIds)
       : { data: [] };
-  const withEmail = new Set(
-    (addresses ?? []).flatMap((c) => (c.email ? [c.id] : [])),
+  const emailOf = new Map(
+    (addresses ?? []).flatMap((c) =>
+      c.email ? [[c.id, c.email] as const] : [],
+    ),
   );
 
   const now = new Date().toISOString();
   return people_.map((person): FormRow => {
-    const canEmail = person.contactId ? withEmail.has(person.contactId) : false;
+    const email = person.contactId
+      ? (emailOf.get(person.contactId) ?? null)
+      : null;
+    const canEmail = email !== null;
     const form = person.contactId ? latest.get(person.contactId) : undefined;
     if (!form)
       return {
@@ -174,6 +181,7 @@ export async function loadForms(
         openedAt: null,
         link: null,
         canEmail,
+        email,
         revokedReason: null,
         submission: null,
         complement: null,
@@ -210,6 +218,7 @@ export async function loadForms(
             }
           : null,
       canEmail,
+      email,
       revokedReason: form.status === "revoked" ? form.revoked_reason : null,
       submission: submissionOf.get(form.id) ?? null,
       complement:

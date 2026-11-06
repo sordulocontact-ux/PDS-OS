@@ -612,23 +612,36 @@ export const legal = {
   },
   // The panels of the plan's lines (components/legal/tracking/*-panel.tsx).
   panels: {
+    // A person's fiche in their démarche, as the Master sends its package
+    // (Sacha, 06/11/2026: « pas pro »; proto juridique-v3 `link`).
     fiche: {
-      next: "Prochaine action",
-      waiting: "En attente d'un retour",
       decision: "Décision",
-      prepare: (name: string) => `Préparer la fiche de ${name}`,
-      prepareBody: (name: string, roles: string) =>
-        roles
-          ? `Rôles déjà connus : ${roles}. ${name} ne verra que les questions de ces rôles, et confirmera ce qui est pré-rempli.`
-          : `${name} choisit ses rôles, puis ne voit que les questions de ces rôles.`,
-      sendLink: (name: string) => `Envoyer ce lien à ${name}`,
-      once: "Affiché une seule fois. Valable 30 jours, sans compte. WhatsApp convient.",
-      linkGone:
-        "Le lien n'est affiché qu'une fois : envoyé, marquez-le comme tel ; perdu, « Nouveau lien » en crée un autre et révoque l'ancien.",
+      known: "Déjà connu, pré-rempli dans sa fiche",
+      roles: "Rôles sur le projet",
+      creditName: "Nom à créditer",
+      artistName: "Nom d'artiste",
+      fromCredits: "Crédits du titre",
+      fromArtist: "Page artiste",
+      fromNetwork: "Réseau",
+      mailTitle: "L'e-mail que PDS OS enverra",
+      mailLine:
+        "De : l'adresse de PO · gardé dans l'historique, c'est la preuve d'envoi",
+      added: "Ajouté automatiquement à la fin de l'e-mail :",
+      newLink: "lien privé créé à l'envoi",
+      validity: "Lien privé, sans compte",
+      send: (name: string) => `Envoyer la fiche à ${name}`,
+      sending: "Envoi…",
+      linkInstead: "Copier le lien plutôt",
+      noAddress: (name: string) =>
+        `PDS OS n'a pas encore l'adresse de ${name} : c'est justement la fiche qui la recueille. Créez le lien, envoyez-le par votre canal habituel, puis marquez la fiche comme envoyée.`,
+      createLink: "Créer le lien de la fiche",
+      sendYourself: (name: string) =>
+        `Envoyez ce lien à ${name} par votre canal habituel, puis marquez la fiche comme envoyée.`,
       sent: (date: string) =>
-        date ? `Envoyée le ${date}, sans réponse` : "Envoyée, sans réponse",
-      sentBody:
-        "Rien à faire. Un nouveau lien révoque l'ancien : utile pour relancer.",
+        date ? `Envoyée le ${date}, sans réponse.` : "Envoyée, sans réponse.",
+      answers: (name: string) => `Ce que ${name} a rempli`,
+      corrections: "Corrections à vérifier",
+      fromFiche: (name: string) => `Fournie par ${name}, dans sa fiche`,
       corrected: "Une valeur déjà connue a été corrigée",
       complete: "Fiche complète",
       completeBody: "Ses données permanentes sont sur son contact du Réseau.",

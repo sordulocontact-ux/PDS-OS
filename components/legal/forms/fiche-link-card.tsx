@@ -19,44 +19,52 @@ export function FicheLinkCard({
   projectId,
   projectTitle,
   row,
+  url: justMade,
   pending,
   onRenew,
+  onMarkSent,
 }: {
   projectId: string;
   projectTitle: string;
   row: FormRow;
+  // The link just created, before the page reads it again.
+  url?: string | null;
   pending: boolean;
   onRenew: () => void;
+  // While it is not marked sent (PDS OS did not e-mail it).
+  onMarkSent?: () => void;
 }) {
   const link = row.link;
-  if (!link || !row.formId) return null;
+  if (!row.formId || (!link && !justMade)) return null;
   const formId = row.formId;
+  const url = justMade ?? link?.url ?? null;
   return (
     <PrivateLinkCard
       name={row.name}
       state={
         row.openedAt || row.complement
           ? "opened"
-          : link.sentAt
+          : link?.sentAt
             ? "sent"
             : "unsent"
       }
-      url={link.url}
+      url={url}
+      onMarkSent={onMarkSent}
       remindHref={
-        !link.url
+        !url
           ? null
           : row.complement
             ? // The complement asked, with its message (JUR-06).
               mailtoHref(
                 "",
                 t.emailSubject(projectTitle),
-                `${row.complement.note ?? ""}\n\n${link.url}`.trim(),
+                `${row.complement.note ?? ""}\n\n${url}`.trim(),
               )
             : row.state === "sent"
               ? mailtoHref(
                   "",
                   t.emailSubject(projectTitle),
-                  t.emailBody(row.name, projectTitle, link.url),
+                  t.emailBody(row.name, projectTitle, url),
                 )
               : null
       }

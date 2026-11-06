@@ -1,26 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import { useTransition } from "react";
-import { toast } from "@/components/ui/toast";
+import { useState, useTransition } from "react";
 
-import { NextCard } from "@/components/ui/next-card";
-import { usePublishResult } from "@/components/shell/module/result-banner";
 import { ComplementRequest } from "@/components/legal/forms/complement-request";
+import { FicheLinkCard } from "@/components/legal/forms/fiche-link-card";
+import { FicheAnswers } from "@/components/legal/tracking/fiche-answers";
+import { FicheSend } from "@/components/legal/tracking/fiche-send";
 import {
   usePlanSheet,
   type PreparedLink,
 } from "@/components/legal/tracking/plan-sheet-context";
+import { AddToNetworkButton } from "@/components/network/add-to-network-button";
+import { StepSection } from "@/components/shell/journey/step-section";
+import { usePublishResult } from "@/components/shell/module/result-banner";
 import { Button } from "@/components/ui/button";
-import { FactList } from "@/components/ui/fact-list";
+import { FactRow, FactRows } from "@/components/ui/fact-row";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { toast } from "@/components/ui/toast";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
-import { FicheLinkCard } from "@/components/legal/forms/fiche-link-card";
-import { AddToNetworkButton } from "@/components/network/add-to-network-button";
 import { legal } from "@/lib/i18n/fr/legal";
 import { legalForms } from "@/lib/i18n/fr/legal-forms";
 import { masterPage } from "@/lib/i18n/fr/master-page";
-import { mailtoHref } from "@/lib/utils/mailto";
 import {
   prepareLegalForm,
   requestLegalFormComplement,
@@ -28,23 +30,23 @@ import {
   setLegalFormState,
 } from "@/lib/legal/forms/actions";
 import { ficheMissing } from "@/lib/legal/forms/completeness";
-import { ficheBadge, missingLabels } from "@/lib/legal/forms/state";
-import type { WriteResult } from "@/lib/utils/write-result";
 import type { FormRow } from "@/lib/legal/forms/queries";
+import { ficheBadge, missingLabels } from "@/lib/legal/forms/state";
 import { formatInstant } from "@/lib/utils/instant";
+import type { WriteResult } from "@/lib/utils/write-result";
 
 const fr = { legal, legalForms, masterPage };
 
-const facts = (values: Record<string, string>) =>
-  Object.entries(values).map(([id, value]) => ({
-    label: fr.legalForms.fields[id] ?? id,
-    value: fr.legalForms.options[id]?.[value] ?? value,
-  }));
+const muted =
+  "text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]";
 
 /**
- * One person's fiche in the plan's panel (the prototype's): prepare its
- * link (shown once, to copy and send by any channel), mark it sent, follow
- * it, check a correction before it applies, read the answers.
+ * One person's fiche in their démarche, as the Master sends its package
+ * (Sacha, 06/11/2026: « pas pro »; proto juridique-v3 `link`): what the
+ * fiche already knows, then the e-mail PDS OS will send (`MailCard`) or,
+ * without an address, the link to create; the private link kept visible
+ * (`PrivateLinkCard`) while it waits; what the person filled in as fact
+ * rows with their source, the corrections to check and the decision.
  */
 export function FichePanel({
   projectId,
@@ -52,7 +54,7 @@ export function FichePanel({
   row,
 }: {
   projectId: string;
-  // For the ready e-mail of « Relancer ».
+  // The e-mail's subject.
   projectTitle?: string;
   row: FormRow;
 }) {
@@ -65,6 +67,7 @@ export function FichePanel({
   // Just prepared, or kept sealed by the server (rule 19).
   const url = link?.url ?? row.link?.url ?? null;
   const [pending, startTransition] = useTransition();
+  const [message, setMessage] = useState<string>(t.emailed.body);
   const publish = usePublishResult();
 
   const act = (action: () => Promise<{ ok: boolean; error?: string }>) =>
@@ -79,35 +82,33 @@ export function FichePanel({
       if (!result.ok) return void toast.error(result.error);
       publish(result);
     });
-  const prepare = () =>
+  // `send`: PDS OS e-mails it with the message; else only the link.
+  const prepare = (send: boolean) =>
     startTransition(async () => {
-      const result = await prepareLegalForm(projectId, row.key);
+      const result = await prepareLegalForm(projectId, row.key, {
+        send,
+        message,
+      });
       if (!result.ok) return void toast.error(result.error);
-      // E-mailed by PDS OS: nothing to copy, the fiche is marked sent.
       if (result.emailed === "sent")
         return void toast.success(t.emailed.sent(row.name));
       if (result.emailed === "failed") toast.warning(t.emailed.failed);
       setLink(result);
     });
-  const copy = async () => {
-    if (!url) return;
-    try {
-      await navigator.clipboard.writeText(url);
-      toast.success(t.copied);
-    } catch {
-      toast.error(t.failed);
-    }
-  };
-  const roles = row.creditRoles
-    .map((role) => fr.masterPage.credits.roles[role])
-    .join(", ")
-    .toLowerCase();
+  const markSent = () =>
+    act(async () => {
+      if (!row.formId) return { ok: false };
+      const result = await setLegalFormState(projectId, row.formId, "sent");
+      if (result.ok) setLink(null);
+      return result;
+    });
 
   // A featured artist not in the Réseau yet: added there, linked to the
   // artist page, before any fiche.
   if (row.artistId)
     return (
-      <NextCard kind="act" label={p.next} title={t.notInNetwork(row.name)}>
+      <div className="flex flex-col items-start gap-3">
+        <p className={muted}>{t.notInNetwork(row.name)}</p>
         <AddToNetworkButton
           label={fr.legal.board.verbs.addToNetwork}
           action={{
@@ -118,7 +119,7 @@ export function FichePanel({
             artistId: row.artistId,
           }}
         />
-      </NextCard>
+      </div>
     );
 
   if (row.namesakeId)
@@ -134,155 +135,84 @@ export function FichePanel({
       </ToneCallout>
     );
 
-  // The link just prepared: shown here once, to copy.
-  if (url)
+  // A link to send by hand: just created, or created and not marked sent.
+  if (url && (link || row.state === "link_generated"))
     return (
-      <NextCard kind="act" label={p.next} title={p.sendLink(row.name)}>
-        <div className="flex items-center gap-2 rounded-xl border bg-background p-1.5 pl-3">
-          <code className="min-w-0 flex-1 truncate text-sm">{url}</code>
-          <Button size="sm" variant="outline" onClick={copy}>
-            {t.copy}
-          </Button>
-        </div>
-        {link?.email && (
-          <Button
-            size="sm"
-            variant="outline"
-            className="self-start"
-            nativeButton={false}
-            render={
-              <a
-                href={mailtoHref(
-                  link.email,
-                  t.emailSubject(link.project),
-                  t.emailBody(row.name, link.project, link.url),
-                )}
-              />
-            }
-          >
-            {t.email}
-          </Button>
-        )}
-        {link && !row.link?.url && (
-          <p className="text-sm text-muted-foreground">{p.once}</p>
-        )}
-        <Button
-          className="self-start"
-          disabled={pending || !row.formId}
-          onClick={() =>
-            act(async () => {
-              if (!row.formId) return { ok: false };
-              const result = await setLegalFormState(
-                projectId,
-                row.formId,
-                "sent",
-              );
-              if (result.ok) setLink(null);
-              return result;
-            })
-          }
-        >
-          {t.markSent}
-        </Button>
-      </NextCard>
+      <div className="flex flex-col gap-3">
+        <p className={muted}>{p.sendYourself(row.name)}</p>
+        <FicheLinkCard
+          projectId={projectId}
+          projectTitle={projectTitle}
+          row={row}
+          url={url}
+          pending={pending}
+          onRenew={() => prepare(false)}
+          onMarkSent={markSent}
+        />
+      </div>
     );
 
   if (
     row.state === "none" ||
     row.state === "expired" ||
-    row.state === "revoked"
+    row.state === "revoked" ||
+    row.state === "link_generated"
   )
     return (
-      <NextCard kind="act" label={p.next} title={p.prepare(row.name)}>
-        <p className="text-sm text-muted-foreground">
-          {p.prepareBody(row.name, roles)}
-        </p>
+      <div className="flex flex-col gap-3.5">
+        <StepSection title={p.known}>
+          <KnownRows row={row} />
+        </StepSection>
         {row.revokedReason && (
-          <p className="text-sm text-muted-foreground">
+          <ToneCallout tone="warning">
             {t.revokedWhy(row.revokedReason)}
-          </p>
+          </ToneCallout>
         )}
-        <Button className="self-start" disabled={pending} onClick={prepare}>
-          {pending ? t.preparing : t.prepare}
-        </Button>
-      </NextCard>
+        <FicheSend
+          row={row}
+          projectTitle={projectTitle}
+          message={message}
+          onMessage={setMessage}
+          pending={pending}
+          onSend={() => prepare(true)}
+          onLinkOnly={() => prepare(false)}
+        />
+      </div>
     );
 
-  if (row.state === "link_generated")
-    return (
-      <NextCard kind="act" label={p.next} title={p.sendLink(row.name)}>
-        <p className="text-sm text-muted-foreground">{p.linkGone}</p>
-        <div className="flex flex-wrap gap-2">
-          <Button
-            disabled={pending}
-            onClick={() =>
-              act(() => setLegalFormState(projectId, row.formId!, "sent"))
-            }
-          >
-            {t.markSent}
-          </Button>
-          <Button variant="ghost" disabled={pending} onClick={prepare}>
-            {t.newLink}
-          </Button>
-        </div>
-      </NextCard>
-    );
-
-  const answers = row.submission && (
-    <div className="flex flex-col gap-4">
-      <section className="flex flex-col gap-2">
-        <h3 className="text-sm font-medium">{t.person}</h3>
-        <FactList facts={facts(row.submission.person)} />
-      </section>
-      {Object.keys(row.submission.contribution).length > 0 && (
-        <section className="flex flex-col gap-2">
-          <h3 className="text-sm font-medium">{t.contribution}</h3>
-          <FactList facts={facts(row.submission.contribution)} />
-        </section>
-      )}
-    </div>
+  const linkCard = (
+    <FicheLinkCard
+      projectId={projectId}
+      projectTitle={projectTitle}
+      row={row}
+      pending={pending}
+      onRenew={() => prepare(false)}
+    />
   );
 
   if (row.state === "sent")
     return (
-      <NextCard
-        kind="wait"
-        label={p.waiting}
-        title={p.sent(row.since ? formatInstant(row.since) : "")}
-      >
-        <p className="text-sm text-muted-foreground">{p.sentBody}</p>
-        <FicheLinkCard
-          projectId={projectId}
-          projectTitle={projectTitle}
-          row={row}
-          pending={pending}
-          onRenew={prepare}
-        />
-      </NextCard>
+      <div className="flex flex-col gap-3">
+        <p className={muted}>
+          {p.sent(row.since ? formatInstant(row.since) : "")}
+        </p>
+        {linkCard}
+      </div>
     );
 
   // A complement asked: the person answers on their link (JUR-06).
   if (row.state === "action_required" && row.complement)
     return (
-      <>
-        <NextCard
-          kind="wait"
-          label={p.waiting}
-          title={t.complementWaiting(
+      <div className="flex flex-col gap-3.5">
+        <p className={muted}>
+          {t.complementWaiting(
             formatInstant(row.complement.at),
             missingLabels(row.complement.fields),
           )}
-        >
-          <FicheLinkCard
-            projectId={projectId}
-            projectTitle={projectTitle}
-            row={row}
-            pending={pending}
-            onRenew={prepare}
-          />
-        </NextCard>
-        {answers}
-      </>
+        </p>
+        {linkCard}
+        <FicheAnswers row={row} />
+      </div>
     );
 
   // Received, to check (JUR-06): incomplete, it is asked again; complete,
@@ -290,64 +220,104 @@ export function FichePanel({
   if (row.state === "action_required" && row.submission) {
     const missing = ficheMissing(row.submission);
     const corrections = Object.entries(row.submission.corrections);
+    const badge = ficheBadge(row);
     const validate = (accept: boolean) =>
       decide(() => reviewLegalForm(projectId, row.formId!, accept));
     return (
-      <>
-        <NextCard
-          kind="decision"
-          label={p.decision}
-          title={ficheBadge(row).label}
-        >
-          {corrections.length > 0 && (
-            <FactList
-              facts={corrections.map(([id, c]) => ({
-                label: fr.legalForms.fields[id] ?? id,
-                value: t.correction(c.before, c.after),
-              }))}
-            />
-          )}
-          {missing.length > 0 ? (
-            <ComplementRequest
-              key={missing.join(",")}
-              name={row.name}
-              missing={missing}
-              pending={pending}
-              emailed={row.canEmail}
-              onAsk={(note) =>
-                decide(() =>
-                  requestLegalFormComplement(projectId, row.formId!, note),
-                )
-              }
-            />
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              <Button disabled={pending} onClick={() => validate(true)}>
-                {corrections.length > 0 ? t.validateCorrections : t.validate}
+      <div className="flex flex-col gap-3.5">
+        {corrections.length > 0 && (
+          <StepSection title={p.corrections}>
+            <FactRows>
+              {corrections.map(([id, c]) => (
+                <FactRow
+                  key={id}
+                  label={fr.legalForms.fields[id] ?? id}
+                  value={t.correction(c.before, c.after)}
+                  source={p.fromFiche(row.name)}
+                />
+              ))}
+            </FactRows>
+          </StepSection>
+        )}
+        <FicheAnswers
+          row={row}
+          aside={
+            <StatusBadge tone={badge.tone} size="sm">
+              {badge.label}
+            </StatusBadge>
+          }
+        />
+        {missing.length > 0 ? (
+          <ComplementRequest
+            key={missing.join(",")}
+            name={row.name}
+            missing={missing}
+            pending={pending}
+            emailed={row.canEmail}
+            onAsk={(note) =>
+              decide(() =>
+                requestLegalFormComplement(projectId, row.formId!, note),
+              )
+            }
+          />
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            <Button disabled={pending} onClick={() => validate(true)}>
+              {corrections.length > 0 ? t.validateCorrections : t.validate}
+            </Button>
+            {corrections.length > 0 && (
+              <Button
+                variant="ghost"
+                disabled={pending}
+                onClick={() => validate(false)}
+              >
+                {t.keepOld}
               </Button>
-              {corrections.length > 0 && (
-                <Button
-                  variant="ghost"
-                  disabled={pending}
-                  onClick={() => validate(false)}
-                >
-                  {t.keepOld}
-                </Button>
-              )}
-            </div>
-          )}
-        </NextCard>
-        {answers}
-      </>
+            )}
+          </div>
+        )}
+      </div>
     );
   }
 
   return (
-    <>
+    <div className="flex flex-col gap-3.5">
       <ToneCallout tone="success">
         <span className="font-medium">{p.complete}</span> — {p.completeBody}
       </ToneCallout>
-      {answers}
-    </>
+      <FicheAnswers row={row} />
+    </div>
+  );
+}
+
+/** What the fiche already knows of the person, each with its source:
+ * they confirm it rather than type it (rule 20). */
+function KnownRows({ row }: { row: FormRow }) {
+  const p = fr.legal.panels.fiche;
+  const roles = row.creditRoles
+    .map((role) => fr.masterPage.credits.roles[role])
+    .join(", ");
+  return (
+    <FactRows>
+      {roles && (
+        <FactRow label={p.roles} value={roles} source={p.fromCredits} />
+      )}
+      {row.performer ? (
+        <FactRow
+          label={p.artistName}
+          value={row.performer.name}
+          source={p.fromArtist}
+        />
+      ) : (
+        <FactRow label={p.creditName} value={row.name} source={p.fromCredits} />
+      )}
+      {row.email && (
+        <FactRow
+          label={fr.legalForms.fields.email}
+          value={row.email}
+          source={p.fromNetwork}
+        />
+      )}
+    </FactRows>
   );
 }
