@@ -1,6 +1,10 @@
 import "server-only";
 
-import { getServerEnv } from "@/lib/env";
+import {
+  googleAccessToken,
+  googleSettings,
+  type GoogleSettings,
+} from "@/lib/integrations/google-oauth";
 import { IntegrationError } from "@/lib/integrations/http";
 
 /**
@@ -8,11 +12,10 @@ import { IntegrationError } from "@/lib/integrations/http";
  * becomes an event of the organizer's calendar, with a Google Meet link, and
  * Google e-mails the invitation to every participant (sendUpdates=all).
  * Server-side only, with the organizer's OAuth refresh token
- * (GOOGLE_CALENDAR_*), never exposed to the browser. Optional: without it,
+ * (GOOGLE_CALENDAR_*, google-oauth.ts), never exposed to the browser. Optional: without it,
  * a call takes a video link pasted by hand (docs/ARCHITECTURE.md § 4 bis).
  */
 
-const TOKEN_URL = "https://oauth2.googleapis.com/token";
 const API = "https://www.googleapis.com/calendar/v3";
 
 export class GoogleCalendarError extends IntegrationError {
@@ -22,67 +25,15 @@ export class GoogleCalendarError extends IntegrationError {
   }
 }
 
-type Settings = {
-  clientId: string;
-  clientSecret: string;
-  refreshToken: string;
-  calendarId: string;
-};
+type Settings = GoogleSettings;
 
 function settings(): Settings | null {
-  const env = getServerEnv();
-  if (
-    !env.GOOGLE_CALENDAR_CLIENT_ID ||
-    !env.GOOGLE_CALENDAR_CLIENT_SECRET ||
-    !env.GOOGLE_CALENDAR_REFRESH_TOKEN
-  )
-    return null;
-  return {
-    clientId: env.GOOGLE_CALENDAR_CLIENT_ID,
-    clientSecret: env.GOOGLE_CALENDAR_CLIENT_SECRET,
-    refreshToken: env.GOOGLE_CALENDAR_REFRESH_TOKEN,
-    calendarId: env.GOOGLE_CALENDAR_ID ?? "primary",
-  };
+  return googleSettings();
 }
 
 /** Whether a new call can get its Meet link from Google. */
 export function googleMeetConfigured(): boolean {
   return settings() !== null;
-}
-
-// An access token lasts about an hour: kept by the server instance.
-let cached: { token: string; expiresAt: number } | null = null;
-
-async function accessToken(config: Settings): Promise<string> {
-  if (cached && cached.expiresAt > Date.now() + 60_000) return cached.token;
-  let response: Response;
-  try {
-    response = await fetch(TOKEN_URL, {
-      method: "POST",
-      cache: "no-store",
-      headers: { "content-type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        client_id: config.clientId,
-        client_secret: config.clientSecret,
-        refresh_token: config.refreshToken,
-        grant_type: "refresh_token",
-      }),
-      signal: AbortSignal.timeout(8000),
-    });
-  } catch {
-    throw new GoogleCalendarError("unreachable");
-  }
-  if (!response.ok) throw new GoogleCalendarError(`token_${response.status}`);
-  const body = (await response.json()) as {
-    access_token?: string;
-    expires_in?: number;
-  };
-  if (!body.access_token) throw new GoogleCalendarError("token_missing");
-  cached = {
-    token: body.access_token,
-    expiresAt: Date.now() + (body.expires_in ?? 3600) * 1000,
-  };
-  return cached.token;
 }
 
 type EventBody = {
@@ -100,7 +51,7 @@ async function request(
   path: string,
   body?: unknown,
 ): Promise<EventBody> {
-  const token = await accessToken(config);
+  const token = await googleAccessToken(config);
   let response: Response;
   try {
     response = await fetch(`${API}${path}`, {

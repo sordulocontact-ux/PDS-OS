@@ -9,6 +9,7 @@ import {
   createMeetEvent,
   googleMeetConfigured,
 } from "@/lib/integrations/google-calendar";
+import { turnOnAutoTranscription } from "@/lib/integrations/google-meet";
 import type { Database } from "@/lib/supabase/database.types";
 
 /**
@@ -181,9 +182,21 @@ export async function attachGoogleMeet(
       .update({ meeting_url: event.meetUrl, google_event_id: event.eventId })
       .eq("id", input.callId);
     if (error) throw new Error(error.message);
+    await transcribeMeet(event.meetUrl);
     return true;
   } catch (error) {
     console.error("[calls] google meet failed:", error);
     return false;
+  }
+}
+
+/** Meet transcribes the call by itself (google-meet.ts). A refusal (token
+ * without the Meet scope, Workspace edition that does not transcribe) never
+ * costs the call its link: it is only logged. */
+async function transcribeMeet(meetUrl: string): Promise<void> {
+  try {
+    await turnOnAutoTranscription(meetUrl);
+  } catch (error) {
+    console.warn("[calls] meet auto transcription not turned on:", error);
   }
 }

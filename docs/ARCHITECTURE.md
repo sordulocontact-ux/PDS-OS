@@ -1397,14 +1397,26 @@ la semaine du Calendrier, et une création de call qui donne un lien Google Meet
   Calendar, client OAuth « Desktop app », puis
   `node scripts/google-calendar-token.mjs <client id> <client secret>` connecté avec le
   compte qui organisera les calls (celui de l'agence) → `GOOGLE_CALENDAR_REFRESH_TOKEN`.
-  Portées demandées (06/11/2026) : `calendar.events` et `drive.file` (fichiers que PDS OS dépose
-  lui-même dans le Drive du compte, pour l'import des rushs à venir ; jamais le reste du Drive),
-  en une seule connexion : activer aussi l'API Google Drive. Compte organisateur :
+  Portées demandées (06/11/2026), en une seule connexion : `calendar.events`, `drive.file` (fichiers
+  que PDS OS dépose lui-même dans le Drive du compte, pour l'import des rushs à venir ; jamais le
+  reste du Drive), `meetings.space.settings` (transcription automatique, ci-dessous) et
+  `meetings.space.readonly` (relire la transcription d'un Meet, lot à venir) : activer aussi les
+  API Google Drive et Google Meet REST. Compte organisateur :
   **po@pdsrecords.com**, que seul Ibé ouvre : le lien du script peut être ouvert sur son
   ordinateur, il renvoie alors l'adresse `http://127.0.0.1:<port>/?code=…` (page inaccessible)
   à coller ici pendant que le script tourne. Écran de consentement « Externe » : publier
   l'application, sinon Google invalide le jeton au bout de 7 jours. La variable garde son nom
   `GOOGLE_CALENDAR_REFRESH_TOKEN`.
+- **Transcription automatique du Meet** (06/11/2026, `lib/integrations/google-meet.ts`) : juste après
+  la création du lien (`attachGoogleMeet`), PDS OS retrouve l'espace Meet par son code
+  (`GET spaces/{code}`) puis active `config.artifactConfig.transcriptionConfig.autoTranscriptionGeneration
+  = ON` (`PATCH spaces/{id}`) : Meet transcrit seul dès qu'une personne autorisée rejoint, la
+  transcription arrive en Google Doc dans le Drive de po@ et sur l'événement. Possible parce que po@
+  organise le Meet (Calendar le crée en son nom). Exige la portée `meetings.space.settings` et une
+  offre Workspace qui transcrit (Business Standard ou plus) : sinon Google répond 403, journalisé
+  (`[calls] meet auto transcription not turned on`), le call garde son lien. Jeton partagé
+  Calendar / Meet : `lib/integrations/google-oauth.ts`. Rapatrier la transcription dans la page du
+  call (à la place de l'enregistreur) : non construit.
 
 ---
 

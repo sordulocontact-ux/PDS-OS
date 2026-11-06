@@ -11,9 +11,12 @@
 // there): the browser then lands on an unreachable http://127.0.0.1:<port>/?code=…
 // page; paste that whole address in a browser here while this script runs.
 //
-// Scopes: calendar.events (Meet links of the calls) and drive.file (files PDS OS
-// itself puts in the account's Drive, e.g. a session's rushes; it never sees
-// the rest of the Drive). One sign-in covers both.
+// Scopes, all in one sign-in:
+// - calendar.events: the calls' events and Meet links;
+// - drive.file: files PDS OS itself puts in the account's Drive (e.g. a
+//   session's rushes); it never sees the rest of the Drive;
+// - meetings.space.settings: turns on Meet's automatic transcription of a call;
+// - meetings.space.readonly: reads a call's Meet transcript afterwards.
 import { createServer } from "node:http";
 
 const [clientId, clientSecret] = process.argv.slice(2);
@@ -27,6 +30,8 @@ if (!clientId || !clientSecret) {
 const SCOPE = [
   "https://www.googleapis.com/auth/calendar.events",
   "https://www.googleapis.com/auth/drive.file",
+  "https://www.googleapis.com/auth/meetings.space.settings",
+  "https://www.googleapis.com/auth/meetings.space.readonly",
 ].join(" ");
 
 const server = createServer(async (request, response) => {
