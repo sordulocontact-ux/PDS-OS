@@ -50,7 +50,7 @@ export async function listNetworkContacts(
   const query = supabase
     .from("network_contacts")
     .select(
-      "id, kind, name, roles, relations, email, phone, city, parent_id, artist_id, tiktok_handle",
+      "id, kind, name, roles, relations, email, phone, city, parent_id, artist_id, tiktok_handle, picture_path",
     )
     .order("name")
     .limit(LIST_LIMIT);
@@ -61,10 +61,15 @@ export async function listNetworkContacts(
     console.error("listNetworkContacts:", error.message);
     return null;
   }
-  const parents = await parentNames(
-    supabase,
-    data.map((row) => row.parent_id),
-  );
+  const [parents, pictures] = await Promise.all([
+    parentNames(
+      supabase,
+      data.map((row) => row.parent_id),
+    ),
+    signNetworkPictures(
+      data.flatMap((row) => (row.picture_path ? [row.picture_path] : [])),
+    ),
+  ]);
   return data.map((row) => ({
     id: row.id,
     kind: kindOf(row.kind),
@@ -77,6 +82,9 @@ export async function listNetworkContacts(
     phone: row.phone,
     city: row.city,
     tiktok: row.tiktok_handle,
+    pictureUrl: row.picture_path
+      ? (pictures.get(row.picture_path) ?? null)
+      : null,
   }));
 }
 

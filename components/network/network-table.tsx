@@ -4,6 +4,7 @@ import { IconOffice, IconUser } from "nucleo-sharp-essential";
 
 import { RecordSelection } from "@/components/archive/record-selection";
 import { ContactActions } from "@/components/network/contact-actions";
+import { Avatar } from "@/components/ui/avatar";
 import {
   DataTable,
   DataTableActionsCell,
@@ -73,9 +74,18 @@ export function NetworkTable({
             <DataTableCell>
               <DataTableMedia
                 visual={
-                  <DataTableIcon
-                    icon={contact.kind === "person" ? IconUser : IconOffice}
-                  />
+                  // Its picture, or the icon of its kind without one.
+                  contact.pictureUrl ? (
+                    <Avatar
+                      name={contact.name}
+                      pictureUrl={contact.pictureUrl}
+                      className="size-9"
+                    />
+                  ) : (
+                    <DataTableIcon
+                      icon={contact.kind === "person" ? IconUser : IconOffice}
+                    />
+                  )
                 }
                 title={
                   <DataTableLink

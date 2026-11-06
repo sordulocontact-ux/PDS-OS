@@ -212,6 +212,8 @@ export type NetworkContactRow = {
   city: string | null;
   // Shown when there is no e-mail nor phone: how to reach a spotted artist.
   tiktok: string | null;
+  // Its picture, signed for the page (chosen, or from TikTok or Instagram).
+  pictureUrl: string | null;
 };
 
 /** Everything the contact form edits, as saved. */
