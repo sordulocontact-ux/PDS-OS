@@ -10,11 +10,13 @@ export const maxDuration = 60;
 
 /**
  * The latest version of a generated contract as a PDF, downloaded (« export »
- * of the ticket's MVP, sent to signature by the team). Read with the user's
- * session: RLS decides who sees the contract.
+ * of the ticket's MVP, sent to signature by the team). `?view=1`: shown in
+ * the browser's tab instead (« Voir le PDF » of a démarche, Sacha
+ * 06/11/2026). Read with the user's session: RLS decides who sees the
+ * contract.
  */
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: RouteContext<"/api/contracts/[contractId]/document">,
 ) {
   const access = await getAccess();
@@ -48,7 +50,7 @@ export async function GET(
     {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="contrat.pdf"; filename*=UTF-8''${encodeURIComponent(name)}`,
+        "Content-Disposition": `${new URL(request.url).searchParams.get("view") === "1" ? "inline" : "attachment"}; filename="contrat.pdf"; filename*=UTF-8''${encodeURIComponent(name)}`,
         "Cache-Control": "private, no-store",
       },
     },

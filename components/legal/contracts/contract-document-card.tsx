@@ -1,6 +1,7 @@
 import { ContractValueRows } from "@/components/legal/contracts/contract-value-rows";
 import { DocumentCard } from "@/components/ui/document-card";
-import { PdfExportButton } from "@/components/ui/pdf-export-button";
+import { Button } from "@/components/ui/button";
+import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
 import { legalDocuments } from "@/lib/i18n/fr/legal-documents";
 import { isBlocking } from "@/lib/legal/contracts/completeness";
@@ -71,18 +72,35 @@ export function ContractDocumentCard({
           ? t.generated(blocking, row.fields.length)
           : t.toGenerate(blocking, row.fields.length)
       }
+      // « Voir le PDF » in a new tab: the démarche stays (Sacha, 06/11/2026);
+      // the contract's page in the Contrats module, second (JUR-17).
       action={
         data &&
         contractId && (
-          <PdfExportButton
-            href={routes.contractDocumentPdf(contractId)}
-            fileName={name}
-            label={t.pdf}
-            pendingLabel={t.pdfPending}
-            failedLabel={t.pdfFailed}
-            variant="outline"
-            size="sm"
-          />
+          <span className="flex flex-wrap items-center gap-1">
+            <Button
+              variant="outline"
+              size="sm"
+              nativeButton={false}
+              render={
+                <a
+                  href={routes.contractDocumentView(contractId)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                />
+              }
+            >
+              {t.view}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              nativeButton={false}
+              render={<ViewLink href={routes.contract(contractId)} />}
+            >
+              {t.contractPage}
+            </Button>
+          </span>
         )
       }
       change={

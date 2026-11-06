@@ -118,6 +118,8 @@ export const routes = {
   contractTemplate: (seriesId: string) =>
     `/app/contracts/templates/${seriesId}`,
   contractDocumentPdf: (id: string) => `/api/contracts/${id}/document`,
+  // The same PDF shown in a new tab rather than downloaded.
+  contractDocumentView: (id: string) => `/api/contracts/${id}/document?view=1`,
   formalityDraftPdf: (id: string) => `/api/legal/formalities/${id}/draft`,
   formalityDocumentPdf: (id: string, version: number) =>
     `/api/legal/formalities/${id}/document?version=${version}`,

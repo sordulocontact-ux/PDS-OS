@@ -1606,3 +1606,6 @@ Proto « Plan d'action de Néons » (artefact du 06/11, copie `~/Desktop/Protos 
       « Compléter » ne recharge plus la page : « Voir sa fiche » ouvre la démarche sur la fiche avec « Retour
       au contrat » (JUR-10), Réseau et État des lieux à leur place, rémunération modifiée sur sa ligne
       (`saveAgreementFee`). `ContractValueList` et `ContractValues` supprimés.
+- [x] Contrat dans sa démarche : « Voir le PDF » l'ouvre dans un nouvel onglet (`?view=1`, `inline`), la
+      démarche reste ; « Fiche du contrat » (module Contrats, JUR-17) en lien secondaire sur la carte ; plus
+      de bouton « Ouvrir le contrat » sous la carte.

@@ -96,16 +96,9 @@ export function ContractPanel({
   ) =>
     contractId && run(() => advanceContract({ contractId, action, ...extra }));
 
-  const open = contractId && (
-    <Button
-      variant="ghost"
-      size="sm"
-      nativeButton={false}
-      render={<Link href={routes.contract(contractId)} />}
-    >
-      {t.openContract}
-    </Button>
-  );
+  // The contract's page is reached from its document card (« Fiche du
+  // contrat », JUR-17), its PDF seen there in a new tab: no « Ouvrir le
+  // contrat » under it any more (Sacha, 06/11/2026).
   // The fee as a fact with its source (JUR-15), as the Master's rates —
   // only when the template does not show it among its values.
   const fee = !row.fields.some((f) => f.id === "remuneration") && (
@@ -236,7 +229,6 @@ export function ContractPanel({
             <Button disabled={pending} onClick={() => advance("submit")}>
               {card?.review ? d.resubmit : t.submitAction}
             </Button>
-            {open}
           </div>
         </>
       );
@@ -299,7 +291,6 @@ export function ContractPanel({
               draft={draft}
             />
           )}
-          {open}
         </>
       );
     case "signature_pending":
@@ -321,7 +312,6 @@ export function ContractPanel({
               direction={direction}
               onCountersign={() => advance("countersign")}
               personLink={personLink}
-              extra={open}
             />
           )}
         </>
@@ -334,7 +324,6 @@ export function ContractPanel({
             <span className="font-medium">{t.signed}</span>
           </ToneCallout>
           {invoice}
-          {open}
         </>
       );
   }
