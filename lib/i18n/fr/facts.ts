@@ -1,11 +1,7 @@
 // Shared by the first step of every specialised workflow (Juridique's État
-// des lieux, Master's État du master): the fact tables and the Réseau.
+// des lieux, Master's État du master): their lists and the Réseau.
 export const facts = {
   columns: {
-    title: "Titre",
-    fact: "Élément",
-    source: "Source",
-    state: "État",
     actions: "Actions",
   },
   failed: "Impossible de lire ces informations pour l'instant.",

@@ -5079,8 +5079,8 @@ lots, chacun utile seul.
   titre. Un crédit déjà relié à un autre contact n'est jamais déplacé
   (`contact_id is null` dans la mise à jour).
 - **Socle commun avec le Juridique** : `lib/facts/` (types de faits, `groupOf`, statut d'un
-  crédit dans le Réseau, filtres par état), `FactTable` (`components/ui/fact-table.tsx`, l'action dessinée par
-  `renderAction`), `factTone`, textes `fr.facts`, action `linkContributorContact`
+  crédit dans le Réseau, filtres par état), les lignes `FactRows` / `FactRow`
+  (`components/ui/fact-row.tsx`, comme le Brief du Master), `factTone`, textes `fr.facts`, action `linkContributorContact`
   (`lib/catalog/master/contact-link-actions.ts`).
 - **Depuis le Cadrage intelligent** (§ 6, 06/10/2026) : avant son premier enregistrement,
   le Brief Mix/Master part de l'ingénieur du mix et du mastering choisis au Cadrage (rôles
