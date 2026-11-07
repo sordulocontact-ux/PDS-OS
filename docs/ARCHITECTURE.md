@@ -1073,6 +1073,10 @@ s'afficher sans chargement.
   requêtes au lieu de 263** ; une page déjà vue, **9 en moyenne** (22 au plus) au lieu de 13 à 57.
   `PERF_TRACE=1` ajoute une ligne `[cache] <vue> computed again: changed: <tables>` par vue refaite.
   Une fonction lue par une vue doit rester `STABLE` si elle ne fait que lire (sinon jamais gardée).
+  **Une vue SQL lue par l'API** (`current_field_values`, `library_files`, `marketing_review_*`) n'est
+  jamais tamponnée : `VIEW_TABLES` (`live-deps.ts`) la traduit en ses tables. Toute nouvelle vue y
+  entre, sinon la page reste sur son état d'avant (07/11 : « Confirmer » la date cible refusé en
+  `invalid_transition`, le Cadrage resservi sans la réponse confirmée).
   Une Server Action relit sans cache (`readProjectJourneys`). Conséquence pour `ProjectLive` : la
   page ouverte se met à jour pour un changement d'un collègue dans **n'importe quel** workflow.
 - **Entrée d'un module** (28/10, `lib/journey/landing.ts`) : `/framing`, `/strategy`, `/master`,

@@ -144,14 +144,42 @@ export const functionReads = new Map<
   { tables: string[]; readOnly: boolean } | null
 >();
 
+// The tables each view of the database reads (supabase/migrations, `create
+// view`): project_live stamps the table a write changed, never a view, so a
+// read through a view depends on its tables. Without it, confirming an answer
+// of the Cadrage (field_values, read as current_field_values) left the page
+// on its state of before, and the next « Confirmer » was refused (07/11/2026).
+// A new view goes here.
+const VIEW_TABLES: Record<string, string[]> = {
+  current_field_values: ["field_values"],
+  library_files: [
+    "artist_files",
+    "artists",
+    "contract_files",
+    "contracts",
+    "master_files",
+    "masters",
+    "project_files",
+    "projects",
+  ],
+  marketing_review_activations: ["marketing_activations"],
+  marketing_review_evidence: [
+    "activation_evidence",
+    "activation_evidence_checks",
+    "activation_metrics",
+  ],
+};
+
 /** The tables `deps` stand for, with what decides visibility; null while a
  * function among them is not known yet, "all" when one cannot be known. */
 export function tablesOfDeps(deps: Iterable<string>): Tables | null {
   const tables = new Set<string>();
   const functions = [...VISIBILITY];
   for (const dep of deps) {
-    if (dep.startsWith("t:")) tables.add(dep.slice(2));
-    else if (dep.startsWith("r:")) functions.push(dep.slice(2));
+    if (dep.startsWith("t:")) {
+      const name = dep.slice(2);
+      for (const table of VIEW_TABLES[name] ?? [name]) tables.add(table);
+    } else if (dep.startsWith("r:")) functions.push(dep.slice(2));
   }
   for (const name of functions) {
     if (!functionReads.has(name)) return null;
