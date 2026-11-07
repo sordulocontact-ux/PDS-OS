@@ -35,6 +35,7 @@ export function AttendeeChips({
   hint,
   hiddenNames = false,
   filesEmails = true,
+  invitesAll = true,
 }: {
   id: string;
   pool: PrepPerson[];
@@ -47,6 +48,10 @@ export function AttendeeChips({
   // An address typed becomes a Réseau fiche (prepared calls), or stays an
   // address (« Nouveau call »): the last line of the list says which.
   filesEmails?: boolean;
+  // true: everyone named is invited, so a contact without an address is
+  // refused (calls). false: the list records who takes part and only the
+  // team is invited (Sessions studio, Ibé 05/11/2026): any contact goes.
+  invitesAll?: boolean;
 }) {
   const t = fr.callPrep;
   const [query, setQuery] = useState("");
@@ -64,7 +69,7 @@ export function AttendeeChips({
   const focusInput = () => setTimeout(() => inputRef.current?.focus(), 0);
   const add = (person: PrepPerson) => {
     setOwnError(null);
-    if (!person.invite) {
+    if (invitesAll && !person.invite) {
       setOwnError(t.contactWithoutEmail(person.name));
       return;
     }

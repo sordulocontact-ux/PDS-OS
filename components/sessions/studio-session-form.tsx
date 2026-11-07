@@ -100,6 +100,7 @@ export function StudioSessionForm({
               hint={t.participantsHint}
               hiddenNames
               filesEmails
+              invitesAll={false}
             />
           </FormSection>
           <FormSection plain title={t.what}>

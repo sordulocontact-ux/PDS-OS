@@ -187,6 +187,7 @@ function ReportForm({
             onChange={setPeople}
             hint={t.presentHint}
             hiddenNames
+            invitesAll={false}
           />
         </>
       )}
