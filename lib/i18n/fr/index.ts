@@ -30,6 +30,7 @@ import { catalog } from "./catalog";
 import { catalogFiles } from "./catalog-files";
 import { contracts } from "./contracts";
 import { core } from "./core";
+import { datePicker } from "./date-picker";
 import { artistIdentity } from "./artist-identity";
 import { conception } from "./conception";
 import { conceptionCall } from "./conception-call";
@@ -165,6 +166,7 @@ export const fr = {
   decisions,
   aiUsage,
   ...core,
+  datePicker,
   errors,
   labo,
   laboCaptures,

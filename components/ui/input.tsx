@@ -4,12 +4,26 @@ import * as React from "react"
 import { Input as InputPrimitive } from "@base-ui/react/input"
 import { cn } from "cn"
 
-// A date or a time field: Safari draws an empty one with today's date and
+import { DatePicker } from "@/components/ui/date-picker"
+
+// A time field: Safari draws an empty one with today's date and
 // 12:30 in grey, read as a value (recette 23/10, CONC-001). `data-empty`
 // lets app/globals.css hide that drawing until the field is focused.
-const TIME_LIKE = new Set(["date", "time", "datetime-local", "month", "week"])
+const TIME_LIKE = new Set(["time", "datetime-local", "month", "week"])
 
 function Input({
+  className,
+  type,
+  onChange,
+  ...props
+}: React.ComponentProps<"input">) {
+  // Every date field of the app: PDS OS's own calendar, not the browser's.
+  if (type === "date")
+    return <DatePicker className={className} onChange={onChange} {...props} />
+  return <NativeInput className={className} type={type} onChange={onChange} {...props} />
+}
+
+function NativeInput({
   className,
   type,
   onChange,

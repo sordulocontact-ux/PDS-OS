@@ -694,6 +694,21 @@ D'après le proto « Projet complet » (`docs/protos/projet.html`), qui fait foi
   `lib/utils/day.ts`, Europe/Paris) ; dans une source ou un historique, en court :
   « le 14/10 », et avec l'heure « 19/10, 11:16 » (`formatShortDay`, `formatShortInstant`).
   `Timestamp` reste pour les instants détaillés (« 11 oct. 2026 à 16:42 »).
+- **Champ date** (Sacha 07/11/2026 : le calendrier natif du navigateur « pas très beau ») :
+  `Input type="date"` dessine `DatePicker` (`components/ui/date-picker.tsx`), jamais le
+  sélecteur du navigateur. Au repos le champ lit « Sam. 05/12/2026 » ; au focus il passe en
+  « 05/12/2026 », tout sélectionné, se tape au clavier (barres posées toutes seules, « 5/12 »
+  ou « 5/12/26 » compris en quittant le champ, illisible = on revient au dernier jour bon) et
+  le calendrier s'ouvre dessous (`Calendar`, popover du système). Mois en titre, flèches à
+  droite, lundi en premier, **six semaines toujours** (la hauteur ne saute pas d'un mois à
+  l'autre), jours hors du mois en `--text-tertiary` ; jour choisi = sélection bleue
+  (`--selection-border` + `--selection-bg`, § 3 bis, jamais un rond plein) ; aujourd'hui =
+  chiffre semi-gras et point d'encre dessous (le rond d'encre reste au Calendrier, où rien
+  n'est choisi) ; hors `min`/`max` = gris barré, inaccessible au clic. Pied : « Aujourd'hui »
+  en contour (absent si hors limites), « Effacer » en fantôme quand le champ n'est pas
+  obligatoire. Clavier : ↓ entre dans les jours, flèches, Début/Fin, Page préc./suiv. (Maj :
+  un an), Entrée choisit, Échap ferme sans fermer la modale. Aucune animation propre : le
+  popover garde `popupMotion`. Les champs heure (`type="time"`) restent natifs.
 - **Durées et questions par point d'ordre du jour** (formulaire de call, Sacha 28/10/2026) : la
   durée est visible et modifiable sur chaque point ; les questions de PO ne sont pas dans le
   formulaire, elles se lisent sous chaque point dans la carte de l'échange prévu.
