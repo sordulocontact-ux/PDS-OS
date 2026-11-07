@@ -2,6 +2,7 @@
 // mirrors a check of supabase/migrations/20260927003001_master_page.sql.
 
 import type { FieldErrors, FormValues } from "@/lib/auth/form-state";
+import type { SessionState } from "@/lib/sessions/state";
 
 export const SESSION_KINDS = [
   "recording",
@@ -135,6 +136,8 @@ export type MasterSession = {
   engineer: string | null;
   notes: string | null;
   status: SessionStatus;
+  // Computed from the date, the hours and the report (lib/sessions/state.ts).
+  state: SessionState;
   // "HH:MM", optional.
   startsAt: string | null;
   endsAt: string | null;

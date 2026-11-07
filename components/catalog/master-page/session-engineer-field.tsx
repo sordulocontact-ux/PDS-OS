@@ -85,11 +85,9 @@ export function SessionEngineerField({
         onPick={() => setFrozen((current) => current ?? kind)}
         error={error}
       />
-      {suggestion && (
-        <p className="text-caption text-[color:var(--text-secondary)]">
-          {t.engineerSuggested(suggestion.name)}
-        </p>
-      )}
+      <p className="text-caption text-[color:var(--text-secondary)]">
+        {suggestion ? t.engineerSuggested(suggestion.name) : t.engineerHint}
+      </p>
     </div>
   );
 }

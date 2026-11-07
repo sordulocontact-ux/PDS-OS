@@ -60,14 +60,27 @@ export const studioSessionSchema = z
     ...sessionFieldsShape,
     sessionId: optionalId,
     artistIds: jsonIds,
+    // Chosen when the session is created; then from its page.
+    titleIds: jsonIds,
     projectIds: jsonIds,
     attendees: jsonIds,
     guests: jsonContacts,
   })
   .refine(sessionTimesOk, sessionTimesIssue())
-  .refine((v) => v.artistIds.length + v.projectIds.length > 0, {
-    error: fr.sessions.form.anchorRequired,
+  // Tied first to its artists (Ibé, 06/11/2026): a session can come before
+  // any project.
+  .refine((v) => v.artistIds.length > 0, {
+    error: fr.sessions.form.artistRequired,
     path: ["artistIds"],
+  });
+
+/** A short part of the report, null when left empty. */
+const reportPart = z
+  .string()
+  .optional()
+  .transform((value) => value?.trim() || null)
+  .refine((value) => value === null || value.length <= 2000, {
+    error: e.tooLong,
   });
 
 export const sessionReportSchema = z.object({
@@ -77,6 +90,8 @@ export const sessionReportSchema = z.object({
     .trim()
     .min(1, { error: e.required })
     .max(5000, { error: e.tooLong }),
+  reportTakeaways: reportPart,
+  reportNextStep: reportPart,
   attendees: jsonIds,
   guests: jsonContacts,
 });

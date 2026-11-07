@@ -10,27 +10,18 @@ import {
   EMPTY_CELL,
 } from "@/components/ui/data-table";
 import { masterPage } from "@/lib/i18n/fr/master-page";
+import { cn } from "@/lib/utils";
 import { sessions } from "@/lib/i18n/fr/sessions";
 import { formatShortDate } from "@/lib/release/format";
 import { sessionHref, type SessionDoor } from "@/lib/sessions/door";
-import type {
-  SessionReportState,
-  StudioSessionRow,
-} from "@/lib/sessions/types";
-import type { Tone } from "@/lib/ui/state-tones";
+import type { StudioSessionRow } from "@/lib/sessions/types";
+import { sessionStateTone } from "@/lib/ui/state-tones";
 
 const fr = { masterPage, sessions };
 
 const secondary = "text-[color:var(--text-secondary)]";
 const sub =
   "block text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-secondary)]";
-
-const REPORT_TONE: Record<SessionReportState, Tone> = {
-  todo: "action",
-  done: "success",
-  later: "neutral",
-  cancelled: "neutral",
-};
 
 /** « Enregistrement · Studio Ferber », the name of a session in a list. */
 export function sessionName(
@@ -39,6 +30,18 @@ export function sessionName(
   return [fr.masterPage.sessions.kinds[session.kind], session.studio]
     .filter(Boolean)
     .join(" · ");
+}
+
+const minutesOf = (hm: string) =>
+  Number(hm.slice(0, 2)) * 60 + Number(hm.slice(3, 5));
+
+/** « 4 h 18 » when both hours are known, else nothing. */
+export function sessionDuration(
+  session: Pick<StudioSessionRow, "startsAt" | "endsAt">,
+): string | null {
+  if (!session.startsAt || !session.endsAt) return null;
+  const minutes = minutesOf(session.endsAt) - minutesOf(session.startsAt);
+  return minutes > 0 ? fr.sessions.duration(minutes) : null;
 }
 
 /** « 14:00 – 18:00 », or nothing. */
@@ -52,8 +55,10 @@ export function sessionHours(
 
 /**
  * The sessions list (the menu's page, an artist's tab, a project's section):
- * when, what, for whom, and where the report stands. `hide` drops the column
- * the page already names (the artist, the project).
+ * when, what (with its engineer and length), for which artists (before the
+ * projects, Ibé 06/11/2026), and its state, the report to write standing
+ * out. The whole row opens the session. `hide` drops the column the page
+ * already names (the artist, the project).
  */
 export function SessionsTable({
   sessions: rows,
@@ -75,13 +80,16 @@ export function SessionsTable({
           <DataTableHead hideBelow="sm">{t.artists}</DataTableHead>
         )}
         {hide !== "projects" && (
-          <DataTableHead hideBelow="md">{t.projects}</DataTableHead>
+          <DataTableHead hideBelow="lg">{t.projects}</DataTableHead>
         )}
-        <DataTableHead fill>{t.report}</DataTableHead>
+        <DataTableHead fill>{t.state}</DataTableHead>
       </DataTableHeader>
       <DataTableBody>
         {rows.map((session) => {
           const hours = sessionHours(session);
+          const detail = [session.engineer, sessionDuration(session)]
+            .filter(Boolean)
+            .join(" · ");
           return (
             <DataTableRow key={session.id}>
               <DataTableCell className="tabular-nums">
@@ -99,9 +107,7 @@ export function SessionsTable({
                   <DataTableLink href={sessionHref(door, session.id)}>
                     {sessionName(session)}
                   </DataTableLink>
-                  {session.engineer && (
-                    <span className={sub}>{session.engineer}</span>
-                  )}
+                  {detail && <span className={sub}>{detail}</span>}
                 </span>
               </DataTableCell>
               {hide !== "artists" && (
@@ -112,15 +118,18 @@ export function SessionsTable({
                 </DataTableCell>
               )}
               {hide !== "projects" && (
-                <DataTableCell hideBelow="md" className="break-words">
+                <DataTableCell
+                  hideBelow="lg"
+                  className={cn("break-words", secondary)}
+                >
                   {session.projects.map((p) => p.name).join(", ") || (
                     <span className={secondary}>{EMPTY_CELL}</span>
                   )}
                 </DataTableCell>
               )}
               <DataTableCell fill>
-                <StatusBadge tone={REPORT_TONE[session.report]}>
-                  {fr.sessions.reportState[session.report]}
+                <StatusBadge tone={sessionStateTone[session.state]}>
+                  {fr.sessions.states[session.state]}
                 </StatusBadge>
               </DataTableCell>
             </DataTableRow>

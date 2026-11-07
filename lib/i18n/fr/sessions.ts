@@ -1,31 +1,38 @@
-// Sessions studio (retours d'Ibé du 01 et du 05/11/2026): their list, their
-// page, their form, their report, the maquettes and links they gather.
+// Sessions studio (retours d'Ibé du 01, du 05 et du 06/11/2026): their list,
+// their page, their form, their report, the maquettes and links they gather.
 
 export const sessions = {
   title: "Sessions studio",
-  subtitle:
-    "Les séances de studio : planifiées, puis racontées, avec leurs maquettes et leurs rushs.",
+  subtitle: "Planifier, préparer et garder la trace des séances.",
   newSession: "Nouvelle session",
   loadError: "Les sessions n'ont pas pu être lues. Réessayez dans un instant.",
   views: {
     label: "Sessions",
     upcoming: "À venir",
-    past: "Passées",
+    toReport: "À compléter",
+    done: "Terminées",
     all: "Toutes",
   },
   columns: {
     date: "Date",
-    session: "Session",
+    session: "Séance",
     artists: "Artistes",
     projects: "Projets",
-    report: "Compte rendu",
+    state: "État",
   },
-  reportState: {
-    todo: "À rédiger",
-    done: "Rédigé",
-    later: "Après la séance",
+  // Computed, never typed (lib/sessions/state.ts).
+  states: {
+    planned: "Prévue",
+    ongoing: "En cours",
+    toReport: "Compte rendu à compléter",
+    done: "Terminée",
     cancelled: "Annulée",
   },
+  // « 4 h 18 », « 45 min ».
+  duration: (minutes: number) =>
+    minutes < 60
+      ? `${minutes} min`
+      : `${Math.floor(minutes / 60)} h ${String(minutes % 60).padStart(2, "0")}`,
   noDate: "Date à fixer",
   search: {
     label: "Rechercher une session",
@@ -38,7 +45,8 @@ export const sessions = {
     bodyReadOnly:
       "Les séances planifiées par la direction et les chefs de projet apparaîtront ici.",
     upcoming: "Aucune session à venir",
-    past: "Aucune session passée",
+    toReport: "Aucun compte rendu à compléter",
+    done: "Aucune session terminée",
     viewBody: "Les autres sessions sont dans les autres onglets.",
     artist: "Aucune session pour cet artiste",
     project: "Aucune session pour ce projet",
@@ -49,14 +57,25 @@ export const sessions = {
     createTitle: "Nouvelle session studio",
     editTitle: "Modifier la session",
     description:
-      "Une session planifiée arrive dans le Calendrier ; l'équipe interne invitée la reçoit dans son agenda.",
+      "Elle arrive dans le Calendrier ; l'équipe interne invitée la reçoit dans son agenda.",
+    // The three parts of the form (Ibé, 06/11/2026).
+    when: "La séance",
+    who: "Avec qui",
+    what: "Ce qu'on travaille",
     artists: "Artistes",
     artistsPlaceholder: "Choisir des artistes",
+    titles: "Titres ou maquettes",
+    titlesPlaceholder: "Choisir des titres",
+    titlesHint: "Leur projet est rattaché tout seul à la session.",
     projects: "Projets",
     projectsPlaceholder: "Choisir des projets",
+    projectsHint:
+      "Seulement un projet sans titre choisi : celui d'un titre vient tout seul.",
+    notes: "Notes de préparation",
+    notesPlaceholder: "Objectifs, consignes, morceaux à travailler…",
     participantsHint:
       "L'équipe et les personnes du Réseau présentes. Seule l'équipe interne est invitée dans l'agenda.",
-    anchorRequired: "Choisissez au moins un artiste ou un projet.",
+    artistRequired: "Choisissez au moins un artiste.",
     teamDetail: "Équipe PDS",
   },
   // The block of a title's Vue d'ensemble.
@@ -68,6 +87,8 @@ export const sessions = {
   page: {
     back: "Toutes les sessions",
     infoTitle: "Informations",
+    prepTitle: "Préparation",
+    prepDescription: "Ce qui est prévu pour la séance.",
     facts: {
       date: "Date",
       hours: "Horaires",
@@ -76,7 +97,7 @@ export const sessions = {
       artists: "Artistes",
       projects: "Projets",
       participants: "Participants",
-      notes: "Notes",
+      notes: "Notes de préparation",
       responsible: "Compte rendu par",
     },
     hours: (start: string | null, end: string | null) =>
@@ -89,20 +110,31 @@ export const sessions = {
     edit: "Modifier",
     menu: "Actions de la session",
     close: "Fermer",
+    cancel: "Annuler la séance",
+    cancelTitle: "Annuler cette séance ?",
+    cancelBody:
+      "Elle quitte le Calendrier et n'attend plus de compte rendu. Vous pourrez la rétablir.",
+    cancelled: "Séance annulée",
+    keep: "Garder la séance",
+    restore: "Rétablir la séance",
+    restored: "Séance rétablie",
   },
   report: {
     title: "Compte rendu",
-    description:
-      "Qui était là, les maquettes réalisées et ce qu'il faut retenir.",
+    description: "Ce qui s'est passé pendant la séance et la suite.",
     write: "Rédiger le compte rendu",
     edit: "Modifier le compte rendu",
     why: "La séance a eu lieu : racontez-la pendant que tout est frais.",
+    ongoing: "La séance est en cours : le compte rendu peut déjà commencer.",
     waitingFor: (name: string) => `À rédiger par ${name}`,
-    notYet: "Le compte rendu se rédige après la séance.",
-    cancelled: "Session annulée : pas de compte rendu.",
-    notes: "Informations importantes",
+    notes: "Résumé",
     notesPlaceholder:
-      "Ce qui a été enregistré, les choix faits, ce qui reste à faire…",
+      "Racontez librement la séance : ce qui a été travaillé, ce qui a marché, les choix faits…",
+    takeaways: "À retenir",
+    takeawaysPlaceholder:
+      "Versions validées, choix artistiques, points d'attention…",
+    nextStep: "Prochaine étape",
+    nextStepPlaceholder: "Ce qu'il reste à faire, par qui et pour quand…",
     present: "Présents",
     presentHint: "Qui était là : retirez les absents, ajoutez les autres.",
     nobody: "Personne n'est noté présent.",

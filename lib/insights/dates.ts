@@ -7,6 +7,16 @@ export function todayInParis(now = new Date()): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: TIME_ZONE }).format(now);
 }
 
+/** The time of day as "HH:MM" in Paris. */
+export function timeInParis(now = new Date()): string {
+  return new Intl.DateTimeFormat("fr-FR", {
+    timeZone: TIME_ZONE,
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).format(now);
+}
+
 export function isOverdue(dueDate: string, today = todayInParis()): boolean {
   return dueDate < today;
 }

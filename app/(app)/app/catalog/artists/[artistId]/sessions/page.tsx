@@ -7,7 +7,7 @@ import { routes } from "@/lib/auth/redirects";
 import { getArtist } from "@/lib/catalog/artist-queries";
 import { fr } from "@/lib/i18n/fr";
 import { listStudioSessions } from "@/lib/sessions/queries";
-import { sessionViewOf } from "@/lib/sessions/types";
+import { sessionViewOf } from "@/lib/sessions/state";
 import { allInOrder } from "@/lib/utils/parallel";
 
 export const metadata = { title: fr.catalog.artistPage.tabs.sessions };

@@ -2,7 +2,7 @@
 -- supabase/migrations/20261105220101_studio_sessions.sql).
 -- Run with `supabase test db`, or psql on the pre-prod (rolled back).
 begin;
-select plan(16);
+select plan(19);
 
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
 declare v_id uuid := gen_random_uuid();
@@ -74,6 +74,18 @@ update public.master_sessions set report_notes = 'Deux prises voix gardées.', s
 select ok((select reported_at is not null and reported_by = pg_temp.id_of('manager_person')
              from public.master_sessions where id = pg_temp.id_of('session')),
           'the report says who wrote it and when');
+select lives_ok(format($$ update public.master_sessions set report_takeaways = 'Refrain validé',
+    report_next_step = 'Éditer les voix avant le 10' where id = %L $$, pg_temp.id_of('session')),
+  'the report takes its two short marks');
+select throws_ok(format($$ update public.master_sessions set report_takeaways = '   ' where id = %L $$,
+    pg_temp.id_of('session')),
+  '23514', null, 'a blank mark is refused: none is null');
+update public.master_sessions set report_notes = null where id = pg_temp.id_of('session');
+select ok((select reported_at is null and reported_by is null
+             from public.master_sessions where id = pg_temp.id_of('session')),
+          'without its summary, the report is not written');
+update public.master_sessions set report_notes = 'Deux prises voix gardées.'
+ where id = pg_temp.id_of('session');
 
 -- 3. Detaching the last title of a session anchored on an artist keeps it.
 insert into ids select 'demo', public.create_master(pg_temp.id_of('org'), 'Sans titre 1',

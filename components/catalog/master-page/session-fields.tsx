@@ -22,7 +22,6 @@ const isSessionKind = (value: string | undefined): value is SessionKind =>
 type Saved = Pick<
   MasterSession,
   | "kind"
-  | "status"
   | "date"
   | "startsAt"
   | "endsAt"
@@ -32,34 +31,36 @@ type Saved = Pick<
   | "notes"
 >;
 
-/**
- * The fields of a session (type, status, date and times, studio, engineer,
- * notes): the title's form (SessionForm) and the Sessions studio form share
- * them. `masterId` null: a session without a title (the engineers proposed
- * come from the Réseau only).
- */
-export function SessionFields({
-  masterId,
-  session,
-  defaultKind,
-  defaultStatus,
-  value,
-  error,
-}: {
-  masterId: string | null;
-  session: Saved | null;
-  // The kind proposed by PO, over the saved one.
-  defaultKind?: string;
-  // A new session: held already (told from a title) or planned (Sessions studio).
-  defaultStatus: "planned" | "done";
+type FormReaders = {
   value: (name: string, saved: string | number | null | undefined) => string;
   error: (name: string) => string | undefined;
-}) {
-  const t = fr.masterPage.sessions;
-  // The engineer proposed follows the kind of session (credit of that work).
-  const [kind, setKind] = useState<SessionKind>(
+};
+
+/** The session's kind, followed by the engineer proposed for it. */
+export function useSessionKind(
+  session: Pick<Saved, "kind"> | null,
+  defaultKind?: string,
+) {
+  return useState<SessionKind>(
     isSessionKind(defaultKind) ? defaultKind : (session?.kind ?? "recording"),
   );
+}
+
+/**
+ * « La séance »: its kind, date, hours and place. Never its state: it is
+ * computed from these and from its report (lib/sessions/state.ts, Ibé,
+ * 06/11/2026).
+ */
+export function SessionWhenFields({
+  session,
+  onKind,
+  value,
+  error,
+}: FormReaders & {
+  session: Saved | null;
+  onKind: (kind: SessionKind) => void;
+}) {
+  const t = fr.masterPage.sessions;
   return (
     <>
       <OptionSelect
@@ -68,15 +69,8 @@ export function SessionFields({
         required
         items={t.kinds}
         defaultValue={value("kind", session?.kind ?? "recording")}
-        onValueChange={(next) => isSessionKind(next) && setKind(next)}
+        onValueChange={(next) => isSessionKind(next) && onKind(next)}
         error={error("kind")}
-      />
-      <OptionSelect
-        name="status"
-        label={t.fields2.status}
-        items={t.statuses}
-        defaultValue={value("status", session?.status ?? defaultStatus)}
-        error={error("status")}
       />
       <Field
         name="date"
@@ -109,6 +103,62 @@ export function SessionFields({
         defaultValue={value("studio", session?.studio)}
         error={error("studio")}
       />
+    </>
+  );
+}
+
+/** The session's notes; `label`: « Notes de préparation » in Sessions studio. */
+export function SessionNotesField({
+  session,
+  label,
+  placeholder,
+  value,
+  error,
+}: FormReaders & {
+  session: Pick<Saved, "notes"> | null;
+  label?: string;
+  placeholder?: string;
+}) {
+  return (
+    <TextareaField
+      name="notes"
+      label={label ?? fr.masterPage.sessions.fields.notes}
+      rows={3}
+      maxLength={2000}
+      placeholder={placeholder}
+      defaultValue={value("notes", session?.notes)}
+      error={error("notes")}
+    />
+  );
+}
+
+/**
+ * Every field of a session in one column, for the title's form
+ * (SessionForm); the Sessions studio form spreads the same pieces over its
+ * three parts. `masterId` null: the engineers proposed come from the Réseau
+ * only.
+ */
+export function SessionFields({
+  masterId,
+  session,
+  defaultKind,
+  value,
+  error,
+}: FormReaders & {
+  masterId: string | null;
+  session: Saved | null;
+  // The kind proposed by PO, over the saved one.
+  defaultKind?: string;
+}) {
+  const [kind, setKind] = useSessionKind(session, defaultKind);
+  return (
+    <>
+      <SessionWhenFields
+        session={session}
+        onKind={setKind}
+        value={value}
+        error={error}
+      />
       <SessionEngineerField
         masterId={masterId}
         kind={kind}
@@ -116,14 +166,7 @@ export function SessionFields({
         defaultRef={value("engineerRef", session?.engineerContactId) || null}
         error={error("engineer")}
       />
-      <TextareaField
-        name="notes"
-        label={t.fields.notes}
-        rows={3}
-        maxLength={2000}
-        defaultValue={value("notes", session?.notes)}
-        error={error("notes")}
-      />
+      <SessionNotesField session={session} value={value} error={error} />
     </>
   );
 }

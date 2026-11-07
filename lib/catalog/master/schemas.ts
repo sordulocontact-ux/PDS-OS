@@ -6,7 +6,6 @@ import {
   MASTER_ITEM_SECTIONS,
   ORGANISMS,
   SESSION_KINDS,
-  SESSION_STATUSES,
   SPLIT_KINDS,
   SPLIT_ROLES,
   roleFitsKind,
@@ -70,7 +69,6 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 // studio form (lib/sessions/schemas.ts).
 export const sessionFieldsShape = {
   kind: z.enum(SESSION_KINDS, { error: e.required }),
-  status: z.enum(SESSION_STATUSES).optional().default("done"),
   date: optionalDate,
   startsAt: optionalTime,
   endsAt: optionalTime,

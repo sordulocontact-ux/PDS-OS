@@ -74,10 +74,7 @@ export async function loadAttachableTitles(
   return Object.fromEntries(
     (titles.data ?? [])
       .filter((m) => !taken.has(m.id))
-      .map((m) => [
-        m.id,
-        m.demo_status ? `${m.title} (${fr.demos.tab})` : m.title,
-      ]),
+      .map((m) => [m.id, m.demo_status ? fr.demos.inList(m.title) : m.title]),
   );
 }
 

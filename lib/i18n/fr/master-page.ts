@@ -148,7 +148,7 @@ export const masterPage = {
   sessions: {
     title: "Sessions",
     description:
-      "Enregistrement, production, mixage, mastering : où et avec qui le titre a été fait.",
+      "Composition, enregistrement, mixage, mastering : où et avec qui le titre a été fait.",
     add: "Ajouter une session",
     emptyTitle: "Aucune session",
     emptyBody:
@@ -156,9 +156,10 @@ export const masterPage = {
     emptyBodyReadOnly: "Les sessions du titre apparaîtront ici.",
     undated: "Date à préciser",
     noStudio: "Lieu non renseigné",
+    // Ibé, 06/11/2026: « Composition » rather than « Production », first.
     kinds: {
+      production: "Composition",
       recording: "Enregistrement",
-      production: "Production",
       mixing: "Mixage",
       mastering: "Mastering",
       other: "Autre",
@@ -170,6 +171,8 @@ export const masterPage = {
       engineer: "Ingénieur du son",
       notes: "Notes",
     },
+    engineerHint:
+      "Choisissez quelqu'un du Réseau, ou gardez seulement le nom tapé.",
     engineerSuggested: (name: string) =>
       `${name} est proposé d'après les crédits du titre ou le Brief Mix/Master.`,
     addTitle: "Nouvelle session",
@@ -178,14 +181,9 @@ export const masterPage = {
     confirmTitle: "Supprimer cette session ?",
     confirmBody: (name: string) =>
       `« ${name} » sera supprimée. Ses fichiers de travail restent, sans session.`,
-    // Retours 27 à 35: one session, several titles.
-    statuses: {
-      planned: "Prévue",
-      done: "Réalisée",
-      cancelled: "Annulée",
-    },
+    // Retours 27 à 35: one session, several titles. Its state is computed
+    // (lib/sessions/state.ts, texts in sessions.states).
     fields2: {
-      status: "Statut",
       startsAt: "Début",
       endsAt: "Fin",
     },

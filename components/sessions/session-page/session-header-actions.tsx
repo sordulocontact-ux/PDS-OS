@@ -4,18 +4,26 @@ import { IconTrash } from "nucleo-sharp-essential";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
+import { IconBan, IconRefresh } from "@/components/icons";
 import { SessionFormButton } from "@/components/sessions/session-form-button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { RowActions } from "@/components/ui/row-actions";
 import { toast } from "@/components/ui/toast";
 import { masterPage } from "@/lib/i18n/fr/master-page";
 import { sessions } from "@/lib/i18n/fr/sessions";
-import { deleteStudioSession } from "@/lib/sessions/actions";
+import {
+  deleteStudioSession,
+  setSessionCancelled,
+} from "@/lib/sessions/actions";
 import type { StudioSession } from "@/lib/sessions/types";
 
 const fr = { masterPage, sessions };
 
-/** « Modifier » and « ⋯ » › « Supprimer la session », in the page's head. */
+/**
+ * « Modifier » and « ⋯ » in the page's head: « Annuler la séance » (the only
+ * state anyone sets, after a confirmation) or « Rétablir la séance », and
+ * « Supprimer la session ».
+ */
 export function SessionHeaderActions({
   session,
   afterDeleteHref,
@@ -26,40 +34,77 @@ export function SessionHeaderActions({
 }) {
   const t = fr.sessions;
   const router = useRouter();
-  const [deleting, setDeleting] = useState(false);
+  const [confirming, setConfirming] = useState<"cancel" | "delete" | null>(
+    null,
+  );
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const cancelled = session.state === "cancelled";
+
+  const restore = () =>
+    startTransition(async () => {
+      const result = await setSessionCancelled(session.id, false);
+      if (result.ok) toast.success(t.page.restored);
+      else toast.error(result.error);
+    });
+
   return (
     <div className="flex flex-wrap gap-2">
-      <SessionFormButton session={session} />
+      {!cancelled && <SessionFormButton session={session} />}
       <RowActions
         size="icon-lg"
         label={t.page.menu}
         actions={[
+          cancelled
+            ? {
+                key: "restore",
+                label: t.page.restore,
+                icon: IconRefresh,
+                onSelect: restore,
+              }
+            : {
+                key: "cancel",
+                label: t.page.cancel,
+                icon: IconBan,
+                onSelect: () => setConfirming("cancel"),
+              },
           {
             key: "delete",
             label: t.delete.label,
             icon: IconTrash,
-            onSelect: () => setDeleting(true),
+            onSelect: () => setConfirming("delete"),
           },
         ]}
       />
       <ConfirmDialog
-        open={deleting}
+        open={confirming !== null}
         onOpenChange={(open) => {
-          setDeleting(open);
-          if (!open) setError(null);
+          if (!open) {
+            setConfirming(null);
+            setError(null);
+          }
         }}
-        title={t.delete.title}
-        description={t.delete.body}
-        cancelLabel={fr.masterPage.form.cancel}
+        title={confirming === "cancel" ? t.page.cancelTitle : t.delete.title}
+        description={
+          confirming === "cancel" ? t.page.cancelBody : t.delete.body
+        }
+        cancelLabel={
+          confirming === "cancel" ? t.page.keep : fr.masterPage.form.cancel
+        }
         closeLabel={t.page.close}
-        confirmLabel={t.delete.label}
-        destructive
+        confirmLabel={confirming === "cancel" ? t.page.cancel : t.delete.label}
+        destructive={confirming === "delete"}
         pending={pending}
         error={error}
         onConfirm={() =>
           startTransition(async () => {
+            if (confirming === "cancel") {
+              const result = await setSessionCancelled(session.id, true);
+              if (!result.ok) return setError(result.error);
+              toast.success(t.page.cancelled);
+              setConfirming(null);
+              return;
+            }
             const result = await deleteStudioSession(session.id);
             if (!result.ok) return setError(result.error);
             toast.success(t.delete.done);

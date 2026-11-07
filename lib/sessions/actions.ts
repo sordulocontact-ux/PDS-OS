@@ -36,9 +36,10 @@ export async function saveStudioSession(
   const parsed = await parseSessionForm(studioSessionSchema, formData);
   if (!parsed.ok) return parsed.state;
   const { organizationId, data } = parsed;
+  // Never its state: computed (lib/sessions/state.ts); « Annuler la séance »
+  // alone stores one.
   const row = {
     kind: data.kind,
-    status: data.status,
     session_date: data.date,
     starts_at: data.startsAt,
     ends_at: data.endsAt,
@@ -58,11 +59,24 @@ export async function saveStudioSession(
   } else {
     const { data: created, error } = await supabase
       .from("master_sessions")
-      .insert({ ...row, organization_id: organizationId })
+      .insert({ ...row, status: "planned", organization_id: organizationId })
       .select("id")
       .single();
     if (error) return failedState("saveStudioSession", formData, error);
     sessionId = created.id;
+    if (data.titleIds.length) {
+      const { error: titlesError } = await supabase
+        .from("master_session_titles")
+        .insert(
+          data.titleIds.map((masterId) => ({
+            session_id: sessionId!,
+            master_id: masterId,
+            organization_id: organizationId,
+          })),
+        );
+      if (titlesError)
+        return failedState("saveStudioSession", formData, titlesError);
+    }
   }
   const linkError =
     (await syncLinks(
@@ -93,7 +107,8 @@ export async function saveStudioSession(
   return { status: "saved" };
 }
 
-/** « Rédiger le compte rendu »: who was there and what to remember. */
+/** « Rédiger le compte rendu »: what happened, what to remember, what comes
+ * next, and who was there. Written, the session is Terminée. */
 export async function saveSessionReport(
   _previous: MasterFormState,
   formData: FormData,
@@ -105,7 +120,12 @@ export async function saveSessionReport(
   // Reported: the session took place (a planned one is marked held).
   const { error } = await supabase
     .from("master_sessions")
-    .update({ report_notes: data.reportNotes, status: "done" })
+    .update({
+      report_notes: data.reportNotes,
+      report_takeaways: data.reportTakeaways,
+      report_next_step: data.reportNextStep,
+      status: "done",
+    })
     .eq("id", data.sessionId)
     .neq("status", "cancelled");
   if (error) return failedState("saveSessionReport", formData, error);
@@ -199,6 +219,24 @@ export async function detachSessionTitle(
     .eq("master_id", masterId)
     .select("session_id");
   if (error || !data?.length) return failure("detachSessionTitle", error);
+  refreshSessions(sessionId);
+  return { ok: true };
+}
+
+/** « Annuler la séance » / « Rétablir la séance »: the only state stored. */
+export async function setSessionCancelled(
+  sessionId: string,
+  cancelled: boolean,
+): Promise<WriteResult> {
+  const refused = await guard(sessionId);
+  if (refused) return refused;
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("master_sessions")
+    .update({ status: cancelled ? "cancelled" : "planned" })
+    .eq("id", sessionId)
+    .select("id");
+  if (error || !data?.length) return failure("setSessionCancelled", error);
   refreshSessions(sessionId);
   return { ok: true };
 }

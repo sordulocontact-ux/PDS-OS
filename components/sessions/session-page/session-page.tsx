@@ -17,15 +17,14 @@ import { FactList } from "@/components/ui/fact-list";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { can, type Access } from "@/lib/auth/access";
 import { routes } from "@/lib/auth/redirects";
-import { masterPage } from "@/lib/i18n/fr/master-page";
 import { sessions } from "@/lib/i18n/fr/sessions";
 import { shell } from "@/lib/i18n/fr/shell";
 import { sessionsHref, type SessionDoor } from "@/lib/sessions/door";
 import type { SessionRef, StudioSession } from "@/lib/sessions/types";
-import { sessionStatusTone } from "@/lib/ui/state-tones";
+import { sessionStateTone } from "@/lib/ui/state-tones";
 import { formatDay } from "@/lib/utils/day";
 
-const fr = { masterPage, sessions, shell };
+const fr = { sessions, shell };
 
 const linkClass = "underline-offset-4 hover:underline";
 
@@ -52,8 +51,11 @@ function Refs({
  * One studio session's page, whichever door opened it (lib/sessions/door.ts):
  * inside a project, under its header and trail « Sessions studio / name »;
  * elsewhere, on its own, with the way back to where it was opened from
- * (`backLabel`). Its report first (the gesture of its responsible), the
- * maquettes and titles worked on, the rushes' links, then its facts.
+ * (`backLabel`). Its state is computed (lib/sessions/state.ts). Before the
+ * séance: its preparation first, then the titles and the files; the report
+ * only opens once it starts (Ibé, 06/11/2026). After: the report first (the
+ * gesture of its responsible, then the sheet everyone reads), the titles,
+ * the files, then its facts.
  */
 export function SessionPageView({
   session,
@@ -77,58 +79,76 @@ export function SessionPageView({
     .filter(Boolean)
     .join(" · ");
   const status = {
-    label: fr.masterPage.sessions.statuses[session.status],
-    tone: sessionStatusTone[session.status],
+    label: t.states[session.state],
+    tone: sessionStateTone[session.state],
   };
+  const before = session.state === "planned" || session.state === "cancelled";
   const actions = canEdit ? (
     <SessionHeaderActions session={session} afterDeleteHref={back} />
   ) : null;
 
+  const facts = (
+    <FactList
+      emptyLabel={t.page.none}
+      facts={[
+        {
+          label: t.page.facts.artists,
+          value: <Refs refs={session.artists} href={routes.artist} />,
+        },
+        {
+          label: t.page.facts.projects,
+          value: <Refs refs={session.projects} href={routes.project} />,
+        },
+        { label: t.page.facts.studio, value: session.studio },
+        { label: t.page.facts.engineer, value: session.engineer },
+        {
+          label: t.page.facts.participants,
+          value: session.attendees.map((a) => a.name).join(", ") || null,
+        },
+        {
+          label: t.page.facts.responsible,
+          value: session.responsible
+            ? `${session.responsible.name} (${
+                session.responsible.why === "owner"
+                  ? t.report.responsibleOwner
+                  : t.report.responsibleCreator
+              })`
+            : null,
+        },
+        { label: t.page.facts.notes, value: session.notes },
+      ]}
+    />
+  );
+
   const body = (
     <div className="flex flex-col gap-[var(--section-gap)]">
-      <ReportSection
-        session={session}
-        viewerPersonId={access.personId}
-        canEdit={canEdit}
-      />
+      {before ? (
+        <PageSection
+          card
+          id="preparation"
+          title={t.page.prepTitle}
+          description={t.page.prepDescription}
+        >
+          {facts}
+        </PageSection>
+      ) : (
+        <ReportSection
+          session={session}
+          viewerPersonId={access.personId}
+          canEdit={canEdit}
+        />
+      )}
       <TitlesSection session={session} canEdit={canEdit} />
       <LinksSection
         sessionId={session.id}
         links={session.links}
         canEdit={canEdit}
       />
-      <PageSection card id="informations" title={t.page.infoTitle}>
-        <FactList
-          emptyLabel={t.page.none}
-          facts={[
-            {
-              label: t.page.facts.artists,
-              value: <Refs refs={session.artists} href={routes.artist} />,
-            },
-            {
-              label: t.page.facts.projects,
-              value: <Refs refs={session.projects} href={routes.project} />,
-            },
-            { label: t.page.facts.studio, value: session.studio },
-            { label: t.page.facts.engineer, value: session.engineer },
-            {
-              label: t.page.facts.participants,
-              value: session.attendees.map((a) => a.name).join(", ") || null,
-            },
-            {
-              label: t.page.facts.responsible,
-              value: session.responsible
-                ? `${session.responsible.name} (${
-                    session.responsible.why === "owner"
-                      ? t.report.responsibleOwner
-                      : t.report.responsibleCreator
-                  })`
-                : null,
-            },
-            { label: t.page.facts.notes, value: session.notes },
-          ]}
-        />
-      </PageSection>
+      {!before && (
+        <PageSection card id="informations" title={t.page.infoTitle}>
+          {facts}
+        </PageSection>
+      )}
     </div>
   );
 

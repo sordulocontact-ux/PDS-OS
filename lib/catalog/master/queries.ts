@@ -23,7 +23,9 @@ import {
 } from "@/lib/catalog/master/rules";
 import { FILE_BUCKETS, withDownloadName } from "@/lib/catalog/file-rules";
 import { catalogIdSchema } from "@/lib/catalog/schemas";
+import { timeInParis, todayInParis } from "@/lib/insights/dates";
 import { personName } from "@/lib/projects/types";
+import { sessionStateOf } from "@/lib/sessions/state";
 import { createClient } from "@/lib/supabase/server";
 
 // Sections of the master page, read with the user's session: RLS decides
@@ -80,7 +82,7 @@ export async function listMasterSessions(masterId: string): Promise<{
     supabase
       .from("master_session_titles")
       .select(
-        "session_id, master_sessions!inner(id, kind, session_date, studio, engineer, engineer_contact_id, notes, status, starts_at, ends_at, created_at)",
+        "session_id, master_sessions!inner(id, kind, session_date, studio, engineer, engineer_contact_id, notes, status, starts_at, ends_at, report_notes, created_at)",
       )
       .eq("master_id", masterId),
     supabase
@@ -112,20 +114,36 @@ export async function listMasterSessions(masterId: string): Promise<{
       (a.session_date ?? "9999").localeCompare(b.session_date ?? "9999") ||
       a.created_at.localeCompare(b.created_at),
   );
+  const now = { today: todayInParis(), time: timeInParis() };
   return {
-    sessions: sorted.map((row) => ({
-      id: row.id,
-      kind: oneOf(SESSION_KINDS, row.kind, "other"),
-      date: row.session_date,
-      studio: row.studio,
-      engineer: row.engineer,
-      notes: row.notes,
-      status: oneOf(SESSION_STATUSES, row.status, "done"),
-      startsAt: row.starts_at?.slice(0, 5) ?? null,
-      endsAt: row.ends_at?.slice(0, 5) ?? null,
-      engineerContactId: row.engineer_contact_id,
-      titles: titlesOf(row.id),
-    })),
+    sessions: sorted.map((row) => {
+      const status = oneOf(SESSION_STATUSES, row.status, "done");
+      const startsAt = row.starts_at?.slice(0, 5) ?? null;
+      const endsAt = row.ends_at?.slice(0, 5) ?? null;
+      return {
+        id: row.id,
+        kind: oneOf(SESSION_KINDS, row.kind, "other"),
+        date: row.session_date,
+        studio: row.studio,
+        engineer: row.engineer,
+        notes: row.notes,
+        status,
+        state: sessionStateOf(
+          {
+            status,
+            date: row.session_date,
+            startsAt,
+            endsAt,
+            reported: !!row.report_notes,
+          },
+          now,
+        ),
+        startsAt,
+        endsAt,
+        engineerContactId: row.engineer_contact_id,
+        titles: titlesOf(row.id),
+      };
+    }),
     tracks: (tracks.data ?? []).map((row) => ({
       id: row.id,
       name: row.name,

@@ -33,7 +33,6 @@ export function SessionForm({
           masterId={masterId}
           session={session}
           defaultKind={defaults?.kind}
-          defaultStatus="done"
           value={value}
           error={error}
         />

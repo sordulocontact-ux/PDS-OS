@@ -5,20 +5,20 @@ import { SessionFormButton } from "@/components/sessions/session-form-button";
 import { SessionsList } from "@/components/sessions/sessions-list";
 import { EmptyState } from "@/components/shell/empty-state";
 import { DataTableViews } from "@/components/ui/data-table";
-import { todayInParis } from "@/lib/insights/dates";
 import { sessions } from "@/lib/i18n/fr/sessions";
 import {
   inSessionView,
   SESSION_VIEWS,
   type SessionView,
-  type StudioSessionRow,
-} from "@/lib/sessions/types";
+} from "@/lib/sessions/state";
+import type { StudioSessionRow } from "@/lib/sessions/types";
 import { viewHref } from "@/lib/ui/view-href";
 
 const fr = { sessions };
 
 /**
- * A list of sessions with its tabs (À venir, Passées, Toutes, in the URL),
+ * A list of sessions with its tabs (À venir, À compléter, Terminées, Toutes,
+ * in the URL; Ibé, 06/11/2026),
  * its search and its empty states: the menu's page, an artist's tab, a
  * project's section. `scope`: the artist or project it is opened from (its
  * column hidden, « Nouvelle session » with it already chosen).
@@ -40,8 +40,9 @@ export function SessionsView({
 }) {
   const t = fr.sessions;
   if (error) return <FormMessage kind="error">{t.loadError}</FormMessage>;
-  const today = todayInParis();
-  const visible = rows.filter((s) => inSessionView(s, view, today));
+  // The list comes latest first; what is ahead reads soonest first.
+  const inView = rows.filter((s) => inSessionView(s.state, view));
+  const visible = view === "upcoming" ? inView.toReversed() : inView;
   const create = canCreate ? (
     <SessionFormButton
       size={scope ? "sm" : "lg"}
@@ -80,14 +81,20 @@ export function SessionsView({
       views={SESSION_VIEWS.map((value) => ({
         href: viewHref(path, { vue: value === "upcoming" ? null : value }),
         label: t.views[value],
-        count: rows.filter((s) => inSessionView(s, value, today)).length,
+        count: rows.filter((s) => inSessionView(s.state, value)).length,
         current: view === value,
       }))}
     >
       {visible.length === 0 ? (
         <EmptyState
           icon={IconSliders}
-          title={view === "past" ? t.empty.past : t.empty.upcoming}
+          title={
+            view === "toReport"
+              ? t.empty.toReport
+              : view === "done"
+                ? t.empty.done
+                : t.empty.upcoming
+          }
           body={t.empty.viewBody}
         />
       ) : (

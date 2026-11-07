@@ -6,7 +6,6 @@ import { useState } from "react";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { AttendeeChips } from "@/components/calls/prep/attendee-chips";
 import { MasterForm } from "@/components/catalog/master-page/master-form";
-import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { LoadedFormButton } from "@/components/ui/loaded-form-button";
 import { Timestamp } from "@/components/ui/timestamp";
@@ -21,12 +20,25 @@ import type { StudioSession } from "@/lib/sessions/types";
 
 const fr = { sessions };
 const muted = "text-sm text-[color:var(--text-secondary)]";
+const label = "text-sm font-medium text-[color:var(--text-secondary)]";
+
+/** One part of a written report, under its small heading. */
+function Part({ title, text }: { title: string; text: string }) {
+  return (
+    <div className="flex min-w-0 flex-col gap-1">
+      <span className={label}>{title}</span>
+      <p className="break-words whitespace-pre-line">{text}</p>
+    </div>
+  );
+}
 
 /**
- * « Compte rendu » (Ibé, 01/11/2026): who was there, the maquettes made (the
- * section below) and what to remember. Written after the session by its
- * responsible (the project manager, else whoever created it): for them, the
- * gesture comes first (« À vous »), as in every step (docs/VISION-UX.md § 4).
+ * « Compte rendu » (Ibé, 01 and 06/11/2026): a free summary, then two short
+ * marks, « À retenir » and « Prochaine étape », and who was there (the
+ * maquettes made are the section below). It opens once the séance starts;
+ * its responsible (the project manager, else whoever created it) writes it,
+ * their gesture first (docs/VISION-UX.md § 4). Written, the session is
+ * Terminée and this is the sheet everyone reads.
  */
 export function ReportSection({
   session,
@@ -39,6 +51,7 @@ export function ReportSection({
 }) {
   const t = fr.sessions.report;
   const mine = session.responsible?.personId === viewerPersonId;
+  const done = session.state === "done";
   const write = (primary: boolean) =>
     canEdit && (
       <LoadedFormButton
@@ -63,19 +76,27 @@ export function ReportSection({
       id="compte-rendu"
       title={t.title}
       description={t.description}
-      action={session.report === "done" ? write(false) : null}
+      action={done ? write(false) : null}
     >
-      {session.report === "done" ? (
-        <div className="flex flex-col gap-4">
+      {done ? (
+        <div className="flex flex-col gap-5">
           <p className="break-words whitespace-pre-line">
             {session.reportNotes}
           </p>
-          <div className="flex flex-col gap-1">
-            <span className={muted}>{t.present}</span>
-            <span>
-              {session.attendees.map((a) => a.name).join(", ") || t.nobody}
-            </span>
-          </div>
+          {(session.reportTakeaways || session.reportNextStep) && (
+            <div className="grid gap-5 sm:grid-cols-2">
+              {session.reportTakeaways && (
+                <Part title={t.takeaways} text={session.reportTakeaways} />
+              )}
+              {session.reportNextStep && (
+                <Part title={t.nextStep} text={session.reportNextStep} />
+              )}
+            </div>
+          )}
+          <Part
+            title={t.present}
+            text={session.attendees.map((a) => a.name).join(", ") || t.nobody}
+          />
           {session.reportedBy && session.reportedAt && (
             <p className={muted}>
               {t.signed(session.reportedBy)} ·{" "}
@@ -83,11 +104,11 @@ export function ReportSection({
             </p>
           )}
         </div>
-      ) : session.report === "todo" ? (
+      ) : (
         <div className="flex flex-col items-start gap-3">
           {mine ? (
             <>
-              <p>{t.why}</p>
+              <p>{session.state === "ongoing" ? t.ongoing : t.why}</p>
               {write(true)}
             </>
           ) : (
@@ -101,10 +122,6 @@ export function ReportSection({
             </>
           )}
         </div>
-      ) : (
-        <EmptyNote>
-          {session.report === "cancelled" ? t.cancelled : t.notYet}
-        </EmptyNote>
       )}
     </PageSection>
   );
@@ -133,14 +150,6 @@ function ReportForm({
     >
       {({ value, error }) => (
         <>
-          <AttendeeChips
-            id="report-attendees"
-            pool={data.people}
-            value={people}
-            onChange={setPeople}
-            hint={t.presentHint}
-            hiddenNames
-          />
           <TextareaField
             name="reportNotes"
             label={t.notes}
@@ -150,6 +159,34 @@ function ReportForm({
             placeholder={t.notesPlaceholder}
             defaultValue={value("reportNotes", session.reportNotes)}
             error={error("reportNotes")}
+          />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <TextareaField
+              name="reportTakeaways"
+              label={t.takeaways}
+              rows={3}
+              maxLength={2000}
+              placeholder={t.takeawaysPlaceholder}
+              defaultValue={value("reportTakeaways", session.reportTakeaways)}
+              error={error("reportTakeaways")}
+            />
+            <TextareaField
+              name="reportNextStep"
+              label={t.nextStep}
+              rows={3}
+              maxLength={2000}
+              placeholder={t.nextStepPlaceholder}
+              defaultValue={value("reportNextStep", session.reportNextStep)}
+              error={error("reportNextStep")}
+            />
+          </div>
+          <AttendeeChips
+            id="report-attendees"
+            pool={data.people}
+            value={people}
+            onChange={setPeople}
+            hint={t.presentHint}
+            hiddenNames
           />
         </>
       )}

@@ -10822,7 +10822,9 @@ export type Database = {
           master_id: string | null
           notes: string | null
           organization_id: string
+          report_next_step: string | null
           report_notes: string | null
+          report_takeaways: string | null
           reported_at: string | null
           reported_by: string | null
           session_date: string | null
@@ -10842,7 +10844,9 @@ export type Database = {
           master_id?: string | null
           notes?: string | null
           organization_id: string
+          report_next_step?: string | null
           report_notes?: string | null
+          report_takeaways?: string | null
           reported_at?: string | null
           reported_by?: string | null
           session_date?: string | null
@@ -10862,7 +10866,9 @@ export type Database = {
           master_id?: string | null
           notes?: string | null
           organization_id?: string
+          report_next_step?: string | null
           report_notes?: string | null
+          report_takeaways?: string | null
           reported_at?: string | null
           reported_by?: string | null
           session_date?: string | null

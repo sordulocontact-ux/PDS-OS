@@ -1614,3 +1614,26 @@ Proto « Plan d'action de Néons » (artefact du 06/11, copie `~/Desktop/Protos 
       l'échéance dépassée. Démarche d'une personne terminée sans contrat dans le plan : « Fiche validée »,
       plus « Contrat signé ». Fiche publique : « Modifier mes rôles » en contour (règle des boutons secondaires,
       `docs/DESIGN.md`).
+
+## Sessions studio : refonte d'après Ibé (07/11/2026, branche `pre-prod`)
+
+Retour « Refonte du module Sessions studio » (Ibé, 06/11, maquettes de direction). Migration
+`20261107110101_session_report_parts.sql` (pré-prod ; **prod à pousser avec accord**), test
+`studio-sessions.test.sql` (19/19), `docs/ARCHITECTURE.md` § 2 sexies bis.
+
+- [x] État calculé, jamais saisi : Prévue, En cours, Compte rendu à compléter, Terminée (date,
+      horaires, compte rendu) ; Annulée par « ⋯ › Annuler la séance », rétablissable. Plus de champ
+      Statut, fiche titre comprise.
+- [x] Liste : onglets À venir (la plus proche d'abord) / À compléter / Terminées / Toutes ; colonnes
+      Date, Séance (ingénieur · durée), Artistes, Projets en secondaire, État (le compte rendu à
+      compléter ressort).
+- [x] Création en trois parties (La séance, Avec qui, Ce qu'on travaille) ; artistes obligatoires,
+      projet facultatif ; titres choisis dès la création, leur projet rattaché tout seul ; ouverte
+      depuis un projet, son artiste déjà choisi ; ingénieur du Réseau ou nom libre, dit sous le champ.
+- [x] « Production » devient « Composition », en tête des types.
+- [x] Compte rendu : résumé libre, « À retenir », « Prochaine étape », présents ; il s'ouvre au début de
+      la séance ; avant, la page commence par la Préparation. Terminée, la page est la fiche à lire.
+- Écarté volontairement : un bouton par ligne (Préparer / Compléter / Consulter : la ligne s'ouvre
+  déjà, l'état dit le geste), l'éditeur de texte riche, le brouillon distinct de la version finale,
+  une note par titre travaillé, la colonne de droite (elle écrasait les tableaux sur la fiche
+  artiste). Le dépôt de fichiers vers Drive attend la connexion Google de po@pdsrecords.com.

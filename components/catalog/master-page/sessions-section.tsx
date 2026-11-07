@@ -32,15 +32,16 @@ import { sessionLabel } from "@/lib/catalog/master/session-label";
 import { framing } from "@/lib/i18n/fr/framing";
 import { masterPage } from "@/lib/i18n/fr/master-page";
 import { records } from "@/lib/i18n/fr/records";
+import { sessions as sessionsText } from "@/lib/i18n/fr/sessions";
 import { formatShortDate } from "@/lib/release/format";
 import { sessionHref } from "@/lib/sessions/door";
-import { sessionStatusTone } from "@/lib/ui/state-tones";
+import { sessionStateTone } from "@/lib/ui/state-tones";
 
 import { AttachSessionButton } from "./attach-session-button";
 import { AddItemButton } from "./item-dialogs";
 import { SessionForm } from "./session-form";
 
-const fr = { framing, masterPage, records };
+const fr = { framing, masterPage, records, sessions: sessionsText };
 
 /**
  * Sessions of the title, by date (retours Catalogue 27 à 35): one session
@@ -106,7 +107,9 @@ export function SessionsSection({
         <DataTable framed>
           <DataTableHeader>
             <DataTableHead>{t.fields.kind}</DataTableHead>
-            <DataTableHead hideBelow="sm">{t.fields2.status}</DataTableHead>
+            <DataTableHead hideBelow="sm">
+              {fr.sessions.columns.state}
+            </DataTableHead>
             <DataTableHead hideBelow="md">{t.fields.studio}</DataTableHead>
             <DataTableHead hideBelow="lg" fill>
               {t.fields.engineer}
@@ -145,10 +148,10 @@ export function SessionsSection({
                   </DataTableCell>
                   <DataTableCell hideBelow="sm">
                     <StatusBadge
-                      tone={sessionStatusTone[session.status]}
+                      tone={sessionStateTone[session.state]}
                       size="sm"
                     >
-                      {t.statuses[session.status]}
+                      {fr.sessions.states[session.state]}
                     </StatusBadge>
                   </DataTableCell>
                   <DataTableCell hideBelow="md">

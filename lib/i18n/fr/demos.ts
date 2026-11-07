@@ -4,6 +4,8 @@
 export const demos = {
   title: "Maquettes",
   tab: "Maquettes",
+  // After a title's name in a choice list: « Nuit blanche (maquette) ».
+  inList: (title: string) => `${title} (maquette)`,
   subtitle:
     "Les morceaux en travail, pas encore décidés pour une sortie. Une maquette retenue passe au catalogue des masters, sans rien recréer.",
   newDemo: "Nouvelle maquette",

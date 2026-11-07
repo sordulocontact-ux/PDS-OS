@@ -441,13 +441,15 @@ Migration `…20261012101601_sessions_work_files`.
 Retours « Sessions studio accessibles depuis la barre de menu, jusqu'au master » et « Importer et
 stocker des fichiers rattachés aux sessions, artistes et projets », réponses d'Ibé du 05/11/2026.
 Migration `20261105220101_studio_sessions.sql`, test `supabase/tests/studio-sessions.test.sql`.
+Refonte du 07/11 (retour d'Ibé « Refonte du module Sessions studio », 06/11) : migration
+`20261107110101_session_report_parts.sql`.
 
 - **Une session sans titre.** `master_sessions.master_id` (le titre d'origine) devient facultatif ;
   une session est liée à des artistes (`master_session_artists`), des projets
   (`master_session_projects`, dans `project_live`, cascade à la suppression du projet) et des
   titres (`master_session_titles`, existant). Une seule ligne vue de partout : page
   `/app/sessions/[id]`, entrée « Sessions studio » du menu (`/app/sessions`, onglets À venir /
-  Passées / Toutes en `?vue=`), onglet « Sessions » de l'artiste, section « Sessions studio » du
+  À compléter / Terminées / Toutes en `?vue=`, « À venir » la plus proche d'abord), onglet « Sessions » de l'artiste, section « Sessions studio » du
   Pilotage d'un projet, bloc Sessions de l'onglet Audio d'un titre (lien vers la page). Une liste
   d'artiste ou de projet reprend aussi les sessions de **ses titres** (`sessionIdsOf`).
   **Portes** (`lib/sessions/door.ts`, comme `lib/calls/door.ts`, Sacha 06/11) : depuis un projet, la
@@ -465,13 +467,36 @@ Migration `20261105220101_studio_sessions.sql`, test `supabase/tests/studio-sess
   pas (comme le Catalogue).
 - **Participants** (`master_session_attendees`) : membres (`person_id`) et contacts du Réseau
   (`contact_id`), choisis avec `AttendeeChips` ; une adresse tapée n'est pas gardée.
-- **Compte rendu** : `report_notes` (« Informations importantes »), `reported_at` /
-  `reported_by` posés par trigger ; l'enregistrer marque la session Réalisée et confirme les
-  présents (les participants, pré-remplis). **Responsable calculé** (Ibé) : le chef de projet du
-  premier projet lié, sinon qui a créé la session ; il voit « À vous · Rédiger le compte rendu »
-  en tête de la page, les autres « À rédiger par … ». État du compte rendu calculé
-  (`reportStateOf` : Rédigé, À rédiger dès que la séance est passée ou réalisée, Après la séance,
-  Annulée), jamais stocké.
+- **État calculé, jamais saisi** (refonte du 07/11, `lib/sessions/state.ts`, `sessionStateOf`) :
+  Prévue avant le début, En cours pendant (toute la journée sans horaires), Compte rendu à
+  compléter une fois finie, Terminée dès que le compte rendu est écrit, d'après la date, les
+  horaires (heure de Paris, `timeInParis`) et `report_notes`. Seule « Annulée » est stockée
+  (`status = 'cancelled'`, « ⋯ › Annuler la séance » / « Rétablir la séance »,
+  `setSessionCancelled`) ; plus de champ Statut dans aucun formulaire (le bloc Sessions d'un titre
+  lit le même état). Une session sans date racontée depuis un titre (`status` 'done' par défaut)
+  attend son compte rendu, une session studio sans date reste Prévue.
+- **Création en trois parties** (`StudioSessionForm`, `FormSection plain`) : La séance (type, date,
+  horaires, lieu), Avec qui (**artistes obligatoires** : une séance peut précéder tout projet ;
+  ingénieur choisi dans le Réseau ou nom gardé tel quel ; participants), Ce qu'on travaille (titres
+  ou maquettes **à la création seulement**, ensuite depuis la page ; projets ; notes de
+  préparation). Ouverte depuis un projet, son artiste est déjà choisi (`projectArtists`). Le
+  **projet d'un titre vient tout seul** : les projets affichés d'une session = ceux qu'elle nomme
+  puis ceux de ses titres (`projectsOf`, `project_masters`), le formulaire ne modifie que les
+  premiers (`linkedProjectIds`). Type « Production » affiché « Composition » (valeur
+  `production` inchangée), en tête de la liste.
+- **Compte rendu** : un **résumé** libre (`report_notes`, obligatoire) et deux repères courts,
+  **À retenir** (`report_takeaways`) et **Prochaine étape** (`report_next_step`), 2 000 caractères
+  chacun ; `reported_at` / `reported_by` posés par trigger dès qu'une des trois parties change,
+  effacés sans résumé. L'enregistrer rend la session Terminée et confirme les présents (les
+  participants, pré-remplis). La section n'existe qu'à partir du début de la séance ; avant, la
+  page commence par sa **Préparation** (les faits et les notes), puis titres et fichiers. Terminée,
+  la page devient la fiche à lire : résumé, À retenir / Prochaine étape côte à côte, présents,
+  « Rédigé par … », puis titres, fichiers, informations. **Responsable calculé** (Ibé) : le chef de
+  projet du premier projet (nommé, sinon d'un titre), sinon qui a créé la session ; il voit le geste
+  en tête de la section, les autres « À rédiger par … ».
+- **Liste** : Date, Séance (type · lieu, ingénieur · durée), Artistes, Projets (en secondaire),
+  État (« Compte rendu à compléter » en ton action, peu de couleurs). Pas de bouton par ligne : la
+  ligne entière ouvre la session, l'état dit le geste.
 - **Rushs et gros fichiers : des liens** (`master_session_links`, https), décision d'Ibé du
   05/11 (coût du stockage vidéo) ; l'import direct depuis PO vers Google Drive reste à faire
   (connexion Google de po@pdsrecords.com).

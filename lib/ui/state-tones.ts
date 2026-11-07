@@ -389,10 +389,13 @@ export const engineerSignalTone: Record<string, Tone> = {
   handled: "success",
 };
 
-/** A studio session (retour Catalogue 28): planned, held, cancelled. */
-export const sessionStatusTone: Record<string, Tone> = {
+/** A studio session's computed state (lib/sessions/state.ts): few colours
+ * (Ibé, 06/11/2026), the report to write stands out. */
+export const sessionStateTone: Record<string, Tone> = {
   planned: "info",
-  done: "success",
+  ongoing: "info",
+  toReport: "action",
+  done: "neutral",
   cancelled: "neutral",
 };
 

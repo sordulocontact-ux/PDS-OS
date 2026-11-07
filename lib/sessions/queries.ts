@@ -8,13 +8,13 @@ import {
   SESSION_STATUSES,
   oneOf,
 } from "@/lib/catalog/master/rules";
-import { todayInParis } from "@/lib/insights/dates";
+import { timeInParis, todayInParis } from "@/lib/insights/dates";
 import { personName } from "@/lib/projects/types";
-import {
-  reportStateOf,
-  type SessionAttendee,
-  type StudioSession,
-  type StudioSessionRow,
+import { sessionStateOf, type ParisNow } from "@/lib/sessions/state";
+import type {
+  SessionAttendee,
+  StudioSession,
+  StudioSessionRow,
 } from "@/lib/sessions/types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -24,12 +24,21 @@ const ROW_SELECT = `id, kind, status, session_date, starts_at, ends_at, studio, 
   report_notes, created_by,
   artists:master_session_artists(artist:artists!master_session_artists_artist_same_org(id, name, archived_at)),
   projects:master_session_projects(linked_at, project:projects!master_session_projects_project_same_org(id, title, owner_person_id, archived_at)),
-  titles:master_session_titles(linked_at, master:masters!master_session_titles_master_same_org(id, title, demo_status, archived_at))`;
+  titles:master_session_titles(linked_at, master:masters!master_session_titles_master_same_org(id, title, demo_status, archived_at,
+    projects:project_masters!project_masters_master_same_org(project:projects!project_masters_project_same_org(id, title, owner_person_id, archived_at))))`;
 
-const DETAIL_SELECT = `${ROW_SELECT}, engineer_contact_id, notes, reported_at, reported_by,
+const DETAIL_SELECT = `${ROW_SELECT}, engineer_contact_id, notes, report_takeaways,
+  report_next_step, reported_at, reported_by,
   attendees:master_session_attendees(person_id, contact_id, created_at,
     contact:network_contacts!master_session_attendees_contact_same_org(name)),
   links:master_session_links(id, label, url, created_at)`;
+
+type RawProject = {
+  id: string;
+  title: string;
+  owner_person_id: string | null;
+  archived_at: string | null;
+};
 
 type RawRow = {
   id: string;
@@ -45,15 +54,7 @@ type RawRow = {
   artists: Array<{
     artist: { id: string; name: string; archived_at: string | null } | null;
   }>;
-  projects: Array<{
-    linked_at: string;
-    project: {
-      id: string;
-      title: string;
-      owner_person_id: string | null;
-      archived_at: string | null;
-    } | null;
-  }>;
+  projects: Array<{ linked_at: string; project: RawProject | null }>;
   titles: Array<{
     linked_at: string;
     master: {
@@ -61,9 +62,41 @@ type RawRow = {
       title: string;
       demo_status: string | null;
       archived_at: string | null;
+      projects: Array<{ project: RawProject | null }>;
     } | null;
   }>;
 };
+
+const byLink = (a: { linked_at: string }, b: { linked_at: string }) =>
+  a.linked_at.localeCompare(b.linked_at);
+
+/**
+ * The session's projects: those it names, then those of its titles (Ibé,
+ * 06/11/2026: a title chosen brings its project), each once, never an
+ * archived one; RLS leaves out the projects the viewer cannot see.
+ */
+function projectsOf(row: RawRow): RawProject[] {
+  const seen = new Set<string>();
+  return [
+    ...row.projects.toSorted(byLink).map((l) => l.project),
+    ...row.titles
+      .toSorted(byLink)
+      .flatMap((l) =>
+        l.master && !l.master.archived_at
+          ? l.master.projects.map((p) => p.project)
+          : [],
+      ),
+  ].filter((p): p is RawProject => {
+    if (!p || p.archived_at || seen.has(p.id)) return false;
+    seen.add(p.id);
+    return true;
+  });
+}
+
+const parisNow = (): ParisNow => ({
+  today: todayInParis(),
+  time: timeInParis(),
+});
 
 // "HH:MM:SS" from Postgres, "HH:MM" on screen.
 const hm = (value: string | null) => (value ? value.slice(0, 5) : null);
@@ -87,25 +120,30 @@ async function namesOf(
 
 function ownerOf(row: RawRow): string | null {
   return (
-    row.projects
-      .filter((l) => l.project && !l.project.archived_at)
-      .sort((a, b) => a.linked_at.localeCompare(b.linked_at))
-      .find((l) => l.project?.owner_person_id)?.project?.owner_person_id ?? null
+    projectsOf(row).find((p) => p.owner_person_id)?.owner_person_id ?? null
   );
 }
 
 function toRow(
   row: RawRow,
   names: Map<string, string>,
-  today: string,
+  now: ParisNow,
 ): StudioSessionRow {
-  const status = oneOf(SESSION_STATUSES, row.status, "done");
   const owner = ownerOf(row);
   const responsibleId = owner ?? row.created_by;
   return {
     id: row.id,
     kind: oneOf(SESSION_KINDS, row.kind, "other"),
-    status,
+    state: sessionStateOf(
+      {
+        status: oneOf(SESSION_STATUSES, row.status, "done"),
+        date: row.session_date,
+        startsAt: hm(row.starts_at),
+        endsAt: hm(row.ends_at),
+        reported: !!row.report_notes,
+      },
+      now,
+    ),
     date: row.session_date,
     startsAt: hm(row.starts_at),
     endsAt: hm(row.ends_at),
@@ -116,29 +154,17 @@ function toRow(
         ? [{ id: l.artist.id, name: l.artist.name }]
         : [],
     ),
-    projects: row.projects
-      .toSorted((a, b) => a.linked_at.localeCompare(b.linked_at))
-      .flatMap((l) =>
-        l.project && !l.project.archived_at
-          ? [{ id: l.project.id, name: l.project.title }]
-          : [],
-      ),
-    titles: row.titles
-      .toSorted((a, b) => a.linked_at.localeCompare(b.linked_at))
-      .flatMap((l) =>
-        l.master && !l.master.archived_at
-          ? [
-              {
-                id: l.master.id,
-                title: l.master.title,
-                demoStatus: demoStatusOf(l.master.demo_status),
-              },
-            ]
-          : [],
-      ),
-    report: reportStateOf(
-      { status, date: row.session_date, reported: !!row.report_notes },
-      today,
+    projects: projectsOf(row).map((p) => ({ id: p.id, name: p.title })),
+    titles: row.titles.toSorted(byLink).flatMap((l) =>
+      l.master && !l.master.archived_at
+        ? [
+            {
+              id: l.master.id,
+              title: l.master.title,
+              demoStatus: demoStatusOf(l.master.demo_status),
+            },
+          ]
+        : [],
     ),
     responsible: responsibleId
       ? {
@@ -228,13 +254,15 @@ export async function listStudioSessions(scope?: {
     supabase,
     rows.flatMap((r) => [ownerOf(r) ?? r.created_by]),
   );
-  const today = todayInParis();
-  return { sessions: rows.map((r) => toRow(r, names, today)), error: false };
+  const now = parisNow();
+  return { sessions: rows.map((r) => toRow(r, names, now)), error: false };
 }
 
 type RawDetail = RawRow & {
   engineer_contact_id: string | null;
   notes: string | null;
+  report_takeaways: string | null;
+  report_next_step: string | null;
   reported_at: string | null;
   reported_by: string | null;
   attendees: Array<{
@@ -281,7 +309,10 @@ export async function getStudioSession(
           : [],
     );
   return {
-    ...toRow(row, names, todayInParis()),
+    ...toRow(row, names, parisNow()),
+    linkedProjectIds: row.projects.flatMap((l) =>
+      l.project ? [l.project.id] : [],
+    ),
     engineerContactId: row.engineer_contact_id,
     notes: row.notes,
     attendees,
@@ -289,6 +320,8 @@ export async function getStudioSession(
       .toSorted((a, b) => a.created_at.localeCompare(b.created_at))
       .map(({ id, label, url }) => ({ id, label, url })),
     reportNotes: row.report_notes,
+    reportTakeaways: row.report_takeaways,
+    reportNextStep: row.report_next_step,
     reportedAt: row.reported_at,
     reportedBy: row.reported_by ? (names.get(row.reported_by) ?? null) : null,
   };

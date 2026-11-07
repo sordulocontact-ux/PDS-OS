@@ -7,7 +7,7 @@ import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { listStudioSessions } from "@/lib/sessions/queries";
-import { sessionViewOf } from "@/lib/sessions/types";
+import { sessionViewOf } from "@/lib/sessions/state";
 import { allInOrder } from "@/lib/utils/parallel";
 
 export const metadata = {
