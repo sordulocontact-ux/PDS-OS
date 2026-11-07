@@ -1690,5 +1690,11 @@ de retiré.
 - **Attentes en bleu** (patron du Master) : demande envoyée, conditions chez la direction, contrat qui
   attend sa validation. Boutons secondaires en contour.
 - `ClearanceDrawer` (plus utilisé) supprimé ; journal replié par `Fold`, sans ses listes vides.
+- **En mots simples** (Sacha : « je comprends rien sur la page ») : la phrase d'en-tête dit ce qui se
+  passe (le titre reprend un morceau d'une chanson existante, il faut l'accord écrit de ses ayants droit,
+  en trois temps) ; chaque temps dit « Temps n sur 3 · ensuite … » ; « Leur demander l'accord » devient
+  un mode d'emploi numéroté (`NumberedSteps`) : ce que vous reprenez (œuvre = mélodie et paroles,
+  enregistrement = son d'origine), à qui demander, le texte de la demande affiché à copier (PDS OS ne
+  l'envoie pas), puis « J'ai envoyé la demande ».
 - **Écart titre / phrase** porté à 10 px sur toute l'app (`TitleBlock`, aussi `PageHeader`,
   `PageSection`, `FormSection`, `PoQuestion`, `PoReading`), commit séparé.

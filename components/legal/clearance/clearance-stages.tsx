@@ -46,7 +46,11 @@ export function ClearanceStages({
   const moment = momentOf(clearance.status);
   if (!moment) return null;
   return (
-    <StepSection title={t[moment].title} className="gap-4">
+    <StepSection
+      title={t[moment].title}
+      description={t.rank[moment]}
+      className="gap-4"
+    >
       {moment === "ask" && (
         <AskMoment projectId={projectId} clearance={clearance} />
       )}

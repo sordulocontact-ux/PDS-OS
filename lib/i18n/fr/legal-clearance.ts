@@ -201,8 +201,14 @@ export const legalClearance = {
     },
   },
   stages: {
+    // Where the person stands in the three times, under each title.
+    rank: {
+      ask: "Temps 1 sur 3 · ensuite : s'accorder sur les conditions, puis faire signer la licence.",
+      negotiate: "Temps 2 sur 3 · ensuite : faire signer la licence.",
+      sign: "Temps 3 sur 3 · une fois la licence signée, le titre n'est plus bloqué.",
+    },
     ask: {
-      title: "Demander l'autorisation",
+      title: "Leur demander l'accord",
       sent: "J'ai envoyé la demande",
       sending: "Enregistrement…",
       note: "Ce qui est parti",
@@ -215,7 +221,7 @@ export const legalClearance = {
       none: "Rien à sécuriser : lever le blocage",
     },
     negotiate: {
-      title: "Négocier les conditions",
+      title: "S'accorder sur les conditions",
       reply: "Leur réponse",
       replyHint:
         "Collez leur e-mail ou leur message : PO en tire les conditions et les ayants droit, rien n'est appliqué sans vous.",
@@ -267,16 +273,30 @@ export const legalClearance = {
       abandoned: "Élément abandonné : il ne bloque plus la sortie.",
     },
     journal: "Journal de l'autorisation",
-    other: "Autre issue",
+    other: "Autres cas : rien à autoriser, élément retiré",
   },
   // The words of the panel's three moments, as in the prototype of
   // 07/10/2026 (lib/legal/clearance/flow-actions.ts).
   flow: {
-    // Two toggles, one per right (proto Juridique v3).
-    rightsToAsk: "Droits à demander",
+    // The request as a how-to in three numbered steps (Sacha, 07/11/2026:
+    // « je comprends rien sur la page »).
+    intro: (element: string, title: string | null) =>
+      title
+        ? `« ${title} » reprend : ${element.charAt(0).toLowerCase()}${element.slice(1)}.`
+        : `Ce qui est repris : ${element.charAt(0).toLowerCase()}${element.slice(1)}.`,
+    stepTaken: "Ce que vous reprenez",
+    stepHolders: "À qui demander",
+    stepSend: "Envoyez-leur la demande",
     rightChip: { work: "L'œuvre", master: "L'enregistrement" },
+    rightsExplained:
+      "L'œuvre, c'est la mélodie et les paroles. L'enregistrement, c'est le son d'origine, quand vous l'utilisez tel quel.",
     scopeMissing:
-      "Choisissez au moins un droit, ou « Rien à autoriser » dans « Autre issue ».",
+      "Choisissez ce que vous reprenez, ou « Rien à autoriser » dans les autres cas, en bas.",
+    sendHow:
+      "Depuis votre boîte mail, à leur service licences : PDS OS ne l'envoie pas à votre place.",
+    copyText: "Copier le texte",
+    sentAfter:
+      "Cliquez une fois la demande partie : la démarche attend alors leur réponse.",
     proposed: {
       sample:
         "Proposé parce que c'est un sample : il reprend en général la mélodie et le son. Corrigez si besoin.",
@@ -291,9 +311,9 @@ export const legalClearance = {
         `Qui détient l'enregistrement original de « ${work} » ?`,
     },
     holderWhere: {
-      work: "Son éditeur musical : il figure sur la fiche de l'œuvre dans le répertoire en ligne de la SACEM. Écrivez à son service licences.",
+      work: "Son éditeur musical : il figure sur la fiche de l'œuvre, dans le répertoire en ligne de la SACEM.",
       master:
-        "Le label ou le producteur du son original : il figure sur la mention ℗ de la sortie (pochette, plateformes). Écrivez à son service licences.",
+        "Le label ou le producteur du son d'origine : il figure sur la mention ℗ de la sortie (pochette, plateformes).",
     },
     holderMissing: "Choisissez à qui vous avez demandé.",
     holdersFallback: "les ayants droit",
@@ -305,9 +325,8 @@ export const legalClearance = {
     reasonLabel: "Pourquoi rien n'est à autoriser",
     nothingDone: "Rien à autoriser : démarche close",
     sent: "J'ai envoyé la demande",
-    copyRequest: "Copier un modèle de demande",
-    copied: "Modèle de demande copié",
-    copiedDetail: "L'élément, l'œuvre et le titre sont déjà remplis.",
+    copied: "Texte de la demande copié",
+    copiedDetail: "Collez-le dans votre e-mail.",
     requestTemplate: (element: string, work: string, title: string | null) =>
       `Bonjour,\n\nNous souhaitons utiliser ${element.toLowerCase()} de « ${work} »${
         title ? ` dans le titre « ${title} »` : ""

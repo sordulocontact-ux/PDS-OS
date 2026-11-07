@@ -2,19 +2,19 @@
 
 import { IconXmark } from "nucleo-sharp-essential";
 import { useRef, useState } from "react";
-import { toast } from "@/components/ui/toast";
 
 import { FieldError, FormMessage } from "@/components/auth/form-message";
 import { PersonPickerField } from "@/components/network/person-picker-field";
 import { usePickerLoad } from "@/components/network/use-picker-load";
 import { Button } from "@/components/ui/button";
-import { FactRows } from "@/components/ui/fact-row";
+import { CopyButton } from "@/components/ui/copy-button";
 import { FilterChip } from "@/components/ui/filter-chip";
+import { NumberedStep, NumberedSteps } from "@/components/ui/numbered-step";
 import { RequiredMark } from "@/components/ui/required-mark";
 import { legal } from "@/lib/i18n/fr/legal";
 import { legalClearance } from "@/lib/i18n/fr/legal-clearance";
 import { removeRightsholder } from "@/lib/legal/clearance/actions";
-import { usageOf } from "@/lib/legal/clearance/element";
+import { elementLine, usageOf } from "@/lib/legal/clearance/element";
 import { requestClearance } from "@/lib/legal/clearance/flow-actions";
 import {
   listClearanceHolders,
@@ -31,8 +31,6 @@ import type { Clearance } from "@/lib/legal/clearance/types";
 import type { NetworkRole } from "@/lib/network/types";
 
 import { useLegalAction } from "@/components/legal/use-legal-action";
-
-import { ElementRow } from "./clearance-request";
 
 const fr = { legal, legalClearance };
 
@@ -126,145 +124,162 @@ export function AskMoment({
     );
   }
 
-  async function copyRequest() {
-    const elements = fr.legal.intake.facts.elements as Record<string, string>;
-    const text = t.requestTemplate(
-      elements[clearance.element] ?? elements.other,
-      clearance.work,
-      clearance.title,
-    );
-    try {
-      await navigator.clipboard.writeText(text);
-      toast.success(t.copied, { description: t.copiedDetail });
-    } catch {
-      toast.error(fr.legalClearance.errors.failed);
-    }
-  }
-
+  const elements = fr.legal.intake.facts.elements as Record<string, string>;
+  const request = t.requestTemplate(
+    elements[clearance.element] ?? elements.other,
+    clearance.work,
+    clearance.title,
+  );
   const rightsId = `rights-${clearance.id}`;
   return (
-    <div ref={root} className="flex flex-col gap-5">
-      <FactRows>
-        <ElementRow clearance={clearance} />
-      </FactRows>
-
-      <div className="flex flex-col gap-2">
-        <span id={rightsId} className="text-sm leading-none font-medium">
-          {t.rightsToAsk}
-          <RequiredMark announce />
-        </span>
-        <div
-          role="group"
-          aria-labelledby={rightsId}
-          className="flex flex-wrap gap-2"
-        >
-          {RIGHT_KINDS.map((right) => (
-            <FilterChip
-              key={right}
-              pressed={asked[right]}
-              aria-invalid={tried && !scope ? true : undefined}
-              onClick={() => {
-                setAsked((all) => ({ ...all, [right]: !all[right] }));
-                setProposed(false);
-                setTried(false);
-              }}
-            >
-              {t.rightChip[right]}
-            </FilterChip>
-          ))}
-        </div>
-        {tried && !scope ? (
-          <FieldError id={`${rightsId}-error`}>{t.scopeMissing}</FieldError>
-        ) : (
-          proposed &&
-          proposal && (
-            <p className="text-xs text-muted-foreground">
-              {proposal === "both" ? t.proposed.sample : t.proposed.work}
-            </p>
-          )
-        )}
-      </div>
-
-      {rights.map((right) =>
-        known(right).length > 0 ? (
-          <div key={right} className="flex flex-col gap-1.5">
-            <span className="text-sm leading-none font-medium">
-              {t.holderOf[right](clearance.work)}
+    <div ref={root} className="flex flex-col gap-7">
+      <p>{t.intro(elementLine(clearance), clearance.title)}</p>
+      <NumberedSteps>
+        <NumberedStep
+          n={1}
+          title={
+            <span id={rightsId}>
+              {t.stepTaken}
+              <RequiredMark announce />
             </span>
-            {known(right).map((h) => (
-              <div
-                key={h.id}
-                className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2"
+          }
+        >
+          <div
+            role="group"
+            aria-labelledby={rightsId}
+            className="flex flex-wrap gap-2"
+          >
+            {RIGHT_KINDS.map((right) => (
+              <FilterChip
+                key={right}
+                pressed={asked[right]}
+                aria-invalid={tried && !scope ? true : undefined}
+                onClick={() => {
+                  setAsked((all) => ({ ...all, [right]: !all[right] }));
+                  setProposed(false);
+                  setTried(false);
+                }}
               >
-                <span className="min-w-0 break-words">
-                  <span className="font-medium">{h.name}</span>
-                  <span className="text-sm text-muted-foreground">
-                    {" "}
-                    · {fr.legalClearance.roles[h.role as HolderRole]}
-                  </span>
-                </span>
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  aria-label={t.removeHolder(h.name)}
-                  disabled={pending}
-                  onClick={() => run(() => removeRightsholder(projectId, h.id))}
-                >
-                  <IconXmark aria-hidden />
-                </Button>
-              </div>
+                {t.rightChip[right]}
+              </FilterChip>
             ))}
           </div>
-        ) : (
-          <div key={right} className="flex flex-col gap-1.5">
-            <PersonPickerField<HolderOption>
-              refName={`holder-ref-${clearance.id}-${right}`}
-              nameName={`holder-${clearance.id}-${right}`}
-              legend={t.holderOf[right](clearance.work)}
-              required
-              load={load}
-              defaultRef={null}
-              defaultName={null}
-              createRoles={[NETWORK_ROLE_OF[right]]}
-              createKind="organization"
-              refOfContact={(id) => id}
-              onPick={(option, name) =>
-                setPicked((all) => ({
-                  ...all,
-                  [right]: name.trim()
-                    ? {
-                        name,
-                        contactId: option?.id ?? null,
-                        role: option?.role ?? DEFAULT_ROLE[right],
-                      }
-                    : undefined,
-                }))
-              }
-              error={
-                tried && lacking.includes(right) ? t.holderMissing : undefined
-              }
-            />
-            <p className="text-xs text-muted-foreground">
-              {t.holderWhere[right]}
+          {tried && !scope ? (
+            <FieldError id={`${rightsId}-error`}>{t.scopeMissing}</FieldError>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              {t.rightsExplained}
+              {proposed && proposal && (
+                <>
+                  {" "}
+                  {proposal === "both" ? t.proposed.sample : t.proposed.work}
+                </>
+              )}
             </p>
-          </div>
-        ),
-      )}
+          )}
+        </NumberedStep>
 
-      <div className="flex flex-col gap-3">
+        {rights.length > 0 && (
+          <NumberedStep n={2} title={t.stepHolders}>
+            <div className="flex flex-col gap-5">
+              {rights.map((right) =>
+                known(right).length > 0 ? (
+                  <div key={right} className="flex flex-col gap-1.5">
+                    <span className="text-sm leading-none font-medium">
+                      {t.holderOf[right](clearance.work)}
+                    </span>
+                    {known(right).map((h) => (
+                      <div
+                        key={h.id}
+                        className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2"
+                      >
+                        <span className="min-w-0 break-words">
+                          <span className="font-medium">{h.name}</span>
+                          <span className="text-sm text-muted-foreground">
+                            {" "}
+                            · {fr.legalClearance.roles[h.role as HolderRole]}
+                          </span>
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label={t.removeHolder(h.name)}
+                          disabled={pending}
+                          onClick={() =>
+                            run(() => removeRightsholder(projectId, h.id))
+                          }
+                        >
+                          <IconXmark aria-hidden />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div key={right} className="flex flex-col gap-1.5">
+                    <PersonPickerField<HolderOption>
+                      refName={`holder-ref-${clearance.id}-${right}`}
+                      nameName={`holder-${clearance.id}-${right}`}
+                      legend={t.holderOf[right](clearance.work)}
+                      required
+                      load={load}
+                      defaultRef={null}
+                      defaultName={null}
+                      createRoles={[NETWORK_ROLE_OF[right]]}
+                      createKind="organization"
+                      refOfContact={(id) => id}
+                      onPick={(option, name) =>
+                        setPicked((all) => ({
+                          ...all,
+                          [right]: name.trim()
+                            ? {
+                                name,
+                                contactId: option?.id ?? null,
+                                role: option?.role ?? DEFAULT_ROLE[right],
+                              }
+                            : undefined,
+                        }))
+                      }
+                      error={
+                        tried && lacking.includes(right)
+                          ? t.holderMissing
+                          : undefined
+                      }
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      {t.holderWhere[right]}
+                    </p>
+                  </div>
+                ),
+              )}
+            </div>
+          </NumberedStep>
+        )}
+
+        <NumberedStep n={rights.length > 0 ? 3 : 2} title={t.stepSend}>
+          <p className="text-sm text-muted-foreground">{t.sendHow}</p>
+          <blockquote className="rounded-xl border border-[color:var(--border-hairline)] bg-[var(--surface-page)] p-4 text-sm break-words whitespace-pre-wrap">
+            {request}
+          </blockquote>
+          <CopyButton
+            value={request}
+            label={t.copyText}
+            copiedLabel={t.copied}
+            size="sm"
+            className="self-start"
+          />
+        </NumberedStep>
+      </NumberedSteps>
+
+      <div className="flex flex-col gap-3 border-t border-[color:var(--border-hairline)] pt-5">
         {tried && scope && lacking.length > 0 && (
           <FormMessage kind="error">
             {t.missingCount(lacking.length)}
           </FormMessage>
         )}
-        <div className="flex flex-wrap gap-2">
-          <Button disabled={pending} onClick={send}>
-            {t.sent}
-          </Button>
-          <Button variant="outline" onClick={copyRequest}>
-            {t.copyRequest}
-          </Button>
-        </div>
+        <Button className="self-start" disabled={pending} onClick={send}>
+          {t.sent}
+        </Button>
+        <p className="text-sm text-muted-foreground">{t.sentAfter}</p>
       </div>
     </div>
   );
