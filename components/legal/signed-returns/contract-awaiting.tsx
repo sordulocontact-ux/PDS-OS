@@ -52,6 +52,9 @@ export function ContractAwaiting({
   if (proof?.deposit)
     return (
       <ContractReceived
+        contractId={contractId}
+        organizationId={organizationId}
+        proof={proof}
         person={person}
         deposit={proof.deposit}
         version={version}

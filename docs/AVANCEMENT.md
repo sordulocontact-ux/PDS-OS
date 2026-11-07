@@ -1698,3 +1698,18 @@ de retiré.
   l'envoie pas), puis « J'ai envoyé la demande ».
 - **Écart titre / phrase** porté à 10 px sur toute l'app (`TitleBlock`, aussi `PageHeader`,
   `PageSection`, `FormSection`, `PoQuestion`, `PoReading`), commit séparé.
+
+## La personne signe en premier, puis PDS (07/11/2026, branche `pre-prod`, migration `20261107200101_person_signs_first`)
+
+Réponses d'Ibé du 07/11 : l'outil de signature de PDS est **Yousign**, **la personne signe** en premier,
+et il veut qu'on branche Yousign (étape suivante, clés à obtenir). L'ordre « PDS signe en premier » du
+même jour (`20261107150101`, pré-prod seulement) est inversé.
+
+- **Base** (`advance_contract`) : l'envoi n'attend plus la signature de PDS ; « Signer pour PDS » exige
+  l'exemplaire signé par la personne sur la dernière version (`contract_not_returned`), puis le PDF signé
+  à son tour pour PDS (`pds_signed`, l'exemplaire signé des deux parties), déposé après lui ; « Marquer
+  comme signé » inchangé. La page de la personne sert ce PDF une fois PDS passé, la version validée avant.
+- **Écrans** : un contrat validé part tout de suite (`ContractSend`) ; une fois le signé revenu, la
+  direction dépose le PDF et signe pour PDS dans la vérification (`SignatureGate` → `PdsSignStep`), sur la
+  page de la démarche comme dans la fenêtre « Signer pour PDS » de la page Contrats (dépôt ajouté).
+- **Tests SQL** : `signed-returns` (39), `legal-contracts` (20), `legal-reste` (35) au nouvel ordre.

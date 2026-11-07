@@ -1,7 +1,7 @@
 -- What comes back signed comes back by the person's private link (20261020070101): a token only
 -- signs the documents of its own contact, in its own project.
 begin;
-select plan(36);
+select plan(39);
 
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
 declare v_id uuid := gen_random_uuid();
@@ -93,20 +93,10 @@ select throws_ok(format($$ select public.open_signed_return_slot(%L, 'contract',
                  'P0001', 'contract_not_sent', 'nothing to sign before it is sent');
 reset role;
 
--- PDS signs first (20261107150101): not sent before, only by the direction, on its PDF.
-select pg_temp.act_as(pg_temp.id_of('manager'));
-select throws_ok(format($$ select public.send_contract(%L, 'link', null, null) $$, pg_temp.id_of('contract')),
-                 'P0001', 'contract_countersign_missing', 'not sent before PDS signs it');
-select throws_ok(format($$ select public.advance_contract(%L, 'countersign') $$, pg_temp.id_of('contract')),
-                 '42501', null, 'only the direction signs for PDS');
+-- The person signs first (20261107200101): PDS never signs before.
 select pg_temp.act_as(pg_temp.id_of('director'));
 select throws_ok(format($$ select public.advance_contract(%L, 'countersign') $$, pg_temp.id_of('contract')),
-                 'P0001', 'contract_pds_file_missing', 'PDS signs its PDF, never a click alone');
-insert into public.contract_files (organization_id, contract_id, category, path, file_name, mime, bytes)
-values (pg_temp.id_of('org'), pg_temp.id_of('contract'), 'pds_signed',
-        pg_temp.id_of('org') || '/' || pg_temp.id_of('contract') || '/' || gen_random_uuid() || '.pdf',
-        'Contrat signé PDS.pdf', 'application/pdf', 1000);
-select public.advance_contract(pg_temp.id_of('contract'), 'countersign');
+                 'P0001', 'contract_not_returned', 'PDS does not sign before the person');
 select pg_temp.act_as(pg_temp.id_of('manager'));
 select lives_ok(format($$ select public.send_contract(%L, 'link', null, null) $$, pg_temp.id_of('contract')),
                 'sent on their private link');
@@ -119,8 +109,8 @@ select is((select status || ' · ' || sent_via from public.contracts where id = 
 set local role anon;
 select is((public.get_contact_contract_document(pg_temp.v('sami_token'), pg_temp.id_of('contract')) ->> 'version'),
           '1', 'the person downloads the version validated');
-select is((public.get_contact_contract_pds_file(pg_temp.v('sami_token'), pg_temp.id_of('contract')) ->> 'file_name'),
-          'Contrat signé PDS.pdf', 'the person downloads the PDF signed for PDS');
+select is(public.get_contact_contract_pds_file(pg_temp.v('sami_token'), pg_temp.id_of('contract')),
+          null, 'no copy signed by PDS before the person signs');
 select is(public.get_contact_contract_document(pg_temp.v('yanis_token'), pg_temp.id_of('contract')),
           null, 'another person of the project never reads it');
 select is(public.get_contact_contract_document(pg_temp.v('sami_other'), pg_temp.id_of('contract')),
@@ -164,7 +154,28 @@ select is((select count(*)::int from public.notifications
           1, 'the owner is told');
 select is((select status from public.contracts where id = pg_temp.id_of('contract')),
           'sent', 'the team checks it before it is signed');
--- JUR-11: both parties, and the team's check (20261024000201).
+-- JUR-11: both parties, the person then PDS (20261107200101), and the team's check.
+select pg_temp.act_as(pg_temp.id_of('manager'));
+select throws_ok(format($$ select public.advance_contract(%L, 'sign', null, current_date, true) $$, pg_temp.id_of('contract')),
+                 'P0001', 'contract_countersign_missing', 'never signed without PDS''s signature');
+select throws_ok(format($$ select public.advance_contract(%L, 'countersign') $$, pg_temp.id_of('contract')),
+                 '42501', null, 'only the direction signs for PDS');
+select pg_temp.act_as(pg_temp.id_of('director'));
+select throws_ok(format($$ select public.advance_contract(%L, 'countersign') $$, pg_temp.id_of('contract')),
+                 'P0001', 'contract_pds_file_missing', 'PDS signs the PDF, never a click alone');
+reset role;
+insert into public.contract_files (organization_id, contract_id, category, path, file_name, mime, bytes)
+values (pg_temp.id_of('org'), pg_temp.id_of('contract'), 'pds_signed',
+        pg_temp.id_of('org') || '/' || pg_temp.id_of('contract') || '/' || gen_random_uuid() || '.pdf',
+        'Contrat signé des deux parties.pdf', 'application/pdf', 1000);
+select pg_temp.act_as(pg_temp.id_of('director'));
+select lives_ok(format($$ select public.advance_contract(%L, 'countersign') $$, pg_temp.id_of('contract')),
+                'the direction signs for PDS after the person');
+reset role;
+set local role anon;
+select is((public.get_contact_contract_pds_file(pg_temp.v('sami_token'), pg_temp.id_of('contract')) ->> 'file_name'),
+          'Contrat signé des deux parties.pdf', 'the person then downloads the copy signed by both');
+reset role;
 select pg_temp.act_as(pg_temp.id_of('manager'));
 select throws_ok(format($$ select public.advance_contract(%L, 'sign', null, current_date) $$, pg_temp.id_of('contract')),
                  'P0001', 'contract_signature_unchecked', 'nor without the team''s check of the signature');

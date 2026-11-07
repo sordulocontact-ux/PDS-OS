@@ -11,7 +11,6 @@ import {
   ContractSend,
   type ContractMailDraft,
 } from "@/components/legal/signed-returns/contract-send";
-import { PdsSignStep } from "@/components/legal/signed-returns/pds-sign-step";
 import { usePublishResult } from "@/components/shell/module/result-banner";
 import { Button } from "@/components/ui/button";
 import { DecisionPanel } from "@/components/ui/decision-panel";
@@ -25,8 +24,6 @@ import { legal } from "@/lib/i18n/fr/legal";
 import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
 import { legalDemarches } from "@/lib/i18n/fr/legal-demarches";
 import { legalDocuments } from "@/lib/i18n/fr/legal-documents";
-import { signedReturns } from "@/lib/i18n/fr/signed-returns";
-import { formatShortDay } from "@/lib/utils/day";
 import {
   generateLegalContract,
   saveAgreementFee,
@@ -43,10 +40,7 @@ const fr = {
   legalContracts,
   legalDemarches,
   legalDocuments,
-  signedReturns,
 };
-
-const sr = fr.signedReturns.team;
 
 /**
  * One person's contract in their démarche (proto « Projet complet »): once
@@ -290,61 +284,19 @@ export function ContractPanel({
           />
         </>
       );
-    // PDS signs first (Sacha, 06/11/2026): the direction drops the PDF it
-    // signed for PDS, then it is sent — that PDF is what the person signs.
+    // Sent as validated: the person signs first, then PDS (Ibé, 07/11/2026).
     case "ready_for_signature":
       return (
         <>
           {documentCard}
-          {contractId &&
-            (proof?.countersign ? (
-              <>
-                <FactRows>
-                  <FactRow
-                    label={sr.pdsSignedTitle}
-                    value={sr.pdsSignedBy(
-                      proof.countersign.by,
-                      formatShortDay(proof.countersign.at),
-                    )}
-                    source={proof.pdsSigned?.fileName ?? null}
-                    side={
-                      proof.pdsSigned?.url && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          nativeButton={false}
-                          render={
-                            <a
-                              href={proof.pdsSigned.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            />
-                          }
-                        >
-                          {sr.viewPdf}
-                        </Button>
-                      )
-                    }
-                  />
-                </FactRows>
-                <ContractSend
-                  projectId={projectId}
-                  contractId={contractId}
-                  person={row.name}
-                  draft={draft}
-                />
-              </>
-            ) : (
-              <PdsSignStep
-                contractId={contractId}
-                organizationId={organizationId}
-                proof={proof}
-                canSign={canValidate}
-                direction={direction}
-                pending={pending}
-                onSign={() => advance("countersign")}
-              />
-            ))}
+          {contractId && (
+            <ContractSend
+              projectId={projectId}
+              contractId={contractId}
+              person={row.name}
+              draft={draft}
+            />
+          )}
         </>
       );
     case "signature_pending":

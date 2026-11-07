@@ -152,6 +152,8 @@ export function ContractNowActions({
         <div>
           <ContractCountersignDialog
             contractId={contract.id}
+            organizationId={contract.organizationId}
+            pdsSigned={Boolean(proof?.pdsSigned)}
             person={person}
             version={version}
             canSign={contract.can.sign}

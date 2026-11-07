@@ -80,6 +80,9 @@ export function ContractSign({
         </FormMessage>
       )}
       <SignatureGate
+        contractId={contractId}
+        organizationId={organizationId}
+        proof={proof}
         person={person}
         countersign={proof?.countersign ?? null}
         canCountersign={canCountersign}

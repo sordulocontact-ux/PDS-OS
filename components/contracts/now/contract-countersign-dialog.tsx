@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from "react";
 
 import { FieldError, FormMessage } from "@/components/auth/form-message";
+import { ContractProofSlot } from "@/components/legal/clearance/contract-proof-slot";
 import { CheckboxField } from "@/components/ui/checkbox-field";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
@@ -16,14 +17,18 @@ const fr = { contracts, signedReturns };
 const t = fr.contracts.now.countersign;
 
 /**
- * « Signer pour PDS » (proto `countersign`): the copy signed by the party,
- * then the direction's signature (JUR-11, advance_contract 'countersign').
+ * « Signer pour PDS » (proto `countersign`): the copy signed by the party —
+ * who signs first (Ibé, 07/11/2026) — then the direction's signature on that
+ * PDF, dropped here (« pds_signed », the copy signed by both parties;
+ * JUR-11, advance_contract 'countersign', 20261107200101).
  * When the direction may also mark it signed, it ticks that it checked the
  * signature (red at the first try) and the contract is concluded in the
  * same gesture — the day the signed copy came back.
  */
 export function ContractCountersignDialog({
   contractId,
+  organizationId,
+  pdsSigned,
   person,
   version,
   document,
@@ -31,6 +36,9 @@ export function ContractCountersignDialog({
   signedOn,
 }: {
   contractId: string;
+  organizationId: string;
+  // The PDF signed in turn for PDS is already dropped.
+  pdsSigned: boolean;
   person: string;
   version: number | null;
   // The signed copy (name, « Voir le PDF »).
@@ -50,6 +58,8 @@ export function ContractCountersignDialog({
       {(close) => (
         <CountersignForm
           contractId={contractId}
+          organizationId={organizationId}
+          pdsSigned={pdsSigned}
           person={person}
           document={document}
           canSign={canSign}
@@ -63,6 +73,8 @@ export function ContractCountersignDialog({
 
 function CountersignForm({
   contractId,
+  organizationId,
+  pdsSigned,
   person,
   document,
   canSign,
@@ -70,6 +82,8 @@ function CountersignForm({
   onDone,
 }: {
   contractId: string;
+  organizationId: string;
+  pdsSigned: boolean;
   person: string;
   document: ReactNode;
   canSign: boolean;
@@ -108,8 +122,16 @@ function CountersignForm({
     >
       {document}
       <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
-        {team.countersignBody}
+        {team.countersignBody(person)}
       </p>
+      <ContractProofSlot
+        organizationId={organizationId}
+        contractId={contractId}
+        category="pds_signed"
+        label={team.pdsFile}
+        hint={team.pdsFileHint}
+        present={pdsSigned}
+      />
       {canSign && (
         <div className="flex flex-col gap-1">
           <CheckboxField

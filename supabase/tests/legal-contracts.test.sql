@@ -148,8 +148,13 @@ begin
   perform public.advance_contract(p_contract, 'submit');
   perform pg_temp.act_as(pg_temp.id_of('director'));
   perform public.advance_contract(p_contract, 'approve');
-  -- JUR-11: the direction signs for PDS (20261024000201), first and on its PDF
-  -- (20261107150101).
+  perform pg_temp.act_as(pg_temp.id_of('manager'));
+end $$;
+-- JUR-11: the direction signs for PDS (20261024000201), after the person and on the PDF
+-- they signed (20261107200101).
+create function pg_temp.countersign(p_contract uuid) returns void language plpgsql as $$
+begin
+  perform pg_temp.act_as(pg_temp.id_of('director'));
   perform pg_temp.add_file(p_contract, 'pds_signed');
   perform public.advance_contract(p_contract, 'countersign');
   perform pg_temp.act_as(pg_temp.id_of('manager'));
@@ -163,6 +168,7 @@ select pg_temp.add_file(pg_temp.id_of('contract_ever'), 'signed');
 select throws_ok(format($$ select public.advance_contract(%L, 'sign', null, current_date) $$, pg_temp.id_of('contract_ever')),
                  'P0001', 'contract_proof_missing', 'the signature is not recorded without its proof');
 select pg_temp.add_file(pg_temp.id_of('contract_ever'), 'evidence');
+select pg_temp.countersign(pg_temp.id_of('contract_ever'));
 select public.advance_contract(pg_temp.id_of('contract_ever'), 'sign', null, current_date, true);
 
 reset role;
@@ -187,6 +193,8 @@ select pg_temp.add_file(pg_temp.id_of('contract_samy'), 'signed');
 select pg_temp.add_file(pg_temp.id_of('contract_samy'), 'evidence');
 select pg_temp.add_file(pg_temp.id_of('contract_lej'), 'signed');
 select pg_temp.add_file(pg_temp.id_of('contract_lej'), 'evidence');
+select pg_temp.countersign(pg_temp.id_of('contract_samy'));
+select pg_temp.countersign(pg_temp.id_of('contract_lej'));
 select public.advance_contract(pg_temp.id_of('contract_samy'), 'sign', null, current_date, true);
 select public.advance_contract(pg_temp.id_of('contract_lej'), 'sign', null, current_date, true);
 select is((select sum(amount_cents)::int || ' ' || count(*) || ' ' || string_agg(distinct status, ',')

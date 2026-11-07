@@ -95,7 +95,7 @@ export const signedReturns = {
       `Manquante : ${direction}, habilitée à signer pour PDS, doit signer`,
     checkDevices: "Dispositifs de signature",
     checkDevicesValue: (name: string) =>
-      `${name} : signature sur le PDF déposé · PDS : PDF signé par la direction avant l'envoi. Une confirmation dans PDS OS n'est jamais une signature.`,
+      `${name} : signature sur le PDF déposé · PDS : le même PDF signé ensuite par la direction. Une confirmation dans PDS OS n'est jamais une signature.`,
     checkBox: (name: string) =>
       `J'ai vérifié que la signature est bien celle de ${name}, sur chaque page à parapher`,
     checkMissing:
@@ -103,24 +103,19 @@ export const signedReturns = {
     countersign: "Signer le contrat pour PDS",
     countersigning: "Signature…",
     countersigned: "Contrat signé pour PDS",
-    countersignBody:
-      "Signez le PDF de la version validée pour PDS, avec votre outil habituel, puis déposez-le : c'est ce PDF signé qui part à la personne.",
+    // The person signs first, then PDS (Ibé, 07/11/2026).
+    countersignBody: (person: string) =>
+      `${person} a signé. Signez ce PDF à votre tour pour PDS, avec votre outil habituel, puis déposez-le : c'est l'exemplaire signé des deux parties.`,
     countersignMissing:
       "Le contrat ne vaut qu'avec la signature de PDS : la direction doit d'abord le signer.",
     awaitingCountersign: (direction: string) =>
       `En attente de ${direction} : signer le contrat pour PDS.`,
-    // PDS signs first (Sacha, 06/11/2026), on the PDF that is sent.
-    pdsFile: "Le contrat signé pour PDS (PDF)",
-    pdsFileHint: "Le PDF de la version validée, signé par la direction",
+    pdsFile: "Le contrat signé des deux parties (PDF)",
+    pdsFileHint: "Le PDF signé par la personne, signé à son tour pour PDS",
     pdsFileMissing:
-      "Déposez d'abord le PDF signé pour PDS : c'est lui qui part à la personne.",
-    pdsSignedBy: (name: string | null, date: string) =>
-      name
-        ? `Signé pour PDS par ${name} le ${date}`
-        : `Signé pour PDS le ${date}`,
-    pdsSignedTitle: "Signature de PDS",
-    sendBeforePds:
-      "PDS signe en premier : la direction doit signer le contrat avant l'envoi.",
+      "Déposez d'abord le PDF signé pour PDS : l'exemplaire signé des deux parties.",
+    notReturned:
+      "La personne signe en premier : PDS signe une fois son exemplaire signé revenu.",
     signedFile: "Contrat signé",
     depositedBy: (name: string, date: string) =>
       `Déposé par ${name} le ${date}`,

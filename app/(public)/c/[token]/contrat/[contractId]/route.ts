@@ -21,11 +21,11 @@ const document = z.object({
 const pdsFile = z.object({ path: z.string(), file_name: z.string() });
 
 /**
- * « Télécharger » on the person's page (/c/): the PDF PDS signed first
- * (Sacha, 06/11/2026), read through a one-minute slot opened by their token
- * (get_contact_contract_pds_file); for a contract sent before that rule,
- * the version validated by the direction, printed here
- * (get_contact_contract_document). Never another person's contract.
+ * « Télécharger » on the person's page (/c/): the version validated by the
+ * direction, printed here (get_contact_contract_document), which the person
+ * signs first (Ibé, 07/11/2026); once PDS signed it in turn, the copy signed
+ * by both parties, read through a one-minute slot opened by their token
+ * (get_contact_contract_pds_file). Never another person's contract.
  */
 export async function GET(
   _request: Request,

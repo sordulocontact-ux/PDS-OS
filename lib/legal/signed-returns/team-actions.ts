@@ -73,9 +73,6 @@ export async function sendContract(input: {
         console.error("sendContract:", error.code, m);
         if (m.includes("contact_link_missing"))
           return { ok: false, error: t.errors.noLink };
-        // PDS signs first (20261107150101).
-        if (m.includes("contract_countersign_missing"))
-          return { ok: false, error: t.sendBeforePds };
         if (error.code === "23514") return { ok: false, error: t.errors.date };
         if (error.code === "42501" || m.includes("contract_not_allowed"))
           return { ok: false, error: fr.contracts.errors.forbidden };

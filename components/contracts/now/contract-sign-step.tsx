@@ -81,6 +81,9 @@ export function ContractSignStep({
     );
   return (
     <SignatureGate
+      contractId={contractId}
+      organizationId={organizationId}
+      proof={proof}
       person={person}
       countersign={proof?.countersign ?? null}
       canCountersign={canCountersign}

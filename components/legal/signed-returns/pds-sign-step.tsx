@@ -12,12 +12,12 @@ const fr = { signedReturns };
 const t = fr.signedReturns.team;
 
 /**
- * PDS signs first (Sacha, 06/11/2026): before a validated contract is sent,
- * the direction signs its PDF for PDS with its usual tool and drops it here
- * (« pds_signed »), then « Signer le contrat pour PDS ». That PDF is the one
- * the person downloads from their page, signs and sends back. Anyone else
- * waits, said in the Master's blue. The database refuses the sending
- * without it (20261107150101).
+ * PDS signs after the person (Ibé, 07/11/2026): once their signed copy is
+ * back, the direction signs that PDF in turn for PDS with its usual tool,
+ * drops it here (« pds_signed », the copy signed by both parties), then
+ * « Signer le contrat pour PDS ». Anyone else waits, said in the Master's
+ * blue. The database refuses the countersignature without it
+ * (20261107200101).
  */
 export function PdsSignStep({
   contractId,
@@ -28,6 +28,8 @@ export function PdsSignStep({
   pending,
   error,
   onSign,
+  person,
+  extra,
 }: {
   contractId: string;
   organizationId: string | null;
@@ -39,15 +41,24 @@ export function PdsSignStep({
   pending: boolean;
   error?: string | null;
   onSign: () => void;
+  // Whose signed copy PDS signs in turn.
+  person: string;
+  // Another way out beside the gesture (« Je l'ai remis autrement »…).
+  extra?: React.ReactNode;
 }) {
   if (!canSign)
     return (
-      <ToneCallout tone="info">{t.awaitingCountersign(direction)}</ToneCallout>
+      <div className="flex flex-col gap-3">
+        <ToneCallout tone="info">
+          {t.awaitingCountersign(direction)}
+        </ToneCallout>
+        {extra && <div className="flex flex-wrap gap-2">{extra}</div>}
+      </div>
     );
   return (
     <div className="flex flex-col gap-3">
       <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
-        {t.countersignBody}
+        {t.countersignBody(person)}
       </p>
       {organizationId && (
         <ContractProofSlot
@@ -60,14 +71,16 @@ export function PdsSignStep({
         />
       )}
       <FormMessage kind="error">{error ?? null}</FormMessage>
-      <Button
-        className="self-start"
-        disabled={pending}
-        aria-busy={pending || undefined}
-        onClick={onSign}
-      >
-        {pending ? t.countersigning : t.countersign}
-      </Button>
+      <div className="flex flex-wrap gap-2">
+        <Button
+          disabled={pending}
+          aria-busy={pending || undefined}
+          onClick={onSign}
+        >
+          {pending ? t.countersigning : t.countersign}
+        </Button>
+        {extra}
+      </div>
     </div>
   );
 }

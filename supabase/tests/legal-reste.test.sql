@@ -122,9 +122,12 @@ select public.advance_contract(pg_temp.id_of('contract'), 'submit');
 reset role;
 select pg_temp.act_as(pg_temp.id_of('director'));
 select public.advance_contract(pg_temp.id_of('contract'), 'approve');
--- PDS signs its PDF (20261107150101).
+-- The person's signed copy, then the PDF PDS signs after them (20261107200101).
 insert into public.contract_files (organization_id, contract_id, category, path, file_name, mime, bytes)
-values (pg_temp.id_of('org'), pg_temp.id_of('contract'), 'pds_signed',
+values (pg_temp.id_of('org'), pg_temp.id_of('contract'), 'signed',
+        pg_temp.id_of('org') || '/' || pg_temp.id_of('contract') || '/' || gen_random_uuid() || '.pdf',
+        'signe.pdf', 'application/pdf', 1000),
+       (pg_temp.id_of('org'), pg_temp.id_of('contract'), 'pds_signed',
         pg_temp.id_of('org') || '/' || pg_temp.id_of('contract') || '/' || gen_random_uuid() || '.pdf',
         'pds.pdf', 'application/pdf', 1000);
 select public.advance_contract(pg_temp.id_of('contract'), 'countersign');

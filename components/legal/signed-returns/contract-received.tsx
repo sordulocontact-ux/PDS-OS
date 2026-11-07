@@ -24,6 +24,9 @@ const t = fr.signedReturns.team;
  * OS is never a signature.
  */
 export function ContractReceived({
+  contractId,
+  organizationId,
+  proof,
   person,
   deposit,
   version,
@@ -35,6 +38,9 @@ export function ContractReceived({
   onSign,
   extra,
 }: {
+  contractId: string;
+  organizationId: string | null;
+  proof: ContractProof | null;
   person: string;
   deposit: NonNullable<ContractProof["deposit"]>;
   // The version validated by the direction and sent.
@@ -110,6 +116,9 @@ export function ContractReceived({
         </FactRows>
       </StepSection>
       <SignatureGate
+        contractId={contractId}
+        organizationId={organizationId}
+        proof={proof}
         person={person}
         countersign={countersign}
         canCountersign={canCountersign}

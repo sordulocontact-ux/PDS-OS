@@ -13,8 +13,9 @@ export type ContractProof = {
   deposit: { fileName: string; at: string; url: string | null } | null;
   // Signed for PDS in PDS OS (JUR-11): by whom, when.
   countersign: { by: string | null; at: string } | null;
-  // The PDF the direction signed for PDS, the one sent to the person
-  // (Sacha, 06/11/2026: PDS signs first): its name, when, a link (1 h).
+  // The PDF the direction signed for PDS,
+  // after the person (Ibé, 07/11/2026): the copy signed by both parties; its
+  // name, when, a link (1 h).
   pdsSigned: { fileName: string; at: string; url: string | null } | null;
 };
 
