@@ -3235,7 +3235,13 @@ choisit ce qui est utile et le **transmet** avec une priorité à l'équipe qui 
   Propriétés attendues, nom et type exacts : **Titre** (titre), **Résumé** (texte),
   **Type** (sélection), **Priorité** (sélection), **Retours** (nombre), **Transmis par**
   (texte), **Transmis le** (date et heure, pour trier par le plus récent ; vues triées dessus), **Lien** (URL) ; facultative : **Captures** (fichiers et
-  médias), remplie seulement si la base l'a (schéma lu à chaque envoi). Les captures sont
+  médias), remplie seulement si la base l'a (schéma lu à chaque envoi), et **Partie**
+  (sélection multiple, 07/11/2026) : les parties de l'app où les retours du sujet ont été
+  écrits, déduites de leur `page_path` par le code (`lib/feedback/app-part.ts`, noms des
+  options dans `fr.feedback.notion.parts`, mot pour mot ceux de Notion), écrite **à la
+  création seulement** pour ne jamais défaire une correction faite dans Notion ; une page
+  sans partie (réglages) la laisse vide. Les retours repris du Drive la reçoivent du script
+  `~/.local/bin/pds-retours-sync.py` (liste `PARTS`, même ordre). Les captures sont
   **téléversées** chez Notion (API *File Upload* : création, envoi en multipart, puis
   rattachement), jamais en lien : les URL signées de l'app expirent en une heure. Elles
   apparaissent en blocs image sous chaque retour d'origine du corps, et dans la colonne

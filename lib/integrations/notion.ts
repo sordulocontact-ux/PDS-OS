@@ -10,7 +10,8 @@ import { IntegrationError } from "@/lib/integrations/http";
  * The database must have these properties, by name and type:
  *   Titre (title) · Résumé (text) · Type (select) · Priorité (select) ·
  *   Retours (number) · Transmis par (text) · Transmis le (date) · Lien (URL)
- * and may have Captures (files & media), filled when it exists. Screenshots
+ * and may have Captures (files & media) and Partie (multi-select, the pages
+ * of the app the feedback was written on), each filled when it exists. Screenshots
  * are sent through Notion's file uploads, never as links: the app's signed
  * URLs expire within the hour.
  */
@@ -24,6 +25,9 @@ const ORIGINALS_MAX = 60;
 // An optional column: filled only when the database has it, as files.
 export const CAPTURES_PROPERTY = "Captures";
 const CAPTURES_MAX = 25;
+// Another optional column: set when the page is created, then left to the
+// people sorting the feedback in Notion.
+export const PARTS_PROPERTY = "Partie";
 
 /** A refused call: `reason` for code ("http_404"), `code` and `detail` as
  * Notion gave them ("object_not_found", "Could not find database…"). */
@@ -107,18 +111,22 @@ export type FeedbackOriginal = {
   captures: string[];
 };
 
-/** Whether the database has the optional Captures column, as files. */
-export async function hasCapturesColumn(): Promise<boolean> {
+export type OptionalColumns = { captures: boolean; parts: boolean };
+
+/** Which optional columns the database has, with the right type. */
+export async function optionalColumns(): Promise<OptionalColumns> {
   const { NOTION_FEEDBACK_DATABASE_ID } = getServerEnv();
   if (!NOTION_FEEDBACK_DATABASE_ID) throw new NotionError("not_configured");
   const database = await call(
     "GET",
     `/databases/${NOTION_FEEDBACK_DATABASE_ID}`,
   );
-  const column = (database.properties as Record<string, { type?: string }>)?.[
-    CAPTURES_PROPERTY
-  ];
-  return column?.type === "files";
+  const columns = database.properties as
+    Record<string, { type?: string }> | undefined;
+  return {
+    captures: columns?.[CAPTURES_PROPERTY]?.type === "files",
+    parts: columns?.[PARTS_PROPERTY]?.type === "multi_select",
+  };
 }
 
 /** Sends a file to Notion; its id is then attached to a block or a column,
@@ -146,6 +154,8 @@ export type FeedbackPageInput = {
   link: string;
   // Every screenshot of the topic, when the database has the column.
   captures?: string[];
+  // The parts of the app, by their Notion option name, when it has the column.
+  parts?: string[];
 };
 
 function properties(page: Partial<FeedbackPageInput>) {
@@ -166,6 +176,11 @@ function properties(page: Partial<FeedbackPageInput>) {
       "Transmis le": { date: { start: page.sentOn } },
     }),
     ...(page.link !== undefined && { Lien: { url: page.link } }),
+    ...(page.parts !== undefined && {
+      [PARTS_PROPERTY]: {
+        multi_select: page.parts.map((name) => ({ name })),
+      },
+    }),
     ...(page.captures !== undefined && {
       [CAPTURES_PROPERTY]: {
         files: page.captures.slice(0, CAPTURES_MAX).map((id, i) => ({

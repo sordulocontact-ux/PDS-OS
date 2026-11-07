@@ -1,15 +1,16 @@
 import "server-only";
 
 import { routes } from "@/lib/auth/redirects";
+import { appPartsOf } from "@/lib/feedback/app-part";
 import { siteUrl } from "@/lib/auth/site-url";
 import { FEEDBACK_SCREENSHOT_BUCKET } from "@/lib/feedback/screenshot-rules";
 import { isFeedbackKind, isFeedbackPriority } from "@/lib/feedback/types";
 import { fr } from "@/lib/i18n/fr";
 import {
   createFeedbackPage,
-  hasCapturesColumn,
   NotionError,
   notionMissingSettings,
+  optionalColumns,
   updateFeedbackPage,
   uploadFile,
   type FeedbackOriginal,
@@ -146,13 +147,16 @@ export async function syncTopicToNotion(
 
   try {
     // Captures column: every screenshot of the topic, re-sent only when
-    // new ones came (a column is replaced as a whole).
+    // new ones came (a column is replaced as a whole). Partie column: on
+    // creation only, so a part corrected in Notion is never undone.
     const bodyPaths = written.flatMap((f) => f.screenshot_paths);
-    const columnPaths =
-      (!topic.notion_page_id || bodyPaths.length > 0) &&
-      (await hasCapturesColumn())
-        ? items.flatMap((f) => f.screenshot_paths)
-        : [];
+    const columns =
+      !topic.notion_page_id || bodyPaths.length > 0
+        ? await optionalColumns()
+        : { captures: false, parts: false };
+    const columnPaths = columns.captures
+      ? items.flatMap((f) => f.screenshot_paths)
+      : [];
     const uploaded = await uploadScreenshots(supabase, [
       ...bodyPaths,
       ...columnPaths,
@@ -175,6 +179,11 @@ export async function syncTopicToNotion(
       const created = await createFeedbackPage(
         {
           ...withCaptures,
+          ...(columns.parts && {
+            parts: appPartsOf(items.map((f) => f.page_path)).map(
+              (part) => t.notion.parts[part],
+            ),
+          }),
           sentBy: fullName(topic.reviewer),
           // Date and time, so the database sorts the latest first.
           sentOn: new Date(topic.reviewed_at ?? Date.now()).toISOString(),
