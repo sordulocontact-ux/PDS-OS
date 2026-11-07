@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { after } from "next/server";
 
 import { getServerEnv } from "@/lib/env";
+import { gated } from "@/lib/supabase/request-gate";
 
 // Measure of a page's database requests (page loads audit, docs/
 // ARCHITECTURE.md § 3 bis), on with PERF_TRACE=1. After the response, one
@@ -166,8 +167,11 @@ export function tracingFetch(inner: typeof fetch): typeof fetch {
 }
 
 /** The fetch that reaches the database (lib/supabase/batch.ts), measured
- * when PERF_TRACE=1: what really leaves. */
-export const sentFetch: typeof fetch = measured(
-  (input, init) => fetch(input, init),
-  (trace) => trace.sent,
+ * when PERF_TRACE=1: what really leaves. A few at a time (request-gate.ts):
+ * the time waiting for a slot is not counted as the request's. */
+export const sentFetch: typeof fetch = gated(
+  measured(
+    (input, init) => fetch(input, init),
+    (trace) => trace.sent,
+  ),
 );

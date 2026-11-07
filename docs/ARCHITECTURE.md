@@ -962,6 +962,14 @@ s'afficher sans chargement.
   et il **ferme ses connexions après ~35 s sans requête** ; la session neuve paie 100 à 400 ms au
   premier appel de chaque fonction (catalogue à recharger). Chaque lecture évitée compte donc
   double après une pause.
+- **Concurrence bornée** (audit des chargements, 07/11, `lib/supabase/request-gate.ts`) : toute requête serveur
+  vers Supabase passe par `sentFetch`, qui n'en laisse partir que **16 à la fois** par processus ; les autres
+  attendent leur tour (une requête annulée en attente sort de la file). Avant, un rendu envoyait tout d'un coup :
+  la liste Projets, ~1 475 requêtes en 12 s (jusqu'à 289/s), et Kong local (512 connexions) en coupait,
+  d'où des `fetch failed` ; sur la pré-prod, 137 à 1 118 requêtes attendaient ensemble la dizaine de connexions
+  de PostgREST (0,8 à 129 s pour une lecture d'une ligne). Au-delà de ~10, une requête de plus ne fait
+  qu'attendre plus longtemps dans PostgREST. `PERF_TRACE` ne compte pas l'attente d'une place dans la durée
+  d'une requête envoyée. Reste à réduire le nombre de lectures lui-même (Accueil, parcours de tous les projets).
 - **Temps réel par diffusion** (`20261027000401_live_broadcast.sql`) : la base envoie elle-même les
   signaux (`realtime.send`) sur des canaux privés, `project:<id>` (`changed`, depuis
   `project_live_bump`) et `notifications:<personne>` (`inserted`) ; qui peut écouter est décidé par

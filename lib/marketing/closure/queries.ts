@@ -90,8 +90,7 @@ export const loadMarketingStanding = trackedCache(
       supabase
         .from("marketing_activations")
         .select("id", { count: "exact", head: true })
-        .eq("project_id", projectId)
-        .is("archived_at", null),
+        .eq("project_id", projectId),
       supabase
         .from("marketing_reports")
         .select("state")
