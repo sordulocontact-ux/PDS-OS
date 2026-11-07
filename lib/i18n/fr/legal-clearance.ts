@@ -177,14 +177,22 @@ export const legalClearance = {
   // The drawer in three moments (Sacha, 07/10/2026: « simplifie-la au max
   // et rends-la plus fluide »). The nine states of the ticket stay
   // underneath; each moment ends with one action.
-  // JUR-09: what is taken, then each right apart, its holder and its own
-  // state, in one block (Sacha, 07/11/2026: « trop d'informations »).
+  // JUR-09: what is asked, then each right apart, with its own state.
   request: {
     title: "La demande",
     element: "Ce qui est repris",
-    inTitle: (title: string) => `Dans « ${title} »`,
-    fromIntake: "Cadrage juridique",
+    work: "Œuvre existante",
+    usage: "Usage",
+    holder: (right: string) => `Ayant droit de ${right}`,
     noHolder: "À identifier",
+    rightsTitle: (n: number) =>
+      n > 1 ? "Deux autorisations distinctes" : "L'autorisation",
+    rightsBody:
+      "Les droits sur l'œuvre (auteurs, éditeur) et sur l'enregistrement (producteur) s'autorisent chacun à part. Accepter des conditions n'est pas être autorisé : seule la licence signée finalise.",
+    rightOf: { work: "l'œuvre", master: "l'enregistrement" } as Record<
+      string,
+      string
+    >,
     rightLabel: {
       work: "Droits sur l'œuvre",
       master: "Droits sur l'enregistrement",
@@ -201,14 +209,8 @@ export const legalClearance = {
     },
   },
   stages: {
-    // Where the person stands in the three times, under each title.
-    rank: {
-      ask: "Temps 1 sur 3 · ensuite : s'accorder sur les conditions, puis faire signer la licence.",
-      negotiate: "Temps 2 sur 3 · ensuite : faire signer la licence.",
-      sign: "Temps 3 sur 3 · une fois la licence signée, le titre n'est plus bloqué.",
-    },
     ask: {
-      title: "Leur demander l'accord",
+      title: "Demander",
       sent: "J'ai envoyé la demande",
       sending: "Enregistrement…",
       note: "Ce qui est parti",
@@ -221,7 +223,7 @@ export const legalClearance = {
       none: "Rien à sécuriser : lever le blocage",
     },
     negotiate: {
-      title: "S'accorder sur les conditions",
+      title: "Négocier",
       reply: "Leur réponse",
       replyHint:
         "Collez leur e-mail ou leur message : PO en tire les conditions et les ayants droit, rien n'est appliqué sans vous.",
@@ -251,7 +253,7 @@ export const legalClearance = {
       },
     },
     sign: {
-      title: "Faire signer la licence",
+      title: "Signer",
       contract: (right: string) => `Contrat · ${right}`,
       deposit:
         "Déposez ici le contrat signé et sa preuve : ils sont rangés dans le contrat.",
@@ -273,30 +275,18 @@ export const legalClearance = {
       abandoned: "Élément abandonné : il ne bloque plus la sortie.",
     },
     journal: "Journal de l'autorisation",
-    other: "Autres cas : rien à autoriser, élément retiré",
+    other: "Autre issue",
   },
   // The words of the panel's three moments, as in the prototype of
   // 07/10/2026 (lib/legal/clearance/flow-actions.ts).
   flow: {
-    // The request as a how-to in three numbered steps (Sacha, 07/11/2026:
-    // « je comprends rien sur la page »).
-    intro: (element: string, title: string | null) =>
-      title
-        ? `« ${title} » reprend : ${element.charAt(0).toLowerCase()}${element.slice(1)}.`
-        : `Ce qui est repris : ${element.charAt(0).toLowerCase()}${element.slice(1)}.`,
-    stepTaken: "Ce que vous reprenez",
-    stepHolders: "À qui demander",
-    stepSend: "Envoyez-leur la demande",
-    rightChip: { work: "L'œuvre", master: "L'enregistrement" },
-    rightsExplained:
-      "L'œuvre, c'est la mélodie et les paroles. L'enregistrement, c'est le son d'origine, quand vous l'utilisez tel quel.",
-    scopeMissing:
-      "Choisissez ce que vous reprenez, ou « Rien à autoriser » dans les autres cas, en bas.",
-    sendHow:
-      "Depuis votre boîte mail, à leur service licences : PDS OS ne l'envoie pas à votre place.",
-    copyText: "Copier le texte",
-    sentAfter:
-      "Cliquez une fois la demande partie : la démarche attend alors leur réponse.",
+    taken: (work: string) => `Ce qui est repris de « ${work} »`,
+    scopes: {
+      both: "L'œuvre et l'enregistrement",
+      work: "L'œuvre",
+      master: "L'enregistrement",
+      none: "Rien à sécuriser",
+    },
     proposed: {
       sample:
         "Proposé parce que c'est un sample : il reprend en général la mélodie et le son. Corrigez si besoin.",
@@ -311,22 +301,23 @@ export const legalClearance = {
         `Qui détient l'enregistrement original de « ${work} » ?`,
     },
     holderWhere: {
-      work: "Son éditeur musical : il figure sur la fiche de l'œuvre, dans le répertoire en ligne de la SACEM.",
+      work: "Son éditeur musical : il figure sur la fiche de l'œuvre dans le répertoire en ligne de la SACEM. Écrivez à son service licences.",
       master:
-        "Le label ou le producteur du son d'origine : il figure sur la mention ℗ de la sortie (pochette, plateformes).",
+        "Le label ou le producteur du son original : il figure sur la mention ℗ de la sortie (pochette, plateformes). Écrivez à son service licences.",
     },
     holderMissing: "Choisissez à qui vous avez demandé.",
     holdersFallback: "les ayants droit",
     removeHolder: (name: string) => `Retirer ${name}`,
-    // « Autre issue » before the request: nothing to authorise.
-    nothing: "Rien à autoriser",
-    nothingBody:
-      "La démarche se clôt avec sa raison, gardée dans le journal : l'élément ne bloque plus la sortie.",
-    reasonLabel: "Pourquoi rien n'est à autoriser",
-    nothingDone: "Rien à autoriser : démarche close",
+    reasonLabel: "Pourquoi rien n'est à sécuriser ?",
+    reasonPlaceholder: "Ex. composition du domaine public",
+    reasonMissing: "Dites pourquoi rien n'est à sécuriser.",
+    save: "Enregistrer",
+    askHint:
+      "Envoyez la demande par votre canal habituel. Contacter n'est pas être autorisé : rien n'avance avant leur réponse.",
     sent: "J'ai envoyé la demande",
-    copied: "Texte de la demande copié",
-    copiedDetail: "Collez-le dans votre e-mail.",
+    copyRequest: "Copier un modèle de demande",
+    copied: "Modèle de demande copié",
+    copiedDetail: "L'élément, l'œuvre et le titre sont déjà remplis.",
     requestTemplate: (element: string, work: string, title: string | null) =>
       `Bonjour,\n\nNous souhaitons utiliser ${element.toLowerCase()} de « ${work} »${
         title ? ` dans le titre « ${title} »` : ""
@@ -340,9 +331,7 @@ export const legalClearance = {
         ? "Un ayant droit manque."
         : `${count} ayants droit manquent.`,
     askedTo: (names: string, date: string) =>
-      date
-        ? `Demande envoyée à ${names} le ${date} : en attente de leur réponse.`
-        : `Demande envoyée à ${names} : en attente de leur réponse.`,
+      `Demandé à ${names} le ${date}. Quand ils répondent, collez leur réponse : PO en tire les conditions.`,
     replyLabel: "Leur réponse",
     replyPlaceholder: "Collez leur e-mail ou leur message",
     replyMissing: "Collez leur réponse.",
@@ -362,8 +351,9 @@ export const legalClearance = {
     credits: "Crédits",
     countered:
       "La direction a demandé une contre-proposition : collez leur nouvelle réponse.",
-    atDirection:
-      "En attente de la direction, qui valide les conditions. Le contrat se prépare dès qu'elle a validé.",
+    atDirection: "Chez la direction",
+    atDirectionBody:
+      "La direction valide les conditions. Rien à faire de votre côté : le contrat se prépare dès qu'elle a validé.",
     validate: "Valider les conditions",
     counter: "Demander une contre-proposition",
     validateNote:

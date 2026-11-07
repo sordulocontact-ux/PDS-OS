@@ -6,7 +6,6 @@ import { useState } from "react";
 import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
 import { contracts } from "@/lib/i18n/fr/contracts";
 import { legalClearance } from "@/lib/i18n/fr/legal-clearance";
@@ -86,7 +85,7 @@ export function SignMoment({
             </span>
           </span>
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
             nativeButton={false}
             render={<Link href={routes.contract(contract.id)} />}
@@ -97,7 +96,7 @@ export function SignMoment({
       ))}
 
       {waitsDirector ? (
-        <ToneCallout tone="info">{t.contractWaits}</ToneCallout>
+        <p className="text-sm text-muted-foreground">{t.contractWaits}</p>
       ) : toSend ? (
         <>
           <p className="text-sm text-muted-foreground">{t.sendHint}</p>

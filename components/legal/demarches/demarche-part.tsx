@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { ClearanceBody } from "@/components/legal/clearance/clearance-body";
+import { ClearanceBody } from "@/components/legal/clearance/clearance-drawer";
 import {
   ContractInvoice,
   type ContractInvoices,

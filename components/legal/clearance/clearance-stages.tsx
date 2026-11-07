@@ -2,7 +2,7 @@
 
 import { StepSection } from "@/components/shell/journey/step-section";
 import { legalClearance } from "@/lib/i18n/fr/legal-clearance";
-import { momentOf } from "@/lib/legal/clearance/moments";
+import type { ClearanceStatus } from "@/lib/legal/clearance/matrix";
 import type { Clearance, Clearances } from "@/lib/legal/clearance/types";
 import { formatFee } from "@/lib/legal/contracts/fields";
 
@@ -11,6 +11,25 @@ import { NegotiateMoment } from "./negotiate-moment";
 import { SignMoment } from "./sign-moment";
 
 const fr = { legalClearance };
+
+// The ticket's nine states, as three moments for the person (the prototype
+// of 07/10/2026): ask the rights holders, negotiate their conditions, get
+// the contract signed with its proof. Closed: none.
+const MOMENTS = ["ask", "negotiate", "sign"] as const;
+const MOMENT_OF: Record<ClearanceStatus, number> = {
+  to_investigate: 0,
+  rightsholders_identified: 0,
+  contacted: 1,
+  waiting_external: 1,
+  negotiating: 1,
+  refused: 1,
+  action_required: 1,
+  agreement_reached: 2,
+  document_pending: 2,
+  signed: 2,
+  cleared: 3,
+  abandoned: 3,
+};
 
 /** The validated conditions in a few words (« 600 € · 5 % »). */
 export function termsLine(clearance: Clearance): string {
@@ -43,14 +62,10 @@ export function ClearanceStages({
   context: Omit<Clearances, "items">;
 }) {
   const t = fr.legalClearance.stages;
-  const moment = momentOf(clearance.status);
+  const moment = MOMENTS[MOMENT_OF[clearance.status]];
   if (!moment) return null;
   return (
-    <StepSection
-      title={t[moment].title}
-      description={t.rank[moment]}
-      className="gap-4"
-    >
+    <StepSection title={t[moment].title}>
       {moment === "ask" && (
         <AskMoment projectId={projectId} clearance={clearance} />
       )}

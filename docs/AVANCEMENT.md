@@ -1672,6 +1672,10 @@ Retour « Refonte du module Sessions studio » (Ibé, 06/11, maquettes de direct
 
 ## Page Autorisation d'utilisation refaite (07/11/2026, branche `pre-prod`)
 
+**Annulé le soir même** (Sacha : « remet comme avant la page autorisation ») : la page, ses textes et ses
+composants sont revenus à leur état d'avant ; seul l'écart titre / phrase de 10 px reste. Détail de
+l'essai ci-dessous, pour mémoire.
+
 Demande de Sacha : « la page est moche, mal hiérarchisée, trop d'informations, on ne sait pas quoi
 lire ». Retours d'Ibé relus avant (recette Juridique V1, JUR-09, JUR-10 ; ticket Juridique 05) : rien
 de retiré.

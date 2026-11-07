@@ -42,9 +42,8 @@ export const legalDemarches = {
   why: {
     person:
       "Sa fiche donne au contrat ce qui lui manque. La direction valide le document avant l'envoi en signature.",
-    // In plain words (Sacha, 07/11/2026: « je comprends rien sur la page »).
     clearance:
-      "Le titre reprend un morceau d'une chanson qui existe déjà. Pour pouvoir le sortir, il faut l'accord écrit de ceux qui en ont les droits, en trois temps : leur demander, s'accorder sur les conditions, leur faire signer une licence.",
+      "Une œuvre existante non autorisée bloque la sortie. Demander, négocier, faire signer : chaque temps garde sa preuve. Un refus se décide : retirer, remplacer, ou rester bloqué.",
     split:
       "Les parts de l'œuvre, saisies par une personne et confirmées par chaque ayant droit par son lien. Confirmer n'est pas signer un contrat.",
     sacem:
