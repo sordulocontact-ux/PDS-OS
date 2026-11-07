@@ -3097,6 +3097,11 @@ choisit ce qui est utile et le **transmet** avec une priorité à l'équipe qui 
   (`fileEachAlone` : titre = ses premiers mots, résumé = son message, aucun appel au modèle) ;
   le DG le retouche (« Modifier », « Demander à PO de réécrire ») avant de le transmettre.
   Remettre la constante à `true` rétablit le tri ci-dessous.
+  Les retours que PO avait rangés dans un sujet déjà publié sur Notion, après sa publication,
+  en ont été détachés (migration `20261107140101_feedback_detach_unpublished`) : la page
+  Notion de ces sujets était déjà « Terminé », ils y auraient été perdus. Ils redeviennent
+  chacun un sujet « À examiner ». Pour un sujet publié qui garde un retour en retard (retour
+  modifié depuis, échec), le bouton dit « Ajouter les N retours à la page Notion ».
 
 - **Fenêtre de retour** (`FeedbackProvider`, une pour toute l'app) : « Envoyer un retour »
   en bas de la navigation, « Nouveau retour » sur la page. Type fermé (`bug`, `idea`,

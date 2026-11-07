@@ -176,7 +176,10 @@ export const feedback = {
     originalsHeading: "Retours d'origine",
     open: "Voir sur Notion",
     send: "Envoyer sur Notion",
-    update: "Mettre à jour sur Notion",
+    update: (count: number) =>
+      count === 1
+        ? "Ajouter le retour à la page Notion"
+        : `Ajouter les ${count} retours à la page Notion`,
     pending: "Envoi sur Notion…",
     synced: "Envoyé sur Notion.",
     failed: (reason: string) =>

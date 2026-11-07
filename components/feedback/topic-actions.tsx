@@ -150,7 +150,7 @@ export function TopicActions({
           {topic.notionError
             ? t.notion.retry
             : topic.notionSynced
-              ? t.notion.update
+              ? t.notion.update(topic.newSinceSync)
               : t.notion.send}
         </Button>
       )}
