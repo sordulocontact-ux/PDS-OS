@@ -127,6 +127,20 @@ export const details = {
     link: (url: string) => `Lien de la visio : ${url}`,
     noLink: "Lien de la visio : à venir",
   },
+  // « Modifier les participants » of the Participants card (whoever works
+  // on the call).
+  participants: {
+    edit: "Modifier les participants",
+    title: "Participants",
+    description:
+      "Ajoutez ou retirez des participants. Un membre ajouté est prévenu dans PDS OS ; si le call a un lien Google Meet, Google envoie l'invitation par e-mail aux nouveaux invités et prévient ceux que vous retirez.",
+    save: "Enregistrer",
+    saving: "Enregistrement…",
+    close: "Fermer",
+    done: "Participants enregistrés.",
+    googleFailed:
+      "Participants enregistrés, mais Google Agenda n'a pas été mis à jour : prévenez les nouveaux invités.",
+  },
   // The recording of a call to come another day, folded.
   recordTitle: "Enregistrer le call",
   recordLater:

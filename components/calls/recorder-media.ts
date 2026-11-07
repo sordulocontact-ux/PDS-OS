@@ -31,14 +31,26 @@ export function isRecordingSupported(source: RecorderSource): boolean {
     !pickFormat()
   )
     return false;
-  return source === "mic"
-    ? "getUserMedia" in navigator.mediaDevices
-    : "getDisplayMedia" in navigator.mediaDevices;
+  if (source === "mic") return "getUserMedia" in navigator.mediaDevices;
+  // Only Chromium (Chrome, Edge) shares a tab's sound: Safari and Firefox
+  // share the screen without it (retour « Échec de l'enregistrement »,
+  // 05/11/2026). userAgentData is Chromium's alone.
+  return (
+    "getDisplayMedia" in navigator.mediaDevices && "userAgentData" in navigator
+  );
 }
 
 export class NoTabAudioError extends Error {}
-/** The tab picker failed or was cancelled: never a microphone problem. */
-export class TabShareError extends Error {}
+/** The tab picker failed or was cancelled: never a microphone problem.
+ * `cancelled`: the person closed the picker; otherwise the browser refused. */
+export class TabShareError extends Error {
+  constructor(
+    message: string,
+    readonly cancelled: boolean,
+  ) {
+    super(message);
+  }
+}
 
 /** Why the microphone could not be opened, told apart for the user (PROJ-BUG-01). */
 export type CaptureError =
@@ -49,6 +61,7 @@ export type CaptureError =
   | "no_device"
   | "device_busy"
   | "tab_cancelled"
+  | "tab_failed"
   | "no_tab_audio"
   | "device_error";
 
@@ -91,7 +104,8 @@ export async function micDiagnosis(): Promise<CaptureError | null> {
 /** Maps a failure of openCapture to what the user can do about it. */
 export async function captureErrorOf(caught: unknown): Promise<CaptureError> {
   if (caught instanceof NoTabAudioError) return "no_tab_audio";
-  if (caught instanceof TabShareError) return "tab_cancelled";
+  if (caught instanceof TabShareError)
+    return caught.cancelled ? "tab_cancelled" : "tab_failed";
   const name = caught instanceof DOMException ? caught.name : "";
   if (name === "NotAllowedError" || name === "SecurityError") {
     const state = await micPermission();
@@ -127,11 +141,10 @@ export async function openCapture(source: RecorderSource): Promise<Capture> {
   const context = new AudioContext();
   void context.resume().catch(() => undefined);
   try {
-    const mic = await navigator.mediaDevices.getUserMedia({
-      audio: { echoCancellation: true, noiseSuppression: true },
-    });
-    streams.push(mic);
-
+    // The tab first, still inside the click: a browser opens its picker only
+    // from a user gesture, which the microphone's permission prompt would
+    // otherwise use up (the share then failed as if it had been cancelled,
+    // retour « Échec de l'enregistrement », 05/11/2026).
     let tab: MediaStream | null = null;
     if (source === "tab") {
       // Chrome only shares a tab's sound when video is requested too; the video is dropped.
@@ -141,12 +154,18 @@ export async function openCapture(source: RecorderSource): Promise<Capture> {
           audio: true,
         });
       } catch (error) {
-        throw new TabShareError(String(error));
+        const name = error instanceof DOMException ? error.name : "";
+        throw new TabShareError(String(error), name === "NotAllowedError");
       }
       streams.push(tab);
       tab.getVideoTracks().forEach((t) => t.stop());
       if (tab.getAudioTracks().length === 0) throw new NoTabAudioError();
     }
+
+    const mic = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: true, noiseSuppression: true },
+    });
+    streams.push(mic);
 
     // Often suspended after a permission prompt: nothing would reach the
     // recorder. Resume it explicitly.

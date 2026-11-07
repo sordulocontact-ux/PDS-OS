@@ -167,6 +167,11 @@ export function CallRecorder({
           onSourceChange={setChosen}
           tabSupported={tabSupported}
           videoCall={videoCall}
+          tabFailed={
+            rec.error === "tab_cancelled" ||
+            rec.error === "tab_failed" ||
+            rec.error === "no_tab_audio"
+          }
           starting={rec.status === "requesting"}
           problem={
             problemText

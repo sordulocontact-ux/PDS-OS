@@ -1,5 +1,6 @@
 import { CallAudio } from "@/components/calls/call-audio";
 import { CallLinkButton } from "@/components/calls/call-link-button";
+import { CallParticipantsButton } from "@/components/calls/call-participants-button";
 import { JoinCallLink } from "@/components/calls/join-call-link";
 import { PreparedCallDetails } from "@/components/calls/prepared-call-details";
 import { PageSection } from "@/components/shell/page-section";
@@ -12,7 +13,7 @@ const fr = { calls };
 
 /**
  * The side column of a call's page (proto `docs/protos/pages.html`): who
- * takes part, what the call was prepared for, its recording once there, its
+ * takes part (changed by whoever works on the call), what the call was prepared for, its recording once there, its
  * video link (« Rejoindre » while it is to come, « Copier le lien », the
  * link changed by whoever works on the call before it is recorded).
  */
@@ -21,11 +22,14 @@ export function CallSide({
   audioUrls,
   upcoming,
   canEditLink,
+  canEditPeople,
 }: {
   call: CallDetail;
   audioUrls: Array<string | null>;
   upcoming: boolean;
   canEditLink: boolean;
+  // Whoever works on the call changes who takes part.
+  canEditPeople: boolean;
 }) {
   const t = fr.calls.details;
   const p = fr.calls.page;
@@ -67,6 +71,12 @@ export function CallSide({
               </li>
             ))}
           </ul>
+        )}
+        {canEditPeople && (
+          <CallParticipantsButton
+            callId={call.id}
+            isProject={call.projectId !== null}
+          />
         )}
       </PageSection>
       {call.prepared && <PreparedCallDetails prepared={call.prepared} />}

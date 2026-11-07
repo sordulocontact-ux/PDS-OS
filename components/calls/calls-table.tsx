@@ -17,6 +17,7 @@ import {
   DataTableMedia,
   DataTableRow,
 } from "@/components/ui/data-table";
+import { canDeleteCall, type CallDeleter } from "@/lib/calls/delete-rule";
 import { callHref, type CallDoor } from "@/lib/calls/door";
 import {
   callViewOf,
@@ -57,14 +58,14 @@ export function CallsTable({
   calls,
   now,
   door,
-  deletable,
+  deleter,
 }: {
   calls: CallListItem[];
   // Reference time for "À venir", taken once by the page.
   now: Date;
   door: CallDoor;
-  // The viewer may delete calls (archive_records).
-  deletable: boolean;
+  // Who looks: the director deletes every call, an owner theirs.
+  deleter: CallDeleter;
 }) {
   const t = fr.calls.all;
   const withProject = door.kind === "calls";
@@ -105,7 +106,7 @@ export function CallsTable({
                 now={now}
                 door={door}
                 withProject={withProject}
-                deletable={deletable}
+                deletable={canDeleteCall(deleter, call)}
               />
             ))}
           </Fragment>

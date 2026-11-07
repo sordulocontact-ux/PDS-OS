@@ -22,7 +22,8 @@ export const callPage = {
     pending: "Suppression…",
     done: "Réunion supprimée.",
     errors: {
-      forbidden: "Seule la direction peut supprimer une réunion.",
+      forbidden:
+        "Seuls la direction et le responsable de la réunion peuvent la supprimer.",
       not_found: "Cette réunion n'existe plus.",
       in_use:
         "Cette réunion est encore utilisée : des tâches, des points ou un Brief Master viennent de son compte rendu. Supprimez-les d'abord.",

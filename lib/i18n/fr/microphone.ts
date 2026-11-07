@@ -16,9 +16,11 @@ export const microphoneErrors = {
   device_busy:
     "Le micro ne répond pas : il est peut-être utilisé par une autre application. Fermez-la, ou débranchez et rebranchez le micro, puis réessayez.",
   tab_cancelled:
-    "Le partage de l'onglet a été annulé. Relancez et choisissez l'onglet du call.",
+    "Le partage de l'onglet a été annulé. Relancez et choisissez l'onglet du call, ou choisissez « Une réunion sur place » pour n'enregistrer que votre micro.",
+  tab_failed:
+    "Le navigateur n'a pas pu partager l'onglet du call. Réessayez, ou choisissez « Une réunion sur place » pour n'enregistrer que votre micro.",
   no_tab_audio:
-    "L'onglet a été partagé sans son. Recommencez en cochant « Partager aussi l'audio de l'onglet ».",
+    "L'onglet a été partagé sans son. Recommencez en cochant « Partager aussi l'audio de l'onglet », ou choisissez « Une réunion sur place » pour n'enregistrer que votre micro.",
   device_error: "Le micro n'a pas pu être ouvert. Vérifiez qu'il est branché.",
   save_unavailable:
     "La sauvegarde de l'enregistrement n'a pas pu être préparée (connexion ?). Rien n'est enregistré : réessayez.",

@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import type { ActionResult } from "@/lib/calls/constants";
 import type { CallContact } from "@/lib/calls/invite";
+import { participantPool } from "@/lib/calls/prep/pool";
 import type { PrepPerson } from "@/lib/calls/prep/types";
 import { instantOf, slotFrom, slotMinutes } from "@/lib/calls/slot";
 import { calls } from "@/lib/i18n/fr/calls";
@@ -107,24 +108,12 @@ export function CallPlanForm({
   const [title, setTitle] = useState(defaultTitle ?? "");
   const [link, setLink] = useState(defaultUrl ?? "");
   // Who takes part: members and contacts by id, addresses typed.
-  const [pool] = useState<PrepPerson[]>(() => [
-    ...members.map((m) => ({
-      key: `m:${m.personId}`,
-      name: m.name,
-      detail: m.detail ?? memberDetail,
-      external: false,
-      invite: "app" as const,
-      email: null,
-    })),
-    ...contacts.map((c) => ({
-      key: `c:${c.contactId}`,
-      name: c.name,
-      detail: c.roles || t.contactNoEmail,
-      external: true,
-      invite: c.email ? ("email" as const) : null,
-      email: c.email?.toLowerCase() ?? null,
-    })),
-  ]);
+  const [pool] = useState<PrepPerson[]>(() =>
+    participantPool(members, contacts, {
+      memberDetail,
+      noEmail: t.contactNoEmail,
+    }),
+  );
   const [people, setPeople] = useState<PrepPerson[]>(() =>
     pool.filter(
       (p) => defaultMemberIds.includes(p.key.slice(2)) && !p.external,

@@ -1,7 +1,7 @@
 import { CallsListView } from "@/components/calls/calls-list-view";
 import { CreateCallForm } from "@/components/calls/create-call-form";
 import { ProjectHeader } from "@/components/projects/project-header";
-import { can } from "@/lib/auth/access";
+import { callDeleter } from "@/lib/calls/delete-rule";
 import { requireApproved } from "@/lib/auth/dal";
 import { asCallView, nextRoundHourInput } from "@/lib/calls/format";
 import { loadCallContacts, loadCallMembers } from "@/lib/calls/invite";
@@ -64,7 +64,7 @@ export default async function ProjectCallsPage({
         door={{ kind: "project", projectId }}
         view={asCallView(view)}
         project={null}
-        deletable={can(access, "archive_records")}
+        deleter={callDeleter(access)}
         empty={
           <section className="flex flex-col gap-4">
             <div className="flex max-w-prose flex-col gap-1">

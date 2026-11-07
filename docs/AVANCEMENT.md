@@ -1653,3 +1653,19 @@ Retour « Refonte du module Sessions studio » (Ibé, 06/11, maquettes de direct
 - [ ] **Migration à pousser en production** (avec accord). Le geste « Signer pour PDS » de la page Contrats
       (`ContractCountersignDialog`) n'a pas encore le dépôt du PDF : la base le refusera tant qu'il manque.
       Confirmer avec Ibé que PDS signe toujours en premier.
+
+## Retours Calls : suppression, participants, enregistrement (07/11/2026, branche `pre-prod`, migration `20261107180101_call_owner_deletes`)
+
+- [x] **Supprimer une réunion** (Akili, 07/11) : « Supprimer la réunion » (« ⋯ » de la page et de chaque ligne)
+      ouvert au responsable du call (créateur d'une réunion, responsable du projet), plus seulement à la direction ;
+      `delete_call` le vérifie (`is_call_owner`), test pgTAP `call-delete` (5). Un call à venir supprimé annule aussi
+      son événement Google (les invités en sont prévenus).
+- [x] **Ajouter des participants à une réunion déjà planifiée** (Ibé, 05/11) : il n'existait aucun moyen de le
+      faire. « Modifier les participants » dans la carte Participants (responsable du call), même champ que
+      « Nouveau call » ; membres notifiés, invitations Google mises à jour pour un call à venir.
+- [x] **Échec de l'enregistrement** (Ibé, 05/11, « Le partage de l'onglet a été annulé ») : l'onglet est demandé
+      avant le micro, encore dans le clic (l'invite du micro faisait échouer le partage comme une annulation) ;
+      l'onglet n'est plus proposé dans Safari / Firefox, qui ne partagent pas son son ; après un échec du partage,
+      « Une réunion sur place » (micro seul) est proposé même pour un call en visio.
+- [ ] Migration à pousser en production (avec accord). À rejouer par l'équipe dans un vrai Chrome : enregistrer un
+      Meet (la première fois, avec l'invite du micro), ajouter puis retirer un participant d'un call Google Meet.

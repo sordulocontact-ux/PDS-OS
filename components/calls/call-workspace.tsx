@@ -161,6 +161,7 @@ export function CallWorkspace({
           audioUrls={audioUrls}
           upcoming={upcoming}
           canEditLink={linkable}
+          canEditPeople={canEdit}
         />
       </div>
     </div>

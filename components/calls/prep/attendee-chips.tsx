@@ -5,6 +5,7 @@ import { useRef, useState, type KeyboardEvent } from "react";
 import { FieldError } from "@/components/auth/form-message";
 import { CreateContactDialog } from "@/components/network/create-contact-dialog";
 import { Label } from "@/components/ui/label";
+import { emailParticipant, participantsPayload } from "@/lib/calls/prep/pool";
 import type { PrepPerson } from "@/lib/calls/prep/types";
 import { callPrep } from "@/lib/i18n/fr/call-prep";
 import { listNetworkPeople } from "@/lib/network/people-actions";
@@ -80,14 +81,7 @@ export function AttendeeChips({
   const addNew = () => {
     if (!newWho) return;
     if (newWho.kind === "name") return setCreating(newWho.value);
-    add({
-      key: `e:${newWho.value}`,
-      name: newWho.value,
-      detail: t.how.email,
-      external: true,
-      invite: "email",
-      email: newWho.value,
-    });
+    add(emailParticipant(newWho.value, null, t.how.email));
   };
   const remove = (key: string) => {
     onChange(value.filter((p) => p.key !== key));
@@ -114,17 +108,7 @@ export function AttendeeChips({
     }
   };
 
-  const attendees = value.flatMap((p) =>
-    p.key.startsWith("m:") ? [p.key.slice(2)] : [],
-  );
-  const guests = value.flatMap(
-    (p): Array<{ contactId: string } | { email: string }> =>
-      p.key.startsWith("c:")
-        ? [{ contactId: p.key.slice(2) }]
-        : p.key.startsWith("e:")
-          ? [{ email: p.key.slice(2) }]
-          : [],
-  );
+  const { attendees, guests } = participantsPayload(value);
 
   return (
     <div className="flex flex-col gap-1.5">

@@ -11,8 +11,9 @@ import { calls } from "@/lib/i18n/fr/calls";
 const fr = { calls };
 
 /**
- * Before recording: what to record (only when the call is not in visio or
- * the browser cannot share a tab), the problem found, and the button. On
+ * Before recording: what to record (only when the call is not in visio, the
+ * browser cannot share a tab, or sharing the tab just failed), the problem
+ * found, and the button. On
  * the call's page, the full how-to; `compact` (a step's card): one button
  * that starts at once, a gesture of the module beside it, and the how-to in
  * one line under them.
@@ -22,6 +23,7 @@ export function RecorderStart({
   onSourceChange,
   tabSupported,
   videoCall,
+  tabFailed = false,
   starting,
   problem,
   onStart,
@@ -31,13 +33,15 @@ export function RecorderStart({
   onSourceChange: (source: RecorderSource) => void;
   tabSupported: boolean;
   videoCall: boolean;
+  // Sharing the tab just failed: the microphone alone is offered.
+  tabFailed?: boolean;
   starting: boolean;
   problem: { text: string; tone: "danger" | "warning" } | null;
   onStart: () => void;
   compact?: { label: string; beside?: ReactNode };
 }) {
   const t = fr.calls.recorder;
-  const choice = !(videoCall && tabSupported) && (
+  const choice = (tabFailed || !(videoCall && tabSupported)) && (
     <ChoiceCards
       name="recorder-source"
       legend={t.sourceLabel}

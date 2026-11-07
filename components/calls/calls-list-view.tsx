@@ -4,6 +4,7 @@ import { CallsList } from "@/components/calls/calls-list";
 import { EmptyState } from "@/components/shell/empty-state";
 import { DataTableViews } from "@/components/ui/data-table";
 import { UrlFilters, type UrlFilterGroup } from "@/components/ui/url-filters";
+import type { CallDeleter } from "@/lib/calls/delete-rule";
 import { callsHref, type CallDoor } from "@/lib/calls/door";
 import { callViewOf, CALL_VIEWS, type CallView } from "@/lib/calls/format";
 import type { CallListItem } from "@/lib/calls/queries";
@@ -29,7 +30,7 @@ export function CallsListView({
   door,
   view,
   project,
-  deletable,
+  deleter,
   empty,
 }: {
   calls: CallListItem[];
@@ -38,7 +39,7 @@ export function CallsListView({
   view: CallView | null;
   // ?project= of Calls: a project's id, or « internal ».
   project: string | null;
-  deletable: boolean;
+  deleter: CallDeleter;
   empty: React.ReactNode;
 }) {
   if (calls.length === 0) return empty;
@@ -86,7 +87,7 @@ export function CallsListView({
         calls={shown}
         now={now}
         door={door}
-        deletable={deletable}
+        deleter={deleter}
         filters={
           withFilter && (
             <UrlFilters

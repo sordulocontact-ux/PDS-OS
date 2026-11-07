@@ -40,8 +40,9 @@ const copy = (text: string, done: string) =>
  * « ⋯ » of a call, the same on its page and on its row in a list of calls:
  * the video link copied, its sheet for people outside the label (when, how
  * long, the agenda, the video link; lib/calls/sheet.ts) copied or written
- * as an e-mail from one's own mailbox. For the director (`deletable`),
- * « Supprimer la réunion » too, asked first. The sheet is written by the
+ * as an e-mail from one's own mailbox. For the director and whoever works
+ * on the call (`deletable`, lib/calls/delete-rule.ts), « Supprimer la
+ * réunion » too, asked first. The sheet is written by the
  * code from the call, when it is asked for.
  */
 export function CallSheetMenu({
@@ -52,7 +53,8 @@ export function CallSheetMenu({
   reveal = false,
 }: {
   call: CallMenuCall;
-  // The viewer may delete calls (archive_records): the SQL has the last word.
+  // The viewer may delete this call (lib/calls/delete-rule.ts): the SQL has
+  // the last word.
   deletable?: boolean;
   // Where the page goes once the call is gone; a list stays (the action
   // revalidates it).

@@ -2,6 +2,7 @@
 
 import { CallsTable } from "@/components/calls/calls-table";
 import { SearchableList } from "@/components/ui/searchable-list";
+import type { CallDeleter } from "@/lib/calls/delete-rule";
 import type { CallDoor } from "@/lib/calls/door";
 import type { CallListItem } from "@/lib/calls/queries";
 import { calls } from "@/lib/i18n/fr/calls";
@@ -14,14 +15,14 @@ export function CallsList({
   calls,
   now,
   door,
-  deletable,
+  deleter,
   filters,
   empty,
 }: {
   calls: CallListItem[];
   now: Date;
   door: CallDoor;
-  deletable: boolean;
+  deleter: CallDeleter;
   // The page's filters, beside the search; what stands for no row at all.
   filters?: React.ReactNode;
   empty?: React.ReactNode;
@@ -42,12 +43,7 @@ export function CallsList({
       empty={empty}
     >
       {(visible) => (
-        <CallsTable
-          calls={visible}
-          now={now}
-          door={door}
-          deletable={deletable}
-        />
+        <CallsTable calls={visible} now={now} door={door} deleter={deleter} />
       )}
     </SearchableList>
   );

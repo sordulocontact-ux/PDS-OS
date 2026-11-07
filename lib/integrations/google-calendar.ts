@@ -158,6 +158,27 @@ export async function moveMeetEvent(input: {
   );
 }
 
+/** Replaces the event's guests; Google invites the new ones and tells the
+ * ones taken off (sendUpdates). */
+export async function setMeetEventGuests(input: {
+  eventId: string;
+  guests: Array<{ email: string; name?: string | null }>;
+}): Promise<void> {
+  const config = settings();
+  if (!config) throw new GoogleCalendarError("not_configured");
+  await request(
+    config,
+    "PATCH",
+    `/calendars/${encodeURIComponent(config.calendarId)}/events/${encodeURIComponent(input.eventId)}?sendUpdates=all`,
+    {
+      attendees: input.guests.map((guest) => ({
+        email: guest.email,
+        ...(guest.name && { displayName: guest.name }),
+      })),
+    },
+  );
+}
+
 /** Cancels the event; Google tells every guest (sendUpdates). Already gone
  * (410) counts as cancelled. */
 export async function cancelMeetEvent(eventId: string): Promise<void> {

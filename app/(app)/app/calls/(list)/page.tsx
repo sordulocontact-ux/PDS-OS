@@ -15,7 +15,7 @@ import { PageHeader } from "@/components/shell/page-header";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { CalendarToolbar } from "@/components/ui/calendar-toolbar";
 import { ViewToggle } from "@/components/ui/view-toggle";
-import { can } from "@/lib/auth/access";
+import { callDeleter } from "@/lib/calls/delete-rule";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { placeCalls } from "@/lib/calls/calendar";
@@ -160,7 +160,7 @@ export default async function CallsPage({
           door={{ kind: "calls" }}
           view={asCallView(params.view)}
           project={filterParam(params.project)}
-          deletable={can(access, "archive_records")}
+          deleter={callDeleter(access)}
           empty={
             <EmptyState
               icon={IconPhone}

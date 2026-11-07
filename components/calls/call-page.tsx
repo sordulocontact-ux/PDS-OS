@@ -4,6 +4,7 @@ import { EditAccessProvider } from "@/components/projects/edit-access";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
+import { callDeleter, canDeleteCall } from "@/lib/calls/delete-rule";
 import type { CallDoor } from "@/lib/calls/door";
 import { isUpcoming } from "@/lib/calls/format";
 import type { CallModule } from "@/lib/calls/now";
@@ -128,6 +129,9 @@ export async function CallPage({
           organizer={organizer}
           upcoming={isUpcoming(call, now)}
           closed={data.closures.length > 0}
+          deletable={canDeleteCall(callDeleter(access), {
+            ownerPersonId: project ? project.ownerPersonId : call.createdBy,
+          })}
         />
       }
       transcript={transcript}

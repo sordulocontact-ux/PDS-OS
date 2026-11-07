@@ -6,8 +6,6 @@ import { CallSheetMenu } from "@/components/calls/call-sheet-menu";
 import { JoinCallLink } from "@/components/calls/join-call-link";
 import { ProjectHeader } from "@/components/projects/project-header";
 import { ViewLink } from "@/components/ui/view-link";
-import { can } from "@/lib/auth/access";
-import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { callsHref, type CallDoor } from "@/lib/calls/door";
 import type { CallDetail } from "@/lib/calls/queries";
@@ -28,13 +26,14 @@ const fr = { calls, shell };
  *   organizes as its facts.
  * On the right, « Rejoindre » while it is to come and « ⋯ » (CallSheetMenu).
  */
-export async function CallHeader({
+export function CallHeader({
   call,
   project,
   door,
   organizer,
   upcoming,
   closed,
+  deletable,
 }: {
   call: CallDetail;
   project: { id: string; title: string } | null;
@@ -42,8 +41,9 @@ export async function CallHeader({
   organizer: string | null;
   upcoming: boolean;
   closed: boolean;
+  // « Supprimer la réunion » in its « ⋯ » (lib/calls/delete-rule.ts).
+  deletable: boolean;
 }) {
-  const deletable = can(await requireApproved(), "archive_records");
   const back = callsHref(door);
   const actions = (
     <div className="flex shrink-0 items-center gap-2">

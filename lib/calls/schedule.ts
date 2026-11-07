@@ -42,7 +42,7 @@ export function slotOf(
   return { ok: true, slot: { start, end } };
 }
 
-const guestsSchema = z
+export const guestsSchema = z
   .array(
     z.union([
       z.object({ contactId: z.uuid() }),
@@ -134,6 +134,33 @@ export async function saveGuests(
 }
 
 /**
+ * Who a call's Google event invites: the members' addresses (read from
+ * their fiche with the user's session), then the guests, each address once.
+ */
+export async function eventGuestsOf(
+  supabase: Client,
+  memberIds: string[],
+  guests: Guest[],
+): Promise<Array<{ email: string; name: string | null }>> {
+  const { data: people } = memberIds.length
+    ? await supabase
+        .from("people")
+        .select("email, first_name, last_name")
+        .in("id", memberIds)
+    : { data: [] };
+  const invited = new Map<string, string | null>();
+  for (const person of people ?? [])
+    if (person.email)
+      invited.set(
+        person.email,
+        [person.first_name, person.last_name].filter(Boolean).join(" "),
+      );
+  for (const guest of guests)
+    if (!invited.has(guest.email)) invited.set(guest.email, guest.name);
+  return [...invited].map(([email, name]) => ({ email, name }));
+}
+
+/**
  * Creates the Google Calendar event of a call already saved: its Meet link
  * and the invitations of the creator, the members and the guests. Returns
  * false when Google refused: the call stays, without a link, and its page
@@ -153,29 +180,13 @@ export async function attachGoogleMeet(
   },
 ): Promise<boolean> {
   try {
-    const { data: people } = input.memberIds.length
-      ? await supabase
-          .from("people")
-          .select("email, first_name, last_name")
-          .in("id", input.memberIds)
-      : { data: [] };
-    const invited = new Map<string, string | null>();
-    for (const person of people ?? [])
-      if (person.email)
-        invited.set(
-          person.email,
-          [person.first_name, person.last_name].filter(Boolean).join(" "),
-        );
-    for (const guest of input.guests)
-      if (!invited.has(guest.email)) invited.set(guest.email, guest.name);
-
     const event = await createMeetEvent({
       requestId: input.callId,
       title: input.title,
       description: input.description ?? fr.calls.schedule.eventDescription,
       start: input.slot.start,
       end: input.slot.end,
-      guests: [...invited].map(([email, name]) => ({ email, name })),
+      guests: await eventGuestsOf(supabase, input.memberIds, input.guests),
     });
     const { error } = await supabase
       .from("calls")

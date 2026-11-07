@@ -55,6 +55,7 @@ service role n'est utilisée que par le cron (`lib/supabase/admin.ts`).
 | `…20261006000301_delete_records` (numéroté `000101` à l'origine, en double avec le Cadrage intelligent) | Suppression définitive (§ 2 quater) : `delete_records(kind, ids[])` (SECURITY DEFINER, `archive_records`, 200 lignes au plus) renvoie une ligne par id (`error` nul = supprimée, sinon `not_found` / `forbidden` / `*_in_use` / `generic`), chaque id dans son sous-bloc ; un projet part avec tout son contenu (`delete_project_row`, enfants avant parents), un master / artiste / contact seulement s'il n'est plus utilisé ; crédits et parts d'un contact supprimé gardent le nom sans lien. Tests : `delete-records.test.sql`. |
 | `…20261105170101_project_master_validator` (**non appliquée**) | Qui fait les retours sur le mix, choisi à la création (retour d'Ibé, 02/11/2026, § 8 septies) : `projects.master_validator_person_id` (droits insert/update comme les autres colonnes, RLS « avant lancement »), `create_project(…, p_master_validator_person_id)` (sortie musicale seulement). Règle du Brief vérifiée **au commit** (`z_check_master_validator`, différé : les directeurs créatifs sont ajoutés après l'insert) : responsable, personne à qui le projet est transmis (en attente) ou directeur créatif, sinon `invalid_master_validator`. Trigger `a_default_validator` (before insert de `master_briefs`) : un Brief créé sans validateur prend celui du projet s'il est encore responsable ou directeur créatif, sinon le responsable ; `apply_master_question` ne pose plus le responsable lui-même. |
 | `…20261105110101_delete_call` (**non appliquée**) | Suppression d'une réunion / d'un call (retour d'Ibé, 02/11/2026) : `delete_call(p_call_id)` (SECURITY DEFINER, `archive_records` = DG, `can_see_call`) supprime l'appel avec ses invités, prises d'enregistrement, transcriptions et comptes rendus ; refus `call_in_use` si une tâche, un besoin ou un Brief Master en dépend. UI : « Supprimer la réunion » dans le « ⋯ » de la page (`CallSheetMenu`), action `lib/calls/delete-actions.ts`. Les objets audio du bucket restent à nettoyer. |
+| `…20261107180101_call_owner_deletes` | Suppression d'un call ouverte à **son responsable** (retour d'Akili, 07/11/2026) : `delete_call` accepte la direction (`archive_records`) **ou** `is_call_owner` (responsable du projet, créateur d'une réunion) ; le reste inchangé. L'écran suit `lib/calls/delete-rule.ts` (`canDeleteCall`, ligne par ligne dans les listes) ; `deleteCall` annule aussi l'événement Google d'un call à venir. Test : `call-delete.test.sql`. |
 | `…260927001101_framing_team_roles`, `…001201_framing_constraints`, `…001401_framing_guided_review` | Cadrage en relecture guidée (§ 6) : `project_team_members.role_key` (rôle fixe, au plus une ligne par rôle ; une personne peut cumuler plusieurs rôles, une ligne chacun, et « Attribuer » propose aussi les directeurs créatifs, du projet puis de l'organisation pour la direction artistique ou créative, `assignRole` avec `personId` : Sacha, 10/10/2026), table `framing_constraints` (une ligne par contrainte typée, provenance, relue comme les besoins), source `voice` et changement de type autorisés, droits colonne sur `role_key`, lignes figées une fois le Cadrage soumis (`framing_is_editable`). |
 | `…260927001101_security_audit_fixes` | Correctifs de l'audit back du 27/09 : lecture des objets `artist-files` en **positif** (`manage_catalog`, ou une ligne `artist_files` visible — les contrats restent cachés) ; **Cadrage figé une fois soumis** (`framing_is_editable` : Brief, besoins, équipe écrits seulement en `not_started` / `in_progress`, policies restrictives insert + update) ; `project_masters` modifiable seulement avant lancement, sur un projet et un master non archivés (`project_masters_editable`) ; Web Push protégé par un secret serveur (§ 8 bis). Tests : `security-audit.test.sql`. |
 | `…260927004101_project_drafts` | Brouillons du formulaire « Nouveau projet » (retour n°6, § 2 octies) : `project_drafts.form_values` (objet JSON, 64 Ko au plus), auteur posé par trigger ; lus, modifiés et supprimés par leur auteur seul, tant qu'il a `create_projects`. Tests : `project-drafts.test.sql`. |
@@ -1216,12 +1217,19 @@ s'afficher sans chargement.
   d'un projet (le cadre du projet le fait dedans). Le compte rendu partagé
   (`/app/calls/<id>/report`) reste hors du garde 404 du call (`[callId]/(call)/layout.tsx`) : un
   membre à qui il est partagé le lit sans voir le call.
+- **Participants d'un call planifié** (retour d'Ibé, 05/11/2026) : « Modifier les participants »
+  dans la carte Participants (`CallParticipantsButton`, responsable du call seul), le même champ
+  `AttendeeChips` que « Nouveau call », rempli de qui participe (`readParticipantsForm`,
+  `lib/calls/participants.ts` ; un membre sorti de l'équipe du projet reste affiché). À
+  l'enregistrement (`saveCallParticipants`) : membres et invités ajoutés / retirés par la session
+  (RLS `is_call_owner`), un membre ajouté est notifié (`call_invited`), et l'événement Google d'un
+  call à venir reçoit la nouvelle liste (`setMeetEventGuests`, Google envoie les invitations).
 - **Liste des calls** (les deux portes) : onglets Tous / À venir / Passés, recherche, filtre Projet
   (Calls seul) ; les prochains d'abord, le plus proche en haut, puis les passés, titrés « À venir »
   / « Passés » sous « Tous » ; Projet à la teinte du projet (comme Travail), « Rejoindre » et « ⋯ »
   en bout de ligne. Le « ⋯ » d'une ligne est **le même menu** que celui de la page
   (`CallSheetMenu` : lien de la visio, fiche copiée ou écrite en e-mail, « Supprimer la réunion »
-  pour la direction, `delete_call`), visible au survol à la souris (`RowActions reveal`), toujours
+  pour la direction et le responsable du call, `canDeleteCall`, `delete_call`), visible au survol à la souris (`RowActions reveal`), toujours
   sur écran tactile ; la fiche s'écrit au clic depuis la ligne (`agenda`, `guestEmails` lus par
   `listAllCalls`). « Nouveau call » d'un projet : bouton de l'en-tête (modale, comme « Nouvelle
   réunion ») ; formulaire sur place quand le projet n'a aucun call.
@@ -1247,7 +1255,13 @@ s'afficher sans chargement.
   ouvert : quitter la page arrête l'enregistrement (ce qui est sauvé reste repris).
 - **Enregistreur dans l'app** (`components/calls/call-recorder.tsx`, `use-recorder.ts`,
   `recorder-media.ts`, `recording-live.tsx`, `recording-review.tsx`) :
-  - source « onglet » (Meet, Zoom… + micro mixés) ou « micro seul » ;
+  - source « onglet » (Meet, Zoom… + micro mixés) ou « micro seul » ; l'onglet n'est proposé que
+    dans Chrome / Edge (seuls à partager le son d'un onglet, `userAgentData`) ; **l'onglet est
+    demandé avant le micro**, encore dans le clic : sinon l'invite du micro consomme le geste
+    utilisateur et `getDisplayMedia` échoue comme une annulation (retour « Échec de
+    l'enregistrement », 05/11/2026). Annulé (`tab_cancelled`), refusé par le navigateur
+    (`tab_failed`) ou sans son (`no_tab_audio`) : le choix « Une réunion sur place » (micro seul)
+    réapparaît, même pour un call en visio ;
   - Opus 32 kbit/s ≈ 14 Mo/h ; chrono, jauge, pause, réécoute, confirmation avant
     suppression, garde `beforeunload` ;
   - arrêt auto si le partage d'onglet est coupé ; **raccrocher ne suffit pas** (l'onglet
