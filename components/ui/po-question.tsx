@@ -1,6 +1,7 @@
 import { IconChevronLeft, IconChevronRight } from "nucleo-sharp-essential";
 
 import { StatusBadge } from "@/components/ui/status-badge";
+import { TitleBlock } from "@/components/ui/title-block";
 import { ViewLink } from "@/components/ui/view-link";
 import { poQuestion } from "@/lib/i18n/fr/po-question";
 import type { Tone } from "@/lib/ui/state-tones";
@@ -62,6 +63,7 @@ export function PoQuestion({
             )
           )}
         </div>
+        <TitleBlock>
         <h3
           id="po-question-title"
           className="text-[length:var(--type-display-sm)] leading-[var(--type-display-sm-lh)] font-medium tracking-[var(--type-display-tracking)] text-balance break-words"
@@ -74,6 +76,7 @@ export function PoQuestion({
             {why}
           </div>
         )}
+        </TitleBlock>
         {state && (
           <StatusBadge tone={state.tone} size="sm" className="self-start">
             {state.label}

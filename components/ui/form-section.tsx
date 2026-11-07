@@ -1,6 +1,7 @@
 import { useId } from "react";
 
 import { sectionCardClass } from "@/components/ui/section-card";
+import { TitleBlock } from "@/components/ui/title-block";
 import { cn } from "@/lib/utils";
 
 // A titled block of a long form, on its own white card (the "Nouveau
@@ -27,14 +28,14 @@ export function FormSection({
         !plain && sectionCardClass,
       )}
     >
-      <div className="flex flex-col gap-0.5">
+      <TitleBlock>
         <h2 id={id} className="text-base font-medium">
           {title}
         </h2>
         {description && (
           <p className="text-sm text-muted-foreground">{description}</p>
         )}
-      </div>
+      </TitleBlock>
       {children}
     </section>
   );

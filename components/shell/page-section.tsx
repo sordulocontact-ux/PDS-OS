@@ -1,3 +1,5 @@
+import { TitleBlock } from "@/components/ui/title-block";
+
 import { CollapsibleSection } from "./collapsible-section";
 import { sectionClass, sectionHeaderClass } from "./page-section-classes";
 
@@ -36,12 +38,14 @@ export function PageSection({
           {eyebrow}
         </span>
       )}
-      <h2 id={titleId} className="text-base font-medium">
-        {title}
-      </h2>
-      {description && (
-        <p className="text-sm text-muted-foreground">{description}</p>
-      )}
+      <TitleBlock>
+        <h2 id={titleId} className="text-base font-medium">
+          {title}
+        </h2>
+        {description && (
+          <p className="text-sm text-muted-foreground">{description}</p>
+        )}
+      </TitleBlock>
     </div>
   );
   if (collapsible)

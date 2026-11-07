@@ -3,6 +3,7 @@
 import { IconSparkle3 } from "nucleo-sharp-essential";
 
 import { Button } from "@/components/ui/button";
+import { TitleBlock } from "@/components/ui/title-block";
 import { poQuestion } from "@/lib/i18n/fr/po-question";
 
 const fr = { poQuestion };
@@ -37,7 +38,7 @@ export function PoReading({
 }) {
   return (
     <div className="flex flex-col gap-3" aria-live="polite">
-      <div className="flex flex-col gap-0.5">
+      <TitleBlock>
         <h4 className="flex items-center gap-1.5 text-[length:var(--type-body-sm)] font-semibold">
           <IconSparkle3 aria-hidden className="size-4" />
           {t.title}
@@ -45,7 +46,7 @@ export function PoReading({
         <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
           {t.hint}
         </p>
-      </div>
+      </TitleBlock>
       {items.length === 0 ? (
         empty
       ) : (
