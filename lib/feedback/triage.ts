@@ -5,6 +5,7 @@ import { extract } from "@/lib/ai/llm";
 import { aiQuotaMessage } from "@/lib/ai/quota";
 import { feedbackTriageSchema } from "@/lib/ai/schemas/feedback-triage";
 import {
+  FEEDBACK_GROUPED_BY_PO,
   plainText,
   TOPIC_SUMMARY_MAX as SUMMARY_MAX,
   TOPIC_TITLE_MAX as TITLE_MAX,
@@ -53,6 +54,7 @@ export async function triageUnfiledFeedback(
   supabase: Awaited<ReturnType<typeof createClient>>,
   organizationId: string,
 ): Promise<TriageResult> {
+  if (!FEEDBACK_GROUPED_BY_PO) return fileEachAlone(supabase, organizationId);
   const [unfiledRes, topicsRes] = await Promise.all([
     supabase
       .from("feedback")
@@ -120,6 +122,42 @@ export async function triageUnfiledFeedback(
         : { id: topicId, kind: feedback.kind, title, summary: newSummary };
     if (match && summary) topic.summary = summary;
     topics.unshift(topic);
+    filed += 1;
+  }
+  return { ok: true, filed };
+}
+
+/**
+ * PO's grouping switched off (FEEDBACK_GROUPED_BY_PO): each feedback waiting
+ * opens a topic of its own, to review, titled with its first words and summed
+ * up by its own message (code, no call to the model, no quota).
+ */
+async function fileEachAlone(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  organizationId: string,
+): Promise<TriageResult> {
+  const { data, error } = await supabase
+    .from("feedback")
+    .select("id, message")
+    .eq("organization_id", organizationId)
+    .is("topic_id", null)
+    .order("created_at")
+    .limit(MAX_PER_RUN);
+  if (error) {
+    console.error("fileEachAlone:", error.message);
+    return { ok: false, filed: 0 };
+  }
+  let filed = 0;
+  for (const feedback of data ?? []) {
+    const { error: fileError } = await supabase.rpc("file_feedback", {
+      p_feedback: feedback.id,
+      p_title: fallbackTitle(feedback.message),
+      p_summary: feedback.message.trim().slice(0, SUMMARY_MAX),
+    });
+    if (fileError) {
+      console.error("fileEachAlone:", fileError.message);
+      return { ok: false, filed };
+    }
     filed += 1;
   }
   return { ok: true, filed };

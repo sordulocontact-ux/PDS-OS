@@ -6,12 +6,14 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { triageFeedback } from "@/lib/feedback/actions";
+import { FEEDBACK_GROUPED_BY_PO } from "@/lib/feedback/types";
 import { feedback } from "@/lib/i18n/fr/feedback";
 
 const fr = { feedback };
 
-// Before the director reads the topics, PO files the new feedback (one call
-// per opening). While it works, the list waits behind a status line; then
+// Before the director reads the topics, the new feedback is filed (one call
+// per opening): by PO when it groups (FEEDBACK_GROUPED_BY_PO), else each
+// alone, by code. While it works, the list waits behind a status line; then
 // the page reloads its data. If PO fails, the list shows at once with the
 // new feedback still waiting, and a retry.
 export function FeedbackTriage({
@@ -27,14 +29,15 @@ export function FeedbackTriage({
   const [failed, setFailed] = useState<string | null>(null);
   const [, startRefresh] = useTransition();
   const started = useRef(false);
+  const failedText = FEEDBACK_GROUPED_BY_PO ? t.failed : t.filingFailed;
 
   const run = () =>
     triageFeedback().then(
       (result) => {
         if (result.ok) startRefresh(() => router.refresh());
-        else setFailed(result.error ?? t.failed);
+        else setFailed(result.error ?? failedText);
       },
-      () => setFailed(t.failed),
+      () => setFailed(failedText),
     );
 
   useEffect(() => {
@@ -77,7 +80,7 @@ export function FeedbackTriage({
         aria-hidden
         className="size-2 shrink-0 rounded-full bg-current motion-safe:animate-pulse"
       />
-      {t.running(count)}
+      {FEEDBACK_GROUPED_BY_PO ? t.running(count) : t.filing(count)}
     </p>
   );
 }

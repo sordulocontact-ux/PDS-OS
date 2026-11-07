@@ -20,6 +20,14 @@ export const FEEDBACK_MESSAGE_MAX = 4000;
 export const TOPIC_TITLE_MAX = 200;
 export const TOPIC_SUMMARY_MAX = 2000;
 
+/**
+ * PO groups new feedback with similar topics. Off since 07/11/2026 (Sacha):
+ * it filed feedback into topics already sent, which no one saw again. Each
+ * feedback is now a topic of its own, waiting for the director, titled and
+ * summed up by code; the director edits it (or asks PO to) before sending.
+ */
+export const FEEDBACK_GROUPED_BY_PO = false;
+
 const isOneOf =
   <T extends string>(values: readonly T[]) =>
   (value: unknown): value is T =>

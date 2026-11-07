@@ -3088,8 +3088,15 @@ facture d'un contrat payé du Juridique, `20261020030301`) n'en font plus qu'une
 
 ## 8 quater. Retours sur l'application (`/app/feedback`)
 
-Circuit : l'équipe écrit au **DG**, PO regroupe les doublons, le DG choisit ce qui est
-utile et le **transmet** avec une priorité à l'équipe qui construit l'outil.
+Circuit : l'équipe écrit au **DG**, chaque retour devient un sujet « À examiner », le DG
+choisit ce qui est utile et le **transmet** avec une priorité à l'équipe qui construit l'outil.
+
+- **Regroupement par PO coupé** (Sacha, 07/11/2026, `FEEDBACK_GROUPED_BY_PO = false` dans
+  `lib/feedback/types.ts`) : PO rangeait des retours dans des sujets déjà transmis, que
+  personne ne revoyait. Chaque retour ouvre donc son propre sujet, par le code
+  (`fileEachAlone` : titre = ses premiers mots, résumé = son message, aucun appel au modèle) ;
+  le DG le retouche (« Modifier », « Demander à PO de réécrire ») avant de le transmettre.
+  Remettre la constante à `true` rétablit le tri ci-dessous.
 
 - **Fenêtre de retour** (`FeedbackProvider`, une pour toute l'app) : « Envoyer un retour »
   en bas de la navigation, « Nouveau retour » sur la page. Type fermé (`bug`, `idea`,
@@ -3166,7 +3173,7 @@ utile et le **transmet** avec une priorité à l'équipe qui construit l'outil.
   faire).
 - **Lecture** : chacun voit les siens ; la permission **`read_feedback`** (DG seul,
   `role_permissions`) voit tous ceux de l'organisation et décide.
-- **Tri par PO** (`lib/feedback/triage.ts`) : à l'ouverture de la page par le DG, s'il y a
+- **Tri par PO** (`lib/feedback/triage.ts`, coupé, voir plus haut) : à l'ouverture de la page par le DG, s'il y a
   des retours non classés, `FeedbackTriage` appelle `triageFeedback` (session du DG,
   jamais le service role) et affiche « PO vérifie… » à la place de la liste. Pour chaque
   retour, PO reçoit le message et les sujets ouverts (données, jamais consignes) et dit

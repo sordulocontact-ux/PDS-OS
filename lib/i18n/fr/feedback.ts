@@ -8,7 +8,7 @@ export const feedback = {
   subtitle:
     "Un bug, une idée, une gêne ? Écrivez-le : le directeur général lit chaque retour et transmet les plus utiles à l'équipe qui construit PDS OS.",
   subtitleReader:
-    "Les retours de l'équipe, regroupés par PO. Choisissez ceux à transmettre à l'équipe qui construit PDS OS, avec leur priorité.",
+    "Les retours de l'équipe, un par un. Choisissez ceux à transmettre à l'équipe qui construit PDS OS, avec leur priorité.",
   newFeedback: "Nouveau retour",
 
   dialog: {
@@ -118,6 +118,13 @@ export const feedback = {
         : `PO vérifie les ${count} nouveaux retours pour éviter les doublons…`,
     failed:
       "PO n'a pas pu trier les nouveaux retours. Ils restent visibles ci-dessous, en attente de tri.",
+    // PO's grouping off: each feedback is filed alone, by code.
+    filing: (count: number) =>
+      count === 1
+        ? "Ajout du nouveau retour…"
+        : `Ajout des ${count} nouveaux retours…`,
+    filingFailed:
+      "Les nouveaux retours n'ont pas pu être ajoutés. Ils restent visibles ci-dessous, en attente.",
     retry: "Réessayer",
   },
   unfiled: "En attente de tri",
@@ -126,7 +133,7 @@ export const feedback = {
     count === 1
       ? "Voir le retour d'origine"
       : `Voir les ${count} retours d'origine`,
-  byPo: "Regroupé et résumé par PO (sauf mention « Modifié par »), qui peut se tromper : les retours d'origine restent consultables.",
+  byPo: "Les sujets de plusieurs retours ont été regroupés et résumés par PO (sauf mention « Modifié par »), qui peut se tromper : les retours d'origine restent consultables.",
   topicOf: (title: string) => `Sujet : ${title}`,
 
   priorities: { high: "Haute", normal: "Normale", low: "Basse" },
