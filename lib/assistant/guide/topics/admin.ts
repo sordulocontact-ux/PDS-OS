@@ -1,0 +1,164 @@
+import type { GuideTopic } from "@/lib/assistant/guide/types";
+
+export const adminTopics: GuideTopic[] = [
+  {
+    key: "members",
+    title: "Équipe",
+    summary:
+      "Les comptes, les postes et les demandes d'accès des membres de PDS OS.",
+    keywords: [
+      "equipe",
+      "membre",
+      "membres",
+      "compte",
+      "acces",
+      "invitation",
+      "inviter",
+      "poste",
+      "approuver",
+      "suspendre",
+      "limite",
+      "requetes",
+    ],
+    nav: "/app/members",
+    facts: [
+      "La page Équipe liste les comptes avec les vues Invités, En attente, Actifs, Refusés, Suspendus.",
+      "Quelqu'un qui s'inscrit arrive sans poste : la direction approuve ou refuse la demande et choisit son poste en l'approuvant.",
+      "La direction peut aussi créer un compte (nom, e-mail, mot de passe, poste) ; la personne confirme ensuite son e-mail si nécessaire, et un lien d'invitation peut être copié.",
+      "Les postes sont Directeur général, Chef de projet et Directeur créatif. On peut modifier le nom et le poste d'un membre, le suspendre et le réactiver.",
+      "La direction fixe aussi, par membre, le nombre de requêtes à PO par jour.",
+      "Quand des demandes d'accès attendent, un compteur s'affiche à côté d'Équipe dans la barre latérale.",
+    ],
+    faq: [
+      {
+        q: "Comment donner accès à quelqu'un ?",
+        a: "Soit la personne s'inscrit et la direction approuve sa demande, soit la direction crée directement son compte.",
+      },
+      {
+        q: "On ne me voit pas dans Équipe ?",
+        a: "La page est réservée à la direction ; elle n'apparaît pas pour les autres postes.",
+      },
+    ],
+    permissions: ["administer"],
+  },
+  {
+    key: "feedback",
+    title: "Retours",
+    summary:
+      "Signaler un bug, une idée ou une gêne sur PDS OS ; la direction transmet à l'équipe qui le construit.",
+    keywords: [
+      "retour",
+      "retours",
+      "bug",
+      "idee",
+      "signaler",
+      "probleme",
+      "remarque",
+      "feedback",
+      "capture d'ecran",
+      "suggestion",
+    ],
+    nav: "/app/feedback",
+    where:
+      "Le bouton « Envoyer un retour » en bas de la navigation ouvre le formulaire depuis n'importe quelle page.",
+    facts: [
+      "Le formulaire demande le type (Bug, Idée, Autre) et le message ; la page d'où vous écrivez est jointe d'office, et on peut ajouter des captures d'écran.",
+      "On peut dicter le message avec le micro du champ.",
+      "Chaque membre écrit à la direction. La direction lit chaque retour, le retouche si besoin et choisit de le transmettre avec une priorité à l'équipe qui construit PDS OS.",
+      "La page Retours montre à la direction les retours de l'équipe, et à chacun les siens.",
+      "Pour un bug, dites ce que vous faisiez, ce qui s'est passé et ce que vous attendiez.",
+    ],
+    faq: [
+      {
+        q: "Comment joindre une capture ?",
+        a: "Dans la fenêtre du retour, glissez l'image, choisissez-la ou collez-la.",
+      },
+    ],
+    permissions: ["read_feedback"],
+  },
+  {
+    key: "settings",
+    title: "Paramètres",
+    summary:
+      "Votre utilisation de PO, et pour la direction la facturation et les exigences de distribution.",
+    keywords: [
+      "parametres",
+      "reglages",
+      "utilisation de po",
+      "requetes",
+      "limite du jour",
+      "facturation",
+      "siret",
+      "tva",
+      "formats audio",
+      "theme",
+      "mode sombre",
+      "mode clair",
+      "sombre",
+      "clair",
+    ],
+    href: "/app/settings",
+    where: "Dans le menu du compte, en bas de la barre latérale.",
+    facts: [
+      "Utilisation de PO : le nombre de requêtes du jour utilisées sur votre limite. Chaque message, analyse ou lecture de document compte pour une requête.",
+      "Le compteur repart à zéro à minuit, heure de Paris. La limite est fixée par la direction dans Équipe.",
+      "La direction y règle aussi la facturation de PDS (raison sociale, adresse, SIRET, TVA), que les prestataires lisent sur leur lien privé.",
+      "Elle y règle les formats audio exigés par The Orchard, repris dans le Brief des ingénieurs.",
+      "Le thème de l'interface (Système, Clair, Sombre) se change dans le menu du compte.",
+    ],
+    faq: [
+      {
+        q: "J'ai atteint ma limite de requêtes à PO.",
+        a: "PO ne répond plus avant minuit. La direction peut augmenter votre limite dans Équipe.",
+      },
+      {
+        q: "Comment passer en mode sombre ?",
+        a: "Dans le menu du compte : Thème, puis Système, Clair ou Sombre.",
+      },
+    ],
+  },
+  {
+    key: "rules",
+    title: "Règles générales de l'application",
+    summary:
+      "Les règles qui valent partout : étapes validées, qui écrit, postes et droits, archivage.",
+    keywords: [
+      "regles",
+      "droits",
+      "permissions",
+      "poste",
+      "qui peut",
+      "definitif",
+      "valide",
+      "archiver",
+      "supprimer",
+      "restaurer",
+      "theme",
+      "sombre",
+      "lecture seule",
+      "interdit",
+    ],
+    where: "Valable dans toute l'application.",
+    facts: [
+      "Une étape validée est définitive : on ne la rouvre pas.",
+      "Dans un projet lancé, seul son responsable écrit. La direction lit et valide.",
+      "Un poste n'est pas une permission : un poste donne un ensemble de droits, et c'est ce droit que l'application vérifie.",
+      "Les trois postes sont Directeur général, Chef de projet et Directeur créatif. Un projet n'est visible que de la direction, de son responsable, de la personne à qui il est transmis, de sa direction artistique, des ingénieurs internes de son Master et de son équipe de production.",
+      "Seule la direction archive, restaure ou supprime un artiste, un titre, un projet ou un contact. Archiver garde tout l'historique ; supprimer est définitif et refusé tant que l'élément est utilisé ailleurs.",
+      "Les états (en cours, en retard, terminé), compteurs, dates et calculs sont toujours faits par le code, jamais par PO.",
+      "PO peut préparer un brouillon qui ouvre le vrai formulaire pré-rempli : c'est toujours une personne qui enregistre. PO ne valide, ne signe et ne transmet jamais à la place de quelqu'un.",
+      "Le thème de l'interface peut être Clair, Sombre ou suivre l'ordinateur.",
+    ],
+    faq: [
+      {
+        q: "Pourquoi ne puis-je pas modifier ce projet ?",
+        a: "Dans un projet lancé, seul son responsable peut écrire. Les autres lisent.",
+      },
+      {
+        q: "Peut-on supprimer un projet ?",
+        a: "Seule la direction, avec confirmation, et c'est définitif : le projet part avec tout son contenu. L'archivage garde l'historique.",
+      },
+    ],
+    permissions: ["archive_records"],
+  },
+];

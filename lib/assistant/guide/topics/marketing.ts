@@ -1,0 +1,155 @@
+import type { GuideTopic } from "@/lib/assistant/guide/types";
+
+export const marketingTopics: GuideTopic[] = [
+  {
+    key: "marketing",
+    title: "Marketing",
+    summary:
+      "Le workflow Marketing : Stratégie, Conception, Production, Activations, Suivi & bilan.",
+    keywords: [
+      "marketing",
+      "promotion",
+      "communication",
+      "campagne",
+      "lancement",
+    ],
+    projectSection: "strategy",
+    where: "Dans un projet lancé › Workflows › Marketing.",
+    facts: [
+      "Le Marketing regroupe cinq parties : Stratégie, Conception, Production, Activations, Suivi & bilan.",
+      "Chaque partie s'ouvre quand sa page existe et que ses prérequis sont faits ; la Stratégie attend le lancement du plan du projet.",
+      "La Stratégie décide quoi faire et se termine par le Brief de sortie validé. La Conception décide à quoi ça ressemble. La Production fabrique les livrables. Les Activations les font vivre. Le Suivi & bilan mesure et clôt.",
+      "Les parties Conception, Production, Activations et Suivi & bilan sont décrites dans leur propre sujet du guide.",
+    ],
+  },
+  {
+    key: "design",
+    title: "Conception",
+    summary:
+      "La partie créative du Marketing : intentions, références, direction artistique, brief créatif, fiches livrables.",
+    keywords: [
+      "conception",
+      "creatif",
+      "direction artistique",
+      "references",
+      "moodboard",
+      "intentions",
+      "brief creatif",
+      "fiche livrable",
+      "livrables",
+      "directeur creatif",
+    ],
+    projectSection: "design",
+    where: "Dans un projet lancé › Marketing › Conception.",
+    facts: [
+      "La Conception a six étapes : Accueil, Intentions, Références, Direction artistique, Brief créatif, Fiches Livrables.",
+      "Accueil : on voit les livrables reçus de la Stratégie, on désigne le responsable créatif et on commence directement ou par un échange créatif.",
+      "Intentions : ce que la sortie et chaque livrable doivent raconter, confirmé avant la direction artistique.",
+      "Références : moodboards et références rattachés à des livrables ; ce sont des propositions jusqu'à la validation de la direction artistique.",
+      "Direction artistique : concept, codes, ton et lignes rouges, soumis à la direction.",
+      "Brief créatif : le cadre commun à tous les livrables, établi à partir de ce qui est validé.",
+      "Fiches Livrables : une fiche par livrable ou série, avec son responsable ; chacune se complète, se valide et part seule en Production.",
+    ],
+    faq: [
+      {
+        q: "Qui valide la direction artistique ?",
+        a: "La direction, par défaut. Le valideur peut être changé dans « Qui fait quoi ».",
+      },
+    ],
+  },
+  {
+    key: "production",
+    title: "Production",
+    summary:
+      "La fabrication des livrables, par livrable : de qui produit au fichier livré.",
+    keywords: [
+      "production",
+      "tournage",
+      "clip",
+      "devis",
+      "prestataire",
+      "societe de production",
+      "rushes",
+      "montage",
+      "livraison",
+      "feuille de service",
+      "lieu",
+    ],
+    projectSection: "production",
+    where: "Dans un projet lancé › Marketing › Production.",
+    facts: [
+      "La Production se déroule livrable par livrable, après la Conception.",
+      "Elle commence par « Qui produit ? » : en interne, PDS pilote avec ses freelances ; en externe, une société ou un prestataire est mandaté.",
+      "Étapes : call de production, devis, proposition de réalisation, préproduction, équipes et matériel, lieux, planning et feuille de service, contrôle avant tournage, tournage, rushes, montage et retours, contrôle technique, livraison et clôture.",
+      "Un devis déposé par la société est vérifié par la production et validé budgétairement : un dépôt ne vaut jamais validation.",
+      "Une version de montage n'est pas livrable avant son contrôle technique.",
+      "Un livrable ne peut être clos que quand son fichier final validé est livré.",
+    ],
+    faq: [
+      {
+        q: "Une société externe a-t-elle besoin d'un compte ?",
+        a: "Non, elle agit par un lien privé.",
+      },
+    ],
+  },
+  {
+    key: "activations",
+    title: "Activations",
+    summary:
+      "Le pilotage des actions de promotion : contenu, influence, relations presse, événements.",
+    keywords: [
+      "activation",
+      "activations",
+      "influence",
+      "influenceur",
+      "presse",
+      "rp",
+      "relations presse",
+      "agence",
+      "levier",
+      "preuve",
+      "campagne",
+    ],
+    projectSection: "activations",
+    where: "Dans un projet lancé › Marketing › Activations.",
+    facts: [
+      "Une activation est une action de promotion pilotée : contenu, influence, relations presse, événement ou session, autre.",
+      "Elle naît d'un levier retenu dans le Brief de sortie, d'un livrable engagé ou d'un transfert de la Production, ou se crée à la main.",
+      "L'influence et les relations presse se gèrent soit en interne, soit avec une agence externe.",
+      "Chaque activation a un statut (À préparer, En cours, Réalisée, Clôturée, Annulée ou Bloquée avec sa raison), des preuves et des statistiques déclarées.",
+      "Une statistique manquante n'est jamais comptée comme zéro.",
+      "La page signale ce qui demande attention : responsable absent, échéance passée, preuve manquante.",
+    ],
+    faq: [
+      {
+        q: "Où créer une activation ?",
+        a: "Sur la page Activations du projet : chaque levier retenu peut devenir une activation quand vous êtes prêt.",
+      },
+    ],
+  },
+  {
+    key: "review",
+    title: "Suivi & bilan",
+    summary:
+      "Le bilan du Marketing : tableau de bord, bilan provisoire, réserves et clôture du Marketing.",
+    keywords: [
+      "suivi",
+      "bilan",
+      "suivi et bilan",
+      "resultats",
+      "statistiques",
+      "reserves",
+      "cloture du marketing",
+      "rapport",
+    ],
+    projectSection: "review",
+    where: "Dans un projet lancé › Marketing › Suivi & bilan.",
+    facts: [
+      "Trois étapes : Bilan provisoire, Réserves, Clôture du Marketing.",
+      "Le bilan provisoire est un rapport figé à une date et calculé par le code. La direction l'approuve, même avec des activations encore ouvertes.",
+      "Les réserves sont arbitrées par le responsable : à lever avant la clôture, à suivre après, non applicable ou doublon.",
+      "La direction clôture le Marketing. Ensuite on lit seulement, et le Marketing peut être rouvert avec un motif.",
+      "Clôturer le Marketing ne clôt pas le projet : la clôture du projet se fait depuis la Vue d'ensemble, page « Bilan & clôture du projet ».",
+    ],
+  },
+];

@@ -1,0 +1,142 @@
+import type { GuideTopic } from "@/lib/assistant/guide/types";
+
+export const libraryTopics: GuideTopic[] = [
+  {
+    key: "artists",
+    title: "Artistes",
+    summary:
+      "La liste des artistes de PDS et la fiche de chacun : titres, projets, sessions, fichiers.",
+    keywords: [
+      "artiste",
+      "artistes",
+      "roster",
+      "signe",
+      "collaboration",
+      "fiche artiste",
+      "discographie",
+      "identite",
+    ],
+    nav: "/app/catalog/artists",
+    facts: [
+      "Chaque artiste a une relation avec PDS : Signé (intégré au roster, accompagné dans la durée) ou Collaboration (projets ponctuels). Elle se choisit à la création et se change sans perdre la fiche.",
+      "La liste a les onglets Tous, Signés, Collaborations, et la direction a aussi une vue Archivés.",
+      "La fiche d'un artiste a des onglets : Vue d'ensemble, Titres, Projets, Sessions, Fichiers, Activité, Discographie et Identité.",
+      "L'Identité artistique est écrite une fois : chaque sortie la reprend comme contexte au lieu de la redemander.",
+      "Archiver un artiste le retire des listes et des sélecteurs mais garde tout son historique ; la direction peut le restaurer.",
+      "Un artiste ne se supprime pas tant qu'un titre le crédite ou qu'un projet ou un contrat le nomme.",
+    ],
+    faq: [
+      {
+        q: "Quelle différence entre un artiste du Catalogue et un contact du Réseau ?",
+        a: "Les artistes signés ou en collaboration sont au Catalogue. Les artistes à contacter un jour, pas encore signés, sont dans le Réseau, onglet Artistes repérés.",
+      },
+    ],
+    permissions: ["manage_catalog"],
+  },
+  {
+    key: "catalog",
+    title: "Catalogue",
+    summary:
+      "La liste des titres, de la maquette au master final, avec leurs identifiants et leurs sorties.",
+    keywords: [
+      "catalogue",
+      "titre",
+      "titres",
+      "maquette",
+      "maquettes",
+      "isrc",
+      "iswc",
+      "credits",
+      "splits",
+      "etat audio",
+      "master final",
+      "variante",
+    ],
+    nav: "/app/catalog/masters",
+    facts: [
+      "Le Catalogue liste les morceaux de PDS. Un titre est créé dès la maquette et enrichi sans jamais être recréé.",
+      "Seuls le titre et l'artiste principal sont obligatoires à la création.",
+      "L'état audio avance de Maquette à Mise à plat, Mix, Master, Master final. Il avance seul quand on dépose un fichier audio d'un état plus avancé.",
+      "Onglets de la liste : Tous, En création, En production, Finalisés (un master final validé).",
+      "Les maquettes ont leur propre onglet : des morceaux en travail, pas encore décidés pour une sortie. Une maquette retenue passe au catalogue des masters sans rien recréer.",
+      "La fiche d'un titre a six onglets : Vue d'ensemble, Audio, Crédits, Droits, Projets & sorties, Fichiers.",
+      "Le titre est la source des crédits, parts, identifiants et droits que le Master, le Juridique et la Distribution relisent.",
+    ],
+    faq: [
+      {
+        q: "Un titre dit « Validé » : que signifie-t-il ?",
+        a: "Son Master final a été validé dans le workflow Master du projet.",
+      },
+    ],
+    permissions: ["manage_catalog"],
+  },
+  {
+    key: "sessions",
+    title: "Sessions studio",
+    summary:
+      "Planifier les séances de studio, les préparer et garder leur compte rendu.",
+    keywords: [
+      "session",
+      "sessions",
+      "studio",
+      "seance",
+      "enregistrement",
+      "composition",
+      "mixage",
+      "compte rendu de session",
+      "ingenieur",
+    ],
+    nav: "/app/sessions",
+    where:
+      "Aussi dans un projet lancé › Pilotage › Sessions studio, et dans la fiche d'un artiste ou d'un titre.",
+    facts: [
+      "La page liste les séances avec les onglets À venir, À compléter, Terminées, Toutes.",
+      "« Nouvelle session » se remplit en trois parties : la séance (type, date, horaires, lieu), avec qui (au moins un artiste, ingénieur, participants), ce qu'on travaille (titres ou maquettes, projets, notes de préparation).",
+      "Une session n'appartient pas forcément à un projet : elle peut précéder tout projet.",
+      "L'état est calculé : Prévue, En cours, Compte rendu à compléter une fois la séance finie, Terminée dès que le compte rendu est écrit. Seule « Annulée » se choisit à la main.",
+      "Le compte rendu a un résumé obligatoire, un « À retenir » et une « Prochaine étape ».",
+    ],
+    faq: [
+      {
+        q: "Qui peut créer une session ?",
+        a: "La direction et les chefs de projet.",
+      },
+    ],
+    permissions: ["manage_sessions"],
+  },
+  {
+    key: "network",
+    title: "Réseau",
+    summary:
+      "L'annuaire partagé des personnes et organisations avec qui PDS travaille.",
+    keywords: [
+      "reseau",
+      "contact",
+      "contacts",
+      "annuaire",
+      "personne",
+      "organisation",
+      "prestataire",
+      "label",
+      "studio",
+      "ingenieur",
+      "artistes repetes",
+    ],
+    nav: "/app/network",
+    facts: [
+      "Le Réseau liste les personnes et organisations : artistes, techniciens, labels, studios, médias, prestataires.",
+      "Onglets : Tous, Personnes, Organisations, Artistes repérés. Filtres par métier, type de relation (client, prestataire, partenaire, fournisseur) et ville.",
+      "Seuls le type et le nom sont obligatoires à la création. Un contact peut avoir plusieurs métiers et plusieurs types de relation.",
+      "À la création, les contacts au nom proche sont signalés pour éviter les doublons, sans bloquer.",
+      "La fiche d'un contact montre ce qu'on attend de lui, ses projets, ses contrats, ses crédits et ses calls.",
+      "Tous les membres lisent le Réseau. Un contact s'archive, il ne se supprime pas tant qu'un contrat le nomme.",
+    ],
+    faq: [
+      {
+        q: "Comment ajouter un artiste repéré ?",
+        a: "Depuis la page Repérage, « Ajouter au Réseau » l'enregistre dans l'onglet Artistes repérés.",
+      },
+    ],
+    permissions: ["manage_network"],
+  },
+];

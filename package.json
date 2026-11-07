@@ -13,6 +13,7 @@
     "db:types": "supabase gen types typescript --local > lib/supabase/database.types.ts",
     "db:types:preprod": "supabase gen types typescript --project-id xluuruuzfohfixzaoxmu > lib/supabase/database.types.ts",
     "preprod:reset": "bash scripts/preprod-reset.sh",
+    "eval:po": "node --env-file=.env.local scripts/eval-po.mjs",
     "prepare": "simple-git-hooks"
   },
   "dependencies": {

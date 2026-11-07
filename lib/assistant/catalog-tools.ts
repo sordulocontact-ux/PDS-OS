@@ -4,6 +4,7 @@ import { tool } from "ai";
 import { z } from "zod";
 
 import { findNamed, foldName, rankByName } from "@/lib/assistant/propose/match";
+import { capped } from "@/lib/assistant/read/target";
 import type { Source } from "@/lib/assistant/sources";
 import { routes } from "@/lib/auth/redirects";
 import { listMasters } from "@/lib/catalog/queries";
@@ -144,6 +145,7 @@ export function findMastersTool() {
         facts: [
           ...notes,
           ...(shown.length ? shown.map(masterFact) : [t.noMaster]),
+          ...capped(masters.length, shown.length),
         ],
         sources: shown.slice(0, 8).map((m): Source => ({
           label: masterLabel(m),

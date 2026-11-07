@@ -55,7 +55,8 @@ export function notionConfigured(): boolean {
   return notionMissingSettings().length === 0;
 }
 
-async function call(
+/** The only HTTP call to Notion; other Notion files go through it. */
+export async function call(
   method: "GET" | "POST" | "PATCH",
   path: string,
   body?: unknown,

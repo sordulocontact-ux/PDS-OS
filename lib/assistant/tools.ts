@@ -10,6 +10,9 @@ import {
   findMastersTool,
 } from "@/lib/assistant/catalog-tools";
 import { activityLine } from "@/lib/assistant/facts";
+import { guideTools } from "@/lib/assistant/guide-tools";
+import { readTools } from "@/lib/assistant/read";
+import { capped } from "@/lib/assistant/read/target";
 import { myWorkFacts } from "@/lib/assistant/my-work";
 import { projectStatus } from "@/lib/assistant/project-status";
 import { workflowLines } from "@/lib/assistant/project-workflows";
@@ -62,6 +65,8 @@ export function createAssistantTools(
 ) {
   const context = { access, verbatim: verbatimFrom(userTexts), pagePath };
   return {
+    ...guideTools(access, pagePath),
+    ...readTools(access, pagePath),
     find_artists: findArtistsTool(),
     find_masters: findMastersTool(),
     propose_artist: proposeArtistTool(context),
@@ -116,6 +121,8 @@ export function createAssistantTools(
           handoverOf(projects, access).toAccept.map((p) => p.id),
         );
         return {
+          // Said when the list was cut (audit of PO § 3.5).
+          facts: capped(list.length, found.length),
           projects: found.map((p, i) => ({
             projectId: p.id,
             title: p.title,

@@ -9,6 +9,8 @@ import {
 import { z } from "zod";
 
 import { saveConversation } from "@/lib/assistant/conversations";
+import { recordUnanswered } from "@/lib/assistant/gaps";
+import { guideMap } from "@/lib/assistant/guide";
 import { pageContext } from "@/lib/assistant/page-context";
 import { isTestDataEnabled } from "@/lib/assistant/test-data/tool";
 import { createAssistantTools } from "@/lib/assistant/tools";
@@ -85,6 +87,7 @@ export async function POST(request: Request) {
       role: access.role,
       page: await pageContext(parsed.data.page),
       testData: isTestDataEnabled(),
+      appMap: guideMap(),
     }),
   );
   const result = streamText({
@@ -92,7 +95,9 @@ export async function POST(request: Request) {
     ...settings,
     messages: await convertToModelMessages(messages),
     tools: createAssistantTools(access, userTexts, parsed.data.page ?? null),
-    stopWhen: isStepCount(5),
+    // A question across workflows (Master, Juridique, Distribution) takes
+    // several reads: 8 steps (audit of PO § 3.3), to be measured.
+    stopWhen: isStepCount(8),
   });
 
   // Saved after every answer, with the member's session (client made now,
@@ -106,6 +111,8 @@ export async function POST(request: Request) {
       stream: result.stream,
       originalMessages: messages,
       onEnd: async ({ messages: turns }) => {
+        // Unanswered questions, without their text (§ 4 bis).
+        await recordUnanswered(turns, parsed.data.page ?? null);
         if (!conversationId.success || !organizationId) return;
         await saveConversation(supabase, {
           id: conversationId.data,

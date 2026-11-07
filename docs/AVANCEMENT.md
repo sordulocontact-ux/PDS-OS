@@ -1703,6 +1703,27 @@ de retiré.
 - **Écart titre / phrase** porté à 10 px sur toute l'app (`TitleBlock`, aussi `PageHeader`,
   `PageSection`, `FormSection`, `PoQuestion`, `PoReading`), commit séparé.
 
+## PO répond sur l'application, les droits et lui-même (07/11/2026, branche `pre-prod`)
+
+Lot 1 de l'audit de PO du 05/11 (`IA microsoft/AUDIT-PO.md`, hors git). Constat de Sacha : PO
+répondait « non » à « mes conversations sont-elles enregistrées ? ». Détail : `docs/ASSISTANT.md`
+§ 1, 3 et 3 quater.
+
+- **Guide de PDS OS** (`lib/assistant/guide/`) : 32 sujets (un par partie de l'app, plus `po` et
+  `rules`), en français d'utilisateur, avec questions fréquentes. Libellés et liens de la barre
+  latérale, onglet du projet ouvert et « qui peut » (lu de `role_permissions`) ajoutés par le code.
+  Carte d'une ligne par sujet dans la partie en cache du prompt ; détail par **`app_guide`**.
+- **`explain_access`** : pourquoi l'utilisateur peut ou non agir sur la page ouverte (poste et
+  permissions, responsable et état du projet, Juridique, budget, étape faite ou verrouillée, droits sur
+  un contrat, permission de la page) et qui peut le faire à sa place.
+- **Consignes** : le rôle couvre l'app et PO ; plus de refus sec (ce qu'il ne lit pas, où le trouver,
+  un retour proposé) ; « hors sujet » réduit à la culture générale, l'actualité et la météo.
+- Questions tests 34 à 40 ajoutées, 6 et 9 réécrites. Règle d'équipe dans `CLAUDE.md` : un parcours ou
+  un droit modifié met à jour son sujet du guide.
+- Reste (lots suivants de l'audit) : recherche globale et lecture des contrats, du Juridique, du
+  budget, du Master et du calendrier (lot 2) ; points à trancher : notions du métier, premier contact,
+  compteur anonyme, longueur des réponses.
+
 ## La personne signe en premier, puis PDS (07/11/2026, branche `pre-prod`, migration `20261107200101_person_signs_first`)
 
 Réponses d'Ibé du 07/11 : l'outil de signature de PDS est **Yousign**, **la personne signe** en premier,
@@ -1717,6 +1738,34 @@ même jour (`20261107150101`, pré-prod seulement) est inversé.
   direction dépose le PDF et signe pour PDS dans la vérification (`SignatureGate` → `PdsSignStep`), sur la
   page de la démarche comme dans la fenêtre « Signer pour PDS » de la page Contrats (dépôt ajouté).
 - **Tests SQL** : `signed-returns` (39), `legal-contracts` (20), `legal-reste` (35) au nouvel ordre.
+
+## PO lit toute l'application et explique le métier (07/11/2026, branche `pre-prod`)
+
+Lots 2 à 6 de l'audit de PO, d'après les décisions de Sacha du 07/11 : notions du métier oui ;
+aucune interface de page touchée (« surtout de la réflexion de l'IA ») ; ni « Signaler cette
+réponse » ni mise en évidence des champs interprétés ; questions sans réponse stockées dans Notion.
+Détail : `docs/ASSISTANT.md` § 1, 3, 3 quinquies, 4 bis, 5.
+
+- **Lecture de chaque domaine** (`lib/assistant/read/`, réunies par `readTools`) : `contracts`,
+  `legal_status`, `title_sheet`, `network`, `master_status`, `distribution_status`,
+  `marketing_status`, `budget`, `calendar`, `files`, `notifications`, sur les chargeurs des pages ;
+  **recherche globale** `search_everything` (« où est… ? », « emmène-moi à… »).
+- **Notions du métier** : `explain_notion` (`lib/assistant/guide/notions.ts`, 14 notions et leur
+  endroit dans PDS OS), étiquette « connaissance générale, à vérifier » écrite par le code, sans
+  chiffre, date ni conseil juridique.
+- **Questions sans réponse** comptées sans texte ni personne dans la base Notion « Questions sans
+  réponse de PO » (PDS OS › Retours), `lib/assistant/gaps.ts`, `NOTION_PO_GAPS_DATABASE_ID`.
+  Écriture testée en local le 07/11.
+- **Consignes** : routage vers chaque fonction, anti-flatterie, incertitude à la première personne,
+  citations des calls, plan annoncé avant plusieurs propositions, listes numérotées pour
+  « comment / où », « qu'est-ce que tu sais faire ? » par le guide ; réponses partielles dites par le
+  code (`capped`) ; 8 étapes au lieu de 5.
+- **Questions tests automatiques** : `pnpm eval:po` (`scripts/eval-po.mjs`), 16 cas indépendants des
+  données ; questions 41 à 46 ajoutées au § 5.
+- Reste : `NOTION_PO_GAPS_DATABASE_ID` sur Vercel ; rejouer `pnpm eval:po` avec un compte réel ;
+  limites notées par les agents : « ingé mastering » non distingué dans le Réseau (rôle Ingénieur
+  seul), Production et Suivi & bilan lus par leurs parcours seulement, fil avec l'ingénieur du
+  Master non lu.
 
 ## Chargements sous la seconde (07/11/2026, branche `pre-prod`, migrations `20261107230101_live_function_map`, `20261107230201_project_view_cache`)
 

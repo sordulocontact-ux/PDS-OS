@@ -67,6 +67,16 @@ export const serverEnvSchema = z
         )
         .optional(),
     ),
+    /** Notion: optional, PO's unanswered questions, counted without their text. */
+    NOTION_PO_GAPS_DATABASE_ID: z.preprocess(
+      blankToUndefined,
+      z
+        .string()
+        .regex(
+          /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i,
+        )
+        .optional(),
+    ),
     /** Google Calendar: optional, a new call takes a pasted link without them. */
     GOOGLE_CALENDAR_CLIENT_ID: optionalSecret,
     GOOGLE_CALENDAR_CLIENT_SECRET: optionalSecret,

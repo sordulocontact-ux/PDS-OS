@@ -1,0 +1,133 @@
+import type { GuideTopic } from "@/lib/assistant/guide/types";
+
+export const workflowsTopics: GuideTopic[] = [
+  {
+    key: "master",
+    title: "Master",
+    summary:
+      "Le workflow du mix et du mastering : de la source confirmée au Master final du titre.",
+    keywords: [
+      "master",
+      "mix",
+      "mixage",
+      "mastering",
+      "ingenieur",
+      "ingenieur son",
+      "brief",
+      "source",
+      "master final",
+      "version",
+      "stems",
+      "pistes",
+    ],
+    projectSection: "master",
+    where: "Dans un projet lancé › Workflows › Master.",
+    facts: [
+      "Le Master a cinq étapes : Source, Brief, Mixage, Mastering, Master final.",
+      "Source : on confirme la version de départ du mix (maquette ou mise à plat, jamais un master final) et si les voix définitives sont là ou attendues.",
+      "Brief : le dossier que recevront les ingénieurs du mix puis du mastering (direction, livrables, formats, dates), pré-rempli de ce que PDS OS sait.",
+      "Mixage et Mastering : le responsable envoie le dossier à l'ingénieur par un lien privé (e-mail envoyé par PDS OS ou marqué comme envoyé). L'ingénieur prend en charge le dossier avec son tarif, dépose les versions, la personne désignée écoute et valide ou demande une modification.",
+      "Un tarif peut être accepté ou refusé avec un motif ; il alimente le Budget.",
+      "Un mix validé ne change plus. Le mastering s'ouvre quand le mix final est validé.",
+      "Master final : le master validé devient celui du titre dans le Catalogue ; la Distribution et le Juridique le lisent directement.",
+      "Un Historique du master garde tous les gestes.",
+    ],
+    faq: [
+      {
+        q: "L'ingénieur doit-il avoir un compte ?",
+        a: "Non. Il agit par un lien privé que le responsable lui envoie.",
+      },
+      {
+        q: "Qui valide les versions ?",
+        a: "La personne désignée au Brief ou au Cadrage, sinon le responsable du projet.",
+      },
+    ],
+  },
+  {
+    key: "legal",
+    title: "Juridique",
+    summary:
+      "Le workflow des droits : contrats, répartitions, SACEM et autorisations d'œuvres existantes.",
+    keywords: [
+      "juridique",
+      "droits",
+      "contrat",
+      "contrats",
+      "sacem",
+      "split",
+      "repartition",
+      "autorisation",
+      "sample",
+      "emprunt",
+      "licence",
+      "fiche de renseignements",
+      "pret pour la sortie",
+      "bulletin",
+    ],
+    projectSection: "legal",
+    where: "Dans un projet lancé › Workflows › Juridique.",
+    facts: [
+      "Le Juridique a cinq étapes : État des lieux, Cadrage juridique, Confirmation, Plan d'action, Suivi.",
+      "État des lieux : ce que le projet sait déjà, classé connu, à confirmer ou manquant, lu par le code à chaque ouverture. Une ligne s'ouvre pour être corrigée sur place.",
+      "Cadrage juridique : PO pose une question à la fois sur ce qui manque ; vous répondez librement et vérifiez ce qu'il relève avant qu'il soit gardé.",
+      "Confirmation : une synthèse, confirmée par une personne. Cela ne vaut ni signature, ni autorisation, ni dépôt.",
+      "Plan d'action : PDS OS propose les démarches et les contrats à prévoir ; on les confirme, puis on attribue et date chaque démarche.",
+      "Suivi : chaque démarche se fait depuis sa ligne. Les pages de démarche sont les fiches de renseignements, les contrats, les répartitions, les autorisations, la SACEM et l'historique.",
+      "Une œuvre existante non autorisée (un sample par exemple) bloque la sortie.",
+      "PO n'écrit jamais de clause ni de modèle de contrat. Le Juridique n'est visible que de la direction et des chefs de projet.",
+    ],
+    faq: [
+      {
+        q: "Je ne vois pas l'onglet Juridique.",
+        a: "Il est réservé à la direction et aux chefs de projet : il apparaît grisé pour les autres postes.",
+      },
+      {
+        q: "Où se trouve le bulletin SACEM ?",
+        a: "Dans le Suivi du Juridique, à la démarche SACEM.",
+      },
+    ],
+    permissions: ["manage_legal"],
+  },
+  {
+    key: "release",
+    title: "Distribution",
+    summary:
+      "Le workflow de la sortie : préparer, contrôler et suivre le dépôt manuel dans The Orchard.",
+    keywords: [
+      "distribution",
+      "sortie",
+      "the orchard",
+      "orchard",
+      "depot",
+      "plateformes",
+      "upc",
+      "isrc",
+      "dossier de livraison",
+      "cloture",
+      "spotify",
+      "deezer",
+    ],
+    projectSection: "release",
+    where: "Dans un projet lancé › Workflows › Distribution.",
+    facts: [
+      "PDS OS prépare, contrôle et suit le dépôt, mais ne dépose rien lui-même : la personne saisit le dossier dans The Orchard puis déclare le dépôt ici.",
+      "Sept étapes : Préparation, Paramètres de distribution, Dossier de livraison, Dépôt dans The Orchard, Réponse de The Orchard, Plateformes, Clôture.",
+      "Préparation : ce que le dépôt réutilise (titre, identifiants, master final validé, pochette livrée, droits), lu dans son module d'origine avec un lien « Corriger » ; rien n'est recopié ici.",
+      "Dossier de livraison : les sections attendues par The Orchard, contrôlées par une personne puis validées avant le dépôt.",
+      "Réponse de The Orchard : réception, acceptation, puis livraison aux plateformes, chacune déclarée à part.",
+      "Plateformes : le lien officiel de chaque plateforme, puis ce qu'une personne a constaté en l'ouvrant.",
+      "Clôture : on ferme le suivi, normalement quand tout est déclaré et vérifié, sinon avec des réserves.",
+      "Les écoutes et statistiques de streaming ne sont pas branchées.",
+    ],
+    faq: [
+      {
+        q: "PDS OS envoie-t-il la sortie à The Orchard ?",
+        a: "Non. Le dépôt est manuel : vous saisissez le dossier validé dans The Orchard, puis vous le déclarez dans PDS OS.",
+      },
+      {
+        q: "Pourquoi la Distribution est-elle verrouillée ?",
+        a: "Parce que le plan du projet n'est pas lancé et qu'aucune sortie n'est enregistrée.",
+      },
+    ],
+  },
+];

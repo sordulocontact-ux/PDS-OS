@@ -19,7 +19,8 @@ import {
 
 const fr = { assistant };
 
-type Found = { journey: ModuleJourney; step: JourneyStep };
+export type PageStep = { journey: ModuleJourney; step: JourneyStep };
+type Found = PageStep;
 
 const clean = (href: string) => href.split(/[?#]/)[0].replace(/\/$/, "");
 
@@ -27,7 +28,7 @@ const clean = (href: string) => href.split(/[?#]/)[0].replace(/\/$/, "");
  * The steps the open page shows: the one whose page it is, else, on a
  * module's page (/master, /legal), its steps still to do.
  */
-function stepsOfPage(journeys: ModuleJourney[], path: string): Found[] {
+export function stepsOfPage(journeys: ModuleJourney[], path: string): Found[] {
   const here = clean(path);
   const all = journeys.flatMap((journey) =>
     journey.steps.map((step) => ({ journey, step })),
