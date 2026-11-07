@@ -17,6 +17,7 @@ import {
 } from "ai";
 import type { z } from "zod";
 
+import { repairedOutput } from "@/lib/ai/output-repair";
 import { DEFAULT_LLM_MODEL, type LlmProvider } from "@/lib/ai/providers";
 import { takeAiRequest } from "@/lib/ai/quota";
 import { getServerEnv, type ServerEnv } from "@/lib/env";
@@ -216,9 +217,9 @@ async function generate<T>(
     output = result.output;
     usage = result.usage;
   } catch (error) {
-    const echoed = fromSchemaEcho(error, schema);
-    if (echoed === undefined) throw error;
-    output = echoed;
+    const repaired = repairedOutput(error, schema);
+    if (repaired === undefined) throw error;
+    output = repaired;
     usage = NoObjectGeneratedError.isInstance(error) ? error.usage : undefined;
   }
 
@@ -230,27 +231,4 @@ async function generate<T>(
     inputTokens: usage?.inputTokens,
     outputTokens: usage?.outputTokens,
   };
-}
-
-/**
- * ministral-14b sometimes wraps a correct answer in the shape of the schema
- * itself: {"type":"object","properties":{…the answer…}} (seen on feedback
- * triage, 2026-09-27). When the answer did not match the schema, the content
- * of `properties` is validated in its place; anything else stays an error.
- */
-function fromSchemaEcho<T>(
-  error: unknown,
-  schema: z.ZodType<T>,
-): T | undefined {
-  if (!NoObjectGeneratedError.isInstance(error) || !error.text) return;
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(error.text);
-  } catch {
-    return;
-  }
-  if (!parsed || typeof parsed !== "object" || !("properties" in parsed))
-    return;
-  const result = schema.safeParse(parsed.properties);
-  return result.success ? result.data : undefined;
 }

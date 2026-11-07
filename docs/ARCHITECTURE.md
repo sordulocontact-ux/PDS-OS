@@ -1597,8 +1597,11 @@ migration y **ajoute** `call_summary_sent` en relisant la liste en place (deux f
   parties sont jointes dans leur ordre (prompt de ministral inchangé).
 - **Sortie structurée** : Haiku 5.5 a la sortie structurée native (`output_config.format`
   JSON Schema, vérifié sur la requête émise) ; les `min`/`max` de zod n'y sont qu'en
-  description et zod les revérifie à l'arrivée. `fromSchemaEcho` reste : propre à ministral,
-  sans effet ailleurs. Images (`extractFromImage(s)`) : PNG, JPEG, WebP, GIF en base64.
+  description et zod les revérifie à l'arrivée. `repairedOutput` (`lib/ai/output-repair.ts`) reste :
+  propre à ministral, sans effet ailleurs — réponse enveloppée dans l'écho du schéma, et depuis le
+  07/11/2026 éléments de liste qui ne suivent pas le schéma écartés (cinq leviers sans citation
+  faisaient échouer tout un compte rendu ; un élément sans citation ne peut pas être cité de toute
+  façon) ; tout autre écart reste une erreur. Images (`extractFromImage(s)`) : PNG, JPEG, WebP, GIF en base64.
 
 ### 5 bis. Quota quotidien de requêtes (`lib/ai/quota.ts`, 14/10/2026)
 
