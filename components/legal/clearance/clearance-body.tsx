@@ -2,10 +2,11 @@ import { Fold } from "@/components/ui/fold";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { legalClearance } from "@/lib/i18n/fr/legal-clearance";
 import { isClosed } from "@/lib/legal/clearance/matrix";
+import { momentOf } from "@/lib/legal/clearance/moments";
 import type { Clearance, Clearances } from "@/lib/legal/clearance/types";
 
 import { ClearanceRequest } from "./clearance-request";
-import { ClearanceStages, momentOf } from "./clearance-stages";
+import { ClearanceStages } from "./clearance-stages";
 import { ExchangesTab } from "./exchanges-tab";
 import { HistoryTab } from "./history-tab";
 import { OtherWays } from "./other-ways";
