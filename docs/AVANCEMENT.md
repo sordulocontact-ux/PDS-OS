@@ -1736,3 +1736,24 @@ Projets 1 012 lectures, 16,5 s ; ouvrir un projet, écran figé 4,3 s.
   0,33 à 0,39 s ; après une écriture, rafraîchissement du projet 268 lectures en 670 ms.
 - Reste : pousser les deux migrations en prod au moment de fusionner `pre-prod` dans `main` ; la pré-prod
   reste sur une instance Supabase gratuite (0,5 Go) ; `pnpm dev` compile chaque page à sa première visite.
+
+## Enregistrer l'échange sur place, dans tous les modules (07/11/2026, branche `pre-prod`)
+
+Demande de Sacha : enregistrer l'appel depuis la page du module, comme le Cadrage, sans passer par la page du call.
+
+- `PlannedCallInPlace` (`components/calls/prep/`) remplace `ExchangeInPlace` du Cadrage : échange prévu,
+  « Enregistrer l'échange » / « le call » qui enregistre dans la carte, dépôt d'un fichier, puis
+  transcription et compte rendu sur place (`CallProcessing`). `PlannedCallFacts` n'a plus de lien vers
+  la page du call (`action` obligatoire).
+- Branché sur le Cadrage (« Annuler l'échange » à côté), la Stratégie, la Conception (échange créatif),
+  la Production (call de production) et le Master (l'échange pas encore traité au-dessus du tableau des
+  échanges, qui garde « Proposer pour le Brief »).
+- Guide de PO (Calls) mis à jour. La page du call reste l'archive (Calls, Calendrier).
+- **Déposer un fichier** (même jour) : « Déposer un fichier à la place » devient une zone de dépôt (`CallFileUpload`,
+  partout où un call se dépose : carte de l'échange, page du call, Meet) qui prend un audio **ou une
+  transcription** (PDF, Word, txt, md, vtt, srt ; 4 Mo). Le texte est lu par le serveur
+  (`lib/calls/transcript-file.ts`, lecture de `lib/legal/contracts/source-text.ts`), enregistré comme
+  transcription (`provider = file`), puis le compte rendu suit le chemin habituel. Le texte reste une donnée.
+- **Compte rendu refusé par ministral** (même jour) : « Le service de transcription n'a pas répondu » venait de
+  l'extraction, pas du dépôt (cinq leviers de la Stratégie sans citation : tout le compte rendu rejeté).
+  `lib/ai/output-repair.ts` écarte désormais les éléments de liste qui ne suivent pas le schéma et garde le reste.

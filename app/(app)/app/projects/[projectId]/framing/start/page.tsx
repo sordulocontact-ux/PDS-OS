@@ -36,6 +36,7 @@ export default async function FramingStartPage({
   if (call)
     body = (
       <FramingExchange
+        projectId={projectId}
         call={call}
         assessment={assessment}
         canEdit={canEdit}

@@ -134,9 +134,6 @@ export const strategyJourney = {
       name
         ? `Commencée directement par ${name} le ${when}`
         : `Commencée directement le ${when}`,
-    openCall: "Ouvrir le call",
-    processing:
-      "L'échange est enregistré : la transcription puis le compte rendu se font sur la page du call. PO propose ensuite ce qui a été dit dans « Les 8 dimensions ».",
     meetingName: "Échange stratégique",
     summaryNext: (names: string) =>
       `Le Brief de sortie part en validation auprès de ${names}.`,

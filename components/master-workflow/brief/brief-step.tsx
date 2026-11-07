@@ -1,3 +1,4 @@
+import { PlannedCallInPlace } from "@/components/calls/prep/planned-call-in-place";
 import { BriefExchanges } from "@/components/master-workflow/brief-exchanges";
 import { BriefQuestions } from "@/components/master-workflow/brief-questions";
 import { DocumentCard } from "@/components/ui/document-card";
@@ -80,6 +81,10 @@ export function BriefStep({
     step.dirty,
   );
   const missing = missingSentence(step.missing);
+  // The newest exchange not processed yet is recorded and processed in the
+  // step (PlannedCallInPlace, Sacha 07/11/2026); the others are listed.
+  const current = view.exchanges.find((e) => e.status !== "ready") ?? null;
+  const done = view.exchanges.filter((e) => e !== current);
   // Who PO asks the artistic direction (the creative directors, whoever
   // validates: _master_ask_direction), and where that question stands.
   const directionAsk = step.questions.toAsk.find(
@@ -186,10 +191,13 @@ export function BriefStep({
         exchange && (
           <BriefExchange projectId={view.projectId} defaults={exchange} />
         )}
-      {view.exchanges.length > 0 && (
+      {current && (
+        <PlannedCallInPlace callId={current.callId} noun="exchange" />
+      )}
+      {done.length > 0 && (
         <BriefExchanges
           projectId={view.projectId}
-          exchanges={view.exchanges}
+          exchanges={done}
           canEdit={canEdit}
         />
       )}

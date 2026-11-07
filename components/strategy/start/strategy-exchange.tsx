@@ -2,13 +2,11 @@ import { CallFacts } from "@/components/calls/call-facts";
 import { MeetingFacts } from "@/components/calls/meeting/meeting-facts";
 import { MeetingSummaryBlock } from "@/components/calls/meeting/meeting-summary-block";
 import { MeetingSummaryFor } from "@/components/calls/meeting/meeting-summary-for";
-import { PlannedCallFacts } from "@/components/calls/prep/planned-call-facts";
-import { ViewLink } from "@/components/ui/view-link";
+import { PlannedCallInPlace } from "@/components/calls/prep/planned-call-in-place";
 import { routes } from "@/lib/auth/redirects";
 import { summaryDraft } from "@/lib/calls/meeting/draft";
 import { loadCallSummaries, loadMeeting } from "@/lib/calls/meeting/queries";
 import { callWhen } from "@/lib/calls/prep/dates";
-import { loadPlannedCall } from "@/lib/calls/prep/planned";
 import { strategyJourney } from "@/lib/i18n/fr/strategy-journey";
 import type { StrategyModel } from "@/lib/strategy/dimension-model";
 import { strategyMeetingLines } from "@/lib/strategy/meeting-lines";
@@ -18,8 +16,8 @@ const fr = { strategyJourney };
 
 /**
  * The strategy exchange in « Démarrer la stratégie », once prepared (proto
- * prepGate « strat », then summaryBlock): the planned call (recorded in PDS
- * OS from its page), then — once recorded, transcribed and filed by PO —
+ * prepGate « strat », then summaryBlock): the planned call, recorded and
+ * processed in the card (PlannedCallInPlace), then — once recorded, transcribed and filed by PO —
  * the summary to the participants above « Départ : Échange stratégique du
  * … · Lire le compte rendu », when everything said is settled in « Les 8
  * dimensions ».
@@ -54,35 +52,26 @@ export async function StrategyExchange({
   );
 
   if (!call.reported) {
-    const planned = await loadPlannedCall(call.callId);
-    if (!planned) return departure;
-    if (!call.recorded)
-      return (
-        <PlannedCallFacts
-          call={planned}
-          noun="exchange"
-          waiting={
-            canEdit
-              ? null
-              : {
-                  name: ownerName ?? "—",
-                  what: fr.strategyJourney.todo.hold.toLowerCase(),
-                }
-          }
-        />
-      );
+    const inPlace = (
+      <PlannedCallInPlace
+        callId={call.callId}
+        noun="exchange"
+        waiting={
+          canEdit
+            ? null
+            : {
+                name: ownerName ?? "—",
+                what: fr.strategyJourney.todo.hold.toLowerCase(),
+              }
+        }
+      />
+    );
+    // The planned call already says when: no « Départ » before it.
+    if (!call.recorded) return inPlace;
     return (
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-5">
         {departure}
-        <p className="text-body-md text-[color:var(--text-secondary)]">
-          {t.processing}
-        </p>
-        <ViewLink
-          href={routes.projectCall(projectId, call.callId)}
-          className="self-start text-body-md font-semibold underline underline-offset-2"
-        >
-          {t.openCall}
-        </ViewLink>
+        {inPlace}
       </div>
     );
   }

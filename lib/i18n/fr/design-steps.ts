@@ -93,9 +93,6 @@ export const designSteps = {
       exchangeOf: (day: string) => `Échange créatif du ${day}`,
       exchangeReady:
         "Compte rendu disponible : les intentions sont proposées dans l'étape suivante",
-      processing:
-        "L'échange est enregistré : PO prépare le compte rendu, puis propose les intentions.",
-      openCall: "Ouvrir l'échange",
       meetingName: "Échange créatif",
       summaryNext: (creative: string, validator: string) =>
         `${creative} soumet la direction artistique à ${validator}.`,

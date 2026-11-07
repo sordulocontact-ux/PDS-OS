@@ -2,12 +2,12 @@ import { CallFacts } from "@/components/calls/call-facts";
 import { MeetingFacts } from "@/components/calls/meeting/meeting-facts";
 import { MeetingSummaryBlock } from "@/components/calls/meeting/meeting-summary-block";
 import { MeetingSummaryFor } from "@/components/calls/meeting/meeting-summary-for";
-import { ExchangeInPlace } from "@/components/framing/start/exchange-in-place";
+import { PlannedCallInPlace } from "@/components/calls/prep/planned-call-in-place";
+import { CancelExchangeButton } from "@/components/framing/start/cancel-exchange-button";
 import { summaryDraft } from "@/lib/calls/meeting/draft";
 import { loadCallSummaries, loadMeeting } from "@/lib/calls/meeting/queries";
 import type { MeetingLine } from "@/lib/calls/meeting/types";
 import { callWhen } from "@/lib/calls/prep/dates";
-import { loadCallInPlace, loadPlannedCall } from "@/lib/calls/prep/planned";
 import type { FramingAssessment } from "@/lib/framing/assess";
 import type { FramingCallInfo } from "@/lib/framing/journey-context";
 import { framingIntel } from "@/lib/i18n/fr/framing-intel";
@@ -56,12 +56,13 @@ function framingLines(
 /**
  * The framing exchange in « Démarrer le cadrage », once prepared (proto
  * prepGate « frame », then summaryBlock): the planned call, recorded and
- * processed in the card (ExchangeInPlace), with « Départ · Échange de
+ * processed in the card (PlannedCallInPlace, « Annuler l'échange » beside), with « Départ · Échange de
  * cadrage du … » once recorded; once filed by PO, the meeting and, when
  * everything said is settled in « Les 6 dimensions », the summary to the
  * participants.
  */
 export async function FramingExchange({
+  projectId,
   call,
   assessment,
   canEdit,
@@ -69,6 +70,7 @@ export async function FramingExchange({
   validatorName,
   mePersonId,
 }: {
+  projectId: string;
   call: FramingCallInfo;
   assessment: FramingAssessment;
   canEdit: boolean;
@@ -89,19 +91,26 @@ export async function FramingExchange({
   );
 
   if (!call.reported) {
-    const [planned, state] = await Promise.all([
-      loadPlannedCall(call.callId),
-      loadCallInPlace(call.callId),
-    ]);
-    if (!planned || !state) return departure;
     const inPlace = (
-      <ExchangeInPlace
-        planned={planned}
+      <PlannedCallInPlace
+        callId={call.callId}
+        noun="exchange"
         goal={call.goal}
-        state={state}
-        recorded={call.recorded}
-        canEdit={canEdit}
-        ownerName={ownerName}
+        waiting={
+          canEdit
+            ? null
+            : {
+                name: ownerName ?? "—",
+                what: fr.framingJourney.todo.hold.toLowerCase(),
+              }
+        }
+        beside={
+          <CancelExchangeButton
+            projectId={projectId}
+            callId={call.callId}
+            when={callWhen(call.occurredAt)}
+          />
+        }
       />
     );
     // The planned call already says when: no « Départ » before it.

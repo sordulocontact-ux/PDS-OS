@@ -3,14 +3,11 @@ import { MeetingFacts } from "@/components/calls/meeting/meeting-facts";
 import { MeetingSummaryBlock } from "@/components/calls/meeting/meeting-summary-block";
 import { MeetingSummaryFor } from "@/components/calls/meeting/meeting-summary-for";
 import { CallPrepForm } from "@/components/calls/prep/call-prep-form";
-import { PlannedCallFacts } from "@/components/calls/prep/planned-call-facts";
+import { PlannedCallInPlace } from "@/components/calls/prep/planned-call-in-place";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { ViewLink } from "@/components/ui/view-link";
-import { routes } from "@/lib/auth/redirects";
 import { summaryDraft } from "@/lib/calls/meeting/draft";
 import { loadCallSummaries, loadMeeting } from "@/lib/calls/meeting/queries";
 import type { MeetingLine } from "@/lib/calls/meeting/types";
-import { loadPlannedCall } from "@/lib/calls/prep/planned";
 import { productionCall } from "@/lib/i18n/fr/production-call";
 import { productionCallDefaults } from "@/lib/production/call-prep-defaults";
 import type { CallItem, PreprodData } from "@/lib/production/preprod/types";
@@ -88,29 +85,16 @@ export async function CallStepHead({
       : null;
     return defaults ? <CallPrepForm defaults={defaults} stay /> : null;
   }
-  if (call.status !== "ready") {
-    const planned = await loadPlannedCall(call.callId);
-    if (!planned) return null;
-    return planned.held ? (
-      <div className="flex flex-col gap-2">
-        <p className="text-[color:var(--text-secondary)]">{t.processing}</p>
-        <ViewLink
-          href={routes.projectCall(projectId, call.callId)}
-          className="self-start font-semibold underline underline-offset-2"
-        >
-          {t.openCall}
-        </ViewLink>
-      </div>
-    ) : (
-      <PlannedCallFacts
-        call={planned}
+  if (call.status !== "ready")
+    return (
+      <PlannedCallInPlace
+        callId={call.callId}
         noun="call"
         waiting={
           canOrganize ? null : { name: data.ownerName ?? "—", what: t.hold }
         }
       />
     );
-  }
   const meeting = await loadMeeting(call.callId, {
     name: t.meetingName,
     noun: "call",

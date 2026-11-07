@@ -1268,12 +1268,16 @@ s'afficher sans chargement.
   l'état toutes les 5 s si un traitement tourne ailleurs) → redirection vers la relecture
   de l'échange dans le Cadrage (`?step=review&call=…`, § 6).
   Consentement **accordé par contrat** (défaut `granted`, `…260926002301`) : plus d'écran.
-- **Enregistrer sans ouvrir la page du call** (Cadrage, Sacha 28/10/2026) : dans la carte
-  « Échange de cadrage », « Enregistrer l'échange » est l'enregistreur lui-même (`ExchangeInPlace`,
-  `CallRecorder compact`) : au clic, Chrome demande l'onglet du Meet (le clic est le geste
-  utilisateur qu'exige `getDisplayMedia`), l'enregistrement se fait dans la carte, puis
-  `CallProcessing` y lance transcription et compte rendu et ouvre « Les 6 dimensions ». Les
-  autres modules mènent encore à la page du call (`#call-recording`). Garder l'onglet PDS OS
+- **Enregistrer sans ouvrir la page du call** (Cadrage, Sacha 28/10/2026 ; **tous les modules**
+  depuis le 07/11/2026 : Stratégie, Conception, Production, Master) : dans la carte de l'échange
+  prévu, « Enregistrer l'échange » / « le call » est l'enregistreur lui-même (`PlannedCallInPlace`,
+  `components/calls/prep/` : `PlannedCallFacts` + `CallRecorder compact` + dépôt d'un fichier) : au
+  clic, Chrome demande l'onglet du Meet (le clic est le geste utilisateur qu'exige
+  `getDisplayMedia`), l'enregistrement se fait dans la carte, puis `CallProcessing` y lance
+  transcription et compte rendu et mène là où PO propose (Les 6 dimensions, la Stratégie, les
+  Intentions, l'étape du call de production ; le Master reste sur le Brief, « Proposer pour le
+  Brief » dans le tableau des échanges). Un geste du module se pose à côté (`beside` : « Annuler
+  l'échange » du Cadrage). La page du call reste l'archive (Calls, Calendrier), plus un détour. Garder l'onglet PDS OS
   ouvert : quitter la page arrête l'enregistrement (ce qui est sauvé reste repris).
 - **Enregistreur dans l'app** (`components/calls/call-recorder.tsx`, `use-recorder.ts`,
   `recorder-media.ts`, `recording-live.tsx`, `recording-review.tsx`) :
@@ -1932,8 +1936,7 @@ l'étape qui attend la personne (`framingLanding`) et les anciennes URL (`?step=
   manquant + à confirmer > connu (`recommendedStart`, `lib/framing/lines.ts`), raison dite seulement
   dans ce cas. « Préparer un échange » ouvre `CallPrepForm` dans l'étape (`callSheetData` : un point par
   dimension qui a un manque ou un « à confirmer »), « Changer » revient au choix. Après création :
-  `PlannedCallFacts` ; enregistré mais pas encore rangé : lien vers le call (le vrai pipeline
-  enregistrement → transcription → compte rendu se fait sur sa page) ; compte rendu reçu : `MeetingFacts`
+  `PlannedCallInPlace` (enregistrement, transcription et compte rendu dans la carte) ; compte rendu reçu : `MeetingFacts`
   avec, pour lignes, **ce que PO a proposé de l'échange par dimension** et son état dans le Cadrage
   (confirmé, écarté, à confirmer ; budget interne), puis le résumé aux participants quand tout est
   tranché (`MeetingSummaryBlock`, prochaine étape « Le Brief de cadrage part en validation »).
@@ -2285,7 +2288,7 @@ d'exécution décrits plus haut** (tables et fonctions gardées).
   Brief à transformer en leviers, date de sortie, enveloppe, objectif du Cadrage (`knownAtStart`,
   `lib/strategy/start-reco.ts`). Ordre du jour de l'échange = **les 8 dimensions** (proto), les questions
   de ce qui manque repliées sous chaque point (`strategyCallTopics`) ; objectif du proto. Puis
-  `PlannedCallFacts`, et une fois le compte rendu rangé : `MeetingFacts` + `MeetingSummaryBlock`, les
+  `PlannedCallInPlace` (enregistré et traité sur place), et une fois le compte rendu rangé : `MeetingFacts` + `MeetingSummaryBlock`, les
   lignes du compte rendu étant **les propositions de la Stratégie** (`strategyMeetingLines`), la
   prochaine étape nommant direction **et** directions créatives (incohérence du proto corrigée).
 - **Les 8 dimensions** (`lib/strategy/dimension-model.ts`, `-items.ts`, `-levers.ts`, `-budget.ts`) :

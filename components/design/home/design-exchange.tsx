@@ -1,13 +1,10 @@
 import { CallFacts, CallSource } from "@/components/calls/call-facts";
 import { MeetingSummaryBlock } from "@/components/calls/meeting/meeting-summary-block";
 import { MeetingSummaryFor } from "@/components/calls/meeting/meeting-summary-for";
-import { PlannedCallFacts } from "@/components/calls/prep/planned-call-facts";
-import { ViewLink } from "@/components/ui/view-link";
-import { routes } from "@/lib/auth/redirects";
+import { PlannedCallInPlace } from "@/components/calls/prep/planned-call-in-place";
 import { meetingSettled, summaryDraft } from "@/lib/calls/meeting/draft";
 import { loadCallSummaries, loadMeeting } from "@/lib/calls/meeting/queries";
 import type { MeetingLine } from "@/lib/calls/meeting/types";
-import { loadPlannedCall } from "@/lib/calls/prep/planned";
 import type { DesignJourneyContext } from "@/lib/design/journey-context";
 import { designJourney } from "@/lib/i18n/fr/design-journey";
 import { designSteps } from "@/lib/i18n/fr/design-steps";
@@ -51,46 +48,29 @@ function designLines(ctx: DesignJourneyContext, callId: string): MeetingLine[] {
 
 /**
  * The creative exchange in the Accueil, once created (proto prepGate
- * « design », then summaryBlock): the planned exchange (recorded in PDS OS
- * from its page), the processing, then « Échange créatif du … · Compte
+ * « design », then summaryBlock): the planned exchange, recorded and
+ * processed in place (PlannedCallInPlace), then « Échange créatif du … · Compte
  * rendu disponible » and — once every intention heard is settled — the
  * summary to the participants, versioned.
  */
 export async function DesignExchange({ ctx }: { ctx: DesignJourneyContext }) {
   const call = ctx.call;
   if (!call) return null;
-  if (!call.held) {
-    const planned = await loadPlannedCall(call.callId);
-    if (!planned) return null;
-    if (!call.recorded)
-      return (
-        <PlannedCallFacts
-          call={planned}
-          noun="exchange"
-          waiting={
-            ctx.isOwner
-              ? null
-              : {
-                  name: ctx.owner?.name ?? "—",
-                  what: fr.designJourney.todo.holdCall.toLowerCase(),
-                }
-          }
-        />
-      );
+  if (!call.held)
     return (
-      <div className="flex flex-col gap-3">
-        <p className="text-body-md text-[color:var(--text-secondary)]">
-          {t.processing}
-        </p>
-        <ViewLink
-          href={routes.projectCall(ctx.project.id, call.callId)}
-          className="self-start text-body-md font-semibold underline underline-offset-2"
-        >
-          {t.openCall}
-        </ViewLink>
-      </div>
+      <PlannedCallInPlace
+        callId={call.callId}
+        noun="exchange"
+        waiting={
+          ctx.isOwner
+            ? null
+            : {
+                name: ctx.owner?.name ?? "—",
+                what: fr.designJourney.todo.holdCall.toLowerCase(),
+              }
+        }
+      />
     );
-  }
 
   const [base, summaries] = await Promise.all([
     loadMeeting(call.callId, { name: t.meetingName, noun: "exchange" }),

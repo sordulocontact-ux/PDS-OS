@@ -1,6 +1,3 @@
-import { buttonVariants, ButtonRoll } from "@/components/ui/button";
-import { ViewLink } from "@/components/ui/view-link";
-import { routes } from "@/lib/auth/redirects";
 import { callWhen } from "@/lib/calls/prep/dates";
 import type { PlannedCall } from "@/lib/calls/prep/planned";
 import { callPrep } from "@/lib/i18n/fr/call-prep";
@@ -9,17 +6,13 @@ import { CallPlanBlock, callBlockHeadingClass } from "./call-plan-block";
 
 const fr = { callPrep };
 
-// Where the call's page opens: its recorder.
-const RECORDER_ANCHOR = "call-recording";
-
 /**
  * The call once prepared, in its step (Figma PDS OS 304:20801, screen 5,
  * Sacha 29/10/2026): its name, then in one block when and who organizes it,
  * the video link to open or copy, the participants, the agenda beside the
  * objective (CallPlanBlock, as the summary before it); then how it is
- * recorded and « Enregistrer l'échange », which opens the call's page on its
- * recorder. `action`: the module records in place instead (the
- * Cadrage: CallRecorder `compact`, « Annuler l'échange » beside it).
+ * recorded, then `action`: the recorder in place (PlannedCallInPlace, every
+ * module since 07/11/2026, never a detour by the call's page).
  * `waiting`: what someone else than the owner reads instead of the buttons
  * (« En attente de Lina Haddad : … »).
  */
@@ -35,7 +28,7 @@ export function PlannedCallFacts({
   // The objective, when the module keeps it (framing_calls.purpose).
   goal?: string | null;
   waiting?: { name: string; what: string } | null;
-  action?: React.ReactNode;
+  action: React.ReactNode;
 }) {
   const t = fr.callPrep.planned;
   return (
@@ -56,17 +49,8 @@ export function PlannedCallFacts({
         <p className="text-caption text-[color:var(--text-tertiary)]">
           {t.waiting(waiting.name, waiting.what)}
         </p>
-      ) : action ? (
-        action
       ) : (
-        call.projectId && (
-          <ViewLink
-            href={`${routes.projectCall(call.projectId, call.callId)}#${RECORDER_ANCHOR}`}
-            className={buttonVariants({ size: "sm", className: "self-start" })}
-          >
-            <ButtonRoll>{t.record[noun]}</ButtonRoll>
-          </ViewLink>
-        )
+        action
       )}
     </section>
   );

@@ -75,9 +75,6 @@ export const productionCall = {
       import:
         "PO propose les points tirés du document importé. Retenez, corrigez ou écartez chacun.",
     },
-    processing:
-      "Le call est enregistré : la transcription puis le compte rendu arrivent ici.",
-    openCall: "Ouvrir le call",
     hold: "tenir le call et l'enregistrer dans PDS OS",
     items: {
       call: "Ce qui a été dit",
