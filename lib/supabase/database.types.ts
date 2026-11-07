@@ -16131,6 +16131,53 @@ export type Database = {
           },
         ]
       }
+      project_view_cache: {
+        Row: {
+          account_id: string
+          computed_at: string
+          deps: string[]
+          project: string
+          reader: string
+          seen: Json
+          tables: Json
+          updated_at: string
+          value: Json
+          view: string
+        }
+        Insert: {
+          account_id?: string
+          computed_at: string
+          deps?: string[]
+          project: string
+          reader: string
+          seen: Json
+          tables: Json
+          updated_at?: string
+          value: Json
+          view: string
+        }
+        Update: {
+          account_id?: string
+          computed_at?: string
+          deps?: string[]
+          project?: string
+          reader?: string
+          seen?: Json
+          tables?: Json
+          updated_at?: string
+          value?: Json
+          view?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_view_cache_project_fkey"
+            columns: ["project"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           archived_at: string | null
@@ -18020,6 +18067,10 @@ export type Database = {
       }
       live_rpc_reads: {
         Args: { p_names: string[] }
+        Returns: Json
+      }
+      live_function_map: {
+        Args: { p_known?: string }
         Returns: Json
       }
       distribution_status_rows: {

@@ -36,6 +36,8 @@ const eslintConfig = defineConfig([
     ignores: [
       "lib/projects/live-deps.ts",
       "lib/projects/version-cache.ts",
+      // Per-request containers (batched reads and writes), not a shared read.
+      "lib/projects/view-store.ts",
       "lib/utils/request-memo.ts",
     ],
     rules: {

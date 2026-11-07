@@ -137,19 +137,34 @@ export const VISIBILITY = [
 ];
 
 /** What each database function reads and whether it can write, as the
- * database says it (live_rpc_reads), once per server instance; null:
- * unknown to the database. Filled by lib/projects/version-cache.ts. */
+ * database says it (live_function_map), once per server instance; null:
+ * unknown to the database. Filled by lib/projects/function-map.ts. */
 export const functionReads = new Map<
   string,
   { tables: string[]; readOnly: boolean } | null
 >();
+
+// Whether functionReads holds every function of the database: a name it
+// lacks is then no function of the schema, read as every table.
+let functionsKnown = false;
+export function setFunctionsKnown(known: boolean) {
+  functionsKnown = known;
+}
+
+// The tables of each view as the database says them (live_function_map,
+// pg_depend), over VIEW_TABLES below once known.
+let databaseViewTables: Record<string, string[]> = {};
+export function setViewTables(views: Record<string, string[]>) {
+  databaseViewTables = views;
+}
 
 // The tables each view of the database reads (supabase/migrations, `create
 // view`): project_live stamps the table a write changed, never a view, so a
 // read through a view depends on its tables. Without it, confirming an answer
 // of the Cadrage (field_values, read as current_field_values) left the page
 // on its state of before, and the next « Confirmer » was refused (07/11/2026).
-// A new view goes here.
+// The database now says them itself (live_function_map); this list is what
+// holds until it has.
 const VIEW_TABLES: Record<string, string[]> = {
   current_field_values: ["field_values"],
   library_files: [
@@ -178,11 +193,16 @@ export function tablesOfDeps(deps: Iterable<string>): Tables | null {
   for (const dep of deps) {
     if (dep.startsWith("t:")) {
       const name = dep.slice(2);
-      for (const table of VIEW_TABLES[name] ?? [name]) tables.add(table);
+      for (const table of databaseViewTables[name] ??
+        VIEW_TABLES[name] ?? [name])
+        tables.add(table);
     } else if (dep.startsWith("r:")) functions.push(dep.slice(2));
   }
   for (const name of functions) {
-    if (!functionReads.has(name)) return null;
+    if (!functionReads.has(name)) {
+      if (functionsKnown) return "all";
+      return null;
+    }
     const reads = functionReads.get(name);
     if (!reads) return "all";
     for (const table of reads.tables) tables.add(table);
@@ -210,6 +230,14 @@ export const currentView = () => views.getStore() ?? null;
 /** Runs a view's computation in its scope. */
 export function inView<T>(scope: ViewScope, run: () => T): T {
   return views.run(scope, run);
+}
+
+/** Runs a read that belongs to no view and is never kept as one of its
+ * answers (the views kept in the database, lib/projects/view-store.ts). */
+export function outsideViews<T>(run: () => PromiseLike<T>): Promise<T> {
+  return views.run(undefined as unknown as ViewScope, () =>
+    collectors.run([], async () => await run()),
+  );
 }
 
 // The scope of a page's own read of a project (lib/projects/request-cache.ts),

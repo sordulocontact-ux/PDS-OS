@@ -963,6 +963,28 @@ s'afficher sans chargement.
   et il **ferme ses connexions après ~35 s sans requête** ; la session neuve paie 100 à 400 ms au
   premier appel de chaque fonction (catalogue à recharger). Chaque lecture évitée compte donc
   double après une pause.
+- **Carte des fonctions** (audit du 07/11, `20261107230101_live_function_map.sql`,
+  `lib/projects/function-map.ts`) : ce que lit chaque fonction SQL (tables et vues nommées, fonctions
+  appelées, lecture seule) et les tables de chaque vue (`pg_depend`) arrivent en **une lecture pour tout le
+  schéma**, chargée une fois par instance, revérifiée toutes les 5 min par sa signature (nombre de fonctions
+  + version de ligne la plus récente de `pg_proc` : une migration qui touche une fonction la fait recalculer,
+  une fois, sous verrou). Le serveur suit lui-même les appels. Avant, `live_rpc_reads` relisait et passait
+  aux expressions régulières le corps de toutes les fonctions à chaque appel : 6 à 12 s au premier appel
+  d'une connexion, requête n°1 de la base, et rien n'était servi du cache tant qu'elle tournait. Une
+  fonction absente de la carte compte pour toutes les tables.
+- **Cache des vues en base** (audit du 07/11, `20261107230201_project_view_cache.sql`,
+  `lib/projects/view-store.ts`) : le cache de `byProjectVersion` ne vivait que dans la mémoire d'une
+  instance ; chaque instance neuve (Vercel en démarre sans cesse, un `pnpm dev` relancé) recalculait tous
+  les projets (Accueil : 1 688 lectures, 20 s ; Projets : 1 012). Chaque vue calculée est aussi écrite en
+  base **après la réponse** (une ligne par lecteur, vue et projet ; JSON pur seulement, 1 Mo au plus), et
+  une instance qui ne l'a pas en mémoire lit **en une requête** les lignes de toutes les vues et projets
+  demandés dans le même instant, puis les sert sous les règles de la mémoire (version lue d'abord, aucune
+  table lue changée, 5 min puis servie une fois et recalculée en arrière-plan, 72 h au plus). `reader` =
+  hachage du lecteur (compte, poste, permissions) ; **le jour n'est plus dans la clé** : une vue d'un autre
+  jour (étapes en retard) est servie une fois puis recalculée juste après la réponse, au lieu de tout
+  recalculer, bloquant, au premier passage de chaque matinée. RLS : chacun ne lit et n'écrit que ses
+  lignes. La table n'a **pas** de `project_id` (colonne `project`) et `attach_project_live` l'exclut : l'écrire
+  ne doit jamais faire changer la version du projet.
 - **Concurrence bornée** (audit des chargements, 07/11, `lib/supabase/request-gate.ts`) : toute requête serveur
   vers Supabase passe par `sentFetch`, qui n'en laisse partir que **16 à la fois** par processus ; les autres
   attendent leur tour (une requête annulée en attente sort de la file). Avant, un rendu envoyait tout d'un coup :
@@ -1068,7 +1090,7 @@ s'afficher sans chargement.
   version à laquelle **chaque table** a changé (même déclencheur `zz_project_live` : une version et un
   signal par transaction, chaque table écrite tamponnée). Le serveur **note ce que chaque vue lit**
   (le `fetch` du client Supabase : la table, les tables imbriquées par son `select`, et pour une
-  fonction ses tables d'après la base, `live_rpc_reads`, avec les tables de visibilité RLS) et la
+  fonction ses tables d'après la base, `live_function_map`, avec les tables de visibilité RLS) et la
   ressert tant qu'**aucune de ses tables** n'a changé. Les lectures partagées par `cache()` notent
   leurs tables chez chaque appelant : **`trackedCache` remplace `cache` de React** dans `lib/`
   (même comportement), `memoPerRequest` aussi. Parcours (`journey-<module>`) et faits des états

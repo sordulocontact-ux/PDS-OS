@@ -5,6 +5,7 @@ import { type WorkflowCard, workflowCards } from "@/lib/overview/cards";
 import { loadShellJourneys } from "@/lib/overview/journeys";
 import { planLaunchedAt } from "@/lib/plan/queries";
 import type { ActiveWorkflow, ProjectListItem } from "@/lib/projects/types";
+import { withQueryBatching } from "@/lib/supabase/batch";
 import { OPEN_STATUSES } from "@/lib/ui/journey";
 import { loadWorkflowStates } from "@/lib/workflow-status/load";
 
@@ -62,14 +63,19 @@ async function loadFramingStep(projectId: string): Promise<string | null> {
 export async function withActiveWorkflows(
   projects: ProjectListItem[],
 ): Promise<ProjectListItem[]> {
-  const progress = await Promise.all(
-    projects.map(async (p) => {
-      if (p.status !== "launched") return null;
-      const cards = await loadWorkflowProgress(p.id);
-      // Not launched yet: the Cadrage (or its plan) is where it stands.
-      if (cards || !p.currentStage) return { cards, framingStep: null };
-      return { cards: null, framingStep: await loadFramingStep(p.id) };
-    }),
+  // The same read of every project leaves as one request (lib/supabase/
+  // batch.ts), as for the Accueil: 1 012 requests for 13 projects before
+  // (page loads audit of 07/11/2026).
+  const progress = await withQueryBatching(() =>
+    Promise.all(
+      projects.map(async (p) => {
+        if (p.status !== "launched") return null;
+        const cards = await loadWorkflowProgress(p.id);
+        // Not launched yet: the Cadrage (or its plan) is where it stands.
+        if (cards || !p.currentStage) return { cards, framingStep: null };
+        return { cards: null, framingStep: await loadFramingStep(p.id) };
+      }),
+    ),
   );
   return projects.map((p, i) => {
     const { cards = null, framingStep = null } = progress[i] ?? {};

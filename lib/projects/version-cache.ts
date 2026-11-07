@@ -11,7 +11,6 @@ import {
   addDeps,
   apart,
   collecting,
-  functionReads,
   inView,
   type LiveStamps,
   providePageScope,
@@ -21,9 +20,15 @@ import {
   unchanged,
   untracked,
   type ViewScope,
-  VISIBILITY,
 } from "@/lib/projects/live-deps";
+import { ensureFunctionMap } from "@/lib/projects/function-map";
 import { holdsSignedLink, isPlain } from "@/lib/projects/plain-data";
+import {
+  loadStoredView,
+  readerHash,
+  type StoredView,
+  storeView,
+} from "@/lib/projects/view-store";
 import {
   createClient,
   requestCookies,
@@ -46,7 +51,7 @@ import {
 // - the reader as the database knows them (the whole Access: account,
 //   position, permissions), since RLS and the journeys depend on who reads,
 //   and the tables RLS reads to decide what a reader sees (VISIBILITY);
-// - the day in Paris (overdue steps), and fresh for TTL_MS: what is not a
+// - fresh for TTL_MS on the same day in Paris (overdue steps): what is not a
 //   table of a project (a name in the Réseau, a catalog file of a title held
 //   by no project) is read again after that. Past it, and up to STALE_MS, an
 //   entry whose tables did not change is still served once while it is
@@ -61,8 +66,12 @@ import {
 // hovered link's prefetch, then the click) share one computation.
 
 const TTL_MS = 5 * 60_000;
-// A working day: the reader's key changes at midnight anyway.
-const STALE_MS = 8 * 60 * 60_000;
+// A night or a weekend: a view kept in the database (lib/projects/view-
+// store.ts) is then served once, the morning after, and computed again
+// right after the response (page loads audit of 07/11/2026). Only what is
+// not a table of the project, and the steps overdue since, may show their
+// state of the day before on that one page.
+const STALE_MS = 72 * 60 * 60_000;
 const MAX_ENTRIES = 300;
 // A background computation's session must outlive it by far: a client that
 // renewed it then could not hand the new cookies back, and the browser's
@@ -131,6 +140,7 @@ providePageScope(async (projectId) => {
   const [access, now] = await Promise.all([
     getAccess(),
     projectLive(projectId),
+    ensureFunctionMap(),
   ]);
   if (!now || access.state !== "approved") return null;
   return {
@@ -149,30 +159,10 @@ export async function projectVersion(
 
 export type { LiveStamps } from "@/lib/projects/live-deps";
 
-/** Asks the database what the functions among `deps` (and those deciding
- * visibility) read, once per server instance. */
-export async function learnFunctions(deps: Iterable<string>) {
-  const names = [
-    ...new Set([
-      ...VISIBILITY,
-      ...[...deps].flatMap((d) => (d.startsWith("r:") ? [d.slice(2)] : [])),
-    ]),
-  ].filter((name) => !functionReads.has(name));
-  if (!names.length) return;
-  const supabase = await createClient();
-  const { data, error } = await untracked(() =>
-    supabase.rpc("live_rpc_reads", { p_names: names }),
-  );
-  if (error) return;
-  const known = (data ?? {}) as Record<
-    string,
-    { tables: string[]; readOnly: boolean }
-  >;
-  for (const name of names) functionReads.set(name, known[name] ?? null);
-}
-
+// The tables `deps` stand for, once the functions' reads are known
+// (lib/projects/function-map.ts).
 async function tablesOf(deps: string[]): Promise<Tables> {
-  await learnFunctions(deps);
+  await ensureFunctionMap();
   return tablesOfDeps(deps) ?? "all";
 }
 
@@ -228,7 +218,9 @@ function servable(
     entry.seen = now;
   }
   const age = Date.now() - entry.at;
-  if (age < TTL_MS) return "fresh";
+  // Computed another day: its overdue steps may have changed since.
+  const sameDay = todayInParis(new Date(entry.at)) === todayInParis(new Date());
+  if (age < TTL_MS && sameDay) return "fresh";
   if (
     !settled?.kept ||
     settled.signed ||
@@ -238,6 +230,37 @@ function servable(
     return null;
   return "stale";
 }
+
+// An entry from a view kept in the database (lib/projects/view-store.ts).
+function storedEntry(stored: StoredView): Entry {
+  const settled: Kept = {
+    kept: true,
+    value: stored.value,
+    deps: stored.deps,
+    tables: stored.tables,
+    signed: false,
+  };
+  return {
+    at: stored.computedAt,
+    seen: stored.seen,
+    settled,
+    value: Promise.resolve(settled),
+  };
+}
+
+// What a computed entry gives the database to keep, once kept.
+const toStore = (entry: Entry): Promise<StoredView | null> =>
+  entry.value.then((kept) =>
+    kept.kept && !kept.signed
+      ? {
+          computedAt: entry.at,
+          seen: entry.seen,
+          deps: kept.deps,
+          tables: kept.tables,
+          value: kept.value,
+        }
+      : null,
+  );
 
 type Computation<T> = { entry: Entry; result: Promise<T>; deps: Set<string> };
 
@@ -301,6 +324,8 @@ async function refresh<T>(
   stale: Entry,
   scope: ViewScope,
   read: (projectId: string) => Promise<T>,
+  accountId: string | null,
+  who: string,
 ) {
   if (stale.refreshing) return;
   stale.refreshing = true;
@@ -329,8 +354,20 @@ async function refresh<T>(
           void result.catch(() => {});
           return entry.value.then((kept) => {
             if (entries.get(key) !== stale) return;
-            if (kept.kept) remember(key, entry);
-            else entries.delete(key);
+            if (kept.kept) {
+              remember(key, entry);
+              if (accountId)
+                storeView(
+                  {
+                    accountId,
+                    view: name,
+                    project: scope.projectId,
+                    reader: readerHash(who),
+                    stored: toStore(entry),
+                  },
+                  true,
+                );
+            } else entries.delete(key);
             if (process.env.PERF_TRACE === "1")
               console.info(
                 `[cache] ${name} computed again in the background, ${Date.now() - started} ms`,
@@ -364,20 +401,49 @@ export function byProjectVersion<T>(
 ): (projectId: string) => Promise<T> {
   return async (projectId) => {
     if (uncacheable.has(name)) return read(projectId);
+    // The functions' reads are known before the view's reads leave: its
+    // answers can be served from the request cache from the first one.
     const [access, now] = await Promise.all([
       getAccess(),
       projectLive(projectId),
+      ensureFunctionMap(),
     ]);
     if (now === null || access.state !== "approved") return read(projectId);
 
     // Who reads, and on which day (overdue steps).
+    // The answers of the request cache are kept per day; a view is kept
+    // whatever the day and served stale once on another day (servable).
     const reader = JSON.stringify([todayInParis(new Date()), access]);
-    const key = JSON.stringify([name, projectId, reader]);
+    const who = JSON.stringify(access);
+    const key = JSON.stringify([name, projectId, who]);
     const scope: ViewScope = { projectId, now, reader };
-    const hit = entries.get(key);
-    const state = servable(hit, now);
+    const { accountId } = access;
+    let hit = entries.get(key);
+    let state = servable(hit, now);
+    // Not in this instance's memory: kept in the database by an earlier
+    // one (lib/projects/view-store.ts), served under the same rules.
+    if (!state && accountId && !refreshing.getStore()) {
+      const stored = await loadStoredView(name, projectId, readerHash(who));
+      // Another request of this instance may have started it meanwhile.
+      const current = entries.get(key);
+      if (current && servable(current, now)) {
+        hit = current;
+        state = servable(current, now);
+      } else if (stored) {
+        const entry = storedEntry(stored);
+        const storedState = servable(entry, now);
+        if (storedState) {
+          remember(key, entry);
+          hit = entry;
+          state = storedState;
+          if (process.env.PERF_TRACE === "1")
+            console.info(`[cache] ${name} served from the database`);
+        }
+      }
+    }
     if (hit && state) {
-      if (state === "stale") void refresh(name, key, hit, scope, read);
+      if (state === "stale")
+        void refresh(name, key, hit, scope, read, accountId, who);
       const found = await hit.value;
       // Each request gets its own copy: nothing it changes reaches another.
       if (found.kept) {
@@ -390,6 +456,14 @@ export function byProjectVersion<T>(
     traceMiss(name, hit, now);
     const { entry, result, deps } = compute(name, key, scope, read);
     remember(key, entry);
+    if (accountId)
+      storeView({
+        accountId,
+        view: name,
+        project: projectId,
+        reader: readerHash(who),
+        stored: toStore(entry),
+      });
     const started = Date.now();
     const value = await result;
     addDeps(deps);
