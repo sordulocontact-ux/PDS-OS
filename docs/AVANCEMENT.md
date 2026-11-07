@@ -1713,3 +1713,22 @@ même jour (`20261107150101`, pré-prod seulement) est inversé.
   direction dépose le PDF et signe pour PDS dans la vérification (`SignatureGate` → `PdsSignStep`), sur la
   page de la démarche comme dans la fenêtre « Signer pour PDS » de la page Contrats (dépôt ajouté).
 - **Tests SQL** : `signed-returns` (39), `legal-contracts` (20), `legal-reste` (35) au nouvel ordre.
+
+## Chargements sous la seconde (07/11/2026, branche `pre-prod`, migrations `20261107230101_live_function_map`, `20261107230201_project_view_cache`)
+
+Audit des chargements (Chrome, journaux Vercel, `pg_stat_statements`, version de production locale avec
+`PERF_TRACE=1`). Mesure de départ en local (base Docker, 13 projets) : Accueil 1 688 lectures, 14,6 s ;
+Projets 1 012 lectures, 16,5 s ; ouvrir un projet, écran figé 4,3 s.
+
+- **Concurrence bornée** (`48ff99e9`, `lib/supabase/request-gate.ts`) : 16 requêtes en vol au plus par
+  instance ; avant, jusqu'à 1 118 en même temps (Kong local coupait : `fetch failed`).
+- **Carte des fonctions** (`live_function_map`, `lib/projects/function-map.ts`) : remplace `live_rpc_reads`
+  (6 à 12 s par appel, requête n°1 de la base) ; tables des vues SQL lues dans `pg_depend`.
+- **Cache des vues en base** (`project_view_cache`, `lib/projects/view-store.ts`) : une instance neuve ne
+  recalcule plus tous les projets ; le jour sort de la clé (servi une fois, recalculé après la réponse).
+- **Liste Projets** regroupée comme l'Accueil (`withQueryBatching`).
+- **Bug** : le compteur d'activations Marketing filtrait sur une colonne absente (400 à chaque appel).
+- Après, instance neuve : Accueil 0,58 s, Projets 0,70 s, chaque entrée de la barre et d'un projet
+  0,33 à 0,39 s ; après une écriture, rafraîchissement du projet 268 lectures en 670 ms.
+- Reste : pousser les deux migrations en prod au moment de fusionner `pre-prod` dans `main` ; la pré-prod
+  reste sur une instance Supabase gratuite (0,5 Go) ; `pnpm dev` compile chaque page à sa première visite.
