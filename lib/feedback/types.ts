@@ -86,6 +86,20 @@ export type FeedbackTopic = {
   newSinceSync: number;
 };
 
+/**
+ * A sent topic whose Notion page lags behind: never published, failed, or
+ * feedback joined (or changed) since. It waits for the director again, in
+ * « À examiner » too, since nothing else would bring them back to it.
+ */
+export function awaitsNotion(topic: FeedbackTopic): boolean {
+  return (
+    topic.status === "sent" &&
+    (!topic.notionSynced ||
+      topic.newSinceSync > 0 ||
+      topic.notionError !== null)
+  );
+}
+
 export type SendFeedbackInput = {
   kind: string;
   message: string;

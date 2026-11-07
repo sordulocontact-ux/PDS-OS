@@ -13,7 +13,11 @@ import { PageSection } from "@/components/shell/page-section";
 import { can, type Access } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { listMyFeedback, loadFeedbackInbox } from "@/lib/feedback/queries";
-import { isTopicStatus } from "@/lib/feedback/types";
+import {
+  awaitsNotion,
+  isTopicStatus,
+  type FeedbackTopic,
+} from "@/lib/feedback/types";
 import { fr } from "@/lib/i18n/fr";
 import { notionMissingSettings } from "@/lib/integrations/notion";
 
@@ -60,6 +64,9 @@ async function Mine({ access }: { access: Access }) {
   );
 }
 
+const byLatestFeedback = (a: FeedbackTopic, b: FeedbackTopic) =>
+  b.items[0].createdAt.localeCompare(a.items[0].createdAt);
+
 async function Inbox({ access, view }: { access: Access; view: FeedbackView }) {
   const t = fr.feedback;
   const inbox = access.personId
@@ -70,14 +77,23 @@ async function Inbox({ access, view }: { access: Access; view: FeedbackView }) {
         unfiled: [],
         all: [],
       };
+  // Said before sending and on the sent tab: nothing leaves for Notion.
+  const missingNotion = notionMissingSettings();
+  // A sent topic whose Notion page lags (feedback joined since, a failure)
+  // waits for the director in « À examiner » too: new feedback filed by PO
+  // into an already sent topic was otherwise seen by no one.
+  const toReview = [
+    ...inbox.topics.new,
+    ...(missingNotion.length === 0
+      ? inbox.topics.sent.filter(awaitsNotion)
+      : []),
+  ].sort(byLatestFeedback);
   const counts = {
-    new: inbox.topics.new.length + inbox.unfiled.length,
+    new: toReview.length + inbox.unfiled.length,
     sent: inbox.topics.sent.length,
     dismissed: inbox.topics.dismissed.length,
   };
 
-  // Said before sending and on the sent tab: nothing leaves for Notion.
-  const missingNotion = notionMissingSettings();
   const notionOff =
     missingNotion.length > 0 && (view === "new" || view === "sent");
 
@@ -87,7 +103,7 @@ async function Inbox({ access, view }: { access: Access; view: FeedbackView }) {
   } else {
     const topics = (
       <FeedbackTopics
-        topics={inbox.topics[view]}
+        topics={view === "new" ? toReview : inbox.topics[view]}
         unfiled={view === "new" ? inbox.unfiled : []}
         error={inbox.error}
         emptyBody={t.emptyView[view]}

@@ -55,6 +55,12 @@ export const feedback = {
     printScreenHint: "Capture faite : collez-la ici (Ctrl+V) pour la joindre.",
     altOf: (n: number) => `Capture d'écran ${n} jointe au retour`,
     openOf: (n: number) => `Voir la capture ${n}`,
+    titleOf: (n: number, total: number) => `Capture ${n} sur ${total}`,
+    viewer: {
+      close: "Fermer la capture",
+      previous: "Capture précédente",
+      next: "Capture suivante",
+    },
     badType: "Image PNG, JPEG ou WebP uniquement.",
     tooLarge: "5 Mo au plus par capture.",
     tooMany: "5 captures au plus : les suivantes n'ont pas été ajoutées.",

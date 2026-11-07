@@ -4,6 +4,7 @@ import { IconMsgSmile } from "nucleo-sharp-essential";
 import { EditFeedbackButton } from "@/components/feedback/edit-feedback-button";
 import { FeedbackCard } from "@/components/feedback/feedback-card";
 import { EmptyState } from "@/components/shell/empty-state";
+import { ImageGallery } from "@/components/ui/image-gallery";
 import { FormMessage } from "@/components/auth/form-message";
 import type { Feedback } from "@/lib/feedback/types";
 import { feedback } from "@/lib/i18n/fr/feedback";
@@ -74,27 +75,16 @@ export function FeedbackItems({
             {item.message}
           </p>
           {item.screenshots.length > 0 && (
-            <ul className="flex flex-wrap gap-2">
-              {item.screenshots.map(({ path, url }, index) => (
-                <li key={path}>
-                  <a
-                    href={url}
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label={t.screenshot.openOf(index + 1)}
-                    className="block w-fit"
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element -- signed URL of a private bucket */}
-                    <img
-                      src={url}
-                      alt={t.screenshot.altOf(index + 1)}
-                      loading="lazy"
-                      className="max-h-40 max-w-full rounded-lg border border-border object-contain"
-                    />
-                  </a>
-                </li>
-              ))}
-            </ul>
+            <ImageGallery
+              images={item.screenshots.map(({ path, url }, index) => ({
+                key: path,
+                src: url,
+                alt: t.screenshot.altOf(index + 1),
+                openLabel: t.screenshot.openOf(index + 1),
+                title: t.screenshot.titleOf(index + 1, item.screenshots.length),
+              }))}
+              labels={t.screenshot.viewer}
+            />
           )}
           {showTopic && (
             <p className="text-sm text-muted-foreground">

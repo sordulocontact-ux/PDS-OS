@@ -3094,7 +3094,9 @@ utile et le **transmet** avec une priorité à l'équipe qui construit l'outil.
   `<organisation>/<personne>/<uuid>.<ext>` (RLS : chacun son dossier ; lecture par
   l'auteur et le DG), avant l'envoi du retour ; un trigger refuse un chemin qui n'est pas
   celui de l'auteur. Chemins dans `feedback.screenshot_paths` (`text[]`, 5 au plus,
-  vérifié par contrainte et par le code). Affichées par URL signée (1 h).
+  vérifié par contrainte et par le code). Affichées par URL signée (1 h). Un clic ouvre
+  la capture en grand dans la page (`ImageGallery`, jamais un nouvel onglet), ← → ou les
+  flèches pour passer d'une capture à l'autre.
 - **Coller dans une zone de dépôt** (partout dans l'app) : toute zone bâtie sur
   `useFileDrop` (`FileDropZone`, fichiers d'une fiche, source d'un modèle de contrat) prend
   aussi les fichiers collés (⌘V / Ctrl+V), vérifiés par l'appelant comme un dépôt
@@ -3164,7 +3166,12 @@ utile et le **transmet** avec une priorité à l'équipe qui construit l'outil.
   (écarté). Changements par `review_feedback_topic` seulement : transmettre, changer la
   priorité, écarter, remettre à examiner. Un retour qui rejoint un sujet écarté le remet à
   examiner ; un sujet transmis affiche « N nouveaux retours depuis la transmission »
-  (calculé par le code).
+  (calculé par le code). **Un sujet transmis dont la page Notion est en retard** (retour
+  arrivé ou modifié depuis, jamais publié, échec : `awaitsNotion`) revient aussi dans
+  « À examiner », avec « Mettre à jour sur Notion » en action principale : PO range un
+  nouveau retour dans un sujet déjà transmis, que personne ne revoyait (07/11/2026 : 12
+  retours d'un chef de projet restés hors de Notion). La consigne de tri demande un seul
+  problème précis par sujet (même écran ne suffit pas) et un résumé jamais élargi.
 - La page est dans la navigation principale (« Retours », hors Figma, pour tous) : le DG y
   trouve sa boîte, les autres leurs retours envoyés.
 - **Modifier avant de transmettre** (sujet à examiner ou écarté, jamais transmis) : le DG

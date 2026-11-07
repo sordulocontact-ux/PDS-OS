@@ -17,6 +17,7 @@ import {
   syncFeedbackTopicToNotion,
 } from "@/lib/feedback/actions";
 import {
+  awaitsNotion,
   FEEDBACK_PRIORITIES,
   type FeedbackPriority,
   type FeedbackTopic,
@@ -36,7 +37,7 @@ const TopicEditForm = dynamic(() =>
 // priority (one menu, one click) or dismiss it. Sent: change its priority.
 // Dismissed: bring it back to review.
 // Sent, and Notion configured: its page, and a button to publish it again
-// when it failed or new feedback joined since.
+// when it failed or new feedback joined since (the card's main action).
 export function TopicActions({
   topic,
   notion,
@@ -138,25 +139,21 @@ export function TopicActions({
       )}
       {topic.status === "sent" &&
         priorityMenu(t.actions.changePriority, "prioritize")}
-      {topic.status === "sent" &&
-        notion &&
-        (!topic.notionSynced ||
-          topic.newSinceSync > 0 ||
-          topic.notionError !== null) && (
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={pending}
-            aria-busy={pending || undefined}
-            onClick={publish}
-          >
-            {topic.notionError
-              ? t.notion.retry
-              : topic.notionSynced
-                ? t.notion.update
-                : t.notion.send}
-          </Button>
-        )}
+      {notion && awaitsNotion(topic) && (
+        <Button
+          size="sm"
+          variant="default"
+          disabled={pending}
+          aria-busy={pending || undefined}
+          onClick={publish}
+        >
+          {topic.notionError
+            ? t.notion.retry
+            : topic.notionSynced
+              ? t.notion.update
+              : t.notion.send}
+        </Button>
+      )}
       {topic.status === "sent" && topic.notionUrl && (
         <a
           href={topic.notionUrl}
