@@ -131,11 +131,14 @@ export const calls = {
   },
   audio: {
     title: "Enregistrement",
-    hint: "mp3, m4a, wav, webm, ogg ou flac — 100 Mo maximum. Au-delà de 25 Mo, la transcription exige le palier payant du fournisseur.",
-    label: "Fichier audio",
-    submit: "Déposer l'enregistrement",
+    // The drop zone: a recording, or a transcript (Sacha 07/11/2026).
+    drop: "Glissez un fichier ici, ou cliquez pour le choisir",
+    hint: "Audio (mp3, m4a, wav, webm, ogg, flac), 100 Mo au plus · Transcription (PDF, Word, txt, md, vtt, srt), 4 Mo au plus",
+    chosen: (name: string) => `Fichier choisi : ${name}`,
+    submit: "Déposer le fichier",
     pending: "Envoi…",
     uploaded: "Enregistrement déposé.",
+    transcriptUploaded: "Transcription déposée : PO prépare le compte rendu.",
     size: (mb: string) => `${mb} Mo`,
     playerUnavailable: "Lecture impossible pour le moment.",
     part: (n: number) => `Partie ${n}`,
@@ -192,7 +195,7 @@ export const calls = {
     sent: "Enregistrement envoyé. Transcription en cours…",
     freeTierNote:
       "Au-delà de 25 Mo (environ 1 h 45), la transcription exige le palier payant du fournisseur.",
-    or: "Déposer un fichier audio à la place",
+    or: "Déposer un fichier à la place",
     errors: microphoneErrors,
     // Before any prompt: what the browser already says (PROJ-BUG-01).
     diagnosis: "Avant de commencer",
@@ -370,9 +373,12 @@ export const calls = {
     consent_required:
       "Le consentement doit être accordé avant de déposer un enregistrement.",
     audio_exists: "Un enregistrement est déjà déposé pour ce call.",
-    no_file: "Choisissez un fichier audio.",
-    file_too_large: "Fichier trop lourd : 100 Mo maximum.",
-    unsupported_type: "Format non pris en charge. Utilisez un fichier audio.",
+    no_file: "Choisissez un fichier.",
+    file_too_large:
+      "Fichier trop lourd : 100 Mo au plus pour un audio, 4 Mo pour une transcription.",
+    unsupported_type:
+      "Format non pris en charge : un audio (mp3, m4a, wav, webm, ogg, flac) ou une transcription (PDF, Word, txt, md, vtt, srt).",
+    transcript_exists: "Ce call a déjà une transcription.",
     upload_failed: "L'envoi du fichier a échoué. Réessayez.",
     busy: "Un traitement est déjà en cours pour ce call.",
     no_transcript: "Transcrivez l'enregistrement avant d'extraire.",

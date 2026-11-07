@@ -1,4 +1,4 @@
-import { AudioUploadFold } from "@/components/calls/audio-upload-fold";
+import { CallFileUploadFold } from "@/components/calls/call-file-upload-fold";
 import { CallRecorder } from "@/components/calls/call-recorder";
 import type { CallDetail } from "@/lib/calls/queries";
 
@@ -23,7 +23,7 @@ export function CallRecording({
       videoCall={call.meetingUrl !== null}
       compact={compact}
       alternative={
-        <AudioUploadFold
+        <CallFileUploadFold
           callId={call.id}
           organizationId={call.organizationId}
         />

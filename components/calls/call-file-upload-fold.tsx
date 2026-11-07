@@ -1,11 +1,12 @@
-import { AudioUpload } from "@/components/calls/audio-upload";
+import { CallFileUpload } from "@/components/calls/call-file-upload";
 import { calls } from "@/lib/i18n/fr/calls";
 
 const fr = { calls };
 
-/** « Déposer un fichier audio à la place », folded under the recorder (or
- * under the Meet transcript being taken back, with its own `label`). */
-export function AudioUploadFold({
+/** « Déposer un fichier à la place » (an audio or a transcript), folded
+ * under the recorder (or under the Meet transcript being taken back, with
+ * its own `label`). */
+export function CallFileUploadFold({
   callId,
   organizationId,
   label = fr.calls.recorder.or,
@@ -20,7 +21,7 @@ export function AudioUploadFold({
         {label}
       </summary>
       <div className="pt-4">
-        <AudioUpload callId={callId} organizationId={organizationId} />
+        <CallFileUpload callId={callId} organizationId={organizationId} />
       </div>
     </details>
   );

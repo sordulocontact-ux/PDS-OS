@@ -1,4 +1,4 @@
-import { AudioUpload } from "@/components/calls/audio-upload";
+import { CallFileUpload } from "@/components/calls/call-file-upload";
 import { CallRecording } from "@/components/calls/call-recording";
 import { CallSummaryButton } from "@/components/calls/call-summary-button";
 import { CloseCallButton } from "@/components/calls/closure/close-call-button";
@@ -48,7 +48,7 @@ export function CallNowAction({
               }}
             />
           ) : (
-            <AudioUpload
+            <CallFileUpload
               callId={call.id}
               organizationId={call.organizationId}
             />

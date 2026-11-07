@@ -47,6 +47,31 @@ export const ALLOWED_AUDIO_MIMES = [
   "video/mp4",
 ] as const;
 
+/**
+ * A transcript dropped instead of a recording (PDF, Word, text, subtitles):
+ * read as text on the server, then processed like a transcription. Sent
+ * through a route, whose body Vercel stops at 4,5 Mo.
+ */
+export const TRANSCRIPT_EXTENSIONS = [
+  "pdf",
+  "docx",
+  "txt",
+  "md",
+  "vtt",
+  "srt",
+] as const;
+export type TranscriptExtension = (typeof TRANSCRIPT_EXTENSIONS)[number];
+export const MAX_TRANSCRIPT_BYTES = 4 * 1024 * 1024;
+
+export const transcriptExtensionOf = (
+  name: string,
+): TranscriptExtension | null => {
+  const ext = name.split(".").pop()?.toLowerCase() ?? "";
+  return (TRANSCRIPT_EXTENSIONS as readonly string[]).includes(ext)
+    ? (ext as TranscriptExtension)
+    : null;
+};
+
 export type CallErrorCode =
   | "invalid_input"
   | "title_required"
@@ -72,6 +97,8 @@ export type CallErrorCode =
   | "ai_quota"
   | "provider_error"
   | "transcript_empty"
+  // A transcript dropped while the call already has one.
+  | "transcript_exists"
   // The transcript taken from the call's Meet (lib/calls/meet-transcript.ts).
   | "meet_pending"
   | "meet_no_conference"

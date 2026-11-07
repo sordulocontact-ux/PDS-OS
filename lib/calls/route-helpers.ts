@@ -20,6 +20,11 @@ const HTTP_STATUS: Partial<Record<CallErrorCode, number>> = {
   meet_no_conference: 409,
   meet_no_transcript: 409,
   meet_unavailable: 502,
+  invalid_input: 400,
+  file_too_large: 413,
+  unsupported_type: 415,
+  transcript_empty: 422,
+  transcript_exists: 409,
 };
 
 // A step may add facts to its success (the extraction says if the Brief or

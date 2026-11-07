@@ -14,6 +14,8 @@ export function FilePickField({
   id,
   label,
   hint,
+  accept,
+  disabled,
   chosenLabel,
   file,
   error,
@@ -22,6 +24,9 @@ export function FilePickField({
   id: string;
   label: string;
   hint: string;
+  // The formats offered by the picker (the caller still checks the file).
+  accept?: string;
+  disabled?: boolean;
   chosenLabel: (name: string) => string;
   file: File | null;
   error?: string | null;
@@ -33,6 +38,8 @@ export function FilePickField({
         label={label}
         hint={hint}
         icon={IconFile}
+        accept={accept}
+        disabled={disabled}
         describedBy={error ? `${id}-error` : undefined}
         onFiles={(files) => files[0] && onFile(files[0])}
       />

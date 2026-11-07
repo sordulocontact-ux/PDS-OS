@@ -3,8 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-import { AudioUpload } from "@/components/calls/audio-upload";
-import { AudioUploadFold } from "@/components/calls/audio-upload-fold";
+import { CallFileUpload } from "@/components/calls/call-file-upload";
+import { CallFileUploadFold } from "@/components/calls/call-file-upload-fold";
 import { useCanEditProject } from "@/components/projects/edit-access";
 import { Button } from "@/components/ui/button";
 import { ProcessingSteps } from "@/components/ui/processing-steps";
@@ -108,10 +108,10 @@ export function MeetTranscriptFetch({
         </Button>
       )}
       {canEdit && dropInstead && (
-        <AudioUpload callId={callId} organizationId={organizationId} />
+        <CallFileUpload callId={callId} organizationId={organizationId} />
       )}
       {canEdit && !dropInstead && !running && (
-        <AudioUploadFold
+        <CallFileUploadFold
           callId={callId}
           organizationId={organizationId}
           label={t.instead}
