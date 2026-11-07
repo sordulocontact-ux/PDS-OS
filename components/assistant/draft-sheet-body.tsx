@@ -22,17 +22,17 @@ import {
 } from "@/components/assistant/record-draft-forms";
 import { TitleItemDraftForm } from "@/components/assistant/title-item-draft-form";
 import {
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import type { DraftProposal } from "@/lib/assistant/drafts";
 import { assistant } from "@/lib/i18n/fr/assistant";
 import { assistantRecords } from "@/lib/i18n/fr/assistant-records";
 
 const fr = { assistant, assistantRecords };
 
-// Inside the review panel, loaded only when a draft is opened
+// Inside the review modal, loaded only when a draft is opened
 // (next/dynamic): the real form of the draft's kind, pre-filled.
 export default function DraftSheetBody({
   proposal,
@@ -49,11 +49,11 @@ export default function DraftSheetBody({
 
   return (
     <>
-      <SheetHeader className="px-5 pt-5 pr-14">
-        <SheetTitle>{proposal.title}</SheetTitle>
-        <SheetDescription>{description}</SheetDescription>
-      </SheetHeader>
-      <div className="px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+      <DialogHeader>
+        <DialogTitle>{proposal.title}</DialogTitle>
+        <DialogDescription>{description}</DialogDescription>
+      </DialogHeader>
+      <div>
         {draft.kind === "artist" && (
           <ArtistDraftFlow
             draft={draft}

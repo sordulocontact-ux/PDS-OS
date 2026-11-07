@@ -15,12 +15,29 @@ import type {
   PositioningPart,
 } from "@/lib/framing/brief";
 import { strategyBudget } from "@/lib/i18n/fr/strategy-budget";
+import { strategyDimensions } from "@/lib/i18n/fr/strategy-dimensions";
 import { strategyPilot } from "@/lib/i18n/fr/strategy-pilot";
 import { strategyBudget as computeStrategyBudget } from "@/lib/strategy/budget";
 import type { StrategyDimension } from "@/lib/strategy/dimensions";
 import type { StrategyData } from "@/lib/strategy/queries";
 
-const fr = { strategyBudget, strategyPilot };
+const fr = { strategyBudget, strategyDimensions, strategyPilot };
+
+/** The parts of a written answer, under one title. */
+function Parts({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="flex flex-col gap-3">
+      <h3 className="text-body-md font-semibold">{title}</h3>
+      {children}
+    </section>
+  );
+}
 
 /**
  * What a dimension keeps folded under its lines (« Garde, repliés »,
@@ -52,7 +69,7 @@ export function DimensionWork({
 }) {
   // A part of the positioning or the narrative: an anchor for the card's
   // « premier manque » and the draft's questions, and « Proposer à nouveau »
-  // while it is not confirmed (MKT-S1-06).
+  // on PO's proposal (MKT-S1-06).
   const partCard = (
     part: FieldState<PositioningPart | NarrativePart>,
     label: string,
@@ -67,7 +84,9 @@ export function DimensionWork({
         label={label}
         projectId={projectId}
         actions={
-          part.status !== "confirmed" ? (
+          // « Proposer à nouveau » once PO proposed it: empty, PO's
+          // question above asks it (« M'aider à définir »).
+          part.status === "proposed" ? (
             <RedraftButton projectId={projectId} field={part.key} />
           ) : undefined
         }
@@ -78,11 +97,11 @@ export function DimensionWork({
   switch (dimension) {
     case "positioning":
       return (
-        <div className="flex flex-col gap-3">
+        <Parts title={fr.strategyDimensions.parts.positioning}>
           {data.positioningParts.map((part) =>
             partCard(part, fr.strategyPilot.positioning.parts[part.key]),
           )}
-        </div>
+        </Parts>
       );
     case "audiences":
       return (
@@ -93,18 +112,19 @@ export function DimensionWork({
         />
       );
     case "narrative":
+      // The parts first, then the synthesis PO writes from them.
       return (
         <>
+          <Parts title={fr.strategyDimensions.parts.narrative}>
+            {data.narrativeParts.map((part) =>
+              partCard(part, fr.strategyPilot.narrative.parts[part.key]),
+            )}
+          </Parts>
           <NarrativeSummary
             field={data.narrativeSummary}
             parts={data.narrativeParts}
             projectId={projectId}
           />
-          <div className="flex flex-col gap-3">
-            {data.narrativeParts.map((part) =>
-              partCard(part, fr.strategyPilot.narrative.parts[part.key]),
-            )}
-          </div>
         </>
       );
     case "levers":

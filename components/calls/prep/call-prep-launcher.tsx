@@ -4,21 +4,22 @@ import { useState, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { callPrep } from "@/lib/i18n/fr/call-prep";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
 
-const fr = { callPrep };
+const fr = { callPrep, dialogs };
 
 /**
  * « Préparer un échange » until the module's step holds the form itself:
  * the button, then the common form (`children`, a `CallPrepForm`) right
- * below it (`inline`, in a card), or in the side panel where the button
- * sits in a toolbar (`sheet`). Mounted only while open: reopening starts
+ * below it (`inline`, in a card), or in the modal where the button sits
+ * in a toolbar (`dialog`). Mounted only while open: reopening starts
  * from what the module proposes.
  */
 export function CallPrepLauncher({
@@ -32,7 +33,7 @@ export function CallPrepLauncher({
   label: string;
   title: string;
   body?: string;
-  mode?: "inline" | "sheet";
+  mode?: "inline" | "dialog";
   variant?: "default" | "outline";
   children: ReactNode;
 }) {
@@ -67,19 +68,18 @@ export function CallPrepLauncher({
   return (
     <>
       {button}
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent className="gap-0 overflow-y-auto data-[side=right]:w-full data-[side=right]:sm:max-w-xl">
-          <SheetHeader className="px-5 pt-5 pr-14">
-            <SheetTitle>{title}</SheetTitle>
-            {body && <SheetDescription>{body}</SheetDescription>}
-          </SheetHeader>
-          {open && (
-            <div className="px-5 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
-              {children}
-            </div>
-          )}
-        </SheetContent>
-      </Sheet>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent
+          closeLabel={fr.dialogs.close}
+          className="sm:max-w-[var(--dialog-width-medium)]"
+        >
+          <DialogHeader>
+            <DialogTitle>{title}</DialogTitle>
+            {body && <DialogDescription>{body}</DialogDescription>}
+          </DialogHeader>
+          {open && children}
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

@@ -72,11 +72,21 @@ export const strategyDimensions = {
     saved: "Modifié et retenu",
     retained: "Levier retenu",
     notRetained: "Levier non retenu",
+    confirmedAll: (n: number, dimension: string) =>
+      `${plural(n, "proposition retenue", "propositions retenues")} · ${dimension}`,
   },
-  po: "PO a rangé dans chaque dimension ce qui a été dit pendant l'échange, avec la phrase exacte. Confirmez, corrigez ou écartez chaque proposition, et ajoutez ce qui manque : rien n'entre dans la Stratégie sans vous.",
+  // The dimensions as the Cadrage's (DimensionList, Sacha 06/11/2026).
+  listTitle: "Les 8 dimensions",
+  confirmAll: (n: number) => (n > 1 ? `Confirmer les ${n}` : "Confirmer"),
+  confirming: "Confirmation…",
+  confirmAllHint: (n: number) =>
+    n > 1
+      ? "Tout est juste ? Confirmez-les ensemble, ou modifiez ou écartez une ligne d'abord."
+      : "C'est juste ? Confirmez-la, ou modifiez-la ou écartez-la d'abord.",
+  po: "PO a rangé dans chaque dimension ce qui a été dit pendant l'échange, avec la phrase exacte. Relisez, corrigez ou écartez ce qui ne va pas, puis confirmez la dimension, et ajoutez ce qui manque : rien n'entre dans la Stratégie sans vous.",
   counter: (complete: number, toDecide: number, toComplete: number) =>
     `${complete} ${complete > 1 ? "complétées" : "complétée"} · ${toDecide} à arbitrer · ${toComplete} à compléter`,
-  frozen: " · la Stratégie est figée pendant la validation",
+  frozenCallout: "La Stratégie est figée pendant sa validation.",
   nothingYet: "Rien de renseigné pour l'instant.",
   nothingSaidMeta: "rien de dit",
   // Facts at the head of the step.
@@ -131,20 +141,11 @@ export const strategyDimensions = {
     internal:
       "Le budget reste interne : il ne figure ni dans le Plan de sortie, ni dans le Dossier de presse.",
   },
-  // Folded: what the ticket asks beyond the proto.
-  details: {
+  // The parts of a written answer, in its open dimension.
+  parts: {
     positioning: "Les quatre points du positionnement",
-    audiences: "Décrire chaque public",
-    narrative: "Le récit en cinq parties",
-    levers: "Prérequis juridiques et autres leviers",
-    deliverables: "Quantité, levier et délais des livrables",
-    calendar: "Modifier les temps forts, vue par canal",
-    budget: "Répartition par levier et détail des lignes",
-    objectives: "Objectif stratégique et KPI chiffrés",
-    withPo: "Avec PO",
+    narrative: "Le récit, partie par partie",
   },
-  withPoBody:
-    "PO prépare un brouillon depuis le Brief de cadrage et les comptes rendus, ou range ce que vous lui dictez : chaque réponse arrive en proposition, à trancher ici.",
   strategicObjective: "Objectif stratégique",
   toConfirm: (n: number) => `${n} à confirmer`,
   pending: (n: number) =>

@@ -55,12 +55,8 @@ export async function sendRound(
   const s = stageSchema.safeParse(stage);
   if (!s.success)
     return { ok: false, error: fr.masterWorkflow.mix.errors.failed };
-  return withOutcome(
-    projectId,
-    ["master"],
-    done,
-    () => deliverRound(projectId, s.data, note, withoutStemsReason, email),
-    { openNext: true },
+  return withOutcome(projectId, ["master"], done, () =>
+    deliverRound(projectId, s.data, note, withoutStemsReason, email),
   );
 }
 
@@ -354,72 +350,66 @@ export async function decideRound(
   const access = await requireApproved();
   if (!input.success) return { ok: false, error: t.decision.errors.failed };
   const v = input.data;
-  return withOutcome(
-    v.projectId,
-    ["master"],
-    done,
-    async () => {
-      const supabase = await createClient();
-      const { error } = await supabase.rpc("decide_mix_version", {
-        p_version_id: v.versionId,
-        p_decision: v.decision,
-        p_note: v.note,
-      });
-      if (error) {
-        console.error("decideRound:", error.code, error.message);
-        const refused = fr.masterWorkflow.mixVersions.errors.decisionRefused;
-        const known = (
-          Object.keys(refused) as Array<keyof typeof refused>
-        ).find((code) => error.message.includes(code));
-        return {
-          ok: false,
-          error: error.message.includes("working_source")
-            ? t.decision.errors.working
-            : error.code === "42501"
-              ? fr.masterWorkflow.mixVersions.errors.forbidden
-              : known
-                ? refused[known]
-                : t.decision.errors.failed,
-        };
-      }
-      refresh(v.projectId);
-      const version = await versionOf(v.versionId);
-      const n = t.notify[v.decision === "approved" ? "approved" : "changes"];
-      // The last Master final asks the engineers for their invoice (SQL):
-      // the engineer of this round gets it in the « validé » e-mail, the
-      // others in their own, one e-mail per person.
-      const asked =
-        version?.stage === "mastering" && v.decision === "approved"
-          ? await justAskedInvoices(v.projectId, { origin: "master" })
-          : [];
-      const engineer = version
-        ? await engineerOf(v.projectId, version.stage)
-        : null;
-      const invoiceToo = engineer !== null && asked.includes(engineer);
-      // The validated mix carries the mastering to the same engineer: the
-      // mastering e-mail says both.
-      const continued =
-        version?.stage === "mix" &&
-        v.decision === "approved" &&
-        (await continueToMastering(
-          v.projectId,
-          t.notify.approvedNext(version.name, nameOf(access)),
-        ));
-      if (version && !continued)
-        await emailEngineer(v.projectId, version.stage, (title) => ({
-          subject: n.subject(title, version.name),
-          body: (invoiceToo ? t.notify.approvedInvoice : n).body(
-            version.name,
-            nameOf(access),
-          ),
-          anchor: "ps-versions",
-        }));
-      for (const contactId of asked.filter((id) => id !== engineer))
-        await emailInvoiceRequest(v.projectId, contactId);
-      return { ok: true };
-    },
-    { openNext: true },
-  );
+  return withOutcome(v.projectId, ["master"], done, async () => {
+    const supabase = await createClient();
+    const { error } = await supabase.rpc("decide_mix_version", {
+      p_version_id: v.versionId,
+      p_decision: v.decision,
+      p_note: v.note,
+    });
+    if (error) {
+      console.error("decideRound:", error.code, error.message);
+      const refused = fr.masterWorkflow.mixVersions.errors.decisionRefused;
+      const known = (Object.keys(refused) as Array<keyof typeof refused>).find(
+        (code) => error.message.includes(code),
+      );
+      return {
+        ok: false,
+        error: error.message.includes("working_source")
+          ? t.decision.errors.working
+          : error.code === "42501"
+            ? fr.masterWorkflow.mixVersions.errors.forbidden
+            : known
+              ? refused[known]
+              : t.decision.errors.failed,
+      };
+    }
+    refresh(v.projectId);
+    const version = await versionOf(v.versionId);
+    const n = t.notify[v.decision === "approved" ? "approved" : "changes"];
+    // The last Master final asks the engineers for their invoice (SQL):
+    // the engineer of this round gets it in the « validé » e-mail, the
+    // others in their own, one e-mail per person.
+    const asked =
+      version?.stage === "mastering" && v.decision === "approved"
+        ? await justAskedInvoices(v.projectId, { origin: "master" })
+        : [];
+    const engineer = version
+      ? await engineerOf(v.projectId, version.stage)
+      : null;
+    const invoiceToo = engineer !== null && asked.includes(engineer);
+    // The validated mix carries the mastering to the same engineer: the
+    // mastering e-mail says both.
+    const continued =
+      version?.stage === "mix" &&
+      v.decision === "approved" &&
+      (await continueToMastering(
+        v.projectId,
+        t.notify.approvedNext(version.name, nameOf(access)),
+      ));
+    if (version && !continued)
+      await emailEngineer(v.projectId, version.stage, (title) => ({
+        subject: n.subject(title, version.name),
+        body: (invoiceToo ? t.notify.approvedInvoice : n).body(
+          version.name,
+          nameOf(access),
+        ),
+        anchor: "ps-versions",
+      }));
+    for (const contactId of asked.filter((id) => id !== engineer))
+      await emailInvoiceRequest(v.projectId, contactId);
+    return { ok: true };
+  });
 }
 
 /** « Rouvrir le mix » with its reason (the owner, before the mastering). */

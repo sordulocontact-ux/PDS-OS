@@ -12,7 +12,8 @@ const t = fr.poQuestion;
 
 /**
  * THE box of a question PO asks, one at a time — the Cadrage's
- * (QuestionScreen) and the Cadrage juridique's (QuestionCard). Sunk to the
+ * (QuestionScreen), the Cadrage juridique's (QuestionCard) and the
+ * Stratégie's (StrategyQuestionBox). Sunk to the
  * page's surface inside the step's card (Figma PDS OS 304:20801), the domain
  * alone above the question (« Temporalité »: whether it is missing or to
  * confirm shows in the field or the answer below, Sacha 29/10/2026), its

@@ -221,8 +221,7 @@ Liste des projets : la colonne « Étape » ne montre **que l'étape** (jamais �
 lancement le statut de transmission (« Transmis, à accepter »…).
 
 Formulaire long en **blocs titrés** (`FormSection`) : une carte blanche à filet par groupe
-(« Le projet », « Informations initiales », « Équipe »), sans la carte dans une modale ou un
-panneau latéral. **Fiche à beaucoup de champs facultatifs en modale** (contact du Réseau, Sacha
+(« Le projet », « Informations initiales », « Équipe »), sans la carte dans une modale. **Fiche à beaucoup de champs facultatifs en modale** (contact du Réseau, Sacha
 05/11/2026 : « trop d'informations d'un coup » ; Attio, Linear) : une colonne (`FormDialog
 size="medium"`, 640 px), l'essentiel toujours affiché, les autres champs affichés seulement s'ils
 ont une valeur, les vides réduits à des boutons « + E-mail », « + TikTok »… sous les champs, qui
@@ -736,11 +735,22 @@ composant par motif, dans `components/ui/` (`docs/COMPOSANTS.md`) :
 
 - **Départ d'une étape = `StartChoices`** : cartes entières cliquables, au fond de la page
   (`--surface-page`) dans la carte de l'étape ; la carte « Recommandé » (choisie par le code) est
-  placée **en premier, à gauche** (Sacha, 29/10/2026) et la raison, calculée par le code, est écrite **sous les cartes, sur toute la largeur**. Le Cadrage dessine
-  en plus un bouton au pied de chaque carte (`action`, Figma 304:20801) : plein sur la recommandée,
-  contour sur l'autre ; c'est un dessin, la carte entière reste la seule cible. La règle « l'échange est toujours plein » ci-dessus
+  placée **en premier, à gauche** (Sacha, 29/10/2026) et la raison, calculée par le code, est écrite **sous les cartes, sur toute la largeur**. Chaque carte dessine
+  un bouton à son pied (Figma 304:20801, **partout** depuis le 06/11/2026 : Cadrage, Stratégie, Brief du
+  Master, Conception) : plein sur la recommandée, contour sur l'autre, libellé = le titre sauf `action` ;
+  c'est un dessin, la carte entière reste la seule cible. Pendant le départ, `pending` rend la carte
+  choisie occupée et l'autre inerte, sur tous les écrans. **Le départ peut toujours changer** : une étape
+  démarrée en direct garde ses cartes tant qu'elle est ouverte, sous « Continuer ou changer de départ »
+  (« Reprendre … » avec « Commencé(e) le … », ou l'échange) — Cadrage (01/11) et Stratégie (06/11/2026). La règle « l'échange est toujours plein » ci-dessus
   vaut pour les cartes à bouton qui restent ; une entrée migrée vers `StartChoices` n'a plus de
   bouton. Un choix de formulaire qui ne déclenche rien = `ChoiceCards variant="list"`.
+- **Dimensions d'une étape = `DimensionList`** (Cadrage, Stratégie, Sacha 06/11/2026) : un seul cadre,
+  une dimension par ligne repliable (nom, pastilles, chevron), une seule ouverte au départ. **Jamais un
+  pli dans un pli** : ce qu'une dimension ouverte contient s'affiche sous son titre, pas sous un
+  chevron de plus (« des chevrons dans des chevrons, ça cache des informations »). Une même chose ne
+  s'affiche qu'une fois dans une dimension : une seule phrase vide, un seul « Ajouter », et une ligne
+  retenue d'une dimension en liste vit dans sa liste détaillée, pas aussi en ligne au-dessus. L'essai « une
+  dimension à la fois, liste à gauche » du même jour a été refusé par Sacha.
 - **Proposition = `ProposalRow`** : rien de coché d'avance ; « Confirmer » (contour),
   « Modifier », « Écarter » (fantômes) ; le texte modifié est **confirmé en l'enregistrant**
   (bouton « Enregistrer », plus « Confirmer ainsi ») ; « Modifié par … » en gris dans la source
@@ -779,9 +789,18 @@ n'a plus de variante. Toute nouvelle modale passe par `Dialog` / `FormDialog` /
   ou un formulaire qui s'ouvre dans une carte ou une ligne : il change la taille de la carte
   et la page saute. Un geste sans saisie (« Nouveau lien », « Relancer ») reste un bouton
   direct. Le bouton principal de la modale reprend le verbe (« Révoquer l'accès »).
-- Hors périmètre : les panneaux latéraux (`Sheet`), les menus et listes déroulantes en
-  portail (`Select`, `DropdownMenu`, `Popover`, `Tooltip`).
-- **Entrée** : opacité et `scale(.97 → 1)` en `--duration-base` (180 ms) `--ease-out`, le flou
+- **Plus de panneau latéral** (Sacha, 07/11/2026 : « quand on ouvre quelque chose, je veux que
+  ça ouvre une modale normale ») : formulaire proposé par PO, ligne de budget, dépense, préparation
+  d'un échange, autorisation d'utilisation, historique de PO sur téléphone s'ouvrent dans
+  `Dialog` / `FormDialog`, **menu de navigation du téléphone compris** (`shell/mobile-nav.tsx`,
+  Sacha, 07/11 : « pas un tiroir, un drawer qui vient d'en bas »). `components/ui/sheet.tsx` est
+  supprimé.
+- **Sur téléphone** (sous `sm`), la modale est posée en bas, pleine largeur, et **monte du bord
+  bas** (`translate-y` 100 % → 0, `--duration-base`, `--ease-out`) au lieu de grandir de .97 ;
+  elle redescend en sortant. Mouvement réduit : fondu seul.
+- Hors périmètre : les menus et listes déroulantes en portail (`Select`, `DropdownMenu`,
+  `Popover`, `Tooltip`).
+- **Entrée** : opacité et `scale(.97 → 1)` (montée du bord bas sur téléphone) en `--duration-base` (180 ms) `--ease-out`, le flou
   de la page monte avec le panneau ; sortie en opacité, `--duration-fast`. Mouvement réduit :
   opacité seule. **Sauf une modale ouverte au clavier** (la fenêtre de PO, Espace Espace) :
   `DialogContent instant`, aucune transition, elle est là dès la touche (Sacha, 03/11/2026).

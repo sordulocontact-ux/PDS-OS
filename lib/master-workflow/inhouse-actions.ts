@@ -31,32 +31,26 @@ export async function assignRound(
   if (!z.uuid().safeParse(projectId).success || !stage.safeParse(round).success)
     return { ok: false, error: t.errors.failed };
   await requireApproved();
-  return withOutcome(
-    projectId,
-    ["master"],
-    t.assigned(name),
-    async () => {
-      const supabase = await createClient();
-      const { error } = await supabase.rpc("assign_master_round", {
-        p_project_id: projectId,
-        p_role: round,
-      });
-      if (error) {
-        console.error("assignRound:", error.message);
-        return {
-          ok: false,
-          error: error.message.includes("vocals_awaited")
-            ? t.errors.vocals
-            : error.code === "42501"
-              ? fr.auth.errors.forbidden
-              : t.errors.failed,
-        };
-      }
-      refresh(projectId);
-      return { ok: true };
-    },
-    { openNext: true },
-  );
+  return withOutcome(projectId, ["master"], t.assigned(name), async () => {
+    const supabase = await createClient();
+    const { error } = await supabase.rpc("assign_master_round", {
+      p_project_id: projectId,
+      p_role: round,
+    });
+    if (error) {
+      console.error("assignRound:", error.message);
+      return {
+        ok: false,
+        error: error.message.includes("vocals_awaited")
+          ? t.errors.vocals
+          : error.code === "42501"
+            ? fr.auth.errors.forbidden
+            : t.errors.failed,
+      };
+    }
+    refresh(projectId);
+    return { ok: true };
+  });
 }
 
 const CODES = [

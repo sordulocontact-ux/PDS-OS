@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { VersionCard } from "@/components/ui/version-card";
 import { decisions } from "@/lib/i18n/fr/decisions";
 import type { Tone } from "@/lib/ui/state-tones";
+import { cn } from "@/lib/utils";
 
 const fr = { decisions };
 
@@ -22,10 +23,55 @@ const AddFormContext = createContext<() => void>(() => undefined);
 /** For an add form given to `ProposalGroup`: closes it once added. */
 export const useCloseProposalAdd = () => useContext(AddFormContext);
 
-/** The frame of a list of `ProposalRow` (proto `.rows`): joined rows. */
-export function ProposalRows({ children }: { children: ReactNode }) {
+/**
+ * « Ajouter … » that opens the caller's form in its place, on a soft card
+ * (the form closes itself with `useCloseProposalAdd`, or gets `close` when
+ * given as a function): in the head of a `ProposalGroup`, at the foot of a
+ * `DimensionItem`.
+ */
+export function ProposalAdd({
+  label,
+  align = "start",
+  children,
+}: {
+  label: string;
+  align?: "start" | "end";
+  children: ReactNode | ((close: () => void) => ReactNode);
+}) {
+  const [adding, setAdding] = useState(false);
+  const close = () => setAdding(false);
+  return adding ? (
+    <div className="flex flex-col gap-2.5 rounded-2xl bg-[var(--surface-soft)] p-3.5">
+      <AddFormContext.Provider value={close}>
+        {typeof children === "function" ? children(close) : children}
+      </AddFormContext.Provider>
+    </div>
+  ) : (
+    <div className={cn("flex", align === "end" && "justify-end")}>
+      <Button variant="outline" size="sm" onClick={() => setAdding(true)}>
+        {label}
+      </Button>
+    </div>
+  );
+}
+
+/** The frame of a list of `ProposalRow` (proto `.rows`): joined rows;
+ * `flush` without its own frame, inside one (a `DimensionItem`). */
+export function ProposalRows({
+  flush = false,
+  children,
+}: {
+  flush?: boolean;
+  children: ReactNode;
+}) {
   return (
-    <div className="flex flex-col overflow-hidden rounded-xl border border-[color:var(--border-hairline)]">
+    <div
+      className={cn(
+        "flex flex-col",
+        !flush &&
+          "overflow-hidden rounded-xl border border-[color:var(--border-hairline)]",
+      )}
+    >
       {children}
     </div>
   );
@@ -73,8 +119,6 @@ export function ProposalGroup({
   emptyNote?: string;
   children?: ReactNode;
 }) {
-  const [adding, setAdding] = useState(false);
-  const close = () => setAdding(false);
   return (
     <VersionCard
       id={id}
@@ -88,21 +132,11 @@ export function ProposalGroup({
           {note}
         </p>
       )}
-      {addLabel &&
-        addForm &&
-        (adding ? (
-          <div className="flex flex-col gap-2.5 rounded-2xl bg-[var(--surface-soft)] p-3.5">
-            <AddFormContext.Provider value={close}>
-              {typeof addForm === "function" ? addForm(close) : addForm}
-            </AddFormContext.Provider>
-          </div>
-        ) : (
-          <div className="flex justify-end">
-            <Button variant="outline" size="sm" onClick={() => setAdding(true)}>
-              {addLabel}
-            </Button>
-          </div>
-        ))}
+      {addLabel && addForm && (
+        <ProposalAdd label={addLabel} align="end">
+          {addForm}
+        </ProposalAdd>
+      )}
       {empty ? (
         <p className="text-caption text-muted-foreground">
           {emptyNote ?? t.nothingSaid}

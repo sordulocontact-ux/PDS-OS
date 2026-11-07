@@ -74,7 +74,7 @@ export async function TechnicalCallSection({
       label={t.prepare}
       title={t.sheetTitle}
       body={t.sheetBody}
-      mode="sheet"
+      mode="dialog"
       variant="default"
     >
       <CallPrepForm defaults={defaults} />

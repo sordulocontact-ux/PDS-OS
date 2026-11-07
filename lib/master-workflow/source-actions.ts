@@ -53,30 +53,24 @@ export async function confirmSource(
       error: parsed.success ? t.errors.failed : t.errors.plan,
     };
   const v = parsed.data;
-  return withOutcome(
-    v.projectId,
-    ["master"],
-    t.done,
-    async () => {
-      const supabase = await createClient();
-      const { error } = await supabase.from("master_flow_sources").insert({
-        organization_id: access.organizationId!,
-        project_id: v.projectId,
-        master_id: v.masterId,
-        file_id: v.fileId,
-        vocals_final: v.vocalsFinal,
-        vocals_pending: v.vocalsFinal ? null : v.vocalsPending || null,
-        plan: v.vocalsFinal ? null : v.plan,
-      });
-      if (error) {
-        console.error("confirmSource:", error.code, error.message);
-        return { ok: false, error: errorOf(error) };
-      }
-      refresh(v.projectId);
-      return { ok: true };
-    },
-    { openNext: true },
-  );
+  return withOutcome(v.projectId, ["master"], t.done, async () => {
+    const supabase = await createClient();
+    const { error } = await supabase.from("master_flow_sources").insert({
+      organization_id: access.organizationId!,
+      project_id: v.projectId,
+      master_id: v.masterId,
+      file_id: v.fileId,
+      vocals_final: v.vocalsFinal,
+      vocals_pending: v.vocalsFinal ? null : v.vocalsPending || null,
+      plan: v.vocalsFinal ? null : v.plan,
+    });
+    if (error) {
+      console.error("confirmSource:", error.code, error.message);
+      return { ok: false, error: errorOf(error) };
+    }
+    refresh(v.projectId);
+    return { ok: true };
+  });
 }
 
 const replaceSchema = z.object({
@@ -212,32 +206,26 @@ export async function declareExistingMix(
   await requireApproved();
   if (!parsed.success) return { ok: false, error: t.errors.reason };
   const v = parsed.data;
-  return withOutcome(
-    v.projectId,
-    ["master"],
-    t.existing.done,
-    async () => {
-      const supabase = await createClient();
-      const { error } = await supabase.rpc("declare_mix_final", {
-        p_project_id: v.projectId,
-        p_master_id: v.masterId,
-        p_file_id: v.fileId,
-        p_note: v.reason,
-      });
-      if (error) {
-        console.error("declareExistingMix:", error.code, error.message);
-        return {
-          ok: false,
-          error: error.message.includes("reason_required")
-            ? t.errors.reason
-            : error.code === "42501"
-              ? t.errors.forbidden
-              : t.errors.failed,
-        };
-      }
-      refresh(v.projectId);
-      return { ok: true };
-    },
-    { openNext: true },
-  );
+  return withOutcome(v.projectId, ["master"], t.existing.done, async () => {
+    const supabase = await createClient();
+    const { error } = await supabase.rpc("declare_mix_final", {
+      p_project_id: v.projectId,
+      p_master_id: v.masterId,
+      p_file_id: v.fileId,
+      p_note: v.reason,
+    });
+    if (error) {
+      console.error("declareExistingMix:", error.code, error.message);
+      return {
+        ok: false,
+        error: error.message.includes("reason_required")
+          ? t.errors.reason
+          : error.code === "42501"
+            ? t.errors.forbidden
+            : t.errors.failed,
+      };
+    }
+    refresh(v.projectId);
+    return { ok: true };
+  });
 }

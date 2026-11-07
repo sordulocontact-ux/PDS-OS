@@ -35,12 +35,8 @@ export async function sendBriefVersion(
   projectId: string,
   unchangedReason = "",
 ): Promise<WriteResult> {
-  return withOutcome(
-    projectId,
-    ["framing"],
-    t.briefSent,
-    async () => asWrite(await sendFramingBrief(projectId, unchangedReason)),
-    { openNext: true },
+  return withOutcome(projectId, ["framing"], t.briefSent, async () =>
+    asWrite(await sendFramingBrief(projectId, unchangedReason)),
   );
 }
 
@@ -91,6 +87,5 @@ export async function decideFramingBrief(
       revalidatePath(routes.project(projectId), "layout");
       return { ok: true };
     },
-    { openNext: true },
   );
 }

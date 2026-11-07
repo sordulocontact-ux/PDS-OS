@@ -54,7 +54,7 @@ export type ProjectFormDefaults = {
 // list (blank) and from a master page (music, single, that master linked).
 // Rules are checked on submit only: switching the type never warns ahead.
 // With `projectId` it edits a project that is not launched (no team then);
-// with `onSaved` (side panel, a PO draft) the page behind stays. Both show
+// with `onSaved` (modal, a PO draft) the page behind stays. Both show
 // the sections without their cards. On the new project page, what is typed
 // is kept as a draft (`draftId`: the one being resumed).
 export function CreateProjectForm({

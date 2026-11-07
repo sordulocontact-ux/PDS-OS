@@ -7,17 +7,12 @@ import { useState } from "react";
 import { BudgetLineForm } from "@/components/budget/budget-line-form";
 import { Button } from "@/components/ui/button";
 import { Loaded } from "@/components/ui/loaded";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { FormDialog } from "@/components/ui/form-dialog";
 import { loadExpenseForm } from "@/lib/budget/actions";
 import { budget } from "@/lib/i18n/fr/budget";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
 
-const fr = { budget };
+const fr = { budget, dialogs };
 
 // The Marketing pages where a spend shows up while working (the Budget
 // page has its own button).
@@ -40,36 +35,32 @@ export function AddExpenseButton({ projectId }: { projectId: string }) {
         <IconPlus aria-hidden data-icon="inline-start" />
         {t.add}
       </Button>
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent className="gap-0 overflow-y-auto data-[side=right]:w-full data-[side=right]:sm:max-w-md">
-          <SheetHeader className="px-5 pt-5 pr-14">
-            <SheetTitle>{t.form.newTitle}</SheetTitle>
-            <SheetDescription>{t.form.globalDescription}</SheetDescription>
-          </SheetHeader>
-          {open && (
-            <div className="px-5 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
-              <Loaded
-                load={() => loadExpenseForm(projectId)}
-                loadingLabel={t.form.loading}
-                errorLabel={t.loadError}
-              >
-                {(data) => (
-                  <BudgetLineForm
-                    projectId={projectId}
-                    line={null}
-                    levers={data.levers}
-                    deliverables={data.deliverables}
-                    organizationId={data.organizationId}
-                    onDone={() => {
-                      setOpen(false);
-                    }}
-                  />
-                )}
-              </Loaded>
-            </div>
+      <FormDialog
+        open={open}
+        onOpenChange={setOpen}
+        title={t.form.newTitle}
+        description={t.form.globalDescription}
+        closeLabel={fr.dialogs.close}
+      >
+        <Loaded
+          load={() => loadExpenseForm(projectId)}
+          loadingLabel={t.form.loading}
+          errorLabel={t.loadError}
+        >
+          {(data) => (
+            <BudgetLineForm
+              projectId={projectId}
+              line={null}
+              levers={data.levers}
+              deliverables={data.deliverables}
+              organizationId={data.organizationId}
+              onDone={() => {
+                setOpen(false);
+              }}
+            />
           )}
-        </SheetContent>
-      </Sheet>
+        </Loaded>
+      </FormDialog>
     </>
   );
 }

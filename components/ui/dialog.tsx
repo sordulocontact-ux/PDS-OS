@@ -12,14 +12,16 @@ import { cn } from "@/lib/utils";
 // (--surface-glass), so what it holds reads the page's own tokens. It fades
 // in with a slight scale (opacity only under reduced motion) and leaves
 // faster. 520 px wide (900 px through FormDialog's `wide`); on phones it sits
-// at the bottom, full width, so its actions stay within thumb reach.
+// at the bottom, full width, so its actions stay within thumb reach, and
+// rises from the bottom edge.
 
 // Enters in --duration-base, leaves a little faster.
 const fade =
   "duration-[var(--duration-base)] ease-[var(--ease-out)] data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-[var(--duration-fast)]";
-// The panel also grows from .97 when motion is allowed.
+// When motion is allowed, the panel rises from the bottom edge on phones
+// (where it sits, a bottom sheet) and grows from .97 elsewhere.
 const pop =
-  "motion-safe:transition-[opacity,scale] motion-safe:data-starting-style:scale-[.97] motion-reduce:transition-opacity";
+  "motion-safe:transition-[opacity,scale,translate] max-sm:motion-safe:data-starting-style:translate-y-full max-sm:motion-safe:data-ending-style:translate-y-full sm:motion-safe:data-starting-style:scale-[.97] motion-reduce:transition-opacity";
 // The blur itself rises with the panel: switched on at once, the whole page
 // seemed to reload before the modal appeared.
 const scrimMotion =

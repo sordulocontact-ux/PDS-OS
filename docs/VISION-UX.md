@@ -327,7 +327,8 @@ valent partout, dans l'app comme dans les protos.
     ce dont personne n'a parlé se voit (« Rien n'a été dit pendant l'échange »). « Ajouter » est
     dans l'en-tête du groupe. Le call est une **source** des étapes, pas une étape à confirmer.
     *(Sacha 18/10, proto Marketing)*
-    **Exception, le Cadrage** *(Sacha 29/10, proto « Suite du Cadrage »)* : PO ne pose en question que
+    **Exception, le Cadrage et la Stratégie** *(Sacha 29/10, proto « Suite du Cadrage » ; étendue à la
+    Stratégie le 06/11, même cadre `DimensionList`, une ligne s'y modifie ou s'écarte seule)* : PO ne pose en question que
     ce qui manque ; ce qu'il a compris se lit « À vérifier » dans sa dimension, rien de coché d'avance,
     et se confirme **une dimension à la fois** (« Confirmer les n », après lecture) ; une ligne se
     corrige d'un clic dessus. Les parties juridiques et les contradictions restent une par une.

@@ -1,27 +1,29 @@
 "use client";
 
-import { IconMenu } from "@/components/icons";
 import { useState } from "react";
 
+import { IconMenu } from "@/components/icons";
 import { NavLinks } from "@/components/shell/nav-links";
 import { PdsLogo } from "@/components/shell/pds-logo";
 import { Button } from "@/components/ui/button";
 import { CountBadge } from "@/components/ui/count-badge";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
 import { shell } from "@/lib/i18n/fr/shell";
 
-const fr = { shell };
+const fr = { dialogs, shell };
 
-// Mobile navigation: a drawer from the left edge, closed on navigation.
+// Mobile navigation: the common modal, which rises from the bottom of a
+// phone (Sacha, 07/11/2026: no drawer from the side), closed on navigation.
 // The user panel is passed from the server (it holds the sign-out form).
 // Waiting access requests are counted on the menu button too, since the
-// "Équipe" item that carries them is hidden in the drawer.
+// "Équipe" item that carries them is hidden in the menu.
 export function MobileNav({
   isAdmin,
   pendingMembers = 0,
@@ -35,8 +37,8 @@ export function MobileNav({
   const [open, setOpen] = useState(false);
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger
         render={
           <Button
             variant="ghost"
@@ -57,34 +59,29 @@ export function MobileNav({
             className="absolute -top-0.5 -right-0.5"
           />
         )}
-      </SheetTrigger>
-      <SheetContent
-        side="left"
-        className="w-72 gap-6 border-none bg-sidebar px-6 py-4 text-sidebar-foreground"
-      >
-        <SheetHeader className="p-0 pt-1.5">
-          <SheetTitle className="text-[color:var(--nav-fg)]">
+      </DialogTrigger>
+      <DialogContent closeLabel={fr.dialogs.close}>
+        <DialogHeader>
+          <DialogTitle className="text-[color:var(--nav-fg)]">
             <PdsLogo className="w-8" />
             <span className="sr-only">{fr.shell.brand}</span>
-          </SheetTitle>
-        </SheetHeader>
-        <div className="flex flex-1 flex-col justify-between gap-6">
-          <NavLinks
-            isAdmin={isAdmin}
-            pendingMembers={pendingMembers}
-            onNavigate={() => setOpen(false)}
-          />
-          {/* The feedback button opens its window: close the drawer first. */}
-          <div
-            onClick={(event) => {
-              const target = event.target as HTMLElement;
-              if (target.closest("a, [data-close-nav]")) setOpen(false);
-            }}
-          >
-            {footer}
-          </div>
+          </DialogTitle>
+        </DialogHeader>
+        <NavLinks
+          isAdmin={isAdmin}
+          pendingMembers={pendingMembers}
+          onNavigate={() => setOpen(false)}
+        />
+        {/* The feedback button opens its window: close the menu first. */}
+        <div
+          onClick={(event) => {
+            const target = event.target as HTMLElement;
+            if (target.closest("a, [data-close-nav]")) setOpen(false);
+          }}
+        >
+          {footer}
         </div>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }

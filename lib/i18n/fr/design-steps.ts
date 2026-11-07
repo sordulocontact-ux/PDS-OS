@@ -72,6 +72,14 @@ export const designSteps = {
         title: "Commencer directement",
         body: "PO montre ce qui est déjà connu et ne demande que ce qui manque.",
       },
+      // Once started directly, the way in can still change (as the Cadrage
+      // and the Stratégie, Sacha 06/11/2026).
+      resume: {
+        title: "Reprendre la Conception",
+        body: "Les intentions où vous en êtes : rien de ce qui est déjà confirmé n'est perdu.",
+        startedOn: (day: string) => `Commencée le ${day}`,
+      },
+      changeLegend: "Continuer ou changer de départ",
       reasonEmpty:
         "Rien n'a encore été dit sur la direction artistique : un échange ira plus vite que des questions une à une.",
       reasonKnown: (n: number) =>

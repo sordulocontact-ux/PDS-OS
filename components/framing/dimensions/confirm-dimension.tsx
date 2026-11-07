@@ -2,7 +2,7 @@
 
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { usePublishResult } from "@/components/shell/module/result-banner";
-import { Button } from "@/components/ui/button";
+import { DimensionConfirm } from "@/components/ui/dimension-list";
 import { confirmDimension } from "@/lib/framing/actions/questions";
 import { framingIntel } from "@/lib/i18n/fr/framing-intel";
 import { framingJourney } from "@/lib/i18n/fr/framing-journey";
@@ -54,20 +54,12 @@ export function ConfirmDimension({
       },
     );
   return (
-    <div className="flex flex-wrap items-center gap-x-3.5 gap-y-2 px-3.5 py-3">
-      <Button
-        size="sm"
-        disabled={pending}
-        aria-busy={pending || undefined}
-        onClick={confirm}
-      >
-        {pending
-          ? fr.framingIntel.guide.confirming
-          : t.dimensions.confirmAll(count)}
-      </Button>
-      <p className="min-w-48 flex-1 text-caption text-[color:var(--text-secondary)]">
-        {t.dimensions.confirmAllHint(count)}
-      </p>
-    </div>
+    <DimensionConfirm
+      label={t.dimensions.confirmAll(count)}
+      pendingLabel={fr.framingIntel.guide.confirming}
+      hint={t.dimensions.confirmAllHint(count)}
+      pending={pending}
+      onConfirm={confirm}
+    />
   );
 }

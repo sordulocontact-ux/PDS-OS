@@ -17,15 +17,9 @@ export function legalOutcome<R extends WriteResult>(
   // A write that already says something more precise (« Contrat envoyé par
   // e-mail », « Facture demandée à Claire ») keeps its own sentence.
   let own: string | undefined;
-  return withOutcome(
-    projectId,
-    ["legal"],
-    done,
-    async () => {
-      const result = await write();
-      if (result.ok) own = result.done;
-      return result;
-    },
-    { openNext: true },
-  ).then((result) => (result.ok && own ? { ...result, done: own } : result));
+  return withOutcome(projectId, ["legal"], done, async () => {
+    const result = await write();
+    if (result.ok) own = result.done;
+    return result;
+  }).then((result) => (result.ok && own ? { ...result, done: own } : result));
 }

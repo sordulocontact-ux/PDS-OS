@@ -240,9 +240,15 @@ export const routes = {
   sharedDocument: (token: string) => `/d/${token}`,
   // The Brief de cadrage's PDF, latest version sent, read without an account.
   sharedFramingBrief: (token: string) => `/b/${token}`,
+  // PO's question in « Les 8 dimensions » (lib/strategy/questions.ts), and
+  // the one after `key`, chosen by the server once the answer is recorded.
+  projectStrategyQuestion: (id: string, key: string) =>
+    `/app/projects/${id}/strategy/dimensions?q=${encodeURIComponent(key)}`,
+  projectStrategyAfter: (id: string, key: string) =>
+    `/app/projects/${id}/strategy/dimensions?after=${encodeURIComponent(key)}`,
   // A dimension of the Stratégie, in « Les 8 dimensions ».
   projectStrategyDimension: (id: string, dimension: string) =>
-    `/app/projects/${id}/strategy/dimensions#dim-${dimension}`,
+    `/app/projects/${id}/strategy/dimensions?d=${dimension}#dim-${dimension}`,
   projectDesign: (id: string) => `/app/projects/${id}/design`,
   // A step of the Conception's journey (lib/design/journey.ts).
   projectDesignStep: (id: string, step: string) =>

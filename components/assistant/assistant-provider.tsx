@@ -14,11 +14,12 @@ import { toast } from "@/components/ui/toast";
 import { AssistantLauncher } from "@/components/assistant/assistant-launcher";
 import { keepChat, keptChat } from "@/components/assistant/chat-registry";
 import type { SavedLink } from "@/components/assistant/draft-forms";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { proposalOf, type DraftProposal } from "@/lib/assistant/drafts";
 import { assistant } from "@/lib/i18n/fr/assistant";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
 
-const fr = { assistant };
+const fr = { assistant, dialogs };
 
 // Heavy and rarely shown: the forms load when a draft is opened.
 const DraftSheetBody = dynamic(
@@ -33,7 +34,7 @@ type AssistantContextValue = {
   /** Drafts saved in this tab, by tool call: the card shows the link. */
   saved: Record<string, SavedLink>;
   review: (toolCallId: string, proposal: DraftProposal) => void;
-  /** A draft completed outside the side panel (a feedback sent from its card). */
+  /** A draft completed outside the review modal (a feedback sent from its card). */
   markSaved: (toolCallId: string, link: SavedLink) => void;
   launcherOpen: boolean;
   setLauncherOpen: (open: boolean) => void;
@@ -52,7 +53,7 @@ export function useAssistant(): AssistantContextValue {
 
 /**
  * The home PO conversation (one per tab), the Espace Espace window (which
- * opens its own), and the side panel where a PO draft is reviewed and saved
+ * opens its own), and the modal where a PO draft is reviewed and saved
  * (docs/ASSISTANT.md § 3 bis). The conversations are saved by
  * /api/assistant in the viewer's history (§ 2 ter), not here.
  */
@@ -136,11 +137,14 @@ export function AssistantProvider({
     <AssistantContext.Provider value={value}>
       {children}
       {launcher && <AssistantLauncher />}
-      <Sheet
+      <Dialog
         open={reviewing !== null}
         onOpenChange={(open) => !open && setReviewing(null)}
       >
-        <SheetContent className="gap-0 overflow-y-auto data-[side=right]:w-full data-[side=right]:sm:max-w-md">
+        <DialogContent
+          closeLabel={fr.dialogs.close}
+          className="sm:max-w-[var(--dialog-width-medium)]"
+        >
           {reviewing && (
             <DraftSheetBody
               // A new body per draft: forms start from its values.
@@ -150,8 +154,8 @@ export function AssistantProvider({
               onCancel={() => setReviewing(null)}
             />
           )}
-        </SheetContent>
-      </Sheet>
+        </DialogContent>
+      </Dialog>
     </AssistantContext.Provider>
   );
 }

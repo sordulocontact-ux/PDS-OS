@@ -17,11 +17,11 @@ import {
 } from "@/components/assistant/shared-chat";
 import { Button } from "@/components/ui/button";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { conversationTitle } from "@/lib/assistant/conversation-title";
 import type {
   ConversationSummary,
@@ -29,8 +29,9 @@ import type {
 } from "@/lib/assistant/conversations";
 import { routes } from "@/lib/auth/redirects";
 import { assistant } from "@/lib/i18n/fr/assistant";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
 
-const fr = { assistant };
+const fr = { assistant, dialogs };
 
 /**
  * PO's page (« PO » in the sidebar): the history of the viewer's
@@ -98,7 +99,7 @@ export function AssistantConversation({
     if (id === chat.id) restart();
   }
 
-  // Drawn twice (beside, and in the phone's drawer): ids kept apart.
+  // Drawn twice (beside, and in the phone's modal): ids kept apart.
   const history = (idPrefix: string) => (
     <ConversationHistory
       idPrefix={idPrefix}
@@ -179,14 +180,14 @@ export function AssistantConversation({
         )}
       </div>
 
-      <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
-        <SheetContent side="left" className="gap-4 overflow-y-auto px-3 py-4">
-          <SheetHeader className="px-4 py-0">
-            <SheetTitle>{t.history.title}</SheetTitle>
-          </SheetHeader>
-          {history("po-history-drawer")}
-        </SheetContent>
-      </Sheet>
+      <Dialog open={historyOpen} onOpenChange={setHistoryOpen}>
+        <DialogContent closeLabel={fr.dialogs.close}>
+          <DialogHeader>
+            <DialogTitle>{t.history.title}</DialogTitle>
+          </DialogHeader>
+          {history("po-history-dialog")}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

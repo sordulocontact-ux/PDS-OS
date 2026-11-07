@@ -31,6 +31,9 @@ const t = fr.decisions.proposal;
  * the module adds under the words (a callout, a target to pick);
  * `leading`: before them (a check box to merge); `extraActions`: after the
  * buttons; `editAddon`: in the field (the microphone, given the field id).
+ * `confirmInGroup`: a proposal is confirmed with the others of its group
+ * (« Confirmer les n » of a dimension, Sacha 06/11/2026), so its own row
+ * only offers « Modifier » / « Écarter ».
  */
 export function ProposalRow({
   proposal,
@@ -41,6 +44,7 @@ export function ProposalRow({
   extraActions,
   editAddon,
   messages,
+  confirmInGroup = false,
   children,
 }: {
   proposal: Proposal;
@@ -52,6 +56,7 @@ export function ProposalRow({
   editAddon?: (fieldId: string) => ReactNode;
   // The module's own toasts, said with the verb of the button.
   messages?: { confirmed?: string; discarded?: string; saved?: string };
+  confirmInGroup?: boolean;
   children?: ReactNode;
 }) {
   const p = proposal;
@@ -142,15 +147,19 @@ export function ProposalRow({
           pill
         ) : p.state === "proposed" ? (
           <>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={pending}
-              aria-busy={pending || undefined}
-              onClick={() => confirm()}
-            >
-              {t.confirm}
-            </Button>
+            {confirmInGroup ? (
+              pill
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={pending}
+                aria-busy={pending || undefined}
+                onClick={() => confirm()}
+              >
+                {t.confirm}
+              </Button>
+            )}
             {editButton}
             <Button variant="ghost" size="sm" disabled={pending} onClick={discard}>
               {t.discard}

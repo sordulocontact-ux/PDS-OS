@@ -99,7 +99,14 @@ export function NarrativeSummary({
         />
       )}
 
-      {canWrite && (
+      {/* Nothing to write from yet: one sentence, no settings nor a
+          button that cannot work. */}
+      {canWrite && written.length === 0 && !field.value && (
+        <p className="text-caption text-[color:var(--text-tertiary)]">
+          {t.noParts}
+        </p>
+      )}
+      {canWrite && (written.length > 0 || field.value) && (
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
           <ChipChoice
             name="summary-tone"

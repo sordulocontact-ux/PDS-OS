@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 // A titled block of a long form, on its own white card (the "Nouveau
 // projet" page: Le projet, Informations initiales, Équipe). `plain`: the
-// same block without the card, inside a modal or a side panel.
+// same block without the card, inside a modal.
 // `description`: one line under the title, what the block is for.
 export function FormSection({
   title,

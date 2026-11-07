@@ -869,15 +869,15 @@ Socle de toutes les zones (sous-lots C0 à C5 de `docs/projet-complet/commons.md
   d'un devis de Production (`submitQuote`, `decideQuote`). Coût : deux lectures des parcours des
   `modules` donnés, à limiter au module concerné.
   **Passage à la suite** (lot 3 des retours d'Ibé, 22/10/2026) : `next[]` porte `viewer` — le bandeau
-  dit « À vous : … » ou « En attente de **X** : … ». `withOutcome(…, { openNext: true })` ajoute
+  dit « À vous : … » ou « En attente de **X** : … ». `withOutcome` ajoute **toujours** (06/11/2026, Sacha :
+  « Commencer la stratégie » laissait sur la page de départ ; `openNext: false` = rester sur place, à justifier)
   `open` (`{href, step}`, la première action **nouvelle** du lecteur) : `usePublishResult` l'ouvre
   (`router.push`) si elle est sur une autre page, et le résultat la suit (variable de module
   `carried`, lue par le `StepResultProvider` de la page d'arrivée) → « Étape ouverte pour vous :
-  Cadrage › Brief de cadrage ». Activé seulement sur le Cadrage (Brief : créer, envoyer, décider ;
-  dernière réponse des 6 dimensions, `useNextQuestion`), le plan (`launchProjectPlan`), le Juridique
-  (`lib/legal/outcome.ts`) et tout le Master (04/11/2026, Sacha) : Brief (`startBrief`, `recordBrief`),
-  Source (`confirmSource`, `declareExistingMix`), envoi (`sendRound`), décision d'une version
-  (`decideRound` : Mix validé → Mastering, Master validé → Master final), ingénieur interne ; ailleurs le bandeau dit la suite sans naviguer. Les
+  Cadrage › Brief de cadrage ». D'abord activé geste par geste (Cadrage, plan, Juridique, Master),
+  c'est le comportement de **tous** les gestes passés par `withOutcome` depuis le 06/11/2026 : un geste
+  qui n'en passe pas par lui (`write()` seul, ex. « Préparer un échange » qui reste dans l'étape) ne
+  navigue pas. Les
   réponses aux 6 dimensions n'ont pas de toast (des dizaines par Cadrage) : « Réponse confirmée ·
   Date cible » dans le bandeau, au-dessus de la question suivante. Pendant le geste, le bouton dit
   ce qui se passe (« Envoi en validation… », « Validation en cours… » sur l'issue cliquée de
@@ -1499,7 +1499,7 @@ la Production (call de production et call technique) et le Master. Il remplace `
   ensuite sur la page du call ne met pas la description à jour. `stay` : la page reste (l'étape montre
   `PlannedCallFacts`) ; sinon la page du call s'ouvre.
 - **Conteneur** : tant que l'étape d'une zone ne porte pas le formulaire, `CallPrepLauncher` le pose sous son
-  bouton (`inline`, cartes d'entrée) ou dans le panneau latéral (`sheet`, barres d'outils). Les zones le
+  bouton (`inline`, cartes d'entrée) ou dans la modale commune (`dialog`, barres d'outils). Les zones le
   placent ensuite directement dans l'étape (`<CallPrepForm defaults stay />`).
 
 **Compte rendu rangé par point** : `report_items.agenda_topic` (migration `20261018200101`). L'extraction
@@ -2241,7 +2241,19 @@ d'exécution décrits plus haut** (tables et fonctions gardées).
   chaque réponse, levier, livrable, temps fort et objectif est une ligne `ProposalRow` (Confirmer /
   Modifier / Écarter, citation · « Échange stratégique du 05/10 », « Saisi par », « Modifié par »),
   **un écarté reste visible barré**, rien n'est pré-coché (règle 21 : plus de `proposeStrategyChoices`
-  après un call, plus de « Tout accepter »). États : À compléter / En cours / À arbitrer / Complété
+  après un call, plus de « Tout accepter »). **Depuis le 06/11/2026** (Sacha, cadre commun avec le
+  Cadrage, `DimensionList`) : une dimension repliée par ligne, une seule ouverte (le détail du ticket
+  sous son titre, plus de pli dans le pli) ; ses propositions se
+  confirment ensemble après lecture (« Confirmer les n » au pied, `confirmStrategyDimension`, les lignes
+  affichées seulement), chaque ligne garde « Modifier » / « Écarter » (`ProposalRow confirmInGroup`).
+  **La question de PO** (06/11/2026, Sacha : « pourquoi il n'y a pas de question comme au Cadrage ? ») :
+  au-dessus des dimensions, l'encadré commun `PoQuestion` pose une question à la fois, choisie par le
+  code (`lib/strategy/questions.ts`) : les points rédigés sans valeur (positionnement et ses 4 points,
+  publics, angle et les 4 parties du récit, objectif stratégique ; pas ceux d'une dimension complète),
+  puis les leviers à arbitrer. Une proposition de PO n'est pas posée en question : elle se confirme dans
+  sa dimension. Les listes (publics détaillés, livrables, temps forts, budget, KPI) restent dans leur
+  dimension. Écritures : `saveField` / `confirmField` / `rejectField` (deliverable `strategy`),
+  `prepareStrategyDraft(…, champ)` pour « M'aider à définir », `arbitrateLever`. États : À compléter / En cours / À arbitrer / Complété
   (mots du ticket, le proto disait « À trancher ») ; l'étape est faite quand plus rien n'est à arbitrer
   ni à compléter (proto ; « En cours » ne bloque pas et part dans « Restant à arbitrer »). Positionnement
   et Angle : une réponse (« Ajouter » tant qu'aucune n'est gardée) ; Publics : la réponse + une ligne
@@ -2811,7 +2823,7 @@ les cartes. Puis, calculés par `lib/workflow-status/board.ts` (pur, testé) : *
 ensuite** (la prochaine étape de chaque workflow en cours, avec la date du Brief pour le
 Master et la sortie pour la Distribution ; pour le Juridique lancé, ses décisions et
 actions libres du Suivi ; retards d'abord puis par date), **Blocages** (workflow au statut
-Bloqué, emprunts non sécurisés ; un clic ouvre un panneau `Sheet` : cause, impact, source,
+Bloqué, emprunts non sécurisés ; un clic ouvre une modale : cause, impact, source,
 « Ouvrir dans … »), **Échéances** (échéance du projet, calendrier du Brief tant que son
 étape n'est pas passée — Mix V1 tant qu'on est en Préparation —, actions datées du Suivi,
 sortie prévue ; les retards gardés, triés par date, six au plus). `LaunchedPlan` n'est plus
@@ -3390,7 +3402,7 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
     ligne de dates) ; « À vous » (JUR-08) : `legalJourney` donne à tout geste du lecteur un
     lien vers l'encadré de son étape (`leadHref`), et `LegalStepFrame` met le contenu de
     l'étape dans le `lead` de `StepPanel` quand l'étape attend le lecteur ; JUR-04 :
-    `legalOutcome` (`lib/legal/outcome.ts`, `withOutcome` + `openNext`) et `useLegalAction`
+    `legalOutcome` (`lib/legal/outcome.ts`, `withOutcome`) et `useLegalAction`
     qui publie le bandeau de résultat, branchés geste par geste dans les lots suivants.
   - *Lot 2, Plan d'action* (JUR-05, JUR-12) : avant lancement, « Démarches immédiates » (aucun
     prérequis gardé dans le plan) / « Démarches dépendantes » (`PlanForm`), « Prérequis : … » au

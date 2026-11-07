@@ -8,14 +8,15 @@ import { fr } from "@/lib/i18n/fr";
 import { strategySheetData } from "@/lib/strategy/call-sheet-data";
 import { knownAtStart } from "@/lib/strategy/start-reco";
 import { strategyStepData } from "@/lib/strategy/step-data";
-import { formatShortInstant } from "@/lib/utils/day";
+import { formatShortDay, formatShortInstant } from "@/lib/utils/day";
 
 /**
  * Stratégie › Démarrer la stratégie (proto stratEntry, ticket § 1): the two
  * ways in, the project and its release being in the module's head (Ibé
  * 02/11/2026, « bruit à nettoyer »); once chosen,
  * « Départ » — started directly, or the strategy exchange from its
- * preparation to its summary to the participants.
+ * preparation to its summary to the participants. Started directly, the
+ * two ways in stay offered while it is open: the start can always change.
  */
 export default async function StrategyStartPage({
   params,
@@ -27,6 +28,16 @@ export default async function StrategyStartPage({
   const t = fr.strategyJourney.start;
   const step = steps[0];
   const names = fr.strategyJourney.names(ctx.validators.map((v) => v.name));
+
+  const known = knownAtStart({
+    openNeeds: data.openNeeds.length,
+    referenceDate: data.referenceDate,
+    envelopeCents: project.budgetCents,
+    framingObjective: data.framingObjective.text,
+  });
+  const missing = 8 - known;
+  const recommended = missing > known ? "call" : "po";
+  const callDefaults = () => strategySheetData(project, data, ctx.budget.lines);
 
   let body: React.ReactNode;
   if (call)
@@ -43,55 +54,54 @@ export default async function StrategyStartPage({
     );
   else if (step.status === "done") {
     const started = ctx.sources.workspace;
-    body = (
-      <CallFacts
-        facts={[
-          {
-            label: t.departure,
-            value: t.departureDirect(
-              started?.startedBy ?? project.ownerName,
-              started ? formatShortInstant(started.startedAt) : "—",
-            ),
-          },
-        ]}
-      />
-    );
-  } else {
-    const known = knownAtStart({
-      openNeeds: data.openNeeds.length,
-      referenceDate: data.referenceDate,
-      envelopeCents: project.budgetCents,
-      framingObjective: data.framingObjective.text,
-    });
-    const missing = 8 - known;
-    const recommended = missing > known ? "call" : "po";
-    body = (
-      <>
-        {isOwner && step.status === "current" ? (
-          <StrategyStartWays
-            projectId={projectId}
-            recommended={recommended}
-            reason={
-              recommended === "call"
-                ? t.reason(known, missing)
-                : t.reasonPo(known)
-            }
-            callDefaults={await strategySheetData(
-              project,
-              data,
-              ctx.budget.lines,
-            )}
-          />
-        ) : (
-          step.status === "current" && (
-            <p className="text-caption text-[color:var(--text-tertiary)]">
-              {t.waiting(project.ownerName ?? "—")}
-            </p>
-          )
-        )}
-      </>
-    );
-  }
+    // Started directly, the two ways in stay offered while the strategy is
+    // open (as the Cadrage, Sacha 06/11/2026); the line « Départ » for
+    // whoever reads without the cards.
+    body =
+      ctx.canEdit && ctx.stage === "in_progress" ? (
+        <StrategyStartWays
+          projectId={projectId}
+          recommended={recommended}
+          reason={null}
+          callDefaults={await callDefaults()}
+          started
+          startedOn={
+            started ? formatShortDay(started.startedAt, { bare: true }) : null
+          }
+        />
+      ) : (
+        <CallFacts
+          facts={[
+            {
+              label: t.departure,
+              value: t.departureDirect(
+                started?.startedBy ?? project.ownerName,
+                started ? formatShortInstant(started.startedAt) : "—",
+              ),
+            },
+          ]}
+        />
+      );
+  } else
+    body =
+      isOwner && step.status === "current" ? (
+        <StrategyStartWays
+          projectId={projectId}
+          recommended={recommended}
+          reason={
+            recommended === "call"
+              ? t.reason(known, missing)
+              : t.reasonPo(known)
+          }
+          callDefaults={await callDefaults()}
+        />
+      ) : (
+        step.status === "current" && (
+          <p className="text-caption text-[color:var(--text-tertiary)]">
+            {t.waiting(project.ownerName ?? "—")}
+          </p>
+        )
+      );
 
   return (
     <StrategyStepFrame projectId={projectId} stepKey="start">

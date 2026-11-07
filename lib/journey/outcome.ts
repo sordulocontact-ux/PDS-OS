@@ -94,10 +94,11 @@ function only(
 /**
  * Runs a write of a Server Action and says what follows: the journeys of
  * `modules` read before and after, `done` the gesture in the past
- * participle, used by ResultBanner and the toast. `openNext`: the
- * viewer's next step, when it is on another page, opens by itself (the
- * Cadrage, its plan, the Juridique and the Master, lot 3 of Ibé's feedback);
- * elsewhere the banner only says it.
+ * participle, used by ResultBanner and the toast. The viewer's next step,
+ * when it is on another page, opens by itself after every gesture (lot 3 of
+ * Ibé's feedback, everywhere since Sacha 06/11/2026: « Commencer la
+ * stratégie » left the viewer on its start page). `openNext: false` only
+ * for a gesture that must keep the viewer where they are.
  *
  *   return withOutcome(projectId, ["legal"], t.done.confirmed, async () => {
  *     const { error } = await supabase.rpc(…);
@@ -109,7 +110,7 @@ export async function withOutcome<R extends WriteResult>(
   modules: readonly JourneyModuleKey[],
   done: string,
   write: () => Promise<R>,
-  { openNext = false }: { openNext?: boolean } = {},
+  { openNext = true }: { openNext?: boolean } = {},
 ): Promise<R> {
   // Both readings go through the journeys kept per project version
   // (loadProjectJourneys): « before » is the version the page on screen was

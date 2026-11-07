@@ -15,9 +15,10 @@ export type StartChoice = {
   title: string;
   // What the choice does, in one or two sentences.
   body: string;
-  // The gesture, drawn as a button at the foot of the card (Figma PDS OS
-  // 304:20801, the Cadrage): filled on the recommended card. Only a
-  // drawing: the whole card stays the one target.
+  // The gesture, drawn as a button at the foot of every card (Figma PDS OS
+  // 304:20801): filled on the recommended card, outlined on the other.
+  // Only a drawing: the whole card stays the one target. The title when
+  // left out, so every start draws one (Sacha 06/11/2026).
   action?: string;
   // The card is a link (a page that starts this way).
   href?: string;
@@ -84,18 +85,16 @@ export function StartChoices({
         <span className="text-caption text-[color:var(--text-secondary)]">
           {choice.body}
         </span>
-        {choice.action && (
-          <span className="mt-auto pt-5">
-            <span
-              aria-hidden
-              className={buttonVariants({
-                variant: isRecommended ? "default" : "outline",
-              })}
-            >
-              {choice.action}
-            </span>
+        <span className="mt-auto pt-5">
+          <span
+            aria-hidden
+            className={buttonVariants({
+              variant: isRecommended ? "default" : "outline",
+            })}
+          >
+            {choice.action ?? choice.title}
           </span>
-        )}
+        </span>
       </>
     );
     if (choice.href)

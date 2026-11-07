@@ -2,6 +2,8 @@
 // calls (GOOGLE_CALENDAR_REFRESH_TOKEN, docs/ARCHITECTURE.md § 4 bis).
 //
 //   node scripts/google-calendar-token.mjs <client id> <client secret>
+//   (or GOOGLE_CALENDAR_CLIENT_ID / _SECRET in the environment; TOKEN_OUT=<file>
+//   writes the token there, mode 600, instead of printing it)
 //
 // Opens a sign-in link; once the organizer's account has accepted, Google
 // redirects to this local server, which trades the code for the refresh token
@@ -19,7 +21,14 @@
 // - meetings.space.readonly: reads a call's Meet transcript afterwards.
 import { createServer } from "node:http";
 
-const [clientId, clientSecret] = process.argv.slice(2);
+// From the arguments, else from the environment (never in argv then: `ps`
+// shows every process's command line).
+const [clientId, clientSecret] = process.argv[2]
+  ? process.argv.slice(2)
+  : [
+      process.env.GOOGLE_CALENDAR_CLIENT_ID,
+      process.env.GOOGLE_CALENDAR_CLIENT_SECRET,
+    ];
 if (!clientId || !clientSecret) {
   console.error(
     "Usage: node scripts/google-calendar-token.mjs <client id> <client secret>",
@@ -59,7 +68,18 @@ const server = createServer(async (request, response) => {
         ? "C'est fait : revenez au terminal."
         : "Échec : voir le terminal.",
     );
-  if (result.refresh_token) {
+  if (result.refresh_token && process.env.TOKEN_OUT) {
+    // Written to a private file rather than shown (TOKEN_OUT, mode 600).
+    const { writeFileSync } = await import("node:fs");
+    writeFileSync(process.env.TOKEN_OUT, result.refresh_token, { mode: 0o600 });
+    console.log(
+      "\nJeton écrit dans " +
+        process.env.TOKEN_OUT +
+        " (droits : " +
+        result.scope +
+        ")",
+    );
+  } else if (result.refresh_token) {
     console.log("\nGOOGLE_CALENDAR_REFRESH_TOKEN=" + result.refresh_token);
   } else {
     console.error("\nNo refresh token:", result.error ?? result);
@@ -81,6 +101,7 @@ server.listen(0, "127.0.0.1", () => {
     scope: SCOPE,
     access_type: "offline",
     prompt: "consent",
+    login_hint: "po@pdsrecords.com",
   }).toString();
   console.log(
     "Ouvrez ce lien avec le compte Google qui organisera les calls :\n\n" +

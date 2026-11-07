@@ -1,11 +1,10 @@
-import { IconChevronRight } from "nucleo-sharp-essential";
 import { Fragment } from "react";
 
 import { ConfirmDimension } from "@/components/framing/dimensions/confirm-dimension";
 import { FramingLine } from "@/components/framing/framing-line";
 import { PartyLines } from "@/components/framing/intel/party-lines";
+import { DimensionItem, DimensionList } from "@/components/ui/dimension-list";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
-import { StatusBadge } from "@/components/ui/status-badge";
 import { routes } from "@/lib/auth/redirects";
 import type { FramingAssessment, QuestionState } from "@/lib/framing/assess";
 import type { Dimension } from "@/lib/framing/dimensions";
@@ -21,17 +20,17 @@ const open = (q: QuestionState) =>
 
 /**
  * The six dimensions under the question (proto « Suite du Cadrage », Sacha
- * 29/10/2026): one row each in a single frame, folded but the dimension of
- * the question asked above and the first one with proposals to check. Open,
- * one line per information (value, source, state); the question asked
- * above says « Question en cours » instead of its value. While the step is
- * the viewer's, PO's proposals read « À vérifier » and are confirmed
- * together under their dimension (« Confirmer les n »); every line opens in
- * the question box with a click on it, no « Modifier » beside it (a
- * correction reopens only its dimensions). For the others, « n à
- * traiter » or « Complète ». The legal parties are listed one per line
- * under their line, qualified there while the dimension is open (Sacha
- * 28/10/2026).
+ * 29/10/2026): one row each in a single frame (`DimensionList`), folded but
+ * the dimension of the question asked above and the first one with
+ * proposals to check. Open, one line per information (value, source,
+ * state); the question asked above says « Question en cours » instead of
+ * its value. While the step is the viewer's, PO's proposals read « À
+ * vérifier » and are confirmed together under their dimension
+ * (« Confirmer les n »); every line opens in the question box with a click
+ * on it, no « Modifier » beside it (a correction reopens only its
+ * dimensions). For the others, « n à traiter » or « Complète ». The legal
+ * parties are listed one per line under their line, qualified there while
+ * the dimension is open (Sacha 28/10/2026).
  */
 export function DimensionRows({
   projectId,
@@ -68,128 +67,118 @@ export function DimensionRows({
   const t = fr.framingJourney.dimensions;
   const ti = fr.framingIntel;
   return (
-    <section aria-labelledby="dimension-rows" className="flex flex-col gap-3">
-      {header}
-      <div className="overflow-hidden rounded-xl border border-[color:var(--border-hairline)] bg-[var(--surface-page)]">
-        {assessment.dimensions.map((d) => {
-          const mine = editable(d.dimension);
-          const checked = mine
-            ? d.questions.filter((q) => verify.includes(q.key))
-            : [];
-          const left = d.questions.filter(
-            (q) => open(q) && !checked.includes(q),
-          ).length;
-          const asked = d.questions.some((q) => q.key === current);
-          return (
-            <details
-              key={d.dimension}
-              id={`dimension-${d.dimension}`}
-              open={asked || d.dimension === openFirst}
-              className="group/dim border-t border-[color:var(--border-hairline)] first:border-t-0"
-            >
-              <summary className="flex min-h-12 cursor-pointer list-none items-center gap-3 px-4 py-3 outline-none hover:bg-[var(--control-bg-hover)] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[color:var(--focus-ring)] [&::-webkit-details-marker]:hidden">
-                <span className="min-w-0 flex-1 font-medium">
-                  {ti.dimensions[d.dimension]}
-                </span>
-                {checked.length > 0 && (
-                  <StatusBadge tone="info" size="sm">
-                    {t.toVerify(checked.length)}
-                  </StatusBadge>
-                )}
-                {left > 0 && (
-                  <StatusBadge tone={mine ? "warning" : "info"} size="sm">
-                    {mine ? t.questions(left) : t.toTreat(left)}
-                  </StatusBadge>
-                )}
-                {checked.length === 0 && left === 0 && (
-                  <StatusBadge tone="success" size="sm">
-                    {t.complete}
-                  </StatusBadge>
-                )}
-                <IconChevronRight className="size-4 shrink-0 text-[color:var(--text-tertiary)] transition-transform duration-[var(--duration-base)] ease-[var(--ease-standard)] group-open/dim:rotate-90 motion-reduce:transition-none" />
-              </summary>
-              <FactRows className="rounded-none border-0 border-t bg-[var(--surface-soft)]">
-                {d.facts.map((fact) => (
-                  <FactRow
-                    key={fact.label}
-                    value={
-                      <span>
-                        <span className="font-semibold">{fact.label}</span>
-                        {" · "}
-                        {fact.value}
-                      </span>
+    <DimensionList labelledBy="dimension-rows" header={header}>
+      {assessment.dimensions.map((d) => {
+        const mine = editable(d.dimension);
+        const checked = mine
+          ? d.questions.filter((q) => verify.includes(q.key))
+          : [];
+        const left = d.questions.filter(
+          (q) => open(q) && !checked.includes(q),
+        ).length;
+        const asked = d.questions.some((q) => q.key === current);
+        return (
+          <DimensionItem
+            key={d.dimension}
+            id={`dimension-${d.dimension}`}
+            name={ti.dimensions[d.dimension]}
+            open={asked || d.dimension === openFirst}
+            badges={[
+              checked.length > 0 && {
+                tone: "info",
+                label: t.toVerify(checked.length),
+              },
+              left > 0 && {
+                tone: mine ? "warning" : "info",
+                label: mine ? t.questions(left) : t.toTreat(left),
+              },
+              checked.length === 0 &&
+                left === 0 && { tone: "success", label: t.complete },
+            ]}
+            footer={
+              checked.length > 0 && (
+                <ConfirmDimension
+                  projectId={projectId}
+                  dimension={d.dimension}
+                  name={ti.dimensions[d.dimension]}
+                  count={checked.length}
+                  briefHref={
+                    lastDimension === d.dimension
+                      ? routes.projectFramingStep(projectId, "brief")
+                      : null
+                  }
+                />
+              )
+            }
+          >
+            <FactRows className="rounded-none border-0">
+              {d.facts.map((fact) => (
+                <FactRow
+                  key={fact.label}
+                  value={
+                    <span>
+                      <span className="font-semibold">{fact.label}</span>
+                      {" · "}
+                      {fact.value}
+                    </span>
+                  }
+                  state={{
+                    tone: framingLineTone.known,
+                    label: t.states.known,
+                  }}
+                />
+              ))}
+              {d.questions.map((q) => {
+                // The parties, one per line under their line (not while the
+                // question itself is asked above, with the same list).
+                const partyList =
+                  q.key === "legal_parties" &&
+                  q.key !== current &&
+                  parties.board.lines.length > 0;
+                const opens = mine && q.key !== current && !partyList;
+                const line = (
+                  <FramingLine
+                    key={q.key}
+                    question={q}
+                    current={q.key === current}
+                    verify={checked.includes(q)}
+                    lines={
+                      partyList
+                        ? [ti.parties.count(parties.board.lines.length)]
+                        : (lines[q.key] ?? [])
                     }
-                    state={{
-                      tone: framingLineTone.known,
-                      label: t.states.known,
-                    }}
-                  />
-                ))}
-                {d.questions.map((q) => {
-                  // The parties, one per line under their line (not while the
-                  // question itself is asked above, with the same list).
-                  const partyList =
-                    q.key === "legal_parties" &&
-                    q.key !== current &&
-                    parties.board.lines.length > 0;
-                  const opens = mine && q.key !== current && !partyList;
-                  const line = (
-                    <FramingLine
-                      key={q.key}
-                      question={q}
-                      current={q.key === current}
-                      verify={checked.includes(q)}
-                      lines={
-                        partyList
-                          ? [ti.parties.count(parties.board.lines.length)]
-                          : (lines[q.key] ?? [])
-                      }
-                      href={
-                        opens
-                          ? routes.projectFramingQuestion(
-                              projectId,
-                              d.dimension,
-                              q.key,
-                            )
-                          : null
-                      }
-                      hrefLabel={t.open(ti.questions[q.key].label)}
-                    />
-                  );
-                  if (!partyList) return line;
-                  return (
-                    <Fragment key={q.key}>
-                      {line}
-                      <div className="border-b border-[color:var(--border-hairline)] px-3.5 last:border-b-0">
-                        <PartyLines
-                          projectId={projectId}
-                          board={parties.board}
-                          members={parties.members}
-                          legacy={null}
-                          editable={mine}
-                        />
-                      </div>
-                    </Fragment>
-                  );
-                })}
-                {checked.length > 0 && (
-                  <ConfirmDimension
-                    projectId={projectId}
-                    dimension={d.dimension}
-                    name={ti.dimensions[d.dimension]}
-                    count={checked.length}
-                    briefHref={
-                      lastDimension === d.dimension
-                        ? routes.projectFramingStep(projectId, "brief")
+                    href={
+                      opens
+                        ? routes.projectFramingQuestion(
+                            projectId,
+                            d.dimension,
+                            q.key,
+                          )
                         : null
                     }
+                    hrefLabel={t.open(ti.questions[q.key].label)}
                   />
-                )}
-              </FactRows>
-            </details>
-          );
-        })}
-      </div>
-    </section>
+                );
+                if (!partyList) return line;
+                return (
+                  <Fragment key={q.key}>
+                    {line}
+                    <div className="border-b border-[color:var(--border-hairline)] px-3.5 last:border-b-0">
+                      <PartyLines
+                        projectId={projectId}
+                        board={parties.board}
+                        members={parties.members}
+                        legacy={null}
+                        editable={mine}
+                      />
+                    </div>
+                  </Fragment>
+                );
+              })}
+            </FactRows>
+          </DimensionItem>
+        );
+      })}
+    </DimensionList>
   );
 }

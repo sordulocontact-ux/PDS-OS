@@ -175,3 +175,30 @@ export async function decideStrategyLine(
     return dbWrite(error);
   });
 }
+
+/**
+ * « Confirmer les n » of a dimension (as the Cadrage's, Sacha 06/11/2026):
+ * the proposals read under it, kept with their words, in one gesture.
+ * Stops at the first refused line (the strategy closed meanwhile).
+ */
+export async function confirmStrategyDimension(
+  projectId: string,
+  dimension: string,
+  lines: LineTarget[],
+): Promise<WriteResult> {
+  const p = z.array(target).min(1).max(100).safeParse(lines);
+  const name = Object.hasOwn(t.names, dimension)
+    ? t.names[dimension as keyof typeof t.names]
+    : null;
+  if (!z.uuid().safeParse(projectId).success || !p.success || !name)
+    return { ok: false, error: fr.framing.errors.invalid_input };
+  const done = t.done.confirmedAll(p.data.length, name);
+  return withOutcome(projectId, ["marketing"], done, async () => {
+    for (const line of p.data) {
+      const error = await write(projectId, line, true, null);
+      if (error) return dbWrite(error);
+    }
+    revalidatePath(routes.project(projectId), "layout");
+    return dbWrite(null);
+  });
+}

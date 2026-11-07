@@ -75,7 +75,7 @@ type Step =
   | { kind: "search"; query: string }
   | { kind: "details"; deezer: DeezerArtistResult | null; name: string };
 
-// Also used on its own, in the side panel reviewing a PO draft.
+// Also used on its own, in the modal reviewing a PO draft.
 export function ArtistForm({
   initialName,
   initialNotes,

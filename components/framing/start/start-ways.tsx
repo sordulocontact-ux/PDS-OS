@@ -63,22 +63,21 @@ export function StartWays({
         legend={started ? t.changeLegend : undefined}
         recommended={recommended}
         reason={reason}
+        pending={starting ? "po" : null}
         choices={[
           {
             value: "po",
             title: po.title,
             body: po.body,
-            action: po.title,
             badge: startedOn
               ? t.choices.resume.startedOn(startedOn)
               : undefined,
-            onChoose: starting ? undefined : startDirectly,
+            onChoose: startDirectly,
           },
           {
             value: "call",
             title: t.choices.call.title,
             body: t.choices.call.body,
-            action: t.choices.call.title,
             onChoose: () => setWay("call"),
           },
         ]}

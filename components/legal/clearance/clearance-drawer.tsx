@@ -4,14 +4,15 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
 import { legal } from "@/lib/i18n/fr/legal";
 import { legalClearance } from "@/lib/i18n/fr/legal-clearance";
 import { isClosed } from "@/lib/legal/clearance/matrix";
@@ -24,7 +25,7 @@ import { ExchangesTab } from "./exchanges-tab";
 import { HistoryTab } from "./history-tab";
 import { WithdrawButton } from "./withdraw-button";
 
-const fr = { legal, legalClearance };
+const fr = { dialogs, legal, legalClearance };
 
 /**
  * The drawer of a borrowing (the ticket's « drawer validé »), in three
@@ -64,11 +65,14 @@ export function ClearanceDrawer({
       >
         {triggerLabel ?? t.page.open}
       </Button>
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent className="gap-0 overflow-y-auto data-[side=right]:w-full data-[side=right]:sm:max-w-2xl">
-          <SheetHeader className="gap-2 px-5 pt-5 pr-14">
-            <SheetTitle>« {clearance.work} »</SheetTitle>
-            <SheetDescription>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent
+          closeLabel={fr.dialogs.close}
+          className="sm:max-w-[var(--dialog-width-wide)]"
+        >
+          <DialogHeader className="gap-2">
+            <DialogTitle>« {clearance.work} »</DialogTitle>
+            <DialogDescription>
               {[
                 fr.legal.intake.facts.elements[
                   clearance.element as keyof typeof fr.legal.intake.facts.elements
@@ -82,23 +86,23 @@ export function ClearanceDrawer({
               ]
                 .filter(Boolean)
                 .join(" · ")}
-            </SheetDescription>
+            </DialogDescription>
             <StatusBadge
               tone={clearanceTone[clearance.status]}
               className="self-start"
             >
               {t.statuses[clearance.status]}
             </StatusBadge>
-          </SheetHeader>
-          <div className="flex flex-col gap-8 px-5 pt-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+          </DialogHeader>
+          <div className="flex flex-col gap-8">
             <ClearanceBody
               projectId={projectId}
               clearance={clearance}
               context={context}
             />
           </div>
-        </SheetContent>
-      </Sheet>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

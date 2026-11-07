@@ -1,20 +1,29 @@
 import { IconChevronRight } from "nucleo-sharp-essential";
 import type { ReactNode } from "react";
 
+import { cn } from "@/lib/utils";
+
 import { ViewLink } from "@/components/ui/view-link";
 
 /** Joined rows in a hairline frame (proto « Projet complet », `.rows`). */
 export function Rows({
   label,
+  flush = false,
   children,
 }: {
   label?: string;
+  // Without its own frame, inside one (a `DimensionItem`).
+  flush?: boolean;
   children: ReactNode;
 }) {
   return (
     <ul
       aria-label={label}
-      className="flex flex-col overflow-hidden rounded-xl border border-[color:var(--border-hairline)] [&>li+li]:border-t [&>li+li]:border-[color:var(--border-hairline)]"
+      className={cn(
+        "flex flex-col [&>li+li]:border-t [&>li+li]:border-[color:var(--border-hairline)]",
+        !flush &&
+          "overflow-hidden rounded-xl border border-[color:var(--border-hairline)]",
+      )}
     >
       {children}
     </ul>

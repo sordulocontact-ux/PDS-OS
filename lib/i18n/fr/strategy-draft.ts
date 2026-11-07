@@ -27,7 +27,7 @@ export const strategyDraft = {
   },
   summary: {
     title: "Synthèse du récit",
-    hint: "Le récit en un seul texte, rédigé par PO à partir des parties ci-dessous. Toujours à confirmer.",
+    hint: "Le récit en un seul texte, rédigé par PO à partir des parties ci-dessus. Toujours à confirmer.",
     tone: "Ton",
     length: "Longueur",
     tones: {

@@ -148,6 +148,7 @@ import { strategyDocuments } from "./strategy-documents";
 import { strategyDispositif } from "./strategy-dispositif";
 import { strategyDimensions } from "./strategy-dimensions";
 import { strategyDraft } from "./strategy-draft";
+import { strategyQuestions } from "./strategy-questions";
 import { strategyEntry } from "./strategy-entry";
 import { strategyFollowUp } from "./strategy-follow-up";
 import { strategyJourney } from "./strategy-journey";
@@ -197,6 +198,7 @@ export const fr = {
   strategyFollowUp,
   strategyPilot,
   strategyDraft,
+  strategyQuestions,
   strategyDimensions,
   strategyBriefOut,
   strategyJourney,

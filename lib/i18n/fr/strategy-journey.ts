@@ -113,7 +113,15 @@ export const strategyJourney = {
         title: "Préparer un échange",
         body: "Un call avec l'équipe ; PO en tire des propositions pour chaque dimension.",
       },
+      // Once started, the way in can still change (as the Cadrage, Sacha
+      // 06/11/2026).
+      resume: {
+        title: "Reprendre la stratégie",
+        body: "Les 8 dimensions où vous en êtes : rien de ce qui est déjà décidé n'est perdu.",
+        startedOn: (day: string) => `Commencée le ${day}`,
+      },
     },
+    changeLegend: "Continuer ou changer de départ",
     // Same rule as the Cadrage's (docs/ARCHITECTURE.md § 6 bis, « Lot 3 »).
     reason: (known: number, missing: number) =>
       `PDS OS connaît déjà ${plural(known, "dimension", "dimensions")} sur 8 ; ${missing} ${missing > 1 ? "restent" : "reste"} à décider : un échange ira plus vite qu'une dimension après l'autre.`,

@@ -173,7 +173,7 @@ des `sources` (libellé + lien) que l'interface affiche.
 | `propose_task` | tâche d'un projet lancé : intitulé, responsable (membre trouvé par son nom), échéance citée ; projet nommé ou page ouverte | responsable du projet |
 | `propose_budget_line` | dépense d'un projet lancé : libellé, montant cité, état seulement dit (« payé », « engagé », « prévu »), famille, note ; création seule (PO ne lit jamais les lignes existantes) | responsable du projet |
 | `propose_meeting` | réunion interne : titre, date **et heure** citées (sinon l'heure pleine suivante), lien de visio cité, participants | tout membre |
-| `propose_feedback` | retour sur l'app : type (« Autre » par défaut, affiché), message (avec les mots de l'utilisateur), page d'où PO a été ouvert. Exception au panneau latéral : la carte montre tout le texte, **Envoyer** l'envoie tel quel (clic de la personne, sa session), **Modifier** ouvre la fenêtre de retour pré-remplie | tout membre |
+| `propose_feedback` | retour sur l'app : type (« Autre » par défaut, affiché), message (avec les mots de l'utilisateur), page d'où PO a été ouvert. Exception à la modale : la carte montre tout le texte, **Envoyer** l'envoie tel quel (clic de la personne, sa session), **Modifier** ouvre la fenêtre de retour pré-remplie | tout membre |
 | `find_feedback` | (lecture) sujets de retours par statut, avec `topicId` | `read_feedback` (DG) |
 | `propose_feedback_edit` | titre, résumé, type d'un sujet pas encore transmis ; « réécris / reformule » → `rewrite`, et c'est `lib/feedback/rewrite.ts` qui réécrit à partir des retours d'origine, jamais le texte du modèle | `read_feedback` |
 | `propose_feedback_review` | transmettre (priorité), changer la priorité, écarter, remettre à examiner ; la priorité n'est gardée que si les mots de l'utilisateur la disent (`priorityQuote` vérifiée), sinon le DG la choisit | `read_feedback` |
@@ -209,7 +209,7 @@ Le parcours :
 3. La fonction renvoie un **brouillon** (`lib/assistant/drafts.ts`) et les lignes « avant
    → après » rédigées par le code. Rien n'est écrit.
 4. L'interface affiche une carte « Proposition de PO » ; « Relire et enregistrer » ouvre
-   le **vrai formulaire** de l'app, pré-rempli, dans un panneau latéral. L'humain corrige
+   le **vrai formulaire** de l'app, pré-rempli, dans la modale commune (`Dialog`, 640 px). L'humain corrige
    et enregistre avec sa session : RLS, droits et validations habituels. Artiste : création
    (Deezer d'abord), puis identité et biographie, puis chaque contact, une étape à la fois.
    PO le sait (description de `propose_artist` et consignes) : à « crée-le avec Deezer », il
