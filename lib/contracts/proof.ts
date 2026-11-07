@@ -13,6 +13,9 @@ export type ContractProof = {
   deposit: { fileName: string; at: string; url: string | null } | null;
   // Signed for PDS in PDS OS (JUR-11): by whom, when.
   countersign: { by: string | null; at: string } | null;
+  // The PDF the direction signed for PDS, the one sent to the person
+  // (Sacha, 06/11/2026: PDS signs first): its name, when, a link (1 h).
+  pdsSigned: { fileName: string; at: string; url: string | null } | null;
 };
 
 const empty = (): ContractProof => ({
@@ -21,6 +24,7 @@ const empty = (): ContractProof => ({
   sent: null,
   deposit: null,
   countersign: null,
+  pdsSigned: null,
 });
 
 /** Whether each contract holds its signed copy and its proof of signature,
@@ -41,7 +45,7 @@ export async function contractProofOf(
         "contract_id, category, via_contact_id, file_name, path, created_at",
       )
       .in("contract_id", contractIds)
-      .in("category", ["signed", "evidence"])
+      .in("category", ["signed", "evidence", "pds_signed"])
       .order("created_at", { ascending: false }),
     supabase
       .from("contracts")
@@ -54,11 +58,21 @@ export async function contractProofOf(
   if (contracts.error)
     console.error("contractProofOf:", contracts.error.message);
   const deposits: Array<{ id: string; path: string }> = [];
+  const pdsFiles: Array<{ id: string; path: string }> = [];
   for (const row of files.data ?? []) {
     const known = proof.get(row.contract_id);
     if (!known) continue;
     if (row.category === "signed") known.signed = true;
     if (row.category === "evidence") known.evidence = true;
+    // The latest first (ordered by created_at desc).
+    if (row.category === "pds_signed" && !known.pdsSigned) {
+      known.pdsSigned = {
+        fileName: row.file_name,
+        at: row.created_at,
+        url: null,
+      };
+      pdsFiles.push({ id: row.contract_id, path: row.path });
+    }
     if (row.category === "signed" && row.via_contact_id && !known.deposit) {
       known.deposit = {
         fileName: row.file_name,
@@ -90,6 +104,18 @@ export async function contractProofOf(
     deposits.forEach((d, i) => {
       const known = proof.get(d.id);
       if (known?.deposit) known.deposit.url = data?.[i]?.signedUrl ?? null;
+    });
+  }
+  if (pdsFiles.length > 0) {
+    const { data } = await supabase.storage
+      .from("contract-files")
+      .createSignedUrls(
+        pdsFiles.map((d) => d.path),
+        3600,
+      );
+    pdsFiles.forEach((d, i) => {
+      const known = proof.get(d.id);
+      if (known?.pdsSigned) known.pdsSigned.url = data?.[i]?.signedUrl ?? null;
     });
   }
   return proof;

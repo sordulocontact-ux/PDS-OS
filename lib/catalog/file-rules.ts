@@ -35,7 +35,8 @@ export const FILE_CATEGORIES = {
   // Call recordings and design versions have their own tables and sections.
   project: ["brief", "visual", "contract", "press", "other"],
   // The drafts exchanged, the signed copy, its proof (Juridique 03), annexes.
-  contract: ["draft", "signed", "evidence", "annex", "other"],
+  // « pds_signed »: the PDF the direction signed for PDS, sent to the person.
+  contract: ["draft", "signed", "evidence", "annex", "other", "pds_signed"],
 } as const satisfies Record<FileOwnerKind, readonly string[]>;
 
 /** Categories offered by the Files tab: audio versions have their own tab. */

@@ -304,6 +304,9 @@ export async function advanceContract(input: {
         return { ok: false, error: fr.legalContracts.document.proofMissing };
       if (message.includes("contract_countersign_missing"))
         return { ok: false, error: fr.signedReturns.team.countersignMissing };
+      // PDS signs first, on its PDF (20261107150101).
+      if (message.includes("contract_pds_file_missing"))
+        return { ok: false, error: fr.signedReturns.team.pdsFileMissing };
       if (message.includes("contract_signature_unchecked"))
         return { ok: false, error: fr.signedReturns.team.checkMissing };
       if (error.code === "42501") return { ok: false, error: t.forbidden };

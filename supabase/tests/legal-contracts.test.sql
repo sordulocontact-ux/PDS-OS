@@ -136,22 +136,24 @@ select is((select max(version)::int from public.contract_documents where contrac
           'a clause change is a new version');
 
 -- Review, sending and signature with proof (SIMULATED) ------------------------------------
-create function pg_temp.to_review(p_contract uuid) returns void language plpgsql as $$
-begin
-  perform pg_temp.act_as(pg_temp.id_of('manager'));
-  perform public.advance_contract(p_contract, 'submit');
-  perform pg_temp.act_as(pg_temp.id_of('director'));
-  perform public.advance_contract(p_contract, 'approve');
-  -- JUR-11: the direction signs for PDS (20261024000201).
-  perform public.advance_contract(p_contract, 'countersign');
-  perform pg_temp.act_as(pg_temp.id_of('manager'));
-end $$;
 create function pg_temp.add_file(p_contract uuid, p_category text) returns void language sql as $$
   insert into public.contract_files (organization_id, contract_id, category, path, file_name, mime, bytes)
   values (pg_temp.id_of('org'), p_contract, p_category,
           pg_temp.id_of('org') || '/' || p_contract || '/' || gen_random_uuid() || '.pdf',
           p_category || '.pdf', 'application/pdf', 1000)
 $$;
+create function pg_temp.to_review(p_contract uuid) returns void language plpgsql as $$
+begin
+  perform pg_temp.act_as(pg_temp.id_of('manager'));
+  perform public.advance_contract(p_contract, 'submit');
+  perform pg_temp.act_as(pg_temp.id_of('director'));
+  perform public.advance_contract(p_contract, 'approve');
+  -- JUR-11: the direction signs for PDS (20261024000201), first and on its PDF
+  -- (20261107150101).
+  perform pg_temp.add_file(p_contract, 'pds_signed');
+  perform public.advance_contract(p_contract, 'countersign');
+  perform pg_temp.act_as(pg_temp.id_of('manager'));
+end $$;
 
 select pg_temp.to_review(pg_temp.id_of('contract_ever'));
 select throws_ok(format($$ select public.advance_contract(%L, 'send') $$, pg_temp.id_of('contract_ever')),

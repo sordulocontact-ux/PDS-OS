@@ -1637,3 +1637,19 @@ Retour « Refonte du module Sessions studio » (Ibé, 06/11, maquettes de direct
   déjà, l'état dit le geste), l'éditeur de texte riche, le brouillon distinct de la version finale,
   une note par titre travaillé, la colonne de droite (elle écrasait les tableaux sur la fiche
   artiste). Le dépôt de fichiers vers Drive attend la connexion Google de po@pdsrecords.com.
+
+## PDS signe en premier (07/11/2026, branche `pre-prod`, migration `20261107150101_pds_signs_first`)
+
+- [x] Un contrat généré, validé par la direction, est d'abord **signé pour PDS** : la direction signe le PDF
+      avec son outil habituel, le dépose (catégorie `pds_signed`) puis « Signer le contrat pour PDS » ; la base
+      refuse la signature sans ce PDF (`contract_pds_file_missing`) et l'envoi sans la signature de PDS sur la
+      dernière version (`contract_countersign_missing`). Les autres voient « En attente de … : signer le contrat
+      pour PDS » en bleu ; ensuite, la ligne « Signé pour PDS par … » (« Voir le PDF ») et l'envoi.
+- [x] La page de la personne (`/c/…/contrat/…`) sert ce PDF signé par PDS (créneau de lecture d'une minute
+      ouvert par son jeton, `get_contact_contract_pds_file`, politique Storage, sans clé de service) ; le PDF
+      généré reste pour un contrat envoyé avant la règle.
+- [x] Textes « signature électronique simple dans PDS OS » retirés (JUR-11) ; tests pgTAP `signed-returns`,
+      `legal-contracts`, `legal-reste` au nouvel ordre (36, 20, 35 passés sur la pré-prod).
+- [ ] **Migration à pousser en production** (avec accord). Le geste « Signer pour PDS » de la page Contrats
+      (`ContractCountersignDialog`) n'a pas encore le dépôt du PDF : la base le refusera tant qu'il manque.
+      Confirmer avec Ibé que PDS signe toujours en premier.

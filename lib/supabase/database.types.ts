@@ -18189,6 +18189,10 @@ export type Database = {
         Args: { p_contact_token: string; p_contract_id: string }
         Returns: Json
       }
+      get_contact_contract_pds_file: {
+        Args: { p_contact_token: string; p_contract_id: string }
+        Returns: Json
+      }
       get_contact_bulletin_document: {
         Args: { p_contact_token: string; p_signature_id: string }
         Returns: Json

@@ -27,7 +27,7 @@ export function ContractProofSlot({
 }: {
   organizationId: string;
   contractId: string;
-  category: "signed" | "evidence";
+  category: "signed" | "evidence" | "pds_signed";
   label: string;
   hint: string;
   present: boolean;

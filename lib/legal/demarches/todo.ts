@@ -62,8 +62,11 @@ export function expectedOf(row: BoardRow): Expected | null {
           return owner(t.submit);
         case "review_required":
           return { who: "direction", todo: t.validateDocument };
+        // PDS signs first (Sacha, 06/11/2026), then the owner sends it.
         case "ready_for_signature":
-          return owner(t.send);
+          return a.contract?.countersigned
+            ? owner(t.send)
+            : { who: "direction", todo: t.countersign };
         case "signature_pending":
           // JUR-11: back signed, PDS signs, then the team checks.
           if (a.contract?.returned && !a.contract.countersigned)

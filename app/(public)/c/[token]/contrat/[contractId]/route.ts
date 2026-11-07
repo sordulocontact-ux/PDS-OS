@@ -18,10 +18,14 @@ const document = z.object({
   body: z.string(),
 });
 
+const pdsFile = z.object({ path: z.string(), file_name: z.string() });
+
 /**
- * « Télécharger » on the person's page (/c/): the version of their contract
- * validated by the direction, once it is sent to them. Read by their token
- * (get_contact_contract_document): never another person's contract.
+ * « Télécharger » on the person's page (/c/): the PDF PDS signed first
+ * (Sacha, 06/11/2026), read through a one-minute slot opened by their token
+ * (get_contact_contract_pds_file); for a contract sent before that rule,
+ * the version validated by the direction, printed here
+ * (get_contact_contract_document). Never another person's contract.
  */
 export async function GET(
   _request: Request,
@@ -31,6 +35,26 @@ export async function GET(
   if (!/^[0-9a-f]{64}$/.test(token) || !z.uuid().safeParse(contractId).success)
     return notFoundResponse();
   const supabase = await createClient();
+  const signed = pdsFile.safeParse(
+    (
+      await supabase.rpc("get_contact_contract_pds_file", {
+        p_contact_token: token,
+        p_contract_id: contractId,
+      })
+    ).data,
+  );
+  if (signed.success) {
+    const { data: file, error: readError } = await supabase.storage
+      .from("contract-files")
+      .download(signed.data.path);
+    if (file)
+      return pdfResponse(
+        new Uint8Array(await file.arrayBuffer()),
+        signed.data.file_name,
+        "contrat.pdf",
+      );
+    console.error("[contact-contract] signed file:", readError?.message);
+  }
   const { data, error } = await supabase.rpc("get_contact_contract_document", {
     p_contact_token: token,
     p_contract_id: contractId,
