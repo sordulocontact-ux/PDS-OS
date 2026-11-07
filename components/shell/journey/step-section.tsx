@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
  * about; 8 px between the title and its content, 28 px before the section
  * (14 px of the step's gap plus its own margin). `aside`: a pill or a count
  * next to the title; `description`: one sentence under it, read with it
- * (6 px, `TitleBlock`, Sacha 06/11/2026); `id` for an anchor.
+ * (10 px, `TitleBlock`, Sacha 06 and 07/11/2026); `id` for an anchor.
  */
 export function StepSection({
   title,

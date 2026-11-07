@@ -31,6 +31,10 @@ const MOMENT_OF: Record<ClearanceStatus, number> = {
   abandoned: 3,
 };
 
+/** The open moment of a clearance, none once closed. */
+export const momentOf = (status: ClearanceStatus) =>
+  MOMENTS[MOMENT_OF[status]] ?? null;
+
 /** The validated conditions in a few words (« 600 € · 5 % »). */
 export function termsLine(clearance: Clearance): string {
   const terms = clearance.terms.find((x) => x.status === "validated");
@@ -62,10 +66,10 @@ export function ClearanceStages({
   context: Omit<Clearances, "items">;
 }) {
   const t = fr.legalClearance.stages;
-  const moment = MOMENTS[MOMENT_OF[clearance.status]];
+  const moment = momentOf(clearance.status);
   if (!moment) return null;
   return (
-    <StepSection title={t[moment].title}>
+    <StepSection title={t[moment].title} className="gap-4">
       {moment === "ask" && (
         <AskMoment projectId={projectId} clearance={clearance} />
       )}

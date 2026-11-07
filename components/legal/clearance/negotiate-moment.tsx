@@ -138,12 +138,8 @@ export function NegotiateMoment({
       return (
         <>
           {box}
-          <div className="flex flex-col gap-1 rounded-xl bg-muted p-4">
-            <span className="text-caption font-medium tracking-wide text-muted-foreground uppercase">
-              {t.atDirection}
-            </span>
-            <span className="text-sm">{t.atDirectionBody}</span>
-          </div>
+          {/* Who is awaited, in the Master's blue. */}
+          <ToneCallout tone="info">{t.atDirection}</ToneCallout>
         </>
       );
     return (
@@ -166,7 +162,7 @@ export function NegotiateMoment({
             {t.validate}
           </Button>
           <Button
-            variant="ghost"
+            variant="outline"
             disabled={pending}
             onClick={() =>
               run(() =>
@@ -199,13 +195,16 @@ export function NegotiateMoment({
 
   return (
     <>
-      {countered && <ToneCallout tone="neutral">{t.countered}</ToneCallout>}
-      <p className="text-sm text-muted-foreground">
-        {t.askedTo(
-          names || fr.legalClearance.flow.holdersFallback,
-          askedOn ? formatInstant(askedOn) : "",
-        )}
-      </p>
+      {/* Who is awaited, in the Master's blue; a counter-proposal asked
+          by the direction says so instead. */}
+      <ToneCallout tone="info">
+        {countered
+          ? t.countered
+          : t.askedTo(
+              names || fr.legalClearance.flow.holdersFallback,
+              askedOn ? formatInstant(askedOn) : "",
+            )}
+      </ToneCallout>
       {reading === null ? (
         <>
           <TextareaField
@@ -220,7 +219,6 @@ export function NegotiateMoment({
             error={tried && !reply.trim() ? t.replyMissing : undefined}
           />
           <Button
-            variant="outline"
             className="self-start"
             disabled={reads}
             aria-busy={reads || undefined}
@@ -255,7 +253,7 @@ export function NegotiateMoment({
             >
               {t.recordRefusal}
             </Button>
-            <Button variant="ghost" onClick={() => setReading(null)}>
+            <Button variant="outline" onClick={() => setReading(null)}>
               {t.notThat}
             </Button>
           </div>
@@ -275,10 +273,7 @@ export function NegotiateMoment({
                 setReading({ ...reading, lines });
               }}
             />
-            <blockquote className="border-l-2 pl-3 text-sm break-words text-muted-foreground">
-              « {reply} »
-            </blockquote>
-            <span className="text-sm text-muted-foreground">{t.verbatim}</span>
+            <span className="text-xs text-muted-foreground">{t.verbatim}</span>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button
@@ -311,7 +306,7 @@ export function NegotiateMoment({
             >
               {t.toDirection}
             </Button>
-            <Button variant="ghost" onClick={() => setReading(null)}>
+            <Button variant="outline" onClick={() => setReading(null)}>
               {t.notThat}
             </Button>
           </div>

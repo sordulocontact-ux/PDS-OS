@@ -1,115 +1,24 @@
-"use client";
-
-import { useState } from "react";
-
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { StatusBadge } from "@/components/ui/status-badge";
+import { Fold } from "@/components/ui/fold";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { dialogs } from "@/lib/i18n/fr/dialogs";
-import { legal } from "@/lib/i18n/fr/legal";
 import { legalClearance } from "@/lib/i18n/fr/legal-clearance";
 import { isClosed } from "@/lib/legal/clearance/matrix";
 import type { Clearance, Clearances } from "@/lib/legal/clearance/types";
-import { clearanceTone } from "@/lib/ui/state-tones";
 
 import { ClearanceRequest } from "./clearance-request";
-import { ClearanceStages } from "./clearance-stages";
+import { ClearanceStages, momentOf } from "./clearance-stages";
 import { ExchangesTab } from "./exchanges-tab";
 import { HistoryTab } from "./history-tab";
-import { WithdrawButton } from "./withdraw-button";
+import { OtherWays } from "./other-ways";
 
-const fr = { dialogs, legal, legalClearance };
+const fr = { legalClearance };
 
 /**
- * The drawer of a borrowing (the ticket's « drawer validé »), in three
- * moments — Demander, Négocier, Signer — the current one open with the one
- * action that ends it, as in the prototype of 07/10/2026. The exchanges and
- * the history fold under it; the one other way out: withdraw the element
- * from the title (a refusal is recorded from their answer).
+ * An authorisation's démarche (recette Juridique V1, JUR-09), read in the
+ * order it is used (Sacha, 07/11/2026: « mal hiérarchisée, trop
+ * d'informations ») — the gesture of the moment first (or its outcome once
+ * closed), then « La demande » once asked (each right, its holder, its
+ * state), then what stays folded: the journal and the other ways out.
  */
-export function ClearanceDrawer({
-  projectId,
-  clearance,
-  context,
-  triggerLabel,
-  primary = false,
-  defaultOpen = false,
-}: {
-  projectId: string;
-  clearance: Clearance;
-  context: Omit<Clearances, "items">;
-  // The button that opens it (« Ouvrir » on the list, the action's verb in
-  // the plan); in ink when it is the line's next action.
-  triggerLabel?: string;
-  primary?: boolean;
-  // Opened on arrival: a notification led here (`?emprunt=`).
-  defaultOpen?: boolean;
-}) {
-  const t = fr.legalClearance;
-  const [open, setOpen] = useState(defaultOpen);
-  const closed = isClosed(clearance.status);
-
-  return (
-    <>
-      <Button
-        size="xs"
-        variant={primary ? "default" : "outline"}
-        onClick={() => setOpen(true)}
-      >
-        {triggerLabel ?? t.page.open}
-      </Button>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent
-          closeLabel={fr.dialogs.close}
-          className="sm:max-w-[var(--dialog-width-wide)]"
-        >
-          <DialogHeader className="gap-2">
-            <DialogTitle>« {clearance.work} »</DialogTitle>
-            <DialogDescription>
-              {[
-                fr.legal.intake.facts.elements[
-                  clearance.element as keyof typeof fr.legal.intake.facts.elements
-                ],
-                clearance.author,
-                clearance.title,
-                clearance.responsibleName
-                  ? t.page.responsible(clearance.responsibleName)
-                  : null,
-                closed ? null : t.page.blocksRelease,
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-            </DialogDescription>
-            <StatusBadge
-              tone={clearanceTone[clearance.status]}
-              className="self-start"
-            >
-              {t.statuses[clearance.status]}
-            </StatusBadge>
-          </DialogHeader>
-          <div className="flex flex-col gap-8">
-            <ClearanceBody
-              projectId={projectId}
-              clearance={clearance}
-              context={context}
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
-    </>
-  );
-}
-
-/** What an authorisation's panel holds (recette Juridique V1, JUR-09): its
- * outcome once closed, « La demande », each right apart, the moment open,
- * the folded journal, the one other way out. */
 export function ClearanceBody({
   projectId,
   clearance,
@@ -121,8 +30,11 @@ export function ClearanceBody({
 }) {
   const t = fr.legalClearance;
   const closed = isClosed(clearance.status);
+  // While asking, the moment itself shows what is taken and who holds it.
+  const asking = momentOf(clearance.status) === "ask";
+  const journal = clearance.exchanges.length + clearance.history.length;
   return (
-    <>
+    <div className="flex min-w-0 flex-col gap-4">
       {closed && (
         <ToneCallout
           tone={clearance.status === "cleared" ? "success" : "neutral"}
@@ -132,25 +44,33 @@ export function ClearanceBody({
             : t.stages.done.abandoned}
         </ToneCallout>
       )}
-      <ClearanceRequest clearance={clearance} />
       <ClearanceStages
         projectId={projectId}
         clearance={clearance}
         context={context}
       />
-      <details className="group flex flex-col gap-4 border-t pt-4">
-        <summary className="cursor-pointer list-none text-sm text-muted-foreground marker:hidden">
-          {t.stages.journal} ·{" "}
-          {clearance.exchanges.length + clearance.history.length}
-        </summary>
-        <div className="flex flex-col gap-6 pt-4">
-          <ExchangesTab clearance={clearance} />
-          <HistoryTab clearance={clearance} />
+      {!asking && <ClearanceRequest clearance={clearance} />}
+      {(journal > 0 || !closed) && (
+        <div className="mt-3.5 flex flex-col gap-3">
+          {journal > 0 && (
+            <Fold summary={`${t.stages.journal} · ${journal}`}>
+              {clearance.exchanges.length > 0 && (
+                <ExchangesTab clearance={clearance} />
+              )}
+              {clearance.history.length > 0 && (
+                <HistoryTab clearance={clearance} />
+              )}
+            </Fold>
+          )}
+          {!closed && (
+            <OtherWays
+              projectId={projectId}
+              clearance={clearance}
+              asking={asking}
+            />
+          )}
         </div>
-      </details>
-      {!closed && (
-        <WithdrawButton projectId={projectId} clearanceId={clearance.id} />
       )}
-    </>
+    </div>
   );
 }

@@ -1669,3 +1669,26 @@ Retour « Refonte du module Sessions studio » (Ibé, 06/11, maquettes de direct
       « Une réunion sur place » (micro seul) est proposé même pour un call en visio.
 - [ ] Migration à pousser en production (avec accord). À rejouer par l'équipe dans un vrai Chrome : enregistrer un
       Meet (la première fois, avec l'invite du micro), ajouter puis retirer un participant d'un call Google Meet.
+
+## Page Autorisation d'utilisation refaite (07/11/2026, branche `pre-prod`)
+
+Demande de Sacha : « la page est moche, mal hiérarchisée, trop d'informations, on ne sait pas quoi
+lire ». Retours d'Ibé relus avant (recette Juridique V1, JUR-09, JUR-10 ; ticket Juridique 05) : rien
+de retiré.
+
+- **Le geste d'abord** : le moment en cours sous un titre-verbe (« Demander l'autorisation »,
+  « Négocier les conditions », « Faire signer la licence »), puis « La demande », puis le replié.
+- **« La demande » en un bloc** au lieu de trois (La demande, Deux autorisations distinctes, et les
+  ayants droit redits dans « Demander ») : l'élément, puis une ligne par droit avec son ayant droit et
+  son état (JUR-09 : chaque droit à part ; JUR-10 : conditions acceptées ≠ autorisée). Masqué pendant
+  « Demander », où les champs disent déjà la même chose. L'élément s'écrit en mots (« Sample de « … » »,
+  plus la clé brute `sample`).
+- **Demander** (proto Juridique v3) : deux pastilles « L'œuvre » / « L'enregistrement » à la place des
+  quatre choix ; « Rien à sécuriser » et le paragraphe d'aide retirés de l'écran.
+- **« Autre issue » replié** en bas : « Rien à autoriser » (avec sa raison, tant que rien n'est
+  demandé) et « Retirer l'élément du titre », en modales `ReasonForm`.
+- **Attentes en bleu** (patron du Master) : demande envoyée, conditions chez la direction, contrat qui
+  attend sa validation. Boutons secondaires en contour.
+- `ClearanceDrawer` (plus utilisé) supprimé ; journal replié par `Fold`, sans ses listes vides.
+- **Écart titre / phrase** porté à 10 px sur toute l'app (`TitleBlock`, aussi `PageHeader`,
+  `PageSection`, `FormSection`, `PoQuestion`, `PoReading`), commit séparé.
