@@ -194,6 +194,9 @@ export async function requestPasswordReset(
     parsed.data.email,
     { redirectTo: confirmUrl() },
   );
+  // The screen says the same either way (an address is never confirmed): a
+  // refused send (SMTP, sender, allowed redirect) is only told in the logs.
+  if (error) console.error("resetPasswordForEmail:", error.code, error.message);
 
   if (error && RATE_LIMIT_CODES.has(error.code ?? "")) {
     return {
