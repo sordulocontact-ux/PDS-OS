@@ -86,6 +86,8 @@ export type MessageEmail = {
   // The whole message, as the member wrote or approved it (no link added).
   text: string;
   attachments?: EmailAttachment[];
+  // Replies also go there (PO's address of an authorisation request).
+  replyTo?: string[];
 };
 
 /**
@@ -105,6 +107,7 @@ export async function emailMessage(
     text: [mail.text.trim(), "", t.signature(sender), ""].join("\n"),
     sender: { name: sender, email },
     attachments: mail.attachments,
+    replyTo: mail.replyTo,
   });
   return outcomeOf(sent);
 }

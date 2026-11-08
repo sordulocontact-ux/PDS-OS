@@ -20,9 +20,10 @@ import type { Clearance, Clearances } from "@/lib/legal/clearance/types";
 import { clearanceTone } from "@/lib/ui/state-tones";
 
 import { ClearanceRequest } from "./clearance-request";
-import { ClearanceStages } from "./clearance-stages";
-import { ExchangesTab } from "./exchanges-tab";
-import { HistoryTab } from "./history-tab";
+import { ClearanceStages, isAskMoment } from "./clearance-stages";
+import { ClearanceExchanges } from "./clearance-exchanges";
+import { NothingToSecureButton } from "./nothing-to-secure-button";
+import { takenOf } from "./usage";
 import { WithdrawButton } from "./withdraw-button";
 
 const fr = { dialogs, legal, legalClearance };
@@ -99,6 +100,7 @@ export function ClearanceDrawer({
               projectId={projectId}
               clearance={clearance}
               context={context}
+              showTaken={false}
             />
           </div>
         </DialogContent>
@@ -109,18 +111,31 @@ export function ClearanceDrawer({
 
 /** What an authorisation's panel holds (recette Juridique V1, JUR-09): its
  * outcome once closed, « La demande », each right apart, the moment open,
- * the folded journal, the one other way out. */
+ * the other ways out, then « Échanges » folded (`ClearanceExchanges`). Before anything is asked, « La
+ * demande » would only repeat the element and the work: one line says them
+ * (`showTaken`, the drawer's header already does), and nothing to secure
+ * joins « Autre issue » (Sacha, 07/11/2026). */
 export function ClearanceBody({
   projectId,
   clearance,
   context,
+  showTaken = true,
+  exchangesBelow = false,
+  directionName,
 }: {
   projectId: string;
   clearance: Clearance;
   context: Omit<Clearances, "items">;
+  showTaken?: boolean;
+  // The démarche shows « Échanges » itself, under who answers for it.
+  exchangesBelow?: boolean;
+  // Who validates for the direction (the démarche knows), for « En attente
+  // de … »; else « La direction ».
+  directionName?: string;
 }) {
   const t = fr.legalClearance;
   const closed = isClosed(clearance.status);
+  const asking = !closed && isAskMoment(clearance.status);
   return (
     <>
       {closed && (
@@ -132,25 +147,36 @@ export function ClearanceBody({
             : t.stages.done.abandoned}
         </ToneCallout>
       )}
-      <ClearanceRequest clearance={clearance} />
+      {!asking ? (
+        <ClearanceRequest clearance={clearance} />
+      ) : (
+        showTaken && (
+          <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
+            {takenOf(clearance)}
+          </p>
+        )
+      )}
       <ClearanceStages
         projectId={projectId}
         clearance={clearance}
         context={context}
+        directionName={directionName}
       />
-      <details className="group flex flex-col gap-4 border-t pt-4">
-        <summary className="cursor-pointer list-none text-sm text-muted-foreground marker:hidden">
-          {t.stages.journal} ·{" "}
-          {clearance.exchanges.length + clearance.history.length}
-        </summary>
-        <div className="flex flex-col gap-6 pt-4">
-          <ExchangesTab clearance={clearance} />
-          <HistoryTab clearance={clearance} />
-        </div>
-      </details>
       {!closed && (
-        <WithdrawButton projectId={projectId} clearanceId={clearance.id} />
+        <div className="mt-4 flex flex-wrap items-center gap-2 border-t pt-4">
+          <span className="text-sm text-muted-foreground">
+            {t.stages.other}
+          </span>
+          {asking && (
+            <NothingToSecureButton
+              projectId={projectId}
+              clearance={clearance}
+            />
+          )}
+          <WithdrawButton projectId={projectId} clearanceId={clearance.id} />
+        </div>
       )}
+      {!exchangesBelow && <ClearanceExchanges clearance={clearance} />}
     </>
   );
 }

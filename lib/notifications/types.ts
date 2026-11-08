@@ -45,6 +45,8 @@ export const NOTIFICATION_KINDS = [
   "clearance_terms_proposed",
   "clearance_terms_validated",
   "clearance_terms_rejected",
+  // A rights holder's reply, filed from PO's mailbox (cron).
+  "clearance_reply_received",
   // An element withdrawn from a title after a refusal: the Master redoes it.
   "legal_element_withdrawn",
   // A strategy document's review (Brief de sortie, Plan de sortie…): asked,

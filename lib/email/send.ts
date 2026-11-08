@@ -23,6 +23,9 @@ export type OutgoingEmail = {
   text: string;
   // The member who sends: shown as the sender's name, and the reply-to.
   sender: { name: string; email: string | null };
+  // Other reply-to addresses, after the member's: PO's own for a request
+  // whose replies PDS OS files (lib/email/reply-address.ts).
+  replyTo?: string[];
   // Files joined to the e-mail (a meeting's report as a PDF).
   attachments?: EmailAttachment[];
 };
@@ -32,6 +35,13 @@ export type EmailAttachment = {
   content: Uint8Array;
   contentType: string;
 };
+
+function replyToOf(mail: OutgoingEmail): string[] | undefined {
+  const all = [mail.sender.email, ...(mail.replyTo ?? [])].filter(
+    (address): address is string => Boolean(address),
+  );
+  return all.length > 0 ? all : undefined;
+}
 
 export async function sendEmail(
   mail: OutgoingEmail,
@@ -49,7 +59,7 @@ export async function sendEmail(
     await transport.sendMail({
       from: { name: `${mail.sender.name} · PDS`, address: env.EMAIL_SMTP_USER },
       to: { name: mail.to.name, address: mail.to.email },
-      replyTo: mail.sender.email ?? undefined,
+      replyTo: replyToOf(mail),
       subject: mail.subject,
       text: mail.text,
       attachments: mail.attachments?.map((a) => ({

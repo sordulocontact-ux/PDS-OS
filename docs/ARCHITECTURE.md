@@ -2311,10 +2311,13 @@ d'exécution décrits plus haut** (tables et fonctions gardées).
   (mots du ticket, le proto disait « À trancher ») ; l'étape est faite quand plus rien n'est à arbitrer
   ni à compléter (proto ; « En cours » ne bloque pas et part dans « Restant à arbitrer »). Positionnement
   et Angle : une réponse (« Ajouter » tant qu'aucune n'est gardée) ; Publics : la réponse + une ligne
-  par public (`strategy_audiences`, « Écarter » le retire). **Dispositif** : tous les leviers listés —
-  propositions de PO, Retenu, À arbitrer (« Retenir » / « Ne pas retenir », aussi pour un besoin confirmé
-  du Brief sans levier, jamais retenu d'avance), Non retenu (« Leviers courants ») ; « Ajouter un
-  levier » choisit parmi les non retenus (ou « Autre levier »). **Budget**, règle tranchée (point 5) :
+  par public (`strategy_audiences`, « Écarter » le retire). **Dispositif** : propositions de PO
+  d'abord, « Confirmer les n » juste dessous, puis les leviers Retenu, À arbitrer (aussi un besoin
+  confirmé du Brief sans levier, jamais retenu d'avance) et Non retenu par quelqu'un ; un levier courant
+  que personne n'a choisi n'est pas listé (`preset`), « Ajouter un levier » le propose (ou « Autre
+  levier ») (Sacha 07/11/2026). « Retenir » / « Ne pas retenir » ne sont que dans la question de PO
+  au-dessus quand elle pose les leviers (`decideAbove`), la ligne dit seulement l'état. Une pastille par
+  dimension : « n à confirmer », sinon l'état (plus de « rien de dit »). **Budget**, règle tranchée (point 5) :
   Proposé = lignes des leviers retenus et « Hors levier », À arbitrer = lignes d'un levier à arbitrer,
   Écartée = levier non retenu, Validé = engagé, facturé ou payé parmi le proposé, Reste = enveloppe −
   proposé − à arbitrer ; enveloppe non définie ou à confirmer = « En cours », listée sans bloquer.
@@ -3663,21 +3666,48 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
     PDS OS v3 », repris à l'identique le 07/10 à la demande de Sacha ; chaque bouton = une
     action de `lib/legal/clearance/flow-actions.ts` qui enchaîne les états par les mêmes
     fonctions SQL) :
-    - **Demander** (`AskMoment`) : ce qui est repris en pastilles (proposé par le code selon
+    - **Demander** (`AskMoment`, refait le 07/11/2026 : trois `StepSection` sans numéro ni titre
+      « Demander » au-dessus, l'écart entre elles fait la hiérarchie, sans paragraphe d'aide ; avant toute demande, « La demande » est remplacée par une ligne
+      « Topline de « X » (auteur) » et le journal vide est masqué) : ce qui est repris (proposé par le code selon
       l'élément : un sample = l'œuvre et l'enregistrement, une topline, une interpolation ou une
       reprise = l'œuvre ; à corriger, rien d'appliqué avant le clic), un ayant droit par droit
       choisi dans le Réseau (`PersonPickerField`, rôle repris du Réseau, sinon éditeur pour
       l'œuvre, label pour l'enregistrement ; libellés « Qui détient l'œuvre « X » ? » et « Qui
       détient l'enregistrement original de « X » ? » avec où trouver : répertoire SACEM, mention
-      ℗ ; « Ajouter au Réseau » crée une structure Éditeur ou Label sans quitter le panneau),
-      « Copier un modèle de demande », puis « J'ai envoyé la demande » (`requestClearance` :
+      ℗ ; « Ajouter au Réseau » crée une structure Éditeur ou Label sans quitter le panneau ; ce
+      qui est repris en `SegmentedControl` (choix unique, comme Personne / Organisation du Réseau ;
+      jamais `FilterChip`, réservé aux filtres), « · proposé » sur la proposition ; sous l'œuvre,
+      lien vers le répertoire en ligne de la SACEM), puis la demande en e-mail (`RequestSend` =
+      `MailCard`, adresse dans la ligne « À » de la carte (`toControl`) : celle du Réseau
+      pré-remplie et modifiable, sinon à écrire ; message modifiable, objet « Demande
+      d'autorisation · … ») : « Envoyer à X » l'envoie par PDS OS (`emailMessage`, un e-mail par
+      ayant droit, adresse écrite gardée dans sa fiche si elle n'en avait pas, `lib/legal/clearance/request-email.ts`)
+      et garde le texte envoyé dans le journal comme preuve (JUR-10) ; **réponses rangées seules**
+      (08/11/2026) : la demande part avec une deuxième adresse de réponse, celle de PO propre à
+      la demande (`po+aut-<id>@…`, `lib/email/reply-address.ts`) ; toutes les 10 min, pg_cron
+      (`public.poll_inbox`, secrets Vault `inbox_poll_url` et `cron_secret`) appelle
+      `/api/cron/inbox`, qui lit les enveloppes des 14 derniers jours de po@ en IMAP
+      (`lib/email/inbox.ts`, BODY.PEEK : rien n'est marqué lu) et range par le code seul
+      (`lib/legal/clearance/inbox-replies.ts`) : adressée à `po+aut-<id>` → cette demande ;
+      sinon venue de l'adresse d'un ayant droit d'une seule demande envoyée → celle-là ;
+      plusieurs → celle dont l'œuvre est nommée dans l'objet ou le texte, si une seule ;
+      sinon laissée dans po@. Texte sans l'historique cité (`lib/email/reply-text.ts`), pièces
+      jointes nommées seulement ; `receive_clearance_reply` (service role seul, une fois par
+      Message-ID, jamais sur une demande close, état inchangé) et notification
+      `clearance_reply_received` au responsable. « Négocier » pré-remplit « Leur réponse »
+      avec elle (source dessous) ; gardée telle quelle, elle n'est pas copiée deux fois au
+      journal (`receivedId`). Aucune IA ne décide du rattachement ; aucun e-mail parti = rien
+      d'enregistré ; « Je l'ai envoyée autrement » déclare seulement ; sans SMTP, « Ouvrir dans ma
+      messagerie » et « J'ai envoyé la demande » (`requestClearance` :
       qualification avec l'usage écrit par le code depuis le dossier, ayants droit, identifiés,
-      envoi consigné, contactés). « Rien à sécuriser » demande sa raison et clôt.
+      envoi consigné, contactés). « Rien à sécuriser » n'est plus une pastille : c'est une
+      « Autre issue » à côté de « Retirer l'élément du titre » (`NothingToSecureButton`, raison
+      demandée en modale, puis clôt).
     - **Négocier** (`NegotiateMoment`) : leur réponse collée, lue par PO
       (`readClearanceMessage`), les conditions affichées dans des champs à corriger, « Envoyer à
       la direction » (`submitClearanceReply` : réponse au journal, conditions proposées, en
       négociation) ou « Enregistrer le refus ». La direction voit « Valider les conditions » ou
-      « Demander une contre-proposition » ; le responsable voit « Chez la direction ».
+      « Demander une contre-proposition » (contour) ; le responsable voit en tête `StepWaiting` « En attente de Claire Morel : valider les conditions » (nom de qui valide, sinon « La direction »), les conditions envoyées dessous (08/11/2026).
       **Notifications** (`…20261007000601_clearance_terms_notifications.sql`, trigger sur
       `legal_clearance_terms`) : des conditions proposées notifient chaque membre qui valide
       (`clearance_terms_proposed`) ; leur validation ou leur refus notifie le responsable de

@@ -2,6 +2,7 @@ import { IconChevronRight } from "nucleo-sharp-essential";
 import type { ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
+import { StateMark, type MarkState } from "@/components/ui/state-mark";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { Tone } from "@/lib/ui/state-tones";
 
@@ -26,9 +27,9 @@ export function DimensionList({
   return (
     <section aria-labelledby={labelledBy} className="flex flex-col gap-3">
       {header}
-      <div className="overflow-hidden rounded-xl border border-[color:var(--border-hairline)] bg-[var(--surface-page)]">
-        {children}
-      </div>
+      {/* One card per dimension, spaced (Vanta, Adaline, Squarespace;
+          Sacha 07/11/2026). */}
+      <div className="flex flex-col gap-2">{children}</div>
     </section>
   );
 }
@@ -37,16 +38,17 @@ const isBadge = (b: DimensionBadge | false | null): b is DimensionBadge =>
   Boolean(b);
 
 /**
- * One dimension, folded: its name, its pills (counted by the module's
- * code: « n à confirmer », what is left, « Complète »), the chevron; open,
- * its lines on the soft surface (`children`), then what closes it
- * (`footer`: « Confirmer les n », « Ajouter … »). Nothing inside folds
- * again (Sacha 06/11/2026: « des chevrons dans des chevrons, ça cache des
- * informations »).
+ * One dimension, its own card: its state mark (`mark`: done, to look at,
+ * nothing yet), its name, its pill (counted by the module's code: « n à
+ * confirmer », what is left, « Complète »), the chevron; open, its lines
+ * under a hairline (`children`), then what closes it (`footer`: « Confirmer
+ * les n », « Ajouter … »). Nothing inside folds again (Sacha 06/11/2026:
+ * « des chevrons dans des chevrons, ça cache des informations »).
  */
 export function DimensionItem({
   id,
   name,
+  mark,
   badges,
   open = false,
   children,
@@ -55,6 +57,7 @@ export function DimensionItem({
   // Anchor (a link of the step opens on it).
   id: string;
   name: ReactNode;
+  mark: MarkState;
   // A pill each; `false` / `null` for one that does not apply.
   badges: Array<DimensionBadge | false | null>;
   open?: boolean;
@@ -65,10 +68,11 @@ export function DimensionItem({
     <details
       id={id}
       open={open}
-      className="group/dim scroll-mt-24 border-t border-[color:var(--border-hairline)] first:border-t-0"
+      className="group/dim scroll-mt-24 overflow-hidden rounded-xl border border-[color:var(--border-hairline)] bg-card"
     >
-      <summary className="flex min-h-12 cursor-pointer list-none items-center gap-3 px-4 py-3 outline-none hover:bg-[var(--control-bg-hover)] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[color:var(--focus-ring)] [&::-webkit-details-marker]:hidden">
-        <span className="min-w-0 flex-1 font-medium">{name}</span>
+      <summary className="flex min-h-14 cursor-pointer list-none items-center gap-3 px-4 py-3 outline-none hover:bg-[var(--control-bg-hover)] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[color:var(--focus-ring)] [&::-webkit-details-marker]:hidden">
+        <StateMark state={mark} />
+        <span className="min-w-0 flex-1 text-body-md font-medium">{name}</span>
         {badges.filter(isBadge).map((b) => (
           <StatusBadge key={b.label} tone={b.tone} size="sm">
             {b.label}
@@ -76,7 +80,7 @@ export function DimensionItem({
         ))}
         <IconChevronRight className="size-4 shrink-0 text-[color:var(--text-tertiary)] transition-transform duration-[var(--duration-base)] ease-[var(--ease-standard)] group-open/dim:rotate-90 motion-reduce:transition-none" />
       </summary>
-      <div className="border-t border-[color:var(--border-hairline)] bg-[var(--surface-soft)]">
+      <div className="border-t border-[color:var(--border-hairline)]">
         {children}
         {footer}
       </div>

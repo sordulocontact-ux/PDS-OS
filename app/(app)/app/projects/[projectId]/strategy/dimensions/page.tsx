@@ -172,6 +172,7 @@ export default async function StrategyDimensionsPage({
                 canEdit={canEdit}
                 exchange={exchange}
                 open={view.key === initial}
+                decideAbove={queue.some((q) => q.kind === "lever")}
                 extra={
                   view.key === "calendar" ? (
                     <UpstreamBlock chains={chains} />

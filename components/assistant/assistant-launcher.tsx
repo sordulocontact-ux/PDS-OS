@@ -74,7 +74,9 @@ export function AssistantLauncher() {
       <DialogContent closeLabel={t.close} className="sm:max-w-2xl" instant>
         <DialogHeader>
           <DialogTitle>{t.title}</DialogTitle>
-          <DialogDescription>
+          {/* Read by a screen reader; on screen, the listening composer
+              says it (the instructions took two lines at every opening). */}
+          <DialogDescription className="sr-only">
             {t.description} {t.stopHint}
           </DialogDescription>
         </DialogHeader>

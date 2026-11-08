@@ -142,7 +142,9 @@ function SelectItem({
           />
         </span>
       )}
-      <SelectPrimitive.ItemText className="flex flex-1 shrink-0 gap-2 whitespace-nowrap">
+      {/* A long option wraps inside the list, never under the tick (Sacha
+          07/11/2026: a Dispositif lever ran past the popup). */}
+      <SelectPrimitive.ItemText className="flex min-w-0 flex-1 gap-2 break-words whitespace-normal">
         {children}
       </SelectPrimitive.ItemText>
       {indicator === "check" && (

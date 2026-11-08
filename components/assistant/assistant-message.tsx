@@ -1,7 +1,7 @@
 import type { UIMessage } from "ai";
-import { IconLoader } from "nucleo-sharp-essential";
-import Link from "next/link";
+import { IconChevronRight, IconLoader } from "nucleo-sharp-essential";
 
+import { AnswerActions } from "@/components/assistant/answer-actions";
 import { AnswerText } from "@/components/assistant/answer-text";
 import { DraftCard } from "@/components/assistant/draft-card";
 import { evidenceOf } from "@/components/assistant/tool-output";
@@ -16,9 +16,32 @@ const isToolPart = (
 ): part is Extract<Part, { toolCallId: string }> =>
   part.type.startsWith("tool-") && "toolCallId" in part;
 
-/** One turn. Assistant turns show the model's text, then the facts and links
- * found by code. `live`: the turn being answered, the only one whose
- * unfinished lookups still spin (a stopped or failed answer shows none). */
+/**
+ * Splits an answer's text: what the model said before its last lookup
+ * (« Je vais vérifier… ») is the way there, folded with what it read, once
+ * an answer follows that lookup. A failed or stopped answer keeps it all.
+ */
+function answerParts(parts: Part[]): { steps: string[]; answer: string } {
+  const lastTool = parts.findLastIndex(isToolPart);
+  const textOf = (from: number, to: number) =>
+    parts
+      .slice(from, to)
+      .map((p) => (p.type === "text" ? p.text : ""))
+      .join("");
+  const after = textOf(lastTool + 1, parts.length);
+  if (lastTool === -1 || !after.trim())
+    return { steps: [], answer: textOf(0, parts.length) };
+  const steps = parts
+    .slice(0, lastTool)
+    .flatMap((p) => (p.type === "text" && p.text.trim() ? [p.text] : []));
+  return { steps, answer: after };
+}
+
+/** One turn. Assistant turns show, folded above the answer, what PO read
+ * (the facts found by code) and said on the way; then the answer; then, once
+ * it is finished, the row to copy it and open its sources. `live`: the turn
+ * being answered, the only one whose unfinished lookups still spin (a
+ * stopped or failed answer shows none). */
 export function AssistantMessage({
   message,
   live = false,
@@ -27,11 +50,11 @@ export function AssistantMessage({
   live?: boolean;
 }) {
   const t = fr.assistant;
-  const text = message.parts
-    .map((p) => (p.type === "text" ? p.text : ""))
-    .join("");
 
   if (message.role === "user") {
+    const text = message.parts
+      .map((p) => (p.type === "text" ? p.text : ""))
+      .join("");
     return (
       <div className="ml-auto max-w-[85%] rounded-2xl bg-muted px-4 py-2 text-sm whitespace-pre-wrap">
         <span className="sr-only">{t.you} : </span>
@@ -40,6 +63,7 @@ export function AssistantMessage({
     );
   }
 
+  const { steps, answer } = answerParts(message.parts);
   const tools = message.parts.filter(isToolPart);
   const running = live
     ? tools.filter(
@@ -65,10 +89,33 @@ export function AssistantMessage({
   return (
     <div className="grid max-w-[95%] gap-3">
       <span className="sr-only">{t.po} : </span>
+      {(facts.length > 0 || steps.length > 0) && (
+        <details className="group text-caption text-muted-foreground">
+          <summary className="flex w-fit cursor-pointer list-none items-center gap-1 rounded-sm hover:text-foreground [&::-webkit-details-marker]:hidden">
+            {facts.length > 0 ? t.read(facts.length) : t.steps}
+            <IconChevronRight
+              aria-hidden
+              className="size-3.5 transition-transform duration-[var(--duration-fast)] group-open:rotate-90 motion-reduce:transition-none"
+            />
+          </summary>
+          <div className="mt-2 grid gap-2 border-l border-border pl-3">
+            {steps.map((step, i) => (
+              <AnswerText key={i} text={step} />
+            ))}
+            {facts.length > 0 && (
+              <ul className="grid list-disc gap-1 pl-4">
+                {facts.map((fact, i) => (
+                  <li key={i}>{fact}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </details>
+      )}
       {running.map((p) => (
         <p
           key={p.toolCallId}
-          className="flex items-center gap-2 text-xs text-muted-foreground"
+          className="flex items-center gap-2 text-caption text-muted-foreground"
         >
           <IconLoader
             className="size-3.5 animate-spin motion-reduce:animate-none"
@@ -77,35 +124,11 @@ export function AssistantMessage({
           {t.tools[p.type.replace(/^tool-/, "")] ?? t.thinking}
         </p>
       ))}
-      {text && <AnswerText text={text} />}
+      {answer && <AnswerText text={answer} />}
       {drafts.map((d) => (
         <DraftCard key={d.toolCallId} {...d} />
       ))}
-      {facts.length > 0 && (
-        <details className="rounded-lg border border-border px-3 py-2 text-xs">
-          <summary className="cursor-pointer font-medium text-muted-foreground">
-            {t.facts} ({facts.length})
-          </summary>
-          <ul className="mt-2 grid list-disc gap-1 pl-4">
-            {facts.map((fact, i) => (
-              <li key={i}>{fact}</li>
-            ))}
-          </ul>
-        </details>
-      )}
-      {sources.length > 0 && (
-        <nav aria-label={t.sources} className="flex flex-wrap gap-2">
-          {sources.map((s) => (
-            <Link
-              key={s.href}
-              href={s.href}
-              className="rounded-full border border-border px-3 py-1 text-xs hover:bg-muted"
-            >
-              {s.label}
-            </Link>
-          ))}
-        </nav>
-      )}
+      {!live && <AnswerActions text={answer} sources={sources} />}
     </div>
   );
 }

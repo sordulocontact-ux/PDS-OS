@@ -83,6 +83,7 @@ export function DimensionRows({
             id={`dimension-${d.dimension}`}
             name={ti.dimensions[d.dimension]}
             open={asked || d.dimension === openFirst}
+            mark={checked.length > 0 ? "current" : left > 0 ? "todo" : "done"}
             badges={[
               checked.length > 0 && {
                 tone: "info",

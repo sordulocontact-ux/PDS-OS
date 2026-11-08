@@ -91,6 +91,11 @@ export const serverEnvSchema = z
      * without them, each sending is declared (« Marquer comme envoyé »). */
     EMAIL_SMTP_USER: z.preprocess(blankToUndefined, z.email().optional()),
     EMAIL_SMTP_PASSWORD: optionalSecret,
+    /** Reading PO's mailbox (lib/email/inbox.ts, IMAP): the replies to the
+     * authorisation requests. An app password of its own (« PDS OS
+     * lecture »), revocable without stopping the sending. Optional: without
+     * it, the SMTP one is used; without both, nothing is read. */
+    EMAIL_IMAP_PASSWORD: optionalSecret,
     /** Web Push: optional, browser notifications are off without them. */
     VAPID_PRIVATE_KEY: optionalSecret,
     /** Same value as the Vault secret push_claim_secret: pushes are off without it. */

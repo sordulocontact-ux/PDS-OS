@@ -16,6 +16,7 @@ import type { Clearance, Clearances } from "@/lib/legal/clearance/types";
 import { personName } from "@/lib/projects/types";
 import { listLegalPeople } from "@/lib/legal/legal-people";
 import { legalClearanceRows } from "@/lib/legal/shared-rows";
+import { emailEnabled } from "@/lib/email/send";
 import { createClient } from "@/lib/supabase/server";
 
 // The clearances of a project (ticket Juridique 05), with everything their
@@ -45,13 +46,13 @@ export async function loadClearances(
       ? await Promise.all([
           supabase
             .from("legal_clearance_rightsholders")
-            .select("id, clearance_id, right, name, role")
+            .select("id, clearance_id, right, name, role, contact_id")
             .in("clearance_id", ids)
             .order("created_at"),
           supabase
             .from("legal_clearance_communications")
             .select(
-              "id, clearance_id, kind, direction, body, occurred_at, created_by",
+              "id, clearance_id, kind, direction, body, occurred_at, created_by, from_address",
             )
             .in("clearance_id", ids)
             .order("occurred_at", { ascending: false }),
@@ -77,13 +78,29 @@ export async function loadClearances(
       : [none, none, none, none, none];
 
   const contractIds = (links.data ?? []).map((l) => l.contract_id);
-  const files =
+  // The holders' addresses in the Réseau (the request is e-mailed to them).
+  const contactIds = [
+    ...new Set(
+      (holders.data ?? []).flatMap((h) => (h.contact_id ? [h.contact_id] : [])),
+    ),
+  ];
+  const [files, mails] = await Promise.all([
     contractIds.length > 0
-      ? await supabase
+      ? supabase
           .from("contract_files")
           .select("contract_id, category")
           .in("contract_id", contractIds)
-      : none;
+      : none,
+    contactIds.length > 0
+      ? supabase
+          .from("network_contacts")
+          .select("id, email")
+          .in("id", contactIds)
+      : none,
+  ]);
+  const emailOf = new Map(
+    (mails.data ?? []).flatMap((c) => (c.email ? [[c.id, c.email]] : [])),
+  );
   const nameOf = new Map(
     (people.data ?? []).map((p) => [
       p.person_id,
@@ -136,6 +153,8 @@ export async function loadClearances(
             right: h.right as RightKind,
             name: h.name,
             role: h.role,
+            contactId: h.contact_id,
+            email: h.contact_id ? (emailOf.get(h.contact_id) ?? null) : null,
           })),
         exchanges: (exchanges.data ?? [])
           .filter((e) => e.clearance_id === row.id)
@@ -146,6 +165,7 @@ export async function loadClearances(
             body: e.body,
             at: e.occurred_at,
             by: who(e.created_by),
+            from: e.from_address,
           })),
         terms: (terms.data ?? [])
           .filter((t) => t.clearance_id === row.id)
@@ -206,5 +226,6 @@ export async function loadClearances(
     })),
     canValidate: can(access, "validate"),
     organizationId: access.organizationId,
+    emailEnabled: emailEnabled(),
   };
 }

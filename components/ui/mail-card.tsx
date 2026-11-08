@@ -1,6 +1,7 @@
 "use client";
 
 import { IconEnvelopeOpen } from "nucleo-sharp-essential";
+import type { ReactNode } from "react";
 
 import { TextareaField } from "@/components/auth/textarea-field";
 import { DocumentCard } from "@/components/ui/document-card";
@@ -21,18 +22,23 @@ export function MailCard({
   title,
   line,
   to,
+  toControl,
   toSource,
   subject,
   message,
   onMessage,
   name,
   added,
+  rows = 3,
 }: {
   // Default « L'e-mail que PDS OS enverra ».
   title?: string;
   // Under the title: from whom, kept as the proof of sending.
   line?: string;
   to: string;
+  // The address written in the card itself (prefilled from the Réseau,
+  // corrected or typed here), in place of `to` (Sacha, 07/11/2026).
+  toControl?: ReactNode;
   // Default « Réseau ».
   toSource?: FactSource | null;
   subject: string;
@@ -40,9 +46,12 @@ export function MailCard({
   onMessage: (message: string) => void;
   // The message field's name (one per card on a page).
   name: string;
+  // Lines of the message field: more when the message is the whole e-mail.
+  rows?: number;
   // « Ajouté automatiquement à la fin de l'e-mail : », « Ouvrir votre
   // dossier : » + the link (or « lien privé créé à l'envoi »), its validity.
-  added: { intro?: string; open: string; link?: string; validity?: string };
+  // None: the message is the whole e-mail (an authorisation request).
+  added?: { intro?: string; open: string; link?: string; validity?: string };
 }) {
   const t = fr.mail;
   return (
@@ -55,6 +64,7 @@ export function MailCard({
         <FactRow
           label={t.to}
           value={to}
+          control={toControl}
           source={toSource === undefined ? t.fromNetwork : toSource}
         />
         <FactRow label={t.subject} value={subject} />
@@ -63,11 +73,12 @@ export function MailCard({
         <TextareaField
           name={name}
           label={t.message}
-          rows={3}
+          rows={rows}
           maxLength={2000}
           value={message}
           onChange={(event) => onMessage(event.target.value)}
         />
+        {added && (
         <p className="flex flex-col gap-1 rounded-lg bg-[var(--surface-soft)] px-3 py-2.5 break-words">
           <span className="text-[color:var(--text-secondary)]">
             {added.intro ?? t.added}
@@ -77,6 +88,7 @@ export function MailCard({
           </span>
           <span>{added.validity ?? t.validity}</span>
         </p>
+        )}
       </div>
     </DocumentCard>
   );

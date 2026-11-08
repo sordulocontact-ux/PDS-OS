@@ -131,6 +131,10 @@ export const legalClearance = {
       "Choisissez l'ayant droit dans le Réseau, ou gardez seulement son nom.",
   },
   exchanges: {
+    title: (count: number) => `Échanges (${count})`,
+    last: (at: string) => `Dernier le ${at}`,
+    more: "Lire tout",
+    less: "Réduire",
     empty: "Aucun échange pour l'instant.",
     kind: "Type",
     direction: "Sens",
@@ -187,8 +191,6 @@ export const legalClearance = {
     noHolder: "À identifier",
     rightsTitle: (n: number) =>
       n > 1 ? "Deux autorisations distinctes" : "L'autorisation",
-    rightsBody:
-      "Les droits sur l'œuvre (auteurs, éditeur) et sur l'enregistrement (producteur) s'autorisent chacun à part. Accepter des conditions n'est pas être autorisé : seule la licence signée finalise.",
     rightOf: { work: "l'œuvre", master: "l'enregistrement" } as Record<
       string,
       string
@@ -274,23 +276,22 @@ export const legalClearance = {
         "Autorisée : le titre n'est plus bloqué par cette œuvre existante.",
       abandoned: "Élément abandonné : il ne bloque plus la sortie.",
     },
-    journal: "Journal de l'autorisation",
     other: "Autre issue",
   },
   // The words of the panel's three moments, as in the prototype of
   // 07/10/2026 (lib/legal/clearance/flow-actions.ts).
   flow: {
     taken: (work: string) => `Ce qui est repris de « ${work} »`,
+    // The three numbered steps of « Demander » (Sacha, 07/11/2026: fewer
+    // words, the number gives the order).
+    stepScope: "Ce qui est repris",
+    stepSend: "Envoyer la demande",
+    proposedTag: "proposé",
     scopes: {
       both: "L'œuvre et l'enregistrement",
       work: "L'œuvre",
       master: "L'enregistrement",
       none: "Rien à sécuriser",
-    },
-    proposed: {
-      sample:
-        "Proposé parce que c'est un sample : il reprend en général la mélodie et le son. Corrigez si besoin.",
-      work: "Proposé parce que l'élément est réenregistré : seule l'œuvre est reprise. Corrigez si besoin.",
     },
     // Who holds the rights of the borrowed work, never of the project's
     // title (Sacha's question of 07/10/2026): almost always companies,
@@ -300,39 +301,71 @@ export const legalClearance = {
       master: (work: string) =>
         `Qui détient l'enregistrement original de « ${work} » ?`,
     },
+    // Under the picker: a gesture when there is one (the SACEM's online
+    // repertoire names the work's publisher), a few words otherwise.
     holderWhere: {
-      work: "Son éditeur musical : il figure sur la fiche de l'œuvre dans le répertoire en ligne de la SACEM. Écrivez à son service licences.",
-      master:
-        "Le label ou le producteur du son original : il figure sur la mention ℗ de la sortie (pochette, plateformes). Écrivez à son service licences.",
+      work: "Trouver son éditeur dans le répertoire de la SACEM",
+      master: "Le label du son original : mention ℗ de la sortie.",
     },
     holderMissing: "Choisissez à qui vous avez demandé.",
     holdersFallback: "les ayants droit",
     removeHolder: (name: string) => `Retirer ${name}`,
+    // « Autre issue » before asking: nothing to secure, with its reason.
+    nothing: "Rien à sécuriser",
+    nothingBody:
+      "Le blocage est levé sans demande : dites pourquoi, la raison reste dans le journal.",
+    nothingDone: "Rien à sécuriser : blocage levé",
     reasonLabel: "Pourquoi rien n'est à sécuriser ?",
-    reasonPlaceholder: "Ex. composition du domaine public",
-    reasonMissing: "Dites pourquoi rien n'est à sécuriser.",
-    save: "Enregistrer",
-    askHint:
-      "Envoyez la demande par votre canal habituel. Contacter n'est pas être autorisé : rien n'avance avant leur réponse.",
     sent: "J'ai envoyé la demande",
-    copyRequest: "Copier un modèle de demande",
-    copied: "Modèle de demande copié",
-    copiedDetail: "L'élément, l'œuvre et le titre sont déjà remplis.",
+    sentOtherwise: "Je l'ai envoyée autrement",
+    send: "Envoyer la demande",
+    ownMail: "À envoyer depuis votre messagerie, puis à déclarer ici",
+    sendTo: (names: string) => `Envoyer à ${names}`,
+    sending: "Envoi…",
+    subject: (taken: string) => `Demande d'autorisation · ${taken}`,
+    toPending: "L'ayant droit choisi ci-dessus",
+    addressOf: (name: string) => `Adresse e-mail de ${name}`,
+    addressMissing: "Écrivez son adresse e-mail.",
+    addressPlaceholder: (name: string) => `Adresse e-mail de ${name}`,
+    addressSaved: "Gardée dans sa fiche du Réseau à l'envoi",
+    openMail: "Ouvrir dans ma messagerie",
     requestTemplate: (element: string, work: string, title: string | null) =>
       `Bonjour,\n\nNous souhaitons utiliser ${element.toLowerCase()} de « ${work} »${
         title ? ` dans le titre « ${title} »` : ""
       }. Pourriez-vous nous indiquer à quelles conditions vous l'autoriseriez ?\n\nBien à vous,`,
+    // The journal keeps what left, word for word: the proof (JUR-10).
+    emailLog: (
+      names: string,
+      subject: string,
+      message: string,
+      missed: string,
+    ) =>
+      [
+        `Demande envoyée par e-mail par PDS OS à ${names}.`,
+        ...(missed
+          ? [`Non partie pour ${missed} : à leur écrire vous-même.`]
+          : []),
+        `Objet : ${subject}`,
+        "",
+        message,
+      ].join("\n"),
     requestLog: (names: string) =>
       names
         ? `Demande d'autorisation envoyée à ${names}.`
         : "Demande d'autorisation envoyée aux ayants droit.",
     missingCount: (count: number) =>
       count === 1
-        ? "Un ayant droit manque."
-        : `${count} ayants droit manquent.`,
+        ? "Il manque une réponse ci-dessus."
+        : `Il manque ${count} réponses ci-dessus.`,
     askedTo: (names: string, date: string) =>
       `Demandé à ${names} le ${date}. Quand ils répondent, collez leur réponse : PO en tire les conditions.`,
     replyLabel: "Leur réponse",
+    // A reply filed from PO's mailbox (cron), put in « Leur réponse ».
+    replyReceived: (from: string, at: string) =>
+      `Reçue par e-mail de ${from}, le ${at}. Vérifiez-la, puis lisez-la.`,
+    replyEmpty: "(Message sans texte)",
+    replyAttachments: (names: string) =>
+      `Pièces jointes, dans la boîte de PO : ${names}`,
     replyPlaceholder: "Collez leur e-mail ou leur message",
     replyMissing: "Collez leur réponse.",
     read: "Lire la réponse",
@@ -351,9 +384,8 @@ export const legalClearance = {
     credits: "Crédits",
     countered:
       "La direction a demandé une contre-proposition : collez leur nouvelle réponse.",
-    atDirection: "Chez la direction",
-    atDirectionBody:
-      "La direction valide les conditions. Rien à faire de votre côté : le contrat se prépare dès qu'elle a validé.",
+    // « En attente de Claire Morel : valider les conditions » (StepWaiting).
+    atDirection: "valider les conditions",
     validate: "Valider les conditions",
     counter: "Demander une contre-proposition",
     validateNote:
@@ -413,5 +445,7 @@ export const legalClearance = {
     contactInvalid:
       "Ce contact n'est plus dans le Réseau : choisissez-en un autre.",
     failed: "L'action n'a pas pu être faite. Réessayez.",
+    emailFailed:
+      "L'e-mail n'est pas parti, rien n'est enregistré. Réessayez, ou envoyez-le vous-même puis « Je l'ai envoyée autrement ».",
   },
 } as const;

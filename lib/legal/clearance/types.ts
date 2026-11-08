@@ -23,7 +23,16 @@ export type Clearance = {
   next: ClearanceStatus | null;
   // Codes of clearance_missing for the next state (empty: it can move).
   missing: string[];
-  holders: Array<{ id: string; right: RightKind; name: string; role: string }>;
+  holders: Array<{
+    id: string;
+    right: RightKind;
+    name: string;
+    role: string;
+    // Their contact in the Réseau and its address: whom the request is
+    // e-mailed to.
+    contactId: string | null;
+    email: string | null;
+  }>;
   exchanges: Array<{
     id: string;
     kind: string;
@@ -31,6 +40,8 @@ export type Clearance = {
     body: string;
     at: string;
     by: string;
+    // The sender of an e-mail filed from PO's mailbox (cron), else null.
+    from: string | null;
   }>;
   terms: Array<{
     id: string;
@@ -71,4 +82,6 @@ export type Clearances = {
   // Where the signed copy and its proof are uploaded from the drawer
   // (contract-files/<organisation>/…).
   organizationId: string | null;
+  // PDS OS sends e-mails itself (SMTP set): the request leaves from here.
+  emailEnabled: boolean;
 };

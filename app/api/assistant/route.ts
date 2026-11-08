@@ -1,5 +1,7 @@
 import {
+  APICallError,
   convertToModelMessages,
+  RetryError,
   createUIMessageStreamResponse,
   isStepCount,
   streamText,
@@ -42,6 +44,16 @@ const bodySchema = z.object({
   page: z.string().max(300).optional(),
 });
 const MAX_USER_TEXT = 2000;
+
+// The provider said « too many requests » or « overloaded », after the SDK's
+// own retries: worth asking again in a minute.
+function isSaturated(error: unknown): boolean {
+  const last = RetryError.isInstance(error) ? error.lastError : error;
+  return (
+    APICallError.isInstance(last) &&
+    [429, 503, 529].includes(last.statusCode ?? 0)
+  );
+}
 
 export async function POST(request: Request) {
   const access = await getAccess();
@@ -110,6 +122,12 @@ export async function POST(request: Request) {
     stream: toUIMessageStream({
       stream: result.stream,
       originalMessages: messages,
+      // The client gets a code, never the provider's message: « busy » (try
+      // again in a minute) or « failed » (components/assistant/assistant-thread.tsx).
+      onError: (error) => {
+        console.error("[assistant] answer failed:", error);
+        return isSaturated(error) ? "busy" : "failed";
+      },
       onEnd: async ({ messages: turns }) => {
         // Unanswered questions, without their text (§ 4 bis).
         await recordUnanswered(turns, parsed.data.page ?? null);

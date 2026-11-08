@@ -18,6 +18,7 @@ import {
   rightsOf,
   type Scope,
 } from "@/lib/legal/clearance/matrix";
+import { emailClearanceRequest } from "@/lib/legal/clearance/request-email";
 import { run, type ClearanceResult } from "@/lib/legal/clearance/run";
 import { legalOutcome } from "@/lib/legal/outcome";
 import { createClient } from "@/lib/supabase/server";
@@ -92,10 +93,30 @@ const requestSchema = z.object({
   // title), unless one was written before.
   usage: z.string().trim().min(1).max(2000),
   holders: z.array(holderSchema).max(4),
+  // « Envoyer à … »: PDS OS sends the request itself, as written in the
+  // panel; absent: « Je l'ai envoyée autrement ».
+  email: z
+    .object({
+      subject: z.string().trim().min(1).max(300),
+      message: z.string().trim().min(1).max(4000),
+      recipients: z
+        .array(
+          z.object({
+            name: z.string().trim().min(1).max(200),
+            email: z.email(),
+            contactId: catalogIdSchema.nullable(),
+          }),
+        )
+        .min(1)
+        .max(4),
+    })
+    .optional(),
 });
 
-/** « J'ai envoyé la demande »: what is taken, who holds each right, the
- * request logged as sent; the borrowing waits for their answer. */
+/** « Envoyer à … » / « Je l'ai envoyée autrement »: what is taken, who
+ * holds each right, the request e-mailed by PDS OS when asked (its text kept
+ * in the journal as the proof, JUR-10) or declared sent; the borrowing waits
+ * for their answer. Nothing is logged when no e-mail left. */
 export async function requestClearance(input: z.input<typeof requestSchema>) {
   return gesture(input, done.requested, requestClearanceFlow);
 }
@@ -136,12 +157,26 @@ async function requestClearanceFlow(
   ]);
   if (!identified.ok) return identified;
   const names = holders.map((h) => h.name).join(", ");
+  const t = fr.legalClearance.flow;
+  let body = t.requestLog(names);
+  if (p.data.email) {
+    const { subject, message, recipients } = p.data.email;
+    const { sent, missed } = await emailClearanceRequest(
+      clearanceId,
+      recipients,
+      subject,
+      message,
+    );
+    if (sent.length === 0)
+      return { ok: false, error: fr.legalClearance.errors.emailFailed };
+    body = t.emailLog(sent.join(", "), subject, message, missed.join(", "));
+  }
   const logged = await run(projectId, (s) =>
     s.rpc("log_clearance_communication", {
       p_clearance_id: clearanceId,
       p_kind: "message",
       p_direction: "out",
-      p_body: fr.legalClearance.flow.requestLog(names),
+      p_body: body,
       p_occurred_at: null,
     }),
   );
@@ -190,6 +225,8 @@ async function declareNothingToSecureFlow(
 const replySchema = z.object({
   ...ids,
   body: z.string().trim().min(1).max(8000),
+  // The e-mail filed from PO's mailbox it was taken from (unchanged).
+  receivedId: catalogIdSchema.optional(),
   // One line per right (the work, the recording), or one without right.
   terms: z
     .array(
@@ -223,16 +260,21 @@ async function submitClearanceReplyFlow(
   const access = await requireApproved();
   if (!can(access, "manage_legal"))
     return { ok: false as const, error: fr.auth.errors.forbidden };
-  const { data: communicationId, error } = await supabase.rpc(
-    "log_clearance_communication",
-    {
-      p_clearance_id: clearanceId,
-      p_kind: "message",
-      p_direction: "in",
-      p_body: body,
-      p_occurred_at: null,
-    },
+  const received = await alreadyReceived(
+    supabase,
+    clearanceId,
+    p.data.receivedId,
+    body,
   );
+  const { data: communicationId, error } = received
+    ? { data: received, error: null }
+    : await supabase.rpc("log_clearance_communication", {
+        p_clearance_id: clearanceId,
+        p_kind: "message",
+        p_direction: "in",
+        p_body: body,
+        p_occurred_at: null,
+      });
   if (error || !communicationId) {
     if (error) console.error("submitClearanceReply:", error.message);
     return failed();
@@ -263,7 +305,28 @@ async function submitClearanceReplyFlow(
 const refusalSchema = z.object({
   ...ids,
   body: z.string().trim().min(1).max(8000),
+  receivedId: catalogIdSchema.optional(),
 });
+
+/** The reply already in the journal when the person kept the e-mail filed
+ * from PO's mailbox as it came (no second copy of it), else null. */
+async function alreadyReceived(
+  supabase: Supabase,
+  clearanceId: string,
+  receivedId: string | undefined,
+  body: string,
+): Promise<string | null> {
+  if (!receivedId) return null;
+  const { data } = await supabase
+    .from("legal_clearance_communications")
+    .select("id, body")
+    .eq("id", receivedId)
+    .eq("clearance_id", clearanceId)
+    .eq("kind", "email")
+    .eq("direction", "in")
+    .maybeSingle();
+  return data && data.body.trim() === body.trim() ? data.id : null;
+}
 
 /** « Enregistrer le refus »: their answer kept, the borrowing refused
  * (it blocks the title as it stands). */
@@ -278,16 +341,24 @@ async function recordClearanceRefusalFlow(
 ): Promise<ClearanceResult> {
   const p = refusalSchema.safeParse(input);
   if (!p.success) return failed();
-  const logged = await run(p.data.projectId, (s) =>
-    s.rpc("log_clearance_communication", {
-      p_clearance_id: p.data.clearanceId,
-      p_kind: "message",
-      p_direction: "in",
-      p_body: p.data.body,
-      p_occurred_at: null,
-    }),
+  const received = await alreadyReceived(
+    await createClient(),
+    p.data.clearanceId,
+    p.data.receivedId,
+    p.data.body,
   );
-  if (!logged.ok) return logged;
+  if (!received) {
+    const logged = await run(p.data.projectId, (s) =>
+      s.rpc("log_clearance_communication", {
+        p_clearance_id: p.data.clearanceId,
+        p_kind: "message",
+        p_direction: "in",
+        p_body: p.data.body,
+        p_occurred_at: null,
+      }),
+    );
+    if (!logged.ok) return logged;
+  }
   return run(p.data.projectId, (s) =>
     s.rpc("advance_clearance", {
       p_clearance_id: p.data.clearanceId,

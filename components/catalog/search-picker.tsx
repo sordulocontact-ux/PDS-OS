@@ -1,6 +1,6 @@
 "use client";
 
-import { IconMagnifier, IconPlus } from "nucleo-sharp-essential";
+import { IconMagnifier, IconPlus, IconTextTool2 } from "nucleo-sharp-essential";
 import { useId, useMemo, useRef, useState } from "react";
 
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,9 @@ export type PickerOption = { id: string; label: string; detail?: string };
 // 05/11/2026). The focus stays in the field. `clearOnCreate`: the
 // shortcut adds at once (an e-mail address), so the field empties, unless
 // `onCreate` returns false (nothing added: the query stays to be fixed).
+// `keepName`: a last row once something is typed (« Garder « X » comme
+// simple nom »), the way out when nobody fits, in the list where the eye
+// looks for it rather than as a loose button under the field.
 export function SearchPicker({
   label,
   placeholder,
@@ -35,6 +38,7 @@ export function SearchPicker({
   describedBy,
   clearOnCreate = false,
   onQueryChange,
+  keepName,
 }: {
   label: string;
   placeholder: string;
@@ -51,8 +55,11 @@ export function SearchPicker({
   invalid?: boolean;
   describedBy?: string;
   clearOnCreate?: boolean;
-  // Told of what is typed (« Garder seulement le nom » takes it).
   onQueryChange?: (query: string) => void;
+  keepName?: {
+    label: (query: string) => string;
+    onKeep: (query: string) => void;
+  };
 }) {
   const id = useId();
   const listId = `${id}-list`;
@@ -82,8 +89,9 @@ export function SearchPicker({
       .slice(0, 8);
   }, [available, query, suggestedIds]);
 
-  // Rows: results, then the create shortcut.
-  const rowCount = results.length + 1;
+  // Rows: results, the create shortcut, then « keep the name » once typed.
+  const keepRow = keepName && query.trim() ? results.length + 1 : null;
+  const rowCount = results.length + (keepRow === null ? 1 : 2);
   const activeIndex = Math.min(active, rowCount - 1);
 
   function pick(index: number) {
@@ -91,6 +99,9 @@ export function SearchPicker({
       onPick(results[index].id);
       setQuery("");
       setActive(0);
+    } else if (index === keepRow && keepName) {
+      keepName.onKeep(query.trim());
+      setOpen(false);
     } else {
       const created = onCreate(query.trim());
       if (clearOnCreate && created !== false) {
@@ -226,6 +237,25 @@ export function SearchPicker({
               <IconPlus className="size-4" aria-hidden />
               {createLabel(query.trim())}
             </li>
+            {keepRow !== null && keepName && (
+              <li
+                id={`${id}-row-${keepRow}`}
+                role="option"
+                aria-selected={activeIndex === keepRow}
+                onMouseDown={(event) => {
+                  event.preventDefault();
+                  pick(keepRow);
+                }}
+                onMouseEnter={() => setActive(keepRow)}
+                className={cn(
+                  "flex min-h-11 cursor-pointer items-center gap-2 px-3 text-sm text-muted-foreground",
+                  activeIndex === keepRow && "bg-[var(--control-bg-hover)]",
+                )}
+              >
+                <IconTextTool2 className="size-4" aria-hidden />
+                {keepName.label(query.trim())}
+              </li>
+            )}
           </ul>
         </PopoverContent>
       </Popover>

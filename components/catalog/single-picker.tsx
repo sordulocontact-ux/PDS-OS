@@ -10,6 +10,7 @@ import {
 } from "@/components/catalog/search-picker";
 import { Button } from "@/components/ui/button";
 import { RequiredMark } from "@/components/ui/required-mark";
+import { cn } from "@/lib/utils";
 
 /**
  * One item picked from a list with search (a content format, the artist of
@@ -20,6 +21,7 @@ import { RequiredMark } from "@/components/ui/required-mark";
 export function SinglePicker({
   name,
   legend,
+  hideLegend = false,
   required = false,
   options,
   selectedId,
@@ -35,9 +37,12 @@ export function SinglePicker({
   removeLabel,
   error,
   onQueryChange,
+  keepName,
 }: {
   name: string;
   legend: string;
+  // Read by screen readers only (a title above already says it).
+  hideLegend?: boolean;
   // Shows the « * » after the legend (docs/DESIGN.md § 4).
   required?: boolean;
   options: PickerOption[];
@@ -54,6 +59,7 @@ export function SinglePicker({
   removeLabel: (label: string) => string;
   error?: string;
   onQueryChange?: (query: string) => void;
+  keepName?: React.ComponentProps<typeof SearchPicker>["keepName"];
 }) {
   const id = useId();
   const selected = options.find((o) => o.id === selectedId) ?? null;
@@ -65,13 +71,24 @@ export function SinglePicker({
       aria-labelledby={`${id}-label`}
       className="flex flex-col gap-1.5"
     >
-      <span id={`${id}-label`} className="text-sm leading-none font-medium">
+      <span
+        id={`${id}-label`}
+        className={cn(
+          "text-sm leading-none font-medium",
+          hideLegend && "sr-only",
+        )}
+      >
         {legend}
         {required && <RequiredMark announce />}
       </span>
       <input type="hidden" name={name} value={selected?.id ?? ""} />
       {selected ? (
-        <div className="mt-1 flex items-center gap-2 rounded-lg border border-border py-1.5 pr-1.5 pl-3">
+        <div
+          className={cn(
+            "flex items-center gap-2 rounded-lg border border-border py-1.5 pr-1.5 pl-3",
+            !hideLegend && "mt-1",
+          )}
+        >
           <span className="flex min-w-0 flex-1 flex-col">
             <span className="truncate text-sm font-medium">
               {selected.label}
@@ -93,7 +110,7 @@ export function SinglePicker({
           </Button>
         </div>
       ) : (
-        <div className="pt-1">
+        <div className={cn(!hideLegend && "pt-1")}>
           <SearchPicker
             label={searchLabel}
             placeholder={placeholder}
@@ -109,6 +126,7 @@ export function SinglePicker({
             invalid={Boolean(error)}
             describedBy={error ? `${id}-error` : undefined}
             onQueryChange={onQueryChange}
+            keepName={keepName}
           />
         </div>
       )}

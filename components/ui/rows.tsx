@@ -34,16 +34,37 @@ const sub =
   "text-[length:var(--type-micro)] leading-[var(--type-micro-lh)] text-[color:var(--text-tertiary)]";
 
 /** A row that says something (proto `.irow`): its title in semibold, a
- * 13 px source below, a badge on the right. */
+ * 13 px source below, a badge on the right. With `leading` (a `StateMark`),
+ * laid out as a `ProposalRow` it sits with (the Dispositif's levers under
+ * PO's proposals, Sacha 07/11/2026). */
 export function InfoRow({
   title,
   detail,
   badge,
+  leading,
 }: {
   title: string;
   detail?: string;
   badge?: ReactNode;
+  leading?: ReactNode;
 }) {
+  if (leading)
+    return (
+      <li className="flex items-start gap-3 px-4 py-3.5">
+        {leading}
+        <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <span className="text-body-md font-medium break-words text-[color:var(--text-primary)]">
+            {title}
+          </span>
+          {detail && (
+            <span className="text-caption text-[color:var(--text-tertiary)]">
+              {detail}
+            </span>
+          )}
+        </span>
+        {badge}
+      </li>
+    );
   return (
     <li className="flex flex-wrap items-center justify-between gap-x-3.5 gap-y-2.5 px-3.5 py-3 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)]">
       <span className="flex min-w-0 flex-[1_1_18rem] flex-col">

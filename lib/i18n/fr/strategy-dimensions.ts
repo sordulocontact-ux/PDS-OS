@@ -77,18 +77,23 @@ export const strategyDimensions = {
   },
   // The dimensions as the Cadrage's (DimensionList, Sacha 06/11/2026).
   listTitle: "Les 8 dimensions",
+  // The Dispositif's two parts.
+  leverHeads: {
+    proposed: "Proposé par PO",
+    levers: "Leviers",
+  },
   confirmAll: (n: number) => (n > 1 ? `Confirmer les ${n}` : "Confirmer"),
   confirming: "Confirmation…",
   confirmAllHint: (n: number) =>
     n > 1
       ? "Tout est juste ? Confirmez-les ensemble, ou modifiez ou écartez une ligne d'abord."
       : "C'est juste ? Confirmez-la, ou modifiez-la ou écartez-la d'abord.",
-  po: "PO a rangé dans chaque dimension ce qui a été dit pendant l'échange, avec la phrase exacte. Relisez, corrigez ou écartez ce qui ne va pas, puis confirmez la dimension, et ajoutez ce qui manque : rien n'entre dans la Stratégie sans vous.",
+  // After « PO » in bold (the step's description already says what to do).
+  po: "a rangé ce qui a été dit pendant l'échange, avec la phrase exacte : rien n'entre dans la Stratégie sans vous.",
   counter: (complete: number, toDecide: number, toComplete: number) =>
     `${complete} ${complete > 1 ? "complétées" : "complétée"} · ${toDecide} à arbitrer · ${toComplete} à compléter`,
   frozenCallout: "La Stratégie est figée pendant sa validation.",
   nothingYet: "Rien de renseigné pour l'instant.",
-  nothingSaidMeta: "rien de dit",
   // Facts at the head of the step.
   // Sources of a line.
   saidIn: (day: string) => `Échange stratégique du ${day}`,

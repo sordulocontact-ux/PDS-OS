@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+
+import { FieldError, FormMessage } from "@/components/auth/form-message";
 
 import { OptionSelect } from "@/components/framing/option-select";
 import { labelClass } from "@/components/ui/option-class";
@@ -51,6 +53,9 @@ export function DeliverableForm({
   const [lever, setLever] = useState(initial?.leverId ?? "");
   const [assignee, setAssignee] = useState(initial?.assigneePersonId || NONE);
   const [due, setDue] = useState(initial?.dueDate ?? "");
+  // Said at the first try, never before (CLAUDE.md « Formulaires »).
+  const [missing, setMissing] = useState(false);
+  const titleRef = useRef<HTMLInputElement>(null);
   // Falls back to the first selected lever until one is picked.
   const leverId = leverIds.includes(lever) ? lever : (leverIds[0] ?? "");
   const id = (field: string) => `${idPrefix}-${field}`;
@@ -60,6 +65,12 @@ export function DeliverableForm({
       className="grid gap-4 sm:grid-cols-2"
       onSubmit={(event) => {
         event.preventDefault();
+        if (title.trim() === "") {
+          setMissing(true);
+          titleRef.current?.focus();
+          return;
+        }
+        setMissing(false);
         onSubmit({
           leverId,
           title,
@@ -75,15 +86,21 @@ export function DeliverableForm({
           {t.name}
         </Label>
         <Input
+          ref={titleRef}
           id={id("title")}
           aria-required
+          aria-invalid={missing && title.trim() === "" ? true : undefined}
+          aria-describedby={missing ? id("title-error") : undefined}
           maxLength={200}
           value={title}
           placeholder={d.titlePlaceholder}
           onChange={(e) => setTitle(e.target.value)}
         />
+        <FieldError id={id("title-error")}>
+          {missing && title.trim() === "" ? d.titleRequired : undefined}
+        </FieldError>
       </div>
-      <div className="flex flex-col gap-2">
+      <div className="flex min-w-0 flex-col gap-2">
         <Label htmlFor={id("lever")} required className={labelClass}>
           {t.lever}
         </Label>
@@ -92,11 +109,12 @@ export function DeliverableForm({
           required
           label={t.lever}
           options={levers}
+          fill
           value={leverId}
           onChange={setLever}
         />
       </div>
-      <div className="flex flex-col gap-2">
+      <div className="flex min-w-0 flex-col gap-2">
         <Label htmlFor={id("quantity")} className={labelClass}>
           {d.quantity}
         </Label>
@@ -108,16 +126,16 @@ export function DeliverableForm({
           value={quantity}
           aria-describedby={id("quantity-hint")}
           onChange={(e) => setQuantity(e.target.value)}
-          className="w-24 tabular-nums"
+          className="tabular-nums"
         />
         <p
           id={id("quantity-hint")}
-          className="text-caption text-muted-foreground"
+          className="text-caption text-pretty text-muted-foreground"
         >
           {d.quantityHint}
         </p>
       </div>
-      <div className="flex flex-col gap-2">
+      <div className="flex min-w-0 flex-col gap-2">
         <Label htmlFor={id("format")} className={labelClass}>
           {d.format}
         </Label>
@@ -130,12 +148,12 @@ export function DeliverableForm({
         />
         <p
           id={id("format-hint")}
-          className="text-caption text-muted-foreground"
+          className="text-caption text-pretty text-muted-foreground"
         >
           {d.formatHint}
         </p>
       </div>
-      <div className="flex flex-col gap-2">
+      <div className="flex min-w-0 flex-col gap-2">
         <Label htmlFor={id("assignee")} className={labelClass}>
           {t.assignee}
         </Label>
@@ -143,27 +161,33 @@ export function DeliverableForm({
           id={id("assignee")}
           label={t.assignee}
           options={{ [NONE]: t.noAssignee, ...people }}
+          fill
           value={assignee}
           onChange={setAssignee}
         />
       </div>
-      <div className="flex flex-col gap-2">
+      <div className="flex min-w-0 flex-col gap-2">
         <Label htmlFor={id("due")} className={labelClass}>
           {t.dueDate}
         </Label>
         <Input
           id={id("due")}
           type="date"
-          className="w-fit"
+          className="w-full"
           value={due}
           onChange={(e) => setDue(e.target.value)}
         />
       </div>
+      {missing && title.trim() === "" && (
+        <FormMessage kind="error" className="sm:col-span-2">
+          {d.missingOne}
+        </FormMessage>
+      )}
       <div className="flex flex-wrap gap-2 sm:col-span-2">
         <Button
           type="submit"
           variant={initial ? "default" : "outline"}
-          disabled={pending || title.trim() === "" || !leverId}
+          disabled={pending || !leverId}
         >
           {submitLabel}
         </Button>

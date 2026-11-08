@@ -120,6 +120,8 @@ export async function DemarchePart({
           projectId={projectId}
           clearance={panel.clearance}
           context={clearances}
+          directionName={direction}
+          exchangesBelow
         />
       );
     case "sacem":
