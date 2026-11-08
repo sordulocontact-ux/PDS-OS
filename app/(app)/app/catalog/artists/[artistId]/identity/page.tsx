@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { IdentityEditButton } from "@/components/catalog/identity/identity-edit-button";
 import { IdentityHistory } from "@/components/catalog/identity/identity-history";
+import { IdentityMoodboards } from "@/components/catalog/identity/identity-moodboards";
 import { IdentityView } from "@/components/catalog/identity/identity-view";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
@@ -13,6 +14,8 @@ import {
   loadArtistIdentity,
 } from "@/lib/catalog/artist-identity";
 import { getArtist } from "@/lib/catalog/artist-queries";
+import { CREATIVE_ARTIST_CATEGORIES } from "@/lib/catalog/file-rules";
+import { listCatalogFiles } from "@/lib/catalog/files";
 import { loadMembers } from "@/lib/framing/related";
 import { fr } from "@/lib/i18n/fr";
 import { formatInstantDay } from "@/lib/utils/instant";
@@ -36,8 +39,19 @@ export default async function ArtistIdentityPage({
     getArtist(artistId),
   ]);
   if (!artist) notFound();
-  const members = await loadMembers(access);
+  const [members, library] = await Promise.all([
+    loadMembers(access),
+    listCatalogFiles({ kind: "artist", id: artistId }),
+  ]);
   const identity = await loadArtistIdentity(artistId, members);
+  // The artistic director's boards (retour du 31/10/2026): the artist's
+  // files of that category; a creative director deletes his own only.
+  const moodboards = library.files.filter((f) => f.category === "moodboard");
+  const manages = can(access, "manage_catalog");
+  const moodboardScope =
+    !manages && can(access, "creative_work") && access.personId
+      ? { categories: CREATIVE_ARTIST_CATEGORIES, personId: access.personId }
+      : null;
   const t = fr.artistIdentity;
   const validates = can(access, "validate");
   // An archived artist is refused by the database (propose_artist_identity).
@@ -90,6 +104,21 @@ export default async function ArtistIdentityPage({
             {t.empty} {canWrite ? t.emptyHint : null}
           </EmptyNote>
         )}
+      </PageSection>
+
+      <PageSection
+        id="identity-moodboards"
+        title={t.moodboards.title}
+        description={t.moodboards.description}
+      >
+        <IdentityMoodboards
+          artistId={artistId}
+          files={moodboards}
+          organizationId={
+            manages || moodboardScope ? artist.organizationId : null
+          }
+          scope={moodboardScope}
+        />
       </PageSection>
 
       {pending.length > 0 && (

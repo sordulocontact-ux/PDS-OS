@@ -43,6 +43,33 @@ export const artistIdentity = {
     urlInvalid: "Un lien commence par https://",
     none: "Aucun lien.",
   },
+  // Files dropped on the Identité tab (retour du 31/10/2026): outside the
+  // versions, kept in the artist's Fichiers (category Moodboard).
+  moodboards: {
+    title: "Moodboards",
+    description:
+      "Les moodboards du directeur artistique, déposés tels quels : une image ou un PDF. Ils sont aussi rangés dans les Fichiers de l'artiste.",
+    drop: "Glissez un moodboard ici, ou cliquez pour le choisir",
+    dropHint: "Image (PNG, JPEG, WebP) ou PDF, 50 Mo au plus.",
+    sending: (done: number, total: number) =>
+      total > 1 ? `Envoi ${done + 1}/${total}…` : "Envoi…",
+    sent: (count: number) =>
+      count > 1 ? `${count} moodboards déposés` : "Moodboard déposé",
+    empty: "Aucun moodboard pour l'instant.",
+    open: (name: string) => `Ouvrir ${name}`,
+    remove: (name: string) => `Supprimer ${name}`,
+    by: (date: string, name: string) => (name ? `${date} · ${name}` : date),
+    confirm: {
+      title: "Supprimer ce moodboard ?",
+      body: (name: string) =>
+        `« ${name} » sera supprimé définitivement, aussi des Fichiers de l'artiste.`,
+      confirm: "Supprimer",
+      deleting: "Suppression…",
+      cancel: "Annuler",
+      close: "Fermer",
+      deleted: "Moodboard supprimé",
+    },
+  },
   changeNote: "Ce qui change",
   changeNoteHint: "Une phrase pour l'historique.",
   edit: "Modifier l'identité",

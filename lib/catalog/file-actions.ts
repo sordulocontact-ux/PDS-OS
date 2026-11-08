@@ -154,6 +154,8 @@ function refresh(owner: FileOwner) {
     case "artist":
       revalidatePath(routes.artistFiles(owner.id));
       revalidatePath(routes.artistActivity(owner.id));
+      // Its moodboards show on the Identité tab too.
+      revalidatePath(routes.artistIdentity(owner.id));
       return;
     case "master":
       // Every tab of the master: the overview counts the master file. The
