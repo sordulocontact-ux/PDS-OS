@@ -19,6 +19,7 @@ export const catalogFiles = {
       photo: "Photos",
       contract: "Contrats",
       audio: "Audio",
+      moodboard: "Moodboards",
       other: "Autres",
     },
     master: {
@@ -69,6 +70,7 @@ export const catalogFiles = {
       photo: "Photo",
       contract: "Contrat",
       audio: "Audio",
+      moodboard: "Moodboard",
       other: "Autre",
     },
     master: {
@@ -127,6 +129,7 @@ export const catalogFiles = {
         photo: "Ex. Portrait presse — septembre 2026",
         contract: "Ex. Contrat artiste 2026",
         audio: "Ex. Maquette voix",
+        moodboard: "Ex. Moodboard du DA — octobre",
         other: "Ex. Fiche technique",
       },
       master: {

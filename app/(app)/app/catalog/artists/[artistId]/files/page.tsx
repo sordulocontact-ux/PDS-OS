@@ -6,7 +6,10 @@ import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { getArtist } from "@/lib/catalog/artist-queries";
-import { fileViewOf } from "@/lib/catalog/file-rules";
+import {
+  CREATIVE_ARTIST_CATEGORIES,
+  fileViewOf,
+} from "@/lib/catalog/file-rules";
 import { listCatalogFiles } from "@/lib/catalog/files";
 import { fr } from "@/lib/i18n/fr";
 import { allInOrder } from "@/lib/utils/parallel";
@@ -15,7 +18,8 @@ export const metadata = { title: fr.catalog.artistPage.tabs.files };
 
 // Files tab: the artist's document library, filtered by category in the
 // URL (?category=). Everyone reads it (contracts only with manage_catalog,
-// RLS); manage_catalog adds, edits, reclassifies and deletes.
+// RLS); manage_catalog adds, edits, reclassifies and deletes; the creative
+// director adds moodboards and edits or deletes his own.
 export default async function ArtistFilesPage({
   params,
   searchParams,
@@ -30,13 +34,18 @@ export default async function ArtistFilesPage({
   ]);
   if (!artist) notFound();
   const canEdit = can(access, "manage_catalog");
+  const creativeScope =
+    !canEdit && can(access, "creative_work") && access.personId
+      ? { categories: CREATIVE_ARTIST_CATEGORIES, personId: access.personId }
+      : null;
   const t = fr.catalogFiles;
 
   if (error) return <FormMessage kind="error">{t.loadError}</FormMessage>;
   return (
     <FileLibrary
       owner={owner}
-      organizationId={canEdit ? artist.organizationId : null}
+      organizationId={canEdit || creativeScope ? artist.organizationId : null}
+      scope={creativeScope}
       canReadContracts={canEdit}
       files={files}
       view={fileViewOf("artist", canEdit, query.category)}

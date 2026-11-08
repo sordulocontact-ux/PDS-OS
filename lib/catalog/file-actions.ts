@@ -134,13 +134,18 @@ const updateSchema = z
 // and Autres (their own files): RLS checks which.
 async function writerAccess(owner: FileOwner) {
   const access = await requireApproved();
+  const writer = {
+    project: "pilot_projects",
+    artist: "manage_catalog",
+    master: "manage_catalog",
+    contract: "manage_contracts",
+  } as const;
+  // The creative team also writes in a project's library, and the creative
+  // director an artist's moodboards (RLS: those categories, their own files).
   const allowed =
-    owner.kind === "project"
-      ? can(access, "pilot_projects") || can(access, "creative_work")
-      : can(
-          access,
-          owner.kind === "contract" ? "manage_contracts" : "manage_catalog",
-        );
+    can(access, writer[owner.kind]) ||
+    ((owner.kind === "project" || owner.kind === "artist") &&
+      can(access, "creative_work"));
   return access.organizationId && allowed ? access.organizationId : null;
 }
 

@@ -28,7 +28,8 @@ export const FILE_BUCKETS = {
 } as const satisfies Record<FileOwnerKind, string>;
 
 export const FILE_CATEGORIES = {
-  artist: ["press", "photo", "contract", "audio", "other"],
+  // « moodboard »: shown on the Identité tab too (retour du 31/10/2026).
+  artist: ["press", "photo", "contract", "audio", "moodboard", "other"],
   // `audio`: a successive audio version of the title, with its audio state
   // (Audio tab); the others are the Files tab's.
   master: ["audio", "stems", "artwork", "contract", "other"],
@@ -57,6 +58,9 @@ export type FileWriteScope = {
 };
 
 export const CREATIVE_PROJECT_CATEGORIES = ["visual", "other"] as const;
+
+// The creative director in an artist's library: its moodboards only.
+export const CREATIVE_ARTIST_CATEGORIES = ["moodboard"] as const;
 
 /** Whether a scoped writer may edit or delete this file (RLS says the same). */
 export function canWriteFile(
