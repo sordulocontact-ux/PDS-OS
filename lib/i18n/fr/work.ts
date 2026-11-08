@@ -133,10 +133,10 @@ export const work = {
       submit: "Ajouter",
       titleMissing: "Écrivez la tâche.",
       important: "Important",
-      urgent: "Urgent",
       goesTo: "Rangée dans",
+      // No « Urgent » box (simplified 08/11/2026): the date says it.
       urgentHint:
-        "Une tâche devient urgente d'elle-même 3 jours avant son échéance.",
+        "L'urgence vient de la date : une tâche devient urgente 3 jours avant son échéance.",
     },
     // The Eisenhower matrix (« comme l'app Matrix »).
     quadrants: {

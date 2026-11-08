@@ -198,7 +198,6 @@ function AddTask({ today, onAdded }: { today: string; onAdded: () => void }) {
   const [title, setTitle] = useState("");
   const [due, setDue] = useState("");
   const [important, setImportant] = useState(false);
-  const [urgent, setUrgent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -219,7 +218,6 @@ function AddTask({ today, onAdded }: { today: string; onAdded: () => void }) {
             title,
             dueDate: due || null,
             important,
-            urgent,
           });
           if (!res.ok) {
             toast.error(fr.work.tasks.failed);
@@ -228,7 +226,6 @@ function AddTask({ today, onAdded }: { today: string; onAdded: () => void }) {
           setTitle("");
           setDue("");
           setImportant(false);
-          setUrgent(false);
           setError(null);
           onAdded();
           document.getElementById("new-task-title")?.focus();
@@ -272,7 +269,6 @@ function AddTask({ today, onAdded }: { today: string; onAdded: () => void }) {
           checked={important}
           onChange={setImportant}
         />
-        <CheckboxField label={t.urgent} checked={urgent} onChange={setUrgent} />
         <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
           {t.goesTo}
           <QuadrantBadge
@@ -282,7 +278,7 @@ function AddTask({ today, onAdded }: { today: string; onAdded: () => void }) {
                 title,
                 dueDate: due || null,
                 important,
-                urgent,
+                urgent: false,
                 projectId: null,
                 done: false,
                 doneAt: null,
