@@ -157,6 +157,18 @@ export const work = {
         "Son échéance est dans 3 jours ou moins : la tâche reste urgente. Changez sa date pour la planifier.",
     },
     boxEmpty: "Aucune tâche ici.",
+    // Lot 5: on the home, the urgent ones and the suggestions to sort.
+    home: {
+      title: "Vos tâches",
+      all: "Voir mes tâches",
+      due: (day: string) => `Échéance ${day}`,
+      more: (n: number) => `Et ${n} autre${n > 1 ? "s" : ""} dans Mes tâches`,
+      suggestions: (n: number) =>
+        n === 1
+          ? "1 action de vos réunions à trier"
+          : `${n} actions de vos réunions à trier`,
+      suggestionsSub: "Ajoutez-les à vos tâches ou ignorez-les.",
+    },
     // Lot 4: the next actions of the meetings, suggested to whom they fall.
     fromCall: (title: string) => `Réunion « ${title} »`,
     suggestions: {

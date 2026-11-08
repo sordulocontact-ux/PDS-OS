@@ -1,5 +1,6 @@
 import { FormMessage } from "@/components/auth/form-message";
 import { HomeAlso } from "@/components/home/home-also";
+import { HomeMyTasks } from "@/components/home/home-my-tasks";
 import { HomeProjects } from "@/components/home/home-projects";
 import { HomeWaiting } from "@/components/home/home-waiting";
 import { OnboardingAutoOpen } from "@/components/onboarding/onboarding-provider";
@@ -11,7 +12,11 @@ import { loadHomeFeed } from "@/lib/home/feed";
 import { loadWelcome } from "@/lib/home/welcome";
 import { shell } from "@/lib/i18n/fr/shell";
 import { work } from "@/lib/i18n/fr/work";
+import { todayInParis } from "@/lib/insights/dates";
+import { loadMyCallSuggestions } from "@/lib/work/call-suggestions";
 import { loadMyJourneyWork } from "@/lib/work/journeys";
+import { homeTasksOf } from "@/lib/work/personal-tasks";
+import { loadMyPersonalTasks } from "@/lib/work/personal-tasks-queries";
 
 const fr = { shell, work };
 
@@ -19,14 +24,18 @@ const fr = { shell, work };
 // streamed behind a Suspense boundary: the greeting and PO show first.
 // « Maintenant » (the Travail's lead), « Aussi à vous », « Ce que vous
 // attendez », « Vos projets »: all read from the projects' journeys and the
-// Travail's rows (lib/home/feed.ts), never from a list of their own.
+// Travail's rows (lib/home/feed.ts), never from a list of their own. Between
+// them, « Vos tâches »: the urgent ones of « Mes tâches », the person's own.
 export async function HomeFeed({ access }: { access: Access }) {
   const t = fr.shell.home;
-  const [feed, journeys, welcome] = await Promise.all([
+  const [feed, journeys, welcome, personal, suggested] = await Promise.all([
     loadHomeFeed(access),
     loadMyJourneyWork(),
     loadWelcome(access),
+    loadMyPersonalTasks(),
+    loadMyCallSuggestions(access),
   ]);
+  const today = todayInParis();
   const { lead } = feed;
   // Nothing anywhere yet: « Maintenant » says what will arrive.
   const first = !lead && feed.projects.length === 0 && !feed.error;
@@ -44,6 +53,11 @@ export async function HomeFeed({ access }: { access: Access }) {
         />
         <HomeAlso rows={feed.also} />
       </div>
+      <HomeMyTasks
+        tasks={homeTasksOf(personal.todo, today)}
+        suggestions={suggested.suggestions.length}
+        today={today}
+      />
       <HomeWaiting items={feed.waiting} />
       <HomeProjects
         projects={feed.projects}

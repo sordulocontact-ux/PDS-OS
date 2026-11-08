@@ -68,3 +68,14 @@ export function byDue(a: PersonalTask, b: PersonalTask): number {
 export function byDoneAt(a: PersonalTask, b: PersonalTask): number {
   return (b.doneAt ?? "").localeCompare(a.doneAt ?? "");
 }
+
+/** What the home shows of « Mes tâches » (lot 5): the urgent ones (late, due
+ * within three days, or said urgent), the nearest first. */
+export function homeTasksOf(
+  tasks: PersonalTask[],
+  today: string,
+): PersonalTask[] {
+  return tasks
+    .filter((task) => !task.done && isUrgent(task, today))
+    .sort(byDue);
+}
