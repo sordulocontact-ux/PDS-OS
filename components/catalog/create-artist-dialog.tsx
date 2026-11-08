@@ -84,6 +84,7 @@ export function ArtistForm({
   onDone,
   pickerMode,
   withContact = true,
+  initialDeezer = null,
 }: {
   initialName: string;
   initialNotes?: string;
@@ -93,11 +94,15 @@ export function ArtistForm({
   pickerMode: boolean;
   // false: PO's draft proposes the contacts, reviewed after.
   withContact?: boolean;
+  // The Deezer profile PO found (the only one of that name): the form opens
+  // on it, « Retour » goes back to the search.
+  initialDeezer?: DeezerArtistResult | null;
 }) {
-  const [step, setStep] = useState<Step>({
-    kind: "search",
-    query: initialName,
-  });
+  const [step, setStep] = useState<Step>(
+    initialDeezer
+      ? { kind: "details", deezer: initialDeezer, name: initialDeezer.name }
+      : { kind: "search", query: initialName },
+  );
 
   if (step.kind === "search") {
     return (

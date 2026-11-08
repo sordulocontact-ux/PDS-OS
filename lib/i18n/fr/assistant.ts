@@ -261,6 +261,24 @@ export const assistant = {
     // « Échéance non repris : il doit… »).
     notSaid: (label: string) =>
       `« ${label} » n'a pas été repris : la valeur doit figurer telle quelle dans votre message. Saisissez-la dans le formulaire.`,
+    // A new artist looked up on Deezer by the code (retour d'Ibé du
+    // 31/10/2026): the profile is chosen by the person, never by PO.
+    deezer: {
+      label: "Profil Deezer",
+      found: (name: string, fans: string) => `${name} · ${fans} fans`,
+      several: (name: string, list: string) =>
+        `Plusieurs profils Deezer s'appellent « ${name} » (${list}) : choisissez le bon dans le formulaire.`,
+      none: (name: string) =>
+        `Aucun profil Deezer ne s'appelle exactement « ${name} » : collez le lien de sa page Deezer dans le formulaire, ou créez-le sans Deezer.`,
+      closest: (list: string) => `Les plus proches : ${list}.`,
+      notArtist:
+        "Ce lien Deezer ne mène à aucun artiste : vérifiez-le, ou cherchez l'artiste dans le formulaire.",
+      unavailable:
+        "Deezer n'a pas répondu : la recherche se refait dans le formulaire.",
+      alreadyIn: (name: string) =>
+        `Ce profil Deezer est déjà celui de l'artiste « ${name} » du catalogue : rien à créer. Ouvrez sa fiche pour la compléter.`,
+      fanCount: (name: string, fans: string) => `${name} (${fans} fans)`,
+    },
     nameFollowedBy: (name: string, after: string) =>
       `Dans votre message, « ${name} » est suivi de « ${after} » : vérifiez le nom dans le formulaire.`,
     // Dates read by code (lib/assistant/said-date.ts), never by PO.

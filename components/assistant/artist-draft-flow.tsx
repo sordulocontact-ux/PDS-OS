@@ -64,6 +64,7 @@ export function ArtistDraftFlow({
         initialName={values.name}
         initialNotes={values.notes ?? ""}
         initialRelation={values.relation}
+        initialDeezer={draft.deezer ?? null}
         pickerMode={false}
         // The contacts PO proposes are reviewed one by one after.
         withContact={contacts.length === 0}

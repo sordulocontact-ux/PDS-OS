@@ -22,8 +22,12 @@ import { routes } from "@/lib/auth/redirects";
 import { getArtist } from "@/lib/catalog/artist-queries";
 import { CONTACT_ROLES } from "@/lib/catalog/contacts";
 import { countryName } from "@/lib/catalog/countries";
+import {
+  lookUpDeezerArtists,
+  sameName,
+} from "@/lib/catalog/deezer-artist-lookup";
 import { listArtistOptions } from "@/lib/catalog/queries";
-import { ARTIST_RELATIONS } from "@/lib/catalog/types";
+import { ARTIST_RELATIONS, type DeezerArtistResult } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
 import { parseSaidEmail, parseSaidPhone } from "@/lib/assistant/verbatim";
 
@@ -36,7 +40,7 @@ const said = z
 export function proposeArtistTool({ access, verbatim }: ProposeContext) {
   return tool({
     description:
-      "Prépare la création d'un artiste, ou la modification / le complément de la fiche d'un artiste existant (nom, relation avec PDS, nom civil, pays, biographie, notes, contacts). N'enregistre RIEN : l'utilisateur relit le formulaire pré-rempli et enregistre lui-même. Ne remplis que ce que l'utilisateur a dit. Pour un nouvel artiste, le formulaire s'ouvre sur une recherche Deezer déjà lancée sur le nom : l'utilisateur y choisit le profil (ou colle le lien de sa page Deezer), et l'application reprend d'elle-même sa photo, son lien et ses fans.",
+      "Prépare la création d'un artiste, ou la modification / le complément de la fiche d'un artiste existant (nom, relation avec PDS, nom civil, pays, biographie, notes, contacts). N'enregistre RIEN : l'utilisateur relit le formulaire pré-rempli et enregistre lui-même. Ne remplis que ce que l'utilisateur a dit. Pour un nouvel artiste, l'application cherche elle-même son profil Deezer sur le nom (ou sur le lien Deezer collé) : s'il n'y en a qu'un de ce nom, le formulaire s'ouvre dessus (photo, lien, fans repris) ; sinon, la réponse dit les homonymes ou l'absence de profil, et l'utilisateur choisit dans le formulaire.",
     inputSchema: z.object({
       existingArtist: z
         .string()
@@ -79,6 +83,13 @@ export function proposeArtistTool({ access, verbatim }: ProposeContext) {
         .optional()
         .describe(
           "Notes, recopiées exactement si elles ont été écrites ; jamais une interprétation",
+        ),
+      deezerLink: z
+        .string()
+        .max(500)
+        .optional()
+        .describe(
+          "Lien de la page Deezer de l'artiste, recopié exactement s'il a été collé ; jamais inventé",
         ),
       contacts: z
         .array(
@@ -195,12 +206,58 @@ export function proposeArtistTool({ access, verbatim }: ProposeContext) {
         );
       }
 
+      // A new artist: its Deezer profile, looked up by the code; kept only
+      // when it is the one of that name (or the link's), else said.
+      let deezer: DeezerArtistResult | null = null;
+      if (!current && values.name) {
+        const link = input.deezerLink ? verbatim.quote(input.deezerLink) : null;
+        const found = await lookUpDeezerArtists(link ?? values.name).catch(
+          (error: unknown) => {
+            console.error("propose_artist (Deezer):", error);
+            return null;
+          },
+        );
+        const d = t.deezer;
+        const fans = (n: number) => n.toLocaleString("fr-FR");
+        const listed = (rows: DeezerArtistResult[]) =>
+          rows
+            .slice(0, 3)
+            .map((r) => d.fanCount(r.name, fans(r.fans)))
+            .join(", ");
+        const named = found && (link ? found : sameName(found, values.name));
+        if (!found) warnings.push(d.unavailable);
+        else if (named?.length === 1) {
+          const [only] = named;
+          if (only.existing)
+            return {
+              facts: [d.alreadyIn(only.existing.name)],
+              sources: [
+                {
+                  label: only.existing.name,
+                  href: routes.artist(only.existing.id),
+                },
+              ],
+            };
+          deezer = only;
+          change(changes, d.label, null, d.found(only.name, fans(only.fans)));
+        } else if (named && named.length > 1)
+          warnings.push(d.several(values.name, listed(named)));
+        else if (link) warnings.push(d.notArtist);
+        else
+          warnings.push(
+            [d.none(values.name), found.length ? d.closest(listed(found)) : ""]
+              .filter(Boolean)
+              .join(" "),
+          );
+      }
+
       return proposalResult({
         draft: {
           kind: "artist",
           artistId: current?.id ?? null,
           values,
           contacts,
+          deezer,
         },
         title: current
           ? t.titles.updateArtist(current.name)

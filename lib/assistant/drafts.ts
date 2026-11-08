@@ -8,6 +8,7 @@ import {
 } from "@/lib/assistant/draft-records";
 import type {
   ArtistRelation,
+  DeezerArtistResult,
   Credit,
   MasterFormDefaults,
 } from "@/lib/catalog/types";
@@ -52,6 +53,9 @@ export type ArtistDraft = {
     bio: string | null;
   };
   contacts: ContactDraft[];
+  // A new artist: the one Deezer profile of that name, found by the code
+  // (retour d'Ibé du 31/10/2026); absent on drafts saved before.
+  deezer?: DeezerArtistResult | null;
 };
 
 export type MasterDraft = {
