@@ -28,6 +28,7 @@ import {
   type Quadrant,
 } from "@/lib/work/personal-tasks";
 
+import type { TaskEdit } from "./my-task-edit";
 import { QuadrantBadge, TaskRow } from "./my-task-row";
 import { MyTasksMatrix } from "./my-tasks-matrix";
 
@@ -67,9 +68,14 @@ export function MyTasks({
     {},
   );
 
-  const all = [...todo, ...done].map((task) =>
-    task.id in changed ? { ...task, ...changed[task.id] } : task,
-  );
+  // Deleted ones, gone at once.
+  const [removed, setRemoved] = useState<Set<string>>(() => new Set());
+
+  const all = [...todo, ...done]
+    .filter((task) => !removed.has(task.id))
+    .map((task) =>
+      task.id in changed ? { ...task, ...changed[task.id] } : task,
+    );
   const open = all.filter((task) => !task.done).sort(byDue);
   const closed = all.filter((task) => task.done).sort(byDoneAt);
 
@@ -119,6 +125,20 @@ export function MyTasks({
     change(task, flags, () => setPersonalTaskBox(task.id, flags));
   };
 
+  // Saved by its dialog: shown at once, the server read follows.
+  const edited = (task: PersonalTask, next: TaskEdit) => {
+    setChanged((prev) => ({
+      ...prev,
+      [task.id]: { ...prev[task.id], ...next },
+    }));
+    router.refresh();
+  };
+  const remove = (task: PersonalTask) => {
+    setRemoved((prev) => new Set(prev).add(task.id));
+    router.refresh();
+  };
+  const handlers = { onMove: move, onEdited: edited, onRemoved: remove };
+
   const pick = (next: TasksView | null) => {
     if (!next) return;
     setView(next);
@@ -155,7 +175,7 @@ export function MyTasks({
               tasks={open}
               today={today}
               onToggle={toggle}
-              onMove={move}
+              {...handlers}
             />
           ) : open.length === 0 ? (
             <p className="text-sm text-muted-foreground">{t.allDone}</p>
@@ -167,7 +187,7 @@ export function MyTasks({
                   task={task}
                   today={today}
                   onToggle={toggle}
-                  onMove={move}
+                  {...handlers}
                 />
               ))}
             </Rows>
@@ -184,6 +204,7 @@ export function MyTasks({
                 task={task}
                 today={today}
                 onToggle={toggle}
+                {...handlers}
               />
             ))}
           </Rows>

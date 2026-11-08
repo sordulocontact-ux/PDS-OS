@@ -78,3 +78,45 @@ export async function setPersonalTaskBox(
   revalidatePath(routes.work);
   return error ? { ok: false } : { ok: true };
 }
+
+const editInput = z.object({
+  title: z.string().trim().min(1).max(300),
+  dueDate: z.iso.date().nullable(),
+  important: z.boolean(),
+});
+
+/** Its wording, its date and its importance, changed by its owner. */
+export async function updatePersonalTask(
+  taskId: string,
+  input: z.input<typeof editInput>,
+): Promise<Result> {
+  const p = editInput.safeParse(input);
+  if (!p.success || !z.uuid().safeParse(taskId).success) return { ok: false };
+  await requireApproved();
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("personal_tasks")
+    .update({
+      title: p.data.title,
+      due_date: p.data.dueDate,
+      important: p.data.important,
+    })
+    .eq("id", taskId);
+  if (error) console.error("updatePersonalTask:", error.message);
+  revalidatePath(routes.work);
+  return error ? { ok: false } : { ok: true };
+}
+
+/** Gone for good: nothing builds on a personal task. */
+export async function deletePersonalTask(taskId: string): Promise<Result> {
+  if (!z.uuid().safeParse(taskId).success) return { ok: false };
+  await requireApproved();
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("personal_tasks")
+    .delete()
+    .eq("id", taskId);
+  if (error) console.error("deletePersonalTask:", error.message);
+  revalidatePath(routes.work);
+  return error ? { ok: false } : { ok: true };
+}

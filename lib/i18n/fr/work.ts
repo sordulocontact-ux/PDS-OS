@@ -157,6 +157,22 @@ export const work = {
         "Son échéance est dans 3 jours ou moins : la tâche reste urgente. Changez sa date pour la planifier.",
     },
     boxEmpty: "Aucune tâche ici.",
+    edit: {
+      title: "Modifier la tâche",
+      description: "Son intitulé, son échéance et son importance.",
+      name: "Tâche",
+      due: "Échéance",
+      dueHint: "Facultative. 3 jours avant, la tâche devient urgente.",
+      important: "Important",
+      submit: "Enregistrer",
+      done: "Tâche modifiée.",
+    },
+    remove: {
+      title: "Supprimer la tâche ?",
+      body: (title: string) =>
+        `« ${title} » sera supprimée définitivement. Pour la garder, cochez-la plutôt comme faite.`,
+      done: "Tâche supprimée.",
+    },
     quadrantHelp: {
       do: "Urgent et important : à faire tout de suite.",
       plan: "Important, pas urgent : prévoyez un moment pour le faire.",

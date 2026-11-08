@@ -2,19 +2,22 @@
 
 import { IconArrowUpRight } from "@/components/icons";
 import { Checkbox } from "@/components/ui/checkbox";
-import { RowActions } from "@/components/ui/row-actions";
+import { RecordMenu } from "@/components/ui/record-menu";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { work } from "@/lib/i18n/fr/work";
 import { isOverdue } from "@/lib/insights/dates";
 import type { Tone } from "@/lib/ui/state-tones";
 import { cn } from "@/lib/utils";
 import { formatShortDay } from "@/lib/utils/day";
+import { deletePersonalTask } from "@/lib/work/personal-task-actions";
 import {
   QUADRANTS,
   quadrantOf,
   type PersonalTask,
   type Quadrant,
 } from "@/lib/work/personal-tasks";
+
+import { TaskEditForm, type TaskEdit } from "./my-task-edit";
 
 const fr = { work };
 
@@ -39,30 +42,36 @@ export function QuadrantBadge({ quadrant }: { quadrant: Quadrant }) {
 
 /**
  * One task of « Mes tâches »: ticked in place, its box (in the list; the
- * matrix's box already says it), its due date, red when past. `onMove`: the
- * « ⋯ » to send it to another box, and dragged with the mouse.
+ * matrix's box already says it), its due date, red when past. With the
+ * handlers, its « ⋯ »: to another box (also dragged with the mouse),
+ * « Modifier », « Supprimer ».
  */
 export function TaskRow({
   task,
   today,
   onToggle,
   onMove,
+  onEdited,
+  onRemoved,
   showBox = true,
 }: {
   task: PersonalTask;
   today: string;
   onToggle: (task: PersonalTask, next: boolean) => void;
   onMove?: (task: PersonalTask, to: Quadrant) => void;
+  onEdited?: (task: PersonalTask, next: TaskEdit) => void;
+  onRemoved?: (task: PersonalTask) => void;
   showBox?: boolean;
 }) {
   const t = fr.work.tasks;
   const late = !task.done && task.dueDate && isOverdue(task.dueDate, today);
   const box = quadrantOf(task, today);
+  const draggable = Boolean(onMove) && !task.done;
   return (
     <li
-      draggable={onMove ? true : undefined}
+      draggable={draggable || undefined}
       onDragStart={
-        onMove
+        draggable
           ? (event) => {
               event.dataTransfer.setData("text/plain", task.id);
               event.dataTransfer.effectAllowed = "move";
@@ -71,7 +80,7 @@ export function TaskRow({
       }
       className={cn(
         "group/row flex items-center gap-3 px-4 py-3",
-        onMove && "cursor-grab active:cursor-grabbing",
+        draggable && "cursor-grab active:cursor-grabbing",
       )}
     >
       <Checkbox
@@ -102,16 +111,41 @@ export function TaskRow({
               .join(" · ")
           : t.noDue}
       </span>
-      {onMove && !task.done && (
-        <RowActions
-          label={t.move.label(task.title)}
-          reveal
-          actions={QUADRANTS.filter((to) => to !== box).map((to) => ({
-            key: to,
-            label: t.move.to(t.quadrants[to]),
-            icon: IconArrowUpRight,
-            onSelect: () => onMove(task, to),
-          }))}
+      {onMove && onEdited && onRemoved && (
+        <RecordMenu
+          label={task.title}
+          extra={
+            task.done
+              ? []
+              : QUADRANTS.filter((to) => to !== box).map((to) => ({
+                  key: to,
+                  label: t.move.to(t.quadrants[to]),
+                  icon: IconArrowUpRight,
+                  onSelect: () => onMove(task, to),
+                }))
+          }
+          edit={{
+            title: t.edit.title,
+            description: t.edit.description,
+            form: (close) => (
+              <TaskEditForm
+                task={task}
+                onDone={close}
+                onSaved={(next) => onEdited(task, next)}
+              />
+            ),
+          }}
+          remove={{
+            title: t.remove.title,
+            body: t.remove.body(task.title),
+            done: t.remove.done,
+            run: async () => {
+              const res = await deletePersonalTask(task.id);
+              if (!res.ok) return { ok: false, error: t.failed };
+              onRemoved(task);
+              return { ok: true };
+            },
+          }}
         />
       )}
     </li>

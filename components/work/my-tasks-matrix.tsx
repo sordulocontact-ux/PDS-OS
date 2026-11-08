@@ -13,6 +13,7 @@ import {
   type Quadrant,
 } from "@/lib/work/personal-tasks";
 
+import type { TaskEdit } from "./my-task-edit";
 import { quadrantTone, TaskRow } from "./my-task-row";
 
 const fr = { work };
@@ -28,11 +29,15 @@ export function MyTasksMatrix({
   today,
   onToggle,
   onMove,
+  onEdited,
+  onRemoved,
 }: {
   tasks: PersonalTask[];
   today: string;
   onToggle: (task: PersonalTask, next: boolean) => void;
   onMove: (task: PersonalTask, to: Quadrant) => void;
+  onEdited: (task: PersonalTask, next: TaskEdit) => void;
+  onRemoved: (task: PersonalTask) => void;
 }) {
   const t = fr.work.tasks;
   // The box a task is dragged over, outlined.
@@ -95,6 +100,8 @@ export function MyTasksMatrix({
                     today={today}
                     onToggle={onToggle}
                     onMove={onMove}
+                    onEdited={onEdited}
+                    onRemoved={onRemoved}
                     showBox={false}
                   />
                 ))}
