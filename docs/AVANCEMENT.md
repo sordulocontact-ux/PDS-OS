@@ -1882,3 +1882,10 @@ Demande de Sacha : « PDS ne peut pas détecter le retour du mail pour ajouter l
 - Même jour : l'attente de la direction dans « Négocier » passe de l'encart bleu au composant commun `StepWaiting`
   (initiales et nom de qui valide). Reste à trancher : la fiche et le contrat du Juridique disent encore l'attente
   en encart bleu, la Confirmation avec `StepWaiting`.
+- 08/11/2026 — **Budget d'un artiste signé : plus de postes et total « Par poste »** (Sacha : « budget transport, uber
+  eat, restauration, studio, marketing etc. »). Douze postes au lieu de six (migration `20261108140101`) : Transport,
+  Hébergement, Restauration, **Livraison de repas** (Uber Eats, séparé du restaurant), **Per diem**, Studio,
+  **Matériel**, **Coaching**, **Image** (stylisme, coiffure, maquillage), **Photo et vidéo**, Marketing, Autre ; une
+  aide sous la liste dit ce que chaque poste couvre. Section « Par poste » (`ArtistBudgetCategories`, calcul
+  `artistCategoryTotals`) dès deux postes : total payé + prévu par poste, le plus coûteux en tête, « dont X € prévus ».
+  « Ses projets » passe sur `PageSection`. Pas encore d'enveloppe par poste (montant prévu à ne pas dépasser).

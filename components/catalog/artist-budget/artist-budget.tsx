@@ -9,9 +9,11 @@ import {
 import Link from "next/link";
 import { useState } from "react";
 
+import { ArtistBudgetCategories } from "@/components/catalog/artist-budget/artist-budget-categories";
 import { ArtistExpenseForm } from "@/components/catalog/artist-budget/artist-expense-form";
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { EmptyState } from "@/components/shell/empty-state";
+import { PageSection } from "@/components/shell/page-section";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
@@ -45,7 +47,7 @@ const fr = { artistBudget, dialogs };
 
 /**
  * « Budget » of a signed artist: four totals computed by code (its paid and
- * planned spends, what its projects owe, the sum), its spends newest first
+ * planned spends, what its projects owe, the sum), « Par poste », its spends newest first
  * with « Nouvelle dépense », edit and delete, then each project's share
  * linked to its Budget. Only shown to the Catalogue (manage_catalog).
  */
@@ -114,6 +116,8 @@ export function ArtistBudget({
           },
         ]}
       />
+
+      <ArtistBudgetCategories expenses={expenses} />
 
       {expenses.length === 0 ? (
         <EmptyState
@@ -188,11 +192,11 @@ export function ArtistBudget({
       )}
 
       {projects.length > 0 && (
-        <section aria-label={t.projects.title} className="flex flex-col gap-2">
-          <div className="flex flex-col gap-0.5">
-            <h3 className="text-sm font-semibold">{t.projects.title}</h3>
-            <p className="text-xs text-muted-foreground">{t.projects.hint}</p>
-          </div>
+        <PageSection
+          id="artist-budget-projects"
+          title={t.projects.title}
+          description={t.projects.hint}
+        >
           <Rows label={t.projects.title}>
             {projects.map((project) => (
               <li key={project.projectId}>
@@ -211,7 +215,7 @@ export function ArtistBudget({
               </li>
             ))}
           </Rows>
-        </section>
+        </PageSection>
       )}
 
       <FormDialog
