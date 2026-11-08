@@ -1,4 +1,5 @@
 import { CaptureArtistsBench } from "@/components/labo/captures/capture-artists-bench";
+import { ShareShortcut } from "@/components/labo/captures/share-shortcut";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
 import { PageSection } from "@/components/shell/page-section";
@@ -27,6 +28,7 @@ export default async function LaboPage({
   return (
     <PageContainer>
       <PageHeader title={t.title} description={t.description} />
+      <ShareShortcut />
       <PageSection
         id="captures"
         title={t.section}

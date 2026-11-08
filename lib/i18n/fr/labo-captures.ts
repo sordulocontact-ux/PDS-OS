@@ -19,6 +19,23 @@ export const laboCaptures = {
     submit: "Lire le lien",
     required: "Collez d'abord un lien.",
   },
+  // The iPhone Raccourci « Repérer dans PDS OS », installed from its iCloud
+  // link (docs/RACCOURCI-REPERAGE.md).
+  shortcut: {
+    summary: "Partager depuis TikTok ou Instagram (iPhone)",
+    body: "Avec le raccourci « Repérer dans PDS OS », un compte arrive ici depuis le menu Partager, sans copier de lien.",
+    install: "Installer le raccourci",
+    unavailable:
+      "Le lien d'installation n'est pas encore prêt : demandez-le à l'équipe.",
+    steps: [
+      "Ouvrez « Installer le raccourci » sur votre iPhone, puis touchez « Ajouter le raccourci ».",
+      "Connectez-vous une fois à PDS OS dans Safari, même si l'app est sur votre écran d'accueil : le raccourci ouvre toujours Safari.",
+      "TikTok : Partager › Plus › « Repérer dans PDS OS ». Instagram : sur un profil, l'avion en papier › Partager vers… › « Repérer dans PDS OS ».",
+      "Une capture d'écran : touchez sa vignette › Partager › « Repérer dans PDS OS », puis ici « Coller une capture ou un lien ».",
+    ],
+    reelHint:
+      "Un reel Instagram ne dit pas qui l'a publié : partagez le profil, ou faites une capture.",
+  },
   // The clipboard button: what the iPhone Raccourci copied (?coller=1).
   paste: {
     button: "Coller une capture ou un lien",
