@@ -145,6 +145,18 @@ export const work = {
       delegate: "Déléguer",
       later: "Plus tard",
     },
+    views: {
+      label: "Affichage des tâches",
+      list: "Liste",
+      matrix: "Matrice",
+    },
+    move: {
+      label: (title: string) => `Déplacer « ${title} »`,
+      to: (box: string) => `Vers « ${box} »`,
+      staysUrgent:
+        "Son échéance est dans 3 jours ou moins : la tâche reste urgente. Changez sa date pour la planifier.",
+    },
+    boxEmpty: "Aucune tâche ici.",
     quadrantHelp: {
       do: "Urgent et important : à faire tout de suite.",
       plan: "Important, pas urgent : prévoyez un moment pour le faire.",

@@ -55,3 +55,26 @@ export async function setPersonalTaskDone(
   revalidatePath(routes.work);
   return error ? { ok: false } : { ok: true };
 }
+
+const boxInput = z.object({
+  important: z.boolean(),
+  urgent: z.boolean(),
+});
+
+/** Moved to another box of the matrix: what the person says of it. */
+export async function setPersonalTaskBox(
+  taskId: string,
+  box: z.input<typeof boxInput>,
+): Promise<Result> {
+  const p = boxInput.safeParse(box);
+  if (!p.success || !z.uuid().safeParse(taskId).success) return { ok: false };
+  await requireApproved();
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("personal_tasks")
+    .update({ important: p.data.important, urgent: p.data.urgent })
+    .eq("id", taskId);
+  if (error) console.error("setPersonalTaskBox:", error.message);
+  revalidatePath(routes.work);
+  return error ? { ok: false } : { ok: true };
+}

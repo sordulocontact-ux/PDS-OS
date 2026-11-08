@@ -40,6 +40,22 @@ export function quadrantOf(task: PersonalTask, today: string): Quadrant {
   return urgent ? "delegate" : "later";
 }
 
+/** What a box says of its tasks, to move one into it. */
+export const BOX_FLAGS: Record<
+  Quadrant,
+  { important: boolean; urgent: boolean }
+> = {
+  do: { important: true, urgent: true },
+  plan: { important: true, urgent: false },
+  delegate: { important: false, urgent: true },
+  later: { important: false, urgent: false },
+};
+
+/** Its due date alone makes it urgent: it cannot go to a box that is not. */
+export function urgentByDate(task: PersonalTask, today: string): boolean {
+  return isUrgent({ ...task, urgent: false }, today);
+}
+
 /** The nearest due date first (so the overdue ones), undated last; the
  * oldest written first among equals is kept by the query's order. */
 export function byDue(a: PersonalTask, b: PersonalTask): number {

@@ -1,40 +1,48 @@
 "use client";
 
 import { IconClipboardCheck } from "nucleo-sharp-essential";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
 
 import { EmptyState } from "@/components/shell/empty-state";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { CheckboxField } from "@/components/ui/checkbox-field";
 import { Fold } from "@/components/ui/fold";
 import { Input } from "@/components/ui/input";
 import { Rows } from "@/components/ui/rows";
-import { StatusBadge } from "@/components/ui/status-badge";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 import { toast } from "@/components/ui/toast";
 import { work } from "@/lib/i18n/fr/work";
-import { isOverdue } from "@/lib/insights/dates";
-import { cn } from "@/lib/utils";
-import { formatShortDay } from "@/lib/utils/day";
 import {
   addPersonalTask,
+  setPersonalTaskBox,
   setPersonalTaskDone,
 } from "@/lib/work/personal-task-actions";
-import type { Tone as StatusTone } from "@/lib/ui/state-tones";
 import {
+  BOX_FLAGS,
   byDoneAt,
   byDue,
   quadrantOf,
+  urgentByDate,
   type PersonalTask,
   type Quadrant,
 } from "@/lib/work/personal-tasks";
 
+import { QuadrantBadge, TaskRow } from "./my-task-row";
+import { MyTasksMatrix } from "./my-tasks-matrix";
+
 const fr = { work };
 
+const TASKS_VIEWS = ["list", "matrix"] as const;
+type TasksView = (typeof TASKS_VIEWS)[number];
+// In the URL beside ?section=taches, in French as the page's other params.
+const VIEW_PARAM = "affichage";
+const MATRIX_VALUE = "matrice";
+
 /**
- * « Mes tâches »: a field to write a task (and its date, if any), then the
- * tasks still to do, the nearest due date first, each ticked in place; the
+ * « Mes tâches »: a field to write a task (its date, its importance and
+ * urgency, if any), then the tasks still to do, as a list by due date or as
+ * the Eisenhower matrix, each ticked in place and moved to another box; the
  * latest done folded below, to undo a tick.
  */
 export function MyTasks({
@@ -48,39 +56,76 @@ export function MyTasks({
 }) {
   const t = fr.work.tasks;
   const router = useRouter();
+  const params = useSearchParams();
+  const pathname = usePathname();
   const [, startTransition] = useTransition();
-  // Ticks shown at once, before the server answers.
-  const [ticked, setTicked] = useState<Record<string, boolean>>({});
+  const [view, setView] = useState<TasksView>(
+    params.get(VIEW_PARAM) === MATRIX_VALUE ? "matrix" : "list",
+  );
+  // Changes shown at once, before the server answers (a tick, a move).
+  const [changed, setChanged] = useState<Record<string, Partial<PersonalTask>>>(
+    {},
+  );
 
   const all = [...todo, ...done].map((task) =>
-    task.id in ticked
-      ? {
-          ...task,
-          done: ticked[task.id],
-          doneAt: ticked[task.id]
-            ? (task.doneAt ?? new Date().toISOString())
-            : null,
-        }
-      : task,
+    task.id in changed ? { ...task, ...changed[task.id] } : task,
   );
   const open = all.filter((task) => !task.done).sort(byDue);
   const closed = all.filter((task) => task.done).sort(byDoneAt);
 
-  const toggle = (task: PersonalTask, next: boolean) => {
-    setTicked((prev) => ({ ...prev, [task.id]: next }));
+  const change = (
+    task: PersonalTask,
+    next: Partial<PersonalTask>,
+    write: () => Promise<{ ok: boolean }>,
+  ) => {
+    const before = changed[task.id];
+    setChanged((prev) => ({
+      ...prev,
+      [task.id]: { ...prev[task.id], ...next },
+    }));
     startTransition(async () => {
-      const res = await setPersonalTaskDone(task.id, next);
+      const res = await write();
       if (!res.ok) {
         toast.error(t.failed);
-        setTicked((prev) => {
+        setChanged((prev) => {
           const rest = { ...prev };
-          delete rest[task.id];
+          if (before) rest[task.id] = before;
+          else delete rest[task.id];
           return rest;
         });
         return;
       }
       router.refresh();
     });
+  };
+
+  const toggle = (task: PersonalTask, isDone: boolean) =>
+    change(
+      task,
+      {
+        done: isDone,
+        doneAt: isDone ? (task.doneAt ?? new Date().toISOString()) : null,
+      },
+      () => setPersonalTaskDone(task.id, isDone),
+    );
+
+  const move = (task: PersonalTask, to: Quadrant) => {
+    const flags = BOX_FLAGS[to];
+    // A near due date keeps it urgent: said, not moved.
+    if (!flags.urgent && urgentByDate(task, today)) {
+      toast.info(t.move.staysUrgent);
+      return;
+    }
+    change(task, flags, () => setPersonalTaskBox(task.id, flags));
+  };
+
+  const pick = (next: TasksView | null) => {
+    if (!next) return;
+    setView(next);
+    const url = new URLSearchParams(params.toString());
+    if (next === "matrix") url.set(VIEW_PARAM, MATRIX_VALUE);
+    else url.delete(VIEW_PARAM);
+    window.history.replaceState(null, "", `${pathname}?${url.toString()}`);
   };
 
   return (
@@ -93,19 +138,41 @@ export function MyTasks({
           title={t.emptyTitle}
           body={t.emptyBody}
         />
-      ) : open.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t.allDone}</p>
       ) : (
-        <Rows label={fr.work.tabs.tasks}>
-          {open.map((task) => (
-            <TaskRow
-              key={task.id}
-              task={task}
+        <>
+          <SegmentedControl
+            aria-label={t.views.label}
+            className="self-start"
+            options={TASKS_VIEWS.map((key) => ({
+              value: key,
+              label: t.views[key],
+            }))}
+            value={view}
+            onChange={pick}
+          />
+          {view === "matrix" ? (
+            <MyTasksMatrix
+              tasks={open}
               today={today}
               onToggle={toggle}
+              onMove={move}
             />
-          ))}
-        </Rows>
+          ) : open.length === 0 ? (
+            <p className="text-sm text-muted-foreground">{t.allDone}</p>
+          ) : (
+            <Rows label={fr.work.tabs.tasks}>
+              {open.map((task) => (
+                <TaskRow
+                  key={task.id}
+                  task={task}
+                  today={today}
+                  onToggle={toggle}
+                  onMove={move}
+                />
+              ))}
+            </Rows>
+          )}
+        </>
       )}
 
       {closed.length > 0 && (
@@ -123,69 +190,6 @@ export function MyTasks({
         </Fold>
       )}
     </div>
-  );
-}
-
-function TaskRow({
-  task,
-  today,
-  onToggle,
-}: {
-  task: PersonalTask;
-  today: string;
-  onToggle: (task: PersonalTask, next: boolean) => void;
-}) {
-  const t = fr.work.tasks;
-  const late = !task.done && task.dueDate && isOverdue(task.dueDate, today);
-  return (
-    <li className="flex items-center gap-3 px-4 py-3">
-      <Checkbox
-        size="md"
-        checked={task.done}
-        onChange={(event) => onToggle(task, event.currentTarget.checked)}
-        aria-label={task.done ? t.untoggle(task.title) : t.toggle(task.title)}
-      />
-      <span
-        className={cn(
-          "min-w-0 flex-1 text-sm break-words",
-          task.done && "text-muted-foreground line-through",
-        )}
-      >
-        {task.title}
-      </span>
-      {!task.done && <QuadrantBadge quadrant={quadrantOf(task, today)} />}
-      <span
-        className={cn(
-          "w-28 shrink-0 text-right text-xs tabular-nums",
-          late ? "text-error" : "text-muted-foreground",
-        )}
-      >
-        {task.dueDate
-          ? [late && t.overdue, formatShortDay(task.dueDate, { bare: true })]
-              .filter(Boolean)
-              .join(" · ")
-          : t.noDue}
-      </span>
-    </li>
-  );
-}
-
-const quadrantTone: Record<Quadrant, StatusTone> = {
-  do: "danger",
-  plan: "info",
-  delegate: "warning",
-  later: "neutral",
-};
-
-/** Its box of the matrix, with what the box means on hover. */
-function QuadrantBadge({ quadrant }: { quadrant: Quadrant }) {
-  const t = fr.work.tasks;
-  return (
-    <span title={t.quadrantHelp[quadrant]} className="shrink-0">
-      <StatusBadge tone={quadrantTone[quadrant]} size="sm">
-        {t.quadrants[quadrant]}
-      </StatusBadge>
-    </span>
   );
 }
 
