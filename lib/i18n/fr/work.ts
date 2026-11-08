@@ -114,6 +114,57 @@ export const work = {
     },
   },
 
+  // The two sections of the Travail: what the projects ask, and the
+  // person's own to-do list (retour du 31/10/2026).
+  tabs: {
+    label: "Sections du travail",
+    actions: "Actions des projets",
+    tasks: "Mes tâches",
+  },
+
+  // « Mes tâches »: private, written by the person for themselves.
+  tasks: {
+    description:
+      "Vos tâches à vous, visibles de vous seul, la plus proche échéance d'abord.",
+    add: {
+      title: "Nouvelle tâche",
+      titlePlaceholder: "Ajouter une tâche…",
+      due: "Échéance",
+      submit: "Ajouter",
+      titleMissing: "Écrivez la tâche.",
+      important: "Important",
+      urgent: "Urgent",
+      goesTo: "Rangée dans",
+      urgentHint:
+        "Une tâche devient urgente d'elle-même 3 jours avant son échéance.",
+    },
+    // The Eisenhower matrix (« comme l'app Matrix »).
+    quadrants: {
+      do: "Faire",
+      plan: "Planifier",
+      delegate: "Déléguer",
+      later: "Plus tard",
+    },
+    quadrantHelp: {
+      do: "Urgent et important : à faire tout de suite.",
+      plan: "Important, pas urgent : prévoyez un moment pour le faire.",
+      delegate: "Urgent, pas important : confiez-le ou faites-le vite.",
+      later: "Ni urgent ni important : si vous avez le temps.",
+    },
+    toggle: (title: string) => `Marquer « ${title} » comme faite`,
+    untoggle: (title: string) => `Remettre « ${title} » à faire`,
+    overdue: "En retard",
+    noDue: "Sans échéance",
+    emptyTitle: "Aucune tâche",
+    emptyBody:
+      "Notez ici ce que vous avez à faire : une tâche, et si besoin sa date.",
+    allDone: "Tout est fait.",
+    done: (count: number) =>
+      count === 1 ? "1 tâche faite" : `${count} tâches faites`,
+    loadError: "Impossible de charger vos tâches. Rechargez la page.",
+    failed: "La tâche n'a pas pu être enregistrée. Réessayez.",
+  },
+
   cards: {
     toRetransmitEmpty: "Aucun projet refusé ni de précision demandée.",
     awaitingAcceptance: "En attente d'un chef de projet",

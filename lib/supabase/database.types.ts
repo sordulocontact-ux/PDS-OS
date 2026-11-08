@@ -12225,6 +12225,73 @@ export type Database = {
           },
         ]
       }
+      personal_tasks: {
+        Row: {
+          created_at: string
+          done_at: string | null
+          due_date: string | null
+          id: string
+          important: boolean
+          organization_id: string
+          owner_person_id: string
+          project_id: string | null
+          status: string
+          title: string
+          updated_at: string
+          urgent: boolean
+        }
+        Insert: {
+          created_at?: string
+          done_at?: string | null
+          due_date?: string | null
+          id?: string
+          important?: boolean
+          organization_id: string
+          owner_person_id?: string
+          project_id?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          urgent?: boolean
+        }
+        Update: {
+          created_at?: string
+          done_at?: string | null
+          due_date?: string | null
+          id?: string
+          important?: boolean
+          organization_id?: string
+          owner_person_id?: string
+          project_id?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          urgent?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "personal_tasks_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "personal_tasks_owner_person_id_fkey"
+            columns: ["owner_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "personal_tasks_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       press_opportunities: {
         Row: {
           activation_id: string

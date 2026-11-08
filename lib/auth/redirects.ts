@@ -90,6 +90,8 @@ export const routes = {
   assistant: "/app/assistant",
   assistantConversation: (id: string) => `/app/assistant/${id}`,
   work: "/app/work",
+  // « Mes tâches »: the person's own to-do list, a section of the Travail.
+  workTasks: "/app/work?section=taches",
   // Every visible project's dates, one calendar (?mode=week&date=…&voir=mine).
   calendar: "/app/calendar",
   calls: "/app/calls",
