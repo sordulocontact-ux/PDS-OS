@@ -14,6 +14,14 @@ Côté app (`docs/ARCHITECTURE.md` § 10 bis) :
   presse-papiers sans ce geste.
 - Déconnecté, on passe par la connexion puis on revient sur la même adresse (`?next=`).
 
+## Version installée (08/11/2026)
+
+Lien d'installation : https://www.icloud.com/shortcuts/e163c98866e6437f876a6b37726ca9cf (repris
+dans l'encart « Partager depuis TikTok ou Instagram » du Repérage, `components/labo/captures/share-shortcut.tsx`).
+C'est la **version courte** : liens seulement (actions 1, 3 à 6 ci-dessous, sans le « Si / Sinon »).
+Une capture d'écran se dépose sur la page. La version complète ci-dessous ajoute les captures ;
+la publier = un nouveau lien iCloud, à remplacer dans `share-shortcut.tsx`.
+
 ## Créer le raccourci (une fois, sur l'iPhone ou le Mac de Sacha)
 
 Le fichier ne peut pas être généré ni signé hors d'un appareil connecté à iCloud : on le crée dans

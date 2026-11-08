@@ -31,10 +31,9 @@ export const laboCaptures = {
       "Ouvrez « Installer le raccourci » sur votre iPhone, puis touchez « Ajouter le raccourci ».",
       "Connectez-vous une fois à PDS OS dans Safari, même si l'app est sur votre écran d'accueil : le raccourci ouvre toujours Safari.",
       "TikTok : Partager › Plus › « Repérer dans PDS OS ». Instagram : sur un profil, l'avion en papier › Partager vers… › « Repérer dans PDS OS ».",
-      "Une capture d'écran : touchez sa vignette › Partager › « Repérer dans PDS OS », puis ici « Coller une capture ou un lien ».",
     ],
     reelHint:
-      "Un reel Instagram ne dit pas qui l'a publié : partagez le profil, ou faites une capture.",
+      "Le raccourci envoie des liens. Un reel Instagram ne dit pas qui l'a publié : partagez le profil. Une capture d'écran se dépose ici, dans la zone ci-dessous.",
   },
   // The clipboard button: what the iPhone Raccourci copied (?coller=1).
   paste: {

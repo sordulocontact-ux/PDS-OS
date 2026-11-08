@@ -11,7 +11,8 @@ const fr = { laboCaptures };
  * (docs/RACCOURCI-REPERAGE.md), made once in the Raccourcis app. Frozen: a
  * new version of the shortcut is a new link, to put here.
  */
-export const SHARE_SHORTCUT_URL: string | null = null;
+export const SHARE_SHORTCUT_URL: string | null =
+  "https://www.icloud.com/shortcuts/e163c98866e6437f876a6b37726ca9cf";
 
 /**
  * « Partager depuis TikTok ou Instagram » of the Repérage: where the team
