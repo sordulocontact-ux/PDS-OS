@@ -2874,6 +2874,76 @@ export type Database = {
           },
         ]
       }
+      artist_expenses: {
+        Row: {
+          amount_cents: number
+          artist_id: string
+          category: string
+          category_detail: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          label: string
+          note: string | null
+          organization_id: string
+          spent_on: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          artist_id: string
+          category: string
+          category_detail?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label: string
+          note?: string | null
+          organization_id: string
+          spent_on?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          artist_id?: string
+          category?: string
+          category_detail?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label?: string
+          note?: string | null
+          organization_id?: string
+          spent_on?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artist_expenses_artist_same_org"
+            columns: ["artist_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "artist_expenses_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "artist_expenses_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       artist_files: {
         Row: {
           artist_id: string
