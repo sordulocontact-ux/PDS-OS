@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { toast } from "@/components/ui/toast";
 
 import { CaptureCard } from "@/components/labo/captures/capture-card";
@@ -37,6 +37,24 @@ export function CaptureArtistsBench({
 }) {
   const t = fr.laboCaptures;
   const { items, add, addLink, remove, retry } = useCaptureQueue();
+  const results = useRef<HTMLDivElement>(null);
+  const seen = useRef(0);
+
+  // A new capture or link is read at the top of the list: brought into view
+  // when it is below the screen (a phone, arrived by the Raccourci), so the
+  // reading shows without scrolling.
+  useEffect(() => {
+    const added = items.length > seen.current;
+    seen.current = items.length;
+    const list = results.current;
+    if (!added || !list) return;
+    if (list.getBoundingClientRect().top < window.innerHeight * 0.6) return;
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    list.scrollIntoView({
+      behavior: still ? "auto" : "smooth",
+      block: "start",
+    });
+  }, [items.length]);
 
   // A shared link is read once; the address loses its parameters so that a
   // reload does not read it again (the page itself is not reloaded).
@@ -103,7 +121,7 @@ export function CaptureArtistsBench({
       {items.length === 0 ? (
         <EmptyNote>{t.empty}</EmptyNote>
       ) : (
-        <div className="grid gap-3">
+        <div ref={results} className="grid scroll-mt-4 gap-3">
           {[...items].reverse().map((item) => (
             <CaptureCard
               key={item.id}
