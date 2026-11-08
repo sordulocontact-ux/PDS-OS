@@ -35,7 +35,6 @@ export function plainText(text: string): string {
       // Links written by the model are never trusted: only code-built sources are clickable.
       .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
       .replace(/https?:\/\/\S+/g, "")
-      .replace(/\*\*(.+?)\*\*/g, "$1")
       .replace(/^#{1,6}\s+/gm, "")
       .replace(/`([^`]*)`/g, "$1")
   );

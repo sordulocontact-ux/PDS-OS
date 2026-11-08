@@ -1,6 +1,7 @@
 import { CallActionList } from "@/components/calls/call-action-list";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
+import { MarkedText } from "@/components/ui/marked-text";
 import type { CallOutcomes as Outcomes } from "@/lib/calls/outcomes";
 import { calls } from "@/lib/i18n/fr/calls";
 
@@ -48,7 +49,7 @@ export function CallOutcomes({
               {outcomes.decisions.map((decision) => (
                 <li key={decision.id} className="grid gap-0.5 text-sm">
                   <span>
-                    {decision.what}
+                    <MarkedText text={decision.what} />
                     {decision.who && (
                       <span className="text-muted-foreground">
                         {" "}

@@ -3,12 +3,14 @@
 import { useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
+import { MarkedText } from "@/components/ui/marked-text";
 import { Rows } from "@/components/ui/rows";
 import { toast } from "@/components/ui/toast";
 import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
 import { work } from "@/lib/i18n/fr/work";
 import { formatShortDay } from "@/lib/utils/day";
+import { withoutMarkdownMarks } from "@/lib/utils/markdown-marks";
 import type { CallSuggestion } from "@/lib/work/call-suggestions";
 import {
   acceptCallSuggestion,
@@ -75,7 +77,7 @@ export function CallSuggestions({
           >
             <span className="flex min-w-0 flex-1 flex-col gap-0.5">
               <span className="text-sm font-medium break-words">
-                {suggestion.what}
+                <MarkedText text={suggestion.what} />
               </span>
               <span className="text-xs text-muted-foreground">
                 <ViewLink
@@ -89,7 +91,7 @@ export function CallSuggestions({
               </span>
               {suggestion.quote && (
                 <span className="text-xs break-words text-muted-foreground italic">
-                  {t.said(suggestion.quote)}
+                  {t.said(withoutMarkdownMarks(suggestion.quote))}
                 </span>
               )}
             </span>
@@ -97,7 +99,7 @@ export function CallSuggestions({
               <Button
                 size="sm"
                 variant="outline"
-                aria-label={t.addLabel(suggestion.what)}
+                aria-label={t.addLabel(withoutMarkdownMarks(suggestion.what))}
                 onClick={() => answer(suggestion, true)}
               >
                 {t.add}
@@ -105,7 +107,9 @@ export function CallSuggestions({
               <Button
                 size="sm"
                 variant="ghost"
-                aria-label={t.dismissLabel(suggestion.what)}
+                aria-label={t.dismissLabel(
+                  withoutMarkdownMarks(suggestion.what),
+                )}
                 onClick={() => answer(suggestion, false)}
               >
                 {t.dismiss}

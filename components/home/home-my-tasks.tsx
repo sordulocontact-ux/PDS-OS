@@ -5,6 +5,7 @@ import {
   HomeSection,
 } from "@/components/home/home-list";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { MarkedText } from "@/components/ui/marked-text";
 import { QuadrantBadge } from "@/components/work/my-task-row";
 import { routes } from "@/lib/auth/redirects";
 import { work } from "@/lib/i18n/fr/work";
@@ -75,7 +76,11 @@ export function HomeMyTasks({
             }
           >
             <HomeRowText
-              main={<span className="font-semibold">{task.title}</span>}
+              main={
+                <span className="font-semibold">
+                  <MarkedText text={task.title} />
+                </span>
+              }
               sub={[when, task.source && t.fromCall(task.source.callTitle)]
                 .filter(Boolean)
                 .join(" · ")}

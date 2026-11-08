@@ -1,6 +1,7 @@
 import { NowFrame } from "@/components/shell/journey/now-card";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { MarkedText } from "@/components/ui/marked-text";
 import { ViewLink } from "@/components/ui/view-link";
 import { work } from "@/lib/i18n/fr/work";
 import { overdueTone } from "@/lib/ui/state-tones";
@@ -63,7 +64,7 @@ export function WorkLead({
         <span>{whereOf(row)}</span>
       </div>
       <h2 className="text-[length:var(--type-display-sm)] leading-[var(--type-display-sm-lh)] font-medium tracking-[var(--type-display-tracking)] text-balance">
-        {titleOf(row)}
+        <MarkedText text={titleOf(row)} />
       </h2>
       {row.why && <p className={cn(secondary, "text-pretty")}>{row.why}</p>}
       {facts.length > 0 && (
