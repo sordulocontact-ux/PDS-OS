@@ -31,6 +31,11 @@ const MOMENT_OF: Record<ClearanceStatus, number> = {
   abandoned: 3,
 };
 
+/** The moment of « Demander »: nothing asked yet. */
+export function isAskMoment(status: ClearanceStatus): boolean {
+  return MOMENT_OF[status] === 0;
+}
+
 /** The validated conditions in a few words (« 600 € · 5 % »). */
 export function termsLine(clearance: Clearance): string {
   const terms = clearance.terms.find((x) => x.status === "validated");
@@ -56,24 +61,33 @@ export function ClearanceStages({
   projectId,
   clearance,
   context,
+  directionName,
 }: {
   projectId: string;
   clearance: Clearance;
   context: Omit<Clearances, "items">;
+  directionName?: string;
 }) {
   const t = fr.legalClearance.stages;
   const moment = MOMENTS[MOMENT_OF[clearance.status]];
   if (!moment) return null;
+  // « Demander » needs no title over its own sections (Sacha, 07/11/2026).
+  if (moment === "ask")
+    return (
+      <AskMoment
+        projectId={projectId}
+        clearance={clearance}
+        canEmail={context.emailEnabled}
+      />
+    );
   return (
     <StepSection title={t[moment].title}>
-      {moment === "ask" && (
-        <AskMoment projectId={projectId} clearance={clearance} />
-      )}
       {moment === "negotiate" && (
         <NegotiateMoment
           projectId={projectId}
           clearance={clearance}
           canValidate={context.canValidate}
+          directionName={directionName}
         />
       )}
       {moment === "sign" && (

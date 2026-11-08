@@ -18,6 +18,8 @@ export type HolderOption = {
   label: string;
   detail?: string;
   role: HolderRole | null;
+  // Their address in the Réseau: whom the request is e-mailed to.
+  email: string | null;
 };
 
 type Supabase = Awaited<ReturnType<typeof createClient>>;
@@ -94,7 +96,7 @@ export async function listClearanceHolders(
       .maybeSingle(),
     supabase
       .from("network_contacts")
-      .select("id, name, roles")
+      .select("id, name, roles, email")
       .is("archived_at", null)
       .order("name")
       .limit(1000),
@@ -112,6 +114,7 @@ export async function listClearanceHolders(
         onTitle?.role ??
         roles.map((r) => ROLE_OF_NETWORK[r]).find(Boolean) ??
         null,
+      email: c.email,
     };
   });
   return [

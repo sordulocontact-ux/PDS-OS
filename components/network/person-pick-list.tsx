@@ -96,7 +96,7 @@ export function PersonPickList({
               </Button>
               {onKeepName && (
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
                   disabled={pending}
                   onClick={() => {

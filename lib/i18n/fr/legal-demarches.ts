@@ -42,8 +42,7 @@ export const legalDemarches = {
   why: {
     person:
       "Sa fiche donne au contrat ce qui lui manque. La direction valide le document avant l'envoi en signature.",
-    clearance:
-      "Une œuvre existante non autorisée bloque la sortie. Demander, négocier, faire signer : chaque temps garde sa preuve. Un refus se décide : retirer, remplacer, ou rester bloqué.",
+    clearance: "Une œuvre existante non autorisée bloque la sortie.",
     split:
       "Les parts de l'œuvre, saisies par une personne et confirmées par chaque ayant droit par son lien. Confirmer n'est pas signer un contrat.",
     sacem:

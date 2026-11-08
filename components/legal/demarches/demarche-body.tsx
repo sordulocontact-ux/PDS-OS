@@ -2,6 +2,7 @@ import { contractLead } from "@/lib/legal/contracts/lead";
 import { ficheLead } from "@/lib/legal/forms/state";
 import { DemarchePart } from "@/components/legal/demarches/demarche-part";
 import { DemarcheOwner } from "@/components/legal/demarches/demarche-owner";
+import { ClearanceExchanges } from "@/components/legal/clearance/clearance-exchanges";
 import { PlanSheetProvider } from "@/components/legal/tracking/plan-sheet-context";
 import { StepSection } from "@/components/shell/journey/step-section";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -135,6 +136,13 @@ export function DemarcheBody({
           }}
           changedBy={ownerChangedBy}
           overdue={demarche.step.alert === "overdue"}
+        />
+      )}
+      {/* An authorisation's exchanges: consulted, so last (Sacha, 08/11/2026). */}
+      {shown?.panel.kind === "clearance" && (
+        <ClearanceExchanges
+          clearance={shown.panel.clearance}
+          className="mt-2"
         />
       )}
     </PlanSheetProvider>

@@ -24,6 +24,11 @@ import type { StrategyData } from "@/lib/strategy/queries";
 
 const fr = { dialogs, strategy, strategyDeliverables };
 
+// A lever's deliverables, and the form to add one: apart from the next by
+// a hairline only, never a box (Sacha 07/11/2026).
+const part =
+  "flex flex-col gap-3 border-t border-[color:var(--border-hairline)] pt-4 first-of-type:border-t-0 first-of-type:pt-0";
+
 /**
  * « Livrables engagés »: what the selected levers commit to produce, grouped
  * by lever. Nature and number are typed by the owner, never preset; once the
@@ -85,7 +90,7 @@ export function DeliverablesSection({
   return (
     <section
       aria-labelledby="deliverables-title"
-      className="flex flex-col gap-8"
+      className="flex flex-col gap-4"
     >
       {/* Named by the panel title: kept for the section label. */}
       <h3 id="deliverables-title" className="sr-only">
@@ -98,11 +103,16 @@ export function DeliverablesSection({
         groups.map((lever) => {
           const own = deliverables.filter((d) => d.lever_id === lever.id);
           return (
-            <div key={lever.id} className="flex flex-col gap-3">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <h4 className="text-body-md font-semibold">{lever.label}</h4>
+            // One part per lever, a hairline above the next (Sacha
+            // 07/11/2026: « on se perd »): its name and gestures on one
+            // head, its deliverables under it.
+            <div key={lever.id} className={part}>
+              <div className="flex items-start justify-between gap-3">
+                <h4 className="min-w-0 flex-1 pt-1 text-body-md font-semibold break-words">
+                  {lever.label}
+                </h4>
                 {canEdit && lever.state === "selected" && (
-                  <span className="flex flex-wrap gap-2">
+                  <span className="flex shrink-0 flex-wrap justify-end gap-2">
                     <Button
                       size="sm"
                       variant="outline"
@@ -220,7 +230,7 @@ export function DeliverablesSection({
       </FormDialog>
 
       {canEdit && selected.length > 0 && editing === null && (
-        <div className="flex flex-col gap-3">
+        <div className={part}>
           <h4 className="text-body-md font-semibold">{s.newTitle}</h4>
           <DeliverableForm
             key={formKey}

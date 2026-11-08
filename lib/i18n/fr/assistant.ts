@@ -1,8 +1,7 @@
 /** Home page: the PO assistant and the cards below it. */
 export const assistant = {
   title: "Demander à PO",
-  disclaimer:
-    "PO est une IA : il peut se tromper. Les faits exacts et les liens sont affichés sous chaque réponse.",
+  disclaimer: "PO peut se tromper. Vérifiez avec ses sources.",
   placeholder: "Comment je peux t'aider ?",
   label: "Votre question",
   send: "Envoyer",
@@ -412,10 +411,21 @@ export const assistant = {
     deleteFailed: "La conversation n'a pas pu être supprimée.",
   },
   facts: "Données utilisées",
+  // The folded line above an answer: what PO read, and what it said on the way.
+  read: (count: number) =>
+    count === 1 ? "A lu 1 donnée" : `A lu ${count} données`,
+  steps: "Étapes de la réponse",
   sources: "Sources",
+  sourcesCount: (count: number) => `Sources (${count})`,
+  copy: "Copier la réponse",
+  copied: "Réponse copiée",
   you: "Vous",
   po: "PO",
-  error: "PO n'a pas pu répondre.",
+  // The route's error codes (app/api/assistant/route.ts).
+  errors: {
+    busy: "Réponse interrompue : PO est saturé, réessayez dans une minute.",
+    failed: "Réponse interrompue : PO n'a pas pu la terminer.",
+  },
   retry: "Réessayer",
   tooLong: "Question trop longue (2000 caractères maximum).",
   activityKinds: {

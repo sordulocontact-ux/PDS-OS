@@ -184,6 +184,8 @@ export const notifications = {
       `${actor} vous demande de valider les conditions d'utilisation d'une œuvre existante (« ${project} »).`,
     clearance_terms_validated: (actor: string, project: string) =>
       `${actor} a validé les conditions d'utilisation (« ${project} ») : la licence est prête à envoyer.`,
+    clearance_reply_received: (_actor: string, project: string) =>
+      `Un ayant droit a répondu à votre demande d'autorisation (« ${project} ») : sa réponse vous attend.`,
     clearance_terms_rejected: (actor: string, project: string) =>
       `${actor} demande une contre-proposition sur l'autorisation d'utilisation (« ${project} »).`,
     legal_template_to_validate: (actor: string, project: string) =>

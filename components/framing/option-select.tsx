@@ -20,6 +20,7 @@ export function OptionSelect({
   onChange,
   disabled,
   required = false,
+  fill = false,
 }: {
   id: string;
   label: string;
@@ -28,6 +29,9 @@ export function OptionSelect({
   onChange: (value: string) => void;
   disabled?: boolean;
   required?: boolean;
+  // In a form: as wide as its column, like the other fields (Sacha
+  // 07/11/2026); without it, as wide as its value (a row, a filter).
+  fill?: boolean;
 }) {
   return (
     <Select
@@ -40,9 +44,11 @@ export function OptionSelect({
         id={id}
         aria-label={label}
         aria-required={required || undefined}
-        className="min-w-44"
+        // A long option never runs past its column (Sacha 07/11/2026: the
+        // Dispositif's lever over « Quantité »): cut with an ellipsis.
+        className={fill ? "w-full min-w-0" : "max-w-full min-w-44"}
       >
-        <SelectValue />
+        <SelectValue className="block! min-w-0 truncate" />
       </SelectTrigger>
       <SelectContent>
         {Object.entries(options).map(([key, text]) => (

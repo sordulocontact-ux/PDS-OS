@@ -29,6 +29,7 @@ export function PersonPickerField<T extends PersonOption = PersonOption>({
   refName,
   nameName,
   legend,
+  hideLegend = false,
   load,
   defaultRef,
   defaultName,
@@ -45,6 +46,8 @@ export function PersonPickerField<T extends PersonOption = PersonOption>({
   refName: string;
   nameName: string;
   legend: string;
+  // Read by screen readers only (the step's title already asks it).
+  hideLegend?: boolean;
   // `fresh`: read again (a contact was just added), not from a cache.
   load: (fresh?: boolean) => Promise<T[]>;
   defaultRef: string | null;
@@ -73,8 +76,6 @@ export function PersonPickerField<T extends PersonOption = PersonOption>({
     defaultName && !defaultRef ? "name" : "pick",
   );
   const [creating, setCreating] = useState<string | null>(null);
-  // What is typed in the search: « Garder seulement le nom » keeps it.
-  const [query, setQuery] = useState("");
 
   const reload = (select?: string) =>
     load(Boolean(select)).then((list) => {
@@ -122,6 +123,7 @@ export function PersonPickerField<T extends PersonOption = PersonOption>({
           <SinglePicker
             name={refName}
             legend={legend}
+            hideLegend={hideLegend}
             required={required}
             options={options}
             selectedId={selected}
@@ -140,7 +142,18 @@ export function PersonPickerField<T extends PersonOption = PersonOption>({
             noSuggestionLabel={t.noSuggestion}
             removeLabel={t.remove}
             error={error}
-            onQueryChange={setQuery}
+            keepName={
+              allowNameOnly
+                ? {
+                    label: t.keepNamed,
+                    onKeep: (name) => {
+                      setFreeName(name);
+                      onPick?.(null, name);
+                      setMode("name");
+                    },
+                  }
+                : undefined
+            }
           />
         )
       ) : (
@@ -149,6 +162,7 @@ export function PersonPickerField<T extends PersonOption = PersonOption>({
           <Field
             name={nameName}
             label={legend}
+            hideLabel={hideLegend}
             required
             autoComplete="off"
             maxLength={200}
@@ -164,44 +178,27 @@ export function PersonPickerField<T extends PersonOption = PersonOption>({
       {mode === "pick" && picked && (
         <input type="hidden" name={nameName} value={picked.label} />
       )}
-      <div className="flex flex-wrap gap-2">
-        {mode === "pick" && !picked && allowNameOnly && (
+      {mode === "name" && (
+        <div className="flex flex-wrap gap-2">
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             size="xs"
-            onClick={() => {
-              const name = query.trim() || freeName;
-              setFreeName(name);
-              onPick?.(null, name);
-              setMode("name");
-            }}
+            disabled={!freeName.trim()}
+            onClick={() => setCreating(freeName.trim())}
           >
-            {t.keepName}
+            {freeName.trim() ? t.createNamed(freeName.trim()) : t.create}
           </Button>
-        )}
-        {mode === "name" && (
-          <>
-            <Button
-              type="button"
-              variant="outline"
-              size="xs"
-              disabled={!freeName.trim()}
-              onClick={() => setCreating(freeName.trim())}
-            >
-              {freeName.trim() ? t.createNamed(freeName.trim()) : t.create}
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="xs"
-              onClick={() => setMode("pick")}
-            >
-              {t.search}
-            </Button>
-          </>
-        )}
-      </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="xs"
+            onClick={() => setMode("pick")}
+          >
+            {t.search}
+          </Button>
+        </div>
+      )}
       <CreateContactDialog
         open={creating !== null}
         onOpenChange={(open) => !open && setCreating(null)}

@@ -72,9 +72,16 @@ Six couches, chacune ferme une porte :
    l'enregistrer, jamais une action.
 4. **Les faits et les sources viennent du code** : les fonctions renvoient des faits déjà
    rédigés en français par le code (« Cadrage : validée », « Tâche … : dans les temps »).
-   Sous chaque réponse, l'interface affiche ces faits (« Données utilisées ») et les liens.
-   Le texte du modèle n'est qu'un résumé : si le modèle se trompe, la vérité est juste en
-   dessous. Les liens écrits par le modèle ne sont jamais cliquables (retirés à l'affichage).
+   L'interface affiche ces faits au-dessus de la réponse, sur une ligne repliée « A lu N
+   données » (avec ce que le modèle a dit avant sa dernière lecture, « Je vais vérifier… »),
+   et les liens sous la réponse, derrière « Sources (N) », groupés par projet (le libellé
+   « Projet · Page » construit par le code, `groupSources`), à côté de « Copier » (Sacha,
+   08/11/2026, sur le modèle de ChatGPT et Perplexity mobiles). Le texte du modèle n'est
+   qu'un résumé : si le modèle se trompe, la vérité est à un clic. Les liens écrits par le
+   modèle ne sont jamais cliquables (retirés à l'affichage). Une réponse coupée garde ce qui
+   est arrivé et le dit (« Réponse interrompue », ton d'avertissement) : la route envoie un
+   code, `busy` (fournisseur saturé, 429/503/529 après les reprises du SDK) ou `failed`,
+   jamais le message du fournisseur ; « Réessayer » la remplace.
 5. **Des consignes strictes** (`lib/ai/instructions/assistant.ts`) : voir § 4.
 6. **Des questions tests** (§ 5), rejouées à chaque modification.
 

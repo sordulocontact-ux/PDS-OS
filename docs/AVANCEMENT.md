@@ -1806,3 +1806,79 @@ Demande de Sacha : enregistrer l'appel depuis la page du module, comme le Cadrag
 - **Compte rendu refusé par ministral** (même jour) : « Le service de transcription n'a pas répondu » venait de
   l'extraction, pas du dépôt (cinq leviers de la Stratégie sans citation : tout le compte rendu rejeté).
   `lib/ai/output-repair.ts` écarte désormais les éléments de liste qui ne suivent pas le schéma et garde le reste.
+
+## Les 8 dimensions allégées (07/11/2026, branche `pre-prod`)
+
+Revue de la page avec Sacha, comparée sur Mobbin (Dovetail, AirOps, Vanta, Squarespace, Deel).
+- Une seule pastille par dimension : « n à confirmer », sinon l'état ; plus de « rien de dit ».
+- Dispositif : propositions de PO d'abord, « Confirmer les n » juste dessous, puis les leviers ; les leviers
+  courants que personne n'a choisis ne sont plus listés en « Non retenu » (ils restent dans « Ajouter un levier »).
+- « Retenir / Ne pas retenir » n'est plus en double : seulement dans la question de PO quand elle pose les leviers.
+- Encart de PO raccourci (« PO PO » corrigé).
+- Gardés volontairement : « Complété » dès que la réponse est confirmée (retour d'Ibé MKT-S1-01) et le bloc
+  « Prérequis et dépendances » dans le Dispositif (MKT-S1-07).
+
+## Autorisation d'utilisation : l'étape « Demander » allégée (07/11/2026, branche `pre-prod`)
+
+Revue de Sacha (« rien n'est hiérarchisé, tout est collé, trop de texte »), comparée sur Mobbin (Asana, Plane,
+Calendly, Workable, Square).
+- « Demander » en trois sections (`StepSection`, sans numéro ni titre « Demander » : l'écart fait la hiérarchie,
+  Sacha) : ce qui est repris, qui détient chaque droit, la demande à envoyer (texte affiché, « Copier »), puis « J'ai envoyé la demande ». Paragraphes d'aide retirés ;
+  « proposé » sur la pastille (raison en infobulle) ; lien vers le répertoire SACEM au lieu d'un paragraphe.
+- Avant toute demande, la carte « La demande » (qui répétait l'élément et l'œuvre) devient une ligne ; elle
+  revient avec les droits et leurs états dès « Négocier » (JUR-09/10). Journal masqué tant qu'il est vide.
+- « Rien à sécuriser » rejoint « Autre issue » avec « Retirer l'élément du titre », tous deux en contour.
+- Phrase de l'étape réduite à « Une œuvre existante non autorisée bloque la sortie. »
+- **Partout** : « Garder seulement le nom » de `PersonPickerField` devient la dernière ligne de la liste de
+  résultats (« Garder « X » comme simple nom ») ; « Chercher dans le Réseau » et le « Garder seulement le nom »
+  de `PersonPickList` passent en contour.
+- **Lisibilité (même jour, d'après Vanta, Adaline, Squarespace)** : chaque dimension est une carte séparée avec
+  un rond d'état (`StateMark`, commun avec le parcours) ; une proposition se lit sur toute la largeur (texte
+  16 px medium, citation en retrait, une ligne discrète « À vérifier · source », boutons dessous) ; le Dispositif
+  est titré « Proposé par PO » puis « Leviers ». Vaut partout où ces composants servent : Cadrage, Conception,
+  Production (import d'un document), Intentions.
+- **Envoi de la demande depuis PDS OS** (Sacha, même soir : « une mini interface de mail ») : `RequestSend` montre
+  la demande en `MailCard` (À : l'adresse écrite dans la carte, pré-remplie depuis le Réseau et modifiable, à
+  écrire quand il n'en a pas, puis gardée dans sa fiche à l'envoi ; Objet ; message modifiable). « Envoyer à X » envoie par PDS OS et enregistre la
+  demande, le texte envoyé au journal (preuve, JUR-10) ; « Je l'ai envoyée autrement » déclare seulement.
+- **Livrables engagés** (même jour) : un filet entre chaque levier et avant « Nouveau livrable » (pas de carte) ; menu « Levier »
+  qui ne déborde plus sur « Quantité » (`OptionSelect` coupé par « … », partout) ; « Ajouter le livrable »
+  toujours actif, nom manquant dit au clic (champ en rouge, `FormMessage`, focus) ; boutons d'un levier
+  au nom long gardés à droite. Citations sur fond `--surface-soft` ; « Modifier » en contour.
+  Champs du formulaire sur toute la largeur de leur colonne (`OptionSelect fill`) ; option longue d'un menu
+  qui passe à la ligne dans la liste (`SelectItem`, partout).
+- Même soir : ce qui est repris passe de pastilles de filtre au `SegmentedControl` (comme Personne / Organisation
+  du Réseau, « · proposé » sur la proposition) ; bouton « Copier le message » retiré ; lien vers le répertoire SACEM
+  en texte secondaire, souligné au survol seulement.
+- **Réponses de PO allégées** (08/11/2026, sur le modèle de ChatGPT, Claude et Perplexity mobiles) : ce que PO a
+  lu et dit en chemin replié au-dessus de la réponse (« A lu N données ») ; sous la réponse, « Sources (N) »
+  (liens groupés par projet, le nom du projet écrit une fois) et « Copier » ; réponse coupée dite en ton
+  d'avertissement (« PO est saturé, réessayez dans une minute » quand le fournisseur refuse, code `busy` de la
+  route) ; fenêtre Espace Espace sans les deux lignes de consignes, « Nouvelle conversation » en icône à côté
+  de la croix ; mention « PO peut se tromper. Vérifiez avec ses sources. »
+
+## Réponses des ayants droit rangées seules (08/11/2026, branche `pre-prod`)
+
+Demande de Sacha : « PDS ne peut pas détecter le retour du mail pour ajouter la réponse ? ».
+- La demande d'autorisation part avec l'adresse de réponse de PO propre à la demande (`po+aut-<id>@pdsrecords.com`)
+  en plus de celle du membre.
+- `/api/cron/inbox` (pg_cron toutes les 10 min, migration `20261108000101`) lit po@ en IMAP (`imapflow`,
+  `mailparser`, `lib/email/inbox.ts`) et range chaque réponse au journal de sa demande, par le code seul
+  (adresse `po+aut-…`, sinon expéditeur = ayant droit d'une seule demande, sinon œuvre nommée) ; le responsable
+  est notifié ; l'état ne bouge pas. « Négocier » pré-remplit « Leur réponse ». Test pgTAP
+  `legal-clearance-email-replies.test.sql`.
+- Paragraphe « Les droits sur l'œuvre… s'autorisent chacun à part » retiré de « L'autorisation » (l'état de
+  chaque droit le dit).
+- **Reste pour l'activer** : IMAP activé sur po@ et un mot de passe d'application « PDS OS lecture » (Ibé) →
+  `EMAIL_IMAP_PASSWORD` ; `CRON_SECRET` sur Vercel ; secrets Vault `cron_secret` (même valeur) et
+  `inbox_poll_url` (`https://<site>/api/cron/inbox`) ; migration poussée en prod. Plus tard : pièces jointes
+  rangées, « Réponses non rangées », proposition de PO pour les cas ambigus.
+- Même jour : le « Journal de l'autorisation » (replié sans chevron, entre l'action et « Autre issue ») devient
+  « Échanges (n) » tout en bas du panneau, sous « Responsable et échéance » (`ClearanceExchanges`, carte `VersionCard` à
+  chevron) : envoyés et reçus seulement, texte long coupé avec « Lire tout » ; l'historique des états reste dans
+  l'historique du dossier. « Chez la direction » (encart gris en capitales après les conditions) devient l'encart
+  bleu en tête « En attente de la direction : valider les conditions. » ; « Demander une contre-proposition » en
+  contour.
+- Même jour : l'attente de la direction dans « Négocier » passe de l'encart bleu au composant commun `StepWaiting`
+  (initiales et nom de qui valide). Reste à trancher : la fiche et le contrat du Juridique disent encore l'attente
+  en encart bleu, la Confirmation avec `StepWaiting`.

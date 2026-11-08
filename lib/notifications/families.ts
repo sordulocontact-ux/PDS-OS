@@ -18,6 +18,7 @@ export const REQUEST_KINDS = [
   "master_invoice_received",
   "master_round_assigned",
   "clearance_terms_proposed",
+  "clearance_reply_received",
   "strategy_review_requested",
   "strategy_review_reminder",
   "production_version_submitted",

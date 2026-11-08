@@ -60,6 +60,8 @@ export const strategyDeliverables = {
   quantityHint: "Laissez vide pour un seul.",
   noLeverGroup: "Aucun livrable pour ce levier.",
   add: "Ajouter le livrable",
+  titleRequired: "Nommez le livrable.",
+  missingOne: "Un champ à compléter.",
   save: "Enregistrer",
   cancel: "Annuler",
   edit: "Modifier",

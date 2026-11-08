@@ -583,8 +583,9 @@ Règles de Sacha (07/10/2026), pour **toute** l'application :
 - **Désigner quelqu'un = `PersonPickerField`**, jamais un champ texte libre : un crédit, une
   part, un créateur ou un éditeur SACEM, un ingénieur, une partie… Les personnes déjà liées
   à l'objet (crédités du titre, artistes, répartition) en tête, puis le Réseau ; « Ajouter
-  « X » au Réseau » en modale sans quitter le formulaire ; « Garder seulement le nom » en
-  dernier recours. On enregistre l'id (`contact_id`), jamais un lien deviné par le nom. Les
+  « X » au Réseau » en modale sans quitter le formulaire ; « Garder « X » comme simple nom »
+  en dernier recours, **dernière ligne de la liste de résultats** dès qu'un nom est tapé, jamais
+  un bouton sans contour sous le champ, qu'on prenait pour du texte mal aligné (Sacha, 07/11/2026). On enregistre l'id (`contact_id`), jamais un lien deviné par le nom. Les
   comptes de l'app (responsable, assigné, validateur) restent choisis dans la liste des
   membres : ce ne sont pas des contacts du Réseau.
   Appliqué le 07/10/2026 : créateurs et éditeurs SACEM, ayants droit d'un accord, lignes
@@ -665,7 +666,20 @@ D'après le proto « Projet complet » (`docs/protos/projet.html`), qui fait foi
   jamais en texte seul, tant qu'aucun autre secondaire plus important n'est à côté ; `ghost` est réservé
   au troisième niveau (un geste de plus à côté d'un secondaire déjà en contour, « Annuler », un geste
   dans une ligne ou un menu). Appliqué d'abord à « Modifier mes rôles » (fiche publique) ; à reprendre
-  écran par écran.
+  écran par écran. **Jamais une rangée de boutons texte sans contour** (Sacha, 07/11/2026 : « on dirait
+  des textes qui volent ») : un `ghost` ne sert qu'à hiérarchiser, donc seulement à côté d'un bouton en
+  contour. Exemple : une proposition = « Modifier » en contour, « Écarter » en texte à côté.
+- **Livrables engagés** (Sacha, 07/11/2026, « on se perd ») : chaque levier et le formulaire « Nouveau
+  livrable » sont séparés par un **filet** (`--border-hairline`), jamais encadrés (« pas une card
+  complète, juste un contour qui le sépare »). Un menu (`OptionSelect`) ne dépasse jamais sa
+  colonne : libellé long coupé par « … ».
+- **Largeur d'un champ** (Sacha, 07/11/2026) : dans un formulaire, **chaque champ prend toute la largeur
+  de sa colonne** (texte, nombre, date, menu `OptionSelect fill`) ; seul un menu hors formulaire (une
+  ligne, un filtre) garde la largeur de sa valeur. Appliqué d'abord à « Nouveau livrable » ; à reprendre
+  écran par écran. Dans la liste d'un menu, une option longue passe à la ligne (jamais sous la coche).
+- **Citation** (Sacha, 07/11/2026) : la phrase exacte d'un échange se détache du texte, filet de 2 px à
+  gauche (`--border-default`) **et** fond un peu plus clair (`--surface-soft`), coins droits arrondis,
+  texte 15 px secondaire (`ProposalSource`).
 - **Survol d'un bouton** (repris du site Raw Studio, Sacha, 04/11/2026) : le bouton grossit
   à `scale(1.05)` (`--duration-grow`, 200 ms) et son libellé **roule** : il monte et sort par
   le haut pendant qu'une copie entre par le bas (`--duration-roll`, 500 ms, `--ease-out`).

@@ -59,7 +59,7 @@ export const network = {
     noSuggestion:
       "Personne du Réseau n'a encore ce rôle : tapez un nom pour chercher dans tout le Réseau.",
     remove: (name: string) => `Changer ${name}`,
-    keepName: "Garder seulement le nom",
+    keepNamed: (name: string) => `Garder « ${name} » comme simple nom`,
     search: "Chercher dans le Réseau",
     loading: "Chargement du Réseau…",
   },

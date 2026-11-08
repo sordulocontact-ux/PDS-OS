@@ -32,7 +32,7 @@ export const poTopics: GuideTopic[] = [
     ],
     nav: "/app/assistant",
     facts: [
-      "PO est l'assistant de PDS OS. Il lit les données que vous pouvez voir (projets, étapes, Brief, tâches, validations, calls et comptes rendus, artistes, fiches des titres, équipe, contrats, Juridique, Master, Distribution, Marketing, budget, calendrier, fichiers, Réseau, notifications) et répond avec les faits et les liens affichés sous sa réponse. Il sait aussi retrouver où se trouve un élément et expliquer comment marche l'application.",
+      "PO est l'assistant de PDS OS. Il lit les données que vous pouvez voir (projets, étapes, Brief, tâches, validations, calls et comptes rendus, artistes, fiches des titres, équipe, contrats, Juridique, Master, Distribution, Marketing, budget, calendrier, fichiers, Réseau, notifications) et répond avec les faits qu'il a lus (« A lu … données », replié au-dessus de la réponse) et les liens (« Sources », sous la réponse). Il sait aussi retrouver où se trouve un élément et expliquer comment marche l'application.",
       "Il prépare des créations et des modifications (artiste, titre et sa fiche, projet, contrat, modèle de contrat, contact du Réseau, tâche, dépense, réunion, retour sur l'application) : il ouvre le vrai formulaire pré-rempli, et c'est vous qui relisez et enregistrez.",
       "Il ne décide jamais : valider une étape, transmettre un projet, soumettre, envoyer ou signer un contrat restent vos gestes, sur la page concernée. Il n'écrit aucune clause juridique et ne cherche pas sur Internet.",
       "Il utilise vos droits, jamais plus : il ne voit que ce que vous voyez.",

@@ -6,8 +6,10 @@ import { toast } from "@/components/ui/toast";
 
 import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
+import { StepWaiting } from "@/components/shell/journey/step-waiting";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { legalClearance } from "@/lib/i18n/fr/legal-clearance";
+import { legalDemarches } from "@/lib/i18n/fr/legal-demarches";
 import { advanceClearance } from "@/lib/legal/clearance/actions";
 import {
   counterClearanceTerms,
@@ -32,7 +34,7 @@ import {
 import { useLegalAction } from "@/components/legal/use-legal-action";
 import { formatInstant } from "@/lib/utils/instant";
 
-const fr = { legalClearance };
+const fr = { legalClearance, legalDemarches };
 
 // What PO read, line by line (one per right), as the person may correct it.
 type Reading = { refusal: boolean; lines: TermsLine[] };
@@ -68,14 +70,26 @@ export function NegotiateMoment({
   projectId,
   clearance,
   canValidate,
+  directionName,
 }: {
   projectId: string;
   clearance: Clearance;
   canValidate: boolean;
+  // Who validates (« En attente de Claire Morel »), else « La direction ».
+  directionName?: string;
 }) {
   const t = fr.legalClearance.flow;
   const { pending, run } = useLegalAction({ refresh: true });
-  const [reply, setReply] = useState("");
+  // A reply filed from PO's mailbox, newest of the journal: put in « Leur
+  // réponse », its source said under it (still read only on a click).
+  const latest = clearance.exchanges[0];
+  const received =
+    latest?.kind === "email" && latest.direction === "in" && latest.from
+      ? latest
+      : null;
+  const [reply, setReply] = useState(received?.body ?? "");
+  const receivedId =
+    received && reply.trim() === received.body.trim() ? received.id : undefined;
   const [reading, setReading] = useState<Reading | null>(null);
   const [tried, setTried] = useState(false);
   // Lines whose amount is not one, at the last « Envoyer à la direction ».
@@ -134,16 +148,16 @@ export function NegotiateMoment({
         )}
       </div>
     );
+    // Waiting for the direction: said first, with who (`StepWaiting`, as
+    // the Confirmation, the Master and the Marketing's review).
     if (!canValidate)
       return (
         <>
+          <StepWaiting
+            who={directionName || fr.legalDemarches.direction}
+            todo={t.atDirection}
+          />
           {box}
-          <div className="flex flex-col gap-1 rounded-xl bg-muted p-4">
-            <span className="text-caption font-medium tracking-wide text-muted-foreground uppercase">
-              {t.atDirection}
-            </span>
-            <span className="text-sm">{t.atDirectionBody}</span>
-          </div>
         </>
       );
     return (
@@ -166,7 +180,7 @@ export function NegotiateMoment({
             {t.validate}
           </Button>
           <Button
-            variant="ghost"
+            variant="outline"
             disabled={pending}
             onClick={() =>
               run(() =>
@@ -218,6 +232,11 @@ export function NegotiateMoment({
             value={reply}
             onChange={(event) => setReply(event.target.value)}
             error={tried && !reply.trim() ? t.replyMissing : undefined}
+            hint={
+              receivedId && received?.from
+                ? t.replyReceived(received.from, formatInstant(received.at))
+                : undefined
+            }
           />
           <Button
             variant="outline"
@@ -249,6 +268,7 @@ export function NegotiateMoment({
                     projectId,
                     clearanceId: clearance.id,
                     body: reply,
+                    receivedId,
                   }),
                 )
               }
@@ -297,6 +317,7 @@ export function NegotiateMoment({
                     projectId,
                     clearanceId: clearance.id,
                     body: reply,
+                    receivedId,
                     terms: reading.lines.map((line) => ({
                       right: line.right,
                       amountCents: centsOf(line.amount) ?? null,

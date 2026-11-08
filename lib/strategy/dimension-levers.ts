@@ -2,7 +2,8 @@
 // every lever listed — retained, to arbitrate (« Retenir » / « Ne pas
 // retenir »), not retained — PO's proposals decided one by one, the
 // Brief's confirmed needs still without lever to arbitrate (nothing is
-// decided in advance, rule 21), the common levers not chosen. Client-safe.
+// decided in advance, rule 21); the common levers nobody chose are marked
+// `preset` (offered by « Ajouter un levier », not listed). Client-safe.
 
 import { strategyDimensions } from "@/lib/i18n/fr/strategy-dimensions";
 import { strategyDispositif } from "@/lib/i18n/fr/strategy-dispositif";
@@ -41,6 +42,9 @@ export type LeverLine =
       // What « Retenir » / « Ne pas retenir » act on (to arbitrate only).
       action:
         { type: "lever"; id: string } | { type: "need"; id: string } | null;
+      // A common lever nobody chose: offered by « Ajouter un levier », not
+      // listed as « Non retenu » (Sacha 07/11/2026).
+      preset: boolean;
     };
 
 /** « Ajouter un levier »: a common lever not taken, or one not retained. */
@@ -125,6 +129,7 @@ export function leverLines(
       state: l.review_status === "rejected" ? "not_retained" : STATE[l.state],
       by: l.decided_by ? ctx.name(l.decided_by) : null,
       action: l.state === "to_decide" ? { type: "lever", id: l.id } : null,
+      preset: false,
     };
   });
 
@@ -137,6 +142,7 @@ export function leverLines(
     state: "to_decide",
     by: null,
     action: { type: "need", id: n.id },
+    preset: false,
   }));
 
   // A common lever is taken once a lever speaks of it (« Influence : une
@@ -158,6 +164,7 @@ export function leverLines(
     state: "not_retained",
     by: null,
     action: null,
+    preset: true,
   }));
 
   const options: LeverOption[] = [

@@ -2,6 +2,7 @@
 
 import { useChat, type Chat } from "@ai-sdk/react";
 import type { UIMessage } from "ai";
+import { IconPlus } from "nucleo-sharp-essential";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -53,14 +54,18 @@ export function AssistantPanel({
     <section aria-label={t.title} className="flex flex-col gap-3">
       {inline && messages.length > 0 && (
         <>
+          {/* In the window's head, beside its close button (as in Claude
+              and ChatGPT); the window's panel is the positioned parent. */}
           <Button
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             onClick={onNew}
             disabled={busy}
-            className="self-end"
+            aria-label={t.clear}
+            title={t.clear}
+            className="absolute top-3 right-12"
           >
-            {t.clear}
+            <IconPlus aria-hidden />
           </Button>
           <AssistantThread
             messages={messages}

@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  IconCheck,
   IconLock,
   IconTriangleWarning,
   IconXmark,
@@ -10,6 +9,7 @@ import { usePathname } from "next/navigation";
 import { Fragment } from "react";
 
 import { IconStop } from "@/components/icons";
+import { StateMark, type MarkState } from "@/components/ui/state-mark";
 import { ViewLink } from "@/components/ui/view-link";
 import { journey } from "@/lib/i18n/fr/journey";
 import {
@@ -143,46 +143,30 @@ export function JourneySpine({
 
 function StepMark({ step: s }: { step: JourneyStep }) {
   const mine = Boolean(s.actor?.viewer);
-  const open = s.status === "current";
+  const state: MarkState =
+    s.status === "done"
+      ? s.reserve
+        ? "reserve"
+        : "done"
+      : s.status === "current"
+        ? mine
+          ? "mine"
+          : "current"
+        : s.status === "waiting" || s.status === "rework"
+          ? "waiting"
+          : "idle";
   return (
-    <span
-      aria-hidden
-      className={cn(
-        "relative z-10 grid size-6 place-items-center rounded-full border-2 border-[color:var(--border-default)] bg-card text-[color:var(--text-tertiary)]",
-        s.status === "done" &&
-          (s.reserve
-            ? "border-transparent bg-[var(--tone-warning-bg)] text-[color:var(--tone-warning-fg)]"
-            : "border-transparent bg-[var(--tone-success-bg)] text-[color:var(--tone-success-fg)]"),
-        open &&
-          (mine
-            ? "border-[color:var(--selection)] bg-[var(--selection)]"
-            : "border-[color:var(--selection)] bg-[var(--selection-bg)]"),
-        (s.status === "waiting" || s.status === "rework") &&
-          "border-[color:var(--tone-warning-fg)] bg-[var(--tone-warning-bg)]",
-        isLocked(s.status) && "border-dashed",
-      )}
-    >
-      {s.status === "done" ? (
-        s.reserve ? (
-          <IconTriangleWarning className="size-3.5" />
-        ) : (
-          <IconCheck className="size-3.5" />
-        )
-      ) : open ? (
-        <span
-          className={cn(
-            "size-2 rounded-full",
-            mine ? "bg-white" : "bg-[var(--selection)]",
-          )}
-        />
-      ) : s.status === "waiting" ? (
-        <span className="size-2 rounded-full bg-[var(--tone-warning-fg)]" />
+    <StateMark state={state} dashed={isLocked(s.status)}>
+      {s.status === "done" && s.reserve ? (
+        <IconTriangleWarning className="size-3.5" />
+      ) : s.status === "rework" ? (
+        <span />
       ) : s.status === "blocked" ? (
         <IconLock className="size-3" />
       ) : s.status === "obsolete" ? (
         <IconXmark className="size-3" />
-      ) : null}
-    </span>
+      ) : undefined}
+    </StateMark>
   );
 }
 

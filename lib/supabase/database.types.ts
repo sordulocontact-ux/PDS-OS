@@ -7131,6 +7131,8 @@ export type Database = {
           created_at: string
           created_by: string | null
           direction: string
+          external_id: string | null
+          from_address: string | null
           id: string
           kind: string
           occurred_at: string
@@ -7142,6 +7144,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           direction: string
+          external_id?: string | null
+          from_address?: string | null
           id?: string
           kind: string
           occurred_at?: string
@@ -7153,6 +7157,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           direction?: string
+          external_id?: string | null
+          from_address?: string | null
           id?: string
           kind?: string
           occurred_at?: string
@@ -18296,9 +18302,20 @@ export type Database = {
         Args: { p_session_id: string }
         Returns: boolean
       }
+      poll_inbox: { Args: never; Returns: undefined }
       promote_demo: {
         Args: { p_master_id: string; p_title: string }
         Returns: undefined
+      }
+      receive_clearance_reply: {
+        Args: {
+          p_body: string
+          p_clearance_id: string
+          p_external_id: string
+          p_from: string
+          p_received_at: string
+        }
+        Returns: boolean
       }
       request_distribution_reserve_lift: {
         Args: {

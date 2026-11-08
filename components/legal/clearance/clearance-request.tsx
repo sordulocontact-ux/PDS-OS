@@ -44,7 +44,8 @@ export function ClearanceRequest({ clearance }: { clearance: Clearance }) {
               key={right}
               label={t.holder(t.rightOf[right])}
               value={holdersOf(right) || null}
-              missing
+              // Red only while nobody holds it (« À identifier »).
+              missing={!holdersOf(right)}
               missingLabel={t.noHolder}
             />
           ))}
@@ -52,9 +53,6 @@ export function ClearanceRequest({ clearance }: { clearance: Clearance }) {
       </StepSection>
       {rights.length > 0 && (
         <StepSection title={t.rightsTitle(rights.length)}>
-          <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
-            {t.rightsBody}
-          </p>
           <FactRows>
             {rights.map((right) => {
               const state = rightState(clearance, right);
