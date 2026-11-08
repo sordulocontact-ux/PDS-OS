@@ -13,6 +13,7 @@ import { Rows } from "@/components/ui/rows";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { toast } from "@/components/ui/toast";
 import { work } from "@/lib/i18n/fr/work";
+import type { CallSuggestion } from "@/lib/work/call-suggestions";
 import {
   addPersonalTask,
   setPersonalTaskBox,
@@ -28,6 +29,7 @@ import {
   type Quadrant,
 } from "@/lib/work/personal-tasks";
 
+import { CallSuggestions } from "./call-suggestions";
 import type { TaskEdit } from "./my-task-edit";
 import { QuadrantBadge, TaskRow } from "./my-task-row";
 import { MyTasksMatrix } from "./my-tasks-matrix";
@@ -49,10 +51,12 @@ const MATRIX_VALUE = "matrice";
 export function MyTasks({
   todo,
   done,
+  suggestions,
   today,
 }: {
   todo: PersonalTask[];
   done: PersonalTask[];
+  suggestions: CallSuggestion[];
   today: string;
 }) {
   const t = fr.work.tasks;
@@ -151,6 +155,10 @@ export function MyTasks({
   return (
     <div className="flex flex-col gap-5">
       <AddTask today={today} onAdded={() => router.refresh()} />
+      <CallSuggestions
+        suggestions={suggestions}
+        onAnswered={() => router.refresh()}
+      />
 
       {open.length === 0 && closed.length === 0 ? (
         <EmptyState
@@ -303,6 +311,7 @@ function AddTask({ today, onAdded }: { today: string; onAdded: () => void }) {
                 projectId: null,
                 done: false,
                 doneAt: null,
+                source: null,
               },
               today,
             )}

@@ -120,3 +120,48 @@ export async function deletePersonalTask(taskId: string): Promise<Result> {
   revalidatePath(routes.work);
   return error ? { ok: false } : { ok: true };
 }
+
+/**
+ * A meeting's suggestion answered: added as a task (its words, no date, not
+ * important: the person sorts it after) or set aside. Either way a row, so
+ * it is not suggested again. The item is read with the person's session:
+ * one of a call they do not see is refused.
+ */
+async function answerSuggestion(
+  itemId: string,
+  status: "todo" | "dismissed",
+): Promise<Result> {
+  if (!z.uuid().safeParse(itemId).success) return { ok: false };
+  const access = await requireApproved();
+  if (!access.organizationId) return { ok: false };
+  const supabase = await createClient();
+  const { data: item } = await supabase
+    .from("report_items")
+    .select(
+      "id, kind, what, report:call_reports!report_items_report_same_org(call_id)",
+    )
+    .eq("id", itemId)
+    .maybeSingle();
+  if (!item || item.kind !== "next_action" || !item.report)
+    return { ok: false };
+  const { error } = await supabase.from("personal_tasks").insert({
+    organization_id: access.organizationId,
+    title: item.what.trim().slice(0, 300),
+    status,
+    source_call_id: item.report.call_id,
+    source_report_item_id: item.id,
+  });
+  // Answered already (a double click, another tab): nothing more to do.
+  if (error && error.code !== "23505")
+    console.error("answerSuggestion:", error.message);
+  revalidatePath(routes.work);
+  return error && error.code !== "23505" ? { ok: false } : { ok: true };
+}
+
+export async function acceptCallSuggestion(itemId: string): Promise<Result> {
+  return answerSuggestion(itemId, "todo");
+}
+
+export async function dismissCallSuggestion(itemId: string): Promise<Result> {
+  return answerSuggestion(itemId, "dismissed");
+}

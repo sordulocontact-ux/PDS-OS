@@ -4,6 +4,8 @@ import { IconArrowUpRight } from "@/components/icons";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RecordMenu } from "@/components/ui/record-menu";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { ViewLink } from "@/components/ui/view-link";
+import { routes } from "@/lib/auth/redirects";
 import { work } from "@/lib/i18n/fr/work";
 import { isOverdue } from "@/lib/insights/dates";
 import type { Tone } from "@/lib/ui/state-tones";
@@ -89,13 +91,24 @@ export function TaskRow({
         onChange={(event) => onToggle(task, event.currentTarget.checked)}
         aria-label={task.done ? t.untoggle(task.title) : t.toggle(task.title)}
       />
-      <span
-        className={cn(
-          "min-w-0 flex-1 text-sm break-words",
-          task.done && "text-muted-foreground line-through",
+      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <span
+          className={cn(
+            "text-sm break-words",
+            task.done && "text-muted-foreground line-through",
+          )}
+        >
+          {task.title}
+        </span>
+        {task.source && (
+          <ViewLink
+            href={routes.call(task.source.callId)}
+            draggable={false}
+            className="self-start text-xs text-muted-foreground underline-offset-2 hover:underline"
+          >
+            {t.fromCall(task.source.callTitle)}
+          </ViewLink>
         )}
-      >
-        {task.title}
       </span>
       {showBox && !task.done && <QuadrantBadge quadrant={box} />}
       <span

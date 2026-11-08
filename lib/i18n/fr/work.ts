@@ -157,6 +157,20 @@ export const work = {
         "Son échéance est dans 3 jours ou moins : la tâche reste urgente. Changez sa date pour la planifier.",
     },
     boxEmpty: "Aucune tâche ici.",
+    // Lot 4: the next actions of the meetings, suggested to whom they fall.
+    fromCall: (title: string) => `Réunion « ${title} »`,
+    suggestions: {
+      title: "Suggérées par vos réunions",
+      hint: "Les actions relevées par l'IA dans vos réunions des 30 derniers jours, qui vous reviennent. Ajoutez celles à garder.",
+      add: "Ajouter",
+      dismiss: "Ignorer",
+      addLabel: (what: string) => `Ajouter « ${what} » à vos tâches`,
+      dismissLabel: (what: string) => `Ignorer « ${what} »`,
+      said: (quote: string) => `« ${quote} »`,
+      added: "Ajoutée à vos tâches.",
+      partial:
+        "Une partie des suggestions de vos réunions n'a pas pu être lue. Rechargez la page.",
+    },
     edit: {
       title: "Modifier la tâche",
       description: "Son intitulé, son échéance et son importance.",

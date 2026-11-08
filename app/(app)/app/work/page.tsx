@@ -86,7 +86,7 @@ export default async function WorkPage({
               </LoadingRegion>
             }
           >
-            <MyTasksSection />
+            <MyTasksSection access={access} />
           </Suspense>
         }
       />

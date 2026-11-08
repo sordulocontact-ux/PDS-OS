@@ -13,6 +13,8 @@ export type PersonalTask = {
   projectId: string | null;
   done: boolean;
   doneAt: string | null;
+  // The meeting it was suggested by (lot 4), when the person can still see it.
+  source: { callId: string; callTitle: string } | null;
 };
 
 /** The four boxes of the matrix (retour du 31/10/2026, « comme l'app

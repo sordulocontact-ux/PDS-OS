@@ -12235,6 +12235,8 @@ export type Database = {
           organization_id: string
           owner_person_id: string
           project_id: string | null
+          source_call_id: string | null
+          source_report_item_id: string | null
           status: string
           title: string
           updated_at: string
@@ -12249,6 +12251,8 @@ export type Database = {
           organization_id: string
           owner_person_id?: string
           project_id?: string | null
+          source_call_id?: string | null
+          source_report_item_id?: string | null
           status?: string
           title: string
           updated_at?: string
@@ -12263,6 +12267,8 @@ export type Database = {
           organization_id?: string
           owner_person_id?: string
           project_id?: string | null
+          source_call_id?: string | null
+          source_report_item_id?: string | null
           status?: string
           title?: string
           updated_at?: string
@@ -12282,6 +12288,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "personal_tasks_call_same_org"
+            columns: ["source_call_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "calls"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "personal_tasks_item_same_org"
+            columns: ["source_report_item_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "report_items"
+            referencedColumns: ["id", "organization_id"]
           },
           {
             foreignKeyName: "personal_tasks_project_same_org"

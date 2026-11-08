@@ -17,7 +17,7 @@ export async function loadMyPersonalTasks(): Promise<{
 }> {
   const supabase = await createClient();
   const columns =
-    "id, title, due_date, important, urgent, project_id, status, done_at";
+    "id, title, due_date, important, urgent, project_id, status, done_at, source_call:calls!personal_tasks_call_same_org(id, title)";
   const [todoRes, doneRes] = await Promise.all([
     supabase
       .from("personal_tasks")
@@ -43,6 +43,9 @@ export async function loadMyPersonalTasks(): Promise<{
     projectId: row.project_id,
     done: row.status === "done",
     doneAt: row.done_at,
+    source: row.source_call
+      ? { callId: row.source_call.id, callTitle: row.source_call.title }
+      : null,
   });
   return {
     todo: (todoRes.data ?? []).map(toTask),
