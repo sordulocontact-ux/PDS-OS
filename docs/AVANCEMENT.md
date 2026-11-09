@@ -1925,3 +1925,11 @@ Demande de Sacha : « PDS ne peut pas détecter le retour du mail pour ajouter l
   divers, Autre ; « Déplacements » disparaît, ses lignes passent en Transport. La suggestion d'après le libellé dit
   d'abord ce qui est payé (« Train pour le showcase » = Transport, « Uber Eats » = Livraison de repas). Section
   « Par poste » sous les lignes (`BudgetByFamily`). Test `budget-model` 8/8.
+- 09/11/2026 — **Travail, suite des retours.** « Mes tâches » : chaque case de la matrice est un cadre (tête sur
+  bande douce, tâches collées au cadre). « Actions des projets » : Tout / À faire / À valider en contrôle segmenté
+  (plus de seconde barre d'onglets). **Une tâche mène à la page concernée** : colonne `personal_tasks.project_page`
+  (migration `20261109200101_personal_task_page`, liste fixe de 13 pages dans `lib/work/task-pages.ts`). PO la
+  lit dans les mots d'une action de réunion (« Valider le budget du clip » → Budget, « Réserver le studio pour les
+  prises de voix » → Sessions studio, « Envoyer le moodboard au réalisateur » → Conception), par du code, jamais
+  par un modèle ; la tâche prend le projet de sa réunion (les tâches déjà mises le récupèrent). Dans la modale :
+  Projet (recherche) et Page à ouvrir, proposée d'après l'intitulé. Sur l'accueil, « Vos tâches » ouvre la page.

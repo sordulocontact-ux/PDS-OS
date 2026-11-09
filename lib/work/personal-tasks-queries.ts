@@ -2,6 +2,7 @@ import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 import type { PersonalTask } from "@/lib/work/personal-tasks";
+import { isTaskPage } from "@/lib/work/task-pages";
 
 // The done ones kept on the page: enough to undo a tick, not an archive.
 const DONE_SHOWN = 30;
@@ -17,7 +18,7 @@ export async function loadMyPersonalTasks(): Promise<{
 }> {
   const supabase = await createClient();
   const columns =
-    "id, title, due_date, important, urgent, project_id, status, done_at, source_call:calls!personal_tasks_call_same_org(id, title)";
+    "id, title, due_date, important, urgent, project_id, project_page, status, done_at, source_call:calls!personal_tasks_call_same_org(id, title), project:projects!personal_tasks_project_same_org(title)";
   const [todoRes, doneRes] = await Promise.all([
     supabase
       .from("personal_tasks")
@@ -41,6 +42,8 @@ export async function loadMyPersonalTasks(): Promise<{
     important: row.important,
     urgent: row.urgent,
     projectId: row.project_id,
+    projectTitle: row.project?.title ?? null,
+    page: isTaskPage(row.project_page) ? row.project_page : null,
     done: row.status === "done",
     doneAt: row.done_at,
     source: row.source_call

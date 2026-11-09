@@ -12250,6 +12250,7 @@ export type Database = {
           organization_id: string
           owner_person_id: string
           project_id: string | null
+          project_page: string | null
           source_call_id: string | null
           source_report_item_id: string | null
           status: string
@@ -12266,6 +12267,7 @@ export type Database = {
           organization_id: string
           owner_person_id?: string
           project_id?: string | null
+          project_page?: string | null
           source_call_id?: string | null
           source_report_item_id?: string | null
           status?: string
@@ -12282,6 +12284,7 @@ export type Database = {
           organization_id?: string
           owner_person_id?: string
           project_id?: string | null
+          project_page?: string | null
           source_call_id?: string | null
           source_report_item_id?: string | null
           status?: string

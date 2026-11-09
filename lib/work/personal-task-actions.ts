@@ -6,14 +6,23 @@ import { z } from "zod";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { createClient } from "@/lib/supabase/server";
+import { TASK_PAGES } from "@/lib/work/task-pages";
 
 type Result = { ok: true } | { ok: false };
+
+// The project and the page of it the task opens (retour du 09/11/2026); a
+// page without a project is dropped.
+const linkInput = {
+  projectId: z.uuid().nullable().default(null),
+  page: z.enum(TASK_PAGES).nullable().default(null),
+};
 
 const addInput = z.object({
   title: z.string().trim().min(1).max(300),
   dueDate: z.iso.date().nullable(),
   important: z.boolean().default(false),
   urgent: z.boolean().default(false),
+  ...linkInput,
 });
 
 /** A task the person writes for themselves (« Mes tâches »). */
@@ -30,6 +39,8 @@ export async function addPersonalTask(
     due_date: p.data.dueDate,
     important: p.data.important,
     urgent: p.data.urgent,
+    project_id: p.data.projectId,
+    project_page: p.data.projectId ? p.data.page : null,
   });
   if (error) console.error("addPersonalTask:", error.message);
   revalidatePath(routes.work);
@@ -83,9 +94,11 @@ const editInput = z.object({
   title: z.string().trim().min(1).max(300),
   dueDate: z.iso.date().nullable(),
   important: z.boolean(),
+  ...linkInput,
 });
 
-/** Its wording, its date and its importance, changed by its owner. */
+/** Its wording, its date, its importance and where it leads, changed by its
+ * owner. */
 export async function updatePersonalTask(
   taskId: string,
   input: z.input<typeof editInput>,
@@ -100,6 +113,8 @@ export async function updatePersonalTask(
       title: p.data.title,
       due_date: p.data.dueDate,
       important: p.data.important,
+      project_id: p.data.projectId,
+      project_page: p.data.projectId ? p.data.page : null,
     })
     .eq("id", taskId);
   if (error) console.error("updatePersonalTask:", error.message);

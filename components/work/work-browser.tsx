@@ -4,13 +4,13 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { EmptyNote } from "@/components/shell/empty-state";
-import { DataTableViews } from "@/components/ui/data-table-views";
 import {
   FilterBar,
   ListToolbar,
   type FilterControl,
 } from "@/components/ui/filter-bar";
 import { SearchField } from "@/components/ui/search-field";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 import { work } from "@/lib/i18n/fr/work";
 import { optionsByName } from "@/lib/ui/filter-options";
 import { normalizeSearch } from "@/lib/utils/search";
@@ -49,7 +49,8 @@ const matches = (row: WorkRow, filters: WorkFilters, needle: string) =>
     ).includes(needle));
 
 /**
- * The global Travail under its lead: tabs Tout | À faire | À valider, each
+ * The global Travail under its lead: Tout | À faire | À valider in a
+ * segmented control (never a second row of tabs under the page's), each
  * count being every action of the view (« Maintenant » included), then one
  * table whose rows are grouped by when — En retard, Cette semaine, Plus
  * tard, Sans échéance, and what waits for someone else. Above the table,
@@ -120,11 +121,16 @@ export function WorkBrowser({
   const kept = rows.filter((row) => matches(row, filters, needle));
   const listed = kept.filter((row) => row.key !== lead);
   const shown = listed.filter((row) => inView(row, view));
-  const tabs = WORK_VIEWS.map((key) => ({
-    label: t.views[key],
-    count: kept.filter((row) => inView(row, key)).length,
-    current: view === key,
-    onSelect: () => select(key),
+  const views = WORK_VIEWS.map((key) => ({
+    value: key,
+    label: (
+      <>
+        {t.views[key]}
+        <span className="ml-1.5 text-[color:var(--text-tertiary)] tabular-nums">
+          {kept.filter((row) => inView(row, key)).length}
+        </span>
+      </>
+    ),
   }));
   const groups = WORK_GROUPS.map((group) => ({
     group,
@@ -172,7 +178,17 @@ export function WorkBrowser({
     needle !== "" || Object.values(filters).some((value) => value !== null);
 
   return (
-    <DataTableViews label={t.viewsLabel} views={tabs}>
+    <div className="flex flex-col gap-4">
+      {/* A segmented control, not a second row of tabs under « Actions des
+          projets | Mes tâches » (retour du 09/11/2026, « une double
+          navigation »): the same place as « Matrice | Liste » there. */}
+      <SegmentedControl
+        aria-label={t.viewsLabel}
+        className="self-start"
+        options={views}
+        value={view}
+        onChange={(next) => next && select(next)}
+      />
       <ListToolbar
         search={
           <SearchField
@@ -194,6 +210,6 @@ export function WorkBrowser({
       ) : (
         <WorkTable groups={groups} />
       )}
-    </DataTableViews>
+    </div>
   );
 }

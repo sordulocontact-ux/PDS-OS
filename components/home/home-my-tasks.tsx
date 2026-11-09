@@ -13,6 +13,7 @@ import { isOverdue } from "@/lib/insights/dates";
 import { overdueTone } from "@/lib/ui/state-tones";
 import { formatShortDay } from "@/lib/utils/day";
 import { quadrantOf, type PersonalTask } from "@/lib/work/personal-tasks";
+import { taskHref } from "@/lib/work/task-pages";
 
 const fr = { work };
 
@@ -23,7 +24,8 @@ const MAX = 3;
  * « Vos tâches » on the home (lot 5 of the retour du 31/10/2026, « des
  * notifications aussi sur l'accueil »): the viewer's own urgent tasks, late
  * first (their meetings' included, put in without asking). Each row opens
- * « Mes tâches ». Nothing when there is none.
+ * the page the task is about, else « Mes tâches ». Nothing when there is
+ * none.
  */
 export function HomeMyTasks({
   tasks,
@@ -49,7 +51,8 @@ export function HomeMyTasks({
         return (
           <HomeRow
             key={task.id}
-            href={href}
+            // The page it is about, else « Mes tâches ».
+            href={taskHref(task.projectId, task.page) ?? href}
             badges={
               <>
                 {late && (
@@ -67,7 +70,16 @@ export function HomeMyTasks({
                   <MarkedText text={task.title} />
                 </span>
               }
-              sub={[when, task.source && t.fromCall(task.source.callTitle)]
+              sub={[
+                when,
+                task.projectId &&
+                  task.projectTitle &&
+                  t.leadsTo(
+                    task.projectTitle,
+                    t.pages[task.page ?? "overview"],
+                  ),
+                task.source && t.fromCall(task.source.callTitle),
+              ]
                 .filter(Boolean)
                 .join(" · ")}
             />

@@ -3,6 +3,7 @@
 // list sorts again after a change).
 
 import { daysBetween } from "@/lib/utils/calendar-period";
+import type { TaskPage } from "@/lib/work/task-pages";
 
 export type PersonalTask = {
   id: string;
@@ -11,6 +12,11 @@ export type PersonalTask = {
   important: boolean;
   urgent: boolean;
   projectId: string | null;
+  // Its project's title, when the person still sees it.
+  projectTitle: string | null;
+  // The page of its project it opens (lib/work/task-pages.ts); null: the
+  // project's overview.
+  page: TaskPage | null;
   done: boolean;
   doneAt: string | null;
   // The meeting it was suggested by (lot 4), when the person can still see it.

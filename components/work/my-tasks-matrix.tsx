@@ -22,9 +22,10 @@ const caption =
 /**
  * The Eisenhower matrix of « Mes tâches » (« comme l'app Matrix »), the
  * first view of the tab (retour du 09/11/2026): four boxes, urgent and
- * important at the top left. Each box is a list of the home (docs/DESIGN.md
- * § 4, « Accueil »): its name and count in grey above, what it means below
- * them, then its tasks by due date in one frame, hairlines between the rows.
+ * important at the top left, each its own frame (« une frame pour chaque
+ * partie »): its name, count and meaning on a soft band, then its tasks by
+ * due date against the frame, hairlines between the rows; the two boxes of
+ * a row as tall as each other.
  * A task goes to another box by its « ⋯ » or dragged onto it.
  */
 export function MyTasksMatrix({
@@ -47,7 +48,7 @@ export function MyTasksMatrix({
   const [over, setOver] = useState<Quadrant | null>(null);
 
   return (
-    <div className="grid gap-x-4 gap-y-8 md:grid-cols-2">
+    <div className="grid gap-4 md:grid-cols-2">
       {QUADRANTS.map((box) => {
         const own = tasks.filter((task) => quadrantOf(task, today) === box);
         return (
@@ -71,15 +72,16 @@ export function MyTasksMatrix({
               );
               if (task && quadrantOf(task, today) !== box) onMove(task, box);
             }}
-            className="flex flex-col gap-2"
+            className={cn(
+              "flex min-h-48 flex-col overflow-hidden rounded-xl border bg-card transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)]",
+              over === box
+                ? "border-[color:var(--border-strong)] bg-[var(--control-bg-hover)]"
+                : "border-[color:var(--border-default)]",
+            )}
           >
-            <div className="flex flex-col gap-0.5 px-1">
-              <h2
-                className={cn(
-                  caption,
-                  "font-semibold text-[color:var(--text-secondary)]",
-                )}
-              >
+            {/* Its head on a soft band, as a table's (docs/DESIGN.md § 4). */}
+            <div className="flex flex-col gap-0.5 border-b border-[color:var(--border-hairline)] bg-[var(--surface-soft)] px-4 py-3">
+              <h2 className="text-[length:var(--type-body-md)] leading-[var(--type-body-md-lh)] font-semibold text-[color:var(--text-primary)]">
                 {t.quadrants[box]}
                 {own.length > 0 && (
                   <span className="ml-1.5 font-medium text-[color:var(--text-tertiary)] tabular-nums">
@@ -87,13 +89,13 @@ export function MyTasksMatrix({
                   </span>
                 )}
               </h2>
-              <p className={cn(caption, "text-[color:var(--text-tertiary)]")}>
+              <p className={cn(caption, "text-[color:var(--text-secondary)]")}>
                 {t.quadrantHelp[box]}
               </p>
             </div>
             <TaskList
               label={t.quadrants[box]}
-              highlighted={over === box}
+              flush
               empty={own.length === 0 ? t.boxEmpty : undefined}
             >
               {own.map((task) => (

@@ -486,7 +486,9 @@ Refonte du 27/10/2026, d'après `docs/VISION-UX.md` § 2 (les cinq questions) :
   ligne « Validation : … · Ensuite : … », le bouton plein « Ouvrir » (le geste, `actionHref`).
   Rien à faire : « Rien à faire pour vous », et la Vue d'ensemble de chaque projet dit qui on
   attend.
-- Dessous, onglets **Tout / À faire / À valider**, puis **un tableau** (`DataTable`, Sacha 28/10 :
+- Dessous, **Tout / À faire / À valider en contrôle segmenté** (nombre en gris ; plus des onglets depuis le
+  09/11/2026 : deux barres d'onglets l'une sous l'autre sous « Actions des projets | Mes tâches » faisaient
+  une double navigation), puis **un tableau** (`DataTable`, Sacha 28/10 :
   « comme Asana, Plane, GitLab ») : **Action** (l'endroit dans le module en dessous, « Mixage »,
   « Production › Pochette »), **Projet** (étiquette à la teinte du projet, `projectHue`, la même que
   dans les Calls et le Calendrier), **Module** (étiquette Cadrage, Marketing, Master, Juridique,
@@ -498,9 +500,14 @@ Refonte du 27/10/2026, d'après `docs/VISION-UX.md` § 2 (les cinq questions) :
   Action (projet, module et lieu en dessous) et État ; sous 1024 px, le module repasse sous
   l'action. L'action de « Maintenant » n'y est jamais répétée.
 - **Mes tâches** (onglet à côté des actions, retour du 09/11/2026) : la **matrice d'Eisenhower par
-  défaut**, la liste en second. Chaque case est dessinée comme une liste de l'accueil (nom et nombre
-  en `caption` gris, sens en tertiaire, liste encadrée `--border-default`, rayon 12, filets), jamais
-  une carte dans une carte ni une pastille en guise de titre. Une ligne = case à cocher, intitulé
+  défaut**, la liste en second. **Chaque case est son propre cadre**
+  (« une frame pour chaque partie ») : contour `--border-default`, rayon 12, fond carte, au moins 192 px
+  de haut ; en tête, sur bande douce `--surface-soft`, son nom en `body-md` semi-gras, son nombre en
+  tertiaire et son sens en `caption` ; puis ses tâches collées au cadre, filets entre elles (la liste n'a
+  pas de contour à elle : rien d'encadré dans une carte). Les deux cases d'une rangée ont la même hauteur ;
+  une tâche glissée dessus fonce le contour. **Une tâche mène à sa page** (retour du 09/11/2026) : son intitulé est un
+  lien (flèche ↗ discrète) vers la page de son projet qu'elle concerne, dite dessous (« Minuit pile ›
+  Budget ») ; sans page, la Vue d'ensemble du projet ; sans projet, pas de lien. Une ligne = case à cocher, intitulé
   `body-md` medium, échéance et réunion d'origine en `caption`. Les actions des réunions arrivent
   **sans validation** ; ajouter à la main est secondaire (bouton de l'en-tête, modale).
 

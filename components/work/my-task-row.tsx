@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { formatShortDay } from "@/lib/utils/day";
 import { withoutMarkdownMarks } from "@/lib/utils/markdown-marks";
 import { deletePersonalTask } from "@/lib/work/personal-task-actions";
+import { taskHref } from "@/lib/work/task-pages";
 import {
   QUADRANTS,
   quadrantOf,
@@ -31,17 +32,18 @@ const caption =
 
 /**
  * Tasks of « Mes tâches » in one frame, as the home's lists: border, card
- * background, radius 12, hairlines between the rows. `highlighted`: a task
- * is dragged over it (a box of the matrix). `empty`: said inside the frame.
+ * background, radius 12, hairlines between the rows. `flush`: without its
+ * own frame, inside one (a box of the matrix: no frame in a frame).
+ * `empty`: said inside the frame.
  */
 export function TaskList({
   label,
-  highlighted = false,
+  flush = false,
   empty,
   children,
 }: {
   label: string;
-  highlighted?: boolean;
+  flush?: boolean;
   empty?: string;
   children?: React.ReactNode;
 }) {
@@ -49,10 +51,9 @@ export function TaskList({
     <ul
       aria-label={label}
       className={cn(
-        "flex flex-col overflow-hidden rounded-xl border bg-card transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] [&>li+li]:border-t [&>li+li]:border-[color:var(--border-hairline)]",
-        highlighted
-          ? "border-[color:var(--border-strong)] bg-[var(--control-bg-hover)]"
-          : "border-[color:var(--border-default)]",
+        "flex flex-col [&>li+li]:border-t [&>li+li]:border-[color:var(--border-hairline)]",
+        !flush &&
+          "overflow-hidden rounded-xl border border-[color:var(--border-default)] bg-card",
       )}
     >
       {empty ? (
@@ -73,8 +74,9 @@ export function TaskList({
 
 /**
  * One task of « Mes tâches », laid out as a row of the home's lists: ticked
- * in place, its wording (16 px medium), below its due date and the meeting
- * it comes from; on the right « En retard » and its box (in the list; the
+ * in place, its wording (16 px medium) a link to the page it is about when
+ * it has a project, below its due date, that page (« Minuit pile › Budget »)
+ * and the meeting it comes from; on the right « En retard » and its box (in the list; the
  * matrix's box already says it). With the handlers, its « ⋯ »: to another
  * box (also dragged with the mouse), « Modifier », « Supprimer ».
  */
@@ -100,6 +102,11 @@ export function TaskRow({
   const late =
     !task.done && task.dueDate !== null && isOverdue(task.dueDate, today);
   const box = quadrantOf(task, today);
+  const href = taskHref(task.projectId, task.page);
+  const where =
+    href && task.projectTitle
+      ? t.leadsTo(task.projectTitle, t.pages[task.page ?? "overview"])
+      : null;
   const draggable = Boolean(onMove) && !task.done;
   return (
     <li
@@ -134,7 +141,23 @@ export function TaskRow({
               : "text-[color:var(--text-primary)]",
           )}
         >
-          <MarkedText text={task.title} />
+          {href ? (
+            // The task opens the page it is about (retour du 09/11/2026).
+            <ViewLink
+              href={href}
+              draggable={false}
+              aria-label={t.open(plainTitle, where ?? "")}
+              className="decoration-[color:var(--border-hover)] underline-offset-[3px] hover:underline focus-visible:underline"
+            >
+              <MarkedText text={task.title} />
+              <IconArrowUpRight
+                aria-hidden
+                className="ml-1 inline size-3.5 align-[-1px] text-[color:var(--text-tertiary)]"
+              />
+            </ViewLink>
+          ) : (
+            <MarkedText text={task.title} />
+          )}
         </span>
         <span
           className={cn(
@@ -145,6 +168,7 @@ export function TaskRow({
           {task.dueDate
             ? t.due(formatShortDay(task.dueDate, { bare: true }))
             : t.noDue}
+          {where && ` · ${where}`}
           {task.source && (
             <>
               {" · "}

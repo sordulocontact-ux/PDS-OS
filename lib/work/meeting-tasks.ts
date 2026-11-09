@@ -5,6 +5,7 @@ import type { Access } from "@/lib/auth/access";
 import { loadMembers } from "@/lib/framing/related";
 import { daysAgo } from "@/lib/insights/dates";
 import { createClient } from "@/lib/supabase/server";
+import { suggestTaskPage } from "@/lib/work/task-pages";
 
 // Meetings older than this are not dug up again.
 const RECENT_DAYS = 30;
@@ -35,7 +36,9 @@ const fold = (text: string) =>
  * Run with the viewer's session before their tasks are read (the Travail,
  * the home): RLS gives only the calls they see and lets them write only
  * their own tasks. No date, not important: the matrix puts them in
- * « Plus tard » until the person sorts them. Returns whether a read failed.
+ * « Plus tard » until the person sorts them. Each leads to the page of its
+ * meeting's project its words name (lib/work/task-pages.ts). Returns whether
+ * a read failed.
  */
 export async function addMyMeetingTasks(access: Access): Promise<boolean> {
   const me = access.personId;
@@ -46,7 +49,7 @@ export async function addMyMeetingTasks(access: Access): Promise<boolean> {
   const { data: calls, error: callsError } = await supabase
     .from("calls")
     .select(
-      "id, created_by, project:projects!calls_project_same_org(owner_person_id)",
+      "id, created_by, project_id, project:projects!calls_project_same_org(owner_person_id)",
     )
     .gte("occurred_at", daysAgo(RECENT_DAYS))
     .order("occurred_at", { ascending: false });
@@ -127,6 +130,10 @@ export async function addMyMeetingTasks(access: Access): Promise<boolean> {
         title: item.what.trim().slice(0, 300),
         source_call_id: item.callId,
         source_report_item_id: item.id,
+        // Its meeting's project, and the page its words name (« Valider le
+        // budget du clip » opens the Budget), else the project's overview.
+        project_id: call.project_id,
+        project_page: call.project_id ? suggestTaskPage(item.what) : null,
       },
     ];
   });

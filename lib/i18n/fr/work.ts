@@ -154,11 +154,40 @@ export const work = {
       important: "Importante",
       secondary: "Pas importante",
       goesTo: "Rangée dans",
+      // Where it leads (retour du 09/11/2026).
+      project: "Projet",
+      noProject: "Aucun",
+      projectSearch: "Rechercher un projet",
+      projectNone: "Aucun projet ne correspond.",
+      page: "Page à ouvrir",
+      pageSuggested:
+        "Proposée d'après l'intitulé. Un clic sur la tâche ouvre cette page.",
+      pageHint: "Un clic sur la tâche ouvre cette page.",
       submit: "Ajouter la tâche",
       save: "Enregistrer",
       added: "Tâche ajoutée.",
       edited: "Tâche modifiée.",
     },
+    // The pages a task opens (lib/work/task-pages.ts), named as in a
+    // project's sidebar.
+    pages: {
+      overview: "Vue d'ensemble",
+      framing: "Cadrage",
+      strategy: "Stratégie",
+      design: "Conception",
+      production: "Production",
+      activations: "Activations",
+      master: "Master",
+      sessions: "Sessions studio",
+      legal: "Juridique",
+      release: "Distribution",
+      budget: "Budget",
+      calls: "Calls",
+      files: "Fichiers",
+    },
+    // « Minuit pile › Budget », below the task.
+    leadsTo: (project: string, page: string) => `${project} › ${page}`,
+    open: (title: string, where: string) => `Ouvrir « ${title} » : ${where}`,
     // The Eisenhower matrix (« comme l'app Matrix »).
     quadrants: {
       do: "Faire",
