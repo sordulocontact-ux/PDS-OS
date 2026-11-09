@@ -14,13 +14,13 @@ const t = fr.journey;
 
 /** « En attente de **Claire Morel** (lien privé) : valider la V1 · Étape »
  * — who « Maintenant » waits for, an avatar or a clock when nobody is named
- * (a date), and « Voir », but to the step already shown (`shownKey`). */
+ * (a date), and « Voir », but to a step already shown (`shown`). */
 export function WaitingRows({
   items,
-  shownKey,
+  shown = [],
 }: {
   items: NowItem[];
-  shownKey?: string;
+  shown?: string[];
 }) {
   return (
     <ul className="flex flex-col gap-2">
@@ -53,7 +53,7 @@ export function WaitingRows({
                 {[place, step.title].filter(Boolean).join(" › ")}
               </span>
             </span>
-            {step.key !== shownKey && (
+            {!shown.includes(step.key) && (
               <ViewLink
                 href={step.href}
                 className={buttonVariants({ variant: "ghost", size: "sm" })}

@@ -29,7 +29,9 @@ export type NowCardProps = {
   // The module's name in the eyebrow (« Marketing › Les 8 dimensions »).
   moduleLabel?: string;
   // The step shown below: never repeated (VISION-UX § 4).
-  shownKey?: string;
+  // Several when the page shows more than one step (Activations: the levers
+  // and the open activation, Sacha 10/11/2026).
+  shownKey?: string | string[];
   // The viewer's actions in other modules (loadProjectJourneys, elsewhereOf)
   // — or, in the overview, all of them.
   elsewhere?: NowItem[];
@@ -71,7 +73,8 @@ export function NowCard({
 }: NowCardProps) {
   const overview = variant === "overview";
   const all = nowOf(steps);
-  const here = all.mine.filter((s) => s.key !== shownKey);
+  const shown = [shownKey ?? []].flat();
+  const here = all.mine.filter((s) => !shown.includes(s.key));
   const also = here.length < all.mine.length;
   // A module's card shows this module's gesture only; the rest is a line.
   const mine: NowItem[] = [
@@ -108,7 +111,7 @@ export function NowCard({
           {[t.nothing, viewerName].filter(Boolean).join(" · ")}
         </span>
         {waiting.length > 0 ? (
-          <WaitingRows items={waiting.slice(0, 3)} shownKey={shownKey} />
+          <WaitingRows items={waiting.slice(0, 3)} shown={shown} />
         ) : (
           <p className="font-medium">{texts.finished}</p>
         )}

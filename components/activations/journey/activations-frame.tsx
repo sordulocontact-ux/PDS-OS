@@ -74,7 +74,10 @@ export async function ActivationsFrame({
         steps={steps}
         viewerName={viewerName}
         moduleLabel={t.crumb}
-        shownKey={open?.id}
+        // The levers are on this page (LeversBanner): « Maintenant » never
+        // sends to them (Sacha 10/11/2026); the open activation's steps
+        // are left out above.
+        shownKey="levers"
         here={all}
       />
       <LeversBanner
