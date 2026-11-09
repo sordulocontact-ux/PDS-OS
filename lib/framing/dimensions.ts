@@ -133,15 +133,34 @@ export const FIELD_QUESTION_KINDS: readonly QuestionKind[] = [
 export const dimensionOfConstraint = (type: string): Dimension =>
   type === "rights" ? "legal" : "budget";
 
-/** The states an item of a structured answer can be in (PROJ-UX-05). */
+/**
+ * The states an item of a structured answer can be in (PROJ-UX-05), one
+ * menu where none overlaps (Ibé 05/11/2026: « Existe », « Décidé » and « En
+ * cours » mixed what exists, what is decided and how far it is): already
+ * there, or to produce and how far, or not concerned.
+ */
 export const ITEM_STATES = [
-  "exists",
+  "available",
+  "to_decide",
+  "planned",
   "in_progress",
   "done",
-  "decided",
-  "planned",
+  "not_concerned",
 ] as const;
 export type ItemState = (typeof ITEM_STATES)[number];
+/** Stored before 09/11/2026: « Existe », « Décidé » (decided, not yet
+ * planned). */
+export const LEGACY_ITEM_STATES: Record<string, ItemState> = {
+  exists: "available",
+  decided: "planned",
+};
+/** The state an item starts in, by question: nothing presumed done. */
+export const itemStartState = (key: string): ItemState =>
+  key === "existing_elements"
+    ? "available"
+    : key === "work_started"
+      ? "in_progress"
+      : "to_decide";
 export type AnswerItem = { label: string; state: ItemState };
 /** The measures of one success criterion, at most (Ibé 01/11/2026). */
 export const MAX_MEASURES = 6;

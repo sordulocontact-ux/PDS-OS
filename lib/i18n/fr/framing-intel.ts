@@ -267,11 +267,12 @@ export const framingIntel = {
   itemPresets: ["Enregistrement", "Mix", "Mastering", "Master final"],
   // An item of a structured answer (PROJ-UX-05): never « mix » alone.
   itemStates: {
-    exists: "Existe",
-    in_progress: "En cours",
-    done: "Terminé",
-    decided: "Décidé",
+    available: "Déjà disponible",
+    to_decide: "À décider",
     planned: "Prévu",
+    in_progress: "En cours",
+    done: "Finalisé",
+    not_concerned: "Non concerné",
   },
   items: {
     label: "Éléments",

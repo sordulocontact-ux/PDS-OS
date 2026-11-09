@@ -16,6 +16,7 @@ import {
 import type { FramingKnowledge } from "@/lib/framing/knowledge";
 import {
   ITEM_STATES,
+  LEGACY_ITEM_STATES,
   type AnswerItem,
   type Measure,
 } from "@/lib/framing/dimensions";
@@ -144,10 +145,14 @@ function itemsOf(value: unknown): AnswerItem[] | null {
   if (!Array.isArray(value)) return null;
   return value.flatMap((item: unknown) => {
     const i = item as { label?: unknown; state?: unknown } | null;
+    const state =
+      typeof i?.state === "string"
+        ? (LEGACY_ITEM_STATES[i.state] ?? i.state)
+        : null;
     return typeof i?.label === "string" &&
       i.label.trim() &&
-      (ITEM_STATES as readonly unknown[]).includes(i.state)
-      ? [{ label: i.label.trim(), state: i.state as AnswerItem["state"] }]
+      (ITEM_STATES as readonly unknown[]).includes(state)
+      ? [{ label: i.label.trim(), state: state as AnswerItem["state"] }]
       : [];
   });
 }
@@ -329,14 +334,14 @@ function recordOf(key: QuestionKey, k: FramingKnowledge): Record_ {
       // files, confirmed by a person, never asked again from scratch.
       const files = k.files
         .slice(0, 10)
-        .map((f): AnswerItem => ({ label: f.name, state: "exists" }));
+        .map((f): AnswerItem => ({ label: f.name, state: "available" }));
       return items(
         k.files.length > files.length
           ? [
               ...files,
               {
                 label: t.records.moreFiles(k.files.length - files.length),
-                state: "exists",
+                state: "available",
               },
             ]
           : files,

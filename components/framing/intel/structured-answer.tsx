@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { answerItems } from "@/lib/framing/actions/answers";
 import type { QuestionState } from "@/lib/framing/assess";
 import {
-  ITEM_STATES,
+  itemStartState,
   type AnswerItem,
   type ItemState,
 } from "@/lib/framing/dimensions";
@@ -63,7 +63,8 @@ export function StructuredActions({
 
 /**
  * Several items, each with its state (PROJ-UX-05): « le mix » never stands
- * alone, it is « en cours » or « terminé ». Suggestions add an item in one
+ * alone, it is « en cours » or « finalisé », in one menu where no state
+ * overlaps another (Ibé 05/11/2026). Suggestions add an item in one
  * click, several can be picked; the same item is kept once.
  */
 export function ItemsAnswer({
@@ -78,11 +79,14 @@ export function ItemsAnswer({
   const t = fr.framingIntel.items;
   const states = fr.framingIntel.itemStates;
   const { pending, run } = useFramingAction();
+  // A new item starts where the question puts it: « À décider » for what
+  // must be ready, never « En cours » presumed (Ibé 05/11/2026).
+  const initial = itemStartState(question.key);
   const [items, setItems] = useState<AnswerItem[]>(() => {
     const a = question.answer;
     if (a?.kind === "text" && a.items) return a.items;
     const start = draft ?? (a?.kind === "text" ? a.text : null);
-    return start ? [{ label: start, state: "in_progress" }] : [];
+    return start ? [{ label: start, state: initial }] : [];
   });
   const [tried, setTried] = useState(false);
   const has = (label: string) =>
@@ -125,7 +129,7 @@ export function ItemsAnswer({
                       ? all.filter(
                           (i) => i.label.toLowerCase() !== label.toLowerCase(),
                         )
-                      : [...all, { label, state: "in_progress" }],
+                      : [...all, { label, state: initial }],
                   )
                 }
               >
@@ -186,7 +190,7 @@ export function ItemsAnswer({
         variant="outline"
         className="self-start"
         onClick={() =>
-          setItems((all) => [...all, { label: "", state: ITEM_STATES[0] }])
+          setItems((all) => [...all, { label: "", state: initial }])
         }
       >
         {t.add}

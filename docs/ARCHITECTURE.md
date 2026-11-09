@@ -1801,8 +1801,11 @@ liste), est obligatoire ou non, accepte ou non « Rien à signaler » (`{"none":
     la cible est lue par le code dans la phrase dite, jamais par PO ; la Stratégie propose chaque
     mesure comme KPI (« Préparer ce KPI »), sauf celle dont le chiffre est déjà un KPI ;
   - **éléments à états** (`prerequisites`, `existing_elements`, `work_started`,
-    `shape: "items"`) : plusieurs éléments, chacun Existe / En cours / Terminé / Décidé /
-    Prévu (`{ items }`), suggestions en un clic, pré-remplis depuis le Catalogue (étape audio
+    `shape: "items"`) : plusieurs éléments, chacun dans **un seul menu sans chevauchement**
+    (Ibé 05/11, fait le 09/11) : Déjà disponible / À décider / Prévu / En cours / Finalisé / Non
+    concerné (`{ items }` ; « exists » et « decided » enregistrés avant sont lus « Déjà disponible »
+    et « Prévu », `LEGACY_ITEM_STATES`), départ d'un élément ajouté selon la question
+    (`itemStartState` : à décider, déjà disponible, en cours ; jamais « En cours » présumé), suggestions en un clic, pré-remplis depuis le Catalogue (étape audio
     de chaque titre : « mix reçu, pas encore validé » = en cours, seul le master final est
     terminé) et les fichiers ; une phrase proposée (call, contexte) se « précise » avant
     d'être confirmée, sa source gardée (`answerItems` / `answerMeasure`, `keepSource`) ;
