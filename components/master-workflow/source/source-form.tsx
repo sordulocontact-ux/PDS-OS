@@ -29,6 +29,7 @@ export function SourceForm({
   title,
   mixV1Due,
   checked,
+  imports,
   onCancel,
 }: {
   projectId: string;
@@ -36,6 +37,8 @@ export function SourceForm({
   mixV1Due: string | null;
   // « Ce que PDS OS a vérifié », between the versions and the vocals.
   checked?: React.ReactNode;
+  // « Importer une version », under the version (Sacha, 09/11/2026).
+  imports?: React.ReactNode;
   // « Annuler » when the form reopens a confirmed source.
   onCancel?: () => void;
 }) {
@@ -90,6 +93,7 @@ export function SourceForm({
           candidates={title.candidates}
           value={fileId ?? ""}
           onChange={setFileId}
+          imports={imports}
         />
         {tried && (
           <FieldError id="source-version-error">{errors.version}</FieldError>

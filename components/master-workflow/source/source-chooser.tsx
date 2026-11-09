@@ -64,10 +64,12 @@ export function SourceChooser({
               title={title}
               mixV1Due={mixV1Due}
               checked={checked}
+              imports={imports}
               onCancel={confirmed ? () => setEditing(false) : undefined}
             />
           )}
-          {imports}
+          {/* With versions, the import sits under the chosen one. */}
+          {title.candidates.length === 0 && imports}
         </>
       )}
     </div>

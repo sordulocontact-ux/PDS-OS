@@ -21,19 +21,23 @@ const t = fr.masterSource;
  * `DocumentCard` as the newer source and the mix versions), to listen to
  * on the spot — never a lone radio already ticked (Sacha, 09/11/2026). The
  * newest is chosen; « Partir d'une autre version » only when the Catalogue
- * has others.
+ * has others, then « Importer une version » when the right one is missing:
+ * all about the version in one place, the submit alone below (Sacha,
+ * 09/11/2026).
  */
 export function SourceVersionPick({
   id,
   candidates,
   value,
   onChange,
+  imports,
 }: {
   id: string;
   // Newest first: the first is the detected one.
   candidates: SourceVersion[];
   value: string;
   onChange: (fileId: string) => void;
+  imports?: React.ReactNode;
 }) {
   // Uncontrolled menu: its first value only, so it never remounts.
   const [initial] = useState(value);
@@ -88,6 +92,7 @@ export function SourceVersionPick({
           onValueChange={onChange}
         />
       )}
+      {imports}
     </div>
   );
 }
