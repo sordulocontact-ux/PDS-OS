@@ -24,12 +24,22 @@ const FAMILY: Record<string, string> = {
   creation_content: "création & contenus",
   promotion_distribution: "promotion & diffusion",
   experiences_activations: "expériences & activations",
-  // Spending families (MKT-S1-11).
+  // Postes of a budget line (MKT-S1-11, joined by the artist's kinds of
+  // spend on 09/11/2026).
   content_production: "production de contenus",
+  photo_video: "photo et vidéo",
+  image: "image",
   advertising: "publicité & promotion",
   events: "événements & activations",
+  studio: "studio",
   services: "prestations",
-  travel: "déplacements",
+  coaching: "coaching",
+  equipment: "matériel",
+  transport: "transport",
+  lodging: "hébergement",
+  per_diem: "per diem",
+  food: "restauration",
+  food_delivery: "livraison de repas",
   misc: "frais divers",
   other: "autre",
 };

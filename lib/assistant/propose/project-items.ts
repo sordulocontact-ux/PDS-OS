@@ -129,7 +129,7 @@ export function proposeBudgetLineTool({
 }: ProposeContext) {
   return tool({
     description:
-      "Prépare une nouvelle ligne de dépense dans le budget d'un projet lancé : libellé, montant, état (prévu, engagé, payé), famille, note. Seul le chef de projet responsable peut en créer. N'enregistre RIEN : l'utilisateur relit le formulaire pré-rempli et enregistre lui-même.",
+      "Prépare une nouvelle ligne de dépense dans le budget d'un projet lancé : libellé, montant, état (prévu, engagé, payé), poste (transport, hébergement, restauration, livraison de repas, per diem, studio, prestations, photo et vidéo…), note. Seul le chef de projet responsable peut en créer. N'enregistre RIEN : l'utilisateur relit le formulaire pré-rempli et enregistre lui-même.",
     inputSchema: z.object({
       project,
       label: z.string().min(1).max(200).describe("Ce que paie la dépense"),
@@ -137,7 +137,10 @@ export function proposeBudgetLineTool({
       status: said(
         "État de la dépense dans les mots de l'utilisateur (« déjà payé », « engagé »)",
       ),
-      family: z.enum(BUDGET_FAMILIES).optional(),
+      family: z
+        .enum(BUDGET_FAMILIES)
+        .optional()
+        .describe("Poste de la dépense, seulement s'il est clair"),
       note: z.string().max(1000).optional(),
     }),
     execute: async (input) => {

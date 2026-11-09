@@ -139,8 +139,6 @@ export const routes = {
   artistActivity: (id: string) => `/app/catalog/artists/${id}/activity`,
   artistIdentity: (id: string) => `/app/catalog/artists/${id}/identity`,
   artistSessions: (id: string) => `/app/catalog/artists/${id}/sessions`,
-  // A signed artist's spends outside any release (retour de Sacha du 07/11/2026).
-  artistBudget: (id: string) => `/app/catalog/artists/${id}/budget`,
   // Studio sessions: their own page, seen from each artist, project and
   // title they concern (retour d'Ibé du 01/11/2026).
   sessions: "/app/sessions",

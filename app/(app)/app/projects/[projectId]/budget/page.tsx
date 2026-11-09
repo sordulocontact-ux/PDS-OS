@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { FormMessage } from "@/components/auth/form-message";
+import { BudgetByFamily } from "@/components/budget/budget-by-family";
 import { BudgetLines } from "@/components/budget/budget-lines";
 import { BudgetSummary } from "@/components/budget/budget-summary";
 import { PayList } from "@/components/invoices/pay-list";
@@ -50,6 +51,8 @@ export default async function ProjectBudgetPage({
         deliverables={deliverables}
         organizationId={access.organizationId}
       />
+      {/* What each poste adds up to (retour du 09/11/2026). */}
+      <BudgetByFamily lines={lines} />
     </div>
   );
 }

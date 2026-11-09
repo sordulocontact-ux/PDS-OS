@@ -1916,3 +1916,12 @@ Demande de Sacha : « PDS ne peut pas détecter le retour du mail pour ajouter l
   (migration `20261109170101_clearance_holder_email`, test `legal-clearance-holder-email`).
   Une réponse reçue par e-mail est lue par PO dès l'ouverture de « Négocier », lecture gardée avec elle
   (migration `20261109180101_clearance_reply_reading`). Titre et phrase d'une `StepSection` : 2 px, puis 12 px.
+- 09/11/2026 — **Les postes du Budget de l'artiste passent dans le Budget des projets** (retour : « ça aurait été mieux
+  que tu le ranges dans la partie budget des projets »). La fiche artiste revient à son état d'avant le 08/11 : plus
+  d'onglet Budget, table `artist_expenses` et fonction `is_signed_artist` supprimées (migration
+  `20261109190101_budget_posts`). Une ligne du Budget d'un projet a maintenant un **Poste** (ex-« Famille ») dans une
+  seule liste de 16 : Production de contenus, Photo et vidéo, Image, Publicité & promotion, Événements & activations,
+  Studio, Prestations, Coaching, Matériel, Transport, Hébergement, Per diem, Restauration, Livraison de repas, Frais
+  divers, Autre ; « Déplacements » disparaît, ses lignes passent en Transport. La suggestion d'après le libellé dit
+  d'abord ce qui est payé (« Train pour le showcase » = Transport, « Uber Eats » = Livraison de repas). Section
+  « Par poste » sous les lignes (`BudgetByFamily`). Test `budget-model` 8/8.

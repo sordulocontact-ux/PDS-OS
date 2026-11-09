@@ -176,20 +176,6 @@ export function BudgetLineForm({
               : t.amountHint}
         </p>
       </div>
-      <div className="grid gap-1.5">
-        <Label htmlFor="budget-status" required>
-          {t.status}
-        </Label>
-        <OptionSelect
-          id="budget-status"
-          required
-          label={t.status}
-          options={fr.budget.statuses}
-          disabled={followsInvoice}
-          value={status}
-          onChange={(v) => isBudgetStatus(v) && setStatus(v)}
-        />
-      </div>
       <BudgetClassificationFields
         label={label}
         value={classification}
@@ -197,6 +183,23 @@ export function BudgetLineForm({
         levers={levers}
         deliverables={deliverables}
         detailError={detailError}
+        afterFamily={
+          <div className="grid gap-1.5">
+            <Label htmlFor="budget-status" required>
+              {t.status}
+            </Label>
+            <OptionSelect
+              id="budget-status"
+              required
+              fill
+              label={t.status}
+              options={fr.budget.statuses}
+              disabled={followsInvoice}
+              value={status}
+              onChange={(v) => isBudgetStatus(v) && setStatus(v)}
+            />
+          </div>
+        }
       />
       {organizationId && (
         <FilePickField

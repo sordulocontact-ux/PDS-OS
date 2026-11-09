@@ -698,6 +698,10 @@ D'après le proto « Projet complet » (`docs/protos/projet.html`), qui fait foi
   de sa colonne** (texte, nombre, date, menu `OptionSelect fill`) ; seul un menu hors formulaire (une
   ligne, un filtre) garde la largeur de sa valeur. Appliqué d'abord à « Nouveau livrable » ; à reprendre
   écran par écran. Dans la liste d'un menu, une option longue passe à la ligne (jamais sous la coche).
+- **Menu à longue liste** (retour du 09/11/2026) : au-delà d'une dizaine de choix, le menu est un
+  `SearchSelect` : à l'ouverture, on est directement dans un champ de recherche, les choix filtrés dessous
+  (« restau » ne laisse que Restauration). Premier cas : le Poste d'une ligne de budget, dont la modale met
+  aussi Statut, Levier et Livrable sur toute la largeur.
 - **Citation** (Sacha, 07/11/2026) : la phrase exacte d'un échange se détache du texte, filet de 2 px à
   gauche (`--border-default`) **et** fond un peu plus clair (`--surface-soft`), coins droits arrondis,
   texte 15 px secondaire (`ProposalSource`).

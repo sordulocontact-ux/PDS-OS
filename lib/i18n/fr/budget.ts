@@ -33,27 +33,55 @@ export const budget = {
     paid: "Payé",
   },
   // MKT-S1-11: the team's real spending, said with examples.
+  // The « Poste » of a line (retour du 09/11/2026: the artist's kinds of
+  // spend joined the families, one list).
   families: {
     content_production: "Production de contenus",
+    photo_video: "Photo et vidéo",
+    image: "Image",
     advertising: "Publicité & promotion",
     events: "Événements & activations",
+    studio: "Studio",
     services: "Prestations",
-    travel: "Déplacements",
+    coaching: "Coaching",
+    equipment: "Matériel",
+    transport: "Transport",
+    lodging: "Hébergement",
+    per_diem: "Per diem",
+    food: "Restauration",
+    food_delivery: "Livraison de repas",
     misc: "Frais divers",
     other: "Autre",
   },
   familyHints: {
     content_production:
-      "Ce qui se fabrique : clip, photos, visuels, teaser, pochette.",
+      "Ce qui se fabrique : clip, visuels, teaser, pochette, motion design.",
+    photo_video: "Shooting photo, tournage, contenus pour les réseaux.",
+    image: "Stylisme, tenues, coiffure, maquillage.",
     advertising:
       "Ce qui fait connaître : campagne publicitaire, sponsorisation, relations presse, influence, playlists.",
     events:
       "Ce qui se vit : concert, showcase, release party, activation de terrain.",
+    studio: "Location de studio, heures d'enregistrement.",
     services:
-      "Ce qu'un prestataire facture : studio, mixage, mastering, avocat, graphiste.",
-    travel: "Train, avion, hôtel, transport sur place.",
-    misc: "Repas, fournitures, abonnements, logiciels.",
+      "Ce qu'un prestataire facture : mixage, mastering, avocat, graphiste, réalisateur.",
+    coaching: "Coach vocal, scénique, média training.",
+    equipment: "Instrument, micro, location de matériel.",
+    transport: "Train, avion, taxi, Uber, essence, péage.",
+    lodging: "Hôtel, Airbnb.",
+    per_diem: "Indemnité par jour en déplacement, en tournée.",
+    food: "Restaurant, repas de session, traiteur.",
+    food_delivery: "Uber Eats, Deliveroo.",
+    misc: "Fournitures, abonnements, logiciels.",
     other: "Ce qui n'entre nulle part ailleurs : précisez ce que c'est.",
+  },
+  // « Par poste » (retour du 09/11/2026, repris du Budget de l'artiste).
+  byFamily: {
+    title: "Par poste",
+    hint: "Toutes les lignes, quel que soit leur état, additionnées par poste.",
+    none: "Sans poste",
+    count: (count: number) => `${count} ligne${count > 1 ? "s" : ""}`,
+    pending: (amount: string) => `dont ${amount} pas encore engagés`,
   },
   filters: {
     label: "Filtrer par statut",
@@ -91,7 +119,9 @@ export const budget = {
       "Le montant et l'état suivent la facture : ils changent quand elle est reçue, puis payée.",
     amountHint: "Par exemple 1500 ou 1 500,50.",
     status: "Statut",
-    family: "Famille",
+    family: "Poste",
+    familySearch: "Rechercher un poste",
+    familyNone: "Aucun poste ne correspond.",
     familyDetail: "Précisez de quoi il s'agit",
     familyDetailRequired: "Dites ce qu'est cette dépense « Autre ».",
     suggestion: (family: string, word: string) =>

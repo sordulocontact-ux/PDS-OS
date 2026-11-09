@@ -123,11 +123,7 @@ export default async function ArtistLayout({
         <ArtistIdentityNow artistId={artist.id} artistName={artist.name} />
       </Suspense>
 
-      <ArtistTabs
-        artistId={artist.id}
-        hasDeezer={artist.deezerId !== null}
-        showBudget={canEdit && artist.relation === "signed"}
-      />
+      <ArtistTabs artistId={artist.id} hasDeezer={artist.deezerId !== null} />
       <div className="-mt-2 flex flex-col gap-[var(--section-gap)]">
         {children}
       </div>

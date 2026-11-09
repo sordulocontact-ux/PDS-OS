@@ -13,14 +13,28 @@ export const BUDGET_STATUSES = [
 ] as const;
 export type BudgetStatus = (typeof BUDGET_STATUSES)[number];
 
-// The team's real spending (MKT-S1-11), each with a definition and
-// examples (fr.budget.families); « Autre » asks a precision.
+// The « Poste » of a line: the team's real spending (MKT-S1-11) and, since
+// the retour du 09/11/2026, the finer kinds the artist's Budget had
+// (transport, restauration, livraison de repas, per diem…), in one list,
+// grouped: what is made, what makes known, who is paid, the trips, the
+// meals, the rest. Each with a definition and examples
+// (fr.budget.familyHints); « Autre » asks a precision. Named « family » in
+// the code and the database (server functions write 'services').
 export const BUDGET_FAMILIES = [
   "content_production",
+  "photo_video",
+  "image",
   "advertising",
   "events",
+  "studio",
   "services",
-  "travel",
+  "coaching",
+  "equipment",
+  "transport",
+  "lodging",
+  "per_diem",
+  "food",
+  "food_delivery",
   "misc",
   "other",
 ] as const;
@@ -122,30 +136,83 @@ export function budgetTotals(
   };
 }
 
+/** What one poste adds up to (« Par poste », retour du 09/11/2026). */
+export type BudgetFamilyTotal = {
+  // Null: the lines with no poste chosen.
+  family: BudgetFamily | null;
+  count: number;
+  // Every line, whatever its state: the forecast of the poste.
+  totalCents: number;
+  // Of which not engaged yet (estimated or quoted).
+  pendingCents: number;
+};
+
+/** The postes the project's lines use, the costliest first, the lines
+ * without one last; computed by code, never by PO. */
+export function budgetFamilyTotals(
+  lines: Pick<BudgetLine, "amountCents" | "status" | "family">[],
+): BudgetFamilyTotal[] {
+  const totals = new Map<BudgetFamily | null, BudgetFamilyTotal>();
+  for (const line of lines) {
+    const row = totals.get(line.family) ?? {
+      family: line.family,
+      count: 0,
+      totalCents: 0,
+      pendingCents: 0,
+    };
+    row.count += 1;
+    row.totalCents += line.amountCents;
+    if (line.status === "planned" || line.status === "proposed")
+      row.pendingCents += line.amountCents;
+    totals.set(line.family, row);
+  }
+  const order = (family: BudgetFamily | null) =>
+    family === null ? BUDGET_FAMILIES.length : BUDGET_FAMILIES.indexOf(family);
+  return [...totals.values()].sort(
+    (a, b) =>
+      Number(a.family === null) - Number(b.family === null) ||
+      b.totalCents - a.totalCents ||
+      order(a.family) - order(b.family),
+  );
+}
+
 // Words of a label that point at a family (MKT-S1-11): a suggestion the
 // person sees with its reason and may refuse, never a silent choice.
+// What is paid before what it is for: « Train pour le showcase » is a
+// Transport, « Uber Eats » a meal delivery before a ride, « Repas de session
+// studio » a meal; then what is made (the look and the shoot before the
+// content they serve), who is paid, what makes known.
 const FAMILY_WORDS: Array<[BudgetFamily, RegExp]> = [
+  ["food_delivery", /\b(uber ?eats|deliveroo|just ?eat|livraison de repas)/],
+  ["per_diem", /\b(per ?diem|indemnite)/],
+  ["lodging", /\b(hotel|hebergement|airbnb|logement)/],
+  [
+    "transport",
+    /\b(train|avion|vol\b|billet|transport|deplacement|taxi|uber|vtc|essence|peage)/,
+  ],
+  ["food", /\b(repas|restau|dejeuner|diner|traiteur|catering)/],
+  ["image", /\b(stylis|tenue|coiff|maquill|habill)/],
+  ["photo_video", /\b(photo|shooting|tournage|video|reels?\b|tiktok)/],
+  [
+    "content_production",
+    /\b(clip|visuel|pochette|montage|teaser|contenu|motion|graphis)/,
+  ],
+  [
+    "services",
+    /\b(prestat|freelance|mixage|mix\b|master|ingenieur|inge son|avocat|comptab|graphiste|realisat|consultant)/,
+  ],
+  ["studio", /\b(studio)/],
+  ["coaching", /\b(coach|media training)/],
+  ["equipment", /\b(materiel|instrument|micro\b|location de|enceinte|casque)/],
   [
     "advertising",
     /\b(campagne|pub\b|publicit|ads?\b|sponsor|boost|promo|playlist|presse|rp\b|influen)/,
   ],
   [
-    "content_production",
-    /\b(clip|tournage|video|photo|shooting|visuel|pochette|montage|teaser|contenu|motion|graphis)/,
-  ],
-  [
     "events",
     /\b(concert|showcase|evenement|soiree|release party|live|salle|festival|activation|pop.?up)/,
   ],
-  [
-    "travel",
-    /\b(train|avion|vol|billet|transport|deplacement|hotel|hebergement|taxi|uber|essence|peage)/,
-  ],
-  [
-    "services",
-    /\b(prestat|freelance|mixage|mix|master|ingenieur|studio|avocat|comptab|graphiste|realisat|consultant)/,
-  ],
-  ["misc", /\b(frais|repas|fourniture|abonnement|logiciel|licence|divers)/],
+  ["misc", /\b(frais|fourniture|abonnement|logiciel|licence|divers)/],
 ];
 
 const fold = (text: string) =>

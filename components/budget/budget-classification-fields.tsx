@@ -2,6 +2,7 @@
 
 import { OptionSelect } from "@/components/framing/option-select";
 import { Button } from "@/components/ui/button";
+import { SearchSelect } from "@/components/ui/search-select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -37,6 +38,7 @@ export function BudgetClassificationFields({
   levers,
   deliverables,
   detailError,
+  afterFamily,
 }: {
   // The label typed: what the suggestions read.
   label: string;
@@ -45,6 +47,9 @@ export function BudgetClassificationFields({
   levers: BudgetLever[];
   deliverables: BudgetDeliverable[];
   detailError: boolean;
+  // Laid right after the poste (and its precision): the line's status
+  // (retour du 09/11/2026: « le poste avant le statut »).
+  afterFamily?: React.ReactNode;
 }) {
   const t = fr.budget.form;
   const set = (patch: Partial<Classification>) =>
@@ -67,12 +72,16 @@ export function BudgetClassificationFields({
     <>
       <div className="grid gap-1.5">
         <Label htmlFor="budget-family">{t.family}</Label>
-        <OptionSelect
+        {/* 16 postes: searched as one types (retour du 09/11/2026). */}
+        <SearchSelect
           id="budget-family"
           label={t.family}
           options={families}
           value={value.family}
           onChange={(family) => set({ family })}
+          searchPlaceholder={t.familySearch}
+          emptyLabel={t.familyNone}
+          fill
         />
         {shownFamily && (
           <p className="text-caption text-muted-foreground">
@@ -118,11 +127,13 @@ export function BudgetClassificationFields({
           )}
         </div>
       )}
+      {afterFamily}
       {levers.length > 0 && (
         <div className="grid gap-1.5">
           <Label htmlFor="budget-lever">{t.lever}</Label>
           <OptionSelect
             id="budget-lever"
+            fill
             label={t.lever}
             options={{
               [NONE]: t.none,
@@ -138,6 +149,7 @@ export function BudgetClassificationFields({
           <Label htmlFor="budget-deliverable">{t.deliverable}</Label>
           <OptionSelect
             id="budget-deliverable"
+            fill
             label={t.deliverable}
             options={{
               [NONE]: t.none,

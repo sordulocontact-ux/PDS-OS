@@ -1,8 +1,9 @@
 -- Budget : familles, statut Facturé, livrable et pièce (MKT-S1-11, 12, 15,
--- supabase/migrations/20261012101101_budget_model.sql).
+-- supabase/migrations/20261012101101_budget_model.sql) ; postes repris du Budget
+-- d'un artiste (20261109190101_budget_posts.sql).
 -- Run with `supabase test db`.
 begin;
-select plan(6);
+select plan(8);
 
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
 declare v_id uuid := gen_random_uuid();
@@ -71,6 +72,11 @@ select throws_ok($$ select pg_temp.line('creation_content', null) $$, '23514', n
                  'the former families are gone (mapped by the migration)');
 select throws_ok($$ select pg_temp.line('other', null) $$, '23514', null, '« Autre » says what it is');
 select lives_ok($$ select pg_temp.line('other', 'Assurance du matériel') $$, '« Autre » with its precision');
+
+-- Postes joined on 09/11/2026 (20261109190101_budget_posts.sql) ---------------
+select lives_ok($$ select pg_temp.line('food_delivery', null) $$, 'a meal delivery is a poste');
+select throws_ok($$ select pg_temp.line('travel', null) $$, '23514', null,
+                 '« Déplacements » is gone (its lines became Transport)');
 
 -- Statuses (MKT-S1-12 / 15) --------------------------------------------------
 select lives_ok($$ select pg_temp.line('services', null, 'invoiced') $$, 'a spend can be invoiced');
