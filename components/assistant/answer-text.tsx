@@ -1,4 +1,5 @@
 import { plainText } from "@/components/assistant/tool-output";
+import { MarkedText } from "@/components/ui/marked-text";
 
 type Block =
   | { kind: "text"; lines: string[] }
@@ -32,8 +33,8 @@ function blocksOf(text: string): Block[] {
 }
 
 /**
- * PO's answer as read: paragraphs and lists, nothing else. The text stays
- * plain (no link, no emphasis from the model: `plainText`); only code-built
+ * PO's answer as read: paragraphs and lists, its « **gras** » in bold
+ * (MarkedText). No link from the model (`plainText`): only code-built
  * sources are clickable.
  */
 export function AnswerText({ text }: { text: string }) {
@@ -43,7 +44,7 @@ export function AnswerText({ text }: { text: string }) {
         if (block.kind === "text")
           return (
             <p key={i} className="whitespace-pre-wrap">
-              {block.lines.join("\n")}
+              <MarkedText text={block.lines.join("\n")} />
             </p>
           );
         const List = block.kind === "bullets" ? "ul" : "ol";
@@ -57,7 +58,9 @@ export function AnswerText({ text }: { text: string }) {
             }
           >
             {block.lines.map((line, j) => (
-              <li key={j}>{line}</li>
+              <li key={j}>
+                <MarkedText text={line} />
+              </li>
             ))}
           </List>
         );

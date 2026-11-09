@@ -2,6 +2,7 @@
 
 import { IconArrowUpRight } from "@/components/icons";
 import { Checkbox } from "@/components/ui/checkbox";
+import { MarkedText } from "@/components/ui/marked-text";
 import { RecordMenu } from "@/components/ui/record-menu";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ViewLink } from "@/components/ui/view-link";
@@ -11,6 +12,7 @@ import { isOverdue } from "@/lib/insights/dates";
 import type { Tone } from "@/lib/ui/state-tones";
 import { cn } from "@/lib/utils";
 import { formatShortDay } from "@/lib/utils/day";
+import { withoutMarkdownMarks } from "@/lib/utils/markdown-marks";
 import { deletePersonalTask } from "@/lib/work/personal-task-actions";
 import {
   QUADRANTS,
@@ -66,6 +68,7 @@ export function TaskRow({
   showBox?: boolean;
 }) {
   const t = fr.work.tasks;
+  const plainTitle = withoutMarkdownMarks(task.title);
   const late = !task.done && task.dueDate && isOverdue(task.dueDate, today);
   const box = quadrantOf(task, today);
   const draggable = Boolean(onMove) && !task.done;
@@ -89,7 +92,7 @@ export function TaskRow({
         size="md"
         checked={task.done}
         onChange={(event) => onToggle(task, event.currentTarget.checked)}
-        aria-label={task.done ? t.untoggle(task.title) : t.toggle(task.title)}
+        aria-label={task.done ? t.untoggle(plainTitle) : t.toggle(plainTitle)}
       />
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span
@@ -98,7 +101,7 @@ export function TaskRow({
             task.done && "text-muted-foreground line-through",
           )}
         >
-          {task.title}
+          <MarkedText text={task.title} />
         </span>
         {task.source && (
           <ViewLink
@@ -126,7 +129,7 @@ export function TaskRow({
       </span>
       {onMove && onEdited && onRemoved && (
         <RecordMenu
-          label={task.title}
+          label={plainTitle}
           extra={
             task.done
               ? []
@@ -150,7 +153,7 @@ export function TaskRow({
           }}
           remove={{
             title: t.remove.title,
-            body: t.remove.body(task.title),
+            body: t.remove.body(plainTitle),
             done: t.remove.done,
             run: async () => {
               const res = await deletePersonalTask(task.id);

@@ -9,6 +9,7 @@ import { FormMessage } from "@/components/auth/form-message";
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { OptionSelect } from "@/components/projects/option-select";
 import { DialogButton } from "@/components/ui/dialog-button";
+import { MarkedText } from "@/components/ui/marked-text";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import type { CallAction } from "@/lib/calls/outcomes";
 import { createTask } from "@/lib/framing/actions/points-tasks";
@@ -104,7 +105,9 @@ function TaskForm({
       }}
     >
       <div className="flex flex-col gap-1">
-        <p className="text-body-md font-semibold">{action.what}</p>
+        <p className="text-body-md font-semibold">
+          <MarkedText text={action.what} />
+        </p>
         {action.quote && (
           <p className="text-caption text-[color:var(--text-secondary)]">
             {t.why(action.quote)}

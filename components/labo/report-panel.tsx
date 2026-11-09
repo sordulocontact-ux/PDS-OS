@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { ProvenanceTag } from "@/components/labo/provenance-tag";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { MarkedText } from "@/components/ui/marked-text";
 import type { LocatedCallReport } from "@/lib/ai/call-report";
 import type { QuoteLocation } from "@/lib/ai/provenance";
 import { labo } from "@/lib/i18n/fr/labo";
@@ -30,9 +31,17 @@ function Section({ title, items }: { title: string; items: Item[] }) {
               className="grid gap-1 border-l-2 border-border pl-3 sm:grid-cols-[1fr_16rem] sm:gap-4"
             >
               <div className="text-sm">
-                <p>{item.main}</p>
+                <p>
+                  {typeof item.main === "string" ? (
+                    <MarkedText text={item.main} />
+                  ) : (
+                    item.main
+                  )}
+                </p>
                 {item.detail && (
-                  <p className="text-muted-foreground">{item.detail}</p>
+                  <p className="text-muted-foreground">
+                    <MarkedText text={item.detail} />
+                  </p>
                 )}
               </div>
               <ProvenanceTag at={item.at} quote={item.quote} />
@@ -63,7 +72,7 @@ export function ReportPanel({ report }: { report: LocatedCallReport }) {
             main: (
               <>
                 <span className="text-muted-foreground">{label} : </span>
-                {value.value}
+                <MarkedText text={value.value} />
               </>
             ),
             at: value.at,
@@ -79,7 +88,9 @@ export function ReportPanel({ report }: { report: LocatedCallReport }) {
       </StatusBadge>
       <section className="space-y-1">
         <h3 className="text-sm font-medium">{t.summary}</h3>
-        <p className="text-sm">{report.summary}</p>
+        <p className="text-sm">
+          <MarkedText text={report.summary} />
+        </p>
       </section>
       <Section
         title={t.decided}

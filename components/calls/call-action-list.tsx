@@ -1,5 +1,6 @@
 import { ActionTaskButton } from "@/components/calls/action-task-dialog";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { MarkedText } from "@/components/ui/marked-text";
 import { matchByName } from "@/lib/assistant/fuzzy-name";
 import type { CallAction } from "@/lib/calls/outcomes";
 import { calls } from "@/lib/i18n/fr/calls";
@@ -44,7 +45,7 @@ export function CallActionList({
         >
           <span className="flex min-w-0 flex-col gap-0.5">
             <b className="text-body-md font-semibold break-words">
-              {action.what}
+              <MarkedText text={action.what} />
               {action.who && (
                 <span className="font-medium text-[color:var(--text-secondary)]">
                   {" "}

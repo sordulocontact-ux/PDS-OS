@@ -6,6 +6,7 @@ import {
 } from "@/components/home/home-list";
 import { rowBadge, titleOf, whereOf } from "@/components/work/work-row";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { MarkedText } from "@/components/ui/marked-text";
 import { routes } from "@/lib/auth/redirects";
 import { shell } from "@/lib/i18n/fr/shell";
 import { work } from "@/lib/i18n/fr/work";
@@ -53,7 +54,11 @@ export function HomeAlso({ rows }: { rows: WorkRow[] }) {
             }
           >
             <HomeRowText
-              main={<span className="font-semibold">{titleOf(row)}</span>}
+              main={
+                <span className="font-semibold">
+                  <MarkedText text={titleOf(row)} />
+                </span>
+              }
               sub={whereOf(row)}
             />
           </HomeRow>

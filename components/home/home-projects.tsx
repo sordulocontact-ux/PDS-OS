@@ -5,6 +5,7 @@ import {
 } from "@/components/home/home-list";
 import { titleOf } from "@/components/work/work-row";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { MarkedText } from "@/components/ui/marked-text";
 import { routes } from "@/lib/auth/redirects";
 import type { HomeProject } from "@/lib/home/feed";
 import { shell } from "@/lib/i18n/fr/shell";
@@ -38,7 +39,9 @@ const grid = "grid flex-1 grid-cols-[minmax(0,1fr)_auto] items-center gap-4";
 function NextAction({ next, mine }: { next: WorkRow; mine: number }) {
   return (
     <>
-      <span className="font-semibold break-words">{titleOf(next)}</span>
+      <span className="font-semibold break-words">
+        <MarkedText text={titleOf(next)} />
+      </span>
       {mine > 1 && (
         <span className={cn(caption, secondary)}>
           {" "}

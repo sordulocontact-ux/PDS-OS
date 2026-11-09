@@ -1,4 +1,5 @@
 import type { ReportContent } from "@/lib/calls/closure";
+import { MarkedText } from "@/components/ui/marked-text";
 import { formatBriefDate } from "@/lib/framing/assess";
 import { calls } from "@/lib/i18n/fr/calls";
 
@@ -14,7 +15,7 @@ export function ReportView({ content }: { content: ReportContent }) {
         <ul className="flex list-disc flex-col gap-1 pl-5 text-body-md">
           {items.map((item, i) => (
             <li key={i} className="break-words">
-              {item}
+              <MarkedText text={item} />
             </li>
           ))}
         </ul>
@@ -24,7 +25,9 @@ export function ReportView({ content }: { content: ReportContent }) {
     <div className="flex flex-col gap-4">
       <section className="flex flex-col gap-1.5">
         <h4 className="text-body-md font-semibold">{t.summary}</h4>
-        <p className="text-body-md whitespace-pre-wrap">{content.summary}</p>
+        <p className="text-body-md whitespace-pre-wrap">
+          <MarkedText text={content.summary} />
+        </p>
       </section>
       {block(
         t.decisions,

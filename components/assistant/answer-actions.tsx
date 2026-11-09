@@ -10,6 +10,7 @@ import { CopyButton } from "@/components/ui/copy-button";
 import { groupSources, type Source } from "@/lib/assistant/sources";
 import { assistant } from "@/lib/i18n/fr/assistant";
 import { cn } from "@/lib/utils";
+import { withoutMarkdownMarks } from "@/lib/utils/markdown-marks";
 
 const fr = { assistant };
 
@@ -56,7 +57,7 @@ export function AnswerActions({
           // Text only beside the outlined « Sources » (docs/DESIGN.md,
           // « Bouton secondaire »); outlined when alone.
           <CopyButton
-            value={plainText(text).trim()}
+            value={withoutMarkdownMarks(plainText(text)).trim()}
             label=""
             ariaLabel={t.copy}
             copiedLabel={t.copied}

@@ -16,6 +16,7 @@ import {
   EMPTY_CELL,
 } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { MarkedText } from "@/components/ui/marked-text";
 import { work } from "@/lib/i18n/fr/work";
 import { moduleHue, projectHue } from "@/lib/ui/category-hues";
 import { workStatusTone } from "@/lib/ui/state-tones";
@@ -97,7 +98,11 @@ function ActionRow({ row }: { row: WorkRow }) {
     <DataTableRow>
       <DataTableCell fill className="max-w-0">
         <DataTableMedia
-          title={<DataTableLink href={row.href}>{titleOf(row)}</DataTableLink>}
+          title={
+            <DataTableLink href={row.href}>
+              <MarkedText text={titleOf(row)} />
+            </DataTableLink>
+          }
           subtitle={
             // The project and the module show here once their column is
             // hidden.
