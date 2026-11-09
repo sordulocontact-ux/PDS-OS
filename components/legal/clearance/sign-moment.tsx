@@ -4,39 +4,45 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
+import { StepWaiting } from "@/components/shell/journey/step-waiting";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
 import { contracts } from "@/lib/i18n/fr/contracts";
 import { legalClearance } from "@/lib/i18n/fr/legal-clearance";
-import {
-  secureClearanceFlow,
-  sendClearanceContract,
-} from "@/lib/legal/clearance/flow-actions";
+import { legalDemarches } from "@/lib/i18n/fr/legal-demarches";
+import { secureClearanceFlow } from "@/lib/legal/clearance/flow-actions";
 import type { Clearance, Clearances } from "@/lib/legal/clearance/types";
 import { contractStateTone } from "@/lib/ui/state-tones";
 
+import { ClearanceContractSend } from "./clearance-contract-send";
 import { termsLine } from "./clearance-stages";
 import { ContractProofSlot } from "./contract-proof-slot";
 import { DocumentsTab } from "./documents-tab";
 import { useLegalAction } from "@/components/legal/use-legal-action";
 
-const fr = { contracts, legalClearance };
+const fr = { contracts, legalClearance, legalDemarches };
 
 /**
- * « Signer »: the authorisation contract prepared when the direction
- * validated the conditions; « Envoyé par e-mail » (the way it went is its
- * proof of sending); then the signed copy and its proof dropped here, and
- * « Marquer comme sécurisé ».
+ * « Signer »: the authorisation contract prepared (and approved) when the
+ * direction validated the conditions; its owner sends it, e-mailed by PDS
+ * OS with the contract joined or declared sent another way
+ * (`ClearanceContractSend`, the way it went is its proof); then the signed copy
+ * and its proof dropped here, and « Marquer comme sécurisé ». Whoever else
+ * looks is told who acts next (`StepWaiting`); a contract sent back to draft
+ * or in review is submitted / validated on its own page.
  */
 export function SignMoment({
   projectId,
   clearance,
   context,
+  directionName,
 }: {
   projectId: string;
   clearance: Clearance;
   context: Omit<Clearances, "items">;
+  directionName?: string;
 }) {
   const t = fr.legalClearance.flow;
   const { pending, run } = useLegalAction({ refresh: true });
@@ -57,10 +63,22 @@ export function SignMoment({
       />
     );
 
-  const toSend = contracts.some((c) => c.state === "approved");
-  const waitsDirector = contracts.some(
-    (c) => c.state === "draft" || c.state === "in_review",
-  );
+  // The least advanced contract says what comes next: submitted by its
+  // owner, validated by the direction, sent by its owner, then signed.
+  const draft = contracts.find((c) => c.state === "draft");
+  const review = contracts.find((c) => c.state === "in_review");
+  const toSend = contracts.find((c) => c.state === "approved");
+  const next = draft ?? review ?? toSend;
+  const ownerOf = (c: (typeof contracts)[number]) =>
+    c.ownerName || t.responsible;
+  // The viewer's gesture happens on the contract's page: its button leads.
+  const openLabel = (c: (typeof contracts)[number]) =>
+    c.state === "draft" && c.ownerIsViewer
+      ? t.openToSubmit
+      : c.state === "in_review" && context.canValidate
+        ? t.openToDecide
+        : null;
+  const emailed = contracts.find((c) => c.signedByEmail);
   const missing = contracts.flatMap((c) => [
     ...(c.signedFile ? [] : [t.signedMissing]),
     ...(c.evidenceFile ? [] : [t.evidenceMissing]),
@@ -85,45 +103,71 @@ export function SignMoment({
             </span>
           </span>
           <Button
-            variant="ghost"
+            variant={openLabel(contract) ? "default" : "outline"}
             size="sm"
             nativeButton={false}
             render={<Link href={routes.contract(contract.id)} />}
           >
-            {t.openContract}
+            {openLabel(contract) ?? t.openContract}
           </Button>
         </div>
       ))}
 
-      {waitsDirector ? (
-        <p className="text-sm text-muted-foreground">{t.contractWaits}</p>
+      {next && next !== toSend ? (
+        // Submitted by its owner, then validated by the direction: on the
+        // contract's page; said here as « À vous » or « En attente de ».
+        next.state === "draft" ? (
+          next.ownerIsViewer ? (
+            <p className="text-sm font-medium">{t.toSubmit}</p>
+          ) : (
+            <StepWaiting who={ownerOf(next)} todo={t.awaitSubmit} />
+          )
+        ) : context.canValidate ? (
+          <p className="text-sm font-medium">{t.toDecide}</p>
+        ) : (
+          <StepWaiting
+            who={directionName || fr.legalDemarches.direction}
+            todo={t.awaitDecide}
+          />
+        )
+      ) : toSend && !toSend.ownerIsViewer ? (
+        <StepWaiting who={ownerOf(toSend)} todo={t.awaitSend} />
       ) : toSend ? (
-        <>
-          <p className="text-sm text-muted-foreground">{t.sendHint}</p>
-          <div className="flex flex-wrap gap-2">
-            {t.sendBy.map((how) => (
-              <Button
-                key={how}
-                variant="outline"
-                disabled={pending}
-                onClick={() =>
-                  run(() =>
-                    sendClearanceContract({
-                      projectId,
-                      clearanceId: clearance.id,
-                      how,
-                    }),
-                  )
-                }
-              >
-                {how}
-              </Button>
-            ))}
-          </div>
-        </>
+        <ClearanceContractSend
+          projectId={projectId}
+          clearance={clearance}
+          canEmail={context.emailEnabled}
+        />
       ) : (
         <>
-          <p className="text-sm text-muted-foreground">{t.sentHint}</p>
+          {emailed ? (
+            // Sent back by e-mail and kept by PDS OS: a person checks it.
+            <ToneCallout
+              tone="info"
+              as="div"
+              contentClassName="flex flex-col items-start gap-2"
+            >
+              <span>{t.signedByEmail}</span>
+              {emailed.signedByEmail?.url && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  nativeButton={false}
+                  render={
+                    <a
+                      href={emailed.signedByEmail.url}
+                      target="_blank"
+                      rel="noreferrer"
+                    />
+                  }
+                >
+                  {t.seeSigned}
+                </Button>
+              )}
+            </ToneCallout>
+          ) : (
+            <p className="text-sm text-muted-foreground">{t.sentHint}</p>
+          )}
           {context.organizationId &&
             contracts.map((contract) => (
               <div key={contract.id} className="grid gap-2 sm:grid-cols-2">

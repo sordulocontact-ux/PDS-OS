@@ -1889,3 +1889,30 @@ Demande de Sacha : « PDS ne peut pas détecter le retour du mail pour ajouter l
   aide sous la liste dit ce que chaque poste couvre. Section « Par poste » (`ArtistBudgetCategories`, calcul
   `artistCategoryTotals`) dès deux postes : total payé + prévu par poste, le plus coûteux en tête, « dont X € prévus ».
   « Ses projets » passe sur `PageSection`. Pas encore d'enveloppe par poste (montant prévu à ne pas dépasser).
+- 09/11/2026 — **Retours Master et Sessions studio** (Notion Retours). Master · Brief : l'encadré « À vous, ailleurs »
+  était déjà réduit à une ligne depuis le 05/11 (`6351f97c`), retour passé en « À tester ». Master · Source (Akili :
+  « on ne sait pas quoi faire en arrivant ») : le geste du responsable passe en tête de l'étape (`StepPanel lead`,
+  `SourceLead`) ; sans aucune version du titre au Catalogue, l'action s'appelle « Importer la version de départ du
+  mix » (parcours, Travail) avec une phrase et le bouton principal « Importer une version », les vérifications
+  dessous ; l'encart jaune disparaît. Sessions studio : « Rédiger le compte rendu de la session » dans Travail et sur
+  l'Accueil, et l'événement du Google Agenda du label avec l'équipe interne invitée (migration
+  `20261109100101_session_google_event`, `docs/ARCHITECTURE.md` § 2 sexies bis).
+- 09/11/2026 — **Juridique : autorisation bloquée « En préparation » et refonte de la déclaration SACEM** (Notion
+  Retours). Autorisation : valider les conditions approuve le contrat d'un coup (`approve_clearance_contract`,
+  migration `20261109120101_clearance_contract_approval`, contrats déjà coincés débloqués) et l'étape « Signer » dit qui
+  agit (« À vous » / « En attente de … »). SACEM (Ibé, et le total à 125 % d'Akili) : participants avec leurs rôles
+  (auteur, compositeur, arrangeur, adaptateur, interprète uniquement), artiste principal ajouté d'office et à
+  confirmer, parts par catégorie Auteur / Compositeur / Éditeur à 100 % chacune, parts Phono du bulletin déduites
+  (toujours 100 %), « Aucun éditeur musical », label pris pour un éditeur signalé (migration
+  `20261109140101_sacem_participants`, `lib/legal/formalities/participants.ts`, `docs/ARCHITECTURE.md` § 8 sexies).
+  Puis (Sacha) : le contrat d'autorisation part par e-mail depuis « Signer », comme la demande : `MailCard` à
+  l'adresse du Réseau de chaque ayant droit, contrat joint (document généré en PDF, sinon fichier « Projet »),
+  réponses rangées dans les Échanges ; contrat sans texte dit et renvoyé à sa page (`ClearanceContractSend`,
+  `lib/legal/clearance/contract-email.ts`). Le signé qui revient en PDF dans la réponse est rangé dans le contrat
+  (« Signé » + l'e-mail en preuve, à vérifier avant « Marquer comme sécurisé » ; migration
+  `20261109160101_clearance_signed_by_email`, test `legal-clearance-signed-by-email`).
+  « L'autorisation » montre chaque ayant droit avec son adresse (`ContactCard`, variante Réseau de `DocumentCard`) ;
+  un ayant droit gardé par son nom seul garde l'adresse à laquelle on lui a écrit et s'ajoute au Réseau en un clic
+  (migration `20261109170101_clearance_holder_email`, test `legal-clearance-holder-email`).
+  Une réponse reçue par e-mail est lue par PO dès l'ouverture de « Négocier », lecture gardée avec elle
+  (migration `20261109180101_clearance_reply_reading`). Titre et phrase d'une `StepSection` : 2 px, puis 12 px.

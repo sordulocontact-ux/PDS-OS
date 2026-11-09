@@ -50,6 +50,9 @@ export async function readClearanceMessage(
   projectId: string,
   clearanceId: string,
   message: string,
+  // A reply received by e-mail, read as received: its reading is kept with
+  // it, and given back without a new call (Sacha, 09/11/2026).
+  receivedId?: string,
 ): Promise<
   { ok: true; proposal: MessageProposal } | { ok: false; error: string }
 > {
@@ -73,6 +76,14 @@ export async function readClearanceMessage(
     .eq("project_id", input.data.projectId)
     .maybeSingle();
   if (!clearance) return { ok: false, error: fr.auth.errors.forbidden };
+
+  const received = receivedId
+    ? await receivedReply(supabase, input.data.clearanceId, receivedId)
+    : null;
+  const asReceived =
+    received !== null && received.body.trim() === input.data.message;
+  if (asReceived && received.reading)
+    return { ok: true, proposal: received.reading };
 
   const context = `<context>\nÉlément : ${escape(clearance.element)} de « ${escape(clearance.work)} »${
     clearance.author ? ` (${escape(clearance.author)})` : ""
@@ -118,17 +129,48 @@ export async function readClearanceMessage(
         line.duration,
       ].some((v) => v !== null),
     );
+  const proposal: MessageProposal = {
+    event: output.event,
+    outgoing: output.outgoing,
+    status: statusFromEvent(output.event, clearance.status as ClearanceStatus),
+    holders,
+    terms,
+  };
+  // Kept with the reply: whoever opens « Négocier » next sees it as is.
+  if (asReceived) {
+    const { error } = await supabase.rpc("keep_clearance_reading", {
+      p_communication_id: received.id,
+      p_reading: proposal,
+    });
+    if (error) console.error("readClearanceMessage keep:", error.message);
+  }
+  return { ok: true, proposal };
+}
+
+type Supabase = Awaited<ReturnType<typeof createClient>>;
+
+/** A reply received of this borrowing, with the reading kept, if any. */
+async function receivedReply(
+  supabase: Supabase,
+  clearanceId: string,
+  receivedId: string,
+): Promise<{
+  id: string;
+  body: string;
+  reading: MessageProposal | null;
+} | null> {
+  if (!catalogIdSchema.safeParse(receivedId).success) return null;
+  const { data } = await supabase
+    .from("legal_clearance_communications")
+    .select("id, body, reading")
+    .eq("id", receivedId)
+    .eq("clearance_id", clearanceId)
+    .eq("direction", "in")
+    .maybeSingle();
+  if (!data) return null;
   return {
-    ok: true,
-    proposal: {
-      event: output.event,
-      outgoing: output.outgoing,
-      status: statusFromEvent(
-        output.event,
-        clearance.status as ClearanceStatus,
-      ),
-      holders,
-      terms,
-    },
+    id: data.id,
+    body: data.body,
+    reading: (data.reading as MessageProposal | null) ?? null,
   };
 }

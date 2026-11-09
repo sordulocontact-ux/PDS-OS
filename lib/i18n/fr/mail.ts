@@ -6,6 +6,7 @@
 export const mail = {
   to: "À",
   subject: "Objet",
+  attachment: "Pièce jointe",
   message: "Message",
   title: "L'e-mail que PDS OS enverra",
   line: "De : l'adresse de PO · gardé dans l'historique, c'est la preuve d'envoi",

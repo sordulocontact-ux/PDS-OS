@@ -72,8 +72,9 @@ export const legalFormalities = {
     first_exploitation_place: "Lieu ou diffuseur / exploitant",
     territories: "Territoires cédés",
     arrangement: "Arrangement",
-    creators: "Créateurs (1 à 5)",
-    publishers: "Éditeurs (1 à 3)",
+    creators: "Participants",
+    publishers: "Éditeur musical",
+    phono_split: "Parts Phono entre catégories",
     dep_dr: "Partage des DEP et DR",
     publishing_contract: "Contrat d'édition",
   } as Record<string, string>,
@@ -87,16 +88,33 @@ export const legalFormalities = {
     dep_dr:
       "DEP : droits d'exécution publique (radio, télé, concerts, lieux publics). DR : droits de reproduction (disques, streaming). Ils suivent les parts Phono, ou se partagent à égalité dans chaque catégorie (auteurs, compositeurs, éditeurs), comme le prévoit le Règlement général de la SACEM. Un choix explicite, jamais déduit.",
     creators:
-      "Choisissez chaque personne dans le Réseau : son identité et son IPI viennent de sa fiche. Le total des parts Phono (créateurs et éditeurs) doit faire 100 %.",
+      "Chaque personne qui a écrit, composé ou interprété le titre, choisie dans le Réseau : son identité et son IPI viennent de sa fiche. Dites ses rôles ; les parts se répartissent ensuite par catégorie, en « 4. Répartition ». Cinq créateurs au plus sur le bulletin.",
     phonoFromSplit:
-      "Parts Phono reprises de la répartition confirmée de ce titre : vérifiez-les avant d'enregistrer.",
+      "Parts reprises de la répartition confirmée de ce titre : vérifiez-les en « 4. Répartition » avant d'enregistrer.",
     // Decision of 10/10/2026: the splits of the title's page are not
     // confirmed by the rightholders, so their shares are never taken.
     noConfirmedSplit:
-      "Aucune répartition de l'édition confirmée pour ce titre : les parts Phono sont à saisir. Les splits de la fiche du titre ne sont pas repris tant que les ayants droit ne les ont pas confirmés.",
+      "Aucune répartition de l'édition confirmée pour ce titre : les parts sont à saisir. Les splits de la fiche du titre ne sont pas repris tant que les ayants droit ne les ont pas confirmés.",
   } as Record<string, string>,
   sources: {
     toVerify: "À vérifier",
+  },
+  // A participant's roles (retour d'Ibé du 02/11/2026).
+  roles: {
+    legend: "Rôle dans l'œuvre",
+    author: "Auteur · paroles",
+    composer: "Compositeur · musique",
+    arranger: "Arrangeur",
+    adapter: "Adaptateur",
+    performer: "Interprète uniquement",
+    hint: "Auteur et compositeur à la fois : cochez les deux. Un interprète seul ne reçoit pas de part SACEM : ses droits passent par un autre circuit.",
+    performerNote:
+      "Interprète uniquement : pas sur le bulletin, pas de part SACEM, ne signe pas.",
+    mainArtist: "Artiste principal",
+    mainArtistHint:
+      "Ajouté d'office comme artiste du titre, jamais comme auteur : confirmez ce qu'il a fait.",
+    confirm: "Confirmer son rôle",
+    confirmed: "Rôle confirmé",
   },
   qualities: {
     author: "Auteur",
@@ -110,6 +128,41 @@ export const legalFormalities = {
     statutory: "Partage égal du Règlement général de la SACEM",
   },
   // JUR-23: what the rubrique D does to the DEP and DR, computed by the code.
+  // « 4. Répartition »: each category shared on its own.
+  categories: {
+    intro:
+      "Chaque catégorie se partage à part et doit faire 100 % : les auteurs se partagent la part Auteur, les compositeurs la part Compositeur, les éditeurs la part Éditeur. Une personne auteur et compositrice a une part dans chacune.",
+    names: {
+      author: "Auteur",
+      composer: "Compositeur",
+      publisher: "Éditeur",
+    },
+    hints: {
+      author: "Les paroles : auteurs et adaptateurs.",
+      composer: "La musique : compositeurs et arrangeurs.",
+      publisher: "Les éditeurs musicaux de l'œuvre.",
+    },
+    empty: {
+      author: "Personne n'a écrit les paroles (œuvre instrumentale ?).",
+      composer: "Aucun compositeur pour l'instant.",
+      publisher: "",
+    },
+    total: (total: string) => `Total : ${total} sur 100 %`,
+    sole: "100 % : seul dans la catégorie",
+    equal: "Parts égales",
+    shareLabel: (name: string, role: string) => `Part de ${name} (${role})`,
+    parts: "Parts Phono entre catégories",
+    partsUsual: (parts: string, edited: boolean) =>
+      `${parts} : la règle usuelle des droits sur les enregistrements, œuvre ${edited ? "éditée" : "non éditée"}.`,
+    partsCustom: "Répartition contractuelle",
+    partsEdit: "Suivre un contrat",
+    partsReset: "Revenir à la règle usuelle",
+    partsHint:
+      "La reproduction mécanique peut suivre une répartition prévue au contrat : chaque catégorie présente a une part, le total fait 100 %.",
+    phonoTitle: "Parts Phono du bulletin",
+    phonoNote:
+      "Calculées par PDS OS : la part de la catégorie multipliée par la part de chacun dedans. Le total fait toujours 100 %.",
+  },
   sharing: {
     // JUR-02: computed by the code, checked by a person.
     toCheck: "Calculées par le code depuis les parts de l'œuvre : à vérifier",
@@ -140,7 +193,7 @@ export const legalFormalities = {
       "Résultat calculé par PDS OS, à confirmer par la personne responsable avant le dépôt. Il ne prouve pas la conformité des contrats.",
     alerts: {
       phono_total: (total: string) =>
-        `Total Phono à ${total} : il doit faire exactement 100 %, créateurs et éditeurs réunis.`,
+        `Total Phono à ${total} : une catégorie n'est pas encore répartie à 100 %.`,
       empty_category: (category: string) =>
         `Aucun ${category} : sa part des DEP et DR reste sans ayant droit.`,
       not_covered: (name: string, quality: string) =>
@@ -158,31 +211,32 @@ export const legalFormalities = {
     specific: "Autorisé pour certaines exploitations déterminées",
   },
   creator: {
-    totals: (creators: string, publishers: string) =>
-      `Créateurs : ${creators} · Éditeurs : ${publishers}`,
-    person: "Créateur",
+    person: "Participant",
     lastName: "Nom",
     firstName: "Prénom",
     pseudonym: "Pseudonyme",
     ipi: "IPI / COAD",
-    quality: "Qualité",
-    qualityHint:
-      "Son rôle dans l'œuvre : auteur (paroles), compositeur (musique), arrangeur, adaptateur (paroles traduites ou adaptées).",
-    phono: "Part Phono",
-    phonoHint: "Sa part des droits de reproduction (disques, streaming), en %.",
     signs: "Signe le bulletin",
-    add: "Ajouter un créateur",
+    add: "Ajouter un participant",
     remove: "Retirer",
   },
   publisher: {
+    // Retour d'Ibé du 02/11/2026: never the label by default.
+    explain:
+      "Un éditeur musical édite et administre l'œuvre. Ce n'est pas d'office le label, le producteur du master, le studio ou le distributeur : ceux-là ont des droits sur l'enregistrement, pas sur l'œuvre.",
+    none: "Aucun éditeur musical",
+    noneChosen:
+      "Aucun éditeur musical : les droits de l'œuvre reviennent aux auteurs et compositeurs.",
+    change: "Changer",
+    addFirst: "Ajouter un éditeur musical",
+    labelWarning:
+      "Cette structure est au Réseau comme label, producteur, studio ou distributeur, pas comme éditeur : vérifiez qu'elle édite bien l'œuvre, ou ajoutez-lui le rôle Éditeur dans le Réseau.",
     person: "Éditeur",
     inSplit: "Éditeur de la répartition",
     name: "Dénomination",
     nameHint:
       "Le nom de la société d'édition, tel qu'il est inscrit à la SACEM.",
     ipi: "IPI / COAD",
-    phono: "Part Phono",
-    phonoHint: "La part de l'éditeur dans les droits de reproduction, en %.",
     add: "Ajouter un éditeur",
     // JUR-22 / JUR-25: whom it publishes, under which contract.
     represents: "Éditeur de",
@@ -207,15 +261,24 @@ export const legalFormalities = {
     title: "Le titre",
     duration: "La durée du master final",
     creators: "Au moins un créateur",
-    creators_max: "Cinq créateurs au plus",
+    creators_max: "Cinq créateurs au plus sur le bulletin",
     publishers_max: "Trois éditeurs au plus",
     creator_name: (i: string) => `Le nom du créateur ${i}`,
-    creator_quality: (i: string) => `La qualité du créateur ${i}`,
+    creator_role: (i: string) => `Le rôle du participant ${i}`,
+    main_artist_role: (i: string) =>
+      `La confirmation du rôle de l'artiste principal (participant ${i})`,
+    creator_share: (i: string) => `Les parts du participant ${i}`,
+    author_total: "Une part Auteur répartie à 100 %",
+    composer_total: "Une part Compositeur répartie à 100 %",
+    publisher_total: "Une part Éditeur répartie à 100 %",
+    publishers_choice: "Un éditeur musical, ou « Aucun éditeur musical »",
+    publisher_label: (i: string) =>
+      `L'éditeur ${i} : un label ou un producteur n'est pas un éditeur musical`,
+    phono_split: "Des parts Phono entre catégories qui font 100 %",
     genre: "Le genre de l'œuvre",
     creator_first: (i: string) => `Le prénom ou le pseudonyme du créateur ${i}`,
     publisher_name: (i: string) => `La dénomination de l'éditeur ${i}`,
     publisher_link: (i: string) => `Les créateurs que publie l'éditeur ${i}`,
-    phono_total: "Des parts Phono qui font exactement 100 %",
     dep_dr: "Le partage des DEP et DR",
     dep_dr_check: "La vérification des parts DEP et DR",
     first_exploitation: "La date de la première exploitation",
@@ -230,7 +293,7 @@ export const legalFormalities = {
     title: "Obligatoire sur le bulletin.",
     duration:
       "Obligatoire : la durée du master final, qui n'est pas encore reçu.",
-    creators: "Le bulletin nomme au moins un créateur.",
+    creators: "Le bulletin nomme au moins un auteur ou un compositeur.",
     creator_name: "Le nom civil est obligatoire pour la SACEM.",
     genre:
       "Obligatoire pour la SACEM : aucune source ne le donne, vous le choisissez.",
@@ -244,10 +307,18 @@ export const legalFormalities = {
       "La dénomination de la société d'édition, telle qu'elle est déclarée à la SACEM.",
     publisher_link:
       "Cochez le ou les créateurs dont cet éditeur publie la part (coédition : plusieurs éditeurs pour un créateur).",
-    creator_quality:
-      "Choisissez la qualité : auteur, compositeur, arrangeur ou adaptateur.",
-    phono_total:
-      "Les parts Phono des créateurs et des éditeurs doivent faire exactement 100 %.",
+    creator_role:
+      "Dites ce qu'il a fait : auteur, compositeur, arrangeur, adaptateur, ou interprète uniquement.",
+    main_artist_role:
+      "Confirmez le rôle de l'artiste principal : il n'est pas auteur d'office.",
+    category_total:
+      "Les parts de cette catégorie doivent faire exactement 100 %.",
+    publishers_choice:
+      "Ajoutez l'éditeur musical, ou dites qu'il n'y en a pas.",
+    publisher_label:
+      "Un label ou un producteur n'est pas un éditeur musical : choisissez l'éditeur de l'œuvre, ou ajoutez-lui le rôle Éditeur dans le Réseau.",
+    phono_split:
+      "Donnez une part à chaque catégorie présente, aucune aux autres, pour un total de 100 %.",
     dep_dr:
       "Dites si le partage des DEP et DR suit les parts Phono : jamais déduit de la répartition.",
     arrangement:
@@ -285,7 +356,7 @@ export const legalFormalities = {
     // Before the bulletin exists: who will sign it (UX test of 09/10/2026).
     willSign: "Qui signera le bulletin",
     willSignHint:
-      "Les créateurs cochés « Signe le bulletin » et les éditeurs, d'après le dossier enregistré.",
+      "Les auteurs et compositeurs cochés « Signe le bulletin » et les éditeurs, d'après le dossier enregistré : leur signature confirme la répartition avant le dépôt.",
     publisherRole: "Éditeur",
     // Who signs, and what the proof is (JUR-26).
     sign: (signer: string) => `Enregistrer la signature de ${signer}`,

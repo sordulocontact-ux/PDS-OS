@@ -10,7 +10,8 @@ import { IntegrationError } from "@/lib/integrations/http";
 /**
  * Single entry point to Google Calendar (CLAUDE.md, rule 2): a new call
  * becomes an event of the organizer's calendar, with a Google Meet link, and
- * Google e-mails the invitation to every participant (sendUpdates=all).
+ * Google e-mails the invitation to every participant (sendUpdates=all). A
+ * planned studio session becomes an event without Meet (CalendarEvent).
  * Server-side only, with the organizer's OAuth refresh token
  * (GOOGLE_CALENDAR_*, google-oauth.ts), never exposed to the browser. Optional: without it,
  * a call takes a video link pasted by hand (docs/ARCHITECTURE.md § 4 bis).
@@ -195,4 +196,77 @@ export async function cancelMeetEvent(eventId: string): Promise<void> {
       return;
     throw error;
   }
+}
+
+/** A timed slot, or a whole day (« YYYY-MM-DD ») when it has no hours. */
+export type CalendarSlot =
+  { start: Date; end: Date } | { day: string; nextDay: string };
+
+/** What a plain event says (a studio session): no Meet link. */
+export type CalendarEvent = {
+  title: string;
+  description: string;
+  location: string | null;
+  slot: CalendarSlot;
+  guests: Array<{ email: string; name?: string | null }>;
+};
+
+function eventBodyOf(event: CalendarEvent) {
+  const when =
+    "day" in event.slot
+      ? {
+          start: { date: event.slot.day },
+          end: { date: event.slot.nextDay },
+        }
+      : {
+          start: {
+            dateTime: event.slot.start.toISOString(),
+            timeZone: "Europe/Paris",
+          },
+          end: {
+            dateTime: event.slot.end.toISOString(),
+            timeZone: "Europe/Paris",
+          },
+        };
+  return {
+    summary: event.title,
+    description: event.description,
+    location: event.location ?? "",
+    ...when,
+    attendees: event.guests.map((guest) => ({
+      email: guest.email,
+      ...(guest.name && { displayName: guest.name }),
+    })),
+  };
+}
+
+/** Creates a plain event and invites its guests; returns its id. */
+export async function createCalendarEvent(
+  event: CalendarEvent,
+): Promise<string> {
+  const config = settings();
+  if (!config) throw new GoogleCalendarError("not_configured");
+  const created = await request(
+    config,
+    "POST",
+    `/calendars/${encodeURIComponent(config.calendarId)}/events?sendUpdates=all`,
+    eventBodyOf(event),
+  );
+  if (!created.id) throw new GoogleCalendarError("event_missing");
+  return created.id;
+}
+
+/** Rewrites a plain event (slot, place, guests); Google tells every guest. */
+export async function updateCalendarEvent(
+  eventId: string,
+  event: CalendarEvent,
+): Promise<void> {
+  const config = settings();
+  if (!config) throw new GoogleCalendarError("not_configured");
+  await request(
+    config,
+    "PATCH",
+    `/calendars/${encodeURIComponent(config.calendarId)}/events/${encodeURIComponent(eventId)}?sendUpdates=all`,
+    eventBodyOf(event),
+  );
 }

@@ -3,7 +3,7 @@
 -- `supabase test db`. Fixture of the ticket (« Humanisme » in « Piégée »,
 -- test data only: the authorization, its conditions and proof are SIMULATED).
 begin;
-select plan(21);
+select plan(24);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -159,6 +159,20 @@ select throws_ok(format($$ select pg_temp.advance(%L, 'document_pending') $$, pg
                  'P0001', 'clearance_missing', 'a document is pending once a contract carries the right');
 select public.link_clearance_contract(pg_temp.id_of('humanisme'), 'work', pg_temp.id_of('contract'));
 select is(pg_temp.advance(pg_temp.id_of('humanisme'), 'document_pending'), 'document_pending', 'document pending');
+-- The contract of validated conditions is approved by the direction, never
+-- submitted in its owner's name (20261109120101).
+select throws_ok(format($$ select public.approve_clearance_contract(%L) $$, pg_temp.id_of('contract')),
+                 '42501', 'contract_not_allowed', 'a project manager does not approve the contract');
+select pg_temp.act_as(pg_temp.id_of('director'));
+select public.approve_clearance_contract(pg_temp.id_of('contract'));
+reset role;
+select is((select status from public.contracts where id = pg_temp.id_of('contract')), 'approved',
+          'validated conditions make the contract ready to send');
+select is((select count(*)::int from public.notifications
+            where recipient_person_id = pg_temp.id_of('manager_person')
+              and kind = 'contract_approved' and subject_id = pg_temp.id_of('contract')), 1,
+          'its owner is told it can be sent');
+select pg_temp.act_as(pg_temp.id_of('manager'));
 select throws_ok(format($$ select pg_temp.advance(%L, 'signed') $$, pg_temp.id_of('humanisme')),
                  'P0001', 'clearance_missing', 'signed needs the contract signed');
 reset role;

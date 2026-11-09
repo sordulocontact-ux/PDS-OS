@@ -33,8 +33,23 @@ export function Rows({
 const sub =
   "text-[length:var(--type-micro)] leading-[var(--type-micro-lh)] text-[color:var(--text-tertiary)]";
 
+// The whole row is the link: hover tint, inset focus ring.
+const rowLink =
+  "text-[color:var(--text-primary)] no-underline transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:bg-[var(--surface-soft)] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[color:var(--focus-ring)]";
+
+function RowChevron() {
+  return (
+    <IconChevronRight
+      aria-hidden
+      className="size-3.5 shrink-0 text-[color:var(--text-tertiary)]"
+    />
+  );
+}
+
 /** A row that says something (proto `.irow`): its title in semibold, a
- * 13 px source below, a badge on the right. With `leading` (a `StateMark`),
+ * 13 px source below, a badge on the right. With `href`, the whole row
+ * opens that page, a chevron after the badge (« Avant les workflows » of
+ * the overview, Sacha 09/11/2026). With `leading` (a `StateMark`),
  * laid out as a `ProposalRow` it sits with (the Dispositif's levers under
  * PO's proposals, Sacha 07/11/2026). */
 export function InfoRow({
@@ -42,11 +57,13 @@ export function InfoRow({
   detail,
   badge,
   leading,
+  href,
 }: {
   title: string;
   detail?: string;
   badge?: ReactNode;
   leading?: ReactNode;
+  href?: string;
 }) {
   if (leading)
     return (
@@ -65,12 +82,29 @@ export function InfoRow({
         {badge}
       </li>
     );
+  const row =
+    "flex flex-wrap items-center justify-between gap-x-3.5 gap-y-2.5 px-3.5 py-3 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)]";
+  const body = (
+    <span className="flex min-w-0 flex-[1_1_18rem] flex-col">
+      <b className="font-semibold break-words">{title}</b>
+      {detail && <span className={sub}>{detail}</span>}
+    </span>
+  );
+  if (href)
+    return (
+      <li>
+        <ViewLink href={href} className={cn(row, "w-full", rowLink)}>
+          {body}
+          <span className="flex items-center gap-3">
+            {badge}
+            <RowChevron />
+          </span>
+        </ViewLink>
+      </li>
+    );
   return (
-    <li className="flex flex-wrap items-center justify-between gap-x-3.5 gap-y-2.5 px-3.5 py-3 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)]">
-      <span className="flex min-w-0 flex-[1_1_18rem] flex-col">
-        <b className="font-semibold break-words">{title}</b>
-        {detail && <span className={sub}>{detail}</span>}
-      </span>
+    <li className={row}>
+      {body}
       {badge}
     </li>
   );
@@ -92,7 +126,10 @@ export function LinkRow({
     <li>
       <ViewLink
         href={href}
-        className="flex w-full items-center gap-3 px-4 py-3.5 text-[length:var(--type-body-md)] leading-[var(--type-body-md-lh)] text-[color:var(--text-primary)] no-underline transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:bg-[var(--surface-soft)] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[color:var(--focus-ring)]"
+        className={cn(
+          "flex w-full items-center gap-3 px-4 py-3.5 text-[length:var(--type-body-md)] leading-[var(--type-body-md-lh)]",
+          rowLink,
+        )}
       >
         <span className="flex min-w-0 flex-1 flex-col">
           <b className="font-semibold break-words">{title}</b>
@@ -102,10 +139,7 @@ export function LinkRow({
             </span>
           )}
         </span>
-        <IconChevronRight
-          aria-hidden
-          className="size-3.5 shrink-0 text-[color:var(--text-tertiary)]"
-        />
+        <RowChevron />
       </ViewLink>
     </li>
   );

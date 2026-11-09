@@ -166,9 +166,16 @@ export function masterJourney(input: MasterJourneyInput): MasterJourneyStep[] {
     (x) => !approved(x.id, "mix") && vocalsAwaited(x.sources[0] ?? null),
   );
   const arrived = awaited.filter((x) => newerThan(x.audio, x.sources[0]));
+  // Nothing at the Catalogue for any of them: the gesture is the import
+  // (Akili, 02/11/2026: « on ne sait pas quoi faire en arrivant »).
+  const nothingToConfirm = toConfirm.every((x) => x.audio.length === 0);
   const sourceActions: Action[] =
     toConfirm.length > 0
-      ? ownerDoes(t.todo.confirmSource(toConfirm.length))
+      ? ownerDoes(
+          nothingToConfirm
+            ? t.todo.importSource(toConfirm.length)
+            : t.todo.confirmSource(toConfirm.length),
+        ).map((a) => ({ ...a, lead: true }))
       : arrived.length > 0
         ? ownerDoes(t.todo.replaceSource)
         : awaited.length > 0

@@ -1030,7 +1030,9 @@ button[data-busy]::before {
 }
 
 /* Toasts maison (components/ui/toaster.tsx, toast-card.tsx ; docs/DESIGN.md § 4, « Toast »).
-   Fond encre, en bas à droite, empilés : le plus récent devant, les autres
+   Fond du thème (carte claire en clair, sombre un cran au-dessus des cartes
+   en sombre), détaché par un filet et une ombre plus marquée que celle d'une
+   carte ; en bas à droite, empilés : le plus récent devant, les autres
    dépassent de 10 px au-dessus ; survol ou focus = la pile s'ouvre en colonne.
    Seuls transform, opacity et clip-path bougent. */
 :root {
@@ -1038,28 +1040,31 @@ button[data-busy]::before {
   --toast-gap: 8px;
   --toast-peek: 10px;
   --toast-ease: cubic-bezier(0.23, 1, 0.32, 1);
-  --toast-bg: var(--surface-inverse);
-  --toast-fg: var(--control-primary-fg);
-  --toast-fg-secondary: rgb(255 255 255 / 0.66);
-  --toast-border: rgb(255 255 255 / 0.08);
-  --toast-control: rgb(255 255 255 / 0.12);
-  --toast-control-hover: rgb(255 255 255 / 0.2);
-  --toast-success: #7fdca0;
-  --toast-error: #ff9b94;
-  --toast-warning: #f5c869;
-  --toast-info: #9ec5ff;
-  --toast-shadow: 0 2px 6px rgb(0 0 0 / 0.08), 0 16px 40px rgb(0 0 0 / 0.18);
-}
-:root.dark {
-  --toast-fg-secondary: rgb(10 10 10 / 0.62);
-  --toast-border: rgb(0 0 0 / 0.06);
-  --toast-control: rgb(0 0 0 / 0.07);
-  --toast-control-hover: rgb(0 0 0 / 0.13);
+  --toast-bg: var(--surface-raised);
+  --toast-fg: var(--text-primary);
+  --toast-fg-secondary: var(--text-secondary);
+  --toast-border: var(--border-default);
+  --toast-control: rgb(0 0 0 / 0.06);
+  --toast-control-hover: rgb(0 0 0 / 0.11);
   --toast-success: #15703a;
   --toast-error: #b3261e;
   --toast-warning: #8a5600;
   --toast-info: #1f5fbf;
-  --toast-shadow: 0 2px 6px rgb(0 0 0 / 0.4), 0 16px 40px rgb(0 0 0 / 0.55);
+  --toast-shadow:
+    0 1px 2px rgb(0 0 0 / 0.06), 0 4px 12px rgb(0 0 0 / 0.08),
+    0 20px 48px rgb(0 0 0 / 0.16);
+}
+:root.dark {
+  /* Plus clair que les cartes (#161616) : en sombre, l'élévation se lit à la
+     clarté du fond et au filet, l'ombre se voit à peine. */
+  --toast-bg: #1f1f1f;
+  --toast-control: rgb(255 255 255 / 0.09);
+  --toast-control-hover: rgb(255 255 255 / 0.16);
+  --toast-success: #7fdca0;
+  --toast-error: #ff9b94;
+  --toast-warning: #f5c869;
+  --toast-info: #9ec5ff;
+  --toast-shadow: 0 2px 6px rgb(0 0 0 / 0.5), 0 20px 48px rgb(0 0 0 / 0.6);
 }
 
 .toaster {

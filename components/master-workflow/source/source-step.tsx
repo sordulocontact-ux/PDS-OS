@@ -1,7 +1,6 @@
 import { IconDisc } from "@/components/icons";
 import { DocumentCard } from "@/components/ui/document-card";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
-import { SegmentedLinks } from "@/components/ui/segmented-control";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { catalog } from "@/lib/i18n/fr/catalog";
 import { masterSource } from "@/lib/i18n/fr/master-source";
@@ -9,27 +8,28 @@ import type {
   SourceStepView,
   SourceTitle,
 } from "@/lib/master-workflow/source-step";
-import { masterStepHref } from "@/lib/ui/master-steps";
 import { formatShortDay } from "@/lib/utils/day";
-
-import { MissingStemsRow } from "@/components/master-workflow/round/stems-row";
 
 import { ReplaceSourceButton } from "./newer-source";
 import { SourceAudioFile } from "./source-audio";
+import { SourceChecked } from "./source-checked";
 import { SourceChooser } from "./source-chooser";
 import { SourceImport } from "./source-import";
+import {
+  pickSourceTitle,
+  sourceGestureFirst,
+  SourceTitlePills,
+} from "./source-lead";
 
 const fr = { catalog, masterSource };
 
 const t = fr.masterSource;
 
-const sectionTitle =
-  "text-[length:var(--type-body-md)] leading-[var(--type-body-md-lh)] font-semibold";
-
 /**
  * The Source step's content (proto `master-v2.html`): one title at a time
  * (pills when the project has several), what PDS OS checked, the source in
- * force, the final vocals awaited or arrived, and the owner's gesture.
+ * force, the final vocals awaited or arrived. The owner's gesture on a title
+ * still to confirm heads the step instead (SourceLead, the page's `lead`).
  */
 export function SourceStep({
   view,
@@ -40,28 +40,16 @@ export function SourceStep({
   titleId: string | null;
   ownerName: string | null;
 }) {
-  if (view.titles.length === 0)
-    return <ToneCallout tone="info">{t.noTitle}</ToneCallout>;
-  const title =
-    view.titles.find((x) => x.id === titleId) ??
-    view.titles.find((x) => !x.current && !x.declared) ??
-    view.titles.find((x) => x.awaited) ??
-    view.titles[0];
-  const base = masterStepHref(view.projectId, "source");
+  const title = pickSourceTitle(view, titleId);
+  if (!title) return <ToneCallout tone="info">{t.noTitle}</ToneCallout>;
+  if (sourceGestureFirst(view, title))
+    // Its checks sit inside the form when there are versions to choose.
+    return title.candidates.length > 0 ? null : (
+      <SourceChecked view={view} title={title} />
+    );
   return (
     <div className="flex flex-col gap-5">
-      {view.titles.length > 1 && (
-        <SegmentedLinks
-          label={t.titles}
-          className="self-start"
-          options={view.titles.map((x) => ({
-            key: x.id,
-            href: `${base}?titre=${x.id}`,
-            current: x.id === title.id,
-            label: x.title,
-          }))}
-        />
-      )}
+      <SourceTitlePills view={view} title={title} />
       <TitleSource view={view} title={title} ownerName={ownerName} />
     </div>
   );
@@ -89,66 +77,7 @@ function TitleSource({
     );
   const current = title.current;
   const working = current?.vocalsFinal === false;
-  // Before the first confirmation, the checks sit inside the form, between
-  // the versions and the question on the vocals (proto).
-  const inForm = view.canConfirm && !current && title.candidates.length > 0;
-  const checked = (
-    <section className="flex flex-col gap-2.5">
-      <h3 className={sectionTitle}>{t.checked}</h3>
-      <FactRows>
-        <FactRow
-          label={t.mix.label}
-          value={
-            title.mix === "todo" && title.existingMix
-              ? t.mix.value.found(title.existingMix.fileName)
-              : t.mix.value[title.mix]
-          }
-          source={t.mix.source}
-          state={{
-            tone: title.mix === "done" ? "success" : "neutral",
-            label: t.mix.state[title.mix],
-          }}
-        />
-        {title.stems.count > 0 ? (
-          <FactRow
-            label={t.stems.label}
-            value={t.stems.value(title.stems.count, title.stems.latest)}
-            source={t.stems.source}
-            state={{ tone: "success", label: t.stems.ready }}
-          />
-        ) : (
-          // Missing: the row adds them (Ibé's feedback of 02/11).
-          <MissingStemsRow
-            organizationId={view.organizationId}
-            masterId={title.id}
-            title={title.title}
-            value={t.stems.value(0, null)}
-            source={t.stems.source}
-            missingLabel={t.stems.missing}
-          />
-        )}
-        {current && current.vocalsFinal !== null && (
-          <FactRow
-            label={t.vocals.label}
-            value={
-              current.vocalsFinal
-                ? t.vocals.yes
-                : t.vocals.no(current.vocalsPending)
-            }
-            source={t.vocals.source(
-              current.confirmedBy,
-              formatShortDay(current.confirmedAt),
-            )}
-            state={
-              current.vocalsFinal
-                ? { tone: "success", label: t.vocals.ready }
-                : { tone: "warning", label: t.vocals.notYet }
-            }
-          />
-        )}
-      </FactRows>
-    </section>
-  );
+  const checked = <SourceChecked view={view} title={title} />;
   return (
     <>
       {title.newer && (
@@ -230,26 +159,21 @@ function TitleSource({
         </DocumentCard>
       )}
 
-      {!inForm && checked}
+      {checked}
 
       {view.canConfirm ? (
-        <>
-          {title.candidates.length === 0 && !title.existingMix && (
-            <ToneCallout tone="warning">{t.noAudio}</ToneCallout>
-          )}
-          <SourceChooser
-            projectId={view.projectId}
-            title={title}
-            mixV1Due={view.mixV1Due}
-            checked={inForm ? checked : null}
-            imports={
-              <SourceImport
-                organizationId={view.organizationId}
-                masterId={title.id}
-              />
-            }
-          />
-        </>
+        // A confirmed source: « Changer la source » reopens the form.
+        <SourceChooser
+          projectId={view.projectId}
+          title={title}
+          mixV1Due={view.mixV1Due}
+          imports={
+            <SourceImport
+              organizationId={view.organizationId}
+              masterId={title.id}
+            />
+          }
+        />
       ) : (
         !current &&
         ownerName && (

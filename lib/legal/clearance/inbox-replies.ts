@@ -2,6 +2,7 @@ import "server-only";
 
 import { withInbox, inboxEnabled, type Inbox } from "@/lib/email/inbox";
 import { clearanceOfAddress } from "@/lib/email/reply-address";
+import { fileSignedCopy } from "@/lib/legal/clearance/signed-by-email";
 import { getServerEnv } from "@/lib/env";
 import { legalClearance } from "@/lib/i18n/fr/legal-clearance";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -38,6 +39,8 @@ type OpenRequest = { id: string; work: string; asked: boolean };
  * 3. else, a holder of several: the one whose work the subject or the text
  *    names, when only one does.
  * Anything else stays in po@, untouched (pasted by hand in « Négocier »).
+ * A PDF joined to a reply while the contract is out for signature is kept
+ * in the contract as its signed copy (`fileSignedCopy`).
  */
 export async function fileClearanceReplies(): Promise<{
   filed: number;
@@ -113,24 +116,28 @@ async function requestsByHolder(
   if (ids.length === 0) return byHolder;
   const { data: holders } = await supabase
     .from("legal_clearance_rightsholders")
-    .select("clearance_id, contact_id")
-    .in("clearance_id", ids)
-    .not("contact_id", "is", null);
+    .select("clearance_id, contact_id, email")
+    .in("clearance_id", ids);
   const contactIds = [
     ...new Set((holders ?? []).flatMap((h) => h.contact_id ?? [])),
   ];
-  if (contactIds.length === 0) return byHolder;
-  const { data: contacts } = await supabase
-    .from("network_contacts")
-    .select("id, email")
-    .in("id", contactIds);
+  const { data: contacts } =
+    contactIds.length > 0
+      ? await supabase
+          .from("network_contacts")
+          .select("id, email")
+          .in("id", contactIds)
+      : { data: [] as Array<{ id: string; email: string | null }> };
   const emailOf = new Map(
     (contacts ?? []).flatMap((c) =>
       c.email ? [[c.id, c.email.trim().toLowerCase()] as const] : [],
     ),
   );
   for (const h of holders ?? []) {
-    const email = h.contact_id ? emailOf.get(h.contact_id) : undefined;
+    // The fiche's address, else the one a name-only holder was e-mailed to.
+    const email = h.contact_id
+      ? emailOf.get(h.contact_id)
+      : h.email?.trim().toLowerCase();
     if (!email) continue;
     const list = byHolder.get(email) ?? [];
     if (!list.includes(h.clearance_id)) list.push(h.clearance_id);
@@ -191,5 +198,9 @@ async function file(
     console.error("fileClearanceReplies file:", error.message);
     return false;
   }
-  return data === true;
+  if (data !== true) return false;
+  // Filed for the first time: a signed contract joined goes to the contract.
+  if (e.from)
+    await fileSignedCopy(supabase, clearanceId, e.from, e.date, message);
+  return true;
 }

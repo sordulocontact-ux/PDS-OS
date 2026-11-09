@@ -3,7 +3,7 @@
 -- `supabase test db`. Fixture of the ticket (« Piégée », test data only: the
 -- shares, signatures, deposit, registration and ISWC here are SIMULATED).
 begin;
-select plan(37);
+select plan(41);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -81,11 +81,15 @@ select pg_temp.id_of('org'), id, pg_temp.id_of('project'), 'formality:' || pg_te
   from public.legal_plans where project_id = pg_temp.id_of('project');
 select public.legal_plan_item_task((select id from public.legal_plan_items where project_id = pg_temp.id_of('project')));
 
+-- Participants (20261109140101): roles, and a share within each role's category.
 create function pg_temp.creators(p_shares text[]) returns jsonb language sql as $$
   select jsonb_build_array(
-    jsonb_build_object('last_name', 'Ever', 'first_name', 'Ever', 'quality', 'composer', 'phono', p_shares[1], 'signs', true),
-    jsonb_build_object('last_name', 'Samy', 'pseudonym', 'Samy', 'quality', 'composer', 'phono', p_shares[2], 'signs', true),
-    jsonb_build_object('last_name', 'Le J', 'first_name', 'Jérémy', 'quality', 'author', 'phono', p_shares[3], 'signs', true))
+    jsonb_build_object('last_name', 'Ever', 'first_name', 'Ever', 'roles', jsonb_build_array('composer'),
+                       'shares', jsonb_build_object('composer', p_shares[1]), 'signs', true),
+    jsonb_build_object('last_name', 'Samy', 'pseudonym', 'Samy', 'roles', jsonb_build_array('composer'),
+                       'shares', jsonb_build_object('composer', p_shares[2]), 'signs', true),
+    jsonb_build_object('last_name', 'Le J', 'first_name', 'Jérémy', 'roles', jsonb_build_array('author'),
+                       'shares', jsonb_build_object('author', p_shares[3]), 'signs', true))
 $$;
 create function pg_temp.status() returns text language sql as $$
   select status from public.legal_formalities where project_id = pg_temp.id_of('project')
@@ -100,11 +104,17 @@ select public.save_formality_values(pg_temp.id_of('f'), jsonb_build_object(
   'duration', jsonb_build_object('value', '3:12', 'source', 'Master final'),
   'genre', jsonb_build_object('value', 'Rap', 'source', 'Saisi'),
   'performers', jsonb_build_object('value', 'Dioo', 'source', 'Artistes du titre'),
-  'creators', jsonb_build_object('value', pg_temp.creators(array['33.33', '33.33', '33.33']), 'source', 'Saisi'),
+  'creators', jsonb_build_object('value', pg_temp.creators(array['50', '75', '100']), 'source', 'Saisi'),
   'dep_dr', jsonb_build_object('value', jsonb_build_object('choice', 'follow_phono'), 'source', 'Saisi')));
-select ok('phono_total' = any (public.formality_missing(pg_temp.id_of('f'))), 'the Phono shares must total exactly 100 %');
+-- Retour d'Ibé du 02/11/2026: each category is checked on its own (no more 125 % in all).
+select ok('composer_total' = any (public.formality_missing(pg_temp.id_of('f')))
+          and not ('author_total' = any (public.formality_missing(pg_temp.id_of('f')))),
+          'the Compositeur part must be shared to exactly 100 %, apart from the Auteur part');
+select ok('publishers_choice' = any (public.formality_missing(pg_temp.id_of('f'))),
+          'no music publisher is said, never assumed');
 select public.save_formality_values(pg_temp.id_of('f'), jsonb_build_object(
-  'creators', jsonb_build_object('value', pg_temp.creators(array['33.3334', '33.3333', '33.3333']), 'source', 'Saisi')));
+  'creators', jsonb_build_object('value', pg_temp.creators(array['50', '50', '100']), 'source', 'Saisi'),
+  'phono_split', jsonb_build_object('value', jsonb_build_object('no_publisher', true), 'source', 'Saisi')));
 -- JUR-02/03 (…20261024000401): the first exploitation, and the DEP / DR checked by a person.
 select is(public.formality_missing(pg_temp.id_of('f')),
           array['borrowing:Humanisme', 'first_exploitation', 'dep_dr_check'],
@@ -117,9 +127,10 @@ select is(public.formality_missing(pg_temp.id_of('f')), array['borrowing:Humanis
 -- and a publisher without denomination, block the bulletin.
 select public.save_formality_values(pg_temp.id_of('f'), jsonb_build_object(
   'creators', jsonb_build_object('value', jsonb_build_array(
-    jsonb_build_object('last_name', 'Ever', 'quality', 'composer', 'phono', '50', 'signs', true)), 'source', 'Saisi'),
+    jsonb_build_object('last_name', 'Ever', 'roles', jsonb_build_array('composer'),
+                       'shares', jsonb_build_object('composer', '100'), 'signs', true)), 'source', 'Saisi'),
   'publishers', jsonb_build_object('value', jsonb_build_array(
-    jsonb_build_object('name', '', 'phono', '50')), 'source', 'Saisi')));
+    jsonb_build_object('name', '', 'share', '100')), 'source', 'Saisi')));
 select ok(public.formality_missing(pg_temp.id_of('f')) @> array['creator_first:1', 'publisher_name:1'],
           'a first name or pseudonym, and the publisher''s denomination, are required');
 -- JUR-22 / JUR-25 (…20261012100701): a publisher says whom it publishes, and
@@ -128,14 +139,48 @@ select ok('publisher_link:1' = any (public.formality_missing(pg_temp.id_of('f'))
           'a publisher publishes at least one creator of the bulletin');
 select public.save_formality_values(pg_temp.id_of('f'), jsonb_build_object(
   'publishers', jsonb_build_object('value', jsonb_build_array(
-    jsonb_build_object('name', 'Éditions PDS', 'phono', '50', 'represents', jsonb_build_array(1))), 'source', 'Saisi'),
+    jsonb_build_object('name', 'Éditions PDS', 'share', '100', 'represents', jsonb_build_array(1))), 'source', 'Saisi'),
   'publishing_contract', jsonb_build_object('value', jsonb_build_object('provided', true, 'rubric_g', ''), 'source', 'Saisi')));
 select ok(not ('publisher_link:1' = any (public.formality_missing(pg_temp.id_of('f'))))
           and 'rubric_g' = any (public.formality_missing(pg_temp.id_of('f'))),
           'a copy « joined » without any contract counts as no copy: the rubric G is asked');
+-- A label taken for a music publisher is pointed out (retour d'Ibé du 02/11/2026).
+reset role;
+insert into public.network_contacts (organization_id, kind, name, roles)
+values (pg_temp.id_of('org'), 'organization', 'Label Test ' || (select v from vars where k = 'tag'), array['label']);
+insert into ids select 'label', id from public.network_contacts
+ where name = 'Label Test ' || (select v from vars where k = 'tag');
+select pg_temp.act_as(pg_temp.id_of('manager'));
 select public.save_formality_values(pg_temp.id_of('f'), jsonb_build_object(
-  'creators', jsonb_build_object('value', pg_temp.creators(array['33.3334', '33.3333', '33.3333']), 'source', 'Saisi'),
+  'publishers', jsonb_build_object('value', jsonb_build_array(
+    jsonb_build_object('name', 'Label Test', 'share', '100', 'represents', jsonb_build_array(1),
+                       'contact_id', pg_temp.id_of('label'))), 'source', 'Saisi')));
+select ok('publisher_label:1' = any (public.formality_missing(pg_temp.id_of('f'))),
+          'a label is not a music publisher');
+-- The main artist is never an author by default: their role is confirmed by a person; a
+-- performer alone has no share and is not on the bulletin.
+select public.save_formality_values(pg_temp.id_of('f'), jsonb_build_object(
+  'creators', jsonb_build_object('value', pg_temp.creators(array['50', '50', '100'])
+    || jsonb_build_array(jsonb_build_object('last_name', 'Dioo', 'pseudonym', 'Dioo', 'roles', '[]'::jsonb,
+                                            'performer_only', true, 'shares', '{}'::jsonb, 'signs', false,
+                                            'main_artist', true)), 'source', 'Saisi'),
   'publishers', jsonb_build_object('value', '[]'::jsonb, 'source', 'Saisi')));
+select ok('main_artist_role:4' = any (public.formality_missing(pg_temp.id_of('f')))
+          and not ('creator_role:4' = any (public.formality_missing(pg_temp.id_of('f')))),
+          'the main artist''s role is confirmed by a person; a performer alone needs no role');
+-- A contract's parts between categories make 100 %, with none for a category nobody holds.
+select public.save_formality_values(pg_temp.id_of('f'), jsonb_build_object(
+  'phono_split', jsonb_build_object('value', jsonb_build_object('no_publisher', true,
+    'custom', jsonb_build_object('author', '40', 'composer', '40', 'publisher', '20')), 'source', 'Saisi')));
+select ok('phono_split' = any (public.formality_missing(pg_temp.id_of('f'))),
+          'no Éditeur part without a music publisher');
+select public.save_formality_values(pg_temp.id_of('f'), jsonb_build_object(
+  'creators', jsonb_build_object('value', pg_temp.creators(array['50', '50', '100'])
+    || jsonb_build_array(jsonb_build_object('last_name', 'Dioo', 'pseudonym', 'Dioo', 'roles', '[]'::jsonb,
+                                            'performer_only', true, 'shares', '{}'::jsonb, 'signs', true,
+                                            'main_artist', true, 'confirmed', true)), 'source', 'Saisi'),
+  'phono_split', jsonb_build_object('value', jsonb_build_object('no_publisher', true,
+    'custom', jsonb_build_object('author', '40', 'composer', '60', 'publisher', '')), 'source', 'Saisi')));
 select is(pg_temp.status(), 'collecting_data', 'an unsecured Humanisme keeps the formality from being finalised');
 select throws_ok(format($$ select public.generate_formality_document(%L) $$, pg_temp.id_of('f')),
                  'P0001', 'formality_not_ready', 'no bulletin before the borrowing is secured');
@@ -160,7 +205,7 @@ select pg_temp.act_as(pg_temp.id_of('manager'));
 -- Document, signatures, deposit ----------------------------------------------------
 select is(public.generate_formality_document(pg_temp.id_of('f')), 1, 'version 1 of the bulletin');
 select is((select count(*)::int from public.legal_formality_signatures where formality_id = pg_temp.id_of('f')), 3,
-          'every rights holder who signs has a signature to collect');
+          'every rights holder who signs has a signature to collect, never a performer alone');
 select throws_ok(format($$ select public.submit_formality(%L, 'Envoyé') $$, pg_temp.id_of('f')),
                  'P0001', 'formality_not_ready', 'no deposit before the signatures');
 select throws_ok(format($$ select public.record_formality_signature((select id from public.legal_formality_signatures where formality_id = %L limit 1), null) $$, pg_temp.id_of('f')),

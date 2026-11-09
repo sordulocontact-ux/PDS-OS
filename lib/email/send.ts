@@ -8,7 +8,8 @@ import { getServerEnv } from "@/lib/env";
  * The single entry point of the e-mails PDS OS sends itself (non-negotiable
  * rule 2): from PO's Google account (EMAIL_SMTP_USER, through Gmail's SMTP
  * with an app password), in the name of the member who sends, replies going
- * back to them. Plain text only: what the member wrote, then the link.
+ * back to them. Plain text, and the same in HTML in the common frame when
+ * the caller gives it (lib/email/compose.ts).
  * Without the two variables, `emailEnabled()` is false and every sending
  * stays declared (« Marquer comme envoyé »).
  */
@@ -21,6 +22,8 @@ export type OutgoingEmail = {
   to: { name: string; email: string };
   subject: string;
   text: string;
+  // The same message in HTML (lib/email/compose.ts); clients pick one.
+  html?: string;
   // The member who sends: shown as the sender's name, and the reply-to.
   sender: { name: string; email: string | null };
   // Other reply-to addresses, after the member's: PO's own for a request
@@ -62,6 +65,7 @@ export async function sendEmail(
       replyTo: replyToOf(mail),
       subject: mail.subject,
       text: mail.text,
+      html: mail.html,
       attachments: mail.attachments?.map((a) => ({
         filename: a.filename,
         content: Buffer.from(a.content),

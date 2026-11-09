@@ -68,7 +68,7 @@ export const projectsTopics: GuideTopic[] = [
       "Dans un projet lancé › Vue d'ensemble (le Plan du projet est la 4e étape du Cadrage).",
     facts: [
       "La Vue d'ensemble montre ce qui vous attend dans ce projet, puis une carte par workflow : son statut, sa progression et qui fait quoi.",
-      "Tant que le plan du projet n'est pas lancé, elle ne montre que ce qui précède les workflows.",
+      "Tant que le plan du projet n'est pas lancé, elle ne montre que ce qui précède les workflows : les étapes du Cadrage, chacune ouvre sa page d'un clic.",
       "Le Plan du projet s'écrit à la fin du Cadrage : il propose ce qui commence maintenant, ce qui suit, ce qui avance en parallèle et ce qu'il faut prévoir. On peut le modifier avant de le lancer.",
       "Rien ne démarre avant « Lancer le plan » : alors les workflows prévus démarrent.",
       "Un workflow retiré du plan peut être ajouté et lancé ensuite.",

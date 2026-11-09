@@ -380,4 +380,11 @@ export const network = {
     },
     linkSentOn: (day: string) => `Envoyé le ${day}`,
   },
+  // A contact shown in another module (components/network/contact-card.tsx).
+  card: {
+    noEmail: "Pas d'adresse e-mail dans le Réseau",
+    nameOnly: "Nom seul, pas dans le Réseau",
+    notInNetwork: "pas dans le Réseau",
+    fiche: "Voir la fiche",
+  },
 } as const;

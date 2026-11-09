@@ -131,8 +131,7 @@ export function SplitEditor({
           ))}
         </FactRows>
       </StepSection>
-      <StepSection title={t.parts}>
-        <p className="text-caption text-muted-foreground">{t.partsBody}</p>
+      <StepSection title={t.parts} description={t.partsBody}>
         <SplitParts
           draft={draft}
           errors={shown}

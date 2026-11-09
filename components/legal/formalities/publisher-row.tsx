@@ -2,12 +2,15 @@
 
 import { IconXmark } from "nucleo-sharp-essential";
 
+import { useState } from "react";
+
 import { Field } from "@/components/auth/field";
 import { FieldError } from "@/components/auth/form-message";
 import { OptionSelect } from "@/components/projects/option-select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PersonPickerField } from "@/components/network/person-picker-field";
 import { Button } from "@/components/ui/button";
+import { ToneCallout } from "@/components/ui/tone-callout";
 import { contracts } from "@/lib/i18n/fr/contracts";
 import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
 import type { Publisher } from "@/lib/legal/formalities/definition";
@@ -21,10 +24,12 @@ const fr = { contracts, legalFormalities };
 // « À obtenir »: no contract chosen yet (JUR-25).
 const TO_OBTAIN = "to_obtain";
 
-/** One publisher of the bulletin: a structure picked in the Réseau (the
- * title's publishing split first), which fills its name and IPI; the
- * creators it publishes (JUR-22) and the contract that founds the link, or
- * « à obtenir » (JUR-25). */
+/** One music publisher of the bulletin: a structure picked in the Réseau
+ * (the title's publishing split first), which fills its name and IPI — one
+ * there as a label or producer only is pointed out (retour d'Ibé du
+ * 02/11/2026); the creators it publishes (JUR-22) and the contract that
+ * founds the link, or « à obtenir » (JUR-25). Its share is typed in « 4.
+ * Répartition ». */
 export function PublisherRow({
   rowId,
   publisher,
@@ -45,9 +50,11 @@ export function PublisherRow({
   disabled: boolean;
   onChange: (change: Partial<Publisher>) => void;
   onRemove: () => void;
-  errors?: { name?: string; link?: string };
+  errors?: { name?: string; link?: string; label?: string };
 }) {
   const t = fr.legalFormalities.publisher;
+  // Picked here as a label or producer: said at once, before the check.
+  const [picked, setPicked] = useState<boolean | null>(null);
   return (
     <div className="grid gap-3 rounded-xl border p-3 sm:grid-cols-3">
       <fieldset disabled={disabled} className="contents">
@@ -62,14 +69,22 @@ export function PublisherRow({
             createRoles={["other"]}
             createKind="organization"
             refOfContact={(id) => id}
-            onPick={(option, name) =>
+            onPick={(option, name) => {
+              setPicked(option?.notPublisher ?? false);
               onChange(
                 option
                   ? { ...option.fill, contact_id: option.id }
                   : { name, ipi: "", contact_id: undefined },
-              )
-            }
+              );
+            }}
           />
+          {(picked || (picked === null && errors?.label)) && (
+            <div className="mt-2">
+              <ToneCallout tone="warning">
+                {errors?.label ?? t.labelWarning}
+              </ToneCallout>
+            </div>
+          )}
         </div>
       </fieldset>
       <Field
@@ -144,32 +159,14 @@ export function PublisherRow({
           />
         </div>
       </fieldset>
-      <div className="flex items-end gap-2">
-        <div className="min-w-0 flex-1">
-          <Field
-            name={`p-phono-${rowId}`}
-            label={t.phono}
-            hint={t.phonoHint}
-            inputMode="decimal"
-            suffix="%"
-            value={publisher.phono.replace(".", ",")}
-            disabled={disabled}
-            onChange={(e) =>
-              onChange({ phono: e.target.value.replace(",", ".") })
-            }
-          />
-        </div>
-        {!disabled && (
-          <Button
-            size="icon"
-            variant="ghost"
-            aria-label={fr.legalFormalities.creator.remove}
-            onClick={onRemove}
-          >
+      {!disabled && (
+        <div className="flex items-end justify-end sm:col-span-3">
+          <Button size="sm" variant="ghost" onClick={onRemove}>
             <IconXmark aria-hidden />
+            {fr.legalFormalities.creator.remove}
           </Button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

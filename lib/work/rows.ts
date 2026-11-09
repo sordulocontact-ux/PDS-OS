@@ -1,5 +1,6 @@
 import { routes } from "@/lib/auth/redirects";
 import { journey } from "@/lib/i18n/fr/journey";
+import { masterPage } from "@/lib/i18n/fr/master-page";
 import { work } from "@/lib/i18n/fr/work";
 import {
   actionHref,
@@ -9,10 +10,11 @@ import {
 } from "@/lib/ui/journey";
 import type { JourneyModuleKey } from "@/lib/journey/types";
 import { addDays, weekStartOf } from "@/lib/utils/calendar-period";
+import { formatShortDay } from "@/lib/utils/day";
 import type { MyJourneyWork } from "@/lib/work/journeys";
 import type { MyWork } from "@/lib/work/queries";
 
-const fr = { journey, work };
+const fr = { journey, masterPage, work };
 
 /** The tabs of the global Travail, « Tout » first. What is late is a group
  * of the list, not a tab: it is always seen first. */
@@ -32,7 +34,7 @@ export type WorkGroup = (typeof WORK_GROUPS)[number];
 /**
  * What the row asks: a step to do or to decide (journeys), a task tied to no
  * workflow, a project to accept or to transmit again, one waiting for a
- * project manager, PO's proposals to review.
+ * project manager, PO's proposals to review, a studio session's report.
  */
 export type WorkRowKind =
   | "do"
@@ -42,7 +44,8 @@ export type WorkRowKind =
   | "accept"
   | "retransmit"
   | "awaiting"
-  | "proposals";
+  | "proposals"
+  | "session";
 
 /** One line of the global Travail, computed by code. */
 export type WorkRow = {
@@ -83,6 +86,7 @@ const viewsOf: Record<WorkRowKind, WorkView[]> = {
   // Someone else's move: listed, never counted as the viewer's.
   awaiting: [],
   proposals: ["validate"],
+  session: ["todo"],
 };
 
 export const inView = (row: WorkRow, view: WorkView) =>
@@ -217,6 +221,31 @@ export function workRowsOf(
       validator: null,
       then: [],
       proposalCount: p.count,
+    })),
+    ...work.sessions.map((s): Draft => ({
+      key: `session|${s.id}`,
+      kind: "session",
+      // Opened on its report (components/sessions/session-page).
+      href: `${routes.session(s.id)}#compte-rendu`,
+      title: fr.work.table.titles.session,
+      module: null,
+      place: [
+        fr.work.table.session.place(
+          fr.masterPage.sessions.kinds[s.kind],
+          s.date ? formatShortDay(s.date, { bare: true }) : null,
+        ),
+        s.artists.map((a) => a.name).join(", "),
+      ]
+        .filter(Boolean)
+        .join(" · "),
+      projectId: s.projects[0]?.id ?? "",
+      projectTitle: s.projects[0]?.name ?? fr.work.table.session.noProject,
+      // Due once the session is over: no date of its own, never « late ».
+      due: null,
+      overdue: false,
+      why: why.session,
+      validator: null,
+      then: [],
     })),
   ];
   return drafts

@@ -5,6 +5,7 @@ import { legalClearance } from "@/lib/i18n/fr/legal-clearance";
 import type { ClearanceStatus } from "@/lib/legal/clearance/matrix";
 import type { Clearance, Clearances } from "@/lib/legal/clearance/types";
 import { formatFee } from "@/lib/legal/contracts/fields";
+import { formatInstant } from "@/lib/utils/instant";
 
 import { AskMoment } from "./ask-moment";
 import { NegotiateMoment } from "./negotiate-moment";
@@ -81,7 +82,11 @@ export function ClearanceStages({
       />
     );
   return (
-    <StepSection title={t[moment].title}>
+    <StepSection
+      title={t[moment].title}
+      // « Demandé à … le … »: read with its title (Sacha, 09/11/2026).
+      description={moment === "negotiate" ? askedLine(clearance) : undefined}
+    >
       {moment === "negotiate" && (
         <NegotiateMoment
           projectId={projectId}
@@ -95,8 +100,19 @@ export function ClearanceStages({
           projectId={projectId}
           clearance={clearance}
           context={context}
+          directionName={directionName}
         />
       )}
     </StepSection>
+  );
+}
+
+/** « Demandé à X le … » under « Négocier ». */
+function askedLine(clearance: Clearance): string {
+  const names = clearance.holders.map((h) => h.name).join(" et ");
+  const askedOn = clearance.exchanges.find((e) => e.direction === "out")?.at;
+  return fr.legalClearance.flow.askedTo(
+    names || fr.legalClearance.flow.holdersFallback,
+    askedOn ? formatInstant(askedOn) : "",
   );
 }

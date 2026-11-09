@@ -1,16 +1,21 @@
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
-import type { Creator, Publisher } from "@/lib/legal/formalities/definition";
+import type {
+  Creator,
+  PhonoSplit,
+  Publisher,
+} from "@/lib/legal/formalities/definition";
+import {
+  bulletinShares,
+  creatorName,
+} from "@/lib/legal/formalities/participants";
 import {
   sharingPreview,
   type SharingAlert,
 } from "@/lib/legal/formalities/sharing-rule";
-import { formatShare } from "@/lib/legal/splits/shares";
+import { formatShare, shareOf } from "@/lib/legal/splits/shares";
 
 const fr = { legalFormalities };
-
-const nameOf = (c: Creator) =>
-  c.pseudonym || [c.first_name, c.last_name].filter(Boolean).join(" ") || "—";
 
 /**
  * « Aperçu des DEP et DR » under the rubrique D (JUR-23): what each right
@@ -21,24 +26,31 @@ const nameOf = (c: Creator) =>
 export function DepDrPreview({
   creators,
   publishers,
+  split,
   choice,
   ruleId,
 }: {
   creators: Creator[];
   publishers: Publisher[];
+  split: PhonoSplit;
   choice: string;
   ruleId: string;
 }) {
   const t = fr.legalFormalities.sharing;
+  // One line per role of the bulletin, its Phono share derived from the
+  // categories (retour d'Ibé du 02/11/2026).
+  const derived = bulletinShares(creators, publishers, split);
   const people = {
-    creators: creators.map((c) => ({
-      name: nameOf(c),
-      quality: c.quality,
-      phono: c.phono,
-    })),
-    publishers: publishers.map((p) => ({
+    creators: creators.flatMap((c, i) =>
+      derived.creators[i].map((line) => ({
+        name: creatorName(c) || "—",
+        quality: line.quality,
+        phono: shareOf(line.phono),
+      })),
+    ),
+    publishers: publishers.map((p, i) => ({
       name: p.name || "—",
-      phono: p.phono,
+      phono: shareOf(derived.publishers[i]),
     })),
     ruleId,
   };

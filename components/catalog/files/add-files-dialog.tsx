@@ -6,8 +6,8 @@ import { FormMessage } from "@/components/auth/form-message";
 import { FileDetailsFields } from "@/components/catalog/files/file-details-fields";
 import { PendingFiles } from "@/components/catalog/files/pending-files";
 import { useCatalogUpload } from "@/components/catalog/files/use-catalog-upload";
+import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
-import { ChipChoice } from "@/components/ui/chip-choice";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { readAudioDuration } from "@/lib/catalog/audio-duration";
 import {
@@ -15,7 +15,11 @@ import {
   isAudioFile,
   type FileOwner,
 } from "@/lib/catalog/file-rules";
-import { AUDIO_STATES, type AudioState } from "@/lib/catalog/title-rules";
+import {
+  AUDIO_STATES,
+  isAudioState,
+  type AudioState,
+} from "@/lib/catalog/title-rules";
 import { catalog } from "@/lib/i18n/fr/catalog";
 import { catalogFiles } from "@/lib/i18n/fr/catalog-files";
 import { masterPage } from "@/lib/i18n/fr/master-page";
@@ -149,16 +153,22 @@ function AddFilesForm({
       <PendingFiles files={remaining} />
       {audio ? (
         <fieldset disabled={pending} className="contents">
-          <ChipChoice
+          {/* A menu, not chips: five states wrapped on two lines in the
+              modal (Sacha 09/11/2026), as « Reclasser » asks it. */}
+          <OptionSelect
             name="audioState"
-            legend={a.stateLabel}
+            label={a.stateLabel}
             required
-            options={AUDIO_STATES.map((value) => ({
-              value,
-              label: fr.catalog.audioStates[value],
-            }))}
-            value={audioState}
-            onChange={(value) => value && setAudioState(value)}
+            items={Object.fromEntries(
+              AUDIO_STATES.map((value) => [
+                value,
+                fr.catalog.audioStates[value],
+              ]),
+            )}
+            defaultValue={audioState}
+            onValueChange={(value) =>
+              isAudioState(value) && setAudioState(value)
+            }
           />
         </fieldset>
       ) : (

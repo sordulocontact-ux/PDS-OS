@@ -148,7 +148,11 @@ export function ClearanceBody({
         </ToneCallout>
       )}
       {!asking ? (
-        <ClearanceRequest clearance={clearance} />
+        <ClearanceRequest
+          projectId={projectId}
+          clearance={clearance}
+          editable={!closed}
+        />
       ) : (
         showTaken && (
           <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">

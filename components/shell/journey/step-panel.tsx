@@ -142,7 +142,9 @@ export function StepPanel({
                 : { "aria-label": step.actor?.todo ?? t.now.mine })}
               // No frame of its own (Sacha, 04/11/2026: « le fond bleu
               // non »): the pill and the gesture's name say it is yours.
-              className="flex scroll-mt-24 flex-col gap-3.5"
+              // Well apart from what follows (« Ce que PDS OS a vérifié »…,
+              // Sacha 09/11/2026).
+              className="mb-4 flex scroll-mt-24 flex-col gap-3.5"
             >
               {leadTitle && (
                 <div className="flex flex-wrap items-center gap-2">

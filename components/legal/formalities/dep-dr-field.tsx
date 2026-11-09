@@ -4,7 +4,11 @@ import { FieldError } from "@/components/auth/form-message";
 import { OptionSelect } from "@/components/projects/option-select";
 import { CheckboxField } from "@/components/ui/checkbox-field";
 import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
-import type { Creator, Publisher } from "@/lib/legal/formalities/definition";
+import type {
+  Creator,
+  PhonoSplit,
+  Publisher,
+} from "@/lib/legal/formalities/definition";
 import type { DossierErrors } from "@/lib/legal/formalities/field-errors";
 import { CURRENT_SHARING_RULE } from "@/lib/legal/formalities/sharing-rule";
 
@@ -23,6 +27,7 @@ export function DepDrField({
   value,
   creators,
   publishers,
+  split,
   errors,
   onChange,
 }: {
@@ -31,6 +36,7 @@ export function DepDrField({
   value: DepDr;
   creators: Creator[];
   publishers: Publisher[];
+  split: PhonoSplit;
   errors: DossierErrors | null;
   onChange: (value: DepDr) => void;
 }) {
@@ -61,6 +67,7 @@ export function DepDrField({
       <DepDrPreview
         creators={creators}
         publishers={publishers}
+        split={split}
         choice={value.choice ?? ""}
         ruleId={value.rule ?? CURRENT_SHARING_RULE}
       />

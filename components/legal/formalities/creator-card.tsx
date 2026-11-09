@@ -3,12 +3,18 @@
 import { IconXmark } from "nucleo-sharp-essential";
 
 import { Field } from "@/components/auth/field";
+import { FieldError } from "@/components/auth/form-message";
 import { PersonPickerField } from "@/components/network/person-picker-field";
-import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { ChipMultiChoice } from "@/components/ui/chip-choice";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
-import { QUALITIES, type Creator } from "@/lib/legal/formalities/definition";
+import {
+  QUALITIES,
+  type Creator,
+  type Quality,
+} from "@/lib/legal/formalities/definition";
 import type { CreatorOption } from "@/lib/legal/formalities/party-actions";
 
 const fr = { legalFormalities };
@@ -19,10 +25,15 @@ const EMPTY_IDENTITY = {
   pseudonym: "",
   ipi: "",
 };
+const PERFORMER = "performer";
+type RoleChoice = Quality | typeof PERFORMER;
 
-/** One creator of the bulletin: picked in the Réseau (the title's credited
- * people first), which fills their identity, IPI and quality from what PDS
- * OS knows; every value stays correctable. Only the Phono share is typed. */
+/** One participant of the work (retour d'Ibé du 02/11/2026): picked in the
+ * Réseau (the title's credited people first), which fills their identity,
+ * IPI and roles from what PDS OS knows; then what they did — author,
+ * composer, both, arranger, adapter, or « interprète uniquement » (no SACEM
+ * share). The main artist is put in by PDS OS and their role confirmed by a
+ * person. Their shares are typed by category, in « 4. Répartition ». */
 export function CreatorCard({
   rowId,
   creator,
@@ -36,19 +47,60 @@ export function CreatorCard({
   creator: Creator;
   load: (fresh?: boolean) => Promise<CreatorOption[]>;
   disabled: boolean;
-  errors?: { last_name?: string; first_name?: string; quality?: string };
+  errors?: {
+    last_name?: string;
+    first_name?: string;
+    roles?: string;
+    confirm?: string;
+  };
   onChange: (change: Partial<Creator>) => void;
   onRemove: () => void;
 }) {
-  const t = fr.legalFormalities.creator;
+  const t = fr.legalFormalities;
+  const chosen: RoleChoice[] = creator.performer_only
+    ? [PERFORMER]
+    : creator.roles;
+  // Any choice of roles confirms the main artist's (never made an author by
+  // PDS OS).
+  const confirming = creator.main_artist ? { confirmed: true } : {};
+  // « Interprète uniquement » excludes every other role, and the reverse.
+  const choose = (next: RoleChoice[]) => {
+    const performer = next
+      .filter((v) => !chosen.includes(v))
+      .includes(PERFORMER);
+    onChange({
+      ...confirming,
+      performer_only: performer,
+      roles: performer
+        ? []
+        : QUALITIES.filter((q) => (next as string[]).includes(q)),
+      // An interpreter alone signs nothing.
+      ...(performer
+        ? { signs: false }
+        : creator.performer_only
+          ? { signs: true }
+          : {}),
+    });
+  };
+
   return (
     <div className="grid gap-3 rounded-xl border p-3 sm:grid-cols-3">
       <fieldset disabled={disabled} className="contents">
-        <div className="sm:col-span-2">
+        <div className="flex flex-col gap-2 sm:col-span-3">
+          {creator.main_artist && (
+            <div className="flex flex-wrap items-center gap-2">
+              <StatusBadge tone="info" size="sm">
+                {t.roles.mainArtist}
+              </StatusBadge>
+              <span className="text-sm text-muted-foreground">
+                {creator.confirmed ? t.roles.confirmed : t.roles.mainArtistHint}
+              </span>
+            </div>
+          )}
           <PersonPickerField<CreatorOption>
             refName={`c-ref-${rowId}`}
             nameName={`c-name-${rowId}`}
-            legend={t.person}
+            legend={t.creator.person}
             load={load}
             defaultRef={creator.contact_id ?? null}
             defaultName={null}
@@ -59,7 +111,9 @@ export function CreatorCard({
                 option
                   ? {
                       ...option.fill,
-                      quality: option.fill.quality || creator.quality,
+                      roles: creator.roles.length
+                        ? creator.roles
+                        : option.fill.roles,
                       contact_id: option.id,
                     }
                   : // A name only, or the choice undone: nothing of the
@@ -74,23 +128,46 @@ export function CreatorCard({
           />
         </div>
       </fieldset>
-      <OptionSelect
-        // Remounted when another person is picked (it fills the quality).
-        key={`q-${rowId}-${creator.contact_id ?? ""}`}
-        name={`c-quality-${rowId}`}
-        label={t.quality}
-        hint={t.qualityHint}
-        required
-        items={Object.fromEntries(
-          QUALITIES.map((q) => [q, fr.legalFormalities.qualities[q]]),
+      <div className="flex flex-col gap-2 sm:col-span-3">
+        <ChipMultiChoice<RoleChoice>
+          name={`c-roles-${rowId}`}
+          legend={t.roles.legend}
+          required
+          hint={t.roles.hint}
+          error={errors?.roles}
+          options={[
+            ...QUALITIES.map((q) => ({ value: q, label: t.roles[q] })),
+            { value: PERFORMER, label: t.roles.performer },
+          ]}
+          value={chosen}
+          onChange={disabled ? undefined : choose}
+        />
+        {creator.performer_only && (
+          <p className="text-sm text-muted-foreground">
+            {t.roles.performerNote}
+          </p>
         )}
-        defaultValue={creator.quality || null}
-        error={errors?.quality}
-        onValueChange={(v) => onChange({ quality: v as Creator["quality"] })}
-      />
+        {creator.main_artist && !creator.confirmed && !disabled && (
+          <div className="flex flex-col gap-1">
+            {chosen.length > 0 && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="self-start"
+                onClick={() => onChange({ confirmed: true })}
+              >
+                {t.roles.confirm}
+              </Button>
+            )}
+            <FieldError id={`c-confirm-${rowId}-error`}>
+              {errors?.confirm}
+            </FieldError>
+          </div>
+        )}
+      </div>
       <Field
         name={`c-last-${rowId}`}
-        label={t.lastName}
+        label={t.creator.lastName}
         aria-required
         value={creator.last_name}
         disabled={disabled}
@@ -99,7 +176,7 @@ export function CreatorCard({
       />
       <Field
         name={`c-first-${rowId}`}
-        label={t.firstName}
+        label={t.creator.firstName}
         value={creator.first_name}
         disabled={disabled}
         error={errors?.first_name}
@@ -107,41 +184,37 @@ export function CreatorCard({
       />
       <Field
         name={`c-pseudo-${rowId}`}
-        label={t.pseudonym}
+        label={t.creator.pseudonym}
         value={creator.pseudonym}
         disabled={disabled}
         onChange={(e) => onChange({ pseudonym: e.target.value })}
       />
-      <Field
-        name={`c-ipi-${rowId}`}
-        label={t.ipi}
-        value={creator.ipi}
-        disabled={disabled}
-        onChange={(e) => onChange({ ipi: e.target.value })}
-      />
-      <Field
-        name={`c-phono-${rowId}`}
-        label={t.phono}
-        hint={t.phonoHint}
-        inputMode="decimal"
-        suffix="%"
-        value={creator.phono.replace(".", ",")}
-        disabled={disabled}
-        onChange={(e) => onChange({ phono: e.target.value.replace(",", ".") })}
-      />
-      <div className="flex items-end justify-between gap-2">
-        <label className="flex h-10 items-center gap-2 text-sm">
-          <Checkbox
-            checked={creator.signs}
-            disabled={disabled}
-            onChange={(e) => onChange({ signs: e.target.checked })}
-          />
-          {t.signs}
-        </label>
+      {!creator.performer_only && (
+        <Field
+          name={`c-ipi-${rowId}`}
+          label={t.creator.ipi}
+          value={creator.ipi}
+          disabled={disabled}
+          onChange={(e) => onChange({ ipi: e.target.value })}
+        />
+      )}
+      <div className="flex items-end justify-between gap-2 sm:col-span-2">
+        {!creator.performer_only ? (
+          <label className="flex h-10 items-center gap-2 text-sm">
+            <Checkbox
+              checked={creator.signs}
+              disabled={disabled}
+              onChange={(e) => onChange({ signs: e.target.checked })}
+            />
+            {t.creator.signs}
+          </label>
+        ) : (
+          <span />
+        )}
         {!disabled && (
           <Button size="sm" variant="ghost" onClick={onRemove}>
             <IconXmark aria-hidden />
-            {t.remove}
+            {t.creator.remove}
           </Button>
         )}
       </div>

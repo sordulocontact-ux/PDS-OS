@@ -19,9 +19,10 @@ const fr = { legalDocuments, legalFormalities };
 
 // The section of a code that no field answers.
 function sectionOfCode(code: string): FormalitySection {
-  if (code.startsWith("creator")) return "creators";
+  if (code.endsWith("_total") || code === "phono_split") return "sharing";
+  if (code.startsWith("creator") || code.startsWith("main_artist"))
+    return "creators";
   if (code.startsWith("publisher")) return "publishers";
-  if (code === "phono_total") return "sharing";
   return "work";
 }
 // Codes said by a field itself, on screen, never twice.
@@ -66,7 +67,8 @@ export function fieldStates(input: {
   const publishers = (entries.publishers?.value as Publisher[] | null) ?? [];
   const requiredOf = (key: string, required: boolean) =>
     required ||
-    (key === "arrangement" && creators.some((c) => c.quality === "arranger")) ||
+    (key === "arrangement" &&
+      creators.some((c) => c.roles?.includes("arranger"))) ||
     (key === "publishing_contract" && publishers.length > 0);
 
   const fields = SACEM_725_FIELDS.flatMap((field): FieldStateEntry[] => {

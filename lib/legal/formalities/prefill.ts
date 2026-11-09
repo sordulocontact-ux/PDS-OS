@@ -3,10 +3,12 @@
 // liste les valeurs manquantes »). Never an ISWC that is not on the title,
 // never a draft's duration. The first exploitation is proposed from the
 // planned release (recette Juridique V1, JUR-02), « Proposé » until a person
-// confirms it. The Phono shares
-// start from the title's confirmed split (UX test of 09/10/2026, decided
-// with Sacha on 10/10: they were retyped right after the confirmation),
-// matched by contact, never by name, and shown « à vérifier ». A signed
+// confirms it. The participants are the
+// title's main artists (never made authors: their role is confirmed by a
+// person, retour d'Ibé du 02/11/2026) and its credited creators, one per
+// person with all their roles. Their shares within each category start from
+// the title's confirmed split (UX test of 09/10/2026, decided with Sacha on
+// 10/10), matched by contact, never by name, and shown « à vérifier ». A signed
 // publishing contract of the project ticks « copie jointe » (also done in
 // SQL when the contract is signed later: contracts_tick_formalities). Pure.
 
@@ -16,7 +18,15 @@ import {
   creatorIdentity,
   type Creator,
   type Publisher,
+  type Quality,
 } from "@/lib/legal/formalities/definition";
+import {
+  CATEGORIES,
+  membersOf,
+  withSoleShares,
+} from "@/lib/legal/formalities/participants";
+import { allocate } from "@/lib/legal/formalities/sharing-rule";
+import { FULL, shareOf, unitsOf } from "@/lib/legal/splits/shares";
 
 export type Prefill = Record<
   string,
@@ -38,6 +48,12 @@ export type PrefillContext = {
   audioState: string | null;
   iswc: string | null;
   performers: string[];
+  // The title's main artists, with their Réseau contact when they have one.
+  mainArtists: Array<{
+    name: string;
+    contactId: string | null;
+    details: Record<string, string>;
+  }>;
   credits: Array<{
     name: string;
     role: ContributorRole;
@@ -77,23 +93,66 @@ export function splitShareOf(
 const minutes = (seconds: number) =>
   `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
 
+// Each category shared as the confirmed split weighs its members, when it
+// knows them all; otherwise left to type.
+function sharesFromSplit(
+  creators: Creator[],
+  publishers: Publisher[],
+  weightOf: (member: {
+    creator?: number;
+    role?: Quality;
+    publisher?: number;
+  }) => number,
+): boolean {
+  const members = membersOf(creators, publishers);
+  let any = false;
+  for (const category of CATEGORIES) {
+    const list = members[category];
+    const weights = list.map(weightOf);
+    if (list.length === 0 || weights.some((w) => w <= 0)) continue;
+    allocate(FULL, weights).forEach((u, k) => {
+      const share = shareOf(u).replace(/\.?0+$/, "");
+      const m = list[k];
+      if (m.publisher !== undefined) publishers[m.publisher].share = share;
+      else creators[m.creator!].shares[m.role!] = share;
+    });
+    any = true;
+  }
+  return any;
+}
+
 export function prefillSacem725(ctx: PrefillContext): Prefill {
-  const seen = new Set<string>();
-  const creators: Creator[] = ctx.credits.flatMap((c) => {
+  const byKey = new Map<string, Creator>();
+  for (const a of ctx.mainArtists) {
+    const key = a.contactId ?? a.name;
+    if (byKey.has(key)) continue;
+    byKey.set(key, {
+      ...creatorIdentity(a.name, a.details),
+      roles: [],
+      shares: {},
+      signs: true,
+      main_artist: true,
+      ...(a.contactId ? { contact_id: a.contactId } : {}),
+    });
+  }
+  for (const c of ctx.credits) {
     const quality = QUALITY_OF_ROLE[c.role];
-    const key = `${c.contactId ?? c.name}|${quality}`;
-    if (!quality || seen.has(key)) return [];
-    seen.add(key);
-    return [
-      {
-        ...creatorIdentity(c.name, c.details),
-        quality,
-        phono: splitShareOf(ctx.splitShares, c.contactId, quality),
-        signs: true,
-        ...(c.contactId ? { contact_id: c.contactId } : {}),
-      },
-    ];
-  });
+    if (!quality) continue;
+    const key = c.contactId ?? c.name;
+    const known = byKey.get(key);
+    if (known) {
+      if (!known.roles.includes(quality)) known.roles.push(quality);
+      continue;
+    }
+    byKey.set(key, {
+      ...creatorIdentity(c.name, c.details),
+      roles: [quality],
+      shares: {},
+      signs: true,
+      ...(c.contactId ? { contact_id: c.contactId } : {}),
+    });
+  }
+  const participants = [...byKey.values()];
   const named = new Set<string>();
   // PDS Éditions: the publisher without a Réseau contact when the confirmed
   // split has the house's line — signed by the direction in PDS OS (JUR-03).
@@ -109,14 +168,33 @@ export function prefillSacem725(ctx: PrefillContext): Prefill {
       {
         name: p.name,
         ipi: p.details.ipi_coad || "",
-        phono: house
-          ? houseLine.share
-          : splitShareOf(ctx.splitShares, p.contactId, "publisher"),
+        share: "",
         ...(p.contactId ? { contact_id: p.contactId } : {}),
         ...(house ? { house: true } : {}),
       },
     ];
   });
+  const listed = publishers.slice(0, 3);
+  const fromSplit = sharesFromSplit(participants, listed, (m) =>
+    m.publisher !== undefined
+      ? (unitsOf(
+          listed[m.publisher].house
+            ? (houseLine?.share ?? "")
+            : splitShareOf(
+                ctx.splitShares,
+                listed[m.publisher].contact_id ?? null,
+                "publisher",
+              ),
+        ) ?? 0)
+      : (unitsOf(
+          splitShareOf(
+            ctx.splitShares,
+            participants[m.creator!].contact_id ?? null,
+            m.role!,
+          ),
+        ) ?? 0),
+  );
+  const people = withSoleShares(participants, listed);
   return {
     title: { value: ctx.title, source: "Titre" },
     duration:
@@ -132,17 +210,20 @@ export function prefillSacem725(ctx: PrefillContext): Prefill {
         ? { value: ctx.performers.join(", "), source: "Artistes du titre" }
         : undefined,
     creators:
-      creators.length > 0
-        ? { value: creators, source: "Crédits et fiches de renseignements" }
+      people.creators.length > 0
+        ? {
+            value: people.creators,
+            source: "Artistes, crédits et fiches de renseignements",
+          }
         : undefined,
     // Not a field of the bulletin: says the shares came from the split.
     phono_from_split:
-      ctx.splitShares && [...creators, ...publishers].some((p) => p.phono)
+      ctx.splitShares && fromSplit
         ? { value: true, source: "Répartition confirmée" }
         : undefined,
     publishers:
-      publishers.length > 0
-        ? { value: publishers.slice(0, 3), source: "Répartition de l'édition" }
+      people.publishers.length > 0
+        ? { value: people.publishers, source: "Répartition de l'édition" }
         : undefined,
     publishing_contract: ctx.signedPublishingContract
       ? {

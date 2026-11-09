@@ -95,6 +95,8 @@ export const libraryTopics: GuideTopic[] = [
       "Une session n'appartient pas forcément à un projet : elle peut précéder tout projet.",
       "L'état est calculé : Prévue, En cours, Compte rendu à compléter une fois la séance finie, Terminée dès que le compte rendu est écrit. Seule « Annulée » se choisit à la main.",
       "Le compte rendu a un résumé obligatoire, un « À retenir » et une « Prochaine étape ».",
+      "Le compte rendu à rédiger revient à la cheffe ou au chef de projet de la session, sinon à la personne qui l'a créée : il apparaît dans son Travail et sur son Accueil dès que la séance est finie.",
+      "Une session datée va dans le Google Agenda du label quand la connexion Google est en place : les membres de l'équipe qui y participent et la personne du compte rendu sont invités, jamais les contacts du Réseau. Modifier ou annuler la session met l'événement à jour.",
     ],
     faq: [
       {

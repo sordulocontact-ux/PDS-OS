@@ -653,6 +653,11 @@ Dans une étape ouverte, chaque section a un titre à l'encre (`StepSection`, 18
 jamais un intertitre gris : il passe au-dessus des libellés de champs et des valeurs qu'il
 introduit. 28 px séparent deux sections, 8 px séparent un titre de son contenu, et une
 explication reste collée à la liste qu'elle commente (proto Juridique v3, Sacha, 24/10/2026).
+La phrase qui présente une section passe par `description` : **2 px sous le titre, puis 12 px
+avant le contenu** (Sacha, 09/11/2026 : « le titre et la description sont trop décollés »).
+Écart voulu avec le `TitleBlock` d'une carte (10 px) : dans une étape, la phrase écrite en simple
+paragraphe était à la même distance du titre que du champ suivant, donc rien ne se regroupait ;
+le couple titre + phrase doit toujours être plus serré que ce qui le sépare du contenu.
 
 ### Boutons, pastilles, encarts, toast, dates (décisions C0 du 18/10/2026)
 
@@ -692,8 +697,9 @@ D'après le proto « Projet complet » (`docs/protos/projet.html`), qui fait foi
 - **Encart** (`ToneCallout`) : rayon 10, padding 12/14, 15 px, **icône du ton à gauche**
   (info, alerte, stop, coche ; un cadenas pour une étape verrouillée, prop `icon`).
 - **Toast** (maison depuis le 03/11/2026, `components/ui/toast.ts`, plus de `sonner`) : **fond
-  encre** (`--toast-bg` = `--surface-inverse`, clair en thème sombre), rayon 12, 15 px, filet
-  à peine visible, en bas à droite, 380 px ; il reprend le verbe du bouton (« Confirmer » →
+  du thème** (`--toast-bg` = `--surface-raised` en clair, `#1f1f1f` en sombre, un cran au-dessus
+  des cartes ; plus de fond inversé depuis le 09/11/2026, Sacha), rayon 12, 15 px, filet
+  `--border-default` et ombre plus marquée qu'une carte (trois couches), en bas à droite, 380 px ; il reprend le verbe du bouton (« Confirmer » →
   « Proposition confirmée. »). Icône du ton à gauche (succès, erreur, alerte, info ; aucune
   pour un message neutre), seconde ligne en 14 px secondaire (`description`), un geste au
   plus (`action`, pilule, ferme le toast). **Pile** : le plus récent devant, les autres
@@ -856,3 +862,27 @@ n'a plus de variante. Toute nouvelle modale passe par `Dialog` / `FormDialog` /
 Rien au-delà de 16 px, sauf la pilule. Piège : le `Button` utilise `rounded-full` et
 non `rounded-pill`, car Tailwind trie les arrondis par nom et `rounded-pill` passerait
 après le `rounded-lg` des tailles icône.
+
+### E-mails (09/11/2026)
+
+Sacha : « tous les e-mails qu'on reçoit doivent être un minimum designés ». **Un seul cadre** pour
+tous, `lib/email/layout.ts` : fond `--po-grey-50`, carte blanche bordée (`--po-grey-150`, arrondi
+16 px), logo PO 40 px en tête de carte, pied gris centré. Les clients mail ne lisent ni variables CSS
+ni feuilles externes : les valeurs des tokens y sont recopiées en ligne, dans des tableaux (Outlook),
+avec un thème sombre pour Apple Mail (`prefers-color-scheme`). Google Sans Flex chargée depuis Google
+Fonts (Apple Mail, iOS, Outlook Mac, Thunderbird ; Gmail et Outlook Windows retombent sur la police
+système), medium minimum, 16 px courant, 14 px au plus petit. Une seule action, en
+pilule noire comme le bouton principal de l'app, suivie du lien écrit en entier pour un client qui
+bloquerait le bouton. Logo lu sur l'adresse de production (`EMAIL_LOGO_URL`) : un e-mail parti du
+local arrive aussi dans une vraie boîte.
+
+- **E-mails d'un membre** (dossier, page par personne, message) : une lettre, pas une notification.
+  Pas de titre ; son message d'abord, le bouton (« Ouvrir votre dossier »), la validité, sa signature ;
+  pied « Envoyé avec PDS OS au nom de … Répondez à cet e-mail pour lui écrire. ». Le texte brut reste
+  envoyé à côté, inchangé (`lib/email/compose.ts`).
+- **E-mails de Supabase Auth** (confirmation d'adresse, mot de passe oublié) : titre, « Bonjour
+  <prénom>, » (métadonnées de l'inscription), une phrase, le bouton, ce qui suit, puis « Vous n'avez
+  rien demandé ? ». Générés par `pnpm email:templates` dans `supabase/templates/` (textes :
+  `lib/i18n/fr/emails.ts`), **à recoller dans Supabase prod et pré-prod** après chaque changement
+  (Authentication › Emails › Templates). Prettier ne les touche pas : il couperait les balises Go.
+

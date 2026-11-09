@@ -232,6 +232,8 @@ export async function listStudioSessions(scope?: {
   artistId?: string;
   projectId?: string;
   masterId?: string;
+  // Only the sessions whose report is not written yet (not cancelled).
+  unreported?: boolean;
 }): Promise<{ sessions: StudioSessionRow[]; error: boolean }> {
   const supabase = await createClient();
   let ids: string[] | null = null;
@@ -241,6 +243,8 @@ export async function listStudioSessions(scope?: {
   }
   let query = supabase.from("master_sessions").select(ROW_SELECT);
   if (ids) query = query.in("id", ids);
+  if (scope?.unreported)
+    query = query.is("report_notes", null).neq("status", "cancelled");
   const { data, error } = await query
     .order("session_date", { ascending: false, nullsFirst: true })
     .order("created_at", { ascending: false })
@@ -256,6 +260,25 @@ export async function listStudioSessions(scope?: {
   );
   const now = parisNow();
   return { sessions: rows.map((r) => toRow(r, names, now)), error: false };
+}
+
+/**
+ * The sessions over whose report the person writes (« Compte rendu à
+ * compléter », they are its responsible: the project manager, else the
+ * creator): rows of their Travail and of the home (retour d'Ibé du
+ * 01/11/2026).
+ */
+export async function listSessionsToReport(
+  personId: string | null,
+): Promise<{ sessions: StudioSessionRow[]; error: boolean }> {
+  if (!personId) return { sessions: [], error: false };
+  const { sessions, error } = await listStudioSessions({ unreported: true });
+  return {
+    sessions: sessions.filter(
+      (s) => s.state === "toReport" && s.responsible?.personId === personId,
+    ),
+    error,
+  };
 }
 
 type RawDetail = RawRow & {

@@ -14,9 +14,9 @@
 // catégorie ». The fractions are the usual ones of the Règlement général for
 // an edited work (DEP a third each, DR half to the publishers) and stay to
 // confirm by the legal referent before production (ticket: « Les règles
-// exactes doivent être confirmées »). Arrangers and adapters take their
-// share from the authors or composers by rules V1 does not hold: said, never
-// computed.
+// exactes doivent être confirmées »). Since 09/11/2026 (retour d'Ibé), an
+// adapter shares the Auteur category and an arranger the Compositeur one,
+// with the share the dossier gives them within it.
 
 import { FULL, unitsOf } from "@/lib/legal/splits/shares";
 
@@ -98,10 +98,15 @@ export function allocate(total: number, weights: number[]): number[] {
   return parts;
 }
 
+const CATEGORY: Record<string, Category> = {
+  author: "author",
+  adapter: "author",
+  composer: "composer",
+  arranger: "composer",
+  publisher: "publisher",
+};
 const categoryOf = (quality: string): Category | null =>
-  quality === "author" || quality === "composer" || quality === "publisher"
-    ? quality
-    : null;
+  CATEGORY[quality] ?? null;
 
 function shareOut(
   fractions: Fractions,

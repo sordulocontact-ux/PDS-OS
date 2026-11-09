@@ -6,6 +6,11 @@ export const masterSource = {
   titles: "Titres du projet",
   noTitle: "Aucun titre dans le projet : le Master commence avec un titre.",
   detected: "Dernière version détectée",
+  // Another version picked instead of the newest (Sacha, 09/11/2026).
+  chosen: "Version choisie",
+  otherVersion: "Partir d'une autre version",
+  versionOption: (version: number, state: string, fileName: string) =>
+    `v${version} · ${state.toLowerCase()} · ${fileName}`,
   versionMeta: (
     version: number,
     state: string,
@@ -26,8 +31,9 @@ export const masterSource = {
     "Les versions audio du titre au Catalogue. Un master final ne peut pas être une source.",
   notListed: "Une version manque ?",
   importVersion: "Importer une version",
+  // The step's gesture when the title has no audio (Akili, 02/11/2026).
   noAudio:
-    "Aucune maquette ni mise à plat au Catalogue pour ce titre : importez la version de départ du mix.",
+    "Importez la maquette ou la mise à plat dont part le mix. Elle rejoint les fichiers du titre au Catalogue ; vous confirmerez ensuite que c'est la source.",
   checked: "Ce que PDS OS a vérifié",
   mix: {
     label: "Où en est le mix",

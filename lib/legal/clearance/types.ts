@@ -32,6 +32,8 @@ export type Clearance = {
     // e-mailed to.
     contactId: string | null;
     email: string | null;
+    // A person or a structure of the Réseau; null for a name only.
+    kind: "person" | "organization" | null;
   }>;
   exchanges: Array<{
     id: string;
@@ -61,6 +63,13 @@ export type Clearance = {
     state: ContractState;
     signedFile: boolean;
     evidenceFile: boolean;
+    // What it is e-mailed as from « Signer »; null: no text yet.
+    document: { fileName: string; kind: "generated" | "file" } | null;
+    // Its signed copy came back by e-mail (kept by the cron): to check.
+    signedByEmail: { url: string | null } | null;
+    // Who follows it: only they submit it and send it (VISION-UX rule 9).
+    ownerName: string | null;
+    ownerIsViewer: boolean;
   }>;
   history: Array<{
     id: string;

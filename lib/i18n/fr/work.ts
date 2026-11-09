@@ -68,10 +68,17 @@ export const work = {
       retransmit: "Retransmettre le projet",
       awaiting: "En attente d'un chef de projet",
       proposals: "Relire les propositions de PO",
+      session: "Rédiger le compte rendu de la session",
     },
     places: {
       task: "Tâche",
       deliverable: "Livrable",
+    },
+    // A studio session's report to write (retour d'Ibé du 01/11/2026).
+    session: {
+      place: (kind: string, day: string | null) =>
+        day ? `Session studio › ${kind} du ${day}` : `Session studio › ${kind}`,
+      noProject: "Sans projet",
     },
     todo: "À faire",
     emptyTitle: "Rien ne vous attend",
@@ -111,6 +118,8 @@ export const work = {
         "Le projet attend la réponse du chef de projet à qui il est transmis.",
       proposals:
         "PO a tiré des propositions d'un échange : confirmez, modifiez ou écartez chacune.",
+      session:
+        "La séance est passée : notez qui était là, les maquettes réalisées et ce qu'il faut retenir.",
     },
   },
 

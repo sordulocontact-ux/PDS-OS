@@ -53,10 +53,7 @@ export function SplitLinks({
     });
 
   return (
-    <StepSection title={s.confirmations}>
-      <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
-        {s.confirmationsBody}
-      </p>
+    <StepSection title={s.confirmations} description={s.confirmationsBody}>
       <ul className="flex flex-col gap-3">
         {waiting.map((line) => {
           const link = line.confirmation.link!;

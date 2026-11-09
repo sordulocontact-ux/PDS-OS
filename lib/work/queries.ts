@@ -5,6 +5,8 @@ import { freeTasksOf, loadMyTodo, type Todo } from "@/lib/insights/todo";
 import { handoverOf } from "@/lib/projects/handover";
 import { listProjects } from "@/lib/projects/queries";
 import type { ProjectListItem } from "@/lib/projects/types";
+import { listSessionsToReport } from "@/lib/sessions/queries";
+import type { StudioSessionRow } from "@/lib/sessions/types";
 
 export type MyWork = {
   error: boolean;
@@ -17,6 +19,8 @@ export type MyWork = {
   awaitingAcceptance: ProjectListItem[];
   // pilot_projects: PO's proposals in the projects the viewer runs.
   proposals: Todo["proposals"];
+  // Studio sessions over whose report the viewer writes (no workflow).
+  sessions: StudioSessionRow[];
 };
 
 /**
@@ -24,13 +28,14 @@ export type MyWork = {
  * seule source »): what waits for them in the projects is read from the
  * journeys (lib/work/journeys.ts, shown by WorkList), never from
  * a list of its own; here, what comes before a project's journeys (a
- * project to accept, to transmit again), PO's proposals and the tasks tied
- * to no workflow. Read with the user's session (RLS).
+ * project to accept, to transmit again), PO's proposals, the tasks tied
+ * to no workflow and the studio sessions' reports to write. Read with the user's session (RLS).
  */
 export async function loadMyWork(access: Access): Promise<MyWork> {
-  const [todo, { projects, error }] = await Promise.all([
+  const [todo, { projects, error }, toReport] = await Promise.all([
     loadMyTodo(access),
     listProjects(),
+    listSessionsToReport(access.personId),
   ]);
   const me = access.personId ?? "";
   // Only the owner writes in a launched project, so only they review.
@@ -44,7 +49,7 @@ export async function loadMyWork(access: Access): Promise<MyWork> {
     access,
   );
   return {
-    error: error || todo.error,
+    error: error || todo.error || toReport.error,
     tasks: freeTasksOf(todo),
     toAccept,
     toRetransmit,
@@ -52,5 +57,6 @@ export async function loadMyWork(access: Access): Promise<MyWork> {
     proposals: can(access, "pilot_projects")
       ? todo.proposals.filter((p) => owned.has(p.projectId))
       : [],
+    sessions: toReport.sessions,
   };
 }

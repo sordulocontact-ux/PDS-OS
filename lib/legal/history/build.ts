@@ -12,6 +12,9 @@ import type { LegalEvent } from "@/lib/legal/history/types";
 import { formatDate } from "@/lib/release/format";
 import type { Database } from "@/lib/supabase/database.types";
 
+// Contract events done by the person who signs, named in the note.
+const SIGNED_BY_THEM = ["signature.received", "signature.emailed"];
+
 const fr = { legalClearance, legalContracts, legalFormalities, legalHistory };
 
 type Tables = Database["public"]["Tables"];
@@ -220,11 +223,12 @@ export function buildLegalEvents(r: HistoryRows): LegalEvent[] {
       subject: e.contract_id
         ? (contractTitle.get(e.contract_id) ?? null)
         : null,
-      // A signed copy deposited by a private link: by the person named.
+      // A signed copy deposited by a private link or sent back by e-mail:
+      // by the person named.
       by:
         who(e.actor_person_id) ??
-        (e.kind === "signature.received" && e.note ? e.note : t.system),
-      note: e.kind === "signature.received" ? null : e.note,
+        (SIGNED_BY_THEM.includes(e.kind) && e.note ? e.note : t.system),
+      note: SIGNED_BY_THEM.includes(e.kind) ? null : e.note,
       href: e.contract_id ? routes.contract(e.contract_id) : step("contracts"),
     });
 

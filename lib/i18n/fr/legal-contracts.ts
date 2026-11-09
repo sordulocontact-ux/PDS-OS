@@ -351,6 +351,7 @@ export const legalContracts = {
       "contract.changes_requested": "Modifications demandées",
       "signature.requested": "Envoyé en signature",
       "signature.received": "Contrat signé reçu par son lien privé",
+      "signature.emailed": "Contrat signé reçu par e-mail",
       "contract.signed": "Signé",
       "contract.terminated": "Résilié",
       "financial_need.created": "Besoin financier créé",

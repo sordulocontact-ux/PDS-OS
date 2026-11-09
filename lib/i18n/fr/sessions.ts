@@ -196,6 +196,13 @@ export const sessions = {
     created: "Session créée",
     updated: "Session enregistrée",
   },
+  // The event of the label's Google Agenda (lib/sessions/calendar.ts).
+  calendar: {
+    title: (kind: string, who: string) =>
+      who ? `Session studio · ${kind} · ${who}` : `Session studio · ${kind}`,
+    description: (url: string) =>
+      `Session studio planifiée depuis PDS OS. Le compte rendu se rédige sur sa page : ${url}`,
+  },
   errors: {
     failed: "L'enregistrement n'a pas abouti. Réessayez dans un instant.",
     forbidden:

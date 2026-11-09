@@ -8,16 +8,15 @@ import { getServerEnv } from "@/lib/env";
 
 /**
  * The single entry point for reading PO's mailbox (non-negotiable rule 2,
- * as lib/email/send.ts for sending): Gmail's IMAP with an app password.
+ * as lib/email/send.ts for sending): Gmail's IMAP with the same account and
+ * app password as the sending (EMAIL_SMTP_USER / EMAIL_SMTP_PASSWORD).
  * Messages are fetched with BODY.PEEK: reading never marks them as read
  * in po@. Without the account or a password, `inboxEnabled()` is false and
  * nothing is read.
  */
 export function inboxEnabled(): boolean {
   const env = getServerEnv();
-  return Boolean(
-    env.EMAIL_SMTP_USER && (env.EMAIL_IMAP_PASSWORD ?? env.EMAIL_SMTP_PASSWORD),
-  );
+  return Boolean(env.EMAIL_SMTP_USER && env.EMAIL_SMTP_PASSWORD);
 }
 
 export type InboxEnvelope = {
@@ -35,7 +34,14 @@ export type InboxMessage = {
   text: string;
   // The names of the files joined (kept in the mailbox, named in the journal).
   attachments: string[];
+  // The PDFs joined, read: a signed contract coming back (Sacha, 09/11/2026).
+  pdfs: Array<{ name: string; content: Uint8Array }>;
+  // The whole message as received (.eml): the proof of where a file came from.
+  source: Uint8Array;
 };
+
+// The contract-files bucket's limit (50 Mo).
+const MAX_FILE = 52_428_800;
 
 export type Inbox = {
   // The envelopes (sender, recipients, subject: no content) of the last
@@ -53,7 +59,7 @@ export async function withInbox<T>(
   work: (inbox: Inbox) => Promise<T>,
 ): Promise<T | null> {
   const env = getServerEnv();
-  const pass = env.EMAIL_IMAP_PASSWORD ?? env.EMAIL_SMTP_PASSWORD;
+  const pass = env.EMAIL_SMTP_PASSWORD;
   if (!env.EMAIL_SMTP_USER || !pass) return null;
   const client = new ImapFlow({
     host: "imap.gmail.com",
@@ -113,6 +119,19 @@ export async function withInbox<T>(
           attachments: parsed.attachments.map(
             (a) => a.filename ?? a.contentType,
           ),
+          pdfs: parsed.attachments
+            .filter(
+              (a) =>
+                (a.contentType === "application/pdf" ||
+                  /\.pdf$/i.test(a.filename ?? "")) &&
+                a.size > 0 &&
+                a.size <= MAX_FILE,
+            )
+            .map((a) => ({
+              name: a.filename || "Contrat signé.pdf",
+              content: new Uint8Array(a.content),
+            })),
+          source: new Uint8Array(m.source),
         };
       },
     });

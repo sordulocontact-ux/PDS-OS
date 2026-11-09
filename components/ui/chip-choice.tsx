@@ -75,8 +75,9 @@ export function ChipChoice<V extends string>({
 /**
  * Several choices among a few, as toggle pills (roles of a contact, a
  * meeting's attendees): uncontrolled, submitted under `name` as one JSON
- * array through a hidden input. `emptyLabel` replaces the pills when there
- * is nothing to choose.
+ * array through a hidden input; controlled when `value` is given (the parent
+ * may then make a choice exclusive). `emptyLabel` replaces the pills when
+ * there is nothing to choose.
  */
 export function ChipMultiChoice<V extends string>({
   name,
@@ -84,6 +85,7 @@ export function ChipMultiChoice<V extends string>({
   required = false,
   options,
   defaultValue,
+  value,
   onChange,
   emptyLabel,
   hint,
@@ -98,20 +100,22 @@ export function ChipMultiChoice<V extends string>({
   // Shows the « * » after the legend (docs/DESIGN.md § 4).
   required?: boolean;
   options: ChipOption<V>[];
-  defaultValue: V[];
+  defaultValue?: V[];
+  value?: V[];
   onChange?: (value: V[]) => void;
   emptyLabel?: string;
   hint?: string;
   error?: string;
 }) {
   const id = useId();
-  const [selected, setSelected] = useState<V[]>(defaultValue);
+  const [own, setOwn] = useState<V[]>(defaultValue ?? []);
+  const selected = value ?? own;
   const describedBy = error ? `${id}-error` : hint ? `${id}-hint` : undefined;
-  const toggle = (value: V) => {
-    const next = selected.includes(value)
-      ? selected.filter((item) => item !== value)
-      : [...selected, value];
-    setSelected(next);
+  const toggle = (option: V) => {
+    const next = selected.includes(option)
+      ? selected.filter((item) => item !== option)
+      : [...selected, option];
+    setOwn(next);
     onChange?.(next);
   };
 

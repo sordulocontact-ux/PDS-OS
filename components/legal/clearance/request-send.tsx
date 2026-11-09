@@ -1,5 +1,7 @@
 "use client";
 
+import type { ReactNode } from "react";
+
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
@@ -9,6 +11,16 @@ import { isEmail } from "@/lib/utils/email";
 import { mailtoHref } from "@/lib/utils/mailto";
 
 const fr = { legalClearance };
+
+type SendLabels = {
+  // Without SMTP: the card's title and line.
+  title: string;
+  ownMail: string;
+  send: string;
+  sendTo: (names: string) => string;
+  sent: string;
+  sentOtherwise: string;
+};
 
 export type RequestRecipient = {
   key: string;
@@ -25,7 +37,9 @@ export type RequestRecipient = {
  * correctable, typed when there is none — and the message editable; PDS OS
  * sends it (« Envoyer à … »), or the person sends
  * it their way and says so. Without SMTP, the same card to open in their
- * own mail app. The parent validates and runs the gesture.
+ * own mail app. The parent validates and runs the gesture. « Signer » sends
+ * the contract the same way (Sacha, 09/11/2026): its words in `labels`,
+ * the contract in `attachment`.
  */
 export function RequestSend({
   canEmail,
@@ -40,6 +54,8 @@ export function RequestSend({
   missingCount,
   pending,
   onSend,
+  labels,
+  attachment,
 }: {
   canEmail: boolean;
   recipients: RequestRecipient[];
@@ -55,8 +71,19 @@ export function RequestSend({
   missingCount: number;
   pending: boolean;
   onSend: (byEmail: boolean) => void;
+  // The buttons' and card's words; default: the request's.
+  labels?: SendLabels;
+  attachment?: { name: string; side?: ReactNode };
 }) {
   const t = fr.legalClearance.flow;
+  const words: SendLabels = labels ?? {
+    title: t.stepSend,
+    ownMail: t.ownMail,
+    send: t.send,
+    sendTo: t.sendTo,
+    sent: t.sent,
+    sentOtherwise: t.sentOtherwise,
+  };
   const addressOf = (r: RequestRecipient) =>
     (typed[r.key] ?? r.email ?? "").trim();
   // « Réseau » under the row while every address is the Réseau's.
@@ -96,8 +123,8 @@ export function RequestSend({
   return (
     <>
       <MailCard
-        title={canEmail ? undefined : t.stepSend}
-        line={canEmail ? undefined : t.ownMail}
+        title={canEmail ? undefined : words.title}
+        line={canEmail ? undefined : words.ownMail}
         to={t.toPending}
         toControl={toControl}
         toSource={fromNetwork && recipients.length > 0 ? undefined : null}
@@ -106,6 +133,7 @@ export function RequestSend({
         onMessage={onMessage}
         name={name}
         rows={7}
+        attachment={attachment}
       />
       {tried && missingCount > 0 && (
         <FormMessage kind="error">{t.missingCount(missingCount)}</FormMessage>
@@ -118,20 +146,20 @@ export function RequestSend({
               aria-busy={pending || undefined}
               onClick={() => onSend(true)}
             >
-              {pending ? t.sending : names ? t.sendTo(names) : t.send}
+              {pending ? t.sending : names ? words.sendTo(names) : words.send}
             </Button>
             <Button
               variant="outline"
               disabled={pending}
               onClick={() => onSend(false)}
             >
-              {t.sentOtherwise}
+              {words.sentOtherwise}
             </Button>
           </>
         ) : (
           <>
             <Button disabled={pending} onClick={() => onSend(false)}>
-              {t.sent}
+              {words.sent}
             </Button>
             <Button
               variant="outline"

@@ -8,20 +8,24 @@ import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
 import {
   SACEM_725_FIELDS,
   SACEM_GENRES,
-  type Creator,
   type FormalitySection,
-  type Publisher,
+  type PhonoSplit,
 } from "@/lib/legal/formalities/definition";
 import type { DossierErrors } from "@/lib/legal/formalities/field-errors";
 import type { FieldStateEntry } from "@/lib/legal/formalities/field-states";
+import {
+  readCreators,
+  readPhonoSplit,
+  readPublishers,
+} from "@/lib/legal/formalities/participants";
 import type { TitleFormality } from "@/lib/legal/formalities/types";
 
 import { BorrowingLine } from "./borrowing-line";
+import { CategoryShares } from "./category-shares";
 import { DepDrField, type DepDr } from "./dep-dr-field";
 import { ArrangementField, ContractField } from "./dossier-fields";
 import { BulletinRow } from "./field-state";
-import { PeopleEditor } from "./people-editor";
-import { PhonoTotal } from "./phono-total";
+import { PeopleEditor, type People } from "./people-editor";
 
 const fr = { legalFormalities };
 
@@ -61,9 +65,29 @@ export function DossierSection({
 }) {
   const t = fr.legalFormalities;
   const f = title.formality!;
-  const creators = obj<Creator[]>("creators", []);
-  const publishers = obj<Publisher[]>("publishers", []);
+  const creators = readCreators(obj<unknown>("creators", []));
+  const publishers = readPublishers(obj<unknown>("publishers", []));
+  const split = readPhonoSplit(obj<unknown>("phono_split", {}));
   const depDr = obj<DepDr>("dep_dr", {});
+  // Participants and publishers change together: a category's shares
+  // follow who is in it.
+  const setPeople = (next: People) => {
+    if (next.creators !== creators) set("creators", next.creators);
+    if (next.publishers !== publishers) {
+      set("publishers", next.publishers);
+      // « Copie jointe » only with every publisher's contract chosen
+      // (JUR-25).
+      set("publishing_contract", {
+        ...obj("publishing_contract", { provided: false, rubric_g: "" }),
+        provided:
+          next.publishers.length > 0 &&
+          next.publishers.every((p) => p.contract_id),
+      });
+    }
+  };
+  const arranger = creators.some(
+    (c) => !c.performer_only && c.roles.includes("arranger"),
+  );
 
   // A field's state, on its row: none when optional and empty.
   const rowState = (key: string, filled: boolean) => {
@@ -82,30 +106,19 @@ export function DossierSection({
 
   return (
     <StepSection title={t.sections[section]}>
-      {section === "sharing" && (
-        <PhonoTotal
-          id={`phono-${title.masterId}-error`}
-          creators={creators}
-          publishers={publishers}
-          error={errors?.phono}
-        />
-      )}
       <FactRows>
         {SACEM_725_FIELDS.filter((field) => field.section === section).map(
           (field) => {
             const label = t.fields[field.key];
             const disabled = !editable(field.key);
             const value = text(field.key);
-            const arrangerRequired = creators.some(
-              (c) => c.quality === "arranger",
-            );
             return (
               <BulletinRow
                 key={field.key}
                 label={label}
                 required={
                   field.kind === "arrangement"
-                    ? arrangerRequired
+                    ? arranger
                     : field.kind === "contract"
                       ? publishers.length > 0
                       : field.kind === "genre" ||
@@ -117,10 +130,12 @@ export function DossierSection({
                   field.kind === "creators"
                     ? creators.length > 0
                     : field.kind === "publishers"
-                      ? publishers.length > 0
-                      : field.kind === "dep_dr"
-                        ? Boolean(depDr.choice)
-                        : value.trim() !== "",
+                      ? publishers.length > 0 || Boolean(split.no_publisher)
+                      : field.kind === "phono_split"
+                        ? true
+                        : field.kind === "dep_dr"
+                          ? Boolean(depDr.choice)
+                          : value.trim() !== "",
                 )}
                 control={
                   <>
@@ -166,26 +181,27 @@ export function DossierSection({
                         masterId={title.masterId}
                         formalityId={f.id}
                         errors={errors}
+                        people={{ creators, publishers }}
+                        noPublisher={Boolean(split.no_publisher)}
+                        disabled={disabled}
+                        hasSplit={Boolean(title.splitShares)}
+                        fromSplit={fromSplit}
+                        onPeople={setPeople}
+                        onNoPublisher={(none) =>
+                          set("phono_split", { ...split, no_publisher: none })
+                        }
+                      />
+                    )}
+                    {field.kind === "phono_split" && (
+                      <CategoryShares
+                        id={`${f.id}-shares`}
                         creators={creators}
                         publishers={publishers}
+                        split={split}
                         disabled={disabled}
-                        splitShares={title.splitShares}
-                        fromSplit={fromSplit}
-                        onCreators={(next) => set("creators", next)}
-                        onPublishers={(next) => {
-                          set("publishers", next);
-                          // « Copie jointe » only with every publisher's
-                          // contract chosen (JUR-25).
-                          set("publishing_contract", {
-                            ...obj("publishing_contract", {
-                              provided: false,
-                              rubric_g: "",
-                            }),
-                            provided:
-                              next.length > 0 &&
-                              next.every((p) => p.contract_id),
-                          });
-                        }}
+                        errors={errors}
+                        onPeople={setPeople}
+                        onSplit={(next: PhonoSplit) => set("phono_split", next)}
                       />
                     )}
                     {field.kind === "dep_dr" && (
@@ -195,6 +211,7 @@ export function DossierSection({
                         value={depDr}
                         creators={creators}
                         publishers={publishers}
+                        split={split}
                         errors={errors}
                         onChange={(v) => set("dep_dr", v)}
                       />
@@ -204,9 +221,7 @@ export function DossierSection({
                         id={f.id}
                         label={label}
                         // Required once a creator is an arranger.
-                        required={creators.some(
-                          (c) => c.quality === "arranger",
-                        )}
+                        required={arranger}
                         disabled={disabled}
                         value={obj("arrangement", { scope: "", detail: "" })}
                         error={errors?.fields.arrangement}

@@ -58,7 +58,9 @@ export async function loadFormalities(
       .in("id", masterIds),
     supabase
       .from("master_artists")
-      .select("master_id, artist:artists!master_artists_artist_same_org(name)")
+      .select(
+        "master_id, role, artist:artists!master_artists_artist_same_org(name, contacts:network_contacts!network_contacts_artist_same_org(id))",
+      )
       .in("master_id", masterIds),
     supabase
       .from("master_contributors")
@@ -105,12 +107,20 @@ export async function loadFormalities(
       .limit(1)
       .maybeSingle(),
   ]);
+  // A main artist's Réseau contact (the one linked to the artist).
+  const artistContact = (p: {
+    artist: { contacts: Array<{ id: string }> } | null;
+  }) => p.artist?.contacts[0]?.id ?? null;
   const contactIds = [
-    ...new Set(
-      [...(credits.data ?? []), ...(publisherSplits.data ?? [])].flatMap((c) =>
-        c.contact_id ? [c.contact_id] : [],
+    ...new Set([
+      ...[...(credits.data ?? []), ...(publisherSplits.data ?? [])].flatMap(
+        (c) => (c.contact_id ? [c.contact_id] : []),
       ),
-    ),
+      ...(performers.data ?? []).flatMap((p) => {
+        const id = artistContact(p);
+        return id ? [id] : [];
+      }),
+    ]),
   ];
   const fIds = (formalities.data ?? []).map((f) => f.id);
   const [details, values, documents, signatures, events, splits, links] =
@@ -208,6 +218,19 @@ export async function loadFormalities(
         performers: (performers.data ?? [])
           .filter((p) => p.master_id === m.id)
           .flatMap((p) => (p.artist?.name ? [p.artist.name] : [])),
+        mainArtists: (performers.data ?? [])
+          .filter((p) => p.master_id === m.id && p.role === "main")
+          .flatMap((p) => {
+            if (!p.artist?.name) return [];
+            const contactId = artistContact(p);
+            return [
+              {
+                name: p.artist.name,
+                contactId,
+                details: contactId ? (detailsOf.get(contactId) ?? {}) : {},
+              },
+            ];
+          }),
         credits: (credits.data ?? [])
           .filter((c) => c.master_id === m.id)
           .map((c) => ({

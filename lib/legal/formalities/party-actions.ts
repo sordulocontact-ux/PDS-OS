@@ -21,16 +21,25 @@ export type CreatorOption = {
   id: string;
   label: string;
   detail?: string;
-  fill: Pick<Creator, "last_name" | "first_name" | "pseudonym" | "ipi"> & {
-    quality: Creator["quality"];
-  };
+  fill: Pick<
+    Creator,
+    "last_name" | "first_name" | "pseudonym" | "ipi" | "roles"
+  >;
 };
 export type PublisherOption = {
   id: string;
   label: string;
   detail?: string;
   fill: Pick<Publisher, "name" | "ipi">;
+  // In the Réseau as a label, producer, studio or distributor, not as a
+  // publisher (retour d'Ibé du 02/11/2026: never confused).
+  notPublisher: boolean;
 };
+
+// The structures that hold rights on the recording, not on the work.
+const RECORDING_SIDE = ["label", "production_company", "studio", "distributor"];
+const notPublisher = (roles: string[]) =>
+  !roles.includes("publisher") && roles.some((r) => RECORDING_SIDE.includes(r));
 
 const asText = (value: unknown): Record<string, string> =>
   value && typeof value === "object"
@@ -84,7 +93,7 @@ const rolesOf = (roles: string[]) =>
   (roles as NetworkRole[]).map((r) => fr.network.roles[r]).join(", ");
 
 /** The Réseau's people, those credited on the title as author, composer or
- * arranger first, with their identity and their quality on the title. */
+ * arranger first, with their identity and their roles on the title. */
 export async function listSacemCreators(
   masterId: string,
 ): Promise<CreatorOption[]> {
@@ -106,7 +115,14 @@ export async function listSacemCreators(
         : rolesOf(c.roles),
       fill: {
         ...creatorIdentity(c.name, data.detailsOf.get(c.id) ?? {}),
-        quality: (onTitle && QUALITY_OF_ROLE[onTitle[0]]) || "",
+        roles: [
+          ...new Set(
+            (onTitle ?? []).flatMap((r) => {
+              const q = QUALITY_OF_ROLE[r];
+              return q ? [q] : [];
+            }),
+          ),
+        ],
       },
     };
   });
@@ -133,6 +149,7 @@ export async function listSacemPublishers(
       name: c.name,
       ipi: data.detailsOf.get(c.id)?.ipi_coad ?? "",
     },
+    notPublisher: notPublisher(c.roles),
   }));
   return [
     ...options.filter((o) => data.publishers.has(o.id)),

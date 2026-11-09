@@ -1,6 +1,7 @@
 import "server-only";
 
 import { requireApproved } from "@/lib/auth/dal";
+import { composeLinkEmail, composeMessageEmail } from "@/lib/email/compose";
 import {
   type EmailAttachment,
   emailEnabled,
@@ -46,15 +47,15 @@ export async function emailLink(
   const sent = await sendEmail({
     to: { name: mail.to.name, email: mail.to.email },
     subject: mail.subject,
-    text: [
-      mail.message.trim(),
-      "",
-      `${mail.open} ${mail.url}`,
-      ...(mail.validity ? [mail.validity] : []),
-      "",
-      t.signature(sender),
-      "",
-    ].join("\n"),
+    ...composeLinkEmail({
+      message: mail.message,
+      open: mail.open,
+      url: mail.url,
+      validity: mail.validity,
+      signature: t.signature(sender),
+      sender,
+      subject: mail.subject,
+    }),
     sender: { name: sender, email },
   });
   return outcomeOf(sent);
@@ -104,7 +105,12 @@ export async function emailMessage(
   const sent = await sendEmail({
     to: { name: mail.to.name, email: mail.to.email },
     subject: mail.subject,
-    text: [mail.text.trim(), "", t.signature(sender), ""].join("\n"),
+    ...composeMessageEmail({
+      text: mail.text,
+      signature: t.signature(sender),
+      sender,
+      subject: mail.subject,
+    }),
     sender: { name: sender, email },
     attachments: mail.attachments,
     replyTo: mail.replyTo,

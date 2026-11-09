@@ -1,5 +1,6 @@
 import "server-only";
 
+import { composeLinkEmail } from "@/lib/email/compose";
 import { sendEmail } from "@/lib/email/send";
 import { getPublicEnv } from "@/lib/env";
 import { masterRound } from "@/lib/i18n/fr/master-round";
@@ -56,10 +57,19 @@ export async function emailTransmission(input: {
   const message =
     input.message.trim() ||
     t.defaultMessage(input.engineer.name, input.project, input.role);
+  const subject = t.subjectValue(input.project, input.role);
   const sent = await sendEmail({
     to: input.engineer,
-    subject: t.subjectValue(input.project, input.role),
-    text: `${message}\n\n${t.open} ${url}\n${t.validity(formatDay(row.expires_at))}\n\n${t.signature(input.sender.name)}\n`,
+    subject,
+    ...composeLinkEmail({
+      message,
+      open: t.open,
+      url,
+      validity: t.validity(formatDay(row.expires_at)),
+      signature: t.signature(input.sender.name),
+      sender: input.sender.name,
+      subject,
+    }),
     sender: input.sender,
   });
   if (!sent.ok) return "failed";

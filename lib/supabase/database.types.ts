@@ -7136,6 +7136,7 @@ export type Database = {
           id: string
           kind: string
           occurred_at: string
+          reading: Json | null
           organization_id: string
         }
         Insert: {
@@ -7149,6 +7150,7 @@ export type Database = {
           id?: string
           kind: string
           occurred_at?: string
+          reading?: Json | null
           organization_id: string
         }
         Update: {
@@ -7162,6 +7164,7 @@ export type Database = {
           id?: string
           kind?: string
           occurred_at?: string
+          reading?: Json | null
           organization_id?: string
         }
         Relationships: []
@@ -7232,6 +7235,7 @@ export type Database = {
           contact_id: string | null
           created_at: string
           created_by: string | null
+          email: string | null
           id: string
           name: string
           organization_id: string
@@ -7243,6 +7247,7 @@ export type Database = {
           contact_id?: string | null
           created_at?: string
           created_by?: string | null
+          email?: string | null
           id?: string
           name: string
           organization_id: string
@@ -7254,6 +7259,7 @@ export type Database = {
           contact_id?: string | null
           created_at?: string
           created_by?: string | null
+          email?: string | null
           id?: string
           name?: string
           organization_id?: string
@@ -10893,6 +10899,7 @@ export type Database = {
           ends_at: string | null
           engineer: string | null
           engineer_contact_id: string | null
+          google_event_id: string | null
           id: string
           kind: string
           master_id: string | null
@@ -10915,6 +10922,7 @@ export type Database = {
           ends_at?: string | null
           engineer?: string | null
           engineer_contact_id?: string | null
+          google_event_id?: string | null
           id?: string
           kind: string
           master_id?: string | null
@@ -10937,6 +10945,7 @@ export type Database = {
           ends_at?: string | null
           engineer?: string | null
           engineer_contact_id?: string | null
+          google_event_id?: string | null
           id?: string
           kind?: string
           master_id?: string | null
@@ -18224,6 +18233,10 @@ export type Database = {
       }
     }
     Functions: {
+      approve_clearance_contract: {
+        Args: { p_contract_id: string }
+        Returns: undefined
+      }
       live_rpc_tables: {
         Args: { p_names: string[] }
         Returns: Json
@@ -18314,6 +18327,15 @@ export type Database = {
           p_external_id: string
           p_from: string
           p_received_at: string
+        }
+        Returns: boolean
+      }
+      receive_clearance_signed_copy: {
+        Args: {
+          p_clearance_id: string
+          p_contract_id: string
+          p_files: Json
+          p_from: string
         }
         Returns: boolean
       }
@@ -20010,6 +20032,18 @@ export type Database = {
       }
       lift_strategy_reserve: {
         Args: { p_note?: string; p_reserve_id: string }
+        Returns: undefined
+      }
+      keep_clearance_reading: {
+        Args: { p_communication_id: string; p_reading: Json }
+        Returns: undefined
+      }
+      keep_clearance_holder_email: {
+        Args: { p_email: string; p_holder_id: string }
+        Returns: undefined
+      }
+      link_clearance_holder_contact: {
+        Args: { p_contact_id: string; p_holder_id: string }
         Returns: undefined
       }
       link_clearance_contract: {

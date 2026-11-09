@@ -24,7 +24,7 @@ export const workflowsTopics: GuideTopic[] = [
     where: "Dans un projet lancé › Workflows › Master.",
     facts: [
       "Le Master a cinq étapes : Source, Brief, Mixage, Mastering, Master final.",
-      "Source : on confirme la version de départ du mix (maquette ou mise à plat, jamais un master final) et si les voix définitives sont là ou attendues.",
+      "Source : on confirme la version de départ du mix (maquette ou mise à plat, jamais un master final) et si les voix définitives sont là ou attendues. La version la plus récente est proposée, à écouter sur place ; « Partir d'une autre version » en choisit une autre quand le Catalogue en a plusieurs. Sans aucune version du titre au Catalogue, le geste en tête de l'étape est « Importer une version ».",
       "Brief : le dossier que recevront les ingénieurs du mix puis du mastering (direction, livrables, formats, dates), pré-rempli de ce que PDS OS sait.",
       "Mixage et Mastering : le responsable envoie le dossier à l'ingénieur par un lien privé (e-mail envoyé par PDS OS ou marqué comme envoyé). L'ingénieur prend en charge le dossier avec son tarif, dépose les versions, la personne désignée écoute et valide ou demande une modification.",
       "Un tarif peut être accepté ou refusé avec un motif ; il alimente le Budget.",
@@ -84,6 +84,14 @@ export const workflowsTopics: GuideTopic[] = [
       {
         q: "Où se trouve le bulletin SACEM ?",
         a: "Dans le Suivi du Juridique, à la démarche SACEM.",
+      },
+      {
+        q: "Comment envoyer le contrat d'une autorisation à l'ayant droit ?",
+        a: "Depuis l'autorisation, au temps « Signer », une fois le contrat validé par la direction : l'e-mail est prêt à son adresse du Réseau, le contrat joint, et PDS OS l'envoie ; sa réponse arrive dans les Échanges, et s'il renvoie le contrat signé en PDF, PDS OS le range dans le contrat avec l'e-mail comme preuve, à vérifier avant « Marquer comme sécurisé ». Sinon « Je l'ai envoyé autrement ». Un contrat sans texte se complète d'abord sur sa page.",
+      },
+      {
+        q: "Comment se répartissent les parts sur le bulletin SACEM ?",
+        a: "Par catégorie : chaque participant a ses rôles (auteur, compositeur, arrangeur, adaptateur, ou interprète uniquement, sans part), puis les auteurs se partagent la part Auteur, les compositeurs la part Compositeur et les éditeurs musicaux la part Éditeur, chacune à 100 %. Les parts Phono du bulletin en sont calculées et font toujours 100 %. L'artiste principal est ajouté d'office mais son rôle est à confirmer, et « Aucun éditeur musical » se dit explicitement.",
       },
     ],
     permissions: ["manage_legal"],

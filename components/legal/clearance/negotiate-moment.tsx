@@ -1,7 +1,7 @@
 "use client";
 
 import { RefusalDecision } from "@/components/legal/clearance/refusal-decision";
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "@/components/ui/toast";
 
 import { TextareaField } from "@/components/auth/textarea-field";
@@ -81,7 +81,7 @@ export function NegotiateMoment({
   const t = fr.legalClearance.flow;
   const { pending, run } = useLegalAction({ refresh: true });
   // A reply filed from PO's mailbox, newest of the journal: put in « Leur
-  // réponse », its source said under it (still read only on a click).
+  // réponse », its source said under it, and read by PO at once.
   const latest = clearance.exchanges[0];
   const received =
     latest?.kind === "email" && latest.direction === "in" && latest.from
@@ -99,8 +99,33 @@ export function NegotiateMoment({
   const proposed = clearance.terms.filter((x) => x.status === "proposed");
   const countered = clearance.terms.some((x) => x.status === "rejected");
   const lastIn = clearance.exchanges.find((e) => e.direction === "in");
-  const names = clearance.holders.map((h) => h.name).join(" et ");
-  const askedOn = clearance.exchanges.find((e) => e.direction === "out")?.at;
+
+  // A reply received by e-mail is read by PO as soon as the step opens
+  // (Sacha, 09/11/2026), once: its reading is kept with it, so the next
+  // opening gets it back without a new call. Never on a refusal or while the
+  // direction decides.
+  const autoRead = useRef(false);
+  const toRead =
+    received &&
+    proposed.length === 0 &&
+    clearance.status !== "refused" &&
+    clearance.status !== "action_required"
+      ? received
+      : null;
+  useEffect(() => {
+    if (!toRead || autoRead.current) return;
+    autoRead.current = true;
+    startReading(async () => {
+      const result = await readClearanceMessage(
+        projectId,
+        clearance.id,
+        toRead.body.trim(),
+        toRead.id,
+      );
+      if (!result.ok) return void toast.error(result.error);
+      setReading(readingOf(result.proposal));
+    });
+  }, [toRead, projectId, clearance.id]);
 
   if (clearance.status === "refused" || clearance.status === "action_required")
     return (
@@ -205,7 +230,12 @@ export function NegotiateMoment({
       return;
     }
     startReading(async () => {
-      const result = await readClearanceMessage(projectId, clearance.id, reply);
+      const result = await readClearanceMessage(
+        projectId,
+        clearance.id,
+        reply.trim(),
+        receivedId,
+      );
       if (!result.ok) return void toast.error(result.error);
       setReading(readingOf(result.proposal));
     });
@@ -214,12 +244,6 @@ export function NegotiateMoment({
   return (
     <>
       {countered && <ToneCallout tone="neutral">{t.countered}</ToneCallout>}
-      <p className="text-sm text-muted-foreground">
-        {t.askedTo(
-          names || fr.legalClearance.flow.holdersFallback,
-          askedOn ? formatInstant(askedOn) : "",
-        )}
-      </p>
       {reading === null ? (
         <>
           <TextareaField

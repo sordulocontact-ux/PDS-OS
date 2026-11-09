@@ -1,4 +1,9 @@
 import { MasterStepFrame } from "@/components/master-workflow/master-step-frame";
+import {
+  pickSourceTitle,
+  SourceLead,
+  sourceGestureFirst,
+} from "@/components/master-workflow/source/source-lead";
 import { SourceStep } from "@/components/master-workflow/source/source-step";
 import { masterJourneyContext } from "@/lib/master-workflow/journey-context";
 import { loadSourceStep } from "@/lib/master-workflow/source-step";
@@ -15,13 +20,21 @@ export default async function ProjectMasterSourcePage({
     masterJourneyContext(projectId),
     loadSourceStep(projectId),
   ]);
+  const titleId = typeof titre === "string" ? titre : null;
+  // The owner's gesture heads the step (Akili, 02/11/2026: « on ne sait pas
+  // quoi faire en arrivant »), the checks below it.
+  const title = pickSourceTitle(view, titleId);
   return (
-    <MasterStepFrame projectId={projectId} stepKey="source">
-      <SourceStep
-        view={view}
-        titleId={typeof titre === "string" ? titre : null}
-        ownerName={project.ownerName}
-      />
+    <MasterStepFrame
+      projectId={projectId}
+      stepKey="source"
+      slots={
+        sourceGestureFirst(view, title)
+          ? { lead: <SourceLead view={view} title={title} /> }
+          : undefined
+      }
+    >
+      <SourceStep view={view} titleId={titleId} ownerName={project.ownerName} />
     </MasterStepFrame>
   );
 }

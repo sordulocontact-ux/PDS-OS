@@ -7,6 +7,10 @@ import { routes } from "@/lib/auth/redirects";
 import type { MasterFormState } from "@/lib/catalog/master/rules";
 import { sessions } from "@/lib/i18n/fr/sessions";
 import {
+  cancelSessionEvent,
+  syncSessionCalendar,
+} from "@/lib/sessions/calendar";
+import {
   sessionLinkSchema,
   sessionReportSchema,
   studioSessionSchema,
@@ -101,6 +105,8 @@ export async function saveStudioSession(
       data.guests,
     ));
   if (linkError) return failedState("saveStudioSession", formData, linkError);
+  // The label's Google Agenda, the internal team invited (never blocking).
+  await syncSessionCalendar(sessionId);
   refreshSessions(sessionId);
   // A new session opens on its own page.
   if (!data.sessionId) redirect(routes.session(sessionId));
@@ -237,6 +243,7 @@ export async function setSessionCancelled(
     .eq("id", sessionId)
     .select("id");
   if (error || !data?.length) return failure("setSessionCancelled", error);
+  await syncSessionCalendar(sessionId);
   refreshSessions(sessionId);
   return { ok: true };
 }
@@ -252,8 +259,9 @@ export async function deleteStudioSession(
     .from("master_sessions")
     .delete()
     .eq("id", sessionId)
-    .select("id");
+    .select("id, google_event_id");
   if (error || !data?.length) return failure("deleteStudioSession", error);
+  await cancelSessionEvent(data[0]?.google_event_id ?? null);
   refreshSessions();
   return { ok: true };
 }

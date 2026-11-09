@@ -14,11 +14,12 @@ import { saveFormalityValues } from "@/lib/legal/formalities/actions";
 import {
   FORMALITY_SECTIONS,
   SACEM_725_FIELDS,
-  type Creator,
-  type Publisher,
 } from "@/lib/legal/formalities/definition";
 import { fieldStates, type Entry } from "@/lib/legal/formalities/field-states";
-import { splitShareOf } from "@/lib/legal/formalities/prefill";
+import {
+  readCreators,
+  readPublishers,
+} from "@/lib/legal/formalities/participants";
 import { generateFormality } from "@/lib/legal/formalities/step-actions";
 import type { TitleFormality } from "@/lib/legal/formalities/types";
 import { fileNamePart } from "@/lib/utils/file-name-part";
@@ -55,42 +56,36 @@ export function DossierForm({
   const t = fr.legalFormalities;
   const b = fr.legalDocuments.bulletin;
   const f = title.formality!;
-  // A share left empty in a dossier saved before the split was confirmed is
-  // taken from it (UX test of 09/10/2026), « à confirmer » like the others.
+  // A dossier saved before 09/11/2026 (one quality and one Phono share per
+  // creator) is read as participants and shares by category.
   const [initial] = useState(() => {
-    let filled = false;
-    const withShares = <T extends { phono: string; contact_id?: string }>(
-      people: T[],
-      roleOf: (person: T) => string,
-    ) =>
-      people.map((person) => {
-        if (person.phono) return person;
-        const phono = splitShareOf(
-          title.splitShares,
-          person.contact_id ?? null,
-          roleOf(person),
-        );
-        if (phono) filled = true;
-        return phono ? { ...person, phono } : person;
-      });
+    const read = (key: string, value: unknown) =>
+      key === "creators"
+        ? readCreators(value)
+        : key === "publishers"
+          ? readPublishers(value)
+          : value;
     const entries: Record<string, Entry> = Object.fromEntries(
       SACEM_725_FIELDS.map((field) => {
         const stored = f.values[field.key];
         const sourced = title.prefill[field.key];
-        if (stored) {
-          const value =
-            field.key === "creators" && Array.isArray(stored.value)
-              ? withShares(stored.value as Creator[], (c) => c.quality)
-              : field.key === "publishers" && Array.isArray(stored.value)
-                ? withShares(stored.value as Publisher[], () => "publisher")
-                : stored.value;
-          return [field.key, { value, typed: stored.source === "Saisi" }];
-        }
-        if (sourced) return [field.key, { value: sourced.value, typed: false }];
+        if (stored)
+          return [
+            field.key,
+            {
+              value: read(field.key, stored.value),
+              typed: stored.source === "Saisi",
+            },
+          ];
+        if (sourced)
+          return [
+            field.key,
+            { value: read(field.key, sourced.value), typed: false },
+          ];
         return [field.key, { value: null, typed: true }];
       }),
     );
-    return { entries, filled };
+    return { entries };
   });
   const [entries, setEntries] = useState(initial.entries);
   const [refused, setRefused] = useState<string | null>(null);
@@ -162,9 +157,7 @@ export function DossierForm({
           stateOf={stateOf}
           others={othersOf(section)}
           fromSplit={
-            initial.filled ||
-            (Boolean(title.prefill.phono_from_split) &&
-              !entries.creators?.typed)
+            Boolean(title.prefill.phono_from_split) && !entries.creators?.typed
           }
           text={text}
           obj={obj}

@@ -12,11 +12,15 @@ import {
   type PDFForm,
 } from "pdf-lib";
 
-import type {
-  Creator,
-  Publisher,
-  Quality,
-} from "@/lib/legal/formalities/definition";
+import type { Quality } from "@/lib/legal/formalities/definition";
+import {
+  bulletinShares,
+  onBulletin,
+  readCreators,
+  readPhonoSplit,
+  readPublishers,
+} from "@/lib/legal/formalities/participants";
+import { shareOf } from "@/lib/legal/splits/shares";
 
 // « PO génère une version du bulletin » (ticket Juridique 06): the official
 // bulletin SACEM 725 - 02/2026 (œuvres éditées), the one given with the
@@ -189,6 +193,71 @@ function writer(form: PDFForm, font: PDFFont) {
   };
 }
 
+type Person = {
+  last_name: string;
+  first_name: string;
+  pseudonym: string;
+  ipi: string;
+};
+type Line = { quality: Quality; phono: string };
+
+// Who goes on the bulletin, with their Phono share per line. A version
+// generated since 09/11/2026 holds participants, roles and shares within
+// each category: the Phono shares are derived. One generated before holds a
+// quality and a Phono share per creator: printed as it was signed.
+function bulletinPeople(content: Content): {
+  creators: Array<Person & { lines: Line[] }>;
+  publishers: Array<{ name: string; ipi: string; phono: string }>;
+} {
+  const rawCreators = content.creators?.value;
+  const rawPublishers = content.publishers?.value;
+  const legacy =
+    Array.isArray(rawCreators) &&
+    rawCreators.some((c) => !Array.isArray((c as { roles?: unknown }).roles));
+  if (legacy) {
+    type Old = Person & { quality?: Quality | ""; phono?: string };
+    return {
+      creators: (rawCreators as Old[]).map((c) => ({
+        ...c,
+        lines: c.quality ? [{ quality: c.quality, phono: c.phono ?? "" }] : [],
+      })),
+      publishers: (
+        (Array.isArray(rawPublishers) ? rawPublishers : []) as Array<{
+          name: string;
+          ipi: string;
+          phono?: string;
+        }>
+      ).map((p) => ({ ...p, phono: p.phono ?? "" })),
+    };
+  }
+  const creators = readCreators(rawCreators);
+  const publishers = readPublishers(rawPublishers);
+  const shares = bulletinShares(
+    creators,
+    publishers,
+    readPhonoSplit(content.phono_split?.value),
+  );
+  return {
+    creators: creators.flatMap((c, i) =>
+      onBulletin(c)
+        ? [
+            {
+              ...c,
+              lines: shares.creators[i].map((l) => ({
+                quality: l.quality,
+                phono: shareOf(l.phono),
+              })),
+            },
+          ]
+        : [],
+    ),
+    publishers: publishers.map((p, i) => ({
+      ...p,
+      phono: shareOf(shares.publishers[i]),
+    })),
+  };
+}
+
 /** The official bulletin of a document version, filled, as a PDF. A draft
  * (« Générer un brouillon », proto « Projet complet ») carries `draft` across
  * each page: it is never signed. */
@@ -242,8 +311,9 @@ export async function sacem725Pdf(
   if ((v("dep_dr") as { choice?: string } | null)?.choice === "follow_phono")
     w.check("Box100");
 
-  // E. Creators.
-  ((v("creators") as Creator[] | null) ?? []).slice(0, 5).forEach((c, i) => {
+  // E. Creators and F. publishers, as the version was generated.
+  const { creators, publishers } = bulletinPeople(content);
+  creators.slice(0, 5).forEach((c, i) => {
     const f = CREATOR_FIELDS[i];
     w.set(f.name, c.last_name.trim());
     w.set(f.first, c.first_name.trim());
@@ -251,27 +321,24 @@ export async function sacem725Pdf(
     const code = ipiOrCoad(c.ipi.trim());
     w.set(f.ipi, code.ipi);
     w.set(f.coad, code.coad);
-    if (!c.quality) return;
-    const [box, whole, decimals] = f.lines[c.quality];
-    w.check(box);
-    const [n, d] = share(c.phono);
-    w.set(whole, n);
-    w.set(decimals, d);
+    for (const line of c.lines) {
+      const [box, whole, decimals] = f.lines[line.quality];
+      w.check(box);
+      const [n, d] = share(line.phono);
+      w.set(whole, n);
+      w.set(decimals, d);
+    }
   });
-
-  // F. Publishers.
-  ((v("publishers") as Publisher[] | null) ?? [])
-    .slice(0, 3)
-    .forEach((p, i) => {
-      const f = PUBLISHER_FIELDS[i];
-      w.set(f.name, p.name.trim());
-      const [n, d] = share(p.phono);
-      w.set(f.whole, n);
-      w.set(f.decimals, d);
-      const code = ipiOrCoad(p.ipi.trim());
-      w.set(f.ipi, code.ipi);
-      w.set(f.coad, code.coad);
-    });
+  publishers.slice(0, 3).forEach((p, i) => {
+    const f = PUBLISHER_FIELDS[i];
+    w.set(f.name, p.name.trim());
+    const [n, d] = share(p.phono);
+    w.set(f.whole, n);
+    w.set(f.decimals, d);
+    const code = ipiOrCoad(p.ipi.trim());
+    w.set(f.ipi, code.ipi);
+    w.set(f.coad, code.coad);
+  });
 
   // G. Without a copy of the contract: the date it was signed jointly.
   const contract = v("publishing_contract") as {

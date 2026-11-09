@@ -7,22 +7,21 @@ import { FieldError, FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { ChoiceCards } from "@/components/ui/choice-cards";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { catalog } from "@/lib/i18n/fr/catalog";
 import { masterSource } from "@/lib/i18n/fr/master-source";
 import { confirmSource } from "@/lib/master-workflow/source-actions";
 import type { SourceTitle } from "@/lib/master-workflow/source-step";
-import { formatDay, formatShortDay } from "@/lib/utils/day";
+import { formatDay } from "@/lib/utils/day";
 
-import { SourceAudio } from "./source-audio";
+import { SourceVersionPick } from "./source-version-pick";
 
-const fr = { catalog, masterSource };
+const fr = { masterSource };
 
 const t = fr.masterSource;
 
 /**
  * « Dernière version détectée » then the vocals and, when they are not
  * final, « Attendre / Anticiper » (proto `master-v2.html`): the newest
- * version chosen first, each one listened to before choosing, every missing
+ * version shown as its document, another one picked from a menu, every missing
  * answer in red at the first try (never a disabled button).
  */
 export function SourceForm({
@@ -41,8 +40,13 @@ export function SourceForm({
   onCancel?: () => void;
 }) {
   const detected = title.candidates[0];
+  // The confirmed source when « Changer la source » reopens the form and it
+  // is still a candidate, else the newest.
+  const kept = title.candidates.find(
+    (c) => c.id === title.current?.version?.id,
+  );
   const [fileId, setFileId] = useState<string | null>(
-    title.current?.version?.id ?? detected?.id ?? null,
+    kept?.id ?? detected?.id ?? null,
   );
   const [vocals, setVocals] = useState<"yes" | "no" | null>(null);
   const [plan, setPlan] = useState<"wait" | "anticipate" | null>(null);
@@ -81,26 +85,11 @@ export function SourceForm({
       }}
     >
       <div ref={first} className="flex flex-col gap-1.5">
-        <ChoiceCards
-          name={`source-${title.id}`}
-          legend={t.detected}
-          required
-          variant="list"
-          value={fileId}
+        <SourceVersionPick
+          id={title.id}
+          candidates={title.candidates}
+          value={fileId ?? ""}
           onChange={setFileId}
-          choices={title.candidates.map((c, i) => ({
-            value: c.id,
-            label: c.fileName,
-            hint: t.versionMeta(
-              // « v3 »: its rank among the title's versions, oldest first.
-              title.candidates.length - i,
-              fr.catalog.audioStates[c.audioState],
-              c.addedBy,
-              formatShortDay(c.createdAt),
-              i === 0,
-            ),
-            aside: <SourceAudio name={c.fileName} url={c.listenUrl} />,
-          }))}
         />
         {tried && (
           <FieldError id="source-version-error">{errors.version}</FieldError>

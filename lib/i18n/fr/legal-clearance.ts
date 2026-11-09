@@ -189,6 +189,7 @@ export const legalClearance = {
     usage: "Usage",
     holder: (right: string) => `Ayant droit de ${right}`,
     noHolder: "À identifier",
+    linked: (name: string) => `${name} est dans le Réseau`,
     rightsTitle: (n: number) =>
       n > 1 ? "Deux autorisations distinctes" : "L'autorisation",
     rightOf: { work: "l'œuvre", master: "l'enregistrement" } as Record<
@@ -357,15 +358,13 @@ export const legalClearance = {
       count === 1
         ? "Il manque une réponse ci-dessus."
         : `Il manque ${count} réponses ci-dessus.`,
-    askedTo: (names: string, date: string) =>
-      `Demandé à ${names} le ${date}. Quand ils répondent, collez leur réponse : PO en tire les conditions.`,
+    askedTo: (names: string, date: string) => `Demandé à ${names} le ${date}.`,
     replyLabel: "Leur réponse",
     // A reply filed from PO's mailbox (cron), put in « Leur réponse ».
     replyReceived: (from: string, at: string) =>
-      `Reçue par e-mail de ${from}, le ${at}. Vérifiez-la, puis lisez-la.`,
+      `Reçue par e-mail de ${from}, le ${at}.`,
     replyEmpty: "(Message sans texte)",
-    replyAttachments: (names: string) =>
-      `Pièces jointes, dans la boîte de PO : ${names}`,
+    replyAttachments: (names: string) => `Pièces jointes : ${names}`,
     replyPlaceholder: "Collez leur e-mail ou leur message",
     replyMissing: "Collez leur réponse.",
     read: "Lire la réponse",
@@ -403,16 +402,63 @@ export const legalClearance = {
         ? `Conditions validées : ${terms}`
         : "Conditions validées par la direction",
     openContract: "Ouvrir le contrat",
-    sendHint: "Envoyez-le, puis dites comment : c'est la preuve d'envoi.",
+    // « Signer » sends the contract like the request (Sacha, 09/11/2026):
+    // the same e-mail card, the contract joined.
+    contractSubject: (work: string) =>
+      `Contrat d'autorisation · « ${work} » · à signer`,
+    contractTemplate: (work: string, terms: string) =>
+      `Bonjour,\n\nComme convenu, vous trouverez ci-joint le contrat d'autorisation pour « ${work} »${
+        terms ? ` (${terms})` : ""
+      }. Pourriez-vous nous le retourner signé, en réponse à cet e-mail ?\n\nBien à vous,`,
+    contractSendTo: (names: string) => `Envoyer le contrat à ${names}`,
+    contractSentOtherwise: "Je l'ai envoyé autrement",
+    contractOwnMail:
+      "À envoyer depuis votre messagerie, contrat joint, puis à déclarer ici",
+    contractSent: "J'ai envoyé le contrat",
+    attachmentSee: "Voir",
+    noDocument:
+      "Le contrat n'a pas encore de texte : mettez-le sur sa page (depuis un modèle ou un fichier importé), puis revenez l'envoyer d'ici.",
+    openToWrite: "Ouvrir le contrat",
+    otherwiseHow: "Comment est-il parti ?",
+    contractEmailLog: (
+      names: string,
+      subject: string,
+      message: string,
+      missed: string,
+      files: string,
+    ) =>
+      [
+        `Contrat envoyé par e-mail par PDS OS à ${names}, joint : ${files}.`,
+        ...(missed
+          ? [`Non parti pour ${missed} : à leur écrire vous-même.`]
+          : []),
+        `Objet : ${subject}`,
+        "",
+        message,
+      ].join("\n"),
     sendBy: [
       "Envoyé par e-mail",
       "Envoyé par un outil de signature",
       "Remis en main propre",
     ],
     sentHint:
-      "Envoyé pour signature. Quand le signé revient, déposez-le avec sa preuve (l'e-mail de retour, le certificat de signature).",
-    contractWaits:
-      "Le contrat attend la validation de la direction avant de pouvoir partir.",
+      "Envoyé pour signature. S'il revient signé en réponse à l'e-mail, PDS OS le range ici avec l'e-mail comme preuve ; sinon déposez-le avec sa preuve (l'e-mail de retour, le certificat de signature).",
+    // The signed copy came back by e-mail, kept by PDS OS (cron).
+    signedByEmail:
+      "Le contrat signé est revenu par e-mail : PDS OS l'a rangé, avec l'e-mail comme preuve. Ouvrez-le pour vérifier qu'il est bien signé, puis marquez l'autorisation comme sécurisée.",
+    seeSigned: "Voir le contrat signé",
+    // Who acts next on the authorisation contract, by its state (the
+    // owner submits and sends it, the direction validates it).
+    toSubmit:
+      "À vous : soumettez le contrat à la direction depuis sa page. Une fois validé, vous l'enverrez d'ici.",
+    toDecide:
+      "À vous : validez le contrat depuis sa page. Son responsable pourra ensuite l'envoyer.",
+    awaitSubmit: "soumettre le contrat à la direction",
+    awaitDecide: "valider le contrat",
+    awaitSend: "envoyer le contrat pour signature",
+    openToSubmit: "Ouvrir le contrat pour le soumettre",
+    openToDecide: "Ouvrir le contrat pour le valider",
+    responsible: "son responsable",
     secure: "Marquer comme sécurisé",
     filesMissing: (what: string) => `Il manque ${what}.`,
     signedMissing: "le contrat signé",
@@ -447,5 +493,9 @@ export const legalClearance = {
     failed: "L'action n'a pas pu être faite. Réessayez.",
     emailFailed:
       "L'e-mail n'est pas parti, rien n'est enregistré. Réessayez, ou envoyez-le vous-même puis « Je l'ai envoyée autrement ».",
+    contractEmailFailed:
+      "L'e-mail n'est pas parti, rien n'est enregistré. Réessayez, ou envoyez le contrat vous-même puis « Je l'ai envoyé autrement ».",
+    contractNoDocument:
+      "Le contrat n'a pas encore de texte à joindre : mettez-le sur sa page, puis revenez l'envoyer.",
   },
 } as const;

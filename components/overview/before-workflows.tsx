@@ -11,7 +11,8 @@ const fr = { journey, projectShell };
  * « Avant les workflows » (proto « Projet complet »): before « Lancer le
  * plan », the order the project follows and where the Cadrage's steps stand
  * — Fait, En cours, À venir, a step to come naming the one it waits for
- * (« Après : Brief de cadrage », as the journey says it). « Maintenant »
+ * (« Après : Brief de cadrage », as the journey says it). Each row opens
+ * its step, locked ones too (read-only, as the spine does). « Maintenant »
  * above already opens the Cadrage (Figma PDS OS 304:20801, Sacha 29/10).
  */
 export function BeforeWorkflows({ steps }: { steps: JourneyStep[] }) {
@@ -37,6 +38,7 @@ export function BeforeWorkflows({ steps }: { steps: JourneyStep[] }) {
           return (
             <InfoRow
               key={step.key}
+              href={step.href}
               title={step.title}
               detail={
                 state === "later" && waitsFor.length > 0

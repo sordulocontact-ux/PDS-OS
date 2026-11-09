@@ -33,6 +33,7 @@ export type FieldKind =
   | "creators"
   | "publishers"
   | "dep_dr"
+  | "phono_split"
   | "arrangement"
   | "contract";
 
@@ -82,6 +83,14 @@ export const SACEM_725_FIELDS: readonly FormalityField[] = [
     kind: "contract",
     required: false,
   },
+  // The Phono shares between the categories, and « Aucun éditeur musical »
+  // (retour d'Ibé du 02/11/2026): checked in formality_missing.
+  {
+    key: "phono_split",
+    section: "sharing",
+    kind: "phono_split",
+    required: false,
+  },
   { key: "dep_dr", section: "sharing", kind: "dep_dr", required: true },
   // The bulletin asks the date and, apart, the place or broadcaster. The
   // date is required since JUR-02 (formality_missing, 20261024000401).
@@ -114,6 +123,10 @@ export const SACEM_GENRES = [
   "Autre",
 ] as const;
 
+// The roles a participant may hold in the work (retour d'Ibé du 02/11/2026:
+// « participant + rôle(s) + répartition par catégorie »). A person can be
+// author and composer: one participant, two roles, one share in each
+// category. A performer only is a participant with no role: no SACEM share.
 export const QUALITIES = ["author", "composer", "arranger", "adapter"] as const;
 
 // Rubrique D: within each category, the DEP and DR shares follow the Phono
@@ -127,18 +140,28 @@ export type Creator = {
   first_name: string;
   pseudonym: string;
   ipi: string;
-  quality: Quality | "";
-  // Exact share, « 33.3334 » (from the confirmed split when there is one,
-  // to verify).
-  phono: string;
+  // Their roles in the work; none with `performer_only`.
+  roles: Quality[];
+  // « Interprète uniquement »: sings or plays, wrote nothing — on no line
+  // of the bulletin, signs nothing (another circuit of rights).
+  performer_only?: boolean;
+  // Their share within the category of each role, exact, « 33.3334 »:
+  // authors and adapters share the Auteur part, composers and arrangers the
+  // Compositeur part (lib/legal/formalities/participants.ts).
+  shares: Partial<Record<Quality, string>>;
   signs: boolean;
   // The Réseau contact this creator was picked from (never by name).
   contact_id?: string;
+  // The title's main artist, put in by PDS OS, never made an author by it:
+  // their role is confirmed by a person (`confirmed`).
+  main_artist?: boolean;
+  confirmed?: boolean;
 };
 export type Publisher = {
   name: string;
   ipi: string;
-  phono: string;
+  // Its share within the Éditeur part, « 50 ».
+  share: string;
   contact_id?: string;
   // The creators it publishes, by their position on the bulletin (1 to 5):
   // a publisher is never a free line (JUR-22).
@@ -149,6 +172,14 @@ export type Publisher = {
   // PDS Éditions (from the confirmed split): signed by the direction in PDS
   // OS, never on a link (20261028000601).
   house?: boolean;
+};
+
+// « Aucun éditeur musical » said explicitly, and the Phono shares between
+// the categories when a contract sets them (« la reproduction mécanique
+// peut suivre une répartition contractuelle »); otherwise the usual ones.
+export type PhonoSplit = {
+  no_publisher?: boolean;
+  custom?: { author: string; composer: string; publisher: string } | null;
 };
 
 // What the bulletin takes of a person, from their name in the Réseau and
@@ -180,8 +211,14 @@ export function formalityMissingLabel(code: string): string {
   switch (what) {
     case "creator_name":
       return t.creator_name(arg);
-    case "creator_quality":
-      return t.creator_quality(arg);
+    case "creator_role":
+      return t.creator_role(arg);
+    case "main_artist_role":
+      return t.main_artist_role(arg);
+    case "creator_share":
+      return t.creator_share(arg);
+    case "publisher_label":
+      return t.publisher_label(arg);
     case "creator_first":
       return t.creator_first(arg);
     case "publisher_name":

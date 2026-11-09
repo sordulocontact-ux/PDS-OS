@@ -461,6 +461,19 @@ Refonte du 07/11 (retour d'Ibé « Refonte du module Sessions studio », 06/11) 
   d'ensemble d'un titre** liste ses sessions (`TitleSessionsSection`), l'onglet Audio les modifie.
   Détacher le dernier titre d'une session encore liée à un artiste ou un projet la garde
   (`master_session_anchored`) ; un titre supprimé lui laisse la vie de même.
+- **Google Agenda du label** (09/11/2026, migration `20261109100101_session_google_event.sql`,
+  `lib/sessions/calendar.ts`) : à l'enregistrement, à l'annulation et à la suppression d'une session,
+  `syncSessionCalendar` crée, réécrit ou annule l'événement (sans Meet : `createCalendarEvent` /
+  `updateCalendarEvent` de `lib/integrations/google-calendar.ts`, même jeton que les Calls, droit
+  `calendar.events`). Invités : l'équipe interne seulement, les membres participants et le
+  responsable du compte rendu ; jamais un contact du Réseau. Sans horaires, un événement sur la
+  journée ; un début sans fin, 2 h. Une session racontée après coup (datée avant aujourd'hui) n'invite
+  personne. Un refus de Google est journalisé, jamais bloquant ; l'id est dans
+  `master_sessions.google_event_id`.
+- **Compte rendu dans Travail et l'Accueil** (09/11/2026) : `listSessionsToReport` (« Compte rendu à
+  compléter » dont la personne est responsable) entre dans `loadMyWork`, ligne `kind: "session"`
+  de `workRowsOf` (« Rédiger le compte rendu de la session », lien `#compte-rendu`, sans échéance) ;
+  l'Accueil lit les mêmes lignes.
 - **Permission `manage_sessions`** (DG et chefs de projet, `role_permissions`) : créer, modifier,
   supprimer une session et ses liens (RLS de toutes ces tables). « Gérer dans les rôles qui crée
   des sessions » (Ibé) = le poste : il n'existe pas d'écran pour donner une permission à la
@@ -3538,8 +3551,9 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
     « Vérification ») ; chaque ligne dit son état (`fieldStates` + `FieldStateLine` :
     « Confirmé », « Proposé » avec sa source et « Confirmer », « Manquant » avec pourquoi), le
     bouton « Générer la version à signer » compte les manques ; genre en liste
-    (`SACEM_GENRES`) ; « Œuvre préexistante » dans l'Œuvre (`BorrowingLine`) ; total Phono en
-    tête de la Répartition (`PhonoTotal`), DEP / DR expliqués, calculés par le code et
+    (`SACEM_GENRES`) ; « Œuvre préexistante » dans l'Œuvre (`BorrowingLine`) ; parts par
+    catégorie dans la Répartition (`CategoryShares`, depuis le 09/11 : voir « Participants et
+    parts par catégorie »), DEP / DR expliqués, calculés par le code et
     « J'ai vérifié les parts DEP et DR » (`DepDrField`, `dep_dr.checked`) ; première
     exploitation **obligatoire**, proposée depuis la date de sortie prévue
     (`releases.planned_release_date`, « Proposé » jusqu'à « Confirmer ») — ce qui remplace la
@@ -3687,15 +3701,27 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
       la demande (`po+aut-<id>@…`, `lib/email/reply-address.ts`) ; toutes les 10 min, pg_cron
       (`public.poll_inbox`, secrets Vault `inbox_poll_url` et `cron_secret`) appelle
       `/api/cron/inbox`, qui lit les enveloppes des 14 derniers jours de po@ en IMAP
-      (`lib/email/inbox.ts`, BODY.PEEK : rien n'est marqué lu) et range par le code seul
+      (`lib/email/inbox.ts`, BODY.PEEK : rien n'est marqué lu ; même compte et même mot de passe
+      d'application que l'envoi, `EMAIL_SMTP_USER` / `EMAIL_SMTP_PASSWORD`, depuis le 09/11/2026) et range par le code seul
       (`lib/legal/clearance/inbox-replies.ts`) : adressée à `po+aut-<id>` → cette demande ;
       sinon venue de l'adresse d'un ayant droit d'une seule demande envoyée → celle-là ;
       plusieurs → celle dont l'œuvre est nommée dans l'objet ou le texte, si une seule ;
       sinon laissée dans po@. Texte sans l'historique cité (`lib/email/reply-text.ts`), pièces
-      jointes nommées seulement ; `receive_clearance_reply` (service role seul, une fois par
+      jointes nommées seulement, **sauf le contrat signé** (09/11/2026,
+      `lib/legal/clearance/signed-by-email.ts`) : réponse rangée pour la première fois, PDF joints
+      et un seul contrat de l'emprunt « Envoyé » sans signé → PDF déposés comme « Signé » (avec
+      l'ayant droit dont l'adresse du Réseau l'a envoyé, `via_contact_id`) et l'e-mail entier
+      (.eml) comme « Preuve de signature », par `receive_clearance_signed_copy` (service role,
+      migration `20261109160101`, événement `signature.emailed`) ; rien n'est décidé : « Signer »
+      dit « revenu par e-mail, à vérifier » avec « Voir le contrat signé », puis « Marquer comme
+      sécurisé » à la main ; `receive_clearance_reply` (service role seul, une fois par
       Message-ID, jamais sur une demande close, état inchangé) et notification
       `clearance_reply_received` au responsable. « Négocier » pré-remplit « Leur réponse »
-      avec elle (source dessous) ; gardée telle quelle, elle n'est pas copiée deux fois au
+      avec elle (source dessous) et **PO la lit dès l'ouverture** (09/11/2026, migration
+      `20261109180101`) : le premier qui ouvre l'étape la fait lire avec sa session et son quota,
+      la lecture est gardée avec la réponse (`legal_clearance_communications.reading`,
+      `keep_clearance_reading`, jamais remplacée) et redonnée sans nouvel appel ensuite ; elle
+      reste une proposition à vérifier, « Pas ça » revient au texte ; gardée telle quelle, elle n'est pas copiée deux fois au
       journal (`receivedId`). Aucune IA ne décide du rattachement ; aucun e-mail parti = rien
       d'enregistré ; « Je l'ai envoyée autrement » déclare seulement ; sans SMTP, « Ouvrir dans ma
       messagerie » et « J'ai envoyé la demande » (`requestClearance` :
@@ -3717,11 +3743,35 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
     - **Décision du 07/10/2026** : valider les conditions vaut accord sur l'emprunt. Le même
       clic de la direction (`validateClearanceTerms`) prépare le contrat d'autorisation (un
       contrat pour l'emprunt, type licence, suivi par le responsable de l'emprunt sinon du
-      projet, ayants droit en parties, rattaché à chaque droit concerné), le soumet et
-      l'approuve : une validation au lieu de deux. À revoir si le DG veut relire le document
-      lui-même avant l'envoi.
-    - **Signer** (`SignMoment`) : « Envoyé par e-mail / par un outil de signature / remis en
-      main propre » (`sendClearanceContract`, la façon est la preuve d'envoi), puis le signé et
+      projet, ayants droit en parties, rattaché à chaque droit concerné) et l'approuve
+      directement (`approve_clearance_contract`, `…20261109120101`) : une validation au lieu de
+      deux, jamais une soumission au nom du responsable (règle 9). Avant le 09/11 le flux le
+      « soumettait » au nom de la direction, refusé depuis la règle 9 : le contrat restait « En
+      préparation » et la page disait attendre la direction ; la migration a approuvé ces
+      contrats restés en brouillon. À revoir si le DG veut relire le document lui-même avant
+      l'envoi.
+    - **Signer** (`SignMoment`) : la page dit qui agit, selon l'état du contrat le moins avancé
+      — brouillon renvoyé : « À vous : soumettez… » au responsable, sinon `StepWaiting` ; à
+      valider : « À vous : validez… » à la direction, sinon `StepWaiting` « En attente de … :
+      valider le contrat » ; validé : les boutons d'envoi pour son responsable seul, les autres
+      voient « En attente de … : envoyer le contrat pour signature ». Le bouton « Ouvrir le
+      contrat » passe en principal quand le geste du lecteur se fait sur la page du contrat.
+      **Envoi du contrat comme la demande** (Sacha, 09/11/2026, `ClearanceContractSend`) : la
+      même `MailCard` (`RequestSend` avec `labels` et `attachment`), « À » = chaque ayant droit à
+      son adresse du Réseau (modifiable, gardée dans la fiche), le contrat **joint** (dernière
+      version du document généré imprimée en PDF, sinon dernier fichier « Projet » du contrat :
+      `lib/legal/clearance/contract-email.ts`), « Envoyer le contrat à … » par PDS OS, réponses
+      à l'adresse de l'emprunt donc rangées dans ses Échanges, texte gardé au journal ; ou « Je
+      l'ai envoyé autrement » puis « Envoyé par e-mail / par un outil de signature / remis en
+      main propre ». Un contrat sans texte le dit et mène à sa page (PDS OS n'en écrit jamais).
+      **Ayant droit gardé par son nom seul** (09/11/2026, migration `20261109170101`) : l'adresse
+      à laquelle la demande ou le contrat est parti reste sur lui (`legal_clearance_rightsholders.email`,
+      `keep_clearance_holder_email`), le journal écrit « à Nom (adresse) », la carte mail du
+      contrat la reprend et le cron range ses réponses ; « L'autorisation » montre chaque ayant
+      droit en `ContactCard` (adresse en vue) avec « Ajouter au Réseau » (`HolderToNetworkButton` :
+      formulaire de contact pré-rempli, puis `link_clearance_holder_contact`, l'adresse passe à la
+      fiche si elle n'en a pas).
+      `sendClearanceContract`, la façon est la preuve d'envoi ; puis le signé et
       sa preuve **déposés dans le panneau** (`ContractProofSlot`, rangés dans le contrat), puis
       « Marquer comme sécurisé » (`secureClearanceFlow` : contrat signé ce jour, emprunt signé
       puis sécurisé, jamais en arrière ; manques dits en rouge avant). Un emprunt arrivé là sans
@@ -4349,7 +4399,8 @@ la personne (`/c/`). Migration `20261020070101_signed_returns.sql`, pgTAP `signe
   (04/11/2026, choix de Sacha : pas de domaine, donc le Gmail de PO plutôt que Resend) : un seul point
   d'entrée `lib/email/send.ts` (nodemailer, `smtp.gmail.com`, `EMAIL_SMTP_USER` = po@pdsrecords.com,
   `EMAIL_SMTP_PASSWORD` = mot de passe d'application), expéditeur « <membre> · PDS », réponses au
-  membre, texte seul. Branché d'abord sur l'envoi du dossier du Mixage/Mastering
+  membre, texte brut **et HTML** depuis le 09/11/2026 (`lib/email/compose.ts`, cadre commun
+  `lib/email/layout.ts`, `docs/DESIGN.md` « E-mails »). Branché d'abord sur l'envoi du dossier du Mixage/Mastering
   (`transmission-email.ts` : message écrit dans l'étape, gardé comme note du dossier, lien à la fin,
   puis `mark_master_transmission_sent` et `mark_contact_link_sent`). **Le lien envoyé est la page par
   personne** (Sacha, 04/11/2026, Figma 378-6581) : `sendRound` la crée au besoin
@@ -4451,8 +4502,37 @@ la personne (`/c/`). Migration `20261020070101_signed_returns.sql`, pgTAP `signe
   total toujours 100 %). L'effet de l'autre choix est dit ligne par ligne ; alertes : total Phono
   différent de 100 %, catégorie sans ayant droit, arrangeur ou adaptateur non calculé par V1, règle
   inconnue. La règle utilisée est **gardée avec le dossier** (`dep_dr.rule`) : une V2 ne change
-  pas un dossier ni un bulletin déjà fait. **Point à trancher** : fractions de V1 et part des
-  arrangeurs / adaptateurs, à confirmer par le référent juridique avant production (ticket).
+  pas un dossier ni un bulletin déjà fait. **Point à trancher** : fractions de V1, à confirmer
+  par le référent juridique avant production (ticket). Depuis le 09/11, un adaptateur partage la
+  catégorie Auteur et un arrangeur la catégorie Compositeur, avec la part que le dossier leur
+  donne dedans (plus d'alerte « non calculé »).
+- **Participants et parts par catégorie (retour d'Ibé du 02/11, total à 125 % d'Akili ;
+  `20261109140101`, `lib/legal/formalities/participants.ts`)** : le bulletin ne se remplit plus
+  « personne + qualité + part Phono », mais **participant + rôle(s) + part dans chaque catégorie**.
+  Un participant (`creators`) a des `roles` (auteur, compositeur, arrangeur, adaptateur ; auteur et
+  compositeur à la fois = un seul participant, une seule ligne du bulletin avec deux cases) ou
+  `performer_only` (« Interprète uniquement » : pas sur le bulletin, pas de part, ne signe pas) ;
+  `shares` = sa part dans la catégorie de chaque rôle. Catégories : Auteur (auteurs, adaptateurs),
+  Compositeur (compositeurs, arrangeurs), Éditeur (`publishers[].share`), chacune à **100 %**,
+  contrôlée à part (`author_total`, `composer_total`, `publisher_total`). Un membre seul a 100 %
+  d'office ; qui entre ou sort d'une catégorie la remet à parts égales (`reshare`), « Parts
+  égales » en un clic. Les **parts Phono** du bulletin sont **déduites** (`bulletinShares`) : part
+  de la catégorie × part dedans, en unités exactes, donc toujours 100 %. Parts entre catégories
+  (`phono_split`) : règle usuelle des droits sur les enregistrements (éditée 25 / 25 / 50, non
+  éditée moitié / moitié, une catégorie vide — instrumental — laisse sa part aux autres), ou celles
+  d'un contrat (`custom`, « Suivre un contrat » : 100 %, une part par catégorie présente, aucune
+  aux autres, code `phono_split`). L'**artiste principal** du titre (`master_artists.role = main`,
+  son contact par `network_contacts.artist_id`) est mis d'office parmi les participants
+  (`main_artist`), jamais comme auteur : son rôle est confirmé par une personne (`confirmed`, code
+  `main_artist_role`). « **Aucun éditeur musical** » se dit (`phono_split.no_publisher`, sinon
+  `publishers_choice`) ; un éditeur pris dans le Réseau qui n'y est que label, société de
+  production, studio ou distributeur est signalé (`publisher_label`, avertissement dès le choix).
+  Le contrôle « les contributeurs ont confirmé la répartition avant le dépôt » est la signature du
+  bulletin par chacun (pas de dépôt sans elle). Les dossiers d'avant sont convertis par la
+  migration (rôle = l'ancienne qualité, part dans la catégorie = Phono / total Phono de la
+  catégorie) ; les versions déjà générées gardent leur forme et `bulletin-pdf.ts` les imprime
+  telles qu'elles ont été signées. Plus de reprise de part au choix d'une personne ajoutée à la
+  main : le pré-remplissage depuis la répartition confirmée se fait par catégorie (`prefill.ts`).
 - **Fiches (JUR-11, JUR-13, JUR-14)** : `legal_forms.opened_at`, noté une fois par
   `note_legal_form_opened` (anon) à l'ouverture de `/f/…` (« lien ouvert le … » dans la liste) ;
   une fiche reçue notifie qui l'a préparée et le responsable du projet (`legal_form_received`,

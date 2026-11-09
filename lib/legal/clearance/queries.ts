@@ -17,7 +17,11 @@ import { personName } from "@/lib/projects/types";
 import { listLegalPeople } from "@/lib/legal/legal-people";
 import { legalClearanceRows } from "@/lib/legal/shared-rows";
 import { emailEnabled } from "@/lib/email/send";
+import { contractDocumentRefs } from "@/lib/legal/clearance/contract-email";
 import { createClient } from "@/lib/supabase/server";
+
+// The description receive_clearance_signed_copy gives what came by e-mail.
+const RECEIVED_BY_EMAIL = "Reçu par e-mail";
 
 // The clearances of a project (ticket Juridique 05), with everything their
 // drawer shows, read with the viewer's session (RLS: manage_legal).
@@ -35,7 +39,7 @@ export async function loadClearances(
       : Promise.resolve({ data: [], error: null }),
     supabase
       .from("contracts")
-      .select("id, title, status, ends_on")
+      .select("id, title, status, ends_on, owner_person_id")
       .eq("project_id", project.id),
   ]);
   if (rows.error) console.error("loadClearances:", rows.error.message);
@@ -46,7 +50,7 @@ export async function loadClearances(
       ? await Promise.all([
           supabase
             .from("legal_clearance_rightsholders")
-            .select("id, clearance_id, right, name, role, contact_id")
+            .select("id, clearance_id, right, name, role, contact_id, email")
             .in("clearance_id", ids)
             .order("created_at"),
           supabase
@@ -84,22 +88,53 @@ export async function loadClearances(
       (holders.data ?? []).flatMap((h) => (h.contact_id ? [h.contact_id] : [])),
     ),
   ];
-  const [files, mails] = await Promise.all([
+  const [files, mails, documents] = await Promise.all([
     contractIds.length > 0
       ? supabase
           .from("contract_files")
-          .select("contract_id, category")
+          .select("contract_id, category, description, path")
           .in("contract_id", contractIds)
       : none,
     contactIds.length > 0
       ? supabase
           .from("network_contacts")
-          .select("id, email")
+          .select("id, email, kind")
           .in("id", contactIds)
       : none,
+    // What each contract is e-mailed as from « Signer ».
+    contractDocumentRefs(
+      supabase,
+      (contracts.data ?? []).filter((c) => contractIds.includes(c.id)),
+    ),
   ]);
   const emailOf = new Map(
     (mails.data ?? []).flatMap((c) => (c.email ? [[c.id, c.email]] : [])),
+  );
+  const kindOf = new Map(
+    (mails.data ?? []).map((c) => [
+      c.id,
+      c.kind === "person" ? ("person" as const) : ("organization" as const),
+    ]),
+  );
+  // A signed copy sent back by e-mail and kept by PDS OS (cron): shown to
+  // check before « Marquer comme sécurisé ».
+  const emailedFiles = (files.data ?? []).filter(
+    (f) => f.category === "signed" && f.description === RECEIVED_BY_EMAIL,
+  );
+  const emailedUrls =
+    emailedFiles.length > 0
+      ? (
+          await supabase.storage.from("contract-files").createSignedUrls(
+            emailedFiles.map((f) => f.path),
+            3600,
+          )
+        ).data
+      : null;
+  const emailed = new Map(
+    emailedFiles.map((f, i) => [
+      f.contract_id,
+      { url: emailedUrls?.[i]?.signedUrl ?? null },
+    ]),
   );
   const nameOf = new Map(
     (people.data ?? []).map((p) => [
@@ -154,7 +189,13 @@ export async function loadClearances(
             name: h.name,
             role: h.role,
             contactId: h.contact_id,
-            email: h.contact_id ? (emailOf.get(h.contact_id) ?? null) : null,
+            // The fiche's address, else the one a name-only holder was
+            // e-mailed to.
+            email:
+              (h.contact_id ? emailOf.get(h.contact_id) : null) ??
+              h.email ??
+              null,
+            kind: h.contact_id ? (kindOf.get(h.contact_id) ?? null) : null,
           })),
         exchanges: (exchanges.data ?? [])
           .filter((e) => e.clearance_id === row.id)
@@ -199,6 +240,13 @@ export async function loadClearances(
                 ),
                 signedFile: mine.some((f) => f.category === "signed"),
                 evidenceFile: mine.some((f) => f.category === "evidence"),
+                document: documents.get(c.id) ?? null,
+                signedByEmail: emailed.get(c.id) ?? null,
+                ownerName: c.owner_person_id
+                  ? (nameOf.get(c.owner_person_id) ?? null)
+                  : null,
+                ownerIsViewer:
+                  !!c.owner_person_id && c.owner_person_id === access.personId,
               },
             ];
           }),

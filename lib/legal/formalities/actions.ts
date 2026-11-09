@@ -25,31 +25,44 @@ const share = z
   .string()
   .trim()
   .regex(/^(\d{1,3}(\.\d{1,4})?)?$/);
+// A participant: their roles and their share within each role's category
+// (retour d'Ibé du 02/11/2026), or « interprète uniquement ».
 const creator = z.object({
   last_name: z.string().trim().max(200),
   first_name: z.string().trim().max(200),
   pseudonym: z.string().trim().max(200),
   ipi: z.string().trim().max(40),
-  quality: z.enum(QUALITIES).or(z.literal("")),
-  phono: share,
+  roles: z.array(z.enum(QUALITIES)).max(QUALITIES.length),
+  performer_only: z.boolean().optional(),
+  shares: z.partialRecord(z.enum(QUALITIES), share),
   signs: z.boolean(),
   contact_id: id.optional(),
+  main_artist: z.boolean().optional(),
+  confirmed: z.boolean().optional(),
 });
 const publisher = z.object({
   name: z.string().trim().max(200),
   ipi: z.string().trim().max(40),
-  phono: share,
+  share,
   contact_id: id.optional(),
   // Whom it publishes (JUR-22) and the contract that founds it (JUR-25):
   // kept, or formality_missing reads « publisher_link » on every typed line.
-  represents: z.array(z.number().int().min(1).max(5)).max(5).optional(),
+  represents: z.array(z.number().int().min(1).max(10)).max(10).optional(),
   contract_id: id.optional(),
   // PDS Éditions, signed by the direction (20261028000601).
   house: z.boolean().optional(),
 });
 const VALUE: Record<string, z.ZodType> = {
-  creators: z.array(creator).max(5),
+  // Five on the bulletin at most (formality_missing); performers only too.
+  creators: z.array(creator).max(10),
   publishers: z.array(publisher).max(3),
+  phono_split: z.object({
+    no_publisher: z.boolean().optional(),
+    custom: z
+      .object({ author: share, composer: share, publisher: share })
+      .nullable()
+      .optional(),
+  }),
   dep_dr: z.object({
     choice: z.enum(DEP_DR_CHOICES).or(z.literal("")),
     // The sharing rule the dossier was computed with (JUR-23).

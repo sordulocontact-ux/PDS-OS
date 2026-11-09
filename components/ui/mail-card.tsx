@@ -15,7 +15,7 @@ const fr = { mail };
  * 19, proto `mailCard`): a document headed « L'e-mail que PDS OS enverra »,
  * to whom with the source of the address, the subject, the message written
  * here, then what PDS OS adds at the end (the private link, created on
- * sending, and its validity). The caller's button sends it: the Master's
+ * sending, and its validity), or the file it joins (`attachment`). The caller's button sends it: the Master's
  * package (`SendForm`), a person's fiche (`FichePanel`).
  */
 export function MailCard({
@@ -29,6 +29,7 @@ export function MailCard({
   onMessage,
   name,
   added,
+  attachment,
   rows = 3,
 }: {
   // Default « L'e-mail que PDS OS enverra ».
@@ -52,6 +53,9 @@ export function MailCard({
   // dossier : » + the link (or « lien privé créé à l'envoi »), its validity.
   // None: the message is the whole e-mail (an authorisation request).
   added?: { intro?: string; open: string; link?: string; validity?: string };
+  // A file joined to the e-mail (the authorisation contract), its name and
+  // a way to see it on the right.
+  attachment?: { name: string; side?: ReactNode };
 }) {
   const t = fr.mail;
   return (
@@ -68,6 +72,14 @@ export function MailCard({
           source={toSource === undefined ? t.fromNetwork : toSource}
         />
         <FactRow label={t.subject} value={subject} />
+        {attachment && (
+          <FactRow
+            label={t.attachment}
+            value={attachment.name}
+            source={null}
+            side={attachment.side}
+          />
+        )}
       </FactRows>
       <div className="flex flex-col gap-3 px-3.5 pt-1 pb-3.5">
         <TextareaField

@@ -76,6 +76,10 @@ export const masterJourney = {
     addTitle: "Ajouter le titre au projet",
     confirmSource: (n: number) =>
       n > 1 ? `Confirmer la source de ${titles(n)}` : "Confirmer la source",
+    importSource: (n: number) =>
+      n > 1
+        ? `Importer la version de départ de ${titles(n)}`
+        : "Importer la version de départ du mix",
     replaceSource: "Remplacer la source",
     recordVocals: (pending: string | null) =>
       pending

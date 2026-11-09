@@ -7,7 +7,11 @@ import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { Fold } from "@/components/ui/fold";
 import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
 import { signedReturns } from "@/lib/i18n/fr/signed-returns";
-import type { Creator, Publisher } from "@/lib/legal/formalities/definition";
+import {
+  onBulletin,
+  readCreators,
+  readPublishers,
+} from "@/lib/legal/formalities/participants";
 import type { FormalityView } from "@/lib/legal/formalities/types";
 import { signFormalityForHouse } from "@/lib/legal/signed-returns/team-actions";
 import { formatShortDay } from "@/lib/utils/day";
@@ -191,15 +195,11 @@ function SignatureRow({
 // The signers the saved dossier names: creators who sign, then publishers.
 function FutureSigners({ f }: { f: FormalityView }) {
   const t = fr.legalFormalities;
-  const creators = Array.isArray(f.values.creators?.value)
-    ? (f.values.creators.value as Creator[])
-    : [];
-  const publishers = Array.isArray(f.values.publishers?.value)
-    ? (f.values.publishers.value as Publisher[])
-    : [];
+  const creators = readCreators(f.values.creators?.value);
+  const publishers = readPublishers(f.values.publishers?.value);
   const signers = [
     ...creators
-      .filter((c) => c.signs)
+      .filter((c) => c.signs && onBulletin(c))
       .map((c) => {
         const civil = [c.first_name, c.last_name].filter(Boolean).join(" ");
         return {
@@ -207,7 +207,7 @@ function FutureSigners({ f }: { f: FormalityView }) {
             c.pseudonym && civil && c.pseudonym !== civil
               ? `${c.pseudonym} (${civil})`
               : c.pseudonym || civil,
-          role: c.quality ? t.qualities[c.quality] : "",
+          role: c.roles.map((r) => t.qualities[r]).join(", "),
         };
       }),
     ...publishers.map((p) => ({ name: p.name, role: t.page.publisherRole })),

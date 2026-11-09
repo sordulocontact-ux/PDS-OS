@@ -18,6 +18,7 @@ import {
   rightsOf,
   type Scope,
 } from "@/lib/legal/clearance/matrix";
+import { contractAttachments } from "@/lib/legal/clearance/contract-email";
 import { emailClearanceRequest } from "@/lib/legal/clearance/request-email";
 import { run, type ClearanceResult } from "@/lib/legal/clearance/run";
 import { legalOutcome } from "@/lib/legal/outcome";
@@ -86,6 +87,18 @@ const holderSchema = z.object({
   contactId: catalogIdSchema.nullable(),
 });
 
+// Whom PDS OS e-mails the request, then the contract: each holder once.
+const recipientsSchema = z
+  .array(
+    z.object({
+      name: z.string().trim().min(1).max(200),
+      email: z.email(),
+      contactId: catalogIdSchema.nullable(),
+    }),
+  )
+  .min(1)
+  .max(4);
+
 const requestSchema = z.object({
   ...ids,
   scope: z.enum(SCOPES),
@@ -99,16 +112,7 @@ const requestSchema = z.object({
     .object({
       subject: z.string().trim().min(1).max(300),
       message: z.string().trim().min(1).max(4000),
-      recipients: z
-        .array(
-          z.object({
-            name: z.string().trim().min(1).max(200),
-            email: z.email(),
-            contactId: catalogIdSchema.nullable(),
-          }),
-        )
-        .min(1)
-        .max(4),
+      recipients: recipientsSchema,
     })
     .optional(),
 });
@@ -378,8 +382,8 @@ const termsSchema = z.object({
  * « Valider les conditions » (the direction). Validating the conditions is
  * validating the agreement: the same click prepares its contract — one
  * contract for the borrowing, followed by its responsible, with the rights
- * holders as parties, attached to each concerned right, submitted and
- * approved — so the responsible only has to send it. Decision of
+ * holders as parties, attached to each concerned right, and approved
+ * (`approve_clearance_contract`) — so the responsible only has to send it. Decision of
  * 07/10/2026 (docs/ARCHITECTURE.md § 8 sexies): the direction gives one
  * approval instead of two.
  */
@@ -490,15 +494,14 @@ async function validateClearanceTermsFlow(
       );
       if (!link.ok) return link;
     }
-    for (const action of ["submit", "approve"] as const) {
-      const { error } = await supabase.rpc("advance_contract", {
-        p_contract_id: contractId,
-        p_action: action,
-      });
-      if (error) {
-        console.error("validateClearanceTerms contract:", error.message);
-        return failed();
-      }
+    // Approved by this validation, never submitted in the responsible's
+    // name (only the owner submits: VISION-UX rule 9, 20261109120101).
+    const { error } = await supabase.rpc("approve_clearance_contract", {
+      p_contract_id: contractId,
+    });
+    if (error) {
+      console.error("validateClearanceTerms contract:", error.message);
+      return failed();
     }
   }
   const pending = await moveForward(supabase, projectId, clearanceId, [
@@ -552,10 +555,22 @@ async function contractsOf(supabase: Supabase, clearanceId: string) {
 const sendSchema = z.object({
   ...ids,
   how: z.string().trim().min(1).max(200),
+  // « Envoyer à … » (Sacha, 09/11/2026): PDS OS e-mails the contract
+  // itself, joined as a file, as written in the step; absent: declared sent
+  // another way.
+  email: z
+    .object({
+      subject: z.string().trim().min(1).max(300),
+      message: z.string().trim().min(1).max(4000),
+      recipients: recipientsSchema,
+    })
+    .optional(),
 });
 
-/** « Envoyé par e-mail » (or another way): the way it went is its proof of
- * sending; the borrowing then waits for the signed copy. */
+/** « Envoyer à … » or « Je l'ai envoyé autrement »: the contract e-mailed
+ * by PDS OS with its document joined (the text kept in the journal, the
+ * holder's reply filed there too), or the way it went declared; that is
+ * its proof of sending. The borrowing then waits for the signed copy. */
 export async function sendClearanceContract(input: z.input<typeof sendSchema>) {
   return gesture(input, done.contractSent, sendClearanceContractFlow);
 }
@@ -567,11 +582,41 @@ async function sendClearanceContractFlow(
   if (!p.success) return failed();
   await requireApproved();
   const supabase = await createClient();
-  for (const [contractId, status] of await contractsOf(
-    supabase,
-    p.data.clearanceId,
-  )) {
-    if (status !== "approved") continue;
+  const toSend = [...(await contractsOf(supabase, p.data.clearanceId))].filter(
+    ([, status]) => status === "approved",
+  );
+  if (p.data.email) {
+    const { subject, message, recipients } = p.data.email;
+    const attachments = await contractAttachments(toSend.map(([id]) => id));
+    if (!attachments || attachments.length === 0)
+      return { ok: false, error: fr.legalClearance.errors.contractNoDocument };
+    const { sent, missed } = await emailClearanceRequest(
+      p.data.clearanceId,
+      recipients,
+      subject,
+      message,
+      attachments,
+    );
+    if (sent.length === 0)
+      return { ok: false, error: fr.legalClearance.errors.contractEmailFailed };
+    const logged = await run(p.data.projectId, (s) =>
+      s.rpc("log_clearance_communication", {
+        p_clearance_id: p.data.clearanceId,
+        p_kind: "message",
+        p_direction: "out",
+        p_body: fr.legalClearance.flow.contractEmailLog(
+          sent.join(", "),
+          subject,
+          message,
+          missed.join(", "),
+          attachments.map((a) => a.filename).join(", "),
+        ),
+        p_occurred_at: null,
+      }),
+    );
+    if (!logged.ok) return logged;
+  }
+  for (const [contractId] of toSend) {
     const { error } = await supabase.rpc("advance_contract", {
       p_contract_id: contractId,
       p_action: "send",

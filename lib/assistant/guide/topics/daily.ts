@@ -55,7 +55,7 @@ export const dailyTopics: GuideTopic[] = [
       "En tête, « Maintenant » met l'action la plus pressée, avec son pourquoi, ce qui est validé ensuite et un bouton « Ouvrir » qui mène au geste exact.",
       "Les autres actions sont dans un seul tableau, en groupes repliables : En retard, Cette semaine, Plus tard, Sans échéance, En attente d'un autre.",
       "Trois onglets : Tout, À faire, À valider.",
-      "On y trouve aussi un projet à accepter, un projet à retransmettre et les tâches libres rattachées à aucun workflow.",
+      "On y trouve aussi un projet à accepter, un projet à retransmettre, les tâches libres rattachées à aucun workflow et les comptes rendus de session studio à rédiger.",
       "Le bouton « Voir le calendrier » ouvre le Calendrier.",
       "Un chiffre à côté de « Travail » dans la barre latérale compte ce qui vous attend.",
     ],
