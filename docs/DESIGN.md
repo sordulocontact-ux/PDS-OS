@@ -470,7 +470,7 @@ l'activation des notifications du navigateur), PO prépare et vous décidez. Rem
 
 Refonte du 27/10/2026, d'après `docs/VISION-UX.md` § 2 (les cinq questions) :
 
-- `PageHeader` (« Voir le calendrier » en contour à droite), puis **« Maintenant »** : le cadre de
+- `PageHeader` (« Ajouter une tâche » en contour à droite, qui ouvre la modale d'une tâche de « Mes tâches » ; « Voir le calendrier » retiré le 09/11/2026, le Calendrier reste dans la barre), puis **« Maintenant »** : le cadre de
   `NowCard` (`NowFrame`), l'action la plus pressée — « À vous » (+ « En retard », « À valider »),
   « Projet · Module › Étape · avant le Sam. 05/12/2026 », l'action en titre, le pourquoi, une
   ligne « Validation : … · Ensuite : … », le bouton plein « Ouvrir » (le geste, `actionHref`).
@@ -487,6 +487,12 @@ Refonte du 27/10/2026, d'après `docs/VISION-UX.md` § 2 (les cinq questions) :
   En attente d'un autre), avec leur nombre et un chevron qui replie le groupe. Sur téléphone :
   Action (projet, module et lieu en dessous) et État ; sous 1024 px, le module repasse sous
   l'action. L'action de « Maintenant » n'y est jamais répétée.
+- **Mes tâches** (onglet à côté des actions, retour du 09/11/2026) : la **matrice d'Eisenhower par
+  défaut**, la liste en second. Chaque case est dessinée comme une liste de l'accueil (nom et nombre
+  en `caption` gris, sens en tertiaire, liste encadrée `--border-default`, rayon 12, filets), jamais
+  une carte dans une carte ni une pastille en guise de titre. Une ligne = case à cocher, intitulé
+  `body-md` medium, échéance et réunion d'origine en `caption`. Les actions des réunions arrivent
+  **sans validation** ; ajouter à la main est secondaire (bouton de l'en-tête, modale).
 
 ### Calendrier
 

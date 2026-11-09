@@ -56,7 +56,9 @@ export const dailyTopics: GuideTopic[] = [
       "Les autres actions sont dans un seul tableau, en groupes repliables : En retard, Cette semaine, Plus tard, Sans échéance, En attente d'un autre.",
       "Trois onglets : Tout, À faire, À valider.",
       "On y trouve aussi un projet à accepter, un projet à retransmettre, les tâches libres rattachées à aucun workflow et les comptes rendus de session studio à rédiger.",
-      "Le bouton « Voir le calendrier » ouvre le Calendrier.",
+      "Un second onglet, « Mes tâches », est la liste personnelle de chacun, visible de lui seul : en matrice (Faire, Planifier, Déléguer, Plus tard) par défaut, ou en liste.",
+      "Les actions relevées par PO dans les réunions y sont ajoutées directement, sans validation, à la personne qu'elles concernent.",
+      "Le bouton « Ajouter une tâche », en haut de la page, ouvre une fenêtre pour en écrire une : intitulé, échéance, importance.",
       "Un chiffre à côté de « Travail » dans la barre latérale compte ce qui vous attend.",
     ],
     faq: [
@@ -66,7 +68,7 @@ export const dailyTopics: GuideTopic[] = [
       },
       {
         q: "Puis-je ajouter une tâche à la main ?",
-        a: "Travail ne sert pas à écrire une liste à part. Les actions viennent des parcours des projets. Des tâches libres existent, créées depuis un compte rendu de call.",
+        a: "Oui, dans « Mes tâches » : le bouton « Ajouter une tâche » en haut de Travail. Les actions de vos réunions y arrivent déjà toutes seules.",
       },
     ],
   },

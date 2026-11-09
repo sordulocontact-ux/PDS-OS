@@ -4,6 +4,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { PageHeader } from "@/components/shell/page-header";
+import { AddTaskButton } from "@/components/work/add-task-button";
 import { TabBar } from "@/components/ui/tab-bar";
 import { work } from "@/lib/i18n/fr/work";
 import { cn } from "@/lib/utils";
@@ -20,19 +21,21 @@ const fr = { work };
  * The two sections of the Travail: what the projects ask, and « Mes
  * tâches », the person's own to-do list (retour du 31/10/2026). Both are
  * already on the page: a tab shows one at once, without a new request, and
- * the URL keeps it (shared, reloaded) like the tabs of the list below.
+ * the URL keeps it (shared, reloaded) like the tabs of the list below. At
+ * the head, « Ajouter une tâche » (retour du 09/11/2026, in place of « Voir
+ * le calendrier », in the sidebar anyway): once added, « Mes tâches » shows.
  */
 export function WorkSections({
   title,
   descriptions,
-  action,
+  today,
   initial,
   actions,
   tasks,
 }: {
   title: string;
   descriptions: Record<WorkSection, string>;
-  action: React.ReactNode;
+  today: string;
   initial: WorkSection;
   actions: React.ReactNode;
   tasks: React.ReactNode;
@@ -60,7 +63,7 @@ export function WorkSections({
       <PageHeader
         title={title}
         description={descriptions[section]}
-        action={action}
+        action={<AddTaskButton today={today} onAdded={() => select("tasks")} />}
       />
       <TabBar
         label={t.label}

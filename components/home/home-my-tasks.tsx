@@ -6,7 +6,7 @@ import {
 } from "@/components/home/home-list";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { MarkedText } from "@/components/ui/marked-text";
-import { QuadrantBadge } from "@/components/work/my-task-row";
+import { QuadrantBadge } from "@/components/work/quadrant-badge";
 import { routes } from "@/lib/auth/redirects";
 import { work } from "@/lib/i18n/fr/work";
 import { isOverdue } from "@/lib/insights/dates";
@@ -22,43 +22,29 @@ const MAX = 3;
 /**
  * « Vos tâches » on the home (lot 5 of the retour du 31/10/2026, « des
  * notifications aussi sur l'accueil »): the viewer's own urgent tasks, late
- * first, and how many actions of their meetings wait to be sorted. Each row
- * opens « Mes tâches ». Nothing when there is neither.
+ * first (their meetings' included, put in without asking). Each row opens
+ * « Mes tâches ». Nothing when there is none.
  */
 export function HomeMyTasks({
   tasks,
-  suggestions,
   today,
 }: {
   tasks: PersonalTask[];
-  suggestions: number;
   today: string;
 }) {
-  if (tasks.length === 0 && suggestions === 0) return null;
+  if (tasks.length === 0) return null;
   const t = fr.work.tasks;
   const href = routes.workTasks;
   return (
     <HomeSection
       title={t.home.title}
-      count={tasks.length || undefined}
+      count={tasks.length}
       action={{ label: t.home.all, href }}
     >
-      {suggestions > 0 && (
-        <HomeRow href={href}>
-          <HomeRowText
-            main={
-              <span className="font-semibold">
-                {t.home.suggestions(suggestions)}
-              </span>
-            }
-            sub={t.home.suggestionsSub}
-          />
-        </HomeRow>
-      )}
       {tasks.slice(0, MAX).map((task) => {
         const late = task.dueDate !== null && isOverdue(task.dueDate, today);
         const when = task.dueDate
-          ? t.home.due(formatShortDay(task.dueDate, { bare: true }))
+          ? t.due(formatShortDay(task.dueDate, { bare: true }))
           : t.noDue;
         return (
           <HomeRow

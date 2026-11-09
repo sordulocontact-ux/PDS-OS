@@ -5,17 +5,11 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
 
 import { EmptyState } from "@/components/shell/empty-state";
-import { Button } from "@/components/ui/button";
-import { CheckboxField } from "@/components/ui/checkbox-field";
 import { Fold } from "@/components/ui/fold";
-import { Input } from "@/components/ui/input";
-import { Rows } from "@/components/ui/rows";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { toast } from "@/components/ui/toast";
 import { work } from "@/lib/i18n/fr/work";
-import type { CallSuggestion } from "@/lib/work/call-suggestions";
 import {
-  addPersonalTask,
   setPersonalTaskBox,
   setPersonalTaskDone,
 } from "@/lib/work/personal-task-actions";
@@ -23,40 +17,38 @@ import {
   BOX_FLAGS,
   byDoneAt,
   byDue,
-  quadrantOf,
   urgentByDate,
   type PersonalTask,
   type Quadrant,
 } from "@/lib/work/personal-tasks";
 
-import { CallSuggestions } from "./call-suggestions";
-import type { TaskEdit } from "./my-task-edit";
-import { QuadrantBadge, TaskRow } from "./my-task-row";
+import type { TaskEdit } from "./my-task-form";
+import { TaskList, TaskRow } from "./my-task-row";
 import { MyTasksMatrix } from "./my-tasks-matrix";
 
 const fr = { work };
 
-const TASKS_VIEWS = ["list", "matrix"] as const;
+// The matrix first, the list second (retour du 09/11/2026).
+const TASKS_VIEWS = ["matrix", "list"] as const;
 type TasksView = (typeof TASKS_VIEWS)[number];
-// In the URL beside ?section=taches, in French as the page's other params.
+// In the URL beside ?section=taches, in French as the page's other params;
+// only the list is said, the matrix being the default.
 const VIEW_PARAM = "affichage";
-const MATRIX_VALUE = "matrice";
+const LIST_VALUE = "liste";
 
 /**
- * « Mes tâches »: a field to write a task (its date, its importance and
- * urgency, if any), then the tasks still to do, as a list by due date or as
- * the Eisenhower matrix, each ticked in place and moved to another box; the
- * latest done folded below, to undo a tick.
+ * « Mes tâches »: the tasks still to do, as the Eisenhower matrix (first)
+ * or as a list by due date, each ticked in place and moved to another box;
+ * the latest done folded below, to undo a tick. Most are put in by PO from
+ * the meetings; « Ajouter une tâche » sits at the head of the page.
  */
 export function MyTasks({
   todo,
   done,
-  suggestions,
   today,
 }: {
   todo: PersonalTask[];
   done: PersonalTask[];
-  suggestions: CallSuggestion[];
   today: string;
 }) {
   const t = fr.work.tasks;
@@ -65,7 +57,7 @@ export function MyTasks({
   const pathname = usePathname();
   const [, startTransition] = useTransition();
   const [view, setView] = useState<TasksView>(
-    params.get(VIEW_PARAM) === MATRIX_VALUE ? "matrix" : "list",
+    params.get(VIEW_PARAM) === LIST_VALUE ? "list" : "matrix",
   );
   // Changes shown at once, before the server answers (a tick, a move).
   const [changed, setChanged] = useState<Record<string, Partial<PersonalTask>>>(
@@ -147,19 +139,13 @@ export function MyTasks({
     if (!next) return;
     setView(next);
     const url = new URLSearchParams(params.toString());
-    if (next === "matrix") url.set(VIEW_PARAM, MATRIX_VALUE);
+    if (next === "list") url.set(VIEW_PARAM, LIST_VALUE);
     else url.delete(VIEW_PARAM);
     window.history.replaceState(null, "", `${pathname}?${url.toString()}`);
   };
 
   return (
     <div className="flex flex-col gap-5">
-      <AddTask today={today} onAdded={() => router.refresh()} />
-      <CallSuggestions
-        suggestions={suggestions}
-        onAnswered={() => router.refresh()}
-      />
-
       {open.length === 0 && closed.length === 0 ? (
         <EmptyState
           icon={IconClipboardCheck}
@@ -185,10 +171,11 @@ export function MyTasks({
               onToggle={toggle}
               {...handlers}
             />
-          ) : open.length === 0 ? (
-            <p className="text-sm text-muted-foreground">{t.allDone}</p>
           ) : (
-            <Rows label={fr.work.tabs.tasks}>
+            <TaskList
+              label={fr.work.tabs.tasks}
+              empty={open.length === 0 ? t.allDone : undefined}
+            >
               {open.map((task) => (
                 <TaskRow
                   key={task.id}
@@ -198,14 +185,14 @@ export function MyTasks({
                   {...handlers}
                 />
               ))}
-            </Rows>
+            </TaskList>
           )}
         </>
       )}
 
       {closed.length > 0 && (
         <Fold summary={t.done(closed.length)}>
-          <Rows>
+          <TaskList label={t.done(closed.length)}>
             {closed.map((task) => (
               <TaskRow
                 key={task.id}
@@ -215,110 +202,9 @@ export function MyTasks({
                 {...handlers}
               />
             ))}
-          </Rows>
+          </TaskList>
         </Fold>
       )}
     </div>
-  );
-}
-
-function AddTask({ today, onAdded }: { today: string; onAdded: () => void }) {
-  const t = fr.work.tasks.add;
-  const [title, setTitle] = useState("");
-  const [due, setDue] = useState("");
-  const [important, setImportant] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
-
-  return (
-    <form
-      noValidate
-      aria-label={t.title}
-      className="flex flex-col gap-2"
-      onSubmit={(event) => {
-        event.preventDefault();
-        if (!title.trim()) {
-          setError(t.titleMissing);
-          document.getElementById("new-task-title")?.focus();
-          return;
-        }
-        startTransition(async () => {
-          const res = await addPersonalTask({
-            title,
-            dueDate: due || null,
-            important,
-          });
-          if (!res.ok) {
-            toast.error(fr.work.tasks.failed);
-            return;
-          }
-          setTitle("");
-          setDue("");
-          setImportant(false);
-          setError(null);
-          onAdded();
-          document.getElementById("new-task-title")?.focus();
-        });
-      }}
-    >
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
-        <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <Input
-            id="new-task-title"
-            name="title"
-            aria-label={t.title}
-            placeholder={t.titlePlaceholder}
-            maxLength={300}
-            autoComplete="off"
-            value={title}
-            aria-invalid={error ? true : undefined}
-            onChange={(event) => {
-              setTitle(event.target.value);
-              if (error) setError(null);
-            }}
-          />
-          {error && <p className="text-xs text-error">{error}</p>}
-        </div>
-        <Input
-          type="date"
-          name="due"
-          aria-label={t.due}
-          placeholder={t.due}
-          className="sm:w-44"
-          value={due}
-          onChange={(event) => setDue(event.target.value)}
-        />
-        <Button type="submit" disabled={pending}>
-          {t.submit}
-        </Button>
-      </div>
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-        <CheckboxField
-          label={t.important}
-          checked={important}
-          onChange={setImportant}
-        />
-        <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          {t.goesTo}
-          <QuadrantBadge
-            quadrant={quadrantOf(
-              {
-                id: "",
-                title,
-                dueDate: due || null,
-                important,
-                urgent: false,
-                projectId: null,
-                done: false,
-                doneAt: null,
-                source: null,
-              },
-              today,
-            )}
-          />
-        </span>
-      </div>
-      <p className="text-xs text-muted-foreground">{t.urgentHint}</p>
-    </form>
   );
 }

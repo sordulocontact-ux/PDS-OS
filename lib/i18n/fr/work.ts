@@ -104,7 +104,6 @@ export const work = {
     due: (day: string) => `avant le ${day}`,
     validator: "Validation",
     then: "Ensuite",
-    calendar: "Voir le calendrier",
     // Rows with no step behind them: the sentence the page says.
     why: {
       task: "Une tâche qui vous est confiée dans ce projet, en dehors des étapes de ses workflows.",
@@ -131,21 +130,34 @@ export const work = {
     tasks: "Mes tâches",
   },
 
-  // « Mes tâches »: private, written by the person for themselves.
+  // « Mes tâches »: private, put in by PO from the meetings or written by
+  // the person for themselves.
   tasks: {
     description:
-      "Vos tâches à vous, visibles de vous seul, la plus proche échéance d'abord.",
-    add: {
-      title: "Nouvelle tâche",
-      titlePlaceholder: "Ajouter une tâche…",
+      "Vos tâches à vous, visibles de vous seul : celles que PO relève dans vos réunions et celles que vous ajoutez.",
+    // « Ajouter une tâche » at the head of the page and « Modifier » of a
+    // task: one form, in a modal (retour du 09/11/2026).
+    form: {
+      open: "Ajouter une tâche",
+      addTitle: "Nouvelle tâche",
+      addDescription:
+        "Elle rejoint Mes tâches, rangée dans la matrice selon son importance et son échéance.",
+      editTitle: "Modifier la tâche",
+      editDescription: "Son intitulé, son échéance et son importance.",
+      name: "Tâche",
+      namePlaceholder: "Rappeler le distributeur",
+      nameMissing: "Écrivez la tâche.",
       due: "Échéance",
-      submit: "Ajouter",
-      titleMissing: "Écrivez la tâche.",
-      important: "Important",
+      dueHint:
+        "Facultative. Une tâche devient urgente 3 jours avant son échéance.",
+      importance: "Importance",
+      important: "Importante",
+      secondary: "Pas importante",
       goesTo: "Rangée dans",
-      // No « Urgent » box (simplified 08/11/2026): the date says it.
-      urgentHint:
-        "L'urgence vient de la date : une tâche devient urgente 3 jours avant son échéance.",
+      submit: "Ajouter la tâche",
+      save: "Enregistrer",
+      added: "Tâche ajoutée.",
+      edited: "Tâche modifiée.",
     },
     // The Eisenhower matrix (« comme l'app Matrix »).
     quadrants: {
@@ -166,42 +178,18 @@ export const work = {
         "Son échéance est dans 3 jours ou moins : la tâche reste urgente. Changez sa date pour la planifier.",
     },
     boxEmpty: "Aucune tâche ici.",
-    // Lot 5: on the home, the urgent ones and the suggestions to sort.
+    // Lot 5: on the home, the urgent ones.
     home: {
       title: "Vos tâches",
       all: "Voir mes tâches",
-      due: (day: string) => `Échéance ${day}`,
       more: (n: number) => `Et ${n} autre${n > 1 ? "s" : ""} dans Mes tâches`,
-      suggestions: (n: number) =>
-        n === 1
-          ? "1 action de vos réunions à trier"
-          : `${n} actions de vos réunions à trier`,
-      suggestionsSub: "Ajoutez-les à vos tâches ou ignorez-les.",
     },
-    // Lot 4: the next actions of the meetings, suggested to whom they fall.
+    due: (day: string) => `Échéance ${day}`,
+    // Put in by PO from a meeting's next actions (lot 4, without asking
+    // since the retour du 09/11/2026).
     fromCall: (title: string) => `Réunion « ${title} »`,
-    suggestions: {
-      title: "Suggérées par vos réunions",
-      hint: "Les actions relevées par l'IA dans vos réunions des 30 derniers jours, qui vous reviennent. Ajoutez celles à garder.",
-      add: "Ajouter",
-      dismiss: "Ignorer",
-      addLabel: (what: string) => `Ajouter « ${what} » à vos tâches`,
-      dismissLabel: (what: string) => `Ignorer « ${what} »`,
-      said: (quote: string) => `« ${quote} »`,
-      added: "Ajoutée à vos tâches.",
-      partial:
-        "Une partie des suggestions de vos réunions n'a pas pu être lue. Rechargez la page.",
-    },
-    edit: {
-      title: "Modifier la tâche",
-      description: "Son intitulé, son échéance et son importance.",
-      name: "Tâche",
-      due: "Échéance",
-      dueHint: "Facultative. 3 jours avant, la tâche devient urgente.",
-      important: "Important",
-      submit: "Enregistrer",
-      done: "Tâche modifiée.",
-    },
+    meetingsPartial:
+      "Les actions de vos dernières réunions n'ont pas toutes pu être ajoutées. Rechargez la page.",
     remove: {
       title: "Supprimer la tâche ?",
       body: (title: string) =>
@@ -220,7 +208,7 @@ export const work = {
     noDue: "Sans échéance",
     emptyTitle: "Aucune tâche",
     emptyBody:
-      "Notez ici ce que vous avez à faire : une tâche, et si besoin sa date.",
+      "PO y met les actions relevées dans vos réunions. Ajoutez les vôtres avec « Ajouter une tâche ».",
     allDone: "Tout est fait.",
     done: (count: number) =>
       count === 1 ? "1 tâche faite" : `${count} tâches faites`,

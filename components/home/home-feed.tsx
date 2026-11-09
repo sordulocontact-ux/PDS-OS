@@ -13,8 +13,8 @@ import { loadWelcome } from "@/lib/home/welcome";
 import { shell } from "@/lib/i18n/fr/shell";
 import { work } from "@/lib/i18n/fr/work";
 import { todayInParis } from "@/lib/insights/dates";
-import { loadMyCallSuggestions } from "@/lib/work/call-suggestions";
 import { loadMyJourneyWork } from "@/lib/work/journeys";
+import { addMyMeetingTasks } from "@/lib/work/meeting-tasks";
 import { homeTasksOf } from "@/lib/work/personal-tasks";
 import { loadMyPersonalTasks } from "@/lib/work/personal-tasks-queries";
 
@@ -25,15 +25,16 @@ const fr = { shell, work };
 // « Maintenant » (the Travail's lead), « Aussi à vous », « Ce que vous
 // attendez », « Vos projets »: all read from the projects' journeys and the
 // Travail's rows (lib/home/feed.ts), never from a list of their own. Between
-// them, « Vos tâches »: the urgent ones of « Mes tâches », the person's own.
+// them, « Vos tâches »: the urgent ones of « Mes tâches », the person's own
+// (with what their meetings put in).
 export async function HomeFeed({ access }: { access: Access }) {
   const t = fr.shell.home;
-  const [feed, journeys, welcome, personal, suggested] = await Promise.all([
+  const [feed, journeys, welcome, personal] = await Promise.all([
     loadHomeFeed(access),
     loadMyJourneyWork(),
     loadWelcome(access),
-    loadMyPersonalTasks(),
-    loadMyCallSuggestions(access),
+    // What the meetings ask first put in « Mes tâches », then read.
+    addMyMeetingTasks(access).then(() => loadMyPersonalTasks()),
   ]);
   const today = todayInParis();
   const { lead } = feed;
@@ -53,11 +54,7 @@ export async function HomeFeed({ access }: { access: Access }) {
         />
         <HomeAlso rows={feed.also} />
       </div>
-      <HomeMyTasks
-        tasks={homeTasksOf(personal.todo, today)}
-        suggestions={suggested.suggestions.length}
-        today={today}
-      />
+      <HomeMyTasks tasks={homeTasksOf(personal.todo, today)} today={today} />
       <HomeWaiting items={feed.waiting} />
       <HomeProjects
         projects={feed.projects}

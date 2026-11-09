@@ -1222,3 +1222,13 @@ export const demoStatusTone: Record<string, Tone> = {
   validated: "success",
   abandoned: "neutral",
 };
+
+/** A box of the Eisenhower matrix of « Mes tâches »: « Faire » presses,
+ * « Déléguer » waits for someone else, « Planifier » runs, « Plus tard » is
+ * set aside. */
+export const quadrantTone = {
+  do: "danger",
+  plan: "info",
+  delegate: "warning",
+  later: "neutral",
+} as const satisfies Record<string, Tone>;

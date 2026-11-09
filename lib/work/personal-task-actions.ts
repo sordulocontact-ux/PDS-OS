@@ -107,11 +107,27 @@ export async function updatePersonalTask(
   return error ? { ok: false } : { ok: true };
 }
 
-/** Gone for good: nothing builds on a personal task. */
+/**
+ * Gone from « Mes tâches »: nothing builds on a personal task. One that came
+ * from a meeting stays as a 'dismissed' row (never listed): without it, the
+ * meeting would put it back at the next read (addMyMeetingTasks).
+ */
 export async function deletePersonalTask(taskId: string): Promise<Result> {
   if (!z.uuid().safeParse(taskId).success) return { ok: false };
   await requireApproved();
   const supabase = await createClient();
+  const { data: dismissed, error: dismissError } = await supabase
+    .from("personal_tasks")
+    .update({ status: "dismissed", done_at: null })
+    .eq("id", taskId)
+    .or("source_call_id.not.is.null,source_report_item_id.not.is.null")
+    .select("id");
+  if (dismissError) console.error("deletePersonalTask:", dismissError.message);
+  if (dismissed && dismissed.length > 0) {
+    revalidatePath(routes.work);
+    return { ok: true };
+  }
+  // Written by the person, or its meeting no longer seen: deleted.
   const { error } = await supabase
     .from("personal_tasks")
     .delete()
@@ -119,49 +135,4 @@ export async function deletePersonalTask(taskId: string): Promise<Result> {
   if (error) console.error("deletePersonalTask:", error.message);
   revalidatePath(routes.work);
   return error ? { ok: false } : { ok: true };
-}
-
-/**
- * A meeting's suggestion answered: added as a task (its words, no date, not
- * important: the person sorts it after) or set aside. Either way a row, so
- * it is not suggested again. The item is read with the person's session:
- * one of a call they do not see is refused.
- */
-async function answerSuggestion(
-  itemId: string,
-  status: "todo" | "dismissed",
-): Promise<Result> {
-  if (!z.uuid().safeParse(itemId).success) return { ok: false };
-  const access = await requireApproved();
-  if (!access.organizationId) return { ok: false };
-  const supabase = await createClient();
-  const { data: item } = await supabase
-    .from("report_items")
-    .select(
-      "id, kind, what, report:call_reports!report_items_report_same_org(call_id)",
-    )
-    .eq("id", itemId)
-    .maybeSingle();
-  if (!item || item.kind !== "next_action" || !item.report)
-    return { ok: false };
-  const { error } = await supabase.from("personal_tasks").insert({
-    organization_id: access.organizationId,
-    title: item.what.trim().slice(0, 300),
-    status,
-    source_call_id: item.report.call_id,
-    source_report_item_id: item.id,
-  });
-  // Answered already (a double click, another tab): nothing more to do.
-  if (error && error.code !== "23505")
-    console.error("answerSuggestion:", error.message);
-  revalidatePath(routes.work);
-  return error && error.code !== "23505" ? { ok: false } : { ok: true };
-}
-
-export async function acceptCallSuggestion(itemId: string): Promise<Result> {
-  return answerSuggestion(itemId, "todo");
-}
-
-export async function dismissCallSuggestion(itemId: string): Promise<Result> {
-  return answerSuggestion(itemId, "dismissed");
 }
