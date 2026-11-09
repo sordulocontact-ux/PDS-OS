@@ -92,6 +92,7 @@ export function QuestionScreen({
   variant = "box",
   close,
   at,
+  why,
   children,
 }: {
   projectId: string;
@@ -113,6 +114,8 @@ export function QuestionScreen({
   close?: React.ReactNode;
   // Where the answer's confirmation is said (ResultLine).
   at?: string;
+  // Under the title, read with it (the parties: « 4 sur 6 à qualifier »).
+  why?: React.ReactNode;
   children?: React.ReactNode;
 }) {
   const t = fr.framingIntel.guide;
@@ -324,6 +327,7 @@ export function QuestionScreen({
     title: titleOf(question),
     variant,
     aside: close,
+    why,
   };
 
   if (yesNo && mode !== "na")

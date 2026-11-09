@@ -129,6 +129,7 @@ export default async function FramingDimensionsPage({
     assessment.conflicts.length === 0
       ? checked[0].dimension
       : null;
+  const partyBoard = legalPartyBoard(k);
   const lines = Object.fromEntries(
     Object.keys(QUESTIONS).map((key) => [key, linesOf(key, k)]),
   );
@@ -160,6 +161,7 @@ export default async function FramingDimensionsPage({
       ...requestsAt(openRequests, q.dimension, null),
     ];
     const at = place.variant === "box" ? questions.indexOf(q) : -1;
+    const board = q.key === "legal_parties" ? partyBoard : null;
     return (
       <>
         {asking.length > 0 && (
@@ -185,6 +187,11 @@ export default async function FramingDimensionsPage({
           variant={place.variant}
           close={place.close}
           at={place.at}
+          why={
+            board && board.lines.length > 0
+              ? ti.parties.toQualify(board.undecided, board.lines.length)
+              : undefined
+          }
           nav={
             at >= 0
               ? {
@@ -320,7 +327,7 @@ export default async function FramingDimensionsPage({
           line={line || null}
           keepOpen={keepOpen}
           editable={editableIn}
-          parties={{ board: legalPartyBoard(k), members: k.framing.members }}
+          parties={{ board: partyBoard, members: k.framing.members }}
           verify={checked.map((q) => q.key)}
           openFirst={asked || lineQ ? null : (checked[0]?.dimension ?? null)}
           lastDimension={lastDimension}

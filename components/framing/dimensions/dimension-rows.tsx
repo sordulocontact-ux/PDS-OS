@@ -191,7 +191,7 @@ export function DimensionRows({
                 return (
                   <Fragment key={q.key}>
                     {row}
-                    <div className="border-b border-[color:var(--border-hairline)] px-3.5 last:border-b-0">
+                    <div className="border-b border-[color:var(--border-hairline)] px-3.5 py-3.5 last:border-b-0">
                       <PartyLines
                         projectId={projectId}
                         board={parties.board}
