@@ -191,6 +191,25 @@ export const routes = {
   // asked in « Les 6 dimensions ».
   projectFramingQuestion: (id: string, _dimension: string, key: string) =>
     `/app/projects/${id}/framing/dimensions?q=${key}`,
+  // A line of « Les 6 dimensions » opened in place, under itself (Sacha
+  // 09/11/2026); `box`: the question PO's box keeps meanwhile. Without
+  // `key`: the line closed, the box unchanged, its dimension (`dimension`)
+  // left open.
+  projectFramingLine: (
+    id: string,
+    key: string | null,
+    box?: string | null,
+    dimension?: string | null,
+  ) => {
+    const query = [
+      key && `line=${key}`,
+      box && `q=${box}`,
+      dimension && `d=${dimension}`,
+    ]
+      .filter(Boolean)
+      .join("&");
+    return `/app/projects/${id}/framing/dimensions${query ? `?${query}` : ""}`;
+  },
   // The question after `key` that still needs someone, chosen by the server
   // when the page is asked for: never a render made before the last answers
   // (a prefetched page sent back to a question already answered, 01/11/2026).

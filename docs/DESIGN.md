@@ -202,7 +202,10 @@ pâle). Classes Tailwind `accent-selection`, `outline-ring`, `border-ring`. Il h
 `--selection-bg`). Ce n'est pas un ton d'état (§ 3) : le bleu `info` reste réservé à
 « en cours ». Les pastilles `FilterChip` (filtres qui se combinent) restent en encre pleine :
 un filtre actif n'est pas une sélection de formulaire. Un choix unique (`ChipChoice`) est un
-`SegmentedControl` gris (§ 4, « Onglets et filtres de liste »).
+`SegmentedControl` gris (§ 4, « Onglets et filtres de liste »). **Une ligne ouverte ou
+sélectionnée** (une ligne de liste ouverte sur place, la ligne dont l'objet est ouvert dans
+l'encadré de PO : `FactRow current`) est **gris clair** (`--surface-sunken`, comme la page ouverte
+de la navigation), jamais teintée de bleu (Sacha 09/11/2026) ; le bleu reste au contrôle coché.
 
 ## 3 ter. Teintes de catégorie
 

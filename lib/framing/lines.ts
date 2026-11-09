@@ -45,3 +45,12 @@ export function recommendedStart(
 ): "call" | "po" {
   return counts.missing + counts.to_confirm > counts.known ? "call" : "po";
 }
+
+/** Still to answer or to check: neither known, not applicable, nor put off. */
+export function isLineOpen(q: QuestionState): boolean {
+  return (
+    q.status !== "known" &&
+    q.answer?.kind !== "na" &&
+    q.answer?.kind !== "later"
+  );
+}

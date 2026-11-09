@@ -22,6 +22,9 @@ const t = fr.poQuestion;
  * the caller gives `nav` —, the question in 20 px, why it is asked and its
  * state badge, then the answer the caller renders (`children`: field,
  * « M'aider à définir », Confirmer / Modifier, PoReading…). Server-safe.
+ * `variant="inline"`: the same question opened in place, under its line of
+ * a list (Cadrage « Les 6 dimensions », Sacha 09/11/2026): no frame nor
+ * domain, the question in 18 px and `aside` (« Fermer ») on its right.
  */
 export function PoQuestion({
   eyebrow,
@@ -30,6 +33,8 @@ export function PoQuestion({
   title,
   why,
   state,
+  variant = "box",
+  aside,
   children,
 }: {
   eyebrow: string;
@@ -39,9 +44,37 @@ export function PoQuestion({
   title: string;
   why?: React.ReactNode;
   state?: { label: string; tone: Tone };
+  variant?: "box" | "inline";
+  // Inline: on the right of the question (« Fermer »).
+  aside?: React.ReactNode;
   children?: React.ReactNode;
 }) {
   const position = nav ?? rank;
+  if (variant === "inline")
+    return (
+      <section
+        aria-labelledby="po-question-inline-title"
+        className="flex min-w-0 flex-col gap-3.5 border-b border-[color:var(--border-hairline)] bg-[var(--surface-soft)] px-3.5 pt-3.5 pb-4 last:border-b-0"
+      >
+        <div className="flex items-start justify-between gap-3">
+          <TitleBlock>
+            <h4
+              id="po-question-inline-title"
+              className="text-body-lg font-medium tracking-[var(--type-display-tracking)] text-balance break-words"
+            >
+              {title}
+            </h4>
+            {why && (
+              <div className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
+                {why}
+              </div>
+            )}
+          </TitleBlock>
+          {aside}
+        </div>
+        {children}
+      </section>
+    );
   return (
     <section
       aria-labelledby="po-question-title"

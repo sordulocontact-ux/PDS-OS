@@ -45,6 +45,10 @@ export type WriteDone = {
   next?: ResultNext[];
   unlocked?: ResultUnlocked[];
   open?: ResultOpen;
+  // Where the gesture was made, when it is said there in one quiet line
+  // rather than by the step's banner (ResultLine: the answers of « Les 6
+  // dimensions », in the dimension or above PO's question, Sacha 09/11/2026).
+  at?: string;
 };
 
 export type WriteResult = WriteDone | { ok: false; error: string };

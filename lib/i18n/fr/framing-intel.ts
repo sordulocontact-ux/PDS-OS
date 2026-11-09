@@ -44,6 +44,23 @@ export const framingIntel = {
     `Question ${index} sur ${total}`,
   none: "Rien à signaler",
   notProvided: "Non renseigné",
+  // The questions answered « Oui / Non / Je ne sais pas encore » (proto
+  // « Les dimensions », Sacha 09/11/2026): « Non » records the question's
+  // « none », « Oui » opens what to fill, the last one a date.
+  yesNo: {
+    deadlines: { yes: "Oui, il y en a", no: "Non, aucune échéance imposée" },
+    calendar_constraints: {
+      yes: "Oui, il y en a",
+      no: "Non, aucune contrainte",
+    },
+    commitments: {
+      yes: "Oui, des dépenses sont engagées",
+      no: "Non, aucune dépense engagée",
+    },
+  } as Partial<Record<string, { yes: string; no: string }>>,
+  yesNoLegend: "Votre réponse",
+  notYet: "Je ne sais pas encore",
+  saveAnswer: "Enregistrer la réponse",
   questions: {
     objective: {
       label: "Résultat recherché",

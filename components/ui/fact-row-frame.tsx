@@ -75,9 +75,12 @@ export type FactRowProps = {
   href?: string | null;
   onClick?: () => void;
   hrefLabel?: string;
-  // The row whose item is open elsewhere on the page (the question in
-  // PO's box): tinted in the selection colour, `aria-current`.
+  // The row whose item is open (under it, or in PO's box): light grey, as
+  // the open page in the navigation, `aria-current` (Sacha 09/11/2026:
+  // « pas bleu, gris clair comme partout »).
   current?: boolean;
+  // `href` opens without moving the page (a line opened in place).
+  keepScroll?: boolean;
 };
 
 /** The source line under the value (« Modifié par … » once changed). */
@@ -133,6 +136,7 @@ export function FactRowFrame({
   onClick,
   hrefLabel,
   current,
+  keepScroll,
   sourceNode,
   hoverAction,
   buttonRef,
@@ -215,7 +219,7 @@ export function FactRowFrame({
     frame,
     "outline-none [transition:var(--transition-control)] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[color:var(--focus-ring)]",
     current
-      ? "bg-[var(--selection-bg)]"
+      ? "bg-[var(--surface-sunken)]"
       : "hover:bg-[var(--control-bg-hover)]",
   );
   if (onClick)
@@ -231,7 +235,12 @@ export function FactRowFrame({
       </button>
     );
   return href ? (
-    <ViewLink href={href} className={actionFrame}>
+    <ViewLink
+      href={href}
+      scroll={keepScroll ? false : undefined}
+      aria-current={current || undefined}
+      className={actionFrame}
+    >
       {content}
     </ViewLink>
   ) : (

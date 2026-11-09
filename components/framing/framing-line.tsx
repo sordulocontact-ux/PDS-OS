@@ -1,29 +1,60 @@
 import type { ReactNode } from "react";
 
-import { FactRow } from "@/components/ui/fact-row";
+import { FactRow, type FactSource } from "@/components/ui/fact-row";
+import { FactSourceText } from "@/components/ui/fact-row-frame";
 import type { QuestionState } from "@/lib/framing/assess";
 import { lineSourceOf, lineStateOf } from "@/lib/framing/lines";
 import { framingIntel } from "@/lib/i18n/fr/framing-intel";
 import { framingJourney } from "@/lib/i18n/fr/framing-journey";
 import { framingLineTone } from "@/lib/ui/state-tones";
+import { cn } from "@/lib/utils";
 
 const fr = { framingIntel, framingJourney };
 
 /**
- * One information of the Cadrage (proto `.irow`): « **Libellé** · valeur »
- * (« Pas encore connu » when nothing is), its source, its state pill, and
- * an action on the right.
- * `current`: the question asked above, said once there (« Question en
- * cours » here, never its value twice). `verify`: a proposal of PO checked
- * in the list, « À vérifier » (lib/framing/verify.ts). `href`: the whole
- * line opens it in the question box (Sacha 29/10/2026).
+ * A line's label and its value in two columns, the source under the value
+ * (proto « Les dimensions », Sacha 09/11/2026: « Libellé · valeur » glued
+ * together read as one sentence); the label above the value on a phone.
+ */
+export function LineColumns({
+  label,
+  value,
+  source,
+}: {
+  label: string;
+  value: ReactNode;
+  source?: FactSource | null;
+}) {
+  return (
+    <span className="grid gap-x-3 gap-y-0.5 md:grid-cols-[11rem_minmax(0,1fr)]">
+      <span className="text-caption text-[color:var(--text-secondary)] md:leading-[var(--type-body-sm-lh)]">
+        {label}
+      </span>
+      <span className="flex min-w-0 flex-col gap-0.5">
+        {value}
+        <FactSourceText source={source} />
+      </span>
+    </span>
+  );
+}
+
+/**
+ * One information of the Cadrage (proto `.irow`): its label and value
+ * (« Pas encore connu » when nothing is), its source, and on its right only
+ * what it still needs — « À vérifier » for a proposal of PO checked in the
+ * list (`verify`, lib/framing/verify.ts), « Répondre » for the one who
+ * answers (`mine`), else « À répondre »; nothing once it is done, « Plus
+ * tard » and « Non applicable » being said by its source (Sacha 09/11/2026). `href`: the whole line opens it in place, under
+ * itself, the page staying still; `open`: it is open, in light grey, and a
+ * click closes it.
  */
 export function FramingLine({
   question,
   lines,
   side,
-  current = false,
   verify = false,
+  mine = false,
+  open = false,
   href,
   hrefLabel,
 }: {
@@ -31,8 +62,10 @@ export function FramingLine({
   // The lines of a list question, in words.
   lines: string[];
   side?: ReactNode;
-  current?: boolean;
   verify?: boolean;
+  // The viewer answers it.
+  mine?: boolean;
+  open?: boolean;
   href?: string | null;
   hrefLabel?: string;
 }) {
@@ -44,35 +77,58 @@ export function FramingLine({
       : lines.length
         ? lines.join(" · ")
         : question.display;
+  // « Plus tard » and « Non applicable » say themselves in the source.
+  const says =
+    state === "missing"
+      ? mine
+        ? t.lineStates.answer
+        : t.lineStates.toAnswer
+      : null;
   return (
     <FactRow
       value={
-        <span>
-          <span className="font-semibold">
-            {fr.framingIntel.questions[question.key].label}
-          </span>
-          {" · "}
-          {current ? (
-            <span className="text-[color:var(--selection)]">
-              {t.currentQuestion}
-            </span>
-          ) : value ? (
-            <span className="whitespace-pre-line">{value}</span>
-          ) : (
-            <span className="text-caption text-muted-foreground">
-              {fr.framingJourney.start.notKnown}
-            </span>
-          )}
-        </span>
+        <LineColumns
+          label={fr.framingIntel.questions[question.key].label}
+          value={
+            value ? (
+              <span className="whitespace-pre-line">{value}</span>
+            ) : (
+              <span className="text-[color:var(--text-tertiary)]">
+                {fr.framingJourney.start.notKnown}
+              </span>
+            )
+          }
+          source={lineSourceOf(question)}
+        />
       }
-      source={current ? undefined : lineSourceOf(question)}
-      state={{
-        tone: framingLineTone[state],
-        label: verify ? t.states.to_verify : t.states[state],
-      }}
-      side={side}
+      state={
+        verify || state === "to_confirm"
+          ? { tone: framingLineTone.to_confirm, label: t.states.to_verify }
+          : null
+      }
+      side={
+        (says || side) && (
+          <>
+            {says && !open && (
+              <span
+                className={cn(
+                  "text-caption whitespace-nowrap",
+                  state === "missing" && mine
+                    ? "font-semibold text-[color:var(--selection)]"
+                    : "text-[color:var(--text-secondary)]",
+                )}
+              >
+                {says}
+              </span>
+            )}
+            {side}
+          </>
+        )
+      }
       href={href}
       hrefLabel={hrefLabel}
+      current={open}
+      keepScroll
     />
   );
 }

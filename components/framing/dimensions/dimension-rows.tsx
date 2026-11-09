@@ -1,42 +1,44 @@
 import { Fragment } from "react";
 
 import { ConfirmDimension } from "@/components/framing/dimensions/confirm-dimension";
-import { FramingLine } from "@/components/framing/framing-line";
+import { FramingLine, LineColumns } from "@/components/framing/framing-line";
 import { PartyLines } from "@/components/framing/intel/party-lines";
+import { ResultLine } from "@/components/shell/module/result-banner";
 import { DimensionItem, DimensionList } from "@/components/ui/dimension-list";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { routes } from "@/lib/auth/redirects";
-import type { FramingAssessment, QuestionState } from "@/lib/framing/assess";
+import type { FramingAssessment } from "@/lib/framing/assess";
 import type { Dimension } from "@/lib/framing/dimensions";
 import type { LegalPartyBoard } from "@/lib/framing/legal-parties";
+import { isLineOpen } from "@/lib/framing/lines";
 import { framingIntel } from "@/lib/i18n/fr/framing-intel";
 import { framingJourney } from "@/lib/i18n/fr/framing-journey";
-import { framingLineTone } from "@/lib/ui/state-tones";
 
 const fr = { framingIntel, framingJourney };
 
-const open = (q: QuestionState) =>
-  q.status !== "known" && q.answer?.kind !== "na" && q.answer?.kind !== "later";
-
 /**
- * The six dimensions under the question (proto « Suite du Cadrage », Sacha
- * 29/10/2026): one row each in a single frame (`DimensionList`), folded but
- * the dimension of the question asked above and the first one with
- * proposals to check. Open, one line per information (value, source,
- * state); the question asked above says « Question en cours » instead of
- * its value. While the step is the viewer's, PO's proposals read « À
- * vérifier » and are confirmed together under their dimension
- * (« Confirmer les n »); every line opens in the question box with a click
- * on it, no « Modifier » beside it (a correction reopens only its
- * dimensions). For the others, « n à traiter » or « Complète ». The legal
- * parties are listed one per line under their line, qualified there while
- * the dimension is open (Sacha 28/10/2026).
+ * The six dimensions under PO's question (proto « Les dimensions », Sacha
+ * 09/11/2026), under « Avancement »: one card each (`DimensionList`), folded
+ * but the one of the question asked above, of the line opened, and the
+ * first one with proposals to check. A dimension says where it stands in
+ * grey words (« 2 à vérifier · 1 à répondre », « Complète »), a dot when
+ * something there is the viewer's. Open, one line per information (label
+ * and value in two columns, source, only what it still needs on its right).
+ * While the step is the viewer's, PO's proposals read « À vérifier » and are
+ * confirmed together under their dimension (« Confirmer les n »); a click
+ * on a line opens it in place, under itself (`line`), the page staying
+ * still, PO's box keeping its question (`box`); its confirmation is said in
+ * the dimension (ResultLine). For the others, « n à traiter » or
+ * « Complète ». The legal parties are listed one per line under their
+ * line, qualified there while the dimension is open (Sacha 28/10/2026).
  */
 export function DimensionRows({
   projectId,
   assessment,
   lines,
-  current,
+  box,
+  line,
+  keepOpen,
   editable,
   parties,
   header,
@@ -47,15 +49,19 @@ export function DimensionRows({
   projectId: string;
   assessment: FramingAssessment;
   lines: Record<string, string[]>;
-  // The question asked above, if any.
-  current: string | null;
+  // The question in PO's box above, if any.
+  box: string | null;
+  // The line opened in place, and its question (QuestionScreen inline).
+  line: { key: string; node: React.ReactNode } | null;
+  // Left open after a gesture made in it (`?d=`).
+  keepOpen: string | null;
   // Who may answer, dimension by dimension (a correction reopens only some).
   editable: (dimension: string) => boolean;
   parties: {
     board: LegalPartyBoard;
     members: Array<{ personId: string; name: string }>;
   };
-  // « Les 6 dimensions » and the dictation beside it (the page's).
+  // « Avancement » and the dictation beside it (the page's).
   header: React.ReactNode;
   // PO's proposals checked here rather than asked (lib/framing/verify.ts).
   verify: string[];
@@ -74,96 +80,117 @@ export function DimensionRows({
           ? d.questions.filter((q) => verify.includes(q.key))
           : [];
         const left = d.questions.filter(
-          (q) => open(q) && !checked.includes(q),
+          (q) => isLineOpen(q) && !checked.includes(q),
         ).length;
-        const asked = d.questions.some((q) => q.key === current);
+        const has = (key: string | null) =>
+          d.questions.some((q) => q.key === key);
+        const at = `dimension-${d.dimension}`;
+        const state =
+          [
+            checked.length > 0 && t.toVerify(checked.length),
+            left > 0 && (mine ? t.toAnswer(left) : t.toTreat(left)),
+          ]
+            .filter(Boolean)
+            .join(" · ") || t.complete;
         return (
           <DimensionItem
             key={d.dimension}
-            id={`dimension-${d.dimension}`}
+            id={at}
             name={ti.dimensions[d.dimension]}
-            open={asked || d.dimension === openFirst}
+            open={
+              has(box) ||
+              has(line?.key ?? null) ||
+              d.dimension === keepOpen ||
+              d.dimension === openFirst
+            }
             mark={checked.length > 0 ? "current" : left > 0 ? "todo" : "done"}
-            badges={[
-              checked.length > 0 && {
-                tone: "info",
-                label: t.toVerify(checked.length),
-              },
-              left > 0 && {
-                tone: mine ? "warning" : "info",
-                label: mine ? t.questions(left) : t.toTreat(left),
-              },
-              checked.length === 0 &&
-                left === 0 && { tone: "success", label: t.complete },
-            ]}
+            state={{
+              label: state,
+              mine: mine && (checked.length > 0 || left > 0),
+            }}
             footer={
-              checked.length > 0 && (
-                <ConfirmDimension
-                  projectId={projectId}
-                  dimension={d.dimension}
-                  name={ti.dimensions[d.dimension]}
-                  count={checked.length}
-                  briefHref={
-                    lastDimension === d.dimension
-                      ? routes.projectFramingStep(projectId, "brief")
-                      : null
-                  }
+              <>
+                <ResultLine
+                  at={at}
+                  className="border-t border-[color:var(--border-hairline)] px-3.5 py-3"
                 />
-              )
+                {checked.length > 0 && (
+                  <ConfirmDimension
+                    projectId={projectId}
+                    dimension={d.dimension}
+                    name={ti.dimensions[d.dimension]}
+                    count={checked.length}
+                    at={at}
+                    briefHref={
+                      lastDimension === d.dimension
+                        ? routes.projectFramingStep(projectId, "brief")
+                        : null
+                    }
+                  />
+                )}
+              </>
             }
           >
             <FactRows className="rounded-none border-0">
               {d.facts.map((fact) => (
                 <FactRow
                   key={fact.label}
-                  value={
-                    <span>
-                      <span className="font-semibold">{fact.label}</span>
-                      {" · "}
-                      {fact.value}
-                    </span>
-                  }
-                  state={{
-                    tone: framingLineTone.known,
-                    label: t.states.known,
-                  }}
+                  value={<LineColumns label={fact.label} value={fact.value} />}
                 />
               ))}
               {d.questions.map((q) => {
+                const opened = line?.key === q.key;
                 // The parties, one per line under their line (not while the
-                // question itself is asked above, with the same list).
+                // line is open, its question bringing the same list).
                 const partyList =
                   q.key === "legal_parties" &&
-                  q.key !== current &&
+                  !opened &&
                   parties.board.lines.length > 0;
-                const opens = mine && q.key !== current && !partyList;
-                const line = (
+                const opens = mine && !partyList;
+                const row = (
                   <FramingLine
                     key={q.key}
                     question={q}
-                    current={q.key === current}
                     verify={checked.includes(q)}
+                    mine={mine}
+                    open={opened}
                     lines={
                       partyList
                         ? [ti.parties.count(parties.board.lines.length)]
                         : (lines[q.key] ?? [])
                     }
                     href={
-                      opens
-                        ? routes.projectFramingQuestion(
-                            projectId,
-                            d.dimension,
-                            q.key,
-                          )
-                        : null
+                      !opens
+                        ? null
+                        : opened
+                          ? routes.projectFramingLine(
+                              projectId,
+                              null,
+                              box,
+                              d.dimension,
+                            )
+                          : routes.projectFramingLine(
+                              projectId,
+                              q.key,
+                              box === q.key ? null : box,
+                            )
                     }
-                    hrefLabel={t.open(ti.questions[q.key].label)}
+                    hrefLabel={
+                      opened ? t.close : t.open(ti.questions[q.key].label)
+                    }
                   />
                 );
-                if (!partyList) return line;
+                if (opened)
+                  return (
+                    <Fragment key={q.key}>
+                      {row}
+                      {line?.node}
+                    </Fragment>
+                  );
+                if (!partyList) return row;
                 return (
                   <Fragment key={q.key}>
-                    {line}
+                    {row}
                     <div className="border-b border-[color:var(--border-hairline)] px-3.5 last:border-b-0">
                       <PartyLines
                         projectId={projectId}

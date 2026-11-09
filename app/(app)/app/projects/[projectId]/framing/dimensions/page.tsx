@@ -3,11 +3,14 @@ import { IconLock } from "nucleo-sharp-essential";
 
 import { FramingDictation } from "@/components/framing/framing-dictation";
 import { FramingStepFrame } from "@/components/framing/framing-step-frame";
+import { CloseLine } from "@/components/framing/dimensions/close-line";
 import { ContextReread } from "@/components/framing/dimensions/context-reread";
 import { DimensionRows } from "@/components/framing/dimensions/dimension-rows";
 import { FramingReturn } from "@/components/framing/dimensions/framing-return";
 import { QuestionLines } from "@/components/framing/dimensions/question-lines";
 import { QuestionScreen } from "@/components/framing/intel/question-screen";
+import { ResultLine } from "@/components/shell/module/result-banner";
+import { DimensionListTitle } from "@/components/ui/dimension-list";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
 import { editableDimensions } from "@/lib/framing/analyse";
@@ -24,6 +27,7 @@ import {
 import type { HelpSuggestion } from "@/lib/framing/help";
 import { framingJourneyContext } from "@/lib/framing/journey-context";
 import { contextUnread } from "@/lib/framing/knowledge";
+import { isLineOpen } from "@/lib/framing/lines";
 import { fr } from "@/lib/i18n/fr";
 import { formatDay } from "@/lib/utils/day";
 
@@ -32,12 +36,14 @@ const first = (value: string | string[] | undefined) =>
 
 /**
  * Cadrage › Les 6 dimensions (proto « Suite du Cadrage », Sacha 29/10/2026;
- * ticket § 4 and § 6): for the one who answers, PO's one question — only
- * what nobody can confirm at a glance, the arrows walking those — or the
- * line opened from the list (?q=); then the six dimensions, where PO's
- * proposals are checked and confirmed a dimension at a time
- * (lib/framing/verify.ts), the dictation beside them. How many are left is
- * said once, in the step's « À vous » line.
+ * ticket § 4 and § 6; proto « Les dimensions », Sacha 09/11/2026): for the
+ * one who answers, PO's one question — only what nobody can confirm at a
+ * glance, the arrows walking those (`?q=`) —, then « Avancement » and what
+ * is left, the six dimensions, where PO's proposals are checked and
+ * confirmed a dimension at a time (lib/framing/verify.ts), the dictation
+ * beside them. A line clicked opens in place, under itself (`?line=`), the
+ * box keeping its question; each answer is said in one quiet line where it
+ * was given (ResultLine).
  * Frozen while the direction reads the Brief; a correction reopens only
  * the dimensions it names (framing_dimension_editable).
  */
@@ -79,6 +85,13 @@ export default async function FramingDimensionsPage({
   const questions = reachable.filter((q) => !verified.has(q.key));
   const asked = first(sp.q);
   const after = first(sp.after);
+  const keepOpen = first(sp.d) ?? null;
+  // The line opened in place: never in the box at the same time.
+  const lineKey = first(sp.line);
+  const lineQ =
+    (isQuestionKey(lineKey) && reachable.find((q) => q.key === lineKey)) ||
+    null;
+  const forBox = (q: QuestionState) => needsSomeone(q) && q !== lineQ;
   // The questions after `key`, in order, the first ones last.
   const following = (key: string) => {
     const from = questions.findIndex((q) => q.key === key);
@@ -90,12 +103,13 @@ export default async function FramingDimensionsPage({
   // `?after=` (an answer just given): the next question is chosen now, from
   // what the project holds at this request (projectFramingAfter).
   const question: QuestionState | null =
-    (isQuestionKey(asked) && reachable.find((q) => q.key === asked)) ||
+    (isQuestionKey(asked) &&
+      asked !== lineQ?.key &&
+      reachable.find((q) => q.key === asked)) ||
     (isQuestionKey(after)
-      ? following(after).find(needsSomeone)
-      : questions.find(needsSomeone)) ||
+      ? following(after).find(forBox)
+      : questions.find(forBox)) ||
     null;
-  const at = question ? questions.indexOf(question) : -1;
   const hrefOf = (q: QuestionState | undefined) =>
     q ? routes.projectFramingQuestion(projectId, q.dimension, q.key) : null;
   // After a gesture: the next question, or the list while proposals are
@@ -119,27 +133,34 @@ export default async function FramingDimensionsPage({
     Object.keys(QUESTIONS).map((key) => [key, linesOf(key, k)]),
   );
 
-  let box: React.ReactNode = null;
-  if (question) {
+  // PO's question, in the box or opened in place under its line.
+  const screen = (
+    q: QuestionState,
+    place: {
+      variant: "box" | "inline";
+      at: string;
+      nextHref: string;
+      close?: React.ReactNode;
+    },
+  ) => {
     // A list question brings its lines; a single value opens its field.
-    const kind = QUESTIONS[question.key].kind;
+    const kind = QUESTIONS[q.key].kind;
     const hasLines =
-      question.key === "commitments" ||
+      q.key === "commitments" ||
       !(kind === "text" || kind === "date" || kind === "money");
     const suggestionsRow = k.framing.briefRows.find(
-      (r) =>
-        r.field_key === `${question.key}_suggestions` &&
-        r.status === "proposed",
+      (r) => r.field_key === `${q.key}_suggestions` && r.status === "proposed",
     );
     const suggestions = ((
       suggestionsRow?.value as { items?: HelpSuggestion[] } | null
     )?.items ?? []) as HelpSuggestion[];
     const timingSaid = k.framing.fields.find((f) => f.key === "timing")?.value;
     const asking = [
-      ...requestsAt(openRequests, question.dimension, question.key),
-      ...requestsAt(openRequests, question.dimension, null),
+      ...requestsAt(openRequests, q.dimension, q.key),
+      ...requestsAt(openRequests, q.dimension, null),
     ];
-    box = (
+    const at = place.variant === "box" ? questions.indexOf(q) : -1;
+    return (
       <>
         {asking.length > 0 && (
           <ToneCallout tone="warning">
@@ -156,11 +177,14 @@ export default async function FramingDimensionsPage({
           </ToneCallout>
         )}
         <QuestionScreen
-          key={`${question.key}-${question.status}-${question.display ?? ""}`}
+          key={`${place.variant}-${q.key}-${q.status}-${q.display ?? ""}`}
           projectId={projectId}
-          question={question}
-          eyebrow={ti.dimensions[question.dimension]}
+          question={q}
+          eyebrow={ti.dimensions[q.dimension]}
           artist={ctx.project.artistName}
+          variant={place.variant}
+          close={place.close}
+          at={place.at}
           nav={
             at >= 0
               ? {
@@ -172,16 +196,16 @@ export default async function FramingDimensionsPage({
               : undefined
           }
           editable
-          nextHref={nextHref(question)}
+          nextHref={place.nextHref}
           suggestions={suggestions}
           itemPresets={[
             ...ti.itemPresets,
             ...Object.values(fr.framing.needs.presets),
           ]}
           hint={
-            question.key === "target_date" && timingSaid
+            q.key === "target_date" && timingSaid
               ? ti.sources.timingSaid(timingSaid)
-              : question.key === "deadlines" && ctx.project.dueDate
+              : q.key === "deadlines" && ctx.project.dueDate
                 ? ti.sources.releaseReminder(formatDay(ctx.project.dueDate))
                 : null
           }
@@ -189,14 +213,28 @@ export default async function FramingDimensionsPage({
           {hasLines && (
             <QuestionLines
               projectId={projectId}
-              question={question}
+              question={q}
               k={k}
               editable
-              nextHref={nextHref(question)}
+              nextHref={place.nextHref}
             />
           )}
         </QuestionScreen>
       </>
+    );
+  };
+
+  let box: React.ReactNode = null;
+  if (question) {
+    box = (
+      <div className="flex flex-col gap-2">
+        <ResultLine at="question" />
+        {screen(question, {
+          variant: "box",
+          at: "question",
+          nextHref: nextHref(question),
+        })}
+      </div>
     );
   } else if (!frozen && assessment.ready)
     box = (
@@ -207,10 +245,47 @@ export default async function FramingDimensionsPage({
       </ToneCallout>
     );
 
+  // Closing the line (« Fermer », Échap, an answer given): the box keeps
+  // its question, the line's dimension stays open; after the last thing
+  // left, the Brief.
+  const line = lineQ && {
+    key: lineQ.key,
+    node: (() => {
+      const closeHref = routes.projectFramingLine(
+        projectId,
+        null,
+        question?.key ?? null,
+        lineQ.dimension,
+      );
+      const left =
+        questions.some((q) => q !== lineQ && needsSomeone(q)) ||
+        checked.some((x) => x !== lineQ);
+      return screen(lineQ, {
+        variant: "inline",
+        at: `dimension-${lineQ.dimension}`,
+        nextHref: left
+          ? closeHref
+          : routes.projectFramingStep(projectId, "brief"),
+        close: <CloseLine href={closeHref} />,
+      });
+    })(),
+  };
+
+  // What is done and left in the whole step, on the right of the title.
+  const all = assessment.dimensions.flatMap((d) => d.questions);
+  const toAnswer = all.filter(
+    (q) => isLineOpen(q) && !verified.has(q.key),
+  ).length;
   const heading = (
-    <h3 id="dimension-rows" className="text-body-lg font-semibold">
-      {t.listTitle}
-    </h3>
+    <DimensionListTitle
+      id="dimension-rows"
+      title={t.listTitle}
+      counter={t.counter(
+        all.length - checked.length - toAnswer,
+        checked.length,
+        toAnswer,
+      )}
+    />
   );
 
   return (
@@ -241,11 +316,13 @@ export default async function FramingDimensionsPage({
           projectId={projectId}
           assessment={assessment}
           lines={lines}
-          current={question?.key ?? null}
+          box={question?.key ?? null}
+          line={line || null}
+          keepOpen={keepOpen}
           editable={editableIn}
           parties={{ board: legalPartyBoard(k), members: k.framing.members }}
           verify={checked.map((q) => q.key)}
-          openFirst={asked ? null : (checked[0]?.dimension ?? null)}
+          openFirst={asked || lineQ ? null : (checked[0]?.dimension ?? null)}
           lastDimension={lastDimension}
           header={
             canEdit && working && !correction ? (

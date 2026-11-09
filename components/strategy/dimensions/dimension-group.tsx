@@ -12,7 +12,6 @@ import { InfoRow, Rows } from "@/components/ui/rows";
 import { decisions } from "@/lib/i18n/fr/decisions";
 import { strategyDimensions } from "@/lib/i18n/fr/strategy-dimensions";
 import type { DimensionView } from "@/lib/strategy/dimension-model";
-import { strategyDimensionTone } from "@/lib/ui/state-tones";
 
 const fr = { decisions, strategyDimensions };
 
@@ -183,16 +182,19 @@ export function DimensionGroup({
             ? "todo"
             : "current"
       }
-      // One pill: what to do first (« n à confirmer »), else the state
-      // (Sacha 07/11/2026, as the Cadrage).
-      badges={[
-        view.toConfirm > 0
-          ? { tone: "info", label: t.toConfirm(view.toConfirm) }
-          : {
-              tone: strategyDimensionTone[view.state],
-              label: t.states[view.state],
-            },
-      ]}
+      // In grey words, as the Cadrage (« 2 à confirmer · à arbitrer »,
+      // « Complète »), a dot when the owner has something to do there
+      // (Sacha 09/11/2026).
+      state={{
+        label:
+          [
+            view.toConfirm > 0 && t.toConfirm(view.toConfirm),
+            view.state !== "complete" && t.stateWords[view.state],
+          ]
+            .filter(Boolean)
+            .join(" · ") || t.stateWords.complete,
+        mine: canEdit && (view.toConfirm > 0 || view.state !== "complete"),
+      }}
       footer={
         <>
           {/* The Dispositif confirms right under PO's proposals, before

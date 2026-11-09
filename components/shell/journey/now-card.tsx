@@ -51,9 +51,11 @@ export type NowCardProps = {
  * logic for every module and the overview: « À vous » (the action, its why,
  * « Ouvrir l'étape »), « Aussi à vous » when the step shown is already the
  * viewer's, « À vous, ailleurs » when only another module waits for them,
- * else « Rien à faire pour vous » and who is expected; blockers to lift, the
- * due date in the eyebrow. It disappears when the only action of the viewer
- * is the step shown. Computed by code for the person looking.
+ * else « Rien à faire pour vous » and who is expected, quiet, without a
+ * title nor a « Voir » to the step already shown (proto « Les dimensions »,
+ * Sacha 09/11/2026); blockers to lift, the due date in the eyebrow. It
+ * disappears when the only action of the viewer is the step shown.
+ * Computed by code for the person looking.
  */
 export function NowCard({
   steps,
@@ -94,6 +96,24 @@ export function NowCard({
   ];
   if (overview && also && mine.length === 0 && blockers.length === 0)
     return null;
+  const texts = labels ?? {
+    waitingTitle: t.waitingTitle,
+    finished: t.finished,
+  };
+  // Nothing for the viewer here: who is expected, in a quiet card.
+  if (!overview && mine.length === 0 && blockers.length === 0)
+    return (
+      <NowFrame label={t.label} quiet>
+        <span className="text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-secondary)]">
+          {[t.nothing, viewerName].filter(Boolean).join(" · ")}
+        </span>
+        {waiting.length > 0 ? (
+          <WaitingRows items={waiting.slice(0, 3)} shownKey={shownKey} />
+        ) : (
+          <p className="font-medium">{texts.finished}</p>
+        )}
+      </NowFrame>
+    );
   const [first, ...more] = mine;
   const badge = first
     ? {
@@ -103,10 +123,6 @@ export function NowCard({
     : blockers.length > 0
       ? { tone: "danger" as const, label: t.blocker }
       : { tone: "neutral" as const, label: t.nothing };
-  const texts = labels ?? {
-    waitingTitle: t.waitingTitle,
-    finished: t.finished,
-  };
   const eyebrow = first
     ? [
         viewerName,
@@ -224,16 +240,22 @@ function ElsewhereLine({
  * shadow (Sacha, 30/10/2026): NowCard in a module, the lead of the Travail. */
 export function NowFrame({
   label,
+  quiet = false,
   children,
 }: {
   label: string;
+  // Nothing for the viewer: tighter, no title.
+  quiet?: boolean;
   children: React.ReactNode;
 }) {
   return (
     <section
       aria-label={label}
       data-now-card
-      className="flex flex-col gap-3.5 rounded-2xl border border-[color:var(--border-hairline)] bg-card p-5"
+      className={cn(
+        "flex flex-col rounded-2xl border border-[color:var(--border-hairline)] bg-card",
+        quiet ? "gap-2.5 px-4 py-3.5" : "gap-3.5 p-5",
+      )}
     >
       {children}
     </section>

@@ -131,7 +131,8 @@ export function ContractTableRow({
   const frame = cn(
     line,
     "w-full border-b border-[color:var(--border-hairline)] px-3.5 py-2.75 text-left text-body-sm last:border-b-0",
-    open && "bg-[var(--selection-bg)]",
+    // Open: light grey, never blue (docs/DESIGN.md § 3 bis, 09/11/2026).
+    open && "bg-[var(--surface-sunken)]",
   );
   if (!onClick) return <div className={frame}>{content}</div>;
   return (

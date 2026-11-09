@@ -13,13 +13,19 @@ const fr = { framingIntel, framingJourney };
 const t = fr.framingJourney;
 
 /**
- * After an answer in « Les 6 dimensions » (lot 3 of Ibé's feedback): the
- * banner says what was just recorded (« Réponse confirmée · Date cible »)
- * above the next question, without a toast — a Cadrage has dozens of
- * answers. After the last one, the Brief de cadrage, the same person's next
- * step, opens by itself with the banner and the toast.
+ * After an answer in « Les 6 dimensions » (lot 3 of Ibé's feedback): one
+ * quiet line says what was just recorded (« Réponse confirmée · Date
+ * cible ») where it was answered (`at`: above PO's question, or in the
+ * dimension of a line opened in place, which closes without moving the page:
+ * `keepScroll`), without a toast — a Cadrage has dozens of answers. After the
+ * last one, the Brief de cadrage, the same person's next step, opens by
+ * itself with the banner and the toast.
  */
-export function useNextQuestion(nextHref: string, key: QuestionKey) {
+export function useNextQuestion(
+  nextHref: string,
+  key: QuestionKey,
+  { at, keepScroll = false }: { at?: string; keepScroll?: boolean } = {},
+) {
   const router = useRouter();
   const pathname = usePathname();
   const publish = usePublishResult();
@@ -30,16 +36,18 @@ export function useNextQuestion(nextHref: string, key: QuestionKey) {
       const result = {
         ok: true as const,
         done: t.dimensions.answered(done, fr.framingIntel.questions[key].label),
-        ...(leaving && {
-          open: {
-            href: nextHref,
-            step: `${t.module} › ${t.steps.brief.title}`,
-          },
-        }),
+        ...(leaving
+          ? {
+              open: {
+                href: nextHref,
+                step: `${t.module} › ${t.steps.brief.title}`,
+              },
+            }
+          : at && { at }),
       };
       publish(result, undefined, { toast: leaving });
-      if (!leaving) router.push(nextHref);
+      if (!leaving) router.push(nextHref, { scroll: !keepScroll });
     },
-    [nextHref, key, pathname, publish, router],
+    [nextHref, key, at, keepScroll, pathname, publish, router],
   );
 }

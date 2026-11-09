@@ -22,6 +22,13 @@ export const strategyDimensions = {
     to_decide: "À arbitrer",
     complete: "Complété",
   },
+  // Where a dimension stands, after « n à confirmer » (the Cadrage's words).
+  stateWords: {
+    to_complete: "à compléter",
+    in_progress: "en cours",
+    to_decide: "à arbitrer",
+    complete: "Complète",
+  },
   add: {
     positioning: "Ajouter une réponse",
     audiences: "Ajouter un public",
@@ -75,8 +82,9 @@ export const strategyDimensions = {
     confirmedAll: (n: number, dimension: string) =>
       `${plural(n, "proposition retenue", "propositions retenues")} · ${dimension}`,
   },
-  // The dimensions as the Cadrage's (DimensionList, Sacha 06/11/2026).
-  listTitle: "Les 8 dimensions",
+  // The dimensions as the Cadrage's (DimensionList, Sacha 06/11/2026),
+  // under PO's question: never the step's name twice (Sacha 09/11/2026).
+  listTitle: "Avancement",
   // The Dispositif's two parts.
   leverHeads: {
     proposed: "Proposé par PO",
@@ -88,8 +96,6 @@ export const strategyDimensions = {
     n > 1
       ? "Tout est juste ? Confirmez-les ensemble, ou modifiez ou écartez une ligne d'abord."
       : "C'est juste ? Confirmez-la, ou modifiez-la ou écartez-la d'abord.",
-  // After « PO » in bold (the step's description already says what to do).
-  po: "a rangé ce qui a été dit pendant l'échange, avec la phrase exacte : rien n'entre dans la Stratégie sans vous.",
   counter: (complete: number, toDecide: number, toComplete: number) =>
     `${complete} ${complete > 1 ? "complétées" : "complétée"} · ${toDecide} à arbitrer · ${toComplete} à compléter`,
   frozenCallout: "La Stratégie est figée pendant sa validation.",

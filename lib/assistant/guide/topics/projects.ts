@@ -103,6 +103,7 @@ export const projectsTopics: GuideTopic[] = [
       "Le Cadrage a quatre étapes : Démarrer le cadrage, Les 6 dimensions, Brief de cadrage, Plan du projet.",
       "On démarre soit directement avec PO, soit en préparant un échange (un call) dont le compte rendu nourrit le cadrage.",
       "Les 6 dimensions regroupent ce que le projet sait déjà, ce que PO a compris de l'échange et ce qui manque. PO ne pose de questions que sur ce qui manque, une à la fois.",
+      "Sous la question de PO, « Avancement » liste les 6 dimensions : un clic sur une ligne l'ouvre sur place, juste en dessous, pour y répondre ou la corriger ; « Fermer » ou Échap la referme.",
       "Le Brief de cadrage rassemble les 6 dimensions dans un document versionné, avec leurs sources.",
       "La direction valide le Brief. Une demande de modification ne rouvre que les dimensions concernées.",
       "Le Plan du projet, dernière étape, lance ensuite les autres workflows.",

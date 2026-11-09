@@ -13,6 +13,7 @@ import {
 } from "@/components/framing/intel/answer-states";
 import { MeasureAnswer } from "@/components/framing/intel/measure-answer";
 import { ItemsAnswer } from "@/components/framing/intel/structured-answer";
+import { YesNoAnswer } from "@/components/framing/intel/yes-no-answer";
 import { useNextQuestion } from "@/components/framing/dimensions/use-next-question";
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { ChoiceCards } from "@/components/ui/choice-cards";
@@ -72,7 +73,10 @@ function placeholderOf(q: QuestionState, artist: string): string {
  * (« Non applicable », « Rien à signaler », « Passer »…), folded under
  * « Autre réponse » (Sacha 29/10/2026). In the box every question of PO
  * uses (PoQuestion, shared with the Cadrage juridique), with the arrows to
- * the question before and after (`nav`).
+ * the question before and after (`nav`) — or opened in place under its line
+ * (`variant="inline"`, `close`: « Fermer »), its confirmation said there
+ * (`at`). A question with a yes-or-no form (« Des dépenses sont-elles déjà
+ * engagées ? ») is answered by its answers (YesNoAnswer, Sacha 09/11/2026).
  */
 export function QuestionScreen({
   projectId,
@@ -85,6 +89,9 @@ export function QuestionScreen({
   hint,
   itemPresets = [],
   artist = "",
+  variant = "box",
+  close,
+  at,
   children,
 }: {
   projectId: string;
@@ -100,6 +107,12 @@ export function QuestionScreen({
   itemPresets?: string[];
   // The project's artist, named in the answer's example (retour d'Ibé 05/11).
   artist?: string;
+  // In the box above the list, or opened in place under its line.
+  variant?: "box" | "inline";
+  // Inline: « Fermer », on the right of the question.
+  close?: React.ReactNode;
+  // Where the answer's confirmation is said (ResultLine).
+  at?: string;
   children?: React.ReactNode;
 }) {
   const t = fr.framingIntel.guide;
@@ -116,7 +129,15 @@ export function QuestionScreen({
   // is (« M'aider à définir » proposes, a person decides; PROJ-UX-04).
   const [picked, setPicked] = useState<string | null>(null);
   const [more, setMore] = useState(false);
-  const goNext = useNextQuestion(nextHref, question.key);
+  const goNext = useNextQuestion(nextHref, question.key, {
+    at,
+    keepScroll: variant === "inline",
+  });
+  // « Oui / Non / Je ne sais pas encore » while nothing is known.
+  const yesNo =
+    editable && question.status === "missing"
+      ? fr.framingIntel.yesNo[question.key]
+      : undefined;
   const g = fr.framingJourney.dimensions.gesture;
   // After a gesture: its confirmation, then the next question (or the
   // Brief de cadrage after the last one).
@@ -164,17 +185,19 @@ export function QuestionScreen({
           >
             {fr.framingIntel.answerStates.naAction}
           </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            disabled={busy}
-            onClick={() => setMode("later")}
-          >
-            {fr.framingIntel.answerStates.laterAction}
-          </Button>
+          {!yesNo && (
+            <Button
+              size="sm"
+              variant="ghost"
+              disabled={busy}
+              onClick={() => setMode("later")}
+            >
+              {fr.framingIntel.answerStates.laterAction}
+            </Button>
+          )}
         </>
       )}
-      {question.status === "missing" && def.allowNone && (
+      {question.status === "missing" && def.allowNone && !yesNo && (
         <Button
           size="sm"
           variant="ghost"
@@ -277,8 +300,65 @@ export function QuestionScreen({
       ? provenance.quote
       : null;
 
+  // « Autre réponse »: the common answers, folded (Sacha 29/10/2026).
+  const others = secondary && (
+    <div className="flex flex-wrap gap-1">
+      {more ? (
+        secondary
+      ) : (
+        <Button
+          size="sm"
+          variant="ghost"
+          aria-expanded={false}
+          className="text-[color:var(--text-secondary)]"
+          onClick={() => setMore(true)}
+        >
+          {t.otherAnswer}
+        </Button>
+      )}
+    </div>
+  );
+  const frame = {
+    eyebrow,
+    nav: variant === "box" ? nav : undefined,
+    title: titleOf(question),
+    variant,
+    aside: close,
+  };
+
+  if (yesNo && mode !== "na")
+    return (
+      <PoQuestion {...frame}>
+        {hint && (
+          <p className="text-caption text-[color:var(--text-secondary)]">
+            {hint}
+          </p>
+        )}
+        <YesNoAnswer
+          projectId={projectId}
+          questionKey={question.key}
+          labels={yesNo}
+          onDone={goNext}
+          yes={
+            isField ? (
+              <AnswerForm
+                projectId={projectId}
+                question={question}
+                picked={null}
+                artist={artist}
+                onDone={next(g.saved)}
+              />
+            ) : (
+              children
+            )
+          }
+        />
+        {others}
+      </PoQuestion>
+    );
+
   return (
-    <PoQuestion eyebrow={eyebrow} nav={nav} title={titleOf(question)}>
+    <PoQuestion {...frame}>
       {isField && question.display && mode === "view" && (
         <div className="flex flex-col gap-1">
           <p className="text-body-md font-semibold break-words whitespace-pre-line">
@@ -397,23 +477,7 @@ export function QuestionScreen({
       )}
 
       {children}
-      {(mode === "view" || missingWrite) && secondary && (
-        <div className="flex flex-wrap gap-1">
-          {more ? (
-            secondary
-          ) : (
-            <Button
-              size="sm"
-              variant="ghost"
-              aria-expanded={false}
-              className="text-[color:var(--text-secondary)]"
-              onClick={() => setMore(true)}
-            >
-              {t.otherAnswer}
-            </Button>
-          )}
-        </div>
-      )}
+      {(mode === "view" || missingWrite) && others}
     </PoQuestion>
   );
 }

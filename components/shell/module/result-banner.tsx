@@ -13,6 +13,7 @@ import {
 import { toast } from "@/components/ui/toast";
 
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { moduleFrame } from "@/lib/i18n/fr/module-frame";
 import { lowerFirst } from "@/lib/ui/journey";
 import type { WriteDone } from "@/lib/utils/write-result";
@@ -86,10 +87,11 @@ export function usePublishResult() {
   );
 }
 
-/** The banner of the step's last gesture, if any (StepPanel's `flash`). */
+/** The banner of the step's last gesture, if any (StepPanel's `flash`);
+ * never one said where it was made (`at`, ResultLine). */
 export function ResultBanner() {
   const ctx = use(StepResult);
-  if (!ctx?.result?.done) return null;
+  if (!ctx?.result?.done || ctx.result.at) return null;
   return (
     <ResultBannerView result={ctx.result} onClose={() => ctx.show(null)} />
   );
@@ -156,5 +158,45 @@ export function ResultBannerView({
         <IconXmark aria-hidden />
       </Button>
     </div>
+  );
+}
+
+// How long a quiet result stays (proto « Les dimensions »): read, then gone.
+const LINE_MS = 8000;
+
+/**
+ * « ✓ Réponse enregistrée · Contraintes calendaires », in one quiet line
+ * where the gesture was made (`at`, given by the gesture's result): a
+ * Cadrage has dozens of answers, the step's green banner for each was noise
+ * (Akili's feedback, proto « Les dimensions », Sacha 09/11/2026). Gone after
+ * 8 s, or at the next gesture.
+ */
+export function ResultLine({
+  at,
+  className,
+}: {
+  at: string;
+  className?: string;
+}) {
+  const ctx = use(StepResult);
+  const result = ctx?.result?.at === at ? ctx.result : null;
+  const show = ctx?.show;
+  useEffect(() => {
+    if (!result || !show) return;
+    const timer = setTimeout(() => show(null), LINE_MS);
+    return () => clearTimeout(timer);
+  }, [result, show]);
+  if (!result?.done) return null;
+  return (
+    <p
+      role="status"
+      className={cn(
+        "flex items-center gap-2 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] font-semibold text-[color:var(--tone-success-fg)]",
+        className,
+      )}
+    >
+      <IconCheck aria-hidden className="size-4 shrink-0" />
+      {result.done}
+    </p>
   );
 }

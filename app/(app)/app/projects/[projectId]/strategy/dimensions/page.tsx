@@ -7,7 +7,10 @@ import { DimensionWork } from "@/components/strategy/dimension-work";
 import { DimensionGroup } from "@/components/strategy/dimensions/dimension-group";
 import { StrategyDictation } from "@/components/strategy/strategy-dictation";
 import { StrategyDraftButton } from "@/components/strategy/strategy-draft-button";
-import { DimensionList } from "@/components/ui/dimension-list";
+import {
+  DimensionList,
+  DimensionListTitle,
+} from "@/components/ui/dimension-list";
 import { UpstreamBlock } from "@/components/strategy/dimensions/upstream-block";
 import { StrategyStepFrame } from "@/components/strategy/journey/strategy-step-frame";
 import { StrategyQuestionBox } from "@/components/strategy/questions/strategy-question-box";
@@ -23,9 +26,11 @@ import { upstreamChains } from "@/lib/strategy/upstream";
 /**
  * Stratégie › Les 8 dimensions (proto BODY_MK.st2, ticket § 2 to 7), on the
  * Cadrage's frame (DimensionList, Sacha 06/11/2026): the exchange it comes
- * from, PO's box while proposals wait, PO's one question (a written point
- * nothing answers, a lever to arbitrate, StrategyQuestionBox), the title with « n complétées · n à
- * arbitrer · n à compléter » and the dictation beside it, then each
+ * from, PO's one question (a written point nothing answers, a lever to
+ * arbitrate, StrategyQuestionBox), « Avancement » with « n complétées · n à
+ * arbitrer · n à compléter » on its right and the dictation beside it (no
+ * PO callout, the step's description says it; proto « Les dimensions »,
+ * Sacha 09/11/2026), then each
  * dimension folded — one open — its proposals confirmed together
  * (« Confirmer les n »), each correctable or set aside, the ticket's detail
  * under its title, and « Ajouter … ».
@@ -94,17 +99,7 @@ export default async function StrategyDimensionsPage({
   );
 
   return (
-    <StrategyStepFrame
-      projectId={projectId}
-      stepKey="dimensions"
-      po={
-        model.pending > 0 ? (
-          <ToneCallout tone="info" as="div">
-            <strong className="font-semibold">PO</strong> {t.po}
-          </ToneCallout>
-        ) : undefined
-      }
-    >
+    <StrategyStepFrame projectId={projectId} stepKey="dimensions">
       <EditAccessProvider canEdit={canEdit}>
         <div className="flex flex-col gap-4">
           {frozen && (
@@ -148,19 +143,15 @@ export default async function StrategyDimensionsPage({
                 projectId={projectId}
                 actions={<StrategyDraftButton projectId={projectId} />}
               >
-                <h3
+                <DimensionListTitle
                   id="strategy-dimensions"
-                  className="text-body-lg font-semibold"
-                >
-                  {t.listTitle}
-                </h3>
-                <p className="text-caption text-[color:var(--text-secondary)]">
-                  {t.counter(
+                  title={t.listTitle}
+                  counter={t.counter(
                     count("complete"),
                     count("to_decide"),
                     count("to_complete"),
                   )}
-                </p>
+                />
               </StrategyDictation>
             }
           >

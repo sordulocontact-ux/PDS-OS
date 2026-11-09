@@ -200,7 +200,8 @@ valent partout, dans l'app comme dans les protos.
    doit agir ensuite** ; le toast reprend le même verbe que le bouton (« Confirmer » →
    « confirmée ») ; l'Activité l'horodate. On ne laisse jamais la personne devant une page qui ne
    bouge plus. **Le bandeau s'affiche là où on a cliqué**, dans l'étape, juste au-dessus du geste,
-   jamais seulement en haut de page où on ne le voit pas. Pendant le geste, le bouton dit qu'il
+   jamais seulement en haut de page où on ne le voit pas (un geste répété des dizaines de fois, les
+   réponses des dimensions, se dit en une ligne discrète à sa place : règle 21, 09/11). Pendant le geste, le bouton dit qu'il
    travaille (« Envoi en validation… »). Si la suite revient à la même personne sur une autre étape,
    elle **s'ouvre toute seule** avec le bandeau (« Étape ouverte pour vous : … ») ; sinon le bandeau
    et l'étape disent **qui on attend** et sur quoi (« En attente de Lina Haddad : valider le Brief
@@ -332,6 +333,19 @@ valent partout, dans l'app comme dans les protos.
     ce qui manque ; ce qu'il a compris se lit « À vérifier » dans sa dimension, rien de coché d'avance,
     et se confirme **une dimension à la fois** (« Confirmer les n », après lecture) ; une ligne se
     corrige d'un clic dessus. Les parties juridiques et les contradictions restent une par une.
+    **Une ligne cliquée s'ouvre sur place, sous elle-même** *(Sacha 09/11, proto « Les dimensions »,
+    remplace « chaque ligne s'ouvre dans l'encadré de question » du 29/10)* : la page ne bouge pas,
+    l'encadré de PO garde sa question (jamais la même question à deux endroits), plus de « Question
+    en cours » ; « Fermer » ou Échap la referme, la ligne ouverte est en **gris clair** comme la page
+    ouverte de la navigation, jamais en bleu. Sous la question, la liste s'appelle « Avancement »
+    (le nom de l'étape n'est jamais dit deux fois), avec ce qui est fait et reste à droite ; une
+    dimension dit où elle en est en mots gris (un point bleu quand c'est au lecteur), une ligne
+    n'affiche à droite que ce qui lui manque (« À vérifier », « Répondre »), rien une fois faite ;
+    libellé et valeur en deux colonnes. Chaque réponse se dit **en une ligne discrète là où elle a été
+    donnée** (« ✓ Réponse enregistrée · Contraintes calendaires », 8 s), pas par le bandeau vert : un
+    Cadrage compte des dizaines de réponses. Une question qui se répond par oui ou non (« Des
+    dépenses sont-elles déjà engagées ? ») propose ses vraies réponses (« Oui… » ouvre ce qu'il faut
+    remplir, « Non… », « Je ne sais pas encore » + date), pas « M'aider à définir / Écrire moi-même ».
 22. **Pas d'onglets sous les chevrons.** Une information notée (appel, WhatsApp, e-mail) s'affiche
     dans l'étape qu'elle concerne, avec « Noter une information » à côté de « Signaler un blocage » ;
     la liste complète s'ouvre dans la modale depuis la pastille « n informations à confirmer ». Les

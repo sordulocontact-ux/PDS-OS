@@ -143,6 +143,18 @@ export const framingJourney = {
     toConfirm: "À vérifier",
     toTreat: (n: number) => `${n} à traiter`,
     toVerify: (n: number) => `${n} à vérifier`,
+    toAnswer: (n: number) => `${n} à répondre`,
+    // On the right of « Avancement », for the whole step.
+    counter: (done: number, verify: number, answer: number) =>
+      [
+        `${done} ${done > 1 ? "faites" : "faite"}`,
+        verify ? `${verify} à vérifier` : "",
+        answer ? `${answer} à répondre` : "",
+      ]
+        .filter(Boolean)
+        .join(" · "),
+    // A line opened in place (Sacha 09/11/2026).
+    close: "Fermer",
     questions: (n: number) => plural(n, "question", "questions"),
     // Under a dimension's proposals (Sacha 29/10/2026).
     confirmAll: (n: number) => (n > 1 ? `Confirmer les ${n}` : "Confirmer"),
@@ -154,8 +166,7 @@ export const framingJourney = {
       `${plural(n, "information confirmée", "informations confirmées")} · ${dimension}`,
     open: (label: string) => `Ouvrir : ${label}`,
     complete: "Complète",
-    currentQuestion: "Question en cours",
-    listTitle: "Les 6 dimensions",
+    listTitle: "Avancement",
     // PO's reading of the initial context failed at the start.
     contextUnread:
       "PO n'a pas encore lu le contexte initial : ses propositions n'apparaissent pas.",
@@ -176,6 +187,13 @@ export const framingJourney = {
     },
     frozen: (name: string) =>
       `Le cadrage est figé pendant la relecture du Brief par ${name}.`,
+    // What a line still needs, in words on its right (only an exception
+    // shows: nothing once done, Sacha 09/11/2026); « Répondre » for the one
+    // who answers.
+    lineStates: {
+      answer: "Répondre",
+      toAnswer: "À répondre",
+    },
     states: {
       // Plain states (Ibé, 02/11/2026): to do, to check, done.
       known: "Fait",
