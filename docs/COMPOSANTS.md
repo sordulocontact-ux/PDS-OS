@@ -14,7 +14,7 @@ texte `--text-*` · bordures `--border-*`, `--hairline-*` · tons d'état `--ton
 contrôles `--control-*` · erreur de saisie `--error` (le seul rouge : champ manquant, message d'erreur ; `--destructive` reste à l'encre) · typo `--type-*`, `--fw-*`, `--font-*` · espacement `--space-*`,
 `--stack-*`, `--section-*`, `--page-*` · densité `--density-*` · rayons `--radius-*` ·
 élévation `--elevation-*`, `--shadow-*` · mouvement `--duration-*`, `--delay-*`, `--ease-*`,
-`--transition-*` · coquille `--nav-*`, `--shell-inset` · jauges `--meter-*` · calendrier `--calendar-*`. **Thème sombre** : bloc `:root.dark` qui redéfinit ces tokens (jamais la palette, jamais un composant), `--border-hover` = contour au survol (`docs/DESIGN.md` § 3 quater).
+`--transition-*` · coquille `--nav-*`, `--shell-inset` · barre de défilement `--scrollbar-size`, `--scrollbar-thumb`, `--scrollbar-thumb-hover` (place toujours réservée, DESIGN.md § 4) · jauges `--meter-*` · calendrier `--calendar-*`. **Thème sombre** : bloc `:root.dark` qui redéfinit ces tokens (jamais la palette, jamais un composant), `--border-hover` = contour au survol (`docs/DESIGN.md` § 3 quater).
 
 ## Composants
 

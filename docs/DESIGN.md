@@ -398,6 +398,16 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   toujours visible au-dessus du bouton de dépliage ; « Travail » porte le nombre de mes actions
   du projet ouvert (`CountBadge size="sm"` 16 px au coin de l'icône).
 
+### Barre de défilement
+
+- **La nôtre, jamais celle du système** (retour du 09/11/2026), partout : page, barre latérale,
+  modales, menus. Piste transparente, pouce en pilule de 6 px dans une largeur de 12 px
+  (`--scrollbar-size`), couleur `--scrollbar-thumb` (= `--border-hover`), `--scrollbar-thumb-hover`
+  (= `--text-tertiary`) au survol ; le thème sombre suit par ces tokens. `app/globals.css`, bloc base.
+- **Sa place est toujours réservée** (`scrollbar-gutter: stable` sur `html`) : une page qui devient
+  plus haute que l'écran (passer d'« Actions des projets » à « Mes tâches », ouvrir un pli) ne saute
+  plus de côté, ni à l'ouverture d'une modale.
+
 ### Écran d'entrée
 
 Une seule fois par onglet, en arrivant sur `/`, `/login`, `/signup` ou `/app…` ; jamais sur
