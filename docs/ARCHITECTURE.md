@@ -1700,7 +1700,9 @@ liste), est obligatoire ou non, accepte ou non « Rien à signaler » (`{"none":
   « Existant » exige un contrat **signé** de Contrats dont la personne est partie (SQL),
   « Non nécessaire » / « Non applicable » une raison ; le code n'indique un statut que sur
   preuve (« Contrat trouvé dans Contrats »), jamais d'après le rôle ; un rôle non attribué
-  n'est pas une partie. La question est « connue » quand toutes les parties sont qualifiées,
+  n'est pas une partie. Qualifiées **dans la liste, un clic par partie** (Sacha 10/11/2026, proto
+  « Qualifier les parties » : une fenêtre par personne était pénible ; `PartyChoice`).
+  La question est « connue » quand toutes les parties sont qualifiées,
   jamais confirmée en bloc. **Contrats et droits à prévoir** n'est plus proposé par le code
   (fini « Un accord avec chaque partie ») : il garde les autres besoins (autorisations…).
   Le Juridique lit ces qualifications : drapeaux de l'État des lieux, et pas de « Faire

@@ -362,9 +362,18 @@ export const framingIntel = {
   parties: {
     undecided: "À qualifier",
     count: (n: number) => plural(n, "partie", "parties"),
-    qualify: "Qualifier",
-    edit: "Modifier",
-    clear: "Retirer la qualification",
+    // Qualified in the list, one click each (Sacha 10/11/2026).
+    toQualify: (left: number, total: number) =>
+      left
+        ? `${left} sur ${total} à qualifier`
+        : `${plural(total, "partie qualifiée", "parties qualifiées")}`,
+    statusFor: (name: string) => `Document avec ${name}`,
+    qualified: (status: string) => `Qualifié · ${status}`,
+    saveReason: "Enregistrer",
+    addDetails: "Préciser la relation et le suivi",
+    editDetails: "Modifier la relation et le suivi",
+    closeDetails: "Fermer",
+    detailsSaved: "Relation et suivi enregistrés",
     found: (origins: string) => `Trouvé dans : ${origins}`,
     suggestion: (status: string, contract: string) =>
       `Contrat trouvé dans Contrats : « ${contract} ». Statut possible : ${status}.`,
@@ -376,20 +385,10 @@ export const framingIntel = {
     none: "Aucune partie dans les crédits, l'équipe ou le Juridique.",
     relationLabel: "Relation avec PDS",
     relationNone: "Non précisée",
-    statusLabel: "Document",
-    statusRequired: "Choisissez le document qu'il faut avec cette partie.",
-    contractLabel: "Contrat qui le prouve",
-    contractNone: "Aucun contrat",
-    contractRequired:
-      "« Existant » demande le contrat signé qui le prouve : un accord de production n'est pas un contrat.",
-    noSignedContract:
-      "Aucun contrat signé de cette personne dans Contrats : « Existant » n'est pas possible.",
     ownerLabel: "Qui suit",
     ownerNone: "Personne",
     noteLabel: "Pourquoi",
     noteRequired: "Dites pourquoi aucun document n'est nécessaire.",
-    save: "Enregistrer la qualification",
-    title: (name: string) => `Qualifier ${name}`,
     contract: (title: string) => `Contrat : ${title}`,
     owner: (name: string) => `Suivi : ${name}`,
     relations: {

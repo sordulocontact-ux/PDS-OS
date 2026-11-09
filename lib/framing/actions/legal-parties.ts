@@ -86,20 +86,3 @@ export async function qualifyLegalParty(
       });
   return done(projectId, error);
 }
-
-/** Back to « À qualifier »: the decision is removed, the party stays listed. */
-export async function clearLegalParty(
-  projectId: string,
-  key: string,
-): Promise<ActionResult> {
-  if (!id.safeParse(projectId).success || !key.trim())
-    return fail("invalid_input");
-  await requireApproved();
-  const supabase = await createClient();
-  const { error } = await supabase
-    .from("framing_legal_parties")
-    .delete()
-    .eq("project_id", projectId)
-    .eq("party_key", key);
-  return done(projectId, error);
-}

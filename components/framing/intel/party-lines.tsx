@@ -1,19 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 
-import { PartyDialog } from "@/components/framing/intel/party-dialog";
-import { useFramingAction } from "@/components/framing/use-framing-action";
-import { Button, buttonVariants, ButtonRoll } from "@/components/ui/button";
+import { PartyChoice } from "@/components/framing/intel/party-choice";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { clearLegalParty } from "@/lib/framing/actions/legal-parties";
 import {
   partyDecisionText,
   type DocumentStatus,
   type LegalPartyBoard,
-  type LegalPartyLine,
 } from "@/lib/framing/legal-parties";
 import { framingIntel } from "@/lib/i18n/fr/framing-intel";
 import { partyStatusTone } from "@/lib/ui/state-tones";
@@ -27,9 +23,12 @@ const day = new Intl.DateTimeFormat("fr-FR", {
 
 /**
  * « Parties impliquées » (PROJ-BUG-03): every party the project's records
- * name, each qualified by a person — never by its role alone. A party not
- * qualified yet reads « À qualifier »; a contract found in Contrats is shown
- * as a lead, not applied. Roles nobody holds are named apart: no party.
+ * name, each qualified by a person — never by its role alone —, in its line
+ * with one click (PartyChoice, proto « Qualifier les parties », Sacha
+ * 10/11/2026: a window per person was tedious), « n sur N à qualifier » above.
+ * A party not qualified yet reads « À qualifier » for the others; a contract
+ * found in Contrats is shown as a lead, not applied. Roles nobody holds are
+ * named apart: no party.
  * Also in the card « 06 · Cadre juridique » once the question is answered,
  * one party per line, still qualified there while the dimension is open.
  */
@@ -51,14 +50,17 @@ export function PartyLines({
   nextHref?: string;
 }) {
   const t = fr.framingIntel.parties;
-  const { pending, run } = useFramingAction();
-  const [editing, setEditing] = useState<LegalPartyLine | null>(null);
   const nameOf = (personId: string) =>
     members.find((m) => m.personId === personId)?.name ?? null;
 
   return (
     <div className="flex flex-col gap-4">
       {legacy && <ToneCallout tone="neutral">{t.legacy(legacy)}</ToneCallout>}
+      {editable && board.lines.length > 0 && (
+        <p className="text-caption text-[color:var(--text-secondary)] tabular-nums">
+          {t.toQualify(board.undecided, board.lines.length)}
+        </p>
+      )}
       {board.lines.length === 0 ? (
         <p className="text-body-md text-muted-foreground">{t.none}</p>
       ) : (
@@ -78,12 +80,15 @@ export function PartyLines({
                       </span>
                     )}
                   </span>
-                  <StatusBadge
-                    tone={status ? partyStatusTone[status] : "warning"}
-                    size="sm"
-                  >
-                    {status ? t.statuses[status] : t.undecided}
-                  </StatusBadge>
+                  {/* The one who qualifies reads the state in the choice. */}
+                  {!editable && (
+                    <StatusBadge
+                      tone={status ? partyStatusTone[status] : "warning"}
+                      size="sm"
+                    >
+                      {status ? t.statuses[status] : t.undecided}
+                    </StatusBadge>
+                  )}
                 </span>
                 {d ? (
                   <span className="text-caption text-muted-foreground">
@@ -108,28 +113,11 @@ export function PartyLines({
                   </span>
                 )}
                 {editable && (
-                  <span className="flex flex-wrap gap-2 pt-1">
-                    <Button
-                      size="sm"
-                      variant={d ? "outline" : "default"}
-                      disabled={pending}
-                      onClick={() => setEditing(line)}
-                    >
-                      {d ? t.edit : t.qualify}
-                    </Button>
-                    {d && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        disabled={pending}
-                        onClick={() =>
-                          run(() => clearLegalParty(projectId, line.key))
-                        }
-                      >
-                        {t.clear}
-                      </Button>
-                    )}
-                  </span>
+                  <PartyChoice
+                    projectId={projectId}
+                    line={line}
+                    members={members}
+                  />
                 )}
               </li>
             );
@@ -148,14 +136,6 @@ export function PartyLines({
         >
           <ButtonRoll>{fr.framingIntel.guide.next}</ButtonRoll>
         </Link>
-      )}
-      {editing && (
-        <PartyDialog
-          projectId={projectId}
-          line={editing}
-          members={members}
-          onClose={() => setEditing(null)}
-        />
       )}
     </div>
   );
