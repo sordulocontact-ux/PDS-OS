@@ -76,6 +76,8 @@ export const conceptionIntents = {
   },
 
   merge: {
+    start: "Fusionner des propositions",
+    cancel: "Annuler",
     select: (n: number) =>
       n === 0
         ? "Cochez au moins deux propositions pour les fusionner."

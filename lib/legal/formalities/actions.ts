@@ -11,6 +11,7 @@ import {
   SACEM_725,
   SACEM_725_FIELDS,
 } from "@/lib/legal/formalities/definition";
+import type { Prefill } from "@/lib/legal/formalities/prefill";
 import { loadFormalities } from "@/lib/legal/formalities/queries";
 import { run } from "@/lib/legal/formalities/run";
 import { getProject } from "@/lib/projects/queries";
@@ -100,13 +101,47 @@ export async function openFormality(projectId: string, masterId: string) {
   );
 }
 
+type Values = Record<string, { value: unknown; typed: boolean }>;
+type Stored = Record<string, { value: unknown; source: string }>;
+
+// The values as written: a typed one checked against its schema; one left
+// as PDS OS proposed it read again from its source (`prefill`). `skipInvalid`:
+// a value caught half typed (« 33. ») waits for the next save instead of
+// refusing the whole dossier.
+function toWrite(
+  values: Values,
+  prefill: Prefill,
+  skipInvalid = false,
+): Stored | null {
+  const out: Stored = {};
+  for (const [key, entry] of Object.entries(values)) {
+    if (!KEYS.includes(key)) continue;
+    // A field left empty is not an answer: nothing to write (and a null
+    // creators or text would fail its schema and refuse the whole dossier).
+    if (entry.value === null || entry.value === undefined) continue;
+    if (!entry.typed) {
+      const sourced = prefill[key];
+      if (sourced) out[key] = sourced;
+      continue;
+    }
+    const schema = VALUE[key] ?? z.string().trim().max(2000);
+    const parsed = schema.safeParse(entry.value);
+    if (!parsed.success) {
+      if (skipInvalid) continue;
+      return null;
+    }
+    out[key] = { value: parsed.data, source: "Saisi" };
+  }
+  return out;
+}
+
 /** « Justine valide les valeurs » : a value typed is kept as typed; one
  * left as PDS OS proposed it is read again here from its source. */
 export async function saveFormalityValues(
   projectId: string,
   masterId: string,
   formalityId: string,
-  values: Record<string, { value: unknown; typed: boolean }>,
+  values: Values,
 ) {
   const p = z
     .object({ projectId: id, masterId: id, formalityId: id })
@@ -121,23 +156,9 @@ export async function saveFormalityValues(
   );
   if (!title) return { ok: false as const, error: fr.auth.errors.forbidden };
 
-  const out: Record<string, { value: unknown; source: string }> = {};
-  for (const [key, entry] of Object.entries(values)) {
-    if (!KEYS.includes(key)) continue;
-    // A field left empty is not an answer: nothing to write (and a null
-    // creators or text would fail its schema and refuse the whole dossier).
-    if (entry.value === null || entry.value === undefined) continue;
-    if (!entry.typed) {
-      const sourced = title.prefill[key];
-      if (sourced) out[key] = sourced;
-      continue;
-    }
-    const schema = VALUE[key] ?? z.string().trim().max(2000);
-    const parsed = schema.safeParse(entry.value);
-    if (!parsed.success)
-      return { ok: false as const, error: fr.legalFormalities.errors.failed };
-    out[key] = { value: parsed.data, source: "Saisi" };
-  }
+  const out = toWrite(values, title.prefill);
+  if (!out)
+    return { ok: false as const, error: fr.legalFormalities.errors.failed };
   return run(
     p.data.projectId,
     (s) =>
@@ -146,5 +167,32 @@ export async function saveFormalityValues(
         p_values: out as Json,
       }),
     fr.legalJourney.done.formality.valuesSaved,
+  );
+}
+
+/** The dossier saved as it is filled (Sacha, 10/11/2026): only what the
+ * person typed or confirmed, quietly — no banner, no step moved on. A value
+ * still as PDS OS proposed it waits for « Générer ». The SQL function checks
+ * the rights and the state itself. */
+export async function autosaveFormalityValues(
+  projectId: string,
+  formalityId: string,
+  values: Values,
+) {
+  const p = z
+    .object({ projectId: id, formalityId: id })
+    .safeParse({ projectId, formalityId });
+  if (!p.success)
+    return { ok: false as const, error: fr.auth.errors.forbidden };
+  const typed = Object.fromEntries(
+    Object.entries(values).filter(([, e]) => e.typed),
+  );
+  const out = toWrite(typed, {}, true) ?? {};
+  if (Object.keys(out).length === 0) return { ok: true as const };
+  return run(p.data.projectId, (s) =>
+    s.rpc("save_formality_values", {
+      p_formality_id: p.data.formalityId,
+      p_values: out as Json,
+    }),
   );
 }

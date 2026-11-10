@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 type CommonProps = {
   id?: string;
@@ -24,6 +25,8 @@ type CommonProps = {
   hideLabel?: boolean;
   // Shows the « * » after the label (docs/DESIGN.md § 4).
   required?: boolean;
+  // On the root column (a wider gap under the label in an inline form).
+  className?: string;
 };
 
 type SingleProps = CommonProps & {
@@ -57,6 +60,7 @@ export function OptionSelect(props: SingleProps | MultipleProps) {
     error,
     hideLabel = false,
     required = false,
+    className,
   } = props;
   const id = idProp ?? `${name}-select`;
   const describedBy = error ? `${id}-error` : hint ? `${id}-hint` : undefined;
@@ -69,7 +73,7 @@ export function OptionSelect(props: SingleProps | MultipleProps) {
   } as const;
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className={cn("flex flex-col gap-1.5", className)}>
       <Label
         htmlFor={id}
         required={required}

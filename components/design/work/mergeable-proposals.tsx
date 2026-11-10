@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 import { MergeDialog } from "@/components/design/work/merge-dialog";
 import {
@@ -9,6 +9,7 @@ import {
 } from "@/components/design/work/conception-proposal-row";
 import { SplitDialog } from "@/components/design/work/split-dialog";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ProposalRows } from "@/components/ui/proposal-group";
 import { conceptionIntents } from "@/lib/i18n/fr/conception-intents";
 
@@ -16,8 +17,10 @@ const fr = { conceptionIntents };
 
 /**
  * PO's proposals of one place, consolidated by the person (ticket § 4):
- * check two or more to merge them, split one into parts. Read-only for
- * those who do not write: the cards alone.
+ * « Fusionner des propositions » shows a check box on each, two or more
+ * checked are merged; split one into parts. The boxes only show while
+ * merging, so they are never read as the way to confirm (Sacha,
+ * 10/11/2026). Read-only for those who do not write: the cards alone.
  */
 export function MergeableProposals({
   projectId,
@@ -26,6 +29,7 @@ export function MergeableProposals({
   target,
   targets,
   attachTargets,
+  footer,
 }: {
   projectId: string;
   proposals: ProposalView[];
@@ -36,12 +40,21 @@ export function MergeableProposals({
   targets: Record<string, string>;
   // Proposals to attach: the card asks for the target first.
   attachTargets?: Record<string, string>;
+  // At the foot of the rows: « Confirmer les n » of the section, whose rows
+  // then only offer « Modifier » / « Écarter ».
+  footer?: ReactNode;
 }) {
   const t = fr.conceptionIntents.merge;
+  const [selecting, setSelecting] = useState(false);
   const [checked, setChecked] = useState<string[]>([]);
   const [merging, setMerging] = useState(false);
   const [splitting, setSplitting] = useState<ProposalView | null>(null);
   const selected = proposals.filter((p) => checked.includes(p.id));
+  const mergeable = canWrite && proposals.length > 1;
+  const stop = () => {
+    setSelecting(false);
+    setChecked([]);
+  };
   const toggle = (id: string) =>
     setChecked((all) =>
       all.includes(id) ? all.filter((x) => x !== id) : [...all, id],
@@ -49,19 +62,34 @@ export function MergeableProposals({
 
   return (
     <div className="flex flex-col gap-3">
-      {canWrite && proposals.length > 1 && (
+      {mergeable && !selecting && (
+        <Button
+          variant="outline"
+          size="sm"
+          className="self-start"
+          onClick={() => setSelecting(true)}
+        >
+          {t.start}
+        </Button>
+      )}
+      {mergeable && selecting && (
         <div className="flex flex-wrap items-center gap-3">
           <p className="text-caption text-muted-foreground tabular-nums">
             {t.select(selected.length)}
           </p>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={selected.length < 2}
-            onClick={() => setMerging(true)}
-          >
-            {t.open}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={selected.length < 2}
+              onClick={() => setMerging(true)}
+            >
+              {t.open}
+            </Button>
+            <Button variant="ghost" size="sm" onClick={stop}>
+              {t.cancel}
+            </Button>
+          </div>
         </div>
       )}
       <ProposalRows>
@@ -72,12 +100,11 @@ export function MergeableProposals({
             proposal={p}
             canWrite={canWrite}
             targets={attachTargets}
+            confirmInGroup={Boolean(footer)}
             leading={
-              canWrite &&
-              proposals.length > 1 && (
-                <input
-                  type="checkbox"
-                  className="size-4 shrink-0 accent-foreground"
+              mergeable &&
+              selecting && (
+                <Checkbox
                   aria-label={t.pick(p.value)}
                   checked={checked.includes(p.id)}
                   onChange={() => toggle(p.id)}
@@ -91,6 +118,7 @@ export function MergeableProposals({
             }
           />
         ))}
+        {footer}
       </ProposalRows>
       {merging && (
         <MergeDialog
@@ -102,7 +130,7 @@ export function MergeableProposals({
           targets={targets}
           onDone={() => {
             setMerging(false);
-            setChecked([]);
+            stop();
           }}
         />
       )}

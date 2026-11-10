@@ -52,7 +52,7 @@ export function ContractMailDraft({
             {email ? (
               <b className="font-semibold break-all">{email}</b>
             ) : (
-              <span className="text-[color:var(--tone-danger-fg)]">
+              <span className="text-[color:var(--tone-warning-fg)]">
                 {t.noAddress}
               </span>
             )}

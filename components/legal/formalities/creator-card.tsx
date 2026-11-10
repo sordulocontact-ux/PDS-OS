@@ -199,6 +199,15 @@ export function CreatorCard({
         disabled={disabled}
         onChange={(e) => onChange({ pseudonym: e.target.value })}
       />
+      {/* Neither field has « * »: one of the two is required (JUR-24),
+          said while both are empty and no error says it already. */}
+      {!creator.first_name.trim() &&
+        !creator.pseudonym.trim() &&
+        !errors?.first_name && (
+          <p className="-mt-2 text-caption text-muted-foreground sm:col-span-3">
+            {t.creator.nameHint}
+          </p>
+        )}
       {!creator.performer_only && (
         <Field
           name={`c-ipi-${rowId}`}

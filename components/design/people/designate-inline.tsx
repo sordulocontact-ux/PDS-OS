@@ -44,7 +44,7 @@ export function DesignateInline({
   const { pending, error, run } = useWriteSubmit(() => undefined, "");
   return (
     <form
-      className="grid items-end gap-3 sm:grid-cols-[minmax(0,1fr)_auto]"
+      className="flex flex-col gap-1.5"
       onSubmit={(e) => {
         e.preventDefault();
         const personId = String(new FormData(e.currentTarget).get(name) ?? "");
@@ -61,8 +61,11 @@ export function DesignateInline({
         );
       }}
     >
-      <div className="flex flex-col gap-1">
+      {/* The hint sits under the row, not inside the select's column, so
+          « Désigner » lines up with the select itself. */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <OptionSelect
+          className="min-w-0 flex-1 gap-3"
           name={name}
           label={label}
           required
@@ -70,18 +73,22 @@ export function DesignateInline({
             members.filter((m) => m.name).map((m) => [m.personId, m.name]),
           )}
           defaultValue={suggestion?.personId ?? members[0]?.personId ?? null}
-          hint={hint}
         />
-        <FieldError id={`${name}-error`}>{error ?? undefined}</FieldError>
+        <Button
+          type="submit"
+          variant="outline"
+          className="h-10"
+          disabled={pending}
+          aria-busy={pending}
+        >
+          {fr.designSteps.home.creative.designate}
+        </Button>
       </div>
-      <Button
-        type="submit"
-        variant="outline"
-        disabled={pending}
-        aria-busy={pending}
-      >
-        {fr.designSteps.home.creative.designate}
-      </Button>
+      {error ? (
+        <FieldError id={`${name}-error`}>{error}</FieldError>
+      ) : (
+        <p className="text-xs text-muted-foreground">{hint}</p>
+      )}
     </form>
   );
 }

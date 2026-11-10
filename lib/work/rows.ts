@@ -127,10 +127,29 @@ function validatorOf(step: JourneyStep): string | null {
   return names.length > 0 ? names.join(", ") : (step.validator?.name ?? null);
 }
 
-/** What the step unlocks, « Mastering · Karim Haddou ». */
+/** What the step unlocks, « Mastering · Karim Haddou »; « · vous » when it
+ * falls to the viewer again (the step is theirs: its actor is them). */
 function thenOf(step: JourneyStep, steps: JourneyStep[]): string[] {
   return nextOf(step, steps).map((n) =>
-    n.who ? fr.journey.nextBy(withModule(n), n.who) : withModule(n),
+    n.who
+      ? fr.journey.nextBy(
+          withModule(n),
+          n.who === step.actor?.name ? fr.work.lead.you : n.who,
+        )
+      : withModule(n),
+  );
+}
+
+const sameWords = (a: string, b: string) =>
+  a.toLocaleLowerCase("fr").includes(b.toLocaleLowerCase("fr"));
+
+/** Where in its module, « Production › Pochette »: the step's name left out
+ * when the action already says it (« Démarrer le cadrage » under « Démarrer
+ * le cadrage »), so the row's context never repeats its title. */
+function placeOfStep(title: string, part: string | null, step: string) {
+  return (
+    [part, sameWords(title, step) ? null : step].filter(Boolean).join(" › ") ||
+    null
   );
 }
 
@@ -149,22 +168,25 @@ export function workRowsOf(
   const why = fr.work.lead.why;
   const drafts: Draft[] = [
     ...journeys.projects.flatMap((project) =>
-      project.mine.map((a): Draft => ({
-        key: `step|${project.projectId}|${a.place}|${a.step.key}|${a.step.href}`,
-        kind: a.step.actor?.kind === "validate" ? "validate" : "do",
-        // The gesture's own section when the step shows it first.
-        href: actionHref(a.step),
-        title: a.step.actor?.todo ?? a.step.title,
-        module: a.module,
-        place: [a.partLabel, a.step.title].filter(Boolean).join(" › "),
-        projectId: project.projectId,
-        projectTitle: project.projectTitle,
-        due: a.step.due ?? null,
-        overdue: a.step.alert === "overdue",
-        why: a.step.why,
-        validator: validatorOf(a.step),
-        then: thenOf(a.step, project.stepsByPlace[a.place] ?? []),
-      })),
+      project.mine.map((a): Draft => {
+        const title = a.step.actor?.todo ?? a.step.title;
+        return {
+          key: `step|${project.projectId}|${a.place}|${a.step.key}|${a.step.href}`,
+          kind: a.step.actor?.kind === "validate" ? "validate" : "do",
+          // The gesture's own section when the step shows it first.
+          href: actionHref(a.step),
+          title,
+          module: a.module,
+          place: placeOfStep(title, a.partLabel ?? null, a.step.title),
+          projectId: project.projectId,
+          projectTitle: project.projectTitle,
+          due: a.step.due ?? null,
+          overdue: a.step.alert === "overdue",
+          why: a.step.why,
+          validator: validatorOf(a.step),
+          then: thenOf(a.step, project.stepsByPlace[a.place] ?? []),
+        };
+      }),
     ),
     ...work.tasks.map((task): Draft => ({
       key: `task|${task.id}`,

@@ -22,10 +22,12 @@ import {
 } from "@/lib/legal/formalities/participants";
 import { generateFormality } from "@/lib/legal/formalities/step-actions";
 import type { TitleFormality } from "@/lib/legal/formalities/types";
+import { cn } from "@/lib/utils";
 import { fileNamePart } from "@/lib/utils/file-name-part";
 
 import { DossierSection } from "./dossier-section";
 import { FutureSigners } from "./signatures-list";
+import { useDossierAutosave } from "./use-dossier-autosave";
 import { useDossierErrors } from "./use-dossier-errors";
 
 const fr = { legalDocuments, legalFormalities };
@@ -39,6 +41,15 @@ export const EDITABLE = [
   "ready_to_submit",
   "action_required",
 ];
+// Saved as it is filled while no version was generated (Sacha, 10/11/2026).
+const AUTOSAVED = ["collecting_data", "ready_to_generate"];
+
+// Codes said on their own field once « Générer » is tried (a participant's
+// first name, a publisher's creators…), never as a line apart: a line under
+// the section did not say where to fill it (Sacha, 10/11/2026). The lines
+// left are what no field answers (five creators, three publishers).
+const onAField = (code: string) =>
+  /^(creator_|main_artist_|publisher_)/.test(code) || code.endsWith("_total");
 
 /**
  * The SACEM bulletin on one page (recette Juridique V1, JUR-02 and JUR-03,
@@ -92,6 +103,12 @@ export function DossierForm({
   const [entries, setEntries] = useState(initial.entries);
   const [refused, setRefused] = useState<string | null>(null);
   const { pending, run } = useLegalAction();
+  const autosave = useDossierAutosave({
+    projectId,
+    formalityId: f.id,
+    entries,
+    enabled: AUTOSAVED.includes(f.status),
+  });
   const { root, errors, markEdited, attempt } = useDossierErrors(
     f.missing,
     Object.fromEntries(Object.entries(entries).map(([k, e]) => [k, e.value])),
@@ -131,11 +148,22 @@ export function DossierForm({
       (i) =>
         !fieldKeys.has(i.key) &&
         i.section === section &&
-        !i.key.startsWith("borrowing:"),
+        !i.key.startsWith("borrowing:") &&
+        !onAField(i.key),
     );
-  const open = items.filter((i) => i.state !== "optional").length;
-  const save = () =>
-    saveFormalityValues(projectId, title.masterId, f.id, entries);
+  const toConfirm = items.filter((i) => i.state === "proposed").length;
+  const toFill = items.filter((i) => i.state === "missing").length;
+  const save = async () => {
+    await autosave.settle();
+    const saved = await saveFormalityValues(
+      projectId,
+      title.masterId,
+      f.id,
+      entries,
+    );
+    if (saved.ok) autosave.saved();
+    return saved;
+  };
 
   // JUR-03: a change after generation makes a new version; the signatures
   // already given stop counting.
@@ -178,7 +206,8 @@ export function DossierForm({
               aria-busy={pending || undefined}
               onClick={() => {
                 attempt();
-                if (open > 0) return setRefused(b.notYet(open));
+                if (toFill + toConfirm > 0)
+                  return setRefused(b.notYet(toFill, toConfirm));
                 run(
                   async () => {
                     const saved = await save();
@@ -209,6 +238,19 @@ export function DossierForm({
             </Button>
           </div>
           <p className="text-caption text-muted-foreground">{b.draftNote}</p>
+          {autosave.state !== "idle" && (
+            <p
+              role="status"
+              className={cn(
+                "text-caption",
+                autosave.state === "failed"
+                  ? "text-[color:var(--tone-danger-fg)]"
+                  : "text-muted-foreground",
+              )}
+            >
+              {t.page.autosave[autosave.state]}
+            </p>
+          )}
         </div>
       )}
     </div>

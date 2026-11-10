@@ -41,7 +41,9 @@ const column = ({ hideBelow: hide, fill, align }: ColumnProps) =>
   cn(
     !fill && "w-48",
     hide && hideBelow[hide],
-    align === "end" && "pr-0 text-right",
+    // Its gap to the next column stays (« ValeurSource », 10/11/2026); the
+    // last column's padding is the row's inset (ROW_INSET).
+    align === "end" && "text-right",
   );
 
 // Tabs above a table (or its empty state): see data-table-views.tsx.

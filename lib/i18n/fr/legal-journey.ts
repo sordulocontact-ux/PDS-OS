@@ -85,14 +85,16 @@ export const legalJourney = {
   },
   todo: {
     framing: (open: number) =>
-      open > 1 ? `Répondre aux ${open} questions` : "Répondre à la question",
-    confirm: "Confirmer le dossier",
-    confirmAgain: "Confirmer à nouveau le dossier",
-    launch: "Lancer le plan d'action",
+      open > 1
+        ? `Répondre aux ${open} questions du cadrage juridique`
+        : "Répondre à la question du cadrage juridique",
+    confirm: "Confirmer le dossier juridique",
+    confirmAgain: "Confirmer à nouveau le dossier juridique",
+    launch: "Lancer le plan d'action juridique",
     track: (open: number) =>
       open > 1
-        ? `Faire avancer ${open} démarches`
-        : "Faire avancer la démarche",
+        ? `Faire avancer ${open} démarches juridiques`
+        : "Faire avancer la démarche juridique",
   },
   summary: {
     inventory: (known: number, toConfirm: number, missing: number) =>

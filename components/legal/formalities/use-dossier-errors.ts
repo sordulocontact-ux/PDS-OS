@@ -6,7 +6,8 @@ import { dossierErrors } from "@/lib/legal/formalities/field-errors";
 
 /** Once « Valider le dossier » is tried, what the dossier misses (codes of
  * formality_missing) said under each field until its value is fixed; the
- * first field in red takes the focus when the validation ends. */
+ * first field in red — or else the first « Confirmer » — takes the focus
+ * when the validation ends. */
 export function useDossierErrors(
   missing: string[],
   values: Record<string, unknown>,
@@ -20,9 +21,10 @@ export function useDossierErrors(
   useEffect(() => {
     if (pending || !focusNext.current) return;
     focusNext.current = false;
-    const first = root.current?.querySelector<HTMLElement>(
-      '[aria-invalid="true"]',
-    );
+    // A field in red first; else the first value to confirm.
+    const first =
+      root.current?.querySelector<HTMLElement>('[aria-invalid="true"]') ??
+      root.current?.querySelector<HTMLElement>("[data-to-confirm]");
     first?.focus({ preventScroll: true });
     first?.scrollIntoView({ block: "center", behavior: "smooth" });
   }, [pending, missing]);

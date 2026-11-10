@@ -60,6 +60,8 @@ export function BulletinRow({
                 type="button"
                 variant="outline"
                 size="xs"
+                // Where « Générer » leads when only confirmations are left.
+                data-to-confirm
                 onClick={onConfirm}
               >
                 {t.confirm}

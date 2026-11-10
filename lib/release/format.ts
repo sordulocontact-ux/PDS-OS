@@ -28,3 +28,8 @@ const shortDate = new Intl.DateTimeFormat("fr-FR", {
 export function formatShortDate(iso: string): string {
   return shortDate.format(new Date(iso));
 }
+
+/** "18–28 nov. 2026", "18 nov. – 3 déc. 2026": a period in one short line. */
+export function formatShortRange(from: string, to: string): string {
+  return shortDate.formatRange(new Date(from), new Date(to));
+}

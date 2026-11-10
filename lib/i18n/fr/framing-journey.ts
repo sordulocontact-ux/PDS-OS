@@ -43,9 +43,9 @@ export const framingJourney = {
     },
   },
   todo: {
-    start: "Choisir comment démarrer",
+    start: "Démarrer le cadrage",
     hold: "Tenir l'échange de cadrage",
-    holdOn: (day: string) => `Tenir l'échange du ${day}`,
+    holdOn: (day: string) => `Tenir l'échange de cadrage du ${day}`,
     // The box's questions, then PO's proposals checked in the list (Sacha
     // 29/10/2026).
     answer: (questions: number, verify: number) =>
@@ -59,7 +59,7 @@ export const framingJourney = {
       ]
         .filter(Boolean)
         .join(" et "),
-    send: "Envoyer le Brief en validation",
+    send: "Envoyer le Brief de cadrage en validation",
     validate: "Valider le Brief de cadrage",
     launch: "Lancer le plan du projet",
   },

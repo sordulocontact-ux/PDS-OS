@@ -44,7 +44,7 @@ export const marketingTopics: GuideTopic[] = [
     facts: [
       "La Conception a six étapes : Accueil, Intentions, Références, Direction artistique, Brief créatif, Fiches Livrables.",
       "Accueil : on voit les livrables reçus de la Stratégie, on désigne le responsable créatif et on commence directement ou par un échange créatif.",
-      "Intentions : ce que la sortie et chaque livrable doivent raconter, confirmé avant la direction artistique.",
+      "Intentions : ce que la sortie et chaque livrable doivent raconter, confirmé avant la direction artistique, section par section avec « Confirmer les n » au pied de la direction et de chaque livrable (celles à rattacher se confirment une à une, avec leur cible).",
       "Références : moodboards et références rattachés à des livrables ; ce sont des propositions jusqu'à la validation de la direction artistique.",
       "Direction artistique : concept, codes, ton et lignes rouges, soumis à la direction.",
       "Brief créatif : le cadre commun à tous les livrables, établi à partir de ce qui est validé.",

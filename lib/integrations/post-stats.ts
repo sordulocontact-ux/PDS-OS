@@ -4,13 +4,19 @@ import { z } from "zod";
 
 import type { StatsLink, StatsPlatform } from "@/lib/activations/stats-links";
 import { getServerEnv } from "@/lib/env";
+import {
+  googleAccessToken,
+  googleHasScope,
+  googleSettings,
+} from "@/lib/integrations/google-oauth";
 import { fetchJson, fetchText } from "@/lib/integrations/http";
 
 /**
  * The public statistics of a published link, read by code at the moment of
  * the read (Sacha 10/11/2026). Each platform by its most official door
  * (docs/CONTEXTE-PROJET.md § 6, six levels):
- * - YouTube: the Data API v3 with a key (YOUTUBE_API_KEY);
+ * - YouTube: the Data API v3, with its own key (YOUTUBE_API_KEY) or po@'s
+ *   Google token granted YouTube (youtubeAuth);
  * - Deezer: its public API, no key;
  * - TikTok: no public API for a video's figures; its public page embeds them
  *   as JSON, read without a login like the profiles of the Labo
@@ -157,17 +163,50 @@ const youtubeSchema = z.object({
   ),
 });
 
-async function readYouTube(link: StatsLink): Promise<PostStatsRead> {
+// po@'s Google token reads YouTube once it was granted this scope
+// (scripts/google-calendar-token.mjs).
+const YOUTUBE_SCOPE = "https://www.googleapis.com/auth/youtube.readonly";
+
+/**
+ * How PDS OS calls YouTube (Sacha 10/11/2026: « branche YouTube avec le
+ * jeton PDS OS, une clé séparée plus tard »): its own key when
+ * YOUTUBE_API_KEY is set, else the organizer's Google token (po@) if it was
+ * granted YouTube, else nothing. Both read any public video of any channel.
+ */
+async function youtubeAuth(): Promise<
+  { key: string } | { bearer: string } | null
+> {
   const key = getServerEnv().YOUTUBE_API_KEY;
-  if (!key) return { ok: false, reason: "no_key" };
+  if (key) return { key };
+  const config = googleSettings();
+  if (!config || !(await googleHasScope(YOUTUBE_SCOPE))) return null;
+  try {
+    return { bearer: await googleAccessToken(config) };
+  } catch {
+    return null;
+  }
+}
+
+async function readYouTube(link: StatsLink): Promise<PostStatsRead> {
   if (!link.id) return { ok: false, reason: "unreadable" };
+  const auth = await youtubeAuth();
+  if (!auth) return { ok: false, reason: "no_key" };
   const url = new URL("https://www.googleapis.com/youtube/v3/videos");
   url.searchParams.set("part", "statistics,snippet");
   url.searchParams.set("id", link.id);
-  url.searchParams.set("key", key);
+  if ("key" in auth) url.searchParams.set("key", auth.key);
   let raw: unknown;
   try {
-    raw = await fetchJson("youtube", url);
+    const response = await fetch(url, {
+      cache: "no-store",
+      headers: {
+        accept: "application/json",
+        ...("bearer" in auth ? { authorization: `Bearer ${auth.bearer}` } : {}),
+      },
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!response.ok) return { ok: false, reason: "unreadable" };
+    raw = await response.json();
   } catch {
     return { ok: false, reason: "unreadable" };
   }

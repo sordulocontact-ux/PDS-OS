@@ -103,3 +103,21 @@ export async function confirmDesignIntentions(
   });
   return designDone(projectId, error, "confirmDesignIntentions");
 }
+
+/** « Confirmer les n » at the foot of a section (Sacha, 10/11/2026): every
+ * proposal of one target, in one transaction
+ * (confirm_design_target_proposals). */
+export async function confirmDesignTargetProposals(
+  projectId: string,
+  target: string,
+): Promise<DesignResult> {
+  const tg = targetKey.safeParse(target);
+  if (!id.safeParse(projectId).success || !tg.success) return invalid();
+  await requireApproved();
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("confirm_design_target_proposals", {
+    p_project_id: projectId,
+    p_deliverable_id: toTarget(tg.data).deliverableId,
+  });
+  return designDone(projectId, error, "confirmDesignTargetProposals");
+}

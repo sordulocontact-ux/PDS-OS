@@ -43,6 +43,7 @@ export function ConceptionProposalRow({
   targets,
   leading,
   extraActions,
+  confirmInGroup = false,
 }: {
   projectId: string;
   proposal: ProposalView;
@@ -50,6 +51,9 @@ export function ConceptionProposalRow({
   targets?: Record<string, string>;
   leading?: React.ReactNode;
   extraActions?: React.ReactNode;
+  // Confirmed with its section (« Confirmer les n »): the row only offers
+  // « Modifier » / « Écarter ».
+  confirmInGroup?: boolean;
 }) {
   const t = fr.conceptionWork.proposals;
   const [target, setTarget] = useState("");
@@ -86,6 +90,7 @@ export function ConceptionProposalRow({
       onDiscard={() => reviewDesignIntention(proposal.id, projectId, false)}
       leading={leading}
       extraActions={extraActions}
+      confirmInGroup={confirmInGroup}
       editAddon={(fieldId) => <VoiceFieldControl fieldId={fieldId} />}
       messages={{
         confirmed: t.confirmed,

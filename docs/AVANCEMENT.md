@@ -1999,8 +1999,10 @@ Demande de Sacha : garder « Noter un relevé » et relever seul les stats des l
   activation, d'une collaboration et d'un média, quand une preuve a un lien TikTok, YouTube ou playlist
   Deezer : vues, j'aime, commentaires, partages, enregistrements, abonnés de playlist ; un relevé par
   chiffre, source « Plateforme », déclaré, période depuis la publication.
-- Aucune dépendance ajoutée. Variable optionnelle `YOUTUBE_API_KEY` (Google Cloud « PDS OS », API
-  YouTube Data v3) : **à créer et poser en local et sur Vercel** ; sans elle YouTube reste à la main.
+- Aucune dépendance ajoutée. YouTube par le jeton Google de po@ (Sacha, 10/11 : « branche YouTube avec
+  le jeton PDS OS ») : portée `youtube.readonly` ajoutée à `scripts/google-calendar-token.mjs`, **à
+  prendre en refaisant le jeton avec Ibé** ; une clé séparée `YOUTUBE_API_KEY`, si elle est posée plus
+  tard, passe avant le jeton. Sans l'une ni l'autre, YouTube reste à la main.
 - Pas de relevé périodique (cron) : un clic, par la personne, en RLS. Un cron demanderait le service
   role pour écrire des relevés : à décider.
 - Risque : TikTok n'a pas d'API publique des chiffres d'une vidéo ; la page publique est lue sans
@@ -2026,3 +2028,16 @@ Sortie visée / blocages, retirée à sa demande ; la pochette aussi dans la lis
   « Oui… / Non… » (`YesNoChoice`, commun avec les dimensions du Cadrage) ; « Non » enregistre
   « aucun » sans PO, « Oui » ouvre le champ ; moins de texte gris (exemples dans « Oui… », une
   ligne sous le champ, plus de « Question en cours » ni du titre répété sur chaque réponse).
+
+## Travail : une action se lit au premier coup d'œil (10/11/2026, branche `pre-prod`)
+
+Retour d'Akili du 01/11 (Notion Retours « Travail : une tâche pas explicite au premier coup d'œil »).
+
+- Intitulés des actions réécrits verbe + objet dans les parcours (`lib/i18n/fr/*-journey.ts`) :
+  « Démarrer le cadrage » / « Démarrer la stratégie » (au lieu de « Choisir comment démarrer » pour
+  les deux), dossier juridique, dossier de distribution Vn, Brief du master, préparation du
+  tournage, bilan Vn, clôtures nommées… (`docs/DESIGN.md` « Page Travail »).
+- « Maintenant » (Travail et Accueil) : étiquettes du projet et du module à leur teinte en tête
+  (`ProjectTag`, `ModuleTag`, partagés avec le tableau), plus de « À vous » ; l'étape n'est plus
+  répétée quand l'action la dit (`lib/work/rows.ts`, aussi dans le tableau) ; « Ensuite : … · vous »
+  quand l'étape suivante revient à la personne.

@@ -1,3 +1,4 @@
+import { ConfirmIntentionGroup } from "@/components/design/intentions/confirm-intention-group";
 import { IntentionAddForm } from "@/components/design/intentions/intention-add-form";
 import { MergeableProposals } from "@/components/design/work/mergeable-proposals";
 import { targetsOf, viewOf } from "@/components/design/work/proposals";
@@ -21,8 +22,9 @@ const t = fr.designSteps.intentions;
  * One group of the Intentions step (proto de1): « Direction de la sortie »
  * or a deliverable — its state (À confirmer, Confirmé, À compléter, Hérite
  * de la direction), « n à confirmer », « Ajouter une intention » on the
- * right, PO's proposals to confirm, correct or set aside (merge and split
- * kept, ticket § 4), then what is confirmed.
+ * right, PO's proposals to correct or set aside one by one and confirmed
+ * together at their foot (« Confirmer les n », Sacha 10/11/2026; merge and
+ * split kept, ticket § 4), then what is confirmed.
  */
 export function IntentionGroup({
   projectId,
@@ -85,6 +87,15 @@ export function IntentionGroup({
           canWrite={canEdit}
           target={deliverableId ?? DIRECTION_KEY}
           targets={targetsOf(data)}
+          footer={
+            canEdit && (
+              <ConfirmIntentionGroup
+                projectId={projectId}
+                target={deliverableId ?? DIRECTION_KEY}
+                count={proposed.length}
+              />
+            )
+          }
         />
       )}
       {confirmed.length > 0 && (

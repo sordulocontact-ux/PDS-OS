@@ -75,30 +75,32 @@ export const masterJourney = {
   todo: {
     addTitle: "Ajouter le titre au projet",
     confirmSource: (n: number) =>
-      n > 1 ? `Confirmer la source de ${titles(n)}` : "Confirmer la source",
+      n > 1
+        ? `Confirmer la source de ${titles(n)}`
+        : "Confirmer la source du master",
     importSource: (n: number) =>
       n > 1
         ? `Importer la version de départ de ${titles(n)}`
         : "Importer la version de départ du mix",
-    replaceSource: "Remplacer la source",
+    replaceSource: "Remplacer la source du master",
     recordVocals: (pending: string | null) =>
       pending
         ? `Enregistrer les voix définitives (${pending})`
         : "Enregistrer les voix définitives",
-    startBrief: "Démarrer le Brief",
-    answerQuestion: "Répondre à la question du Brief",
-    applyAnswer: "Ajouter la réponse au Brief",
+    startBrief: "Démarrer le Brief du master",
+    answerQuestion: "Répondre à la question du Brief du master",
+    applyAnswer: "Ajouter la réponse au Brief du master",
     callHeld: (day: string) => `Tenir l'échange prévu ${day}`,
     reviewCall: "Relire ce que PO a compris du call",
-    completeBrief: "Compléter le Brief",
-    recordBrief: "Enregistrer le Brief",
+    completeBrief: "Compléter le Brief du master",
+    recordBrief: "Enregistrer le Brief du master",
     chooseEngineer: (stage: "mix" | "mastering") =>
       stage === "mix"
         ? "Choisir l'ingénieur du mix"
         : "Choisir l'ingénieur du mastering",
     transmit: (stage: "mix" | "mastering") =>
       stage === "mix" ? "Transmettre au mixeur" : "Transmettre au mastering",
-    renewLink: "Renouveler le lien",
+    renewLink: "Renouveler le lien de l'ingénieur",
     takeCharge: "Prendre en charge le dossier",
     deposit: (label: string, n: number, title: string | null) =>
       `Déposer le ${label} V${n}${title ? ` de « ${title} »` : ""}`,

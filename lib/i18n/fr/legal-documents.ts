@@ -119,8 +119,17 @@ export const legalDocuments = {
     draft: "Générer un brouillon",
     draftNote:
       "Le brouillon porte « BROUILLON — ne pas signer » sur chaque page : il sert à relire, jamais à signer.",
-    notYet: (count: number) =>
-      `${count} information${count > 1 ? "s" : ""} à compléter ou à confirmer avant la version à signer, chacune sur sa ligne. Un brouillon reste possible.`,
+    // What still stands between the dossier and the version to sign, said
+    // by kind: to fill (in red once tried) and proposed to confirm.
+    notYet: (fill: number, confirm: number) => {
+      const parts = [
+        fill > 0 &&
+          `${fill} information${fill > 1 ? "s" : ""} à compléter (en rouge)`,
+        confirm > 0 &&
+          `${confirm} valeur${confirm > 1 ? "s" : ""} proposée${confirm > 1 ? "s" : ""} à confirmer (« À vérifier »)`,
+      ].filter(Boolean);
+      return `Avant la version à signer : ${parts.join(" et ")}. Un brouillon reste possible.`;
+    },
     draftDone: "Brouillon prêt",
   },
   split: {

@@ -129,6 +129,17 @@ export const designSteps = {
     emptyDeliverable:
       "Rien n'a été dit sur ce livrable : il hérite de la direction de la sortie.",
     add: "Ajouter une intention",
+    // « Confirmer les n » at the foot of a section (Sacha, 10/11/2026).
+    confirmGroup: {
+      label: (n: number) => (n > 1 ? `Confirmer les ${n}` : "Confirmer"),
+      pending: "Confirmation…",
+      hint: (n: number) =>
+        n > 1
+          ? "Tout est juste ? Confirmez-les ensemble, ou modifiez ou écartez une proposition d'abord."
+          : "C'est juste ? Confirmez-la, ou modifiez-la ou écartez-la d'abord.",
+      done: (n: number) =>
+        n > 1 ? `${n} intentions confirmées` : "Intention confirmée",
+    },
     question: "Question",
     intention: "Intention",
     submit: "Ajouter",

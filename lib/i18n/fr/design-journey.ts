@@ -69,13 +69,13 @@ export const designJourney = {
     holdCall: "Tenir l'échange créatif",
     confirm: (n: number) =>
       `Confirmer ou écarter ${plural(n, "intention", "intentions")}`,
-    write: "Écrire les intentions",
+    write: "Écrire les intentions créatives",
     attach: (n: number) => `Rattacher ${plural(n, "référence", "références")}`,
     addReferences: "Ajouter des références",
     submitDirection: (validator: string) =>
       `Soumettre la direction à ${validator}`,
     validateDirection: "Valider la direction artistique",
-    resubmit: "Répondre et soumettre à nouveau",
+    resubmit: "Répondre et soumettre à nouveau la direction artistique",
     brief: (n: number) => `Établir le Brief créatif V${n}`,
     sheetResponsible: (title: string) =>
       `Désigner le responsable de la fiche ${title}`,

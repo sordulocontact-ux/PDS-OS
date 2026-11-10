@@ -101,7 +101,11 @@ export async function readLinkStats(
   }
   const list = [...sources.values()].slice(0, MAX_LINKS);
   if (list.length === 0)
-    return invalid(byHand.size ? t.byHand(names([...byHand])) : t.nothing);
+    // Nothing to read is not a failure: said in the toast, never in red.
+    return {
+      ok: true,
+      notice: byHand.size ? t.byHand(names([...byHand])) : t.nothing,
+    };
 
   const today = todayInParis();
   const [reads, done] = await Promise.all([
@@ -175,7 +179,7 @@ export async function readLinkStats(
         ...refreshed(v.projectId),
         notice: [t.already, ...notes].join(" "),
       };
-    return invalid([t.nothing, ...notes].join(" "));
+    return { ok: true, notice: [t.nothing, ...notes].join(" ") };
   }
   const inserted = await supabase.from("activation_metrics").insert(rows);
   if (inserted.error) return activationFailure(inserted.error);

@@ -1490,8 +1490,10 @@ la semaine du Calendrier, et une création de call qui donne un lien Google Meet
   Portées demandées (06/11/2026), en une seule connexion : `calendar.events`, `drive.file` (fichiers
   que PDS OS dépose lui-même dans le Drive du compte, pour l'import des rushs à venir ; jamais le
   reste du Drive), `meetings.space.settings` (transcription automatique, ci-dessous) et
-  `meetings.space.readonly` (relire la transcription d'un Meet, lot à venir) : activer aussi les
-  API Google Drive et Google Meet REST. Compte organisateur :
+  `meetings.space.readonly` (relire la transcription d'un Meet, lot à venir) et, depuis le
+  10/11/2026, `youtube.readonly` (chiffres publics d'une vidéo YouTube pour « Relever les
+  statistiques », `lib/integrations/post-stats.ts`, quand `YOUTUBE_API_KEY` n'est pas posée) :
+  activer aussi les API Google Drive, Google Meet REST et YouTube Data API v3. Compte organisateur :
   **po@pdsrecords.com**, que seul Ibé ouvre : le lien du script peut être ouvert sur son
   ordinateur, il renvoie alors l'adresse `http://127.0.0.1:<port>/?code=…` (page inaccessible)
   à coller ici pendant que le script tourne. Écran de consentement « Externe » : publier
@@ -4584,6 +4586,16 @@ la personne (`/c/`). Migration `20261020070101_signed_returns.sql`, pgTAP `signe
   prévoir d'un projet, ou autorisation d'un emprunt : `legalOriginOf`) et y ramène. Un modèle a sa
   page `/app/contracts/templates/[seriesId]` (ligne cliquable) avec « Valider » pour le DG et, pour
   les autres, qui valide. Pas encore : refus motivé d'un modèle.
+- **Dossier SACEM enregistré à la saisie (Sacha, 10/11/2026)** : `useDossierAutosave` enregistre ce
+  que la personne a tapé ou confirmé une seconde après la dernière modification
+  (`autosaveFormalityValues`, sans bandeau ; une valeur à moitié tapée attend la suivante), une à
+  la fois, tant que le dossier est en `collecting_data` / `ready_to_generate`. Ensuite (version
+  générée, correction SACEM) une modification annule les signatures (JUR-03) : enregistrée par
+  « Générer » seulement, et quitter la page demande d'abord. Le formulaire garde ce qui est à
+  l'écran ; la revalidation ne relit que les manques. `save_formality_values` n'écrit qu'un
+  « Dossier validé » par personne et demi-heure (migration `20261110120101`). Les manques d'un
+  participant ou d'un éditeur se disent sous leur champ, plus en ligne à part ; le refus de
+  « Générer » compte « à compléter » et « à confirmer » séparément et mène au premier.
 - **SACEM (JUR-24, JUR-26)** : `formality_missing` exige aussi le genre, un prénom ou un
   pseudonyme par créateur et la dénomination de chaque éditeur (migration `20261012100401`,
   dossiers non générés rejugés) ; l'IPI / COAD reste facultatif (un créateur non membre n'en a
@@ -6401,7 +6413,10 @@ annulée : aucune action réelle). Pages du module sous `ConceptionTabs` : Accue
   Production → Transférée).
 - **Consolidation** : fusionner (`merge_design_intentions`, les originaux passent en `merged` avec
   `merged_into`) ou dissocier (`split_design_intention`, parties `split_from`, même source) les
-  propositions ; le chef de projet confirme l'ensemble d'une cible (`confirm_design_intentions`,
+  propositions (`MergeableProposals` : les cases n'apparaissent qu'après « Fusionner des propositions »,
+  pour ne pas passer pour la façon de confirmer, Sacha 10/11/2026) ; « Confirmer les n » au pied de chaque section, direction ou livrable (`DimensionConfirm`,
+  `confirm_design_target_proposals`, une transaction, chaque proposition passe par `review_design_intention`, les
+  plus anciennes d'abord ; les lignes n'offrent plus que Modifier / Écarter, comme Cadrage et Stratégie) ; le chef de projet confirme l'ensemble d'une cible (`confirm_design_intentions`,
   refusé tant qu'une proposition attend) : instantané `design_intent_confirmations`. Un changement
   ultérieur rend la cible « À réviser ».
 - **Responsables et validateurs** (`design_assignments`, `design_validators`) : désignés par le
@@ -6888,8 +6903,8 @@ Piégée / Dioo / Alka et chiffres ATYR rejoués dans une transaction annulée).
   colonne pour le lien ; `autoLinkOf` le relit, les totaux comptent chaque lien comme un sujet), période
   de la publication à aujourd'hui, un lien relu une fois par jour au plus, 20 liens par clic. TikTok n'a
   pas d'API publique des chiffres d'une vidéo : sa page publique, lue sans compte comme les profils du
-  Labo, format non documenté qui peut casser ; YouTube par la Data API v3 (`YOUTUBE_API_KEY`, sans elle
-  « à noter à la main ») ; Deezer `api.deezer.com/playlist/<id>` (`fans`)). États de preuve et de mesure **calculés par le code** (`lib/activations/states.ts`),
+  Labo, format non documenté qui peut casser ; YouTube par la Data API v3 (`YOUTUBE_API_KEY` si posée, sinon le jeton Google de
+  po@ s'il a `youtube.readonly` ; sans l'un ni l'autre « à noter à la main ») ; Deezer `api.deezer.com/playlist/<id>` (`fans`)). États de preuve et de mesure **calculés par le code** (`lib/activations/states.ts`),
   jamais stockés ; une statistique manquante n'est jamais un zéro.
 - **Pilotage** (`board.ts`) : alertes calculées (responsable absent, échéance passée, réalisée sans
   preuve ou sans statistiques, preuve contestée, dépendance bloquante ou changée, écart agence /

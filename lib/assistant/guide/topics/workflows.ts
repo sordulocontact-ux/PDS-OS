@@ -86,6 +86,10 @@ export const workflowsTopics: GuideTopic[] = [
         a: "Dans le Suivi du Juridique, à la démarche SACEM.",
       },
       {
+        q: "Le dossier SACEM est-il enregistré pendant la saisie ?",
+        a: "Oui : il s'enregistre tout seul à chaque pause, tant qu'aucune version à signer n'a été générée (« Modifications enregistrées » sous les boutons). Ensuite, une modification annule les signatures déjà données : elle n'est enregistrée qu'avec « Générer la version à signer » ou « Générer un brouillon », et quitter la page avant le demande d'abord.",
+      },
+      {
         q: "Comment envoyer le contrat d'une autorisation à l'ayant droit ?",
         a: "Depuis l'autorisation, au temps « Signer », une fois le contrat validé par la direction : l'e-mail est prêt à son adresse du Réseau, le contrat joint, et PDS OS l'envoie ; sa réponse arrive dans les Échanges, et s'il renvoie le contrat signé en PDF, PDS OS le range dans le contrat avec l'e-mail comme preuve, à vérifier avant « Marquer comme sécurisé ». Sinon « Je l'ai envoyé autrement ». Un contrat sans texte se complète d'abord sur sa page.",
       },

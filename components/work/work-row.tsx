@@ -3,6 +3,7 @@ import { assistant } from "@/lib/i18n/fr/assistant";
 import { shell } from "@/lib/i18n/fr/shell";
 import { transmission } from "@/lib/i18n/fr/transmission";
 import { work } from "@/lib/i18n/fr/work";
+import { moduleHue, projectHue } from "@/lib/ui/category-hues";
 import { myValidationTone, projectStatusTone } from "@/lib/ui/state-tones";
 import { formatDay } from "@/lib/utils/day";
 import type { WorkRow } from "@/lib/work/rows";
@@ -26,6 +27,28 @@ export const placeOf = (row: WorkRow) =>
   (row.kind === "task" || row.kind === "deliverable"
     ? t.places[row.kind]
     : null);
+
+/** Its project's tag, at the project's hue (the Calls and the Calendrier's). */
+export function ProjectTag({ row }: { row: WorkRow }) {
+  return (
+    <StatusBadge
+      tone={projectHue(row.projectId)}
+      size="sm"
+      className="max-w-full"
+    >
+      <span className="truncate">{row.projectTitle}</span>
+    </StatusBadge>
+  );
+}
+
+/** Its workflow's tag (Cadrage, Master, Juridique…), at its fixed hue. */
+export function ModuleTag({ row }: { row: WorkRow }) {
+  return row.module ? (
+    <StatusBadge tone={moduleHue[row.module]} size="sm">
+      {moduleOf(row)}
+    </StatusBadge>
+  ) : null;
+}
 
 /** « Néons · Master › Mixage · avant le Dim. 15/11/2026 ». */
 export function whereOf(row: WorkRow): string {

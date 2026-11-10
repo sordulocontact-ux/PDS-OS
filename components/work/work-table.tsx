@@ -18,13 +18,19 @@ import {
 import { StatusBadge } from "@/components/ui/status-badge";
 import { MarkedText } from "@/components/ui/marked-text";
 import { work } from "@/lib/i18n/fr/work";
-import { moduleHue, projectHue } from "@/lib/ui/category-hues";
 import { workStatusTone } from "@/lib/ui/state-tones";
 import { cn } from "@/lib/utils";
 import { formatShortDay } from "@/lib/utils/day";
 import type { WorkGroup, WorkRow } from "@/lib/work/rows";
 
-import { moduleOf, placeOf, rowBadge, titleOf } from "./work-row";
+import {
+  ModuleTag,
+  moduleOf,
+  placeOf,
+  ProjectTag,
+  rowBadge,
+  titleOf,
+} from "./work-row";
 
 const fr = { work };
 
@@ -117,13 +123,7 @@ function ActionRow({ row }: { row: WorkRow }) {
         />
       </DataTableCell>
       <DataTableCell hideBelow="md">
-        <StatusBadge
-          tone={projectHue(row.projectId)}
-          size="sm"
-          className="max-w-full"
-        >
-          <span className="truncate">{row.projectTitle}</span>
-        </StatusBadge>
+        <ProjectTag row={row} />
       </DataTableCell>
       <DataTableCell
         hideBelow="lg"
@@ -132,13 +132,7 @@ function ActionRow({ row }: { row: WorkRow }) {
           !row.module && "text-[color:var(--text-tertiary)]",
         )}
       >
-        {row.module ? (
-          <StatusBadge tone={moduleHue[row.module]} size="sm">
-            {moduleLabel}
-          </StatusBadge>
-        ) : (
-          EMPTY_CELL
-        )}
+        {row.module ? <ModuleTag row={row} /> : EMPTY_CELL}
       </DataTableCell>
       <DataTableCell
         hideBelow="sm"

@@ -553,12 +553,13 @@ export const activations = {
           : to
             ? `jusqu'au ${to}`
             : "période non renseignée",
-    totalsTitle: "Totaux par métrique",
-    totalsRule:
-      "Additionnés seulement entre relevés valides de même métrique et même unité ; les taux ne s'additionnent jamais.",
-    totalValue: (value: string, n: number) =>
-      `${value} (${n} ${plural(n, "relevé", "relevés")})`,
     notSummed: "Non additionnable",
+    // Under a total's tile: how many snapshots and where they come from.
+    totalHint: (n: number, from: string) =>
+      `${n} ${plural(n, "relevé", "relevés")} · ${from}`,
+    periodLabel: "Période",
+    state: "État",
+    actions: "Actions",
     // « Relever les statistiques » : the published links read by PDS OS
     // (Sacha 10/11/2026), beside « Noter un relevé ».
     auto: {
@@ -571,7 +572,8 @@ export const activations = {
       unreadable: (links: string) => `Illisible pour l'instant : ${links}.`,
       notFound: (links: string) =>
         `Introuvable (supprimé ou privé) : ${links}.`,
-      noKey: "YouTube n'est pas encore branché : à noter à la main.",
+      noKey:
+        "YouTube n'est pas encore branché (jeton Google sans accès YouTube) : à noter à la main.",
       byHand: (hosts: string) => `À noter à la main : ${hosts}.`,
       nothing: "Aucun chiffre n'a pu être lu sur ces liens.",
     },

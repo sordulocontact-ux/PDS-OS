@@ -172,7 +172,10 @@ par la couleur mais par son libellé (« À valider », « ✦ PO »).
   Plus de « Manquant », « Connu », « À renseigner », « À compléter », « À confirmer » comme
   état d'une ligne ; la provenance (déclaré, déduit…) se dit dans la source sous la valeur.
   **Une information manquante n'est jamais rouge** : `danger` reste aux refus, échecs et
-  blocages, et au champ manquant après un essai d'enregistrement (§ 4). Les cycles de vie
+  blocages, et au champ manquant après un essai d'enregistrement (§ 4). **Une attente n'est jamais rouge non
+  plus** (Sacha, 10/11/2026) : décision requise, en attente de quelqu'un, modifications ou corrections
+  demandées, retard transmis à la direction sont en `warning` ; la colonne du parcours dit « À vous : … »
+  quand l'étape attend la personne qui la regarde. Les cycles de vie
   d'un objet (versions, plans, déclarations, matériel…) gardent leurs propres mots.
 - La correspondance état → ton vit **uniquement** dans `lib/ui/state-tones.ts`. Un écran
   n'écrit jamais une couleur, il passe `tone={…Tone[état]}`.
@@ -492,9 +495,17 @@ l'activation des notifications du navigateur), PO prépare et vous décidez. Rem
 Refonte du 27/10/2026, d'après `docs/VISION-UX.md` § 2 (les cinq questions) :
 
 - `PageHeader` (« Ajouter une tâche » en contour à droite, qui ouvre la modale d'une tâche de « Mes tâches » ; « Voir le calendrier » retiré le 09/11/2026, le Calendrier reste dans la barre), puis **« Maintenant »** : le cadre de
-  `NowCard` (`NowFrame`), l'action la plus pressée — « À vous » (+ « En retard », « À valider »),
-  « Projet · Module › Étape · avant le Sam. 05/12/2026 », l'action en titre, le pourquoi, une
-  ligne « Validation : … · Ensuite : … », le bouton plein « Ouvrir » (le geste, `actionHref`).
+  `NowCard` (`NowFrame`), l'action la plus pressée — en tête les **étiquettes du projet et du
+  module** à leur teinte (`ProjectTag`, `ModuleTag`, les mêmes que le tableau ; plus de « À vous » :
+  tout le bloc est à vous), « En retard », « À valider », puis « Étape · avant le Sam. 05/12/2026 »
+  (l'étape omise quand l'action la dit déjà), l'action en titre, le pourquoi, une ligne
+  « Validation : … · Ensuite : … » (« · vous » quand l'étape suivante vous revient), le bouton plein
+  « Ouvrir » (le geste, `actionHref`).
+- **Une action se lit seule** (retour d'Akili du 01/11/2026) : son intitulé (`JourneyActor.todo`,
+  `lib/i18n/fr/*-journey.ts`) dit le verbe **et son objet** (« Démarrer le cadrage », « Valider le
+  dossier de distribution V2 », « Confirmer le dossier juridique »), jamais un geste qui ne se
+  comprend que dans la page du module (« Choisir comment démarrer », « Valider la V2 ») : le même
+  texte paraît dans Travail, l'Accueil et « Maintenant ». Deux modules n'ont jamais le même intitulé.
   Rien à faire : « Rien à faire pour vous », et la Vue d'ensemble de chaque projet dit qui on
   attend.
 - Dessous, **Tout / À faire / À valider en contrôle segmenté** (nombre en gris ; plus des onglets depuis le

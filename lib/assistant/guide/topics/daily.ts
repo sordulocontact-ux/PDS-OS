@@ -52,7 +52,7 @@ export const dailyTopics: GuideTopic[] = [
     nav: "/app/work",
     facts: [
       "Travail rassemble ce qui attend la personne connectée, dans tous les projets lancés qu'elle voit.",
-      "En tête, « Maintenant » met l'action la plus pressée, avec son pourquoi, ce qui est validé ensuite et un bouton « Ouvrir » qui mène au geste exact.",
+      "En tête, « Maintenant » met l'action la plus pressée, sous les étiquettes de son projet et de son module, avec son pourquoi, ce qui est validé ensuite et un bouton « Ouvrir » qui mène au geste exact.",
       "Les autres actions sont dans un seul tableau, en groupes repliables : En retard, Cette semaine, Plus tard, Sans échéance, En attente d'un autre.",
       "Trois vues au-dessus du tableau : Tout, À faire, À valider.",
       "On y trouve aussi un projet à accepter, un projet à retransmettre, les tâches libres rattachées à aucun workflow et les comptes rendus de session studio à rédiger.",

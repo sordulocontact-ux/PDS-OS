@@ -57,7 +57,7 @@ export function DelayDecision({
     (status === "open" && isOwner) || (status === "escalated" && isDirection);
   if (!decides)
     return status === "escalated" ? (
-      <ToneCallout tone="danger">{t.atDirection(direction)}</ToneCallout>
+      <ToneCallout tone="warning">{t.atDirection(direction)}</ToneCallout>
     ) : null;
 
   const keep = () => {

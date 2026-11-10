@@ -226,6 +226,8 @@ export const legalFormalities = {
     lastName: "Nom",
     firstName: "Prénom",
     pseudonym: "Pseudonyme",
+    // JUR-24: one of the two; said while both are empty.
+    nameHint: "Un prénom ou un pseudonyme : l'un des deux suffit.",
     ipi: "IPI / COAD",
     signs: "Signe le bulletin",
     add: "Ajouter un participant",
@@ -348,6 +350,12 @@ export const legalFormalities = {
     open: "Ouvrir la formalité",
     validate: "Valider le dossier",
     validating: "Validation…",
+    // The dossier saves itself as it is filled (Sacha, 10/11/2026).
+    autosave: {
+      saving: "Enregistrement…",
+      saved: "Modifications enregistrées",
+      failed: "Modifications non enregistrées : vérifiez la connexion.",
+    },
     invalid: (n: number) =>
       n === 1
         ? "Dossier enregistré, mais une information manque : elle est en rouge."

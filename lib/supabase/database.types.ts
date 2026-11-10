@@ -19687,6 +19687,7 @@ export type Database = {
       merge_design_intentions: { Args: { p_deliverable_id: string | null; p_ids: string[]; p_target: string; p_topic: string; p_value: string }; Returns: string }
       split_design_intention: { Args: { p_id: string; p_parts: Json }; Returns: undefined }
       confirm_design_intentions: { Args: { p_deliverable_id: string | null; p_project_id: string }; Returns: string }
+      confirm_design_target_proposals: { Args: { p_deliverable_id: string | null; p_project_id: string }; Returns: number }
       assign_design_responsible: { Args: { p_person_id: string; p_project_id: string; p_scope: string; p_sheet_id: string | null }; Returns: string }
       set_design_validators: { Args: { p_people: string[]; p_project_id: string; p_scope: string; p_sheet_id: string | null }; Returns: undefined }
       set_design_validation_mode: { Args: { p_mode: string; p_project_id: string }; Returns: undefined }

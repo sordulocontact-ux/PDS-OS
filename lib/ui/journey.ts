@@ -133,8 +133,9 @@ export type JourneyStep = {
   clipSummary?: boolean;
   // Intertitle of the journey this step sits under (« Dossier »).
   group?: string;
-  // Red subtitle in the journey: a missed due date, a decision required,
-  // sources that block it (the subtitle is then its summary alone).
+  // Subtitle in the journey: red for a missed due date or sources that block
+  // it (the subtitle is then its summary alone), warning for a decision
+  // required (a wait, not an error).
   alert?: "overdue" | "decision" | "blocking";
   // Done, but not « clean »: closed with reserves (warning mark, never
   // green; proto Distribution).

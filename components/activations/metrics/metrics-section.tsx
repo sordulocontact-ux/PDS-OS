@@ -8,12 +8,14 @@ import {
   DataTableHeader,
   DataTableRow,
 } from "@/components/ui/data-table";
+import { StatTiles } from "@/components/ui/stat-tiles";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { MetricSource } from "@/lib/activations/model";
 import { formatMetric, metricTotals } from "@/lib/activations/totals";
 import type { ActivationScope, MetricRecord } from "@/lib/activations/types";
 import { activations } from "@/lib/i18n/fr/activations";
-import { formatShortDate } from "@/lib/release/format";
+import { formatShortDate, formatShortRange } from "@/lib/release/format";
+import { cn } from "@/lib/utils";
 
 import { MetricActions, RecordMetricButton } from "./metric-actions";
 import { ReadStatsButton } from "./read-stats-button";
@@ -27,12 +29,18 @@ const verificationTone = {
   contested: "danger",
 } as const;
 
+const caption =
+  "text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-tertiary)]";
+
 /**
- * Statistics as dated, sourced snapshots ; the totals add only compatible
- * figures (same metric and unit, latest valid snapshot of each subject) and
- * say whether they are verified. Nothing missing is shown as zero. Typed by
- * hand (« Noter un relevé ») or read from the proofs' TikTok, YouTube and
- * Deezer links (« Relever les statistiques », `readable`).
+ * Statistics as dated, sourced snapshots, in few words (Sacha 10/11/2026:
+ * « trop de texte »): the totals as tiles only when they add several
+ * snapshots (one snapshot is its own total), then one row per snapshot —
+ * metric with where and who it comes from, value, period, day and state,
+ * its acts in « ⋯ ». The rules stay in the code: only compatible figures
+ * add up, nothing missing is a zero. Typed by hand (« Noter un relevé ») or
+ * read from the proofs' TikTok, YouTube and Deezer links (« Relever les
+ * statistiques », `readable`).
  */
 export function MetricsSection({
   scope,
@@ -59,11 +67,17 @@ export function MetricsSection({
   const totals = metricTotals(metrics);
   const name = (m: Pick<MetricRecord, "metric" | "label">) =>
     m.label ?? t.names[m.metric];
+  const period = (m: MetricRecord) =>
+    m.periodStart && m.periodEnd
+      ? formatShortRange(m.periodStart, m.periodEnd)
+      : t.period(
+          m.periodStart ? formatShortDate(m.periodStart) : null,
+          m.periodEnd ? formatShortDate(m.periodEnd) : null,
+        );
   return (
     <ActivationSection
       id="metrics"
       title={title}
-      description={t.description}
       action={
         canWrite && (
           <span className="flex flex-wrap items-start justify-end gap-2">
@@ -89,43 +103,35 @@ export function MetricsSection({
         <EmptyNote>{t.none}</EmptyNote>
       ) : (
         <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <h3 className="text-body-sm font-medium">{t.totalsTitle}</h3>
-            <ul className="flex flex-wrap gap-2">
-              {totals.map((total) => (
-                <li
-                  key={`${total.metric}-${total.label}-${total.unit}`}
-                  className="rounded-lg border px-3 py-2 text-body-sm"
-                >
-                  <span className="text-muted-foreground">
-                    {name(total)} ·{" "}
-                  </span>
-                  <span className="font-medium tabular-nums">
-                    {total.value === null
-                      ? t.notSummed
-                      : t.totalValue(
-                          formatMetric(total.value, total.unit),
-                          total.count,
-                        )}
-                  </span>
-                  <span className="text-muted-foreground">
-                    {" · "}
-                    {total.allVerified
-                      ? t.verification.verified
-                      : total.sources.map((s) => t.sources[s]).join(", ")}
-                  </span>
-                </li>
-              ))}
-            </ul>
-            <p className="text-caption text-muted-foreground">{t.totalsRule}</p>
-          </div>
+          {totals.some((total) => total.count > 1) && (
+            <StatTiles
+              stats={totals.map((total) => ({
+                label: name(total),
+                value:
+                  total.value === null
+                    ? t.notSummed
+                    : formatMetric(total.value, total.unit),
+                hint: t.totalHint(
+                  total.count,
+                  total.allVerified
+                    ? t.verification.verified
+                    : total.sources.map((s) => t.sources[s]).join(", "),
+                ),
+              }))}
+            />
+          )}
           <DataTable>
             <DataTableHeader>
               <DataTableHead>{t.metric}</DataTableHead>
               <DataTableHead align="end">{t.value}</DataTableHead>
-              <DataTableHead hideBelow="md">{t.source}</DataTableHead>
-              <DataTableHead hideBelow="lg">{t.periodStart}</DataTableHead>
-              <DataTableHead fill>{t.collectedOn}</DataTableHead>
+              <DataTableHead fill hideBelow="lg">
+                {t.periodLabel}
+              </DataTableHead>
+              <DataTableHead hideBelow="md">{t.collectedOn}</DataTableHead>
+              <DataTableHead>{t.state}</DataTableHead>
+              <DataTableHead className="w-px">
+                <span className="sr-only">{t.actions}</span>
+              </DataTableHead>
             </DataTableHeader>
             <DataTableBody>
               {metrics.map((m) => (
@@ -133,59 +139,62 @@ export function MetricsSection({
                   key={m.id}
                   className={m.invalidatedAt ? "opacity-60" : undefined}
                 >
-                  <DataTableCell>
+                  <DataTableCell className="whitespace-normal">
                     <span className="flex flex-col">
                       {name(m)}
-                      <span className="text-caption text-muted-foreground">
-                        {m.platform}
+                      <span className={caption}>
+                        {[m.platform, t.sources[m.source]]
+                          .filter(Boolean)
+                          .join(" · ")}
                       </span>
                     </span>
                   </DataTableCell>
                   <DataTableCell align="end" className="tabular-nums">
                     {formatMetric(m.value, m.unit)}
                     {m.partial && (
-                      <span className="text-[length:var(--type-micro)] text-[color:var(--text-tertiary)]">
-                        {" "}
-                        · {t.partialMark}
+                      <span className={cn(caption, "block")}>
+                        {t.partialMark}
                       </span>
                     )}
                   </DataTableCell>
-                  <DataTableCell hideBelow="md">
-                    {t.sources[m.source]}
+                  <DataTableCell
+                    fill
+                    hideBelow="lg"
+                    className="text-[color:var(--text-secondary)]"
+                  >
+                    {period(m)}
                   </DataTableCell>
-                  <DataTableCell hideBelow="lg">
-                    {t.period(
-                      m.periodStart ? formatShortDate(m.periodStart) : null,
-                      m.periodEnd ? formatShortDate(m.periodEnd) : null,
+                  <DataTableCell
+                    hideBelow="md"
+                    className="text-[color:var(--text-secondary)] tabular-nums"
+                  >
+                    {formatShortDate(m.collectedOn)}
+                  </DataTableCell>
+                  <DataTableCell>
+                    <StatusBadge
+                      size="sm"
+                      tone={
+                        m.invalidatedAt
+                          ? "neutral"
+                          : verificationTone[m.verification]
+                      }
+                    >
+                      {m.invalidatedAt
+                        ? t.invalidatedLabel
+                        : t.verification[m.verification]}
+                    </StatusBadge>
+                  </DataTableCell>
+                  <DataTableCell align="end" className="w-px">
+                    {!m.invalidatedAt && (canWrite || canVerify) && (
+                      <MetricActions
+                        projectId={scope.projectId}
+                        metricId={m.id}
+                        name={[name(m), m.platform].filter(Boolean).join(" · ")}
+                        verification={m.verification}
+                        canVerify={canVerify || canWrite}
+                        canInvalidate={canWrite}
+                      />
                     )}
-                  </DataTableCell>
-                  <DataTableCell fill>
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className="flex items-center gap-2">
-                        {formatShortDate(m.collectedOn)}
-                        <StatusBadge
-                          size="sm"
-                          tone={
-                            m.invalidatedAt
-                              ? "neutral"
-                              : verificationTone[m.verification]
-                          }
-                        >
-                          {m.invalidatedAt
-                            ? t.invalidatedLabel
-                            : t.verification[m.verification]}
-                        </StatusBadge>
-                      </span>
-                      {!m.invalidatedAt && (canWrite || canVerify) && (
-                        <MetricActions
-                          projectId={scope.projectId}
-                          metricId={m.id}
-                          verification={m.verification}
-                          canVerify={canVerify || canWrite}
-                          canInvalidate={canWrite}
-                        />
-                      )}
-                    </div>
                   </DataTableCell>
                 </DataTableRow>
               ))}

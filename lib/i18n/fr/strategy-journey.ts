@@ -79,9 +79,9 @@ export const strategyJourney = {
     },
   },
   todo: {
-    start: "Choisir comment démarrer",
+    start: "Démarrer la stratégie",
     hold: "Tenir l'échange stratégique",
-    holdOn: (day: string) => `Tenir l'échange du ${day}`,
+    holdOn: (day: string) => `Tenir l'échange stratégique du ${day}`,
     confirm: (n: number) =>
       `Confirmer ou écarter ${plural(n, "proposition", "propositions")} de PO`,
     arbitrate: (dimension: string) => `Arbitrer : ${lcFirst(dimension)}`,
@@ -91,7 +91,7 @@ export const strategyJourney = {
     answerDoc: (doc: string) => `Répondre à la demande sur le ${doc}`,
     validateDoc: (doc: string) => `Valider le ${doc}`,
     validate: "Valider le Brief de sortie",
-    resubmit: "Répondre et transmettre à nouveau",
+    resubmit: "Répondre et transmettre à nouveau le Brief de sortie",
   },
   summary: {
     exchange: (day: string) => `Échange du ${day}`,

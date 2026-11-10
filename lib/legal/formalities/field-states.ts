@@ -7,6 +7,7 @@
 
 import { legalDocuments } from "@/lib/i18n/fr/legal-documents";
 import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
+import { answeredOnScreen } from "@/lib/legal/formalities/answered";
 import {
   SACEM_725_FIELDS,
   formalityMissingLabel,
@@ -122,9 +123,15 @@ export function fieldStates(input: {
     return [];
   });
   const keys = new Set(SACEM_725_FIELDS.map((f) => f.key));
+  const values = Object.fromEntries(
+    Object.entries(entries).map(([k, e]) => [k, e.value]),
+  );
+  // The codes come from the last save: one filled on screen since (a first
+  // name, a role…) is no longer « à faire ».
   const others = input.missing
     .filter((code) => !keys.has(code) && !FIELD_CODES.has(code))
     .filter((code) => !code.startsWith("to_verify:"))
+    .filter((code) => !answeredOnScreen(code, values))
     .map((code): FieldStateEntry => ({
       key: code,
       section: sectionOfCode(code),

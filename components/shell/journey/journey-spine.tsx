@@ -29,9 +29,11 @@ const t = fr.journey;
  * The journey on the left of a module (docs/VISION-UX.md § 4, proto
  * « Projet complet »): each step, its state, who acts on it or what it gave,
  * the viewer's own steps marked « À vous ». States: done (green check),
- * current (blue dot; full blue when it is the viewer's), waiting and rework
- * (warning), locked (dashed, lock, « Après : … »), obsolete (struck through);
- * a reported blocker adds a stop icon, an alert a red subtitle. Steps with a
+ * current (blue dot; full blue when it is the viewer's, also when the step
+ * waits for the viewer), waiting and rework (warning), locked (dashed,
+ * lock, « Après : … »), obsolete (struck through); a reported blocker adds
+ * a stop icon, an alert a red subtitle (warning for a decision awaited,
+ * which is not an error). Steps with a
  * `group` sit under its intertitle. The open step is the page shown on the
  * right (`openKey`, else the one whose URL is the current path); `title`
  * defaults to « Parcours » (« Parcours · Stratégie » via `t.titleOf`);
@@ -148,7 +150,7 @@ function StepMark({ step: s }: { step: JourneyStep }) {
       ? s.reserve
         ? "reserve"
         : "done"
-      : s.status === "current"
+      : s.status === "current" || (s.status === "waiting" && mine)
         ? mine
           ? "mine"
           : "current"
@@ -183,7 +185,12 @@ function StepSub({
   let text: string | null = null;
   let tone: "me" | "warn" | null = null;
   if (s.status === "done") text = s.summary;
-  else if (s.status === "waiting") {
+  // Waiting for the viewer (the validator looking at it): their turn, not a
+  // wait (Sacha, 10/11/2026).
+  else if (s.status === "waiting" && mine && todo) {
+    text = t.joinTodo(t.me, todo);
+    tone = "me";
+  } else if (s.status === "waiting") {
     const who = t.waitingFor(s.actor?.name ?? "—");
     text = todo ? t.joinTodo(who, todo) : who;
     tone = "warn";
@@ -198,9 +205,19 @@ function StepSub({
     const missing = prereqsOf(s, steps).filter((p) => !p.done);
     text = missing.length ? t.after(missing.map(withModule).join(", ")) : null;
   }
-  if (s.alert && s.status !== "done")
+  // Red is for what went wrong (a missed due date, what blocks); a decision
+  // awaited is not an error: warning, like any wait (Sacha, 10/11/2026).
+  // The decision is the viewer's own: « À vous : valider… » says it.
+  if (s.alert && s.status !== "done" && !(s.alert === "decision" && mine))
     return (
-      <span className="text-[length:var(--type-caption)] leading-snug font-semibold text-[color:var(--tone-danger-fg)]">
+      <span
+        className={cn(
+          "text-[length:var(--type-caption)] leading-snug font-semibold",
+          s.alert === "decision"
+            ? "text-[color:var(--tone-warning-fg)]"
+            : "text-[color:var(--tone-danger-fg)]",
+        )}
+      >
         {[t.alert[s.alert], text].filter(Boolean).join(" · ")}
       </span>
     );

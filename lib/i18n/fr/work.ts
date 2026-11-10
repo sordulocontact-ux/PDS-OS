@@ -95,7 +95,6 @@ export const work = {
   // who validates, what follows.
   lead: {
     label: "Maintenant",
-    mine: "À vous",
     nothing: "Rien à faire pour vous",
     allDone: "Tout ce qui vous concerne est fait",
     othersMove:
@@ -104,6 +103,8 @@ export const work = {
     due: (day: string) => `avant le ${day}`,
     validator: "Validation",
     then: "Ensuite",
+    // The next step falls to the viewer again: « Les 6 dimensions · vous ».
+    you: "vous",
     // Rows with no step behind them: the sentence the page says.
     why: {
       task: "Une tâche qui vous est confiée dans ce projet, en dehors des étapes de ses workflows.",

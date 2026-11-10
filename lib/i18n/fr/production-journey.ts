@@ -89,7 +89,7 @@ export const productionJourney = {
   },
   todo: {
     organize: "Choisir qui produit",
-    callPlan: "Planifier le call",
+    callPlan: "Planifier le call de production",
     callReport: "Après le call, lancer le compte rendu",
     callProposals: "Trancher les tâches proposées par PO",
     prepare: "Trancher les points proposés par PO",
@@ -112,17 +112,17 @@ export const productionJourney = {
         ? "Faire avancer 1 tâche de préproduction"
         : `Faire avancer ${n} tâches de préproduction`,
     gearList: "Lister les besoins en matériel",
-    team: "Compléter l'équipe",
+    team: "Compléter l'équipe du tournage",
     locationsPropose: "Proposer des lieux",
     locationsChoose: "Retenir un lieu",
     callSheet: "Compléter et diffuser la feuille de service",
-    ready: "Confirmer : préparation validée",
-    readyAgain: "Contrôler à nouveau la préparation",
+    ready: "Confirmer que la préparation du tournage est validée",
+    readyAgain: "Contrôler à nouveau la préparation du tournage",
     readyDecide: "Décider la dérogation avant tournage",
     shootDone: "Confirmer que le tournage a eu lieu",
     rushesLink: "Transmettre le lien des rushes",
     rushesReceived: "Confirmer la réception des rushes",
-    rushesBackup: "Vérifier la sauvegarde",
+    rushesBackup: "Vérifier la sauvegarde des rushes",
   },
   summary: {
     organization: {

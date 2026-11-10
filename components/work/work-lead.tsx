@@ -6,9 +6,10 @@ import { ViewLink } from "@/components/ui/view-link";
 import { work } from "@/lib/i18n/fr/work";
 import { overdueTone } from "@/lib/ui/state-tones";
 import { cn } from "@/lib/utils";
+import { formatDay } from "@/lib/utils/day";
 import type { WorkRow } from "@/lib/work/rows";
 
-import { rowBadge, titleOf, whereOf } from "./work-row";
+import { ModuleTag, placeOf, ProjectTag, rowBadge, titleOf } from "./work-row";
 
 const fr = { work };
 
@@ -47,21 +48,30 @@ export function WorkLead({
     );
 
   const badge = rowBadge(row);
+  // The tags say the project and the module: what is left, where in it and
+  // by when.
+  const context = [placeOf(row), row.due ? t.due(formatDay(row.due)) : null]
+    .filter(Boolean)
+    .join(" · ");
   const facts = [
     row.validator ? { label: t.validator, value: row.validator } : null,
     row.then.length > 0 ? { label: t.then, value: row.then.join(", ") } : null,
   ].filter((fact) => fact !== null);
   return (
     <NowFrame label={t.label}>
+      {/* Which project, which workflow, as tags first (retour d'Akili du
+          01/11/2026: a task must read at first glance, among many); the
+          place in the module only when the action does not say it. */}
       <div className="flex flex-wrap items-center gap-2 text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-secondary)]">
-        <StatusBadge tone="info">{t.mine}</StatusBadge>
+        <ProjectTag row={row} />
+        <ModuleTag row={row} />
         {row.overdue && (
-          <StatusBadge tone={overdueTone}>
+          <StatusBadge tone={overdueTone} size="sm">
             {fr.work.journeys.overdue}
           </StatusBadge>
         )}
         {badge}
-        <span>{whereOf(row)}</span>
+        {context && <span>{context}</span>}
       </div>
       <h2 className="text-[length:var(--type-display-sm)] leading-[var(--type-display-sm-lh)] font-medium tracking-[var(--type-display-tracking)] text-balance">
         <MarkedText text={titleOf(row)} />

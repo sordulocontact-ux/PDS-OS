@@ -19,6 +19,8 @@
 //   session's rushes); it never sees the rest of the Drive;
 // - meetings.space.settings: turns on Meet's automatic transcription of a call;
 // - meetings.space.readonly: reads a call's Meet transcript afterwards.
+// - youtube.readonly: reads the public statistics of a YouTube video (any
+//   channel) for « Relever les statistiques » of an activation.
 import { createServer } from "node:http";
 
 // From the arguments, else from the environment (never in argv then: `ps`
@@ -41,6 +43,8 @@ const SCOPE = [
   "https://www.googleapis.com/auth/drive.file",
   "https://www.googleapis.com/auth/meetings.space.settings",
   "https://www.googleapis.com/auth/meetings.space.readonly",
+  // Public statistics of YouTube videos (activations, 10/11/2026).
+  "https://www.googleapis.com/auth/youtube.readonly",
 ].join(" ");
 
 const server = createServer(async (request, response) => {

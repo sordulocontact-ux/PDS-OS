@@ -46,7 +46,7 @@ export function mappingPill(
   if (row.compatible.length === 0)
     return request?.pending
       ? { tone: "warning", label: c.pendingTemplate }
-      : { tone: "danger", label: c.missingTemplate };
+      : { tone: "warning", label: c.missingTemplate };
   return { tone: "info", label: c.needed };
 }
 

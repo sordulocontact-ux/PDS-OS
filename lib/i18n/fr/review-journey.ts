@@ -69,11 +69,11 @@ export const reviewJourney = {
   todo: {
     prepare: (n: number) => `Préparer la version ${n} du bilan`,
     submit: "Soumettre le bilan à validation",
-    resubmit: (n: number) => `Soumettre de nouveau la V${n}`,
+    resubmit: (n: number) => `Soumettre de nouveau le bilan V${n}`,
     approve: "Approuver le bilan provisoire",
     arbitrate: (n: number) => `Arbitrer ${n} réserve${s(n)}`,
     lift: (text: string) => `Lever : ${text}`,
-    request: "Demander la clôture",
+    request: "Demander la clôture du Marketing",
     close: "Clôturer le Marketing",
   },
   summary: {

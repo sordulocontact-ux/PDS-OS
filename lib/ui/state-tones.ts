@@ -189,7 +189,8 @@ export const budgetStatusTone: Record<string, Tone> = {
 export const designStateTone: Record<string, Tone> = {
   to_design: "neutral",
   submitted: "warning",
-  changes_requested: "danger",
+  // A normal return of the review, not an error: warning (Sacha, 10/11/2026).
+  changes_requested: "warning",
   approved: "success",
   discarded: "neutral",
 };
@@ -377,15 +378,16 @@ export const strategyDocumentTone: Record<string, Tone> = {
   pending: "neutral",
   sent: "action",
   approved: "success",
-  changes_requested: "danger",
+  changes_requested: "warning",
   superseded: "neutral",
 };
 
 /** A signal of the engineer (PROJ-AMEL-02): to handle, handled. */
 export const engineerSignalTone: Record<string, Tone> = {
   open: "warning",
-  // A delay sent to the direction (proto « Chez la direction »).
-  escalated: "danger",
+  // A delay sent to the direction (proto « Chez la direction »): waiting
+  // for its decision, not an error.
+  escalated: "warning",
   handled: "success",
 };
 
@@ -405,14 +407,15 @@ export const workStatusFileTone: Record<string, Tone> = {
   final: "success",
 };
 
-/** A value of a contract to generate (JUR-16): blocking ones in red. */
+/** A value of a contract to generate (JUR-16): an invalid one in red; a
+ * missing one is still to fill, not an error (Sacha, 10/11/2026). */
 export const contractValueTone: Record<string, Tone> = {
   filled: "success",
   unconfirmed: "warning",
   not_applicable: "neutral",
   waiting: "info",
   invalid: "danger",
-  missing: "danger",
+  missing: "warning",
 };
 
 /** An item of the Brief between two versions (MKT-S1-16). */
@@ -666,7 +669,7 @@ export const designReviewTone: Record<string, Tone> = {
   approved: "success",
   ready_for_production: "success",
   transferred: "success",
-  changes_requested: "danger",
+  changes_requested: "warning",
   rejected: "danger",
   withdrawn: "neutral",
 };
@@ -1065,7 +1068,8 @@ export const distributionEvidenceTone: Record<
   none: "neutral",
   declared: "warning",
   proven: "info",
-  corrections: "danger",
+  // « Corrections demandées »: for the team to do, not a refusal.
+  corrections: "warning",
 };
 
 // A Marketing report version (ticket « Suivi & bilan »): generated, waiting
