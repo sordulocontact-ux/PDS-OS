@@ -58,6 +58,7 @@ export function CallProcessing({
   errorCode,
   hasTranscript,
   fromMeet = false,
+  ownerName = null,
 }: {
   projectId: string | null;
   callId: string;
@@ -66,6 +67,8 @@ export function CallProcessing({
   hasTranscript: boolean;
   // Taken from the call's Meet: no recording, the transcript came first.
   fromMeet?: boolean;
+  // The project's owner, the only one who relaunches a failed processing.
+  ownerName?: string | null;
 }) {
   const t = fr.calls.process;
   const router = useRouter();
@@ -187,11 +190,15 @@ export function CallProcessing({
           <p role="alert" className="text-sm text-error">
             {errorText(error ?? errorCode)}
           </p>
-          {canEdit && (
+          {canEdit ? (
             <Button onClick={() => void run()} className="justify-self-start">
               {t.retry}
             </Button>
-          )}
+          ) : ownerName ? (
+            <p className="text-sm text-muted-foreground">
+              {t.retryBy(ownerName)}
+            </p>
+          ) : null}
         </div>
       )}
     </div>

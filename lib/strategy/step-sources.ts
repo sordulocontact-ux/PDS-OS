@@ -23,6 +23,8 @@ export type StrategyCallInfo = {
   recorded: boolean;
   // Its report exists: PO proposed what was said.
   reported: boolean;
+  // Its transcription or its report failed: the owner relaunches it.
+  failed: boolean;
 };
 
 /** The project's strategy exchange (strategy_calls), the latest prepared. */
@@ -47,6 +49,7 @@ export async function loadStrategyCall(
     createdAt: data.created_at,
     recorded: Boolean(data.call.audio_path) || data.call.status !== "draft",
     reported: (data.call.call_reports ?? []).length > 0,
+    failed: data.call.status === "failed",
   };
 }
 

@@ -5,6 +5,7 @@
 // from what the project records (rule 6), never stored. Client-safe.
 
 import { routes } from "@/lib/auth/redirects";
+import { relaunchTodo, type ExchangeCall } from "@/lib/calls/exchange-todo";
 import type { SheetPhase } from "@/lib/design/sheet-phase";
 import { designJourney as frDesignJourney } from "@/lib/i18n/fr/design-journey";
 import type {
@@ -53,7 +54,7 @@ export type DesignJourneyInput = {
   validator: JourneyPerson | null;
   path: "direct" | "call" | null;
   // The creative exchange created; `held` once its report exists.
-  call: { occurredAt: string; held: boolean } | null;
+  call: ExchangeCall | null;
   intentions: { proposed: number; confirmed: number };
   references: { total: number; unattached: number };
   direction: DirectionPhase;
@@ -130,7 +131,10 @@ export function designJourney(i: DesignJourneyInput): JourneyStep[] {
       ? actorOf(i.owner, t.todo.choose)
       : i.path === "call" && !i.call
         ? actorOf(i.owner, t.todo.createCall)
-        : null;
+        : // Its processing failed: the owner relaunches the report.
+          i.path === "call" && i.call?.failed
+          ? actorOf(i.owner, relaunchTodo(i.call))
+          : null;
   const home = step(
     "home",
     !i.strategy.validated ? "blocked" : homeDone ? "done" : "current",

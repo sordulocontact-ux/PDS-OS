@@ -42,6 +42,7 @@ async function loadDesignCall(projectId: string) {
     occurredAt: data.call.occurred_at,
     recorded: Boolean(data.call.audio_path) || data.call.status !== "draft",
     held: (data.call.call_reports ?? []).length > 0,
+    failed: data.call.status === "failed",
   };
 }
 export type DesignCallInfo = NonNullable<
@@ -207,7 +208,9 @@ const readDesignContext = byProjectVersion(
       creative,
       validator,
       path: start.path,
-      call: call ? { occurredAt: call.occurredAt, held: call.held } : null,
+      call: call
+        ? { occurredAt: call.occurredAt, held: call.held, failed: call.failed }
+        : null,
       intentions: {
         proposed: data.intentions.filter((i) => i.status === "proposed").length,
         confirmed: data.intentions.filter((i) => i.status === "confirmed")

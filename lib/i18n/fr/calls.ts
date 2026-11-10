@@ -242,6 +242,11 @@ export const calls = {
     },
     stepDone: "terminé",
     retry: "Réessayer",
+    // Read by anyone else than the project's owner: only they relaunch.
+    retryBy: (name: string) => `${name} peut relancer le traitement.`,
+    // The module's journey when the exchange's processing failed.
+    relaunchOn: (day: string) =>
+      `Relancer le compte rendu de l'échange du ${day}`,
     hint: "Quelques minutes pour un call long. Gardez cette page ouverte : vous arriverez sur le Cadrage à la fin.",
     meetingHint:
       "Quelques minutes pour une réunion longue. Gardez cette page ouverte : le compte rendu s'affichera ici.",
@@ -392,8 +397,10 @@ export const calls = {
     // The member's daily limit of requests to PO (lib/ai/quota.ts).
     ai_quota:
       "Limite du jour de requêtes à PO atteinte : le compteur repart à zéro à minuit ; le directeur général peut l'augmenter dans Équipe.",
+    // Transcription (Groq) or report (LLM): the step that failed is the one
+    // left unchecked above the message.
     provider_error:
-      "Le service de transcription n'a pas répondu. Réessayez dans un moment ; si ça continue, prévenez l'équipe technique.",
+      "Le service d'IA n'a pas répondu. Réessayez dans un moment ; si ça continue, prévenez l'équipe technique.",
     transcript_empty:
       "Rien d'exploitable dans l'enregistrement : aucune parole n'a été entendue (micro coupé ?). Aucun compte rendu n'a été fait : réenregistrez, ou importez un autre fichier.",
     save_failed: "Le résultat n'a pas pu être enregistré. Réessayez.",

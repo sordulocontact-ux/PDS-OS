@@ -124,6 +124,7 @@ export function CallNow({
           errorCode={call.errorCode}
           hasTranscript={hasTranscript}
           fromMeet={fromMeet}
+          ownerName={ownerName}
         />
       </CallNowBlock>
     );

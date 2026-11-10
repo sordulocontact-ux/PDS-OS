@@ -25,6 +25,8 @@ export type FramingCallInfo = {
   recorded: boolean;
   // Its report exists: PO proposed what was said.
   reported: boolean;
+  // Its transcription or its report failed: the owner relaunches it.
+  failed: boolean;
 };
 
 /** The project's framing call (framing_calls), the latest prepared. */
@@ -50,6 +52,7 @@ async function loadFramingCall(
     goal: data.purpose,
     recorded: Boolean(data.call.audio_path) || data.call.status !== "draft",
     reported: (data.call.call_reports ?? []).length > 0,
+    failed: data.call.status === "failed",
   };
 }
 
@@ -114,7 +117,13 @@ export const framingJourneyContext = trackedCache(
             viaLink: false,
           }
         : null,
-      call: call ? { occurredAt: call.occurredAt, held: call.reported } : null,
+      call: call
+        ? {
+            occurredAt: call.occurredAt,
+            held: call.reported,
+            failed: call.failed,
+          }
+        : null,
       startedDirect: framingStarted(k),
       stage,
       dimensions: {

@@ -168,7 +168,13 @@ async function readStrategyStepData(projectId: string) {
     plan: { launched, at: launchedAt },
     stage,
     started: data.started,
-    call: call ? { occurredAt: call.occurredAt, held: call.reported } : null,
+    call: call
+      ? {
+          occurredAt: call.occurredAt,
+          held: call.reported,
+          failed: call.failed,
+        }
+      : null,
     dims: {
       ready: model.ready,
       pending: model.pending,

@@ -6,6 +6,7 @@
 // never stored. Client-safe.
 
 import { routes } from "@/lib/auth/redirects";
+import { exchangeTodo, type ExchangeCall } from "@/lib/calls/exchange-todo";
 import { strategyDimensions } from "@/lib/i18n/fr/strategy-dimensions";
 import { strategyJourney as frStrategyJourney } from "@/lib/i18n/fr/strategy-journey";
 import type {
@@ -45,7 +46,7 @@ export type StrategyJourneyInput = {
   stage: string;
   // « Commencer la stratégie » (strategy_workspaces), or a call filed.
   started: boolean;
-  call: { occurredAt: string; held: boolean } | null;
+  call: ExchangeCall | null;
   dims: {
     ready: boolean;
     pending: number;
@@ -172,11 +173,7 @@ export function strategyJourney(i: StrategyJourneyInput): JourneyStep[] {
     next: ["dimensions"],
     actor:
       i.plan.launched && !startDone
-        ? owned(
-            i.call
-              ? t.todo.holdOn(formatShortDay(i.call.occurredAt, { bare: true }))
-              : t.todo.start,
-          )
+        ? owned(i.call ? exchangeTodo(i.call, t.todo.holdOn) : t.todo.start)
         : null,
     summary: startDone
       ? i.call?.held

@@ -5,6 +5,7 @@
 // records (rule 6), never stored. Client-safe.
 
 import { routes } from "@/lib/auth/redirects";
+import { exchangeTodo, type ExchangeCall } from "@/lib/calls/exchange-todo";
 import { framingJourney as frFramingJourney } from "@/lib/i18n/fr/framing-journey";
 import type {
   JourneyPerson,
@@ -26,7 +27,7 @@ export type FramingJourneyInput = {
   owner: JourneyPerson | null;
   validator: JourneyPerson | null;
   // The framing call (framing_calls), when one was prepared.
-  call: { occurredAt: string; held: boolean } | null;
+  call: ExchangeCall | null;
   // Started straight with PO (framingStarted, no call).
   startedDirect: boolean;
   // Framing stage state (project_stages).
@@ -78,11 +79,7 @@ export function framingJourney(i: FramingJourneyInput): JourneyStep[] {
     next: ["dimensions"],
     actor: startDone
       ? null
-      : owned(
-          i.call
-            ? t.todo.holdOn(formatShortDay(i.call.occurredAt, { bare: true }))
-            : t.todo.start,
-        ),
+      : owned(i.call ? exchangeTodo(i.call, t.todo.holdOn) : t.todo.start),
     summary: startDone
       ? i.call?.held
         ? t.summary.exchange(formatShortDay(i.call.occurredAt, { bare: true }))

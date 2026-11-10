@@ -46,6 +46,7 @@ export async function PlannedCallInPlace({
         status={state.status}
         errorCode={state.errorCode}
         hasTranscript={state.hasTranscript}
+        ownerName={waiting?.name ?? null}
       />
     );
   return (
