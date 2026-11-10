@@ -1,5 +1,6 @@
 "use client";
 
+import { StepSection } from "@/components/shell/journey/step-section";
 import { FilterChip } from "@/components/ui/filter-chip";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { DesignCallDeliverable } from "@/lib/design/call-prep";
@@ -19,7 +20,7 @@ export function CallDeliverablesField({
   selected,
   onToggle,
 }: {
-  // Heading id, for aria-labelledby.
+  // Anchor id of the section.
   id: string;
   deliverables: DesignCallDeliverable[];
   selected: ReadonlySet<string>;
@@ -27,15 +28,11 @@ export function CallDeliverablesField({
 }) {
   const t = fr.conceptionCall;
   return (
-    <section aria-labelledby={id} className="flex flex-col gap-3">
-      <div className="flex flex-col gap-1">
-        <h3 id={id} className="text-sm font-medium">
-          {t.deliverables}
-        </h3>
-        <p className="text-caption text-muted-foreground">
-          {deliverables.length ? t.deliverablesHint : t.noDeliverables}
-        </p>
-      </div>
+    <StepSection
+      id={id}
+      title={t.deliverables}
+      description={deliverables.length ? t.deliverablesHint : t.noDeliverables}
+    >
       {deliverables.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {deliverables.map((d) => (
@@ -58,6 +55,6 @@ export function CallDeliverablesField({
           ))}
         </div>
       )}
-    </section>
+    </StepSection>
   );
 }

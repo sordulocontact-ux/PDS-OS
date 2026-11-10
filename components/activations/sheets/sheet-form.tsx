@@ -57,7 +57,7 @@ export function SheetForm({
         );
       }}
     >
-      {notice && <p className="text-sm text-muted-foreground">{notice}</p>}
+      {notice && <p className="text-body-sm text-muted-foreground">{notice}</p>}
       {keys.map((key) => {
         const source = values[key]?.source;
         return (

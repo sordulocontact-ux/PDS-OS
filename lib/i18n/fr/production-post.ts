@@ -230,8 +230,6 @@ export const productionPost = {
     follows: (n: number) => `Suit la V${n}`,
     earlier: (n: number) =>
       n === 1 ? "1 version précédente" : `${n} versions précédentes`,
-    earlierHint:
-      "Leurs retours et décisions restent consultables, séparés de la version en cours.",
   },
 
   comments: {

@@ -1,4 +1,5 @@
 import type { PortalCardItem } from "@/components/portal/portal-sections";
+import { StepWaiting } from "@/components/shell/journey/step-waiting";
 import { portal } from "@/lib/i18n/fr/portal";
 import { productionLink } from "@/lib/i18n/fr/production-link";
 import type { LinkJourney } from "@/lib/production/provider/journey";
@@ -52,9 +53,10 @@ export function linkQuoteCard(
             revision={j.quoteRevision?.reason ?? null}
           />
         ) : last?.status === "deposited" || last?.status === "submitted" ? (
-          <p className="rounded-xl bg-[var(--surface-soft)] px-3.5 py-3 text-[color:var(--text-secondary)]">
-            {last.status === "deposited" ? t.waitCheck : t.waitDecide}
-          </p>
+          <StepWaiting
+            who={t.pds}
+            todo={last.status === "deposited" ? t.waitCheck : t.waitDecide}
+          />
         ) : null}
       </>
     ),

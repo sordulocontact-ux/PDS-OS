@@ -1,10 +1,7 @@
 import type { PortalCardItem } from "@/components/portal/portal-sections";
 import { ComplementForm } from "@/components/legal/forms/complement-form";
 import { PublicForm } from "@/components/legal/forms/public-form";
-import {
-  DataUseNote,
-  RequesterNote,
-} from "@/components/legal/forms/requester-note";
+import { RequesterNote } from "@/components/legal/forms/requester-note";
 import { legalForms } from "@/lib/i18n/fr/legal-forms";
 import { portal } from "@/lib/i18n/fr/portal";
 import type { PublicForm as PublicFormData } from "@/lib/legal/forms/public";
@@ -36,20 +33,18 @@ export function formPortalCard({
     workflow: "legal",
     body:
       form.state === "open" ? (
-        <>
-          <p className="text-muted-foreground">
-            {t.intro(form.person, form.project, form.requester.organization)}
-          </p>
-          <PublicForm
-            token={linkKey}
-            prefillRoles={form.prefill.roles}
-            // Their own earlier answers win over what the project knows.
-            known={{ ...form.prefill.answers, ...form.known }}
-            requester={form.requester}
-          />
-          <RequesterNote requester={form.requester} />
-          <DataUseNote requester={form.requester} />
-        </>
+        <PublicForm
+          intro={t.intro(
+            form.person,
+            form.project,
+            form.requester.organization,
+          )}
+          token={linkKey}
+          prefillRoles={form.prefill.roles}
+          // Their own earlier answers win over what the project knows.
+          known={{ ...form.prefill.answers, ...form.known }}
+          requester={form.requester}
+        />
       ) : form.state === "complement" ? (
         <>
           <p className="text-muted-foreground">

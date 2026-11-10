@@ -9,6 +9,7 @@ import {
   StepPanel,
   type StepSlots,
 } from "@/components/shell/journey/step-panel";
+import { StepHistory } from "@/components/shell/journey/step-history";
 import { ModuleAttention } from "@/components/shell/module/module-attention";
 import {
   StepBlockers,
@@ -17,11 +18,12 @@ import {
 import { designJourneyContext } from "@/lib/design/journey-context";
 import type { DesignStepKey } from "@/lib/design/journey";
 import { designJourney } from "@/lib/i18n/fr/design-journey";
+import { designSteps } from "@/lib/i18n/fr/design-steps";
 import { journey } from "@/lib/i18n/fr/journey";
 import { stepChoiceKey, type StepRef } from "@/lib/step-tools/model";
 import { isLocked } from "@/lib/ui/journey";
 
-const fr = { journey, designJourney };
+const fr = { journey, designJourney, designSteps };
 
 const t = fr.designJourney;
 
@@ -53,6 +55,34 @@ export async function DesignStepFrame({
     key: stepChoiceKey({ module: "design", stepKey: s.key }),
     label: s.title,
   }));
+  const history =
+    stepKey !== "direction"
+      ? []
+      : [...ctx.direction.submissions]
+          .filter((s) => s.status !== "withdrawn")
+          .reverse()
+          .flatMap((s) => [
+            {
+              key: `${s.id}-s`,
+              text: fr.designSteps.direction.history.submitted(s.number),
+              who: s.submittedByName,
+              at: s.submittedAt,
+            },
+            ...s.decisions.map((d) => ({
+              key: d.id,
+              text:
+                (d.decision === "approved"
+                  ? fr.designSteps.direction.history.approved
+                  : d.decision === "rejected"
+                    ? fr.designSteps.direction.history.refused
+                    : fr.designSteps.direction.history.changes) +
+                (d.comment
+                  ? fr.designSteps.sheets.history.comment(d.comment)
+                  : ""),
+              who: d.decidedByName,
+              at: d.decidedAt,
+            })),
+          ]);
   const open = data.stage?.state === "in_progress";
   return (
     <div className="flex flex-col gap-5">
@@ -94,6 +124,7 @@ export async function DesignStepFrame({
           step={step}
           steps={steps}
           blockedLabel={t.blocked}
+          history={<StepHistory items={history} />}
           {...slots}
         >
           <StepBlockers stepRef={stepRef} steps={choices} />

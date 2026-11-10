@@ -375,8 +375,8 @@ export const framingIntel = {
     closeDetails: "Fermer",
     detailsSaved: "Relation et suivi enregistrés",
     found: (origins: string) => `Trouvé dans : ${origins}`,
-    suggestion: (status: string, contract: string) =>
-      `Contrat trouvé dans Contrats : « ${contract} ». Statut possible : ${status}.`,
+    // Added to « Trouvé dans », never a line of its own (Sacha 10/11/2026).
+    inContracts: (contract: string) => `Contrats (« ${contract} »)`,
     decidedBy: (name: string | null, date: string) =>
       `Qualifié${name ? ` par ${name}` : ""} le ${date}`,
     unassigned: (roles: string[]) =>

@@ -48,7 +48,7 @@ function RowChevron() {
 
 /** A row that says something (proto `.irow`): its title in semibold, a
  * 13 px source below, a badge on the right. With `href`, the whole row
- * opens that page, a chevron after the badge (« Avant les workflows » of
+ * opens that page (or, with `onClick`, runs it), a chevron after the badge (« Avant les workflows » of
  * the overview, Sacha 09/11/2026). With `leading` (a `StateMark`),
  * laid out as a `ProposalRow` it sits with (the Dispositif's levers under
  * PO's proposals, Sacha 07/11/2026). */
@@ -58,12 +58,15 @@ export function InfoRow({
   badge,
   leading,
   href,
+  onClick,
 }: {
   title: string;
   detail?: string;
   badge?: ReactNode;
   leading?: ReactNode;
   href?: string;
+  // Instead of `href`: the whole row is a button (a chevron after the badge).
+  onClick?: () => void;
 }) {
   if (leading)
     return (
@@ -100,6 +103,22 @@ export function InfoRow({
             <RowChevron />
           </span>
         </ViewLink>
+      </li>
+    );
+  if (onClick)
+    return (
+      <li>
+        <button
+          type="button"
+          onClick={onClick}
+          className={cn(row, "w-full cursor-pointer text-left", rowLink)}
+        >
+          {body}
+          <span className="flex items-center gap-3">
+            {badge}
+            <RowChevron />
+          </span>
+        </button>
       </li>
     );
   return (

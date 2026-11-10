@@ -57,8 +57,71 @@ export type StrategyJourneyInput = {
   brief: { version: number; state: string; waiting: JourneyPerson[] } | null;
   approved: { version: number } | null;
   revisionOpen: boolean;
-  documents: { plan: string; press: string };
+  // The Plan de sortie and the Dossier de presse: the latest version's
+  // state, whether a version was ever approved, who is asked to validate.
+  documents: Record<StrategyDocKey, StrategyDocInput>;
 };
+
+export type StrategyDocKey = "plan" | "press";
+export type StrategyDocInput = {
+  state: string;
+  approved: boolean;
+  waiting: JourneyPerson[];
+};
+
+/**
+ * What someone was asked about a document, and by whom: the Plan de sortie
+ * and the Dossier de presse are optional (ticket § 9: the Stratégie is
+ * validated with the Brief; Sacha, 10/11/2026: « si pour Ibé c'est
+ * facultatif, ça doit l'être »), so preparing or sending one is nobody's
+ * task — only a validation asked for, or a change asked back. Its gesture
+ * opens the generator's preview.
+ */
+export function strategyDocumentActors(
+  i: StrategyJourneyInput,
+): Array<{ doc: StrategyDocKey; actor: JourneyActor }> {
+  if (!i.approved) return [];
+  const route = (doc: StrategyDocKey, step?: number) =>
+    doc === "plan"
+      ? routes.projectStrategyReleasePlan(i.projectId, step)
+      : routes.projectStrategyPressKit(i.projectId, step);
+  return (["plan", "press"] as const).flatMap(
+    (doc): Array<{ doc: StrategyDocKey; actor: JourneyActor }> => {
+      const d = i.documents[doc];
+      if (d.approved) return [];
+      const name = t.documents[doc];
+      if (d.state === "sent") {
+        const me = d.waiting.find((p) => p.viewer);
+        const first = me ?? d.waiting[0];
+        if (!first) return [];
+        return [
+          {
+            doc,
+            actor: {
+              ...first,
+              name: me ? me.name : t.names(d.waiting.map((p) => p.name)),
+              todo: t.todo.validateDoc(name),
+              kind: "validate" as const,
+              href: route(doc, 8),
+            },
+          },
+        ];
+      }
+      if (!i.owner || d.state !== "changes_requested") return [];
+      return [
+        {
+          doc,
+          actor: {
+            ...i.owner,
+            todo: t.todo.answerDoc(name),
+            kind: "do" as const,
+            href: route(doc, 8),
+          },
+        },
+      ];
+    },
+  );
+}
 
 const t = fr.strategyJourney;
 const dimName = (key: string) =>
@@ -214,6 +277,8 @@ export function strategyJourney(i: StrategyJourneyInput): JourneyStep[] {
 
   // 4. Stratégie validée: the documents and what the decisions feed. A
   // revision in progress keeps the validated version as the reference.
+  // Done with the Brief (ticket § 9): the Plan de sortie and the Dossier de
+  // presse are optional and never hold the Stratégie open.
   const v = i.approved?.version ?? 1;
   const validatedStep: JourneyStep = {
     key: "validated",
@@ -228,12 +293,20 @@ export function strategyJourney(i: StrategyJourneyInput): JourneyStep[] {
     next: [],
     actor: null,
     summary: i.approved
-      ? t.summary.final(v, i.documents.plan, i.documents.press)
+      ? t.summary.final(
+          v,
+          docSummaryState(i, "plan"),
+          docSummaryState(i, "press"),
+        )
       : null,
   };
 
   return [start, dimensions, validation, validatedStep];
 }
+
+// « validé » once a version was validated, whatever a newer draft says.
+const docSummaryState = (i: StrategyJourneyInput, doc: StrategyDocKey) =>
+  i.documents[doc].approved ? "approved" : i.documents[doc].state;
 
 /** The step a person lands on: their own open step, else the first open. */
 export function strategyLanding(steps: JourneyStep[]): StrategyStepKey {

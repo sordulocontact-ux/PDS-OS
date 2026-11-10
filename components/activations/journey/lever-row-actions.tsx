@@ -15,7 +15,7 @@ const t = fr.activationJourney.banner;
 /**
  * A lever's gestures (proto ac0): the mode for Influence and RP, « Créer
  * l'activation » in one click, « Plus tard ». A lever kept for later only
- * offers « Créer ». The new activation opens on the right.
+ * offers « Créer ». The new activation's page opens (`open` of the result).
  */
 export function LeverRowActions({
   projectId,
@@ -54,12 +54,7 @@ export function LeverRowActions({
             />
           </div>
         )}
-        <Button
-          type="submit"
-          size="sm"
-          variant={later ? "ghost" : "outline"}
-          disabled={pending}
-        >
+        <Button type="submit" size="sm" variant="outline" disabled={pending}>
           {later ? t.createShort : t.create}
         </Button>
         {!later && (

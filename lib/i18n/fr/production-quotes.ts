@@ -6,6 +6,7 @@
 export const productionQuotes = {
   title: "Devis",
   versions: "Versions du devis",
+  earlier: (n: number) => `Versions précédentes (${n})`,
   empty: {
     external: (company: string) =>
       `En attente du devis de ${company}, sur son lien privé.`,

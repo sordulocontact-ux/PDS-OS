@@ -39,6 +39,8 @@ export function UnlaunchedOverview({
   people,
   creatives,
   creativeTeam,
+  cover,
+  subtitle,
 }: {
   project: ProjectDetail;
   viewerPersonId: string | null;
@@ -47,6 +49,9 @@ export function UnlaunchedOverview({
   creatives: CreativeMember[];
   // The creative directors' list, managed in « Qui fait quoi ».
   creativeTeam: React.ReactNode;
+  // The head of every project (ProjectCover, « Artiste · Type »).
+  cover?: React.ReactNode;
+  subtitle?: string;
 }) {
   const t = fr.transmission.page;
   const latest = project.assignments[0] ?? null;
@@ -110,6 +115,8 @@ export function UnlaunchedOverview({
           { label: project.title },
         ]}
         title={project.title}
+        media={cover}
+        subtitle={subtitle}
         actions={
           <WhoDoesWhatButton
             roles={[

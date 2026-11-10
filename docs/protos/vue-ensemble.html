@@ -1,0 +1,585 @@
+<title>Vue d'ensemble PDS OS</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@500;600;700&display=swap">
+<style>
+/* Tokens recopiés de app/globals.css (docs/DESIGN.md). */
+:root{
+  --text-primary:#000;--text-secondary:#5e5e5e;--text-tertiary:#767676;--text-muted:#afafaf;
+  --surface-app:#fbfbfb;--surface-page:#fff;--surface-raised:#fff;--surface-soft:#f4f4f4;--surface-sunken:#ececec;
+  --surface-pressed:#e2e2e2;--surface-tint:rgb(64 64 64 / .06);
+  --border-hairline:#ececec;--border-default:#d4d4d4;--border-hover:#afafaf;
+  --nav-bg:#fff;--nav-fg:#000;--nav-fg-muted:#767676;--nav-item-hover-bg:#f4f4f4;--nav-item-active-bg:#ececec;--nav-border:rgb(0 0 0 / .08);
+  --nav-brand-bg:#000;--nav-brand-fg:#fff;
+  --tone-neutral-bg:#ececec;--tone-neutral-fg:#111;--tone-info-bg:#e2eefc;--tone-info-fg:#0b3d8c;
+  --tone-warning-bg:#fcefd2;--tone-warning-fg:#6e4300;--tone-success-bg:#daf3e2;--tone-success-fg:#0d5226;
+  --tone-danger-bg:#fce1df;--tone-danger-fg:#9a1b1b;--tone-action-bg:#ececec;--tone-action-fg:#111;
+  --selection:#155dfc;--selection-bg:rgb(21 93 252 / .07);
+  --primary-bg:#000;--primary-fg:#fff;--primary-hover:#282828;--control-hover:#f4f4f4;
+  --shadow-card:0 1px 2px rgb(0 0 0 / .04),0 2px 8px rgb(0 0 0 / .04);
+  --glass:rgb(20 20 20 / .82);--glass-fg:#fff;--glass-2:#b5b5b5;
+  --font:"Google Sans Flex",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --ease:cubic-bezier(.23,1,.32,1);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --text-primary:#ededed;--text-secondary:#a8a8a8;--text-tertiary:#8f8f8f;--text-muted:#5e5e5e;
+  --surface-app:#0a0a0a;--surface-page:#0f0f0f;--surface-raised:#161616;--surface-soft:rgb(255 255 255 / .05);--surface-sunken:rgb(255 255 255 / .08);
+  --surface-pressed:rgb(255 255 255 / .12);--surface-tint:rgb(255 255 255 / .06);
+  --border-hairline:rgb(255 255 255 / .08);--border-default:rgb(255 255 255 / .12);--border-hover:rgb(255 255 255 / .28);
+  --nav-bg:#0f0f0f;--nav-fg:#ededed;--nav-fg-muted:#8f8f8f;--nav-item-hover-bg:rgb(255 255 255 / .05);--nav-item-active-bg:rgb(255 255 255 / .09);--nav-border:rgb(255 255 255 / .08);
+  --nav-brand-bg:#ededed;--nav-brand-fg:#000;
+  --tone-neutral-bg:#262626;--tone-neutral-fg:#d4d4d4;--tone-info-bg:#12233d;--tone-info-fg:#9ec5ff;
+  --tone-warning-bg:#33260c;--tone-warning-fg:#f5c869;--tone-success-bg:#0f2e1c;--tone-success-fg:#7fdca0;
+  --tone-danger-bg:#3a1616;--tone-danger-fg:#ff9b94;--tone-action-bg:#262626;--tone-action-fg:#ededed;
+  --selection:#4d8bff;--selection-bg:rgb(77 139 255 / .12);
+  --primary-bg:#ededed;--primary-fg:#000;--primary-hover:#d4d4d4;--control-hover:rgb(255 255 255 / .05);
+  --shadow-card:0 0 0 1px rgb(255 255 255 / .02);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --text-primary:#ededed;--text-secondary:#a8a8a8;--text-tertiary:#8f8f8f;--text-muted:#5e5e5e;
+  --surface-app:#0a0a0a;--surface-page:#0f0f0f;--surface-raised:#161616;--surface-soft:rgb(255 255 255 / .05);--surface-sunken:rgb(255 255 255 / .08);
+  --surface-pressed:rgb(255 255 255 / .12);--surface-tint:rgb(255 255 255 / .06);
+  --border-hairline:rgb(255 255 255 / .08);--border-default:rgb(255 255 255 / .12);--border-hover:rgb(255 255 255 / .28);
+  --nav-bg:#0f0f0f;--nav-fg:#ededed;--nav-fg-muted:#8f8f8f;--nav-item-hover-bg:rgb(255 255 255 / .05);--nav-item-active-bg:rgb(255 255 255 / .09);--nav-border:rgb(255 255 255 / .08);
+  --nav-brand-bg:#ededed;--nav-brand-fg:#000;
+  --tone-neutral-bg:#262626;--tone-neutral-fg:#d4d4d4;--tone-info-bg:#12233d;--tone-info-fg:#9ec5ff;
+  --tone-warning-bg:#33260c;--tone-warning-fg:#f5c869;--tone-success-bg:#0f2e1c;--tone-success-fg:#7fdca0;
+  --tone-danger-bg:#3a1616;--tone-danger-fg:#ff9b94;--tone-action-bg:#262626;--tone-action-fg:#ededed;
+  --selection:#4d8bff;--selection-bg:rgb(77 139 255 / .12);
+  --primary-bg:#ededed;--primary-fg:#000;--primary-hover:#d4d4d4;--control-hover:rgb(255 255 255 / .05);
+  --shadow-card:0 0 0 1px rgb(255 255 255 / .02);
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--surface-app);color:var(--text-primary);font-family:var(--font);font-weight:500;font-size:16px;line-height:24px;letter-spacing:-.02em;-webkit-font-smoothing:antialiased}
+button,input,textarea,select{font:inherit;letter-spacing:inherit;color:inherit}
+h1,h2,h3,p{margin:0}
+:focus-visible{outline:2px solid var(--selection);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+
+:root{--rail:72px;--panel:232px}
+/* Visuel par défaut d'un projet sans pochette : deux teintes tirées du projet, un disque. */
+.cover-def{background:radial-gradient(120% 90% at 20% 15%,oklch(.78 .12 var(--h)) 0%,transparent 60%),linear-gradient(140deg,oklch(.42 .16 var(--h)) 0%,oklch(.18 .06 calc(var(--h) + 40)) 100%)}
+
+/* Coquille : rail d'icônes, panneau du projet, page blanche */
+.shell{display:flex;min-height:100%;background:var(--nav-bg)}
+.rail{position:sticky;top:0;height:100dvh;width:var(--rail);flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 0;background:var(--nav-bg);border-right:1px solid var(--nav-border)}
+.brand{width:44px;height:44px;border-radius:12px;background:var(--nav-brand-bg);color:var(--nav-brand-fg);display:grid;place-items:center;font-weight:700;font-size:17px;letter-spacing:-.04em;margin-bottom:14px}
+.ri{width:44px;height:44px;border-radius:10px;display:grid;place-items:center;color:var(--nav-fg);position:relative}
+.ri[aria-current="page"]{background:var(--nav-item-active-bg)}
+.ri .dotn{position:absolute;top:4px;right:3px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--primary-bg);color:var(--primary-fg);font-size:11px;line-height:18px;font-weight:600;text-align:center}
+.rail .grow{flex:1}
+.av{width:36px;height:36px;border-radius:50%;background:var(--surface-sunken);display:grid;place-items:center;font-size:13px;font-weight:600;letter-spacing:0}
+.panel{position:sticky;top:0;height:100dvh;width:var(--panel);flex-shrink:0;padding:12px;background:var(--nav-bg);border-right:1px solid var(--nav-border);overflow-y:auto}
+.switch{display:flex;align-items:center;justify-content:space-between;height:44px;padding:0 10px;border-radius:10px;font-weight:600;font-size:17px}
+.pnav{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:2px}
+.pnav a{display:flex;align-items:center;gap:10px;height:38px;padding:0 10px;border-radius:8px;color:var(--nav-fg);text-decoration:none;font-size:16px}
+.pnav a[aria-current="page"]{background:var(--nav-item-active-bg)}
+.pnav .grp{font-size:14px;color:var(--nav-fg-muted);padding:16px 10px 4px}
+.sd{width:7px;height:7px;border-radius:50%;background:var(--border-default);flex-shrink:0}
+.sd.cur{background:var(--selection)}.sd.done{background:var(--text-primary)}
+.pnav .cnt{margin-left:auto;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--selection);color:#fff;font-size:12px;line-height:20px;font-weight:600;text-align:center}
+.main{flex:1;min-width:0;background:var(--surface-page)}
+.bar{height:56px;display:flex;align-items:center;padding:0 32px;font-size:16px;border-bottom:1px solid var(--border-hairline)}
+.bar a{color:var(--text-secondary);text-decoration:none}
+.topm{display:none}
+
+/* Vue d'ensemble */
+.ov{max-width:1080px;margin:0 auto;padding:40px 32px 160px;display:flex;flex-direction:column;gap:32px}
+.head{display:flex;align-items:center;gap:20px}
+.head .id{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.head h1{font-size:36px;line-height:42px;letter-spacing:-.04em;font-weight:600;text-wrap:balance;overflow-wrap:anywhere}
+.head .who{font-size:16px;line-height:24px;color:var(--text-secondary)}
+.cover{position:relative;width:104px;height:104px;border-radius:14px;flex-shrink:0;overflow:hidden;box-shadow:inset 0 0 0 1px rgb(0 0 0 / .06)}
+.cover img{width:100%;height:100%;object-fit:cover;display:block}
+.cover svg.disc{position:absolute;inset:0;width:100%;height:100%;color:rgb(255 255 255 / .22)}
+.cover .edit{position:absolute;right:6px;bottom:6px;width:32px;height:32px;border-radius:50%;border:0;display:grid;place-items:center;background:rgb(0 0 0 / .55);color:#fff;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:12px;border:1px solid transparent;background:var(--primary-bg);color:var(--primary-fg);cursor:pointer;font-weight:500;font-size:16px;white-space:nowrap;text-decoration:none;transition:transform 140ms var(--ease),background-color 150ms ease}
+.btn:active{transform:scale(.97)}
+.btn.outline{background:var(--surface-page);color:var(--text-primary);border-color:var(--border-default)}
+.btn.ghost{background:none;color:var(--text-primary)}
+.btn.sm{height:36px;padding:0 14px;font-size:15px;border-radius:10px}
+.grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:16px;align-items:stretch}
+.card{display:flex;flex-direction:column;gap:16px;padding:24px;border-radius:16px;border:1px solid var(--border-default);background:var(--surface-raised)}
+.lbl{font-size:15px;line-height:22px;font-weight:600;color:var(--text-secondary);letter-spacing:-.01em}
+.now{gap:20px}
+.now .what{display:flex;flex-direction:column;gap:8px}
+.now .where{font-size:15px;color:var(--text-tertiary)}
+.act-t{margin:0;font-size:28px;line-height:34px;letter-spacing:-.04em;font-weight:600;text-wrap:balance}
+.now .sub{font-size:17px;line-height:26px;color:var(--text-secondary);text-wrap:pretty}
+.now .sub b{color:var(--text-primary);font-weight:600}
+.now .go{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px}
+.also{font-size:15px;color:var(--text-secondary)}
+.also button{background:none;border:0;padding:0;color:var(--text-primary);font-weight:600;cursor:pointer;text-decoration:underline;text-decoration-color:var(--border-hover);text-underline-offset:3px}
+
+/* Progression : étapes du Cadrage, puis workflows */
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.steps li{position:relative;display:grid;grid-template-columns:22px minmax(0,1fr);gap:14px;padding-bottom:18px}
+.steps li:last-child{padding-bottom:0}
+.steps li:not(:last-child)::before{content:"";position:absolute;left:10px;top:24px;bottom:2px;width:2px;border-radius:2px;background:var(--border-hairline)}
+.steps li.done:not(:last-child)::before{background:var(--text-primary)}
+.mk{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;margin-top:1px}
+.mk.done{background:var(--text-primary);color:var(--surface-page)}
+.mk.cur{box-shadow:inset 0 0 0 2px var(--selection)}.mk.cur::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--selection)}
+.mk.later{box-shadow:inset 0 0 0 1.5px var(--border-default)}
+.steps .t{font-size:16px;line-height:24px}
+.steps li.cur .t{color:var(--selection);font-weight:600}
+.steps li.later .t{color:var(--text-secondary)}
+.steps .c{font-size:14px;line-height:20px;color:var(--text-tertiary)}
+.steps li.cur .c.mine{color:var(--selection)}
+.wfs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.wf{display:grid;grid-template-columns:24px minmax(0,1fr) 16px;align-items:center;gap:14px;width:100%;padding:10px 8px;margin:0 -8px;border:0;border-radius:10px;background:none;text-align:left;cursor:pointer;color:var(--text-primary)}
+.wf .t{font-size:16px;line-height:24px}
+.wf .c{font-size:14px;line-height:20px;color:var(--text-tertiary)}
+.wf .c.mine{color:var(--selection)}
+.ring{color:var(--text-primary)}
+.chev{color:var(--text-tertiary)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.steps li>span:last-child{position:relative}
+
+/* Livrable */
+.deliv{flex-direction:row;align-items:center;gap:20px}
+.deliv .ic{width:52px;height:52px;border-radius:12px;background:var(--surface-soft);display:grid;place-items:center;flex-shrink:0}
+.deliv .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.deliv h2{font-size:22px;line-height:30px;letter-spacing:-.03em;font-weight:600}
+.deliv p{font-size:16px;line-height:24px;color:var(--text-secondary);text-wrap:pretty}
+
+/* Dépendances, sans traits ni pastilles */
+.deps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+.deps li{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(0,1.2fr);gap:16px;font-size:16px}
+.deps .f{color:var(--text-secondary)}
+.deps .ok{color:var(--tone-success-fg)}
+
+/* Repères : responsable, sortie, blocages */
+.marks{display:flex;flex-wrap:wrap;gap:12px 40px;padding:0 4px;font-size:16px;color:var(--text-secondary)}
+.marks span{display:inline-flex;align-items:center;gap:10px}
+.marks b{color:var(--text-primary);font-weight:500}
+.marks .warn{color:var(--tone-warning-fg)}
+.marks button{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;text-decoration:underline;text-underline-offset:3px;text-decoration-color:currentColor}
+
+/* Page de destination (hors sujet du proto) */
+.dest{max-width:1080px;margin:0 auto;padding:40px 32px 160px;display:flex;flex-direction:column;gap:16px}
+.crumbs{font-size:15px;color:var(--text-secondary)}
+.dest h1{font-size:30px;line-height:36px;letter-spacing:-.04em;font-weight:600}
+.back{align-self:flex-start}
+
+/* Modale « verre » */
+.scrim{position:fixed;inset:0;z-index:70;background:rgb(0 0 0 / .32);display:grid;place-items:center;padding:16px}
+.dlg{width:min(600px,100%);max-height:calc(100dvh - 32px);overflow-y:auto;border-radius:20px;background:color-mix(in srgb,var(--surface-raised) 88%,transparent);backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);border:1px solid var(--border-hairline);box-shadow:0 24px 60px rgb(0 0 0 / .25);padding:24px;display:flex;flex-direction:column;gap:20px}
+.dlg h2{font-size:22px;line-height:30px;letter-spacing:-.03em;font-weight:600}
+.dlg .intro{font-size:15px;color:var(--text-secondary);margin-top:4px}
+.fs{display:flex;flex-direction:column;gap:14px}
+.fs>h3{margin:0;font-size:15px;font-weight:600;color:var(--text-secondary)}
+.fld{display:flex;flex-direction:column;gap:6px}
+.fld label,.fld .fl{font-size:15px;font-weight:600}
+.req{color:var(--tone-danger-fg);margin-left:2px}
+.inp{height:44px;padding:0 12px;border-radius:10px;border:1px solid var(--border-default);background:var(--surface-page);font-size:16px;width:100%}
+.inp[aria-invalid="true"]{border-color:var(--tone-danger-fg)}
+.hint{font-size:14px;line-height:20px;color:var(--text-tertiary)}
+.err{font-size:14px;line-height:20px;color:var(--tone-danger-fg)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--border-default);background:var(--surface-page);cursor:pointer;font-size:15px}
+.chip[aria-pressed="true"]{background:var(--primary-bg);color:var(--primary-fg);border-color:var(--primary-bg)}
+.drop{display:flex;align-items:center;gap:16px;padding:16px;border-radius:12px;border:1.5px dashed var(--border-default);background:var(--surface-page);cursor:pointer;width:100%;text-align:left}
+.drop.over{border-color:var(--selection);background:var(--selection-bg)}
+.drop .ph{width:64px;height:64px;border-radius:10px;flex-shrink:0;position:relative;overflow:hidden}
+.drop .tx{display:flex;flex-direction:column;gap:2px;min-width:0}
+.drop .tx b{font-weight:600}
+.drop .tx span{font-size:14px;color:var(--text-tertiary)}
+.picked{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.picked .ph{width:64px;height:64px;border-radius:10px;overflow:hidden;flex-shrink:0}
+.picked .ph img{width:100%;height:100%;object-fit:cover}
+.picked .nm{flex:1;min-width:0;font-size:15px;overflow-wrap:anywhere}
+.fmsg{padding:10px 14px;border-radius:10px;background:var(--tone-danger-bg);color:var(--tone-danger-fg);font-size:15px}
+.acts{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.facts{margin:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:12px 16px;font-size:16px}
+.facts dt{color:var(--text-secondary)}.facts dd{margin:0}
+.infocover{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.infocover .cover{width:72px;height:72px;border-radius:10px}
+
+/* Barre du proto et toast : hors du produit */
+.proto{position:fixed;left:0;right:0;margin-inline:auto;width:fit-content;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:50;background:var(--glass);color:var(--glass-fg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:16px;padding:8px 10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;max-width:calc(100% - 32px);box-shadow:0 10px 30px rgb(0 0 0 / .25)}
+.proto .pl{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--glass-2);padding:0 6px}
+.proto label{font-size:13px;color:var(--glass-2)}
+.proto select{height:34px;border-radius:10px;border:1px solid rgb(255 255 255 / .18);background:rgb(255 255 255 / .08);color:var(--glass-fg);padding:0 10px;font-size:14px;max-width:250px}
+.proto select option{color:#000;background:#fff}
+.proto button{height:34px;border-radius:10px;border:1px solid rgb(255 255 255 / .18);background:none;color:var(--glass-fg);padding:0 12px;font-size:14px;cursor:pointer}
+.toast{position:fixed;right:20px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:80;background:var(--primary-bg);color:var(--primary-fg);padding:12px 16px;border-radius:12px;font-size:15px;max-width:min(420px,calc(100% - 40px));transition:opacity 180ms ease,transform 180ms var(--ease)}
+.toast.off{opacity:0;transform:translateY(8px);pointer-events:none}
+
+@media (hover:hover) and (pointer:fine){
+  .ri:not([aria-current="page"]):hover,.pnav a:not([aria-current="page"]):hover{background:var(--nav-item-hover-bg)}
+  .btn:hover{background:var(--primary-hover)}
+  .btn.outline:hover,.btn.ghost:hover{background:var(--control-hover);border-color:var(--border-hover)}
+  .wf:hover{background:var(--control-hover)}
+  .chip:not([aria-pressed="true"]):hover{border-color:var(--border-hover)}
+  .drop:hover{border-color:var(--border-hover)}
+  .cover .edit{opacity:0;transition:opacity 150ms ease}
+  .cover:hover .edit,.cover:focus-within .edit{opacity:1}
+}
+@media (max-width:1100px){.panel{display:none}}
+@media (max-width:860px){
+  .rail{display:none}
+  .topm{display:flex;align-items:center;justify-content:space-between;height:56px;padding:0 16px;border-bottom:1px solid var(--nav-border);background:var(--nav-bg);position:sticky;top:0;z-index:30;font-weight:600}
+  .topm .brand{width:36px;height:36px;font-size:14px;margin:0}
+  .bar{display:none}
+  .ov,.dest{padding:24px 16px 160px;gap:24px}
+  .grid{grid-template-columns:minmax(0,1fr)}
+  .head{gap:16px}
+  .cover{width:80px;height:80px;border-radius:12px}
+  .head h1{font-size:28px;line-height:34px}
+  .head .info-l{display:none}
+  .act-t{font-size:24px;line-height:30px}
+  .card{padding:20px}
+  .deliv{flex-direction:column;align-items:flex-start}
+  .deps li{grid-template-columns:minmax(0,1fr)}
+  .deps li{gap:2px}
+  .marks{flex-direction:column;gap:12px}
+  .facts{grid-template-columns:minmax(0,1fr)}.facts dt{margin-top:6px}
+}
+@media (min-width:861px){.head .info-s{display:none}}
+@media (prefers-reduced-motion:reduce){*{transition-duration:1ms!important}}
+</style>
+
+<div class="shell">
+  <nav class="rail" id="rail" aria-label="Navigation principale"></nav>
+  <nav class="panel" id="panel" aria-label="Navigation du projet"></nav>
+  <div class="main">
+    <div class="topm"><span class="brand">po</span><span id="topTitle">Néons</span><span class="av" id="topAv">LH</span></div>
+    <div class="bar" id="bar"></div>
+    <main id="app"></main>
+  </div>
+</div>
+<input type="file" id="file" accept="image/*,.pdf" hidden>
+<div id="modal"></div>
+<div class="toast off" id="toast" role="status" aria-live="polite"></div>
+<div class="proto" role="region" aria-label="Commandes du prototype">
+  <span class="pl">Proto</span>
+  <label for="roleSel">Voir comme</label>
+  <select id="roleSel">
+    <option value="cp">Lina Haddad · cheffe de projet</option>
+    <option value="dg">Claire Morel · DG</option>
+  </select>
+  <label for="momSel">Aller à</label>
+  <select id="momSel">
+    <option value="dims">Cadrage : les 6 dimensions</option>
+    <option value="brief">Cadrage : Brief en validation</option>
+    <option value="launched">Plan lancé : workflows en cours</option>
+    <option value="create">Créer le projet (DG)</option>
+  </select>
+  <button type="button" id="resetBtn">Recommencer</button>
+</div>
+
+<script>
+(function(){
+"use strict";
+const svg=(d,s=20,w=1.7)=>`<svg width="${s}" height="${s}" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const I={
+  home:svg('<path d="M3 9l7-6 7 6v8H3z"/>'),
+  spark:svg('<path d="M10 2.5l1.6 4.4 4.4 1.6-4.4 1.6L10 14.5l-1.6-4.4L4 8.5l4.4-1.6zM15.5 13.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z"/>'),
+  work:svg('<rect x="2.5" y="6" width="15" height="10.5" rx="2"/><path d="M7 6V4.5h6V6"/>'),
+  folder:svg('<path d="M2.5 5.5h5l2 2h8v8.5h-15z"/>'),
+  cal:svg('<rect x="3" y="4.5" width="14" height="12.5" rx="2"/><path d="M3 8.5h14M7 2.5v3M13 2.5v3"/>'),
+  phone:svg('<path d="M5 3h3l1.5 4-2 1.5a9 9 0 004 4l1.5-2 4 1.5v3a1.5 1.5 0 01-1.5 1.5A13.5 13.5 0 013.5 4.5 1.5 1.5 0 015 3z"/>'),
+  disc:svg('<circle cx="10" cy="10" r="7.5"/><circle cx="10" cy="10" r="2"/>'),
+  users:svg('<circle cx="10" cy="6.5" r="3"/><path d="M4 17a6 6 0 0112 0"/>'),
+  bell:svg('<path d="M5 14V9a5 5 0 0110 0v5l1.5 1.5h-13zM8.5 17.5h3"/>'),
+  updown:svg('<path d="M6.5 7.5L10 4l3.5 3.5M6.5 12.5L10 16l3.5-3.5"/>',18),
+  info:svg('<circle cx="10" cy="10" r="7.5"/><path d="M10 9v5M10 6.3v.2"/>',18),
+  person:svg('<circle cx="10" cy="6.5" r="3.2"/><path d="M3.8 17.2a6.2 6.2 0 0112.4 0"/>'),
+  check:svg('<path d="M4 10.5l4 4 8-9"/>'),
+  alert:svg('<path d="M10 3l8 14H2z"/><path d="M10 8.5v3.5M10 14.3v.2"/>'),
+  doc:svg('<path d="M5 2.5h6.5l3.5 3.5v11.5H5z"/><path d="M11.5 2.5V6H15M7.5 10h5M7.5 13h5"/>',24,1.6),
+  arrow:svg('<path d="M4 10h12M11 5l5 5-5 5"/>',18,1.8),
+  chev:'<svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5L10.5 8 6 12.5"/></svg>',
+  tick:'<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.3l2.3 2.2 4.7-5"/></svg>',
+  image:svg('<rect x="2.5" y="3.5" width="15" height="13" rx="2"/><circle cx="7" cy="8" r="1.5"/><path d="M17.5 13l-4-4-8 7.5"/>',18),
+  back:svg('<path d="M12 4l-6 6 6 6"/>',16,1.8),
+  upload:svg('<path d="M10 13V3.5M6 7.5l4-4 4 4M3.5 13v3.5h13V13"/>',22,1.6)
+};
+const discArt='<svg class="disc" viewBox="0 0 100 100" fill="none" stroke="currentColor" aria-hidden="true"><circle cx="78" cy="82" r="20"/><circle cx="78" cy="82" r="34"/><circle cx="78" cy="82" r="48"/><circle cx="78" cy="82" r="62"/></svg>';
+
+const P={cp:{name:"Lina Haddad",ini:"LH",role:"Cheffe de projet"},dg:{name:"Claire Morel",ini:"CM",role:"Directrice générale"}};
+const PROJECT={title:"Néons",artist:"Mona Lys",type:"Single",release:"Sam. 05/12/2026",budget:"25 000 € HT",priority:"Normale",creative:"Nadia Benali",hue:262};
+const fresh=()=>({role:"cp",mom:"dims",cover:null,coverName:null,view:"overview",dest:null,dlg:null,form:null});
+let S=fresh();
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let tt;function toast(m){const t=$("toast");t.textContent=m;t.classList.remove("off");clearTimeout(tt);tt=setTimeout(()=>t.classList.add("off"),2600)}
+
+/* Visuel du projet : la pochette importée, sinon le visuel par défaut. */
+function coverHTML(src,editable,cls=""){
+  const inner=src?`<img src="${src}" alt="Pochette de ${esc(PROJECT.title)}">`:discArt;
+  const edit=editable?`<button type="button" class="edit" data-act="pickCover" aria-label="${src?"Changer la pochette":"Ajouter une pochette"}">${I.image}</button>`:"";
+  return `<div class="cover ${src?"":"cover-def"} ${cls}" style="--h:${PROJECT.hue}" ${src?"":`role="img" aria-label="Visuel par défaut de ${esc(PROJECT.title)}"`}>${inner}${edit}</div>`;
+}
+
+/* Le Cadrage : quatre étapes, le moment dit où on en est. */
+const FR_STEPS=[["start","Démarrer le cadrage"],["dims","Les 6 dimensions"],["brief","Brief de cadrage"],["plan","Plan du projet"]];
+function stepState(k){
+  const order={dims:1,brief:2,launched:4}[S.mom==="create"?"dims":S.mom];
+  const i=FR_STEPS.findIndex(s=>s[0]===k);
+  return i<order?"done":i===order?"cur":"later";
+}
+const WFS=[
+  {k:"framing",name:"Cadrage",done:4,total:4,cap:"Plan lancé le Mar. 10/11/2026"},
+  {k:"master",name:"Master",done:2,total:5,cap:"Étape 3 sur 5 · Mixage",mine:"À vous : transmettre au mixeur"},
+  {k:"legal",name:"Juridique",done:1,total:6,cap:"Étape 2 sur 6 · Fiches de renseignements"},
+  {k:"marketing",name:"Marketing",done:0,total:5,cap:"Étape 1 sur 5 · Stratégie",mineDg:"À vous : valider la Stratégie"},
+  {k:"distribution",name:"Distribution",done:0,total:4,cap:"Démarre après le Master final"}
+];
+function ring(done,total){
+  if(done===total)return `<span class="mk done" style="width:24px;height:24px">${I.tick}</span>`;
+  const r=10,c=2*Math.PI*r,f=total?done/total:0;
+  return `<svg class="ring" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="${r}" fill="none" stroke="var(--border-hairline)" stroke-width="2.5"/>${f>0?`<circle cx="12" cy="12" r="${r}" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="${c*f} ${c}" transform="rotate(-90 12 12)"/>`:""}</svg>`;
+}
+
+/* « Maintenant » : un seul titre, l'action en grand, une action principale. */
+function nowCard(){
+  const cp=S.role==="cp",m=S.mom==="create"?"dims":S.mom;
+  let where,title,sub,btn,also="";
+  if(m==="dims"){
+    where="Cadrage › Les 6 dimensions";
+    if(cp){title="Répondre aux questions de PO";sub="<b>7</b> questions à traiter · <b>5</b> informations à confirmer";btn=["primary","Continuer le cadrage","Les 6 dimensions"];}
+    else{title="Rien à faire pour vous";sub="En attente de <b>Lina Haddad</b> : répondre aux questions de PO. Le Brief de cadrage vous arrivera ensuite pour validation.";btn=["outline","Voir le Cadrage","Les 6 dimensions"];}
+  }else if(m==="brief"){
+    where="Cadrage › Brief de cadrage";
+    if(cp){title="Rien à faire pour vous";sub="En attente de <b>Claire Morel</b> : valider le Brief de cadrage, version 1 envoyée le Lun. 09/11/2026.";btn=["outline","Ouvrir le Brief","Brief de cadrage"];}
+    else{title="Valider le Brief de cadrage";sub="Version 1 envoyée par <b>Lina Haddad</b> le Lun. 09/11/2026.";btn=["primary","Relire et valider","Brief de cadrage"];}
+  }else{
+    if(cp){where="Master › Mixage";title="Transmettre au mixeur";sub="Karim Haddou reçoit le Brief Mix et les stems par son lien privé.";btn=["primary","Ouvrir l'étape","Mixage"];
+      also=`<p class="also">Aussi à vous : <button type="button" data-act="dest" data-to="Fiches de renseignements">relancer Sami Kader (Juridique)</button></p>`;}
+    else{where="Marketing › Stratégie";title="Valider la Stratégie";sub="Envoyée par <b>Lina Haddad</b> le Mar. 10/11/2026.";btn=["primary","Relire et valider","Stratégie"];}
+  }
+  return `<section class="card now" aria-labelledby="nowL">
+    <div class="what"><h2 class="lbl" id="nowL">Maintenant</h2>
+      <p class="where">${where}</p>
+      <h3 class="act-t">${esc(title)}</h3>
+      <p class="sub">${sub}</p></div>
+    <div class="go"><button type="button" class="btn ${btn[0]==="outline"?"outline":""}" data-act="dest" data-to="${esc(btn[2])}">${esc(btn[1])}${btn[0]==="primary"?I.arrow:""}</button></div>
+    ${also}
+  </section>`;
+}
+
+function progression(){
+  if(S.mom==="launched"){
+    const cp=S.role==="cp";
+    return `<section class="card" aria-labelledby="progL"><h2 class="lbl" id="progL">Progression</h2>
+      <ul class="wfs">${WFS.map(w=>{
+        const mine=cp?w.mine:w.mineDg;
+        return `<li><button type="button" class="wf" data-act="dest" data-to="${w.name}">${ring(w.done,w.total)}<span><span class="t">${w.name}</span><br><span class="c ${mine?"mine":""}">${mine||w.cap}</span></span>${I.chev}</button></li>`;}).join("")}</ul>
+    </section>`;
+  }
+  const cp=S.role==="cp";
+  return `<section class="card" aria-labelledby="progL"><h2 class="lbl" id="progL">Progression du cadrage</h2>
+    <ol class="steps">${FR_STEPS.map(([k,t])=>{
+      const st=stepState(k);
+      let cap="";
+      if(st==="cur"&&k==="dims")cap=cp?`<span class="c mine">À vous</span>`:`<span class="c">Lina Haddad</span>`;
+      if(st==="cur"&&k==="brief")cap=cp?`<span class="c">Claire Morel valide</span>`:`<span class="c mine">À vous de valider</span>`;
+      return `<li class="${st}"><span class="mk ${st}">${st==="done"?I.tick:""}</span><span><span class="t">${t}</span>${cap?"<br>"+cap:""}<span class="sr">${st==="done"?" (fait)":st==="cur"?" (en cours)":" (à venir)"}</span></span></li>`;}).join("")}</ol>
+  </section>`;
+}
+
+function deliverable(){
+  const m=S.mom==="create"?"dims":S.mom;
+  const txt=m==="dims"
+    ?"Il se rédige à partir des 6 dimensions, puis la direction le valide. C'est la référence du Plan du projet."
+    :"Version 1 envoyée le Lun. 09/11/2026, en validation par Claire Morel.";
+  const open=m==="brief"?`<button type="button" class="btn outline sm" data-act="dest" data-to="Brief de cadrage">Ouvrir le Brief</button>`:"";
+  return `<section class="card deliv" aria-labelledby="delL"><span class="ic">${I.doc}</span>
+    <div class="tx"><p class="lbl" style="color:var(--text-tertiary)">Livrable du cadrage</p><h2 id="delL">Brief de cadrage</h2><p>${txt}</p></div>${open}</section>`;
+}
+
+function deps(){
+  return `<section class="card" aria-labelledby="depL"><h2 class="lbl" id="depL">Ce qui dépend d'un autre workflow</h2>
+    <ul class="deps">
+      <li><span>Master final</span><span class="f">Master → Distribution</span><span class="f">Attendu le Sam. 21/11/2026</span></li>
+      <li><span>Pochette livrée</span><span class="f">Conception → Distribution</span><span class="f">Attendue</span></li>
+      <li><span>Fiches de renseignements</span><span class="f">Juridique → Distribution</span><span class="f">1 sur 2 reçue</span></li>
+    </ul></section>`;
+}
+
+function marks(){
+  const block=S.mom==="launched"
+    ?`<span class="warn">${I.alert}<button type="button" data-act="dest" data-to="Fiches de renseignements">1 blocage : fiche de Sami Kader en attente</button></span>`
+    :`<span>${I.check}Aucun blocage</span>`;
+  return `<div class="marks" aria-label="Repères du projet">
+    <span>${I.person}<span>Responsable · <b>Lina Haddad</b></span></span>
+    <span>${I.cal}<span>Sortie visée le <b>${PROJECT.release}</b></span></span>
+    ${block}</div>`;
+}
+
+function overview(){
+  const editable=S.role==="cp";
+  return `<div class="ov">
+    <header class="head">${coverHTML(S.cover,editable)}
+      <div class="id"><h1>${esc(PROJECT.title)}</h1><p class="who">${PROJECT.artist} · ${PROJECT.type}</p>
+        <button type="button" class="btn outline sm info-s" style="align-self:flex-start;margin-top:6px" data-act="info">${I.info}Informations</button></div>
+      <button type="button" class="btn outline sm info-l" data-act="info">${I.info}Informations</button>
+    </header>
+    <div class="grid">${nowCard()}${progression()}</div>
+    ${S.mom==="launched"?deps():deliverable()}
+  </div>`;
+}
+
+function dest(){
+  return `<div class="dest"><button type="button" class="btn ghost sm back" data-act="home">${I.back}Vue d'ensemble</button>
+    <p class="crumbs">Néons › ${esc(S.dest)}</p><h1>${esc(S.dest)}</h1>
+    <p style="color:var(--text-secondary)">L'étape s'ouvre ici, avec le geste en tête.</p></div>`;
+}
+
+/* Navigation : rail et panneau du projet */
+function renderNav(){
+  const ini=P[S.role].ini;
+  $("rail").innerHTML=`<span class="brand">po</span>
+    <a class="ri" aria-label="Accueil">${I.home}</a><a class="ri" aria-label="PO">${I.spark}</a>
+    <a class="ri" aria-label="Travail">${I.work}<span class="dotn">${S.role==="cp"?3:2}</span></a>
+    <a class="ri" aria-current="page" aria-label="Projets">${I.folder}</a><a class="ri" aria-label="Calendrier">${I.cal}</a>
+    <a class="ri" aria-label="Calls">${I.phone}</a><a class="ri" aria-label="Catalogue">${I.disc}</a><a class="ri" aria-label="Réseau">${I.users}</a>
+    <span class="grow"></span><a class="ri" aria-label="Notifications">${I.bell}</a><span class="av">${ini}</span>`;
+  const launched=S.mom==="launched";
+  const mineFr=(S.mom==="dims"||S.mom==="create")&&S.role==="cp"||S.mom==="brief"&&S.role==="dg";
+  const dot=k=>launched?(k==="framing"?"done":k==="distribution"?"":"cur"):(k==="framing"?"cur":"");
+  const cnt=k=>{if(!launched)return k==="framing"&&mineFr?1:0;return S.role==="cp"?(k==="master"||k==="legal"?1:0):(k==="marketing"?1:0)};
+  const item=(k,l)=>`<li><a href="#" data-act="dest" data-to="${l}"><span class="sd ${dot(k)}"></span>${l}${cnt(k)?`<span class="cnt">${cnt(k)}</span>`:""}</a></li>`;
+  $("panel").innerHTML=`<div class="switch">Néons ${I.updown}</div>
+    <ul class="pnav"><li><a href="#" aria-current="${S.view==="overview"?"page":"false"}" data-act="home">Vue d'ensemble</a></li>
+    ${item("framing","Cadrage")}
+    <li class="grp">Workflows</li>${item("master","Master")}${item("legal","Juridique")}${item("marketing","Marketing")}${item("distribution","Distribution")}
+    <li class="grp">Pilotage</li>${["Travail","Calls","Validations","Activité","Budget"].map(l=>`<li><a href="#" data-act="dest" data-to="${l}">${l}</a></li>`).join("")}</ul>`;
+  $("bar").innerHTML=S.view==="overview"?"Vue d'ensemble":`<a href="#" data-act="home">Vue d'ensemble</a>`;
+  $("topAv").textContent=ini;
+}
+
+/* Modales : Informations du projet, Nouveau projet */
+function infoDlg(){
+  const cp=S.role==="cp";
+  return `<div class="scrim" data-act="closeBg"><div class="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgT" style="position:relative">
+    <div><h2 id="dlgT">Informations du projet</h2></div>
+    <div class="infocover">${coverHTML(S.cover,false)}<div style="display:flex;flex-direction:column;gap:6px;flex:1;min-width:0">
+      <span class="fl" style="font-weight:600">Pochette</span>
+      <span class="hint">${S.cover?esc(S.coverName||"Image importée"):"Visuel par défaut : aucune image importée."}</span>
+      ${cp?`<span style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn outline sm" data-act="pickCover">${S.cover?"Changer":"Importer une image"}</button>${S.cover?`<button type="button" class="btn ghost sm" data-act="dropCover">Retirer</button>`:""}</span>`:""}
+    </div></div>
+    <dl class="facts">
+      <dt>Type</dt><dd>${PROJECT.type}</dd><dt>Artiste</dt><dd>${PROJECT.artist}</dd><dt>Titre</dt><dd>Néons</dd>
+      <dt>Date de sortie visée</dt><dd>${PROJECT.release}</dd><dt>Budget prévisionnel</dt><dd>${PROJECT.budget}</dd>
+      <dt>Priorité</dt><dd>${PROJECT.priority}</dd><dt>Chef de projet</dt><dd>Lina Haddad</dd><dt>Direction créative</dt><dd>${PROJECT.creative}</dd>
+    </dl>
+    <div class="acts"><button type="button" class="btn outline" data-act="close">Fermer</button></div>
+  </div></div>`;
+}
+function createDlg(){
+  const f=S.form,e=f.errors||{};
+  const n=Object.keys(e).length;
+  const pick=f.cover
+    ?`<div class="picked"><span class="ph"><img src="${f.cover}" alt="Pochette choisie"></span><span class="nm">${esc(f.coverName)}</span><button type="button" class="btn outline sm" data-act="pickForm">Changer</button><button type="button" class="btn ghost sm" data-act="dropForm">Retirer</button></div>`
+    :`<button type="button" class="drop" id="drop" data-act="pickForm" aria-describedby="covH"><span class="ph cover-def" style="--h:${PROJECT.hue}">${discArt}</span><span class="tx"><b>Déposer une image ou choisir un fichier</b><span>JPG, PNG ou WebP, carrée de préférence</span></span></button>`;
+  return `<div class="scrim" data-act="closeBg"><form class="dlg" id="createForm" role="dialog" aria-modal="true" aria-labelledby="dlgT" novalidate>
+    <div><h2 id="dlgT">Nouveau projet</h2><p class="intro">Le projet part chez le chef de projet choisi. Il sera lancé une fois qu'il l'aura accepté.</p></div>
+    ${n?`<p class="fmsg" role="alert">${n===1?"1 champ obligatoire manque.":n+" champs obligatoires manquent."}</p>`:""}
+    <div class="fs"><h3>Le projet</h3>
+      <div class="fld"><span class="fl">Type<span class="req">*</span></span><div class="chips">${["Single","EP","Album","Contenu"].map(t=>`<button type="button" class="chip" aria-pressed="${f.type===t}" data-act="type" data-v="${t}">${t}</button>`).join("")}</div></div>
+      <div class="fld"><label for="fArtist">Artiste<span class="req">*</span></label><select class="inp" id="fArtist"><option>Mona Lys</option><option>Isaac Néré</option></select></div>
+    </div>
+    <div class="fs"><h3>Informations initiales</h3>
+      <div class="fld"><label for="fTitle">Titre du projet<span class="req">*</span></label><input class="inp" id="fTitle" value="${esc(f.title)}" ${e.title?'aria-invalid="true" aria-describedby="eTitle"':""}>
+        ${e.title?`<span class="err" id="eTitle">Donnez un titre au projet.</span>`:`<span class="hint">Repris du titre « Néons », modifiable.</span>`}</div>
+      <div class="fld"><label for="fDate">Date de sortie visée</label><input class="inp" type="date" id="fDate" value="2026-12-05"></div>
+      <div class="fld"><span class="fl" id="covL">Pochette</span>${pick}
+        ${f.coverErr?`<span class="err" role="alert">${f.coverErr}</span>`:`<span class="hint" id="covH">Sans image, PDS OS affiche un visuel par défaut. Le chef de projet pourra la changer depuis le projet.</span>`}</div>
+    </div>
+    <div class="fs"><h3>Équipe</h3>
+      <div class="fld"><label for="fCp">Chef de projet<span class="req">*</span></label><select class="inp" id="fCp" ${e.cp?'aria-invalid="true" aria-describedby="eCp"':""}><option value="">Choisir un chef de projet</option><option value="lh" ${f.cp==="lh"?"selected":""}>Lina Haddad</option><option value="tm" ${f.cp==="tm"?"selected":""}>Tom Mercier</option></select>
+        ${e.cp?`<span class="err" id="eCp">Choisissez le chef de projet qui recevra le projet.</span>`:""}</div>
+    </div>
+    <div class="acts"><button type="button" class="btn outline" data-act="close">Annuler</button><button type="submit" class="btn">Créer le projet</button></div>
+  </form></div>`;
+}
+
+function render(){
+  renderNav();
+  $("app").innerHTML=S.view==="overview"?overview():dest();
+  const m=$("modal");
+  m.innerHTML=S.dlg==="info"?infoDlg():S.dlg==="create"?createDlg():"";
+  const d=m.querySelector(".dlg");if(d&&!d.contains(document.activeElement)){const f=d.querySelector("input,select,button");f&&f.focus({preventScroll:true});}
+  wireDrop();
+  $("roleSel").value=S.role;$("momSel").value=S.mom;
+}
+
+/* Fichiers : une image seulement, lue sur place. */
+let pickTarget="cover";
+function readFile(file){
+  if(!file)return;
+  if(!/^image\/(jpeg|png|webp)$/.test(file.type)){
+    if(pickTarget==="form"){S.form.coverErr="Choisissez une image JPG, PNG ou WebP.";render();}
+    else toast("Choisissez une image JPG, PNG ou WebP.");
+    return;
+  }
+  const r=new FileReader();
+  r.onload=()=>{
+    if(pickTarget==="form"){S.form.cover=r.result;S.form.coverName=file.name;S.form.coverErr=null;}
+    else{S.cover=r.result;S.coverName=file.name;toast("Pochette enregistrée.");}
+    render();
+  };
+  r.readAsDataURL(file);
+}
+$("file").addEventListener("change",e=>{readFile(e.target.files[0]);e.target.value="";});
+function wireDrop(){
+  const z=$("drop");if(!z)return;
+  z.addEventListener("dragover",e=>{e.preventDefault();z.classList.add("over")});
+  z.addEventListener("dragleave",()=>z.classList.remove("over"));
+  z.addEventListener("drop",e=>{e.preventDefault();z.classList.remove("over");pickTarget="form";readFile(e.dataTransfer.files[0]);});
+}
+function syncForm(){const f=S.form;if(!f)return;const t=$("fTitle"),c=$("fCp");if(t)f.title=t.value;if(c)f.cp=c.value;
+  // Une erreur corrigée disparaît ; les autres restent jusqu'au prochain essai.
+  if(f.title.trim())delete f.errors.title;if(f.cp)delete f.errors.cp;}
+// Mise à jour sur place (pas de rendu complet : le champ garde le focus).
+document.addEventListener("change",e=>{
+  const id=e.target.id;if(!S.form||(id!=="fTitle"&&id!=="fCp"))return;
+  syncForm();const key=id==="fTitle"?"title":"cp";
+  if(!S.form.errors[key]){e.target.removeAttribute("aria-invalid");const er=$(id==="fTitle"?"eTitle":"eCp");er&&er.remove();}
+  const n=Object.keys(S.form.errors).length,m=document.querySelector(".fmsg");
+  if(m){if(!n)m.remove();else m.textContent=n===1?"1 champ obligatoire manque.":n+" champs obligatoires manquent.";}
+});
+
+document.addEventListener("click",e=>{
+  const a=e.target.closest("[data-act]");if(!a)return;
+  const act=a.dataset.act;
+  if(act==="closeBg"&&e.target!==a)return;
+  if(a.tagName==="A")e.preventDefault();
+  if(act==="dest"){S.view="dest";S.dest=a.dataset.to;S.dlg=null;render();window.scrollTo(0,0);}
+  else if(act==="home"){S.view="overview";render();}
+  else if(act==="info"){S.dlg="info";render();}
+  else if(act==="close"||act==="closeBg"){S.dlg=null;render();}
+  else if(act==="pickCover"){pickTarget="cover";$("file").click();}
+  else if(act==="dropCover"){S.cover=null;S.coverName=null;toast("Pochette retirée : le visuel par défaut revient.");render();}
+  else if(act==="pickForm"){syncForm();pickTarget="form";$("file").click();}
+  else if(act==="dropForm"){syncForm();S.form.cover=null;S.form.coverName=null;render();}
+  else if(act==="type"){syncForm();S.form.type=a.dataset.v;render();}
+});
+document.addEventListener("submit",e=>{
+  if(e.target.id!=="createForm")return;e.preventDefault();syncForm();
+  const f=S.form,errors={};
+  if(!f.title.trim())errors.title=1;if(!f.cp)errors.cp=1;
+  f.errors=errors;
+  if(Object.keys(errors).length){render();const first=document.querySelector('[aria-invalid="true"]');first&&first.focus();return;}
+  S.cover=f.cover;S.coverName=f.coverName;S.dlg=null;S.form=null;S.mom="dims";S.view="overview";
+  render();toast("Projet créé et transmis à Lina Haddad.");
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&S.dlg){S.dlg=null;render();}});
+$("roleSel").addEventListener("change",e=>{S.role=e.target.value;S.dlg=null;render();});
+$("momSel").addEventListener("change",e=>{
+  const v=e.target.value;S.view="overview";S.dlg=null;
+  if(v==="create"){S.role="dg";S.mom="create";S.dlg="create";S.form={type:"Single",title:"Néons",cp:"lh",cover:S.cover,coverName:S.coverName,errors:{}};}
+  else S.mom=v;
+  render();
+});
+$("resetBtn").addEventListener("click",()=>{S=fresh();render();});
+render();
+})();
+</script>

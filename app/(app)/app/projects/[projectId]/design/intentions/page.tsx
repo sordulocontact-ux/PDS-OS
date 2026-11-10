@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
 
-import { CallFacts } from "@/components/calls/call-facts";
+import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { MeetingFacts } from "@/components/calls/meeting/meeting-facts";
 import { DesignStepFrame } from "@/components/design/design-step-frame";
 import { IntentionGroup } from "@/components/design/intentions/intention-group";
-import { DesignWaits } from "@/components/design/waiting-row";
+import { StepWaiting } from "@/components/shell/journey/step-waiting";
 import { ImportBriefDialog } from "@/components/design/work/import-brief-dialog";
 import { UnassignedProposals } from "@/components/design/work/proposals";
 import { PoCallout } from "@/components/ui/po-callout";
@@ -108,7 +108,11 @@ export default async function DesignIntentionsPage({
       {meeting ? (
         <MeetingFacts meeting={meeting} />
       ) : (
-        <CallFacts facts={facts} />
+        <FactRows>
+          {facts.map((f) => (
+            <FactRow key={f.label} label={f.label} value={f.value} />
+          ))}
+        </FactRows>
       )}
       {canEdit && start.path === "direct" && (
         <div className="flex justify-end">
@@ -136,7 +140,7 @@ export default async function DesignIntentionsPage({
         data={{ ...data, canWrite: canEdit }}
         projectId={projectId}
       />
-      <DesignWaits step={step} actors={[step.actor]} />
+      <StepWaiting step={step} />
     </DesignStepFrame>
   );
 }

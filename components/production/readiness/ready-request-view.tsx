@@ -1,3 +1,4 @@
+import { StepSection } from "@/components/shell/journey/step-section";
 import { ReadyDecision } from "@/components/production/readiness/ready-decision";
 import { ReadySynthesisTable } from "@/components/production/readiness/ready-synthesis-table";
 import { ToneCallout } from "@/components/ui/tone-callout";
@@ -37,8 +38,7 @@ export function ReadyRequestView({
       </ToneCallout>
       <ReadySynthesisTable rows={request.rows} />
       <p>{r.reasonGiven(request.reason)}</p>
-      <section className="flex flex-col gap-1.5">
-        <h3 className="font-semibold">{r.plan.title}</h3>
+      <StepSection title={r.plan.title}>
         <ul className="flex flex-col gap-1">
           {request.plan.map((l) => (
             <li key={l.key}>
@@ -46,7 +46,7 @@ export function ReadyRequestView({
             </li>
           ))}
         </ul>
-      </section>
+      </StepSection>
       {decides && (
         <ReadyDecision projectId={projectId} deliverableId={deliverableId} />
       )}

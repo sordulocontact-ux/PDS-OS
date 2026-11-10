@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { FieldError } from "@/components/auth/form-message";
-import { DesignBlock } from "@/components/design/design-block";
+import { StepSection } from "@/components/shell/journey/step-section";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
@@ -74,7 +74,7 @@ export function DirectionSubmitForm({
   };
   return (
     <>
-      <DesignBlock title={t.title}>
+      <StepSection title={t.title}>
         <FactRows>
           {rows.map((r) => (
             <FactRow
@@ -109,8 +109,8 @@ export function DirectionSubmitForm({
             />
           ))}
         </FactRows>
-      </DesignBlock>
-      <DesignBlock title={t.submitted}>
+      </StepSection>
+      <StepSection title={t.submitted}>
         <span className="text-[length:var(--type-micro)] leading-[var(--type-micro-lh)] text-[color:var(--text-tertiary)]">
           {who}
         </span>
@@ -147,7 +147,7 @@ export function DirectionSubmitForm({
             />
           ))}
         </FactRows>
-      </DesignBlock>
+      </StepSection>
       {editable && (
         <div className="flex flex-col gap-2">
           <FieldError id="direction-submit-error">

@@ -4,12 +4,15 @@ import { DocumentHistory } from "@/components/strategy/documents/document-histor
 import { ReviewPanel } from "@/components/strategy/documents/review-panel";
 import { SendForValidation } from "@/components/strategy/documents/send-for-validation";
 import { ShareButton } from "@/components/strategy/release-plan/share-button";
+import { StepSection } from "@/components/shell/journey/step-section";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
+import { DocumentCard } from "@/components/ui/document-card";
 import { SegmentedLinks } from "@/components/ui/segmented-control";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
 import { formatDay } from "@/lib/assistant/facts";
+import { strategyDocuments } from "@/lib/i18n/fr/strategy-documents";
 import { strategyPressKit } from "@/lib/i18n/fr/strategy-press-kit";
 import { strategyReleasePlan } from "@/lib/i18n/fr/strategy-release-plan";
 import type { StrategyDocument } from "@/lib/strategy/documents/queries";
@@ -30,14 +33,16 @@ function htmlOf(kind: GeneratorKind, content: unknown): string | null {
 }
 import { strategyDocumentTone } from "@/lib/ui/state-tones";
 
-const fr = { strategyReleasePlan, strategyPressKit };
+const fr = { strategyDocuments, strategyReleasePlan, strategyPressKit };
 
 /**
- * The last step of a generator (ticket § 11 and § 12): the generated
- * document page by page (a sandboxed
- * iframe: the same HTML as the shared link and the PDF, no script), its
- * versions, and Modifier · Partager · Exporter PDF · Demander validation.
- * A version is never rewritten: regenerating makes the next one.
+ * The last step of a generator (ticket § 11 and § 12): the version on
+ * screen in its `DocumentCard` — state, Modifier · Partager · Exporter PDF
+ * in its head, the document page by page in its body (a sandboxed iframe:
+ * the same HTML as the shared link and the PDF, no script) —, then
+ * Demander validation and Générer, who validates, and every version in a
+ * `VersionCard`. A version is never rewritten: regenerating makes the next
+ * one.
  */
 export function PreviewStep({
   projectId,
@@ -72,28 +77,19 @@ export function PreviewStep({
   const html = current ? htmlOf(kind, current.content) : null;
   if (!current || !html)
     return (
-      <section className="flex flex-col items-start gap-4">
-        <h2 className="text-display-sm font-semibold">{own.title}</h2>
-        <ToneCallout tone="neutral">{own.none}</ToneCallout>
-        {generate}
-      </section>
-    );
-  return (
-    <section aria-labelledby="preview-title" className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <h2 id="preview-title" className="text-display-sm font-semibold">
-              {own.title} · {t.version(current.version)}
-            </h2>
-            <StatusBadge tone={strategyDocumentTone[current.state]} size="sm">
-              {t.states[current.state]}
-            </StatusBadge>
-          </div>
-          <p className="text-caption text-muted-foreground">
-            {t.generatedOn(formatDay(current.createdAt.slice(0, 10)))}
-          </p>
+      <StepSection title={own.title}>
+        <div className="flex flex-col items-start gap-4">
+          <ToneCallout tone="neutral">{own.none}</ToneCallout>
+          {generate}
         </div>
+      </StepSection>
+    );
+  const sendable = canEdit && current.state === "pending";
+  // No title of its own: the screen's segment says « Aperçu », the card
+  // names the document.
+  return (
+    <>
+      <div className="flex flex-col gap-5">
         {versions.length > 1 && (
           <SegmentedLinks
             label={t.versions}
@@ -106,38 +102,63 @@ export function PreviewStep({
             }))}
           />
         )}
-      </div>
 
-      <div className="flex flex-wrap gap-2">
-        {canEdit && (
-          <Link
-            href={href(6)}
-            className={buttonVariants({ size: "sm", variant: "outline" })}
-          >
-            <ButtonRoll>{t.edit}</ButtonRoll>
-          </Link>
-        )}
-        {canEdit && (
-          <ShareButton projectId={projectId} documentId={current.id} />
-        )}
-        <a
-          href={routes.projectStrategyDocumentPdf(projectId, current.id)}
-          download
-          className={buttonVariants({ size: "sm", variant: "outline" })}
+        {/* The version on screen, page by page in its card. */}
+        <DocumentCard
+          name={fr.strategyDocuments.titleVersion(
+            fr.strategyDocuments.kinds[kind],
+            current.version,
+          )}
+          line={t.generatedOn(formatDay(current.createdAt.slice(0, 10)))}
+          action={
+            <span className="flex flex-wrap items-center gap-2">
+              <StatusBadge tone={strategyDocumentTone[current.state]} size="sm">
+                {t.states[current.state]}
+              </StatusBadge>
+              {canEdit && (
+                <Link
+                  href={href(6)}
+                  className={buttonVariants({ size: "sm", variant: "outline" })}
+                >
+                  <ButtonRoll>{t.edit}</ButtonRoll>
+                </Link>
+              )}
+              {canEdit && (
+                <ShareButton projectId={projectId} documentId={current.id} />
+              )}
+              <a
+                href={routes.projectStrategyDocumentPdf(projectId, current.id)}
+                download
+                className={buttonVariants({ size: "sm", variant: "outline" })}
+              >
+                <ButtonRoll>{t.pdf}</ButtonRoll>
+              </a>
+            </span>
+          }
         >
-          <ButtonRoll>{t.pdf}</ButtonRoll>
-        </a>
-        {canEdit && current.state === "pending" && (
-          <SendForValidation
-            projectId={projectId}
-            target={{ documentId: current.id }}
-            directorName={directorName}
-            creatives={creatives}
-            title={own.requestTitle}
-            description={own.requestBody}
+          <iframe
+            title={own.frameTitle(current.version)}
+            srcDoc={html}
+            sandbox=""
+            className="block h-[80vh] w-full bg-muted"
           />
+        </DocumentCard>
+
+        {(sendable || generate) && (
+          <div className="flex flex-wrap gap-2">
+            {sendable && (
+              <SendForValidation
+                projectId={projectId}
+                target={{ documentId: current.id }}
+                directorName={directorName}
+                creatives={creatives}
+                title={own.requestTitle}
+                description={own.requestBody}
+              />
+            )}
+            {generate}
+          </div>
         )}
-        {generate}
       </div>
 
       {current.state !== "pending" && current.reviews.length > 0 && (
@@ -151,21 +172,13 @@ export function PreviewStep({
         />
       )}
 
-      <iframe
-        title={own.frameTitle(current.version)}
-        srcDoc={html}
-        sandbox=""
-        className="h-[80vh] w-full rounded-2xl border border-border bg-muted"
+      {/* « Historique »: every version kept, with its state and decisions. */}
+      <DocumentHistory
+        id="versions"
+        versions={versions}
+        currentId={current.id}
+        hrefOf={(v) => `${href(8)}&v=${v.version}`}
       />
-
-      {/* « Versions »: every version kept, with its state and decisions. */}
-      <div id="versions" className="scroll-mt-6">
-        <DocumentHistory
-          versions={versions}
-          currentId={current.id}
-          hrefOf={(v) => `${href(8)}&v=${v.version}`}
-        />
-      </div>
-    </section>
+    </>
   );
 }

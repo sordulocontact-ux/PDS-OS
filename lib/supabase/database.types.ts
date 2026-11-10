@@ -16289,6 +16289,7 @@ export type Database = {
           artist_id: string | null
           budget_cents: number | null
           content_format_id: string | null
+          cover_path: string | null
           created_at: string
           created_by: string | null
           due_date: string | null
@@ -16308,6 +16309,7 @@ export type Database = {
           artist_id?: string | null
           budget_cents?: number | null
           content_format_id?: string | null
+          cover_path?: string | null
           created_at?: string
           created_by?: string | null
           due_date?: string | null
@@ -16327,6 +16329,7 @@ export type Database = {
           artist_id?: string | null
           budget_cents?: number | null
           content_format_id?: string | null
+          cover_path?: string | null
           created_at?: string
           created_by?: string | null
           due_date?: string | null
@@ -19282,6 +19285,10 @@ export type Database = {
         }[]
       }
       call_awaits_audio: { Args: { p_call_id: string }; Returns: boolean }
+      can_edit_project_cover: {
+        Args: { p_project_id: string }
+        Returns: boolean
+      }
       can_see_call: { Args: { p_call_id: string }; Returns: boolean }
       can_see_contract: { Args: { p_contract_id: string }; Returns: boolean }
       can_see_project: { Args: { p_project_id: string }; Returns: boolean }
@@ -20909,6 +20916,10 @@ export type Database = {
           score: number
           title: string
         }[]
+      }
+      set_project_cover: {
+        Args: { p_path?: string; p_project_id: string }
+        Returns: string
       }
       set_artist_archived: {
         Args: { p_archived: boolean; p_artist_id: string }

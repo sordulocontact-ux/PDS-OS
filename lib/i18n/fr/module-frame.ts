@@ -4,6 +4,13 @@
 
 export const moduleFrame = {
   crumbs: "Fil d'Ariane",
+  // The double chevron of a segment (« Changer de page : Activations »).
+  switchTo: (label: string) => `Changer : ${label}`,
+  switcher: {
+    search: "Chercher",
+    placeholder: "Chercher…",
+    noResult: (q: string) => `Aucun résultat pour « ${q} ».`,
+  },
   subModules: "Sous-modules",
   mine: (n: number) => `${n} à vous`,
   done: "fait",

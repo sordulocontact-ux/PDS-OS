@@ -103,8 +103,16 @@ export function NowCard({
     waitingTitle: t.waitingTitle,
     finished: t.finished,
   };
+  // « Terminé » only when every step is: a module not started yet (no
+  // step, or all locked) is never « terminé » (Activations before the
+  // Stratégie is validated, 10/11/2026).
+  const finished =
+    steps.length > 0 &&
+    steps.every((s) => s.status === "done" || s.status === "obsolete");
   // Nothing for the viewer here: who is expected, in a quiet card.
-  if (!overview && mine.length === 0 && blockers.length === 0)
+  if (!overview && mine.length === 0 && blockers.length === 0) {
+    // Nothing started and nobody expected: the page says why.
+    if (waiting.length === 0 && steps.length === 0) return null;
     return (
       <NowFrame label={t.label} quiet>
         <span className="text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-secondary)]">
@@ -113,10 +121,13 @@ export function NowCard({
         {waiting.length > 0 ? (
           <WaitingRows items={waiting.slice(0, 3)} shown={shown} />
         ) : (
-          <p className="font-medium">{texts.finished}</p>
+          <p className="font-medium">
+            {finished ? texts.finished : texts.waitingTitle}
+          </p>
         )}
       </NowFrame>
     );
+  }
   const [first, ...more] = mine;
   const badge = first
     ? {
@@ -154,7 +165,7 @@ export function NowCard({
             ? first.step.actor?.todo
             : overview
               ? t.allDone
-              : waiting.length > 0
+              : waiting.length > 0 || !finished
                 ? texts.waitingTitle
                 : texts.finished}
         </h2>
@@ -224,7 +235,9 @@ function ElsewhereLine({
   return (
     <p
       data-now-card
-      className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]"
+      // Right under the module's title, read with it (Figma of the SACEM
+      // step, Sacha 10/11/2026): the column's gap cancelled.
+      className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)] [[data-project-header]+&]:-mt-5"
     >
       {also ? t.alsoElsewhere(count) : t.nothingHere(count)}{" "}
       {href && (

@@ -1,5 +1,7 @@
 "use client";
 
+import { nestedCardClass } from "@/components/ui/nested-card";
+import { cn } from "@/lib/utils";
 import { IconXmark } from "nucleo-sharp-essential";
 
 import { Field } from "@/components/auth/field";
@@ -7,7 +9,7 @@ import { FieldError } from "@/components/auth/form-message";
 import { PersonPickerField } from "@/components/network/person-picker-field";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ChipMultiChoice } from "@/components/ui/chip-choice";
+import { OptionSelect } from "@/components/projects/option-select";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
 import {
@@ -84,20 +86,22 @@ export function CreatorCard({
   };
 
   return (
-    <div className="grid gap-3 rounded-xl border p-3 sm:grid-cols-3">
+    <div className={cn(nestedCardClass, "grid gap-4 sm:grid-cols-3")}>
       <fieldset disabled={disabled} className="contents">
-        <div className="flex flex-col gap-2 sm:col-span-3">
+        <div className="flex flex-col gap-3 sm:col-span-3">
           {creator.main_artist && (
             <div className="flex flex-wrap items-center gap-2">
               <StatusBadge tone="info" size="sm">
                 {t.roles.mainArtist}
               </StatusBadge>
-              <span className="text-sm text-muted-foreground">
+              <span className="text-body-sm text-muted-foreground">
                 {creator.confirmed ? t.roles.confirmed : t.roles.mainArtistHint}
               </span>
             </div>
           )}
           <PersonPickerField<CreatorOption>
+            // Remounted when PDS OS fills the main artist's fiche.
+            key={creator.contact_id ?? "none"}
             refName={`c-ref-${rowId}`}
             nameName={`c-name-${rowId}`}
             legend={t.creator.person}
@@ -128,22 +132,28 @@ export function CreatorCard({
           />
         </div>
       </fieldset>
-      <div className="flex flex-col gap-2 sm:col-span-3">
-        <ChipMultiChoice<RoleChoice>
-          name={`c-roles-${rowId}`}
-          legend={t.roles.legend}
-          required
-          hint={t.roles.hint}
-          error={errors?.roles}
-          options={[
-            ...QUALITIES.map((q) => ({ value: q, label: t.roles[q] })),
-            { value: PERFORMER, label: t.roles.performer },
-          ]}
-          value={chosen}
-          onChange={disabled ? undefined : choose}
-        />
+      <div className="flex flex-col gap-3 sm:col-span-3">
+        {/* A menu rather than chips: lighter in a long form (Sacha,
+            09/11/2026); several roles ticked in it. */}
+        <fieldset disabled={disabled} className="contents">
+          <OptionSelect
+            multiple
+            name={`c-roles-${rowId}`}
+            label={t.roles.legend}
+            required
+            placeholder={t.roles.placeholder}
+            hint={t.roles.hint}
+            error={errors?.roles}
+            items={Object.fromEntries([
+              ...QUALITIES.map((q) => [q, t.roles[q]]),
+              [PERFORMER, t.roles.performer],
+            ])}
+            value={chosen}
+            onValueChange={(next) => choose(next as RoleChoice[])}
+          />
+        </fieldset>
         {creator.performer_only && (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-body-sm text-muted-foreground">
             {t.roles.performerNote}
           </p>
         )}

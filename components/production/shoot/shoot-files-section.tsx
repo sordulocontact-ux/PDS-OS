@@ -1,4 +1,4 @@
-import { PageSection } from "@/components/shell/page-section";
+import { StepSection } from "@/components/shell/journey/step-section";
 import { FactList } from "@/components/ui/fact-list";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDateTime } from "@/lib/calls/format";
@@ -38,11 +38,11 @@ export function ShootFilesSection({
   contacts: NetworkOption[];
 }) {
   return (
-    <PageSection
+    <StepSection
       id="shoot-files"
       title={t.title}
       description={t.description}
-      action={
+      aside={
         canOrganize && (
           <DeclarationsDialog
             projectId={projectId}
@@ -111,6 +111,6 @@ export function ShootFilesSection({
           ]}
         />
       </div>
-    </PageSection>
+    </StepSection>
   );
 }

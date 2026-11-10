@@ -26,7 +26,16 @@ export default async function StrategyValidatedPage({
   const { projectId } = await params;
   const ctx = await strategyStepData(projectId);
   if (!ctx) notFound();
-  const { approved, model, data, docs, isOwner, access } = ctx;
+  const { approved, model, data, docs, isOwner, access, documentActors } = ctx;
+  // What the viewer was asked on a document, opened where it is.
+  const mine = Object.fromEntries(
+    documentActors
+      .filter((a) => a.actor.viewer)
+      .map((a) => [
+        a.doc === "plan" ? "release_plan" : "press_kit",
+        a.actor.href ?? "",
+      ]),
+  );
   const t = fr.strategyBriefOut.final;
   const out = approved
     ? (briefOutOf(approved.content) ?? briefOutFrom(model, data.referenceDate))
@@ -64,6 +73,7 @@ export default async function StrategyValidatedPage({
             projectId={projectId}
             approved={approved}
             documents={docs.documents}
+            mine={mine}
           />
           <StrategyFeeds
             projectId={projectId}

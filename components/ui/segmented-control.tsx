@@ -2,6 +2,7 @@
 
 import { useRef, type KeyboardEvent, type ReactNode } from "react";
 
+import { ButtonRoll } from "@/components/ui/button";
 import { useSegmentIndicator } from "@/components/ui/use-segment-indicator";
 import { ViewLink } from "@/components/ui/view-link";
 import { cn } from "@/lib/utils";
@@ -15,6 +16,8 @@ import { cn } from "@/lib/utils";
  * (`SegmentedLinks`, through `ViewToggle`). Several choices that combine stay
  * `FilterChip`. Too many segments for the width wrap inside the frame. The
  * chosen ground slides from one segment to the next (`useSegmentIndicator`).
+ * The label of a segment not chosen rolls on hover, as a button's
+ * (`ButtonRoll`); no growth, which would push it out of the sliding ground.
  */
 
 // `bare`: the segments alone, without the frame (a menu's tabs, Figma's
@@ -35,7 +38,7 @@ const segmentClass = (active: boolean, fill: boolean, bare = false) =>
     // Its own ground until the sliding one is measured (server HTML).
     active
       ? "bg-[var(--control-bg-soft)] text-foreground group-data-ready/segments:bg-transparent"
-      : "text-[color:var(--text-secondary)] hover:bg-[var(--control-bg-hover)] hover:text-foreground",
+      : "group/button text-[color:var(--text-secondary)] hover:bg-[var(--control-bg-hover)] hover:text-foreground",
   );
 
 // The sliding ground, under the segments (drawn first).
@@ -126,7 +129,7 @@ export function SegmentedControl<V extends string>({
             onKeyDown={(event) => onKeyDown(event, index)}
             className={segmentClass(active, fill, bare)}
           >
-            {option.label}
+            <ButtonRoll>{option.label}</ButtonRoll>
           </button>
         );
       })}
@@ -167,7 +170,7 @@ export function SegmentedLinks({
           aria-current={option.current ? "page" : undefined}
           className={segmentClass(option.current, fill)}
         >
-          {option.label}
+          <ButtonRoll>{option.label}</ButtonRoll>
         </ViewLink>
       ))}
     </nav>

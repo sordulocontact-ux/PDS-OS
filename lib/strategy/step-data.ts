@@ -15,7 +15,9 @@ import { strategyModel } from "@/lib/strategy/dimension-model";
 import { approvedOf, latestOf, sentOf } from "@/lib/strategy/documents/model";
 import { loadStrategyDocuments } from "@/lib/strategy/documents/queries";
 import {
+  strategyDocumentActors,
   strategyJourney,
+  type StrategyJourneyInput,
   type StrategyValidator,
 } from "@/lib/strategy/journey";
 import { loadStrategy } from "@/lib/strategy/queries";
@@ -135,10 +137,25 @@ async function readStrategyStepData(projectId: string) {
         ].map((v) => ({ ...v, viewer: viewer(v.personId), viaLink: false }));
   const approved = approvedOf(docs.documents, "brief");
   const stage = data.stage?.state ?? "not_started";
-  const docState = (kind: "release_plan" | "press_kit") =>
-    latestOf(docs.documents, kind)?.state ?? "to_generate";
+  const docInput = (kind: "release_plan" | "press_kit") => {
+    const last = latestOf(docs.documents, kind);
+    return {
+      state: last?.state ?? "to_generate",
+      approved: Boolean(approvedOf(docs.documents, kind)),
+      waiting:
+        last?.state === "sent"
+          ? last.reviews
+              .filter((r) => r.state === "pending")
+              .map((r) => ({
+                name: r.name,
+                viewer: viewer(r.personId),
+                viaLink: false,
+              }))
+          : [],
+    };
+  };
 
-  const steps = strategyJourney({
+  const input: StrategyJourneyInput = {
     projectId,
     owner: project.ownerPersonId
       ? {
@@ -174,8 +191,14 @@ async function readStrategyStepData(projectId: string) {
       : null,
     approved: approved ? { version: approved.version } : null,
     revisionOpen: docs.revisionOpen,
-    documents: { plan: docState("release_plan"), press: docState("press_kit") },
-  });
+    documents: {
+      plan: docInput("release_plan"),
+      press: docInput("press_kit"),
+    },
+  };
+  const steps = strategyJourney(input);
+  // Who acts on which document (« À vous » on its card).
+  const documentActors = strategyDocumentActors(input);
 
   return {
     access,
@@ -187,6 +210,7 @@ async function readStrategyStepData(projectId: string) {
     docs,
     model,
     steps,
+    documentActors,
     validators,
     approved,
     latest,

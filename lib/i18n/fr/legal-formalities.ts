@@ -101,6 +101,7 @@ export const legalFormalities = {
   },
   // A participant's roles (retour d'Ibé du 02/11/2026).
   roles: {
+    placeholder: "Choisir ses rôles",
     legend: "Rôle dans l'œuvre",
     author: "Auteur · paroles",
     composer: "Compositeur · musique",
@@ -123,6 +124,11 @@ export const legalFormalities = {
     adapter: "Adaptateur",
   },
   // Rubrique D of the bulletin.
+  // Two choices side by side (`SegmentedControl`, Sacha 09/11/2026).
+  depDrSegments: {
+    follow_phono: "Comme les parts Phono",
+    statutory: "Partage égal SACEM",
+  },
   depDrChoices: {
     follow_phono: "Comme les parts Phono",
     statutory: "Partage égal du Règlement général de la SACEM",
@@ -130,6 +136,9 @@ export const legalFormalities = {
   // JUR-23: what the rubrique D does to the DEP and DR, computed by the code.
   // « 4. Répartition »: each category shared on its own.
   categories: {
+    // Nobody holds a category yet (no role chosen, no publisher).
+    nobody:
+      "Les parts se répartissent ici dès qu'un participant a un rôle ou qu'un éditeur est ajouté.",
     intro:
       "Chaque catégorie se partage à part et doit faire 100 % : les auteurs se partagent la part Auteur, les compositeurs la part Compositeur, les éditeurs la part Éditeur. Une personne auteur et compositrice a une part dans chacune.",
     names: {
@@ -167,8 +176,6 @@ export const legalFormalities = {
     // JUR-02: computed by the code, checked by a person.
     toCheck: "Calculées par le code depuis les parts de l'œuvre : à vérifier",
     check: "J'ai vérifié les parts DEP et DR",
-    explain:
-      "DEP, droits d'exécution publique : quand l'œuvre est diffusée (radio, télé, lieux publics, streaming). DR, droits de reproduction mécanique : quand elle est copiée (disques, téléchargements, streaming). Ils ne se partagent pas comme les parts de l'œuvre : le code les calcule selon la règle de la SACEM.",
     title: "Aperçu des DEP et DR",
     intro:
       "Phono, DEP et DR sont trois partages différents : ils ne s'additionnent jamais. Les DEP et DR sont d'abord répartis entre catégories par la règle, puis au sein de chaque catégorie.",
@@ -205,6 +212,10 @@ export const legalFormalities = {
       composer: "compositeur",
       publisher: "éditeur",
     },
+  },
+  arrangementSegments: {
+    all: "Toutes les exploitations",
+    specific: "Certaines exploitations",
   },
   arrangementScopes: {
     all: "Autorisé pour toutes les exploitations",

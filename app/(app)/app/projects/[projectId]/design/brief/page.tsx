@@ -1,12 +1,12 @@
 import { notFound } from "next/navigation";
 
-import { CallFacts } from "@/components/calls/call-facts";
-import { DesignBlock } from "@/components/design/design-block";
 import { DesignStepFrame } from "@/components/design/design-step-frame";
 import { EstablishBriefButton } from "@/components/design/brief-step/establish-brief-button";
-import { DesignWaits } from "@/components/design/waiting-row";
-import { buttonVariants, ButtonRoll } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
+import { DocumentCard } from "@/components/ui/document-card";
+import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { PoCallout } from "@/components/ui/po-callout";
+import { StepWaiting } from "@/components/shell/journey/step-waiting";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
 import { liveCreativeBrief } from "@/lib/design/brief-live";
@@ -53,6 +53,41 @@ export default async function DesignBriefPage({
   const canEstablish =
     (ctx.isCreative || ctx.isOwner) && !isLocked(step.status);
 
+  const facts = c
+    ? [
+        {
+          label: t.rows.context,
+          value: t.contextValue(
+            [c.context.project, c.context.artist].filter(Boolean).join(" · "),
+            c.context.releaseDate ? formatDay(c.context.releaseDate) : null,
+            ctx.start.strategy?.version ?? null,
+          ),
+        },
+        { label: t.rows.goals, value: c.objectives.strategic ?? "—" },
+        { label: t.rows.audiences, value: c.audiences.audiences ?? "—" },
+        {
+          label: t.rows.narrative,
+          value:
+            c.narrative.angle ?? join(c.narrative.parts.map((p) => p.value)),
+        },
+        { label: t.rows.principles, value: join(c.principles) },
+        { label: t.rows.tone, value: join(c.tone) },
+        { label: t.rows.avoid, value: join(c.showAvoid) },
+        {
+          label: t.rows.deliverables,
+          value: c.deliverables.map((d) => d.title).join(", ") || "—",
+        },
+        {
+          label: t.rows.references,
+          value: `${validated.length} · ${join(validated)}`,
+        },
+        {
+          label: t.rows.open,
+          value: open.length ? open.join(" · ") : t.none,
+        },
+      ]
+    : [];
+
   return (
     <DesignStepFrame
       projectId={projectId}
@@ -71,63 +106,38 @@ export default async function DesignBriefPage({
       {outdated && (
         <ToneCallout tone="warning">{t.outdated(number)}</ToneCallout>
       )}
-      <DesignBlock
-        title={t.title(number)}
-        action={
-          stored && (
-            <a
-              href={routes.projectDesignBriefPdf(projectId, stored.number)}
-              target="_blank"
-              rel="noreferrer"
-              className={buttonVariants({ variant: "ghost", size: "sm" })}
-            >
-              <ButtonRoll>{t.pdf}</ButtonRoll>
-            </a>
-          )
-        }
-      >
-        {c && (
-          <CallFacts
-            facts={[
-              {
-                label: t.rows.context,
-                value: t.contextValue(
-                  [c.context.project, c.context.artist]
-                    .filter(Boolean)
-                    .join(" · "),
-                  c.context.releaseDate
-                    ? formatDay(c.context.releaseDate)
-                    : null,
-                  ctx.start.strategy?.version ?? null,
-                ),
-              },
-              { label: t.rows.goals, value: c.objectives.strategic ?? "—" },
-              { label: t.rows.audiences, value: c.audiences.audiences ?? "—" },
-              {
-                label: t.rows.narrative,
-                value:
-                  c.narrative.angle ??
-                  join(c.narrative.parts.map((p) => p.value)),
-              },
-              { label: t.rows.principles, value: join(c.principles) },
-              { label: t.rows.tone, value: join(c.tone) },
-              { label: t.rows.avoid, value: join(c.showAvoid) },
-              {
-                label: t.rows.deliverables,
-                value: c.deliverables.map((d) => d.title).join(", ") || "—",
-              },
-              {
-                label: t.rows.references,
-                value: `${validated.length} · ${join(validated)}`,
-              },
-              {
-                label: t.rows.open,
-                value: open.length ? open.join(" · ") : t.none,
-              },
-            ]}
-          />
-        )}
-      </DesignBlock>
+      {c && (
+        <DocumentCard
+          name={t.title(number)}
+          action={
+            stored && (
+              <Button
+                variant="outline"
+                size="sm"
+                nativeButton={false}
+                render={
+                  <a
+                    href={routes.projectDesignBriefPdf(
+                      projectId,
+                      stored.number,
+                    )}
+                    target="_blank"
+                    rel="noreferrer"
+                  />
+                }
+              >
+                {t.pdf}
+              </Button>
+            )
+          }
+        >
+          <FactRows className="rounded-none border-0">
+            {facts.map((f) => (
+              <FactRow key={f.label} label={f.label} value={f.value} />
+            ))}
+          </FactRows>
+        </DocumentCard>
+      )}
       {canEstablish && (!stored || outdated) ? (
         <EstablishBriefButton
           projectId={projectId}
@@ -135,7 +145,7 @@ export default async function DesignBriefPage({
           done={t.establishedDone(stored ? stored.number + 1 : 1)}
         />
       ) : (
-        <DesignWaits step={step} actors={[step.actor]} />
+        <StepWaiting step={step} />
       )}
     </DesignStepFrame>
   );

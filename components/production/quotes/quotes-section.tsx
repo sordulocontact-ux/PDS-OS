@@ -11,6 +11,7 @@ import { AddQuoteButton } from "./add-quote-button";
 import { QuoteCheckForm } from "./quote-check-form";
 import { QuoteDecisionForm } from "./quote-decision-form";
 import { QuoteRevisionForm } from "./quote-revision-form";
+import { StepSection } from "@/components/shell/journey/step-section";
 import { QuoteVersionList, type QuoteVersionView } from "./quote-version-row";
 
 const fr = { productionQuotes };
@@ -94,13 +95,14 @@ export function QuotesSection({
           « {revision.reason} »
         </ToneCallout>
       )}
-      <section className="flex flex-col gap-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h3 className="font-semibold">{t.versions}</h3>
-          {canOrganize && (
+      <StepSection
+        title={t.versions}
+        aside={
+          canOrganize && (
             <AddQuoteButton projectId={projectId} sheetId={sheetId} />
-          )}
-        </div>
+          )
+        }
+      >
         {quotes.length === 0 ? (
           <EmptyNote>
             {external ? t.empty.external(companyName) : t.empty.internal}
@@ -108,7 +110,7 @@ export function QuotesSection({
         ) : (
           <QuoteVersionList quotes={quotes.map(view)} />
         )}
-      </section>
+      </StepSection>
       {last?.status === "deposited" && canOrganize && validatorName && (
         <QuoteCheckForm
           projectId={projectId}

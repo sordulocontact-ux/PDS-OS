@@ -25,11 +25,13 @@ import type { TitleFormality } from "@/lib/legal/formalities/types";
 import { fileNamePart } from "@/lib/utils/file-name-part";
 
 import { DossierSection } from "./dossier-section";
+import { FutureSigners } from "./signatures-list";
 import { useDossierErrors } from "./use-dossier-errors";
 
 const fr = { legalDocuments, legalFormalities };
 
-const EDITABLE = [
+// The dossier can still be changed (and generated) in these states.
+export const EDITABLE = [
   "collecting_data",
   "ready_to_generate",
   "document_ready",
@@ -166,6 +168,9 @@ export function DossierForm({
       ))}
       {EDITABLE.includes(f.status) && (
         <div className="flex flex-col gap-3 border-t border-[color:var(--border-hairline)] pt-6">
+          {/* Read again just before generating, where it serves (Sacha,
+              10/11/2026), not at the head of a dossier still being filled. */}
+          {f.signatures.length === 0 && <FutureSigners f={f} />}
           {refused && <FormMessage kind="error">{refused}</FormMessage>}
           <div className="flex flex-wrap gap-2">
             <Button

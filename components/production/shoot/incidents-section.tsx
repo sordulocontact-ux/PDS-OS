@@ -1,5 +1,7 @@
+import { FactRow, FactRows } from "@/components/ui/fact-row";
+import { Rows } from "@/components/ui/rows";
 import { EmptyNote } from "@/components/shell/empty-state";
-import { PageSection } from "@/components/shell/page-section";
+import { StepSection } from "@/components/shell/journey/step-section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDateTime } from "@/lib/calls/format";
 import type { Member } from "@/lib/framing/related";
@@ -34,11 +36,11 @@ export function IncidentsSection({
   canOrganize: boolean;
 }) {
   return (
-    <PageSection
+    <StepSection
       id="shoot-incidents"
       title={t.title}
       description={t.description}
-      action={
+      aside={
         canOrganize && (
           <IncidentAddButton
             projectId={projectId}
@@ -52,7 +54,7 @@ export function IncidentsSection({
       {incidents.length === 0 ? (
         <EmptyNote>{t.empty}</EmptyNote>
       ) : (
-        <ul className="flex flex-col gap-3">
+        <Rows>
           {incidents.map((incident) => (
             <IncidentItem
               key={incident.id}
@@ -70,9 +72,9 @@ export function IncidentsSection({
               }
             />
           ))}
-        </ul>
+        </Rows>
       )}
-    </PageSection>
+    </StepSection>
   );
 }
 
@@ -91,7 +93,7 @@ function IncidentItem({
     { label: t.resolution, value: i.resolution },
   ].filter((d) => d.value !== null);
   return (
-    <li className="flex flex-col gap-3 rounded-xl border border-border p-4">
+    <li className="flex flex-col gap-3 px-4 py-3.5">
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 flex-col gap-2">
           <span className="text-sm font-semibold break-words">{i.title}</span>
@@ -136,16 +138,19 @@ function IncidentItem({
         {actions}
       </div>
       {details.length > 0 && (
-        <dl className="flex flex-col gap-2 text-sm">
+        <FactRows>
           {details.map((d) => (
-            <div key={d.label} className="flex flex-col gap-0.5">
-              <dt className="text-xs text-muted-foreground">{d.label}</dt>
-              <dd className="font-medium break-words whitespace-pre-line">
-                {d.value}
-              </dd>
-            </div>
+            <FactRow
+              key={d.label}
+              label={d.label}
+              value={
+                <span className="break-words whitespace-pre-line">
+                  {d.value}
+                </span>
+              }
+            />
           ))}
-        </dl>
+        </FactRows>
       )}
       {resolved && i.resolvedAt && (
         <p className="text-xs text-muted-foreground">

@@ -255,6 +255,16 @@ export const shell = {
       budget: "Budget prévisionnel",
       priority: "Priorité",
       priorityHint: "Haute : en tête de l'accueil, de Travail et des projets.",
+      // The project's image (retour d'Akili du 05/11/2026): optional.
+      cover: "Pochette",
+      coverDrop: "Déposer une image ou choisir un fichier",
+      coverHint:
+        "JPG, PNG ou WebP, carrée de préférence. Sans image, PDS OS reprend la pochette du titre au Catalogue, sinon un visuel par défaut. Le chef de projet pourra la changer depuis le projet.",
+      coverChosen: (name: string) => `Image choisie : ${name}`,
+      coverRemove: "Retirer l'image",
+      // The project exists: only its image could not be filed.
+      coverFailed:
+        "Projet créé, mais la pochette n'a pas pu être enregistrée : ajoutez-la depuis le projet.",
       initialContext: "Contexte initial",
       initialContextHint:
         "Ajoutez ici les informations déjà connues au moment de créer le projet.",

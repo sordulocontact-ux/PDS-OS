@@ -17,6 +17,7 @@ import {
 import { getMaster } from "@/lib/catalog/queries";
 import { fr } from "@/lib/i18n/fr";
 import { withActiveWorkflows } from "@/lib/overview/workflow-progress";
+import { withCovers } from "@/lib/projects/covers";
 import { listProjects } from "@/lib/projects/queries";
 import { allInOrder } from "@/lib/utils/parallel";
 import { IconPlus } from "nucleo-sharp-essential";
@@ -79,7 +80,7 @@ export default async function MasterProjectsPage({
           <EmptyNote>{t.emptyBody}</EmptyNote>
         ) : (
           <ProjectsTable
-            projects={await withActiveWorkflows(projects)}
+            projects={await withCovers(await withActiveWorkflows(projects))}
             rights={{
               canEdit: can(access, "create_projects"),
               canArchive: can(access, "archive_records"),

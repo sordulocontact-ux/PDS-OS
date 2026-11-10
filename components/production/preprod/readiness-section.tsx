@@ -1,4 +1,4 @@
-import { PageSection } from "@/components/shell/page-section";
+import { StepSection } from "@/components/shell/journey/step-section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
@@ -47,12 +47,7 @@ export function ReadinessSection({
 }) {
   const open = openChecks(rows);
   return (
-    <PageSection
-      id="readiness"
-      title={t.title}
-      description={t.description}
-      card
-    >
+    <StepSection id="readiness" title={t.title} description={t.description}>
       <div className="flex flex-col gap-6">
         <ul className="flex flex-col gap-4">
           {rows.map((row) => (
@@ -126,6 +121,6 @@ export function ReadinessSection({
           </p>
         )}
       </div>
-    </PageSection>
+    </StepSection>
   );
 }

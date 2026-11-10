@@ -1,3 +1,5 @@
+import { Fold } from "@/components/ui/fold";
+import { StepSection } from "@/components/shell/journey/step-section";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import { CALL_ITEM_KINDS, type CallItem } from "@/lib/production/preprod/types";
@@ -68,14 +70,7 @@ export function CallItems({
   return (
     <div className="flex flex-col gap-8">
       {order.map((topic, index) => (
-        <section
-          key={topic}
-          aria-labelledby={`call-topic-${index}`}
-          className="flex flex-col gap-4"
-        >
-          <h3 id={`call-topic-${index}`} className="text-base font-semibold">
-            {topic}
-          </h3>
+        <StepSection key={topic} id={`call-topic-${index}`} title={topic}>
           {CALL_ITEM_KINDS.map((kind) => {
             const group = live.filter(
               (i) => i.topic === topic && i.kind === kind,
@@ -90,15 +85,12 @@ export function CallItems({
               </div>
             );
           })}
-        </section>
+        </StepSection>
       ))}
       {rejected.length > 0 && (
-        <details className="flex flex-col gap-3">
-          <summary className="cursor-pointer text-sm text-muted-foreground">
-            {t.rejectedCount(rejected.length)}
-          </summary>
-          <ul className="mt-3 flex flex-col gap-3">{rejected.map(row)}</ul>
-        </details>
+        <Fold summary={t.rejectedCount(rejected.length)}>
+          <ul className="flex flex-col gap-3">{rejected.map(row)}</ul>
+        </Fold>
       )}
     </div>
   );

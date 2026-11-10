@@ -1,5 +1,7 @@
 import { IconCheck } from "nucleo-sharp-essential";
 
+import { StepSection } from "@/components/shell/journey/step-section";
+import { InfoRow, Rows } from "@/components/ui/rows";
 import { ReturnCallout } from "@/components/ui/return-callout";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
@@ -199,24 +201,21 @@ export async function ClosureStep({ ctx }: { ctx: ReviewContext }) {
       {active?.state === "requested" && active.requestNote && (
         <ToneCallout tone="warning">{active.requestNote}</ToneCallout>
       )}
-      <section className="flex flex-col gap-2.5">
-        <h3 className="text-[length:var(--type-body-md)] leading-[var(--type-body-md-lh)] font-semibold">
-          {t.before}
-        </h3>
-        <ul className="flex flex-col overflow-hidden rounded-xl border border-[color:var(--border-hairline)]">
+      <StepSection title={t.before}>
+        <Rows>
           {checks.map((c) => (
-            <li
+            <InfoRow
               key={c.key}
-              className="flex flex-wrap items-center justify-between gap-2.5 border-b border-[color:var(--border-hairline)] px-4 py-3 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] last:border-b-0"
-            >
-              <span className="min-w-0 flex-1 break-words">{c.text}</span>
-              <StatusBadge tone={reviewCheckTone[c.kind]} size="sm">
-                {LABEL[c.kind]}
-              </StatusBadge>
-            </li>
+              title={c.text}
+              badge={
+                <StatusBadge tone={reviewCheckTone[c.kind]} size="sm">
+                  {LABEL[c.kind]}
+                </StatusBadge>
+              }
+            />
           ))}
-        </ul>
-      </section>
+        </Rows>
+      </StepSection>
       {closed && active && viewer.canValidate && (
         <ReopenForm projectId={project.id} closureId={active.id} />
       )}

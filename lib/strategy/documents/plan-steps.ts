@@ -12,44 +12,79 @@ import type {
 
 const fr = { strategyReleasePlan };
 
-const join = (values: string[]) => values.slice(0, 4).join(" · ") || null;
+/**
+ * One thing the validated strategy already says, as the first screen of a
+ * generator shows it (Sacha, 10/11/2026: no more long texts in a table):
+ * a sentence (`value`), pills (`items`), or the narrative's angle with its
+ * other parts folded under it (`parts`). `wide` takes a whole row.
+ */
+export type KnownFact = {
+  key: string;
+  label: string;
+  value: string | null;
+  items?: string[];
+  parts?: Array<{ label: string; text: string }>;
+  wide?: boolean;
+};
 
-/** One line per thing the validated strategy decided (never the budget). */
+/** What the validated strategy decided (never the budget). */
 export function knownItems(
   input: Omit<ReleasePlanInput, "images">,
   kpis: number,
-) {
+): KnownFact[] {
   const t = fr.strategyReleasePlan.intro;
   const release = input.project.releaseDate;
+  const angleLabel = fr.strategyReleasePlan.content.angle;
+  const angle =
+    input.narrative.find((n) => n.label === angleLabel) ??
+    input.narrative[0] ??
+    null;
+  const milestones = [...input.milestones].sort((a, b) =>
+    a.occurs_on.localeCompare(b.occurs_on),
+  );
   return [
-    { label: t.items.positioning, value: input.positioning },
-    { label: t.items.audiences, value: input.audiences },
     {
-      label: t.items.narrative,
-      value: join(input.narrative.map((n) => n.text)),
+      key: "positioning",
+      label: t.items.positioning,
+      value: input.positioning,
     },
     {
+      key: "objectives",
       label: t.items.objectives,
       value:
-        [input.objective, kpis ? `${kpis} KPI${kpis > 1 ? "s" : ""}` : null]
+        [input.objective, kpis ? t.kpis(kpis) : null]
           .filter(Boolean)
           .join(" · ") || null,
     },
-    { label: t.items.levers, value: join(input.levers.map((l) => l.label)) },
     {
-      label: t.items.deliverables,
-      value: join(input.formats.map((f) => f.title)),
+      key: "narrative",
+      label: t.items.narrative,
+      value: angle?.text ?? null,
+      parts: input.narrative.filter((n) => n !== angle),
+      wide: true,
+    },
+    { key: "audiences", label: t.items.audiences, value: input.audiences },
+    {
+      key: "levers",
+      label: t.items.levers,
+      value: null,
+      items: input.levers.map((l) => l.label),
     },
     {
+      key: "deliverables",
+      label: t.items.deliverables,
+      value: null,
+      items: input.formats.map((f) => f.title),
+      wide: true,
+    },
+    {
+      key: "calendar",
       label: t.items.calendar,
-      value: input.milestones.length
-        ? [
-            t.milestones(input.milestones.length),
-            release ? formatDay(release) : null,
-          ]
-            .filter(Boolean)
-            .join(" · ")
-        : null,
+      value: release ? t.release(formatDay(release)) : null,
+      items: milestones.map((m) =>
+        t.milestone(m.title, formatDay(m.occurs_on)),
+      ),
+      wide: true,
     },
   ];
 }

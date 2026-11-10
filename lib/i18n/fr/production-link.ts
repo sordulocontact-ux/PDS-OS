@@ -59,8 +59,8 @@ export const productionLink = {
       `Location des lieux pour ${days} jour${days > 1 ? "s" : ""} de tournage${day ? ` (${day})` : ""}. Le lieu retenu y sera comparé.`,
     revision: (reason: string) => `PDS demande une révision : « ${reason} »`,
     pds: "PDS",
-    waitCheck: "En attente de PDS : vérifier le devis",
-    waitDecide: "En attente de PDS : valider le devis",
+    waitCheck: "Vérifier le devis",
+    waitDecide: "Valider le devis",
     description:
       "Déposez-le ici : le chargé de production le vérifie, puis il est validé chez PDS.",
     // Never the internal envelope (VISION-UX rule 21): the delivery only.

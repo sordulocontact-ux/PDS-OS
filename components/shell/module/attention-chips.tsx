@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { ButtonRoll, buttonGrow } from "@/components/ui/button";
 import { ViewLink } from "@/components/ui/view-link";
 import { stepTools } from "@/lib/i18n/fr/step-tools";
 import { cn } from "@/lib/utils";
@@ -13,7 +14,13 @@ const fr = { stepTools };
 const t = fr.stepTools.chips;
 
 const CHIP =
-  "inline-flex h-[34px] items-center gap-2 rounded-pill border border-[color:var(--border-hairline)] bg-card px-3 text-caption font-medium text-foreground transition-colors hover:bg-[var(--control-bg-hover)]";
+  "inline-flex h-[34px] items-center gap-2 rounded-pill border border-[color:var(--border-hairline)] bg-card px-3 text-caption font-medium text-foreground";
+// A chip that opens something: hover as a button (it grows, its label rolls).
+const ACTION_CHIP = cn(
+  CHIP,
+  buttonGrow,
+  "group/button hover:bg-[var(--control-bg-hover)]",
+);
 const DOT = {
   danger: "bg-[var(--tone-danger-fg)]",
   warning: "bg-[var(--tone-warning-fg)]",
@@ -51,9 +58,11 @@ export function AttentionChips({
     <div aria-label={t.label} className="flex flex-wrap gap-2">
       {blockers > 0 &&
         (blockersHref ? (
-          <ViewLink href={blockersHref} className={CHIP}>
-            <Dot tone="danger" />
-            {t.blockers(blockers)}
+          <ViewLink href={blockersHref} className={ACTION_CHIP}>
+            <ButtonRoll>
+              <Dot tone="danger" />
+              {t.blockers(blockers)}
+            </ButtonRoll>
           </ViewLink>
         ) : (
           <span className={CHIP}>
@@ -62,15 +71,23 @@ export function AttentionChips({
           </span>
         ))}
       {review > 0 && reviewHref && (
-        <ViewLink href={reviewHref} className={CHIP}>
-          <Dot tone="warning" />
-          {t.review(review)}
+        <ViewLink href={reviewHref} className={ACTION_CHIP}>
+          <ButtonRoll>
+            <Dot tone="warning" />
+            {t.review(review)}
+          </ButtonRoll>
         </ViewLink>
       )}
       {toConfirm > 0 && (
-        <button type="button" className={CHIP} onClick={() => setOpen(true)}>
-          <Dot tone="info" />
-          {t.toConfirm(toConfirm)}
+        <button
+          type="button"
+          className={ACTION_CHIP}
+          onClick={() => setOpen(true)}
+        >
+          <ButtonRoll>
+            <Dot tone="info" />
+            {t.toConfirm(toConfirm)}
+          </ButtonRoll>
         </button>
       )}
       <NotesDialog {...dialog} open={open} onOpenChange={setOpen} />

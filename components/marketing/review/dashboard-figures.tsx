@@ -55,7 +55,7 @@ export function DashboardFigures({
               <h3 id={`group-${group}`} className="text-base font-medium">
                 {t.groups[group]}
               </h3>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-body-sm text-muted-foreground">
                 {group === "budget" && budgetRestricted
                   ? t.budgetRestricted
                   : t.groupHints[group]}

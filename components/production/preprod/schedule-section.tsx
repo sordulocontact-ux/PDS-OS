@@ -1,4 +1,4 @@
-import { PageSection } from "@/components/shell/page-section";
+import { StepSection } from "@/components/shell/journey/step-section";
 import {
   DataTable,
   DataTableBody,
@@ -83,11 +83,11 @@ export function ScheduleSection({
       : (day(row.date) ?? EMPTY_CELL);
 
   return (
-    <PageSection
+    <StepSection
       id="schedule"
       title={t.title}
       description={t.description}
-      action={
+      aside={
         canOrganize ? (
           <ScheduleEditButton
             projectId={projectId}
@@ -113,7 +113,6 @@ export function ScheduleSection({
           />
         ) : undefined
       }
-      card
     >
       <div className="flex flex-col gap-8">
         <p className="text-sm text-muted-foreground">
@@ -185,6 +184,6 @@ export function ScheduleSection({
         )}
         {children}
       </div>
-    </PageSection>
+    </StepSection>
   );
 }

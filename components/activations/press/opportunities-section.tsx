@@ -1,6 +1,6 @@
 import { EmptyNote } from "@/components/shell/empty-state";
-import { PageSection } from "@/components/shell/page-section";
-import { StatusBadge } from "@/components/ui/status-badge";
+import { ActivationSection } from "@/components/activations/activation-section";
+import { FactRow, FactRows } from "@/components/ui/fact-row";
 import type { OpportunityRecord } from "@/lib/activations/press/queries";
 import type { Member } from "@/lib/framing/related";
 import { activationPress } from "@/lib/i18n/fr/activation-press";
@@ -42,7 +42,7 @@ export function OpportunitiesSection({
   canWrite: boolean;
 }) {
   return (
-    <PageSection
+    <ActivationSection
       id="opportunities"
       title={t.title}
       description={t.description}
@@ -61,83 +61,86 @@ export function OpportunitiesSection({
       {opportunities.length === 0 ? (
         <EmptyNote>{t.none}</EmptyNote>
       ) : (
-        <ul className="flex flex-col gap-3">
+        <FactRows>
           {opportunities.map((o) => (
-            <li
+            <FactRow
               key={o.id}
-              className="flex flex-col gap-2 rounded-xl border bg-card p-4"
-            >
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="font-medium">
-                  {t.types[o.type as keyof typeof t.types]}
-                  {o.subject && ` · ${o.subject}`}
-                </span>
-                <StatusBadge
-                  size="sm"
-                  tone={tone[o.status as keyof typeof tone]}
-                >
-                  {t.statuses[o.status as keyof typeof t.statuses]}
-                </StatusBadge>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {[
+              value={`${t.types[o.type as keyof typeof t.types]}${o.subject ? ` · ${o.subject}` : ""}`}
+              source={
+                [
                   o.scheduledAt && formatDateTime(o.scheduledAt),
                   o.location,
                   o.format,
                 ]
                   .filter(Boolean)
-                  .join(" · ")}
-              </p>
-              {o.confirmedByName && o.confirmationChannel && o.confirmedAt && (
-                <p className="text-sm">
-                  {t.confirmedOn(
-                    o.confirmedByName,
-                    fr.activationWork.messages.channels[
-                      o.confirmationChannel as "email"
-                    ],
-                    formatDate(o.confirmedAt),
-                  )}
-                  {o.confirmationProofUrl && (
-                    <>
-                      {" · "}
-                      <a
-                        href={o.confirmationProofUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="underline underline-offset-4"
-                      >
-                        {t.confirmationProof}
-                      </a>
-                    </>
-                  )}
-                </p>
-              )}
-              {o.statusNote && (
-                <p className="text-sm text-muted-foreground">{o.statusNote}</p>
-              )}
-              {canWrite && (
-                <div className="flex flex-wrap gap-2">
-                  <OpportunityButton
-                    projectId={projectId}
-                    activationId={activationId}
-                    targetId={targetId}
-                    opportunity={o}
-                    members={members}
-                  />
-                  {o.type === "interview" && (
-                    <BriefButton
+                  .join(" · ") || null
+              }
+              state={{
+                tone: tone[o.status as keyof typeof tone],
+                label: t.statuses[o.status as keyof typeof t.statuses],
+              }}
+              side={
+                canWrite && (
+                  <div className="flex flex-wrap gap-2">
+                    <OpportunityButton
                       projectId={projectId}
-                      opportunityId={o.id}
-                      defaultBrief={o.brief ?? briefOf(o)}
-                      saved={Boolean(o.brief)}
+                      activationId={activationId}
+                      targetId={targetId}
+                      opportunity={o}
+                      members={members}
                     />
-                  )}
-                </div>
-              )}
-            </li>
+                    {o.type === "interview" && (
+                      <BriefButton
+                        projectId={projectId}
+                        opportunityId={o.id}
+                        defaultBrief={o.brief ?? briefOf(o)}
+                        saved={Boolean(o.brief)}
+                      />
+                    )}
+                  </div>
+                )
+              }
+              below={
+                (o.confirmedByName || o.statusNote) && (
+                  <span className="flex flex-col gap-1 text-body-sm">
+                    {o.confirmedByName &&
+                      o.confirmationChannel &&
+                      o.confirmedAt && (
+                        <span>
+                          {t.confirmedOn(
+                            o.confirmedByName,
+                            fr.activationWork.messages.channels[
+                              o.confirmationChannel as "email"
+                            ],
+                            formatDate(o.confirmedAt),
+                          )}
+                          {o.confirmationProofUrl && (
+                            <>
+                              {" · "}
+                              <a
+                                href={o.confirmationProofUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="underline underline-offset-4"
+                              >
+                                {t.confirmationProof}
+                              </a>
+                            </>
+                          )}
+                        </span>
+                      )}
+                    {o.statusNote && (
+                      <span className="text-[color:var(--text-secondary)]">
+                        {o.statusNote}
+                      </span>
+                    )}
+                  </span>
+                )
+              }
+            />
           ))}
-        </ul>
+        </FactRows>
       )}
-    </PageSection>
+    </ActivationSection>
   );
 }

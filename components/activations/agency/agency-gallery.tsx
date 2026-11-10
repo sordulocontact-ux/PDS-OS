@@ -71,7 +71,7 @@ export function AgencyGallery({
               <Avatar name={name} pictureUrl={null} className="size-10" />
               <div className="flex min-w-0 flex-1 flex-col">
                 <span className="font-medium break-words">{name}</span>
-                <span className="text-sm break-words text-muted-foreground">
+                <span className="text-body-sm break-words text-muted-foreground">
                   {[
                     c.handle && !c.name
                       ? null
@@ -87,22 +87,22 @@ export function AgencyGallery({
               </div>
             </div>
             {typeof c.followers === "number" && (
-              <p className="text-sm">
+              <p className="text-body-sm">
                 <span className="text-muted-foreground">{t.followers} · </span>
                 <span className="font-medium tabular-nums">
                   {numbers.format(c.followers)}
                 </span>
               </p>
             )}
-            <dl className="grid grid-cols-2 gap-2 text-sm">
+            <dl className="grid grid-cols-2 gap-2 text-body-sm">
               <div>
-                <dt className="text-xs text-muted-foreground">
+                <dt className="text-caption text-muted-foreground">
                   {t.agencyStatus}
                 </dt>
                 <dd className="break-words">{r.agencyStatus ?? "—"}</dd>
               </div>
               <div>
-                <dt className="text-xs text-muted-foreground">
+                <dt className="text-caption text-muted-foreground">
                   {t.pdsDecision}
                 </dt>
                 <dd>
@@ -118,11 +118,11 @@ export function AgencyGallery({
               </div>
             </dl>
             {r.pdsNote && (
-              <p className="text-sm break-words">
+              <p className="text-body-sm break-words">
                 {t.note} : {r.pdsNote}
               </p>
             )}
-            <p className="flex flex-wrap gap-x-3 text-sm">
+            <p className="flex flex-wrap gap-x-3 text-body-sm">
               {URL_FIELDS.flatMap((f) =>
                 typeof c[f] === "string" && /^https?:\/\//.test(String(c[f]))
                   ? [
@@ -161,7 +161,7 @@ export function AgencyGallery({
                 )}
               </div>
             )}
-            <p className="text-xs text-muted-foreground">
+            <p className="text-caption text-muted-foreground">
               {fr.activationAgency.agencyData} ·{" "}
               {t.source(source?.label ?? "—", formatDate(r.updatedAt))}
             </p>

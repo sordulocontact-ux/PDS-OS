@@ -1,5 +1,5 @@
 import { EmptyNote } from "@/components/shell/empty-state";
-import { PageSection } from "@/components/shell/page-section";
+import { StepSection } from "@/components/shell/journey/step-section";
 import {
   DataTable,
   DataTableActionsCell,
@@ -60,11 +60,11 @@ export function EquipmentReturnSection({
 }) {
   const state = returnStateOf(equipment);
   return (
-    <PageSection
+    <StepSection
       id="shoot-equipment"
       title={t.title}
       description={t.description}
-      action={
+      aside={
         <StatusBadge tone={returnStateTone[state]}>
           {t.returnState[state]}
         </StatusBadge>
@@ -164,6 +164,6 @@ export function EquipmentReturnSection({
         )}
         <ClosingCheck equipment={equipment} blockers={closingBlockers} />
       </div>
-    </PageSection>
+    </StepSection>
   );
 }

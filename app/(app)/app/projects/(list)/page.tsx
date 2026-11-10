@@ -22,6 +22,7 @@ import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { viewHref } from "@/lib/ui/view-href";
 import { listProjectDrafts } from "@/lib/projects/drafts";
+import { withCovers } from "@/lib/projects/covers";
 import { listProjects } from "@/lib/projects/queries";
 import { withActiveWorkflows } from "@/lib/overview/workflow-progress";
 
@@ -45,8 +46,9 @@ export default async function ProjectsPage({
       // Drafts belong with the live projects of whoever may create them.
       canCreate ? listProjectDrafts() : [],
     ]);
-  // Launched: the workflows each project is at (Étape column, 03/11/2026).
-  const projects = await withActiveWorkflows(listedProjects);
+  // Launched: the workflows each project is at (Étape column, 03/11/2026);
+  // every one: its cover, next to its name (Sacha, 10/11/2026).
+  const projects = await withCovers(await withActiveWorkflows(listedProjects));
   const listed = projects.length + drafts.length > 0;
 
   const newProject = canCreate ? (

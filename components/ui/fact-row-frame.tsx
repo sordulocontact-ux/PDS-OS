@@ -166,14 +166,20 @@ export function FactRowFrame({
         {label && (
           <span
             className={
-              titleOnly ? "font-medium" : "text-caption text-muted-foreground"
+              titleOnly
+                ? "font-medium"
+                : control
+                  ? // A field's label in ink, above its explanations in grey
+                    // (Sacha, 09/11/2026: the SACEM bulletin).
+                    "font-medium text-foreground"
+                  : "text-caption text-muted-foreground"
             }
           >
             {label}
             {required && <RequiredMark />}
           </span>
         )}
-        {control ??
+        {!control &&
           (titleOnly ? null : (
           <span
             className={cn(
@@ -184,9 +190,10 @@ export function FactRowFrame({
             {missing && empty && !pill ? missingLabel : value}
           </span>
           ))}
-        {sourceNode ?? (
-          <FactSourceText source={source} changedBy={changedBy} />
-        )}
+        {!control &&
+          (sourceNode ?? (
+            <FactSourceText source={source} changedBy={changedBy} />
+          ))}
       </div>
       {(shownState || side || hoverAction) && (
         <div className="flex flex-wrap items-center gap-2 md:justify-end">
@@ -209,6 +216,17 @@ export function FactRowFrame({
                 </span>
               </span>
             </span>
+          )}
+        </div>
+      )}
+      {control && (
+        // A field takes the row's whole width, under its label and state:
+        // the same width whether a pill sits on the right or not (Sacha,
+        // 09/11/2026, the SACEM bulletin).
+        <div className="flex min-w-0 flex-col gap-1 md:col-span-2">
+          {control}
+          {sourceNode ?? (
+            <FactSourceText source={source} changedBy={changedBy} />
           )}
         </div>
       )}

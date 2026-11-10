@@ -2,6 +2,7 @@
 
 import { useLayoutEffect, useRef } from "react";
 
+import { ButtonRoll } from "@/components/ui/button";
 import { tabLinkClass } from "@/components/ui/tab-link";
 import { ViewLink } from "@/components/ui/view-link";
 
@@ -132,13 +133,13 @@ export function TabBar({ label, items }: { label: string; items: TabBarItem[] })
 
 function TabLabel({ item }: { item: TabBarItem }) {
   return (
-    <>
+    <ButtonRoll>
       {item.label}
       {item.count !== undefined && (
         <span className="text-muted-foreground tabular-nums">
           ({item.count})
         </span>
       )}
-    </>
+    </ButtonRoll>
   );
 }

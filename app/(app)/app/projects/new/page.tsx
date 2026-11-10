@@ -65,6 +65,7 @@ export default async function NewProjectPage({
         managers={managers}
         creatives={creatives}
         draftId={draft ? draftId : null}
+        organizationId={access.organizationId ?? undefined}
         defaults={
           draft
             ? draftDefaults(draft)

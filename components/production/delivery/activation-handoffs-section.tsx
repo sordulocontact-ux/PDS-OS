@@ -1,4 +1,5 @@
-import { PageSection } from "@/components/shell/page-section";
+import { Rows } from "@/components/ui/rows";
+import { StepSection } from "@/components/shell/journey/step-section";
 import type { Access } from "@/lib/auth/access";
 import { routes } from "@/lib/auth/redirects";
 import { productionDelivery } from "@/lib/i18n/fr/production-delivery";
@@ -26,12 +27,12 @@ export async function ActivationHandoffsSection({
   const handoffs = await loadActivationHandoffs(projectId, access);
   if (handoffs.length === 0) return null;
   return (
-    <PageSection
+    <StepSection
       id="production-handoffs"
       title={t.title}
       description={t.description}
     >
-      <ul className="flex flex-col gap-2">
+      <Rows>
         {handoffs.map((h) => (
           <HandoffItem
             key={h.id}
@@ -47,7 +48,7 @@ export async function ActivationHandoffsSection({
             }}
           />
         ))}
-      </ul>
-    </PageSection>
+      </Rows>
+    </StepSection>
   );
 }

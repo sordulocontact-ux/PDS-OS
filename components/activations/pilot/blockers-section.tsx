@@ -1,5 +1,6 @@
 import { EmptyNote } from "@/components/shell/empty-state";
-import { PageSection } from "@/components/shell/page-section";
+import { ActivationSection } from "@/components/activations/activation-section";
+import { InfoRow, Rows } from "@/components/ui/rows";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { alertText } from "@/lib/activations/describe";
 import type { Alert } from "@/lib/activations/states";
@@ -46,7 +47,7 @@ export function BlockersSection({
         : 1,
   );
   return (
-    <PageSection
+    <ActivationSection
       id="blockers"
       title={t.title}
       description={t.description}
@@ -63,31 +64,51 @@ export function BlockersSection({
       {alerts.length === 0 && blockers.length === 0 ? (
         <EmptyNote>{t.none}</EmptyNote>
       ) : (
-        <ul className="flex flex-col gap-2">
+        <Rows>
           {alerts.map((a, i) => (
-            <li
+            <InfoRow
               key={`${a.key}-${i}`}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-dashed p-3"
-            >
-              <span className="text-sm">{alertText(a)}</span>
-              <span className="flex gap-2">
-                <StatusBadge size="sm" tone="neutral">
-                  {t.categories[a.category]}
-                </StatusBadge>
-                <StatusBadge size="sm" tone={severityTone[a.severity]}>
-                  {t.computed}
-                </StatusBadge>
-              </span>
-            </li>
+              title={alertText(a)}
+              badge={
+                <span className="flex gap-2">
+                  <StatusBadge size="sm" tone="neutral">
+                    {t.categories[a.category]}
+                  </StatusBadge>
+                  <StatusBadge size="sm" tone={severityTone[a.severity]}>
+                    {t.computed}
+                  </StatusBadge>
+                </span>
+              }
+            />
           ))}
           {ordered.map((b) => (
-            <li
+            <InfoRow
               key={b.id}
-              className="flex flex-col gap-1 rounded-xl border bg-card p-4"
-            >
-              <div className="flex flex-wrap items-start justify-between gap-2">
-                <span className="font-medium break-words">{b.description}</span>
-                <span className="flex gap-2">
+              title={b.description}
+              detail={[
+                [
+                  b.blockingObject,
+                  nameOf(b.ownerPersonId),
+                  t.since(formatDate(b.createdAt)),
+                  b.expectedResolution
+                    ? `${t.expected} ${formatDate(b.expectedResolution)}`
+                    : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · "),
+                b.impact ? `${t.impact} : ${b.impact}` : null,
+                b.resolutionNote
+                  ? `${t.resolution} : ${b.resolutionNote}${
+                      b.resolvedAt
+                        ? ` (${formatDate(b.resolvedAt)}, ${nameOf(b.resolvedBy) ?? "—"})`
+                        : ""
+                    }`
+                  : null,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+              badge={
+                <span className="flex flex-wrap items-center gap-2">
                   <StatusBadge size="sm" tone="neutral">
                     {t.categories[b.category]}
                   </StatusBadge>
@@ -103,44 +124,18 @@ export function BlockersSection({
                       ? t.resolvedLabel
                       : t.severities[b.severity]}
                   </StatusBadge>
+                  {canWrite && b.status === "open" && (
+                    <ResolveBlockerButton
+                      projectId={projectId}
+                      blockerId={b.id}
+                    />
+                  )}
                 </span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {[
-                  b.blockingObject,
-                  nameOf(b.ownerPersonId),
-                  t.since(formatDate(b.createdAt)),
-                  b.expectedResolution
-                    ? `${t.expected} ${formatDate(b.expectedResolution)}`
-                    : null,
-                ]
-                  .filter(Boolean)
-                  .join(" · ")}
-              </p>
-              {b.impact && (
-                <p className="text-sm">
-                  {t.impact} : {b.impact}
-                </p>
-              )}
-              {b.resolutionNote && (
-                <p className="text-sm text-muted-foreground">
-                  {t.resolution} : {b.resolutionNote}
-                  {b.resolvedAt &&
-                    ` (${formatDate(b.resolvedAt)}, ${nameOf(b.resolvedBy) ?? "—"})`}
-                </p>
-              )}
-              {canWrite && b.status === "open" && (
-                <div>
-                  <ResolveBlockerButton
-                    projectId={projectId}
-                    blockerId={b.id}
-                  />
-                </div>
-              )}
-            </li>
+              }
+            />
           ))}
-        </ul>
+        </Rows>
       )}
-    </PageSection>
+    </ActivationSection>
   );
 }

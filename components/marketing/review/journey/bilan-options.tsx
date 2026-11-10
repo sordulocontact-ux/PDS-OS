@@ -96,7 +96,7 @@ export function BilanOptions({
                 disabled
                 readOnly
               />
-              <span className="text-sm font-medium">{sections[key]}</span>
+              <span className="text-body-sm font-medium">{sections[key]}</span>
             </label>
           ) : (
             <CheckboxField

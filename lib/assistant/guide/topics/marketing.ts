@@ -118,12 +118,19 @@ export const marketingTopics: GuideTopic[] = [
       "L'influence et les relations presse se gèrent soit en interne, soit avec une agence externe.",
       "Chaque activation a un statut (À préparer, En cours, Réalisée, Clôturée, Annulée ou Bloquée avec sa raison), des preuves et des statistiques déclarées.",
       "Une statistique manquante n'est jamais comptée comme zéro.",
+      "La page Activations montre en haut les leviers du Brief de sortie à transformer, puis le tableau des activations avec ses vues : À moi, En cours, À mesurer, Terminées.",
+      "Une ligne du tableau ouvre la page de l'activation : sa frise, ce qu'il y a à faire maintenant, son module et ses informations.",
+      "Le fil d'Ariane en haut de la page change de partie du Marketing ou d'activation par son double chevron.",
       "La page signale ce qui demande attention : responsable absent, échéance passée, preuve manquante.",
     ],
     faq: [
       {
         q: "Où créer une activation ?",
-        a: "Sur la page Activations du projet : chaque levier retenu peut devenir une activation quand vous êtes prêt.",
+        a: "Sur la page Activations du projet : chaque levier retenu peut devenir une activation quand vous êtes prêt, et « Nouvelle activation » à côté du tableau pour une action hors des leviers. L'activation créée s'ouvre sur sa page.",
+      },
+      {
+        q: "Comment passer d'une activation à une autre ?",
+        a: "Par le double chevron à côté de son nom dans le fil d'Ariane, en haut de la page, ou en revenant au tableau par « Activations ».",
       },
     ],
   },

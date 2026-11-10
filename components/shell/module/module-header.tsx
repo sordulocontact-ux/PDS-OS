@@ -14,6 +14,10 @@ export type ModuleHeaderProps = {
   tabs?: SubModuleTab[];
   // The module's name, the page's h1 (« Stratégie », « Master »).
   title: string;
+  // Under the title, quiet (the overview: « Mona Lys · Single »).
+  subtitle?: string;
+  // Before the title (the overview: the project's cover).
+  media?: React.ReactNode;
   // The workflow's state, on the right of the title's line (Distribution:
   // « En attente »).
   status?: { label: string; tone: Tone };
@@ -36,11 +40,18 @@ export function ModuleHeader({
   crumbs,
   tabs,
   title,
+  subtitle,
+  media,
   status,
   actions,
   facts,
   className,
 }: ModuleHeaderProps) {
+  const heading = (
+    <h1 className="min-w-0 text-[length:var(--type-display-module)] leading-[var(--type-display-module-lh)] break-words">
+      {title}
+    </h1>
+  );
   return (
     <header
       data-module-header=""
@@ -54,9 +65,21 @@ export function ModuleHeader({
       {/* Proto `.headrow`: the title on the left, its state on the right of
           the line, before the actions. */}
       <div className="flex flex-wrap items-center justify-between gap-2.5">
-        <h1 className="min-w-0 text-[length:var(--type-display-module)] leading-[var(--type-display-module-lh)] break-words">
-          {title}
-        </h1>
+        {media || subtitle ? (
+          <div className="flex min-w-0 flex-1 items-center gap-4 sm:gap-5">
+            {media}
+            <div className="flex min-w-0 flex-col gap-1">
+              {heading}
+              {subtitle && (
+                <p className="text-[length:var(--type-body-md)] leading-[var(--type-body-md-lh)] text-[color:var(--text-secondary)]">
+                  {subtitle}
+                </p>
+              )}
+            </div>
+          </div>
+        ) : (
+          heading
+        )}
         {(status || actions) && (
           <div className="flex flex-wrap items-center gap-2">
             {status && (

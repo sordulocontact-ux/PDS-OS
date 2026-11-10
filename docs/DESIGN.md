@@ -346,7 +346,15 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
      dessous, sur toute la largeur de la colonne ; le fil à 24 px du bord, 16 px medium
      `--text-tertiary`, séparateur « / » : « Module / [sous-module /] Étape », **sans le projet**
      (la barre latérale du projet le nomme) ; chaque segment sauf le dernier est un lien, le
-     dernier (`aria-current="page"`) en `--text-primary` ;
+     dernier (`aria-current="page"`) en `--text-primary` ; **un segment qui a des frères porte un
+     double chevron** (`IconChevronExpandY`, `CrumbSwitcher`, Sacha 10/11/2026, comme le sélecteur
+     de projet) : le sous-module du Marketing (les cinq parties, avec la coche verte et le compteur
+     « à vous » des pilules), l'activation ouverte (les autres activations, type · phase), le
+     livrable de la Production (les autres livrables, qui produit · livré). Le libellé reste un lien
+     vers sa page (sous une activation ou un livrable, « Activations » / « Production » remonte à la
+     liste, jamais là où le sous-module s'ouvre), le chevron est un bouton à part qui ouvre la
+     liste (recherche au-delà de 8) ; sur le dernier segment, libellé et chevron forment un seul
+     bouton ;
   2. **pilules des sous-modules**, Marketing seul (Stratégie · Conception · Production ·
      Activations · Suivi & bilan) : pilule 36 px, fond `--surface-soft`, texte
      `--text-secondary` 15 px ; active = encre pleine (`--surface-inverse`) ; sous-module fait =
@@ -681,9 +689,22 @@ introduit. 28 px séparent deux sections, 8 px séparent un titre de son contenu
 explication reste collée à la liste qu'elle commente (proto Juridique v3, Sacha, 24/10/2026).
 La phrase qui présente une section passe par `description` : **2 px sous le titre, puis 12 px
 avant le contenu** (Sacha, 09/11/2026 : « le titre et la description sont trop décollés »).
-Écart voulu avec le `TitleBlock` d'une carte (10 px) : dans une étape, la phrase écrite en simple
-paragraphe était à la même distance du titre que du champ suivant, donc rien ne se regroupait ;
-le couple titre + phrase doit toujours être plus serré que ce qui le sépare du contenu.
+Le `TitleBlock` d'une carte suit la même règle depuis le 10/11/2026 (Figma de Sacha, étape
+« Déclaration SACEM », « partout ») : **4 px entre le titre et sa phrase**, puis **24 px avant le
+contenu** dans la carte d'une étape (`StepPanel`) ; la date d'échéance à droite du titre en
+`--text-muted`, plus discrète que la phrase (en retard, elle reste en rouge). Sous le titre d'un
+module, la ligne « n autres choses à faire ailleurs » est collée au titre (0 px, `NowCard`), puis
+20 px avant le reste. Dans une étape, la phrase écrite en simple paragraphe était à la même
+distance du titre que du champ suivant, donc rien ne se regroupait ; le couple titre + phrase
+doit toujours être plus serré que ce qui le sépare du contenu.
+
+**Cadre dans des cadres** (Sacha, 10/11/2026, Figma du bulletin SACEM) : un cadre posé dans une
+carte elle-même dans une carte (participant, éditeur, blocs de catégorie et « Parts Phono entre
+catégories » de la Répartition, aperçu des DEP et DR, ligne « Aucun éditeur musical ») est
+**rempli un cran plus clair que la carte, avec un fin contour blanc** (`--border-hairline`, `nestedCardClass`,
+`components/ui/nested-card.ts`, fond `--surface-tint`) : en sombre, plus clair se lit au-dessus,
+le contour fin le détache sans alourdir. Un cadre directement dans une carte garde son contour. Le fond
+de l'app à la place (plus sombre, « un trou dans la carte ») a été essayé puis refusé le même jour.
 
 ### Boutons, pastilles, encarts, toast, dates (décisions C0 du 18/10/2026)
 
@@ -722,6 +743,12 @@ D'après le proto « Projet complet » (`docs/protos/projet.html`), qui fait foi
   un lien stylé par `buttonVariants()` enveloppe son contenu dans `<ButtonRoll>`. La copie
   est `aria-hidden` ; tout est coupé quand le mouvement est réduit (seules les couleurs
   changent).
+  **Étendu aux contrôles qui agissent comme des boutons** (Sacha, 10/11/2026), même roulement,
+  mêmes durées : segments (`SegmentedControl`, `SegmentedLinks`), onglets (`TabBar`) et pilules de
+  sous-modules (`SubModuleTabs`) roulent **sans grossir** (le fond ou le trait qui glisse resterait
+  décalé), et jamais sur le segment ou l'onglet ouvert ; `FilterChip` et les pastilles
+  `AttentionChips` cliquables roulent **et** grossissent (`buttonGrow`, `ui/button.tsx`). Pas sur
+  la navigation latérale, les éléments de menu, les lignes et cartes cliquables ni les liens texte.
 - **Pastille** (`StatusBadge`) : 24 px, padding 10, **13 px semi-gras** (`--type-micro`) ;
   `sm` garde 20 px pour les lignes denses.
 - **Encart** (`ToneCallout`) : rayon 10, padding 12/14, 15 px, **icône du ton à gauche**
@@ -879,6 +906,19 @@ n'a plus de variante. Toute nouvelle modale passe par `Dialog` / `FormDialog` /
 - **Boutons d'une modale ou d'une décision** (décision C0) : le **principal d'abord, à
   gauche**, puis les secondaires (« Annuler » en dernier), comme le proto. Un seul endroit :
   `DialogFormActions` et `ReasonForm` ; aucune modale ne range ses boutons à la main.
+
+### Pochette d'un projet (10/11/2026)
+
+Retour d'Akili du 05/11, proto « Vue d'ensemble » validé par Sacha. Un projet a une image : celle
+importée pour lui (à la création, ou ensuite par son responsable), sinon la pochette de son premier
+titre au Catalogue, sinon un **visuel par défaut** — une teinte de catégorie (§ 3 ter) tirée de son
+id, du clair au profond, sous les anneaux d'un disque (`.project-cover-default`, `ProjectCover`) :
+chaque projet garde la sienne, partout. 104 px (80 px en mobile) en tête de la Vue d'ensemble, à
+gauche du nom et de « Artiste · Type » ; 36 px devant le nom dans les listes de projets ; 64 px en
+aperçu de formulaire. La changer : bouton rond en verre sur l'image (au survol à la souris, toujours
+au toucher) ou « Informations ». Écart voulu : la Vue d'ensemble ne montre **aucune pastille
+d'état** (étapes en fil, workflows en anneau `ProgressRing`) et sépare ses blocs par l'espace, pas
+par des traits.
 
 ### Arrondis
 

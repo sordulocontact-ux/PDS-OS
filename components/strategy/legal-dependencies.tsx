@@ -1,3 +1,4 @@
+import { StrategyPart } from "@/components/strategy/strategy-part";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { formatBriefDate } from "@/lib/framing/assess";
 import { strategyDispositif } from "@/lib/i18n/fr/strategy-dispositif";
@@ -21,14 +22,11 @@ export function LegalDependencies({
   const t = fr.strategyDispositif.legal;
   if (dependencies.length === 0 && needs.length === 0) return null;
   return (
-    <section
-      aria-labelledby="legal-dependencies"
-      className="flex flex-col gap-2"
+    <StrategyPart
+      id="legal-dependencies"
+      title={t.title}
+      description={t.description}
     >
-      <h3 id="legal-dependencies" className="text-body-md font-semibold">
-        {t.title}
-      </h3>
-      <p className="text-caption text-muted-foreground">{t.description}</p>
       <ul className="flex flex-col gap-1.5 text-sm">
         {dependencies.map((d) => (
           <li key={d.id} className="flex flex-wrap gap-x-2">
@@ -51,6 +49,6 @@ export function LegalDependencies({
           {t.needs(needs.map((n) => n.label).join(", "))}
         </ToneCallout>
       )}
-    </section>
+    </StrategyPart>
   );
 }

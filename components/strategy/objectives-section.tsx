@@ -7,7 +7,8 @@ import { useFramingAction } from "@/components/framing/use-framing-action";
 import { useCanEditProject } from "@/components/projects/edit-access";
 import { KpiItem } from "@/components/strategy/kpi-item";
 import { ObjectiveForm } from "@/components/strategy/objective-form";
-import { labelClass } from "@/components/ui/option-class";
+import { StrategyPart } from "@/components/strategy/strategy-part";
+import { Rows } from "@/components/ui/rows";
 import type { FieldState } from "@/lib/framing/brief";
 import { strategyKpis } from "@/lib/i18n/fr/strategy-kpis";
 import {
@@ -108,20 +109,18 @@ export function ObjectivesSection({
         )}
       </div>
 
-      <section aria-labelledby="kpis-title" className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1">
-          <h3 id="kpis-title" className={labelClass}>
-            {t.kpisTitle}
-          </h3>
-          <p className="text-caption text-muted-foreground">{t.kpisHint}</p>
-        </div>
+      <StrategyPart
+        id="kpis-title"
+        title={t.kpisTitle}
+        description={t.kpisHint}
+      >
         {objectives.length === 0 ? (
           <p className="text-body-md text-muted-foreground">{t.empty}</p>
         ) : (
-          <ul className="flex flex-col gap-3">
+          <Rows label={t.kpisTitle}>
             {objectives.map((o) =>
               editing === o.id ? (
-                <li key={o.id}>
+                <li key={o.id} className="p-3.5">
                   <ObjectiveForm
                     idPrefix={`objective-${o.id}`}
                     initial={{
@@ -162,7 +161,7 @@ export function ObjectivesSection({
                 />
               ),
             )}
-          </ul>
+          </Rows>
         )}
         {canEdit &&
           editing === null &&
@@ -206,7 +205,7 @@ export function ObjectivesSection({
             }
           />
         )}
-      </section>
+      </StrategyPart>
     </div>
   );
 }

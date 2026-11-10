@@ -5,6 +5,8 @@ import { ReportComparisonView } from "@/components/marketing/review/report-compa
 import { ReportView } from "@/components/marketing/review/report-view";
 import { BackLink } from "@/components/shell/back-link";
 import { Button } from "@/components/ui/button";
+import { DocumentCard } from "@/components/ui/document-card";
+import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { PdfExportButton } from "@/components/ui/pdf-export-button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { requireApproved } from "@/lib/auth/dal";
@@ -90,46 +92,13 @@ export default async function MarketingReportPage({
         <BackLink href={reviewStepHref(projectId, "bilan")}>
           {fr.reviewJourney.steps.bilan.title}
         </BackLink>
-        <div className="flex flex-wrap items-center gap-3">
-          <h2 className="text-display-sm font-semibold">
-            {fr.reviewJourney.bilan.versionTitle(project.title, report.version)}
-          </h2>
-          <StatusBadge tone={marketingReportTone[report.state]}>
-            {t.states[report.state]}
-          </StatusBadge>
-          <span className="ml-auto flex flex-wrap gap-2">
-            {previous && !comparison && (
-              <Button
-                variant="outline"
-                size="sm"
-                render={
-                  <Link
-                    href={routes.projectReviewReport(
-                      projectId,
-                      report.id,
-                      previous.id,
-                    )}
-                    scroll={false}
-                  />
-                }
-                nativeButton={false}
-              >
-                {t.compare.choose}
-              </Button>
-            )}
-            <PdfExportButton
-              href={routes.projectReviewReportPdf(projectId, report.id)}
-              fileName={t.pdfFileName(project.title, report.version)}
-              label={t.exportPdf}
-              pendingLabel={t.exporting}
-              failedLabel={t.exportFailed}
-              variant="outline"
-            />
-          </span>
-        </div>
-        <ul className="grid gap-0.5 text-sm text-muted-foreground">
-          <li>
-            {report.authorName
+        <DocumentCard
+          name={fr.reviewJourney.bilan.versionTitle(
+            project.title,
+            report.version,
+          )}
+          line={
+            report.authorName
               ? m.generatedBy(
                   report.authorName,
                   formatLongDay(report.createdAt),
@@ -138,23 +107,62 @@ export default async function MarketingReportPage({
               : m.generatedOn(
                   formatLongDay(report.createdAt),
                   formatTime(report.createdAt),
-                )}
-          </li>
-          <li>
-            {[
-              m.period(date(report.periodStart), date(report.periodEnd)),
-              m.scope(report.activationIds.length),
-              m.rules(report.rulesVersion),
-            ].join(" · ")}
-          </li>
-          <li>
-            <span title={m.fingerprintHint}>
-              {m.fingerprint} :{" "}
-              <span className="font-mono break-all">{report.contentHash}</span>
+                )
+          }
+          action={
+            <span className="flex flex-wrap items-center gap-2">
+              <StatusBadge tone={marketingReportTone[report.state]}>
+                {t.states[report.state]}
+              </StatusBadge>
+              {previous && !comparison && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  render={
+                    <Link
+                      href={routes.projectReviewReport(
+                        projectId,
+                        report.id,
+                        previous.id,
+                      )}
+                      scroll={false}
+                    />
+                  }
+                  nativeButton={false}
+                >
+                  {t.compare.choose}
+                </Button>
+              )}
+              <PdfExportButton
+                href={routes.projectReviewReportPdf(projectId, report.id)}
+                fileName={t.pdfFileName(project.title, report.version)}
+                label={t.exportPdf}
+                pendingLabel={t.exporting}
+                failedLabel={t.exportFailed}
+                variant="outline"
+              />
             </span>
-          </li>
-        </ul>
-        <p className="text-sm text-muted-foreground">{t.frozenNote}</p>
+          }
+        >
+          <FactRows className="rounded-none border-0">
+            <FactRow
+              value={[
+                m.period(date(report.periodStart), date(report.periodEnd)),
+                m.scope(report.activationIds.length),
+                m.rules(report.rulesVersion),
+              ].join(" · ")}
+            />
+            <FactRow
+              label={m.fingerprint}
+              value={
+                <span title={m.fingerprintHint} className="font-mono break-all">
+                  {report.contentHash}
+                </span>
+              }
+              source={t.frozenNote}
+            />
+          </FactRows>
+        </DocumentCard>
       </header>
       {comparison && other && newer && (
         <ReportComparisonView

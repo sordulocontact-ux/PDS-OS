@@ -1,5 +1,5 @@
 import { EmptyNote } from "@/components/shell/empty-state";
-import { PageSection } from "@/components/shell/page-section";
+import { ActivationSection } from "@/components/activations/activation-section";
 import {
   DataTable,
   DataTableBody,
@@ -54,7 +54,7 @@ export function MetricsSection({
   const name = (m: Pick<MetricRecord, "metric" | "label">) =>
     m.label ?? t.names[m.metric];
   return (
-    <PageSection
+    <ActivationSection
       id="metrics"
       title={title}
       description={t.description}
@@ -74,12 +74,12 @@ export function MetricsSection({
       ) : (
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <h3 className="text-sm font-medium">{t.totalsTitle}</h3>
+            <h3 className="text-body-sm font-medium">{t.totalsTitle}</h3>
             <ul className="flex flex-wrap gap-2">
               {totals.map((total) => (
                 <li
                   key={`${total.metric}-${total.label}-${total.unit}`}
-                  className="rounded-lg border px-3 py-2 text-sm"
+                  className="rounded-lg border px-3 py-2 text-body-sm"
                 >
                   <span className="text-muted-foreground">
                     {name(total)} ·{" "}
@@ -101,7 +101,7 @@ export function MetricsSection({
                 </li>
               ))}
             </ul>
-            <p className="text-xs text-muted-foreground">{t.totalsRule}</p>
+            <p className="text-caption text-muted-foreground">{t.totalsRule}</p>
           </div>
           <DataTable>
             <DataTableHeader>
@@ -120,7 +120,7 @@ export function MetricsSection({
                   <DataTableCell>
                     <span className="flex flex-col">
                       {name(m)}
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-caption text-muted-foreground">
                         {m.platform}
                       </span>
                     </span>
@@ -177,6 +177,6 @@ export function MetricsSection({
           </DataTable>
         </div>
       )}
-    </PageSection>
+    </ActivationSection>
   );
 }

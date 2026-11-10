@@ -1,3 +1,5 @@
+import { StepSection } from "@/components/shell/journey/step-section";
+import { StepWaiting } from "@/components/shell/journey/step-waiting";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { shortStamp } from "@/lib/calls/prep/dates";
@@ -36,24 +38,13 @@ export async function DirectorBlock({
   const list = await loadDirectorProposals(sheet.id);
   const retained = list.find((d) => d.status === "retained");
   return (
-    <section
-      id="director-proposals"
-      aria-labelledby="director-title"
-      className="flex flex-col gap-3"
-    >
-      <h3 id="director-title" className="font-semibold">
-        {t.title}
-      </h3>
+    <StepSection id="director-proposals" title={t.title}>
       {retained ? (
         <ToneCallout tone="success">
           {t.retained(retained.name, company)}
         </ToneCallout>
       ) : list.length === 0 ? (
-        !sheet.director && (
-          <p className="rounded-xl bg-[var(--surface-soft)] px-3.5 py-3 text-[color:var(--text-secondary)]">
-            {t.waiting(company)}
-          </p>
-        )
+        !sheet.director && <StepWaiting who={company} todo={t.waitingTodo} />
       ) : (
         <p className="text-[color:var(--text-secondary)]">{t.intro(company)}</p>
       )}
@@ -96,6 +87,6 @@ export async function DirectorBlock({
           ))}
         </ul>
       )}
-    </section>
+    </StepSection>
   );
 }

@@ -277,6 +277,7 @@ export function readCreators(raw: unknown): Creator[] {
       signs: c.signs ?? true,
       ...(c.contact_id ? { contact_id: c.contact_id } : {}),
       ...(c.main_artist ? { main_artist: true } : {}),
+      ...(c.artist_id ? { artist_id: c.artist_id } : {}),
       ...(c.confirmed ? { confirmed: true } : {}),
       ...(c.performer_only ? { performer_only: true } : {}),
     };

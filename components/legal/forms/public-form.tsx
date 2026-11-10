@@ -17,10 +17,9 @@ import {
 import type { FormRequester } from "@/lib/legal/forms/public";
 import { submitLegalForm } from "@/lib/legal/forms/public-actions";
 
-import { formatInstant } from "@/lib/utils/instant";
-
+import { FormDone } from "./form-done";
 import { FormReview } from "./form-review";
-import { RequesterNote } from "./requester-note";
+import { DataUseNote, RequesterNote } from "./requester-note";
 import { RoleStep } from "./role-step";
 
 const fr = { legalForms };
@@ -33,30 +32,59 @@ const fr = { legalForms };
  * again.
  */
 export function PublicForm({
-  token,
-  prefillRoles,
-  known,
+  intro,
   requester,
-}: {
+  ...props
+}: Omit<FormStepsProps, "onSent"> & { intro: string }) {
+  // Once sent, the end is alone in the card: no greeting, no « Une
+  // question ? » twice, no data notice (retour d'Akili, 02/11/2026).
+  const [sent, setSent] = useState<Sent | null>(null);
+  if (sent)
+    return (
+      <FormDone
+        status={sent.status}
+        sentAt={sent.sentAt}
+        requester={requester}
+      />
+    );
+  return (
+    <>
+      <p className="text-muted-foreground">{intro}</p>
+      <FormSteps {...props} requester={requester} onSent={setSent} />
+      <RequesterNote requester={requester} />
+      <DataUseNote requester={requester} />
+    </>
+  );
+}
+
+type Sent = {
+  status: "complete" | "action_required";
+  // When the fiche left: the receipt says it (JUR-14).
+  sentAt: string;
+};
+
+type FormStepsProps = {
   token: string;
   prefillRoles: FormRole[];
   known: Record<string, string>;
   requester: FormRequester;
-}) {
+  onSent: (sent: Sent) => void;
+};
+
+function FormSteps({
+  token,
+  prefillRoles,
+  known,
+  requester,
+  onSent,
+}: FormStepsProps) {
   const t = fr.legalForms;
-  const [step, setStep] = useState<"roles" | "fields" | "review" | "done">(
-    "roles",
-  );
-  // When the fiche left: the receipt says it (JUR-14).
-  const [sentAt, setSentAt] = useState<string | null>(null);
+  const [step, setStep] = useState<"roles" | "fields" | "review">("roles");
   const [roles, setRoles] = useState<FormRole[]>(prefillRoles);
   const [otherRole, setOtherRole] = useState("");
   const [answers, setAnswers] = useState<Record<string, string>>(known);
   const [error, setError] = useState<string | null>(null);
   const [flagged, setFlagged] = useState<string[]>([]);
-  const [status, setStatus] = useState<"complete" | "action_required">(
-    "complete",
-  );
   const [pending, startTransition] = useTransition();
 
   const toggle = (role: FormRole) =>
@@ -75,9 +103,7 @@ export function PublicForm({
         answers,
       });
       if (result.ok) {
-        setStatus(result.status);
-        setSentAt(new Date().toISOString());
-        setStep("done");
+        onSent({ status: result.status, sentAt: new Date().toISOString() });
       } else {
         setError(result.error);
         const flags = [...(result.missing ?? []), ...(result.invalid ?? [])];
@@ -86,32 +112,6 @@ export function PublicForm({
         if (flags.length > 0) setStep("fields");
       }
     });
-
-  // The end says what happens next and whom to write to (UX test of
-  // 09/10/2026: a one-line message).
-  if (step === "done")
-    return (
-      <div className="flex flex-col gap-5 rounded-2xl border bg-background p-6">
-        <p role="status" className="text-lg font-semibold">
-          {t.public.done[status]}
-        </p>
-        {sentAt && (
-          <p className="text-sm text-muted-foreground">
-            {t.public.review.receipt(formatInstant(sentAt))}
-          </p>
-        )}
-        <section className="flex flex-col gap-2">
-          <h2 className="text-base font-medium">
-            {t.public.afterSubmit.title}
-          </h2>
-          <ul className="flex list-disc flex-col gap-1 pl-5 text-sm text-muted-foreground">
-            <li>{t.public.afterSubmit.review}</li>
-            <li>{t.public.afterSubmit.follow}</li>
-          </ul>
-        </section>
-        <RequesterNote requester={requester} />
-      </div>
-    );
 
   if (step === "roles")
     return (

@@ -12,6 +12,7 @@
 // publishing contract of the project ticks « copie jointe » (also done in
 // SQL when the contract is signed later: contracts_tick_formalities). Pure.
 
+import { countryName } from "@/lib/catalog/countries";
 import type { ContributorRole } from "@/lib/catalog/master/rules";
 import {
   QUALITY_OF_ROLE,
@@ -50,6 +51,8 @@ export type PrefillContext = {
   performers: string[];
   // The title's main artists, with their Réseau contact when they have one.
   mainArtists: Array<{
+    // Their artist of the Catalogue.
+    artistId: string | null;
     name: string;
     contactId: string | null;
     details: Record<string, string>;
@@ -73,6 +76,10 @@ export type PrefillContext = {
   splitShares: SplitShare[] | null;
   // The project's planned release day, « 2026-12-05 ».
   releaseDate: string | null;
+  // The title's version (« Version acoustique »): its subtitle.
+  variantLabel: string | null;
+  // The project's distribution parameters (Distribution › Paramètres).
+  distribution: { mode: string; territories: string[] } | null;
 };
 
 // The share of a person in the confirmed split: the line of their contact
@@ -132,6 +139,7 @@ export function prefillSacem725(ctx: PrefillContext): Prefill {
       shares: {},
       signs: true,
       main_artist: true,
+      ...(a.artistId ? { artist_id: a.artistId } : {}),
       ...(a.contactId ? { contact_id: a.contactId } : {}),
     });
   }
@@ -202,6 +210,20 @@ export function prefillSacem725(ctx: PrefillContext): Prefill {
         ? { value: minutes(ctx.durationSeconds), source: "Master final" }
         : undefined,
     iswc: ctx.iswc ? { value: ctx.iswc, source: "Titre" } : undefined,
+    // Everything known elsewhere is proposed (Sacha, 09/11/2026: « tout ce
+    // qui peut être rempli automatiquement le soit »), still to confirm.
+    subtitle: ctx.variantLabel
+      ? { value: ctx.variantLabel, source: "Version du titre" }
+      : undefined,
+    territories: ctx.distribution
+      ? {
+          value: territoriesOf(ctx.distribution),
+          source: "Paramètres de distribution",
+        }
+      : undefined,
+    first_exploitation_place: ctx.distribution
+      ? { value: DIGITAL_PLACE, source: "Distribution" }
+      : undefined,
     first_exploitation: ctx.releaseDate
       ? { value: ctx.releaseDate, source: "Date de sortie prévue" }
       : undefined,
@@ -236,4 +258,16 @@ export function prefillSacem725(ctx: PrefillContext): Prefill {
         }
       : undefined,
   };
+}
+
+// The first exploitation of a release distributed by PDS: the digital
+// platforms, through The Orchard (Distribution, dépôt manuel).
+const DIGITAL_PLACE =
+  "Plateformes numériques (streaming et téléchargement), distribution The Orchard";
+
+/** « Monde », the countries only, or the world but some, in words. */
+function territoriesOf(d: { mode: string; territories: string[] }): string {
+  if (d.mode === "world" || d.territories.length === 0) return "Monde";
+  const names = d.territories.map((c) => countryName(c) ?? c).join(", ");
+  return d.mode === "exclude" ? `Monde, sauf ${names}` : names;
 }

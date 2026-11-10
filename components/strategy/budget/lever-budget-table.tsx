@@ -1,3 +1,4 @@
+import { StrategyPart } from "@/components/strategy/strategy-part";
 import {
   DataTable,
   DataTableBody,
@@ -19,13 +20,7 @@ const fr = { strategyBudget };
 export function LeverBudgetTable({ rows }: { rows: LeverBudget[] }) {
   const t = fr.strategyBudget.byLever;
   return (
-    <section
-      aria-labelledby="lever-budget-title"
-      className="flex flex-col gap-3"
-    >
-      <h3 id="lever-budget-title" className="text-body-md font-semibold">
-        {t.title}
-      </h3>
+    <StrategyPart id="lever-budget-title" title={t.title}>
       {rows.length === 0 ? (
         <p className="text-body-md text-muted-foreground">{t.empty}</p>
       ) : (
@@ -62,6 +57,6 @@ export function LeverBudgetTable({ rows }: { rows: LeverBudget[] }) {
           </DataTableBody>
         </DataTable>
       )}
-    </section>
+    </StrategyPart>
   );
 }

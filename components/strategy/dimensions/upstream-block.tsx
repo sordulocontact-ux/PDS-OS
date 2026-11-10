@@ -1,4 +1,6 @@
+import { StrategyPart } from "@/components/strategy/strategy-part";
 import { Rows } from "@/components/ui/rows";
+
 import { strategyDimensions } from "@/lib/i18n/fr/strategy-dimensions";
 import { dayLabel } from "@/lib/strategy/dimension-model";
 import type { UpstreamChain } from "@/lib/strategy/upstream";
@@ -16,11 +18,7 @@ const t = fr.strategyDimensions.upstream;
  */
 export function UpstreamBlock({ chains }: { chains: UpstreamChain[] }) {
   return (
-    <section className="flex flex-col gap-2" aria-labelledby="upstream-title">
-      <h3 id="upstream-title" className="text-body-md font-semibold">
-        {t.title}
-      </h3>
-      <p className="text-caption text-muted-foreground">{t.note}</p>
+    <StrategyPart id="upstream-title" title={t.title} description={t.note}>
       <Rows label={t.title}>
         {chains.length === 0 ? (
           <li className="px-3.5 py-3 text-caption text-muted-foreground">
@@ -52,6 +50,6 @@ export function UpstreamBlock({ chains }: { chains: UpstreamChain[] }) {
           ))
         )}
       </Rows>
-    </section>
+    </StrategyPart>
   );
 }

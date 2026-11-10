@@ -1,5 +1,5 @@
 import { EmptyNote } from "@/components/shell/empty-state";
-import { PageSection } from "@/components/shell/page-section";
+import { StepSection } from "@/components/shell/journey/step-section";
 import { productionPost } from "@/lib/i18n/fr/production-post";
 import { formatDate } from "@/lib/release/format";
 import type { HandedFiche } from "@/lib/production/fiche";
@@ -76,12 +76,11 @@ export function ReferencesSection({
   }));
 
   return (
-    <PageSection
+    <StepSection
       id="references"
       title={t.title}
       description={t.description}
-      card
-      action={canOrganize && <ReferenceAddButton scope={scope} />}
+      aside={canOrganize && <ReferenceAddButton scope={scope} />}
     >
       <div className="grid gap-6 md:grid-cols-2">
         <div className="flex flex-col gap-3">
@@ -121,7 +120,7 @@ export function ReferencesSection({
           )}
         </div>
       </div>
-    </PageSection>
+    </StepSection>
   );
 }
 

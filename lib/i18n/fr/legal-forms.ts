@@ -66,9 +66,9 @@ export const legalForms = {
     failed: "Votre fiche n'a pas pu être envoyée. Réessayez dans un instant.",
     closed: "Ce lien n'est plus valable : demandez-en un nouveau à l'équipe.",
     done: {
-      complete: "Merci, votre fiche est enregistrée.",
-      action_required:
-        "Merci, votre fiche est enregistrée. Certaines informations différaient de ce que l'équipe avait : elle va les vérifier.",
+      title: "Merci, votre fiche est enregistrée.",
+      differs:
+        "Certaines informations différaient de ce que l'équipe avait : elle va les vérifier.",
     },
     states: {
       submitted: "Cette fiche a déjà été envoyée. Merci !",

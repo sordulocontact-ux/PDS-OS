@@ -21,40 +21,39 @@ export function BriefDecision({
   projectId: string;
   documentId: string;
 }) {
+  // Posed directly in the step, no frame around it (as the Master's).
   return (
-    <section className="flex flex-col gap-3 rounded-2xl border border-[color:var(--border-hairline)] p-3.5">
-      <DecisionPanel
-        id="brief-decision"
-        commentHint={t.decision.hint}
-        outcomes={[
-          {
-            kind: "approve",
-            label: t.decision.approve,
-            done: t.decision.done.approve,
-          },
-          {
-            kind: "approve_reserves",
-            label: t.decision.reserves,
-            done: t.decision.done.reserves,
-          },
-          {
-            kind: "request_changes",
-            label: t.decision.changes,
-            done: t.decision.done.changes,
-          },
-        ]}
-        onDecide={(kind, comment) =>
-          decideBriefOut(
-            projectId,
-            documentId,
-            kind === "approve_reserves" || kind === "request_changes"
-              ? kind
-              : "approve",
-            comment,
-          )
-        }
-      />
-    </section>
+    <DecisionPanel
+      id="brief-decision"
+      commentHint={t.decision.hint}
+      outcomes={[
+        {
+          kind: "approve",
+          label: t.decision.approve,
+          done: t.decision.done.approve,
+        },
+        {
+          kind: "approve_reserves",
+          label: t.decision.reserves,
+          done: t.decision.done.reserves,
+        },
+        {
+          kind: "request_changes",
+          label: t.decision.changes,
+          done: t.decision.done.changes,
+        },
+      ]}
+      onDecide={(kind, comment) =>
+        decideBriefOut(
+          projectId,
+          documentId,
+          kind === "approve_reserves" || kind === "request_changes"
+            ? kind
+            : "approve",
+          comment,
+        )
+      }
+    />
   );
 }
 

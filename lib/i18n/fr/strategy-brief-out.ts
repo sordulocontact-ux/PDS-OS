@@ -4,10 +4,18 @@
 
 export const strategyBriefOut = {
   doc: {
-    title: (v: number) => `Brief de sortie — V${v}`,
-    pdf: "Voir le PDF",
+    // As the Brief de cadrage's card (« Brief de cadrage · version 1 »).
+    title: (v: number) => `Brief de sortie · version ${v}`,
+    pdf: "Télécharger le PDF",
+    exporting: "Préparation du PDF…",
+    pdfFailed: "Le PDF n'a pas pu être préparé. Réessayez.",
+    // Under the card, as the Brief de cadrage.
+    created: (name: string | null, when: string) =>
+      name ? `Créée par ${name} le ${when}` : `Créée le ${when}`,
+    validatedMeta: (name: string | null, when: string) =>
+      `validée par ${name ?? "la direction"} le ${when}`,
+    draftMeta: "Faite depuis les 8 dimensions, créée à l'envoi",
     openPoints: "Restant à arbitrer",
-    none: "aucun",
     who: "Pour qui et pourquoi",
     how: "Comment",
     when: "Quand",
@@ -78,16 +86,13 @@ export const strategyBriefOut = {
   validated: (v: number, when: string) =>
     `le ${when}. Il est figé ; le réviser crée une V${v + 1}.`,
   validatedTitle: (v: number) => `Brief de sortie — V${v} validé`,
-  waiting: (names: string) =>
-    `En attente de ${names} : valider le Brief de sortie`,
-  waitingOwner: (name: string, what: string) =>
-    `En attente de ${name} : ${what}`,
   // Stratégie validée (st4).
   final: {
     callout: "Stratégie validée",
     calloutBody: (when: string, v: number) =>
       `le ${when} : Brief de sortie — V${v}. Rien n'oblige à lancer la Conception maintenant.`,
     documents: "Documents",
+    mine: "À vous",
     brief: (v: number) => `Brief de sortie — V${v}`,
     briefFor: "Interne · avec le budget",
     plan: "Plan de sortie",

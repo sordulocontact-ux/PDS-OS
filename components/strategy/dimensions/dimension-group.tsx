@@ -5,6 +5,7 @@ import { ConfirmStrategyDimension } from "@/components/strategy/dimensions/confi
 import { LeverState } from "@/components/strategy/dimensions/lever-state";
 import { StrategyAddForm } from "@/components/strategy/dimensions/strategy-add-form";
 import { StrategyLine } from "@/components/strategy/dimensions/strategy-line";
+import { StrategyPart } from "@/components/strategy/strategy-part";
 import { DimensionItem } from "@/components/ui/dimension-list";
 import { StateMark } from "@/components/ui/state-mark";
 import { ProposalAdd, ProposalRows } from "@/components/ui/proposal-group";
@@ -17,9 +18,9 @@ const fr = { decisions, strategyDimensions };
 
 const t = fr.strategyDimensions;
 
-// The Dispositif's two parts, named (Adaline's groups, Sacha 07/11/2026).
-const subhead =
-  "px-4 pt-4 pb-1 text-caption font-medium text-[color:var(--text-secondary)]";
+// The Dispositif's two parts, named (Adaline's groups, Sacha 07/11/2026),
+// with the Stratégie's one intertitle; the rows stay flush in the card.
+const subhead = "gap-1 pt-4 [&>div]:px-4";
 
 // Dimensions whose rows are listed in detail under them.
 const LIST_DIMENSIONS = new Set<DimensionView["key"]>([
@@ -205,21 +206,19 @@ export function DimensionGroup({
       }
     >
       {view.key === "levers" && leverProposals.length > 0 && (
-        <>
-          <h4 className={subhead}>{t.leverHeads.proposed}</h4>
+        <StrategyPart className={subhead} title={t.leverHeads.proposed}>
           <Rows label={t.leverHeads.proposed} flush>
             {leverProposals.map(leverRow)}
           </Rows>
-        </>
+        </StrategyPart>
       )}
       {view.key === "levers" && confirm}
       {view.key === "levers" && leverOthers.length > 0 && (
-        <>
-          <h4 className={subhead}>{t.leverHeads.levers}</h4>
+        <StrategyPart className={subhead} title={t.leverHeads.levers}>
           <Rows label={t.leverHeads.levers} flush>
             {leverOthers.map(leverRow)}
           </Rows>
-        </>
+        </StrategyPart>
       )}
       {view.key !== "levers" && lines.length > 0 && (
         <ProposalRows flush>{lines.map(line)}</ProposalRows>

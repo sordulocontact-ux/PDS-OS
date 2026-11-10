@@ -1,5 +1,6 @@
 "use client";
 
+import { EDITABLE } from "@/components/legal/formalities/dossier-form";
 import { Button } from "@/components/ui/button";
 import { ConfirmButton } from "@/components/ui/confirm-button";
 import { DialogButton } from "@/components/ui/dialog-button";
@@ -40,7 +41,10 @@ export function SignaturesList({
   const t = fr.legalFormalities.page;
   const r = fr.signedReturns.sacem;
   const latest = f.documents[0];
-  if (f.signatures.length === 0) return <FutureSigners f={f} />;
+  // Before the first signatures, who will sign is read above « Générer la
+  // version à signer » (DossierForm) while the dossier can change.
+  if (f.signatures.length === 0)
+    return EDITABLE.includes(f.status) ? null : <FutureSigners f={f} />;
   const signed = f.signatures.filter(
     (s) => s.status === "signed" && !s.superseded,
   ).length;
@@ -193,7 +197,7 @@ function SignatureRow({
 }
 
 // The signers the saved dossier names: creators who sign, then publishers.
-function FutureSigners({ f }: { f: FormalityView }) {
+export function FutureSigners({ f }: { f: FormalityView }) {
   const t = fr.legalFormalities;
   const creators = readCreators(f.values.creators?.value);
   const publishers = readPublishers(f.values.publishers?.value);

@@ -417,8 +417,9 @@ export const legalClearance = {
     contractSent: "J'ai envoyé le contrat",
     attachmentSee: "Voir",
     noDocument:
-      "Le contrat n'a pas encore de texte : mettez-le sur sa page (depuis un modèle ou un fichier importé), puis revenez l'envoyer d'ici.",
-    openToWrite: "Ouvrir le contrat",
+      "Déposez ici le contrat à envoyer : PDS OS le joindra à l'e-mail. Il n'en écrit jamais le texte.",
+    draftSlot: "Contrat à envoyer",
+    draftHint: "PDF ou Word · glissez un fichier ou cliquez",
     otherwiseHow: "Comment est-il parti ?",
     contractEmailLog: (
       names: string,
@@ -445,8 +446,8 @@ export const legalClearance = {
       "Envoyé pour signature. S'il revient signé en réponse à l'e-mail, PDS OS le range ici avec l'e-mail comme preuve ; sinon déposez-le avec sa preuve (l'e-mail de retour, le certificat de signature).",
     // The signed copy came back by e-mail, kept by PDS OS (cron).
     signedByEmail:
-      "Le contrat signé est revenu par e-mail : PDS OS l'a rangé, avec l'e-mail comme preuve. Ouvrez-le pour vérifier qu'il est bien signé, puis marquez l'autorisation comme sécurisée.",
-    seeSigned: "Voir le contrat signé",
+      "Revenu signé par e-mail : ouvrez-le pour vérifier qu'il est bien signé, puis marquez l'autorisation comme sécurisée.",
+    receivedByEmail: "Reçu par e-mail",
     // Who acts next on the authorisation contract, by its state (the
     // owner submits and sends it, the direction validates it).
     toSubmit:

@@ -428,15 +428,6 @@ export const strategyReserveTone: Record<string, Tone> = {
   lifted: "success",
 };
 
-/** A reviewer of a strategy document: waiting, validated, asked for a
- * change, or the round ended before they answered. */
-export const strategyReviewTone: Record<string, Tone> = {
-  pending: "warning",
-  approved: "success",
-  changes_requested: "danger",
-  cancelled: "neutral",
-};
-
 /** A validator of the Brief de sortie in its step (proto st3): waiting
  * (info), validated, with reserves, a change asked (warning), the round
  * ended before they answered. */

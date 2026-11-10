@@ -1,6 +1,7 @@
 import { RecordSelection } from "@/components/archive/record-selection";
 import { DraftRowActions } from "@/components/projects/draft-row-actions";
 import { ProjectActions } from "@/components/projects/project-actions";
+import { ProjectCover } from "@/components/projects/project-cover";
 import { ProjectKindBadge } from "@/components/projects/project-kind-badge";
 import { ProjectStepCell } from "@/components/projects/project-step-cell";
 import {
@@ -98,9 +99,19 @@ export function ProjectsTable({
                 />
               )}
               <DataTableCell>
-                <DataTableLink href={`${routes.projectsNew}?draft=${draft.id}`}>
-                  {name}
-                </DataTableLink>
+                <span className="flex min-w-0 items-center gap-3">
+                  <ProjectCover
+                    id={draft.id}
+                    title={name}
+                    url={null}
+                    size="sm"
+                  />
+                  <DataTableLink
+                    href={`${routes.projectsNew}?draft=${draft.id}`}
+                  >
+                    {name}
+                  </DataTableLink>
+                </span>
               </DataTableCell>
               <DataTableCell hideBelow="md">{EMPTY_CELL}</DataTableCell>
               <DataTableCell hideBelow="xl">{EMPTY_CELL}</DataTableCell>
@@ -149,11 +160,20 @@ export function ProjectsTable({
                 withSelection && <SelectEmptyCell />
               )}
               <DataTableCell>
-                <DataTableLink
-                  href={rights?.archived ? null : routes.project(project.id)}
-                >
-                  {project.title}
-                </DataTableLink>
+                {/* Its cover next to its name (Sacha, 10/11/2026). */}
+                <span className="flex min-w-0 items-center gap-3">
+                  <ProjectCover
+                    id={project.id}
+                    title={project.title}
+                    url={project.coverUrl ?? null}
+                    size="sm"
+                  />
+                  <DataTableLink
+                    href={rights?.archived ? null : routes.project(project.id)}
+                  >
+                    {project.title}
+                  </DataTableLink>
+                </span>
               </DataTableCell>
               {/* Its own column (Sacha 29/10), no longer under the name. */}
               <DataTableCell hideBelow="md">

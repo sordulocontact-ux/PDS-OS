@@ -1,7 +1,9 @@
 "use client";
 
+import { StepSection } from "@/components/shell/journey/step-section";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { ReasonForm } from "@/components/ui/reason-form";
+import { InfoRow, Rows } from "@/components/ui/rows";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDay } from "@/lib/assistant/facts";
 import { formatBriefDate } from "@/lib/framing/assess";
@@ -14,9 +16,10 @@ import { strategyReserveTone } from "@/lib/ui/state-tones";
 const fr = { strategyDocuments };
 
 /**
- * The reserves put on the Brief's versions (MKT-S1-16), open ones first:
- * what, who lifts it and by when, who put it on which version; « Lever »
- * for its owner or the project's owner, with how it was lifted.
+ * The reserves put on the Brief's versions (MKT-S1-16), open ones first,
+ * one row each (`Rows` + `InfoRow`): what, who lifts it and by when, who
+ * put it on which version, how it was lifted; « Lever » (outlined) for its
+ * owner or the project's owner.
  */
 export function ReservesList({
   projectId,
@@ -41,64 +44,57 @@ export function ReservesList({
       (a.dueOn ?? "9999").localeCompare(b.dueOn ?? "9999"),
   );
   return (
-    <section aria-labelledby="reserves-title" className="flex flex-col gap-3">
-      <h3 id="reserves-title" className="text-body-md font-semibold">
-        {t.listTitle}
-      </h3>
-      <ul className="flex flex-col gap-2">
+    <StepSection title={t.listTitle}>
+      <Rows label={t.listTitle}>
         {sorted.map((r) => (
-          <li
+          <InfoRow
             key={r.id}
-            className="flex flex-col gap-1.5 rounded-2xl border border-border px-4 py-3"
-          >
-            <div className="flex items-start justify-between gap-2">
-              <span className="text-body-md font-medium break-words">
-                {r.text}
+            title={r.text}
+            detail={[
+              t.line(r.ownerName, r.dueOn ? formatBriefDate(r.dueOn) : "—"),
+              t.from(r.createdByName, versions[r.documentId] ?? 0),
+              r.status === "lifted" && r.liftedAt
+                ? `${t.liftedLine(r.liftedByName ?? "—", formatDay(r.liftedAt))}${
+                    r.liftNote ? ` — ${r.liftNote}` : ""
+                  }`
+                : null,
+            ]
+              .filter(Boolean)
+              .join(" · ")}
+            badge={
+              <span className="flex flex-wrap items-center gap-2">
+                <StatusBadge tone={strategyReserveTone[r.status]} size="sm">
+                  {r.status === "open" ? t.open : t.lifted}
+                </StatusBadge>
+                {r.status === "open" && (isOwner || r.ownerId === meId) && (
+                  <DialogButton
+                    label={t.lift}
+                    variant="outline"
+                    size="xs"
+                    title={t.liftTitle}
+                    description={t.liftBody}
+                  >
+                    {(close) => (
+                      <ReasonForm
+                        label={t.liftNote}
+                        submitLabel={t.lift}
+                        doneMessage={t.liftedToast}
+                        required={false}
+                        run={async (note) =>
+                          written(
+                            await liftStrategyReserve(projectId, r.id, note),
+                          )
+                        }
+                        onDone={close}
+                      />
+                    )}
+                  </DialogButton>
+                )}
               </span>
-              <StatusBadge tone={strategyReserveTone[r.status]} size="sm">
-                {r.status === "open" ? t.open : t.lifted}
-              </StatusBadge>
-            </div>
-            <p className="text-caption text-muted-foreground">
-              {t.line(r.ownerName, r.dueOn ? formatBriefDate(r.dueOn) : "—")}
-            </p>
-            <p className="text-caption text-muted-foreground">
-              {t.from(r.createdByName, versions[r.documentId] ?? 0)}
-            </p>
-            {r.status === "lifted" && r.liftedAt && (
-              <p className="text-caption text-muted-foreground">
-                {t.liftedLine(r.liftedByName ?? "—", formatDay(r.liftedAt))}
-                {r.liftNote ? ` — ${r.liftNote}` : ""}
-              </p>
-            )}
-            {r.status === "open" && (isOwner || r.ownerId === meId) && (
-              <div>
-                <DialogButton
-                  label={t.lift}
-                  size="xs"
-                  title={t.liftTitle}
-                  description={t.liftBody}
-                >
-                  {(close) => (
-                    <ReasonForm
-                      label={t.liftNote}
-                      submitLabel={t.lift}
-                      doneMessage={t.liftedToast}
-                      required={false}
-                      run={async (note) =>
-                        written(
-                          await liftStrategyReserve(projectId, r.id, note),
-                        )
-                      }
-                      onDone={close}
-                    />
-                  )}
-                </DialogButton>
-              </div>
-            )}
-          </li>
+            }
+          />
         ))}
-      </ul>
-    </section>
+      </Rows>
+    </StepSection>
   );
 }

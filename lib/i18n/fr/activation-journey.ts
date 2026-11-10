@@ -16,19 +16,18 @@ export const activationJourney = {
   },
   owner: "Responsable de l'activation",
   unitLabels: { press: "Retombées", event: "Personnes" },
+  // The card of the levers still to turn into activations, above the table
+  // (Sacha 10/11/2026: a frame with its title, like the other tables).
   banner: {
-    toTransform: (n: number) =>
-      `${n} ${plural(n, "levier", "leviers")} du Brief de sortie à transformer en ${plural(n, "activation", "activations")}`,
-    kept: (n: number) =>
-      `${n} ${plural(n, "levier gardé", "leviers gardés")} pour plus tard`,
-    sub: "Créez l'activation quand vous êtes prêt ; un levier peut attendre.",
-    source: (kind: string, lever: string, version: number) =>
-      `${kind} · levier ${lever} · Brief de sortie V${version} › Dispositif`,
+    title: "Leviers du Brief de sortie",
+    toTransform: (n: number, version: number) =>
+      `${n} ${plural(n, "levier", "leviers")} à transformer en ${plural(n, "activation", "activations")} · Brief de sortie V${version} › Dispositif`,
+    kept: (n: number, version: number) =>
+      `${n} ${plural(n, "levier gardé", "leviers gardés")} pour plus tard · Brief de sortie V${version} › Dispositif`,
+    columns: { lever: "Levier", kind: "Type" },
     create: "Créer l'activation",
     createShort: "Créer",
     later: "Plus tard",
-    created: "Créée",
-    open: "Ouvrir",
     toPrepare: "À préparer",
     mode: "Mode",
     empty:
@@ -254,9 +253,16 @@ export const activationJourney = {
     done: "Terminées",
   },
   noneHere: "Aucune activation ici.",
-  // The open activation listed though it is out of the filter (ACT-003).
-  outOfFilter: "Hors filtre",
-  ownerToAppoint: "responsable à désigner",
+  // The table of the activations (Sacha 10/11/2026), sober columns: never
+  // the 9 columns removed on 18/10.
+  table: {
+    activation: "Activation",
+    kind: "Type",
+    owner: "Responsable",
+    due: "Échéance",
+    phase: "Avancement",
+    ownerToAppoint: "À désigner",
+  },
   // « À vous · récupérer les statistiques · et 2 autres »
   sentence: {
     mine: "À vous",

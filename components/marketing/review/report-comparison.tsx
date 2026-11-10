@@ -1,7 +1,8 @@
 import Link from "next/link";
 
-import { PageSection } from "@/components/shell/page-section";
+import { StepSection } from "@/components/shell/journey/step-section";
 import { Button } from "@/components/ui/button";
+import { FactRow, FactRows } from "@/components/ui/fact-row";
 import {
   DataTable,
   DataTableBody,
@@ -55,24 +56,19 @@ export function ReportComparisonView({
         : number.format(value);
   const list = (title: string, items: string[]) =>
     items.length > 0 && (
-      <div className="grid gap-1">
-        <h3 className="text-sm font-medium">{title}</h3>
-        <ul className="grid gap-0.5 text-sm text-muted-foreground">
-          {items.map((item, i) => (
-            <li key={i}>{item}</li>
-          ))}
-        </ul>
-      </div>
+      <FactRows>
+        <FactRow label={title} value={items.join(" · ")} />
+      </FactRows>
     );
   return (
-    <PageSection
+    <StepSection
       id="comparison"
       title={t.title(from, to)}
-      card
-      action={
+      aside={
         <Button
-          variant="ghost"
+          variant="outline"
           size="sm"
+          className="ml-auto"
           render={<Link href={hideHref} scroll={false} />}
           nativeButton={false}
         >
@@ -81,7 +77,9 @@ export function ReportComparisonView({
       }
     >
       {c.figures.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t.identical}</p>
+        <p className="text-body-sm text-[color:var(--text-secondary)]">
+          {t.identical}
+        </p>
       ) : (
         <DataTable>
           <DataTableHeader>
@@ -106,13 +104,13 @@ export function ReportComparisonView({
           </DataTableBody>
         </DataTable>
       )}
-      <p className="text-sm text-muted-foreground">
+      <p className="text-body-sm text-[color:var(--text-secondary)]">
         {t.evidence(c.evidenceAdded, c.evidenceRemoved, c.evidenceChanged)}
       </p>
       {list(t.activationsAdded, c.activationsAdded)}
       {list(t.activationsRemoved, c.activationsRemoved)}
       {list(t.reservesAdded, c.reservesAdded)}
       {list(t.reservesRemoved, c.reservesRemoved)}
-    </PageSection>
+    </StepSection>
   );
 }

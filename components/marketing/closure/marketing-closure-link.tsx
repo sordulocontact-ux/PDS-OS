@@ -55,7 +55,7 @@ export function MarketingClosureLink({
         )}
         <Link
           href={routes.projectReviewClosure(projectId)}
-          className="text-sm underline underline-offset-4"
+          className="text-body-sm underline underline-offset-4"
         >
           {t.projectLink.open}
         </Link>

@@ -1,4 +1,4 @@
-import { PageSection } from "@/components/shell/page-section";
+import { StepSection } from "@/components/shell/journey/step-section";
 import { FactList } from "@/components/ui/fact-list";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
@@ -44,7 +44,7 @@ export function TeamBriefsSection({
 }) {
   const members = teamMembers(needs);
   return (
-    <PageSection id="briefs" title={t.title} description={t.description} card>
+    <StepSection id="briefs" title={t.title} description={t.description}>
       <div className="flex flex-col gap-10">
         {briefs.map(({ team, content, state }) => {
           const row = rows.find((r) => r.team === team);
@@ -119,6 +119,6 @@ export function TeamBriefsSection({
           );
         })}
       </div>
-    </PageSection>
+    </StepSection>
   );
 }

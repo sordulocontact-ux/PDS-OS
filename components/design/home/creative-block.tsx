@@ -1,6 +1,5 @@
-import { DesignBlock } from "@/components/design/design-block";
 import { DesignateInline } from "@/components/design/people/designate-inline";
-import { DesignWaits } from "@/components/design/waiting-row";
+import { StepWaiting } from "@/components/shell/journey/step-waiting";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
 import type { DesignJourneyContext } from "@/lib/design/journey-context";
 import { designJourney } from "@/lib/i18n/fr/design-journey";
@@ -32,12 +31,11 @@ export function CreativeBlock({ ctx }: { ctx: DesignJourneyContext }) {
   const home = ctx.steps[0];
   if (!ctx.isOwner)
     return (
-      <DesignWaits
-        step={home}
-        actors={
+      <StepWaiting
+        step={
           home.actor?.todo === fr.designJourney.todo.designate
-            ? [home.actor]
-            : []
+            ? home
+            : undefined
         }
       />
     );
@@ -47,20 +45,25 @@ export function CreativeBlock({ ctx }: { ctx: DesignJourneyContext }) {
       members.some((m) => m.personId === s.personId),
     ) ?? null;
   return (
-    <DesignBlock title={t.title}>
-      <DesignateInline
-        projectId={ctx.project.id}
-        scope="direction"
-        sheetId={null}
-        name="creative"
-        label={t.label}
-        members={members}
-        suggestion={suggestion}
-        hint={suggestion ? t.suggestion(suggestion.name) : t.noSuggestion}
-        done={Object.fromEntries(
-          members.map((m) => [m.personId, t.done(m.name)]),
-        )}
+    <FactRows>
+      <FactRow
+        label={t.title}
+        value={
+          <DesignateInline
+            projectId={ctx.project.id}
+            scope="direction"
+            sheetId={null}
+            name="creative"
+            label={t.label}
+            members={members}
+            suggestion={suggestion}
+            hint={suggestion ? t.suggestion(suggestion.name) : t.noSuggestion}
+            done={Object.fromEntries(
+              members.map((m) => [m.personId, t.done(m.name)]),
+            )}
+          />
+        }
       />
-    </DesignBlock>
+    </FactRows>
   );
 }

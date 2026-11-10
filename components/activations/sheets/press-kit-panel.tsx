@@ -1,4 +1,4 @@
-import { PageSection } from "@/components/shell/page-section";
+import { ActivationSection } from "@/components/activations/activation-section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ViewLink } from "@/components/ui/view-link";
 import type { PressKitState } from "@/lib/activations/press-kit";
@@ -21,20 +21,20 @@ export function PressKitPanel({
   sentCount: number;
 }) {
   return (
-    <PageSection
+    <ActivationSection
       id="press-kit"
       title={t.title}
       description={t.description}
       action={
         <ViewLink
           href={routes.projectStrategyPressKit(projectId)}
-          className="text-sm underline underline-offset-4"
+          className="text-body-sm underline underline-offset-4"
         >
           {t.open}
         </ViewLink>
       }
     >
-      <div className="flex flex-col gap-1 text-sm">
+      <div className="flex flex-col gap-1 text-body-sm">
         {kit.approved ? (
           <p className="flex flex-wrap items-center gap-2">
             <StatusBadge size="sm" tone="success">
@@ -54,6 +54,6 @@ export function PressKitPanel({
           <p className="text-muted-foreground">{t.missing}</p>
         )}
       </div>
-    </PageSection>
+    </ActivationSection>
   );
 }

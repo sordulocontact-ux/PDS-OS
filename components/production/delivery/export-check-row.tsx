@@ -36,7 +36,7 @@ export function ExportCheckRow({
   const total = EXPORT_POINTS[line.kind].length;
   const failed = line.points.filter((point) => point.result === "not_ok");
   return (
-    <li className="flex flex-col gap-3 rounded-xl border bg-card p-4 sm:flex-row sm:items-start sm:justify-between">
+    <li className="flex flex-col gap-3 px-4 py-3.5 sm:flex-row sm:items-start sm:justify-between">
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="flex flex-wrap items-center gap-2">
           <h3 className="font-medium break-words">{line.label}</h3>

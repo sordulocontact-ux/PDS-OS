@@ -1,8 +1,11 @@
-import { BulletinCard } from "@/components/legal/formalities/bulletin-card";
+import {
+  BulletinDownload,
+  bulletinGenerated,
+} from "@/components/legal/formalities/bulletin-download";
 import { DossierForm } from "@/components/legal/formalities/dossier-form";
 import { OpenFormalityButton } from "@/components/legal/formalities/open-formality-button";
 import { StepsPanel } from "@/components/legal/formalities/steps-panel";
-import { PageSection } from "@/components/shell/page-section";
+import { DocumentCard } from "@/components/ui/document-card";
 import { Fold } from "@/components/ui/fold";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
@@ -14,9 +17,11 @@ import { formatInstant } from "@/lib/utils/instant";
 
 const fr = { legalDocuments, legalFormalities };
 
-/** One title's SACEM 725: where it stands, the bulletin, the steps, the
- * dossier in its five sections — each miss on its own line (JUR-02) —, the
- * history. */
+/** One title's SACEM 725, a document (Sacha, 09/11/2026: « pour la SACEM
+ * c'est un peu un document ») — one `DocumentCard` per title: in its head
+ * the title, the bulletin, when it was generated, where it stands and
+ * « Télécharger »; in its body the steps, the dossier in its five sections
+ * — each miss on its own line (JUR-02) —, the history. */
 export function FormalityCard({
   projectId,
   title,
@@ -27,18 +32,21 @@ export function FormalityCard({
   const t = fr.legalFormalities;
   const f = title.formality;
   return (
-    <PageSection
-      card
-      id={`formality-${title.masterId}`}
-      title={title.title}
-      description={t.definitions.SACEM_725_EDITED_WORK}
+    <DocumentCard
+      name={title.title}
+      line={[t.definitions.SACEM_725_EDITED_WORK, f && bulletinGenerated(f)]
+        .filter(Boolean)
+        .join(" · ")}
       // Folded, a bulletin still says where it stands.
-      collapsible={!!f}
+      collapsible
       action={
         f ? (
-          <StatusBadge tone={formalityTone[f.status]}>
-            {t.statuses[f.status]}
-          </StatusBadge>
+          <span className="flex flex-wrap items-center gap-2">
+            <StatusBadge tone={formalityTone[f.status]}>
+              {t.statuses[f.status]}
+            </StatusBadge>
+            <BulletinDownload title={title.title} f={f} />
+          </span>
         ) : (
           <OpenFormalityButton
             projectId={projectId}
@@ -48,9 +56,9 @@ export function FormalityCard({
       }
     >
       {f && (
-        <div className="flex flex-col gap-6">
-          {/* The bulletin in head, at every step that follows it. */}
-          <BulletinCard title={title.title} f={f} />
+        // `section-card`: the pieces inside drop their own frame, as in a
+        // section card.
+        <div className="section-card flex flex-col gap-6 p-4 md:p-6">
           {(f.submittedAt || f.completedAt) && (
             <div className="flex flex-wrap items-center gap-2">
               {f.submittedAt && (
@@ -107,6 +115,6 @@ export function FormalityCard({
           )}
         </div>
       )}
-    </PageSection>
+    </DocumentCard>
   );
 }

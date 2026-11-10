@@ -89,7 +89,7 @@ export function MappingForm({
         ))}
       </div>
       <fieldset className="flex flex-col gap-2">
-        <legend className="mb-1 text-sm font-medium">
+        <legend className="mb-1 text-body-sm font-medium">
           {t.sources.keyFields}
         </legend>
         <div className="flex flex-wrap gap-x-6 gap-y-2">

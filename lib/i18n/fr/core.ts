@@ -10,6 +10,10 @@ export const core = {
     close: "Fermer",
     saving: "Enregistrement…",
   },
+  // « ‹ 3 sur 8 › » (components/ui/rank-arrows.tsx).
+  rankArrows: {
+    rank: (n: number, total: number) => `${n} sur ${total}`,
+  },
   // The toasts (components/ui/toaster.tsx, toast-card.tsx).
   toast: {
     region: "Notifications",

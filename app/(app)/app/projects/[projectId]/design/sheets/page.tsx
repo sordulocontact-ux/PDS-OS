@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 
 import { DesignStepFrame } from "@/components/design/design-step-frame";
 import { SheetCard } from "@/components/design/sheets-step/sheet-card";
-import { DesignWaits } from "@/components/design/waiting-row";
+import { StepWaiting } from "@/components/shell/journey/step-waiting";
 import { sheetAction } from "@/lib/design/journey";
 import { designJourneyContext } from "@/lib/design/journey-context";
 import { loadSheetViews } from "@/lib/design/sheet-views";
@@ -35,10 +35,12 @@ export default async function DesignSheetsPage({
           canWrite={canWrite}
         />
       ))}
-      <DesignWaits
-        step={step}
-        actors={ctx.journeySheets.map((s) => sheetAction(s, ctx))}
-      />
+      {ctx.journeySheets.map((s) => {
+        const actor = sheetAction(s, ctx);
+        return actor && !actor.viewer ? (
+          <StepWaiting key={s.id} who={actor.name} todo={actor.todo} />
+        ) : null;
+      })}
     </DesignStepFrame>
   );
 }

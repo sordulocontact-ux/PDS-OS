@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { StrategyPart } from "@/components/strategy/strategy-part";
 import { toast } from "@/components/ui/toast";
 
 import { BriefFieldCard } from "@/components/framing/brief-field-card";
@@ -83,12 +84,11 @@ export function NarrativeSummary({
       aria-labelledby="narrative-summary-title"
       className="flex scroll-mt-24 flex-col gap-3"
     >
-      <div className="flex flex-col gap-1">
-        <h3 id="narrative-summary-title" className="text-body-md font-semibold">
-          {t.title}
-        </h3>
-        <p className="text-body-md text-muted-foreground">{t.hint}</p>
-      </div>
+      <StrategyPart
+        id="narrative-summary-title"
+        title={t.title}
+        description={t.hint}
+      />
 
       {field.value && (
         <BriefFieldCard

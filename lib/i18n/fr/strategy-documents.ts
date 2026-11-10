@@ -56,11 +56,8 @@ export const strategyDocuments = {
     who: "Personnes qui valident",
     waiting:
       "En attente de validation : la stratégie est figée, aucun Plan de sortie ni Dossier de presse final n'est généré d'ici là.",
-    comments: "Commentaires",
     remind: "Relancer",
     reminded: "Relance envoyée.",
-    remindedOn: (date: string) => `Relancé le ${date}`,
-    decidedOn: (date: string) => `le ${date}`,
     note: (text: string) => `Message : ${text}`,
     youDecide: "Votre décision est attendue sur cette version.",
     commentLabel: "Commentaire",
@@ -82,11 +79,6 @@ export const strategyDocuments = {
     alertsHint:
       "Valider, c'est accepter chacune en connaissance de cause. Sinon, demandez une modification.",
     alertsMissing: "Acceptez chaque alerte, ou demandez une modification.",
-    accepted: (n: number) =>
-      n === 1
-        ? "1 alerte critique acceptée"
-        : `${n} alertes critiques acceptées`,
-    withReserves: "avec réserves",
   },
   reserves: {
     title: "Réserves",

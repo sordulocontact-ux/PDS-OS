@@ -3,6 +3,7 @@ import { ficheLead } from "@/lib/legal/forms/state";
 import { DemarchePart } from "@/components/legal/demarches/demarche-part";
 import { DemarcheOwner } from "@/components/legal/demarches/demarche-owner";
 import { ClearanceExchanges } from "@/components/legal/clearance/clearance-exchanges";
+import { ClearanceExit } from "@/components/legal/clearance/clearance-exit";
 import { PlanSheetProvider } from "@/components/legal/tracking/plan-sheet-context";
 import { StepSection } from "@/components/shell/journey/step-section";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -123,26 +124,32 @@ export function DemarcheBody({
             {part(shown)}
           </StepSection>
         ))}
-      {own && demarche.step.status !== "done" && (
-        <DemarcheOwner
-          owner={{
-            projectId,
-            itemId: own.id,
-            label: demarche.step.title,
-            responsibleId: own.responsibleId,
-            responsibleName: own.responsibleName,
-            dueOn: own.dueOn,
-            people,
-          }}
-          changedBy={ownerChangedBy}
-          overdue={demarche.step.alert === "overdue"}
-        />
-      )}
-      {/* An authorisation's exchanges: consulted, so last (Sacha, 08/11/2026). */}
+      {/* Who answers for it, the exchanges, then the rare way out: one group
+          at the foot (Sacha, 09/11/2026: « cette partie est vraiment moche »). */}
+      <div className="mt-3.5 flex flex-col gap-2">
+        {own && demarche.step.status !== "done" && (
+          <DemarcheOwner
+            owner={{
+              projectId,
+              itemId: own.id,
+              label: demarche.step.title,
+              responsibleId: own.responsibleId,
+              responsibleName: own.responsibleName,
+              dueOn: own.dueOn,
+              people,
+            }}
+            changedBy={ownerChangedBy}
+            overdue={demarche.step.alert === "overdue"}
+          />
+        )}
+        {shown?.panel.kind === "clearance" && (
+          <ClearanceExchanges clearance={shown.panel.clearance} />
+        )}
+      </div>
       {shown?.panel.kind === "clearance" && (
-        <ClearanceExchanges
+        <ClearanceExit
+          projectId={projectId}
           clearance={shown.panel.clearance}
-          className="mt-2"
         />
       )}
     </PlanSheetProvider>

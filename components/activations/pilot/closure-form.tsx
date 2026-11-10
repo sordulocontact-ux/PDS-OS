@@ -55,15 +55,15 @@ export function ClosureForm({
       }}
     >
       <div className="flex flex-col gap-2">
-        <h3 className="text-sm font-medium">{t.reserves}</h3>
+        <h3 className="text-body-sm font-medium">{t.reserves}</h3>
         {has ? (
-          <ul className="flex list-disc flex-col gap-1 pl-5 text-sm">
+          <ul className="flex list-disc flex-col gap-1 pl-5 text-body-sm">
             {reserves.map((r) => (
               <li key={r.key}>{r.label}</li>
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-muted-foreground">{t.noReserves}</p>
+          <p className="text-body-sm text-muted-foreground">{t.noReserves}</p>
         )}
       </div>
       {has && (

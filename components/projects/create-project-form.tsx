@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef, useState } from "react";
 
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { SubmitButton } from "@/components/auth/submit-button";
 import { TextareaField } from "@/components/auth/textarea-field";
+import { ProjectCoverField } from "@/components/projects/project-cover-field";
 import { ProjectDraftControls } from "@/components/projects/project-draft-controls";
 import { ProjectKindFields } from "@/components/projects/project-kind-fields";
 import { ProjectTeamFields } from "@/components/projects/project-team-fields";
@@ -14,12 +16,15 @@ import { useProjectDraft } from "@/components/projects/use-project-draft";
 import { Button, buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { ChipChoice } from "@/components/ui/chip-choice";
 import { FormSection } from "@/components/ui/form-section";
+import { toast } from "@/components/ui/toast";
 import { routes } from "@/lib/auth/redirects";
 import type { ArtistOption, MasterOption } from "@/lib/catalog/types";
+import { projectShell } from "@/lib/i18n/fr/project-shell";
 import { shell } from "@/lib/i18n/fr/shell";
 import { createProject } from "@/lib/projects/actions";
 import type { CreativeMember } from "@/lib/projects/creatives";
 import { updateProject } from "@/lib/projects/edit-actions";
+import { uploadProjectCover } from "@/lib/projects/upload-cover";
 import {
   PRIORITIES,
   idleCreateProjectState,
@@ -30,7 +35,7 @@ import {
   type ProjectType,
 } from "@/lib/projects/types";
 
-const fr = { shell };
+const fr = { shell, projectShell };
 
 export type ProjectFormDefaults = {
   title: string;
@@ -68,6 +73,7 @@ export function CreateProjectForm({
   draftId: resumedDraftId = null,
   onSaved,
   onCancel,
+  organizationId,
 }: {
   masters: MasterOption[];
   artists: ArtistOption[];
@@ -79,6 +85,9 @@ export function CreateProjectForm({
   draftId?: string | null;
   onSaved?: (project: { id: string; title: string }) => void;
   onCancel?: () => void;
+  // Given on the creation page: the « Pochette » field, filed once the
+  // project exists (storage path « <organization>/<project>/… »).
+  organizationId?: string;
 }) {
   const t = fr.shell.newProject;
   const [state, action] = useActionState(
@@ -112,9 +121,30 @@ export function CreateProjectForm({
     if (state.status === "error") pause(false);
   }, [state, pause]);
 
+  // The cover waits for the project to exist: the action then returns it
+  // (intent « cover ») instead of redirecting, and the page opens after.
+  const router = useRouter();
+  const withCover = Boolean(organizationId) && !projectId;
+  const [cover, setCover] = useState<File | null>(null);
+  // Saved with a cover: it is being filed, then the project opens.
+  const filing =
+    state.status === "saved" && cover !== null && Boolean(organizationId);
   useEffect(() => {
-    if (state.status === "saved") onSaved?.(state.project);
-    // onSaved changes identity on every render of the parent.
+    if (state.status !== "saved") return;
+    const saved = state.project;
+    const done = () =>
+      onSaved ? onSaved(saved) : router.push(routes.project(saved.id));
+    if (!cover || !organizationId) return done();
+    void uploadProjectCover({
+      organizationId,
+      projectId: saved.id,
+      file: cover,
+    }).then((result) => {
+      if (!result.ok) toast.warning(t.fields.coverFailed);
+      done();
+    });
+    // onSaved changes identity on every render of the parent; the cover is
+    // the one chosen when the form was sent.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
 
@@ -125,11 +155,19 @@ export function CreateProjectForm({
       ref={formRef}
       action={action}
       // The created project deletes the draft: nothing is saved meanwhile.
-      onSubmit={() => pause(true)}
+      // While its cover is filed, the project exists: never sent twice.
+      onSubmit={(event) => {
+        if (filing) return event.preventDefault();
+        pause(true);
+      }}
       noValidate
       className="flex flex-col gap-5"
     >
-      {onSaved && <input type="hidden" name="intent" value="dialog" />}
+      {onSaved ? (
+        <input type="hidden" name="intent" value="dialog" />
+      ) : (
+        cover && <input type="hidden" name="intent" value="cover" />
+      )}
       {withDraft && draft.draftId && (
         <input type="hidden" name="draftId" value={draft.draftId} />
       )}
@@ -196,6 +234,7 @@ export function CreateProjectForm({
             className="h-10 pr-9 text-base tabular-nums md:text-sm"
           />
         </div>
+        {withCover && <ProjectCoverField file={cover} onFile={setCover} />}
         <ChipChoice
           name="priority"
           legend={t.fields.priority}
@@ -277,7 +316,12 @@ export function CreateProjectForm({
         {projectId ? (
           <SubmitButton pendingLabel={t.saving}>{t.save}</SubmitButton>
         ) : (
-          <SubmitButton pendingLabel={t.submitting}>{t.submit}</SubmitButton>
+          <SubmitButton
+            pendingLabel={filing ? fr.projectShell.cover.saving : t.submitting}
+            busy={filing}
+          >
+            {t.submit}
+          </SubmitButton>
         )}
       </div>
     </form>

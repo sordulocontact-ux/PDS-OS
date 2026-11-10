@@ -1,4 +1,4 @@
-import { PageSection } from "@/components/shell/page-section";
+import { StepSection } from "@/components/shell/journey/step-section";
 import {
   DataTable,
   DataTableBody,
@@ -28,7 +28,7 @@ export function MetricTotals({ metrics }: { metrics: MetricTotal[] }) {
       number.format(v)
     );
   return (
-    <PageSection
+    <StepSection
       id="metrics"
       title={t.metrics.title}
       description={t.metrics.description}
@@ -57,6 +57,6 @@ export function MetricTotals({ metrics }: { metrics: MetricTotal[] }) {
           ))}
         </DataTableBody>
       </DataTable>
-    </PageSection>
+    </StepSection>
   );
 }

@@ -1,14 +1,14 @@
-import { IconChevronLeft } from "nucleo-sharp-essential";
 import { notFound } from "next/navigation";
 
+import { StepSection } from "@/components/shell/journey/step-section";
 import { FollowUpGroups } from "@/components/strategy/follow-up/follow-up-groups";
+import { StrategyStepFrame } from "@/components/strategy/journey/strategy-step-frame";
 import { KpiTable } from "@/components/strategy/follow-up/kpi-table";
 import { RecommendationCard } from "@/components/strategy/follow-up/recommendation-card";
 import { SettledRecommendations } from "@/components/strategy/follow-up/settled-recommendations";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { ViewLink } from "@/components/ui/view-link";
+import { Rows } from "@/components/ui/rows";
 import { requireApproved } from "@/lib/auth/dal";
-import { routes } from "@/lib/auth/redirects";
 import { formatBriefDate } from "@/lib/framing/assess";
 import { fr } from "@/lib/i18n/fr";
 import { canEditProject } from "@/lib/projects/edit-access";
@@ -39,103 +39,84 @@ export default async function StrategyFollowUpPage({
   if (!data) notFound();
   const t = fr.strategyFollowUp;
 
-  const back = (
-    <ViewLink
-      href={routes.projectStrategy(projectId)}
-      className="-ml-1 inline-flex min-h-10 w-fit items-center gap-1 rounded-md px-1 text-sm text-muted-foreground hover:text-foreground"
+  // Under « Stratégie validée », in the step's frame (the journey keeps
+  // that step open, the panel is named « Suivi de la stratégie »).
+  const frame = (children: React.ReactNode) => (
+    <StrategyStepFrame
+      projectId={projectId}
+      stepKey="validated"
+      page={{ title: t.title }}
     >
-      <IconChevronLeft aria-hidden className="size-4" />
-      {t.back}
-    </ViewLink>
+      {children}
+    </StrategyStepFrame>
   );
   if (data.stage?.state !== "validated")
-    return (
-      <div className="flex flex-col gap-6 pt-6">
-        {back}
-        <ToneCallout tone="neutral">{t.locked}</ToneCallout>
-      </div>
-    );
+    return frame(<ToneCallout tone="neutral">{t.locked}</ToneCallout>);
 
   const followUp = await loadFollowUp(projectId, project.title, data);
   const canAct = canEditProject(access, project);
   const ref = followUp.referenceDate;
 
-  return (
-    <div className="flex flex-col gap-10 pt-6">
-      <div className="flex flex-col gap-3">
-        {back}
-        <h2 className="text-display-md font-semibold">{t.title}</h2>
-      </div>
-
+  return frame(
+    <>
       {followUp.released && ref ? (
-        <section aria-labelledby="after-title" className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <h3 id="after-title" className="text-display-sm font-semibold">
-              {t.after.title}
-            </h3>
-            <p className="text-body-md text-muted-foreground">
-              {t.after.body(formatBriefDate(ref))}
-            </p>
-          </div>
+        <StepSection
+          title={t.after.title}
+          description={t.after.body(formatBriefDate(ref))}
+        >
           <KpiTable
             projectId={projectId}
             kpis={followUp.kpis}
             canNote={canAct}
             today={followUp.today}
           />
-        </section>
+        </StepSection>
       ) : (
-        <section aria-labelledby="before-title" className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <h3 id="before-title" className="text-display-sm font-semibold">
-              {t.before.title}
-            </h3>
-            <p className="text-body-md text-muted-foreground">
-              {ref
-                ? t.before.body(
-                    `${t.inDays(dayOffset(ref, followUp.today))} (${formatBriefDate(ref)})`,
-                  )
-                : t.before.noDate}
-            </p>
-          </div>
+        <StepSection
+          title={t.before.title}
+          description={
+            ref
+              ? t.before.body(
+                  `${t.inDays(dayOffset(ref, followUp.today))} (${formatBriefDate(ref)})`,
+                )
+              : t.before.noDate
+          }
+        >
           <FollowUpGroups groups={followUp.groups} />
-        </section>
+        </StepSection>
       )}
 
-      <section aria-labelledby="reco-title" className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1">
-          <h3 id="reco-title" className="text-display-sm font-semibold">
-            {t.recommendations.title}
-          </h3>
-          <p className="text-body-md text-muted-foreground">
-            {t.recommendations.hint}
-          </p>
+      <StepSection
+        title={t.recommendations.title}
+        description={t.recommendations.hint}
+      >
+        <div className="flex flex-col gap-5">
+          {followUp.recommendations.length === 0 ? (
+            <p className="text-body-md text-muted-foreground">
+              {t.recommendations.empty}
+            </p>
+          ) : (
+            <Rows label={t.recommendations.title}>
+              {followUp.recommendations.map((rec) => (
+                <RecommendationCard
+                  key={rec.ruleKey}
+                  projectId={projectId}
+                  projectTitle={project.title}
+                  recommendation={rec}
+                  canAct={canAct}
+                  members={data.members}
+                  ownerId={project.ownerPersonId}
+                  today={followUp.today}
+                />
+              ))}
+            </Rows>
+          )}
+          <SettledRecommendations
+            projectId={projectId}
+            items={followUp.settled}
+          />
         </div>
-        {followUp.recommendations.length === 0 ? (
-          <p className="text-body-md text-muted-foreground">
-            {t.recommendations.empty}
-          </p>
-        ) : (
-          <ul className="flex flex-col gap-3">
-            {followUp.recommendations.map((rec) => (
-              <RecommendationCard
-                key={rec.ruleKey}
-                projectId={projectId}
-                projectTitle={project.title}
-                recommendation={rec}
-                canAct={canAct}
-                members={data.members}
-                ownerId={project.ownerPersonId}
-                today={followUp.today}
-              />
-            ))}
-          </ul>
-        )}
-        <SettledRecommendations
-          projectId={projectId}
-          items={followUp.settled}
-        />
-      </section>
-    </div>
+      </StepSection>
+    </>,
   );
 }

@@ -8,10 +8,14 @@ import {
 } from "@/components/strategy/validation/brief-decision";
 import { EditAccessProvider } from "@/components/projects/edit-access";
 import { StrategyDictation } from "@/components/strategy/strategy-dictation";
-import { BriefOutDoc } from "@/components/strategy/validation/brief-out-doc";
+import {
+  BriefOutDoc,
+  BriefOutPdf,
+} from "@/components/strategy/validation/brief-out-doc";
 import { RemindReviewer } from "@/components/strategy/validation/remind-reviewer";
 import { ReviewRows } from "@/components/strategy/validation/review-rows";
 import { SendBrief } from "@/components/strategy/validation/send-brief";
+import { StepWaiting } from "@/components/shell/journey/step-waiting";
 import { ReturnCallout } from "@/components/ui/return-callout";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
@@ -20,6 +24,7 @@ import { briefOutFrom, briefOutOf } from "@/lib/strategy/brief-out";
 import { briefSnapshotOf } from "@/lib/strategy/documents/brief-snapshot";
 import { versionsOf } from "@/lib/strategy/documents/model";
 import { strategyStepData } from "@/lib/strategy/step-data";
+import { strategyDocumentTone } from "@/lib/ui/state-tones";
 import { formatShortInstant } from "@/lib/utils/day";
 
 /**
@@ -63,6 +68,34 @@ export default async function StrategyValidationPage({
   const creatives = validators.filter((v) => v.role === "creative");
   const validatedHere =
     approved && step?.status === "done" && (!shown || shown.id === approved.id);
+  // The version shown, as the document's head says it.
+  const status = {
+    tone: strategyDocumentTone[shown?.state ?? "pending"] ?? "neutral",
+    label: fr.strategyDocuments.states[shown?.state ?? "pending"],
+  };
+  const meta = shown
+    ? [
+        t.doc.created(shown.createdByName, formatShortInstant(shown.createdAt)),
+        shown.state === "approved" && shown.decidedAt
+          ? t.doc.validatedMeta(
+              shown.reviews.find((r) => r.state === "approved")?.name ?? null,
+              formatShortInstant(shown.decidedAt),
+            )
+          : null,
+      ]
+        .filter(Boolean)
+        .join(" · ")
+    : t.doc.draftMeta;
+  const pdf = shown
+    ? {
+        href: routes.projectStrategyDocumentPdf(projectId, shown.id),
+        fileName: fr.strategyDocuments.pdfFileName(
+          ctx.project.title,
+          fr.strategyDocuments.kinds.brief,
+          shown.version,
+        ),
+      }
+    : null;
 
   return (
     <StrategyStepFrame
@@ -93,16 +126,21 @@ export default async function StrategyValidationPage({
           </ToneCallout>
         )}
         {old && shown ? (
-          <BriefSnapshotView snapshot={old} projectId={projectId} />
+          <BriefSnapshotView
+            snapshot={old}
+            projectId={projectId}
+            title={t.doc.title(shown.version)}
+            status={status}
+            meta={meta}
+            actions={pdf && <BriefOutPdf {...pdf} />}
+          />
         ) : (
           <BriefOutDoc
             version={version}
             out={stored ?? live}
-            pdfHref={
-              shown
-                ? routes.projectStrategyDocumentPdf(projectId, shown.id)
-                : null
-            }
+            status={status}
+            meta={meta}
+            pdf={pdf}
           />
         )}
         {(sent ?? returned ?? (validatedHere ? approved : null)) && (
@@ -149,24 +187,10 @@ export default async function StrategyValidationPage({
             creatives={creatives}
           />
         )}
-        {!isOwner && !myReview && step?.status === "current" && (
-          <p className="text-caption text-[color:var(--text-tertiary)]">
-            {t.waitingOwner(
-              ctx.project.ownerName ?? "—",
-              (step.actor?.todo ?? "").toLowerCase(),
-            )}
-          </p>
-        )}
-        {sent && !myReview && !isOwner && (
-          <p className="text-caption text-[color:var(--text-tertiary)]">
-            {t.waiting(
-              fr.strategyJourney.names(
-                sent.reviews
-                  .filter((r) => r.state === "pending")
-                  .map((r) => r.name),
-              ),
-            )}
-          </p>
+        {/* « En attente de … » for whoever only reads: the owner to send,
+            the validators to decide (the journey's actor). */}
+        {!isOwner && !myReview && (step?.status === "current" || sent) && (
+          <StepWaiting step={step} />
         )}
       </div>
     </StrategyStepFrame>

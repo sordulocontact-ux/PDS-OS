@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Textarea } from "@/components/ui/textarea";
+import { StepSection } from "@/components/shell/journey/step-section";
 import { strategyPressKit } from "@/lib/i18n/fr/strategy-press-kit";
 import { strategyReleasePlan } from "@/lib/i18n/fr/strategy-release-plan";
 import type { PressBlock } from "@/lib/strategy/documents/press-kit-model";
@@ -52,99 +53,95 @@ export function PressContentStep({
     );
 
   return (
-    <section aria-labelledby="press-content" className="flex flex-col gap-6">
-      <div className="flex flex-col gap-2">
-        <h2 id="press-content" className="text-display-sm font-semibold">
-          {t.title}
-        </h2>
-        <p className="max-w-prose text-body-md text-muted-foreground">
-          {t.body}
-        </p>
-      </div>
-      <ul className="flex flex-col gap-5">
-        {items.map((item) => {
-          const id = `press-${item.key}`;
-          const hint =
-            item.key === "artist" && bioSource
-              ? t.sources[bioSource]
-              : t.hints[item.key];
-          return (
-            <li key={item.key} className="flex flex-col gap-2">
-              <div className="flex flex-wrap items-center gap-2">
-                <Label htmlFor={id} className="text-body-md font-semibold">
-                  {t.blocks[item.key]}
-                </Label>
-                {item.excluded ? (
-                  <StatusBadge tone={draftTone} size="sm">
-                    {t.excluded}
-                  </StatusBadge>
-                ) : (
-                  !item.text.trim() && (
-                    <StatusBadge tone="warning" size="sm">
-                      {t.missing}
+    <StepSection title={t.title} description={t.body}>
+      <div className="flex flex-col gap-6">
+        <ul className="flex flex-col gap-5">
+          {items.map((item) => {
+            const id = `press-${item.key}`;
+            const hint =
+              item.key === "artist" && bioSource
+                ? t.sources[bioSource]
+                : t.hints[item.key];
+            return (
+              <li key={item.key} className="flex flex-col gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Label htmlFor={id} className="text-body-md font-semibold">
+                    {t.blocks[item.key]}
+                  </Label>
+                  {item.excluded ? (
+                    <StatusBadge tone={draftTone} size="sm">
+                      {t.excluded}
                     </StatusBadge>
-                  )
-                )}
-              </div>
-              <p className="text-caption text-muted-foreground">{hint}</p>
-              <Textarea
-                id={id}
-                value={item.text}
-                rows={item.key === "artist" ? 6 : 4}
-                maxLength={6000}
-                disabled={!canEdit || item.excluded}
-                onChange={(e) => update(item.key, { text: e.target.value })}
-              />
-              {canEdit && (
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="ghost"
-                    onClick={() =>
-                      update(item.key, { excluded: !item.excluded })
-                    }
-                  >
-                    {item.excluded ? t.include : t.hide}
-                  </Button>
-                  {item.proposed && item.text !== item.proposed && (
+                  ) : (
+                    !item.text.trim() && (
+                      <StatusBadge tone="warning" size="sm">
+                        {t.missing}
+                      </StatusBadge>
+                    )
+                  )}
+                </div>
+                <p className="text-caption text-muted-foreground">{hint}</p>
+                <Textarea
+                  id={id}
+                  value={item.text}
+                  rows={item.key === "artist" ? 6 : 4}
+                  maxLength={6000}
+                  disabled={!canEdit || item.excluded}
+                  onChange={(e) => update(item.key, { text: e.target.value })}
+                />
+                {canEdit && (
+                  <div className="flex flex-wrap gap-2">
                     <Button
                       type="button"
                       size="sm"
                       variant="ghost"
-                      onClick={() => update(item.key, { text: item.proposed })}
+                      onClick={() =>
+                        update(item.key, { excluded: !item.excluded })
+                      }
                     >
-                      {t.reset}
+                      {item.excluded ? t.include : t.hide}
                     </Button>
-                  )}
-                </div>
-              )}
-            </li>
-          );
-        })}
-      </ul>
-      {canEdit && (
-        <Button
-          type="button"
-          className="self-start"
-          disabled={pending}
-          onClick={() =>
-            save(
-              {
-                texts: items.map(({ key, text, excluded }) => ({
-                  key,
-                  text,
-                  excluded,
-                })),
-                textsConfirmed: true,
-              },
-              nextHref,
-            )
-          }
-        >
-          {pending ? a.saving : a.validate}
-        </Button>
-      )}
-    </section>
+                    {item.proposed && item.text !== item.proposed && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() =>
+                          update(item.key, { text: item.proposed })
+                        }
+                      >
+                        {t.reset}
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+        {canEdit && (
+          <Button
+            type="button"
+            className="self-start"
+            disabled={pending}
+            onClick={() =>
+              save(
+                {
+                  texts: items.map(({ key, text, excluded }) => ({
+                    key,
+                    text,
+                    excluded,
+                  })),
+                  textsConfirmed: true,
+                },
+                nextHref,
+              )
+            }
+          >
+            {pending ? a.saving : a.validate}
+          </Button>
+        )}
+      </div>
+    </StepSection>
   );
 }

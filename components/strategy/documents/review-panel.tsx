@@ -7,22 +7,21 @@ import {
   DecisionForm,
   type CriticalAlert,
 } from "@/components/strategy/documents/decision-form";
+import { ReviewRows } from "@/components/strategy/validation/review-rows";
 import { Button } from "@/components/ui/button";
-import { StatusBadge } from "@/components/ui/status-badge";
-import { formatDay } from "@/lib/assistant/facts";
 import { strategyDocuments } from "@/lib/i18n/fr/strategy-documents";
 import type { Member } from "@/lib/framing/related";
 import { remindStrategyReview } from "@/lib/strategy/actions/documents";
 import type { DocumentReview } from "@/lib/strategy/documents/queries";
-import { strategyReviewTone } from "@/lib/ui/state-tones";
 
 const fr = { strategyDocuments };
 
 /**
  * Who must validate a sent version and where each stands (ticket Stratégie
- * § 9): validé, en attente, non commencé; the comments; « Relancer » for the
- * owner on a pending reviewer; the decision form for a reviewer still
- * expected. Kind-agnostic: the Brief de sortie, the Plan de sortie…
+ * § 9), on the Brief de sortie's rows (`ReviewRows`): state, comment,
+ * « Relancer » for the owner on a pending reviewer; the request's message
+ * under the title; the decision form for a reviewer still expected.
+ * Kind-agnostic: the Plan de sortie, the Dossier de presse…
  */
 export function ReviewPanel({
   projectId,
@@ -45,79 +44,37 @@ export function ReviewPanel({
   members?: Member[];
 }) {
   const t = fr.strategyDocuments.review;
-  const states = fr.strategyDocuments.reviewStates;
   const { pending, run } = useFramingAction();
   const mine = reviews.find(
     (r) => r.personId === meId && r.state === "pending",
   );
-  const comments = reviews.filter((r) => r.comment);
 
   return (
-    <section aria-labelledby="review-title" className="flex flex-col gap-4">
-      <h3 id="review-title" className="text-body-md font-semibold">
-        {t.who}
-      </h3>
-      {requestNote && (
-        <p className="text-caption text-muted-foreground">
-          {t.note(requestNote)}
-        </p>
-      )}
-      <ul className="flex flex-col gap-3">
-        {reviews.map((r) => (
-          <li key={r.id} className="flex flex-col gap-1">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="font-medium">{r.name}</span>
-              <span className="flex items-center gap-2">
-                <StatusBadge tone={strategyReviewTone[r.state]} size="sm">
-                  {states[r.state]}
-                </StatusBadge>
-                {canRemind && r.state === "pending" && r.personId !== meId && (
-                  <Button
-                    size="xs"
-                    variant="outline"
-                    disabled={pending}
-                    onClick={() =>
-                      run(
-                        () => remindStrategyReview(projectId, r.id),
-                        () => toast.success(t.reminded),
-                      )
-                    }
-                  >
-                    {t.remind}
-                  </Button>
-                )}
-              </span>
-            </div>
-            {(r.decidedAt || r.remindedAt) && (
-              <span className="text-caption text-muted-foreground">
-                {r.decidedAt
-                  ? t.decidedOn(formatDay(r.decidedAt))
-                  : t.remindedOn(formatDay(r.remindedAt!))}
-                {r.withReserves && ` · ${t.withReserves}`}
-                {r.acceptedAlerts.length > 0 &&
-                  ` · ${t.accepted(r.acceptedAlerts.length)}`}
-              </span>
-            )}
-          </li>
-        ))}
-      </ul>
-
-      {comments.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <p className="text-caption text-muted-foreground">{t.comments}</p>
-          <ul className="flex flex-col gap-2">
-            {comments.map((r) => (
-              <li
-                key={r.id}
-                className="rounded-xl bg-[var(--surface-tint)] px-3 py-2 text-body-md"
-              >
-                <span className="font-semibold">{r.name}</span> · {r.comment}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
+    <>
+      <ReviewRows
+        reviews={reviews}
+        title={t.who}
+        description={requestNote ? t.note(requestNote) : undefined}
+        action={(r) =>
+          canRemind &&
+          r.state === "pending" &&
+          r.personId !== meId && (
+            <Button
+              size="xs"
+              variant="outline"
+              disabled={pending}
+              onClick={() =>
+                run(
+                  () => remindStrategyReview(projectId, r.id),
+                  () => toast.success(t.reminded),
+                )
+              }
+            >
+              {t.remind}
+            </Button>
+          )
+        }
+      />
       {mine && (
         <DecisionForm
           projectId={projectId}
@@ -126,6 +83,6 @@ export function ReviewPanel({
           members={members}
         />
       )}
-    </section>
+    </>
   );
 }

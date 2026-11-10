@@ -1,5 +1,5 @@
 import { EmptyNote } from "@/components/shell/empty-state";
-import { PageSection } from "@/components/shell/page-section";
+import { StepSection } from "@/components/shell/journey/step-section";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
@@ -50,7 +50,7 @@ export function DecisionSection({
     reviewers.length > 0 ? t.deciders(reviewers.join(", ")) : t.decidersNone;
 
   return (
-    <PageSection id="decision" title={t.title} description={t.description} card>
+    <StepSection id="decision" title={t.title} description={t.description}>
       {waiting.length === 0 &&
         (approved ? (
           <ToneCallout tone={productionVersionTone.approved}>
@@ -106,6 +106,6 @@ export function DecisionSection({
           </div>
         );
       })}
-    </PageSection>
+    </StepSection>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { StepSection } from "@/components/shell/journey/step-section";
 import { DecisionPanel } from "@/components/ui/decision-panel";
 import { productionLight } from "@/lib/i18n/fr/production-light";
 import { decideLightVersion } from "@/lib/production/light/actions";
@@ -20,8 +21,7 @@ export function LightDecision({
   number: number;
 }) {
   return (
-    <section className="flex flex-col gap-3">
-      <h3 className="font-semibold">{t.title(number)}</h3>
+    <StepSection title={t.title(number)}>
       <DecisionPanel
         id={`light-${versionId}`}
         title={null}
@@ -42,6 +42,6 @@ export function LightDecision({
           })
         }
       />
-    </section>
+    </StepSection>
   );
 }

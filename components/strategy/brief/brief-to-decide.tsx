@@ -7,9 +7,10 @@ import type { Arbitration } from "@/lib/strategy/brief";
 const fr = { strategyBrief };
 
 /**
- * What the Brief still leaves to arbitrate, and only that (ticket § 8): each
- * line opens its dimension's work panel — not in a frozen version
- * (`projectId` null). Nothing left: one quiet line.
+ * What the Brief still leaves to arbitrate, and only that (ticket § 8), said
+ * before the document as the Brief de sortie says it (a warning callout,
+ * never inside the card): each line opens its dimension's work panel — not
+ * in a frozen version (`projectId` null). Nothing left: one quiet line.
  */
 export function BriefToDecide({
   projectId,
@@ -22,32 +23,29 @@ export function BriefToDecide({
   if (items.length === 0)
     return <ToneCallout tone="success">{t.none}</ToneCallout>;
   return (
-    <section
-      aria-labelledby="brief-to-decide"
-      className="flex flex-col gap-2 rounded-2xl bg-[var(--tone-warning-bg)] px-4 py-3 text-[color:var(--tone-warning-fg)]"
-    >
-      <h2 id="brief-to-decide" className="text-body-md font-semibold">
-        {t.title}
-      </h2>
-      <ul className="flex list-disc flex-col gap-1 pl-5 text-body-md font-medium">
-        {items.map((item) => (
-          <li key={item.key}>
-            {projectId ? (
-              <ViewLink
-                href={routes.projectStrategyDimension(
-                  projectId,
-                  item.dimension,
-                )}
-                className="underline-offset-2 hover:underline"
-              >
-                {item.text}
-              </ViewLink>
-            ) : (
-              item.text
-            )}
-          </li>
-        ))}
-      </ul>
-    </section>
+    <ToneCallout tone="warning" as="div">
+      <span className="flex flex-col gap-1">
+        <strong className="font-semibold">{t.title}</strong>
+        <ul className="list-disc pl-5">
+          {items.map((item) => (
+            <li key={item.key}>
+              {projectId ? (
+                <ViewLink
+                  href={routes.projectStrategyDimension(
+                    projectId,
+                    item.dimension,
+                  )}
+                  className="underline-offset-2 hover:underline"
+                >
+                  {item.text}
+                </ViewLink>
+              ) : (
+                item.text
+              )}
+            </li>
+          ))}
+        </ul>
+      </span>
+    </ToneCallout>
   );
 }

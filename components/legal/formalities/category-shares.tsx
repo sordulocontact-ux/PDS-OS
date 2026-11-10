@@ -1,8 +1,10 @@
 "use client";
 
+import { nestedCardClass } from "@/components/ui/nested-card";
 import { Field } from "@/components/auth/field";
 import { FieldError } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
+import { TitleBlock } from "@/components/ui/title-block";
 import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
 import type {
   Creator,
@@ -55,7 +57,9 @@ export function CategoryShares({
   const t = fr.legalFormalities.categories;
   const members = membersOf(creators, publishers);
   const held = CATEGORIES.filter((c) => members[c].length > 0);
-  if (held.length === 0) return null;
+  // Never an empty row: what fills it, said.
+  if (held.length === 0)
+    return <p className="text-body-sm text-muted-foreground">{t.nobody}</p>;
 
   const nameOf = (m: Member) =>
     m.publisher !== undefined
@@ -86,7 +90,7 @@ export function CategoryShares({
 
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-sm text-muted-foreground">{t.intro}</p>
+      <p className="text-body-sm text-muted-foreground">{t.intro}</p>
       {held.map((category) => (
         <CategoryBox
           key={category}
@@ -100,43 +104,43 @@ export function CategoryShares({
           onShares={(values) => setShares(members[category], values)}
         />
       ))}
-      <div className="flex flex-col gap-2 rounded-xl border p-3">
-        <span className="font-medium">{t.parts}</span>
-        {!custom ? (
-          <p className="text-sm text-muted-foreground tabular-nums">
-            {t.partsUsual(
-              held
-                .map((c) => `${t.names[c]} ${formatShare(parts[c])}`)
-                .join(" · "),
-              edited,
-            )}
+      <div className={cn(nestedCardClass, "flex flex-col gap-2")}>
+        <TitleBlock>
+          <span className="font-medium">{t.parts}</span>
+          <p className="text-body-sm text-muted-foreground tabular-nums">
+            {!custom
+              ? t.partsUsual(
+                  held
+                    .map((c) => `${t.names[c]} ${formatShare(parts[c])}`)
+                    .join(" · "),
+                  edited,
+                )
+              : t.partsHint}
           </p>
-        ) : (
-          <>
-            <p className="text-sm text-muted-foreground">{t.partsHint}</p>
-            <div className="grid gap-2 sm:grid-cols-3">
-              {held.map((c) => (
-                <Field
-                  key={c}
-                  name={`${id}-part-${c}`}
-                  label={t.names[c]}
-                  inputMode="decimal"
-                  suffix="%"
-                  value={custom[c].replace(".", ",")}
-                  disabled={disabled}
-                  onChange={(e) =>
-                    onSplit({
-                      ...split,
-                      custom: {
-                        ...custom,
-                        [c]: e.target.value.replace(",", "."),
-                      },
-                    })
-                  }
-                />
-              ))}
-            </div>
-          </>
+        </TitleBlock>
+        {custom && (
+          <div className="grid gap-2 sm:grid-cols-3">
+            {held.map((c) => (
+              <Field
+                key={c}
+                name={`${id}-part-${c}`}
+                label={t.names[c]}
+                inputMode="decimal"
+                suffix="%"
+                value={custom[c].replace(".", ",")}
+                disabled={disabled}
+                onChange={(e) =>
+                  onSplit({
+                    ...split,
+                    custom: {
+                      ...custom,
+                      [c]: e.target.value.replace(",", "."),
+                    },
+                  })
+                }
+              />
+            ))}
+          </div>
         )}
         <FieldError id={`${id}-parts-error`}>
           {errors?.fields.phono_split}
@@ -182,23 +186,29 @@ function CategoryBox({
   // Words and music by one person only: their role says which line it is.
   const showRole = (m: Member) => m.role === "arranger" || m.role === "adapter";
   return (
-    <div className="flex flex-col gap-2 rounded-xl border p-3">
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <span className="font-medium">{t.names[category]}</span>
-        <span
-          className={cn(
-            "text-sm tabular-nums",
-            total === FULL
-              ? "text-muted-foreground"
-              : error
-                ? "text-error"
-                : "text-[color:var(--tone-warning-fg)]",
-          )}
-        >
-          {t.total(formatShare(total))}
-        </span>
-      </div>
-      <p className="text-sm text-muted-foreground">{t.hints[category]}</p>
+    <div className={cn(nestedCardClass, "flex flex-col gap-2")}>
+      {/* The category and what it holds, read together (4 px, Sacha
+          10/11/2026). */}
+      <TitleBlock>
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <span className="font-medium">{t.names[category]}</span>
+          <span
+            className={cn(
+              "text-sm tabular-nums",
+              total === FULL
+                ? "text-muted-foreground"
+                : error
+                  ? "text-error"
+                  : "text-[color:var(--tone-warning-fg)]",
+            )}
+          >
+            {t.total(formatShare(total))}
+          </span>
+        </div>
+        <p className="text-body-sm text-muted-foreground">
+          {t.hints[category]}
+        </p>
+      </TitleBlock>
       {list.length === 1 ? (
         <p className="text-sm">
           <span className="font-medium">{nameOf(list[0])}</span> · {t.sole}

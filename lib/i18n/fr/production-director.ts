@@ -2,8 +2,7 @@
 // directorBlock, production.md § 2.6).
 export const productionDirector = {
   title: "Réalisateur",
-  waiting: (company: string) =>
-    `En attente de ${company} (lien privé) : proposer un réalisateur`,
+  waitingTodo: "proposer un réalisateur (lien privé)",
   intro: (company: string) =>
     `${company} a proposé un réalisateur. Celui que vous retenez reçoit le rôle « Réalisation » et son lien privé ; les autres sont gardés ici.`,
   by: (company: string, at: string) => `Proposé par ${company} le ${at}`,

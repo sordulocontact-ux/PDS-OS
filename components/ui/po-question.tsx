@@ -1,11 +1,8 @@
-import { IconChevronLeft, IconChevronRight } from "nucleo-sharp-essential";
-
+import { RankArrows, type RankNav } from "@/components/ui/rank-arrows";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { TitleBlock } from "@/components/ui/title-block";
-import { ViewLink } from "@/components/ui/view-link";
 import { poQuestion } from "@/lib/i18n/fr/po-question";
 import type { Tone } from "@/lib/ui/state-tones";
-import { cn } from "@/lib/utils";
 
 const fr = { poQuestion };
 
@@ -86,7 +83,7 @@ export function PoQuestion({
             {eyebrow}
           </span>
           {nav ? (
-            <QuestionArrows nav={nav} />
+            <RankArrows nav={nav} labels={arrowLabels} />
           ) : (
             position &&
             position.total > 1 && (
@@ -121,48 +118,7 @@ export function PoQuestion({
   );
 }
 
-// A link (Cadrage: one URL per question), or an action when the questions
-// live in one page's state (Cadrage juridique); null at the ends.
-type NavTarget = string | (() => void) | null;
+// The arrows to the question before and after (components/ui/rank-arrows.tsx).
+export type PoQuestionNav = RankNav;
 
-export type PoQuestionNav = {
-  position: number;
-  total: number;
-  previous: NavTarget;
-  next: NavTarget;
-};
-
-const arrowClass =
-  "grid size-8 shrink-0 place-items-center rounded-full border border-[color:var(--border-default)] text-foreground transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:border-[color:var(--border-hover)] hover:bg-[var(--control-bg-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--focus-ring)] [&_svg]:size-4";
-
-/** « ‹ 8 sur 23 › »: links to the question before and after, faded at the ends. */
-function QuestionArrows({ nav }: { nav: PoQuestionNav }) {
-  const arrow = (to: NavTarget, label: string, icon: React.ReactNode) =>
-    typeof to === "string" ? (
-      <ViewLink href={to} aria-label={label} className={arrowClass}>
-        {icon}
-      </ViewLink>
-    ) : to ? (
-      <button
-        type="button"
-        onClick={to}
-        aria-label={label}
-        className={cn(arrowClass, "cursor-pointer")}
-      >
-        {icon}
-      </button>
-    ) : (
-      <span aria-hidden className={cn(arrowClass, "opacity-35")}>
-        {icon}
-      </span>
-    );
-  return (
-    <nav aria-label={t.nav} className="flex shrink-0 items-center gap-1.5">
-      {arrow(nav.previous, t.previous, <IconChevronLeft />)}
-      <span className="text-caption text-[color:var(--text-tertiary)] tabular-nums">
-        {t.rank(nav.position, nav.total)}
-      </span>
-      {arrow(nav.next, t.next, <IconChevronRight />)}
-    </nav>
-  );
-}
+const arrowLabels = { nav: t.nav, previous: t.previous, next: t.next };

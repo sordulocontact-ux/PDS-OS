@@ -7,7 +7,7 @@ import {
   type TileReference,
 } from "@/components/design/refs/reference-tile";
 import { SimilarReferencesDialog } from "@/components/design/references/similar-references-dialog";
-import { DesignWaits } from "@/components/design/waiting-row";
+import { StepWaiting } from "@/components/shell/journey/step-waiting";
 import { designJourneyContext } from "@/lib/design/journey-context";
 import { DIRECTION_TARGET, targetKeyOf } from "@/lib/design/reference-rules";
 import {
@@ -141,7 +141,7 @@ export default async function DesignReferencesPage({
           ))}
         </ReferenceGroup>
       )}
-      <DesignWaits step={step} actors={[step.actor]} />
+      <StepWaiting step={step} />
     </DesignStepFrame>
   );
 }

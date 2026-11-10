@@ -6,8 +6,9 @@ import { useState } from "react";
 import { FormMessage } from "@/components/auth/form-message";
 import { StepWaiting } from "@/components/shell/journey/step-waiting";
 import { Button } from "@/components/ui/button";
+import { DocumentCard } from "@/components/ui/document-card";
+import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
 import { contracts } from "@/lib/i18n/fr/contracts";
 import { legalClearance } from "@/lib/i18n/fr/legal-clearance";
@@ -78,7 +79,6 @@ export function SignMoment({
       : c.state === "in_review" && context.canValidate
         ? t.openToDecide
         : null;
-  const emailed = contracts.find((c) => c.signedByEmail);
   const missing = contracts.flatMap((c) => [
     ...(c.signedFile ? [] : [t.signedMissing]),
     ...(c.evidenceFile ? [] : [t.evidenceMissing]),
@@ -87,30 +87,70 @@ export function SignMoment({
   return (
     <>
       {contracts.map((contract) => (
-        <div
+        // The contract in head of the step, as every document (Sacha,
+        // 09/11/2026: « pourquoi c'est pas le composant document ? »): its
+        // file once there, the conditions validated, its state, its page.
+        <DocumentCard
           key={contract.id}
-          className="flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4"
-        >
-          <span className="flex min-w-0 flex-col gap-0.5">
+          name={contract.title}
+          line={[
+            contract.document?.fileName,
+            t.contractDetail(termsLine(clearance)),
+          ]
+            .filter(Boolean)
+            .join(" · ")}
+          // Sent back by e-mail and kept by PDS OS: a person checks it.
+          change={
+            contract.proof.some((f) => f.byEmail) ? t.signedByEmail : undefined
+          }
+          action={
             <span className="flex flex-wrap items-center gap-2">
-              <span className="font-medium break-words">{t.contractCard}</span>
               <StatusBadge tone={contractStateTone[contract.state]} size="sm">
                 {fr.contracts.states[contract.state]}
               </StatusBadge>
+              <Button
+                variant={openLabel(contract) ? "default" : "outline"}
+                size="sm"
+                nativeButton={false}
+                render={<Link href={routes.contract(contract.id)} />}
+              >
+                {openLabel(contract) ?? t.openContract}
+              </Button>
             </span>
-            <span className="text-sm text-muted-foreground">
-              {t.contractDetail(termsLine(clearance))}
-            </span>
-          </span>
-          <Button
-            variant={openLabel(contract) ? "default" : "outline"}
-            size="sm"
-            nativeButton={false}
-            render={<Link href={routes.contract(contract.id)} />}
-          >
-            {openLabel(contract) ?? t.openContract}
-          </Button>
-        </div>
+          }
+        >
+          {contract.proof.length > 0 && (
+            // The signed copy and its proof, each opened from here.
+            <FactRows className="rounded-none border-0">
+              {contract.proof.map((file) => (
+                <FactRow
+                  key={file.id}
+                  label={
+                    file.category === "signed"
+                      ? fr.legalClearance.stages.sign.signedSlot
+                      : fr.legalClearance.stages.sign.evidenceSlot
+                  }
+                  value={file.name}
+                  source={file.byEmail ? t.receivedByEmail : null}
+                  side={
+                    file.url && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        nativeButton={false}
+                        render={
+                          <a href={file.url} target="_blank" rel="noreferrer" />
+                        }
+                      >
+                        {t.attachmentSee}
+                      </Button>
+                    )
+                  }
+                />
+              ))}
+            </FactRows>
+          )}
+        </DocumentCard>
       ))}
 
       {next && next !== toSend ? (
@@ -137,60 +177,44 @@ export function SignMoment({
           projectId={projectId}
           clearance={clearance}
           canEmail={context.emailEnabled}
+          organizationId={context.organizationId}
         />
       ) : (
         <>
-          {emailed ? (
-            // Sent back by e-mail and kept by PDS OS: a person checks it.
-            <ToneCallout
-              tone="info"
-              as="div"
-              contentClassName="flex flex-col items-start gap-2"
-            >
-              <span>{t.signedByEmail}</span>
-              {emailed.signedByEmail?.url && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  nativeButton={false}
-                  render={
-                    <a
-                      href={emailed.signedByEmail.url}
-                      target="_blank"
-                      rel="noreferrer"
-                    />
-                  }
-                >
-                  {t.seeSigned}
-                </Button>
-              )}
-            </ToneCallout>
-          ) : (
+          {contracts.every((c) => c.proof.length === 0) && (
             <p className="text-sm text-muted-foreground">{t.sentHint}</p>
           )}
           {context.organizationId &&
-            contracts.map((contract) => (
-              <div key={contract.id} className="grid gap-2 sm:grid-cols-2">
-                <ContractProofSlot
-                  organizationId={context.organizationId!}
-                  contractId={contract.id}
-                  category="signed"
-                  label={fr.legalClearance.stages.sign.signedSlot}
-                  hint={fr.legalClearance.stages.sign.slotHint}
-                  present={contract.signedFile}
-                  invalid={tried && !contract.signedFile}
-                />
-                <ContractProofSlot
-                  organizationId={context.organizationId!}
-                  contractId={contract.id}
-                  category="evidence"
-                  label={fr.legalClearance.stages.sign.evidenceSlot}
-                  hint={fr.legalClearance.stages.sign.evidenceHint}
-                  present={contract.evidenceFile}
-                  invalid={tried && !contract.evidenceFile}
-                />
-              </div>
-            ))}
+            contracts
+              .filter((c) => !c.signedFile || !c.evidenceFile)
+              .map((contract) => (
+                // What is there opens from the card: only what is missing is
+                // dropped here.
+                <div key={contract.id} className="grid gap-2 sm:grid-cols-2">
+                  {!contract.signedFile && (
+                    <ContractProofSlot
+                      organizationId={context.organizationId!}
+                      contractId={contract.id}
+                      category="signed"
+                      label={fr.legalClearance.stages.sign.signedSlot}
+                      hint={fr.legalClearance.stages.sign.slotHint}
+                      present={contract.signedFile}
+                      invalid={tried && !contract.signedFile}
+                    />
+                  )}
+                  {!contract.evidenceFile && (
+                    <ContractProofSlot
+                      organizationId={context.organizationId!}
+                      contractId={contract.id}
+                      category="evidence"
+                      label={fr.legalClearance.stages.sign.evidenceSlot}
+                      hint={fr.legalClearance.stages.sign.evidenceHint}
+                      present={contract.evidenceFile}
+                      invalid={tried && !contract.evidenceFile}
+                    />
+                  )}
+                </div>
+              ))}
           {tried && missing.length > 0 && (
             <FormMessage kind="error">
               {t.filesMissing(missing.join(t.and))}

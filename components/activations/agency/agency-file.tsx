@@ -2,7 +2,7 @@ import { AgencyGallery } from "@/components/activations/agency/agency-gallery";
 import { PreviewPanel } from "@/components/activations/agency/preview-panel";
 import { RecapForm } from "@/components/activations/agency/recap-form";
 import { SourcesSection } from "@/components/activations/agency/sources-section";
-import { PageSection } from "@/components/shell/page-section";
+import { ActivationSection } from "@/components/activations/activation-section";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { loadAgency } from "@/lib/activations/agency/queries";
 import {
@@ -88,14 +88,16 @@ export async function AgencyFile({
           canWrite={canWrite}
         />
       )}
-      <PageSection
+      <ActivationSection
         id="rows"
         title={press ? t.gallery.titlePress : t.gallery.title}
         description={t.gallery.description}
       >
         <div className="flex flex-col gap-4">
           {agency.rows.length === 0 ? (
-            <p className="text-sm text-muted-foreground">{t.gallery.empty}</p>
+            <p className="text-body-sm text-muted-foreground">
+              {t.gallery.empty}
+            </p>
           ) : (
             <AgencyGallery
               projectId={projectId}
@@ -106,7 +108,7 @@ export async function AgencyFile({
             />
           )}
         </div>
-      </PageSection>
+      </ActivationSection>
       {recaps.length > 0 && (
         <FactRows>
           <FactRow

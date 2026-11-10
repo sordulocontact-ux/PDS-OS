@@ -1,4 +1,6 @@
-import { PageSection } from "@/components/shell/page-section";
+import { ActivationSection } from "@/components/activations/activation-section";
+import { StepSection } from "@/components/shell/journey/step-section";
+import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { InfluenceData } from "@/lib/activations/influence/queries";
 import { activationInfluence } from "@/lib/i18n/fr/activation-influence";
@@ -36,7 +38,7 @@ export function RightsSection({
   canWrite: boolean;
 }) {
   return (
-    <PageSection id="rights" title={t.title} description={t.description}>
+    <ActivationSection id="rights" title={t.title} description={t.description}>
       <div className="grid gap-3 md:grid-cols-2">
         {(["organic", "ads"] as const).map((kind) => {
           const blocks = rights.filter((r) => r.kind === kind);
@@ -51,18 +53,18 @@ export function RightsSection({
               ? "expired"
               : (current.status as keyof typeof tone);
           return (
-            <div
+            <StepSection
               key={kind}
-              className="flex flex-col gap-2 rounded-xl border bg-card p-4"
-            >
-              <div className="flex items-center justify-between gap-2">
-                <h3 className="font-medium">{t.kinds[kind]}</h3>
+              title={t.kinds[kind]}
+              aside={
                 <StatusBadge size="sm" tone={tone[state]}>
                   {t.statuses[state]}
                 </StatusBadge>
-              </div>
+              }
+              className="[&:not(:first-child)]:mt-0"
+            >
               {current ? (
-                <dl className="flex flex-col gap-1 text-sm">
+                <FactRows>
                   {[
                     [t.platforms, current.platforms.join(", ")],
                     [t.supports, current.supports],
@@ -87,21 +89,16 @@ export function RightsSection({
                       Boolean(pair[1]),
                     )
                     .map(([label, value]) => (
-                      <div key={label} className="flex gap-2">
-                        <dt className="shrink-0 text-muted-foreground">
-                          {label}
-                        </dt>
-                        <dd className="break-words">{value}</dd>
-                      </div>
+                      <FactRow key={label} label={label} value={value} />
                     ))}
-                </dl>
+                </FactRows>
               ) : (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-body-sm text-muted-foreground">
                   {t.kindHints[kind]}
                 </p>
               )}
               {kind === "ads" && state !== "accepted" && (
-                <p className="text-sm text-[color:var(--tone-danger-fg)]">
+                <p className="text-body-sm text-[color:var(--tone-danger-fg)]">
                   {t.adsBlocked}
                 </p>
               )}
@@ -115,14 +112,14 @@ export function RightsSection({
                 />
               )}
               {blocks.length > 1 && (
-                <p className="text-xs text-muted-foreground">
+                <p className="text-caption text-[color:var(--text-secondary)]">
                   {t.history} : {blocks.filter((b) => b.superseded_at).length}
                 </p>
               )}
-            </div>
+            </StepSection>
           );
         })}
       </div>
-    </PageSection>
+    </ActivationSection>
   );
 }

@@ -194,3 +194,50 @@ export async function listPublishingContracts(
     status: c.status,
   }));
 }
+
+/**
+ * The main artist's Réseau fiche (Sacha, 09/11/2026: « si on connaît
+ * l'artiste principal, tu pré-remplis aussi le participant »): their
+ * contact linked to their artist of the Catalogue, made from it when they
+ * have none — by the artist's id, never matched by name. Only for a main
+ * artist of this title. Its id, else null (the picker stays to choose).
+ */
+export async function ensureMainArtistContact(
+  masterId: string,
+  artistId: string,
+): Promise<string | null> {
+  const ids = catalogIdSchema.safeParse(masterId);
+  const artist = catalogIdSchema.safeParse(artistId);
+  if (!ids.success || !artist.success) return null;
+  const access = await requireApproved();
+  if (!access.organizationId) return null;
+  const supabase = await createClient();
+  const { data: link } = await supabase
+    .from("master_artists")
+    .select("artist:artists!master_artists_artist_same_org(id, name)")
+    .eq("master_id", ids.data)
+    .eq("artist_id", artist.data)
+    .eq("role", "main")
+    .maybeSingle();
+  if (!link?.artist) return null;
+  const { data: known } = await supabase
+    .from("network_contacts")
+    .select("id")
+    .eq("artist_id", artist.data)
+    .limit(1)
+    .maybeSingle();
+  if (known) return known.id;
+  const { data, error } = await supabase
+    .from("network_contacts")
+    .insert({
+      organization_id: access.organizationId,
+      kind: "person",
+      name: link.artist.name,
+      roles: ["artist"],
+      artist_id: artist.data,
+    })
+    .select("id")
+    .maybeSingle();
+  if (error) console.error("ensureMainArtistContact:", error.message);
+  return data?.id ?? null;
+}

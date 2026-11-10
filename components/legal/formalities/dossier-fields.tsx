@@ -2,7 +2,7 @@
 
 import { Field } from "@/components/auth/field";
 import { FieldError } from "@/components/auth/form-message";
-import { OptionSelect } from "@/components/projects/option-select";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
 
 const fr = { legalFormalities };
@@ -31,20 +31,24 @@ export function ArrangementField({
 }) {
   const t = fr.legalFormalities;
   return (
-    <div className="grid gap-2 sm:grid-cols-2">
-      <OptionSelect
-        name={`${id}-arrangement`}
-        label={label}
-        hideLabel
-        required={required}
-        items={{
-          all: t.arrangementScopes.all,
-          specific: t.arrangementScopes.specific,
-        }}
-        defaultValue={value.scope || null}
-        error={error}
-        onValueChange={(scope) => onChange({ ...value, scope })}
-      />
+    // The exploitations named under the choice, when some only.
+    <div className="flex flex-col gap-2">
+      {/* Two choices: side by side (Sacha, 09/11/2026). */}
+      <fieldset disabled={disabled} className="flex flex-col gap-1.5">
+        <SegmentedControl
+          aria-label={label}
+          fill
+          options={Object.entries(t.arrangementSegments).map(([v, l]) => ({
+            value: v,
+            label: l,
+          }))}
+          value={value.scope || null}
+          // Optional unless a participant arranged: it can be undone.
+          deselectable={!required}
+          onChange={(scope) => onChange({ ...value, scope: scope ?? "" })}
+        />
+        <FieldError id={`${id}-arrangement-error`}>{error}</FieldError>
+      </fieldset>
       {value.scope === "specific" && (
         <Field
           name={`${id}-arrangement-detail`}
@@ -80,7 +84,7 @@ export function ContractField({
     <div className="flex flex-col gap-2">
       {/* Derived from the publishers' contracts, never ticked by hand
           (JUR-25): a copy is joined only when there is a piece. */}
-      <p className="text-sm font-medium">
+      <p className="text-body-sm">
         {value.provided ? t.providedYes : t.providedNo}
       </p>
       <FieldError id={`${id}-contract-error`}>{error}</FieldError>

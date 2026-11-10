@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 
-import { DesignBlock } from "@/components/design/design-block";
+import { StepSection } from "@/components/shell/journey/step-section";
 import {
   AddDeliverableForm,
   type AddDeliverableDefaults,
@@ -35,9 +35,9 @@ export function ReceivedHead({
 }) {
   const [adding, setAdding] = useState(Boolean(initial));
   return (
-    <DesignBlock
+    <StepSection
       title={t.received(count)}
-      action={
+      aside={
         canAdd &&
         !adding && (
           <Button variant="outline" size="sm" onClick={() => setAdding(true)}>
@@ -56,6 +56,6 @@ export function ReceivedHead({
         />
       )}
       {children}
-    </DesignBlock>
+    </StepSection>
   );
 }

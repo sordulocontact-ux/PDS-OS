@@ -1,6 +1,7 @@
 import { EmptyNote } from "@/components/shell/empty-state";
-import { PageSection } from "@/components/shell/page-section";
-import { StatusBadge } from "@/components/ui/status-badge";
+import { ActivationSection } from "@/components/activations/activation-section";
+import { Fold } from "@/components/ui/fold";
+import { VersionCard } from "@/components/ui/version-card";
 import type { MessageRecord } from "@/lib/activations/messages/queries";
 import type { MessageKind } from "@/lib/activations/model";
 import { emailEnabled } from "@/lib/email/send";
@@ -55,7 +56,7 @@ export function MessagesSection({
   const nameOf = (id: string | null) =>
     members.find((m) => m.personId === id)?.name ?? "—";
   return (
-    <PageSection
+    <ActivationSection
       id="messages"
       title={title}
       description={t.description}
@@ -76,45 +77,37 @@ export function MessagesSection({
       {messages.length === 0 ? (
         <EmptyNote>{t.none}</EmptyNote>
       ) : (
-        <ul className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3">
           {messages.map((m) => (
-            <li
+            <VersionCard
               key={m.id}
-              className="flex flex-col gap-2 rounded-xl border bg-card p-4"
-            >
-              <div className="flex flex-wrap items-start justify-between gap-2">
-                <div className="flex min-w-0 flex-col">
-                  <span className="font-medium break-words">
-                    {m.subject ?? t.kinds[m.kind]}
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    {t.kinds[m.kind]} · {t.channels[m.channel]}
-                    {m.dueOn && ` · ${t.dueOn} ${formatDate(m.dueOn)}`}
-                  </span>
-                </div>
-                <StatusBadge size="sm" tone={activationMessageTone[m.status]}>
-                  {m.status === "sent_declared" && m.sentProofUrl
+              title={m.subject ?? t.kinds[m.kind]}
+              status={{
+                tone: activationMessageTone[m.status],
+                label:
+                  m.status === "sent_declared" && m.sentProofUrl
                     ? t.proven
-                    : t.statuses[m.status]}
-                </StatusBadge>
-              </div>
-              <details className="text-sm">
-                <summary className="w-fit cursor-pointer text-muted-foreground">
-                  {t.body}
-                </summary>
-                <p className="mt-2 break-words whitespace-pre-wrap">{m.body}</p>
-              </details>
+                    : t.statuses[m.status],
+              }}
+              meta={`${t.kinds[m.kind]} · ${t.channels[m.channel]}${m.dueOn ? ` · ${t.dueOn} ${formatDate(m.dueOn)}` : ""}`}
+              defaultOpen={m.status === "draft" || m.status === "to_validate"}
+            >
+              <Fold summary={t.body}>
+                <p className="text-body-sm break-words whitespace-pre-wrap">
+                  {m.body}
+                </p>
+              </Fold>
               {m.reviewComment && m.status === "draft" && (
-                <p className="text-sm text-[color:var(--tone-warning-fg)]">
+                <p className="text-body-sm text-[color:var(--tone-warning-fg)]">
                   {t.reviewComment} : {m.reviewComment}
                 </p>
               )}
               {m.derogationReason && (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-body-sm text-muted-foreground">
                   {t.derogation} : {m.derogationReason}
                 </p>
               )}
-              <p className="text-xs text-muted-foreground">
+              <p className="text-caption text-muted-foreground">
                 {[
                   m.validatedAt
                     ? t.validatedBy(
@@ -161,10 +154,10 @@ export function MessagesSection({
                   today={today}
                 />
               )}
-            </li>
+            </VersionCard>
           ))}
-        </ul>
+        </div>
       )}
-    </PageSection>
+    </ActivationSection>
   );
 }

@@ -14,7 +14,7 @@ import {
   type ModuleHeaderProps,
 } from "@/components/shell/module/module-header";
 import type { ProjectHeaderData } from "@/lib/projects/header";
-import type { ModuleCrumb } from "@/lib/ui/module-frame";
+import type { CrumbOption, ModuleCrumb } from "@/lib/ui/module-frame";
 import {
   isSubModuleAt,
   moduleTrail,
@@ -23,7 +23,10 @@ import {
 import { cn } from "@/lib/utils";
 
 export type ProjectHeaderOverrides = Partial<
-  Pick<ModuleHeaderProps, "title" | "status" | "actions" | "facts">
+  Pick<
+    ModuleHeaderProps,
+    "title" | "subtitle" | "media" | "status" | "actions" | "facts"
+  >
 > & {
   // Replaces the whole trail.
   crumbs?: ModuleCrumb[];
@@ -93,14 +96,38 @@ export function ProjectHeaderView({
     ),
   );
   const step = (steps ?? data.steps).find((s) => s.href === pathname);
+  const sub = data.subModules.find((s) => isSubModuleAt(s, pathname));
+  // The Marketing's sub-modules, to switch to from the trail (Sacha
+  // 10/11/2026): where each pill opens, its check and its count.
+  const subOptions: CrumbOption[] = data.subModules
+    .filter((s) => s.built)
+    .map((s) => ({
+      key: s.key,
+      label: s.label,
+      href: opens[s.key] ?? s.href,
+      current: s.key === sub?.key,
+      done: s.done,
+      mine: mine[s.key],
+    }));
   const all = crumbs ?? [
-    ...trail.crumbs.map((c) =>
-      c.href && entryOf.has(c.href) ? { ...c, href: entryOf.get(c.href) } : c,
-    ),
+    ...trail.crumbs.map((c) => {
+      if (sub && c.href === sub.href)
+        return {
+          ...c,
+          // Below its own page (an activation, a deliverable), the
+          // sub-module's crumb goes up to it, not to where it opens.
+          href:
+            pathname !== sub.href ? sub.href : (entryOf.get(c.href) ?? c.href),
+          options: subOptions,
+        };
+      return c.href && entryOf.has(c.href)
+        ? { ...c, href: entryOf.get(c.href) }
+        : c;
+    }),
     ...extraCrumbs,
     ...(step ? [{ label: step.title }] : []),
   ];
-  const inMarketing = data.subModules.some((s) => isSubModuleAt(s, pathname));
+  const inMarketing = Boolean(sub);
   return (
     <div
       data-project-header={isDefault ? "default" : "page"}

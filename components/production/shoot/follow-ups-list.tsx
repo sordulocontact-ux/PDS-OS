@@ -1,3 +1,5 @@
+import { Rows } from "@/components/ui/rows";
+import { StepSection } from "@/components/shell/journey/step-section";
 import { EmptyNote } from "@/components/shell/empty-state";
 import type { Member } from "@/lib/framing/related";
 import { productionShoot } from "@/lib/i18n/fr/production-shoot";
@@ -23,19 +25,15 @@ export function FollowUpsList({
   canOrganize: boolean;
 }) {
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex flex-col gap-0.5">
-        <h3 className="text-sm font-semibold">{t.title}</h3>
-        <p className="text-sm text-muted-foreground">{t.description}</p>
-      </div>
+    <StepSection title={t.title} description={t.description}>
       {followUps.length === 0 ? (
         <EmptyNote>{t.empty}</EmptyNote>
       ) : (
-        <ul className="flex flex-col gap-3">
+        <Rows>
           {followUps.map((f) => (
             <li
               key={f.key}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border p-4"
+              className="flex flex-wrap items-center justify-between gap-3 px-4 py-3.5"
             >
               <div className="flex min-w-0 flex-col gap-0.5">
                 <span className="text-sm font-medium break-words">
@@ -54,8 +52,8 @@ export function FollowUpsList({
               )}
             </li>
           ))}
-        </ul>
+        </Rows>
       )}
-    </div>
+    </StepSection>
   );
 }

@@ -1,12 +1,20 @@
 import "server-only";
 
-import type { RetainedIntention } from "@/components/design/work/consolidation-panel";
 import type { ConceptionData } from "@/lib/design/conception";
 import { DIRECTION_KEY } from "@/lib/design/intentions";
 import { intentionsState, type IntentionsState } from "@/lib/design/states";
 import type { Member } from "@/lib/framing/related";
 import { fr } from "@/lib/i18n/fr";
 import { createClient } from "@/lib/supabase/server";
+
+/** An intention retained for a target, with where it comes from. */
+export type RetainedIntention = {
+  id: string;
+  topicLabel: string;
+  value: string;
+  // Where it comes from: typed by a person, or the source of PO's proposal.
+  sourceLabel: string;
+};
 
 /** The latest consolidation the owner confirmed for a target. */
 export type IntentConfirmation = {

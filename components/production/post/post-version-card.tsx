@@ -1,7 +1,6 @@
 import { IconFile, IconLink } from "nucleo-sharp-essential";
 
-import { sectionCardClass } from "@/components/ui/section-card";
-import { StatusBadge } from "@/components/ui/status-badge";
+import { DeliverableVersion } from "@/components/ui/deliverable-version";
 import { productionCut } from "@/lib/i18n/fr/production-cut";
 import { productionPost } from "@/lib/i18n/fr/production-post";
 import { versionName } from "@/lib/production/post/labels";
@@ -13,8 +12,7 @@ import type {
   ProviderLinkState,
 } from "@/lib/production/post/types";
 import { formatDateTime } from "@/lib/release/format";
-import { productionVersionTone } from "@/lib/ui/state-tones";
-import { cn } from "@/lib/utils";
+import { productionVersionTone, type Tone } from "@/lib/ui/state-tones";
 
 import { CommentAddButton } from "./comment-add-button";
 import { CommentList } from "./comment-list";
@@ -34,7 +32,7 @@ const t = fr.productionPost;
  * version had to correct (PROD-032); its feedback by timecode; its
  * correction request (PROD-031), else the corrections still open.
  */
-export function VersionCard({
+export function PostVersionCard({
   scope,
   people,
   version: v,
@@ -66,58 +64,47 @@ export function VersionCard({
       ? { href: v.url, label: t.versions.openLink, icon: IconLink }
       : null;
 
-  return (
-    <article
-      aria-labelledby={`version-${v.id}`}
-      className={cn(sectionCardClass, "flex flex-col gap-5")}
-    >
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex min-w-0 flex-col gap-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 id={`version-${v.id}`} className="text-base font-semibold">
-              {name}
-            </h3>
-            <StatusBadge tone={productionVersionTone[v.status]}>
-              {t.versions.statuses[v.status]}
-            </StatusBadge>
-            {v.ext !== "none" && (
-              <StatusBadge
-                size="sm"
-                tone={
-                  v.ext === "approved"
-                    ? "success"
-                    : v.ext === "changes"
-                      ? "warning"
-                      : "info"
-                }
-              >
-                {fr.productionCut.side.ext(fr.productionCut.side.states[v.ext])}
-              </StatusBadge>
-            )}
-            {v.previousNumber !== null && (
-              <span className="text-sm text-muted-foreground">
-                {t.versions.follows(v.previousNumber)}
-              </span>
-            )}
-          </div>
-          <p className="text-sm text-muted-foreground">
-            {t.versions.authorLine(v.author?.name ?? t.versions.authorNone)}
-            {" · "}
-            {t.versions.createdBy(v.createdBy, formatDateTime(v.createdAt))}
-            {v.submittedBy && v.submittedAt && (
-              <>
-                {" · "}
-                {t.versions.submittedOn(
-                  v.submittedBy,
-                  formatDateTime(v.submittedAt),
-                )}
-              </>
-            )}
-          </p>
-        </div>
-        <VersionControls scope={scope} people={people} version={v} can={can} />
-      </div>
+  const statuses = [
+    {
+      tone: productionVersionTone[v.status],
+      label: t.versions.statuses[v.status],
+    },
+    ...(v.ext !== "none"
+      ? [
+          {
+            tone: (v.ext === "approved"
+              ? "success"
+              : v.ext === "changes"
+                ? "warning"
+                : "info") as Tone,
+            label: fr.productionCut.side.ext(
+              fr.productionCut.side.states[v.ext],
+            ),
+          },
+        ]
+      : []),
+  ];
 
+  return (
+    <DeliverableVersion
+      name={name}
+      statuses={statuses}
+      controls={
+        <VersionControls scope={scope} people={people} version={v} can={can} />
+      }
+      line={
+        <>
+          {v.previousNumber !== null &&
+            `${t.versions.follows(v.previousNumber)} · `}
+          {t.versions.authorLine(v.author?.name ?? t.versions.authorNone)}
+          {" · "}
+          {t.versions.createdBy(v.createdBy, formatDateTime(v.createdAt))}
+          {v.submittedBy &&
+            v.submittedAt &&
+            ` · ${t.versions.submittedOn(v.submittedBy, formatDateTime(v.submittedAt))}`}
+        </>
+      }
+    >
       {media ? (
         <a
           href={media.href}
@@ -191,6 +178,6 @@ export function VersionCard({
       ) : (
         v.status !== "draft" && <CorrectionsBlock version={v} />
       )}
-    </article>
+    </DeliverableVersion>
   );
 }

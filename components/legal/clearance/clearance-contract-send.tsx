@@ -12,6 +12,7 @@ import type { Clearance } from "@/lib/legal/clearance/types";
 import { isEmail } from "@/lib/utils/email";
 
 import { termsLine } from "./clearance-stages";
+import { ContractProofSlot } from "./contract-proof-slot";
 import { RequestSend, type RequestRecipient } from "./request-send";
 
 const fr = { legalClearance };
@@ -29,10 +30,13 @@ export function ClearanceContractSend({
   projectId,
   clearance,
   canEmail,
+  organizationId,
 }: {
   projectId: string;
   clearance: Clearance;
   canEmail: boolean;
+  // Where the contract's file is uploaded (contract-files/<organisation>/…).
+  organizationId: string | null;
 }) {
   const t = fr.legalClearance.flow;
   const { pending, run } = useLegalAction({ refresh: true });
@@ -89,18 +93,34 @@ export function ClearanceContractSend({
     </div>
   );
 
+  // No text yet: dropped here as its « Projet de contrat » (never written
+  // by PDS OS), then the e-mail card shows with it joined (Sacha,
+  // 09/11/2026: « j'ai pas capté »).
   if (noText)
     return (
       <>
         <p className="text-sm text-muted-foreground">{t.noDocument}</p>
-        <Button
-          className="self-start"
-          nativeButton={false}
-          render={<Link href={routes.contract(noText.id)} />}
-        >
-          {t.openToWrite}
-        </Button>
-        {ways(t.sendBy)}
+        {organizationId && (
+          <ContractProofSlot
+            organizationId={organizationId}
+            contractId={noText.id}
+            category="draft"
+            label={t.draftSlot}
+            hint={t.draftHint}
+            present={false}
+          />
+        )}
+        {otherwise ? (
+          ways(t.sendBy)
+        ) : (
+          <Button
+            variant="outline"
+            className="self-start"
+            onClick={() => setOtherwise(true)}
+          >
+            {t.contractSentOtherwise}
+          </Button>
+        )}
       </>
     );
 

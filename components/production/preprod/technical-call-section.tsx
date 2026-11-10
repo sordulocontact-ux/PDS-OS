@@ -1,6 +1,6 @@
 import { ProductionCallList } from "@/components/production/prep/production-call-list";
 import { EmptyNote } from "@/components/shell/empty-state";
-import { PageSection } from "@/components/shell/page-section";
+import { StepSection } from "@/components/shell/journey/step-section";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import { CallPrepForm } from "@/components/calls/prep/call-prep-form";
@@ -82,12 +82,11 @@ export async function TechnicalCallSection({
   ) : undefined;
 
   return (
-    <PageSection
+    <StepSection
       id="technical-call"
       title={heading?.title ?? t.title}
       description={heading?.description ?? t.description}
-      action={launcher}
-      card
+      aside={launcher}
     >
       <div className="flex flex-col gap-8">
         {listCalls && (
@@ -147,6 +146,6 @@ export async function TechnicalCallSection({
           </div>
         )}
       </div>
-    </PageSection>
+    </StepSection>
   );
 }

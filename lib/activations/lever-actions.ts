@@ -10,6 +10,7 @@ import {
   invalid,
 } from "@/lib/activations/result";
 import { requireApproved } from "@/lib/auth/dal";
+import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { withOutcome } from "@/lib/journey/outcome";
 import { createClient } from "@/lib/supabase/server";
@@ -103,8 +104,18 @@ export async function createFromLever(input: {
         .delete()
         .eq("project_id", projectId)
         .eq("lever_id", lever.id);
-      return activationDone(projectId);
+      // The new activation's page opens at once (Sacha 10/11/2026: an
+      // activation opens its page, never below the list).
+      return {
+        ...activationDone(projectId),
+        open: {
+          href: routes.projectActivation(projectId, data.id),
+          step: `${t.crumb} › ${lever.label}`,
+        },
+      };
     },
+    // Its own page, not the journey's next step.
+    { openNext: false },
   );
 }
 

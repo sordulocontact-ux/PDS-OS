@@ -1,9 +1,10 @@
 "use client";
 
-import { IconChevronRight } from "nucleo-sharp-essential";
 import { useState } from "react";
 
+import { StepSection } from "@/components/shell/journey/step-section";
 import { FormDialog } from "@/components/ui/form-dialog";
+import { InfoRow, Rows } from "@/components/ui/rows";
 import { dialogs } from "@/lib/i18n/fr/dialogs";
 import { reviewJourney } from "@/lib/i18n/fr/review-journey";
 import type {
@@ -26,35 +27,16 @@ export function StandingRows({ rows }: { rows: StandingRow[] }) {
   const [open, setOpen] = useState<StandingFigure | null>(null);
   return (
     <>
-      <ul className="overflow-hidden rounded-xl border border-[color:var(--border-hairline)]">
+      <Rows>
         {rows.map((row) => (
-          <li
+          <InfoRow
             key={row.key}
-            className="border-b border-[color:var(--border-hairline)] last:border-b-0"
-          >
-            <button
-              type="button"
-              onClick={() => setOpen(row.figure)}
-              className="flex w-full items-center gap-3 px-4 py-3.5 text-left focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[color:var(--focus-ring)] [@media(hover:hover)]:hover:bg-[var(--surface-soft)]"
-            >
-              <span className="flex min-w-0 flex-1 flex-col">
-                <b className="text-[length:var(--type-body-md)] leading-[var(--type-body-md-lh)] font-semibold">
-                  {row.text}
-                </b>
-                {row.sub && (
-                  <span className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
-                    {row.sub}
-                  </span>
-                )}
-              </span>
-              <IconChevronRight
-                aria-hidden
-                className="size-4 shrink-0 text-[color:var(--text-tertiary)]"
-              />
-            </button>
-          </li>
+            title={row.text}
+            detail={row.sub ?? undefined}
+            onClick={() => setOpen(row.figure)}
+          />
         ))}
-      </ul>
+      </Rows>
       <FigureDialog figure={open} onClose={() => setOpen(null)} />
     </>
   );
@@ -65,10 +47,7 @@ export function StandingTiles({ groups }: { groups: StandingGroup[] }) {
   return (
     <>
       {groups.map((group) => (
-        <section key={group.key} className="flex flex-col gap-2.5">
-          <h3 className="text-[length:var(--type-body-md)] leading-[var(--type-body-md-lh)] font-semibold">
-            {group.label}
-          </h3>
+        <StepSection key={group.key} title={group.label}>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-2.5">
             {group.figures.map((figure) => (
               <button
@@ -87,7 +66,7 @@ export function StandingTiles({ groups }: { groups: StandingGroup[] }) {
               </button>
             ))}
           </div>
-        </section>
+        </StepSection>
       ))}
       <FigureDialog figure={open} onClose={() => setOpen(null)} />
     </>
@@ -110,23 +89,15 @@ function FigureDialog({
       closeLabel={fr.dialogs.close}
     >
       {figure && figure.items.length > 0 ? (
-        <ul className="flex flex-col">
+        <Rows flush>
           {figure.items.map((item) => (
-            <li
+            <InfoRow
               key={item.key}
-              className="flex flex-col border-b border-[color:var(--border-hairline)] px-3.5 py-3 last:border-b-0"
-            >
-              <b className="text-[length:var(--type-body-md)] leading-[var(--type-body-md-lh)] font-semibold break-words">
-                {item.title}
-              </b>
-              {item.detail && (
-                <span className="text-[length:var(--type-micro)] leading-[var(--type-micro-lh)] break-words text-[color:var(--text-tertiary)]">
-                  {item.detail}
-                </span>
-              )}
-            </li>
+              title={item.title}
+              detail={item.detail ?? undefined}
+            />
           ))}
-        </ul>
+        </Rows>
       ) : (
         <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
           {t.none}

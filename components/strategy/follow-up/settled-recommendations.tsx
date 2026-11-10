@@ -1,3 +1,5 @@
+import { StrategyPart } from "@/components/strategy/strategy-part";
+import { Rows } from "@/components/ui/rows";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Timestamp } from "@/components/ui/timestamp";
 import { ViewLink } from "@/components/ui/view-link";
@@ -25,16 +27,13 @@ export function SettledRecommendations({
   const s = t.settled;
   if (items.length === 0) return null;
   return (
-    <section aria-labelledby="settled-title" className="flex flex-col gap-3">
-      <h4 id="settled-title" className="text-body-md font-semibold">
-        {s.title}
-      </h4>
-      <ul className="flex flex-col divide-y divide-border rounded-2xl border border-border bg-background">
+    <StrategyPart id="settled-title" title={s.title}>
+      <Rows label={s.title}>
         {items.map((item) => (
           <li
             key={item.id}
             id={`reco-${item.id}`}
-            className="flex scroll-mt-6 flex-col gap-2 p-4"
+            className="flex scroll-mt-6 flex-col gap-2 px-3.5 py-3"
           >
             <div className="flex flex-wrap items-center gap-2 text-caption text-muted-foreground">
               {item.level && (
@@ -84,7 +83,7 @@ export function SettledRecommendations({
             )}
           </li>
         ))}
-      </ul>
-    </section>
+      </Rows>
+    </StrategyPart>
   );
 }

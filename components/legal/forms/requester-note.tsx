@@ -10,7 +10,7 @@ export function RequesterNote({ requester }: { requester: FormRequester }) {
   const { contact, email } = requester;
   return (
     <section className="flex flex-col gap-1">
-      <h2 className="text-base font-medium">{t.title}</h2>
+      <h2 className="text-sm font-medium">{t.title}</h2>
       <p className="text-sm text-muted-foreground">
         {contact && email ? (
           <>
@@ -39,7 +39,7 @@ export function DataUseNote({ requester }: { requester: FormRequester }) {
   const t = fr.legalForms.public.dataUse;
   return (
     <section className="flex flex-col gap-2">
-      <h2 className="text-base font-medium">{t.title}</h2>
+      <h2 className="text-sm font-medium">{t.title}</h2>
       <ul className="flex list-disc flex-col gap-1 pl-5 text-sm text-muted-foreground">
         <li>{t.purposes}</li>
         <li>{t.access(requester.organization)}</li>

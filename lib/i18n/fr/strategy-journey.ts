@@ -87,6 +87,9 @@ export const strategyJourney = {
     arbitrate: (dimension: string) => `Arbitrer : ${lcFirst(dimension)}`,
     complete: (dimension: string) => `Compléter : ${lcFirst(dimension)}`,
     send: "Demander la validation du Brief de sortie",
+    // What is asked about a document of « Stratégie validée ».
+    answerDoc: (doc: string) => `Répondre à la demande sur le ${doc}`,
+    validateDoc: (doc: string) => `Valider le ${doc}`,
     validate: "Valider le Brief de sortie",
     resubmit: "Répondre et transmettre à nouveau",
   },
@@ -141,6 +144,7 @@ export const strategyJourney = {
     started: "Stratégie commencée",
   },
   // « Claire Morel et Nadia Benali »
+  documents: { plan: "Plan de sortie", press: "Dossier de presse" },
   names: (list: string[]) =>
     list.length <= 1
       ? (list[0] ?? "—")

@@ -37,7 +37,7 @@ export function ImportProposalRow({
   const t = fr.productionImport.review;
   const boxId = `production-import-${id}`;
   return (
-    <li className="flex items-start gap-3 rounded-2xl border border-border p-4">
+    <li className="flex items-start gap-3 px-4 py-3.5">
       <Checkbox
         id={boxId}
         size="md"

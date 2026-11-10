@@ -1,6 +1,6 @@
 import { EmptyNote } from "@/components/shell/empty-state";
-import { PageSection } from "@/components/shell/page-section";
-import { StatusBadge } from "@/components/ui/status-badge";
+import { ActivationSection } from "@/components/activations/activation-section";
+import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { ViewLink } from "@/components/ui/view-link";
 import type { DependencyOptions } from "@/lib/activations/dependency-options";
 import type { DependencyRecord } from "@/lib/activations/types";
@@ -31,7 +31,7 @@ export function DependenciesSection({
   canWrite: boolean;
 }) {
   return (
-    <PageSection
+    <ActivationSection
       id="dependencies"
       title={t.title}
       description={t.description}
@@ -48,59 +48,56 @@ export function DependenciesSection({
       {dependencies.length === 0 ? (
         <EmptyNote>{t.none}</EmptyNote>
       ) : (
-        <ul className="flex flex-col divide-y divide-[color:var(--border-hairline)] rounded-xl border bg-card">
+        <FactRows>
           {dependencies.map((d) => (
-            <li
+            <FactRow
               key={d.id}
-              className="flex flex-wrap items-center justify-between gap-3 px-4 py-3"
-            >
-              <div className="flex min-w-0 flex-col">
-                {d.href ? (
+              value={
+                d.href ? (
                   <ViewLink
                     href={d.href}
-                    className="font-medium break-words underline-offset-4 hover:underline"
+                    className="underline-offset-4 hover:underline"
                   >
                     {d.label}
                   </ViewLink>
                 ) : (
-                  <span className="font-medium break-words">{d.label}</span>
-                )}
-                <span className="text-sm text-muted-foreground">
-                  {d.blocking ? t.blocking : null}
-                  {d.changed && ` · ${t.changed}`}
-                </span>
-              </div>
-              <span className="flex items-center gap-2">
-                <StatusBadge
-                  size="sm"
-                  tone={
-                    d.resolved === null
-                      ? "neutral"
-                      : d.resolved
-                        ? "success"
-                        : d.blocking
-                          ? "warning"
-                          : "neutral"
-                  }
-                >
-                  {d.resolved === null
+                  d.label
+                )
+              }
+              source={
+                [d.blocking ? t.blocking : null, d.changed ? t.changed : null]
+                  .filter(Boolean)
+                  .join(" · ") || null
+              }
+              state={{
+                tone:
+                  d.resolved === null
+                    ? "neutral"
+                    : d.resolved
+                      ? "success"
+                      : d.blocking
+                        ? "warning"
+                        : "neutral",
+                label:
+                  d.resolved === null
                     ? t.unknown
                     : d.resolved
                       ? t.resolved
-                      : t.open}
-                </StatusBadge>
-                {canWrite && (
+                      : t.open,
+              }}
+              side={
+                canWrite && (
                   <UnlinkDependencyButton
                     projectId={projectId}
                     dependencyId={d.id}
                     label={d.label}
                   />
-                )}
-              </span>
-            </li>
+                )
+              }
+            />
           ))}
-        </ul>
+        </FactRows>
       )}
-    </PageSection>
+    </ActivationSection>
   );
 }

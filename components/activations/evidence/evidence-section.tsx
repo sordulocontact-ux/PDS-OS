@@ -1,6 +1,6 @@
 import { EmptyNote } from "@/components/shell/empty-state";
-import { PageSection } from "@/components/shell/page-section";
-import { StatusBadge } from "@/components/ui/status-badge";
+import { ActivationSection } from "@/components/activations/activation-section";
+import { VersionCard } from "@/components/ui/version-card";
 import type { ActivationFile } from "@/lib/activations/files/queries";
 import type { EvidenceKind, EvidenceSource } from "@/lib/activations/model";
 import { evidenceState } from "@/lib/activations/states";
@@ -49,7 +49,7 @@ export function EvidenceSection({
     members.find((m) => m.personId === id)?.name ??
     fr.activations.journal.system;
   return (
-    <PageSection
+    <ActivationSection
       id="evidence"
       title={title}
       description={t.description}
@@ -67,7 +67,7 @@ export function EvidenceSection({
       {evidences.length === 0 ? (
         <EmptyNote>{t.none}</EmptyNote>
       ) : (
-        <ul className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3">
           {evidences.map((e) => {
             const state = evidenceState({
               id: e.id,
@@ -77,35 +77,22 @@ export function EvidenceSection({
             });
             const file = e.fileId ? files.get(e.fileId) : undefined;
             return (
-              <li
+              <VersionCard
                 key={e.id}
-                className="flex flex-col gap-2 rounded-xl border bg-card p-4"
+                title={`${t.kinds[e.kind]}${e.platform ? ` · ${e.platform}` : ""}${e.declaredOn ? ` · ${formatDate(e.declaredOn)}` : ""}`}
+                status={{
+                  tone: e.withdrawnAt ? "neutral" : proofTone[state],
+                  label: e.withdrawnAt
+                    ? t.withdrawnLabel
+                    : e.checks[0]
+                      ? t.results[e.checks[0].result]
+                      : t.unverified,
+                }}
+                meta={`${t.sources[e.declaredSource]} — ${t.by(nameOf(e.createdBy), formatDate(e.createdAt))}`}
+                defaultOpen={!e.withdrawnAt && e.checks.length === 0}
               >
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="flex min-w-0 flex-col gap-0.5">
-                    <span className="font-medium">
-                      {t.kinds[e.kind]}
-                      {e.platform && ` · ${e.platform}`}
-                      {e.declaredOn && ` · ${formatDate(e.declaredOn)}`}
-                    </span>
-                    <span className="text-sm text-muted-foreground">
-                      {t.sources[e.declaredSource]} —{" "}
-                      {t.by(nameOf(e.createdBy), formatDate(e.createdAt))}
-                    </span>
-                  </div>
-                  <StatusBadge
-                    size="sm"
-                    tone={e.withdrawnAt ? "neutral" : proofTone[state]}
-                  >
-                    {e.withdrawnAt
-                      ? t.withdrawnLabel
-                      : e.checks[0]
-                        ? t.results[e.checks[0].result]
-                        : t.unverified}
-                  </StatusBadge>
-                </div>
                 {(e.url || file) && (
-                  <p className="flex flex-wrap gap-x-4 text-sm">
+                  <p className="flex flex-wrap gap-x-4 text-body-sm">
                     {e.url && (
                       <a
                         href={e.url}
@@ -128,14 +115,14 @@ export function EvidenceSection({
                     )}
                   </p>
                 )}
-                {e.note && <p className="text-sm break-words">{e.note}</p>}
+                {e.note && <p className="text-body-sm break-words">{e.note}</p>}
                 {e.withdrawnReason && (
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-body-sm text-[color:var(--text-secondary)]">
                     {t.withdrawnLabel} : {e.withdrawnReason}
                   </p>
                 )}
                 {e.checks.length > 0 && (
-                  <ul className="flex flex-col gap-1 border-l-2 border-[color:var(--border-hairline)] pl-3 text-sm text-muted-foreground">
+                  <ul className="flex flex-col gap-1 border-l-2 border-[color:var(--border-hairline)] pl-3 text-body-sm text-[color:var(--text-secondary)]">
                     {e.checks.map((c) => (
                       <li key={c.id}>
                         {t.lastCheck(
@@ -158,11 +145,11 @@ export function EvidenceSection({
                     canWithdraw={canWrite}
                   />
                 )}
-              </li>
+              </VersionCard>
             );
           })}
-        </ul>
+        </div>
       )}
-    </PageSection>
+    </ActivationSection>
   );
 }

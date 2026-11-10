@@ -1,5 +1,5 @@
 import { needLabel } from "@/components/production/prep/need-label";
-import { PageSection } from "@/components/shell/page-section";
+import { StepSection } from "@/components/shell/journey/step-section";
 import { FactList } from "@/components/ui/fact-list";
 import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import { productionShoot } from "@/lib/i18n/fr/production-shoot";
@@ -40,12 +40,7 @@ export function ShootDay({
     (a) => a.blocking && a.status === "approved" && a.taskDone !== true,
   );
   return (
-    <PageSection
-      id="shoot-day"
-      title={t.title}
-      description={t.description}
-      card
-    >
+    <StepSection id="shoot-day" title={t.title} description={t.description}>
       <div className="flex flex-col gap-6">
         <FactList
           emptyLabel={fr.productionPreprod.notFilled}
@@ -80,13 +75,7 @@ export function ShootDay({
             },
           ]}
         />
-        <section
-          className="flex flex-col gap-2"
-          aria-labelledby="shoot-day-team"
-        >
-          <h3 id="shoot-day-team" className="text-sm font-semibold">
-            {t.team}
-          </h3>
+        <StepSection id="shoot-day-team" title={t.team}>
           {team.length === 0 ? (
             <p className="text-sm text-muted-foreground">{t.noTeam}</p>
           ) : (
@@ -99,14 +88,8 @@ export function ShootDay({
               ))}
             </ul>
           )}
-        </section>
-        <section
-          className="flex flex-col gap-2"
-          aria-labelledby="shoot-day-critical"
-        >
-          <h3 id="shoot-day-critical" className="text-sm font-semibold">
-            {t.critical}
-          </h3>
+        </StepSection>
+        <StepSection id="shoot-day-critical" title={t.critical}>
           {critical.length === 0 ? (
             <p className="text-sm text-muted-foreground">{t.noCritical}</p>
           ) : (
@@ -130,7 +113,7 @@ export function ShootDay({
               ))}
             </ul>
           )}
-        </section>
+        </StepSection>
         <p className="text-sm">
           {t.incidents(openIncidents)}
           {openIncidents > 0 && (
@@ -143,6 +126,6 @@ export function ShootDay({
           )}
         </p>
       </div>
-    </PageSection>
+    </StepSection>
   );
 }

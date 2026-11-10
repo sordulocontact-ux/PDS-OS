@@ -1933,3 +1933,72 @@ Demande de Sacha : « PDS ne peut pas détecter le retour du mail pour ajouter l
   prises de voix » → Sessions studio, « Envoyer le moodboard au réalisateur » → Conception), par du code, jamais
   par un modèle ; la tâche prend le projet de sa réunion (les tâches déjà mises le récupèrent). Dans la modale :
   Projet (recherche) et Page à ouvrir, proposée d'après l'intitulé. Sur l'accueil, « Vos tâches » ouvre la page.
+
+## Marketing aligné sur le Master et le Juridique (09/11/2026, branche `pre-prod`)
+
+Demande de Sacha : « toutes les pages du marketing ne sont pas à jour comparé au juridique / master ». Forme
+seulement, ni données ni textes métier. Détail des composants : `docs/COMPOSANTS.md`.
+
+- **Brief de sortie** = le Brief de cadrage : `BriefDocument` (remonté dans `ui/`) + `DocumentSection` (nouveau,
+  « libellé | valeur », source dessous, partagé avec `BriefVersionDoc`), état, « Télécharger le PDF », « Créée par …
+  · validée par … » sous la carte ; « Restant à arbitrer » en `ToneCallout` au-dessus. Ancienne version
+  (`BriefSnapshotView`) sur le même patron.
+- **Stratégie** : Plan de sortie, Dossier de presse et Suivi dans `StrategyStepFrame page` (plus de `<h1>` ni de lien
+  retour maison) ; Aperçu et documents de « Stratégie validée » en `DocumentCard` ; historique en `VersionCard` ;
+  `ReviewPanel` réutilise `ReviewRows` ; réserves, livrables, KPI, publics en `Rows` (Modifier en contour) ;
+  intertitres en `StrategyPart`.
+- **Conception** : Brief de conception en `DocumentCard` + `FactRows` ; `StepWaiting` au lieu de `DesignWaits` ;
+  `StepSection` au lieu de `DesignBlock` ; historique de la Direction dans le cadre. Code mort retiré.
+- **Production** : `DeliverableVersion(s)` (`ui/`) pour toute version de livrable ; `StepWaiting` ; tous les
+  `PageSection` d'étape en `StepSection` ; cartes de ligne en `Rows` ; `<details>` en `Fold` ; `<dl>` en `FactRows`.
+- **Activations, Suivi & bilan** : `ActivationSection`, `VersionCard` / `FactRows` / `Rows` / `Fold` ; rapport en
+  `DocumentCard` ; `InfoRow onClick` ; `MarketingHistory` sur `StepHistory`.
+- **Reste à trancher** : maître/détail des Activations (pas de frise) ; page d'historique de la Conception et de la
+  Stratégie (aucune n'existe) ; cartes d'édition des écrans du générateur (Phases, Contenus, Récapitulatif) encore
+  encadrées ; `LocationCard` garde sa carte (photo, grille).
+
+## Stratégie validée : documents et générateurs (10/11/2026, branche `pre-prod`)
+
+Demande de Sacha, après le proto « Stratégie validée » (variante « Sélecteur » retenue, sans liste déroulante).
+
+- **Générateurs** (Plan de sortie, Dossier de presse) : les 8 écrans se parcourent comme les questions des
+  dimensions, « ‹ 3 sur 8 › » (`RankArrows`, extrait de `PoQuestion`) ; « ← Stratégie validée » au-dessus du
+  titre (`StepPanel back`) ; « Déjà connu » en `FactBlock` (`KnownFacts`) au lieu de longs textes en tableau.
+- **Parcours** : inchangé, « Stratégie validée » est faite avec le Brief (ticket § 9) ; les deux documents
+  sont facultatifs (Sacha, même jour, après un essai qui gardait l'étape ouverte).
+- **Page** : « À vous » et bouton plein sur un document seulement quand on a demandé quelque chose au lecteur
+  (valider, reprendre une modification). Guide de PO mis à jour (`topics/projects.ts`).
+- **Reste** : à vérifier dans le navigateur par Sacha (pas de session locale en mode auto).
+
+
+## Activations en deux pages et fil d'Ariane à chevrons (10/11/2026, branche `pre-prod`)
+
+Demande de Sacha (audit de la page Activations) : les leviers n'avaient ni cadre ni fond, et
+l'activation ouverte tombait sous la liste et sous les leviers dépliés.
+
+- `/activations` : carte titrée « Leviers du Brief de sortie » (seulement ceux à créer ou gardés pour
+  plus tard, source dite une fois), puis le tableau commun (`DataTable`) des activations avec ses vues
+  en onglets ; « Nouvelle activation » en contour.
+- `/activations/[id]` : l'activation en pleine page ; « Créer l'activation » ouvre directement sa page.
+- Fil d'Ariane : double chevron sur le sous-module du Marketing (toutes ses pages), sur l'activation
+  et sur le livrable de la Production (`CrumbSwitcher`).
+- Boutons seuls sans contour corrigés (« Créer » d'un levier gardé, « Nouvelle activation »).
+- Reste : les pilules des sous-modules et la barre des livrables de la Production doublent maintenant
+  le chevron du fil (Ibé, 15/10 : pas de seconde navigation) — à trancher.
+
+## Vue d'ensemble refaite et pochette du projet (10/11/2026, branche `pre-prod`)
+
+Retour d'Akili du 05/11 (Notion Retours « Vue d'ensemble du projet : pochette, intitulés en double,
+sobriété »), proto `docs/protos/vue-ensemble.html` validé par Sacha (sans la ligne Responsable /
+Sortie visée / blocages, retirée à sa demande ; la pochette aussi dans la liste des projets).
+
+- Pochette d'un projet : `projects.cover_path`, bucket privé `project-covers`, `set_project_cover` /
+  `can_edit_project_cover` (direction avant l'acceptation, puis le responsable seul), migration
+  `20261110100101_project_cover`. Repli : la pochette du premier titre au Catalogue, puis un visuel
+  par défaut tiré de l'id. Champ facultatif « Pochette » dans « Nouveau projet » ; changer / retirer
+  depuis la Vue d'ensemble (bouton sur l'image, « Informations »).
+- Vue d'ensemble : en-tête pochette + nom + « Artiste · Type » + « Informations » ; « Maintenant »
+  et « Progression » (un titre chacun, aucune pastille, anneaux par workflow) ; le Brief de cadrage
+  comme livrable avant le plan ; dépendances en texte après. `BeforeWorkflows` et `WorkflowCards`
+  supprimés.
+- Listes de projets (Projets, Catalogue › artiste et titre) : la pochette devant le nom.

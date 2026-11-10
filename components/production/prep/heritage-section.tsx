@@ -1,5 +1,5 @@
 import { HeritageList } from "@/components/production/prep/heritage-list";
-import { PageSection } from "@/components/shell/page-section";
+import { StepSection } from "@/components/shell/journey/step-section";
 import { FactList, type Fact } from "@/components/ui/fact-list";
 import { formatEuros } from "@/lib/budget/types";
 import { productionPrep } from "@/lib/i18n/fr/production-prep";
@@ -82,7 +82,7 @@ export function HeritageSection({ data }: { data: ProductionSheetData }) {
     : h.intentions.filter((i) => i.scope === "deliverable");
 
   return (
-    <PageSection id="heritage" title={t.title} description={t.description} card>
+    <StepSection id="heritage" title={t.title} description={t.description}>
       <FactList emptyLabel={t.notFilled} facts={facts} />
 
       <div className="grid gap-6 pt-6 md:grid-cols-2">
@@ -191,7 +191,7 @@ export function HeritageSection({ data }: { data: ProductionSheetData }) {
           </HeritageList>
         </div>
       </div>
-    </PageSection>
+    </StepSection>
   );
 }
 

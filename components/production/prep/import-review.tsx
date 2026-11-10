@@ -11,6 +11,7 @@ import {
   needTitle,
 } from "@/components/production/prep/import-labels";
 import { ImportProposalRow } from "@/components/production/prep/import-proposal-row";
+import { Rows } from "@/components/ui/rows";
 import { Button } from "@/components/ui/button";
 import { productionImport } from "@/lib/i18n/fr/production-import";
 import { productionNeeds } from "@/lib/i18n/fr/production-needs";
@@ -113,7 +114,7 @@ export function ImportReview({
           <h3 id="pi-brief" className="font-semibold">
             {t.review.brief}
           </h3>
-          <ul className="flex flex-col gap-3">
+          <Rows>
             {proposals.brief.map((p) => {
               const current = brief[p.field];
               return (
@@ -130,7 +131,7 @@ export function ImportReview({
                 />
               );
             })}
-          </ul>
+          </Rows>
         </section>
       )}
       {proposals.needs.length > 0 && (
@@ -143,7 +144,7 @@ export function ImportReview({
               {t.review.needsHint}
             </p>
           </div>
-          <ul className="flex flex-col gap-3">
+          <Rows>
             {proposals.needs.map((n) => {
               return (
                 <ImportProposalRow
@@ -175,7 +176,7 @@ export function ImportReview({
                 </ImportProposalRow>
               );
             })}
-          </ul>
+          </Rows>
         </section>
       )}
       <FormMessage kind="error">{error}</FormMessage>

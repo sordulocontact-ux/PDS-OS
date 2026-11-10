@@ -1,4 +1,4 @@
-import { PageSection } from "@/components/shell/page-section";
+import { ActivationSection } from "@/components/activations/activation-section";
 import { reserveText } from "@/lib/activations/describe";
 import type { ActivationSummary } from "@/lib/activations/types";
 import type { Member } from "@/lib/framing/related";
@@ -33,10 +33,9 @@ export function ClosureSection({
     const who = members.find((m) => m.personId === a.closedBy)?.name ?? "—";
     const kept = a.closureReserves ?? [];
     return (
-      <PageSection
+      <ActivationSection
         id="closure"
         title={t.title}
-        card
         action={
           canReopen && (
             <ReopenActivationButton
@@ -46,7 +45,7 @@ export function ClosureSection({
           )
         }
       >
-        <div className="flex flex-col gap-2 text-sm">
+        <div className="flex flex-col gap-2 text-body-sm">
           <p className="font-medium">
             {t.closedOn(
               t.kinds[a.closureKind ?? "definitive"],
@@ -63,11 +62,11 @@ export function ClosureSection({
             </ul>
           )}
         </div>
-      </PageSection>
+      </ActivationSection>
     );
   }
   return (
-    <PageSection
+    <ActivationSection
       id="closure"
       title={t.title}
       action={
@@ -81,14 +80,14 @@ export function ClosureSection({
       }
     >
       {reserves.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t.noReserves}</p>
+        <p className="text-body-sm text-muted-foreground">{t.noReserves}</p>
       ) : (
-        <ul className="flex list-disc flex-col gap-1 pl-5 text-sm">
+        <ul className="flex list-disc flex-col gap-1 pl-5 text-body-sm">
           {reserves.map((r) => (
             <li key={r.key}>{r.label}</li>
           ))}
         </ul>
       )}
-    </PageSection>
+    </ActivationSection>
   );
 }

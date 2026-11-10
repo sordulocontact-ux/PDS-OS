@@ -50,7 +50,7 @@ export function TargetHeader({
       {!inCard && (
         <ViewLink
           href={routes.projectActivationTab(projectId, activationId, "targets")}
-          className="-ml-1 inline-flex min-h-10 w-fit items-center gap-1 rounded-md px-1 text-sm text-muted-foreground hover:text-foreground"
+          className="-ml-1 inline-flex min-h-10 w-fit items-center gap-1 rounded-md px-1 text-body-sm text-muted-foreground hover:text-foreground"
         >
           <IconChevronLeft aria-hidden className="size-4" />
           {press ? t.back : t.backCollaborations}
@@ -84,7 +84,7 @@ export function TargetHeader({
           />
         )}
       </div>
-      <p className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+      <p className="flex flex-wrap gap-x-4 gap-y-1 text-body-sm text-muted-foreground">
         {x.journalistName && x.journalistId && (
           <ViewLink
             href={routes.networkContact(x.journalistId)}

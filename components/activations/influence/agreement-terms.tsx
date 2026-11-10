@@ -33,7 +33,7 @@ export function AgreementTerms({ content }: { content: AgreementContent }) {
     <>
       <section className="flex flex-col gap-2">
         <h2 className="font-semibold">{t.public.terms}</h2>
-        <dl className="flex flex-col gap-2 text-sm">
+        <dl className="flex flex-col gap-2 text-body-sm">
           {termRows
             .filter(([, v]) => v)
             .map(([label, value]) => (
@@ -48,7 +48,7 @@ export function AgreementTerms({ content }: { content: AgreementContent }) {
         <section className="flex flex-col gap-2">
           <h2 className="font-semibold">{t.public.rights}</h2>
           {rights.map((r) => (
-            <div key={r.kind} className="rounded-xl border p-3 text-sm">
+            <div key={r.kind} className="rounded-xl border p-3 text-body-sm">
               <p className="font-medium">{t.rights.kinds[r.kind]}</p>
               <p className="text-muted-foreground">
                 {[

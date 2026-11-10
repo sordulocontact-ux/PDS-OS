@@ -5,6 +5,11 @@ import {
 } from "nucleo-sharp-essential";
 import type { ReactNode } from "react";
 
+import {
+  documentCardClass,
+  documentHeadClass,
+} from "@/components/ui/document-card-classes";
+import { DocumentCardFold } from "@/components/ui/document-card-fold";
 import { cn } from "@/lib/utils";
 
 /**
@@ -16,6 +21,8 @@ import { cn } from "@/lib/utils";
  * body flush against the frame: `FactRows className="rounded-none
  * border-0"`, other content with its own padding (`px-3.5`). Without a body
  * (the Brief, a deposited file), the head alone: name and download.
+ * `collapsible`: a chevron at the end of the head folds a long body (the
+ * SACEM bulletin and its dossier).
  */
 export function DocumentCard({
   name,
@@ -24,6 +31,7 @@ export function DocumentCard({
   change,
   children,
   className,
+  collapsible = false,
   icon: Icon = IconFile,
 }: {
   name: string;
@@ -34,34 +42,26 @@ export function DocumentCard({
   change?: ReactNode;
   children?: ReactNode;
   className?: string;
+  collapsible?: boolean;
   // A file by default; an envelope for an e-mail about to leave.
   icon?: React.ComponentType<IconProps>;
 }) {
   const body = Boolean(change || children);
-  return (
-    <section
-      className={cn(
-        "flex min-w-0 flex-col overflow-hidden rounded-xl border border-[color:var(--border-hairline)] bg-card",
-        className,
-      )}
-    >
-      <div
-        className={cn(
-          "flex flex-wrap items-center gap-3 bg-[var(--surface-soft)] p-3.5",
-          body && "border-b border-[color:var(--border-hairline)]",
+  const head = (
+    <>
+      <Icon aria-hidden className="size-5 shrink-0 text-foreground" />
+      <span className="flex min-w-0 flex-1 flex-col">
+        <b className="font-semibold break-words">{name}</b>
+        {line && (
+          <span className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
+            {line}
+          </span>
         )}
-      >
-        <Icon aria-hidden className="size-5 shrink-0 text-foreground" />
-        <span className="flex min-w-0 flex-1 flex-col">
-          <b className="font-semibold break-words">{name}</b>
-          {line && (
-            <span className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
-              {line}
-            </span>
-          )}
-        </span>
-        {action}
-      </div>
+      </span>
+    </>
+  );
+  const rest = (
+    <>
       {change && (
         <p
           className={cn(
@@ -74,6 +74,26 @@ export function DocumentCard({
         </p>
       )}
       {children}
+    </>
+  );
+  if (collapsible && body)
+    return (
+      <DocumentCardFold
+        name={name}
+        head={head}
+        action={action}
+        className={className}
+      >
+        {rest}
+      </DocumentCardFold>
+    );
+  return (
+    <section className={cn(documentCardClass, className)}>
+      <div className={documentHeadClass(body)}>
+        {head}
+        {action}
+      </div>
+      {rest}
     </section>
   );
 }

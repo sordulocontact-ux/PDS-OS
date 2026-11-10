@@ -42,27 +42,41 @@ export const projectShell = {
       plan: (day: string) => `Lancé le ${day}`,
     },
   },
+  // The overview (retour d'Akili du 05/11/2026, proto validated by Sacha
+  // 10/11): one title per zone, no state pills, the Cadrage's deliverable.
   overview: {
-    before: {
-      title: "Avant les workflows",
-      body: "Le projet avance dans cet ordre : le Cadrage, puis le Plan du projet. Au lancement du plan, le Master, le Juridique, le Marketing et la Distribution démarrent.",
-      sub: {
-        done: "Fait",
-        current: "En cours",
-        later: "Après l'étape précédente",
-      },
-      badge: { done: "Fait", current: "En cours", later: "À venir" },
+    info: "Informations",
+    infoTitle: "Informations du projet",
+    infoDescription: "Ce qui a été saisi à la création du projet.",
+    owner: "Chef de projet",
+    now: {
+      label: "Maintenant",
+      nothing: "Rien à faire pour vous",
+      allDone: "Tout ce qui vous concerne est fait",
+      open: "Ouvrir l'étape",
+      also: "Aussi à vous :",
+      more: (n: number) => `et ${n} autre${n > 1 ? "s" : ""}`,
     },
-    workflows: {
-      title: "Les workflows",
+    progress: {
+      title: "Progression",
+      framing: "Progression du cadrage",
+      mine: "À vous",
+      mineTodo: (todo: string) => `À vous : ${todo}`,
       stepOf: (n: number, total: number, title: string) =>
         `Étape ${n} sur ${total} · ${title}`,
-      mine: (todo: string) => `À vous : ${todo}`,
-      other: (who: string, todo: string) => `${who} : ${todo}`,
-      nothing: "Rien en attente",
+      done: "Terminé",
       restricted: "Réservé à la direction et aux chefs de projet",
-      progress: (done: number, total: number) =>
+      // Read by a screen reader after each step.
+      state: { done: "fait", current: "en cours", later: "à venir" },
+      steps: (done: number, total: number) =>
         `${done} étape${done > 1 ? "s" : ""} faite${done > 1 ? "s" : ""} sur ${total}`,
+    },
+    deliverable: {
+      label: "Livrable du cadrage",
+      locked:
+        "Il se rédige à partir des 6 dimensions, puis la direction le valide. C'est la référence du Plan du projet.",
+      open: "Ouvrir le Brief",
+      mine: (todo: string) => `À vous : ${todo}.`,
     },
     dependencies: {
       title: "Ce qui dépend d'un autre workflow",
@@ -76,6 +90,23 @@ export const projectShell = {
       sacem: "Juridique · SACEM",
       available: "Disponible",
       expected: "Attendu",
+    },
+  },
+  // The project's image (lib/projects/cover-rules.ts).
+  cover: {
+    label: "Pochette",
+    add: "Ajouter une pochette",
+    change: "Changer la pochette",
+    remove: "Retirer la pochette",
+    alt: (title: string) => `Pochette de ${title}`,
+    defaultAlt: (title: string) => `Visuel par défaut de ${title}`,
+    saving: "Enregistrement de la pochette…",
+    saved: "Pochette enregistrée.",
+    removed: "Pochette retirée : le visuel par défaut revient.",
+    failed: "La pochette n'a pas pu être enregistrée. Réessayez.",
+    problem: {
+      type: "Choisissez une image JPG, PNG ou WebP.",
+      size: "L'image dépasse 5 Mo : choisissez-en une plus légère.",
     },
   },
   locked: {

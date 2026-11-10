@@ -1,3 +1,5 @@
+import { StrategyPart } from "@/components/strategy/strategy-part";
+import { InfoRow, Rows } from "@/components/ui/rows";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { strategyFollowUp } from "@/lib/i18n/fr/strategy-follow-up";
 import type { FollowUpGroup } from "@/lib/strategy/follow-up";
@@ -18,40 +20,28 @@ export function FollowUpGroups({ groups }: { groups: FollowUpGroup[] }) {
       <p className="text-body-md text-muted-foreground">{t.before.empty}</p>
     );
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
+    <div className="grid gap-5 xl:grid-cols-2">
       {groups.map((group) => (
-        <section
+        <StrategyPart
           key={group.area}
-          aria-labelledby={`follow-${group.area}`}
-          className="flex flex-col gap-3 rounded-2xl border border-border bg-background p-5"
+          id={`follow-${group.area}`}
+          title={t.areas[group.area]}
         >
-          <h3
-            id={`follow-${group.area}`}
-            className="text-body-md font-semibold"
-          >
-            {t.areas[group.area]}
-          </h3>
-          <ul className="flex flex-col gap-3">
+          <Rows label={t.areas[group.area]}>
             {group.items.map((item) => (
-              <li
+              <InfoRow
                 key={item.key}
-                className="flex flex-wrap items-start justify-between gap-2"
-              >
-                <span className="flex min-w-0 flex-col">
-                  <span className="font-semibold break-words">
-                    {item.label}
-                  </span>
-                  <span className="text-caption text-muted-foreground">
-                    {item.reason}
-                  </span>
-                </span>
-                <StatusBadge tone={followUpTone[item.state]} size="sm">
-                  {t.states[item.state]}
-                </StatusBadge>
-              </li>
+                title={item.label}
+                detail={item.reason}
+                badge={
+                  <StatusBadge tone={followUpTone[item.state]} size="sm">
+                    {t.states[item.state]}
+                  </StatusBadge>
+                }
+              />
             ))}
-          </ul>
-        </section>
+          </Rows>
+        </StrategyPart>
       ))}
     </div>
   );

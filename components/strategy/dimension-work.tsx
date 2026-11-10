@@ -8,6 +8,7 @@ import { LegalDependencies } from "@/components/strategy/legal-dependencies";
 import { NarrativeSummary } from "@/components/strategy/narrative-summary";
 import { ObjectivesWork } from "@/components/strategy/objectives-work";
 import { RedraftButton } from "@/components/strategy/redraft-button";
+import { StrategyPart } from "@/components/strategy/strategy-part";
 import type { BudgetData } from "@/lib/budget/queries";
 import type {
   FieldState,
@@ -22,22 +23,6 @@ import type { StrategyDimension } from "@/lib/strategy/dimensions";
 import type { StrategyData } from "@/lib/strategy/queries";
 
 const fr = { strategyBudget, strategyDimensions, strategyPilot };
-
-/** The parts of a written answer, under one title. */
-function Parts({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="flex flex-col gap-3">
-      <h3 className="text-body-md font-semibold">{title}</h3>
-      {children}
-    </section>
-  );
-}
 
 /**
  * What a dimension keeps folded under its lines (« Garde, repliés »,
@@ -97,11 +82,11 @@ export function DimensionWork({
   switch (dimension) {
     case "positioning":
       return (
-        <Parts title={fr.strategyDimensions.parts.positioning}>
+        <StrategyPart title={fr.strategyDimensions.parts.positioning}>
           {data.positioningParts.map((part) =>
             partCard(part, fr.strategyPilot.positioning.parts[part.key]),
           )}
-        </Parts>
+        </StrategyPart>
       );
     case "audiences":
       return (
@@ -115,11 +100,11 @@ export function DimensionWork({
       // The parts first, then the synthesis PO writes from them.
       return (
         <>
-          <Parts title={fr.strategyDimensions.parts.narrative}>
+          <StrategyPart title={fr.strategyDimensions.parts.narrative}>
             {data.narrativeParts.map((part) =>
               partCard(part, fr.strategyPilot.narrative.parts[part.key]),
             )}
-          </Parts>
+          </StrategyPart>
           <NarrativeSummary
             field={data.narrativeSummary}
             parts={data.narrativeParts}
@@ -163,10 +148,7 @@ export function DimensionWork({
       return (
         <>
           <LeverBudgetTable rows={strategyBudget.byLever} />
-          <div className="flex flex-col gap-3">
-            <h3 className="text-body-md font-semibold">
-              {fr.strategyBudget.linesTitle}
-            </h3>
+          <StrategyPart title={fr.strategyBudget.linesTitle}>
             <BudgetLines
               projectId={projectId}
               lines={budget.lines}
@@ -174,7 +156,7 @@ export function DimensionWork({
               deliverables={budget.deliverables}
               organizationId={organizationId}
             />
-          </div>
+          </StrategyPart>
         </>
       );
     }

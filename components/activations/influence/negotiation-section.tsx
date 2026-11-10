@@ -1,8 +1,11 @@
 import { EmptyNote } from "@/components/shell/empty-state";
-import { PageSection } from "@/components/shell/page-section";
+import { ActivationSection } from "@/components/activations/activation-section";
+import { StepSection } from "@/components/shell/journey/step-section";
+import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { Fold } from "@/components/ui/fold";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
+import { VersionCard } from "@/components/ui/version-card";
 import { agreementContentSchema } from "@/lib/activations/influence/agreement-content";
 import type { InfluenceData } from "@/lib/activations/influence/queries";
 import type { Member } from "@/lib/framing/related";
@@ -34,7 +37,7 @@ function agreementPreview(content: unknown) {
   if (!parsed.success) return null;
   return (
     <Fold summary={t.agreement.preview}>
-      <div className="flex flex-col gap-4 rounded-xl border p-4">
+      <div className="flex flex-col gap-4 rounded-xl border border-[color:var(--border-hairline)] p-4">
         <AgreementTerms content={parsed.data} />
       </div>
     </Fold>
@@ -81,9 +84,9 @@ export function NegotiationSection({
 }) {
   if (!canSeeBudget)
     return (
-      <PageSection id="negotiation" title={t.negotiation.title}>
+      <ActivationSection id="negotiation" title={t.negotiation.title}>
         <EmptyNote>{t.negotiation.restricted}</EmptyNote>
-      </PageSection>
+      </ActivationSection>
     );
   const nameOf = (id: string | null) =>
     members.find((m) => m.personId === id)?.name ?? t.negotiation.creatorLink;
@@ -105,7 +108,7 @@ export function NegotiationSection({
     ].filter((pair): pair is [string, string] => Boolean(pair[1]));
 
   return (
-    <PageSection
+    <ActivationSection
       id="negotiation"
       title={t.negotiation.title}
       description={t.negotiation.description}
@@ -123,68 +126,61 @@ export function NegotiationSection({
         {proposals.length === 0 ? (
           <EmptyNote>{t.negotiation.none}</EmptyNote>
         ) : (
-          <ol className="flex flex-col gap-3">
-            {proposals.map((p) => (
-              <li
-                key={p.id}
-                className="flex flex-col gap-2 rounded-xl border bg-card p-4"
-              >
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="font-medium">
-                    {t.negotiation.parties[p.party as "pds" | "creator"]}
-                    <span className="font-normal text-muted-foreground">
-                      {" · "}
-                      {t.negotiation.by(
-                        nameOf(p.created_by),
-                        formatDateTime(p.created_at),
-                      )}
-                    </span>
-                  </span>
-                  <span className="flex gap-2">
-                    {p.id === latest?.id && (
-                      <StatusBadge size="sm" tone="info">
-                        {t.negotiation.latest}
-                      </StatusBadge>
-                    )}
-                    {p.accepted_at && (
-                      <StatusBadge size="sm" tone="success">
-                        {t.negotiation.acceptedBy(
-                          nameOf(p.accepted_by),
-                          formatDate(p.accepted_at),
-                        )}
-                      </StatusBadge>
-                    )}
-                  </span>
-                </div>
-                {terms(p).length > 0 && (
-                  <dl className="grid gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
-                    {terms(p).map(([label, value]) => (
-                      <div key={label} className="flex flex-col">
-                        <dt className="text-xs text-muted-foreground">
-                          {label}
-                        </dt>
-                        <dd className="break-words">{value}</dd>
-                      </div>
-                    ))}
-                  </dl>
-                )}
-                {p.note && <p className="text-sm break-words">{p.note}</p>}
-                {canWrite && p.id === latest?.id && !p.accepted_at && (
-                  <div>
-                    <AcceptTermsButton
-                      projectId={projectId}
-                      proposalId={p.id}
-                    />
-                  </div>
-                )}
-              </li>
-            ))}
-          </ol>
+          <div className="flex flex-col gap-3">
+            {proposals.map((p) => {
+              const isLatest = p.id === latest?.id;
+              const facts = terms(p);
+              return (
+                <VersionCard
+                  key={p.id}
+                  title={t.negotiation.parties[p.party as "pds" | "creator"]}
+                  status={
+                    p.accepted_at
+                      ? {
+                          tone: "success",
+                          label: t.negotiation.acceptedBy(
+                            nameOf(p.accepted_by),
+                            formatDate(p.accepted_at),
+                          ),
+                        }
+                      : isLatest
+                        ? { tone: "info", label: t.negotiation.latest }
+                        : null
+                  }
+                  meta={t.negotiation.by(
+                    nameOf(p.created_by),
+                    formatDateTime(p.created_at),
+                  )}
+                  defaultOpen={isLatest}
+                >
+                  {facts.length > 0 && (
+                    <FactRows>
+                      {facts.map(([label, value]) => (
+                        <FactRow key={label} label={label} value={value} />
+                      ))}
+                    </FactRows>
+                  )}
+                  {p.note && (
+                    <p className="text-body-sm break-words">{p.note}</p>
+                  )}
+                  {canWrite && isLatest && !p.accepted_at && (
+                    <div>
+                      <AcceptTermsButton
+                        projectId={projectId}
+                        proposalId={p.id}
+                      />
+                    </div>
+                  )}
+                </VersionCard>
+              );
+            })}
+          </div>
         )}
-        <div className="flex flex-col gap-2 rounded-xl border border-dashed p-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="font-medium">{t.agreement.title}</h3>
-            {agreement && (
+        <StepSection
+          title={t.agreement.title}
+          description={t.agreement.description}
+          aside={
+            agreement && (
               <StatusBadge
                 size="sm"
                 tone={
@@ -197,13 +193,11 @@ export function NegotiationSection({
                   ]
                 }
               </StatusBadge>
-            )}
-          </div>
-          <p className="text-sm text-muted-foreground">
-            {t.agreement.description}
-          </p>
+            )
+          }
+        >
           {agreement ? (
-            <p className="text-sm">
+            <p className="text-body-sm">
               {[
                 t.agreement.created(formatDateTime(agreement.created_at)),
                 agreement.sent_at
@@ -234,7 +228,7 @@ export function NegotiationSection({
                 .join(" · ")}
             </p>
           ) : (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-body-sm text-[color:var(--text-secondary)]">
               {t.agreement.noneYet}
             </p>
           )}
@@ -260,7 +254,7 @@ export function NegotiationSection({
                 />
               ) : (
                 !latest?.accepted_at && (
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-body-sm text-[color:var(--text-secondary)]">
                     {t.agreement.needsTerms}
                   </p>
                 )
@@ -274,8 +268,8 @@ export function NegotiationSection({
             </div>
           )}
           <ToneCallout tone="neutral">{t.agreement.legalNote}</ToneCallout>
-        </div>
+        </StepSection>
       </div>
-    </PageSection>
+    </ActivationSection>
   );
 }

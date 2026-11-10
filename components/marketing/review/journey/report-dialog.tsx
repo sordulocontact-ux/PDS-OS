@@ -60,6 +60,14 @@ export default function ReportDialog({
                 pendingLabel={r.exporting}
                 failedLabel={r.exportFailed}
               />
+              {compareHref && (
+                <Link
+                  href={compareHref}
+                  className={buttonVariants({ variant: "outline" })}
+                >
+                  <ButtonRoll>{r.compare.choose}</ButtonRoll>
+                </Link>
+              )}
               <Button
                 type="button"
                 variant="ghost"
@@ -67,14 +75,6 @@ export default function ReportDialog({
               >
                 {t.close}
               </Button>
-              {compareHref && (
-                <Link
-                  href={compareHref}
-                  className={buttonVariants({ variant: "ghost" })}
-                >
-                  <ButtonRoll>{r.compare.choose}</ButtonRoll>
-                </Link>
-              )}
             </div>
           </div>
         )}

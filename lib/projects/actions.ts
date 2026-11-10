@@ -105,8 +105,10 @@ export async function createProject(
   await schedulePendingPushes();
   // Projects list and the "Projets liés" block of each linked master.
   revalidatePath(routes.app, "layout");
-  // From a side panel (a PO draft), the page behind stays.
-  if (formData.get("intent") === "dialog") {
+  // From a side panel (a PO draft), the page behind stays; with a cover,
+  // the form files it before opening the project (CreateProjectForm).
+  const intent = formData.get("intent");
+  if (intent === "dialog" || intent === "cover") {
     return { status: "saved", project: { id: projectId, title: input.title } };
   }
   redirect(routes.project(projectId));

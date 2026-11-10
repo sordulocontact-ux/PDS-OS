@@ -1,3 +1,4 @@
+import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { IconFile, IconLink } from "nucleo-sharp-essential";
 
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -104,7 +105,7 @@ export function LocationCard({
           )}
       </div>
 
-      <dl className="grid gap-x-4 gap-y-1 text-sm sm:grid-cols-[auto_1fr]">
+      <FactRows>
         {(
           [
             [
@@ -117,13 +118,16 @@ export function LocationCard({
           ] as const
         ).map(([label, value]) =>
           value ? (
-            <div key={label} className="contents">
-              <dt className="text-muted-foreground">{label}</dt>
-              <dd className="break-words whitespace-pre-line">{value}</dd>
-            </div>
+            <FactRow
+              key={label}
+              label={label}
+              value={
+                <span className="break-words whitespace-pre-line">{value}</span>
+              }
+            />
           ) : null,
         )}
-      </dl>
+      </FactRows>
       {budgetNote && (
         <p
           className={cn(

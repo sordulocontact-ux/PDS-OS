@@ -11,6 +11,23 @@ const fr = { productionJourney, productionLight };
 
 const t = fr.productionJourney;
 
+type Deliverable = Awaited<ReturnType<typeof productionDeliverables>>[number];
+
+/** A deliverable's line, in the bar and in the trail's switcher: who
+ * produces it (« Qui produit ? à choisir » before), « livré » once closed. */
+export function deliverableLine(d: Deliverable): string {
+  return [
+    d.derived
+      ? fr.productionLight.derived
+      : d.kind
+        ? [t.header.organization[d.kind], d.company].filter(Boolean).join(" · ")
+        : t.bar.toChoose,
+    d.closed ? t.bar.delivered : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
+
 async function LoadedDeliverableBar({
   projectId,
   current,
@@ -33,18 +50,7 @@ async function LoadedDeliverableBar({
       items={list.map((d) => ({
         key: d.id,
         title: d.title,
-        sub: [
-          d.derived
-            ? fr.productionLight.derived
-            : d.kind
-              ? [t.header.organization[d.kind], d.company]
-                  .filter(Boolean)
-                  .join(" · ")
-              : t.bar.toChoose,
-          d.closed ? t.bar.delivered : null,
-        ]
-          .filter(Boolean)
-          .join(" · "),
+        sub: deliverableLine(d),
         href: routes.projectProductionSheet(projectId, d.id),
         mine: mine(d.id),
       }))}

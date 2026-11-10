@@ -1,4 +1,6 @@
 import { ToneCallout } from "@/components/ui/tone-callout";
+import { cn } from "@/lib/utils";
+import { nestedCardClass } from "@/components/ui/nested-card";
 import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
 import type {
   Creator,
@@ -79,12 +81,12 @@ export function DepDrPreview({
   return (
     <section
       aria-labelledby="dep-dr-preview"
-      className="flex flex-col gap-3 rounded-2xl border border-border p-4"
+      className={cn(nestedCardClass, "flex flex-col gap-3")}
     >
       <h4 id="dep-dr-preview" className="text-body-md font-semibold">
         {t.title}
       </h4>
-      <p className="text-sm text-muted-foreground">{t.intro}</p>
+      <p className="text-body-sm text-muted-foreground">{t.intro}</p>
       {shown.alerts.map((alert, i) => (
         <ToneCallout key={i} tone="warning">
           {alertText(alert, quality)}
@@ -123,10 +125,12 @@ export function DepDrPreview({
       <div className="flex flex-col gap-1">
         <p className="text-sm font-medium">{t.effectTitle}</p>
         {effects.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t.effectNone}</p>
+          <p className="text-body-sm text-muted-foreground">{t.effectNone}</p>
         ) : (
           <>
-            <p className="text-sm text-muted-foreground">{t.effectIntro}</p>
+            <p className="text-body-sm text-muted-foreground">
+              {t.effectIntro}
+            </p>
             <ul className="flex list-disc flex-col gap-0.5 pl-5 text-sm tabular-nums">
               {effects.map((e) => (
                 <li key={e}>{e}</li>

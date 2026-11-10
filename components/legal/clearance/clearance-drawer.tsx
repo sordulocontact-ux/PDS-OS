@@ -22,9 +22,8 @@ import { clearanceTone } from "@/lib/ui/state-tones";
 import { ClearanceRequest } from "./clearance-request";
 import { ClearanceStages, isAskMoment } from "./clearance-stages";
 import { ClearanceExchanges } from "./clearance-exchanges";
-import { NothingToSecureButton } from "./nothing-to-secure-button";
+import { ClearanceExit } from "./clearance-exit";
 import { takenOf } from "./usage";
-import { WithdrawButton } from "./withdraw-button";
 
 const fr = { dialogs, legal, legalClearance };
 
@@ -111,7 +110,8 @@ export function ClearanceDrawer({
 
 /** What an authorisation's panel holds (recette Juridique V1, JUR-09): its
  * outcome once closed, « La demande », each right apart, the moment open,
- * the other ways out, then « Échanges » folded (`ClearanceExchanges`). Before anything is asked, « La
+ * then « Échanges » folded (`ClearanceExchanges`) and the other ways out
+ * last (`ClearanceExit`). Before anything is asked, « La
  * demande » would only repeat the element and the work: one line says them
  * (`showTaken`, the drawer's header already does), and nothing to secure
  * joins « Autre issue » (Sacha, 07/11/2026). */
@@ -120,15 +120,16 @@ export function ClearanceBody({
   clearance,
   context,
   showTaken = true,
-  exchangesBelow = false,
+  footerBelow = false,
   directionName,
 }: {
   projectId: string;
   clearance: Clearance;
   context: Omit<Clearances, "items">;
   showTaken?: boolean;
-  // The démarche shows « Échanges » itself, under who answers for it.
-  exchangesBelow?: boolean;
+  // The démarche shows « Échanges » and « Autre issue » itself, under who
+  // answers for it.
+  footerBelow?: boolean;
   // Who validates for the direction (the démarche knows), for « En attente
   // de … »; else « La direction ».
   directionName?: string;
@@ -166,21 +167,13 @@ export function ClearanceBody({
         context={context}
         directionName={directionName}
       />
-      {!closed && (
-        <div className="mt-4 flex flex-wrap items-center gap-2 border-t pt-4">
-          <span className="text-sm text-muted-foreground">
-            {t.stages.other}
-          </span>
-          {asking && (
-            <NothingToSecureButton
-              projectId={projectId}
-              clearance={clearance}
-            />
-          )}
-          <WithdrawButton projectId={projectId} clearanceId={clearance.id} />
+      {!footerBelow && (
+        // Consulted, then the rare way out, last (Sacha, 09/11/2026).
+        <div className="flex flex-col gap-3">
+          <ClearanceExchanges clearance={clearance} />
+          <ClearanceExit projectId={projectId} clearance={clearance} />
         </div>
       )}
-      {!exchangesBelow && <ClearanceExchanges clearance={clearance} />}
     </>
   );
 }

@@ -1,3 +1,4 @@
+import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { productionBrief } from "@/lib/i18n/fr/production-brief";
 import type { ProductionBrief } from "@/lib/production/brief";
 
@@ -75,26 +76,29 @@ export function BriefReading({ brief }: { brief: ProductionBrief }) {
   ];
 
   return (
-    <dl className="grid gap-x-6 gap-y-5 md:grid-cols-2">
+    <FactRows>
       {topics.map((topic) => (
-        <div key={topic.key} className="flex min-w-0 flex-col gap-0.5">
-          <dt className="text-sm text-muted-foreground">{topic.label}</dt>
-          {!topic.choice && !topic.text ? (
-            <dd className="text-muted-foreground">{t.notFilled}</dd>
-          ) : (
-            <dd className="flex flex-col gap-0.5">
-              {topic.choice && (
-                <span className="font-semibold">{topic.choice}</span>
-              )}
-              {topic.text && (
-                <span className="break-words whitespace-pre-line">
-                  {topic.text}
-                </span>
-              )}
-            </dd>
-          )}
-        </div>
+        <FactRow
+          key={topic.key}
+          label={topic.label}
+          value={
+            !topic.choice && !topic.text ? (
+              <span className="text-muted-foreground">{t.notFilled}</span>
+            ) : (
+              <span className="flex flex-col gap-0.5">
+                {topic.choice && (
+                  <span className="font-semibold">{topic.choice}</span>
+                )}
+                {topic.text && (
+                  <span className="break-words whitespace-pre-line">
+                    {topic.text}
+                  </span>
+                )}
+              </span>
+            )
+          }
+        />
       ))}
-    </dl>
+    </FactRows>
   );
 }

@@ -60,7 +60,8 @@ export function RecommendationCard({
   return (
     <li
       id={anchor}
-      className="flex scroll-mt-6 flex-col gap-3 rounded-2xl border border-border bg-background p-4"
+      // A row of the recommendations' `Rows` (its frame and hairlines).
+      className="flex scroll-mt-6 flex-col gap-3 p-3.5"
     >
       <div className="flex flex-wrap items-center gap-2">
         <StatusBadge tone={recommendationLevelTone[rec.level]} size="sm">
@@ -134,6 +135,8 @@ export function RecommendationCard({
           </>
         )}
         <AskPoButton
+          // In text beside « Ignorer », outlined when it is alone.
+          variant={canAct ? "ghost" : "outline"}
           question={rec.question}
           label={t.askPo}
           origin={{

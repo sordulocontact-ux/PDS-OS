@@ -1,6 +1,7 @@
+import { Rows } from "@/components/ui/rows";
 import { DeliveryStepButton } from "@/components/production/delivery-step-button";
 import { FinalFileButton } from "@/components/production/final-file-button";
-import { PageSection } from "@/components/shell/page-section";
+import { StepSection } from "@/components/shell/journey/step-section";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
@@ -68,8 +69,8 @@ export function DecisionsSection({
   );
 
   return (
-    <PageSection id="decisions" title={t.title} description={t.description}>
-      <ol className="grid gap-3 lg:grid-cols-3">
+    <StepSection id="decisions" title={t.title} description={t.description}>
+      <Rows>
         <DecisionCard
           number={1}
           title={t.creative.title}
@@ -186,8 +187,8 @@ export function DecisionsSection({
           )}
           {canOrganize && d?.checkedAt && step("reopen")}
         </DecisionCard>
-      </ol>
+      </Rows>
       {delivery.state === "to_do" && deliver}
-    </PageSection>
+    </StepSection>
   );
 }

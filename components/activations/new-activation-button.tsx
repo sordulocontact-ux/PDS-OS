@@ -26,14 +26,15 @@ export function NewActivationButton({
   members: Member[];
   source?: ActivationFormSource;
   defaultOwnerId: string | null;
-  // A discreet entry at the foot of the list of activations.
+  // A secondary entry beside the table's views (outlined: never a lone
+  // ghost button, docs/DESIGN.md « Bouton secondaire »).
   quiet?: boolean;
 }) {
   return (
     <DialogButton
       label={source ? t.fromSource : t.button}
       icon={source ? undefined : IconPlus}
-      variant={quiet ? "ghost" : source ? "outline" : "default"}
+      variant={quiet || source ? "outline" : "default"}
       size={quiet ? "sm" : source ? "xs" : "lg"}
       title={t.title}
       description={t.description}

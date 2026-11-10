@@ -1,5 +1,5 @@
 import { EmptyNote } from "@/components/shell/empty-state";
-import { PageSection } from "@/components/shell/page-section";
+import { StepSection } from "@/components/shell/journey/step-section";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { productionBrief } from "@/lib/i18n/fr/production-brief";
 import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
@@ -58,12 +58,11 @@ export function EquipmentSection({
       linesByFile[e.quoteFileId] = (linesByFile[e.quoteFileId] ?? 0) + 1;
 
   return (
-    <PageSection
+    <StepSection
       id="equipment"
       title={t.title}
       description={t.description}
-      action={canOrganize ? <AddEquipmentButton {...common} /> : undefined}
-      card
+      aside={canOrganize ? <AddEquipmentButton {...common} /> : undefined}
     >
       <div className="flex flex-col gap-8">
         {needs.length > 0 && (
@@ -72,13 +71,7 @@ export function EquipmentSection({
           </p>
         )}
         {pairs.length > 0 && (
-          <section
-            aria-labelledby="equipment-duplicates"
-            className="flex flex-col gap-2"
-          >
-            <h3 id="equipment-duplicates" className="text-base font-semibold">
-              {t.duplicates}
-            </h3>
+          <StepSection id="equipment-duplicates" title={t.duplicates}>
             {pairs.map(({ keep, other }) => (
               <div
                 key={`${keep.id}-${other.id}`}
@@ -96,7 +89,7 @@ export function EquipmentSection({
                 )}
               </div>
             ))}
-          </section>
+          </StepSection>
         )}
         {preprod.equipment.length ? (
           <EquipmentTable
@@ -128,6 +121,6 @@ export function EquipmentSection({
           />
         </section>
       </div>
-    </PageSection>
+    </StepSection>
   );
 }

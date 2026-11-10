@@ -1,4 +1,5 @@
 import { QuoteVersionList } from "@/components/production/quotes/quote-version-row";
+import { StepSection } from "@/components/shell/journey/step-section";
 import { productionLink } from "@/lib/i18n/fr/production-link";
 import { productionQuotes } from "@/lib/i18n/fr/production-quotes";
 import type { LinkJourney } from "@/lib/production/provider/journey";
@@ -16,8 +17,7 @@ export function LinkQuoteList({
 }) {
   if (quotes.length === 0) return null;
   return (
-    <section className="flex flex-col gap-2">
-      <h3 className="font-semibold">{fr.productionQuotes.versions}</h3>
+    <StepSection title={fr.productionQuotes.versions}>
       <QuoteVersionList
         quotes={quotes.map((q) => ({
           number: q.number,
@@ -37,6 +37,6 @@ export function LinkQuoteList({
           ].filter((c): c is { who: string; text: string } => Boolean(c)),
         }))}
       />
-    </section>
+    </StepSection>
   );
 }

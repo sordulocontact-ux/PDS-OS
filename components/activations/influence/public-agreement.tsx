@@ -68,7 +68,9 @@ export function PublicAgreement({
   return (
     <div className="flex flex-col gap-5 rounded-2xl border bg-background p-5 sm:p-6">
       <AgreementTerms content={agreement.content} />
-      <p className="text-xs text-muted-foreground">{t.public.notQualified}</p>
+      <p className="text-caption text-muted-foreground">
+        {t.public.notQualified}
+      </p>
       {changing ? (
         <div className="flex flex-col gap-3">
           <TextareaField

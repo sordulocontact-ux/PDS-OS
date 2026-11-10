@@ -26,7 +26,7 @@ export const projectsTopics: GuideTopic[] = [
     facts: [
       "La liste Projets a quatre onglets : Tous, Brouillons, Actifs, Archivés, avec une recherche et des filtres par type, responsable, statut, échéance et artiste.",
       "Un projet est de type Musical (single, EP, album, mixtape, compilation ou autre), Contenu, ou Événement. Le type Événement n'est pas encore ouvert à la création.",
-      "« Nouveau projet » demande le type, le format, les titres ou l'artiste liés, les informations de départ, puis le chef de projet à qui le transmettre.",
+      "« Nouveau projet » demande le type, le format, les titres ou l'artiste liés, les informations de départ (dont la pochette, facultative), puis le chef de projet à qui le transmettre.",
       "Ce qu'on saisit est enregistré au fil de l'eau comme brouillon, qu'on reprend depuis la liste.",
       "Le chef de projet reçoit le projet et peut l'accepter, le refuser ou demander une précision. Un refus ou une demande revient à la direction avec un message.",
       "En acceptant, il devient responsable du projet : le projet est lancé et le Cadrage s'ouvre.",
@@ -53,7 +53,7 @@ export const projectsTopics: GuideTopic[] = [
     key: "overview",
     title: "Vue d'ensemble",
     summary:
-      "La page d'accueil d'un projet lancé : où il en est, ce qui vous attend, une carte par workflow.",
+      "La page d'accueil d'un projet lancé : sa pochette, ce qui vous attend maintenant, sa progression et le livrable du Cadrage.",
     keywords: [
       "vue d'ensemble",
       "plan du projet",
@@ -62,13 +62,20 @@ export const projectsTopics: GuideTopic[] = [
       "cloture",
       "bilan du projet",
       "carte",
+      "pochette",
+      "cover",
+      "progression",
+      "informations du projet",
     ],
     projectSection: "overview",
     where:
       "Dans un projet lancé › Vue d'ensemble (le Plan du projet est la 4e étape du Cadrage).",
     facts: [
-      "La Vue d'ensemble montre ce qui vous attend dans ce projet, puis une carte par workflow : son statut, sa progression et qui fait quoi.",
-      "Tant que le plan du projet n'est pas lancé, elle ne montre que ce qui précède les workflows : les étapes du Cadrage, chacune ouvre sa page d'un clic.",
+      "En tête : la pochette du projet, son nom, l'artiste et le type, et « Informations » pour relire ce qui a été saisi à la création.",
+      "La pochette est l'image importée pour le projet ; sans elle, la pochette de son titre au Catalogue ; sinon un visuel par défaut. La direction peut la choisir en créant le projet, puis le chef de projet responsable la change en cliquant sur l'image (ou dans « Informations »).",
+      "Deux zones : « Maintenant », votre première action dans ce projet avec son bouton (ou qui est attendu, sur quoi), et « Progression ».",
+      "Tant que le plan du projet n'est pas lancé, « Progression » montre les étapes du Cadrage, et le livrable attendu est rappelé dessous : le Brief de cadrage. Chaque étape ouvre sa page d'un clic.",
+      "Une fois le plan lancé, « Progression » montre une ligne par workflow avec l'étape où il en est, puis ce qui dépend d'un autre workflow.",
       "Le Plan du projet s'écrit à la fin du Cadrage : il propose ce qui commence maintenant, ce qui suit, ce qui avance en parallèle et ce qu'il faut prévoir. On peut le modifier avant de le lancer.",
       "Rien ne démarre avant « Lancer le plan » : alors les workflows prévus démarrent.",
       "Un workflow retiré du plan peut être ajouté et lancé ensuite.",
@@ -76,6 +83,10 @@ export const projectsTopics: GuideTopic[] = [
       "Les statuts d'un workflow (Non démarré, En cours, En attente, Bloqué, Terminé) sont calculés, jamais cochés à la main.",
     ],
     faq: [
+      {
+        q: "Comment changer la pochette du projet ?",
+        a: "Cliquez sur l'image en tête de la Vue d'ensemble, ou ouvrez « Informations ». Avant que le projet soit accepté, c'est la direction ; ensuite, seul le chef de projet responsable. « Retirer » revient à la pochette du titre ou au visuel par défaut.",
+      },
       {
         q: "Pourquoi le Master ou le Juridique est-il verrouillé ?",
         a: "Parce que le plan du projet n'est pas encore lancé. Terminez le Cadrage et lancez le plan.",
@@ -144,6 +155,7 @@ export const projectsTopics: GuideTopic[] = [
       "Chaque dimension est « À compléter », « En cours », « À arbitrer » ou « Complétée », calculé par le code.",
       "La direction valide le Brief de sortie, sur pièce. Pendant la relecture, la Stratégie est figée.",
       "Une fois validé, ses décisions alimentent la Conception, les Activations et le calendrier.",
+      "La Stratégie est validée avec le Brief de sortie. Ensuite, le Plan de sortie (équipe de l'artiste) et le Dossier de presse (médias) sont facultatifs : chacun se prépare en 8 écrans parcourus avec les flèches, puis peut être envoyé en validation à la direction.",
     ],
     faq: [
       {

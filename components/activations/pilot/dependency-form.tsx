@@ -35,7 +35,7 @@ export function DependencyForm({
   const [missing, setMissing] = useState(false);
   const { pending, error, run } = useWriteSubmit(onDone, t.linked);
   if (!kind)
-    return <p className="text-sm text-muted-foreground">{t.noOption}</p>;
+    return <p className="text-body-sm text-muted-foreground">{t.noOption}</p>;
 
   return (
     <form

@@ -1,4 +1,4 @@
-import { PageSection } from "@/components/shell/page-section";
+import { StepSection } from "@/components/shell/journey/step-section";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { FactList } from "@/components/ui/fact-list";
 import { ToneCallout } from "@/components/ui/tone-callout";
@@ -60,7 +60,7 @@ export function ClosureSection({
     : `${routes.projectActivations(projectId)}#attach`;
 
   return (
-    <PageSection id="closure" title={t.title} description={t.description}>
+    <StepSection id="closure" title={t.title} description={t.description}>
       <div className="flex flex-col gap-4">
         {closed && (
           <ToneCallout tone="success">
@@ -136,6 +136,6 @@ export function ClosureSection({
           )}
         </div>
       </div>
-    </PageSection>
+    </StepSection>
   );
 }

@@ -2,6 +2,7 @@ import {
   StepPanel,
   type StepSlots,
 } from "@/components/shell/journey/step-panel";
+import { StepWaiting } from "@/components/shell/journey/step-waiting";
 import {
   StepBlockers,
   StepToolsBlock,
@@ -11,10 +12,7 @@ import {
   productionStepRef,
 } from "@/lib/production/journey/step-ref";
 import type { JourneyStep } from "@/lib/production/journey/types";
-import { journey } from "@/lib/i18n/fr/journey";
-import { isLocked, lowerFirst } from "@/lib/ui/journey";
-
-const fr = { journey };
+import { isLocked } from "@/lib/ui/journey";
 
 /**
  * A step of a deliverable's production on the common pattern (proto
@@ -46,13 +44,7 @@ export async function ProductionStepPanel({
       <StepBlockers stepRef={stepRef} steps={choices} />
       {children}
       {/* Who the step waits for, when it is not the viewer (proto waitRow). */}
-      {step.actor && !step.actor.viewer && !isLocked(step.status) && (
-        <p className="rounded-xl bg-[var(--surface-soft)] px-3.5 py-3">
-          {fr.journey.waitingFor(step.actor.name)}
-          {step.actor.viaLink && ` (${fr.journey.privateLink})`} :{" "}
-          {lowerFirst(step.actor.todo)}
-        </p>
-      )}
+      {!isLocked(step.status) && <StepWaiting step={step} />}
       <StepToolsBlock
         stepRef={stepRef}
         steps={choices}

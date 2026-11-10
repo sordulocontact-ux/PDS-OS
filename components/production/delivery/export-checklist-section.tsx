@@ -1,5 +1,6 @@
+import { Rows } from "@/components/ui/rows";
 import { EmptyNote } from "@/components/shell/empty-state";
-import { PageSection } from "@/components/shell/page-section";
+import { StepSection } from "@/components/shell/journey/step-section";
 import { FactList } from "@/components/ui/fact-list";
 import { productionClosure } from "@/lib/i18n/fr/production-closure";
 import { productionDelivery } from "@/lib/i18n/fr/production-delivery";
@@ -51,11 +52,11 @@ export function ExportChecklistSection({
   const missing = lines.length > 0;
 
   return (
-    <PageSection
+    <StepSection
       id="exports"
       title={t.title}
       description={t.description}
-      action={
+      aside={
         canOrganize && (
           <AddExportCheckButton projectId={projectId} sheetId={sheetId} />
         )
@@ -104,7 +105,7 @@ export function ExportChecklistSection({
           </div>
         )}
         {lines.length > 0 && (
-          <ul className="flex flex-col gap-2">
+          <Rows>
             {lines.map((line) => (
               <ExportCheckRow
                 key={line.id}
@@ -115,9 +116,9 @@ export function ExportChecklistSection({
                 canOrganize={canOrganize}
               />
             ))}
-          </ul>
+          </Rows>
         )}
       </div>
-    </PageSection>
+    </StepSection>
   );
 }

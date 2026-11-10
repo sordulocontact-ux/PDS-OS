@@ -1,5 +1,7 @@
-import { StatusBadge } from "@/components/ui/status-badge";
-import { buttonVariants, ButtonRoll } from "@/components/ui/button";
+import {
+  DeliverableVersion,
+  DeliverableVersions,
+} from "@/components/ui/deliverable-version";
 import { formatEuros } from "@/lib/budget/types";
 import { shortStamp } from "@/lib/calls/prep/dates";
 import { productionQuotes } from "@/lib/i18n/fr/production-quotes";
@@ -34,28 +36,17 @@ export type QuoteVersionView = {
 };
 
 /**
- * One version of the quote (proto quoteRow): « V1 · 16 400 € HT dont lieux
- * 1 800 € HT · file », who deposited it and when, who decided, what was
- * said, its state and « Voir le devis ». The same in the step and on the
- * company's link.
+ * One version of the quote (proto quoteRow), as a `DeliverableVersion`:
+ * « V1 · 16 400 € HT », who deposited it and when, who decided, its state and
+ * « Voir le devis », then its label, the share for the places and what was
+ * said. The same in the step and on the company's link.
  */
 export function QuoteVersionRow({ q }: { q: QuoteVersionView }) {
   return (
-    <li className="flex flex-wrap items-start justify-between gap-3 border-b border-[color:var(--border-hairline)] px-4 py-3 last:border-b-0">
-      <span className="flex min-w-0 flex-1 flex-col gap-0.5 break-words">
-        <span>
-          <b className="font-semibold tabular-nums">
-            {t.line(q.number, formatEuros(q.amountCents))}
-          </b>
-          {q.locBudgetCents !== null && (
-            <span className="text-[length:var(--type-caption)] text-[color:var(--text-secondary)]">
-              {" "}
-              {t.loc(formatEuros(q.locBudgetCents))}
-            </span>
-          )}
-          {` · ${q.label}`}
-        </span>
-        <span className="text-[length:var(--type-micro)] leading-[var(--type-micro-lh)] text-[color:var(--text-tertiary)]">
+    <DeliverableVersion
+      name={t.line(q.number, formatEuros(q.amountCents))}
+      line={
+        <>
           {t.deposited(q.depositedBy, shortStamp(q.depositedAt))}
           {q.decidedBy &&
             q.decidedAt &&
@@ -64,42 +55,40 @@ export function QuoteVersionRow({ q }: { q: QuoteVersionView }) {
               q.decidedBy,
               shortStamp(q.decidedAt),
             )}
-        </span>
-        {q.comments.map((c, i) => (
-          <span
-            key={i}
-            className="text-[length:var(--type-micro)] leading-[var(--type-micro-lh)] text-[color:var(--text-secondary)]"
-          >
-            {t.said(c.who, c.text)}
+        </>
+      }
+      statuses={[{ tone: TONE[q.status], label: t.status[q.status] }]}
+      open={q.url ? { href: q.url, label: t.open } : null}
+    >
+      <p className="break-words">
+        {q.label}
+        {q.locBudgetCents !== null && (
+          <span className="text-[color:var(--text-secondary)]">
+            {" · "}
+            {t.loc(formatEuros(q.locBudgetCents))}
           </span>
-        ))}
-      </span>
-      <span className="flex flex-wrap items-center gap-2">
-        <StatusBadge size="sm" tone={TONE[q.status]}>
-          {t.status[q.status]}
-        </StatusBadge>
-        {q.url && (
-          <a
-            href={q.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={buttonVariants({ variant: "ghost", size: "sm" })}
-          >
-            <ButtonRoll>{t.open}</ButtonRoll>
-          </a>
         )}
-      </span>
-    </li>
+      </p>
+      {q.comments.map((c, i) => (
+        <p
+          key={i}
+          className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]"
+        >
+          {t.said(c.who, c.text)}
+        </p>
+      ))}
+    </DeliverableVersion>
   );
 }
 
-/** The versions, newest first, in one frame. */
+/** The versions, newest first: the latest open, the others folded. */
 export function QuoteVersionList({ quotes }: { quotes: QuoteVersionView[] }) {
   return (
-    <ul className="flex flex-col overflow-hidden rounded-xl border border-[color:var(--border-hairline)]">
-      {quotes.map((q) => (
-        <QuoteVersionRow key={q.number} q={q} />
-      ))}
-    </ul>
+    <DeliverableVersions
+      versions={quotes.map((q) => ({ ...q, id: String(q.number) }))}
+      isCurrent={(_, i) => i === 0}
+      render={(q) => <QuoteVersionRow q={q} />}
+      earlierTitle={t.earlier}
+    />
   );
 }

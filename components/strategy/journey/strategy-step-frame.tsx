@@ -32,15 +32,23 @@ const t = fr.strategyJourney;
  * on the left, the open step on the right — its why, then the step's
  * content. A locked step stays
  * readable (StepPanel makes it inert).
+ *
+ * `page`: a page reached from the step without being one of its own (the
+ * Plan de sortie, the Dossier de presse, the Suivi, under « Stratégie
+ * validée »): the journey keeps the step open, the panel is named after
+ * the page and its line, « ← Step » above its title leads back, and the
+ * trail ends « Step › Page ».
  */
 export async function StrategyStepFrame({
   projectId,
   stepKey,
+  page,
   children,
   ...slots
 }: StepSlots & {
   projectId: string;
   stepKey: StrategyStepKey;
+  page?: { title: string; why?: string };
   children: React.ReactNode;
 }) {
   const ctx = await strategyStepData(projectId);
@@ -53,11 +61,19 @@ export async function StrategyStepFrame({
     key: stepChoiceKey({ module: "strategy", stepKey: s.key }),
     label: s.title,
   }));
+  const shown = page
+    ? { ...step, title: page.title, why: page.why ?? "", due: null }
+    : step;
   return (
     <div className="flex flex-col gap-5">
       <ProjectHeader
         projectId={projectId}
         steps={steps}
+        extraCrumbs={
+          page
+            ? [{ label: step.title, href: step.href }, { label: page.title }]
+            : undefined
+        }
         actions={
           <WhoDoesWhatButton
             roles={[
@@ -102,7 +118,8 @@ export async function StrategyStepFrame({
           title={fr.journey.titleOf(t.module)}
         />
         <StepPanel
-          step={step}
+          step={shown}
+          back={page ? { href: step.href, label: step.title } : undefined}
           steps={steps}
           blockedLabel={t.blocked}
           {...slots}

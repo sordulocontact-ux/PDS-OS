@@ -4,8 +4,9 @@ import {
 } from "@/components/activations/agency/report-buttons";
 import { ReportSynthesis } from "@/components/activations/agency/report-synthesis";
 import { EmptyNote } from "@/components/shell/empty-state";
-import { PageSection } from "@/components/shell/page-section";
-import { StatusBadge } from "@/components/ui/status-badge";
+import { ActivationSection } from "@/components/activations/activation-section";
+import { Fold } from "@/components/ui/fold";
+import { VersionCard } from "@/components/ui/version-card";
 import { loadAgency } from "@/lib/activations/agency/queries";
 import { agencyReserves } from "@/lib/activations/agency/reserves";
 import type { ActivationFiche } from "@/lib/activations/fiche";
@@ -68,7 +69,7 @@ export async function AgencyReports({
 
   return (
     <div id="report" className="grid scroll-mt-5 gap-8">
-      <PageSection
+      <ActivationSection
         id="reports"
         title={t.title}
         description={t.description}
@@ -79,66 +80,59 @@ export async function AgencyReports({
         {agency.reports.length === 0 ? (
           <EmptyNote>{t.none}</EmptyNote>
         ) : (
-          <ul className="flex flex-col gap-3">
-            {agency.reports.map((r) => {
+          <div className="flex flex-col gap-3">
+            {agency.reports.map((r, i) => {
               const file = r.fileId ? files.get(r.fileId) : undefined;
               return (
-                <li
+                <VersionCard
                   key={r.id}
-                  className="flex flex-col gap-2 rounded-xl border bg-card p-4"
+                  title={`${t.receivedOn} ${formatDate(r.receivedOn)}`}
+                  status={{
+                    tone: statusTone[r.status as keyof typeof statusTone],
+                    label: t.statuses[r.status as keyof typeof t.statuses],
+                  }}
+                  defaultOpen={i === 0 || r.status !== "validated"}
                 >
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="font-medium">
-                      {t.receivedOn} {formatDate(r.receivedOn)}
-                    </span>
-                    <StatusBadge
-                      size="sm"
-                      tone={statusTone[r.status as keyof typeof statusTone]}
-                    >
-                      {t.statuses[r.status as keyof typeof t.statuses]}
-                    </StatusBadge>
-                  </div>
-                  <p className="flex flex-wrap gap-4 text-sm">
-                    {file?.href && (
-                      <a
-                        href={file.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="underline underline-offset-4"
-                      >
-                        {t.openFile} · {file.fileName}
-                      </a>
-                    )}
-                    {r.url && (
-                      <a
-                        href={r.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="break-all underline underline-offset-4"
-                      >
-                        {r.url}
-                      </a>
-                    )}
-                  </p>
+                  {(file?.href || r.url) && (
+                    <p className="flex flex-wrap gap-4 text-body-sm">
+                      {file?.href && (
+                        <a
+                          href={file.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline underline-offset-4"
+                        >
+                          {t.openFile} · {file.fileName}
+                        </a>
+                      )}
+                      {r.url && (
+                        <a
+                          href={r.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="break-all underline underline-offset-4"
+                        >
+                          {r.url}
+                        </a>
+                      )}
+                    </p>
+                  )}
                   {r.body && (
-                    <details className="text-sm">
-                      <summary className="w-fit cursor-pointer text-muted-foreground">
-                        {t.body}
-                      </summary>
-                      <p className="mt-2 break-words whitespace-pre-wrap">
+                    <Fold summary={t.body}>
+                      <p className="text-body-sm break-words whitespace-pre-wrap">
                         {r.body}
                       </p>
-                    </details>
+                    </Fold>
                   )}
                   {r.decidedAt && (
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-body-sm text-[color:var(--text-secondary)]">
                       {t.statuses[r.status as keyof typeof t.statuses]}{" "}
                       {t.by(nameOf(r.decidedBy), formatDate(r.decidedAt))}
                       {r.comment && ` — ${r.comment}`}
                     </p>
                   )}
                   {r.reserves && r.reserves.length > 0 && (
-                    <ul className="list-disc pl-5 text-sm text-muted-foreground">
+                    <ul className="list-disc pl-5 text-body-sm text-[color:var(--text-secondary)]">
                       {r.reserves.map((x) => (
                         <li key={x.key}>{x.label ?? x.key}</li>
                       ))}
@@ -153,12 +147,12 @@ export async function AgencyReports({
                       canValidate={canValidate}
                     />
                   )}
-                </li>
+                </VersionCard>
               );
             })}
-          </ul>
+          </div>
         )}
-      </PageSection>
+      </ActivationSection>
       <ReportSynthesis
         sources={agency.sources}
         rows={agency.rows}

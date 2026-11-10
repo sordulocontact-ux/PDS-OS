@@ -148,6 +148,10 @@ export function activationSentence(
 export const ACTIVATION_FILTERS = ["mine", "open", "measure", "done"] as const;
 export type ActivationFilter = (typeof ACTIVATION_FILTERS)[number];
 
+/** `vue` of the URL: « En cours » by default (proto). */
+export const filterOf = (value: unknown): ActivationFilter =>
+  ACTIVATION_FILTERS.find((f) => f === value) ?? "open";
+
 /** Which filters of the list an activation answers (proto ACT_FILTERS). */
 export function filtersOf(
   a: PhaseInput,

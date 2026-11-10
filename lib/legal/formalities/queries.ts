@@ -51,15 +51,16 @@ export async function loadFormalities(
     publishing,
     publisherSplits,
     release,
+    distribution,
   ] = await Promise.all([
     supabase
       .from("masters")
-      .select("id, title, duration_seconds, audio_state, iswc")
+      .select("id, title, duration_seconds, audio_state, iswc, variant_label")
       .in("id", masterIds),
     supabase
       .from("master_artists")
       .select(
-        "master_id, role, artist:artists!master_artists_artist_same_org(name, contacts:network_contacts!network_contacts_artist_same_org(id))",
+        "master_id, role, artist:artists!master_artists_artist_same_org(id, name, contacts:network_contacts!network_contacts_artist_same_org(id))",
       )
       .in("master_id", masterIds),
     supabase
@@ -105,6 +106,12 @@ export async function loadFormalities(
       .not("planned_release_date", "is", null)
       .order("planned_release_date")
       .limit(1)
+      .maybeSingle(),
+    // The distribution's territories: the territories ceded proposed.
+    supabase
+      .from("distribution_dossiers")
+      .select("territory_mode, territories")
+      .eq("project_id", project.id)
       .maybeSingle(),
   ]);
   // A main artist's Réseau contact (the one linked to the artist).
@@ -225,6 +232,7 @@ export async function loadFormalities(
             const contactId = artistContact(p);
             return [
               {
+                artistId: p.artist.id,
                 name: p.artist.name,
                 contactId,
                 details: contactId ? (detailsOf.get(contactId) ?? {}) : {},
@@ -249,6 +257,13 @@ export async function loadFormalities(
         signedPublishingContract: publishing.data?.title ?? null,
         splitShares: splits.get(m.id) ?? null,
         releaseDate: release.data?.planned_release_date ?? null,
+        variantLabel: master?.variant_label ?? null,
+        distribution: distribution.data
+          ? {
+              mode: distribution.data.territory_mode,
+              territories: distribution.data.territories ?? [],
+            }
+          : null,
       });
       // Kept for the people added by hand: they take their share too.
       const splitShares = splits.get(m.id) ?? null;

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { BriefActions } from "@/components/framing/guide/brief-actions";
-import { BriefDocument } from "@/components/framing/brief/brief-document";
+import { BriefDocument } from "@/components/ui/brief-document";
 import { BriefOwnerStep } from "@/components/framing/brief/brief-owner-step";
 import { BriefReview } from "@/components/framing/brief/brief-review";
 import { BriefVersionDoc } from "@/components/framing/brief/brief-version-doc";

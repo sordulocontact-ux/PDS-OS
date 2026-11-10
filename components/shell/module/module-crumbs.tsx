@@ -2,6 +2,8 @@ import { Fragment } from "react";
 
 import { ViewLink } from "@/components/ui/view-link";
 import { moduleFrame } from "@/lib/i18n/fr/module-frame";
+
+import { CrumbSwitcher } from "./crumb-switcher";
 import type { ModuleCrumb } from "@/lib/ui/module-frame";
 import { cn } from "@/lib/utils";
 
@@ -14,7 +16,8 @@ export type { ModuleCrumb };
  * 29/10/2026): « Module / [sous-module /] Étape » in the bar at the top of
  * the page (ProjectFrame draws the bar, `--project-bar-height`), every
  * segment a link but the last, which is the page itself. No project crumb:
- * the project's sidebar names it.
+ * the project's sidebar names it. A segment with siblings (`options`) gets
+ * a double chevron to switch to one of them (CrumbSwitcher).
  */
 export function ModuleCrumbs({
   crumbs,
@@ -31,7 +34,12 @@ export function ModuleCrumbs({
         {crumbs.map((crumb, index) => (
           <Fragment key={`${index}-${crumb.label}`}>
             <li className={cn("min-w-0 truncate", index < last && "shrink-0")}>
-              {index === last ? (
+              {crumb.options && crumb.options.length > 1 ? (
+                <CrumbSwitcher
+                  crumb={{ ...crumb, options: crumb.options }}
+                  last={index === last}
+                />
+              ) : index === last ? (
                 <span
                   aria-current="page"
                   className="text-[color:var(--text-primary)]"

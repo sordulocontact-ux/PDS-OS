@@ -112,6 +112,13 @@ export function DossierSection({
             const label = t.fields[field.key];
             const disabled = !editable(field.key);
             const value = text(field.key);
+            // One line under the field: where its value stands, else its
+            // note — never the same words twice (Sacha, 09/11/2026).
+            const said = stateOf(field.key);
+            const note =
+              said?.reason && said.state !== "optional"
+                ? undefined
+                : t.notes[field.key];
             return (
               <BulletinRow
                 key={field.key}
@@ -149,7 +156,7 @@ export function DossierSection({
                         value={value}
                         disabled={disabled}
                         maxLength={2000}
-                        hint={t.notes[field.key]}
+                        hint={note}
                         error={errors?.fields[field.key]}
                         onChange={(e) => set(field.key, e.target.value)}
                       />
@@ -158,6 +165,8 @@ export function DossierSection({
                       <OptionSelect
                         name={`${f.id}-genre`}
                         label={label}
+                        // The row says « Genre * » already.
+                        hideLabel
                         required
                         placeholder={t.genrePlaceholder}
                         items={Object.fromEntries(
@@ -208,6 +217,7 @@ export function DossierSection({
                       <DepDrField
                         id={f.id}
                         label={label}
+                        hint={note}
                         value={depDr}
                         creators={creators}
                         publishers={publishers}

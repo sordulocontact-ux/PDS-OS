@@ -1,4 +1,4 @@
-import { PageSection } from "@/components/shell/page-section";
+import { StepSection } from "@/components/shell/journey/step-section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { Member } from "@/lib/framing/related";
 import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
@@ -48,16 +48,15 @@ export function PlanSection({
       i.kind === "action" && i.status === "confirmed" && !planned.has(i.id),
   ).length;
   return (
-    <PageSection
+    <StepSection
       id="plan"
       title={t.title}
       description={t.description}
-      action={
+      aside={
         <StatusBadge tone={planStateTone[planState]}>
           {t.states[planState]}
         </StatusBadge>
       }
-      card
     >
       <PlanBoard
         projectId={projectId}
@@ -70,6 +69,6 @@ export function PlanSection({
         canOrganize={canOrganize}
         template={template}
       />
-    </PageSection>
+    </StepSection>
   );
 }

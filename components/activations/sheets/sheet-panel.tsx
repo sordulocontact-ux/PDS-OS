@@ -1,5 +1,6 @@
-import { PageSection } from "@/components/shell/page-section";
+import { ActivationSection } from "@/components/activations/activation-section";
 import { FactList } from "@/components/ui/fact-list";
+import { Fold } from "@/components/ui/fold";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import type {
@@ -75,11 +76,10 @@ export function SheetPanel({
         : null;
   const values = current?.fields ?? prefill;
   return (
-    <PageSection
+    <ActivationSection
       id={id}
       title={title}
       description={description}
-      card
       action={
         current && (
           <SheetDecisions
@@ -95,7 +95,7 @@ export function SheetPanel({
       <div className="flex flex-col gap-4">
         {current ? (
           <div className="flex flex-col gap-1">
-            <p className="flex flex-wrap items-center gap-2 text-sm">
+            <p className="flex flex-wrap items-center gap-2 text-body-sm">
               <span className="font-medium">{t.version(current.version)}</span>
               <StatusBadge size="sm" tone={activationSheetTone[current.status]}>
                 {t.statuses[current.status]}
@@ -107,11 +107,13 @@ export function SheetPanel({
               )}
             </p>
             {current.decisionComment && (
-              <p className="text-sm break-words">{current.decisionComment}</p>
+              <p className="text-body-sm break-words">
+                {current.decisionComment}
+              </p>
             )}
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">{t.none}</p>
+          <p className="text-body-sm text-muted-foreground">{t.none}</p>
         )}
         {strategyChanged && (
           <ToneCallout tone="warning">{t.strategyChanged}</ToneCallout>
@@ -137,11 +139,8 @@ export function SheetPanel({
           />
         )}
         {earlier.length > 0 && (
-          <details className="text-sm">
-            <summary className="w-fit cursor-pointer text-muted-foreground underline-offset-4 hover:underline">
-              {t.history}
-            </summary>
-            <ul className="mt-2 flex flex-col gap-1 text-muted-foreground">
+          <Fold summary={t.history}>
+            <ul className="flex flex-col gap-1 text-body-sm text-[color:var(--text-secondary)]">
               {earlier.map((v) => (
                 <li key={v.id}>
                   {t.version(v.version)} · {t.statuses[v.status]}
@@ -150,9 +149,9 @@ export function SheetPanel({
                 </li>
               ))}
             </ul>
-          </details>
+          </Fold>
         )}
       </div>
-    </PageSection>
+    </ActivationSection>
   );
 }

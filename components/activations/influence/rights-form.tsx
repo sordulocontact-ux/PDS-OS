@@ -78,7 +78,7 @@ export function RightsForm({
         );
       }}
     >
-      <p className="text-sm text-muted-foreground">{t.kindHints[kind]}</p>
+      <p className="text-body-sm text-muted-foreground">{t.kindHints[kind]}</p>
       <Field
         name="platforms"
         label={t.platforms}

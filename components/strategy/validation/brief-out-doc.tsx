@@ -1,13 +1,15 @@
-import type { ReactNode } from "react";
-
-import { Rows } from "@/components/ui/rows";
-import { StatusBadge } from "@/components/ui/status-badge";
-import { buttonVariants, ButtonRoll } from "@/components/ui/button";
-import { VersionCard } from "@/components/ui/version-card";
+import { BriefDocument } from "@/components/ui/brief-document";
+import {
+  DocumentSection,
+  type DocumentLine,
+} from "@/components/ui/document-section";
+import { PdfExportButton } from "@/components/ui/pdf-export-button";
+import { ToneCallout } from "@/components/ui/tone-callout";
 import { formatEuros } from "@/lib/budget/types";
 import { strategyBriefOut } from "@/lib/i18n/fr/strategy-brief-out";
 import type { BriefOut } from "@/lib/strategy/brief-out";
 import { dayLabel } from "@/lib/strategy/dimension-model";
+import type { Tone } from "@/lib/ui/state-tones";
 import { formatDay } from "@/lib/utils/day";
 
 const fr = { strategyBriefOut };
@@ -15,162 +17,156 @@ const fr = { strategyBriefOut };
 const t = fr.strategyBriefOut.doc;
 const euros = formatEuros;
 
-function Block({ title, children }: { title: string; children: ReactNode }) {
+const joined = (list: string[]) => list.join(" · ") || t.empty;
+
+/** « Télécharger le PDF » of a stored version, in the head of its card
+ * (the four parts' Brief and an older snapshot alike). */
+export function BriefOutPdf({
+  href,
+  fileName,
+}: {
+  href: string;
+  fileName: string;
+}) {
   return (
-    <section className="flex flex-col gap-2">
-      <h4 className="text-body-sm font-semibold text-[color:var(--text-secondary)]">
-        {title}
-      </h4>
-      {children}
-    </section>
+    <PdfExportButton
+      href={href}
+      fileName={fileName}
+      label={t.pdf}
+      pendingLabel={t.exporting}
+      failedLabel={t.pdfFailed}
+      variant="outline"
+      size="sm"
+    />
   );
 }
 
-const Chips = ({ list }: { list: string[] }) =>
-  list.length ? (
-    <span className="flex flex-wrap gap-1.5">
-      {list.map((x) => (
-        <StatusBadge key={x} tone="neutral" size="sm">
-          {x}
-        </StatusBadge>
-      ))}
-    </span>
-  ) : (
-    <span>{t.empty}</span>
-  );
-
 /**
- * The Brief de sortie on the piece (proto briefDoc): « Brief de sortie —
- * Vn », what stays to arbitrate (computed), « Voir le PDF », then Pour qui
- * et pourquoi · Comment (retained levers, deliverables) · Quand (each
- * milestone's day and J) · Objectif et budget (internal).
+ * The Brief de sortie on the piece, as the Brief de cadrage (Sacha
+ * 09/11/2026: « inspire-toi du Master et du Cadrage, les patterns doivent
+ * être pareils partout »): the shared `BriefDocument` — name, its state,
+ * « Télécharger le PDF » —, who made and validated it under the card, and
+ * its four parts as « libellé | valeur » (`DocumentSection`): Pour qui et
+ * pourquoi · Comment · Quand · Objectif et budget. What stays to arbitrate
+ * (computed) comes first, in a warning callout, only when there is some.
  */
 export function BriefOutDoc({
   version,
   out,
-  pdfHref,
+  status,
+  meta,
+  pdf,
   alerts = [],
 }: {
   version: number;
   out: BriefOut;
-  pdfHref: string | null;
+  status: { tone: Tone; label: string };
+  meta?: string | null;
+  // A version stored: its PDF, drawn from what was sent.
+  pdf: { href: string; fileName: string } | null;
   // Critical alerts of an older version, read before deciding.
   alerts?: string[];
 }) {
-  const row = (label: string, list: string[]) => (
-    <li className="flex flex-col gap-0.5 px-3.5 py-3 text-body-sm">
-      <span className="text-caption text-[color:var(--text-secondary)]">
-        {label}
-      </span>
-      <b className="font-semibold break-words">{list.join(" · ") || t.empty}</b>
-    </li>
-  );
-  return (
-    <VersionCard
-      title={t.title(version)}
-      defaultOpen
-      meta={
-        <span className="flex flex-wrap items-center gap-3">
-          <span className="text-caption text-[color:var(--text-secondary)]">
-            {t.openPoints} :{" "}
-            {out.openPoints.length ? out.openPoints.join(" · ") : t.none}
-          </span>
-          {pdfHref && (
-            <a
-              href={pdfHref}
-              target="_blank"
-              rel="noreferrer"
-              className={buttonVariants({ variant: "ghost", size: "sm" })}
-            >
-              <ButtonRoll>{t.pdf}</ButtonRoll>
-            </a>
-          )}
-        </span>
-      }
-    >
-      {alerts.length > 0 && (
-        <Block title={t.alerts}>
-          <ul className="list-disc pl-5 text-body-sm">
-            {alerts.map((a) => (
-              <li key={a}>{a}</li>
+  // What stays open, said before the document as the Master and the
+  // Cadrage say what is missing: a warning callout, never inside the card.
+  const warning = (title: string, list: string[]) =>
+    list.length > 0 && (
+      <ToneCallout tone="warning" as="div">
+        <span className="flex flex-col gap-1">
+          <strong className="font-semibold">{title}</strong>
+          <ul className="list-disc pl-5">
+            {list.map((point) => (
+              <li key={point}>{point}</li>
             ))}
           </ul>
-        </Block>
-      )}
-      <Block title={t.who}>
-        <Rows label={t.who}>
-          {row(t.positioning, out.positioning)}
-          {row(t.audiences, out.audiences)}
-          {row(t.narrative, out.narrative)}
-        </Rows>
-      </Block>
-      <Block title={t.how}>
-        <Rows label={t.how}>
-          <li className="flex flex-col gap-1.5 px-3.5 py-3 text-body-sm">
-            <span className="text-caption text-[color:var(--text-secondary)]">
-              {t.levers}
-            </span>
-            <Chips list={out.levers} />
-          </li>
-          <li className="flex flex-col gap-1.5 px-3.5 py-3 text-body-sm">
-            <span className="text-caption text-[color:var(--text-secondary)]">
-              {t.deliverables}
-            </span>
-            <Chips list={out.deliverables} />
-          </li>
-        </Rows>
-      </Block>
-      <Block title={t.when}>
-        <Rows label={t.when}>
-          {out.when.length === 0 ? (
-            <li className="px-3.5 py-3 text-body-sm">{t.empty}</li>
-          ) : (
-            out.when.map((w) => (
-              <li
-                key={`${w.day}-${w.name}`}
-                className="flex flex-wrap items-baseline gap-x-4 gap-y-1 px-3.5 py-3 text-body-sm"
-              >
-                <span className="min-w-[9.5rem] font-semibold tabular-nums">
-                  {formatDay(w.day)}
+        </span>
+      </ToneCallout>
+    );
+  const when: DocumentLine[] = out.when.length
+    ? out.when.map((w) => ({
+        key: `${w.day}-${w.name}`,
+        label: formatDay(w.day),
+        value: w.name,
+        source: w.offset !== null ? dayLabel(w.offset) : null,
+      }))
+    : [{ key: "none", label: t.when, value: t.empty }];
+
+  return (
+    <div className="flex flex-col gap-4">
+      {warning(t.alerts, alerts)}
+      {warning(t.openPoints, out.openPoints)}
+      <BriefDocument
+        title={t.title(version)}
+        meta={meta}
+        status={status}
+        actions={pdf && <BriefOutPdf {...pdf} />}
+      >
+        <DocumentSection
+          id="brief-out-who"
+          title={t.who}
+          lines={[
+            {
+              key: "positioning",
+              label: t.positioning,
+              value: joined(out.positioning),
+            },
+            {
+              key: "audiences",
+              label: t.audiences,
+              value: joined(out.audiences),
+            },
+            {
+              key: "narrative",
+              label: t.narrative,
+              value: joined(out.narrative),
+            },
+          ]}
+        />
+        <DocumentSection
+          id="brief-out-how"
+          title={t.how}
+          lines={[
+            { key: "levers", label: t.levers, value: joined(out.levers) },
+            {
+              key: "deliverables",
+              label: t.deliverables,
+              value: joined(out.deliverables),
+            },
+          ]}
+        />
+        <DocumentSection id="brief-out-when" title={t.when} lines={when} />
+        <DocumentSection
+          id="brief-out-goal"
+          title={t.goal}
+          lines={[
+            {
+              key: "objective",
+              label: t.objective,
+              value: joined(out.objectives),
+            },
+            {
+              key: "budget",
+              label: t.budget,
+              value: (
+                <span className="tabular-nums">
+                  {out.budget.lines === 0
+                    ? t.noExpense
+                    : euros(out.budget.proposedCents)}
                 </span>
-                <span className="min-w-0 flex-1">
-                  {w.name}
-                  {w.offset !== null && (
-                    <span className="text-caption text-[color:var(--text-tertiary)]">
-                      {" "}
-                      · {dayLabel(w.offset)}
-                    </span>
-                  )}
-                </span>
-              </li>
-            ))
-          )}
-        </Rows>
-      </Block>
-      <Block title={t.goal}>
-        <Rows label={t.goal}>
-          {row(t.objective, out.objectives)}
-          <li className="flex flex-col gap-0.5 px-3.5 py-3 text-body-sm">
-            <span className="text-caption text-[color:var(--text-secondary)]">
-              {t.budget}
-            </span>
-            <b className="font-semibold tabular-nums">
-              {out.budget.lines === 0
-                ? t.noExpense
-                : euros(out.budget.proposedCents)}
-            </b>
-            <span className="text-caption text-[color:var(--text-tertiary)]">
-              {out.budget.envelopeToConfirm && out.budget.envelopeCents !== null
-                ? t.envelopeToConfirm(euros(out.budget.envelopeCents))
-                : t.budgetOf(
-                    out.budget.envelopeCents === null
-                      ? null
-                      : euros(out.budget.envelopeCents),
-                  )}
-            </span>
-          </li>
-        </Rows>
-      </Block>
-    </VersionCard>
+              ),
+              source:
+                out.budget.envelopeToConfirm &&
+                out.budget.envelopeCents !== null
+                  ? t.envelopeToConfirm(euros(out.budget.envelopeCents))
+                  : t.budgetOf(
+                      out.budget.envelopeCents === null
+                        ? null
+                        : euros(out.budget.envelopeCents),
+                    ),
+            },
+          ]}
+        />
+      </BriefDocument>
+    </div>
   );
 }

@@ -1,22 +1,13 @@
-import { filterOf } from "@/components/activations/journey/activation-list";
-import { ActivationsFrame } from "@/components/activations/journey/activations-frame";
+import { ActivationPageView } from "@/components/activations/journey/activation-page-view";
 
-/** One activation open on the right of the list (proto actPage): its
- * frieze, « Maintenant », its module, « Informations » (docs/ARCHITECTURE.md
+/** One activation on its own page (Sacha 10/11/2026): its frieze,
+ * « Maintenant », its module, « Informations » (docs/ARCHITECTURE.md
  * § 8 duodecies). */
 export default async function ActivationPage({
   params,
-  searchParams,
 }: PageProps<"/app/projects/[projectId]/activations/[activationId]">) {
-  const [{ projectId, activationId }, query] = await Promise.all([
-    params,
-    searchParams,
-  ]);
+  const { projectId, activationId } = await params;
   return (
-    <ActivationsFrame
-      projectId={projectId}
-      openId={activationId}
-      filter={filterOf(query.vue)}
-    />
+    <ActivationPageView projectId={projectId} activationId={activationId} />
   );
 }

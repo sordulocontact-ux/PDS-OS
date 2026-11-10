@@ -7,7 +7,6 @@ export const strategyFollowUp = {
   link: "Suivi de la stratégie",
   linkHint:
     "Avant la sortie, ce qui est prêt ou bloqué ; après, les résultats face aux objectifs.",
-  back: "Stratégie",
   locked:
     "Le suivi s'ouvre une fois la stratégie validée : il s'appuie sur ce qu'elle a décidé.",
   before: {

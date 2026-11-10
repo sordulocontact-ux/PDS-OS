@@ -1,7 +1,7 @@
 import { BriefDialog } from "@/components/production/prep/brief-dialog";
 import { BriefReading } from "@/components/production/prep/brief-reading";
 import { DirectorDialog } from "@/components/production/prep/director-dialog";
-import { PageSection } from "@/components/shell/page-section";
+import { StepSection } from "@/components/shell/journey/step-section";
 import type { Member } from "@/lib/framing/related";
 import { productionBrief } from "@/lib/i18n/fr/production-brief";
 import type {
@@ -37,12 +37,11 @@ export function ProductionBriefSection({
 }) {
   const { director } = sheet;
   return (
-    <PageSection
+    <StepSection
       id="production-brief"
       title={t.title}
       description={t.description}
-      card
-      action={
+      aside={
         canWriteBrief ? (
           <BriefDialog
             projectId={projectId}
@@ -92,6 +91,6 @@ export function ProductionBriefSection({
           </p>
         )}
       </div>
-    </PageSection>
+    </StepSection>
   );
 }

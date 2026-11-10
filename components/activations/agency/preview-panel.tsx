@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { toast } from "@/components/ui/toast";
 
-import { PageSection } from "@/components/shell/page-section";
+import { ActivationSection } from "@/components/activations/activation-section";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { StatTiles } from "@/components/ui/stat-tiles";
@@ -82,11 +82,10 @@ export function PreviewPanel({
     });
 
   return (
-    <PageSection
+    <ActivationSection
       id="preview"
       title={`${t.title} · ${sourceLabel}`}
       description={t.description}
-      card
     >
       <div className="flex flex-col gap-4">
         <StatTiles
@@ -102,7 +101,7 @@ export function PreviewPanel({
             },
           ]}
         />
-        <p className="text-xs text-muted-foreground">{t.rule}</p>
+        <p className="text-caption text-muted-foreground">{t.rule}</p>
         {fileErrors.length > 0 && (
           <ToneCallout tone="warning">
             <p className="font-medium">{t.fileErrors}</p>
@@ -114,7 +113,7 @@ export function PreviewPanel({
           </ToneCallout>
         )}
         {changed.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t.nothing}</p>
+          <p className="text-body-sm text-muted-foreground">{t.nothing}</p>
         ) : (
           <ul className="flex flex-col divide-y divide-[color:var(--border-hairline)] rounded-xl border">
             {changed.map((r) => (
@@ -135,7 +134,7 @@ export function PreviewPanel({
                   />
                 )}
                 <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                  <span className="flex flex-wrap items-center gap-2 text-sm">
+                  <span className="flex flex-wrap items-center gap-2 text-body-sm">
                     <StatusBadge size="sm" tone={changeTone[r.change]}>
                       {t.changes[r.change]}
                     </StatusBadge>
@@ -143,7 +142,7 @@ export function PreviewPanel({
                       {summary(r)}
                     </span>
                     {r.position && (
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-caption text-muted-foreground">
                         l. {r.position}
                       </span>
                     )}
@@ -151,7 +150,7 @@ export function PreviewPanel({
                   {r.errors.map((e) => (
                     <span
                       key={e}
-                      className="text-xs text-[color:var(--tone-warning-fg)]"
+                      className="text-caption text-[color:var(--tone-warning-fg)]"
                     >
                       {e}
                     </span>
@@ -198,6 +197,6 @@ export function PreviewPanel({
           </div>
         )}
       </div>
-    </PageSection>
+    </ActivationSection>
   );
 }

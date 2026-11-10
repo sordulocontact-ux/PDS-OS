@@ -1,3 +1,4 @@
+import { DocumentSection } from "@/components/ui/document-section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { BriefSnapshot } from "@/lib/framing/brief-snapshot";
 import { DIMENSIONS, type Dimension } from "@/lib/framing/dimensions";
@@ -54,23 +55,14 @@ export function BriefVersionDoc({
           })),
         ];
         return (
-          <section
+          <DocumentSection
             key={dimension}
-            aria-labelledby={`brief-${dimension}`}
-            className={cn(
-              "flex flex-col gap-2 border-t border-[color:var(--border-hairline)] py-3.5 first:border-t-0 first:pt-1",
-              marked &&
-                "-mx-2.5 rounded-lg border-t-transparent bg-[var(--tone-warning-bg)] px-2.5",
-            )}
-          >
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <h4
-                id={`brief-${dimension}`}
-                className="text-body-md font-semibold"
-              >
-                {t.dimensions[dimension]}
-              </h4>
-              {marking ? (
+            id={`brief-${dimension}`}
+            title={t.dimensions[dimension]}
+            lines={lines}
+            marked={marked}
+            aside={
+              marking ? (
                 <button
                   type="button"
                   aria-pressed={marked}
@@ -89,26 +81,9 @@ export function BriefVersionDoc({
                     {fr.framingJourney.dimensions.states.toReview}
                   </StatusBadge>
                 )
-              )}
-            </div>
-            <dl className="grid grid-cols-1 gap-x-4 gap-y-1.5 text-body-sm sm:grid-cols-[minmax(0,12rem)_minmax(0,1fr)]">
-              {lines.map((line) => (
-                <div key={line.key} className="contents">
-                  <dt className="text-[color:var(--text-secondary)]">
-                    {line.label}
-                  </dt>
-                  <dd className="mb-1.5 flex min-w-0 flex-col break-words sm:mb-0">
-                    <span className="whitespace-pre-line">{line.value}</span>
-                    {line.source && (
-                      <span className="text-caption text-[color:var(--text-tertiary)]">
-                        {line.source}
-                      </span>
-                    )}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </section>
+              )
+            }
+          />
         );
       })}
     </div>

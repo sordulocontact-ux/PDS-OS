@@ -10,6 +10,8 @@ import { FileDropZone } from "@/components/ui/file-drop-zone";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ToneCallout } from "@/components/ui/tone-callout";
+import { StepSection } from "@/components/shell/journey/step-section";
+import { StrategyPart } from "@/components/strategy/strategy-part";
 import { strategyReleasePlan } from "@/lib/i18n/fr/strategy-release-plan";
 import type { GeneratorKind } from "@/lib/strategy/documents/generator-kind";
 import type { VisualCandidate } from "@/lib/strategy/documents/release-plan-sources";
@@ -112,92 +114,85 @@ export function VisualsStep({
   };
 
   return (
-    <section aria-labelledby="visuals-title" className="flex flex-col gap-6">
-      <div className="flex flex-col gap-2">
-        <h2 id="visuals-title" className="text-display-sm font-semibold">
-          {t.title}
-        </h2>
-        <p className="max-w-prose text-body-md text-muted-foreground">
-          {t.body}
-        </p>
+    <StepSection title={t.title} description={t.body}>
+      <div className="flex flex-col gap-6">
         <p className="text-caption text-muted-foreground">{t.hint}</p>
-      </div>
-      {all.length === 0 && <ToneCallout tone="neutral">{t.none}</ToneCallout>}
-      {GROUPS.map((group) => {
-        const items = all.filter((c) => c.group === group);
-        if (items.length === 0) return null;
-        return (
-          <div key={group} className="flex flex-col gap-3">
-            <h3 className="text-body-md font-semibold">{t.groups[group]}</h3>
-            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-              {items.map((c) => (
-                <li key={c.key}>
-                  <VisualTile
-                    name={c.visual.name}
-                    url={c.previewUrl}
-                    selected={selected.has(c.key)}
-                    disabled={!canEdit}
-                    onToggle={() => toggle(c.key)}
-                  />
-                </li>
-              ))}
-            </ul>
-          </div>
-        );
-      })}
-      {canEdit && (
-        <div className="flex flex-col gap-4">
-          <FileDropZone
-            label={uploading ? t.uploading : t.upload}
-            hint={t.uploadHint}
-            accept="image/jpeg,image/png,image/webp"
-            multiple
-            disabled={uploading}
-            onFiles={(files) => void upload(files)}
-          />
-          <form
-            className="flex flex-col gap-2 sm:flex-row sm:items-end"
-            onSubmit={(e) => {
-              e.preventDefault();
-              const url = reference.trim();
-              if (!isReference(url)) return toast.error(t.referenceInvalid);
-              add(
-                { source: "reference", url, name: url.slice(0, 200) },
-                url,
-                "references",
-              );
-              setReference("");
-            }}
-          >
-            <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-              <Label htmlFor="visual-reference">{t.referenceLabel}</Label>
-              <Input
-                id="visual-reference"
-                type="url"
-                inputMode="url"
-                value={reference}
-                placeholder={t.referencePlaceholder}
-                onChange={(e) => setReference(e.target.value)}
-              />
-            </div>
-            <Button type="submit" variant="outline">
-              {t.addReference}
-            </Button>
-          </form>
-          <div className="flex flex-wrap items-center gap-3">
-            <Button
-              type="button"
-              disabled={pending || uploading}
-              onClick={submit}
+        {all.length === 0 && <ToneCallout tone="neutral">{t.none}</ToneCallout>}
+        {GROUPS.map((group) => {
+          const items = all.filter((c) => c.group === group);
+          if (items.length === 0) return null;
+          return (
+            <StrategyPart key={group} title={t.groups[group]}>
+              <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                {items.map((c) => (
+                  <li key={c.key}>
+                    <VisualTile
+                      name={c.visual.name}
+                      url={c.previewUrl}
+                      selected={selected.has(c.key)}
+                      disabled={!canEdit}
+                      onToggle={() => toggle(c.key)}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </StrategyPart>
+          );
+        })}
+        {canEdit && (
+          <div className="flex flex-col gap-4">
+            <FileDropZone
+              label={uploading ? t.uploading : t.upload}
+              hint={t.uploadHint}
+              accept="image/jpeg,image/png,image/webp"
+              multiple
+              disabled={uploading}
+              onFiles={(files) => void upload(files)}
+            />
+            <form
+              className="flex flex-col gap-2 sm:flex-row sm:items-end"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const url = reference.trim();
+                if (!isReference(url)) return toast.error(t.referenceInvalid);
+                add(
+                  { source: "reference", url, name: url.slice(0, 200) },
+                  url,
+                  "references",
+                );
+                setReference("");
+              }}
             >
-              {pending ? a.saving : a.validate}
-            </Button>
-            <span className="text-caption text-muted-foreground tabular-nums">
-              {t.selected(selected.size)}
-            </span>
+              <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                <Label htmlFor="visual-reference">{t.referenceLabel}</Label>
+                <Input
+                  id="visual-reference"
+                  type="url"
+                  inputMode="url"
+                  value={reference}
+                  placeholder={t.referencePlaceholder}
+                  onChange={(e) => setReference(e.target.value)}
+                />
+              </div>
+              <Button type="submit" variant="outline">
+                {t.addReference}
+              </Button>
+            </form>
+            <div className="flex flex-wrap items-center gap-3">
+              <Button
+                type="button"
+                disabled={pending || uploading}
+                onClick={submit}
+              >
+                {pending ? a.saving : a.validate}
+              </Button>
+              <span className="text-caption text-muted-foreground tabular-nums">
+                {t.selected(selected.size)}
+              </span>
+            </div>
           </div>
-        </div>
-      )}
-    </section>
+        )}
+      </div>
+    </StepSection>
   );
 }

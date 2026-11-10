@@ -1,5 +1,5 @@
 import { EmptyNote } from "@/components/shell/empty-state";
-import { PageSection } from "@/components/shell/page-section";
+import { StepSection } from "@/components/shell/journey/step-section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { productionPost } from "@/lib/i18n/fr/production-post";
 import { stepLabel, stepPeriod } from "@/lib/production/post/labels";
@@ -45,12 +45,11 @@ export function StepsSection({
   deliverableId: string;
 }) {
   return (
-    <PageSection
+    <StepSection
       id="steps"
       title={t.title}
       description={t.description}
-      card
-      action={canOrganize && <StepAddButton scope={scope} people={people} />}
+      aside={canOrganize && <StepAddButton scope={scope} people={people} />}
     >
       {steps.length === 0 ? (
         <EmptyNote>{t.none}</EmptyNote>
@@ -134,7 +133,7 @@ export function StepsSection({
           deliverableId={deliverableId}
         />
       )}
-    </PageSection>
+    </StepSection>
   );
 }
 

@@ -1,3 +1,4 @@
+import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { productionShoot } from "@/lib/i18n/fr/production-shoot";
 import type { ClosingBlocker } from "@/lib/production/shoot/blockers";
@@ -45,14 +46,11 @@ export function ClosingCheck({
   return (
     <div className="flex flex-col gap-3">
       <h3 className="text-sm font-semibold">{t.closingTitle}</h3>
-      <dl className="flex flex-col gap-2 text-sm">
+      <FactRows>
         {answers.map((a) => (
-          <div key={a.question} className="flex flex-col gap-0.5">
-            <dt className="text-muted-foreground">{a.question}</dt>
-            <dd className="font-medium">{a.answer}</dd>
-          </div>
+          <FactRow key={a.question} label={a.question} value={a.answer} />
         ))}
-      </dl>
+      </FactRows>
       {blockers.length > 0 ? (
         <ToneCallout tone="warning">
           {t.closingBlocked} {blockers.map(blockerText).join(" ; ")}.

@@ -1,5 +1,6 @@
+import { Rows } from "@/components/ui/rows";
 import { EmptyNote } from "@/components/shell/empty-state";
-import { PageSection } from "@/components/shell/page-section";
+import { StepSection } from "@/components/shell/journey/step-section";
 import { productionDelivery } from "@/lib/i18n/fr/production-delivery";
 import type { DeliveryTabData } from "@/lib/production/delivery/queries";
 import {
@@ -47,11 +48,11 @@ export function HandoffSection({
   const offer = canOrganize && deliveredAt && (!latest || staleness);
 
   return (
-    <PageSection
+    <StepSection
       id="activations"
       title={t.title}
       description={t.description}
-      action={
+      aside={
         offer && deliveredAt ? (
           <TransmitButton
             projectId={projectId}
@@ -89,7 +90,7 @@ export function HandoffSection({
           <p className="text-sm text-muted-foreground">{t.upToDate}</p>
         )}
         {handoffs.length > 0 && (
-          <ul className="flex flex-col gap-2">
+          <Rows>
             {handoffs.map((h, i) => (
               <HandoffItem
                 key={h.id}
@@ -98,9 +99,9 @@ export function HandoffSection({
                 earlier={i > 0}
               />
             ))}
-          </ul>
+          </Rows>
         )}
       </div>
-    </PageSection>
+    </StepSection>
   );
 }

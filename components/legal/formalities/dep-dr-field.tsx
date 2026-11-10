@@ -1,7 +1,7 @@
 "use client";
 
 import { FieldError } from "@/components/auth/form-message";
-import { OptionSelect } from "@/components/projects/option-select";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 import { CheckboxField } from "@/components/ui/checkbox-field";
 import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
 import type {
@@ -24,6 +24,7 @@ export type DepDr = { choice?: string; rule?: string; checked?: boolean };
 export function DepDrField({
   id,
   label,
+  hint,
   value,
   creators,
   publishers,
@@ -33,6 +34,8 @@ export function DepDrField({
 }: {
   id: string;
   label: string;
+  // Its note, unless the row already says where it stands.
+  hint?: string;
   value: DepDr;
   creators: Creator[];
   publishers: Publisher[];
@@ -42,28 +45,40 @@ export function DepDrField({
 }) {
   const t = fr.legalFormalities;
   return (
-    <>
-      <p className="text-sm text-muted-foreground">{t.sharing.explain}</p>
-      <OptionSelect
-        name={`${id}-dep-dr`}
-        label={label}
-        hideLabel
-        required
-        hint={t.notes.dep_dr}
-        error={errors?.fields.dep_dr}
-        items={t.depDrChoices}
-        defaultValue={value.choice || null}
-        onValueChange={(v) =>
-          onChange({
-            choice: v,
-            // The rule the preview used is kept with the dossier: a later
-            // rule never changes it (JUR-23).
-            rule: value.rule ?? CURRENT_SHARING_RULE,
-            // Another choice, other shares: checked again.
-            checked: false,
-          })
-        }
-      />
+    // 12 px around the preview's card (Sacha, 10/11/2026: « la carte
+    // au-dessus et le texte vérifié les parts sont un peu trop collés »).
+    <div className="flex flex-col gap-3">
+      {/* Two choices: side by side, the chosen one's background
+          sliding (Sacha, 09/11/2026). */}
+      <div className="flex flex-col gap-1.5">
+        <SegmentedControl
+          aria-label={label}
+          fill
+          options={Object.entries(t.depDrSegments).map(([v, l]) => ({
+            value: v,
+            label: l,
+          }))}
+          value={value.choice || null}
+          onChange={(v) =>
+            v &&
+            onChange({
+              choice: v,
+              // The rule the preview used is kept with the dossier: a later
+              // rule never changes it (JUR-23).
+              rule: value.rule ?? CURRENT_SHARING_RULE,
+              // Another choice, other shares: checked again.
+              checked: false,
+            })
+          }
+        />
+        {errors?.fields.dep_dr ? (
+          <FieldError id={`${id}-dep-dr-error`}>
+            {errors.fields.dep_dr}
+          </FieldError>
+        ) : (
+          hint && <p className="text-body-sm text-muted-foreground">{hint}</p>
+        )}
+      </div>
       <DepDrPreview
         creators={creators}
         publishers={publishers}
@@ -83,6 +98,6 @@ export function DepDrField({
           </FieldError>
         </div>
       )}
-    </>
+    </div>
   );
 }

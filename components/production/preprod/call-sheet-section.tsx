@@ -1,5 +1,5 @@
 import { EmptyNote } from "@/components/shell/empty-state";
-import { PageSection } from "@/components/shell/page-section";
+import { StepSection } from "@/components/shell/journey/step-section";
 import { FactList } from "@/components/ui/fact-list";
 import { productionPreprod } from "@/lib/i18n/fr/production-preprod";
 import type { CallSheetDefaults } from "@/lib/production/preprod/call-sheet-defaults";
@@ -75,11 +75,11 @@ export function CallSheetSection({
   });
 
   return (
-    <PageSection
+    <StepSection
       id="call-sheet"
       title={t.title}
       description={t.description}
-      action={
+      aside={
         canOrganize ? (
           <CallSheetEditButton
             projectId={projectId}
@@ -89,7 +89,6 @@ export function CallSheetSection({
           />
         ) : undefined
       }
-      card
     >
       <div className="flex flex-col gap-8">
         <FactList
@@ -172,6 +171,6 @@ export function CallSheetSection({
         )}
         {children}
       </div>
-    </PageSection>
+    </StepSection>
   );
 }

@@ -14,8 +14,15 @@ import type { ReactNode } from "react"
 // own border colour (never the base): buttonVariants() is also used raw on
 // links, without cn(), and a base border-transparent sorted after
 // border-border erased every outline (recette, 19/10/2026).
+
+// The hover growth of a button (and its colour transitions): 1.05 on hover,
+// .97 on press, cut when motion is reduced. Shared with the pills that read as
+// buttons (FilterChip, AttentionChips), so they grow exactly the same way.
+const buttonGrow =
+  "[transition:background-color_var(--duration-fast)_var(--ease-out),border-color_var(--duration-fast)_var(--ease-out),color_var(--duration-fast)_var(--ease-out),scale_var(--duration-grow)_var(--ease-out)] motion-safe:hover:scale-[1.05] motion-safe:active:scale-[.97]"
+
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center rounded-full border bg-clip-padding text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] font-semibold whitespace-nowrap no-underline [transition:background-color_var(--duration-fast)_var(--ease-out),border-color_var(--duration-fast)_var(--ease-out),color_var(--duration-fast)_var(--ease-out),scale_var(--duration-grow)_var(--ease-out)] outline-none motion-safe:hover:scale-[1.05] motion-safe:active:scale-[.97] select-none disabled:pointer-events-none disabled:opacity-40 aria-invalid:border-[color:var(--border-strong)] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  `${buttonGrow} group/button inline-flex shrink-0 items-center justify-center rounded-full border bg-clip-padding text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] font-semibold whitespace-nowrap no-underline outline-none select-none disabled:pointer-events-none disabled:opacity-40 aria-invalid:border-[color:var(--border-strong)] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4`,
   {
     variants: {
       variant: {
@@ -58,6 +65,9 @@ const rollLayer =
 // styled with buttonVariants() (a link): the parent must carry group/button.
 // It grows to fill a full-width button and inherits its gap and alignment, so
 // the button lays out as before; the copy is hidden from assistive tech.
+// Also in the controls that act like buttons (docs/DESIGN.md § 4): segments,
+// tabs, sub-module pills, filter and attention chips; a current segment or
+// tab leaves out group/button, so it stays still.
 function ButtonRoll({ children }: { children: ReactNode }) {
   return (
     <span
@@ -100,4 +110,4 @@ function Button({
   )
 }
 
-export { Button, ButtonRoll, buttonVariants }
+export { Button, ButtonRoll, buttonGrow, buttonVariants }

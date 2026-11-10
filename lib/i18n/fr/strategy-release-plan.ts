@@ -13,7 +13,9 @@ export const strategyReleasePlan = {
     "Aperçu",
   ],
   stepsLabel: "Étapes du Plan de sortie",
-  stepOf: (n: number, total: number) => `Étape ${n} sur ${total}`,
+  // The arrows of the generator (GeneratorShell, as the dimensions').
+  previousStep: "Étape précédente",
+  nextStep: "Étape suivante",
   stepDone: "Fait",
   stepTodo: "À faire",
   locked: {
@@ -24,7 +26,6 @@ export const strategyReleasePlan = {
       "Une version du Brief de sortie attend sa validation : aucun Plan de sortie final n'est généré pendant ce temps.",
     readOnly:
       "Seul le chef de projet responsable prépare le Plan de sortie. Les versions générées sont lisibles ici.",
-    toStrategy: "Retour à la stratégie",
   },
   intro: {
     title: "Créons le Plan de sortie",
@@ -51,7 +52,11 @@ export const strategyReleasePlan = {
     notProvided: "Non renseigné",
     confirmed: "Confirmé",
     start: "Commencer",
-    milestones: (n: number) => `${n} temps fort${n > 1 ? "s" : ""}`,
+    kpis: (n: number) => `${n} KPI${n > 1 ? "s" : ""}`,
+    release: (day: string) => `Sortie le ${day}`,
+    milestone: (title: string, day: string) => `${title} · ${day}`,
+    moreParts: (n: number) =>
+      n > 1 ? `Voir les ${n} autres parties` : "Voir l'autre partie",
   },
   actions: {
     validate: "Valider",

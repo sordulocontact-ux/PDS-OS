@@ -33,18 +33,23 @@ export function ActivationsReview({
     <Card>
       <CardHeader>
         <CardTitle>{t.review.title}</CardTitle>
-        <p className="text-sm text-muted-foreground">{t.review.description}</p>
+        <p className="text-body-sm text-muted-foreground">
+          {t.review.description}
+        </p>
       </CardHeader>
       <CardContent>
         {live.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t.review.none}</p>
+          <p className="text-body-sm text-muted-foreground">{t.review.none}</p>
         ) : (
           <ul className="divide-y">
             {live.map((a) => {
               const reserves =
                 a.status === "closed" ? (a.closureReserves ?? []) : a.reserves;
               return (
-                <li key={a.id} className="flex flex-col gap-1.5 py-3 text-sm">
+                <li
+                  key={a.id}
+                  className="flex flex-col gap-1.5 py-3 text-body-sm"
+                >
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <ViewLink
                       href={routes.projectActivation(projectId, a.id)}

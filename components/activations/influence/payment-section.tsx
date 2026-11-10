@@ -1,5 +1,5 @@
 import { EmptyNote } from "@/components/shell/empty-state";
-import { PageSection } from "@/components/shell/page-section";
+import { ActivationSection } from "@/components/activations/activation-section";
 import { FactList } from "@/components/ui/fact-list";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { ActivationFile } from "@/lib/activations/files/queries";
@@ -43,9 +43,9 @@ export function PaymentSection({
 }) {
   if (!canSeeBudget)
     return (
-      <PageSection id="payment" title={t.title}>
+      <ActivationSection id="payment" title={t.title}>
         <EmptyNote>{t.restricted}</EmptyNote>
-      </PageSection>
+      </ActivationSection>
     );
   const invoice = payment?.invoice_file_id
     ? files.get(payment.invoice_file_id)
@@ -58,7 +58,7 @@ export function PaymentSection({
       n,
     );
   return (
-    <PageSection
+    <ActivationSection
       id="payment"
       title={t.title}
       description={t.description}
@@ -91,7 +91,7 @@ export function PaymentSection({
               { label: t.statusNote, value: payment.status_note },
             ]}
           />
-          <p className="flex flex-wrap gap-4 text-sm">
+          <p className="flex flex-wrap gap-4 text-body-sm">
             {invoice?.href && (
               <a
                 href={invoice.href}
@@ -115,6 +115,6 @@ export function PaymentSection({
           </p>
         </div>
       )}
-    </PageSection>
+    </ActivationSection>
   );
 }

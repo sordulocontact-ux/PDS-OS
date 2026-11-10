@@ -1,5 +1,7 @@
 "use client";
 
+import { cn } from "@/lib/utils";
+import { nestedCardClass } from "@/components/ui/nested-card";
 import { IconPlus } from "nucleo-sharp-essential";
 import { useEffect, useRef, useState } from "react";
 
@@ -19,6 +21,7 @@ import {
   type ShareCategory,
 } from "@/lib/legal/formalities/participants";
 import {
+  ensureMainArtistContact,
   listPublishingContracts,
   listSacemCreators,
   listSacemPublishers,
@@ -118,6 +121,40 @@ export function PeopleEditor({
       active = false;
     };
   }, [formalityId, part]);
+  // A main artist without a Réseau fiche gets one from their artist of the
+  // Catalogue, and the participant is filled with it (Sacha, 09/11/2026):
+  // once, when the editor opens.
+  const linking = useRef(false);
+  useEffect(() => {
+    if (part !== "creators" || disabled || linking.current) return;
+    const todo = creators.filter(
+      (c) => c.main_artist && c.artist_id && !c.contact_id,
+    );
+    if (todo.length === 0) return;
+    linking.current = true;
+    Promise.all(
+      todo.map((c) =>
+        ensureMainArtistContact(masterId, c.artist_id!).then(
+          (id) => [c.artist_id!, id] as const,
+        ),
+      ),
+    ).then(async (pairs) => {
+      const idOf = new Map(
+        pairs.flatMap(([artist, id]) => (id ? [[artist, id] as const] : [])),
+      );
+      if (idOf.size === 0) return;
+      // The picker reads the new fiche from a fresh list.
+      await loadCreators(true);
+      onPeople({
+        creators: creators.map((c) =>
+          c.artist_id && !c.contact_id && idOf.has(c.artist_id)
+            ? { ...c, contact_id: idOf.get(c.artist_id) }
+            : c,
+        ),
+        publishers,
+      });
+    });
+  }, [part, disabled, creators, publishers, masterId, onPeople, loadCreators]);
   // The participants by position, named, for « Éditeur de » (JUR-22).
   const creatorNames = creators.flatMap((c, i) =>
     onBulletin(c) ? [{ position: i + 1, name: creatorName(c) }] : [],
@@ -165,7 +202,7 @@ export function PeopleEditor({
   if (part === "creators")
     return (
       <div className="flex flex-col gap-4">
-        <p className="text-sm text-muted-foreground">{t.notes.creators}</p>
+        <p className="text-body-sm text-muted-foreground">{t.notes.creators}</p>
         {fromSplit && !disabled && (
           <ToneCallout tone="warning">{t.notes.phonoFromSplit}</ToneCallout>
         )}
@@ -207,12 +244,19 @@ export function PeopleEditor({
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-sm text-muted-foreground">{t.publisher.explain}</p>
+      <p className="text-body-sm text-muted-foreground">
+        {t.publisher.explain}
+      </p>
       <FieldError id={`publishers-${masterId}-error`}>
         {errors?.fields.publishers}
       </FieldError>
       {publishers.length === 0 && noPublisher && (
-        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border p-3">
+        <div
+          className={cn(
+            nestedCardClass,
+            "flex flex-wrap items-center justify-between gap-2",
+          )}
+        >
           <p className="text-sm font-medium">{t.publisher.noneChosen}</p>
           {!disabled && (
             <Button size="sm" variant="outline" onClick={addPublisher}>

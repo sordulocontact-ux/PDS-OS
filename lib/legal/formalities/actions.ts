@@ -38,6 +38,7 @@ const creator = z.object({
   signs: z.boolean(),
   contact_id: id.optional(),
   main_artist: z.boolean().optional(),
+  artist_id: z.uuid().optional(),
   confirmed: z.boolean().optional(),
 });
 const publisher = z.object({

@@ -8,8 +8,10 @@ import { DeliverableForm } from "@/components/strategy/deliverable-form";
 import { DeliverableItem } from "@/components/strategy/deliverable-item";
 import { DeliverableLotForm } from "@/components/strategy/deliverable-lot-form";
 import { DeliverablesBulkBar } from "@/components/strategy/deliverables-bulk-bar";
+import { StrategyPart } from "@/components/strategy/strategy-part";
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
+import { Rows } from "@/components/ui/rows";
 import { dialogs } from "@/lib/i18n/fr/dialogs";
 import { strategy } from "@/lib/i18n/fr/strategy";
 import { strategyDeliverables } from "@/lib/i18n/fr/strategy-deliverables";
@@ -106,12 +108,13 @@ export function DeliverablesSection({
             // One part per lever, a hairline above the next (Sacha
             // 07/11/2026: « on se perd »): its name and gestures on one
             // head, its deliverables under it.
-            <div key={lever.id} className={part}>
-              <div className="flex items-start justify-between gap-3">
-                <h4 className="min-w-0 flex-1 pt-1 text-body-md font-semibold break-words">
-                  {lever.label}
-                </h4>
-                {canEdit && lever.state === "selected" && (
+            <StrategyPart
+              key={lever.id}
+              className={part}
+              title={lever.label}
+              aside={
+                canEdit &&
+                lever.state === "selected" && (
                   <span className="flex shrink-0 flex-wrap justify-end gap-2">
                     <Button
                       size="sm"
@@ -139,17 +142,18 @@ export function DeliverablesSection({
                       </Button>
                     )}
                   </span>
-                )}
-              </div>
+                )
+              }
+            >
               {own.length === 0 ? (
                 <p className="text-caption text-muted-foreground">
                   {lever.no_deliverables ? s.noneRequiredSet : s.noLeverGroup}
                 </p>
               ) : (
-                <ul className="flex flex-col gap-3">
+                <Rows label={lever.label}>
                   {own.map((d) =>
                     editing === d.id ? (
-                      <li key={d.id}>
+                      <li key={d.id} className="p-3.5">
                         <DeliverableForm
                           idPrefix={`deliverable-${d.id}`}
                           initial={{
@@ -195,9 +199,9 @@ export function DeliverablesSection({
                       />
                     ),
                   )}
-                </ul>
+                </Rows>
               )}
-            </div>
+            </StrategyPart>
           );
         })
       )}
@@ -230,8 +234,7 @@ export function DeliverablesSection({
       </FormDialog>
 
       {canEdit && selected.length > 0 && editing === null && (
-        <div className={part}>
-          <h4 className="text-body-md font-semibold">{s.newTitle}</h4>
+        <StrategyPart className={part} title={s.newTitle}>
           <DeliverableForm
             key={formKey}
             idPrefix="deliverable-new"
@@ -246,7 +249,7 @@ export function DeliverablesSection({
               )
             }
           />
-        </div>
+        </StrategyPart>
       )}
     </section>
   );

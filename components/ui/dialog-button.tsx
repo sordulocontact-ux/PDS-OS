@@ -11,7 +11,8 @@ const fr = { dialogs };
 /**
  * A button that opens a form in the modal (« Ajouter un article »,
  * « Modifier le lieu »…). The form is mounted per opening and receives the
- * close callback, called on success or « Annuler ».
+ * close callback, called on success or « Annuler ». `children` may also be
+ * plain content read in the modal (the overview's « Informations »).
  */
 export function DialogButton({
   label,
@@ -31,7 +32,7 @@ export function DialogButton({
   title: string;
   description: string;
   wide?: boolean;
-  children: (close: () => void) => ReactNode;
+  children: ReactNode | ((close: () => void) => ReactNode);
 }) {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
@@ -55,7 +56,7 @@ export function DialogButton({
         closeLabel={fr.dialogs.close}
         size={wide ? "wide" : "default"}
       >
-        {children(close)}
+        {typeof children === "function" ? children(close) : children}
       </FormDialog>
     </>
   );

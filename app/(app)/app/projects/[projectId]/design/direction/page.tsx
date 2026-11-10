@@ -3,8 +3,7 @@ import { notFound } from "next/navigation";
 import { DesignDecision } from "@/components/design/design-decision";
 import { DesignStepFrame } from "@/components/design/design-step-frame";
 import { DirectionSubmitForm } from "@/components/design/direction-step/direction-submit-form";
-import { DesignWaits } from "@/components/design/waiting-row";
-import { StepHistory } from "@/components/shell/journey/step-history";
+import { StepWaiting } from "@/components/shell/journey/step-waiting";
 import { ReturnCallout } from "@/components/ui/return-callout";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { designJourneyContext } from "@/lib/design/journey-context";
@@ -100,36 +99,11 @@ export default async function DesignDirectionPage({
         note={lastDecision.comment ?? ""}
       />
     ) : undefined;
-  const history = [...ctx.direction.submissions]
-    .filter((s) => s.status !== "withdrawn")
-    .reverse()
-    .flatMap((s) => [
-      {
-        key: `${s.id}-s`,
-        text: t.history.submitted(s.number),
-        who: s.submittedByName,
-        at: s.submittedAt,
-      },
-      ...s.decisions.map((d) => ({
-        key: d.id,
-        text:
-          (d.decision === "approved"
-            ? t.history.approved
-            : d.decision === "rejected"
-              ? t.history.refused
-              : t.history.changes) +
-          (d.comment ? fr.designSteps.sheets.history.comment(d.comment) : ""),
-        who: d.decidedByName,
-        at: d.decidedAt,
-      })),
-    ]);
-
   return (
     <DesignStepFrame
       projectId={projectId}
       stepKey="direction"
       returned={returned}
-      history={<StepHistory items={history} />}
     >
       {phase === "approved" && lastDecision && (
         <ToneCallout tone="success">
@@ -167,7 +141,7 @@ export default async function DesignDirectionPage({
           commentRequired={t.commentRequired}
         />
       ) : (
-        <DesignWaits step={step} actors={[step.actor]} />
+        <StepWaiting step={step} />
       )}
     </DesignStepFrame>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import { StepSection } from "@/components/shell/journey/step-section";
 import { useState } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
@@ -59,16 +60,11 @@ export function DirectionDecision({
   const error = submit.error ?? approve.error ?? changes.error;
   const pending = submit.pending || approve.pending || changes.pending;
   return (
-    <section
-      aria-labelledby="direction-decision"
-      className="flex flex-col gap-3 rounded-2xl border border-[color:var(--border-hairline)] bg-card p-5"
+    <StepSection
+      id="direction-decision"
+      title={t.title}
+      aside={<StatusBadge tone={TONE[status]}>{t.status[status]}</StatusBadge>}
     >
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 id="direction-decision" className="text-body-md font-semibold">
-          {t.title}
-        </h3>
-        <StatusBadge tone={TONE[status]}>{t.status[status]}</StatusBadge>
-      </div>
       {status === "changes" && comment && (
         <ToneCallout tone="warning">
           {t.changes(decided.by ?? "—", comment)}
@@ -158,6 +154,6 @@ export function DirectionDecision({
           </p>
         ))}
       {error && <FormMessage kind="error">{error}</FormMessage>}
-    </section>
+    </StepSection>
   );
 }

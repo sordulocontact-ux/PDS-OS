@@ -1,6 +1,7 @@
 "use client";
 
 import { IconCheck, IconFile } from "nucleo-sharp-essential";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "@/components/ui/toast";
 
@@ -27,7 +28,8 @@ export function ContractProofSlot({
 }: {
   organizationId: string;
   contractId: string;
-  category: "signed" | "evidence" | "pds_signed";
+  // « draft »: the contract to send, when it has no text yet (09/11/2026).
+  category: "draft" | "signed" | "evidence" | "pds_signed";
   label: string;
   hint: string;
   present: boolean;
@@ -36,6 +38,7 @@ export function ContractProofSlot({
 }) {
   const t = fr.legalClearance.stages.sign;
   const [busy, setBusy] = useState(false);
+  const router = useRouter();
 
   if (present)
     return (
@@ -70,6 +73,8 @@ export function ContractProofSlot({
           });
           setBusy(false);
           if (!result.ok) return void toast.error(result.error);
+          // The upload refreshes the contract's page only: this one too.
+          router.refresh();
         }}
       />
     </div>

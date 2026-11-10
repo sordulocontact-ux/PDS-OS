@@ -65,8 +65,15 @@ export type Clearance = {
     evidenceFile: boolean;
     // What it is e-mailed as from « Signer »; null: no text yet.
     document: { fileName: string; kind: "generated" | "file" } | null;
-    // Its signed copy came back by e-mail (kept by the cron): to check.
-    signedByEmail: { url: string | null } | null;
+    // Its signed copies and proofs, to open; `byEmail`: sent back by e-mail
+    // and kept by the cron, to check.
+    proof: Array<{
+      id: string;
+      category: "signed" | "evidence";
+      name: string;
+      url: string | null;
+      byEmail: boolean;
+    }>;
     // Who follows it: only they submit it and send it (VISION-UX rule 9).
     ownerName: string | null;
     ownerIsViewer: boolean;

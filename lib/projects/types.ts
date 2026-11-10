@@ -192,6 +192,12 @@ export type ProjectListItem = {
   responsibleName: string | null;
   responsiblePersonId: string | null;
   dueDate: string | null;
+  // The image chosen for the project (lib/projects/covers.ts), and its first
+  // title, whose Catalogue cover stands in when none was chosen.
+  coverPath: string | null;
+  firstMasterId: string | null;
+  // Its signed image, once read for a list (withCovers); absent elsewhere.
+  coverUrl?: string | null;
   // Launched: the workflows it moves or waits at, side by side (Étape
   // column, lib/overview/workflow-progress.ts); absent where not read.
   activeWorkflows?: ActiveWorkflow[];
@@ -218,6 +224,8 @@ export type ProjectDetail = {
   // Who validates the Master's versions, chosen at creation (the Brief
   // takes it over; retour d'Ibé du 02/11/2026).
   masterValidatorPersonId: string | null;
+  // The image chosen for the project (lib/projects/covers.ts).
+  coverPath: string | null;
   status: ProjectStatus;
   // Newest first.
   assignments: Assignment[];

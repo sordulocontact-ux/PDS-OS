@@ -4,6 +4,7 @@
 // quoi » names one, the external one decide each.
 export const productionProposal = {
   versions: "Versions",
+  earlier: (n: number) => `Versions précédentes (${n})`,
   piece: {
     treatment: "Traitement",
     moodboard: "Moodboard",

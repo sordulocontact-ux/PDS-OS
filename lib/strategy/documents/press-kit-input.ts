@@ -16,6 +16,7 @@ import type {
   PressKitConfig,
   PressLink,
 } from "@/lib/strategy/documents/press-kit-model";
+import type { KnownFact } from "@/lib/strategy/documents/plan-steps";
 import type { StrategyData } from "@/lib/strategy/queries";
 
 const fr = { strategyPressKit };
@@ -93,22 +94,34 @@ export function textsOf(input: PressKitInput, config: PressKitConfig) {
 }
 
 /** One line per thing already known (step 1), never asked again. */
-export function pressKnownItems(input: PressKitInput) {
+export function pressKnownItems(input: PressKitInput): KnownFact[] {
   const t = fr.strategyPressKit.intro.items;
   const proposed = proposedTexts(input);
   const cut = (value: string) =>
     value.length > 160 ? `${value.slice(0, 157)}…` : value;
   return [
-    { label: t.artist, value: proposed.artist ? cut(proposed.artist) : null },
-    { label: t.release, value: proposed.news || null },
-    { label: t.story, value: proposed.story ? cut(proposed.story) : null },
     {
+      key: "artist",
+      label: t.artist,
+      value: proposed.artist ? cut(proposed.artist) : null,
+    },
+    { key: "release", label: t.release, value: proposed.news || null },
+    {
+      key: "story",
+      label: t.story,
+      value: proposed.story ? cut(proposed.story) : null,
+    },
+    {
+      key: "narrative",
       label: t.narrative,
       value: proposed.narrative ? cut(proposed.narrative) : null,
     },
     {
+      key: "tracks",
       label: t.tracks,
-      value: input.tracks.map((x) => x.title).join(" · ") || null,
+      value: null,
+      items: input.tracks.map((x) => x.title),
+      wide: true,
     },
   ];
 }

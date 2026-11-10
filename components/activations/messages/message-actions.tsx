@@ -228,7 +228,7 @@ export function MessageActions({
           {email && m.channel === "email" && (
             <a
               href={mailtoHref(email, m.subject ?? "", m.body)}
-              className="inline-flex items-center rounded-full border px-3 text-xs font-medium hover:bg-muted"
+              className="inline-flex items-center rounded-full border px-3 text-caption font-medium hover:bg-muted"
             >
               {t.mailto}
             </a>

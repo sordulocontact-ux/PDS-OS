@@ -26,7 +26,9 @@ function sectionOfCode(code: string): FormalitySection {
   return "work";
 }
 // Codes said by a field itself, on screen, never twice.
-const FIELD_CODES = new Set(["dep_dr_check"]);
+// Codes said on a field's own row, never as a line apart: the choice of a
+// publisher (or none) is the « Éditeur musical » row's (Sacha, 09/11/2026).
+const FIELD_CODES = new Set(["dep_dr_check", "publishers_choice"]);
 
 export type Entry = { value: unknown; typed: boolean };
 export type FieldState = "missing" | "proposed" | "optional";
@@ -83,6 +85,16 @@ export function fieldStates(input: {
     const depDr = entry?.value as { choice?: string; checked?: boolean } | null;
     const empty =
       field.key === "dep_dr" ? !depDr?.choice : !entry || !filled(entry.value);
+    if (empty && field.key === "publishers")
+      return [
+        input.missing.includes("publishers_choice")
+          ? {
+              ...base,
+              state: "missing",
+              reason: formalityMissingLabel("publishers_choice"),
+            }
+          : { ...base, state: "optional", reason: "" },
+      ];
     if (empty)
       return [
         requiredOf(field.key, field.required)

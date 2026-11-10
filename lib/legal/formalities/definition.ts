@@ -155,6 +155,9 @@ export type Creator = {
   // The title's main artist, put in by PDS OS, never made an author by it:
   // their role is confirmed by a person (`confirmed`).
   main_artist?: boolean;
+  // The main artist's artist of the Catalogue: their Réseau fiche is made
+  // from it when they have none (never matched by name, Sacha 09/11/2026).
+  artist_id?: string;
   confirmed?: boolean;
 };
 export type Publisher = {

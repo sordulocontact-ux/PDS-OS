@@ -30,7 +30,7 @@ export function DecisionCard({
   children?: React.ReactNode;
 }) {
   return (
-    <li className="flex flex-col gap-3 rounded-xl border bg-card p-4">
+    <li className="flex flex-col gap-3 px-4 py-3.5">
       <div className="flex items-start justify-between gap-3">
         <h3 className="font-medium">
           {number}. {title}

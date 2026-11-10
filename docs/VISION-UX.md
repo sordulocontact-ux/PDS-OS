@@ -76,6 +76,15 @@ et la fiche de l'objet, qui garde son « Maintenant ». En tête d'une fiche, l'
 du titre et le reste dans « Informations », pas dans une ligne de faits grise. *(Sacha, 29/10,
 proto des pages : « On est là pour juste regarder la liste. »)*
 
+**Des objets parallèles = une liste, puis une page par objet.** Les activations ne se suivent pas
+comme les étapes d'un parcours : `/activations` montre les leviers du Brief de sortie à créer dans
+leur carte titrée, puis le tableau des activations (colonnes sobres, jamais les 9 colonnes retirées
+le 18/10) ; une activation **s'ouvre sur sa page**, jamais sous une liste ni dans une modale (son
+module ouvre lui-même des modales, et Travail doit pouvoir y mener par lien). On change d'activation,
+de livrable de la Production ou de partie du Marketing **par le double chevron du fil d'Ariane**.
+Créer une activation ouvre sa page. *(Sacha, 10/11/2026, remplace la page unique liste à gauche +
+activation à droite du 18-19/10)*
+
 ## 4. Le patron d'écran unique
 
 Tous les modules (Lancement, Cadrage, Master, Juridique, chaque chevron du Marketing,
@@ -107,7 +116,9 @@ Titre du module                                   [chevrons des sous-modules]
 - **Parcours** (à gauche). Une ligne par étape : rond coché (faite), point bleu (en cours), cadenas
   sur cercle pointillé (verrouillée). Le sous-titre dit le **résultat** si c'est fait, **« Personne ·
   action »** si c'est en cours, **« Après : X »** si c'est verrouillé. « À vous · » en couleur de
-  sélection sur ses propres étapes.
+  sélection sur ses propres étapes. **Le Parcours reste celui du module**, même dans une page à plusieurs écrans
+  ouverte depuis une étape (générateur du Plan de sortie, 8 écrans) : ces écrans se parcourent comme les
+  questions des dimensions, « ‹ 3 sur 8 › », avec « ← Étape » au-dessus du titre *(Sacha, 10/11/2026)*.
 - **Étape ouverte** (à droite). Titre et échéance, pourquoi, puis, dans cet ordre et
   seulement s'ils existent : « Se débloque quand X est fait », le motif d'un retour, l'encadré PO, les faits, ce
   qui manque encore, l'action (ou « En attente de X (lien privé) : … »), le résultat final, et
@@ -132,8 +143,12 @@ Titre du module                                   [chevrons des sous-modules]
   ne peut rien y faire : ni action, ni « Modifier », ni question posée avec son champ de réponse
   (Ibé 01/11/2026 : sous le cadenas, il se croyait dans l'étape).
 
-Les écrans transverses reprennent les mêmes briques : la **Vue d'ensemble** a une carte par
-workflow (statut, barre, « Étape n sur N », qui fait quoi), **Travail** la liste de **mes**
+Les écrans transverses reprennent les mêmes briques : la **Vue d'ensemble** a en tête la
+pochette du projet, puis deux zones à un seul titre, sans pastille : « Maintenant » (ma première
+action en grand) et « Progression » (les étapes du Cadrage, puis une ligne par workflow et « Étape n
+sur N »), et avant le plan le livrable du Cadrage, le Brief de cadrage *(retour d'Akili du 05/11,
+proto validé par Sacha le 10/11/2026 : un titre dit une chose une fois, pas « Prochaine action » et
+« À faire maintenant »)*, **Travail** la liste de **mes**
 actions tirées des parcours (« Module › Étape », pour quand), **Validations** les mêmes filtrées
 sur les actions de type *valider* (le type de l'action, jamais le verbe de son libellé),
 **Activité** le journal horodaté de tous les gestes. *(Correction du 18/10/2026, proto « Projet

@@ -1,5 +1,5 @@
-import { IconCheck } from "nucleo-sharp-essential";
-
+import { ButtonRoll } from "@/components/ui/button";
+import { DoneCheck } from "@/components/ui/done-check";
 import { MineBadge } from "@/components/ui/mine-badge";
 import { ViewLink } from "@/components/ui/view-link";
 import { moduleFrame } from "@/lib/i18n/fr/module-frame";
@@ -30,7 +30,8 @@ const pill =
  * The sub-modules of the Marketing as pills, between the trail and the title
  * (proto « Projet complet », docs/DESIGN.md § 4): the open one in ink, a
  * green check on those done, the viewer's count in blue. No other workflow
- * has them: their steps are in the journey.
+ * has them: their steps are in the journey. A pill not current rolls its
+ * label on hover, as a button's (ButtonRoll), without growing.
  */
 export function SubModuleTabs({
   label = fr.moduleFrame.subModules,
@@ -39,22 +40,13 @@ export function SubModuleTabs({
   label?: string;
   tabs: SubModuleTab[];
 }) {
-  const t = fr.moduleFrame;
   return (
     <nav aria-label={label}>
       <ul className="flex flex-wrap gap-1">
         {tabs.map((tab) => {
           const body = (
             <>
-              {tab.done && (
-                <span
-                  className="grid size-4 place-items-center rounded-full bg-[var(--tone-success-bg)] text-[color:var(--tone-success-fg)]"
-                  aria-label={t.done}
-                  role="img"
-                >
-                  <IconCheck aria-hidden className="size-3" />
-                </span>
-              )}
+              {tab.done && <DoneCheck />}
               {tab.label}
               <MineBadge count={tab.mine ?? 0} />
             </>
@@ -69,10 +61,10 @@ export function SubModuleTabs({
                     pill,
                     tab.current
                       ? "bg-[var(--control-primary-bg)] text-[color:var(--control-primary-fg)]"
-                      : "bg-[var(--surface-soft)] text-[color:var(--text-secondary)] hover:bg-[var(--surface-sunken)] hover:text-foreground",
+                      : "group/button bg-[var(--surface-soft)] text-[color:var(--text-secondary)] hover:bg-[var(--surface-sunken)] hover:text-foreground",
                   )}
                 >
-                  {body}
+                  <ButtonRoll>{body}</ButtonRoll>
                 </ViewLink>
               ) : (
                 <span

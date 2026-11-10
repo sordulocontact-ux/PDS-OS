@@ -4,6 +4,7 @@ import { SheetActions } from "@/components/design/sheets-step/sheet-actions";
 import { SheetFieldRow } from "@/components/design/sheets-step/sheet-field-row";
 import { SheetItemRow } from "@/components/design/sheets-step/sheet-item-row";
 import { StepHistory } from "@/components/shell/journey/step-history";
+import { StepSection } from "@/components/shell/journey/step-section";
 import { FactRows } from "@/components/ui/fact-row";
 import { ReturnCallout } from "@/components/ui/return-callout";
 import { VersionCard } from "@/components/ui/version-card";
@@ -170,8 +171,7 @@ export function SheetCard({
         ))}
       </FactRows>
       {v.items.length > 0 && (
-        <>
-          <h4 className="text-body-sm font-semibold">{t.series_}</h4>
+        <StepSection title={t.series_}>
           <FactRows>
             {v.items.map((item) => {
               const date = item.publish_date ?? item.proposedDate?.date ?? null;
@@ -196,7 +196,7 @@ export function SheetCard({
               );
             })}
           </FactRows>
-        </>
+        </StepSection>
       )}
       <SheetActions
         projectId={projectId}

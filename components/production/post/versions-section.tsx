@@ -1,5 +1,6 @@
 import { EmptyNote } from "@/components/shell/empty-state";
-import { PageSection } from "@/components/shell/page-section";
+import { StepSection } from "@/components/shell/journey/step-section";
+import { DeliverableVersions } from "@/components/ui/deliverable-version";
 import { productionPost } from "@/lib/i18n/fr/production-post";
 import type { PostRole } from "@/lib/production/post/rules";
 import type {
@@ -10,7 +11,7 @@ import type {
   VersionDefaults,
 } from "@/lib/production/post/types";
 
-import { VersionCard } from "./version-card";
+import { PostVersionCard } from "./post-version-card";
 import { VersionAddButton } from "./version-dialog";
 
 const fr = { productionPost };
@@ -36,9 +37,8 @@ export function VersionsSection({
   defaults: VersionDefaults;
   links: Record<string, ProviderLinkState>;
 }) {
-  const card = (v: PostVersion) => (
-    <VersionCard
-      key={v.id}
+  const render = (v: PostVersion) => (
+    <PostVersionCard
       scope={scope}
       people={people}
       version={v}
@@ -47,38 +47,27 @@ export function VersionsSection({
       links={links}
     />
   );
-  const [current, ...earlier] = versions;
   return (
-    <PageSection
+    <StepSection
       id="versions"
       title={t.title}
       description={t.description}
-      action={
+      aside={
         role.canOrganize && (
           <VersionAddButton scope={scope} people={people} defaults={defaults} />
         )
       }
     >
-      {!current ? (
+      {versions.length === 0 ? (
         <EmptyNote>{t.none}</EmptyNote>
       ) : (
-        <div className="flex flex-col gap-4">
-          {card(current)}
-          {earlier.length > 0 && (
-            <details className="group flex flex-col gap-4">
-              <summary className="flex min-h-10 cursor-pointer flex-col justify-center rounded-lg px-1 text-sm font-medium">
-                {t.earlier(earlier.length)}
-                <span className="text-xs font-normal text-muted-foreground">
-                  {t.earlierHint}
-                </span>
-              </summary>
-              <div className="mt-4 flex flex-col gap-4">
-                {earlier.map(card)}
-              </div>
-            </details>
-          )}
-        </div>
+        <DeliverableVersions
+          versions={versions}
+          isCurrent={(_, i) => i === 0}
+          render={render}
+          earlierTitle={t.earlier}
+        />
       )}
-    </PageSection>
+    </StepSection>
   );
 }

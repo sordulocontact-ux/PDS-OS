@@ -5,7 +5,7 @@ import { toast } from "@/components/ui/toast";
 
 import { CallFacts, CallSource } from "@/components/calls/call-facts";
 import { ConceptionCallPrep } from "@/components/design/conception-call-prep";
-import { DesignBlock } from "@/components/design/design-block";
+import { StepSection } from "@/components/shell/journey/step-section";
 import { usePublishResult } from "@/components/shell/module/result-banner";
 import { Button } from "@/components/ui/button";
 import { StartChoices } from "@/components/ui/start-choices";
@@ -91,7 +91,7 @@ export function DesignStartWays({
     );
 
   return (
-    <DesignBlock title={started ? t.changeLegend : t.title}>
+    <StepSection title={started ? t.changeLegend : t.title}>
       <div aria-busy={pending || undefined}>
         <StartChoices
           recommended="call"
@@ -122,6 +122,6 @@ export function DesignStartWays({
           ]}
         />
       </div>
-    </DesignBlock>
+    </StepSection>
   );
 }

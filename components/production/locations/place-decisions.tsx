@@ -1,3 +1,4 @@
+import { StepSection } from "@/components/shell/journey/step-section";
 import { productionPlace } from "@/lib/i18n/fr/production-place";
 import type { PlaceDecision } from "@/lib/production/place";
 import { formatShortDay, formatShortInstant } from "@/lib/utils/day";
@@ -11,8 +12,7 @@ const t = fr.productionPlace;
 export function PlaceDecisions({ decisions }: { decisions: PlaceDecision[] }) {
   if (decisions.length === 0) return null;
   return (
-    <section className="flex flex-col gap-2">
-      <h3 className="font-semibold">{t.decisions}</h3>
+    <StepSection title={t.decisions}>
       <ul className="flex flex-col gap-1.5">
         {decisions.map((d) => (
           <li key={d.id} className="flex gap-2">
@@ -38,6 +38,6 @@ export function PlaceDecisions({ decisions }: { decisions: PlaceDecision[] }) {
           </li>
         ))}
       </ul>
-    </section>
+    </StepSection>
   );
 }

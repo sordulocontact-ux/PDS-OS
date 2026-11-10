@@ -44,7 +44,9 @@ export function StepsPanel({
     );
 
   return (
-    <div className="flex flex-col gap-4">
+    // Nothing to do or show yet (the dossier still being filled): no empty
+    // box, which would add its gap above the dossier.
+    <div className="flex flex-col gap-4 [&:not(:has(>:not(:empty)))]:hidden">
       {f.status === "rejected" && (
         <ToneCallout tone="danger">
           {t.rejected(
@@ -53,7 +55,7 @@ export function StepsPanel({
           )}
         </ToneCallout>
       )}
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2 empty:hidden">
         {f.status === "signatures_pending" && (
           <DialogButton
             label={t.partial}

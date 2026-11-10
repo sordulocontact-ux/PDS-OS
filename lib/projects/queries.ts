@@ -184,7 +184,7 @@ export async function listProjects(filter?: {
   const select = supabase
     .from("projects")
     .select(
-      `id, title, type, music_format, priority, owner_person_id, due_date, artist:artists!projects_artist_same_org(name), owner:people!projects_owner_person_id_fkey(first_name, last_name), ${FORMAT_SELECT}, ${MASTERS_SELECT}, ${STAGES_SELECT}, ${ASSIGNMENTS_SELECT}`,
+      `id, title, type, music_format, priority, owner_person_id, due_date, cover_path, artist:artists!projects_artist_same_org(name), owner:people!projects_owner_person_id_fkey(first_name, last_name), ${FORMAT_SELECT}, ${MASTERS_SELECT}, ${STAGES_SELECT}, ${ASSIGNMENTS_SELECT}`,
     );
   let query = filter?.archived
     ? select.not("archived_at", "is", null)
@@ -224,6 +224,8 @@ export async function listProjects(filter?: {
       responsiblePersonId:
         row.owner_person_id ?? latest?.assigneePersonId ?? null,
       dueDate: row.due_date,
+      coverPath: row.cover_path,
+      firstMasterId: masters[0]?.id ?? null,
     };
   });
   // Stable: newest first inside each priority.
@@ -241,7 +243,7 @@ export const getProject = trackedCache(
       supabase
         .from("projects")
         .select(
-          `id, title, type, music_format, artist_id, created_at, due_date, budget_cents, priority, initial_context, owner_person_id, master_validator_person_id, artist:artists!projects_artist_same_org(name), owner:people!projects_owner_person_id_fkey(first_name, last_name), ${FORMAT_SELECT}, ${MASTERS_SELECT}, ${STAGES_SELECT}, ${ASSIGNMENTS_SELECT}`,
+          `id, title, type, music_format, artist_id, created_at, due_date, budget_cents, priority, initial_context, owner_person_id, master_validator_person_id, cover_path, artist:artists!projects_artist_same_org(name), owner:people!projects_owner_person_id_fkey(first_name, last_name), ${FORMAT_SELECT}, ${MASTERS_SELECT}, ${STAGES_SELECT}, ${ASSIGNMENTS_SELECT}`,
         )
         .eq("id", projectId)
         .is("archived_at", null)
@@ -284,6 +286,7 @@ export const getProject = trackedCache(
       ownerName: owner || null,
       ownerPersonId: data.owner_person_id,
       masterValidatorPersonId: data.master_validator_person_id,
+      coverPath: data.cover_path,
       status: projectStatusOf(stages.length, assignments[0] ?? null),
       assignments,
       dueDate: data.due_date,

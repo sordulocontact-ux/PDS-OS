@@ -1,4 +1,4 @@
-import { PageSection } from "@/components/shell/page-section";
+import { StepSection } from "@/components/shell/journey/step-section";
 import { FactList } from "@/components/ui/fact-list";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
@@ -50,11 +50,11 @@ export function ShootReportSection({
       : "not_ended";
   const returnLabel = s.equipment.returnState[report.returnState];
   return (
-    <PageSection
+    <StepSection
       id="shoot-report"
       title={t.title}
       description={t.description}
-      action={
+      aside={
         status !== "not_ended" && (
           <StatusBadge tone={shootReportTone[status]}>
             {status === "validated" ? t.validated : t.toValidate}
@@ -139,6 +139,6 @@ export function ShootReportSection({
           <FactList facts={[{ label: t.note, value: shoot.reportNote }]} />
         )}
       </div>
-    </PageSection>
+    </StepSection>
   );
 }

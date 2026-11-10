@@ -1699,7 +1699,7 @@ liste), est obligatoire ou non, accepte ou non « Rien à signaler » (`{"none":
   à préparer / non nécessaire / non applicable, contrat qui le prouve, qui suit, raison) ;
   « Existant » exige un contrat **signé** de Contrats dont la personne est partie (SQL),
   « Non nécessaire » / « Non applicable » une raison ; le code n'indique un statut que sur
-  preuve (« Contrat trouvé dans Contrats »), jamais d'après le rôle ; un rôle non attribué
+  preuve (le contrat ajouté à « Trouvé dans : …, Contrats (« … ») »), jamais d'après le rôle ; un rôle non attribué
   n'est pas une partie. Qualifiées **dans la liste, un clic par partie** (Sacha 10/11/2026, proto
   « Qualifier les parties » : une fenêtre par personne était pénible ; `PartyChoice`).
   La question est « connue » quand toutes les parties sont qualifiées,
@@ -2302,6 +2302,12 @@ d'exécution décrits plus haut** (tables et fonctions gardées).
   `/strategy` redirige vers l'étape de la personne (`strategyLanding`), `?d=x` vers
   `/strategy/dimensions#dim-x`, `/strategy/brief` vers `/strategy/validation` (`?v=n` gardé). Cadre :
   `StrategyStepFrame`.
+  **`validated` est faite dès la validation du Brief** (ticket § 9 : « la stratégie passe à « Stratégie
+  validée » ») : le Plan de sortie et le Dossier de presse sont **facultatifs** et ne la gardent jamais
+  ouverte (Sacha, 10/11/2026 : « si pour Ibé c'est facultatif, ça doit l'être », après un essai du même jour
+  qui la laissait en cours). `strategyDocumentActors` ne donne que ce qu'on a demandé à quelqu'un : « Valider
+  le … » (valideurs en attente, lien vers l'Aperçu `?step=8`) et « Répondre à la demande sur le … »
+  (responsable) ; la page met « À vous » sur ce document.
 - **Démarrer** : `StartChoices` « Commencer la stratégie » (`startStrategyDirect`, `withOutcome`) /
   « Préparer un échange » (`CallPrepForm` dans l'étape, « Changer »). **Recommandé** : même règle que le
   Cadrage — l'échange quand ce qui reste à décider dépasse ce que PDS OS sait déjà ; connu = besoins du
@@ -2807,12 +2813,26 @@ pour l'écran, les lots 1 et 4 ci-dessous (la logique `lib/workflow-status/` res
   `lib/overview/framing-steps.ts` : étape `framing` de `project_stages`, validation en attente, `project_plans`) ;
   **avant « Lancer le plan », seules les actions du Cadrage comptent** (un workflow commencé avant le plan garde sa
   page mais ses actions attendent le plan). Lu par la navigation, la Vue d'ensemble, Travail, Validations.
-- **Vue d'ensemble** (`app/(app)/app/projects/[projectId]/page.tsx`) : `ProjectHeader` avec le nom du projet seul
-  (Figma PDS OS 304:20801, Sacha 29/10/2026 : plus d'état ni de ligne de faits, `overviewHead` supprimé) ; « Bilan &
-  clôture du projet » (page `closure`, hors proto) en action
-  `ghost` de la tête. `NowCard variant="overview"` (toutes mes actions, deux nommées). Avant le plan :
-  `BeforeWorkflows` seul (le Plan du projet est l'étape 4 du Cadrage depuis le lot 2, `/framing/plan`, § 6 ter). Après : `WorkflowCards` (`lib/overview/cards.ts` : parcours du workflow s'il
-  en a un, sinon ses chevrons ; « À vous · » / « Nom · » depuis `mine` / `waiting`) et `DependencyRows`
+- **Vue d'ensemble** (`app/(app)/app/projects/[projectId]/page.tsx`, refaite le 10/11/2026 d'après le retour
+  d'Akili du 05/11 et le proto « Vue d'ensemble » validé par Sacha) : `ProjectHeader` avec la **pochette**
+  (`media` = `ProjectCover`, bouton `ProjectCoverEdit` pour qui peut la changer), le nom et « Artiste · Type »
+  (`subtitle`) ; « Informations » (`ProjectInfoButton` : `HandoverFacts` + chef de projet + changer / retirer la
+  pochette) et « Bilan & clôture du projet » (page `closure`, hors proto, `ghost` à côté du contour) en actions.
+  Puis deux zones, un seul titre chacune, sans pastille : `OverviewNow` (« Maintenant » : ma première action en
+  grand, son pourquoi, « Ouvrir l'étape », « Aussi à vous : … » ; sinon « Rien à faire pour vous » et qui est
+  attendu) et `OverviewProgress` (avant le plan : les 4 étapes du Cadrage en fil, cochées / en cours en couleur
+  de sélection avec « À vous » ou le nom / à venir ; après : une ligne par workflow, `ProgressRing`, « Étape n sur
+  N · titre » ou « À vous : … », modèle `lib/overview/cards.ts`). Dessous, avant le plan : `FramingDeliverable`
+  (le Brief de cadrage, son état lu de l'étape `brief` du Cadrage, « Ouvrir le Brief ») ; après : `DependencyRows`
+  (en texte, sans pastille). `BeforeWorkflows`, `WorkflowCards` et l'en-tête « nom seul » du 29/10 sont supprimés.
+  **Pochette d'un projet** : `projects.cover_path` (bucket privé `project-covers`, « org/projet/uuid.ext »),
+  écrite par `set_project_cover` seulement (`can_edit_project_cover` : la direction `create_projects` avant
+  l'acceptation, puis le responsable seul, `is_project_owner`) ; lue par `lib/projects/covers.ts`
+  (`projectCoverUrls` : l'image du projet, sinon la pochette de son premier titre au Catalogue
+  `listMasterCovers`, sinon rien → visuel par défaut `.project-cover-default`, teinte tirée de l'id) ; URLs
+  signées au rendu, jamais dans un cache (elles expirent). À la création, le formulaire envoie `intent=cover`
+  (l'action renvoie le projet au lieu de rediriger), téléverse l'image (`uploadProjectCover`) puis ouvre le
+  projet. Listes de projets (`ProjectsTable`, aussi dans le Catalogue) : `withCovers` (petites copies). Sources de `DependencyRows`
   (`lib/overview/dependencies.ts` : Master final = dépendance `master-online` ; Pochette livrée = un livrable dont
   le titre correspond à `COVER` livré (`deliverable_deliveries.delivered_at`) ; Prêt pour la sortie = étape `ready`
   du parcours du Juridique s'il en a une, sinon Juridique Terminé ; Durée du master final = chaque titre a un fichier
@@ -3771,7 +3791,9 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
       `lib/legal/clearance/contract-email.ts`), « Envoyer le contrat à … » par PDS OS, réponses
       à l'adresse de l'emprunt donc rangées dans ses Échanges, texte gardé au journal ; ou « Je
       l'ai envoyé autrement » puis « Envoyé par e-mail / par un outil de signature / remis en
-      main propre ». Un contrat sans texte le dit et mène à sa page (PDS OS n'en écrit jamais).
+      main propre ». Un contrat sans texte (aucun modèle de licence dans la bibliothèque, PDS OS n'en écrit
+      jamais) se dépose **dans « Signer »** (`ContractProofSlot category="draft"`, rangé en « Projet de
+      contrat », la page se relit) ; la carte mail apparaît alors avec lui joint.
       **Ayant droit gardé par son nom seul** (09/11/2026, migration `20261109170101`) : l'adresse
       à laquelle la demande ou le contrat est parti reste sur lui (`legal_clearance_rightsholders.email`,
       `keep_clearance_holder_email`), le journal écrit « à Nom (adresse) », la carte mail du
@@ -4514,6 +4536,15 @@ la personne (`/c/`). Migration `20261020070101_signed_returns.sql`, pgTAP `signe
   par le référent juridique avant production (ticket). Depuis le 09/11, un adaptateur partage la
   catégorie Auteur et un arrangeur la catégorie Compositeur, avec la part que le dossier leur
   donne dedans (plus d'alerte « non calculé »).
+- **Pré-rempli du bulletin** (Sacha, 09/11/2026 : « tout ce qui peut être rempli automatiquement le soit ») :
+  titre, interprètes, ISWC, date de sortie, participants et éditeurs comme avant ; **sous-titre** = version
+  du titre (`variant_label`), **territoires cédés** = paramètres de distribution (« Monde », sauf…), **lieu /
+  exploitant** = plateformes numériques via The Orchard dès qu'il y a un dossier de distribution ; toujours
+  « à vérifier ». Sans source dans l'app : genre, nom du groupe, arrangement, DEP/DR (choix explicite). La
+  **durée** ne vient que du master final validé (jamais d'un brouillon). **Artiste principal sans fiche** :
+  `ensureMainArtistContact` crée sa fiche du Réseau depuis l'artiste du Catalogue (par `artist_id`, jamais
+  par le nom) à l'ouverture de l'éditeur, et le participant est rempli avec elle. Rôles en menu à choix
+  multiple (`OptionSelect multiple`), plus de pastilles.
 - **Participants et parts par catégorie (retour d'Ibé du 02/11, total à 125 % d'Akili ;
   `20261109140101`, `lib/legal/formalities/participants.ts`)** : le bulletin ne se remplit plus
   « personne + qualité + part Phono », mais **participant + rôle(s) + part dans chaque catégorie**.
@@ -4762,9 +4793,10 @@ Remplace l'étape « Suivi » et les pages de branche (`docs/projet-complet/lega
   génère ; refusé avec le compte des manques) et « Générer un brouillon »
   (`/api/legal/formalities/[id]/draft` : le 725 rempli des valeurs enregistrées,
   « BROUILLON — ne pas signer » en travers, aucune version gardée). Une fois généré,
-  `BulletinCard` (« Bulletin_725_Neons_v1.pdf · Généré le … · signatures : n sur m »,
-  « Télécharger ») est en tête à chaque étape qui suit, le dossier replié sous « Les valeurs du
-  bulletin ». Retirés : étapes du dossier (`DossierStepChips`), récapitulatif (`DossierRecap`).
+  la tête du bulletin (une `DocumentCard` repliable par titre, `FormalityCard`, 10/11/2026 :
+  « Bulletin SACEM 725 · œuvre éditée · Généré le … · signatures : n sur m », état et
+  « Télécharger » le « Bulletin_725_Neons_v1.pdf », `BulletinDownload`) le dit à chaque étape
+  qui suit, le dossier replié sous « Les valeurs du bulletin ». Retirés : étapes du dossier (`DossierStepChips`), récapitulatif (`DossierRecap`).
 - **Factures (J10)** : table `legal_invoices` (une par `financial_needs`, cascade avec lui ;
   numéro, montant HT, `gap_reason` obligatoire si le montant n'est pas la rémunération
   convenue, fichier du bucket privé `legal-invoices`, reçue le, échéance = +30 jours, `link` ou
@@ -6954,6 +6986,21 @@ Piégée / Dioo / Alka et chiffres ATYR rejoués dans une transaction annulée).
   vérification automatique des liens, collecte API, synchronisation planifiée : après MVP.
 - **Dépendance** : `read-excel-file` (lecture seule d'un .xlsx côté serveur).
 ### Lot 6 — Activations sur une seule page (proto « Projet complet », 19/10/2026)
+
+> **Remplacé le 10/11/2026 (Sacha) : deux pages.** `/activations` (`ActivationsIndex`) = en-tête du
+> Marketing, `ProjectNowCard` (`shownKey="levers"`), carte **« Leviers du Brief de sortie »**
+> (`LeversCard` : `PageSection card collapsible` + `DataTable`, seulement les leviers à créer ou gardés
+> pour plus tard, source dite une fois, ancre `#levers`), puis le **tableau des activations**
+> (`ActivationsTable` : `DataTableViews` « À moi / En cours / À mesurer / Terminées » en `?vue=`, colonnes
+> Activation + phrase « À vous · … », Type · mode, Responsable, Échéance, Avancement = `PhaseStrip` ;
+> « Nouvelle activation » en contour au bout des onglets). `/activations` n'ouvre plus d'activation d'office.
+> `/activations/[id]` (`ActivationPageView`) = l'activation en pleine largeur (`ActivationDetail` inchangé),
+> fil « Marketing / Activations / <activation> » dont le dernier segment change d'activation
+> (`CrumbSwitcher`) ; « Activations » remonte au tableau (`ProjectHeaderView` ne renvoie plus un segment de
+> sous-module vers l'entrée du sous-module quand on est en dessous). « Créer l'activation » ouvre la page
+> de l'activation créée (`createFromLever` renvoie `open`, `withOutcome(…, { openNext: false })`). « Hors
+> filtre » (ACT-003) n'a plus lieu d'être : aucune activation n'est ouverte sur la liste, et une activation
+> traitée reste sur sa page (ACT-002 par construction). La description ci-dessous garde l'historique.
 
 Migrations `20261019060101_activation_journey.sql` et `20261019060201_influence_creator_link.sql`,
 pgTAP `marketing-activations.test.sql` (65) et `activation-creator-link.test.sql` (11).

@@ -3,7 +3,10 @@ import { DashboardFigures } from "@/components/marketing/review/dashboard-figure
 import { EvidenceTable } from "@/components/marketing/review/evidence-table";
 import { MetricTotals } from "@/components/marketing/review/metric-totals";
 import { EmptyNote } from "@/components/shell/empty-state";
-import { PageSection } from "@/components/shell/page-section";
+import { StepSection } from "@/components/shell/journey/step-section";
+import { FactRow, FactRows } from "@/components/ui/fact-row";
+import { InfoRow, Rows } from "@/components/ui/rows";
+
 import { formatBriefDate } from "@/lib/framing/assess";
 import { marketingReview } from "@/lib/i18n/fr/marketing-review";
 import type { Dashboard } from "@/lib/marketing/dashboard";
@@ -38,60 +41,60 @@ export function ReportView({
     snapshot.activations.find((a) => a.id === id)?.title ?? "";
 
   return (
-    <div className="grid gap-10">
+    <div className="flex flex-col gap-3.5">
       {has("summary") && (
-        <PageSection id="summary" title={t.sections.summary}>
-          <p className="text-sm whitespace-pre-line">
+        <StepSection id="summary" title={t.sections.summary}>
+          <p className="text-body-sm whitespace-pre-line">
             {snapshot.summary ?? (
-              <span className="text-muted-foreground">{v.noSummary}</span>
+              <span className="text-[color:var(--text-secondary)]">
+                {v.noSummary}
+              </span>
             )}
           </p>
           {snapshot.excluded.length > 0 && (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-body-sm text-[color:var(--text-secondary)]">
               {v.excluded(snapshot.excluded.length)}
             </p>
           )}
-        </PageSection>
+        </StepSection>
       )}
       {has("objectives") && (
-        <PageSection id="objectives" title={t.sections.objectives}>
-          <div className="grid gap-1">
-            <h3 className="text-sm font-medium">{v.strategic}</h3>
-            <p className="text-sm whitespace-pre-line text-muted-foreground">
-              {snapshot.objectives.strategic ?? v.noStrategic}
-            </p>
-          </div>
-          <div className="grid gap-1">
-            <h3 className="text-sm font-medium">{v.kpis}</h3>
+        <StepSection id="objectives" title={t.sections.objectives}>
+          <FactRows>
+            <FactRow
+              label={v.strategic}
+              value={snapshot.objectives.strategic ?? v.noStrategic}
+            />
             {snapshot.objectives.kpis.length === 0 ? (
-              <p className="text-sm text-muted-foreground">{v.noKpis}</p>
+              <FactRow label={v.kpis} value={v.noKpis} />
             ) : (
-              <ul className="grid gap-1 text-sm">
-                {snapshot.objectives.kpis.map((k, i) => (
-                  <li key={i}>
-                    <span className="font-medium">{k.label}</span>
-                    <span className="text-muted-foreground">
-                      {" · "}
-                      {k.kind === "qualitative"
-                        ? v.qualitative
-                        : k.target === null
-                          ? v.noTarget
-                          : v.target(
-                              [number.format(k.target), k.unit]
-                                .filter(Boolean)
-                                .join(" "),
-                            )}
-                      {k.dueOn && ` · ${formatBriefDate(k.dueOn)}`}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+              snapshot.objectives.kpis.map((k, i) => (
+                <FactRow
+                  key={i}
+                  label={i === 0 ? v.kpis : undefined}
+                  value={k.label}
+                  source={[
+                    k.kind === "qualitative"
+                      ? v.qualitative
+                      : k.target === null
+                        ? v.noTarget
+                        : v.target(
+                            [number.format(k.target), k.unit]
+                              .filter(Boolean)
+                              .join(" "),
+                          ),
+                    k.dueOn ? formatBriefDate(k.dueOn) : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                />
+              ))
             )}
-          </div>
-        </PageSection>
+          </FactRows>
+        </StepSection>
       )}
       {has("activations") && (
-        <PageSection id="activations" title={t.sections.activations}>
+        <StepSection id="activations" title={t.sections.activations}>
           <DashboardFigures
             dashboard={figures}
             budgetRestricted
@@ -99,10 +102,10 @@ export function ReportView({
             headings={false}
           />
           <ActivationTable activations={snapshot.activations} hrefOf={null} />
-        </PageSection>
+        </StepSection>
       )}
       {has("results") && (
-        <PageSection
+        <StepSection
           id="results"
           title={t.sections.results}
           description={v.declaredApart}
@@ -112,10 +115,10 @@ export function ReportView({
             budgetRestricted
             groups={["publications", "coverage"]}
           />
-        </PageSection>
+        </StepSection>
       )}
       {has("statistics") && (
-        <PageSection id="statistics" title={t.sections.statistics}>
+        <StepSection id="statistics" title={t.sections.statistics}>
           <DashboardFigures
             dashboard={figures}
             budgetRestricted
@@ -123,10 +126,10 @@ export function ReportView({
             headings={false}
           />
           <MetricTotals metrics={figures.metrics} />
-        </PageSection>
+        </StepSection>
       )}
       {has("budget") && (
-        <PageSection id="budget" title={t.sections.budget}>
+        <StepSection id="budget" title={t.sections.budget}>
           {budget ? (
             <DashboardFigures
               dashboard={figures}
@@ -137,38 +140,33 @@ export function ReportView({
           ) : (
             <EmptyNote>{v.budgetMissing}</EmptyNote>
           )}
-        </PageSection>
+        </StepSection>
       )}
       {has("reserves") && (
-        <PageSection id="reserves" title={t.sections.reserves}>
+        <StepSection id="reserves" title={t.sections.reserves}>
           {snapshot.reserves.length === 0 ? (
             <EmptyNote>{v.noReserves}</EmptyNote>
           ) : (
-            <ul className="grid gap-2">
+            <Rows>
               {snapshot.reserves.map((r) => (
-                <li
+                <InfoRow
                   key={r.id}
-                  className="grid gap-0.5 rounded-xl border border-border p-3 text-sm"
-                >
-                  <span className="text-caption text-muted-foreground">
-                    {t.reserveCategories[r.category]}
-                    {r.activationId && ` · ${titleOf(r.activationId)}`}
-                  </span>
-                  <span className="font-medium">{r.description}</span>
-                </li>
+                  title={r.description}
+                  detail={`${t.reserveCategories[r.category]}${r.activationId ? ` · ${titleOf(r.activationId)}` : ""}`}
+                />
               ))}
-            </ul>
+            </Rows>
           )}
-          <div className="grid gap-1">
-            <h3 className="text-sm font-medium">{v.recommendations}</h3>
-            <p className="text-sm whitespace-pre-line text-muted-foreground">
-              {snapshot.recommendations ?? v.noRecommendations}
-            </p>
-          </div>
-        </PageSection>
+          <FactRows>
+            <FactRow
+              label={v.recommendations}
+              value={snapshot.recommendations ?? v.noRecommendations}
+            />
+          </FactRows>
+        </StepSection>
       )}
       {has("annexes") && (
-        <PageSection id="annexes" title={t.sections.annexes}>
+        <StepSection id="annexes" title={t.sections.annexes}>
           {snapshot.evidence.length === 0 ? (
             <EmptyNote>{v.noEvidence}</EmptyNote>
           ) : (
@@ -178,7 +176,7 @@ export function ReportView({
               activationHref={null}
             />
           )}
-        </PageSection>
+        </StepSection>
       )}
     </div>
   );

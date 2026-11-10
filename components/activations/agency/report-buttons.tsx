@@ -155,11 +155,11 @@ function DecisionForm({
       }}
     >
       <div className="flex flex-col gap-1">
-        <h3 className="text-sm font-medium">{t.reserves}</h3>
+        <h3 className="text-body-sm font-medium">{t.reserves}</h3>
         {reserves.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t.noReserves}</p>
+          <p className="text-body-sm text-muted-foreground">{t.noReserves}</p>
         ) : (
-          <ul className="list-disc pl-5 text-sm">
+          <ul className="list-disc pl-5 text-body-sm">
             {reserves.map((r) => (
               <li key={r}>{r}</li>
             ))}

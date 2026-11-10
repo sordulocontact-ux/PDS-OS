@@ -1,4 +1,4 @@
-import { PageSection } from "@/components/shell/page-section";
+import { ActivationSection } from "@/components/activations/activation-section";
 import { FactList } from "@/components/ui/fact-list";
 import { launchGapsText } from "@/lib/activations/describe";
 import { NOT_STARTED_STATUSES } from "@/lib/activations/model";
@@ -34,10 +34,9 @@ export function IdentitySection({
         ? formatDate(a.dueOn)
         : null;
   return (
-    <PageSection
+    <ActivationSection
       id="identity"
       title={t.identity.title}
-      card
       action={canWrite && <IdentityActions activation={a} members={members} />}
     >
       <FactList
@@ -73,6 +72,6 @@ export function IdentitySection({
             : []),
         ]}
       />
-    </PageSection>
+    </ActivationSection>
   );
 }

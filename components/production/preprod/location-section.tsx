@@ -1,4 +1,4 @@
-import { PageSection } from "@/components/shell/page-section";
+import { StepSection } from "@/components/shell/journey/step-section";
 import { FactList } from "@/components/ui/fact-list";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
@@ -34,11 +34,11 @@ export function LocationSection({
   children?: React.ReactNode;
 }) {
   return (
-    <PageSection
+    <StepSection
       id="location"
       title={t.title}
       description={t.description}
-      action={
+      aside={
         canOrganize ? (
           <LocationEditButton
             projectId={projectId}
@@ -47,7 +47,6 @@ export function LocationSection({
           />
         ) : undefined
       }
-      card
     >
       <div className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center gap-2">
@@ -78,6 +77,6 @@ export function LocationSection({
         />
         {children}
       </div>
-    </PageSection>
+    </StepSection>
   );
 }

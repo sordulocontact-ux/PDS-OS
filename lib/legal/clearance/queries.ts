@@ -92,7 +92,7 @@ export async function loadClearances(
     contractIds.length > 0
       ? supabase
           .from("contract_files")
-          .select("contract_id, category, description, path")
+          .select("id, contract_id, category, description, path, file_name")
           .in("contract_id", contractIds)
       : none,
     contactIds.length > 0
@@ -116,26 +116,35 @@ export async function loadClearances(
       c.kind === "person" ? ("person" as const) : ("organization" as const),
     ]),
   );
-  // A signed copy sent back by e-mail and kept by PDS OS (cron): shown to
-  // check before « Marquer comme sécurisé ».
-  const emailedFiles = (files.data ?? []).filter(
-    (f) => f.category === "signed" && f.description === RECEIVED_BY_EMAIL,
+  // The signed copy and its proof, each to open from the contract's card
+  // (Sacha, 09/11/2026); one sent back by e-mail and kept by PDS OS (cron)
+  // is said, to check before « Marquer comme sécurisé ».
+  const proofFiles = (files.data ?? []).filter(
+    (f) => f.category === "signed" || f.category === "evidence",
   );
-  const emailedUrls =
-    emailedFiles.length > 0
+  const proofUrls =
+    proofFiles.length > 0
       ? (
           await supabase.storage.from("contract-files").createSignedUrls(
-            emailedFiles.map((f) => f.path),
+            proofFiles.map((f) => f.path),
             3600,
           )
         ).data
       : null;
-  const emailed = new Map(
-    emailedFiles.map((f, i) => [
-      f.contract_id,
-      { url: emailedUrls?.[i]?.signedUrl ?? null },
-    ]),
-  );
+  const proofOf = (contractId: string) =>
+    proofFiles.flatMap((f, i) =>
+      f.contract_id === contractId
+        ? [
+            {
+              id: f.id,
+              category: f.category as "signed" | "evidence",
+              name: f.file_name,
+              url: proofUrls?.[i]?.signedUrl ?? null,
+              byEmail: f.description === RECEIVED_BY_EMAIL,
+            },
+          ]
+        : [],
+    );
   const nameOf = new Map(
     (people.data ?? []).map((p) => [
       p.person_id,
@@ -241,7 +250,7 @@ export async function loadClearances(
                 signedFile: mine.some((f) => f.category === "signed"),
                 evidenceFile: mine.some((f) => f.category === "evidence"),
                 document: documents.get(c.id) ?? null,
-                signedByEmail: emailed.get(c.id) ?? null,
+                proof: proofOf(c.id),
                 ownerName: c.owner_person_id
                   ? (nameOf.get(c.owner_person_id) ?? null)
                   : null,

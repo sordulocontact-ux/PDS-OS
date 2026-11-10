@@ -528,6 +528,44 @@
   --popover: var(--surface-raised);
 }
 
+/* Default visual of a project without a cover (ProjectCover, DESIGN.md
+   « Pochette d'un projet »): a category hue (§ 3 ter) drawn from its id,
+   light to deep, under the rings of a disc. Same in both themes: it stands
+   for an image. */
+.project-cover-default {
+  --cover-hue: var(--hue-indigo-fg);
+  background:
+    radial-gradient(
+      120% 90% at 20% 15%,
+      color-mix(in srgb, var(--cover-hue) 45%, white) 0%,
+      transparent 60%
+    ),
+    linear-gradient(
+      140deg,
+      var(--cover-hue) 0%,
+      color-mix(in srgb, var(--cover-hue) 30%, black) 100%
+    );
+  color: rgb(255 255 255 / 0.22);
+}
+.project-cover-default[data-hue="violet"] {
+  --cover-hue: var(--hue-violet-fg);
+}
+.project-cover-default[data-hue="sky"] {
+  --cover-hue: var(--hue-sky-fg);
+}
+.project-cover-default[data-hue="teal"] {
+  --cover-hue: var(--hue-teal-fg);
+}
+.project-cover-default[data-hue="pink"] {
+  --cover-hue: var(--hue-pink-fg);
+}
+.project-cover-default[data-hue="orange"] {
+  --cover-hue: var(--hue-orange-fg);
+}
+.project-cover-default[data-hue="slate"] {
+  --cover-hue: var(--hue-slate-fg);
+}
+
 /* ==========================================================================
    3 — UTILITAIRES TAILWIND
    ========================================================================== */

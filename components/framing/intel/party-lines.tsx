@@ -28,7 +28,7 @@ const day = new Intl.DateTimeFormat("fr-FR", {
  * 10/11/2026: a window per person was tedious); « n sur N à qualifier » is
  * said under the question's title (QuestionScreen `why`).
  * A party not qualified yet reads « À qualifier » for the others; a contract
- * found in Contrats is shown as a lead, not applied. Roles nobody holds are
+ * found in Contrats joins « Trouvé dans », a lead, never applied. Roles nobody holds are
  * named apart: no party.
  * Also in the card « 06 · Cadre juridique » once the question is answered,
  * one party per line, still qualified there while the dimension is open.
@@ -101,14 +101,13 @@ export function PartyLines({
                     </span>
                   ) : (
                     <span className="text-caption text-muted-foreground">
-                      {t.found(line.origins.join(", "))}
-                    </span>
-                  )}
-                  {!d && line.suggestion && (
-                    <span className="text-caption">
-                      {t.suggestion(
-                        t.statuses[line.suggestion.status],
-                        line.suggestion.contract.title,
+                      {t.found(
+                        [
+                          ...line.origins,
+                          ...(line.suggestion
+                            ? [t.inContracts(line.suggestion.contract.title)]
+                            : []),
+                        ].join(", "),
                       )}
                     </span>
                   )}

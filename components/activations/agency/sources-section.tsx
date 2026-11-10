@@ -1,5 +1,6 @@
+import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { EmptyNote } from "@/components/shell/empty-state";
-import { PageSection } from "@/components/shell/page-section";
+import { ActivationSection } from "@/components/activations/activation-section";
 import type { AgencySourceRecord } from "@/lib/activations/agency/queries";
 import type { ActivationScope } from "@/lib/activations/types";
 import { activationAgency } from "@/lib/i18n/fr/activation-agency";
@@ -30,7 +31,7 @@ export function SourcesSection({
   canWrite: boolean;
 }) {
   return (
-    <PageSection
+    <ActivationSection
       id="sources"
       title={t.title}
       description={t.description}
@@ -46,32 +47,51 @@ export function SourcesSection({
       {sources.length === 0 ? (
         <EmptyNote>{t.empty}</EmptyNote>
       ) : (
-        <ul className="flex flex-col divide-y divide-[color:var(--border-hairline)] rounded-xl border bg-card">
+        <FactRows>
           {sources.map((s) => (
-            <li
+            <FactRow
               key={s.id}
-              className="flex flex-wrap items-center justify-between gap-3 px-4 py-3"
-            >
-              <div className="flex min-w-0 flex-col">
-                <span className="font-medium break-words">
-                  {s.label}
-                  <span className="font-normal text-muted-foreground">
-                    {" "}
-                    · {t.kinds[s.kind]}
-                  </span>
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  {s.lastSnapshot
-                    ? t.last(
-                        formatDateTime(s.lastSnapshot.takenAt),
-                        t.statuses[
-                          s.lastSnapshot.status as keyof typeof t.statuses
-                        ],
-                      )
-                    : t.never}
-                  {s.url && (
-                    <>
-                      {" · "}
+              value={`${s.label} · ${t.kinds[s.kind]}`}
+              source={
+                s.lastSnapshot
+                  ? t.last(
+                      formatDateTime(s.lastSnapshot.takenAt),
+                      t.statuses[
+                        s.lastSnapshot.status as keyof typeof t.statuses
+                      ],
+                    )
+                  : t.never
+              }
+              side={
+                canWrite && (
+                  <div className="flex flex-wrap gap-2">
+                    {s.kind !== "manual" && (
+                      <RefreshButton
+                        scope={scope}
+                        sourceId={s.id}
+                        kind={s.kind}
+                        press={press}
+                        mapping={s.mapping}
+                        keyFields={s.keyFields}
+                      />
+                    )}
+                    <ManualRowButton
+                      projectId={scope.projectId}
+                      sourceId={s.id}
+                      press={press}
+                    />
+                    <ImportMetricsButton
+                      projectId={scope.projectId}
+                      activationId={scope.activationId}
+                      sourceId={s.id}
+                    />
+                  </div>
+                )
+              }
+              below={
+                (s.url || s.kind === "manual") && (
+                  <span className="flex flex-col gap-0.5 text-caption text-[color:var(--text-secondary)]">
+                    {s.url && (
                       <a
                         href={s.url}
                         target="_blank"
@@ -80,43 +100,15 @@ export function SourcesSection({
                       >
                         {t.openSource}
                       </a>
-                    </>
-                  )}
-                </span>
-                {s.kind === "manual" && (
-                  <span className="text-xs text-muted-foreground">
-                    {t.pdfNote}
+                    )}
+                    {s.kind === "manual" && <span>{t.pdfNote}</span>}
                   </span>
-                )}
-              </div>
-              {canWrite && (
-                <div className="flex flex-wrap gap-2">
-                  {s.kind !== "manual" && (
-                    <RefreshButton
-                      scope={scope}
-                      sourceId={s.id}
-                      kind={s.kind}
-                      press={press}
-                      mapping={s.mapping}
-                      keyFields={s.keyFields}
-                    />
-                  )}
-                  <ManualRowButton
-                    projectId={scope.projectId}
-                    sourceId={s.id}
-                    press={press}
-                  />
-                  <ImportMetricsButton
-                    projectId={scope.projectId}
-                    activationId={scope.activationId}
-                    sourceId={s.id}
-                  />
-                </div>
-              )}
-            </li>
+                )
+              }
+            />
           ))}
-        </ul>
+        </FactRows>
       )}
-    </PageSection>
+    </ActivationSection>
   );
 }

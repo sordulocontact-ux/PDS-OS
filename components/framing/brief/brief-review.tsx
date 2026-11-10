@@ -5,7 +5,7 @@ import { useState } from "react";
 import { FieldError, FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { BriefDetailedRequest } from "@/components/framing/brief/brief-detailed-request";
-import { BriefDocument } from "@/components/framing/brief/brief-document";
+import { BriefDocument } from "@/components/ui/brief-document";
 import { BriefVersionDoc } from "@/components/framing/brief/brief-version-doc";
 import { Button } from "@/components/ui/button";
 import { ToneCallout } from "@/components/ui/tone-callout";

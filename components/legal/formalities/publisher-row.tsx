@@ -1,5 +1,7 @@
 "use client";
 
+import { nestedCardClass } from "@/components/ui/nested-card";
+import { cn } from "@/lib/utils";
 import { IconXmark } from "nucleo-sharp-essential";
 
 import { useState } from "react";
@@ -56,9 +58,9 @@ export function PublisherRow({
   // Picked here as a label or producer: said at once, before the check.
   const [picked, setPicked] = useState<boolean | null>(null);
   return (
-    <div className="grid gap-3 rounded-xl border p-3 sm:grid-cols-3">
+    <div className={cn(nestedCardClass, "grid gap-3 sm:grid-cols-2")}>
       <fieldset disabled={disabled} className="contents">
-        <div className="sm:col-span-3">
+        <div className="sm:col-span-2">
           <PersonPickerField<PublisherOption>
             refName={`p-ref-${rowId}`}
             nameName={`p-picked-${rowId}`}
@@ -105,12 +107,12 @@ export function PublisherRow({
       />
       <fieldset
         disabled={disabled}
-        className="flex flex-col gap-2 sm:col-span-3"
+        className="flex flex-col gap-2 sm:col-span-2"
         aria-describedby={errors?.link ? `${rowId}-link-error` : undefined}
       >
         <legend className="mb-1 text-sm font-medium">{t.represents}</legend>
         {creators.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t.noCreator}</p>
+          <p className="text-body-sm text-muted-foreground">{t.noCreator}</p>
         ) : (
           <div className="flex flex-wrap gap-x-4 gap-y-2">
             {creators.map((c) => (
@@ -138,7 +140,7 @@ export function PublisherRow({
         <FieldError id={`${rowId}-link-error`}>{errors?.link}</FieldError>
       </fieldset>
       <fieldset disabled={disabled} className="contents">
-        <div className="sm:col-span-3">
+        <div className="sm:col-span-2">
           <OptionSelect
             name={`p-contract-${rowId}`}
             label={t.contract}
@@ -160,7 +162,7 @@ export function PublisherRow({
         </div>
       </fieldset>
       {!disabled && (
-        <div className="flex items-end justify-end sm:col-span-3">
+        <div className="flex items-end justify-end sm:col-span-2">
           <Button size="sm" variant="ghost" onClick={onRemove}>
             <IconXmark aria-hidden />
             {fr.legalFormalities.creator.remove}

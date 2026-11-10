@@ -1,4 +1,4 @@
-import { PageSection } from "@/components/shell/page-section";
+import { StepSection } from "@/components/shell/journey/step-section";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { FactList } from "@/components/ui/fact-list";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -43,11 +43,11 @@ export function ShootStateSection({
 }) {
   const notStarted = shoot.state === "planned" || shoot.state === "postponed";
   return (
-    <PageSection
+    <StepSection
       id="shoot-state"
       title={t.title}
       description={t.description}
-      action={
+      aside={
         canOrganize && (
           <ShootStateDialog
             projectId={projectId}
@@ -112,6 +112,6 @@ export function ShootStateSection({
           ]}
         />
       </div>
-    </PageSection>
+    </StepSection>
   );
 }

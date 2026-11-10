@@ -10,6 +10,7 @@ import { GeneratorShell } from "@/components/strategy/release-plan/generator-she
 import { PagesStep } from "@/components/strategy/release-plan/pages-step";
 import { PlanIntro } from "@/components/strategy/release-plan/plan-intro";
 import { PreviewStep } from "@/components/strategy/release-plan/preview-step";
+import { StrategyStepFrame } from "@/components/strategy/journey/strategy-step-frame";
 import { VisualsStep } from "@/components/strategy/release-plan/visuals-step";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { requireApproved } from "@/lib/auth/dal";
@@ -65,15 +66,20 @@ export default async function PressKitPage({
   const lock = releasePlanLock(docs);
   const owner = canEditProject(access, project);
   const versions = pressKitVersions(docs);
+  // Under « Stratégie validée », in the step's frame (the journey keeps
+  // that step open, the panel is named after the document).
+  const frame = (children: React.ReactNode) => (
+    <StrategyStepFrame
+      projectId={projectId}
+      stepKey="validated"
+      page={{ title: t.title, why: t.audience }}
+    >
+      {children}
+    </StrategyStepFrame>
+  );
   if (lock && versions.length === 0)
-    return (
-      <div className="pt-6">
-        <GeneratorLocked
-          projectId={projectId}
-          title={t.locked.title}
-          reason={t.locked[lock]}
-        />
-      </div>
+    return frame(
+      <GeneratorLocked title={t.locked.title} reason={t.locked[lock]} />,
     );
   const canEdit = owner && !lock;
 
@@ -216,12 +222,8 @@ export default async function PressKitPage({
     }
   })();
 
-  return (
-    <div className="flex flex-col gap-6 pt-6">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-display-md font-semibold">{t.title}</h1>
-        <p className="text-body-md text-muted-foreground">{t.audience}</p>
-      </div>
+  return frame(
+    <div className="flex flex-col gap-5">
       {lock && <ToneCallout tone="warning">{t.locked[lock]}</ToneCallout>}
       {owner ? (
         <GeneratorShell
@@ -241,6 +243,6 @@ export default async function PressKitPage({
           {screen}
         </>
       )}
-    </div>
+    </div>,
   );
 }

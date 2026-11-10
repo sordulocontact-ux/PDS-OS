@@ -1,5 +1,8 @@
 import { ProjectHeader } from "@/components/projects/project-header";
-import { DeliverableBar } from "@/components/production/journey/deliverable-bar";
+import {
+  DeliverableBar,
+  deliverableLine,
+} from "@/components/production/journey/deliverable-bar";
 import { ContactLinksSection } from "@/components/portal/contact-links-section";
 import { ProductionWhoDoesWhatButton } from "@/components/production/journey/who-does-what";
 import {
@@ -12,6 +15,7 @@ import { ProjectNowCard } from "@/components/shell/journey/project-now-card";
 import { ModuleAttention } from "@/components/shell/module/module-attention";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
+import { productionDeliverables } from "@/lib/journey/production";
 import { journeyContext } from "@/lib/production/journey/context";
 import { loadProductionHistory } from "@/lib/production/history";
 import {
@@ -35,10 +39,10 @@ export default async function ProductionSheetLayout({
   params,
 }: LayoutProps<"/app/projects/[projectId]/production/[deliverableId]">) {
   const { projectId, deliverableId } = await params;
-  const { access, data, steps } = await journeyContext(
-    projectId,
-    deliverableId,
-  );
+  const [{ access, data, steps }, deliverables] = await Promise.all([
+    journeyContext(projectId, deliverableId),
+    productionDeliverables(projectId),
+  ]);
   const started = Boolean(data.heritage.fiche || data.heritage.source);
   const viewer =
     data.members.find((m) => m.personId === access.personId)?.name ?? null;
@@ -79,6 +83,15 @@ export default async function ProductionSheetLayout({
           {
             label: data.deliverable.title,
             href: routes.projectProductionSheet(projectId, deliverableId),
+            // The other deliverables in Production, from the trail (Sacha
+            // 10/11/2026, like the activations).
+            options: deliverables.map((d) => ({
+              key: d.id,
+              label: d.title,
+              href: routes.projectProductionSheet(projectId, d.id),
+              detail: deliverableLine(d),
+              current: d.id === deliverableId,
+            })),
           },
         ]}
         steps={steps}

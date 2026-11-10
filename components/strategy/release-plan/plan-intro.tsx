@@ -2,17 +2,23 @@ import { IconCheck } from "nucleo-sharp-essential";
 import Link from "next/link";
 
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
-import { FactList } from "@/components/ui/fact-list";
+import { KnownFacts } from "@/components/strategy/release-plan/known-facts";
+import { StrategyPart } from "@/components/strategy/strategy-part";
+import { InfoRow, Rows } from "@/components/ui/rows";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { StepSection } from "@/components/shell/journey/step-section";
 import { strategyReleasePlan } from "@/lib/i18n/fr/strategy-release-plan";
+import type { KnownFact } from "@/lib/strategy/documents/plan-steps";
 import { doneTone, draftTone } from "@/lib/ui/state-tones";
 
 const fr = { strategyReleasePlan };
 
 /**
  * Step 1 (ticket § 11): « Créons le Plan de sortie ». What the validated
- * strategy already says is shown, never asked again; what the document
- * still needs is listed apart, each with its state.
+ * strategy already says is shown as a block of facts (`KnownFacts`: the
+ * label above its value, lists as pills), never asked again;
+ * what the document still needs is listed apart, one row each opening its
+ * screen, with its state.
  */
 export function PlanIntro({
   known,
@@ -25,7 +31,7 @@ export function PlanIntro({
   // The document's own entry (the Plan de sortie's by default).
   title?: string;
   body?: string;
-  known: Array<{ label: string; value: string | null }>;
+  known: KnownFact[];
   toComplete: Array<{
     key: string;
     label: string;
@@ -37,49 +43,40 @@ export function PlanIntro({
 }) {
   const t = fr.strategyReleasePlan.intro;
   return (
-    <section aria-labelledby="plan-intro" className="flex flex-col gap-8">
-      <div className="flex flex-col gap-2">
-        <h2 id="plan-intro" className="text-display-sm font-semibold">
-          {title ?? t.title}
-        </h2>
-        <p className="max-w-prose text-body-md text-muted-foreground">
-          {body ?? t.body}
-        </p>
-      </div>
-      <div className="flex flex-col gap-3">
-        <div className="flex flex-col gap-1">
-          <h3 className="text-body-md font-semibold">{t.known}</h3>
-          <p className="text-caption text-muted-foreground">{t.knownHint}</p>
-        </div>
-        <FactList facts={known} emptyLabel={t.notProvided} />
-      </div>
-      <div className="flex flex-col gap-3">
-        <h3 className="text-body-md font-semibold">{t.toComplete}</h3>
-        <ul className="flex flex-col gap-2">
-          {toComplete.map((item) => (
-            <li key={item.key}>
-              <Link
+    <StepSection title={title ?? t.title} description={body ?? t.body}>
+      <div className="flex flex-col gap-7">
+        <StrategyPart title={t.known} description={t.knownHint}>
+          <KnownFacts facts={known} />
+        </StrategyPart>
+        <StrategyPart title={t.toComplete}>
+          <Rows label={t.toComplete}>
+            {toComplete.map((item) => (
+              <InfoRow
+                key={item.key}
+                title={item.label}
                 href={item.href}
-                className="flex items-center justify-between gap-3 rounded-2xl border border-border px-4 py-3 text-body-md transition-[background-color] duration-[var(--duration-fast)] hover:bg-[var(--control-bg-hover)]"
-              >
-                <span className="font-medium">{item.label}</span>
-                <StatusBadge tone={item.done ? doneTone : draftTone} size="sm">
-                  {item.done && <IconCheck aria-hidden className="size-3" />}
-                  {item.done ? t.confirmed : fr.strategyReleasePlan.stepTodo}
-                </StatusBadge>
-              </Link>
-            </li>
-          ))}
-        </ul>
+                badge={
+                  <StatusBadge
+                    tone={item.done ? doneTone : draftTone}
+                    size="sm"
+                  >
+                    {item.done && <IconCheck aria-hidden className="size-3" />}
+                    {item.done ? t.confirmed : fr.strategyReleasePlan.stepTodo}
+                  </StatusBadge>
+                }
+              />
+            ))}
+          </Rows>
+        </StrategyPart>
+        {canEdit && (
+          <Link
+            href={startHref}
+            className={buttonVariants({ size: "lg", className: "self-start" })}
+          >
+            <ButtonRoll>{t.start}</ButtonRoll>
+          </Link>
+        )}
       </div>
-      {canEdit && (
-        <Link
-          href={startHref}
-          className={buttonVariants({ size: "lg", className: "self-start" })}
-        >
-          <ButtonRoll>{t.start}</ButtonRoll>
-        </Link>
-      )}
-    </section>
+    </StepSection>
   );
 }

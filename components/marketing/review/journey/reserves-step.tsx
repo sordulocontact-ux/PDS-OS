@@ -1,5 +1,6 @@
 import { AddReserveButton } from "@/components/marketing/closure/add-reserve-button";
 import { ReserveMenu } from "@/components/marketing/closure/reserve-menu";
+import { Rows } from "@/components/ui/rows";
 import { StepWaiting } from "@/components/shell/journey/step-waiting";
 import { loadMembers } from "@/lib/framing/related";
 import { marketingReview } from "@/lib/i18n/fr/marketing-review";
@@ -78,17 +79,14 @@ export async function ReservesStep({ ctx }: { ctx: ReviewContext }) {
           {t.empty}
         </p>
       ) : (
-        <ul className="flex flex-col overflow-hidden rounded-xl border border-[color:var(--border-hairline)]">
+        <Rows>
           {reserves.map((r) => {
             const line = resultLine(r, reserves);
             const follower =
               viewer.personId !== null &&
               viewer.personId === r.followUp.personId;
             return (
-              <li
-                key={r.id}
-                className="flex flex-col gap-3 border-b border-[color:var(--border-hairline)] px-4 py-3.5 last:border-b-0"
-              >
+              <li key={r.id} className="flex flex-col gap-3 px-4 py-3.5">
                 <div className="flex items-start gap-3">
                   <div className="flex min-w-0 flex-1 flex-col">
                     <span className="text-[length:var(--type-micro)] leading-[var(--type-micro-lh)] text-[color:var(--text-tertiary)]">
@@ -154,7 +152,7 @@ export async function ReservesStep({ ctx }: { ctx: ReviewContext }) {
               </li>
             );
           })}
-        </ul>
+        </Rows>
       )}
       {viewer.isOwner && !closed && (
         <div>

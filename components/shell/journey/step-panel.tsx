@@ -1,5 +1,6 @@
 import { IconLock } from "nucleo-sharp-essential";
 
+import { BackLink } from "@/components/shell/back-link";
 import {
   ResultBanner,
   StepResultProvider,
@@ -69,6 +70,7 @@ export function StepPanel({
   steps,
   blockedLabel = t.blocked,
   badge,
+  back,
   leadTitle = true,
   children,
   ...slots
@@ -80,6 +82,10 @@ export function StepPanel({
   // itself has no pill: the journey and the card already say it (Ibé,
   // 03/11/2026).
   badge?: { tone: Tone; label: string };
+  // A page opened from the step without being one of its own (the Plan de
+  // sortie under « Stratégie validée »): the way back to the step, above
+  // the title (Sacha, 10/11/2026: « pas de bouton retour »).
+  back?: { href: string; label: string };
   // False when the step is the gesture itself: the lead without its line.
   leadTitle?: boolean;
   // Replaces « Se débloque quand … » (Marketing: « S'ouvre quand … »).
@@ -101,7 +107,10 @@ export function StepPanel({
         aria-labelledby="journey-step-title"
         className="flex min-w-0 flex-col gap-3.5 rounded-2xl border border-[color:var(--border-hairline)] bg-card p-5"
       >
-        <TitleBlock>
+        {back && <BackLink href={back.href}>{back.label}</BackLink>}
+        {/* 24 px under the title and its sentence, before the step's
+            content (Figma of the SACEM step, Sacha 10/11/2026). */}
+        <TitleBlock className="mb-2.5">
           <div className="flex flex-wrap items-center justify-between gap-2.5">
             <h2
               id="journey-step-title"
@@ -113,7 +122,9 @@ export function StepPanel({
               {step.due && step.status !== "done" && (
                 <span
                   className={cn(
-                    "text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-secondary)]",
+                    // Quieter than the sentence under the title (Figma,
+                    // 10/11/2026); an overdue date stays loud.
+                    "text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-muted)]",
                     step.alert === "overdue" &&
                       "font-semibold text-[color:var(--tone-danger-fg)]",
                   )}

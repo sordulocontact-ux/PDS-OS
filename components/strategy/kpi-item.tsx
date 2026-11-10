@@ -1,6 +1,5 @@
 "use client";
 
-import { optionClass } from "@/components/ui/option-class";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { strategyKpis } from "@/lib/i18n/fr/strategy-kpis";
@@ -67,7 +66,8 @@ export function KpiItem({
   const metric = isKpiMetric(kpi.metric) ? kpi.metric : null;
 
   return (
-    <li className={`${optionClass(false)} justify-between`}>
+    // A row of the KPIs' `Rows` (its frame and hairlines).
+    <li className="flex flex-wrap items-start justify-between gap-3 px-3.5 py-3">
       <div className="flex min-w-0 flex-col gap-1">
         <div className="flex flex-wrap items-center gap-2">
           <span className="font-semibold break-words">{kpi.label}</span>
@@ -119,10 +119,11 @@ export function KpiItem({
         )}
       </div>
       {canEdit && (
-        <div className="flex shrink-0 gap-1">
+        // « Modifier » outlined, « Retirer » in text beside it.
+        <div className="flex shrink-0 items-center gap-1.5">
           <Button
             size="sm"
-            variant="ghost"
+            variant="outline"
             disabled={pending}
             aria-label={t.editLabel(kpi.label)}
             onClick={onEdit}

@@ -1,6 +1,5 @@
 "use client";
 
-import { optionClass } from "@/components/ui/option-class";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { strategy } from "@/lib/i18n/fr/strategy";
@@ -16,7 +15,8 @@ const dueFormat = new Intl.DateTimeFormat("fr-FR", {
   timeZone: "UTC",
 });
 
-/** One committed deliverable: its name and number, who, when; edit, remove. */
+/** One committed deliverable, a row of its lever's `Rows`: its name and
+ * number, who, when; « Modifier » (outlined), « Retirer » beside it. */
 export function DeliverableItem({
   deliverable: d,
   assigneeName,
@@ -44,7 +44,8 @@ export function DeliverableItem({
   const s = fr.strategyDeliverables;
   const name = deliverableTitle(d.title, d.quantity);
   return (
-    <li className={`${optionClass(false)} justify-between`}>
+    // A row of the lever's `Rows` (its frame and hairlines).
+    <li className="flex flex-wrap items-start justify-between gap-3 px-3.5 py-3">
       <div className="flex min-w-0 items-start gap-3">
         {canEdit && onToggle && (
           <Checkbox
@@ -75,10 +76,11 @@ export function DeliverableItem({
         </div>
       </div>
       {canEdit && (
-        <div className="flex shrink-0 gap-1">
+        // « Modifier » outlined, « Retirer » in text beside it.
+        <div className="flex shrink-0 items-center gap-1.5">
           <Button
             size="sm"
-            variant="ghost"
+            variant="outline"
             disabled={pending}
             aria-label={s.editLabel(name)}
             onClick={onEdit}

@@ -1,3 +1,4 @@
+import { StepSection } from "@/components/shell/journey/step-section";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { strategyPressKit } from "@/lib/i18n/fr/strategy-press-kit";
 import { strategyReleasePlan } from "@/lib/i18n/fr/strategy-release-plan";
@@ -25,16 +26,11 @@ export function GenerateStep({
       ? fr.strategyPressKit.generate
       : fr.strategyReleasePlan.generate;
   return (
-    <section
-      aria-labelledby="generate-title"
-      className="flex flex-col items-start gap-4"
-    >
-      <h2 id="generate-title" className="text-display-sm font-semibold">
-        {t.title}
-      </h2>
-      <p className="max-w-prose text-body-md text-muted-foreground">{t.body}</p>
-      {!complete && <ToneCallout tone="warning">{t.incomplete}</ToneCallout>}
-      {children}
-    </section>
+    <StepSection title={t.title} description={t.body}>
+      <div className="flex flex-col items-start gap-4">
+        {!complete && <ToneCallout tone="warning">{t.incomplete}</ToneCallout>}
+        {children}
+      </div>
+    </StepSection>
   );
 }

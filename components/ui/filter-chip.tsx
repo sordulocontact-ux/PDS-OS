@@ -1,16 +1,18 @@
-
+import { ButtonRoll, buttonGrow } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 // FilterChip (docs/DESIGN.md § 7): pill, rest / hover / active. Active is
 // full ink for a filter; "soft" (grey) for a selection that sits next to a
-// black main button, so the two never look alike.
+// black main button, so the two never look alike. Hover as a button: it
+// grows and its label rolls (buttonGrow, ButtonRoll).
 const chipClass = (
   active: boolean,
   className?: string,
   variant: "ink" | "soft" = "ink",
 ) =>
   cn(
-    "inline-flex min-h-9 items-center gap-1.5 rounded-pill border px-3.5 py-1.5 text-left text-sm no-underline transition-[background-color,border-color,color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-40",
+    buttonGrow,
+    "group/button inline-flex min-h-9 items-center gap-1.5 rounded-pill border px-3.5 py-1.5 text-left text-sm no-underline outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-40",
     // Primary, not foreground/background: the same ink on the page, and
     // still readable inside the glass modal, whose background is translucent.
     active &&
@@ -48,7 +50,7 @@ export function FilterChip({
       className={chipClass(pressed, className, variant)}
       {...props}
     >
-      {children}
+      <ButtonRoll>{children}</ButtonRoll>
     </button>
   );
 }

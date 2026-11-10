@@ -1,5 +1,6 @@
 "use client";
 
+import { Fold } from "@/components/ui/fold";
 import { IconPlus } from "nucleo-sharp-essential";
 import { useState, useTransition } from "react";
 import { toast } from "@/components/ui/toast";
@@ -160,12 +161,7 @@ export function PlanBoard({
       )}
       {live.length > 0 ? table(live) : <EmptyNote>{t.empty}</EmptyNote>}
       {removed.length > 0 && (
-        <details>
-          <summary className="cursor-pointer text-sm text-muted-foreground">
-            {t.removedCount(removed.length)}
-          </summary>
-          <div className="mt-3">{table(removed)}</div>
-        </details>
+        <Fold summary={t.removedCount(removed.length)}>{table(removed)}</Fold>
       )}
     </div>
   );

@@ -1,3 +1,4 @@
+import { Fold } from "@/components/ui/fold";
 import {
   DataTable,
   DataTableBody,
@@ -99,11 +100,8 @@ export function LocationsBoard({
         <div className="grid gap-4 md:grid-cols-2">{live.map(card)}</div>
       )}
       {live.length > 1 && (
-        <details>
-          <summary className="cursor-pointer text-sm font-medium">
-            {t.compare.title}
-          </summary>
-          <div className="mt-3">
+        <Fold summary={t.compare.title}>
+          <div>
             <DataTable>
               <DataTableHeader>
                 <DataTableHead fill>{t.compare.place}</DataTableHead>
@@ -158,17 +156,12 @@ export function LocationsBoard({
               </DataTableBody>
             </DataTable>
           </div>
-        </details>
+        </Fold>
       )}
       {discarded.length > 0 && (
-        <details>
-          <summary className="cursor-pointer text-sm text-muted-foreground">
-            {t.statuses.discarded} ({discarded.length})
-          </summary>
-          <div className="mt-3 grid gap-4 md:grid-cols-2">
-            {discarded.map(card)}
-          </div>
-        </details>
+        <Fold summary={`${t.statuses.discarded} (${discarded.length})`}>
+          <div className="grid gap-4 md:grid-cols-2">{discarded.map(card)}</div>
+        </Fold>
       )}
     </div>
   );

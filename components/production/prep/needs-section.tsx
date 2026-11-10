@@ -1,4 +1,4 @@
-import { PageSection } from "@/components/shell/page-section";
+import { StepSection } from "@/components/shell/journey/step-section";
 import type { Member } from "@/lib/framing/related";
 import { productionNeeds } from "@/lib/i18n/fr/production-needs";
 import type { ProductionBriefChoices } from "@/lib/production/brief";
@@ -47,11 +47,10 @@ export function ProductionNeedsSection({
       )
     : [];
   return (
-    <PageSection
+    <StepSection
       id="production-needs"
       title={t.title}
       description={t.description}
-      card
     >
       <div className="flex flex-col gap-8">
         {NEED_FAMILIES.map((family) => (
@@ -69,6 +68,6 @@ export function ProductionNeedsSection({
           />
         ))}
       </div>
-    </PageSection>
+    </StepSection>
   );
 }
