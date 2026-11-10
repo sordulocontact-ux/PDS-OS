@@ -28,7 +28,7 @@ import {
   type LegalDemarcheKind,
 } from "@/lib/ui/legal-steps";
 
-import { expectedOf } from "./todo";
+import { bare, expectedOf } from "./todo";
 
 const fr = { legal, legalDemarches, legalJourney };
 
@@ -119,13 +119,6 @@ function groupLines(board: PlanBoard) {
     (a, b) => KIND_ORDER.indexOf(a.kind) - KIND_ORDER.indexOf(b.kind),
   );
 }
-
-/** A work or title as typed, without the guillemets the title adds. */
-const bare = (text: string) =>
-  text
-    .trim()
-    .replace(/^[«"“]\s*/, "")
-    .replace(/\s*[»"”]$/, "");
 
 /** Who or what the démarche is about, read from its steps' sources. */
 function subjectOf(parts: BoardRow[]): string | null {
@@ -281,6 +274,7 @@ export function launchedDemarches(input: {
       key: legalDemarcheKey(kind, ref),
       href: legalDemarcheHref(ctx.projectId, kind, ref),
       title: t.titles[kind](subject),
+      subject,
       why: t.why[kind],
       status: state.status,
       owner: ownerOf(own, ctx),

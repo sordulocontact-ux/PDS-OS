@@ -145,12 +145,13 @@ const sameWords = (a: string, b: string) =>
 
 /** Where in its module, « Production › Pochette »: the step's name left out
  * when the action already says it (« Démarrer le cadrage » under « Démarrer
- * le cadrage »), so the row's context never repeats its title. */
-function placeOfStep(title: string, part: string | null, step: string) {
-  return (
-    [part, sameWords(title, step) ? null : step].filter(Boolean).join(" › ") ||
-    null
-  );
+ * le cadrage », « Préparer le contrat de Sami Kader » under « Sami Kader ·
+ * fiche et contrat »), so the row's context never repeats its title. */
+function placeOfStep(title: string, part: string | null, step: JourneyStep) {
+  const said =
+    sameWords(title, step.title) ||
+    (step.subject ? sameWords(title, step.subject) : false);
+  return [part, said ? null : step.title].filter(Boolean).join(" › ") || null;
 }
 
 type Draft = Omit<WorkRow, "group">;
@@ -177,7 +178,7 @@ export function workRowsOf(
           href: actionHref(a.step),
           title,
           module: a.module,
-          place: placeOfStep(title, a.partLabel ?? null, a.step.title),
+          place: placeOfStep(title, a.partLabel ?? null, a.step),
           projectId: project.projectId,
           projectTitle: project.projectTitle,
           due: a.step.due ?? null,

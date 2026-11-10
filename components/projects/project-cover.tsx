@@ -11,8 +11,9 @@ const frame = cva(
   {
     variants: {
       size: {
-        // The overview's head (proto « Vue d'ensemble », 10/11/2026).
-        lg: "size-20 rounded-xl sm:size-26 sm:rounded-2xl",
+        // The overview's head (proto « Vue d'ensemble », 10/11/2026; a step
+        // smaller, Sacha 10/11/2026).
+        lg: "size-16 rounded-lg sm:size-20 sm:rounded-xl",
         // A preview in a form.
         md: "size-16 rounded-lg",
       },

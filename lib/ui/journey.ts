@@ -109,6 +109,10 @@ export type JourneyStep = {
   key: string;
   href: string;
   title: string;
+  // Who or what the step is about (« Sami Kader », « Néons »), when its
+  // action names it: Travail then leaves the step's title out of the row's
+  // context instead of saying it twice.
+  subject?: string;
   // Empty when nothing is left to explain (a choice already made).
   why: string;
   status: JourneyStatus;

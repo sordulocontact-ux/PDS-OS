@@ -61,43 +61,61 @@ export const legalDemarches = {
   prereq: {
     fiche: (name: string) => `Fiche ${de(name)}`,
   },
-  // What is expected now, by whom (the journey's « À vous · … »).
+  // What is expected now, by whom (the journey's « À vous · … »). A gesture
+  // of the démarche's responsible or of the direction names its object and
+  // who it is for (« Préparer le contrat de Sami Kader »): it reads alone in
+  // Travail and on the home (retour d'Akili du 01/11/2026, Sacha 10/11). The
+  // gestures of someone outside stay short: their name comes before them
+  // (« Sami Kader · remplir sa fiche »).
   todo: {
-    prepareFiche: "Créer le lien de la fiche",
-    markSent: "Envoyer le lien",
+    prepareFiche: (name: string) => `Créer le lien de la fiche ${de(name)}`,
+    markSent: (name: string) => `Envoyer à ${name} le lien de sa fiche`,
     fillFiche: "Remplir sa fiche de renseignements",
-    review: "Vérifier la fiche",
+    review: (name: string) => `Vérifier la fiche ${de(name)}`,
     completeFiche: "Compléter sa fiche",
-    link: "Relier au Réseau",
-    addToNetwork: "Ajouter au Réseau",
-    mapping: "Confirmer les contrats nécessaires",
-    missing: "Compléter ce qui manque au contrat",
-    generate: "Générer le contrat",
-    submit: "Soumettre à la direction",
-    validateDocument: "Valider le document",
-    send: "Envoyer le contrat",
+    link: (name: string) => `Relier ${name} au Réseau`,
+    addToNetwork: (name: string) => `Ajouter ${name} au Réseau`,
+    mapping: (name: string) =>
+      `Confirmer les contrats nécessaires pour ${name}`,
+    missing: (name: string) => `Compléter ce qui manque au contrat ${de(name)}`,
+    prepareContract: (name: string) => `Préparer le contrat ${de(name)}`,
+    generate: (name: string) => `Générer le contrat ${de(name)}`,
+    submit: (name: string) => `Soumettre le contrat ${de(name)} à la direction`,
+    validateDocument: (name: string) => `Valider le contrat ${de(name)}`,
+    send: (name: string) => `Envoyer le contrat à ${name}`,
     signContract: "Signer et renvoyer le contrat",
-    deposit: "Marquer comme signé",
-    countersign: "Signer le contrat pour PDS",
-    checkSigned: "Vérifier la signature et marquer signé",
-    decide: "Décider de la suite",
-    ask: "Demander l'autorisation",
+    deposit: (name: string) => `Marquer le contrat ${de(name)} comme signé`,
+    countersign: (name: string) => `Signer le contrat ${de(name)} pour PDS`,
+    checkSigned: (name: string) =>
+      `Vérifier la signature ${de(name)} et marquer le contrat signé`,
+    decideContract: (name: string) =>
+      `Décider de la suite du contrat ${de(name)}`,
+    decide: (work: string) => `Décider de la suite pour « ${work} »`,
+    ask: (work: string) => `Demander l'autorisation d'utiliser « ${work} »`,
     answer: "Répondre à la demande",
-    reply: "Coller leur réponse",
-    validateTerms: "Valider les conditions",
-    sendLicence: "Envoyer la licence",
+    reply: (work: string) =>
+      `Coller la réponse des ayants droit de « ${work} »`,
+    validateTerms: (work: string) =>
+      `Valider les conditions d'utilisation de « ${work} »`,
+    sendLicence: (work: string) => `Envoyer la licence de « ${work} »`,
     signLicence: "Signer la licence",
-    secure: "Marquer comme sécurisé",
-    proposeSplit: "Proposer la répartition",
-    sendSplit: "Envoyer pour confirmation",
+    secure: (work: string) => `Marquer « ${work} » comme sécurisé`,
+    proposeSplit: (title: string) => `Proposer la répartition de « ${title} »`,
+    sendSplit: (title: string) =>
+      `Envoyer la répartition de « ${title} » pour confirmation`,
     confirmSplit: "Confirmer la répartition",
-    disputed: "Proposer une nouvelle version",
-    bulletin: "Préparer le bulletin",
-    signatures: "Recueillir les signatures",
-    file: "Enregistrer le dépôt",
+    confirmSplitOwn: (title: string) =>
+      `Confirmer la répartition de « ${title} »`,
+    disputed: (title: string) =>
+      `Proposer une nouvelle répartition de « ${title} »`,
+    bulletin: (title: string) => `Préparer le bulletin SACEM de « ${title} »`,
+    signatures: (title: string) =>
+      `Recueillir les signatures du bulletin de « ${title} »`,
+    file: (title: string) => `Enregistrer le dépôt SACEM de « ${title} »`,
     sacemAnswer: "Répondre à la déclaration",
-    correct: "Corriger la déclaration",
-    open: "Faire avancer la démarche",
+    correct: (title: string) => `Corriger la déclaration SACEM de « ${title} »`,
+    // Last resort, a step the code does not know: still says which one.
+    open: (subject: string) => `Faire avancer la démarche ${de(subject)}`,
   },
   summary: {
     person: "Contrat signé",

@@ -498,14 +498,20 @@ Refonte du 27/10/2026, d'après `docs/VISION-UX.md` § 2 (les cinq questions) :
   `NowCard` (`NowFrame`), l'action la plus pressée — en tête les **étiquettes du projet et du
   module** à leur teinte (`ProjectTag`, `ModuleTag`, les mêmes que le tableau ; plus de « À vous » :
   tout le bloc est à vous), « En retard », « À valider », puis « Étape · avant le Sam. 05/12/2026 »
-  (l'étape omise quand l'action la dit déjà), l'action en titre, le pourquoi, une ligne
-  « Validation : … · Ensuite : … » (« · vous » quand l'étape suivante vous revient), le bouton plein
+  (l'étape omise quand l'action la dit déjà), l'action en titre et son pourquoi collés (`TitleBlock`,
+  comme le « Maintenant » des modules), une ligne « Validation : … · Ensuite : … » plus discrète
+  (`caption`, valeurs en encre sans gras ; « · vous » quand l'étape suivante vous revient), le bouton plein
   « Ouvrir » (le geste, `actionHref`).
 - **Une action se lit seule** (retour d'Akili du 01/11/2026) : son intitulé (`JourneyActor.todo`,
   `lib/i18n/fr/*-journey.ts`) dit le verbe **et son objet** (« Démarrer le cadrage », « Valider le
   dossier de distribution V2 », « Confirmer le dossier juridique »), jamais un geste qui ne se
   comprend que dans la page du module (« Choisir comment démarrer », « Valider la V2 ») : le même
   texte paraît dans Travail, l'Accueil et « Maintenant ». Deux modules n'ont jamais le même intitulé.
+  Une démarche juridique nomme **son geste et sa personne ou son œuvre** (« Préparer le contrat de
+  Sami Kader », « Proposer la répartition de « Néons » », `lib/legal/demarches/todo.ts`), jamais
+  « Faire avancer la démarche » seul ; le contexte ne répète alors plus « Sami Kader · fiche et
+  contrat » (`JourneyStep.subject`). Le geste d'une personne extérieure reste court, son nom le
+  précède (« Sami Kader · remplir sa fiche »).
   Rien à faire : « Rien à faire pour vous », et la Vue d'ensemble de chaque projet dit qui on
   attend.
 - Dessous, **Tout / À faire / À valider en contrôle segmenté** (nombre en gris ; plus des onglets depuis le
@@ -924,7 +930,7 @@ Retour d'Akili du 05/11, proto « Vue d'ensemble » validé par Sacha. Un projet
 importée pour lui (à la création, ou ensuite par son responsable), sinon la pochette de son premier
 titre au Catalogue, sinon **rien de coloré** : le disque sur fond gris des titres du Catalogue
 (`ProjectCover`, `ReleaseCover`), partout (Sacha, 10/11/2026 : ni visuel par défaut coloré dans les
-listes ni sur la Vue d'ensemble). 104 px (80 px en mobile) en tête de la Vue d'ensemble, à gauche du
+listes ni sur la Vue d'ensemble). 80 px (64 px en mobile ; réduite le 10/11) en tête de la Vue d'ensemble, à gauche du
 nom et de « Artiste · Type » ; 36 px devant le nom dans les listes de projets ; 64 px en aperçu de
 formulaire. La changer : bouton rond en verre sur l'image (au survol à la souris, toujours
 au toucher) ou « Informations ». Écart voulu : la Vue d'ensemble ne montre **aucune pastille

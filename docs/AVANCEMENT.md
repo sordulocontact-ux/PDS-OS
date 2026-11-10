@@ -2041,3 +2041,9 @@ Retour d'Akili du 01/11 (Notion Retours « Travail : une tâche pas explicite au
   (`ProjectTag`, `ModuleTag`, partagés avec le tableau), plus de « À vous » ; l'étape n'est plus
   répétée quand l'action la dit (`lib/work/rows.ts`, aussi dans le tableau) ; « Ensuite : … · vous »
   quand l'étape suivante revient à la personne.
+- « Maintenant » hiérarchisé (Sacha, 10/11) : l'action et son pourquoi collés (`TitleBlock`),
+  « Validation / Ensuite » en `caption` sans gras.
+- Démarches juridiques (Sacha, 10/11, proposition 1) : chaque geste nomme sa personne ou son œuvre
+  (« Préparer le contrat de Sami Kader », « Demander l'autorisation d'utiliser « Night Lights » »,
+  « Préparer le bulletin SACEM de « Néons » ») ; une étape suivie sans objet source encore créé
+  reçoit son premier geste (`firstGesture`) au lieu de « Faire avancer la démarche ».

@@ -2,6 +2,7 @@ import { NowFrame } from "@/components/shell/journey/now-card";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { MarkedText } from "@/components/ui/marked-text";
+import { TitleBlock } from "@/components/ui/title-block";
 import { ViewLink } from "@/components/ui/view-link";
 import { work } from "@/lib/i18n/fr/work";
 import { overdueTone } from "@/lib/ui/state-tones";
@@ -17,6 +18,8 @@ const t = fr.work.lead;
 
 const secondary =
   "text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]";
+const caption =
+  "text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-secondary)]";
 
 /**
  * « Maintenant » of the Travail (docs/VISION-UX.md § 2): the most pressing of
@@ -73,18 +76,22 @@ export function WorkLead({
         {badge}
         {context && <span>{context}</span>}
       </div>
-      <h2 className="text-[length:var(--type-display-sm)] leading-[var(--type-display-sm-lh)] font-medium tracking-[var(--type-display-tracking)] text-balance">
-        <MarkedText text={titleOf(row)} />
-      </h2>
-      {row.why && <p className={cn(secondary, "text-pretty")}>{row.why}</p>}
+      {/* The action and its why read as one block (TitleBlock, as the
+          modules' « Maintenant »); who validates and what follows a step
+          quieter, in caption, never as loud as the action (Sacha,
+          10/11/2026: « tout est à peu près la même chose »). */}
+      <TitleBlock>
+        <h2 className="text-[length:var(--type-display-sm)] leading-[var(--type-display-sm-lh)] font-medium tracking-[var(--type-display-tracking)] text-balance">
+          <MarkedText text={titleOf(row)} />
+        </h2>
+        {row.why && <p className={cn(secondary, "text-pretty")}>{row.why}</p>}
+      </TitleBlock>
       {facts.length > 0 && (
         <dl className="flex flex-wrap gap-x-6 gap-y-1">
           {facts.map((fact) => (
-            <div key={fact.label} className={cn("flex gap-1.5", secondary)}>
+            <div key={fact.label} className={cn("flex gap-1", caption)}>
               <dt>{fact.label} :</dt>
-              <dd className="font-semibold text-[color:var(--text-primary)]">
-                {fact.value}
-              </dd>
+              <dd className="text-[color:var(--text-primary)]">{fact.value}</dd>
             </div>
           ))}
         </dl>
