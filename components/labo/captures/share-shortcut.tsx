@@ -1,7 +1,7 @@
 import { IconExternalLink } from "@/components/icons";
 
 import { buttonVariants } from "@/components/ui/button";
-import { Fold } from "@/components/ui/fold";
+import { VersionCard } from "@/components/ui/version-card";
 import { laboCaptures } from "@/lib/i18n/fr/labo-captures";
 
 const fr = { laboCaptures };
@@ -16,13 +16,14 @@ export const SHARE_SHORTCUT_URL: string | null =
 
 /**
  * « Partager depuis TikTok ou Instagram » of the Repérage: where the team
- * finds the Raccourci and the few gestures that use it. Folded: once
- * installed, nobody needs it again.
+ * finds the Raccourci and the few gestures that use it. A folding card
+ * (VersionCard, Sacha 10/11/2026: a real card, not a text fold), closed:
+ * once installed, nobody needs it again. Beside the page's sections: h2.
  */
 export function ShareShortcut() {
   const t = fr.laboCaptures.shortcut;
   return (
-    <Fold summary={t.summary}>
+    <VersionCard title={t.summary} headingLevel={2}>
       <p className="text-sm text-muted-foreground">{t.body}</p>
       {SHARE_SHORTCUT_URL ? (
         <a
@@ -46,6 +47,6 @@ export function ShareShortcut() {
         ))}
       </ol>
       <p className="text-xs text-muted-foreground">{t.reelHint}</p>
-    </Fold>
+    </VersionCard>
   );
 }
