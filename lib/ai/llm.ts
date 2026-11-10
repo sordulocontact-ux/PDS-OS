@@ -7,6 +7,7 @@ import {
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createMistral } from "@ai-sdk/mistral";
 import {
+  APICallError,
   generateText,
   NoObjectGeneratedError,
   Output,
@@ -78,6 +79,35 @@ function providerSettings(provider: LlmProvider): ProviderSettings {
     case "google":
       return { temperature: 0 };
   }
+}
+
+/**
+ * Anthropic compiles the schema of a strict structured output into a grammar
+ * and refuses one too large (400 « The compiled grammar is too large »): the
+ * call report's schema, Brief and Stratégie together, did so in production on
+ * 10/11/2026. The same schema then goes through a plain « json » tool, not
+ * strict: no grammar, the AI SDK checks the answer against the schema and
+ * repairedOutput keeps what it can, as with the other providers.
+ */
+function grammarTooLarge(error: unknown): boolean {
+  return (
+    APICallError.isInstance(error) &&
+    error.statusCode === 400 &&
+    /grammar is too large|schema is too complex/i.test(error.message)
+  );
+}
+
+function withJsonTool(settings: ProviderSettings): ProviderSettings {
+  return {
+    ...settings,
+    providerOptions: {
+      ...settings.providerOptions,
+      anthropic: {
+        ...settings.providerOptions?.anthropic,
+        structuredOutputMode: "jsonTool",
+      } satisfies AnthropicLanguageModelOptions,
+    },
+  };
 }
 
 /**
@@ -206,13 +236,21 @@ async function generate<T>(
 
   let output: T;
   let usage: LanguageModelUsage | undefined;
-  try {
-    const result = await generateText({
+  const run = (settings: ProviderSettings) =>
+    generateText({
       model,
-      ...providerSettings(env.LLM_PROVIDER),
+      ...settings,
       system: instructions,
       messages: [{ role: "user", content }],
       output: Output.object({ schema }),
+    });
+  const settings = providerSettings(env.LLM_PROVIDER);
+  try {
+    const result = await run(settings).catch((error: unknown) => {
+      if (env.LLM_PROVIDER !== "anthropic" || !grammarTooLarge(error))
+        throw error;
+      console.warn("[ai] schema too large for strict output: json tool");
+      return run(withJsonTool(settings));
     });
     output = result.output;
     usage = result.usage;

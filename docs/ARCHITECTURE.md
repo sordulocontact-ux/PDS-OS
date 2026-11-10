@@ -7502,6 +7502,12 @@ clés VAPID et `PUSH_CLAIM_SECRET` (≥ 32 car., même valeur que le secret Vaul
 
 ## 12. Pièges rencontrés (à ne pas redécouvrir)
 
+- **Claude refuse un schéma de sortie trop gros** (prod, 10/11/2026) : en sortie structurée stricte,
+  Anthropic compile le schéma en grammaire et répond `400 The compiled grammar is too large` (le compte
+  rendu de call, Brief + Stratégie). `lib/ai/llm.ts` rejoue alors la même demande par un outil `json`
+  non strict (`structuredOutputMode: "jsonTool"`) : le SDK valide la réponse par zod, `repairedOutput`
+  garde ce qu'il peut. Ne pas retirer ce repli ; un schéma qui grossit n'a pas à être découpé pour Claude.
+  Mistral, en local, ne passe jamais par là : tester un gros schéma avec `LLM_PROVIDER=anthropic`.
 - **Une policy par ligne qui appelle une fonction de visibilité coûte une requête par ligne lue.**
   Une fonction `SECURITY DEFINER` avec son `search_path` n'est jamais intégrée au plan :
   `can_see_project(project_id)` relançait 5 à 7 sous-requêtes pour chaque ligne, environ 1,5 ms la
