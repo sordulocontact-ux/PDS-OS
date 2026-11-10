@@ -29,6 +29,7 @@ export function BulletinRow({
   value,
   state,
   reason,
+  invalid,
   onConfirm,
   side,
   below,
@@ -39,6 +40,9 @@ export function BulletinRow({
   value?: ReactNode;
   state?: Exclude<State, "optional"> | "confirmed" | null;
   reason?: string;
+  // Still to confirm once « Générer » was tried: the pill in red, the field
+  // saying why under it (Sacha, 10/11/2026).
+  invalid?: boolean;
   onConfirm?: () => void;
   // Another action of the row (« Ouvrir l'autorisation »…).
   side?: ReactNode;
@@ -51,7 +55,14 @@ export function BulletinRow({
       control={control}
       value={value}
       source={reason}
-      state={state ? { tone: TONE[state], label: t.states[state] } : null}
+      state={
+        state
+          ? {
+              tone: invalid ? "danger" : TONE[state],
+              label: t.states[state],
+            }
+          : null
+      }
       side={
         onConfirm || side ? (
           <>

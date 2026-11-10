@@ -3,8 +3,8 @@ import { notFound } from "next/navigation";
 import { DesignWhoDoesWhatButton } from "@/components/design/roles/design-roles";
 import { ContactLinksSection } from "@/components/portal/contact-links-section";
 import { ProjectHeader } from "@/components/projects/project-header";
+import { JourneyLayout } from "@/components/shell/journey/journey-layout";
 import { JourneySpine } from "@/components/shell/journey/journey-spine";
-import { ProjectNowCard } from "@/components/shell/journey/project-now-card";
 import {
   StepPanel,
   type StepSlots,
@@ -19,21 +19,19 @@ import { designJourneyContext } from "@/lib/design/journey-context";
 import type { DesignStepKey } from "@/lib/design/journey";
 import { designJourney } from "@/lib/i18n/fr/design-journey";
 import { designSteps } from "@/lib/i18n/fr/design-steps";
-import { journey } from "@/lib/i18n/fr/journey";
 import { stepChoiceKey, type StepRef } from "@/lib/step-tools/model";
 import { isLocked } from "@/lib/ui/journey";
 
-const fr = { journey, designJourney, designSteps };
+const fr = { designJourney, designSteps };
 
 const t = fr.designJourney;
 
 /**
- * The frame of a Conception step (docs/VISION-UX.md § 4, proto « Projet
- * complet »): the Marketing's head (« Projet › Marketing › Conception ›
- * Étape », its pills, h1 « Conception », « Qui fait quoi »), « Maintenant »
- * for the person looking, « Parcours · Conception » on the left, the open
- * step on the right — its why, then the step's content and its tools. A locked step stays
- * readable (StepPanel makes it inert).
+ * The frame of a Conception step (docs/VISION-UX.md § 4, JourneyLayout): the
+ * journey on the left, on its right the Marketing's head (trail « Projet ›
+ * Marketing › Conception › Étape », its pills, h1 = the step's title, its
+ * why, « Qui fait quoi ») then the step's content and its tools. A locked
+ * step stays readable (StepPanel makes it inert).
  */
 export async function DesignStepFrame({
   projectId,
@@ -47,7 +45,7 @@ export async function DesignStepFrame({
 }) {
   const ctx = await designJourneyContext(projectId);
   if (!ctx) notFound();
-  const { steps, viewerName, people, data } = ctx;
+  const { steps, people, data } = ctx;
   const step = steps.find((s) => s.key === stepKey);
   if (!step) notFound();
   const stepRef: StepRef = { projectId, module: "design", stepKey };
@@ -85,57 +83,53 @@ export async function DesignStepFrame({
           ]);
   const open = data.stage?.state === "in_progress";
   return (
-    <div className="flex flex-col gap-5">
-      <ProjectHeader
-        projectId={projectId}
-        steps={steps}
-        actions={
-          <DesignWhoDoesWhatButton
+    <JourneyLayout
+      spine={<JourneySpine steps={steps} openKey={stepKey} />}
+      head={
+        <>
+          <ProjectHeader
             projectId={projectId}
-            scope="direction"
-            sheetId={null}
-            people={people.direction}
-            ownerName={ctx.project.ownerName}
-            members={people.members}
-            suggestions={people.suggestions}
-            canAssign={ctx.isOwner && open}
-            canEditValidators={ctx.isOwner && open}
-            responsibleLabel={t.roles.creative}
-            personLinks={<ContactLinksSection projectId={projectId} />}
+            steps={steps}
+            head={step}
+            actions={
+              <DesignWhoDoesWhatButton
+                projectId={projectId}
+                scope="direction"
+                sheetId={null}
+                people={people.direction}
+                ownerName={ctx.project.ownerName}
+                members={people.members}
+                suggestions={people.suggestions}
+                canAssign={ctx.isOwner && open}
+                canEditValidators={ctx.isOwner && open}
+                responsibleLabel={t.roles.creative}
+                personLinks={<ContactLinksSection projectId={projectId} />}
+              />
+            }
           />
-        }
-      />
-      <ProjectNowCard
-        projectId={projectId}
-        steps={steps}
-        viewerName={viewerName}
-        moduleLabel={t.module}
-        shownKey={stepKey}
-        labels={t.now}
-      />
-      <ModuleAttention stepRef={stepRef} modules={["design"]} steps={choices} />
-      <div className="grid items-start gap-6 min-[900px]:grid-cols-[300px_minmax(0,1fr)]">
-        <JourneySpine
-          steps={steps}
-          openKey={stepKey}
-          title={fr.journey.titleOf(t.module)}
-        />
-        <StepPanel
-          step={step}
-          steps={steps}
-          blockedLabel={t.blocked}
-          history={<StepHistory items={history} />}
-          {...slots}
-        >
-          <StepBlockers stepRef={stepRef} steps={choices} />
-          {children}
-          <StepToolsBlock
+          <ModuleAttention
             stepRef={stepRef}
+            modules={["design"]}
             steps={choices}
-            locked={isLocked(step.status)}
           />
-        </StepPanel>
-      </div>
-    </div>
+        </>
+      }
+    >
+      <StepPanel
+        step={step}
+        steps={steps}
+        blockedLabel={t.blocked}
+        history={<StepHistory items={history} />}
+        {...slots}
+      >
+        <StepBlockers stepRef={stepRef} steps={choices} />
+        {children}
+        <StepToolsBlock
+          stepRef={stepRef}
+          steps={choices}
+          locked={isLocked(step.status)}
+        />
+      </StepPanel>
+    </JourneyLayout>
   );
 }

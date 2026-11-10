@@ -42,7 +42,7 @@ export function ReadyPlanFields({
           return (
             <li
               key={l.key}
-              className="flex flex-col gap-3 rounded-xl border border-[color:var(--border-hairline)] p-3"
+              className="flex flex-col gap-3 rounded-xl border border-[color:var(--border-hairline)] bg-card p-3"
             >
               <b className="font-semibold">{l.label}</b>
               <div className="grid gap-3 sm:grid-cols-2">

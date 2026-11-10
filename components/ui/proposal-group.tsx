@@ -69,7 +69,7 @@ export function ProposalRows({
       className={cn(
         "flex flex-col",
         !flush &&
-          "overflow-hidden rounded-xl border border-[color:var(--border-hairline)]",
+          "overflow-hidden rounded-xl border border-[color:var(--border-hairline)] bg-card",
       )}
     >
       {children}

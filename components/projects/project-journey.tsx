@@ -32,7 +32,7 @@ export function ProjectJourney({ project }: { project: ProjectDetail }) {
       <h2 id="journey-title" className="text-base font-medium">
         {t.title}
       </h2>
-      <ol className="flex flex-col gap-1 rounded-xl border border-border p-1">
+      <ol className="flex flex-col gap-1 rounded-xl border border-border bg-card p-1">
         {steps.map((step, index) => {
           const content = (
             <>

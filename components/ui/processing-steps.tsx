@@ -37,7 +37,7 @@ export function ProcessingSteps({
               "flex size-6 shrink-0 items-center justify-center rounded-full border",
               step.state === "done"
                 ? "border-foreground bg-foreground text-background"
-                : "border-border",
+                : "border-border bg-card",
             )}
           >
             {step.state === "done" && <IconCheck className="size-3.5" />}

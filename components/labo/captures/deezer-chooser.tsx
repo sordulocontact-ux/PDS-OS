@@ -84,7 +84,7 @@ export function DeezerChooser({
   return (
     <section
       aria-label={t.title}
-      className="grid gap-3 rounded-xl border border-[var(--border-hairline)] p-3"
+      className="grid gap-3 rounded-xl border border-[var(--border-hairline)] bg-card p-3"
     >
       <h3 className="text-sm font-semibold">{t.title}</h3>
       {artist.suggestion && suggested === null && (

@@ -50,7 +50,7 @@ export function SplitParts({
     })),
   ];
   return (
-    <div className="flex flex-col overflow-hidden rounded-xl border border-[color:var(--border-hairline)]">
+    <div className="flex flex-col overflow-hidden rounded-xl border border-[color:var(--border-hairline)] bg-card">
       {rows.map((row) => (
         <div
           key={row.id}

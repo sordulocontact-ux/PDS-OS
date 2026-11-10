@@ -69,7 +69,7 @@ function TitleFinal({
         <ToneCallout tone="info">{t.waiting}</ToneCallout>
       ) : (
         <>
-          <div className="flex flex-col gap-2 rounded-2xl border border-[color:var(--border-hairline)] p-4">
+          <div className="flex flex-col gap-2 rounded-2xl border border-[color:var(--border-hairline)] bg-card p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <b className="font-semibold break-all">{t.card(file.fileName)}</b>
               <StatusBadge

@@ -19,7 +19,7 @@ const t = fr.designSteps.sheets;
 
 // A native select drawn like `Input` (proto `.in`).
 const selectClass =
-  "h-10 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm";
+  "h-10 w-full min-w-0 rounded-lg border border-input bg-card px-2.5 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm";
 
 /** The field of a sheet in edition, by its type (proto fieldRow editor). */
 export function SheetFieldEditor({

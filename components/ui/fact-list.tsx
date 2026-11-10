@@ -23,7 +23,7 @@ export function FactList({
   return (
     <dl
       className={cn(
-        "flex flex-col gap-3 rounded-xl border border-border p-4 text-sm",
+        "flex flex-col gap-3 rounded-xl border border-border p-4 text-sm bg-card",
         "in-[.section-card]:grid in-[.section-card]:grid-cols-[repeat(auto-fill,minmax(12rem,1fr))] in-[.section-card]:gap-x-6 in-[.section-card]:gap-y-4 in-[.section-card]:border-0 in-[.section-card]:p-0",
         className,
       )}

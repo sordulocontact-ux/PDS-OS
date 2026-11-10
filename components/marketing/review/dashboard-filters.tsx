@@ -42,7 +42,7 @@ export function DashboardFilterBar({
       method="get"
       action={action}
       aria-label={t.title}
-      className="grid gap-4 rounded-2xl border border-[color:var(--border-hairline)] p-4"
+      className="grid gap-4 rounded-2xl border border-[color:var(--border-hairline)] bg-card p-4"
     >
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Field

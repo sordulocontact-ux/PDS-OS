@@ -37,7 +37,7 @@ export function ContractTable({ children }: { children: ReactNode }) {
     <div
       className={cn(
         table,
-        "overflow-hidden rounded-xl border border-[color:var(--border-hairline)]",
+        "overflow-hidden rounded-xl border border-[color:var(--border-hairline)] bg-card",
       )}
     >
       <div

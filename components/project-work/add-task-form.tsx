@@ -94,7 +94,7 @@ export function TaskForm({
       aria-label={t.title}
       className={cn(
         "grid w-full gap-3",
-        framed && "rounded-2xl border border-border p-4",
+        framed && "rounded-2xl border border-border bg-card p-4",
       )}
       onSubmit={(e) => {
         e.preventDefault();

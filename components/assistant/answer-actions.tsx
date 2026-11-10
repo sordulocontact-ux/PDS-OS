@@ -70,7 +70,7 @@ export function AnswerActions({
         <nav
           id={listId}
           aria-label={t.sources}
-          className="grid gap-3 rounded-lg border border-border p-3 text-caption"
+          className="grid gap-3 rounded-lg border border-border bg-card p-3 text-caption"
         >
           {groupSources(sources).map((group) => (
             <div key={group.title} className="grid gap-1">

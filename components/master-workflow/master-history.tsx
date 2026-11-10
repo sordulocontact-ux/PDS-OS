@@ -1,7 +1,6 @@
 import { MasterHistoryCsv } from "@/components/master-workflow/master-history-csv";
 import { masterFacts } from "@/components/master-workflow/master-step-frame";
 import { ProjectHeader } from "@/components/projects/project-header";
-import { ProjectNowCard } from "@/components/shell/journey/project-now-card";
 import { StepHistory } from "@/components/shell/journey/step-history";
 import { SegmentedLinks } from "@/components/ui/segmented-control";
 import { ViewLink } from "@/components/ui/view-link";
@@ -27,7 +26,7 @@ export async function MasterHistory({
   projectId: string;
   person: string | null;
 }) {
-  const { steps, viewerName, facts } = await masterJourneyContext(projectId);
+  const { steps, facts } = await masterJourneyContext(projectId);
   const all = masterHistory(facts).reverse();
   const people = historyPeople(all);
   const who = person && people.includes(person) ? person : null;
@@ -42,13 +41,6 @@ export async function MasterHistory({
           { href: base, title: fr.masterJourney.steps.history.title },
         ]}
         facts={masterFacts(projectId)}
-      />
-      <ProjectNowCard
-        projectId={projectId}
-        steps={steps}
-        viewerName={viewerName}
-        moduleLabel={fr.masterJourney.module}
-        labels={fr.masterJourney.now}
       />
       <section
         aria-labelledby="master-history-title"

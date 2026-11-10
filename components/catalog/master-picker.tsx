@@ -100,7 +100,7 @@ export function MasterPicker({
       {selected.length > 0 && (
         <ul
           aria-label={t.linked}
-          className="flex flex-col divide-y divide-[color:var(--border-hairline)] rounded-lg border border-border"
+          className="flex flex-col divide-y divide-[color:var(--border-hairline)] rounded-lg border border-border bg-card"
         >
           {selected.map((master) => (
             <li

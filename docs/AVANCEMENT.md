@@ -2047,3 +2047,23 @@ Retour d'Akili du 01/11 (Notion Retours « Travail : une tâche pas explicite au
   (« Préparer le contrat de Sami Kader », « Demander l'autorisation d'utiliser « Night Lights » »,
   « Préparer le bulletin SACEM de « Néons » ») ; une étape suivie sans objet source encore créé
   reçoit son premier geste (`firstGesture`) au lieu de « Faire avancer la démarche ».
+
+## Mise en page des modules : parcours à gauche, titre de l'étape (10/11/2026, branche `pre-prod`)
+
+Retour d'Ibé « Refonte visuelle allégée des deux états de maquette » (07/11), étendu par Sacha à tous
+les modules à parcours (proto « Mise en page des modules », version « Proposition »).
+
+- `JourneyLayout` (nouveau, `components/shell/journey/`) dans les 8 cadres : Cadrage, Stratégie,
+  Conception, Production (livrable), Juridique, Master, Suivi & bilan, Distribution. Parcours toute la
+  hauteur à gauche, titré « Parcours » seul ; à droite l'en-tête puis l'étape **sans carte**.
+- Titre de la page = titre de l'étape (`ProjectHeader head`, `StepDue`), échéance et « Qui fait quoi » à
+  droite, pourquoi dessous ; fil d'Ariane inchangé dans la barre du haut. Plan de sortie : flèche de
+  retour avant le titre (`ProjectHeader back`).
+- Plus de « Maintenant » dans ces modules (ni carte « À vous » vers une autre étape, ni « Rien à faire
+  pour vous », ni « À faire ailleurs »), ni sur l'historique du Master ; reste dans les activations.
+- « En attente de X » en tête de toute étape attendue (`StepPanel` → `StepWaiting auto`, effacé quand
+  la page dit le sien) ; plus de ligne « À vous · … » au-dessus du geste (`leadTitle` supprimé).
+- Contenu des étapes inchangé. Textes retirés : `now` des parcours, `titleOf`, `spineTitle`, `spine`.
+- Fonds (Sacha, même jour) : sans la carte de l'étape, le fond gris de l'app passait sous les blocs en
+  contour seul et sous les champs. ~95 blocs en contour et tous les champs (`Input`, `Textarea`,
+  `Select`, `DatePicker`, éditeurs) prennent `bg-card` (règle dans `docs/DESIGN.md` § 4).

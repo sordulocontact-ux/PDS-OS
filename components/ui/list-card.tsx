@@ -34,7 +34,7 @@ export function ListCard({
   return (
     <section
       className={cn(
-        "flex flex-col gap-6 rounded-2xl border border-border p-3",
+        "flex flex-col gap-6 rounded-2xl border border-border p-3 bg-card",
         className,
       )}
     >

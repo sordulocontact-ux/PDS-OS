@@ -135,11 +135,6 @@ export const masterJourney = {
   // Status pill of a done Mixage whose mix existed (proto « Non nécessaire »).
   notNeeded: "Non nécessaire",
   versionLabel: { mix: "Mix", mastering: "Master" },
-  // « Maintenant » of the module.
-  now: {
-    waitingTitle: "Le Master avance sans vous pour l'instant",
-    finished: "Le master final est au Catalogue",
-  },
   lowerFirst,
   // « Déjà fait » and the Historique du master (lib/master-workflow/history.ts).
   history: {

@@ -49,7 +49,7 @@ export function VersionComments({
           {t.feedback.empty}
         </p>
       ) : (
-        <ul className="flex flex-col overflow-hidden rounded-xl border border-[color:var(--border-hairline)]">
+        <ul className="flex flex-col overflow-hidden rounded-xl border border-[color:var(--border-hairline)] bg-card">
           {comments.map((c) => (
             <li
               key={c.id}

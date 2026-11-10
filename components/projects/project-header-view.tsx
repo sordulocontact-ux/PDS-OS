@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { AddExpenseButton } from "@/components/budget/add-expense-button";
 import { ReadOnlyNotice } from "@/components/projects/read-only-notice";
 import { BackLink } from "@/components/shell/back-link";
+import { StepDue, type StepHead } from "@/components/shell/journey/step-due";
 import {
   useSubModuleCounts,
   useModuleEntries,
@@ -37,7 +38,14 @@ export type ProjectHeaderOverrides = Partial<
   // Added after the URL's trail (a deliverable of the Production).
   extraCrumbs?: ModuleCrumb[];
   // The module's steps: the one whose page is open ends the trail.
-  steps?: Array<{ href: string; title: string }>;
+  steps?: Array<StepHead & { href: string }>;
+  // The open step names the page: h1 = its title, its due date on the right,
+  // its why under it (docs/VISION-UX.md § 4, Sacha 10/11/2026). "path": the
+  // step whose URL is the current path (a layout, which does not know it).
+  head?: StepHead | "path";
+  // A page reached from a step without being one of its own (the Plan de
+  // sortie): the arrow before its title goes back to the step.
+  back?: { href: string; label: string };
 };
 
 // Before a page's first header is read (components/projects/project-
@@ -61,7 +69,7 @@ export function ProjectHeaderSkeleton({
       <div className="absolute inset-x-0 top-0 flex h-[var(--project-bar-height)] items-center px-6">
         <Skeleton className="h-5 w-56 max-w-full" />
       </div>
-      <Skeleton className="h-9 w-64 max-w-full" />
+      <Skeleton className="h-8.5 w-64 max-w-full" />
     </div>
   );
 }
@@ -79,6 +87,8 @@ export function ProjectHeaderView({
   crumbs,
   extraCrumbs = [],
   steps,
+  head,
+  back,
   title,
   media,
   facts,
@@ -101,6 +111,7 @@ export function ProjectHeaderView({
     ),
   );
   const step = (steps ?? data.steps).find((s) => s.href === pathname);
+  const shown: StepHead | undefined = head === "path" ? step : head;
   const sub = data.subModules.find((s) => isSubModuleAt(s, pathname));
   // The Marketing's sub-modules, to switch to from the trail (Sacha
   // 10/11/2026): where each pill opens, its check and its count.
@@ -148,10 +159,16 @@ export function ProjectHeaderView({
     >
       <ModuleHeader
         crumbs={all}
-        title={title ?? object ?? trail.title}
+        title={title ?? shown?.title ?? object ?? trail.title}
+        meta={shown && <StepDue step={shown} />}
+        why={shown?.why || undefined}
         media={
           media ??
-          (sub && object ? (
+          (back ? (
+            <BackLink href={back.href} icon>
+              {back.label}
+            </BackLink>
+          ) : sub && object ? (
             <BackLink href={sub.href} icon>
               {fr.moduleFrame.backTo(sub.label)}
             </BackLink>

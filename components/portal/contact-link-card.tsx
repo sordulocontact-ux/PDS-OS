@@ -1,7 +1,12 @@
 "use client";
 
 import { IconCheck } from "nucleo-sharp-essential";
-import { useState, useSyncExternalStore } from "react";
+import {
+  useState,
+  useSyncExternalStore,
+  type ComponentProps,
+  type ReactNode,
+} from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { IconBan } from "@/components/icons";
@@ -44,6 +49,9 @@ export function ContactLinkCard({
   row,
   canEdit,
   canEmail,
+  lead,
+  badge,
+  children,
 }: {
   projectId: string;
   projectTitle: string;
@@ -51,6 +59,11 @@ export function ContactLinkCard({
   canEdit: boolean;
   // PDS OS can e-mail this person (SMTP set, address in the Réseau).
   canEmail: boolean;
+  // Before the link's validity, under the name (« Auteur »).
+  lead?: string;
+  badge?: ComponentProps<typeof PersonLinkCard>["badge"];
+  // Under the link: what it carries (a signature of the SACEM bulletin).
+  children?: ReactNode;
 }) {
   const origin = useOrigin();
   const [revoking, setRevoking] = useState(false);
@@ -67,7 +80,12 @@ export function ContactLinkCard({
   return (
     <PersonLinkCard
       name={row.name}
-      line={link ? t.validUntil(formatDay(link.expiresAt)) : null}
+      line={
+        [lead, link ? t.validUntil(formatDay(link.expiresAt)) : null]
+          .filter(Boolean)
+          .join(" · ") || null
+      }
+      badge={badge}
       state={state}
       url={url}
       pending={write.pending}
@@ -153,6 +171,7 @@ export function ContactLinkCard({
         />
       )}
       <FormMessage kind="error">{write.error}</FormMessage>
+      {children}
     </PersonLinkCard>
   );
 }

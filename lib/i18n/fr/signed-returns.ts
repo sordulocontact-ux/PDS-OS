@@ -135,7 +135,17 @@ export const signedReturns = {
   sacem: {
     pending: "En attente",
     onLink: "Sur son lien privé",
-    noLink: "Pas encore de lien privé : à créer dans « Qui fait quoi »",
+    // Made with the version to sign (Sacha, 10/11/2026); else « Créer le
+    // lien » on the signer's link card.
+    noLink: "Pas encore de lien privé",
+    noContact: "Sans fiche dans le Réseau : pas de lien privé",
+    // The e-mail PDS OS sends each signer with the version to sign.
+    auto: {
+      subject: (title: string) => `« ${title} » : le bulletin SACEM à signer`,
+      body: (title: string) =>
+        `Le bulletin SACEM de « ${title} » est prêt. Vous pouvez le télécharger, le signer et nous le renvoyer depuis votre page, sans compte.`,
+      open: "Ouvrir votre page :",
+    },
     byLink: (date: string) => `Par son lien privé · le ${date}`,
     otherwise: (date: string) => `A signé autrement · le ${date}`,
     signedOtherwise: "A signé autrement",

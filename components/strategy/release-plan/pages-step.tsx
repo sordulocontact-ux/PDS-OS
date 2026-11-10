@@ -62,7 +62,7 @@ export function PagesStep({
             return (
               <li
                 key={page.key}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border px-4 py-3"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card px-4 py-3"
               >
                 <span className="flex min-w-0 items-center gap-3">
                   <span className="text-caption text-muted-foreground tabular-nums">

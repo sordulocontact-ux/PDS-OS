@@ -244,7 +244,7 @@ export function AskMoment({
               known(right).map((h) => (
                 <div
                   key={h.id}
-                  className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2"
+                  className="flex items-center justify-between gap-3 rounded-lg border bg-card px-3 py-2"
                 >
                   <span className="min-w-0 break-words">
                     <span className="font-medium">{h.name}</span>

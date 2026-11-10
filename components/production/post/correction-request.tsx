@@ -87,7 +87,7 @@ export function CorrectionRequestBlock({
   }
 
   return (
-    <section className="flex flex-col gap-2 rounded-xl border border-border p-4">
+    <section className="flex flex-col gap-2 rounded-xl border border-border bg-card p-4">
       <div className="flex flex-wrap items-center gap-2">
         <h4 className="text-sm font-semibold">{t.title}</h4>
         <StatusBadge tone={correctionRequestTone[request.status]} size="sm">

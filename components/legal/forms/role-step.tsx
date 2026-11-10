@@ -35,7 +35,7 @@ export function RoleStep({
         {FORM_ROLES.map((role) => (
           <label
             key={role}
-            className="flex items-center gap-3 rounded-xl border px-3 py-2.5 has-checked:border-selection has-checked:bg-selection-bg"
+            className="flex items-center gap-3 rounded-xl border bg-card px-3 py-2.5 has-checked:border-selection has-checked:bg-selection-bg"
           >
             <Checkbox
               className="shrink-0"

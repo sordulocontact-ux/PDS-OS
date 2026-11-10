@@ -23,7 +23,7 @@ export function VisualTile({
   return (
     <label
       className={cn(
-        "relative flex cursor-pointer flex-col gap-2 rounded-2xl border p-2 transition-[border-color,background-color] duration-[var(--duration-fast)]",
+        "relative flex cursor-pointer flex-col gap-2 rounded-2xl border bg-card p-2 transition-[border-color,background-color] duration-[var(--duration-fast)]",
         selected
           ? "border-[var(--selection-border)] bg-[var(--selection-bg)]"
           : "border-border hover:bg-[var(--control-bg-hover)]",

@@ -41,7 +41,7 @@ export function RecordingLive({
 }) {
   const t = fr.calls.recorder;
   return (
-    <div className="grid gap-3 rounded-lg border border-border p-4">
+    <div className="grid gap-3 rounded-lg border border-border bg-card p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <StatusBadge tone={paused ? "warning" : "info"} dot>
           {paused ? t.paused : t.recording}
@@ -65,7 +65,7 @@ export function RecordingLive({
         // only actions, so "Stop" is never shown twice.
         <div
           role="alert"
-          className="grid gap-2 rounded-lg border border-[color:var(--border-strong)] p-3"
+          className="grid gap-2 rounded-lg border border-[color:var(--border-strong)] bg-card p-3"
         >
           <p className="text-sm">
             <span className="font-medium">{t.silenceTitle}</span>{" "}

@@ -7,6 +7,7 @@
 import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
 import { answeredOnScreen } from "@/lib/legal/formalities/answered";
 import type { Creator, Publisher } from "@/lib/legal/formalities/definition";
+import type { FieldStateEntry } from "@/lib/legal/formalities/field-states";
 import {
   CATEGORY_OF,
   categoryTotal,
@@ -162,6 +163,34 @@ export function dossierErrors(
       // Borrowings and the 5 / 3 caps are not a field: the list above the
       // dossier says them.
     }
+  }
+  return out;
+}
+
+/** The values still « À vérifier » (proposed from a source, computed by the
+ * code, or reopened by the SACEM) said in red on their own field once
+ * « Générer la version à signer » is tried: the refusal counted them without
+ * saying where they were (Sacha, 10/11/2026). A value confirmed or changed
+ * since is no longer proposed, so its field turns back to normal. */
+export function withToConfirm(
+  errors: DossierErrors,
+  items: FieldStateEntry[],
+  sourceOf: (key: string) => string | null,
+): DossierErrors {
+  const t = fr.legalFormalities.fieldErrors;
+  const out = { ...errors, fields: { ...errors.fields } };
+  for (const item of items) {
+    if (item.state !== "proposed") continue;
+    const [key, message] =
+      item.key === "dep_dr"
+        ? ["dep_dr_check", t.dep_dr_check]
+        : [
+            item.key,
+            item.confirmable ? t.to_confirm(sourceOf(item.key)) : t.to_verify,
+          ];
+    if (out.fields[key]) continue;
+    out.fields[key] = message;
+    out.count += 1;
   }
   return out;
 }

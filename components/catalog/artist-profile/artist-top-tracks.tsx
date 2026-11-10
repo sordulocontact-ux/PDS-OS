@@ -6,7 +6,7 @@ import { formatDuration } from "@/lib/catalog/types";
 // Deezer's most played tracks, in its order.
 export function ArtistTopTracks({ tracks }: { tracks: ArtistTopTrack[] }) {
   return (
-    <ol className="divide-y divide-border rounded-xl border border-border">
+    <ol className="divide-y divide-border rounded-xl border border-border bg-card">
       {tracks.map((track, index) => (
         <li
           key={track.id}

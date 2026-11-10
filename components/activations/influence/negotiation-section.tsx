@@ -37,7 +37,7 @@ function agreementPreview(content: unknown) {
   if (!parsed.success) return null;
   return (
     <Fold summary={t.agreement.preview}>
-      <div className="flex flex-col gap-4 rounded-xl border border-[color:var(--border-hairline)] p-4">
+      <div className="flex flex-col gap-4 rounded-xl border border-[color:var(--border-hairline)] bg-card p-4">
         <AgreementTerms content={parsed.data} />
       </div>
     </Fold>

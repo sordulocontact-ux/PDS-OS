@@ -38,7 +38,7 @@ export function IdentityView({
               {refs.map((ref) => (
                 <li
                   key={`${ref.kind}-${ref.url}`}
-                  className="flex flex-col gap-2 rounded-xl border border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                  className="flex flex-col gap-2 rounded-xl border border-border bg-card px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div className="flex min-w-0 flex-col gap-0.5">
                     <a

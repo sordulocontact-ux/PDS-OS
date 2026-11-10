@@ -85,7 +85,7 @@ export function SinglePicker({
       {selected ? (
         <div
           className={cn(
-            "flex items-center gap-2 rounded-lg border border-border py-1.5 pr-1.5 pl-3",
+            "flex items-center gap-2 rounded-lg border border-border bg-card py-1.5 pr-1.5 pl-3",
             !hideLegend && "mt-1",
           )}
         >

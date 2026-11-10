@@ -20,7 +20,7 @@ const t = fr.decisions.fact;
 
 // A native select drawn like `Input` (Entrée and Échap stay the row's).
 const selectClass =
-  "h-10 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-error aria-invalid:ring-3 aria-invalid:ring-error/20 md:text-sm";
+  "h-10 w-full min-w-0 rounded-lg border border-input bg-card px-2.5 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-error aria-invalid:ring-3 aria-invalid:ring-error/20 md:text-sm";
 
 /**
  * A fact edited in place (docs/VISION-UX.md rule 2, proto `dateRow`):

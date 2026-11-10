@@ -9,8 +9,6 @@ const de = (name: string) =>
 export const journey = {
   label: "Parcours",
   title: "Parcours",
-  // « Parcours · Stratégie » (Marketing, Cadrage).
-  titleOf: (module: string) => `Parcours · ${module}`,
   after: (titles: string) => `Après : ${titles}`,
   me: "À vous",
   // « À vous : choisir comment démarrer » (Figma PDS OS 304:20801).

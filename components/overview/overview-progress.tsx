@@ -115,7 +115,7 @@ function StepMark({ state }: { state: State }) {
     <span
       aria-hidden
       className={cn(
-        "mt-px grid size-[1.375rem] place-items-center rounded-full border",
+        "mt-px grid size-[1.375rem] place-items-center rounded-full border bg-card",
         state === "current"
           ? "border-2 border-[color:var(--selection)]"
           : "border-[color:var(--border-default)]",

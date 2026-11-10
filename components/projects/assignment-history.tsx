@@ -23,7 +23,7 @@ export function AssignmentHistory({
         <h2 id="history-title" className="text-base font-medium">
           {t.title}
         </h2>
-        <ol className="divide-y divide-border rounded-xl border border-border">
+        <ol className="divide-y divide-border rounded-xl border border-border bg-card">
           {assignments.map((a) => (
             <li key={a.id} className="flex flex-col gap-1.5 px-4 py-3 text-sm">
               <div className="flex flex-wrap items-baseline justify-between gap-2">

@@ -42,7 +42,7 @@ export function ContractProofSlot({
 
   if (present)
     return (
-      <div className="flex items-center gap-2 rounded-lg border border-[color:var(--tone-success-fg)] px-4 py-3 text-sm">
+      <div className="flex items-center gap-2 rounded-lg border border-[color:var(--tone-success-fg)] bg-card px-4 py-3 text-sm">
         <IconCheck
           aria-hidden
           className="size-4 text-[color:var(--tone-success-fg)]"

@@ -52,7 +52,7 @@ export function FormatsStep({
           {formats.map((format, index) => (
             <li
               key={format.id}
-              className="flex flex-col gap-3 rounded-2xl border border-border p-4"
+              className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4"
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <label className="flex items-center gap-2 text-body-md font-medium">

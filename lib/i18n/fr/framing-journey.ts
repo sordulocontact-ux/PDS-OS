@@ -19,11 +19,6 @@ export const framingJourney = {
     prereqs.includes(" et ")
       ? `S'ouvre quand ${prereqs} sont faits.`
       : `S'ouvre quand ${prereqs} est fait.`,
-  // NowCard: the proto said « Le Marketing avance… » here (defect, § 7).
-  now: {
-    waitingTitle: "Le Cadrage avance sans vous pour l'instant",
-    finished: "Le Cadrage est terminé",
-  },
   steps: {
     start: {
       title: "Démarrer le cadrage",

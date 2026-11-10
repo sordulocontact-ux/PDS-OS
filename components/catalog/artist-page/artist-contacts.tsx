@@ -62,7 +62,7 @@ export function ArtistContacts({
       {contacts.length === 0 ? (
         <EmptyNote>{t.empty}</EmptyNote>
       ) : (
-        <ul className="divide-y divide-border rounded-xl border border-border">
+        <ul className="divide-y divide-border rounded-xl border border-border bg-card">
           {contacts.map((contact) => (
             <li key={contact.id} className="flex items-start gap-3 p-4">
               <div className="flex min-w-0 flex-1 flex-col gap-1">

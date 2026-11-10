@@ -43,7 +43,7 @@ export function BriefFieldCard({
   const inputId = `${field.deliverable}-${field.key}`;
 
   return (
-    <section className="grid gap-2 rounded-lg border border-border p-4">
+    <section className="grid gap-2 rounded-lg border border-border bg-card p-4">
       <div className="flex flex-wrap items-center gap-2">
         <h3 className="text-sm font-medium">{label}</h3>
         {field.status === "proposed" && <ProposedBadge />}

@@ -21,7 +21,7 @@ export function NextCard({
   return (
     <section
       className={cn(
-        "flex flex-col gap-3 rounded-xl border p-4",
+        "flex flex-col gap-3 rounded-xl border p-4 bg-card",
         kind === "act" &&
           "border-[color:var(--selection)] bg-[color:var(--selection-bg)]",
         kind === "decision" &&

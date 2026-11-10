@@ -71,7 +71,7 @@ export default async function MembersPage({
           }))}
         >
           {visible.length === 0 ? (
-            <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border py-12 text-center">
+            <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border bg-card py-12 text-center">
               <IconUsers2
                 className="size-5 text-muted-foreground"
                 aria-hidden

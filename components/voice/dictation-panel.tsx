@@ -101,7 +101,7 @@ export function DictationPanel<P>({
       return (
         <div
           role="alert"
-          className="grid gap-2 rounded-lg border border-[color:var(--border-strong)] p-3"
+          className="grid gap-2 rounded-lg border border-[color:var(--border-strong)] bg-card p-3"
         >
           <p className="text-sm">{t.errors[phase.error]}</p>
           <div className="flex flex-wrap gap-2">

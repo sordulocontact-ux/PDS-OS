@@ -85,7 +85,7 @@ export function IntakeAnswers({
         </StepSection>
       )}
       {notAsked.length > 0 && (
-        <details className="group rounded-xl border border-[color:var(--border-hairline)] px-3.5 py-2.5">
+        <details className="group rounded-xl border border-[color:var(--border-hairline)] bg-card px-3.5 py-2.5">
           <summary className="flex cursor-pointer list-none flex-col marker:hidden">
             <span className="text-[length:var(--type-body-sm)] font-semibold">
               {fr.poQuestion.notAsked.title}

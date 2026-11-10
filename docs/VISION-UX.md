@@ -93,51 +93,55 @@ Tous les modules (Lancement, Cadrage, Master, Juridique, chaque chevron du Marke
 Distribution, Clôture) ont la même forme. On l'apprend une fois.
 
 ```
-Titre du module                                   [chevrons des sous-modules]
-┌ Maintenant ───────────────────────────────────────────────────────────────┐
-│ [À vous]  Lina Haddad · Master › Mixage                                   │
-│ Transmettre au mixeur                                                      │
-│ Pourquoi, en une phrase.                       [Ouvrir l'étape]           │
-│ En attente de Nadia Benali : valider la pochette                          │
-└────────────────────────────────────────────────────────────────────────────┘
-┌ Parcours ────────┐ ┌ Étape ouverte ───────────────────────────── avant le … ┐
-│ ✓ Source         │ │ Pourquoi                                                │
-│   Version confir.│ │ [À vous · action] en tête, si la personne a un geste    │
-│ ● Brief Mix…     │ │ [PO] ce que PO a pré-rempli et d'où                     │
-│   À vous · …     │ │ Faits pré-remplis, avec source        [Modifier/Changer]│
-│ ◌ Mixage         │ │ [Action principale] [Issue avec motif]                  │
-│   Après : Brief  │ │ Déjà fait : …                                           │
-└──────────────────┘ └─────────────────────────────────────────────────────────┘
+                              Néons / Marketing / Master / Mixage   ← fil d'Ariane, barre du haut
+┌ Parcours ────────┐  [chevrons des sous-modules, Marketing seul]
+│ ✓ Source         │  Mixage                        avant le …  [Qui fait quoi]
+│   Version confir.│  Pourquoi, en une phrase.
+│ ● Brief Mix…     │  Faits du module (Master final, Sortie…)
+│   À vous · …     │
+│ ◌ Mixage         │  En attente de Claire Morel : valider le Mix V1   ← si le geste est à un autre
+│   Après : Brief  │  [PO] ce que PO a pré-rempli et d'où
+│                  │  Faits pré-remplis, avec source        [Modifier/Changer]
+│                  │  [Action principale] [Issue avec motif]
+│                  │  Déjà fait : …
+└──────────────────┘
 ```
 
-- **Maintenant** (en haut). Trois états : « À vous » (l'action, son pourquoi, « Ouvrir l'étape ») ;
-  « À vous, ailleurs » (rien ici, mais une action attend dans un autre module, avec le lien) ;
-  « Rien à faire pour vous » (et qui on attend, sur quoi). **Il ne répète jamais l'étape déjà
-  affichée en dessous** : si l'étape ouverte est celle de la personne, la carte disparaît, et ne
-  revient que pour une *autre* action, sous la mention « Aussi à vous ».
+- **Mise en page** *(retour d'Ibé du 07/11, proto « Mise en page des modules », Sacha 10/11/2026)*.
+  Le Parcours tient **toute la hauteur à gauche** ; à sa droite, l'en-tête puis l'étape **sans
+  carte**. **Le titre de la page est celui de l'étape** (h1), avec son échéance et « Qui fait
+  quoi » à droite, son pourquoi dessous : le module est déjà dit par le fil d'Ariane, qui reste
+  dans la barre du haut comme avant. Rien au-dessus du titre. Sur un téléphone : l'en-tête, le
+  Parcours, puis l'étape. Code : `JourneyLayout` + `ProjectHeader head` + `StepPanel`.
+- **Pas de « Maintenant » dans un module.** La carte « À vous » vers une autre étape du module,
+  la ligne « À faire ailleurs » et « Rien à faire pour vous » ne sont plus affichées dans un module :
+  le Parcours dit « À vous · … » en bleu sur l'étape qui attend la personne, à côté, et les points
+  de la navigation disent les autres modules. Une carte sous le titre d'une étape, qui parle d'une
+  autre étape, se lirait comme faisant partie de celle-ci *(Sacha, 10/11/2026)*. « Maintenant »
+  reste la tête de l'Accueil, du Travail, de la Vue d'ensemble et des activations.
+- **« En attente de X (lien privé) : … » se dit dans l'étape attendue**, en tête de son contenu
+  (`StepPanel` le pose depuis le Parcours ; il s'efface quand la page le dit elle-même, plus
+  précisément : un contrat, une fiche), jamais au-dessus du titre.
 - **Parcours** (à gauche). Une ligne par étape : rond coché (faite), point bleu (en cours), cadenas
   sur cercle pointillé (verrouillée). Le sous-titre dit le **résultat** si c'est fait, **« Personne ·
   action »** si c'est en cours, **« Après : X »** si c'est verrouillé. « À vous · » en couleur de
   sélection sur ses propres étapes. **Le Parcours reste celui du module**, même dans une page à plusieurs écrans
   ouverte depuis une étape (générateur du Plan de sortie, 8 écrans) : ces écrans se parcourent comme les
   questions des dimensions, « ‹ 3 sur 8 › », avec « ← Étape » au-dessus du titre *(Sacha, 10/11/2026)*.
-- **Étape ouverte** (à droite). Titre et échéance, pourquoi, puis, dans cet ordre et
-  seulement s'ils existent : « Se débloque quand X est fait », le motif d'un retour, l'encadré PO, les faits, ce
-  qui manque encore, l'action (ou « En attente de X (lien privé) : … »), le résultat final, et
+- **Étape ouverte** (à droite). Titre, échéance et pourquoi en tête de page, puis, dans cet ordre et
+  seulement s'ils existent : « En attente de X », « Se débloque quand X est fait », le motif d'un retour, l'encadré PO, les faits, ce
+  qui manque encore, l'action, le résultat final, et
   **tout en bas l'historique « Déjà fait »** : ce qui est fait ferme l'étape, sous tout ce qui
   compte encore *(Sacha 17/10)*. **Ni pastille d'état (« En cours », « Fait »…), ni grille « Exécute / Coordonne / Valide / Prérequis /
-  Ensuite », ni ligne « À vous : … » sous le pourquoi** : Ibé trouvait que ça faisait trop de
+  Ensuite », ni ligne « À vous · … »** : Ibé trouvait que ça faisait trop de
   bruit (cases vides, redites). Le Parcours dit déjà qui agit et sur quoi, « Qui fait quoi »
-  donne les rôles, le cadenas dit ce qu'une étape attend, et l'encadré « À vous · … » en tête
-  reste quand la personne a un geste à faire *(Ibé et Sacha, 03/11/2026)* — sans cadre ni fond bleu : la pastille « À vous » et le nom du geste suffisent *(Sacha, 04/11/2026)*. **Sauf quand toute l'étape est le geste** (tout le Juridique : quand c'est à la personne, le
-  contenu entier de l'étape passe en tête, question de PO, plan, demande d'autorisation…) : la ligne
-  « À vous · … » ne ferait que répéter le Parcours et la section du geste avec son bouton ; le contenu
-  garde sa place en tête et son ancre `#a-vous`, sans titre *(Sacha, 06/11/2026 ;
-  `StepPanel leadTitle={false}`, posé par `LegalStepFrame`)*.
+  donne les rôles, le cadenas dit ce qu'une étape attend *(Ibé et Sacha, 03/11/2026)*. Quand la
+  personne a un geste à faire, il passe en tête de l'étape, **sans ligne « À vous · … » au-dessus** :
+  le bouton du geste suffit, et la ligne ne ferait que répéter le Parcours *(Sacha, 06/11 pour le
+  Juridique, étendu à tous les modules le 10/11/2026)*.
 - **On arrive au bon endroit.** Ouvrir un module ouvre l'étape qui attend la personne, sinon
   l'étape en cours. Quand la personne a un geste à faire, **il passe en tête de l'étape**
-  (« À vous · Valider le Mix V1 » : la version, ses retours et la décision ; ou la question qu'on
-  lui pose), les informations secondaires repliées dessous (qui fait quoi, versions précédentes,
+  (la version à valider, ses retours et la décision ; ou la question qu'on lui pose), les informations secondaires repliées dessous (qui fait quoi, versions précédentes,
   tarif, lien privé, échanges), et **un clic dans Travail ouvre ce geste**, pas le haut de la page
   ni celle du projet. *(Ibé, lot 4 « l'action principale en haut », 22/10)* Une page qui n'a plus de raison d'être (ancienne fiche à onglets) redirige
   vers cette étape.
@@ -169,9 +173,10 @@ validera ensuite) ; **« Vos projets »** par échéance avec ce que chacun dema
 pressée (« Valider le Mix V1 +3 »), jamais un simple compte, sinon le statut de transmission ou « Suivi ». Plus d'activité ni de cartes juxtaposées. *(Sacha 29/10/2026,
 proto `docs/protos/accueil.html`.)*
 
-**En-tête de module** (au-dessus de « Maintenant ») : fil d'Ariane « Projet › Module ›
-[sous-module ›] Étape », pilules des sous-modules (Marketing seul), titre du module, « Qui fait
-quoi » à droite, ligne de faits (`docs/DESIGN.md` § 4, « En-tête de module »).
+**En-tête de module** : fil d'Ariane « Projet › Module › [sous-module ›] Étape » dans la barre du
+haut, pilules des sous-modules (Marketing seul), titre = l'étape ouverte (le module sur une page
+sans parcours : Anomalies, Historique), « Qui fait quoi » à droite, pourquoi, ligne de faits
+(`docs/DESIGN.md` § 4, « En-tête de module »).
 
 ## 5. Règles d'interaction
 
@@ -226,8 +231,8 @@ valent partout, dans l'app comme dans les protos.
    distributeur qui reçoit, accepte, livre) se montre en **frise** dont chaque point se coche avec
    sa date, et se déclare en **un seul geste** (on coche ce qu'on a appris), pas un bouton par
    état. *(Sacha 18/10, proto Distribution)*
-8. **Pas de cul-de-sac.** Rien à faire dans ce module ? « Maintenant » renvoie vers l'action
-   ailleurs. Un bloquant (Distribution) dit ce qui manque et propose **« Corriger dans X »** avec le
+8. **Pas de cul-de-sac.** Rien à faire dans ce module ? Les points de la navigation et le Travail
+   mènent à l'action ailleurs. Un bloquant (Distribution) dit ce qui manque et propose **« Corriger dans X »** avec le
    lien.
 9. **Chacun voit sa part.** Les mêmes données, un « Maintenant » différent selon le rôle.
    Dans un projet lancé, le responsable écrit ; le DG lit et valide ; le chargé de production
@@ -430,6 +435,7 @@ Erreurs trouvées en testant, chacune corrigée le 14/10 :
 | « Modifier » sur les informations d'un autre | Celui qui accepte réécrirait ce que le DG a transmis | Demander une précision ou refuser |
 | Un refus sans motif, ou pas d'issue « Refuser » | La personne ne sait pas quoi corriger | Règle 6 |
 | « Maintenant » qui répète l'étape affichée, avec « Ouvrir l'étape » vers la page où on est déjà | Bruit, et un bouton qui ne mène nulle part | La carte disparaît ; « Aussi à vous » pour une autre action |
+| Carte « À vous » ou « En attente de » sous le titre d'une étape, qui parle d'une autre étape (10/11) | Se lit comme une partie de l'étape affichée ; le Parcours le dit déjà à côté | Plus de « Maintenant » dans un module ; « À vous » en bleu dans le Parcours, l'attente dans l'étape attendue |
 | « Maintenant » et « Ce que vous attendez » en tête de la liste du Réseau ou des Contrats (29/10) | On vient regarder la liste ; le travail y est en double | La liste seule ; le travail dans Accueil, Travail et la fiche |
 | Un encadré PO qui affirme des faits avant toute réponse, avec un « 40 % » inventé | On ne sait pas d'où ça vient, et l'IA ne produit pas de chiffre | Question, réponse, « Ce que PO a compris » avec citations (règle 12) |
 | « Déposer le Mix V1 » comme simple bouton | Ce qui se livre, c'est un fichier audio qu'on écoute | Dépôt audio et versions écoutables (règle 13) |

@@ -22,7 +22,7 @@ function Totals({ totals }: { totals: MetricTotal[] }) {
       {totals.map((x) => (
         <li
           key={`${x.metric}-${x.unit}`}
-          className="rounded-lg border px-3 py-2 text-body-sm"
+          className="rounded-lg border bg-card px-3 py-2 text-body-sm"
         >
           <span className="text-muted-foreground">
             {fr.activations.metrics.names[x.metric]} ·{" "}

@@ -28,7 +28,7 @@ export function FactRows({
   return (
     <div
       className={cn(
-        "flex flex-col overflow-hidden rounded-xl border border-[color:var(--border-hairline)]",
+        "flex flex-col overflow-hidden rounded-xl border border-[color:var(--border-hairline)] bg-card",
         className,
       )}
     >

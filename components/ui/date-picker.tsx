@@ -189,7 +189,7 @@ export function DatePicker({
         ref={frame}
         data-slot="input"
         className={cn(
-          "flex h-8 w-full min-w-0 items-center gap-1 rounded-lg border border-input bg-transparent pr-1 text-base transition-colors focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 has-[input:disabled]:cursor-not-allowed has-[input:disabled]:bg-input/50 has-[input:disabled]:opacity-50 has-[input[aria-invalid=true]]:border-error has-[input[aria-invalid=true]]:ring-3 has-[input[aria-invalid=true]]:ring-error/20 md:text-sm dark:bg-input/30",
+          "flex h-8 w-full min-w-0 items-center gap-1 rounded-lg border border-input bg-card pr-1 text-base transition-colors focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 has-[input:disabled]:cursor-not-allowed has-[input:disabled]:bg-input/50 has-[input:disabled]:opacity-50 has-[input[aria-invalid=true]]:border-error has-[input[aria-invalid=true]]:ring-3 has-[input[aria-invalid=true]]:ring-error/20 md:text-sm",
           open && "border-ring",
           className,
         )}

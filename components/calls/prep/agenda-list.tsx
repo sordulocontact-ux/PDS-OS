@@ -80,7 +80,7 @@ export function AgendaList({
           {t.agendaEmpty}
         </p>
       ) : (
-        <ol className="flex flex-col rounded-xl border border-[var(--border-default)]">
+        <ol className="flex flex-col rounded-xl border border-[var(--border-default)] bg-card">
           {items.map((item, index) => (
             <AgendaRow
               key={item.id}

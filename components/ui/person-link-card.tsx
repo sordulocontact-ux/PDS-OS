@@ -9,6 +9,7 @@ import { DocumentCard } from "@/components/ui/document-card";
 import { RowActions, type RowAction } from "@/components/ui/row-actions";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { personLink } from "@/lib/i18n/fr/person-link";
+import type { Tone } from "@/lib/ui/state-tones";
 
 const fr = { personLink };
 
@@ -42,7 +43,9 @@ const shortOf = (url: string) => {
  * in « ⋯ » (« Marquer comme envoyé », « Révoquer »…). No server action
  * here: each module gives its gestures (Master: `LinkPanel`; Juridique:
  * `ContactLinkCard`). `empty` while there is no link; `children` under it
- * (a reason to give, an error).
+ * (a reason to give, an error, what the link carries); `badge` in place of
+ * the link's state when the card says something else first (a signer of the
+ * SACEM bulletin: « En attente », « Signé »).
  */
 export function PersonLinkCard({
   name,
@@ -55,6 +58,7 @@ export function PersonLinkCard({
   onRenew,
   actions = [],
   empty,
+  badge,
   children,
 }: {
   name: string;
@@ -72,6 +76,7 @@ export function PersonLinkCard({
   actions?: RowAction[];
   // No link yet: what to say and the button that creates it.
   empty?: ReactNode;
+  badge?: { tone: Tone; label: string };
   children?: ReactNode;
 }) {
   const hasLink = state !== "none";
@@ -80,7 +85,16 @@ export function PersonLinkCard({
       name={t.title(name)}
       line={line ?? undefined}
       icon={IconLink}
-      action={<StatusBadge tone={TONE[state]}>{t.states[state]}</StatusBadge>}
+      // Folded from the chevron after its pill, and folded on arrival
+      // (Sacha, 10/11/2026): its pill says where it stands. Open while there
+      // is no link yet, « Créer le lien » being the gesture to make.
+      collapsible
+      defaultOpen={!hasLink}
+      action={
+        <StatusBadge tone={badge?.tone ?? TONE[state]}>
+          {badge?.label ?? t.states[state]}
+        </StatusBadge>
+      }
     >
       <div className="flex flex-col gap-3 p-3.5">
         {hasLink ? (

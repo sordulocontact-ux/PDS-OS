@@ -22,7 +22,7 @@ export function Rows({
       className={cn(
         "flex flex-col [&>li+li]:border-t [&>li+li]:border-[color:var(--border-hairline)]",
         !flush &&
-          "overflow-hidden rounded-xl border border-[color:var(--border-hairline)]",
+          "overflow-hidden rounded-xl border border-[color:var(--border-hairline)] bg-card",
       )}
     >
       {children}

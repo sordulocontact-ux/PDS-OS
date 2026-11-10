@@ -97,6 +97,10 @@ export const workflowsTopics: GuideTopic[] = [
         q: "Comment se répartissent les parts sur le bulletin SACEM ?",
         a: "Par catégorie : chaque participant a ses rôles (auteur, compositeur, arrangeur, adaptateur, ou interprète uniquement, sans part), puis les auteurs se partagent la part Auteur, les compositeurs la part Compositeur et les éditeurs musicaux la part Éditeur, chacune à 100 %. Les parts Phono du bulletin en sont calculées et font toujours 100 %. L'artiste principal est ajouté d'office mais son rôle est à confirmer, et « Aucun éditeur musical » se dit explicitement.",
       },
+      {
+        q: "Comment les signataires reçoivent-ils le bulletin SACEM ?",
+        a: "Par leur lien privé, créé tout seul pour chaque signataire qui a une fiche dans le Réseau quand la version à signer est générée, avec un e-mail quand PDS OS peut l'envoyer. Ils y téléchargent le bulletin et le déposent signé. Sous la carte du bulletin, « Signatures » montre la carte du lien de chaque signataire, comme au Master : où en est sa signature, copier le lien, « Relancer », « Nouveau lien », « Créer le lien » s'il n'a pas pu être créé, et « A signé autrement » pour une signature reçue hors du lien. PDS Éditions signe dans PDS OS, par la direction.",
+      },
     ],
     permissions: ["manage_legal"],
   },

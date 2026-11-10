@@ -11,6 +11,7 @@ import { routes } from "@/lib/auth/redirects";
 import { legalDocuments } from "@/lib/i18n/fr/legal-documents";
 import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
 import { saveFormalityValues } from "@/lib/legal/formalities/actions";
+import { EDITABLE } from "@/lib/legal/formalities/editable";
 import {
   FORMALITY_SECTIONS,
   SACEM_725_FIELDS,
@@ -32,15 +33,6 @@ import { useDossierErrors } from "./use-dossier-errors";
 
 const fr = { legalDocuments, legalFormalities };
 
-// The dossier can still be changed (and generated) in these states.
-export const EDITABLE = [
-  "collecting_data",
-  "ready_to_generate",
-  "document_ready",
-  "signatures_pending",
-  "ready_to_submit",
-  "action_required",
-];
 // Saved as it is filled while no version was generated (Sacha, 10/11/2026).
 const AUTOSAVED = ["collecting_data", "ready_to_generate"];
 
@@ -109,10 +101,23 @@ export function DossierForm({
     entries,
     enabled: AUTOSAVED.includes(f.status),
   });
+  const sourceOf = (key: string) =>
+    title.prefill[key]?.source ?? f.values[key]?.source ?? null;
+  const items = fieldStates({
+    entries,
+    sourceOf,
+    reopened: new Set(
+      Object.entries(f.values)
+        .filter(([, v]) => v.status === "to_verify")
+        .map(([k]) => k),
+    ),
+    missing: f.missing,
+  });
   const { root, errors, markEdited, attempt } = useDossierErrors(
     f.missing,
     Object.fromEntries(Object.entries(entries).map(([k, e]) => [k, e.value])),
     pending,
+    { items, sourceOf },
   );
   const reopening = f.status === "action_required";
   const editable = (key: string) =>
@@ -129,17 +134,6 @@ export function DossierForm({
   const obj = <T,>(key: string, fallback: T) =>
     (entries[key]?.value as T | null) ?? fallback;
 
-  const items = fieldStates({
-    entries,
-    sourceOf: (key) =>
-      title.prefill[key]?.source ?? f.values[key]?.source ?? null,
-    reopened: new Set(
-      Object.entries(f.values)
-        .filter(([, v]) => v.status === "to_verify")
-        .map(([k]) => k),
-    ),
-    missing: f.missing,
-  });
   const fieldKeys = new Set(SACEM_725_FIELDS.map((x) => x.key));
   const stateOf = (key: string) => items.find((i) => i.key === key) ?? null;
   // A borrowing has its own line in « 1. Œuvre ».

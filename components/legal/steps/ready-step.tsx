@@ -175,7 +175,7 @@ function Controls({
   if (rows.length === 0) return null;
   return (
     <StepSection title={title}>
-      <ul className="flex flex-col divide-y divide-[color:var(--border-hairline)] rounded-xl border border-[color:var(--border-hairline)]">
+      <ul className="flex flex-col divide-y divide-[color:var(--border-hairline)] rounded-xl border border-[color:var(--border-hairline)] bg-card">
         {rows.map((c) => (
           <ControlRow
             key={c.key}

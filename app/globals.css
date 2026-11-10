@@ -185,9 +185,10 @@
   --type-display-lg-lh: 42px;
   --type-display-md: 28px;
   --type-display-md-lh: 34px;
-  /* Titre d'un module (h1 de ModuleHeader, proto « Projet complet »). */
-  --type-display-module: 30px;
-  --type-display-module-lh: 36px;
+  /* Titre d'une page de module (h1 de ModuleHeader) : 28 px depuis que c'est
+     le nom de l'étape ouverte (Sacha, 10/11/2026 ; 30 px avant). */
+  --type-display-module: 28px;
+  --type-display-module-lh: 34px;
   --type-display-sm: 20px;
   --type-display-sm-lh: 28px;
   --type-figure-xl: 32px;

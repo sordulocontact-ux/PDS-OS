@@ -22,7 +22,9 @@ import { cn } from "@/lib/utils";
  * border-0"`, other content with its own padding (`px-3.5`). Without a body
  * (the Brief, a deposited file), the head alone: name and download.
  * `collapsible`: a chevron at the end of the head folds a long body (the
- * SACEM bulletin and its dossier).
+ * SACEM bulletin and its dossier, a person's link), open unless
+ * `defaultOpen={false}` (the SACEM bulletin, folded on arrival: Sacha,
+ * 10/11/2026).
  */
 export function DocumentCard({
   name,
@@ -32,6 +34,7 @@ export function DocumentCard({
   children,
   className,
   collapsible = false,
+  defaultOpen = true,
   icon: Icon = IconFile,
 }: {
   name: string;
@@ -43,6 +46,7 @@ export function DocumentCard({
   children?: ReactNode;
   className?: string;
   collapsible?: boolean;
+  defaultOpen?: boolean;
   // A file by default; an envelope for an e-mail about to leave.
   icon?: React.ComponentType<IconProps>;
 }) {
@@ -83,6 +87,7 @@ export function DocumentCard({
         head={head}
         action={action}
         className={className}
+        defaultOpen={defaultOpen}
       >
         {rest}
       </DocumentCardFold>

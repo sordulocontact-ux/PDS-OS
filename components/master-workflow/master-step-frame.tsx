@@ -1,6 +1,6 @@
 import { ProjectHeader } from "@/components/projects/project-header";
+import { JourneyLayout } from "@/components/shell/journey/journey-layout";
 import { JourneySpine } from "@/components/shell/journey/journey-spine";
-import { ProjectNowCard } from "@/components/shell/journey/project-now-card";
 import { StepHistory } from "@/components/shell/journey/step-history";
 import { StepPanel } from "@/components/shell/journey/step-panel";
 import { ModuleAttention } from "@/components/shell/module/module-attention";
@@ -49,10 +49,10 @@ export async function masterFacts(projectId: string): Promise<ModuleFact[]> {
 }
 
 /**
- * The frame of a Master step (docs/VISION-UX.md § 4, proto `master-v2.html`):
- * the module's head with its facts, « Maintenant » for the person looking,
- * the journey on the left with « Historique du master » at its foot, the
- * open step on the right — its grid, its content, then « Déjà fait ».
+ * The frame of a Master step (docs/VISION-UX.md § 4, JourneyLayout): the
+ * journey on the left with « Historique du master » at its foot, on its
+ * right the head (h1 = the step's title, its why, « Qui fait quoi », the
+ * Master's facts) then the step's content and « Déjà fait ».
  */
 export async function MasterStepFrame({
   projectId,
@@ -65,12 +65,7 @@ export async function MasterStepFrame({
   children: React.ReactNode;
   slots?: Omit<React.ComponentProps<typeof StepPanel>, "step" | "steps">;
 }) {
-  const {
-    steps,
-    viewerName,
-    facts: rows,
-    project,
-  } = await masterJourneyContext(projectId);
+  const { steps, facts: rows, project } = await masterJourneyContext(projectId);
   const step = steps.find((s) => s.key === stepKey);
   if (!step) return null;
   // Blockers and noted information of the step (C6).
@@ -84,33 +79,8 @@ export async function MasterStepFrame({
     .reverse();
   const roles = masterRoles(rows, project.ownerName);
   return (
-    <div className="flex flex-col gap-5">
-      <ProjectHeader
-        projectId={projectId}
-        steps={steps}
-        facts={masterFacts(projectId)}
-        actions={
-          <WhoDoesWhatButton
-            {...roles}
-            personLinks={
-              <ContactLinksSection
-                projectId={projectId}
-                sub={(roles.links?.length ?? 0) > 0}
-              />
-            }
-          />
-        }
-      />
-      <ProjectNowCard
-        projectId={projectId}
-        steps={steps}
-        viewerName={viewerName}
-        moduleLabel={t.module}
-        shownKey={stepKey}
-        labels={t.now}
-      />
-      <ModuleAttention stepRef={stepRef} modules={["master"]} steps={choices} />
-      <div className="grid items-start gap-6 min-[900px]:grid-cols-[300px_minmax(0,1fr)]">
+    <JourneyLayout
+      spine={
         <JourneySpine
           steps={steps}
           openKey={stepKey}
@@ -119,22 +89,49 @@ export async function MasterStepFrame({
             label: t.history.link,
           }}
         />
-        <StepPanel
-          step={step}
-          steps={steps}
-          blockedLabel={t.blocked}
-          history={<StepHistory items={history} />}
-          {...slots}
-        >
-          <StepBlockers stepRef={stepRef} steps={choices} />
-          {children}
-          <StepToolsBlock
-            stepRef={stepRef}
-            steps={choices}
-            locked={step.status === "blocked"}
+      }
+      head={
+        <>
+          <ProjectHeader
+            projectId={projectId}
+            steps={steps}
+            head={step}
+            facts={masterFacts(projectId)}
+            actions={
+              <WhoDoesWhatButton
+                {...roles}
+                personLinks={
+                  <ContactLinksSection
+                    projectId={projectId}
+                    sub={(roles.links?.length ?? 0) > 0}
+                  />
+                }
+              />
+            }
           />
-        </StepPanel>
-      </div>
-    </div>
+          <ModuleAttention
+            stepRef={stepRef}
+            modules={["master"]}
+            steps={choices}
+          />
+        </>
+      }
+    >
+      <StepPanel
+        step={step}
+        steps={steps}
+        blockedLabel={t.blocked}
+        history={<StepHistory items={history} />}
+        {...slots}
+      >
+        <StepBlockers stepRef={stepRef} steps={choices} />
+        {children}
+        <StepToolsBlock
+          stepRef={stepRef}
+          steps={choices}
+          locked={step.status === "blocked"}
+        />
+      </StepPanel>
+    </JourneyLayout>
   );
 }

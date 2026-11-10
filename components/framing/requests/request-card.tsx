@@ -63,7 +63,7 @@ export function RequestCard({
             )
           : null);
   return (
-    <li className="flex flex-col gap-2 rounded-2xl border border-border p-4">
+    <li className="flex flex-col gap-2 rounded-2xl border border-border bg-card p-4">
       <div className="flex flex-wrap items-center gap-2">
         <Link
           href={requestHref(projectId, request)}

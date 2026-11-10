@@ -128,7 +128,7 @@ export function OrchardForm({
       <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
         {t.tellBody}
       </p>
-      <div className="flex flex-col overflow-hidden rounded-xl border border-[color:var(--border-hairline)]">
+      <div className="flex flex-col overflow-hidden rounded-xl border border-[color:var(--border-hairline)] bg-card">
         {left.map((k, index) => {
           // A box opens once the one before it is ticked.
           const enabled = index === 0 || Boolean(ticked[left[index - 1]]);

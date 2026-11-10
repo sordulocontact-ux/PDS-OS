@@ -146,7 +146,7 @@ export function TitleCover({
           aria-label={t.add}
           aria-busy={pending || undefined}
           className={cn(
-            "flex size-full flex-col items-center justify-center gap-1 rounded-2xl border border-dashed border-border text-muted-foreground transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:border-[color:var(--border-hover)] hover:bg-muted hover:text-foreground",
+            "flex size-full flex-col items-center justify-center gap-1 rounded-2xl border border-dashed border-border bg-card text-muted-foreground transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:border-[color:var(--border-hover)] hover:bg-muted hover:text-foreground",
             dragging && "border-solid border-ring bg-muted text-foreground",
             pending && "opacity-40",
             FOCUS,

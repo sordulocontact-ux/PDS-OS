@@ -10,8 +10,8 @@ import {
   SheetNotices,
   sheetFacts,
 } from "@/components/production/prep/sheet-header";
+import { JourneyLayout } from "@/components/shell/journey/journey-layout";
 import { JourneySpine } from "@/components/shell/journey/journey-spine";
-import { ProjectNowCard } from "@/components/shell/journey/project-now-card";
 import { ModuleAttention } from "@/components/shell/module/module-attention";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
@@ -27,25 +27,25 @@ import { loadRevokedLinks } from "@/lib/production/producer-history";
 import { projectHeaderData } from "@/lib/projects/header";
 import { createClient } from "@/lib/supabase/server";
 
-// One deliverable's production as a journey (Ibé, 14/10; proto « Projet
-// complet »): the module's head (trail « Projet › Marketing › Production ›
-// livrable › étape », who produces, « Qui fait quoi », what frames it),
-// « Maintenant » for the person looking, the points to look at, the bar of
-// the deliverables in Production, then the steps on the left and the open
-// step on the right — one page per step. Pages check access themselves;
-// everything is read once per request (journeyContext is cached).
+// One deliverable's production as a journey (Ibé, 14/10; JourneyLayout,
+// docs/VISION-UX.md § 4): the steps on the left; on their right the head
+// (trail « Projet › Marketing › Production › livrable › étape » in the top
+// bar, h1 = the open step's title, read from the URL, its why, who
+// produces, « Qui fait quoi », what frames it), the points to look at, the
+// bar of the deliverables in Production, then the open step — one page per
+// step. Before it starts, the page alone in full width. Pages check access
+// themselves; everything is read once per request (journeyContext is
+// cached).
 export default async function ProductionSheetLayout({
   children,
   params,
 }: LayoutProps<"/app/projects/[projectId]/production/[deliverableId]">) {
   const { projectId, deliverableId } = await params;
-  const [{ access, data, steps }, deliverables] = await Promise.all([
+  const [{ data, steps }, deliverables] = await Promise.all([
     journeyContext(projectId, deliverableId),
     productionDeliverables(projectId),
   ]);
   const started = Boolean(data.heritage.fiche || data.heritage.source);
-  const viewer =
-    data.members.find((m) => m.personId === access.personId)?.name ?? null;
   const sheet = data.sheet;
   const organized = Boolean(sheet?.organization.kind);
   const [links, history, revoked] = sheet
@@ -75,8 +75,8 @@ export default async function ProductionSheetLayout({
     const release = header?.facts.find((f) => f.key === "release");
     return [...sheetFacts(data), ...(release ? [release] : [])];
   });
-  return (
-    <div className="flex flex-col gap-5">
+  const head = (
+    <>
       <ProjectHeader
         projectId={projectId}
         extraCrumbs={[
@@ -95,6 +95,7 @@ export default async function ProductionSheetLayout({
           },
         ]}
         steps={steps}
+        head={started ? "path" : undefined}
         actions={
           <>
             {organized && <SheetKindBadge data={data} />}
@@ -119,41 +120,39 @@ export default async function ProductionSheetLayout({
         facts={organized ? facts : undefined}
       />
       <SheetNotices data={data} />
-      {started && (
-        <ProjectNowCard
-          projectId={projectId}
-          byPath
-          steps={steps}
-          viewerName={viewer}
-          moduleLabel={fr.shell.project.marketingSteps.production}
-          labels={fr.productionJourney.now}
-        />
-      )}
       <ModuleAttention
         stepRef={productionStepRef(projectId, deliverableId, "organisation")}
         modules={["production"]}
         steps={productionStepChoices(deliverableId, steps)}
       />
       <DeliverableBar projectId={projectId} current={deliverableId} />
-      {started ? (
-        <div className="grid items-start gap-6 min-[900px]:grid-cols-[300px_minmax(0,1fr)]">
-          <JourneySpine
-            steps={steps}
-            title={fr.productionJourney.spine}
-            footer={{
-              href: routes.projectProductionStep(
-                projectId,
-                deliverableId,
-                "history",
-              ),
-              label: fr.productionJourney.history,
-            }}
-          />
-          <div className="min-w-0">{children}</div>
-        </div>
-      ) : (
-        children
-      )}
-    </div>
+    </>
+  );
+  if (!started)
+    return (
+      <div className="flex flex-col gap-5">
+        {head}
+        {children}
+      </div>
+    );
+  return (
+    <JourneyLayout
+      spine={
+        <JourneySpine
+          steps={steps}
+          footer={{
+            href: routes.projectProductionStep(
+              projectId,
+              deliverableId,
+              "history",
+            ),
+            label: fr.productionJourney.history,
+          }}
+        />
+      }
+      head={head}
+    >
+      {children}
+    </JourneyLayout>
   );
 }

@@ -70,7 +70,7 @@ export function ReserveFields({
   const errors = draftErrors(draft, today);
   const key = reserve.cause;
   return (
-    <fieldset className="flex flex-col gap-3 rounded-[var(--radius-md)] border border-[color:var(--border-hairline)] p-3.5">
+    <fieldset className="flex flex-col gap-3 rounded-[var(--radius-md)] border border-[color:var(--border-hairline)] bg-card p-3.5">
       <legend className="px-1 font-semibold">{reserve.label}</legend>
       <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
         {reserve.details.join(" · ")}

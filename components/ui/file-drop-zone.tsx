@@ -40,7 +40,7 @@ export function FileDropZone({
       {...handlers}
       data-dragging={dragging || undefined}
       className={cn(
-        "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border px-4 py-6 text-center transition-colors",
+        "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border px-4 py-6 text-center transition-colors bg-card",
         "hover:bg-muted has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-[color:var(--focus-ring)]",
         "data-dragging:border-solid data-dragging:border-ring data-dragging:bg-muted",
         disabled && "pointer-events-none opacity-60",

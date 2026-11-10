@@ -1,12 +1,10 @@
 import { IconLock } from "nucleo-sharp-essential";
 
-import { BackLink } from "@/components/shell/back-link";
 import {
   ResultBanner,
   StepResultProvider,
 } from "@/components/shell/module/result-banner";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { TitleBlock } from "@/components/ui/title-block";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { journey } from "@/lib/i18n/fr/journey";
 import {
@@ -17,8 +15,8 @@ import {
   withModule,
 } from "@/lib/ui/journey";
 import type { Tone } from "@/lib/ui/state-tones";
-import { formatDay } from "@/lib/utils/day";
-import { cn } from "@/lib/utils";
+
+import { StepWaiting } from "./step-waiting";
 
 const fr = { journey };
 
@@ -36,13 +34,10 @@ const t = fr.journey;
  *
  * `lead`: the viewer's gesture, given when the step's page puts it first
  * (lot 4 of Ibé's feedback: « l'action attendue en tête de page, les
- * informations secondaires repliées »). It comes right under the « why »,
- * named by the step's action (« À vous · Valider le Mix V1 ») and anchored
- * (`#a-vous`, where Travail opens it); the result banner moves above it.
- * `leadTitle={false}` when the whole step is the gesture (the Juridique,
- * whose content comes first when the viewer acts): no « À vous · … » line,
- * which would only repeat the journey and the gesture's own button (Sacha,
- * 06/11/2026).
+ * informations secondaires repliées »), anchored (`#a-vous`, where Travail
+ * opens it); the result banner moves above it. No « À vous · … » line above
+ * it: the gesture's own button says it, the journey marks the step « À vous »
+ * (Sacha, 06 and 10/11/2026).
  */
 export type StepSlots = {
   lead?: React.ReactNode;
@@ -58,36 +53,29 @@ export type StepSlots = {
 };
 
 /**
- * One step of the journey, as the right side of a module, all in one card
- * (proto « Projet complet »): its title and due date, why it matters, then its
- * slots. No grid of who does what nor « À vous : … » line (Ibé, 03/11/2026:
- * too much noise): the journey beside it already says who acts and on what,
- * the lead names the viewer's gesture. A locked step says what unlocks it
- * and shows its content read-only (inert): nothing to do there yet.
+ * One step of the journey, on the right of the spine, without a card (proto
+ * « Mise en page des modules », Sacha 10/11/2026): the page's head already
+ * names it (h1 = the step's title, its why, its due date: ProjectHeader
+ * `head`), so the panel holds its slots only. A step waiting for someone
+ * else says it first (« En attente de … », StepWaiting) unless the page says
+ * it itself, more precisely. A locked step says what unlocks it and shows
+ * its content read-only (inert): nothing to do there yet.
  */
 export function StepPanel({
   step,
   steps,
   blockedLabel = t.blocked,
   badge,
-  back,
-  leadTitle = true,
   children,
   ...slots
 }: StepSlots & {
   step: JourneyStep;
   steps: JourneyStep[];
   // A pill when the module says more than the state (Distribution:
-  // « Prêt pour contrôle », « Clôturée avec réserves (3) »). The state
-  // itself has no pill: the journey and the card already say it (Ibé,
+  // « Prêt pour contrôle », « Clôturée avec réserves (3) »), first in the
+  // step. The state itself has no pill: the journey already says it (Ibé,
   // 03/11/2026).
   badge?: { tone: Tone; label: string };
-  // A page opened from the step without being one of its own (the Plan de
-  // sortie under « Stratégie validée »): the way back to the step, above
-  // the title (Sacha, 10/11/2026: « pas de bouton retour »).
-  back?: { href: string; label: string };
-  // False when the step is the gesture itself: the lead without its line.
-  leadTitle?: boolean;
   // Replaces « Se débloque quand … » (Marketing: « S'ouvre quand … »).
   blockedLabel?: (prereqs: string) => string;
   children?: React.ReactNode;
@@ -101,75 +89,31 @@ export function StepPanel({
   const lead =
     slots.lead && (!locked || step.actor?.viewer) ? slots.lead : null;
   const banner = slots.flash ?? <ResultBanner />;
+  const waits =
+    !locked && ["current", "waiting", "rework"].includes(step.status);
   return (
     <StepResultProvider>
       <section
-        aria-labelledby="journey-step-title"
-        className="flex min-w-0 flex-col gap-3.5 rounded-2xl border border-[color:var(--border-hairline)] bg-card p-5"
+        aria-label={step.title}
+        className="group/step flex min-w-0 flex-col gap-3.5"
       >
-        {back && <BackLink href={back.href}>{back.label}</BackLink>}
-        {/* 24 px under the title and its sentence, before the step's
-            content (Figma of the SACEM step, Sacha 10/11/2026). */}
-        <TitleBlock className="mb-2.5">
-          <div className="flex flex-wrap items-center justify-between gap-2.5">
-            <h2
-              id="journey-step-title"
-              className="text-[length:var(--type-figure-lg)] leading-[var(--type-figure-lg-lh)] font-medium tracking-[var(--type-display-tracking)] text-balance"
-            >
-              {step.title}
-            </h2>
-            <div className="flex flex-wrap items-center gap-2.5">
-              {step.due && step.status !== "done" && (
-                <span
-                  className={cn(
-                    // Quieter than the sentence under the title (Figma,
-                    // 10/11/2026); an overdue date stays loud.
-                    "text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-muted)]",
-                    step.alert === "overdue" &&
-                      "font-semibold text-[color:var(--tone-danger-fg)]",
-                  )}
-                >
-                  {t.meta.due(formatDay(step.due))}
-                </span>
-              )}
-              {badge && (
-                <StatusBadge tone={badge.tone}>{badge.label}</StatusBadge>
-              )}
-            </div>
-          </div>
-          {step.why && (
-            <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
-              {step.why}
-            </p>
-          )}
-        </TitleBlock>
+        {badge && (
+          <StatusBadge tone={badge.tone} className="self-start">
+            {badge.label}
+          </StatusBadge>
+        )}
+        {waits && <StepWaiting step={step} auto />}
         {lead && (
           <>
             {banner}
             <section
               id={LEAD_ANCHOR}
-              {...(step.actor?.viewer && leadTitle
-                ? { "aria-labelledby": "journey-step-lead" }
-                : { "aria-label": step.actor?.todo ?? t.now.mine })}
+              aria-label={step.actor?.todo ?? t.now.mine}
               // No frame of its own (Sacha, 04/11/2026: « le fond bleu
-              // non »): the pill and the gesture's name say it is yours.
-              // Well apart from what follows (« Ce que PDS OS a vérifié »…,
-              // Sacha 09/11/2026).
+              // non »). Well apart from what follows (« Ce que PDS OS a
+              // vérifié »…, Sacha 09/11/2026).
               className="mb-4 flex scroll-mt-24 flex-col gap-3.5"
             >
-              {leadTitle && (
-                <div className="flex flex-wrap items-center gap-2">
-                  <StatusBadge tone="info">{t.now.mine}</StatusBadge>
-                  {step.actor?.viewer && (
-                    <h3
-                      id="journey-step-lead"
-                      className="text-[length:var(--type-body-md)] leading-[var(--type-body-md-lh)] font-semibold"
-                    >
-                      {step.actor.todo}
-                    </h3>
-                  )}
-                </div>
-              )}
               {lead}
             </section>
           </>

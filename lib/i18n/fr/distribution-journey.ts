@@ -695,11 +695,6 @@ export const distributionJourney = {
     platforms: ["Vérifier les plateformes"],
     closure: ["Proposer la clôture", "Valider la clôture"],
   },
-  // « Maintenant » of the module.
-  now: {
-    waitingTitle: "La Distribution avance sans vous pour l'instant",
-    finished: "La distribution est clôturée",
-  },
   footer: {
     anomalies: "Anomalies",
     anomaliesOpen: (n: number) =>

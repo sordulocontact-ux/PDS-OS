@@ -134,7 +134,11 @@ export async function DemarchePart({
               title={row.badge.label}
             />
           )}
-          <FormalityCard projectId={projectId} title={panel.title} />
+          <FormalityCard
+            projectId={projectId}
+            projectTitle={projectTitle}
+            title={panel.title}
+          />
         </>
       );
     case "link":

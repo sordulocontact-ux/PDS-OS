@@ -68,7 +68,7 @@ export function BriefVersionDoc({
                   aria-pressed={marked}
                   onClick={() => marking.onToggle(dimension)}
                   className={cn(
-                    "h-7 rounded-full border border-[color:var(--border-default)] px-2.5 text-caption transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:border-[color:var(--border-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--focus-ring)]",
+                    "h-7 rounded-full border border-[color:var(--border-default)] bg-card px-2.5 text-caption transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:border-[color:var(--border-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--focus-ring)]",
                     marked &&
                       "border-transparent bg-[var(--tone-warning-bg)] text-[color:var(--tone-warning-fg)]",
                   )}

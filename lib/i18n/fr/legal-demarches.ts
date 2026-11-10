@@ -170,8 +170,6 @@ export const legalDemarches = {
   },
   // « Responsable · Changer » on an open démarche.
   responsible: "Responsable et échéance",
-  // « Maintenant » when nothing waits for the viewer (proto).
-  nowWaiting: "Le Juridique avance sans vous pour l'instant",
   // The démarche's steps inside its card (a person: fiche then contract).
   partsLabel: "Les temps de la démarche",
   ready: {

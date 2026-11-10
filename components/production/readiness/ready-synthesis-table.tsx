@@ -20,7 +20,7 @@ export function ReadySynthesisTable({
   actions?: Record<string, React.ReactNode>;
 }) {
   return (
-    <ul className="flex flex-col overflow-hidden rounded-xl border border-[color:var(--border-hairline)]">
+    <ul className="flex flex-col overflow-hidden rounded-xl border border-[color:var(--border-hairline)] bg-card">
       {rows.map((r) => (
         <li
           key={r.key}

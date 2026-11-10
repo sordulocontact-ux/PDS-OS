@@ -3,7 +3,6 @@
 // their words, who acts and what for, the « Maintenant » of each person.
 export const productionJourney = {
   label: "Parcours de la production",
-  spine: "Parcours · Production",
   steps: {
     organisation: {
       title: "Qui produit ?",
@@ -158,10 +157,6 @@ export const productionJourney = {
   },
   meta: {
     fiche: "Fiche Livrable validée",
-  },
-  now: {
-    waitingTitle: "La production avance sans vous pour l'instant",
-    finished: "La production est terminée",
   },
   roles: {
     owner: "Responsable du projet",

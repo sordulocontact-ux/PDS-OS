@@ -2,7 +2,6 @@ import {
   StepPanel,
   type StepSlots,
 } from "@/components/shell/journey/step-panel";
-import { StepWaiting } from "@/components/shell/journey/step-waiting";
 import {
   StepBlockers,
   StepToolsBlock,
@@ -16,8 +15,8 @@ import { isLocked } from "@/lib/ui/journey";
 
 /**
  * A step of a deliverable's production on the common pattern (proto
- * `detail`): its card (`StepPanel`), the blockers reported on it at the
- * top, its content, who it waits for, then « Informations notées » and « Signaler un
+ * `detail`): `StepPanel` (who it waits for first), the blockers reported on
+ * it at the top, its content, then « Informations notées » and « Signaler un
  * blocage » / « Noter une information » for the team (sub-lot C6), never
  * on a locked step nor once the production is closed.
  */
@@ -43,8 +42,6 @@ export async function ProductionStepPanel({
     <StepPanel step={step} steps={steps} {...slots}>
       <StepBlockers stepRef={stepRef} steps={choices} />
       {children}
-      {/* Who the step waits for, when it is not the viewer (proto waitRow). */}
-      {!isLocked(step.status) && <StepWaiting step={step} />}
       <StepToolsBlock
         stepRef={stepRef}
         steps={choices}

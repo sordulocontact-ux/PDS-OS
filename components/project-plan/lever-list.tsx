@@ -16,7 +16,7 @@ export function LeverList({ levers }: { levers: PlanLever[] }) {
     return <p className="text-sm text-muted-foreground">{t.familyEmpty}</p>;
 
   return (
-    <ul className="divide-y divide-border rounded-xl border border-border">
+    <ul className="divide-y divide-border rounded-xl border border-border bg-card">
       {levers.map((lever) => (
         <li
           key={lever.id}

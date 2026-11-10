@@ -173,7 +173,7 @@ export function OrchardStep({ ctx }: { ctx: DistributionContext }) {
     <div className="flex flex-col gap-4">
       <ol
         aria-label={o.frieze(cycle.version)}
-        className="grid gap-3 rounded-xl border border-[color:var(--border-hairline)] p-4 sm:grid-cols-4"
+        className="grid gap-3 rounded-xl border border-[color:var(--border-hairline)] bg-card p-4 sm:grid-cols-4"
       >
         {nodes.map(({ key, d }) => {
           const now = !d && key === current;
@@ -182,7 +182,7 @@ export function OrchardStep({ ctx }: { ctx: DistributionContext }) {
               <span
                 aria-hidden
                 className={cn(
-                  "grid size-6 place-items-center rounded-full border-2 border-[color:var(--border-default)]",
+                  "grid size-6 place-items-center rounded-full border-2 border-[color:var(--border-default)] bg-card",
                   d &&
                     "border-transparent bg-[var(--tone-success-bg)] text-[color:var(--tone-success-fg)]",
                   now &&

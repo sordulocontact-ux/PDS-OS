@@ -46,10 +46,6 @@ export const strategyJourney = {
     prereqs.includes(" et ")
       ? `S'ouvre quand ${prereqs} sont faits.`
       : `S'ouvre quand ${prereqs} est fait.`,
-  now: {
-    waitingTitle: "La Stratégie avance sans vous pour l'instant",
-    finished: "La Stratégie est validée",
-  },
   plan: {
     label: "Plan du projet",
     module: "Cadrage",

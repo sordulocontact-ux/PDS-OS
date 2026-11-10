@@ -29,7 +29,7 @@ export function ChosenFiles({
         {files.map((file, index) => (
           <li
             key={`${file.name}-${file.size}-${index}`}
-            className="flex items-center gap-2 rounded-lg border border-border py-1.5 pr-1.5 pl-3"
+            className="flex items-center gap-2 rounded-lg border border-border bg-card py-1.5 pr-1.5 pl-3"
           >
             <span className="min-w-0 flex-1 truncate text-sm font-medium">
               {file.name}

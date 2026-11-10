@@ -37,7 +37,7 @@ export function DraftCard({
   return (
     <section
       aria-label={proposal.title}
-      className="grid gap-3 rounded-xl border border-border p-4"
+      className="grid gap-3 rounded-xl border border-border bg-card p-4"
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm font-medium">{proposal.title}</p>

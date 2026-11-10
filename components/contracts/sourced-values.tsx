@@ -24,7 +24,7 @@ export function SourcedValues({
   return (
     <dl
       className={cn(
-        "flex flex-col rounded-xl border border-[color:var(--border-hairline)] px-4 [&>div+div]:border-t [&>div+div]:border-[color:var(--border-hairline)]",
+        "flex flex-col rounded-xl border border-[color:var(--border-hairline)] bg-card px-4 [&>div+div]:border-t [&>div+div]:border-[color:var(--border-hairline)]",
         className,
       )}
     >

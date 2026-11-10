@@ -49,7 +49,7 @@ export function AudioFileField({
     <div className="flex flex-col gap-1.5">
       <Label id={`${id}-label`}>{label}</Label>
       {file ? (
-        <div className="flex items-center gap-3 rounded-lg border border-border px-3 py-2">
+        <div className="flex items-center gap-3 rounded-lg border border-border bg-card px-3 py-2">
           <IconVolumeUp
             aria-hidden
             className="size-5 shrink-0 text-muted-foreground"

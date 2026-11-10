@@ -21,7 +21,7 @@ export function EmptyState({
   onClick?: () => void;
 }) {
   const frame =
-    "flex w-full flex-col items-center gap-3 rounded-xl border border-dashed border-border px-4 py-16 text-center";
+    "flex w-full flex-col items-center gap-3 rounded-xl border border-dashed border-border px-4 py-16 text-center bg-card";
   if (onClick)
     return (
       <button
@@ -52,7 +52,7 @@ export function EmptyState({
 export function EmptyNote({ children }: { children: React.ReactNode }) {
   return (
     // On a section card, a plain line: no frame inside a card.
-    <p className="rounded-xl border border-dashed border-border p-4 text-sm text-muted-foreground in-[.section-card]:border-0 in-[.section-card]:p-0">
+    <p className="rounded-xl border border-dashed border-border bg-card p-4 text-sm text-muted-foreground in-[.section-card]:border-0 in-[.section-card]:p-0">
       {children}
     </p>
   );

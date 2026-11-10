@@ -133,7 +133,7 @@ export function PlatformsStep({ ctx }: { ctx: DistributionContext }) {
         </h3>
         {mine && view.canEdit && <AddPlatform projectId={ctx.project.id} />}
       </div>
-      <div className="flex flex-col overflow-hidden rounded-xl border border-[color:var(--border-hairline)]">
+      <div className="flex flex-col overflow-hidden rounded-xl border border-[color:var(--border-hairline)] bg-card">
         {lines.map((line) => (
           <PlatformRow
             key={line.platform}

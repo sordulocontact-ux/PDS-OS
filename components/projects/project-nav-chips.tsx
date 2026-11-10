@@ -48,7 +48,7 @@ export function ProjectNavChips({
               title={fr.shell.project.sidebar.restricted}
               className={cn(
                 chip,
-                "cursor-not-allowed border-[color:var(--border-hairline)] text-[color:var(--text-muted)]",
+                "cursor-not-allowed border-[color:var(--border-hairline)] bg-card text-[color:var(--text-muted)]",
               )}
             >
               {section.label}

@@ -22,16 +22,18 @@ export function DocumentCardFold({
   head,
   action,
   className,
+  defaultOpen = true,
   children,
 }: {
   name: string;
   head: ReactNode;
   action?: ReactNode;
   className?: string;
+  defaultOpen?: boolean;
   children: ReactNode;
 }) {
   const t = fr.shell.section;
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(defaultOpen);
   const bodyId = useId();
   return (
     <section className={cn(documentCardClass, className)}>

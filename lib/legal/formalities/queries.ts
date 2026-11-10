@@ -323,6 +323,7 @@ export async function loadFormalities(
               via: (s.via as "link" | "other" | "house" | null) ?? null,
               signedOn: s.signed_on,
               onLink: s.contact_id !== null && linked.has(s.contact_id),
+              contactId: s.contact_id,
               fileUrl: urlOf.get(s.id) ?? null,
               house: s.house,
               superseded: s.superseded_at !== null,

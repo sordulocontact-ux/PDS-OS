@@ -33,7 +33,7 @@ export function AudioFile({
   return (
     <fieldset
       className={cn(
-        "flex max-w-xl min-w-0 items-center gap-3 rounded-2xl border border-[color:var(--border-default)] px-4 pb-3",
+        "flex max-w-xl min-w-0 items-center gap-3 rounded-2xl border border-[color:var(--border-default)] px-4 pb-3 bg-card",
         name ? "pt-1" : "pt-3",
         className,
       )}

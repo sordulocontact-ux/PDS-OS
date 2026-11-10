@@ -186,7 +186,7 @@ export function TemplateBodyEditor({
           onKeyDown={onKeyDown}
           onPaste={onPaste}
           onDrop={(event) => event.preventDefault()}
-          className="max-h-[60vh] min-h-56 w-full overflow-y-auto overscroll-contain rounded-lg border border-input bg-transparent px-2.5 py-2 text-base leading-relaxed break-words whitespace-pre-wrap transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30"
+          className="max-h-[60vh] min-h-56 w-full overflow-y-auto overscroll-contain rounded-lg border border-input bg-card px-2.5 py-2 text-base leading-relaxed break-words whitespace-pre-wrap transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm"
         />
         {!body.trim() && (
           <p className="pointer-events-none absolute inset-x-2.5 top-2 text-base text-muted-foreground md:text-sm">

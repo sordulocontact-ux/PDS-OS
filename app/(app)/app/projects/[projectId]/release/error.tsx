@@ -14,7 +14,7 @@ export default function ReleaseError({
   return (
     <div
       role="alert"
-      className="grid justify-items-start gap-3 rounded-xl border p-6"
+      className="grid justify-items-start gap-3 rounded-xl border bg-card p-6"
     >
       <p className="font-medium">{fr.release.states.error}</p>
       <Button type="button" variant="outline" onClick={retry}>

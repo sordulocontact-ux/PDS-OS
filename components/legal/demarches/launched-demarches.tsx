@@ -45,7 +45,7 @@ export function LaunchedDemarches({
   const section = (list: Demarche[], kind: "immediate" | "dependent") =>
     list.length > 0 && (
       <StepSection title={fr.legal.plan.sections[kind].title(list.length)}>
-        <ul className="flex flex-col divide-y divide-[color:var(--border-hairline)] rounded-xl border border-[color:var(--border-hairline)]">
+        <ul className="flex flex-col divide-y divide-[color:var(--border-hairline)] rounded-xl border border-[color:var(--border-hairline)] bg-card">
           {list.map((d) => (
             <Row
               key={d.step.key}

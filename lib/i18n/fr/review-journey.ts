@@ -7,16 +7,11 @@ const s = (n: number) => (n > 1 ? "s" : "");
 
 export const reviewJourney = {
   module: "Suivi & bilan",
-  spineTitle: "Parcours · Suivi & bilan",
   // « S'ouvre quand Réserves est fait. » (Marketing wording).
   blocked: (prereqs: string) =>
     prereqs.includes(" et ")
       ? `S'ouvre quand ${prereqs} sont faits.`
       : `S'ouvre quand ${prereqs} est fait.`,
-  now: {
-    waitingTitle: "Le Marketing avance sans vous pour l'instant",
-    finished: "Le Marketing est clôturé",
-  },
   history: {
     link: "Historique",
     title: "Historique du suivi & bilan",

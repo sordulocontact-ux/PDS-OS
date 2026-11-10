@@ -26,7 +26,7 @@ export function ClarificationList({ items }: { items: Clarification[] }) {
         {items.map((c) => (
           <li
             key={c.id}
-            className="flex flex-col gap-2 rounded-xl border border-border px-4 py-3 text-sm"
+            className="flex flex-col gap-2 rounded-xl border border-border bg-card px-4 py-3 text-sm"
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="font-medium">

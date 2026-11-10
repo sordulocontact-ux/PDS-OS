@@ -45,7 +45,7 @@ export function listenPortalCards({
     workflow: "master",
     body: (
       <div className="flex flex-col gap-3">
-        <div className="flex flex-col gap-2 rounded-2xl border border-[color:var(--border-hairline)] p-4">
+        <div className="flex flex-col gap-2 rounded-2xl border border-[color:var(--border-hairline)] bg-card p-4">
           <b className="font-semibold break-all">
             {t.version(v.stage, v.number, v.fileName)}
           </b>

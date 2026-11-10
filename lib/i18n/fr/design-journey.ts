@@ -24,10 +24,6 @@ export const designJourney = {
     prereqs.includes(" et ")
       ? `S'ouvre quand ${prereqs} sont faits.`
       : `S'ouvre quand ${prereqs} est fait.`,
-  now: {
-    waitingTitle: "La Conception avance sans vous pour l'instant",
-    finished: "La Conception est terminée",
-  },
   // Prerequisite of the Accueil, in the Stratégie.
   strategyPrereq: {
     module: "Stratégie",

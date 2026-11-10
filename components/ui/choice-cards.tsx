@@ -67,7 +67,7 @@ export function ChoiceCards<V extends string>({
         "flex cursor-pointer transition-colors has-checked:bg-[var(--selection-bg)] has-focus-visible:outline-2 has-focus-visible:outline-ring has-disabled:cursor-not-allowed has-disabled:opacity-60",
         list
           ? "border-b border-[color:var(--border-hairline)] px-4 py-3 last:border-b-0 hover:bg-[var(--surface-soft)] has-checked:hover:bg-[var(--selection-bg)] has-focus-visible:-outline-offset-2"
-          : "rounded-lg border border-border has-checked:border-[var(--selection-border)] has-focus-visible:outline-offset-2",
+          : "rounded-lg border border-border has-checked:border-[var(--selection-border)] has-focus-visible:outline-offset-2 bg-card",
         tile
           ? "flex-col items-center justify-center gap-2 p-6 text-center"
           : list
@@ -172,7 +172,7 @@ export function ChoiceCards<V extends string>({
         <p className="col-span-full text-sm text-muted-foreground">{hint}</p>
       )}
       {list ? (
-        <div className="flex flex-col overflow-hidden rounded-xl border border-[color:var(--border-hairline)]">
+        <div className="flex flex-col overflow-hidden rounded-xl border border-[color:var(--border-hairline)] bg-card">
           {items}
         </div>
       ) : (

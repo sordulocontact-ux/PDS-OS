@@ -850,6 +850,19 @@ Socle de toutes les zones (sous-lots C0 à C5 de `docs/projet-complet/commons.md
   positionnée (`relative`, `sticky`, `transform`…) entre la colonne et `ModuleHeader`, sinon le fil
   quitte la barre. Le fil commence au module (plus de segment projet, `moduleTrail`) ; la ligne de
   faits du projet n'est plus affichée par défaut, seulement les `facts` qu'un module donne.
+  **Page à parcours** (proto « Mise en page des modules », retour d'Ibé du 07/11, Sacha
+  10/11/2026) : chaque cadre de module (`FramingStepFrame`, `StrategyStepFrame`,
+  `DesignStepFrame`, layout du livrable de Production, `LegalStepFrame`, `MasterStepFrame`,
+  `ReviewStepFrame`, `DistributionFrame`) rend `JourneyLayout` (`components/shell/journey/`) :
+  `spine` = `JourneySpine` toute la hauteur à gauche, `head` = son `ProjectHeader head={step}`
+  (h1 = titre de l'étape, échéance, pourquoi ; `head="path"` dans un layout qui ne connaît pas
+  la page ouverte) + puces d'attention, puis `StepPanel` sans carte. L'en-tête est dans la
+  colonne de droite mais son fil reste dans la barre : la grille et ses cellules ne sont pas
+  positionnées (le `sticky` du parcours n'est pas un ancêtre de l'en-tête). Plus de
+  `ProjectNowCard` dans ces cadres : l'attente se dit dans l'étape (`StepPanel` pose
+  `StepWaiting auto`, effacé en CSS — `group/step` + `data-step-waiting=page` — quand la page
+  rend le sien). Les vues sans étape (Anomalies, Historique de la Distribution et du Master)
+  gardent l'en-tête du module en pleine largeur.
 - **Parcours** (`lib/ui/journey.ts`). `JourneyStep` : statuts `done | current | waiting | rework |
   blocked | upcoming | obsolete` (calculés, jamais stockés), `roles` (`exec`/`coord`/`valid`/`owner`
   → grille 5 ou 4 colonnes), `prereq` (clés du même parcours) + `external` (`{key, label, done,
@@ -898,8 +911,9 @@ Socle de toutes les zones (sous-lots C0 à C5 de `docs/projet-complet/commons.md
   `DecisionPanel`, carte occupée de `StartChoices pending`). L'attente d'un autre est `StepWaiting`
   (avatar + « En attente de **X** : … », pris sur l'acteur de l'étape), jamais une ligne grise.
   **Action en tête, lien direct** (lot 4 des retours d'Ibé, 22/10/2026) : `StepPanel` a un slot
-  `lead` — le geste du lecteur, juste sous le « pourquoi », dans un encadré « À vous · *action de
-  l'étape* » ancré `#a-vous` (`LEAD_ANCHOR`) ; le bandeau de résultat passe au-dessus. La grille
+  `lead` — le geste du lecteur, en tête de l'étape, ancré `#a-vous` (`LEAD_ANCHOR`), sans ligne
+  « À vous · … » au-dessus depuis le 10/11/2026 (le bouton du geste suffit) ; le bandeau de
+  résultat passe au-dessus. La grille
   `StepMeta` et la ligne « À vous : … » sous le pourquoi ont été retirées le 03/11/2026 (Ibé : trop
   de bruit) ; le Parcours et « Qui fait quoi » disent qui agit. Le parcours qui donne un
   `lead` met sur l'acteur `href` = `leadHref(page de l'étape)` ; Travail (global et du projet),
@@ -942,8 +956,8 @@ s'afficher sans chargement.
   (110 à 230 requêtes, 3 à 6 s pour un geste qui en coûte 2 à 5). Les zones lues du projet entier
   passent donc sous `ProjectFresh` : barre du projet (entrées et pastilles, puis compteurs),
   en-tête (`ProjectHeader`, ses faits viennent des états des workflows ; un module peut lui passer
-  la **promesse** de ses faits, `masterFacts`), « Maintenant » (`ProjectNowCard`, les actions
-  « ailleurs » viennent de tous les parcours) et la barre des livrables de la Production. La
+  la **promesse** de ses faits, `masterFacts`), « Maintenant » des activations (`ProjectNowCard`,
+  les actions « ailleurs » viennent de tous les parcours) et la barre des livrables de la Production. La
   frontière a pour clé la version du projet : après une écriture c'est une **nouvelle** frontière,
   l'action se termine dès que la page elle-même est prête, et le dernier rendu de la zone reste à
   l'écran (`KeptView` / `KeptFallback`, `components/shell/kept-view.tsx`, en mémoire de l'onglet,
@@ -3590,6 +3604,18 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
     règle « jamais déduite » du ticket 06. `formality_missing` (renommée
     `formality_missing_base` et enveloppée) ajoute `first_exploitation` et `dep_dr_check`.
     Plus de frise ni de liste « Il manque » en tête ; brouillon « BROUILLON — ne pas signer ».
+  - *Liens privés des signataires* (Sacha, 10/11/2026) : « Générer la version à signer » crée le lien privé
+    (`/c/`, lot 11) de chaque signataire qui a une fiche Réseau, sauf PDS Éditions, et lui envoie l'e-mail du
+    bulletin quand PDS OS le peut (`openSignerPages`, `lib/legal/formalities/signer-pages.ts`, comme un contrat
+    envoyé sur le lien). Les signatures sont **sous** la carte du bulletin, plus dedans
+    (`SignaturesSection`) : chaque signataire du Réseau = la carte de lien de l'app (`PersonLink` avec `lead` =
+    rôle, `badge` = état de la signature, `SignatureFooter` sous le lien : comment il a signé, « Voir le PDF »,
+    « A signé autrement ») ; PDS Éditions et un signataire sans fiche Réseau gardent une ligne (`SignatureRow`).
+    Puis les étapes suivantes (`StepsPanel` : déclaration partielle, dépôt, réponse). Les signataires entrent
+    dans `project_link_contacts` (migration `20261110140101`), pour « Créer le lien » avant le premier lien. Le
+    Juridique n'a pas de « Qui fait quoi » : plus aucun texte n'y renvoie.
+  - *Valeurs à confirmer en rouge* (Sacha, 10/11/2026) : au refus de « Générer la version à signer », chaque
+    valeur « À vérifier » passe en rouge sur son champ avec sa raison (`withToConfirm`), le focus sur la première.
   - *Lot 6b, dépôt et réponse de la SACEM* (JUR-03, JUR-10, migration
     `20261024000501_sacem_outcomes`, test `legal-formalities`) : les preuves sont des **PDF**
     déposés par l'équipe dans le bucket privé `formality-signatures`, sous

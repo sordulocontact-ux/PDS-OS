@@ -59,7 +59,7 @@ export function ContractParties({
             return (
               <li
                 key={party.contactId}
-                className="flex min-w-0 items-center gap-3 rounded-xl border border-border px-3 py-2"
+                className="flex min-w-0 items-center gap-3 rounded-xl border border-border bg-card px-3 py-2"
               >
                 <Icon
                   aria-hidden

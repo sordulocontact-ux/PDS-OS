@@ -32,7 +32,7 @@ export function TemplateRequestCard({
   return (
     <section
       aria-label={t.toValidate}
-      className="flex flex-col gap-3 rounded-2xl border border-[color:var(--selection-border)] p-4"
+      className="flex flex-col gap-3 rounded-2xl border border-[color:var(--selection-border)] bg-card p-4"
     >
       <span className="text-[length:var(--type-micro)] leading-[var(--type-micro-lh)] font-semibold text-[color:var(--text-secondary)]">
         {t.toValidate}

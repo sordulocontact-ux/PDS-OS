@@ -78,7 +78,7 @@ export function ExportChecklistSection({
           <EmptyNote>{fiche ? t.empty : t.noFiche}</EmptyNote>
         )}
         {proposed.length > 0 && (
-          <div className="flex flex-col gap-3 rounded-xl border border-dashed border-border p-4 text-sm">
+          <div className="flex flex-col gap-3 rounded-xl border border-dashed border-border bg-card p-4 text-sm">
             <p>
               {missing
                 ? c.missing.title(proposed.length)

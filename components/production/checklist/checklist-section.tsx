@@ -67,7 +67,7 @@ export function ChecklistSection({
       {list.length === 0 ? (
         <EmptyNote>{t.empty}</EmptyNote>
       ) : (
-        <ul className="flex flex-col overflow-hidden rounded-xl border border-[color:var(--border-hairline)]">
+        <ul className="flex flex-col overflow-hidden rounded-xl border border-[color:var(--border-hairline)] bg-card">
           {list.map((a) => {
             const isDone = done(a);
             const mine =

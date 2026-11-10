@@ -116,7 +116,7 @@ export function DeezerArtistSearch({
       {shown.status === "done" && shown.results.length > 0 && (
         <ul
           aria-label={t.resultsLabel}
-          className="max-h-[min(22rem,50vh)] divide-y divide-[color:var(--border-hairline)] overflow-y-auto rounded-xl border border-border"
+          className="max-h-[min(22rem,50vh)] divide-y divide-[color:var(--border-hairline)] overflow-y-auto rounded-xl border border-border bg-card"
         >
           {shown.results.map((artist) => (
             <li key={artist.deezerId}>

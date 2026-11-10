@@ -13,7 +13,7 @@ export function ReleaseCard({
   release: ArtistRelease;
 }) {
   return (
-    <article className="relative flex items-center gap-4 rounded-2xl border border-border p-3 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:bg-[var(--control-bg-hover)]">
+    <article className="relative flex items-center gap-4 rounded-2xl border border-border bg-card p-3 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:bg-[var(--control-bg-hover)]">
       <ReleaseCover coverUrl={release.coverUrl} className="size-20" />
       <div className="flex min-w-0 flex-col gap-1">
         <p className="text-caption text-grey-400">{label}</p>

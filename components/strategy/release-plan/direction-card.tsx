@@ -23,7 +23,7 @@ export function DirectionCard({
   const t = fr.strategyReleasePlan.direction;
   const fonts = FONT_PAIRINGS[direction.fonts];
   return (
-    <div className="flex flex-col gap-4 rounded-2xl border border-border p-4">
+    <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="text-body-md font-semibold">
           {label} · {t.themes[direction.theme]}

@@ -9,7 +9,7 @@ import type { NetworkKind } from "@/lib/network/types";
 const fr = { network };
 
 const noticeClass =
-  "flex flex-wrap items-center gap-3 rounded-xl border border-border px-3 py-2.5";
+  "flex flex-wrap items-center gap-3 rounded-xl border border-border px-3 py-2.5 bg-card";
 
 /** A new person named exactly as an artist of the catalog: linked unless
  * removed (UX test of 09/10/2026, section 8). */

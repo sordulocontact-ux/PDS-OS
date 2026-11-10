@@ -35,20 +35,20 @@ const t = fr.journey;
  * a stop icon, an alert a red subtitle (warning for a decision awaited,
  * which is not an error). Steps with a
  * `group` sit under its intertitle. The open step is the page shown on the
- * right (`openKey`, else the one whose URL is the current path); `title`
- * defaults to « Parcours » (« Parcours · Stratégie » via `t.titleOf`);
- * `footer`: links at its foot (the module's history; the Distribution adds
- * its anomalies). A step done with `reserve` has a warning mark, never green.
+ * right (`openKey`, else the one whose URL is the current path). Titled
+ * « Parcours » alone: the trail already names the module (Sacha,
+ * 10/11/2026). Full height beside the step from 900 px (JourneyLayout),
+ * kept in view while the step scrolls. `footer`: links at its foot (the
+ * module's history; the Distribution adds its anomalies). A step done with
+ * `reserve` has a warning mark, never green.
  */
 export function JourneySpine({
   steps,
   openKey,
-  title = t.title,
   footer,
 }: {
   steps: JourneyStep[];
   openKey?: string;
-  title?: string;
   footer?:
     { href: string; label: string } | Array<{ href: string; label: string }>;
 }) {
@@ -57,10 +57,10 @@ export function JourneySpine({
   return (
     <nav
       aria-label={t.label}
-      className="flex flex-col gap-0.5 rounded-2xl border border-[color:var(--border-hairline)] bg-card p-3 min-[900px]:sticky min-[900px]:top-5"
+      className="flex flex-col gap-0.5 rounded-2xl border border-[color:var(--border-hairline)] bg-card p-3 min-[900px]:sticky min-[900px]:top-5 min-[900px]:min-h-[calc(100dvh-var(--project-bar-height)-3rem)]"
     >
       <h2 className="px-2 pt-1 pb-2 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
-        {title}
+        {t.title}
       </h2>
       <ol className="flex flex-col gap-0.5">
         {steps.map((s, index) => {

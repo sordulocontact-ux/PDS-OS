@@ -19,7 +19,7 @@ export type RankNav = {
 };
 
 const arrowClass =
-  "grid size-8 shrink-0 place-items-center rounded-full border border-[color:var(--border-default)] text-foreground transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:border-[color:var(--border-hover)] hover:bg-[var(--control-bg-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--focus-ring)] [&_svg]:size-4";
+  "grid size-8 shrink-0 place-items-center rounded-full border border-[color:var(--border-default)] bg-card text-foreground transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:border-[color:var(--border-hover)] hover:bg-[var(--control-bg-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--focus-ring)] [&_svg]:size-4";
 
 /**
  * « ‹ 3 sur 8 › »: the screens before and after, one at a time, faded at

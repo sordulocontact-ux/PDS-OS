@@ -147,7 +147,7 @@ export function ArtistDetailsForm({
   return (
     <form action={action} noValidate className="flex flex-col gap-5">
       {deezer ? (
-        <div className="flex items-center gap-3 rounded-xl border border-border p-3">
+        <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-3">
           <input type="hidden" name="deezerId" value={deezer.deezerId} />
           <Avatar
             name={deezer.name}

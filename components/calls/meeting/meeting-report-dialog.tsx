@@ -24,7 +24,7 @@ function Section({ title, lines }: { title: string; lines: MeetingLine[] }) {
   return (
     <section className="flex flex-col gap-2">
       <h3 className="text-body-md font-semibold">{title}</h3>
-      <ul className="flex flex-col rounded-xl border border-[color:var(--border-hairline)] px-4">
+      <ul className="flex flex-col rounded-xl border border-[color:var(--border-hairline)] bg-card px-4">
         {lines.map((line) => (
           <MeetingLineRow key={line.id} line={line} />
         ))}

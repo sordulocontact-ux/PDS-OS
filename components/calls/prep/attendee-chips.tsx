@@ -135,7 +135,7 @@ export function AttendeeChips({
         <div
           onClick={() => inputRef.current?.focus()}
           className={cn(
-            "flex min-h-11 flex-wrap items-center gap-1.5 rounded-lg border border-[var(--border-field)] bg-transparent px-2 py-1.5 transition-colors focus-within:border-[var(--selection)] focus-within:ring-3 focus-within:ring-[var(--selection-bg)]",
+            "flex min-h-11 flex-wrap items-center gap-1.5 rounded-lg border border-[var(--border-field)] bg-card px-2 py-1.5 transition-colors focus-within:border-[var(--selection)] focus-within:ring-3 focus-within:ring-[var(--selection-bg)]",
             shown && "border-error",
           )}
         >

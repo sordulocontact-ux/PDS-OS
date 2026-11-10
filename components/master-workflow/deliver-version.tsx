@@ -164,7 +164,7 @@ export function DeliverVersion({
   return (
     <div className="flex flex-col gap-2" aria-busy={pending || undefined}>
       {chosen ? (
-        <div className="flex flex-col gap-3 rounded-2xl border border-border p-4">
+        <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4">
           <p className="text-sm font-medium">{t.confirmTitle}</p>
           <p className="text-sm break-words">
             {chosen.name}

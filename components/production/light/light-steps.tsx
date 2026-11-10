@@ -134,7 +134,7 @@ export function LightControlStep({ projectId, data, facts }: Common) {
       {auto.length > 0 && (
         <section className="flex flex-col gap-2">
           <h3 className="font-semibold">{c.auto}</h3>
-          <ul className="flex flex-col overflow-hidden rounded-xl border border-[color:var(--border-hairline)]">
+          <ul className="flex flex-col overflow-hidden rounded-xl border border-[color:var(--border-hairline)] bg-card">
             {auto.map((a) => (
               <li
                 key={a.key}

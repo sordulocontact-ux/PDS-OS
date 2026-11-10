@@ -45,7 +45,7 @@ export function ContractMailDraft({
   const email = to?.email ?? null;
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-col gap-3 rounded-xl border border-[color:var(--border-default)] p-3">
+      <div className="flex flex-col gap-3 rounded-xl border border-[color:var(--border-default)] bg-card p-3">
         <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1.5 text-[length:var(--type-body-sm)]">
           <dt className="text-[color:var(--text-secondary)]">{t.to}</dt>
           <dd className="flex flex-wrap items-baseline gap-x-2">

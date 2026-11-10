@@ -127,9 +127,9 @@ sur ces paliers dans `app/globals.css` : `text-sm` = 16 px, `text-xs` = 14 px. N
 les **sources** (« Catalogue · le 02/10 », sous une valeur), les **libellés de la grille d'une
 étape** (Exécute, Prérequis…) et les **pastilles** (`StatusBadge`), via le token
 `--type-micro` (13 px, classe `text-micro`), jamais une valeur en dur. Tout autre texte reste à
-14 px au moins. Le titre d'un module (h1 de `ModuleHeader`) est à **30 px**
-(`--type-display-module`, classe `text-display-module`) ; le titre de l'étape ouverte et de la
-carte « Maintenant » à 22 px (`text-figure-lg`).
+14 px au moins. Le titre d'une page de module (h1 de `ModuleHeader`) est à **28 px** (30 px jusqu'au 10/11/2026, réduit quand il est devenu le nom de l'étape, Sacha)
+(`--type-display-module`, classe `text-display-module`), et c'est aussi le titre de l'étape ouverte ;
+la carte « Maintenant » à 22 px (`text-figure-lg`).
 
 **Graisse : medium (500) au minimum, partout.** Jamais de regular ni plus léger (demande
 de Sacha, 27/09/2026) ; semi-bold (600) et bold (700) si besoin de hiérarchie. `body`
@@ -362,9 +362,14 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
      Activations · Suivi & bilan) : pilule 36 px, fond `--surface-soft`, texte
      `--text-secondary` 15 px ; active = encre pleine (`--surface-inverse`) ; sous-module fait =
      rond vert 16 px coché avant le libellé ; compteur « à vous » (rond bleu `--selection`) après ;
-  3. **ligne de titre** : h1 du module à **30 px** (`text-display-module`), pastille de statut
-     facultative à côté (Distribution), actions à droite (« Qui fait quoi » en `ghost sm`,
-     « Ajouter une dépense » du Budget) ;
+  3. **ligne de titre** : h1 à **28 px** (`text-display-module`, 30 px avant le 10/11/2026). **Sur une page à parcours, c'est
+     le titre de l'étape ouverte** (retour d'Ibé du 07/11, Sacha 10/11/2026 : le fil nomme déjà le
+     module), son échéance en légende à droite (rouge en retard, `StepDue`), puis son pourquoi
+     dessous en 16 px `--text-secondary` (`why`, 68 caractères au plus) ; ailleurs le titre du
+     module. Pastille de statut facultative à côté (Distribution, hors étape), actions à droite
+     (« Qui fait quoi » en `ghost sm`, « Ajouter une dépense » du Budget) ; une page ouverte depuis
+     une étape sans en être une (Plan de sortie) a la flèche de retour avant son titre, comme la
+     page d'une activation ;
   4. **ligne de faits** (`ModuleFacts`), seulement quand le module donne les siens (Master,
      Distribution, fiche de Production…) : 15 px `--text-secondary`, valeurs en semi-gras
      `--text-primary` (« Master final **Ven. 20/11/2026** », « Sortie **Sam. 05/12/2026** »), dates
@@ -386,12 +391,21 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   au-dessus du contenu. Exception assumée à « une pastille = un filtre » (§ « Onglets et
   filtres ») : ces puces sont des liens de navigation, signalés comme tels (`nav`,
   `aria-current`), jamais mêlées à des filtres sur la même ligne.
-- **Patron d'étape** (`JourneySpine`, `StepPanel`, `NowCard`, `docs/VISION-UX.md` § 4) :
-  colonne de contenu de **1180 px** au plus, blocs espacés de **20 px** ; parcours et étape
-  en grille `[300 px | 1fr]` (écart 24 px, une colonne sous 900 px). Toute l'étape ouverte est
-  **dans une carte** (rayon 12, filet `--border-hairline`, padding 20, écart 14). La carte
-  « Maintenant » (et toute section « À vous » / tête du Travail) a le même filet que les autres
-  cartes, `--border-hairline`, **sans ombre** (Sacha, 30/10/2026).
+- **Patron d'étape** (`JourneyLayout`, `JourneySpine`, `StepPanel`, `docs/VISION-UX.md` § 4 ;
+  proto « Mise en page des modules », Sacha 10/11/2026) : colonne de contenu de **1180 px** au
+  plus. Le **parcours tient toute la hauteur à gauche** (carte, `[240 px | 1fr]` écart 24 px dès
+  900 px, `[272 px | 1fr]` écart 32 px dès 1280 px), collé en haut quand on fait défiler, titré
+  « Parcours » seul ; à sa droite l'en-tête (`ProjectHeader head`), les puces d'attention, puis
+  l'étape **sans carte** (écart 14 px). Sous 900 px : l'en-tête, le parcours, puis l'étape. **Pas
+  de carte « Maintenant » dans un module** ; elle reste en tête de l'Accueil, du Travail, de la Vue
+  d'ensemble et des activations, avec le même filet que les autres cartes, `--border-hairline`,
+  **sans ombre** (Sacha, 30/10/2026).
+- **Tout cadre et tout champ ont un fond** (Sacha, 10/11/2026) : l'étape n'est plus dans une
+  carte, donc le fond de l'app (`--surface-app`) passe dessous. Un bloc dessiné par son contour
+  (liste, carte de document, zone de dépôt, état vide) prend `bg-card`, jamais un contour seul ; un
+  champ (`Input`, `Textarea`, `Select`, `DatePicker`, éditeurs) aussi, en clair comme en sombre,
+  pour rester lisible sur un cadre plus foncé (`--surface-soft`, `--surface-sunken` : le bulletin
+  SACEM). Un nouveau composant en contour naît avec `bg-card`.
 - **Sidebar ou onglets : un seul interrupteur**, `DOUBLE_SIDEBAR` dans
   `lib/ui/project-sections.ts` (liste des sections partagée par les deux). `true` : la
   sidebar contextuelle ci-dessus, la barre principale repliée. `false` : une seule
@@ -707,11 +721,10 @@ explication reste collée à la liste qu'elle commente (proto Juridique v3, Sach
 La phrase qui présente une section passe par `description` : **2 px sous le titre, puis 12 px
 avant le contenu** (Sacha, 09/11/2026 : « le titre et la description sont trop décollés »).
 Le `TitleBlock` d'une carte suit la même règle depuis le 10/11/2026 (Figma de Sacha, étape
-« Déclaration SACEM », « partout ») : **4 px entre le titre et sa phrase**, puis **24 px avant le
-contenu** dans la carte d'une étape (`StepPanel`) ; la date d'échéance à droite du titre en
-`--text-muted`, plus discrète que la phrase (en retard, elle reste en rouge). Sous le titre d'un
-module, la ligne « n autres choses à faire ailleurs » est collée au titre (0 px, `NowCard`), puis
-20 px avant le reste. Dans une étape, la phrase écrite en simple paragraphe était à la même
+« Déclaration SACEM », « partout ») : **4 px entre le titre et sa phrase**. Le titre d'une étape
+ouverte est le h1 de la page depuis le 10/11/2026 (`ModuleHeader`, 6 px avant son pourquoi, 24 px
+avant le contenu de l'étape) ; la date d'échéance à droite du titre en `--text-muted`, plus
+discrète que la phrase (en retard, elle reste en rouge). Dans une étape, la phrase écrite en simple paragraphe était à la même
 distance du titre que du champ suivant, donc rien ne se regroupait ; le couple titre + phrase
 doit toujours être plus serré que ce qui le sépare du contenu.
 
@@ -828,9 +841,9 @@ Une seule action pleine (`variant="default"`) par carte, le reste en contour.
   modifications » ; modification interdite → l'état terminé seul. Le serveur garde son
   refus (« Rien à enregistrer… ») en filet. Premier cas : `BriefRecord` du Brief Master.
 - **Qui agit, quoi, qui prend le relais** (retour « Néons » 10, 21/10/2026) : toute étape
-  ouverte d'un parcours (`StepPanel`) dit sous son « pourquoi » qui agit maintenant et
-  quoi (« À vous : … », « En attente de Nadia : … »), même quand « Maintenant » ne la
-  répète pas ; « Ensuite » nomme qui reprend l'étape suivante (« Mixage · Karim »), lu
+  ouverte d'un parcours (`StepPanel`) dit qui agit maintenant et quoi : le geste du lecteur
+  en tête (son bouton le dit, sans ligne « À vous · … »), sinon « En attente de Nadia : … »
+  en tête du contenu (`StepWaiting`, 10/11/2026) ; « Ensuite » nomme qui reprend l'étape suivante (« Mixage · Karim »), lu
   dans le parcours, jamais deviné.
 - **Blocage** (retour « Néons » 05) : un blocage dit sa raison, mène à l'endroit où on le
   lève (« Résoudre le blocage », `BlockerCallout`, type `Blocker` de `lib/ui/journey.ts`)

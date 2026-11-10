@@ -55,7 +55,7 @@ export function CreativeTeam({
       {members.length === 0 ? (
         <p className="text-sm text-muted-foreground">{t.empty}</p>
       ) : (
-        <ul className="divide-y divide-border rounded-xl border border-border">
+        <ul className="divide-y divide-border rounded-xl border border-border bg-card">
           {members.map((member) => (
             <li
               key={member.personId}

@@ -50,7 +50,7 @@ export function DictationReview({
 
   return (
     <section
-      className="grid gap-4 rounded-lg border border-border p-4"
+      className="grid gap-4 rounded-lg border border-border bg-card p-4"
       aria-labelledby="dictation-review-title"
     >
       <div className="grid gap-1">

@@ -50,7 +50,7 @@ export function PoReading({
       {items.length === 0 ? (
         empty
       ) : (
-        <ul className="flex flex-col divide-y divide-[color:var(--border-hairline)] rounded-xl border border-[color:var(--border-hairline)]">
+        <ul className="flex flex-col divide-y divide-[color:var(--border-hairline)] rounded-xl border border-[color:var(--border-hairline)] bg-card">
           {items.map((item, index) => (
             <li
               key={item.key}

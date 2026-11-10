@@ -63,7 +63,7 @@ export type DossierCardProps = {
 export function DossierCard(props: DossierCardProps) {
   const { sections, mode } = props;
   return (
-    <section className="flex flex-col gap-3.5 rounded-2xl border border-[color:var(--border-default)] p-4">
+    <section className="flex flex-col gap-3.5 rounded-2xl border border-[color:var(--border-default)] bg-card p-4">
       <div className="flex flex-wrap items-center gap-3">
         <IconFile
           aria-hidden

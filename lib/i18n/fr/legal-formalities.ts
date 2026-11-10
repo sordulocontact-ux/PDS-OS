@@ -341,6 +341,11 @@ export const legalFormalities = {
     rubric_g:
       "Sans copie du contrat d'édition, donnez la date du contrat (rubrique G).",
     to_verify: "Valeur rouverte par la SACEM : vérifiez-la.",
+    // A value proposed by PDS OS, still to confirm (Sacha, 10/11/2026).
+    to_confirm: (source: string | null) =>
+      source
+        ? `Proposé depuis ${source} : « Confirmer » si c'est juste, sinon corrigez.`
+        : "Valeur proposée : « Confirmer » si c'est juste, sinon corrigez.",
   },
   page: {
     title: "SACEM",

@@ -115,7 +115,7 @@ export function PreviewPanel({
         {changed.length === 0 ? (
           <p className="text-body-sm text-muted-foreground">{t.nothing}</p>
         ) : (
-          <ul className="flex flex-col divide-y divide-[color:var(--border-hairline)] rounded-xl border">
+          <ul className="flex flex-col divide-y divide-[color:var(--border-hairline)] rounded-xl border bg-card">
             {changed.map((r) => (
               <li key={r.rowKey} className="flex items-start gap-3 px-3 py-2">
                 {canWrite && (

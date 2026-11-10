@@ -94,9 +94,13 @@ export function DossierSection({
     const s = stateOf(key);
     if (s?.state === "optional") return {};
     if (!s) return filled ? { state: "confirmed" as const } : {};
+    // Said in red under the field once « Générer » was tried: the grey
+    // reason would say it a second time.
+    const error = errors?.fields[key === "dep_dr" ? "dep_dr_check" : key];
     return {
       state: s.state,
-      reason: s.reason,
+      reason: error ? undefined : s.reason,
+      invalid: Boolean(error),
       onConfirm:
         s.confirmable && editable(key)
           ? () => set(key, obj(key, null))

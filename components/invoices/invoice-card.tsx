@@ -81,7 +81,7 @@ export function InvoiceCard({ invoice: i }: { invoice: ProjectInvoice }) {
   const conform = i.expected !== null && i.amountCents === i.expected.total;
   const rib = ribRow(i);
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-[color:var(--border-hairline)] p-4">
+    <div className="flex flex-col gap-3 rounded-2xl border border-[color:var(--border-hairline)] bg-card p-4">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="flex min-w-0 flex-col">
           <b className="font-semibold break-all">

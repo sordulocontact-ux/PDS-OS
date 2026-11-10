@@ -109,7 +109,7 @@ export function IdentityForm({
         {rows.map((row, index) => (
           <div
             key={row.id}
-            className="flex flex-col gap-3 rounded-2xl border border-border p-4"
+            className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4"
           >
             <div className="flex items-start gap-2">
               <div className="grid min-w-0 flex-1 gap-3 sm:grid-cols-[10rem_minmax(0,1fr)]">

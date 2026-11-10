@@ -49,7 +49,7 @@ export async function DirectorBlock({
         <p className="text-[color:var(--text-secondary)]">{t.intro(company)}</p>
       )}
       {list.length > 0 && (
-        <ul className="flex flex-col overflow-hidden rounded-xl border border-[color:var(--border-hairline)]">
+        <ul className="flex flex-col overflow-hidden rounded-xl border border-[color:var(--border-hairline)] bg-card">
           {list.map((d) => (
             <li
               key={d.id}

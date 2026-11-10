@@ -59,7 +59,7 @@ export function AddPartyForm({ contractId }: { contractId: string }) {
   return (
     <form
       noValidate
-      className="flex flex-col gap-3 rounded-xl border border-dashed border-border p-3"
+      className="flex flex-col gap-3 rounded-xl border border-dashed border-border bg-card p-3"
       onSubmit={submit}
     >
       <PersonPickerField<ContractPartyOption>

@@ -44,7 +44,7 @@ export function StatTiles({
         <div
           key={stat.label}
           className={cn(
-            "relative flex min-w-0 flex-col-reverse gap-1 rounded-2xl border border-border p-3",
+            "relative flex min-w-0 flex-col-reverse gap-1 rounded-2xl border border-border p-3 bg-card",
             stat.href &&
               "transition-colors focus-within:ring-3 focus-within:ring-ring/50 hover:bg-muted",
             // An active filter is in ink, like an active FilterChip.

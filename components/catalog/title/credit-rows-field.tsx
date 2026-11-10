@@ -112,7 +112,7 @@ export function CreditRowsField({
         return (
           <div
             key={row.key}
-            className="grid items-start gap-3 rounded-xl border border-border p-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]"
+            className="grid items-start gap-3 rounded-xl border border-border bg-card p-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]"
           >
             <div id={`credit-${row.key}-person`} className="min-w-0">
               <ContributorPersonField

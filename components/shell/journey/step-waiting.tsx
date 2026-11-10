@@ -1,5 +1,6 @@
 import { journey } from "@/lib/i18n/fr/journey";
 import { lowerFirst, type JourneyStep } from "@/lib/ui/journey";
+import { cn } from "@/lib/utils";
 
 const fr = { journey };
 
@@ -18,10 +19,14 @@ export const initials = (name: string) =>
  * Ibé's feedback: said as a state, never as a grey line). Who and what come
  * from the journey's `step`, or are given (`who`, `todo`) where the page has
  * no journey step at hand; nothing when the viewer acts, or nobody does.
+ * StepPanel says it first in every waiting step (`auto`, proto « Mise en
+ * page des modules »: « Maintenant » no longer does); that line steps aside
+ * when the page says it itself, more precisely (a contract, a sheet).
  */
 export function StepWaiting(
-  props:
-    { step: JourneyStep | undefined } | { who: string | null; todo: string },
+  props: (
+    { step: JourneyStep | undefined } | { who: string | null; todo: string }
+  ) & { auto?: boolean },
 ) {
   const actor = "step" in props ? props.step?.actor : null;
   const who =
@@ -29,7 +34,13 @@ export function StepWaiting(
   const todo = "step" in props ? (actor?.todo ?? "") : props.todo;
   if (!who) return null;
   return (
-    <p className="flex items-center gap-2.5 rounded-lg bg-[var(--surface-soft)] px-3 py-2.5 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)]">
+    <p
+      data-step-waiting={props.auto ? "auto" : "page"}
+      className={cn(
+        "flex items-center gap-2.5 rounded-lg bg-[var(--surface-soft)] px-3 py-2.5 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)]",
+        props.auto && "group-has-[[data-step-waiting=page]]/step:hidden",
+      )}
+    >
       <span
         aria-hidden
         className="grid size-6 shrink-0 place-items-center rounded-full bg-[var(--surface-sunken)] text-[length:var(--type-micro)] leading-[var(--type-micro-lh)] font-semibold"

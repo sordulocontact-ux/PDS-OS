@@ -8,6 +8,7 @@ import { catalogIdSchema } from "@/lib/catalog/schemas";
 import { fr } from "@/lib/i18n/fr";
 import { SACEM_725_FIELDS } from "@/lib/legal/formalities/definition";
 import { run } from "@/lib/legal/formalities/run";
+import { openSignerPages } from "@/lib/legal/formalities/signer-pages";
 
 // The steps after the dossier (ticket Juridique 06): the bulletin, its
 // signatures, the deposit, the processing, a correction, the result —
@@ -52,8 +53,14 @@ export async function generateFormality(
     return { ok: false as const, error: fr.auth.errors.forbidden };
   return run(
     projectId,
-    (s) =>
-      s.rpc("generate_formality_document", { p_formality_id: formalityId }),
+    async (s) => {
+      const generated = await s.rpc("generate_formality_document", {
+        p_formality_id: formalityId,
+      });
+      // Each signer's private page, made with the version to sign.
+      if (!generated.error) await openSignerPages(projectId, formalityId);
+      return generated;
+    },
     done.generated,
   );
 }

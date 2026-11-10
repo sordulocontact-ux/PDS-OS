@@ -93,7 +93,7 @@ export function ArtistPicker({
       {credits.length > 0 && (
         <ol
           aria-label={t.credits}
-          className="flex flex-col divide-y divide-[color:var(--border-hairline)] rounded-lg border border-border"
+          className="flex flex-col divide-y divide-[color:var(--border-hairline)] rounded-lg border border-border bg-card"
         >
           {credits.map((credit, index) => (
             <li

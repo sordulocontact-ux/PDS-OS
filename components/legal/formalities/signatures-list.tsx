@@ -1,10 +1,9 @@
 "use client";
 
-import { EDITABLE } from "@/components/legal/formalities/dossier-form";
 import { Button } from "@/components/ui/button";
 import { ConfirmButton } from "@/components/ui/confirm-button";
 import { DialogButton } from "@/components/ui/dialog-button";
-import { FactRow, FactRows } from "@/components/ui/fact-row";
+import { FactRow } from "@/components/ui/fact-row";
 import { Fold } from "@/components/ui/fold";
 import { legalFormalities } from "@/lib/i18n/fr/legal-formalities";
 import { signedReturns } from "@/lib/i18n/fr/signed-returns";
@@ -13,6 +12,12 @@ import {
   readCreators,
   readPublishers,
 } from "@/lib/legal/formalities/participants";
+import {
+  signatureBadge,
+  signatureHow,
+  signatureRole,
+  type Signature,
+} from "@/lib/legal/formalities/signature-view";
 import type { FormalityView } from "@/lib/legal/formalities/types";
 import { signFormalityForHouse } from "@/lib/legal/signed-returns/team-actions";
 import { formatShortDay } from "@/lib/utils/day";
@@ -21,144 +26,100 @@ import { SignedOtherwiseForm } from "./signed-otherwise-form";
 
 const fr = { legalFormalities, signedReturns };
 
-type Signature = FormalityView["signatures"][number];
+// The pieces of « Signatures », under the bulletin's card (Sacha,
+// 10/11/2026: « un peu comme on fait sur le master »): each signer with a
+// Réseau contact is THE link card (`PersonLink`, `SignaturesSection`), with
+// what follows here under its link; PDS Éditions and a signer without a
+// contact keep a line of their own.
 
-/** « Le bulletin doit être signé par tous les ayants droit » (proto
- * « Projet complet », E10 step 2): each signer of the current version —
- * on their private link, where they deposit it signed, or « A signé
- * autrement » in a dialog, with the day and the signed bulletin scanned;
- * PDS Éditions by the direction, in PDS OS. A change to the bulletin makes
- * them « Ne vaut plus », and the versions replaced stay folded below, with
- * the signatures they had (JUR-03). Before the bulletin exists, who will
- * sign it, named (UX test of 09/10/2026). */
-export function SignaturesList({
-  projectId,
-  f,
-}: {
-  projectId: string;
-  f: FormalityView;
-}) {
-  const t = fr.legalFormalities.page;
-  const r = fr.signedReturns.sacem;
-  const latest = f.documents[0];
-  // Before the first signatures, who will sign is read above « Générer la
-  // version à signer » (DossierForm) while the dossier can change.
-  if (f.signatures.length === 0)
-    return EDITABLE.includes(f.status) ? null : <FutureSigners f={f} />;
-  const signed = f.signatures.filter(
-    (s) => s.status === "signed" && !s.superseded,
-  ).length;
-  const superseded = f.signatures.some((s) => s.superseded);
-  return (
-    <section className="flex flex-col gap-2">
-      <h3 className="font-medium">
-        {t.signatures} · {t.version(latest?.version ?? 1)} ·{" "}
-        {t.signedCount(signed, f.signatures.length)}
-      </h3>
-      {superseded && (
-        <p className="text-sm text-muted-foreground">{r.supersededNote}</p>
-      )}
-      <FactRows>
-        {f.signatures.map((s) => (
-          <SignatureRow
-            key={s.id}
-            projectId={projectId}
-            formalityId={f.id}
-            s={s}
-            open={f.status === "signatures_pending" && !s.superseded}
-            canSignHouse={f.canSignHouse}
-          />
-        ))}
-      </FactRows>
-      {f.replaced.length > 0 && (
-        <Fold summary={r.replaced}>
-          <ul className="flex flex-col gap-1 text-sm text-muted-foreground">
-            {f.replaced.map((v) => (
-              <li key={v.version} className="break-words">
-                {r.replacedLine(
-                  v.version,
-                  v.at ? formatShortDay(v.at, { bare: true }) : "",
-                  v.signers.filter((x) => x.signed).length,
-                )}
-                {v.signers.some((x) => x.signed) &&
-                  ` : ${v.signers
-                    .filter((x) => x.signed)
-                    .map((x) => x.signer)
-                    .join(", ")}`}
-              </li>
-            ))}
-          </ul>
-        </Fold>
-      )}
-    </section>
-  );
-}
-
-function SignatureRow({
-  projectId,
-  formalityId,
-  s,
-  open,
-  canSignHouse,
-}: {
+type Gesture = {
   projectId: string;
   formalityId: string;
   s: Signature;
+  // The current version, still waiting for signatures.
   open: boolean;
-  canSignHouse: boolean;
-}) {
-  const t = fr.legalFormalities.page;
+};
+
+/** « A signé autrement »: the day and the signed bulletin scanned, in a
+ * dialog (proto v3). */
+function SignedOtherwiseButton({ projectId, formalityId, s }: Gesture) {
   const r = fr.signedReturns.sacem;
-  const role =
-    s.role === "publisher"
-      ? t.publisherRole
-      : (fr.legalFormalities.qualities[
-          s.role as keyof typeof fr.legalFormalities.qualities
-        ] ?? s.role);
-  const day = (value: string | null) =>
-    value ? formatShortDay(value, { bare: true }) : "";
-  const source =
-    s.status === "signed"
-      ? s.via === "link"
-        ? r.byLink(day(s.signedOn ?? s.at))
-        : s.via === "other"
-          ? r.otherwise(day(s.signedOn))
-          : s.via === "house"
-            ? r.byHouse(day(s.signedOn ?? s.at))
-            : (s.proof ?? t.signed(day(s.at)))
-      : s.house
-        ? r.houseWaits
-        : s.onLink
-          ? r.onLink
-          : s.role === "publisher"
-            ? null
-            : r.noLink;
+  return (
+    <DialogButton
+      label={r.signedOtherwise}
+      variant="outline"
+      size="sm"
+      title={r.signedOtherwise}
+      description={r.otherwiseBody(s.signer)}
+    >
+      {(close) => (
+        <SignedOtherwiseForm
+          projectId={projectId}
+          formalityId={formalityId}
+          signatureId={s.id}
+          signer={s.signer}
+          onDone={close}
+        />
+      )}
+    </DialogButton>
+  );
+}
+
+function SignedPdf({ s }: { s: Signature }) {
+  if (!s.fileUrl) return null;
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      nativeButton={false}
+      render={<a href={s.fileUrl} target="_blank" rel="noreferrer" />}
+    >
+      {fr.signedReturns.sacem.viewPdf}
+    </Button>
+  );
+}
+
+/** Under a signer's link: how they signed and the bulletin they gave
+ * back, or « A signé autrement » while the version waits. */
+export function SignatureFooter(props: Gesture) {
+  const { s, open } = props;
+  const how = signatureHow(s);
+  const action =
+    s.status === "signed" ? (
+      <SignedPdf s={s} />
+    ) : open ? (
+      <SignedOtherwiseButton {...props} />
+    ) : null;
+  if (!how && !action) return null;
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[color:var(--border-hairline)] pt-3">
+      <span className="text-caption text-muted-foreground">{how}</span>
+      {action}
+    </div>
+  );
+}
+
+/** A signature without a link card: PDS Éditions, signed by the direction
+ * in PDS OS (JUR-03), or a signer the Réseau does not know. */
+export function SignatureRow({
+  canSignHouse,
+  ...props
+}: Gesture & { canSignHouse: boolean }) {
+  const r = fr.signedReturns.sacem;
+  const { s, open } = props;
   return (
     <FactRow
-      label={role}
+      label={signatureRole(s)}
       value={<b className="font-semibold">{s.signer}</b>}
-      source={source}
-      state={
-        s.superseded
-          ? { tone: "neutral", label: r.superseded }
-          : s.status === "signed"
-            ? { tone: "success", label: fr.signedReturns.portal.signedBadge }
-            : { tone: "warning", label: r.pending }
+      source={
+        signatureHow(s) ??
+        (s.house ? r.houseWaits : s.contactId ? r.noLink : r.noContact)
       }
+      state={signatureBadge(s)}
       side={
         s.status === "signed" ? (
-          s.fileUrl && (
-            <Button
-              variant="ghost"
-              size="sm"
-              nativeButton={false}
-              render={<a href={s.fileUrl} target="_blank" rel="noreferrer" />}
-            >
-              {r.viewPdf}
-            </Button>
-          )
+          <SignedPdf s={s} />
         ) : open && s.house ? (
-          // PDS Éditions: the direction signs here, nobody else (JUR-03).
           canSignHouse && (
             <ConfirmButton
               label={r.signHouse}
@@ -168,31 +129,41 @@ function SignatureRow({
               confirmLabel={r.signHouse}
               pendingLabel={r.signingHouse}
               done={r.signedHouse}
-              run={() => signFormalityForHouse(projectId, s.id)}
+              run={() => signFormalityForHouse(props.projectId, s.id)}
             />
           )
         ) : open ? (
-          // A gesture that asks for something opens a dialog (proto v3).
-          <DialogButton
-            label={r.signedOtherwise}
-            variant="ghost"
-            size="sm"
-            title={r.signedOtherwise}
-            description={r.otherwiseBody(s.signer)}
-          >
-            {(close) => (
-              <SignedOtherwiseForm
-                projectId={projectId}
-                formalityId={formalityId}
-                signatureId={s.id}
-                signer={s.signer}
-                onDone={close}
-              />
-            )}
-          </DialogButton>
+          <SignedOtherwiseButton {...props} />
         ) : null
       }
     />
+  );
+}
+
+/** The versions a newer one replaced, with the signatures they had
+ * (JUR-03), folded. */
+export function ReplacedVersions({ f }: { f: FormalityView }) {
+  const r = fr.signedReturns.sacem;
+  if (f.replaced.length === 0) return null;
+  return (
+    <Fold summary={r.replaced}>
+      <ul className="flex flex-col gap-1 text-sm text-muted-foreground">
+        {f.replaced.map((v) => (
+          <li key={v.version} className="break-words">
+            {r.replacedLine(
+              v.version,
+              v.at ? formatShortDay(v.at, { bare: true }) : "",
+              v.signers.filter((x) => x.signed).length,
+            )}
+            {v.signers.some((x) => x.signed) &&
+              ` : ${v.signers
+                .filter((x) => x.signed)
+                .map((x) => x.signer)
+                .join(", ")}`}
+          </li>
+        ))}
+      </ul>
+    </Fold>
   );
 }
 

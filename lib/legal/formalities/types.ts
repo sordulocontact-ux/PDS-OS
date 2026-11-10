@@ -38,6 +38,8 @@ export type FormalityView = {
     signedOn: string | null;
     // The signer has an active private page on the project: they sign there.
     onLink: boolean;
+    // Named from the Réseau: their link card sits under the bulletin.
+    contactId: string | null;
     // The bulletin they deposited signed, « Voir le PDF » (one hour).
     fileUrl: string | null;
     // PDS Éditions' line: signed by the direction in PDS OS (JUR-03).

@@ -104,7 +104,6 @@ export const legalDocuments = {
     download: "Télécharger",
     pdfPending: "Préparation du PDF…",
     pdfFailed: "Le PDF n'a pas pu être préparé.",
-    values: "Les valeurs du bulletin",
     // JUR-02: each value says where it stands, on its line.
     states: {
       confirmed: "Fait",
@@ -120,15 +119,14 @@ export const legalDocuments = {
     draftNote:
       "Le brouillon porte « BROUILLON — ne pas signer » sur chaque page : il sert à relire, jamais à signer.",
     // What still stands between the dossier and the version to sign, said
-    // by kind: to fill (in red once tried) and proposed to confirm.
+    // by kind, each one in red on its field (Sacha, 10/11/2026).
     notYet: (fill: number, confirm: number) => {
       const parts = [
-        fill > 0 &&
-          `${fill} information${fill > 1 ? "s" : ""} à compléter (en rouge)`,
+        fill > 0 && `${fill} information${fill > 1 ? "s" : ""} à compléter`,
         confirm > 0 &&
-          `${confirm} valeur${confirm > 1 ? "s" : ""} proposée${confirm > 1 ? "s" : ""} à confirmer (« À vérifier »)`,
+          `${confirm} valeur${confirm > 1 ? "s" : ""} proposée${confirm > 1 ? "s" : ""} à confirmer`,
       ].filter(Boolean);
-      return `Avant la version à signer : ${parts.join(" et ")}. Un brouillon reste possible.`;
+      return `Avant la version à signer : ${parts.join(" et ")}, en rouge. Un brouillon reste possible.`;
     },
     draftDone: "Brouillon prêt",
   },

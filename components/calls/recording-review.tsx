@@ -52,7 +52,7 @@ export function RecordingReview({
     recording.heardSeconds / recording.durationSeconds < QUIET_RATIO;
 
   return (
-    <div className="grid gap-3 rounded-lg border border-border p-4">
+    <div className="grid gap-3 rounded-lg border border-border bg-card p-4">
       <p className="text-sm">{t.review}</p>
       {url && (
         <AudioPlayer

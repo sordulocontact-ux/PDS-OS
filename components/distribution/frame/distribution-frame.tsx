@@ -1,7 +1,7 @@
 import { WorkflowLocked } from "@/components/plan/workflow-locked";
 import { ProjectHeader } from "@/components/projects/project-header";
+import { JourneyLayout } from "@/components/shell/journey/journey-layout";
 import { JourneySpine } from "@/components/shell/journey/journey-spine";
-import { ProjectNowCard } from "@/components/shell/journey/project-now-card";
 import { ModuleAttention } from "@/components/shell/module/module-attention";
 import { DistributionRolesButton } from "@/components/distribution/frame/distribution-roles";
 import { distributionStatus } from "@/lib/distribution/journey";
@@ -60,12 +60,13 @@ function factsOf(ctx: DistributionContext): ModuleFact[] {
 }
 
 /**
- * The frame of every Distribution page (docs/VISION-UX.md § 4, proto
- * « Projet complet »): the head (« Distribution », its state, its facts),
- * « Maintenant » for the person looking, then the journey on the left and
- * the open step on the right — or, for the two views of the journey's foot
- * (Anomalies, Historique), the view in full width. Before the plan is
- * launched, the module's lock leads to the plan.
+ * The frame of every Distribution page (docs/VISION-UX.md § 4,
+ * JourneyLayout): the journey on the left, on its right the head (h1 = the
+ * step's title, its why, the module's facts, « Qui fait quoi ») and the
+ * open step. The two views of the journey's foot (Anomalies, Historique)
+ * keep the module's head (« Distribution », its state, its facts) and take
+ * the full width. Before the plan is launched, the module's lock leads to
+ * the plan.
  */
 export async function DistributionFrame({
   projectId,
@@ -81,58 +82,72 @@ export async function DistributionFrame({
   if (!ctx) return <WorkflowLocked projectId={projectId} title={t.module} />;
   const status = distributionStatus(ctx.steps);
   const open = ctx.anomalies.filter(isOpen).length;
+  const stepRef = {
+    projectId,
+    module: "distribution" as const,
+    stepKey: shownKey ?? ctx.steps[0]?.key ?? "prep",
+  };
+  const choices = ctx.steps.map((s) => ({
+    key: stepChoiceKey({ module: "distribution", stepKey: s.key }),
+    label: s.title,
+  }));
+  const actions = <DistributionRolesButton ctx={ctx} />;
+  // Blockers and noted information of the module (sub-lot C6).
+  const attention = (
+    <ModuleAttention
+      stepRef={stepRef}
+      modules={["distribution"]}
+      steps={choices}
+    />
+  );
+  const shown = ctx.steps.find((s) => s.key === shownKey);
+  if (!shown)
+    return (
+      <div className="flex flex-col gap-5">
+        <ProjectHeader
+          projectId={projectId}
+          title={t.module}
+          status={{ label: t.status[status], tone: workflowStatusTone[status] }}
+          facts={factsOf(ctx)}
+          steps={ctx.steps}
+          actions={actions}
+        />
+        {attention}
+        {children(ctx)}
+      </div>
+    );
   return (
-    <div className="flex flex-col gap-5">
-      <ProjectHeader
-        projectId={projectId}
-        title={t.module}
-        status={{ label: t.status[status], tone: workflowStatusTone[status] }}
-        facts={factsOf(ctx)}
-        steps={ctx.steps}
-        actions={<DistributionRolesButton ctx={ctx} />}
-      />
-      <ProjectNowCard
-        projectId={projectId}
-        steps={ctx.steps}
-        viewerName={ctx.viewerName}
-        moduleLabel={t.module}
-        shownKey={shownKey}
-        labels={{ waitingTitle: t.now.waitingTitle, finished: t.now.finished }}
-      />
-      {/* Blockers and noted information of the module (sub-lot C6). */}
-      <ModuleAttention
-        stepRef={{
-          projectId,
-          module: "distribution",
-          stepKey: shownKey ?? ctx.steps[0]?.key ?? "prep",
-        }}
-        modules={["distribution"]}
-        steps={ctx.steps.map((s) => ({
-          key: stepChoiceKey({ module: "distribution", stepKey: s.key }),
-          label: s.title,
-        }))}
-      />
-      {shownKey ? (
-        <div className="grid items-start gap-6 min-[900px]:grid-cols-[300px_minmax(0,1fr)]">
-          <JourneySpine
+    <JourneyLayout
+      spine={
+        <JourneySpine
+          steps={ctx.steps}
+          openKey={shown.key}
+          footer={[
+            {
+              href: distributionViewHref(projectId, "anomalies"),
+              label: open ? t.footer.anomaliesOpen(open) : t.footer.anomalies,
+            },
+            {
+              href: distributionViewHref(projectId, "history"),
+              label: t.footer.history,
+            },
+          ]}
+        />
+      }
+      head={
+        <>
+          <ProjectHeader
+            projectId={projectId}
+            head={shown}
+            facts={factsOf(ctx)}
             steps={ctx.steps}
-            openKey={shownKey}
-            footer={[
-              {
-                href: distributionViewHref(projectId, "anomalies"),
-                label: open ? t.footer.anomaliesOpen(open) : t.footer.anomalies,
-              },
-              {
-                href: distributionViewHref(projectId, "history"),
-                label: t.footer.history,
-              },
-            ]}
+            actions={actions}
           />
-          {children(ctx)}
-        </div>
-      ) : (
-        children(ctx)
-      )}
-    </div>
+          {attention}
+        </>
+      }
+    >
+      {children(ctx)}
+    </JourneyLayout>
   );
 }

@@ -46,7 +46,7 @@ export function ReserveList({
           {t.stillOpen(open)}
         </p>
       )}
-      <ul className="flex flex-col rounded-[var(--radius-lg)] border border-[color:var(--border-hairline)]">
+      <ul className="flex flex-col rounded-[var(--radius-lg)] border border-[color:var(--border-hairline)] bg-card">
         {rows.map((r) => (
           <li
             key={r.id}

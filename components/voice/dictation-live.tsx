@@ -23,7 +23,7 @@ export function DictationLive({
 }) {
   const t = fr.voice;
   return (
-    <div className="grid gap-3 rounded-lg border border-border p-4">
+    <div className="grid gap-3 rounded-lg border border-border bg-card p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <StatusBadge tone="info" dot>
           {t.recording}

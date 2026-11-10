@@ -150,7 +150,7 @@ export function PickList({
         id={listId}
         hidden={!shownList}
         className={cn(
-          "flex flex-col overflow-auto overscroll-contain rounded-xl border border-[color:var(--border-hairline)]",
+          "flex flex-col overflow-auto overscroll-contain rounded-xl border border-[color:var(--border-hairline)] bg-card",
           searchable && "max-h-75",
         )}
       >
