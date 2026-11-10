@@ -134,7 +134,7 @@ export default async function FramingPlanPage({
             formatShortInstant(plan.launchedAt),
           )}
         >
-          <PlanColumns cards={cards} />
+          <PlanColumns cards={cards} targetDate={target} />
         </SunkCard>
         {absent.length > 0 && (
           <section className="flex flex-col gap-2">

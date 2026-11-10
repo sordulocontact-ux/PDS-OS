@@ -6,6 +6,7 @@ import { framingIntel } from "@/lib/i18n/fr/framing-intel";
 import { workflowStatus } from "@/lib/i18n/fr/workflow-status";
 import type { StepIssue } from "@/lib/plan/steps";
 import { workflowStatusTone } from "@/lib/ui/state-tones";
+import { cn } from "@/lib/utils";
 import { formatDay } from "@/lib/utils/day";
 import type { CommonStatus } from "@/lib/workflow-status/rules";
 
@@ -15,11 +16,12 @@ const fr = { framingIntel, workflowStatus };
 export const stepAnchor = (key: string) => `plan-step-${key}`;
 
 /**
- * A step of the plan, one row of its group (proto « Suite du Cadrage »,
- * Sacha 29/10/2026; PROJ-UX-07): « **Stratégie** · Marketing », why it is
- * there, its real state once it runs and what does not hold; its pilot and
- * due date beside it; `actions` on the right (« Modifier », « Lancer
- * maintenant »); `below`: the row's editor.
+ * A step of the plan, one card on its group's stop (Akili, 05/11/2026: a
+ * visual plan; proto « Suite du Cadrage », PROJ-UX-07): « **Stratégie** ·
+ * Marketing », why it is there, its real state once it runs and what does
+ * not hold; under it its pilot and due date, `actions` on the right
+ * (« Modifier », « Lancer maintenant »); `below`: the step's editor. A note
+ * of « À anticiper » (`muted`) is a quiet line, no pilot nor frame.
  */
 export function PlanStepCard({
   stepKey,
@@ -55,56 +57,68 @@ export function PlanStepCard({
   return (
     <li
       id={stepAnchor(stepKey)}
-      className="grid scroll-mt-24 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 py-2.5 md:grid-cols-[minmax(0,1fr)_minmax(0,14rem)_auto]"
+      className={cn(
+        "flex min-w-0 scroll-mt-24 flex-col gap-3",
+        muted
+          ? "rounded-lg bg-[var(--surface-soft)] px-3.5 py-2.5"
+          : "rounded-xl border border-[color:var(--border-hairline)] bg-card p-3.5",
+      )}
     >
-      <div className="flex min-w-0 flex-col gap-0.5">
-        <p className="break-words">
-          <span className="font-semibold">{title}</span>
-          {group && (
-            <span className="text-caption text-[color:var(--text-secondary)]">
-              {" "}
-              · {group}
-            </span>
-          )}
-        </p>
-        {why && (
-          <p className="text-caption text-[color:var(--text-secondary)]">
-            {why}
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <p className="break-words">
+            <span className="font-semibold">{title}</span>
+            {group && (
+              <span className="text-caption text-[color:var(--text-secondary)]">
+                {" "}
+                · {group}
+              </span>
+            )}
           </p>
-        )}
-        {specialized && (
-          <p className="text-caption">{tp.specialized(specialized)}</p>
-        )}
-        {status && (
-          <StatusDot
-            tone={workflowStatusTone[status]}
-            label={fr.workflowStatus.statuses[status]}
-            showLabel
-            className="text-caption text-[color:var(--text-secondary)]"
-          />
-        )}
-        {issues.length > 0 && (
-          <ul className="mt-1 flex flex-col gap-1 rounded-lg bg-[var(--tone-warning-bg)] px-3 py-2 text-caption text-[color:var(--tone-warning-fg)]">
-            {issues.map((issue) => (
-              <li key={issue.text}>
-                {issue.href ? (
-                  <Link
-                    href={issue.href}
-                    className="underline underline-offset-4"
-                  >
-                    {issue.text}
-                  </Link>
-                ) : (
-                  issue.text
-                )}
-              </li>
-            ))}
-          </ul>
+          {why && (
+            <p className="text-caption text-[color:var(--text-secondary)]">
+              {why}
+            </p>
+          )}
+          {specialized && (
+            <p className="text-caption">{tp.specialized(specialized)}</p>
+          )}
+          {status && (
+            <StatusDot
+              tone={workflowStatusTone[status]}
+              label={fr.workflowStatus.statuses[status]}
+              showLabel
+              className="text-caption text-[color:var(--text-secondary)]"
+            />
+          )}
+        </div>
+        {muted && actions && (
+          <div className="flex shrink-0 flex-wrap justify-end gap-1">
+            {actions}
+          </div>
         )}
       </div>
-      <div className="col-start-1 row-start-2 flex min-w-0 items-center gap-2 md:col-start-auto md:row-start-auto">
-        {!muted && (
-          <>
+      {issues.length > 0 && (
+        <ul className="flex flex-col gap-1 rounded-lg bg-[var(--tone-warning-bg)] px-3 py-2 text-caption text-[color:var(--tone-warning-fg)]">
+          {issues.map((issue) => (
+            <li key={issue.text}>
+              {issue.href ? (
+                <Link
+                  href={issue.href}
+                  className="underline underline-offset-4"
+                >
+                  {issue.text}
+                </Link>
+              ) : (
+                issue.text
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+      {!muted && (
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex min-w-0 items-center gap-2">
             <Avatar name={pilot ?? tp.noOwner} pictureUrl={null} />
             <span className="flex min-w-0 flex-col text-body-sm">
               <span className="truncate">{pilot ?? tp.noOwner}</span>
@@ -114,13 +128,13 @@ export function PlanStepCard({
                 </span>
               )}
             </span>
-          </>
-        )}
-      </div>
-      <div className="col-start-2 row-span-2 row-start-1 flex flex-wrap justify-end gap-1 md:col-start-auto md:row-span-1 md:row-start-auto">
-        {actions}
-      </div>
-      {below && <div className="col-span-full">{below}</div>}
+          </div>
+          {actions && (
+            <div className="flex flex-wrap justify-end gap-1">{actions}</div>
+          )}
+        </div>
+      )}
+      {below}
     </li>
   );
 }

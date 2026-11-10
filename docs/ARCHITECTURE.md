@@ -2009,10 +2009,12 @@ l'étape qui attend la personne (`framingLanding`) et les anciennes URL (`?step=
   projet. La route ne lit plus tout le Cadrage pour une version (seulement s'il n'y en a pas). Police
   Google Sans Flex intégrée au HTML (`lib/pdf/fonts/google-sans-flex.ts`, OFL) : plus d'attente de
   Google Fonts pour ce PDF.
-  **Mise en page du PDF** (retour d'Ibé du 02/11, `lib/framing/brief-pdf.ts` + `brief-pdf-style.ts`) :
-  bandeau PDS OS, titre du projet, bande Version / État / Envoyée le / Validée le, Synthèse en encadré,
-  dimensions numérotées (libellé à gauche, valeur à droite, source dessous), sources en pied, numéros de
-  page. Les fichiers gardés portent la mise en page dans leur nom (`<id>-<state>-l2.pdf`, migration
+  **Mise en page du PDF** (retours d'Ibé du 02/11 et du 07/11, `lib/framing/brief-pdf.ts` +
+  `brief-pdf-style.ts`) : **page de garde** (bandeau PDS OS, projet, version et date, objectif / date cible /
+  budget, bande Version / État / Envoyée le / Validée le, sommaire), Synthèse du projet, dimensions
+  numérotées (libellé à gauche, valeur à droite, source dessous), **« Sources et validation »** sur sa page
+  (sources, historique : envoyée, validée ou modification demandée), numéros de page. Les fichiers gardés
+  portent la mise en page dans leur nom (`<id>-<state>-l3.pdf` depuis le 10/11, migration
   `20261105180201`, l'ancien nom reste lisible) : changer la mise en page = changer `LAYOUT`.
   **Lien de partage** (Sacha 05/11 : « toujours vers la dernière version ») : « Copier le lien »
   (`shareFramingBrief` → `share_framing_brief`, responsable ou direction, une version envoyée) copie
@@ -2591,7 +2593,8 @@ Cadrage › Plan du projet `app/(app)/app/projects/[projectId]/framing/plan`, `l
   Conception (pilote = direction créative), Production et Activations en Ensuite, Distribution
   (projet musical) et Suivi & bilan en À anticiper. « Hors du plan » ne propose jamais un Master à
   un projet sans titre ; les lignes-notes d'anticipation ne sont plus proposées. **« Lancer le plan » démarre
-  tous les workflows du plan, quelle que soit leur colonne** (la colonne dit l'ordre) ;
+  tous les workflows du plan, quelle que soit leur colonne** (la colonne dit l'ordre), puis ouvre la Vue
+  d'ensemble (`open` du résultat, Akili 05/11 : « un changement visuel qui incite à commencer ») ;
   `launch_plan_workflow` garde sa signature (ajout d'un workflow oublié). **Verrou** :
   `workflow_is_launched` couvre les huit ; Conception, Production, Activations, Suivi & bilan et
   Distribution s'ouvrent au lancement du plan (ou s'ils avaient commencé avant : Stratégie entamée,

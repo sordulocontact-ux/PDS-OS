@@ -63,9 +63,10 @@ export function PlanRowEditor({
   const tj = fr.framingJourney.plan;
   const ts = fr.planSteps;
   return (
-    <div className="mb-1 flex flex-col gap-3 rounded-lg bg-[var(--surface-soft)] p-3">
+    <div className="@container flex flex-col gap-3 rounded-lg bg-[var(--surface-soft)] p-3">
       {!note && (
-        <div className="grid gap-2 sm:grid-cols-2">
+        // Side by side when the card is wide enough, not the window.
+        <div className="grid gap-2 @md:grid-cols-2">
           <OptionSelect
             id={`plan-column-${title}`}
             label={tj.columnOf(title)}

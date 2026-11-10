@@ -52,7 +52,8 @@ export type PlanContext = {
 /**
  * The plan PO proposes (ticket § 9, PROJ-UX-07; proto « Suite du Cadrage »,
  * Sacha 29/10/2026), in one card: « Proposée par PO à partir du Brief… »,
- * « Ajouter une étape » in its head, the four groups one under the other,
+ * « Ajouter une étape » in its head, the four groups as stops on one line
+ * to the target date (PlanColumns),
  * each step with its pilot, due date and what does not hold. Its own
  * « Modifier » opens a step in place; under the plan, what « Lancer le
  * plan » starts, said before the gesture. Nothing is recorded before it.
@@ -272,6 +273,7 @@ export function PlanBoard({
       footer={footer}
     >
       <PlanColumns
+        targetDate={context.targetDate}
         cards={
           Object.fromEntries(
             PLAN_COLUMNS.map((column) => [

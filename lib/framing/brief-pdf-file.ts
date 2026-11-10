@@ -25,10 +25,10 @@ type PrintedVersion = Pick<
   "version" | "state" | "sent_at" | "decided_at"
 >;
 
-// The layout of the kept files: a new one (05/11/2026, retour d'Ibé) is
-// printed again instead of reading a file of the old one
-// (…20261105180201_framing_brief_pdf_layout).
-const LAYOUT = "l2";
+// The layout of the kept files: a new one (05/11/2026, retour d'Ibé; the
+// editorial one with its cover, 10/11/2026) is printed again instead of
+// reading a file of the old one (…20261105180201_framing_brief_pdf_layout).
+const LAYOUT = "l3";
 const pathOf = (brief: BriefVersionRow) =>
   `${brief.id}-${brief.state}-${LAYOUT}.pdf`;
 

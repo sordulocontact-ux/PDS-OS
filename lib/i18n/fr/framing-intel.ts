@@ -710,6 +710,8 @@ export const framingIntel = {
       meanwhile: "Pendant ce temps",
       anticipate: "À anticiper",
     },
+    // The end of the plan's line (Akili, 05/11/2026).
+    target: "Date cible",
     columnHints: {
       focus: "Ce qui commence maintenant",
       next: "Ce qui suit une étape",

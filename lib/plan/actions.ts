@@ -165,15 +165,27 @@ export async function launchProjectPlan(
   choices: z.input<typeof choice>[],
   addedSteps: z.input<typeof added>[] = [],
 ): Promise<WriteResult> {
-  return withOutcome(
+  const result = await withOutcome(
     projectId,
     JOURNEY_MODULES,
     fr.framingJourney.done.planLaunched,
     async () => {
-      const result = await launchPlan(projectId, choices, addedSteps);
-      return result.ok
+      const launched = await launchPlan(projectId, choices, addedSteps);
+      return launched.ok
         ? { ok: true }
-        : { ok: false, error: fr.framing.errors[result.error] };
+        : { ok: false, error: fr.framing.errors[launched.error] };
     },
   );
+  // Launched, the project's overview opens: every workflow with its
+  // progress, the viewer's first gesture on top (Akili, 05/11/2026: « un
+  // changement visuel qui incite à commencer »), never the same page again.
+  return result.ok
+    ? {
+        ...result,
+        open: {
+          href: routes.project(projectId),
+          step: fr.shell.project.sidebar.overview,
+        },
+      }
+    : result;
 }
