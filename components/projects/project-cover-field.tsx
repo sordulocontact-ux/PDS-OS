@@ -56,7 +56,7 @@ export function ProjectCoverField({
       </span>
       {file ? (
         <div className="flex flex-wrap items-center gap-4">
-          <ProjectCover id={id} title={file.name} url={preview} size="md" />
+          <ProjectCover title={file.name} url={preview} size="md" />
           <span className="min-w-0 flex-1 text-sm break-all text-[color:var(--text-secondary)]">
             {t.coverChosen(file.name)}
           </span>

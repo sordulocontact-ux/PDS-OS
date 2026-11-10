@@ -78,8 +78,10 @@ proto des pages : « On est là pour juste regarder la liste. »)*
 
 **Des objets parallèles = une liste, puis une page par objet.** Les activations ne se suivent pas
 comme les étapes d'un parcours : `/activations` montre les leviers du Brief de sortie à créer dans
-leur carte titrée, puis le tableau des activations (colonnes sobres, jamais les 9 colonnes retirées
-le 18/10) ; une activation **s'ouvre sur sa page**, jamais sous une liste ni dans une modale (son
+leur tableau titré, puis le tableau des activations (colonnes sobres, jamais les 9 colonnes retirées
+le 18/10), **« Maintenant » seulement si la personne a un geste sur la page d'une activation** (Claire :
+« vérifier la preuve »), jamais pour les leviers qu'on a sous les yeux ni pour dire qui on attend
+(Sacha 10/11) ; une activation **s'ouvre sur sa page**, jamais sous une liste ni dans une modale (son
 module ouvre lui-même des modales, et Travail doit pouvoir y mener par lien). On change d'activation,
 de livrable de la Production ou de partie du Marketing **par le double chevron du fil d'Ariane**.
 Créer une activation ouvre sa page. *(Sacha, 10/11/2026, remplace la page unique liste à gauche +
@@ -361,6 +363,9 @@ valent partout, dans l'app comme dans les protos.
     Cadrage compte des dizaines de réponses. Une question qui se répond par oui ou non (« Des
     dépenses sont-elles déjà engagées ? ») propose ses vraies réponses (« Oui… » ouvre ce qu'il faut
     remplir, « Non… », « Je ne sais pas encore » + date), pas « M'aider à définir / Écrire moi-même ».
+    **Partout** (Sacha, 10/11/2026), Cadrage juridique compris (« Velours reprend-il un élément d'une
+    œuvre existante ? », accords, éditeur) : `YesNoChoice`, les exemples dans le libellé de « Oui… »
+    plutôt qu'en phrase grise, une seule ligne grise sous le champ (sa source, sinon l'aide).
 22. **Pas d'onglets sous les chevrons.** Une information notée (appel, WhatsApp, e-mail) s'affiche
     dans l'étape qu'elle concerne, avec « Noter une information » à côté de « Signaler un blocage » ;
     la liste complète s'ouvre dans la modale depuis la pastille « n informations à confirmer ». Les

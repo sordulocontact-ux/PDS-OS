@@ -99,7 +99,7 @@ export const projectShell = {
     change: "Changer la pochette",
     remove: "Retirer la pochette",
     alt: (title: string) => `Pochette de ${title}`,
-    defaultAlt: (title: string) => `Visuel par défaut de ${title}`,
+    defaultAlt: (title: string) => `${title} n'a pas encore de pochette`,
     saving: "Enregistrement de la pochette…",
     saved: "Pochette enregistrée.",
     removed: "Pochette retirée : le visuel par défaut revient.",

@@ -21,8 +21,10 @@ const t = fr.activationJourney.banner;
 
 /**
  * The levers of the Brief de sortie still to turn into activations, above
- * the table (Sacha 10/11/2026: « une frame avec le titre au-dessus », a
- * table on its card like the others). Its source said once in the title's
+ * the table (Sacha 10/11/2026: « une frame avec le titre au-dessus », « un
+ * vrai tableau »): the title and its source above, then the table in its own
+ * frame — band, rules — like the activations' below, never flattened in a
+ * section card. Its source said once in the title's
  * line; one row per lever — its name, its kind, the owner's gestures (mode
  * for Influence and RP, « Créer l'activation », « Plus tard »), « À
  * préparer » for the others. A lever turned into an activation leaves the
@@ -52,7 +54,6 @@ export function LeversCard({
           ? t.toTransform(todo.length, version)
           : t.kept(later.length, version)
       }
-      card
       collapsible
       defaultOpen={todo.length > 0}
     >

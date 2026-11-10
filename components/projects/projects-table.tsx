@@ -1,7 +1,7 @@
 import { RecordSelection } from "@/components/archive/record-selection";
+import { ReleaseCover } from "@/components/catalog/artist-profile/release-cover";
 import { DraftRowActions } from "@/components/projects/draft-row-actions";
 import { ProjectActions } from "@/components/projects/project-actions";
-import { ProjectCover } from "@/components/projects/project-cover";
 import { ProjectKindBadge } from "@/components/projects/project-kind-badge";
 import { ProjectStepCell } from "@/components/projects/project-step-cell";
 import {
@@ -100,12 +100,7 @@ export function ProjectsTable({
               )}
               <DataTableCell>
                 <span className="flex min-w-0 items-center gap-3">
-                  <ProjectCover
-                    id={draft.id}
-                    title={name}
-                    url={null}
-                    size="sm"
-                  />
+                  <ReleaseCover coverUrl={null} className="size-9 rounded-md" />
                   <DataTableLink
                     href={`${routes.projectsNew}?draft=${draft.id}`}
                   >
@@ -160,13 +155,12 @@ export function ProjectsTable({
                 withSelection && <SelectEmptyCell />
               )}
               <DataTableCell>
-                {/* Its cover next to its name (Sacha, 10/11/2026). */}
+                {/* Its cover next to its name (Sacha, 10/11/2026); none = the
+                    Catalogue's disc on grey, not the overview's coloured visual. */}
                 <span className="flex min-w-0 items-center gap-3">
-                  <ProjectCover
-                    id={project.id}
-                    title={project.title}
-                    url={project.coverUrl ?? null}
-                    size="sm"
+                  <ReleaseCover
+                    coverUrl={project.coverUrl ?? null}
+                    className="size-9 rounded-md"
                   />
                   <DataTableLink
                     href={rights?.archived ? null : routes.project(project.id)}

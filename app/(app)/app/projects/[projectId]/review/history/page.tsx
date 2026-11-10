@@ -1,10 +1,8 @@
 import { MarketingHistory } from "@/components/marketing/marketing-history";
 import { ProjectHeader } from "@/components/projects/project-header";
-import { BackLink } from "@/components/shell/back-link";
 import { fr } from "@/lib/i18n/fr";
 import { loadMarketingEvents } from "@/lib/marketing/queries";
 import { reviewJourneyContext } from "@/lib/marketing/review/context";
-import { reviewStepHref } from "@/lib/ui/review-steps";
 
 const t = fr.reviewJourney.history;
 
@@ -22,13 +20,10 @@ export default async function ReviewHistoryPage({
         projectId={projectId}
         steps={steps}
         extraCrumbs={[{ label: t.link }]}
+        // Its name as the title, the header's arrow back to the module
+        // (Sacha 10/11/2026, like an activation's page).
+        title={t.title}
       />
-      <BackLink href={reviewStepHref(projectId, "bilan")}>
-        {fr.reviewJourney.module}
-      </BackLink>
-      <h2 className="text-[length:var(--type-figure-lg)] leading-[var(--type-figure-lg-lh)] font-medium">
-        {t.title}
-      </h2>
       <MarketingHistory events={events} emptyLabel={t.empty} />
     </div>
   );

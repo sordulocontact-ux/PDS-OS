@@ -24,8 +24,9 @@ const t = fr.activationJourney;
 /**
  * Marketing › Activations, the list (Sacha 10/11/2026, replacing the
  * single page of the 18/10 proto, list on the left and activation on the
- * right): the Marketing's head, « Maintenant » for the person looking, the
- * levers of the Brief de sortie still to turn into activations on their
+ * right): the Marketing's head, « Maintenant » only when the viewer has a
+ * gesture on an activation's page (the levers are the page itself, Sacha
+ * 10/11/2026), the levers of the Brief de sortie still to turn into activations on their
  * card, then the table of the activations. A row opens the activation's own
  * page (ActivationPageView). Everything computed at each read.
  */
@@ -44,9 +45,13 @@ export async function ActivationsIndex({
     activationsJourneys(projectId),
   ]);
   const levers = await loadLevers(projectId, board.data.activations);
+  const canCreate = canEditProject(access, project);
   const steps =
     journeys.find((j) => j.part?.key === "activations")?.steps ?? [];
-  const canCreate = canEditProject(access, project);
+  // « À vous » only for a gesture on an activation's page (Sacha 10/11/2026,
+  // Claire: « vérifier la preuve »): never for the levers, on this page, and
+  // never a card of who is awaited — a list page stays a list otherwise.
+  const elsewhere = steps.some((s) => s.actor?.viewer && s.key !== "levers");
   const viewerName =
     personName(access.firstName ?? "", access.lastName ?? "") || null;
   const rows = board.summaries.map((a) => ({
@@ -56,16 +61,16 @@ export async function ActivationsIndex({
   return (
     <div className="flex flex-col gap-5">
       <ProjectHeader projectId={projectId} />
-      <ProjectNowCard
-        projectId={projectId}
-        steps={steps}
-        viewerName={viewerName}
-        moduleLabel={t.crumb}
-        // The levers are on this page (LeversCard): « Maintenant » never
-        // sends to them (Sacha 10/11/2026).
-        shownKey="levers"
-        here={steps}
-      />
+      {elsewhere && (
+        <ProjectNowCard
+          projectId={projectId}
+          steps={steps}
+          viewerName={viewerName}
+          moduleLabel={t.crumb}
+          shownKey="levers"
+          here={steps}
+        />
+      )}
       <LeversCard projectId={projectId} levers={levers} canCreate={canCreate} />
       {rows.length > 0 ? (
         <ActivationsTable

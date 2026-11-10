@@ -21,7 +21,7 @@ const fr = { poQuestion, legal };
  * came from; « À répondre » on the right while unanswered. A click on the
  * whole row opens its question in the box above, no verb written, the
  * row's tint on hover says it (Sacha 06/11/2026, as the Brief); the
- * question open there is the tinted row, « Question en cours ». Then the questions PO does not
+ * question open there is the tinted row. Then the questions PO does not
  * ask, settled by reliable data, with their source.
  */
 export function IntakeAnswers({
@@ -40,7 +40,14 @@ export function IntakeAnswers({
 }) {
   const t = fr.legal.intake;
   const answered = questions.filter((q) => q.answered).length;
-  const where = (title: string | null) => title ?? t.project;
+  // The title said on a row only when there are several (as the
+  // Confirmation), the project-wide question then reading « Projet ».
+  const several =
+    new Set(questions.flatMap((q) => (q.title ? [q.title] : []))).size > 1;
+  const labelOf = (q: IntakeQuestion) =>
+    several
+      ? `${t.questions[q.key].short} · ${q.title ?? t.project}`
+      : t.questions[q.key].short;
   return (
     <div className="flex flex-col gap-4">
       {questions.length > 0 && (
@@ -59,16 +66,15 @@ export function IntakeAnswers({
               return (
                 <FactRowFrame
                   key={key}
-                  label={`${t.questions[q.key].short} · ${where(q.title)}`}
+                  label={labelOf(q)}
                   value={answerOf(q)}
                   source={quotesOf(q)}
                   // Not answered: « À répondre » on the right, as the
-                  // Master's « À renseigner »; the question in the box:
-                  // « Question en cours ».
+                  // Master's « À renseigner »; the question in the box is
+                  // the tinted row, no badge (as the Cadrage, 09/11/2026).
                   missing={!q.answered}
                   missingAs="badge"
                   missingLabel={t.toAnswerPill}
-                  state={current ? { tone: "info", label: t.inTheBox } : null}
                   current={current}
                   onClick={() => onOpen(q)}
                   hrefLabel={q.answered ? t.edit : t.answer}
@@ -83,9 +89,6 @@ export function IntakeAnswers({
           <summary className="flex cursor-pointer list-none flex-col marker:hidden">
             <span className="text-[length:var(--type-body-sm)] font-semibold">
               {fr.poQuestion.notAsked.title}
-            </span>
-            <span className="text-[length:var(--type-micro)] text-[color:var(--text-secondary)]">
-              {fr.poQuestion.notAsked.hint}
             </span>
           </summary>
           <ul className="flex flex-col gap-2 pt-3">

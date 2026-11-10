@@ -6,6 +6,8 @@ export const moduleFrame = {
   crumbs: "Fil d'Ariane",
   // The double chevron of a segment (« Changer de page : Activations »).
   switchTo: (label: string) => `Changer : ${label}`,
+  // The arrow before the title of an object's page (« Retour à Activations »).
+  backTo: (label: string) => `Retour à ${label}`,
   switcher: {
     search: "Chercher",
     placeholder: "Chercher…",

@@ -1985,6 +1985,26 @@ l'activation ouverte tombait sous la liste et sous les leviers dépliés.
 - Boutons seuls sans contour corrigés (« Créer » d'un levier gardé, « Nouvelle activation »).
 - Reste : les pilules des sous-modules et la barre des livrables de la Production doublent maintenant
   le chevron du fil (Ibé, 15/10 : pas de seconde navigation) — à trancher.
+- Suite du même jour : leviers en vrai tableau encadré (titre au-dessus, boutons sur une ligne) ;
+  « Maintenant » de la liste seulement pour un geste sur une activation (jamais les leviers) ; page
+  d'une activation, d'un livrable de la Production et Historique du Suivi & bilan : leur nom en titre,
+  flèche de retour à gauche (`BackLink icon` posé par `ProjectHeaderView`), état de l'activation à côté
+  du titre (`activationPill`).
+
+## Relevé automatique des statistiques (10/11/2026, branche `pre-prod`)
+
+Demande de Sacha : garder « Noter un relevé » et relever seul les stats des liens publiés.
+
+- « Relever les statistiques » (`ReadStatsButton`, `readLinkStats`) dans la section Statistiques d'une
+  activation, d'une collaboration et d'un média, quand une preuve a un lien TikTok, YouTube ou playlist
+  Deezer : vues, j'aime, commentaires, partages, enregistrements, abonnés de playlist ; un relevé par
+  chiffre, source « Plateforme », déclaré, période depuis la publication.
+- Aucune dépendance ajoutée. Variable optionnelle `YOUTUBE_API_KEY` (Google Cloud « PDS OS », API
+  YouTube Data v3) : **à créer et poser en local et sur Vercel** ; sans elle YouTube reste à la main.
+- Pas de relevé périodique (cron) : un clic, par la personne, en RLS. Un cron demanderait le service
+  role pour écrire des relevés : à décider.
+- Risque : TikTok n'a pas d'API publique des chiffres d'une vidéo ; la page publique est lue sans
+  compte (comme les profils du Labo), format non documenté qui peut casser du jour au lendemain.
 
 ## Vue d'ensemble refaite et pochette du projet (10/11/2026, branche `pre-prod`)
 
@@ -2002,3 +2022,7 @@ Sortie visée / blocages, retirée à sa demande ; la pochette aussi dans la lis
   comme livrable avant le plan ; dépendances en texte après. `BeforeWorkflows` et `WorkflowCards`
   supprimés.
 - Listes de projets (Projets, Catalogue › artiste et titre) : la pochette devant le nom.
+- Cadrage juridique (Sacha, 10/11/2026) : élément repris, accords et éditeur se répondent
+  « Oui… / Non… » (`YesNoChoice`, commun avec les dimensions du Cadrage) ; « Non » enregistre
+  « aucun » sans PO, « Oui » ouvre le champ ; moins de texte gris (exemples dans « Oui… », une
+  ligne sous le champ, plus de « Question en cours » ni du titre répété sur chaque réponse).

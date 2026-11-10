@@ -48,6 +48,8 @@ export const serverEnvSchema = z
     CRON_SECRET: z.preprocess(blankToUndefined, z.string().min(32).optional()),
     /** Optional: Odesli closed its public API, keys come from a whitelist. */
     ODESLI_API_KEY: optionalSecret,
+    /** YouTube Data API v3: optional, reads a video's public views, likes and comments (activation statistics). */
+    YOUTUBE_API_KEY: optionalSecret,
     /** Unsplash and Tumblr: optional, each turns its source on (similar references). */
     UNSPLASH_ACCESS_KEY: optionalSecret,
     TUMBLR_API_KEY: optionalSecret,

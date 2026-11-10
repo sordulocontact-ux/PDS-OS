@@ -226,12 +226,7 @@ function OverviewCover({
   organizationId: string | null;
 }) {
   return (
-    <ProjectCover
-      id={project.id}
-      title={project.title}
-      url={url}
-      className="group/cover"
-    >
+    <ProjectCover title={project.title} url={url} className="group/cover">
       {organizationId && (
         <ProjectCoverEdit
           organizationId={organizationId}

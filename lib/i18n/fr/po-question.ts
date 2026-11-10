@@ -23,6 +23,5 @@ export const poQuestion = {
   // Questions settled by reliable data (« Questions que PO ne pose pas »).
   notAsked: {
     title: "Questions que PO ne pose pas",
-    hint: "Déjà réglées par une donnée fiable",
   },
 } as const;

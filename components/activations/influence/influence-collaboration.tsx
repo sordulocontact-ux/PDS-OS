@@ -3,6 +3,7 @@ import { Fragment } from "react";
 import { EvidenceSection } from "@/components/activations/evidence/evidence-section";
 import { JournalSection } from "@/components/activations/journal-section";
 import { MessagesSection } from "@/components/activations/messages/messages-section";
+import { readablePlatforms } from "@/lib/activations/stats-links";
 import { MetricsSection } from "@/components/activations/metrics/metrics-section";
 import { SheetPanel } from "@/components/activations/sheets/sheet-panel";
 import { Fold } from "@/components/ui/fold";
@@ -227,6 +228,9 @@ export async function InfluenceCollaboration({
         canVerify={canValidate}
         today={today}
         targetId={target.id}
+        readable={readablePlatforms(
+          board.data.evidences.filter((e) => e.targetId === target.id),
+        )}
         defaultSource="creator"
       />,
     ],

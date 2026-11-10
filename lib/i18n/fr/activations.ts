@@ -559,6 +559,22 @@ export const activations = {
     totalValue: (value: string, n: number) =>
       `${value} (${n} ${plural(n, "relevé", "relevés")})`,
     notSummed: "Non additionnable",
+    // « Relever les statistiques » : the published links read by PDS OS
+    // (Sacha 10/11/2026), beside « Noter un relevé ».
+    auto: {
+      read: "Relever les statistiques",
+      readHint: (platforms: string) =>
+        `Lit les chiffres publics des liens ${platforms} déclarés en preuve.`,
+      done: (figures: number, links: number) =>
+        `${figures} ${plural(figures, "chiffre relevé", "chiffres relevés")} sur ${links} ${plural(links, "lien", "liens")}.`,
+      already: "Ces liens ont déjà été relevés aujourd'hui.",
+      unreadable: (links: string) => `Illisible pour l'instant : ${links}.`,
+      notFound: (links: string) =>
+        `Introuvable (supprimé ou privé) : ${links}.`,
+      noKey: "YouTube n'est pas encore branché : à noter à la main.",
+      byHand: (hosts: string) => `À noter à la main : ${hosts}.`,
+      nothing: "Aucun chiffre n'a pu être lu sur ces liens.",
+    },
   },
   journal: {
     title: "Journal",

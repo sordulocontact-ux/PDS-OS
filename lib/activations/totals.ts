@@ -2,6 +2,7 @@
 // n'additionne pas silencieusement des périodes ou définitions
 // incompatibles »). Client-safe.
 
+import { autoLinkOf } from "@/lib/activations/stats-links";
 import type { MetricRecord } from "@/lib/activations/types";
 
 export type MetricTotal = {
@@ -15,12 +16,17 @@ export type MetricTotal = {
   sources: MetricRecord["source"][];
 };
 
+// An automatic snapshot belongs to its link too: two videos of one
+// collaboration add up instead of the latest hiding the other.
 const subjectOf = (m: MetricRecord) =>
-  m.targetId ?? m.agencyRowId ?? "activation";
+  [
+    m.targetId ?? m.agencyRowId ?? "activation",
+    autoLinkOf(m.method) ?? "",
+  ].join("|");
 
 /**
  * The latest valid snapshot of each subject (a collaboration, an agency row
- * or the activation itself) and metric, then one total per metric and unit.
+ * or the activation itself, and the link of an automatic one) and metric, then one total per metric and unit.
  * A percentage is never summed; an invalidated snapshot never counts.
  */
 export function metricTotals(metrics: MetricRecord[]): MetricTotal[] {

@@ -1,6 +1,7 @@
 import { EvidenceSection } from "@/components/activations/evidence/evidence-section";
 import { JournalSection } from "@/components/activations/journal-section";
 import { MessagesSection } from "@/components/activations/messages/messages-section";
+import { readablePlatforms } from "@/lib/activations/stats-links";
 import { MetricsSection } from "@/components/activations/metrics/metrics-section";
 import { Fold } from "@/components/ui/fold";
 import { TargetHeader } from "@/components/activations/targets/target-header";
@@ -91,6 +92,9 @@ export async function PressTarget({
         canVerify={canValidate}
         today={today}
         targetId={target.id}
+        readable={readablePlatforms(
+          board.data.evidences.filter((e) => e.targetId === target.id),
+        )}
         defaultSource="media"
       />
       <JournalSection entries={journal} />

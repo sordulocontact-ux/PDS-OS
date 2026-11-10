@@ -68,7 +68,7 @@ export const legalJourney = {
     },
     framing: {
       title: "Cadrage juridique",
-      why: "PO pose une question à la fois sur ce que le projet ne sait pas encore. Vous répondez librement ; il relève les informations, vous les vérifiez avant qu'elles soient gardées.",
+      why: "PO pose une question à la fois sur ce que le projet ne sait pas encore.",
     },
     confirmation: {
       title: "Confirmation",

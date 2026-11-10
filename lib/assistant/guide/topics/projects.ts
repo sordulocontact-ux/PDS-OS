@@ -72,7 +72,7 @@ export const projectsTopics: GuideTopic[] = [
       "Dans un projet lancé › Vue d'ensemble (le Plan du projet est la 4e étape du Cadrage).",
     facts: [
       "En tête : la pochette du projet, son nom, l'artiste et le type, et « Informations » pour relire ce qui a été saisi à la création.",
-      "La pochette est l'image importée pour le projet ; sans elle, la pochette de son titre au Catalogue ; sinon un visuel par défaut. La direction peut la choisir en créant le projet, puis le chef de projet responsable la change en cliquant sur l'image (ou dans « Informations »).",
+      "La pochette est l'image importée pour le projet ; sans elle, la pochette de son titre au Catalogue ; sinon un disque gris en attendant une image. La direction peut la choisir en créant le projet, puis le chef de projet responsable la change en cliquant sur l'image (ou dans « Informations »).",
       "Deux zones : « Maintenant », votre première action dans ce projet avec son bouton (ou qui est attendu, sur quoi), et « Progression ».",
       "Tant que le plan du projet n'est pas lancé, « Progression » montre les étapes du Cadrage, et le livrable attendu est rappelé dessous : le Brief de cadrage. Chaque étape ouvre sa page d'un clic.",
       "Une fois le plan lancé, « Progression » montre une ligne par workflow avec l'étape où il en est, puis ce qui dépend d'un autre workflow.",
@@ -85,7 +85,7 @@ export const projectsTopics: GuideTopic[] = [
     faq: [
       {
         q: "Comment changer la pochette du projet ?",
-        a: "Cliquez sur l'image en tête de la Vue d'ensemble, ou ouvrez « Informations ». Avant que le projet soit accepté, c'est la direction ; ensuite, seul le chef de projet responsable. « Retirer » revient à la pochette du titre ou au visuel par défaut.",
+        a: "Cliquez sur l'image en tête de la Vue d'ensemble, ou ouvrez « Informations ». Avant que le projet soit accepté, c'est la direction ; ensuite, seul le chef de projet responsable. « Retirer » revient à la pochette du titre, ou au disque gris.",
       },
       {
         q: "Pourquoi le Master ou le Juridique est-il verrouillé ?",

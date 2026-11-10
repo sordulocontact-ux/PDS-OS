@@ -5,15 +5,13 @@ import { useState, type ReactNode } from "react";
 import { LaterForm } from "@/components/framing/intel/answer-states";
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { Button } from "@/components/ui/button";
-import { ChoiceCards } from "@/components/ui/choice-cards";
+import { YesNoChoice, type YesNo } from "@/components/ui/yes-no-choice";
 import { answerNone } from "@/lib/framing/actions/questions";
 import type { QuestionKey } from "@/lib/framing/dimensions";
 import { framingIntel } from "@/lib/i18n/fr/framing-intel";
 import { framingJourney } from "@/lib/i18n/fr/framing-journey";
 
 const fr = { framingIntel, framingJourney };
-
-type Choice = "yes" | "no" | "later";
 
 /**
  * A question answered by a real answer rather than by a way to answer
@@ -40,22 +38,16 @@ export function YesNoAnswer({
   const t = fr.framingIntel;
   const g = fr.framingJourney.dimensions.gesture;
   const { pending, run } = useFramingAction();
-  const [choice, setChoice] = useState<Choice | null>(null);
+  const [choice, setChoice] = useState<YesNo | null>(null);
   return (
     <div className="flex flex-col gap-3.5">
-      <ChoiceCards<Choice>
+      <YesNoChoice
         name={`yes-no-${questionKey}`}
         legend={t.yesNoLegend}
-        hideLegend
-        variant="list"
+        labels={{ ...labels, later: t.notYet }}
         value={choice}
         onChange={setChoice}
         disabled={pending}
-        choices={[
-          { value: "yes", label: labels.yes },
-          { value: "no", label: labels.no },
-          { value: "later", label: t.notYet },
-        ]}
       />
       {choice === "yes" && yes}
       {choice === "no" && (

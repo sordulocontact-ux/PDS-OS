@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 
 import { AddExpenseButton } from "@/components/budget/add-expense-button";
 import { ReadOnlyNotice } from "@/components/projects/read-only-notice";
+import { BackLink } from "@/components/shell/back-link";
 import {
   useSubModuleCounts,
   useModuleEntries,
@@ -13,6 +14,7 @@ import {
   ModuleHeader,
   type ModuleHeaderProps,
 } from "@/components/shell/module/module-header";
+import { moduleFrame } from "@/lib/i18n/fr/module-frame";
 import type { ProjectHeaderData } from "@/lib/projects/header";
 import type { CrumbOption, ModuleCrumb } from "@/lib/ui/module-frame";
 import {
@@ -21,6 +23,8 @@ import {
   projectSections,
 } from "@/lib/ui/project-sections";
 import { cn } from "@/lib/utils";
+
+const fr = { moduleFrame };
 
 export type ProjectHeaderOverrides = Partial<
   Pick<
@@ -76,6 +80,7 @@ export function ProjectHeaderView({
   extraCrumbs = [],
   steps,
   title,
+  media,
   facts,
   actions,
   ...rest
@@ -128,6 +133,11 @@ export function ProjectHeaderView({
     ...(step ? [{ label: step.title }] : []),
   ];
   const inMarketing = Boolean(sub);
+  // An object's page below a sub-module (an activation, a deliverable):
+  // its name is the title, an arrow before it goes up to the list (Sacha
+  // 10/11/2026), like its crumb.
+  const object =
+    sub && pathname !== sub.href ? extraCrumbs.at(0)?.label : undefined;
   return (
     <div
       data-project-header={isDefault ? "default" : "page"}
@@ -138,7 +148,15 @@ export function ProjectHeaderView({
     >
       <ModuleHeader
         crumbs={all}
-        title={title ?? trail.title}
+        title={title ?? object ?? trail.title}
+        media={
+          media ??
+          (sub && object ? (
+            <BackLink href={sub.href} icon>
+              {fr.moduleFrame.backTo(sub.label)}
+            </BackLink>
+          ) : undefined)
+        }
         tabs={
           inMarketing
             ? data.subModules.map((s) => ({

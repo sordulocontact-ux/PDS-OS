@@ -17,7 +17,7 @@ import { personName } from "@/lib/projects/types";
 import type { CrumbOption } from "@/lib/ui/module-frame";
 import { allInOrder } from "@/lib/utils/parallel";
 
-import { ActivationDetail } from "./activation-detail";
+import { ActivationDetail, activationPill } from "./activation-detail";
 
 const fr = { activations, activationJourney };
 
@@ -72,6 +72,8 @@ export async function ActivationPageView({
       <ProjectHeader
         projectId={projectId}
         extraCrumbs={[{ label: open.title, options }]}
+        // Its title is the page's (the header's), its state beside it.
+        status={fiche ? activationPill(fiche.activation) : undefined}
       />
       <ProjectNowCard
         projectId={projectId}

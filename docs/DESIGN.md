@@ -911,11 +911,11 @@ n'a plus de variante. Toute nouvelle modale passe par `Dialog` / `FormDialog` /
 
 Retour d'Akili du 05/11, proto « Vue d'ensemble » validé par Sacha. Un projet a une image : celle
 importée pour lui (à la création, ou ensuite par son responsable), sinon la pochette de son premier
-titre au Catalogue, sinon un **visuel par défaut** — une teinte de catégorie (§ 3 ter) tirée de son
-id, du clair au profond, sous les anneaux d'un disque (`.project-cover-default`, `ProjectCover`) :
-chaque projet garde la sienne, partout. 104 px (80 px en mobile) en tête de la Vue d'ensemble, à
-gauche du nom et de « Artiste · Type » ; 36 px devant le nom dans les listes de projets ; 64 px en
-aperçu de formulaire. La changer : bouton rond en verre sur l'image (au survol à la souris, toujours
+titre au Catalogue, sinon **rien de coloré** : le disque sur fond gris des titres du Catalogue
+(`ProjectCover`, `ReleaseCover`), partout (Sacha, 10/11/2026 : ni visuel par défaut coloré dans les
+listes ni sur la Vue d'ensemble). 104 px (80 px en mobile) en tête de la Vue d'ensemble, à gauche du
+nom et de « Artiste · Type » ; 36 px devant le nom dans les listes de projets ; 64 px en aperçu de
+formulaire. La changer : bouton rond en verre sur l'image (au survol à la souris, toujours
 au toucher) ou « Informations ». Écart voulu : la Vue d'ensemble ne montre **aucune pastille
 d'état** (étapes en fil, workflows en anneau `ProgressRing`) et sépare ses blocs par l'espace, pas
 par des traits.

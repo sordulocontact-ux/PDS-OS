@@ -2829,7 +2829,7 @@ pour l'écran, les lots 1 et 4 ci-dessous (la logique `lib/workflow-status/` res
   écrite par `set_project_cover` seulement (`can_edit_project_cover` : la direction `create_projects` avant
   l'acceptation, puis le responsable seul, `is_project_owner`) ; lue par `lib/projects/covers.ts`
   (`projectCoverUrls` : l'image du projet, sinon la pochette de son premier titre au Catalogue
-  `listMasterCovers`, sinon rien → visuel par défaut `.project-cover-default`, teinte tirée de l'id) ; URLs
+  `listMasterCovers`, sinon rien → disque sur fond gris, comme les titres du Catalogue) ; URLs
   signées au rendu, jamais dans un cache (elles expirent). À la création, le formulaire envoie `intent=cover`
   (l'action renvoie le projet au lieu de rediriger), téléverse l'image (`uploadProjectCover`) puis ouvre le
   projet. Listes de projets (`ProjectsTable`, aussi dans le Catalogue) : `withCovers` (petites copies). Sources de `DependencyRows`
@@ -6880,7 +6880,16 @@ Piégée / Dioo / Alka et chiffres ATYR rejoués dans une transaction annulée).
   `activation_evidence_checks` : chaque contrôle avec méthode, auteur, date, append-only ; une
   preuve retirée reste historisée) ; la **mesure** (`activation_metrics` : relevés datés avec
   source, période, méthode, toujours « déclarés » à l'enregistrement, vérifiés à part, invalidés
-  sans effacement). États de preuve et de mesure **calculés par le code** (`lib/activations/states.ts`),
+  sans effacement ; **relevé automatique** du 10/11/2026 : `readLinkStats`
+  (`lib/activations/stats-actions.ts`) lit les liens des preuves reconnus par `statsLinkOf`
+  (`lib/activations/stats-links.ts` : vidéo TikTok, vidéo ou Short YouTube, playlist Deezer) avec
+  `readPostStats` (`lib/integrations/post-stats.ts`), puis insère un relevé par chiffre donné, en session
+  utilisateur (RLS) : source `platform`, méthode « Relevé automatique · <lien canonique> » (pas de
+  colonne pour le lien ; `autoLinkOf` le relit, les totaux comptent chaque lien comme un sujet), période
+  de la publication à aujourd'hui, un lien relu une fois par jour au plus, 20 liens par clic. TikTok n'a
+  pas d'API publique des chiffres d'une vidéo : sa page publique, lue sans compte comme les profils du
+  Labo, format non documenté qui peut casser ; YouTube par la Data API v3 (`YOUTUBE_API_KEY`, sans elle
+  « à noter à la main ») ; Deezer `api.deezer.com/playlist/<id>` (`fans`)). États de preuve et de mesure **calculés par le code** (`lib/activations/states.ts`),
   jamais stockés ; une statistique manquante n'est jamais un zéro.
 - **Pilotage** (`board.ts`) : alertes calculées (responsable absent, échéance passée, réalisée sans
   preuve ou sans statistiques, preuve contestée, dépendance bloquante ou changée, écart agence /

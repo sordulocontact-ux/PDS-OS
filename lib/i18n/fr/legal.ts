@@ -98,7 +98,7 @@ export const legal = {
       contributors: {
         ask: (title: string) =>
           `Qui a participé à « ${title} », et à quel titre ?`,
-        hint: "Composition, texte, arrangement, production, enregistrement, mix, musiciens… Plusieurs personnes à la fois, comme vous le diriez.",
+        hint: "Composition, texte, arrangement, production, mix, musiciens… comme vous le diriez.",
         why: "Les crédits de ce titre sont vides : ils servent aux contrats et à la déclaration SACEM.",
         short: "Participants",
         // Some people are already known (known-people.ts): ask for the rest.
@@ -109,23 +109,46 @@ export const legal = {
       third_party: {
         ask: (title: string) =>
           `« ${title} » reprend-il un élément d'une œuvre existante ?`,
-        hint: "Une topline, un sample, une interpolation, une reprise… Précisez l'œuvre et, si vous le savez, son auteur. Sinon, répondez « non ».",
+        hint: "L'œuvre et, si vous le savez, son auteur.",
         why: "Utiliser une œuvre existante exige l'autorisation préalable de ses ayants droit (bulletin SACEM).",
         short: "Élément repris",
       },
       agreements: {
         ask: () => "Des accords existent-ils déjà pour ce projet ?",
-        hint: "Contrat d'artiste, cession, licence, édition, coproduction… Avec qui ? Sinon, répondez « non ».",
+        hint: "Le type d'accord et avec qui.",
         why: "Aucun contrat n'est encore rattaché au projet.",
         short: "Accords existants",
       },
       publisher: {
         ask: (title: string) => `L'œuvre « ${title} » a-t-elle un éditeur ?`,
-        hint: "Le nom de l'éditeur, ou « non ».",
+        hint: "Le nom de l'éditeur.",
         why: "Le bulletin SACEM demande les éditeurs de l'œuvre, s'il y en a.",
         short: "Éditeur",
       },
     },
+    // A question answered « Oui… / Non… » (as the Cadrage's dimensions,
+    // Sacha 10/11/2026): « Oui » opens the field (its label), « Non »
+    // records the question's « none ». The examples live in « Oui », not
+    // in a grey hint.
+    yesNo: {
+      third_party: {
+        yes: "Oui : sample, topline, interpolation, reprise…",
+        no: "Non, aucune œuvre existante",
+        label: "Quel élément, de quelle œuvre et de qui ?",
+      },
+      agreements: {
+        yes: "Oui : contrat d'artiste, cession, licence, édition…",
+        no: "Non, aucun accord",
+        label: "Quels accords, avec qui ?",
+      },
+      publisher: {
+        yes: "Oui, elle a un éditeur",
+        no: "Non, pas d'éditeur",
+        label: "Quel éditeur ?",
+      },
+    } as Partial<Record<string, { yes: string; no: string; label: string }>>,
+    yesNoLegend: "Votre réponse",
+    saveNone: "Enregistrer la réponse",
     project: "Projet",
     // The domain of a question, in the eyebrow of « Question de PO ».
     domains: {
@@ -154,12 +177,10 @@ export const legal = {
       publisher: "Pas d'éditeur",
     } as Record<string, string>,
     // What the Cadrage already established, offered as the answer.
-    fromCadrage:
-      "Repris du Cadrage : vérifiez, corrigez si besoin, puis faites lire la réponse à PO.",
+    fromCadrage: "Repris du Cadrage, à vérifier.",
     // Who the title and the Cadrage already name (known-people.ts),
     // offered as the start of the answer, one line per person.
-    fromKnown:
-      "Déjà connu, avec sa source : ajoutez à la suite les autres personnes et leur rôle, puis faites lire la réponse à PO.",
+    fromKnown: "Déjà connu, avec sa source. Ajoutez les autres à la suite.",
     known: {
       roles: {
         performer: "interprète",
@@ -203,7 +224,6 @@ export const legal = {
     // for an open one), its pill while unanswered or open in PO's box.
     edit: "Modifier la réponse",
     toAnswerPill: "À répondre",
-    inTheBox: "Question en cours",
     correcting: "Correction d'une réponse",
     lastAnswer: (text: string) => `Votre réponse : « ${text} »`,
     facts: {

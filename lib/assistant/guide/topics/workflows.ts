@@ -69,7 +69,7 @@ export const workflowsTopics: GuideTopic[] = [
     facts: [
       "Le Juridique a cinq étapes : État des lieux, Cadrage juridique, Confirmation, Plan d'action, Suivi.",
       "État des lieux : ce que le projet sait déjà, classé connu, à confirmer ou manquant, lu par le code à chaque ouverture. Une ligne s'ouvre pour être corrigée sur place.",
-      "Cadrage juridique : PO pose une question à la fois sur ce qui manque ; vous répondez librement et vérifiez ce qu'il relève avant qu'il soit gardé.",
+      "Cadrage juridique : PO pose une question à la fois sur ce qui manque. Élément repris, accords et éditeur se répondent d'abord par Oui ou Non : Non enregistre « aucun » tout de suite, Oui ouvre le champ. Vous répondez librement et vérifiez ce que PO relève avant qu'il soit gardé.",
       "Confirmation : une synthèse, confirmée par une personne. Cela ne vaut ni signature, ni autorisation, ni dépôt.",
       "Plan d'action : PDS OS propose les démarches et les contrats à prévoir ; on les confirme, puis on attribue et date chaque démarche.",
       "Suivi : chaque démarche se fait depuis sa ligne. Les pages de démarche sont les fiches de renseignements, les contrats, les répartitions, les autorisations, la SACEM et l'historique.",

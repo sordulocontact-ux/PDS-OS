@@ -118,6 +118,10 @@ export const marketingTopics: GuideTopic[] = [
       "L'influence et les relations presse se gèrent soit en interne, soit avec une agence externe.",
       "Chaque activation a un statut (À préparer, En cours, Réalisée, Clôturée, Annulée ou Bloquée avec sa raison), des preuves et des statistiques déclarées.",
       "Une statistique manquante n'est jamais comptée comme zéro.",
+      "Les statistiques se notent à la main (« Noter un relevé ») ou se relèvent seules (« Relever les statistiques ») depuis les liens TikTok, YouTube et playlist Deezer déclarés en preuve : vues, j'aime, commentaires, partages, enregistrements, abonnés d'une playlist. Instagram, Spotify et les autres se notent à la main.",
+      "Un relevé automatique a la source « Plateforme », reste déclaré jusqu'à sa vérification, et un même lien n'est relu qu'une fois par jour.",
+      "En tête de la page Activations, « À vous » n'apparaît que si vous avez un geste dans une activation, jamais pour les leviers affichés dessous.",
+      "La page d'une activation porte son nom en titre, une flèche à gauche du titre ramène au tableau.",
       "La page Activations montre en haut les leviers du Brief de sortie à transformer, puis le tableau des activations avec ses vues : À moi, En cours, À mesurer, Terminées.",
       "Une ligne du tableau ouvre la page de l'activation : sa frise, ce qu'il y a à faire maintenant, son module et ses informations.",
       "Le fil d'Ariane en haut de la page change de partie du Marketing ou d'activation par son double chevron.",
@@ -127,6 +131,10 @@ export const marketingTopics: GuideTopic[] = [
       {
         q: "Où créer une activation ?",
         a: "Sur la page Activations du projet : chaque levier retenu peut devenir une activation quand vous êtes prêt, et « Nouvelle activation » à côté du tableau pour une action hors des leviers. L'activation créée s'ouvre sur sa page.",
+      },
+      {
+        q: "Peut-on récupérer les statistiques automatiquement ?",
+        a: "Oui pour les liens TikTok, YouTube et les playlists Deezer déclarés en preuve : « Relever les statistiques » dans la section Statistiques de l'activation ou de la collaboration lit leurs chiffres publics et les enregistre comme relevés datés. Les autres plateformes se notent avec « Noter un relevé ».",
       },
       {
         q: "Comment passer d'une activation à une autre ?",

@@ -27,15 +27,19 @@ export function RecordMetricButton(props: {
   agencyRowId?: string | null;
   defaultSource?: MetricSource;
   today: string;
+  // Ghost beside « Relever les statistiques » (outline), else outline.
+  variant?: "outline" | "ghost";
 }) {
+  const { variant, ...form } = props;
   return (
     <DialogButton
+      variant={variant}
       label={t.record}
       icon={IconPlus}
       title={t.recordTitle}
       description={t.recordDescription}
     >
-      {(close) => <MetricForm {...props} onDone={close} />}
+      {(close) => <MetricForm {...form} onDone={close} />}
     </DialogButton>
   );
 }

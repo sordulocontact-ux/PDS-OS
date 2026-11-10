@@ -100,7 +100,10 @@ Décisions du lot 7 (19/10/2026, parcours du proto) :
   (ticket) ; seul le responsable arbitre, la direction accepte une limite définitive (règle « seul le
   responsable écrit »), alors que le proto laissait la DG tout arbitrer.
 - Preuve « lien inaccessible » comptée « à vérifier » dans « Où on en est » ; « statistiques
-  indisponibles / partielles » : aucune source dans l'app pour l'instant, affichées « — ».
+  indisponibles / partielles » affichées « — ». **Relevé automatique** (Sacha 10/11/2026) : « Relever les
+  statistiques » lit les chiffres publics des liens TikTok (page publique de la vidéo, sans compte),
+  YouTube (Data API v3, `YOUTUBE_API_KEY`) et playlist Deezer (API publique) déclarés en preuve ;
+  Instagram, Spotify et le reste restent « Noter un relevé » (chiffres derrière un compte).
 - Les filtres du tableau de bord (ticket) sont gardés, repliés dans « Voir le détail » (retirés du proto
   le 18/10).
 - « Avant la clôture » ajoute, comme le demande le ticket, l'engagé non payé et l'état du Juridique

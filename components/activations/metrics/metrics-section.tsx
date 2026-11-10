@@ -16,6 +16,7 @@ import { activations } from "@/lib/i18n/fr/activations";
 import { formatShortDate } from "@/lib/release/format";
 
 import { MetricActions, RecordMetricButton } from "./metric-actions";
+import { ReadStatsButton } from "./read-stats-button";
 
 const fr = { activations };
 
@@ -29,7 +30,9 @@ const verificationTone = {
 /**
  * Statistics as dated, sourced snapshots ; the totals add only compatible
  * figures (same metric and unit, latest valid snapshot of each subject) and
- * say whether they are verified. Nothing missing is shown as zero.
+ * say whether they are verified. Nothing missing is shown as zero. Typed by
+ * hand (« Noter un relevé ») or read from the proofs' TikTok, YouTube and
+ * Deezer links (« Relever les statistiques », `readable`).
  */
 export function MetricsSection({
   scope,
@@ -40,6 +43,7 @@ export function MetricsSection({
   targetId = null,
   defaultSource,
   title = t.title,
+  readable = [],
 }: {
   scope: ActivationScope;
   metrics: MetricRecord[];
@@ -49,6 +53,8 @@ export function MetricsSection({
   targetId?: string | null;
   defaultSource?: MetricSource;
   title?: string;
+  // The platforms PDS OS can read among the proofs (readablePlatforms).
+  readable?: string[];
 }) {
   const totals = metricTotals(metrics);
   const name = (m: Pick<MetricRecord, "metric" | "label">) =>
@@ -60,12 +66,22 @@ export function MetricsSection({
       description={t.description}
       action={
         canWrite && (
-          <RecordMetricButton
-            scope={scope}
-            targetId={targetId}
-            defaultSource={defaultSource}
-            today={today}
-          />
+          <span className="flex flex-wrap items-start justify-end gap-2">
+            {readable.length > 0 && (
+              <ReadStatsButton
+                scope={scope}
+                targetId={targetId}
+                platforms={readable}
+              />
+            )}
+            <RecordMetricButton
+              scope={scope}
+              targetId={targetId}
+              defaultSource={defaultSource}
+              today={today}
+              variant={readable.length > 0 ? "ghost" : "outline"}
+            />
+          </span>
         )
       }
     >
