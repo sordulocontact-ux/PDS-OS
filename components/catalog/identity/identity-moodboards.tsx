@@ -1,172 +1,245 @@
 "use client";
 
-import { IconFile, IconTrash } from "nucleo-sharp-essential";
-import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { IconFolderOpen, IconPlus } from "nucleo-sharp-essential";
+import { useSearchParams } from "next/navigation";
+import { useState } from "react";
 
-import { useCatalogUpload } from "@/components/catalog/files/use-catalog-upload";
+import {
+  MoodboardFolder,
+  type OpenFolder,
+} from "@/components/catalog/identity/moodboard-folder";
+import {
+  FigmaImportForm,
+  MoodboardForm,
+} from "@/components/catalog/identity/moodboard-forms";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { Button } from "@/components/ui/button";
-import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import { FileDropZone } from "@/components/ui/file-drop-zone";
-import { toast } from "@/components/ui/toast";
-import { deleteCatalogFile } from "@/lib/catalog/file-actions";
+import { FormDialog } from "@/components/ui/form-dialog";
+import { StatusBadge } from "@/components/ui/status-badge";
 import {
   type CatalogFile,
-  canWriteFile,
   type FileWriteScope,
-  isShownImage,
 } from "@/lib/catalog/file-rules";
+import {
+  type ArtistMoodboard,
+  canWriteMoodboard,
+} from "@/lib/catalog/moodboard-rules";
 import { artistIdentity } from "@/lib/i18n/fr/artist-identity";
 import { formatInstantDay } from "@/lib/utils/instant";
 
 const fr = { artistIdentity };
 
-// What a moodboard is dropped as: a picture the browser shows, or a PDF.
-const ACCEPT = "image/png,image/jpeg,image/webp,image/gif,application/pdf";
+// The « Non classés » pseudo-folder.
+const LOOSE = "loose";
+const PARAM = "moodboard";
 
 /**
- * « Moodboards » of the Identité tab: the artistic director's boards,
- * dropped as they are (an image or a PDF), newest first, each opened full
- * size. Files of the artist's library, category « moodboard »: outside the
- * identity's versions. `organizationId`: whoever may drop (the Catalogue,
- * the creative directors); `scope`: a creative director edits his own only.
+ * « Moodboards » of the Identité tab (retours du 31/10 et du 10/11/2026):
+ * the artistic director's pistes as folders, newest first, each with a
+ * glimpse of its images; a click opens it in place. « Nouveau moodboard »
+ * and « Importer depuis Figma » for whoever may write (`organizationId`:
+ * the Catalogue, the creative directors; `scope`: a creative director edits
+ * his own folders and images only; `figma`: a Figma token is set).
  */
 export function IdentityMoodboards({
   artistId,
-  files,
+  moodboards,
+  loose,
   organizationId,
   scope,
+  figma,
 }: {
   artistId: string;
-  files: CatalogFile[];
+  moodboards: ArtistMoodboard[];
+  loose: CatalogFile[];
   organizationId: string | null;
   scope: FileWriteScope | null;
+  figma: boolean;
 }) {
   const t = fr.artistIdentity.moodboards;
-  const router = useRouter();
-  const owner = { kind: "artist", id: artistId } as const;
-  const upload = useCatalogUpload();
-  const [sending, setSending] = useState(0);
-  const [deleting, setDeleting] = useState<CatalogFile | null>(null);
-  const [deletePending, startDelete] = useTransition();
-  const [deleteError, setDeleteError] = useState<string | null>(null);
-  const nameOf = (file: CatalogFile) => file.description ?? file.fileName;
-
-  const send = (picked: File[]) => {
-    if (!organizationId || picked.length === 0) return;
-    setSending(picked.length);
-    upload.run(
-      picked,
-      (file) => ({ organizationId, owner, category: "moodboard", file }),
-      (failed, lastError) => {
-        setSending(0);
-        const sent = picked.length - failed.length;
-        if (sent > 0) toast.success(t.sent(sent));
-        if (lastError) toast.error(lastError);
-        router.refresh();
-      },
+  // The folder opened lives in the address (« ?moodboard=… »): it survives a
+  // reload, can be sent as a link, and « Précédent » goes back to the grid.
+  const openId = useSearchParams().get(PARAM);
+  const setOpenId = (id: string | null) => {
+    const params = new URLSearchParams(window.location.search);
+    if (id) params.set(PARAM, id);
+    else params.delete(PARAM);
+    const query = params.toString();
+    window.history.pushState(
+      null,
+      "",
+      `${window.location.pathname}${query ? `?${query}` : ""}#identity-moodboards`,
     );
   };
+  const [creating, setCreating] = useState(false);
+  const [importing, setImporting] = useState(false);
+
+  const opened: OpenFolder | null =
+    openId === LOOSE && loose.length > 0
+      ? {
+          id: null,
+          title: t.loose,
+          note: null,
+          sourceUrl: null,
+          files: loose,
+          canEdit: false,
+        }
+      : (() => {
+          const folder = moodboards.find((m) => m.id === openId);
+          return folder
+            ? {
+                ...folder,
+                canEdit:
+                  organizationId !== null && canWriteMoodboard(folder, scope),
+              }
+            : null;
+        })();
+
+  if (opened)
+    return (
+      <MoodboardFolder
+        // A new folder starts fresh (its dialogs and viewer closed).
+        key={opened.id ?? LOOSE}
+        artistId={artistId}
+        folder={opened}
+        organizationId={organizationId}
+        scope={scope}
+        onBack={() => setOpenId(null)}
+      />
+    );
+
+  const cards = [
+    ...moodboards.map((m) => ({
+      key: m.id,
+      title: m.title,
+      files: m.files,
+      meta: t.by(formatInstantDay(m.createdAt), m.authorName),
+      figma: Boolean(m.sourceUrl),
+    })),
+    ...(loose.length > 0
+      ? [
+          {
+            key: LOOSE,
+            title: t.loose,
+            files: loose,
+            meta: t.looseNote,
+            figma: false,
+          },
+        ]
+      : []),
+  ];
 
   return (
     <div className="flex flex-col gap-4">
       {organizationId && (
-        <FileDropZone
-          label={upload.pending ? t.sending(upload.done, sending) : t.drop}
-          hint={t.dropHint}
-          accept={ACCEPT}
-          multiple
-          disabled={upload.pending}
-          onFiles={send}
-        />
+        <div className="flex flex-wrap items-center gap-2">
+          <Button size="sm" onClick={() => setCreating(true)}>
+            <IconPlus aria-hidden data-icon="inline-start" />
+            {t.create}
+          </Button>
+          {figma && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setImporting(true)}
+            >
+              {t.figma.action}
+            </Button>
+          )}
+        </div>
       )}
 
-      {files.length === 0 ? (
-        !organizationId && <EmptyNote>{t.empty}</EmptyNote>
+      {cards.length === 0 ? (
+        <EmptyNote>
+          {t.empty} {organizationId ? t.emptyHint : null}
+        </EmptyNote>
       ) : (
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {files.map((file) => (
-            <li
-              key={file.id}
-              className="group relative flex min-w-0 flex-col overflow-hidden rounded-xl border border-[color:var(--border-hairline)] bg-card"
-            >
-              <a
-                href={file.openUrl ?? undefined}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={t.open(nameOf(file))}
-                className="flex aspect-[4/3] items-center justify-center bg-muted/40"
+          {cards.map((card) => (
+            <li key={card.key} className="min-w-0">
+              <button
+                type="button"
+                aria-label={t.openFolder(card.title)}
+                onClick={() => setOpenId(card.key)}
+                className="group flex w-full min-w-0 flex-col overflow-hidden rounded-xl border border-[color:var(--border-hairline)] bg-card text-left transition-colors hover:border-[color:var(--border-strong)] focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
               >
-                {file.openUrl && isShownImage(file.mime) ? (
-                  // eslint-disable-next-line @next/next/no-img-element -- a short-lived signed URL, not an optimisable asset
-                  <img
-                    src={file.openUrl}
-                    alt=""
-                    className="size-full object-cover"
-                  />
-                ) : (
-                  <IconFile
-                    aria-hidden
-                    className="size-10 text-muted-foreground"
-                  />
-                )}
-              </a>
-              <div className="flex items-start gap-2 px-3 py-2">
-                <div className="flex min-w-0 flex-1 flex-col">
-                  <span className="truncate text-sm font-medium">
-                    {nameOf(file)}
+                <FolderCover files={card.files} />
+                <div className="flex min-w-0 flex-col gap-0.5 px-3 py-2">
+                  <span className="flex min-w-0 items-center gap-2">
+                    <span className="truncate text-sm font-medium">
+                      {card.title}
+                    </span>
+                    {card.figma && (
+                      <StatusBadge size="sm">{t.fromFigma}</StatusBadge>
+                    )}
                   </span>
                   <span className="truncate text-xs text-muted-foreground">
-                    {t.by(formatInstantDay(file.createdAt), file.authorName)}
+                    {t.count(card.files.length)} · {card.meta}
                   </span>
                 </div>
-                {organizationId && canWriteFile(file, scope) && (
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label={t.remove(nameOf(file))}
-                    onClick={() => setDeleting(file)}
-                  >
-                    <IconTrash aria-hidden />
-                  </Button>
-                )}
-              </div>
+              </button>
             </li>
           ))}
         </ul>
       )}
 
-      <ConfirmDialog
-        open={deleting !== null}
-        onOpenChange={(open) => {
-          if (open) return;
-          setDeleteError(null);
-          setDeleting(null);
-        }}
-        title={t.confirm.title}
-        description={deleting ? t.confirm.body(nameOf(deleting)) : ""}
-        cancelLabel={t.confirm.cancel}
+      <FormDialog
+        open={creating}
+        onOpenChange={setCreating}
+        title={t.form.createTitle}
+        description={t.form.createBody}
         closeLabel={t.confirm.close}
-        confirmLabel={t.confirm.confirm}
-        pendingLabel={t.confirm.deleting}
-        pending={deletePending}
-        destructive
-        error={deleteError}
-        onConfirm={() => {
-          if (!deleting) return;
-          startDelete(async () => {
-            const result = await deleteCatalogFile({
-              owner,
-              fileId: deleting.id,
-            });
-            if (!result.ok) return setDeleteError(result.error);
-            toast.success(t.confirm.deleted);
-            setDeleting(null);
-            router.refresh();
-          });
-        }}
-      />
+      >
+        <MoodboardForm
+          artistId={artistId}
+          onDone={() => setCreating(false)}
+          onCreated={setOpenId}
+        />
+      </FormDialog>
+      <FormDialog
+        open={importing}
+        onOpenChange={setImporting}
+        title={t.figma.title}
+        description={t.figma.body}
+        closeLabel={t.confirm.close}
+      >
+        <FigmaImportForm
+          artistId={artistId}
+          onDone={() => setImporting(false)}
+        />
+      </FormDialog>
+    </div>
+  );
+}
+
+/** Four images of the folder side by side, one alone, or a folder icon. */
+function FolderCover({ files }: { files: CatalogFile[] }) {
+  const shown = files.flatMap((file) =>
+    file.previewUrl ? [file.previewUrl] : [],
+  );
+  const tiles = shown.length >= 4 ? shown.slice(0, 4) : shown.slice(0, 1);
+  return (
+    <div
+      className={
+        tiles.length === 4
+          ? "grid aspect-[4/3] grid-cols-2 grid-rows-2 gap-px overflow-hidden bg-[color:var(--border-hairline)]"
+          : "flex aspect-[4/3] items-center justify-center bg-muted/40"
+      }
+    >
+      {tiles.length === 0 ? (
+        <IconFolderOpen aria-hidden className="size-10 text-muted-foreground" />
+      ) : (
+        tiles.map((src) => (
+          // eslint-disable-next-line @next/next/no-img-element -- a short-lived signed URL, not an optimisable asset
+          <img
+            key={src}
+            src={src}
+            alt=""
+            loading="lazy"
+            className="size-full min-h-0 object-cover"
+          />
+        ))
+      )}
     </div>
   );
 }

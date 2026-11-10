@@ -27,6 +27,8 @@ export async function uploadCatalogFile(input: {
   file: File;
   // A new version of this file (same category and precision).
   replacesId?: string;
+  // An image of an artist's moodboard folder (category "moodboard").
+  moodboardId?: string;
   // An audio version of a title (category "audio").
   audioState?: AudioState;
   durationSeconds?: number | null;
@@ -65,6 +67,7 @@ export async function uploadCatalogFile(input: {
     mime,
     bytes: input.file.size,
     replacesId: input.replacesId,
+    moodboardId: input.moodboardId,
     audioState: input.audioState,
     durationSeconds: input.durationSeconds,
     sessionId: input.sessionId,

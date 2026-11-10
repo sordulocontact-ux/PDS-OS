@@ -43,31 +43,112 @@ export const artistIdentity = {
     urlInvalid: "Un lien commence par https://",
     none: "Aucun lien.",
   },
-  // Files dropped on the Identité tab (retour du 31/10/2026): outside the
-  // versions, kept in the artist's Fichiers (category Moodboard).
+  // The artistic director's pistes (retours du 31/10 et du 10/11/2026): one
+  // folder per moodboard, its images inside, outside the versions, kept in
+  // the artist's Fichiers (category Moodboard).
   moodboards: {
     title: "Moodboards",
     description:
-      "Les moodboards du directeur artistique, déposés tels quels : une image ou un PDF. Ils sont aussi rangés dans les Fichiers de l'artiste.",
-    drop: "Glissez un moodboard ici, ou cliquez pour le choisir",
-    dropHint: "Image (PNG, JPEG, WebP) ou PDF, 50 Mo au plus.",
+      "Les pistes du directeur artistique : un dossier par moodboard, ses images dedans. Créez-le ici ou importez-le depuis Figma ; les images sont aussi rangées dans les Fichiers de l'artiste.",
+    create: "Nouveau moodboard",
+    empty: "Aucun moodboard pour l'instant.",
+    emptyHint:
+      "Créez une piste et glissez-y ses images, ou importez un moodboard fait sur Figma.",
+    count: (n: number) =>
+      n === 0 ? "Vide" : n > 1 ? `${n} images` : "1 image",
+    by: (date: string, name: string) => (name ? `${date} · ${name}` : date),
+    fromFigma: "Figma",
+    openFolder: (title: string) => `Ouvrir le moodboard ${title}`,
+    // The moodboard files in no folder (filed from the Fichiers tab).
+    loose: "Non classés",
+    looseNote: "Déposés depuis les Fichiers de l'artiste, hors d'un dossier.",
+    back: "Tous les moodboards",
+    openInFigma: "Ouvrir dans Figma",
+    edit: "Modifier",
+    remove: "Supprimer",
+    drop: "Glissez des images ici, ou cliquez pour les choisir",
+    dropHint: "PNG, JPEG, WebP, GIF ou PDF, 50 Mo au plus chacune.",
     sending: (done: number, total: number) =>
       total > 1 ? `Envoi ${done + 1}/${total}…` : "Envoi…",
     sent: (count: number) =>
-      count > 1 ? `${count} moodboards déposés` : "Moodboard déposé",
-    empty: "Aucun moodboard pour l'instant.",
-    open: (name: string) => `Ouvrir ${name}`,
-    remove: (name: string) => `Supprimer ${name}`,
-    by: (date: string, name: string) => (name ? `${date} · ${name}` : date),
+      count > 1 ? `${count} images ajoutées` : "Image ajoutée",
+    folderEmpty: "Aucune image dans ce moodboard.",
+    openImage: (name: string) => `Agrandir ${name}`,
+    removeImage: (name: string) => `Supprimer ${name}`,
+    viewer: {
+      close: "Fermer",
+      previous: "Image précédente",
+      next: "Image suivante",
+      title: (n: number, total: number) => `Image ${n} sur ${total}`,
+    },
+    form: {
+      createTitle: "Nouveau moodboard",
+      createBody:
+        "Une piste : donnez-lui un nom, ses images se déposent ensuite dedans.",
+      editTitle: "Modifier le moodboard",
+      editBody: "Son nom et son intention.",
+      title: "Nom",
+      titlePlaceholder: "Ex. Piste 1 — Néons froids",
+      titleMissing: "Donnez un nom au moodboard.",
+      note: "Intention",
+      noteHint: "Facultatif. Ce que la piste cherche à dire.",
+      submitCreate: "Créer le moodboard",
+      submitEdit: "Enregistrer",
+      created: "Moodboard créé",
+      saved: "Moodboard enregistré",
+    },
+    figma: {
+      action: "Importer depuis Figma",
+      title: "Importer depuis Figma",
+      body: "Collez le lien d'un cadre (frame) Figma : il devient un moodboard avec ses images. Le lien d'une page importe chacun de ses cadres comme une piste.",
+      link: "Lien Figma",
+      linkPlaceholder: "https://www.figma.com/design/…?node-id=…",
+      linkHint:
+        "Dans Figma : clic droit sur le cadre → Copier/Coller en tant que → Copier le lien.",
+      submit: "Importer",
+      pending: "Import en cours…",
+      done: (boards: number, images: number) =>
+        `${boards > 1 ? `${boards} moodboards importés` : "Moodboard importé"} · ${images > 1 ? `${images} images` : "1 image"}`,
+      partial: (failed: number) =>
+        failed > 1
+          ? `${failed} images n'ont pas pu être récupérées.`
+          : "Une image n'a pas pu être récupérée.",
+      errors: {
+        link: "Ce n'est pas un lien Figma (figma.com/design/…).",
+        not_configured:
+          "L'import Figma n'est pas configuré (jeton Figma manquant).",
+        not_found:
+          "Rien trouvé à ce lien : vérifiez qu'il pointe vers un cadre ou une page du fichier.",
+        forbidden:
+          "PDS OS n'a pas accès à ce fichier : partagez-le avec le compte Figma relié à PDS OS.",
+        rate_limited:
+          "Figma limite les imports pour le moment : réessayez dans une minute.",
+        empty: "Aucune image trouvée à ce lien.",
+        failed: "L'import n'a pas abouti. Réessayez.",
+      },
+    },
+    errors: {
+      invalid: "Vérifiez le nom du moodboard.",
+      failed: "Le moodboard n'a pas pu être enregistré. Réessayez.",
+      deleteFailed: "Le moodboard n'a pas pu être supprimé. Réessayez.",
+      deleteBlocked:
+        "Ce moodboard contient des images ajoutées par quelqu'un d'autre : le Catalogue peut le supprimer.",
+    },
     confirm: {
       title: "Supprimer ce moodboard ?",
-      body: (name: string) =>
-        `« ${name} » sera supprimé définitivement, aussi des Fichiers de l'artiste.`,
+      body: (name: string, count: number) =>
+        count > 0
+          ? `« ${name} » et ${count > 1 ? `ses ${count} images` : "son image"} seront supprimés définitivement, aussi des Fichiers de l'artiste.`
+          : `« ${name} » sera supprimé définitivement.`,
+      imageTitle: "Supprimer cette image ?",
+      imageBody: (name: string) =>
+        `« ${name} » sera supprimée définitivement, aussi des Fichiers de l'artiste.`,
       confirm: "Supprimer",
       deleting: "Suppression…",
       cancel: "Annuler",
       close: "Fermer",
       deleted: "Moodboard supprimé",
+      imageDeleted: "Image supprimée",
     },
   },
   changeNote: "Ce qui change",

@@ -55,6 +55,8 @@ export const serverEnvSchema = z
     TUMBLR_API_KEY: optionalSecret,
     /** Are.na: optional, a Premium token opens its search by words. */
     ARENA_TOKEN: optionalSecret,
+    /** Figma: optional, a personal token opens « Importer depuis Figma » (an artist's moodboards). */
+    FIGMA_TOKEN: optionalSecret,
     /** Openverse: optional, raise the free anonymous search limit. */
     OPENVERSE_CLIENT_ID: optionalSecret,
     OPENVERSE_CLIENT_SECRET: optionalSecret,

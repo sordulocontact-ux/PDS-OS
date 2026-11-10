@@ -86,6 +86,9 @@ const recordSchema = z
     bytes: z.number().int().positive().max(MAX_MASTER_FILE_BYTES),
     // A new version of this file (same owner, the database checks).
     replacesId: z.uuid().nullish(),
+    // An image of an artist's moodboard folder (same artist, the database
+    // checks).
+    moodboardId: z.uuid().nullish(),
     // An audio version of a title: the state it stands for, and the
     // duration the browser read from it (null when it could not).
     audioState: z.enum(AUDIO_STATES).nullish(),
@@ -98,6 +101,11 @@ const recordSchema = z
     (input) =>
       (!input.sessionId && !input.workStatus) ||
       (input.owner.kind === "master" && input.category === "stems"),
+  )
+  .refine(
+    (input) =>
+      !input.moodboardId ||
+      (input.owner.kind === "artist" && input.category === "moodboard"),
   )
   .refine((input) => isFileCategory(input.owner.kind, input.category))
   .refine((input) => input.bytes <= maxFileBytes(input.owner.kind))
@@ -211,9 +219,11 @@ export async function recordCatalogFile(
   const insert = () => {
     switch (owner.kind) {
       case "artist":
-        return supabase
-          .from("artist_files")
-          .insert({ ...row, artist_id: owner.id });
+        return supabase.from("artist_files").insert({
+          ...row,
+          artist_id: owner.id,
+          moodboard_id: parsed.data.moodboardId ?? null,
+        });
       case "master":
         return supabase.from("master_files").insert({
           ...row,

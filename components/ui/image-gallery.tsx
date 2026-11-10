@@ -16,6 +16,8 @@ export type GalleryImage = {
   title: string;
 };
 
+type ViewerLabels = { close: string; previous: string; next: string };
+
 // A row of thumbnails; a click opens the image large in the app's one modal,
 // without leaving the page. With several, ← and → (or the arrows) move from
 // one to the next; no wrap-around, the counter says where we are. Changing
@@ -25,17 +27,9 @@ export function ImageGallery({
   labels,
 }: {
   images: GalleryImage[];
-  labels: { close: string; previous: string; next: string };
+  labels: ViewerLabels;
 }) {
   const [open, setOpen] = useState<number | null>(null);
-  const current = open === null ? null : images[open];
-  const many = images.length > 1;
-  const go = (step: number) =>
-    setOpen((index) =>
-      index === null
-        ? index
-        : Math.min(images.length - 1, Math.max(0, index + step)),
-    );
 
   return (
     <>
@@ -59,59 +53,91 @@ export function ImageGallery({
           </li>
         ))}
       </ul>
-      <Dialog
-        open={current !== null}
-        onOpenChange={(next) => !next && setOpen(null)}
-      >
-        <DialogContent
-          closeLabel={labels.close}
-          className="sm:max-w-[var(--dialog-width-viewer)]"
-          onKeyDown={(event) => {
-            if (event.key === "ArrowLeft") go(-1);
-            else if (event.key === "ArrowRight") go(1);
-          }}
-        >
-          {current && open !== null && (
-            <>
-              <DialogTitle className="sr-only">{current.title}</DialogTitle>
-              {/* eslint-disable-next-line @next/next/no-img-element -- signed URL of a private bucket */}
-              <img
-                src={current.src}
-                alt={current.alt}
-                className="mx-auto max-h-[calc(100dvh-12rem)] w-auto max-w-full rounded-lg object-contain"
-              />
-              {many && (
-                <div className="flex items-center justify-center gap-3">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    disabled={open === 0}
-                    onClick={() => go(-1)}
-                  >
-                    <IconChevronLeft aria-hidden />
-                    <span className="sr-only">{labels.previous}</span>
-                  </Button>
-                  <span
-                    aria-hidden
-                    className="min-w-12 text-center text-sm text-muted-foreground tabular-nums"
-                  >
-                    {open + 1} / {images.length}
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    disabled={open === images.length - 1}
-                    onClick={() => go(1)}
-                  >
-                    <IconChevronRight aria-hidden />
-                    <span className="sr-only">{labels.next}</span>
-                  </Button>
-                </div>
-              )}
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+      <ImageViewer
+        images={images}
+        index={open}
+        onIndexChange={setOpen}
+        labels={labels}
+      />
     </>
+  );
+}
+
+/**
+ * The large view of `ImageGallery`, for a page that lays out its own
+ * thumbnails (an artist's moodboard): `index` is the image shown, null
+ * closes it.
+ */
+export function ImageViewer({
+  images,
+  index,
+  onIndexChange,
+  labels,
+}: {
+  images: Pick<GalleryImage, "src" | "alt" | "title">[];
+  index: number | null;
+  onIndexChange: (index: number | null) => void;
+  labels: ViewerLabels;
+}) {
+  const current = index === null ? null : (images[index] ?? null);
+  const many = images.length > 1;
+  const go = (step: number) =>
+    index !== null &&
+    onIndexChange(Math.min(images.length - 1, Math.max(0, index + step)));
+
+  return (
+    <Dialog
+      open={current !== null}
+      onOpenChange={(next) => !next && onIndexChange(null)}
+    >
+      <DialogContent
+        closeLabel={labels.close}
+        className="sm:max-w-[var(--dialog-width-viewer)]"
+        onKeyDown={(event) => {
+          if (event.key === "ArrowLeft") go(-1);
+          else if (event.key === "ArrowRight") go(1);
+        }}
+      >
+        {current && index !== null && (
+          <>
+            <DialogTitle className="sr-only">{current.title}</DialogTitle>
+            {/* eslint-disable-next-line @next/next/no-img-element -- signed URL of a private bucket */}
+            <img
+              src={current.src}
+              alt={current.alt}
+              className="mx-auto max-h-[calc(100dvh-12rem)] w-auto max-w-full rounded-lg object-contain"
+            />
+            {many && (
+              <div className="flex items-center justify-center gap-3">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  disabled={index === 0}
+                  onClick={() => go(-1)}
+                >
+                  <IconChevronLeft aria-hidden />
+                  <span className="sr-only">{labels.previous}</span>
+                </Button>
+                <span
+                  aria-hidden
+                  className="min-w-12 text-center text-sm text-muted-foreground tabular-nums"
+                >
+                  {index + 1} / {images.length}
+                </span>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  disabled={index === images.length - 1}
+                  onClick={() => go(1)}
+                >
+                  <IconChevronRight aria-hidden />
+                  <span className="sr-only">{labels.next}</span>
+                </Button>
+              </div>
+            )}
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }

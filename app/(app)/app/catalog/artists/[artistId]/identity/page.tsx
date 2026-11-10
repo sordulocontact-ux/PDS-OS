@@ -16,13 +16,19 @@ import {
 import { getArtist } from "@/lib/catalog/artist-queries";
 import { CREATIVE_ARTIST_CATEGORIES } from "@/lib/catalog/file-rules";
 import { listCatalogFiles } from "@/lib/catalog/files";
+import { listArtistMoodboards } from "@/lib/catalog/moodboards";
 import { loadMembers } from "@/lib/framing/related";
 import { fr } from "@/lib/i18n/fr";
+import { figmaReady } from "@/lib/integrations/figma";
 import { formatInstantDay } from "@/lib/utils/instant";
 import { allInOrder } from "@/lib/utils/parallel";
 
 // Under the artist's template (« Nova · Identité · PDS OS »).
 export const metadata = { title: fr.artistIdentity.tab };
+
+// « Importer depuis Figma » renders and stores a board's images: a server
+// action of this page may take a while.
+export const maxDuration = 300;
 
 /**
  * The artist's identity (MKT-C2-04): the version in force, read by every
@@ -43,10 +49,13 @@ export default async function ArtistIdentityPage({
     loadMembers(access),
     listCatalogFiles({ kind: "artist", id: artistId }),
   ]);
-  const identity = await loadArtistIdentity(artistId, members);
-  // The artistic director's boards (retour du 31/10/2026): the artist's
-  // files of that category; a creative director deletes his own only.
-  const moodboards = library.files.filter((f) => f.category === "moodboard");
+  // The artistic director's pistes (retours du 31/10 et du 10/11/2026):
+  // folders holding the artist's files of that category; a creative
+  // director edits or deletes his own only.
+  const [identity, { moodboards, loose }] = await Promise.all([
+    loadArtistIdentity(artistId, members),
+    listArtistMoodboards(artistId, library.files),
+  ]);
   const manages = can(access, "manage_catalog");
   const moodboardScope =
     !manages && can(access, "creative_work") && access.personId
@@ -113,11 +122,13 @@ export default async function ArtistIdentityPage({
       >
         <IdentityMoodboards
           artistId={artistId}
-          files={moodboards}
+          moodboards={moodboards}
+          loose={loose}
           organizationId={
             manages || moodboardScope ? artist.organizationId : null
           }
           scope={moodboardScope}
+          figma={figmaReady()}
         />
       </PageSection>
 

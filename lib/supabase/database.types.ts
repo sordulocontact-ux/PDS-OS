@@ -2885,6 +2885,7 @@ export type Database = {
           file_name: string
           id: string
           mime: string
+          moodboard_id: string | null
           organization_id: string
           path: string
           replaces_id: string | null
@@ -2901,6 +2902,7 @@ export type Database = {
           file_name: string
           id?: string
           mime: string
+          moodboard_id?: string | null
           organization_id: string
           path: string
           replaces_id?: string | null
@@ -2917,6 +2919,7 @@ export type Database = {
           file_name?: string
           id?: string
           mime?: string
+          moodboard_id?: string | null
           organization_id?: string
           path?: string
           replaces_id?: string | null
@@ -2924,6 +2927,13 @@ export type Database = {
           version?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "artist_files_moodboard_same_artist"
+            columns: ["moodboard_id", "artist_id"]
+            isOneToOne: false
+            referencedRelation: "artist_moodboards"
+            referencedColumns: ["id", "artist_id"]
+          },
           {
             foreignKeyName: "artist_files_artist_same_org"
             columns: ["artist_id", "organization_id"]
@@ -2940,6 +2950,61 @@ export type Database = {
           },
           {
             foreignKeyName: "artist_files_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      artist_moodboards: {
+        Row: {
+          artist_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          note: string | null
+          organization_id: string
+          source_url: string | null
+          title: string
+        }
+        Insert: {
+          artist_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          organization_id: string
+          source_url?: string | null
+          title: string
+        }
+        Update: {
+          artist_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          organization_id?: string
+          source_url?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artist_moodboards_artist_same_org"
+            columns: ["artist_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "artist_moodboards_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "artist_moodboards_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
