@@ -32,6 +32,10 @@ export const ORGANIZATION_ROLES = [
   "general_director",
   "project_manager",
   "creative_director",
+  // Business module (BIZ 1, 11/11/2026): Glen negotiates the deals assigned
+  // to him, Thibault develops the business.
+  "business_manager",
+  "business",
 ] as const;
 export type OrganizationRole = (typeof ORGANIZATION_ROLES)[number];
 
@@ -64,6 +68,8 @@ export const PERMISSIONS = [
   "manage_legal",
   // Creates and runs the studio sessions (the direction and project managers).
   "manage_sessions",
+  // Negotiates the deals assigned to them (business manager, business).
+  "negotiate",
 ] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 

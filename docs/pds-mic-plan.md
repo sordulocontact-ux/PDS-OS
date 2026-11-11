@@ -6,7 +6,8 @@ tel que le code le montre, les décisions prises, puis le modèle et les lots. L
 relatifs à la racine du dépôt ; les migrations sont dans `supabase/migrations/` (la plus récente
 qui redéfinit un objet fait foi).
 
-**Ordre de lecture** : § 0 (constat), **§ 0 bis (décisions validées)**, § 3 (modèle), **§ 3 bis
+**Ordre de lecture** : § 0 (constat), **§ 0 bis (décisions validées)**, **§ 0 ter (message de
+la session de Sacha, partage avec le module Business)**, § 3 (modèle), **§ 3 bis
 (sorties titre par titre)**, § 6 (risques), **§ 8 (découpage)**. Les § 1 et 2 sont l'inventaire de
 référence ; là où le § 0 bis tranche une question ou une variante des § 3 à 7, il fait foi.
 
@@ -88,6 +89,38 @@ fiche artiste « PDS » existe au Catalogue.
   actifs** (prudent : un seul contrat manquant bloque, d'où l'intérêt de cibler). Les
   participations prises en compte sont les `confirmed` ; l'artiste principal (PDS) n'est pas une
   participation et n'est pas vérifié.
+
+---
+
+## 0 ter. Message de la session de Sacha à la session de Maël (11/11/2026)
+
+À lire avant de continuer les lots. Sacha a relu ce plan et les lots 1 et 2 : **le modèle est
+validé tel quel** (`collective`, `project_titles`, `title_participations`,
+`participation_waivers` à part, une ligne `releases` par sortie de titre, plan de sortie par
+titre). **Les 15 lots restent de ce côté**, verrous de contrat et Master compris. La session de
+Sacha prend le **module Business** (ticket PDSBIZ : objet Deal, poste Business Manager, vue de
+Glen, contacts privés) et le **Budget** (enveloppe par artiste, dépense rattachée à un projet ou
+à un artiste). Trois points à respecter :
+
+1. **PDSMIC 4 (en prod, type Contenu) : tranché, il sera recréé** en projet collectif (Sacha,
+   11/11). La décision 1 tient : **aucune conversion à coder**, pas même pour ce projet.
+2. **Une seule source pour le contrat d'une participation : `title_participations.contract_id`**
+   (les verrous des lots 12 et 15 la lisent). Le futur Deal aura `deals.participation_id` et lira
+   le contrat à travers la participation ; pour le PDS MIC, il n'aura pas son propre lien vers
+   `contracts`. **N'ajoute rien côté participation pour le Deal** : la clé sera posée côté
+   `deals`, par la session de Sacha.
+3. **État de la participation ≠ négociation.** Le statut de `title_participations` (`proposed` /
+   `invited` / `confirmed` / `declined` / `withdrawn`) dit si l'artiste est dans le projet. Les
+   étapes de négociation (call prévu, négociation, accord de principe, contractualisation) seront
+   dans le Deal. Dans la vue Titres et artistes (lot 6), prévoir une colonne « Négociation »
+   (vide ou « — » pour l'instant) que la session de Sacha branchera sur le Deal ; **ne mettre
+   aucune étape de négociation dans `title_participations`**.
+
+Pour information (rien à faire ici) : pour un collectif, les dépenses comptent dans
+l'enveloppe de l'artiste principal (`projects.artist_id`, PDS par défaut). Les migrations du
+module Business et du Budget toucheront `budget_lines`, `network_contacts` (visibilité),
+`calls` (rattachement à un deal) et une nouvelle table `deals` : signaler dans ce fichier
+avant de modifier l'une d'elles.
 
 ---
 

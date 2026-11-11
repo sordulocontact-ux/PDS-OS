@@ -2067,3 +2067,10 @@ les modules à parcours (proto « Mise en page des modules », version « Propos
 - Fonds (Sacha, même jour) : sans la carte de l'étape, le fond gris de l'app passait sous les blocs en
   contour seul et sous les champs. ~95 blocs en contour et tous les champs (`Input`, `Textarea`,
   `Select`, `DatePicker`, éditeurs) prennent `bg-card` (règle dans `docs/DESIGN.md` § 4).
+- 11/11/2026 — **Module Business, BIZ 1 : postes Business manager et Business** (ticket d'Ibé du 10/11, épic Notion
+  « Module Business et négociations »). Deux postes de plus dans `role_permissions` (`business_manager`,
+  `business`), qui portent la nouvelle permission `negotiate` et `manage_network` ; `invite_member` ne liste plus
+  les postes, il refuse un poste sans permission (migration `20261111183101_business_positions`, test
+  `business-positions` 8/8). Libellés, aide du formulaire de compte, Travail et PO (`explain_access`) suivent.
+  Comptes de test locaux dans `supabase/seed.sql` : `glen@pds.test`, `thibault@pds.test`
+  (`pds-local-business`). Cadrage des lots : `docs/pds-mic-plan.md` § 0 ter et l'épic Notion.

@@ -16,6 +16,8 @@ const POSITION_NAMES: Record<string, string> = {
   general_director: "directeur général",
   project_manager: "chef de projet",
   creative_director: "directeur créatif",
+  business_manager: "business manager",
+  business: "business (développement commercial)",
 };
 
 export function assistantInstructions(context: {
