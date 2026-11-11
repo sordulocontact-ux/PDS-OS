@@ -1,11 +1,13 @@
 # Projet collectif (PDS Mic) : résumé
 
 Résumé de travail de `docs/pds-mic-plan.md` (qui fait foi en cas de doute). Mis à jour à la fin
-de chaque lot. Dernière mise à jour : 11/11/2026, après le lot 3.
+de chaque lot. Dernière mise à jour : 11/11/2026, après le lot 4 (validé et commité).
 
 **Module Business fait en parallèle par un collègue** : rôle Business manager, négociation, deal
 memo, contrats, contacts privés, mails. Ces lots n'y touchent pas ; son dossier de négociation
-pointe `title_participations.id` (stable, jamais recréé).
+pointe `title_participations.id` (stable, jamais recréé). Plan § 0 ter : rien côté participation
+pour le Deal, aucune étape de négociation dans son statut, prévenir avant de toucher
+`budget_lines`, `network_contacts`, `calls`.
 
 ## Les 10 décisions validées
 
@@ -35,8 +37,8 @@ pointe `title_participations.id` (stable, jamais recréé).
 
 | Lot | Contenu | État |
 | --- | --- | --- |
-| 1 – 3 | Drapeau et artiste principal ; titres, abandon, réactivation ; participations artiste | faits |
-| 4 – 5 | Sélections d'artistes ; création d'un collectif depuis une sélection | à faire |
+| 1 – 4 | Drapeau et artiste principal ; titres, abandon, réactivation ; participations artiste ; sélections d'artistes | faits |
+| 5 | Création d'un collectif depuis une sélection | à faire |
 | 6 – 7 | Vue Titres et artistes ; titre provisoire (voie A) | à faire |
 | 8 – 9 | Master : sélecteur de titre ; vue consolidée, abandonnés hors des comptes | à faire |
 | 10 – 12 | Ciblage marketing par titre ; suivi juridique par participation ; contrat manquant, verrou du tournage | à faire |
@@ -59,7 +61,18 @@ pointe `title_participations.id` (stable, jamais recréé).
   `project_title_shared_projects` (titres partagés, pour l'avertissement). Code :
   `participation-rules.ts` (`projectArtists`), `participation-actions.ts`. Fiche artiste : ses
   collectifs par participation.
-- Tests : `collective-projects`, `project-titles`, `title-participations` (`supabase/tests/`).
+- **Lot 4** (`200101_artist_selections`) : `artist_selections` (nom, responsable
+  `owner_person_id` = « Mes sélections », transmise par / le) et `artist_selection_items`
+  (artistes ordonnés) ; lues par toute l'équipe, écrites par `manage_catalog` ;
+  `create_` / `rename_artist_selection`, `add_artists_to_selection`,
+  `remove_artist_from_selection`, `transmit_artist_selection` (notification
+  `selection_transmitted`), `list_selection_recipients`. Pages `/app/catalog/artists/selections`.
+  Aucun projet créé. Code : `lib/catalog/selections.ts`, `selection-actions.ts`,
+  `components/catalog/selections/` (dans « Ajouter des artistes », la liste ne s'ouvre qu'au
+  clic ou à la frappe : `SearchPicker openOnFocus={false}`).
+- Tests : `collective-projects`, `project-titles`, `title-participations`, `artist-selections`.
+- À savoir pour le lot 5 : créer un projet demande `create_projects` (direction seule) ; une
+  cheffe de projet responsable d'une sélection ne peut pas la convertir sans changer ce droit.
 
 ## Règles à tenir à chaque lot
 

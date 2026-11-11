@@ -161,6 +161,9 @@ export const NOTIFICATION_KINDS = [
   // What comes back signed by a private link (20261020070101).
   "legal_contract_signed_received",
   "legal_bulletin_signed",
+  // A selection of artists handed over (lot 4 of docs/pds-mic-plan.md): its
+  // page in the Catalogue, no project (the subject is the selection).
+  "selection_transmitted",
 ] as const;
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
 
@@ -196,7 +199,10 @@ export function notificationText(
   projectTitle: string | null,
 ): string {
   const t = fr.notifications;
-  return t.texts[kind](actorName || t.someone, projectTitle || t.aProject);
+  // A selection of artists has no project: its own name, else a plain text.
+  const subject =
+    kind === "selection_transmitted" ? projectTitle || "" : projectTitle;
+  return t.texts[kind](actorName || t.someone, subject ?? t.aProject);
 }
 
 // A contract or a meeting opens its own page (`subjectId`); a design version
@@ -242,6 +248,10 @@ export function notificationHref(
   // A call's report shared with a member: that report only (PROJ-AMEL-01).
   if (kind === "call_report_shared" && subjectId)
     return routes.callReport(subjectId);
+  if (kind === "selection_transmitted")
+    return subjectId
+      ? routes.artistSelection(subjectId)
+      : routes.artistSelections;
   if (!projectId) return routes.app;
   // A production version: the deliverable's Postproduction (the subject is
   // the deliverable).

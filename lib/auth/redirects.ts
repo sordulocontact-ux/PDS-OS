@@ -144,6 +144,10 @@ export const routes = {
   artistFiles: (id: string) => `/app/catalog/artists/${id}/files`,
   artistActivity: (id: string) => `/app/catalog/artists/${id}/activity`,
   artistIdentity: (id: string) => `/app/catalog/artists/${id}/identity`,
+  // Selections of artists, before a project (lot 4 of docs/pds-mic-plan.md):
+  // under the artists, a static segment beside [artistId].
+  artistSelections: "/app/catalog/artists/selections",
+  artistSelection: (id: string) => `/app/catalog/artists/selections/${id}`,
   artistSessions: (id: string) => `/app/catalog/artists/${id}/sessions`,
   // Studio sessions: their own page, seen from each artist, project and
   // title they concern (retour d'Ibé du 01/11/2026).

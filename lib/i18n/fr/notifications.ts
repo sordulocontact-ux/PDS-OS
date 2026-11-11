@@ -202,6 +202,12 @@ export const notifications = {
       `Un contrat signé est arrivé par un lien privé (« ${project} ») : à vérifier, puis à marquer comme signé.`,
     legal_bulletin_signed: (_actor: string, project: string) =>
       `Un bulletin SACEM signé est arrivé par un lien privé (« ${project} »).`,
+    // A selection of artists handed over (lot 4 of docs/pds-mic-plan.md):
+    // no project yet.
+    selection_transmitted: (actor: string, selection: string) =>
+      selection
+        ? `${actor} vous transmet la sélection d'artistes « ${selection} ».`
+        : `${actor} vous transmet une sélection d'artistes.`,
     legal_element_withdrawn: (actor: string, project: string) =>
       `${actor} a retiré un élément repris d'une œuvre existante de « ${project} » : le passage est à refaire sans lui dans le Master.`,
     strategy_review_requested: (actor: string, project: string) =>
