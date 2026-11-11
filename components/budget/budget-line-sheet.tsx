@@ -5,6 +5,7 @@ import type {
   BudgetDeliverable,
   BudgetLever,
   BudgetLine,
+  BudgetTarget,
 } from "@/lib/budget/types";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { budget } from "@/lib/i18n/fr/budget";
@@ -15,7 +16,7 @@ const fr = { budget, dialogs };
 // Modal to add a line (line = null) or edit one. Mounted per opening,
 // so the fields always start from the saved values.
 export function BudgetLineSheet({
-  projectId,
+  target,
   line,
   levers,
   deliverables,
@@ -23,9 +24,9 @@ export function BudgetLineSheet({
   open,
   onOpenChange,
 }: {
-  projectId: string;
+  target: BudgetTarget;
   line: BudgetLine | null;
-  levers: BudgetLever[];
+  levers?: BudgetLever[];
   deliverables?: BudgetDeliverable[];
   organizationId?: string | null;
   open: boolean;
@@ -41,7 +42,7 @@ export function BudgetLineSheet({
       closeLabel={fr.dialogs.close}
     >
       <BudgetLineForm
-        projectId={projectId}
+        target={target}
         line={line}
         levers={levers}
         deliverables={deliverables}

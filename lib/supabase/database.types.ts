@@ -34,6 +34,381 @@ export type Database = {
   }
   public: {
     Tables: {
+      artist_budgets: {
+        Row: {
+          amount_cents: number
+          artist_id: string
+          closed_at: string | null
+          created_at: string
+          created_by: string | null
+          ends_on: string | null
+          id: string
+          organization_id: string
+          starts_on: string
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          artist_id: string
+          closed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          ends_on?: string | null
+          id?: string
+          organization_id: string
+          starts_on: string
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          artist_id?: string
+          closed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          ends_on?: string | null
+          id?: string
+          organization_id?: string
+          starts_on?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artist_budgets_artist_same_org"
+            columns: ["artist_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "artist_budgets_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      artist_budget_posts: {
+        Row: {
+          amount_cents: number
+          budget_id: string
+          family: string
+        }
+        Insert: {
+          amount_cents: number
+          budget_id: string
+          family: string
+        }
+        Update: {
+          amount_cents?: number
+          budget_id?: string
+          family?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artist_budget_posts_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "artist_budgets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      artist_budget_events: {
+        Row: {
+          actor_person_id: string | null
+          artist_id: string
+          budget_id: string
+          created_at: string
+          detail: Json
+          id: string
+          kind: string
+          organization_id: string
+          seq: number
+        }
+        Insert: {
+          actor_person_id?: string | null
+          artist_id: string
+          budget_id: string
+          created_at?: string
+          detail?: Json
+          id?: string
+          kind: string
+          organization_id: string
+          seq?: never
+        }
+        Update: {
+          actor_person_id?: string | null
+          artist_id?: string
+          budget_id?: string
+          created_at?: string
+          detail?: Json
+          id?: string
+          kind?: string
+          organization_id?: string
+          seq?: never
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artist_budget_events_actor_person_id_fkey"
+            columns: ["actor_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "artist_budget_events_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "artist_budgets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deal_events: {
+        Row: {
+          actor_person_id: string | null
+          created_at: string
+          deal_id: string
+          detail: Json
+          from_stage: string | null
+          id: string
+          kind: string
+          organization_id: string
+          reason: string | null
+          to_stage: string | null
+        }
+        Insert: {
+          actor_person_id?: string | null
+          created_at?: string
+          deal_id: string
+          detail?: Json
+          from_stage?: string | null
+          id?: string
+          kind: string
+          organization_id: string
+          reason?: string | null
+          to_stage?: string | null
+        }
+        Update: {
+          actor_person_id?: string | null
+          created_at?: string
+          deal_id?: string
+          detail?: Json
+          from_stage?: string | null
+          id?: string
+          kind?: string
+          organization_id?: string
+          reason?: string | null
+          to_stage?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_events_actor_person_id_fkey"
+            columns: ["actor_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_events_deal_same_org"
+            columns: ["deal_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      deal_terms: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          deal_id: string
+          id: string
+          organization_id: string
+          state: string
+          term_key: string
+          value: Json | null
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          deal_id: string
+          id?: string
+          organization_id: string
+          state?: string
+          term_key: string
+          value?: Json | null
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          deal_id?: string
+          id?: string
+          organization_id?: string
+          state?: string
+          term_key?: string
+          value?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_terms_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_terms_deal_same_org"
+            columns: ["deal_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      deals: {
+        Row: {
+          abandon_reason: string | null
+          abandoned_at: string | null
+          abandoned_by: string | null
+          agreement_decided_at: string | null
+          agreement_decided_by: string | null
+          agreement_status: string | null
+          artist_id: string | null
+          assignee_person_id: string | null
+          created_at: string
+          created_by: string | null
+          follow_up_notified_on: string | null
+          follow_up_on: string | null
+          id: string
+          kind: string
+          next_action: string | null
+          next_action_on: string | null
+          organization_id: string
+          participation_id: string | null
+          project_id: string | null
+          stage: string
+          stage_changed_at: string
+          stage_changed_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          abandon_reason?: string | null
+          abandoned_at?: string | null
+          abandoned_by?: string | null
+          agreement_decided_at?: string | null
+          agreement_decided_by?: string | null
+          agreement_status?: string | null
+          artist_id?: string | null
+          assignee_person_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          follow_up_notified_on?: string | null
+          follow_up_on?: string | null
+          id?: string
+          kind?: string
+          next_action?: string | null
+          next_action_on?: string | null
+          organization_id: string
+          participation_id?: string | null
+          project_id?: string | null
+          stage?: string
+          stage_changed_at?: string
+          stage_changed_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          abandon_reason?: string | null
+          abandoned_at?: string | null
+          abandoned_by?: string | null
+          agreement_decided_at?: string | null
+          agreement_decided_by?: string | null
+          agreement_status?: string | null
+          artist_id?: string | null
+          assignee_person_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          follow_up_notified_on?: string | null
+          follow_up_on?: string | null
+          id?: string
+          kind?: string
+          next_action?: string | null
+          next_action_on?: string | null
+          organization_id?: string
+          participation_id?: string | null
+          project_id?: string | null
+          stage?: string
+          stage_changed_at?: string
+          stage_changed_by?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deals_abandoned_by_fkey"
+            columns: ["abandoned_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_agreement_decided_by_fkey"
+            columns: ["agreement_decided_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_artist_same_org"
+            columns: ["artist_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "deals_assignee_person_id_fkey"
+            columns: ["assignee_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_participation_id_fkey"
+            columns: ["participation_id"]
+            isOneToOne: false
+            referencedRelation: "title_participations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "deals_stage_changed_by_fkey"
+            columns: ["stage_changed_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       distribution_reserves: {
         Row: {
           category: string
@@ -2928,13 +3303,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "artist_files_moodboard_same_artist"
-            columns: ["moodboard_id", "artist_id"]
-            isOneToOne: false
-            referencedRelation: "artist_moodboards"
-            referencedColumns: ["id", "artist_id"]
-          },
-          {
             foreignKeyName: "artist_files_artist_same_org"
             columns: ["artist_id", "organization_id"]
             isOneToOne: false
@@ -2947,6 +3315,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "artist_files_moodboard_same_artist"
+            columns: ["moodboard_id", "artist_id"]
+            isOneToOne: false
+            referencedRelation: "artist_moodboards"
+            referencedColumns: ["id", "artist_id"]
           },
           {
             foreignKeyName: "artist_files_organization_id_fkey"
@@ -3210,93 +3585,116 @@ export type Database = {
       budget_lines: {
         Row: {
           activation_id: string | null
-          committed_cents: number | null
           amount_cents: number
+          artist_attachment_file_id: string | null
+          artist_id: string | null
           attachment_file_id: string | null
+          committed_cents: number | null
           created_at: string
           created_by: string | null
           deliverable_id: string | null
           family: string | null
           family_detail: string | null
-          invoice_id: string | null
           id: string
+          invoice_id: string | null
           label: string
           lever_id: string | null
           master_role: string | null
           note: string | null
           organization_id: string
-          project_id: string
+          project_id: string | null
           refusal_reason: string | null
           refused_at: string | null
           refused_by: string | null
           refused_cents: number | null
+          spent_on: string
           status: string
           updated_at: string
         }
         Insert: {
           activation_id?: string | null
-          committed_cents?: number | null
           amount_cents: number
+          artist_attachment_file_id?: string | null
+          artist_id?: string | null
           attachment_file_id?: string | null
+          committed_cents?: number | null
           created_at?: string
           created_by?: string | null
           deliverable_id?: string | null
           family?: string | null
           family_detail?: string | null
-          invoice_id?: string | null
           id?: string
+          invoice_id?: string | null
           label: string
           lever_id?: string | null
           master_role?: string | null
           note?: string | null
           organization_id: string
-          project_id: string
+          project_id?: string | null
           refusal_reason?: string | null
           refused_at?: string | null
           refused_by?: string | null
           refused_cents?: number | null
+          spent_on?: string
           status?: string
           updated_at?: string
         }
         Update: {
           activation_id?: string | null
-          committed_cents?: number | null
           amount_cents?: number
+          artist_attachment_file_id?: string | null
+          artist_id?: string | null
           attachment_file_id?: string | null
+          committed_cents?: number | null
           created_at?: string
           created_by?: string | null
           deliverable_id?: string | null
           family?: string | null
           family_detail?: string | null
-          invoice_id?: string | null
           id?: string
+          invoice_id?: string | null
           label?: string
           lever_id?: string | null
           master_role?: string | null
           note?: string | null
           organization_id?: string
-          project_id?: string
+          project_id?: string | null
           refusal_reason?: string | null
           refused_at?: string | null
           refused_by?: string | null
           refused_cents?: number | null
+          spent_on?: string
           status?: string
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "budget_lines_invoice_id_fkey"
-            columns: ["invoice_id"]
+            foreignKeyName: "budget_lines_activation_same_org"
+            columns: ["activation_id", "organization_id"]
             isOneToOne: false
-            referencedRelation: "project_invoices"
+            referencedRelation: "marketing_activations"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "budget_lines_activation_same_org"
+            columns: ["activation_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_review_activations"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "budget_lines_artist_attachment_file_id_fkey"
+            columns: ["artist_attachment_file_id"]
+            isOneToOne: false
+            referencedRelation: "artist_files"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "budget_lines_deliverable_id_fkey"
-            columns: ["deliverable_id"]
+            foreignKeyName: "budget_lines_artist_same_org"
+            columns: ["artist_id", "organization_id"]
             isOneToOne: false
-            referencedRelation: "strategy_deliverables"
-            referencedColumns: ["id"]
+            referencedRelation: "artists"
+            referencedColumns: ["id", "organization_id"]
           },
           {
             foreignKeyName: "budget_lines_attachment_file_id_fkey"
@@ -3313,6 +3711,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "budget_lines_deliverable_id_fkey"
+            columns: ["deliverable_id"]
+            isOneToOne: false
+            referencedRelation: "strategy_deliverables"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_lines_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "project_invoices"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "budget_lines_lever_same_org"
             columns: ["lever_id", "organization_id"]
             isOneToOne: false
@@ -3325,6 +3737,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "budget_lines_refused_by_fkey"
+            columns: ["refused_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -18602,6 +19021,128 @@ export type Database = {
       }
     }
     Functions: {
+      abandon_deal: {
+        Args: { p_deal_id: string; p_reason: string }
+        Returns: undefined
+      }
+      assign_deal: {
+        Args: { p_assignee_person_id?: string; p_deal_id: string }
+        Returns: undefined
+      }
+      can_read_deal: {
+        Args: { p_assignee: string; p_org: string; p_project: string }
+        Returns: boolean
+      }
+      can_write_deal: {
+        Args: { p_assignee: string; p_org: string }
+        Returns: boolean
+      }
+      create_deal: {
+        Args: {
+          p_artist_id?: string
+          p_assignee_person_id?: string
+          p_kind?: string
+          p_next_action?: string
+          p_next_action_on?: string
+          p_participation_id?: string
+          p_project_id?: string
+        }
+        Returns: string
+      }
+      decide_deal_agreement: {
+        Args: { p_approve: boolean; p_deal_id: string; p_reason?: string }
+        Returns: undefined
+      }
+      list_deal_negotiators: {
+        Args: never
+        Returns: {
+          first_name: string
+          last_name: string
+          person_id: string
+          role: string
+        }[]
+      }
+      read_deal_context: {
+        Args: { p_deal_ids: string[] }
+        Returns: {
+          contract_status: string
+          deal_id: string
+          participation_status: string
+          project_owner_id: string
+          project_title: string
+          project_visible: boolean
+          title_id: string
+          title_label: string
+          title_position: number
+        }[]
+      }
+      set_deal_next_action: {
+        Args: {
+          p_deal_id: string
+          p_follow_up_on?: string
+          p_next_action?: string
+          p_next_action_on?: string
+        }
+        Returns: undefined
+      }
+      set_deal_stage: {
+        Args: { p_deal_id: string; p_note?: string; p_stage: string }
+        Returns: undefined
+      }
+      set_deal_term: {
+        Args: {
+          p_deal_id: string
+          p_state: string
+          p_term_key: string
+          p_value: Json
+        }
+        Returns: undefined
+      }
+      update_artist_budget: {
+        Args: {
+          p_amount_cents: number
+          p_budget_id: string
+          p_ends_on: string
+          p_posts: Json
+          p_starts_on: string
+        }
+        Returns: undefined
+      }
+      project_artist_budget_share: {
+        Args: { p_project_id: string }
+        Returns: {
+          amount_cents: number
+          artist_id: string
+          artist_name: string
+          budget_id: string
+          ends_on: string
+          project_spent_cents: number
+          starts_on: string
+          total_spent_cents: number
+        }[]
+      }
+      open_artist_budget: {
+        Args: {
+          p_amount_cents: number
+          p_artist_id: string
+          p_ends_on: string
+          p_posts: Json
+          p_starts_on: string
+        }
+        Returns: string
+      }
+      artist_project_ids: { Args: { p_artist_id: string }; Returns: string[] }
+      artist_budget_usage: {
+        Args: { p_budget_id: string }
+        Returns: {
+          allocated_cents: number
+          direct_cents: number
+          family: string
+          pending_cents: number
+          project_cents: number
+          spent_cents: number
+        }[]
+      }
       abandon_project_title: {
         Args: { p_reason: string; p_title_id: string }
         Returns: undefined

@@ -3014,6 +3014,75 @@ date de sortie de la Stratégie, NDA : à décider).
     formulaire, même ligne que la page Budget ; libellé, montant et statut suffisent.
   - **Brief de stratégie** : prévisionnel, engagé, réel et à arbitrer, un reste par type ;
     les leviers sans dépense n'y sont plus listés (comptés en une ligne).
+  - **Dépense d'un projet ou d'un artiste** (BUD 1, Ibé 11/11/2026, migration
+    `20261111200101_budget_artist_lines`, tests `budget-artist-lines.test.sql`) : une dépense reste
+    **une ligne de `budget_lines`**, rattachée à un projet **ou** à un artiste (`artist_id`,
+    contrainte `budget_lines_one_owner` : exactement l'un des deux ; jamais de seconde table, la
+    `artist_expenses` du 08/11 ne revient pas). Ce à quoi elle est rattachée se choisit une fois (pas
+    de droit de mise à jour sur `project_id` / `artist_id`). **Date de la dépense** `spent_on`
+    (jour de Paris par défaut, reprise de `created_at` pour les lignes existantes) : la période d'une
+    enveloppe d'artiste la lit. Les lignes d'un projet gardent leurs règles (`can_read_project_budget`,
+    le responsable écrit) ; celles d'un artiste sont lues **et saisies** par la nouvelle permission
+    **`read_artist_budgets`** (direction, chefs de projet, business managers ; pas le business
+    developer ni la direction créative), sur un artiste non archivé (`is_open_artist`). Une ligne
+    d'artiste ne sert ni levier, ni livrable, ni activation (triggers : projet nul). Un artiste qui a
+    des dépenses ne se supprime pas (`delete_artist_row` → `artist_in_use`).
+  - **Justificatif** (BUD 1) : facultatif, une photo du ticket ou un PDF, posé **en premier** dans le
+    formulaire ; rangé dans la bibliothèque de ce à quoi la dépense appartient, jamais un second
+    stockage : Fichiers du projet (catégorie Autres, comme avant) ou fichiers de l'artiste, catégorie
+    **`receipt`** (`artist_attachment_file_id`), lue seulement par `read_artist_budgets`, hors de
+    l'onglet Fichiers, de la page Fichiers et de l'Activité (`artist_files_log`), supprimée avec sa
+    dépense (`deleteBudgetLine`). Une **dépense réelle** (facturée ou payée) **sans justificatif** ni
+    facture suivie est signalée « Sans justificatif » (`lacksProof`, ton `proofTone.to_provide`) et
+    filtrable (onglet du tableau) ; une estimation n'en demande pas.
+  - **Un seul formulaire, une seule ligne** (`BudgetLineForm` pour une `BudgetTarget`
+    `{ kind: "project" | "artist", id }`, `BudgetTable`, lecture commune `lib/budget/rows.ts`) :
+    justificatif, montant, libellé, poste (suggéré, `lib/budget/suggest.ts`, « grec », « kebab »… =
+    Restauration), statut et date, levier et livrable d'un projet, note ; manques en rouge au premier
+    essai seulement ; écritures en `WriteResult` (`saveBudgetLine(target, …)`,
+    `deleteBudgetLine(target, id)`, messages en français dans `fr.budget.errors`).
+  - **Enveloppe d'un artiste** (BUD 2, Ibé 11/11/2026 : « Morris a 60 000 de budget, 30 000
+    production, 20 000 marketing, 10 000 transport » ; migration `20261111210101_artist_budget_envelopes`,
+    tests `artist-budgets.test.sql`) : `artist_budgets` (montant, `starts_on`, `ends_on` facultatif,
+    `closed_at`), `artist_budget_posts` (montant par poste, les 16 postes de `budget_lines.family`),
+    journal `artist_budget_events` (ouverte, modifiée avec l'avant, close). **Une seule ouverte par
+    artiste** (index unique) : `open_artist_budget` clôt l'ouverte la veille du premier jour de la
+    nouvelle (qui commence forcément après), gardée en historique ; `update_artist_budget` ne change que
+    l'ouverte. Somme des postes ≤ montant (`posts_over_total`), le reste « non réparti ». Écrites par
+    ces fonctions seules, par **`manage_artist_budgets`** (la direction) ; lues par
+    `read_artist_budgets`. **Consommé calculé à chaque lecture, jamais stocké** (`artist_budget_usage`) :
+    par poste, prévu, dépensé (engagé, facturé, payé), estimé (estimé, proposé), part directe et part
+    des projets ; lignes datées (`spent_on`) dans la période ; dépenses directes de l'artiste + lignes
+    de ses projets (`artist_project_ids` = `project_artist_id` : l'artiste principal d'un collectif,
+    sinon le premier crédit du premier titre, sinon `projects.artist_id`). Un business manager voit ces
+    totaux sans lire les lignes d'un projet. Restes et dépassements par le code (`envelopeView`,
+    `lib/budget/envelope.ts`) : un poste dépasse quand il a reçu un montant et que le dépensé le passe
+    (signalé, ton `envelopeTone`, jamais bloquant) ; un poste sans montant puise dans le non réparti.
+    **Onglet Budget de la fiche artiste** (`/app/catalog/artists/[id]/budget`, lecteurs du budget) :
+    enveloppe (tuiles, « Par poste » prévu / dépensé / reste), dépenses (directes écrites ici, celles
+    des projets lues selon leur règle, lecture seule), historique ; sans enveloppe, « Ouvrir
+    l'enveloppe » pour la direction. **Budget d'un projet** : la part de l'enveloppe ouverte de son
+    artiste qu'il consomme (`project_artist_budget_share`, lecteurs du budget du projet qui lisent
+    aussi les budgets d'artistes). Un artiste avec une enveloppe ne se supprime pas (`artist_in_use`).
+  - **Page Dépenses** (BUD 3, `/app/expenses`, entrée de la navigation principale réservée à
+    `read_artist_budgets` : `NavItem.permission`, `NavLinks permissions`) : toutes les dépenses que le
+    lecteur peut lire (lignes d'un projet pour les lecteurs de son budget, d'un artiste pour
+    `read_artist_budgets`, RLS), la plus récente d'abord, 1 000 au plus (`loadExpenses`,
+    `lib/budget/expenses-queries.ts`). Onglets Toutes / Sans justificatif (`?vue=sans-justificatif`),
+    filtres en URL artiste (celui d'un projet par la règle de `listProjects`), projet, poste, saisie
+    par, mois (`lib/budget/expense-filters.ts`), recherche instantanée. **Même ligne** (`BudgetTable
+    showTarget`) et mêmes modales (`useBudgetLineDialogs`) que le Budget d'un projet et d'un artiste ;
+    modifiable là où le lecteur écrit : une dépense d'artiste, une ligne d'un projet qu'il mène.
+  - **Saisie rapide** (BUD 4) : `QuickExpenseButton`, « + Dépense » dans l'en-tête du téléphone sur
+    toutes les pages (`read_artist_budgets` ou `pilot_projects`), « Ajouter une dépense » sur la page
+    Dépenses en ordinateur (les Budgets gardent le leur). **Même formulaire** (`BudgetLineForm` avec
+    `target={null}` et `targets`) : justificatif → montant → libellé → poste (suggéré, « Utiliser »)
+    → **pour** (`BudgetTargetField` : projets que le lecteur mène, artistes pour `read_artist_budgets`,
+    non archivés ; les cinq derniers où il a saisi en tête, `loadExpenseTargets`) → statut, **Payé**
+    par défaut (`initial={{ status: "paid" }}` : une dépense saisie après coup est déjà payée) et
+    date. Manques en rouge au premier essai (`lineFormErrors`, `lib/budget/line-form.ts`).
+    `initial` / `target` permettent à PO d'ouvrir ce formulaire ; `propose_budget_line` ne prépare
+    encore qu'une dépense de projet.
 
 ### Blocages et informations notées d'une étape (C6, 18/10/2026)
 
@@ -7319,6 +7388,60 @@ Migrations `20261026400101_activation_recette_guards.sql`, `20261026400201_marke
   `objectives.ts` (purs), `StandingGoals` sous « Voir le détail » ; figure `budget_invoiced` du tableau de
   bord. Le formulaire d'une ligne de budget ne propose pas encore l'activation : la ligne est lue sur son
   livrable ou son levier.
+
+## 8 quaterdecies. Business : les deals (`/app/deals`, `lib/deals/`, `components/deals/`)
+
+Ticket d'Ibé du 10/11/2026 (« un espace deal » pour Glen, business manager), décisions du 11/11/2026.
+Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`20261111183101`).
+
+- **Un deal n'est pas un projet** (BIZ 2, `20261111230101_deals.sql`) : table `deals` à part, avec ses
+  droits. Dans un projet lancé seul le responsable écrit ; Glen n'en est pas responsable, il écrit **sur le
+  deal**, jamais dans le projet. Type `kind` (`music` seul créable en V1 ; `brand_partnership`, `label`
+  plus tard ; jamais « influence », le mot est celui de l'influence achetée, `lib/activations/influence`).
+- **Rattachement** : `participation_id` (→ `title_participations`, PDS MIC), qui fixe `project_id` et
+  `artist_id` à la création (un projet ou un artiste donné à côté doit être le même :
+  `participation_other_project`, `participation_other_artist`) ; sinon `project_id` et/ou `artist_id`.
+  **Le contrat d'un deal de participation se lit sur `title_participations.contract_id`**, jamais copié ;
+  rien n'est ajouté à `title_participations` (`docs/pds-mic-plan.md` § 0 ter). Un seul deal vivant par
+  participation (`deals_open_participation_key`, un deal abandonné reste à côté d'un nouveau).
+- **Étapes** (fonctions SQL seules) : `to_contact` → `call_planned` → `negotiation` → `agreement` (accord
+  de principe) → `contracting` → `signed`, ou `abandoned` (`abandon_deal`, motif obligatoire, deal et
+  historique gardés). `set_deal_stage` va d'une étape ouverte à l'autre dans les deux sens ;
+  `contracting` exige un accord **validé**, `signed` vient de `contracting` ; signé ou abandonné, le deal
+  ne bouge plus (`deal_closed`). **L'accord de principe est une étape** : l'affecté la propose
+  (`agreement_status = pending`), la direction (`validate`) la valide ou la renvoie en négociation avec un
+  motif (`decide_deal_agreement`) ; la direction qui pose elle-même l'étape la valide d'emblée. Seuils de
+  validation : plus tard.
+- **Droits** (`can_read_deal`, `can_write_deal`) : la direction (`validate`) lit et écrit tous les deals ;
+  l'affecté (membre qui a `negotiate`) lit et écrit les siens ; le responsable du projet lié
+  (`is_project_owner`) lit seulement. Créer et affecter (`create_deal`, `assign_deal`) : la direction ou le
+  responsable du projet lié (un deal sur un artiste seul : la direction). Pour tout autre, le deal n'existe
+  pas (`deal_not_found`). On n'affecte qu'à un membre qui négocie (`assignee_cannot_negotiate`,
+  `list_deal_negotiators`).
+- **Prochaine action** (texte, date) et **date de relance** par deal (`set_deal_next_action`) ; journal
+  `deal_events` (auteur, date, transition, motif, détail).
+- **Contexte** : `read_deal_context(ids)` (SECURITY DEFINER, pour qui lit le deal) donne le nom du projet
+  même à qui ne le voit pas (Glen ne voit aucun projet : nom sans lien), le titre et le statut de la
+  participation et l'état de son contrat. **Aucun contact** (décision 5 du plan).
+- `delete_project_row` supprime les deals du projet (journal en cascade) avant ses participations ;
+  `deals` suit `project_live` (`attach_project_live`).
+- **Termes négociés** (BIZ 3, `20261111231101_deal_terms.sql`) : une ligne `deal_terms` par terme d'un deal
+  (valeur jsonb, état `pds_proposal` / `counter_proposal` / `confirmed` / `to_define`, auteur et date du
+  dernier changement), écrite par `set_deal_term` seule (direction ou affecté, deal ouvert ; une valeur sauf
+  « À définir », qui l'efface) ; chaque changement va au journal (`deal_events` `term`, valeur et état
+  avant / après). **La liste des termes et la forme de leurs valeurs sont dans un seul endroit,
+  `lib/deals/terms.ts`** (`DEAL_TERMS` par type de deal : splits auteur-compositeur, part du master,
+  royalties, avance ou cachet, crédits, territoires, durée, exclusivité, promo ; libellés dans
+  `lib/i18n/fr/deals.ts`) : pour suivre l'Excel d'Ibé, on change ce fichier, jamais la base, qui ne vérifie
+  que la forme de la clé. Formats `text`, `percent` et `split` en dix-millièmes de pour cent comme le
+  Juridique, `money` en centimes HT, `yesno`. **Les splits reprennent les rôles du Juridique**
+  (`SPLIT_ROLES`, `legal_split_entries.role`) dans la valeur du terme : aucun second modèle de répartition.
+  Lecture `loadDealTerms` (`term-queries.ts`), écriture `setDealTerm` (`term-actions.ts`, valeur validée
+  par le format du terme), affichage `DealTerms` / `TermForm` / `TermValueFields` (`components/deals/`),
+  ton de l'état `dealTermTone`. Test : `supabase/tests/deal-terms.test.sql`.
+- Code : `lib/deals/types.ts` (étapes), `actions.ts` (un geste = une fonction SQL, `WriteResult`, push après
+  ce qui notifie), `errors.ts` (exceptions en français, `lib/i18n/fr/deals.ts`). Test :
+  `supabase/tests/deals.test.sql`.
 
 ## 9. Design (`docs/DESIGN.md`)
 

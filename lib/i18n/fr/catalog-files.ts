@@ -72,6 +72,7 @@ export const catalogFiles = {
       audio: "Audio",
       moodboard: "Moodboard",
       other: "Autre",
+      receipt: "Justificatif de dépense",
     },
     master: {
       audio: "Audio",

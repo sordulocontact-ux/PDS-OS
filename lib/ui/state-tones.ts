@@ -184,6 +184,13 @@ export const budgetStatusTone: Record<string, Tone> = {
   paid: "success",
 };
 
+// A poste or an artist's envelope (BUD 2): spent beyond what it was given,
+// signalled, never blocking.
+export const envelopeTone: Record<"within" | "over", Tone> = {
+  within: "neutral",
+  over: "danger",
+};
+
 /** Design state of a deliverable (lib/design/rules.ts): nothing yet, waiting
  * for the owner's review, sent back for changes, approved. */
 export const designStateTone: Record<string, Tone> = {
@@ -1225,6 +1232,16 @@ export const projectTitleTone: Record<string, Tone> = {
   active: "info",
   abandoned: "neutral",
 };
+
+/** A term of a deal (BIZ 3): PDS's proposal waits for the artist's side, a
+ * counter-proposal waits for PDS, confirmed is settled, to define is
+ * nothing yet. */
+export const dealTermTone = {
+  pds_proposal: "warning",
+  counter_proposal: "action",
+  confirmed: "success",
+  to_define: "neutral",
+} as const satisfies Record<string, Tone>;
 
 /** A box of the Eisenhower matrix of « Mes tâches »: « Faire » presses,
  * « Déléguer » waits for someone else, « Planifier » runs, « Plus tard » is

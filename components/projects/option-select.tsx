@@ -5,6 +5,7 @@ import { useState } from "react";
 import { FieldError } from "@/components/auth/form-message";
 import { Label } from "@/components/ui/label";
 import {
+  formFieldControlClassName,
   Select,
   SelectContent,
   SelectItem,
@@ -69,7 +70,7 @@ export function OptionSelect(props: SingleProps | MultipleProps) {
     "aria-invalid": error ? true : undefined,
     "aria-describedby": describedBy,
     "aria-required": required || undefined,
-    className: "w-full text-base data-[size=default]:h-10 md:text-sm",
+    className: cn("w-full", formFieldControlClassName),
   } as const;
 
   return (

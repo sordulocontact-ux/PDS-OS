@@ -8,7 +8,7 @@ import { NavLinks } from "@/components/shell/nav-links";
 import { PdsLogo } from "@/components/shell/pds-logo";
 import { useCollapsedNav } from "@/components/shell/use-collapsed-nav";
 import { Button } from "@/components/ui/button";
-import { routes } from "@/lib/auth/redirects";
+import { routes, type Permission } from "@/lib/auth/redirects";
 import { shell } from "@/lib/i18n/fr/shell";
 import { cn } from "@/lib/utils";
 
@@ -21,12 +21,14 @@ const fr = { shell };
 // project; the IconSidebar button overrides it for the current visit only.
 export function Sidebar({
   isAdmin,
+  permissions,
   pendingMembers,
   bell,
   name,
   email,
 }: {
   isAdmin: boolean;
+  permissions: readonly Permission[];
   pendingMembers: number;
   bell: React.ReactNode;
   name: string;
@@ -74,6 +76,7 @@ export function Sidebar({
         </div>
         <NavLinks
           isAdmin={isAdmin}
+          permissions={permissions}
           pendingMembers={pendingMembers}
           collapsed={collapsed}
         />

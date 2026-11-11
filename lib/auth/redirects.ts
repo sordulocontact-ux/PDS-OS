@@ -70,6 +70,11 @@ export const PERMISSIONS = [
   "manage_sessions",
   // Negotiates the deals assigned to them (business manager, business).
   "negotiate",
+  // Reads the artists' budgets and enters their direct spends (the
+  // direction, project managers and business managers, BUD 1, 11/11/2026).
+  "read_artist_budgets",
+  // Opens and changes an artist's envelope (the direction, BUD 2).
+  "manage_artist_budgets",
 ] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 
@@ -113,6 +118,11 @@ export const routes = {
     `/api/calls/${callId}/report?v=${version}&scope=${scope}`,
   // Every file the viewer may read, across artists, titles, projects, contracts.
   files: "/app/files",
+  // Every spend the reader may see, projects and artists (BUD 3).
+  expenses: "/app/expenses",
+  // The Business module's deals (BIZ 2 to 4): the list, a deal's page.
+  deals: "/app/deals",
+  deal: (dealId: string) => `/app/deals/${dealId}`,
   // Features on trial before they enter the app (any member).
   labo: "/app/labo",
   network: "/app/network",
@@ -142,6 +152,8 @@ export const routes = {
   artistMasters: (id: string) => `/app/catalog/artists/${id}/masters`,
   artistProjects: (id: string) => `/app/catalog/artists/${id}/projects`,
   artistFiles: (id: string) => `/app/catalog/artists/${id}/files`,
+  // Its envelope by poste and its spends (BUD 2), for the budget's readers.
+  artistBudget: (id: string) => `/app/catalog/artists/${id}/budget`,
   artistActivity: (id: string) => `/app/catalog/artists/${id}/activity`,
   artistIdentity: (id: string) => `/app/catalog/artists/${id}/identity`,
   // Selections of artists, before a project (lot 4 of docs/pds-mic-plan.md):

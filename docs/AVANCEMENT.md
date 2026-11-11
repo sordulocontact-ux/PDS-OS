@@ -2074,3 +2074,46 @@ les modules à parcours (proto « Mise en page des modules », version « Propos
   `business-positions` 8/8). Libellés, aide du formulaire de compte, Travail et PO (`explain_access`) suivent.
   Comptes de test locaux dans `supabase/seed.sql` : `glen@pds.test`, `thibault@pds.test`
   (`pds-local-business`). Cadrage des lots : `docs/pds-mic-plan.md` § 0 ter et l'épic Notion.
+- 11/11/2026 — **Budget, BUD 1 : une dépense rattachée à un projet ou à un artiste.** `budget_lines`
+  prend `artist_id` (exactement un projet ou un artiste), `spent_on` (date de la dépense) et le
+  justificatif d'un artiste (`artist_files` catégorie `receipt`, privée au budget). Permission
+  `read_artist_budgets` (DG, chefs de projet, business managers) : lit et saisit les dépenses d'un
+  artiste ; les lignes d'un projet gardent leurs règles. Formulaire unique (justificatif en premier,
+  montant, libellé, poste, statut et date), ligne commune avec « Sans justificatif » et son onglet ;
+  écritures en `WriteResult`. Migration `20261111200101`, test `budget-artist-lines` 17/17.
+- 11/11/2026 — **Budget, BUD 2 : l'enveloppe d'un artiste.** Montant, période, répartition par
+  poste (somme ≤ montant, reste non réparti) ; une seule ouverte, la précédente close la veille et
+  gardée ; journal de chaque changement ; ouverte et modifiée par la direction seule
+  (`manage_artist_budgets`). Consommé calculé à chaque lecture (`artist_budget_usage`) : dépenses
+  directes + lignes des projets de l'artiste (artiste principal d'un collectif) dans la période.
+  Onglet Budget de la fiche artiste (enveloppe par poste prévu / dépensé / reste, dépassement signalé,
+  dépenses, historique) et, au Budget d'un projet, la part de l'enveloppe de l'artiste qu'il consomme.
+  Migration `20261111210101`, test `artist-budgets` 20/20.
+- 11/11/2026 — **Budget, BUD 3 : la page Dépenses.** Entrée « Dépenses » de la navigation
+  principale pour `read_artist_budgets` (DG, chefs de projet, business managers ; `NavItem.permission`).
+  Toutes les dépenses lisibles, projets et artistes, onglets Toutes / Sans justificatif, filtres
+  artiste, projet, poste, saisie par, mois, recherche ; même ligne et mêmes modales que les Budgets
+  (`useBudgetLineDialogs` extrait de `BudgetLines`). Pas de migration.
+- 11/11/2026 — **Budget, BUD 4 : saisie rapide sur téléphone.** « + Dépense » dans l'en-tête mobile
+  sur toutes les pages (qui peut saisir une dépense), « Ajouter une dépense » sur la page Dépenses en
+  ordinateur. Même formulaire que les Budgets, dans l'ordre justificatif (photo) → montant → libellé →
+  poste (suggéré : « grec », « kebab »… = Restauration) → projet ou artiste (récents en tête) →
+  statut (Payé par défaut) et date ; manques en rouge au premier essai. Pas de migration. BUD 5
+  (partage depuis l'iPhone, lecture du ticket par PO) non fait.
+- 11/11/2026 — **Business, BIZ 2 : l'objet Deal.** Table `deals` à part (pas un projet) et son journal
+  `deal_events` ; type `music` seul créable ; rattaché à une participation de PDS MIC (projet et artiste
+  repris d'elle, contrat lu sur la participation, rien ajouté à `title_participations`), sinon à un projet
+  et/ou un artiste. Étapes à contacter → call prévu → négociation → accord de principe → contractualisation
+  → signé, ou abandonné (motif obligatoire), par fonctions SQL seules ; accord de principe proposé par
+  l'affecté, validé ou renvoyé en négociation (motif) par la direction seule. Droits : direction et affecté
+  (`negotiate`) lisent et écrivent, responsable du projet lié lit ; création et affectation par la direction
+  ou ce responsable ; pour les autres, introuvable. Prochaine action, date de relance, contexte lisible sans
+  voir le projet (`read_deal_context`, aucun contact). Actions serveur `lib/deals/actions.ts`. Migration
+  `20261111230101`, test `deals` 54/54 (`docs/ARCHITECTURE.md` § 8 quaterdecies).
+- 11/11/2026 — **Business, BIZ 3 : les termes négociés d'un deal musical.** Splits auteur-compositeur
+  (rôles du Juridique, sans second modèle de répartition), part du master, royalties, avance ou cachet,
+  crédits, territoires, durée, exclusivité, promo ; chacun avec sa valeur, son état (Proposé par PDS,
+  Contre-proposition, Confirmé, À définir), l'auteur et la date du dernier changement, l'historique au
+  journal du deal. La liste et la forme des termes tiennent dans `lib/deals/terms.ts` (à ajuster à l'Excel
+  d'Ibé sans migration). Lignes de faits « Termes négociés » et fenêtre de modification
+  (`components/deals/`). Migration `20261111231101`, test `deal-terms` 16/16.

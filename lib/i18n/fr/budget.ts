@@ -101,7 +101,20 @@ export const budget = {
     bodyReadOnly:
       "Le responsable du projet ajoute ici chaque dépense, de prévue à payée.",
   },
+  // BUD 1: a real spend (invoiced or paid) without its proof.
+  noProof: "Sans justificatif",
+  errors: {
+    invalid: "Vérifiez le libellé, le montant et la date de la dépense.",
+    forbidden:
+      "Vous ne pouvez pas écrire cette dépense : le budget d'un projet s'écrit par son responsable, celui d'un artiste par la direction, les chefs de projet et les business managers.",
+    followsInvoice:
+      "Cette dépense suit une facture : son montant et son état changent avec elle.",
+    generic: "La dépense n'a pas pu être enregistrée. Réessayez.",
+  },
   add: "Ajouter une dépense",
+  // The quick entry of the phone's header (BUD 4).
+  quickAdd: "Dépense",
+  quickAddLabel: "Ajouter une dépense",
   edit: (label: string) => `Modifier « ${label} »`,
   remove: (label: string) => `Supprimer « ${label} »`,
   // A line that follows an invoice (lib/invoices).
@@ -118,6 +131,26 @@ export const budget = {
     followsInvoice:
       "Le montant et l'état suivent la facture : ils changent quand elle est reçue, puis payée.",
     amountHint: "Par exemple 1500 ou 1 500,50.",
+    labelMissing:
+      "Dites ce qu'est la dépense, par exemple « Repas après la session ».",
+    spentOn: "Date",
+    // A quick spend (BUD 4): what it goes to.
+    target: "Pour",
+    targetPlaceholder: "Choisir un projet ou un artiste",
+    targetSearch: "Rechercher un projet ou un artiste",
+    targetNone: "Aucun projet ni artiste ne correspond.",
+    targetMissing: "Dites à quel projet ou à quel artiste va la dépense.",
+    // Its kind as a badge after the name (Sacha 11/11/2026), « récent » beside.
+    targetKinds: { project: "Projet", artist: "Artiste" },
+    targetRecent: "récent",
+    quickTitle: "Nouvelle dépense",
+    quickDescription:
+      "Le ticket en photo si vous l'avez, le montant, ce que c'est et pour qui : déjà payée par défaut.",
+    noTargets:
+      "Vous ne menez aucun projet et ne lisez pas le budget des artistes : aucune dépense à saisir ici.",
+    spentOnMissing: "Indiquez le jour de la dépense.",
+    missingCount: (n: number) =>
+      n > 1 ? `${n} champs à compléter.` : "Un champ à compléter.",
     status: "Statut",
     family: "Poste",
     familySearch: "Rechercher un poste",
@@ -131,13 +164,17 @@ export const budget = {
     deliverable: "Livrable",
     linkSuggestion: (label: string) =>
       `Proposé : ${label} (même mot dans le libellé).`,
-    attachment: "Pièce (devis, facture)",
+    attachment: "Justificatif (photo du ticket, facture)",
     attachmentHint:
-      "Rangée dans les Fichiers du projet, catégorie Autres : jamais déposée deux fois.",
-    attachmentKept: (name: string) => `Pièce jointe : ${name}`,
-    attachmentOf: (label: string) => `Pièce de la dépense « ${label} »`,
+      "Rangé dans les Fichiers du projet, catégorie Autres : jamais déposé deux fois.",
+    // An artist's spend: the receipt is kept with the artist, read by the
+    // budget's readers only.
+    attachmentHintArtist:
+      "Gardé avec l'artiste, lu seulement par ceux qui lisent son budget.",
+    attachmentKept: (name: string) => `Justificatif : ${name}`,
+    attachmentOf: (label: string) => `Justificatif de la dépense « ${label} »`,
     attachmentFailed:
-      "La dépense est enregistrée, mais la pièce n'a pas pu être déposée. Réessayez depuis la ligne.",
+      "Le justificatif n'a pas pu être déposé. Réessayez, ou enregistrez la dépense sans lui.",
     none: "Aucun",
     note: "Note",
     save: "Enregistrer",

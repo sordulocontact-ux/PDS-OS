@@ -5,6 +5,7 @@ import {
   IconHandshake,
   IconHouse2,
   IconMicrophone,
+  IconMoneyBillCoin,
   IconMsgs,
   IconNodes,
   IconPhone,
@@ -15,7 +16,7 @@ import {
 } from "nucleo-sharp-essential";
 
 import { IconBriefcase, IconDisc } from "@/components/icons";
-import { routes } from "@/lib/auth/redirects";
+import { routes, type Permission } from "@/lib/auth/redirects";
 import { shell } from "@/lib/i18n/fr/shell";
 
 const fr = { shell };
@@ -33,6 +34,8 @@ export type NavItem = {
   icon: typeof IconHouse2;
   exact?: boolean;
   adminOnly?: boolean;
+  // Shown only to whoever holds it (Dépenses: the budget's readers).
+  permission?: Permission;
   disabled?: boolean;
 };
 
@@ -58,6 +61,13 @@ export const NAV_ITEMS: readonly NavItem[] = [
     icon: IconHandshake,
   },
   { href: routes.files, label: fr.shell.nav.files, icon: IconFile },
+  // Every spend the reader may see, of the projects and the artists (BUD 3).
+  {
+    href: routes.expenses,
+    label: fr.shell.nav.expenses,
+    icon: IconMoneyBillCoin,
+    permission: "read_artist_budgets",
+  },
   {
     href: routes.members,
     label: fr.shell.nav.members,

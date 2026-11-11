@@ -743,6 +743,12 @@ Permission propre aux deux postes Business : `negotiate`. Comptes de test locaux
 `glen@pds.test` et `thibault@pds.test`, mot de passe `pds-local-business` ; pas encore de vrais
 comptes en production.
 
+Budget des artistes (BUD 1, Ibé 11/11/2026) : `read_artist_budgets` (DG, chefs de projet, business
+managers ; pas le poste Business ni la direction créative) lit l'enveloppe et les dépenses d'un artiste
+et saisit ses dépenses directes. Les lignes du budget d'un projet gardent leur règle : son responsable
+et la direction.
+`manage_artist_budgets` (DG seul, BUD 2) ouvre et modifie l'enveloppe d'un artiste.
+
 ### Matrice des accès
 
 | Accès V1 | DG | Chef de projet | Dir. créatif |

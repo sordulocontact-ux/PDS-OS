@@ -27,6 +27,10 @@ export const assistantAccess = {
       "voir et mener le Juridique des projets, gérer les modèles de contrat",
     manage_sessions: "créer et mener les sessions studio",
     negotiate: "négocier les dossiers qui vous sont affectés",
+    read_artist_budgets:
+      "lire le budget des artistes et saisir leurs dépenses directes",
+    manage_artist_budgets:
+      "ouvrir et modifier l'enveloppe budgétaire d'un artiste",
   } as Record<string, string>,
   // A permission the page needs: granted, or who holds it.
   youCan: (what: string) => `Votre poste vous permet de ${what}.`,
