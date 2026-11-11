@@ -589,7 +589,8 @@ Refonte du 27/10/2026, d'après `docs/VISION-UX.md` § 2 (les cinq questions) :
   filtre) : on **fusionne** les sections voisines en blocs (`PageSection`) d'une même page,
   atteints par leur ancre. Fiche titre, 04/10/2026 : Vue d'ensemble (+ Variantes, Activité)
   · Audio (+ Sessions & pistes) · Crédits (+ Splits) · Droits · Projets & sorties (+
-  Distribution) · Fichiers. Dans une page fusionnée, une section vide est une `EmptyNote`,
+  Distribution) · Fichiers. Fiche artiste, 12/11/2026 (BIZ 10) : Budget et Deals fusionnés dans
+  « Business » (Deals puis Budget), sans ajouter d'onglet. Dans une page fusionnée, une section vide est une `EmptyNote`,
   pas un `EmptyState`.
 - **Tout filtre d'un tableau est en onglets** (`DataTableViews`, exporté avec
   `DataTable`, d'après une référence de Sacha le 27/09/2026) : un onglet par vue avec

@@ -156,7 +156,9 @@ export const routes = {
   artistProjects: (id: string) => `/app/catalog/artists/${id}/projects`,
   artistFiles: (id: string) => `/app/catalog/artists/${id}/files`,
   // Its envelope by poste and its spends (BUD 2), for the budget's readers.
-  artistBudget: (id: string) => `/app/catalog/artists/${id}/budget`,
+  // « Business » of an artist (BIZ 10): its deals, then its budget.
+  artistBusiness: (id: string) => `/app/catalog/artists/${id}/business`,
+  artistBudget: (id: string) => `/app/catalog/artists/${id}/business#budget`,
   artistActivity: (id: string) => `/app/catalog/artists/${id}/activity`,
   artistIdentity: (id: string) => `/app/catalog/artists/${id}/identity`,
   // Selections of artists, before a project (lot 4 of docs/pds-mic-plan.md):

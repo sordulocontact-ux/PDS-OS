@@ -36,6 +36,7 @@ export const deals = {
     next: "Prochaine action",
     assignee: "Négocié par",
     unassigned: "À affecter",
+    contract: "Contrat",
     followUpDue: (day: string) => `Relance due · ${day}`,
     followUpOn: (day: string) => `Relancer le ${day}`,
     on: (action: string, day: string) => `${action} · ${day}`,

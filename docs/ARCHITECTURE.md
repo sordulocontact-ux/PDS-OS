@@ -3060,7 +3060,8 @@ date de sortie de la Stratégie, NDA : à décider).
     totaux sans lire les lignes d'un projet. Restes et dépassements par le code (`envelopeView`,
     `lib/budget/envelope.ts`) : un poste dépasse quand il a reçu un montant et que le dépensé le passe
     (signalé, ton `envelopeTone`, jamais bloquant) ; un poste sans montant puise dans le non réparti.
-    **Onglet Budget de la fiche artiste** (`/app/catalog/artists/[id]/budget`, lecteurs du budget) :
+    **Partie Budget de l'onglet Business de la fiche artiste** (`/app/catalog/artists/[id]/business#budget`
+    depuis BIZ 10, l'ancienne adresse `…/budget` y renvoie ; lecteurs du budget, `ArtistBudgetSections`) :
     enveloppe (tuiles, « Par poste » prévu / dépensé / reste), dépenses (directes écrites ici, celles
     des projets lues selon leur règle, lecture seule), historique ; sans enveloppe, « Ouvrir
     l'enveloppe » pour la direction. **Budget d'un projet** : la part de l'enveloppe ouverte de son
@@ -7552,8 +7553,18 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   celle notée sur l'ayant droit) ; une fiche de renseignements publique n'est plus pré-remplie de ses
   coordonnées ; un contact rendu privé garde ses liens à des deals déjà faits (ce sont des partages, retirables).
   Test : `supabase/tests/private-contacts.test.sql` (dont `project_link_contacts` sans adresse privée).
+- **Deals sur la fiche artiste** (BIZ 10, pas de migration). **Décision** : la fiche artiste avait déjà neuf
+  onglets (règle : six au plus, `docs/DESIGN.md`) ; plutôt qu'un dixième, Budget et Deals partagent un seul
+  onglet **« Business »** (`/app/catalog/artists/[id]/business`) : Deals puis Budget, chaque partie selon ses
+  droits (les deals par RLS `can_read_deal`, filtrés sur `deals.artist_id` : `loadArtistDeals` ; le Budget par
+  `read_artist_budgets`). L'onglet paraît pour qui lit le budget ou voit au moins un deal de l'artiste
+  (`showsArtistBusiness`, un comptage sous RLS), sinon la page est introuvable. Deals rangés comme les vues de
+  la page Deals : à relancer, en cours, signés (collaborations terminées, consultables), abandonnés
+  (`DealsTable groups`), avec étape, prochaine action, **contrat** (`read_deal_contract`, `DealsTable
+  contracts`), projet dans le nom du deal, négociateur ; jamais un contact. `routes.artistBudget` mène à
+  `…/business#budget` (lien « Budget de l'artiste » d'un projet).
 - **Pas encore** : BIZ 5 (colonne « Négociation » de la vue Titres et artistes de Maël),
-  e-mails, onglet Deals de la fiche artiste, seuils de validation.
+  e-mails (BIZ 9), seuils de validation.
 - Code : `lib/deals/types.ts` (étapes), `actions.ts` (un geste = une fonction SQL, `WriteResult`, push après
   ce qui notifie), `errors.ts` (exceptions en français, `lib/i18n/fr/deals.ts`). Test :
   `supabase/tests/deals.test.sql`.

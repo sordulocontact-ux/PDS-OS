@@ -18,6 +18,7 @@ import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { getArtist } from "@/lib/catalog/artist-queries";
+import { showsArtistBusiness } from "@/lib/deals/artist-has-deals";
 import { countryName } from "@/lib/catalog/countries";
 import { fr } from "@/lib/i18n/fr";
 import { allInOrder } from "@/lib/utils/parallel";
@@ -55,6 +56,7 @@ export default async function ArtistLayout({
   const t = fr.catalog.artist;
   const canEdit = can(access, "manage_catalog");
   const canArchive = can(access, "archive_records");
+  const showBusiness = await showsArtistBusiness(access, artist.id);
 
   return (
     <PageContainer className="max-w-5xl">
@@ -126,7 +128,7 @@ export default async function ArtistLayout({
       <ArtistTabs
         artistId={artist.id}
         hasDeezer={artist.deezerId !== null}
-        showBudget={can(access, "read_artist_budgets")}
+        showBusiness={showBusiness}
       />
       <div className="-mt-2 flex flex-col gap-[var(--section-gap)]">
         {children}

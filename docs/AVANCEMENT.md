@@ -2152,3 +2152,8 @@ les modules à parcours (proto « Mise en page des modules », version « Propos
   coordonnées avec la session : ils marchent pour qui a le droit, disent « Coordonnées privées » sinon.
   Migration `20261112030101`, test `private-contacts` 34/34 ; 62 tests SQL qui touchent `network_contacts`
   rejoués (deux échecs antérieurs, sans lien : `activation-creator-link`, `ux-roles` n°5).
+- 12/11/2026 — **Business, BIZ 10 : deals sur la fiche artiste.** Budget et Deals réunis dans un seul onglet
+  « Business » (pas de dixième onglet) : les deals de l'artiste que le lecteur peut voir (à relancer, en
+  cours, signés, abandonnés ; étape, prochaine action, contrat, projet, négociateur ; aucun contact), puis
+  le budget pour ses lecteurs. Onglet visible de qui lit le budget ou voit un deal de l'artiste ; l'ancienne
+  adresse `…/budget` y mène. Sans migration.

@@ -44,6 +44,7 @@ export const businessTopics: GuideTopic[] = [
       "Seule la direction valide un deal memo, et seulement le dernier.",
       "Le contrat d'un deal de participation (PDS MIC) est celui de la participation, dans le Juridique. Un autre deal se lie à un contrat principal parmi ceux de son projet ou de son artiste ; les autres contrats de l'opération restent dans Contrats.",
       "Le contrat se compare au dernier deal memo validé, terme par terme : PDS OS ne lit pas le PDF du contrat. Il compare seulement le montant saisi sur le contrat à l'avance ou au cachet ; pour chaque terme, la personne qui négocie ou la direction dit « Conforme » ou « Différent », avec ce que dit le contrat. Les termes que le contrat contredit sont signalés ; rien n'est corrigé tout seul.",
+      "Sur la fiche d'un artiste, l'onglet Business réunit ses deals puis son budget : deals à relancer, en cours, signés (les collaborations terminées restent consultables) et abandonnés, avec l'étape, la prochaine action, le contrat et le projet de chacun. Chacun n'y voit que les deals qu'il a le droit de voir, et jamais de contact ; la partie Budget suit ses propres droits.",
       "La page Deals est une seule liste : onglets En cours, À relancer, Signés, Abandonnés ; filtres par étape, personne qui négocie et projet.",
     ],
     faq: [
