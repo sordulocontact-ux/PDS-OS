@@ -14,6 +14,8 @@ import { networkPictureSourceOf } from "@/lib/network/picture-rules";
 import { signNetworkPictures } from "@/lib/network/pictures";
 import { asHandle } from "@/lib/network/socials";
 import { createClient } from "@/lib/supabase/server";
+import { personName } from "@/lib/projects/types";
+import { withPrivateDetails } from "@/lib/network/private-details";
 
 // Read side of the network, with the viewer's session (RLS: every active
 // member reads it).
@@ -50,17 +52,19 @@ export async function listNetworkContacts(
   const query = supabase
     .from("network_contacts")
     .select(
-      "id, kind, name, roles, relations, email, phone, city, parent_id, artist_id, tiktok_handle, picture_path",
+      "id, kind, name, roles, relations, email, phone, city, parent_id, artist_id, tiktok_handle, picture_path, private_owner_person_id",
     )
     .order("name")
     .limit(LIST_LIMIT);
-  const { data, error } = await (archived
+  const { data: raw, error } = await (archived
     ? query.not("archived_at", "is", null)
     : query.is("archived_at", null));
   if (error) {
     console.error("listNetworkContacts:", error.message);
     return null;
   }
+  // A private contact's coordinates, for whoever may read them (BIZ 8).
+  const { rows: data } = await withPrivateDetails(supabase, raw);
   const [parents, pictures] = await Promise.all([
     parentNames(
       supabase,
@@ -90,6 +94,15 @@ export async function listNetworkContacts(
 
 export type NetworkContactDetail = NetworkContactValues & {
   archived: boolean;
+  // BIZ 8: a private contact's owner (null: shared), who created it (may
+  // make it private), and whether its coordinates are hidden from the reader.
+  privacy: {
+    ownerId: string | null;
+    ownerName: string | null;
+    since: string | null;
+    createdBy: string | null;
+    hidden: boolean;
+  };
   parentName: string | null;
   artistName: string | null;
   // People of the network who work for this organization.
@@ -112,7 +125,9 @@ export const getNetworkContact = trackedCache(async function getNetworkContact(
   const [contact, members, parties] = await Promise.all([
     supabase
       .from("network_contacts")
-      .select("*, artist:artists!network_contacts_artist_same_org(name)")
+      .select(
+        "*, artist:artists!network_contacts_artist_same_org(name), owner:people!network_contacts_private_owner_person_id_fkey(first_name, last_name)",
+      )
       .eq("id", id)
       .maybeSingle(),
     supabase
@@ -130,8 +145,12 @@ export const getNetworkContact = trackedCache(async function getNetworkContact(
       .eq("contact_id", id),
   ]);
   if (contact.error) console.error("getNetworkContact:", contact.error.message);
-  const row = contact.data;
-  if (!row) return null;
+  if (!contact.data) return null;
+  // A private contact's coordinates, for whoever may read them (BIZ 8).
+  const {
+    rows: [row],
+    hidden,
+  } = await withPrivateDetails(supabase, [contact.data]);
   const [parents, pictures] = await Promise.all([
     parentNames(supabase, [row.parent_id]),
     signNetworkPictures(row.picture_path ? [row.picture_path] : []),
@@ -158,6 +177,15 @@ export const getNetworkContact = trackedCache(async function getNetworkContact(
       : null,
     pictureSource: networkPictureSourceOf(row.picture_source),
     archived: row.archived_at !== null,
+    privacy: {
+      ownerId: row.private_owner_person_id,
+      ownerName: row.owner
+        ? personName(row.owner.first_name, row.owner.last_name)
+        : null,
+      since: row.private_since,
+      createdBy: row.created_by,
+      hidden: hidden.has(row.id),
+    },
     parentName: row.parent_id ? (parents.get(row.parent_id) ?? null) : null,
     artistName: row.artist?.name ?? null,
     members: (members.data ?? []).map((m) => ({

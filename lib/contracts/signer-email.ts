@@ -4,6 +4,7 @@ import { emailContact } from "@/lib/email/contact-email";
 import { emailEnabled } from "@/lib/email/send";
 import { contracts } from "@/lib/i18n/fr/contracts";
 import { createClient } from "@/lib/supabase/server";
+import { contactAddressOf } from "@/lib/network/private-details";
 import { formatDate } from "@/lib/release/format";
 
 const t = contracts.now.auto;
@@ -78,11 +79,8 @@ export async function contractSignerDraft(contractId: string): Promise<{
       .maybeSingle(),
   ]);
   if (!need?.contact_id || !contract) return null;
-  const { data: contact } = await supabase
-    .from("network_contacts")
-    .select("email")
-    .eq("id", need.contact_id)
-    .maybeSingle();
+  // A private contact's address only for whoever may read it (BIZ 8).
+  const contact = await contactAddressOf(supabase, need.contact_id);
   if (!contact?.email) return null;
   return {
     email: contact.email,

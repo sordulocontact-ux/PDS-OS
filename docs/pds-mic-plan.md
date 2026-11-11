@@ -126,7 +126,11 @@ avant de modifier l'une d'elles.
 `20261112010101`) ; un call de deal a `calls.project_id` **nul** (le projet se lit à travers le deal), il
 n'entre donc dans aucune lecture « calls du projet ». `can_see_call`, `is_call_owner` et les politiques de
 `calls` gagnent une branche deal en tête, `delete_project_row` prend aussi les calls des deals du projet.
-`network_contacts` : voir BIZ 8 (`docs/ARCHITECTURE.md` § 8 quaterdecies), signalé à son lot.
+`network_contacts` (BIZ 8, `20261112030101`) : deux colonnes `private_owner_person_id` / `private_since` ;
+les coordonnées d'un contact **privé** quittent la table (`network_contact_private_details`), un trigger y
+déplace toute coordonnée écrite ensuite. **Rien ne change pour un contact partagé** (tous aujourd'hui) ;
+`title_participations.contact_id` reste lu sous RLS, l'identité du contact reste lisible de tous
+(`docs/ARCHITECTURE.md` § 8 quaterdecies).
 
 ---
 

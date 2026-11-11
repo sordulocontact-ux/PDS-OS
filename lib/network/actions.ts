@@ -174,10 +174,14 @@ export async function saveNetworkContact(
 
   const supabase = await createClient();
   const before = id ? await pictureStateOf(supabase, id) : null;
+  // A private contact (BIZ 8): its coordinates are written apart, by whoever
+  // may read them; anyone else's are not kept.
+  const privacy = id ? await privateEdit(supabase, id) : null;
+  const { email, phone, city, notes, ...shared } = row;
   const { data, error } = id
     ? await supabase
         .from("network_contacts")
-        .update(row)
+        .update(privacy?.isPrivate ? shared : row)
         .eq("id", id)
         .select("id")
         .maybeSingle()
@@ -193,6 +197,22 @@ export async function saveNetworkContact(
       return { ok: false, error: t.members };
     if (error) console.error("saveNetworkContact:", error.message);
     return { ok: false, error: t.failed };
+  }
+  if (privacy?.isPrivate && privacy.canRead) {
+    const { error: privateError } = await supabase.rpc(
+      "set_private_contact_details",
+      {
+        p_contact_id: data.id,
+        p_email: email,
+        p_phone: phone,
+        p_city: city,
+        p_notes: notes,
+      },
+    );
+    if (privateError) {
+      console.error("saveNetworkContact private:", privateError.message);
+      return { ok: false, error: t.failed };
+    }
   }
   // Its picture, once it exists: a failed file of an existing contact is
   // said (a new one opens anyway; « Modifier » adds it again).
@@ -231,7 +251,10 @@ export async function saveNetworkContact(
  */
 export async function loadContactEdit(id: string): Promise<{
   // memberCount: an organization with people attached stays one.
-  contact: NetworkContactValues & { memberCount: number };
+  contact: NetworkContactValues & {
+    memberCount: number;
+    coordinatesHidden: boolean;
+  };
   options: NetworkFormOptions;
 } | null> {
   const access = await requireApproved();
@@ -243,7 +266,11 @@ export async function loadContactEdit(id: string): Promise<{
   ]);
   if (!contact || contact.archived) return null;
   return {
-    contact: { ...contact, memberCount: contact.members.length },
+    contact: {
+      ...contact,
+      memberCount: contact.members.length,
+      coordinatesHidden: contact.privacy.hidden,
+    },
     options,
   };
 }
@@ -252,4 +279,23 @@ export async function loadContactEdit(id: string): Promise<{
 export async function loadContactOptions(): Promise<NetworkFormOptions> {
   await requireApproved();
   return loadNetworkFormOptions();
+}
+
+/** Whether a contact is private and its coordinates readable (BIZ 8). */
+async function privateEdit(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  id: string,
+): Promise<{ isPrivate: boolean; canRead: boolean }> {
+  const [{ data }, { data: canRead }] = await Promise.all([
+    supabase
+      .from("network_contacts")
+      .select("private_owner_person_id")
+      .eq("id", id)
+      .maybeSingle(),
+    supabase.rpc("can_read_contact_details", { p_contact_id: id }),
+  ]);
+  return {
+    isPrivate: Boolean(data?.private_owner_person_id),
+    canRead: canRead === true,
+  };
 }

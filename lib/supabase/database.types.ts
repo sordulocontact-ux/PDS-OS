@@ -302,6 +302,52 @@ export type Database = {
           },
         ]
       }
+      deal_contacts: {
+        Row: {
+          contact_id: string
+          created_at: string
+          deal_id: string
+          linked_by: string | null
+          organization_id: string
+        }
+        Insert: {
+          contact_id: string
+          created_at?: string
+          deal_id: string
+          linked_by?: string | null
+          organization_id: string
+        }
+        Update: {
+          contact_id?: string
+          created_at?: string
+          deal_id?: string
+          linked_by?: string | null
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_contacts_contact_same_org"
+            columns: ["contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "deal_contacts_deal_same_org"
+            columns: ["deal_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "deal_contacts_linked_by_fkey"
+            columns: ["linked_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deal_events: {
         Row: {
           actor_person_id: string | null
@@ -12593,8 +12639,103 @@ export type Database = {
         }
         Relationships: []
       }
+      network_contact_private_details: {
+        Row: {
+          city: string | null
+          contact_id: string
+          email: string | null
+          notes: string | null
+          organization_id: string
+          phone: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          city?: string | null
+          contact_id: string
+          email?: string | null
+          notes?: string | null
+          organization_id: string
+          phone?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          city?: string | null
+          contact_id?: string
+          email?: string | null
+          notes?: string | null
+          organization_id?: string
+          phone?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "network_contact_private_details_contact_same_org"
+            columns: ["contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "network_contact_private_details_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      network_contact_privacy_events: {
+        Row: {
+          actor_person_id: string | null
+          contact_id: string
+          created_at: string
+          deal_id: string | null
+          id: string
+          kind: string
+          organization_id: string
+        }
+        Insert: {
+          actor_person_id?: string | null
+          contact_id: string
+          created_at?: string
+          deal_id?: string | null
+          id?: string
+          kind: string
+          organization_id: string
+        }
+        Update: {
+          actor_person_id?: string | null
+          contact_id?: string
+          created_at?: string
+          deal_id?: string | null
+          id?: string
+          kind?: string
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "network_contact_privacy_events_actor_person_id_fkey"
+            columns: ["actor_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "network_contact_privacy_events_contact_same_org"
+            columns: ["contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       network_contacts: {
         Row: {
+          private_owner_person_id: string | null
+          private_since: string | null
           archived_at: string | null
           artist_id: string | null
           city: string | null
@@ -12620,6 +12761,8 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          private_owner_person_id?: string | null
+          private_since?: string | null
           archived_at?: string | null
           artist_id?: string | null
           city?: string | null
@@ -12645,6 +12788,8 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          private_owner_person_id?: string | null
+          private_since?: string | null
           archived_at?: string | null
           artist_id?: string | null
           city?: string | null
@@ -12670,6 +12815,13 @@ export type Database = {
           website?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "network_contacts_private_owner_person_id_fkey"
+            columns: ["private_owner_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "network_contacts_artist_same_org"
             columns: ["artist_id", "organization_id"]
@@ -19324,6 +19476,36 @@ export type Database = {
       }
       validate_deal_memo: {
         Args: { p_memo_id: string }
+        Returns: undefined
+      }
+      can_read_contact_details: {
+        Args: { p_contact_id: string }
+        Returns: boolean
+      }
+      link_deal_contact: {
+        Args: { p_contact_id: string; p_deal_id: string }
+        Returns: string
+      }
+      make_contact_private: {
+        Args: { p_contact_id: string }
+        Returns: undefined
+      }
+      make_contact_shared: {
+        Args: { p_contact_id: string }
+        Returns: undefined
+      }
+      set_private_contact_details: {
+        Args: {
+          p_city: string | null
+          p_contact_id: string
+          p_email: string | null
+          p_notes: string | null
+          p_phone: string | null
+        }
+        Returns: undefined
+      }
+      unlink_deal_contact: {
+        Args: { p_contact_id: string; p_deal_id: string }
         Returns: undefined
       }
       read_deal_context: {

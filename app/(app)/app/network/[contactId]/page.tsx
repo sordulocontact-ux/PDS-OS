@@ -5,6 +5,7 @@ import { ContactActions } from "@/components/network/contact-actions";
 import { ContactCoordinates } from "@/components/network/contact-coordinates";
 import { ContactHistory } from "@/components/network/contact-history";
 import { ContactMarketing } from "@/components/network/contact-marketing";
+import { ContactPrivacy } from "@/components/network/contact-privacy";
 import {
   ContactAwaited,
   ContactFiches,
@@ -21,6 +22,7 @@ import { ReturnBanner } from "@/components/shell/return-banner";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
 import { Avatar } from "@/components/ui/avatar";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
@@ -30,6 +32,7 @@ import { todayInParis } from "@/lib/insights/dates";
 import { loadContactMarketing } from "@/lib/network/campaigns";
 import { loadContactHistory } from "@/lib/network/contact-history";
 import { loadContactProjects } from "@/lib/network/contact-projects";
+import { loadContactPrivacy } from "@/lib/network/privacy-queries";
 import { getNetworkContact } from "@/lib/network/queries";
 import { rolesText } from "@/lib/network/types";
 
@@ -40,7 +43,9 @@ export const metadata = { title: `${fr.network.title} · ${fr.app.name}` };
  * for it and what it does in each project, then its contracts, credits,
  * calls, the people of an organization, its Marketing campaigns and dated
  * observations; on the side how to reach it and its fiches de
- * renseignements. Each block is a titled card, as on a title's page.
+ * renseignements. Each block is a titled card, as on a title's page. A
+ * private contact (BIZ 8) keeps its identity for everyone; its coordinates
+ * and its exchanges (calls) only for whoever may read them.
  */
 export default async function NetworkContactPage({
   params,
@@ -60,6 +65,20 @@ export default async function NetworkContactPage({
   const t = fr.network;
   const p = t.page;
   const canEdit = can(access, "manage_network") && !contact.archived;
+  const privacy = contact.privacy;
+  const isPrivate = privacy.ownerId !== null;
+  const director = can(access, "validate");
+  const canMakePrivate =
+    !isPrivate &&
+    !contact.archived &&
+    (director ||
+      (privacy.createdBy === access.personId && can(access, "manage_network")));
+  const canMakeShared =
+    isPrivate && (director || privacy.ownerId === access.personId);
+  const sharing =
+    canMakeShared || (isPrivate && !privacy.hidden)
+      ? await loadContactPrivacy(access, contact.id)
+      : { deals: [], events: [] };
 
   return (
     <PageContainer>
@@ -77,6 +96,11 @@ export default async function NetworkContactPage({
           />
         }
         title={contact.name}
+        badge={
+          isPrivate ? (
+            <StatusBadge tone="neutral">{t.privacy.badge}</StatusBadge>
+          ) : undefined
+        }
         description={[
           t.kinds[contact.kind],
           rolesText(contact.roles),
@@ -112,7 +136,11 @@ export default async function NetworkContactPage({
           />
           <ContactInProjects projects={projects} />
           <ContactContracts contracts={contact.contracts} />
-          <ContactHistory credits={history.credits} calls={history.calls} />
+          {/* A private contact's exchanges stay with whoever reads it. */}
+          <ContactHistory
+            credits={history.credits}
+            calls={privacy.hidden ? [] : history.calls}
+          />
           {contact.kind === "organization" && (
             <ContactMembers members={contact.members} />
           )}
@@ -126,6 +154,17 @@ export default async function NetworkContactPage({
         </div>
         <div className="flex min-w-0 flex-col gap-6">
           <ContactCoordinates contact={contact} />
+          {(isPrivate || canMakePrivate) && (
+            <ContactPrivacy
+              contactId={contact.id}
+              ownerName={privacy.ownerName}
+              isPrivate={isPrivate}
+              canMakePrivate={canMakePrivate}
+              canMakeShared={canMakeShared}
+              deals={sharing.deals}
+              events={sharing.events}
+            />
+          )}
           <ContactFiches projects={projects} />
         </div>
       </div>

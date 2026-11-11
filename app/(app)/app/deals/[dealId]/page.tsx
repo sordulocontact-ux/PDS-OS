@@ -4,6 +4,7 @@ import { z } from "zod";
 import { DealCallButton } from "@/components/deals/deal-call-button";
 import { DealCallProposals } from "@/components/deals/deal-call-proposals";
 import { DealCalls } from "@/components/deals/deal-calls";
+import { DealContacts } from "@/components/deals/deal-contacts";
 import { DealHistory } from "@/components/deals/deal-history";
 import { DealInfo } from "@/components/deals/deal-info";
 import { DealMemoSections } from "@/components/deals/deal-memo-sections";
@@ -22,12 +23,14 @@ import { nextRoundHourInput } from "@/lib/calls/format";
 import { loadCallContacts } from "@/lib/calls/invite";
 import { dealCallAgenda, dealCallTitle } from "@/lib/deals/call-prep";
 import { loadDealCallProposals, loadDealCalls } from "@/lib/deals/call-queries";
+import { loadDealContacts } from "@/lib/deals/contact-queries";
 import { dealName } from "@/lib/deals/names";
 import { loadDeal, loadDealEvents } from "@/lib/deals/queries";
 import { loadDealTerms } from "@/lib/deals/term-queries";
 import type { DealTerm } from "@/lib/deals/terms";
 import type { Deal } from "@/lib/deals/types";
 import { dealCalls } from "@/lib/i18n/fr/deal-calls";
+import { dealContacts } from "@/lib/i18n/fr/deal-contacts";
 import { deals as t } from "@/lib/i18n/fr/deals";
 import { googleMeetConfigured } from "@/lib/integrations/google-calendar";
 import { createClient } from "@/lib/supabase/server";
@@ -65,7 +68,8 @@ async function callFormFor(deal: Deal, terms: DealTerm[]) {
  * A deal's page (BIZ 4): its stage beside its name, « Maintenant » when the
  * reader has a gesture, then the next action, the terms negotiated
  * (BIZ 3), PO's proposals from its calls and the calls themselves (BIZ 6),
- * its deal memo and its contract compared with it (BIZ 7),
+ * its deal memo and its contract compared with it (BIZ 7), its people (a
+ * private contact's coordinates for whoever may read them, BIZ 8),
  * the stages, what it is about and who negotiates it, and its history at
  * the bottom. Not found for whoever may not read it.
  */
@@ -77,13 +81,15 @@ export default async function DealPage({
   const access = await requireApproved();
   const deal = await loadDeal(access, dealId);
   if (!deal) notFound();
-  const [events, terms, negotiators, calls, proposals] = await Promise.all([
-    loadDealEvents(deal.id),
-    loadDealTerms(deal.id, deal.kind),
-    negotiatorsFor(deal.canAssign),
-    loadDealCalls(deal.id),
-    loadDealCallProposals(deal.id, deal.kind),
-  ]);
+  const [events, terms, negotiators, calls, proposals, contacts] =
+    await Promise.all([
+      loadDealEvents(deal.id),
+      loadDealTerms(deal.id, deal.kind),
+      negotiatorsFor(deal.canAssign),
+      loadDealCalls(deal.id),
+      loadDealCallProposals(deal.id, deal.kind),
+      loadDealContacts(deal.id),
+    ]);
   const callForm = await callFormFor(deal, terms);
   const s = t.page.sections;
 
@@ -114,6 +120,13 @@ export default async function DealPage({
         <DealCalls calls={calls} />
       </PageSection>
       <DealMemoSections access={access} deal={deal} terms={terms} />
+      <PageSection id="contacts" title={dealContacts.section}>
+        <DealContacts
+          dealId={deal.id}
+          contacts={contacts}
+          canWrite={deal.canWrite}
+        />
+      </PageSection>
       <PageSection id="etapes" title={s.stages}>
         <DealStages deal={deal} events={events} />
       </PageSection>

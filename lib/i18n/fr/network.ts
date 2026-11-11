@@ -1,3 +1,5 @@
+import { networkPrivacy } from "./network-privacy";
+
 /** Network: the people and organizations PDS works with. */
 export const network = {
   title: "Réseau",
@@ -387,4 +389,6 @@ export const network = {
     notInNetwork: "pas dans le Réseau",
     fiche: "Voir la fiche",
   },
+  // Private contacts (BIZ 8).
+  privacy: networkPrivacy,
 } as const;

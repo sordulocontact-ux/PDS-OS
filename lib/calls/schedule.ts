@@ -10,6 +10,7 @@ import {
   googleMeetConfigured,
 } from "@/lib/integrations/google-calendar";
 import { turnOnAutoTranscription } from "@/lib/integrations/google-meet";
+import { withPrivateDetails } from "@/lib/network/private-details";
 import type { Database } from "@/lib/supabase/database.types";
 
 /**
@@ -93,11 +94,14 @@ export async function resolveGuests(
   const { data: contacts, error } = contactIds.length
     ? await supabase
         .from("network_contacts")
-        .select("id, name, email")
+        .select("id, name, email, private_owner_person_id")
         .in("id", contactIds)
     : { data: [], error: null };
   if (error) return { ok: false, error: "save_failed" };
-  const byId = new Map((contacts ?? []).map((c) => [c.id, c]));
+  // A private contact's address for whoever may read it (BIZ 8); for anyone
+  // else it has none, and cannot be invited.
+  const { rows } = await withPrivateDetails(supabase, contacts ?? []);
+  const byId = new Map(rows.map((c) => [c.id, c]));
 
   const guests = new Map<string, Guest>();
   for (const guest of input) {

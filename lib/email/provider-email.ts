@@ -4,6 +4,7 @@ import { emailLink, siteUrl } from "@/lib/email/link-email";
 import { emailEnabled } from "@/lib/email/send";
 import { core } from "@/lib/i18n/fr/core";
 import { createClient } from "@/lib/supabase/server";
+import { contactAddressOf } from "@/lib/network/private-details";
 
 export type ProviderEmail = {
   // The Réseau contact who holds the link; no address: nothing is sent.
@@ -27,11 +28,8 @@ export async function emailProviderLink(
 ): Promise<"sent" | "failed" | "disabled"> {
   if (!emailEnabled()) return "disabled";
   const supabase = await createClient();
-  const { data: contact } = await supabase
-    .from("network_contacts")
-    .select("name, email")
-    .eq("id", mail.contactId)
-    .maybeSingle();
+  // A private contact's address only for whoever may read it (BIZ 8).
+  const contact = await contactAddressOf(supabase, mail.contactId);
   if (!contact?.email) return "disabled";
   return emailLink({
     to: { name: contact.name, email: contact.email },

@@ -3440,6 +3440,10 @@ choisit ce qui est utile et le **transmet** avec une priorité à l'équipe qui 
 
 ## 8 quinquies. Réseau, contrats, versions de fichiers, bibliothèque globale
 
+**Contacts privés** (BIZ 8, 12/11/2026) : l'identité d'un contact reste lue par tous ; les coordonnées et
+les échanges d'un contact privé ne sont lus que par sa propriétaire, la direction et les lecteurs d'un deal
+où il est partagé. Détail et chemins touchés : § 8 quaterdecies.
+
 Ajouts du MVP du 15 octobre (`…260929000101` à `…000301`, tests
 `supabase/tests/network-contracts-meetings.test.sql`).
 
@@ -7515,8 +7519,41 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   « Différent ») sont signalés en tête ; **jamais de correction automatique**. Journal : `memo`,
   `memo_validated`, `contract_linked`, `contract_check`. Le contrat a quitté « Informations » pour sa section.
   Test : `supabase/tests/deal-memos.test.sql`.
+- **Contacts privés** (BIZ 8, `20261112030101_private_contacts.sql`). L'**identité** d'un contact (nom, type,
+  métiers, organisation, artiste, photo, comptes publics, site) reste partagée : tout membre la lit,
+  `PersonPickerField` marche pour tous. Ses **coordonnées** (e-mail, téléphone, ville = l'adresse, notes) et
+  ses **échanges** (calls de sa fiche) peuvent être rendus privés par sa **propriétaire** : la personne qui l'a
+  créé (avec `manage_network`) ou la direction (`make_contact_private` ; `make_contact_shared` par la
+  propriétaire ou la direction). Lecteurs : propriétaire, direction, lecteurs d'un deal où il est partagé
+  (`can_read_contact_details`). **Modèle choisi, le plus sûr** : les coordonnées d'un contact privé **quittent**
+  `network_contacts` pour `network_contact_private_details` (RLS `can_read_contact_details`). Une RLS ne cache
+  pas certaines colonnes d'une ligne à certains lecteurs, et une quarantaine de fonctions SECURITY DEFINER
+  (fiches de renseignements publiques `_get_legal_form_h` / `_submit_legal_form_h`, `review_legal_form`,
+  `project_link_contacts`, autorisations `link_clearance_holder_contact`, `receive_clearance_signed_copy`…)
+  lisent les colonnes de `network_contacts` : une fois déplacées, elles n'ont **rien à divulguer**, par
+  construction, quel que soit l'appelant. Seules les fonctions de cette migration touchent la table privée
+  (un test pgTAP le vérifie sur `pg_proc`). Toute coordonnée écrite ensuite sur un contact privé (formulaire du
+  Réseau, fiche remplie depuis sa page publique, autorisation) est **déplacée** par le trigger
+  `network_contacts_keep_private` : elle remplace la valeur pour qui lit les coordonnées, sinon elle remplit
+  seulement un champ vide (jamais d'écrasement à l'aveugle). Effacer passe par `set_private_contact_details`
+  (le formulaire du Réseau y envoie les coordonnées d'un contact privé, `privateEdit` ; il ne les montre pas
+  à qui ne les lit pas). **Partage deal par deal** : `deal_contacts` (« Contacts » de la page du deal,
+  `link_deal_contact` par qui écrit le deal ; un contact privé seulement par sa propriétaire ou la direction,
+  sinon **refus noté** et résultat `refused`, pas d'exception qui annulerait le journal ; `unlink_deal_contact`
+  par qui écrit le deal ou la propriétaire). Journal `network_contact_privacy_events` (rendu privé, partagé,
+  partage avec un deal, retrait, refus, coordonnées modifiées), lu par la propriétaire et la direction.
+  **Chemins de l'app qui ont besoin d'une adresse** : lus avec la session (`lib/network/private-details.ts` :
+  `withPrivateDetails`, `contactAddressOf`) — liste et fiche du Réseau, `listNetworkPeople` (pré-remplissage),
+  invités d'un call (`loadCallContacts`, `resolveGuests`), e-mails envoyés (`emailContact`,
+  `emailProviderLink`, e-mail du signataire) : ils marchent pour qui a le droit ; pour les autres l'adresse est
+  absente et le chemin échoue comme pour un contact sans adresse (invitation refusée `guest_without_email`,
+  e-mail non envoyé, la page reste), la fiche disant « Coordonnées privées ». **Limites assumées** : le cron
+  des réponses aux autorisations (`/api/cron/inbox`) ne reconnaît plus l'adresse d'un contact privé (seulement
+  celle notée sur l'ayant droit) ; une fiche de renseignements publique n'est plus pré-remplie de ses
+  coordonnées ; un contact rendu privé garde ses liens à des deals déjà faits (ce sont des partages, retirables).
+  Test : `supabase/tests/private-contacts.test.sql` (dont `project_link_contacts` sans adresse privée).
 - **Pas encore** : BIZ 5 (colonne « Négociation » de la vue Titres et artistes de Maël),
-  contacts privés, e-mails, onglet Deals de la fiche artiste, seuils de validation.
+  e-mails, onglet Deals de la fiche artiste, seuils de validation.
 - Code : `lib/deals/types.ts` (étapes), `actions.ts` (un geste = une fonction SQL, `WriteResult`, push après
   ce qui notifie), `errors.ts` (exceptions en français, `lib/i18n/fr/deals.ts`). Test :
   `supabase/tests/deals.test.sql`.

@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { PageSection } from "@/components/shell/page-section";
 import { FactList } from "@/components/ui/fact-list";
+import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
 import { network } from "@/lib/i18n/fr/network";
 import type { NetworkContactDetail } from "@/lib/network/queries";
@@ -24,6 +25,13 @@ export function ContactCoordinates({
   const accounts = socialLinksOf(contact);
   return (
     <PageSection card id="coordinates" title={p.coordinates}>
+      {/* A private contact (BIZ 8) whose coordinates the reader may not read. */}
+      {contact.privacy.hidden && (
+        <ToneCallout className="mb-4">
+          {fr.network.privacy.hidden} ·{" "}
+          {fr.network.privacy.hiddenBody(contact.privacy.ownerName)}
+        </ToneCallout>
+      )}
       <FactList
         emptyLabel={p.none}
         facts={[

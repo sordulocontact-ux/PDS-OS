@@ -2143,3 +2143,12 @@ les modules à parcours (proto « Mise en page des modules », version « Propos
   compare le montant saisi à l'avance ou au cachet, une personne dit « Conforme » / « Différent » terme par
   terme ; les contradictions sont signalées, rien n'est corrigé tout seul. Migration `20261112020101`,
   test `deal-memos` 27/27.
+- 12/11/2026 — **Business, BIZ 8 : contacts privés.** L'identité d'un contact reste partagée dans le Réseau ;
+  ses coordonnées (e-mail, téléphone, ville, notes) et ses échanges peuvent être rendus privés par la personne
+  qui l'a créé ou la direction, et se partagent deal par deal (« Contacts » de la page d'un deal ; un contact
+  privé seulement par sa propriétaire ou la direction). Les coordonnées privées quittent `network_contacts`
+  pour une table sous RLS : aucune fonction SECURITY DEFINER existante ne peut plus les lire. Partages,
+  retraits, refus journalisés. Liste, fiche, pré-remplissage, invités d'un call et e-mails envoyés lisent les
+  coordonnées avec la session : ils marchent pour qui a le droit, disent « Coordonnées privées » sinon.
+  Migration `20261112030101`, test `private-contacts` 34/34 ; 62 tests SQL qui touchent `network_contacts`
+  rejoués (deux échecs antérieurs, sans lien : `activation-creator-link`, `ux-roles` n°5).

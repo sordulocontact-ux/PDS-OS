@@ -62,7 +62,11 @@ export function ContactForm({
   onCancel,
 }: {
   // Absent: a new contact. `memberCount`: people attached to an organization.
-  contact?: NetworkContactValues & { memberCount?: number };
+  contact?: NetworkContactValues & {
+    memberCount?: number;
+    // A private contact whose coordinates the reader may not read (BIZ 8).
+    coordinatesHidden?: boolean;
+  };
   // A new contact already filled: a credit of a title (name and roles), a
   // draft of PO, or an artist spotted on TikTok in the Labo.
   initial?: Partial<Omit<NetworkContactValues, "id">>;
@@ -219,7 +223,11 @@ export function ContactForm({
       {namesake && !unlinked && (
         <input type="hidden" name="artistId" value={namesake.id} />
       )}
-      <ContactDetailsFields values={contact ?? initial} error={error} />
+      <ContactDetailsFields
+        values={contact ?? initial}
+        error={error}
+        privateHidden={contact?.coordinatesHidden}
+      />
       {error && !error.field && (
         <FormMessage kind="error">{error.error}</FormMessage>
       )}
