@@ -1,5 +1,5 @@
 -- A spend of a project or of an artist (BUD 1,
--- supabase/migrations/20261111200101_budget_artist_lines.sql): one row of
+-- supabase/migrations/20261111200102_budget_artist_lines.sql): one row of
 -- budget_lines, exactly one owner; an artist's spends read and written by the
 -- direction, the project managers and the business managers; a project's
 -- lines keep their rule; the receipt of an artist's spend is a private file of

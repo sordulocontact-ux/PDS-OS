@@ -2080,7 +2080,7 @@ les modules à parcours (proto « Mise en page des modules », version « Propos
   `read_artist_budgets` (DG, chefs de projet, business managers) : lit et saisit les dépenses d'un
   artiste ; les lignes d'un projet gardent leurs règles. Formulaire unique (justificatif en premier,
   montant, libellé, poste, statut et date), ligne commune avec « Sans justificatif » et son onglet ;
-  écritures en `WriteResult`. Migration `20261111200101`, test `budget-artist-lines` 17/17.
+  écritures en `WriteResult`. Migration `20261111200102`, test `budget-artist-lines` 17/17.
 - 11/11/2026 — **Budget, BUD 2 : l'enveloppe d'un artiste.** Montant, période, répartition par
   poste (somme ≤ montant, reste non réparti) ; une seule ouverte, la précédente close la veille et
   gardée ; journal de chaque changement ; ouverte et modifiée par la direction seule

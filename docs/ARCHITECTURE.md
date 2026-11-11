@@ -3015,7 +3015,7 @@ date de sortie de la Stratégie, NDA : à décider).
   - **Brief de stratégie** : prévisionnel, engagé, réel et à arbitrer, un reste par type ;
     les leviers sans dépense n'y sont plus listés (comptés en une ligne).
   - **Dépense d'un projet ou d'un artiste** (BUD 1, Ibé 11/11/2026, migration
-    `20261111200101_budget_artist_lines`, tests `budget-artist-lines.test.sql`) : une dépense reste
+    `20261111200102_budget_artist_lines`, tests `budget-artist-lines.test.sql`) : une dépense reste
     **une ligne de `budget_lines`**, rattachée à un projet **ou** à un artiste (`artist_id`,
     contrainte `budget_lines_one_owner` : exactement l'un des deux ; jamais de seconde table, la
     `artist_expenses` du 08/11 ne revient pas). Ce à quoi elle est rattachée se choisit une fois (pas
