@@ -94,6 +94,8 @@ export type DealEvent = {
   toStage: DealStage | null;
   reason: string | null;
   detail: Record<string, unknown>;
+  // « assigned »: who the deal was given to, by name (null: taken back).
+  assignee: string | null;
   actor: string | null;
   createdAt: string;
 };

@@ -161,6 +161,12 @@ export const NOTIFICATION_KINDS = [
   // What comes back signed by a private link (20261020070101).
   "legal_contract_signed_received",
   "legal_bulletin_signed",
+  // The Business module's deals (BIZ 4): to the assignee and the direction.
+  "deal_assigned",
+  "deal_agreement_proposed",
+  "deal_agreement_validated",
+  "deal_agreement_refused",
+  "deal_follow_up_due",
 ] as const;
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
 
@@ -242,6 +248,8 @@ export function notificationHref(
   // A call's report shared with a member: that report only (PROJ-AMEL-01).
   if (kind === "call_report_shared" && subjectId)
     return routes.callReport(subjectId);
+  // A deal opens its page, with or without a project (BIZ 4).
+  if (kind.startsWith("deal_") && subjectId) return routes.deal(subjectId);
   if (!projectId) return routes.app;
   // A production version: the deliverable's Postproduction (the subject is
   // the deliverable).

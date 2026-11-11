@@ -2117,3 +2117,14 @@ les modules à parcours (proto « Mise en page des modules », version « Propos
   journal du deal. La liste et la forme des termes tiennent dans `lib/deals/terms.ts` (à ajuster à l'Excel
   d'Ibé sans migration). Lignes de faits « Termes négociés » et fenêtre de modification
   (`components/deals/`). Migration `20261111231101`, test `deal-terms` 16/16.
+- 11/11/2026 — **Business, BIZ 4 : la vue « Deals » et la page d'un deal.** Entrée « Deals » de la navigation
+  principale (négociateurs, direction, chefs de projet) : une seule liste, onglets En cours / À relancer /
+  Signés / Abandonnés, filtres étape, négociateur, projet, recherche ; « Nouveau deal » (direction, chef de
+  projet sur ses projets) parmi les participations, projets, artistes et membres qui négocient existants. Page
+  d'un deal : « Maintenant » si le lecteur a un geste (valider ou renvoyer l'accord ; étape suivante, autre
+  étape, abandon motivé), prochaine action et relance, termes négociés, étapes, informations, historique. Les
+  actions des deals (relances dues, prochaines actions, accords à valider) arrivent dans Travail et l'accueil
+  par la source unique. Notifications à l'affecté et à la direction (affectation, accord à valider, validé ou
+  renvoyé, relance due par le cron quotidien). PO : sujet du guide et lecteur `deals`. Migration
+  `20261111232101`, test `deal-notifications` 9/9. Reste : BIZ 5 (colonne de Maël), calls, deal memo,
+  contacts privés, fiche artiste › Deals.

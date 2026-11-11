@@ -7438,6 +7438,32 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   Lecture `loadDealTerms` (`term-queries.ts`), écriture `setDealTerm` (`term-actions.ts`, valeur validée
   par le format du terme), affichage `DealTerms` / `TermForm` / `TermValueFields` (`components/deals/`),
   ton de l'état `dealTermTone`. Test : `supabase/tests/deal-terms.test.sql`.
+- **Vue « Deals » et page d'un deal** (BIZ 4) : entrée de la navigation principale `/app/deals` pour qui a
+  `negotiate`, `validate` ou `pilot_projects` (`NavItem.permission` accepte une liste : l'une suffit ;
+  **décision** : les chefs de projet l'ont aussi, ils ouvrent les deals de leurs projets et lisent ceux-ci).
+  **Une seule liste** (jamais Opportunités / Négociations / Accords) : onglets En cours / À relancer
+  (relance dont la date est venue) / Signés / Abandonnés, filtres étape, négociateur, projet
+  (`lib/deals/filters.ts`). **Pas de bloc « Maintenant » sur la liste** (`docs/VISION-UX.md` § 3 : une page
+  liste n'est qu'une liste) : ce que les deals demandent (appels à préparer, relances dues, accords à valider)
+  vit dans **Travail et l'accueil**, par la source unique (`lib/deals/work.ts` → `MyWork.deals` → lignes
+  `deal` / `validate` de `workRowsOf`) : un geste par deal confié au lecteur (relance venue, sinon prochaine
+  action, sinon relance à venir, sinon le geste de l'étape ; rien pendant que la direction décide l'accord),
+  et pour la direction chaque accord de principe à valider. Page `/app/deals/[dealId]` (introuvable pour qui ne
+  lit pas le deal) : étape à côté du titre, « Maintenant » seulement si le lecteur a un geste, Prochaine
+  action, Termes négociés, Étapes, Informations (projet en lien seulement s'il est visible, contrat lu sur la
+  participation, négociateur et « Changer »), Historique. « Nouveau deal » (direction, chef de projet sur ses
+  projets) : participation d'un collectif (sans deal vivant), sinon projet et/ou artiste choisis parmi
+  l'existant, négociateur parmi les membres qui négocient (`loadNewDealOptions`).
+- **Notifications** (`20261111232101_deal_notifications.sql`, trigger sur `deal_events`) : `deal_assigned`
+  (à l'affecté), `deal_agreement_proposed` (à la direction), `deal_agreement_validated` /
+  `deal_agreement_refused` (à l'affecté), `deal_follow_up_due` (à l'affecté, une fois par date, posée par
+  `flag_due_deal_follow_ups` dans le cron quotidien `/api/cron/detect-releases`, le même que les réserves
+  de la Distribution). Ouvrent la page du deal ; push par `schedulePendingPushes()` après les gestes.
+- **PO** : sujet `deals` du guide (`topics/business.ts`), lecteur `deals` (`lib/assistant/read/deals.ts` :
+  étape, négociateur, prochaine action, relance, termes écrits), règle d'appel dans
+  `lib/ai/instructions/assistant.ts`.
+- **Pas encore** : BIZ 5 (colonne « Négociation » de la vue Titres et artistes de Maël), calls d'un deal,
+  deal memo, contacts privés, e-mails, onglet Deals de la fiche artiste, seuils de validation.
 - Code : `lib/deals/types.ts` (étapes), `actions.ts` (un geste = une fonction SQL, `WriteResult`, push après
   ce qui notifie), `errors.ts` (exceptions en français, `lib/i18n/fr/deals.ts`). Test :
   `supabase/tests/deals.test.sql`.

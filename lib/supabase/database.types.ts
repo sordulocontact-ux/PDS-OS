@@ -19490,6 +19490,7 @@ export type Database = {
         Returns: string
       }
       ai_quota_day_start: { Args: never; Returns: string }
+      flag_due_deal_follow_ups: { Args: never; Returns: number }
       flag_overdue_distribution_reserves: { Args: never; Returns: number }
       ai_quota_resets_at: { Args: never; Returns: string }
       ai_usage_today: {

@@ -1,3 +1,8 @@
+// « (« PDS MIC #5 ») » after a deal's words, nothing for a deal without a
+// project (the text then falls back on « un projet »).
+const dealOf = (project: string) =>
+  project === "un projet" ? "" : ` (« ${project} »)`;
+
 /** Notifications: bell, toasts and browser notifications. */
 export const notifications = {
   bell: "Notifications",
@@ -202,6 +207,17 @@ export const notifications = {
       `Un contrat signé est arrivé par un lien privé (« ${project} ») : à vérifier, puis à marquer comme signé.`,
     legal_bulletin_signed: (_actor: string, project: string) =>
       `Un bulletin SACEM signé est arrivé par un lien privé (« ${project} »).`,
+    // The deals (BIZ 4): the project's name only when the deal has one.
+    deal_assigned: (actor: string, project: string) =>
+      `${actor} vous confie un deal${dealOf(project)} : à vous de négocier.`,
+    deal_agreement_proposed: (actor: string, project: string) =>
+      `${actor} propose un accord de principe${dealOf(project)} : à valider.`,
+    deal_agreement_validated: (actor: string, project: string) =>
+      `${actor} a validé l'accord de principe${dealOf(project)} : place au contrat.`,
+    deal_agreement_refused: (actor: string, project: string) =>
+      `${actor} renvoie l'accord de principe en négociation${dealOf(project)} : voyez pourquoi.`,
+    deal_follow_up_due: (_actor: string, project: string) =>
+      `Une relance est due aujourd'hui${dealOf(project)}.`,
     legal_element_withdrawn: (actor: string, project: string) =>
       `${actor} a retiré un élément repris d'une œuvre existante de « ${project} » : le passage est à refaire sans lui dans le Master.`,
     strategy_review_requested: (actor: string, project: string) =>

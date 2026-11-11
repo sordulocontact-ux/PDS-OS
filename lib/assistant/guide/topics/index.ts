@@ -1,6 +1,7 @@
 import { foldName } from "@/lib/assistant/fuzzy-name";
 import type { GuideTopic } from "@/lib/assistant/guide/types";
 import { adminTopics } from "@/lib/assistant/guide/topics/admin";
+import { businessTopics } from "@/lib/assistant/guide/topics/business";
 import { dailyTopics } from "@/lib/assistant/guide/topics/daily";
 import { libraryTopics } from "@/lib/assistant/guide/topics/library";
 import { libraryFilesTopics } from "@/lib/assistant/guide/topics/library-files";
@@ -20,6 +21,7 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
   ...dailyTopics,
   ...projectsTopics,
   ...projectPilotTopics,
+  ...businessTopics,
   ...workflowsTopics,
   ...marketingTopics,
   ...libraryTopics,
