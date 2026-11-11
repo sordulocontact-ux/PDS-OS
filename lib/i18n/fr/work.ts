@@ -9,6 +9,10 @@ export const work = {
       "Ce qui vous attend dans tous vos projets, le plus pressé d'abord.",
     creative_director:
       "Ce qui vous attend dans tous vos projets, le plus pressé d'abord.",
+    business_manager:
+      "Ce qui vous attend dans vos négociations, le plus pressé d'abord.",
+    business:
+      "Ce qui vous attend dans vos négociations, le plus pressé d'abord.",
   } as Record<string, string>,
   descriptionFallback:
     "Ce qui vous attend dans tous vos projets, le plus pressé d'abord.",

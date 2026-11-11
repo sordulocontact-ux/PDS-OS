@@ -729,13 +729,19 @@ Fiche fournie par le client le 26/09/2026, complétée par ses réponses du mêm
 le rôle du DG. Dans le code, un poste ne donne jamais un droit directement : une seule
 table de correspondance traduit le poste en permissions (`role_permissions` en base).
 
-### Les 3 postes
+### Les postes
 
 | Poste | Nature | Rôle |
 | --- | --- | --- |
 | **Directeur général** (DG) | Gestionnaire, admin V1 | Cumule Label Manager et responsable stratégie financière. Voit et administre l'ensemble. **Valide tout ce qui est soumis à validation**, dont le scénario (= la **Stratégie de lancement**). |
 | **Chef de projet** (CP) | Responsable opérationnel | Reçoit un projet, l'**accepte, le refuse ou demande une précision**. Pilote les projets qu'il a acceptés. **Ne voit que les projets qui lui sont attribués.** |
 | **Directeur créatif** (DC) | Membre interne affecté | Travaille sur les projets et livrables créatifs qui lui sont affectés. Dépose et propose des versions. Sans administration ni validation globale. |
+| **Business manager** (BM) | Négociateur | Ajouté le 11/11/2026 (module Business, BIZ 1). Négocie les dossiers (deals) qui lui sont affectés : artistes et titres d'un PDS MIC d'abord. **N'écrit jamais dans un projet** ; ses deals ont leurs propres droits. Exemple : Glen. |
+| **Business** | Développement commercial | Ajouté le 11/11/2026. Partenariats et opportunités commerciales (son CRM vient plus tard, BIZ 11) ; négocie aussi ses dossiers affectés. Exemple : Thibault. |
+
+Permission propre aux deux postes Business : `negotiate`. Comptes de test locaux (Docker, seed) :
+`glen@pds.test` et `thibault@pds.test`, mot de passe `pds-local-business` ; pas encore de vrais
+comptes en production.
 
 ### Matrice des accès
 

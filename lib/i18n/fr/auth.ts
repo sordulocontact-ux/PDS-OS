@@ -121,6 +121,8 @@ export const auth = {
       general_director: "Directeur général",
       project_manager: "Chef de projet",
       creative_director: "Directeur créatif",
+      business_manager: "Business manager",
+      business: "Business",
     },
     statuses: {
       invited: "Invité",
@@ -181,6 +183,10 @@ export const auth = {
         "Reçoit les projets attribués, les accepte, les refuse ou demande une précision, puis les pilote.",
       creative_director:
         "Travaille sur les projets et livrables créatifs qui lui sont affectés. Sans administration ni validation.",
+      business_manager:
+        "Négocie les dossiers qui lui sont affectés (artistes, titres, partenariats). Ne modifie pas les projets.",
+      business:
+        "Développe les partenariats et les opportunités commerciales, et négocie les dossiers qui lui sont affectés.",
     },
     submit: "Créer le compte",
     submitting: "Création…",
