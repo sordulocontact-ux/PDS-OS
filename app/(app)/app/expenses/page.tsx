@@ -2,6 +2,7 @@ import { IconMoneyBillCoin } from "nucleo-sharp-essential";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { ExpensesList } from "@/components/budget/expenses-list";
+import { QuickExpenseButton } from "@/components/budget/quick-expense-button";
 import { EmptyState } from "@/components/shell/empty-state";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
@@ -49,7 +50,16 @@ export default async function ExpensesPage({
 
   return (
     <PageContainer>
-      <PageHeader title={t.title} description={t.description} />
+      <PageHeader
+        title={t.title}
+        description={t.description}
+        // The phone has it in its header already (BUD 4).
+        action={
+          <div className="hidden md:block">
+            <QuickExpenseButton />
+          </div>
+        }
+      />
       {error && <FormMessage kind="error">{t.loadError}</FormMessage>}
       {expenses.length === 0 ? (
         <EmptyState

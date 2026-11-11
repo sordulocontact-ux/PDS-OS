@@ -422,6 +422,12 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
 - Mobile : même navigation (pleine largeur) dans un tiroir blanc, ouvert depuis l'en-tête ;
   la navigation du projet y est la rangée de puces (`ProjectNavChips`, ci-dessus), toutes ses
   entrées (Validations, Activité et Budget compris, pour qu'aucune page ne soit sans accès).
+- **« + Dépense » dans l'en-tête du téléphone** (BUD 4, 11/11/2026 : « t'es dans le rush, tu ajoutes
+  une dépense après avoir commandé au grec ») : bouton contour `sm` à gauche de la cloche, sur toutes
+  les pages, pour qui peut saisir une dépense (`read_artist_budgets` ou `pilot_projects`). Pas de
+  bouton flottant ; sur ordinateur, l'entrée est sur la page Dépenses et dans chaque Budget. Le
+  formulaire est celui de toute dépense, dans l'ordre justificatif (photo) → montant → libellé →
+  poste → projet ou artiste (les derniers utilisés en tête) → statut (Payé par défaut) et date.
 - Barre principale repliée (dans un projet) : le carré du logo (40 px, rayon 12, monogramme 24 px) reste
   toujours visible au-dessus du bouton de dépliage ; « Travail » porte le nombre de mes actions
   du projet ouvert (`CountBadge size="sm"` 16 px au coin de l'icône).

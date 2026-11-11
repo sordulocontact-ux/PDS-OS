@@ -2094,3 +2094,9 @@ les modules à parcours (proto « Mise en page des modules », version « Propos
   Toutes les dépenses lisibles, projets et artistes, onglets Toutes / Sans justificatif, filtres
   artiste, projet, poste, saisie par, mois, recherche ; même ligne et mêmes modales que les Budgets
   (`useBudgetLineDialogs` extrait de `BudgetLines`). Pas de migration.
+- 11/11/2026 — **Budget, BUD 4 : saisie rapide sur téléphone.** « + Dépense » dans l'en-tête mobile
+  sur toutes les pages (qui peut saisir une dépense), « Ajouter une dépense » sur la page Dépenses en
+  ordinateur. Même formulaire que les Budgets, dans l'ordre justificatif (photo) → montant → libellé →
+  poste (suggéré : « grec », « kebab »… = Restauration) → projet ou artiste (récents en tête) →
+  statut (Payé par défaut) et date ; manques en rouge au premier essai. Pas de migration. BUD 5
+  (partage depuis l'iPhone, lecture du ticket par PO) non fait.

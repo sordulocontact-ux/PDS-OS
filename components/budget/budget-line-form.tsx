@@ -11,38 +11,28 @@ import {
   type Classification,
 } from "@/components/budget/budget-classification-fields";
 import { BudgetProofField } from "@/components/budget/budget-proof-field";
-import { OptionSelect } from "@/components/framing/option-select";
-import { Label } from "@/components/ui/label";
+import { BudgetStatusDateFields } from "@/components/budget/budget-status-date-fields";
+import {
+  BudgetTargetField,
+  targetKey,
+} from "@/components/budget/budget-target-field";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { saveBudgetLine } from "@/lib/budget/actions";
 import {
   centsToInput,
-  isBudgetStatus,
   type BudgetDeliverable,
-  type BudgetFamily,
   type BudgetLever,
   type BudgetLine,
-  type BudgetStatus,
   type BudgetTarget,
+  type ExpenseTarget,
 } from "@/lib/budget/types";
+import { lineFormErrors, type BudgetLineInitial } from "@/lib/budget/line-form";
 import { uploadBudgetProof } from "@/lib/budget/upload-proof";
 import { budget } from "@/lib/i18n/fr/budget";
 import { todayInParis } from "@/lib/insights/dates";
-import { parseEurosToCents } from "@/lib/projects/schemas";
 
 const fr = { budget };
-
-/** What a new line starts with: a draft of PO, a quick entry (« déjà
- * payée »). Every value optional. */
-export type BudgetLineInitial = Partial<{
-  label: string;
-  amount: string;
-  status: BudgetStatus | null;
-  family: BudgetFamily | null;
-  note: string;
-  spentOn: string;
-}>;
 
 /**
  * The one form of a spend, on a project or an artist (BUD 1): the proof
@@ -54,7 +44,8 @@ export type BudgetLineInitial = Partial<{
  * « Formulaires »).
  */
 export function BudgetLineForm({
-  target,
+  target: fixedTarget,
+  targets = [],
   line,
   initial,
   levers = [],
@@ -63,7 +54,9 @@ export function BudgetLineForm({
   onDone,
   onCancel = onDone,
 }: {
-  target: BudgetTarget;
+  // Null: chosen in the form among `targets` (a quick spend, BUD 4).
+  target: BudgetTarget | null;
+  targets?: ExpenseTarget[];
   line: BudgetLine | null;
   initial?: BudgetLineInitial;
   levers?: BudgetLever[];
@@ -90,32 +83,23 @@ export function BudgetLineForm({
     deliverableId: line?.deliverableId ?? NONE,
   });
   const [proof, setProof] = useState<File | null>(null);
+  const [chosen, setChosen] = useState("");
+  const target =
+    fixedTarget ?? targets.find((o) => targetKey(o) === chosen) ?? null;
   const [tried, setTried] = useState(false);
   const none = (value: string) => (value === NONE ? "" : value);
   // A line that follows an invoice: its amount and state are the invoice's.
   const followsInvoice = Boolean(line?.invoiceId);
-  const onProject = target.kind === "project";
+  const onProject = target?.kind === "project";
 
-  const amountCents = parseEurosToCents(v.amount);
-  const errors = {
-    amount:
-      amountCents === null || amountCents === undefined
-        ? t.invalidAmount
-        : undefined,
-    label: v.label.trim() ? undefined : t.labelMissing,
-    detail:
-      classification.family === "other" && !classification.familyDetail.trim()
-        ? t.familyDetailRequired
-        : undefined,
-    spentOn: v.spentOn ? undefined : t.spentOnMissing,
-  };
+  const errors = lineFormErrors({ ...v, ...classification, target });
   const missing = Object.values(errors).filter(Boolean).length;
   const shown: Partial<typeof errors> = tried ? errors : {};
 
   function send(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setTried(true);
-    if (missing > 0) {
+    if (missing > 0 || !target) {
       requestAnimationFrame(() =>
         root.current
           ?.querySelector<HTMLElement>('[aria-invalid="true"]')
@@ -191,32 +175,25 @@ export function BudgetLineForm({
         deliverables={onProject ? deliverables : []}
         detailError={Boolean(shown.detail)}
         afterFamily={
-          <div className="grid gap-5 sm:grid-cols-2">
-            <div className="grid content-start gap-1.5">
-              <Label htmlFor="budget-status" required>
-                {t.status}
-              </Label>
-              <OptionSelect
-                id="budget-status"
-                required
-                fill
-                label={t.status}
-                options={fr.budget.statuses}
-                disabled={followsInvoice}
-                value={v.status}
-                onChange={(s) => isBudgetStatus(s) && setV({ ...v, status: s })}
+          <>
+            {/* « projet ou artiste » right after the poste (BUD 4). */}
+            {!fixedTarget && (
+              <BudgetTargetField
+                targets={targets}
+                value={chosen}
+                error={shown.target}
+                onChange={setChosen}
               />
-            </div>
-            <Field
-              name="spent-on"
-              type="date"
-              label={t.spentOn}
-              aria-required
-              value={v.spentOn}
-              error={shown.spentOn}
-              onChange={(e) => setV({ ...v, spentOn: e.target.value })}
+            )}
+            <BudgetStatusDateFields
+              status={v.status}
+              spentOn={v.spentOn}
+              spentOnError={shown.spentOn}
+              statusLocked={followsInvoice}
+              onStatus={(status) => setV({ ...v, status })}
+              onSpentOn={(spentOn) => setV({ ...v, spentOn })}
             />
-          </div>
+          </>
         }
       />
       <TextareaField

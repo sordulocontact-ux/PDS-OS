@@ -6,6 +6,7 @@ import { FeedbackProvider } from "@/components/feedback/feedback-provider";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { NotificationListener } from "@/components/notifications/notification-listener";
 import { OnboardingProvider } from "@/components/onboarding/onboarding-provider";
+import { QuickExpenseButton } from "@/components/budget/quick-expense-button";
 import { PreprodSlot } from "@/components/preprod/preprod-slot";
 import { MobileNav } from "@/components/shell/mobile-nav";
 import { PdsLogo } from "@/components/shell/pds-logo";
@@ -80,6 +81,11 @@ export default async function AppLayout({
   const name = [access.firstName, access.lastName].filter(Boolean).join(" ");
   const userPanel = <UserPanel name={name} email={access.email} />;
   const signedIn = access.state === "approved" && access.personId !== null;
+  // « + Dépense » on the phone (BUD 4): for whoever may enter one (an
+  // artist's spend, or a line of a project they run).
+  const spends =
+    signedIn &&
+    (can(access, "read_artist_budgets") || can(access, "pilot_projects"));
   // Access requests waiting for a decision: counted on "Équipe" for admins.
   const notifications = signedIn
     ? loadNotifications()
@@ -158,7 +164,10 @@ export default async function AppLayout({
                       footer={userPanel}
                     />
                     {brand}
-                    <div className="ml-auto">{bell("ghost")}</div>
+                    <div className="ml-auto flex items-center gap-1">
+                      {spends && <QuickExpenseButton compact />}
+                      {bell("ghost")}
+                    </div>
                   </header>
                   <main className="flex min-w-0 flex-1 flex-col">
                     {children}

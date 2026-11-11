@@ -112,6 +112,9 @@ export const budget = {
     generic: "La dépense n'a pas pu être enregistrée. Réessayez.",
   },
   add: "Ajouter une dépense",
+  // The quick entry of the phone's header (BUD 4).
+  quickAdd: "Dépense",
+  quickAddLabel: "Ajouter une dépense",
   edit: (label: string) => `Modifier « ${label} »`,
   remove: (label: string) => `Supprimer « ${label} »`,
   // A line that follows an invoice (lib/invoices).
@@ -131,6 +134,23 @@ export const budget = {
     labelMissing:
       "Dites ce qu'est la dépense, par exemple « Repas après la session ».",
     spentOn: "Date",
+    // A quick spend (BUD 4): what it goes to.
+    target: "Pour",
+    targetPlaceholder: "Choisir un projet ou un artiste",
+    targetSearch: "Rechercher un projet ou un artiste",
+    targetNone: "Aucun projet ni artiste ne correspond.",
+    targetMissing: "Dites à quel projet ou à quel artiste va la dépense.",
+    targetOption: (
+      label: string,
+      kind: "project" | "artist",
+      recent: boolean,
+    ) =>
+      `${label} · ${kind === "project" ? "projet" : "artiste"}${recent ? " · récent" : ""}`,
+    quickTitle: "Nouvelle dépense",
+    quickDescription:
+      "Le ticket en photo si vous l'avez, le montant, ce que c'est et pour qui : déjà payée par défaut.",
+    noTargets:
+      "Vous ne menez aucun projet et ne lisez pas le budget des artistes : aucune dépense à saisir ici.",
     spentOnMissing: "Indiquez le jour de la dépense.",
     missingCount: (n: number) =>
       n > 1 ? `${n} champs à compléter.` : "Un champ à compléter.",

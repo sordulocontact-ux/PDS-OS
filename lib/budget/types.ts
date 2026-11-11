@@ -43,6 +43,10 @@ export type BudgetFamily = (typeof BUDGET_FAMILIES)[number];
 /** What a spend belongs to (BUD 1): a project or an artist, never both. */
 export type BudgetTarget = { kind: "project" | "artist"; id: string };
 
+/** A target offered to a quick spend (BUD 4): its name, and whether the
+ * reader spent on it lately (those lead the list). */
+export type ExpenseTarget = BudgetTarget & { label: string; recent?: boolean };
+
 export type BudgetLine = {
   id: string;
   target: BudgetTarget;

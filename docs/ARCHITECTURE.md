@@ -3072,6 +3072,16 @@ date de sortie de la Stratégie, NDA : à décider).
     par, mois (`lib/budget/expense-filters.ts`), recherche instantanée. **Même ligne** (`BudgetTable
     showTarget`) et mêmes modales (`useBudgetLineDialogs`) que le Budget d'un projet et d'un artiste ;
     modifiable là où le lecteur écrit : une dépense d'artiste, une ligne d'un projet qu'il mène.
+  - **Saisie rapide** (BUD 4) : `QuickExpenseButton`, « + Dépense » dans l'en-tête du téléphone sur
+    toutes les pages (`read_artist_budgets` ou `pilot_projects`), « Ajouter une dépense » sur la page
+    Dépenses en ordinateur (les Budgets gardent le leur). **Même formulaire** (`BudgetLineForm` avec
+    `target={null}` et `targets`) : justificatif → montant → libellé → poste (suggéré, « Utiliser »)
+    → **pour** (`BudgetTargetField` : projets que le lecteur mène, artistes pour `read_artist_budgets`,
+    non archivés ; les cinq derniers où il a saisi en tête, `loadExpenseTargets`) → statut, **Payé**
+    par défaut (`initial={{ status: "paid" }}` : une dépense saisie après coup est déjà payée) et
+    date. Manques en rouge au premier essai (`lineFormErrors`, `lib/budget/line-form.ts`).
+    `initial` / `target` permettent à PO d'ouvrir ce formulaire ; `propose_budget_line` ne prépare
+    encore qu'une dépense de projet.
 
 ### Blocages et informations notées d'une étape (C6, 18/10/2026)
 

@@ -86,6 +86,7 @@ export const projectPilotTopics: GuideTopic[] = [
       "La page Dépenses liste, la plus récente d'abord, les dépenses des projets dont vous lisez le budget et celles des artistes.",
       "Elle se filtre par artiste, projet, poste, personne qui a saisi et mois ; l'onglet « Sans justificatif » garde les dépenses facturées ou payées sans photo du ticket ni facture.",
       "Chaque ligne est la même que dans le Budget d'un projet ou d'un artiste : la modifier ici la modifie partout.",
+      "Sur téléphone, « + Dépense » en haut de chaque page ouvre la saisie rapide : photo du ticket, montant, libellé, poste proposé d'après le libellé, puis le projet ou l'artiste (les derniers utilisés en tête) ; la dépense est déjà payée par défaut.",
     ],
     permissions: ["read_artist_budgets"],
   },

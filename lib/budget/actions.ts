@@ -79,6 +79,7 @@ function refresh(target: BudgetTarget) {
   if (target.kind === "project")
     revalidatePath(routes.project(target.id), "layout");
   else revalidatePath(routes.artist(target.id), "layout");
+  revalidatePath(routes.expenses);
 }
 
 function failure(error: { code?: string; message?: string }): WriteResult {
