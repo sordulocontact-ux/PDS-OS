@@ -12,7 +12,7 @@ export const assistantAccess = {
     administer: "gérer l'équipe et les accès",
     assign_projects: "transmettre un projet à un chef de projet",
     validate:
-      "valider ce qu'on soumet (Brief, étapes, contrats, modèles de contrat)",
+      "valider ce qu'on soumet (Brief, étapes, contrats, modèles de contrat, accords de principe des deals)",
     pilot_projects: "mener les projets dont on est responsable",
     creative_work:
       "valider les maquettes et déposer des fichiers dans les projets",
@@ -26,7 +26,7 @@ export const assistantAccess = {
     manage_legal:
       "voir et mener le Juridique des projets, gérer les modèles de contrat",
     manage_sessions: "créer et mener les sessions studio",
-    negotiate: "négocier les dossiers qui vous sont affectés",
+    negotiate: "négocier les deals qui vous sont confiés (page Deals)",
     read_artist_budgets:
       "lire le budget des artistes et saisir leurs dépenses directes",
     manage_artist_budgets:

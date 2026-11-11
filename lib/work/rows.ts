@@ -1,4 +1,5 @@
 import { routes } from "@/lib/auth/redirects";
+import { deals } from "@/lib/i18n/fr/deals";
 import { journey } from "@/lib/i18n/fr/journey";
 import { masterPage } from "@/lib/i18n/fr/master-page";
 import { work } from "@/lib/i18n/fr/work";
@@ -14,7 +15,7 @@ import { formatShortDay } from "@/lib/utils/day";
 import type { MyJourneyWork } from "@/lib/work/journeys";
 import type { MyWork } from "@/lib/work/queries";
 
-const fr = { journey, masterPage, work };
+const fr = { deals, journey, masterPage, work };
 
 /** The tabs of the global Travail, « Tout » first. What is late is a group
  * of the list, not a tab: it is always seen first. */
@@ -45,7 +46,8 @@ export type WorkRowKind =
   | "retransmit"
   | "awaiting"
   | "proposals"
-  | "session";
+  | "session"
+  | "deal";
 
 /** One line of the global Travail, computed by code. */
 export type WorkRow = {
@@ -87,6 +89,7 @@ const viewsOf: Record<WorkRowKind, WorkView[]> = {
   awaiting: [],
   proposals: ["validate"],
   session: ["todo"],
+  deal: ["todo"],
 };
 
 export const inView = (row: WorkRow, view: WorkView) =>
@@ -267,6 +270,29 @@ export function workRowsOf(
       due: null,
       overdue: false,
       why: why.session,
+      validator: null,
+      then: [],
+    })),
+    // The deals (BIZ 4): their page, their project when they have one,
+    // else their artist as the tag.
+    ...work.deals.map(({ deal, kind, title, due, overdue }): Draft => ({
+      key: `deal|${deal.id}`,
+      kind,
+      href: routes.deal(deal.id),
+      title,
+      module: null,
+      place: [
+        deal.projectTitle ? deal.artistName : null,
+        fr.deals.work.place(fr.deals.stages[deal.stage]),
+      ]
+        .filter(Boolean)
+        .join(" · "),
+      projectId: deal.projectId ?? deal.artistId ?? "",
+      projectTitle: deal.projectTitle ?? deal.artistName ?? "",
+      due,
+      overdue,
+      why:
+        kind === "validate" ? fr.deals.work.why.decide : fr.deals.work.why.deal,
       validator: null,
       then: [],
     })),

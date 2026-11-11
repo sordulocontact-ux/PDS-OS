@@ -9,6 +9,7 @@ import {
   IconMsgs,
   IconNodes,
   IconPhone,
+  IconScale,
   IconSliders,
   IconSparkle3,
   IconUserSearch,
@@ -34,8 +35,9 @@ export type NavItem = {
   icon: typeof IconHouse2;
   exact?: boolean;
   adminOnly?: boolean;
-  // Shown only to whoever holds it (Dépenses: the budget's readers).
-  permission?: Permission;
+  // Shown only to whoever holds it (Dépenses: the budget's readers), or one
+  // of them (Deals: the negotiators, the direction, the project managers).
+  permission?: Permission | readonly Permission[];
   disabled?: boolean;
 };
 
@@ -68,6 +70,14 @@ export const NAV_ITEMS: readonly NavItem[] = [
     icon: IconMoneyBillCoin,
     permission: "read_artist_budgets",
   },
+  // The Business module's deals (BIZ 4): the negotiators, the direction,
+  // and the project managers who open the deals of their projects.
+  {
+    href: routes.deals,
+    label: fr.shell.nav.deals,
+    icon: IconScale,
+    permission: ["negotiate", "validate", "pilot_projects"],
+  },
   {
     href: routes.members,
     label: fr.shell.nav.members,
@@ -80,3 +90,14 @@ export const NAV_ITEMS: readonly NavItem[] = [
   // Repérage (Sacha 03/11): artists spotted on TikTok, read from a screenshot.
   { href: routes.labo, label: fr.shell.nav.labo, icon: IconUserSearch },
 ] as const;
+
+/** Whether an item is shown to whoever holds these permissions. */
+export function navItemAllowed(
+  item: NavItem,
+  permissions: readonly Permission[],
+): boolean {
+  if (!item.permission) return true;
+  const asked: readonly Permission[] =
+    typeof item.permission === "string" ? [item.permission] : item.permission;
+  return asked.some((p) => permissions.includes(p));
+}

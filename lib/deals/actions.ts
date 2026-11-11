@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
+import { settleProposal } from "@/lib/deals/call-settle";
 import { dealFailure } from "@/lib/deals/errors";
 import { MOVABLE_DEAL_STAGES } from "@/lib/deals/types";
 import { deals } from "@/lib/i18n/fr/deals";
@@ -38,6 +39,17 @@ const optionalText = (max: number) =>
     .optional()
     .nullable()
     .transform((v) => v || null);
+
+/** The proposal of PO a saved form applied (BIZ 6); a failure is only
+ * logged, the deal's change is made. */
+async function applied(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  proposalId: string | null | undefined,
+) {
+  if (!proposalId || !id.safeParse(proposalId).success) return;
+  const error = await settleProposal(supabase, proposalId, "applied");
+  if (error) console.error("deal proposal not settled:", error);
+}
 
 function refresh(dealId?: string) {
   revalidatePath(routes.deals);
@@ -101,11 +113,13 @@ export async function assignDeal(
   return { ok: true, done: who.data ? t.done.assigned : t.done.unassigned };
 }
 
-/** « Passer à l'étape … » (the direction, the assignee). */
+/** « Passer à l'étape … » (the direction, the assignee); `proposalId`: the
+ * proposal of PO it applies (BIZ 6). */
 export async function setDealStage(
   dealId: string,
   stage: string,
   note?: string | null,
+  proposalId?: string | null,
 ): Promise<WriteResult> {
   await requireApproved();
   const deal = id.safeParse(dealId);
@@ -120,6 +134,7 @@ export async function setDealStage(
     p_note: why.data ?? undefined,
   });
   if (error) return { ok: false, error: dealFailure("setDealStage", error) };
+  await applied(supabase, proposalId);
   await schedulePendingPushes();
   refresh(deal.data);
   return { ok: true, done: t.done.stage(t.stages[to.data]) };
@@ -182,10 +197,11 @@ const nextInput = z.object({
 });
 export type DealNextActionInput = z.input<typeof nextInput>;
 
-/** « Prochaine action » and « Relancer le ». */
+/** « Prochaine action » and « Relancer le »; `proposalId` as above. */
 export async function setDealNextAction(
   dealId: string,
   input: DealNextActionInput,
+  proposalId?: string | null,
 ): Promise<WriteResult> {
   await requireApproved();
   const deal = id.safeParse(dealId);
@@ -201,6 +217,7 @@ export async function setDealNextAction(
   });
   if (error)
     return { ok: false, error: dealFailure("setDealNextAction", error) };
+  await applied(supabase, proposalId);
   refresh(deal.data);
   return { ok: true, done: t.done.nextAction };
 }

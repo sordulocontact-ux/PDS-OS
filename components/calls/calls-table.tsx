@@ -146,7 +146,9 @@ function CallRow({
             <>
               {withProject && (
                 <span className="md:hidden">
-                  {call.projectTitle ?? fr.calls.all.internal}
+                  {call.deal
+                    ? fr.calls.page.deal.pill(call.deal.artistName)
+                    : (call.projectTitle ?? fr.calls.all.internal)}
                   <span className="sm:hidden"> · </span>
                 </span>
               )}
@@ -160,6 +162,7 @@ function CallRow({
           <CallProjectPill
             projectId={call.projectId}
             title={call.projectTitle}
+            deal={call.deal}
             size="sm"
           />
         </DataTableCell>

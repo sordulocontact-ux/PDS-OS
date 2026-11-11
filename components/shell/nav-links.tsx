@@ -15,7 +15,7 @@ import {
 import { routes, type Permission } from "@/lib/auth/redirects";
 import { moduleFrame } from "@/lib/i18n/fr/module-frame";
 import { shell } from "@/lib/i18n/fr/shell";
-import { NAV_ITEMS } from "@/lib/ui/nav-items";
+import { NAV_ITEMS, navItemAllowed } from "@/lib/ui/nav-items";
 import { cn } from "@/lib/utils";
 
 const fr = { shell, moduleFrame };
@@ -58,8 +58,7 @@ export function NavLinks({
       <ul className="flex flex-col gap-1">
         {NAV_ITEMS.filter(
           (item) =>
-            (!item.adminOnly || isAdmin) &&
-            (!item.permission || permissions.includes(item.permission)),
+            (!item.adminOnly || isAdmin) && navItemAllowed(item, permissions),
         ).map((item) => {
           const href = item.href;
           const active = isActive(pathname, href, item.exact ?? false);

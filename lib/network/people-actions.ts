@@ -4,6 +4,7 @@ import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
 import type { NetworkRole } from "@/lib/network/types";
 import { createClient } from "@/lib/supabase/server";
+import { withPrivateDetails } from "@/lib/network/private-details";
 
 export type NetworkPersonOption = {
   id: string;
@@ -24,12 +25,14 @@ export async function listNetworkPeople(): Promise<NetworkPersonOption[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("network_contacts")
-    .select("id, name, roles, email, phone")
+    .select("id, name, roles, email, phone, private_owner_person_id")
     .is("archived_at", null)
     .order("name")
     .limit(1000);
   if (error) console.error("listNetworkPeople:", error.message);
-  return (data ?? []).map((c) => ({
+  // A private contact's coordinates prefill only for whoever may read them.
+  const { rows } = await withPrivateDetails(supabase, data ?? []);
+  return rows.map((c) => ({
     id: c.id,
     label: c.name,
     detail: (c.roles as NetworkRole[])

@@ -161,6 +161,12 @@ export const NOTIFICATION_KINDS = [
   // What comes back signed by a private link (20261020070101).
   "legal_contract_signed_received",
   "legal_bulletin_signed",
+  // The Business module's deals (BIZ 4): to the assignee and the direction.
+  "deal_assigned",
+  "deal_agreement_proposed",
+  "deal_agreement_validated",
+  "deal_agreement_refused",
+  "deal_follow_up_due",
   // A selection of artists handed over (lot 4 of docs/pds-mic-plan.md): its
   // page in the Catalogue, no project (the subject is the selection).
   "selection_transmitted",
@@ -248,6 +254,8 @@ export function notificationHref(
   // A call's report shared with a member: that report only (PROJ-AMEL-01).
   if (kind === "call_report_shared" && subjectId)
     return routes.callReport(subjectId);
+  // A deal opens its page, with or without a project (BIZ 4).
+  if (kind.startsWith("deal_") && subjectId) return routes.deal(subjectId);
   if (kind === "selection_transmitted")
     return subjectId
       ? routes.artistSelection(subjectId)

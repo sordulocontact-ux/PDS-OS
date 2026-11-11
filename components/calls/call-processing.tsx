@@ -26,6 +26,8 @@ type StepResult = ActionResult & {
   strategyFilled?: boolean;
   designFilled?: boolean;
   productionDeliverableId?: string;
+  dealId?: string;
+  dealProposals?: number;
 };
 
 // A job started elsewhere (another tab, a reload): check back on it.
@@ -99,7 +101,11 @@ export function CallProcessing({
       router.refresh();
       return setError(extracted.error);
     }
-    if (extracted.productionDeliverableId && projectId) {
+    if (extracted.dealId && extracted.dealProposals) {
+      // A deal's call (BIZ 6): PO's proposals wait on the deal's page.
+      toast.success(t.dealProposals(extracted.dealProposals));
+      router.push(`${routes.deal(extracted.dealId)}#propositions`);
+    } else if (extracted.productionDeliverableId && projectId) {
       toast.success(fr.productionPreprod.call.afterCall);
       router.push(
         routes.projectProductionStep(

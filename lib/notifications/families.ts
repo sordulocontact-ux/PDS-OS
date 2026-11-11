@@ -38,6 +38,9 @@ export const REQUEST_KINDS = [
   "activation_owner_assigned",
   "legal_template_to_validate",
   "legal_invoice_received",
+  "deal_assigned",
+  "deal_agreement_proposed",
+  "deal_follow_up_due",
 ] as const satisfies readonly NotificationKind[];
 
 export function isRequestKind(kind: NotificationKind): boolean {

@@ -1243,6 +1243,32 @@ export const dealTermTone = {
   to_define: "neutral",
 } as const satisfies Record<string, Tone>;
 
+/** A deal's stage (BIZ 4): running stages are info, the accord de principe
+ * waits for the direction, signed is done, abandoned is set aside. */
+export const dealStageTone = {
+  to_contact: "neutral",
+  call_planned: "info",
+  negotiation: "info",
+  agreement: "warning",
+  contracting: "info",
+  signed: "success",
+  abandoned: "neutral",
+} as const satisfies Record<string, Tone>;
+
+/** A deal memo (BIZ 7): a draft waits for the direction, validated is done. */
+export const dealMemoTone = {
+  draft: "warning",
+  validated: "success",
+} as const satisfies Record<string, Tone>;
+
+/** A term of the validated deal memo against the contract (BIZ 7): the
+ * contract says the same, says otherwise, or nobody checked yet. */
+export const dealCheckTone = {
+  conform: "success",
+  different: "danger",
+  unchecked: "neutral",
+} as const satisfies Record<string, Tone>;
+
 /** A box of the Eisenhower matrix of « Mes tâches »: « Faire » presses,
  * « Déléguer » waits for someone else, « Planifier » runs, « Plus tard » is
  * set aside. */

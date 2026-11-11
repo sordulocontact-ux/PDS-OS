@@ -2080,7 +2080,7 @@ les modules à parcours (proto « Mise en page des modules », version « Propos
   `read_artist_budgets` (DG, chefs de projet, business managers) : lit et saisit les dépenses d'un
   artiste ; les lignes d'un projet gardent leurs règles. Formulaire unique (justificatif en premier,
   montant, libellé, poste, statut et date), ligne commune avec « Sans justificatif » et son onglet ;
-  écritures en `WriteResult`. Migration `20261111200101`, test `budget-artist-lines` 17/17.
+  écritures en `WriteResult`. Migration `20261111200102`, test `budget-artist-lines` 17/17.
 - 11/11/2026 — **Budget, BUD 2 : l'enveloppe d'un artiste.** Montant, période, répartition par
   poste (somme ≤ montant, reste non réparti) ; une seule ouverte, la précédente close la veille et
   gardée ; journal de chaque changement ; ouverte et modifiée par la direction seule
@@ -2117,3 +2117,43 @@ les modules à parcours (proto « Mise en page des modules », version « Propos
   journal du deal. La liste et la forme des termes tiennent dans `lib/deals/terms.ts` (à ajuster à l'Excel
   d'Ibé sans migration). Lignes de faits « Termes négociés » et fenêtre de modification
   (`components/deals/`). Migration `20261111231101`, test `deal-terms` 16/16.
+- 11/11/2026 — **Business, BIZ 4 : la vue « Deals » et la page d'un deal.** Entrée « Deals » de la navigation
+  principale (négociateurs, direction, chefs de projet) : une seule liste, onglets En cours / À relancer /
+  Signés / Abandonnés, filtres étape, négociateur, projet, recherche ; « Nouveau deal » (direction, chef de
+  projet sur ses projets) parmi les participations, projets, artistes et membres qui négocient existants. Page
+  d'un deal : « Maintenant » si le lecteur a un geste (valider ou renvoyer l'accord ; étape suivante, autre
+  étape, abandon motivé), prochaine action et relance, termes négociés, étapes, informations, historique. Les
+  actions des deals (relances dues, prochaines actions, accords à valider) arrivent dans Travail et l'accueil
+  par la source unique. Notifications à l'affecté et à la direction (affectation, accord à valider, validé ou
+  renvoyé, relance due par le cron quotidien). PO : sujet du guide et lecteur `deals`. Migration
+  `20261111232101`, test `deal-notifications` 9/9. Reste : BIZ 5 (colonne de Maël), calls, deal memo,
+  contacts privés, fiche artiste › Deals.
+- 12/11/2026 — **Business, BIZ 6 : les calls d'un deal.** `calls.deal_id` : un call de deal reprend tout
+  (enregistreur, transcription, compte rendu, clôture) mais appartient au deal, vu de ses lecteurs,
+  travaillé par ses écrivains ; son projet se lit à travers le deal (`calls.project_id` reste nul, pour
+  qu'aucun module du projet ne le lise). « Préparer un call » depuis la page du deal (ordre du jour : où en
+  est le deal, termes non confirmés ; « À contacter » → « Call prévu ») et liste de ses calls. Après le
+  compte rendu, PO propose des changements de termes, d'étape ou de prochaine action, chacun avec son
+  passage, chiffres et dates vérifiés par le code ; « Vérifier » ouvre le vrai formulaire, « Écarter » les
+  met de côté. Migration `20261112010101`, test `deal-calls` 29/29.
+- 12/11/2026 — **Business, BIZ 7 : deal memo versionné et passage au contrat.** Photo numérotée des termes
+  (auteur, date, statut brouillon / validé), prise à l'accord de principe (validée avec lui) ou à la main,
+  validée par la direction seule, exportable en PDF. Contrat : celui de la participation, sinon un contrat
+  principal du projet ou de l'artiste lié au deal. Comparaison du dernier memo validé au contrat : le code
+  compare le montant saisi à l'avance ou au cachet, une personne dit « Conforme » / « Différent » terme par
+  terme ; les contradictions sont signalées, rien n'est corrigé tout seul. Migration `20261112020101`,
+  test `deal-memos` 27/27.
+- 12/11/2026 — **Business, BIZ 8 : contacts privés.** L'identité d'un contact reste partagée dans le Réseau ;
+  ses coordonnées (e-mail, téléphone, ville, notes) et ses échanges peuvent être rendus privés par la personne
+  qui l'a créé ou la direction, et se partagent deal par deal (« Contacts » de la page d'un deal ; un contact
+  privé seulement par sa propriétaire ou la direction). Les coordonnées privées quittent `network_contacts`
+  pour une table sous RLS : aucune fonction SECURITY DEFINER existante ne peut plus les lire. Partages,
+  retraits, refus journalisés. Liste, fiche, pré-remplissage, invités d'un call et e-mails envoyés lisent les
+  coordonnées avec la session : ils marchent pour qui a le droit, disent « Coordonnées privées » sinon.
+  Migration `20261112030101`, test `private-contacts` 34/34 ; 62 tests SQL qui touchent `network_contacts`
+  rejoués (deux échecs antérieurs, sans lien : `activation-creator-link`, `ux-roles` n°5).
+- 12/11/2026 — **Business, BIZ 10 : deals sur la fiche artiste.** Budget et Deals réunis dans un seul onglet
+  « Business » (pas de dixième onglet) : les deals de l'artiste que le lecteur peut voir (à relancer, en
+  cours, signés, abandonnés ; étape, prochaine action, contrat, projet, négociateur ; aucun contact), puis
+  le budget pour ses lecteurs. Onglet visible de qui lit le budget ou voit un deal de l'artiste ; l'ancienne
+  adresse `…/budget` y mène. Sans migration.

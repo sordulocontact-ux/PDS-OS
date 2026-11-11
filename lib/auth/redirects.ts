@@ -123,6 +123,9 @@ export const routes = {
   // The Business module's deals (BIZ 2 to 4): the list, a deal's page.
   deals: "/app/deals",
   deal: (dealId: string) => `/app/deals/${dealId}`,
+  // A deal memo as a PDF (BIZ 7).
+  dealMemoPdf: (dealId: string, memoId: string) =>
+    `/api/deals/${dealId}/memos/${memoId}`,
   // Features on trial before they enter the app (any member).
   labo: "/app/labo",
   network: "/app/network",
@@ -153,7 +156,9 @@ export const routes = {
   artistProjects: (id: string) => `/app/catalog/artists/${id}/projects`,
   artistFiles: (id: string) => `/app/catalog/artists/${id}/files`,
   // Its envelope by poste and its spends (BUD 2), for the budget's readers.
-  artistBudget: (id: string) => `/app/catalog/artists/${id}/budget`,
+  // « Business » of an artist (BIZ 10): its deals, then its budget.
+  artistBusiness: (id: string) => `/app/catalog/artists/${id}/business`,
+  artistBudget: (id: string) => `/app/catalog/artists/${id}/business#budget`,
   artistActivity: (id: string) => `/app/catalog/artists/${id}/activity`,
   artistIdentity: (id: string) => `/app/catalog/artists/${id}/identity`,
   // Selections of artists, before a project (lot 4 of docs/pds-mic-plan.md):

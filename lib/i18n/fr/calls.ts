@@ -251,6 +251,11 @@ export const calls = {
     meetingHint:
       "Quelques minutes pour une réunion longue. Gardez cette page ouverte : le compte rendu s'affichera ici.",
     done: "Compte rendu prêt.",
+    // A deal's call (BIZ 6): PO's proposals wait on the deal's page.
+    dealProposals: (n: number) =>
+      n === 1
+        ? "Compte rendu prêt : PO propose 1 changement sur le deal."
+        : `Compte rendu prêt : PO propose ${n} changements sur le deal.`,
     briefFilled: "Brief pré-rempli depuis le call. Relisez et confirmez.",
   },
   // A call's page: « Maintenant », its cards, its windows.

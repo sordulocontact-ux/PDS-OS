@@ -8,6 +8,7 @@ import { googleMeetConfigured } from "@/lib/integrations/google-calendar";
 import { networkRolesOf, rolesText } from "@/lib/network/types";
 import { schedulePendingPushes } from "@/lib/notifications/push";
 import { personName } from "@/lib/projects/types";
+import { withPrivateDetails } from "@/lib/network/private-details";
 import { createClient } from "@/lib/supabase/server";
 
 // Where a member stands for the project: its owner, its creative team, the
@@ -89,12 +90,14 @@ export async function loadCallContacts(): Promise<CallContact[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("network_contacts")
-    .select("id, name, email, roles")
+    .select("id, name, email, roles, private_owner_person_id")
     .is("archived_at", null)
     .order("name")
     .limit(1000);
   if (error) console.error("[calls] load contacts failed:", error.message);
-  return (data ?? []).map((c) => ({
+  // A private contact is invited by whoever may read its address (BIZ 8).
+  const { rows } = await withPrivateDetails(supabase, data ?? []);
+  return rows.map((c) => ({
     contactId: c.id,
     name: c.name,
     email: c.email,

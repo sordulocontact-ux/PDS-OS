@@ -38,6 +38,9 @@ type Step = (
     strategyFilled?: boolean;
     designFilled?: boolean;
     productionDeliverableId?: string;
+    // A deal's call (BIZ 6): its deal, and how many changes PO proposed.
+    dealId?: string;
+    dealProposals?: number;
   }
 >;
 

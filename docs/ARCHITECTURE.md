@@ -1387,6 +1387,8 @@ s'afficher sans chargement.
 - **Lien de visio** `calls.meeting_url` (https seulement, vérifié en SQL et en zod) : saisi à
   la création ou ensuite (`updateCallLink`), ouvert dans un nouvel onglet ; l'enregistrement
   reste celui de l'app (`…260929000301`).
+- **Call d'un deal** (BIZ 6) : `project_id` nul aussi, mais `deal_id` posé ; vu et travaillé selon le deal,
+  pas comme une réunion (§ 8 quaterdecies).
 - **Réunion interne** = call **sans projet** (`project_id` nul), créé depuis `/app/calls`
   (« Nouvelle réunion », `createMeeting`) par n'importe quel membre, avec des participants
   (`call_attendees`, membres actifs, **seulement sur une réunion**, chacun notifié
@@ -3016,7 +3018,7 @@ date de sortie de la Stratégie, NDA : à décider).
   - **Brief de stratégie** : prévisionnel, engagé, réel et à arbitrer, un reste par type ;
     les leviers sans dépense n'y sont plus listés (comptés en une ligne).
   - **Dépense d'un projet ou d'un artiste** (BUD 1, Ibé 11/11/2026, migration
-    `20261111200101_budget_artist_lines`, tests `budget-artist-lines.test.sql`) : une dépense reste
+    `20261111200102_budget_artist_lines`, tests `budget-artist-lines.test.sql`) : une dépense reste
     **une ligne de `budget_lines`**, rattachée à un projet **ou** à un artiste (`artist_id`,
     contrainte `budget_lines_one_owner` : exactement l'un des deux ; jamais de seconde table, la
     `artist_expenses` du 08/11 ne revient pas). Ce à quoi elle est rattachée se choisit une fois (pas
@@ -3059,7 +3061,8 @@ date de sortie de la Stratégie, NDA : à décider).
     totaux sans lire les lignes d'un projet. Restes et dépassements par le code (`envelopeView`,
     `lib/budget/envelope.ts`) : un poste dépasse quand il a reçu un montant et que le dépensé le passe
     (signalé, ton `envelopeTone`, jamais bloquant) ; un poste sans montant puise dans le non réparti.
-    **Onglet Budget de la fiche artiste** (`/app/catalog/artists/[id]/budget`, lecteurs du budget) :
+    **Partie Budget de l'onglet Business de la fiche artiste** (`/app/catalog/artists/[id]/business#budget`
+    depuis BIZ 10, l'ancienne adresse `…/budget` y renvoie ; lecteurs du budget, `ArtistBudgetSections`) :
     enveloppe (tuiles, « Par poste » prévu / dépensé / reste), dépenses (directes écrites ici, celles
     des projets lues selon leur règle, lecture seule), historique ; sans enveloppe, « Ouvrir
     l'enveloppe » pour la direction. **Budget d'un projet** : la part de l'enveloppe ouverte de son
@@ -3438,6 +3441,10 @@ choisit ce qui est utile et le **transmet** avec une priorité à l'équipe qui 
   place (vu sur le tri, 27/09/2026).
 
 ## 8 quinquies. Réseau, contrats, versions de fichiers, bibliothèque globale
+
+**Contacts privés** (BIZ 8, 12/11/2026) : l'identité d'un contact reste lue par tous ; les coordonnées et
+les échanges d'un contact privé ne sont lus que par sa propriétaire, la direction et les lecteurs d'un deal
+où il est partagé. Détail et chemins touchés : § 8 quaterdecies.
 
 Ajouts du MVP du 15 octobre (`…260929000101` à `…000301`, tests
 `supabase/tests/network-contracts-meetings.test.sql`).
@@ -7440,6 +7447,125 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   Lecture `loadDealTerms` (`term-queries.ts`), écriture `setDealTerm` (`term-actions.ts`, valeur validée
   par le format du terme), affichage `DealTerms` / `TermForm` / `TermValueFields` (`components/deals/`),
   ton de l'état `dealTermTone`. Test : `supabase/tests/deal-terms.test.sql`.
+- **Vue « Deals » et page d'un deal** (BIZ 4) : entrée de la navigation principale `/app/deals` pour qui a
+  `negotiate`, `validate` ou `pilot_projects` (`NavItem.permission` accepte une liste : l'une suffit ;
+  **décision** : les chefs de projet l'ont aussi, ils ouvrent les deals de leurs projets et lisent ceux-ci).
+  **Une seule liste** (jamais Opportunités / Négociations / Accords) : onglets En cours / À relancer
+  (relance dont la date est venue) / Signés / Abandonnés, filtres étape, négociateur, projet
+  (`lib/deals/filters.ts`). **Pas de bloc « Maintenant » sur la liste** (`docs/VISION-UX.md` § 3 : une page
+  liste n'est qu'une liste) : ce que les deals demandent (appels à préparer, relances dues, accords à valider)
+  vit dans **Travail et l'accueil**, par la source unique (`lib/deals/work.ts` → `MyWork.deals` → lignes
+  `deal` / `validate` de `workRowsOf`) : un geste par deal confié au lecteur (relance venue, sinon prochaine
+  action, sinon relance à venir, sinon le geste de l'étape ; rien pendant que la direction décide l'accord),
+  et pour la direction chaque accord de principe à valider. Page `/app/deals/[dealId]` (introuvable pour qui ne
+  lit pas le deal) : étape à côté du titre, « Maintenant » seulement si le lecteur a un geste, Prochaine
+  action, Termes négociés, Étapes, Informations (projet en lien seulement s'il est visible, contrat lu sur la
+  participation, négociateur et « Changer »), Historique. « Nouveau deal » (direction, chef de projet sur ses
+  projets) : participation d'un collectif (sans deal vivant), sinon projet et/ou artiste choisis parmi
+  l'existant, négociateur parmi les membres qui négocient (`loadNewDealOptions`).
+- **Notifications** (`20261111232101_deal_notifications.sql`, trigger sur `deal_events`) : `deal_assigned`
+  (à l'affecté), `deal_agreement_proposed` (à la direction), `deal_agreement_validated` /
+  `deal_agreement_refused` (à l'affecté), `deal_follow_up_due` (à l'affecté, une fois par date, posée par
+  `flag_due_deal_follow_ups` dans le cron quotidien `/api/cron/detect-releases`, le même que les réserves
+  de la Distribution). Ouvrent la page du deal ; push par `schedulePendingPushes()` après les gestes.
+- **PO** : sujet `deals` du guide (`topics/business.ts`), lecteur `deals` (`lib/assistant/read/deals.ts` :
+  étape, négociateur, prochaine action, relance, termes écrits), règle d'appel dans
+  `lib/ai/instructions/assistant.ts`.
+- **Calls d'un deal** (BIZ 6, `20261112010101_deal_calls.sql`) : `calls.deal_id` (fixé à la création,
+  `calls_keep_deal`). **Décision** : le call garde le projet du deal **à travers le deal**
+  (`deals.project_id`, affiché « Deal · Nadia › » sur sa page et dans les listes), jamais dans
+  `calls.project_id`, qui reste nul (`calls_deal_check`) : plus de vingt lectures des modules d'un projet
+  (Cadrage, Stratégie, Conception, Production, Master, historique, plan, lecteurs de PO) prennent « tous les
+  calls du projet » et une négociation y entrerait. Un call de deal sans projet est donc permis ; la réunion
+  interne reste un call sans projet ni deal. `can_see_call`, `is_call_owner` et les politiques de `calls`
+  ont une branche deal **en premier** : vu de qui lit le deal (`can_read_deal`), enregistré, traité, clôturé
+  par qui l'écrit (`can_write_deal`) ; tout ce qui suit déjà ces fonctions (transcriptions, comptes rendus,
+  parties d'enregistrement, audio du Storage, clôtures, invités) suit le deal. Créé par qui écrit un deal
+  ouvert ; aucun membre invité comme participant (`deal_call_no_attendee` : l'audience est celle du deal),
+  des invités du Réseau ou par e-mail. Il ne s'ouvre que par la porte Calls (`/app/calls/<id>`, la porte
+  projet le cherche par `project_id` et ne le trouve pas). « Préparer un call » (page du deal,
+  `DealCallButton` → `createDealCall`, `planCall` avec `deal`) : le formulaire de call de Calls, ordre du
+  jour écrit par le code (`lib/deals/call-prep.ts` : où en est le deal, puis chaque terme non confirmé avec
+  ce qui a été dit) ; un deal « À contacter » passe à « Call prévu » par le même geste. Après le compte
+  rendu, la route `extract` ne touche à aucun module du projet : `proposeFromDealCall`
+  (`lib/deals/call-proposals.ts`) lit la transcription (donnée dans `<data>`, jamais une consigne,
+  `lib/ai/instructions/deal-call-proposals.ts`) et écrit des **propositions** `deal_call_proposals`
+  (terme et valeur, étape, prochaine action ; chacune avec son passage recopié) que le code garde seulement
+  si le terme existe, le passage est trouvé mot pour mot, chaque chiffre vient du passage
+  (`parseSaidEuros`, `unitsOf`) et la date dite est résolue par le code (`resolveSaidDate`). Page du deal :
+  « Propositions des calls » (`DealCallProposals`) : « Vérifier » ouvre le **vrai formulaire** pré-rempli
+  (`TermForm`, `DealStageForm`, `NextActionForm`, `proposalId`), l'enregistrer applique la proposition
+  (`settle_deal_call_proposal` `applied`) ; « Écarter » la met de côté. PO ne change jamais un deal ; la
+  « Maintenant » du call renvoie au deal (`CallModule` « le deal », compte des propositions en attente).
+  Liste « Calls » du deal (`DealCalls`). `delete_project_row` prend les calls des deals du projet. Test :
+  `supabase/tests/deal-calls.test.sql`.
+- **Deal memo et contrat** (BIZ 7, `20261112020101_deal_memos.sql`) : `deal_memos` = photo **numérotée**
+  des termes (valeur et état de chacun, « À définir » exclus), auteur, date, étape, statut `draft` /
+  `validated` ; jamais modifiée. Prise **à l'accord de principe** (trigger `deal_events_memo` : proposé →
+  brouillon ; validé par la direction → le dernier brouillon est validé, sinon un memo validé est pris ;
+  la direction qui pose l'accord elle-même → validé d'emblée) ou à la main (`create_deal_memo`, qui écrit le
+  deal). `validate_deal_memo` : direction seule, le dernier seulement. PDF par le rendu commun
+  (`/api/deals/<id>/memos/<memo>`, `memoHtml`, `lib/pdf/render.ts`). **Contrat** : celui de la participation
+  pour un deal de participation (`title_participations.contract_id`, jamais copié :
+  `deals_contract_participation_check`) ; sinon **un contrat principal** `deals.contract_id`
+  (**décision** : le modèle le plus simple ; les autres contrats d'une opération restent dans Contrats, sur
+  son projet ou son artiste), choisi parmi ceux du projet ou de l'artiste du deal
+  (`list_deal_contract_options`, `link_deal_contract`, qui écrit le deal ; Glen ne lit pas les contrats, la
+  liste et `read_deal_contract` lui donnent nom, type, état, date de signature, montant saisi
+  `financial_needs`, et si le lecteur peut l'ouvrir dans Contrats). **Comparaison** du dernier memo validé au
+  contrat : PDS OS ne lit pas un PDF de contrat de façon fiable ; le code compare seulement le **montant
+  saisi** sur le contrat à l'avance ou au cachet (`compareMemo`, `lib/deals/memos.ts`), et une personne dit
+  pour chaque terme « Conforme » ou « Différent » avec ce que dit le contrat (`deal_memo_checks`, par memo
+  **et par contrat** : changer de contrat repart de zéro ; `set_deal_memo_check`, qui écrit le deal, aussi
+  après la signature, jamais sur un deal abandonné). Les termes contredits (montant différent ou
+  « Différent ») sont signalés en tête ; **jamais de correction automatique**. Journal : `memo`,
+  `memo_validated`, `contract_linked`, `contract_check`. Le contrat a quitté « Informations » pour sa section.
+  Test : `supabase/tests/deal-memos.test.sql`.
+- **Contacts privés** (BIZ 8, `20261112030101_private_contacts.sql`). L'**identité** d'un contact (nom, type,
+  métiers, organisation, artiste, photo, comptes publics, site) reste partagée : tout membre la lit,
+  `PersonPickerField` marche pour tous. Ses **coordonnées** (e-mail, téléphone, ville = l'adresse, notes) et
+  ses **échanges** (calls de sa fiche) peuvent être rendus privés par sa **propriétaire** : la personne qui l'a
+  créé (avec `manage_network`) ou la direction (`make_contact_private` ; `make_contact_shared` par la
+  propriétaire ou la direction). Lecteurs : propriétaire, direction, lecteurs d'un deal où il est partagé
+  (`can_read_contact_details`). **Modèle choisi, le plus sûr** : les coordonnées d'un contact privé **quittent**
+  `network_contacts` pour `network_contact_private_details` (RLS `can_read_contact_details`). Une RLS ne cache
+  pas certaines colonnes d'une ligne à certains lecteurs, et une quarantaine de fonctions SECURITY DEFINER
+  (fiches de renseignements publiques `_get_legal_form_h` / `_submit_legal_form_h`, `review_legal_form`,
+  `project_link_contacts`, autorisations `link_clearance_holder_contact`, `receive_clearance_signed_copy`…)
+  lisent les colonnes de `network_contacts` : une fois déplacées, elles n'ont **rien à divulguer**, par
+  construction, quel que soit l'appelant. Seules les fonctions de cette migration touchent la table privée
+  (un test pgTAP le vérifie sur `pg_proc`). Toute coordonnée écrite ensuite sur un contact privé (formulaire du
+  Réseau, fiche remplie depuis sa page publique, autorisation) est **déplacée** par le trigger
+  `network_contacts_keep_private` : elle remplace la valeur pour qui lit les coordonnées, sinon elle remplit
+  seulement un champ vide (jamais d'écrasement à l'aveugle). Effacer passe par `set_private_contact_details`
+  (le formulaire du Réseau y envoie les coordonnées d'un contact privé, `privateEdit` ; il ne les montre pas
+  à qui ne les lit pas). **Partage deal par deal** : `deal_contacts` (« Contacts » de la page du deal,
+  `link_deal_contact` par qui écrit le deal ; un contact privé seulement par sa propriétaire ou la direction,
+  sinon **refus noté** et résultat `refused`, pas d'exception qui annulerait le journal ; `unlink_deal_contact`
+  par qui écrit le deal ou la propriétaire). Journal `network_contact_privacy_events` (rendu privé, partagé,
+  partage avec un deal, retrait, refus, coordonnées modifiées), lu par la propriétaire et la direction.
+  **Chemins de l'app qui ont besoin d'une adresse** : lus avec la session (`lib/network/private-details.ts` :
+  `withPrivateDetails`, `contactAddressOf`) — liste et fiche du Réseau, `listNetworkPeople` (pré-remplissage),
+  invités d'un call (`loadCallContacts`, `resolveGuests`), e-mails envoyés (`emailContact`,
+  `emailProviderLink`, e-mail du signataire) : ils marchent pour qui a le droit ; pour les autres l'adresse est
+  absente et le chemin échoue comme pour un contact sans adresse (invitation refusée `guest_without_email`,
+  e-mail non envoyé, la page reste), la fiche disant « Coordonnées privées ». **Limites assumées** : le cron
+  des réponses aux autorisations (`/api/cron/inbox`) ne reconnaît plus l'adresse d'un contact privé (seulement
+  celle notée sur l'ayant droit) ; une fiche de renseignements publique n'est plus pré-remplie de ses
+  coordonnées ; un contact rendu privé garde ses liens à des deals déjà faits (ce sont des partages, retirables).
+  Test : `supabase/tests/private-contacts.test.sql` (dont `project_link_contacts` sans adresse privée).
+- **Deals sur la fiche artiste** (BIZ 10, pas de migration). **Décision** : la fiche artiste avait déjà neuf
+  onglets (règle : six au plus, `docs/DESIGN.md`) ; plutôt qu'un dixième, Budget et Deals partagent un seul
+  onglet **« Business »** (`/app/catalog/artists/[id]/business`) : Deals puis Budget, chaque partie selon ses
+  droits (les deals par RLS `can_read_deal`, filtrés sur `deals.artist_id` : `loadArtistDeals` ; le Budget par
+  `read_artist_budgets`). L'onglet paraît pour qui lit le budget ou voit au moins un deal de l'artiste
+  (`showsArtistBusiness`, un comptage sous RLS), sinon la page est introuvable. Deals rangés comme les vues de
+  la page Deals : à relancer, en cours, signés (collaborations terminées, consultables), abandonnés
+  (`DealsTable groups`), avec étape, prochaine action, **contrat** (`read_deal_contract`, `DealsTable
+  contracts`), projet dans le nom du deal, négociateur ; jamais un contact. `routes.artistBudget` mène à
+  `…/business#budget` (lien « Budget de l'artiste » d'un projet).
+- **Pas encore** : BIZ 5 (colonne « Négociation » de la vue Titres et artistes de Maël),
+  e-mails (BIZ 9), seuils de validation.
 - Code : `lib/deals/types.ts` (étapes), `actions.ts` (un geste = une fonction SQL, `WriteResult`, push après
   ce qui notifie), `errors.ts` (exceptions en français, `lib/i18n/fr/deals.ts`). Test :
   `supabase/tests/deals.test.sql`.

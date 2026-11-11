@@ -3,6 +3,7 @@ import "server-only";
 import { budgetTool } from "@/lib/assistant/read/budget";
 import { calendarTool } from "@/lib/assistant/read/calendar";
 import { contractsTool } from "@/lib/assistant/read/contracts";
+import { dealsTool } from "@/lib/assistant/read/deals";
 import { distributionStatusTool } from "@/lib/assistant/read/distribution";
 import { filesTool } from "@/lib/assistant/read/files";
 import { legalStatusTool } from "@/lib/assistant/read/legal";
@@ -33,5 +34,6 @@ export function readTools(access: Access, pagePath: string | null) {
     calendar: calendarTool(access),
     files: filesTool(),
     notifications: notificationsTool(access),
+    deals: dealsTool(access),
   };
 }

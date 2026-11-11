@@ -52,7 +52,7 @@ export const projectPilotTopics: GuideTopic[] = [
       "non reparti",
       "depassement",
     ],
-    where: "Dans la fiche d'un artiste › onglet Budget.",
+    where: "Dans la fiche d'un artiste › onglet Business, sous ses deals.",
     facts: [
       "La direction fixe l'enveloppe d'un artiste : un montant, un premier jour, un dernier jour facultatif, et sa répartition par poste (production, publicité, transport…). Ce qui n'est donné à aucun poste reste « non réparti » ; les postes ne dépassent jamais le montant.",
       "Ce qui est dépensé se calcule tout seul : les dépenses directes de l'artiste et celles de ses projets (pour un projet collectif, son artiste principal), datées dans la période, engagées, facturées ou payées. Une estimation est comptée à part.",

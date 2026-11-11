@@ -26,6 +26,10 @@ const DETAILS = [
 ] as const;
 type Detail = (typeof DETAILS)[number];
 
+// A private contact's coordinates (BIZ 8), left out of the form for whoever
+// may not read them: nothing typed there could be kept.
+const PRIVATE_DETAILS: readonly Detail[] = ["email", "phone", "city", "notes"];
+
 // What the contact already has, as typed in its field.
 function savedValue(
   values: Partial<NetworkContactValues> | undefined,
@@ -57,11 +61,17 @@ function savedValue(
 export function ContactDetailsFields({
   values,
   error,
+  privateHidden = false,
 }: {
   values?: Partial<NetworkContactValues>;
   error: Extract<SaveContactResult, { ok: false }> | null;
+  // A private contact whose coordinates the reader may not read.
+  privateHidden?: boolean;
 }) {
   const t = fr.network.form;
+  const details = privateHidden
+    ? DETAILS.filter((detail) => !PRIVATE_DETAILS.includes(detail))
+    : DETAILS;
   const [opened, setOpened] = useState<Detail[]>([]);
   // The field just opened takes the focus (React focuses it on mount).
   const [justOpened, setJustOpened] = useState<Detail | null>(null);
@@ -69,7 +79,7 @@ export function ContactDetailsFields({
     savedValue(values, detail) !== "" ||
     opened.includes(detail) ||
     error?.field === detail;
-  const closed = DETAILS.filter((detail) => !shown(detail));
+  const closed = details.filter((detail) => !shown(detail));
 
   function field(detail: Detail) {
     const common = {
@@ -149,7 +159,12 @@ export function ContactDetailsFields({
 
   return (
     <>
-      {DETAILS.filter(shown).map((detail) => (
+      {privateHidden && (
+        <p className="text-body-sm text-[color:var(--text-secondary)]">
+          {fr.network.privacy.formHidden}
+        </p>
+      )}
+      {details.filter(shown).map((detail) => (
         <Fragment key={detail}>{field(detail)}</Fragment>
       ))}
       {closed.length > 0 && (

@@ -89,11 +89,19 @@ export type DealEvent = {
     | "agreement_refused"
     | "abandoned"
     | "next_action"
-    | "term";
+    | "term"
+    // BIZ 7: a deal memo made or validated, a contract linked, a term of the
+    // memo checked against the contract.
+    | "memo"
+    | "memo_validated"
+    | "contract_linked"
+    | "contract_check";
   fromStage: DealStage | null;
   toStage: DealStage | null;
   reason: string | null;
   detail: Record<string, unknown>;
+  // « assigned »: who the deal was given to, by name (null: taken back).
+  assignee: string | null;
   actor: string | null;
   createdAt: string;
 };

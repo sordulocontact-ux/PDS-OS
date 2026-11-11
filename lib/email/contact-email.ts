@@ -5,6 +5,7 @@ import { emailEnabled } from "@/lib/email/send";
 import { core } from "@/lib/i18n/fr/core";
 import { ensureContactLink } from "@/lib/portal/ensure-contact-link";
 import { createClient } from "@/lib/supabase/server";
+import { contactAddressOf } from "@/lib/network/private-details";
 import { formatDay } from "@/lib/utils/day";
 
 const t = core.linkEmail;
@@ -39,11 +40,8 @@ export async function emailContact(
 ): Promise<"sent" | "failed" | "disabled"> {
   if (!emailEnabled()) return "disabled";
   const supabase = await createClient();
-  const { data: contact } = await supabase
-    .from("network_contacts")
-    .select("name, email")
-    .eq("id", mail.contactId)
-    .maybeSingle();
+  // A private contact's address only for whoever may read it (BIZ 8).
+  const contact = await contactAddressOf(supabase, mail.contactId);
   const to = mail.email?.trim() || contact?.email;
   if (!contact || !to) return "disabled";
   const link = await ensureContactLink(mail.projectId, mail.contactId);

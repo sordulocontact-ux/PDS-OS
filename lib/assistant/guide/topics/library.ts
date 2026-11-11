@@ -123,6 +123,9 @@ export const libraryTopics: GuideTopic[] = [
       "studio",
       "ingenieur",
       "artistes repetes",
+      "contact prive",
+      "prive",
+      "coordonnees",
     ],
     nav: "/app/network",
     facts: [
@@ -132,6 +135,9 @@ export const libraryTopics: GuideTopic[] = [
       "À la création, les contacts au nom proche sont signalés pour éviter les doublons, sans bloquer.",
       "La fiche d'un contact montre ce qu'on attend de lui, ses projets, ses contrats, ses crédits et ses calls.",
       "Tous les membres lisent le Réseau. Un contact s'archive, il ne se supprime pas tant qu'un contrat le nomme.",
+      "Un contact peut être rendu privé (« Rendre privé », dans Confidentialité sur sa fiche) par la personne qui l'a créé ou par la direction. Son nom, ses métiers et son organisation restent dans le Réseau pour tous ; ses coordonnées (e-mail, téléphone, ville, notes) et ses échanges ne sont lus que par sa propriétaire, la direction et les personnes des deals où il est partagé.",
+      "Un contact privé se partage deal par deal, en l'ajoutant aux contacts d'un deal : seule sa propriétaire, ou la direction, peut le faire. Partages, retraits et refus sont notés dans son journal. « Rendre partagé » remet ses coordonnées dans le Réseau.",
+      "Pour qui ne lit pas ses coordonnées, PDS OS n'envoie rien à un contact privé et ne l'invite pas à un call : la fiche dit « Coordonnées privées ».",
     ],
     faq: [
       {

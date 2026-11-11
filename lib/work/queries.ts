@@ -1,6 +1,7 @@
 import "server-only";
 
 import { can, type Access } from "@/lib/auth/access";
+import { loadMyDealWork, type DealWork } from "@/lib/deals/work";
 import { freeTasksOf, loadMyTodo, type Todo } from "@/lib/insights/todo";
 import { handoverOf } from "@/lib/projects/handover";
 import { listProjects } from "@/lib/projects/queries";
@@ -21,6 +22,9 @@ export type MyWork = {
   proposals: Todo["proposals"];
   // Studio sessions over whose report the viewer writes (no workflow).
   sessions: StudioSessionRow[];
+  // The deals' actions (BIZ 4): the direction's decisions, the negotiator's
+  // moves on the deals assigned to him (no workflow, no project needed).
+  deals: DealWork[];
 };
 
 /**
@@ -29,13 +33,15 @@ export type MyWork = {
  * journeys (lib/work/journeys.ts, shown by WorkList), never from
  * a list of its own; here, what comes before a project's journeys (a
  * project to accept, to transmit again), PO's proposals, the tasks tied
- * to no workflow and the studio sessions' reports to write. Read with the user's session (RLS).
+ * to no workflow, the studio sessions' reports to write and the deals'
+ * actions. Read with the user's session (RLS).
  */
 export async function loadMyWork(access: Access): Promise<MyWork> {
-  const [todo, { projects, error }, toReport] = await Promise.all([
+  const [todo, { projects, error }, toReport, dealWork] = await Promise.all([
     loadMyTodo(access),
     listProjects(),
     listSessionsToReport(access.personId),
+    loadMyDealWork(access),
   ]);
   const me = access.personId ?? "";
   // Only the owner writes in a launched project, so only they review.
@@ -49,7 +55,7 @@ export async function loadMyWork(access: Access): Promise<MyWork> {
     access,
   );
   return {
-    error: error || todo.error || toReport.error,
+    error: error || todo.error || toReport.error || dealWork.error,
     tasks: freeTasksOf(todo),
     toAccept,
     toRetransmit,
@@ -58,5 +64,6 @@ export async function loadMyWork(access: Access): Promise<MyWork> {
       ? todo.proposals.filter((p) => owned.has(p.projectId))
       : [],
     sessions: toReport.sessions,
+    deals: dealWork.items,
   };
 }
