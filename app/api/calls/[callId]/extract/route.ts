@@ -1,5 +1,6 @@
 import { getAccess } from "@/lib/auth/dal";
 import { runExtraction } from "@/lib/calls/pipeline";
+import { proposeFromDealCall } from "@/lib/deals/call-proposals";
 import { fillDesignFromCall } from "@/lib/design/import-call";
 import { handleStep } from "@/lib/calls/route-helpers";
 import { analyseFramingCall } from "@/lib/framing/call-analysis";
@@ -20,7 +21,9 @@ export const maxDuration = 300;
 // and points to decide in the Préproduction
 // (lib/production/preprod/fill-from-call.ts); any other call goes into
 // the Cadrage as proposals, and PO reads it for the six dimensions
-// (lib/framing/call-analysis.ts). The report itself stays in Calls.
+// (lib/framing/call-analysis.ts). A deal's call (BIZ 6) feeds no project
+// module: PO proposes changes to the deal (lib/deals/call-proposals.ts),
+// settled on the deal's page. The report itself stays in Calls.
 export async function POST(
   _request: Request,
   { params }: RouteContext<"/api/calls/[callId]/extract">,
@@ -29,6 +32,15 @@ export async function POST(
   return handleStep(callId, async (supabase, id) => {
     const extracted = await runExtraction(supabase, id);
     if (!extracted.ok) return extracted;
+    const { data: call } = await supabase
+      .from("calls")
+      .select("deal_id")
+      .eq("id", id)
+      .maybeSingle();
+    if (call?.deal_id) {
+      const proposed = await proposeFromDealCall(supabase, id, call.deal_id);
+      return { ok: true, dealId: call.deal_id, dealProposals: proposed };
+    }
     const [{ data: exchange }, { data: strategyCall }, { data: designCall }] =
       await Promise.all([
         supabase

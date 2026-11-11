@@ -2128,3 +2128,11 @@ les modules à parcours (proto « Mise en page des modules », version « Propos
   renvoyé, relance due par le cron quotidien). PO : sujet du guide et lecteur `deals`. Migration
   `20261111232101`, test `deal-notifications` 9/9. Reste : BIZ 5 (colonne de Maël), calls, deal memo,
   contacts privés, fiche artiste › Deals.
+- 12/11/2026 — **Business, BIZ 6 : les calls d'un deal.** `calls.deal_id` : un call de deal reprend tout
+  (enregistreur, transcription, compte rendu, clôture) mais appartient au deal, vu de ses lecteurs,
+  travaillé par ses écrivains ; son projet se lit à travers le deal (`calls.project_id` reste nul, pour
+  qu'aucun module du projet ne le lise). « Préparer un call » depuis la page du deal (ordre du jour : où en
+  est le deal, termes non confirmés ; « À contacter » → « Call prévu ») et liste de ses calls. Après le
+  compte rendu, PO propose des changements de termes, d'étape ou de prochaine action, chacun avec son
+  passage, chiffres et dates vérifiés par le code ; « Vérifier » ouvre le vrai formulaire, « Écarter » les
+  met de côté. Migration `20261112010101`, test `deal-calls` 29/29.

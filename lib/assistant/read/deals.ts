@@ -41,15 +41,24 @@ export async function readDeals(
     : all.filter((d) => d.stage !== "signed" && d.stage !== "abandoned");
   const shown = kept.slice(0, MAX_SHOWN);
   const supabase = await createClient();
-  const { data: terms } = shown.length
-    ? await supabase
-        .from("deal_terms")
-        .select("deal_id, term_key, value, state")
-        .in(
-          "deal_id",
-          shown.map((d) => d.id),
-        )
-    : { data: [] };
+  const ids = shown.map((d) => d.id);
+  const [{ data: terms }, { data: calls }, { data: proposals }] = ids.length
+    ? await Promise.all([
+        supabase
+          .from("deal_terms")
+          .select("deal_id, term_key, value, state")
+          .in("deal_id", ids),
+        // BIZ 6: its calls and PO's proposals still waiting.
+        supabase.from("calls").select("deal_id").in("deal_id", ids),
+        supabase
+          .from("deal_call_proposals")
+          .select("deal_id")
+          .in("deal_id", ids)
+          .eq("status", "proposed"),
+      ])
+    : [{ data: [] }, { data: [] }, { data: [] }];
+  const countOf = (rows: { deal_id: string | null }[] | null, id: string) =>
+    (rows ?? []).filter((row) => row.deal_id === id).length;
   return {
     facts: [
       t.count(kept.length),
@@ -69,6 +78,9 @@ export async function readDeals(
           : []),
         ...(d.followUpOn ? [t.followUp(formatDay(d.followUpOn))] : []),
         ...(d.abandonReason ? [t.abandoned(d.abandonReason)] : []),
+        ...(countOf(calls, d.id) > 0
+          ? [t.calls(countOf(calls, d.id), countOf(proposals, d.id))]
+          : []),
         ...(terms ?? [])
           .filter((row) => row.deal_id === d.id)
           .flatMap((row) => {

@@ -165,6 +165,85 @@ export type Database = {
           },
         ]
       }
+      deal_call_proposals: {
+        Row: {
+          call_id: string
+          created_at: string
+          deal_id: string
+          id: string
+          kind: string
+          next_action: string | null
+          next_action_on: string | null
+          organization_id: string
+          quote: string
+          settled_at: string | null
+          settled_by: string | null
+          stage: string | null
+          status: string
+          term_key: string | null
+          term_state: string | null
+          value: Json | null
+        }
+        Insert: {
+          call_id: string
+          created_at?: string
+          deal_id: string
+          id?: string
+          kind: string
+          next_action?: string | null
+          next_action_on?: string | null
+          organization_id: string
+          quote: string
+          settled_at?: string | null
+          settled_by?: string | null
+          stage?: string | null
+          status?: string
+          term_key?: string | null
+          term_state?: string | null
+          value?: Json | null
+        }
+        Update: {
+          call_id?: string
+          created_at?: string
+          deal_id?: string
+          id?: string
+          kind?: string
+          next_action?: string | null
+          next_action_on?: string | null
+          organization_id?: string
+          quote?: string
+          settled_at?: string | null
+          settled_by?: string | null
+          stage?: string | null
+          status?: string
+          term_key?: string | null
+          term_state?: string | null
+          value?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_call_proposals_call_same_org"
+            columns: ["call_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "calls"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "deal_call_proposals_deal_same_org"
+            columns: ["deal_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "deal_call_proposals_settled_by_fkey"
+            columns: ["settled_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deal_events: {
         Row: {
           actor_person_id: string | null
@@ -4142,6 +4221,7 @@ export type Database = {
       }
       calls: {
         Row: {
+          deal_id: string | null
           agenda_edited_at: string | null
           agenda_edited_by: string | null
           agenda: Json | null
@@ -4170,6 +4250,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          deal_id?: string | null
           agenda_edited_at?: string | null
           agenda_edited_by?: string | null
           agenda?: Json | null
@@ -4198,6 +4279,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          deal_id?: string | null
           agenda_edited_at?: string | null
           agenda_edited_by?: string | null
           agenda?: Json | null
@@ -4226,6 +4308,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "calls_deal_same_org"
+            columns: ["deal_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id", "organization_id"]
+          },
           {
             foreignKeyName: "calls_agenda_edited_by_fkey"
             columns: ["agenda_edited_by"]
@@ -19087,6 +19176,10 @@ export type Database = {
       }
       set_deal_stage: {
         Args: { p_deal_id: string; p_note?: string; p_stage: string }
+        Returns: undefined
+      }
+      settle_deal_call_proposal: {
+        Args: { p_proposal_id: string; p_status: string }
         Returns: undefined
       }
       set_deal_term: {

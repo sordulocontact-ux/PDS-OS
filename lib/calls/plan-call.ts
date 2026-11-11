@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import type { Access } from "@/lib/auth/access";
 import type { CallErrorCode } from "@/lib/calls/constants";
+import type { AgendaItem } from "@/lib/calls/first-call-agenda";
 import { inviteProjectTeam } from "@/lib/calls/invite";
 import {
   attachGoogleMeet,
@@ -41,12 +42,15 @@ type Session = { access: Access; supabase: SupabaseClient<Database> };
  * title, slot, members, guests by e-mail, and a Meet link created by Google
  * Calendar (or a pasted link). Everything is checked before anything is
  * written; the Meet link comes last: Google refusing it never loses the call,
- * its page says so. `projectId` null: an internal meeting.
+ * its page says so. `projectId` null: an internal meeting, or with `deal` a
+ * deal's call (BIZ 6): no member invited (the deal's readers see it), its
+ * agenda prepared by the code (the terms still to settle).
  */
 export async function planCall(
   session: Session,
   form: FormData,
   projectId: string | null,
+  deal: { id: string; agenda: AgendaItem[] | null } | null = null,
 ): Promise<
   | { ok: true; id: string; meetFailed: boolean }
   | { ok: false; error: CallErrorCode }
@@ -66,7 +70,7 @@ export async function planCall(
   const guests = await resolveGuests(session.supabase, guestInput);
   if (!guests.ok) return guests;
   const me = session.access.personId;
-  const attendees = picked.filter((id) => id !== me);
+  const attendees = deal ? [] : picked.filter((id) => id !== me);
 
   const organizationId = session.access.organizationId!;
   const { data, error } = await session.supabase
@@ -74,6 +78,8 @@ export async function planCall(
     .insert({
       organization_id: organizationId,
       project_id: projectId,
+      deal_id: deal?.id ?? null,
+      agenda: deal?.agenda?.length ? deal.agenda : null,
       title,
       occurred_at: slot.slot.start.toISOString(),
       ends_at: slot.slot.end.toISOString(),
@@ -85,7 +91,10 @@ export async function planCall(
     .single();
   if (error || !data) {
     console.error("[calls] create failed:", error?.message);
-    return { ok: false, error: projectId ? "forbidden" : "save_failed" };
+    return {
+      ok: false,
+      error: projectId || deal ? "forbidden" : "save_failed",
+    };
   }
 
   // Each invitation notifies its member (database trigger).

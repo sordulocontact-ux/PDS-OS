@@ -18,15 +18,18 @@ const fr = { deals };
  * « Modifier » a term of a deal (BIZ 3): its state first (proposed by PDS,
  * counter-proposal, confirmed, to define), then its value in its format,
  * prefilled with the current one. A missing value turns red at the first
- * try; « À définir » needs none.
+ * try; « À définir » needs none. Opened on a proposal of PO (BIZ 6): `term`
+ * carries the proposed value and state, saving applies `proposalId`.
  */
 export function TermForm({
   dealId,
   term,
+  proposalId,
   onDone,
 }: {
   dealId: string;
   term: DealTerm;
+  proposalId?: string;
   onDone: () => void;
 }) {
   const t = fr.deals.terms;
@@ -52,7 +55,9 @@ export function TermForm({
             ?.focus();
           return;
         }
-        run(() => setDealTerm({ dealId, key: term.key, state, value }));
+        run(() =>
+          setDealTerm({ dealId, key: term.key, state, value, proposalId }),
+        );
       }}
     >
       <ChipChoice

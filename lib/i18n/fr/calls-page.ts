@@ -36,6 +36,13 @@ export const callPage = {
     strategy: "la Stratégie",
     design: "la Conception",
     production: "la Production",
+    // A deal's call (BIZ 6): its proposals are settled on the deal's page.
+    deal: "le deal",
+  },
+  // A deal's call (BIZ 6): where it belongs.
+  deal: {
+    pill: (artist: string | null) => (artist ? `Deal · ${artist}` : "Deal"),
+    open: "Ouvrir le deal",
   },
   now: {
     label: "Maintenant",

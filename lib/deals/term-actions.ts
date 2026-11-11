@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
+import { settleProposal } from "@/lib/deals/call-settle";
 import { dealFailure } from "@/lib/deals/errors";
 import { TERM_STATES, TERM_VALUES, termOf } from "@/lib/deals/terms";
 import { DEAL_KINDS } from "@/lib/deals/types";
@@ -20,6 +21,8 @@ const input = z.object({
   key: z.string().min(1).max(40),
   state: z.enum(TERM_STATES),
   value: z.unknown(),
+  // The proposal of PO this form applies (BIZ 6).
+  proposalId: z.uuid().nullish(),
 });
 export type DealTermInput = z.input<typeof input>;
 
@@ -54,6 +57,14 @@ export async function setDealTerm(raw: DealTermInput): Promise<WriteResult> {
     p_state: p.data.state,
   });
   if (error) return { ok: false, error: dealFailure("setDealTerm", error) };
+  if (p.data.proposalId) {
+    const settled = await settleProposal(
+      supabase,
+      p.data.proposalId,
+      "applied",
+    );
+    if (settled) console.error("deal proposal not settled:", settled);
+  }
   revalidatePath(routes.deal(p.data.dealId));
   return { ok: true, done: t.done.term };
 }

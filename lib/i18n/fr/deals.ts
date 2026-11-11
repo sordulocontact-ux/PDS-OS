@@ -278,6 +278,11 @@ export const deals = {
         : `Prochaine action : ${action}.`,
     followUp: (day: string) => `Relance prévue le ${day}.`,
     abandoned: (reason: string) => `Abandonné : « ${reason} ».`,
+    calls: (calls: number, proposals: number) =>
+      `${calls} call${calls > 1 ? "s" : ""}` +
+      (proposals > 0
+        ? `, ${proposals} proposition${proposals > 1 ? "s" : ""} de PO à vérifier sur la page du deal.`
+        : "."),
     term: (label: string, value: string, state: string) =>
       `${label} : ${value} (${state}).`,
   },

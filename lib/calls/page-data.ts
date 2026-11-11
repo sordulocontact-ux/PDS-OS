@@ -86,13 +86,20 @@ export async function loadCallPage(
       loadCallClosures(call.id),
       loadCallSummaries(call.id),
       loadMeeting(call.id, { name: call.title, noun: "call" }),
-      proposalIds.length
+      // A deal's call (BIZ 6): its proposals are PO's deal_call_proposals.
+      call.dealId
         ? supabase
-            .from("current_field_values")
+            .from("deal_call_proposals")
             .select("id", { count: "exact", head: true })
-            .in("source_report_item_id", proposalIds)
+            .eq("call_id", call.id)
             .eq("status", "proposed")
-        : Promise.resolve({ count: 0 }),
+        : proposalIds.length
+          ? supabase
+              .from("current_field_values")
+              .select("id", { count: "exact", head: true })
+              .in("source_report_item_id", proposalIds)
+              .eq("status", "proposed")
+          : Promise.resolve({ count: 0 }),
     ]);
 
   // What the last closing kept reads « Confirmé par » whoever closed it.

@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
 import { z } from "zod";
 
+import { DealCallButton } from "@/components/deals/deal-call-button";
+import { DealCallProposals } from "@/components/deals/deal-call-proposals";
+import { DealCalls } from "@/components/deals/deal-calls";
 import { DealHistory } from "@/components/deals/deal-history";
 import { DealInfo } from "@/components/deals/deal-info";
 import { DealNextAction } from "@/components/deals/deal-next-action";
@@ -14,10 +17,18 @@ import { PageHeader } from "@/components/shell/page-header";
 import { PageSection } from "@/components/shell/page-section";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
+import { nextRoundHourInput } from "@/lib/calls/format";
+import { loadCallContacts } from "@/lib/calls/invite";
+import { dealCallAgenda, dealCallTitle } from "@/lib/deals/call-prep";
+import { loadDealCallProposals, loadDealCalls } from "@/lib/deals/call-queries";
 import { dealName } from "@/lib/deals/names";
 import { loadDeal, loadDealEvents } from "@/lib/deals/queries";
 import { loadDealTerms } from "@/lib/deals/term-queries";
+import type { DealTerm } from "@/lib/deals/terms";
+import type { Deal } from "@/lib/deals/types";
+import { dealCalls } from "@/lib/i18n/fr/deal-calls";
 import { deals as t } from "@/lib/i18n/fr/deals";
+import { googleMeetConfigured } from "@/lib/integrations/google-calendar";
 import { createClient } from "@/lib/supabase/server";
 import { personName } from "@/lib/projects/types";
 
@@ -34,11 +45,27 @@ async function negotiatorsFor(canAssign: boolean) {
   );
 }
 
+/** What « Préparer un call » needs, for whoever writes the deal (BIZ 6). */
+async function callFormFor(deal: Deal, terms: DealTerm[]) {
+  if (!deal.canWrite) return null;
+  return {
+    dealId: deal.id,
+    title: dealCallTitle(dealName(deal)),
+    contacts: await loadCallContacts(),
+    googleMeet: googleMeetConfigured(),
+    defaultOccurredAt: nextRoundHourInput(new Date()),
+    topics: dealCallAgenda(deal, terms).map((item) =>
+      [item.topic, ...(item.questions ?? [])].join(" · "),
+    ),
+  };
+}
+
 /**
  * A deal's page (BIZ 4): its stage beside its name, « Maintenant » when the
  * reader has a gesture, then the next action, the terms negotiated
- * (BIZ 3), the stages, what it is about and who negotiates it, and its
- * history at the bottom. Not found for whoever may not read it.
+ * (BIZ 3), PO's proposals from its calls and the calls themselves (BIZ 6),
+ * the stages, what it is about and who negotiates it, and its history at
+ * the bottom. Not found for whoever may not read it.
  */
 export default async function DealPage({
   params,
@@ -48,11 +75,14 @@ export default async function DealPage({
   const access = await requireApproved();
   const deal = await loadDeal(access, dealId);
   if (!deal) notFound();
-  const [events, terms, negotiators] = await Promise.all([
+  const [events, terms, negotiators, calls, proposals] = await Promise.all([
     loadDealEvents(deal.id),
     loadDealTerms(deal.id, deal.kind),
     negotiatorsFor(deal.canAssign),
+    loadDealCalls(deal.id),
+    loadDealCallProposals(deal.id, deal.kind),
   ]);
+  const callForm = await callFormFor(deal, terms);
   const s = t.page.sections;
 
   return (
@@ -66,8 +96,20 @@ export default async function DealPage({
       <PageSection id="prochaine-action" title={s.next}>
         <DealNextAction deal={deal} />
       </PageSection>
+      {proposals.length > 0 && (
+        <PageSection id="propositions" title={dealCalls.proposals.title}>
+          <DealCallProposals deal={deal} proposals={proposals} />
+        </PageSection>
+      )}
       <PageSection id="termes" title={t.terms.title}>
         <DealTerms dealId={deal.id} terms={terms} canWrite={deal.canWrite} />
+      </PageSection>
+      <PageSection
+        id="calls"
+        title={dealCalls.section}
+        action={callForm && <DealCallButton data={callForm} />}
+      >
+        <DealCalls calls={calls} />
       </PageSection>
       <PageSection id="etapes" title={s.stages}>
         <DealStages deal={deal} events={events} />

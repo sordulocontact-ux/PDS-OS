@@ -122,6 +122,12 @@ module Business et du Budget toucheront `budget_lines`, `network_contacts` (visi
 `calls` (rattachement à un deal) et une nouvelle table `deals` : signaler dans ce fichier
 avant de modifier l'une d'elles.
 
+**Signalé par la session de Sacha (12/11/2026)** : `calls.deal_id` est ajouté (BIZ 6,
+`20261112010101`) ; un call de deal a `calls.project_id` **nul** (le projet se lit à travers le deal), il
+n'entre donc dans aucune lecture « calls du projet ». `can_see_call`, `is_call_owner` et les politiques de
+`calls` gagnent une branche deal en tête, `delete_project_row` prend aussi les calls des deals du projet.
+`network_contacts` : voir BIZ 8 (`docs/ARCHITECTURE.md` § 8 quaterdecies), signalé à son lot.
+
 ---
 
 ## 1. Les modèles existants

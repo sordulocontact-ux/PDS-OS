@@ -51,8 +51,10 @@ export type CallAttendee = { personId: string; name: string };
 
 export type CallDetail = CallSummary & {
   organizationId: string;
-  // Null: an internal meeting, outside any project.
+  // Null: an internal meeting, outside any project — or a deal's call.
   projectId: string | null;
+  // A deal's call (BIZ 6): its project is the deal's, read through the deal.
+  dealId: string | null;
   createdBy: string | null;
   // Members invited (the project's team on a project call).
   attendees: CallAttendee[];
@@ -113,9 +115,11 @@ export type StoredReport = {
 };
 
 export type CallListItem = CallSummary & {
-  // Null for an internal meeting.
+  // Null for an internal meeting or a deal's call.
   projectId: string | null;
   projectTitle: string | null;
+  // A deal's call (BIZ 6): the deal and its artist, never a contact.
+  deal: { id: string; artistName: string | null } | null;
   // Where the Calendrier opens it: inside its project, or in Calls for a
   // meeting. A list of calls links by its door (CallsTable), not by this.
   href: string;
@@ -151,7 +155,7 @@ export async function listAllCalls(
   let query = supabase
     .from("calls")
     .select(
-      "id, title, occurred_at, ends_at, duration_minutes, status, meeting_url, project_id, created_by, agenda, project:projects!calls_project_same_org(title, owner_person_id), closures:call_closures!call_closures_call_same_org(id), call_guests(email)",
+      "id, title, occurred_at, ends_at, duration_minutes, status, meeting_url, project_id, created_by, agenda, project:projects!calls_project_same_org(title, owner_person_id), deal:deals!calls_deal_same_org(id, assignee_person_id, artist:artists!deals_artist_same_org(name)), closures:call_closures!call_closures_call_same_org(id), call_guests(email)",
     );
   if (projectId) query = query.eq("project_id", projectId);
   if (range)
@@ -172,14 +176,18 @@ export async function listAllCalls(
     durationMinutes: row.duration_minutes,
     projectId: row.project_id,
     projectTitle: row.project?.title ?? null,
+    deal: row.deal
+      ? { id: row.deal.id, artistName: row.deal.artist?.name ?? null }
+      : null,
     href: row.project_id
       ? routes.projectCall(row.project_id, row.id)
       : routes.call(row.id),
     agenda: toAgenda(row.agenda),
     guestEmails: row.call_guests.map((g) => g.email),
+    // A deal's call: its negotiator (the direction works on it too).
     ownerPersonId: row.project_id
       ? (row.project?.owner_person_id ?? null)
-      : row.created_by,
+      : (row.deal?.assignee_person_id ?? row.created_by),
     closed: row.closures.length > 0,
   }));
 }
@@ -249,6 +257,7 @@ export async function getCall(
     endsAt: data.ends_at,
     organizationId: data.organization_id,
     projectId: data.project_id,
+    dealId: data.deal_id,
     createdBy: data.created_by,
     attendees: data.call_attendees
       .map((a) => ({

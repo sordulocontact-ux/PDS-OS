@@ -1386,6 +1386,8 @@ s'afficher sans chargement.
 - **Lien de visio** `calls.meeting_url` (https seulement, vérifié en SQL et en zod) : saisi à
   la création ou ensuite (`updateCallLink`), ouvert dans un nouvel onglet ; l'enregistrement
   reste celui de l'app (`…260929000301`).
+- **Call d'un deal** (BIZ 6) : `project_id` nul aussi, mais `deal_id` posé ; vu et travaillé selon le deal,
+  pas comme une réunion (§ 8 quaterdecies).
 - **Réunion interne** = call **sans projet** (`project_id` nul), créé depuis `/app/calls`
   (« Nouvelle réunion », `createMeeting`) par n'importe quel membre, avec des participants
   (`call_attendees`, membres actifs, **seulement sur une réunion**, chacun notifié
@@ -7463,7 +7465,35 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
 - **PO** : sujet `deals` du guide (`topics/business.ts`), lecteur `deals` (`lib/assistant/read/deals.ts` :
   étape, négociateur, prochaine action, relance, termes écrits), règle d'appel dans
   `lib/ai/instructions/assistant.ts`.
-- **Pas encore** : BIZ 5 (colonne « Négociation » de la vue Titres et artistes de Maël), calls d'un deal,
+- **Calls d'un deal** (BIZ 6, `20261112010101_deal_calls.sql`) : `calls.deal_id` (fixé à la création,
+  `calls_keep_deal`). **Décision** : le call garde le projet du deal **à travers le deal**
+  (`deals.project_id`, affiché « Deal · Nadia › » sur sa page et dans les listes), jamais dans
+  `calls.project_id`, qui reste nul (`calls_deal_check`) : plus de vingt lectures des modules d'un projet
+  (Cadrage, Stratégie, Conception, Production, Master, historique, plan, lecteurs de PO) prennent « tous les
+  calls du projet » et une négociation y entrerait. Un call de deal sans projet est donc permis ; la réunion
+  interne reste un call sans projet ni deal. `can_see_call`, `is_call_owner` et les politiques de `calls`
+  ont une branche deal **en premier** : vu de qui lit le deal (`can_read_deal`), enregistré, traité, clôturé
+  par qui l'écrit (`can_write_deal`) ; tout ce qui suit déjà ces fonctions (transcriptions, comptes rendus,
+  parties d'enregistrement, audio du Storage, clôtures, invités) suit le deal. Créé par qui écrit un deal
+  ouvert ; aucun membre invité comme participant (`deal_call_no_attendee` : l'audience est celle du deal),
+  des invités du Réseau ou par e-mail. Il ne s'ouvre que par la porte Calls (`/app/calls/<id>`, la porte
+  projet le cherche par `project_id` et ne le trouve pas). « Préparer un call » (page du deal,
+  `DealCallButton` → `createDealCall`, `planCall` avec `deal`) : le formulaire de call de Calls, ordre du
+  jour écrit par le code (`lib/deals/call-prep.ts` : où en est le deal, puis chaque terme non confirmé avec
+  ce qui a été dit) ; un deal « À contacter » passe à « Call prévu » par le même geste. Après le compte
+  rendu, la route `extract` ne touche à aucun module du projet : `proposeFromDealCall`
+  (`lib/deals/call-proposals.ts`) lit la transcription (donnée dans `<data>`, jamais une consigne,
+  `lib/ai/instructions/deal-call-proposals.ts`) et écrit des **propositions** `deal_call_proposals`
+  (terme et valeur, étape, prochaine action ; chacune avec son passage recopié) que le code garde seulement
+  si le terme existe, le passage est trouvé mot pour mot, chaque chiffre vient du passage
+  (`parseSaidEuros`, `unitsOf`) et la date dite est résolue par le code (`resolveSaidDate`). Page du deal :
+  « Propositions des calls » (`DealCallProposals`) : « Vérifier » ouvre le **vrai formulaire** pré-rempli
+  (`TermForm`, `DealStageForm`, `NextActionForm`, `proposalId`), l'enregistrer applique la proposition
+  (`settle_deal_call_proposal` `applied`) ; « Écarter » la met de côté. PO ne change jamais un deal ; la
+  « Maintenant » du call renvoie au deal (`CallModule` « le deal », compte des propositions en attente).
+  Liste « Calls » du deal (`DealCalls`). `delete_project_row` prend les calls des deals du projet. Test :
+  `supabase/tests/deal-calls.test.sql`.
+- **Pas encore** : BIZ 5 (colonne « Négociation » de la vue Titres et artistes de Maël),
   deal memo, contacts privés, e-mails, onglet Deals de la fiche artiste, seuils de validation.
 - Code : `lib/deals/types.ts` (étapes), `actions.ts` (un geste = une fonction SQL, `WriteResult`, push après
   ce qui notifie), `errors.ts` (exceptions en français, `lib/i18n/fr/deals.ts`). Test :

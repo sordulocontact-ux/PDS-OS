@@ -29,6 +29,7 @@ const fr = { calls, shell };
 export function CallHeader({
   call,
   project,
+  deal = null,
   door,
   organizer,
   upcoming,
@@ -37,6 +38,8 @@ export function CallHeader({
 }: {
   call: CallDetail;
   project: { id: string; title: string } | null;
+  // A deal's call (BIZ 6): « Deal · Nadia › » leads to the deal.
+  deal?: { id: string; artistName: string | null } | null;
   door: CallDoor;
   organizer: string | null;
   upcoming: boolean;
@@ -118,7 +121,14 @@ export function CallHeader({
             <CallProjectPill
               projectId={project?.id ?? null}
               title={project?.title ?? null}
-              href={project ? routes.project(project.id) : undefined}
+              deal={deal}
+              href={
+                deal
+                  ? routes.deal(deal.id)
+                  : project
+                    ? routes.project(project.id)
+                    : undefined
+              }
             />
             <span>
               <time dateTime={call.occurredAt}>{callWhen(call)}</time>

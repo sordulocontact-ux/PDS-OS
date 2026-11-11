@@ -17,7 +17,17 @@ import { formatDay } from "@/lib/utils/day";
 
 const fr = { deals, dialogs };
 
-function NextActionForm({ deal, onDone }: { deal: Deal; onDone: () => void }) {
+/** The next action and follow-up; on a proposal of PO (BIZ 6), the action
+ * and day it proposes, saving applies it. */
+export function NextActionForm({
+  deal,
+  proposal,
+  onDone,
+}: {
+  deal: Deal;
+  proposal?: { id: string; action: string; on: string | null };
+  onDone: () => void;
+}) {
   const t = fr.deals.page.next;
   const { pending, error, run } = useWriteSubmit(
     onDone,
@@ -30,11 +40,15 @@ function NextActionForm({ deal, onDone }: { deal: Deal; onDone: () => void }) {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
         run(() =>
-          setDealNextAction(deal.id, {
-            nextAction: String(data.get("nextAction") ?? ""),
-            nextActionOn: String(data.get("nextActionOn") ?? ""),
-            followUpOn: String(data.get("followUpOn") ?? ""),
-          }),
+          setDealNextAction(
+            deal.id,
+            {
+              nextAction: String(data.get("nextAction") ?? ""),
+              nextActionOn: String(data.get("nextActionOn") ?? ""),
+              followUpOn: String(data.get("followUpOn") ?? ""),
+            },
+            proposal?.id,
+          ),
         );
       }}
     >
@@ -43,14 +57,14 @@ function NextActionForm({ deal, onDone }: { deal: Deal; onDone: () => void }) {
         name="nextAction"
         label={t.action}
         maxLength={500}
-        defaultValue={deal.nextAction ?? ""}
+        defaultValue={proposal?.action ?? deal.nextAction ?? ""}
       />
       <Field
         id={`deal-${deal.id}-next-on`}
         name="nextActionOn"
         type="date"
         label={t.on}
-        defaultValue={deal.nextActionOn ?? ""}
+        defaultValue={(proposal ? proposal.on : deal.nextActionOn) ?? ""}
       />
       <Field
         id={`deal-${deal.id}-follow-up`}

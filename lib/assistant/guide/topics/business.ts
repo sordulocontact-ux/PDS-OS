@@ -1,6 +1,6 @@
 import type { GuideTopic } from "@/lib/assistant/guide/types";
 
-/** The Business module (BIZ 2 to 4): the deals. */
+/** The Business module (BIZ 2 to 6): the deals and their calls. */
 export const businessTopics: GuideTopic[] = [
   {
     key: "deals",
@@ -17,6 +17,8 @@ export const businessTopics: GuideTopic[] = [
       "accord de principe",
       "relance",
       "termes",
+      "call du deal",
+      "preparer un call",
       "avance",
       "cachet",
       "royalties",
@@ -30,12 +32,19 @@ export const businessTopics: GuideTopic[] = [
       "L'accord de principe est proposé par la personne qui négocie et validé par la direction, qui peut le renvoyer en négociation avec un motif. La contractualisation attend un accord validé.",
       "Chaque terme négocié (splits auteur-compositeur, part du master, royalties, avance ou cachet, crédits, territoires, durée, exclusivité, promo) a sa valeur, son état (Proposé par PDS, Contre-proposition, Confirmé, À définir) et l'historique de ses changements.",
       "Chaque deal a une prochaine action et une date de relance : le jour venu, PDS OS prévient la personne qui négocie, et l'action apparaît dans son Travail et son accueil.",
+      "Depuis la page d'un deal, « Préparer un call » crée un call dont l'ordre du jour reprend le contexte du deal et les termes encore à négocier (tous ceux qui ne sont pas confirmés). Un deal « À contacter » passe alors à « Call prévu ».",
+      "Le call d'un deal s'enregistre, se transcrit et se clôture comme tout call, depuis sa page dans Calls. Il n'appartient pas au projet : il n'apparaît ni dans les Calls du projet ni dans ses modules (Cadrage, Stratégie…), seulement pour ceux qui lisent le deal.",
+      "Après le call, PO propose sur la page du deal les changements qu'il a lus (un terme, une étape, la prochaine action) avec le passage de la transcription : vous les vérifiez dans le vrai formulaire, ou vous les écartez. PO ne change jamais un deal lui-même.",
       "La page Deals est une seule liste : onglets En cours, À relancer, Signés, Abandonnés ; filtres par étape, personne qui négocie et projet.",
     ],
     faq: [
       {
         q: "Qui voit un deal ?",
         a: "La direction voit tous les deals. La personne qui le négocie voit les siens, et seulement eux. Le responsable du projet lié le lit sans le modifier.",
+      },
+      {
+        q: "Qui voit le call d'un deal ?",
+        a: "Ceux qui lisent le deal : la direction, la personne qui le négocie et le responsable du projet lié (qui le lit seulement). L'équipe du projet ne le voit pas. L'enregistrent et le traitent la direction et la personne qui négocie.",
       },
       {
         q: "Qui crée un deal et le confie ?",

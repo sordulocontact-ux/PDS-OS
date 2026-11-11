@@ -17,6 +17,8 @@ import {
   type CallDetail,
 } from "@/lib/calls/queries";
 import { loadMembers } from "@/lib/framing/related";
+import { dealName } from "@/lib/deals/names";
+import { loadDeal } from "@/lib/deals/queries";
 import { calls } from "@/lib/i18n/fr/calls";
 import { canEditProject } from "@/lib/projects/edit-access";
 import type { ProjectDetail } from "@/lib/projects/types";
@@ -72,7 +74,9 @@ async function deliverableOf(
  * run by itself (it lands on the module the call feeds), then settle what
  * it proposed, turn its actions into tasks (the call's project, or for a
  * meeting a launched project the viewer owns), send its summary, close it.
- * The pages read the call (and its project) for their 404 first.
+ * The pages read the call (and its project) for their 404 first. A deal's
+ * call (BIZ 6) opens from Calls only: worked on by whoever writes the deal,
+ * its proposals settled on the deal's page.
  */
 export async function CallPage({
   call,
@@ -88,9 +92,12 @@ export async function CallPage({
 }) {
   const access = await requireApproved();
   const supabase = await createClient();
-  const canEdit = project
-    ? canEditProject(access, project)
-    : access.personId !== null && call.createdBy === access.personId;
+  const deal = call.dealId ? await loadDeal(access, call.dealId) : null;
+  const canEdit = deal
+    ? deal.canWrite
+    : project
+      ? canEditProject(access, project)
+      : access.personId !== null && call.createdBy === access.personId;
   const [transcript, report, audioUrls, members, taskProjects, deliverableId] =
     await Promise.all([
       loadLatestTranscript(supabase, call.id),
@@ -125,21 +132,33 @@ export async function CallPage({
         <CallHeader
           call={call}
           project={project && { id: project.id, title: project.title }}
+          deal={deal && { id: deal.id, artistName: deal.artistName }}
           door={door}
           organizer={organizer}
           upcoming={isUpcoming(call, now)}
           closed={data.closures.length > 0}
           deletable={canDeleteCall(callDeleter(access), {
-            ownerPersonId: project ? project.ownerPersonId : call.createdBy,
+            ownerPersonId: project
+              ? project.ownerPersonId
+              : (deal?.assignee?.id ?? call.createdBy),
           })}
         />
       }
       transcript={transcript}
       audioUrls={audioUrls}
       canEdit={canEdit}
-      where={project?.title ?? fr.calls.all.internal}
+      where={deal ? dealName(deal) : (project?.title ?? fr.calls.all.internal)}
       organizer={organizer}
-      module={project ? moduleOf(project.id, call) : null}
+      module={
+        deal
+          ? {
+              href: `${routes.deal(deal.id)}#propositions`,
+              name: fr.calls.page.modules.deal,
+            }
+          : project
+            ? moduleOf(project.id, call)
+            : null
+      }
       data={data}
       members={members}
       mePersonId={access.personId}
