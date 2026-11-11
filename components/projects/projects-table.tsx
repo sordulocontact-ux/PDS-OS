@@ -171,7 +171,8 @@ export function ProjectsTable({
               </DataTableCell>
               {/* Its own column (Sacha 29/10), no longer under the name. */}
               <DataTableCell hideBelow="md">
-                {project.type === "music_release" && project.artistName
+                {(project.type === "music_release" || project.collective) &&
+                project.artistName
                   ? project.artistName
                   : EMPTY_CELL}
               </DataTableCell>
@@ -179,7 +180,10 @@ export function ProjectsTable({
                 {project.responsibleName ?? EMPTY_CELL}
               </DataTableCell>
               <DataTableCell hideBelow="2xl">
-                <ProjectKindBadge kind={project} />
+                <ProjectKindBadge
+                  kind={project}
+                  collective={project.collective}
+                />
               </DataTableCell>
               <DataTableCell
                 hideBelow="sm"

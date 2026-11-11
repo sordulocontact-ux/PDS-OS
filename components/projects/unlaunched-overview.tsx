@@ -41,6 +41,7 @@ export function UnlaunchedOverview({
   creativeTeam,
   cover,
   subtitle,
+  status: kindStatus,
 }: {
   project: ProjectDetail;
   viewerPersonId: string | null;
@@ -52,6 +53,8 @@ export function UnlaunchedOverview({
   // The head of every project (ProjectCover, « Artiste · Type »).
   cover?: React.ReactNode;
   subtitle?: string;
+  // « Projet collectif » on the right of the name (docs/pds-mic-plan.md).
+  status?: React.ComponentProps<typeof ModuleHeader>["status"];
 }) {
   const t = fr.transmission.page;
   const latest = project.assignments[0] ?? null;
@@ -117,6 +120,7 @@ export function UnlaunchedOverview({
         title={project.title}
         media={cover}
         subtitle={subtitle}
+        status={kindStatus}
         actions={
           <WhoDoesWhatButton
             roles={[

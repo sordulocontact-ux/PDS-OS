@@ -76,7 +76,9 @@ export function ModuleHeader({
       <div className="flex min-w-0 flex-col gap-1.5">
         <div className="flex flex-wrap items-center justify-between gap-2.5">
           {media || subtitle ? (
-            <div className="flex min-w-0 flex-1 items-center gap-4 sm:gap-5">
+            // Never narrower than 16rem (or the whole line): on a phone the
+            // state and actions wrap under the title instead of crushing it.
+            <div className="flex min-w-[min(100%,16rem)] flex-1 items-center gap-4 sm:gap-5">
               {media}
               <div className="flex min-w-0 flex-col gap-1">
                 {heading}

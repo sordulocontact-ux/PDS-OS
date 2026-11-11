@@ -8,6 +8,7 @@ import {
   type DesignCallSheetData,
 } from "@/lib/design/call-prep";
 import type { ConceptionData } from "@/lib/design/conception";
+import { identityMismatchArtist } from "@/lib/design/identity-mismatch";
 import { missingTopics } from "@/lib/design/intentions";
 import { fr } from "@/lib/i18n/fr";
 import { listProjectCreatives } from "@/lib/projects/creatives";
@@ -90,16 +91,25 @@ export async function designCallContext(
           })
         ).data
       : null);
-  const { data: version } = versionId
-    ? await supabase
-        .from("artist_identity_versions")
-        .select("number")
-        .eq("id", versionId)
-        .maybeSingle()
-    : { data: null };
+  const [{ data: version }, mismatch] = await Promise.all([
+    versionId
+      ? supabase
+          .from("artist_identity_versions")
+          .select("number")
+          .eq("id", versionId)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+    // Only the identity the Conception kept can stop matching.
+    identityMismatchArtist(
+      supabase,
+      projectId,
+      workspace.data?.identity_version_id ?? null,
+    ),
+  ]);
   return {
     openPoints: (points.data ?? []).map((p) => p.question),
     identityVersion: version?.number ?? null,
+    identityMismatchArtist: mismatch,
   };
 }
 

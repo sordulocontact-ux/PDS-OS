@@ -140,6 +140,8 @@ export const shell = {
     content: "Contenu",
     event: "Événement",
   },
+  // projects.collective (docs/pds-mic-plan.md, décision 2).
+  projectCollective: "Projet collectif",
 
   musicFormats: {
     single: "Single",

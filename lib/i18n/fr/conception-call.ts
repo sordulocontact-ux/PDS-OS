@@ -88,5 +88,10 @@ export const conceptionCall = {
     openPointsTopic: "Points ouverts du projet",
     identityQuestion: (n: number) =>
       `La sortie reste-t-elle dans l'identité V${n} de l'artiste, ou s'en écarte-t-elle volontairement ?`,
+    // A collective whose main artist changed (docs/pds-mic-plan.md).
+    identityMismatchQuestion: (n: number, artist: string) =>
+      artist
+        ? `L'identité V${n} retenue est celle de ${artist} et ne correspond plus à l'artiste principal : la garder, ou passer à celle de l'artiste principal ?`
+        : `L'identité V${n} retenue ne correspond plus à l'artiste principal : la garder, ou passer à celle de l'artiste principal ?`,
   },
 };

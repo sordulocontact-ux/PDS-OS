@@ -38,6 +38,10 @@ export const projectTypeHue: Record<ProjectType, Hue> = {
   event: "sand",
 };
 
+/** « Projet collectif », beside the type's hue in the projects list and the
+ * overview's head: every hue already sits on that row, slate is the quiet one. */
+export const projectCollectiveHue: Hue = "slate";
+
 /** One hue per workflow (the Travail's « Module » tag), close to its stage's
  * hue: the Cadrage sky, the Marketing pink, the Distribution teal. */
 export const moduleHue: Record<JourneyModuleKey, Hue> = {

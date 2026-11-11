@@ -269,6 +269,9 @@ export const designSteps = {
       `Ce qui est validé a changé depuis la V${n} : établissez la V${n + 1}.`,
     rows: {
       context: "Contexte",
+      // Only for a collective whose kept identity no longer matches its
+      // main artist (docs/pds-mic-plan.md, § 6 risque 2).
+      identity: "Identité de l'artiste",
       goals: "Objectifs créatifs",
       audiences: "Publics et usages",
       narrative: "Narratif",
@@ -279,6 +282,7 @@ export const designSteps = {
       references: "Références validées",
       open: "Points encore ouverts",
     },
+    identityToCheck: "À vérifier",
     contextValue: (project: string, day: string | null, brief: number | null) =>
       [
         project,

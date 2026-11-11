@@ -219,6 +219,11 @@ export const conceptionDirection = {
           : `V${n} du référentiel`,
       deviation: "Dérogation de cette sortie",
       noDeviation: "Aucune : la sortie suit l'identité habituelle.",
+      // A collective whose main artist changed (docs/pds-mic-plan.md).
+      mismatch: (artist: string) =>
+        artist
+          ? `Cette identité est celle de ${artist} : elle ne correspond plus à l'artiste principal du projet.`
+          : "Cette identité ne correspond plus à l'artiste principal du projet.",
     },
     sections: {
       context: "Contexte de la sortie",

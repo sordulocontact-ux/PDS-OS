@@ -71,7 +71,8 @@ function toStages(raw: RawStage[]): ProjectStage[] {
 }
 
 // Masters in link order, each with its credits: the artist of a project is
-// the first credit of its first master (same rule as project_artist_name).
+// a collective's main artist, else the first credit of its first master
+// (same rule as project_artist_name).
 const MASTERS_SELECT = `links:project_masters!project_masters_project_same_org(position, master:masters!project_masters_master_same_org(id, title, variant, variant_label, ${CREDITS_SELECT}))`;
 
 type RawLink = {
@@ -159,11 +160,16 @@ function toAssignments(
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
+// A collective shows its main artist (projects.artist_id, docs/pds-mic-
+// plan.md, décision 2) before its titles' credits; any other project keeps
+// the first credit of its first master, else the artist it names.
 function artistNameOf(
   masters: Array<{ credits: Credit[] }>,
-  legacyArtist: { name: string } | null,
+  namedArtist: { name: string } | null,
+  collective: boolean,
 ): string {
-  return masters[0]?.credits[0]?.name ?? legacyArtist?.name ?? "";
+  if (collective && namedArtist) return namedArtist.name;
+  return masters[0]?.credits[0]?.name ?? namedArtist?.name ?? "";
 }
 
 /**
@@ -184,7 +190,7 @@ export async function listProjects(filter?: {
   const select = supabase
     .from("projects")
     .select(
-      `id, title, type, music_format, priority, owner_person_id, due_date, cover_path, artist:artists!projects_artist_same_org(name), owner:people!projects_owner_person_id_fkey(first_name, last_name), ${FORMAT_SELECT}, ${MASTERS_SELECT}, ${STAGES_SELECT}, ${ASSIGNMENTS_SELECT}`,
+      `id, title, type, music_format, collective, priority, owner_person_id, due_date, cover_path, artist:artists!projects_artist_same_org(name), owner:people!projects_owner_person_id_fkey(first_name, last_name), ${FORMAT_SELECT}, ${MASTERS_SELECT}, ${STAGES_SELECT}, ${ASSIGNMENTS_SELECT}`,
     );
   let query = filter?.archived
     ? select.not("archived_at", "is", null)
@@ -206,10 +212,11 @@ export async function listProjects(filter?: {
     return {
       id: row.id,
       title: row.title,
-      artistName: artistNameOf(masters, row.artist),
+      artistName: artistNameOf(masters, row.artist, row.collective),
       type: isProjectType(row.type) ? row.type : "music_release",
       musicFormat: isMusicFormat(row.music_format) ? row.music_format : null,
       contentFormatName: row.content_format?.name ?? null,
+      collective: row.collective,
       priority: isPriority(row.priority) ? row.priority : null,
       status: projectStatusOf(stages.length, latest ?? null),
       ownerPersonId: row.owner_person_id,
@@ -243,7 +250,7 @@ export const getProject = trackedCache(
       supabase
         .from("projects")
         .select(
-          `id, title, type, music_format, artist_id, created_at, due_date, budget_cents, priority, initial_context, owner_person_id, master_validator_person_id, cover_path, artist:artists!projects_artist_same_org(name), owner:people!projects_owner_person_id_fkey(first_name, last_name), ${FORMAT_SELECT}, ${MASTERS_SELECT}, ${STAGES_SELECT}, ${ASSIGNMENTS_SELECT}`,
+          `id, title, type, music_format, collective, artist_id, created_at, due_date, budget_cents, priority, initial_context, owner_person_id, master_validator_person_id, cover_path, artist:artists!projects_artist_same_org(name), owner:people!projects_owner_person_id_fkey(first_name, last_name), ${FORMAT_SELECT}, ${MASTERS_SELECT}, ${STAGES_SELECT}, ${ASSIGNMENTS_SELECT}`,
         )
         .eq("id", projectId)
         .is("archived_at", null)
@@ -280,9 +287,10 @@ export const getProject = trackedCache(
       type: isProjectType(data.type) ? data.type : "music_release",
       musicFormat: isMusicFormat(data.music_format) ? data.music_format : null,
       contentFormat: data.content_format,
+      collective: data.collective,
       artistId: data.artist_id,
       createdAt: data.created_at,
-      artistName: artistNameOf(masters, data.artist),
+      artistName: artistNameOf(masters, data.artist, data.collective),
       ownerName: owner || null,
       ownerPersonId: data.owner_person_id,
       masterValidatorPersonId: data.master_validator_person_id,

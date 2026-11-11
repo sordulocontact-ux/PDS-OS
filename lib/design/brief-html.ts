@@ -77,6 +77,9 @@ export function creativeBriefHtml({
             "muted",
           )
         : "") +
+        (i.mismatchArtist !== undefined
+          ? para(t.identity.mismatch(i.mismatchArtist))
+          : "") +
         (i.manifesto
           ? para(`${fr.artistIdentity.fields.manifesto} : ${i.manifesto}`)
           : "") +

@@ -16353,6 +16353,7 @@ export type Database = {
           archived_at: string | null
           artist_id: string | null
           budget_cents: number | null
+          collective: boolean
           content_format_id: string | null
           cover_path: string | null
           created_at: string
@@ -16373,6 +16374,7 @@ export type Database = {
           archived_at?: string | null
           artist_id?: string | null
           budget_cents?: number | null
+          collective?: boolean
           content_format_id?: string | null
           cover_path?: string | null
           created_at?: string
@@ -16393,6 +16395,7 @@ export type Database = {
           archived_at?: string | null
           artist_id?: string | null
           budget_cents?: number | null
+          collective?: boolean
           content_format_id?: string | null
           cover_path?: string | null
           created_at?: string
@@ -20982,6 +20985,10 @@ export type Database = {
           score: number
           title: string
         }[]
+      }
+      set_project_main_artist: {
+        Args: { p_artist_id: string; p_project_id: string }
+        Returns: undefined
       }
       set_project_cover: {
         Args: { p_path?: string; p_project_id: string }

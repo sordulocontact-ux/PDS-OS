@@ -53,7 +53,11 @@ export default async function DesignBriefPage({
   const canEstablish =
     (ctx.isCreative || ctx.isOwner) && !isLocked(step.status);
 
-  const facts = c
+  const facts: Array<{
+    label: string;
+    value: string;
+    state?: { tone: "warning"; label: string };
+  }> = c
     ? [
         {
           label: t.rows.context,
@@ -63,6 +67,19 @@ export default async function DesignBriefPage({
             ctx.start.strategy?.version ?? null,
           ),
         },
+        // A collective whose main artist changed: the identity kept is
+        // said not to match it any more, never replaced in silence.
+        ...(c.identity?.mismatchArtist !== undefined
+          ? [
+              {
+                label: t.rows.identity,
+                value: fr.conceptionDirection.brief.identity.mismatch(
+                  c.identity.mismatchArtist,
+                ),
+                state: { tone: "warning" as const, label: t.identityToCheck },
+              },
+            ]
+          : []),
         { label: t.rows.goals, value: c.objectives.strategic ?? "—" },
         { label: t.rows.audiences, value: c.audiences.audiences ?? "—" },
         {
@@ -133,7 +150,12 @@ export default async function DesignBriefPage({
         >
           <FactRows className="rounded-none border-0">
             {facts.map((f) => (
-              <FactRow key={f.label} label={f.label} value={f.value} />
+              <FactRow
+                key={f.label}
+                label={f.label}
+                value={f.value}
+                state={f.state}
+              />
             ))}
           </FactRows>
         </DocumentCard>

@@ -31,6 +31,9 @@ export type DesignCallDeliverable = {
 export type DesignCallContext = {
   openPoints: string[];
   identityVersion: number | null;
+  // A collective whose main artist changed: the artist the kept identity
+  // belongs to (docs/pds-mic-plan.md, § 6 risque 2); null otherwise.
+  identityMismatchArtist?: string | null;
 };
 
 /** What « Préparer un échange créatif » opens with, prepared by code. */
@@ -75,7 +78,16 @@ export function designCallTopics(
   const identity = data.context.identityVersion;
   if (data.directionMissing.length > 0 || identity !== null) {
     const questions = [
-      ...(identity !== null ? [t.exchanges.identityQuestion(identity)] : []),
+      ...(identity !== null
+        ? [
+            data.context.identityMismatchArtist != null
+              ? t.exchanges.identityMismatchQuestion(
+                  identity,
+                  data.context.identityMismatchArtist,
+                )
+              : t.exchanges.identityQuestion(identity),
+          ]
+        : []),
       ...data.directionMissing.map((topic) => t.questions.direction[topic]),
     ];
     topics.push({

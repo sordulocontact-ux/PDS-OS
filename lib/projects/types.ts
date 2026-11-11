@@ -174,11 +174,14 @@ export function projectStatusOf(
 export type ProjectListItem = {
   id: string;
   title: string;
-  // Main credit of the first master; empty when the project has no master.
+  // A collective's main artist, else the main credit of the first master;
+  // empty when there is neither.
   artistName: string;
   type: ProjectType;
   musicFormat: MusicFormat | null;
   contentFormatName: string | null;
+  // « Projet collectif » (docs/pds-mic-plan.md): its artist is its main one.
+  collective: boolean;
   priority: Priority | null;
   status: ProjectStatus;
   // Who runs the launched project (null before acceptance).
@@ -215,7 +218,10 @@ export type ProjectDetail = {
   type: ProjectType;
   musicFormat: MusicFormat | null;
   contentFormat: ContentFormatOption | null;
-  // Artist named by a content project (a music one reads its masters).
+  // « Projet collectif » (docs/pds-mic-plan.md): artistId is its main artist.
+  collective: boolean;
+  // Artist named by a content project or a collective's main artist (any
+  // other music project reads its masters).
   artistId: string | null;
   createdAt: string;
   artistName: string;

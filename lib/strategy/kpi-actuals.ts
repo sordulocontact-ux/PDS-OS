@@ -10,9 +10,10 @@ const byPosition = (a: { position: number }, b: { position: number }) =>
   a.position - b.position;
 
 /**
- * The Deezer id of the project's artist: the main artist of its first
- * master, as the project's header names it, else the artist a content
- * project names. Null when none has a Deezer profile.
+ * The Deezer id of the project's artist, as the project's header names it:
+ * a collective's main artist; else the main artist of its first master,
+ * else the artist a content project names. Null when none has a Deezer
+ * profile.
  */
 async function projectArtistDeezerId(
   projectId: string,
@@ -21,11 +22,12 @@ async function projectArtistDeezerId(
   const { data } = await supabase
     .from("projects")
     .select(
-      "artist:artists!projects_artist_same_org(deezer_id), links:project_masters!project_masters_project_same_org(position, master:masters!project_masters_master_same_org(credits:master_artists!master_artists_master_same_org(position, artist:artists!master_artists_artist_same_org(deezer_id))))",
+      "collective, artist:artists!projects_artist_same_org(deezer_id), links:project_masters!project_masters_project_same_org(position, master:masters!project_masters_master_same_org(credits:master_artists!master_artists_master_same_org(position, artist:artists!master_artists_artist_same_org(deezer_id))))",
     )
     .eq("id", projectId)
     .maybeSingle();
   if (!data) return null;
+  if (data.collective && data.artist) return data.artist.deezer_id ?? null;
   const firstMaster = [...data.links].sort(byPosition)[0]?.master;
   const firstCredit = firstMaster
     ? [...firstMaster.credits].sort(byPosition)[0]

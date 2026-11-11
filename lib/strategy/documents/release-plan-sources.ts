@@ -45,15 +45,16 @@ const byPosition = (a: { position: number }, b: { position: number }) =>
   a.position - b.position;
 
 /**
- * The project's artist (main artist of its first master, else its own) and
- * its masters, in order. Shared with the Dossier de presse.
+ * The project's artist (a collective's main artist; else the main artist of
+ * its first master, else its own) and its masters, in order. Shared with the
+ * Dossier de presse.
  */
 export async function projectArtist(projectId: string) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("projects")
     .select(
-      "artist:artists!projects_artist_same_org(id, name, picture_path, picture_url, bio, country_code, deezer_id, deezer_url), links:project_masters!project_masters_project_same_org(position, master_id, master:masters!project_masters_master_same_org(title, isrc, credits:master_artists!master_artists_master_same_org(position, artist:artists!master_artists_artist_same_org(id, name, picture_path, picture_url, bio, country_code, deezer_id, deezer_url))))",
+      "collective, artist:artists!projects_artist_same_org(id, name, picture_path, picture_url, bio, country_code, deezer_id, deezer_url), links:project_masters!project_masters_project_same_org(position, master_id, master:masters!project_masters_master_same_org(title, isrc, credits:master_artists!master_artists_master_same_org(position, artist:artists!master_artists_artist_same_org(id, name, picture_path, picture_url, bio, country_code, deezer_id, deezer_url))))",
     )
     .eq("id", projectId)
     .maybeSingle();
@@ -67,7 +68,11 @@ export async function projectArtist(projectId: string) {
   const first = links[0]?.master;
   const credit = first ? [...first.credits].sort(byPosition)[0] : undefined;
   return {
-    artist: credit?.artist ?? data.artist ?? null,
+    artist:
+      (data.collective ? data.artist : null) ??
+      credit?.artist ??
+      data.artist ??
+      null,
     masterIds: links.map((l) => l.master_id),
     masters: links.flatMap((l) =>
       l.master ? [{ title: l.master.title, isrc: l.master.isrc }] : [],

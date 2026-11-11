@@ -31,6 +31,7 @@ import { projectCoverUrls } from "@/lib/projects/covers";
 import { projectKindLabel } from "@/lib/projects/labels";
 import { getProject, listAssignablePeople } from "@/lib/projects/queries";
 import type { ProjectDetail } from "@/lib/projects/types";
+import { projectCollectiveHue } from "@/lib/ui/category-hues";
 import { allInOrder } from "@/lib/utils/parallel";
 import { loadWorkflowStates } from "@/lib/workflow-status/load";
 
@@ -77,6 +78,7 @@ export default async function ProjectOverviewPage({
         people={people}
         creatives={creatives}
         subtitle={projectSubtitle(project)}
+        status={collectiveStatus(project)}
         cover={
           <OverviewCover
             project={project}
@@ -121,6 +123,7 @@ export default async function ProjectOverviewPage({
         projectId={project.id}
         title={project.title}
         subtitle={projectSubtitle(project)}
+        status={collectiveStatus(project)}
         media={
           <OverviewCover
             project={project}
@@ -203,6 +206,14 @@ function projectSubtitle(project: ProjectDetail): string {
   ]
     .filter(Boolean)
     .join(" · ");
+}
+
+/** « Projet collectif » on the right of the project's name (lot 1 of
+ * docs/pds-mic-plan.md); nothing for any other project. */
+function collectiveStatus(project: ProjectDetail) {
+  return project.collective
+    ? { label: fr.shell.projectCollective, tone: projectCollectiveHue }
+    : undefined;
 }
 
 /** What the cover is read from: its image, else its first title's. */
