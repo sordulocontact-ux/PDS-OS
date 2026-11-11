@@ -418,8 +418,14 @@ export const shell = {
         "Choisissez l'artiste principal : il est crédité en tête sur chaque titre.",
       invalidMainArtist:
         "Cet artiste n'est plus disponible. Choisissez-en un autre.",
-      mainArtistIsGuest:
-        "Cet artiste participe à un titre du projet. Retirez sa participation avant d'en faire l'artiste principal.",
+      // The titles where the artist takes part, named as the project names
+      // them (« Titre 4 · sans nom »); none known: said in general.
+      mainArtistIsGuest: (titles: string[]) =>
+        titles.length === 0
+          ? "Cet artiste participe à un titre du projet. Retirez sa participation avant d'en faire l'artiste principal."
+          : titles.length === 1
+            ? `Cet artiste participe au titre « ${titles[0]} ». Retirez sa participation avant d'en faire l'artiste principal.`
+            : `Cet artiste participe aux titres ${new Intl.ListFormat("fr-FR", { type: "conjunction" }).format(titles.map((t) => `« ${t} »`))}. Retirez ses participations avant d'en faire l'artiste principal.`,
       selectionRequired: "Choisissez une de vos sélections d'artistes.",
       selectionNotFound:
         "Cette sélection n'existe plus. Choisissez-en une autre.",

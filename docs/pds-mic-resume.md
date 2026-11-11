@@ -1,7 +1,7 @@
 # Projet collectif (PDS Mic) : résumé
 
 Résumé de travail de `docs/pds-mic-plan.md` (qui fait foi en cas de doute). Mis à jour à la fin
-de chaque lot. Dernière mise à jour : 11/11/2026, après le lot 5 (commité, pas encore poussé).
+de chaque lot. Dernière mise à jour : 11/11/2026, après le lot 5 (validé, commité, pas encore poussé).
 
 **Module Business fait en parallèle par un collègue** : rôle Business manager, négociation, deal
 memo, contrats, contacts privés, mails. Ces lots n'y touchent pas ; son dossier de négociation
@@ -38,7 +38,7 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
 | Lot | Contenu | État |
 | --- | --- | --- |
 | 1 – 4 | Drapeau et artiste principal ; titres, abandon, réactivation ; participations artiste ; sélections d'artistes | faits |
-| 5 | Création d'un collectif (formulaire, depuis une sélection, PO) | fait (commité, pas poussé) |
+| 5 | Création d'un collectif (formulaire, depuis une sélection, PO) | fait, validé (commité, pas poussé) |
 | 6 – 7 | Vue Titres et artistes ; titre provisoire (voie A) | à faire |
 | 8 – 9 | Master : sélecteur de titre ; vue consolidée, abandonnés hors des comptes | à faire |
 | 10 – 12 | Ciblage marketing par titre ; suivi juridique par participation ; contrat manquant, verrou du tournage | à faire |
@@ -81,8 +81,11 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
   titre du projet, même abandonné (`main_artist_is_guest`) ; une participation refusée ou retirée
   ne bloque pas (on retire la participation, puis on en fait l'artiste principal), et
   `set_title_participation_status` ne la remet pas en proposée / invitée / confirmée tant que
-  l'artiste est principal (`main_artist_not_participant`). Code : `lib/projects/collective-rules.ts` (PDS =
-  l'artiste nommé comme l'organisation, modèle = format « PDS Mic » trouvé par son nom),
+  l'artiste est principal (`main_artist_not_participant`). Le refus nomme le ou les titres concernés
+  (« Titre 4 · sans nom », lus par `guestTitles` dans `edit-actions.ts`). Le champ Artiste ne propose
+  plus « Créer l'artiste X » quand un artiste de ce nom existe (`SearchPicker uniqueLabels`).
+  Code : `lib/projects/collective-rules.ts` (PDS = l'artiste nommé comme l'organisation, modèle =
+  format « PDS Mic » trouvé par son nom),
   `collective-context.ts`, `components/projects/collective-fields.tsx` ; page
   `/app/projects/new?selection=…` ; bouton « Créer le projet » de la sélection ; PO
   `propose_project` (`collective`, `selection`). Le cadrage reste celui du projet.
@@ -108,6 +111,9 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
   sens comme dans l'autre.
 - Garder verts `project-types` et `visible-project-ids` ; régénérer les types Supabase. Tests sur
   la base locale seulement. (`visible-project-ids` n° 24 échoue déjà avant ces lots : trois
-  politiques du 26/10 et du 05/11 lisent `can_see_project(project_id)`.)
+  politiques du 26/10 et du 05/11 lisent `can_see_project(project_id)`.) Sur une base propre
+  (11/11/2026), échouent aussi déjà avant le lot 1 : `team` n° 14-15, `ux-roles` n° 5,
+  `marketing-review`, `marketing-review-notifications`, `project-view-cache` ; `marketing-review`
+  n° 9 est instable (deux vérifications au même instant).
 - Une migration de ces lots vient **après** la dernière migration du module Business et du Budget
   (numérotation sans doublon).

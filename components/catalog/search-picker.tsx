@@ -24,6 +24,9 @@ export type PickerOption = { id: string; label: string; detail?: string };
 // `keepName`: a last row once something is typed (« Garder « X » comme
 // simple nom »), the way out when nobody fits, in the list where the eye
 // looks for it rather than as a loose button under the field.
+// `uniqueLabels`: the options are unique by name (artists, as the database
+// holds them: case aside, spaces trimmed), so no create shortcut for a name
+// that already exists; the existing one is listed instead.
 export function SearchPicker({
   label,
   placeholder,
@@ -42,6 +45,7 @@ export function SearchPicker({
   onQueryChange,
   keepName,
   openOnFocus = true,
+  uniqueLabels = false,
 }: {
   label: string;
   placeholder: string;
@@ -67,6 +71,7 @@ export function SearchPicker({
   // when it merely takes the focus (a modal focusing it on opening, whose
   // buttons the list would cover: « Ajouter des artistes »).
   openOnFocus?: boolean;
+  uniqueLabels?: boolean;
 }) {
   const id = useId();
   const listId = `${id}-list`;
@@ -96,11 +101,20 @@ export function SearchPicker({
       .slice(0, 8);
   }, [available, query, suggestedIds]);
 
-  // Rows: results, the create shortcut (with `onCreate`), then « keep the
-  // name » once typed.
-  const createRow = onCreate ? results.length : null;
+  // Rows: results, the create shortcut (with `onCreate`, unless the name
+  // exists), then « keep the name » once typed.
+  const named = useMemo(() => {
+    const typed = sameName(query);
+    return (
+      uniqueLabels &&
+      typed !== "" &&
+      options.some((o) => sameName(o.label) === typed)
+    );
+  }, [uniqueLabels, options, query]);
+  const canCreate = Boolean(onCreate) && !named;
+  const createRow = canCreate ? results.length : null;
   const keepRow =
-    keepName && query.trim() ? results.length + (onCreate ? 1 : 0) : null;
+    keepName && query.trim() ? results.length + (canCreate ? 1 : 0) : null;
   const rowCount =
     results.length + (createRow === null ? 0 : 1) + (keepRow === null ? 0 : 1);
   const activeIndex = Math.max(0, Math.min(active, rowCount - 1));
@@ -276,6 +290,12 @@ export function SearchPicker({
       </Popover>
     </div>
   );
+}
+
+// A name as the database tells two apart (artists_org_name_key: case aside,
+// spaces trimmed; accents count).
+function sameName(value: string): string {
+  return value.trim().toLowerCase();
 }
 
 function normalize(value: string): string {

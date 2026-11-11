@@ -62,6 +62,8 @@ export function ProjectArtistField({
         searchLabel={searchLabel ?? t.artistField.searchLabel}
         placeholder={picker.placeholder}
         onCreate={(query) => setCreating(query)}
+        // An artist of that name exists: it is listed, never created twice.
+        uniqueLabels
         createLabel={(query) =>
           query ? picker.createNamed(query) : picker.create
         }

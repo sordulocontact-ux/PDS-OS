@@ -31,9 +31,10 @@ export function collectiveError(
   error: { code?: string; message?: string } | null,
 ): { fieldErrors?: FieldErrors; formError?: string } | null {
   const message = error?.message ?? "";
-  // Main and guest of the project at once, never.
+  // Main and guest of the project at once, never (the edit form names the
+  // titles: guestTitles in edit-actions).
   if (message.includes("main_artist_is_guest"))
-    return { fieldErrors: { mainArtistId: pe.mainArtistIsGuest } };
+    return { fieldErrors: { mainArtistId: pe.mainArtistIsGuest([]) } };
   if (message.includes("artist_required"))
     return { fieldErrors: { mainArtistId: pe.mainArtistRequired } };
   if (message.includes("artist_not_found"))

@@ -14,8 +14,44 @@ import {
   shapeError,
 } from "@/lib/projects/errors";
 import { updateProjectSchema } from "@/lib/projects/schemas";
+import { projectTitleLabel } from "@/lib/projects/title-rules";
 import type { CreateProjectState } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
+
+type Supabase = Awaited<ReturnType<typeof createClient>>;
+
+// The titles where an artist takes part in the project (a participation
+// neither declined nor withdrawn, the rule of set_project_main_artist), in
+// their order, named as the project names them. Read under RLS; none read:
+// the message says it in general.
+async function guestTitles(
+  supabase: Supabase,
+  projectId: string,
+  artistId: string,
+): Promise<string[]> {
+  const { data, error } = await supabase
+    .from("title_participations")
+    .select(
+      "title:project_titles!title_participations_title(position, working_title, link:project_masters!project_titles_link(master:masters!project_masters_master_same_org(title)))",
+    )
+    .eq("project_id", projectId)
+    .eq("artist_id", artistId)
+    .not("status", "in", "(declined,withdrawn)");
+  if (error) {
+    console.error("guestTitles:", error.message);
+    return [];
+  }
+  return (data ?? [])
+    .flatMap((row) => (row.title ? [row.title] : []))
+    .sort((a, b) => a.position - b.position)
+    .map((title) =>
+      projectTitleLabel({
+        position: title.position,
+        workingTitle: title.working_title,
+        masterTitle: title.link?.master?.title ?? null,
+      }),
+    );
+}
 
 // Edits a project before its launch (update_project), with the user's
 // session: RLS decides (create_projects, project visible, no stage yet).
@@ -63,6 +99,23 @@ export async function updateProject(
     const pe = fr.shell.newProject.errors;
     const shape = shapeError(error.message);
     if (shape) return { status: "error", ...shape, values };
+    // The main artist takes part in titles of the project: named.
+    if (
+      input.collective &&
+      input.mainArtistId &&
+      error.message.includes("main_artist_is_guest")
+    ) {
+      const titles = await guestTitles(
+        supabase,
+        input.projectId,
+        input.mainArtistId,
+      );
+      return {
+        status: "error",
+        fieldErrors: { mainArtistId: pe.mainArtistIsGuest(titles) },
+        values,
+      };
+    }
     const collective = input.collective ? collectiveError(error) : null;
     if (collective?.fieldErrors)
       return { status: "error", fieldErrors: collective.fieldErrors, values };

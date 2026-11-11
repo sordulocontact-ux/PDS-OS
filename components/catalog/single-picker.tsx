@@ -38,6 +38,7 @@ export function SinglePicker({
   error,
   onQueryChange,
   keepName,
+  uniqueLabels,
 }: {
   name: string;
   legend: string;
@@ -61,6 +62,8 @@ export function SinglePicker({
   error?: string;
   onQueryChange?: (query: string) => void;
   keepName?: React.ComponentProps<typeof SearchPicker>["keepName"];
+  // No « create » row for a name already among the options (artists).
+  uniqueLabels?: boolean;
 }) {
   const id = useId();
   const selected = options.find((o) => o.id === selectedId) ?? null;
@@ -124,6 +127,7 @@ export function SinglePicker({
             onPick={onSelect}
             onCreate={onCreate}
             createLabel={createLabel}
+            uniqueLabels={uniqueLabels}
             noResultLabel={noResultLabel}
             allSelectedLabel={allSelectedLabel}
             suggestedIds={suggestedIds}
