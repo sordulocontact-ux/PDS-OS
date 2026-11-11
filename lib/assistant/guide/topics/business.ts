@@ -1,6 +1,7 @@
 import type { GuideTopic } from "@/lib/assistant/guide/types";
 
-/** The Business module (BIZ 2 to 6): the deals and their calls. */
+/** The Business module (BIZ 2 to 7): the deals, their calls, the deal memo
+ * and the contract. */
 export const businessTopics: GuideTopic[] = [
   {
     key: "deals",
@@ -19,6 +20,10 @@ export const businessTopics: GuideTopic[] = [
       "termes",
       "call du deal",
       "preparer un call",
+      "deal memo",
+      "memo",
+      "contrat du deal",
+      "conforme",
       "avance",
       "cachet",
       "royalties",
@@ -35,6 +40,10 @@ export const businessTopics: GuideTopic[] = [
       "Depuis la page d'un deal, « Préparer un call » crée un call dont l'ordre du jour reprend le contexte du deal et les termes encore à négocier (tous ceux qui ne sont pas confirmés). Un deal « À contacter » passe alors à « Call prévu ».",
       "Le call d'un deal s'enregistre, se transcrit et se clôture comme tout call, depuis sa page dans Calls. Il n'appartient pas au projet : il n'apparaît ni dans les Calls du projet ni dans ses modules (Cadrage, Stratégie…), seulement pour ceux qui lisent le deal.",
       "Après le call, PO propose sur la page du deal les changements qu'il a lus (un terme, une étape, la prochaine action) avec le passage de la transcription : vous les vérifiez dans le vrai formulaire, ou vous les écartez. PO ne change jamais un deal lui-même.",
+      "Le deal memo est une photo numérotée des termes du deal (valeur et état de chacun), avec son auteur, sa date et son statut, Brouillon ou Validé. Il est pris à l'accord de principe (validé avec lui par la direction) ou à la main avec « Nouveau deal memo ». Il ne change jamais : un nouveau deal memo prend les termes du moment, les précédents restent, chacun exportable en PDF.",
+      "Seule la direction valide un deal memo, et seulement le dernier.",
+      "Le contrat d'un deal de participation (PDS MIC) est celui de la participation, dans le Juridique. Un autre deal se lie à un contrat principal parmi ceux de son projet ou de son artiste ; les autres contrats de l'opération restent dans Contrats.",
+      "Le contrat se compare au dernier deal memo validé, terme par terme : PDS OS ne lit pas le PDF du contrat. Il compare seulement le montant saisi sur le contrat à l'avance ou au cachet ; pour chaque terme, la personne qui négocie ou la direction dit « Conforme » ou « Différent », avec ce que dit le contrat. Les termes que le contrat contredit sont signalés ; rien n'est corrigé tout seul.",
       "La page Deals est une seule liste : onglets En cours, À relancer, Signés, Abandonnés ; filtres par étape, personne qui négocie et projet.",
     ],
     faq: [

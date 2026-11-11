@@ -42,7 +42,12 @@ export async function readDeals(
   const shown = kept.slice(0, MAX_SHOWN);
   const supabase = await createClient();
   const ids = shown.map((d) => d.id);
-  const [{ data: terms }, { data: calls }, { data: proposals }] = ids.length
+  const [
+    { data: terms },
+    { data: calls },
+    { data: proposals },
+    { data: memos },
+  ] = ids.length
     ? await Promise.all([
         supabase
           .from("deal_terms")
@@ -55,8 +60,16 @@ export async function readDeals(
           .select("deal_id")
           .in("deal_id", ids)
           .eq("status", "proposed"),
+        // BIZ 7: its deal memos, the latest first.
+        supabase
+          .from("deal_memos")
+          .select("deal_id, number, status")
+          .in("deal_id", ids)
+          .order("number", { ascending: false }),
       ])
-    : [{ data: [] }, { data: [] }, { data: [] }];
+    : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }];
+  const memoOf = (id: string) =>
+    (memos ?? []).find((memo) => memo.deal_id === id);
   const countOf = (rows: { deal_id: string | null }[] | null, id: string) =>
     (rows ?? []).filter((row) => row.deal_id === id).length;
   return {
@@ -78,6 +91,9 @@ export async function readDeals(
           : []),
         ...(d.followUpOn ? [t.followUp(formatDay(d.followUpOn))] : []),
         ...(d.abandonReason ? [t.abandoned(d.abandonReason)] : []),
+        ...(memoOf(d.id)
+          ? [t.memo(memoOf(d.id)!.number, memoOf(d.id)!.status === "validated")]
+          : []),
         ...(countOf(calls, d.id) > 0
           ? [t.calls(countOf(calls, d.id), countOf(proposals, d.id))]
           : []),

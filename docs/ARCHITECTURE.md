@@ -7493,8 +7493,30 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   « Maintenant » du call renvoie au deal (`CallModule` « le deal », compte des propositions en attente).
   Liste « Calls » du deal (`DealCalls`). `delete_project_row` prend les calls des deals du projet. Test :
   `supabase/tests/deal-calls.test.sql`.
+- **Deal memo et contrat** (BIZ 7, `20261112020101_deal_memos.sql`) : `deal_memos` = photo **numérotée**
+  des termes (valeur et état de chacun, « À définir » exclus), auteur, date, étape, statut `draft` /
+  `validated` ; jamais modifiée. Prise **à l'accord de principe** (trigger `deal_events_memo` : proposé →
+  brouillon ; validé par la direction → le dernier brouillon est validé, sinon un memo validé est pris ;
+  la direction qui pose l'accord elle-même → validé d'emblée) ou à la main (`create_deal_memo`, qui écrit le
+  deal). `validate_deal_memo` : direction seule, le dernier seulement. PDF par le rendu commun
+  (`/api/deals/<id>/memos/<memo>`, `memoHtml`, `lib/pdf/render.ts`). **Contrat** : celui de la participation
+  pour un deal de participation (`title_participations.contract_id`, jamais copié :
+  `deals_contract_participation_check`) ; sinon **un contrat principal** `deals.contract_id`
+  (**décision** : le modèle le plus simple ; les autres contrats d'une opération restent dans Contrats, sur
+  son projet ou son artiste), choisi parmi ceux du projet ou de l'artiste du deal
+  (`list_deal_contract_options`, `link_deal_contract`, qui écrit le deal ; Glen ne lit pas les contrats, la
+  liste et `read_deal_contract` lui donnent nom, type, état, date de signature, montant saisi
+  `financial_needs`, et si le lecteur peut l'ouvrir dans Contrats). **Comparaison** du dernier memo validé au
+  contrat : PDS OS ne lit pas un PDF de contrat de façon fiable ; le code compare seulement le **montant
+  saisi** sur le contrat à l'avance ou au cachet (`compareMemo`, `lib/deals/memos.ts`), et une personne dit
+  pour chaque terme « Conforme » ou « Différent » avec ce que dit le contrat (`deal_memo_checks`, par memo
+  **et par contrat** : changer de contrat repart de zéro ; `set_deal_memo_check`, qui écrit le deal, aussi
+  après la signature, jamais sur un deal abandonné). Les termes contredits (montant différent ou
+  « Différent ») sont signalés en tête ; **jamais de correction automatique**. Journal : `memo`,
+  `memo_validated`, `contract_linked`, `contract_check`. Le contrat a quitté « Informations » pour sa section.
+  Test : `supabase/tests/deal-memos.test.sql`.
 - **Pas encore** : BIZ 5 (colonne « Négociation » de la vue Titres et artistes de Maël),
-  deal memo, contacts privés, e-mails, onglet Deals de la fiche artiste, seuils de validation.
+  contacts privés, e-mails, onglet Deals de la fiche artiste, seuils de validation.
 - Code : `lib/deals/types.ts` (étapes), `actions.ts` (un geste = une fonction SQL, `WriteResult`, push après
   ce qui notifie), `errors.ts` (exceptions en français, `lib/i18n/fr/deals.ts`). Test :
   `supabase/tests/deals.test.sql`.

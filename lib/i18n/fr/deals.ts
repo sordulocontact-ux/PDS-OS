@@ -230,10 +230,6 @@ export const deals = {
       title: "Titre",
       artist: "Artiste",
       participation: "Participation",
-      contract: "Contrat",
-      contractSigned: "Signé",
-      contractOpen: "Pas encore signé",
-      contractNone: "Aucun contrat lié à la participation",
       assignee: "Négocié par",
       unassigned: "À affecter",
       change: "Changer",
@@ -258,6 +254,15 @@ export const deals = {
       abandoned: "Deal abandonné",
       nextAction: "Prochaine action mise à jour",
       term: (label: string, value: string) => `${label} : ${value}`,
+      memo: (agreement: boolean) =>
+        agreement
+          ? "Deal memo pris à l'accord de principe"
+          : "Nouveau deal memo",
+      memoValidated: "Deal memo validé",
+      contractLinked: "Contrat lié",
+      contractUnlinked: "Lien du contrat retiré",
+      contractCheck: (label: string, different: boolean) =>
+        `${label} : ${different ? "le contrat diffère" : "conforme au contrat"}`,
       by: (who: string) => `par ${who}`,
     },
   },
@@ -278,6 +283,8 @@ export const deals = {
         : `Prochaine action : ${action}.`,
     followUp: (day: string) => `Relance prévue le ${day}.`,
     abandoned: (reason: string) => `Abandonné : « ${reason} ».`,
+    memo: (n: number, validated: boolean) =>
+      `Dernier deal memo : n°${n}, ${validated ? "validé" : "brouillon"}.`,
     calls: (calls: number, proposals: number) =>
       `${calls} call${calls > 1 ? "s" : ""}` +
       (proposals > 0

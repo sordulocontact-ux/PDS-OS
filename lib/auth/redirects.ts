@@ -123,6 +123,9 @@ export const routes = {
   // The Business module's deals (BIZ 2 to 4): the list, a deal's page.
   deals: "/app/deals",
   deal: (dealId: string) => `/app/deals/${dealId}`,
+  // A deal memo as a PDF (BIZ 7).
+  dealMemoPdf: (dealId: string, memoId: string) =>
+    `/api/deals/${dealId}/memos/${memoId}`,
   // Features on trial before they enter the app (any member).
   labo: "/app/labo",
   network: "/app/network",

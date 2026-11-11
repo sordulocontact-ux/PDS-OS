@@ -9,8 +9,8 @@ const fr = { deals };
 /**
  * What a deal is about and who negotiates it (BIZ 4): its kind, project
  * (a link only for whoever sees the project), title, artist, the
- * participation and its contract (read on the participation, never copied
- * on the deal), the negotiator (« Changer » for who assigns).
+ * participation, the negotiator (« Changer » for who assigns). The contract
+ * has its own section (BIZ 7, DealContract).
  */
 export function DealInfo({
   deal,
@@ -25,13 +25,6 @@ export function DealInfo({
     (deal.titlePosition !== null
       ? fr.deals.name.title(deal.titlePosition)
       : null);
-  const contract = deal.participationId
-    ? deal.contractStatus === "signed"
-      ? t.contractSigned
-      : deal.contractStatus
-        ? t.contractOpen
-        : t.contractNone
-    : null;
   return (
     <FactRows>
       <FactRow label={t.kind} value={fr.deals.kinds[deal.kind]} />
@@ -65,7 +58,6 @@ export function DealInfo({
           }
         />
       )}
-      {contract && <FactRow label={t.contract} value={contract} />}
       <FactRow
         label={t.assignee}
         value={deal.assignee?.name ?? t.unassigned}

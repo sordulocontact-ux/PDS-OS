@@ -26,6 +26,19 @@ function lineOf(event: DealEvent, deal: Deal): string {
       return t.abandoned;
     case "next_action":
       return t.nextAction;
+    case "memo":
+      return t.memo(Boolean(event.detail.agreement));
+    case "memo_validated":
+      return t.memoValidated;
+    case "contract_linked":
+      return event.detail.contract ? t.contractLinked : t.contractUnlinked;
+    case "contract_check": {
+      const key = String(event.detail.key ?? "");
+      return t.contractCheck(
+        fr.deals.terms.labels[key] ?? key,
+        event.detail.verdict === "different",
+      );
+    }
     case "term": {
       const key = String(event.detail.key ?? "");
       const term = (DEAL_KINDS as readonly string[]).includes(deal.kind)

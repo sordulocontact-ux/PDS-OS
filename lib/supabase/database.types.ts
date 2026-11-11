@@ -244,6 +244,64 @@ export type Database = {
           },
         ]
       }
+      deal_memo_checks: {
+        Row: {
+          checked_at: string
+          checked_by: string | null
+          contract_id: string
+          id: string
+          memo_id: string
+          note: string | null
+          organization_id: string
+          term_key: string
+          verdict: string
+        }
+        Insert: {
+          checked_at?: string
+          checked_by?: string | null
+          contract_id: string
+          id?: string
+          memo_id: string
+          note?: string | null
+          organization_id: string
+          term_key: string
+          verdict: string
+        }
+        Update: {
+          checked_at?: string
+          checked_by?: string | null
+          contract_id?: string
+          id?: string
+          memo_id?: string
+          note?: string | null
+          organization_id?: string
+          term_key?: string
+          verdict?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_memo_checks_checked_by_fkey"
+            columns: ["checked_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_memo_checks_contract_same_org"
+            columns: ["contract_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "deal_memo_checks_memo_same_org"
+            columns: ["memo_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "deal_memos"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       deal_events: {
         Row: {
           actor_person_id: string | null
@@ -298,6 +356,70 @@ export type Database = {
           },
         ]
       }
+      deal_memos: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          deal_id: string
+          id: string
+          number: number
+          organization_id: string
+          stage: string
+          status: string
+          terms: Json
+          validated_at: string | null
+          validated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          deal_id: string
+          id?: string
+          number: number
+          organization_id: string
+          stage: string
+          status?: string
+          terms?: Json
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          deal_id?: string
+          id?: string
+          number?: number
+          organization_id?: string
+          stage?: string
+          status?: string
+          terms?: Json
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_memos_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_memos_deal_same_org"
+            columns: ["deal_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "deal_memos_validated_by_fkey"
+            columns: ["validated_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deal_terms: {
         Row: {
           changed_at: string
@@ -348,6 +470,7 @@ export type Database = {
       }
       deals: {
         Row: {
+          contract_id: string | null
           abandon_reason: string | null
           abandoned_at: string | null
           abandoned_by: string | null
@@ -373,6 +496,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          contract_id?: string | null
           abandon_reason?: string | null
           abandoned_at?: string | null
           abandoned_by?: string | null
@@ -398,6 +522,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          contract_id?: string | null
           abandon_reason?: string | null
           abandoned_at?: string | null
           abandoned_by?: string | null
@@ -423,6 +548,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "deals_contract_same_org"
+            columns: ["contract_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id", "organization_id"]
+          },
           {
             foreignKeyName: "deals_abandoned_by_fkey"
             columns: ["abandoned_by"]
@@ -19150,6 +19282,49 @@ export type Database = {
           person_id: string
           role: string
         }[]
+      }
+      create_deal_memo: {
+        Args: { p_deal_id: string }
+        Returns: string
+      }
+      link_deal_contract: {
+        Args: { p_contract_id: string | null; p_deal_id: string }
+        Returns: undefined
+      }
+      list_deal_contract_options: {
+        Args: { p_deal_id: string }
+        Returns: {
+          contract_id: string
+          status: string
+          title: string
+          type: string
+        }[]
+      }
+      read_deal_contract: {
+        Args: { p_deal_id: string }
+        Returns: {
+          amount_cents: number
+          contract_id: string
+          signed_on: string
+          source: string
+          status: string
+          title: string
+          type: string
+          visible: boolean
+        }[]
+      }
+      set_deal_memo_check: {
+        Args: {
+          p_memo_id: string
+          p_note?: string
+          p_term_key: string
+          p_verdict: string
+        }
+        Returns: undefined
+      }
+      validate_deal_memo: {
+        Args: { p_memo_id: string }
+        Returns: undefined
       }
       read_deal_context: {
         Args: { p_deal_ids: string[] }

@@ -2136,3 +2136,10 @@ les modules à parcours (proto « Mise en page des modules », version « Propos
   compte rendu, PO propose des changements de termes, d'étape ou de prochaine action, chacun avec son
   passage, chiffres et dates vérifiés par le code ; « Vérifier » ouvre le vrai formulaire, « Écarter » les
   met de côté. Migration `20261112010101`, test `deal-calls` 29/29.
+- 12/11/2026 — **Business, BIZ 7 : deal memo versionné et passage au contrat.** Photo numérotée des termes
+  (auteur, date, statut brouillon / validé), prise à l'accord de principe (validée avec lui) ou à la main,
+  validée par la direction seule, exportable en PDF. Contrat : celui de la participation, sinon un contrat
+  principal du projet ou de l'artiste lié au deal. Comparaison du dernier memo validé au contrat : le code
+  compare le montant saisi à l'avance ou au cachet, une personne dit « Conforme » / « Différent » terme par
+  terme ; les contradictions sont signalées, rien n'est corrigé tout seul. Migration `20261112020101`,
+  test `deal-memos` 27/27.

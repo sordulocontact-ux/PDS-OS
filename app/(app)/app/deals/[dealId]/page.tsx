@@ -6,6 +6,7 @@ import { DealCallProposals } from "@/components/deals/deal-call-proposals";
 import { DealCalls } from "@/components/deals/deal-calls";
 import { DealHistory } from "@/components/deals/deal-history";
 import { DealInfo } from "@/components/deals/deal-info";
+import { DealMemoSections } from "@/components/deals/deal-memo-sections";
 import { DealNextAction } from "@/components/deals/deal-next-action";
 import { DealNow } from "@/components/deals/deal-now";
 import { DealStageBadge } from "@/components/deals/deal-stage-badge";
@@ -64,6 +65,7 @@ async function callFormFor(deal: Deal, terms: DealTerm[]) {
  * A deal's page (BIZ 4): its stage beside its name, « Maintenant » when the
  * reader has a gesture, then the next action, the terms negotiated
  * (BIZ 3), PO's proposals from its calls and the calls themselves (BIZ 6),
+ * its deal memo and its contract compared with it (BIZ 7),
  * the stages, what it is about and who negotiates it, and its history at
  * the bottom. Not found for whoever may not read it.
  */
@@ -111,6 +113,7 @@ export default async function DealPage({
       >
         <DealCalls calls={calls} />
       </PageSection>
+      <DealMemoSections access={access} deal={deal} terms={terms} />
       <PageSection id="etapes" title={s.stages}>
         <DealStages deal={deal} events={events} />
       </PageSection>
