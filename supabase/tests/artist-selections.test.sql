@@ -1,4 +1,4 @@
--- Projet collectif, lot 4 (…20261111200101, docs/pds-mic-plan.md § 3.1): the
+-- Projet collectif, lot 4 (…20261111232101, docs/pds-mic-plan.md § 3.1): the
 -- selections of artists in the Catalogue — created, renamed, artists added
 -- and removed by who manages the Catalogue (direction, project managers),
 -- read by every active member, handed to a member who finds it in her
