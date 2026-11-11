@@ -1,6 +1,8 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import {
+  formFieldControlClassName,
   Select,
   SelectContent,
   SelectItem,
@@ -46,7 +48,11 @@ export function OptionSelect({
         aria-required={required || undefined}
         // A long option never runs past its column (Sacha 07/11/2026: the
         // Dispositif's lever over « Quantité »): cut with an ellipsis.
-        className={fill ? "w-full min-w-0" : "max-w-full min-w-44"}
+        className={cn(
+          fill
+            ? ["w-full min-w-0", formFieldControlClassName]
+            : "max-w-full min-w-44",
+        )}
       >
         <SelectValue className="block! min-w-0 truncate" />
       </SelectTrigger>

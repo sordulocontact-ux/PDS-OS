@@ -42,6 +42,13 @@ export const projectTypeHue: Record<ProjectType, Hue> = {
  * overview's head: every hue already sits on that row, slate is the quiet one. */
 export const projectCollectiveHue: Hue = "slate";
 
+/** What a spend goes to (« Pour » of a quick spend): a project or an artist,
+ * told apart at a glance in the list (Sacha 11/11/2026). */
+export const budgetTargetHue: Record<"project" | "artist", Hue> = {
+  project: "violet",
+  artist: "orange",
+};
+
 /** One hue per workflow (the Travail's « Module » tag), close to its stage's
  * hue: the Cadrage sky, the Marketing pink, the Distribution teal. */
 export const moduleHue: Record<JourneyModuleKey, Hue> = {

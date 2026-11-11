@@ -8,6 +8,12 @@ import { CheckboxMark } from "@/components/ui/checkbox";
 
 const Select = SelectPrimitive.Root
 
+// A menu inside a form (`fill`): the height and text of every other field of
+// the form (Field, DatePicker: 40 px), so a row « Statut | Date » lines up
+// (Sacha 11/11/2026). A menu in a row or a filter keeps the 32 px box.
+export const formFieldControlClassName =
+  "data-[size=default]:h-10 text-base md:text-sm"
+
 // The closed menu's box, shared with SearchSelect (a long list with a search
 // field) so every menu of a form looks the same.
 export const selectTriggerClassName =

@@ -765,6 +765,13 @@ D'après le proto « Projet complet » (`docs/protos/projet.html`), qui fait foi
   de sa colonne** (texte, nombre, date, menu `OptionSelect fill`) ; seul un menu hors formulaire (une
   ligne, un filtre) garde la largeur de sa valeur. Appliqué d'abord à « Nouveau livrable » ; à reprendre
   écran par écran. Dans la liste d'un menu, une option longue passe à la ligne (jamais sous la coche).
+- **Hauteur d'un champ** (Sacha, 11/11/2026) : dans un formulaire, **tous les champs ont la même hauteur,
+  40 px** : texte, date, menu (`OptionSelect fill`, `SearchSelect fill`, `OptionSelect` des projets). Une
+  seule source : `formFieldControlClassName` (`components/ui/select.tsx`). Un menu hors formulaire (ligne,
+  filtre) garde 32 px, la hauteur des boutons `sm` à côté desquels il se tient.
+- **Type d'un choix dans un menu** (Sacha, 11/11/2026) : quand une liste mêle deux sortes d'objets (projets
+  et artistes dans « Pour » d'une dépense), la sorte est un **badge dans sa teinte** après le nom
+  (`SearchSelect badge`, `budgetTargetHue`), jamais un suffixe « · projet » ; la recherche lit le nom seul.
 - **Menu à longue liste** (retour du 09/11/2026) : au-delà d'une dizaine de choix, le menu est un
   `SearchSelect` : à l'ouverture, on est directement dans un champ de recherche, les choix filtrés dessous
   (« restau » ne laisse que Restauration). Premier cas : le Poste d'une ligne de budget, dont la modale met

@@ -6,9 +6,12 @@ import {
   IconChevronDown,
   IconMagnifier,
 } from "nucleo-sharp-essential";
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
 
-import { selectTriggerClassName } from "@/components/ui/select";
+import {
+  formFieldControlClassName,
+  selectTriggerClassName,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 type Option = { value: string; label: string };
@@ -26,8 +29,10 @@ const fold = (text: string) =>
  * retour du 09/11/2026): the same closed box as `OptionSelect`, and once
  * open, a search field on top, focused at once, the choices below narrowed
  * as one types (« restau » leaves « Restauration »). ↑ ↓ move, Entrée
- * chooses, Échap closes. `fill`: as wide as its column, as every field of a
- * form (docs/DESIGN.md « Largeur d'un champ »).
+ * chooses, Échap closes. `fill`: as wide and as high as every field of a
+ * form (docs/DESIGN.md « Largeur d'un champ »). `badge`: a tag after a
+ * choice's name (« Projet », « Artiste »), in the list and the closed box;
+ * the search reads the name only.
  */
 export function SearchSelect({
   id,
@@ -43,6 +48,7 @@ export function SearchSelect({
   placeholder,
   invalid = false,
   describedBy,
+  badge,
 }: {
   id: string;
   label: string;
@@ -60,6 +66,7 @@ export function SearchSelect({
   // la validation »): red box, its FieldError named by `describedBy`.
   invalid?: boolean;
   describedBy?: string;
+  badge?: (value: string) => ReactNode;
 }) {
   const items = useMemo<Option[]>(
     () => Object.entries(options).map(([key, text]) => ({ value: key, label: text })),
@@ -88,7 +95,9 @@ export function SearchSelect({
         aria-describedby={describedBy}
         className={cn(
           selectTriggerClassName,
-          fill ? "w-full min-w-0" : "max-w-full min-w-44",
+          fill
+            ? ["w-full min-w-0", formFieldControlClassName]
+            : "max-w-full min-w-44",
         )}
       >
         <span className="block min-w-0 flex-1 truncate text-left">
@@ -98,6 +107,7 @@ export function SearchSelect({
             <span className="text-muted-foreground">{placeholder}</span>
           )}
         </span>
+        {selected && badge?.(selected.value)}
         <IconChevronDown
           aria-hidden
           className="pointer-events-none size-4 text-muted-foreground"
@@ -135,6 +145,7 @@ export function SearchSelect({
                   <span className="min-w-0 flex-1 break-words">
                     {item.label}
                   </span>
+                  {badge?.(item.value)}
                   <Combobox.ItemIndicator className="pointer-events-none absolute right-2 flex size-4 items-center justify-center">
                     <IconCheck className="size-4" />
                   </Combobox.ItemIndicator>

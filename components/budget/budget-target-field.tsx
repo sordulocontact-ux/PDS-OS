@@ -3,8 +3,10 @@
 import { FieldError } from "@/components/auth/form-message";
 import { Label } from "@/components/ui/label";
 import { SearchSelect } from "@/components/ui/search-select";
+import { StatusBadge } from "@/components/ui/status-badge";
 import type { BudgetTarget, ExpenseTarget } from "@/lib/budget/types";
 import { budget } from "@/lib/i18n/fr/budget";
+import { budgetTargetHue } from "@/lib/ui/category-hues";
 
 const fr = { budget };
 
@@ -12,7 +14,9 @@ export const targetKey = (t: BudgetTarget) => `${t.kind}:${t.id}`;
 
 /**
  * « Pour » of a quick spend (BUD 4): a project the reader runs or an
- * artist, searched as one types, the last ones spent on first.
+ * artist, searched as one types, the last ones spent on first. The name is
+ * the choice; its kind is a badge in its hue (Projet, Artiste), so the two
+ * read apart at a glance (Sacha 11/11/2026).
  */
 export function BudgetTargetField({
   targets,
@@ -27,6 +31,7 @@ export function BudgetTargetField({
   onChange: (key: string) => void;
 }) {
   const t = fr.budget.form;
+  const byKey = new Map(targets.map((target) => [targetKey(target), target]));
   return (
     <div className="grid gap-1.5">
       <Label htmlFor="budget-target" required>
@@ -39,10 +44,7 @@ export function BudgetTargetField({
         options={{
           "": t.targetPlaceholder,
           ...Object.fromEntries(
-            targets.map((target) => [
-              targetKey(target),
-              t.targetOption(target.label, target.kind, target.recent ?? false),
-            ]),
+            targets.map((target) => [targetKey(target), target.label]),
           ),
         }}
         value={value}
@@ -50,6 +52,22 @@ export function BudgetTargetField({
         searchPlaceholder={t.targetSearch}
         emptyLabel={t.targetNone}
         fill
+        badge={(key) => {
+          const target = byKey.get(key);
+          if (!target) return null;
+          return (
+            <span className="flex shrink-0 items-center gap-2">
+              {target.recent && (
+                <span className="text-[length:var(--type-caption)] text-[color:var(--text-tertiary)]">
+                  {t.targetRecent}
+                </span>
+              )}
+              <StatusBadge tone={budgetTargetHue[target.kind]} size="sm">
+                {t.targetKinds[target.kind]}
+              </StatusBadge>
+            </span>
+          );
+        }}
       />
       {error && <FieldError id="budget-target-error">{error}</FieldError>}
     </div>

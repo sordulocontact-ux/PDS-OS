@@ -140,12 +140,9 @@ export const budget = {
     targetSearch: "Rechercher un projet ou un artiste",
     targetNone: "Aucun projet ni artiste ne correspond.",
     targetMissing: "Dites à quel projet ou à quel artiste va la dépense.",
-    targetOption: (
-      label: string,
-      kind: "project" | "artist",
-      recent: boolean,
-    ) =>
-      `${label} · ${kind === "project" ? "projet" : "artiste"}${recent ? " · récent" : ""}`,
+    // Its kind as a badge after the name (Sacha 11/11/2026), « récent » beside.
+    targetKinds: { project: "Projet", artist: "Artiste" },
+    targetRecent: "récent",
     quickTitle: "Nouvelle dépense",
     quickDescription:
       "Le ticket en photo si vous l'avez, le montant, ce que c'est et pour qui : déjà payée par défaut.",
