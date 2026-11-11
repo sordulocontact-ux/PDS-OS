@@ -69,6 +69,27 @@ export const projectPilotTopics: GuideTopic[] = [
     permissions: ["read_artist_budgets", "manage_artist_budgets"],
   },
   {
+    key: "expenses",
+    title: "Dépenses",
+    summary:
+      "Toutes les dépenses des projets et des artistes que vous pouvez lire, au même endroit.",
+    keywords: [
+      "depenses",
+      "toutes les depenses",
+      "justificatif",
+      "ticket",
+      "note de frais",
+      "sans justificatif",
+    ],
+    nav: "/app/expenses",
+    facts: [
+      "La page Dépenses liste, la plus récente d'abord, les dépenses des projets dont vous lisez le budget et celles des artistes.",
+      "Elle se filtre par artiste, projet, poste, personne qui a saisi et mois ; l'onglet « Sans justificatif » garde les dépenses facturées ou payées sans photo du ticket ni facture.",
+      "Chaque ligne est la même que dans le Budget d'un projet ou d'un artiste : la modifier ici la modifie partout.",
+    ],
+    permissions: ["read_artist_budgets"],
+  },
+  {
     key: "project_team",
     title: "Équipe d'un projet",
     summary:

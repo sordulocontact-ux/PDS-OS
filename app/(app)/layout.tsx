@@ -142,6 +142,7 @@ export default async function AppLayout({
 
                 <CountedSidebar
                   isAdmin={isAdmin}
+                  permissions={access.permissions}
                   pending={pendingMembers}
                   bell={bell("nav")}
                   name={name}
@@ -152,6 +153,7 @@ export default async function AppLayout({
                   <header className="sticky top-0 z-40 flex h-14 items-center gap-2 border-b border-[color:var(--border-hairline)] bg-background px-2 md:hidden">
                     <CountedMobileNav
                       isAdmin={isAdmin}
+                      permissions={access.permissions}
                       pending={pendingMembers}
                       footer={userPanel}
                     />

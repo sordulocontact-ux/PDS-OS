@@ -15,6 +15,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { dialogs } from "@/lib/i18n/fr/dialogs";
+import type { Permission } from "@/lib/auth/redirects";
 import { shell } from "@/lib/i18n/fr/shell";
 
 const fr = { dialogs, shell };
@@ -26,10 +27,12 @@ const fr = { dialogs, shell };
 // "Équipe" item that carries them is hidden in the menu.
 export function MobileNav({
   isAdmin,
+  permissions,
   pendingMembers = 0,
   footer,
 }: {
   isAdmin: boolean;
+  permissions: readonly Permission[];
   pendingMembers?: number;
   footer: React.ReactNode;
 }) {
@@ -69,6 +72,7 @@ export function MobileNav({
         </DialogHeader>
         <NavLinks
           isAdmin={isAdmin}
+          permissions={permissions}
           pendingMembers={pendingMembers}
           onNavigate={() => setOpen(false)}
         />

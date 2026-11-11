@@ -3,9 +3,8 @@
 import { IconMoneyBillCoin, IconPlus } from "nucleo-sharp-essential";
 import { useState } from "react";
 
-import { BudgetLineSheet } from "@/components/budget/budget-line-sheet";
 import { BudgetTable } from "@/components/budget/budget-table";
-import { DeleteBudgetLineDialog } from "@/components/budget/delete-budget-line-dialog";
+import { useBudgetLineDialogs } from "@/components/budget/use-budget-line-dialogs";
 import { useCanEditProject } from "@/components/projects/edit-access";
 import { EmptyState } from "@/components/shell/empty-state";
 import { Button } from "@/components/ui/button";
@@ -51,9 +50,12 @@ export function BudgetLines({
   const unproved = lines.filter(lacksProof);
   const isOwn = (line: BudgetLine) =>
     line.target.kind === target.kind && line.target.id === target.id;
-  const [editing, setEditing] = useState<BudgetLine | null>(null);
-  const [sheetOpen, setSheetOpen] = useState(false);
-  const [deleting, setDeleting] = useState<BudgetLine | null>(null);
+  const dialogs = useBudgetLineDialogs({
+    target,
+    levers,
+    deliverables,
+    organizationId,
+  });
 
   const shown =
     filter === "no_proof"
@@ -61,13 +63,8 @@ export function BudgetLines({
       : filter
         ? lines.filter((l) => l.status === filter)
         : lines;
-  const openSheet = (line: BudgetLine | null) => {
-    setEditing(line);
-    setSheetOpen(true);
-  };
-
   const addButton = canEdit && (
-    <Button size="lg" onClick={() => openSheet(null)}>
+    <Button size="lg" onClick={dialogs.add}>
       <IconPlus aria-hidden data-icon="inline-start" />
       {t.add}
     </Button>
@@ -122,26 +119,14 @@ export function BudgetLines({
               // (an artist's tab also reads its projects' lines).
               canEdit={(line) => canEdit && isOwn(line)}
               showTarget={lines.some((line) => !isOwn(line))}
-              onEdit={openSheet}
-              onDelete={setDeleting}
+              onEdit={dialogs.edit}
+              onDelete={dialogs.remove}
             />
           )}
         </DataTableViews>
       )}
 
-      <BudgetLineSheet
-        target={target}
-        line={editing}
-        levers={levers}
-        deliverables={deliverables}
-        organizationId={organizationId}
-        open={sheetOpen}
-        onOpenChange={setSheetOpen}
-      />
-      <DeleteBudgetLineDialog
-        line={deleting}
-        onClose={() => setDeleting(null)}
-      />
+      {dialogs.dialogs}
     </div>
   );
 }

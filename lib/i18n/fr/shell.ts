@@ -28,6 +28,7 @@ export const shell = {
     network: "Réseau",
     contracts: "Contrats",
     files: "Fichiers",
+    expenses: "Dépenses",
     members: "Équipe",
     feedback: "Retours",
     labo: "Repérage",

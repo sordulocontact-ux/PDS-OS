@@ -3063,6 +3063,15 @@ date de sortie de la Stratégie, NDA : à décider).
     l'enveloppe » pour la direction. **Budget d'un projet** : la part de l'enveloppe ouverte de son
     artiste qu'il consomme (`project_artist_budget_share`, lecteurs du budget du projet qui lisent
     aussi les budgets d'artistes). Un artiste avec une enveloppe ne se supprime pas (`artist_in_use`).
+  - **Page Dépenses** (BUD 3, `/app/expenses`, entrée de la navigation principale réservée à
+    `read_artist_budgets` : `NavItem.permission`, `NavLinks permissions`) : toutes les dépenses que le
+    lecteur peut lire (lignes d'un projet pour les lecteurs de son budget, d'un artiste pour
+    `read_artist_budgets`, RLS), la plus récente d'abord, 1 000 au plus (`loadExpenses`,
+    `lib/budget/expenses-queries.ts`). Onglets Toutes / Sans justificatif (`?vue=sans-justificatif`),
+    filtres en URL artiste (celui d'un projet par la règle de `listProjects`), projet, poste, saisie
+    par, mois (`lib/budget/expense-filters.ts`), recherche instantanée. **Même ligne** (`BudgetTable
+    showTarget`) et mêmes modales (`useBudgetLineDialogs`) que le Budget d'un projet et d'un artiste ;
+    modifiable là où le lecteur écrit : une dépense d'artiste, une ligne d'un projet qu'il mène.
 
 ### Blocages et informations notées d'une étape (C6, 18/10/2026)
 

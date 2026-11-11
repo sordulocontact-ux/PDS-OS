@@ -118,6 +118,8 @@ export const routes = {
     `/api/calls/${callId}/report?v=${version}&scope=${scope}`,
   // Every file the viewer may read, across artists, titles, projects, contracts.
   files: "/app/files",
+  // Every spend the reader may see, projects and artists (BUD 3).
+  expenses: "/app/expenses",
   // Features on trial before they enter the app (any member).
   labo: "/app/labo",
   network: "/app/network",

@@ -2089,3 +2089,8 @@ les modules à parcours (proto « Mise en page des modules », version « Propos
   Onglet Budget de la fiche artiste (enveloppe par poste prévu / dépensé / reste, dépassement signalé,
   dépenses, historique) et, au Budget d'un projet, la part de l'enveloppe de l'artiste qu'il consomme.
   Migration `20261111210101`, test `artist-budgets` 20/20.
+- 11/11/2026 — **Budget, BUD 3 : la page Dépenses.** Entrée « Dépenses » de la navigation
+  principale pour `read_artist_budgets` (DG, chefs de projet, business managers ; `NavItem.permission`).
+  Toutes les dépenses lisibles, projets et artistes, onglets Toutes / Sans justificatif, filtres
+  artiste, projet, poste, saisie par, mois, recherche ; même ligne et mêmes modales que les Budgets
+  (`useBudgetLineDialogs` extrait de `BudgetLines`). Pas de migration.

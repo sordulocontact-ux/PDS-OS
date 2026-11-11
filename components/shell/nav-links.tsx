@@ -12,7 +12,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { routes } from "@/lib/auth/redirects";
+import { routes, type Permission } from "@/lib/auth/redirects";
 import { moduleFrame } from "@/lib/i18n/fr/module-frame";
 import { shell } from "@/lib/i18n/fr/shell";
 import { NAV_ITEMS } from "@/lib/ui/nav-items";
@@ -37,11 +37,14 @@ function isActive(pathname: string, href: string, exact: boolean): boolean {
 // (lib/work/journeys.ts).
 export function NavLinks({
   isAdmin,
+  permissions = [],
   pendingMembers = 0,
   collapsed = false,
   onNavigate,
 }: {
   isAdmin: boolean;
+  // The viewer's permissions: an item that asks one is shown to its holders.
+  permissions?: readonly Permission[];
   pendingMembers?: number;
   collapsed?: boolean;
   onNavigate?: () => void;
@@ -53,7 +56,11 @@ export function NavLinks({
   return (
     <nav aria-label={t.label}>
       <ul className="flex flex-col gap-1">
-        {NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin).map((item) => {
+        {NAV_ITEMS.filter(
+          (item) =>
+            (!item.adminOnly || isAdmin) &&
+            (!item.permission || permissions.includes(item.permission)),
+        ).map((item) => {
           const href = item.href;
           const active = isActive(pathname, href, item.exact ?? false);
           const Icon = item.icon;
