@@ -18,7 +18,7 @@ import { ViewLink } from "@/components/ui/view-link";
 import { can, type Access } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
-import { listMasterOptions } from "@/lib/catalog/queries";
+import { listArtistOptions, listMasterOptions } from "@/lib/catalog/queries";
 import { fr } from "@/lib/i18n/fr";
 import { workflowCards } from "@/lib/overview/cards";
 import { overviewDependencies } from "@/lib/overview/dependencies";
@@ -218,19 +218,21 @@ function projectSubtitle(project: ProjectDetail): string {
 }
 
 /**
- * The titles of a collective (docs/pds-mic-plan.md, lot 2), the minimal
- * list until the « Titres et artistes » view (lot 6); nothing for any other
- * project. Written by its owner once launched, by whoever creates projects
- * before (same rule as add_project_title, which enforces it).
+ * The titles of a collective and their artists (docs/pds-mic-plan.md, lots
+ * 2 and 3), the minimal list until the « Titres et artistes » view (lot 6);
+ * nothing for any other project. Written by its owner once launched, by
+ * whoever creates projects before (same rule as add_project_title and
+ * add_title_participation, which enforce it).
  */
 async function collectiveTitles(project: ProjectDetail, access: Access) {
   if (!project.collective) return null;
   const canManage =
     canEditProject(access, project) ||
     (project.stages.length === 0 && can(access, "create_projects"));
-  const [titles, masters] = await Promise.all([
+  const [titles, masters, artists] = await Promise.all([
     loadProjectTitles(project.id),
     canManage ? listMasterOptions() : Promise.resolve([]),
+    canManage ? listArtistOptions() : Promise.resolve([]),
   ]);
   const inProject = new Set(titles.map((title) => title.master?.id));
   const masterOptions = Object.fromEntries(
@@ -247,6 +249,10 @@ async function collectiveTitles(project: ProjectDetail, access: Access) {
       titles={titles}
       canManage={canManage}
       masterOptions={masterOptions}
+      artists={{
+        options: Object.fromEntries(artists.map((a) => [a.id, a.name])),
+        mainArtistId: project.artistId,
+      }}
     />
   );
 }

@@ -3,6 +3,10 @@
 
 import type { DemoStatus } from "@/lib/catalog/demo-rules";
 import { projectTitles } from "@/lib/i18n/fr/project-titles";
+import type {
+  ParticipationRole,
+  TitleParticipation,
+} from "@/lib/projects/participation-rules";
 
 const fr = { projectTitles };
 
@@ -20,7 +24,7 @@ export function projectTitleStatusOf(value: string): ProjectTitleStatus {
 }
 
 /** A title of the project (project_titles), with its master once it is in
- * the Catalogue. */
+ * the Catalogue, and its artists' participations (lot 3). */
 export type ProjectTitle = {
   id: string;
   // « Titre 3 »: its number in the project, kept when it is abandoned.
@@ -32,10 +36,31 @@ export type ProjectTitle = {
     title: string;
     // Null when the master is not a maquette.
     demoStatus: DemoStatus | null;
+    // Its credits in the Catalogue, in their order.
+    credits: Array<{
+      artist: { id: string; name: string };
+      role: ParticipationRole;
+    }>;
   } | null;
   abandonedAt: string | null;
   abandonReason: string | null;
+  // Active first, declined and withdrawn after (sortParticipations).
+  participations: TitleParticipation[];
+  // Its master is also in a project that is not collective: no automatic
+  // credit (décision 10). The names of those the viewer sees, and how many
+  // others; null when it is in no such project.
+  sharedWith: { names: string[]; hidden: number } | null;
 };
+
+/** How a confirmation credits the title: now (in the Catalogue), later
+ * (once it is), or never automatically (its master is also in a project
+ * that is not collective: credits to check by hand, décision 10). */
+export function creditModeOf(
+  title: Pick<ProjectTitle, "master" | "sharedWith">,
+): "now" | "later" | "manual" {
+  if (title.sharedWith) return "manual";
+  return title.master ? "now" : "later";
+}
 
 /** What a title is called in the project: its working title, else its
  * master's title, else « Titre 3 · sans nom » (same rule for the history,

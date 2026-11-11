@@ -19,6 +19,10 @@ import {
 import { audioStateOf, variantOf } from "@/lib/catalog/title-rules";
 import { pickMasterRelease } from "@/lib/catalog/master-release";
 import { signArtistPictures } from "@/lib/catalog/pictures";
+import {
+  isActiveParticipation,
+  participationStatusOf,
+} from "@/lib/projects/participation-rules";
 import { createClient } from "@/lib/supabase/server";
 
 // Every query runs with the user's session: RLS decides what is visible.
@@ -82,23 +86,52 @@ export function toMasterListItem(row: RawMaster): MasterListItem {
   };
 }
 
+// An artist's participations in the titles of collective projects (lot 3
+// of docs/pds-mic-plan.md), read under RLS: only the projects the viewer
+// sees.
+export const PARTICIPATIONS_SELECT =
+  "participations:title_participations!title_participations_artist_same_org(status, title:project_titles!title_participations_title(status), project:projects!title_participations_project_same_org(id, archived_at))";
+
+type RawProjectRef = { id: string; archived_at: string | null } | null;
+
+/** The live collective projects where the artist takes part in a title:
+ * its participations neither declined nor withdrawn, on a title not
+ * abandoned (the rule of « the artists of the project », projectArtists). */
+export function participationProjectIds(
+  participations: RawParticipation[],
+): string[] {
+  return participations.flatMap((p) =>
+    p.project &&
+    !p.project.archived_at &&
+    p.title?.status !== "abandoned" &&
+    isActiveParticipation(participationStatusOf(p.status))
+      ? [p.project.id]
+      : [],
+  );
+}
+
+type RawParticipation = {
+  status: string;
+  title: { status: string } | null;
+  project: RawProjectRef;
+};
+
 type RawArtistProjects = {
   credits: Array<{
     master: {
       archived_at: string | null;
-      links: Array<{
-        project: { id: string; archived_at: string | null } | null;
-      }>;
+      links: Array<{ project: RawProjectRef }>;
     } | null;
   }>;
   named: Array<{ id: string; archived_at: string | null }>;
+  participations: RawParticipation[];
 };
 
-// Live projects of the artist: those holding one of its live masters, and
-// the content projects naming it; each once.
+// Live projects of the artist: those holding one of its live masters, the
+// content projects naming it and the collectives it takes part in; each
+// once.
 function artistProjectIds(row: RawArtistProjects): string[] {
-  const live = (p: { id: string; archived_at: string | null } | null) =>
-    p && !p.archived_at ? [p.id] : [];
+  const live = (p: RawProjectRef) => (p && !p.archived_at ? [p.id] : []);
   return [
     ...new Set([
       ...row.credits.flatMap((c) =>
@@ -107,6 +140,7 @@ function artistProjectIds(row: RawArtistProjects): string[] {
           : [],
       ),
       ...row.named.flatMap(live),
+      ...participationProjectIds(row.participations),
     ]),
   ];
 }
@@ -120,7 +154,7 @@ export async function listArtists(filter?: { archived?: boolean }): Promise<{
   const query = supabase
     .from("artists")
     .select(
-      "id, name, notes, relation, picture_url, picture_path, credits:master_artists!master_artists_artist_same_org(master:masters!master_artists_master_same_org(archived_at, links:project_masters!project_masters_master_same_org(project:projects!project_masters_project_same_org(id, archived_at)))), named:projects!projects_artist_same_org(id, archived_at)",
+      `id, name, notes, relation, picture_url, picture_path, credits:master_artists!master_artists_artist_same_org(master:masters!master_artists_master_same_org(archived_at, links:project_masters!project_masters_master_same_org(project:projects!project_masters_project_same_org(id, archived_at)))), named:projects!projects_artist_same_org(id, archived_at), ${PARTICIPATIONS_SELECT}`,
     );
   const { data, error } = await (
     filter?.archived

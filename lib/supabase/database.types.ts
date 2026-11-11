@@ -18137,6 +18137,110 @@ export type Database = {
           },
         ]
       }
+      title_participations: {
+        Row: {
+          artist_id: string
+          contact_id: string | null
+          contract_id: string | null
+          created_at: string
+          created_by: string | null
+          decided_at: string
+          decided_by: string | null
+          id: string
+          note: string | null
+          organization_id: string
+          project_id: string
+          role: string
+          status: string
+          title_id: string
+          updated_at: string
+        }
+        Insert: {
+          artist_id: string
+          contact_id?: string | null
+          contract_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string
+          decided_by?: string | null
+          id?: string
+          note?: string | null
+          organization_id: string
+          project_id: string
+          role?: string
+          status?: string
+          title_id: string
+          updated_at?: string
+        }
+        Update: {
+          artist_id?: string
+          contact_id?: string | null
+          contract_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string
+          decided_by?: string | null
+          id?: string
+          note?: string | null
+          organization_id?: string
+          project_id?: string
+          role?: string
+          status?: string
+          title_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "title_participations_artist_same_org"
+            columns: ["artist_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "title_participations_contact_same_org"
+            columns: ["contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "title_participations_contract_same_org"
+            columns: ["contract_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "title_participations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "title_participations_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "title_participations_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "title_participations_title"
+            columns: ["title_id", "project_id"]
+            isOneToOne: false
+            referencedRelation: "project_titles"
+            referencedColumns: ["id", "project_id"]
+          },
+        ]
+      }
       transcripts: {
         Row: {
           call_id: string
@@ -18387,6 +18491,20 @@ export type Database = {
         }
         Returns: string
       }
+      add_title_participation: {
+        Args: {
+          p_artist_id: string
+          p_contact_id?: string
+          p_note?: string
+          p_role?: string
+          p_status?: string
+          p_title_id: string
+        }
+        Returns: {
+          credited: number
+          participation_id: string
+        }[]
+      }
       approve_clearance_contract: {
         Args: { p_contract_id: string }
         Returns: undefined
@@ -18477,6 +18595,17 @@ export type Database = {
       reactivate_project_title: {
         Args: { p_title_id: string }
         Returns: undefined
+      }
+      set_title_participation_status: {
+        Args: { p_note?: string; p_participation_id: string; p_status: string }
+        Returns: number
+      }
+      project_title_shared_projects: {
+        Args: { p_project_id: string }
+        Returns: {
+          other_project_title: string
+          title_id: string
+        }[]
       }
       receive_clearance_reply: {
         Args: {

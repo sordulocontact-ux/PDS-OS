@@ -11,6 +11,8 @@ import {
 import { signArtistPictures } from "@/lib/catalog/pictures";
 import {
   CREDITS_SELECT,
+  PARTICIPATIONS_SELECT,
+  participationProjectIds,
   toMasterListItem,
   type RawMaster,
 } from "@/lib/catalog/queries";
@@ -21,7 +23,7 @@ import { createClient } from "@/lib/supabase/server";
 // Artist page queries, with the user's session: RLS decides what is visible
 // (contacts only with manage_catalog, projects only those the viewer sees).
 
-const ARTIST_SELECT = `id, organization_id, name, relation, legal_name, country_code, bio, notes, picture_url, picture_path, deezer_id, deezer_url, credits:master_artists!master_artists_artist_same_org(master:masters!master_artists_master_same_org(id, title, variant, variant_label, audio_state, isrc, duration_seconds, final_validated_at, source_master_id, demo_status, archived_at, ${CREDITS_SELECT}, links:project_masters!project_masters_master_same_org(project:projects!project_masters_project_same_org(id, archived_at)))), named:projects!projects_artist_same_org(id, archived_at)`;
+const ARTIST_SELECT = `id, organization_id, name, relation, legal_name, country_code, bio, notes, picture_url, picture_path, deezer_id, deezer_url, credits:master_artists!master_artists_artist_same_org(master:masters!master_artists_master_same_org(id, title, variant, variant_label, audio_state, isrc, duration_seconds, final_validated_at, source_master_id, demo_status, archived_at, ${CREDITS_SELECT}, links:project_masters!project_masters_master_same_org(project:projects!project_masters_project_same_org(id, archived_at)))), named:projects!projects_artist_same_org(id, archived_at), ${PARTICIPATIONS_SELECT}`;
 
 // Cached per request: the layout and the tab pages read the same artist.
 export const getArtist = trackedCache(
@@ -49,7 +51,8 @@ export const getArtist = trackedCache(
       .map((m) => toMasterListItem(m as RawMaster))
       .sort((a, b) => a.title.localeCompare(b.title, "fr"));
     // A project holding two of the artist's masters counts once; a content
-    // project names the artist directly.
+    // project names the artist directly; a collective has it on one of its
+    // titles (lot 3 of docs/pds-mic-plan.md).
     const projectIds = new Set([
       ...liveMasters.flatMap((m) =>
         m.links.flatMap((l) =>
@@ -57,6 +60,7 @@ export const getArtist = trackedCache(
         ),
       ),
       ...data.named.flatMap((p) => (p.archived_at ? [] : [p.id])),
+      ...participationProjectIds(data.participations),
     ]);
 
     const uploaded = data.picture_path

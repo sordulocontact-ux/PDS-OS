@@ -40,6 +40,9 @@ export function SearchSelect({
   disabled,
   required = false,
   fill = false,
+  placeholder,
+  invalid = false,
+  describedBy,
 }: {
   id: string;
   label: string;
@@ -51,6 +54,12 @@ export function SearchSelect({
   disabled?: boolean;
   required?: boolean;
   fill?: boolean;
+  // Said in the closed box while nothing is chosen.
+  placeholder?: string;
+  // A required choice missing after a first try (docs/DESIGN.md « Manques à
+  // la validation »): red box, its FieldError named by `describedBy`.
+  invalid?: boolean;
+  describedBy?: string;
 }) {
   const items = useMemo<Option[]>(
     () => Object.entries(options).map(([key, text]) => ({ value: key, label: text })),
@@ -75,13 +84,19 @@ export function SearchSelect({
         data-size="default"
         aria-label={label}
         aria-required={required || undefined}
+        aria-invalid={invalid || undefined}
+        aria-describedby={describedBy}
         className={cn(
           selectTriggerClassName,
           fill ? "w-full min-w-0" : "max-w-full min-w-44",
         )}
       >
         <span className="block min-w-0 flex-1 truncate text-left">
-          <Combobox.Value />
+          {selected || !placeholder ? (
+            <Combobox.Value />
+          ) : (
+            <span className="text-muted-foreground">{placeholder}</span>
+          )}
         </span>
         <IconChevronDown
           aria-hidden

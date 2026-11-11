@@ -9,6 +9,10 @@ import { loadRecentActivity } from "@/lib/insights/activity";
 import { loadLegalHistory } from "@/lib/legal/history/queries";
 import { loadMarketingEvents } from "@/lib/marketing/queries";
 import { actorless, describeEvent } from "@/lib/production/history-text";
+import {
+  participationRoleOf,
+  participationStatusOf,
+} from "@/lib/projects/participation-rules";
 import { projectTitleLabel } from "@/lib/projects/title-rules";
 import type { ProjectDetail } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
@@ -39,7 +43,8 @@ const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
  * deliverable's production_events), the Juridique's (only with
  * manage_legal, as its pages), the Distribution's (distribution_events),
  * a collective's titles (project_title_events: added, renamed, abandoned
- * with its reason, reactivated).
+ * with its reason, reactivated; an artist added to a title, its status
+ * changed).
  * Read with the viewer's session: what RLS hides stays hidden. The Master
  * has no journal of its own yet. Nothing rewritten, nothing invented.
  */
@@ -197,10 +202,16 @@ export async function loadProjectActivity(
 }
 
 /** One line of a collective's titles history: the title named as it was
- * then (« Titre 3 · sans nom » when it had no name). */
+ * then (« Titre 3 · sans nom » when it had no name); an artist's
+ * participation by the artist's name then (never the interlocutor). */
 function titleEventText(kind: string, detail: Record<string, unknown>): string {
   const t = fr.projectTitles.events;
+  const p = fr.projectTitles.participations;
   const text = (value: unknown) => (typeof value === "string" ? value : null);
+  const role = (value: unknown) =>
+    p.roles[participationRoleOf(text(value) ?? "")].toLowerCase();
+  const status = (value: unknown) =>
+    p.statuses[participationStatusOf(text(value) ?? "")];
   const position = typeof detail.position === "number" ? detail.position : 0;
   const masterTitle = text(detail.master_title);
   const label = (workingTitle: string | null) =>
@@ -215,6 +226,20 @@ function titleEventText(kind: string, detail: Record<string, unknown>): string {
       return t.abandoned(current, text(detail.reason) ?? "");
     case "reactivated":
       return t.reactivated(current);
+    case "participation_added":
+      return t.participationAdded(
+        text(detail.artist) ?? "",
+        role(detail.role),
+        status(detail.status).toLowerCase(),
+        current,
+      );
+    case "participation_status":
+      return t.participationStatus(
+        text(detail.artist) ?? "",
+        current,
+        status(detail.from),
+        status(detail.to),
+      );
     default:
       return "";
   }
