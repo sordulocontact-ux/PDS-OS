@@ -73,6 +73,8 @@ export const PERMISSIONS = [
   // Reads the artists' budgets and enters their direct spends (the
   // direction, project managers and business managers, BUD 1, 11/11/2026).
   "read_artist_budgets",
+  // Opens and changes an artist's envelope (the direction, BUD 2).
+  "manage_artist_budgets",
 ] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 
@@ -145,6 +147,8 @@ export const routes = {
   artistMasters: (id: string) => `/app/catalog/artists/${id}/masters`,
   artistProjects: (id: string) => `/app/catalog/artists/${id}/projects`,
   artistFiles: (id: string) => `/app/catalog/artists/${id}/files`,
+  // Its envelope by poste and its spends (BUD 2), for the budget's readers.
+  artistBudget: (id: string) => `/app/catalog/artists/${id}/budget`,
   artistActivity: (id: string) => `/app/catalog/artists/${id}/activity`,
   artistIdentity: (id: string) => `/app/catalog/artists/${id}/identity`,
   artistSessions: (id: string) => `/app/catalog/artists/${id}/sessions`,

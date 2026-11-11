@@ -2081,3 +2081,11 @@ les modules à parcours (proto « Mise en page des modules », version « Propos
   artiste ; les lignes d'un projet gardent leurs règles. Formulaire unique (justificatif en premier,
   montant, libellé, poste, statut et date), ligne commune avec « Sans justificatif » et son onglet ;
   écritures en `WriteResult`. Migration `20261111200101`, test `budget-artist-lines` 17/17.
+- 11/11/2026 — **Budget, BUD 2 : l'enveloppe d'un artiste.** Montant, période, répartition par
+  poste (somme ≤ montant, reste non réparti) ; une seule ouverte, la précédente close la veille et
+  gardée ; journal de chaque changement ; ouverte et modifiée par la direction seule
+  (`manage_artist_budgets`). Consommé calculé à chaque lecture (`artist_budget_usage`) : dépenses
+  directes + lignes des projets de l'artiste (artiste principal d'un collectif) dans la période.
+  Onglet Budget de la fiche artiste (enveloppe par poste prévu / dépensé / reste, dépassement signalé,
+  dépenses, historique) et, au Budget d'un projet, la part de l'enveloppe de l'artiste qu'il consomme.
+  Migration `20261111210101`, test `artist-budgets` 20/20.

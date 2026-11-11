@@ -184,6 +184,13 @@ export const budgetStatusTone: Record<string, Tone> = {
   paid: "success",
 };
 
+// A poste or an artist's envelope (BUD 2): spent beyond what it was given,
+// signalled, never blocking.
+export const envelopeTone: Record<"within" | "over", Tone> = {
+  within: "neutral",
+  over: "danger",
+};
+
 /** Design state of a deliverable (lib/design/rules.ts): nothing yet, waiting
  * for the owner's review, sent back for changes, approved. */
 export const designStateTone: Record<string, Tone> = {

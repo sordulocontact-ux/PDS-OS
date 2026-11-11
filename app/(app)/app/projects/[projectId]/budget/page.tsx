@@ -4,8 +4,10 @@ import { FormMessage } from "@/components/auth/form-message";
 import { BudgetByFamily } from "@/components/budget/budget-by-family";
 import { BudgetLines } from "@/components/budget/budget-lines";
 import { BudgetSummary } from "@/components/budget/budget-summary";
+import { ProjectEnvelopeShare } from "@/components/budget/envelope/project-envelope-share";
 import { PayList } from "@/components/invoices/pay-list";
 import { requireApproved } from "@/lib/auth/dal";
+import { loadProjectEnvelopeShare } from "@/lib/budget/envelope-queries";
 import { loadBudget } from "@/lib/budget/queries";
 import { budgetTotals } from "@/lib/budget/types";
 import { fr } from "@/lib/i18n/fr";
@@ -30,8 +32,12 @@ export default async function ProjectBudgetPage({
       loadBudget(projectId),
     ]);
   if (!canSeeProjectBudget(access, project)) notFound();
-  // « À payer », for the direction: the invoices received and not paid.
-  const invoices = await loadProjectInvoices(projectId, project.ownerPersonId);
+  // « À payer », for the direction: the invoices received and not paid;
+  // the part of its artist's envelope the project takes (BUD 2).
+  const [invoices, share] = await Promise.all([
+    loadProjectInvoices(projectId, project.ownerPersonId),
+    loadProjectEnvelopeShare(projectId),
+  ]);
   const t = fr.budget;
 
   return (
@@ -44,6 +50,7 @@ export default async function ProjectBudgetPage({
         envelopeCents={project.budgetCents}
         totals={budgetTotals(lines, project.budgetCents)}
       />
+      <ProjectEnvelopeShare share={share} />
       <BudgetLines
         target={{ kind: "project", id: projectId }}
         lines={lines}

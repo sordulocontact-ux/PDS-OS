@@ -34,6 +34,137 @@ export type Database = {
   }
   public: {
     Tables: {
+      artist_budgets: {
+        Row: {
+          amount_cents: number
+          artist_id: string
+          closed_at: string | null
+          created_at: string
+          created_by: string | null
+          ends_on: string | null
+          id: string
+          organization_id: string
+          starts_on: string
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          artist_id: string
+          closed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          ends_on?: string | null
+          id?: string
+          organization_id: string
+          starts_on: string
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          artist_id?: string
+          closed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          ends_on?: string | null
+          id?: string
+          organization_id?: string
+          starts_on?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artist_budgets_artist_same_org"
+            columns: ["artist_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "artist_budgets_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      artist_budget_posts: {
+        Row: {
+          amount_cents: number
+          budget_id: string
+          family: string
+        }
+        Insert: {
+          amount_cents: number
+          budget_id: string
+          family: string
+        }
+        Update: {
+          amount_cents?: number
+          budget_id?: string
+          family?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artist_budget_posts_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "artist_budgets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      artist_budget_events: {
+        Row: {
+          actor_person_id: string | null
+          artist_id: string
+          budget_id: string
+          created_at: string
+          detail: Json
+          id: string
+          kind: string
+          organization_id: string
+          seq: number
+        }
+        Insert: {
+          actor_person_id?: string | null
+          artist_id: string
+          budget_id: string
+          created_at?: string
+          detail?: Json
+          id?: string
+          kind: string
+          organization_id: string
+          seq?: never
+        }
+        Update: {
+          actor_person_id?: string | null
+          artist_id?: string
+          budget_id?: string
+          created_at?: string
+          detail?: Json
+          id?: string
+          kind?: string
+          organization_id?: string
+          seq?: never
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artist_budget_events_actor_person_id_fkey"
+            columns: ["actor_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "artist_budget_events_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "artist_budgets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       distribution_reserves: {
         Row: {
           category: string
@@ -18523,6 +18654,51 @@ export type Database = {
       }
     }
     Functions: {
+      update_artist_budget: {
+        Args: {
+          p_amount_cents: number
+          p_budget_id: string
+          p_ends_on: string
+          p_posts: Json
+          p_starts_on: string
+        }
+        Returns: undefined
+      }
+      project_artist_budget_share: {
+        Args: { p_project_id: string }
+        Returns: {
+          amount_cents: number
+          artist_id: string
+          artist_name: string
+          budget_id: string
+          ends_on: string
+          project_spent_cents: number
+          starts_on: string
+          total_spent_cents: number
+        }[]
+      }
+      open_artist_budget: {
+        Args: {
+          p_amount_cents: number
+          p_artist_id: string
+          p_ends_on: string
+          p_posts: Json
+          p_starts_on: string
+        }
+        Returns: string
+      }
+      artist_project_ids: { Args: { p_artist_id: string }; Returns: string[] }
+      artist_budget_usage: {
+        Args: { p_budget_id: string }
+        Returns: {
+          allocated_cents: number
+          direct_cents: number
+          family: string
+          pending_cents: number
+          project_cents: number
+          spent_cents: number
+        }[]
+      }
       abandon_project_title: {
         Args: { p_reason: string; p_title_id: string }
         Returns: undefined

@@ -37,6 +37,38 @@ export const projectPilotTopics: GuideTopic[] = [
     ],
   },
   {
+    key: "artist_budget",
+    title: "Budget d'un artiste",
+    summary:
+      "L'enveloppe d'un artiste répartie par poste, ce qui est dépensé et ce qui reste.",
+    keywords: [
+      "budget artiste",
+      "enveloppe artiste",
+      "budget de l'artiste",
+      "poste",
+      "prevu",
+      "depense",
+      "reste",
+      "non reparti",
+      "depassement",
+    ],
+    where: "Dans la fiche d'un artiste › onglet Budget.",
+    facts: [
+      "La direction fixe l'enveloppe d'un artiste : un montant, un premier jour, un dernier jour facultatif, et sa répartition par poste (production, publicité, transport…). Ce qui n'est donné à aucun poste reste « non réparti » ; les postes ne dépassent jamais le montant.",
+      "Ce qui est dépensé se calcule tout seul : les dépenses directes de l'artiste et celles de ses projets (pour un projet collectif, son artiste principal), datées dans la période, engagées, facturées ou payées. Une estimation est comptée à part.",
+      "Chaque poste montre le prévu, le dépensé et le reste ; un poste qui dépasse est signalé, sans rien bloquer.",
+      "Une seule enveloppe est ouverte à la fois : en ouvrir une nouvelle clôt la précédente la veille, gardée dans l'historique avec chaque modification.",
+      "Le Budget d'un projet dit la part de l'enveloppe de son artiste qu'il consomme.",
+    ],
+    faq: [
+      {
+        q: "Qui voit le budget d'un artiste ?",
+        a: "La direction, les chefs de projet et les business managers. Seule la direction ouvre ou modifie l'enveloppe ; les trois saisissent les dépenses directes de l'artiste.",
+      },
+    ],
+    permissions: ["read_artist_budgets", "manage_artist_budgets"],
+  },
+  {
     key: "project_team",
     title: "Équipe d'un projet",
     summary:

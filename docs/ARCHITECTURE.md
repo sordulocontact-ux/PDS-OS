@@ -3040,6 +3040,29 @@ date de sortie de la Stratégie, NDA : à décider).
     Restauration), statut et date, levier et livrable d'un projet, note ; manques en rouge au premier
     essai seulement ; écritures en `WriteResult` (`saveBudgetLine(target, …)`,
     `deleteBudgetLine(target, id)`, messages en français dans `fr.budget.errors`).
+  - **Enveloppe d'un artiste** (BUD 2, Ibé 11/11/2026 : « Morris a 60 000 de budget, 30 000
+    production, 20 000 marketing, 10 000 transport » ; migration `20261111210101_artist_budget_envelopes`,
+    tests `artist-budgets.test.sql`) : `artist_budgets` (montant, `starts_on`, `ends_on` facultatif,
+    `closed_at`), `artist_budget_posts` (montant par poste, les 16 postes de `budget_lines.family`),
+    journal `artist_budget_events` (ouverte, modifiée avec l'avant, close). **Une seule ouverte par
+    artiste** (index unique) : `open_artist_budget` clôt l'ouverte la veille du premier jour de la
+    nouvelle (qui commence forcément après), gardée en historique ; `update_artist_budget` ne change que
+    l'ouverte. Somme des postes ≤ montant (`posts_over_total`), le reste « non réparti ». Écrites par
+    ces fonctions seules, par **`manage_artist_budgets`** (la direction) ; lues par
+    `read_artist_budgets`. **Consommé calculé à chaque lecture, jamais stocké** (`artist_budget_usage`) :
+    par poste, prévu, dépensé (engagé, facturé, payé), estimé (estimé, proposé), part directe et part
+    des projets ; lignes datées (`spent_on`) dans la période ; dépenses directes de l'artiste + lignes
+    de ses projets (`artist_project_ids` = `project_artist_id` : l'artiste principal d'un collectif,
+    sinon le premier crédit du premier titre, sinon `projects.artist_id`). Un business manager voit ces
+    totaux sans lire les lignes d'un projet. Restes et dépassements par le code (`envelopeView`,
+    `lib/budget/envelope.ts`) : un poste dépasse quand il a reçu un montant et que le dépensé le passe
+    (signalé, ton `envelopeTone`, jamais bloquant) ; un poste sans montant puise dans le non réparti.
+    **Onglet Budget de la fiche artiste** (`/app/catalog/artists/[id]/budget`, lecteurs du budget) :
+    enveloppe (tuiles, « Par poste » prévu / dépensé / reste), dépenses (directes écrites ici, celles
+    des projets lues selon leur règle, lecture seule), historique ; sans enveloppe, « Ouvrir
+    l'enveloppe » pour la direction. **Budget d'un projet** : la part de l'enveloppe ouverte de son
+    artiste qu'il consomme (`project_artist_budget_share`, lecteurs du budget du projet qui lisent
+    aussi les budgets d'artistes). Un artiste avec une enveloppe ne se supprime pas (`artist_in_use`).
 
 ### Blocages et informations notées d'une étape (C6, 18/10/2026)
 

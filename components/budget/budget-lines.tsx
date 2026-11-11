@@ -49,6 +49,8 @@ export function BudgetLines({
   // A status, or the real spends without their proof (BUD 1).
   const [filter, setFilter] = useState<BudgetStatus | "no_proof" | null>(null);
   const unproved = lines.filter(lacksProof);
+  const isOwn = (line: BudgetLine) =>
+    line.target.kind === target.kind && line.target.id === target.id;
   const [editing, setEditing] = useState<BudgetLine | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [deleting, setDeleting] = useState<BudgetLine | null>(null);
@@ -116,7 +118,10 @@ export function BudgetLines({
           ) : (
             <BudgetTable
               lines={shown}
-              canEdit={canEdit}
+              // Written here: the lines of this page's project or artist
+              // (an artist's tab also reads its projects' lines).
+              canEdit={(line) => canEdit && isOwn(line)}
+              showTarget={lines.some((line) => !isOwn(line))}
               onEdit={openSheet}
               onDelete={setDeleting}
             />
