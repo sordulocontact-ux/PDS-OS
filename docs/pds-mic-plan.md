@@ -102,11 +102,8 @@ Sacha prend le **module Business** (ticket PDSBIZ : objet Deal, poste Business M
 Glen, contacts privés) et le **Budget** (enveloppe par artiste, dépense rattachée à un projet ou
 à un artiste). Trois points à respecter :
 
-1. **PDSMIC 4 est en prod.** Ibé l'a créé le 10/11 (type Contenu, Cadrage lancé) et c'est le
-   projet qu'il testera en visio en fin de semaine. La décision 1 (« les anciens PDS Mic ne sont
-   pas convertis ») le laisse hors du collectif : prévoir la conversion de **ce** projet, ou
-   qu'Ibé le recrée en collectif avant le test. À trancher avec Ibé (passer par Maël), pas en
-   silence.
+1. **PDSMIC 4 (en prod, type Contenu) : tranché, il sera recréé** en projet collectif (Sacha,
+   11/11). La décision 1 tient : **aucune conversion à coder**, pas même pour ce projet.
 2. **Une seule source pour le contrat d'une participation : `title_participations.contract_id`**
    (les verrous des lots 12 et 15 la lisent). Le futur Deal aura `deals.participation_id` et lira
    le contrat à travers la participation ; pour le PDS MIC, il n'aura pas son propre lien vers
