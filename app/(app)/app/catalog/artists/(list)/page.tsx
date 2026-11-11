@@ -1,4 +1,5 @@
 import { IconBoxArchive, IconMicrophone } from "nucleo-sharp-essential";
+import Link from "next/link";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { ArtistListViews } from "@/components/catalog/artist-list-views";
@@ -8,6 +9,7 @@ import { EmptyState } from "@/components/shell/empty-state";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
 import { LiveViewLink } from "@/components/archive/live-view-link";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { UrlFilters, type UrlFilterGroup } from "@/components/ui/url-filters";
 import { archiveFilterGroup } from "@/lib/archive/filter";
 import { isArchivedView } from "@/lib/archive/types";
@@ -100,7 +102,19 @@ export default async function ArtistsPage({
       <PageHeader
         title={t.title}
         description={t.subtitle}
-        action={canCreate && all.length > 0 ? <NewArtistButton /> : null}
+        action={
+          <div className="flex flex-wrap gap-2">
+            {/* The selections of artists, before a project (lot 4 of
+                docs/pds-mic-plan.md): read by the whole team. */}
+            <Link
+              href={routes.artistSelections}
+              className={buttonVariants({ variant: "outline", size: "lg" })}
+            >
+              <ButtonRoll>{fr.artistSelections.open}</ButtonRoll>
+            </Link>
+            {canCreate && all.length > 0 && <NewArtistButton />}
+          </div>
+        }
       />
       {error ? (
         <FormMessage kind="error">{t.loadError}</FormMessage>

@@ -218,6 +218,12 @@ export const notifications = {
       `${actor} renvoie l'accord de principe en négociation${dealOf(project)} : voyez pourquoi.`,
     deal_follow_up_due: (_actor: string, project: string) =>
       `Une relance est due aujourd'hui${dealOf(project)}.`,
+    // A selection of artists handed over (lot 4 of docs/pds-mic-plan.md):
+    // no project yet.
+    selection_transmitted: (actor: string, selection: string) =>
+      selection
+        ? `${actor} vous transmet la sélection d'artistes « ${selection} ».`
+        : `${actor} vous transmet une sélection d'artistes.`,
     legal_element_withdrawn: (actor: string, project: string) =>
       `${actor} a retiré un élément repris d'une œuvre existante de « ${project} » : le passage est à refaire sans lui dans le Master.`,
     strategy_review_requested: (actor: string, project: string) =>

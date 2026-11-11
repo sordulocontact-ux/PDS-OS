@@ -39,6 +39,7 @@ export function SearchPicker({
   clearOnCreate = false,
   onQueryChange,
   keepName,
+  openOnFocus = true,
 }: {
   label: string;
   placeholder: string;
@@ -60,6 +61,10 @@ export function SearchPicker({
     label: (query: string) => string;
     onKeep: (query: string) => void;
   };
+  // `false`: the list opens only once the field is clicked or typed in, not
+  // when it merely takes the focus (a modal focusing it on opening, whose
+  // buttons the list would cover: « Ajouter des artistes »).
+  openOnFocus?: boolean;
 }) {
   const id = useId();
   const listId = `${id}-list`;
@@ -170,12 +175,15 @@ export function SearchPicker({
           setActive(0);
           setOpen(true);
         }}
-        onFocus={() => setOpen(true)}
+        onFocus={() => openOnFocus && setOpen(true)}
+        // Where focus alone does not open it, a click does.
+        onClick={() => !openOnFocus && setOpen(true)}
         onBlur={() => setOpen(false)}
         onKeyDown={onKeyDown}
         className="h-10 pl-9 text-base md:text-sm"
       />
-      {/* Opened and closed by the field alone (focus, typing, Escape, blur):
+      {/* Opened and closed by the field alone (focus, or a click without
+          openOnFocus, typing, Escape, blur):
           the popover's own dismissal is ignored, so a click in the field
           never closes it. */}
       <Popover open={open} onOpenChange={() => {}}>

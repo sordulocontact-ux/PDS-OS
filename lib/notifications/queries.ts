@@ -87,16 +87,35 @@ async function loadStepTargets(
   return map;
 }
 
+// The names of the selections of artists handed over (lot 4 of
+// docs/pds-mic-plan.md), read with the reader's session.
+async function loadSelectionNames(
+  supabase: SupabaseClient<Database>,
+  rows: Row[],
+): Promise<Map<string, string>> {
+  const ids = rows
+    .filter((r) => r.kind === "selection_transmitted" && r.subject_id)
+    .map((r) => r.subject_id!);
+  if (ids.length === 0) return new Map();
+  const { data } = await supabase
+    .from("artist_selections")
+    .select("id, name")
+    .in("id", ids);
+  return new Map((data ?? []).map((r) => [r.id, r.name]));
+}
+
 function toItem(
   row: Row,
   stageKey: StageKey | null,
   target?: string,
+  // What a notification without a project names (a selection of artists).
+  subjectName?: string,
 ): NotificationItem | null {
   if (!isNotificationKind(row.kind)) return null;
   const actor = row.actor
     ? personName(row.actor.first_name, row.actor.last_name)
     : null;
-  const project = row.project?.title ?? null;
+  const project = row.project?.title ?? subjectName ?? null;
   const text = notificationText(row.kind, actor, project);
   const named = actor !== null && text.startsWith(`${actor} `);
   return {
@@ -154,9 +173,10 @@ export async function loadNotifications(limit = 20): Promise<{
   const validationIds = rows
     .filter((r) => r.kind.startsWith("validation_") && r.subject_id)
     .map((r) => r.subject_id!);
-  const [stageKeys, targets] = await Promise.all([
+  const [stageKeys, targets, selections] = await Promise.all([
     loadStageKeys(supabase, validationIds),
     loadStepTargets(supabase, rows),
+    loadSelectionNames(supabase, rows),
   ]);
   return {
     items: rows.flatMap(
@@ -165,6 +185,7 @@ export async function loadNotifications(limit = 20): Promise<{
           row,
           row.subject_id ? (stageKeys.get(row.subject_id) ?? null) : null,
           row.subject_id ? targets.get(row.subject_id) : undefined,
+          row.subject_id ? selections.get(row.subject_id) : undefined,
         ) ?? [],
     ),
     unreadCount: unread.count ?? 0,
@@ -183,15 +204,21 @@ export async function loadNotification(
     .maybeSingle();
   if (error || !data) return null;
   const row = data as Row;
-  const [stageKeys, targets] = row.subject_id
+  const [stageKeys, targets, selections] = row.subject_id
     ? await Promise.all([
         loadStageKeys(supabase, [row.subject_id]),
         loadStepTargets(supabase, [row]),
+        loadSelectionNames(supabase, [row]),
       ])
-    : [new Map<string, StageKey>(), new Map<string, string>()];
+    : [
+        new Map<string, StageKey>(),
+        new Map<string, string>(),
+        new Map<string, string>(),
+      ];
   return toItem(
     row,
     row.subject_id ? (stageKeys.get(row.subject_id) ?? null) : null,
     row.subject_id ? targets.get(row.subject_id) : undefined,
+    row.subject_id ? selections.get(row.subject_id) : undefined,
   );
 }

@@ -167,6 +167,9 @@ export const NOTIFICATION_KINDS = [
   "deal_agreement_validated",
   "deal_agreement_refused",
   "deal_follow_up_due",
+  // A selection of artists handed over (lot 4 of docs/pds-mic-plan.md): its
+  // page in the Catalogue, no project (the subject is the selection).
+  "selection_transmitted",
 ] as const;
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
 
@@ -202,7 +205,10 @@ export function notificationText(
   projectTitle: string | null,
 ): string {
   const t = fr.notifications;
-  return t.texts[kind](actorName || t.someone, projectTitle || t.aProject);
+  // A selection of artists has no project: its own name, else a plain text.
+  const subject =
+    kind === "selection_transmitted" ? projectTitle || "" : projectTitle;
+  return t.texts[kind](actorName || t.someone, subject ?? t.aProject);
 }
 
 // A contract or a meeting opens its own page (`subjectId`); a design version
@@ -250,6 +256,10 @@ export function notificationHref(
     return routes.callReport(subjectId);
   // A deal opens its page, with or without a project (BIZ 4).
   if (kind.startsWith("deal_") && subjectId) return routes.deal(subjectId);
+  if (kind === "selection_transmitted")
+    return subjectId
+      ? routes.artistSelection(subjectId)
+      : routes.artistSelections;
   if (!projectId) return routes.app;
   // A production version: the deliverable's Postproduction (the subject is
   // the deliverable).

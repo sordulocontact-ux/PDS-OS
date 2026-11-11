@@ -3387,6 +3387,129 @@ export type Database = {
           },
         ]
       }
+      artist_selection_items: {
+        Row: {
+          added_by: string | null
+          artist_id: string
+          created_at: string
+          note: string | null
+          organization_id: string
+          position: number
+          selection_id: string
+        }
+        Insert: {
+          added_by?: string | null
+          artist_id: string
+          created_at?: string
+          note?: string | null
+          organization_id: string
+          position: number
+          selection_id: string
+        }
+        Update: {
+          added_by?: string | null
+          artist_id?: string
+          created_at?: string
+          note?: string | null
+          organization_id?: string
+          position?: number
+          selection_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artist_selection_items_added_by_fkey"
+            columns: ["added_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "artist_selection_items_artist_same_org"
+            columns: ["artist_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "artist_selection_items_selection_same_org"
+            columns: ["selection_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "artist_selections"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      artist_selections: {
+        Row: {
+          archived_at: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          note: string | null
+          organization_id: string
+          owner_person_id: string
+          transmitted_at: string | null
+          transmitted_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          archived_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          note?: string | null
+          organization_id: string
+          owner_person_id: string
+          transmitted_at?: string | null
+          transmitted_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          archived_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          note?: string | null
+          organization_id?: string
+          owner_person_id?: string
+          transmitted_at?: string | null
+          transmitted_by?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artist_selections_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "artist_selections_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "artist_selections_owner_person_id_fkey"
+            columns: ["owner_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "artist_selections_transmitted_by_fkey"
+            columns: ["transmitted_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       artists: {
         Row: {
           archived_at: string | null
@@ -19147,6 +19270,34 @@ export type Database = {
           other_project_title: string
           title_id: string
         }[]
+      }
+      add_artists_to_selection: {
+        Args: { p_artist_ids: string[]; p_selection_id: string }
+        Returns: number
+      }
+      create_artist_selection: {
+        Args: { p_artist_ids?: string[]; p_name: string; p_organization_id: string }
+        Returns: string
+      }
+      list_selection_recipients: {
+        Args: { p_organization_id: string }
+        Returns: {
+          first_name: string
+          last_name: string
+          person_id: string
+        }[]
+      }
+      remove_artist_from_selection: {
+        Args: { p_artist_id: string; p_selection_id: string }
+        Returns: undefined
+      }
+      rename_artist_selection: {
+        Args: { p_name: string; p_selection_id: string }
+        Returns: undefined
+      }
+      transmit_artist_selection: {
+        Args: { p_person_id: string; p_selection_id: string }
+        Returns: undefined
       }
       receive_clearance_reply: {
         Args: {
