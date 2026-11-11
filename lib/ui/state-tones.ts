@@ -1218,6 +1218,14 @@ export const demoStatusTone: Record<string, Tone> = {
   abandoned: "neutral",
 };
 
+/** A title of a collective project (docs/pds-mic-plan.md, lot 2): planned
+ * waits for nothing yet, active runs, abandoned is set aside. */
+export const projectTitleTone: Record<string, Tone> = {
+  planned: "neutral",
+  active: "info",
+  abandoned: "neutral",
+};
+
 /** A box of the Eisenhower matrix of « Mes tâches »: « Faire » presses,
  * « Déléguer » waits for someone else, « Planifier » runs, « Plus tard » is
  * set aside. */

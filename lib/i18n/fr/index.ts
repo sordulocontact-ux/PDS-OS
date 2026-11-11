@@ -135,6 +135,7 @@ import { release } from "./release";
 import { distribution } from "./distribution";
 import { distributionJourney } from "./distribution-journey";
 import { projectDates } from "./project-dates";
+import { projectTitles } from "./project-titles";
 import { marketing } from "./marketing";
 import { marketingReview } from "./marketing-review";
 import { onboarding } from "./onboarding";
@@ -259,6 +260,7 @@ export const fr = {
   distribution,
   distributionJourney,
   projectDates,
+  projectTitles,
   assistant,
   assistantRecords,
   voice,

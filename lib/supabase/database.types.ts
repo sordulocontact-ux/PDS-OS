@@ -16348,6 +16348,144 @@ export type Database = {
           },
         ]
       }
+      project_title_events: {
+        Row: {
+          actor_person_id: string | null
+          created_at: string
+          detail: Json
+          id: string
+          kind: string
+          organization_id: string
+          project_id: string
+          seq: number
+          title_id: string
+        }
+        Insert: {
+          actor_person_id?: string | null
+          created_at?: string
+          detail?: Json
+          id?: string
+          kind: string
+          organization_id: string
+          project_id: string
+          seq?: never
+          title_id: string
+        }
+        Update: {
+          actor_person_id?: string | null
+          created_at?: string
+          detail?: Json
+          id?: string
+          kind?: string
+          organization_id?: string
+          project_id?: string
+          seq?: never
+          title_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_title_events_actor_person_id_fkey"
+            columns: ["actor_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_title_events_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "project_title_events_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "project_titles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_titles: {
+        Row: {
+          abandon_reason: string | null
+          abandoned_at: string | null
+          abandoned_by: string | null
+          created_at: string
+          created_by: string | null
+          demo_status_before_abandon: string | null
+          id: string
+          master_id: string | null
+          organization_id: string
+          position: number
+          project_id: string
+          status: string
+          updated_at: string
+          working_title: string | null
+        }
+        Insert: {
+          abandon_reason?: string | null
+          abandoned_at?: string | null
+          abandoned_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          demo_status_before_abandon?: string | null
+          id?: string
+          master_id?: string | null
+          organization_id: string
+          position: number
+          project_id: string
+          status?: string
+          updated_at?: string
+          working_title?: string | null
+        }
+        Update: {
+          abandon_reason?: string | null
+          abandoned_at?: string | null
+          abandoned_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          demo_status_before_abandon?: string | null
+          id?: string
+          master_id?: string | null
+          organization_id?: string
+          position?: number
+          project_id?: string
+          status?: string
+          updated_at?: string
+          working_title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_titles_abandoned_by_fkey"
+            columns: ["abandoned_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_titles_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_titles_link"
+            columns: ["project_id", "master_id"]
+            isOneToOne: true
+            referencedRelation: "project_masters"
+            referencedColumns: ["project_id", "master_id"]
+          },
+          {
+            foreignKeyName: "project_titles_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           archived_at: string | null
@@ -18237,6 +18375,18 @@ export type Database = {
       }
     }
     Functions: {
+      abandon_project_title: {
+        Args: { p_reason: string; p_title_id: string }
+        Returns: undefined
+      }
+      add_project_title: {
+        Args: {
+          p_master_id?: string
+          p_project_id: string
+          p_working_title?: string
+        }
+        Returns: string
+      }
       approve_clearance_contract: {
         Args: { p_contract_id: string }
         Returns: undefined
@@ -18324,6 +18474,10 @@ export type Database = {
         Args: { p_master_id: string; p_title: string }
         Returns: undefined
       }
+      reactivate_project_title: {
+        Args: { p_title_id: string }
+        Returns: undefined
+      }
       receive_clearance_reply: {
         Args: {
           p_body: string
@@ -18342,6 +18496,10 @@ export type Database = {
           p_from: string
         }
         Returns: boolean
+      }
+      rename_project_title: {
+        Args: { p_title_id: string; p_working_title: string }
+        Returns: undefined
       }
       request_distribution_reserve_lift: {
         Args: {

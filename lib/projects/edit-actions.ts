@@ -56,6 +56,15 @@ export async function updateProject(
     const pe = fr.shell.newProject.errors;
     const shape = shapeError(error.message);
     if (shape) return { status: "error", ...shape, values };
+    // A collective's titles are abandoned, never unlinked (lot 2 of
+    // docs/pds-mic-plan.md).
+    if (error.message.includes("collective_title_kept")) {
+      return {
+        status: "error",
+        fieldErrors: { masterIds: fr.projectTitles.errors.keptInProject },
+        values,
+      };
+    }
     if (error.message.includes("project_not_editable")) {
       return { status: "error", formError: pe.notEditable, values };
     }

@@ -42,6 +42,7 @@ export function UnlaunchedOverview({
   cover,
   subtitle,
   status: kindStatus,
+  titles,
 }: {
   project: ProjectDetail;
   viewerPersonId: string | null;
@@ -55,6 +56,8 @@ export function UnlaunchedOverview({
   subtitle?: string;
   // « Projet collectif » on the right of the name (docs/pds-mic-plan.md).
   status?: React.ComponentProps<typeof ModuleHeader>["status"];
+  // A collective's titles (docs/pds-mic-plan.md, lot 2), under the handover.
+  titles?: React.ReactNode;
 }) {
   const t = fr.transmission.page;
   const latest = project.assignments[0] ?? null;
@@ -208,6 +211,7 @@ export function UnlaunchedOverview({
             </div>
           ))}
       </section>
+      {titles}
     </div>
   );
 }

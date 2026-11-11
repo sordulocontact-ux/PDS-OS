@@ -10,13 +10,15 @@ import { HandoverFacts } from "@/components/projects/handover-facts";
 import { ProjectCover } from "@/components/projects/project-cover";
 import { ProjectCoverEdit } from "@/components/projects/project-cover-edit";
 import { ProjectHeader } from "@/components/projects/project-header";
+import { ProjectTitles } from "@/components/projects/project-titles";
 import { UnlaunchedOverview } from "@/components/projects/unlaunched-overview";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { BlockFact } from "@/components/ui/fact-block";
 import { ViewLink } from "@/components/ui/view-link";
-import { can } from "@/lib/auth/access";
+import { can, type Access } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
+import { listMasterOptions } from "@/lib/catalog/queries";
 import { fr } from "@/lib/i18n/fr";
 import { workflowCards } from "@/lib/overview/cards";
 import { overviewDependencies } from "@/lib/overview/dependencies";
@@ -30,6 +32,7 @@ import { canEditProject } from "@/lib/projects/edit-access";
 import { projectCoverUrls } from "@/lib/projects/covers";
 import { projectKindLabel } from "@/lib/projects/labels";
 import { getProject, listAssignablePeople } from "@/lib/projects/queries";
+import { loadProjectTitles } from "@/lib/projects/titles";
 import type { ProjectDetail } from "@/lib/projects/types";
 import { projectCollectiveHue } from "@/lib/ui/category-hues";
 import { allInOrder } from "@/lib/utils/parallel";
@@ -60,7 +63,7 @@ export default async function ProjectOverviewPage({
   if (project.stages.length === 0) {
     const canTransmit = can(access, "assign_projects");
     const canManage = canTransmit || canEditProject(access, project);
-    const [creatives, candidates, people, covers] = await Promise.all([
+    const [creatives, candidates, people, covers, titles] = await Promise.all([
       listProjectCreatives(project.id),
       canManage && access.organizationId
         ? listCreativePeople(access.organizationId)
@@ -69,6 +72,7 @@ export default async function ProjectOverviewPage({
         ? listAssignablePeople(access.organizationId)
         : Promise.resolve([]),
       projectCoverUrls([coverSource(project)], "full"),
+      collectiveTitles(project, access),
     ]);
     return (
       <UnlaunchedOverview
@@ -97,17 +101,21 @@ export default async function ProjectOverviewPage({
             canManage={canManage}
           />
         }
+        titles={titles}
       />
     );
   }
 
-  const [all, flows, launchedAt, creatives, covers] = await Promise.all([
-    loadShellJourneys(project.id),
-    loadWorkflowStates(project.id),
-    planLaunchedAt(project.id),
-    listProjectCreatives(project.id),
-    projectCoverUrls([coverSource(project)], "full"),
-  ]);
+  const [all, flows, launchedAt, creatives, covers, titles] = await Promise.all(
+    [
+      loadShellJourneys(project.id),
+      loadWorkflowStates(project.id),
+      planLaunchedAt(project.id),
+      listProjectCreatives(project.id),
+      projectCoverUrls([coverSource(project)], "full"),
+      collectiveTitles(project, access),
+    ],
+  );
   const framing =
     all.journeys.find((journey) => journey.module === "framing")?.steps ?? [];
   const brief = framing.find((step) => step.key === "brief");
@@ -185,6 +193,7 @@ export default async function ProjectOverviewPage({
           <OverviewProgress framing={framing} />
         )}
       </div>
+      {titles}
       {launchedAt && flows ? (
         <DependencyRows deps={deps} />
       ) : (
@@ -206,6 +215,40 @@ function projectSubtitle(project: ProjectDetail): string {
   ]
     .filter(Boolean)
     .join(" · ");
+}
+
+/**
+ * The titles of a collective (docs/pds-mic-plan.md, lot 2), the minimal
+ * list until the « Titres et artistes » view (lot 6); nothing for any other
+ * project. Written by its owner once launched, by whoever creates projects
+ * before (same rule as add_project_title, which enforces it).
+ */
+async function collectiveTitles(project: ProjectDetail, access: Access) {
+  if (!project.collective) return null;
+  const canManage =
+    canEditProject(access, project) ||
+    (project.stages.length === 0 && can(access, "create_projects"));
+  const [titles, masters] = await Promise.all([
+    loadProjectTitles(project.id),
+    canManage ? listMasterOptions() : Promise.resolve([]),
+  ]);
+  const inProject = new Set(titles.map((title) => title.master?.id));
+  const masterOptions = Object.fromEntries(
+    masters
+      .filter((master) => !inProject.has(master.id))
+      .map((master) => [
+        master.id,
+        master.artists ? `${master.title} · ${master.artists}` : master.title,
+      ]),
+  );
+  return (
+    <ProjectTitles
+      projectId={project.id}
+      titles={titles}
+      canManage={canManage}
+      masterOptions={masterOptions}
+    />
+  );
 }
 
 /** « Projet collectif » on the right of the project's name (lot 1 of

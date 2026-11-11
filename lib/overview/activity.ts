@@ -9,6 +9,7 @@ import { loadRecentActivity } from "@/lib/insights/activity";
 import { loadLegalHistory } from "@/lib/legal/history/queries";
 import { loadMarketingEvents } from "@/lib/marketing/queries";
 import { actorless, describeEvent } from "@/lib/production/history-text";
+import { projectTitleLabel } from "@/lib/projects/title-rules";
 import type { ProjectDetail } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -36,7 +37,9 @@ const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
  * the project's own (calls, Cadrage, validations, files:
  * lib/insights/activity.ts), the Marketing's (marketing_events and each
  * deliverable's production_events), the Juridique's (only with
- * manage_legal, as its pages), the Distribution's (distribution_events).
+ * manage_legal, as its pages), the Distribution's (distribution_events),
+ * a collective's titles (project_title_events: added, renamed, abandoned
+ * with its reason, reactivated).
  * Read with the viewer's session: what RLS hides stays hidden. The Master
  * has no journal of its own yet. Nothing rewritten, nothing invented.
  */
@@ -47,31 +50,48 @@ export async function loadProjectActivity(
   const supabase = await createClient();
   const name = fr.shell.project.sidebar;
   const legalAllowed = can(access, "manage_legal");
-  const [members, own, marketing, production, legal, distribution, sheets] =
-    await Promise.all([
-      loadMembers(access),
-      loadRecentActivity({ projectId: project.id, days: 3650, limit: LIMIT }),
-      loadMarketingEvents(project.id, access, { limit: LIMIT }),
-      supabase
-        .from("production_events")
-        .select(
-          "id, entity, action, before, after, actor_person_id, at, sheet_id",
-        )
-        .eq("project_id", project.id)
-        .order("at", { ascending: false })
-        .limit(LIMIT),
-      legalAllowed ? loadLegalHistory(project, access) : null,
-      supabase
-        .from("distribution_events")
-        .select("id, kind, data, actor, created_at")
-        .eq("project_id", project.id)
-        .order("created_at", { ascending: false })
-        .limit(LIMIT),
-      supabase
-        .from("production_sheets")
-        .select("id, deliverable_id")
-        .eq("project_id", project.id),
-    ]);
+  const [
+    members,
+    own,
+    marketing,
+    production,
+    legal,
+    distribution,
+    sheets,
+    titles,
+  ] = await Promise.all([
+    loadMembers(access),
+    loadRecentActivity({ projectId: project.id, days: 3650, limit: LIMIT }),
+    loadMarketingEvents(project.id, access, { limit: LIMIT }),
+    supabase
+      .from("production_events")
+      .select(
+        "id, entity, action, before, after, actor_person_id, at, sheet_id",
+      )
+      .eq("project_id", project.id)
+      .order("at", { ascending: false })
+      .limit(LIMIT),
+    legalAllowed ? loadLegalHistory(project, access) : null,
+    supabase
+      .from("distribution_events")
+      .select("id, kind, data, actor, created_at")
+      .eq("project_id", project.id)
+      .order("created_at", { ascending: false })
+      .limit(LIMIT),
+    supabase
+      .from("production_sheets")
+      .select("id, deliverable_id")
+      .eq("project_id", project.id),
+    project.collective
+      ? supabase
+          .from("project_title_events")
+          .select("id, kind, detail, actor_person_id, created_at")
+          .eq("project_id", project.id)
+          .order("created_at", { ascending: false })
+          .order("seq", { ascending: false })
+          .limit(LIMIT)
+      : null,
+  ]);
   if (production.error)
     console.error("loadProjectActivity production:", production.error.message);
   if (distribution.error)
@@ -79,6 +99,8 @@ export async function loadProjectActivity(
       "loadProjectActivity distribution:",
       distribution.error.message,
     );
+  if (titles?.error)
+    console.error("loadProjectActivity titles:", titles.error.message);
   const person = (id: unknown) =>
     typeof id === "string"
       ? (members.find((m) => m.personId === id)?.name ?? null)
@@ -151,6 +173,14 @@ export async function loadProjectActivity(
       who: e.by,
       href: e.href,
     })),
+    ...(titles?.data ?? []).map((row) => ({
+      id: `titles:${row.id}`,
+      at: row.created_at,
+      workflow: fr.projectShell.activity.project,
+      text: titleEventText(row.kind, record(row.detail)),
+      who: person(row.actor_person_id),
+      href: routes.project(project.id),
+    })),
     ...(distribution.data ?? []).map((row) => ({
       id: `distribution:${row.id}`,
       at: row.created_at,
@@ -164,4 +194,28 @@ export async function loadProjectActivity(
     .filter((line) => line.text)
     .sort((a, b) => b.at.localeCompare(a.at))
     .slice(0, LIMIT);
+}
+
+/** One line of a collective's titles history: the title named as it was
+ * then (« Titre 3 · sans nom » when it had no name). */
+function titleEventText(kind: string, detail: Record<string, unknown>): string {
+  const t = fr.projectTitles.events;
+  const text = (value: unknown) => (typeof value === "string" ? value : null);
+  const position = typeof detail.position === "number" ? detail.position : 0;
+  const masterTitle = text(detail.master_title);
+  const label = (workingTitle: string | null) =>
+    projectTitleLabel({ position, workingTitle, masterTitle });
+  const current = label(text(detail.working_title));
+  switch (kind) {
+    case "added":
+      return t.added(current);
+    case "renamed":
+      return t.renamed(label(text(detail.from)), label(text(detail.to)));
+    case "abandoned":
+      return t.abandoned(current, text(detail.reason) ?? "");
+    case "reactivated":
+      return t.reactivated(current);
+    default:
+      return "";
+  }
 }
