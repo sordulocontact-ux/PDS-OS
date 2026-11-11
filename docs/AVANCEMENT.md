@@ -2100,3 +2100,13 @@ les modules à parcours (proto « Mise en page des modules », version « Propos
   poste (suggéré : « grec », « kebab »… = Restauration) → projet ou artiste (récents en tête) →
   statut (Payé par défaut) et date ; manques en rouge au premier essai. Pas de migration. BUD 5
   (partage depuis l'iPhone, lecture du ticket par PO) non fait.
+- 11/11/2026 — **Business, BIZ 2 : l'objet Deal.** Table `deals` à part (pas un projet) et son journal
+  `deal_events` ; type `music` seul créable ; rattaché à une participation de PDS MIC (projet et artiste
+  repris d'elle, contrat lu sur la participation, rien ajouté à `title_participations`), sinon à un projet
+  et/ou un artiste. Étapes à contacter → call prévu → négociation → accord de principe → contractualisation
+  → signé, ou abandonné (motif obligatoire), par fonctions SQL seules ; accord de principe proposé par
+  l'affecté, validé ou renvoyé en négociation (motif) par la direction seule. Droits : direction et affecté
+  (`negotiate`) lisent et écrivent, responsable du projet lié lit ; création et affectation par la direction
+  ou ce responsable ; pour les autres, introuvable. Prochaine action, date de relance, contexte lisible sans
+  voir le projet (`read_deal_context`, aucun contact). Actions serveur `lib/deals/actions.ts`. Migration
+  `20261111230101`, test `deals` 54/54 (`docs/ARCHITECTURE.md` § 8 quaterdecies).

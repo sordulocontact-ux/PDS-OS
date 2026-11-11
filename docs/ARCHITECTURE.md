@@ -7388,6 +7388,46 @@ Migrations `20261026400101_activation_recette_guards.sql`, `20261026400201_marke
   bord. Le formulaire d'une ligne de budget ne propose pas encore l'activation : la ligne est lue sur son
   livrable ou son levier.
 
+## 8 quaterdecies. Business : les deals (`/app/deals`, `lib/deals/`, `components/deals/`)
+
+Ticket d'Ibé du 10/11/2026 (« un espace deal » pour Glen, business manager), décisions du 11/11/2026.
+Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`20261111183101`).
+
+- **Un deal n'est pas un projet** (BIZ 2, `20261111230101_deals.sql`) : table `deals` à part, avec ses
+  droits. Dans un projet lancé seul le responsable écrit ; Glen n'en est pas responsable, il écrit **sur le
+  deal**, jamais dans le projet. Type `kind` (`music` seul créable en V1 ; `brand_partnership`, `label`
+  plus tard ; jamais « influence », le mot est celui de l'influence achetée, `lib/activations/influence`).
+- **Rattachement** : `participation_id` (→ `title_participations`, PDS MIC), qui fixe `project_id` et
+  `artist_id` à la création (un projet ou un artiste donné à côté doit être le même :
+  `participation_other_project`, `participation_other_artist`) ; sinon `project_id` et/ou `artist_id`.
+  **Le contrat d'un deal de participation se lit sur `title_participations.contract_id`**, jamais copié ;
+  rien n'est ajouté à `title_participations` (`docs/pds-mic-plan.md` § 0 ter). Un seul deal vivant par
+  participation (`deals_open_participation_key`, un deal abandonné reste à côté d'un nouveau).
+- **Étapes** (fonctions SQL seules) : `to_contact` → `call_planned` → `negotiation` → `agreement` (accord
+  de principe) → `contracting` → `signed`, ou `abandoned` (`abandon_deal`, motif obligatoire, deal et
+  historique gardés). `set_deal_stage` va d'une étape ouverte à l'autre dans les deux sens ;
+  `contracting` exige un accord **validé**, `signed` vient de `contracting` ; signé ou abandonné, le deal
+  ne bouge plus (`deal_closed`). **L'accord de principe est une étape** : l'affecté la propose
+  (`agreement_status = pending`), la direction (`validate`) la valide ou la renvoie en négociation avec un
+  motif (`decide_deal_agreement`) ; la direction qui pose elle-même l'étape la valide d'emblée. Seuils de
+  validation : plus tard.
+- **Droits** (`can_read_deal`, `can_write_deal`) : la direction (`validate`) lit et écrit tous les deals ;
+  l'affecté (membre qui a `negotiate`) lit et écrit les siens ; le responsable du projet lié
+  (`is_project_owner`) lit seulement. Créer et affecter (`create_deal`, `assign_deal`) : la direction ou le
+  responsable du projet lié (un deal sur un artiste seul : la direction). Pour tout autre, le deal n'existe
+  pas (`deal_not_found`). On n'affecte qu'à un membre qui négocie (`assignee_cannot_negotiate`,
+  `list_deal_negotiators`).
+- **Prochaine action** (texte, date) et **date de relance** par deal (`set_deal_next_action`) ; journal
+  `deal_events` (auteur, date, transition, motif, détail).
+- **Contexte** : `read_deal_context(ids)` (SECURITY DEFINER, pour qui lit le deal) donne le nom du projet
+  même à qui ne le voit pas (Glen ne voit aucun projet : nom sans lien), le titre et le statut de la
+  participation et l'état de son contrat. **Aucun contact** (décision 5 du plan).
+- `delete_project_row` supprime les deals du projet (journal en cascade) avant ses participations ;
+  `deals` suit `project_live` (`attach_project_live`).
+- Code : `lib/deals/types.ts` (étapes), `actions.ts` (un geste = une fonction SQL, `WriteResult`, push après
+  ce qui notifie), `errors.ts` (exceptions en français, `lib/i18n/fr/deals.ts`). Test :
+  `supabase/tests/deals.test.sql`.
+
 ## 9. Design (`docs/DESIGN.md`)
 
 - Design system : tokens et pont shadcn dans `app/globals.css`, polices

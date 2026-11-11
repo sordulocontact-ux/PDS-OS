@@ -165,6 +165,202 @@ export type Database = {
           },
         ]
       }
+      deal_events: {
+        Row: {
+          actor_person_id: string | null
+          created_at: string
+          deal_id: string
+          detail: Json
+          from_stage: string | null
+          id: string
+          kind: string
+          organization_id: string
+          reason: string | null
+          to_stage: string | null
+        }
+        Insert: {
+          actor_person_id?: string | null
+          created_at?: string
+          deal_id: string
+          detail?: Json
+          from_stage?: string | null
+          id?: string
+          kind: string
+          organization_id: string
+          reason?: string | null
+          to_stage?: string | null
+        }
+        Update: {
+          actor_person_id?: string | null
+          created_at?: string
+          deal_id?: string
+          detail?: Json
+          from_stage?: string | null
+          id?: string
+          kind?: string
+          organization_id?: string
+          reason?: string | null
+          to_stage?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_events_actor_person_id_fkey"
+            columns: ["actor_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_events_deal_same_org"
+            columns: ["deal_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      deals: {
+        Row: {
+          abandon_reason: string | null
+          abandoned_at: string | null
+          abandoned_by: string | null
+          agreement_decided_at: string | null
+          agreement_decided_by: string | null
+          agreement_status: string | null
+          artist_id: string | null
+          assignee_person_id: string | null
+          created_at: string
+          created_by: string | null
+          follow_up_notified_on: string | null
+          follow_up_on: string | null
+          id: string
+          kind: string
+          next_action: string | null
+          next_action_on: string | null
+          organization_id: string
+          participation_id: string | null
+          project_id: string | null
+          stage: string
+          stage_changed_at: string
+          stage_changed_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          abandon_reason?: string | null
+          abandoned_at?: string | null
+          abandoned_by?: string | null
+          agreement_decided_at?: string | null
+          agreement_decided_by?: string | null
+          agreement_status?: string | null
+          artist_id?: string | null
+          assignee_person_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          follow_up_notified_on?: string | null
+          follow_up_on?: string | null
+          id?: string
+          kind?: string
+          next_action?: string | null
+          next_action_on?: string | null
+          organization_id: string
+          participation_id?: string | null
+          project_id?: string | null
+          stage?: string
+          stage_changed_at?: string
+          stage_changed_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          abandon_reason?: string | null
+          abandoned_at?: string | null
+          abandoned_by?: string | null
+          agreement_decided_at?: string | null
+          agreement_decided_by?: string | null
+          agreement_status?: string | null
+          artist_id?: string | null
+          assignee_person_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          follow_up_notified_on?: string | null
+          follow_up_on?: string | null
+          id?: string
+          kind?: string
+          next_action?: string | null
+          next_action_on?: string | null
+          organization_id?: string
+          participation_id?: string | null
+          project_id?: string | null
+          stage?: string
+          stage_changed_at?: string
+          stage_changed_by?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deals_abandoned_by_fkey"
+            columns: ["abandoned_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_agreement_decided_by_fkey"
+            columns: ["agreement_decided_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_artist_same_org"
+            columns: ["artist_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "deals_assignee_person_id_fkey"
+            columns: ["assignee_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_participation_id_fkey"
+            columns: ["participation_id"]
+            isOneToOne: false
+            referencedRelation: "title_participations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "deals_stage_changed_by_fkey"
+            columns: ["stage_changed_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       distribution_reserves: {
         Row: {
           category: string
@@ -18654,6 +18850,74 @@ export type Database = {
       }
     }
     Functions: {
+      abandon_deal: {
+        Args: { p_deal_id: string; p_reason: string }
+        Returns: undefined
+      }
+      assign_deal: {
+        Args: { p_assignee_person_id?: string; p_deal_id: string }
+        Returns: undefined
+      }
+      can_read_deal: {
+        Args: { p_assignee: string; p_org: string; p_project: string }
+        Returns: boolean
+      }
+      can_write_deal: {
+        Args: { p_assignee: string; p_org: string }
+        Returns: boolean
+      }
+      create_deal: {
+        Args: {
+          p_artist_id?: string
+          p_assignee_person_id?: string
+          p_kind?: string
+          p_next_action?: string
+          p_next_action_on?: string
+          p_participation_id?: string
+          p_project_id?: string
+        }
+        Returns: string
+      }
+      decide_deal_agreement: {
+        Args: { p_approve: boolean; p_deal_id: string; p_reason?: string }
+        Returns: undefined
+      }
+      list_deal_negotiators: {
+        Args: never
+        Returns: {
+          first_name: string
+          last_name: string
+          person_id: string
+          role: string
+        }[]
+      }
+      read_deal_context: {
+        Args: { p_deal_ids: string[] }
+        Returns: {
+          contract_status: string
+          deal_id: string
+          participation_status: string
+          project_owner_id: string
+          project_title: string
+          project_visible: boolean
+          title_id: string
+          title_label: string
+          title_position: number
+        }[]
+      }
+      set_deal_next_action: {
+        Args: {
+          p_deal_id: string
+          p_follow_up_on?: string
+          p_next_action?: string
+          p_next_action_on?: string
+        }
+        Returns: undefined
+      }
+      set_deal_stage: {
+        Args: { p_deal_id: string; p_note?: string; p_stage: string }
+        Returns: undefined
+      }
       update_artist_budget: {
         Args: {
           p_amount_cents: number

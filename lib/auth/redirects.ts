@@ -120,6 +120,9 @@ export const routes = {
   files: "/app/files",
   // Every spend the reader may see, projects and artists (BUD 3).
   expenses: "/app/expenses",
+  // The Business module's deals (BIZ 2 to 4): the list, a deal's page.
+  deals: "/app/deals",
+  deal: (dealId: string) => `/app/deals/${dealId}`,
   // Features on trial before they enter the app (any member).
   labo: "/app/labo",
   network: "/app/network",
