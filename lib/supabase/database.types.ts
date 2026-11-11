@@ -219,6 +219,54 @@ export type Database = {
           },
         ]
       }
+      deal_terms: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          deal_id: string
+          id: string
+          organization_id: string
+          state: string
+          term_key: string
+          value: Json | null
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          deal_id: string
+          id?: string
+          organization_id: string
+          state?: string
+          term_key: string
+          value?: Json | null
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          deal_id?: string
+          id?: string
+          organization_id?: string
+          state?: string
+          term_key?: string
+          value?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_terms_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_terms_deal_same_org"
+            columns: ["deal_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       deals: {
         Row: {
           abandon_reason: string | null
@@ -18916,6 +18964,15 @@ export type Database = {
       }
       set_deal_stage: {
         Args: { p_deal_id: string; p_note?: string; p_stage: string }
+        Returns: undefined
+      }
+      set_deal_term: {
+        Args: {
+          p_deal_id: string
+          p_state: string
+          p_term_key: string
+          p_value: Json
+        }
         Returns: undefined
       }
       update_artist_budget: {

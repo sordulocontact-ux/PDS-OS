@@ -1233,6 +1233,16 @@ export const projectTitleTone: Record<string, Tone> = {
   abandoned: "neutral",
 };
 
+/** A term of a deal (BIZ 3): PDS's proposal waits for the artist's side, a
+ * counter-proposal waits for PDS, confirmed is settled, to define is
+ * nothing yet. */
+export const dealTermTone = {
+  pds_proposal: "warning",
+  counter_proposal: "action",
+  confirmed: "success",
+  to_define: "neutral",
+} as const satisfies Record<string, Tone>;
+
 /** A box of the Eisenhower matrix of « Mes tâches »: « Faire » presses,
  * « Déléguer » waits for someone else, « Planifier » runs, « Plus tard » is
  * set aside. */

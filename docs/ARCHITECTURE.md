@@ -7424,6 +7424,20 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   participation et l'état de son contrat. **Aucun contact** (décision 5 du plan).
 - `delete_project_row` supprime les deals du projet (journal en cascade) avant ses participations ;
   `deals` suit `project_live` (`attach_project_live`).
+- **Termes négociés** (BIZ 3, `20261111231101_deal_terms.sql`) : une ligne `deal_terms` par terme d'un deal
+  (valeur jsonb, état `pds_proposal` / `counter_proposal` / `confirmed` / `to_define`, auteur et date du
+  dernier changement), écrite par `set_deal_term` seule (direction ou affecté, deal ouvert ; une valeur sauf
+  « À définir », qui l'efface) ; chaque changement va au journal (`deal_events` `term`, valeur et état
+  avant / après). **La liste des termes et la forme de leurs valeurs sont dans un seul endroit,
+  `lib/deals/terms.ts`** (`DEAL_TERMS` par type de deal : splits auteur-compositeur, part du master,
+  royalties, avance ou cachet, crédits, territoires, durée, exclusivité, promo ; libellés dans
+  `lib/i18n/fr/deals.ts`) : pour suivre l'Excel d'Ibé, on change ce fichier, jamais la base, qui ne vérifie
+  que la forme de la clé. Formats `text`, `percent` et `split` en dix-millièmes de pour cent comme le
+  Juridique, `money` en centimes HT, `yesno`. **Les splits reprennent les rôles du Juridique**
+  (`SPLIT_ROLES`, `legal_split_entries.role`) dans la valeur du terme : aucun second modèle de répartition.
+  Lecture `loadDealTerms` (`term-queries.ts`), écriture `setDealTerm` (`term-actions.ts`, valeur validée
+  par le format du terme), affichage `DealTerms` / `TermForm` / `TermValueFields` (`components/deals/`),
+  ton de l'état `dealTermTone`. Test : `supabase/tests/deal-terms.test.sql`.
 - Code : `lib/deals/types.ts` (étapes), `actions.ts` (un geste = une fonction SQL, `WriteResult`, push après
   ce qui notifie), `errors.ts` (exceptions en français, `lib/i18n/fr/deals.ts`). Test :
   `supabase/tests/deals.test.sql`.

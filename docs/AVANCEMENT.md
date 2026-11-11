@@ -2110,3 +2110,10 @@ les modules à parcours (proto « Mise en page des modules », version « Propos
   ou ce responsable ; pour les autres, introuvable. Prochaine action, date de relance, contexte lisible sans
   voir le projet (`read_deal_context`, aucun contact). Actions serveur `lib/deals/actions.ts`. Migration
   `20261111230101`, test `deals` 54/54 (`docs/ARCHITECTURE.md` § 8 quaterdecies).
+- 11/11/2026 — **Business, BIZ 3 : les termes négociés d'un deal musical.** Splits auteur-compositeur
+  (rôles du Juridique, sans second modèle de répartition), part du master, royalties, avance ou cachet,
+  crédits, territoires, durée, exclusivité, promo ; chacun avec sa valeur, son état (Proposé par PDS,
+  Contre-proposition, Confirmé, À définir), l'auteur et la date du dernier changement, l'historique au
+  journal du deal. La liste et la forme des termes tiennent dans `lib/deals/terms.ts` (à ajuster à l'Excel
+  d'Ibé sans migration). Lignes de faits « Termes négociés » et fenêtre de modification
+  (`components/deals/`). Migration `20261111231101`, test `deal-terms` 16/16.
