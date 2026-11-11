@@ -70,6 +70,9 @@ export const PERMISSIONS = [
   "manage_sessions",
   // Negotiates the deals assigned to them (business manager, business).
   "negotiate",
+  // Reads the artists' budgets and enters their direct spends (the
+  // direction, project managers and business managers, BUD 1, 11/11/2026).
+  "read_artist_budgets",
 ] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 

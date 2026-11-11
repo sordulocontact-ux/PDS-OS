@@ -62,9 +62,8 @@ export function ExpenseLines({
         </Button>
       )}
       <BudgetLineSheet
-        projectId={projectId}
+        target={{ kind: "project", id: projectId }}
         line={null}
-        levers={[]}
         open={open}
         onOpenChange={setOpen}
       />

@@ -13,24 +13,33 @@ import {
   DataTableRow,
 } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { formatEuros, type BudgetLine } from "@/lib/budget/types";
+import { formatEuros, lacksProof, type BudgetLine } from "@/lib/budget/types";
 import { budget } from "@/lib/i18n/fr/budget";
-import { budgetStatusTone } from "@/lib/ui/state-tones";
+import { budgetStatusTone, proofTone } from "@/lib/ui/state-tones";
+import { formatDay } from "@/lib/utils/day";
 
 const fr = { budget };
 
-// Budget lines with their total (code), edit and delete for the owner.
+// Budget lines with their total (code), edit and delete for whoever
+// writes them. The one row of a spend (a project's Budget, an artist's,
+// Dépenses): its day, what it belongs to when `showTarget`, a real spend
+// without its proof signalled (BUD 1).
 export function BudgetTable({
   lines,
   canEdit,
   onEdit,
   onDelete,
+  showTarget = false,
 }: {
   lines: BudgetLine[];
-  canEdit: boolean;
+  canEdit: boolean | ((line: BudgetLine) => boolean);
   onEdit: (line: BudgetLine) => void;
   onDelete: (line: BudgetLine) => void;
+  showTarget?: boolean;
 }) {
+  const writes = (line: BudgetLine) =>
+    typeof canEdit === "function" ? canEdit(line) : canEdit;
+  const anyWrites = lines.some(writes);
   const t = fr.budget;
   const total = lines.reduce((sum, l) => sum + l.amountCents, 0);
   return (
@@ -39,7 +48,7 @@ export function BudgetTable({
         <DataTableHead fill>{t.table.label}</DataTableHead>
         <DataTableHead hideBelow="sm">{t.table.status}</DataTableHead>
         <DataTableHead align="end">{t.table.amount}</DataTableHead>
-        {canEdit && (
+        {anyWrites && (
           <DataTableHead align="end" className="w-24">
             <span className="sr-only">{t.table.actions}</span>
           </DataTableHead>
@@ -50,10 +59,21 @@ export function BudgetTable({
           <DataTableRow key={line.id}>
             <DataTableCell fill>
               <DataTableMedia
-                title={<span className="truncate">{line.label}</span>}
+                title={
+                  <span className="flex min-w-0 items-center gap-2">
+                    <span className="truncate">{line.label}</span>
+                    {lacksProof(line) && (
+                      <StatusBadge tone={proofTone.to_provide} size="sm">
+                        {t.noProof}
+                      </StatusBadge>
+                    )}
+                  </span>
+                }
                 subtitle={
                   <>
                     {[
+                      formatDay(line.spentOn),
+                      showTarget && line.targetLabel,
                       line.family === "other" && line.familyDetail
                         ? `${fr.budget.families.other} : ${line.familyDetail}`
                         : line.family && fr.budget.families[line.family],
@@ -89,28 +109,30 @@ export function BudgetTable({
             <DataTableCell align="end" className="tabular-nums">
               {formatEuros(line.amountCents)}
             </DataTableCell>
-            {canEdit && (
+            {anyWrites && (
               <DataTableCell align="end" className="w-24">
-                <div className="flex justify-end gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label={t.edit(line.label)}
-                    onClick={() => onEdit(line)}
-                  >
-                    <IconPenWriting2 aria-hidden />
-                  </Button>
-                  {!line.invoiceId && (
+                {writes(line) && (
+                  <div className="flex justify-end gap-1">
                     <Button
                       variant="ghost"
                       size="icon-sm"
-                      aria-label={t.remove(line.label)}
-                      onClick={() => onDelete(line)}
+                      aria-label={t.edit(line.label)}
+                      onClick={() => onEdit(line)}
                     >
-                      <IconTrash aria-hidden />
+                      <IconPenWriting2 aria-hidden />
                     </Button>
-                  )}
-                </div>
+                    {!line.invoiceId && (
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label={t.remove(line.label)}
+                        onClick={() => onDelete(line)}
+                      >
+                        <IconTrash aria-hidden />
+                      </Button>
+                    )}
+                  </div>
+                )}
               </DataTableCell>
             )}
           </DataTableRow>
@@ -123,7 +145,7 @@ export function BudgetTable({
           <DataTableCell align="end" className="font-semibold tabular-nums">
             {formatEuros(total)}
           </DataTableCell>
-          {canEdit && <DataTableCell className="w-24">{null}</DataTableCell>}
+          {anyWrites && <DataTableCell className="w-24">{null}</DataTableCell>}
         </DataTableRow>
       </DataTableBody>
     </DataTable>

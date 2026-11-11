@@ -61,13 +61,17 @@ async function readRows(owner: FileOwner, scope?: FileScope) {
           : query;
     return scoped.order("created_at", { ascending: false });
   }
-  return supabase
-    .from("artist_files")
-    .select(
-      `${SELECT}, author:people!artist_files_created_by_fkey(first_name, last_name)`,
-    )
-    .eq("artist_id", owner.id)
-    .order("created_at", { ascending: false });
+  return (
+    supabase
+      .from("artist_files")
+      .select(
+        `${SELECT}, author:people!artist_files_created_by_fkey(first_name, last_name)`,
+      )
+      .eq("artist_id", owner.id)
+      // The receipts of the artist's spends are the budget's (BUD 1).
+      .neq("category", "receipt")
+      .order("created_at", { ascending: false })
+  );
 }
 
 /**

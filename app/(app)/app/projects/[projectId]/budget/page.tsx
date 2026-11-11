@@ -45,7 +45,7 @@ export default async function ProjectBudgetPage({
         totals={budgetTotals(lines, project.budgetCents)}
       />
       <BudgetLines
-        projectId={projectId}
+        target={{ kind: "project", id: projectId }}
         lines={lines}
         levers={levers}
         deliverables={deliverables}

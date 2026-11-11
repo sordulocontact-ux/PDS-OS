@@ -1,20 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import { toast } from "@/components/ui/toast";
+import { useRef, useState } from "react";
 
+import { Field } from "@/components/auth/field";
+import { FormMessage } from "@/components/auth/form-message";
+import { TextareaField } from "@/components/auth/textarea-field";
 import {
   BudgetClassificationFields,
   NONE,
   type Classification,
 } from "@/components/budget/budget-classification-fields";
+import { BudgetProofField } from "@/components/budget/budget-proof-field";
 import { OptionSelect } from "@/components/framing/option-select";
-import { useFramingAction } from "@/components/framing/use-framing-action";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FilePickField } from "@/components/ui/file-pick-field";
-import { Textarea } from "@/components/ui/textarea";
+import { DialogFormActions } from "@/components/ui/dialog-form-actions";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { saveBudgetLine } from "@/lib/budget/actions";
 import {
   centsToInput,
@@ -24,39 +24,49 @@ import {
   type BudgetLever,
   type BudgetLine,
   type BudgetStatus,
+  type BudgetTarget,
 } from "@/lib/budget/types";
-import { uploadCatalogFile } from "@/lib/catalog/upload-file";
+import { uploadBudgetProof } from "@/lib/budget/upload-proof";
 import { budget } from "@/lib/i18n/fr/budget";
+import { todayInParis } from "@/lib/insights/dates";
+import { parseEurosToCents } from "@/lib/projects/schemas";
 
 const fr = { budget };
 
+/** What a new line starts with: a draft of PO, a quick entry (« déjà
+ * payée »). Every value optional. */
+export type BudgetLineInitial = Partial<{
+  label: string;
+  amount: string;
+  status: BudgetStatus | null;
+  family: BudgetFamily | null;
+  note: string;
+  spentOn: string;
+}>;
+
 /**
- * A line's fields. `initial`: a new line already filled (a draft of PO).
- * `onCancel`: when cancelling is not just closing (PO's panel). Label,
- * amount and status are all that is required; the classification is
- * assisted (MKT-S1-15); a proof is stored once, in the project's library,
- * when the writer's organization is known.
+ * The one form of a spend, on a project or an artist (BUD 1): the proof
+ * first (a photo, never required), the amount, what it is, its poste
+ * (suggested from the label, MKT-S1-15), its state and its day, then the
+ * lever and deliverable of a project. `initial`: a new line already filled
+ * (PO, quick entry). `onCancel`: when cancelling is not just closing (PO's
+ * panel). Missing fields turn red at the first try only (CLAUDE.md,
+ * « Formulaires »).
  */
 export function BudgetLineForm({
-  projectId,
+  target,
   line,
   initial,
-  levers,
+  levers = [],
   deliverables = [],
   organizationId = null,
   onDone,
   onCancel = onDone,
 }: {
-  projectId: string;
+  target: BudgetTarget;
   line: BudgetLine | null;
-  initial?: {
-    label: string;
-    amount: string;
-    status: BudgetStatus | null;
-    family: BudgetFamily | null;
-    note: string;
-  };
-  levers: BudgetLever[];
+  initial?: BudgetLineInitial;
+  levers?: BudgetLever[];
   deliverables?: BudgetDeliverable[];
   // Where a proof is uploaded; no proof field without it.
   organizationId?: string | null;
@@ -64,11 +74,15 @@ export function BudgetLineForm({
   onCancel?: () => void;
 }) {
   const t = fr.budget.form;
-  const { pending, run } = useFramingAction();
-  const [status, setStatus] = useState<BudgetStatus>(
-    line?.status ?? initial?.status ?? "planned",
-  );
-  const [label, setLabel] = useState(line?.label ?? initial?.label ?? "");
+  const root = useRef<HTMLFormElement>(null);
+  const submit = useWriteSubmit(onDone, t.saved);
+  const [v, setV] = useState({
+    label: line?.label ?? initial?.label ?? "",
+    amount: line ? centsToInput(line.amountCents) : (initial?.amount ?? ""),
+    status: line?.status ?? initial?.status ?? "planned",
+    spentOn: line?.spentOn ?? initial?.spentOn ?? todayInParis(),
+    note: line?.note ?? initial?.note ?? "",
+  });
   const [classification, setClassification] = useState<Classification>({
     family: line?.family ?? initial?.family ?? NONE,
     familyDetail: line?.familyDetail ?? "",
@@ -76,177 +90,152 @@ export function BudgetLineForm({
     deliverableId: line?.deliverableId ?? NONE,
   });
   const [proof, setProof] = useState<File | null>(null);
-  const [amountError, setAmountError] = useState(false);
-  const [detailError, setDetailError] = useState(false);
+  const [tried, setTried] = useState(false);
   const none = (value: string) => (value === NONE ? "" : value);
   // A line that follows an invoice: its amount and state are the invoice's.
   const followsInvoice = Boolean(line?.invoiceId);
+  const onProject = target.kind === "project";
 
-  function submit(event: React.FormEvent<HTMLFormElement>) {
+  const amountCents = parseEurosToCents(v.amount);
+  const errors = {
+    amount:
+      amountCents === null || amountCents === undefined
+        ? t.invalidAmount
+        : undefined,
+    label: v.label.trim() ? undefined : t.labelMissing,
+    detail:
+      classification.family === "other" && !classification.familyDetail.trim()
+        ? t.familyDetailRequired
+        : undefined,
+    spentOn: v.spentOn ? undefined : t.spentOnMissing,
+  };
+  const missing = Object.values(errors).filter(Boolean).length;
+  const shown: Partial<typeof errors> = tried ? errors : {};
+
+  function send(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    const amount = String(form.get("amount") ?? "");
-    setAmountError(false);
-    const missingDetail =
-      classification.family === "other" && !classification.familyDetail.trim();
-    setDetailError(missingDetail);
-    if (missingDetail) return;
-    run(
-      async () => {
-        // The proof first: the line keeps the file it was saved with.
-        let attachmentFileId = "";
-        if (proof && organizationId) {
-          const uploaded = await uploadCatalogFile({
-            organizationId,
-            owner: { kind: "project", id: projectId },
-            category: "other",
-            description: t.attachmentOf(label),
-            file: proof,
-          });
-          if (uploaded.ok) attachmentFileId = uploaded.id;
-          else toast.error(t.attachmentFailed);
-        }
-        const result = await saveBudgetLine(projectId, {
-          id: line?.id,
-          label,
-          amount,
-          status,
-          family: none(classification.family),
-          familyDetail: classification.familyDetail,
-          leverId: none(classification.leverId),
-          deliverableId: none(classification.deliverableId),
-          attachmentFileId,
-          note: String(form.get("note") ?? ""),
+    setTried(true);
+    if (missing > 0) {
+      requestAnimationFrame(() =>
+        root.current
+          ?.querySelector<HTMLElement>('[aria-invalid="true"]')
+          ?.focus(),
+      );
+      return;
+    }
+    submit.run(async () => {
+      // The proof first: the line keeps the file it was saved with.
+      let attachmentFileId = "";
+      if (proof && organizationId) {
+        const uploaded = await uploadBudgetProof({
+          organizationId,
+          target,
+          description: t.attachmentOf(v.label),
+          file: proof,
         });
-        if (!result.ok && result.error === "invalid_input")
-          setAmountError(true);
-        return result;
-      },
-      () => {
-        toast.success(t.saved);
-        onDone();
-      },
-    );
+        if (!uploaded.ok) return { ok: false, error: t.attachmentFailed };
+        attachmentFileId = uploaded.id;
+      }
+      return saveBudgetLine(target, {
+        id: line?.id,
+        label: v.label,
+        amount: v.amount,
+        status: v.status,
+        spentOn: v.spentOn,
+        family: none(classification.family),
+        familyDetail: classification.familyDetail,
+        leverId: onProject ? none(classification.leverId) : "",
+        deliverableId: onProject ? none(classification.deliverableId) : "",
+        attachmentFileId,
+        note: v.note,
+      });
+    });
   }
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-5">
-      <div className="grid gap-1.5">
-        <Label htmlFor="budget-label" required>
-          {t.label}
-        </Label>
-        <Input
-          id="budget-label"
-          name="label"
-          required
-          maxLength={200}
-          value={label}
-          onChange={(event) => setLabel(event.target.value)}
-        />
-      </div>
-      <div className="grid gap-1.5">
-        <Label htmlFor="budget-amount" required>
-          {t.amount}
-        </Label>
-        <Input
-          id="budget-amount"
-          name="amount"
-          required
-          inputMode="decimal"
-          autoComplete="off"
-          aria-invalid={amountError || undefined}
-          aria-describedby="budget-amount-hint"
-          readOnly={followsInvoice}
-          defaultValue={
-            line ? centsToInput(line.amountCents) : (initial?.amount ?? "")
-          }
-        />
-        <p
-          id="budget-amount-hint"
-          className={
-            amountError
-              ? "text-caption text-error"
-              : "text-caption text-muted-foreground"
-          }
-        >
-          {amountError
-            ? t.invalidAmount
-            : followsInvoice
-              ? t.followsInvoice
-              : t.amountHint}
-        </p>
-      </div>
-      <BudgetClassificationFields
-        label={label}
-        value={classification}
-        onChange={setClassification}
-        levers={levers}
-        deliverables={deliverables}
-        detailError={detailError}
-        afterFamily={
-          <div className="grid gap-1.5">
-            <Label htmlFor="budget-status" required>
-              {t.status}
-            </Label>
-            <OptionSelect
-              id="budget-status"
-              required
-              fill
-              label={t.status}
-              options={fr.budget.statuses}
-              disabled={followsInvoice}
-              value={status}
-              onChange={(v) => isBudgetStatus(v) && setStatus(v)}
-            />
-          </div>
-        }
-      />
+    <form ref={root} noValidate onSubmit={send} className="flex flex-col gap-5">
       {organizationId && (
-        <FilePickField
-          id="budget-proof"
-          label={t.attachment}
-          hint={t.attachmentHint}
-          chosenLabel={(name) => t.attachmentKept(name)}
+        <BudgetProofField
+          target={target}
+          line={line}
           file={proof}
           onFile={setProof}
         />
       )}
-      {!proof && line?.attachment && (
-        <p className="text-sm text-[color:var(--text-secondary)]">
-          {line.attachment.url ? (
-            <a
-              href={line.attachment.url}
-              className="underline underline-offset-4"
-            >
-              {t.attachmentKept(line.attachment.name)}
-            </a>
-          ) : (
-            t.attachmentKept(line.attachment.name)
-          )}
-        </p>
+      <Field
+        name="amount"
+        label={t.amount}
+        aria-required
+        inputMode="decimal"
+        autoComplete="off"
+        readOnly={followsInvoice}
+        value={v.amount}
+        error={shown.amount}
+        hint={followsInvoice ? t.followsInvoice : t.amountHint}
+        onChange={(e) => setV({ ...v, amount: e.target.value })}
+      />
+      <Field
+        name="label"
+        label={t.label}
+        aria-required
+        maxLength={200}
+        value={v.label}
+        error={shown.label}
+        onChange={(e) => setV({ ...v, label: e.target.value })}
+      />
+      <BudgetClassificationFields
+        label={v.label}
+        value={classification}
+        onChange={setClassification}
+        levers={onProject ? levers : []}
+        deliverables={onProject ? deliverables : []}
+        detailError={Boolean(shown.detail)}
+        afterFamily={
+          <div className="grid gap-5 sm:grid-cols-2">
+            <div className="grid content-start gap-1.5">
+              <Label htmlFor="budget-status" required>
+                {t.status}
+              </Label>
+              <OptionSelect
+                id="budget-status"
+                required
+                fill
+                label={t.status}
+                options={fr.budget.statuses}
+                disabled={followsInvoice}
+                value={v.status}
+                onChange={(s) => isBudgetStatus(s) && setV({ ...v, status: s })}
+              />
+            </div>
+            <Field
+              name="spent-on"
+              type="date"
+              label={t.spentOn}
+              aria-required
+              value={v.spentOn}
+              error={shown.spentOn}
+              onChange={(e) => setV({ ...v, spentOn: e.target.value })}
+            />
+          </div>
+        }
+      />
+      <TextareaField
+        name="note"
+        label={t.note}
+        maxLength={1000}
+        value={v.note}
+        onChange={(e) => setV({ ...v, note: e.target.value })}
+      />
+      {tried && missing > 0 && (
+        <FormMessage kind="error">{t.missingCount(missing)}</FormMessage>
       )}
-      <div className="grid gap-1.5">
-        <Label htmlFor="budget-note">{t.note}</Label>
-        <Textarea
-          id="budget-note"
-          name="note"
-          maxLength={1000}
-          defaultValue={line?.note ?? initial?.note ?? ""}
-        />
-      </div>
-      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <Button type="button" variant="ghost" size="lg" onClick={onCancel}>
-          {t.cancel}
-        </Button>
-        <Button
-          type="submit"
-          size="lg"
-          disabled={pending}
-          aria-busy={pending || undefined}
-        >
-          {pending ? t.saving : t.save}
-        </Button>
-      </div>
+      {submit.error && <FormMessage kind="error">{submit.error}</FormMessage>}
+      <DialogFormActions
+        pending={submit.pending}
+        submitLabel={t.save}
+        pendingLabel={t.saving}
+        onCancel={onCancel}
+      />
     </form>
   );
 }

@@ -2074,3 +2074,10 @@ les modules à parcours (proto « Mise en page des modules », version « Propos
   `business-positions` 8/8). Libellés, aide du formulaire de compte, Travail et PO (`explain_access`) suivent.
   Comptes de test locaux dans `supabase/seed.sql` : `glen@pds.test`, `thibault@pds.test`
   (`pds-local-business`). Cadrage des lots : `docs/pds-mic-plan.md` § 0 ter et l'épic Notion.
+- 11/11/2026 — **Budget, BUD 1 : une dépense rattachée à un projet ou à un artiste.** `budget_lines`
+  prend `artist_id` (exactement un projet ou un artiste), `spent_on` (date de la dépense) et le
+  justificatif d'un artiste (`artist_files` catégorie `receipt`, privée au budget). Permission
+  `read_artist_budgets` (DG, chefs de projet, business managers) : lit et saisit les dépenses d'un
+  artiste ; les lignes d'un projet gardent leurs règles. Formulaire unique (justificatif en premier,
+  montant, libellé, poste, statut et date), ligne commune avec « Sans justificatif » et son onglet ;
+  écritures en `WriteResult`. Migration `20261111200101`, test `budget-artist-lines` 17/17.

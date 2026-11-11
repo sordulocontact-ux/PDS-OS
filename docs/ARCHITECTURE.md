@@ -3013,6 +3013,33 @@ date de sortie de la Stratégie, NDA : à décider).
     formulaire, même ligne que la page Budget ; libellé, montant et statut suffisent.
   - **Brief de stratégie** : prévisionnel, engagé, réel et à arbitrer, un reste par type ;
     les leviers sans dépense n'y sont plus listés (comptés en une ligne).
+  - **Dépense d'un projet ou d'un artiste** (BUD 1, Ibé 11/11/2026, migration
+    `20261111200101_budget_artist_lines`, tests `budget-artist-lines.test.sql`) : une dépense reste
+    **une ligne de `budget_lines`**, rattachée à un projet **ou** à un artiste (`artist_id`,
+    contrainte `budget_lines_one_owner` : exactement l'un des deux ; jamais de seconde table, la
+    `artist_expenses` du 08/11 ne revient pas). Ce à quoi elle est rattachée se choisit une fois (pas
+    de droit de mise à jour sur `project_id` / `artist_id`). **Date de la dépense** `spent_on`
+    (jour de Paris par défaut, reprise de `created_at` pour les lignes existantes) : la période d'une
+    enveloppe d'artiste la lit. Les lignes d'un projet gardent leurs règles (`can_read_project_budget`,
+    le responsable écrit) ; celles d'un artiste sont lues **et saisies** par la nouvelle permission
+    **`read_artist_budgets`** (direction, chefs de projet, business managers ; pas le business
+    developer ni la direction créative), sur un artiste non archivé (`is_open_artist`). Une ligne
+    d'artiste ne sert ni levier, ni livrable, ni activation (triggers : projet nul). Un artiste qui a
+    des dépenses ne se supprime pas (`delete_artist_row` → `artist_in_use`).
+  - **Justificatif** (BUD 1) : facultatif, une photo du ticket ou un PDF, posé **en premier** dans le
+    formulaire ; rangé dans la bibliothèque de ce à quoi la dépense appartient, jamais un second
+    stockage : Fichiers du projet (catégorie Autres, comme avant) ou fichiers de l'artiste, catégorie
+    **`receipt`** (`artist_attachment_file_id`), lue seulement par `read_artist_budgets`, hors de
+    l'onglet Fichiers, de la page Fichiers et de l'Activité (`artist_files_log`), supprimée avec sa
+    dépense (`deleteBudgetLine`). Une **dépense réelle** (facturée ou payée) **sans justificatif** ni
+    facture suivie est signalée « Sans justificatif » (`lacksProof`, ton `proofTone.to_provide`) et
+    filtrable (onglet du tableau) ; une estimation n'en demande pas.
+  - **Un seul formulaire, une seule ligne** (`BudgetLineForm` pour une `BudgetTarget`
+    `{ kind: "project" | "artist", id }`, `BudgetTable`, lecture commune `lib/budget/rows.ts`) :
+    justificatif, montant, libellé, poste (suggéré, `lib/budget/suggest.ts`, « grec », « kebab »… =
+    Restauration), statut et date, levier et livrable d'un projet, note ; manques en rouge au premier
+    essai seulement ; écritures en `WriteResult` (`saveBudgetLine(target, …)`,
+    `deleteBudgetLine(target, id)`, messages en français dans `fr.budget.errors`).
 
 ### Blocages et informations notées d'une étape (C6, 18/10/2026)
 

@@ -150,7 +150,7 @@ export function DimensionWork({
           <LeverBudgetTable rows={strategyBudget.byLever} />
           <StrategyPart title={fr.strategyBudget.linesTitle}>
             <BudgetLines
-              projectId={projectId}
+              target={{ kind: "project", id: projectId }}
               lines={budget.lines}
               levers={budget.levers}
               deliverables={budget.deliverables}

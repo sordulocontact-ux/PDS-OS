@@ -140,7 +140,7 @@ const updateSchema = z
 // The organization to write in, when the viewer may write there at all.
 // Inside a project, its owner writes, and its creative directors in Visuels
 // and Autres (their own files): RLS checks which.
-async function writerAccess(owner: FileOwner) {
+async function writerAccess(owner: FileOwner, category?: string) {
   const access = await requireApproved();
   const writer = {
     project: "pilot_projects",
@@ -150,10 +150,15 @@ async function writerAccess(owner: FileOwner) {
   } as const;
   // The creative team also writes in a project's library, and the creative
   // director an artist's moodboards (RLS: those categories, their own files).
+  // Whoever reads the artists' budgets keeps the receipt of an artist's
+  // spend in its library (BUD 1, RLS: category « receipt »).
   const allowed =
     can(access, writer[owner.kind]) ||
     ((owner.kind === "project" || owner.kind === "artist") &&
-      can(access, "creative_work"));
+      can(access, "creative_work")) ||
+    (owner.kind === "artist" &&
+      category === "receipt" &&
+      can(access, "read_artist_budgets"));
   return access.organizationId && allowed ? access.organizationId : null;
 }
 
@@ -188,7 +193,7 @@ export async function recordCatalogFile(
   const t = fr.catalogFiles;
   const parsed = recordSchema.safeParse(input);
   const organizationId = parsed.success
-    ? await writerAccess(parsed.data.owner)
+    ? await writerAccess(parsed.data.owner, parsed.data.category)
     : null;
   if (!organizationId || !parsed.success)
     return { ok: false, error: fr.auth.errors.forbidden };

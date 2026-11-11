@@ -74,6 +74,8 @@ export async function listLibraryFiles(): Promise<{
     .select(
       "id, source, owner_id, owner_label, category, description, path, file_name, mime, bytes, version, version_count, created_by, created_at",
     )
+    // The receipts of the artists' spends are the budget's (BUD 1).
+    .neq("category", "receipt")
     .order("created_at", { ascending: false })
     .limit(LIBRARY_LIMIT + 1);
   if (error) {

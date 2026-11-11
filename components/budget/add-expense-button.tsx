@@ -49,7 +49,7 @@ export function AddExpenseButton({ projectId }: { projectId: string }) {
         >
           {(data) => (
             <BudgetLineForm
-              projectId={projectId}
+              target={{ kind: "project", id: projectId }}
               line={null}
               levers={data.levers}
               deliverables={data.deliverables}

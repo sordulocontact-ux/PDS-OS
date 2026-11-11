@@ -1,9 +1,7 @@
 "use client";
 
-import { toast } from "@/components/ui/toast";
-
-import { useFramingAction } from "@/components/framing/use-framing-action";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { deleteBudgetLine } from "@/lib/budget/actions";
 import type { BudgetLine } from "@/lib/budget/types";
 import { budget } from "@/lib/i18n/fr/budget";
@@ -12,28 +10,19 @@ const fr = { budget };
 
 // Confirms a definitive deletion; stays open if it fails, with the error.
 export function DeleteBudgetLineDialog({
-  projectId,
   line,
   onClose,
 }: {
-  projectId: string;
   line: BudgetLine | null;
   onClose: () => void;
 }) {
   const t = fr.budget.confirm;
-  const { pending, run, error, clearError } = useFramingAction({
-    inline: true,
-  });
+  const { pending, run, error, setError } = useWriteSubmit(onClose, t.deleted);
+  const clearError = () => setError(null);
 
   function confirm() {
     if (!line) return;
-    run(
-      () => deleteBudgetLine(projectId, line.id),
-      () => {
-        toast.success(t.deleted);
-        onClose();
-      },
-    );
+    run(() => deleteBudgetLine(line.target, line.id));
   }
 
   return (

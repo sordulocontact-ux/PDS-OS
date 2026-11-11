@@ -2928,13 +2928,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "artist_files_moodboard_same_artist"
-            columns: ["moodboard_id", "artist_id"]
-            isOneToOne: false
-            referencedRelation: "artist_moodboards"
-            referencedColumns: ["id", "artist_id"]
-          },
-          {
             foreignKeyName: "artist_files_artist_same_org"
             columns: ["artist_id", "organization_id"]
             isOneToOne: false
@@ -2947,6 +2940,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "artist_files_moodboard_same_artist"
+            columns: ["moodboard_id", "artist_id"]
+            isOneToOne: false
+            referencedRelation: "artist_moodboards"
+            referencedColumns: ["id", "artist_id"]
           },
           {
             foreignKeyName: "artist_files_organization_id_fkey"
@@ -3087,93 +3087,116 @@ export type Database = {
       budget_lines: {
         Row: {
           activation_id: string | null
-          committed_cents: number | null
           amount_cents: number
+          artist_attachment_file_id: string | null
+          artist_id: string | null
           attachment_file_id: string | null
+          committed_cents: number | null
           created_at: string
           created_by: string | null
           deliverable_id: string | null
           family: string | null
           family_detail: string | null
-          invoice_id: string | null
           id: string
+          invoice_id: string | null
           label: string
           lever_id: string | null
           master_role: string | null
           note: string | null
           organization_id: string
-          project_id: string
+          project_id: string | null
           refusal_reason: string | null
           refused_at: string | null
           refused_by: string | null
           refused_cents: number | null
+          spent_on: string
           status: string
           updated_at: string
         }
         Insert: {
           activation_id?: string | null
-          committed_cents?: number | null
           amount_cents: number
+          artist_attachment_file_id?: string | null
+          artist_id?: string | null
           attachment_file_id?: string | null
+          committed_cents?: number | null
           created_at?: string
           created_by?: string | null
           deliverable_id?: string | null
           family?: string | null
           family_detail?: string | null
-          invoice_id?: string | null
           id?: string
+          invoice_id?: string | null
           label: string
           lever_id?: string | null
           master_role?: string | null
           note?: string | null
           organization_id: string
-          project_id: string
+          project_id?: string | null
           refusal_reason?: string | null
           refused_at?: string | null
           refused_by?: string | null
           refused_cents?: number | null
+          spent_on?: string
           status?: string
           updated_at?: string
         }
         Update: {
           activation_id?: string | null
-          committed_cents?: number | null
           amount_cents?: number
+          artist_attachment_file_id?: string | null
+          artist_id?: string | null
           attachment_file_id?: string | null
+          committed_cents?: number | null
           created_at?: string
           created_by?: string | null
           deliverable_id?: string | null
           family?: string | null
           family_detail?: string | null
-          invoice_id?: string | null
           id?: string
+          invoice_id?: string | null
           label?: string
           lever_id?: string | null
           master_role?: string | null
           note?: string | null
           organization_id?: string
-          project_id?: string
+          project_id?: string | null
           refusal_reason?: string | null
           refused_at?: string | null
           refused_by?: string | null
           refused_cents?: number | null
+          spent_on?: string
           status?: string
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "budget_lines_invoice_id_fkey"
-            columns: ["invoice_id"]
+            foreignKeyName: "budget_lines_activation_same_org"
+            columns: ["activation_id", "organization_id"]
             isOneToOne: false
-            referencedRelation: "project_invoices"
+            referencedRelation: "marketing_activations"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "budget_lines_activation_same_org"
+            columns: ["activation_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_review_activations"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "budget_lines_artist_attachment_file_id_fkey"
+            columns: ["artist_attachment_file_id"]
+            isOneToOne: false
+            referencedRelation: "artist_files"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "budget_lines_deliverable_id_fkey"
-            columns: ["deliverable_id"]
+            foreignKeyName: "budget_lines_artist_same_org"
+            columns: ["artist_id", "organization_id"]
             isOneToOne: false
-            referencedRelation: "strategy_deliverables"
-            referencedColumns: ["id"]
+            referencedRelation: "artists"
+            referencedColumns: ["id", "organization_id"]
           },
           {
             foreignKeyName: "budget_lines_attachment_file_id_fkey"
@@ -3190,6 +3213,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "budget_lines_deliverable_id_fkey"
+            columns: ["deliverable_id"]
+            isOneToOne: false
+            referencedRelation: "strategy_deliverables"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_lines_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "project_invoices"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "budget_lines_lever_same_org"
             columns: ["lever_id", "organization_id"]
             isOneToOne: false
@@ -3202,6 +3239,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "budget_lines_refused_by_fkey"
+            columns: ["refused_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
           },
         ]
       }

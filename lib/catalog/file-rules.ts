@@ -29,7 +29,17 @@ export const FILE_BUCKETS = {
 
 export const FILE_CATEGORIES = {
   // « moodboard »: shown on the Identité tab too (retour du 31/10/2026).
-  artist: ["press", "photo", "contract", "audio", "moodboard", "other"],
+  // « receipt »: the proof of an artist's spend (BUD 1), read by the
+  // budget's readers only and kept out of the Files tab (FILES_TAB_CATEGORIES).
+  artist: [
+    "press",
+    "photo",
+    "contract",
+    "audio",
+    "moodboard",
+    "other",
+    "receipt",
+  ],
   // `audio`: a successive audio version of the title, with its audio state
   // (Audio tab); the others are the Files tab's.
   master: ["audio", "stems", "artwork", "contract", "other"],
@@ -42,7 +52,7 @@ export const FILE_CATEGORIES = {
 
 /** Categories offered by the Files tab: audio versions have their own tab. */
 export const FILES_TAB_CATEGORIES = {
-  artist: FILE_CATEGORIES.artist,
+  artist: ["press", "photo", "contract", "audio", "moodboard", "other"],
   master: ["stems", "artwork", "contract", "other"],
   project: FILE_CATEGORIES.project,
   contract: FILE_CATEGORIES.contract,

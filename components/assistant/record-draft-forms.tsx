@@ -210,7 +210,7 @@ export function BudgetLineDraftForm({
     <Loading load={() => loadBudgetLevers(draft.projectId)}>
       {(levers) => (
         <BudgetLineForm
-          projectId={draft.projectId}
+          target={{ kind: "project", id: draft.projectId }}
           line={null}
           initial={draft.values}
           levers={levers}
