@@ -169,7 +169,7 @@ export const projectTitles = {
         "Cette participation n'existe plus ou ne vous est plus visible.",
       exists: "Cet artiste participe déjà à ce titre.",
       mainArtist:
-        "C'est l'artiste principal du projet : il est crédité sur chaque titre sans participation.",
+        "C'est l'artiste principal du projet : il est crédité sur chaque titre sans participation. Pour qu'il participe à un titre, changez d'abord l'artiste principal.",
       artistNotFound: "Cet artiste n'existe plus ou a été archivé.",
       contactNotFound: "Cet interlocuteur n'est pas un contact du Réseau.",
       unchanged: "La participation a déjà ce statut : choisissez-en un autre.",

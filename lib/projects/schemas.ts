@@ -89,6 +89,14 @@ const projectFields = {
   contentMode: optionalEnum(CONTENT_MODES, pe.contentModeRequired),
   contentFormatId: optionalUuid(pe.invalidContentFormat),
   artistId: optionalUuid(pe.invalidArtist),
+  // « Projet collectif » (lot 5 of docs/pds-mic-plan.md): its main artist,
+  // whatever the type, and the selection whose artists it copies.
+  collective: z
+    .string()
+    .optional()
+    .transform((value) => value === "on" || value === "true"),
+  mainArtistId: optionalUuid(pe.invalidMainArtist),
+  selectionId: optionalUuid(pe.selectionNotFound),
   initialContext: z
     .string()
     .trim()
@@ -103,6 +111,8 @@ type Shape = {
   musicFormat: string | null;
   contentMode: string | null;
   contentFormatId: string | null;
+  collective: boolean;
+  mainArtistId: string | null;
 };
 
 // What the type asks for (check_project_shape holds the same rules in SQL):
@@ -123,11 +133,19 @@ function checkShape(data: Shape, ctx: z.RefinementCtx) {
     else if (data.contentMode === "format" && !data.contentFormatId)
       issue("contentFormatId", pe.contentFormatRequired);
   }
+  // A collective is credited to its main artist on every title: never
+  // without one (set_project_main_artist refuses it too).
+  if (data.collective && !data.mainArtistId)
+    issue("mainArtistId", pe.mainArtistRequired);
 }
 
 // What is saved, whatever else the form still holds: the fields of the
-// other type are dropped (the database does the same).
-function normalize<T extends Shape & { artistId: string | null }>(data: T) {
+// other type are dropped (the database does the same). A collective names
+// its main artist instead of a content's artist; any other project has
+// neither main artist nor selection.
+function normalize<
+  T extends Shape & { artistId: string | null; selectionId: string | null },
+>(data: T) {
   const music = data.type === "music_release";
   const content = data.type === "content";
   return {
@@ -136,7 +154,9 @@ function normalize<T extends Shape & { artistId: string | null }>(data: T) {
     musicFormat: music ? data.musicFormat : null,
     contentFormatId:
       content && data.contentMode === "format" ? data.contentFormatId : null,
-    artistId: content ? data.artistId : null,
+    artistId: content && !data.collective ? data.artistId : null,
+    mainArtistId: data.collective ? data.mainArtistId : null,
+    selectionId: data.collective ? data.selectionId : null,
   };
 }
 

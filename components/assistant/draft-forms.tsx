@@ -122,13 +122,18 @@ function withPending(
       return master ? [master.id] : [];
     }),
   ];
+  // A collective's named artist is its main artist (lot 5 of
+  // docs/pds-mic-plan.md).
+  const named = values.collective ? values.mainArtistId : values.artistId;
   const artist =
-    !values.artistId && values.pendingArtist
+    !named && values.pendingArtist
       ? matchByName(lists.artists, values.pendingArtist, (a) => a.name)
       : null;
   return {
     ...values,
     masterIds: [...new Set(masterIds)],
-    artistId: values.artistId ?? artist?.id ?? null,
+    ...(values.collective
+      ? { mainArtistId: values.mainArtistId ?? artist?.id ?? null }
+      : { artistId: values.artistId ?? artist?.id ?? null }),
   };
 }

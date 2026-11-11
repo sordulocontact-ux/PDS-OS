@@ -11,7 +11,9 @@ export type PickerOption = { id: string; label: string; detail?: string };
 
 // Search field + result list (ARIA combobox), shared by the artist and master
 // pickers. Picking adds to the selection kept by the parent; the last row is
-// always the "create" shortcut, so a missing item never blocks the form.
+// the "create" shortcut, so a missing item never blocks the form (none
+// without `onCreate`: what is only picked, a selection of artists in the
+// project form).
 // `suggestedIds`: the only options listed before anything is typed (the
 // people who fit); typing searches them all. The list floats over what is
 // below (a portal popover anchored to the field, as a select's menu), so
@@ -46,8 +48,8 @@ export function SearchPicker({
   options: PickerOption[];
   excludedIds: ReadonlySet<string>;
   onPick: (id: string) => void;
-  onCreate: (query: string) => void | false;
-  createLabel: (query: string) => string;
+  onCreate?: (query: string) => void | false;
+  createLabel?: (query: string) => string;
   noResultLabel: (query: string) => string;
   allSelectedLabel: string;
   suggestedIds?: ReadonlySet<string>;
@@ -94,10 +96,14 @@ export function SearchPicker({
       .slice(0, 8);
   }, [available, query, suggestedIds]);
 
-  // Rows: results, the create shortcut, then « keep the name » once typed.
-  const keepRow = keepName && query.trim() ? results.length + 1 : null;
-  const rowCount = results.length + (keepRow === null ? 1 : 2);
-  const activeIndex = Math.min(active, rowCount - 1);
+  // Rows: results, the create shortcut (with `onCreate`), then « keep the
+  // name » once typed.
+  const createRow = onCreate ? results.length : null;
+  const keepRow =
+    keepName && query.trim() ? results.length + (onCreate ? 1 : 0) : null;
+  const rowCount =
+    results.length + (createRow === null ? 0 : 1) + (keepRow === null ? 0 : 1);
+  const activeIndex = Math.max(0, Math.min(active, rowCount - 1));
 
   function pick(index: number) {
     if (index < results.length) {
@@ -107,7 +113,7 @@ export function SearchPicker({
     } else if (index === keepRow && keepName) {
       keepName.onKeep(query.trim());
       setOpen(false);
-    } else {
+    } else if (index === createRow && onCreate) {
       const created = onCreate(query.trim());
       if (clearOnCreate && created !== false) {
         setQuery("");
@@ -121,15 +127,15 @@ export function SearchPicker({
     if (event.key === "ArrowDown") {
       event.preventDefault();
       setOpen(true);
-      setActive((activeIndex + 1) % rowCount);
+      setActive((activeIndex + 1) % Math.max(rowCount, 1));
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
       setOpen(true);
-      setActive((activeIndex - 1 + rowCount) % rowCount);
+      setActive((activeIndex - 1 + rowCount) % Math.max(rowCount, 1));
     } else if (event.key === "Enter") {
       // Never submits the surrounding form from the search field.
       event.preventDefault();
-      if (open) pick(activeIndex);
+      if (open && rowCount > 0) pick(activeIndex);
       else setOpen(true);
     } else if (event.key === "Escape" && open) {
       event.preventDefault();
@@ -227,24 +233,25 @@ export function SearchPicker({
                 )}
               </li>
             ))}
-            <li
-              id={`${id}-row-${results.length}`}
-              role="option"
-              aria-selected={activeIndex === results.length}
-              onMouseDown={(event) => {
-                event.preventDefault();
-                pick(results.length);
-              }}
-              onMouseEnter={() => setActive(results.length)}
-              className={cn(
-                "flex min-h-11 cursor-pointer items-center gap-2 border-t border-[color:var(--border-hairline)] px-3 text-sm font-medium",
-                activeIndex === results.length &&
-                  "bg-[var(--control-bg-hover)]",
-              )}
-            >
-              <IconPlus className="size-4" aria-hidden />
-              {createLabel(query.trim())}
-            </li>
+            {createRow !== null && createLabel && (
+              <li
+                id={`${id}-row-${createRow}`}
+                role="option"
+                aria-selected={activeIndex === createRow}
+                onMouseDown={(event) => {
+                  event.preventDefault();
+                  pick(createRow);
+                }}
+                onMouseEnter={() => setActive(createRow)}
+                className={cn(
+                  "flex min-h-11 cursor-pointer items-center gap-2 border-t border-[color:var(--border-hairline)] px-3 text-sm font-medium",
+                  activeIndex === createRow && "bg-[var(--control-bg-hover)]",
+                )}
+              >
+                <IconPlus className="size-4" aria-hidden />
+                {createLabel(query.trim())}
+              </li>
+            )}
             {keepRow !== null && keepName && (
               <li
                 id={`${id}-row-${keepRow}`}

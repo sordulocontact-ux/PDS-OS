@@ -8,7 +8,11 @@ import { databaseErrorMessage } from "@/lib/auth/errors";
 import { routes } from "@/lib/auth/redirects";
 import { parseForm, retainedValues } from "@/lib/auth/schemas";
 import { fr } from "@/lib/i18n/fr";
-import { foreignKeyError, shapeError } from "@/lib/projects/errors";
+import {
+  collectiveError,
+  foreignKeyError,
+  shapeError,
+} from "@/lib/projects/errors";
 import { updateProjectSchema } from "@/lib/projects/schemas";
 import type { CreateProjectState } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
@@ -49,13 +53,19 @@ export async function updateProject(
     p_initial_context: input.initialContext ?? undefined,
     p_music_format: input.musicFormat ?? undefined,
     p_content_format_id: input.contentFormatId ?? undefined,
-    p_artist_id: input.artistId ?? undefined,
+    // A collective's main artist (lot 5 of docs/pds-mic-plan.md): changed
+    // through set_project_main_artist by update_project, never erased.
+    p_artist_id:
+      (input.collective ? input.mainArtistId : input.artistId) ?? undefined,
   });
 
   if (error) {
     const pe = fr.shell.newProject.errors;
     const shape = shapeError(error.message);
     if (shape) return { status: "error", ...shape, values };
+    const collective = input.collective ? collectiveError(error) : null;
+    if (collective?.fieldErrors)
+      return { status: "error", fieldErrors: collective.fieldErrors, values };
     // A collective's titles are abandoned, never unlinked (lot 2 of
     // docs/pds-mic-plan.md).
     if (error.message.includes("collective_title_kept")) {

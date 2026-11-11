@@ -39,7 +39,11 @@ export async function loadProjectEdit(
       musicFormat: project.musicFormat,
       contentMode: contentModeOf(project),
       contentFormatId: project.contentFormat?.id ?? null,
-      artistId: project.artistId,
+      // A collective names its main artist in its own field (lot 5 of
+      // docs/pds-mic-plan.md), the content's « Artiste » stays empty.
+      artistId: project.collective ? null : project.artistId,
+      collective: project.collective,
+      mainArtistId: project.collective ? project.artistId : null,
       masterIds: project.masters.map((m) => m.id),
       dueDate: project.dueDate ?? "",
       budget: centsToEuros(project.budgetCents),

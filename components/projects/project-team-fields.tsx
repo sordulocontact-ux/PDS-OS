@@ -16,10 +16,16 @@ const fr = { shell };
 // the team changes by transmission afterwards. Creative direction optional.
 // With a Master (`withMasterValidator`), who validates its versions, among
 // the people chosen above, the manager by default (retour d'Ibé, 02/11/2026).
+// A collective (lot 5 of docs/pds-mic-plan.md): the holder of the selection
+// chosen is proposed (`suggestedManagerId`) until a manager is picked by
+// hand; `self` = the holder converting her own selection runs the project,
+// no one else can be chosen.
 export function ProjectTeamFields({
   managers,
   creatives,
   defaultManagerId,
+  suggestedManagerId = null,
+  self = null,
   defaultCreativeIds,
   withMasterValidator,
   defaultMasterValidatorId,
@@ -28,25 +34,46 @@ export function ProjectTeamFields({
   managers: CreativeMember[];
   creatives: CreativeMember[];
   defaultManagerId: string | null;
+  suggestedManagerId?: string | null;
+  self?: { personId: string; name: string } | null;
   defaultCreativeIds: string[];
   withMasterValidator: boolean;
   defaultMasterValidatorId: string | null;
   errors: FieldErrors;
 }) {
   const t = fr.shell.newProject.fields;
-  const [managerId, setManagerId] = useState(defaultManagerId);
+  const c = fr.shell.newProject.collective;
+  const initialManager = self?.personId ?? defaultManagerId;
+  const [managerId, setManagerId] = useState(initialManager);
+  // What the menu opens on: the default, then the holder proposed, until a
+  // manager is picked by hand.
+  const [managerDefault, setManagerDefault] = useState(initialManager);
+  const [picked, setPicked] = useState(false);
+  const [suggested, setSuggested] = useState(suggestedManagerId);
   const [creativeIds, setCreativeIds] = useState(defaultCreativeIds);
   const [validatorId, setValidatorId] = useState(defaultMasterValidatorId);
   const managerItems = Object.fromEntries(
     managers.map((person) => [person.personId, person.name]),
   );
+  if (suggestedManagerId !== suggested) {
+    setSuggested(suggestedManagerId);
+    if (
+      !picked &&
+      !self &&
+      suggestedManagerId &&
+      managerItems[suggestedManagerId]
+    ) {
+      setManagerId(suggestedManagerId);
+      setManagerDefault(suggestedManagerId);
+    }
+  }
   const creativeItems = Object.fromEntries(
     creatives.map((person) => [person.personId, person.name]),
   );
   // The manager first, then the creative directors in the order picked.
   const validatorItems: Record<string, string> = {};
-  if (managerId && managerItems[managerId])
-    validatorItems[managerId] = managerItems[managerId];
+  if (managerId && (managerItems[managerId] || self?.personId === managerId))
+    validatorItems[managerId] = managerItems[managerId] ?? self?.name ?? "";
   for (const id of creativeIds)
     if (creativeItems[id] && !validatorItems[id])
       validatorItems[id] = creativeItems[id];
@@ -56,7 +83,14 @@ export function ProjectTeamFields({
 
   return (
     <>
-      {managers.length === 0 ? (
+      {self ? (
+        <div className="flex flex-col gap-1.5">
+          <span className="text-sm leading-none font-medium">{t.manager}</span>
+          <p className="text-sm font-medium">{c.managerSelf}</p>
+          <p className="text-xs text-muted-foreground">{c.managerSelfHint}</p>
+          <input type="hidden" name="assigneePersonId" value={self.personId} />
+        </div>
+      ) : managers.length === 0 ? (
         <FormMessage kind="error">{t.managerNone}</FormMessage>
       ) : (
         <OptionSelect
@@ -66,8 +100,11 @@ export function ProjectTeamFields({
           required
           placeholder={t.managerPlaceholder}
           items={managerItems}
-          defaultValue={defaultManagerId}
-          onValueChange={setManagerId}
+          defaultValue={managerDefault}
+          onValueChange={(value) => {
+            setManagerId(value);
+            setPicked(true);
+          }}
           error={errors.assigneePersonId}
         />
       )}

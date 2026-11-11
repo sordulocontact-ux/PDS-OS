@@ -5,6 +5,7 @@ import { trackedCache } from "@/lib/projects/live-deps";
 import { signArtistPictures } from "@/lib/catalog/pictures";
 import { catalogIdSchema } from "@/lib/catalog/schemas";
 import { artistRelationOf, type ArtistRelation } from "@/lib/catalog/types";
+import type { SelectionOption } from "@/lib/projects/collective-rules";
 import { personName } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -82,6 +83,36 @@ export async function listSelections(): Promise<{
     })),
     error: false,
   };
+}
+
+const OPTION_SELECT =
+  "id, name, owner_person_id, owner:people!artist_selections_owner_person_id_fkey(first_name, last_name), items:artist_selection_items!artist_selection_items_selection_same_org(position, artist:artists!artist_selection_items_artist_same_org(id, name, archived_at))";
+
+/** The live selections as the project form offers them (lot 5): their
+ * holder and live artists in order, by name. */
+export async function listSelectionOptions(): Promise<SelectionOption[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("artist_selections")
+    .select(OPTION_SELECT)
+    .is("archived_at", null)
+    .order("name");
+  if (error) {
+    console.error("listSelectionOptions:", error.message);
+    return [];
+  }
+  return data.map((row) => ({
+    id: row.id,
+    name: row.name,
+    holder: { personId: row.owner_person_id, name: nameOf(row.owner) ?? "" },
+    artists: [...row.items]
+      .sort((a, b) => a.position - b.position)
+      .flatMap((item) =>
+        item.artist && !item.artist.archived_at
+          ? [{ id: item.artist.id, name: item.artist.name }]
+          : [],
+      ),
+  }));
 }
 
 const DETAIL_SELECT =

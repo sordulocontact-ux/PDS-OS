@@ -18,19 +18,30 @@ const fr = { shell };
 
 // The PDS format a content project is an edition of ("PDS Mic"). Formats
 // are data: a missing one is created here, in a modal, and selected.
+// `selectedId` + `onSelect`: the form sets it itself (the PDS Mic model of a
+// collective, lot 5 of docs/pds-mic-plan.md).
 export function ContentFormatField({
   formats,
   defaultSelectedId,
+  selectedId: controlledId,
+  onSelect,
   error,
 }: {
   formats: ContentFormatOption[];
   defaultSelectedId: string | null;
+  selectedId?: string | null;
+  onSelect?: (id: string | null) => void;
   error?: string;
 }) {
   const t = fr.shell.newProject;
   const p = t.contentFormatPicker;
   const [created, setCreated] = useState<ContentFormatOption[]>([]);
-  const [selectedId, setSelectedId] = useState(defaultSelectedId);
+  const [ownId, setOwnId] = useState(defaultSelectedId);
+  const selectedId = controlledId !== undefined ? controlledId : ownId;
+  const setSelectedId = (id: string | null) => {
+    setOwnId(id);
+    onSelect?.(id);
+  };
   const [creating, setCreating] = useState<string | null>(null);
 
   const options = useMemo(() => {

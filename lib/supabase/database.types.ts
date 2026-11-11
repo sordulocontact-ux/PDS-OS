@@ -19279,6 +19279,26 @@ export type Database = {
         Args: { p_artist_ids?: string[]; p_name: string; p_organization_id: string }
         Returns: string
       }
+      create_collective_project: {
+        Args: {
+          p_assignee_person_id: string
+          p_budget_cents?: number
+          p_content_format_id?: string
+          p_creative_person_ids?: string[]
+          p_due_date?: string
+          p_initial_context?: string
+          p_main_artist_id: string
+          p_master_ids?: string[]
+          p_master_validator_person_id?: string
+          p_music_format?: string
+          p_organization_id: string
+          p_priority?: string
+          p_selection_id?: string
+          p_title: string
+          p_type: string
+        }
+        Returns: string
+      }
       list_selection_recipients: {
         Args: { p_organization_id: string }
         Returns: {

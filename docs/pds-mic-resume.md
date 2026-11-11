@@ -1,7 +1,7 @@
 # Projet collectif (PDS Mic) : résumé
 
 Résumé de travail de `docs/pds-mic-plan.md` (qui fait foi en cas de doute). Mis à jour à la fin
-de chaque lot. Dernière mise à jour : 11/11/2026, après le lot 4 (validé et commité).
+de chaque lot. Dernière mise à jour : 11/11/2026, après le lot 5 (commité, pas encore poussé).
 
 **Module Business fait en parallèle par un collègue** : rôle Business manager, négociation, deal
 memo, contrats, contacts privés, mails. Ces lots n'y touchent pas ; son dossier de négociation
@@ -38,7 +38,7 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
 | Lot | Contenu | État |
 | --- | --- | --- |
 | 1 – 4 | Drapeau et artiste principal ; titres, abandon, réactivation ; participations artiste ; sélections d'artistes | faits |
-| 5 | Création d'un collectif depuis une sélection | à faire |
+| 5 | Création d'un collectif (formulaire, depuis une sélection, PO) | fait (commité, pas poussé) |
 | 6 – 7 | Vue Titres et artistes ; titre provisoire (voie A) | à faire |
 | 8 – 9 | Master : sélecteur de titre ; vue consolidée, abandonnés hors des comptes | à faire |
 | 10 – 12 | Ciblage marketing par titre ; suivi juridique par participation ; contrat manquant, verrou du tournage | à faire |
@@ -70,9 +70,27 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
   Aucun projet créé. Code : `lib/catalog/selections.ts`, `selection-actions.ts`,
   `components/catalog/selections/` (dans « Ajouter des artistes », la liste ne s'ouvre qu'au
   clic ou à la frappe : `SearchPicker openOnFocus={false}`).
-- Tests : `collective-projects`, `project-titles`, `title-participations`, `artist-selections`.
-- À savoir pour le lot 5 : créer un projet demande `create_projects` (direction seule) ; une
-  cheffe de projet responsable d'une sélection ne peut pas la convertir sans changer ce droit.
+- **Lot 5** (`235101_collective_project_creation`) : `create_collective_project` (collectif dès la
+  création, artiste principal obligatoire ; sélection copiée : un titre sans nom `planned` + une
+  participation `proposed` featuring par artiste vivant, l'artiste principal écarté, aucun lien
+  gardé). Droit : `create_projects`, **ou la responsable de la sélection avec `manage_catalog`**
+  (sans `create_projects` pour le reste) : elle est alors la cheffe de projet, seule possible,
+  projet accepté et lancé aussitôt. `update_project` n'efface plus l'artiste principal (changé par
+  `set_project_main_artist`, absent = gardé). **L'artiste principal n'est jamais invité du projet** :
+  `set_project_main_artist` refuse un artiste qui a une participation ni refusée ni retirée sur un
+  titre du projet, même abandonné (`main_artist_is_guest`) ; une participation refusée ou retirée
+  ne bloque pas (on retire la participation, puis on en fait l'artiste principal), et
+  `set_title_participation_status` ne la remet pas en proposée / invitée / confirmée tant que
+  l'artiste est principal (`main_artist_not_participant`). Code : `lib/projects/collective-rules.ts` (PDS =
+  l'artiste nommé comme l'organisation, modèle = format « PDS Mic » trouvé par son nom),
+  `collective-context.ts`, `components/projects/collective-fields.tsx` ; page
+  `/app/projects/new?selection=…` ; bouton « Créer le projet » de la sélection ; PO
+  `propose_project` (`collective`, `selection`). Le cadrage reste celui du projet.
+- Tests : `collective-projects`, `project-titles`, `title-participations`, `artist-selections`,
+  `collective-project-creation`.
+- **À régler avant de pousser les migrations** : deux migrations portent la version
+  `20261111200101` (`artist_selections`, lot 4, et `budget_artist_lines`, BUD 1). Le lot 5 est en
+  `235101`, après les migrations Deal (`230101`, `231101`).
 
 ## Règles à tenir à chaque lot
 
@@ -85,5 +103,10 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
 - Nouvelle table liée à un projet : RLS forcée, écriture par fonctions, `zz_project_live`, entrée
   dans `delete_project_row`. Calculé, jamais stocké : artistes du projet, état d'un titre, d'un contrat.
 - Rien ne se supprime : un titre s'abandonne, une participation se refuse ou se retire.
+- L'artiste principal n'est jamais invité du projet (participation ni refusée ni retirée), dans un
+  sens comme dans l'autre.
 - Garder verts `project-types` et `visible-project-ids` ; régénérer les types Supabase. Tests sur
-  la base locale seulement.
+  la base locale seulement. (`visible-project-ids` n° 24 échoue déjà avant ces lots : trois
+  politiques du 26/10 et du 05/11 lisent `can_see_project(project_id)`.)
+- Une migration de ces lots vient **après** la dernière migration du module Business et du Budget
+  (numérotation sans doublon).

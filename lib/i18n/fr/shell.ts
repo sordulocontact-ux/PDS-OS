@@ -318,6 +318,47 @@ export const shell = {
       searchLabel: "Rattacher un artiste",
       remove: (name: string) => `Retirer ${name}`,
     },
+    // « Projet collectif » (lot 5 of docs/pds-mic-plan.md): several artists
+    // and titles in one project, PDS Mic as the model.
+    collective: {
+      label: "Projet collectif",
+      hint: "Plusieurs artistes et plusieurs titres dans un seul projet, chacun avec son propre suivi. Le cadrage reste commun au projet.",
+      // A project manager converting the selection handed to her.
+      fromSelection:
+        "Créé depuis votre sélection d'artistes, ce projet est collectif.",
+      // The edit form of a collective: the flag is chosen at creation.
+      kept: "Un projet reste collectif après sa création : son artiste principal est crédité en tête sur chaque titre.",
+      mainArtist: "Artiste principal",
+      mainArtistSearch: "Choisir l'artiste principal",
+      selection: "Sélection d'artistes",
+      selectionSearch: "Choisir une sélection d'artistes",
+      selectionPlaceholder: "Rechercher une sélection…",
+      selectionNoResult: (query: string) =>
+        `Aucune sélection ne s'appelle « ${query} ».`,
+      selectionAllSelected: "Aucune autre sélection.",
+      selectionRemove: (name: string) => `Retirer ${name}`,
+      noSelection:
+        "Aucune sélection d'artistes au Catalogue : vous ajouterez les artistes dans le projet.",
+      // Under the selection chosen: who comes, and how.
+      guests: (count: number) =>
+        count === 1 ? "1 artiste importé" : `${count} artistes importés`,
+      guestsHint:
+        "Chacun reçoit un titre sans nom et une participation proposée. Les titres se nomment ensuite dans le projet, où d'autres s'ajoutent.",
+      mainInSelection: (name: string) =>
+        `${name}, artiste principal, n'est pas ajouté comme invité.`,
+      emptySelection:
+        "Cette sélection n'a aucun artiste : vous les ajouterez dans le projet.",
+      titleFromSelection: (name: string) =>
+        `Repris de la sélection « ${name} », modifiable.`,
+      // The holder converting: she runs the project.
+      managerSelf: "Vous",
+      managerSelfHint:
+        "Pilotage opérationnel : vous menez ce projet, sans transmission.",
+      subtitle:
+        "Un projet collectif créé depuis votre sélection : vous le pilotez, il est lancé dès sa création.",
+      submitHint: "Vous le pilotez : il est lancé dès sa création.",
+      backToSelection: (name: string) => `Retour à ${name}`,
+    },
     // Creating transmits it to the chosen project manager (submitHint).
     submit: "Créer le projet",
     submitting: "Création…",
@@ -372,6 +413,18 @@ export const shell = {
         "Un directeur créatif sélectionné n'est plus disponible. Retirez-le.",
       invalidMasterValidator:
         "Choisissez le chef de projet ou un des directeurs créatifs du projet.",
+      // A collective (lot 5 of docs/pds-mic-plan.md).
+      mainArtistRequired:
+        "Choisissez l'artiste principal : il est crédité en tête sur chaque titre.",
+      invalidMainArtist:
+        "Cet artiste n'est plus disponible. Choisissez-en un autre.",
+      mainArtistIsGuest:
+        "Cet artiste participe à un titre du projet. Retirez sa participation avant d'en faire l'artiste principal.",
+      selectionRequired: "Choisissez une de vos sélections d'artistes.",
+      selectionNotFound:
+        "Cette sélection n'existe plus. Choisissez-en une autre.",
+      notSelectionHolder:
+        "Cette sélection n'est plus à vous : seuls son responsable et la direction en créent le projet.",
     },
   },
 

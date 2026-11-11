@@ -10,21 +10,37 @@ import { routes } from "@/lib/auth/redirects";
 import { parseForm, retainedValues } from "@/lib/auth/schemas";
 import { fr } from "@/lib/i18n/fr";
 import { schedulePendingPushes } from "@/lib/notifications/push";
-import { foreignKeyError, shapeError } from "@/lib/projects/errors";
+import {
+  collectiveError,
+  foreignKeyError,
+  shapeError,
+} from "@/lib/projects/errors";
 import { createProjectSchema } from "@/lib/projects/schemas";
 import type { CreateProjectState } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
 
-// Creates a project in one database call (create_project), with the user's
-// session: RLS (create_projects) and column grants apply. Masters are linked,
-// the project is transmitted to its manager and the creative directors are
-// attached in the same transaction. No stage, no owner until acceptance.
+// Creates a project in one database call, with the user's session: RLS
+// (create_projects) and column grants apply. Masters are linked, the project
+// is transmitted to its manager and the creative directors are attached in
+// the same transaction. No stage, no owner until acceptance. A collective
+// (lot 5 of docs/pds-mic-plan.md) goes through create_collective_project:
+// its main artist, a selection's artists copied as titles and
+// participations; also open to the selection's holder who manages the
+// Catalogue (the database decides), who then runs it, launched at once.
 export async function createProject(
   _previous: CreateProjectState,
   formData: FormData,
 ): Promise<CreateProjectState> {
   const access = await requireApproved();
-  if (!access.organizationId || !can(access, "create_projects")) {
+  const fromSelection =
+    formData.get("collective") === "on" && Boolean(formData.get("selectionId"));
+  if (
+    !access.organizationId ||
+    !(
+      can(access, "create_projects") ||
+      (fromSelection && can(access, "manage_catalog"))
+    )
+  ) {
     return { status: "error", formError: fr.auth.errors.forbidden };
   }
 
@@ -39,9 +55,18 @@ export async function createProject(
     };
   }
   const input = parsed.data;
+  if (!can(access, "create_projects") && !input.selectionId) {
+    return {
+      status: "error",
+      fieldErrors: {
+        selectionId: fr.shell.newProject.errors.selectionRequired,
+      },
+      values,
+    };
+  }
 
   const supabase = await createClient();
-  const { data: projectId, error } = await supabase.rpc("create_project", {
+  const common = {
     p_organization_id: access.organizationId,
     p_title: input.title,
     p_type: input.type,
@@ -50,18 +75,31 @@ export async function createProject(
     p_budget_cents: input.budget ?? undefined,
     p_priority: input.priority ?? undefined,
     p_initial_context: input.initialContext ?? undefined,
-    p_assignee_person_id: input.assigneePersonId,
     p_creative_person_ids: input.creativePersonIds,
     p_music_format: input.musicFormat ?? undefined,
     p_content_format_id: input.contentFormatId ?? undefined,
-    p_artist_id: input.artistId ?? undefined,
     p_master_validator_person_id: input.masterValidatorPersonId ?? undefined,
-  });
+  };
+  const { data: projectId, error } =
+    input.collective && input.mainArtistId
+      ? await supabase.rpc("create_collective_project", {
+          ...common,
+          p_main_artist_id: input.mainArtistId,
+          p_assignee_person_id: input.assigneePersonId,
+          p_selection_id: input.selectionId ?? undefined,
+        })
+      : await supabase.rpc("create_project", {
+          ...common,
+          p_assignee_person_id: input.assigneePersonId,
+          p_artist_id: input.artistId ?? undefined,
+        });
 
   if (error || !projectId) {
     const pe = fr.shell.newProject.errors;
     const shape = shapeError(error?.message);
     if (shape) return { status: "error", ...shape, values };
+    const collective = input.collective ? collectiveError(error) : null;
+    if (collective) return { status: "error", ...collective, values };
     if (error?.message.includes("invalid_assignee")) {
       return {
         status: "error",

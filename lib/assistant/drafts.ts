@@ -81,6 +81,11 @@ export type ProjectDraft = {
     contentMode: ContentMode | null;
     contentFormatId: string | null;
     artistId: string | null;
+    // « Projet collectif » (lot 5 of docs/pds-mic-plan.md): its main artist
+    // and the selection of artists it copies.
+    collective?: boolean;
+    mainArtistId?: string | null;
+    selectionId?: string | null;
     masterIds: string[];
     // Named but not created yet (same answer): picked when the form opens.
     pendingArtist?: string | null;

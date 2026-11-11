@@ -20,6 +20,7 @@ import {
   type SelectionDetail,
 } from "@/lib/catalog/selections";
 import { fr } from "@/lib/i18n/fr";
+import { canConvertSelection } from "@/lib/projects/collective-rules";
 import { allInOrder } from "@/lib/utils/parallel";
 import { formatShortDay } from "@/lib/utils/day";
 
@@ -37,7 +38,8 @@ export async function generateMetadata({
  * A selection of artists (lot 4 of docs/pds-mic-plan.md): its name, who
  * holds it and how it came to them, its artists in order. Read by the whole
  * team; who manages the Catalogue adds and removes artists, hands it over,
- * renames it. No project is made from here yet (lot 5).
+ * renames it. « Créer le projet » (lot 5) opens the project form on it, for
+ * the direction and for its holder, once it has artists.
  */
 export default async function ArtistSelectionPage({
   params,
@@ -58,6 +60,10 @@ export default async function ArtistSelectionPage({
   ]);
   const inSelection = selection.artists.map((a) => a.id);
   const empty = selection.artists.length === 0;
+  const createProjectHref =
+    !empty && canConvertSelection(access, selection.holder.personId)
+      ? routes.projectsNewFromSelection(selection.id)
+      : null;
 
   return (
     <PageContainer className="max-w-5xl">
@@ -75,6 +81,7 @@ export default async function ArtistSelectionPage({
               inSelection={inSelection}
               recipients={recipients}
               emptySelection={empty}
+              createProjectHref={createProjectHref}
             />
           ) : null
         }

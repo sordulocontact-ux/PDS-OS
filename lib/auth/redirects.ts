@@ -197,6 +197,10 @@ export const routes = {
   // Creation form with this master already linked (from the master page).
   projectsNewFromMaster: (masterId: string) =>
     `/app/projects/new?master=${masterId}`,
+  // A collective made from this selection of artists (lot 5 of
+  // docs/pds-mic-plan.md): from the selection's page.
+  projectsNewFromSelection: (selectionId: string) =>
+    `/app/projects/new?selection=${selectionId}`,
   project: (id: string) => `/app/projects/${id}`,
   // The Cadrage's entry: it opens the step that waits for the viewer.
   projectFraming: (id: string) => `/app/projects/${id}/framing`,

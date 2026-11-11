@@ -1,10 +1,13 @@
 "use server";
 
+import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { getArtist } from "@/lib/catalog/artist-queries";
 import type { ArtistDetail } from "@/lib/catalog/artist-types";
 import { listArtistOptions, listMasterOptions } from "@/lib/catalog/queries";
 import type { ArtistOption, MasterOption } from "@/lib/catalog/types";
+import { loadCollectiveContext } from "@/lib/projects/collective-context";
+import type { CollectiveContext } from "@/lib/projects/collective-rules";
 import type { CreativeMember } from "@/lib/projects/creatives";
 import { listCreativePeople } from "@/lib/projects/creatives";
 import { listContentFormats } from "@/lib/projects/content-formats";
@@ -32,6 +35,9 @@ export async function loadProjectForm(): Promise<{
   managers: CreativeMember[];
   creatives: CreativeMember[];
   contentFormats: ContentFormatOption[];
+  // « Projet collectif » (lot 5 of docs/pds-mic-plan.md), for who creates
+  // projects (PO proposes a project to them only).
+  collectiveContext: CollectiveContext | null;
 }> {
   const access = await requireApproved();
   const organizationId = access.organizationId;
@@ -43,5 +49,15 @@ export async function loadProjectForm(): Promise<{
       organizationId ? listCreativePeople(organizationId) : [],
       listContentFormats(),
     ]);
-  return { masters, artists, managers, creatives, contentFormats };
+  const collectiveContext = can(access, "create_projects")
+    ? await loadCollectiveContext(access, artists, contentFormats)
+    : null;
+  return {
+    masters,
+    artists,
+    managers,
+    creatives,
+    contentFormats,
+    collectiveContext,
+  };
 }

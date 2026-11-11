@@ -24,6 +24,8 @@ import { routes } from "@/lib/auth/redirects";
 import { listArtistOptions, listMasterOptions } from "@/lib/catalog/queries";
 import { masterLabel } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
+import { loadCollectiveContext } from "@/lib/projects/collective-context";
+import { selectionGuests } from "@/lib/projects/collective-rules";
 import { listContentFormats } from "@/lib/projects/content-formats";
 import { listCreativePeople } from "@/lib/projects/creatives";
 import { projectKindLabel } from "@/lib/projects/labels";
@@ -49,7 +51,7 @@ const said = (what: string) =>
 export function proposeProjectTool({ access, verbatim }: ProposeContext) {
   return tool({
     description:
-      "Prépare la création d'un projet, ou la modification d'un projet pas encore lancé : titre, type (music_release = musical, content = contenu ; pas d'événement ni de partenariat), format musical et masters du catalogue pour un projet musical, format PDS existant (PDS Mic…) et artiste facultatif pour un contenu, chef de projet et direction créative (création seulement), échéance, budget, priorité, contexte initial. N'enregistre RIEN : l'utilisateur relit le formulaire pré-rempli et enregistre lui-même.",
+      "Prépare la création d'un projet, ou la modification d'un projet pas encore lancé : titre, type (music_release = musical, content = contenu ; pas d'événement ni de partenariat), format musical et masters du catalogue pour un projet musical, format PDS existant (PDS Mic…) et artiste facultatif pour un contenu, projet collectif (plusieurs artistes et plusieurs titres dans un seul projet, modèle PDS Mic : artiste principal, PDS par défaut, et sélection d'artistes à importer ; création seulement), chef de projet et direction créative (création seulement), échéance, budget, priorité, contexte initial. N'enregistre RIEN : l'utilisateur relit le formulaire pré-rempli et enregistre lui-même.",
     inputSchema: z.object({
       existingProject: z
         .string()
@@ -59,7 +61,12 @@ export function proposeProjectTool({ access, verbatim }: ProposeContext) {
           "Titre du projet existant à modifier ; absent pour en créer un",
         ),
       title: z.string().max(200).optional(),
-      type: z.enum(CREATABLE_PROJECT_TYPES).optional(),
+      type: z
+        .enum(CREATABLE_PROJECT_TYPES)
+        .optional()
+        .describe(
+          "Type, seulement s'il est dit ; absent pour un projet collectif sur le modèle PDS Mic (un contenu, choisi d'office)",
+        ),
       musicFormat: z
         .enum(MUSIC_FORMATS)
         .optional()
@@ -69,13 +76,28 @@ export function proposeProjectTool({ access, verbatim }: ProposeContext) {
         .max(120)
         .optional()
         .describe(
-          "Nom du format PDS existant d'un contenu ; absent pour un contenu ponctuel",
+          "Nom du format PDS existant d'un contenu ; absent pour un contenu ponctuel, et pour un projet collectif sur le modèle PDS Mic (choisi d'office). Jamais le nom d'une sélection d'artistes",
         ),
       artist: z
         .string()
         .max(200)
         .optional()
-        .describe("Artiste d'un contenu, s'il en concerne un"),
+        .describe(
+          "Artiste d'un contenu, s'il en concerne un ; pour un projet collectif, son artiste principal (PDS si rien n'est dit)",
+        ),
+      collective: z
+        .boolean()
+        .optional()
+        .describe(
+          "Projet collectif (modèle PDS Mic) : plusieurs artistes et plusieurs titres dans un seul projet, chacun avec son suivi ; jamais un projet par artiste",
+        ),
+      selection: z
+        .string()
+        .max(120)
+        .optional()
+        .describe(
+          "Nom de la sélection d'artistes du Catalogue à importer dans un projet collectif (chaque artiste reçoit un titre sans nom et une participation proposée)",
+        ),
       masters: z
         .array(z.string().max(200))
         .max(20)
@@ -130,16 +152,64 @@ export function proposeProjectTool({ access, verbatim }: ProposeContext) {
           };
       }
 
+      // A collective (lot 5 of docs/pds-mic-plan.md) is chosen at creation;
+      // an existing project stays what it is.
+      const wantsCollective =
+        input.collective ?? (input.selection ? true : undefined);
+      if (current && wantsCollective !== undefined) {
+        if (wantsCollective !== current.collective)
+          warnings.push(t.collectiveAtCreation);
+        else if (input.selection) warnings.push(t.selectionAtCreation);
+      }
+      const collective = current
+        ? current.collective
+        : (wantsCollective ?? false);
+
       const [allMasters, formats, artists] = await Promise.all([
         listMasterOptions(),
-        input.contentFormat ? listContentFormats() : [],
-        input.artist ? listArtistOptions() : [],
+        input.contentFormat || collective ? listContentFormats() : [],
+        input.artist || collective ? listArtistOptions() : [],
       ]);
-      const format = input.contentFormat
-        ? findNamed(formats, input.contentFormat, (f) => f.name, warnings)
+      const collectiveContext =
+        collective && !current
+          ? await loadCollectiveContext(access, artists, formats)
+          : null;
+      // A selection's name given as the format (seen in tests, 11/11/2026:
+      // « PDS MIC #7 · hiver » read as the format « PDS Mic »): it is the
+      // selection, never a format; the model's format applies.
+      const sameName = (a: string, b: string) =>
+        a
+          .normalize("NFD")
+          .replace(/\p{Diacritic}/gu, "")
+          .trim()
+          .toLowerCase() ===
+        b
+          .normalize("NFD")
+          .replace(/\p{Diacritic}/gu, "")
+          .trim()
+          .toLowerCase();
+      const formatIsSelection = Boolean(
+        input.contentFormat &&
+        ((input.selection && sameName(input.contentFormat, input.selection)) ||
+          collectiveContext?.selections.some((s) =>
+            sameName(s.name, input.contentFormat ?? ""),
+          )),
+      );
+      const saidFormat = formatIsSelection ? undefined : input.contentFormat;
+      const saidSelection =
+        input.selection ??
+        (formatIsSelection ? input.contentFormat : undefined);
+      const namedFormat = saidFormat
+        ? findNamed(formats, saidFormat, (f) => f.name, warnings)
         : null;
-      if (input.contentFormat && !format)
-        warnings.push(t.unknownFormat(input.contentFormat));
+      // A new collective starts from the PDS Mic model unless told otherwise.
+      const modelFormatId = collectiveContext?.modelFormatId ?? null;
+      const format =
+        namedFormat ??
+        (modelFormatId && !saidFormat && (input.type ?? "content") === "content"
+          ? (formats.find((f) => f.id === modelFormatId) ?? null)
+          : null);
+      if (saidFormat && !format) warnings.push(t.unknownFormat(saidFormat));
       const artist = input.artist
         ? findNamed(artists, input.artist, (a) => a.name, warnings)
         : null;
@@ -164,6 +234,24 @@ export function proposeProjectTool({ access, verbatim }: ProposeContext) {
         });
       }
 
+      const selection = saidSelection
+        ? findNamed(
+            collectiveContext?.selections ?? [],
+            saidSelection,
+            (s) => s.name,
+            warnings,
+          )
+        : null;
+      if (saidSelection && !current && !selection)
+        warnings.push(t.unknownSelection(saidSelection));
+      const mainArtistId = collective
+        ? (artist?.id ??
+          current?.artistId ??
+          (pendingArtist ? null : (collectiveContext?.houseArtistId ?? null)))
+        : null;
+      if (collective && !mainArtistId && !pendingArtist)
+        warnings.push(t.noMainArtist);
+
       let assigneePersonId: string | null = null;
       let creativePersonIds: string[] = [];
       if (current && (input.manager || input.creatives?.length)) {
@@ -182,6 +270,12 @@ export function proposeProjectTool({ access, verbatim }: ProposeContext) {
           );
           if (!found) warnings.push(t.unknownPerson(input.manager));
           assigneePersonId = found?.personId ?? null;
+        } else if (selection) {
+          // The selection's holder runs it, when they may (the form's rule).
+          const holder = (await listAssignablePeople(organizationId)).find(
+            (p) => p.personId === selection.holder.personId,
+          );
+          assigneePersonId = holder?.personId ?? null;
         }
         creativePersonIds = (input.creatives ?? []).flatMap((name) => {
           const found = findNamed(creatives, name, (p) => p.name, warnings);
@@ -203,10 +297,11 @@ export function proposeProjectTool({ access, verbatim }: ProposeContext) {
         warnings.push(t.notSaid(labels.budget));
 
       const currentBudget = centsToEuros(current?.budgetCents ?? null);
-      const type = input.type ?? current?.type ?? null;
+      const type =
+        input.type ?? current?.type ?? (collective ? "content" : null);
       const contentFormatId = format?.id ?? current?.contentFormat?.id ?? null;
       const values: ProjectDraft["values"] = {
-        title: input.title?.trim() || current?.title || "",
+        title: input.title?.trim() || current?.title || selection?.name || "",
         type,
         musicFormat: input.musicFormat ?? current?.musicFormat ?? null,
         contentMode:
@@ -214,13 +309,16 @@ export function proposeProjectTool({ access, verbatim }: ProposeContext) {
             ? null
             : contentFormatId
               ? "format"
-              : input.contentFormat
+              : saidFormat
                 ? "format"
                 : current
                   ? contentModeOf(current)
                   : null,
         contentFormatId,
-        artistId: artist?.id ?? current?.artistId ?? null,
+        artistId: collective ? null : (artist?.id ?? current?.artistId ?? null),
+        collective,
+        mainArtistId,
+        selectionId: current ? null : (selection?.id ?? null),
         masterIds: [...new Set(masters.map((m) => m.id))],
         pendingArtist,
         pendingMasters,
@@ -267,9 +365,28 @@ export function proposeProjectTool({ access, verbatim }: ProposeContext) {
           : null,
         kindLabel(values),
       );
-      if (artist) change(changes, labels.artist, null, artist.name);
+      const c = fr.shell.newProject.collective;
+      if (collective && !current)
+        change(changes, c.label, null, t.collectiveYes);
+      const artistLabel = collective ? c.mainArtist : labels.artist;
+      const mainArtist = collective
+        ? artists.find((a) => a.id === mainArtistId)
+        : null;
+      if (artist) change(changes, artistLabel, null, artist.name);
       else if (pendingArtist)
-        change(changes, labels.artist, null, t.toCreate(pendingArtist));
+        change(changes, artistLabel, null, t.toCreate(pendingArtist));
+      else if (mainArtist && !current)
+        change(changes, artistLabel, null, mainArtist.name);
+      if (selection)
+        change(
+          changes,
+          c.selection,
+          null,
+          t.selectionGuests(
+            selection.name,
+            selectionGuests(selection, mainArtistId).guests.length,
+          ),
+        );
       change(
         changes,
         labels.masters,

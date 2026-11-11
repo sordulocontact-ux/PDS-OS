@@ -1,13 +1,14 @@
 "use client";
 
 import { IconPenWriting2, IconPlus } from "nucleo-sharp-essential";
+import Link from "next/link";
 import { useState } from "react";
 
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { ArtistChoiceField } from "@/components/catalog/selections/artist-choice-field";
 import { OptionSelect } from "@/components/projects/option-select";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { FormDialog } from "@/components/ui/form-dialog";
@@ -31,6 +32,9 @@ type Person = { personId: string; name: string };
  * (lot 4 of docs/pds-mic-plan.md): « Ajouter des artistes » (the main one),
  * « Transmettre » (to a member who manages the Catalogue, never its
  * holder), and « Renommer » in the « ⋯ ». Each asks a saisie: a modal.
+ * Lot 5: « Créer le projet » (`createProjectHref`, the direction and its
+ * holder, once it has artists) opens the project form on this selection;
+ * it is then the main gesture, « Ajouter des artistes » in outline.
  */
 export function SelectionActions({
   selectionId,
@@ -40,6 +44,7 @@ export function SelectionActions({
   inSelection,
   recipients,
   emptySelection,
+  createProjectHref = null,
 }: {
   selectionId: string;
   name: string;
@@ -50,16 +55,26 @@ export function SelectionActions({
   recipients: Person[];
   // No artist yet: « Ajouter des artistes » is in the empty state instead.
   emptySelection: boolean;
+  createProjectHref?: string | null;
 }) {
   const t = fr.artistSelections;
   const [renaming, setRenaming] = useState(false);
   return (
     <div className="flex flex-wrap items-center gap-2">
+      {createProjectHref && (
+        <Link
+          href={createProjectHref}
+          className={buttonVariants({ variant: "default", size: "lg" })}
+        >
+          <ButtonRoll>{t.createProject}</ButtonRoll>
+        </Link>
+      )}
       {!emptySelection && (
         <AddArtistsButton
           selectionId={selectionId}
           artists={artists}
           inSelection={inSelection}
+          variant={createProjectHref ? "outline" : "default"}
         />
       )}
       <DialogButton
@@ -114,17 +129,20 @@ export function AddArtistsButton({
   selectionId,
   artists,
   inSelection,
+  variant = "default",
 }: {
   selectionId: string;
   artists: ArtistOption[];
   inSelection: string[];
+  // Outline next to « Créer le projet » (one main gesture per head).
+  variant?: "default" | "outline";
 }) {
   const t = fr.artistSelections.add;
   return (
     <DialogButton
       label={t.button}
       icon={IconPlus}
-      variant="default"
+      variant={variant}
       size="lg"
       title={t.title}
       description={t.description}

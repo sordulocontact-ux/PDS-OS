@@ -50,8 +50,9 @@ export function SinglePicker({
   onSelect: (id: string | null) => void;
   searchLabel: string;
   placeholder: string;
-  onCreate: (query: string) => void;
-  createLabel: (query: string) => string;
+  // Without it, no « create » row: only picked (a selection of artists).
+  onCreate?: (query: string) => void;
+  createLabel?: (query: string) => string;
   noResultLabel: (query: string) => string;
   allSelectedLabel: string;
   suggestedIds?: ReadonlySet<string>;
@@ -69,6 +70,9 @@ export function SinglePicker({
     <div
       role="group"
       aria-labelledby={`${id}-label`}
+      // A chosen value refused: the reason read with the group (the search
+      // carries it otherwise).
+      aria-describedby={selected && error ? `${id}-error` : undefined}
       className="flex flex-col gap-1.5"
     >
       <span
@@ -85,7 +89,8 @@ export function SinglePicker({
       {selected ? (
         <div
           className={cn(
-            "flex items-center gap-2 rounded-lg border border-border bg-card py-1.5 pr-1.5 pl-3",
+            "flex items-center gap-2 rounded-lg border bg-card py-1.5 pr-1.5 pl-3",
+            error ? "border-error" : "border-border",
             !hideLegend && "mt-1",
           )}
         >

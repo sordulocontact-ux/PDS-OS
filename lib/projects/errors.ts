@@ -24,6 +24,28 @@ export function shapeError(
   return null;
 }
 
+// Refusals proper to a collective (create_collective_project,
+// set_project_main_artist through update_project; lot 5 of
+// docs/pds-mic-plan.md). null: not one of them.
+export function collectiveError(
+  error: { code?: string; message?: string } | null,
+): { fieldErrors?: FieldErrors; formError?: string } | null {
+  const message = error?.message ?? "";
+  // Main and guest of the project at once, never.
+  if (message.includes("main_artist_is_guest"))
+    return { fieldErrors: { mainArtistId: pe.mainArtistIsGuest } };
+  if (message.includes("artist_required"))
+    return { fieldErrors: { mainArtistId: pe.mainArtistRequired } };
+  if (message.includes("artist_not_found"))
+    return { fieldErrors: { mainArtistId: pe.invalidMainArtist } };
+  if (message.includes("selection_not_found"))
+    return { fieldErrors: { selectionId: pe.selectionNotFound } };
+  // The selection changed hands meanwhile (or was never theirs).
+  if (message.includes("assignee_not_self") || error?.code === "42501")
+    return { formError: pe.notSelectionHolder };
+  return null;
+}
+
 // A foreign key refused: which link is gone, read from its constraint name.
 export function foreignKeyError(error: {
   message?: string;

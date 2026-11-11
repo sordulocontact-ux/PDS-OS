@@ -10,7 +10,10 @@ import { SubmitButton } from "@/components/auth/submit-button";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { ProjectCoverField } from "@/components/projects/project-cover-field";
 import { ProjectDraftControls } from "@/components/projects/project-draft-controls";
-import { ProjectKindFields } from "@/components/projects/project-kind-fields";
+import {
+  ProjectKindFields,
+  type CollectiveMode,
+} from "@/components/projects/project-kind-fields";
 import { ProjectTeamFields } from "@/components/projects/project-team-fields";
 import { useProjectDraft } from "@/components/projects/use-project-draft";
 import { Button, buttonVariants, ButtonRoll } from "@/components/ui/button";
@@ -19,6 +22,7 @@ import { FormSection } from "@/components/ui/form-section";
 import { toast } from "@/components/ui/toast";
 import { routes } from "@/lib/auth/redirects";
 import type { ArtistOption, MasterOption } from "@/lib/catalog/types";
+import type { CollectiveContext } from "@/lib/projects/collective-rules";
 import { projectShell } from "@/lib/i18n/fr/project-shell";
 import { shell } from "@/lib/i18n/fr/shell";
 import { createProject } from "@/lib/projects/actions";
@@ -44,6 +48,10 @@ export type ProjectFormDefaults = {
   contentMode?: ContentMode | null;
   contentFormatId?: string | null;
   artistId?: string | null;
+  // « Projet collectif » (lot 5 of docs/pds-mic-plan.md).
+  collective?: boolean;
+  mainArtistId?: string | null;
+  selectionId?: string | null;
   masterIds: string[];
   assigneePersonId?: string | null;
   creativePersonIds?: string[];
@@ -61,7 +69,10 @@ export type ProjectFormDefaults = {
 // With `projectId` it edits a project that is not launched (no team then);
 // with `onSaved` (modal, a PO draft) the page behind stays. Both show
 // the sections without their cards. On the new project page, what is typed
-// is kept as a draft (`draftId`: the one being resumed).
+// is kept as a draft (`draftId`: the one being resumed). `collectiveContext`
+// offers « Projet collectif » (lot 5 of docs/pds-mic-plan.md); with its
+// `holder`, the project is made from the viewer's selection and run by them
+// (no draft: drafts belong to who creates projects).
 export function CreateProjectForm({
   masters,
   artists,
@@ -74,6 +85,8 @@ export function CreateProjectForm({
   onSaved,
   onCancel,
   organizationId,
+  collectiveContext = null,
+  cancelHref = routes.projects,
 }: {
   masters: MasterOption[];
   artists: ArtistOption[];
@@ -88,6 +101,9 @@ export function CreateProjectForm({
   // Given on the creation page: the « Pochette » field, filed once the
   // project exists (storage path « <organization>/<project>/… »).
   organizationId?: string;
+  collectiveContext?: CollectiveContext | null;
+  // Where « Annuler » leads (the selection the project is made from).
+  cancelHref?: string;
 }) {
   const t = fr.shell.newProject;
   const [state, action] = useActionState(
@@ -98,12 +114,35 @@ export function CreateProjectForm({
   const errors = state.status === "error" ? (state.fieldErrors ?? {}) : {};
   const [type, setType] = useState<ProjectType | null>(defaults.type);
   const [priority, setPriority] = useState(defaults.priority ?? null);
+  const holder = projectId ? null : (collectiveContext?.holder ?? null);
+  const collectiveMode: CollectiveMode | null = projectId
+    ? defaults.collective
+      ? "fixed"
+      : null
+    : holder
+      ? "holder"
+      : collectiveContext
+        ? "choose"
+        : null;
+  const [collective, setCollective] = useState(
+    Boolean(defaults.collective) || collectiveMode === "holder",
+  );
+  const [selectionId, setSelectionId] = useState(defaults.selectionId ?? null);
+  const selection =
+    collectiveContext?.selections.find((s) => s.id === selectionId) ?? null;
   // The project's name takes the title of its only title (UX test of
-  // 09/10/2026, « Titre du projet non repris du titre rattaché »), as long
-  // as nobody typed another one.
+  // 09/10/2026, « Titre du projet non repris du titre rattaché »), or the
+  // name of the selection it is made from, as long as nobody typed another.
   const [title, setTitle] = useState(values.title ?? defaults.title);
-  const [titleFrom, setTitleFrom] = useState<string | null>(null);
-  const typedTitle = title.trim() !== "" && title !== titleFrom;
+  const [titleFrom, setTitleFrom] = useState<{
+    name: string;
+    from: "master" | "selection";
+  } | null>(
+    selection && defaults.title === selection.name
+      ? { name: selection.name, from: "selection" }
+      : null,
+  );
+  const typedTitle = title.trim() !== "" && title !== titleFrom?.name;
   const [returned, setReturned] = useState(state);
   if (returned !== state) {
     setReturned(state);
@@ -111,8 +150,9 @@ export function CreateProjectForm({
       setTitle(state.values.title);
   }
   const formRef = useRef<HTMLFormElement>(null);
-  const withDraft = !projectId && !onSaved;
-  const plain = !withDraft;
+  const withDraft = !projectId && !onSaved && !holder;
+  // In a modal, the sections lose their cards.
+  const plain = Boolean(projectId) || Boolean(onSaved);
   const draft = useProjectDraft(formRef, resumedDraftId, withDraft);
 
   // A refused creation keeps the form, and its draft, going.
@@ -182,6 +222,7 @@ export function CreateProjectForm({
             contentMode: defaults.contentMode ?? null,
             contentFormatId: defaults.contentFormatId ?? null,
             artistId: defaults.artistId ?? null,
+            mainArtistId: defaults.mainArtistId ?? null,
             masterIds: defaults.masterIds,
           }}
           masters={masters}
@@ -190,9 +231,22 @@ export function CreateProjectForm({
           errors={errors}
           onMastersChange={(chosen) => {
             if (typedTitle) return;
+            // A collective made from a selection keeps the selection's name.
+            if (collective && selection) return;
             const only = chosen.length === 1 ? chosen[0].title : null;
             setTitle(only ?? "");
-            setTitleFrom(only);
+            setTitleFrom(only ? { name: only, from: "master" } : null);
+          }}
+          collective={collective}
+          onCollectiveChange={setCollective}
+          collectiveMode={collectiveMode}
+          collectiveContext={collectiveContext}
+          selectionId={selectionId}
+          onSelectionChange={(next) => {
+            setSelectionId(next?.id ?? null);
+            if (typedTitle) return;
+            setTitle(next?.name ?? "");
+            setTitleFrom(next ? { name: next.name, from: "selection" } : null);
           }}
         />
       </FormSection>
@@ -207,8 +261,10 @@ export function CreateProjectForm({
           value={title}
           onChange={(event) => setTitle(event.target.value)}
           hint={
-            titleFrom && title === titleFrom
-              ? t.fields.titleFromMaster(titleFrom)
+            titleFrom && title === titleFrom.name
+              ? titleFrom.from === "selection"
+                ? t.collective.titleFromSelection(titleFrom.name)
+                : t.fields.titleFromMaster(titleFrom.name)
               : undefined
           }
           error={errors.title}
@@ -266,6 +322,10 @@ export function CreateProjectForm({
             defaultManagerId={
               values.assigneePersonId || defaults.assigneePersonId || null
             }
+            suggestedManagerId={
+              collective ? (selection?.holder.personId ?? null) : null
+            }
+            self={holder}
             defaultCreativeIds={
               values.creativePersonIds
                 ? parseIds(values.creativePersonIds)
@@ -288,7 +348,7 @@ export function CreateProjectForm({
 
       {!projectId && (
         <p className="text-sm text-muted-foreground sm:text-right">
-          {t.submitHint}
+          {holder ? t.collective.submitHint : t.submitHint}
         </p>
       )}
 
@@ -307,7 +367,7 @@ export function CreateProjectForm({
           </Button>
         ) : (
           <Link
-            href={routes.projects}
+            href={cancelHref}
             className={buttonVariants({ variant: "ghost", size: "lg" })}
           >
             <ButtonRoll>{t.cancel}</ButtonRoll>

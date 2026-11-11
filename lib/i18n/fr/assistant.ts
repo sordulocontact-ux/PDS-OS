@@ -303,6 +303,18 @@ export const assistant = {
       "Priorité non reprise : elle doit figurer dans votre message (haute, normale ou basse). Choisissez-la dans le formulaire.",
     teamByTransmission:
       "L'équipe d'un projet déjà créé change par la transmission, pas par cette proposition.",
+    // « Projet collectif » (lot 5 of docs/pds-mic-plan.md).
+    unknownSelection: (name: string) =>
+      `Sélection d'artistes « ${name} » introuvable : choisissez-la dans le formulaire.`,
+    collectiveAtCreation:
+      "Un projet devient collectif à sa création seulement : celui-ci reste tel qu'il est.",
+    selectionAtCreation:
+      "Une sélection d'artistes s'importe à la création du projet : ajoutez les artistes depuis les titres du projet.",
+    noMainArtist:
+      "Artiste principal à choisir dans le formulaire : il est crédité en tête sur chaque titre.",
+    collectiveYes: "Oui",
+    selectionGuests: (name: string, count: number) =>
+      `${name} · ${count === 1 ? "1 artiste" : `${count} artistes`}`,
   },
   // Model context: the page PO was opened from, written by code.
   pageContext: {

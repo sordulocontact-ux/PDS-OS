@@ -78,6 +78,8 @@ export const artistSelections = {
       count === 1 ? "1 artiste ajouté" : `${count} artistes ajoutés`,
     none: "Ces artistes étaient déjà dans la sélection",
   },
+  // Lot 5: the collective project made from the selection (the project form).
+  createProject: "Créer le projet",
   remove: {
     action: "Retirer de la sélection",
     done: "Artiste retiré de la sélection.",
