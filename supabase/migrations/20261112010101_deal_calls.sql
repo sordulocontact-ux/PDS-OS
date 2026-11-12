@@ -31,10 +31,10 @@ alter table public.calls add column deal_id uuid;
 alter table public.calls
   add constraint calls_deal_same_org
     foreign key (deal_id, organization_id) references public.deals (id, organization_id);
--- A deal's call reads its project through the deal; no module purpose.
+-- A deal's call reads its project through the deal.
 alter table public.calls
   add constraint calls_deal_check
-    check (deal_id is null or (project_id is null and purpose is null));
+    check (deal_id is null or project_id is null);
 create index calls_deal_idx on public.calls (deal_id, occurred_at desc) where deal_id is not null;
 -- Chosen when the call is planned, never changed (calls_keep_deal).
 grant insert (deal_id) on public.calls to authenticated;

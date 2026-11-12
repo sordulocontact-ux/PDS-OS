@@ -61,7 +61,7 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
   `project_title_shared_projects` (titres partagés, pour l'avertissement). Code :
   `participation-rules.ts` (`projectArtists`), `participation-actions.ts`. Fiche artiste : ses
   collectifs par participation.
-- **Lot 4** (`232101_artist_selections`) : `artist_selections` (nom, responsable
+- **Lot 4** (`233101_artist_selections`) : `artist_selections` (nom, responsable
   `owner_person_id` = « Mes sélections », transmise par / le) et `artist_selection_items`
   (artistes ordonnés) ; lues par toute l'équipe, écrites par `manage_catalog` ;
   `create_` / `rename_artist_selection`, `add_artists_to_selection`,
@@ -92,8 +92,9 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
 - Tests : `collective-projects`, `project-titles`, `title-participations`, `artist-selections`,
   `collective-project-creation`.
 - **Numérotation** : `artist_selections` (lot 4) portait d'abord la même version que
-  `budget_artist_lines` (BUD 1, `200101`) ; renumérotée `232101`, après les migrations Budget et
-  Deal (`210101`, `230101`, `231101`) et avant le lot 5 (`235101`), qui en dépend. Elle ne
+  `budget_artist_lines` (BUD 1, `200101`), puis la même que `deal_notifications` (`232101`, les
+  deux côtés avaient renuméroté) ; depuis le 12/11 `233101`, après les migrations Budget et Deal
+  (`210101`, `230101`, `231101`, `232101`) et avant le lot 5 (`235101`), qui en dépend. Elle ne
   redéfinit rien de ce qu'elles touchent.
 
 ## Règles à tenir à chaque lot
