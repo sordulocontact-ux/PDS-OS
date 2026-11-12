@@ -89,6 +89,12 @@ export const budget = {
   },
   table: {
     label: "Ligne",
+    // One fact per column (Sacha, 12/11/2026: never two lines of facts).
+    date: "Date",
+    family: "Poste",
+    target: "Projet ou artiste",
+    linkedTo: "Lié à",
+    proof: (name: string) => `Voir le justificatif ${name}`,
     status: "Statut",
     amount: "Montant",
     actions: "Actions",
