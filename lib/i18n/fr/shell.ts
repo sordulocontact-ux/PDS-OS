@@ -364,6 +364,13 @@ export const shell = {
     submit: "Créer le projet",
     submitting: "Création…",
     submitHint: "Il est transmis au chef de projet choisi.",
+    // A refused creation: what is missing, counted beside the button, the
+    // first field in error focused (UX test of 12/11/2026: the message
+    // stood at the top, out of view).
+    missingCount: (count: number) =>
+      count === 1
+        ? "1 champ à corriger, signalé en rouge."
+        : `${count} champs à corriger, signalés en rouge.`,
     // Kept as it is typed (feedback n°6), resumed from this page.
     draft: {
       idle: "Votre saisie est gardée en brouillon : vous pouvez quitter la page et la reprendre ici.",

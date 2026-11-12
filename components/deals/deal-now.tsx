@@ -75,10 +75,14 @@ function TermsRecap({ terms }: { terms: DealTerm[] }) {
 export function DealNow({
   deal,
   terms,
+  proposer = null,
   reopen,
 }: {
   deal: Deal;
   terms: DealTerm[];
+  // Who proposed the accord (its last stage event), not whoever holds the
+  // deal now: it may have changed hands since (UX test of 12/11/2026).
+  proposer?: string | null;
   reopen?: ReactNode;
 }) {
   const t = fr.deals.page;
@@ -90,7 +94,7 @@ export function DealNow({
         </div>
         <h2 className={heading}>{t.approve}</h2>
         <p className={secondary}>
-          {t.decideWhy(deal.assignee?.name ?? t.someone)}
+          {t.decideWhy(proposer ?? deal.assignee?.name ?? t.someone)}
         </p>
         <TermsRecap terms={terms} />
         <DealNowActions deal={deal} mode="decide" next={null} />

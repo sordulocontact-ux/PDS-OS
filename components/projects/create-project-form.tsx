@@ -161,6 +161,20 @@ export function CreateProjectForm({
     if (state.status === "error") pause(false);
   }, [state, pause]);
 
+  // A refusal brings the reader to its first field in error (CLAUDE.md,
+  // « Formulaires » 4): the message is never left out of view.
+  useEffect(() => {
+    if (state.status !== "error") return;
+    const form = formRef.current;
+    // A field, else the message of a picker in error (its FieldError).
+    const first =
+      form?.querySelector<HTMLElement>('[aria-invalid="true"]') ??
+      form?.querySelector<HTMLElement>("p.text-error");
+    first?.scrollIntoView({ block: "center" });
+    first?.focus({ preventScroll: true });
+  }, [state]);
+  const errorCount = Object.values(errors).filter(Boolean).length;
+
   // The cover waits for the project to exist: the action then returns it
   // (intent « cover ») instead of redirecting, and the page opens after.
   const router = useRouter();
@@ -344,6 +358,9 @@ export function CreateProjectForm({
 
       {state.status === "error" && state.formError && (
         <FormMessage kind="error">{state.formError}</FormMessage>
+      )}
+      {state.status === "error" && !state.formError && errorCount > 0 && (
+        <FormMessage kind="error">{t.missingCount(errorCount)}</FormMessage>
       )}
 
       {!projectId && (

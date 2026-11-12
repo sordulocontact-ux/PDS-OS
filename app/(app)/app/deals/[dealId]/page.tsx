@@ -71,6 +71,17 @@ async function callFormFor(deal: Deal, terms: DealTerm[]) {
   };
 }
 
+/** The tab's title: the deal's name (UX test of 12/11/2026: « PDS OS »
+ * alone, the tab said nothing). */
+export async function generateMetadata({
+  params,
+}: PageProps<"/app/deals/[dealId]">) {
+  const { dealId } = await params;
+  if (!z.uuid().safeParse(dealId).success) return { title: t.title };
+  const deal = await loadDeal(await requireApproved(), dealId);
+  return { title: deal ? `${dealName(deal)} · ${t.title}` : t.title };
+}
+
 /**
  * A deal's page (BIZ 4): its stage beside its name, « Maintenant » when the
  * reader has a gesture, then the next action, the terms negotiated
@@ -117,6 +128,11 @@ export default async function DealPage({
       <DealNow
         deal={deal}
         terms={terms}
+        // The events come newest first: the last proposal of the accord.
+        proposer={
+          events.find((e) => e.kind === "stage" && e.toStage === "agreement")
+            ?.actor ?? null
+        }
         reopen={
           reopenOptions && (
             <NewDealButton

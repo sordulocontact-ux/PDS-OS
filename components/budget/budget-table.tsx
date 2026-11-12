@@ -1,6 +1,7 @@
 "use client";
 
 import { IconPenWriting2, IconTrash } from "nucleo-sharp-essential";
+import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +14,7 @@ import {
   DataTableRow,
 } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { routes } from "@/lib/auth/redirects";
 import { formatEuros, lacksProof, type BudgetLine } from "@/lib/budget/types";
 import { budget } from "@/lib/i18n/fr/budget";
 import { budgetStatusTone, proofTone } from "@/lib/ui/state-tones";
@@ -71,9 +73,26 @@ export function BudgetTable({
                 }
                 subtitle={
                   <>
+                    {formatDay(line.spentOn)}
+                    {/* What it belongs to, a link to its budget (UX test
+                        of 12/11/2026: the name led nowhere). */}
+                    {showTarget && line.targetLabel && (
+                      <>
+                        {" · "}
+                        <Link
+                          href={
+                            line.target.kind === "artist"
+                              ? routes.artistBudget(line.target.id)
+                              : routes.projectBudget(line.target.id)
+                          }
+                          className="relative z-10 underline-offset-4 hover:underline focus-visible:underline"
+                        >
+                          {line.targetLabel}
+                        </Link>
+                      </>
+                    )}
                     {[
-                      formatDay(line.spentOn),
-                      showTarget && line.targetLabel,
+                      "",
                       line.family === "other" && line.familyDetail
                         ? `${fr.budget.families.other} : ${line.familyDetail}`
                         : line.family && fr.budget.families[line.family],
@@ -84,7 +103,7 @@ export function BudgetTable({
                         ? t.committedWas(formatEuros(line.committedCents))
                         : null,
                     ]
-                      .filter(Boolean)
+                      .filter((part, i) => i === 0 || Boolean(part))
                       .join(" · ")}
                     {line.attachment?.url && (
                       <>

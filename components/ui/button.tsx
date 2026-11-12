@@ -14,6 +14,9 @@ import type { ReactNode } from "react"
 // own border colour (never the base): buttonVariants() is also used raw on
 // links, without cn(), and a base border-transparent sorted after
 // border-border erased every outline (recette, 19/10/2026).
+// No `outline-none` either: it erased the focus outline of app/globals.css
+// (2 px, offset 2 px) on every button, invisible at the keyboard (test UX
+// clavier du 12/11/2026).
 
 // The hover growth of a button (and its colour transitions): 1.05 on hover,
 // .97 on press, cut when motion is reduced. Shared with the pills that read as
@@ -22,7 +25,7 @@ const buttonGrow =
   "[transition:background-color_var(--duration-fast)_var(--ease-out),border-color_var(--duration-fast)_var(--ease-out),color_var(--duration-fast)_var(--ease-out),scale_var(--duration-grow)_var(--ease-out)] motion-safe:hover:scale-[1.05] motion-safe:active:scale-[.97]"
 
 const buttonVariants = cva(
-  `${buttonGrow} group/button inline-flex shrink-0 items-center justify-center rounded-full border bg-clip-padding text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] font-semibold whitespace-nowrap no-underline outline-none select-none disabled:pointer-events-none disabled:opacity-40 aria-invalid:border-[color:var(--border-strong)] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4`,
+  `${buttonGrow} group/button inline-flex shrink-0 items-center justify-center rounded-full border bg-clip-padding text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] font-semibold whitespace-nowrap no-underline select-none disabled:pointer-events-none disabled:opacity-40 aria-invalid:border-[color:var(--border-strong)] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4`,
   {
     variants: {
       variant: {

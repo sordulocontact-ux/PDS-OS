@@ -95,7 +95,13 @@ export function BudgetClassificationFields({
               type="button"
               variant="outline"
               size="xs"
-              onClick={() => set({ family: suggested.family })}
+              onClick={() => {
+                set({ family: suggested.family });
+                // The button leaves with its suggestion: the focus goes to
+                // the poste it filled, never back to the top of the dialog
+                // (test UX clavier du 12/11/2026).
+                document.getElementById("budget-family")?.focus();
+              }}
             >
               {t.useSuggestion}
             </Button>
@@ -165,12 +171,13 @@ export function BudgetClassificationFields({
                 type="button"
                 variant="outline"
                 size="xs"
-                onClick={() =>
+                onClick={() => {
                   set({
                     deliverableId: linked.id,
                     leverId: linked.leverId ?? undefined,
-                  })
-                }
+                  });
+                  document.getElementById("budget-deliverable")?.focus();
+                }}
               >
                 {t.useSuggestion}
               </Button>

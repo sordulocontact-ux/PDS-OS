@@ -2189,3 +2189,15 @@ les modules à parcours (proto « Mise en page des modules », version « Propos
   - changer l'artiste principal d'un collectif déplace toutes ses dépenses passées vers l'enveloppe du nouvel artiste ;
   - les notes de frais d'un membre ;
   - qui ouvre un deal (Thibault ?).
+- 12/11/2026 — **Second passage du test UX, en build de production** (`ux-tests/2026-11-12-business-2/`, parcours
+  PDS MIC → deal d'un invité → validation → budget, session clavier de Lina). Corrections :
+  - `Button` perd `outline-none`, qui effaçait le contour de focus global sur tous les boutons ;
+  - après « Utiliser » (poste ou livrable suggéré), le focus va au champ rempli ;
+  - « Nouveau projet » refusé : focus et défilement vers le premier champ en erreur, manques comptés près du
+    bouton ;
+  - la validation d'un accord nomme qui l'a proposé (dernier événement « accord »), pas le titulaire actuel ;
+  - Dépenses : le projet ou l'artiste d'une ligne mène à son budget ;
+  - fiche d'un deal titrée « <deal> · Deals ».
+
+  Reste pour Maël (lot 5) : un collectif se crée sans ses invités, et un deal ouvert ensuite sur
+  « projet + artiste » part sans participation, sans alerte.
