@@ -3,8 +3,10 @@ import type { OrganizationRole } from "@/lib/auth/redirects";
 /**
  * The pre-production test accounts: the people of the proto « Projet complet »
  * (docs/protos/projet.html). Two project managers, so « only the owner
- * writes » can be felt. The seed creates them (supabase/preprod/seed.sql) and
- * the pre-production bar signs in as them: one list for both sides.
+ * writes » can be felt, and the two business positions (Deals, Dépenses, an
+ * artist's « Business » tab). The seed creates the first four
+ * (supabase/preprod/seed.sql), supabase/preprod/showcase-business.sql the
+ * last two; the pre-production bar signs in as them.
  */
 export const PREPROD_ACCOUNTS = [
   {
@@ -34,6 +36,20 @@ export const PREPROD_ACCOUNTS = [
     firstName: "Nadia",
     lastName: "Benali",
     role: "creative_director",
+  },
+  {
+    key: "bm",
+    email: "malik.durand@preprod.pds",
+    firstName: "Malik",
+    lastName: "Durand",
+    role: "business_manager",
+  },
+  {
+    key: "biz",
+    email: "elise.fabre@preprod.pds",
+    firstName: "Élise",
+    lastName: "Fabre",
+    role: "business",
   },
 ] as const satisfies readonly {
   key: string;

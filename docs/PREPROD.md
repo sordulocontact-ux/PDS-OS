@@ -13,7 +13,7 @@ comme ») et **sauter à un moment du parcours** (« Aller à »). Décision du 
 | Branche | `main` | `pre-prod` |
 | Vercel | déploiement Production | déploiement Preview de la branche `pre-prod`, adresse fixe `…-git-pre-prod-….vercel.app` |
 | Base | projet Supabase de prod | projet Supabase **dédié** « PDS OS pré-prod », jamais la base de prod |
-| Comptes | les vrais | quatre comptes de test, un seul mot de passe (`lib/preprod/accounts.ts`) |
+| Comptes | les vrais | six comptes de test dans la barre, un seul mot de passe (`lib/preprod/accounts.ts`) |
 | Barre « Voir comme / Aller à » | jamais | oui (`PREPROD_TOOLS=1`) |
 | Données de test de PO (« remplis la page ») | jamais | oui |
 
@@ -66,7 +66,8 @@ Vercel de la branche, **et** les comptes en base (`pnpm preprod:reset`, ou la mi
 - **Voir comme** : vraie connexion à un autre compte, retour sur la même page. Ce que chacun voit
   reste décidé par le RLS. Comptes : Claire Morel (directrice générale, seule validatrice), Lina
   Haddad (cheffe de projet, responsable des projets), Tom Mercier (chef de projet, pour sentir « seul
-  le responsable écrit »), Nadia Benali (directrice créative). Sans déconnexion préalable : la
+  le responsable écrit »), Nadia Benali (directrice créative), Malik Durand (business manager) et
+  Élise Fabre (business), ces deux-là créés par le jeu Business (§ 5 ter). Sans déconnexion préalable : la
   nouvelle session remplace les cookies. Compter 2 à 4 s : le nouveau compte n'a encore rien en cache
   (les vues sont gardées par lecteur).
 - **Aller à** : un projet par moment, ouvert sur sa page ; le libellé dit qui agit. Seuls les projets
@@ -137,6 +138,32 @@ contrats **générés** depuis eux par les vrais gestes (`legal_agreement_needs`
 `generate_legal_contract`, chaque valeur avec sa source ; `revise_contract_document` pour une v2 ;
 `advance_contract`) : à valider (Sami, v2), modifications demandées (Julie), validé à envoyer
 (Maxime), en préparation (Bastien). Il remplace les deux contrats écrits à la main de Sami et Julie.
+
+## 5 ter. Le jeu Business
+
+`supabase/preprod/showcase-business.sql` (Sacha, 12/11/2026 : « des nouveaux rôles pour tester les
+nouvelles pages ») ajoute les deux postes du module Business à la barre « Voir comme » et de quoi
+remplir Deals, la page d'un deal, Dépenses et l'onglet « Business » de la fiche artiste, tout par les
+vraies fonctions de l'app :
+
+| Deal | Négocie | Moment |
+| --- | --- | --- |
+| Mona Lys, Minuit pile | Malik | En négociation, termes dans tous les états, relance en retard, Camille Petit en contact |
+| Lila Vega | Malik | Call prévu (un call de deal dans trois jours), Yasmine Ould en contact **privé** de Malik |
+| Nahel Nuit | Élise | Accord de principe proposé : à valider par Claire |
+| Mako Rouge | Malik | Signé |
+| Rivo Blanc | Élise | Abandonné, avec sa raison |
+
+Plus l'enveloppe 2026 de Mona Lys (40 000 €, trois postes) ouverte par Claire et deux dépenses directes
+saisies par Lina. Joué par `pnpm preprod:reset` après les deux autres jeux, ou seul, une fois (il
+s'arrête si `malik.durand@preprod.pds` existe) :
+
+```bash
+{ printf "\\set pw '%s'\n" "$PREPROD_PASSWORD"; cat supabase/preprod/showcase-business.sql; } \
+  | /opt/homebrew/opt/libpq/bin/psql "$PREPROD_DB_URL" -q -v ON_ERROR_STOP=1
+```
+
+Joué sur la pré-prod le 12/11/2026, après ses 15 migrations du 10 au 12/11.
 
 ## 6. Développer sur la base de pré-prod (sans Docker)
 
