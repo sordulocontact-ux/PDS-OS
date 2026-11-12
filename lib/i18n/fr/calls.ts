@@ -193,8 +193,6 @@ export const calls = {
     confirmDiscardAction: "Oui, supprimer",
     cancel: "Garder",
     sent: "Enregistrement envoyé. Transcription en cours…",
-    freeTierNote:
-      "Au-delà de 25 Mo (environ 1 h 45), la transcription exige le palier payant du fournisseur.",
     or: "Déposer un fichier à la place",
     errors: microphoneErrors,
     // Before any prompt: what the browser already says (PROJ-BUG-01).

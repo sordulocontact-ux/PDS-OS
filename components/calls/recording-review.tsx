@@ -17,8 +17,6 @@ import { calls } from "@/lib/i18n/fr/calls";
 
 const fr = { calls };
 
-const FREE_TIER_BYTES = 25 * 1024 * 1024;
-
 /** After stopping: listen back, then send. Discarding asks for confirmation first. */
 export function RecordingReview({
   recording,
@@ -84,9 +82,6 @@ export function RecordingReview({
         <p role="alert" className="text-sm text-[color:var(--tone-warning-fg)]">
           {t.quiet}
         </p>
-      )}
-      {recording.blob.size > FREE_TIER_BYTES && (
-        <p className="text-xs text-muted-foreground">{t.freeTierNote}</p>
       )}
       {sendError && (
         <p role="alert" className="text-sm text-error">

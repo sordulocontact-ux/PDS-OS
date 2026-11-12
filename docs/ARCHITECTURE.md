@@ -1365,6 +1365,10 @@ s'afficher sans chargement.
   porte `briefFilled`, qui déclenche la redirection.
 - Groq : `lib/ai/groq-tolerant-fetch.ts` complète les champs de segment nuls renvoyés sur de
   vrais enregistrements (sinon « Invalid JSON response »). Limite 25 Mo (gratuit) / 100 Mo.
+  Au-delà de 20 Mo, `transcribe()` coupe un **WebM** aux frontières de clusters
+  (`lib/ai/webm-split.ts`, sans décodage : en-tête + clusters entiers, temps remis à 0), transcrit
+  les morceaux l'un après l'autre et les recolle à leur place (12/11/2026 : réunion de 1 h 34,
+  36 Mo, refusée en 413). Un mp3/m4a importé trop lourd part tel quel et reste refusé.
 - **Page commune** `CallWorkspace` (`components/calls/call-workspace.tsx`, refaite selon le proto
   `docs/protos/pages.html` le 29/10/2026), pour le call d'un projet et la réunion interne :
   en-tête (retour, titre et état à côté, « projet · quand · organisé par X », « Rejoindre » tant
