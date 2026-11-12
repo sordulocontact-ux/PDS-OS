@@ -8,6 +8,7 @@ import { MasterPicker } from "@/components/catalog/master-picker";
 import { IconBriefcase } from "@/components/icons";
 import {
   CollectiveOption,
+  CollectiveGuestsField,
   CollectiveSelectionField,
 } from "@/components/projects/collective-fields";
 import { ContentFormatField } from "@/components/projects/content-format-field";
@@ -55,7 +56,7 @@ export type CollectiveMode = "choose" | "holder" | "fixed";
  * and forth loses nothing; the server drops what the type does not use.
  * A collective (ticked under the type): the PDS Mic model proposed (content,
  * PDS Mic), its main artist (PDS proposed) in place of the content's
- * artist, and the selection of artists it copies.
+ * artist, the selection of artists it copies and the guests named here.
  */
 export function ProjectKindFields({
   type,
@@ -84,6 +85,7 @@ export function ProjectKindFields({
     artistId: string | null;
     mainArtistId?: string | null;
     masterIds: string[];
+    guestArtistIds?: string[];
   };
   masters: MasterOption[];
   artists: ArtistOption[];
@@ -105,6 +107,12 @@ export function ProjectKindFields({
   );
   const [mainArtistId, setMainArtistId] = useState(
     defaults.mainArtistId ?? collectiveContext?.houseArtistId ?? null,
+  );
+  // The guests named in the form (direction), kept across a refusal.
+  const [guests, setGuests] = useState<ArtistOption[]>(() =>
+    (defaults.guestArtistIds ?? []).flatMap((id) =>
+      artists.filter((a) => a.id === id),
+    ),
   );
   // A field corrected since the server's refusal is back to normal
   // (docs/DESIGN.md « Manques à la validation »): the errors it answered.
@@ -266,6 +274,15 @@ export function ProjectKindFields({
               mainArtistId={mainArtistId}
               required={collectiveMode === "holder"}
               error={errorOf("selectionId")}
+            />
+          )}
+          {collectiveMode === "choose" && (
+            <CollectiveGuestsField
+              artists={artists}
+              value={guests}
+              onChange={setGuests}
+              mainArtistId={mainArtistId}
+              error={errors.guestArtistIds}
             />
           )}
         </div>

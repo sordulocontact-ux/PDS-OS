@@ -52,6 +52,8 @@ export type ProjectFormDefaults = {
   collective?: boolean;
   mainArtistId?: string | null;
   selectionId?: string | null;
+  // The guests named in the form (test UX du 12/11/2026).
+  guestArtistIds?: string[];
   masterIds: string[];
   assigneePersonId?: string | null;
   creativePersonIds?: string[];
@@ -238,6 +240,7 @@ export function CreateProjectForm({
             artistId: defaults.artistId ?? null,
             mainArtistId: defaults.mainArtistId ?? null,
             masterIds: defaults.masterIds,
+            guestArtistIds: defaults.guestArtistIds ?? [],
           }}
           masters={masters}
           artists={artists}

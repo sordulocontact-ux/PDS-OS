@@ -19736,6 +19736,7 @@ export type Database = {
           p_content_format_id?: string
           p_creative_person_ids?: string[]
           p_due_date?: string
+          p_guest_artist_ids?: string[]
           p_initial_context?: string
           p_main_artist_id: string
           p_master_ids?: string[]

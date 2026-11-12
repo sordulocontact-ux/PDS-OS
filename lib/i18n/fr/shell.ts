@@ -339,7 +339,7 @@ export const shell = {
       selectionAllSelected: "Aucune autre sélection.",
       selectionRemove: (name: string) => `Retirer ${name}`,
       noSelection:
-        "Aucune sélection d'artistes au Catalogue : vous ajouterez les artistes dans le projet.",
+        "Aucune sélection d'artistes au Catalogue : nommez les invités ci-dessous, ou ajoutez-les ensuite dans le projet.",
       // Under the selection chosen: who comes, and how.
       guests: (count: number) =>
         count === 1 ? "1 artiste importé" : `${count} artistes importés`,
@@ -359,6 +359,17 @@ export const shell = {
         "Un projet collectif créé depuis votre sélection : vous le pilotez, il est lancé dès sa création.",
       submitHint: "Vous le pilotez : il est lancé dès sa création.",
       backToSelection: (name: string) => `Retour à ${name}`,
+      // The guests named in the form (test UX du 12/11/2026: a collective
+      // was created without them), beside or instead of a selection.
+      guestsField: "Artistes invités",
+      guestsSearch: "Ajouter un artiste invité",
+      guestsPlaceholder: "Rechercher un artiste…",
+      guestsNoResult: (query: string) =>
+        `Aucun artiste ne s'appelle « ${query} ».`,
+      guestsAllSelected: "Tous les artistes sont déjà invités.",
+      guestRemove: (name: string) => `Retirer ${name}`,
+      guestsFieldHint:
+        "Chacun reçoit un titre sans nom et une participation proposée : sa négociation s'ouvre ensuite depuis Deals.",
     },
     // Creating transmits it to the chosen project manager (submitHint).
     submit: "Créer le projet",
@@ -435,6 +446,7 @@ export const shell = {
             ? `Cet artiste participe au titre « ${titles[0]} ». Retirez sa participation avant d'en faire l'artiste principal.`
             : `Cet artiste participe aux titres ${new Intl.ListFormat("fr-FR", { type: "conjunction" }).format(titles.map((t) => `« ${t} »`))}. Retirez ses participations avant d'en faire l'artiste principal.`,
       selectionRequired: "Choisissez une de vos sélections d'artistes.",
+      invalidGuests: "Choisissez les artistes invités dans la liste.",
       selectionNotFound:
         "Cette sélection n'existe plus. Choisissez-en une autre.",
       notSelectionHolder:

@@ -122,11 +122,15 @@ export function NewDealForm({
             describedBy="new-deal-participation-error"
             fill
           />
-          <FieldError id="new-deal-participation-error">
-            {missing.includes("participation")
-              ? t.required.participation
-              : undefined}
-          </FieldError>
+          {missing.includes("participation") ? (
+            <FieldError id="new-deal-participation-error">
+              {t.required.participation}
+            </FieldError>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              {t.participationHint}
+            </p>
+          )}
         </div>
       ) : (
         <>

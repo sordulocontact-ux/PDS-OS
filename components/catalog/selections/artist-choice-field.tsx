@@ -19,7 +19,8 @@ const fr = { artistSelections };
  * the artist and master pickers (SearchPicker, its last row creates an
  * artist that is then chosen), and the chosen ones listed above it, each
  * with its ✕, in the order they were picked. Controlled by the form;
- * `excludedIds`: artists already in the selection, never offered.
+ * `excludedIds`: artists already in the selection, never offered. `legend`
+ * and `hint`: another use (the guests of a collective in the project form).
  */
 export function ArtistChoiceField({
   artists,
@@ -29,6 +30,8 @@ export function ArtistChoiceField({
   required = false,
   error,
   openOnFocus = true,
+  legend,
+  hint,
 }: {
   artists: ArtistOption[];
   excludedIds?: ReadonlySet<string>;
@@ -38,6 +41,8 @@ export function ArtistChoiceField({
   error?: string;
   // SearchPicker's: `false` where the field is focused on opening a modal.
   openOnFocus?: boolean;
+  legend?: string;
+  hint?: string;
 }) {
   const t = fr.artistSelections.picker;
   const [created, setCreated] = useState<ArtistOption[]>([]);
@@ -58,7 +63,7 @@ export function ArtistChoiceField({
   return (
     <fieldset className="flex flex-col gap-2">
       <legend className="mb-1.5 text-sm font-medium">
-        {t.legend}
+        {legend ?? t.legend}
         {required && <RequiredMark announce />}
       </legend>
       {value.length > 0 && (
@@ -106,7 +111,11 @@ export function ArtistChoiceField({
         describedBy={error ? errorId : undefined}
         openOnFocus={openOnFocus}
       />
-      <FieldError id={errorId}>{error}</FieldError>
+      {error ? (
+        <FieldError id={errorId}>{error}</FieldError>
+      ) : (
+        hint && <p className="text-xs text-muted-foreground">{hint}</p>
+      )}
       <CreateArtistDialog
         open={dialogName !== null}
         onOpenChange={(open) => !open && setDialogName(null)}

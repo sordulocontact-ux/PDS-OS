@@ -87,6 +87,8 @@ export async function createProject(
           p_main_artist_id: input.mainArtistId,
           p_assignee_person_id: input.assigneePersonId,
           p_selection_id: input.selectionId ?? undefined,
+          p_guest_artist_ids:
+            input.guestArtistIds.length > 0 ? input.guestArtistIds : undefined,
         })
       : await supabase.rpc("create_project", {
           ...common,

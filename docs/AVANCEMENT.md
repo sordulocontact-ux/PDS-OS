@@ -2201,3 +2201,19 @@ les modules à parcours (proto « Mise en page des modules », version « Propos
 
   Reste pour Maël (lot 5) : un collectif se crée sans ses invités, et un deal ouvert ensuite sur
   « projet + artiste » part sans participation, sans alerte.
+- 12/11/2026 — **Projet collectif × Business : les invités à la création, une négo de collectif par participation**
+  (Q1 du second test UX, sur demande de Sacha). Migration `20261112130101_collective_guests` :
+  - `create_collective_project` prend `p_guest_artist_ids` (dernier paramètre, avec défaut : le code en prod
+    l'appelle toujours comme avant). Une sélection d'artistes et les invités nommés sont réunis, chacun une fois,
+    jamais l'artiste principal ; chacun reçoit un titre sans nom et une participation proposée ;
+  - `create_deal` refuse « projet + artiste » ou un projet seul sur un collectif (`collective_needs_participation`).
+
+  Formulaire « Nouveau projet » : champ « Artistes invités » (direction) sous la sélection, avec
+  `ArtistChoiceField` de Maël, qui prend `legend` et `hint`. Les invités sont gardés dans le brouillon.
+
+  « Nouveau deal » :
+  - les collectifs ne sont plus proposés en « Un projet ou un artiste » ;
+  - une aide sous « Participation » dit d'inviter d'abord l'artiste.
+
+  Test `deals-collective` 11/11. Vérifié dans le navigateur (build de production) : collectif créé avec deux
+  invités, leurs participations proposées dans « Nouveau deal ».

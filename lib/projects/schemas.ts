@@ -97,6 +97,8 @@ const projectFields = {
     .transform((value) => value === "on" || value === "true"),
   mainArtistId: optionalUuid(pe.invalidMainArtist),
   selectionId: optionalUuid(pe.selectionNotFound),
+  // The guests named in the form (test UX du 12/11/2026), as a selection's.
+  guestArtistIds: uuidListSchema(pe.invalidGuests, 50),
   initialContext: z
     .string()
     .trim()
@@ -144,7 +146,11 @@ function checkShape(data: Shape, ctx: z.RefinementCtx) {
 // its main artist instead of a content's artist; any other project has
 // neither main artist nor selection.
 function normalize<
-  T extends Shape & { artistId: string | null; selectionId: string | null },
+  T extends Shape & {
+    artistId: string | null;
+    selectionId: string | null;
+    guestArtistIds: string[];
+  },
 >(data: T) {
   const music = data.type === "music_release";
   const content = data.type === "content";
@@ -157,6 +163,7 @@ function normalize<
     artistId: content && !data.collective ? data.artistId : null,
     mainArtistId: data.collective ? data.mainArtistId : null,
     selectionId: data.collective ? data.selectionId : null,
+    guestArtistIds: data.collective ? data.guestArtistIds : [],
   };
 }
 

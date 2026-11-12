@@ -40,7 +40,7 @@ export async function loadNewDealOptions(
     [
       supabase
         .from("projects")
-        .select("id, title, owner_person_id")
+        .select("id, title, owner_person_id, collective")
         .is("archived_at", null)
         .order("title"),
       supabase
@@ -97,7 +97,11 @@ export async function loadNewDealOptions(
         .map((p) => [p.id, label(p)] as const)
         .sort((a, b) => a[1].localeCompare(b[1], "fr")),
     ),
-    projects: Object.fromEntries(projects.map((p) => [p.id, p.title])),
+    // A collective's deals go through a participation (20261112130101):
+    // never offered as « un projet ».
+    projects: Object.fromEntries(
+      projects.filter((p) => !p.collective).map((p) => [p.id, p.title]),
+    ),
     artists: Object.fromEntries(
       (artistsRes.data ?? []).map((a) => [a.id, a.name]),
     ),

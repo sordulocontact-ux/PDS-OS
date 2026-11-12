@@ -145,6 +145,10 @@ export const deals = {
     participationPlaceholder: "Choisir un artiste d'un titre",
     participationSearch: "Rechercher un artiste, un titre",
     participationEmpty: "Aucune participation ne correspond.",
+    // A collective's deal goes through its guest's participation
+    // (20261112130101): the guest is invited on a title first.
+    participationHint:
+      "Un artiste invité d'un projet collectif. Absent de la liste : invitez-le d'abord sur un titre, depuis le projet.",
     project: "Projet",
     projectPlaceholder: "Choisir un projet",
     projectSearch: "Rechercher un projet",
@@ -345,6 +349,8 @@ export const deals = {
       "Cette participation est celle d'un autre artiste.",
     useParticipation:
       "Cet artiste participe au projet : ouvrez le deal sur sa participation.",
+    collectiveNeedsParticipation:
+      "Un projet collectif se négocie par la participation de l'artiste : invitez-le d'abord sur un titre, depuis le projet.",
     participationNotInPlay:
       "Cette participation n'est plus en jeu (refusée, retirée ou titre abandonné).",
     projectNotFound: "Ce projet est introuvable.",

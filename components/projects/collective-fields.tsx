@@ -1,8 +1,10 @@
 "use client";
 
+import { ArtistChoiceField } from "@/components/catalog/selections/artist-choice-field";
 import { SinglePicker } from "@/components/catalog/single-picker";
 import { Checkbox } from "@/components/ui/checkbox";
 import { NameChip, NameChips } from "@/components/ui/name-chip";
+import type { ArtistOption } from "@/lib/catalog/types";
 import { artistSelections } from "@/lib/i18n/fr/artist-selections";
 import { shell } from "@/lib/i18n/fr/shell";
 import {
@@ -142,5 +144,49 @@ export function CollectiveSelectionField({
           </div>
         ))}
     </div>
+  );
+}
+
+/**
+ * The guests of a collective named in the form (test UX du 12/11/2026: a
+ * collective was created without them unless they came from a selection),
+ * beside or instead of a selection: each gets a title without a name and a
+ * proposed participation (create_collective_project). Never the main
+ * artist. Submitted as one JSON field `guestArtistIds`.
+ */
+export function CollectiveGuestsField({
+  artists,
+  value,
+  onChange,
+  mainArtistId,
+  error,
+}: {
+  artists: ArtistOption[];
+  value: ArtistOption[];
+  onChange: (next: ArtistOption[]) => void;
+  mainArtistId: string | null;
+  error?: string;
+}) {
+  const t = fr.shell.newProject.collective;
+  const excluded = new Set(mainArtistId ? [mainArtistId] : []);
+  return (
+    <>
+      <ArtistChoiceField
+        artists={artists}
+        excludedIds={excluded}
+        value={value.filter((a) => a.id !== mainArtistId)}
+        onChange={onChange}
+        legend={t.guestsField}
+        hint={t.guestsFieldHint}
+        error={error}
+      />
+      <input
+        type="hidden"
+        name="guestArtistIds"
+        value={JSON.stringify(
+          value.filter((a) => a.id !== mainArtistId).map((a) => a.id),
+        )}
+      />
+    </>
   );
 }
