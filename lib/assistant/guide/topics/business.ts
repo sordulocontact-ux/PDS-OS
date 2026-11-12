@@ -32,7 +32,7 @@ export const businessTopics: GuideTopic[] = [
     nav: "/app/deals",
     facts: [
       "Un deal est une négociation avec un artiste, à part du projet : la personne qui le négocie écrit sur le deal, jamais dans le projet.",
-      "Pour un PDS MIC, un deal s'ouvre pour la participation d'un artiste à un titre ; son contrat est celui de la participation. Un projet collectif ne se négocie que par la participation d'un artiste invité : on l'invite à la création du collectif (« Artistes invités » dans « Nouveau projet », ou une sélection d'artistes) ou ensuite sur un titre du projet ; une participation refusée, retirée ou dont le titre est abandonné ne reçoit plus de deal.",
+      "Pour un PDS MIC, un deal s'ouvre pour la participation d'un artiste à un titre ; son contrat est celui de la participation. Le deal d'une participation que l'artiste a acceptée commence directement « En négociation » ; un deal ouvert avant y passe dès que la participation est acceptée. Un projet collectif ne se négocie que par la participation d'un artiste invité : on l'invite à la création du collectif (« Artistes invités » dans « Nouveau projet », ou une sélection d'artistes) ou ensuite sur un titre du projet ; une participation refusée, retirée ou dont le titre est abandonné ne reçoit plus de deal.",
       "Étapes : À contacter, Call prévu, Négociation, Accord de principe, Contractualisation, Signé ; ou Abandonné, toujours avec un motif. Un deal abandonné ne se rouvre pas : pour reprendre, la direction ouvre un nouveau deal, depuis la page du deal abandonné (« Ouvrir un nouveau deal », artiste déjà choisi).",
       "L'accord de principe est proposé par la personne qui négocie et validé par la direction, qui peut le renvoyer en négociation avec un motif. La contractualisation attend un accord validé. Dès qu'un terme est confirmé, un deal À contacter ou Call prévu propose directement l'accord de principe. La direction est prévenue, et voit les termes confirmés juste au-dessus de son bouton de validation.",
       "Chaque terme négocié (splits auteur-compositeur, part du master, royalties, avance ou cachet, crédits, territoires, durée, exclusivité, promo) a sa valeur, son état (Proposé par PDS, Contre-proposition, Confirmé, À définir) et l'historique de ses changements.",
@@ -58,7 +58,7 @@ export const businessTopics: GuideTopic[] = [
       },
       {
         q: "Qui crée un deal et le confie ?",
-        a: "La direction, ou le responsable du projet lié, avec « Nouveau deal » sur la page Deals ; il se confie à un membre qui négocie (business manager, business). Une personne qui négocie n'ouvre pas de deal : « Ouvrir un deal » sur la page Deals lui dit à qui le demander. La direction change la personne qui négocie depuis le bloc Informations, en haut de la page du deal.",
+        a: "La direction, ou le responsable du projet lié, avec « Nouveau deal » sur la page Deals ; il se confie à un membre qui négocie (business manager, business). Le business manager ouvre aussi un deal sur un artiste du Catalogue, qui lui est confié ; un deal de projet ou de PDS MIC lui est confié par la direction ou le chef de projet. Le poste business n'ouvre pas de deal : « Ouvrir un deal » sur la page Deals lui dit à qui le demander. La direction change la personne qui négocie depuis le bloc Informations, en haut de la page du deal.",
       },
     ],
     permissions: ["negotiate", "validate"],

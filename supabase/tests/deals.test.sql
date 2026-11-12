@@ -88,8 +88,8 @@ insert into ids select 'p2', id from public.title_participations where project_i
 
 -- Creating -------------------------------------------------------------------------
 select pg_temp.act_as(pg_temp.id_of('glen'));
-select throws_ok($$ select public.create_deal(p_artist_id => pg_temp.id_of('sami')) $$,
-  '42501', 'forbidden', 'the business manager does not create a deal');
+select throws_ok($$ select public.create_deal(p_participation_id => pg_temp.id_of('p1')) $$,
+  'P0002', 'participation_not_found', 'the business manager does not open a project''s deal (…20261112140101: an artist''s only)');
 reset role;
 select pg_temp.act_as(pg_temp.id_of('other_pm'));
 select throws_ok($$ select public.create_deal(p_participation_id => pg_temp.id_of('p1')) $$,

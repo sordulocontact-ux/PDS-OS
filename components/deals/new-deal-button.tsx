@@ -39,7 +39,7 @@ export function NewDealButton({
         open={open}
         onOpenChange={setOpen}
         title={t.title}
-        description={t.description}
+        description={options.own ? t.ownDescription : t.description}
         closeLabel={fr.dialogs.close}
       >
         {open && (

@@ -75,6 +75,8 @@ export const PERMISSIONS = [
   "read_artist_budgets",
   // Opens and changes an artist's envelope (the direction, BUD 2).
   "manage_artist_budgets",
+  // Opens a deal on an artist, his own (business manager, Ibé 12/11/2026).
+  "open_deals",
 ] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 

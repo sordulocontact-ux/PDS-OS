@@ -138,6 +138,9 @@ export const deals = {
     title: "Nouveau deal",
     description:
       "Un deal musical pour un artiste : choisissez parmi ce qui existe, puis qui le négocie.",
+    // The business manager's own deal (Ibé 12/11/2026).
+    ownDescription:
+      "Un deal musical pour un artiste du Catalogue : vous le négociez. Un deal de projet ou de PDS MIC vous est confié par la direction ou le chef de projet.",
     for: "Pour",
     forParticipation: "Un artiste d'un projet collectif",
     forOther: "Un projet ou un artiste",
@@ -167,13 +170,14 @@ export const deals = {
       participation: "Choisissez la participation.",
       project: "Choisissez le projet.",
       subject: "Choisissez un projet ou un artiste.",
+      artist: "Choisissez l'artiste.",
     },
     missingCount: (count: number) =>
       count === 1 ? "1 champ manque." : `${count} champs manquent.`,
     // For whoever negotiates but may not open a deal (UX test of 12/11/2026).
     askTitle: "Ouvrir un deal",
     askBody: (who: string) =>
-      `Un deal s'ouvre par la direction${who ? ` (${who})` : ""} ou par le responsable du projet, qui vous le confie. Demandez-lui : le deal apparaîtra ici.`,
+      `Un deal s'ouvre par la direction${who ? ` (${who})` : ""}, le responsable du projet ou le business manager, qui vous le confie. Demandez-leur : le deal apparaîtra ici.`,
     askClose: "Compris",
   },
   // A deal's page (BIZ 4).
@@ -349,6 +353,8 @@ export const deals = {
       "Cette participation est celle d'un autre artiste.",
     useParticipation:
       "Cet artiste participe au projet : ouvrez le deal sur sa participation.",
+    assigneeNotSelf:
+      "Un deal que vous ouvrez vous est confié : la direction le confie ensuite à quelqu'un d'autre si besoin.",
     collectiveNeedsParticipation:
       "Un projet collectif se négocie par la participation de l'artiste : invitez-le d'abord sur un titre, depuis le projet.",
     participationNotInPlay:

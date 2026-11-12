@@ -2217,3 +2217,16 @@ les modules à parcours (proto « Mise en page des modules », version « Propos
 
   Test `deals-collective` 11/11. Vérifié dans le navigateur (build de production) : collectif créé avec deux
   invités, leurs participations proposées dans « Nouveau deal ».
+- 12/11/2026 — **Business : retours d'Ibé de 19 h 15.** Migration `20261112140101_bm_opens_deals` :
+  - permission `open_deals` (business manager seul, Ibé l'a nommé ; pas le poste business) : il ouvre un
+    deal sur un artiste, qui lui est confié (`assignee_not_self` sinon). Un deal de projet ou de PDS MIC reste
+    ouvert par la direction ou le chef de projet ;
+  - un deal ouvert sur une participation acceptée (`confirmed`) commence « En négociation » ;
+  - un deal ouvert avant y passe quand la participation est acceptée (trigger `z_deal_follows`, depuis
+    À contacter ou Call prévu seulement, ligne au journal).
+
+  « Nouveau deal » du business manager : l'artiste seul, sans « Négocié par ». Test `deals-bm-opens`
+  10/10, `deals` mis à jour. Vérifié dans le navigateur en Malik.
+
+  Matrice des rôles d'Ibé (première version, la complète à venir) : rien de construit. À trancher : le
+  business manager y perd Budgets et Dépenses, que la décision BUD lui donnait.

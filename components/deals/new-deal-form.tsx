@@ -14,10 +14,11 @@ import { routes } from "@/lib/auth/redirects";
 import { createDeal } from "@/lib/deals/actions";
 import type { NewDealOptions } from "@/lib/deals/new-deal-options";
 import { deals } from "@/lib/i18n/fr/deals";
+import { cn } from "@/lib/utils";
 
 const fr = { deals };
 
-type Missing = "participation" | "project" | "subject";
+type Missing = "participation" | "project" | "subject" | "artist";
 
 /**
  * « Nouveau deal » (BIZ 4): for an artist of a collective (his
@@ -56,6 +57,7 @@ export function NewDealForm({
   const missingOf = (): Missing[] => {
     if (mode === "participation") return participation ? [] : ["participation"];
     if (!options.artistAlone && !project) return ["project"];
+    if (options.own) return artist ? [] : ["artist"];
     return project || artist ? [] : ["subject"];
   };
 
@@ -134,7 +136,8 @@ export function NewDealForm({
         </div>
       ) : (
         <>
-          <div className="flex flex-col gap-1.5">
+          {/* The business manager opens an artist's deal: no project. */}
+          <div className={cn("flex flex-col gap-1.5", options.own && "hidden")}>
             <SearchSelect
               id={options.artistAlone ? "new-deal-subject" : "new-deal-project"}
               label={t.project}
@@ -160,29 +163,42 @@ export function NewDealForm({
                   : undefined}
             </FieldError>
           </div>
-          <SearchSelect
-            id="new-deal-artist"
-            label={t.artist}
-            options={options.artists}
-            value={artist}
-            onChange={(v) => {
-              setArtist(v);
-              setMissing([]);
-            }}
-            placeholder={t.artistPlaceholder}
-            searchPlaceholder={t.artistSearch}
-            emptyLabel={t.artistEmpty}
-            fill
-          />
+          <div className="flex flex-col gap-1.5">
+            <SearchSelect
+              id="new-deal-artist"
+              label={t.artist}
+              options={options.artists}
+              value={artist}
+              onChange={(v) => {
+                setArtist(v);
+                setMissing([]);
+              }}
+              placeholder={t.artistPlaceholder}
+              searchPlaceholder={t.artistSearch}
+              emptyLabel={t.artistEmpty}
+              required={options.own}
+              invalid={options.own && missing.length > 0}
+              describedBy={options.own ? "new-deal-artist-error" : undefined}
+              fill
+            />
+            {options.own && (
+              <FieldError id="new-deal-artist-error">
+                {missing.length > 0 ? t.required.artist : undefined}
+              </FieldError>
+            )}
+          </div>
         </>
       )}
-      <OptionSelect
-        id="new-deal-assignee"
-        name="assignee"
-        label={t.assignee}
-        hint={t.assigneeHint}
-        items={options.negotiators}
-      />
+      {/* His own deal: nobody else to give it to (dialog's description). */}
+      {!options.own && (
+        <OptionSelect
+          id="new-deal-assignee"
+          name="assignee"
+          label={t.assignee}
+          hint={t.assigneeHint}
+          items={options.negotiators}
+        />
+      )}
       <Field
         id="new-deal-next"
         name="nextAction"

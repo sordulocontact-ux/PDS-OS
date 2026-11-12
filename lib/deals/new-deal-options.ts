@@ -18,6 +18,9 @@ export type NewDealOptions = {
   // The direction may open a deal on an artist alone; a project manager
   // opens one on a project he runs.
   artistAlone: boolean;
+  // The business manager (open_deals, Ibé 12/11/2026): an artist's deal,
+  // his own — no project, nobody else to give it to.
+  own: boolean;
 };
 
 /**
@@ -33,7 +36,9 @@ export async function loadNewDealOptions(
   openParticipations: Set<string>,
 ): Promise<NewDealOptions | null> {
   const director = can(access, "validate");
-  if (!director && !can(access, "pilot_projects")) return null;
+  const own =
+    !director && !can(access, "pilot_projects") && can(access, "open_deals");
+  if (!director && !can(access, "pilot_projects") && !own) return null;
   const me = access.personId;
   const supabase = await createClient();
   const [projectsRes, partsRes, artistsRes, negotiatorsRes] = await Promise.all(
@@ -111,6 +116,7 @@ export async function loadNewDealOptions(
         personName(n.first_name, n.last_name),
       ]),
     ),
-    artistAlone: director,
+    artistAlone: director || own,
+    own,
   };
 }
