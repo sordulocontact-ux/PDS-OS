@@ -2157,3 +2157,35 @@ les modules à parcours (proto « Mise en page des modules », version « Propos
   cours, signés, abandonnés ; étape, prochaine action, contrat, projet, négociateur ; aucun contact), puis
   le budget pour ses lecteurs. Onglet visible de qui lit le budget ou voit un deal de l'artiste ; l'ancienne
   adresse `…/budget` y mène. Sans migration.
+- 12/11/2026 — **Business et Budget : corrections du test UX et coordination avec les projets collectifs.**
+  Test par personas (`ux-tests/2026-11-12-business/rapport.md`, Malik, Élise, Claire ; session clavier à
+  rejouer). Fiche d'un deal :
+  - la direction voit les termes confirmés au-dessus de « Valider l'accord de principe » ;
+  - un deal À contacter ou Call prévu avec un terme confirmé propose directement l'accord ;
+  - « La direction est prévenue » pendant l'attente ;
+  - un deal abandonné dit qu'il ne se rouvre pas, et la direction a « Ouvrir un nouveau deal », artiste choisi ;
+  - le prochain call (jour et heure) apparaît à côté de la prochaine action ;
+  - « Informations » (Négocié par · Changer) monte sous la prochaine action, et « Contacts » avant les Calls.
+
+  Ailleurs :
+  - page Deals : « Ouvrir un deal » explique à qui négocie sans en ouvrir que c'est la direction (nommée) ou le
+    responsable du projet ;
+  - accueil : « Valider l'accord de principe de <artiste> » ;
+  - contact privé : plus de « non renseigné » sous des coordonnées masquées ;
+  - Dépenses filtrée sur un artiste : son enveloppe en tête (`ArtistEnvelopeCard`) ;
+  - le « Dépensé » de l'enveloppe nomme d'abord la part de ses projets ;
+  - jeu `showcase-business.sql` : l'enveloppe de Mona Lys passe à 60 000 €.
+
+  Migration `20261112120101_deals_collective_fixes` (audit avec les lots PDS MIC de Maël) :
+  - `deals.contract_id` passe en `on delete set null` : un contrat lié à un deal bloquait la suppression du projet ;
+  - `create_deal` refuse `use_participation` (un artiste qui participe au projet passe par sa participation)
+    et `participation_not_in_play` (participation refusée, retirée ou titre abandonné, aussi retirée du
+    formulaire) ;
+  - `zz_project_live` retiré de `personal_tasks`, comme Maël l'avait voulu.
+
+  Test : `deals-collective` 8/8.
+
+  Restent à trancher :
+  - changer l'artiste principal d'un collectif déplace toutes ses dépenses passées vers l'enveloppe du nouvel artiste ;
+  - les notes de frais d'un membre ;
+  - qui ouvre un deal (Thibault ?).

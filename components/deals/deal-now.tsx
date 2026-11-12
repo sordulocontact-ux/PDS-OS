@@ -1,6 +1,11 @@
+import type { ReactNode } from "react";
+
 import { DealNowActions } from "@/components/deals/deal-now-actions";
 import { NowFrame } from "@/components/shell/journey/now-card";
+import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { formatTermValue } from "@/lib/deals/term-format";
+import type { DealTerm } from "@/lib/deals/terms";
 import type { Deal } from "@/lib/deals/types";
 import { deals } from "@/lib/i18n/fr/deals";
 import { myValidationTone } from "@/lib/ui/state-tones";
@@ -22,13 +27,60 @@ export const NEXT_STAGE: Partial<Record<Deal["stage"], Deal["stage"]>> = {
 };
 
 /**
+ * The stage the main button proposes: the next one by order, except that
+ * a deal whose terms already hold (one confirmed) before its negotiation
+ * started goes straight to its accord de principe — one gesture, not two
+ * (UX test of 12/11/2026).
+ */
+function nextStageOf(deal: Deal, terms: DealTerm[]): Deal["stage"] | null {
+  const early = deal.stage === "to_contact" || deal.stage === "call_planned";
+  if (early && terms.some((term) => term.state === "confirmed"))
+    return "agreement";
+  return NEXT_STAGE[deal.stage] ?? null;
+}
+
+/** The confirmed terms, recalled above the direction's decision. */
+function TermsRecap({ terms }: { terms: DealTerm[] }) {
+  const t = fr.deals.page;
+  const confirmed = terms.filter((term) => term.state === "confirmed");
+  const others = terms.filter(
+    (term) => term.state !== "confirmed" && term.state !== "to_define",
+  ).length;
+  if (confirmed.length === 0) return <p className={secondary}>{t.recapNone}</p>;
+  return (
+    <div className="flex flex-col gap-2">
+      <FactRows>
+        {confirmed.map((term) => (
+          <FactRow
+            key={term.key}
+            label={fr.deals.terms.labels[term.key] ?? term.key}
+            value={formatTermValue(term.format, term.value) ?? ""}
+          />
+        ))}
+      </FactRows>
+      {others > 0 && <p className={secondary}>{t.recapOthers(others)}</p>}
+    </div>
+  );
+}
+
+/**
  * « Maintenant » of a deal (BIZ 4), only when the reader has a gesture on
- * it: the direction decides a proposed accord de principe; the negotiator
- * moves his deal to its next stage (or another, or abandons it) — or reads
- * that the direction is awaited. Nothing for the project's owner, who
+ * it: the direction decides a proposed accord de principe, its confirmed
+ * terms recalled above; the negotiator moves his deal to its next stage
+ * (or another, or abandons it) — or reads that the direction is warned.
+ * An abandoned deal says it is final and what to do (`reopen`: « Ouvrir un
+ * nouveau deal » for whoever may). Nothing for the project's owner, who
  * reads.
  */
-export function DealNow({ deal }: { deal: Deal }) {
+export function DealNow({
+  deal,
+  terms,
+  reopen,
+}: {
+  deal: Deal;
+  terms: DealTerm[];
+  reopen?: ReactNode;
+}) {
   const t = fr.deals.page;
   if (deal.canDecide)
     return (
@@ -40,7 +92,16 @@ export function DealNow({ deal }: { deal: Deal }) {
         <p className={secondary}>
           {t.decideWhy(deal.assignee?.name ?? t.someone)}
         </p>
+        <TermsRecap terms={terms} />
         <DealNowActions deal={deal} mode="decide" next={null} />
+      </NowFrame>
+    );
+  if (deal.stage === "abandoned")
+    return (
+      <NowFrame label={t.now} quiet>
+        <h2 className={heading}>{t.abandonedTitle}</h2>
+        <p className={secondary}>{t.abandonedBody(deal.abandonReason)}</p>
+        {reopen}
       </NowFrame>
     );
   if (!deal.canWrite) return null;
@@ -51,7 +112,7 @@ export function DealNow({ deal }: { deal: Deal }) {
         <DealNowActions deal={deal} mode="wait" next={null} />
       </NowFrame>
     );
-  const next = NEXT_STAGE[deal.stage] ?? null;
+  const next = nextStageOf(deal, terms);
   return (
     <NowFrame label={t.now}>
       <h2 className={heading}>

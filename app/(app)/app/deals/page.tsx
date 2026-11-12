@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { DealsList } from "@/components/deals/deals-list";
+import { AskDealButton } from "@/components/deals/ask-deal-button";
 import { NewDealButton } from "@/components/deals/new-deal-button";
 import { EmptyState } from "@/components/shell/empty-state";
 import { PageContainer } from "@/components/shell/page-container";
@@ -20,6 +21,7 @@ import {
   inDealView,
   matchesDeal,
 } from "@/lib/deals/filters";
+import { loadValidators } from "@/lib/framing/related";
 import { loadNewDealOptions } from "@/lib/deals/new-deal-options";
 import { loadDeals } from "@/lib/deals/queries";
 import { deals as t } from "@/lib/i18n/fr/deals";
@@ -62,6 +64,11 @@ export default async function DealsPage({
       ),
     ),
   );
+  // Whoever negotiates without opening deals learns who opens them.
+  const directors =
+    !options && access.organizationId
+      ? (await loadValidators(access.organizationId)).map((v) => v.name)
+      : null;
   const today = todayInParis();
   const view = dealViewOf(params.vue);
   const filters = dealFiltersOf(params);
@@ -75,7 +82,13 @@ export default async function DealsPage({
       <PageHeader
         title={t.title}
         description={t.description}
-        action={options && <NewDealButton options={options} />}
+        action={
+          options ? (
+            <NewDealButton options={options} />
+          ) : (
+            directors && <AskDealButton directors={directors} />
+          )
+        }
       />
       {error && <FormMessage kind="error">{t.loadError}</FormMessage>}
       {deals.length === 0 ? (

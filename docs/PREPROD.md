@@ -154,7 +154,7 @@ vraies fonctions de l'app :
 | Mako Rouge | Malik | Signé |
 | Rivo Blanc | Élise | Abandonné, avec sa raison |
 
-Plus l'enveloppe 2026 de Mona Lys (40 000 €, trois postes) ouverte par Claire et deux dépenses directes
+Plus l'enveloppe 2026 de Mona Lys (60 000 €, trois postes : elle couvre aussi les dépenses de « Minuit pile ») ouverte par Claire et deux dépenses directes
 saisies par Lina. Joué par `pnpm preprod:reset` après les deux autres jeux, ou seul, une fois (il
 s'arrête si `malik.durand@preprod.pds` existe) :
 

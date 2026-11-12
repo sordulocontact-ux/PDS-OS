@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 
 import { PageSection } from "@/components/shell/page-section";
 import { FactList } from "@/components/ui/fact-list";
@@ -23,10 +24,15 @@ export function ContactCoordinates({
 }) {
   const p = fr.network.page;
   const accounts = socialLinksOf(contact);
+  // A private contact's coordinates the reader may not read are absent, not
+  // empty: no « non renseigné » under the notice (UX test of 12/11/2026).
+  const hidden = contact.privacy.hidden;
+  const privateFact = (fact: { label: string; value: ReactNode }) =>
+    hidden ? [] : [fact];
   return (
     <PageSection card id="coordinates" title={p.coordinates}>
       {/* A private contact (BIZ 8) whose coordinates the reader may not read. */}
-      {contact.privacy.hidden && (
+      {hidden && (
         <ToneCallout className="mb-4">
           {fr.network.privacy.hidden} ·{" "}
           {fr.network.privacy.hiddenBody(contact.privacy.ownerName)}
@@ -35,22 +41,22 @@ export function ContactCoordinates({
       <FactList
         emptyLabel={p.none}
         facts={[
-          {
+          ...privateFact({
             label: p.email,
             value: contact.email && (
               <a href={`mailto:${contact.email}`} className={linkClass}>
                 {contact.email}
               </a>
             ),
-          },
-          {
+          }),
+          ...privateFact({
             label: p.phone,
             value: contact.phone && (
               <a href={`tel:${contact.phone}`} className={linkClass}>
                 {contact.phone}
               </a>
             ),
-          },
+          }),
           {
             label: p.website,
             value: contact.website && (
@@ -64,7 +70,7 @@ export function ContactCoordinates({
               </a>
             ),
           },
-          { label: p.city, value: contact.city },
+          ...privateFact({ label: p.city, value: contact.city }),
           {
             label: p.relations,
             value: relationsText(contact.relations) || null,
@@ -120,7 +126,7 @@ export function ContactCoordinates({
                 },
               ]
             : []),
-          { label: p.notes, value: contact.notes },
+          ...privateFact({ label: p.notes, value: contact.notes }),
         ]}
       />
     </PageSection>

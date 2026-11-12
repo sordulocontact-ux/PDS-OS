@@ -46,7 +46,7 @@ export async function loadNewDealOptions(
       supabase
         .from("title_participations")
         .select(
-          "id, project_id, status, artist:artists!title_participations_artist_same_org(name), title:project_titles!title_participations_title(position, working_title, master_id)",
+          "id, project_id, status, artist:artists!title_participations_artist_same_org(name), title:project_titles!title_participations_title(position, working_title, master_id, status)",
         )
         .in("status", ["proposed", "invited", "confirmed"]),
       supabase
@@ -67,7 +67,11 @@ export async function loadNewDealOptions(
   );
   const projectTitle = new Map(projects.map((p) => [p.id, p.title]));
   const parts = (partsRes.data ?? []).filter(
-    (p) => projectTitle.has(p.project_id) && !openParticipations.has(p.id),
+    (p) =>
+      projectTitle.has(p.project_id) &&
+      !openParticipations.has(p.id) &&
+      // A title abandoned takes its participations out of play (Maël).
+      p.title?.status !== "abandoned",
   );
   const masterIds = parts.flatMap((p) =>
     p.title?.master_id ? [p.title.master_id] : [],

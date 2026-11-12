@@ -1,6 +1,7 @@
 import "server-only";
 
 import { can, type Access } from "@/lib/auth/access";
+import { dealName } from "@/lib/deals/names";
 import { loadDeals } from "@/lib/deals/queries";
 import type { Deal } from "@/lib/deals/types";
 import { deals } from "@/lib/i18n/fr/deals";
@@ -55,7 +56,13 @@ export async function loadMyDealWork(
   const items = all.flatMap((deal): DealWork[] => {
     if (deal.canDecide)
       return [
-        { deal, kind: "validate", title: t.decide, due: null, overdue: false },
+        {
+          deal,
+          kind: "validate",
+          title: t.decideOf(deal.artistName ?? dealName(deal)),
+          due: null,
+          overdue: false,
+        },
       ];
     const mine =
       deal.canWrite &&

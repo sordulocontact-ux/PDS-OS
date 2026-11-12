@@ -64,6 +64,9 @@ export const deals = {
   // A deal's action in Travail and the home (BIZ 4).
   work: {
     decide: "Valider l'accord de principe",
+    // The deal named in the title: two accords side by side on the home
+    // differed by their tag only (UX test of 12/11/2026).
+    decideOf: (name: string) => `Valider l'accord de principe de ${name}`,
     followUp: "Relancer",
     todo: {
       to_contact: "Prendre contact",
@@ -163,6 +166,11 @@ export const deals = {
     },
     missingCount: (count: number) =>
       count === 1 ? "1 champ manque." : `${count} champs manquent.`,
+    // For whoever negotiates but may not open a deal (UX test of 12/11/2026).
+    askTitle: "Ouvrir un deal",
+    askBody: (who: string) =>
+      `Un deal s'ouvre par la direction${who ? ` (${who})` : ""} ou par le responsable du projet, qui vous le confie. Demandez-lui : le deal apparaîtra ici.`,
+    askClose: "Compris",
   },
   // A deal's page (BIZ 4).
   page: {
@@ -187,7 +195,21 @@ export const deals = {
         "Les termes tiennent : la direction valide l'accord de principe avant le contrat.",
       contracting: "L'accord est validé : le contrat se prépare et se signe.",
     } as Record<string, string>,
-    waitDirection: "En attente de la direction : valider l'accord de principe.",
+    waitDirection:
+      "La direction est prévenue : elle valide l'accord de principe ou le renvoie en négociation.",
+    // The terms the direction validates, recalled above its button (UX test
+    // of 12/11/2026: never validate what one has not read).
+    recap: "Termes confirmés",
+    recapNone: "Aucun terme confirmé pour l'instant.",
+    recapOthers: (count: number) =>
+      count === 1
+        ? "1 autre terme n'est pas confirmé."
+        : `${count} autres termes ne sont pas confirmés.`,
+    // An abandoned deal (UX test of 12/11/2026): final, and what to do.
+    abandonedTitle: "Deal abandonné",
+    abandonedBody: (reason: string | null) =>
+      `${reason ? `« ${reason} » ` : ""}Un deal abandonné ne se rouvre pas : pour reprendre, la direction ouvre un nouveau deal.`,
+    reopen: "Ouvrir un nouveau deal",
     decideWhy: (who: string) =>
       `${who} propose un accord de principe sur ces termes : validez-le, ou renvoyez-le en négociation avec un motif.`,
     someone: "Le business manager",
@@ -217,6 +239,9 @@ export const deals = {
       action: "Prochaine action",
       on: "Pour le",
       followUp: "Relancer le",
+      followUpHint:
+        "Si personne n'a répondu d'ici là : PDS OS vous rappelle de relancer.",
+      call: "Prochain call",
       none: "Aucune",
       edit: "Modifier",
       editTitle: "Prochaine action et relance",
@@ -318,6 +343,10 @@ export const deals = {
       "Cette participation appartient à un autre projet.",
     participationOtherArtist:
       "Cette participation est celle d'un autre artiste.",
+    useParticipation:
+      "Cet artiste participe au projet : ouvrez le deal sur sa participation.",
+    participationNotInPlay:
+      "Cette participation n'est plus en jeu (refusée, retirée ou titre abandonné).",
     projectNotFound: "Ce projet est introuvable.",
     artistNotFound: "Cet artiste est introuvable.",
     exists: "Un deal est déjà ouvert pour cette participation.",

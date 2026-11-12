@@ -176,3 +176,17 @@ export async function loadProjectEnvelopeShare(
       }
     : null;
 }
+
+/** The artist a Dépenses filter names (artist names are unique in the
+ * organization), for its envelope above the list; null when unknown. */
+export async function artistIdByName(name: string): Promise<string | null> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("artists")
+    .select("id")
+    .eq("name", name)
+    .is("archived_at", null)
+    .limit(1)
+    .maybeSingle();
+  return data?.id ?? null;
+}

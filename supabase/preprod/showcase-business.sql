@@ -137,9 +137,9 @@ select public.link_deal_contact(pg_temp.k('d:mona'),
 
 -- Budget: Mona Lys's envelope (Claire) and two direct spends (Lina) ------------
 select pg_temp.as_user('claire.morel@preprod.pds');
-select public.open_artist_budget(pg_temp.k('a:Mona Lys'), 4000000,
+select public.open_artist_budget(pg_temp.k('a:Mona Lys'), 6000000,
   date_trunc('year', current_date)::date, null,
-  '{"studio": 1500000, "photo_video": 1000000, "advertising": 1000000}');
+  '{"studio": 3500000, "photo_video": 1000000, "advertising": 1000000}');
 select pg_temp.as_user('lina.haddad@preprod.pds');
 insert into public.budget_lines (organization_id, artist_id, label, amount_cents, family, status)
 values (pg_temp.k('org'), pg_temp.k('a:Mona Lys'), 'Coaching vocal (4 séances)', 60000, 'coaching', 'paid'),

@@ -28,21 +28,25 @@ type Missing = "participation" | "project" | "subject";
  */
 export function NewDealForm({
   options,
+  artistId = null,
   onDone,
 }: {
   options: NewDealOptions;
+  // An artist already chosen (a new deal after an abandoned one).
+  artistId?: string | null;
   onDone: () => void;
 }) {
   const t = fr.deals.create;
   const router = useRouter();
   const created = useRef<string | null>(null);
   const hasParticipations = Object.keys(options.participations).length > 0;
+  const preset = artistId && options.artists[artistId] ? artistId : "";
   const [mode, setMode] = useState<"participation" | "other">(
-    hasParticipations ? "participation" : "other",
+    hasParticipations && !preset ? "participation" : "other",
   );
   const [participation, setParticipation] = useState("");
   const [project, setProject] = useState("");
-  const [artist, setArtist] = useState("");
+  const [artist, setArtist] = useState(preset);
   const [missing, setMissing] = useState<Missing[]>([]);
   const { pending, error, run } = useWriteSubmit(() => {
     onDone();

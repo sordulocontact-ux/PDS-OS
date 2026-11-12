@@ -15,13 +15,20 @@ export const artistBudget = {
     emptyBodyReader:
       "La direction n'a pas encore fixé le budget de cet artiste. Ses dépenses sont listées dessous.",
   },
+  // Above Dépenses filtered on an artist (UX test of 12/11/2026).
+  expensesCard: {
+    title: (artist: string) => `Budget de ${artist}`,
+    open: "Voir son budget",
+  },
   tiles: {
     amount: "Enveloppe",
     spent: "Dépensé",
     rest: "Reste",
     unallocated: "Non réparti",
+    // The projects' part named first: an envelope counts its projects'
+    // spends too, which a reader did not see (UX test of 12/11/2026).
     spentHint: (direct: string, projects: string) =>
-      `${direct} en direct, ${projects} par ses projets`,
+      `Dont ${projects} dépensés par ses projets et ${direct} en direct`,
     pendingHint: (amount: string) => `${amount} encore estimés`,
     overrun: (amount: string) => `Dépassement de ${amount}`,
     unallocatedHint: "La part de l'enveloppe donnée à aucun poste.",

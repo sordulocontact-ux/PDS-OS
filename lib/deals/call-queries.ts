@@ -129,3 +129,14 @@ export async function loadDealCallProposals(
     return [];
   });
 }
+
+/** The next call still to hold of a deal, beside its next action (UX test
+ * of 12/11/2026: its hour sat at the bottom of the page). */
+export function nextDealCall(calls: DealCall[]): DealCall | null {
+  const now = Date.now();
+  return (
+    calls
+      .filter((c) => !c.closed && Date.parse(c.occurredAt) >= now)
+      .sort((a, b) => a.occurredAt.localeCompare(b.occurredAt))[0] ?? null
+  );
+}

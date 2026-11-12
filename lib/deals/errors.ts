@@ -13,6 +13,8 @@ const MESSAGES: Record<string, string> = {
   participation_not_found: t.participationNotFound,
   participation_other_project: t.participationOtherProject,
   participation_other_artist: t.participationOtherArtist,
+  use_participation: t.useParticipation,
+  participation_not_in_play: t.participationNotInPlay,
   project_not_found: t.projectNotFound,
   artist_not_found: t.artistNotFound,
   deal_exists: t.exists,

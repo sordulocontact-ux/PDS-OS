@@ -13,17 +13,24 @@ import { DealNow } from "@/components/deals/deal-now";
 import { DealStageBadge } from "@/components/deals/deal-stage-badge";
 import { DealStages } from "@/components/deals/deal-stages";
 import { DealTerms } from "@/components/deals/deal-terms";
+import { NewDealButton } from "@/components/deals/new-deal-button";
 import { BackLink } from "@/components/shell/back-link";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
 import { PageSection } from "@/components/shell/page-section";
+import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
-import { nextRoundHourInput } from "@/lib/calls/format";
+import { formatSlot, nextRoundHourInput } from "@/lib/calls/format";
 import { loadCallContacts } from "@/lib/calls/invite";
 import { dealCallAgenda, dealCallTitle } from "@/lib/deals/call-prep";
-import { loadDealCallProposals, loadDealCalls } from "@/lib/deals/call-queries";
+import {
+  loadDealCallProposals,
+  loadDealCalls,
+  nextDealCall,
+} from "@/lib/deals/call-queries";
 import { loadDealContacts } from "@/lib/deals/contact-queries";
+import { loadNewDealOptions } from "@/lib/deals/new-deal-options";
 import { dealName } from "@/lib/deals/names";
 import { loadDeal, loadDealEvents } from "@/lib/deals/queries";
 import { loadDealTerms } from "@/lib/deals/term-queries";
@@ -91,6 +98,13 @@ export default async function DealPage({
       loadDealContacts(deal.id),
     ]);
   const callForm = await callFormFor(deal, terms);
+  // An abandoned deal: the direction opens a new one for its artist.
+  const reopenOptions =
+    deal.stage === "abandoned" && can(access, "validate")
+      ? await loadNewDealOptions(access, new Set())
+      : null;
+  // The next call still to hold, its day and hour beside the next action.
+  const nextCall = nextDealCall(calls);
   const s = t.page.sections;
 
   return (
@@ -100,9 +114,32 @@ export default async function DealPage({
         title={dealName(deal)}
         badge={<DealStageBadge deal={deal} size="md" />}
       />
-      <DealNow deal={deal} />
+      <DealNow
+        deal={deal}
+        terms={terms}
+        reopen={
+          reopenOptions && (
+            <NewDealButton
+              options={reopenOptions}
+              artistId={deal.artistId}
+              label={t.page.reopen}
+            />
+          )
+        }
+      />
       <PageSection id="prochaine-action" title={s.next}>
-        <DealNextAction deal={deal} />
+        <DealNextAction
+          deal={deal}
+          nextCall={
+            nextCall
+              ? { label: formatSlot(nextCall), href: routes.call(nextCall.id) }
+              : null
+          }
+        />
+      </PageSection>
+      {/* Who negotiates it, near the top (UX test of 12/11/2026). */}
+      <PageSection id="informations" title={s.info}>
+        <DealInfo deal={deal} negotiators={negotiators} />
       </PageSection>
       {proposals.length > 0 && (
         <PageSection id="propositions" title={dealCalls.proposals.title}>
@@ -112,6 +149,13 @@ export default async function DealPage({
       <PageSection id="termes" title={t.terms.title}>
         <DealTerms dealId={deal.id} terms={terms} canWrite={deal.canWrite} />
       </PageSection>
+      <PageSection id="contacts" title={dealContacts.section}>
+        <DealContacts
+          dealId={deal.id}
+          contacts={contacts}
+          canWrite={deal.canWrite}
+        />
+      </PageSection>
       <PageSection
         id="calls"
         title={dealCalls.section}
@@ -120,18 +164,8 @@ export default async function DealPage({
         <DealCalls calls={calls} />
       </PageSection>
       <DealMemoSections access={access} deal={deal} terms={terms} />
-      <PageSection id="contacts" title={dealContacts.section}>
-        <DealContacts
-          dealId={deal.id}
-          contacts={contacts}
-          canWrite={deal.canWrite}
-        />
-      </PageSection>
       <PageSection id="etapes" title={s.stages}>
         <DealStages deal={deal} events={events} />
-      </PageSection>
-      <PageSection id="informations" title={s.info}>
-        <DealInfo deal={deal} negotiators={negotiators} />
       </PageSection>
       <PageSection id="historique" title={s.history}>
         <DealHistory deal={deal} events={events} />

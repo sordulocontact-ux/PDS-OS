@@ -16,13 +16,25 @@ const NewDealForm = dynamic(() =>
   import("@/components/deals/new-deal-form").then((m) => m.NewDealForm),
 );
 
-/** « Nouveau deal », for the direction and the project managers (BIZ 4). */
-export function NewDealButton({ options }: { options: NewDealOptions }) {
+/** « Nouveau deal », for the direction and the project managers (BIZ 4);
+ * from an abandoned deal, « Ouvrir un nouveau deal » with its artist
+ * already chosen (`artistId`, `label`). */
+export function NewDealButton({
+  options,
+  artistId,
+  label,
+}: {
+  options: NewDealOptions;
+  artistId?: string | null;
+  label?: string;
+}) {
   const t = fr.deals.create;
   const [open, setOpen] = useState(false);
   return (
     <>
-      <Button onClick={() => setOpen(true)}>{t.button}</Button>
+      <div>
+        <Button onClick={() => setOpen(true)}>{label ?? t.button}</Button>
+      </div>
       <FormDialog
         open={open}
         onOpenChange={setOpen}
@@ -31,7 +43,11 @@ export function NewDealButton({ options }: { options: NewDealOptions }) {
         closeLabel={fr.dialogs.close}
       >
         {open && (
-          <NewDealForm options={options} onDone={() => setOpen(false)} />
+          <NewDealForm
+            options={options}
+            artistId={artistId ?? null}
+            onDone={() => setOpen(false)}
+          />
         )}
       </FormDialog>
     </>

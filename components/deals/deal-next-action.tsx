@@ -71,6 +71,7 @@ export function NextActionForm({
         name="followUpOn"
         type="date"
         label={t.followUp}
+        hint={t.followUpHint}
         defaultValue={deal.followUpOn ?? ""}
       />
       {error && <FormMessage kind="error">{error}</FormMessage>}
@@ -84,10 +85,18 @@ export function NextActionForm({
 }
 
 /**
- * A deal's next action and its follow-up date (BIZ 4), as facts; whoever
+ * A deal's next action, its follow-up date and its next call (BIZ 4, day
+ * and hour: UX test of 12/11/2026), as facts; whoever
  * writes the deal changes them in a dialog.
  */
-export function DealNextAction({ deal }: { deal: Deal }) {
+export function DealNextAction({
+  deal,
+  nextCall = null,
+}: {
+  deal: Deal;
+  // The next call still to hold: its day and hour, a link to it.
+  nextCall?: { label: string; href: string } | null;
+}) {
   const t = fr.deals.page.next;
   const [open, setOpen] = useState(false);
   return (
@@ -109,6 +118,14 @@ export function DealNextAction({ deal }: { deal: Deal }) {
           label={t.followUp}
           value={deal.followUpOn ? formatDay(deal.followUpOn) : t.none}
         />
+        {nextCall && (
+          <FactRow
+            label={t.call}
+            value={nextCall.label}
+            href={nextCall.href}
+            hrefLabel={nextCall.label}
+          />
+        )}
       </FactRows>
       <FormDialog
         open={open}
