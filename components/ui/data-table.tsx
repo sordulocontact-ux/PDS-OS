@@ -32,7 +32,8 @@ const hideBelow: Record<Hide, string> = {
 type ColumnProps = {
   // Hidden under this breakpoint (secondary columns on small screens).
   hideBelow?: Hide;
-  // Takes the remaining width; other columns are 192 px.
+  // Takes the remaining width, shared with the other `fill` columns in
+  // proportion to their content; other columns are 192 px.
   fill?: boolean;
   align?: "start" | "end";
 };

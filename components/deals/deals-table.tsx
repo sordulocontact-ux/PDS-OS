@@ -71,9 +71,12 @@ export function DealsTable({
 }) {
   const t = fr.deals.table;
   const columns = contracts ? 5 : 4;
+  // The text columns share the width (Sacha, 12/11/2026: everything sat on
+  // the left, the space left unused after « Négocié par »); the stage keeps
+  // its 192 px.
   const row = (deal: Deal) => (
     <DataTableRow key={deal.id}>
-      <DataTableCell>
+      <DataTableCell fill>
         <DataTableMedia
           visual={<DataTableIcon icon={IconScale} />}
           title={
@@ -97,11 +100,11 @@ export function DealsTable({
       <DataTableCell hideBelow="sm">
         <DealStageBadge deal={deal} />
       </DataTableCell>
-      <DataTableCell hideBelow="md">
+      <DataTableCell hideBelow="md" fill>
         <NextCell deal={deal} today={today} />
       </DataTableCell>
       {contracts && (
-        <DataTableCell hideBelow="md">
+        <DataTableCell hideBelow="md" fill>
           <ContractCell contract={contracts[deal.id]} />
         </DataTableCell>
       )}
@@ -113,11 +116,15 @@ export function DealsTable({
   return (
     <DataTable>
       <DataTableHeader>
-        <DataTableHead>{t.deal}</DataTableHead>
+        <DataTableHead fill>{t.deal}</DataTableHead>
         <DataTableHead hideBelow="sm">{t.stage}</DataTableHead>
-        <DataTableHead hideBelow="md">{t.next}</DataTableHead>
+        <DataTableHead hideBelow="md" fill>
+          {t.next}
+        </DataTableHead>
         {contracts && (
-          <DataTableHead hideBelow="md">{t.contract}</DataTableHead>
+          <DataTableHead hideBelow="md" fill>
+            {t.contract}
+          </DataTableHead>
         )}
         <DataTableHead hideBelow="lg" fill>
           {t.assignee}
