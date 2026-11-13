@@ -8,14 +8,23 @@ import { loadBriefStep } from "@/lib/master-workflow/brief-step";
 import { masterExchangeDefaults } from "@/lib/master-workflow/exchange-defaults";
 import { liveTransmission } from "@/lib/master-workflow/journey";
 import { masterJourneyContext } from "@/lib/master-workflow/journey-context";
+import { loadMasterTitleScope } from "@/lib/master-workflow/title-scope";
 
 // Master, Brief: what the engineers will receive, as a document whose facts
 // are changed in place, then recorded by the project's owner.
 export default async function ProjectMasterBriefPage({
   params,
+  searchParams,
 }: PageProps<"/app/projects/[projectId]/master/brief">) {
-  const { projectId } = await params;
+  const [{ projectId }, { titre }] = await Promise.all([params, searchParams]);
   const { access, project, facts } = await masterJourneyContext(projectId);
+  // One Brief for all the titles (décision 4): a collective's title stays in
+  // the trail only, to find it again on the next step (lot 8).
+  const scope = await loadMasterTitleScope(
+    projectId,
+    "brief",
+    typeof titre === "string" ? titre : null,
+  );
   const step = await loadBriefStep(
     project,
     access,
@@ -31,6 +40,7 @@ export default async function ProjectMasterBriefPage({
     <MasterStepFrame
       projectId={projectId}
       stepKey="brief"
+      titleScope={scope}
       slots={
         mine.length > 0
           ? {

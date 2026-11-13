@@ -6,16 +6,24 @@ import {
 import { RoundStep } from "@/components/master-workflow/round/round-step";
 import { masterJourneyContext } from "@/lib/master-workflow/journey-context";
 import { loadRoundStep } from "@/lib/master-workflow/round-step";
+import { loadMasterTitleScope } from "@/lib/master-workflow/title-scope";
 
 // Master, Mastering: the package sent to the engineer, the private link, the
 // rate, the versions, their feedback and the validator's decision.
 export default async function ProjectMasterMasteringPage({
   params,
+  searchParams,
 }: PageProps<"/app/projects/[projectId]/master/mastering">) {
-  const { projectId } = await params;
+  const [{ projectId }, { titre }] = await Promise.all([params, searchParams]);
+  // A collective: one title at a time (lot 8); null for any other project.
+  const scope = await loadMasterTitleScope(
+    projectId,
+    "mastering",
+    typeof titre === "string" ? titre : null,
+  );
   const [{ project }, round] = await Promise.all([
     masterJourneyContext(projectId),
-    loadRoundStep(projectId, "mastering"),
+    loadRoundStep(projectId, "mastering", scope?.active.masterId ?? null),
   ]);
   // The validator decides first (lot 4 of Ibé's feedback): the version,
   // its feedback and the decision at the head of the step.
@@ -29,6 +37,7 @@ export default async function ProjectMasterMasteringPage({
     <MasterStepFrame
       projectId={projectId}
       stepKey="mastering"
+      titleScope={scope}
       slots={
         lead.length > 0
           ? {

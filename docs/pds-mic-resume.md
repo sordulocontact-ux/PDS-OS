@@ -1,7 +1,7 @@
 # Projet collectif (PDS Mic) : résumé
 
 Résumé de travail de `docs/pds-mic-plan.md` (qui fait foi en cas de doute). Mis à jour à la fin
-de chaque lot. Dernière mise à jour : 13/11/2026, après le lot 7.
+de chaque lot. Dernière mise à jour : 13/11/2026, après le lot 8.
 
 **Module Business fait en parallèle par un collègue** : rôle Business manager, négociation, deal
 memo, contrats, contacts privés, mails. Ces lots n'y touchent pas ; son dossier de négociation
@@ -42,7 +42,8 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
 | 5 | Création d'un collectif (formulaire, depuis une sélection, PO) | fait, validé |
 | 6 | Vue « Titres et artistes » (remplace la liste des lots 2-3), raccord Négociation | fait |
 | 7 | Titre provisoire (voie A) | fait (Chrome après le lot 10) |
-| 8 – 9 | Master : sélecteur de titre ; vue consolidée, abandonnés hors des comptes | à faire |
+| 8 | Master : sélecteur de titre | fait (Chrome après le lot 10) |
+| 9 | Master : vue consolidée, abandonnés hors des comptes | à faire |
 | 10 – 12 | Ciblage marketing par titre ; suivi juridique par participation ; contrat manquant, verrou du tournage | à faire |
 | 13 – 15 | Sorties individuelles et compilation ; plan de sortie par titre ; Distribution par sortie | à faire |
 
@@ -133,10 +134,19 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
   Catalogue : badge « Nom provisoire » (Maquettes, en-tête). Dans le projet, un nom provisoire
   n'est jamais le nom du titre (`masterNameOf`). Journal : `cataloged`, `master_attached`.
   Compte rendu : `docs/pds-mic-rapports/lot-7.md`.
+- **Lot 8** (sans migration) : Master d'un collectif **un titre à la fois** (`?titre=<master>`),
+  choisi dans le fil « Master ▸ titre ▸ étape » (`CrumbSwitcher` : titres du Master dans l'ordre,
+  état Master en gris, coche du Master final, « Abandonné »), gardé d'étape en étape.
+  `loadMasterTitleScope` (`lib/master-workflow/title-scope.ts`, nul hors collectif). Filtré :
+  Source, versions/retours/décisions (`loadRoundStep(…, masterId)`), Master final. Projet entier :
+  Brief, paquet, lien, tarif, ingénieur, fil, facture, Historique ; « tout est validé » et le
+  bilan du Master final comptent tous les titres. Par défaut : titre qui attend une décision
+  (Mixage, Mastering), règle de la Source, sinon premier titre vivant. La ligne d'un titre de
+  « Titres et artistes » ouvre le Master sur lui. Compte rendu : `docs/pds-mic-rapports/lot-8.md`.
 - Tests : `collective-projects`, `project-titles`, `title-participations`, `artist-selections`,
   `collective-project-creation`, `title-board` (lot 6 : ce que chaque lecteur lit des deals et
   du contrat d'une participation, changer l'artiste principal après lancement et son
-  événement, retirer et rattacher), `provisional-titles` (lot 7).
+  événement, retirer et rattacher), `provisional-titles` (lot 7), `collective-master` (lot 8).
 
 ## Côté Business (Sacha), touchant les collectifs
 

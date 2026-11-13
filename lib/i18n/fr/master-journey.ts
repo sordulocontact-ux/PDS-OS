@@ -10,6 +10,8 @@ const lowerFirst = (text: string) =>
 export const masterJourney = {
   module: "Master",
   facts: { masterFinal: "Master final attendu le" },
+  // Projet collectif, lot 8: the titles of the trail's switcher.
+  titles: { abandoned: "Abandonné" },
   roles: {
     owner: "Responsable du Master",
     ownerWhat: "Confirme la source, remplit le Brief, envoie les dossiers",

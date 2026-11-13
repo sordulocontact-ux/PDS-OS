@@ -6,8 +6,11 @@
 
 import type { ContractState } from "@/lib/contracts/types";
 import type { AgreementStatus, DealStage } from "@/lib/deals/types";
+import { projectTitles } from "@/lib/i18n/fr/project-titles";
 import type { TitleParticipation } from "@/lib/projects/participation-rules";
 import type { ProjectTitle } from "@/lib/projects/title-rules";
+
+const fr = { projectTitles };
 
 // ------------------------------------------------------------------ Master
 
@@ -91,6 +94,27 @@ export function titleMasterState(input: {
 /** The common status a title's Master state reads as (its pill's tone,
  * workflowStatusTone): a version to decide waits for someone, a retake or
  * a round under way runs, the master final is done. */
+/** The words of a title's Master state (« Mix V2 à valider »); null: no
+ * master yet. Shared by « Titres et artistes » and the Master's title
+ * switcher (lot 8). */
+export function titleMasterLabel(state: TitleMasterState): string | null {
+  const t = fr.projectTitles.board.master;
+  switch (state.kind) {
+    case "none":
+      return null;
+    case "todo":
+      return t.todo;
+    case "mixed":
+      return t.mixed;
+    case "final":
+      return t.final;
+    case "round":
+      return state.decision === "pending"
+        ? t.pending(state.round, state.number)
+        : t.retake(state.round, state.number);
+  }
+}
+
 export function titleMasterStatus(
   state: TitleMasterState,
 ): "not_started" | "in_progress" | "waiting" | "done" | null {

@@ -26,13 +26,21 @@ const h3 =
  * unlocks (Distribution, the SACEM bulletin's duration), then the other
  * deliverables of the Brief, expected or received.
  */
-export function FinalStep({ view }: { view: FinalView }) {
-  const missing = view.titles.reduce(
+export function FinalStep({
+  view,
+  whole = view,
+}: {
+  view: FinalView;
+  // A collective shows one title at a time (lot 8): what is still missing
+  // is counted on all its titles all the same, never on the one shown.
+  whole?: FinalView;
+}) {
+  const missing = whole.titles.reduce(
     (n, x) => n + x.deliverables.filter((d) => !d.received).length,
     0,
   );
   const allFinal =
-    view.titles.length > 0 && view.titles.every((x) => x.final ?? x.before);
+    whole.titles.length > 0 && whole.titles.every((x) => x.final ?? x.before);
   return (
     <div className="flex flex-col gap-5">
       {view.titles.map((title) => (

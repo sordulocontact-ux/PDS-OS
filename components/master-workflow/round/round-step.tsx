@@ -67,11 +67,7 @@ export function RoundStep({
   // Every title has its final version: the step shows it, the rest
   // (rate, link, thread, engineer) folds (Ibé, 04/11/2026: « que
   // l'essentiel sur la page du mix validé »).
-  const finished =
-    round.versions.titles.length > 0 &&
-    round.versions.titles.every((x) =>
-      x.versions.some((v) => v.decision === "approved"),
-    );
+  const finished = round.finished;
   // PDS OS sends the e-mail itself: configured, and an address to write to.
   const mailed = round.emailEnabled && Boolean(view.engineer?.email);
   const rest = (

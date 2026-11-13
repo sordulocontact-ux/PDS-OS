@@ -90,6 +90,7 @@ export type RoundStepView = {
   blockers: Blocker[];
   // The mix existed and was declared Mix final (« Non nécessaire »).
   notNeeded: Array<{
+    masterId: string;
     title: string;
     file: string;
     by: string | null;
@@ -97,6 +98,9 @@ export type RoundStepView = {
   }>;
   // The validated Mix finals: the Mastering's prerequisite.
   mixReady: boolean;
+  // Every title of the round has its validated version, all titles counted
+  // even when a collective shows one (lot 8): the rest of the step folds.
+  finished: boolean;
   validator: string | null;
   owner: string | null;
   canSeeBudget: boolean;
@@ -121,6 +125,9 @@ export type RoundStepView = {
 export async function loadRoundStep(
   projectId: string,
   stage: Stage,
+  // A collective (lot 8): the title whose versions, feedback and decisions
+  // the step shows; the package, link, rate and engineer stay the project's.
+  masterId: string | null = null,
 ): Promise<RoundStepView> {
   const { access, project, facts } = await masterJourneyContext(projectId);
   const supabase = await createClient();
@@ -260,7 +267,17 @@ export async function loadRoundStep(
         : []),
       ...shown.blockers,
     ],
-    versions,
+    versions: masterId
+      ? {
+          ...versions,
+          titles: versions.titles.filter((x) => x.masterId === masterId),
+        }
+      : versions,
+    finished:
+      versions.titles.length > 0 &&
+      versions.titles.every((x) =>
+        x.versions.some((v) => v.decision === "approved"),
+      ),
     extras,
     link: live
       ? {
@@ -278,9 +295,10 @@ export async function loadRoundStep(
       live && brief && brief.contentChangedAt > live.createdAt,
     ),
     notNeeded: mixVersions.flatMap((v) =>
-      v.declared
+      v.declared && (!masterId || v.masterId === masterId)
         ? [
             {
+              masterId: v.masterId,
               title: facts.titles.find((t) => t.id === v.masterId)?.title ?? "",
               file: v.fileName,
               by: v.decidedBy,

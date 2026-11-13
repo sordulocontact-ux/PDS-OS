@@ -57,12 +57,12 @@ import {
   startTitleWork,
 } from "@/lib/projects/title-actions";
 import {
+  titleMasterLabel,
   titleMasterStatus,
   type BoardParticipation,
   type BoardTitle,
   type DealReach,
   type ParticipationContract,
-  type TitleMasterState,
 } from "@/lib/projects/title-board-rules";
 import {
   creditModeOf,
@@ -132,25 +132,6 @@ function detailOf(title: BoardTitle, label: string): string {
   return demo
     ? t.catalogDemo(title.master.title, demo)
     : t.catalog(title.master.title);
-}
-
-/** The words of a title's Master state; null: no master yet. */
-function masterLabel(state: TitleMasterState): string | null {
-  const t = fr.projectTitles.board.master;
-  switch (state.kind) {
-    case "none":
-      return null;
-    case "todo":
-      return t.todo;
-    case "mixed":
-      return t.mixed;
-    case "final":
-      return t.final;
-    case "round":
-      return state.decision === "pending"
-        ? t.pending(state.round, state.number)
-        : t.retake(state.round, state.number);
-  }
 }
 
 /** The words of a participation's contract; null: not expected (« — »). */
@@ -460,7 +441,7 @@ function TitleRow({
   const t = fr.projectTitles;
   const abandoned = title.status === "abandoned";
   const deals = dealReach !== "none";
-  const master = masterLabel(title.masterState);
+  const master = titleMasterLabel(title.masterState);
   const masterStatus = titleMasterStatus(title.masterState);
   const shared =
     title.sharedWith && !abandoned
@@ -476,9 +457,15 @@ function TitleRow({
               abandoned && "text-[color:var(--text-secondary)]",
             )}
           >
-            {/* The title's Master, once it has a master (lot 8 will open
-                it on this title). */}
-            <DataTableLink href={title.master ? links.master : null}>
+            {/* The title's Master, once it has a master, open on this
+                title (lot 8). */}
+            <DataTableLink
+              href={
+                title.master && links.master
+                  ? `${links.master}?titre=${title.master.id}`
+                  : null
+              }
+            >
               {label}
             </DataTableLink>
           </span>
