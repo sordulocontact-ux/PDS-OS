@@ -40,12 +40,13 @@ function familyOf(line: BudgetLine): string | null {
 // Budget lines with their total (code), edit and delete for whoever
 // writes them. The one table of the spends (a project's Budget, an
 // artist's, Dépenses), one fact per column (Sacha, 12/11/2026: never two
-// lines of facts under the label): its day, the spend (a real one without
+// lines of facts under the label): the spend first (a real one without
 // its proof signalled, BUD 1), its poste, what it belongs to when
 // `showTarget` (a link to its budget), what it is linked to (a lever or a
-// deliverable of the Stratégie, when any line has one), its state, its
-// amount. The note and the amount committed before an invoice are read in
-// the line's form; its proof opens from the paperclip.
+// deliverable of the Stratégie, when any line has one), its day (no
+// weekday, Sacha 13/11/2026), its state, its amount. The note and the
+// amount committed before an invoice are read in the line's form; its
+// proof opens from the paperclip.
 export function BudgetTable({
   lines,
   canEdit,
@@ -70,9 +71,6 @@ export function BudgetTable({
   return (
     <DataTable>
       <DataTableHeader>
-        <DataTableHead hideBelow="sm" className="w-28">
-          {t.table.date}
-        </DataTableHead>
         <DataTableHead fill>{t.table.label}</DataTableHead>
         <DataTableHead hideBelow="md" fill>
           {t.table.family}
@@ -87,6 +85,9 @@ export function BudgetTable({
             {t.table.linkedTo}
           </DataTableHead>
         )}
+        <DataTableHead hideBelow="sm" className="w-28">
+          {t.table.date}
+        </DataTableHead>
         <DataTableHead hideBelow="sm" className="w-32">
           {t.table.status}
         </DataTableHead>
@@ -102,9 +103,6 @@ export function BudgetTable({
       <DataTableBody>
         {lines.map((line) => (
           <DataTableRow key={line.id}>
-            <DataTableCell hideBelow="sm" className="w-28 tabular-nums">
-              {formatDay(line.spentOn)}
-            </DataTableCell>
             <DataTableCell fill>
               <span className="flex min-w-0 items-center gap-2">
                 <span className="truncate">{line.label}</span>
@@ -142,6 +140,9 @@ export function BudgetTable({
                 {line.deliverableTitle ?? line.leverLabel ?? EMPTY_CELL}
               </DataTableCell>
             )}
+            <DataTableCell hideBelow="sm" className="w-28 tabular-nums">
+              {formatDay(line.spentOn, { weekday: false })}
+            </DataTableCell>
             <DataTableCell hideBelow="sm" className="w-32">
               <StatusBadge tone={budgetStatusTone[line.status]} size="sm">
                 {t.statuses[line.status]}
@@ -192,9 +193,6 @@ export function BudgetTable({
           </DataTableRow>
         ))}
         <DataTableRow className="border-t border-[color:var(--border-hairline)]">
-          <DataTableCell hideBelow="sm" className="w-28">
-            {null}
-          </DataTableCell>
           <DataTableCell fill className="font-semibold">
             {t.table.total}
           </DataTableCell>
@@ -211,6 +209,9 @@ export function BudgetTable({
               {null}
             </DataTableCell>
           )}
+          <DataTableCell hideBelow="sm" className="w-28">
+            {null}
+          </DataTableCell>
           <DataTableCell hideBelow="sm" className="w-32">
             {null}
           </DataTableCell>

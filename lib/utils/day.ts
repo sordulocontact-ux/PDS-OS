@@ -55,10 +55,15 @@ function read(value: string | Date): DayParts | null {
   };
 }
 
-/** « Sam. 05/12/2026 »: the date of a fact, said in full. */
-export function formatDay(value: string | Date): string {
+/** « Sam. 05/12/2026 »: the date of a fact, said in full; « 05/12/2026 »
+ *  with `weekday: false` (a spend's day in its table, Sacha 13/11/2026). */
+export function formatDay(
+  value: string | Date,
+  { weekday: withWeekday = true }: { weekday?: boolean } = {},
+): string {
   const p = read(value);
   if (!p) return "";
+  if (!withWeekday) return `${p.day}/${p.month}/${p.year}`;
   const weekday = p.weekday.replace(/\.$/, "");
   const capital = weekday.charAt(0).toUpperCase() + weekday.slice(1);
   return `${capital}. ${p.day}/${p.month}/${p.year}`;
