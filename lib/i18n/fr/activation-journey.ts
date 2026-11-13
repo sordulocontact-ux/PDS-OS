@@ -253,6 +253,8 @@ export const activationJourney = {
     done: "Terminées",
   },
   noneHere: "Aucune activation ici.",
+  // A collective's list filtered on a title (lot 10).
+  noneForTitle: "Aucune activation pour ce titre dans cette vue.",
   // The table of the activations (Sacha 10/11/2026), sober columns: never
   // the 9 columns removed on 18/10.
   table: {

@@ -21,6 +21,7 @@ import {
   updateDeliverable,
 } from "@/lib/strategy/actions/deliverables";
 import { updateLever } from "@/lib/strategy/actions/levers";
+import { PROJECT_SCOPE } from "@/lib/projects/title-scope-rules";
 import { lotForLever } from "@/lib/strategy/deliverable-lots";
 import type { StrategyData } from "@/lib/strategy/queries";
 
@@ -41,8 +42,11 @@ export function DeliverablesSection({
   levers,
   members,
   milestones,
+  titleScopes = null,
   projectId,
 }: Pick<StrategyData, "deliverables" | "levers" | "members" | "milestones"> & {
+  // A collective (lot 10): the titles each deliverable targets.
+  titleScopes?: StrategyData["titleScopes"];
   projectId: string;
 }) {
   const t = fr.strategy.deliverables;
@@ -192,6 +196,21 @@ export function DeliverablesSection({
                         }
                         canEdit={canEdit}
                         pending={pending}
+                        titleScope={
+                          titleScopes
+                            ? {
+                                action: {
+                                  projectId,
+                                  deliverableId: d.id,
+                                  name: d.title,
+                                },
+                                scope:
+                                  titleScopes.deliverables[d.id] ??
+                                  PROJECT_SCOPE,
+                                titles: titleScopes.titles,
+                              }
+                            : null
+                        }
                         onEdit={() => setEditing(d.id)}
                         onRemove={() =>
                           run(() => removeDeliverable(projectId, d.id))

@@ -1,5 +1,10 @@
 import "server-only";
 
+import type {
+  ActionTitleScope,
+  ScopeTitle,
+} from "@/lib/projects/title-scope-rules";
+import { loadTitleScopes } from "@/lib/projects/title-scopes";
 import type { Access } from "@/lib/auth/access";
 import {
   BRIEF_TEXT_FIELDS,
@@ -113,6 +118,12 @@ export type StrategyData = {
   reports: ImportableReport[];
   members: Member[];
   validators: Member[];
+  // A collective (lot 10): its titles and the titles each deliverable
+  // targets (none listed: the whole project); null for any other project.
+  titleScopes: {
+    titles: ScopeTitle[];
+    deliverables: Record<string, ActionTitleScope>;
+  } | null;
 };
 
 /** Everything the strategy page shows, read with the user's session (RLS). */
@@ -252,8 +263,15 @@ export async function loadStrategy(
 
   const needLabel = new Map(needs.map((n) => [n.id, n.label]));
   const answered = new Set(levers.map((l) => l.need_id));
+  const scopes = await loadTitleScopes(projectId);
 
   return {
+    titleScopes: scopes
+      ? {
+          titles: scopes.titles,
+          deliverables: Object.fromEntries(scopes.deliverables),
+        }
+      : null,
     stage,
     // A submitted or validated strategy has obviously begun.
     started:

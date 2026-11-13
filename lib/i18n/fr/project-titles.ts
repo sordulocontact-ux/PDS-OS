@@ -39,6 +39,39 @@ export const projectTitles = {
     submit: "Ajouter le titre",
     done: "Titre ajouté.",
   },
+  // Lot 10: the titles a marketing action targets (deliverable_titles).
+  scope: {
+    label: "Titres visés",
+    kinds: {
+      project: "Tout le projet",
+      all_titles: "Tous les titres",
+      titles: "Certains titres",
+      none: "Aucun titre",
+    },
+    abandoned: (label: string) => `${label} (abandonné)`,
+    edit: "Modifier",
+    editLabel: (action: string) =>
+      `Modifier les titres visés par « ${action} »`,
+    button: "Titres",
+    title: (action: string) => `Titres visés par « ${action} »`,
+    description:
+      "Une action peut valoir pour tout le projet, pour tous ses titres, pour certains, ou pour aucun : elle n'est jamais copiée par titre.",
+    choice: "Périmètre",
+    pick: "Titres",
+    noTitle:
+      "Le projet n'a pas encore de titre : « Tous les titres » vaudra pour ceux qui viendront.",
+    submit: "Enregistrer",
+    done: "Titres visés enregistrés.",
+    // The filter of a list by title.
+    filter: "Titre",
+    filterAll: "Tous les titres",
+    errors: {
+      failed: "Les titres visés n'ont pas pu être enregistrés. Réessayez.",
+      titlesRequired: "Choisissez au moins un titre.",
+      abandoned: "Ce titre est abandonné : il n'est plus proposé.",
+      titleNotFound: "Ce titre n'existe plus dans le projet.",
+    },
+  },
   // Lot 7 (voie A): a title not in the Catalogue yet.
   catalogStart: {
     action: "Déposer un audio",

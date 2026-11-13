@@ -5169,6 +5169,85 @@ export type Database = {
           },
         ]
       }
+      deliverable_titles: {
+        Row: {
+          activation_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          organization_id: string
+          project_id: string
+          scope: string
+          strategy_deliverable_id: string | null
+          title_id: string | null
+        }
+        Insert: {
+          activation_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id: string
+          project_id: string
+          scope: string
+          strategy_deliverable_id?: string | null
+          title_id?: string | null
+        }
+        Update: {
+          activation_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id?: string
+          project_id?: string
+          scope?: string
+          strategy_deliverable_id?: string | null
+          title_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deliverable_titles_activation_same_org"
+            columns: ["activation_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_activations"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "deliverable_titles_activation_same_org"
+            columns: ["activation_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_review_activations"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "deliverable_titles_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deliverable_titles_deliverable_same_org"
+            columns: ["strategy_deliverable_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "strategy_deliverables"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "deliverable_titles_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "deliverable_titles_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "project_titles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deliverable_deliveries: {
         Row: {
           approved_at: string | null
@@ -19793,6 +19872,15 @@ export type Database = {
       }
       request_project_master_invoices: {
         Args: { p_project_id: string }
+        Returns: undefined
+      }
+      set_marketing_title_scope: {
+        Args: {
+          p_activation_id?: string
+          p_scope: string
+          p_strategy_deliverable_id?: string
+          p_title_ids?: string[]
+        }
         Returns: undefined
       }
       reactivate_project_title: {

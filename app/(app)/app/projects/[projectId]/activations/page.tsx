@@ -14,6 +14,10 @@ export default async function ProjectActivationsPage({
   const [{ projectId }, query] = await Promise.all([params, searchParams]);
   await requireLaunchedProject(projectId);
   return (
-    <ActivationsIndex projectId={projectId} filter={filterOf(query.vue)} />
+    <ActivationsIndex
+      projectId={projectId}
+      filter={filterOf(query.vue)}
+      titleId={typeof query.titre === "string" ? query.titre : null}
+    />
   );
 }

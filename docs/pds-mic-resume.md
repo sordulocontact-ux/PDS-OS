@@ -1,7 +1,7 @@
 # Projet collectif (PDS Mic) : résumé
 
 Résumé de travail de `docs/pds-mic-plan.md` (qui fait foi en cas de doute). Mis à jour à la fin
-de chaque lot. Dernière mise à jour : 13/11/2026, après le lot 9.
+de chaque lot. Dernière mise à jour : 13/11/2026, après le lot 10.
 
 **Module Business fait en parallèle par un collègue** : rôle Business manager, négociation, deal
 memo, contrats, contacts privés, mails. Ces lots n'y touchent pas ; son dossier de négociation
@@ -44,7 +44,8 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
 | 7 | Titre provisoire (voie A) | fait (Chrome après le lot 10) |
 | 8 | Master : sélecteur de titre | fait (Chrome après le lot 10) |
 | 9 | Master : vue consolidée, abandonnés hors des comptes | fait, sauf « Demander des fichiers » (question) |
-| 10 – 12 | Ciblage marketing par titre ; suivi juridique par participation ; contrat manquant, verrou du tournage | à faire |
+| 10 | Ciblage marketing par titre | fait (Chrome après le lot 10) |
+| 11 – 12 | Suivi juridique par participation ; contrat manquant, verrou du tournage | à faire |
 | 13 – 15 | Sorties individuelles et compilation ; plan de sortie par titre ; Distribution par sortie | à faire |
 
 ## Déjà en base (migrations `20261111…`)
@@ -151,10 +152,20 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
   (l'abandon du dernier titre en attente l'envoie). Sélecteur du Master sans les abandonnés. Vue
   consolidée `TitlesOverview` (source, mix, mastering, validation). **« Demander des fichiers »
   pas construit** : à qui et quoi, en question (`docs/pds-mic-rapports/lot-9.md`).
+- **Lot 10** (`20261113200101_deliverable_titles`) : `deliverable_titles` = titres visés par une
+  action (livrable engagé de la Stratégie ou activation, un seul). Aucune ligne = tout le projet
+  (défaut) ; `all_titles` (une ligne, vaut pour les titres à venir) ; `titles` (une ligne par
+  titre) ; `none`. Jamais dupliquée, rien créé par titre. `set_marketing_title_scope` (responsable,
+  collectif, lignes remplacées ; abandonné déjà visé gardé, jamais revisé). Modale « Titres
+  visés » (`TitleScopeLine`, `TitleScopeButton`) : page d'une activation, d'un livrable en
+  Production, livrables de la Stratégie ; périmètre affiché sous chaque activation et dans la
+  barre de la Production ; filtre « Titre » de la liste des activations (tout le projet et tous
+  les titres restent visibles). Entrée dans `delete_project_row`. Compte rendu :
+  `docs/pds-mic-rapports/lot-10.md`.
 - Tests : `collective-projects`, `project-titles`, `title-participations`, `artist-selections`,
   `collective-project-creation`, `title-board` (lot 6 : ce que chaque lecteur lit des deals et
   du contrat d'une participation, changer l'artiste principal après lancement et son
-  événement, retirer et rattacher), `provisional-titles` (lot 7), `collective-master` (lots 8 et 9).
+  événement, retirer et rattacher), `provisional-titles` (lot 7), `collective-master` (lots 8 et 9), `deliverable-titles` (lot 10).
 
 ## Côté Business (Sacha), touchant les collectifs
 
