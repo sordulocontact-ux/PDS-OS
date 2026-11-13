@@ -12271,6 +12271,7 @@ export type Database = {
           rights_year: number | null
           source_master_id: string | null
           title: string
+          title_is_provisional: boolean
           updated_at: string
           variant: string
           variant_label: string | null
@@ -12296,6 +12297,7 @@ export type Database = {
           rights_year?: number | null
           source_master_id?: string | null
           title: string
+          title_is_provisional?: boolean
           updated_at?: string
           variant?: string
           variant_label?: string | null
@@ -12321,6 +12323,7 @@ export type Database = {
           rights_year?: number | null
           source_master_id?: string | null
           title?: string
+          title_is_provisional?: boolean
           updated_at?: string
           variant?: string
           variant_label?: string | null
@@ -19775,6 +19778,18 @@ export type Database = {
       promote_demo: {
         Args: { p_master_id: string; p_title: string }
         Returns: undefined
+      }
+      ensure_project_title_master: {
+        Args: { p_title_id: string }
+        Returns: string
+      }
+      attach_master_to_project_title: {
+        Args: { p_master_id: string; p_title_id: string }
+        Returns: undefined
+      }
+      provisional_title_name: {
+        Args: { p_title_id: string }
+        Returns: string
       }
       reactivate_project_title: {
         Args: { p_title_id: string }

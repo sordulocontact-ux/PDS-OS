@@ -45,7 +45,9 @@ export default async function MasterProjectsPage({
   ]);
   if (!master) notFound();
   const canCreate = can(access, "create_projects");
-  const linkable = canCreate ? await listLinkableProjects(masterId) : [];
+  // Who creates projects, and the owner of a collective (lot 7).
+  const linkable = await listLinkableProjects(masterId, access);
+  const canLink = canCreate || linkable.length > 0;
   const { projects, error } = await listProjects({
     ids: master.projects.map((p) => p.id),
   });
@@ -58,18 +60,20 @@ export default async function MasterProjectsPage({
         id="projects"
         title={t.title}
         action={
-          canCreate && (
+          canLink && (
             <div className="flex flex-wrap gap-2">
               <ProjectLinkButton masterId={master.id} projects={linkable} />
-              <Link
-                href={routes.projectsNewFromMaster(master.id)}
-                className={buttonVariants({ variant: "outline", size: "sm" })}
-              >
-                <ButtonRoll>
-                  <IconPlus aria-hidden data-icon="inline-start" />
-                  {t.create}
-                </ButtonRoll>
-              </Link>
+              {canCreate && (
+                <Link
+                  href={routes.projectsNewFromMaster(master.id)}
+                  className={buttonVariants({ variant: "outline", size: "sm" })}
+                >
+                  <ButtonRoll>
+                    <IconPlus aria-hidden data-icon="inline-start" />
+                    {t.create}
+                  </ButtonRoll>
+                </Link>
+              )}
             </div>
           )
         }

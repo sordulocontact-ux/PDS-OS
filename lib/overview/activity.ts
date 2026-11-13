@@ -214,7 +214,9 @@ function titleEventText(kind: string, detail: Record<string, unknown>): string {
   const status = (value: unknown) =>
     p.statuses[participationStatusOf(text(value) ?? "")];
   const position = typeof detail.position === "number" ? detail.position : 0;
-  const masterTitle = text(detail.master_title);
+  // A provisional name of the Catalogue is not the title's name (lot 7).
+  const masterTitle =
+    detail.master_provisional === true ? null : text(detail.master_title);
   const label = (workingTitle: string | null) =>
     projectTitleLabel({ position, workingTitle, masterTitle });
   const current = label(text(detail.working_title));
@@ -222,7 +224,25 @@ function titleEventText(kind: string, detail: Record<string, unknown>): string {
     case "added":
       return t.added(current);
     case "renamed":
-      return t.renamed(label(text(detail.from)), label(text(detail.to)));
+      return (detail.master_named === true ? t.renamedInCatalog : t.renamed)(
+        projectTitleLabel({
+          position,
+          workingTitle: text(detail.from),
+          masterTitle: detail.master_named === true ? null : masterTitle,
+        }),
+        label(text(detail.to)),
+      );
+    case "cataloged":
+      return t.cataloged(current);
+    case "master_attached":
+      return t.masterAttached(
+        projectTitleLabel({
+          position,
+          workingTitle: text(detail.working_title),
+          masterTitle: null,
+        }),
+        text(detail.master_title) ?? "",
+      );
     case "abandoned":
       return t.abandoned(current, text(detail.reason) ?? "");
     case "reactivated":

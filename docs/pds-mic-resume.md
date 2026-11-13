@@ -1,7 +1,7 @@
 # Projet collectif (PDS Mic) : résumé
 
 Résumé de travail de `docs/pds-mic-plan.md` (qui fait foi en cas de doute). Mis à jour à la fin
-de chaque lot. Dernière mise à jour : 13/11/2026, après le lot 6 (fait, commité).
+de chaque lot. Dernière mise à jour : 13/11/2026, après le lot 7.
 
 **Module Business fait en parallèle par un collègue** : rôle Business manager, négociation, deal
 memo, contrats, contacts privés, mails. Ces lots n'y touchent pas ; son dossier de négociation
@@ -41,7 +41,7 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
 | 1 – 4 | Drapeau et artiste principal ; titres, abandon, réactivation ; participations artiste ; sélections d'artistes | faits |
 | 5 | Création d'un collectif (formulaire, depuis une sélection, PO) | fait, validé |
 | 6 | Vue « Titres et artistes » (remplace la liste des lots 2-3), raccord Négociation | fait |
-| 7 | Titre provisoire (voie A) | à faire |
+| 7 | Titre provisoire (voie A) | fait (Chrome après le lot 10) |
 | 8 – 9 | Master : sélecteur de titre ; vue consolidée, abandonnés hors des comptes | à faire |
 | 10 – 12 | Ciblage marketing par titre ; suivi juridique par participation ; contrat manquant, verrou du tournage | à faire |
 | 13 – 15 | Sorties individuelles et compilation ; plan de sortie par titre ; Distribution par sortie | à faire |
@@ -120,10 +120,23 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
   Code : `lib/projects/title-board-rules.ts` (pur), `title-board.ts` (lectures),
   `main-artist-actions.ts`, `guest-titles.ts` (partagé avec `edit-actions.ts`),
   `components/projects/titles/` ; `DataTableCell colSpan` ajouté ; `lib/overview/activity.ts`.
+- **Lot 7** (`20261113180101_provisional_titles`) : `masters.title_is_provisional` (jamais écrit
+  par le navigateur ; tout renommage du master le termine). `ensure_project_title_master` : au
+  premier audio (« Déposer un audio » dans le « ⋯ » d'un titre pas encore au Catalogue, qui ouvre
+  l'onglet Audio de sa fiche) ou à la première session (les titres sans master des collectifs
+  sont proposés dans « Nouvelle session », `pt:` + id), maquette `draft` « Sans titre · Artiste ·
+  Projet », créditée à l'artiste principal (`main`), invités confirmés en `featuring`, reliée au
+  projet, titre actif. Droits : qui écrit les titres, ou `manage_sessions` sur un projet visible.
+  `rename_project_title` nomme le master provisoire. `attach_master_to_project_title` (« Rattacher
+  un titre du Catalogue »). « Rattacher à un projet existant » propose les collectifs (lancés ou
+  non, tout type) dont la personne écrit les titres, nouveau titre ou titre qui attendait.
+  Catalogue : badge « Nom provisoire » (Maquettes, en-tête). Dans le projet, un nom provisoire
+  n'est jamais le nom du titre (`masterNameOf`). Journal : `cataloged`, `master_attached`.
+  Compte rendu : `docs/pds-mic-rapports/lot-7.md`.
 - Tests : `collective-projects`, `project-titles`, `title-participations`, `artist-selections`,
   `collective-project-creation`, `title-board` (lot 6 : ce que chaque lecteur lit des deals et
   du contrat d'une participation, changer l'artiste principal après lancement et son
-  événement, retirer et rattacher).
+  événement, retirer et rattacher), `provisional-titles` (lot 7).
 
 ## Côté Business (Sacha), touchant les collectifs
 

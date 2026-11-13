@@ -3,6 +3,8 @@
 import {
   IconArrowDottedRotateAnticlockwise,
   IconBoxArchive,
+  IconLink,
+  IconMicrophone,
   IconMinus,
   IconPenWriting2,
   IconTriangleWarning,
@@ -14,6 +16,7 @@ import { DealStageBadge } from "@/components/deals/deal-stage-badge";
 import { IconArrowUpRight, IconDisc, IconUserPlus } from "@/components/icons";
 import {
   AddParticipationForm,
+  AttachCatalogTitleForm,
   ParticipationStatusForm,
   RenameTitleForm,
   type ArtistChoices,
@@ -51,6 +54,7 @@ import { isActiveParticipation } from "@/lib/projects/participation-rules";
 import {
   abandonProjectTitle,
   reactivateProjectTitle,
+  startTitleWork,
 } from "@/lib/projects/title-actions";
 import {
   titleMasterStatus,
@@ -60,7 +64,11 @@ import {
   type ParticipationContract,
   type TitleMasterState,
 } from "@/lib/projects/title-board-rules";
-import { creditModeOf, projectTitleLabel } from "@/lib/projects/title-rules";
+import {
+  creditModeOf,
+  masterNameOf,
+  projectTitleLabel,
+} from "@/lib/projects/title-rules";
 import {
   contractStateTone,
   participationStatusTone,
@@ -85,7 +93,7 @@ const labelOf = (title: BoardTitle) =>
   projectTitleLabel({
     position: title.position,
     workingTitle: title.workingTitle,
-    masterTitle: title.master?.title ?? null,
+    masterTitle: masterNameOf(title.master),
   });
 
 /** How a confirmation credits the title (creditModeOf), and the warning of
@@ -115,6 +123,8 @@ function detailOf(title: BoardTitle, label: string): string {
       title.abandonReason,
     );
   if (!title.master) return t.notInCatalog;
+  // Lot 7: its title in the Catalogue waits for its name.
+  if (title.master.provisional) return t.catalogProvisional(title.master.title);
   const demo = title.master.demoStatus
     ? fr.demos.badge(fr.demos.statuses[title.master.demoStatus])
     : null;
@@ -278,6 +288,7 @@ export function TitlesBoard({
   dealReach,
   canManage,
   artists,
+  masterOptions = {},
   links,
 }: {
   projectId: string;
@@ -285,6 +296,9 @@ export function TitlesBoard({
   dealReach: DealReach;
   canManage: boolean;
   artists: ArtistChoices;
+  // The Catalogue's titles not in the project yet (« Rattacher un titre du
+  // Catalogue », lot 7): id → « Titre · Artistes ».
+  masterOptions?: Record<string, string>;
   links: BoardLinks;
 }) {
   const t = fr.projectTitles.board;
@@ -311,6 +325,7 @@ export function TitlesBoard({
         dealReach={dealReach}
         canManage={canManage}
         artists={artists}
+        masterOptions={masterOptions}
         links={links}
       />
     ));
@@ -361,6 +376,7 @@ type RowProps = {
   dealReach: DealReach;
   canManage: boolean;
   artists: ArtistChoices;
+  masterOptions: Record<string, string>;
   links: BoardLinks;
 };
 
@@ -431,6 +447,7 @@ function TitleRow({
   dealReach,
   canManage,
   artists,
+  masterOptions,
   links,
   label,
   adding,
@@ -524,6 +541,7 @@ function TitleRow({
           title={title}
           label={label}
           artists={artists}
+          masterOptions={masterOptions}
           canManage={canManage}
           adding={adding}
           onAdding={onAdding}
@@ -704,6 +722,7 @@ function TitleActions({
   title,
   label,
   artists,
+  masterOptions,
   canManage,
   adding,
   onAdding,
@@ -712,6 +731,7 @@ function TitleActions({
   title: BoardTitle;
   label: string;
   artists: ArtistChoices;
+  masterOptions: Record<string, string>;
   canManage: boolean;
   adding: boolean;
   onAdding: (open: boolean) => void;
@@ -719,7 +739,9 @@ function TitleActions({
   const t = fr.projectTitles;
   const router = useRouter();
   const credit = creditOf(title);
-  const [open, setOpen] = useState<"rename" | "abandon" | null>(null);
+  const [open, setOpen] = useState<"rename" | "abandon" | "attach" | null>(
+    null,
+  );
   const [, startTransition] = useTransition();
   const close = () => setOpen(null);
   const catalog: RowAction[] = title.master
@@ -732,6 +754,33 @@ function TitleActions({
         },
       ]
     : [];
+  // Lot 7: a title not in the Catalogue yet gets its title there,
+  // provisional, at its first audio; or takes one the Catalogue has.
+  const start: RowAction[] = title.master
+    ? []
+    : [
+        {
+          key: "audio",
+          label: t.catalogStart.action,
+          icon: IconMicrophone,
+          onSelect: () =>
+            startTransition(async () => {
+              const result = await startTitleWork({
+                projectId,
+                titleId: title.id,
+              });
+              if (!result.ok) return void toast.error(result.error);
+              toast.success(t.catalogStart.done);
+              router.push(routes.masterAudio(result.masterId));
+            }),
+        },
+        {
+          key: "attach",
+          label: t.catalogAttach.action,
+          icon: IconLink,
+          onSelect: () => setOpen("attach"),
+        },
+      ];
 
   const actions: RowAction[] = !canManage
     ? catalog
@@ -766,6 +815,7 @@ function TitleActions({
             icon: IconPenWriting2,
             onSelect: () => setOpen("rename"),
           },
+          ...start,
           ...catalog,
           {
             key: "abandon",
@@ -813,6 +863,22 @@ function TitleActions({
               onDone={close}
             />
           </FormDialog>
+          {!title.master && (
+            <FormDialog
+              open={open === "attach"}
+              onOpenChange={(next) => !next && close()}
+              title={t.catalogAttach.title(label)}
+              description={t.catalogAttach.description}
+              closeLabel={fr.dialogs.close}
+            >
+              <AttachCatalogTitleForm
+                projectId={projectId}
+                titleId={title.id}
+                masterOptions={masterOptions}
+                onDone={close}
+              />
+            </FormDialog>
+          )}
           <FormDialog
             open={open === "abandon"}
             onOpenChange={(next) => !next && close()}

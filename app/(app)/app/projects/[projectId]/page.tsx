@@ -254,6 +254,7 @@ async function collectiveTitles(project: ProjectDetail, access: Access) {
         dealReach={board.dealReach}
         canManage={canManage}
         artists={artists}
+        masterOptions={masterOptions}
         // No workflow before the launch: nothing to open yet.
         links={{ master: null, distribution: null }}
       />

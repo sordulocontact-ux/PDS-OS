@@ -34,6 +34,23 @@ const jsonIds = z
     return z.NEVER;
   });
 
+/** The titles of a session: the Catalogue's (ids) and the titles of a
+ * collective not in the Catalogue yet (`pt:` + id, lot 7). */
+const jsonTitleIds = z
+  .string()
+  .optional()
+  .transform((value, ctx) => {
+    try {
+      const parsed = z
+        .array(z.union([z.uuid(), z.string().regex(/^pt:[0-9a-f-]{36}$/)]))
+        .max(50)
+        .safeParse(JSON.parse(value || "[]"));
+      if (parsed.success) return [...new Set(parsed.data)];
+    } catch {}
+    ctx.addIssue({ code: "custom", message: e.required });
+    return z.NEVER;
+  });
+
 /** The Réseau contacts AttendeeChips sends in `guests` (typed addresses left out). */
 const jsonContacts = z
   .string()
@@ -61,7 +78,7 @@ export const studioSessionSchema = z
     sessionId: optionalId,
     artistIds: jsonIds,
     // Chosen when the session is created; then from its page.
-    titleIds: jsonIds,
+    titleIds: jsonTitleIds,
     projectIds: jsonIds,
     attendees: jsonIds,
     guests: jsonContacts,

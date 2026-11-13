@@ -749,8 +749,14 @@ export const masterPage = {
       button: "Rattacher à un projet existant",
       title: "Rattacher ce titre à un projet",
       description:
-        "Un projet musical pas encore lancé : le titre y est relié, jamais copié. Un single garde un seul titre.",
+        "Un projet musical pas encore lancé, ou un projet collectif, même lancé : le titre y est relié, jamais copié. Un single garde un seul titre.",
       field: "Projet",
+      // Projet collectif, lot 7: the title becomes one of its titles.
+      collective: (title: string) => `${title} · Projet collectif`,
+      projectTitle: "Titre du projet",
+      projectTitleHint:
+        "Un titre du projet qui attend son titre au Catalogue le prend ; sinon, le projet en compte un de plus.",
+      newTitle: "Nouveau titre du projet",
       none: "Aucun projet ne peut accueillir ce titre : un projet lancé ne change plus de titres, un single en a déjà un.",
       submit: "Rattacher",
       done: "Titre rattaché au projet.",
@@ -759,6 +765,12 @@ export const masterPage = {
         single: "Ce projet est un single : il a déjà son titre.",
         launched:
           "Ce projet est lancé : ses titres ne changent plus. Seule la direction rattache un titre avant le lancement.",
+        alreadyIn: "Ce titre est déjà un titre de ce projet.",
+        titleTaken: "Ce titre du projet a déjà son titre au Catalogue.",
+        titleAbandoned:
+          "Ce titre du projet est abandonné : réactivez-le avant d'y rattacher un titre.",
+        notOwner:
+          "Seul le chef de projet ajoute des titres à un projet collectif lancé ; avant le lancement, la direction.",
       },
     },
     // Retours 55 et 66: three dates kept apart, never one replacing another.

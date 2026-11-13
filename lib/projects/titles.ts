@@ -18,7 +18,7 @@ import { createClient } from "@/lib/supabase/server";
 // participations with their artist (lot 3); never the interlocutor
 // (contact_id), which no screen of this list shows.
 const TITLES_SELECT =
-  "id, position, working_title, status, abandoned_at, abandon_reason, link:project_masters!project_titles_link(master:masters!project_masters_master_same_org(id, title, demo_status, credits:master_artists!master_artists_master_same_org(role, position, artist:artists!master_artists_artist_same_org(id, name)))), participations:title_participations!title_participations_title(id, role, status, created_at, artist:artists!title_participations_artist_same_org(id, name))";
+  "id, position, working_title, status, abandoned_at, abandon_reason, link:project_masters!project_titles_link(master:masters!project_masters_master_same_org(id, title, title_is_provisional, demo_status, credits:master_artists!master_artists_master_same_org(role, position, artist:artists!master_artists_artist_same_org(id, name)))), participations:title_participations!title_participations_title(id, role, status, created_at, artist:artists!title_participations_artist_same_org(id, name))";
 
 /**
  * The titles of a collective project (docs/pds-mic-plan.md, lots 2 and 3),
@@ -65,6 +65,7 @@ export async function loadProjectTitles(
           ? {
               id: master.id,
               title: master.title,
+              provisional: master.title_is_provisional,
               demoStatus: demoStatusOf(master.demo_status),
               credits: [...master.credits]
                 .sort((a, b) => a.position - b.position)

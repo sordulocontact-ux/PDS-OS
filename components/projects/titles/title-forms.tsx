@@ -27,9 +27,10 @@ import {
 } from "@/lib/projects/participation-rules";
 import {
   addProjectTitle,
+  attachCatalogTitle,
   renameProjectTitle,
 } from "@/lib/projects/title-actions";
-import type { ProjectTitle } from "@/lib/projects/title-rules";
+import { masterNameOf, type ProjectTitle } from "@/lib/projects/title-rules";
 
 const fr = { dialogs, projectTitles };
 
@@ -102,6 +103,66 @@ export function AddTitleForm({
   );
 }
 
+/** « Rattacher un titre du Catalogue » (lot 7): a title of the project not
+ * in the Catalogue yet takes one the Catalogue has (searched). Nothing
+ * chosen: said in red at the first try, never a disabled button. */
+export function AttachCatalogTitleForm({
+  projectId,
+  titleId,
+  masterOptions,
+  onDone,
+}: {
+  projectId: string;
+  titleId: string;
+  masterOptions: Record<string, string>;
+  onDone: () => void;
+}) {
+  const t = fr.projectTitles;
+  const [masterId, setMasterId] = useState("");
+  const [missing, setMissing] = useState(false);
+  const { pending, error, run } = useWriteSubmit(onDone, t.catalogAttach.done);
+  return (
+    <form
+      noValidate
+      className="flex flex-col gap-4"
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (!masterId) return setMissing(true);
+        run(() => attachCatalogTitle({ projectId, titleId, masterId }));
+      }}
+    >
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor={`attach-master-${titleId}`}>{t.add.master}</Label>
+        <SearchSelect
+          id={`attach-master-${titleId}`}
+          label={t.add.master}
+          options={masterOptions}
+          value={masterId}
+          onChange={(value) => {
+            setMasterId(value);
+            setMissing(false);
+          }}
+          placeholder={t.catalogAttach.placeholder}
+          searchPlaceholder={t.add.masterSearch}
+          emptyLabel={t.add.masterEmpty}
+          invalid={missing}
+          describedBy={missing ? `attach-master-${titleId}-error` : undefined}
+          fill
+        />
+        <FieldError id={`attach-master-${titleId}-error`}>
+          {missing ? t.errors.masterRequired : undefined}
+        </FieldError>
+      </div>
+      {error && <FormMessage kind="error">{error}</FormMessage>}
+      <DialogFormActions
+        pending={pending}
+        submitLabel={t.catalogAttach.submit}
+        onCancel={onDone}
+      />
+    </form>
+  );
+}
+
 /** « Renommer »: left empty, the title takes its master's name back, or
  * « sans nom ». */
 export function RenameTitleForm({
@@ -138,7 +199,7 @@ export function RenameTitleForm({
         label={fr.projectTitles.add.name}
         defaultValue={title.workingTitle ?? ""}
         // Left empty, the title takes its master's name back: said here.
-        placeholder={title.master?.title}
+        placeholder={masterNameOf(title.master) ?? undefined}
         maxLength={200}
         autoFocus
       />

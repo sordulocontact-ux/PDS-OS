@@ -21,7 +21,7 @@ export async function guestTitles(
   const { data, error } = await supabase
     .from("title_participations")
     .select(
-      "title:project_titles!title_participations_title(position, working_title, link:project_masters!project_titles_link(master:masters!project_masters_master_same_org(title)))",
+      "title:project_titles!title_participations_title(position, working_title, link:project_masters!project_titles_link(master:masters!project_masters_master_same_org(title, title_is_provisional)))",
     )
     .eq("project_id", projectId)
     .eq("artist_id", artistId)
@@ -37,7 +37,10 @@ export async function guestTitles(
       projectTitleLabel({
         position: title.position,
         workingTitle: title.working_title,
-        masterTitle: title.link?.master?.title ?? null,
+        // A provisional name is not the title's (lot 7).
+        masterTitle: title.link?.master?.title_is_provisional
+          ? null
+          : (title.link?.master?.title ?? null),
       }),
     );
 }

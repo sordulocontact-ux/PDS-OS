@@ -34,6 +34,9 @@ export type ProjectTitle = {
   master: {
     id: string;
     title: string;
+    // A name PDS OS gave while waiting for the real one (lot 7, voie A):
+    // never the title's name in the project.
+    provisional: boolean;
     // Null when the master is not a maquette.
     demoStatus: DemoStatus | null;
     // Its credits in the Catalogue, in their order.
@@ -60,6 +63,14 @@ export function creditModeOf(
 ): "now" | "later" | "manual" {
   if (title.sharedWith) return "manual";
   return title.master ? "now" : "later";
+}
+
+/** The master's name as the title's name: none while it is provisional
+ * (« Titre 3 · sans nom » stays, lot 7). */
+export function masterNameOf(
+  master: { title: string; provisional: boolean } | null,
+): string | null {
+  return master && !master.provisional ? master.title : null;
 }
 
 /** What a title is called in the project: its working title, else its

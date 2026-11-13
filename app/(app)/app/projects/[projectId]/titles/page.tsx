@@ -87,6 +87,7 @@ export default async function ProjectTitlesPage({
         dealReach={board.dealReach}
         canManage={canManage}
         artists={artists}
+        masterOptions={masterOptions}
         links={{
           master: workflows.includes("master")
             ? routes.projectMaster(project.id)

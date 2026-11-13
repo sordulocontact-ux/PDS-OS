@@ -17,6 +17,9 @@ export const projectTitles = {
     `Catalogue : ${title} · ${demoBadge}`,
   inCatalog: "Au Catalogue",
   notInCatalog: "Pas encore au Catalogue",
+  // Lot 7: its title in the Catalogue under a provisional name.
+  catalogProvisional: (name: string) =>
+    `Au Catalogue sous un nom provisoire : ${name}`,
   // « Le 11/11 · « Pas retenu » »: the date first, a long reason is cut
   // after two lines; the status already says « Abandonné ».
   abandonedOn: (day: string, reason: string) => `Le ${day} · « ${reason} »`,
@@ -35,6 +38,20 @@ export const projectTitles = {
       "Choisissez-le seulement s'il existe déjà au Catalogue : il sera rattaché au projet.",
     submit: "Ajouter le titre",
     done: "Titre ajouté.",
+  },
+  // Lot 7 (voie A): a title not in the Catalogue yet.
+  catalogStart: {
+    action: "Déposer un audio",
+    done: "Titre créé au Catalogue sous un nom provisoire : déposez l'audio.",
+  },
+  catalogAttach: {
+    action: "Rattacher un titre du Catalogue",
+    title: (label: string) => `Rattacher un titre du Catalogue à « ${label} »`,
+    description:
+      "Le titre du projet prend ce titre du Catalogue, ses fichiers et ses crédits ; son titre de travail reste le sien.",
+    placeholder: "Choisir un titre",
+    submit: "Rattacher le titre",
+    done: "Titre du Catalogue rattaché.",
   },
   rename: {
     action: "Renommer",
@@ -306,6 +323,11 @@ export const projectTitles = {
       "Un single n'a qu'un titre du Catalogue : changez le format du projet pour en ajouter un autre.",
     abandoned: "Ce titre est abandonné : réactivez-le avant de le modifier.",
     notAbandoned: "Ce titre n'est pas abandonné.",
+    // Lot 7: a title of the Catalogue for a title of the project.
+    hasMaster: "Ce titre est déjà au Catalogue.",
+    masterRequired: "Choisissez un titre du Catalogue.",
+    mainArtistRequired:
+      "Le projet n'a pas d'artiste principal : choisissez-en un avant de créer le titre au Catalogue.",
     // update_project on a collective (the project's edit form).
     keptInProject:
       "Un titre du projet collectif n'est pas retiré : abandonnez-le depuis « Titres et artistes ».",
@@ -314,6 +336,14 @@ export const projectTitles = {
   events: {
     added: (label: string) => `Titre ajouté · ${label}`,
     renamed: (from: string, to: string) => `Titre renommé · ${from} → ${to}`,
+    // The provisional title of the Catalogue named by the same gesture.
+    renamedInCatalog: (from: string, to: string) =>
+      `Titre nommé · ${from} → ${to}, au Catalogue aussi`,
+    // Lot 7: its title created in the Catalogue (provisional), or attached.
+    cataloged: (label: string) =>
+      `Titre créé au Catalogue sous un nom provisoire · ${label}`,
+    masterAttached: (label: string, master: string) =>
+      `Titre du Catalogue rattaché · ${label} → ${master}`,
     abandoned: (label: string, reason: string) =>
       `Titre abandonné · ${label} · « ${reason} »`,
     reactivated: (label: string) => `Titre réactivé · ${label}`,
