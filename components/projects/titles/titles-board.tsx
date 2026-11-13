@@ -441,8 +441,9 @@ function TitleRow({
   const t = fr.projectTitles;
   const abandoned = title.status === "abandoned";
   const deals = dealReach !== "none";
-  const master = titleMasterLabel(title.masterState);
-  const masterStatus = titleMasterStatus(title.masterState);
+  // An abandoned title is out of the Master (lot 9): no state there.
+  const master = abandoned ? null : titleMasterLabel(title.masterState);
+  const masterStatus = abandoned ? null : titleMasterStatus(title.masterState);
   const shared =
     title.sharedWith && !abandoned
       ? t.participations.shared(title.sharedWith.names, title.sharedWith.hidden)
@@ -669,7 +670,11 @@ function ParticipationRow({
             <ViewLink
               href={routes.deal(deal.id)}
               className="relative z-10 inline-flex rounded-full outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--focus-ring)]"
-              aria-label={`${t.board.columns.negotiation} : ${negotiation}`}
+              // Who and where, never « Négociation : Négociation ».
+              aria-label={t.board.negotiation.link(
+                participation.artist.name,
+                negotiation ?? "",
+              )}
             >
               <DealStageBadge deal={deal} />
             </ViewLink>
@@ -841,7 +846,11 @@ function TitleActions({
             open={open === "rename"}
             onOpenChange={(next) => !next && close()}
             title={t.rename.title}
-            description={t.rename.description}
+            description={
+              title.master?.provisional
+                ? t.rename.descriptionProvisional
+                : t.rename.description
+            }
             closeLabel={fr.dialogs.close}
           >
             <RenameTitleForm

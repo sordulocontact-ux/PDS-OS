@@ -32,6 +32,9 @@ export type MasterHistoryItem = {
   who: string | null;
   at: string;
   cause: string | null;
+  // The title it concerns, when it concerns one (a collective's step shows
+  // its active title's only, lot 8).
+  masterId?: string;
 };
 
 export function masterHistory(facts: MasterJourneyFacts): MasterHistoryItem[] {
@@ -47,6 +50,7 @@ export function masterHistory(facts: MasterJourneyFacts): MasterHistoryItem[] {
     for (const s of title.sources)
       items.push({
         key: `src-${s.fileId}-${s.confirmedAt}`,
+        masterId: title.id,
         step: "source",
         text: t.sourceConfirmed(s.fileName, titleOf(title.id)),
         who: s.confirmedBy,
@@ -134,6 +138,7 @@ export function masterHistory(facts: MasterJourneyFacts): MasterHistoryItem[] {
     if (v.declared) {
       items.push({
         key: `${v.id}-declared`,
+        masterId: v.masterId,
         step: "source",
         text: t.existingMix(v.fileName),
         who: v.decidedBy,
@@ -144,6 +149,7 @@ export function masterHistory(facts: MasterJourneyFacts): MasterHistoryItem[] {
     }
     items.push({
       key: `${v.id}-dep`,
+      masterId: v.masterId,
       step: v.stage,
       text: t.deposited(label, v.number, titleOf(v.masterId)),
       who: v.createdBy ?? linked(engineerOf(v.stage)),
@@ -153,6 +159,7 @@ export function masterHistory(facts: MasterJourneyFacts): MasterHistoryItem[] {
     if (v.feedbackSentAt)
       items.push({
         key: `${v.id}-fb`,
+        masterId: v.masterId,
         step: v.stage,
         text: t.feedbackSent(label, v.number),
         who: null,
@@ -162,6 +169,7 @@ export function masterHistory(facts: MasterJourneyFacts): MasterHistoryItem[] {
     if (v.decision && v.decidedAt) {
       items.push({
         key: `${v.id}-dec`,
+        masterId: v.masterId,
         step: v.stage,
         text:
           v.decision === "changes_requested"
@@ -174,6 +182,7 @@ export function masterHistory(facts: MasterJourneyFacts): MasterHistoryItem[] {
       if (v.reopenedAt)
         items.push({
           key: `${v.id}-reopen`,
+          masterId: v.masterId,
           step: v.stage,
           text: t.reopened(label, v.reopenReason ?? ""),
           who: null,
@@ -183,6 +192,7 @@ export function masterHistory(facts: MasterJourneyFacts): MasterHistoryItem[] {
       if (v.decision === "approved" && v.stage === "mastering")
         items.push({
           key: `${v.id}-cat`,
+          masterId: v.masterId,
           step: "final",
           text: t.catalogued(v.number),
           who: t.pdsName,
@@ -195,6 +205,7 @@ export function masterHistory(facts: MasterJourneyFacts): MasterHistoryItem[] {
   for (const r of facts.received)
     items.push({
       key: `rec-${r.masterId}-${r.deliverable}`,
+      masterId: r.masterId,
       step: "final",
       text: t.deliverable(
         fr.masterWorkflow.brief.deliverables[

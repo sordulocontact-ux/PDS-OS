@@ -4,7 +4,8 @@ import { useState } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
-import { ChipChoice, ChipMultiChoice } from "@/components/ui/chip-choice";
+import { OptionSelect } from "@/components/projects/option-select";
+import { ChipMultiChoice } from "@/components/ui/chip-choice";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
@@ -13,6 +14,7 @@ import { projectTitles } from "@/lib/i18n/fr/project-titles";
 import { setMarketingTitleScope } from "@/lib/projects/title-scope-actions";
 import {
   TITLE_SCOPES,
+  titleScopeKindOf,
   titleScopeLabel,
   type ActionTitleScope,
   type ScopeTitle,
@@ -58,6 +60,8 @@ export function TitleScopeLine({ action, scope, titles, canEdit }: Props) {
           <Button
             size="xs"
             variant="ghost"
+            // Its text aligned with the line's when it wraps (a phone).
+            className="-ml-2.5"
             aria-label={t.editLabel(action.name)}
             onClick={() => setOpen(true)}
           >
@@ -165,18 +169,19 @@ function TitleScopeForm({
         );
       }}
     >
-      <ChipChoice
+      {/* Four choices with long words: a select, never two lines of
+          segments in the dialog. */}
+      <OptionSelect
+        id={`title-scope-${action.deliverableId ?? action.activationId}`}
         name="scope"
-        legend={t.choice}
+        label={t.choice}
         required
-        options={TITLE_SCOPES.map((value) => ({
-          value,
-          label: t.kinds[value],
-        }))}
-        value={kind}
-        onChange={(next) => {
-          if (!next) return;
-          setKind(next);
+        items={Object.fromEntries(
+          TITLE_SCOPES.map((value) => [value, t.kinds[value]]),
+        )}
+        defaultValue={scope.kind}
+        onValueChange={(next) => {
+          setKind(titleScopeKindOf(next));
           setMissing(false);
         }}
       />
@@ -195,6 +200,7 @@ function TitleScopeForm({
               setPicked(next);
               setMissing(false);
             }}
+            summary={t.picked}
             error={missing ? t.errors.titlesRequired : undefined}
           />
         ) : (

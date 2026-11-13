@@ -90,7 +90,14 @@ export async function MasterStepFrame({
     label: s.title,
   }));
   const history = masterHistory(rows)
-    .filter((item) => item.step === stepKey)
+    .filter(
+      (item) =>
+        item.step === stepKey &&
+        // A collective: the active title's, and the project's own (lot 8).
+        (!titleScope ||
+          !item.masterId ||
+          item.masterId === titleScope.active.masterId),
+    )
     .reverse();
   const roles = masterRoles(rows, project.ownerName);
   return (

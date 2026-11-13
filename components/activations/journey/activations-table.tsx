@@ -102,22 +102,26 @@ export function ActivationsTable({
   if (!titles || titles.options.length === 0) return views;
   return (
     <div className="flex flex-col gap-3">
-      <UrlFilters
-        path={routes.projectActivations(projectId)}
-        params={{ vue: filter === "open" ? null : filter }}
-        groups={[
-          {
-            key: "titre",
-            label: s.filter,
-            allLabel: s.filterAll,
-            options: titles.options.map((x) => ({
-              value: x.id,
-              label: x.label,
-            })),
-            current: titles.current,
-          },
-        ]}
-      />
+      {/* FilterBar's cells grow in a row (ListToolbar): one select, the
+          width of one cell. */}
+      <div className="flex w-full sm:max-w-xs">
+        <UrlFilters
+          path={routes.projectActivations(projectId)}
+          params={{ vue: filter === "open" ? null : filter }}
+          groups={[
+            {
+              key: "titre",
+              label: s.filter,
+              allLabel: s.filterAll,
+              options: titles.options.map((x) => ({
+                value: x.id,
+                label: x.label,
+              })),
+              current: titles.current,
+            },
+          ]}
+        />
+      </div>
       {views}
     </div>
   );

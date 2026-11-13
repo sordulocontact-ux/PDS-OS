@@ -1,7 +1,8 @@
 # Projet collectif (PDS Mic) : résumé
 
 Résumé de travail de `docs/pds-mic-plan.md` (qui fait foi en cas de doute). Mis à jour à la fin
-de chaque lot. Dernière mise à jour : 13/11/2026, après le lot 10.
+de chaque lot. Dernière mise à jour : 13/11/2026, après les lots 7 à 10 et leur passe Chrome
+(`docs/pds-mic-rapports/recap-7-10.md`).
 
 **Module Business fait en parallèle par un collègue** : rôle Business manager, négociation, deal
 memo, contrats, contacts privés, mails. Ces lots n'y touchent pas ; son dossier de négociation
@@ -41,10 +42,10 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
 | 1 – 4 | Drapeau et artiste principal ; titres, abandon, réactivation ; participations artiste ; sélections d'artistes | faits |
 | 5 | Création d'un collectif (formulaire, depuis une sélection, PO) | fait, validé |
 | 6 | Vue « Titres et artistes » (remplace la liste des lots 2-3), raccord Négociation | fait |
-| 7 | Titre provisoire (voie A) | fait (Chrome après le lot 10) |
-| 8 | Master : sélecteur de titre | fait (Chrome après le lot 10) |
+| 7 | Titre provisoire (voie A) | fait |
+| 8 | Master : sélecteur de titre | fait |
 | 9 | Master : vue consolidée, abandonnés hors des comptes | fait, sauf « Demander des fichiers » (question) |
-| 10 | Ciblage marketing par titre | fait (Chrome après le lot 10) |
+| 10 | Ciblage marketing par titre | fait |
 | 11 – 12 | Suivi juridique par participation ; contrat manquant, verrou du tournage | à faire |
 | 13 – 15 | Sorties individuelles et compilation ; plan de sortie par titre ; Distribution par sortie | à faire |
 
@@ -203,6 +204,15 @@ Lu après le pull du 13/11/2026 ; ses tests : `deals-collective`, `deals-bm-open
   (`210101`, `230101`, `231101`, `232101`) et avant le lot 5 (`235101`), qui en dépend. Elle ne
   redéfinit rien de ce qu'elles touchent.
 
+## Passe Chrome des lots 7 à 10 (13/11/2026)
+
+Corrigé : libellé du lien d'un deal pour les lecteurs d'écran (lot 6) ; plus d'état Master sur un
+titre abandonné ; « Déjà fait » d'une étape du Master filtré au titre actif (lignes d'historique
+rattachées à leur titre, `MasterHistoryItem.masterId`) ; filtre « Titre » des activations dans une
+ligne ; « Périmètre » en liste déroulante ; récapitulatif en mots des titres choisis ; « Tous
+titres confondus » pour l'absence de filtre ; renommage d'un titre provisoire expliqué. Détail :
+`docs/pds-mic-rapports/recap-7-10.md`.
+
 ## Règles à tenir à chaque lot
 
 - Toute règle nouvelle ne joue que si `projects.collective = true` ; un projet simple ne change pas
@@ -217,7 +227,9 @@ Lu après le pull du 13/11/2026 ; ses tests : `deals-collective`, `deals-bm-open
 - L'artiste principal n'est jamais invité du projet (participation ni refusée ni retirée), dans un
   sens comme dans l'autre.
 - Garder verts `project-types` et `visible-project-ids` ; régénérer les types Supabase. Tests sur
-  la base locale seulement. (`visible-project-ids` n° 24 échoue déjà avant ces lots : trois
+  la base locale seulement, **sur base propre** pour la suite complète : avec les données de démo
+  de pré-prod chargées (plusieurs directeurs généraux), `rls`, `plan-all-workflows` et `strategy*`
+  échouent (`multiple_validators`) sans rapport avec ces lots. (`visible-project-ids` n° 24 échoue déjà avant ces lots : trois
   politiques du 26/10 et du 05/11 lisent `can_see_project(project_id)`.) Sur une base propre
   (11/11/2026), échouent aussi déjà avant le lot 1 : `team` n° 14-15, `ux-roles` n° 5,
   `marketing-review`, `marketing-review-notifications`, `project-view-cache` ; `marketing-review`

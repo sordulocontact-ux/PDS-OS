@@ -58,13 +58,19 @@ export const projectTitles = {
       "Une action peut valoir pour tout le projet, pour tous ses titres, pour certains, ou pour aucun : elle n'est jamais copiée par titre.",
     choice: "Périmètre",
     pick: "Titres",
+    // What the chips chose, in words (a chip alone does not say it).
+    picked: (labels: string[]) =>
+      labels.length === 0
+        ? "Aucun titre choisi."
+        : `${labels.length} titre${labels.length > 1 ? "s" : ""} : ${labels.join(", ")}.`,
     noTitle:
       "Le projet n'a pas encore de titre : « Tous les titres » vaudra pour ceux qui viendront.",
     submit: "Enregistrer",
     done: "Titres visés enregistrés.",
     // The filter of a list by title.
     filter: "Titre",
-    filterAll: "Tous les titres",
+    // Not « Tous les titres », which is a scope.
+    filterAll: "Tous titres confondus",
     errors: {
       failed: "Les titres visés n'ont pas pu être enregistrés. Réessayez.",
       titlesRequired: "Choisissez au moins un titre.",
@@ -91,6 +97,9 @@ export const projectTitles = {
     title: "Renommer le titre",
     description:
       "Le titre de travail sert dans le projet. Laissé vide, le titre redevient « sans nom » ou reprend son nom au Catalogue.",
+    // Lot 7: its title in the Catalogue is provisional and takes the name.
+    descriptionProvisional:
+      "Son titre au Catalogue porte encore un nom provisoire : il prendra ce nom, et ne sera plus provisoire.",
     submit: "Renommer",
     done: "Titre renommé.",
   },
@@ -162,6 +171,9 @@ export const projectTitles = {
       none: "Pas de dossier",
       // As the Deals page says it.
       unassigned: "À affecter",
+      // The link to the deal, for a screen reader: the artist and the step.
+      link: (artist: string, stage: string) =>
+        `Ouvrir le deal de ${artist}, étape ${stage}`,
     },
     master: {
       todo: "À mixer",

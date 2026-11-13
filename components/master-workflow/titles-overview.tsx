@@ -7,8 +7,9 @@ import {
 
 const fr = { masterJourney };
 
-// Names under a count: the first ones, then how many more.
-const SHOWN = 3;
+// Names under a count: the first two, then how many more (the tiles of a
+// row keep close heights on a phone).
+const SHOWN = 2;
 
 /**
  * The Master's overview of a collective (lot 9 of docs/pds-mic-plan.md), at
