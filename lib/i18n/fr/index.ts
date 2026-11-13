@@ -4,6 +4,7 @@
  */
 import { errors } from "./errors";
 import { aiUsage } from "./ai-usage";
+import { googleConnections } from "./google-connections";
 import { activations } from "./activations";
 import { activationWork } from "./activation-work";
 import { activationBrief } from "./activation-brief";
@@ -167,6 +168,7 @@ import { workflowStatus } from "./workflow-status";
 export const fr = {
   decisions,
   aiUsage,
+  googleConnections,
   ...core,
   datePicker,
   errors,

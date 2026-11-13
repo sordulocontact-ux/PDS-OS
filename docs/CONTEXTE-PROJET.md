@@ -231,6 +231,8 @@ par les tickets ou laissé « à confirmer », donc décidé provisoirement ou r
   par le Juridique avant toute donnée réelle (exigence du ticket). L'adresse IP n'est pas gardée.
 - **Paiement administratif** : rôle « Finance / administration » absent de l'app ; les montants et
   justificatifs sont lus par le responsable du projet et la direction (`can_read_project_budget`).
+  Depuis le 12/11/2026, la page **Finance** (`read_finance` : direction, business managers, business,
+  décision de Sacha) montre les totaux de toute l'équipe, sans ouvrir l'accès aux lignes elles-mêmes.
 - **Agence** : Google Sheets lu par son export CSV public (le tableau doit être partagé « lecteur
   avec le lien ») ; pas de synchronisation planifiée ni d'OCR des PDF (après MVP).
 - **Réseau** : fusion de doublons, historique daté des rattachements d'un journaliste à ses médias,

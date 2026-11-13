@@ -1,7 +1,10 @@
+import { Suspense } from "react";
+
 import { FormMessage } from "@/components/auth/form-message";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
 import { PageSection } from "@/components/shell/page-section";
+import { SkeletonRows } from "@/components/ui/skeleton";
 import { BillingForm } from "@/components/settings/billing-form";
 import { DistributionForm } from "@/components/settings/distribution-form";
 import { can } from "@/lib/auth/access";
@@ -10,17 +13,25 @@ import { fr } from "@/lib/i18n/fr";
 import { getOwnAiUsage } from "@/lib/members/queries";
 import { loadDistributionFormats } from "@/lib/distribution/requirements";
 import { loadBilling } from "@/lib/invoices/billing";
+import { isConnectOutcome } from "@/lib/google/services";
 
 import { AiUsageMeter } from "./ai-usage-meter";
+import { GoogleConnectionsSection } from "./google-connections-section";
 
 export const metadata = {
   title: `${fr.aiUsage.settings.title} · ${fr.app.name}`,
 };
 
 // Each member's settings: how many requests to PO they used today, against
-// the daily limit the general director sets in Équipe.
-export default async function SettingsPage() {
+// the daily limit the general director sets in Équipe, and their own Google
+// services (Connexions, docs/ARCHITECTURE.md § 4 quater).
+export default async function SettingsPage({
+  searchParams,
+}: PageProps<"/app/settings">) {
   const access = await requireApproved();
+  // How « Connecter un compte Google » just ended (Google's return).
+  const google = (await searchParams).google;
+  const outcome = isConnectOutcome(google) ? google : null;
   const t = fr.aiUsage.settings;
   const admin = can(access, "administer");
   const [usage, billing, formats] = await Promise.all([
@@ -51,6 +62,16 @@ export default async function SettingsPage() {
         ) : (
           <FormMessage kind="error">{t.usage.loadError}</FormMessage>
         )}
+      </PageSection>
+      <PageSection
+        id="connections"
+        title={fr.googleConnections.title}
+        description={fr.googleConnections.description}
+        card
+      >
+        <Suspense fallback={<SkeletonRows count={3} />}>
+          <GoogleConnectionsSection access={access} outcome={outcome} />
+        </Suspense>
       </PageSection>
       {admin && (
         <PageSection

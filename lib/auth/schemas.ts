@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { aiUsage } from "@/lib/i18n/fr/ai-usage";
 import { auth } from "@/lib/i18n/fr/auth";
+import { googleConnections } from "@/lib/i18n/fr/google-connections";
 import type { FieldErrors, FormValues } from "@/lib/auth/form-state";
 import { ORGANIZATION_ROLES } from "@/lib/auth/redirects";
 
@@ -101,6 +102,16 @@ export const inviteMemberSchema = z.object({
   email: emailSchema,
   password: passwordSchema,
   role: z.enum(ORGANIZATION_ROLES, { error: fr.auth.errors.required }),
+});
+
+// Équipe › Modifier: the member's work address (@pdsrecords.com), empty =
+// none. The domain is checked by the action (it depends on the server's env).
+export const membershipGoogleEmailSchema = z.object({
+  googleWorkEmail: z.preprocess(
+    (value) =>
+      typeof value === "string" ? value.trim().toLowerCase() || null : null,
+    z.email({ error: googleConnections.workField.invalid }).nullable(),
+  ),
 });
 
 export const personNameSchema = z.object({

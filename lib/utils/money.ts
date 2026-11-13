@@ -21,6 +21,16 @@ export function formatAmount(
   return `${number(cents)}${NBSP}€${ht ? `${NBSP}HT` : ""}`;
 }
 
+/** « 12 k€ », « 1,2 M€ »: an amount on a chart's axis, where « HT » is said
+ * once by the chart (Finance). */
+export function formatAmountCompact(cents: number): string {
+  const text = new Intl.NumberFormat("fr-FR", {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).format(cents / 100);
+  return `${text.replace(/\s/g, NBSP)}${/\p{L}$/u.test(text) ? "" : NBSP}€`;
+}
+
 /** « 1100,5 », an amount put back into a field, without its unit. */
 export const amountInput = (cents: number): string =>
   number(cents).replace(/\s/g, "");

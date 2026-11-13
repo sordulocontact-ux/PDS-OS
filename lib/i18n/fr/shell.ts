@@ -29,6 +29,7 @@ export const shell = {
     contracts: "Contrats",
     files: "Fichiers",
     expenses: "Dépenses",
+    finance: "Finance",
     deals: "Deals",
     members: "Équipe",
     feedback: "Retours",

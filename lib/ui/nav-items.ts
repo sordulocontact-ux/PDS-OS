@@ -1,5 +1,6 @@
 import {
   IconCalendarDays,
+  IconChartBarTrendUp,
   IconFile,
   IconFolderOpen,
   IconHandshake,
@@ -69,6 +70,14 @@ export const NAV_ITEMS: readonly NavItem[] = [
     label: fr.shell.nav.expenses,
     icon: IconMoneyBillCoin,
     permission: "read_artist_budgets",
+  },
+  // The team's spending as a whole (Sacha 12/11/2026): the direction, the
+  // business managers and business.
+  {
+    href: routes.finance,
+    label: fr.shell.nav.finance,
+    icon: IconChartBarTrendUp,
+    permission: "read_finance",
   },
   // The Business module's deals (BIZ 4): the negotiators, the direction,
   // and the project managers who open the deals of their projects.

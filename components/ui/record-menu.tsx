@@ -38,6 +38,10 @@ export function RecordMenu({
     body: string;
     done: string;
     run: () => Promise<WriteResult>;
+    // Another verb than « Supprimer » (« Déconnecter »), in the menu and on
+    // the confirm button, with its pending label.
+    label?: string;
+    pendingLabel?: string;
   };
   extra?: RowAction[];
 }) {
@@ -64,7 +68,7 @@ export function RecordMenu({
       ? [
           {
             key: "delete",
-            label: t.remove,
+            label: remove.label ?? t.remove,
             icon: IconTrash,
             onSelect: () => setDialog("delete"),
           },
@@ -95,8 +99,8 @@ export function RecordMenu({
           description={remove.body}
           cancelLabel={t.cancel}
           closeLabel={t.close}
-          confirmLabel={t.remove}
-          pendingLabel={fr.dialogs.deleting}
+          confirmLabel={remove.label ?? t.remove}
+          pendingLabel={remove.pendingLabel ?? fr.dialogs.deleting}
           pending={pending}
           destructive
           error={error}

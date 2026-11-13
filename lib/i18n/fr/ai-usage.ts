@@ -12,7 +12,7 @@ export const aiUsage = {
 
   settings: {
     title: "Paramètres",
-    description: "Votre utilisation de PO",
+    description: "Votre utilisation de PO et vos connexions",
     navLink: "Paramètres",
     usage: {
       title: "Utilisation de PO",

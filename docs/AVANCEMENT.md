@@ -2074,6 +2074,14 @@ les modules à parcours (proto « Mise en page des modules », version « Propos
   `business-positions` 8/8). Libellés, aide du formulaire de compte, Travail et PO (`explain_access`) suivent.
   Comptes de test locaux dans `supabase/seed.sql` : `glen@pds.test`, `thibault@pds.test`
   (`pds-local-business`). Cadrage des lots : `docs/pds-mic-plan.md` § 0 ter et l'épic Notion.
+- 11/11/2026 — **Connexions Google des membres, lot 1 : Paramètres › Connexions** (demande de Sacha). Agenda,
+  Gmail et Drive de chaque compte @pdsrecords.com branchés sans clic par délégation au niveau du domaine, en
+  lecture seule (`lib/integrations/google-workspace.ts`, seul point d'entrée, toujours l'adresse de la
+  session). Préférences privées `google_service_opt_outs` (migration `20261111190101`, test
+  `google-connections` 6/6). Section « Connexions » des Paramètres : un service par ligne, coché = lu, état
+  rendu par Google. Inactif tant que `GOOGLE_WORKSPACE_KEY` / `GOOGLE_WORKSPACE_DOMAIN` ne sont pas posés
+  (« Pas encore branché »). Reste : la manip d'Ibé dans la console Google, puis l'agenda dans le Calendrier,
+  Gmail et Drive pour PO, le bouton d'une adresse perso (`docs/ARCHITECTURE.md` § 4 quater).
 - 11/11/2026 — **Budget, BUD 1 : une dépense rattachée à un projet ou à un artiste.** `budget_lines`
   prend `artist_id` (exactement un projet ou un artiste), `spent_on` (date de la dépense) et le
   justificatif d'un artiste (`artist_files` catégorie `receipt`, privée au budget). Permission
@@ -2230,3 +2238,19 @@ les modules à parcours (proto « Mise en page des modules », version « Propos
 
   Matrice des rôles d'Ibé (première version, la complète à venir) : rien de construit. À trancher : le
   business manager y perd Budgets et Dépenses, que la décision BUD lui donnait.
+- 12/11/2026 — **Connexions Google, lot 2 : adresse pro écrite par la direction et autres comptes connectés par
+  le membre** (demande de Sacha : 3 membres sur 4 se connectent en prod avec un gmail.com). Équipe › Modifier :
+  « Adresse Google pro » (`memberships.google_work_email`, direction seule, une adresse par membre, domaine
+  vérifié). Paramètres › Connexions : « Connecter un compte Google » (OAuth « Web », un consentement pour
+  Agenda, Gmail et Drive, jeton scellé `GOOGLE_TOKEN_KEY`, `/api/google/connect` et `/callback`), un bloc par
+  compte, « ⋯ » Déconnecter (accès révoqué chez Google), services coupés par compte. Chiffrement commun
+  `lib/utils/seal.ts` (repris par les liens du Juridique). Migration `20261112100101_google_connections`
+  (remplace celle du lot 1, jamais poussée), test `google-connections` 12/12. Reste : client OAuth « Web » et
+  clés à créer, puis la lecture (Calendrier, PO).
+- 12/11/2026 — **Finance : tableau de bord des dépenses de toute l'équipe** (`/app/finance`, demande de Sacha,
+  inspirations Mobbin validées). Permission `read_finance` (direction, business managers, business), migration
+  `20261112150101_finance` (4 fonctions de totaux, RLS des lignes inchangé), test `finance` 14/14. Période
+  (mois, trimestre, année, tout) comparée à la précédente, tuiles Engagé / Payé / À payer / Enveloppes dépassées,
+  dépenses par mois, par poste, par artiste, budgets des projets et enveloppes des artistes, À payer, plus grosses
+  dépenses, sans justificatif. Dépenses inchangée. Sujet « Finance » du guide de PO. Reste : passage navigateur
+  (extension Chrome non connectée pendant le lot), pousser la migration en prod avec accord.

@@ -1619,6 +1619,59 @@ pas branché : l'app le dit (avertissement) sans bloquer.
 migration y **ajoute** `call_summary_sent` en relisant la liste en place (deux formes possibles de
 `pg_get_constraintdef`). Une migration ultérieure qui réécrit la liste à la main doit garder ce type.
 
+## 4 quater. Connexions Google des membres (11-12/11/2026)
+
+Demande de Sacha : l'Agenda, le Gmail et le Drive de chaque membre lus par PDS OS, réglés dans
+**Paramètres › Connexions**. Le compte pro (@pdsrecords.com) se branche **sans clic** ; tout autre compte
+Google (Gmail perso…) se connecte par un bouton. Tout est **en lecture seule** (`calendar.readonly`,
+`gmail.readonly`, `drive.readonly`) et **privé** : seul le membre voit ce qui est lu, la direction non plus.
+
+- **Compte pro, par délégation au niveau du domaine** (`lib/integrations/google-workspace.ts`) : un compte
+  de service du projet Google Cloud « PDS OS », autorisé une fois par l'administrateur du Workspace
+  (admin.google.com › Commandes des API › Délégation au niveau du domaine). JWT RS256 signé par
+  `node:crypto`, un jeton par membre et par service (un accès non délégué est refusé seul). La clé lit
+  n'importe quelle boîte du domaine : le code ne demande **que** l'adresse pro du membre connecté
+  (`loadWorkAddress`, lue avec sa session) — l'adresse écrite par la direction dans Équipe
+  (`memberships.google_work_email`, « Adresse Google pro » de la modale Modifier), sinon son adresse de
+  connexion si elle est du domaine. **Un membre ne peut pas écrire la sienne** (RLS : direction seule), une
+  adresse n'appartient qu'à un membre (index unique), le domaine est vérifié par l'action
+  (`GOOGLE_WORKSPACE_DOMAIN`). Variables : `GOOGLE_WORKSPACE_KEY` (clé JSON telle quelle ou en base64).
+- **Autre compte, connecté par le membre** (`lib/integrations/google-connect.ts`) : client OAuth « Web »
+  `GOOGLE_CONNECT_*`, un seul écran de consentement pour les trois services (`access_type=offline`,
+  `prompt=consent`, PKCE). Aller-retour : `/api/google/connect` pose un cookie HTTP-only scellé (état,
+  vérificateur PKCE, qui l'a lancé, 10 min, `lib/google/connect-flow.ts`) puis part chez Google ;
+  `/api/google/callback` vérifie le cookie (même membre, même état), échange le code, lit l'adresse dans
+  l'id token (audience et adresse vérifiée contrôlées), **scelle le jeton de rafraîchissement**
+  (`lib/google/token-seal.ts`, AES-256-GCM de `lib/utils/seal.ts`, clé `GOOGLE_TOKEN_KEY`, partagé avec les
+  liens privés du Juridique) et l'enregistre avec la session (`google_accounts`, RLS : ses lignes seules).
+  Son compte pro déjà branché n'est pas gardé deux fois (« already », jeton révoqué). « Déconnecter »
+  (« ⋯ ») révoque l'accès chez Google puis oublie le compte et ses choix. Retour dans les Paramètres par
+  `?google=connected|already|cancelled|failed`. Écran de consentement « External » publié : tant que Google
+  n'a pas vérifié l'application, un Gmail perso passe une fois l'écran « non validée » (100 comptes au plus).
+- **Choix du membre** : `google_service_opt_outs` (compte, service) — branché par défaut, une ligne = un
+  service coupé. Un service décoché sur l'écran de Google = « À autoriser ».
+- **Écran** (`GoogleConnectionsSection` sous `Suspense`, `GoogleAccountServices` par compte) : adresse et
+  « Compte pro » / « Connecté par vous », une ligne par service cochée = lue, état à droite
+  (`googleServiceTone`) : Branché (Google a répondu, gardé 5 min), Pas encore branché (clé absente), À
+  autoriser, Google ne répond pas, Coupé. Sans adresse pro : « le directeur général l'ajoute dans Équipe ».
+  Le bouton « Connecter un compte Google » n'apparaît qu'avec les trois variables `GOOGLE_CONNECT_*` et
+  `GOOGLE_TOKEN_KEY`.
+- **Seuls points d'entrée** : `google-workspace.ts`, `google-connect.ts`, et ce qu'ils partagent
+  (`google-member-api.ts` : accès, test d'un service, appel du point de jeton). Distincts du jeton de po@
+  (`google-oauth.ts`), qui écrit les événements des calls.
+- **Rien n'est encore lu** au-delà du test d'un service : l'agenda dans la semaine du Calendrier
+  (« occupé » pour les autres) et Gmail/Drive comme outils de PO (contenu = donnée, jamais instruction)
+  sont les lots suivants ; chaque lecture y sera journalisée (qui, quel service, quand, sans le contenu).
+  Migration `20261112100101_google_connections`, test `google-connections`.
+- **Côté Google Cloud (projet « PDS OS », 12/11/2026)** : API Gmail activée (Calendar et Drive l'étaient) ;
+  client OAuth Web « PDS OS Connexions membres », retours `/api/google/callback` de la prod
+  (`pds-os.vercel.app`), de la pré-prod (`pds-os-git-pre-prod-sordulocontact-7006s-projects.vercel.app`) et
+  de `localhost:3000` ; accès déclarés sur l'écran de consentement : openid, e-mail, `calendar.readonly`,
+  `gmail.readonly`, `drive.readonly`. Compte de service `pds-os-workspace@pds-os.iam.gserviceaccount.com`
+  (ID client `108697210625728193378`, celui à déclarer dans la délégation du domaine), sans rôle. Tant que
+  l'écran de consentement reste « Interne », seuls les comptes @pdsrecords.com passent « Connecter un
+  compte Google » : un Gmail perso demande « Externe » publié.
+
 ## 5. IA (`lib/ai/`)
 
 - Points d'entrée uniques : `llm.ts` (`extract`, `getChatModel`) et `transcribe.ts`.
@@ -3281,6 +3334,38 @@ facture d'un contrat payé du Juridique, `20261020030301`) n'en font plus qu'une
   `formatEuros` (budget) et `formatFee` (contrats) en sont des alias.
 - pgTAP : `project-invoices.test.sql` (24), `master-invoices`, `legal-reste`, `master-deliverables`
   adaptés (même table ; le responsable lit désormais la facture d'un contrat, jamais le RIB).
+
+## 8 ter ter. Finance : les dépenses de toute l'équipe (12/11/2026, `/app/finance`, `lib/finance/`)
+
+Demande de Sacha : « une vue finance complète, une sorte de dashboard financier », inspirée de Monarch
+(rapports), Copilot Money (budget face au réel), Origin, Wise et Mercury (recherche Mobbin du 12/11).
+
+- **Qui** : permission `read_finance`, à la direction, aux business managers et au poste business (Sacha :
+  « ça sera que ces trois rôles »). Entrée « Finance » de la barre latérale, juste après Dépenses, qui
+  **reste** la liste des lignes (Sacha : l'onglet Dépenses ne devient pas Finance).
+- **Lecture** : quatre fonctions `security definer` de `20261112150101_finance.sql`, qui ne renvoient rien sans
+  `read_finance` : `finance_month_totals()` (lignes sommées par mois, projet ou artiste, poste et état, avec le
+  nombre de dépenses facturées ou payées sans justificatif), `finance_projects()` (projets qui dépensent ou
+  ont une enveloppe, artiste par `project_artist_id`), `finance_artists()` (artistes qui dépensent, enveloppe
+  ouverte et sa consommation, règle de `artist_budget_usage`), `finance_lines(kind, from, to, limit)`
+  (« À payer » = lignes `invoiced` avec l'échéance et l'émetteur de leur facture ; « largest » = plus grosses
+  lignes engagées de la période). Elles renvoient des **totaux** : les lignes gardent leurs règles (un
+  business ne lit toujours pas les lignes d'un projet ; le RLS de `budget_lines` est inchangé).
+- **Un seul grand livre** : `budget_lines`. Les devis et lignes de production (`production_*`), le prévisionnel
+  de Conception (`design_sheets.budget_cents`) et les cachets d'influence hors budget ne sont pas additionnés
+  (pas de double compte). Aucun revenu n'existe dans PDS OS : Finance = dépenses et engagements.
+- **Calculs** (code, `lib/finance/aggregate.ts`, `view.ts`) : engagé = engagé, facturé ou payé ; estimé =
+  estimé ou proposé ; période `?periode=mois|trimestre|annee|tout` (année par défaut, `period.ts`), comparée à
+  la même durée juste avant. « À payer » = tout le facturé, quelle que soit la date. Budgets des projets :
+  projets non archivés, toutes dates (une enveloppe est le tout du projet), du plus proche de l'enveloppe au
+  plus loin, dépassements en tête. Un projet compte pour son artiste dans « Par artiste ».
+- **Écran** : 4 tuiles (`StatTiles`), « Dépenses par mois » (`MonthChart`, barres empilées payé / engagé non
+  payé / estimé, rampe `--chart-*`, dessinée côté serveur sans librairie, infobulle au survol et au clavier,
+  tableau pour les lecteurs d'écran), « Par poste » et « Par artiste » (`RankedBars`), « Budgets des projets » et
+  « Enveloppes des artistes » (`EnvelopeTable`), colonne À payer / Plus grosses dépenses / Sans justificatif
+  (`FinanceLinesCard`, `ListCard`). Liens vers le Budget d'un projet seulement pour `view_all_projects`, vers
+  celui d'un artiste et Dépenses pour `read_artist_budgets` : les autres lisent les totaux sans ouvrir les lignes.
+- pgTAP : `finance.test.sql` (14).
 
 ## 8 quater. Retours sur l'application (`/app/feedback`)
 

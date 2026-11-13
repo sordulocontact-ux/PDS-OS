@@ -77,6 +77,9 @@ export const PERMISSIONS = [
   "manage_artist_budgets",
   // Opens a deal on an artist, his own (business manager, Ibé 12/11/2026).
   "open_deals",
+  // Reads the Finance page: every total of the team's spending (the
+  // direction, business managers and business, Sacha 12/11/2026).
+  "read_finance",
 ] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 
@@ -122,6 +125,8 @@ export const routes = {
   files: "/app/files",
   // Every spend the reader may see, projects and artists (BUD 3).
   expenses: "/app/expenses",
+  // The team's spending as a whole (?periode=mois|trimestre|annee|tout).
+  finance: "/app/finance",
   // The Business module's deals (BIZ 2 to 4): the list, a deal's page.
   deals: "/app/deals",
   deal: (dealId: string) => `/app/deals/${dealId}`,

@@ -48,6 +48,8 @@ export type MembershipRow = {
   decisionNote: string | null;
   // Requests to PO (the language model) today and the daily limit.
   ai: { used: number; limit: number };
+  // The work address the direction wrote (Paramètres › Connexions), or null.
+  googleWorkEmail: string | null;
   person: {
     id: string;
     firstName: string;

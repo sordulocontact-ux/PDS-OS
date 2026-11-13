@@ -15,7 +15,7 @@ export async function listMemberships(
     supabase
       .from("memberships")
       .select(
-        "id, role, status, requested_at, decided_at, decision_note, ai_daily_limit, person:people!memberships_person_id_fkey(id, first_name, last_name, email)",
+        "id, role, status, requested_at, decided_at, decision_note, ai_daily_limit, google_work_email, person:people!memberships_person_id_fkey(id, first_name, last_name, email)",
       )
       .eq("organization_id", organizationId)
       .order("requested_at", { ascending: false }),
@@ -48,6 +48,7 @@ export async function listMemberships(
       decidedAt: raw.decided_at,
       decisionNote: raw.decision_note,
       ai: { used: usedBy.get(raw.person.id) ?? 0, limit: raw.ai_daily_limit },
+      googleWorkEmail: raw.google_work_email,
       person: {
         id: raw.person.id,
         firstName: raw.person.first_name ?? "",

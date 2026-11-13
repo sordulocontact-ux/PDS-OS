@@ -86,6 +86,28 @@ export const serverEnvSchema = z
     GOOGLE_CALENDAR_CLIENT_SECRET: optionalSecret,
     GOOGLE_CALENDAR_REFRESH_TOKEN: optionalSecret,
     GOOGLE_CALENDAR_ID: optionalSecret,
+    /** Google Workspace (Paramètres › Connexions, lib/integrations/
+     * google-workspace.ts): the service account's JSON key (as is, or in
+     * base64) that the domain delegated, read-only, to Agenda, Gmail and
+     * Drive, and that domain. Optional: without them, nothing is read and
+     * the settings say « Pas encore branché ». */
+    GOOGLE_WORKSPACE_KEY: optionalSecret,
+    GOOGLE_WORKSPACE_DOMAIN: z.preprocess(
+      blankToUndefined,
+      z
+        .string()
+        .trim()
+        .toLowerCase()
+        .regex(/^[a-z0-9-]+(\.[a-z0-9-]+)+$/)
+        .optional(),
+    ),
+    /** « Connecter un compte Google » (lib/integrations/google-connect.ts):
+     * the « Web » OAuth client a member signs in through, read-only, and the
+     * key that seals the refresh tokens (32 bytes, base64: `openssl rand
+     * -base64 32`). Optional: without the three, the button is not shown. */
+    GOOGLE_CONNECT_CLIENT_ID: optionalSecret,
+    GOOGLE_CONNECT_CLIENT_SECRET: optionalSecret,
+    GOOGLE_TOKEN_KEY: optionalSecret,
     /** Juridique: seals the private links kept visible in their démarche
      * (32 bytes, base64: `openssl rand -base64 32`). Optional: without it,
      * a link is shown once, then only its state. */

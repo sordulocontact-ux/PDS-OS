@@ -9,6 +9,7 @@ import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
 import { aiUsage } from "@/lib/i18n/fr/ai-usage";
 import { auth } from "@/lib/i18n/fr/auth";
+import { googleConnections } from "@/lib/i18n/fr/google-connections";
 import { memberAction } from "@/lib/members/actions";
 import {
   idleMemberActionState,
@@ -16,11 +17,11 @@ import {
   type MembershipRow,
 } from "@/lib/members/types";
 
-const fr = { aiUsage, auth };
+const fr = { aiUsage, auth, googleConnections };
 
 // Body of the "Modifier" modal of a team row: name, the position when it
-// can change here (invitation or active access, never one's own), and the
-// daily requests to PO.
+// can change here (invitation or active access, never one's own), the
+// daily requests to PO, and the work address read by Paramètres › Connexions.
 export function MemberEditForm({
   membership,
   isSelf,
@@ -31,7 +32,7 @@ export function MemberEditForm({
   onDone: (saved: boolean) => void;
 }) {
   const [state, action] = useActionState(memberAction, idleMemberActionState);
-  const { id, status, role, person, ai } = membership;
+  const { id, status, role, person, ai, googleWorkEmail } = membership;
   const t = fr.auth.members;
   const c = fr.auth.common;
   const fieldErrors = state.status === "error" ? state.fieldErrors : undefined;
@@ -111,6 +112,20 @@ export function MemberEditForm({
         required
         hint={fr.aiUsage.team.hint(ai.used)}
         error={fieldErrors?.aiDailyLimit}
+      />
+      <Field
+        name="googleWorkEmail"
+        id={`googleWorkEmail-${id}`}
+        label={fr.googleConnections.workField.label}
+        type="email"
+        autoComplete="off"
+        defaultValue={retainedMemberValue(
+          state,
+          "googleWorkEmail",
+          googleWorkEmail ?? "",
+        )}
+        hint={fr.googleConnections.workField.hint}
+        error={fieldErrors?.googleWorkEmail}
       />
       {state.status === "error" && !state.fieldErrors && (
         <FormMessage kind="error">{state.error}</FormMessage>

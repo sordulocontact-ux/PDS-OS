@@ -27,6 +27,7 @@ export const adminTopics: GuideTopic[] = [
       "La direction peut aussi créer un compte (nom, e-mail, mot de passe, poste) ; la personne confirme ensuite son e-mail si nécessaire, et un lien d'invitation peut être copié.",
       "Les postes sont Directeur général, Chef de projet et Directeur créatif. On peut modifier le nom et le poste d'un membre, le suspendre et le réactiver.",
       "La direction fixe aussi, par membre, le nombre de requêtes à PO par jour.",
+      "Dans « Modifier », l'Adresse Google pro est l'adresse @pdsrecords.com d'un membre qui se connecte avec une autre : son Agenda, son Gmail et son Drive se branchent alors sans clic. Une adresse n'appartient qu'à un membre, et seule la direction l'écrit.",
       "Quand des demandes d'accès attendent, un compteur s'affiche à côté d'Équipe dans la barre latérale.",
     ],
     faq: [
@@ -80,7 +81,7 @@ export const adminTopics: GuideTopic[] = [
     key: "settings",
     title: "Paramètres",
     summary:
-      "Votre utilisation de PO, et pour la direction la facturation et les exigences de distribution.",
+      "Votre utilisation de PO, vos connexions Google, et pour la direction la facturation et les exigences de distribution.",
     keywords: [
       "parametres",
       "reglages",
@@ -91,6 +92,11 @@ export const adminTopics: GuideTopic[] = [
       "siret",
       "tva",
       "formats audio",
+      "connexions",
+      "google",
+      "gmail",
+      "drive",
+      "agenda google",
       "theme",
       "mode sombre",
       "mode clair",
@@ -104,6 +110,7 @@ export const adminTopics: GuideTopic[] = [
       "Le compteur repart à zéro à minuit, heure de Paris. La limite est fixée par la direction dans Équipe.",
       "La direction y règle aussi la facturation de PDS (raison sociale, adresse, SIRET, TVA), que les prestataires lisent sur leur lien privé.",
       "Elle y règle les formats audio exigés par The Orchard, repris dans le Brief des ingénieurs.",
+      "Connexions : le compte pro @pdsrecords.com a son Agenda, son Gmail et son Drive branchés sans rien faire, en lecture seule ; s'il n'est pas l'adresse de connexion, le directeur général l'écrit dans Équipe (Modifier › Adresse Google pro). « Connecter un compte Google » ajoute un autre compte (Gmail perso), « ⋯ › Déconnecter » le retire. Chacun coupe un service en le décochant ; ce qui en est lu n'est montré qu'à lui, pas même à la direction.",
       "Le thème de l'interface (Système, Clair, Sombre) se change dans le menu du compte.",
     ],
     faq: [

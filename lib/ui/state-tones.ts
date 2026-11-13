@@ -1278,3 +1278,14 @@ export const quadrantTone = {
   delegate: "warning",
   later: "neutral",
 } as const satisfies Record<string, Tone>;
+
+/** A Google service of Paramètres › Connexions: branched is online, waiting
+ * for the domain's authorization is a warning (someone must act), Google not
+ * answering is a failure, not set yet or turned off is nothing to do. */
+export const googleServiceTone = {
+  connected: "success",
+  not_set: "neutral",
+  refused: "warning",
+  unreachable: "danger",
+  off: "neutral",
+} as const satisfies Record<string, Tone>;

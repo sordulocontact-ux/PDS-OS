@@ -36,6 +36,21 @@ export const anonymousAccess: Access = {
   accountId: null,
 };
 
+// Pages kept off in production while the team tries them in pre-prod
+// (Sacha, 13/11/2026: Finance hidden on main). Without its permission the
+// item leaves the sidebar, the page refuses and PO says it is not open to
+// the reader. Vercel sets VERCEL_ENV to "production" on main's deployments
+// only (pre-prod is "preview", local is unset). Hiding, not security: RLS
+// still decides what the database gives.
+const OFF_IN_PRODUCTION: readonly Permission[] = ["read_finance"];
+
+function shownHere(permission: Permission): boolean {
+  return (
+    process.env.VERCEL_ENV !== "production" ||
+    !OFF_IN_PRODUCTION.includes(permission)
+  );
+}
+
 function asString(value: unknown): string | null {
   return typeof value === "string" ? value : null;
 }
@@ -82,7 +97,7 @@ export async function fetchAccess(
     role: state === "approved" ? role : null,
     permissions:
       state === "approved" && Array.isArray(raw.permissions)
-        ? raw.permissions.filter(isPermission)
+        ? raw.permissions.filter(isPermission).filter(shownHere)
         : [],
     personId: asString(raw.person_id),
     organizationId: asString(raw.organization_id),

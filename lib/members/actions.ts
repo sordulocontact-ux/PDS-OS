@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { requireAdmin } from "@/lib/auth/dal";
 import { databaseErrorMessage } from "@/lib/auth/errors";
+import type { FieldErrors } from "@/lib/auth/form-state";
 import { routes } from "@/lib/auth/redirects";
 import { signupUrl, siteUrl } from "@/lib/auth/site-url";
 import type { OrganizationRole } from "@/lib/auth/redirects";
@@ -12,6 +13,7 @@ import {
   inviteMemberSchema,
   membershipDecisionSchema,
   membershipAiLimitSchema,
+  membershipGoogleEmailSchema,
   membershipIdSchema,
   membershipRoleSchema,
   parseForm,
@@ -20,6 +22,8 @@ import {
 } from "@/lib/auth/schemas";
 import { fr } from "@/lib/i18n/fr";
 import { createAnonymousClient } from "@/lib/supabase/anonymous";
+import { googleConnections } from "@/lib/i18n/fr/google-connections";
+import { workspaceDomain } from "@/lib/integrations/google-workspace";
 import { createClient } from "@/lib/supabase/server";
 
 // Access decisions taken from the team screen. Every request runs with the
@@ -32,6 +36,7 @@ type MembershipPatch = {
   role?: OrganizationRole;
   decision_note?: string | null;
   ai_daily_limit?: number;
+  google_work_email?: string | null;
 };
 
 async function patchMembership(
@@ -46,6 +51,15 @@ async function patchMembership(
     .select("id");
 
   if (error) {
+    // One member per work address (unique index).
+    if (error.code === "23505" && patch.google_work_email) {
+      const taken = googleConnections.workField.taken;
+      return {
+        status: "error",
+        error: taken,
+        fieldErrors: { googleWorkEmail: taken },
+      };
+    }
     return { status: "error", error: databaseErrorMessage(error) };
   }
   // Zero rows: RLS hid the row.
@@ -128,11 +142,32 @@ export async function memberAction(
       const withRole = formData.has("role");
       const role = withRole ? parseForm(membershipRoleSchema, formData) : null;
       const aiLimit = parseForm(membershipAiLimitSchema, formData);
-      if (!parsed.ok || (role && !role.ok) || !aiLimit.ok) {
-        const fieldErrors = {
+      const work = parseForm(membershipGoogleEmailSchema, formData);
+      // Only an address of the delegated domain opens a mailbox.
+      const domain = workspaceDomain();
+      const outsideDomain =
+        work.ok &&
+        !!domain &&
+        !!work.data.googleWorkEmail &&
+        !work.data.googleWorkEmail.endsWith(`@${domain}`);
+      if (
+        !parsed.ok ||
+        (role && !role.ok) ||
+        !aiLimit.ok ||
+        !work.ok ||
+        outsideDomain
+      ) {
+        const fieldErrors: FieldErrors = {
           ...(parsed.ok ? {} : parsed.fieldErrors),
           ...(role && !role.ok ? role.fieldErrors : {}),
           ...(aiLimit.ok ? {} : aiLimit.fieldErrors),
+          ...(work.ok ? {} : work.fieldErrors),
+          ...(outsideDomain && domain
+            ? {
+                googleWorkEmail:
+                  googleConnections.workField.outsideDomain(domain),
+              }
+            : {}),
         };
         return {
           status: "error",
@@ -141,6 +176,7 @@ export async function memberAction(
             fieldErrors.lastName ??
             fieldErrors.role ??
             fieldErrors.aiDailyLimit ??
+            fieldErrors.googleWorkEmail ??
             fr.auth.errors.required,
           fieldErrors,
           values: retainedValues(formData),
@@ -162,6 +198,7 @@ export async function memberAction(
 
       return patchMembership(aiLimit.data.membershipId, {
         ai_daily_limit: aiLimit.data.aiDailyLimit,
+        google_work_email: work.data.googleWorkEmail,
         ...(role?.ok ? { role: role.data.role } : {}),
       });
     }

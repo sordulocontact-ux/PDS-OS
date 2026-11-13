@@ -34,6 +34,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      google_accounts: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          person_id: string
+          refresh_token_sealed: string
+          scopes: string[]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          person_id?: string
+          refresh_token_sealed: string
+          scopes?: string[]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          person_id?: string
+          refresh_token_sealed?: string
+          scopes?: string[]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "google_accounts_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       artist_budgets: {
         Row: {
           amount_cents: number
@@ -660,6 +698,35 @@ export type Database = {
           {
             foreignKeyName: "deals_stage_changed_by_fkey"
             columns: ["stage_changed_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      google_service_opt_outs: {
+        Row: {
+          account_email: string
+          created_at: string
+          person_id: string
+          service: string
+        }
+        Insert: {
+          account_email: string
+          created_at?: string
+          person_id?: string
+          service: string
+        }
+        Update: {
+          account_email?: string
+          created_at?: string
+          person_id?: string
+          service?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "google_service_opt_outs_person_id_fkey"
+            columns: ["person_id"]
             isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
@@ -12394,6 +12461,7 @@ export type Database = {
           decided_at: string | null
           decided_by: string | null
           decision_note: string | null
+          google_work_email: string | null
           id: string
           organization_id: string
           person_id: string
@@ -12409,6 +12477,7 @@ export type Database = {
           decided_at?: string | null
           decided_by?: string | null
           decision_note?: string | null
+          google_work_email?: string | null
           id?: string
           organization_id: string
           person_id: string
@@ -12424,6 +12493,7 @@ export type Database = {
           decided_at?: string | null
           decided_by?: string | null
           decision_note?: string | null
+          google_work_email?: string | null
           id?: string
           organization_id?: string
           person_id?: string
@@ -21270,6 +21340,64 @@ export type Database = {
           p_topic: string
         }
         Returns: undefined
+      }
+      finance_artists: {
+        Args: never
+        Returns: {
+          archived: boolean
+          artist_id: string
+          budget_cents: number
+          budget_id: string
+          ends_on: string
+          name: string
+          pending_cents: number
+          spent_cents: number
+          starts_on: string
+        }[]
+      }
+      finance_lines: {
+        Args: {
+          p_from?: string
+          p_kind: string
+          p_limit?: number
+          p_to?: string
+        }
+        Returns: {
+          amount_cents: number
+          artist_id: string
+          contact_name: string
+          due_on: string
+          family: string
+          label: string
+          line_id: string
+          project_id: string
+          spent_on: string
+          status: string
+        }[]
+      }
+      finance_month_totals: {
+        Args: never
+        Returns: {
+          artist_id: string
+          family: string
+          line_count: number
+          month: string
+          no_proof_count: number
+          project_id: string
+          status: string
+          total_cents: number
+        }[]
+      }
+      finance_projects: {
+        Args: never
+        Returns: {
+          archived: boolean
+          artist_id: string
+          budget_cents: number
+          collective: boolean
+          project_id: string
+          title: string
+        }[]
       }
       file_feedback: {
         Args: {

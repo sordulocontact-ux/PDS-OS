@@ -92,6 +92,38 @@ export const projectPilotTopics: GuideTopic[] = [
     permissions: ["read_artist_budgets"],
   },
   {
+    key: "finance",
+    title: "Finance",
+    summary:
+      "Les dépenses de toute l'équipe en un tableau de bord : tous les projets et tous les artistes.",
+    keywords: [
+      "finance",
+      "finances",
+      "tableau de bord financier",
+      "combien on a depense",
+      "depenses globales",
+      "a payer",
+      "factures en retard",
+      "depassement",
+    ],
+    nav: "/app/finance",
+    facts: [
+      "La page Finance additionne toutes les dépenses de l'équipe, projets et artistes confondus, pour la période choisie : ce mois, ce trimestre, cette année (par défaut) ou tout.",
+      "En tête : l'engagé (engagé, facturé ou payé) et son évolution par rapport à la période d'avant, le payé, ce qui reste à payer (facturé, toutes dates, dont les factures en retard) et le nombre d'enveloppes dépassées.",
+      "Le graphique « Dépenses par mois » sépare le payé, l'engagé pas encore payé et l'estimé ; puis la répartition par poste et par artiste (un projet compte pour son artiste).",
+      "« Budgets des projets » compare l'enveloppe de chaque projet en cours à ce qu'il a engagé, toutes dates ; « Enveloppes des artistes » fait de même pour l'enveloppe ouverte de chaque artiste.",
+      "À droite : les factures à payer (les plus pressées d'abord), les plus grosses dépenses de la période et les dépenses facturées ou payées sans justificatif.",
+      "Tous les chiffres sont calculés à partir des lignes de budget ; les devis de production et le prévisionnel de la Conception ne sont pas des dépenses et n'y sont pas comptés. Aucun revenu n'est enregistré dans PDS OS.",
+    ],
+    faq: [
+      {
+        q: "Qui voit la page Finance ?",
+        a: "La direction, les business managers et le poste Business. Ils voient tous les totaux ; ouvrir le Budget d'un projet ou d'un artiste reste réservé à ceux qui le lisent.",
+      },
+    ],
+    permissions: ["read_finance"],
+  },
+  {
     key: "project_team",
     title: "Équipe d'un projet",
     summary:
