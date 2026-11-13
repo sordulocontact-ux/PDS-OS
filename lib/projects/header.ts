@@ -24,7 +24,12 @@ export type ProjectHeaderData = {
   projectId: string;
   projectTitle: string;
   // What projectSections needs to list this viewer's sections.
-  sections: { legal: boolean; budget: boolean; workflows?: string[] };
+  sections: {
+    legal: boolean;
+    budget: boolean;
+    workflows?: string[];
+    collective: boolean;
+  };
   // The Marketing's sub-modules (pills), checked from the project's stages.
   subModules: SubModuleStep[];
   // The project's own facts (proto « Projet complet »): « Néons · Mona Lys ·
@@ -87,6 +92,7 @@ export const projectHeaderData = trackedCache(
         legal: can(access, "manage_legal"),
         budget,
         workflows: flows?.workflows,
+        collective: project.collective,
       },
       subModules: marketingSteps(project.id, {
         strategyLaunched:

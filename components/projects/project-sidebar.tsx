@@ -18,6 +18,8 @@ export type ProjectNavProps = ProjectNavState & {
   canSeeLegal: boolean;
   canSeeBudget?: boolean;
   workflows?: readonly string[];
+  // A collective: « Titres et artistes » after the overview (lot 6).
+  collective?: boolean;
   // Where each entry opens, from the journeys (lib/journey/landing.ts):
   // straight to its step, not through the module's redirecting page.
   entries?: Record<string, string>;
@@ -30,12 +32,14 @@ const navItems = ({
   canSeeLegal,
   canSeeBudget = true,
   workflows,
+  collective = false,
   entries = {},
 }: ProjectNavProps) =>
   projectSections(projectId, {
     legal: canSeeLegal,
     budget: canSeeBudget,
     workflows,
+    collective,
   })
     .filter((section) => !section.hidden)
     .map((section) => ({

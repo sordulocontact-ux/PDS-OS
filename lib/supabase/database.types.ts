@@ -17343,7 +17343,7 @@ export type Database = {
           organization_id: string
           project_id: string
           seq: number
-          title_id: string
+          title_id: string | null
         }
         Insert: {
           actor_person_id?: string | null
@@ -17354,7 +17354,7 @@ export type Database = {
           organization_id: string
           project_id: string
           seq?: never
-          title_id: string
+          title_id?: string | null
         }
         Update: {
           actor_person_id?: string | null
@@ -17365,7 +17365,7 @@ export type Database = {
           organization_id?: string
           project_id?: string
           seq?: never
-          title_id?: string
+          title_id?: string | null
         }
         Relationships: [
           {

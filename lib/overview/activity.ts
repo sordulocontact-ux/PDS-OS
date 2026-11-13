@@ -44,7 +44,8 @@ const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
  * manage_legal, as its pages), the Distribution's (distribution_events),
  * a collective's titles (project_title_events: added, renamed, abandoned
  * with its reason, reactivated; an artist added to a title, its status
- * changed).
+ * changed; the main artist changed, old → new), each to « Titres et
+ * artistes ».
  * Read with the viewer's session: what RLS hides stays hidden. The Master
  * has no journal of its own yet. Nothing rewritten, nothing invented.
  */
@@ -184,7 +185,7 @@ export async function loadProjectActivity(
       workflow: fr.projectShell.activity.project,
       text: titleEventText(row.kind, record(row.detail)),
       who: person(row.actor_person_id),
-      href: routes.project(project.id),
+      href: routes.projectTitles(project.id),
     })),
     ...(distribution.data ?? []).map((row) => ({
       id: `distribution:${row.id}`,
@@ -240,6 +241,8 @@ function titleEventText(kind: string, detail: Record<string, unknown>): string {
         status(detail.from),
         status(detail.to),
       );
+    case "main_artist_changed":
+      return t.mainArtistChanged(text(detail.from), text(detail.to) ?? "");
     default:
       return "";
   }

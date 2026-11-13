@@ -68,6 +68,7 @@ async function navOf({ access, project }: NavSource): Promise<ProjectNavProps> {
     canSeeLegal: can(access, "manage_legal"),
     canSeeBudget: canSeeProjectBudget(access, project),
     workflows: flows?.workflows,
+    collective: project.collective,
     statuses,
     reasons: launchedAt ? reasonsOf(statuses, planned) : {},
   };
@@ -162,6 +163,7 @@ export async function ProjectNavTabs(source: NavSource) {
       canSeeLegal={nav.canSeeLegal}
       canSeeBudget={nav.canSeeBudget ?? true}
       workflows={nav.workflows}
+      collective={nav.collective}
     />
   );
 }

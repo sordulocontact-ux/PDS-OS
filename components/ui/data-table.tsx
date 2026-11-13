@@ -150,13 +150,21 @@ export function DataTableRow({
   );
 }
 
+// `colSpan`: a cell over several columns (a row of another kind in the same
+// table: a title's facts across its participations' columns).
 export function DataTableCell({
   children,
   className,
+  colSpan,
   ...columnProps
-}: ColumnProps & { children: React.ReactNode; className?: string }) {
+}: ColumnProps & {
+  children: React.ReactNode;
+  className?: string;
+  colSpan?: number;
+}) {
   return (
     <TableCell
+      colSpan={colSpan}
       className={cn(
         "px-0 py-3 pr-5 text-[length:var(--type-body-md)] font-medium",
         column(columnProps),
