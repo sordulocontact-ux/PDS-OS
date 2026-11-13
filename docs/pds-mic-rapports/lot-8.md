@@ -70,3 +70,6 @@ Aucune migration : les données du Master sont déjà par projet × titre.
 ## Questions pour toi
 
 Aucune.
+
+*Note du lot 9* : les titres abandonnés sortent du Master ; ils ne sont plus dans le sélecteur
+(au lot 8, ils y restaient marqués « Abandonné »).

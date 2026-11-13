@@ -19791,6 +19791,10 @@ export type Database = {
         Args: { p_title_id: string }
         Returns: string
       }
+      request_project_master_invoices: {
+        Args: { p_project_id: string }
+        Returns: undefined
+      }
       reactivate_project_title: {
         Args: { p_title_id: string }
         Returns: undefined

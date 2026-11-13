@@ -19,13 +19,24 @@ export type MasterTitleChoice = {
   // Its name in the project (« Titre 2 · sans nom », never a provisional
   // name of the Catalogue, lot 7).
   label: string;
-  abandoned: boolean;
   // Where it stands in the Master (« Mix V2 à valider »); null: nothing yet.
   state: string | null;
   done: boolean;
   // A version of it waits for a decision.
   pending: boolean;
+  // What it waits for, for the Master's overview (lot 9): its source, a
+  // mix, a mastering (from the engineer), or a validation (of the round in
+  // `round`); null when it has its Master final.
+  waiting: { kind: MasterTitleWaiting; round: "mix" | "mastering" } | null;
 };
+
+export const MASTER_TITLE_WAITINGS = [
+  "source",
+  "mix",
+  "mastering",
+  "validation",
+] as const;
+export type MasterTitleWaiting = (typeof MASTER_TITLE_WAITINGS)[number];
 
 /** The titles of a collective's Master and the one the page shows. */
 export type MasterTitleScope = {
@@ -36,7 +47,8 @@ export type MasterTitleScope = {
 /**
  * Projet collectif, lot 8: the Master of a collective is worked one title
  * at a time (principle 1). The titles that have a master, in the project's
- * order (abandoned last, still reachable: their history is kept), and the
+ * order (an abandoned title is out of the Master, lot 9: its history is
+ * kept, its reactivation brings it back), and the
  * active one: the URL's (`?titre=`), else the step's own default (the first
  * with a version waiting for a decision on a round, the first live one
  * otherwise; the Source keeps its own rule, pickSourceTitle). Null for any
@@ -68,7 +80,7 @@ export const loadMasterTitleScope = trackedCache(
       ),
     );
     const choices: MasterTitleChoice[] = titles.flatMap((title) => {
-      if (!title.master) return [];
+      if (!title.master || title.status === "abandoned") return [];
       const versions = facts.versions.flatMap((v) =>
         v.masterId === title.master!.id && v.decision !== "reopened"
           ? [{ stage: v.stage, number: v.number, decision: v.decision }]
@@ -79,6 +91,9 @@ export const loadMasterTitleScope = trackedCache(
         finalInCatalogue: finalInCatalogue.has(title.master.id),
         versions,
       });
+      const sourced = facts.titles.some(
+        (t) => t.id === title.master!.id && t.sources.length > 0,
+      );
       return [
         {
           masterId: title.master.id,
@@ -87,20 +102,18 @@ export const loadMasterTitleScope = trackedCache(
             workingTitle: title.workingTitle,
             masterTitle: masterNameOf(title.master),
           }),
-          abandoned: title.status === "abandoned",
           state: titleMasterLabel(state),
           done: state.kind === "final",
           pending: state.kind === "round" && state.decision === "pending",
+          waiting: waitingOf(state, sourced),
         },
       ];
     });
     if (choices.length === 0) return null;
-    const live = choices.filter((choice) => !choice.abandoned);
     const round = step === "mix" || step === "mastering";
     const active =
       choices.find((choice) => choice.masterId === titre) ??
-      (round ? live.find((choice) => choice.pending) : undefined) ??
-      live[0] ??
+      (round ? choices.find((choice) => choice.pending) : undefined) ??
       choices[0];
     return { choices, active };
   },
@@ -112,7 +125,6 @@ export function titleCrumb(
   projectId: string,
   step: MasterStepKey,
   scope: MasterTitleScope,
-  labels: { abandoned: string },
 ): { label: string; options?: CrumbOption[] } {
   if (scope.choices.length < 2) return { label: scope.active.label };
   const href = masterStepHref(projectId, step);
@@ -122,9 +134,56 @@ export function titleCrumb(
       key: choice.masterId,
       label: choice.label,
       href: `${href}?titre=${choice.masterId}`,
-      detail: choice.abandoned ? labels.abandoned : (choice.state ?? undefined),
+      detail: choice.state ?? undefined,
       current: choice.masterId === scope.active.masterId,
       done: choice.done,
     })),
   };
+}
+
+/** What a title waits for in the Master, from its state and whether its
+ * source is confirmed. */
+function waitingOf(
+  state: ReturnType<typeof titleMasterState>,
+  sourced: boolean,
+): MasterTitleChoice["waiting"] {
+  switch (state.kind) {
+    case "none":
+    case "final":
+      return null;
+    case "todo":
+      return sourced
+        ? { kind: "mix", round: "mix" }
+        : { kind: "source", round: "mix" };
+    case "mixed":
+      return { kind: "mastering", round: "mastering" };
+    case "round":
+      return state.decision === "pending"
+        ? { kind: "validation", round: state.round }
+        : { kind: state.round, round: state.round };
+  }
+}
+
+/** The Master's overview of a collective (lot 9): how many titles wait for
+ * a source, a mix, a mastering, a validation; each count opens the first
+ * of them on its step. The abandoned titles are not counted. */
+export function titleWaitings(projectId: string, scope: MasterTitleScope) {
+  return MASTER_TITLE_WAITINGS.map((kind) => {
+    const titles = scope.choices.filter((c) => c.waiting?.kind === kind);
+    const first = titles[0];
+    const step: MasterStepKey =
+      kind === "source"
+        ? "source"
+        : kind === "validation"
+          ? (first?.waiting?.round ?? "mix")
+          : kind;
+    return {
+      kind,
+      count: titles.length,
+      names: titles.map((c) => c.label),
+      href: first
+        ? `${masterStepHref(projectId, step)}?titre=${first.masterId}`
+        : null,
+    };
+  });
 }

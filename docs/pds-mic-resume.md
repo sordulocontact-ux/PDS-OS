@@ -1,7 +1,7 @@
 # Projet collectif (PDS Mic) : résumé
 
 Résumé de travail de `docs/pds-mic-plan.md` (qui fait foi en cas de doute). Mis à jour à la fin
-de chaque lot. Dernière mise à jour : 13/11/2026, après le lot 8.
+de chaque lot. Dernière mise à jour : 13/11/2026, après le lot 9.
 
 **Module Business fait en parallèle par un collègue** : rôle Business manager, négociation, deal
 memo, contrats, contacts privés, mails. Ces lots n'y touchent pas ; son dossier de négociation
@@ -43,7 +43,7 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
 | 6 | Vue « Titres et artistes » (remplace la liste des lots 2-3), raccord Négociation | fait |
 | 7 | Titre provisoire (voie A) | fait (Chrome après le lot 10) |
 | 8 | Master : sélecteur de titre | fait (Chrome après le lot 10) |
-| 9 | Master : vue consolidée, abandonnés hors des comptes | à faire |
+| 9 | Master : vue consolidée, abandonnés hors des comptes | fait, sauf « Demander des fichiers » (question) |
 | 10 – 12 | Ciblage marketing par titre ; suivi juridique par participation ; contrat manquant, verrou du tournage | à faire |
 | 13 – 15 | Sorties individuelles et compilation ; plan de sortie par titre ; Distribution par sortie | à faire |
 
@@ -143,10 +143,18 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
   bilan du Master final comptent tous les titres. Par défaut : titre qui attend une décision
   (Mixage, Mastering), règle de la Source, sinon premier titre vivant. La ligne d'un titre de
   « Titres et artistes » ouvre le Master sur lui. Compte rendu : `docs/pds-mic-rapports/lot-8.md`.
+- **Lot 9** (`20261113190101_abandoned_titles_counts`) : un titre abandonné sort des comptes « tous
+  les titres » sans être délié. `ProjectDetail.abandonedMasterIds` + `countedTitlesProject` aux
+  entrées du Master (contexte, paquet, Brief), de l'état des workflows (pas le Juridique, lot 11)
+  et de la Distribution ; `getProject().masters` reste complet (formulaire d'édition). Facture de
+  l'ingénieur : `request_project_master_invoices`, aussi appelée par `abandon_project_title`
+  (l'abandon du dernier titre en attente l'envoie). Sélecteur du Master sans les abandonnés. Vue
+  consolidée `TitlesOverview` (source, mix, mastering, validation). **« Demander des fichiers »
+  pas construit** : à qui et quoi, en question (`docs/pds-mic-rapports/lot-9.md`).
 - Tests : `collective-projects`, `project-titles`, `title-participations`, `artist-selections`,
   `collective-project-creation`, `title-board` (lot 6 : ce que chaque lecteur lit des deals et
   du contrat d'une participation, changer l'artiste principal après lancement et son
-  événement, retirer et rattacher), `provisional-titles` (lot 7), `collective-master` (lot 8).
+  événement, retirer et rattacher), `provisional-titles` (lot 7), `collective-master` (lots 8 et 9).
 
 ## Côté Business (Sacha), touchant les collectifs
 

@@ -17,6 +17,7 @@ import { loadStepView } from "@/lib/master-workflow/transmission";
 import { isWorkflowLaunched, planLaunchedAt } from "@/lib/plan/queries";
 import { fr } from "@/lib/i18n/fr";
 import { getProject } from "@/lib/projects/queries";
+import { countedTitlesProject } from "@/lib/projects/counted-titles";
 import { byProjectVersion } from "@/lib/projects/version-cache";
 import { REFERENCE_PLATFORMS } from "@/lib/distribution/platforms";
 import { formatDate } from "@/lib/release/format";
@@ -336,8 +337,11 @@ async function distributionFacts(projectId: string) {
 // Each workflow's facts kept on their own, with the tables they read
 // (lib/projects/version-cache.ts): a write in the Cadrage no longer reads the
 // Master, the Juridique and the Distribution again.
-const projectOf = async (projectId: string) =>
-  (await getProject(projectId)) ?? null;
+// A collective's abandoned titles leave the counts (lot 9).
+const projectOf = async (projectId: string) => {
+  const project = await getProject(projectId);
+  return project ? countedTitlesProject(project) : null;
+};
 const keptMasterFacts = byProjectVersion("wf-master", async (projectId) => {
   const [access, project] = await Promise.all([
     requireApproved(),
@@ -345,8 +349,10 @@ const keptMasterFacts = byProjectVersion("wf-master", async (projectId) => {
   ]);
   return project ? masterFacts(project, access.personId) : null;
 });
+// The Juridique keeps every title (abandoned ones too) until it is read by
+// participation (lot 11).
 const keptLegalFacts = byProjectVersion("wf-legal", async (projectId) => {
-  const project = await projectOf(projectId);
+  const project = await getProject(projectId);
   return project ? legalFacts(project) : null;
 });
 const keptDistributionFacts = byProjectVersion(
@@ -369,11 +375,12 @@ export const loadWorkflowStates = trackedCache(
   byProjectVersion(
     "workflow-states",
     async (projectId: string): Promise<WorkflowStates | null> => {
-      const [access, project] = await Promise.all([
+      const [access, read] = await Promise.all([
         requireApproved(),
         getProject(projectId),
       ]);
-      if (!project || project.stages.length === 0) return null;
+      if (!read || read.stages.length === 0) return null;
+      const project = countedTitlesProject(read);
       const workflows = applicableWorkflows({
         type: project.type,
         masterCount: project.masters.length,

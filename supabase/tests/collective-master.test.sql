@@ -3,10 +3,12 @@
 -- Its data are already per (project, title): a mix of title A makes a
 -- version of A in this project only, never of B; deciding on A leaves B as
 -- it was. The page shows one title at a time (lib/master-workflow/
--- title-scope.ts); this test holds what it relies on. No schema change.
+-- title-scope.ts); this test holds what it relies on. Lot 9
+-- (20261113190101): an abandoned title leaves the counts, the engineer's
+-- invoice leaves when the last title waiting is abandoned.
 -- Run with `supabase test db`.
 begin;
-select plan(8);
+select plan(12);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -112,6 +114,43 @@ select is((select decision from public.master_mix_versions
 select is((select count(*)::int from public.master_mix_versions
             where project_id = pg_temp.id_of('c1') and master_id = pg_temp.id_of('mA')),
   1, 'title A unchanged by B''s file');
+
+-- Lot 9 ---------------------------------------------------------------------------
+-- The engineer of the project (a contact of the Réseau, the package sent),
+-- A's Master final validated, B still waiting: no invoice. B abandoned:
+-- every title still counted has its Master final, the invoice leaves.
+insert into public.network_contacts (organization_id, kind, name, roles, email)
+values (pg_temp.id_of('org'), 'person', 'Ingé ' || pg_temp.tag(), '{engineer}', 'inge@test.test');
+insert into ids select 'engineer', id from public.network_contacts where name = 'Ingé ' || pg_temp.tag();
+update public.master_briefs set mix_contact_id = pg_temp.id_of('engineer'), mastering_same_engineer = true
+ where project_id = pg_temp.id_of('c1');
+insert into public.master_transmissions (organization_id, project_id, role, contact_id, token_hash,
+                                         expires_at, package)
+values (pg_temp.id_of('org'), pg_temp.id_of('c1'), 'mix', pg_temp.id_of('engineer'),
+        md5(random()::text), now() + interval '30 days', '{}'::jsonb);
+insert into public.master_files (organization_id, master_id, category, path, file_name, mime, bytes,
+                                 audio_state, version)
+values (pg_temp.id_of('org'), pg_temp.id_of('mA'), 'audio',
+        pg_temp.id_of('org') || '/' || pg_temp.id_of('mA') || '/' || gen_random_uuid() || '.wav',
+        'a-master-v1.wav', 'audio/wav', 1000, 'master', 2);
+update public.master_mix_versions set decision = 'approved', decided_at = now(),
+       decided_by = pg_temp.id_of('owner_person')
+ where project_id = pg_temp.id_of('c1') and master_id = pg_temp.id_of('mA') and stage = 'mastering';
+select is((select count(*)::int from public.project_invoices where project_id = pg_temp.id_of('c1')),
+  0, 'A''s Master final alone asks for no invoice: B waits');
+
+select pg_temp.act_as(pg_temp.id_of('owner'));
+select public.abandon_project_title(pg_temp.id_of('t2'), 'Pas retenu');
+reset role;
+select is((select count(*)::int from public.project_invoices
+            where project_id = pg_temp.id_of('c1') and contact_id = pg_temp.id_of('engineer')),
+  1, 'B abandoned: every title counted has its Master final, the engineer''s invoice is asked');
+select is((select count(*)::int from public.project_masters
+            where project_id = pg_temp.id_of('c1') and master_id = pg_temp.id_of('mB')),
+  1, 'B''s master stays linked');
+select is((select count(*)::int from public.master_mix_versions
+            where project_id = pg_temp.id_of('c1') and master_id = pg_temp.id_of('mB')),
+  1, 'and its version kept');
 
 select * from finish();
 rollback;

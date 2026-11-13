@@ -14,6 +14,7 @@ import type { DistributionResult } from "@/lib/distribution/result";
 import { loadDistributionView, snapshotOf } from "@/lib/distribution/view";
 import { fr } from "@/lib/i18n/fr";
 import { getProject } from "@/lib/projects/queries";
+import { countedTitlesProject } from "@/lib/projects/counted-titles";
 import { createClient } from "@/lib/supabase/server";
 import type { Json } from "@/lib/supabase/database.types";
 
@@ -109,7 +110,9 @@ export async function submitDistributionVersion(input: {
   const access = await requireApproved();
   const parsed = ids.safeParse(input);
   if (!parsed.success) return { ok: false, error: e.invalid };
-  const project = await getProject(parsed.data.projectId);
+  const read = await getProject(parsed.data.projectId);
+  // A collective's abandoned titles leave the checks (lot 9).
+  const project = read ? countedTitlesProject(read) : null;
   if (!project || project.stages.length === 0)
     return { ok: false, error: e.generic };
   const view = await loadDistributionView(project, access);

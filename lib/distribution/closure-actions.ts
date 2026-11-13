@@ -14,6 +14,7 @@ import { loadClosureView } from "@/lib/distribution/closure-queries";
 import type { DistributionResult } from "@/lib/distribution/result";
 import { fr } from "@/lib/i18n/fr";
 import { getProject } from "@/lib/projects/queries";
+import { countedTitlesProject } from "@/lib/projects/counted-titles";
 import type { Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -96,7 +97,9 @@ export async function proposeDistributionClosure(
     return { ok: false, error: e.reasonRequired };
   if ((v.kind === "cancelled" || v.kind === "abandoned") && !v.reasonKind)
     return { ok: false, error: e.reasonKindRequired };
-  const project = await getProject(v.projectId);
+  const read = await getProject(v.projectId);
+  // A collective's abandoned titles leave the checks (lot 9).
+  const project = read ? countedTitlesProject(read) : null;
   if (!project || project.stages.length === 0)
     return { ok: false, error: e.generic };
   const view = await loadClosureView(project, access);

@@ -458,10 +458,10 @@ function TitleRow({
             )}
           >
             {/* The title's Master, once it has a master, open on this
-                title (lot 8). */}
+                title (lot 8); an abandoned title is out of it (lot 9). */}
             <DataTableLink
               href={
-                title.master && links.master
+                title.master && links.master && !abandoned
                   ? `${links.master}?titre=${title.master.id}`
                   : null
               }

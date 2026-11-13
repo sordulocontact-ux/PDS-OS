@@ -1,6 +1,7 @@
 import "server-only";
 
 import { trackedCache } from "@/lib/projects/live-deps";
+import { countedTitlesProject } from "@/lib/projects/counted-titles";
 
 import { requireApproved } from "@/lib/auth/dal";
 import { requireLaunchedProject } from "@/lib/projects/queries";
@@ -19,10 +20,12 @@ import { loadMasterJourneyFacts } from "./journey-facts";
  */
 export const masterJourneyContext = trackedCache(
   byProjectVersion("master-context", async (projectId: string) => {
-    const [access, project] = await allInOrder([
+    const [access, launched] = await allInOrder([
       requireApproved(),
       requireLaunchedProject(projectId),
     ]);
+    // A collective's abandoned titles leave the Master's counts (lot 9).
+    const project = countedTitlesProject(launched);
     const facts = await loadMasterJourneyFacts(project);
     // Who pays an invoice, read only when one waits for it.
     const direction =

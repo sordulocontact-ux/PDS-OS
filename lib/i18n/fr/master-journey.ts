@@ -10,8 +10,16 @@ const lowerFirst = (text: string) =>
 export const masterJourney = {
   module: "Master",
   facts: { masterFinal: "Master final attendu le" },
-  // Projet collectif, lot 8: the titles of the trail's switcher.
-  titles: { abandoned: "Abandonné" },
+  // Projet collectif, lot 9: the overview at the head of the Master.
+  overview: {
+    label: "Où en sont les titres",
+    source: "Attendent leur source",
+    mix: "Attendent un mix",
+    mastering: "Attendent un mastering",
+    validation: "Attendent une validation",
+    none: "Aucun titre",
+    more: (count: number) => `et ${count} autre${count > 1 ? "s" : ""}`,
+  },
   roles: {
     owner: "Responsable du Master",
     ownerWhat: "Confirme la source, remplit le Brief, envoie les dossiers",

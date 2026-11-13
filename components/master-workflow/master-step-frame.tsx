@@ -10,6 +10,7 @@ import {
 } from "@/components/shell/module/step-tools-block";
 import { ContactLinksSection } from "@/components/portal/contact-links-section";
 import { WhoDoesWhatButton } from "@/components/shell/module/who-does-what-button";
+import { TitlesOverview } from "@/components/master-workflow/titles-overview";
 import { masterJourney } from "@/lib/i18n/fr/master-journey";
 import { masterHistory } from "@/lib/master-workflow/history";
 import { masterJourneyContext } from "@/lib/master-workflow/journey-context";
@@ -112,11 +113,7 @@ export async function MasterStepFrame({
             head={step}
             extraCrumbs={
               titleScope
-                ? [
-                    titleCrumb(projectId, stepKey, titleScope, {
-                      abandoned: t.titles.abandoned,
-                    }),
-                  ]
+                ? [titleCrumb(projectId, stepKey, titleScope)]
                 : undefined
             }
             facts={masterFacts(projectId)}
@@ -137,6 +134,10 @@ export async function MasterStepFrame({
             modules={["master"]}
             steps={choices}
           />
+          {/* A collective: where its titles stand, at a glance (lot 9). */}
+          {titleScope && (
+            <TitlesOverview projectId={projectId} scope={titleScope} />
+          )}
         </>
       }
     >

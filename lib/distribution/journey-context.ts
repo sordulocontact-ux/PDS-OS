@@ -20,6 +20,7 @@ import { loadLegalReadiness } from "@/lib/legal/readiness/load";
 import { loadProjectDates } from "@/lib/projects/dates";
 import { projectPlanRow } from "@/lib/plan/queries";
 import { getProject } from "@/lib/projects/queries";
+import { countedTitlesProject } from "@/lib/projects/counted-titles";
 import { personName } from "@/lib/projects/types";
 import { byProjectVersion } from "@/lib/projects/version-cache";
 import type { JourneyPrereq } from "@/lib/ui/journey";
@@ -50,12 +51,14 @@ const readDistributionContext = byProjectVersion(
   "distribution-context",
   async (projectId: string) => {
     // Whether the plan was launched is read with the project, not after it.
-    const [access, project, launched] = await allInOrder([
+    const [access, read, launched] = await allInOrder([
       requireApproved(),
       getProject(projectId),
       distributionLaunched(projectId),
     ]);
-    if (!project || project.stages.length === 0) return null;
+    if (!read || read.stages.length === 0) return null;
+    // A collective's abandoned titles leave the Distribution's checks (lot 9).
+    const project = countedTitlesProject(read);
     if (!launched) return null;
     const viewRead = loadDistributionView(project, access);
     const datesRead = loadProjectDates(project.id);

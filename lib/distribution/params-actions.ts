@@ -13,6 +13,7 @@ import { loadValidators } from "@/lib/framing/related";
 import { fr } from "@/lib/i18n/fr";
 import { withOutcome } from "@/lib/journey/outcome";
 import { getProject } from "@/lib/projects/queries";
+import { countedTitlesProject } from "@/lib/projects/counted-titles";
 import { createClient } from "@/lib/supabase/server";
 import { formatDay } from "@/lib/utils/day";
 import type { WriteResult } from "@/lib/utils/write-result";
@@ -51,7 +52,9 @@ export async function updateDistributionParams(
   const parsed = patchSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: t.errors.generic };
   const { projectId, patch } = parsed.data;
-  const project = await getProject(projectId);
+  const read = await getProject(projectId);
+  // A collective's abandoned titles leave the checks (lot 9).
+  const project = read ? countedTitlesProject(read) : null;
   if (!project) return { ok: false, error: t.errors.generic };
   const { params } = await loadDistributionSources(project, access);
   const yes = (value: "yes" | "no" | undefined, current: boolean | null) =>
@@ -108,7 +111,9 @@ export async function confirmDistributionParams(input: {
   const access = await requireApproved();
   const projectId = z.uuid().safeParse(input.projectId);
   if (!projectId.success) return { ok: false, error: t.errors.generic };
-  const project = await getProject(projectId.data);
+  const read = await getProject(projectId.data);
+  // A collective's abandoned titles leave the checks (lot 9).
+  const project = read ? countedTitlesProject(read) : null;
   if (!project) return { ok: false, error: t.errors.generic };
   const [validators, preorder] = await Promise.all([
     access.organizationId
