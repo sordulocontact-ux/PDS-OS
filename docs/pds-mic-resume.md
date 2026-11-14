@@ -294,8 +294,9 @@ Vérifié : parcours de la Production bloqué puis débloqué par une dérogatio
 encarts du Brief et d'une session studio, demandes de fichiers dans l'Historique du master, page
 « Sorties » dans les trois modes (date, UPC, retour des mêmes sorties), Distribution d'un projet
 classique inchangée. Corrigé : colonne « État » des sorties sous le nom sur téléphone, bouton
-« Modifier le mode ». À trancher : l'Historique du master nomme les titres par leur nom au
-Catalogue. Détail : `docs/pds-mic-rapports/recap-12bis-13.md`.
+« Modifier le mode ». Corrigé ensuite (commit séparé) : dans un collectif, l'Historique du
+master nomme chaque titre comme le projet, le nom au Catalogue en second s'il diffère
+(« Ballade du port · Velours au Catalogue »). Détail : `docs/pds-mic-rapports/recap-12bis-13.md`.
 
 ## Règles à tenir à chaque lot
 

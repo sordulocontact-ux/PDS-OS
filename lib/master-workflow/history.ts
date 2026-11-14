@@ -40,8 +40,18 @@ export type MasterHistoryItem = {
 export function masterHistory(facts: MasterJourneyFacts): MasterHistoryItem[] {
   const items: MasterHistoryItem[] = [];
   const several = facts.titles.length > 1;
-  const titleOf = (id: string) =>
-    several ? (facts.titles.find((x) => x.id === id)?.title ?? null) : null;
+  // A collective names a title as the project does, its name in the
+  // Catalogue after it only when different (« Ballade du port · Velours au
+  // Catalogue »); any other project, its title in the Catalogue.
+  const titleOf = (id: string) => {
+    if (!several) return null;
+    const title = facts.titles.find((x) => x.id === id);
+    if (!title) return null;
+    if (!title.projectLabel) return title.title;
+    return title.catalogueName
+      ? t.titleInCatalogue(title.projectLabel, title.catalogueName)
+      : title.projectLabel;
+  };
   const engineerOf = (stage: "mix" | "mastering") =>
     facts.transmissions.find((x) => x.role === stage)?.contactName ?? null;
   const linked = (name: string | null) => (name ? t.viaLink(name) : null);

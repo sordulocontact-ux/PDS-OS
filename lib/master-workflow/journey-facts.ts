@@ -8,6 +8,12 @@ import {
   masterTransmissionRows,
   masterVersionRows,
 } from "@/lib/master-workflow/shared-rows";
+import { loadProjectTitles } from "@/lib/projects/titles";
+import {
+  masterNameOf,
+  projectTitleLabel,
+  type ProjectTitle,
+} from "@/lib/projects/title-rules";
 import { createClient } from "@/lib/supabase/server";
 
 // What the Master's journey reads (lib/master-workflow/journey.ts), in one
@@ -79,6 +85,10 @@ export type MasterJourneyFacts = {
   titles: Array<{
     id: string;
     title: string;
+    // A collective (its Historique): the title's name in the project, and
+    // its name in the Catalogue when different (never a provisional one).
+    projectLabel?: string;
+    catalogueName?: string | null;
     artists: string;
     audio: JourneyAudio[];
     // Newest first: the first is the current source.
@@ -190,6 +200,23 @@ export type JourneyInvoice = {
   paidBy: string | null;
 };
 
+/** A collective's title as the project names it (projectTitleLabel), and
+ * its name in the Catalogue when it differs; nothing for another project. */
+function titleNamesOf(titles: ProjectTitle[], masterId: string) {
+  const title = titles.find((x) => x.master?.id === masterId);
+  if (!title) return {};
+  const catalogue = masterNameOf(title.master);
+  const projectLabel = projectTitleLabel({
+    position: title.position,
+    workingTitle: title.workingTitle,
+    masterTitle: catalogue,
+  });
+  return {
+    projectLabel,
+    catalogueName: catalogue && catalogue !== projectLabel ? catalogue : null,
+  };
+}
+
 export async function loadMasterJourneyFacts(project: {
   id: string;
   masters: Array<{ id: string; title: string; artists: string }>;
@@ -214,6 +241,7 @@ export async function loadMasterJourneyFacts(project: {
     rates,
     invoices,
     fileRequests,
+    projectTitles,
   ] = await Promise.all([
     ids.length
       ? supabase
@@ -292,6 +320,8 @@ export async function loadMasterJourneyFacts(project: {
           .eq("project_id", project.id)
           .order("created_at")
       : none,
+    // A collective names its titles as the project does (lot 12 bis fix).
+    project.collective ? loadProjectTitles(project.id) : Promise.resolve([]),
   ]);
   // Whether a new RIB waits, per engineer (never a digit): few rows, only
   // once an invoice was received with a new RIB.
@@ -346,6 +376,7 @@ export async function loadMasterJourneyFacts(project: {
   return {
     titles: project.masters.map((m) => ({
       ...m,
+      ...titleNamesOf(projectTitles, m.id),
       audio: (files.data ?? []).flatMap((f) => {
         const state = audioStateOf(f.audio_state);
         return f.master_id === m.id && state

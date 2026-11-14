@@ -37,10 +37,11 @@ Comptes, par « Voir comme » : Claire Morel (direction) et Lina Haddad (cheffe 
 
 - **Vocabulaire / hiérarchie** : le bouton du mode dit l'action, le fait dit l'état.
 - Relevé sans changement :
-  - **Historique du master** : il nomme les titres par leur nom au Catalogue (« Velours »), alors
-    que le Master et la demande disent « Ballade du port ». C'est la règle de tout l'Historique
-    du master depuis le lot 8 ; la changer pour les seules lignes de demande mêlerait deux noms
-    dans la même liste. À trancher pour tout l'Historique d'un collectif.
+  - **Historique du master** : il nommait les titres par leur nom au Catalogue (« Velours »),
+    alors que le Master et la demande disent « Ballade du port ». Tranché et corrigé ensuite
+    (commit séparé), pour tout l'Historique d'un collectif : le titre est nommé comme le projet
+    (`projectTitleLabel`), le nom au Catalogue en second seulement s'il diffère (« Ballade du
+    port · Velours au Catalogue ») ; un projet simple garde le nom au Catalogue.
   - « Pas d'ISRC » sur chaque sortie : l'ISRC se donne au Catalogue, pas ici ; il reste dit en
     gris, sans geste.
 

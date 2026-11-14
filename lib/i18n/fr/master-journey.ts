@@ -172,6 +172,9 @@ export const masterJourney = {
     of: (title: string) => `« ${title} »`,
     sourceConfirmed: (file: string, title: string | null) =>
       `Source confirmée : ${file}${title ? ` (« ${title} »)` : ""}`,
+    // A collective's title: its name in the project, then the Catalogue's.
+    titleInCatalogue: (label: string, catalogue: string) =>
+      `${label} · ${catalogue} au Catalogue`,
     // Lot 12 bis: « Demander des fichiers » (lot 9 bis).
     filesRequested: (
       person: string,
