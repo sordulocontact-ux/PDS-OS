@@ -5,9 +5,9 @@ import { revalidatePath } from "next/cache";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import type { CheckReleaseResult } from "@/lib/release/action-types";
-import { releaseIsrcs } from "@/lib/release/isrc";
+import { releaseLookups } from "@/lib/release/isrc";
 import { detectAndRecord } from "@/lib/release/persist";
-import { getProjectRelease } from "@/lib/release/queries";
+import { getProjectRelease, PROJECT_RELEASE } from "@/lib/release/queries";
 import { isUuid } from "@/lib/release/uuid";
 import { createClient } from "@/lib/supabase/server";
 
@@ -20,7 +20,7 @@ async function load(projectId: string) {
   await requireApproved();
   if (!isUuid(projectId)) return null;
   const supabase = await createClient();
-  const data = await getProjectRelease(supabase, projectId);
+  const data = await getProjectRelease(supabase, projectId, PROJECT_RELEASE);
   return data ? { supabase, ...data } : null;
 }
 
@@ -30,12 +30,12 @@ export async function checkRelease(
   const context = await load(projectId);
   if (!context?.release) return { ok: false, error: "not_found" };
   const { supabase, release } = context;
-  const isrc = (await releaseIsrcs(supabase, [release])).get(release.id);
-  if (!isrc) return { ok: false, error: "no_isrc" };
+  const lookup = (await releaseLookups(supabase, [release])).get(release.id);
+  if (!lookup) return { ok: false, error: "no_isrc" };
 
   const outcome = await detectAndRecord(supabase, {
     id: release.id,
-    isrc,
+    lookup,
     spotifyUrl: release.spotify_url,
   });
   if (!outcome.ok) {

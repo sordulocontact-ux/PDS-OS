@@ -2,7 +2,12 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { detectRelease, type ReleaseDetection } from "@/lib/release/detect";
+import {
+  detectRelease,
+  detectReleaseByUpc,
+  type ReleaseDetection,
+} from "@/lib/release/detect";
+import type { ReleaseLookup } from "@/lib/release/isrc";
 import { platformOf, type Platform } from "@/lib/release/platforms";
 import type { Database } from "@/lib/supabase/database.types";
 
@@ -58,9 +63,14 @@ function allSourcesFailed(detection: ReleaseDetection): boolean {
 
 export async function detectAndRecord(
   supabase: SupabaseClient<Database>,
-  release: { id: string; isrc: string; spotifyUrl: string | null },
+  release: { id: string; lookup: ReleaseLookup; spotifyUrl: string | null },
 ): Promise<RecordOutcome> {
-  const detection = await detectRelease(release.isrc);
+  // A collective's compilation by its UPC, any other release by its ISRC
+  // (lot 13, lib/release/isrc.ts).
+  const detection =
+    "upc" in release.lookup
+      ? await detectReleaseByUpc(release.lookup.upc)
+      : await detectRelease(release.lookup.isrc);
   // An outage is not a check: keep the previous state untouched.
   if (allSourcesFailed(detection))
     return { ok: false, error: "detection_failed" };

@@ -216,6 +216,8 @@ export const routes = {
   project: (id: string) => `/app/projects/${id}`,
   // « Titres et artistes » of a collective (lot 6 of docs/pds-mic-plan.md).
   projectTitles: (id: string) => `/app/projects/${id}/titles`,
+  // A collective's releases (lot 13 of docs/pds-mic-plan.md).
+  projectReleases: (id: string) => `/app/projects/${id}/releases`,
   // The Cadrage's entry: it opens the step that waits for the viewer.
   projectFraming: (id: string) => `/app/projects/${id}/framing`,
   // One step of the Cadrage (lib/framing/journey.ts): start, dimensions,

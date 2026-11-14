@@ -124,6 +124,13 @@ export function projectSections(
             href: routes.projectTitles(projectId),
             match: below(routes.projectTitles(projectId)),
           },
+          // Its releases: per title and/or the compilation (lot 13).
+          {
+            key: "releases",
+            label: t.releases,
+            href: routes.projectReleases(projectId),
+            match: below(routes.projectReleases(projectId)),
+          },
         ]
       : []),
     // The Plan du projet is the Cadrage's fourth step (/framing/plan,

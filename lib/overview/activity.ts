@@ -186,7 +186,11 @@ export async function loadProjectActivity(
       workflow: fr.projectShell.activity.project,
       text: titleEventText(row.kind, record(row.detail)),
       who: person(row.actor_person_id),
-      href: routes.projectTitles(project.id),
+      // The release mode leads to the collective's « Sorties » (lot 13).
+      href:
+        row.kind === "release_mode_changed"
+          ? routes.projectReleases(project.id)
+          : routes.projectTitles(project.id),
     })),
     ...(distribution.data ?? []).map((row) => ({
       id: `distribution:${row.id}`,
@@ -264,6 +268,14 @@ function titleEventText(kind: string, detail: Record<string, unknown>): string {
       );
     case "main_artist_changed":
       return t.mainArtistChanged(text(detail.from), text(detail.to) ?? "");
+    // Lot 13: the collective's release mode.
+    case "release_mode_changed": {
+      const modes = fr.collectiveReleases.modes;
+      return fr.collectiveReleases.event(
+        modes[text(detail.from) ?? ""] ?? "—",
+        modes[text(detail.to) ?? ""] ?? "—",
+      );
+    }
     // Lot 12: the direction's waivers of a missing contract.
     case "waiver_granted":
     case "waiver_revoked": {

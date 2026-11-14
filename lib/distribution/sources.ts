@@ -16,7 +16,11 @@ import type {
 import { loadFinalView } from "@/lib/master-workflow/final";
 import { loadProjectDates } from "@/lib/projects/dates";
 import type { ProjectDetail } from "@/lib/projects/types";
-import { getProjectRelease, type ReleaseRow } from "@/lib/release/queries";
+import {
+  getProjectRelease,
+  PROJECT_RELEASE,
+  type ReleaseRow,
+} from "@/lib/release/queries";
 import {
   distributionCover,
   distributionLegalBlockers,
@@ -95,7 +99,7 @@ export const loadDistributionSources = trackedCache(async function load(
     loadFinalView(project, access),
     loadWorkflowStates(project.id),
     loadSheetSummaries(project.id).catch(() => null),
-    getProjectRelease(supabase, project.id),
+    getProjectRelease(supabase, project.id, PROJECT_RELEASE),
     supabase
       .from("distribution_dossiers")
       .select(

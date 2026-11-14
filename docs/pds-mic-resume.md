@@ -1,8 +1,7 @@
 # Projet collectif (PDS Mic) : résumé
 
 Résumé de travail de `docs/pds-mic-plan.md` (qui fait foi en cas de doute). Mis à jour à la fin
-de chaque lot. Dernière mise à jour : 14/11/2026, après le lot 12 et la passe Chrome des lots 9 bis à 12
-(`docs/pds-mic-rapports/recap-9-12.md`).
+de chaque lot. Dernière mise à jour : 14/11/2026, après les lots 12 bis et 13.
 
 **Module Business fait en parallèle par un collègue** : rôle Business manager, négociation, deal
 memo, contrats, contacts privés, mails. Ces lots n'y touchent pas ; son dossier de négociation
@@ -48,7 +47,8 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
 | 10 | Ciblage marketing par titre | fait |
 | 11 | Suivi juridique par participation (« Participations et contrats », deals de Sacha lus) | fait |
 | 12 | Contrat manquant, verrous du tournage et de la sortie, dérogations ; 12 bis (parcours de la Production, avertissements, Historique du master) | fait |
-| 13 – 15 | Sorties individuelles et compilation ; plan de sortie par titre ; Distribution par sortie | à faire |
+| 13 | Sorties individuelles et compilation (données, page « Sorties ») | fait |
+| 14 – 15 | Plan de sortie par titre ; Distribution par sortie | à faire |
 
 ## Déjà en base (migrations `20261111…`)
 
@@ -215,10 +215,22 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
   studio (par projet collectif, filtré à ses titres) ; « Demander des fichiers » dans
   l'Historique du master (`fileRequestLog` : demandé, reçu, annulé, remplacé). Compte rendu :
   `docs/pds-mic-rapports/lot-12-bis.md`.
+- **Lot 13** (`20261114120101_title_releases`) : `projects.collective_release_mode` (`singles` par
+  défaut ; collectifs déjà lancés avec leur sortie : `singles_then_compilation`), modifiable
+  (`set_collective_release_mode`, droits des titres, archive / ramène, refusé si la sortie retirée
+  est partie, journal). `releases.project_title_id` (nul = sortie du projet / compilation) et
+  `archived_at` ; création idempotente (`ensure_title_release` : titre actif avec master, plan
+  lancé ; `ensure_compilation_release`) ; dates : la sortie d'un titre garde la sienne, la
+  compilation suit l'échéance. `loadRelease(…, PROJECT_RELEASE | { kind: "title" })` échoue pour
+  un collectif sans sélecteur ; lectures « la » date : `next_release_date`. Détection : ISRC du
+  master du titre, UPC de la compilation. UPC par sortie. Verrou de sortie du lot 12 étendu aux
+  sorties (livrée ou confirmée en ligne). Page **« Sorties »** du collectif (entrée sous
+  « Titres et artistes ») : mode, sorties des titres, compilation, abandonnés, date / UPC / ISRC /
+  état, contrats manquants. Compte rendu : `docs/pds-mic-rapports/lot-13.md`.
 - Tests : `collective-projects`, `project-titles`, `title-participations`, `artist-selections`,
   `collective-project-creation`, `title-board` (lot 6 : ce que chaque lecteur lit des deals et
   du contrat d'une participation, changer l'artiste principal après lancement et son
-  événement, retirer et rattacher), `provisional-titles` (lot 7), `collective-master` (lots 8 et 9), `master-file-requests` (lot 9 bis), `deliverable-titles` (lot 10), `legal-participations` (lot 11), `participation-waivers` (lot 12).
+  événement, retirer et rattacher), `provisional-titles` (lot 7), `collective-master` (lots 8 et 9), `master-file-requests` (lot 9 bis), `deliverable-titles` (lot 10), `legal-participations` (lot 11), `participation-waivers` (lot 12), `title-releases` (lot 13).
 
 ## Côté Business (Sacha), touchant les collectifs
 

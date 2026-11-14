@@ -56,6 +56,9 @@ export const loadPlatformsView = trackedCache(async function loadPlatformsView(
       .from("releases")
       .select("id, release_links(platform, url, first_seen_at)")
       .eq("project_id", project.id)
+      // The project's release (lot 13): never a title's, never archived.
+      .is("project_title_id", null)
+      .is("archived_at", null)
       .order("created_at", { ascending: true })
       .limit(1)
       .maybeSingle(),

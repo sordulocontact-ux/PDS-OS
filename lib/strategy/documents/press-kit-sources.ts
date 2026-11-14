@@ -7,7 +7,7 @@ import { platformLabel } from "@/lib/distribution/platforms";
 import { fr } from "@/lib/i18n/fr";
 import type { ProjectDetail } from "@/lib/projects/types";
 import { platformOf } from "@/lib/release/platforms";
-import { getProjectRelease } from "@/lib/release/queries";
+import { getProjectRelease, PROJECT_RELEASE } from "@/lib/release/queries";
 import { versionsOf } from "@/lib/strategy/documents/model";
 import {
   pressKitConfigOf,
@@ -74,10 +74,12 @@ export async function pressKitInput(
   const t = fr.strategyPressKit.links.known;
   const [{ artist, masters }, release, owner, platforms] = await Promise.all([
     projectArtist(project.id),
-    getProjectRelease(supabase, project.id).catch((error: Error) => {
-      console.error("pressKitInput release:", error.message);
-      return null;
-    }),
+    getProjectRelease(supabase, project.id, PROJECT_RELEASE).catch(
+      (error: Error) => {
+        console.error("pressKitInput release:", error.message);
+        return null;
+      },
+    ),
     project.ownerPersonId
       ? supabase
           .from("people")

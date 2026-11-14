@@ -17733,6 +17733,7 @@ export type Database = {
           artist_id: string | null
           budget_cents: number | null
           collective: boolean
+          collective_release_mode: string | null
           content_format_id: string | null
           cover_path: string | null
           created_at: string
@@ -17754,6 +17755,7 @@ export type Database = {
           artist_id?: string | null
           budget_cents?: number | null
           collective?: boolean
+          collective_release_mode?: string | null
           content_format_id?: string | null
           cover_path?: string | null
           created_at?: string
@@ -17775,6 +17777,7 @@ export type Database = {
           artist_id?: string | null
           budget_cents?: number | null
           collective?: boolean
+          collective_release_mode?: string | null
           content_format_id?: string | null
           cover_path?: string | null
           created_at?: string
@@ -17914,6 +17917,8 @@ export type Database = {
       }
       releases: {
         Row: {
+          archived_at: string | null
+          archived_by: string | null
           created_at: string
           created_by: string | null
           delivered_on: string | null
@@ -17931,6 +17936,7 @@ export type Database = {
           organization_id: string
           planned_release_date: string | null
           project_id: string
+          project_title_id: string | null
           smartlink_enabled: boolean
           smartlink_token: string
           spotify_url: string | null
@@ -17939,6 +17945,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          archived_at?: string | null
+          archived_by?: string | null
           created_at?: string
           created_by?: string | null
           delivered_on?: string | null
@@ -17956,6 +17964,7 @@ export type Database = {
           organization_id: string
           planned_release_date?: string | null
           project_id: string
+          project_title_id?: string | null
           smartlink_enabled?: boolean
           smartlink_token?: string
           spotify_url?: string | null
@@ -17964,6 +17973,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          archived_at?: string | null
+          archived_by?: string | null
           created_at?: string
           created_by?: string | null
           delivered_on?: string | null
@@ -17981,6 +17992,7 @@ export type Database = {
           organization_id?: string
           planned_release_date?: string | null
           project_id?: string
+          project_title_id?: string | null
           smartlink_enabled?: boolean
           smartlink_token?: string
           spotify_url?: string | null
@@ -20118,6 +20130,11 @@ export type Database = {
           working_title: string
         }[]
       }
+      set_collective_release_mode: {
+        Args: { p_mode: string; p_project_id: string }
+        Returns: undefined
+      }
+      next_release_date: { Args: { p_project_id: string }; Returns: string }
       set_marketing_title_scope: {
         Args: {
           p_activation_id?: string
