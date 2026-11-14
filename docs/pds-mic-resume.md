@@ -1,7 +1,8 @@
 # Projet collectif (PDS Mic) : résumé
 
 Résumé de travail de `docs/pds-mic-plan.md` (qui fait foi en cas de doute). Mis à jour à la fin
-de chaque lot. Dernière mise à jour : 14/11/2026, après les lots 12 bis et 13.
+de chaque lot. Dernière mise à jour : 14/11/2026, après les lots 12 bis et 13 et leur passe Chrome
+(`docs/pds-mic-rapports/recap-12bis-13.md`).
 
 **Module Business fait en parallèle par un collègue** : rôle Business manager, négociation, deal
 memo, contrats, contacts privés, mails. Ces lots n'y touchent pas ; son dossier de négociation
@@ -286,6 +287,15 @@ signé » (règle) vs « Manquant » (aucun contrat) ; encart fusionné quand to
 nomment les mêmes contrats ; toasts (double point, « Dossier de négociation ouvert. ») ;
 erreurs de la modale de dérogation effacées à la saisie ; élisions des libellés lus (« d'Iris
 Moon »). Le parcours de la Production bloqué par un contrat est traité au lot 12 bis. Détail : `docs/pds-mic-rapports/recap-9-12.md`.
+
+## Passe Chrome des lots 12 bis et 13 (14/11/2026)
+
+Vérifié : parcours de la Production bloqué puis débloqué par une dérogation (Travail compris),
+encarts du Brief et d'une session studio, demandes de fichiers dans l'Historique du master, page
+« Sorties » dans les trois modes (date, UPC, retour des mêmes sorties), Distribution d'un projet
+classique inchangée. Corrigé : colonne « État » des sorties sous le nom sur téléphone, bouton
+« Modifier le mode ». À trancher : l'Historique du master nomme les titres par leur nom au
+Catalogue. Détail : `docs/pds-mic-rapports/recap-12bis-13.md`.
 
 ## Règles à tenir à chaque lot
 

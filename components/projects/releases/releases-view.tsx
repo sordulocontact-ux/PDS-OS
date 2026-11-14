@@ -81,7 +81,7 @@ export function ReleaseModeButton({
         aria-label={t.mode.editLabel}
         onClick={() => setOpen(true)}
       >
-        {t.mode.label}
+        {t.mode.edit}
       </Button>
       <FormDialog
         open={open}
@@ -212,7 +212,7 @@ export function ReleasesView({
           <DataTableHead hideBelow="xl" className={COLUMN.isrc}>
             {t.columns.isrc}
           </DataTableHead>
-          <DataTableHead className={COLUMN.state}>
+          <DataTableHead hideBelow="sm" className={COLUMN.state}>
             {t.columns.state}
           </DataTableHead>
           <DataTableActionsHead label={t.columns.actions} />
@@ -295,13 +295,21 @@ function ReleaseRow({
     <DataTableRow>
       <DataTableCell fill className="whitespace-normal">
         <span className="flex min-w-0 flex-col gap-0.5">
-          <span
-            className={cn(
-              "break-words",
-              release.abandoned && "text-[color:var(--text-secondary)]",
-            )}
-          >
-            {release.label}
+          <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span
+              className={cn(
+                "break-words",
+                release.abandoned && "text-[color:var(--text-secondary)]",
+              )}
+            >
+              {release.label}
+            </span>
+            {/* On a phone, the state beside the name (its column hidden). */}
+            <span className="sm:hidden">
+              <StatusBadge tone={stateTone[release.state]} size="sm">
+                {t.states[release.state]}
+              </StatusBadge>
+            </span>
           </span>
           {compilation && (
             <span className={caption}>{t.tracks(release.tracks)}</span>
@@ -352,7 +360,7 @@ function ReleaseRow({
           <span className={muted}>{EMPTY_CELL}</span>
         )}
       </DataTableCell>
-      <DataTableCell className={COLUMN.state}>
+      <DataTableCell hideBelow="sm" className={COLUMN.state}>
         <StatusBadge tone={stateTone[release.state]} size="sm">
           {t.states[release.state]}
         </StatusBadge>

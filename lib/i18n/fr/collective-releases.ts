@@ -25,7 +25,7 @@ export const collectiveReleases = {
   },
   mode: {
     label: "Mode de sortie",
-    edit: "Modifier",
+    edit: "Modifier le mode",
     editLabel: "Modifier le mode de sortie",
     title: "Mode de sortie",
     description:
