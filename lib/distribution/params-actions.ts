@@ -12,8 +12,8 @@ import { preorderProposal } from "@/lib/distribution/proposals";
 import { loadValidators } from "@/lib/framing/related";
 import { fr } from "@/lib/i18n/fr";
 import { withOutcome } from "@/lib/journey/outcome";
-import { getProject } from "@/lib/projects/queries";
-import { countedTitlesProject } from "@/lib/projects/counted-titles";
+import { distributionProject } from "@/lib/distribution/release-scope";
+import { releaseArg } from "@/lib/distribution/scope";
 import { createClient } from "@/lib/supabase/server";
 import { formatDay } from "@/lib/utils/day";
 import type { WriteResult } from "@/lib/utils/write-result";
@@ -23,6 +23,7 @@ const t = fr.distributionJourney.params;
 const date = z.iso.date().nullable();
 const patchSchema = z.object({
   projectId: z.uuid(),
+  releaseId: z.uuid().nullable().optional(),
   patch: z
     .object({
       territoryMode: z.enum(TERRITORY_MODES),
@@ -51,10 +52,10 @@ export async function updateDistributionParams(
   const access = await requireApproved();
   const parsed = patchSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: t.errors.generic };
-  const { projectId, patch } = parsed.data;
-  const read = await getProject(projectId);
-  // A collective's abandoned titles leave the checks (lot 9).
-  const project = read ? countedTitlesProject(read) : null;
+  const { projectId, releaseId, patch } = parsed.data;
+  // A collective's abandoned titles leave the checks (lot 9); its
+  // parameters are a release's (lot 15).
+  const project = await distributionProject(projectId, releaseId);
   if (!project) return { ok: false, error: t.errors.generic };
   const { params } = await loadDistributionSources(project, access);
   const yes = (value: "yes" | "no" | undefined, current: boolean | null) =>
@@ -71,7 +72,10 @@ export async function updateDistributionParams(
       ? patch.prelistenOn
       : params.prelistenOn
     : null;
-  const release = project.dueDate;
+  // A collective's release (lot 15): its own date.
+  const release = project.distributionRelease
+    ? project.distributionRelease.date
+    : project.dueDate;
   if (release && preorderOn && preorderOn >= release)
     return { ok: false, error: t.errors.preorderLate(formatDay(release)) };
   if (release && prelistenOn && prelistenOn >= release)
@@ -85,6 +89,7 @@ export async function updateDistributionParams(
     value === null ? "" : value ? "yes" : "no";
   const result = await saveDossierParams({
     projectId,
+    releaseId: releaseId ?? null,
     territoryMode: mode,
     territories,
     preorder: asYesNo(preorder),
@@ -107,19 +112,27 @@ export async function updateDistributionParams(
  */
 export async function confirmDistributionParams(input: {
   projectId: string;
+  releaseId?: string | null;
 }): Promise<WriteResult> {
   const access = await requireApproved();
   const projectId = z.uuid().safeParse(input.projectId);
   if (!projectId.success) return { ok: false, error: t.errors.generic };
-  const read = await getProject(projectId.data);
-  // A collective's abandoned titles leave the checks (lot 9).
-  const project = read ? countedTitlesProject(read) : null;
+  const releaseId = z.uuid().nullable().optional().safeParse(input.releaseId);
+  if (!releaseId.success) return { ok: false, error: t.errors.generic };
+  // A collective's abandoned titles leave the checks (lot 9); a release's
+  // parameters (lot 15).
+  const project = await distributionProject(projectId.data, releaseId.data);
   if (!project) return { ok: false, error: t.errors.generic };
   const [validators, preorder] = await Promise.all([
     access.organizationId
       ? loadValidators(access.organizationId)
       : Promise.resolve([]),
-    preorderProposal(project.id, project.dueDate),
+    preorderProposal(
+      project.id,
+      project.distributionRelease
+        ? project.distributionRelease.date
+        : project.dueDate,
+    ),
   ]);
   const proposed =
     validators.find((v) => v.personId !== project.ownerPersonId) ?? null;
@@ -130,6 +143,7 @@ export async function confirmDistributionParams(input: {
       p_validator: proposed?.personId ?? null,
       p_preorder: preorder ? true : null,
       p_preorder_on: preorder?.date ?? null,
+      ...releaseArg(releaseId.data),
     });
     if (error) {
       const message = error.message ?? "";

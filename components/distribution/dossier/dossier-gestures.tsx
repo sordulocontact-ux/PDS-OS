@@ -19,6 +19,7 @@ import {
 } from "@/lib/distribution/validation";
 import { distribution } from "@/lib/i18n/fr/distribution";
 import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
+import { useDistributionRelease } from "@/components/distribution/frame/release-scope";
 
 const fr = { distribution, distributionJourney };
 
@@ -38,6 +39,7 @@ export function SubmitDossier({
   // The Préparation blocks: said at the click, never a disabled button.
   blocked: boolean;
 }) {
+  const releaseId = useDistributionRelease();
   const [refusal, setRefusal] = useState<string | null>(null);
   const { pending, error, run } = useWriteSubmit(
     () => {},
@@ -56,7 +58,9 @@ export function SubmitDossier({
           onClick={() => {
             if (blocked) return setRefusal(t.notReady);
             setRefusal(null);
-            run(() => submitDossier({ projectId, number, validator }));
+            run(() =>
+              submitDossier({ projectId, releaseId, number, validator }),
+            );
           }}
         >
           {t.submit(number, validator)}
@@ -80,6 +84,7 @@ export function DecideDossier({
   number: number;
   owner: string;
 }) {
+  const releaseId = useDistributionRelease();
   const [modules, setModules] = useState<RefusalModule[]>([]);
   const [missing, setMissing] = useState(false);
   return (
@@ -117,6 +122,7 @@ export function DecideDossier({
       onDecide={(kind, comment) =>
         decideDossier({
           projectId,
+          releaseId,
           versionId,
           number,
           approve: kind === "approve",
@@ -142,6 +148,7 @@ export function PrepareNext({
   // The modules that changed: only their checks are to redo.
   modules?: string[];
 }) {
+  const releaseId = useDistributionRelease();
   const [note, setNote] = useState(proposal);
   const [missing, setMissing] = useState(false);
   const { pending, error, run } = useWriteSubmit(() => {}, t.prepared(number));
@@ -172,6 +179,7 @@ export function PrepareNext({
               run(() =>
                 prepareNextDossier({
                   projectId,
+                  releaseId,
                   number,
                   note: note.trim(),
                   modules,

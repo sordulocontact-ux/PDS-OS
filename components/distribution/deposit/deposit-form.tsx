@@ -13,6 +13,7 @@ import { isDeclarationSource } from "@/lib/distribution/tracking";
 import { removeProof, uploadProof } from "@/lib/distribution/upload-proof";
 import { distribution } from "@/lib/i18n/fr/distribution";
 import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
+import { useDistributionRelease } from "@/components/distribution/frame/release-scope";
 
 const fr = { distribution, distributionJourney };
 
@@ -41,6 +42,7 @@ export function DepositForm({
   organizationId: string;
   today: string;
 }) {
+  const releaseId = useDistributionRelease();
   const [file, setFile] = useState<File | null>(null);
   const [failed, setFailed] = useState<string | null>(null);
   const { pending, error, run } = useWriteSubmit(
@@ -61,6 +63,7 @@ export function DepositForm({
       }
       const result = await declareDeposit({
         projectId,
+        releaseId,
         declaredOn: String(form.get("declaredOn") ?? ""),
         orchardId: String(form.get("orchardId") ?? ""),
         source: sourceOf(form.get("source")),

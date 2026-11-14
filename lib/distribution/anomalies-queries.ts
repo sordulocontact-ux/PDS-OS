@@ -12,6 +12,7 @@ import {
   type Anomaly,
 } from "@/lib/distribution/anomalies";
 import { loadMembers } from "@/lib/framing/related";
+import { inScope } from "@/lib/distribution/scope";
 import { createClient } from "@/lib/supabase/server";
 
 const oneOf =
@@ -27,15 +28,20 @@ const isModule = oneOf(ANOMALY_MODULES);
 export const loadAnomalies = trackedCache(async function loadAnomalies(
   projectId: string,
   access: Access,
+  // A collective's release (lot 15); null: a simple project's deposit.
+  releaseId: string | null = null,
 ): Promise<Anomaly[]> {
   const supabase = await createClient();
   const [rows, members] = await Promise.all([
-    supabase
-      .from("distribution_anomalies")
-      .select(
-        "id, version_number, kind, description, platform, severity, source_module, state, state_note, reported_by, reported_at, state_by, state_at, from_distributor, action, owner_person_id, due_on",
-      )
-      .eq("project_id", projectId),
+    inScope(
+      supabase
+        .from("distribution_anomalies")
+        .select(
+          "id, version_number, kind, description, platform, severity, source_module, state, state_note, reported_by, reported_at, state_by, state_at, from_distributor, action, owner_person_id, due_on",
+        )
+        .eq("project_id", projectId),
+      releaseId,
+    ),
     loadMembers(access),
   ]);
   if (rows.error) console.error("distribution anomalies:", rows.error.message);
@@ -76,12 +82,17 @@ export const loadAnomalies = trackedCache(async function loadAnomalies(
 });
 
 /** How many of the six checks someone recorded (the rest: « non vérifié »). */
-export async function countRecordedChecks(projectId: string): Promise<number> {
+export async function countRecordedChecks(
+  projectId: string,
+  releaseId: string | null = null,
+): Promise<number> {
   const supabase = await createClient();
-  const { count } = await supabase
-    .from("distribution_checks")
-    .select("id", { count: "exact", head: true })
-    .eq("project_id", projectId)
-    .neq("result", "unchecked");
+  const { count } = await inScope(
+    supabase
+      .from("distribution_checks")
+      .select("id", { count: "exact", head: true })
+      .eq("project_id", projectId),
+    releaseId,
+  ).neq("result", "unchecked");
   return count ?? 0;
 }

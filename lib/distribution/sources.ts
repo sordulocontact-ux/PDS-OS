@@ -16,6 +16,25 @@ import type {
 import { loadFinalView } from "@/lib/master-workflow/final";
 import { loadProjectDates } from "@/lib/projects/dates";
 import type { ProjectDetail } from "@/lib/projects/types";
+import { listMasterCovers } from "@/lib/catalog/covers";
+import { routes } from "@/lib/auth/redirects";
+import { legalParticipationsHref } from "@/lib/ui/legal-steps";
+import { loadContractGaps, gapNames } from "@/lib/legal/contract-gaps";
+import {
+  joinArtistNames,
+  withFeaturing,
+} from "@/lib/projects/participation-rules";
+import type { DistributionProject } from "@/lib/distribution/release-scope";
+import {
+  inScope,
+  releaseIdOf,
+  type ScopedProject,
+} from "@/lib/distribution/scope";
+import type {
+  ReadinessCollective,
+  TrackDelivery,
+} from "@/lib/distribution/readiness";
+import { fr as frAll } from "@/lib/i18n/fr";
 import {
   getProjectRelease,
   PROJECT_RELEASE,
@@ -64,11 +83,18 @@ export type DistributionSources = {
  * per request.
  */
 export const loadDistributionSources = trackedCache(async function load(
-  project: ProjectDetail,
+  project: ProjectDetail & ScopedProject,
   access: Access,
 ): Promise<DistributionSources> {
   const supabase = await createClient();
   const ids = project.masters.map((master) => master.id);
+  // A collective's release (lot 15): its tracks, its cover, its date.
+  const releaseId = releaseIdOf(project);
+  const scoped = project.distributionRelease ?? null;
+  const releaseTitles =
+    (project as Partial<DistributionProject>).distributionTitles ?? [];
+  const titleCoverMaster =
+    scoped?.kind === "title" ? (releaseTitles[0]?.master?.id ?? null) : null;
   const [
     masters,
     contributors,
@@ -99,14 +125,22 @@ export const loadDistributionSources = trackedCache(async function load(
     loadFinalView(project, access),
     loadWorkflowStates(project.id),
     loadSheetSummaries(project.id).catch(() => null),
-    getProjectRelease(supabase, project.id, PROJECT_RELEASE),
-    supabase
-      .from("distribution_dossiers")
-      .select(
-        "id, territory_mode, territories, preorder, preorder_on, prelisten, prelisten_on, price_tier, notes, cover_sheet_id, updated_at, params_confirmed_at, params_confirmed_by",
-      )
-      .eq("project_id", project.id)
-      .maybeSingle(),
+    getProjectRelease(
+      supabase,
+      project.id,
+      scoped?.kind === "title" && scoped.titleId
+        ? { kind: "title", titleId: scoped.titleId }
+        : PROJECT_RELEASE,
+    ),
+    inScope(
+      supabase
+        .from("distribution_dossiers")
+        .select(
+          "id, territory_mode, territories, preorder, preorder_on, prelisten, prelisten_on, price_tier, notes, cover_sheet_id, updated_at, params_confirmed_at, params_confirmed_by",
+        )
+        .eq("project_id", project.id),
+      releaseId,
+    ).maybeSingle(),
     access.organizationId
       ? supabase
           .from("organizations")
@@ -115,8 +149,14 @@ export const loadDistributionSources = trackedCache(async function load(
           .maybeSingle()
       : null,
     distributionLegalBlockers(project.id),
-    distributionCover(project.id),
+    distributionCover(project.id, releaseId),
     loadProjectDates(project.id),
+  ]);
+  const [titleCovers, gaps] = await Promise.all([
+    titleCoverMaster
+      ? listMasterCovers(titleCoverMaster)
+      : Promise.resolve(null),
+    scoped ? loadContractGaps(project.id, "release") : Promise.resolve([]),
   ]);
 
   const rows = new Map((masters?.data ?? []).map((row) => [row.id, row]));
@@ -162,9 +202,50 @@ export const loadDistributionSources = trackedCache(async function load(
               downloadUrl: file.downloadUrl,
             }
           : null,
+        ...(scoped
+          ? {
+              delivery: trackDelivery(
+                project.artistName,
+                masterLabel({
+                  title: row.title,
+                  variant: variantOf(row.variant),
+                  variantLabel: row.variant_label,
+                }),
+                releaseTitles.find((t) => t.master?.id === master.id) ?? null,
+              ),
+            }
+          : {}),
       },
     ];
   });
+  const ownTitles = new Set(releaseTitles.map((t) => t.id));
+  const releaseGaps = gaps.filter((g) => ownTitles.has(g.titleId));
+  const collective: ReadinessCollective | null = scoped
+    ? {
+        kind: scoped.kind,
+        titlesHref: routes.projectTitles(project.id),
+        contractsHref: legalParticipationsHref(project.id),
+        contracts: releaseGaps.length ? gapNames(releaseGaps) : null,
+        provisional: releaseTitles
+          .filter((t) => t.master?.provisional)
+          .map((t) => frAll.projectTitles.unnamed(t.position)),
+        withoutMaster:
+          scoped.kind === "compilation"
+            ? releaseTitles
+                .filter((t) => !t.master)
+                .map(
+                  (t) =>
+                    t.workingTitle ?? frAll.projectTitles.unnamed(t.position),
+                )
+            : [],
+        catalogCover: titleCoverMaster
+          ? {
+              masterId: titleCoverMaster,
+              fileName: titleCovers?.get(titleCoverMaster)?.fileName ?? null,
+            }
+          : null,
+      }
+    : null;
 
   const legal: ReadinessLegal = {
     blockers: (blockers.data ?? []).map((b) => ({
@@ -210,7 +291,20 @@ export const loadDistributionSources = trackedCache(async function load(
             updatedAt: releaseRow.updated_at,
           }
         : null,
-      releaseDate: dates.release,
+      // A collective's release (lot 15): its own date.
+      releaseDate: scoped
+        ? scoped.date
+          ? {
+              date: scoped.date,
+              source:
+                scoped.kind === "title"
+                  ? frAll.distributionJourney.facts.titleReleaseSource
+                  : frAll.distributionJourney.facts.compilationSource,
+            }
+          : null
+        : dates.release,
+      collective,
+      releaseId,
     },
     params,
     dossierId: dossier.data?.id ?? null,
@@ -234,3 +328,41 @@ export const loadDistributionSources = trackedCache(async function load(
       sheets === null,
   };
 });
+
+const FEAT = /\s*[([]?\s*\b(feat\.?|ft\.?|featuring)\s+[^)\]]*[)\]]?\s*$/i;
+
+/**
+ * A collective's track as the platforms receive it (lot 15, décision 10):
+ * the project's artist as main artist (with any other main credit of the
+ * title), its confirmed guests in featuring, written in the title as the
+ * platforms do (« Marina (feat. Lou Vega) »). What the Catalogue does not
+ * credit is said, never invented.
+ */
+export function trackDelivery(
+  projectArtist: string,
+  catalogueTitle: string,
+  title: DistributionProject["distributionTitles"][number] | null,
+): TrackDelivery {
+  const credits = title?.master?.credits ?? [];
+  const mains = credits
+    .filter((c) => c.role === "main")
+    .map((c) => c.artist.name);
+  const credited = new Set(
+    credits.filter((c) => c.role === "featuring").map((c) => c.artist.name),
+  );
+  const featuring = (title?.participations ?? [])
+    .filter((p) => p.status === "confirmed" && p.role === "featuring")
+    .map((p) => p.artist.name);
+  const cleanTitle = catalogueTitle.replace(FEAT, "").trim() || catalogueTitle;
+  const main = mains.includes(projectArtist)
+    ? [projectArtist, ...mains.filter((m) => m !== projectArtist)]
+    : [projectArtist];
+  return {
+    title: withFeaturing(cleanTitle, featuring),
+    main: joinArtistNames(main),
+    featuring,
+    missingMain: !mains.includes(projectArtist),
+    missingFeaturing: featuring.filter((name) => !credited.has(name)),
+    cleaned: cleanTitle !== catalogueTitle,
+  };
+}

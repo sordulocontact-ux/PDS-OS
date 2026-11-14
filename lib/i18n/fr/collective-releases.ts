@@ -45,9 +45,28 @@ export const collectiveReleases = {
     upc: "UPC",
     isrc: "ISRC",
     state: "État",
+    distribution: "Distribution",
     actions: "Actions",
   },
-  caption: { date: "Date", upc: "UPC", isrc: "ISRC" },
+  caption: {
+    date: "Date",
+    upc: "UPC",
+    isrc: "ISRC",
+    distribution: "Distribution",
+  },
+  // A release's deposit (lot 15).
+  distribution: {
+    to_prepare: () => "À préparer",
+    pending: (n: number | null) => `V${n ?? 1} à valider`,
+    rejected: (n: number | null) => `V${n ?? 1} refusée`,
+    approved: (n: number | null) => `V${n ?? 1} validée`,
+    deposited: () => "Déposée",
+    accepted: () => "Acceptée",
+    closing: () => "Clôture à valider",
+    closed: () => "Clôturée",
+  },
+  provisional: (names: string) =>
+    `Titre provisoire : ${names}. Donnez-lui son nom pour qu'il puisse partir.`,
   states: {
     planned: "Prévue",
     delivered: "Livrée",
@@ -78,6 +97,7 @@ export const collectiveReleases = {
     label: (release: string) => `Actions pour la sortie « ${release} »`,
     date: "Modifier la date",
     upc: "Modifier l'UPC",
+    distribution: "Ouvrir la Distribution",
   },
   date: {
     title: (release: string) => `Date de sortie · ${release}`,

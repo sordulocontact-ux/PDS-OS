@@ -155,8 +155,13 @@ select is((select array_agg(artist_name) from public.list_contract_gaps(pg_temp.
 select is((select count(*)::int from public.list_contract_gaps(pg_temp.id_of('simple'), 'release')),
   0, 'a simple project has no gap');
 reset role;
-select throws_like($$ insert into public.distribution_versions (organization_id, project_id, number, snapshot, submitted_by)
-                      values (pg_temp.id_of('org'), pg_temp.id_of('c1'), 1, '{}'::jsonb, pg_temp.id_of('owner_person')) $$,
+-- (lot 15: a collective's version carries its release, here a compilation)
+insert into public.releases (organization_id, project_id, title)
+values (pg_temp.id_of('org'), pg_temp.id_of('c1'), 'Compilation');
+select throws_like($$ insert into public.distribution_versions (organization_id, project_id, release_id, number, snapshot, submitted_by)
+                      values (pg_temp.id_of('org'), pg_temp.id_of('c1'),
+                              (select id from public.releases where project_id = pg_temp.id_of('c1')),
+                              1, '{}'::jsonb, pg_temp.id_of('owner_person')) $$,
   '%contract_missing%', 'a version submitted to the Distribution is refused');
 
 -- Revocation, append-only ------------------------------------------------------------------

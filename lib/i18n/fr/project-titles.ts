@@ -191,16 +191,17 @@ export const projectTitles = {
       retake: (round: "mix" | "mastering", number: number) =>
         `${round === "mix" ? "Mix" : "Master"} V${number + 1} attendu`,
     },
-    // Not followed per title yet (lot 15): the title goes out with the
-    // project's release.
+    // Each title's release deposit (lot 15): its own, else the
+    // compilation's it goes out with.
     distribution: {
-      withProject: "Avec le projet",
+      withCompilation: (state: string) => `Avec la compilation · ${state}`,
     },
     // Under the name on a small screen, the columns it hides.
     caption: {
       contract: "Contrat",
       negotiation: "Négociation",
       master: "Master",
+      distribution: "Distribution",
     },
     empty: {
       title: "Aucun titre pour l'instant",

@@ -81,6 +81,7 @@ import {
 import { todayInParis } from "@/lib/contracts/types";
 import { formatShortDay } from "@/lib/utils/day";
 import { cn } from "@/lib/utils";
+import type { Tone } from "@/lib/ui/state-tones";
 
 const fr = {
   contracts,
@@ -95,10 +96,14 @@ const caption =
   "text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-tertiary)]";
 const muted = "text-[color:var(--text-tertiary)]";
 
-/** Where a row leads: the project's Master (a title with a master), the
- * project's Distribution (the titles go out with it until lot 15). Null
- * when the project has no such workflow. */
-export type BoardLinks = { master: string | null; distribution: string | null };
+/** Where a row leads: the project's Master (a title with a master), its
+ * release's deposit in the Distribution (lot 15, by title: its own release,
+ * else the compilation's). Null when the project has no such workflow. */
+export type TitleDepositLink = { href: string; label: string; tone: Tone };
+export type BoardLinks = {
+  master: string | null;
+  distribution: Record<string, TitleDepositLink> | null;
+};
 
 const labelOf = (title: BoardTitle) =>
   projectTitleLabel({
@@ -226,7 +231,7 @@ function TitleFacts({
 }: {
   master: string | null;
   masterStatus: ReturnType<typeof titleMasterStatus>;
-  distribution: string | null;
+  distribution: TitleDepositLink | null;
 }) {
   const t = fr.projectTitles.board;
   return (
@@ -245,10 +250,12 @@ function TitleFacts({
         <span className={caption}>{t.columns.distribution}</span>
         {distribution ? (
           <ViewLink
-            href={distribution}
-            className="relative z-10 text-[color:var(--text-secondary)] hover:underline focus-visible:underline"
+            href={distribution.href}
+            className="relative z-10 rounded-full focus-visible:outline-2"
           >
-            {t.distribution.withProject}
+            <StatusBadge tone={distribution.tone} size="sm">
+              {distribution.label}
+            </StatusBadge>
           </ViewLink>
         ) : (
           <span className={muted}>{EMPTY_CELL}</span>
@@ -533,8 +540,8 @@ function TitleRow({
             </span>
           )}
           <HiddenFacts
-            facts={
-              master
+            facts={[
+              ...(master
                 ? [
                     {
                       key: "master",
@@ -542,8 +549,18 @@ function TitleRow({
                       value: master,
                     },
                   ]
-                : []
-            }
+                : []),
+              // Its release's deposit (lot 15).
+              ...(links.distribution?.[title.id]
+                ? [
+                    {
+                      key: "distribution",
+                      label: t.board.caption.distribution,
+                      value: links.distribution[title.id].label,
+                    },
+                  ]
+                : []),
+            ]}
           />
         </span>
       </DataTableCell>
@@ -557,7 +574,7 @@ function TitleRow({
         <TitleFacts
           master={master}
           masterStatus={masterStatus}
-          distribution={links.distribution}
+          distribution={links.distribution?.[title.id] ?? null}
         />
       </DataTableCell>
       <DataTableActionsCell>

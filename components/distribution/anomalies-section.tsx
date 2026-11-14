@@ -24,6 +24,7 @@ export function AnomaliesSection({
   anomalies,
   platforms,
   firstMasterId,
+  releaseId = null,
   uncheckedChecks,
   canCheck,
 }: {
@@ -31,6 +32,8 @@ export function AnomaliesSection({
   anomalies: Anomaly[];
   platforms: Array<{ key: string; name: string }>;
   firstMasterId: string | null;
+  // A collective's release (lot 15).
+  releaseId?: string | null;
   // Said when nothing was reported while checks remain to do (§ 13).
   uncheckedChecks: number;
   canCheck: boolean;
@@ -87,6 +90,7 @@ export function AnomaliesSection({
                     href={moduleHref(anomaly.module, {
                       projectId,
                       firstMasterId,
+                      releaseId,
                     })}
                     className="font-medium underline-offset-4 hover:underline focus-visible:underline"
                   >

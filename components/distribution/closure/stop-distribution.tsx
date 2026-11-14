@@ -13,6 +13,7 @@ import { isReasonKind, type ReasonKind } from "@/lib/distribution/closure";
 import { proposeClosure } from "@/lib/distribution/closure-gestures";
 import { distribution } from "@/lib/i18n/fr/distribution";
 import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
+import { useDistributionRelease } from "@/components/distribution/frame/release-scope";
 
 const fr = { distribution, distributionJourney };
 
@@ -22,6 +23,7 @@ const c = fr.distribution.closure;
 /** « Arrêter la distribution »: cancelled or abandoned, a reason and its
  * motive, decided by the direction (recette DIST-003). */
 export function StopDistribution({ projectId }: { projectId: string }) {
+  const releaseId = useDistributionRelease();
   const [kind, setKind] = useState<"cancelled" | "abandoned" | null>(null);
   const [reasonKind, setReasonKind] = useState<ReasonKind | null>(null);
   const [note, setNote] = useState("");
@@ -37,6 +39,7 @@ export function StopDistribution({ projectId }: { projectId: string }) {
     run(() =>
       proposeClosure({
         projectId,
+        releaseId,
         kind,
         arbitration: note.trim(),
         acknowledged: true,

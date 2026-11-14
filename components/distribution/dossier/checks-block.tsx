@@ -13,6 +13,7 @@ import { recordDistributionCheck } from "@/lib/distribution/validation-actions";
 import { distribution } from "@/lib/i18n/fr/distribution";
 import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
 import { cn } from "@/lib/utils";
+import { useDistributionRelease } from "@/components/distribution/frame/release-scope";
 
 const fr = { distribution, distributionJourney };
 
@@ -86,6 +87,7 @@ function CheckRow({
   check: CheckLine;
   editable: boolean;
 }) {
+  const releaseId = useDistributionRelease();
   const [changing, setChanging] = useState(false);
   const [noting, setNoting] = useState(false);
   const [note, setNote] = useState("");
@@ -99,6 +101,7 @@ function CheckRow({
     run(() =>
       recordDistributionCheck({
         projectId,
+        releaseId,
         key: check.key,
         result,
         note: text,

@@ -12,6 +12,12 @@ import {
 import { loadMembers } from "@/lib/framing/related";
 import { canEditProject } from "@/lib/projects/edit-access";
 import type { ProjectDetail } from "@/lib/projects/types";
+import {
+  inScope,
+  releaseArg,
+  releaseIdOf,
+  type ScopedProject,
+} from "@/lib/distribution/scope";
 import { createClient } from "@/lib/supabase/server";
 
 // A proof opens for an hour after the page is read.
@@ -28,19 +34,25 @@ export type TrackingView = {
 /** The deposit cycles of a project, read with the viewer's session; once
  * per request (the Suivi and the Plateformes both read it). */
 export const loadTrackingView = trackedCache(async function loadTrackingView(
-  project: ProjectDetail,
+  project: ProjectDetail & ScopedProject,
   access: Access,
 ): Promise<TrackingView> {
   const supabase = await createClient();
+  const releaseId = releaseIdOf(project);
   const [rows, current, members] = await Promise.all([
-    supabase
-      .from("distribution_declarations")
-      .select(
-        "id, version_number, kind, declared_on, orchard_id, note, proof_path, proof_name, proof_url, source, declared_by, declared_at, withdrawn_at, withdrawn_by, withdraw_note",
-      )
-      .eq("project_id", project.id)
-      .order("declared_at", { ascending: false }),
-    supabase.rpc("distribution_current_version", { p_project_id: project.id }),
+    inScope(
+      supabase
+        .from("distribution_declarations")
+        .select(
+          "id, version_number, kind, declared_on, orchard_id, note, proof_path, proof_name, proof_url, source, declared_by, declared_at, withdrawn_at, withdrawn_by, withdraw_note",
+        )
+        .eq("project_id", project.id),
+      releaseId,
+    ).order("declared_at", { ascending: false }),
+    supabase.rpc("distribution_current_version", {
+      p_project_id: project.id,
+      ...releaseArg(releaseId),
+    }),
     loadMembers(access),
   ]);
   if (rows.error)
@@ -94,7 +106,9 @@ export const loadTrackingView = trackedCache(async function loadTrackingView(
   return {
     current: typeof current.data === "number" ? current.data : null,
     declarations,
-    canEdit: canEditProject(access, project),
+    // A release archived or its title abandoned is read only (lot 15).
+    canEdit:
+      canEditProject(access, project) && !project.distributionRelease?.readOnly,
     organizationId: access.organizationId,
   };
 });

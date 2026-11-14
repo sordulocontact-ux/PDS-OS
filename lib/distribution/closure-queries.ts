@@ -25,6 +25,11 @@ import { loadPlatformsView } from "@/lib/distribution/platforms-queries";
 import { loadMembers, loadValidators } from "@/lib/framing/related";
 import type { ProjectDetail } from "@/lib/projects/types";
 import { todayInParis } from "@/lib/insights/dates";
+import {
+  inScope,
+  releaseIdOf,
+  type ScopedProject,
+} from "@/lib/distribution/scope";
 import { createClient } from "@/lib/supabase/server";
 
 export type Closure = {
@@ -131,10 +136,11 @@ const asStrings = (value: unknown): string[] =>
 
 /** The closure step: conditions, reserves, closures and the history. */
 export async function loadClosureView(
-  project: ProjectDetail,
+  project: ProjectDetail & ScopedProject,
   access: Access,
 ): Promise<ClosureView> {
   const supabase = await createClient();
+  const releaseId = releaseIdOf(project);
   const [
     platforms,
     anomalies,
@@ -147,40 +153,52 @@ export async function loadClosureView(
     reserveRows,
   ] = await Promise.all([
     loadPlatformsView(project, access),
-    loadAnomalies(project.id, access),
-    supabase
-      .from("distribution_checks")
-      .select("check_key, result, note, checked_by, checked_at")
-      .eq("project_id", project.id),
-    supabase
-      .from("distribution_closures")
-      .select(
-        "id, version_number, kind, reason_kind, early, reserves, arbitration, status, proposed_by, proposed_at, validator_person_id, decided_by, decided_at, decision_note, reopened_by, reopened_at, reopen_note",
-      )
-      .eq("project_id", project.id)
-      .order("proposed_at", { ascending: false }),
-    supabase
-      .from("distribution_events")
-      .select("id, kind, data, actor, created_at")
-      .eq("project_id", project.id)
+    loadAnomalies(project.id, access, releaseId),
+    inScope(
+      supabase
+        .from("distribution_checks")
+        .select("check_key, result, note, checked_by, checked_at")
+        .eq("project_id", project.id),
+      releaseId,
+    ),
+    inScope(
+      supabase
+        .from("distribution_closures")
+        .select(
+          "id, version_number, kind, reason_kind, early, reserves, arbitration, status, proposed_by, proposed_at, validator_person_id, decided_by, decided_at, decision_note, reopened_by, reopened_at, reopen_note",
+        )
+        .eq("project_id", project.id),
+      releaseId,
+    ).order("proposed_at", { ascending: false }),
+    inScope(
+      supabase
+        .from("distribution_events")
+        .select("id, kind, data, actor, created_at")
+        .eq("project_id", project.id),
+      releaseId,
+    )
       .order("created_at", { ascending: false })
       .limit(300),
     loadMembers(access),
     access.organizationId
       ? loadValidators(access.organizationId)
       : Promise.resolve([]),
-    supabase
-      .from("distribution_dossiers")
-      .select("validator_person_id")
-      .eq("project_id", project.id)
-      .maybeSingle(),
-    supabase
-      .from("distribution_reserves")
-      .select(
-        "id, closure_id, position, category, label, details, criticality, owner_person_id, due_on, expected_proof, status, overdue_at, lift_note, lift_proof_path, lift_proof_name, lift_proof_url, lift_requested_by, lift_requested_at, lifted_by, lifted_at, lift_refusal_note",
-      )
-      .eq("project_id", project.id)
-      .order("position"),
+    inScope(
+      supabase
+        .from("distribution_dossiers")
+        .select("validator_person_id")
+        .eq("project_id", project.id),
+      releaseId,
+    ).maybeSingle(),
+    inScope(
+      supabase
+        .from("distribution_reserves")
+        .select(
+          "id, closure_id, position, category, label, details, criticality, owner_person_id, due_on, expected_proof, status, overdue_at, lift_note, lift_proof_path, lift_proof_name, lift_proof_url, lift_requested_by, lift_requested_at, lifted_by, lifted_at, lift_refusal_note",
+        )
+        .eq("project_id", project.id),
+      releaseId,
+    ).order("position"),
   ]);
   const nameOf = (personId: string | null) =>
     personId

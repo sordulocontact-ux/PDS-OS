@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import { releaseArg } from "@/lib/distribution/scope";
+
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import {
@@ -41,6 +43,7 @@ function done(projectId: string): DistributionResult {
 
 const reportSchema = z.object({
   projectId: z.uuid(),
+  releaseId: z.uuid().nullable().optional(),
   kind: z.enum(ANOMALY_KINDS),
   description: z.string().trim().min(1).max(2000),
   platform: z.string().max(40),
@@ -59,6 +62,7 @@ export async function reportDistributionAnomaly(
   const supabase = await createClient();
   const { error } = await supabase.rpc("report_distribution_anomaly", {
     p_project_id: v.projectId,
+    ...releaseArg(v.releaseId),
     p_kind: v.kind,
     p_description: v.description,
     p_platform: v.platform,
@@ -70,6 +74,7 @@ export async function reportDistributionAnomaly(
 
 const stateSchema = z.object({
   projectId: z.uuid(),
+  releaseId: z.uuid().nullable().optional(),
   anomalyId: z.uuid(),
   state: z.enum(ANOMALY_STATES),
   note: z.string().trim().max(1000),
@@ -98,6 +103,7 @@ export async function setDistributionAnomalyState(
  * (CA13): the validated version and its cycle are kept. */
 export async function prepareDistributionVersion(input: {
   projectId: string;
+  releaseId?: string | null;
   note: string;
   // The modules corrected (their checks only are redone); none: all six.
   modules?: string[];
@@ -106,6 +112,7 @@ export async function prepareDistributionVersion(input: {
   const parsed = z
     .object({
       projectId: z.uuid(),
+      releaseId: z.uuid().nullable().optional(),
       note: z.string().trim().min(1).max(1000),
       modules: z.array(z.enum(ANOMALY_MODULES)).max(7).optional(),
     })
@@ -114,6 +121,7 @@ export async function prepareDistributionVersion(input: {
   const supabase = await createClient();
   const { error } = await supabase.rpc("prepare_distribution_version", {
     p_project_id: parsed.data.projectId,
+    ...releaseArg(parsed.data.releaseId),
     p_note: parsed.data.note,
     p_modules: parsed.data.modules?.length ? parsed.data.modules : undefined,
   });

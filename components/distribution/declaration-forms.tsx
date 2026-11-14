@@ -15,6 +15,7 @@ import type { DeclarationKind } from "@/lib/distribution/tracking";
 import { withdrawDistributionDeclaration } from "@/lib/distribution/tracking-actions";
 import { declareWithProof } from "@/lib/distribution/upload-proof";
 import { distribution } from "@/lib/i18n/fr/distribution";
+import { useDistributionRelease } from "@/components/distribution/frame/release-scope";
 
 const fr = { distribution };
 
@@ -157,6 +158,7 @@ export function WithdrawButton({
   projectId: string;
   declarationId: string;
 }) {
+  const releaseId = useDistributionRelease();
   return (
     <DialogButton
       label={t.withdraw}
@@ -172,7 +174,12 @@ export function WithdrawButton({
           done={t.withdrawn}
           onDone={close}
           send={(note) =>
-            withdrawDistributionDeclaration({ projectId, declarationId, note })
+            withdrawDistributionDeclaration({
+              projectId,
+              releaseId,
+              declarationId,
+              note,
+            })
           }
         />
       )}

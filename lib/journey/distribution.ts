@@ -25,6 +25,7 @@ export async function distributionJourneys(
     !applicableWorkflows({
       type: project.type,
       masterCount: project.masters.length,
+      collective: project.collective,
     }).includes("distribution")
   )
     return [];

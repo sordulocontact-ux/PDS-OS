@@ -149,6 +149,13 @@ export function computedSignal(
       };
     }
     case "visual": {
+      // A title's release (lot 15): its title's cover, in the Catalogue.
+      if (sources.collective?.kind === "title") {
+        const file = sources.collective.catalogCover?.fileName;
+        return file
+          ? { status: "coherent", text: t.titleCover(file) }
+          : { status: "gap", text: t.noTitleCover };
+      }
       const cover = sources.cover;
       if (!cover) return { status: "gap", text: t.noCover };
       // The cover delivered by the Production, not the sheet's status.

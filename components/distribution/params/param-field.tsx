@@ -95,7 +95,11 @@ export function ParamField({
     setFieldError(undefined);
     run(() =>
       updateDistributionParams(
-        { projectId: data.projectId, patch: result.patch },
+        {
+          projectId: data.projectId,
+          releaseId: data.releaseId,
+          patch: result.patch,
+        },
         t.done[field],
       ),
     );
@@ -125,7 +129,11 @@ export function ParamField({
         done={t.done.cover}
         onChoose={(id) =>
           updateDistributionParams(
-            { projectId: data.projectId, patch: { coverSheetId: id } },
+            {
+              projectId: data.projectId,
+              releaseId: data.releaseId,
+              patch: { coverSheetId: id },
+            },
             t.done.cover,
           )
         }
@@ -147,7 +155,11 @@ export function ParamField({
         }
         done={t.done.validator}
         onChoose={(personId) =>
-          setDistributionValidator({ projectId: data.projectId, personId })
+          setDistributionValidator({
+            projectId: data.projectId,
+            releaseId: data.releaseId,
+            personId,
+          })
         }
         onDone={close}
       />

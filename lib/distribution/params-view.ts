@@ -38,6 +38,11 @@ const COLUMNS: Record<string, ParamKey> = {
 
 export type ParamsData = {
   projectId: string;
+  // A collective's release (lot 15): the deposit the parameters are of.
+  releaseId: string | null;
+  // A title's release takes its title's cover (Catalogue, in Préparation):
+  // no cover to choose among the Conception's sheets.
+  coverFromTitle: boolean;
   // The owner, on the step in progress or the dossier being prepared.
   canEdit: boolean;
   releaseDate: string | null;

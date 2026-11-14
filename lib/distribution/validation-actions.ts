@@ -13,8 +13,8 @@ import {
 import type { DistributionResult } from "@/lib/distribution/result";
 import { loadDistributionView, snapshotOf } from "@/lib/distribution/view";
 import { fr } from "@/lib/i18n/fr";
-import { getProject } from "@/lib/projects/queries";
-import { countedTitlesProject } from "@/lib/projects/counted-titles";
+import { distributionProject } from "@/lib/distribution/release-scope";
+import { releaseArg } from "@/lib/distribution/scope";
 import { createClient } from "@/lib/supabase/server";
 import type { Json } from "@/lib/supabase/database.types";
 
@@ -36,7 +36,19 @@ function failure(error: {
         error.details || fr.participationWaivers.refused.someone,
       ),
     };
+  // A collective's release (lot 15).
+  if (message.includes("title_provisional"))
+    return {
+      ok: false,
+      error: fr.distribution.validation.gate.provisional(
+        error.details || fr.participationWaivers.refused.someone,
+      ),
+    };
   const known: Array<[string, string]> = [
+    ["release_required", e.releaseRequired],
+    ["release_not_found", e.releaseRequired],
+    ["release_archived", fr.distribution.validation.gate.readOnly.archived],
+    ["title_abandoned", fr.distribution.validation.gate.readOnly.abandoned],
     ["params_not_confirmed", e.paramsNotConfirmed],
     ["legal_blockers", e.legalBlockers],
     ["validator_invalid", e.validatorInvalid],
@@ -69,11 +81,16 @@ function done(projectId: string): DistributionResult {
   return { ok: true };
 }
 
-const ids = z.object({ projectId: z.uuid() });
+// A collective's release (lot 15): null or absent for a simple project.
+const ids = z.object({
+  projectId: z.uuid(),
+  releaseId: z.uuid().nullable().optional(),
+});
 
 /** « Désigner le validateur »: a holder of `validate`, not the owner. */
 export async function setDistributionValidator(input: {
   projectId: string;
+  releaseId?: string | null;
   personId: string;
 }): Promise<DistributionResult> {
   await requireApproved();
@@ -83,6 +100,7 @@ export async function setDistributionValidator(input: {
   const { error } = await supabase.rpc("set_distribution_validator", {
     p_project_id: parsed.data.projectId,
     p_person_id: parsed.data.personId,
+    ...releaseArg(parsed.data.releaseId),
   });
   return error ? failure(error) : done(parsed.data.projectId);
 }
@@ -108,6 +126,7 @@ export async function recordDistributionCheck(
     p_key: parsed.data.key,
     p_result: parsed.data.result,
     p_note: parsed.data.note,
+    ...releaseArg(parsed.data.releaseId),
   });
   return error ? failure(error) : done(parsed.data.projectId);
 }
@@ -116,15 +135,18 @@ export async function recordDistributionCheck(
  * the snapshot is built here, from the sources read now. */
 export async function submitDistributionVersion(input: {
   projectId: string;
+  releaseId?: string | null;
 }): Promise<DistributionResult> {
   const access = await requireApproved();
   const parsed = ids.safeParse(input);
   if (!parsed.success) return { ok: false, error: e.invalid };
-  const read = await getProject(parsed.data.projectId);
-  // A collective's abandoned titles leave the checks (lot 9).
-  const project = read ? countedTitlesProject(read) : null;
-  if (!project || project.stages.length === 0)
-    return { ok: false, error: e.generic };
+  // A collective's abandoned titles leave the checks (lot 9); a collective
+  // submits one release (lot 15).
+  const project = await distributionProject(
+    parsed.data.projectId,
+    parsed.data.releaseId,
+  );
+  if (!project) return { ok: false, error: e.generic };
   const view = await loadDistributionView(project, access);
   if (!view.gate.allowed)
     return {
@@ -138,6 +160,7 @@ export async function submitDistributionVersion(input: {
   const { error } = await supabase.rpc("submit_distribution_version", {
     p_project_id: project.id,
     p_snapshot: snapshotOf(view) as unknown as Json,
+    ...releaseArg(parsed.data.releaseId),
   });
   return error ? failure(error) : done(project.id);
 }
@@ -194,6 +217,7 @@ export async function grantDistributionDerogation(
     p_risk: v.risk,
     p_reason: v.reason,
     p_due_on: v.dueOn,
+    ...releaseArg(v.releaseId),
   });
   return error ? failure(error) : done(v.projectId);
 }
@@ -201,6 +225,7 @@ export async function grantDistributionDerogation(
 /** « Retirer la dérogation » not used yet. */
 export async function revokeDistributionDerogation(input: {
   projectId: string;
+  releaseId?: string | null;
 }): Promise<DistributionResult> {
   await requireApproved();
   const parsed = ids.safeParse(input);
@@ -208,6 +233,7 @@ export async function revokeDistributionDerogation(input: {
   const supabase = await createClient();
   const { error } = await supabase.rpc("revoke_distribution_derogation", {
     p_project_id: parsed.data.projectId,
+    ...releaseArg(parsed.data.releaseId),
   });
   return error ? failure(error) : done(parsed.data.projectId);
 }

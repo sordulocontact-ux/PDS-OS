@@ -50,7 +50,7 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
 | 12 | Contrat manquant, verrous du tournage et de la sortie, dérogations ; 12 bis (parcours de la Production, avertissements, Historique du master) | fait |
 | 13 | Sorties individuelles et compilation (données, page « Sorties ») | fait |
 | 14 | Plan de sortie éditorial par titre (versions, lien de partage, PDF 16:9 style Jeho) | fait |
-| 15 | Distribution par sortie | à faire |
+| 15 | Distribution par sortie | fait |
 
 ## Déjà en base (migrations `20261111…`)
 
@@ -111,7 +111,8 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
   un (`partial`, « — » sur une ligne sans deal visible), jamais « Pas de dossier » à tort. La ligne
   d'un titre porte son **Master** (calculé sur `master_mix_versions` du projet et
   `masters.audio_state` : À mixer, Mix Vn à valider, Mix/Master Vn+1 attendu, Mix validé,
-  Master final) et sa **Distribution** (« Avec le projet », neutre jusqu'au lot 15). Ligne d'un
+  Master final) et sa **Distribution** (lot 15 : le dépôt de la sortie du titre, ou « Avec la
+  compilation · … »). Ligne d'un
   titre → Master du projet ; d'une participation → son contrat. Gestes (responsable une fois
   lancé, `create_projects` avant) : ajouter un titre, renommer, abandonner, réactiver, ajouter un
   artiste, changer le statut, **retirer du titre** (détacher = `withdrawn`) et **rattacher**
@@ -202,7 +203,7 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
   : **direction seule**, journal du collectif (`waiver_granted` / `waiver_revoked`, Activité),
   responsable prévenue. **Verrous collectif seulement** : `c_contract_check` sur
   `production_shoots` (départ ou tournage déclaré tenu) et `distribution_versions` (soumission,
-  tous les titres jusqu'au lot 15) → `contract_missing`, DETAIL = contrats manquants. Écrans :
+  ceux de sa sortie depuis le lot 15) → `contract_missing`, DETAIL = contrats manquants. Écrans :
   encart en Vue d'ensemble (`ContractGapsCallout`), « Contrat manquant : … » sur le titre de
   « Titres et artistes », information avant « Prête pour tournage », `ShootContractNotice` à la
   place de « Lancer le tournage », porte de soumission de la Distribution ; gestes « ⋯ » de la
@@ -242,10 +243,21 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
   `fonts.ts` (League Gothic 75 % pour SegmentA, Hanken Grotesk) ; logo tracé `pds-logo.ts`, à
   remplacer par le fichier officiel. Pages « Plans de sortie » (sous « Sorties »). Compte rendu :
   `docs/pds-mic-rapports/lot-14.md`.
+- **Lot 15** (`20261114140101_release_distribution`) : la **Distribution par sortie**.
+  `release_id` sur les dix tables de la Distribution (nul = projet simple, inchangé ; index
+  partiels ; garde-fou : un collectif écrit toujours avec sa sortie) ; fonctions avec
+  `p_release_id` (nul par défaut, `release_required` pour un collectif sans sortie). Refus de
+  soumission : sortie archivée, titre abandonné, titre provisoire, contrat sans dérogation de
+  sortie (`release_submission_blockers`). Sortie d'un titre : pochette du titre (Catalogue),
+  crédits pour les plateformes (PDS principal, invités en featuring, « Titre (feat. X) »,
+  `trackDelivery`), format Single ; compilation : pochette du projet, pistes = titres actifs.
+  Adresse `?sortie=` (`lib/distribution/scope.ts`), sortie et pistes `release-scope.ts`.
+  « Sorties » et « Titres et artistes » lisent `release_distribution_states`. La Distribution
+  s'applique à tout collectif (décision 9). Compte rendu : `docs/pds-mic-rapports/lot-15.md`.
 - Tests : `collective-projects`, `project-titles`, `title-participations`, `artist-selections`,
   `collective-project-creation`, `title-board` (lot 6 : ce que chaque lecteur lit des deals et
   du contrat d'une participation, changer l'artiste principal après lancement et son
-  événement, retirer et rattacher), `provisional-titles` (lot 7), `collective-master` (lots 8 et 9), `master-file-requests` (lot 9 bis), `deliverable-titles` (lot 10), `legal-participations` (lot 11), `participation-waivers` (lot 12), `title-releases` (lot 13), `title-release-plans` (lot 14).
+  événement, retirer et rattacher), `provisional-titles` (lot 7), `collective-master` (lots 8 et 9), `master-file-requests` (lot 9 bis), `deliverable-titles` (lot 10), `legal-participations` (lot 11), `participation-waivers` (lot 12), `title-releases` (lot 13), `title-release-plans` (lot 14), `release-distribution` (lot 15).
 
 ## Côté Business (Sacha), touchant les collectifs
 

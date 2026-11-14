@@ -154,7 +154,11 @@ export function PlatformsStep({ ctx }: { ctx: DistributionContext }) {
               {t.anomalies}
             </h3>
             <ViewLink
-              href={distributionViewHref(ctx.project.id, "anomalies")}
+              href={distributionViewHref(
+                ctx.project.id,
+                "anomalies",
+                ctx.releaseId,
+              )}
               className={buttonVariants({ variant: "link", size: "sm" })}
             >
               <ButtonRoll>{t.allAnomalies}</ButtonRoll>

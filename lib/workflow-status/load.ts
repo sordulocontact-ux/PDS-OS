@@ -20,6 +20,7 @@ import { getProject } from "@/lib/projects/queries";
 import { countedTitlesProject } from "@/lib/projects/counted-titles";
 import { byProjectVersion } from "@/lib/projects/version-cache";
 import { REFERENCE_PLATFORMS } from "@/lib/distribution/platforms";
+import { releaseArg } from "@/lib/distribution/scope";
 import { formatDate } from "@/lib/release/format";
 import {
   distributionCover,
@@ -238,13 +239,45 @@ type DistributionRows = {
   params_confirmed_at: string | null;
 };
 
+// A collective's Distribution is held release by release (lot 15): its
+// state is the least advanced of its live releases' (archived ones and
+// abandoned titles' left out).
 async function distributionFacts(projectId: string) {
+  const supabase = await createClient();
+  const { data: project } = await supabase
+    .from("projects")
+    .select("collective")
+    .eq("id", projectId)
+    .maybeSingle();
+  if (!project?.collective) return distributionFactsOf(projectId, null);
+  const { data: releases } = await supabase
+    .from("releases")
+    .select("id, project_titles(status)")
+    .eq("project_id", projectId)
+    .is("archived_at", null);
+  const live = (releases ?? []).filter(
+    (r) => r.project_titles?.status !== "abandoned",
+  );
+  if (live.length === 0) return distributionFactsOf(projectId, null);
+  const all = await Promise.all(
+    live.map((r) => distributionFactsOf(projectId, r.id)),
+  );
+  return all.reduce((least, facts) =>
+    facts.state.done.length < least.state.done.length ? facts : least,
+  );
+}
+
+async function distributionFactsOf(
+  projectId: string,
+  releaseId: string | null,
+) {
   const supabase = await createClient();
   const [rows, launchedAt, cover, blockers] = await Promise.all([
     supabase
       .rpc("distribution_status_rows", {
         p_project_id: projectId,
         p_reference_platforms: [...REFERENCE_PLATFORMS],
+        ...releaseArg(releaseId),
       })
       .then(({ data, error }) => {
         if (error) console.error("distributionFacts:", error.message);
@@ -252,7 +285,7 @@ async function distributionFacts(projectId: string) {
       }),
     // The Distribution starts with the plan (lib/distribution/journey-context.ts).
     planLaunchedAt(projectId),
-    distributionCover(projectId),
+    distributionCover(projectId, releaseId),
     distributionLegalBlockers(projectId),
   ]);
   const open = rows?.closure ?? null;
@@ -384,6 +417,7 @@ export const loadWorkflowStates = trackedCache(
       const workflows = applicableWorkflows({
         type: project.type,
         masterCount: project.masters.length,
+        collective: project.collective,
       });
       const has = (workflow: WorkflowKey) => workflows.includes(workflow);
       const legalAllowed = can(access, "manage_legal");

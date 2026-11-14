@@ -217,10 +217,13 @@ select throws_ok($$ select public.set_collective_release_mode(pg_temp.id_of('c_b
   'P0001', 'single_released', 'a title''s release already out stays');
 reset role;
 -- The compilation submitted to the Distribution: « singles » would take it away.
-insert into public.distribution_versions (organization_id, project_id, number, snapshot, submitted_by,
-                                          validator_person_id)
-values (pg_temp.id_of('org'), pg_temp.id_of('c_compil'), 1, '{}'::jsonb, pg_temp.id_of('owner_person'),
-        pg_temp.id_of('director_person'));
+-- (lot 15: a collective's version carries its release, here the compilation)
+insert into public.distribution_versions (organization_id, project_id, release_id, number, snapshot,
+                                          submitted_by, validator_person_id)
+values (pg_temp.id_of('org'), pg_temp.id_of('c_compil'),
+        (select id from public.releases where project_id = pg_temp.id_of('c_compil')
+            and project_title_id is null),
+        1, '{}'::jsonb, pg_temp.id_of('owner_person'), pg_temp.id_of('director_person'));
 select pg_temp.act_as(pg_temp.id_of('owner'));
 select throws_ok($$ select public.set_collective_release_mode(pg_temp.id_of('c_compil'), 'singles') $$,
   'P0001', 'compilation_submitted', 'a compilation submitted stays');

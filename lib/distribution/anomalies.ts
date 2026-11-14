@@ -57,9 +57,14 @@ export const DEFAULT_MODULE: Record<AnomalyKind, AnomalyModule> = {
 /** The screen of the owner module where the correction is made. */
 export function moduleHref(
   module: AnomalyModule,
-  input: { projectId: string; firstMasterId: string | null },
+  input: {
+    projectId: string;
+    firstMasterId: string | null;
+    // A collective's release (lot 15).
+    releaseId?: string | null;
+  },
 ): string {
-  const { projectId, firstMasterId } = input;
+  const { projectId, firstMasterId, releaseId } = input;
   switch (module) {
     case "catalog":
       return firstMasterId ? routes.master(firstMasterId) : routes.masters;
@@ -72,9 +77,9 @@ export function moduleHref(
     case "project":
       return routes.project(projectId);
     case "distribution":
-      return distributionStepHref(projectId, "params");
+      return distributionStepHref(projectId, "params", releaseId);
     case "distributor":
-      return distributionStepHref(projectId, "orchard");
+      return distributionStepHref(projectId, "orchard", releaseId);
   }
 }
 

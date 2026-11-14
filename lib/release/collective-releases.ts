@@ -9,9 +9,11 @@ import { masterNameOf, projectTitleLabel } from "@/lib/projects/title-rules";
 import type { ProjectDetail } from "@/lib/projects/types";
 import {
   isReleaseMode,
+  releaseDistributionOf,
   type CollectiveRelease,
   type CollectiveReleases,
 } from "@/lib/release/collective-rules";
+import { fr } from "@/lib/i18n/fr";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -26,7 +28,7 @@ export async function loadCollectiveReleases(
   access: Access,
 ): Promise<CollectiveReleases> {
   const supabase = await createClient();
-  const [titles, releases, plan, mode, gaps] = await Promise.all([
+  const [titles, releases, plan, mode, gaps, deposits] = await Promise.all([
     loadProjectTitles(project.id),
     supabase
       .from("releases")
@@ -48,7 +50,19 @@ export async function loadCollectiveReleases(
       .eq("id", project.id)
       .maybeSingle(),
     loadContractGaps(project.id, "release"),
+    // Each release's deposit in the Distribution (lot 15).
+    supabase.rpc("release_distribution_states", { p_project_id: project.id }),
   ]);
+  if (deposits.error)
+    console.error("loadCollectiveReleases deposits:", deposits.error.message);
+  const depositOf = (id: string) =>
+    releaseDistributionOf(
+      (deposits.data ?? []).find((d) => d.release_id === id),
+    );
+  const provisionalOf = (list: typeof titles) =>
+    list
+      .filter((t) => t.master?.provisional)
+      .map((t) => fr.projectTitles.unnamed(t.position));
   if (releases.error)
     throw new Error(`loadCollectiveReleases: ${releases.error.message}`);
   const masterIds = titles.flatMap((t) => (t.master ? [t.master.id] : []));
@@ -91,6 +105,8 @@ export async function loadCollectiveReleases(
             state: state(r),
             tracks: live.filter((t) => t.master).map(labelOf),
             gaps: gapsOf(null),
+            provisional: provisionalOf(live),
+            distribution: depositOf(r.id),
           },
         ];
       const title = titles.find((t) => t.id === r.project_title_id);
@@ -109,6 +125,8 @@ export async function loadCollectiveReleases(
           state: state(r),
           tracks: [],
           gaps: gapsOf(title.id),
+          provisional: provisionalOf([title]),
+          distribution: depositOf(r.id),
         },
       ];
     },
@@ -129,4 +147,54 @@ export async function loadCollectiveReleases(
       (can(access, "create_projects") && project.stages.length === 0),
     dueDate: project.dueDate,
   };
+}
+
+/** A title's deposit as « Titres et artistes » shows it (lot 15): its own
+ * release's, else the compilation's it goes out with. */
+export type TitleDeposit = {
+  releaseId: string;
+  // It goes out with the compilation (no release of its own).
+  withCompilation: boolean;
+  distribution: ReturnType<typeof releaseDistributionOf>;
+};
+
+export async function loadTitleDeposits(
+  projectId: string,
+): Promise<Record<string, TitleDeposit>> {
+  const supabase = await createClient();
+  const [releases, titles, deposits] = await Promise.all([
+    supabase
+      .from("releases")
+      .select("id, project_title_id")
+      .eq("project_id", projectId)
+      .is("archived_at", null),
+    supabase
+      .from("project_titles")
+      .select("id, status")
+      .eq("project_id", projectId),
+    supabase.rpc("release_distribution_states", { p_project_id: projectId }),
+  ]);
+  const rows = releases.data ?? [];
+  const stateOf = (id: string) =>
+    releaseDistributionOf(
+      (deposits.data ?? []).find((d) => d.release_id === id),
+    );
+  const compilation = rows.find((r) => !r.project_title_id) ?? null;
+  const out: Record<string, TitleDeposit> = {};
+  for (const title of titles.data ?? []) {
+    const own = rows.find((r) => r.project_title_id === title.id);
+    if (own)
+      out[title.id] = {
+        releaseId: own.id,
+        withCompilation: false,
+        distribution: stateOf(own.id),
+      };
+    else if (compilation && title.status !== "abandoned")
+      out[title.id] = {
+        releaseId: compilation.id,
+        withCompilation: true,
+        distribution: stateOf(compilation.id),
+      };
+  }
+  return out;
 }

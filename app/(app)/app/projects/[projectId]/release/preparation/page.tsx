@@ -6,6 +6,7 @@ import { DistributionStep } from "@/components/distribution/frame/distribution-s
 import { PrepStep } from "@/components/distribution/steps/prep-step";
 import { fr } from "@/lib/i18n/fr";
 import { isUuid } from "@/lib/release/uuid";
+import { releaseParamOf } from "@/lib/distribution/scope";
 import { routes } from "@/lib/auth/redirects";
 import { LEGAL_READY_KEY } from "@/lib/ui/legal-steps";
 import { distributionPreparationTone } from "@/lib/ui/state-tones";
@@ -19,11 +20,18 @@ export const metadata: Metadata = {
 // Distribution › Préparation: what the deposit reuses, read at its source.
 export default async function DistributionPreparationPage({
   params,
+  searchParams,
 }: PageProps<"/app/projects/[projectId]/release/preparation">) {
   const { projectId } = await params;
+  // A collective's release (lot 15).
+  const releaseId = releaseParamOf(await searchParams);
   if (!isUuid(projectId)) notFound();
   return (
-    <DistributionFrame projectId={projectId} shownKey="prep">
+    <DistributionFrame
+      projectId={projectId}
+      releaseId={releaseId}
+      shownKey="prep"
+    >
       {(ctx) => (
         <DistributionStep
           ctx={ctx}

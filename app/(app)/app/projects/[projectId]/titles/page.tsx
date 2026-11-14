@@ -17,6 +17,9 @@ import { loadTitleBoard, titleBoardChoices } from "@/lib/projects/title-board";
 import { titleCounts } from "@/lib/projects/title-board-rules";
 import type { ModuleFact } from "@/lib/ui/module-frame";
 import { allInOrder } from "@/lib/utils/parallel";
+import { withRelease } from "@/lib/distribution/scope";
+import { loadTitleDeposits } from "@/lib/release/collective-releases";
+import { releaseDistributionTone } from "@/lib/release/collective-rules";
 import { loadWorkflowStates } from "@/lib/workflow-status/load";
 
 export const metadata = { title: fr.projectTitles.title };
@@ -42,9 +45,11 @@ export default async function ProjectTitlesPage({
   // A launched project: only its owner writes (is_project_owner).
   const canManage = canEditProject(access, project);
   const canOpenLegal = can(access, "manage_legal");
-  const [board, flows] = await Promise.all([
+  const [board, flows, deposits] = await Promise.all([
     loadTitleBoard(project, access),
     loadWorkflowStates(project.id),
+    // Each title's release deposit (lot 15).
+    loadTitleDeposits(project.id),
   ]);
   const { masterOptions, artists } = await titleBoardChoices(
     project,
@@ -112,7 +117,28 @@ export default async function ProjectTitlesPage({
             ? routes.projectMaster(project.id)
             : null,
           distribution: workflows.includes("distribution")
-            ? routes.projectRelease(project.id)
+            ? Object.fromEntries(
+                Object.entries(deposits).map(([titleId, d]) => {
+                  const state = fr.collectiveReleases.distribution[
+                    d.distribution.key
+                  ](d.distribution.number);
+                  return [
+                    titleId,
+                    {
+                      href: withRelease(
+                        routes.projectRelease(project.id),
+                        d.releaseId,
+                      ),
+                      label: d.withCompilation
+                        ? fr.projectTitles.board.distribution.withCompilation(
+                            state,
+                          )
+                        : state,
+                      tone: releaseDistributionTone[d.distribution.key],
+                    },
+                  ];
+                }),
+              )
             : null,
         }}
       />

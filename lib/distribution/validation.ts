@@ -137,9 +137,15 @@ export function submitGate(input: {
   // A collective (lot 12): the participations whose contract is not signed,
   // without an open waiver of the release, named; null: none.
   contractGaps?: string | null;
+  // A collective's release (lot 15): its provisional titles, named; read
+  // only once archived or its title abandoned.
+  provisional?: string | null;
+  readOnly?: "archived" | "abandoned" | null;
 }): SubmitGate {
   const t = fr.distribution.validation.gate;
   const reasons: string[] = [];
+  if (input.readOnly) reasons.push(t.readOnly[input.readOnly]);
+  if (input.provisional) reasons.push(t.provisional(input.provisional));
   if (input.contractGaps)
     reasons.push(fr.participationWaivers.refused.release(input.contractGaps));
   const open = openVersion(input.versions);

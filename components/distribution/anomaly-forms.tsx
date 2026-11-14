@@ -27,6 +27,7 @@ import {
   setDistributionAnomalyState,
 } from "@/lib/distribution/anomalies-actions";
 import { distribution } from "@/lib/i18n/fr/distribution";
+import { useDistributionRelease } from "@/components/distribution/frame/release-scope";
 
 const fr = { distribution };
 
@@ -71,6 +72,7 @@ function ReportForm({
   platforms: Array<{ key: string; name: string }>;
   onDone: () => void;
 }) {
+  const releaseId = useDistributionRelease();
   const [kind, setKind] = useState<AnomalyKind>("metadata");
   const [module, setModule] = useState<AnomalyModule>(DEFAULT_MODULE.metadata);
   const [severity, setSeverity] = useState<Severity>("major");
@@ -90,6 +92,7 @@ function ReportForm({
     run(() =>
       reportDistributionAnomaly({
         projectId,
+        releaseId,
         kind,
         description,
         platform: String(data.get("platform") ?? ""),
@@ -199,6 +202,7 @@ function StateForm({
   state: AnomalyState;
   onDone: () => void;
 }) {
+  const releaseId = useDistributionRelease();
   const [next, setNext] = useState<AnomalyState>(
     state === "open" ? "in_correction" : state,
   );
@@ -216,7 +220,13 @@ function StateForm({
     }
     setNoteError(undefined);
     run(() =>
-      setDistributionAnomalyState({ projectId, anomalyId, state: next, note }),
+      setDistributionAnomalyState({
+        projectId,
+        releaseId,
+        anomalyId,
+        state: next,
+        note,
+      }),
     );
   }
 
@@ -258,6 +268,7 @@ export function PrepareVersionButton({
   projectId: string;
   current: number;
 }) {
+  const releaseId = useDistributionRelease();
   return (
     <DialogButton
       label={t.newVersion(current + 1)}
@@ -270,7 +281,9 @@ export function PrepareVersionButton({
           submitLabel={t.newVersionSubmit}
           done={t.newVersionDone}
           onDone={close}
-          send={(note) => prepareDistributionVersion({ projectId, note })}
+          send={(note) =>
+            prepareDistributionVersion({ projectId, releaseId, note })
+          }
         />
       )}
     </DialogButton>

@@ -19,6 +19,7 @@ import {
 } from "@/lib/distribution/validation";
 import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
 import { todayInParis } from "@/lib/insights/dates";
+import { useDistributionRelease } from "@/components/distribution/frame/release-scope";
 
 const fr = { distributionJourney };
 
@@ -37,6 +38,7 @@ export function DerogationForm({
   projectId: string;
   blocking: DerogationScope[];
 }) {
+  const releaseId = useDistributionRelease();
   const [scope, setScope] = useState<DerogationScope[]>(blocking);
   const [risk, setRisk] = useState("");
   const [reason, setReason] = useState("");
@@ -61,6 +63,7 @@ export function DerogationForm({
     run(() =>
       grantDerogation({
         projectId,
+        releaseId,
         scope,
         risk: risk.trim(),
         reason: reason.trim(),
@@ -132,6 +135,7 @@ export function DerogationForm({
 
 /** « Retirer la dérogation » while no submission used it. */
 export function RevokeDerogation({ projectId }: { projectId: string }) {
+  const releaseId = useDistributionRelease();
   const { pending, error, run } = useWriteSubmit(() => {}, t.revoked);
   return (
     <span className="flex flex-col gap-1.5">
@@ -141,7 +145,7 @@ export function RevokeDerogation({ projectId }: { projectId: string }) {
           variant="ghost"
           size="sm"
           disabled={pending}
-          onClick={() => run(() => revokeDerogation({ projectId }))}
+          onClick={() => run(() => revokeDerogation({ projectId, releaseId }))}
         >
           {t.revoke}
         </Button>

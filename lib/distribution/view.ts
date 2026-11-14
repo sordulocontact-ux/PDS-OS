@@ -39,6 +39,12 @@ import { loadMembers, loadValidators } from "@/lib/framing/related";
 import { fr } from "@/lib/i18n/fr";
 import { canEditProject } from "@/lib/projects/edit-access";
 import type { ProjectDetail } from "@/lib/projects/types";
+import {
+  inScope,
+  releaseIdOf,
+  type ScopedProject,
+} from "@/lib/distribution/scope";
+import type { DistributionProject } from "@/lib/distribution/release-scope";
 import { formatDay as formatDate } from "@/lib/utils/day";
 import { gapNames, loadContractGaps } from "@/lib/legal/contract-gaps";
 import { createClient } from "@/lib/supabase/server";
@@ -78,10 +84,18 @@ export type DistributionView = {
  * as the screen.
  */
 export async function loadDistributionView(
-  project: ProjectDetail,
+  project: ProjectDetail & ScopedProject,
   access: Access,
 ): Promise<DistributionView> {
   const supabase = await createClient();
+  // A collective's release (lot 15): its deposit alone.
+  const releaseId = releaseIdOf(project);
+  const release = project.distributionRelease ?? null;
+  const releaseTitles = new Set(
+    ((project as Partial<DistributionProject>).distributionTitles ?? []).map(
+      (t) => t.id,
+    ),
+  );
   const [
     sources,
     members,
@@ -98,36 +112,56 @@ export async function loadDistributionView(
     access.organizationId
       ? loadValidators(access.organizationId)
       : Promise.resolve([]),
-    supabase
-      .from("distribution_checks")
-      .select("check_key, result, note, checked_by, checked_at, version_number")
-      .eq("project_id", project.id),
-    supabase
-      .from("distribution_versions")
-      .select(
-        "id, number, status, submitted_by, submitted_at, validator_person_id, decided_by, decided_at, decision_note, superseded_at, snapshot, refusal_modules, derogation_id",
-      )
-      .eq("project_id", project.id)
-      .order("number", { ascending: false }),
-    supabase
-      .from("distribution_dossiers")
-      .select("validator_person_id")
-      .eq("project_id", project.id)
-      .maybeSingle(),
-    supabase
-      .from("distribution_derogations")
-      .select(
-        "id, scope, risk, reason, due_on, granted_by, granted_at, version_number, revoked_at",
-      )
-      .eq("project_id", project.id)
-      .is("revoked_at", null),
-    loadAnomalies(project.id, access),
+    inScope(
+      supabase
+        .from("distribution_checks")
+        .select(
+          "check_key, result, note, checked_by, checked_at, version_number",
+        )
+        .eq("project_id", project.id),
+      releaseId,
+    ),
+    inScope(
+      supabase
+        .from("distribution_versions")
+        .select(
+          "id, number, status, submitted_by, submitted_at, validator_person_id, decided_by, decided_at, decision_note, superseded_at, snapshot, refusal_modules, derogation_id",
+        )
+        .eq("project_id", project.id),
+      releaseId,
+    ).order("number", { ascending: false }),
+    inScope(
+      supabase
+        .from("distribution_dossiers")
+        .select("validator_person_id")
+        .eq("project_id", project.id),
+      releaseId,
+    ).maybeSingle(),
+    inScope(
+      supabase
+        .from("distribution_derogations")
+        .select(
+          "id, scope, risk, reason, due_on, granted_by, granted_at, version_number, revoked_at",
+        )
+        .eq("project_id", project.id),
+      releaseId,
+    ).is("revoked_at", null),
+    loadAnomalies(project.id, access, releaseId),
     // A collective (lot 12): the release waits for every contract signed or
     // waived; the same rule as the database's.
     project.collective
-      ? loadContractGaps(project.id, "release")
+      ? loadContractGaps(project.id, "release").then((gaps) =>
+          // A release's contracts (lot 15): its title's, or every title of
+          // the compilation.
+          releaseId ? gaps.filter((g) => releaseTitles.has(g.titleId)) : gaps,
+        )
       : Promise.resolve([]),
   ]);
+  const provisional = release
+    ? ((project as Partial<DistributionProject>).distributionTitles ?? [])
+        .filter((t) => t.master?.provisional)
+        .map((t) => fr.projectTitles.unnamed(t.position))
+    : [];
   const nameOf = (personId: string | null) =>
     personId
       ? (members.find((m) => m.personId === personId)?.name ?? null)
@@ -140,9 +174,14 @@ export async function loadDistributionView(
     params: sources.params,
     credits: sources.credits,
     label: sources.label,
-    format: project.musicFormat
-      ? fr.shell.musicFormats[project.musicFormat]
-      : null,
+    // A collective's release (lot 15): a single, or the compilation.
+    format: release
+      ? fr.shell.musicFormats[
+          release.kind === "title" ? "single" : "compilation"
+        ]
+      : project.musicFormat
+        ? fr.shell.musicFormats[project.musicFormat]
+        : null,
     artist: project.artistName || null,
     formatDate,
   });
@@ -216,7 +255,9 @@ export async function loadDistributionView(
       ? { personId: validatorId, name: nameOf(validatorId) ?? "—" }
       : null;
 
-  const canEdit = canEditProject(access, project);
+  // A release archived or its title abandoned is read only (lot 15).
+  const canEdit =
+    canEditProject(access, project) && !project.distributionRelease?.readOnly;
   const isValidator =
     validator !== null && validator.personId === access.personId;
   return {
@@ -240,6 +281,8 @@ export async function loadDistributionView(
       anomalies,
       derogation,
       contractGaps: contractGaps.length ? gapNames(contractGaps) : null,
+      provisional: provisional.length ? provisional.join(", ") : null,
+      readOnly: release?.readOnly ?? null,
     }),
     drift: open?.snapshot
       ? snapshotDrift(open.snapshot.sections, sections)

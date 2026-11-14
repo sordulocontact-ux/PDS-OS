@@ -12,6 +12,7 @@ import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { saveDistributionPlatform } from "@/lib/distribution/platforms-actions";
 import { distribution } from "@/lib/i18n/fr/distribution";
 import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
+import { useDistributionRelease } from "@/components/distribution/frame/release-scope";
 
 const fr = { distribution, distributionJourney };
 
@@ -69,6 +70,7 @@ export function PlatformRow({
   members: Array<{ personId: string; name: string }>;
   ownerPersonId: string | null;
 }) {
+  const releaseId = useDistributionRelease();
   const [mode, setMode] = useState<
     "idle" | "link" | "problem" | "recheck" | "confirm"
   >("idle");
@@ -92,6 +94,7 @@ export function PlatformRow({
       () =>
         saveDistributionPlatform({
           projectId,
+          releaseId,
           platform: line.platform as never,
           label: line.extra ? line.name : "",
           url,

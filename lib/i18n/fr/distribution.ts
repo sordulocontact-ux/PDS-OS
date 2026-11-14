@@ -83,6 +83,40 @@ export const distribution = {
       release: "Sortie enregistrée",
       releaseDate: "Date de sortie prévue",
       upc: "UPC",
+      // A collective's release (lot 15).
+      platformCredits: "Crédits pour les plateformes",
+      provisional: "Titre provisoire",
+      trackInCatalogue: "Titre au Catalogue",
+      contracts: "Contrats des participations",
+      titleCover: "Pochette du titre",
+    },
+    // A collective's release (lot 15): its readiness' own words.
+    collective: {
+      delivered: (title: string, main: string, featuring: string[]) =>
+        `« ${title} » · ${main}${featuring.length ? ` · featuring ${featuring.join(", ")}` : ""}`,
+      rules:
+        "Règles des plateformes : artiste principal en tête, invités en featuring et dans le titre.",
+      cleaned:
+        "« feat. » retiré du nom au Catalogue : la Distribution l'écrit selon les plateformes.",
+      missingMain: (artist: string) =>
+        `${artist} doit être l'artiste principal du titre au Catalogue.`,
+      missingFeaturing: (names: string) =>
+        `À créditer en featuring au Catalogue : ${names}.`,
+      provisional: (label: string) =>
+        `${label} : donnez-lui son nom dans « Titres et artistes » (un titre provisoire ne part pas).`,
+      withoutMaster: (label: string) =>
+        `${label} n'est pas encore au Catalogue : il manque à la compilation.`,
+      contractsMissing: (names: string) =>
+        `Contrat non signé de ${names}, sans dérogation de sortie.`,
+      contractsOk: "Signés, ou couverts par une dérogation de sortie.",
+      contractsSource: "Titres et artistes",
+      contractsWhere: "Juridique › Participations et contrats",
+      coverNone:
+        "Pas de pochette : déposez-la dans les fichiers du titre, au Catalogue.",
+      coverFile: (name: string) => `« ${name} », fichier « Pochette » du titre`,
+      coverSource: "Catalogue",
+      dateMissing: "Date à fixer dans « Sorties »",
+      releaseSource: "Sorties",
     },
     // A borrowing's state, as the Juridique names it (legal_clearances).
     clearanceStatus: {
@@ -194,6 +228,7 @@ export const distribution = {
       pricing: "Prix et dates",
       notes: "Notes",
     },
+    noFeaturing: "Aucun",
     fields: {
       releaseTitle: "Titre de la sortie",
       mainArtist: "Artiste principal",
@@ -203,6 +238,7 @@ export const distribution = {
       releaseDate: "Date de sortie",
       trackTitle: "Titre",
       trackArtists: "Artistes",
+      featuring: "Featuring",
       isrc: "ISRC",
       pLine: "Ligne ℗",
       songwriters: "Auteurs et compositeurs",
@@ -368,6 +404,10 @@ export const distribution = {
       rightsConstraints: (count: number) =>
         `${count} contrainte${count > 1 ? "s" : ""} de droits du Cadrage à confronter aux territoires choisis.`,
       noCover: "Aucune pochette désignée.",
+      // A title's release (lot 15).
+      titleCover: (file: string) =>
+        `Pochette du titre au Catalogue : « ${file} ».`,
+      noTitleCover: "Pas de pochette dans les fichiers du titre, au Catalogue.",
       visual: (title: string) =>
         `« ${title} » est validée en Conception et livrée par la Production.`,
       coverNotValidated: (title: string) =>
@@ -430,6 +470,15 @@ export const distribution = {
     driftLine: (label: string, before: string | null, now: string | null) =>
       `${label} : ${before ?? "vide"} → ${now ?? "vide"}`,
     gate: {
+      // A collective's release (lot 15).
+      provisional: (names: string) =>
+        `Dépôt impossible : titre provisoire (${names}). Donnez-lui son nom dans « Titres et artistes ».`,
+      readOnly: {
+        archived:
+          "Sortie archivée par le changement du mode de sortie : son dépôt se lit, il ne se soumet plus.",
+        abandoned:
+          "Titre abandonné : sa sortie se lit, elle ne se soumet plus.",
+      },
       pending: (n: number) => `La V${n} attend la décision du validateur.`,
       approved: (n: number) => `La V${n} est validée.`,
       blockers: () =>
@@ -453,6 +502,9 @@ export const distribution = {
     errors: {
       forbidden: "Vous n'avez pas le droit de faire cette action.",
       invalid: "Une valeur n'est pas valide.",
+      // A collective (lot 15): a deposit is a release's.
+      releaseRequired:
+        "Choisissez la sortie dans « Sorties » : la Distribution d'un projet collectif se fait sortie par sortie.",
       validatorInvalid:
         "Cette personne ne peut pas valider : elle doit détenir le droit de valider et ne pas être le responsable.",
       versionOpen:
@@ -689,6 +741,9 @@ export const distribution = {
     errors: {
       forbidden: "Vous n'avez pas le droit de faire cette action.",
       invalid: "Une valeur n'est pas valide.",
+      // A collective (lot 15): a deposit is a release's.
+      releaseRequired:
+        "Choisissez la sortie dans « Sorties » : la Distribution d'un projet collectif se fait sortie par sortie.",
       noLink: "Renseignez d'abord le lien officiel.",
       generic: "L'action a échoué. Réessayez.",
     },
@@ -768,6 +823,9 @@ export const distribution = {
     errors: {
       forbidden: "Vous n'avez pas le droit de faire cette action.",
       invalid: "Une valeur n'est pas valide.",
+      // A collective (lot 15): a deposit is a release's.
+      releaseRequired:
+        "Choisissez la sortie dans « Sorties » : la Distribution d'un projet collectif se fait sortie par sortie.",
       reasonRequired: "Dites pourquoi.",
       validationPending: "Une version attend sa validation.",
       nothingToSupersede: "Aucune version validée à remplacer.",
@@ -892,6 +950,9 @@ export const distribution = {
     errors: {
       forbidden: "Vous n'avez pas le droit de faire cette action.",
       invalid: "Une valeur n'est pas valide.",
+      // A collective (lot 15): a deposit is a release's.
+      releaseRequired:
+        "Choisissez la sortie dans « Sorties » : la Distribution d'un projet collectif se fait sortie par sortie.",
       noValidator: "Désignez d'abord un validateur Distribution.",
       notDeposited: "Le dépôt de la version validée n'est pas déclaré.",
       closureOpen: "Une clôture est déjà proposée ou en cours.",

@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import { releaseArg } from "@/lib/distribution/scope";
+
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import {
@@ -45,6 +47,7 @@ const httpsOrEmpty = z
 
 const saveSchema = z.object({
   projectId: z.uuid(),
+  releaseId: z.uuid().nullable().optional(),
   // Empty: a new platform added by hand, its key made here.
   platform: z.union([platformKey, z.literal("")]),
   label: z.string().trim().max(80),
@@ -67,6 +70,7 @@ export async function saveDistributionPlatform(
   const supabase = await createClient();
   const { error } = await supabase.rpc("save_distribution_platform", {
     p_project_id: v.projectId,
+    ...releaseArg(v.releaseId),
     p_platform: platform,
     p_label: platform.startsWith("other_") ? v.label : "",
     p_url: v.url,
@@ -77,6 +81,7 @@ export async function saveDistributionPlatform(
 
 const verifySchema = z.object({
   projectId: z.uuid(),
+  releaseId: z.uuid().nullable().optional(),
   platform: platformKey,
   verification: z.enum(VERIFICATIONS),
   verificationNote: z.string().trim().max(1000),
@@ -100,6 +105,7 @@ export async function verifyDistributionPlatform(
   const supabase = await createClient();
   const { error } = await supabase.rpc("verify_distribution_platform", {
     p_project_id: v.projectId,
+    ...releaseArg(v.releaseId),
     p_platform: v.platform,
     p_verification: v.verification,
     p_verification_note: v.verificationNote,

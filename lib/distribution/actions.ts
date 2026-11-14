@@ -10,6 +10,7 @@ import {
 } from "@/lib/distribution/dossier";
 import type { DistributionResult } from "@/lib/distribution/result";
 import { fr } from "@/lib/i18n/fr";
+import { inScope } from "@/lib/distribution/scope";
 import { createClient } from "@/lib/supabase/server";
 
 const e = fr.distribution.dossier.errors;
@@ -40,7 +41,7 @@ export async function saveDossierParams(
   await requireApproved();
   const parsed = dossierParamsSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: e.invalid };
-  const { projectId, ...params } = parsed.data;
+  const { projectId, releaseId, ...params } = parsed.data;
   const supabase = await createClient();
   const [project, existing] = await Promise.all([
     supabase
@@ -48,11 +49,13 @@ export async function saveDossierParams(
       .select("organization_id")
       .eq("id", projectId)
       .maybeSingle(),
-    supabase
-      .from("distribution_dossiers")
-      .select("id")
-      .eq("project_id", projectId)
-      .maybeSingle(),
+    inScope(
+      supabase
+        .from("distribution_dossiers")
+        .select("id")
+        .eq("project_id", projectId),
+      releaseId ?? null,
+    ).maybeSingle(),
   ]);
   if (!project.data) return { ok: false, error: e.generic };
   const row = {
@@ -80,6 +83,7 @@ export async function saveDossierParams(
           ...row,
           organization_id: project.data.organization_id,
           project_id: projectId,
+          release_id: releaseId ?? null,
         })
         .select("id");
   if (error) return failure(error);

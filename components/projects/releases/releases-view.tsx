@@ -25,6 +25,9 @@ import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { RowActions, type RowAction } from "@/components/ui/row-actions";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { ViewLink } from "@/components/ui/view-link";
+import { routes } from "@/lib/auth/redirects";
+import { withRelease } from "@/lib/distribution/scope";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { normalizeUpc, upcError } from "@/lib/distribution/upc";
 import { setReleaseUpc } from "@/lib/distribution/upc-actions";
@@ -37,6 +40,7 @@ import {
 } from "@/lib/release/collective-actions";
 import {
   RELEASE_MODES,
+  releaseDistributionTone,
   type CollectiveRelease,
   type CollectiveReleases,
   type ReleaseMode,
@@ -57,6 +61,7 @@ const COLUMN = {
   upc: "w-36",
   isrc: "w-36",
   state: "w-28",
+  distribution: "w-40",
 } as const;
 
 const stateTone = {
@@ -188,7 +193,7 @@ export function ReleasesView({
         )}
       </div>
     );
-  const columns = 6;
+  const columns = 7;
   const rows = (list: CollectiveRelease[]) =>
     list.map((release) => (
       <ReleaseRow
@@ -214,6 +219,9 @@ export function ReleasesView({
           </DataTableHead>
           <DataTableHead hideBelow="sm" className={COLUMN.state}>
             {t.columns.state}
+          </DataTableHead>
+          <DataTableHead hideBelow="lg" className={COLUMN.distribution}>
+            {t.columns.distribution}
           </DataTableHead>
           <DataTableActionsHead label={t.columns.actions} />
         </DataTableHeader>
@@ -270,6 +278,14 @@ function ReleaseRow({
   const gaps = release.gaps
     .map((g) => (compilation ? `${g.artist} (${g.title})` : g.artist))
     .join(", ");
+  // Its deposit, opened from here (lot 15).
+  const deposit = release.distribution;
+  const depositHref = withRelease(routes.projectRelease(projectId), release.id);
+  const depositBadge = (
+    <StatusBadge tone={releaseDistributionTone[deposit.key]} size="sm">
+      {t.distribution[deposit.key](deposit.number)}
+    </StatusBadge>
+  );
   const actions: RowAction[] = canEdit
     ? [
         // The compilation's date is the project's due date.
@@ -340,6 +356,23 @@ function ReleaseRow({
               {t.gaps(gaps)}
             </span>
           )}
+          {release.provisional.length > 0 && !release.abandoned && (
+            <span
+              className={cn(caption, "text-[color:var(--tone-warning-fg)]")}
+            >
+              {t.provisional(release.provisional.join(", "))}
+            </span>
+          )}
+          {/* Under 1024 px: the deposit, under the name. */}
+          <span className={cn(caption, "flex items-center gap-1.5 lg:hidden")}>
+            {`${t.caption.distribution} : `}
+            <ViewLink
+              href={depositHref}
+              className="relative z-10 rounded-full focus-visible:outline-2"
+            >
+              {depositBadge}
+            </ViewLink>
+          </span>
         </span>
       </DataTableCell>
       <DataTableCell hideBelow="xl" className={COLUMN.date}>
@@ -364,6 +397,15 @@ function ReleaseRow({
         <StatusBadge tone={stateTone[release.state]} size="sm">
           {t.states[release.state]}
         </StatusBadge>
+      </DataTableCell>
+      <DataTableCell hideBelow="lg" className={COLUMN.distribution}>
+        <ViewLink
+          href={depositHref}
+          aria-label={`${t.actions.distribution} · ${release.label}`}
+          className="rounded-full focus-visible:outline-2"
+        >
+          {depositBadge}
+        </ViewLink>
       </DataTableCell>
       <DataTableActionsCell>
         <RowActions label={t.actions.label(release.label)} actions={actions} />

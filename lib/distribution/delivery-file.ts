@@ -95,6 +95,12 @@ export function deliveryFile(input: {
         : t.no;
 
   const release = sources.release;
+  // A collective's title release (lot 15): delivered under its track's
+  // name as the platforms write it, « Marina (feat. Lou Vega) ».
+  const single =
+    sources.collective?.kind === "title"
+      ? (sources.titles[0]?.delivery ?? null)
+      : null;
   const sections: DossierSection[] = [
     {
       key: "release",
@@ -105,7 +111,11 @@ export function deliveryFile(input: {
           key: "release",
           title: null,
           fields: [
-            fromItem("release", t.fields.releaseTitle, release?.title ?? null),
+            fromItem(
+              "release",
+              t.fields.releaseTitle,
+              release ? (single?.title ?? release.title) : null,
+            ),
             {
               key: "artist",
               label: t.fields.mainArtist,
@@ -166,12 +176,39 @@ export function deliveryFile(input: {
           key: title.id,
           title: t.track(index + 1, title.label),
           fields: [
-            fromItem(`identity-${title.id}`, t.fields.trackTitle, title.label),
-            fromItem(
-              `identity-${title.id}`,
-              t.fields.trackArtists,
-              title.hasMainArtist ? title.artists : null,
-            ),
+            ...(title.delivery
+              ? [
+                  // A collective's track (lot 15): the platforms' rules applied.
+                  fromItem(
+                    `platforms-${title.id}`,
+                    t.fields.trackTitle,
+                    title.delivery.title,
+                  ),
+                  fromItem(
+                    `platforms-${title.id}`,
+                    t.fields.trackArtists,
+                    title.delivery.main,
+                  ),
+                  fromItem(
+                    `platforms-${title.id}`,
+                    t.fields.featuring,
+                    title.delivery.featuring.length
+                      ? title.delivery.featuring.join(", ")
+                      : t.noFeaturing,
+                  ),
+                ]
+              : [
+                  fromItem(
+                    `identity-${title.id}`,
+                    t.fields.trackTitle,
+                    title.label,
+                  ),
+                  fromItem(
+                    `identity-${title.id}`,
+                    t.fields.trackArtists,
+                    title.hasMainArtist ? title.artists : null,
+                  ),
+                ]),
             fromItem(`isrc-${title.id}`, t.fields.isrc, title.isrc),
             fromItem(
               `pline-${title.id}`,
@@ -224,17 +261,24 @@ export function deliveryFile(input: {
             fromItem(
               "cover",
               t.fields.cover,
-              sources.cover
-                ? sources.cover.delivered
-                  ? fr.distribution.readiness.details.coverDelivered(
-                      sources.cover.title,
-                      sources.cover.delivered.version,
+              // A title's release (lot 15): its title's cover, Catalogue.
+              sources.collective?.kind === "title"
+                ? sources.collective.catalogCover?.fileName
+                  ? fr.distribution.readiness.collective.coverFile(
+                      sources.collective.catalogCover.fileName,
                     )
-                  : fr.distribution.readiness.details.coverStatus(
-                      sources.cover.title,
-                      fr.distribution.readiness.details.coverNotDelivered,
-                    )
-                : null,
+                  : null
+                : sources.cover
+                  ? sources.cover.delivered
+                    ? fr.distribution.readiness.details.coverDelivered(
+                        sources.cover.title,
+                        sources.cover.delivered.version,
+                      )
+                    : fr.distribution.readiness.details.coverStatus(
+                        sources.cover.title,
+                        fr.distribution.readiness.details.coverNotDelivered,
+                      )
+                  : null,
             ),
           ],
         },

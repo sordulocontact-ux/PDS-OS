@@ -29,6 +29,7 @@ const invalid = {
 
 export async function proposeClosure(input: {
   projectId: string;
+  releaseId?: string | null;
   kind: ClosureKind;
   arbitration: string;
   acknowledged: boolean;
@@ -50,6 +51,7 @@ export async function proposeClosure(input: {
 
 export async function decideClosure(input: {
   projectId: string;
+  releaseId?: string | null;
   closureId: string;
   approve: boolean;
   note: string;
@@ -63,6 +65,7 @@ export async function decideClosure(input: {
 
 export async function reopenClosure(input: {
   projectId: string;
+  releaseId?: string | null;
   note: string;
 }): Promise<WriteResult> {
   if (!id.safeParse(input.projectId).success) return invalid;
@@ -76,6 +79,7 @@ export async function reopenClosure(input: {
 
 export async function requestLift(input: {
   projectId: string;
+  releaseId?: string | null;
   reserveId: string;
   note: string;
   proofPath: string;
@@ -93,6 +97,7 @@ export async function requestLift(input: {
 
 export async function decideLift(input: {
   projectId: string;
+  releaseId?: string | null;
   reserveId: string;
   approve: boolean;
   note: string;
