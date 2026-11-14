@@ -102,8 +102,8 @@ export const distribution = {
         `${artist} doit être l'artiste principal du titre au Catalogue.`,
       missingFeaturing: (names: string) =>
         `À créditer en featuring au Catalogue : ${names}.`,
-      provisional: (label: string) =>
-        `${label} : donnez-lui son nom dans « Titres et artistes » (un titre provisoire ne part pas).`,
+      provisional: () =>
+        "Donnez-lui son nom dans « Titres et artistes » : un titre provisoire ne part pas.",
       withoutMaster: (label: string) =>
         `${label} n'est pas encore au Catalogue : il manque à la compilation.`,
       contractsMissing: (names: string) =>
@@ -326,6 +326,9 @@ export const distribution = {
       "Six contrôles, chacun enregistré par une personne. Le calcul de PDS OS aide, il ne vaut jamais contrôle.",
     summary: (done: number) =>
       `${done} contrôle${done > 1 ? "s" : ""} sur 6 enregistré${done > 1 ? "s" : ""}`,
+    // A title's release (lot 15): its cover is the title's, in the Catalogue.
+    visualTitleWhat:
+      "La pochette publiée correspond au fichier « Pochette » du titre, au Catalogue.",
     items: {
       audio: {
         label: "Audio",

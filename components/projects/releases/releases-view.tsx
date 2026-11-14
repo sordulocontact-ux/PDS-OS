@@ -368,6 +368,7 @@ function ReleaseRow({
             {`${t.caption.distribution} : `}
             <ViewLink
               href={depositHref}
+              aria-label={`${t.actions.distribution} · ${release.label} · ${t.distribution[deposit.key](deposit.number)}`}
               className="relative z-10 rounded-full focus-visible:outline-2"
             >
               {depositBadge}
@@ -401,7 +402,7 @@ function ReleaseRow({
       <DataTableCell hideBelow="lg" className={COLUMN.distribution}>
         <ViewLink
           href={depositHref}
-          aria-label={`${t.actions.distribution} · ${release.label}`}
+          aria-label={`${t.actions.distribution} · ${release.label} · ${t.distribution[deposit.key](deposit.number)}`}
           className="rounded-full focus-visible:outline-2"
         >
           {depositBadge}

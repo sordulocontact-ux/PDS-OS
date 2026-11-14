@@ -338,6 +338,18 @@ placements séparés dans le brouillon (`placements` avec logo, `listeningVisual
 du placement et capture au-dessus du lien d'écoute comme la référence, texte seul sans image.
 Détail : `docs/pds-mic-rapports/lot-14.md`.
 
+## Passe Chrome du lot 15 (14/11/2026)
+
+Vérifié (desktop, 390 px, sombre et clair ; Lina et Claire) : « Sorties » et « Titres et
+artistes » lisent le dépôt de chaque sortie ; Distribution de Marina (crédits pour les
+plateformes, pochette du titre, refus pour contrat, dérogation de sortie, V1 soumise puis
+validée) ; titre provisoire bloquant ; compilation (pistes, crédits par piste, pochette du
+projet) ; « Minuit pile » inchangé. Corrigé : droit d'insérer `release_id` sur le dossier,
+pochette d'une sortie de titre (paramètres, dossier, contrôle « Visuel »), lien des contrats vers
+« Participations et contrats », date d'une sortie de titre dans « Sorties ». Base locale
+reconstruite après une remise à zéro faite par erreur (voir `lot-15.md`). Détail :
+`docs/pds-mic-rapports/lot-15.md`.
+
 ## Règles à tenir à chaque lot
 
 - Toute règle nouvelle ne joue que si `projects.collective = true` ; un projet simple ne change pas

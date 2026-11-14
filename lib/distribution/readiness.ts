@@ -411,7 +411,7 @@ function collectiveItems(input: ReadinessInput, back: string): ReadinessItem[] {
       subject: label,
       state: "missing" as const,
       blocking: true,
-      detail: c.provisional(label),
+      detail: c.provisional(),
       source: c.contractsSource,
       href: titles,
     })),

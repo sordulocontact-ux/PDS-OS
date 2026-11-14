@@ -110,5 +110,76 @@ relevées à part). Aucune base distante n'a été touchée.
 
 ## Ce qui reste à faire
 
-- Passe dans Chrome et `/layers-surface` (ci-dessous).
+- Une sortie archivée n'apparaît plus dans « Sorties » (lot 13) : son dépôt se relit par son
+  adresse seulement.
+- Les messages d'erreur `release_required` ne sont traduits que dans les gestes du dossier ; les
+  autres gestes reçoivent toujours leur sortie de la page.
 - Détection de mise en ligne d'une compilation par UPC : déjà au lot 13 ; rien de neuf ici.
+
+## Passe dans Chrome
+
+Desktop, 390 px (iframe), sombre et clair ; Lina Haddad (cheffe de projet, responsable) et
+Claire Morel (direction).
+
+### Vérifié
+
+- **« Sorties »** : colonne « Distribution » sur chaque sortie (À préparer partout au départ),
+  « Titre provisoire : Titre 7 · sans nom » sous sa sortie, contrats manquants ; le badge ouvre
+  la Distribution de la sortie. À 390 px, « Distribution : … » sous le nom, en sombre et en clair.
+- **Sortie de Marina** : en-tête « « Marina » · sortie du titre · PDS », sortie du 04/12/2026,
+  bouton « Sorties » ; Préparation avec « Crédits pour les plateformes : « Marina (feat. Lou
+  Vega) » · PDS · featuring Lou Vega », la pochette du titre (manquante, puis déposée au
+  Catalogue), le contrat de Lou Vega bloquant ; paramètres réglés et confirmés par sortie ;
+  Dossier « Marina (feat. Lou Vega) », artiste principal PDS, Single, Featuring Lou Vega, ISRC,
+  ℗, auteurs, audio ; « 1 élément bloque la soumission : Contrats des participations ».
+- **Refus puis dérogation** : Claire accorde la dérogation de sortie de Lou Vega dans
+  « Participations et contrats » ; la Préparation passe à 10 sur 10 ; six contrôles enregistrés ;
+  « V1 soumise à Claire Morel » ; Claire valide la V1 ; « Sorties » et « Titres et artistes »
+  affichent « V1 à valider » puis « V1 validée » pour Marina seule ; historique propre à la
+  sortie.
+- **Titre provisoire** (titre 7) : élément bloquant « Titre provisoire » ; refus serveur
+  `title_provisional` couvert par le test SQL.
+- **Compilation** : « « PDS MIC #5 » · compilation de 7 titres · PDS », sept pistes dans l'ordre,
+  crédits de chaque piste (« Néons nocturnes (feat. Nadia Sel) »…, « Marée basse » : PDS doit
+  être l'artiste principal au Catalogue), pochette du projet en Conception, contrats de Nadia
+  Sel, Iris Moon et Malo, titre provisoire.
+- **Projet classique « Minuit pile »** : mêmes faits (« Mona Lys · single »), ligne « Pochette »,
+  pas de bouton « Sorties », adresse sans `?sortie`, enregistrement d'un paramètre toujours
+  possible.
+
+### Défauts trouvés et corrigés
+
+La plupart ont été corrigés pendant la passe, avant le commit du lot ; le commit « Chrome pass »
+porte les corrections de `/layers-surface` et ce compte rendu.
+
+- Enregistrer un paramètre d'une sortie : refusé (« Seul le responsable… »). Cause : les droits
+  d'écriture du dossier sont accordés colonne par colonne ; `release_id` ajouté (migration et
+  test).
+- Paramètres d'une sortie de titre : la ligne « Pochette » proposait une fiche de la Conception ;
+  retirée (la pochette du titre est lue au Catalogue, en Préparation et au dossier).
+- Dossier et contrôle « Visuel » d'une sortie de titre : lisaient la fiche de la Conception ;
+  lisent la pochette du titre.
+- « Contrats des participations » menait à « Titres et artistes » sous « Corriger dans
+  Juridique » : mène à « Participations et contrats », où se donnent les dérogations.
+- Date d'une sortie de titre : « à fixer au Lancement du projet » ; dit maintenant « Date à fixer
+  dans « Sorties » » et y mène (la compilation garde l'échéance du projet).
+- « Titres et artistes » sous 1280 px : la Distribution du titre manquait sous le nom ; ajoutée.
+
+### Ce que `/layers-surface` a changé
+
+- Vocabulaire : le contrôle « Visuel » d'une sortie de titre parle du fichier « Pochette » du
+  titre au Catalogue, plus de la Conception.
+- Redondance : le détail du titre provisoire ne répète plus le nom déjà en tête de ligne.
+- Accessibilité : le lien vers le dépôt, dans « Sorties », dit l'action, la sortie et l'état
+  (« Ouvrir la Distribution · Marina · V1 à valider »).
+- Gardé tel quel : les mêmes huit états du dépôt et les mêmes tons dans « Sorties » et
+  « Titres et artistes » (une seule règle, `releaseDistributionOf`) ; l'en-tête de la
+  Distribution nomme toujours la sortie.
+
+### Ce qui n'a pas pu être vérifié
+
+- Le mode « Compilation finale » dans « Titres et artistes » (« Avec la compilation · … ») : le
+  mode ne peut plus changer une fois la sortie de Marina soumise ; règle couverte par le code
+  (`loadTitleDeposits`), pas vue à l'écran.
+- Le dépôt, la réponse de The Orchard et la clôture d'une sortie : mêmes écrans qu'avant, gestes
+  passés par sortie ; non rejoués jusqu'au bout dans Chrome (couverts côté base par le test).
