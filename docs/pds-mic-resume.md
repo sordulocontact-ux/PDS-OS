@@ -312,6 +312,16 @@ classique inchangée. Corrigé : colonne « État » des sorties sous le nom sur
 master nomme chaque titre comme le projet, le nom au Catalogue en second s'il diffère
 (« Ballade du port · Velours au Catalogue »). Détail : `docs/pds-mic-rapports/recap-12bis-13.md`.
 
+## Passe Chrome du lot 14 (14/11/2026)
+
+Vérifié : un plan par titre, actions ciblées et globales au bon plan, gestes Brouillon → Plan
+actif, version révisée, signalement après le changement d'une action globale, lien ouvert sans
+compte (rien d'interne) puis retiré, PDF 16:9 comparé page par page à la référence (conforme,
+page « Intention » ajoutée, placements sans logos), lecture seule pour la direction, projet
+classique inchangé, 390 px sombre et clair. Corrigé : tailles des titres condensés et des dates
+du document, textes alternatifs, frise et lignes d'actions sur téléphone, journal des liens.
+Détail : `docs/pds-mic-rapports/lot-14.md`.
+
 ## Règles à tenir à chaque lot
 
 - Toute règle nouvelle ne joue que si `projects.collective = true` ; un projet simple ne change pas

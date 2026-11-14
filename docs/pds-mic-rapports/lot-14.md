@@ -1,6 +1,7 @@
 # Lot 14 : plan de sortie éditorial par titre
 
-Compte rendu du 14/11/2026. Vérification dans Chrome à la fin de ce fichier. Pas de Distribution
+Compte rendu du 14/11/2026. Vérification dans Chrome et comparaison avec la référence à la fin
+de ce fichier. Pas de Distribution
 par sortie dans ce lot (lot 15).
 
 ## Ce qui est fait
@@ -130,3 +131,87 @@ par sortie dans ce lot (lot 15).
 ## Questions pour toi
 
 Aucune.
+
+## Passe dans Chrome
+
+14/11/2026, application en local (base Supabase locale : démo et données des lots 6 à 13).
+Données ajoutées (`scratchpad/lot14-data.sql`, `lot14-config.sql`) : trois livrables ciblés sur
+« Marina » de PDS MIC #5 (Play-back, PDS Out, Clip vidéo, datés autour de sa sortie du
+4 décembre 2026), les photos de la référence envoyées comme images du plan. Comptes, par
+« Voir comme » : Lina Haddad (responsable du projet) et Claire Morel (direction). Grand écran,
+390 px (page dans un cadre de 390 px), thème sombre puis clair.
+
+### Écrans et gestes vérifiés
+
+| Écran | Ce qui a été fait |
+| --- | --- |
+| Plans de sortie | 8 titres, 8 plans (7 vivants, l'abandonné « Vieille démo » archivé dessous) ; date cible, statut, version ; « Actions modifiées depuis la dernière version » après le changement d'une action globale. |
+| Plan de « Marina » (Lina) | Les 15 images envoyées d'un coup ; couverture choisie ; plateformes et lien d'écoute (lien sans https refusé sous le champ) ; intention ; trois phases (nom vide refusé) ; texte et images d'une action ; Brouillon → Planning provisoire → Version interne (note) → Prêt à partager → lien copié → Version révisée → Plan actif ; « Retirer le lien ». |
+| Un plan par titre | « Néons nocturnes » : ses actions dédiées (Visuel Néons, Soirée d'écoute) et l'action globale, aucune action de « Marina », « Coulisses du studio » (aucun titre) absente ; le choix « Hors du document » de Marina ne s'applique pas à Néons. |
+| Signalement | Date de « Teaser du collectif » (action globale) changée : encadré « Des actions ont changé depuis la version 1 · Modifiées : Teaser du collectif » sur le plan et dans la liste ; disparu après la version révisée ; la V1 partagée inchangée. |
+| Lien de partage, sans compte | `curl` sans cookie : 200 ; aucune trace de la priorité, du lien Drive, des responsables, des validations, des invités non confirmés ni des actions hors du document ; jeton inconnu et lien retiré : 404 « Ce lien n'est plus disponible. ». |
+| PDF | Route `?format=pdf` : fichier « Plan de sortie - Marina - V1.pdf », 13 pages 16:9. |
+| Claire (direction) | Lecture seule : ni gestes ni « Modifier », phrase d'explication ; versions consultables. |
+| Plan archivé (titre abandonné) | Bandeau « le titre est abandonné… », lecture seule. |
+| Projet classique (« Minuit pile ») | Pas d'entrée « Plans de sortie », `/release-plans` en 404, plan de sortie de la Stratégie inchangé. |
+| 390 px, sombre et clair | Page du plan (frise, sections, timeline, moodboard) ; document partagé. |
+
+### Comparaison avec la référence (`docs/pds-mic-plan-jeho.pdf`)
+
+Les 13 pages du PDF généré, côte à côte avec les 13 pages de la référence (rendues à la même
+taille) :
+
+| Page du PDF | Page de la référence | Écarts |
+| --- | --- | --- |
+| 1 Couverture | 1 | Conforme (titre, « Artiste - Titre », pochette 330 × 330, logo). Au départ titre 5 % trop grand et trop haut : corrigé. |
+| 2 Date de sortie | 2 | Même composition (titre condensé, date, trait). « DATE DE SORTIE » 25 % trop grand : corrigé. Les placements sont écrits en capitales, sans les logos et la capture du lien que la référence montre (pas d'image par plateforme dans le modèle). |
+| 3 Intention | — | Page ajoutée (objectif, audience, message), dans la mise en page des phases ; absente si rien n'est écrit. |
+| 4 « 3 phases » | 3 | Conforme après correction (titre 20 % trop grand). League Gothic un peu plus grasse que SegmentA. |
+| 5 Phases | 4 | Même disposition en escalier des trois phases ; titres 14 % trop grands : corrigés. |
+| 6 « Moodboard des contenus » | 5 | Fond #f1f1f1, logo noir : conforme ; titre corrigé (20 % trop grand). |
+| 7 Play-back | 6 | Conforme : titre et texte à gauche, trois images en colonne à droite. |
+| 8 PDS Out | 7 | Conforme : deux images en haut, une en bas, titre et texte alignés à droite. |
+| 9 Clip vidéo | 8 | Conforme : collage de cinq images, titre près du logo, texte en bas à gauche. |
+| 10 « Timeline des contenus » | 9 | Conforme. |
+| 11 Timeline (5 dates) | 10 | Même frise : marques carrées, dates en alternance dessus / dessous, vignettes, flèche. La référence garde des marques vides entre des dates espacées (page 11) ; nos dates se suivent. Dates un peu petites : agrandies. |
+| 12 Timeline (jour de sortie) | 12 | Point rouge et légende « Jour de sortie » conformes. Le titre « TIMELINE DES CONTENUS » et les dates sont en Hanken Grotesk gras (la référence utilise une police géométrique de Canva pour ces deux éléments). |
+| 13 Fin | 13 | Conforme, logo centré. |
+
+À l'écran, chaque page garde sa mise en page en se réduisant à la largeur : à 390 px le
+document se lit comme un diaporama (texte petit, zoom permis) ; un mode de lecture sur
+téléphone serait une suite possible.
+
+### Défauts trouvés et corrigés
+
+- **Document** (dans ce commit) : tailles des gros titres condensés et des dates de la timeline
+  alignées sur la référence ; texte alternatif : la couverture nommée par le titre, les images
+  des pages et de la timeline décoratives (le nom de fichier n'est plus lu).
+- **Page du plan** (corrigés avant le premier commit, même session) :
+  - indice du Brouillon quand la date est déjà posée (« passez le plan en planning
+    provisoire ») ;
+  - statut dit trois fois dans l'en-tête : le fait « Statut » retiré (pastille et frise restent) ;
+  - un menu « ⋯ » à un seul geste sur chaque action : bouton « Modifier » direct ;
+  - « Images : 3 » → « 3 images » ;
+  - modale des phases : bouton « × » qui se décalait sous l'erreur, à côté de « Phase n » ;
+    exemple seulement sur la première phase ;
+  - lien de la liste lu deux fois par un lecteur d'écran ;
+  - à 390 px : frise réduite aux segments et au statut, pastille « Dans le document » sous les
+    faits de l'action ;
+  - plan archivé : la frise retirée (le bandeau le dit) ;
+  - envoi de plusieurs images à la fois (une seule auparavant).
+
+### Ce que `/layers-surface` a changé
+
+- **Vocabulaire / retours** : le journal dit « Lien de partage donné / retiré · version 1 » au
+  lieu d'un statut répété ; « Prêt à partager » dit où copier le lien (« Versions ») ; l'erreur
+  « le plan a changé entre-temps » dit quoi faire (recharger).
+- **Hiérarchie** : plus de frise sur un plan archivé.
+- **Accessibilité** : textes alternatifs du document.
+- Relevé sans changement : les images du plan ne se retirent pas (le lot ne le demande pas) ;
+  le menu « ⋯ » à un geste reste sur les vignettes et les lignes de tableaux, comme ailleurs
+  dans l'app.
+
+### Ce qui n'a pas pu être vérifié
+
+- Le PDF sur Vercel (Chromium serverless) : vérifié en local avec Chrome.
+- `strategy-documents.test.sql` sur la base de démo (`multiple_validators`, connu).

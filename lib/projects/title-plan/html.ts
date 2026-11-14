@@ -83,10 +83,17 @@ const paragraphs = (text: string) =>
     .map((p) => `<p>${escapeHtml(p).replaceAll("\n", "<br>")}</p>`)
     .join("");
 
-function img(image: DocImage | null, className: string, style: string) {
+// `alt`: the cover is named by the title; a page's shots and the
+// timeline's thumbnails illustrate the text beside them (alt="").
+function img(
+  image: DocImage | null,
+  className: string,
+  style: string,
+  alt = "",
+) {
   const url = image ? safeUrl(image.url) : null;
   return url
-    ? `<img class="${className}" style="${style}" src="${url}" alt="${escapeHtml(image?.alt ?? "")}">`
+    ? `<img class="${className}" style="${style}" src="${url}" alt="${escapeHtml(alt)}">`
     : "";
 }
 
@@ -116,7 +123,7 @@ function cover(c: TitlePlanContent): string {
   return page(`
   <h1 class="cover-title">${lines}</h1>
   <p class="cover-by">${escapeHtml(t.by(c.artist, c.title, c.guests))}</p>
-  ${img(c.cover, "cover-image", box(889, 423, 330, 330))}`);
+  ${img(c.cover, "cover-image", box(889, 423, 330, 330), c.title)}`);
 }
 
 function releaseDate(c: TitlePlanContent): string {
@@ -321,17 +328,17 @@ export function titlePlanHtml(content: TitlePlanContent): string {
     letter-spacing: 0; }
   .divider { ${face(DISPLAY_FONT)} text-transform: uppercase; inset: 0; display: flex;
     align-items: center; justify-content: center; text-align: center; padding: 0 ${u(80)};
-    font-size: ${u(176)}; line-height: 0.92; }
+    font-size: ${u(145)}; line-height: 0.92; }
   .caps { text-transform: uppercase; letter-spacing: 0.04em; }
 
-  .cover-title { left: ${u(84)}; top: ${u(186)}; font-size: ${u(106)}; line-height: 0.81;
+  .cover-title { left: ${u(84)}; top: ${u(194)}; font-size: ${u(101)}; line-height: 0.83;
     text-transform: uppercase; letter-spacing: -0.03em; font-weight: 400; }
   .cover-by { right: ${u(234)}; top: ${u(374)}; max-width: ${u(760)}; text-align: right;
     font-size: ${u(24)}; line-height: 1.25; letter-spacing: -0.02em; }
   .cover-image, .shot, .tl-image { object-fit: cover; display: block; }
 
   .date-block { left: ${u(146)}; top: ${u(334)}; }
-  .date-title { font-size: ${u(86)}; }
+  .date-title { font-size: ${u(69)}; }
   .date-value { font-size: ${u(32)}; line-height: 1; margin-top: ${u(6)}; letter-spacing: 0.02em; }
   .date-rule { left: ${u(440)}; top: ${u(402)}; width: ${u(109)}; height: ${u(1.5)}; background: currentColor; }
   .date-links { left: ${u(668)}; top: ${u(150)}; bottom: ${u(120)}; width: ${u(560)};
@@ -341,14 +348,14 @@ export function titlePlanHtml(content: TitlePlanContent): string {
   .listening { display: flex; flex-direction: column; gap: ${u(10)}; font-size: ${u(21)}; line-height: 1.3; }
   .listening a { color: inherit; font-size: ${u(18)}; opacity: 0.8; word-break: break-all; }
 
-  .slot-head { font-size: ${u(80)}; white-space: nowrap; }
+  .slot-head { font-size: ${u(70)}; white-space: nowrap; }
   .slot-text { font-size: ${u(20)}; line-height: 1.5; display: -webkit-box;
     -webkit-box-orient: vertical; -webkit-line-clamp: 7; overflow: hidden; }
   .slot-text p + p, .content-text p + p { margin-top: ${u(10)}; }
 
   .content { inset: 0; }
   .content > * { position: absolute; }
-  .content-head { font-size: ${u(80)}; }
+  .content-head { font-size: ${u(68)}; }
   .content-text { font-size: ${u(20)}; line-height: 1.45; display: -webkit-box;
     -webkit-box-orient: vertical; -webkit-line-clamp: 10; overflow: hidden; }
   .row-side { left: ${u(104)}; top: ${u(208)}; width: ${u(616)}; display: flex;
@@ -369,7 +376,7 @@ export function titlePlanHtml(content: TitlePlanContent): string {
     border-left: ${u(16)} solid currentColor; }
   .tl-text { width: ${u(215)}; font-size: ${u(22)}; line-height: 1.32; }
   .tl-text.above { display: flex; flex-direction: column; justify-content: flex-end; }
-  .tl-date { font-size: ${u(26)}; font-weight: 700; margin-bottom: ${u(6)}; letter-spacing: 0.01em; }
+  .tl-date { font-size: ${u(28)}; font-weight: 700; margin-bottom: ${u(6)}; letter-spacing: 0.01em; }
   .tl-mark { width: ${u(14)}; height: ${u(14)}; background:
     linear-gradient(to top right, transparent 46%, #555 46%, #555 54%, transparent 54%), #e9e2d6;
     border: ${u(1)} solid #8a8478; }
