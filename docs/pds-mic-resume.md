@@ -320,6 +320,10 @@ compte (rien d'interne) puis retiré, PDF 16:9 comparé page par page à la réf
 page « Intention » ajoutée, placements sans logos), lecture seule pour la direction, projet
 classique inchangé, 390 px sombre et clair. Corrigé : tailles des titres condensés et des dates
 du document, textes alternatifs, frise et lignes d'actions sur téléphone, journal des liens.
+Retouches ensuite (commit séparé) : couverture « PDS - Titre (feat. Invité) » avec les invités
+confirmés (`withFeaturing`, `joinArtistNames` dans `participation-rules.ts`) ; plateformes et
+placements séparés dans le brouillon (`placements` avec logo, `listeningVisual`), logo au-dessus
+du placement et capture au-dessus du lien d'écoute comme la référence, texte seul sans image.
 Détail : `docs/pds-mic-rapports/lot-14.md`.
 
 ## Règles à tenir à chaque lot

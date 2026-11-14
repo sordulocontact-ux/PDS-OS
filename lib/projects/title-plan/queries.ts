@@ -6,6 +6,7 @@ import { FILE_BUCKETS } from "@/lib/catalog/file-rules";
 import { signArtistPictures } from "@/lib/catalog/pictures";
 import { loadMembers, type Member } from "@/lib/framing/related";
 import { canEditProject } from "@/lib/projects/edit-access";
+import { joinArtistNames } from "@/lib/projects/participation-rules";
 import { sourcesFor, type PlanAction } from "@/lib/projects/title-plan/build";
 import {
   changedSince,
@@ -410,7 +411,7 @@ export async function loadTitlePlan(
     canEdit: canEditProject(access, project),
     artist: {
       id: project.artistId,
-      name: [mainName, ...coMain].filter(Boolean).join(" & "),
+      name: joinArtistNames([mainName, ...coMain].filter(Boolean)),
     },
     guests,
     pending: active

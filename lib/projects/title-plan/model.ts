@@ -95,6 +95,7 @@ export const TITLE_PLAN_CHANNELS = [
 export type TitlePlanChannel = (typeof TITLE_PLAN_CHANNELS)[number];
 
 const text = (max: number) => z.string().trim().max(max);
+export const MAX_PLACEMENTS = 4;
 const id = z.string().regex(/^[a-z0-9-]{1,40}$/);
 const https = z
   .string()
@@ -145,6 +146,15 @@ export const actionDateSchema = z.object({
 });
 export type ActionDate = z.infer<typeof actionDateSchema>;
 
+// A placement announced on the release page (a playlist, a radio…), with
+// its logo when the owner picked one among the plan's images.
+export const placementSchema = z.object({
+  id,
+  label: text(80).min(1),
+  visual: visualRef.nullable(),
+});
+export type TitlePlanPlacement = z.infer<typeof placementSchema>;
+
 export const linkSchema = z.object({
   id,
   label: text(80).min(1),
@@ -158,8 +168,12 @@ export const titlePlanConfigSchema = z.object({
   message: text(1000).optional(),
   // Internal: never in the document.
   priority: z.enum(TITLE_PLAN_PRIORITIES).nullable().optional(),
+  // The streaming platforms (Spotify, Apple Music…), named only.
   platforms: z.array(text(80).min(1)).max(8).optional(),
+  placements: z.array(placementSchema).max(MAX_PLACEMENTS).optional(),
   listeningUrl: https.or(z.literal("")).optional(),
+  // A picture of the listening page, shown above its link.
+  listeningVisual: visualRef.nullable().optional(),
   phases: z.array(phaseSchema).max(6).optional(),
   actions: z.record(actionKeySchema, actionChoiceSchema).optional(),
   actionDates: z.record(actionKeySchema, actionDateSchema).optional(),
@@ -201,7 +215,11 @@ export type TitlePlanContent = {
   cover: DocImage | null;
   releaseDate: string | null;
   platforms: string[];
+  // Absent from the versions recorded before placements had their own place
+  // (read with `?? []` / `?? null`).
+  placements?: Array<{ label: string; image: DocImage | null }>;
   listeningUrl: string | null;
+  listeningImage?: DocImage | null;
   objective: string | null;
   audience: string | null;
   message: string | null;

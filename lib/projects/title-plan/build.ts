@@ -55,7 +55,8 @@ export type TitlePlanInput = {
 const clean = (value: string | null | undefined) =>
   value && value.trim() ? value.trim() : null;
 
-/** The visual keys a version needs published (cover, pages, timeline). */
+/** The visual keys a version needs published (cover, release page, content
+ * pages, timeline). */
 export function visualsUsed(
   input: Pick<TitlePlanInput, "actions" | "defaultCover">,
   config: TitlePlanConfig,
@@ -63,6 +64,10 @@ export function visualsUsed(
   const keys = new Set<string>();
   const cover = config.cover ?? input.defaultCover;
   if (cover) keys.add(cover);
+  for (const placement of config.placements ?? [])
+    if (placement.visual) keys.add(placement.visual);
+  if (config.listeningVisual && clean(config.listeningUrl))
+    keys.add(config.listeningVisual);
   for (const action of input.actions) {
     const choice = config.actions?.[action.key];
     if (choice?.include === false) continue;
@@ -136,7 +141,15 @@ export function buildTitlePlan(
     cover: image(config.cover ?? input.defaultCover),
     releaseDate: release,
     platforms: config.platforms ?? [],
+    placements: (config.placements ?? []).map((p) => ({
+      label: p.label,
+      image: image(p.visual),
+    })),
     listeningUrl: clean(config.listeningUrl),
+    // A picture of the listening page says nothing without its link.
+    listeningImage: clean(config.listeningUrl)
+      ? image(config.listeningVisual)
+      : null,
     objective: clean(config.objective) ?? input.strategy.objective,
     audience: clean(config.audience) ?? input.strategy.audience,
     message: clean(config.message) ?? input.strategy.message,

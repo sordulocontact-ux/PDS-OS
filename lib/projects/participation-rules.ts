@@ -31,6 +31,21 @@ export function isActiveParticipation(status: ParticipationStatus): boolean {
   return status !== "declined" && status !== "withdrawn";
 }
 
+/** Names as the platforms list them: « A », « A & B », « A, B & C ». */
+export function joinArtistNames(names: readonly string[]): string {
+  if (names.length <= 1) return names[0] ?? "";
+  return `${names.slice(0, -1).join(", ")} & ${names[names.length - 1]}`;
+}
+
+/** A track as the platforms write it: « Marina (feat. Lou Vega & Malo) ».
+ * The guests are the title's confirmed featurings. */
+export function withFeaturing(
+  title: string,
+  guests: readonly string[],
+): string {
+  return guests.length ? `${title} (feat. ${joinArtistNames(guests)})` : title;
+}
+
 /** An artist on a title of the collective (title_participations). */
 export type TitleParticipation = {
   id: string;

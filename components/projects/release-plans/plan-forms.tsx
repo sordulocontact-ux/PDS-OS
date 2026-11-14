@@ -17,12 +17,14 @@ import { saveTitlePlan } from "@/lib/projects/title-plan/actions";
 import type { PlanAction } from "@/lib/projects/title-plan/build";
 import {
   draftId,
+  MAX_PLACEMENTS,
   TITLE_PLAN_CHANNELS,
   TITLE_PLAN_PRIORITIES,
   type ActionDate,
   type TimelineEntry,
   type TitlePlanConfig,
   type TitlePlanPhase,
+  type TitlePlanPlacement,
 } from "@/lib/projects/title-plan/model";
 import type {
   PlanVisual,
@@ -50,16 +52,115 @@ function useSave(onDone: () => void, done = f.saved) {
   return useWriteSubmit(onDone, done);
 }
 
-/** « Plateformes et lien d'écoute ». */
-export function ReleaseForm({ projectId, planId, config, onDone }: FormBase) {
+/** One image picked among the plan's, folded until the owner opens it. */
+function ImageChoice({
+  id,
+  label,
+  visuals,
+  value: current,
+  onChange,
+}: {
+  id: string;
+  label: string;
+  visuals: PlanVisual[];
+  value: string | null;
+  onChange: (key: string | null) => void;
+}) {
+  const r = f.release;
+  const [open, setOpen] = useState(false);
+  const chosen = current ? visuals.find((v) => v.key === current) : undefined;
+  return (
+    <div className="flex flex-col gap-2" role="group" aria-labelledby={id}>
+      <div className="flex flex-wrap items-center gap-2">
+        <span id={id} className="text-sm text-muted-foreground">
+          {label}
+        </span>
+        {chosen && (
+          <span className="flex min-w-0 items-center gap-2 text-sm">
+            {/* eslint-disable-next-line @next/next/no-img-element -- signed URL */}
+            <img
+              src={chosen.previewUrl}
+              alt=""
+              className="size-8 rounded-md bg-muted object-cover"
+            />
+            <span className="truncate">{chosen.name}</span>
+          </span>
+        )}
+        <span className="ms-auto flex gap-1">
+          {visuals.length > 0 && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              aria-expanded={open}
+              onClick={() => setOpen((o) => !o)}
+            >
+              {open ? r.closeImages : chosen ? r.changeImage : r.chooseImage}
+            </Button>
+          )}
+          {chosen && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                onChange(null);
+                setOpen(false);
+              }}
+            >
+              {r.removeImage}
+            </Button>
+          )}
+        </span>
+      </div>
+      {visuals.length === 0 && (
+        <p className="text-[length:var(--type-caption)] text-[color:var(--text-tertiary)]">
+          {f.action.noVisual}
+        </p>
+      )}
+      {open && (
+        <VisualPicker
+          visuals={visuals}
+          selected={current ? [current] : []}
+          max={1}
+          onChange={(keys) => {
+            onChange(keys[0] ?? null);
+            if (keys[0]) setOpen(false);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+/** « Plateformes, placements et lien d'écoute »: the release page. */
+export function ReleaseForm({
+  projectId,
+  planId,
+  config,
+  visuals,
+  onDone,
+}: FormBase & { visuals: PlanVisual[] }) {
+  const r = f.release;
   const [errors, setErrors] = useState<{ platforms?: string; url?: string }>(
     {},
   );
+  const [placements, setPlacements] = useState<TitlePlanPlacement[]>(
+    config.placements ?? [],
+  );
+  const [missing, setMissing] = useState<string[]>([]);
+  const [listeningVisual, setListeningVisual] = useState<string | null>(
+    config.listeningVisual ?? null,
+  );
   const { pending, error, run } = useSave(onDone);
+  const update = (id: string, patch: Partial<TitlePlanPlacement>) =>
+    setPlacements((list) =>
+      list.map((x) => (x.id === id ? { ...x, ...patch } : x)),
+    );
   return (
     <form
       noValidate
-      className="flex flex-col gap-4"
+      className="flex flex-col gap-5"
       onSubmit={(event) => {
         event.preventDefault();
         const platforms = value(event.currentTarget, "platforms")
@@ -70,41 +171,137 @@ export function ReleaseForm({ projectId, planId, config, onDone }: FormBase) {
         const next = {
           platforms:
             platforms.length > 8 || platforms.some((p) => p.length > 80)
-              ? f.release.tooMany
+              ? r.tooMany
               : undefined,
-          url: url && !HTTPS.test(url) ? f.release.badUrl : undefined,
+          url: url && !HTTPS.test(url) ? r.badUrl : undefined,
         };
+        const empty = placements
+          .filter((x) => !x.label.trim())
+          .map((x) => x.id);
         setErrors(next);
-        if (next.platforms || next.url) return;
+        setMissing(empty);
+        if (next.platforms || next.url || empty.length) return;
         run(() =>
-          saveTitlePlan(projectId, planId, { platforms, listeningUrl: url }),
+          saveTitlePlan(projectId, planId, {
+            platforms,
+            placements: placements.map((x) => ({
+              ...x,
+              label: x.label.trim(),
+            })),
+            listeningUrl: url,
+            listeningVisual: url ? listeningVisual : null,
+          }),
         );
       }}
     >
       <TextareaField
         id="plan-platforms"
         name="platforms"
-        label={f.release.platforms}
-        hint={f.release.platformsHint}
-        rows={4}
+        label={r.platforms}
+        hint={r.platformsHint}
+        rows={3}
         defaultValue={(config.platforms ?? []).join("\n")}
         error={errors.platforms}
       />
-      <Field
-        id="plan-listening"
-        name="listening"
-        type="url"
-        inputMode="url"
-        label={f.release.listening}
-        hint={f.release.listeningHint}
-        defaultValue={config.listeningUrl ?? ""}
-        error={errors.url}
-        onChange={() => setErrors((e) => ({ ...e, url: undefined }))}
-      />
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-0.5">
+          <span className="text-sm font-medium">{r.placements}</span>
+          <span className="text-[length:var(--type-caption)] text-[color:var(--text-tertiary)]">
+            {r.placementsHint}
+          </span>
+        </div>
+        {placements.map((placement, i) => (
+          <fieldset
+            key={placement.id}
+            className="flex flex-col gap-2 rounded-xl bg-muted/50 p-3"
+          >
+            <legend className="sr-only">{r.placement(i + 1)}</legend>
+            <div className="flex items-start gap-2">
+              <div className="min-w-0 flex-1">
+                <Field
+                  id={`plan-placement-${placement.id}`}
+                  name={`placement-${placement.id}`}
+                  label={r.placementLabel(i + 1)}
+                  hideLabel
+                  maxLength={80}
+                  placeholder={i === 0 ? r.placementPlaceholder : undefined}
+                  value={placement.label}
+                  error={
+                    missing.includes(placement.id)
+                      ? r.placementRequired
+                      : undefined
+                  }
+                  onChange={(event) => {
+                    update(placement.id, { label: event.currentTarget.value });
+                    setMissing((m) => m.filter((x) => x !== placement.id));
+                  }}
+                />
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                className="mt-1.5"
+                aria-label={r.removePlacement(i + 1)}
+                onClick={() =>
+                  setPlacements((list) =>
+                    list.filter((x) => x.id !== placement.id),
+                  )
+                }
+              >
+                <IconXmark aria-hidden />
+              </Button>
+            </div>
+            <ImageChoice
+              id={`plan-placement-image-${placement.id}`}
+              label={r.placementImage}
+              visuals={visuals}
+              value={placement.visual}
+              onChange={(key) => update(placement.id, { visual: key })}
+            />
+          </fieldset>
+        ))}
+        {placements.length < MAX_PLACEMENTS && (
+          <Button
+            type="button"
+            variant="outline"
+            className="self-start"
+            onClick={() =>
+              setPlacements((list) => [
+                ...list,
+                { id: draftId(), label: "", visual: null },
+              ])
+            }
+          >
+            <IconPlus aria-hidden />
+            {r.addPlacement}
+          </Button>
+        )}
+      </div>
+      <div className="flex flex-col gap-3">
+        <Field
+          id="plan-listening"
+          name="listening"
+          type="url"
+          inputMode="url"
+          label={r.listening}
+          hint={r.listeningHint}
+          defaultValue={config.listeningUrl ?? ""}
+          error={errors.url}
+          onChange={() => setErrors((e) => ({ ...e, url: undefined }))}
+        />
+        <ImageChoice
+          id="plan-listening-image"
+          label={r.listeningImage}
+          visuals={visuals}
+          value={listeningVisual}
+          onChange={setListeningVisual}
+        />
+      </div>
       {error && <FormMessage kind="error">{error}</FormMessage>}
       <DialogFormActions
         pending={pending}
-        submitLabel={f.release.submit}
+        submitLabel={r.submit}
         onCancel={onDone}
       />
     </form>

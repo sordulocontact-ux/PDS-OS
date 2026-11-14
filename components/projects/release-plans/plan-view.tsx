@@ -257,6 +257,18 @@ function Dialog({
 const visualOf = (plan: TitlePlanDetail, key: string | null | undefined) =>
   key ? plan.visuals.find((v) => v.key === key) : undefined;
 
+/** The image picked for a placement or the listening link, small. */
+function Thumb({ visual }: { visual: PlanVisual | undefined }) {
+  return visual ? (
+    // eslint-disable-next-line @next/next/no-img-element -- signed URL
+    <img
+      src={visual.previewUrl}
+      alt=""
+      className="size-6 shrink-0 rounded bg-muted object-cover"
+    />
+  ) : null;
+}
+
 function ReleaseSection({ projectId, plan, editable }: Ctx) {
   const r = s.release;
   const [open, setOpen] = useState(false);
@@ -349,16 +361,34 @@ function ReleaseSection({ projectId, plan, editable }: Ctx) {
               ),
             },
             {
+              label: r.placements,
+              value: plan.config.placements?.length ? (
+                <span className="flex flex-col gap-1">
+                  {plan.config.placements.map((p) => (
+                    <span key={p.id} className="flex items-center gap-2">
+                      <Thumb visual={visualOf(plan, p.visual)} />
+                      <span>{p.label}</span>
+                    </span>
+                  ))}
+                </span>
+              ) : (
+                <span className={secondary}>{r.noPlacement}</span>
+              ),
+            },
+            {
               label: r.listening,
               value: listening ? (
-                <a
-                  href={listening}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="break-all underline underline-offset-2"
-                >
-                  {listening}
-                </a>
+                <span className="flex items-center gap-2">
+                  <Thumb visual={visualOf(plan, plan.config.listeningVisual)} />
+                  <a
+                    href={listening}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="min-w-0 break-all underline underline-offset-2"
+                  >
+                    {listening}
+                  </a>
+                </span>
               ) : (
                 <span className={secondary}>{r.noListening}</span>
               ),
@@ -376,6 +406,7 @@ function ReleaseSection({ projectId, plan, editable }: Ctx) {
           projectId={projectId}
           planId={plan.planId}
           config={plan.config}
+          visuals={plan.visuals}
           onDone={() => setOpen(false)}
         />
       </Dialog>

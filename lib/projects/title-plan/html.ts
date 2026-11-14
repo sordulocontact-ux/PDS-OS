@@ -12,6 +12,7 @@
 // only, no script runs (the shared link's CSP forbids any). Client-safe.
 
 import { titleReleasePlans } from "@/lib/i18n/fr/title-release-plans";
+import { withFeaturing } from "@/lib/projects/participation-rules";
 import {
   DISPLAY_FONT,
   TEXT_FONT,
@@ -122,12 +123,30 @@ function cover(c: TitlePlanContent): string {
     .join("<br>");
   return page(`
   <h1 class="cover-title">${lines}</h1>
-  <p class="cover-by">${escapeHtml(t.by(c.artist, c.title, c.guests))}</p>
+  <p class="cover-by">${escapeHtml(t.by(c.artist, withFeaturing(c.title, c.guests)))}</p>
   ${img(c.cover, "cover-image", box(889, 423, 330, 330), c.title)}`);
 }
 
+// The release page: the date on the left; on the right the platforms, the
+// placements (a playlist's logo above its name, as the reference shows
+// « Ilebon ») and the listening link (a picture of its page above it).
+// Without images, names and link stay plain lines.
 function releaseDate(c: TitlePlanContent): string {
   const listening = c.listeningUrl ? safeUrl(c.listeningUrl) : null;
+  const placements = c.placements ?? [];
+  const shown = (image: DocImage | null | undefined) =>
+    Boolean(image && safeUrl(image.url));
+  const withImages = placements.some((p) => shown(p.image));
+  // With pictures, the platforms go on one line to leave them room.
+  const pictured = withImages || Boolean(listening && shown(c.listeningImage));
+  const placementList = placements.length
+    ? `<ul class="placements${withImages ? ` with-images${placements.length > 3 ? " many" : ""}` : ""}">${placements
+        .map(
+          (p) =>
+            `<li class="placement">${img(p.image, "placement-logo", "")}<span>${escapeHtml(p.label)}</span></li>`,
+        )
+        .join("")}</ul>`
+    : "";
   return page(`
   <div class="date-block">
     <h2 class="display date-title">${escapeHtml(t.releaseDate)}</h2>
@@ -135,10 +154,11 @@ function releaseDate(c: TitlePlanContent): string {
   </div>
   <span class="date-rule"></span>
   <div class="date-links">
-    ${c.platforms.length ? `<ul class="platforms">${c.platforms.map((p) => `<li>${escapeHtml(p)}</li>`).join("")}</ul>` : ""}
+    ${c.platforms.length ? `<ul class="platforms${pictured ? " inline" : ""}">${c.platforms.map((p) => `<li>${escapeHtml(p)}</li>`).join("")}</ul>` : ""}
+    ${placementList}
     ${
       listening
-        ? `<div class="listening"><p class="caps">${escapeHtml(t.listening)}</p><a href="${listening}">${listening}</a></div>`
+        ? `<div class="listening">${img(c.listeningImage ?? null, "listening-image", "", t.listeningImage)}<p class="caps">${escapeHtml(t.listening)}</p><a href="${listening}">${listening}</a></div>`
         : ""
     }
   </div>`);
@@ -341,11 +361,25 @@ export function titlePlanHtml(content: TitlePlanContent): string {
   .date-title { font-size: ${u(69)}; }
   .date-value { font-size: ${u(32)}; line-height: 1; margin-top: ${u(6)}; letter-spacing: 0.02em; }
   .date-rule { left: ${u(440)}; top: ${u(402)}; width: ${u(109)}; height: ${u(1.5)}; background: currentColor; }
-  .date-links { left: ${u(668)}; top: ${u(150)}; bottom: ${u(120)}; width: ${u(560)};
+  .date-links { left: ${u(668)}; top: ${u(124)}; bottom: ${u(56)}; width: ${u(700)};
     display: flex; flex-direction: column; justify-content: center; gap: ${u(56)}; }
-  .platforms { list-style: none; display: flex; flex-direction: column; gap: ${u(22)};
+  .date-links:has(img) { gap: ${u(44)}; }
+  .date-links:has(img) .listening { margin-top: ${u(32)}; }
+  .platforms, .placements { list-style: none; display: flex; flex-direction: column; gap: ${u(22)};
     font-size: ${u(21)}; line-height: 1.25; text-transform: uppercase; letter-spacing: 0.04em; }
+  .platforms.inline { flex-direction: row; flex-wrap: wrap; gap: ${u(10)} ${u(36)}; }
+  .placements.with-images { flex-direction: row; flex-wrap: wrap; align-items: flex-end;
+    gap: ${u(36)} ${u(48)}; }
+  .placement { display: flex; flex-direction: column; gap: ${u(4)}; }
+  .with-images .placement { max-width: ${u(360)}; }
+  .placement-logo { display: block; width: auto; height: ${u(199)}; max-width: ${u(240)};
+    object-fit: contain; object-position: left bottom; }
+  .placements.many { column-gap: ${u(36)}; }
+  .many .placement { max-width: ${u(140)}; }
+  .many .placement-logo { height: ${u(120)}; max-width: ${u(140)}; }
   .listening { display: flex; flex-direction: column; gap: ${u(10)}; font-size: ${u(21)}; line-height: 1.3; }
+  .listening-image { display: block; width: ${u(161)}; height: ${u(157)}; object-fit: cover;
+    margin-bottom: ${u(4)}; }
   .listening a { color: inherit; font-size: ${u(18)}; opacity: 0.8; word-break: break-all; }
 
   .slot-head { font-size: ${u(70)}; white-space: nowrap; }

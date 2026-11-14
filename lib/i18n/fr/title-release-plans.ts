@@ -150,7 +150,7 @@ export const titleReleasePlans = {
     release: {
       title: "Couverture et sortie",
       description:
-        "Lues sur le titre, ses participations et sa sortie. Plateformes et lien d'écoute se règlent ici.",
+        "Lues sur le titre, ses participations et sa sortie. Plateformes, placements et lien d'écoute se règlent ici.",
       cover: "Couverture",
       noCover:
         "Pas de pochette : ajoutez-la dans les fichiers du titre, au Catalogue, ou choisissez une image du moodboard.",
@@ -165,10 +165,12 @@ export const titleReleasePlans = {
       noRelease: "Pas encore de sortie",
       platforms: "Plateformes",
       noPlatform: "Aucune",
+      placements: "Placements",
+      noPlacement: "Aucun",
       listening: "Lien d'écoute",
       noListening: "À ajouter",
       edit: "Modifier",
-      editLabel: "Modifier les plateformes et le lien d'écoute",
+      editLabel: "Modifier les plateformes, les placements et le lien d'écoute",
     },
     intent: {
       title: "Intention",
@@ -306,13 +308,28 @@ export const titleReleasePlans = {
   // Dialogs.
   forms: {
     release: {
-      title: "Plateformes et lien d'écoute",
+      title: "Plateformes, placements et lien d'écoute",
       description:
         "Ce que le document annonce sur la page de la date de sortie.",
-      platforms: "Plateformes et placements",
-      platformsHint: "Un par ligne : Spotify, Placement playlist « Ilebon »…",
+      platforms: "Plateformes",
+      platformsHint: "Une par ligne : Spotify, Apple Music, Deezer…",
+      placements: "Placements",
+      placementsHint:
+        "Playlists, radios… Avec son logo si vous en choisissez un parmi les images du plan, sinon son nom seul.",
+      placement: (n: number) => `Placement ${n}`,
+      placementLabel: (n: number) => `Nom du placement ${n}`,
+      placementPlaceholder: "Placement playlist « Ilebon »",
+      placementRequired: "Nommez le placement ou retirez-le.",
+      placementImage: "Logo",
+      addPlacement: "Ajouter un placement",
+      removePlacement: (n: number) => `Retirer le placement ${n}`,
       listening: "Lien d'écoute",
       listeningHint: "Le lien multi-plateforme (https).",
+      listeningImage: "Image de la page d'écoute",
+      chooseImage: "Choisir une image",
+      changeImage: "Changer",
+      closeImages: "Fermer",
+      removeImage: "Retirer",
       badUrl: "Un lien commence par https://",
       tooMany: "8 lignes au plus.",
       submit: "Enregistrer",
@@ -407,11 +424,12 @@ export const titleReleasePlans = {
   doc: {
     coverTitle: (single: boolean) =>
       single ? "Plan de sortie single" : "Plan de sortie",
-    by: (artist: string, title: string, guests: string[]) =>
-      `${artist} - ${title}${guests.length ? ` (feat. ${guests.join(", ")})` : ""}`,
+    // « PDS - Marina (feat. Lou Vega) », as the platforms write it.
+    by: (artist: string, track: string) => `${artist} - ${track}`,
     releaseDate: "Date de sortie",
     noDate: "À fixer",
     listening: "Lien d'écoute multi-plateforme",
+    listeningImage: "Page du lien d'écoute",
     intent: { objective: "Objectif", audience: "Audience", message: "Message" },
     phases: (n: number) => (n === 1 ? "1 phase" : `${n} phases`),
     moodboard: "Moodboard des contenus",

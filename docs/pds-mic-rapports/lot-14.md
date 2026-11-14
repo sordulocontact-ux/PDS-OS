@@ -98,8 +98,10 @@ par sortie dans ce lot (lot 15).
   livrable (sinon la même action deux fois) ; activations annulées exclues.
 - **Timeline** : dates des actions dans le document, dates ajoutées, et la sortie elle-même si
   aucun contenu ne tombe ce jour-là ; toute date du jour de sortie a le point rouge.
-- **Plateformes** : une liste libre (« Spotify », « Placement playlist « Ilebon » ») sans logos :
-  la référence montre un logo par placement, notre document les écrit.
+- **Plateformes et placements** (retouche après le lot) : les plateformes (Spotify, Apple
+  Music…) sont une liste de noms ; les placements (playlist « Ilebon »…) sont à part, chacun
+  avec son logo choisi parmi les images du plan, et le lien d'écoute peut avoir l'image de sa
+  page, comme dans la référence. Sans image, le texte seul, comme avant.
 - **Lien public `/t/`** (`/p/` est déjà l'espace des prestataires de la Production).
 - **Un lien donné à une version reste valide** quand une nouvelle version arrive (rien n'est
   écrasé) ; seul « Retirer le lien » l'arrête. Un plan archivé garde ses liens.
@@ -163,8 +165,8 @@ taille) :
 
 | Page du PDF | Page de la référence | Écarts |
 | --- | --- | --- |
-| 1 Couverture | 1 | Conforme (titre, « Artiste - Titre », pochette 330 × 330, logo). Au départ titre 5 % trop grand et trop haut : corrigé. |
-| 2 Date de sortie | 2 | Même composition (titre condensé, date, trait). « DATE DE SORTIE » 25 % trop grand : corrigé. Les placements sont écrits en capitales, sans les logos et la capture du lien que la référence montre (pas d'image par plateforme dans le modèle). |
+| 1 Couverture | 1 | Conforme (titre, « Artiste - Titre », pochette 330 × 330, logo). Au départ titre 5 % trop grand et trop haut : corrigé. Depuis la retouche : « PDS - Marina (feat. Lou Vega) » avec les invités confirmés, comme sur les plateformes. |
+| 2 Date de sortie | 2 | Même composition (titre condensé, date, trait). « DATE DE SORTIE » 25 % trop grand : corrigé. Depuis la retouche : logo du placement au-dessus de son nom (199 px de haut, comme la référence) et capture de la page d'écoute au-dessus du lien (161 × 157). Écart restant : nos plateformes, absentes de la référence, tiennent sur une ligne au-dessus des placements quand la page a des images. |
 | 3 Intention | — | Page ajoutée (objectif, audience, message), dans la mise en page des phases ; absente si rien n'est écrit. |
 | 4 « 3 phases » | 3 | Conforme après correction (titre 20 % trop grand). League Gothic un peu plus grasse que SegmentA. |
 | 5 Phases | 4 | Même disposition en escalier des trois phases ; titres 14 % trop grands : corrigés. |
@@ -215,3 +217,27 @@ téléphone serait une suite possible.
 
 - Le PDF sur Vercel (Chromium serverless) : vérifié en local avec Chrome.
 - `strategy-documents.test.sql` sur la base de démo (`multiple_validators`, connu).
+
+## Retouches du document (après le lot)
+
+Trois retouches demandées avant le lot 15, dans un commit à part :
+
+1. **Couverture** : « PDS - Titre (feat. Invité) », avec les invités confirmés du titre, écrits
+   comme sur les plateformes (« A & B », « A, B & C ») : `withFeaturing` et `joinArtistNames`
+   dans `lib/projects/participation-rules.ts`, repris par la Distribution au lot 15. Le code
+   lisait déjà les invités confirmés ; sur Marina, Lou Vega n'était que « proposé » : confirmé en
+   local pour le vérifier.
+2. **Page de la date de sortie** : plateformes et placements séparés dans le brouillon
+   (`placements` : nom + logo, jusqu'à 4 ; `listeningVisual`), dans la modale « Plateformes,
+   placements et lien d'écoute » (logo et image choisis parmi les images du plan, repliés tant
+   qu'on ne les ouvre pas) et dans la section « Couverture et sortie ». Le document met le logo
+   au-dessus du nom du placement et la capture au-dessus du lien ; sans image, le texte reste
+   comme avant. Les versions déjà enregistrées gardent leur document (lu avec `?? []`).
+3. **Comparaison dans Chrome** des pages 1 et 2 de la version V3 de Marina avec la référence :
+   tableau ci-dessus mis à jour. Corrigé pendant la comparaison : colonne de droite trop haute
+   (plateformes en ligne quand il y a des images), libellé du placement sur deux lignes, logo
+   trop petit, écart trop serré avant le lien d'écoute.
+
+Vérifié : validation d'un placement sans nom, choix et retrait des images, enregistrement,
+version V3, PDF (13 pages), version V2 (sans placements) identique à avant, modale à 390 px.
+
