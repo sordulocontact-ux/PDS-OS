@@ -84,6 +84,7 @@ import { masterInHouse } from "./master-inhouse";
 import { masterFileRequests } from "./master-file-requests";
 import { participationWaivers } from "./participation-waivers";
 import { collectiveReleases } from "./collective-releases";
+import { titleReleasePlans } from "./title-release-plans";
 import { legalParticipations } from "./legal-participations";
 import { masterJourney } from "./master-journey";
 import { reviewJourney } from "./review-journey";
@@ -316,6 +317,7 @@ export const fr = {
   masterFileRequests,
   participationWaivers,
   collectiveReleases,
+  titleReleasePlans,
   legalParticipations,
   masterSource,
   artistActivity,

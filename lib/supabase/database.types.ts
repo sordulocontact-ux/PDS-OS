@@ -18118,6 +18118,7 @@ export type Database = {
           revoked_at: string | null
           scope: string
           token: string
+          title_plan_version_id: string | null
         }
         Insert: {
           created_at?: string
@@ -18130,6 +18131,7 @@ export type Database = {
           revoked_at?: string | null
           scope: string
           token?: string
+          title_plan_version_id?: string | null
         }
         Update: {
           created_at?: string
@@ -18142,8 +18144,16 @@ export type Database = {
           revoked_at?: string | null
           scope?: string
           token?: string
+          title_plan_version_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "share_links_title_plan_same_org"
+            columns: ["title_plan_version_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "title_release_plan_versions"
+            referencedColumns: ["id", "organization_id"]
+          },
           {
             foreignKeyName: "share_links_created_by_fkey"
             columns: ["created_by"]
@@ -19494,6 +19504,224 @@ export type Database = {
           },
         ]
       }
+      title_release_plan_events: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          from_status: string | null
+          id: string
+          note: string | null
+          organization_id: string
+          plan_id: string
+          project_id: string
+          reason: string | null
+          to_status: string
+          version_id: string | null
+        }
+        ComputedFields: never
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          from_status?: string | null
+          id?: string
+          note?: string | null
+          organization_id: string
+          plan_id: string
+          project_id: string
+          reason?: string | null
+          to_status: string
+          version_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          from_status?: string | null
+          id?: string
+          note?: string | null
+          organization_id?: string
+          plan_id?: string
+          project_id?: string
+          reason?: string | null
+          to_status?: string
+          version_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "title_release_plan_events_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "title_release_plan_events_plan_same_org"
+            columns: ["plan_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "title_release_plans"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "title_release_plan_events_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "title_release_plan_events_version_same_org"
+            columns: ["version_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "title_release_plan_versions"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      title_release_plan_versions: {
+        Row: {
+          config: NonNullable<Json>
+          content: NonNullable<Json>
+          created_at: string
+          created_by: string | null
+          id: string
+          note: string | null
+          organization_id: string
+          plan_id: string
+          project_id: string
+          sources: NonNullable<Json>
+          status: string
+          version: number
+        }
+        ComputedFields: never
+        Insert: {
+          config?: NonNullable<Json>
+          content: NonNullable<Json>
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          organization_id: string
+          plan_id: string
+          project_id: string
+          sources?: NonNullable<Json>
+          status: string
+          version: number
+        }
+        Update: {
+          config?: NonNullable<Json>
+          content?: NonNullable<Json>
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          organization_id?: string
+          plan_id?: string
+          project_id?: string
+          sources?: NonNullable<Json>
+          status?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "title_release_plan_versions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "title_release_plan_versions_plan_same_org"
+            columns: ["plan_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "title_release_plans"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "title_release_plan_versions_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      title_release_plans: {
+        Row: {
+          archived_reason: string | null
+          config: NonNullable<Json>
+          config_updated_at: string | null
+          config_updated_by: string | null
+          created_at: string
+          id: string
+          organization_id: string
+          project_id: string
+          status: string
+          status_before_archive: string | null
+          status_changed_at: string
+          status_changed_by: string | null
+          title_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          archived_reason?: string | null
+          config?: NonNullable<Json>
+          config_updated_at?: string | null
+          config_updated_by?: string | null
+          created_at?: string
+          id?: string
+          organization_id: string
+          project_id: string
+          status?: string
+          status_before_archive?: string | null
+          status_changed_at?: string
+          status_changed_by?: string | null
+          title_id: string
+        }
+        Update: {
+          archived_reason?: string | null
+          config?: NonNullable<Json>
+          config_updated_at?: string | null
+          config_updated_by?: string | null
+          created_at?: string
+          id?: string
+          organization_id?: string
+          project_id?: string
+          status?: string
+          status_before_archive?: string | null
+          status_changed_at?: string
+          status_changed_by?: string | null
+          title_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "title_release_plans_config_updated_by_fkey"
+            columns: ["config_updated_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "title_release_plans_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "title_release_plans_status_changed_by_fkey"
+            columns: ["status_changed_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "title_release_plans_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: true
+            referencedRelation: "project_titles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transcripts: {
         Row: {
           call_id: string
@@ -20135,6 +20363,45 @@ export type Database = {
         Returns: undefined
       }
       next_release_date: { Args: { p_project_id: string }; Returns: string }
+      get_shared_title_release_plan: {
+        Args: { p_token: string }
+        Returns: Json
+      }
+      record_title_release_plan_version: {
+        Args: {
+          p_content: Json
+          p_from: string
+          p_note?: string
+          p_plan_id: string
+          p_sources?: Json
+        }
+        Returns: string
+      }
+      revoke_title_release_plan_link: {
+        Args: { p_version_id: string }
+        Returns: undefined
+      }
+      save_title_release_plan: {
+        Args: { p_patch: Json; p_plan_id: string }
+        Returns: undefined
+      }
+      set_title_release_plan_status: {
+        Args: {
+          p_from: string
+          p_note?: string
+          p_plan_id: string
+          p_to: string
+        }
+        Returns: undefined
+      }
+      share_title_release_plan_version: {
+        Args: { p_version_id: string }
+        Returns: string
+      }
+      title_release_plan_target_date: {
+        Args: { p_title_id: string }
+        Returns: string
+      }
       set_marketing_title_scope: {
         Args: {
           p_activation_id?: string

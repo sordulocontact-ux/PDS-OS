@@ -49,7 +49,8 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
 | 11 | Suivi juridique par participation (« Participations et contrats », deals de Sacha lus) | fait |
 | 12 | Contrat manquant, verrous du tournage et de la sortie, dérogations ; 12 bis (parcours de la Production, avertissements, Historique du master) | fait |
 | 13 | Sorties individuelles et compilation (données, page « Sorties ») | fait |
-| 14 – 15 | Plan de sortie par titre ; Distribution par sortie | à faire |
+| 14 | Plan de sortie éditorial par titre (versions, lien de partage, PDF 16:9 style Jeho) | fait |
+| 15 | Distribution par sortie | à faire |
 
 ## Déjà en base (migrations `20261111…`)
 
@@ -228,10 +229,23 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
   sorties (livrée ou confirmée en ligne). Page **« Sorties »** du collectif (entrée sous
   « Titres et artistes ») : mode, sorties des titres, compilation, abandonnés, date / UPC / ISRC /
   état, contrats manquants. Compte rendu : `docs/pds-mic-rapports/lot-13.md`.
+- **Lot 14** (`20261114130101_title_release_plans`) : un **plan de sortie éditorial par titre**
+  (`title_release_plans`, né « Brouillon » avec le titre, brouillon `config`) ; statuts Brouillon
+  › Planning provisoire (date cible = sortie du titre, ou compilation en mode « compilation »)
+  › Version interne › Prêt à partager › Version révisée › Plan actif › Plan archivé (bilan, ou
+  titre abandonné ; réactivé, il retrouve son statut). Versions en ajout seul
+  (`title_release_plan_versions` : document, brouillon, actions lues, auteur, statut), journal
+  (`title_release_plan_events`). Responsable du projet seule. Actions = ciblées sur le titre +
+  globales (lot 10) ; une action modifiée après la dernière version est **signalée** (calculé).
+  Lien `/t/[token]` d'une version (anon, document seul, révocable) ; PDF 16:9
+  (`htmlToPdf(…, { cssPage: true })`). Rendu `lib/projects/title-plan/html.ts` ; polices dans
+  `fonts.ts` (League Gothic 75 % pour SegmentA, Hanken Grotesk) ; logo tracé `pds-logo.ts`, à
+  remplacer par le fichier officiel. Pages « Plans de sortie » (sous « Sorties »). Compte rendu :
+  `docs/pds-mic-rapports/lot-14.md`.
 - Tests : `collective-projects`, `project-titles`, `title-participations`, `artist-selections`,
   `collective-project-creation`, `title-board` (lot 6 : ce que chaque lecteur lit des deals et
   du contrat d'une participation, changer l'artiste principal après lancement et son
-  événement, retirer et rattacher), `provisional-titles` (lot 7), `collective-master` (lots 8 et 9), `master-file-requests` (lot 9 bis), `deliverable-titles` (lot 10), `legal-participations` (lot 11), `participation-waivers` (lot 12), `title-releases` (lot 13).
+  événement, retirer et rattacher), `provisional-titles` (lot 7), `collective-master` (lots 8 et 9), `master-file-requests` (lot 9 bis), `deliverable-titles` (lot 10), `legal-participations` (lot 11), `participation-waivers` (lot 12), `title-releases` (lot 13), `title-release-plans` (lot 14).
 
 ## Côté Business (Sacha), touchant les collectifs
 
