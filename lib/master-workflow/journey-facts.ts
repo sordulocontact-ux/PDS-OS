@@ -138,6 +138,8 @@ export type MasterJourneyFacts = {
   // A collective's files asked of a member of the team (lot 9 bis), the open
   // lines only: one per title, its title by the master.
   fileRequests: JourneyFileRequest[];
+  // Every line, open or closed, for the Historique du master (lot 12 bis).
+  fileRequestLog: JourneyFileRequestLog[];
   planLaunchedAt: string | null;
   // The Master's budget lines (owner and direction only, RLS): a rate
   // proposed by the engineer waits for « Accepter le tarif ».
@@ -157,6 +159,18 @@ export type JourneyFileRequest = {
   requestedByName: string;
   note: string | null;
   createdAt: string;
+};
+
+/** A line of « Demander des fichiers » as the history tells it: asked,
+ * then received (by which file, deposited by whom), or cancelled or
+ * replaced. */
+export type JourneyFileRequestLog = JourneyFileRequest & {
+  receivedAt: string | null;
+  receivedFileName: string | null;
+  receivedBy: string | null;
+  cancelledAt: string | null;
+  cancelledBy: string | null;
+  replaced: boolean;
 };
 
 export type JourneyInvoice = {
@@ -273,11 +287,9 @@ export async function loadMasterJourneyFacts(project: {
       ? supabase
           .from("master_file_requests")
           .select(
-            "id, requested_to, requested_by, note, created_at, title:project_titles!master_file_requests_title_id_fkey(master_id), asked:people!master_file_requests_requested_to_fkey(first_name, last_name), asker:people!master_file_requests_requested_by_fkey(first_name, last_name)",
+            "id, requested_to, requested_by, note, created_at, received_at, cancelled_at, replaced, title:project_titles!master_file_requests_title_id_fkey(master_id), asked:people!master_file_requests_requested_to_fkey(first_name, last_name), asker:people!master_file_requests_requested_by_fkey(first_name, last_name), canceller:people!master_file_requests_cancelled_by_fkey(first_name, last_name), file:master_files!master_file_requests_received_file_id_fkey(file_name, uploader:people!master_files_created_by_fkey(first_name, last_name))",
           )
           .eq("project_id", project.id)
-          .is("received_at", null)
-          .is("cancelled_at", null)
           .order("created_at")
       : none,
   ]);
@@ -307,6 +319,30 @@ export async function loadMasterJourneyFacts(project: {
 
   const b = brief.data;
   const creative = creatives[0];
+  const fileRequestLog: JourneyFileRequestLog[] = (
+    fileRequests.data ?? []
+  ).flatMap((r) =>
+    r.title?.master_id
+      ? [
+          {
+            id: r.id,
+            masterId: r.title.master_id,
+            personId: r.requested_to,
+            name: nameOf(r.asked) ?? "—",
+            requestedBy: r.requested_by,
+            requestedByName: nameOf(r.asker) ?? "—",
+            note: r.note,
+            createdAt: r.created_at,
+            receivedAt: r.received_at,
+            receivedFileName: r.file?.file_name ?? null,
+            receivedBy: nameOf(r.file?.uploader ?? null),
+            cancelledAt: r.cancelled_at,
+            cancelledBy: nameOf(r.canceller),
+            replaced: r.replaced,
+          },
+        ]
+      : [],
+  );
   return {
     titles: project.masters.map((m) => ({
       ...m,
@@ -451,22 +487,10 @@ export async function loadMasterJourneyFacts(project: {
           ]
         : [],
     ),
-    fileRequests: (fileRequests.data ?? []).flatMap((r) =>
-      r.title?.master_id
-        ? [
-            {
-              id: r.id,
-              masterId: r.title.master_id,
-              personId: r.requested_to,
-              name: nameOf(r.asked) ?? "—",
-              requestedBy: r.requested_by,
-              requestedByName: nameOf(r.asker) ?? "—",
-              note: r.note,
-              createdAt: r.created_at,
-            },
-          ]
-        : [],
+    fileRequests: fileRequestLog.filter(
+      (r) => r.receivedAt === null && r.cancelledAt === null,
     ),
+    fileRequestLog,
     planLaunchedAt: plan.data?.launched_at ?? null,
     rates: (rates.data ?? []).flatMap((r) =>
       r.master_role === "mix" || r.master_role === "mastering"

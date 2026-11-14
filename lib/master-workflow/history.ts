@@ -58,6 +58,43 @@ export function masterHistory(facts: MasterJourneyFacts): MasterHistoryItem[] {
         cause: null,
       });
 
+  // « Demander des fichiers » (lot 9 bis), on the title it concerns:
+  // asked, then received, cancelled or replaced (lot 12 bis).
+  for (const r of facts.fileRequestLog) {
+    const title = titleOf(r.masterId);
+    items.push({
+      key: `freq-${r.id}`,
+      masterId: r.masterId,
+      step: "source",
+      text: t.filesRequested(r.name, title, r.note),
+      who: r.requestedByName,
+      at: r.createdAt,
+      cause: null,
+    });
+    if (r.receivedAt)
+      items.push({
+        key: `freq-${r.id}-received`,
+        masterId: r.masterId,
+        step: "source",
+        text: t.filesReceived(r.receivedFileName ?? "—", title),
+        who: r.receivedBy,
+        at: r.receivedAt,
+        cause: t.filesAskedOf(r.name),
+      });
+    else if (r.cancelledAt)
+      items.push({
+        key: `freq-${r.id}-closed`,
+        masterId: r.masterId,
+        step: "source",
+        text: r.replaced
+          ? t.filesReplaced(r.name, title)
+          : t.filesCancelled(r.name, title),
+        who: r.cancelledBy,
+        at: r.cancelledAt,
+        cause: null,
+      });
+  }
+
   if (facts.brief?.recordedAt)
     items.push({
       key: "brief",

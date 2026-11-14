@@ -31,12 +31,15 @@ export function ContractGapsCallout({
   shoot,
   release,
   canOpenLegal,
+  projectTitle,
 }: {
   projectId: string;
   shoot: ContractGap[];
   release: ContractGap[];
   // manage_legal: the link to « Participations et contrats ».
   canOpenLegal: boolean;
+  // Outside the project's pages (a studio session): which project.
+  projectTitle?: string;
 }) {
   if (shoot.length === 0 && release.length === 0) return null;
   // The same participations for both: said once.
@@ -45,7 +48,9 @@ export function ContractGapsCallout({
     <div className="flex flex-col items-start gap-3">
       <ToneCallout tone="warning">
         <span className="flex flex-col gap-1">
-          <b className="font-semibold">{t.callout.title}</b>
+          <b className="font-semibold">
+            {projectTitle ? t.callout.titleOf(projectTitle) : t.callout.title}
+          </b>
           {same ? (
             <span>{t.callout.both(gapNames(shoot))}</span>
           ) : (

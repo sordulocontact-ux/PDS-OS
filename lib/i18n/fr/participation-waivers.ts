@@ -22,6 +22,8 @@ export const participationWaivers = {
   // Upstream (the overview, the Production's preparation).
   callout: {
     title: "Contrats de participation non signés",
+    titleOf: (project: string) =>
+      `Contrats de participation non signés · ${project}`,
     both: (names: string) =>
       `Tournage et sortie bloqués sans dérogation : ${names}.`,
     shoot: (names: string) => `Tournage bloqué sans dérogation : ${names}.`,

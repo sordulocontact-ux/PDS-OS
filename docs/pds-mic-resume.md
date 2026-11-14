@@ -47,7 +47,7 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
 | 9 | Master : vue consolidée, abandonnés hors des comptes ; « Demander des fichiers » (9 bis) | fait |
 | 10 | Ciblage marketing par titre | fait |
 | 11 | Suivi juridique par participation (« Participations et contrats », deals de Sacha lus) | fait |
-| 12 | Contrat manquant, verrous du tournage et de la sortie, dérogations | fait |
+| 12 | Contrat manquant, verrous du tournage et de la sortie, dérogations ; 12 bis (parcours de la Production, avertissements, Historique du master) | fait |
 | 13 – 15 | Sorties individuelles et compilation ; plan de sortie par titre ; Distribution par sortie | à faire |
 
 ## Déjà en base (migrations `20261111…`)
@@ -206,6 +206,15 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
   place de « Lancer le tournage », porte de soumission de la Distribution ; gestes « ⋯ » de la
   direction et lignes de dérogation dans « Participations et contrats ». Pas de système de
   dérogation côté Sacha (vérifié). Compte rendu : `docs/pds-mic-rapports/lot-12.md`.
+- **Lot 12 bis** (sans migration) : l'étape suivante de la Production d'un collectif prête pour le
+  tournage dit « Faire signer les contrats avant le tournage » (contrats nommés, lien vers
+  « Participations et contrats ») quand `list_contract_gaps` en trouve, étape « Tournage »
+  marquée bloquée, plus de « Confirmer que le tournage a eu lieu » en externe (`NextInput.
+  contractGaps`, `ProductionNext.blockedBy`, `JourneyInput.contractBlocked`) ; encart
+  « Contrats de participation non signés » dans le Brief du Master et sur la page d'une session
+  studio (par projet collectif, filtré à ses titres) ; « Demander des fichiers » dans
+  l'Historique du master (`fileRequestLog` : demandé, reçu, annulé, remplacé). Compte rendu :
+  `docs/pds-mic-rapports/lot-12-bis.md`.
 - Tests : `collective-projects`, `project-titles`, `title-participations`, `artist-selections`,
   `collective-project-creation`, `title-board` (lot 6 : ce que chaque lecteur lit des deals et
   du contrat d'une participation, changer l'artiste principal après lancement et son
@@ -264,8 +273,7 @@ layout ; toujours 404 sans `manage_legal`), lien depuis « Titres et artistes »
 signé » (règle) vs « Manquant » (aucun contrat) ; encart fusionné quand tournage et sortie
 nomment les mêmes contrats ; toasts (double point, « Dossier de négociation ouvert. ») ;
 erreurs de la modale de dérogation effacées à la saisie ; élisions des libellés lus (« d'Iris
-Moon »). Reste : le parcours de la Production dit « À vous : lancer le tournage » quand un
-contrat le bloque. Détail : `docs/pds-mic-rapports/recap-9-12.md`.
+Moon »). Le parcours de la Production bloqué par un contrat est traité au lot 12 bis. Détail : `docs/pds-mic-rapports/recap-9-12.md`.
 
 ## Règles à tenir à chaque lot
 

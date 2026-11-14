@@ -9,6 +9,8 @@ import type { WaiverScope } from "@/lib/projects/title-board-rules";
  * and its title's name in the project. */
 export type ContractGap = {
   participationId: string;
+  // Its title in the project (project_titles.id).
+  titleId: string;
   artist: string;
   title: string;
 };
@@ -38,6 +40,7 @@ export const loadContractGaps = trackedCache(
     }
     return (data ?? []).map((row) => ({
       participationId: row.participation_id,
+      titleId: row.title_id,
       artist: row.artist_name,
       title: projectTitleLabel({
         position: row.title_position,

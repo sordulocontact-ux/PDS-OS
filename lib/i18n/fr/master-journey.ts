@@ -172,6 +172,20 @@ export const masterJourney = {
     of: (title: string) => `« ${title} »`,
     sourceConfirmed: (file: string, title: string | null) =>
       `Source confirmée : ${file}${title ? ` (« ${title} »)` : ""}`,
+    // Lot 12 bis: « Demander des fichiers » (lot 9 bis).
+    filesRequested: (
+      person: string,
+      title: string | null,
+      note: string | null,
+    ) =>
+      `Fichiers demandés à ${person}${title ? ` (« ${title} »)` : ""}${note ? ` · ${note}` : ""}`,
+    filesReceived: (file: string, title: string | null) =>
+      `Fichier demandé reçu : ${file}${title ? ` (« ${title} »)` : ""}`,
+    filesAskedOf: (person: string) => `Fichiers demandés à ${person}`,
+    filesCancelled: (person: string, title: string | null) =>
+      `Demande de fichiers à ${person} annulée${title ? ` (« ${title} »)` : ""}`,
+    filesReplaced: (person: string, title: string | null) =>
+      `Demande de fichiers à ${person} remplacée${title ? ` (« ${title} »)` : ""}`,
     sourceChosen: (choice: string) => `Choix · ${choice}`,
     existingMix: (file: string) => `Mix déclaré mix final : ${file}`,
     briefSaved: "Brief enregistré",
