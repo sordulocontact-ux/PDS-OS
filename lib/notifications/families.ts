@@ -17,6 +17,7 @@ export const REQUEST_KINDS = [
   "master_delay_escalated",
   "master_invoice_received",
   "master_round_assigned",
+  "master_files_requested",
   "clearance_terms_proposed",
   "clearance_reply_received",
   "strategy_review_requested",

@@ -255,6 +255,10 @@ export const notifications = {
       `${actor} vous envoie un retard de l'ingénieur de « ${project} » : le master final passerait après la sortie, à vous d'arbitrer.`,
     master_delay_decided: (actor: string, project: string) =>
       `${actor} a tranché le retard de l'ingénieur de « ${project} ».`,
+    master_files_requested: (actor: string, project: string) =>
+      `${actor} vous demande des fichiers pour « ${project} » : déposez la source de chaque titre dans le Master.`,
+    master_files_received: (actor: string, project: string) =>
+      `${actor} a déposé un fichier demandé pour « ${project} » : la source du titre est à confirmer.`,
     master_round_assigned: (actor: string, project: string) =>
       `${actor} vous confie le mix ou le mastering de « ${project} » : le dossier est dans PDS OS, déposez-y vos versions.`,
     master_deliverable_received: (_actor: string, project: string) =>

@@ -135,6 +135,9 @@ export type MasterJourneyFacts = {
     appliedAt: string | null;
   }>;
   exchanges: Array<{ title: string; occurredAt: string; status: string }>;
+  // A collective's files asked of a member of the team (lot 9 bis), the open
+  // lines only: one per title, its title by the master.
+  fileRequests: JourneyFileRequest[];
   planLaunchedAt: string | null;
   // The Master's budget lines (owner and direction only, RLS): a rate
   // proposed by the engineer waits for « Accepter le tarif ».
@@ -142,6 +145,18 @@ export type MasterJourneyFacts = {
   // The engineers' invoices (owner and direction only, RLS).
   invoices: JourneyInvoice[];
   failed: boolean;
+};
+
+export type JourneyFileRequest = {
+  id: string;
+  masterId: string;
+  // The person asked.
+  personId: string;
+  name: string;
+  requestedBy: string;
+  requestedByName: string;
+  note: string | null;
+  createdAt: string;
 };
 
 export type JourneyInvoice = {
@@ -164,6 +179,8 @@ export type JourneyInvoice = {
 export async function loadMasterJourneyFacts(project: {
   id: string;
   masters: Array<{ id: string; title: string; artists: string }>;
+  // Only a collective asks for files (lot 9 bis).
+  collective?: boolean;
 }): Promise<MasterJourneyFacts> {
   const supabase = await createClient();
   const ids = project.masters.map((m) => m.id);
@@ -182,6 +199,7 @@ export async function loadMasterJourneyFacts(project: {
     plan,
     rates,
     invoices,
+    fileRequests,
   ] = await Promise.all([
     ids.length
       ? supabase
@@ -251,6 +269,17 @@ export async function loadMasterJourneyFacts(project: {
       .eq("project_id", project.id)
       .eq("origin", "master")
       .order("requested_at"),
+    project.collective
+      ? supabase
+          .from("master_file_requests")
+          .select(
+            "id, requested_to, requested_by, note, created_at, title:project_titles!master_file_requests_title_id_fkey(master_id), asked:people!master_file_requests_requested_to_fkey(first_name, last_name), asker:people!master_file_requests_requested_by_fkey(first_name, last_name)",
+          )
+          .eq("project_id", project.id)
+          .is("received_at", null)
+          .is("cancelled_at", null)
+          .order("created_at")
+      : none,
   ]);
   // Whether a new RIB waits, per engineer (never a digit): few rows, only
   // once an invoice was received with a new RIB.
@@ -271,6 +300,7 @@ export async function loadMasterJourneyFacts(project: {
     brief.error,
     transmissions.error,
     versions.error,
+    fileRequests.error,
   ].filter(Boolean);
   if (errors.length)
     console.error("loadMasterJourneyFacts:", errors[0]?.message);
@@ -417,6 +447,22 @@ export async function loadMasterJourneyFacts(project: {
               title: e.call.title,
               occurredAt: e.call.occurred_at,
               status: e.call.status,
+            },
+          ]
+        : [],
+    ),
+    fileRequests: (fileRequests.data ?? []).flatMap((r) =>
+      r.title?.master_id
+        ? [
+            {
+              id: r.id,
+              masterId: r.title.master_id,
+              personId: r.requested_to,
+              name: nameOf(r.asked) ?? "—",
+              requestedBy: r.requested_by,
+              requestedByName: nameOf(r.asker) ?? "—",
+              note: r.note,
+              createdAt: r.created_at,
             },
           ]
         : [],

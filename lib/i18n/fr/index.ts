@@ -81,6 +81,7 @@ import { masterListen } from "./master-listen";
 import { masterDelay } from "./master-delay";
 import { masterAnswer } from "./master-answer";
 import { masterInHouse } from "./master-inhouse";
+import { masterFileRequests } from "./master-file-requests";
 import { masterJourney } from "./master-journey";
 import { reviewJourney } from "./review-journey";
 import { masterPage } from "./master-page";
@@ -309,6 +310,7 @@ export const fr = {
   masterDelay,
   masterAnswer,
   masterInHouse,
+  masterFileRequests,
   masterSource,
   artistActivity,
   masterPage,

@@ -11077,6 +11077,103 @@ export type Database = {
           },
         ]
       }
+      master_file_requests: {
+        Row: {
+          cancelled_at: string | null
+          cancelled_by: string | null
+          created_at: string
+          id: string
+          note: string | null
+          organization_id: string
+          project_id: string
+          received_at: string | null
+          received_file_id: string | null
+          replaced: boolean
+          requested_by: string
+          requested_to: string
+          slot_expires_at: string | null
+          slot_path: string | null
+          title_id: string
+        }
+        Insert: {
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          created_at?: string
+          id?: string
+          note?: string | null
+          organization_id: string
+          project_id: string
+          received_at?: string | null
+          received_file_id?: string | null
+          replaced?: boolean
+          requested_by: string
+          requested_to: string
+          slot_expires_at?: string | null
+          slot_path?: string | null
+          title_id: string
+        }
+        Update: {
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          created_at?: string
+          id?: string
+          note?: string | null
+          organization_id?: string
+          project_id?: string
+          received_at?: string | null
+          received_file_id?: string | null
+          replaced?: boolean
+          requested_by?: string
+          requested_to?: string
+          slot_expires_at?: string | null
+          slot_path?: string | null
+          title_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "master_file_requests_cancelled_by_fkey"
+            columns: ["cancelled_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "master_file_requests_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "master_file_requests_received_file_id_fkey"
+            columns: ["received_file_id"]
+            isOneToOne: false
+            referencedRelation: "master_files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "master_file_requests_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "master_file_requests_requested_to_fkey"
+            columns: ["requested_to"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "master_file_requests_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "project_titles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       master_flow_sources: {
         Row: {
           created_at: string
@@ -19873,6 +19970,47 @@ export type Database = {
       request_project_master_invoices: {
         Args: { p_project_id: string }
         Returns: undefined
+      }
+      request_master_files: {
+        Args: {
+          p_note?: string
+          p_person_id: string
+          p_project_id: string
+          p_title_ids: string[]
+        }
+        Returns: number
+      }
+      cancel_master_file_request: {
+        Args: { p_request_id: string }
+        Returns: undefined
+      }
+      list_file_request_recipients: {
+        Args: { p_project_id: string }
+        Returns: {
+          first_name: string
+          last_name: string
+          person_id: string
+          reason: string
+        }[]
+      }
+      file_request_recipient_ok: {
+        Args: { p_person_id: string; p_project_id: string }
+        Returns: boolean
+      }
+      is_open_file_request_slot: { Args: { p_path: string }; Returns: boolean }
+      open_file_request_delivery: {
+        Args: { p_extension: string; p_file_name: string; p_request_id: string }
+        Returns: string
+      }
+      record_file_request_delivery: {
+        Args: {
+          p_audio_state: string
+          p_bytes: number
+          p_file_name: string
+          p_mime: string
+          p_path: string
+        }
+        Returns: string
       }
       set_marketing_title_scope: {
         Args: {

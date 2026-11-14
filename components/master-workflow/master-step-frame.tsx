@@ -74,7 +74,12 @@ export async function MasterStepFrame({
   // (Master ▸ titre ▸ étape) with its siblings, kept from step to step.
   titleScope?: MasterTitleScope | null;
 }) {
-  const { steps, facts: rows, project } = await masterJourneyContext(projectId);
+  const {
+    steps,
+    facts: rows,
+    project,
+    access,
+  } = await masterJourneyContext(projectId);
   const step = steps.find((s) => s.key === stepKey);
   if (!step) return null;
   const titled = titleScope
@@ -143,7 +148,14 @@ export async function MasterStepFrame({
           />
           {/* A collective: where its titles stand, at a glance (lot 9). */}
           {titleScope && (
-            <TitlesOverview projectId={projectId} scope={titleScope} />
+            <TitlesOverview
+              projectId={projectId}
+              scope={titleScope}
+              canRequest={
+                project.ownerPersonId !== null &&
+                project.ownerPersonId === access.personId
+              }
+            />
           )}
         </>
       }

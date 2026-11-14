@@ -1,6 +1,7 @@
 import "server-only";
 
 import { masterJourneyContext } from "@/lib/master-workflow/journey-context";
+import type { JourneyFileRequest } from "@/lib/master-workflow/journey-facts";
 import {
   titleMasterLabel,
   titleMasterState,
@@ -16,6 +17,8 @@ import { trackedCache } from "@/lib/projects/live-deps";
 /** A title of a collective's Master, as its switcher lists it. */
 export type MasterTitleChoice = {
   masterId: string;
+  // Its title in the project (project_titles.id), stable.
+  titleId: string;
   // Its name in the project (« Titre 2 · sans nom », never a provisional
   // name of the Catalogue, lot 7).
   label: string;
@@ -28,6 +31,9 @@ export type MasterTitleChoice = {
   // mix, a mastering (from the engineer), or a validation (of the round in
   // `round`); null when it has its Master final.
   waiting: { kind: MasterTitleWaiting; round: "mix" | "mastering" } | null;
+  // Its files asked of a member of the team (lot 9 bis), while it waits for
+  // its source: the open line.
+  request: JourneyFileRequest | null;
 };
 
 export const MASTER_TITLE_WAITINGS = [
@@ -94,9 +100,11 @@ export const loadMasterTitleScope = trackedCache(
       const sourced = facts.titles.some(
         (t) => t.id === title.master!.id && t.sources.length > 0,
       );
+      const waiting = waitingOf(state, sourced);
       return [
         {
           masterId: title.master.id,
+          titleId: title.id,
           label: projectTitleLabel({
             position: title.position,
             workingTitle: title.workingTitle,
@@ -105,7 +113,13 @@ export const loadMasterTitleScope = trackedCache(
           state: titleMasterLabel(state),
           done: state.kind === "final",
           pending: state.kind === "round" && state.decision === "pending",
-          waiting: waitingOf(state, sourced),
+          waiting,
+          request:
+            waiting?.kind === "source"
+              ? (facts.fileRequests.find(
+                  (r) => r.masterId === title.master!.id,
+                ) ?? null)
+              : null,
         },
       ];
     });
@@ -180,6 +194,8 @@ export function titleWaitings(projectId: string, scope: MasterTitleScope) {
     return {
       kind,
       count: titles.length,
+      // Among them, the titles whose files are asked for (lot 9 bis).
+      requested: titles.filter((c) => c.request).length,
       names: titles.map((c) => c.label),
       href: first
         ? `${masterStepHref(projectId, step)}?titre=${first.masterId}`

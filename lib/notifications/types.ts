@@ -79,6 +79,10 @@ export const NOTIFICATION_KINDS = [
   "master_deliverable_received",
   // The in-house engineer got a round of the Master (proto `master:hugo`).
   "master_round_assigned",
+  // A collective's files asked of a member of the team, then one received
+  // (lot 9 bis of docs/pds-mic-plan.md): the Master's Source.
+  "master_files_requested",
+  "master_files_received",
   // A fiche de renseignements came back through its link (JUR-11).
   "legal_form_received",
   // Production: a version waits for its decision; corrections are asked to
@@ -334,7 +338,7 @@ export function notificationHref(
   // The mastering has its own step (ticket « Architecture globale »).
   if (kind.startsWith("master_mastering_"))
     return routes.projectMasterStep(projectId, "mastering");
-  if (kind === "master_source_newer")
+  if (kind === "master_source_newer" || kind.startsWith("master_files_"))
     return routes.projectMasterStep(projectId, "source");
   if (
     kind === "master_final_approved" ||

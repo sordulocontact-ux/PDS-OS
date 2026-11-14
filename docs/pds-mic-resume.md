@@ -1,8 +1,7 @@
 # Projet collectif (PDS Mic) : résumé
 
 Résumé de travail de `docs/pds-mic-plan.md` (qui fait foi en cas de doute). Mis à jour à la fin
-de chaque lot. Dernière mise à jour : 13/11/2026, après les lots 7 à 10 et leur passe Chrome
-(`docs/pds-mic-rapports/recap-7-10.md`).
+de chaque lot. Dernière mise à jour : 14/11/2026, après le lot 9 bis (« Demander des fichiers »).
 
 **Module Business fait en parallèle par un collègue** : rôle Business manager, négociation, deal
 memo, contrats, contacts privés, mails. Ces lots n'y touchent pas ; son dossier de négociation
@@ -44,7 +43,7 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
 | 6 | Vue « Titres et artistes » (remplace la liste des lots 2-3), raccord Négociation | fait |
 | 7 | Titre provisoire (voie A) | fait |
 | 8 | Master : sélecteur de titre | fait |
-| 9 | Master : vue consolidée, abandonnés hors des comptes | fait, sauf « Demander des fichiers » (question) |
+| 9 | Master : vue consolidée, abandonnés hors des comptes ; « Demander des fichiers » (9 bis) | fait |
 | 10 | Ciblage marketing par titre | fait |
 | 11 – 12 | Suivi juridique par participation ; contrat manquant, verrou du tournage | à faire |
 | 13 – 15 | Sorties individuelles et compilation ; plan de sortie par titre ; Distribution par sortie | à faire |
@@ -151,8 +150,23 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
   et de la Distribution ; `getProject().masters` reste complet (formulaire d'édition). Facture de
   l'ingénieur : `request_project_master_invoices`, aussi appelée par `abandon_project_title`
   (l'abandon du dernier titre en attente l'envoie). Sélecteur du Master sans les abandonnés. Vue
-  consolidée `TitlesOverview` (source, mix, mastering, validation). **« Demander des fichiers »
-  pas construit** : à qui et quoi, en question (`docs/pds-mic-rapports/lot-9.md`).
+  consolidée `TitlesOverview` (source, mix, mastering, validation).
+- **Lot 9 bis** (`20261114100101_master_file_requests`) : « Demander des fichiers » (décision du
+  14/11 : un membre de l'équipe, la source seulement). `master_file_requests` = **une ligne par
+  titre** (une seule ouverte par titre ; redemander à une autre personne remplace et garde),
+  reçue **toute seule** par le déclencheur `z_receive_file_requests` sur `master_files` (premier
+  fichier audio de ce titre, quel que soit le chemin). `request_master_files` (responsable,
+  collectif, titres vivants du Master), `cancel_master_file_request` (auteur ou responsable),
+  `list_file_request_recipients` / `file_request_recipient_ok` (équipe `project_creatives`,
+  ingénieur interne du Master, direction ; jamais soi-même, jamais un contact). Dépôt de la
+  personne sollicitée sans droit Catalogue : chemin à usage unique d'une heure
+  (`open_` / `record_file_request_delivery`, politique de stockage
+  `is_open_file_request_slot`), mise à plat ou maquette. Notifications `master_files_requested`
+  (à la personne), `master_files_received` (à l'auteur). Bouton sous les tuiles, « dont N
+  demandés » sur « Attendent leur source », « À vous » de l'étape Source (journey), « Fichiers
+  qui vous sont demandés » en tête de la Source, « Fichiers demandés à … » + « Annuler la
+  demande » sur le titre. Une ligne ne compte que tant que son titre attend sa source. Entrée
+  dans `delete_project_row`. Compte rendu : `docs/pds-mic-rapports/lot-9-bis.md`.
 - **Lot 10** (`20261113200101_deliverable_titles`) : `deliverable_titles` = titres visés par une
   action (livrable engagé de la Stratégie ou activation, un seul). Aucune ligne = tout le projet
   (défaut) ; `all_titles` (une ligne, vaut pour les titres à venir) ; `titles` (une ligne par
@@ -166,7 +180,7 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
 - Tests : `collective-projects`, `project-titles`, `title-participations`, `artist-selections`,
   `collective-project-creation`, `title-board` (lot 6 : ce que chaque lecteur lit des deals et
   du contrat d'une participation, changer l'artiste principal après lancement et son
-  événement, retirer et rattacher), `provisional-titles` (lot 7), `collective-master` (lots 8 et 9), `deliverable-titles` (lot 10).
+  événement, retirer et rattacher), `provisional-titles` (lot 7), `collective-master` (lots 8 et 9), `master-file-requests` (lot 9 bis), `deliverable-titles` (lot 10).
 
 ## Côté Business (Sacha), touchant les collectifs
 

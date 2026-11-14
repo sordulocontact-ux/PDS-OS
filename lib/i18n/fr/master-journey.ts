@@ -19,6 +19,9 @@ export const masterJourney = {
     validation: "Attendent une validation",
     none: "Aucun titre",
     more: (count: number) => `et ${count} autre${count > 1 ? "s" : ""}`,
+    // Lot 9 bis: among the titles waiting for their source.
+    requested: (count: number) =>
+      `dont ${count} demandé${count > 1 ? "s" : ""}`,
   },
   roles: {
     owner: "Responsable du Master",
@@ -93,6 +96,11 @@ export const masterJourney = {
         ? `Importer la version de départ de ${titles(n)}`
         : "Importer la version de départ du mix",
     replaceSource: "Remplacer la source du master",
+    // Lot 9 bis: the files asked of a member of the team.
+    depositFiles: (n: number) =>
+      n > 1
+        ? `Déposer les fichiers demandés de ${titles(n)}`
+        : "Déposer le fichier demandé",
     recordVocals: (pending: string | null) =>
       pending
         ? `Enregistrer les voix définitives (${pending})`
