@@ -1,7 +1,7 @@
 # Projet collectif (PDS Mic) : résumé
 
 Résumé de travail de `docs/pds-mic-plan.md` (qui fait foi en cas de doute). Mis à jour à la fin
-de chaque lot. Dernière mise à jour : 14/11/2026, après le lot 9 bis (« Demander des fichiers »).
+de chaque lot. Dernière mise à jour : 14/11/2026, après le lot 11.
 
 **Module Business fait en parallèle par un collègue** : rôle Business manager, négociation, deal
 memo, contrats, contacts privés, mails. Ces lots n'y touchent pas ; son dossier de négociation
@@ -45,7 +45,8 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
 | 8 | Master : sélecteur de titre | fait |
 | 9 | Master : vue consolidée, abandonnés hors des comptes ; « Demander des fichiers » (9 bis) | fait |
 | 10 | Ciblage marketing par titre | fait |
-| 11 – 12 | Suivi juridique par participation ; contrat manquant, verrou du tournage | à faire |
+| 11 | Suivi juridique par participation (« Participations et contrats », deals de Sacha lus) | fait |
+| 12 | Contrat manquant, verrou du tournage, dérogations | à faire |
 | 13 – 15 | Sorties individuelles et compilation ; plan de sortie par titre ; Distribution par sortie | à faire |
 
 ## Déjà en base (migrations `20261111…`)
@@ -177,10 +178,22 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
   barre de la Production ; filtre « Titre » de la liste des activations (tout le projet et tous
   les titres restent visibles). Entrée dans `delete_project_row`. Compte rendu :
   `docs/pds-mic-rapports/lot-10.md`.
+- **Lot 11** (sans migration) : page **« Participations et contrats »** du Juridique d'un
+  collectif (`/legal/participations`, lien en pied de la colonne du parcours ; 404 pour un projet
+  simple ou sans `manage_legal`). Un groupe par titre, une ligne par participation : statut,
+  contrat (`contract_id` : état, « Manquant », « Lié »), étape du deal et négociateur
+  (`DealStageBadge`), prochaine action comme la liste des deals (relance due, action et date,
+  relance à venir) ; la ligne ouvre le deal. Sans deal vivant : « Pas de dossier de négociation »
+  et « Ouvrir un dossier » / « Ouvrir un nouveau dossier » (direction ou responsable, titre
+  vivant, participation en jeu) = l'action `createDeal` de Sacha avec la participation, négociateur
+  facultatif. Lecture `loadTitleBoard` (deal : `next_action`, `next_action_on`, `follow_up_on` en
+  plus), `participation-tracking(-rules).ts`, `components/legal/participations/`. « Titres et
+  artistes » : contrat manquant dit « Manquant ». Aucun contact lu. Compte rendu :
+  `docs/pds-mic-rapports/lot-11.md`.
 - Tests : `collective-projects`, `project-titles`, `title-participations`, `artist-selections`,
   `collective-project-creation`, `title-board` (lot 6 : ce que chaque lecteur lit des deals et
   du contrat d'une participation, changer l'artiste principal après lancement et son
-  événement, retirer et rattacher), `provisional-titles` (lot 7), `collective-master` (lots 8 et 9), `master-file-requests` (lot 9 bis), `deliverable-titles` (lot 10).
+  événement, retirer et rattacher), `provisional-titles` (lot 7), `collective-master` (lots 8 et 9), `master-file-requests` (lot 9 bis), `deliverable-titles` (lot 10), `legal-participations` (lot 11).
 
 ## Côté Business (Sacha), touchant les collectifs
 

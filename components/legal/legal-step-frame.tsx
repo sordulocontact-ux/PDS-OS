@@ -13,11 +13,13 @@ import {
 import { routes } from "@/lib/auth/redirects";
 import { legalHistory } from "@/lib/i18n/fr/legal-history";
 import { legalJourney } from "@/lib/i18n/fr/legal-journey";
+import { legalParticipations } from "@/lib/i18n/fr/legal-participations";
 import { legalJourneyContext } from "@/lib/legal/journey-context";
 import { isLocked } from "@/lib/ui/journey";
+import { legalParticipationsHref } from "@/lib/ui/legal-steps";
 import { stepChoiceKey, type StepRef } from "@/lib/step-tools/model";
 
-const fr = { legalHistory, legalJourney };
+const fr = { legalHistory, legalJourney, legalParticipations };
 
 /**
  * The frame of a Juridique step (docs/VISION-UX.md § 4, JourneyLayout): the
@@ -37,7 +39,7 @@ export async function LegalStepFrame({
   stepKey: string;
   children: React.ReactNode;
 }) {
-  const { steps } = await legalJourneyContext(projectId);
+  const { steps, project } = await legalJourneyContext(projectId);
   const step = steps.find((s) => s.key === stepKey);
   if (!step) return null;
   // The viewer's gesture comes first (« À vous », JUR-08): the step's content
@@ -59,10 +61,21 @@ export async function LegalStepFrame({
         <JourneySpine
           steps={steps}
           openKey={stepKey}
-          footer={{
-            href: routes.projectLegalStep(projectId, "history"),
-            label: fr.legalHistory.link,
-          }}
+          footer={[
+            {
+              href: routes.projectLegalStep(projectId, "history"),
+              label: fr.legalHistory.link,
+            },
+            // A collective: each participation's contract and deal (lot 11).
+            ...(project.collective
+              ? [
+                  {
+                    href: legalParticipationsHref(projectId),
+                    label: fr.legalParticipations.link,
+                  },
+                ]
+              : []),
+          ]}
         />
       }
       head={

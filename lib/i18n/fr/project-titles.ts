@@ -161,8 +161,9 @@ export const projectTitles = {
     // A title without any artist yet.
     noArtist: "Aucun artiste invité",
     contract: {
-      // Confirmed without a contract (décision 6): to do, never red.
-      missing: "À faire",
+      // Confirmed without a contract (décision 6): missing, never red (the
+      // same word as the Juridique's « Participations et contrats », lot 11).
+      missing: "Manquant",
       // Linked, the viewer may not read it.
       hidden: "Lié",
     },

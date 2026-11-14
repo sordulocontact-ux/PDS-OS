@@ -175,6 +175,11 @@ export type ParticipationDeal = {
   agreementStatus: AgreementStatus | null;
   assignee: string | null;
   stageChangedAt: string;
+  // The next action and its date, the follow-up date (lot 11: the
+  // Juridique's follow-up, as the Deals page says them).
+  nextAction: string | null;
+  nextActionOn: string | null;
+  followUpOn: string | null;
 };
 
 /** The deal shown for a participation: the live one (one at most,

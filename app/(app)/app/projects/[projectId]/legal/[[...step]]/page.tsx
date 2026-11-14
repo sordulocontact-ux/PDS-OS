@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 
 import { HistoryView } from "@/components/legal/history/history-view";
+import { ParticipationsPage } from "@/components/legal/participations/participations-page";
 import { ConfirmationStep } from "@/components/legal/steps/confirmation-step";
 import { DemarcheStep } from "@/components/legal/steps/demarche-step";
 import { FramingStep } from "@/components/legal/steps/framing-step";
@@ -51,6 +52,8 @@ export default async function ProjectLegalPage({
       />
     );
   if (route.type === "ready") return <ReadyStep projectId={projectId} />;
+  if (route.type === "participations")
+    return <ParticipationsPage projectId={projectId} />;
   if (route.type === "step") {
     const key = route.key;
     if (key === "inventory")
