@@ -4,6 +4,9 @@ import { ReadyConfirmForm } from "@/components/production/readiness/ready-confir
 import { ReadyRequestView } from "@/components/production/readiness/ready-request-view";
 import { ReadySynthesisTable } from "@/components/production/readiness/ready-synthesis-table";
 import { ToneCallout } from "@/components/ui/tone-callout";
+import { ShootContractNotice } from "@/components/legal/contract-gaps-notice";
+import { loadContractGaps } from "@/lib/legal/contract-gaps";
+import { requireLaunchedProject } from "@/lib/projects/queries";
 import { shortStamp } from "@/lib/calls/prep/dates";
 import { fr } from "@/lib/i18n/fr";
 import { stepContext } from "@/lib/production/journey/context";
@@ -38,10 +41,16 @@ export default async function ProductionReadinessStepPage({
     deliverableId,
     "readiness",
   );
-  const { data, sheet, preprod, o, common, people } = await prepContext(
-    projectId,
-    deliverableId,
-  );
+  const [{ data, sheet, preprod, o, common, people }, project] =
+    await Promise.all([
+      prepContext(projectId, deliverableId),
+      requireLaunchedProject(projectId),
+    ]);
+  // A collective (lot 12): the contracts the shoot will wait for, said
+  // before it as information; « Prête pour tournage » stays possible.
+  const gaps = project.collective
+    ? await loadContractGaps(projectId, "shoot", deliverableId)
+    : [];
   const panel = (children: React.ReactNode) => (
     <ProductionStepPanel
       projectId={projectId}
@@ -50,6 +59,14 @@ export default async function ProductionReadinessStepPage({
       steps={steps}
       closed={Boolean(sheet.closedAt)}
     >
+      {!sheet.readyAt && (
+        <ShootContractNotice
+          projectId={projectId}
+          gaps={gaps}
+          canOpenLegal={can(access, "manage_legal")}
+          upstream
+        />
+      )}
       {children}
     </ProductionStepPanel>
   );

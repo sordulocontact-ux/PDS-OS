@@ -259,6 +259,10 @@ export const notifications = {
       `${actor} vous demande des fichiers pour « ${project} » : déposez la source de chaque titre dans le Master.`,
     master_files_received: (actor: string, project: string) =>
       `${actor} a déposé un fichier demandé pour « ${project} » : la source du titre est à confirmer.`,
+    participation_waiver_granted: (actor: string, project: string) =>
+      `${actor} a accordé une dérogation à un contrat de participation manquant de « ${project} ».`,
+    participation_waiver_revoked: (actor: string, project: string) =>
+      `${actor} a révoqué une dérogation à un contrat de participation de « ${project} » : le contrat redevient nécessaire.`,
     master_round_assigned: (actor: string, project: string) =>
       `${actor} vous confie le mix ou le mastering de « ${project} » : le dossier est dans PDS OS, déposez-y vos versions.`,
     master_deliverable_received: (_actor: string, project: string) =>

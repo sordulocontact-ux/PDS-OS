@@ -24,8 +24,18 @@ const e = fr.distribution.validation.errors;
 function failure(error: {
   code?: string;
   message?: string;
+  details?: string | null;
 }): DistributionResult {
   const message = error.message ?? "";
+  // A collective (lot 12): a confirmed participation without its contract
+  // signed nor an open waiver of the release; the database names them.
+  if (message.includes("contract_missing"))
+    return {
+      ok: false,
+      error: fr.participationWaivers.refused.release(
+        error.details || fr.participationWaivers.refused.someone,
+      ),
+    };
   const known: Array<[string, string]> = [
     ["params_not_confirmed", e.paramsNotConfirmed],
     ["legal_blockers", e.legalBlockers],

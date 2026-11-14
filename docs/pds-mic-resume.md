@@ -1,7 +1,7 @@
 # Projet collectif (PDS Mic) : résumé
 
 Résumé de travail de `docs/pds-mic-plan.md` (qui fait foi en cas de doute). Mis à jour à la fin
-de chaque lot. Dernière mise à jour : 14/11/2026, après le lot 11.
+de chaque lot. Dernière mise à jour : 14/11/2026, après le lot 12.
 
 **Module Business fait en parallèle par un collègue** : rôle Business manager, négociation, deal
 memo, contrats, contacts privés, mails. Ces lots n'y touchent pas ; son dossier de négociation
@@ -46,7 +46,7 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
 | 9 | Master : vue consolidée, abandonnés hors des comptes ; « Demander des fichiers » (9 bis) | fait |
 | 10 | Ciblage marketing par titre | fait |
 | 11 | Suivi juridique par participation (« Participations et contrats », deals de Sacha lus) | fait |
-| 12 | Contrat manquant, verrou du tournage, dérogations | à faire |
+| 12 | Contrat manquant, verrous du tournage et de la sortie, dérogations | fait |
 | 13 – 15 | Sorties individuelles et compilation ; plan de sortie par titre ; Distribution par sortie | à faire |
 
 ## Déjà en base (migrations `20261111…`)
@@ -190,10 +190,25 @@ pour le Deal, aucune étape de négociation dans son statut, prévenir avant de 
   plus), `participation-tracking(-rules).ts`, `components/legal/participations/`. « Titres et
   artistes » : contrat manquant dit « Manquant ». Aucun contact lu. Compte rendu :
   `docs/pds-mic-rapports/lot-11.md`.
+- **Lot 12** (`20261114110101_participation_waivers`) : `participation_waivers` en ajout seul
+  (`shoot` / `release`, motif et **échéance** obligatoires, échue = ne couvre plus, révocation
+  tracée ; générique pour PDSBIZ-010 : étendre le `scope_check`). Couverture
+  `participation_covered` (contrat `signed` ou dérogation ouverte) ; `contract_gaps` (interne) /
+  `list_contract_gaps` : participations **confirmées** des titres **non abandonnés** concernés
+  (titres visés du livrable, `none` = aucun, sinon tous). `grant_` / `revoke_participation_waiver`
+  : **direction seule**, journal du collectif (`waiver_granted` / `waiver_revoked`, Activité),
+  responsable prévenue. **Verrous collectif seulement** : `c_contract_check` sur
+  `production_shoots` (départ ou tournage déclaré tenu) et `distribution_versions` (soumission,
+  tous les titres jusqu'au lot 15) → `contract_missing`, DETAIL = contrats manquants. Écrans :
+  encart en Vue d'ensemble (`ContractGapsCallout`), « Contrat manquant : … » sur le titre de
+  « Titres et artistes », information avant « Prête pour tournage », `ShootContractNotice` à la
+  place de « Lancer le tournage », porte de soumission de la Distribution ; gestes « ⋯ » de la
+  direction et lignes de dérogation dans « Participations et contrats ». Pas de système de
+  dérogation côté Sacha (vérifié). Compte rendu : `docs/pds-mic-rapports/lot-12.md`.
 - Tests : `collective-projects`, `project-titles`, `title-participations`, `artist-selections`,
   `collective-project-creation`, `title-board` (lot 6 : ce que chaque lecteur lit des deals et
   du contrat d'une participation, changer l'artiste principal après lancement et son
-  événement, retirer et rattacher), `provisional-titles` (lot 7), `collective-master` (lots 8 et 9), `master-file-requests` (lot 9 bis), `deliverable-titles` (lot 10), `legal-participations` (lot 11).
+  événement, retirer et rattacher), `provisional-titles` (lot 7), `collective-master` (lots 8 et 9), `master-file-requests` (lot 9 bis), `deliverable-titles` (lot 10), `legal-participations` (lot 11), `participation-waivers` (lot 12).
 
 ## Côté Business (Sacha), touchant les collectifs
 

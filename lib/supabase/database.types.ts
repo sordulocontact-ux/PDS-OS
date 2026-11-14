@@ -11174,6 +11174,83 @@ export type Database = {
           },
         ]
       }
+      participation_waivers: {
+        Row: {
+          due_on: string
+          granted_at: string
+          granted_by: string
+          id: string
+          organization_id: string
+          participation_id: string
+          project_id: string
+          reason: string
+          revoke_reason: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          risk: string | null
+          scope: string
+        }
+        Insert: {
+          due_on: string
+          granted_at?: string
+          granted_by: string
+          id?: string
+          organization_id: string
+          participation_id: string
+          project_id: string
+          reason: string
+          revoke_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          risk?: string | null
+          scope: string
+        }
+        Update: {
+          due_on?: string
+          granted_at?: string
+          granted_by?: string
+          id?: string
+          organization_id?: string
+          participation_id?: string
+          project_id?: string
+          reason?: string
+          revoke_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          risk?: string | null
+          scope?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "participation_waivers_granted_by_fkey"
+            columns: ["granted_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "participation_waivers_participation_id_fkey"
+            columns: ["participation_id"]
+            isOneToOne: false
+            referencedRelation: "title_participations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "participation_waivers_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "participation_waivers_revoked_by_fkey"
+            columns: ["revoked_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       master_flow_sources: {
         Row: {
           created_at: string
@@ -20011,6 +20088,35 @@ export type Database = {
           p_path: string
         }
         Returns: string
+      }
+      grant_participation_waiver: {
+        Args: {
+          p_due_on: string
+          p_participation_id: string
+          p_reason: string
+          p_risk?: string
+          p_scope: string
+        }
+        Returns: string
+      }
+      revoke_participation_waiver: {
+        Args: { p_reason?: string; p_waiver_id: string }
+        Returns: undefined
+      }
+      list_contract_gaps: {
+        Args: {
+          p_project_id: string
+          p_scope: string
+          p_strategy_deliverable_id?: string
+        }
+        Returns: {
+          artist_name: string
+          master_title: string
+          participation_id: string
+          title_id: string
+          title_position: number
+          working_title: string
+        }[]
       }
       set_marketing_title_scope: {
         Args: {

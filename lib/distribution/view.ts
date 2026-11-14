@@ -40,6 +40,7 @@ import { fr } from "@/lib/i18n/fr";
 import { canEditProject } from "@/lib/projects/edit-access";
 import type { ProjectDetail } from "@/lib/projects/types";
 import { formatDay as formatDate } from "@/lib/utils/day";
+import { gapNames, loadContractGaps } from "@/lib/legal/contract-gaps";
 import { createClient } from "@/lib/supabase/server";
 
 export type CheckView = RecordedCheck & {
@@ -90,6 +91,7 @@ export async function loadDistributionView(
     dossier,
     derogationRows,
     anomalies,
+    contractGaps,
   ] = await Promise.all([
     loadDistributionSources(project, access),
     loadMembers(access),
@@ -120,6 +122,11 @@ export async function loadDistributionView(
       .eq("project_id", project.id)
       .is("revoked_at", null),
     loadAnomalies(project.id, access),
+    // A collective (lot 12): the release waits for every contract signed or
+    // waived; the same rule as the database's.
+    project.collective
+      ? loadContractGaps(project.id, "release")
+      : Promise.resolve([]),
   ]);
   const nameOf = (personId: string | null) =>
     personId
@@ -232,6 +239,7 @@ export async function loadDistributionView(
       sections,
       anomalies,
       derogation,
+      contractGaps: contractGaps.length ? gapNames(contractGaps) : null,
     }),
     drift: open?.snapshot
       ? snapshotDrift(open.snapshot.sections, sections)

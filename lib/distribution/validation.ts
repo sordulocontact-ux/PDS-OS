@@ -11,8 +11,9 @@ import { missingParams } from "@/lib/distribution/delivery-file";
 import type { DossierParams } from "@/lib/distribution/dossier";
 import type { Readiness } from "@/lib/distribution/readiness";
 import { distribution } from "@/lib/i18n/fr/distribution";
+import { participationWaivers } from "@/lib/i18n/fr/participation-waivers";
 
-const fr = { distribution };
+const fr = { distribution, participationWaivers };
 
 export type VersionStatus = "pending" | "approved" | "rejected";
 
@@ -133,9 +134,14 @@ export function submitGate(input: {
   sections: DossierSection[];
   anomalies: Anomaly[];
   derogation: Derogation | null;
+  // A collective (lot 12): the participations whose contract is not signed,
+  // without an open waiver of the release, named; null: none.
+  contractGaps?: string | null;
 }): SubmitGate {
   const t = fr.distribution.validation.gate;
   const reasons: string[] = [];
+  if (input.contractGaps)
+    reasons.push(fr.participationWaivers.refused.release(input.contractGaps));
   const open = openVersion(input.versions);
   if (open)
     reasons.push(

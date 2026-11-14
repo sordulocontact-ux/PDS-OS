@@ -15,6 +15,7 @@ import {
   participationDeal,
   titleMasterState,
   type ParticipationDeal,
+  type ParticipationWaiver,
   type TitleBoard,
   type TitleVersion,
 } from "@/lib/projects/title-board-rules";
@@ -38,7 +39,7 @@ export async function loadTitleBoard(
   access: Access,
 ): Promise<TitleBoard> {
   const supabase = await createClient();
-  const [titles, contracts, deals, versions] = await Promise.all([
+  const [titles, contracts, deals, versions, waivers] = await Promise.all([
     loadProjectTitles(project.id),
     supabase
       .from("title_participations")
@@ -59,6 +60,15 @@ export async function loadTitleBoard(
       .from("master_mix_versions")
       .select("master_id, stage, number, decision")
       .eq("project_id", project.id),
+    // Lot 12: the waivers of the direction, read by whoever sees the
+    // project (principle 5: traced, never hidden).
+    supabase
+      .from("participation_waivers")
+      .select(
+        "id, participation_id, scope, reason, risk, due_on, granted_at, revoked_at, revoke_reason, granter:people!participation_waivers_granted_by_fkey(first_name, last_name), revoker:people!participation_waivers_revoked_by_fkey(first_name, last_name)",
+      )
+      .eq("project_id", project.id)
+      .order("granted_at", { ascending: false }),
   ]);
   // A failed read is not « no contract » nor « no deal »: thrown to the
   // error page rather than shown as missing.
@@ -68,6 +78,30 @@ export async function loadTitleBoard(
     throw new Error(`loadTitleBoard deals: ${deals.error.message}`);
   if (versions.error)
     throw new Error(`loadTitleBoard versions: ${versions.error.message}`);
+  if (waivers.error)
+    throw new Error(`loadTitleBoard waivers: ${waivers.error.message}`);
+  const waiversOf = new Map<string, ParticipationWaiver[]>();
+  for (const row of waivers.data ?? []) {
+    if (row.scope !== "shoot" && row.scope !== "release") continue;
+    const list = waiversOf.get(row.participation_id) ?? [];
+    list.push({
+      id: row.id,
+      scope: row.scope,
+      reason: row.reason,
+      risk: row.risk,
+      dueOn: row.due_on,
+      grantedBy: row.granter
+        ? personName(row.granter.first_name, row.granter.last_name)
+        : null,
+      grantedAt: row.granted_at,
+      revokedAt: row.revoked_at,
+      revokedBy: row.revoker
+        ? personName(row.revoker.first_name, row.revoker.last_name)
+        : null,
+      revokeReason: row.revoke_reason,
+    });
+    waiversOf.set(row.participation_id, list);
+  }
 
   const masterIds = titles.flatMap((title) =>
     title.master ? [title.master.id] : [],
@@ -167,6 +201,7 @@ export async function loadTitleBoard(
             contract: linked?.contract ?? null,
           }),
           deal: participationDeal(dealsOf.get(participation.id) ?? []),
+          waivers: waiversOf.get(participation.id) ?? [],
         };
       }),
     })),

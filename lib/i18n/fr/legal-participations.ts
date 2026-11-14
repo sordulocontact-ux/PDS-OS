@@ -20,6 +20,7 @@ export const legalParticipations = {
     negotiation: "Négociation",
     nextAction: "Prochaine action",
     title: "Titre",
+    actions: "Actions",
   },
   // Under 1280 px, the hidden columns under the name.
   caption: {

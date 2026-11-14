@@ -1,7 +1,10 @@
 // Notification types and text. Client-safe.
 
 import { routes } from "@/lib/auth/redirects";
-import { legalDemarcheHref } from "@/lib/ui/legal-steps";
+import {
+  legalDemarcheHref,
+  legalParticipationsHref,
+} from "@/lib/ui/legal-steps";
 import { notifications } from "@/lib/i18n/fr/notifications";
 import { distributionStepHref } from "@/lib/ui/distribution-steps";
 import { reviewStepHref } from "@/lib/ui/review-steps";
@@ -83,6 +86,10 @@ export const NOTIFICATION_KINDS = [
   // (lot 9 bis of docs/pds-mic-plan.md): the Master's Source.
   "master_files_requested",
   "master_files_received",
+  // A collective's waiver of a missing participation contract granted or
+  // revoked by the direction (lot 12): to the project's owner.
+  "participation_waiver_granted",
+  "participation_waiver_revoked",
   // A fiche de renseignements came back through its link (JUR-11).
   "legal_form_received",
   // Production: a version waits for its decision; corrections are asked to
@@ -338,6 +345,9 @@ export function notificationHref(
   // The mastering has its own step (ticket « Architecture globale »).
   if (kind.startsWith("master_mastering_"))
     return routes.projectMasterStep(projectId, "mastering");
+  // Lot 12: the participations' contracts and waivers, in the Juridique.
+  if (kind.startsWith("participation_waiver_"))
+    return legalParticipationsHref(projectId);
   if (kind === "master_source_newer" || kind.startsWith("master_files_"))
     return routes.projectMasterStep(projectId, "source");
   if (

@@ -21,6 +21,7 @@ import {
   RenameTitleForm,
   type ArtistChoices,
 } from "@/components/projects/titles/title-forms";
+import { WaiverLines } from "@/components/legal/waiver-lines";
 import { EmptyState } from "@/components/shell/empty-state";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -48,6 +49,7 @@ import { contracts } from "@/lib/i18n/fr/contracts";
 import { deals } from "@/lib/i18n/fr/deals";
 import { demos } from "@/lib/i18n/fr/demos";
 import { dialogs } from "@/lib/i18n/fr/dialogs";
+import { participationWaivers } from "@/lib/i18n/fr/participation-waivers";
 import { projectTitles } from "@/lib/i18n/fr/project-titles";
 import { setTitleParticipationStatus } from "@/lib/projects/participation-actions";
 import { isActiveParticipation } from "@/lib/projects/participation-rules";
@@ -57,6 +59,7 @@ import {
   startTitleWork,
 } from "@/lib/projects/title-actions";
 import {
+  contractGap,
   titleMasterLabel,
   titleMasterStatus,
   type BoardParticipation,
@@ -75,10 +78,18 @@ import {
   projectTitleTone,
   workflowStatusTone,
 } from "@/lib/ui/state-tones";
+import { todayInParis } from "@/lib/contracts/types";
 import { formatShortDay } from "@/lib/utils/day";
 import { cn } from "@/lib/utils";
 
-const fr = { contracts, deals, demos, dialogs, projectTitles };
+const fr = {
+  contracts,
+  deals,
+  demos,
+  dialogs,
+  participationWaivers,
+  projectTitles,
+};
 
 const caption =
   "text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-tertiary)]";
@@ -271,6 +282,7 @@ export function TitlesBoard({
   artists,
   masterOptions = {},
   links,
+  today = todayInParis(new Date()),
 }: {
   projectId: string;
   titles: BoardTitle[];
@@ -281,6 +293,8 @@ export function TitlesBoard({
   // Catalogue », lot 7): id → « Titre · Artistes ».
   masterOptions?: Record<string, string>;
   links: BoardLinks;
+  // Paris's day, read by the server (a waiver's due date, lot 12).
+  today?: string;
 }) {
   const t = fr.projectTitles.board;
   if (titles.length === 0)
@@ -308,6 +322,7 @@ export function TitlesBoard({
         artists={artists}
         masterOptions={masterOptions}
         links={links}
+        today={today}
       />
     ));
 
@@ -359,6 +374,7 @@ type RowProps = {
   artists: ArtistChoices;
   masterOptions: Record<string, string>;
   links: BoardLinks;
+  today: string;
 };
 
 /** A title's rows: its own, then its participations, or « Aucun artiste
@@ -381,6 +397,7 @@ function TitleRows(props: RowProps) {
           label={label}
           credit={credit}
           dealReach={dealReach}
+          today={props.today}
           // Its title abandoned: greyed and not edited (reactivate it first).
           dimmed={abandoned}
           canManage={canManage && !abandoned}
@@ -430,6 +447,7 @@ function TitleRow({
   artists,
   masterOptions,
   links,
+  today,
   label,
   adding,
   onAdding,
@@ -448,6 +466,11 @@ function TitleRow({
     title.sharedWith && !abandoned
       ? t.participations.shared(title.sharedWith.names, title.sharedWith.hidden)
       : null;
+  // Lot 12: its confirmed artists without their contract signed (the shoot
+  // and the release wait for them, or for a waiver).
+  const missing = title.participations
+    .filter((p) => contractGap(title, p, today) !== null)
+    .map((p) => p.artist.name);
   return (
     <DataTableRow>
       <DataTableCell fill className={NAME_CELL}>
@@ -493,6 +516,20 @@ function TitleRow({
                 className="mt-0.5 size-4 shrink-0"
               />
               {`${shared}.`}
+            </span>
+          )}
+          {missing.length > 0 && (
+            <span
+              className={cn(
+                caption,
+                "flex items-start gap-1.5 text-[color:var(--tone-warning-fg)]",
+              )}
+            >
+              <IconTriangleWarning
+                aria-hidden
+                className="mt-0.5 size-4 shrink-0"
+              />
+              {fr.participationWaivers.titleMissing(missing.join(", "))}
             </span>
           )}
           <HiddenFacts
@@ -547,6 +584,7 @@ function ParticipationRow({
   label,
   credit,
   dealReach,
+  today,
   dimmed,
   canManage,
   toCheck,
@@ -556,6 +594,7 @@ function ParticipationRow({
   label: string;
   credit: Credit;
   dealReach: DealReach;
+  today: string;
   dimmed: boolean;
   canManage: boolean;
   toCheck: boolean;
@@ -635,6 +674,9 @@ function ParticipationRow({
               />
               {t.participations.sharedShort}
             </span>
+          )}
+          {!dimmed && (
+            <WaiverLines waivers={participation.waivers} today={today} />
           )}
           <HiddenFacts facts={hidden} />
         </span>

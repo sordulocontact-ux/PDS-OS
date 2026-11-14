@@ -82,6 +82,8 @@ import { masterDelay } from "./master-delay";
 import { masterAnswer } from "./master-answer";
 import { masterInHouse } from "./master-inhouse";
 import { masterFileRequests } from "./master-file-requests";
+import { participationWaivers } from "./participation-waivers";
+import { legalParticipations } from "./legal-participations";
 import { masterJourney } from "./master-journey";
 import { reviewJourney } from "./review-journey";
 import { masterPage } from "./master-page";
@@ -311,6 +313,8 @@ export const fr = {
   masterAnswer,
   masterInHouse,
   masterFileRequests,
+  participationWaivers,
+  legalParticipations,
   masterSource,
   artistActivity,
   masterPage,

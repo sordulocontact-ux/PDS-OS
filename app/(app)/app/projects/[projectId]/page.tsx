@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 
 import { DependencyRows } from "@/components/overview/dependency-rows";
+import { ContractGapsCallout } from "@/components/legal/contract-gaps-notice";
+import { loadContractGaps } from "@/lib/legal/contract-gaps";
 import { FramingDeliverable } from "@/components/overview/framing-deliverable";
 import { OverviewNow } from "@/components/overview/overview-now";
 import { OverviewProgress } from "@/components/overview/overview-progress";
@@ -109,13 +111,22 @@ export default async function ProjectOverviewPage({
 
   // A collective's titles have their own section once launched (« Titres
   // et artistes », lot 6 of docs/pds-mic-plan.md), not the overview.
-  const [all, flows, launchedAt, creatives, covers] = await Promise.all([
-    loadShellJourneys(project.id),
-    loadWorkflowStates(project.id),
-    planLaunchedAt(project.id),
-    listProjectCreatives(project.id),
-    projectCoverUrls([coverSource(project)], "full"),
-  ]);
+  const [all, flows, launchedAt, creatives, covers, shootGaps, releaseGaps] =
+    await Promise.all([
+      loadShellJourneys(project.id),
+      loadWorkflowStates(project.id),
+      planLaunchedAt(project.id),
+      listProjectCreatives(project.id),
+      projectCoverUrls([coverSource(project)], "full"),
+      // A collective (lot 12): the missing participation contracts, said
+      // upstream (décision 6).
+      project.collective
+        ? loadContractGaps(project.id, "shoot")
+        : Promise.resolve([]),
+      project.collective
+        ? loadContractGaps(project.id, "release")
+        : Promise.resolve([]),
+    ]);
   const framing =
     all.journeys.find((journey) => journey.module === "framing")?.steps ?? [];
   const brief = framing.find((step) => step.key === "brief");
@@ -174,6 +185,12 @@ export default async function ProjectOverviewPage({
             )}
           </>
         }
+      />
+      <ContractGapsCallout
+        projectId={project.id}
+        shoot={shootGaps}
+        release={releaseGaps}
+        canOpenLegal={can(access, "manage_legal")}
       />
       {/* Two zones, one title each (retour d'Akili du 05/11/2026, proto
           « Vue d'ensemble » validated 10/11): what the viewer does now,

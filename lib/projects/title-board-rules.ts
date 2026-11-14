@@ -144,7 +144,7 @@ export function titleMasterStatus(
  *   do, never red);
  * - none: not expected yet (proposed, invited) or no longer (declined,
  *   withdrawn).
- * Waivers come with lot 12.
+ * Waivers: participation_waivers (lot 12), beside it.
  */
 export type ParticipationContract =
   | { kind: "contract"; id: string; title: string; state: ContractState }
@@ -215,12 +215,79 @@ export function dealReach(input: {
   return input.visibleDeals > 0 ? "partial" : "none";
 }
 
+// ------------------------------------------------------------------ Waivers
+
+export const WAIVER_SCOPES = ["shoot", "release"] as const;
+export type WaiverScope = (typeof WAIVER_SCOPES)[number];
+
+/**
+ * A waiver of the direction to shoot or release without the participation's
+ * contract signed (lot 12, participation_waivers): append-only, revoked
+ * without anything overwritten; past its due date it no longer covers.
+ */
+export type ParticipationWaiver = {
+  id: string;
+  scope: WaiverScope;
+  reason: string;
+  risk: string | null;
+  dueOn: string;
+  grantedBy: string | null;
+  grantedAt: string;
+  revokedAt: string | null;
+  revokedBy: string | null;
+  revokeReason: string | null;
+};
+
+/** Open: not revoked, its due date not passed (Paris day). */
+export const isOpenWaiver = (waiver: ParticipationWaiver, today: string) =>
+  waiver.revokedAt === null && waiver.dueOn >= today;
+
+/** Where a waiver stands, for its line: open, lapsed, revoked. */
+export function waiverState(
+  waiver: ParticipationWaiver,
+  today: string,
+): "open" | "lapsed" | "revoked" {
+  if (waiver.revokedAt !== null) return "revoked";
+  return waiver.dueOn >= today ? "open" : "lapsed";
+}
+
+/** The contract is signed for the locks (contracts.status = 'signed'; an
+ * expired signed contract stays signed, décision 6). Unknown to a viewer
+ * who may not read it: never said missing. */
+export const contractSigned = (contract: ParticipationContract) =>
+  contract.kind === "contract" &&
+  (contract.state === "signed" || contract.state === "expired");
+
+/**
+ * What lot 12 checks of a participation: confirmed, on a title not
+ * abandoned, its contract not signed (and readable). `covered`: for each
+ * scope, an open waiver. Null: nothing to check (not confirmed, title
+ * abandoned, contract signed or unreadable).
+ */
+export function contractGap(
+  title: { status: string },
+  participation: Pick<BoardParticipation, "status" | "contract" | "waivers">,
+  today: string,
+): { shoot: boolean; release: boolean } | null {
+  if (title.status === "abandoned" || participation.status !== "confirmed")
+    return null;
+  if (participation.contract.kind === "hidden") return null;
+  if (contractSigned(participation.contract)) return null;
+  const covered = (scope: WaiverScope) =>
+    participation.waivers.some(
+      (w) => w.scope === scope && isOpenWaiver(w, today),
+    );
+  return { shoot: covered("shoot"), release: covered("release") };
+}
+
 // ------------------------------------------------------------------- Board
 
 export type BoardParticipation = TitleParticipation & {
   contract: ParticipationContract;
   // Null: no deal the viewer sees.
   deal: ParticipationDeal | null;
+  // Lot 12: its waivers, newest first (revoked and lapsed ones kept).
+  waivers: ParticipationWaiver[];
 };
 
 export type BoardTitle = Omit<ProjectTitle, "participations"> & {

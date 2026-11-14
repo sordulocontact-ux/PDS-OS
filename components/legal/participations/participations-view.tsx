@@ -3,9 +3,13 @@
 import { DealStageBadge } from "@/components/deals/deal-stage-badge";
 import { IconUserPlus } from "@/components/icons";
 import { OpenDealButton } from "@/components/legal/participations/open-deal-button";
+import { WaiverActions } from "@/components/legal/participations/waiver-actions";
+import { WaiverLines } from "@/components/legal/waiver-lines";
 import { EmptyState } from "@/components/shell/empty-state";
 import {
   DataTable,
+  DataTableActionsCell,
+  DataTableActionsHead,
   DataTableBody,
   DataTableCell,
   DataTableGroupRow,
@@ -27,11 +31,14 @@ import {
   openDealOffer,
 } from "@/lib/legal/participation-tracking-rules";
 import { isActiveParticipation } from "@/lib/projects/participation-rules";
-import type {
-  BoardParticipation,
-  BoardTitle,
-  DealReach,
-  ParticipationContract,
+import {
+  contractGap,
+  isOpenWaiver,
+  WAIVER_SCOPES,
+  type BoardParticipation,
+  type BoardTitle,
+  type DealReach,
+  type ParticipationContract,
 } from "@/lib/projects/title-board-rules";
 import { masterNameOf, projectTitleLabel } from "@/lib/projects/title-rules";
 import { formatShortDate } from "@/lib/release/format";
@@ -133,6 +140,7 @@ export function ParticipationsView({
   titles,
   dealReach,
   canCreate,
+  canWaive,
   negotiators,
   today,
 }: {
@@ -140,6 +148,8 @@ export function ParticipationsView({
   titles: BoardTitle[];
   dealReach: DealReach;
   canCreate: boolean;
+  // The direction (« validate »): grants and revokes waivers (lot 12).
+  canWaive: boolean;
   negotiators: Array<{ id: string; name: string }>;
   today: string;
 }) {
@@ -162,7 +172,7 @@ export function ParticipationsView({
     );
   const deals = dealReach !== "none";
   // Every column, hidden ones included (the group row spans them all).
-  const columns = deals ? 5 : 3;
+  const columns = (deals ? 5 : 3) + (canWaive ? 1 : 0);
   return (
     <DataTable>
       <DataTableHeader>
@@ -183,6 +193,7 @@ export function ParticipationsView({
             {t.columns.nextAction}
           </DataTableHead>
         )}
+        {canWaive && <DataTableActionsHead label={t.columns.actions} />}
       </DataTableHeader>
       <DataTableBody>
         {titles.map((title) => {
@@ -217,7 +228,9 @@ export function ParticipationsView({
                     titleLabel={label}
                     participation={participation}
                     dealReach={dealReach}
+                    projectId={projectId}
                     canCreate={canCreate}
+                    canWaive={canWaive}
                     negotiators={negotiators}
                     today={today}
                   />
@@ -230,14 +243,18 @@ export function ParticipationsView({
 }
 
 function ParticipationRow({
+  projectId,
   title,
   titleLabel,
   participation,
   dealReach,
   canCreate,
+  canWaive,
   negotiators,
   today,
 }: {
+  projectId: string;
+  canWaive: boolean;
   title: BoardTitle;
   titleLabel: string;
   participation: BoardParticipation;
@@ -268,6 +285,16 @@ function ParticipationRow({
       : t.negotiation.unassigned
     : null;
   const artist = participation.artist.name;
+  // Lot 12: a confirmed participation of a live title without its contract
+  // signed; the direction covers each scope by a waiver, or revokes one.
+  const gap = contractGap(title, participation, today);
+  const openWaivers = participation.waivers.filter((w) =>
+    isOpenWaiver(w, today),
+  );
+  const grantable = gap ? WAIVER_SCOPES.filter((scope) => !gap[scope]) : [];
+  const waiverLines = !dimmed && (
+    <WaiverLines waivers={participation.waivers} today={today} />
+  );
   return (
     <DataTableRow>
       <DataTableCell fill className="whitespace-normal">
@@ -297,6 +324,7 @@ function ParticipationRow({
                 </span>
               </span>
             )}
+            {waiverLines}
             {deals && stage && (
               <span className={caption}>
                 {`${t.caption.negotiation} : `}
@@ -335,27 +363,33 @@ function ParticipationRow({
           {fr.projectTitles.participations.statuses[participation.status]}
         </StatusBadge>
       </DataTableCell>
-      <DataTableCell hideBelow="xl" className={COLUMN.contract}>
-        {contract.kind === "contract" ? (
-          <ViewLink
-            href={routes.contract(contract.id)}
-            className="relative z-10 inline-flex rounded-full outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--focus-ring)]"
-          >
-            <StatusBadge tone={contractStateTone[contract.state]} size="sm">
+      <DataTableCell
+        hideBelow="xl"
+        className={cn(COLUMN.contract, "whitespace-normal")}
+      >
+        <span className="flex flex-col items-start gap-1">
+          {contract.kind === "contract" ? (
+            <ViewLink
+              href={routes.contract(contract.id)}
+              className="relative z-10 inline-flex rounded-full outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--focus-ring)]"
+            >
+              <StatusBadge tone={contractStateTone[contract.state]} size="sm">
+                {contractWords}
+              </StatusBadge>
+            </ViewLink>
+          ) : contract.kind === "missing" ? (
+            <StatusBadge tone="warning" size="sm">
               {contractWords}
             </StatusBadge>
-          </ViewLink>
-        ) : contract.kind === "missing" ? (
-          <StatusBadge tone="warning" size="sm">
-            {contractWords}
-          </StatusBadge>
-        ) : contract.kind === "hidden" ? (
-          <StatusBadge tone="neutral" size="sm">
-            {contractWords}
-          </StatusBadge>
-        ) : (
-          <span className={muted}>{EMPTY_CELL}</span>
-        )}
+          ) : contract.kind === "hidden" ? (
+            <StatusBadge tone="neutral" size="sm">
+              {contractWords}
+            </StatusBadge>
+          ) : (
+            <span className={muted}>{EMPTY_CELL}</span>
+          )}
+          {waiverLines}
+        </span>
       </DataTableCell>
       {deals && (
         <DataTableCell
@@ -429,6 +463,20 @@ function ParticipationRow({
             <span className={muted}>{EMPTY_CELL}</span>
           )}
         </DataTableCell>
+      )}
+      {canWaive && (
+        <DataTableActionsCell>
+          {(grantable.length > 0 || openWaivers.length > 0) && !dimmed && (
+            <WaiverActions
+              projectId={projectId}
+              participationId={participation.id}
+              artist={artist}
+              title={titleLabel}
+              open={openWaivers}
+              grantable={grantable}
+            />
+          )}
+        </DataTableActionsCell>
       )}
     </DataTableRow>
   );

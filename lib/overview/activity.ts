@@ -14,6 +14,7 @@ import {
   participationStatusOf,
 } from "@/lib/projects/participation-rules";
 import { projectTitleLabel } from "@/lib/projects/title-rules";
+import { formatShortDate } from "@/lib/release/format";
 import type { ProjectDetail } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -263,6 +264,23 @@ function titleEventText(kind: string, detail: Record<string, unknown>): string {
       );
     case "main_artist_changed":
       return t.mainArtistChanged(text(detail.from), text(detail.to) ?? "");
+    // Lot 12: the direction's waivers of a missing contract.
+    case "waiver_granted":
+    case "waiver_revoked": {
+      const w = fr.participationWaivers.scopeOf;
+      const scope = detail.scope === "release" ? w.release : w.shoot;
+      const artist = text(detail.artist) ?? "";
+      if (kind === "waiver_revoked")
+        return t.waiverRevoked(scope, artist, current, text(detail.reason));
+      const due = text(detail.due_on);
+      return t.waiverGranted(
+        scope,
+        artist,
+        current,
+        due ? formatShortDate(due) : "",
+        text(detail.reason) ?? "",
+      );
+    }
     default:
       return "";
   }

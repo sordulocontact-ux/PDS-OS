@@ -412,5 +412,22 @@ export const projectTitles = {
       from
         ? `Artiste principal · ${from} → ${to}`
         : `Artiste principal · ${to}`,
+    // « Dérogation de tournage accordée · Nadia Benali · Titre 2 · jusqu'au
+    // 30 nov. 2026 · le contrat part lundi » (lot 12).
+    waiverGranted: (
+      scope: string,
+      artist: string,
+      label: string,
+      due: string,
+      reason: string,
+    ) =>
+      `Dérogation ${scope} accordée · ${artist} · ${label} · jusqu'au ${due}${reason ? ` · ${reason}` : ""}`,
+    waiverRevoked: (
+      scope: string,
+      artist: string,
+      label: string,
+      reason: string | null,
+    ) =>
+      `Dérogation ${scope} révoquée · ${artist} · ${label}${reason ? ` · ${reason}` : ""}`,
   },
 } as const;
