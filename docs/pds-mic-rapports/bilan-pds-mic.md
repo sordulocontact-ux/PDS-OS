@@ -50,8 +50,6 @@ PDS MIC (voir plus bas).
   référence (`lib/projects/title-plan/pds-logo.ts`) ; à remplacer par le fichier officiel.
 - **Police des titres du plan** : League Gothic (libre) remplace SegmentA, sans licence web
   libre. Une licence SegmentA si Ibé y tient : une ligne dans `lib/projects/title-plan/fonts.ts`.
-- **Avertissements dans les sessions studio et le Brief Mix/Master** (cités par le plan au lot 12,
-  pas par le prompt) : non faits.
 - **Une sortie archivée** n'apparaît plus dans « Sorties » : son dépôt se relit par son adresse
   seulement.
 - **Plan de sortie à 390 px** : le document partagé se lit comme un diaporama réduit (zoom
