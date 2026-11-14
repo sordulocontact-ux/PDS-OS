@@ -1,6 +1,10 @@
 // « Demander des fichiers » in a collective's Master (lot 9 bis of
 // docs/pds-mic-plan.md): the owner asks a member of the team for the source
 // of several titles; one line per title, received by its first audio file.
+// « de » elides before a vowel: « Ouvrir le deal d'Iris Moon ».
+const de = (name: string) =>
+  /^[aeiouyàâéèêëîïôûüh]/i.test(name) ? `d'${name}` : `de ${name}`;
+
 export const masterFileRequests = {
   button: "Demander des fichiers",
   title: "Demander des fichiers",
@@ -33,15 +37,15 @@ export const masterFileRequests = {
     `Fichiers demandés à ${name} le ${date}`,
   askedBy: (name: string, date: string) => `Demandé par ${name} le ${date}`,
   cancel: "Annuler la demande",
-  cancelLabel: (title: string) => `Annuler la demande de fichiers de ${title}`,
+  cancelLabel: (title: string) => `Annuler la demande de fichiers ${de(title)}`,
   cancelled: "Demande annulée.",
   // The person asked: their lines, all titles together.
   mine: "Fichiers qui vous sont demandés",
   mineHint:
     "Déposez la source de chaque titre : elle arrive au Catalogue sur ce titre seulement, et la demande est marquée reçue.",
   deposit: "Déposer le fichier",
-  depositLabel: (title: string) => `Déposer le fichier de ${title}`,
-  depositTitle: (title: string) => `Déposer le fichier de ${title}`,
+  depositLabel: (title: string) => `Déposer le fichier ${de(title)}`,
+  depositTitle: (title: string) => `Déposer le fichier ${de(title)}`,
   depositDescription:
     "Le fichier devient une version audio de ce titre au Catalogue. Choisissez ce que c'est, puis confirmez l'envoi.",
   audioState: "Ce fichier est",

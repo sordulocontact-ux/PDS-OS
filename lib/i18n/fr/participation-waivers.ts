@@ -2,6 +2,10 @@
 // waivers (lot 12 of docs/pds-mic-plan.md, décision 6): preparing and
 // recording stay possible, warned; the shoot and the release are blocked
 // without the contract signed or a waiver of that scope.
+// « de » elides before a vowel: « Ouvrir le deal d'Iris Moon ».
+const de = (name: string) =>
+  /^[aeiouyàâéèêëîïôûüh]/i.test(name) ? `d'${name}` : `de ${name}`;
+
 export const participationWaivers = {
   scopes: { shoot: "Tournage", release: "Sortie" },
   // « Dérogation de tournage »
@@ -14,10 +18,12 @@ export const participationWaivers = {
     revoked: (scope: string) => `Dérogation ${scope} révoquée`,
   },
   // The warning on a title of « Titres et artistes ».
-  titleMissing: (names: string) => `Contrat manquant : ${names}`,
+  titleMissing: (names: string) => `Contrat non signé : ${names}`,
   // Upstream (the overview, the Production's preparation).
   callout: {
-    title: "Contrats de participation manquants",
+    title: "Contrats de participation non signés",
+    both: (names: string) =>
+      `Tournage et sortie bloqués sans dérogation : ${names}.`,
     shoot: (names: string) => `Tournage bloqué sans dérogation : ${names}.`,
     release: (names: string) => `Sortie bloquée sans dérogation : ${names}.`,
     body: "La préparation et l'enregistrement continuent. Faites signer les contrats, ou demandez à la direction une dérogation.",
@@ -27,7 +33,10 @@ export const participationWaivers = {
   shoot: {
     blocked: (names: string) =>
       `Tournage bloqué : contrat non signé de ${names}, et aucune dérogation de tournage ouverte.`,
-    how: "Faites signer le contrat, ou demandez à la direction une dérogation de tournage.",
+    how: (count: number) =>
+      count > 1
+        ? "Faites signer les contrats, ou demandez à la direction une dérogation de tournage pour chacun."
+        : "Faites signer le contrat, ou demandez à la direction une dérogation de tournage.",
     readiness: (names: string) =>
       `Avant le tournage : contrat non signé de ${names}. « Prête pour tournage » reste possible, mais le tournage sera bloqué sans contrat signé ni dérogation de tournage.`,
   },
@@ -41,7 +50,7 @@ export const participationWaivers = {
   },
   // The direction's gestures, in « Participations et contrats ».
   actions: {
-    label: (artist: string) => `Dérogations de ${artist}`,
+    label: (artist: string) => `Dérogations ${de(artist)}`,
     grant: "Accorder une dérogation",
     revoke: (scope: string) => `Révoquer la dérogation ${scope}`,
   },

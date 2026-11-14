@@ -1,5 +1,9 @@
 // The titles of a collective project (docs/pds-mic-plan.md, lot 2): the
 // view « Titres et artistes » (lot 6), its gestures, their history.
+// « de » elides before a vowel: « Ouvrir le deal d'Iris Moon ».
+const de = (name: string) =>
+  /^[aeiouyàâéèêëîïôûüh]/i.test(name) ? `d'${name}` : `de ${name}`;
+
 export const projectTitles = {
   title: "Titres et artistes",
   empty: "Aucun titre pour l'instant.",
@@ -174,7 +178,7 @@ export const projectTitles = {
       unassigned: "À affecter",
       // The link to the deal, for a screen reader: the artist and the step.
       link: (artist: string, stage: string) =>
-        `Ouvrir le deal de ${artist}, étape ${stage}`,
+        `Ouvrir le deal ${de(artist)}, étape ${stage}`,
     },
     master: {
       todo: "À mixer",
@@ -273,7 +277,7 @@ export const projectTitles = {
     status: {
       action: "Changer le statut",
       title: (artist: string, label: string) =>
-        `Participation de ${artist} à « ${label} »`,
+        `Participation ${de(artist)} à « ${label} »`,
       // A credit is never removed by a participation (décision 10): said
       // before confirming, since withdrawing later keeps it; none is
       // written on a title a simple project shares.

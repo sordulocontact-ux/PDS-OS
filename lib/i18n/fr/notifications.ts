@@ -260,7 +260,7 @@ export const notifications = {
     master_files_received: (actor: string, project: string) =>
       `${actor} a déposé un fichier demandé pour « ${project} » : la source du titre est à confirmer.`,
     participation_waiver_granted: (actor: string, project: string) =>
-      `${actor} a accordé une dérogation à un contrat de participation manquant de « ${project} ».`,
+      `${actor} a accordé une dérogation pour un contrat de participation non signé de « ${project} ».`,
     participation_waiver_revoked: (actor: string, project: string) =>
       `${actor} a révoqué une dérogation à un contrat de participation de « ${project} » : le contrat redevient nécessaire.`,
     master_round_assigned: (actor: string, project: string) =>

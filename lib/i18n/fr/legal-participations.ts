@@ -1,6 +1,10 @@
 // « Participations et contrats » of a collective's Juridique (lot 11 of
 // docs/pds-mic-plan.md): each artist on each title, the contract of the
 // participation and its deal (Business module), read under their rights.
+// « de » elides before a vowel: « Ouvrir le deal d'Iris Moon ».
+const de = (name: string) =>
+  /^[aeiouyàâéèêëîïôûüh]/i.test(name) ? `d'${name}` : `de ${name}`;
+
 export const legalParticipations = {
   title: "Participations et contrats",
   link: "Participations et contrats",
@@ -47,7 +51,7 @@ export const legalParticipations = {
     by: (name: string) => `par ${name}`,
     unassigned: "À affecter",
     link: (artist: string, stage: string) =>
-      `Ouvrir le deal de ${artist}, étape ${stage}`,
+      `Ouvrir le deal ${de(artist)}, étape ${stage}`,
   },
   open: {
     button: "Ouvrir un dossier",
@@ -55,7 +59,7 @@ export const legalParticipations = {
     label: (artist: string, title: string) =>
       `Ouvrir un dossier de négociation pour ${artist} sur ${title}`,
     title: (artist: string, title: string) =>
-      `Ouvrir le dossier de négociation de ${artist} · ${title}`,
+      `Ouvrir le dossier de négociation ${de(artist)} · ${title}`,
     description:
       "Le dossier (deal) se crée dans le module Business, rattaché à cette participation. Si l'artiste a déjà accepté, il démarre en négociation.",
     negotiator: "Négocié par",

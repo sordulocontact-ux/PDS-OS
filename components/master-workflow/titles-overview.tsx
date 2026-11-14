@@ -43,12 +43,14 @@ export async function TitlesOverview({
     <section aria-label={t.label} className="flex flex-col gap-3">
       <StatTiles
         stats={titleWaitings(projectId, scope).map((w) => {
+          // « dont N demandés » takes a name's room (close heights).
+          const shown = w.requested > 0 ? SHOWN - 1 : SHOWN;
           const names =
             w.names.length === 0
               ? t.none
               : [
-                  w.names.slice(0, SHOWN).join(", "),
-                  w.names.length > SHOWN ? t.more(w.names.length - SHOWN) : "",
+                  w.names.slice(0, shown).join(", "),
+                  w.names.length > shown ? t.more(w.names.length - shown) : "",
                 ]
                   .filter(Boolean)
                   .join(" ");

@@ -39,14 +39,24 @@ export function ContractGapsCallout({
   canOpenLegal: boolean;
 }) {
   if (shoot.length === 0 && release.length === 0) return null;
+  // The same participations for both: said once.
+  const same = gapNames(shoot) === gapNames(release);
   return (
     <div className="flex flex-col items-start gap-3">
       <ToneCallout tone="warning">
         <span className="flex flex-col gap-1">
           <b className="font-semibold">{t.callout.title}</b>
-          {shoot.length > 0 && <span>{t.callout.shoot(gapNames(shoot))}</span>}
-          {release.length > 0 && (
-            <span>{t.callout.release(gapNames(release))}</span>
+          {same ? (
+            <span>{t.callout.both(gapNames(shoot))}</span>
+          ) : (
+            <>
+              {shoot.length > 0 && (
+                <span>{t.callout.shoot(gapNames(shoot))}</span>
+              )}
+              {release.length > 0 && (
+                <span>{t.callout.release(gapNames(release))}</span>
+              )}
+            </>
           )}
           <span>{t.callout.body}</span>
         </span>
@@ -82,7 +92,7 @@ export function ShootContractNotice({
         ) : (
           <span className="flex flex-col gap-1">
             <b className="font-semibold">{t.shoot.blocked(names)}</b>
-            <span>{t.shoot.how}</span>
+            <span>{t.shoot.how(gaps.length)}</span>
           </span>
         )}
       </ToneCallout>

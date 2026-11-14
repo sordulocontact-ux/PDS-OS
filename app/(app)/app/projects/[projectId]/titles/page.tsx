@@ -3,7 +3,11 @@ import { notFound } from "next/navigation";
 import { ProjectHeader } from "@/components/projects/project-header";
 import { TitlesActions } from "@/components/projects/titles/titles-actions";
 import { TitlesBoard } from "@/components/projects/titles/titles-board";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
+import { ViewLink } from "@/components/ui/view-link";
+import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
+import { legalParticipationsHref } from "@/lib/ui/legal-steps";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { canEditProject } from "@/lib/projects/edit-access";
@@ -37,6 +41,7 @@ export default async function ProjectTitlesPage({
   if (!project.collective) notFound();
   // A launched project: only its owner writes (is_project_owner).
   const canManage = canEditProject(access, project);
+  const canOpenLegal = can(access, "manage_legal");
   const [board, flows] = await Promise.all([
     loadTitleBoard(project, access),
     loadWorkflowStates(project.id),
@@ -72,12 +77,26 @@ export default async function ProjectTitlesPage({
         projectId={projectId}
         facts={facts}
         actions={
-          canManage ? (
-            <TitlesActions
-              projectId={project.id}
-              masterOptions={masterOptions}
-              artists={artists}
-            />
+          canManage || canOpenLegal ? (
+            <div className="flex flex-wrap items-center gap-2">
+              {canManage && (
+                <TitlesActions
+                  projectId={project.id}
+                  masterOptions={masterOptions}
+                  artists={artists}
+                />
+              )}
+              {/* Lots 11 and 12: each participation's contract, deal and
+                  waivers, in the Juridique. */}
+              {canOpenLegal && (
+                <ViewLink
+                  href={legalParticipationsHref(project.id)}
+                  className={buttonVariants({ variant: "ghost" })}
+                >
+                  <ButtonRoll>{fr.legalParticipations.link}</ButtonRoll>
+                </ViewLink>
+              )}
+            </div>
           ) : undefined
         }
       />

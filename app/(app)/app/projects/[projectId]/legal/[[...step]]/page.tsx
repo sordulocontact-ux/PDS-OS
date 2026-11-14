@@ -1,5 +1,12 @@
 import { notFound, redirect } from "next/navigation";
 
+import { WorkflowLocked } from "@/components/plan/workflow-locked";
+import { can } from "@/lib/auth/access";
+import { requireApproved } from "@/lib/auth/dal";
+import { isWorkflowLaunched, workflowGate } from "@/lib/plan/queries";
+import { requireLaunchedProject } from "@/lib/projects/queries";
+import { allInOrder } from "@/lib/utils/parallel";
+
 import { HistoryView } from "@/components/legal/history/history-view";
 import { ParticipationsPage } from "@/components/legal/participations/participations-page";
 import { ConfirmationStep } from "@/components/legal/steps/confirmation-step";
@@ -24,6 +31,21 @@ import { legalRouteOf } from "@/lib/ui/legal-steps";
 // /contracts, /splits, /clearances, /formalities) redirect to the démarche
 // they were about: notifications and tasks keep working. Reserved to
 // manage_legal: anyone else gets the same 404 as a missing page.
+/** The Juridique waits for the Plan du Projet (docs/ARCHITECTURE.md § 6
+ * ter): launched from the plan, or already begun before it existed. Without
+ * manage_legal the page itself answers 404. */
+async function legalLock(projectId: string) {
+  // Launched (the common case): no round of its own before the pages.
+  const [access, project, launched] = await allInOrder([
+    requireApproved(),
+    requireLaunchedProject(projectId),
+    isWorkflowLaunched(projectId, "legal"),
+  ]);
+  if (!can(access, "manage_legal") || launched) return null;
+  const gate = await workflowGate(project, "legal");
+  return gate ? <WorkflowLocked projectId={projectId} gate={gate} /> : null;
+}
+
 export default async function ProjectLegalPage({
   params,
   searchParams,
@@ -34,6 +56,12 @@ export default async function ProjectLegalPage({
   ]);
   const one = (key: string) =>
     typeof query[key] === "string" ? (query[key] as string) : null;
+  // A collective's participations, their contracts and deals: not behind
+  // the Juridique's launch (lots 11 and 12).
+  if (legalRouteOf(step)?.type !== "participations") {
+    const locked = await legalLock(projectId);
+    if (locked) return locked;
+  }
   if (!step || step.length === 0) {
     const { steps } = await legalJourneyContext(projectId);
     redirect(entryHref(projectId, steps, query));

@@ -1,7 +1,8 @@
 # Projet collectif (PDS Mic) : résumé
 
 Résumé de travail de `docs/pds-mic-plan.md` (qui fait foi en cas de doute). Mis à jour à la fin
-de chaque lot. Dernière mise à jour : 14/11/2026, après le lot 12.
+de chaque lot. Dernière mise à jour : 14/11/2026, après le lot 12 et la passe Chrome des lots 9 bis à 12
+(`docs/pds-mic-rapports/recap-9-12.md`).
 
 **Module Business fait en parallèle par un collègue** : rôle Business manager, négociation, deal
 memo, contrats, contacts privés, mails. Ces lots n'y touchent pas ; son dossier de négociation
@@ -254,6 +255,17 @@ rattachées à leur titre, `MasterHistoryItem.masterId`) ; filtre « Titre » de
 ligne ; « Périmètre » en liste déroulante ; récapitulatif en mots des titres choisis ; « Tous
 titres confondus » pour l'absence de filtre ; renommage d'un titre provisoire expliqué. Détail :
 `docs/pds-mic-rapports/recap-7-10.md`.
+
+## Passe Chrome des lots 9 bis à 12 (14/11/2026)
+
+Corrigé : « Participations et contrats » accessible même quand le Juridique n'est pas dans le
+plan du projet (le verrou « workflow non lancé » est décidé par la page du Juridique, pas son
+layout ; toujours 404 sans `manage_legal`), lien depuis « Titres et artistes » ; « Contrat non
+signé » (règle) vs « Manquant » (aucun contrat) ; encart fusionné quand tournage et sortie
+nomment les mêmes contrats ; toasts (double point, « Dossier de négociation ouvert. ») ;
+erreurs de la modale de dérogation effacées à la saisie ; élisions des libellés lus (« d'Iris
+Moon »). Reste : le parcours de la Production dit « À vous : lancer le tournage » quand un
+contrat le bloque. Détail : `docs/pds-mic-rapports/recap-9-12.md`.
 
 ## Règles à tenir à chaque lot
 

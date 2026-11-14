@@ -119,17 +119,21 @@ function RequestFilesForm({
         const note = String(
           new FormData(event.currentTarget).get("note") ?? "",
         );
-        run(async () => {
-          const result = await requestMasterFiles({
-            projectId,
-            titleIds: picked,
-            personId: person,
-            note,
-          });
-          return result.ok
-            ? { ok: true, done: t.done(name(person), result.count ?? 0) }
-            : result;
-        });
+        // Titles already asked of this very person stay as they are.
+        const opened = picked.filter(
+          (id) =>
+            titles.find((x) => x.titleId === id)?.askedOf !== name(person),
+        ).length;
+        run(
+          () =>
+            requestMasterFiles({
+              projectId,
+              titleIds: picked,
+              personId: person,
+              note,
+            }),
+          t.done(name(person), opened),
+        );
       }}
     >
       <ChipMultiChoice

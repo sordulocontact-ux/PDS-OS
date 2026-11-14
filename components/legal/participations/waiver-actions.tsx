@@ -143,6 +143,15 @@ function GrantForm({
     <form
       noValidate
       className="flex flex-col gap-4"
+      // A field filled again clears its message.
+      onChange={(event) => {
+        const field = (event.target as unknown as { name?: string }).name;
+        if (field === "reason" || field === "dueOn")
+          setMissing((m) => ({
+            ...(field === "reason" ? {} : { reason: m.reason }),
+            ...(field === "dueOn" ? {} : { due: m.due }),
+          }));
+      }}
       onSubmit={(event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);

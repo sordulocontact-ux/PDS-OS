@@ -87,12 +87,14 @@ function OpenDealForm({
       className="flex flex-col gap-4"
       onSubmit={(event) => {
         event.preventDefault();
-        run(() =>
-          createDeal({
+        // The Business module's own gesture; said in this page's words.
+        run(async () => {
+          const result = await createDeal({
             participationId,
             assigneeId: assignee === NOBODY ? null : assignee,
-          }),
-        );
+          });
+          return result.ok ? { ok: true } : result;
+        });
       }}
     >
       {negotiators.length > 0 && (
