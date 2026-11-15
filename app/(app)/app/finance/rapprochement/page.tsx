@@ -77,15 +77,17 @@ export default async function FinanceReconcilePage({
   );
   const doubles = possibleDuplicates(data.transactions);
 
+  // New style (docs/FINANCE-V2.md, lot 2): the actions sit on the tabs' row;
+  // in the frame's head only while there is no list yet.
+  const action = canManage ? <ReconcileButtons /> : undefined;
+  const empty = data.transactions.length === 0 && !data.error;
+
   return (
-    <FinanceFrame
-      section="reconcile"
-      action={canManage ? <ReconcileButtons /> : undefined}
-    >
+    <FinanceFrame section="reconcile" action={empty ? action : undefined}>
       {(data.error || treasury.error) && (
         <FormMessage kind="error">{t.loadError}</FormMessage>
       )}
-      {data.transactions.length === 0 && !data.error ? (
+      {empty ? (
         <EmptyState
           icon={IconCreditCard}
           title={t.emptyTitle}
@@ -124,6 +126,7 @@ export default async function FinanceReconcilePage({
           </div>
           <DataTableViews
             label={t.views.label}
+            action={action}
             views={VIEWS.map((key) => ({
               href: `${routes.financeReconcile}?vue=${key}`,
               label: labels[key],

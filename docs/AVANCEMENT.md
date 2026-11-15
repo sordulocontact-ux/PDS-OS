@@ -2321,3 +2321,6 @@ les modules à parcours (proto « Mise en page des modules », version « Propos
       (tailles, graisses et arrondis d'un cran plus bas, `app/globals.css`) ; navigation à icônes en liste plate ;
       Vue d'ensemble en cartes-phrases (`FinanceHome`, `SentenceCard`, `TreasurySpark`, horizon `?horizon=`) ;
       `CockpitOverview`, `FlowCard`, `BudgetsCard`, `WatchCard` retirés.
+- [x] **Finance, nouveau style, lot 2 (15/11/2026)** — pages de section sans titre visible (h1 gardé pour les lecteurs
+      d'écran) ; action sur la ligne des onglets de Dépenses, Rapprochement et Factures & encaissements ; tableaux de
+      Finance en filets fins (en-tête sans bandeau, 13 px gris ; filets verticaux ; cellules 14 px).

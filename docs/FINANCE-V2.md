@@ -34,7 +34,7 @@ de la page, gardent le style de l'app.
 | Lot | Contenu | État |
 | --- | --- | --- |
 | 1 | Thème `finance-scope` (tailles, graisses, arrondis) ; navigation à icônes ; **Vue d'ensemble en cartes-phrases** (solde, prévision 30/60/90, point bas et réserve, à encaisser, à payer, budgets, justificatifs, alertes) | fait le 15/11/2026 |
-| 2 | Listes sans titre, barre d'outils d'abord ; tableau Finance (filets fins, montants à droite, état point + mot) sur Dépenses, Rapprochement, Factures & encaissements, Budgets, Exports ; total sous une liste filtrée | à faire |
+| 2 | Pages de section sans titre visible (h1 pour les lecteurs d'écran, nom gardé sur la page d'une enveloppe) ; action sur la ligne des onglets (Dépenses, Rapprochement, Factures & encaissements) ; tableau Finance dans le thème (en-tête sans bandeau en 13 px gris, filets verticaux, cellules 14 px, montants déjà à droite) | fait le 15/11/2026 ; le total sous une liste filtrée reste à faire (les cartes chiffre de chaque vue donnent déjà la somme) |
 | 3 | Fiche latérale Finance (↑ ↓, Échap, modification au champ, historique) pour une dépense, une opération Qonto, une facture | à faire |
 | 4 | Page d'un budget (chiffres, filtre par statut qui pilote tout, camembert légende dessous) ; Trésorerie (solde après chaque événement, déplacer une émission) ; Financements | à faire |
 | 5 | Graphiques lisibles ; recherche ⌘K et cloche d'alertes de Finance | à faire |

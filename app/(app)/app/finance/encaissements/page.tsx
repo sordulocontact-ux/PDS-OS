@@ -78,21 +78,22 @@ export default async function FinanceIncomesPage({
     annulees: v.views.cancelled,
   };
 
+  // New style (docs/FINANCE-V2.md, lot 2): the action sits on the tabs' row;
+  // in the frame's head only while there is no list yet.
+  const action =
+    canManage && access.organizationId ? (
+      <IncomeAddButton
+        targets={data.targets}
+        organizationId={access.organizationId}
+        ownerId={access.personId}
+      />
+    ) : undefined;
+  const empty = data.incomes.length === 0 && !data.error;
+
   return (
-    <FinanceFrame
-      section="incomes"
-      action={
-        canManage && access.organizationId ? (
-          <IncomeAddButton
-            targets={data.targets}
-            organizationId={access.organizationId}
-            ownerId={access.personId}
-          />
-        ) : undefined
-      }
-    >
+    <FinanceFrame section="incomes" action={empty ? action : undefined}>
       {data.error && <FormMessage kind="error">{t.loadError}</FormMessage>}
-      {data.incomes.length === 0 && !data.error ? (
+      {empty ? (
         <EmptyState
           icon={IconMoneyBillCoin}
           title={v.emptyTitle}
@@ -127,6 +128,7 @@ export default async function FinanceIncomesPage({
           </div>
           <DataTableViews
             label={v.views.label}
+            action={action}
             views={VIEWS.map((key) => ({
               href: `${routes.financeIncomes}?vue=${key}`,
               label: labels[key],

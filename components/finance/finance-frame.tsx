@@ -24,7 +24,10 @@ const fr = { treasury };
  * in `.finance-scope`, which redefines the type, weight and radius tokens
  * (app/globals.css), so every component inside takes Finance's lighter,
  * smaller look without a change of its own. `header={false}`: the page draws
- * its own head (the overview's greeting).
+ * its own head (the overview's greeting). Lot 2: a section's page shows no
+ * title (the sidebar already says where one is, as in the proto) and opens
+ * on its tools; its h1 stays for screen readers, its action on the right.
+ * An envelope's page (`title`) keeps its name as a visible title.
  */
 export function FinanceFrame({
   section,
@@ -47,12 +50,15 @@ export function FinanceFrame({
       <div className="min-w-0 flex-1">
         <PageContainer className="gap-6">
           <div className="flex flex-col gap-4">
-            {header && (
-              <PageHeader
-                title={title ?? current?.label ?? ""}
-                action={action}
-              />
-            )}
+            {header &&
+              (title ? (
+                <PageHeader title={title} action={action} />
+              ) : (
+                <div className="flex items-center justify-end gap-3 empty:hidden">
+                  <h1 className="sr-only">{current?.label}</h1>
+                  {action}
+                </div>
+              ))}
             <div className="md:hidden">
               <SectionTabs
                 label={fr.treasury.tabs.label}

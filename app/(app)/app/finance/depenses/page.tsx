@@ -110,13 +110,15 @@ export default async function FinanceSpendsPage({
     { key: "paid", title: t.tiles.paid, list: paidThisMonth, view: "payees" },
   ];
 
+  // New style (docs/FINANCE-V2.md, lot 2): the action sits on the tabs' row;
+  // in the frame's head only while there is no list yet.
+  const action = canManage ? <QuickExpenseButton /> : undefined;
+  const empty = data.spends.length === 0 && !data.error;
+
   return (
-    <FinanceFrame
-      section="spends"
-      action={canManage ? <QuickExpenseButton /> : undefined}
-    >
+    <FinanceFrame section="spends" action={empty ? action : undefined}>
       {data.error && <FormMessage kind="error">{t.loadError}</FormMessage>}
-      {data.spends.length === 0 && !data.error ? (
+      {empty ? (
         <EmptyState
           icon={IconMoneyBillCoin}
           title={t.emptyTitle}
@@ -138,6 +140,7 @@ export default async function FinanceSpendsPage({
           </div>
           <DataTableViews
             label={t.views.label}
+            action={action}
             views={VIEWS.map((key) => ({
               href: `${routes.financeSpends}?vue=${key}`,
               label: labels[key],

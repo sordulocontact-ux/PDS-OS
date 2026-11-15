@@ -1001,7 +1001,12 @@ plan et lots dans `docs/FINANCE-V2.md`. **Écart voulu, limité à Finance** :
 - **Vue d'ensemble en cartes-phrases** (`FinanceHome`, `SentenceCard`) : salutation à gauche, horizon 30/60/90,
   une carte par chose à savoir, chiffres en gras dans la phrase, la carte entière mène à sa page ; « En bref » en
   fond teinté, sans lien.
-- La suite (listes sans titre, tableau Finance, fiche latérale, graphiques) arrive par lots, `docs/FINANCE-V2.md`.
+- **Pages de section sans titre visible** (lot 2) : `FinanceFrame` garde le h1 pour les lecteurs d'écran ; l'action va sur
+  la ligne des onglets (`DataTableViews action`) quand la page en a, sinon en haut à droite ; la page d'une enveloppe
+  garde son nom en titre.
+- **Tableaux** (lot 2, même bloc de `app/globals.css`) : en-tête sans bandeau gris, en 13 px gris ; filets verticaux entre
+  les colonnes ; cellules en 14 px. Un tableau posé dans une carte de section garde sa forme nue.
+- La suite (fiche latérale, graphiques) arrive par lots, `docs/FINANCE-V2.md`.
 
 ### Arrondis
 

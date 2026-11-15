@@ -1344,3 +1344,28 @@ button[data-busy]::before {
 .finance-scope :is([data-slot="button"], .group\/button) {
   border-radius: var(--radius-lg);
 }
+/* Tableaux de Finance (lot 2) : en-tête sans bandeau, en 13 px gris ; filets
+   verticaux entre les colonnes ; cellules en 14 px. Les tableaux posés dans
+   une carte de section (table-flat) gardent leur forme nue. */
+.finance-scope [data-slot="table-header"] [data-slot="table-row"] {
+  background: transparent;
+}
+.finance-scope [data-slot="table-head"] {
+  height: 40px;
+  font-size: var(--type-colhead);
+  line-height: var(--type-colhead-lh);
+  color: var(--text-tertiary);
+  font-weight: 400;
+}
+.finance-scope [data-slot="table-cell"] {
+  font-size: var(--type-body-sm);
+  line-height: var(--type-body-sm-lh);
+}
+.finance-scope
+  :is(
+    [data-slot="table-head"] + [data-slot="table-head"],
+    [data-slot="table-cell"] + [data-slot="table-cell"]
+  ):not(.section-card *) {
+  border-left: 1px solid var(--border-hairline);
+  padding-left: 14px;
+}
