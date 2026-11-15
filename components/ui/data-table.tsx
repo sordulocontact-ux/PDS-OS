@@ -104,7 +104,7 @@ export function DataTableHead({
   return (
     <TableHead
       className={cn(
-        "h-11 px-0 pr-5 text-[length:var(--type-body-md)] font-medium text-[color:var(--text-secondary)]",
+        "h-11 px-3.5 text-[length:var(--type-body-md)] font-medium text-[color:var(--text-secondary)]",
         column(columnProps),
         className,
       )}
@@ -166,7 +166,7 @@ export function DataTableCell({
     <TableCell
       colSpan={colSpan}
       className={cn(
-        "px-0 py-3 pr-5 text-[length:var(--type-body-md)] font-medium",
+        "px-3.5 py-3 text-[length:var(--type-body-md)] font-medium",
         column(columnProps),
         className,
       )}

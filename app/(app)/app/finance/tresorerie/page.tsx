@@ -1,6 +1,7 @@
 import { FormMessage } from "@/components/auth/form-message";
 import { BudgetsCard } from "@/components/finance/budgets-card";
 import { FinanceFrame } from "@/components/finance/finance-frame";
+import { FlowBars } from "@/components/finance/flow-bars";
 import { PostPie } from "@/components/finance/post-pie";
 import { TreasuryCalendar } from "@/components/finance/treasury-calendar";
 import { TreasuryCard } from "@/components/finance/treasury-card";
@@ -15,6 +16,7 @@ import { requirePermission } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { loadBudgets } from "@/lib/finance/budget-queries";
 import { byPost, envelopeRow, linesOf } from "@/lib/finance/envelopes";
+import { monthFlows } from "@/lib/finance/flows";
 import { spendStage } from "@/lib/finance/spends";
 import {
   TREASURY_HORIZONS,
@@ -33,10 +35,9 @@ export const metadata = { title: t.titles.treasury };
  * Finance › Trésorerie (Ibé's ticket, maquette 6), laid out as the proto's
  * Rapports page (Sacha 15/11/2026: « la page Rapports est mieux designée »):
  * the horizon (?horizon=) and an envelope (?enveloppe=) on top; the balance,
- * the low point against the minimum reserve, money in and out by week and
- * the balance over them (Sacha's Figma); the spends by poste (of the
- * envelope chosen, what is committed, invoiced or paid) beside what the
- * live budgets still allow; then every move the forecast counts. The Finance updates the balance and the reserve here.
+ * the low point against the minimum reserve and the curve; money in and out
+ * by month beside the spends by poste (of the envelope chosen, what is
+ * committed, invoiced or paid); what the live budgets still allow; then every move the forecast counts. The Finance updates the balance and the reserve here.
  */
 export default async function FinanceTreasuryPage({
   searchParams,
@@ -112,8 +113,21 @@ export default async function FinanceTreasuryPage({
         canManage={canManage}
         detailed
       />
+      {/* As the proto's Rapports page (Sacha 15/11/2026: its « Entrées et
+          sorties » chart is the most readable): money in and out by month
+          beside the spends by poste, then the budgets. */}
       <div className="grid items-start gap-4 lg:grid-cols-2">
+        <FlowBars
+          flows={monthFlows({
+            receipts: data.receipts,
+            paid: data.paid,
+            treasury,
+            today,
+          })}
+        />
         <PostPie posts={byPost(spent)} />
+      </div>
+      <div className="grid items-start gap-4">
         <BudgetsCard
           availableCents={rows.reduce(
             (sum, r) => sum + Math.max(r.restCents ?? 0, 0),

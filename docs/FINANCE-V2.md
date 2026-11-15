@@ -41,12 +41,11 @@ La Vue d'ensemble de Finance redevient une vue globale de la Finance (`CockpitOv
 cartes-phrases, le résumé de la semaine et « Je veux… » (lots 1 et 7 : `FinanceHome`, `FinanceBriefCard`, `FinanceAsk`)
 restent dans le code pour la future vue d'ensemble générale (accueil) ; leur assemblage est la page
 `app/(app)/app/finance/page.tsx` du commit `7c071e76`. **Trésorerie** prend le dessin de la page Rapports du proto :
-horizon et enveloppe en haut ; le solde et un seul graphique, d'après la maquette Figma de Sacha (15/11/2026) : une
-barre par semaine, entrées au-dessus du zéro en encre, sorties en dessous en gris, le prévu plus clair dans la même
-barre, au-dessus, le solde seul sur son axe (réel plein, prévu en tirets, réserve, point bas) ; en dessous, la bande des barres sur
-son propre axe (deux axes sur un graphique étaient illisibles) (`TreasuryChart`, `treasuryWeeks` calculé par `computeTreasury`) ; puis les dépenses par poste de
-l'enveloppe choisie (engagé, facturé, payé) à côté de « Disponible sur les budgets » (`BudgetsCard`) ; puis le
-calendrier financier. Le même graphique sert à la Vue d'ensemble.
+horizon et enveloppe en haut ; le solde et sa courbe seule (réel plein, prévu en tirets, réserve, point bas) ; puis
+« Entrées et sorties » par mois comme le proto (`FlowBars`, `monthFlows` : entrées en encre, sorties hachurées, montant
+au-dessus, mois à venir plus pâles) à côté des dépenses par poste de l'enveloppe choisie ; puis « Disponible sur les
+budgets » (`BudgetsCard`) ; puis le calendrier financier. Historique du 15/11 : la maquette Figma (barres par semaine
+sous le solde, puis en deux bandes) a été jugée moins lisible que les barres par mois du proto (Sacha).
 
 ## Lots
 

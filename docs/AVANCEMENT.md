@@ -2354,7 +2354,7 @@ les modules à parcours (proto « Mise en page des modules », version « Propos
       cartes-phrases, résumé de la semaine et « Je veux… » gardés pour l'accueil ; Trésorerie au dessin de la page
       Rapports du proto (dépenses par poste filtrées par enveloppe, disponible sur les budgets) ; graphique du solde d'après
       la maquette Figma de Sacha : barres par semaine, entrées au-dessus, sorties en dessous, prévu plus clair, solde
-      au-dessus dans sa propre bande (`TreasuryChart`, `treasuryWeeks`) ; contrôles segmentés à la hauteur des champs.
+      remplacé le soir même par la courbe seule et les barres par mois du proto (`FlowBars`, `monthFlows`) ; contrôles segmentés à la hauteur des champs.
 - [x] **Finance › Planning** (15/11/2026, demande de Sacha « un vrai calendrier », d'après Midday) : nouvelle section entre
   Trésorerie et Rapprochement ; mois en grille lundi → dimanche (liste par jour sur téléphone), mouvements réels puis
   prévus en pastilles, solde de fin de journée, passage sous la réserve et point bas marqués, détail du jour dans la

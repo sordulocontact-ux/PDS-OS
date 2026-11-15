@@ -29,7 +29,6 @@ import {
   type IncomeState,
 } from "@/lib/finance/money-in";
 import type { FinanceLine } from "@/lib/finance/types";
-import { treasuryWeeks, type TreasuryWeek } from "@/lib/finance/treasury-weeks";
 
 export const TREASURY_HORIZONS = [30, 60, 90] as const;
 export type TreasuryHorizon = (typeof TREASURY_HORIZONS)[number];
@@ -83,8 +82,6 @@ export type Treasury = {
   reserveCents: number;
   events: (TreasuryEvent & { balanceCents: number })[];
   points: TreasuryPoint[];
-  // Money in and out by week, from the first point to the horizon (chart).
-  weeks: TreasuryWeek[];
   low: { day: string; cents: number };
   at: (days: number) => number;
 };
@@ -248,15 +245,6 @@ export function computeTreasury({
       return { ...e, balanceCents: balance };
     }),
     points,
-    weeks: treasuryWeeks({
-      from: start,
-      until,
-      today,
-      receipts,
-      // A Pay Later installment paid has left the account too.
-      paid: [...paid, ...installmentsPaid(engines, statement.asOf, today)],
-      events,
-    }),
     low,
     at: (days: number) =>
       balanceOn.get(addDays(today, Math.min(days, horizon))) ?? running,

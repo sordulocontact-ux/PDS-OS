@@ -24,7 +24,8 @@ export const SPEND_COLUMNS = [
 ] as const;
 export type SpendColumn = (typeof SPEND_COLUMNS)[number];
 
-const DEFAULT: SpendColumn[] = ["post", "day", "state", "proof"];
+// Poste and Fournisseur on demand: the TTC stays in sight at 1440 px.
+const DEFAULT: SpendColumn[] = ["day", "state", "proof"];
 const KEY = "pds.finance.spend-columns";
 
 /**

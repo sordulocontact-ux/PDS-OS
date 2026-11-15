@@ -13,14 +13,8 @@ const fr = { treasury: treasuryText };
 const amount = (cents: number) => formatAmount(cents, { ht: false });
 const day = (value: string) => formatShortDay(value, { bare: true });
 
-// The swatches say how each mark is drawn (TreasuryChart): the bars (money
-// in ink, out grey, forecast lighter), then the lines (balance solid, its
-// forecast dashed, the reserve dotted amber).
-const BARS = [
-  { key: "in", swatch: "bg-[var(--text-primary)]" },
-  { key: "out", swatch: "bg-[var(--text-tertiary)]" },
-  { key: "aheadLegend", swatch: "bg-[var(--border-default)]" },
-] as const;
+// The swatches say how each line is drawn (TreasuryChart): the balance
+// solid, its forecast dashed, the reserve dotted amber.
 const LINES = [
   { key: "balanceReal", swatch: "border-solid border-foreground" },
   { key: "balanceForecast", swatch: "border-dashed border-foreground" },
@@ -101,15 +95,6 @@ export function TreasuryCard({
             aria-label={t.chart.legend}
             className="flex flex-wrap gap-x-5 gap-y-1 text-caption text-[color:var(--text-secondary)]"
           >
-            {BARS.map((l) => (
-              <li key={l.key} className="flex items-center gap-2">
-                <span
-                  aria-hidden
-                  className={cn("size-2.5 rounded-xs", l.swatch)}
-                />
-                {t.chart[l.key]}
-              </li>
-            ))}
             {LINES.filter(
               (l) => l.key !== "reserve" || treasury.reserveCents > 0,
             ).map((l) => (
@@ -129,7 +114,6 @@ export function TreasuryCard({
     >
       <TreasuryChart
         points={treasury.points}
-        weeks={treasury.weeks}
         reserveCents={treasury.reserveCents}
         low={treasury.low}
         tall={detailed}
