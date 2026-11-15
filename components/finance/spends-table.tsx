@@ -5,7 +5,9 @@ import { useState } from "react";
 
 import { IconArrowDottedRotateAnticlockwise } from "nucleo-sharp-essential";
 import { BudgetLineForm } from "@/components/budget/budget-line-form";
+import { FinanceSheet } from "@/components/finance/finance-sheet";
 import { IncomeForm } from "@/components/finance/income-form";
+import { SpendSheet } from "@/components/finance/spend-sheet";
 import {
   DataTable,
   DataTableActionsCell,
@@ -14,6 +16,7 @@ import {
   DataTableCell,
   DataTableHead,
   DataTableHeader,
+  DataTableLink,
   DataTableMedia,
   DataTableRow,
   EMPTY_CELL,
@@ -102,6 +105,8 @@ export function SpendsTable({
     kind: "edit" | "rebill";
     spend: FinanceSpend;
   } | null>(null);
+  // The row open in the side sheet (lot 3, docs/FINANCE-V2.md).
+  const [sheet, setSheet] = useState<number | null>(null);
   const envelopeOf = (spend: FinanceSpend) =>
     spend.target.kind === "off_budget"
       ? fr.budget.form.offBudget
@@ -144,13 +149,17 @@ export function SpendsTable({
           {canManage && <DataTableActionsHead label={c.actions} />}
         </DataTableHeader>
         <DataTableBody>
-          {spends.map((spend) => {
+          {spends.map((spend, index) => {
             const actions = canManage ? actionsOf(spend) : [];
             return (
               <DataTableRow key={spend.id}>
                 <DataTableCell fill>
                   <DataTableMedia
-                    title={<span className="truncate">{spend.label}</span>}
+                    title={
+                      <DataTableLink href={null} onOpen={() => setSheet(index)}>
+                        {spend.label}
+                      </DataTableLink>
+                    }
                     subtitle={[
                       spend.family &&
                         (spend.family === "other"
@@ -212,6 +221,22 @@ export function SpendsTable({
           })}
         </DataTableBody>
       </DataTable>
+      {sheet !== null && spends[sheet] && (
+        <FinanceSheet
+          open
+          onClose={() => setSheet(null)}
+          title={spends[sheet].label}
+          index={sheet}
+          total={spends.length}
+          onMove={setSheet}
+        >
+          <SpendSheet
+            spend={spends[sheet]}
+            envelope={envelopeOf(spends[sheet])}
+            actions={canManage ? actionsOf(spends[sheet]) : []}
+          />
+        </FinanceSheet>
+      )}
       {open && (
         <FormDialog
           open

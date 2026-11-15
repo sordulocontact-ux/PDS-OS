@@ -1006,7 +1006,12 @@ plan et lots dans `docs/FINANCE-V2.md`. **Écart voulu, limité à Finance** :
   garde son nom en titre.
 - **Tableaux** (lot 2, même bloc de `app/globals.css`) : en-tête sans bandeau gris, en 13 px gris ; filets verticaux entre
   les colonnes ; cellules en 14 px. Un tableau posé dans une carte de section garde sa forme nue.
-- La suite (fiche latérale, graphiques) arrive par lots, `docs/FINANCE-V2.md`.
+- **Fiche latérale** (lot 3, `FinanceSheet`) : une ligne de dépense, d'opération bancaire ou de facture s'ouvre à droite
+  (560 px, pleine largeur sur téléphone), la liste visible sous un voile léger ; ↑ ↓ passe à la ligne voisine, Échap
+  ferme. Écart voulu à « une seule modale » (07/11), Finance seulement : la modale reste pour un geste (« Modifier »
+  ouvre le formulaire par-dessus).
+- **Chargement** : `FinanceLoading` dessine le cadre de la section (colonne, thème) sans titre.
+- La suite (graphiques) arrive par lots, `docs/FINANCE-V2.md`.
 
 ### Arrondis
 

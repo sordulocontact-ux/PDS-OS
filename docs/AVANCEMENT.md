@@ -2324,3 +2324,8 @@ les modules à parcours (proto « Mise en page des modules », version « Propos
 - [x] **Finance, nouveau style, lot 2 (15/11/2026)** — pages de section sans titre visible (h1 gardé pour les lecteurs
       d'écran) ; action sur la ligne des onglets de Dépenses, Rapprochement et Factures & encaissements ; tableaux de
       Finance en filets fins (en-tête sans bandeau, 13 px gris ; filets verticaux ; cellules 14 px).
+- [x] **Finance, nouveau style, lot 3 (15/11/2026)** — fiche latérale `FinanceSheet` (↑ ↓, Échap) pour une dépense
+      (`SpendSheet`), une opération bancaire (`TransactionSheet`, proposition et « Valider » dedans) et une entrée
+      d'argent (`IncomeSheet`, relances et encaissements) ; historique de l'enregistrement (`RecordHistory`,
+      `loadRowHistory`) ; `DataTableLink onOpen` ; chargement sans titre (`FinanceLoading`) ; graisse de base 450 ;
+      « Factures & encaissements » devient « Factures ».

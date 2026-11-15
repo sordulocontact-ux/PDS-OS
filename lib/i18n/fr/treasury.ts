@@ -10,7 +10,7 @@ export const treasury = {
     overview: "Vue d'ensemble",
     treasury: "Trésorerie",
     budgets: "Budgets",
-    incomes: "Factures & encaissements",
+    incomes: "Factures",
     fundings: "Financements",
     reconcile: "Rapprochement",
     alerts: "Alertes",
@@ -28,7 +28,7 @@ export const treasury = {
     overview: "Vue d'ensemble",
     treasury: "Trésorerie",
     budgets: "Budgets",
-    incomes: "Factures & encaissements",
+    incomes: "Factures",
   },
   loadError:
     "Une partie des chiffres n'a pas pu être chargée. Rechargez la page.",

@@ -35,7 +35,7 @@ de la page, gardent le style de l'app.
 | --- | --- | --- |
 | 1 | Thème `finance-scope` (tailles, graisses, arrondis) ; navigation à icônes ; **Vue d'ensemble en cartes-phrases** (solde, prévision 30/60/90, point bas et réserve, à encaisser, à payer, budgets, justificatifs, alertes) | fait le 15/11/2026 |
 | 2 | Pages de section sans titre visible (h1 pour les lecteurs d'écran, nom gardé sur la page d'une enveloppe) ; action sur la ligne des onglets (Dépenses, Rapprochement, Factures & encaissements) ; tableau Finance dans le thème (en-tête sans bandeau en 13 px gris, filets verticaux, cellules 14 px, montants déjà à droite) | fait le 15/11/2026 ; le total sous une liste filtrée reste à faire (les cartes chiffre de chaque vue donnent déjà la somme) |
-| 3 | Fiche latérale Finance (↑ ↓, Échap, modification au champ, historique) pour une dépense, une opération Qonto, une facture | à faire |
+| 3 | Fiche latérale Finance (`FinanceSheet` : ↑ ↓, Échap, liste visible dessous) pour une dépense, une opération Qonto, une facture : chiffres, faits, gestes de la ligne, historique de l'enregistrement (`finance_events.row_id`) ; écrans de chargement sans titre (`FinanceLoading`) ; section « Factures & encaissements » renommée « Factures » | fait le 15/11/2026 ; la modification au champ reste à faire (« Modifier » ouvre le formulaire existant) |
 | 4 | Page d'un budget (chiffres, filtre par statut qui pilote tout, camembert légende dessous) ; Trésorerie (solde après chaque événement, déplacer une émission) ; Financements | à faire |
 | 5 | Graphiques lisibles ; recherche ⌘K et cloche d'alertes de Finance | à faire |
 | 6 | Boîte à justificatifs (dépôt partout, adresse e-mail, lecture vérifiée, rattachement proposé) : `docs/ANALYSE-MIDDAY.md` § 7.2 | à faire |

@@ -137,7 +137,7 @@ export const projectPilotTopics: GuideTopic[] = [
     ],
     nav: "/app/finance",
     facts: [
-      "Finance a neuf onglets : Vue d'ensemble, Trésorerie, Budgets, Dépenses, Factures & encaissements, Financements, Rapprochement, Alertes, Exports. Son onglet Dépenses montre toutes les dépenses du label (projets, artistes, centres de coût, hors budget) ; ce n'est pas la page Dépenses de l'équipe.",
+      "Dans Finance, cliquer une dépense, une opération bancaire ou une facture l'ouvre à droite, la liste restant visible : ses chiffres, ses gestes (Modifier, Valider, Relancer…) et son historique ; ↑ ↓ passe à la suivante. Finance a neuf sections, dans sa colonne de gauche : Vue d'ensemble, Trésorerie, Rapprochement, Dépenses, Budgets, Factures (recettes prévues, factures clients, encaissements et avoirs), Financements, Alertes, Exports. Son onglet Dépenses montre toutes les dépenses du label (projets, artistes, centres de coût, hors budget) ; ce n'est pas la page Dépenses de l'équipe.",
       "Une dépense va sur une enveloppe (projet, artiste ou centre de coût de la Finance) ou « hors budget », signalé dans À surveiller. Son montant reste HT ; sa TVA donne le TTC, que la trésorerie retire. Elle porte aussi son fournisseur, son échéance, son valideur et si elle est refacturable : une recette attendue est alors prévue pour elle (par la Finance) ; sinon À surveiller la signale.",
       "Budgets montre chaque enveloppe (projet, artiste, centre de coût) : budget initial, révisions, prévu, engagé, facturé, payé, reste, refacturable et écart au prévisionnel (ce que coûtent les lignes aujourd'hui moins ce qui était prévu à leur saisie), un camembert par poste et les mois. Une enveloppe s'ouvre : postes et sous-postes, révisions (avant, après, qui, pourquoi), part financée par PDS.",
       "La Finance crée un centre de coût vide ou depuis un modèle (les lignes d'une émission, d'un live, d'un tournage), révise son enveloppe avec un motif, règle la part financée par PDS (0 à 100 %), enregistre les lignes d'une enveloppe comme modèle et importe des lignes collées depuis un tableur (Libellé, Poste, Sous-poste, Montant HT, Fournisseur, Échéance, Statut). Elle renomme un centre de coût (« Renommer »).",
@@ -168,7 +168,7 @@ export const projectPilotTopics: GuideTopic[] = [
       },
       {
         q: "Comment enregistrer un paiement reçu ?",
-        a: "Finance › Factures & encaissements, « ⋯ » de l'entrée › Enregistrer un encaissement : le reste à encaisser est proposé, un paiement partiel se tape par-dessus.",
+        a: "Finance › Factures, « ⋯ » de l'entrée › Enregistrer un encaissement : le reste à encaisser est proposé, un paiement partiel se tape par-dessus.",
       },
     ],
     permissions: ["read_finance", "manage_finance"],

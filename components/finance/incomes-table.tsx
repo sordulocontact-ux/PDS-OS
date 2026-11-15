@@ -25,12 +25,15 @@ import {
   DataTableCell,
   DataTableHead,
   DataTableHeader,
+  DataTableLink,
   DataTableMedia,
   DataTableRow,
   EMPTY_CELL,
 } from "@/components/ui/data-table";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { RowActions, type RowAction } from "@/components/ui/row-actions";
+import { FinanceSheet } from "@/components/finance/finance-sheet";
+import { IncomeSheet } from "@/components/finance/income-sheet";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "@/components/ui/toast";
 import { markInvoiceSent } from "@/lib/finance/invoice-actions";
@@ -133,6 +136,12 @@ export function IncomesTable({
     income: Income;
   } | null>(null);
   const name = new Map(targets.map((x) => [x.id, x.name]));
+  // The row open in the side sheet (lot 3, docs/FINANCE-V2.md).
+  const [sheet, setSheet] = useState<number | null>(null);
+  const targetOf = (income: Income) =>
+    [income.projectId, income.artistId, income.dealId]
+      .flatMap((id) => (id && name.get(id) ? [name.get(id)] : []))
+      .join(" · ") || EMPTY_CELL;
 
   function actionsOf(income: Income): RowAction[] {
     if (income.cancelledAt) return [];
@@ -249,7 +258,7 @@ export function IncomesTable({
           {canManage && <DataTableActionsHead label={c.actions} />}
         </DataTableHeader>
         <DataTableBody>
-          {incomes.map((income) => {
+          {incomes.map((income, index) => {
             const state = incomeState(income, today);
             const received = receivedCents(income);
             const target =
@@ -261,7 +270,11 @@ export function IncomesTable({
               <DataTableRow key={income.id}>
                 <DataTableCell fill>
                   <DataTableMedia
-                    title={<span className="truncate">{income.label}</span>}
+                    title={
+                      <DataTableLink href={null} onOpen={() => setSheet(index)}>
+                        {income.label}
+                      </DataTableLink>
+                    }
                     subtitle={[
                       t.kinds[income.kind],
                       income.payer,
@@ -348,6 +361,23 @@ export function IncomesTable({
           })}
         </DataTableBody>
       </DataTable>
+      {sheet !== null && incomes[sheet] && (
+        <FinanceSheet
+          open
+          onClose={() => setSheet(null)}
+          title={incomes[sheet].label}
+          index={sheet}
+          total={incomes.length}
+          onMove={setSheet}
+        >
+          <IncomeSheet
+            income={incomes[sheet]}
+            target={targetOf(incomes[sheet])}
+            today={today}
+            actions={canManage ? actionsOf(incomes[sheet]) : []}
+          />
+        </FinanceSheet>
+      )}
       {open && (
         <IncomeDialog
           kind={open.kind}

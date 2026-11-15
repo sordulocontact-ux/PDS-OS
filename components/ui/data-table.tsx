@@ -184,17 +184,32 @@ export function DataTableCell({
 export function DataTableLink({
   href,
   newTab = false,
+  onOpen,
   children,
 }: {
   href: string | null;
   // A file opened in the browser, outside the app: a plain link, new tab.
   newTab?: boolean;
+  // The row opens a panel on the page (Finance's side sheet) instead of a
+  // page: a button covering the row, `href` then null.
+  onOpen?: () => void;
   children: React.ReactNode;
 }) {
-  if (href === null) return <span className="truncate">{children}</span>;
   const link = { "data-row-link": "" };
   const className =
     "truncate outline-none after:absolute after:inset-0 hover:underline focus-visible:underline";
+  if (onOpen)
+    return (
+      <button
+        type="button"
+        onClick={onOpen}
+        className={cn(className, "min-w-0 text-left")}
+        {...link}
+      >
+        {children}
+      </button>
+    );
+  if (href === null) return <span className="truncate">{children}</span>;
   if (newTab)
     return (
       <a

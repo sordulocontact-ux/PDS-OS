@@ -39,20 +39,50 @@ function fieldsOf(keys: string[]) {
   return named.some((n) => !n) ? [...words, t.history.otherFields] : words;
 }
 
+const EVENT_COLUMNS =
+  "id, created_at, entity, action, before, after, actor:people(first_name, last_name)";
+
 /** The last changes of Finance (finance_events, written by trigger): who,
  * when, what, which fields. Read with the session (read_finance). */
 export async function loadHistory(limit = 100): Promise<HistoryEntry[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("finance_events")
-    .select(
-      "id, created_at, entity, action, before, after, actor:people(first_name, last_name)",
-    )
+    .select(EVENT_COLUMNS)
     .order("seq", { ascending: false })
     .limit(limit);
   if (error) console.error("loadHistory:", error.message);
+  return toEntries(data ?? []);
+}
+
+/** The changes of one record (a spend, an income, a bank transaction): the
+ * history at the foot of Finance's side sheet (lot 3, docs/FINANCE-V2.md).
+ * Read with the session: RLS keeps it to who reads Finance. */
+export async function loadRowHistory(rowId: string): Promise<HistoryEntry[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("finance_events")
+    .select(EVENT_COLUMNS)
+    .eq("row_id", rowId)
+    .order("seq", { ascending: false })
+    .limit(50);
+  if (error) console.error("loadRowHistory:", error.message);
+  return toEntries(data ?? []);
+}
+
+type EventRow = {
+  id: string;
+  created_at: string;
+  entity: string;
+  action: string;
+  before: unknown;
+  after: unknown;
+  actor: { first_name: string | null; last_name: string | null } | null;
+};
+
+function toEntries(rows: EventRow[]): HistoryEntry[] {
   const t = financeExports;
-  return (data ?? []).map((e) => {
+  return rows.map((e) => {
     const before = (e.before ?? {}) as Record<string, unknown>;
     const after = (e.after ?? {}) as Record<string, unknown>;
     const changed =

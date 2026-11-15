@@ -35,7 +35,7 @@ const asView = (value: unknown): View =>
   VIEWS.find((v) => v === value) ?? "a-encaisser";
 
 /**
- * Finance › Factures & encaissements (Ibé's ticket, maquette 5): the money
+ * Finance › Factures (Ibé's ticket, maquette 5): the money
  * coming in, « prévu → facturé → encaissé ». What is expected, invoiced,
  * late and received this month; every income by view. The Finance enters
  * an income, its receipts, changes or cancels it (manage_finance).

@@ -13,7 +13,9 @@ import {
   ManualTransactionForm,
   MatchForm,
 } from "@/components/finance/reconcile-forms";
+import { FinanceSheet } from "@/components/finance/finance-sheet";
 import { TransactionProposal } from "@/components/finance/transaction-proposal";
+import { TransactionSheet } from "@/components/finance/transaction-sheet";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   DataTable,
@@ -23,6 +25,7 @@ import {
   DataTableCell,
   DataTableHead,
   DataTableHeader,
+  DataTableLink,
   DataTableMedia,
   DataTableRow,
 } from "@/components/ui/data-table";
@@ -105,6 +108,8 @@ export function TransactionsTable({
   const t = fr.reconcile;
   const c = t.columns;
   const [open, setOpen] = useState<Open>(null);
+  // The row open in the side sheet (lot 3, docs/FINANCE-V2.md).
+  const [sheet, setSheet] = useState<number | null>(null);
   const close = () => setOpen(null);
   const undo = useWriteSubmit(close, t.done.unmatched);
   const double = new Set(doubles);
@@ -180,7 +185,7 @@ export function TransactionsTable({
           {canManage && <DataTableActionsHead label={c.actions} />}
         </DataTableHeader>
         <DataTableBody>
-          {transactions.map((tx) => {
+          {transactions.map((tx, index) => {
             const state = txState(tx);
             return (
               <DataTableRow key={tx.id}>
@@ -188,9 +193,12 @@ export function TransactionsTable({
                   <DataTableMedia
                     title={
                       <span className="flex min-w-0 items-center gap-2">
-                        <span className="truncate">
+                        <DataTableLink
+                          href={null}
+                          onOpen={() => setSheet(index)}
+                        >
                           {tx.counterparty ?? tx.label ?? tx.reference}
-                        </span>
+                        </DataTableLink>
                         {state === "partial" && (
                           <StatusBadge tone="info">
                             {t.states.partial}
@@ -259,6 +267,27 @@ export function TransactionsTable({
           })}
         </DataTableBody>
       </DataTable>
+      {sheet !== null && transactions[sheet] && (
+        <FinanceSheet
+          open
+          onClose={() => setSheet(null)}
+          title={
+            transactions[sheet].counterparty ?? transactions[sheet].label ?? ""
+          }
+          index={sheet}
+          total={transactions.length}
+          onMove={setSheet}
+        >
+          <TransactionSheet
+            tx={transactions[sheet]}
+            candidates={candidates}
+            double={double.has(transactions[sheet].id)}
+            canManage={canManage}
+            actions={canManage ? actionsOf(transactions[sheet]) : []}
+            onAccept={(candidate) => accept(transactions[sheet], candidate)}
+          />
+        </FinanceSheet>
+      )}
       {open?.kind === "match" && (
         <FormDialog
           open
