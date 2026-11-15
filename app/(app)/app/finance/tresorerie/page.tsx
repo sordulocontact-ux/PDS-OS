@@ -67,21 +67,13 @@ export default async function FinanceTreasuryPage({
   const p = t.page;
 
   return (
-    <FinanceFrame
-      section="treasury"
-      action={
-        canManage && treasury ? (
-          <div className="flex flex-wrap items-center gap-2">
-            <ReserveButton reserveCents={treasury.reserveCents} />
-            <StatementButton />
-          </div>
-        ) : undefined
-      }
-    >
+    <FinanceFrame section="treasury">
       {(data.error || budgets.error) && (
         <FormMessage kind="error">{t.loadError}</FormMessage>
       )}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      {/* One row of tools (Sacha 15/11/2026): the horizon, then the envelope
+          and the Finance's two settings on the right. */}
+      <div className="flex flex-wrap items-center gap-3">
         <SegmentedLinks
           label={p.horizon}
           options={TREASURY_HORIZONS.map((days) => ({
@@ -91,7 +83,7 @@ export default async function FinanceTreasuryPage({
             current: days === horizon,
           }))}
         />
-        <div className="w-full max-w-64">
+        <div className="ml-auto w-full max-w-64">
           <UrlFilters
             path={routes.financeTreasury}
             params={{ horizon: String(horizon) }}
@@ -107,6 +99,12 @@ export default async function FinanceTreasuryPage({
             ]}
           />
         </div>
+        {canManage && treasury && (
+          <>
+            <ReserveButton reserveCents={treasury.reserveCents} />
+            <StatementButton />
+          </>
+        )}
       </div>
       <TreasuryCard
         treasury={treasury}

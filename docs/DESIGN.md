@@ -1027,10 +1027,7 @@ plan et lots dans `docs/FINANCE-V2.md`. **Écart voulu, limité à Finance** :
   proposée en encre, adresse en texte courant avec « Copier » en lien, « Voir les justificatifs rattachés » dans le
   vide, proposition de la fiche dans un cadre de sélection « Correspond à » avec ses raisons cochées et ses gestes ;
   « Déposer » garde le trombone, Nucleo Essential n'ayant pas d'icône d'envoi) : barre d'outils sans titre (recherche, vues segmentées avec
-  comptes, bascule Grille / Liste à icônes `IconImages2` / `IconUnorderedList`, « Déposer » en contour avec
-  `IconPaperclip`), ligne « Transférez vos tickets et factures à … · Copier » ; grille de cartes (aperçu 144 px,
-  statut posé sur l'aperçu, fournisseur et montant, date et expéditeur, dépense proposée ou rattachée, enveloppe,
-  geste sur la carte) ou liste sans vignette. Glisser des fichiers n'importe où sur la page pose un voile pointillé.
+  comptes, « Déposer » en bouton principal (`IconPaperclip`, Sacha 15/11/2026 : c'est le geste de la page) ; la liste seule (la vue Grille, `ReceiptCard`, est mise de côté le 15/11/2026, gardée dans le code). Glisser des fichiers n'importe où sur la page pose un voile pointillé.
   Entrée de navigation « Justificatifs » (`IconPaperclip`) après Rapprochement.
 - Touche du clavier nommée à l'écran : `Kbd` (`components/ui/kbd.tsx`, `raised` pour l'accueil).
 

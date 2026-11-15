@@ -4,13 +4,11 @@ import { IconPaperclip } from "nucleo-sharp-essential";
 import { useState } from "react";
 
 import { FinanceSheet } from "@/components/finance/finance-sheet";
-import { ReceiptCard } from "@/components/finance/receipts/receipt-card";
 import { ReceiptSheet } from "@/components/finance/receipts/receipt-sheet";
 import { ReceiptsDropLayer } from "@/components/finance/receipts/receipts-drop-layer";
 import { ReceiptsTable } from "@/components/finance/receipts/receipts-table";
 import { ReceiptsToolbar } from "@/components/finance/receipts/receipts-toolbar";
 import { useProofIntake } from "@/components/finance/receipts/use-proof-intake";
-import { useReceiptsLayout } from "@/components/finance/receipts/use-receipts-layout";
 import { EmptyState } from "@/components/shell/empty-state";
 import { CopyButton } from "@/components/ui/copy-button";
 import { routes } from "@/lib/auth/redirects";
@@ -50,7 +48,6 @@ export function ReceiptsBox({
   organizationId: string | null;
   address: string | null;
 }) {
-  const [layout, setLayout] = useReceiptsLayout();
   const [sheet, setSheet] = useState<string | null>(null);
   const intake = useProofIntake({
     organizationId,
@@ -83,8 +80,6 @@ export function ReceiptsBox({
           <ReceiptsToolbar
             view={view}
             counts={counts}
-            layout={layout}
-            onLayout={setLayout}
             canManage={canManage}
             busy={intake.busy}
             onFiles={intake.upload}
@@ -114,25 +109,13 @@ export function ReceiptsBox({
         {(visible) => (
           <>
             <ForwardLine address={address} />
-            {layout === "grid" ? (
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] gap-3">
-                {visible.map((row) => (
-                  <ReceiptCard
-                    key={row.proof.id}
-                    row={row}
-                    active={sheet === row.proof.id}
-                    canManage={canManage}
-                    onOpen={() => setSheet(row.proof.id)}
-                  />
-                ))}
-              </div>
-            ) : (
-              <ReceiptsTable
-                rows={visible}
-                canManage={canManage}
-                onOpen={(index) => setSheet(visible[index].proof.id)}
-              />
-            )}
+            {/* The grid (ReceiptCard) is set aside for now: the list only
+                (Sacha 15/11/2026). */}
+            <ReceiptsTable
+              rows={visible}
+              canManage={canManage}
+              onOpen={(index) => setSheet(visible[index].proof.id)}
+            />
             <Sheet
               rows={visible}
               open={sheet}
