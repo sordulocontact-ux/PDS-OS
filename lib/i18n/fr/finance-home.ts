@@ -15,16 +15,25 @@ export const financeHome = {
   horizonDays: (days: number) => `${days} jours`,
   cards: "Finance en un coup d'œil",
   brief: {
-    title: "En bref",
+    // Lot 7 (docs/FINANCE-V2.md): the week's summary, figures chosen by
+    // code (lib/assistant/finance-brief/), sentences by PO when they check.
+    title: "Résumé de la semaine",
     belowReserve: (day: string) =>
       `Le solde passe sous la réserve le ${day} si rien ne bouge.`,
     reserveHeld: (days: number) =>
       `La réserve tient sur les ${days} prochains jours.`,
-    late: (amount: string) => `${amount} d'entrées en retard, à relancer.`,
+    lateCount: (count: number, amount: string) =>
+      `${plural(count, "entrée en retard", "entrées en retard")}, ${amount} à relancer.`,
+    week: (received: string, paid: string) =>
+      `Cette semaine : ${received} encaissés, ${paid} payés.`,
+    weekQuiet: "Rien n'a été encaissé ni payé cette semaine.",
+    byPo: "Chiffres du code, phrase de PO",
     budget: (title: string, percent: number) =>
       `${title} a consommé ${percent} % de son budget.`,
     noProof: (count: number) =>
-      `${plural(count, "dépense attend", "dépenses attendent")} son justificatif.`,
+      count > 1
+        ? `${count} dépenses attendent leur justificatif.`
+        : `${count} dépense attend son justificatif.`,
     calm: "Rien d'urgent : tout suit la prévision.",
     source: "Calculé par PDS OS",
   },
@@ -83,7 +92,7 @@ export const financeHome = {
       ),
     missingEnd: " sans justificatif.",
     done: "Chaque dépense facturée ou payée a son justificatif.",
-    open: "Voir les dépenses sans justificatif",
+    open: "Ouvrir les justificatifs",
   },
   watch: {
     title: "À surveiller",
@@ -94,6 +103,18 @@ export const financeHome = {
     open: "Voir les alertes",
   },
   actions: "Actions rapides",
+  // Lot 7: « Je veux… », a question that opens PO (docs/protos/finance-midday.html v8).
+  ask: {
+    label: "Demander à PO",
+    want: "Je veux",
+    suggestions: "Questions à PO",
+    lowPoint: "connaître le point bas de trésorerie des 90 prochains jours",
+    late: "voir les factures en retard",
+    rest: (name: string) => `savoir ce qu'il reste sur ${name}`,
+    noProof: "voir les dépenses sans justificatif",
+    note: "PO lit Finance ; les chiffres viennent du code.",
+    trail: ["Finance", "Vue d'ensemble"],
+  },
   importStatement: "Importer un relevé Qonto",
   export: "Exporter pour le comptable",
 } as const;

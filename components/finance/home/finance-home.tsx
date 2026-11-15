@@ -8,6 +8,7 @@ import {
 } from "nucleo-sharp-essential";
 import type { ReactNode } from "react";
 
+import { FinanceAsk } from "@/components/finance/home/finance-ask";
 import { SentenceCard, Strong } from "@/components/finance/home/sentence-card";
 import { TreasurySpark } from "@/components/finance/home/treasury-spark";
 import { SegmentedLinks } from "@/components/ui/segmented-control";
@@ -34,6 +35,9 @@ const percent = (share: number) => Math.round(share * 100);
  * bold, opening its page; the actions under them. Ibé's ticket asks the
  * overview the balance, the 30/60/90-day forecast, the low point and the
  * reserve, money in and out, the budgets and the alerts: each has its card.
+ * Lot 7: the first card is the week's summary (`brief`, worded by PO from
+ * the code's figures, components/finance/home/finance-brief.tsx), and « Je
+ * veux… » under the actions opens PO with a question (`suggestions`).
  */
 export function FinanceHome({
   firstName,
@@ -41,16 +45,18 @@ export function FinanceHome({
   view,
   horizon,
   names,
-  canOpenExpenses,
   actions,
+  brief,
+  suggestions,
 }: {
   firstName: string | null;
   treasury: Treasury | null;
   view: Cockpit;
   horizon: TreasuryHorizon;
   names: Map<string, string>;
-  canOpenExpenses: boolean;
   actions: ReactNode;
+  brief: ReactNode;
+  suggestions: string[];
 }) {
   const below = view.watch.find((w) => w.kind === "below_reserve");
   const noProof = view.watch.find((w) => w.kind === "no_proof");
@@ -60,17 +66,6 @@ export function FinanceHome({
     ? top.engagedCents / top.envelopeCents
     : 0;
   const nameOf = (id: string) => names.get(id) ?? "—";
-
-  // « En bref »: at most three sentences, the most urgent first.
-  const brief: string[] = [];
-  if (below?.kind === "below_reserve")
-    brief.push(t.brief.belowReserve(formatDay(below.day)));
-  else if (treasury) brief.push(t.brief.reserveHeld(horizon));
-  if (lateIn > 0) brief.push(t.brief.late(amount(lateIn)));
-  if (top && topShare >= BUDGET_ALERT_SHARE)
-    brief.push(t.brief.budget(nameOf(top.id), percent(topShare)));
-  if (noProof?.kind === "no_proof" && brief.length < 3)
-    brief.push(t.brief.noProof(noProof.count));
 
   return (
     <div className="flex flex-col gap-6">
@@ -106,9 +101,7 @@ export function FinanceHome({
         aria-label={t.cards}
         className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
       >
-        <SentenceCard title={t.brief.title} foot={t.brief.source}>
-          {brief.length ? brief.join(" ") : t.brief.calm}
-        </SentenceCard>
+        {brief}
 
         <SentenceCard
           icon={IconChartBarTrendUp}
@@ -235,11 +228,7 @@ export function FinanceHome({
         <SentenceCard
           icon={IconPaperclip}
           title={t.proof.title}
-          href={
-            canOpenExpenses
-              ? `${routes.expenses}?vue=sans-justificatif`
-              : routes.financeSpends
-          }
+          href={routes.financeReceipts}
           foot={t.proof.open}
         >
           {noProof?.kind === "no_proof" ? (
@@ -276,6 +265,8 @@ export function FinanceHome({
       >
         {actions}
       </div>
+
+      <FinanceAsk suggestions={suggestions} />
     </div>
   );
 }

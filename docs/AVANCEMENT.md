@@ -2329,3 +2329,23 @@ les modules à parcours (proto « Mise en page des modules », version « Propos
       d'argent (`IncomeSheet`, relances et encaissements) ; historique de l'enregistrement (`RecordHistory`,
       `loadRowHistory`) ; `DataTableLink onOpen` ; chargement sans titre (`FinanceLoading`) ; graisse de base 450 ;
       « Factures & encaissements » devient « Factures ».
+- [x] **Finance, nouveau style, lot 4 (15/11/2026)** — page d'un budget : `EnvelopeFigures` (reste disponible et sa
+      jauge, bande des chiffres), filtre par statut `?statut=` qui pilote postes, camembert et lignes.
+- [x] **Finance, nouveau style, lot 5 (15/11/2026)** — barre du haut `FinanceTopbar` : recherche ⌘K (`FinanceSearch`,
+      `SearchResults`, index `financeSearchIndex`), cloche des alertes (`readFinancePulse`, `loadFinanceWatch` partagé
+      avec la page Alertes) ; `?ouvrir=<id>` ouvre une dépense, une facture ou une opération dans sa fiche
+      (`useSheetRow`) ; axes des graphiques en gris secondaire ; composant commun `Kbd`. Sans migration.
+- [x] **Finance, nouveau style, lot 6 (15/11/2026) : boîte à justificatifs** — migration
+      `20261115600101_finance_receipts.sql` (table `finance_proofs`, `attach_finance_proof`,
+      `finance_proof_sender`), 17 tests pgTAP ; section Justificatifs (dépôt, e-mail po+justificatifs@, lecture
+      vérifiée dans le texte, rapprochement par le code, Rattacher / Choisir une autre dépense / Créer la dépense /
+      Écarter, grille et liste, fiche latérale, historique) ; guide de PO mis à jour. Reste : voir la ligne 6 de
+      FINANCE-V2.
+- [x] **Finance, nouveau style, lot 7 (15/11/2026) : PO dans Finance** « Je veux… » sur la Vue d'ensemble (3
+      suggestions par poste et un champ, qui ouvrent PO avec la question posée) ; lecture `finance` de PO
+      (trésorerie et point bas, entrées en retard, à payer, enveloppes, justificatifs) ; carte « Résumé de la
+      semaine » rédigée par PO à partir des slots du code, vérifiée nombre par nombre, gardée par jour dans
+      `finance_briefs` (migration `20261115770101`, 11 tests pgTAP verts en local), payée par le membre qui la
+      déclenche ; guide de PO (`topics/po.ts`) et sujet Finance mis à jour. Reste : migration à pousser en pré-prod
+      puis en prod avec accord ; questions tests 41-43 à ajouter à `scripts/eval-po-cases.mjs` et à jouer ; voir la
+      carte en vrai navigateur (temps de génération avec Haiku).

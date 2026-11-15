@@ -1,19 +1,33 @@
 import { IconCreditCard, IconPaperPlane2 } from "nucleo-sharp-essential";
+import { Suspense } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { QuickExpenseButton } from "@/components/budget/quick-expense-button";
 import { FinanceFrame } from "@/components/finance/finance-frame";
+import { BriefCard } from "@/components/finance/home/brief-card";
+import { FinanceBriefCard } from "@/components/finance/home/finance-brief";
 import { FinanceHome } from "@/components/finance/home/finance-home";
 import { IncomeAddButton } from "@/components/finance/incomes-table";
 import { buttonVariants } from "@/components/ui/button";
 import { ViewLink } from "@/components/ui/view-link";
-import { can } from "@/lib/auth/access";
+import {
+  BRIEF_HORIZON,
+  briefSlots,
+  codeBrief,
+} from "@/lib/assistant/finance-brief/slots";
+import { can, type Access } from "@/lib/auth/access";
 import { requirePermission } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
-import { cockpit } from "@/lib/finance/cockpit";
+import { spendSums } from "@/lib/finance/aggregate";
+import { cockpit, type Cockpit } from "@/lib/finance/cockpit";
 import { financePeriod } from "@/lib/finance/period";
 import { loadFinance } from "@/lib/finance/queries";
-import { asHorizon, addDays, computeTreasury } from "@/lib/finance/treasury";
+import {
+  asHorizon,
+  addDays,
+  computeTreasury,
+  type Treasury,
+} from "@/lib/finance/treasury";
 import { loadSpends } from "@/lib/finance/spend-queries";
 import { loadTreasury } from "@/lib/finance/treasury-queries";
 import { financeHome } from "@/lib/i18n/fr/finance-home";
@@ -22,6 +36,23 @@ import { parisPlace } from "@/lib/utils/calendar-period";
 import { allInOrder } from "@/lib/utils/parallel";
 
 export const metadata = { title: t.titles.overview };
+
+/** « Je veux… » (lot 7): what PO is first asked here, by position. The
+ * direction starts from the treasury, the Finance from the money to chase
+ * (proto finance-midday v8). Only those who read Finance see this page. */
+function suggestionsFor(
+  access: Access,
+  treasury: Treasury | null,
+  view: Cockpit,
+  nameOf: (id: string) => string | undefined,
+): string[] {
+  const s = financeHome.ask;
+  const top = view.budgets[0] ? nameOf(view.budgets[0].id) : undefined;
+  const low = treasury ? [s.lowPoint] : [];
+  const first =
+    access.role === "general_director" ? [...low, s.late] : [s.late, ...low];
+  return [...first, top ? s.rest(top) : s.noProof];
+}
 
 /**
  * Finance › Vue d'ensemble (Ibé's ticket « Cockpit Finance », maquette 1,
@@ -41,7 +72,9 @@ export default async function FinanceOverviewPage({
   ]);
   const horizon = asHorizon(params.horizon);
   const [data, spending, spends] = await allInOrder([
-    loadTreasury(addDays(today, horizon)),
+    // Up to 90 days whatever the horizon shown: the week's summary looks
+    // that far (lot 7); the cards keep to the horizon.
+    loadTreasury(addDays(today, BRIEF_HORIZON)),
     loadFinance(financePeriod("tout", today)),
     loadSpends(),
   ]);
@@ -52,6 +85,39 @@ export default async function FinanceOverviewPage({
     ...data.targets.map((x) => [x.id, x.name] as const),
   ]);
   const quiet = buttonVariants({ variant: "outline", size: "lg" });
+  const view = cockpit({
+    treasury,
+    incomes: data.incomes,
+    upcoming: data.upcoming,
+    spending,
+    spends: spends.spends,
+    engines: data.engines,
+    today,
+    horizon,
+  });
+  // The week's summary (lot 7): figures chosen by code, worded by PO.
+  const top = view.budgets[0];
+  const slots = briefSlots({
+    today,
+    receipts: data.receipts,
+    paid: data.paid,
+    incomes: data.incomes,
+    treasury:
+      horizon === BRIEF_HORIZON
+        ? treasury
+        : computeTreasury({ ...data, today, horizon: BRIEF_HORIZON }),
+    topBudget:
+      top?.envelopeCents && names.has(top.id)
+        ? {
+            name: names.get(top.id) ?? "",
+            share: top.engagedCents / top.envelopeCents,
+          }
+        : null,
+    noProof: spendSums(spending.months).noProof,
+  });
+  const codeCard = (
+    <BriefCard brief={{ text: codeBrief(slots), by: "code" }} slots={slots} />
+  );
 
   return (
     <FinanceFrame section="overview" header={false}>
@@ -61,19 +127,25 @@ export default async function FinanceOverviewPage({
       <FinanceHome
         firstName={access.firstName ?? null}
         treasury={treasury}
-        view={cockpit({
-          treasury,
-          incomes: data.incomes,
-          upcoming: data.upcoming,
-          spending,
-          spends: spends.spends,
-          engines: data.engines,
-          today,
-          horizon,
-        })}
+        view={view}
         horizon={horizon}
         names={names}
-        canOpenExpenses={can(access, "read_artist_budgets")}
+        brief={
+          access.organizationId && !data.error && !spending.error ? (
+            <Suspense fallback={codeCard}>
+              <FinanceBriefCard
+                organizationId={access.organizationId}
+                today={today}
+                slots={slots}
+              />
+            </Suspense>
+          ) : (
+            codeCard
+          )
+        }
+        suggestions={suggestionsFor(access, treasury, view, (id) =>
+          names.get(id),
+        )}
         actions={
           <>
             <QuickExpenseButton outline />

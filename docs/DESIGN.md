@@ -1011,7 +1011,19 @@ plan et lots dans `docs/FINANCE-V2.md`. **Écart voulu, limité à Finance** :
   ferme. Écart voulu à « une seule modale » (07/11), Finance seulement : la modale reste pour un geste (« Modifier »
   ouvre le formulaire par-dessus).
 - **Chargement** : `FinanceLoading` dessine le cadre de la section (colonne, thème) sans titre.
-- La suite (graphiques) arrive par lots, `docs/FINANCE-V2.md`.
+- **Page d'un budget** (lot 4, `EnvelopeFigures`) : « Reste disponible » en grand avec une jauge (ambre à 82 %, rouge
+  au-delà du budget), puis une bande de chiffres (budget initial, révisions, prévu, engagé, facturé, payé,
+  refacturable, écart, part PDS) ; un filtre segmenté par statut pilote postes, camembert et lignes.
+- **Barre du haut** (lot 5, `FinanceTopbar`) : la recherche ⌘K à gauche (un faux champ ; la fenêtre est la modale
+  de l'app, posée en haut pour ne pas sauter quand la liste change), l'action de la page puis la cloche des alertes
+  (compteur encre, ton danger si une alerte est grave). Graphiques : axes et mois en `--text-secondary`.
+- **Justificatifs** (lot 6, proto page Justificatifs) : barre d'outils sans titre (recherche, vues segmentées avec
+  comptes, bascule Grille / Liste à icônes `IconImages2` / `IconUnorderedList`, « Déposer » en contour avec
+  `IconPaperclip`), ligne « Transférez vos tickets et factures à … · Copier » ; grille de cartes (aperçu 144 px,
+  statut posé sur l'aperçu, fournisseur et montant, date et expéditeur, dépense proposée ou rattachée, enveloppe,
+  geste sur la carte) ou liste sans vignette. Glisser des fichiers n'importe où sur la page pose un voile pointillé.
+  Entrée de navigation « Justificatifs » (`IconPaperclip`) après Rapprochement.
+- Touche du clavier nommée à l'écran : `Kbd` (`components/ui/kbd.tsx`, `raised` pour l'accueil).
 
 ### Arrondis
 

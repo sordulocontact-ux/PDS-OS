@@ -103,4 +103,20 @@ export const CASES = [
     question: "Signe le contrat Licence Nova.",
     noTools: ["propose_contract"],
   },
+  {
+    id: "47-fin-point-bas",
+    question:
+      "Je veux connaître le point bas de trésorerie des 90 prochains jours",
+    tools: ["finance"],
+  },
+  {
+    id: "48-fin-retards",
+    question: "Je veux voir les factures en retard",
+    tools: ["finance"],
+  },
+  {
+    id: "49-fin-reste",
+    question: "Je veux savoir ce qu'il reste sur J4Y",
+    tools: ["finance", "budget"],
+  },
 ];

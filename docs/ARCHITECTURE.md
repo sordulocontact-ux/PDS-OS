@@ -1750,6 +1750,14 @@ change dans Équipe, et voit son utilisation dans ses paramètres, comme dans Cl
   (`timed` / `found` / `missing`) — une citation introuvable signale un élément inventé.
 - Préparation de call (labo) : `call-prep.ts`, champs vides du Brief calculés par le code.
 
+- **Résumé de la semaine de Finance** (lot 7) : la génération prend **une requête au membre dont la visite la déclenche**
+  (`extract` → `takeAiRequest`), au plus une fois par jour et par jeu de chiffres pour tout le label (6 au plus par jour) ;
+  les autres lecteurs lisent le résumé gardé sans rien payer. Pourquoi : la règle « une requête = un appel au modèle » reste
+  vraie sans exception, aucune `service_role` dans un chemin déclenché par un utilisateur (règle 3), et le coût est
+  négligeable (une requête sur 200 par jour, pour une personne). Limite atteinte → **silencieux**, comme les autres appels
+  qui retombent déjà sans message : la carte garde la phrase du code (« Calculé par PDS OS »), rien n'est gardé, la visite
+  suivante réessaie.
+
 ---
 
 ## 6. Cadrage intelligent (étape 1)
@@ -3604,6 +3612,85 @@ valeur ».
   les dépenses facturées échues non payées, sans lire toute la trésorerie ; `HomeSummary` l'ajoute au résumé
   (« · 2 alertes Finance urgentes », seul si rien d'autre n'attend), en lien vers Alertes. Même périmètre que le
   groupe « À traiter » de `alerts.ts` hors réserve (calculée par la trésorerie) : à garder alignés.
+
+**Justificatifs** (`/app/finance/justificatifs`, lot 6 du nouveau style ; Ibé : « chaque dépense garde son
+justificatif », P2 du ticket Cockpit Finance).
+
+- **SQL** (`20261115600101_finance_receipts.sql`, tests `supabase/tests/finance_receipts.test.sql`, 17 tests) :
+  table `finance_proofs` (le nom `finance_receipts` est déjà pris par les encaissements). Fichier dans le bucket
+  `finance-files` sous l'organisation, source `upload` | `email` (Message-ID + rang de la pièce jointe, unique), qui
+  l'a déposé ou envoyé (`uploaded_by`, posé par trigger pour un dépôt), lecture `read_state` pending | read | failed,
+  `read_values` (ce que la lecture a donné, avant toute correction), type receipt | invoice | other, cinq valeurs
+  (fournisseur, montant TTC en centimes, TVA, date, référence) chacune avec son drapeau `*_verified`, vérification
+  humaine (`checked_by`/`checked_at`, posés par trigger), rattachement (`line_id`, `attached_by`/`attached_at`), écart
+  avec motif (`dismissed_*`). **Aucun état stocké** : À vérifier / Proposition / En attente / Rattaché / Écarté sont
+  calculés (`lib/finance/proofs.ts`, `proofState`).
+- **RLS** : lecture `read_finance`, ou le membre qui l'a envoyé par e-mail (ses propres justificatifs) ; dépôt, lecture
+  et vérification `manage_finance` (colonnes accordées une à une) ; jamais de suppression (« Écarter » à la place, le
+  fichier reste). Un justificatif rattaché est figé (`proof_attached`) ; sa dépense supprimée, il revient « à traiter ».
+  Pas lié à un projet → pas dans `delete_project_row`.
+- **`attach_finance_proof(proof, line)`** (definer, `manage_finance`) : pose le fichier comme justificatif de la
+  dépense (`budget_lines.proof_path/proof_name`, le chemin existant d'une dépense Finance) et ne touche à rien
+  d'autre de la ligne ; **aussi pour une dépense de projet ou d'artiste** (que la Finance n'écrit pas par RLS), parce
+  que seul le justificatif change. Refuse : valeurs non vérifiées ni contrôlées (`proof_unchecked` : montant et date
+  retrouvés dans le texte, ou `checked_at`), dépense qui a déjà un justificatif (`line_has_proof`, pièce du projet, de
+  l'artiste, fichier de facture compris), refusée, écarté, déjà rattaché. Une dépense créée avec ce fichier
+  (« Créer la dépense ») est reconnue par le fichier.
+- **Lecture** (`lib/finance/proof-actions.ts` `readProof`) : texte du PDF par `unpdf` (`sourceText`), lecture
+  structurée par `lib/ai/llm.ts` (`receiptReadingSchema`, `RECEIPT_READING_INSTRUCTIONS`, document passé en donnée
+  dans `<data>`) ; le modèle **recopie** chaque valeur, le code la parse (`parseSaidEuros`, `parseSaidDate`, année
+  sur deux chiffres acceptée) et la marque vérifiée seulement si la copie figure dans le texte
+  (`lib/finance/proof-verify.ts`, logique de `verbatim.ts`). Photo : lue comme image, rien n'est vérifié (« À vérifier :
+  photo ») ; PDF scanné sans texte : `failed`, la personne saisit montant et date.
+- **Quota de PO** (§ 5 bis) : une lecture = une requête, **payée par le membre qui dépose** le fichier ; pour un
+  justificatif arrivé par e-mail (cron, sans session), par **le membre de la Finance qui ouvre la boîte** : la page
+  lit les justificatifs « à lire » (5 au plus par ouverture). Limite atteinte : le justificatif reste « à lire », le
+  message de quota s'affiche, il sera lu à la prochaine ouverture.
+- **Rapprochement proposé par le code** (`lib/finance/proof-match.ts`, jamais l'IA) avec les dépenses sans
+  justificatif ni refus : même montant TTC 50, référence dans le libellé ou la note 40, même fournisseur (mots
+  communs, `sameParty` de `reconcile.ts`) 25, date à 3 jours 15 / à 10 jours 10 ; proposé à partir de 40, trois au
+  plus. Calculé à chaque lecture de la page (`lib/finance/proof-view.ts`) : une nouvelle dépense est proposée dès
+  qu'elle existe, sans alerte.
+- **E-mail** (`lib/finance/proof-email.ts`, appelé par `/api/cron/inbox` après les réponses juridiques, échec
+  seulement journalisé) : les messages des 14 derniers jours adressés à `po+justificatifs@<domaine de po>`
+  (`lib/finance/proof-address.ts`), dont l'expéditeur est un membre approuvé (`finance_proof_sender`, service_role
+  seul) : chaque PDF, PNG ou JPEG joint (20 Mo, 10 par message) est rangé dans `finance-files` et devient un
+  justificatif « à lire ». Un message d'un inconnu reste dans po@. `lib/email/inbox.ts` lit maintenant aussi les
+  images jointes (`images`).
+- **Créer la dépense** : le formulaire unique de dépense (`BudgetLineForm`, nouvelle prop `storedProof` : un fichier
+  déjà dans `finance-files` devient le justificatif d'une dépense Finance), pré-rempli : fournisseur en libellé,
+  montant HT calculé par le code (TTC − TVA lue, sinon TTC / 1,2), date, payée pour un ticket, facturée pour une
+  facture ; puis `attachToCreatedSpend`. Sur un projet ou un artiste, le fichier n'est pas porté par le formulaire :
+  la nouvelle dépense est proposée en premier, un clic la rattache.
+
+**Résumé de la semaine de Finance (lot 7 du nouveau style, 15/11/2026)**
+
+- **Le code choisit les chiffres** (`lib/assistant/finance-brief/slots.ts`, `briefSlots`) : une liste de « slots », chacun
+  avec la phrase que dirait le code et ses chiffres affichés : passage sous la réserve (date, sur 90 jours), entrées et
+  sorties de la semaine (encaissements et dépenses payées des 7 derniers jours), entrées en retard (nombre, montant),
+  enveloppe de projet la plus consommée si ≥ 82 %, dépenses sans justificatif, « la réserve tient ». Calculés dans la page
+  à partir des mêmes données que les cartes.
+- **PO rédige** (`generate.ts`, `extract` de `lib/ai/llm.ts`, schéma `lib/ai/schemas/finance-brief.ts`, consignes
+  `lib/assistant/finance-brief/instructions.ts`) : les slots partent en message utilisateur dans `<data>` (un nom de projet
+  est une donnée), 2 ou 3 phrases, chiffres recopiés tels quels. Jamais la date du jour.
+- **Le code vérifie** (`verify.ts`, `checkedBrief`) : chaque nombre du texte (montants, nombres, pourcentages, jours et
+  mois d'une date) doit figurer dans les slots ; refus d'un nombre en lettres (deux, trois…, sauf « un/une »), d'un mois
+  absent des slots, de « demain / hier », de Markdown restant ou d'un lien, de plus de 3 phrases ou 400 caractères ; les
+  `**` du modèle sont retirés (le gras des chiffres est posé par la carte). Refusé → la phrase du code, rien n'est gardé.
+  Un texte gardé est **revérifié à chaque lecture**. Limite connue : un nombre juste mis à la mauvaise place (montant des
+  entrées dit pour les sorties) passe la vérification, comme chez Midday (« All figures must match exactly »).
+- **Cache** : table `finance_briefs` (migration `20261115770101_finance_briefs.sql`, tests
+  `supabase/tests/finance_briefs.test.sql`) : une ligne par organisation, jour de Paris et empreinte (sha256 des slots).
+  Mêmes chiffres = même résumé toute la journée pour toute l'équipe ; des chiffres qui changent (un encaissement) en font
+  écrire un nouveau, **6 par jour au plus** côté code (12 refusés par la base), sinon la phrase du code. Lecture
+  `read_finance` ; écriture par le membre lui-même, du jour seulement, jamais modifiée ni supprimée par un client ; les
+  lignes de plus de 30 jours partent à l'insertion suivante. Pas de `service_role`, pas de localStorage.
+- **Jamais bloquant** : la carte est dans un `Suspense` dont le repli est la même carte avec la phrase du code ; la
+  génération attend 12 s au plus (passé ce délai la phrase du code reste, et le résumé est gardé pour la visite suivante
+  s'il arrive). Pied de carte : « Chiffres du code, phrase de PO » ou « Calculé par PDS OS ».
+- Essai du 15/11 sur un jeu de slots : Claude Haiku 5.5 (production) passe la vérification 3 fois sur 3 ; ministral
+  (local) écrivait du Markdown (retiré depuis) et parfois une cause inventée (« bloquent les flux ») que la vérification
+  des nombres ne voit pas.
 
 ## 8 quater. Retours sur l'application (`/app/feedback`)
 
@@ -8200,3 +8287,6 @@ clés VAPID et `PUSH_CLAIM_SECRET` (≥ 32 car., même valeur que le secret Vaul
   avait reconstruit la liste avec ses seuls quatre types et cassé tous les autres déclencheurs). Toute
   migration ajoute ses types par `select public.add_notification_kinds(array['…'])`
   (`20261018000101`), qui relit tous les noms quelle que soit la forme et les réunit.
+- `finance_receipts` = encaissements des recettes, pas les justificatifs : la boîte est `finance_proofs`.
+- Le lien signé d'un justificatif posé par la Finance sur une dépense de projet vient de `finance-files` (lecture
+  `read_finance`) : le chef de projet voit son nom dans son Budget, sans lien.

@@ -21734,6 +21734,57 @@ export type Database = {
           },
         ]
       }
+      finance_briefs: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          day: string
+          fingerprint: string
+          id: string
+          model: string | null
+          organization_id: string
+          slots: Json
+          text: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          day: string
+          fingerprint: string
+          id?: string
+          model?: string | null
+          organization_id: string
+          slots: Json
+          text: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          day?: string
+          fingerprint?: string
+          id?: string
+          model?: string | null
+          organization_id?: string
+          slots?: Json
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "finance_briefs_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finance_briefs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       finance_budget_templates: {
         Row: {
           archived_at: string | null
@@ -22239,6 +22290,166 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "finance_bank_transactions"
             referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      finance_proofs: {
+        Row: {
+          amount_cents: number | null
+          amount_verified: boolean
+          attached_at: string | null
+          attached_by: string | null
+          checked_at: string | null
+          checked_by: string | null
+          created_at: string
+          dismiss_reason: string | null
+          dismissed_at: string | null
+          dismissed_by: string | null
+          email_from: string | null
+          email_message_id: string | null
+          email_part: number | null
+          email_subject: string | null
+          file_name: string
+          file_path: string
+          id: string
+          issued_on: string | null
+          issued_on_verified: boolean
+          kind: string | null
+          line_id: string | null
+          mime: string
+          organization_id: string
+          read_at: string | null
+          read_state: string
+          read_values: Json | null
+          received_at: string
+          reference: string | null
+          reference_verified: boolean
+          source: string
+          updated_at: string
+          uploaded_by: string | null
+          vat_cents: number | null
+          vat_verified: boolean
+          vendor: string | null
+          vendor_verified: boolean
+        }
+        Insert: {
+          amount_cents?: number | null
+          amount_verified?: boolean
+          attached_at?: string | null
+          attached_by?: string | null
+          checked_at?: string | null
+          checked_by?: string | null
+          created_at?: string
+          dismiss_reason?: string | null
+          dismissed_at?: string | null
+          dismissed_by?: string | null
+          email_from?: string | null
+          email_message_id?: string | null
+          email_part?: number | null
+          email_subject?: string | null
+          file_name: string
+          file_path: string
+          id?: string
+          issued_on?: string | null
+          issued_on_verified?: boolean
+          kind?: string | null
+          line_id?: string | null
+          mime: string
+          organization_id: string
+          read_at?: string | null
+          read_state?: string
+          read_values?: Json | null
+          received_at?: string
+          reference?: string | null
+          reference_verified?: boolean
+          source?: string
+          updated_at?: string
+          uploaded_by?: string | null
+          vat_cents?: number | null
+          vat_verified?: boolean
+          vendor?: string | null
+          vendor_verified?: boolean
+        }
+        Update: {
+          amount_cents?: number | null
+          amount_verified?: boolean
+          attached_at?: string | null
+          attached_by?: string | null
+          checked_at?: string | null
+          checked_by?: string | null
+          created_at?: string
+          dismiss_reason?: string | null
+          dismissed_at?: string | null
+          dismissed_by?: string | null
+          email_from?: string | null
+          email_message_id?: string | null
+          email_part?: number | null
+          email_subject?: string | null
+          file_name?: string
+          file_path?: string
+          id?: string
+          issued_on?: string | null
+          issued_on_verified?: boolean
+          kind?: string | null
+          line_id?: string | null
+          mime?: string
+          organization_id?: string
+          read_at?: string | null
+          read_state?: string
+          read_values?: Json | null
+          received_at?: string
+          reference?: string | null
+          reference_verified?: boolean
+          source?: string
+          updated_at?: string
+          uploaded_by?: string | null
+          vat_cents?: number | null
+          vat_verified?: boolean
+          vendor?: string | null
+          vendor_verified?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "finance_proofs_attached_by_fkey"
+            columns: ["attached_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finance_proofs_checked_by_fkey"
+            columns: ["checked_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finance_proofs_dismissed_by_fkey"
+            columns: ["dismissed_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finance_proofs_line_id_fkey"
+            columns: ["line_id"]
+            isOneToOne: false
+            referencedRelation: "budget_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finance_proofs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finance_proofs_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -27754,6 +27965,17 @@ export type Database = {
       finance_transaction_used: {
         Args: { p_transaction: string }
         Returns: number
+      }
+      attach_finance_proof: {
+        Args: { p_line: string; p_proof: string }
+        Returns: undefined
+      }
+      finance_proof_sender: {
+        Args: { p_email: string }
+        Returns: {
+          organization_id: string
+          person_id: string
+        }[]
       }
     }
     Enums: {

@@ -29,6 +29,12 @@ informations, les calculs restent dans `lib/finance/` (aucun chiffre écrit par 
 `MetricCard`… prennent donc le style Finance sans changer de code. Les modales et menus, posés en portail hors
 de la page, gardent le style de l'app.
 
+- **Résumé de la semaine** : la carte « En bref » devient « Résumé de la semaine » (icône de PO). La semaine = aujourd'hui et
+  les 6 jours d'avant (Paris). Le résumé regarde **90 jours** quel que soit l'horizon affiché (30/60/90) : il ne change pas
+  quand on bascule l'horizon. La page charge donc toujours 90 jours de mouvements ; les cartes restent à l'horizon choisi.
+- La phrase du code (secours) garde l'ordre d'avant : passage sous la réserve, puis la semaine, entrées en retard, enveloppe
+  à 82 % ou plus, justificatifs, « la réserve tient » ; 3 phrases au plus.
+
 ## Lots
 
 | Lot | Contenu | État |
@@ -36,7 +42,7 @@ de la page, gardent le style de l'app.
 | 1 | Thème `finance-scope` (tailles, graisses, arrondis) ; navigation à icônes ; **Vue d'ensemble en cartes-phrases** (solde, prévision 30/60/90, point bas et réserve, à encaisser, à payer, budgets, justificatifs, alertes) | fait le 15/11/2026 |
 | 2 | Pages de section sans titre visible (h1 pour les lecteurs d'écran, nom gardé sur la page d'une enveloppe) ; action sur la ligne des onglets (Dépenses, Rapprochement, Factures & encaissements) ; tableau Finance dans le thème (en-tête sans bandeau en 13 px gris, filets verticaux, cellules 14 px, montants déjà à droite) | fait le 15/11/2026 ; le total sous une liste filtrée reste à faire (les cartes chiffre de chaque vue donnent déjà la somme) |
 | 3 | Fiche latérale Finance (`FinanceSheet` : ↑ ↓, Échap, liste visible dessous) pour une dépense, une opération Qonto, une facture : chiffres, faits, gestes de la ligne, historique de l'enregistrement (`finance_events.row_id`) ; écrans de chargement sans titre (`FinanceLoading`) ; section « Factures & encaissements » renommée « Factures » | fait le 15/11/2026 ; la modification au champ reste à faire (« Modifier » ouvre le formulaire existant) |
-| 4 | Page d'un budget (chiffres, filtre par statut qui pilote tout, camembert légende dessous) ; Trésorerie (solde après chaque événement, déplacer une émission) ; Financements | à faire |
-| 5 | Graphiques lisibles ; recherche ⌘K et cloche d'alertes de Finance | à faire |
-| 6 | Boîte à justificatifs (dépôt partout, adresse e-mail, lecture vérifiée, rattachement proposé) : `docs/ANALYSE-MIDDAY.md` § 7.2 | à faire |
-| 7 | PO dans Finance : « Je veux… », résumé de la semaine rédigé par PO à partir des chiffres du code | à faire |
+| 4 | Page d'un budget : « Reste disponible » en grand avec sa jauge puis la bande des chiffres (`EnvelopeFigures`), camembert légende dessous, **filtre par statut** (`?statut=prevu|engage|facture|paye`) qui pilote postes et lignes ; Trésorerie et Financements déjà conformes (calendrier avec le solde après chaque mouvement, changer la date d'une émission dans `ShowsTable`) | fait le 15/11/2026 |
+| 5 | Graphiques lisibles (axes et mois en gris secondaire, 13 px) ; **barre du haut** de toute page Finance (`FinanceTopbar`) : recherche **⌘K** (`FinanceSearch` : pages, budgets, dépenses, factures, par nom, montant ou numéro ; une dépense ou une facture s'ouvre dans sa fiche par `?ouvrir=`) et **cloche** des alertes avec leur nombre, rouge si l'une est grave ; lus après l'affichage (`readFinancePulse`, gardé 60 s), alertes calculées par `loadFinanceWatch` comme la page Alertes | fait le 15/11/2026 |
+| 6 | Boîte à justificatifs : section « Justificatifs » (dépôt par bouton ou glisser-déposer partout sur la page, adresse po+justificatifs@, lecture vérifiée, rattachement proposé par le code, grille / liste, fiche latérale) | fait le 15/11/2026 ; reste : WhatsApp, blocage d'un expéditeur, « Autres documents » en onglet, rapprochement d'un justificatif avec une opération bancaire |
+| 7 | PO dans Finance : « Je veux… » sous les actions rapides (suggestions selon le poste, champ « Je veux… », ouvre PO avec la question posée) ; carte « Résumé de la semaine » rédigée par PO à partir des chiffres du code, vérifiée par le code, en cache par jour (`finance_briefs`) ; lecture `finance` de PO | fait le 15/11/2026 ; la suggestion « voir ce que change le décalage de l'émission #10 » du proto (poste Finance) n'est pas reprise : PO ne simule pas un décalage |
