@@ -40,8 +40,22 @@ export const BUDGET_FAMILIES = [
 ] as const;
 export type BudgetFamily = (typeof BUDGET_FAMILIES)[number];
 
-/** What a spend belongs to (BUD 1): a project or an artist, never both. */
-export type BudgetTarget = { kind: "project" | "artist"; id: string };
+/** What a spend belongs to (BUD 1): a project or an artist, never both;
+ * since Ibé's ticket « Cockpit Finance » (lot 3, 13/11/2026) also a cost
+ * center of the Finance, or none at all (« hors budget », id ""). */
+export type BudgetTargetKind =
+  "project" | "artist" | "cost_center" | "off_budget";
+export type BudgetTarget = { kind: BudgetTargetKind; id: string };
+
+/** A spend's money out: its HT plus its VAT when known (SQL
+ * budget_line_ttc). */
+export const budgetLineTtcCents = (cents: number, vatBp: number | null) =>
+  Math.round((cents * (10000 + (vatBp ?? 0))) / 10000);
+
+/** A target the Finance keeps (its proof in finance-files, its spends
+ * written by manage_finance). */
+export const isFinanceTarget = (target: Pick<BudgetTarget, "kind">) =>
+  target.kind === "cost_center" || target.kind === "off_budget";
 
 /** A target offered to a quick spend (BUD 4): its name, and whether the
  * reader spent on it lately (those lead the list). */
@@ -63,6 +77,8 @@ export type BudgetLine = {
   family: BudgetFamily | null;
   // What « Autre » is (required with it).
   familyDetail: string | null;
+  // « Sous-poste » (Finance, lot 4): a finer kind under the poste.
+  subpost: string | null;
   leverId: string | null;
   leverLabel: string | null;
   // The deliverable it pays for (MKT-S1-12).
@@ -76,6 +92,15 @@ export type BudgetLine = {
   // invoice's, never typed; the amount agreed kept when the invoice changed it.
   invoiceId: string | null;
   committedCents: number | null;
+  // Lot 3 of the Finance: VAT (basis points, null when not given; the
+  // amount stays HT), supplier (a contact or a name), due day, rebillable,
+  // validator (a member).
+  vatBp: number | null;
+  supplierContactId: string | null;
+  supplierName: string | null;
+  dueOn: string | null;
+  rebillable: boolean;
+  validatorId: string | null;
 };
 
 export type BudgetLever = { id: string; label: string };

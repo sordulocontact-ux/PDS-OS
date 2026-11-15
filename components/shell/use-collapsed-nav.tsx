@@ -21,14 +21,17 @@ export function CollapsedNavProvider({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  // Only the project's own sidebar makes room for itself: with tabs, the main
-  // sidebar keeps its width inside a project, as on an artist's page.
+  // Only a section's own sidebar (a project's, Finance's) makes room for
+  // itself: with tabs, the main sidebar keeps its width inside a project,
+  // as on an artist's page.
   const withProjectSidebar =
-    DOUBLE_SIDEBAR && pathname.startsWith(`${routes.projects}/`);
+    (DOUBLE_SIDEBAR && pathname.startsWith(`${routes.projects}/`)) ||
+    pathname === routes.finance ||
+    pathname.startsWith(`${routes.finance}/`);
   const [override, setOverride] = useState<boolean | null>(null);
   const hadProjectSidebar = useRef(withProjectSidebar);
 
-  // Collapsed by default inside a project, full width everywhere else. The
+  // Collapsed by default inside a project or Finance, full width elsewhere. The
   // sidebar toggle button overrides this — no preference is stored, nothing
   // persists — but the override is forgotten when leaving or entering a
   // project, so the automatic behaviour resumes.

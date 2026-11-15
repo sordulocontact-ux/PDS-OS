@@ -2254,3 +2254,41 @@ les modules à parcours (proto « Mise en page des modules », version « Propos
   dépenses par mois, par poste, par artiste, budgets des projets et enveloppes des artistes, À payer, plus grosses
   dépenses, sans justificatif. Dépenses inchangée. Sujet « Finance » du guide de PO. Reste : passage navigateur
   (extension Chrome non connectée pendant le lot), pousser la migration en prod avec accord.
+- [x] **Cockpit Finance, lot 1 : trésorerie et argent entrant** (13/11/2026, ticket d'Ibé) — Finance en
+      onglets (Vue d'ensemble, Trésorerie, Budgets, Factures & encaissements, Dépenses), solde du compte
+      par relevé, réserve minimale, entrées d'argent et encaissements partiels, prévision 30/60/90 jours,
+      point bas, calendrier financier, historique ; `manage_finance` (direction, business managers,
+      business) ; migration `20261113100101_treasury.sql`, pgTAP `treasury.test.sql` (22). Reste : lots
+      Factures clients, Dépenses, Budgets détaillés, Rapprochement Qonto / alertes / moteurs.
+      Même jour, mise en page refaite d'après Midday (Sacha : « assez mal construit ») : cartes chiffre
+      `MetricCard` partout, solde et courbe en tête, À encaisser / À payer / Disponible côte à côte,
+      courbe d'une seule encre (`docs/DESIGN.md` « Finance : cartes chiffre »).
+- [x] **Cockpit Finance, lot 2 : factures clients et avoirs** (13/11/2026) — facture d'une entrée : TVA (HT
+      calculé), deal, responsable, envoi, PDF (bucket `finance-files`) ; états Brouillon / Envoyée / Avoir ;
+      avoirs ; relances notées (vue En retard : retard, responsable, dernière relance, prochaine action) ;
+      migration `20261113200102_client_invoices.sql`, pgTAP `client_invoices.test.sql` (18).
+- [x] **Cockpit Finance, lot 3 : dépenses contextualisées** (13/11/2026) — centres de coût, « hors budget »
+      (alerte), TVA / TTC, fournisseur, échéance, valideur, refacturable (recette prévue, alerte sinon) dans le
+      formulaire unique de dépense ; onglet Finance › Dépenses (`/app/finance/depenses`) ; trésorerie en TTC ;
+      migration `20261113300101_finance_spends.sql`, pgTAP `finance_spends.test.sql` (14).
+- [x] **Cockpit Finance, lot 4 : budgets détaillés** (13/11/2026) — onglet Budgets refait (enveloppes projets,
+      artistes, centres de coût : initial, révisions, prévu, engagé, facturé, payé, reste, refacturable, écart ;
+      camembert par poste ; mois par mois), détail d'une enveloppe (postes et sous-postes, révisions tracées,
+      part PDS), import ligne par ligne, modèles réutilisables ; migration `20261113400101_finance_budgets.sql`,
+      pgTAP `finance_budgets.test.sql` (11).
+- [x] **Cockpit Finance, lot 5 : financements et moteurs** (13/11/2026) — onglet Financements : avances The
+      Orchard calculées par tranche de titres, émissions et lives planifiés (coût et titres provisoires à leur
+      date, déplacer = la trésorerie suit), Pay Later (lignes de crédit, tirages, mensualités, crédit disponible ;
+      la dépense financée sort par ses mensualités), remboursements, réserve ; migration
+      `20261113500101_finance_fundings.sql`, pgTAP `finance_fundings.test.sql` (9).
+- [x] **Cockpit Finance, lot 6 : rapprochement bancaire** (13/11/2026) — onglet Rapprochement : import CSV de
+      Qonto (ou ajout à la main), propositions par montant, référence, tiers et date, validation humaine,
+      encaissement ou lien de dépense créé sans double comptage, rapprochements partiels et multiples,
+      doublons possibles ; migration `20261113600101_finance_reconciliation.sql`, pgTAP
+      `finance_reconciliation.test.sql` (12).
+- [x] **Cockpit Finance, lot 7 : alertes, exports, historique** (13/11/2026) — onglet Alertes (réserve, budgets à
+      82 %, échéances, factures et dépenses possiblement dupliquées, refacturables, hors budget, justificatifs,
+      banque à rapprocher, décalage d'émission qui remonte le point bas) ; onglet Exports (CSV dépenses, factures
+      et avoirs, encaissements, banque, historique ; historique des 100 dernières modifications) ; migration
+      `20261113700101_finance_alerts.sql`. Le ticket Finance d'Ibé est couvert ; reste P2 : synchronisation
+      automatique Qonto, récupération des justificatifs.

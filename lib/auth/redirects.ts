@@ -80,6 +80,10 @@ export const PERMISSIONS = [
   // Reads the Finance page: every total of the team's spending (the
   // direction, business managers and business, Sacha 12/11/2026).
   "read_finance",
+  // Writes the treasury and the money in: the balance, the reserve, the
+  // incomes and their receipts (the direction and the Finance, Ibé's ticket
+  // « Cockpit Finance » and Sacha, 13/11/2026).
+  "manage_finance",
 ] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 
@@ -125,8 +129,23 @@ export const routes = {
   files: "/app/files",
   // Every spend the reader may see, projects and artists (BUD 3).
   expenses: "/app/expenses",
-  // The team's spending as a whole (?periode=mois|trimestre|annee|tout).
+  // Finance (Ibé's ticket « Cockpit Finance », 13/11/2026): the overview,
+  // the treasury (?horizon=30|60|90), the budgets
+  // (?type=), the money in (?vue=), the spends (?vue=).
   finance: "/app/finance",
+  financeTreasury: "/app/finance/tresorerie",
+  financeBudgets: "/app/finance/budgets",
+  financeIncomes: "/app/finance/encaissements",
+  financeSpends: "/app/finance/depenses",
+  financeFundings: "/app/finance/financements",
+  financeReconcile: "/app/finance/rapprochement",
+  financeAlerts: "/app/finance/alertes",
+  financeExports: "/app/finance/exports",
+  // A CSV of Finance (lot 7): ?type=depenses|factures|encaissements|banque|historique.
+  financeExport: (type: string) => `/api/finance/export?type=${type}`,
+  // One envelope (lot 4): projet | artiste | centre.
+  financeBudget: (kind: "projet" | "artiste" | "centre", id: string) =>
+    `/app/finance/budgets/${kind}/${id}`,
   // The Business module's deals (BIZ 2 to 4): the list, a deal's page.
   deals: "/app/deals",
   deal: (dealId: string) => `/app/deals/${dealId}`,

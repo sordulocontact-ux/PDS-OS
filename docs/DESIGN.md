@@ -964,6 +964,24 @@ au toucher) ou « Informations ». Écart voulu : la Vue d'ensemble ne montre **
 d'état** (étapes en fil, workflows en anneau `ProgressRing`) et sépare ses blocs par l'espace, pas
 par des traits.
 
+### Finance : cartes chiffre, d'après Midday (13/11/2026)
+
+Sacha a écarté la première version du cockpit (« assez mal construit ») et choisi Midday comme
+modèle. Écart voulu, propre à Finance : toute la section se lit en **cartes de même anatomie**
+(`MetricCard`) au lieu de `StatTiles` + `PageSection` + `ListCard` mêlés.
+
+- Une carte = petit titre gris, lien « Tout voir » ou choix de période à droite, **le chiffre en
+  grand** (`text-display-md`, `text-display-lg` pour le solde), une ligne d'explication, la
+  légende si une courbe suit, puis le détail (courbe, trois lignes séparées par des filets).
+- Vue d'ensemble : le solde et sa courbe en tête, puis trois cartes côte à côte (À encaisser,
+  À payer, Disponible sur les budgets), puis « À surveiller ». Trésorerie : la même carte du
+  solde, plus les entrées, sorties, solde à l'horizon et point bas sous le chiffre. Factures &
+  encaissements : quatre cartes chiffre au-dessus du tableau ; « En retard » filtre (lien étiré).
+- Courbe **d'une seule encre** : réel en trait plein, prévu en tirets, réserve en pointillé
+  ambre, grille en tirets légers. Plus de bleu pour le prévu.
+- Une couleur sur un chiffre (rouge d'un retard, vert d'une entrée) va sur son propre élément :
+  `cn` ne garde qu'une classe `text-*` et effacerait la taille.
+
 ### Arrondis
 
 | Élément                                            | Classe        | Rayon   |

@@ -1,83 +1,81 @@
-import { IconChartBarTrendUp } from "nucleo-sharp-essential";
-
 import { FormMessage } from "@/components/auth/form-message";
-import { FinanceOverview } from "@/components/finance/finance-overview";
-import { EmptyState } from "@/components/shell/empty-state";
-import { PageContainer } from "@/components/shell/page-container";
-import { PageHeader } from "@/components/shell/page-header";
-import { SegmentedLinks } from "@/components/ui/segmented-control";
+import { CockpitOverview } from "@/components/finance/cockpit-overview";
+import { FinanceFrame } from "@/components/finance/finance-frame";
+import { IncomeAddButton } from "@/components/finance/incomes-table";
 import { can } from "@/lib/auth/access";
 import { requirePermission } from "@/lib/auth/dal";
-import { routes } from "@/lib/auth/redirects";
-import {
-  FINANCE_PERIODS,
-  asFinancePeriod,
-  financePeriod,
-} from "@/lib/finance/period";
+import { cockpit } from "@/lib/finance/cockpit";
+import { financePeriod } from "@/lib/finance/period";
 import { loadFinance } from "@/lib/finance/queries";
-import { financeView } from "@/lib/finance/view";
-import { finance as t } from "@/lib/i18n/fr/finance";
+import {
+  DEFAULT_HORIZON,
+  addDays,
+  computeTreasury,
+} from "@/lib/finance/treasury";
+import { loadSpends } from "@/lib/finance/spend-queries";
+import { loadTreasury } from "@/lib/finance/treasury-queries";
+import { treasury as t } from "@/lib/i18n/fr/treasury";
 import { parisPlace } from "@/lib/utils/calendar-period";
 import { allInOrder } from "@/lib/utils/parallel";
 
-export const metadata = { title: t.title };
+export const metadata = { title: t.titles.overview };
 
 /**
- * Finance (Sacha, 12/11/2026): the team's spending as a whole, every project
- * and every artist, for the direction, the business managers and business
- * (read_finance). Totals by period (this month, quarter, year, everything),
- * the months, the postes and artists, the budgets against their envelopes,
- * what is to pay. Every figure is computed by code from the budget lines
- * (lib/finance/); Dépenses stays the list of the lines themselves.
+ * Finance › Vue d'ensemble (Ibé's ticket « Cockpit Finance », maquette 1,
+ * 13/11/2026): how much there is, what comes in and goes out, where to act.
+ * For the direction and the Finance (read_finance); the Finance enters
+ * money in from here (manage_finance). Every figure is computed by code
+ * (lib/finance/treasury.ts, cockpit.ts).
  */
-export default async function FinancePage({
-  searchParams,
-}: PageProps<"/app/finance">) {
-  const [access, params] = await allInOrder([
-    requirePermission("read_finance"),
-    searchParams,
-  ]);
+export default async function FinanceOverviewPage() {
   const today = parisPlace(new Date()).day;
-  const period = financePeriod(asFinancePeriod(params.periode), today);
-  const data = await loadFinance(period);
-  const view = financeView(data, period, today, {
-    projects: can(access, "view_all_projects"),
-    artists: can(access, "read_artist_budgets"),
-  });
+  const horizon = DEFAULT_HORIZON;
+  const [access, data, spending, spends] = await allInOrder([
+    requirePermission("read_finance"),
+    loadTreasury(addDays(today, horizon)),
+    loadFinance(financePeriod("tout", today)),
+    loadSpends(),
+  ]);
+  const canManage = can(access, "manage_finance");
+  const treasury = computeTreasury({ ...data, today, horizon });
+  const names = new Map([
+    ...spending.projects.map((p) => [p.id, p.title] as const),
+    ...data.targets.map((x) => [x.id, x.name] as const),
+  ]);
 
   return (
-    <PageContainer>
-      <PageHeader
-        title={t.title}
-        description={t.description}
-        action={
-          <SegmentedLinks
-            label={t.periods.label}
-            options={FINANCE_PERIODS.map((key) => ({
-              key,
-              href: `${routes.finance}?periode=${key}`,
-              label: t.periods[key],
-              current: period.key === key,
-            }))}
+    <FinanceFrame
+      section="overview"
+      action={
+        canManage && access.organizationId ? (
+          <IncomeAddButton
+            targets={data.targets}
+            organizationId={access.organizationId}
+            ownerId={access.personId}
           />
-        }
-      />
-      {data.error && <FormMessage kind="error">{t.loadError}</FormMessage>}
-      {data.months.length === 0 && !data.error ? (
-        <EmptyState
-          icon={IconChartBarTrendUp}
-          title={t.emptyTitle}
-          body={t.emptyBody}
-        />
-      ) : (
-        <FinanceOverview
-          data={data}
-          view={view}
-          period={period}
-          today={today}
-          canOpenExpenses={can(access, "read_artist_budgets")}
-        />
+        ) : undefined
+      }
+    >
+      {(data.error || spending.error) && (
+        <FormMessage kind="error">{t.loadError}</FormMessage>
       )}
-    </PageContainer>
+      <CockpitOverview
+        treasury={treasury}
+        view={cockpit({
+          treasury,
+          incomes: data.incomes,
+          upcoming: data.upcoming,
+          spending,
+          spends: spends.spends,
+          engines: data.engines,
+          today,
+          horizon,
+        })}
+        horizon={horizon}
+        names={names}
+        canManage={canManage}
+        canOpenExpenses={can(access, "read_artist_budgets")}
+      />
+    </FinanceFrame>
   );
 }

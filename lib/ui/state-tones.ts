@@ -191,6 +191,42 @@ export const envelopeTone: Record<"within" | "over", Tone> = {
   over: "danger",
 };
 
+/** Money coming in (Finance, lib/finance/money-in.ts): awaited, invoiced
+ * and running, late as an overdue invoice, received, cancelled aside. */
+export const incomeStateTone: Record<
+  | "expected"
+  | "draft"
+  | "sent"
+  | "late"
+  | "partial"
+  | "received"
+  | "credited"
+  | "cancelled",
+  Tone
+> = {
+  expected: "neutral",
+  draft: "neutral",
+  sent: "info",
+  late: overdueTone,
+  partial: "info",
+  received: "success",
+  credited: "neutral",
+  cancelled: "neutral",
+};
+
+/** A spend still to pay in the treasury's calendar (budget_lines.status):
+ * estimated or quoted, engaged, invoiced. */
+export const spendCashTone: Record<
+  "planned" | "proposed" | "committed" | "invoiced" | "paid",
+  Tone
+> = {
+  planned: "neutral",
+  proposed: "warning",
+  committed: "info",
+  invoiced: "info",
+  paid: "success",
+};
+
 /** Design state of a deliverable (lib/design/rules.ts): nothing yet, waiting
  * for the owner's review, sent back for changes, approved. */
 export const designStateTone: Record<string, Tone> = {

@@ -147,9 +147,18 @@ export const budget = {
     targetNone: "Aucun projet ni artiste ne correspond.",
     targetMissing: "Dites à quel projet ou à quel artiste va la dépense.",
     // Its kind as a badge after the name (Sacha 11/11/2026), « récent » beside.
-    targetKinds: { project: "Projet", artist: "Artiste" },
+    targetKinds: {
+      project: "Projet",
+      artist: "Artiste",
+      cost_center: "Centre de coût",
+      off_budget: "Hors budget",
+    },
     targetRecent: "récent",
     quickTitle: "Nouvelle dépense",
+    offBudget: "Hors budget",
+    subpost: "Sous-poste",
+    offBudgetHint:
+      "Sur aucune enveloppe : la Vue d'ensemble de Finance la signale.",
     quickDescription:
       "Le ticket en photo si vous l'avez, le montant, ce que c'est et pour qui : déjà payée par défaut.",
     noTargets:
@@ -198,5 +207,23 @@ export const budget = {
     confirm: "Supprimer",
     deleting: "Suppression…",
     deleted: "Dépense supprimée.",
+  },
+  // A rebillable spend's expected income (Finance, lot 3).
+  rebilling: {
+    label: (spend: string) => `Refacturation · ${spend}`,
+  },
+  // What the Finance needs of a spend (lot 3 of the Finance, 13/11/2026).
+  spendDetails: {
+    title: "Facturation",
+    ttc: (amount: string) => `Soit ${amount} TTC`,
+    dueOn: "Échéance",
+    supplier: "Fournisseur",
+    validator: "Valideur",
+    none: "Aucun",
+    search: "Rechercher",
+    noMatch: "Aucun résultat",
+    rebillable: "Refacturable",
+    rebillableHint:
+      "Refacturée à un client ou un partenaire : une recette attendue est prévue pour elle.",
   },
 } as const;

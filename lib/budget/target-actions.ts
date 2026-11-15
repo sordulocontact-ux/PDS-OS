@@ -3,6 +3,7 @@
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import type { ExpenseTarget } from "@/lib/budget/types";
+import { budget } from "@/lib/i18n/fr/budget";
 import { createClient } from "@/lib/supabase/server";
 
 // How many of the reader's last targets lead the list.
@@ -11,7 +12,9 @@ const RECENT = 5;
 /**
  * What a quick spend can go to (BUD 4), for the reader: the projects they
  * run (not archived) and, for the artists' budgets' readers, every artist
- * not archived; the ones they last spent on first, then by name. Read with
+ * not archived; for the Finance (manage_finance, lot 3 of Ibé's ticket),
+ * its cost centers and « Hors budget » last; the ones they last spent on
+ * first, then by name. Read with
  * the user's session; the database still decides on saving.
  */
 export async function loadExpenseTargets(): Promise<{
@@ -23,7 +26,8 @@ export async function loadExpenseTargets(): Promise<{
     return { organizationId: null, targets: [] };
   const supabase = await createClient();
   const artists = can(access, "read_artist_budgets");
-  const [projectsRes, artistsRes, recentRes] = await Promise.all([
+  const finance = can(access, "manage_finance");
+  const [projectsRes, artistsRes, recentRes, centersRes] = await Promise.all([
     supabase
       .from("projects")
       .select("id, title")
@@ -39,10 +43,17 @@ export async function loadExpenseTargets(): Promise<{
       : Promise.resolve({ data: [], error: null }),
     supabase
       .from("budget_lines")
-      .select("project_id, artist_id")
+      .select("project_id, artist_id, cost_center_id")
       .eq("created_by", access.personId)
       .order("created_at", { ascending: false })
       .limit(50),
+    finance
+      ? supabase
+          .from("finance_cost_centers")
+          .select("id, name")
+          .is("archived_at", null)
+          .order("name")
+      : Promise.resolve({ data: [], error: null }),
   ]);
   const all: ExpenseTarget[] = [
     ...(projectsRes.data ?? []).map((p) => ({
@@ -55,10 +66,19 @@ export async function loadExpenseTargets(): Promise<{
       id: a.id,
       label: a.name,
     })),
+    ...(centersRes.data ?? []).map((c) => ({
+      kind: "cost_center" as const,
+      id: c.id,
+      label: c.name,
+    })),
   ].sort((a, b) => a.label.localeCompare(b.label, "fr"));
+  // « Hors budget »: the last choice, never a habit (the overview signals it).
+  const offBudget: ExpenseTarget[] = finance
+    ? [{ kind: "off_budget", id: "", label: budget.form.offBudget }]
+    : [];
   const recent: string[] = [];
   for (const row of recentRes.data ?? []) {
-    const id = row.project_id ?? row.artist_id;
+    const id = row.project_id ?? row.artist_id ?? row.cost_center_id;
     if (id && !recent.includes(id)) recent.push(id);
     if (recent.length === RECENT) break;
   }
@@ -68,8 +88,11 @@ export async function loadExpenseTargets(): Promise<{
   };
   return {
     organizationId: access.organizationId,
-    targets: all
-      .map((t) => ({ ...t, recent: recent.includes(t.id) }))
-      .sort((a, b) => rank(a) - rank(b)),
+    targets: [
+      ...all
+        .map((t) => ({ ...t, recent: recent.includes(t.id) }))
+        .sort((a, b) => rank(a) - rank(b)),
+      ...offBudget,
+    ],
   };
 }

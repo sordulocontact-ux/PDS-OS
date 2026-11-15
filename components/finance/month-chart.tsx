@@ -1,5 +1,5 @@
 import { MonthChartTable } from "@/components/finance/month-chart-table";
-import { PageSection } from "@/components/shell/page-section";
+import { MetricCard } from "@/components/ui/metric-card";
 import type { MonthBar } from "@/lib/finance/aggregate";
 import type { Month } from "@/lib/finance/period";
 import { finance } from "@/lib/i18n/fr/finance";
@@ -58,10 +58,9 @@ export function MonthChart({
     !highlight || (month >= highlight.from && month <= highlight.to);
 
   return (
-    <PageSection
-      id="finance-chart"
+    <MetricCard
       title={t.title}
-      action={
+      legend={
         <ul
           aria-label={t.legendLabel}
           className="flex flex-wrap gap-x-4 gap-y-1 text-caption text-[color:var(--text-secondary)]"
@@ -192,6 +191,6 @@ export function MonthChart({
         )}
         <MonthChartTable bars={bars} series={SERIES} monthName={monthName} />
       </figure>
-    </PageSection>
+    </MetricCard>
   );
 }

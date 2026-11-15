@@ -42,7 +42,10 @@ export const anonymousAccess: Access = {
 // the reader. Vercel sets VERCEL_ENV to "production" on main's deployments
 // only (pre-prod is "preview", local is unset). Hiding, not security: RLS
 // still decides what the database gives.
-const OFF_IN_PRODUCTION: readonly Permission[] = ["read_finance"];
+const OFF_IN_PRODUCTION: readonly Permission[] = [
+  "read_finance",
+  "manage_finance",
+];
 
 function shownHere(permission: Permission): boolean {
   return (

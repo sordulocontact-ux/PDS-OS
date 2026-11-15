@@ -69,6 +69,11 @@ export function BudgetTargetField({
           );
         }}
       />
+      {byKey.get(value)?.kind === "off_budget" && (
+        <p className="text-caption text-[color:var(--tone-warning-fg)]">
+          {t.offBudgetHint}
+        </p>
+      )}
       {error && <FieldError id="budget-target-error">{error}</FieldError>}
     </div>
   );

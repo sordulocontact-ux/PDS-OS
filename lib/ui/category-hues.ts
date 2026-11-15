@@ -44,9 +44,15 @@ export const projectCollectiveHue: Hue = "slate";
 
 /** What a spend goes to (« Pour » of a quick spend): a project or an artist,
  * told apart at a glance in the list (Sacha 11/11/2026). */
-export const budgetTargetHue: Record<"project" | "artist", Hue> = {
+export const budgetTargetHue: Record<
+  "project" | "artist" | "cost_center" | "off_budget",
+  Hue
+> = {
   project: "violet",
   artist: "orange",
+  // The Finance's own envelopes (lot 3, 13/11/2026).
+  cost_center: "teal",
+  off_budget: "slate",
 };
 
 /** One hue per workflow (the Travail's « Module » tag), close to its stage's

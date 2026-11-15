@@ -3367,6 +3367,230 @@ Demande de Sacha : « une vue finance complète, une sorte de dashboard financie
   celui d'un artiste et Dépenses pour `read_artist_budgets` : les autres lisent les totaux sans ouvrir les lignes.
 - pgTAP : `finance.test.sql` (14).
 
+### Cockpit Finance, lot 1 : trésorerie et argent entrant (13/11/2026, ticket d'Ibé)
+
+Ticket « PDS OS — Cockpit Finance » d'Ibé (13/11/2026, PDF de 7 maquettes) : « combien avons-nous,
+qu'est-ce qui va entrer ou sortir, et où faut-il agir ? ». « La Finance » du ticket = les postes
+`business_manager` et `business` (Sacha, 13/11). Lot 1 sur 5 (ordre choisi par Claude) : trésorerie et
+argent entrant ; suivront Factures clients complètes (PDF, avoirs, relances, deal), Dépenses (HT/TTC,
+fournisseur, refacturable, hors budget), Budgets détaillés (révisions, import, modèles, centres de coût,
+part financée), puis Rapprochement Qonto, alertes et moteurs (Orchard, Pay Later).
+
+- **Section** : `/app/finance` = Vue d'ensemble, `tresorerie` (`?horizon=30|60|90`), `budgets` (l'ancienne
+  page, `?periode=`), `encaissements` (`?vue=a-encaisser|retard|encaissees|annulees`). Cadre commun
+  `FinanceFrame` (titre « Finance », action de la page, onglets `SectionTabs` au lieu du menu latéral des
+  maquettes) ; `/app/expenses` prend ce cadre pour qui a `read_finance` (onglet « Dépenses »).
+- **Droits** : `manage_finance` (nouvelle, direction + business managers + business) écrit ; `read_finance`
+  lit. Les deux sont retirées de l'accès en production (`OFF_IN_PRODUCTION`, `lib/auth/access.ts`) tant que
+  Sacha garde Finance cachée sur `main`.
+- **Tables** (`20261113100101_treasury.sql`) : `treasury_balances` (relevé du compte : solde, date ; jamais
+  modifié, le plus récent fait foi), `treasury_settings` (réserve minimale), `finance_incomes` (entrée
+  d'argent : libellé, nature, montant, payeur contact ou nom seul, projet, artiste, date prévue, facture
+  numéro / émission / échéance, annulation avec motif ; jamais supprimée), `finance_receipts` (encaissements,
+  partiels et multiples ; triggers : jamais au-delà du montant, rien sur une entrée annulée, montant jamais
+  sous l'encaissé, entrée encaissée jamais annulée), `finance_events` (historique avant / après / auteur,
+  écrit par trigger sur les quatre). Clés composites par organisation ; projet, artiste ou contact supprimé
+  → `set null` (l'argent reste), donc rien à ajouter dans `delete_project_row`.
+- **Fonctions** : `finance_cash_out()` (dépenses par jour : payée à sa date, à payer à l'échéance de sa
+  facture sinon à sa date, devis refusé exclu), `finance_lines('upcoming', …, p_to)` (dépenses non payées
+  une à une), `finance_targets()` (noms des projets et artistes pour qui lit Finance).
+- **Calculs** (code, `lib/finance/treasury.ts`, `money-in.ts`, `cockpit.ts`) : solde du jour = dernier relevé
+  + encaissements − dépenses payées datées après lui (une dépense payée datée plus tard compte aujourd'hui) ;
+  prévision = + reste de chaque entrée ouverte à son échéance (sinon date prévue), − chaque dépense non payée
+  à son échéance ; ce qui est en retard compte aujourd'hui. Courbe en marches (30 jours de réel, puis
+  l'horizon), point bas, réserve. État d'une entrée calculé : prévue, facturée, en retard (date dépassée),
+  partiellement encaissée, encaissée, annulée (`incomeStateTone`). « Disponible sur les budgets » = reste des
+  enveloppes de projets en cours (celles des artistes non ajoutées : leurs projets les consomment déjà).
+  « À surveiller » : passage sous la réserve, entrées en retard, budgets ≥ 82 % ou dépassés, dépenses sans
+  justificatif.
+- **Limite connue** : les dépenses sont saisies HT, le solde bancaire est TTC ; la prévision prend les
+  dépenses telles quelles jusqu'au lot Dépenses (HT/TTC). Montants de la trésorerie affichés sans « HT ».
+- **Écran** : `CockpitOverview` (4 tuiles, `TreasuryCard` + « À surveiller », « Budgets à surveiller »,
+  « Prochaines opérations »), `TreasuryChart` (SVG client, réel à l'encre, prévu `--tone-info-fg`, réserve
+  pointillée `--tone-warning-fg`, point bas, infobulle au survol, au toucher et aux flèches), `TreasuryCalendar`,
+  `IncomesTable` (« ⋯ » Enregistrer un encaissement / Modifier / Annuler l'entrée), `IncomeForm`
+  (`PersonPickerField` pour le payeur), `ReceiptForm`, `StatementButton`, `ReserveButton`.
+- pgTAP : `treasury.test.sql` (22).
+
+### Cockpit Finance, lot 2 : factures clients et avoirs (13/11/2026)
+
+Ticket : « Une facture est reliée au client, au deal et/ou projet, au budget de recette, au montant HT/TTC,
+à la date d'émission, à l'échéance et au PDF. États : brouillon, envoyée, partiellement encaissée,
+encaissée, en retard, annulée ou avoir. » ; « Relances : échéance, jours de retard, responsable, dernière
+relance et prochaine action. Aucune relance […] n'est envoyée automatiquement sans validation. »
+
+- **Choix** : une entrée (`finance_incomes`) = la recette prévue, sa facture vit sur elle (une facture par
+  entrée ; une seconde facture pour le même argent = une seconde entrée). Le PDF est celui de l'outil de
+  facturation ou du comptable, déposé : PDS OS ne rédige ni ne numérote une facture (« l'expert-comptable
+  conserve la comptabilité officielle »).
+- **Migration** `20261113200102_client_invoices.sql` : `finance_incomes` + `vat_bp` (TVA en points de base,
+  le HT en découle : `htCents`), `deal_id`, `owner_person_id` (responsable), `sent_on` (envoyée ; exige un
+  numéro, jamais avant l'émission), `file_path` / `file_name`, `next_action` / `next_action_on` ;
+  `finance_reminders` (relance faite : date, canal, note ; ajout et retrait par la Finance) ;
+  `finance_credit_notes` (avoir : numéro, date, montant, motif, PDF ; jamais modifié ni supprimé ; refusé
+  sans facture, avant elle, ou au-delà du reste). Encaissements + avoirs ≤ montant
+  (`finance_income_settled`), entrée avec avoir jamais annulée. Bucket privé `finance-files`
+  (`<org>/<uuid>.<ext>`, PDF/PNG/JPEG, 20 Mo) : dépôt `manage_finance`, lecture `read_finance`
+  (`finance_file_allowed`). `finance_targets()` nomme aussi les deals et les membres qui lisent Finance.
+- **Code** : `lib/finance/money-in.ts` (états `expected` / `draft` / `sent` / `late` / `partial` /
+  `received` / `credited` / `cancelled`, reste = montant − encaissé − avoirs), `invoice-actions.ts`
+  (`markInvoiceSent`, `addReminder`, `removeReminder`, `addCreditNote`), `write-helpers.ts` (analyse et
+  refus SQL communs à toutes les écritures de Finance), `upload-file.ts` (dépôt du navigateur, comme une
+  pochette). Écran : `IncomesTable` (« ⋯ » encaissement, Marquer envoyée, Noter une relance, Émettre un avoir,
+  Ouvrir la facture, Modifier, Annuler ; `followUp` dans la vue En retard), `IncomeDialog`, `IncomeForm` +
+  `InvoiceSection`, `ReminderForm`, `CreditNoteForm`, `TargetSelect`, `FinanceFileField`.
+- **Reste à trancher** : un avoir après encaissement (remboursement du client) n'est pas modélisé ; on
+  retire l'encaissement ou on attend le rapprochement Qonto.
+- pgTAP : `client_invoices.test.sql` (18).
+
+### Cockpit Finance, lot 3 : dépenses contextualisées (13/11/2026)
+
+Ticket : « Créer une dépense : libellé, montant HT/TTC ; projet, artiste ou centre de coût ; poste et
+fournisseur ; date prévue et échéance ; statut prévu, commandé, facturé, payé ; financement, refacturable,
+justificatif ; valideur et commentaire » ; « rattachement obligatoire à une enveloppe ou à « hors budget »
+avec alerte » ; « une dépense refacturable doit créer une recette attendue distincte ».
+
+- **Choix** : une dépense reste une ligne `budget_lines` (quatre objets : budget, dépense, facture,
+  paiement) ; le montant reste HT comme tout budget, la TVA donne le TTC. Les règles d'un projet ne bougent
+  pas (son responsable écrit ; le DG lit et valide sans écrire, `budget.test.sql`) : la Finance écrit
+  seulement ses centres de coût et le hors budget, et lit tout par `finance_spends()`. Le « Financement »
+  de la dépense arrive avec le lot Financements.
+- **Migration** `20261113300101_finance_spends.sql` : `finance_cost_centers` (nom, enveloppe, archivage ;
+  `manage_finance`) ; `budget_lines` + `cost_center_id`, `off_budget` (contrainte : une enveloppe, ou aucune
+  si hors budget), `vat_bp`, `supplier_contact_id` / `supplier_name`, `due_on`, `rebillable`, `proof_path` /
+  `proof_name` (justificatif d'une dépense Finance, bucket `finance-files`), `validator_person_id` ;
+  politiques `budget_lines_*_finance` (lignes sans projet ni artiste) ; historique `finance_events` sur
+  toutes les lignes ; `finance_incomes.source_line_id` (la recette qui refacture une dépense) ;
+  `budget_line_ttc`, `finance_cash_out` / `finance_lines` en TTC et avec l'échéance de la ligne ;
+  `finance_spends()` ; `finance_targets()` + centres de coût.
+- **Code** : `BudgetTarget` a quatre genres (`project`, `artist`, `cost_center`, `off_budget`,
+  `isFinanceTarget`) ; le formulaire unique `BudgetLineForm` gagne `BudgetSpendDetails` (TVA et TTC,
+  échéance, fournisseur `PersonPickerField`, valideur parmi les membres, refacturable) partout ;
+  `saveBudgetLine` écrit ces champs et, pour la Finance, prévoit la recette de refacturation
+  (`lib/finance/rebilling.ts`) ; `loadExpenseTargets` propose centres de coût et « Hors budget » à la Finance
+  (avertissement sous le champ). Onglet `/app/finance/depenses` (`?vue=a-payer|engagees|prevues|payees|
+  hors-budget|a-refacturer`) : 4 `MetricCard` cliquables, `SpendsTable` (enveloppe, échéance, état, TTC et
+  HT ; « ⋯ » Modifier une dépense Finance, Planifier le remboursement → `IncomeForm` pré-rempli). La page
+  Dépenses de l'équipe (`/app/expenses`) reprend son cadre propre. À surveiller : hors budget, refacturables
+  sans remboursement.
+- pgTAP : `finance_spends.test.sql` (14) ; `team.test.sql` remis à jour (permissions actuelles).
+
+### Cockpit Finance, lot 4 : budgets détaillés (13/11/2026)
+
+Ticket : « Chaque enveloppe affiche : budget initial, révisions, prévu, engagé, facturé, payé, reste
+disponible, remboursable/refacturable et écart au prévisionnel. Le camembert montre la répartition par
+poste. » ; « J4Y : part financée par PDS réglable de 0 à 100 % » ; « Dioo : saisie ou import ligne par
+ligne » ; « PDS MIC 7 600 € / émission : modèle réutilisable » ; « postes et sous-postes ».
+
+- **Migration** `20261113400101_finance_budgets.sql` : `budget_lines.forecast_cents` (montant à la saisie,
+  posé par trigger, jamais écrit par un client : l'écart au prévisionnel = ce que coûtent les lignes
+  aujourd'hui − leur prévisionnel) et `subpost` (sous-poste) ; `budget_revisions` (avant, après, auteur,
+  motif) écrite par trigger sur `projects.budget_cents`, `artist_budgets.amount_cents`,
+  `finance_cost_centers.budget_cents`, motif par `revise_cost_center()` ; `finance_envelope_shares` (part
+  PDS, 100 % par défaut) ; `finance_budget_templates` (lignes à recopier) ; `finance_spends()` + prévisionnel
+  et sous-poste.
+- **Code** : `lib/finance/envelopes.ts` (totaux par étape, ligne d'une enveloppe — un artiste compte ses
+  dépenses directes de la période de son enveloppe —, par poste puis sous-poste, barres mensuelles),
+  `budget-queries.ts`, `budget-actions.ts` (centre de coût vide ou depuis un modèle, révision motivée, part
+  PDS, modèle, import), `budget-import.ts` (tableau collé ou .csv : séparateur tab / ; / ,, en-têtes
+  reconnus, poste rapproché des 16 postes sinon « Autre » précisé, statut lu, lignes fautives dites, jamais
+  devinées). Sous-poste dans le formulaire unique de dépense.
+- **Écrans** : `/app/finance/budgets?type=tous|projets|artistes|centres` (4 `MetricCard`, `PostPie`,
+  `MonthChart`, `EnvelopesTable`, tous calculés sur les mêmes enveloppes) ; `/app/finance/budgets/
+  <projet|artiste|centre>/<id>` (budget et révisions, engagé, reste, part PDS ou écart, camembert, révisions,
+  `PostsTable`, `SpendsTable` des lignes ; `EnvelopeActions`). L'ancien contenu de l'onglet
+  (`FinanceOverview`, `EnvelopeTable`, `FinanceLinesCard`, `lib/finance/view.ts`) est supprimé.
+- **Limites** : l'import et le modèle écrivent là où le lecteur écrit (centres de coût pour la Finance,
+  artistes pour qui lit leurs budgets) ; un projet s'importe depuis son Budget par son responsable (pas
+  encore de bouton là). Une révision de projet ou d'artiste est tracée sans motif (saisie sur leurs pages).
+- pgTAP : `finance_budgets.test.sql` (11).
+
+### Cockpit Finance, lot 5 : financements et moteurs (13/11/2026)
+
+Ticket : « Moteurs automatiques : Orchard 52 000 € tous les 12 titres ; PDS MIC 7 600 € et 10 titres
+provisoires par émission ; PDS SHOW 5 500 € par live ; Pay Later : mensualités, intérêts, crédit
+disponible » ; « Déplacer une émission de mars à avril doit recalculer instantanément la trésorerie ».
+
+- **Choix** : la base ne garde que les faits saisis par la Finance ; ce qu'ils provoquent est calculé à
+  chaque lecture (`lib/finance/engines.ts`), jamais stocké. Les titres comptés pour The Orchard sont saisis
+  (« titres livrés depuis la dernière avance », remis à zéro quand l'avance arrive, l'avance reçue se saisit
+  comme une entrée) : aucune règle ne dit encore quels titres du Catalogue comptent (point à trancher).
+- **Migration** `20261113500101_finance_fundings.sql` : `finance_engine_settings` (avance par tranche, titres
+  par tranche, titres comptés), `finance_show_formats` (coût, titres provisoires), `finance_shows` (date ;
+  `cost_center_id` quand son budget est ouvert : ses lignes comptent alors à la place du coût du format),
+  `finance_credit_lines` (plafond), `finance_credit_draws` (montant, date, mensualités, frais en points de
+  base ; jamais au-delà du crédit disponible, `credit_over_limit`) ; une dépense payée par un tirage sort de
+  `finance_cash_out` / `finance_lines` (elle sort par ses mensualités).
+- **Calcul** : avances = titres comptés puis titres provisoires des émissions à venir dans l'ordre des dates,
+  une avance chaque fois qu'une tranche est atteinte (le jour de l'émission) ; coût des émissions sans budget
+  ouvert à leur date ; mensualités = (montant + frais) / n, mensuelles dès le mois suivant le tirage ; crédit
+  utilisé = capital pas encore remboursé. `computeTreasury` et `cockpit` ajoutent ces mouvements
+  (`source.kind = "engine"`), les mensualités passées depuis le relevé sortent du solde réel.
+- **Écran** `/app/finance/financements` : cartes Orchard (compte, prochaine avance, « Régler »), Pay Later
+  (disponible), Remboursements (refacturations attendues, refacturables sans remboursement), Réserve (point
+  bas) ; Émissions et lives (`ShowsTable` : changer la date, annuler ; formats) ; Pay Later (`DrawsTable`,
+  nouvelle ligne de crédit, nouveau tirage depuis une dépense).
+- pgTAP : `finance_fundings.test.sql` (9).
+
+### Cockpit Finance, lot 6 : rapprochement bancaire (13/11/2026)
+
+Ticket : « MVP : import CSV ou ajout manuel, rapprochement proposé, validation humaine » ; « selon le
+montant, la date, le tiers et la référence » ; « paiements partiels et multiples » ; « la transaction
+Qonto de 400 € est rapprochée de la facture et ne crée pas une seconde dépense » ; « détection de
+doublons ».
+
+- **Migration** `20261113600101_finance_reconciliation.sql` : `finance_bank_transactions` (jour, montant signé,
+  contrepartie, référence, libellé, `external_id` unique par organisation = un import n'entre jamais deux
+  fois, source csv / manuelle, ignorée avec motif ; jour et montant figés) ; `finance_receipts.transaction_id`
+  (un crédit devient l'encaissement d'une entrée) ; `finance_spend_matches` (un débit relié à une dépense) ;
+  garde : une transaction règle au plus son montant, dans son sens, jamais une fois ignorée ; une transaction
+  rapprochée ne s'ignore pas. `finance_cash_out` / `finance_lines` : une dépense rapprochée en entier compte
+  payée le jour de sa dernière transaction (sans réécrire la ligne, qui garde ses auteurs) ;
+  `finance_match_candidates()` (dépenses engagées, facturées ou payées pas encore rapprochées en entier).
+- **Code** : `bank-import.ts` (export CSV de Qonto en français ou anglais, ou d'une autre banque : en-têtes
+  reconnus, montant signé ou débit / crédit, lignes illisibles dites), `reconcile.ts` (propositions notées :
+  même montant 50, référence = numéro de facture 40, même tiers 25, date à 10 jours 10 à 15 ; trois au plus,
+  jamais sous 25 ; doublons possibles = même jour, montant et tiers), `reconcile-queries.ts`,
+  `reconcile-actions.ts` (import, ajout, rapprocher, défaire, ignorer / remettre).
+- **Écran** `/app/finance/rapprochement?vue=a-rapprocher|rapprochees|ignorees` : 4 `MetricCard` (à rapprocher,
+  propositions, rapproché ce mois, doublons possibles), `TransactionsTable` (proposition et ses raisons,
+  « Valider » ; « ⋯ » Rapprocher…, Défaire, Ignorer, Remettre), `ReconcileButtons` (importer un relevé,
+  ajouter une transaction).
+- **Suite (P2 du ticket)** : synchronisation automatique avec l'API Qonto, justificatifs ; l'export comptable
+  est au lot 7.
+- pgTAP : `finance_reconciliation.test.sql` (12).
+
+### Finance en double colonne (13/11/2026, Sacha)
+
+« Double sidebar comme le projet » : `FinanceFrame` pose `FinanceSidebar` (sections et groupes dans
+`lib/ui/finance-sections.ts` : Piloter, Dépenser, Encaisser et financer, Banque et comptabilité) contre la barre
+principale, repliée en icônes sur `/app/finance/*` comme dans un projet (`CollapsedNavProvider`) ; la colonne
+commune est `components/shell/context-sidebar.tsx`, partagée avec `ProjectSidebar`. Le titre de la page est sa
+section (une enveloppe : son nom). Téléphone : la rangée d'onglets.
+
+### Cockpit Finance, lot 7 : alertes, exports, historique (13/11/2026)
+
+Ticket : « Alertes utiles : passage sous la réserve minimale ; budget consommé à 82 % ou dépassement ;
+facture potentiellement dupliquée ; dépense refacturable sans remboursement planifié ; impact positif
+d'un décalage de planning » ; « export comptable » ; « Historique : auteur, date, ancienne valeur, nouvelle
+valeur ».
+
+- **Alertes** (`lib/finance/alerts.ts`, `/app/finance/alertes`, groupées À traiter / À vérifier / Pistes,
+  `AlertsList` sur `LinkRows`, la ligne commune avec « À surveiller » de la Vue d'ensemble, qui mène à la page) :
+  réserve, enveloppes ≥ 82 % ou dépassées (projets, artistes, centres de coût), entrées en retard, factures à
+  payer sous 7 jours ou échues, factures possiblement dupliquées (même numéro, ou même client et montant à
+  30 jours), dépenses possiblement dupliquées (même enveloppe, libellé et montant à 7 jours), refacturables
+  sans remboursement, hors budget, sans justificatif, transactions à rapprocher depuis plus de 7 jours, et
+  « Décaler <émission> au … » quand reporter une émission d'un mois remonte le point bas au-dessus de la
+  réserve (simulation de la trésorerie avec l'émission déplacée).
+- **Migration** `20261113700101_finance_alerts.sql` : `finance_spends()` + `matched_cents` ; une dépense
+  rapprochée en entier se lit payée dans Finance (`paidByBank`), jamais « à payer ».
+- **Exports** (`lib/finance/exports.ts`, route `/api/finance/export?type=depenses|factures|encaissements|banque|
+  historique`, `read_finance`, lu avec la session) : CSV « ; » avec BOM, montants à la virgule, pour
+  l'expert-comptable. Page `/app/finance/exports` : un téléchargement par sujet.
+- **Historique** (`lib/finance/history.ts`) : les 100 dernières lignes de `finance_events` (qui, quand, quelle
+  donnée, quels champs) sur la page Exports, et en entier dans l'export « historique ».
+
 ## 8 quater. Retours sur l'application (`/app/feedback`)
 
 Circuit : l'équipe écrit au **DG**, chaque retour devient un sujet « À examiner », le DG
