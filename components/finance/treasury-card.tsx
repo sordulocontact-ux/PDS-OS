@@ -81,11 +81,12 @@ export function TreasuryCard({
       size="lg"
       caption={caption}
       action={
-        control ?? (
+        control ??
+        (detailed ? undefined : (
           <MetricCardLink href={routes.financeTreasury}>
             {t.overview.balance.open}
           </MetricCardLink>
-        )
+        ))
       }
       legend={
         <div className="flex flex-col gap-5">

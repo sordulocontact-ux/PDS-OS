@@ -35,6 +35,15 @@ de la page, gardent le style de l'app.
 - La phrase du code (secours) garde l'ordre d'avant : passage sous la réserve, puis la semaine, entrées en retard, enveloppe
   à 82 % ou plus, justificatifs, « la réserve tient » ; 3 phrases au plus.
 
+**Retour du 15/11/2026 (Sacha)** : la Vue d'ensemble en cartes-phrases « fait accueil d'une application complète ».
+La Vue d'ensemble de Finance redevient une vue globale de la Finance (`CockpitOverview` : solde et courbe, À encaisser,
+À payer, Budgets, À surveiller ; horizon, « Ajouter une dépense » et « Nouvelle recette » en haut à droite). Les
+cartes-phrases, le résumé de la semaine et « Je veux… » (lots 1 et 7 : `FinanceHome`, `FinanceBriefCard`, `FinanceAsk`)
+restent dans le code pour la future vue d'ensemble générale (accueil) ; leur assemblage est la page
+`app/(app)/app/finance/page.tsx` du commit `7c071e76`. **Trésorerie** prend le dessin de la page Rapports du proto :
+horizon et enveloppe en haut, solde et courbe, entrées et sorties par mois (`FlowBars`, `monthFlows`) à côté des
+dépenses par poste de l'enveloppe choisie (engagé, facturé, payé), budgets actifs, puis le calendrier financier.
+
 ## Lots
 
 | Lot | Contenu | État |

@@ -14,7 +14,7 @@ const fr = { auth };
  * A Finance page while it renders (every loading.tsx of the section): the
  * same frame as the page, its sidebar, top band and `.finance-scope`, so nothing jumps
  * when it arrives, and no title, as a section's page has none (lot 2,
- * docs/FINANCE-V2.md). `home`: the overview's greeting and cards; `titled`:
+ * docs/FINANCE-V2.md). `home`: the overview's balance card and the three under it; `titled`:
  * an envelope's name; else a row of tiles over rows.
  */
 export function FinanceLoading({
@@ -31,13 +31,10 @@ export function FinanceLoading({
           <PageContainer className="gap-6">
             {shape === "home" ? (
               <>
-                <div className="flex flex-col gap-2">
-                  <Skeleton className="h-10 w-64 max-w-full" />
-                  <Skeleton className="h-5 w-80 max-w-full" />
-                </div>
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                  {Array.from({ length: 8 }, (_, i) => (
-                    <Skeleton key={i} className="h-56 rounded-2xl" />
+                <Skeleton className="h-[420px] rounded-2xl" />
+                <div className="grid gap-4 lg:grid-cols-3">
+                  {Array.from({ length: 3 }, (_, i) => (
+                    <Skeleton key={i} className="h-64 rounded-2xl" />
                   ))}
                 </div>
               </>

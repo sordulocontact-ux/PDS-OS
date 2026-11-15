@@ -998,7 +998,7 @@ plan et lots dans `docs/FINANCE-V2.md`. **Écart voulu, limité à Finance** :
   est posé dans Finance prend ces valeurs ; les modales et menus, en portail, gardent le style de l'app. Les
   règles « medium minimum » et « 16 px courant » (§ 2) ne valent donc pas dans Finance.
 - **Navigation** : liste plate à icônes (plus de groupes titrés).
-- **Vue d'ensemble en cartes-phrases** (`FinanceHome`, `SentenceCard`) : salutation à gauche, horizon 30/60/90,
+- **Vue d'ensemble en cartes-phrases** (`FinanceHome`, `SentenceCard`, retirée de Finance le 15/11/2026 : la Vue d'ensemble redevient `CockpitOverview`, ces cartes iront à l'accueil ; Trésorerie suit la page Rapports du proto, `docs/FINANCE-V2.md`) : salutation à gauche, horizon 30/60/90,
   une carte par chose à savoir, chiffres en gras dans la phrase, la carte entière mène à sa page ; « En bref » en
   fond teinté, sans lien.
 - **Pages de section sans titre visible** (lot 2) : `FinanceFrame` garde le h1 pour les lecteurs d'écran ; l'action va sur

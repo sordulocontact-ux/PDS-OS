@@ -131,6 +131,25 @@ export const treasury = {
       `Solde aujourd'hui ${today}, point bas prévu ${low} le ${lowDay}.`,
   },
 
+  // « Entrées et sorties » by month (Trésorerie, after the proto's Rapports).
+  flows: {
+    title: "Entrées et sorties",
+    in: "Entrées",
+    out: "Sorties",
+    legend: "Légende des entrées et sorties",
+    ahead: "prévu",
+    month: (
+      month: string,
+      inAmount: string,
+      outAmount: string,
+      ahead: boolean,
+    ) =>
+      `${month}${ahead ? " (prévu)" : ""} : entrées ${inAmount}, sorties ${outAmount}`,
+    empty: "Aucun mouvement sur la période.",
+  },
+  // The envelope whose spends the split by poste shows.
+  envelopeFilter: { label: "Enveloppe", all: "Toutes les enveloppes" },
+  activeBudgets: { title: "Budgets actifs", open: "Tous les budgets" },
   page: {
     balance: {
       title: "Solde aujourd'hui",

@@ -2349,3 +2349,7 @@ les modules à parcours (proto « Mise en page des modules », version « Propos
       déclenche ; guide de PO (`topics/po.ts`) et sujet Finance mis à jour. Reste : migration à pousser en pré-prod
       puis en prod avec accord ; questions tests 41-43 à ajouter à `scripts/eval-po-cases.mjs` et à jouer ; voir la
       carte en vrai navigateur (temps de génération avec Haiku).
+
+- [x] **Finance, retour du 15/11/2026** — Vue d'ensemble globale de la Finance de nouveau (`CockpitOverview` restauré) ;
+      cartes-phrases, résumé de la semaine et « Je veux… » gardés pour l'accueil ; Trésorerie au dessin de la page
+      Rapports du proto (`FlowBars`, `monthFlows`, dépenses par poste filtrées par enveloppe, budgets actifs).

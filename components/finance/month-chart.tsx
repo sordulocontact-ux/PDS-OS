@@ -26,7 +26,7 @@ export const monthName = (month: Month, style: "short" | "long") =>
   }).format(new Date(`${month}-01T12:00:00Z`));
 
 /** A round top for the axis: 1, 2, 2.5 or 5 times a power of ten. */
-function niceMax(value: number): number {
+export function niceMax(value: number): number {
   if (value <= 0) return 1;
   const power = 10 ** Math.floor(Math.log10(value));
   const step = [1, 2, 2.5, 5, 10].find((s) => s * power >= value) ?? 10;
