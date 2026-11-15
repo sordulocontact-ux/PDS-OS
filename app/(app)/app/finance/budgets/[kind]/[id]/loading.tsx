@@ -1,6 +1,5 @@
-import { PageLoading } from "@/components/shell/page-loading";
-import { finance } from "@/lib/i18n/fr/finance";
+import { FinanceLoading } from "@/components/finance/finance-loading";
 
-export default function FinanceLoading() {
-  return <PageLoading title={finance.title} />;
+export default function Loading() {
+  return <FinanceLoading shape="titled" />;
 }

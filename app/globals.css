@@ -1288,7 +1288,7 @@ button[data-busy]::before {
    Écart voulu, limité à la section Finance : FinanceFrame pose .finance-scope
    et ce bloc redéfinit les variables qui pilotent déjà les composants, comme
    :root.dark redéfinit les couleurs. Un cran plus petit et plus léger (texte
-   courant 15 px, regular ; medium pour ce qui ressort), arrondis légers
+   courant 15 px en 450, ce qui ressort en 550), arrondis légers
    (cartes 8 px, boutons et champs 6 px). Les modales et menus, en portail hors
    de la page, gardent le style de l'app. */
 .finance-scope {
@@ -1323,19 +1323,21 @@ button[data-busy]::before {
   --type-colhead: 13px;
   --type-colhead-lh: 18px;
   --type-body-tracking: -0.01em;
-  /* Regular par défaut ; medium et semi-bold descendent d'un cran. */
-  --font-weight-normal: 400;
-  --font-weight-medium: 400;
-  --font-weight-semibold: 500;
-  --font-weight-bold: 600;
-  --fw-semibold: 500;
-  --fw-bold: 600;
+  /* Plus léger que l'app, sans être maigre : 450 par défaut (Google Sans
+     Flex est variable), et ce qui ressort à 550 (Sacha, 15/11/2026 : « les
+     textes sont quand même très fins » à 400). */
+  --font-weight-normal: 450;
+  --font-weight-medium: 450;
+  --font-weight-semibold: 550;
+  --font-weight-bold: 650;
+  --fw-semibold: 550;
+  --fw-bold: 650;
   --radius-lg: 6px;
   --radius-xl: 8px;
   --radius-2xl: 8px;
   --radius-3xl: 12px;
   --radius-4xl: 12px;
-  font-weight: 400;
+  font-weight: 450;
   font-size: var(--type-body-md);
   line-height: var(--type-body-md-lh);
 }
@@ -1355,7 +1357,7 @@ button[data-busy]::before {
   font-size: var(--type-colhead);
   line-height: var(--type-colhead-lh);
   color: var(--text-tertiary);
-  font-weight: 400;
+  font-weight: 450;
 }
 .finance-scope [data-slot="table-cell"] {
   font-size: var(--type-body-sm);

@@ -40,7 +40,7 @@ export function SentenceCard({
         {Icon && <Icon aria-hidden className="size-4 shrink-0" />}
         {title}
       </span>
-      <p className="text-body-md text-pretty text-[color:var(--text-tertiary)]">
+      <p className="text-body-md text-pretty text-[color:var(--text-secondary)]">
         {children}
       </p>
       <span className="mt-auto flex flex-col gap-3">
