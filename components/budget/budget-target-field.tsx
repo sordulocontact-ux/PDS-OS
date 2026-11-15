@@ -14,7 +14,7 @@ export const targetKey = (t: BudgetTarget) => `${t.kind}:${t.id}`;
 
 /**
  * « Pour » of a quick spend (BUD 4): a project the reader runs or an
- * artist, searched as one types, the last ones spent on first. The name is
+ * artist (for the Finance, a cost center or « Hors budget » too), searched as one types, the last ones spent on first. The name is
  * the choice; its kind is a badge in its hue (Projet, Artiste), so the two
  * read apart at a glance (Sacha 11/11/2026).
  */
@@ -32,6 +32,10 @@ export function BudgetTargetField({
 }) {
   const t = fr.budget.form;
   const byKey = new Map(targets.map((target) => [targetKey(target), target]));
+  // The Finance also chooses a cost center or « Hors budget ».
+  const words = targets.some((target) => target.kind === "off_budget")
+    ? t.finance
+    : t;
   return (
     <div className="grid gap-1.5">
       <Label htmlFor="budget-target" required>
@@ -42,16 +46,20 @@ export function BudgetTargetField({
         label={t.target}
         required
         options={{
-          "": t.targetPlaceholder,
+          "": words.targetPlaceholder,
           ...Object.fromEntries(
             targets.map((target) => [targetKey(target), target.label]),
           ),
         }}
         value={value}
         onChange={onChange}
-        searchPlaceholder={t.targetSearch}
-        emptyLabel={t.targetNone}
+        searchPlaceholder={words.targetSearch}
+        emptyLabel={words.targetNone}
         fill
+        keywords={(key) => {
+          const target = byKey.get(key);
+          return target ? t.targetKinds[target.kind] : "";
+        }}
         badge={(key) => {
           const target = byKey.get(key);
           if (!target) return null;

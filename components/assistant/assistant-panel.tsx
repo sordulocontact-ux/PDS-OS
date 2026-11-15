@@ -1,12 +1,13 @@
 "use client";
 
 import { useChat, type Chat } from "@ai-sdk/react";
-import type { UIMessage } from "ai";
+import type { FileUIPart, UIMessage } from "ai";
 import { IconPlus } from "nucleo-sharp-essential";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { AssistantComposer } from "@/components/assistant/assistant-composer";
+import { questionOf } from "@/components/assistant/question";
 import { useSharedChat } from "@/components/assistant/shared-chat";
 import { AssistantThread } from "@/components/assistant/assistant-thread";
 import { Button } from "@/components/ui/button";
@@ -44,9 +45,9 @@ export function AssistantPanel({
   // Only the window shows the conversation here; home has its own page.
   const inline = compact;
 
-  function ask(text: string) {
+  function ask(text: string, images: FileUIPart[]) {
     if (busy) return;
-    void sendMessage({ text });
+    void sendMessage(questionOf(text, images));
     if (!inline) router.push(routes.assistant);
   }
 

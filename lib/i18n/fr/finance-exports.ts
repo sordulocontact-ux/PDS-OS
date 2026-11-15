@@ -4,7 +4,7 @@
 export const financeExports = {
   title: "Exports",
   description:
-    "Pour l'expert-comptable, qui tient la comptabilité officielle : un fichier CSV par sujet, lisible dans Excel.",
+    "Pour l'expert-comptable, qui tient la comptabilité officielle : un fichier CSV par sujet, lisible dans Excel, avec tout l'historique depuis le début.",
   files: {
     depenses: {
       title: "Dépenses",
@@ -24,7 +24,7 @@ export const financeExports = {
     },
     historique: {
       title: "Historique",
-      body: "Chaque modification : qui, quand, avant, après.",
+      body: "Chaque modification : qui, quand, avant, après (les 5 000 dernières).",
     },
   },
   download: "Télécharger",

@@ -25,6 +25,10 @@ export const poTopics: GuideTopic[] = [
       "espace espace",
       "dictee",
       "micro",
+      "image",
+      "capture",
+      "photo",
+      "joindre",
       "chat",
       "sais faire",
       "tu peux",
@@ -42,6 +46,7 @@ export const poTopics: GuideTopic[] = [
       "Quand une réponse reste sans résultat, PDS OS le compte de façon anonyme, sans le texte de la question ni le nom de la personne, pour savoir où PO doit progresser.",
       "Chaque conversation est enregistrée après chaque réponse, dans l'historique de la page PO. Elle est privée : vous seul la lisez, même le directeur général n'y a pas accès. Elle est gardée jusqu'à ce que vous la supprimiez. Supprimer une conversation ne touche à rien de ce que PO a aidé à créer.",
       "Chaque message à PO compte pour une requête de votre limite du jour. Le compteur repart à zéro à minuit, heure de Paris. Votre utilisation se lit dans Paramètres (menu de votre compte, en bas de la barre latérale) ; le directeur général règle la limite de chacun dans Équipe.",
+      "Vous pouvez joindre des images à une question (captures d'écran, photos, documents) : le trombone de la zone de saisie, un glisser-déposer ou ⌘V / Ctrl+V. PNG, JPEG, WebP ou GIF, 4 par question et 12 par conversation. PO les lit pour vous répondre ; un fait de PDS OS reste lu dans l'application. Comme la conversation, elles sont privées et supprimées avec elle.",
       "Deux appuis rapides sur Espace, depuis n'importe quelle page, ouvrent PO dans une fenêtre : il écoute tout de suite, votre demande part dès la fin de la dictée, et il sait sur quelle page vous êtes. Échap annule. Ces conversations sont enregistrées aussi, avec la page d'ouverture.",
     ],
     faq: [
@@ -60,6 +65,10 @@ export const poTopics: GuideTopic[] = [
       {
         q: "Combien de questions puis-je poser à PO ?",
         a: "Autant que votre limite du jour, visible dans Paramètres. Le directeur général peut l'augmenter dans Équipe.",
+      },
+      {
+        q: "Puis-je montrer une image à PO ?",
+        a: "Oui : le trombone de la zone de saisie, un glisser-déposer ou ⌘V / Ctrl+V. 4 images par question, 12 par conversation.",
       },
       {
         q: "PO peut-il valider, envoyer ou signer à ma place ?",

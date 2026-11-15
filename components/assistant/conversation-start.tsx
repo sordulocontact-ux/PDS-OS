@@ -1,5 +1,7 @@
 "use client";
 
+import type { FileUIPart } from "ai";
+
 import { AssistantComposer } from "@/components/assistant/assistant-composer";
 import { assistant } from "@/lib/i18n/fr/assistant";
 
@@ -16,7 +18,7 @@ export function ConversationStart({
   onStop,
   busy,
 }: {
-  onAsk: (question: string) => void;
+  onAsk: (question: string, images: FileUIPart[]) => void;
   onStop: () => void;
   busy: boolean;
 }) {

@@ -1,0 +1,90 @@
+[
+  {
+    "probleme_id": "Q1",
+    "frequence": "frequent",
+    "impact": "fort",
+    "persistance": "difficile",
+    "note": 4,
+    "justification": "Le DG ne peut pas indiquer les invités à la création du projet, et le deal de l'invitée est créé sans participation, sans alerte : elle croit avoir réussi (SEQ 6) alors que la source unique du contrat n'est pas posée. Cela touche la tâche cœur du parcours (projet collectif puis deal) et la première tentative a été abandonnée."
+  },
+  {
+    "probleme_id": "Q2",
+    "frequence": "frequent",
+    "impact": "fort",
+    "persistance": "difficile",
+    "note": 3,
+    "justification": "Deux sessions de Claire ont échoué sur un clic sans retour visible ; elle ne trouve l'erreur en haut de page que par hasard et doute que l'enregistrement ait eu lieu. Le blocage porte sur une tâche cœur (créer un projet) et elle le découvre seule, sans aide."
+  },
+  {
+    "probleme_id": "Q3",
+    "frequence": "rare",
+    "impact": "fort",
+    "persistance": "difficile",
+    "note": 3,
+    "justification": "Un profil étranger (Max Mendes, puis Simple Minds signé) s'est affiché à la place de l'artiste saisie, ce qui a fait abandonner la tâche par peur d'enregistrer une mauvaise artiste. L'analyste n'a pas pu le reproduire, d'où la fréquence rare, mais le risque de mauvaise donnée est sérieux."
+  },
+  {
+    "probleme_id": "Q4",
+    "frequence": "frequent",
+    "impact": "fort",
+    "persistance": "difficile",
+    "note": 4,
+    "justification": "Sans contour de focus, une utilisatrice au clavier valide le mauvais bouton, la fenêtre se ferme sans rien enregistrer, puis ses saisies sont perdues ; elle croit avoir réussi alors que ce n'est pas le cas. Cela touche toute l'app et rend le parcours clavier inutilisable (accessibilité WCAG 2.4.7), même si Lina a fini par réussir."
+  },
+  {
+    "probleme_id": "Q5",
+    "frequence": "occasionnel",
+    "impact": "moyen",
+    "persistance": "modere",
+    "note": 2,
+    "justification": "Le focus est perdu quand le bouton « Utiliser » disparaît, ce qui oblige à retabuler depuis le haut de la fenêtre. Un seul participant le signale, la tâche reste faisable."
+  },
+  {
+    "probleme_id": "Q6",
+    "frequence": "occasionnel",
+    "impact": "moyen",
+    "persistance": "modere",
+    "note": 2,
+    "justification": "Le texte de validation désigne Élise alors que Malik a confirmé les chiffres. Claire a tout de même validé correctement et l'écart ne change pas la décision, mais il entame la confiance."
+  },
+  {
+    "probleme_id": "Q7",
+    "frequence": "occasionnel",
+    "impact": "moyen",
+    "persistance": "facile",
+    "note": 2,
+    "justification": "Le nom de l'artiste n'est pas cliquable dans Dépenses et Claire a perdu un moment, mais elle a trouvé le filtre artiste et le montant correct. Le détour est mineur et se découvre vite."
+  },
+  {
+    "probleme_id": "Q8",
+    "frequence": "frequent",
+    "impact": "faible",
+    "persistance": "facile",
+    "note": 1,
+    "justification": "Le titre d'onglet « PDS OS » ne nomme pas le deal ouvert : gêne cosmétique à l'orientation, surtout pour un lecteur d'écran. Aucun échec de tâche observé."
+  },
+  {
+    "probleme_id": "Q9",
+    "frequence": "occasionnel",
+    "impact": "fort",
+    "persistance": "difficile",
+    "note": 3,
+    "justification": "La tuile annonce 47 478 € et le tableau 47 878 € : l'utilisatrice doute du montant clé de la tâche et risque de rapporter un chiffre faux sans le savoir. Ces chiffres concernent un budget, donc la confiance dans le résultat est atteinte."
+  },
+  {
+    "probleme_id": "Q10",
+    "frequence": "occasionnel",
+    "impact": "moyen",
+    "persistance": "modere",
+    "note": 2,
+    "justification": "Le bloc « Le call est prévu » est en décalage avec l'état réel et Malik l'a ignoré pour descendre aux termes, mais il a abouti en SEQ 5 et le bloc s'est ensuite mis à jour. Claire a aussi hésité devant ce bloc, sans conséquence."
+  },
+  {
+    "probleme_id": "Q11",
+    "frequence": "frequent",
+    "impact": "moyen",
+    "persistance": "modere",
+    "note": 2,
+    "justification": "Les premiers affichages de 3 à 4 s ont fait douter Claire et Élise (elle a recliqué sans savoir si le clic avait pris), mais aucune tâche n'a échoué. Le build local en production sur une machine chargée peut en partie expliquer ces durées, d'où une note mineure."
+  }
+]

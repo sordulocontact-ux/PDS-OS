@@ -1,0 +1,106 @@
+[
+  {
+    "probleme_id": "P1",
+    "frequence": "rare",
+    "impact": "fort",
+    "persistance": "difficile",
+    "note": 3,
+    "justification": "Élise (SEQ 2) n'a pas pu ouvrir la négociation et a créé un doublon d'artiste dans le Réseau, sans que l'écran explique la règle. Tâche cœur bloquée avec une conséquence sur les données, même si un seul persona la rencontre."
+  },
+  {
+    "probleme_id": "P2",
+    "frequence": "rare",
+    "impact": "moyen",
+    "persistance": "modere",
+    "note": 2,
+    "justification": "Le texte « non renseigné » contredit l'encadré « privé » juste au-dessus, mais Élise a compris que c'était verrouillé (« au moins c'est écrit »). Elle n'a pas pu demander le partage depuis la fiche."
+  },
+  {
+    "probleme_id": "P3",
+    "frequence": "rare",
+    "impact": "moyen",
+    "persistance": "difficile",
+    "note": 2,
+    "justification": "Une seule personne a cherché à rouvrir un deal abandonné, sans trouver d'action ni de personne à contacter. L'abandon est une décision rare, la gêne reste limitée."
+  },
+  {
+    "probleme_id": "P4",
+    "frequence": "rare",
+    "impact": "faible",
+    "persistance": "facile",
+    "note": 2,
+    "justification": "Malik a réussi (SEQ 5) mais ignore si la direction est prévenue après deux clics enchaînés. Doute sur une étape clé, sans échec observé."
+  },
+  {
+    "probleme_id": "P5",
+    "frequence": "occasionnel",
+    "impact": "fort",
+    "persistance": "modere",
+    "note": 3,
+    "justification": "Claire valide un accord de principe d'un clic, sans récapitulatif ni confirmation visible, et ne sait pas si c'est enregistré. Deux lignes presque identiques sur l'accueil font craindre la mauvaise validation, sur une action qui engage le label."
+  },
+  {
+    "probleme_id": "P6",
+    "frequence": "rare",
+    "impact": "moyen",
+    "persistance": "modere",
+    "note": 2,
+    "justification": "Claire a réussi (SEQ 4) en défilant jusqu'au bloc « Négocié par », en évitant le bouton de validation. Le changement est définitif, sans notion de durée."
+  },
+  {
+    "probleme_id": "P7",
+    "frequence": "rare",
+    "impact": "fort",
+    "persistance": "difficile",
+    "note": 3,
+    "justification": "Claire ne trouve pas le budget depuis « Dépenses » et lit −7 178 € sans l'expliquer. Elle augmente l'enveloppe ET ajoute un poste en doutant du résultat, avec un risque d'erreur sur le budget."
+  },
+  {
+    "probleme_id": "P8",
+    "frequence": "rare",
+    "impact": "moyen",
+    "persistance": "facile",
+    "note": 2,
+    "justification": "Deux dates pour une seule intention, et une date a basculé à 06/11 sans que Malik le veuille. Il a corrigé en retapant, mais une mauvaise date de relance passe facilement inaperçue."
+  },
+  {
+    "probleme_id": "P9",
+    "frequence": "rare",
+    "impact": "faible",
+    "persistance": "facile",
+    "note": 1,
+    "justification": "Le toast précède de quelques secondes l'affichage de la nouvelle valeur, ce qui est probablement dû au serveur de développement lent. Malik s'est inquiété puis la valeur s'est mise à jour."
+  },
+  {
+    "probleme_id": "P10",
+    "frequence": "rare",
+    "impact": "moyen",
+    "persistance": "modere",
+    "note": 2,
+    "justification": "Malik a trouvé l'heure du call et le numéro, mais après un long défilement et en doutant que l'info existe. Infos utiles à un négociateur pressé."
+  },
+  {
+    "probleme_id": "P11",
+    "frequence": "rare",
+    "impact": "faible",
+    "persistance": "facile",
+    "note": 2,
+    "justification": "La dépense a été enregistrée, mais l'étiquette « Sans justificatif » reste inexpliquée et rien ne dit que Malik doit être remboursé. Seul Malik l'a rencontré."
+  },
+  {
+    "probleme_id": "P12",
+    "frequence": "occasionnel",
+    "impact": "faible",
+    "persistance": "facile",
+    "note": 1,
+    "justification": "Lenteurs surtout dues au serveur de développement sur une machine chargée, donc probablement un artefact d'environnement. Seul l'export PDF sans ouverture du fichier est un petit manque réel."
+  },
+  {
+    "probleme_id": "P13",
+    "frequence": "occasionnel",
+    "impact": "faible",
+    "persistance": "facile",
+    "note": 1,
+    "justification": "La fenêtre de bienvenue a absorbé un clic chez Malik et décalé le menu chez Élise, une seule fois à la première connexion. Gêne ponctuelle sans conséquence."
+  }
+]

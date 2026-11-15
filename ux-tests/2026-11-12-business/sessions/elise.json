@@ -1,0 +1,127 @@
+{
+  "persona_id": "elise",
+  "fenetre": "1440x900",
+  "mode_perception": "visuel",
+  "presentation": "Je suis Élise, business developer chez PDS, je viens de HubSpot et Notion. J'ouvre l'app aujourd'hui pour faire avancer mes pistes moi-même, sans attendre qu'on le fasse à ma place.",
+  "premiere_impression": null,
+  "taches": [
+    {
+      "id": "T1",
+      "issue_declaree": "echec",
+      "pense_avoir_reussi": false,
+      "seq": 2,
+      "nb_actions": 16,
+      "moment_le_plus_penible": "Chercher un bouton pour lancer un deal qui n'existe nulle part, après avoir créé un contact sans savoir si c'était la bonne piste.",
+      "incidents": [
+        {
+          "etape": "Lancer une négociation",
+          "ecran": "http://localhost:3000/app/deals",
+          "voulait": "Un bouton Nouveau deal",
+          "a_fait": "Regardé la liste et les onglets",
+          "attendait": "Un bouton de création en haut",
+          "resultat": "Aucun moyen de créer un deal",
+          "emotion": "agacement",
+          "verbatim": "Ah, donc je peux pas ? Ok mais dis-le moi."
+        },
+        {
+          "etape": "Trouver Kaya",
+          "ecran": "http://localhost:3000/app/catalog/artists",
+          "voulait": "Ajouter ou trouver Kaya dans les artistes",
+          "a_fait": "Ouvert Artistes",
+          "attendait": "Un bouton d'ajout",
+          "resultat": "Pas de Kaya, pas d'ajout",
+          "emotion": "surprise",
+          "verbatim": "Elle n'est même pas là, et je ne peux pas l'ajouter ici."
+        },
+        {
+          "etape": "Créer la fiche puis chercher le deal",
+          "ecran": "http://localhost:3000/app/network/0c196c43-d9ff-458d-aa76-82cc1fc843c5",
+          "voulait": "Ouvrir une négociation depuis sa fiche",
+          "a_fait": "Créé le contact puis ouvert le menu ⋯",
+          "attendait": "Une action Nouveau deal",
+          "resultat": "Le menu ne propose que Modifier",
+          "emotion": "agacement",
+          "verbatim": "J'ai créé la fiche, mais pas la négociation. C'est qui qui décide ça ?"
+        }
+      ],
+      "verbatims": [
+        "Sur HubSpot je fais ça en un clic.",
+        "Ah, donc je peux pas ? Ok mais dis-le moi."
+      ]
+    },
+    {
+      "id": "T2",
+      "issue_declaree": "succes",
+      "pense_avoir_reussi": true,
+      "seq": 6,
+      "nb_actions": 4,
+      "moment_le_plus_penible": "Savoir qui précisément dans la direction doit valider.",
+      "incidents": [
+        {
+          "etape": "Lire l'état de l'accord",
+          "ecran": "http://localhost:3000/app/deals/64d8f997-33ed-43c0-b350-c81e1246adb7",
+          "voulait": "Savoir si c'est validé et par qui",
+          "a_fait": "Ouvert le deal et scrollé aux termes",
+          "attendait": "Un statut clair",
+          "resultat": "Phrase en haut : en attente de la direction ; termes confirmés, le reste à définir",
+          "emotion": "soulagement",
+          "verbatim": "Donc non, pas validé : c'est la direction. Mais qui exactement ?"
+        }
+      ],
+      "verbatims": [
+        "Pas validé, la direction doit valider, et il reste plein de choses à définir."
+      ]
+    },
+    {
+      "id": "T3",
+      "issue_declaree": "echec",
+      "pense_avoir_reussi": false,
+      "seq": 3,
+      "nb_actions": 4,
+      "moment_le_plus_penible": "Voir « non renseigné » partout et ne pas pouvoir demander le partage depuis la fiche.",
+      "incidents": [
+        {
+          "etape": "Trouver le téléphone",
+          "ecran": "http://localhost:3000/app/network/3f4c2691-7901-44a1-99f7-3614c64bac6d",
+          "voulait": "Le numéro de Yasmine Ould",
+          "a_fait": "Cherché dans Réseau et ouvert sa fiche",
+          "attendait": "Un numéro",
+          "resultat": "Coordonnées privées, partagées par Malik deal par deal ; téléphone non renseigné",
+          "emotion": "agacement",
+          "verbatim": "Ok, c'est verrouillé, au moins c'est écrit. Mais je ne peux pas demander à Malik d'ici."
+        }
+      ],
+      "verbatims": ["Je n'ai pas le numéro, il faut passer par Malik."]
+    },
+    {
+      "id": "T4",
+      "issue_declaree": "abandon",
+      "pense_avoir_reussi": false,
+      "seq": 2,
+      "nb_actions": 6,
+      "moment_le_plus_penible": "Aucun bouton pour rouvrir et personne indiqué à qui demander.",
+      "incidents": [
+        {
+          "etape": "Reprendre le deal abandonné",
+          "ecran": "http://localhost:3000/app/deals/44f9328e-7680-4daf-9a90-1a9c5c19a13e",
+          "voulait": "Rouvrir la négociation Rivo Blanc",
+          "a_fait": "Onglet Abandonnés, ouvert le deal, parcouru toute la page",
+          "attendait": "Un bouton Reprendre ou Rouvrir",
+          "resultat": "Rien, seulement l'historique et les étapes grisées",
+          "emotion": "agacement",
+          "verbatim": "Sur HubSpot je rouvre en un clic. Là, rien. Je dois demander à quelqu'un, mais je ne sais pas qui."
+        }
+      ],
+      "verbatims": ["J'abandonne, je ne vois pas la porte."]
+    }
+  ],
+  "sus": [3, 3, 2, 3, 3, 3, 3, 3, 2, 2],
+  "entretien": {
+    "raconter": "C'est un outil de suivi des deals avec les artistes, assez propre, où je vois bien où en est un accord. Mais je n'ai pas réussi à lancer ou reprendre un deal moi-même.",
+    "agace": "Les boutons qui n'existent pas : pas de nouveau deal, pas de reprise, et personne indiqué à qui demander. Et les pages qui mettent du temps à charger.",
+    "pas_sur_que_ca_marche": "Quand j'ai créé Kaya dans le réseau : ça a marché, mais je ne savais pas si ça comptait comme démarrer le suivi.",
+    "pratique": "La fiche d'un deal : l'état, les termes confirmés avec la date et qui, et le message en haut qui dit qui doit faire quoi.",
+    "utiliserait": "Pas à la place de HubSpot tant que je ne peux pas créer ni rouvrir un deal moi-même.",
+    "un_mot": "Verrouillé"
+  }
+}

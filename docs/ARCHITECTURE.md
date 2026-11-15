@@ -3599,6 +3599,11 @@ valeur ».
   l'expert-comptable. Page `/app/finance/exports` : un téléchargement par sujet.
 - **Historique** (`lib/finance/history.ts`) : les 100 dernières lignes de `finance_events` (qui, quand, quelle
   donnée, quels champs) sur la page Exports, et en entier dans l'export « historique ».
+- **Accueil** (test UX du 15/11/2026) : `finance_urgent_count()` (SQL, `security definer`, 0 sans
+  `read_finance`) compte les enveloppes dépassées (projets, centres de coût), les entrées échues non reçues et
+  les dépenses facturées échues non payées, sans lire toute la trésorerie ; `HomeSummary` l'ajoute au résumé
+  (« · 2 alertes Finance urgentes », seul si rien d'autre n'attend), en lien vers Alertes. Même périmètre que le
+  groupe « À traiter » de `alerts.ts` hors réserve (calculée par la trésorerie) : à garder alignés.
 
 ## 8 quater. Retours sur l'application (`/app/feedback`)
 

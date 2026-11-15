@@ -1,0 +1,137 @@
+{
+  "persona_id": "malik",
+  "fenetre": "1366x768",
+  "mode_perception": "visuel",
+  "presentation": "Je suis Malik, business manager chez PDS, je passe mes journées au téléphone avec des managers d'artistes. J'ouvre l'app parce que Claire, la DG, m'a dit que tout doit passer par là maintenant, sinon elle me relance.",
+  "premiere_impression": "Deux choses à faire : relancer Camille sur l'avance de Mona Lys (en retard depuis le 10/11) et un premier call avec Lila Vega dimanche 15/11.",
+  "taches": [
+    {
+      "id": "T1",
+      "issue_declaree": "succes",
+      "pense_avoir_reussi": true,
+      "seq": 7,
+      "nb_actions": 1,
+      "moment_le_plus_penible": "Rien, juste la deuxième carte coupée par la barre du bas.",
+      "incidents": [],
+      "verbatims": [
+        "Bon, j'ai deux trucs. Relancer Camille, je suis en retard, et un call avec Lila Vega dimanche."
+      ]
+    },
+    {
+      "id": "T2",
+      "issue_declaree": "succes_difficile",
+      "pense_avoir_reussi": true,
+      "seq": 4,
+      "nb_actions": 18,
+      "moment_le_plus_penible": "Le chargement au début, puis la date de relance qui s'est mise sur 06/11 à cause du calendrier.",
+      "incidents": [
+        {
+          "etape": "ouvrir le deal",
+          "ecran": "http://localhost:3000/app",
+          "voulait": "ouvrir la fiche de Mona Lys",
+          "a_fait": "clic sur Ouvrir",
+          "attendait": "la fiche",
+          "resultat": "un pop-up de bienvenue a mangé le clic, il a fallu passer puis recliquer, puis attendre la compilation",
+          "emotion": "agacé",
+          "verbatim": "Allez, ça charge."
+        },
+        {
+          "etape": "enregistrer 20 %",
+          "ecran": "http://localhost:3000/app/deals/56f9173c-4123-4028-b938-11018835be65",
+          "voulait": "voir 20 % dans la liste",
+          "a_fait": "Enregistrer le terme",
+          "attendait": "20 % tout de suite",
+          "resultat": "toast Terme enregistré mais la ligne affiche encore 18 % pendant quelques secondes",
+          "emotion": "doute",
+          "verbatim": "Attends, il a enregistré là ou pas ?"
+        },
+        {
+          "etape": "date Relancer le",
+          "ecran": "http://localhost:3000/app/deals/56f9173c-4123-4028-b938-11018835be65",
+          "voulait": "13/11/2026",
+          "a_fait": "tapé la date puis cliqué ailleurs pour fermer le calendrier",
+          "attendait": "13/11",
+          "resultat": "le champ affichait 06/11/2026, retapé et Echap",
+          "emotion": "agacé",
+          "verbatim": "Il a mis 06/11, c'est n'importe quoi."
+        }
+      ],
+      "verbatims": [
+        "Je ne vois pas où noter un appel.",
+        "Ma saisie est toujours là, ok j'enregistre."
+      ]
+    },
+    {
+      "id": "T3",
+      "issue_declaree": "succes",
+      "pense_avoir_reussi": true,
+      "seq": 5,
+      "nb_actions": 8,
+      "moment_le_plus_penible": "Le numéro est tout en bas de la page, j'ai scrollé longtemps sans savoir si ça existait.",
+      "incidents": [
+        {
+          "etape": "trouver l'heure",
+          "ecran": "http://localhost:3000/app/deals/96f969db-1c6a-472a-b0f0-89d0004765e0",
+          "voulait": "l'heure du call",
+          "a_fait": "regardé en haut : seulement Dim. 15/11",
+          "attendait": "l'heure avec la date",
+          "resultat": "heure 12:00 trouvée plus bas dans Calls",
+          "emotion": "pressé",
+          "verbatim": "Dimanche 15 à midi, Yasmine, 06 11 42 87 30."
+        }
+      ],
+      "verbatims": ["Où est le numéro ? Ah, tout en bas."]
+    },
+    {
+      "id": "T4",
+      "issue_declaree": "succes",
+      "pense_avoir_reussi": true,
+      "seq": 5,
+      "nb_actions": 14,
+      "moment_le_plus_penible": "Ne pas savoir quoi faire pour que Claire voie : deux boutons à enchaîner, sans confirmation.",
+      "incidents": [
+        {
+          "etape": "faire avancer le deal",
+          "ecran": "http://localhost:3000/app/deals/96f969db-1c6a-472a-b0f0-89d0004765e0",
+          "voulait": "que la direction puisse valider",
+          "a_fait": "Démarrer la négociation puis Proposer l'accord de principe",
+          "attendait": "un seul bouton pour envoyer",
+          "resultat": "le deal passe en attente de la direction, sans confirmation",
+          "emotion": "hésitant",
+          "verbatim": "Je ne sais pas si Claire reçoit un message."
+        }
+      ],
+      "verbatims": ["Ok, 45 et 10 000, c'est noté."]
+    },
+    {
+      "id": "T5",
+      "issue_declaree": "succes",
+      "pense_avoir_reussi": true,
+      "seq": 5,
+      "nb_actions": 14,
+      "moment_le_plus_penible": "Un formulaire long, et le Sans justificatif en jaune dont je ne comprends pas la conséquence.",
+      "incidents": [
+        {
+          "etape": "enregistrer la dépense",
+          "ecran": "http://localhost:3000/app/expenses",
+          "voulait": "déclarer 120 € avancés par moi",
+          "a_fait": "rempli le formulaire, mis l'info dans la note",
+          "attendait": "un moyen de dire que je dois être remboursé",
+          "resultat": "dépense créée, statut Payé, étiquette Sans justificatif",
+          "emotion": "incertain",
+          "verbatim": "Je ne sais pas si l'app sait que c'est moi qu'il faut rembourser."
+        }
+      ],
+      "verbatims": ["Il me propose Transport, ok."]
+    }
+  ],
+  "sus": [4, 2, 3, 2, 4, 2, 3, 3, 3, 2],
+  "entretien": {
+    "raconter": "C'est un outil où je tiens mes négos à jour pour que Claire puisse suivre et valider.",
+    "agace": "Les chargements, le pop-up au début, le calendrier qui a mis une mauvaise date, et le toast qui dit enregistré avec l'ancien chiffre encore affiché.",
+    "pas_sur_que_ca_marche": "Quand la ligne affichait encore 18 % après Terme enregistré, et après avoir proposé l'accord à Claire sans confirmation.",
+    "pratique": "L'accueil me dit direct ce qui est en retard.",
+    "utiliserait": "Si c'est plus rapide que mon WhatsApp, oui. Pour l'instant pas encore.",
+    "un_mot": "Correct"
+  }
+}

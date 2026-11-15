@@ -1,0 +1,106 @@
+[
+  {
+    "probleme_id": "P1",
+    "frequence": "rare",
+    "impact": "fort",
+    "persistance": "difficile",
+    "note": 3,
+    "justification": "Élise (SEQ 2) n'a trouvé aucun point d'entrée pour ouvrir une négociation, aucun message n'explique la règle, et elle a créé un contact en doublon d'une artiste déjà au catalogue. La tâche est bloquée sans issue indiquée, mais un seul persona l'a rencontrée."
+  },
+  {
+    "probleme_id": "P2",
+    "frequence": "rare",
+    "impact": "moyen",
+    "persistance": "modere",
+    "note": 2,
+    "justification": "La fiche affiche « non renseigné » pour des données masquées, ce qui est trompeur, mais l'encadré au-dessus a permis à Élise de comprendre la cause. Elle n'a pas pu demander le partage depuis la fiche."
+  },
+  {
+    "probleme_id": "P3",
+    "frequence": "rare",
+    "impact": "moyen",
+    "persistance": "difficile",
+    "note": 2,
+    "justification": "Élise ne trouve aucun moyen de rouvrir un deal abandonné et la page ne dit pas à qui s'adresser. Le cas est peu fréquent, et le caractère définitif de l'abandon peut être voulu."
+  },
+  {
+    "probleme_id": "P4",
+    "frequence": "rare",
+    "impact": "faible",
+    "persistance": "facile",
+    "note": 2,
+    "justification": "Malik a réussi (SEQ 5) en enchaînant les deux boutons, et l'écran indique que l'accord est chez la direction. Le doute sur la notification de Claire reste mineur."
+  },
+  {
+    "probleme_id": "P5",
+    "frequence": "occasionnel",
+    "impact": "moyen",
+    "persistance": "modere",
+    "note": 3,
+    "justification": "Claire hésite entre deux lignes quasi identiques et valide d'un clic, sans récapitulatif ni confirmation vue, alors que l'accord engage le label envers l'artiste. Elle doute que ce soit enregistré (« Est-ce que c'est enregistré, là ? »), ce qui est un risque d'erreur sur une action irréversible."
+  },
+  {
+    "probleme_id": "P6",
+    "frequence": "rare",
+    "impact": "moyen",
+    "persistance": "modere",
+    "note": 2,
+    "justification": "Claire réussit à confier le deal mais seulement après avoir défilé jusqu'en bas de la page, et sans pouvoir limiter la durée. Elle a réussi (SEQ 4), le problème est de découvrabilité."
+  },
+  {
+    "probleme_id": "P7",
+    "frequence": "rare",
+    "impact": "fort",
+    "persistance": "difficile",
+    "note": 3,
+    "justification": "Claire croit avoir réussi mais a modifié à la fois l'enveloppe et un poste, sans être sûre du résultat (reste global toujours négatif). Elle a aussi mal compris le reste de −7 178 € et a dû passer par un détour pour trouver le budget."
+  },
+  {
+    "probleme_id": "P8",
+    "frequence": "rare",
+    "impact": "faible",
+    "persistance": "facile",
+    "note": 2,
+    "justification": "Deux dates pour une seule intention et un champ date qui a pris 06/11 par erreur, corrigé par Malik. Le problème a coûté quelques secondes et n'a eu aucune conséquence finale."
+  },
+  {
+    "probleme_id": "P9",
+    "frequence": "rare",
+    "impact": "faible",
+    "persistance": "facile",
+    "note": 1,
+    "justification": "Le toast précède l'affichage de 20 % de quelques secondes, ce qui a surtout été causé par le serveur de développement lent. Malik a seulement douté un instant, sans erreur."
+  },
+  {
+    "probleme_id": "P10",
+    "frequence": "rare",
+    "impact": "faible",
+    "persistance": "modere",
+    "note": 2,
+    "justification": "Malik a trouvé l'heure et le téléphone (SEQ 5) mais après un long défilement sans savoir si l'information existait. La tâche est réussie, avec un ralentissement."
+  },
+  {
+    "probleme_id": "P11",
+    "frequence": "rare",
+    "impact": "faible",
+    "persistance": "facile",
+    "note": 2,
+    "justification": "La dépense est enregistrée (SEQ 5), mais rien ne précise qu'il faut rembourser Malik, noté seulement dans la note, et l'étiquette « Sans justificatif » reste inexpliquée. Risque limité de remboursement oublié."
+  },
+  {
+    "probleme_id": "P12",
+    "frequence": "occasionnel",
+    "impact": "faible",
+    "persistance": "modere",
+    "note": 1,
+    "justification": "Les lenteurs sont en grande partie liées au serveur de développement sur une machine chargée, donc largement un artefact d'environnement. Seule l'absence d'aperçu du PDF exporté est un vrai manque, mineur."
+  },
+  {
+    "probleme_id": "P13",
+    "frequence": "occasionnel",
+    "impact": "faible",
+    "persistance": "facile",
+    "note": 1,
+    "justification": "La fenêtre de bienvenue a absorbé un clic chez Malik et un clic mal placé chez Élise, mais elle n'apparaît qu'à la première connexion. Gêne cosmétique, ponctuelle."
+  }
+]

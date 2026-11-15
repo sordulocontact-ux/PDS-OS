@@ -1,0 +1,114 @@
+[
+  {
+    "probleme_id": "P1",
+    "frequence": "rare",
+    "impact": "fort",
+    "persistance": "difficile",
+    "note": 3,
+    "justification": "Malik abandonne la saisie d'une dépense structurelle (loyer), cas cœur du business manager ; « Hors budget » existe mais enfoui et le libellé du champ pousse à un rattachement faux. Une dépense mal rattachée fausse budgets et trésorerie, et l'obstacle revient à chaque dépense de ce type."
+  },
+  {
+    "probleme_id": "P2",
+    "frequence": "rare",
+    "impact": "fort",
+    "persistance": "difficile",
+    "note": 4,
+    "justification": "Malik croit avoir réussi (T2) avec un centre de coût qui ne porte pas de date, donc l'émission n'entre pas dans la prévision de trésorerie, puis abandonne T3 par peur du doublon. Fausse réussite sur une tâche cœur, avec conséquence financière silencieuse."
+  },
+  {
+    "probleme_id": "P3",
+    "frequence": "rare",
+    "impact": "moyen",
+    "persistance": "modere",
+    "note": 2,
+    "justification": "Un seul persona au clavier déclenche PO et le micro par double Espace, avec confusion mais sans blocage de tâche. Risque de vie privée et d'inquiétude, mais facile à éviter une fois compris."
+  },
+  {
+    "probleme_id": "P4",
+    "frequence": "rare",
+    "impact": "moyen",
+    "persistance": "difficile",
+    "note": 2,
+    "justification": "Malik, seul utilisateur clavier, perd une quinzaine de Tab et croit que ça ne marche pas faute de focus visible. Gêne à chaque page pour ce profil, mais il ne bloque pas la tâche ; accessibilité à ne pas négliger, d'où le haut de la fourchette mineur."
+  },
+  {
+    "probleme_id": "P5",
+    "frequence": "rare",
+    "impact": "moyen",
+    "persistance": "modere",
+    "note": 2,
+    "justification": "Élise réussit en 15 actions après essais (SEQ 4) ; la ligne ne réagit pas au clic et rien n'indique « facture envoyée ». Ralentit nettement, mais se retient une fois le chemin ⋯ › Modifier trouvé."
+  },
+  {
+    "probleme_id": "P6",
+    "frequence": "occasionnel",
+    "impact": "moyen",
+    "persistance": "modere",
+    "note": 2,
+    "justification": "Deux personas sur trois sur écran étroit voient le tableau coupé et l'onglet Exports caché sans indice ; ils finissent par faire défiler. Largeur étroite imposée au test, donc pas forcément représentatif du desktop-first."
+  },
+  {
+    "probleme_id": "P7",
+    "frequence": "rare",
+    "impact": "fort",
+    "persistance": "difficile",
+    "note": 3,
+    "justification": "Élise valide un rapprochement sans voir le rattachement (succès « réel » mais à l'aveugle) ; un mauvais rapprochement fausse la trésorerie sans signal. Le risque est de valider à tort à chaque proposition tronquée."
+  },
+  {
+    "probleme_id": "P8",
+    "frequence": "rare",
+    "impact": "fort",
+    "persistance": "difficile",
+    "note": 3,
+    "justification": "Claire lit « Rien ne vous attend » alors qu'une alerte urgente de 30 778 € existe : elle peut croire qu'il n'y a rien à traiter. Message faux à chaque ouverture de l'accueil tant que Finance n'alimente pas ce résumé."
+  },
+  {
+    "probleme_id": "P9",
+    "frequence": "rare",
+    "impact": "fort",
+    "persistance": "difficile",
+    "note": 3,
+    "justification": "Claire met 30 actions (SEQ 3) à créer un projet collectif : titre créé perdu, titres fantômes non demandés, artistes non rattachés aux titres. Le projet risque d'être créé avec des données fausses sans que l'utilisatrice s'en rende compte."
+  },
+  {
+    "probleme_id": "P10",
+    "frequence": "occasionnel",
+    "impact": "moyen",
+    "persistance": "facile",
+    "note": 2,
+    "justification": "Lina abandonne et Malik fait un détour devant une page Projets vide sans explication, alors que seule la DG crée un projet. Le défaut est le silence de l'écran ; une fois la règle connue, plus de gêne."
+  },
+  {
+    "probleme_id": "P11",
+    "frequence": "occasionnel",
+    "impact": "moyen",
+    "persistance": "modere",
+    "note": 2,
+    "justification": "Claire et Lina doutent que « Master : À mixer » soit tout le suivi, sans écran Master trouvé. Peut être une limite de périmètre plus qu'un défaut d'utilisabilité, et la preuve ne montre pas de blocage."
+  },
+  {
+    "probleme_id": "P12",
+    "frequence": "rare",
+    "impact": "faible",
+    "persistance": "facile",
+    "note": 1,
+    "justification": "Claire se demande seulement si l'export couvre l'année ou tout l'historique. Un libellé de période suffit ; l'export reste utilisable."
+  },
+  {
+    "probleme_id": "P13",
+    "frequence": "rare",
+    "impact": "moyen",
+    "persistance": "modere",
+    "note": 2,
+    "justification": "Élise ne comprend pas « Entrée prévue » sur le bouton principal de Finance, sans verbatim ni détail dans les preuves. Terme jargonneux sur l'action centrale, mais un seul persona et pas de blocage observé."
+  },
+  {
+    "probleme_id": "P14",
+    "frequence": "rare",
+    "impact": "faible",
+    "persistance": "facile",
+    "note": 1,
+    "justification": "Le calendrier recouvre le champ suivant chez Élise seule, probablement lié à la largeur étroite. Gêne cosmétique, on referme le calendrier."
+  }
+]

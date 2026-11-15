@@ -28,8 +28,9 @@ export function FormDialog({
   closeLabel: string;
   // A DialogTrigger, when the modal opens from its own button.
   trigger?: React.ReactNode;
-  // `wide`: a longer form laid out wider rather than taller (feedback).
-  // `medium`: one column with room to breathe (a contact of the Réseau).
+  // `wide`: a longer form laid out wider rather than taller.
+  // `medium`: one column with room to breathe (a contact of the Réseau, a
+  // feedback).
   size?: "default" | "medium" | "wide";
   children: React.ReactNode;
 }) {

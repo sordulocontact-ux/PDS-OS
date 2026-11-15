@@ -8,6 +8,7 @@ import { AssistantMessage } from "@/components/assistant/assistant-message";
 import { Button } from "@/components/ui/button";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { aiUsage } from "@/lib/i18n/fr/ai-usage";
+import { MAX_IMAGES_PER_CONVERSATION } from "@/lib/assistant/image-rules";
 import { assistant } from "@/lib/i18n/fr/assistant";
 import { cn } from "@/lib/utils";
 
@@ -32,6 +33,12 @@ function quotaLimit(error: Error): number | null {
     // Not a JSON body: any other failure.
   }
   return null;
+}
+
+// The route answers 400 {"error":"too_many_images"} past the images PO reads
+// in one conversation (lib/assistant/images.ts).
+function tooManyImages(error: Error): boolean {
+  return error.message.includes('"too_many_images"');
 }
 
 /** The turns of a PO conversation, kept scrolled to the latest one. A
@@ -86,13 +93,15 @@ export function AssistantThread({
         // replaces the cut answer (regenerate).
         <div className="flex flex-wrap items-center gap-3">
           <ToneCallout tone="warning" role="alert" className="min-w-0 flex-1">
-            {reachedLimit === null
-              ? error.message === "busy"
-                ? t.errors.busy
-                : t.errors.failed
-              : fr.aiUsage.exceeded(reachedLimit)}
+            {reachedLimit !== null
+              ? fr.aiUsage.exceeded(reachedLimit)
+              : tooManyImages(error)
+                ? t.errors.tooManyImages(MAX_IMAGES_PER_CONVERSATION)
+                : error.message === "busy"
+                  ? t.errors.busy
+                  : t.errors.failed}
           </ToneCallout>
-          {reachedLimit === null && onRetry && (
+          {reachedLimit === null && !tooManyImages(error) && onRetry && (
             <Button variant="outline" size="sm" onClick={onRetry}>
               {t.retry}
             </Button>

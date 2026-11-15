@@ -1,0 +1,42 @@
+{
+  "run": "2026-11-15-finance-collectifs",
+  "cree_le": "2026-11-15T14:09:25+00:00",
+  "elements": [
+    {
+      "type": "ligne",
+      "id": "finance_cost_centers:ed52c464-378a-406d-a919-d0c7825a269a",
+      "suppression": "delete from finance_cost_centers where id='ed52c464-378a-406d-a919-d0c7825a269a' (créé par Malik, T2)",
+      "note": "",
+      "cree_le": "2026-11-15T14:22:31+00:00",
+      "supprime": true,
+      "supprime_le": "2026-11-15T14:32:44+00:00"
+    },
+    {
+      "type": "ligne",
+      "id": "budget_lines:Ingé son match",
+      "suppression": "match créé par Élise (T3) sur une ligne de démo : à défaire ? (finance_spend_matches created_at > 14:09)",
+      "note": "",
+      "cree_le": "2026-11-15T14:22:31+00:00",
+      "supprime": true,
+      "supprime_le": "2026-11-15T14:32:44+00:00"
+    },
+    {
+      "type": "ligne",
+      "id": "finance_incomes:Synchro pub Renault invoice",
+      "suppression": "remettre invoice_number/invoiced_on/sent_on à null (modifié par Élise, T2)",
+      "note": "",
+      "cree_le": "2026-11-15T14:22:31+00:00",
+      "supprime": true,
+      "supprime_le": "2026-11-15T14:32:44+00:00"
+    },
+    {
+      "type": "projet",
+      "id": "projects:15d38d61-b34c-482a-babe-e365a87cf441",
+      "suppression": "delete_project_row + masters Feu de joie / Maree haute + activity_events + notification (fait)",
+      "note": "",
+      "cree_le": "2026-11-15T14:32:44+00:00",
+      "supprime": true,
+      "supprime_le": "2026-11-15T14:32:44+00:00"
+    }
+  ]
+}

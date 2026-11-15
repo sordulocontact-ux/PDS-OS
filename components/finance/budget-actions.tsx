@@ -5,11 +5,15 @@ import { IconPlus } from "nucleo-sharp-essential";
 import { BudgetImportForm } from "@/components/finance/budget-import-form";
 import {
   CostCenterForm,
+  RenameForm,
   ReviseForm,
   ShareForm,
   TemplateForm,
 } from "@/components/finance/budget-forms";
+import { ButtonRoll, buttonVariants } from "@/components/ui/button";
 import { DialogButton } from "@/components/ui/dialog-button";
+import { ViewLink } from "@/components/ui/view-link";
+import { routes } from "@/lib/auth/redirects";
 import type {
   BudgetTemplate,
   TemplateLine,
@@ -19,7 +23,25 @@ import { financeBudgets } from "@/lib/i18n/fr/finance-budgets";
 
 const fr = { financeBudgets };
 
-/** « Nouveau centre de coût » (Finance › Budgets, the Finance only). */
+/** « Planifier une émission »: to Financements › Émissions et lives, where
+ * a show counts in the forecast (a cost center alone does not). */
+export function PlanShowLink({
+  size = "default",
+}: {
+  size?: "default" | "lg";
+}) {
+  return (
+    <ViewLink
+      href={`${routes.financeFundings}#shows`}
+      className={buttonVariants({ variant: "outline", size })}
+    >
+      <ButtonRoll>{fr.financeBudgets.actions.planShow}</ButtonRoll>
+    </ViewLink>
+  );
+}
+
+/** « Nouveau centre de coût » (Finance › Budgets, the Finance only), beside
+ * « Planifier une émission ». */
 export function NewCostCenterButton({
   templates,
 }: {
@@ -27,16 +49,19 @@ export function NewCostCenterButton({
 }) {
   const t = fr.financeBudgets;
   return (
-    <DialogButton
-      label={t.actions.newCenter}
-      icon={IconPlus}
-      variant="default"
-      size="lg"
-      title={t.centerForm.title}
-      description={t.centerForm.description}
-    >
-      {(close) => <CostCenterForm templates={templates} onDone={close} />}
-    </DialogButton>
+    <div className="flex flex-wrap gap-2">
+      <PlanShowLink size="lg" />
+      <DialogButton
+        label={t.actions.newCenter}
+        icon={IconPlus}
+        variant="default"
+        size="lg"
+        title={t.centerForm.title}
+        description={t.centerForm.description}
+      >
+        {(close) => <CostCenterForm templates={templates} onDone={close} />}
+      </DialogButton>
+    </div>
   );
 }
 
@@ -48,6 +73,7 @@ export function NewCostCenterButton({
 export function EnvelopeActions({
   kind,
   id,
+  name,
   currentCents,
   shareBp,
   lines,
@@ -56,6 +82,7 @@ export function EnvelopeActions({
 }: {
   kind: EnvelopeKind;
   id: string;
+  name: string;
   currentCents: number | null;
   shareBp: number;
   lines: TemplateLine[];
@@ -73,6 +100,16 @@ export function EnvelopeActions({
           wide
         >
           {(close) => <BudgetImportForm kind={kind} id={id} onDone={close} />}
+        </DialogButton>
+      )}
+      {canManage && kind === "cost_center" && <PlanShowLink />}
+      {canManage && kind === "cost_center" && (
+        <DialogButton
+          label={t.actions.rename}
+          title={t.renameForm.title}
+          description={t.renameForm.description}
+        >
+          {(close) => <RenameForm id={id} name={name} onDone={close} />}
         </DialogButton>
       )}
       {canManage && kind === "cost_center" && (

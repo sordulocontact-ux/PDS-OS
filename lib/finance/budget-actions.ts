@@ -97,6 +97,34 @@ export async function createCostCenter(
   return { ok: true, done: done.center };
 }
 
+const renameInput = z.object({
+  id: z.uuid(),
+  name: z.string().trim().min(1).max(120),
+});
+
+/** « Renommer » a cost center (the history keeps the old name). */
+export async function renameCostCenter(
+  input: z.input<typeof renameInput>,
+): Promise<WriteResult> {
+  await requireApproved();
+  const p = renameInput.safeParse(input);
+  if (!p.success) return { ok: false, error: t.invalid };
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("finance_cost_centers")
+    .update({ name: p.data.name })
+    .eq("id", p.data.id)
+    .select("id");
+  if (error) {
+    if (error.code === "23505")
+      return { ok: false, error: financeBudgets.errors.nameTaken };
+    return failure(error, "renameCostCenter");
+  }
+  if (!data?.length) return { ok: false, error: t.invalid };
+  refresh();
+  return { ok: true, done: done.renamed };
+}
+
 const reviseInput = z.object({
   id: z.uuid(),
   amount: positiveEuros,

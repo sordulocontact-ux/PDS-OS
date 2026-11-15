@@ -13,9 +13,10 @@ const RECENT = 5;
  * What a quick spend can go to (BUD 4), for the reader: the projects they
  * run (not archived) and, for the artists' budgets' readers, every artist
  * not archived; for the Finance (manage_finance, lot 3 of Ibé's ticket),
- * its cost centers and « Hors budget » last; the ones they last spent on
- * first, then by name. Read with
- * the user's session; the database still decides on saving.
+ * its cost centers and « Hors budget »; the ones they last spent on
+ * first, then « Hors budget » (a structure spend must be found, UX test of
+ * 15/11/2026), then by name. Read with the user's session; the database
+ * still decides on saving.
  */
 export async function loadExpenseTargets(): Promise<{
   organizationId: string | null;
@@ -72,9 +73,9 @@ export async function loadExpenseTargets(): Promise<{
       label: c.name,
     })),
   ].sort((a, b) => a.label.localeCompare(b.label, "fr"));
-  // « Hors budget »: the last choice, never a habit (the overview signals it).
+  // « Hors budget »: named by what goes there, so a search finds it.
   const offBudget: ExpenseTarget[] = finance
-    ? [{ kind: "off_budget", id: "", label: budget.form.offBudget }]
+    ? [{ kind: "off_budget", id: "", label: budget.form.offBudgetOption }]
     : [];
   const recent: string[] = [];
   for (const row of recentRes.data ?? []) {
@@ -86,13 +87,15 @@ export async function loadExpenseTargets(): Promise<{
     const i = recent.indexOf(t.id);
     return i === -1 ? RECENT : i;
   };
+  const sorted = all
+    .map((t) => ({ ...t, recent: recent.includes(t.id) }))
+    .sort((a, b) => rank(a) - rank(b));
   return {
     organizationId: access.organizationId,
     targets: [
-      ...all
-        .map((t) => ({ ...t, recent: recent.includes(t.id) }))
-        .sort((a, b) => rank(a) - rank(b)),
+      ...sorted.filter((t) => t.recent),
       ...offBudget,
+      ...sorted.filter((t) => !t.recent),
     ],
   };
 }

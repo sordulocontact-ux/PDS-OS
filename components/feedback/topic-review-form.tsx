@@ -3,9 +3,9 @@
 import { useState, useTransition } from "react";
 import { toast } from "@/components/ui/toast";
 
-import { ChoiceCards } from "@/components/ui/choice-cards";
 import { FormMessage } from "@/components/auth/form-message";
-import { Button } from "@/components/ui/button";
+import { ChipChoice } from "@/components/ui/chip-choice";
+import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { reviewFeedbackTopic } from "@/lib/feedback/actions";
 import {
   FEEDBACK_PRIORITIES,
@@ -38,9 +38,14 @@ export function TopicReviewForm({
     proposedPriority,
   );
   const [error, setError] = useState<string | null>(null);
+  const [missing, setMissing] = useState(false);
   const [pending, startTransition] = useTransition();
 
-  const confirm = () =>
+  const confirm = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    // Said at the source on the first try, never a disabled button.
+    setMissing(needsPriority && !priority);
+    if (needsPriority && !priority) return;
     startTransition(async () => {
       setError(null);
       const result = await reviewFeedbackTopic(
@@ -56,38 +61,35 @@ export function TopicReviewForm({
         toast.error(t.notion.failed(result.notion.reason), { duration: 15000 });
       onSaved();
     });
+  };
 
   return (
-    <div className="flex flex-col gap-5">
+    <form onSubmit={confirm} noValidate className="flex flex-col gap-5">
       {needsPriority && (
-        <ChoiceCards
+        <ChipChoice
           name="priority"
           legend={t.review.priority}
           required
-          choices={FEEDBACK_PRIORITIES.map((p) => ({
+          fill
+          options={FEEDBACK_PRIORITIES.map((p) => ({
             value: p,
             label: t.priorities[p],
-            hint: t.review.priorityHints[p],
           }))}
-          value={priority ?? undefined}
-          onChange={setPriority}
+          value={priority}
+          onChange={(next) => {
+            if (next) setPriority(next);
+            setMissing(false);
+          }}
+          hint={priority ? t.review.priorityHints[priority] : undefined}
+          error={missing ? t.review.priorityRequired : undefined}
         />
       )}
       {error && <FormMessage kind="error">{error}</FormMessage>}
-      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <Button type="button" variant="ghost" size="lg" onClick={onCancel}>
-          {t.cancel}
-        </Button>
-        <Button
-          type="button"
-          size="lg"
-          disabled={pending || (needsPriority && !priority)}
-          aria-busy={pending || undefined}
-          onClick={confirm}
-        >
-          {t.review.confirm[action]}
-        </Button>
-      </div>
-    </div>
+      <DialogFormActions
+        pending={pending}
+        submitLabel={t.review.confirm[action]}
+        onCancel={onCancel}
+      />
+    </form>
   );
 }

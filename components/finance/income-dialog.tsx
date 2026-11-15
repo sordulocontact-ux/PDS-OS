@@ -17,7 +17,7 @@ import { treasury } from "@/lib/i18n/fr/treasury";
 const fr = { clientInvoices, dialogs, treasury };
 
 export type IncomeDialogKind =
-  "receive" | "edit" | "cancel" | "remind" | "credit";
+  "receive" | "edit" | "invoice" | "cancel" | "remind" | "credit";
 
 /** The modal of a gesture on an income (the « ⋯ » of its row). */
 export function IncomeDialog({
@@ -46,6 +46,10 @@ export function IncomeDialog({
       title: t.incomeForm.editTitle,
       description: t.incomeForm.description,
     },
+    invoice: {
+      title: c.actions.addInvoice,
+      description: c.actions.addInvoiceDescription(income.label),
+    },
     cancel: {
       title: t.cancelForm.title,
       description: t.cancelForm.description,
@@ -69,12 +73,13 @@ export function IncomeDialog({
       title={head.title}
       description={head.description}
       closeLabel={fr.dialogs.close}
-      size={kind === "edit" ? "medium" : "default"}
+      size={kind === "edit" || kind === "invoice" ? "medium" : "default"}
     >
       {kind === "receive" && <ReceiptForm income={income} onDone={onClose} />}
-      {kind === "edit" && (
+      {(kind === "edit" || kind === "invoice") && (
         <IncomeForm
           income={income}
+          atInvoice={kind === "invoice"}
           targets={targets}
           organizationId={organizationId}
           ownerId={ownerId}

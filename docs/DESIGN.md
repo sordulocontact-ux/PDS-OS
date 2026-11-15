@@ -4,6 +4,10 @@ Design system de PDS OS, reconstruit section par section. Ce fichier fait foi po
 l'apparence de l'interface. Une section absente = pas encore décidée : demander, ne pas
 inventer.
 
+Valeurs : `app/globals.css`. Couches, `tokens.json` généré, contrat des composants, marche à suivre
+pour changer de design system et miroir Figma (variables, composants, écrans clés) :
+`design-system/README.md`.
+
 ---
 
 ## 1. Icônes

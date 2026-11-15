@@ -1,0 +1,200 @@
+{
+  "persona_id": "lina",
+  "fenetre": "1440x900",
+  "mode_perception": "lecteur_ecran",
+  "presentation": "Je m'appelle Lina, je pilote le projet « Minuit pile » de Mona Lys chez PDS. J'ai une tendinite au poignet : plus de souris, je travaille au clavier avec la synthèse vocale.",
+  "premiere_impression": null,
+  "taches": [
+    {
+      "id": "T1",
+      "issue_declaree": "succes",
+      "pense_avoir_reussi": true,
+      "seq": 5,
+      "nb_actions": 70,
+      "moment_le_plus_penible": "Retrouver le lien du deal : 30 Tab puis 18 Tab, j'ai dépassé le lien et atterri sur la barre de test.",
+      "incidents": [
+        {
+          "etape": "Atteindre « Deals »",
+          "ecran": "Accueil",
+          "voulait": "aller aux négociations",
+          "a_fait": "16 Tab depuis le début de page",
+          "attendait": "un raccourci ou un saut au menu",
+          "resultat": "arrivée sur « Deals » après 16 arrêts, nombreux liens avant",
+          "emotion": "agacement",
+          "verbatim": "Seize fois Tab pour arriver à un lien du menu, c'est long."
+        },
+        {
+          "etape": "Ouvrir le deal",
+          "ecran": "Liste des deals",
+          "voulait": "ouvrir la ligne Mona Lys",
+          "a_fait": "30 Tab puis 18 Tab",
+          "attendait": "le focus sur le lien du tableau",
+          "resultat": "focus dans le menu puis sur la barre de test, lien dépassé, Maj+Tab",
+          "emotion": "perdue",
+          "verbatim": "Le focus est parti où, là ?"
+        },
+        {
+          "etape": "Lire la fiche du deal",
+          "ecran": "Fiche du deal",
+          "voulait": "savoir l'état",
+          "a_fait": "lecture de la page",
+          "attendait": "un titre de page parlant",
+          "resultat": "titre d'onglet « PDS OS » seulement ; contenu clair (Négociation, Malik Durand)",
+          "emotion": "neutre",
+          "verbatim": "Bon, ça c'est clair."
+        }
+      ],
+      "verbatims": [
+        "Négociation en cours, Malik Durand s'en occupe, prochaine action vendredi 13.",
+        "J'ai déjà la réponse dans le tableau, mais je veux le détail."
+      ]
+    },
+    {
+      "id": "T2",
+      "issue_declaree": "succes_difficile",
+      "pense_avoir_reussi": true,
+      "seq": 3,
+      "nb_actions": 85,
+      "moment_le_plus_penible": "Appuyer sur Enregistrer, entendre la fenêtre se fermer sans rien et ne pas savoir si c'était enregistré ; il a fallu recharger la liste, puis tout refaire.",
+      "incidents": [
+        {
+          "etape": "Ouvrir le formulaire",
+          "ecran": "Dépenses",
+          "voulait": "« Ajouter une dépense »",
+          "a_fait": "6 Tab puis un de trop",
+          "attendait": "le bouton dès les premiers arrêts",
+          "resultat": "dépassé, retour par Maj+Tab",
+          "emotion": "agacement",
+          "verbatim": "Il est où, ce bouton ?"
+        },
+        {
+          "etape": "Champs de la fenêtre",
+          "ecran": "Nouvelle dépense",
+          "voulait": "savoir quel champ est lequel",
+          "a_fait": "lecture de la fenêtre",
+          "attendait": "des noms pour montant et libellé",
+          "resultat": "« zone de texte » sans nom pour Montant HT et Libellé",
+          "emotion": "perdue",
+          "verbatim": "J'entends « zone de texte », sans nom. Montant ou libellé ?"
+        },
+        {
+          "etape": "Accepter le poste proposé",
+          "ecran": "Nouvelle dépense",
+          "voulait": "choisir Coaching",
+          "a_fait": "Utiliser, puis Tab",
+          "attendait": "rester dans le formulaire",
+          "resultat": "le bouton disparaît, le focus saute en haut de la fenêtre",
+          "emotion": "surprise",
+          "verbatim": "Le focus a disparu."
+        },
+        {
+          "etape": "Validation trop tôt",
+          "ecran": "Nouvelle dépense",
+          "voulait": "ouvrir la liste « Pour »",
+          "a_fait": "Entrée sur le mauvais champ",
+          "attendait": "ouvrir une liste",
+          "resultat": "formulaire validé, message « Dites à quel projet ou à quel artiste va la dépense »",
+          "emotion": "neutre",
+          "verbatim": "Bon, le message est clair, je corrige."
+        },
+        {
+          "etape": "Enregistrer",
+          "ecran": "Nouvelle dépense",
+          "voulait": "enregistrer",
+          "a_fait": "5 Tab puis Entrée",
+          "attendait": "une annonce « dépense enregistrée »",
+          "resultat": "fenêtre fermée, aucune annonce, liste inchangée (8) : rien n'était enregistré",
+          "emotion": "doute",
+          "verbatim": "Je ne sais pas si ça a marché. La liste dit huit, c'était huit avant."
+        },
+        {
+          "etape": "Deuxième essai",
+          "ecran": "Nouvelle dépense",
+          "voulait": "recommencer",
+          "a_fait": "saisie à la réouverture",
+          "attendait": "focus dans le premier champ",
+          "resultat": "focus ailleurs, saisies perdues, formulaire vide validé, trois messages rouges",
+          "emotion": "agacement",
+          "verbatim": "Je tape et rien ne se passe. Le focus n'est pas annoncé."
+        },
+        {
+          "etape": "Confirmation",
+          "ecran": "Dépenses",
+          "voulait": "vérifier l'enregistrement",
+          "a_fait": "lecture de la liste",
+          "attendait": "l'annonce de la confirmation",
+          "resultat": "toast « Dépense enregistrée » visible mais absent de ce que lit mon lecteur ; liste à 9, ligne 300 € HT en tête",
+          "emotion": "soulagement mitigé",
+          "verbatim": "Je l'ai su par la liste, pas par le message."
+        }
+      ],
+      "verbatims": [
+        "Au troisième passage, ça passe. Neuf lignes, la nouvelle en tête.",
+        "300 € en HT, je ne sais pas si c'est mon montant exact."
+      ]
+    },
+    {
+      "id": "T3",
+      "issue_declaree": "succes_difficile",
+      "pense_avoir_reussi": true,
+      "seq": 4,
+      "nb_actions": 75,
+      "moment_le_plus_penible": "Deviner que le budget est dans l'onglet « Business » de la fiche artiste, et ouvrir la fiche de Nahel Nuit au lieu de Mona Lys.",
+      "incidents": [
+        {
+          "etape": "Ouvrir Mona Lys",
+          "ecran": "Liste des artistes",
+          "voulait": "la fiche de Mona Lys",
+          "a_fait": "24 Tab puis Entrée",
+          "attendait": "Mona Lys",
+          "resultat": "fiche de Nahel Nuit ; mauvais repère (soulignement de la souris pris pour le focus)",
+          "emotion": "agacement",
+          "verbatim": "Ce n'est pas Mona, c'est Nahel."
+        },
+        {
+          "etape": "Revenir en arrière",
+          "ecran": "Fiche artiste",
+          "voulait": "retour à la liste",
+          "a_fait": "raccourci du navigateur",
+          "attendait": "retour",
+          "resultat": "sans effet ; passage par le lien « Tous les artistes »",
+          "emotion": "agacement",
+          "verbatim": "Le retour ne fait rien, je passe par le lien."
+        },
+        {
+          "etape": "Trouver le budget",
+          "ecran": "Fiche artiste, vue d'ensemble",
+          "voulait": "les montants dépensés",
+          "a_fait": "lecture de la vue d'ensemble",
+          "attendait": "un budget ou un montant",
+          "resultat": "aucun montant ; huit liens sans nom dans l'arbre ; « Business » trouvé en lisant les onglets",
+          "emotion": "perdue",
+          "verbatim": "Business ? Je ne pensais pas à cet onglet pour l'argent."
+        },
+        {
+          "etape": "Lire les montants",
+          "ecran": "Mona Lys, Business",
+          "voulait": "dépensé et reste",
+          "a_fait": "lecture de l'enveloppe",
+          "attendait": "un seul total cohérent",
+          "resultat": "enveloppe 60 000, dépensé 47 478, reste 12 522 ; tableau du bas 47 878 ; historique parle de 45 000",
+          "emotion": "doute",
+          "verbatim": "Les chiffres ne s'accordent pas, je dis ceux du haut."
+        }
+      ],
+      "verbatims": [
+        "Dépensé 47 478 euros HT depuis le 1er janvier, dont 400 encore estimés. Il reste 12 522 euros sur une enveloppe de 60 000.",
+        "Par poste, le coaching a 4 100 euros de reste sur 5 000 prévus."
+      ]
+    }
+  ],
+  "sus": [3, 3, 2, 3, 2, 4, 2, 4, 2, 3],
+  "entretien": {
+    "raconter": "J'ai trouvé l'état du deal de Mona Lys avec Malik, déclaré mon coaching de 300 € et lu l'enveloppe de l'artiste. Au clavier, c'est long.",
+    "agace": "Des fenêtres qui n'annoncent pas le focus, des champs sans nom, Entrée qui valide trop tôt, et un enregistrement qui ne s'annonce pas.",
+    "pas_sur_que_ca_marche": "Mon premier Enregistrer : la fenêtre s'est fermée sans rien ; et les deux totaux du budget qui ne s'accordent pas.",
+    "pratique": "La liste des deals avec la prochaine action et le responsable, le poste proposé « Coaching », la recherche dans « Pour ».",
+    "utiliserait": "Seulement si le clavier devient fiable ; aujourd'hui je garde mon tableur.",
+    "un_mot": "Brouillon"
+  }
+}

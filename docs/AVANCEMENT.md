@@ -2292,3 +2292,28 @@ les modules à parcours (proto « Mise en page des modules », version « Propos
       et avoirs, encaissements, banque, historique ; historique des 100 dernières modifications) ; migration
       `20261113700101_finance_alerts.sql`. Le ticket Finance d'Ibé est couvert ; reste P2 : synchronisation
       automatique Qonto, récupération des justificatifs.
+- [x] **Finance : correctifs du test UX du 15/11/2026** (`ux-tests/2026-11-15-finance-collectifs/rapport.md`) —
+      accueil : « N alertes Finance urgentes » en lien vers Alertes pour qui lit Finance (SQL
+      `finance_urgent_count()`, migration `20261115100101_finance_home_alerts.sql`, pgTAP
+      `finance_home_alerts.test.sql` (3)) ; « Pour » d'une dépense : textes de la Finance (centre de coût,
+      hors budget), « Loyer, abonnement, frais de structure (aucun projet) » juste après les récents, trouvé
+      aussi par « hors budget » (`SearchSelect keywords`) ; « Planifier une émission » sur Budgets et sur un
+      centre de coût, « Renommer » un centre de coût ; proposition de rapprochement en entier sous la
+      transaction sur écran étroit (`TransactionProposal`) ; Espace Espace ignoré quand le premier Espace a
+      fait défiler la page ; lien « Aller au contenu » au premier Tab ; « Saisir la facture » dans « ⋯ »
+      d'une entrée prévue ; onglets trop larges : fondu au bord et onglet courant ramené dans la vue
+      (`TabBar`, partout) ; « Nouvelle recette » au lieu d'« Entrée prévue » ; Projets vide expliqué ;
+      Exports : « tout l'historique ».
+
+## Images dans une conversation avec PO, choix segmentés des Retours (13/11/2026, branche `pre-prod`)
+
+- [x] **Images jointes à une question à PO** (docs/ASSISTANT.md § 2 quinquies) — trombone, glisser-déposer
+      ou ⌘V dans la zone de saisie (page PO, accueil, fenêtre Espace Espace), vignettes retirables, image
+      dans la bulle (agrandie au clic) ; bucket privé `assistant-images` (`<person_id>/<uuid>`), le message
+      garde l'adresse et `/api/assistant` relit l'image avec la session pour le modèle ; 4 par question,
+      12 par conversation ; supprimées avec la conversation ; migration `20261113800101_assistant_images.sql`,
+      pgTAP `assistant-images.test.sql` (4).
+- [x] **Retours : type et priorité en contrôle segmenté** — `ChipChoice fill` au fond qui glisse à la place
+      des cartes de choix dans la fenêtre de retour, la modification d'un sujet et la confirmation d'une
+      décision (indication du choix retenu dessous) ; boutons `DialogFormActions` ; priorité manquante dite
+      sous le choix au lieu d'un bouton désactivé.

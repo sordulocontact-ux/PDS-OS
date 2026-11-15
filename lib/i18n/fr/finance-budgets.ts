@@ -85,6 +85,10 @@ export const financeBudgets = {
   },
   actions: {
     newCenter: "Nouveau centre de coût",
+    // To Financements › Émissions et lives (UX test of 15/11/2026: an
+    // emission was created as a cost center and never reached the forecast).
+    planShow: "Planifier une émission",
+    rename: "Renommer",
     revise: "Réviser l'enveloppe",
     share: "Part financée par PDS",
     template: "Enregistrer comme modèle",
@@ -93,7 +97,7 @@ export const financeBudgets = {
   centerForm: {
     title: "Nouveau centre de coût",
     description:
-      "Une enveloppe hors projet et hors artiste : frais de structure, une émission, un live.",
+      "Une enveloppe hors projet et hors artiste : frais de structure, une émission, un live. Une émission à venir se planifie dans Financements, pour compter dans la prévision.",
     name: "Nom",
     amount: "Enveloppe",
     amountHint: "Vide avec un modèle : le total de ses lignes.",
@@ -104,6 +108,14 @@ export const financeBudgets = {
     save: "Créer",
     saving: "Création…",
     errors: { name: "Donnez un nom.", amount: "Indiquez un montant en euros." },
+  },
+  renameForm: {
+    title: "Renommer le centre de coût",
+    description: "L'historique de Finance garde l'ancien nom.",
+    name: "Nom",
+    save: "Renommer",
+    saving: "Enregistrement…",
+    errors: { name: "Donnez un nom." },
   },
   reviseForm: {
     title: "Réviser l'enveloppe",
@@ -157,6 +169,7 @@ export const financeBudgets = {
   },
   done: {
     center: "Centre de coût créé",
+    renamed: "Centre de coût renommé",
     revised: "Enveloppe révisée",
     share: "Part PDS enregistrée",
     template: "Modèle enregistré",

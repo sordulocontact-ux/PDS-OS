@@ -1,0 +1,60 @@
+{
+  "run": "2026-11-12-business-2",
+  "cree_le": "2026-11-12T17:35:08+00:00",
+  "elements": [
+    {
+      "type": "artiste",
+      "id": "fbea1107-3ef0-4368-83ed-62a62c29b647",
+      "suppression": "artiste maison « PDS » ajouté en local pour le modèle PDS Mic (à garder : il existe en prod)",
+      "note": "",
+      "cree_le": "2026-11-12T17:35:19+00:00",
+      "supprime": false,
+      "supprime_le": null
+    },
+    {
+      "type": "donnees",
+      "id": "mona-envelope-60k",
+      "suppression": "enveloppe de Mona Lys remise à 60 000 € (aligné sur showcase-business.sql)",
+      "note": "",
+      "cree_le": "2026-11-12T17:35:19+00:00",
+      "supprime": false,
+      "supprime_le": null
+    },
+    {
+      "type": "brouillon-projet",
+      "id": "830c5664-0b82-48f3-a0da-65688bbe3501",
+      "suppression": "delete from project_drafts where id='830c5664-0b82-48f3-a0da-65688bbe3501'",
+      "note": "",
+      "cree_le": "2026-11-12T17:41:47+00:00",
+      "supprime": true,
+      "supprime_le": "2026-11-12T18:01:23+00:00"
+    },
+    {
+      "type": "projet",
+      "id": "d8b70d0e-4eb3-4bef-8574-94b6abef00e2",
+      "suppression": "projet PDS MIC 5 (Claire) : delete_project_row",
+      "note": "",
+      "cree_le": "2026-11-12T17:45:01+00:00",
+      "supprime": true,
+      "supprime_le": "2026-11-12T18:01:23+00:00"
+    },
+    {
+      "type": "deal",
+      "id": "fac48b50-bef2-4e64-85c9-bcb6e9bc3be3",
+      "suppression": "deal Sélène Vega (supprimé avec le projet)",
+      "note": "",
+      "cree_le": "2026-11-12T17:45:01+00:00",
+      "supprime": true,
+      "supprime_le": "2026-11-12T18:01:23+00:00"
+    },
+    {
+      "type": "depense",
+      "id": "1f3c47d2-c6ae-41ae-a2fb-545b2818cccb",
+      "suppression": "budget_lines taxi Sélène Vega (Malik)",
+      "note": "",
+      "cree_le": "2026-11-12T17:47:57+00:00",
+      "supprime": true,
+      "supprime_le": "2026-11-12T18:01:23+00:00"
+    }
+  ]
+}

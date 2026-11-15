@@ -13,6 +13,7 @@ import { PdsLogo } from "@/components/shell/pds-logo";
 import { Sidebar } from "@/components/shell/sidebar";
 import { CollapsedNavProvider } from "@/components/shell/use-collapsed-nav";
 import { UserPanel } from "@/components/shell/user-panel";
+import { buttonVariants } from "@/components/ui/button";
 import { NavigationProgress } from "@/components/ui/navigation-progress";
 import { OneTimeLinksProvider } from "@/components/ui/one-time-links";
 import { can } from "@/lib/auth/access";
@@ -23,6 +24,7 @@ import { welcomeVariantOf } from "@/lib/home/welcome";
 import { fr } from "@/lib/i18n/fr";
 import { countPendingMemberships } from "@/lib/members/queries";
 import { loadNotifications } from "@/lib/notifications/queries";
+import { cn } from "@/lib/utils";
 
 type Notifications = Awaited<ReturnType<typeof loadNotifications>>;
 
@@ -136,6 +138,16 @@ export default async function AppLayout({
           <CollapsedNavProvider>
             <OneTimeLinksProvider>
               <div className="flex flex-1 bg-[var(--surface-app)] md:p-[var(--shell-inset)]">
+                {/* First Tab: past the navigation, to the page. */}
+                <a
+                  href="#contenu"
+                  className={cn(
+                    buttonVariants({ variant: "outline" }),
+                    "sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:top-4 focus-visible:left-4 focus-visible:z-50 focus-visible:bg-background",
+                  )}
+                >
+                  {fr.shell.skipToContent}
+                </a>
                 <NavigationProgress />
                 <AccessWatcher
                   current={access.state}
@@ -169,7 +181,11 @@ export default async function AppLayout({
                       {bell("ghost")}
                     </div>
                   </header>
-                  <main className="flex min-w-0 flex-1 flex-col">
+                  <main
+                    id="contenu"
+                    tabIndex={-1}
+                    className="flex min-w-0 flex-1 flex-col outline-none"
+                  >
                     {children}
                   </main>
                 </div>

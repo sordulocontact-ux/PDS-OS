@@ -1,0 +1,17 @@
+{
+  "chemins_optimaux": {},
+  "succes_reel": {
+    "elise": { "T1": true, "T2": true, "T3": true, "T4": true },
+    "malik": { "T1": true, "T2": false, "T3": false, "T4": false },
+    "lina": { "T1": false, "T2": false, "T3": false },
+    "claire": { "T1": true, "T2": true, "T3": true, "T4": true }
+  },
+  "notes": {
+    "elise.T2": "finance_incomes « Synchro pub Renault » : FA-2026-040, émise et envoyée le 15/11 (vérifié en base).",
+    "elise.T3": "finance_spend_matches 1 080 € sur « Ingé son » (vérifié en base).",
+    "malik.T2": "aucune émission planifiée (finance_shows vide) : un centre de coût « PDS MIC 18 décembre » créé à la place.",
+    "malik.T4": "aucune dépense créée.",
+    "lina.T1": "tâche mal conçue : une cheffe de projet n'a pas create_projects (seule la DG crée un projet). Échec attendu, pas un défaut ; l'écran ne l'explique pas.",
+    "claire.T3": "projet collectif « PDS MIC #9 (test) » créé avec 2 titres liés à des masters + 2 titres prévus sans nom, 2 participations (vérifié en base)."
+  }
+}

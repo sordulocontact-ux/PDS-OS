@@ -13,7 +13,7 @@ import {
   ManualTransactionForm,
   MatchForm,
 } from "@/components/finance/reconcile-forms";
-import { Button } from "@/components/ui/button";
+import { TransactionProposal } from "@/components/finance/transaction-proposal";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   DataTable,
@@ -33,7 +33,6 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "@/components/ui/toast";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import {
-  suggestionsFor,
   txLeft,
   txState,
   type BankTransaction,
@@ -183,10 +182,6 @@ export function TransactionsTable({
         <DataTableBody>
           {transactions.map((tx) => {
             const state = txState(tx);
-            const best =
-              state === "open" || state === "partial"
-                ? suggestionsFor(tx, candidates)[0]
-                : undefined;
             return (
               <DataTableRow key={tx.id}>
                 <DataTableCell fill>
@@ -216,49 +211,26 @@ export function TransactionsTable({
                       .filter(Boolean)
                       .join(" · ")}
                   />
+                  {/* Narrow screen: the proposal under the transaction, whole. */}
+                  {state !== "ignored" && (
+                    <div className="mt-2 md:hidden">
+                      <TransactionProposal
+                        tx={tx}
+                        candidates={candidates}
+                        canManage={canManage}
+                        full
+                        onAccept={(candidate) => accept(tx, candidate)}
+                      />
+                    </div>
+                  )}
                 </DataTableCell>
                 <DataTableCell fill hideBelow="md">
-                  {tx.matches.length > 0 ? (
-                    <span className="grid min-w-0 gap-0.5 text-body-md">
-                      {tx.matches.map((m) => (
-                        <span key={m.id} className="truncate">
-                          {t.matchedWith(m.label, amount(m.cents))}
-                        </span>
-                      ))}
-                    </span>
-                  ) : best ? (
-                    <span className="flex min-w-0 items-center gap-3">
-                      <span className="grid min-w-0 gap-0.5">
-                        <span className="truncate text-body-md">
-                          {t.suggestion(
-                            best.candidate.label,
-                            amount(best.candidate.leftCents),
-                          )}
-                        </span>
-                        <span className="truncate text-caption text-[color:var(--text-secondary)]">
-                          {[
-                            t.kinds[best.candidate.kind],
-                            ...best.reasons.map((r) => t.reasons[r]),
-                          ].join(" · ")}
-                        </span>
-                      </span>
-                      {canManage && (
-                        <Button
-                          type="button"
-                          size="xs"
-                          variant="outline"
-                          className="relative z-10 shrink-0"
-                          onClick={() => accept(tx, best.candidate)}
-                        >
-                          {t.accept}
-                        </Button>
-                      )}
-                    </span>
-                  ) : (
-                    <span className="text-[color:var(--text-secondary)]">
-                      {state === "ignored" ? "" : t.noSuggestion}
-                    </span>
-                  )}
+                  <TransactionProposal
+                    tx={tx}
+                    candidates={candidates}
+                    canManage={canManage}
+                    onAccept={(candidate) => accept(tx, candidate)}
+                  />
                 </DataTableCell>
                 <DataTableCell
                   align="end"

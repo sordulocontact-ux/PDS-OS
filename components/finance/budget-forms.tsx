@@ -11,6 +11,7 @@ import { SearchSelect } from "@/components/ui/search-select";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import {
   createCostCenter,
+  renameCostCenter,
   reviseCostCenter,
   saveTemplate,
   setPdsShare,
@@ -114,6 +115,53 @@ export function CostCenterForm({
         value={value}
         error={tried ? errors.amount : undefined}
         onChange={(e) => setValue(e.target.value)}
+      />
+      {submit.error && <FormMessage kind="error">{submit.error}</FormMessage>}
+      <DialogFormActions
+        pending={submit.pending}
+        submitLabel={t.save}
+        pendingLabel={t.saving}
+        onCancel={onDone}
+      />
+    </form>
+  );
+}
+
+/** « Renommer » a cost center. */
+export function RenameForm({
+  id,
+  name: current,
+  onDone,
+}: {
+  id: string;
+  name: string;
+  onDone: () => void;
+}) {
+  const t = fr.financeBudgets.renameForm;
+  const submit = useWriteSubmit(onDone, "");
+  const [name, setName] = useState(current);
+  const [tried, setTried] = useState(false);
+  const error = name.trim() ? undefined : t.errors.name;
+  return (
+    <form
+      noValidate
+      className="flex flex-col gap-5"
+      onSubmit={(event) => {
+        event.preventDefault();
+        setTried(true);
+        if (error) return;
+        submit.run(() => renameCostCenter({ id, name }));
+      }}
+    >
+      <Field
+        name="rename-center"
+        label={t.name}
+        required
+        maxLength={120}
+        autoComplete="off"
+        value={name}
+        error={tried ? error : undefined}
+        onChange={(e) => setName(e.target.value)}
       />
       {submit.error && <FormMessage kind="error">{submit.error}</FormMessage>}
       <DialogFormActions

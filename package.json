@@ -9,6 +9,8 @@
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
     "format": "prettier --write .",
+    "ds:tokens": "node scripts/design-tokens.mjs",
+    "ds:tokens:check": "node scripts/design-tokens.mjs --check",
     "format:check": "prettier --check .",
     "db:types": "supabase gen types typescript --local > lib/supabase/database.types.ts",
     "db:types:preprod": "supabase gen types typescript --project-id xluuruuzfohfixzaoxmu > lib/supabase/database.types.ts",

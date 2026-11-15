@@ -246,6 +246,7 @@ export const feedback = {
   },
   review: {
     priority: "Priorité",
+    priorityRequired: "Choisissez une priorité.",
     priorityHints: {
       high: "À traiter en premier.",
       normal: "À traiter dans le cours normal.",

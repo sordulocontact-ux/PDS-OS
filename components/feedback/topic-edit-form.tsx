@@ -2,11 +2,12 @@
 
 import { useState, useTransition } from "react";
 
-import { ChoiceCards } from "@/components/ui/choice-cards";
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
+import { ChipChoice } from "@/components/ui/chip-choice";
+import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { editFeedbackTopic, proposeTopicRewrite } from "@/lib/feedback/actions";
 import {
   FEEDBACK_KINDS,
@@ -139,34 +140,28 @@ export function TopicEditForm({
         onChange={(event) => setSummary(event.target.value)}
         error={errors.summary}
       />
-      <ChoiceCards
+      <ChipChoice
         name="kind"
         legend={t.kind}
         required
-        choices={FEEDBACK_KINDS.map((k) => ({
+        fill
+        options={FEEDBACK_KINDS.map((k) => ({
           value: k,
           label: fr.feedback.kinds[k],
-          hint: fr.feedback.kindHints[k],
         }))}
         value={kind}
-        onChange={setKind}
+        onChange={(next) => next && setKind(next)}
+        hint={fr.feedback.kindHints[kind]}
       />
 
       {formError && <FormMessage kind="error">{formError}</FormMessage>}
 
-      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <Button type="button" variant="ghost" size="lg" onClick={onCancel}>
-          {t.cancel}
-        </Button>
-        <Button
-          type="submit"
-          size="lg"
-          disabled={saving || rewriting}
-          aria-busy={saving || undefined}
-        >
-          {saving ? t.saving : t.save}
-        </Button>
-      </div>
+      <DialogFormActions
+        pending={saving || rewriting}
+        submitLabel={t.save}
+        pendingLabel={rewriting ? t.save : t.saving}
+        onCancel={onCancel}
+      />
     </form>
   );
 }

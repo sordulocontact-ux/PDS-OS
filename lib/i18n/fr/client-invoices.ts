@@ -27,6 +27,11 @@ export const clientInvoices = {
   },
 
   actions: {
+    // An expected income with no invoice yet: its form, at « Facture »
+    // (UX test of 15/11/2026).
+    addInvoice: "Saisir la facture",
+    addInvoiceDescription: (label: string) =>
+      `Le numéro, les dates et le PDF de la facture de « ${label} ».`,
     markSent: "Marquer envoyée",
     remind: "Noter une relance",
     credit: "Émettre un avoir",

@@ -78,6 +78,7 @@ export default async function FinanceEnvelopePage({
           <EnvelopeActions
             kind={kind}
             id={id}
+            name={envelope.name}
             currentCents={envelope.currentCents}
             shareBp={share}
             lines={lines

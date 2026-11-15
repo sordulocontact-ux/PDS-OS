@@ -1,6 +1,6 @@
 "use client";
 
-import { IconArrowUp, IconStop } from "@/components/icons";
+import type { FileUIPart } from "ai";
 import {
   useEffect,
   useRef,
@@ -9,6 +9,14 @@ import {
   type KeyboardEvent,
 } from "react";
 
+import {
+  AttachImageButton,
+  ComposerImages,
+} from "@/components/assistant/composer-images";
+import { useImageAttachments } from "@/components/assistant/use-image-attachments";
+import { FieldError } from "@/components/auth/form-message";
+import { IconArrowUp, IconStop } from "@/components/icons";
+import { useFileDrop } from "@/components/ui/use-file-drop";
 import { useVoiceInput } from "@/components/voice/use-voice-input";
 import {
   VoiceInputBar,
@@ -29,7 +37,9 @@ export const MAX_LENGTH = 2000;
  * The PO input (Figma "Desktop - 11"): a tinted box with the microphone and
  * send buttons. `onAsk` receives a trimmed question within MAX_LENGTH.
  * Dictated text joins what was typed; with `voiceFirst` (Espace Espace
- * window) it listens at once and sends what was dictated.
+ * window) it listens at once and sends what was dictated. Images join the
+ * question by the paperclip, a drop or ⌘V (docs/ASSISTANT.md § 2 quinquies):
+ * `onAsk` gets them with the text, which may then be empty.
  */
 export function AssistantComposer({
   onAsk,
@@ -40,7 +50,7 @@ export function AssistantComposer({
   autoFocus = false,
   placeholder = fr.assistant.placeholder,
 }: {
-  onAsk: (question: string) => void;
+  onAsk: (question: string, images: FileUIPart[]) => void;
   onStop: () => void;
   busy: boolean;
   compact?: boolean;
@@ -51,6 +61,8 @@ export function AssistantComposer({
   const t = fr.assistant;
   const [input, setInput] = useState("");
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const images = useImageAttachments();
+  const drop = useFileDrop({ multiple: true, onFiles: images.add });
   const voice = useVoiceInput((text) => {
     const joined = [inputRef.current?.value.trim(), text]
       .filter(Boolean)
@@ -78,9 +90,13 @@ export function AssistantComposer({
 
   function ask(question: string) {
     const text = question.trim();
-    if (!text || busy || text.length > MAX_LENGTH) return;
-    onAsk(text);
+    if (busy || text.length > MAX_LENGTH) return;
+    if (images.uploading) return images.setError(t.images.waiting);
+    if (images.failed) return images.setError(t.images.retryFailed);
+    if (!text && images.parts.length === 0) return;
+    onAsk(text, images.parts);
     setInput("");
+    images.clear();
   }
 
   const onSubmit = (event: FormEvent) => {
@@ -107,12 +123,17 @@ export function AssistantComposer({
       <VoiceInputStatus phase={voice.phase} error={voice.error} />
       <form
         onSubmit={onSubmit}
+        {...drop.handlers}
+        aria-describedby={images.error ? "assistant-images-error" : undefined}
         className={cn(
           "flex flex-col rounded-2xl border border-transparent bg-[var(--surface-tint)] transition-[border-color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] has-[textarea:focus-visible]:border-ring",
+          // An image held over the box: it takes it.
+          drop.dragging && "border-ring",
           // Compact: at the foot of a conversation, where the answers need the room.
           compact ? "min-h-28 gap-3 p-4" : "min-h-51 gap-4 p-6",
         )}
       >
+        <ComposerImages images={images.images} onRemove={images.remove} />
         <label htmlFor="assistant-input" className="sr-only">
           {t.label}
         </label>
@@ -132,7 +153,9 @@ export function AssistantComposer({
           autoFocus={autoFocus}
           aria-busy={voice.phase === "transcribing"}
         />
-        <div className="flex justify-end gap-2">
+        <div className="flex items-center gap-2">
+          {!listening && <AttachImageButton onFiles={images.add} />}
+          <span className="grow" />
           {listening ? (
             <VoiceInputBar
               phase={voice.phase}
@@ -173,6 +196,9 @@ export function AssistantComposer({
           )}
         </div>
       </form>
+      <FieldError id="assistant-images-error">
+        {images.error ?? undefined}
+      </FieldError>
     </>
   );
 }

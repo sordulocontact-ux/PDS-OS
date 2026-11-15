@@ -56,7 +56,7 @@ const fr = { clientInvoices, dialogs, treasury };
 const amount = (cents: number) => formatAmount(cents, { ht: false });
 const short = (day: string) => formatShortDay(day, { bare: true });
 
-/** « Entrée prévue »: a new income, in the common modal. */
+/** « Nouvelle recette »: a new income, in the common modal. */
 export function IncomeAddButton({
   targets,
   organizationId,
@@ -142,6 +142,16 @@ export function IncomesTable({
               label: t.incomes.receive,
               icon: IconCircleCheck,
               onSelect: on("receive"),
+            },
+          ]
+        : []),
+      ...(awaiting && !income.invoiceNumber
+        ? [
+            {
+              key: "invoice",
+              label: a.addInvoice,
+              icon: IconFile,
+              onSelect: on("invoice"),
             },
           ]
         : []),

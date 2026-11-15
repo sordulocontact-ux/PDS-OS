@@ -1,0 +1,174 @@
+{
+  "persona_id": "malik",
+  "fenetre": "1280x800",
+  "mode_perception": "visuel",
+  "presentation": "Malik, 52 ans, business manager chez PDS. Le directeur lui demande des comptes sur un budget et de prévoir la prochaine émission. Clavier seul (tendinite). Note : la fenêtre n'a pas pris 1280 px, la page s'est affichée en format étroit d'environ 750 px.",
+  "premiere_impression": null,
+  "taches": [
+    {
+      "id": "T1",
+      "issue_declaree": "succes_difficile",
+      "pense_avoir_reussi": true,
+      "seq": 4,
+      "nb_actions": 40,
+      "moment_le_plus_penible": "Ne pas voir où était le contour de sélection au début, et devoir appuyer une quinzaine de fois sur Tab pour atteindre le tableau des budgets.",
+      "incidents": [
+        {
+          "etape": "Premiers Tab sur l'accueil",
+          "ecran": "Accueil",
+          "voulait": "atteindre le menu",
+          "a_fait": "Tab 3 fois sans voir aucun contour",
+          "attendait": "voir où je suis",
+          "resultat": "Au 4e appui seulement le menu s'entoure",
+          "emotion": "doute",
+          "verbatim": "J'ai cru que ça ne marchait pas."
+        },
+        {
+          "etape": "Onglets de la Finance",
+          "ecran": "Vue d'ensemble",
+          "voulait": "aller sur Budgets avec les flèches",
+          "a_fait": "Flèche droite",
+          "attendait": "passer à l'onglet suivant",
+          "resultat": "La ligne d'onglets a seulement glissé, il a fallu Tab",
+          "emotion": "surprise",
+          "verbatim": "Les flèches ne font pas ce que je croyais."
+        },
+        {
+          "etape": "Lire le tableau",
+          "ecran": "Budgets",
+          "voulait": "voir quel budget est dépassé",
+          "a_fait": "Descendu avec Espace, comparé Budget et Engagé à la main",
+          "attendait": "une mention dépassé ou une colonne reste",
+          "resultat": "Trouvé Ciel ouvert 15 000 contre 45 778, puis -30 778 en rouge sur sa page",
+          "emotion": "hésitation",
+          "verbatim": "Ça a l'air trop, mais je vérifie."
+        }
+      ],
+      "verbatims": [
+        "Je cherche le mot budget.",
+        "Dépassé de 30 778 €, surtout la prestation Mix de Karim Haddou."
+      ]
+    },
+    {
+      "id": "T2",
+      "issue_declaree": "succes_difficile",
+      "pense_avoir_reussi": true,
+      "seq": 4,
+      "nb_actions": 45,
+      "moment_le_plus_penible": "Ne pas trouver où créer l'émission, puis ne pas pouvoir indiquer la date du 18 décembre.",
+      "incidents": [
+        {
+          "etape": "Chercher où créer une émission",
+          "ecran": "Projets",
+          "voulait": "créer l'émission",
+          "a_fait": "Ouvert Projets",
+          "attendait": "un bouton créer",
+          "resultat": "Aucun projet, aucun bouton",
+          "emotion": "inquiétude",
+          "verbatim": "J'ai dû mal faire quelque chose."
+        },
+        {
+          "etape": "Retour arrière",
+          "ecran": "Page d'un centre de coût",
+          "voulait": "revenir à la liste",
+          "a_fait": "Cmd+[",
+          "attendait": "retour à la page d'avant",
+          "resultat": "Rien ne s'est passé, utilisé le lien ← Budgets",
+          "emotion": "agacement",
+          "verbatim": "Ça ne revient pas en arrière."
+        },
+        {
+          "etape": "Créer le centre de coût",
+          "ecran": "Nouveau centre de coût",
+          "voulait": "saisir la date du 18 décembre",
+          "a_fait": "Date mise dans le nom, enveloppe 8000",
+          "attendait": "un champ date",
+          "resultat": "Centre créé, mais sans vraie date",
+          "emotion": "doute",
+          "verbatim": "La date, je l'ai mise dans le nom, mais l'application ne la connaît pas."
+        }
+      ],
+      "verbatims": [
+        "Une émission, un live : ah, c'est ça.",
+        "Je mets 8000 comme la dernière."
+      ]
+    },
+    {
+      "id": "T3",
+      "issue_declaree": "abandon",
+      "pense_avoir_reussi": false,
+      "seq": 1,
+      "nb_actions": 30,
+      "moment_le_plus_penible": "Ne trouver aucun endroit pour changer la date ou le nom de l'émission.",
+      "incidents": [
+        {
+          "etape": "Chercher à modifier",
+          "ecran": "Page du centre de coût",
+          "voulait": "décaler d'un mois",
+          "a_fait": "Essayé Réviser l'enveloppe, puis Importer des lignes",
+          "attendait": "un bouton modifier ou un champ date",
+          "resultat": "Seulement le montant et un tableau à coller",
+          "emotion": "découragement",
+          "verbatim": "Je n'ai pas osé en refaire un, de peur d'un doublon."
+        },
+        {
+          "etape": "Descendre dans la page",
+          "ecran": "Page du centre de coût",
+          "voulait": "lire la suite de la page",
+          "a_fait": "Espace deux fois",
+          "attendait": "défilement",
+          "resultat": "Une fenêtre PO avec micro Écoute en cours s'est ouverte",
+          "emotion": "peur",
+          "verbatim": "Qu'est-ce que j'ai déclenché ? Ça écoute ?"
+        }
+      ],
+      "verbatims": [
+        "Je ne vois pas où changer la date.",
+        "J'abandonne, je n'ai pas envie d'abîmer quelque chose."
+      ]
+    },
+    {
+      "id": "T4",
+      "issue_declaree": "abandon",
+      "pense_avoir_reussi": false,
+      "seq": 2,
+      "nb_actions": 35,
+      "moment_le_plus_penible": "Être obligé de choisir un projet ou un artiste alors que le loyer n'en a pas.",
+      "incidents": [
+        {
+          "etape": "Choisir pour qui",
+          "ecran": "Nouvelle dépense",
+          "voulait": "dire que ça ne concerne personne",
+          "a_fait": "Ouvert la liste, cherché structure puis studio",
+          "attendait": "un choix aucun ou frais généraux",
+          "resultat": "Aucun projet ni artiste ne correspond, champ rouge obligatoire",
+          "emotion": "blocage",
+          "verbatim": "Je ne vais pas mettre le loyer sur une émission, ce serait faux."
+        },
+        {
+          "etape": "Fermer la fenêtre",
+          "ecran": "Nouvelle dépense",
+          "voulait": "annuler",
+          "a_fait": "Échap deux fois",
+          "attendait": "fermer",
+          "resultat": "Le premier Échap n'a fermé que la liste, le second la fenêtre sans enregistrer",
+          "emotion": "méfiance",
+          "verbatim": "J'espère que rien n'est enregistré."
+        }
+      ],
+      "verbatims": [
+        "Le montant, le libellé, ça va. Mais pour qui ? Pour personne.",
+        "J'arrête, je ne veux pas mettre une fausse information."
+      ]
+    }
+  ],
+  "sus": [3, 3, 2, 4, 3, 3, 2, 4, 2, 4],
+  "entretien": {
+    "raconter": "J'ai regardé les budgets et trouvé que Ciel ouvert est dépassé de 30 778 €, surtout à cause d'une prestation de mixage. J'ai créé une émission avec un nom, mais je n'ai pas pu la décaler ni enregistrer le loyer.",
+    "agace": "Ne pas voir où est le contour au clavier au début, la fenêtre PO avec micro qui s'ouvre avec Espace, et l'obligation de choisir un projet ou un artiste.",
+    "pas_sur_que_ca_marche": "Après Centre de coût créé, la date du 18 décembre n'apparaît nulle part, je ne sais pas si l'application l'a prise en compte.",
+    "pratique": "La page d'un budget avec le reste en rouge et le détail par poste, et la proposition Studio dans la dépense.",
+    "utiliserait": "Pour regarder les budgets, peut-être. Pour enregistrer mes dépenses, pas tant que je ne peux pas dire ni projet ni artiste.",
+    "un_mot": "bloqué"
+  }
+}

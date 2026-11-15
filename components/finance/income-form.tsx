@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
@@ -59,7 +59,7 @@ const positive = (value: string) => {
 };
 
 /**
- * An income (« Entrée prévue ») or its change: what, how much (TTC, its VAT
+ * An income (« Nouvelle recette ») or its change: what, how much (TTC, its VAT
  * giving the HT), from whom, for which project, artist or deal, on which
  * day, who follows it; then its invoice, when there is one: number, days,
  * sent, PDF. What the income already says is filled in.
@@ -70,9 +70,12 @@ export function IncomeForm({
   organizationId,
   ownerId,
   prefill,
+  atInvoice = false,
   onDone,
 }: {
   income: Income | null;
+  // « Saisir la facture »: opened at its invoice number.
+  atInvoice?: boolean;
   // A new income already filled: the rebilling of a spend (lot 3).
   prefill?: IncomePrefill;
   targets: FinanceTarget[];
@@ -84,6 +87,14 @@ export function IncomeForm({
   const t = fr.treasury.incomeForm;
   const f = fr.clientInvoices.fields;
   const root = useRef<HTMLFormElement>(null);
+  useEffect(() => {
+    if (!atInvoice) return;
+    const field = root.current?.querySelector<HTMLElement>(
+      'input[name="income-invoice-number"]',
+    );
+    field?.scrollIntoView({ block: "center" });
+    field?.focus();
+  }, [atInvoice]);
   const submit = useWriteSubmit(onDone, "");
   const loadPayers = usePickerLoad(() => listNetworkForRole(PAYER_ROLES));
   const [label, setLabel] = useState(income?.label ?? prefill?.label ?? "");

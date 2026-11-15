@@ -1,0 +1,116 @@
+{
+  "persona_id": "lina",
+  "fenetre": "1440x900",
+  "mode_perception": "visuel",
+  "presentation": "Lina Haddad, cheffe de projet chez PDS, ouvre l'app pour monter le prochain épisode de PDS MIC, une compil avec plusieurs artistes invités, entre deux calls. Note : la fenêtre est restée à environ 590 px de large malgré la demande 1440x900.",
+  "premiere_impression": null,
+  "taches": [
+    {
+      "id": "T1",
+      "issue_declaree": "abandon",
+      "pense_avoir_reussi": false,
+      "seq": 1,
+      "nb_actions": 12,
+      "moment_le_plus_penible": "Aucun bouton pour créer un projet sur la page Projets, seul « + Dépense » est visible en haut.",
+      "incidents": [
+        {
+          "etape": "Changer de personne dans la barre du bas",
+          "ecran": "Accueil",
+          "voulait": "Passer en Lina Haddad",
+          "a_fait": "Cliqué sur le nom puis sur Lina Haddad",
+          "attendait": "Changement immédiat",
+          "resultat": "Quelques secondes de « Connexion… » avant le changement",
+          "emotion": "neutre",
+          "verbatim": "Ça charge, ok."
+        },
+        {
+          "etape": "Ouvrir la liste des projets",
+          "ecran": "Projets",
+          "voulait": "Voir la liste et un bouton pour créer",
+          "a_fait": "Menu puis Projets",
+          "attendait": "Liste avec bouton Nouveau projet",
+          "resultat": "Squelettes gris plusieurs secondes, puis liste sans bouton de création",
+          "emotion": "agacement",
+          "verbatim": "Où est le bouton pour créer un projet ? Il n'y a que Dépense, c'est n'importe quoi."
+        },
+        {
+          "etape": "Chercher la création dans le menu",
+          "ecran": "Menu latéral",
+          "voulait": "Un lien Nouveau projet",
+          "a_fait": "Rouvert le menu et scrollé jusqu'en bas",
+          "attendait": "Une entrée de création",
+          "resultat": "Rien, seulement des rubriques de consultation",
+          "emotion": "agacement",
+          "verbatim": "Bon, je laisse tomber, j'ai pas le temps."
+        }
+      ],
+      "verbatims": [
+        "Où est le bouton pour créer un projet ?",
+        "Il n'y a que Dépense, c'est n'importe quoi."
+      ]
+    },
+    {
+      "id": "T2",
+      "issue_declaree": "abandon",
+      "pense_avoir_reussi": false,
+      "seq": 1,
+      "nb_actions": 0,
+      "moment_le_plus_penible": "Sans projet créé, impossible d'ajouter des titres ; je n'ai pas voulu écrire dans un projet existant.",
+      "incidents": [
+        {
+          "etape": "Ajouter des titres",
+          "ecran": "aucun",
+          "voulait": "Ajouter deux titres avec leur artiste",
+          "a_fait": "Rien, pas de projet de test",
+          "attendait": "Un projet à ouvrir",
+          "resultat": "Tâche non tentée",
+          "emotion": "résignation",
+          "verbatim": "Sans projet, je ne peux pas ajouter de titres."
+        }
+      ],
+      "verbatims": ["Sans projet, je ne peux pas ajouter de titres."]
+    },
+    {
+      "id": "T3",
+      "issue_declaree": "abandon",
+      "pense_avoir_reussi": false,
+      "seq": 2,
+      "nb_actions": 8,
+      "moment_le_plus_penible": "Aucun onglet Titres ou Master dans le projet PDS Mic, et le Catalogue mène à la liste des artistes.",
+      "incidents": [
+        {
+          "etape": "Ouvrir PDS Mic et chercher le mastering",
+          "ecran": "Projet PDS Mic",
+          "voulait": "Un tableau titre par titre avec l'état du master",
+          "a_fait": "Regardé les onglets et la vue d'ensemble",
+          "attendait": "Un onglet Titres ou Master",
+          "resultat": "Seulement le cadrage, Juridique, Marketing, Travail, Calls, Sessions studio, Validations, Activité, Budget",
+          "emotion": "agacement",
+          "verbatim": "Je cherche juste un tableau titre par titre avec le statut du master."
+        },
+        {
+          "etape": "Essayer le Catalogue",
+          "ecran": "Artistes",
+          "voulait": "La liste des titres et leur master",
+          "a_fait": "Menu puis Catalogue",
+          "attendait": "Une liste de titres",
+          "resultat": "Arrivée sur la liste des artistes, rien sur le mastering",
+          "emotion": "frustration",
+          "verbatim": "Catalogue, et ça m'envoie sur les artistes ? Non."
+        }
+      ],
+      "verbatims": [
+        "Je cherche juste un tableau titre par titre avec le statut du master. Je ne le trouve nulle part."
+      ]
+    }
+  ],
+  "sus": [2, 4, 2, 2, 2, 4, 3, 3, 2, 3],
+  "entretien": {
+    "raconter": "J'ai voulu créer le projet de la compil, je n'ai trouvé aucun bouton pour ça. J'ai regardé PDS Mic et le Catalogue pour le mastering, sans rien trouver. Je n'ai rien réussi.",
+    "agace": "Ne pas trouver où créer un projet, et les longs écrans gris sur la liste des projets.",
+    "pas_sur_que_ca_marche": "Le changement de personne en bas : quelques secondes de « Connexion… » sans savoir si ça prenait.",
+    "pratique": "Le menu est clair dans ses rubriques, et la liste des projets est lisible avec recherche et filtres.",
+    "utiliserait": "Pas pour l'instant : si je ne peux même pas créer ma compil, je reste sur mon outil actuel.",
+    "un_mot": "Bloquée"
+  }
+}

@@ -26577,6 +26577,7 @@ export type Database = {
           name: string
         }[]
       }
+      finance_urgent_count: { Args: never; Returns: number }
       fold_words: { Args: { p_text: string }; Returns: string }
       formality_missing_base: {
         Args: { p_formality_id: string }

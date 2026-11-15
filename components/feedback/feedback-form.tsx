@@ -2,12 +2,12 @@
 
 import { useState, useTransition } from "react";
 
-import { ChoiceCards } from "@/components/ui/choice-cards";
-import { FieldError, FormMessage } from "@/components/auth/form-message";
+import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { ScreenshotField } from "@/components/feedback/screenshot-field";
 import { useScreenshotAttachments } from "@/components/feedback/use-screenshot-attachments";
-import { Button } from "@/components/ui/button";
+import { ChipChoice } from "@/components/ui/chip-choice";
+import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { VoiceFieldControl } from "@/components/voice/voice-field-control";
 import type { FieldErrors } from "@/lib/auth/form-state";
 import { sendFeedback } from "@/lib/feedback/actions";
@@ -20,6 +20,7 @@ import {
   isAppPath,
   type EditedFeedback,
   type FeedbackKind,
+  type FeedbackPriority,
 } from "@/lib/feedback/types";
 import { feedback } from "@/lib/i18n/fr/feedback";
 
@@ -71,20 +72,20 @@ export function FeedbackForm({
   const page = !editing && pagePath && isAppPath(pagePath) ? pagePath : null;
   const toNotion = direct && !editing;
   const initial = editing ?? defaults;
+  const [kind, setKind] = useState<FeedbackKind | null>(initial?.kind ?? null);
+  const [priority, setPriority] = useState<FeedbackPriority | null>("normal");
 
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    const kind = String(data.get("kind") ?? "");
     const message = String(data.get("message") ?? "");
-    const priority = toNotion ? String(data.get("priority") ?? "") : undefined;
     const local: FieldErrors = {
       kind: kind ? undefined : t.errors.kind,
       message: message.trim() ? undefined : t.errors.messageRequired,
     };
     setErrors(local);
     setFormError(null);
-    if (local.kind || local.message) return;
+    if (!kind || local.message) return;
 
     startTransition(async () => {
       const upload = await screenshots.upload();
@@ -101,7 +102,7 @@ export function FeedbackForm({
             message,
             pagePath: page,
             screenshotPaths: upload.paths,
-            priority,
+            priority: toNotion ? (priority ?? "normal") : undefined,
           });
       if (!result.ok) {
         setErrors(result.fieldErrors ?? {});
@@ -112,17 +113,11 @@ export function FeedbackForm({
     });
   };
 
-  const submitLabel = editing
-    ? pending
-      ? t.mineEdit.submitting
-      : t.mineEdit.submit
+  const [submitLabel, pendingLabel] = editing
+    ? [t.mineEdit.submit, t.mineEdit.submitting]
     : toNotion
-      ? pending
-        ? t.directSubmitting
-        : t.directSubmit
-      : pending
-        ? t.submitting
-        : t.submit;
+      ? [t.directSubmit, t.directSubmitting]
+      : [t.submit, t.submitting];
 
   return (
     <form
@@ -131,27 +126,24 @@ export function FeedbackForm({
       noValidate
       className="flex flex-col gap-5"
     >
-      <div className="grid gap-1.5">
-        <ChoiceCards
-          name="kind"
-          legend={t.kind}
-          required
-          columns={3}
-          defaultValue={initial?.kind ?? undefined}
-          choices={FEEDBACK_KINDS.map((kind) => ({
-            value: kind,
-            label: t.kinds[kind],
-          }))}
-        />
-        <FieldError id="kind-error">{errors.kind}</FieldError>
-      </div>
+      <ChipChoice
+        name="kind"
+        legend={t.kind}
+        required
+        fill
+        options={FEEDBACK_KINDS.map((k) => ({ value: k, label: t.kinds[k] }))}
+        value={kind}
+        onChange={(next) => next && setKind(next)}
+        hint={kind ? t.kindHints[kind] : undefined}
+        error={errors.kind}
+      />
 
       <TextareaField
         name="message"
         label={t.message}
         hint={t.messageHint}
         required
-        rows={5}
+        rows={4}
         maxLength={FEEDBACK_MESSAGE_MAX}
         defaultValue={initial?.message}
         error={errors.message}
@@ -169,15 +161,17 @@ export function FeedbackForm({
       />
 
       {toNotion && (
-        <ChoiceCards
+        <ChipChoice
           name="priority"
           legend={t.review.priority}
-          columns={3}
-          defaultValue="normal"
-          choices={FEEDBACK_PRIORITIES.map((priority) => ({
-            value: priority,
-            label: t.priorities[priority],
+          fill
+          options={FEEDBACK_PRIORITIES.map((p) => ({
+            value: p,
+            label: t.priorities[p],
           }))}
+          value={priority}
+          onChange={(next) => next && setPriority(next)}
+          hint={priority ? t.review.priorityHints[priority] : undefined}
         />
       )}
 
@@ -190,19 +184,12 @@ export function FeedbackForm({
 
       {formError && <FormMessage kind="error">{formError}</FormMessage>}
 
-      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <Button type="button" variant="ghost" size="lg" onClick={onCancel}>
-          {t.cancel}
-        </Button>
-        <Button
-          type="submit"
-          size="lg"
-          disabled={pending}
-          aria-busy={pending || undefined}
-        >
-          {submitLabel}
-        </Button>
-      </div>
+      <DialogFormActions
+        pending={pending}
+        submitLabel={submitLabel}
+        pendingLabel={pendingLabel}
+        onCancel={onCancel}
+      />
     </form>
   );
 }

@@ -1,0 +1,142 @@
+{
+  "persona_id": "elise",
+  "fenetre": "1440x900",
+  "mode_perception": "visuel",
+  "presentation": "Élise, chargée business chez PDS depuis un an, a du retard sur les factures et veut tout remettre à jour avant le point de lundi. (Fenêtre réellement observée environ 808x821 malgré le redimensionnement.)",
+  "premiere_impression": "Page Finance avec solde 95 900 € et un graphique de trésorerie : un tableau de bord de l'argent. Le bouton « Entrée prévue » n'est pas clair, et le chargement est long.",
+  "taches": [
+    {
+      "id": "T1",
+      "issue_declaree": "succes",
+      "pense_avoir_reussi": true,
+      "seq": 6,
+      "nb_actions": 3,
+      "moment_le_plus_penible": "Chargement d'environ 10 s et le terme « Entrée prévue » peu clair.",
+      "incidents": [
+        {
+          "etape": "Ouverture de Finance",
+          "ecran": "/app/finance Vue d'ensemble",
+          "voulait": "Voir l'argent du label",
+          "a_fait": "Clic sur Finance dans le menu",
+          "attendait": "Un écran rapide",
+          "resultat": "Affichage complet après environ 10 s",
+          "emotion": "impatience légère",
+          "verbatim": "Ça met du temps à s'afficher."
+        }
+      ],
+      "verbatims": [
+        "C'est un tableau de bord de la trésorerie, le graphique saute aux yeux.",
+        "« Entrée prévue », je ne sais pas trop ce que c'est."
+      ]
+    },
+    {
+      "id": "T2",
+      "issue_declaree": "succes_difficile",
+      "pense_avoir_reussi": true,
+      "seq": 4,
+      "nb_actions": 15,
+      "moment_le_plus_penible": "Aucun bouton pour dire qu'une facture est envoyée : il a fallu deviner « Modifier », sur une ligne non cliquable dans un tableau coupé à droite.",
+      "incidents": [
+        {
+          "etape": "Chercher où déclarer la facture",
+          "ecran": "/app/finance/encaissements",
+          "voulait": "Bouton « nouvelle facture » ou « facture envoyée »",
+          "a_fait": "Cherché en haut, trouvé seulement « Entrée prévue »",
+          "attendait": "Un bouton facture",
+          "resultat": "Aucun bouton facture",
+          "emotion": "hésitation",
+          "verbatim": "Où est le bouton pour ajouter une facture ?"
+        },
+        {
+          "etape": "Clic sur la ligne Synchro pub Renault",
+          "ecran": "liste À encaisser",
+          "voulait": "Ouvrir la ligne",
+          "a_fait": "Clic sur le nom",
+          "attendait": "Une fiche",
+          "resultat": "Rien ne s'ouvre",
+          "emotion": "surprise",
+          "verbatim": "Je clique et il ne se passe rien."
+        },
+        {
+          "etape": "Trouver les actions",
+          "ecran": "tableau coupé à droite",
+          "voulait": "Voir l'état et les actions",
+          "a_fait": "Défilement latéral du tableau",
+          "attendait": "Tout visible",
+          "resultat": "Apparition de l'état et du « ⋯ »",
+          "emotion": "agacement",
+          "verbatim": "Le tableau est coupé, je dois le faire glisser."
+        },
+        {
+          "etape": "Menu ⋯ puis Modifier",
+          "ecran": "menu de ligne",
+          "voulait": "Marquer la facture envoyée",
+          "a_fait": "Choisi Modifier",
+          "attendait": "Une option facture",
+          "resultat": "Formulaire avec une zone Facture en bas",
+          "emotion": "doute",
+          "verbatim": "Rien ne dit facture envoyée, j'essaie Modifier."
+        },
+        {
+          "etape": "Saisie des dates",
+          "ecran": "formulaire Modifier l'entrée",
+          "voulait": "Taper la date",
+          "a_fait": "Saisie 15/11/2026, calendrier ouvert, clic sur le 15 pour fermer",
+          "attendait": "Pas de calendrier",
+          "resultat": "Le calendrier recouvre le champ suivant",
+          "emotion": "léger agacement",
+          "verbatim": "Le calendrier me gêne pour la suite."
+        }
+      ],
+      "verbatims": [
+        "Où est le bouton pour ajouter une facture ?",
+        "La ligne passe en Envoyée, donc ça a marché."
+      ]
+    },
+    {
+      "id": "T3",
+      "issue_declaree": "succes",
+      "pense_avoir_reussi": true,
+      "seq": 6,
+      "nb_actions": 2,
+      "moment_le_plus_penible": "La proposition est tronquée : je valide sans la relire entièrement.",
+      "incidents": [
+        {
+          "etape": "Valider la proposition",
+          "ecran": "/app/finance/rapprochement",
+          "voulait": "Rattacher le prélèvement",
+          "a_fait": "Clic sur Valider",
+          "attendait": "Voir à quoi il est rattaché",
+          "resultat": "« Transaction rapprochée », mais libellé tronqué avant validation",
+          "emotion": "petit doute",
+          "verbatim": "Je n'ai pas bien vu à quoi c'était rattaché."
+        }
+      ],
+      "verbatims": [
+        "Rapprochement, comme sur Qonto.",
+        "C'est rapide, la proposition est déjà prête."
+      ]
+    },
+    {
+      "id": "T4",
+      "issue_declaree": "succes",
+      "pense_avoir_reussi": true,
+      "seq": 6,
+      "nb_actions": 1,
+      "moment_le_plus_penible": "Chargement d'environ 8 s.",
+      "incidents": [],
+      "verbatims": [
+        "Dans 3 mois environ 167 000 €, point bas le 20 novembre à 43 400 €, au-dessus de la réserve."
+      ]
+    }
+  ],
+  "sus": [4, 2, 4, 2, 4, 2, 4, 2, 3, 2],
+  "entretien": {
+    "raconter": "J'ai ouvert Finance, déclaré la facture Renault, rapproché le prélèvement du studio, puis lu le solde à 3 mois.",
+    "agace": "Les chargements longs, le tableau coupé avec le ⋯ caché, l'absence de bouton facture envoyée.",
+    "pas_sur_que_ca_marche": "Le rapprochement : proposition tronquée ; et la facture : je ne savais pas si Modifier était le bon geste.",
+    "pratique": "La proposition prête avec Valider et le point bas dans Trésorerie.",
+    "utiliserait": "Oui probablement, si ça charge plus vite, car tout est au même endroit.",
+    "un_mot": "prometteur"
+  }
+}

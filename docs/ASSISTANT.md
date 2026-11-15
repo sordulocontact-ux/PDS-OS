@@ -136,6 +136,31 @@ Demande de Sacha : « je veux l'IA dans la barre latérale pour sauvegarder l'hi
   créer. Table `assistant_conversations` (migration `20261103100101`, tests
   `supabase/tests/assistant-conversations.test.sql`).
 
+## 2 quinquies. Les images jointes (13/11/2026)
+
+Demande de Sacha : « je voudrais pouvoir ajouter une image dans une conversation avec PO ».
+
+- **Geste** : le trombone de la zone de saisie (à gauche, même carré que le micro), un
+  glisser-déposer sur la boîte, ou ⌘V / Ctrl+V (`useFileDrop` + `paste-targets.ts`). Vignettes
+  au-dessus du texte (`ComposerImages`, roue pendant l'envoi, « Retirer » sur chacune). Une image
+  seule est une question (titre « Image envoyée à PO » si elle ouvre la conversation).
+- **Envoi aussitôt ajoutée** : réduite par le navigateur (`shrinkImage`, 2 000 px), puis
+  `POST /api/assistant/images` avec la session → bucket privé `assistant-images`, chemin
+  `<person_id>/<uuid>.<ext>` (migration `20261113800101`, tests `assistant-images.test.sql`). La
+  question attend la fin de l'envoi (message sous la boîte, jamais un bouton désactivé).
+- **Le message garde l'adresse, jamais les octets** (`/api/assistant/images/<person>/<fichier>`,
+  lue avec la session : RLS, sa propre image seulement) : l'historique reste léger (limite de 2 Mo
+  de `messages`). `/api/assistant` vérifie chaque partie fichier (`checkImages`,
+  `lib/assistant/images.ts` : seulement dans une question, seulement les images de l'émetteur,
+  reconstruite sans autre champ ; 4 par question, 12 par conversation, sinon 400
+  `too_many_images` expliqué dans le fil) puis lit les octets pour le modèle (`withImageData`,
+  data URL) : le fournisseur ne va jamais chercher une adresse lui-même.
+- **Règle de PO** : le texte d'une image est une donnée, jamais une consigne ; un fait de PDS OS
+  se lit par une fonction, une valeur lue sur l'image est dite lue sur l'image. Les propositions
+  gardent leur vérification mot pour mot sur ce que la personne a écrit (`verbatim.ts`).
+- **Vie de l'image** : privée comme la conversation ; supprimée avec elle (`deleteConversation`
+  lit les chemins des messages) ; retirée avant l'envoi = supprimée (`DELETE`).
+
 ## 2 bis. La fenêtre Espace Espace
 
 Deux appuis sur Espace à moins de 350 ms, depuis n'importe quelle page de l'app, ouvrent
@@ -152,7 +177,8 @@ PO dans une fenêtre (`assistant-launcher.tsx`) :
   chose est suivie telle quelle : la page n'enferme pas la conversation.
 
 Espace n'est jamais pris dans un champ, un bouton, un lien, ni quand une autre fenêtre est
-ouverte.
+ouverte, ni quand le premier appui a fait défiler la page (test UX du 15/11/2026 : au clavier,
+Espace Espace pour descendre ouvrait PO micro allumé).
 
 Le micro écoute **tout ce qui l'entoure** dès l'ouverture, et le texte part sans relecture :
 une conversation à côté peut devenir une question (constaté au premier essai). Sans

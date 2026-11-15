@@ -33,8 +33,8 @@ function spaceBelongsTo(target: EventTarget | null): boolean {
 }
 
 /**
- * Espace Espace, from any page: a window with a new PO conversation, the
- * dictation already listening; what is said is sent to PO when the dictation
+ * Espace Espace, from any page (not while the first Space scrolls it): a
+ * window with a new PO conversation, the dictation already listening; what is said is sent to PO when the dictation
  * ends. PO knows the page it was opened from (docs/ASSISTANT.md § 2 bis).
  */
 export function AssistantLauncher() {
@@ -65,8 +65,20 @@ export function AssistantLauncher() {
         lastSpace.current = event.timeStamp;
       }
     };
+    // The first Space scrolled the page: the second one scrolls on, it
+    // does not open PO (UX test of 15/11/2026, a keyboard reader paging down).
+    const onScroll = () => {
+      lastSpace.current = 0;
+    };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("scroll", onScroll, {
+      capture: true,
+      passive: true,
+    });
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("scroll", onScroll, { capture: true });
+    };
   }, [setLauncherOpen]);
 
   return (

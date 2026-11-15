@@ -145,7 +145,14 @@ export const budget = {
     targetPlaceholder: "Choisir un projet ou un artiste",
     targetSearch: "Rechercher un projet ou un artiste",
     targetNone: "Aucun projet ni artiste ne correspond.",
-    targetMissing: "Dites à quel projet ou à quel artiste va la dépense.",
+    // For the Finance, who also has cost centers and « Hors budget » (UX test of 15/11/2026).
+    finance: {
+      targetPlaceholder: "Projet, artiste, centre de coût ou hors budget",
+      targetSearch: "Rechercher un projet, un artiste, un centre de coût…",
+      targetNone:
+        "Rien ne correspond. Une dépense de structure (loyer, abonnement) va dans « Hors budget ».",
+    },
+    targetMissing: "Choisissez à quoi va la dépense.",
     // Its kind as a badge after the name (Sacha 11/11/2026), « récent » beside.
     targetKinds: {
       project: "Projet",
@@ -156,6 +163,9 @@ export const budget = {
     targetRecent: "récent",
     quickTitle: "Nouvelle dépense",
     offBudget: "Hors budget",
+    // Its line in « Pour », beside its « Hors budget » badge: found by
+    // « loyer », « structure », « aucun ».
+    offBudgetOption: "Loyer, abonnement, frais de structure (aucun projet)",
     subpost: "Sous-poste",
     offBudgetHint:
       "Sur aucune enveloppe : la Vue d'ensemble de Finance la signale.",

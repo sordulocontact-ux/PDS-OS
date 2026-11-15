@@ -437,6 +437,32 @@ export const assistant = {
   errors: {
     busy: "Réponse interrompue : PO est saturé, réessayez dans une minute.",
     failed: "Réponse interrompue : PO n'a pas pu la terminer.",
+    tooManyImages: (max: number) =>
+      `PO lit ${max} images au plus par conversation : commencez une nouvelle conversation pour lui en montrer d'autres.`,
+  },
+  // Images joined to a question (docs/ASSISTANT.md § 2 quinquies).
+  images: {
+    add: "Ajouter une image",
+    list: "Images jointes",
+    image: (n: number) => `Image ${n}`,
+    uploading: "Envoi de l'image…",
+    remove: (n: number) => `Retirer l'image ${n}`,
+    waiting: "Une image est encore en cours d'envoi.",
+    retryFailed: "Retirez l'image qui n'a pas pu être envoyée.",
+    imageTitle: "Image envoyée à PO",
+    open: (n: number) => `Voir l'image ${n}`,
+    viewerTitle: (n: number, total: number) => `Image ${n} sur ${total}`,
+    viewer: {
+      close: "Fermer",
+      previous: "Image précédente",
+      next: "Image suivante",
+    },
+    problem: {
+      type: "PO lit les images PNG, JPEG, WebP ou GIF.",
+      size: "Cette image dépasse 5 Mo.",
+      count: (max: number) => `${max} images au plus par question.`,
+      failed: "L'image n'a pas pu être envoyée.",
+    },
   },
   retry: "Réessayer",
   tooLong: "Question trop longue (2000 caractères maximum).",

@@ -229,7 +229,8 @@ export const treasury = {
     emptyBody:
       "Avances, prestations, remboursements : tout ce qui doit arriver sur le compte.",
     emptyView: "Aucune entrée ici.",
-    add: "Entrée prévue",
+    // « Entrée prévue » was misread (UX test of 15/11/2026).
+    add: "Nouvelle recette",
     rowActions: (label: string) => `Actions pour « ${label} »`,
     receive: "Enregistrer un encaissement",
     edit: "Modifier",
@@ -239,7 +240,7 @@ export const treasury = {
   },
 
   incomeForm: {
-    newTitle: "Nouvelle entrée prévue",
+    newTitle: "Nouvelle recette",
     editTitle: "Modifier l'entrée",
     description: "L'argent attendu sur le compte, puis sa facture.",
     label: "Libellé",
