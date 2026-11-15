@@ -166,7 +166,7 @@ export function TreasuryChart({
                 y2={y(reserveCents)}
                 vectorEffect="non-scaling-stroke"
                 strokeWidth={1.5}
-                strokeDasharray="1.5 3"
+                strokeDasharray="2 7"
                 strokeLinecap="round"
                 className="stroke-[var(--tone-warning-fg)]"
               />
@@ -195,7 +195,7 @@ export function TreasuryChart({
               strokeWidth={2}
               strokeDasharray="5 4"
               vectorEffect="non-scaling-stroke"
-              className="stroke-[var(--text-primary)]"
+              className="stroke-[var(--text-tertiary)]"
             />
             {shown && (
               <line

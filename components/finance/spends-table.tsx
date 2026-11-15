@@ -47,7 +47,6 @@ import { spendCashTone } from "@/lib/ui/state-tones";
 import { formatDay } from "@/lib/utils/day";
 import { formatAmount } from "@/lib/utils/money";
 import { cn } from "@/lib/utils";
-import { routes } from "@/lib/auth/redirects";
 
 const fr = { budget, dialogs, financeSpends, treasury };
 
@@ -289,16 +288,7 @@ export function SpendsTable({
             spend={spends[sheet]}
             envelope={envelopeOf(spends[sheet])}
             actions={canManage ? actionsOf(spends[sheet]) : []}
-            attachProof={
-              !canManage || spends[sheet].hasProof
-                ? undefined
-                : isFinanceTarget(spends[sheet].target)
-                  ? {
-                      onSelect: () =>
-                        setOpen({ kind: "edit", spend: spends[sheet] }),
-                    }
-                  : { href: routes.financeReceipts }
-            }
+            proofIn={canManage && organizationId ? organizationId : undefined}
           />
         </FinanceSheet>
       )}

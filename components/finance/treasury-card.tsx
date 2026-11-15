@@ -13,11 +13,15 @@ const fr = { treasury: treasuryText };
 const amount = (cents: number) => formatAmount(cents, { ht: false });
 const day = (value: string) => formatShortDay(value, { bare: true });
 
-// The swatches say how each line is drawn (TreasuryChart): the balance
-// solid, its forecast dashed, the reserve dotted amber.
+// The swatches say how each line is drawn (TreasuryChart): the real balance
+// solid ink, its forecast dashed grey (Sacha 15/11/2026: tell them apart),
+// the reserve in spaced amber dots.
 const LINES = [
   { key: "balanceReal", swatch: "border-solid border-foreground" },
-  { key: "balanceForecast", swatch: "border-dashed border-foreground" },
+  {
+    key: "balanceForecast",
+    swatch: "border-dashed border-[color:var(--text-tertiary)]",
+  },
   { key: "reserve", swatch: "border-dotted border-[var(--tone-warning-fg)]" },
 ] as const;
 
@@ -43,7 +47,9 @@ export function TreasuryCard({
   detailed?: boolean;
 }) {
   const t = fr.treasury;
-  const title = detailed ? t.page.balance.title : t.overview.balance.title;
+  // One title and one sentence on both pages (Sacha 15/11/2026: the
+  // overview and Trésorerie read alike).
+  const title = t.overview.balance.title;
   if (!treasury)
     return (
       <MetricCard
@@ -66,13 +72,11 @@ export function TreasuryCard({
 
   const ahead = treasury.at(horizon);
   const delta = ahead - treasury.todayCents;
-  const caption = detailed
-    ? t.page.balance.caption(day(treasury.statement.asOf))
-    : `${t.overview.balance.caption(day(treasury.statement.asOf))} · ${t.overview.balance.ahead(
-        horizon,
-        amount(ahead),
-        t.overview.balance.signed(amount(Math.abs(delta)), delta >= 0),
-      )}`;
+  const caption = `${t.overview.balance.caption(day(treasury.statement.asOf))} · ${t.overview.balance.ahead(
+    horizon,
+    amount(ahead),
+    t.overview.balance.signed(amount(Math.abs(delta)), delta >= 0),
+  )}`;
 
   return (
     <MetricCard

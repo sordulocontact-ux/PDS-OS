@@ -15,7 +15,7 @@ export function PostLabel({
     <span className="inline-flex min-w-0 items-center gap-2">
       <span
         aria-hidden
-        className={cn("size-2.5 shrink-0", postShade(family).fill)}
+        className={cn("size-2.5 shrink-0 rounded-xs", postShade(family).fill)}
       />
       <span className="truncate">{label}</span>
     </span>

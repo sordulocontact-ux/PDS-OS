@@ -65,7 +65,7 @@ export function FlowBars({ flows }: { flows: MonthFlow[] }) {
               >
                 <span
                   aria-hidden
-                  className="flex h-full items-end justify-center gap-1"
+                  className="flex h-full items-end justify-center gap-3"
                 >
                   <Bar cents={f.inCents} top={top} className="bg-foreground" />
                   <Bar cents={f.outCents} top={top} className={OUT} />
@@ -97,10 +97,10 @@ function Bar({
   className: string;
 }) {
   return (
-    <span className="flex h-full w-full max-w-6 flex-col items-center justify-end gap-1">
+    <span className="flex h-full w-full max-w-7 flex-col items-center justify-end gap-1">
       {/* Its amount above it when the bar is tall enough to carry it. */}
       {cents >= top * 0.12 && (
-        <span className="text-micro text-[color:var(--text-secondary)] tabular-nums">
+        <span className="text-micro whitespace-nowrap text-[color:var(--text-secondary)] tabular-nums">
           {formatAmountCompact(cents)}
         </span>
       )}

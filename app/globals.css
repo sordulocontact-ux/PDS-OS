@@ -14,6 +14,8 @@
    ========================================================================== */
 
 :root {
+  /* A button's radius: the pill, or a section's own style (Finance). */
+  --button-radius: 999px;
   /* --- Encre et gris ----------------------------------------------------- */
   --po-black: #000000;
   --po-ink-900: #000000;
@@ -1341,6 +1343,12 @@ button[data-busy]::before {
   font-size: var(--type-body-md);
   line-height: var(--type-body-md-lh);
 }
+/* Les boutons de Finance, moins arrondis, comme le proto (Sacha, 15/11/2026 :
+   « un nouveau style de bouton, beaucoup moins arrondi ») : 6 px, l'arrondi
+   des champs. */
+.finance-scope {
+  --button-radius: 6px;
+}
 /* Les chiffres de Finance dans la deuxième typo du proto, Geist Mono (Sacha,
    15/11/2026 : « la deuxième typo pour les chiffres, je l'aime vraiment
    bien ») : montants, dates, comptes et axes, tout ce qui s'aligne déjà en
@@ -1356,10 +1364,9 @@ button[data-busy]::before {
     [class*="text-figure"] *
   ) {
   font-family: var(--font-mono);
-  /* A monospace reads larger at one size: a step down, as the proto (13 px
-     beside 14 px text). */
-  font-size: 0.93em;
-  letter-spacing: -0.02em;
+  /* Each figure keeps the size its own class gives it (a size here would
+     override them all); only tightened, as the proto. */
+  letter-spacing: -0.03em;
 }
 /* Un état en Finance : un point de couleur et son texte, sans fond, comme le
    proto avant le design system (Sacha, 15/11/2026 : « plus clair » que les

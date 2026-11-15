@@ -9,8 +9,9 @@ import type { ReactNode } from "react"
 // Hover (taken from Raw Studio): the button grows to 1.05 and its label rolls
 // up while a copy comes in from below (ButtonRoll); a press scales to .97.
 // Both are cut when motion is reduced; no shadow.
-// rounded-full, not rounded-pill: Tailwind sorts radius utilities by name, so
-// only rounded-full lets the icon sizes' rounded-lg win. Each variant sets its
+// Its radius is a token (--button-radius): the pill of the app, 6 px in a
+// section that asks for the proto's squarer button (Finance, Sacha
+// 15/11/2026); cn merges it so the icon sizes' rounded-lg still win. Each variant sets its
 // own border colour (never the base): buttonVariants() is also used raw on
 // links, without cn(), and a base border-transparent sorted after
 // border-border erased every outline (recette, 19/10/2026).
@@ -25,7 +26,7 @@ const buttonGrow =
   "[transition:background-color_var(--duration-fast)_var(--ease-out),border-color_var(--duration-fast)_var(--ease-out),color_var(--duration-fast)_var(--ease-out),scale_var(--duration-grow)_var(--ease-out)] motion-safe:hover:scale-[1.05] motion-safe:active:scale-[.97]"
 
 const buttonVariants = cva(
-  `${buttonGrow} group/button inline-flex shrink-0 items-center justify-center rounded-full border bg-clip-padding text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] font-semibold whitespace-nowrap no-underline select-none disabled:pointer-events-none disabled:opacity-40 aria-invalid:border-[color:var(--border-strong)] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4`,
+  `${buttonGrow} group/button inline-flex shrink-0 items-center justify-center rounded-[var(--button-radius)] border bg-clip-padding text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] font-semibold whitespace-nowrap no-underline select-none disabled:pointer-events-none disabled:opacity-40 aria-invalid:border-[color:var(--border-strong)] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4`,
   {
     variants: {
       variant: {

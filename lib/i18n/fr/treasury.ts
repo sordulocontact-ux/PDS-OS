@@ -153,10 +153,6 @@ export const treasury = {
   // The envelope whose spends the split by poste shows.
   envelopeFilter: { label: "Enveloppe", all: "Toutes les enveloppes" },
   page: {
-    balance: {
-      title: "Solde aujourd'hui",
-      caption: (day: string) => `Dernier relevé le ${day}`,
-    },
     figures: {
       label: "Sur la période",
       in: "Entrées",

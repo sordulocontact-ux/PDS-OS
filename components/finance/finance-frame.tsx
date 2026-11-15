@@ -5,6 +5,7 @@ import { FinanceTopbar } from "@/components/finance/search/finance-topbar";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
 import { SectionTabs } from "@/components/shell/section-tabs";
+import { DialogSideProvider } from "@/components/ui/dialog";
 import { treasury } from "@/lib/i18n/fr/treasury";
 import {
   FINANCE_SECTIONS,
@@ -31,7 +32,8 @@ const fr = { treasury };
  * on its tools; its h1 stays for screen readers, its action on the right.
  * An envelope's page (`title`) keeps its name as a visible title. Lot 5:
  * every page opens on the top band of the proto (⌘K search across the
- * line, the alerts bell), the page's action under it on the right.
+ * line, the alerts bell), the page's action under it on the right. Every
+ * modal of the section opens as the panel on the right (DialogSideProvider).
  */
 export function FinanceFrame({
   section,
@@ -49,45 +51,47 @@ export function FinanceFrame({
 }) {
   const current = FINANCE_SECTIONS.find((s) => s.key === section);
   return (
-    <div className="finance-scope flex flex-1">
-      <FinanceSidebar />
-      <div className="min-w-0 flex-1">
-        <FinanceTopbar />
-        <PageContainer className="gap-6">
-          <div
-            className={cn(
-              "flex flex-col gap-4",
-              // Nothing but the phone's tabs: no room taken on a desktop.
-              !(header && (title || action)) && "md:hidden",
-            )}
-          >
-            {header &&
-              (title ? (
-                <PageHeader title={title} action={action} />
-              ) : (
-                <>
-                  <h1 className="sr-only">{current?.label}</h1>
-                  {action && (
-                    <div className="flex items-center justify-end gap-3">
-                      {action}
-                    </div>
-                  )}
-                </>
-              ))}
-            <div className="md:hidden">
-              <SectionTabs
-                label={fr.treasury.tabs.label}
-                tabs={FINANCE_SECTIONS.map((s) => ({
-                  href: s.href,
-                  label: s.label,
-                  ...("exact" in s ? { exact: s.exact } : {}),
-                }))}
-              />
+    <DialogSideProvider side="right" className="finance-scope">
+      <div className="finance-scope flex flex-1">
+        <FinanceSidebar />
+        <div className="min-w-0 flex-1">
+          <FinanceTopbar />
+          <PageContainer className="gap-6">
+            <div
+              className={cn(
+                "flex flex-col gap-4",
+                // Nothing but the phone's tabs: no room taken on a desktop.
+                !(header && (title || action)) && "md:hidden",
+              )}
+            >
+              {header &&
+                (title ? (
+                  <PageHeader title={title} action={action} />
+                ) : (
+                  <>
+                    <h1 className="sr-only">{current?.label}</h1>
+                    {action && (
+                      <div className="flex items-center justify-end gap-3">
+                        {action}
+                      </div>
+                    )}
+                  </>
+                ))}
+              <div className="md:hidden">
+                <SectionTabs
+                  label={fr.treasury.tabs.label}
+                  tabs={FINANCE_SECTIONS.map((s) => ({
+                    href: s.href,
+                    label: s.label,
+                    ...("exact" in s ? { exact: s.exact } : {}),
+                  }))}
+                />
+              </div>
             </div>
-          </div>
-          {children}
-        </PageContainer>
+            {children}
+          </PageContainer>
+        </div>
       </div>
-    </div>
+    </DialogSideProvider>
   );
 }

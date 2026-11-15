@@ -1,6 +1,6 @@
 import { RecordHistory } from "@/components/finance/record-history";
 import { SheetFacts, SheetHead } from "@/components/finance/finance-sheet";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import type { RowAction } from "@/components/ui/row-actions";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { spendDay, spendTtc, type FinanceSpend } from "@/lib/finance/spends";
@@ -10,9 +10,8 @@ import { treasury } from "@/lib/i18n/fr/treasury";
 import { spendCashTone } from "@/lib/ui/state-tones";
 import { formatDay } from "@/lib/utils/day";
 import { formatAmount } from "@/lib/utils/money";
-import { IconPaperclip } from "nucleo-sharp-essential";
 import { PostLabel } from "@/components/finance/post-label";
-import { ViewLink } from "@/components/ui/view-link";
+import { SpendProof } from "@/components/finance/spend-proof";
 
 const t = financeSheet.spend;
 const amount = (cents: number) => formatAmount(cents, { ht: false });
@@ -24,14 +23,14 @@ export function SpendSheet({
   spend,
   envelope,
   actions,
-  attachProof,
+  proofIn,
 }: {
   spend: FinanceSpend;
   envelope: string;
   actions: RowAction[];
-  // How to give it its proof when it has none: its form (a Finance spend),
-  // else Finance › Justificatifs, where the dropped file is matched to it.
-  attachProof?: { onSelect: () => void } | { href: string };
+  // The organization its proof is kept in, when one may give it one (who
+  // writes Finance): « Joindre le justificatif » right in the sheet.
+  proofIn?: string;
 }) {
   const post = spend.family
     ? spend.family === "other"
@@ -78,28 +77,9 @@ export function SpendSheet({
             value: spend.proof?.name ?? (
               <span className="flex flex-wrap items-center gap-2">
                 <StatusBadge tone="warning">{t.proofMissing}</StatusBadge>
-                {attachProof &&
-                  ("href" in attachProof ? (
-                    <ViewLink
-                      href={attachProof.href}
-                      className={buttonVariants({
-                        variant: "outline",
-                        size: "sm",
-                      })}
-                    >
-                      <IconPaperclip aria-hidden data-icon="inline-start" />
-                      {t.attachProof}
-                    </ViewLink>
-                  ) : (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={attachProof.onSelect}
-                    >
-                      <IconPaperclip aria-hidden data-icon="inline-start" />
-                      {t.attachProof}
-                    </Button>
-                  ))}
+                {proofIn && (
+                  <SpendProof spend={spend} organizationId={proofIn} />
+                )}
               </span>
             ),
           },

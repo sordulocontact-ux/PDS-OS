@@ -56,19 +56,23 @@ export default async function FinanceOverviewPage({
   ]);
 
   return (
-    <FinanceFrame
-      section="overview"
-      action={
-        <>
-          <SegmentedLinks
-            label={t.page.horizon}
-            options={TREASURY_HORIZONS.map((days) => ({
-              key: String(days),
-              href: `${routes.finance}?horizon=${days}`,
-              label: t.page.horizonOption(days),
-              current: days === horizon,
-            }))}
-          />
+    <FinanceFrame section="overview">
+      {(data.error || spending.error) && (
+        <FormMessage kind="error">{t.loadError}</FormMessage>
+      )}
+      {/* The tools on one row, as Trésorerie's: the horizon on the left,
+          the actions on the right. */}
+      <div className="flex flex-wrap items-center gap-3">
+        <SegmentedLinks
+          label={t.page.horizon}
+          options={TREASURY_HORIZONS.map((days) => ({
+            key: String(days),
+            href: `${routes.finance}?horizon=${days}`,
+            label: t.page.horizonOption(days),
+            current: days === horizon,
+          }))}
+        />
+        <div className="ml-auto flex flex-wrap items-center gap-2">
           <QuickExpenseButton outline />
           {canManage && access.organizationId && (
             <IncomeAddButton
@@ -77,12 +81,8 @@ export default async function FinanceOverviewPage({
               ownerId={access.personId}
             />
           )}
-        </>
-      }
-    >
-      {(data.error || spending.error) && (
-        <FormMessage kind="error">{t.loadError}</FormMessage>
-      )}
+        </div>
+      </div>
       <CockpitOverview
         treasury={treasury}
         view={cockpit({

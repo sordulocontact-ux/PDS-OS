@@ -101,6 +101,7 @@ export function FinanceSearch({ pulse }: { pulse: FinancePulse | null }) {
         <DialogContent
           closeLabel={t.close}
           showClose={false}
+          side="center"
           instant={byKeys}
           className="finance-scope gap-3 p-3 sm:top-[12vh] sm:max-w-[560px] sm:translate-y-0"
         >
