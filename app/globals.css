@@ -1283,3 +1283,64 @@ button[data-busy]::before {
     translate: none;
   }
 }
+
+/* --- Finance, nouveau style (Sacha, 15/11/2026 ; docs/FINANCE-V2.md) -------
+   Écart voulu, limité à la section Finance : FinanceFrame pose .finance-scope
+   et ce bloc redéfinit les variables qui pilotent déjà les composants, comme
+   :root.dark redéfinit les couleurs. Un cran plus petit et plus léger (texte
+   courant 15 px, regular ; medium pour ce qui ressort), arrondis légers
+   (cartes 8 px, boutons et champs 6 px). Les modales et menus, en portail hors
+   de la page, gardent le style de l'app. */
+.finance-scope {
+  --type-display-xl: 36px;
+  --type-display-xl-lh: 42px;
+  --type-display-lg: 28px;
+  --type-display-lg-lh: 34px;
+  --type-display-md: 24px;
+  --type-display-md-lh: 30px;
+  --type-display-module: 24px;
+  --type-display-module-lh: 30px;
+  --type-display-sm: 18px;
+  --type-display-sm-lh: 26px;
+  --type-figure-xl: 28px;
+  --type-figure-xl-lh: 32px;
+  --type-figure-lg: 20px;
+  --type-figure-lg-lh: 26px;
+  --type-figure-md: 15px;
+  --type-figure-md-lh: 20px;
+  --type-body-xl: 18px;
+  --type-body-xl-lh: 26px;
+  --type-body-lg: 16px;
+  --type-body-lg-lh: 24px;
+  --type-body-md: 15px;
+  --type-body-md-lh: 22px;
+  --type-body-sm: 14px;
+  --type-body-sm-lh: 20px;
+  --type-caption: 13px;
+  --type-caption-lh: 18px;
+  --type-micro: 12px;
+  --type-micro-lh: 16px;
+  --type-colhead: 13px;
+  --type-colhead-lh: 18px;
+  --type-body-tracking: -0.01em;
+  /* Regular par défaut ; medium et semi-bold descendent d'un cran. */
+  --font-weight-normal: 400;
+  --font-weight-medium: 400;
+  --font-weight-semibold: 500;
+  --font-weight-bold: 600;
+  --fw-semibold: 500;
+  --fw-bold: 600;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
+  --radius-2xl: 8px;
+  --radius-3xl: 12px;
+  --radius-4xl: 12px;
+  font-weight: 400;
+  font-size: var(--type-body-md);
+  line-height: var(--type-body-md-lh);
+}
+/* Le bouton est en pilule par une classe fixe (rounded-full) : en Finance, il
+   prend l'arrondi des champs, lien stylé en bouton compris (buttonVariants). */
+.finance-scope :is([data-slot="button"], .group\/button) {
+  border-radius: var(--radius-lg);
+}

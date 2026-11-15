@@ -20,13 +20,20 @@ const fr = { budget, dialogs };
  * chosen in it (the last ones first), already paid by default. In the
  * phone's header on every page (`compact`), on the Dépenses page otherwise.
  */
-export function QuickExpenseButton({ compact = false }: { compact?: boolean }) {
+export function QuickExpenseButton({
+  compact = false,
+  outline = false,
+}: {
+  compact?: boolean;
+  // Among other actions of the same weight (Finance's overview).
+  outline?: boolean;
+}) {
   const t = fr.budget;
   const [open, setOpen] = useState(false);
   return (
     <>
       <Button
-        variant={compact ? "outline" : "default"}
+        variant={compact || outline ? "outline" : "default"}
         size={compact ? "sm" : "lg"}
         aria-label={compact ? t.quickAddLabel : undefined}
         onClick={() => setOpen(true)}

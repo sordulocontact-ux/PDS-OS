@@ -61,16 +61,23 @@ export function IncomeAddButton({
   targets,
   organizationId,
   ownerId,
+  outline = false,
 }: {
   targets: FinanceTarget[];
   organizationId: string;
   ownerId: string | null;
+  // Among other actions of the same weight (Finance's overview).
+  outline?: boolean;
 }) {
   const t = fr.treasury;
   const [open, setOpen] = useState(false);
   return (
     <>
-      <Button size="lg" onClick={() => setOpen(true)}>
+      <Button
+        size="lg"
+        variant={outline ? "outline" : "default"}
+        onClick={() => setOpen(true)}
+      >
         <IconPlus aria-hidden data-icon="inline-start" />
         {t.incomes.add}
       </Button>

@@ -2317,3 +2317,7 @@ les modules à parcours (proto « Mise en page des modules », version « Propos
       des cartes de choix dans la fenêtre de retour, la modification d'un sujet et la confirmation d'une
       décision (indication du choix retenu dessous) ; boutons `DialogFormActions` ; priorité manquante dite
       sous le choix au lieu d'un bouton désactivé.
+- [x] **Finance, nouveau style, lot 1 (15/11/2026, `docs/FINANCE-V2.md`)** — thème de section `.finance-scope`
+      (tailles, graisses et arrondis d'un cran plus bas, `app/globals.css`) ; navigation à icônes en liste plate ;
+      Vue d'ensemble en cartes-phrases (`FinanceHome`, `SentenceCard`, `TreasurySpark`, horizon `?horizon=`) ;
+      `CockpitOverview`, `FlowCard`, `BudgetsCard`, `WatchCard` retirés.

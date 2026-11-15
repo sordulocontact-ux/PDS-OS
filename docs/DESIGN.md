@@ -986,6 +986,23 @@ modèle. Écart voulu, propre à Finance : toute la section se lit en **cartes d
 - Une couleur sur un chiffre (rouge d'un retard, vert d'une entrée) va sur son propre élément :
   `cn` ne garde qu'une classe `text-*` et effacerait la taille.
 
+### Finance, nouveau style d'après Midday (15/11/2026)
+
+Sacha a choisi de développer dans Finance le style du proto `docs/protos/finance-midday.html` (version v8),
+plan et lots dans `docs/FINANCE-V2.md`. **Écart voulu, limité à Finance** :
+
+- **Un thème de section** : `FinanceFrame` pose `.finance-scope`, dont le bloc dans `app/globals.css` redéfinit
+  `--type-*` (texte courant 15 px, cellules et boutons 14 px, légendes 13 px, titres de page 28 px, salutation
+  36 px), `--font-weight-*` (regular par défaut ; medium et semi-bold descendent d'un cran) et `--radius-*`
+  (cartes et tableaux 8 px, boutons, liens-boutons et champs 6 px). Aucun composant n'est recopié : tout ce qui
+  est posé dans Finance prend ces valeurs ; les modales et menus, en portail, gardent le style de l'app. Les
+  règles « medium minimum » et « 16 px courant » (§ 2) ne valent donc pas dans Finance.
+- **Navigation** : liste plate à icônes (plus de groupes titrés).
+- **Vue d'ensemble en cartes-phrases** (`FinanceHome`, `SentenceCard`) : salutation à gauche, horizon 30/60/90,
+  une carte par chose à savoir, chiffres en gras dans la phrase, la carte entière mène à sa page ; « En bref » en
+  fond teinté, sans lien.
+- La suite (listes sans titre, tableau Finance, fiche latérale, graphiques) arrive par lots, `docs/FINANCE-V2.md`.
+
 ### Arrondis
 
 | Élément                                            | Classe        | Rayon   |
