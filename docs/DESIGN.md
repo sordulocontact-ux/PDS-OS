@@ -1085,6 +1085,16 @@ plan et lots dans `docs/FINANCE-V2.md`. **Écart voulu, limité à Finance** :
   le proto (cadre « Encaissement de / Paiement de », raisons cochées, « Valider le rapprochement », « Choisir autre
   chose ») ; une dépense sans justificatif a « Joindre le justificatif » dans sa fiche ; les actions d'une liste peuvent
   n'être qu'une icône avec une infobulle rapide (`DialogButton iconOnly`, Rapprochement).
+- **Corrections du test UX (16/11/2026)** :
+  - **Vocabulaire unique.** On écrit budget (plus « enveloppe »), « Autre » (ex-centre de coût), entrée (plus « recette »), opération (plus « transaction »). **Rattacher** est le seul verbe pour lier une opération ou un justificatif : « Rattacher à… », vues « À rattacher / Rattachées / Ignorées », « Défaire le rattachement ». Les colonnes de budget sont Budget, Montant, Dépensé, Reste et Utilisé. Le tableau des postes est Prévu, Dépensé, Payé, Écart, où « Dépensé » = engagé + facturé + payé partout. Un budget dépassé s'écrit « Dépassé de X € », jamais avec un reste négatif.
+  - **Boutons.** Une page ou une fiche a une seule action principale en noir (40 px), et ses autres gestes dans un « ⋯ » (`RowActions size="icon-lg"`). Le bouton noir de la page d'un budget est « Ajouter une dépense », celui de Financements « Planifier une émission ». Celui d'une facture change avec son état : « Marquer envoyée », puis « Enregistrer un encaissement ». Dans une ligne, un bouton qui n'est pas l'action de la page est en contour.
+  - **Formulaires sur place.** Ils s'ouvrent dans le panneau de droite (« Planifier une émission » depuis Budgets, « Nouveau budget » avec Nom et Montant). Les lignes du calendrier de Trésorerie et les mouvements du Planning ouvrent leur fiche sur place (`MoveRecord`).
+  - **Placement et vides.** Un filtre se place juste au-dessus de ce qu'il filtre (le budget du camembert est dans sa carte, le statut au-dessus des postes). Une carte ou un chiffre vide n'est pas dessiné. Le lien de retour d'une page de budget est au-dessus du titre.
+  - **Vue d'ensemble.** Trois cartes de même hauteur, dont le total et les lignes viennent des mêmes lignes. Le « disponible » est le même calcul que dans Trésorerie (`budgetsAvailable`). « À surveiller » reprend les alertes de la cloche, dont le groupe grave s'appelle « À traiter ». Le solde est une petite courbe qui mène à Trésorerie, seule page qui garde la grande. Sur les deux pages, l'horizon est à gauche et les actions à droite.
+  - **Dépenses.** La colonne Justificatif montre le trombone, « Manquant » (facturée ou payée sans pièce) ou « Pas encore » (prévue ou engagée). La fiche donne le TTC puis le HT, et sépare « Date » et « Échéance ». Une dépense de projet ou d'artiste mène à son budget (« Modifier dans le projet »).
+  - **Chiffres en Geist Mono.** `tabular-nums` seulement sur les montants et les dates, jamais sur un nom ou une référence. Une source commune (« Lu dans le PDF ») se dit une fois, dans le titre de la section.
+  - **Menus.** Les menus en portail prennent le thème de la section (`useSectionThemeClass`).
+  - **Recherche ⌘K.** Elle cherche aussi les justificatifs, les opérations et les montants, et propose « Ajouter une dépense » et « Ajouter une entrée » quand le champ est vide.
 - Touche du clavier nommée à l'écran : `Kbd` (`components/ui/kbd.tsx`, `raised` pour l'accueil).
 
 ### Arrondis

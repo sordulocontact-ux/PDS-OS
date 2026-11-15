@@ -1,6 +1,7 @@
 // Finance › Dépenses (lot 3 of Ibé's ticket « Cockpit Finance »): every
 // spend of the label, as finance_spends() reads it. Client-safe, pure code.
 
+import { formatDay } from "@/lib/utils/day";
 import {
   budgetLineTtcCents,
   type BudgetFamily,
@@ -71,3 +72,13 @@ export const rebillMissing = (spend: FinanceSpend) =>
 /** The day the money goes out: paid on its day, else its due day. */
 export const spendDay = (spend: FinanceSpend) =>
   spend.status === "paid" ? spend.spentOn : (spend.dueOn ?? spend.spentOn);
+
+// Dates as Finance says them: « 16/11 » in a table, « Lun. 16/11 » in a
+// sheet; the year only when it is not the current one.
+const dropYear = (full: string) =>
+  full.endsWith(formatDay(new Date(), { weekday: false }).slice(-4))
+    ? full.slice(0, -5)
+    : full;
+export const tableDay = (value: string) =>
+  dropYear(formatDay(value, { weekday: false }));
+export const sheetDay = (value: string) => dropYear(formatDay(value));

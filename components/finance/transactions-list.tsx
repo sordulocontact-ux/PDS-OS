@@ -53,10 +53,10 @@ export function TransactionsList({
             />
             <p
               aria-label={t.total.label}
-              className="flex flex-wrap items-baseline justify-end gap-x-4 px-1 text-body-sm text-[color:var(--text-secondary)] tabular-nums"
+              className="flex flex-wrap items-baseline justify-end gap-x-4 px-1 text-body-sm text-[color:var(--text-secondary)]"
             >
               <span>{t.total.count(visible.length)}</span>
-              <span className="text-[color:var(--text-primary)]">
+              <span className="text-[color:var(--text-primary)] tabular-nums">
                 {sum > 0 ? "+" : sum < 0 ? "−" : ""}
                 {formatAmount(Math.abs(sum), { ht: false })}
               </span>

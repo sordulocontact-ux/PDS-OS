@@ -4,13 +4,15 @@ import { TreasuryCard } from "@/components/finance/treasury-card";
 import { WatchCard } from "@/components/finance/watch-card";
 import { routes } from "@/lib/auth/redirects";
 import type { Cockpit } from "@/lib/finance/cockpit";
+import { spendsHref } from "@/lib/finance/spend-links";
 import type { Treasury, TreasuryHorizon } from "@/lib/finance/treasury";
 
 /**
  * Finance's overview (maquette 1 of Ibé's ticket, laid out after Midday's
- * reports, Sacha 13/11/2026): one main card, the balance and its curve;
- * then three cards of the same anatomy, what comes in, what goes out and
- * what the budgets still allow; then where to act.
+ * reports, Sacha 13/11/2026): one main card, the balance with its small
+ * curve (the large one is Trésorerie's); then three cards of the same
+ * anatomy and the same height, what comes in, what goes out and what the
+ * budgets still allow; then where to act.
  */
 export function CockpitOverview({
   treasury,
@@ -18,14 +20,12 @@ export function CockpitOverview({
   horizon,
   names,
   canManage,
-  canOpenExpenses,
 }: {
   treasury: Treasury | null;
   view: Cockpit;
   horizon: TreasuryHorizon;
   names: Map<string, string>;
   canManage: boolean;
-  canOpenExpenses: boolean;
 }) {
   return (
     <div className="flex flex-col gap-4">
@@ -34,7 +34,7 @@ export function CockpitOverview({
         horizon={horizon}
         canManage={canManage}
       />
-      <div className="grid items-start gap-4 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-3">
         <FlowCard
           side="incoming"
           flow={view.incoming}
@@ -46,7 +46,7 @@ export function CockpitOverview({
           side="outgoing"
           flow={view.outgoing}
           horizon={horizon}
-          href={routes.financeTreasury}
+          href={spendsHref({ statut: "facture" })}
           names={names}
         />
         <BudgetsCard
@@ -56,11 +56,7 @@ export function CockpitOverview({
           names={names}
         />
       </div>
-      <WatchCard
-        items={view.watch}
-        names={names}
-        canOpenExpenses={canOpenExpenses}
-      />
+      <WatchCard alerts={view.watch} total={view.watchTotal} />
     </div>
   );
 }

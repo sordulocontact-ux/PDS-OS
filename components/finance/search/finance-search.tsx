@@ -12,11 +12,30 @@ import { financeSearch } from "@/lib/i18n/fr/finance-search";
 import { FINANCE_SECTIONS } from "@/lib/ui/finance-sections";
 import { normalizeSearch } from "@/lib/utils/search";
 
+import { SearchAdd } from "./search-add";
 import { SearchResults, type SearchRow } from "./search-results";
 
 const t = financeSearch;
 // At most this many rows per group: the search finds, the list shows all.
 const PER_GROUP = 6;
+
+// The two gestures offered while nothing is typed: they open the forms.
+const ACTIONS: SearchRow[] = [
+  {
+    id: "action:spend",
+    group: "action",
+    label: t.addSpend,
+    detail: "",
+    href: "",
+  },
+  {
+    id: "action:income",
+    group: "action",
+    label: t.addIncome,
+    detail: "",
+    href: "",
+  },
+];
 
 const SECTIONS: SearchRow[] = FINANCE_SECTIONS.map((s) => ({
   id: `section:${s.key}`,
@@ -39,6 +58,7 @@ export function FinanceSearch({ pulse }: { pulse: FinancePulse | null }) {
   const [byKeys, setByKeys] = useState(false);
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
+  const [adding, setAdding] = useState<"spend" | "income" | null>(null);
   const listId = useId();
   const needle = normalizeSearch(useDeferredValue(query));
 
@@ -56,20 +76,38 @@ export function FinanceSearch({ pulse }: { pulse: FinancePulse | null }) {
 
   const rows = needle
     ? [...SECTIONS, ...(pulse?.items ?? [])].filter((row) =>
-        normalizeSearch(`${row.label} ${row.detail}`).includes(needle),
+        normalizeSearch(
+          `${row.label} ${row.detail} ${"keywords" in row ? (row.keywords ?? "") : ""}`,
+        ).includes(needle),
       )
     : SECTIONS;
-  // Empty, it lists the nine pages; typed, a few rows of each kind.
+  // Empty, it offers the two additions (for who writes Finance) then lists
+  // the pages; typed, a few rows of each kind.
+  const actions = pulse?.add ? ACTIONS : [];
   const shown = needle
-    ? (["section", "envelope", "spend", "income"] as const).flatMap((group) =>
+    ? (
+        [
+          "section",
+          "envelope",
+          "spend",
+          "income",
+          "proof",
+          "transaction",
+        ] as const
+      ).flatMap((group) =>
         rows.filter((r) => r.group === group).slice(0, PER_GROUP),
       )
-    : SECTIONS;
+    : [...actions, ...SECTIONS];
   const current = Math.min(active, Math.max(shown.length - 1, 0));
 
   function go(row: SearchRow | undefined) {
     if (!row) return;
     setOpen(false);
+    if (row.group === "action") {
+      setQuery("");
+      setAdding(row.id === "action:spend" ? "spend" : "income");
+      return;
+    }
     router.push(row.href);
   }
 
@@ -165,6 +203,11 @@ export function FinanceSearch({ pulse }: { pulse: FinancePulse | null }) {
           </div>
         </DialogContent>
       </Dialog>
+      <SearchAdd
+        adding={adding}
+        add={pulse?.add ?? null}
+        onClose={() => setAdding(null)}
+      />
     </>
   );
 }

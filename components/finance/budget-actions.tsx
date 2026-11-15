@@ -1,7 +1,14 @@
 "use client";
 
-import { IconPlus } from "nucleo-sharp-essential";
+import {
+  IconCalendarDays,
+  IconPenWriting2,
+  IconPlus,
+  IconSliders,
+} from "nucleo-sharp-essential";
+import { useState } from "react";
 
+import { BudgetLineForm } from "@/components/budget/budget-line-form";
 import { BudgetImportForm } from "@/components/finance/budget-import-form";
 import {
   CostCenterForm,
@@ -10,63 +17,48 @@ import {
   ShareForm,
   TemplateForm,
 } from "@/components/finance/budget-forms";
-import { ButtonRoll, buttonVariants } from "@/components/ui/button";
+import { ShowForm } from "@/components/finance/show-draw-forms";
+import { IconCopy, IconRefresh, IconUpload } from "@/components/icons";
+import { Button } from "@/components/ui/button";
 import { DialogButton } from "@/components/ui/dialog-button";
-import { ViewLink } from "@/components/ui/view-link";
-import { routes } from "@/lib/auth/redirects";
+import { FormDialog } from "@/components/ui/form-dialog";
+import { RowActions, type RowAction } from "@/components/ui/row-actions";
 import type {
   BudgetTemplate,
   TemplateLine,
 } from "@/lib/finance/budget-queries";
+import type { ShowFormat } from "@/lib/finance/engines";
 import type { EnvelopeKind } from "@/lib/finance/envelopes";
+import { dialogs } from "@/lib/i18n/fr/dialogs";
 import { financeBudgets } from "@/lib/i18n/fr/finance-budgets";
+import { fundings } from "@/lib/i18n/fr/fundings";
 
-const fr = { financeBudgets };
+const fr = { dialogs, financeBudgets, fundings };
 
-/** « Planifier une émission »: to Financements › Émissions et lives, where
- * a show counts in the forecast (a cost center alone does not). */
-export function PlanShowLink({
-  size = "default",
-}: {
-  size?: "default" | "lg";
-}) {
-  return (
-    <ViewLink
-      href={`${routes.financeFundings}#shows`}
-      className={buttonVariants({ variant: "outline", size })}
-    >
-      <ButtonRoll>{fr.financeBudgets.actions.planShow}</ButtonRoll>
-    </ViewLink>
-  );
-}
-
-/** « Nouveau centre de coût » (Finance › Budgets, the Finance only), beside
- * « Planifier une émission ». */
-export function NewCostCenterButton({
+/** « Nouveau budget » (Finance › Budgets, the Finance only): the page's
+ * main action, black, at the page's 40 px. */
+export function NewBudgetButton({
   templates,
 }: {
   templates: BudgetTemplate[];
 }) {
   const t = fr.financeBudgets;
   return (
-    <div className="flex flex-wrap gap-2">
-      <PlanShowLink />
-      <DialogButton
-        label={t.actions.newCenter}
-        icon={IconPlus}
-        variant="default"
-        size="default"
-        title={t.centerForm.title}
-        description={t.centerForm.description}
-      >
-        {(close) => <CostCenterForm templates={templates} onDone={close} />}
-      </DialogButton>
-    </div>
+    <DialogButton
+      label={t.actions.newBudget}
+      icon={IconPlus}
+      variant="default"
+      size="default"
+      title={t.centerForm.title}
+      description=""
+    >
+      {(close) => <CostCenterForm templates={templates} onDone={close} />}
+    </DialogButton>
   );
 }
 
-/** A template's card: « Nouveau centre de coût depuis le modèle », the form
- * opening on that template (its lines become the center's planned lines). */
+/** A template's card: « Nouveau budget depuis le modèle », the form opening
+ * on that template (its lines become the budget's planned lines). */
 export function NewFromTemplateButton({
   template,
   templates,
@@ -80,7 +72,7 @@ export function NewFromTemplateButton({
       label={t.templates.use}
       size="sm"
       title={t.centerForm.title}
-      description={t.centerForm.description}
+      description=""
     >
       {(close) => (
         <CostCenterForm
@@ -94,17 +86,61 @@ export function NewFromTemplateButton({
 }
 
 /**
- * What the Finance does on one envelope: revise a cost center (with its
- * reason), set the share PDS finances, keep its lines as a template, import
- * lines (where the reader writes them: `canImport`).
+ * « Ajouter une dépense » on a budget's page: the one spend form, its target
+ * (« Pour ») being this budget, so it is not asked again.
  */
-export function EnvelopeActions({
+export function AddEnvelopeSpendButton({
+  kind,
+  id,
+  organizationId,
+}: {
+  kind: EnvelopeKind;
+  id: string;
+  organizationId: string;
+}) {
+  const t = fr.financeBudgets.actions;
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <Button size="default" onClick={() => setOpen(true)}>
+        <IconPlus aria-hidden data-icon="inline-start" />
+        {t.addSpend}
+      </Button>
+      <FormDialog
+        open={open}
+        onOpenChange={setOpen}
+        title={t.addSpend}
+        description=""
+        closeLabel={fr.dialogs.close}
+      >
+        <BudgetLineForm
+          target={{ kind, id }}
+          line={null}
+          organizationId={organizationId}
+          onDone={() => setOpen(false)}
+        />
+      </FormDialog>
+    </>
+  );
+}
+
+type Gesture = "import" | "show" | "rename" | "revise" | "share" | "template";
+
+/**
+ * What the Finance does on one budget, in a « ⋯ » beside « Ajouter une
+ * dépense »: rename and revise a cost center (with its reason), plan a
+ * show, set the share PDS finances, keep its lines as a template, import
+ * lines (where the reader writes them: `canImport`). Every form opens in
+ * the panel on the right.
+ */
+export function EnvelopeMenu({
   kind,
   id,
   name,
   currentCents,
   shareBp,
   lines,
+  formats,
   canManage,
   canImport,
 }: {
@@ -114,63 +150,72 @@ export function EnvelopeActions({
   currentCents: number | null;
   shareBp: number;
   lines: TemplateLine[];
+  formats: ShowFormat[];
   canManage: boolean;
   canImport: boolean;
 }) {
   const t = fr.financeBudgets;
+  const [open, setOpen] = useState<Gesture | null>(null);
+  const close = () => setOpen(null);
+  const center = canManage && kind === "cost_center";
+  const action = (
+    key: Gesture,
+    label: string,
+    icon: RowAction["icon"],
+  ): RowAction => ({ key, label, icon, onSelect: () => setOpen(key) });
+  const actions: RowAction[] = [
+    ...(canImport ? [action("import", t.actions.import, IconUpload)] : []),
+    ...(center && formats.some((f) => !f.archived)
+      ? [action("show", t.actions.planShow, IconCalendarDays)]
+      : []),
+    ...(center ? [action("rename", t.actions.rename, IconPenWriting2)] : []),
+    ...(center ? [action("revise", t.actions.revise, IconRefresh)] : []),
+    ...(canManage ? [action("share", t.actions.share, IconSliders)] : []),
+    ...(canManage && lines.length > 0
+      ? [action("template", t.actions.template, IconCopy)]
+      : []),
+  ];
+  const dialog: Record<Gesture, { title: string; form: React.ReactNode }> = {
+    import: {
+      title: t.importForm.title,
+      form: <BudgetImportForm kind={kind} id={id} onDone={close} />,
+    },
+    show: {
+      title: fr.fundings.shows.form.title,
+      form: <ShowForm show={null} formats={formats} onDone={close} />,
+    },
+    rename: {
+      title: t.renameForm.title,
+      form: <RenameForm id={id} name={name} onDone={close} />,
+    },
+    revise: {
+      title: t.reviseForm.title,
+      form: <ReviseForm id={id} currentCents={currentCents} onDone={close} />,
+    },
+    share: {
+      title: t.shareForm.title,
+      form: <ShareForm kind={kind} id={id} shareBp={shareBp} onDone={close} />,
+    },
+    template: {
+      title: t.templateForm.title,
+      form: <TemplateForm lines={lines} onDone={close} />,
+    },
+  };
   return (
-    <div className="flex flex-wrap gap-2">
-      {canImport && (
-        <DialogButton
-          label={t.actions.import}
-          title={t.importForm.title}
-          description={t.importForm.description}
-          wide
+    <>
+      <RowActions label={t.actions.more} actions={actions} size="icon-lg" />
+      {open && (
+        <FormDialog
+          open
+          onOpenChange={(next) => !next && close()}
+          title={dialog[open].title}
+          description=""
+          closeLabel={fr.dialogs.close}
+          size={open === "import" ? "wide" : "default"}
         >
-          {(close) => <BudgetImportForm kind={kind} id={id} onDone={close} />}
-        </DialogButton>
+          {dialog[open].form}
+        </FormDialog>
       )}
-      {canManage && kind === "cost_center" && <PlanShowLink />}
-      {canManage && kind === "cost_center" && (
-        <DialogButton
-          label={t.actions.rename}
-          title={t.renameForm.title}
-          description={t.renameForm.description}
-        >
-          {(close) => <RenameForm id={id} name={name} onDone={close} />}
-        </DialogButton>
-      )}
-      {canManage && kind === "cost_center" && (
-        <DialogButton
-          label={t.actions.revise}
-          title={t.reviseForm.title}
-          description={t.reviseForm.description}
-        >
-          {(close) => (
-            <ReviseForm id={id} currentCents={currentCents} onDone={close} />
-          )}
-        </DialogButton>
-      )}
-      {canManage && (
-        <DialogButton
-          label={t.actions.share}
-          title={t.shareForm.title}
-          description={t.shareForm.description}
-        >
-          {(close) => (
-            <ShareForm kind={kind} id={id} shareBp={shareBp} onDone={close} />
-          )}
-        </DialogButton>
-      )}
-      {canManage && lines.length > 0 && (
-        <DialogButton
-          label={t.actions.template}
-          title={t.templateForm.title}
-          description={t.templateForm.description(lines.length)}
-        >
-          {(close) => <TemplateForm lines={lines} onDone={close} />}
-        </DialogButton>
-      )}
-    </div>
+    </>
   );
 }

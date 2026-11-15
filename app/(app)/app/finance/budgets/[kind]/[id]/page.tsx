@@ -1,7 +1,10 @@
 import { notFound } from "next/navigation";
 
 import { FormMessage } from "@/components/auth/form-message";
-import { EnvelopeActions } from "@/components/finance/budget-actions";
+import {
+  AddEnvelopeSpendButton,
+  EnvelopeMenu,
+} from "@/components/finance/budget-actions";
 import { EnvelopeFigures } from "@/components/finance/envelope-figures";
 import { FinanceFrame } from "@/components/finance/finance-frame";
 import { PostPie } from "@/components/finance/post-pie";
@@ -75,9 +78,8 @@ export default async function FinanceEnvelopePage({
   // The status filter (lot 4): the figures, the pie and the lines follow it;
   // what is left stays the envelope's, whole.
   const stage = asStage(query.statut);
-  const lines = linesOf(envelope, data.spends).filter(
-    (s) => !stage || spendStage(s.status) === stage,
-  );
+  const all = linesOf(envelope, data.spends);
+  const lines = all.filter((s) => !stage || spendStage(s.status) === stage);
   const posts = byPost(lines);
   const here = `${routes.financeBudgets}/${slug}/${id}`;
   const canManage = can(access, "manage_finance");
@@ -89,29 +91,26 @@ export default async function FinanceEnvelopePage({
   const share = envelope.pdsShareBp;
 
   return (
-    <FinanceFrame section="budgets" title={envelope.name}>
-      <div className="flex flex-col gap-4">
-        <BackLink href={routes.financeBudgets}>{t.back}</BackLink>
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <p className="text-body-md text-[color:var(--text-secondary)]">
-            {[
-              t.kindOne[kind],
-              envelope.period &&
-                t.detail.period(
-                  day(envelope.period.startsOn),
-                  envelope.period.endsOn ? day(envelope.period.endsOn) : null,
-                ),
-            ]
-              .filter(Boolean)
-              .join(" · ")}
-          </p>
-          <EnvelopeActions
+    <FinanceFrame
+      section="budgets"
+      title={envelope.name}
+      above={<BackLink href={routes.financeBudgets}>{t.back}</BackLink>}
+      action={
+        <>
+          {canImport && access.organizationId && (
+            <AddEnvelopeSpendButton
+              kind={kind}
+              id={id}
+              organizationId={access.organizationId}
+            />
+          )}
+          <EnvelopeMenu
             kind={kind}
             id={id}
             name={envelope.name}
             currentCents={envelope.currentCents}
             shareBp={share}
-            lines={lines
+            lines={all
               .filter((s) => !s.refused)
               .map((s) => ({
                 label: s.label,
@@ -119,40 +118,36 @@ export default async function FinanceEnvelopePage({
                 subpost: s.subpost,
                 cents: s.cents,
               }))}
+            formats={data.formats}
             canManage={canManage}
             canImport={canImport}
           />
-        </div>
-      </div>
+        </>
+      }
+    >
+      <p className="text-body-md text-[color:var(--text-secondary)]">
+        {[
+          t.kindOne[kind],
+          envelope.period &&
+            t.detail.period(
+              day(envelope.period.startsOn),
+              envelope.period.endsOn ? day(envelope.period.endsOn) : null,
+            ),
+        ]
+          .filter(Boolean)
+          .join(" · ")}
+      </p>
       {data.error && <FormMessage kind="error">{t.loadError}</FormMessage>}
       <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
         <EnvelopeFigures row={row} totals={totalsOf(lines)} />
         <PostPie posts={posts} />
       </div>
-      <div className="flex flex-wrap items-center gap-3">
-        <SegmentedLinks
-          label={t.filter.label}
-          options={[
-            { key: "all", href: here, label: t.filter.all, current: !stage },
-            ...SPEND_STAGES.map((s) => ({
-              key: s,
-              href: `${here}?statut=${STAGE_SLUG[s]}`,
-              label: t.filter[s],
-              current: stage === s,
-            })),
-          ]}
-        />
-      </div>
-      <div className="grid items-start gap-4">
-        <MetricCard
-          title={t.detail.revisions}
-          count={envelope.revisions.length}
-        >
-          {envelope.revisions.length === 0 ? (
-            <p className="text-body-md text-[color:var(--text-secondary)]">
-              {t.detail.noRevision}
-            </p>
-          ) : (
+      {envelope.revisions.length > 0 && (
+        <div className="grid items-start gap-4">
+          <MetricCard
+            title={t.detail.revisions}
+            count={envelope.revisions.length}
+          >
             <ul className="-my-2 divide-y divide-[var(--border-hairline)]">
               {envelope.revisions.map((r) => (
                 <li key={r.at} className="grid gap-0.5 py-2">
@@ -172,18 +167,39 @@ export default async function FinanceEnvelopePage({
                 </li>
               ))}
             </ul>
-          )}
-        </MetricCard>
-      </div>
-      {lines.length === 0 ? (
+          </MetricCard>
+        </div>
+      )}
+      {all.length === 0 ? (
         <EmptyNote>{t.detail.noLines}</EmptyNote>
       ) : (
         <>
           <section className="flex flex-col gap-3">
-            <h3 className="text-body-lg font-medium">{t.detail.posts}</h3>
-            <PostsTable posts={posts} />
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h3 className="text-body-lg font-medium">{t.detail.posts}</h3>
+              <SegmentedLinks
+                label={t.filter.label}
+                options={[
+                  {
+                    key: "all",
+                    href: here,
+                    label: t.filter.all,
+                    current: !stage,
+                  },
+                  ...SPEND_STAGES.map((s) => ({
+                    key: s,
+                    href: `${here}?statut=${STAGE_SLUG[s]}`,
+                    label: t.filter[s],
+                    current: stage === s,
+                  })),
+                ]}
+              />
+            </div>
+            {lines.length > 0 && <PostsTable posts={posts} />}
           </section>
+          {lines.length === 0 && <EmptyNote>{t.detail.noLines}</EmptyNote>}
           <SpendsTable
+            hideEnvelope
             spends={lines}
             targets={treasury.targets}
             canManage={canManage}

@@ -2366,3 +2366,16 @@ les modules à parcours (proto « Mise en page des modules », version « Propos
       Factures aux colonnes du proto (relance, « il y a N j ») ; Budgets en un tableau avec jauge « Consommé » et cartes
       des modèles ; Financements en cartes The Orchard, Pay Later et par format ; boutons et tableaux du design system ;
       vues des listes en filtre segmenté (`DataTableViews segmented`).
+- [x] **Finance, corrections du test UX (16/11/2026)** :
+      - **Mots et boutons.** Vocabulaire unique (budget, Autre, entrée, opération, rattacher), une action noire par page ou fiche et le reste dans « ⋯ ».
+      - **Sur place.** Formulaires et fiches dans le panneau de droite, depuis Budgets, le calendrier de Trésorerie et le Planning.
+      - **Vue d'ensemble.** Chiffres cohérents avec Trésorerie et Alertes, petite courbe.
+      - **Budgets.** Budget en noir « Ajouter une dépense », filtre au-dessus des postes.
+      - **Financements.** Boutons en barre.
+      - **Factures.** Barre comme Dépenses, « Pas envoyée ».
+      - **Justificatifs.** « Sans dépense », ouverture par `?ouvrir=`.
+      - **Dépenses.** Justificatif « Pas encore / Manquant », HT/TTC, impasse projet/artiste levée.
+      - **Historique.** Nommé et paginé.
+      - **⌘K.** Justificatifs, opérations et montants cherchables.
+      - **Menus.** Au thème de Finance.
+      - **Reste.** Unité d'un format d'émission à stocker (migration), gestes d'écriture dans les fiches ouvertes depuis un calendrier (lecture + justificatif aujourd'hui).

@@ -18,6 +18,7 @@ function pulse(): Promise<FinancePulse> {
       alerts: { count: 0, danger: 0 },
       counts: { reconcile: 0, receipts: 0, incomes: 0 },
       items: [],
+      add: null,
       error: true,
     }));
     kept = { at: Date.now(), promise };

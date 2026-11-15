@@ -41,6 +41,7 @@ export function ReceiptAction({
     <Button
       type="button"
       size="xs"
+      variant="outline"
       className="relative z-10"
       disabled={submit.pending}
       onClick={() =>

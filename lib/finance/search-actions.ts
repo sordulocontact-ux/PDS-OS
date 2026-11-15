@@ -1,11 +1,14 @@
 "use server";
 
+import { can } from "@/lib/auth/access";
+import { requirePermission } from "@/lib/auth/dal";
 import { severityOf } from "@/lib/finance/alerts";
-import { countOpenProofs } from "@/lib/finance/proof-queries";
+import { countOpenProofs, loadProofIndex } from "@/lib/finance/proof-queries";
 import {
   financeSearchIndex,
   type FinanceSearchItem,
 } from "@/lib/finance/search";
+import type { FinanceTarget } from "@/lib/finance/treasury-queries";
 import { loadFinanceWatch } from "@/lib/finance/watch-queries";
 import { parisPlace } from "@/lib/utils/calendar-period";
 
@@ -15,6 +18,12 @@ export type FinancePulse = {
   // Justificatifs, Factures).
   counts: { reconcile: number; receipts: number; incomes: number };
   items: FinanceSearchItem[];
+  // What « Ajouter une entrée » of the search needs, for who writes Finance.
+  add: {
+    organizationId: string;
+    ownerId: string | null;
+    targets: FinanceTarget[];
+  } | null;
   error: boolean;
 };
 
@@ -26,9 +35,11 @@ export type FinancePulse = {
  */
 export async function readFinancePulse(): Promise<FinancePulse> {
   const today = parisPlace(new Date()).day;
-  const [watch, receipts] = await Promise.all([
+  const [access, watch, receipts, proofs] = await Promise.all([
+    requirePermission("read_finance"),
     loadFinanceWatch(today),
     countOpenProofs(),
+    loadProofIndex(),
   ]);
   const toReconcile = watch.alerts.find((a) => a.kind === "to_reconcile");
   return {
@@ -44,8 +55,18 @@ export async function readFinancePulse(): Promise<FinancePulse> {
     items: financeSearchIndex({
       budgets: watch.budgets,
       incomes: watch.treasury.incomes,
+      proofs,
+      transactions: watch.transactions,
       today,
     }),
+    add:
+      can(access, "manage_finance") && access.organizationId
+        ? {
+            organizationId: access.organizationId,
+            ownerId: access.personId,
+            targets: watch.treasury.targets,
+          }
+        : null,
     error: watch.error,
   };
 }

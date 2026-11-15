@@ -1,5 +1,6 @@
 "use client";
 
+import { IconPlus } from "nucleo-sharp-essential";
 import { useEffect, useRef } from "react";
 
 import type { FinanceSearchItem } from "@/lib/finance/search";
@@ -7,7 +8,7 @@ import { financeSearch } from "@/lib/i18n/fr/finance-search";
 import { cn } from "@/lib/utils";
 
 export type SearchRow = Omit<FinanceSearchItem, "group"> & {
-  group: FinanceSearchItem["group"] | "section";
+  group: FinanceSearchItem["group"] | "section" | "action";
 };
 
 /**
@@ -64,6 +65,12 @@ export function SearchResults({
               index === active && "bg-[var(--selection-bg)]",
             )}
           >
+            {row.group === "action" && (
+              <IconPlus
+                aria-hidden
+                className="size-4 shrink-0 self-center text-[color:var(--text-secondary)]"
+              />
+            )}
             <span className="min-w-0 flex-1 truncate text-body-sm text-[color:var(--text-primary)]">
               {row.label}
             </span>

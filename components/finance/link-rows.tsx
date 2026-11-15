@@ -4,7 +4,7 @@ export type LinkRow = {
   key: string;
   href: string | null;
   main: string;
-  sub: string;
+  sub?: string;
   end?: React.ReactNode;
 };
 
@@ -25,9 +25,11 @@ export function LinkRows({ rows }: { rows: LinkRow[] }) {
               <span className="text-body-md font-medium break-words">
                 {row.main}
               </span>
-              <span className="text-caption text-[color:var(--text-secondary)]">
-                {row.sub}
-              </span>
+              {row.sub && (
+                <span className="text-caption text-[color:var(--text-secondary)]">
+                  {row.sub}
+                </span>
+              )}
             </span>
             {row.end && <span className="shrink-0">{row.end}</span>}
           </>

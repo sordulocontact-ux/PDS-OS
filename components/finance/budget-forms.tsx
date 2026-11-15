@@ -114,7 +114,6 @@ export function CostCenterForm({
         inputMode="decimal"
         autoComplete="off"
         required={!template}
-        hint={template ? t.amountHint : undefined}
         value={value}
         error={tried ? errors.amount : undefined}
         onChange={(e) => setValue(e.target.value)}

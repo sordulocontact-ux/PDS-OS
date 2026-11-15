@@ -13,6 +13,7 @@ import {
   DataTableRow,
   EMPTY_CELL,
 } from "@/components/ui/data-table";
+import { RestAmount } from "@/components/finance/rest-amount";
 import { routes } from "@/lib/auth/redirects";
 import { ENVELOPE_SLUG } from "@/lib/finance/envelope-slugs";
 import type { EnvelopeRow } from "@/lib/finance/envelopes";
@@ -42,10 +43,10 @@ export function SignedGap({ cents }: { cents: number }) {
 }
 
 /**
- * Every envelope as the proto's Budgets list: its name (with its period or
- * its initial amount once revised), its type, the budget, what is engaged +
- * invoiced + paid, what is left (red once over) and the share consumed with
- * its gauge. Each row opens the envelope's page, which carries every other
+ * Every budget as the proto's Budgets list: its name (with its period, or
+ * « Révisé : avant → après » once revised), its type, its amount, what is
+ * spent (committed + invoiced + paid), what is left (red once over) and the
+ * share used with its gauge. Each row opens the envelope's page, which carries every other
  * figure of the ticket (initial budget, revisions, planned, invoiced, paid,
  * rebillable, gap, PDS share: `EnvelopeFigures`).
  */
@@ -57,13 +58,14 @@ export function EnvelopesTable({ rows }: { rows: EnvelopeRow[] }) {
       <DataTableHeader>
         <DataTableHead fill>{c.envelope}</DataTableHead>
         <DataTableHead hideBelow="lg">{c.type}</DataTableHead>
-        <DataTableHead align="end" hideBelow="sm">
+        <DataTableHead align="end" hideBelow="md">
           {c.budget}
         </DataTableHead>
-        <DataTableHead align="end">{c.used}</DataTableHead>
         <DataTableHead align="end" hideBelow="md">
-          {c.rest}
+          {c.used}
         </DataTableHead>
+        {/* On a phone, what is left is what reads: « Reste ». */}
+        <DataTableHead align="end">{c.rest}</DataTableHead>
         <DataTableHead hideBelow="md" className="w-[22%]">
           {c.consumed}
         </DataTableHead>
@@ -81,8 +83,10 @@ export function EnvelopesTable({ rows }: { rows: EnvelopeRow[] }) {
                   ? formatDay(row.period.endsOn, { weekday: false })
                   : null,
               )
-            : row.revisionsCents !== 0 && row.initialCents !== null
-              ? t.initial(amount(row.initialCents))
+            : row.revisionsCents !== 0 &&
+                row.initialCents !== null &&
+                row.currentCents !== null
+              ? t.revised(amount(row.initialCents), amount(row.currentCents))
               : undefined;
           return (
             <DataTableRow key={`${row.kind}:${row.id}`}>
@@ -109,7 +113,7 @@ export function EnvelopesTable({ rows }: { rows: EnvelopeRow[] }) {
               </DataTableCell>
               <DataTableCell
                 align="end"
-                hideBelow="sm"
+                hideBelow="md"
                 className="tabular-nums"
               >
                 {budget === null ? (
@@ -120,22 +124,18 @@ export function EnvelopesTable({ rows }: { rows: EnvelopeRow[] }) {
                   amount(budget)
                 )}
               </DataTableCell>
-              <DataTableCell align="end" className="tabular-nums">
-                {amount(row.engagedCents)}
-              </DataTableCell>
               <DataTableCell
                 align="end"
                 hideBelow="md"
                 className="tabular-nums"
               >
+                {amount(row.engagedCents)}
+              </DataTableCell>
+              <DataTableCell align="end">
                 {row.restCents === null ? (
                   EMPTY_CELL
-                ) : row.restCents < 0 ? (
-                  <span className="text-[color:var(--error)]">
-                    {t.over(amount(-row.restCents))}
-                  </span>
                 ) : (
-                  amount(row.restCents)
+                  <RestAmount cents={row.restCents} bare />
                 )}
               </DataTableCell>
               <DataTableCell hideBelow="md">

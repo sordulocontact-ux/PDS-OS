@@ -6,6 +6,7 @@ const plural = (count: number, one: string, many: string) =>
 
 export const fundings = {
   title: "Financements",
+  more: "Autres actions",
   moves: {
     orchard: "Avance The Orchard",
     show: (label: string) => label,
@@ -25,10 +26,10 @@ export const fundings = {
       `Titres comptés vers la prochaine avance : ${count} / ${per}`,
     planned: "Avance prévue",
     // The show whose provisional titles complete the tranche.
-    plannedBy: (show: string) => `Avec « ${show} »`,
+    plannedBy: (show: string) => `Avance déclenchée par « ${show} »`,
     due: "Tranche déjà complète : avance attendue",
     nextUnknown: "Aucune avance prévue avec les émissions planifiées.",
-    edit: "Régler",
+    edit: "Modifier la règle",
     form: {
       title: "Règle The Orchard",
       description:
@@ -50,7 +51,7 @@ export const fundings = {
         ? `${day} · ${plural(titles, "titre provisoire", "titres provisoires")}`
         : day,
     noShows: "Aucune émission planifiée.",
-    plan: "Nouvelle émission",
+    plan: "Planifier une émission",
     move: "Changer la date",
     cancel: "Annuler l'émission",
     cancelTitle: "Annuler cette émission ?",
@@ -76,12 +77,20 @@ export const fundings = {
     },
   },
   formats: {
-    add: "Nouveau format",
-    cost: (amount: string) => `${amount} / émission`,
+    add: "Nouveau format d'émission",
+    // The unit a format knows itself by, read from its name (émission,
+    // live, tournage): « 7 600 € / live ».
+    unitOf: (name: string) =>
+      /live/i.test(name)
+        ? "live"
+        : /tournage|shoot/i.test(name)
+          ? "tournage"
+          : "émission",
+    cost: (amount: string, unit: string) => `${amount} / ${unit}`,
     noFormat:
       "Aucun format : un format donne son coût et ses titres provisoires.",
     form: {
-      title: "Nouveau format",
+      title: "Nouveau format d'émission",
       description:
         "Une émission, un live, un tournage : ce qu'il coûte et les titres qu'il donne.",
       name: "Nom",
@@ -98,8 +107,8 @@ export const fundings = {
   },
   payLater: {
     title: "Pay Later",
-    empty: "Aucune ligne de crédit.",
-    noDraws: "Aucun tirage.",
+    empty: "Aucun crédit Pay Later.",
+    noDraws: "Aucun achat en plusieurs fois.",
     figures: { total: "Crédit total", used: "Utilisé", free: "Disponible" },
     summary: (amount: string, fee: string) =>
       `Mensualité ${amount} dont ${fee} d'intérêts`,
@@ -107,16 +116,16 @@ export const fundings = {
     nextDay: (day: string) => `prochaine le ${day}`,
     installment: (n: number, of: number) => `Mensualité ${n}/${of}`,
     noInstallments: "Aucune mensualité à venir.",
-    draws: "Tirages",
-    addLine: "Nouvelle ligne de crédit",
-    draw: "Nouveau tirage",
-    remove: "Retirer le tirage",
-    removeTitle: "Retirer ce tirage ?",
+    draws: "Achats en plusieurs fois",
+    addLine: "Nouveau crédit Pay Later",
+    draw: "Financer une dépense",
+    remove: "Retirer l'achat",
+    removeTitle: "Retirer cet achat ?",
     removeBody:
       "Ses mensualités sortent des prévisions. L'historique le garde.",
     removing: "Retrait…",
     columns: {
-      label: "Tirage",
+      label: "Achat",
       next: "Prochaine mensualité",
       left: "Reste",
       actions: "Actions",
@@ -126,7 +135,7 @@ export const fundings = {
     nextOn: (amount: string, day: string) => `${amount} le ${day}`,
     done: "Remboursé",
     lineForm: {
-      title: "Nouvelle ligne de crédit",
+      title: "Nouveau crédit Pay Later",
       description: "Un Pay Later et son plafond.",
       name: "Nom",
       limit: "Plafond",
@@ -138,22 +147,22 @@ export const fundings = {
       },
     },
     drawForm: {
-      title: "Nouveau tirage",
+      title: "Financer une dépense",
       description:
         "Ce que finance le Pay Later. La dépense choisie sort alors par ses mensualités, plus à sa date.",
-      line: "Ligne de crédit",
-      spend: "Dépense financée",
+      line: "Crédit Pay Later",
+      spend: "Dépense",
       noSpend: "Aucune",
       label: "Libellé",
       amount: "Montant financé",
-      drawnOn: "Date du tirage",
+      drawnOn: "Date du financement",
       installments: "Nombre de mensualités",
       fee: "Frais du crédit",
       feeHint: "En % du montant, pour toute la durée.",
       save: "Enregistrer",
       saving: "Enregistrement…",
       errors: {
-        line: "Choisissez une ligne de crédit.",
+        line: "Choisissez un crédit Pay Later.",
         label: "Donnez un libellé.",
         amount: "Indiquez un montant en euros.",
         drawnOn: "Indiquez la date.",
@@ -163,17 +172,17 @@ export const fundings = {
     },
   },
   rebill: {
-    title: "Remboursements et réserve",
+    title: "Refacturations et réserve",
     expected: (count: number) =>
       plural(count, "refacturation attendue", "refacturations attendues"),
     missing: (count: number) =>
       plural(
         count,
-        "dépense refacturable sans remboursement",
-        "dépenses refacturables sans remboursement",
+        "dépense à refacturer sans entrée prévue",
+        "dépenses à refacturer sans entrée prévue",
       ),
     none: "Rien à rembourser.",
-    row: "Remboursements à refacturer",
+    row: "Refacturations attendues",
   },
   reserve: {
     title: "Réserve",
@@ -182,15 +191,15 @@ export const fundings = {
   },
   loadError: "Les financements n'ont pas pu être chargés.",
   errors: {
-    overLimit: "Ce tirage dépasserait le crédit disponible.",
+    overLimit: "Cette dépense dépasserait le crédit disponible.",
   },
   done: {
     settings: "Règle enregistrée",
     format: "Format créé",
     show: "Émission enregistrée",
     showCancelled: "Émission annulée",
-    line: "Ligne de crédit créée",
-    draw: "Tirage enregistré",
-    drawRemoved: "Tirage retiré",
+    line: "Crédit Pay Later créé",
+    draw: "Dépense financée",
+    drawRemoved: "Achat retiré",
   },
 } as const;

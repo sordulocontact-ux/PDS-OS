@@ -15,7 +15,12 @@ import { can } from "@/lib/auth/access";
 import { requirePermission } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { loadBudgets } from "@/lib/finance/budget-queries";
-import { byPost, envelopeRow, linesOf } from "@/lib/finance/envelopes";
+import {
+  asBudgetRow,
+  budgetsAvailable,
+  liveBudgetRows,
+} from "@/lib/finance/cockpit";
+import { byPost, linesOf } from "@/lib/finance/envelopes";
 import { monthFlows } from "@/lib/finance/flows";
 import { spendStage } from "@/lib/finance/spends";
 import {
@@ -34,10 +39,14 @@ export const metadata = { title: t.titles.treasury };
 /**
  * Finance › Trésorerie (Ibé's ticket, maquette 6), laid out as the proto's
  * Rapports page (Sacha 15/11/2026: « la page Rapports est mieux designée »):
- * the horizon (?horizon=) and an envelope (?enveloppe=) on top; the balance,
- * the low point against the minimum reserve and the curve; money in and out
- * by month beside the spends by poste (of the envelope chosen, what is
- * committed, invoiced or paid); what the live budgets still allow; then every move the forecast counts. The Finance updates the balance and the reserve here.
+ * the horizon (?horizon=) on top, the Finance's actions on its right (the
+ * same row as the overview's); the balance, the low point against the
+ * minimum reserve and the curve; money in and out by month beside the
+ * spends by poste (of the budget chosen in that card, ?enveloppe=: what is
+ * committed, invoiced or paid); what the live budgets still allow (the
+ * overview's figure); then every move the forecast counts, each opening
+ * its record in the side sheet. The Finance updates the balance and the
+ * reserve here.
  */
 export default async function FinanceTreasuryPage({
   searchParams,
@@ -54,17 +63,14 @@ export default async function FinanceTreasuryPage({
   ]);
   const treasury = computeTreasury({ ...data, today, horizon });
   const canManage = can(access, "manage_finance");
-  const names = new Map(data.targets.map((x) => [x.id, x.name] as const));
   const live = budgets.envelopes.filter((e) => !e.archived);
   const chosen = live.find((e) => e.id === params.enveloppe) ?? null;
   // The pie counts what is committed, invoiced or paid; the planned is not.
   const spent = (chosen ? [chosen] : live)
     .flatMap((e) => linesOf(e, budgets.spends))
     .filter((s) => !s.refused && spendStage(s.status) !== "planned");
-  const rows = live
-    .map((e) => envelopeRow(e, budgets.spends))
-    .filter((r) => r.currentCents !== null)
-    .sort((a, b) => b.engagedCents - a.engagedCents);
+  // The same budgets and the same figure as the overview's card.
+  const rows = liveBudgetRows(budgets.envelopes, budgets.spends);
   const p = t.page;
 
   return (
@@ -72,8 +78,8 @@ export default async function FinanceTreasuryPage({
       {(data.error || budgets.error) && (
         <FormMessage kind="error">{t.loadError}</FormMessage>
       )}
-      {/* One row of tools (Sacha 15/11/2026): the horizon, then the envelope
-          and the Finance's two settings on the right. */}
+      {/* The same row as the overview's: the horizon on the left, the
+          Finance's actions on the right (the balance, the reserve). */}
       <div className="flex flex-wrap items-center gap-3">
         <SegmentedLinks
           label={p.horizon}
@@ -84,27 +90,11 @@ export default async function FinanceTreasuryPage({
             current: days === horizon,
           }))}
         />
-        <div className="ml-auto w-full max-w-64">
-          <UrlFilters
-            path={routes.financeTreasury}
-            params={{ horizon: String(horizon) }}
-            inline={1}
-            groups={[
-              {
-                key: "enveloppe",
-                label: t.envelopeFilter.label,
-                allLabel: t.envelopeFilter.all,
-                options: live.map((e) => ({ value: e.id, label: e.name })),
-                current: chosen?.id ?? null,
-              },
-            ]}
-          />
-        </div>
         {canManage && treasury && (
-          <>
+          <div className="ml-auto flex flex-wrap items-center gap-2">
             <ReserveButton reserveCents={treasury.reserveCents} />
-            <StatementButton />
-          </>
+            <StatementButton variant="default" />
+          </div>
         )}
       </div>
       <TreasuryCard
@@ -125,26 +115,52 @@ export default async function FinanceTreasuryPage({
             today,
           })}
         />
-        <PostPie posts={byPost(spent)} />
+        <PostPie
+          posts={byPost(spent)}
+          action={
+            <div className="w-48 max-w-full">
+              <UrlFilters
+                path={routes.financeTreasury}
+                params={{ horizon: String(horizon) }}
+                inline={1}
+                groups={[
+                  {
+                    key: "enveloppe",
+                    label: t.envelopeFilter.label,
+                    allLabel: t.envelopeFilter.all,
+                    options: live.map((e) => ({ value: e.id, label: e.name })),
+                    current: chosen?.id ?? null,
+                  },
+                ]}
+              />
+            </div>
+          }
+        />
       </div>
       <div className="grid items-start gap-4">
         <BudgetsCard
-          availableCents={rows.reduce(
-            (sum, r) => sum + Math.max(r.restCents ?? 0, 0),
-            0,
-          )}
+          availableCents={budgetsAvailable(rows)}
           activeEnvelopes={rows.length}
-          budgets={rows.slice(0, 5).map((r) => ({
-            id: r.id,
-            envelopeCents: r.currentCents,
-            engagedCents: r.engagedCents,
-            estimatedCents: r.totals.plannedCents,
-            restCents: r.restCents,
-          }))}
+          budgets={rows.slice(0, 5).map(asBudgetRow)}
           names={new Map(rows.map((r) => [r.id, r.name] as const))}
         />
       </div>
-      {treasury && <TreasuryCalendar treasury={treasury} names={names} />}
+      {treasury && (
+        <TreasuryCalendar
+          events={treasury.events}
+          reserveCents={treasury.reserveCents}
+          data={{
+            spends: budgets.spends,
+            incomes: data.incomes,
+            targets: data.targets,
+            today,
+            proofIn:
+              canManage && access.organizationId
+                ? access.organizationId
+                : undefined,
+          }}
+        />
+      )}
     </FinanceFrame>
   );
 }

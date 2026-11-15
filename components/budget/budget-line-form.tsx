@@ -196,7 +196,7 @@ export function BudgetLineForm({
         readOnly={followsInvoice}
         value={v.amount}
         error={shown.amount}
-        hint={followsInvoice ? t.followsInvoice : t.amountHint}
+        hint={followsInvoice ? t.followsInvoice : undefined}
         onChange={(e) => setV({ ...v, amount: e.target.value })}
       />
       <Field

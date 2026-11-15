@@ -8,16 +8,12 @@ import { can } from "@/lib/auth/access";
 import { requirePermission } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { cockpit } from "@/lib/finance/cockpit";
-import { financePeriod } from "@/lib/finance/period";
-import { loadFinance } from "@/lib/finance/queries";
-import { loadSpends } from "@/lib/finance/spend-queries";
+import { loadFinanceWatch } from "@/lib/finance/watch-queries";
 import {
   TREASURY_HORIZONS,
-  addDays,
   asHorizon,
   computeTreasury,
 } from "@/lib/finance/treasury";
-import { loadTreasury } from "@/lib/finance/treasury-queries";
 import { treasury as t } from "@/lib/i18n/fr/treasury";
 import { parisPlace } from "@/lib/utils/calendar-period";
 import { allInOrder } from "@/lib/utils/parallel";
@@ -30,7 +26,9 @@ export const metadata = { title: t.titles.overview };
  * comes in and goes out, what the budgets allow, where to act. For the
  * direction and the Finance (read_finance); the Finance enters money in and
  * spends from here (manage_finance). Every figure is computed by code
- * (lib/finance/treasury.ts, cockpit.ts). Sacha 15/11/2026: a Finance overview
+ * (lib/finance/treasury.ts, cockpit.ts); the cards' totals and rows come
+ * from the same lines, the budgets and the alerts from the same lists as
+ * Trésorerie and the bell (16/11/2026). Sacha 15/11/2026: a Finance overview
  * again, not an app's home; the greeting and sentence cards (lots 1 and 7:
  * FinanceHome, FinanceBriefCard, FinanceAsk) wait for the general overview.
  */
@@ -43,23 +41,20 @@ export default async function FinanceOverviewPage({
     searchParams,
   ]);
   const horizon = asHorizon(params.horizon);
-  const [data, spending, spends] = await allInOrder([
-    loadTreasury(addDays(today, horizon)),
-    loadFinance(financePeriod("tout", today)),
-    loadSpends(),
-  ]);
+  // The alerts (the bell's, the same count), the treasury read as far as
+  // the longest horizon and the budgets with their spends, in one round.
+  const watch = await loadFinanceWatch(today);
+  const { treasury: data, budgets } = watch;
   const canManage = can(access, "manage_finance");
   const treasury = computeTreasury({ ...data, today, horizon });
   const names = new Map([
-    ...spending.projects.map((p) => [p.id, p.title] as const),
     ...data.targets.map((x) => [x.id, x.name] as const),
+    ...budgets.envelopes.map((e) => [e.id, e.name] as const),
   ]);
 
   return (
     <FinanceFrame section="overview">
-      {(data.error || spending.error) && (
-        <FormMessage kind="error">{t.loadError}</FormMessage>
-      )}
+      {watch.error && <FormMessage kind="error">{t.loadError}</FormMessage>}
       {/* The tools on one row, as Trésorerie's: the horizon on the left,
           the actions on the right. */}
       <div className="flex flex-wrap items-center gap-3">
@@ -73,9 +68,10 @@ export default async function FinanceOverviewPage({
           }))}
         />
         <div className="ml-auto flex flex-wrap items-center gap-2">
-          <QuickExpenseButton outline />
+          <QuickExpenseButton />
           {canManage && access.organizationId && (
             <IncomeAddButton
+              outline
               targets={data.targets}
               organizationId={access.organizationId}
               ownerId={access.personId}
@@ -86,11 +82,11 @@ export default async function FinanceOverviewPage({
       <CockpitOverview
         treasury={treasury}
         view={cockpit({
-          treasury,
           incomes: data.incomes,
           upcoming: data.upcoming,
-          spending,
-          spends: spends.spends,
+          envelopes: budgets.envelopes,
+          spends: budgets.spends,
+          alerts: watch.alerts,
           engines: data.engines,
           today,
           horizon,
@@ -98,7 +94,6 @@ export default async function FinanceOverviewPage({
         horizon={horizon}
         names={names}
         canManage={canManage}
-        canOpenExpenses={can(access, "read_artist_budgets")}
       />
     </FinanceFrame>
   );

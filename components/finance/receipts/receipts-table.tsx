@@ -1,6 +1,9 @@
 "use client";
 
-import { proofFrom } from "@/components/finance/receipts/receipt-card";
+import {
+  proofFrom,
+  proofTitle,
+} from "@/components/finance/receipts/receipt-card";
 import { ReceiptAction } from "@/components/finance/receipts/receipt-action";
 import {
   DataTable,
@@ -71,10 +74,14 @@ export function ReceiptsTable({
                 <DataTableMedia
                   title={
                     <DataTableLink href={null} onOpen={() => onOpen(index)}>
-                      {proof.values.vendor ?? t.card.unknownVendor}
+                      {proofTitle(row)}
                     </DataTableLink>
                   }
-                  subtitle={[proofFrom(row), isPhoto(proof) && t.photo]
+                  subtitle={[
+                    row.state === "other" && t.kinds.other,
+                    proofFrom(row),
+                    isPhoto(proof) && t.photo,
+                  ]
                     .filter(Boolean)
                     .join(" · ")}
                 />

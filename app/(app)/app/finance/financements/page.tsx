@@ -1,12 +1,7 @@
 import { DrawsTable } from "@/components/finance/draws-table";
 import { OrchardCard, PayLaterCard } from "@/components/finance/engine-cards";
 import { FinanceFrame } from "@/components/finance/finance-frame";
-import {
-  NewFormatButton,
-  OrchardSettingsButton,
-  PayLaterButtons,
-  PlanShowButton,
-} from "@/components/finance/funding-buttons";
+import { FundingActions } from "@/components/finance/funding-buttons";
 import { LinkRows } from "@/components/finance/link-rows";
 import { ShowsList } from "@/components/finance/shows-list";
 import { FormMessage } from "@/components/auth/form-message";
@@ -78,7 +73,16 @@ export default async function FinanceFundingsPage() {
   return (
     <FinanceFrame
       section="fundings"
-      action={canManage ? <NewFormatButton /> : undefined}
+      action={
+        canManage ? (
+          <FundingActions
+            formats={engines.formats}
+            settings={engines.settings}
+            lines={engines.creditLines}
+            spends={drawable}
+          />
+        ) : undefined
+      }
     >
       {(data.error || spends.error) && (
         <FormMessage kind="error">{t.loadError}</FormMessage>
@@ -88,22 +92,13 @@ export default async function FinanceFundingsPage() {
           trancheCents={engines.settings.orchardTrancheCents}
           counted={engines.settings.orchardTitlesCounted}
           orchard={orchard}
-          action={
-            canManage ? (
-              <OrchardSettingsButton settings={engines.settings} />
-            ) : undefined
-          }
         />
         <PayLaterCard
           limitCents={limit}
           usedCents={used}
           hasLines={lines.length > 0}
           summary={payLaterSummary(engines.draws, today)}
-        >
-          {canManage && (
-            <PayLaterButtons lines={engines.creditLines} spends={drawable} />
-          )}
-        </PayLaterCard>
+        />
       </div>
       {formats.length === 0 ? (
         <EmptyNote>{t.formats.noFormat}</EmptyNote>
@@ -115,7 +110,10 @@ export default async function FinanceFundingsPage() {
               title={format.name}
               action={
                 <StatusBadge tone="slate">
-                  {t.formats.cost(amount(format.costCents))}
+                  {t.formats.cost(
+                    amount(format.costCents),
+                    t.formats.unitOf(format.name),
+                  )}
                 </StatusBadge>
               }
             >
@@ -125,11 +123,6 @@ export default async function FinanceFundingsPage() {
                 formats={engines.formats}
                 canManage={canManage}
               />
-              {canManage && !format.archived && (
-                <div>
-                  <PlanShowButton format={format} formats={engines.formats} />
-                </div>
-              )}
             </MetricCard>
           ))}
         </div>

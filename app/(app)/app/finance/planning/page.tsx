@@ -4,10 +4,12 @@ import { PlanningBoard } from "@/components/finance/planning/planning-board";
 import { PlanningTotals } from "@/components/finance/planning/planning-totals";
 import { CalendarToolbar, periodLabel } from "@/components/ui/calendar-toolbar";
 import { ToneCallout } from "@/components/ui/tone-callout";
+import { can } from "@/lib/auth/access";
 import { requirePermission } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { asMonth, planningDays } from "@/lib/finance/planning";
 import { addDays, computeTreasury } from "@/lib/finance/treasury";
+import { loadSpends } from "@/lib/finance/spend-queries";
 import { loadTreasury } from "@/lib/finance/treasury-queries";
 import { financePlanning as t } from "@/lib/i18n/fr/finance-planning";
 import { treasury as treasuryText } from "@/lib/i18n/fr/treasury";
@@ -33,13 +35,14 @@ const monthHref = (date: string | null) =>
  * with its moves, the balance at its end when it moves, the day the
  * balance goes under the reserve and the forecast's low point. Past days
  * show the real (receipts, spends paid), today and after the forecast,
- * everything read from `computeTreasury`. A day opens in the side sheet.
+ * everything read from `computeTreasury`. A day opens in the side sheet, and
+ * so does each of its moves' records, without leaving the page.
  */
 export default async function FinancePlanningPage({
   searchParams,
 }: PageProps<"/app/finance/planning">) {
   const today = parisPlace(new Date()).day;
-  const [, params] = await allInOrder([
+  const [access, params] = await allInOrder([
     requirePermission("read_finance"),
     searchParams,
   ]);
@@ -51,7 +54,7 @@ export default async function FinancePlanningPage({
     MAX_DAYS,
   );
   const until = addDays(today, horizon);
-  const data = await loadTreasury(until);
+  const [data, spends] = await allInOrder([loadTreasury(until), loadSpends()]);
   const treasury = computeTreasury({ ...data, today, horizon });
   const days = planningDays({
     month,
@@ -65,7 +68,7 @@ export default async function FinancePlanningPage({
 
   return (
     <FinanceFrame section="planning">
-      {data.error && (
+      {(data.error || spends.error) && (
         <FormMessage kind="error">{treasuryText.loadError}</FormMessage>
       )}
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -90,6 +93,16 @@ export default async function FinancePlanningPage({
         cells={period.days}
         days={days}
         today={today}
+        data={{
+          spends: spends.spends,
+          incomes: data.incomes,
+          targets: data.targets,
+          today,
+          proofIn:
+            can(access, "manage_finance") && access.organizationId
+              ? access.organizationId
+              : undefined,
+        }}
       />
     </FinanceFrame>
   );

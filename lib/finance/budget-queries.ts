@@ -2,6 +2,8 @@ import "server-only";
 
 import type { BudgetFamily } from "@/lib/budget/types";
 import { isBudgetFamily } from "@/lib/budget/types";
+import { loadEngines } from "@/lib/finance/engine-queries";
+import type { ShowFormat } from "@/lib/finance/engines";
 import type { Envelope, EnvelopeKind, Revision } from "@/lib/finance/envelopes";
 import { loadSpends } from "@/lib/finance/spend-queries";
 import type { FinanceSpend } from "@/lib/finance/spends";
@@ -24,6 +26,8 @@ export type BudgetsData = {
   envelopes: Envelope[];
   spends: FinanceSpend[];
   templates: BudgetTemplate[];
+  // The show formats, for « Planifier une émission » from a budget.
+  formats: ShowFormat[];
   error: boolean;
 };
 
@@ -60,30 +64,39 @@ export function templateLines(raw: unknown): TemplateLine[] {
  */
 export async function loadBudgets(): Promise<BudgetsData> {
   const supabase = await createClient();
-  const [projects, artists, centers, revisions, shares, templates, spends] =
-    await Promise.all([
-      supabase.rpc("finance_projects"),
-      supabase.rpc("finance_artists"),
-      supabase
-        .from("finance_cost_centers")
-        .select("id, name, budget_cents, archived_at")
-        .order("name"),
-      supabase
-        .from("budget_revisions")
-        .select(
-          "target_kind, target_id, before_cents, after_cents, reason, created_at",
-        )
-        .order("created_at"),
-      supabase
-        .from("finance_envelope_shares")
-        .select("target_kind, target_id, pds_share_bp"),
-      supabase
-        .from("finance_budget_templates")
-        .select("id, name, lines")
-        .is("archived_at", null)
-        .order("name"),
-      loadSpends(),
-    ]);
+  const [
+    projects,
+    artists,
+    centers,
+    revisions,
+    shares,
+    templates,
+    spends,
+    engines,
+  ] = await Promise.all([
+    supabase.rpc("finance_projects"),
+    supabase.rpc("finance_artists"),
+    supabase
+      .from("finance_cost_centers")
+      .select("id, name, budget_cents, archived_at")
+      .order("name"),
+    supabase
+      .from("budget_revisions")
+      .select(
+        "target_kind, target_id, before_cents, after_cents, reason, created_at",
+      )
+      .order("created_at"),
+    supabase
+      .from("finance_envelope_shares")
+      .select("target_kind, target_id, pds_share_bp"),
+    supabase
+      .from("finance_budget_templates")
+      .select("id, name, lines")
+      .is("archived_at", null)
+      .order("name"),
+    loadSpends(),
+    loadEngines(supabase),
+  ]);
   const results = { projects, artists, centers, revisions, shares, templates };
   for (const [name, result] of Object.entries(results))
     if (result.error)
@@ -165,6 +178,10 @@ export async function loadBudgets(): Promise<BudgetsData> {
       name: t.name,
       lines: templateLines(t.lines),
     })),
-    error: spends.error || Object.values(results).some((r) => Boolean(r.error)),
+    formats: engines.engines.formats,
+    error:
+      spends.error ||
+      engines.error ||
+      Object.values(results).some((r) => Boolean(r.error)),
   };
 }

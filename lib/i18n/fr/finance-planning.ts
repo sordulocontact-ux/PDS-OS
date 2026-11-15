@@ -24,12 +24,21 @@ export const financePlanning = {
     show: "Émission",
     pay_later: "Pay Later",
   },
+  // A move opened in the side sheet, without leaving the page.
+  record: {
+    back: "Retour au jour",
+    spends: "Voir dans Dépenses",
+    incomes: "Voir dans Factures",
+    fundings: "Voir dans Financements",
+    missing: "Cette fiche n'est plus dans la liste.",
+  },
   paidLabel: "Dépenses payées",
   installmentLabel: "Mensualité Pay Later",
-  real: "Réel",
-  forecast: "Prévu",
+  // « Dépense · Prévue », the origin then the state (feminine for a spend
+  // and an invoice).
+  state: { real: "Réelle", forecast: "Prévue" },
   late: "En retard",
-  lateSince: (day: string) => `En retard, attendu le ${day}`,
+  lateSince: (day: string) => `en retard depuis le ${day}`,
   marks: {
     reserve: "Sous la réserve",
     low: "Point bas",
@@ -71,10 +80,14 @@ export const financePlanning = {
       `Planning · ${plural(count, "mouvement", "mouvements")}`,
     before: "Solde avant",
     after: "Solde après",
+    // The large figure of the sheet is the balance at the end of the day.
+    endOfDay: "Solde en fin de journée",
     in: "Entrées",
     out: "Sorties",
+    // No move that way that day.
+    none: "—",
     moves: "Mouvements",
-    balanceAfter: (amount: string) => `Solde après : ${amount}`,
+    balanceAfter: "Solde après :",
     open: (origin: string) => `Ouvrir · ${origin}`,
     unknown: "—",
   },

@@ -26,33 +26,45 @@ const NOISE = new Set([
 ]);
 
 const nameOf = (row: Record<string, unknown>) => {
-  const value = row.label ?? row.name ?? row.number ?? row.invoice_number;
+  const value =
+    row.label ??
+    row.name ??
+    row.number ??
+    row.invoice_number ??
+    row.vendor ??
+    row.file_name ??
+    row.counterparty;
   return typeof value === "string" && value.trim() ? value : null;
 };
 
-/** The changed fields in words, each once; technical ones folded into
- * « autres champs ». */
+/** The changed fields in words, each once; a technical column with no word
+ * is left out rather than named « autres champs ». */
 function fieldsOf(keys: string[]) {
   const t = financeExports;
   const named = keys.map((k) => t.fields[k as keyof typeof t.fields]);
-  const words = [...new Set(named.filter(Boolean))] as string[];
-  return named.some((n) => !n) ? [...words, t.history.otherFields] : words;
+  return [...new Set(named.filter(Boolean))] as string[];
 }
 
 const EVENT_COLUMNS =
   "id, created_at, entity, action, before, after, actor:people(first_name, last_name)";
 
-/** The last changes of Finance (finance_events, written by trigger): who,
- * when, what, which fields. Read with the session (read_finance). */
-export async function loadHistory(limit = 100): Promise<HistoryEntry[]> {
+export const HISTORY_PAGE = 20;
+
+/** A page of the changes of Finance, the latest first (finance_events,
+ * written by trigger): who, when, what, which fields, and how many there
+ * are in all. Read with the session (read_finance). */
+export async function loadHistory(
+  offset = 0,
+  limit = HISTORY_PAGE,
+): Promise<{ entries: HistoryEntry[]; total: number }> {
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const { data, count, error } = await supabase
     .from("finance_events")
-    .select(EVENT_COLUMNS)
+    .select(EVENT_COLUMNS, { count: "exact" })
     .order("seq", { ascending: false })
-    .limit(limit);
+    .range(offset, offset + limit - 1);
   if (error) console.error("loadHistory:", error.message);
-  return toEntries(data ?? []);
+  return { entries: toEntries(data ?? []), total: count ?? 0 };
 }
 
 /** The changes of one record (a spend, an income, a bank transaction): the
@@ -97,7 +109,7 @@ function toEntries(rows: EventRow[]): HistoryEntry[] {
       id: e.id,
       at: e.created_at,
       who: e.actor ? personName(e.actor.first_name, e.actor.last_name) : null,
-      entity: t.entities[e.entity as keyof typeof t.entities] ?? e.entity,
+      entity: t.entities[e.entity as keyof typeof t.entities] ?? t.entityOther,
       action: t.actions[e.action as keyof typeof t.actions] ?? e.action,
       name: nameOf({ ...before, ...after }),
       fields: fieldsOf(changed),

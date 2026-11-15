@@ -12,6 +12,9 @@ const fr = { treasury };
 
 const amount = (cents: number) => formatAmount(cents, { ht: false });
 
+// Under this share of the chart's width (%), two names under the axis touch.
+const NAME_GAP = 20;
+
 /** Round bounds and four steps: 1, 2, 2.5 or 5 times a power of ten. */
 function axis(low: number, high: number) {
   const span = Math.max(high - low, 1);
@@ -76,8 +79,10 @@ export function TreasuryChart({
     ),
   ];
   const shown = active === null ? null : points[active];
+  // A month's name is left out when it would touch « Aujourd'hui »: a share
+  // of the width, so a phone's narrow chart drops it sooner than a desktop's.
   const months = points.flatMap((p, i) =>
-    p.day.endsWith("-01") && Math.abs(i - todayIndex) > 4
+    p.day.endsWith("-01") && Math.abs(x(i) - x(todayIndex)) >= NAME_GAP
       ? [{ i, day: p.day }]
       : [],
   );

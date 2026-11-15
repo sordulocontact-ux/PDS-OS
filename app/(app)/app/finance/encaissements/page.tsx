@@ -2,13 +2,11 @@ import { IconMoneyBillCoin } from "nucleo-sharp-essential";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { FinanceFrame } from "@/components/finance/finance-frame";
-import {
-  IncomeAddButton,
-  IncomesTable,
-} from "@/components/finance/incomes-table";
+import { IncomesList } from "@/components/finance/incomes-list";
+import { IncomeAddButton } from "@/components/finance/incomes-table";
 import { EmptyNote, EmptyState } from "@/components/shell/empty-state";
-import { DataTableViews } from "@/components/ui/data-table";
 import { MetricCard } from "@/components/ui/metric-card";
+import { SegmentedLinks } from "@/components/ui/segmented-control";
 import { can } from "@/lib/auth/access";
 import { requirePermission } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
@@ -88,6 +86,15 @@ export default async function FinanceIncomesPage({
         ownerId={access.personId}
       />
     ) : undefined;
+  const add =
+    canManage && access.organizationId ? (
+      <IncomeAddButton
+        iconOnly
+        targets={data.targets}
+        organizationId={access.organizationId}
+        ownerId={access.personId}
+      />
+    ) : undefined;
   const empty = data.incomes.length === 0 && !data.error;
 
   return (
@@ -126,30 +133,36 @@ export default async function FinanceIncomesPage({
               caption={v.tiles.receivedHint(thisMonth.length)}
             />
           </div>
-          <DataTableViews
-            segmented
-            label={v.views.label}
-            action={action}
-            views={VIEWS.map((key) => ({
-              href: `${routes.financeIncomes}?vue=${key}`,
-              label: labels[key],
-              count: lists[key].length,
-              current: view === key,
-            }))}
-          >
-            {lists[view].length === 0 ? (
-              <EmptyNote>{v.emptyView}</EmptyNote>
-            ) : (
-              <IncomesTable
-                incomes={lists[view]}
-                targets={data.targets}
-                today={today}
-                canManage={canManage}
-                organizationId={access.organizationId ?? ""}
-                ownerId={access.personId}
-              />
-            )}
-          </DataTableViews>
+          <IncomesList
+            incomes={lists[view]}
+            targets={data.targets}
+            today={today}
+            canManage={canManage}
+            organizationId={access.organizationId ?? ""}
+            ownerId={access.personId}
+            empty={<EmptyNote>{v.emptyView}</EmptyNote>}
+            filters={
+              <>
+                <SegmentedLinks
+                  label={v.views.label}
+                  options={VIEWS.map((key) => ({
+                    key,
+                    href: `${routes.financeIncomes}?vue=${key}`,
+                    label: (
+                      <>
+                        {labels[key]}
+                        <span className="text-[color:var(--text-tertiary)] tabular-nums">
+                          {lists[key].length}
+                        </span>
+                      </>
+                    ),
+                    current: view === key,
+                  }))}
+                />
+                {add}
+              </>
+            }
+          />
         </>
       )}
     </FinanceFrame>

@@ -1,6 +1,7 @@
 "use client";
 
 import { IconPaperclip } from "nucleo-sharp-essential";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { FinanceSheet } from "@/components/finance/finance-sheet";
@@ -48,7 +49,15 @@ export function ReceiptsBox({
   organizationId: string | null;
   address: string | null;
 }) {
-  const [sheet, setSheet] = useState<string | null>(null);
+  // Opened at once when the address names it (`?ouvrir=<id>`, from the ⌘K
+  // search), also when it changes while the list is shown.
+  const wanted = useSearchParams().get("ouvrir");
+  const [sheet, setSheet] = useState<string | null>(wanted);
+  const [seen, setSeen] = useState(wanted);
+  if (wanted !== seen) {
+    setSeen(wanted);
+    setSheet(wanted);
+  }
   const intake = useProofIntake({
     organizationId,
     pending: rows

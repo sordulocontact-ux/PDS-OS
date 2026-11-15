@@ -9,9 +9,13 @@
 // - A day's balance before and after = the treasury's points of the day
 //   before and of the day (the forecast's point wins on today).
 
-import { routes } from "@/lib/auth/redirects";
 import { installmentsPaid, type EngineData } from "@/lib/finance/engines";
-import { incomeState, type Income } from "@/lib/finance/money-in";
+import { type Income } from "@/lib/finance/money-in";
+import {
+  fundingsTarget,
+  targetOfEvent,
+  type MoveTarget,
+} from "@/lib/finance/move-target";
 import { spendsHref } from "@/lib/finance/spend-links";
 import {
   addDays,
@@ -20,7 +24,6 @@ import {
   type TreasuryEvent,
 } from "@/lib/finance/treasury";
 import { financePlanning as t } from "@/lib/i18n/fr/finance-planning";
-import { incomeHref } from "@/lib/finance/income-links";
 
 export type PlanningOrigin =
   "income" | "spend" | "paid" | "orchard" | "show" | "pay_later";
@@ -37,7 +40,8 @@ export type PlanningMove = {
   dueOn: string | null;
   // The balance after it (the forecast's; the real is by day).
   balanceCents: number | null;
-  href: string;
+  // What it opens in the side sheet (its spend, its income, or a link).
+  target: MoveTarget;
 };
 
 // Under the reserve that day; the low point of the forecast (under the
@@ -57,7 +61,7 @@ export type PlanningDay = {
 
 function forecastMove(e: Treasury["events"][number]): PlanningMove {
   const source: TreasuryEvent["source"] = e.source;
-  const base = {
+  return {
     key: e.key,
     label: e.label,
     direction: e.direction,
@@ -65,20 +69,14 @@ function forecastMove(e: Treasury["events"][number]): PlanningMove {
     real: false,
     dueOn: e.dueOn,
     balanceCents: e.balanceCents,
+    origin:
+      source.kind === "income"
+        ? "income"
+        : source.kind === "spend"
+          ? "spend"
+          : source.engine,
+    target: targetOfEvent(source),
   };
-  if (source.kind === "income")
-    return {
-      ...base,
-      origin: "income",
-      href: incomeHref(source.id, source.state),
-    };
-  if (source.kind === "spend")
-    return {
-      ...base,
-      origin: "spend",
-      href: spendsHref({ ouvrir: source.id }),
-    };
-  return { ...base, origin: source.engine, href: routes.financeFundings };
 }
 
 /** The days of `month` ("YYYY-MM"), each with its moves and balance. */
@@ -111,7 +109,6 @@ export function planningDays({
   const real = { real: true, dueOn: null, balanceCents: null } as const;
 
   for (const income of incomes) {
-    const href = incomeHref(income.id, incomeState(income, today));
     for (const r of income.receipts)
       put(r.receivedOn, {
         ...real,
@@ -120,7 +117,7 @@ export function planningDays({
         direction: "in",
         cents: r.cents,
         origin: "income",
-        href,
+        target: { kind: "income", id: income.id },
       });
   }
   paid.forEach((p, i) =>
@@ -131,7 +128,11 @@ export function planningDays({
       direction: "out",
       cents: p.cents,
       origin: "paid",
-      href: spendsHref({ statut: "paye" }),
+      target: {
+        kind: "link",
+        where: "spends",
+        href: spendsHref({ statut: "paye" }),
+      },
     }),
   );
   installmentsPaid(engines, addDays(first, -1), today).forEach((p, i) =>
@@ -142,7 +143,7 @@ export function planningDays({
       direction: "out",
       cents: p.cents,
       origin: "pay_later",
-      href: routes.financeFundings,
+      target: fundingsTarget(),
     }),
   );
   for (const e of treasury?.events ?? []) put(e.day, forecastMove(e));

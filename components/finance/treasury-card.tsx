@@ -1,6 +1,8 @@
+import { TreasurySpark } from "@/components/finance/home/treasury-spark";
 import { TreasuryChart } from "@/components/finance/treasury-chart";
 import { StatementButton } from "@/components/finance/treasury-forms";
 import { MetricCard, MetricCardLink } from "@/components/ui/metric-card";
+import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
 import type { Treasury, TreasuryHorizon } from "@/lib/finance/treasury";
 import { treasury as treasuryText } from "@/lib/i18n/fr/treasury";
@@ -28,22 +30,22 @@ const LINES = [
 /**
  * The balance of the account and its curve, the main card of Finance (after
  * Midday's report cards, 13/11/2026): the balance large, what the forecast
- * says in one line, the legend, the curve. `detailed` (the Trésorerie page):
- * the money in and out of the period, the balance at the horizon and the
- * low point under the figure, the horizon's choice in `control`. Without any
- * statement of the account: what to do first.
+ * says in one line, the curve. On the overview it is a small one without
+ * axes that opens Trésorerie (Sacha 16/11/2026: the two pages did not
+ * repeat the same chart); `detailed` (the Trésorerie page): the large
+ * curve with its legend, the money in and out of the period, the balance
+ * at the horizon and the low point under the figure. Without any statement
+ * of the account: what to do first.
  */
 export function TreasuryCard({
   treasury,
   horizon,
   canManage,
-  control,
   detailed = false,
 }: {
   treasury: Treasury | null;
   horizon: TreasuryHorizon;
   canManage: boolean;
-  control?: React.ReactNode;
   detailed?: boolean;
 }) {
   const t = fr.treasury;
@@ -85,43 +87,54 @@ export function TreasuryCard({
       size="lg"
       caption={caption}
       action={
-        control ??
-        (detailed ? undefined : (
+        detailed ? undefined : (
           <MetricCardLink href={routes.financeTreasury}>
             {t.overview.balance.open}
           </MetricCardLink>
-        ))
+        )
       }
       legend={
-        <div className="flex flex-col gap-5">
-          {detailed && <PeriodFigures treasury={treasury} horizon={horizon} />}
-          <ul
-            aria-label={t.chart.legend}
-            className="flex flex-wrap gap-x-5 gap-y-1 text-caption text-[color:var(--text-secondary)]"
-          >
-            {LINES.filter(
-              (l) => l.key !== "reserve" || treasury.reserveCents > 0,
-            ).map((l) => (
-              <li key={l.key} className="flex items-center gap-2">
-                <span
-                  aria-hidden
-                  className={cn("inline-block w-4 border-t-2", l.swatch)}
-                />
-                {l.key === "reserve"
-                  ? `${t.chart.reserve} ${amount(treasury.reserveCents)}`
-                  : t.chart[l.key]}
-              </li>
-            ))}
-          </ul>
-        </div>
+        detailed && (
+          <div className="flex flex-col gap-5">
+            <PeriodFigures treasury={treasury} horizon={horizon} />
+            <ul
+              aria-label={t.chart.legend}
+              className="flex flex-wrap gap-x-5 gap-y-1 text-caption text-[color:var(--text-secondary)]"
+            >
+              {LINES.filter(
+                (l) => l.key !== "reserve" || treasury.reserveCents > 0,
+              ).map((l) => (
+                <li key={l.key} className="flex items-center gap-2">
+                  <span
+                    aria-hidden
+                    className={cn("inline-block w-4 border-t-2", l.swatch)}
+                  />
+                  {l.key === "reserve"
+                    ? `${t.chart.reserve} ${amount(treasury.reserveCents)}`
+                    : t.chart[l.key]}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
       }
     >
-      <TreasuryChart
-        points={treasury.points}
-        reserveCents={treasury.reserveCents}
-        low={treasury.low}
-        tall={detailed}
-      />
+      {detailed ? (
+        <TreasuryChart
+          points={treasury.points}
+          reserveCents={treasury.reserveCents}
+          low={treasury.low}
+          tall
+        />
+      ) : (
+        <ViewLink
+          href={routes.financeTreasury}
+          aria-label={t.overview.balance.openLabel}
+          className="block rounded-md outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[color:var(--focus-ring)]"
+        >
+          <TreasurySpark treasury={treasury} />
+        </ViewLink>
+      )}
     </MetricCard>
   );
 }

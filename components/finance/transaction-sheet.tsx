@@ -19,6 +19,16 @@ import { formatAmount } from "@/lib/utils/money";
 const t = financeSheet.tx;
 const amount = (cents: number) => formatAmount(cents, { ht: false });
 
+/** The bank's own wording leads; the name PDS OS knows it by comes under. */
+export const txTitle = (tx: BankTransaction) =>
+  tx.label ?? tx.counterparty ?? tx.reference ?? "";
+
+/** What goes under the title: the name, when it adds to the title. */
+export const txSubtitle = (tx: BankTransaction) =>
+  [tx.counterparty !== tx.label ? tx.counterparty : null, tx.reference]
+    .filter(Boolean)
+    .join(" · ");
+
 /**
  * A bank transaction in Finance's side sheet, as the proto (Sacha
  * 15/11/2026): the bank and the day, its amount large (money in green), what
@@ -49,7 +59,7 @@ export function TransactionSheet({
       : undefined;
   const choose = actions.find((a) => a.key === "match");
   const others = actions.filter((a) => a.key !== "match");
-  const said = [tx.reference, tx.label].filter(Boolean).join(" · ");
+  const said = txSubtitle(tx);
 
   return (
     <>
@@ -130,11 +140,6 @@ export function TransactionSheet({
             )}
           </section>
         )
-      )}
-      {state !== "ignored" && (
-        <p className="text-caption text-[color:var(--text-tertiary)]">
-          {t.never}
-        </p>
       )}
       {tx.ignoreReason && (
         <p className="text-body-sm text-[color:var(--text-secondary)]">

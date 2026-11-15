@@ -11,9 +11,13 @@ import { saveReserve, saveStatement } from "@/lib/finance/treasury-actions";
 import { treasury } from "@/lib/i18n/fr/treasury";
 import { todayInParis } from "@/lib/insights/dates";
 import { parseEurosToCents } from "@/lib/projects/schemas";
-import { amountInput } from "@/lib/utils/money";
+import { formatAmount } from "@/lib/utils/money";
 
 const fr = { treasury };
+
+// « 30 000 », as the figures of the page say it (the field accepts the spaces).
+const amountText = (cents: number) =>
+  formatAmount(cents, { ht: false }).replace(/\s*€$/, "");
 
 const isAmount = (value: string) => {
   const parsed = parseEurosToCents(value.trim().replace(/^-/, ""));
@@ -106,7 +110,7 @@ function ReserveForm({
   const t = fr.treasury.reserveForm;
   const submit = useWriteSubmit(onDone, "");
   const [amount, setAmount] = useState(
-    reserveCents > 0 ? amountInput(reserveCents) : "",
+    reserveCents > 0 ? amountText(reserveCents) : "",
   );
   const [tried, setTried] = useState(false);
   const invalid = amount.trim() !== "" && !isAmount(amount);
@@ -168,7 +172,12 @@ export function ReserveButton({ reserveCents }: { reserveCents: number }) {
   const t = fr.treasury;
   return (
     <DialogButton
-      label={t.page.reserve}
+      label={
+        reserveCents > 0
+          ? t.page.reserveSet(formatAmount(reserveCents, { ht: false }))
+          : t.page.reserve
+      }
+      variant="outline"
       size="default"
       title={t.reserveForm.title}
       description={t.reserveForm.description}

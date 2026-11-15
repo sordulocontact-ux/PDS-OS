@@ -3,6 +3,7 @@ import "server-only";
 import { financeAlerts, type Alert } from "@/lib/finance/alerts";
 import { loadBudgets, type BudgetsData } from "@/lib/finance/budget-queries";
 import { envelopeRow } from "@/lib/finance/envelopes";
+import type { BankTransaction } from "@/lib/finance/reconcile";
 import { loadReconciliation } from "@/lib/finance/reconcile-queries";
 import { addDays, computeTreasury } from "@/lib/finance/treasury";
 import {
@@ -24,6 +25,8 @@ export async function loadFinanceWatch(today: string): Promise<{
   alerts: Alert[];
   treasury: TreasuryData;
   budgets: BudgetsData;
+  // The bank's operations, already read for the alerts (the ⌘K search too).
+  transactions: BankTransaction[];
   error: boolean;
 }> {
   const [treasury, budgets] = await allInOrder([
@@ -51,6 +54,7 @@ export async function loadFinanceWatch(today: string): Promise<{
     alerts,
     treasury,
     budgets,
+    transactions: bank.transactions,
     error: treasury.error || budgets.error || bank.error,
   };
 }

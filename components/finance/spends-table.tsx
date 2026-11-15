@@ -30,12 +30,14 @@ import {
 import { FormDialog } from "@/components/ui/form-dialog";
 import { RowActions, type RowAction } from "@/components/ui/row-actions";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { routes } from "@/lib/auth/redirects";
 import { isFinanceTarget, type BudgetLine } from "@/lib/budget/types";
 import {
   proofExpected,
   rebillMissing,
   spendDay,
   spendTtc,
+  tableDay,
   type FinanceSpend,
 } from "@/lib/finance/spends";
 import type { FinanceTarget } from "@/lib/finance/treasury-queries";
@@ -44,7 +46,6 @@ import { dialogs } from "@/lib/i18n/fr/dialogs";
 import { financeSpends } from "@/lib/i18n/fr/finance-spends";
 import { treasury } from "@/lib/i18n/fr/treasury";
 import { spendCashTone } from "@/lib/ui/state-tones";
-import { formatDay } from "@/lib/utils/day";
 import { formatAmount } from "@/lib/utils/money";
 import { cn } from "@/lib/utils";
 
@@ -87,7 +88,7 @@ function asLine(spend: FinanceSpend, targetLabel: string | null): BudgetLine {
 
 /**
  * Every spend of the label (Finance › Dépenses): what and from whom, its
- * envelope (project, artist, cost center, « Hors budget »), the day it goes
+ * budget (project, artist, other, « Hors budget »), the day it goes
  * out, its state, its amount TTC (HT below). The Finance changes the
  * spends of its own envelopes and plans the rebilling of a rebillable one;
  * a project's or an artist's spend is changed from its Budget.
@@ -99,6 +100,7 @@ export function SpendsTable({
   organizationId,
   ownerId,
   columns,
+  hideEnvelope = false,
 }: {
   spends: FinanceSpend[];
   targets: FinanceTarget[];
@@ -108,6 +110,8 @@ export function SpendsTable({
   // The columns one may hide that are shown (Dépenses' « Colonnes »);
   // all of them when absent.
   columns?: Set<SpendColumn>;
+  // On a budget's own page, where the envelope column says nothing.
+  hideEnvelope?: boolean;
 }) {
   const show = (column: SpendColumn) => !columns || columns.has(column);
   const t = fr.financeSpends;
@@ -126,16 +130,25 @@ export function SpendsTable({
 
   function actionsOf(spend: FinanceSpend): RowAction[] {
     return [
-      ...(isFinanceTarget(spend.target)
-        ? [
-            {
-              key: "edit",
-              label: t.edit,
-              icon: IconPenWriting2,
-              onSelect: () => setOpen({ kind: "edit", spend }),
-            },
-          ]
-        : []),
+      // A cost center's or off-budget spend is changed here; a project's or
+      // an artist's in its own Budget.
+      isFinanceTarget(spend.target)
+        ? {
+            key: "edit",
+            label: t.edit,
+            icon: IconPenWriting2,
+            onSelect: () => setOpen({ kind: "edit", spend }),
+          }
+        : {
+            key: "edit",
+            label:
+              spend.target.kind === "artist" ? t.editInArtist : t.editInProject,
+            icon: IconPenWriting2,
+            href:
+              spend.target.kind === "artist"
+                ? routes.artistBudget(spend.target.id)
+                : routes.projectBudget(spend.target.id),
+          },
       ...(rebillMissing(spend)
         ? [
             {
@@ -154,7 +167,9 @@ export function SpendsTable({
       <DataTable framed>
         <DataTableHeader>
           <DataTableHead fill>{c.label}</DataTableHead>
-          <DataTableHead hideBelow="lg">{c.envelope}</DataTableHead>
+          {!hideEnvelope && (
+            <DataTableHead hideBelow="lg">{c.envelope}</DataTableHead>
+          )}
           {show("post") && (
             <DataTableHead hideBelow="xl">{c.post}</DataTableHead>
           )}
@@ -168,7 +183,9 @@ export function SpendsTable({
           {show("proof") && (
             <DataTableHead hideBelow="lg">{c.proof}</DataTableHead>
           )}
-          <DataTableHead align="end">{c.amount}</DataTableHead>
+          <DataTableHead align="end" className="w-28 sm:w-48">
+            {c.amount}
+          </DataTableHead>
           {canManage && <DataTableActionsHead label={c.actions} />}
         </DataTableHeader>
         <DataTableBody>
@@ -190,18 +207,20 @@ export function SpendsTable({
                     }
                   />
                 </DataTableCell>
-                <DataTableCell hideBelow="lg">
-                  {/* The envelope's name alone (Sacha 15/11/2026). */}
-                  <span
-                    className={cn(
-                      "block truncate",
-                      spend.target.kind === "off_budget" &&
-                        "text-[color:var(--text-secondary)]",
-                    )}
-                  >
-                    {envelopeOf(spend)}
-                  </span>
-                </DataTableCell>
+                {!hideEnvelope && (
+                  <DataTableCell hideBelow="lg">
+                    {/* The envelope's name alone (Sacha 15/11/2026). */}
+                    <span
+                      className={cn(
+                        "block truncate",
+                        spend.target.kind === "off_budget" &&
+                          "text-[color:var(--text-secondary)]",
+                      )}
+                    >
+                      {envelopeOf(spend)}
+                    </span>
+                  </DataTableCell>
+                )}
                 {show("post") && (
                   <DataTableCell hideBelow="xl">
                     {spend.family ? (
@@ -225,7 +244,7 @@ export function SpendsTable({
                 )}
                 {show("day") && (
                   <DataTableCell hideBelow="sm" className="tabular-nums">
-                    {formatDay(spendDay(spend), { weekday: false })}
+                    {tableDay(spendDay(spend))}
                   </DataTableCell>
                 )}
                 {show("state") && (
@@ -245,7 +264,9 @@ export function SpendsTable({
                     ) : proofExpected(spend) ? (
                       <StatusBadge tone="warning">{t.proofMissing}</StatusBadge>
                     ) : (
-                      EMPTY_CELL
+                      <span className="text-[color:var(--text-secondary)]">
+                        {t.proofLater}
+                      </span>
                     )}
                   </DataTableCell>
                 )}
@@ -298,9 +319,9 @@ export function SpendsTable({
           onOpenChange={(next) => !next && setOpen(null)}
           title={open.kind === "edit" ? t.editTitle : t.rebillTitle}
           description={
-            open.kind === "edit"
-              ? t.editDescription
-              : t.rebillDescription(open.spend.label)
+            open.kind === "rebill"
+              ? t.rebillDescription(open.spend.label)
+              : undefined
           }
           closeLabel={fr.dialogs.close}
           size={open.kind === "rebill" ? "medium" : "default"}

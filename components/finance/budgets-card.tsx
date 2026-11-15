@@ -1,8 +1,10 @@
 import { MetricCard, MetricCardLink } from "@/components/ui/metric-card";
+import { RestAmount } from "@/components/finance/rest-amount";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { routes } from "@/lib/auth/redirects";
 import type { BudgetRow } from "@/lib/finance/aggregate";
 import { treasury as treasuryText } from "@/lib/i18n/fr/treasury";
+import { cn } from "@/lib/utils";
 import { formatAmount } from "@/lib/utils/money";
 
 const fr = { treasury: treasuryText };
@@ -10,9 +12,10 @@ const fr = { treasury: treasuryText };
 const amount = (cents: number) => formatAmount(cents, { ht: false });
 
 /**
- * « Disponible sur les budgets » on the overview: what the live project
- * envelopes still allow, then the three nearest their limit, each with its
- * bar (engaged on envelope, red past it).
+ * « Disponible sur les budgets » (the overview and Trésorerie): what the
+ * live budgets still allow, then the nearest to their limit, each with
+ * what is left of it (« Reste … », « Dépassé de … ») and its bar (spent on
+ * the budget, red past it).
  */
 export function BudgetsCard({
   availableCents,
@@ -51,15 +54,13 @@ export function BudgetsCard({
                   <span className="truncate text-body-md font-medium">
                     {title}
                   </span>
-                  <span
-                    className={`shrink-0 text-caption whitespace-nowrap tabular-nums ${
-                      over
-                        ? "text-[color:var(--error)]"
-                        : "text-[color:var(--text-secondary)]"
-                    }`}
-                  >
-                    {t.row(amount(row.engagedCents), amount(envelope))}
-                  </span>
+                  <RestAmount
+                    cents={row.restCents ?? 0}
+                    className={cn(
+                      "shrink-0 text-caption",
+                      !over && "text-[color:var(--text-secondary)]",
+                    )}
+                  />
                 </span>
                 <ProgressBar
                   value={row.engagedCents}

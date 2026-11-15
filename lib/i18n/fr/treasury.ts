@@ -40,18 +40,19 @@ export const treasury = {
   overview: {
     balance: {
       title: "Solde du compte",
-      caption: (day: string) => `Relevé du ${day} et mouvements depuis`,
+      caption: (day: string) => `D'après le relevé du ${day}`,
       ahead: (days: number, amount: string, delta: string) =>
         `${amount} prévus dans ${days} jours (${delta})`,
       signed: (amount: string, up: boolean) => `${up ? "+" : "−"}${amount}`,
       open: "Trésorerie",
+      openLabel: "Ouvrir la trésorerie et la courbe du solde",
     },
     incoming: {
       title: "À encaisser",
       caption: (count: number) =>
         count === 0
           ? "Rien en attente"
-          : plural(count, "entrée ouverte", "entrées ouvertes"),
+          : plural(count, "entrée attendue", "entrées attendues"),
       late: (amount: string) => `dont ${amount} en retard`,
       empty: "Aucune entrée prévue.",
       all: "Tout voir",
@@ -64,55 +65,27 @@ export const treasury = {
           : `${plural(count, "dépense", "dépenses")} d'ici ${days} jours`,
       late: (amount: string) => `dont ${amount} en retard`,
       empty: "Aucune dépense à payer.",
-      all: "Calendrier",
+      all: "Tout voir",
     },
     available: {
       title: "Disponible sur les budgets",
       caption: (count: number) =>
         count === 0
-          ? "Aucune enveloppe de projet"
-          : plural(count, "enveloppe active", "enveloppes actives"),
-      row: (engaged: string, envelope: string) => `${engaged} sur ${envelope}`,
+          ? "Aucun budget en cours"
+          : `${count} ${count > 1 ? "budgets" : "budget"} en cours`,
+      rest: (left: string) => `Reste ${left}`,
+      over: (over: string) => `Dépassé de ${over}`,
       progress: (title: string, engaged: string, envelope: string) =>
-        `${title} : ${engaged} engagés sur ${envelope}`,
-      empty: "Aucune enveloppe de projet en cours.",
+        `${title} : ${engaged} dépensés sur ${envelope}`,
+      empty: "Aucun budget en cours.",
       all: "Tous les budgets",
     },
-    due: (day: string) => `Prévu le ${day}`,
+    due: (day: string) => `En retard · prévue le ${day}`,
+    // The rows are the Alertes page's (finance-alerts.ts).
     watch: {
       title: "À surveiller",
-      all: "Toutes les alertes",
+      all: "Tout voir",
       empty: "Rien à surveiller.",
-      belowReserve: "Sous la réserve minimale",
-      belowReserveSub: (day: string, amount: string) =>
-        `Le ${day}, solde prévu ${amount}`,
-      lowPoint: "Point bas prévu",
-      lateIncome: (label: string) => label,
-      lateIncomeSub: (days: number) =>
-        `Échéance dépassée de ${plural(days, "jour", "jours")}`,
-      budget: (title: string, percent: number) => `${title} à ${percent} %`,
-      budgetOver: (title: string) => `${title} dépasse son enveloppe`,
-      budgetSub: (left: string) => `${left} encore disponibles`,
-      budgetOverSub: (over: string) => `Dépassé de ${over}`,
-      noProof: (count: number) =>
-        plural(
-          count,
-          "dépense sans justificatif",
-          "dépenses sans justificatif",
-        ),
-      noProofSub: "Facturées ou payées",
-      offBudget: (count: number) =>
-        plural(count, "dépense hors budget", "dépenses hors budget"),
-      offBudgetSub: (amount: string) => `${amount} sur aucune enveloppe`,
-      rebill: (count: number) =>
-        plural(
-          count,
-          "dépense refacturable sans remboursement",
-          "dépenses refacturables sans remboursement",
-        ),
-      rebillSub: "Aucune recette attendue ne les rembourse",
-      toVerify: "À vérifier",
-      urgent: "Urgent",
     },
     noStatement: {
       title: "Saisissez le solde du compte",
@@ -151,7 +124,7 @@ export const treasury = {
     empty: "Aucun mouvement sur la période.",
   },
   // The envelope whose spends the split by poste shows.
-  envelopeFilter: { label: "Enveloppe", all: "Toutes les enveloppes" },
+  envelopeFilter: { label: "Budget", all: "Tous les budgets" },
   page: {
     figures: {
       label: "Sur la période",
@@ -169,25 +142,27 @@ export const treasury = {
     updateBalance: "Mettre à jour le solde",
     enterBalance: "Saisir le solde",
     reserve: "Réserve minimale",
+    reserveSet: (amount: string) => `Réserve : ${amount}`,
     calendar: {
       title: "Calendrier financier",
       empty: "Aucun mouvement prévu sur cette période.",
       date: "Date",
       operation: "Opération",
-      source: "Projet / source",
-      nature: "Nature",
+      source: "Pour",
+      nature: "Statut",
       amount: "Montant",
       balance: "Solde prévu",
-      late: (day: string) => `Prévu le ${day}`,
+      late: (day: string) => `En retard · prévue le ${day}`,
       in: "Entrée",
       out: "Sortie",
+      spend: "Dépense",
     },
   },
 
   // The state of an income (lib/finance/money-in.ts).
   states: {
     expected: "Prévue",
-    draft: "Brouillon",
+    draft: "Pas envoyée",
     sent: "Envoyée",
     late: "En retard",
     partial: "Partiellement encaissée",
@@ -197,7 +172,7 @@ export const treasury = {
   },
   // The state of a spend still to pay, in the calendar.
   spendStates: {
-    planned: "Estimée",
+    planned: "Prévue",
     proposed: "Proposée",
     committed: "Engagée",
     invoiced: "Facturée",
@@ -215,12 +190,16 @@ export const treasury = {
 
   incomes: {
     tiles: {
-      expected: "Prévu",
+      expected: "Sans facture",
       expectedHint: (count: number) =>
-        count === 0 ? "Rien de prévu" : plural(count, "entrée", "entrées"),
-      toCollect: "À encaisser",
+        count === 0
+          ? "Aucune entrée sans facture"
+          : plural(count, "entrée", "entrées"),
+      toCollect: "Facturé",
       toCollectHint: (count: number) =>
-        count === 0 ? "Aucune facture" : plural(count, "facture", "factures"),
+        count === 0
+          ? "Aucune facture à encaisser"
+          : `${plural(count, "facture", "factures")} à encaisser`,
       late: "En retard",
       lateHint: (count: number) =>
         count === 0 ? "Aucune en retard" : plural(count, "entrée", "entrées"),
@@ -268,18 +247,22 @@ export const treasury = {
     emptyBody:
       "Avances, prestations, remboursements : tout ce qui doit arriver sur le compte.",
     emptyView: "Aucune entrée ici.",
+    searchLabel: "Rechercher une facture",
+    search: "Rechercher une facture, un client",
+    noResult: (query: string) => `Aucune facture ne correspond à « ${query} ».`,
     // « Entrée prévue » was misread (UX test of 15/11/2026).
-    add: "Nouvelle recette",
+    add: "Ajouter une entrée",
     rowActions: (label: string) => `Actions pour « ${label} »`,
     receive: "Enregistrer un encaissement",
     edit: "Modifier",
-    cancel: "Annuler l'entrée",
+    cancel: "Annuler la facture",
+    cancelEntry: "Annuler l'entrée",
     partOf: (received: string, total: string) => `${received} sur ${total}`,
     invoice: (number: string) => `Facture ${number}`,
   },
 
   incomeForm: {
-    newTitle: "Nouvelle recette",
+    newTitle: "Ajouter une entrée",
     editTitle: "Modifier l'entrée",
     description: "L'argent attendu sur le compte, puis sa facture.",
     label: "Libellé",
@@ -291,7 +274,7 @@ export const treasury = {
     none: "Aucun",
     search: "Rechercher",
     noMatch: "Aucun résultat",
-    expectedOn: "Date prévue",
+    expectedOn: "Attendue le",
     invoiceTitle: "Facture",
     invoiceNumber: "Numéro de facture",
     invoicedOn: "Date d'émission",
@@ -338,11 +321,13 @@ export const treasury = {
   },
 
   cancelForm: {
-    title: "Annuler l'entrée",
+    title: "Annuler la facture",
+    entryTitle: "Annuler l'entrée",
     description: "Elle sort des prévisions et reste dans l'historique.",
     reason: "Motif",
     reasonMissing: "Donnez le motif.",
-    confirm: "Annuler l'entrée",
+    confirm: "Annuler la facture",
+    entryConfirm: "Annuler l'entrée",
     pending: "Annulation…",
     done: "Entrée annulée",
   },

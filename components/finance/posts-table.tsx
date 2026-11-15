@@ -17,9 +17,10 @@ const fr = { budget, financeBudgets };
 const amount = (cents: number) => formatAmount(cents, { ht: false });
 
 /**
- * An envelope by poste then sub-post (Ibé's ticket, maquette 3): what was
- * forecast, what the lines cost now, what is engaged and paid, the gap to
- * the forecast. HT.
+ * A budget by poste then sub-post (Ibé's ticket, maquette 3): forecast
+ * (« Prévu »), spent (committed, invoiced and paid), paid, and the gap
+ * (what the lines cost now less the forecast). HT; the figures of
+ * `EnvelopeFigures`, in the same words.
  */
 export function PostsTable({ posts }: { posts: PostRow[] }) {
   const t = fr.financeBudgets.detail;
@@ -45,10 +46,10 @@ export function PostsTable({ posts }: { posts: PostRow[] }) {
         {amount(totals.forecastCents)}
       </DataTableCell>
       <DataTableCell align="end" className="tabular-nums">
-        {amount(totals.projectedCents)}
+        {amount(engagedOf(totals))}
       </DataTableCell>
       <DataTableCell align="end" hideBelow="md" className="tabular-nums">
-        {amount(engagedOf(totals))} · {amount(totals.paidCents)}
+        {amount(totals.paidCents)}
       </DataTableCell>
       <DataTableCell align="end" hideBelow="sm" className="tabular-nums">
         <SignedGap cents={totals.projectedCents - totals.forecastCents} />
@@ -62,9 +63,9 @@ export function PostsTable({ posts }: { posts: PostRow[] }) {
         <DataTableHead align="end" hideBelow="sm">
           {t.forecast}
         </DataTableHead>
-        <DataTableHead align="end">{t.now}</DataTableHead>
+        <DataTableHead align="end">{t.spent}</DataTableHead>
         <DataTableHead align="end" hideBelow="md">
-          {t.stage}
+          {t.paid}
         </DataTableHead>
         <DataTableHead align="end" hideBelow="sm">
           {t.gap}

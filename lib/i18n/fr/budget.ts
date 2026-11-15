@@ -136,7 +136,6 @@ export const budget = {
     amount: "Montant HT (€)",
     followsInvoice:
       "Le montant et l'état suivent la facture : ils changent quand elle est reçue, puis payée.",
-    amountHint: "Par exemple 1500 ou 1 500,50.",
     labelMissing:
       "Dites ce qu'est la dépense, par exemple « Repas après la session ».",
     spentOn: "Date",
@@ -157,7 +156,7 @@ export const budget = {
     targetKinds: {
       project: "Projet",
       artist: "Artiste",
-      cost_center: "Centre de coût",
+      cost_center: "Autre budget",
       off_budget: "Hors budget",
     },
     targetRecent: "récent",
@@ -190,8 +189,6 @@ export const budget = {
     linkSuggestion: (label: string) =>
       `Proposé : ${label} (même mot dans le libellé).`,
     attachment: "Justificatif (photo du ticket, facture)",
-    attachmentHint:
-      "Rangé dans les Fichiers du projet, catégorie Autres : jamais déposé deux fois.",
     // An artist's spend: the receipt is kept with the artist, read by the
     // budget's readers only.
     attachmentHintArtist:

@@ -51,7 +51,9 @@ export function IncomeDialog({
       description: c.actions.addInvoiceDescription(income.label),
     },
     cancel: {
-      title: t.cancelForm.title,
+      title: income.invoiceNumber
+        ? t.cancelForm.title
+        : t.cancelForm.entryTitle,
       description: t.cancelForm.description,
     },
     remind: {

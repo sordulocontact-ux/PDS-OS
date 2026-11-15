@@ -22,7 +22,14 @@ const R = 15.915;
  * named with its amount and share in the legend (the figures never ride on
  * colour alone).
  */
-export function PostPie({ posts }: { posts: PostRow[] }) {
+export function PostPie({
+  posts,
+  action,
+}: {
+  posts: PostRow[];
+  // In the card's header: the budget the split is of (Trésorerie).
+  action?: React.ReactNode;
+}) {
   const t = fr.financeBudgets.pie;
   const total = posts.reduce((s, p) => s + p.totals.projectedCents, 0);
   const named = posts.slice(0, SHOWN).map((p) => ({
@@ -43,7 +50,7 @@ export function PostPie({ posts }: { posts: PostRow[] }) {
   let offset = 25;
 
   return (
-    <MetricCard title={t.title} caption={t.caption}>
+    <MetricCard title={t.title} caption={t.caption} action={action}>
       {total === 0 ? (
         <p className="text-body-md text-[color:var(--text-secondary)]">
           {t.empty}

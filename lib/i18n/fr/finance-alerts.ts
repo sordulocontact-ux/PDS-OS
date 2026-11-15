@@ -16,11 +16,10 @@ export const financeAlerts = {
   belowReserveSub: (day: string, amount: string) =>
     `Le ${day}, solde prévu ${amount}`,
   budget: (name: string, percent: number) =>
-    `${name} à ${percent} % de son enveloppe`,
-  budgetOver: (name: string, over: string) =>
-    `${name} dépasse son enveloppe de ${over}`,
-  budgetSub: (engaged: string, envelope: string) =>
-    `${engaged} engagés sur ${envelope}`,
+    `${name} à ${percent} % de son budget`,
+  budgetOver: (name: string, over: string) => `${name} : dépassé de ${over}`,
+  budgetSub: (engaged: string, budget: string) =>
+    `${engaged} engagés sur ${budget}`,
   lateIncome: (label: string) => `${label} en retard`,
   lateIncomeSub: (days: number, amount: string) =>
     `${amount} attendus depuis ${plural(days, "jour", "jours")}`,
@@ -33,21 +32,19 @@ export const financeAlerts = {
     "Même numéro, ou même client et montant à quelques jours",
   duplicateSpend: (label: string, count: number) =>
     `Dépense potentiellement dupliquée : ${label} (${count} fois)`,
-  duplicateSpendSub: "Même enveloppe, libellé et montant à quelques jours",
-  rebill: (label: string) =>
-    `${label} : refacturable sans remboursement planifié`,
+  duplicateSpendSub: "Même budget, libellé et montant à quelques jours",
+  rebill: (label: string) => `${label} : à refacturer, aucune entrée prévue`,
   rebillSub: (amount: string) => `${amount} à refacturer`,
-  offBudget: (label: string) => `${label} : hors budget`,
-  offBudgetSub: (amount: string) => `${amount} sur aucune enveloppe`,
+  offBudget: (label: string) => `${label} n'est rattachée à aucun budget`,
+  offBudgetSub: (amount: string) => `${amount} sans budget`,
   noProof: (count: number) =>
     plural(
       count,
       "dépense facturée sans justificatif",
       "dépenses facturées sans justificatif",
     ),
-  noProofSub: "Facturées ou payées",
   toReconcile: (count: number) =>
-    plural(count, "transaction à rapprocher", "transactions à rapprocher"),
+    plural(count, "opération à rattacher", "opérations à rattacher"),
   toReconcileSub: (day: string) => `La plus ancienne du ${day}`,
   shift: (label: string, to: string) => `Décaler ${label} au ${to}`,
   shiftSub: (gain: string) =>

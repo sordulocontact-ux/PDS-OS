@@ -1,6 +1,7 @@
 import { SheetFacts, SheetHead } from "@/components/finance/finance-sheet";
 import { RecordHistory } from "@/components/finance/record-history";
 import { Button } from "@/components/ui/button";
+import { RowActions } from "@/components/ui/row-actions";
 import type { RowAction } from "@/components/ui/row-actions";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
@@ -52,6 +53,11 @@ export function IncomeSheet({
       text: t.reminder,
     })),
   ].sort((a, b) => b.day.localeCompare(a.day));
+  // One black gesture by state: send it, else record what came in.
+  const primary =
+    actions.find((a) => a.key === "sent") ??
+    actions.find((a) => a.key === "receive");
+  const rest = actions.filter((a) => a !== primary);
   const opt = (label: string, value: string | null) =>
     value ? [{ label, value }] : [];
 
@@ -104,22 +110,19 @@ export function IncomeSheet({
         <div
           role="group"
           aria-label={financeSheet.actions}
-          className="flex flex-wrap gap-2"
+          className="flex flex-wrap items-center gap-2"
         >
-          {actions.map((a) => {
-            const Icon = a.icon;
-            return (
-              <Button
-                key={a.key}
-                variant="outline"
-                size="sm"
-                onClick={a.onSelect}
-              >
-                <Icon aria-hidden data-icon="inline-start" />
-                {a.label}
-              </Button>
-            );
-          })}
+          {primary && (
+            <Button onClick={primary.onSelect}>
+              <primary.icon aria-hidden data-icon="inline-start" />
+              {primary.label}
+            </Button>
+          )}
+          <RowActions
+            label={treasury.incomes.rowActions(income.label)}
+            size="icon-lg"
+            actions={rest}
+          />
         </div>
       )}
       {events.length > 0 && (

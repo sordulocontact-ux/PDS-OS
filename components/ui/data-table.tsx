@@ -41,6 +41,9 @@ type ColumnProps = {
 const column = ({ hideBelow: hide, fill, align }: ColumnProps) =>
   cn(
     !fill && "w-48",
+    // On a phone a long title is cut (`truncate`) instead of pushing the
+    // amount out of the frame (Finance UX test, 16/11/2026).
+    fill && "max-sm:w-full max-sm:max-w-0",
     hide && hideBelow[hide],
     // Its gap to the next column stays (« ValeurSource », 10/11/2026); the
     // last column's padding is the row's inset (ROW_INSET).

@@ -6,7 +6,7 @@ import { spendTtc } from "@/lib/finance/spends";
 import { financeAlerts } from "@/lib/i18n/fr/finance-alerts";
 import { formatShortDay } from "@/lib/utils/day";
 import { formatAmount } from "@/lib/utils/money";
-import { OFF_BUDGET_SLUG, spendsHref } from "@/lib/finance/spend-links";
+import { spendsHref } from "@/lib/finance/spend-links";
 
 const fr = { financeAlerts };
 
@@ -49,7 +49,7 @@ function rowOf(alert: Alert, index: number): LinkRow {
     case "to_pay":
       return {
         key,
-        href: spendsHref({ statut: "facture" }),
+        href: spendsHref({ ouvrir: alert.spend.id }),
         main: t.toPay(alert.spend.label),
         sub: t.toPaySub(
           day(alert.day),
@@ -74,23 +74,22 @@ function rowOf(alert: Alert, index: number): LinkRow {
     case "rebill":
       return {
         key,
-        href: spendsHref({ statut: "a-refacturer" }),
+        href: spendsHref({ ouvrir: alert.spend.id }),
         main: t.rebill(alert.spend.label),
         sub: t.rebillSub(amount(spendTtc(alert.spend))),
       };
     case "off_budget":
       return {
         key,
-        href: spendsHref({ enveloppe: OFF_BUDGET_SLUG }),
+        href: spendsHref({ ouvrir: alert.spend.id }),
         main: t.offBudget(alert.spend.label),
         sub: t.offBudgetSub(amount(spendTtc(alert.spend))),
       };
     case "no_proof":
       return {
         key,
-        href: routes.financeSpends,
+        href: spendsHref({ justificatif: "sans" }),
         main: t.noProof(alert.count),
-        sub: t.noProofSub,
       };
     case "to_reconcile":
       return {

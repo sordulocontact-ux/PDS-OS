@@ -1,5 +1,9 @@
 import { ConsumptionMeter } from "@/components/finance/consumption-meter";
-import type { EnvelopeRow, Totals } from "@/lib/finance/envelopes";
+import {
+  engagedOf,
+  type EnvelopeRow,
+  type Totals,
+} from "@/lib/finance/envelopes";
 import { financeBudgets } from "@/lib/i18n/fr/finance-budgets";
 import { cn } from "@/lib/utils";
 import { formatAmount } from "@/lib/utils/money";
@@ -10,11 +14,13 @@ const signed = (cents: number) =>
   `${cents > 0 ? "+" : cents < 0 ? "−" : ""}${amount(Math.abs(cents))}`;
 
 /**
- * An envelope's figures in one card (new style, lot 4, after the proto's
- * budget page): what is left, large, with how much is used; then the ticket's
- * figures in a strip — initial budget, revisions, planned, committed,
- * invoiced, paid, rebillable, gap to the forecast, PDS's share. `totals`
- * follows the page's status filter; what is left is the envelope's, whole.
+ * A budget's figures in one card (new style, lot 4, after the proto's
+ * budget page): what is left, large (« Dépassé de X » once over), with how
+ * much is used; then the figures in a strip — initial budget, revisions,
+ * planned, spent, paid, rebillable, gap, PDS's share — the same figures and
+ * words as the posts' table below (`engagedOf`: committed, invoiced and
+ * paid). What is empty is not shown. `totals` follows the page's status
+ * filter; what is left is the budget's, whole.
  */
 export function EnvelopeFigures({
   row,
@@ -28,13 +34,14 @@ export function EnvelopeFigures({
   const percent = Math.round(share * 100);
   const figures = [
     [t.initial, row.initialCents === null ? "—" : amount(row.initialCents)],
-    [t.revisions, row.revisionsCents ? signed(row.revisionsCents) : "—"],
-    [t.planned, amount(totals.plannedCents)],
-    [t.committed, amount(totals.committedCents)],
-    [t.invoiced, amount(totals.invoicedCents)],
+    ...(row.revisionsCents ? [[t.revisions, signed(row.revisionsCents)]] : []),
+    [t.planned, amount(totals.forecastCents)],
+    [t.spent, amount(engagedOf(totals))],
     [t.paid, amount(totals.paidCents)],
-    [t.rebill, amount(totals.rebillableCents)],
     [t.gap, signed(totals.projectedCents - totals.forecastCents)],
+    ...(totals.rebillableCents > 0
+      ? [[t.rebill, amount(totals.rebillableCents)]]
+      : []),
     ...(row.pdsShareBp < 10000
       ? [[t.pds(row.pdsShareBp / 100), amount(row.pdsPartCents)]]
       : []),
@@ -59,7 +66,9 @@ export function EnvelopeFigures({
                   (row.restCents ?? 0) < 0 && "text-[color:var(--error)]",
                 )}
               >
-                {amount(row.restCents ?? 0)}
+                {(row.restCents ?? 0) < 0
+                  ? t.over(amount(-(row.restCents ?? 0)))
+                  : amount(row.restCents ?? 0)}
               </p>
               <p className="text-caption text-[color:var(--text-tertiary)]">
                 {t.restOf(amount(budget), percent)}

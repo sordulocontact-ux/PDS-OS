@@ -205,7 +205,7 @@ export function CancelIncomeForm({
       {submit.error && <FormMessage kind="error">{submit.error}</FormMessage>}
       <DialogFormActions
         pending={submit.pending}
-        submitLabel={t.confirm}
+        submitLabel={income.invoiceNumber ? t.confirm : t.entryConfirm}
         pendingLabel={t.pending}
         onCancel={onDone}
       />

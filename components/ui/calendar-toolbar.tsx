@@ -39,6 +39,7 @@ export function periodLabel(period: CalendarPeriod): string {
  * period, what is shown, and the period (Semaine, Mois). Every choice is a
  * link: the URL holds the view. The Calls and the Calendrier; Finance's
  * Planning without the period's choice (`modes={false}`: months only).
+ * Its buttons are 40 px, as every toolbar's (16/11/2026).
  */
 export function CalendarToolbar({
   period,
@@ -55,21 +56,21 @@ export function CalendarToolbar({
     <div className="flex flex-wrap items-center gap-2">
       <ViewLink
         href={hrefOf(period.mode, null)}
-        className={buttonVariants({ variant: "outline", size: "sm" })}
+        className={buttonVariants({ variant: "outline", size: "default" })}
       >
         <ButtonRoll>{t.today}</ButtonRoll>
       </ViewLink>
       <ViewLink
         href={hrefOf(period.mode, period.previous)}
         aria-label={t.previous[period.mode]}
-        className={buttonVariants({ variant: "ghost", size: "icon-sm" })}
+        className={buttonVariants({ variant: "ghost", size: "icon" })}
       >
         <IconChevronLeft aria-hidden />
       </ViewLink>
       <ViewLink
         href={hrefOf(period.mode, period.next)}
         aria-label={t.next[period.mode]}
-        className={buttonVariants({ variant: "ghost", size: "icon-sm" })}
+        className={buttonVariants({ variant: "ghost", size: "icon" })}
       >
         <IconChevronRight aria-hidden />
       </ViewLink>

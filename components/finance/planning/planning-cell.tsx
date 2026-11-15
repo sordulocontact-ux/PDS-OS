@@ -73,7 +73,7 @@ export function PlanningCell({
 }) {
   const rest = day.moves.length - SHOWN;
   return (
-    <div className="flex h-full min-h-32 flex-col gap-1 p-1.5">
+    <div className="@container/cell flex h-full min-h-32 flex-col gap-1 p-1.5">
       <PlanningDayNumber day={day.day} today={today} />
       <PlanningMarks day={day} />
       {day.moves.slice(0, SHOWN).map((m) => (

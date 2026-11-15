@@ -1,5 +1,3 @@
-import type { ReactNode } from "react";
-
 import { LinkRows, type LinkRow } from "@/components/finance/link-rows";
 import { MetricCard } from "@/components/ui/metric-card";
 import { ProgressBar } from "@/components/ui/progress-bar";
@@ -44,12 +42,10 @@ export function OrchardCard({
   trancheCents,
   counted,
   orchard,
-  action,
 }: {
   trancheCents: number;
   counted: number;
   orchard: ReturnType<typeof orchardAdvances>;
-  action?: ReactNode;
 }) {
   const t = fr.fundings.orchard;
   const rows = orchard.advances.map((a, i): LinkRow => ({
@@ -64,7 +60,6 @@ export function OrchardCard({
       title={t.title}
       value={amount(trancheCents)}
       caption={t.caption(orchard.per)}
-      action={action}
     >
       <div className="flex flex-col gap-2">
         <p className="text-body-md text-[color:var(--text-secondary)]">
@@ -90,20 +85,18 @@ export function OrchardCard({
 /**
  * « Pay Later » (proto): total credit, used and available, the next
  * installment with its interest and how many are paid, then the
- * installments to come. `children`: the buttons of the card.
+ * installments to come.
  */
 export function PayLaterCard({
   limitCents,
   usedCents,
   hasLines,
   summary,
-  children,
 }: {
   limitCents: number;
   usedCents: number;
   hasLines: boolean;
   summary: ReturnType<typeof payLaterSummary>;
-  children?: ReactNode;
 }) {
   const t = fr.fundings.payLater;
   const { next } = summary;
@@ -154,7 +147,6 @@ export function PayLaterCard({
         ) : (
           <LinkRows rows={rows} />
         ))}
-      {children}
     </MetricCard>
   );
 }

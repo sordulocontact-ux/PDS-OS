@@ -8,6 +8,11 @@ import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { Loaded } from "@/components/ui/loaded";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { loadExpenseTargets } from "@/lib/budget/target-actions";
 import { budget } from "@/lib/i18n/fr/budget";
 import { dialogs } from "@/lib/i18n/fr/dialogs";
@@ -37,14 +42,21 @@ export function QuickExpenseButton({
   return (
     <>
       {iconOnly ? (
-        <Button
-          size="icon"
-          aria-label={t.add}
-          title={t.add}
-          onClick={() => setOpen(true)}
-        >
-          <IconPlus aria-hidden />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                type="button"
+                size="icon"
+                aria-label={t.add}
+                onClick={() => setOpen(true)}
+              />
+            }
+          >
+            <IconPlus aria-hidden />
+          </TooltipTrigger>
+          <TooltipContent side="bottom">{t.add}</TooltipContent>
+        </Tooltip>
       ) : (
         <Button
           variant={compact || outline ? "outline" : "default"}
@@ -56,34 +68,49 @@ export function QuickExpenseButton({
           {compact ? t.quickAdd : t.add}
         </Button>
       )}
-      <FormDialog
-        open={open}
-        onOpenChange={setOpen}
-        title={t.form.quickTitle}
-        description={t.form.quickDescription}
-        closeLabel={fr.dialogs.close}
-      >
-        <Loaded
-          load={loadExpenseTargets}
-          loadingLabel={t.form.loading}
-          errorLabel={t.loadError}
-        >
-          {(data) =>
-            data.targets.length === 0 ? (
-              <FormMessage kind="info">{t.form.noTargets}</FormMessage>
-            ) : (
-              <BudgetLineForm
-                target={null}
-                targets={data.targets}
-                line={null}
-                initial={{ status: "paid" }}
-                organizationId={data.organizationId}
-                onDone={() => setOpen(false)}
-              />
-            )
-          }
-        </Loaded>
-      </FormDialog>
+      <QuickExpenseDialog open={open} onOpenChange={setOpen} />
     </>
+  );
+}
+
+/** The quick spend's form in its modal, opened from a button or from
+ * Finance's ⌘K (« Ajouter une dépense »). */
+export function QuickExpenseDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const t = fr.budget;
+  return (
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t.form.quickTitle}
+      description={t.form.quickDescription}
+      closeLabel={fr.dialogs.close}
+    >
+      <Loaded
+        load={loadExpenseTargets}
+        loadingLabel={t.form.loading}
+        errorLabel={t.loadError}
+      >
+        {(data) =>
+          data.targets.length === 0 ? (
+            <FormMessage kind="info">{t.form.noTargets}</FormMessage>
+          ) : (
+            <BudgetLineForm
+              target={null}
+              targets={data.targets}
+              line={null}
+              initial={{ status: "paid" }}
+              organizationId={data.organizationId}
+              onDone={() => onOpenChange(false)}
+            />
+          )
+        }
+      </Loaded>
+    </FormDialog>
   );
 }

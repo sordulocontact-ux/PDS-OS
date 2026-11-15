@@ -46,6 +46,12 @@ function DialogSideProvider({
   );
 }
 
+/** The theme class of the section the component is drawn in, for what it
+ * opens in a portal (a menu): undefined outside a section that sets one. */
+function useSectionThemeClass() {
+  return useContext(DialogSideContext).className;
+}
+
 // The panel on the right: floating with a margin, a hairline, no shadow,
 // the app's dark scrim; full screen on phones (Finance's side sheet).
 const rightPanel =
@@ -175,6 +181,7 @@ export {
   Dialog,
   DialogContent,
   DialogSideProvider,
+  useSectionThemeClass,
   DialogDescription,
   DialogHeader,
   DialogTitle,

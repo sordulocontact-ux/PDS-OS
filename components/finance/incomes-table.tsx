@@ -37,6 +37,11 @@ import { IncomeSheet } from "@/components/finance/income-sheet";
 import { useSheetRow } from "@/components/finance/use-sheet-row";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "@/components/ui/toast";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { markInvoiceSent } from "@/lib/finance/invoice-actions";
 import {
   awaitedOn,
@@ -62,31 +67,52 @@ const fr = { clientInvoices, dialogs, treasury };
 const amount = (cents: number) => formatAmount(cents, { ht: false });
 const short = (day: string) => formatShortDay(day, { bare: true });
 
-/** « Nouvelle recette »: a new income, in the common modal. */
+/** « Ajouter une entrée »: a new income, in the common modal. */
 export function IncomeAddButton({
   targets,
   organizationId,
   ownerId,
   outline = false,
+  iconOnly = false,
 }: {
   targets: FinanceTarget[];
   organizationId: string;
   ownerId: string | null;
   // Among other actions of the same weight (Finance's overview).
   outline?: boolean;
+  // « + » alone, its label in a fast tooltip (a list's tools, as Dépenses).
+  iconOnly?: boolean;
 }) {
   const t = fr.treasury;
   const [open, setOpen] = useState(false);
   return (
     <>
-      <Button
-        size="lg"
-        variant={outline ? "outline" : "default"}
-        onClick={() => setOpen(true)}
-      >
-        <IconPlus aria-hidden data-icon="inline-start" />
-        {t.incomes.add}
-      </Button>
+      {iconOnly ? (
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                type="button"
+                size="icon"
+                aria-label={t.incomes.add}
+                onClick={() => setOpen(true)}
+              />
+            }
+          >
+            <IconPlus aria-hidden />
+          </TooltipTrigger>
+          <TooltipContent side="bottom">{t.incomes.add}</TooltipContent>
+        </Tooltip>
+      ) : (
+        <Button
+          size="lg"
+          variant={outline ? "outline" : "default"}
+          onClick={() => setOpen(true)}
+        >
+          <IconPlus aria-hidden data-icon="inline-start" />
+          {t.incomes.add}
+        </Button>
+      )}
       <FormDialog
         open={open}
         onOpenChange={setOpen}
@@ -227,7 +253,9 @@ export function IncomesTable({
         ? [
             {
               key: "cancel",
-              label: t.incomes.cancel,
+              label: income.invoiceNumber
+                ? t.incomes.cancel
+                : t.incomes.cancelEntry,
               icon: IconBan,
               onSelect: on("cancel"),
             },

@@ -128,3 +128,36 @@ export async function countOpenProofs(): Promise<number> {
   if (error) console.error("countOpenProofs:", error.message);
   return count ?? 0;
 }
+
+/** What the ⌘K search needs of a proof, and nothing more: no signed link,
+ * no reading. Newest first, as the box. */
+export type ProofIndexRow = {
+  id: string;
+  fileName: string;
+  vendor: string | null;
+  amountCents: number | null;
+  reference: string | null;
+  lineId: string | null;
+  dismissed: boolean;
+};
+
+export async function loadProofIndex(): Promise<ProofIndexRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("finance_proofs")
+    .select(
+      "id, file_name, vendor, amount_cents, reference, line_id, dismissed_at",
+    )
+    .order("received_at", { ascending: false })
+    .limit(500);
+  if (error) console.error("loadProofIndex:", error.message);
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    fileName: r.file_name,
+    vendor: r.vendor,
+    amountCents: r.amount_cents === null ? null : Number(r.amount_cents),
+    reference: r.reference,
+    lineId: r.line_id,
+    dismissed: r.dismissed_at !== null,
+  }));
+}

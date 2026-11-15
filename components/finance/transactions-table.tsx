@@ -18,7 +18,11 @@ import {
 import { FinanceSheet } from "@/components/finance/finance-sheet";
 import { SignedAmount } from "@/components/finance/signed-amount";
 import { TransactionProposal } from "@/components/finance/transaction-proposal";
-import { TransactionSheet } from "@/components/finance/transaction-sheet";
+import {
+  TransactionSheet,
+  txSubtitle,
+  txTitle,
+} from "@/components/finance/transaction-sheet";
 import { useSheetRow } from "@/components/finance/use-sheet-row";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -197,7 +201,7 @@ export function TransactionsTable({
         : []),
       ...tx.matches.map((m) => ({
         key: `undo-${m.id}`,
-        label: `${t.undo} · ${m.label}`,
+        label: tx.matches.length > 1 ? `${t.undo} · ${m.label}` : t.undo,
         icon: IconArrowDottedRotateAnticlockwise,
         onSelect: () => setOpen({ kind: "undo", match: m }),
       })),
@@ -218,14 +222,14 @@ export function TransactionsTable({
     <>
       <DataTable framed>
         <DataTableHeader>
-          <DataTableHead>{c.date}</DataTableHead>
+          <DataTableHead hideBelow="sm">{c.date}</DataTableHead>
           <DataTableHead fill>{c.party}</DataTableHead>
           <DataTableHead align="end">{c.amount}</DataTableHead>
           <DataTableHead fill hideBelow="md">
             {c.match}
           </DataTableHead>
           <DataTableHead hideBelow="lg">{c.proof}</DataTableHead>
-          <DataTableHead>{c.status}</DataTableHead>
+          <DataTableHead hideBelow="sm">{c.status}</DataTableHead>
           {canManage && <DataTableActionsHead label={c.actions} />}
         </DataTableHeader>
         <DataTableBody>
@@ -240,17 +244,17 @@ export function TransactionsTable({
             );
             return (
               <DataTableRow key={tx.id}>
-                <DataTableCell className="tabular-nums">
+                <DataTableCell hideBelow="sm" className="tabular-nums">
                   {formatShortDay(tx.bookedOn, { bare: true })}
                 </DataTableCell>
                 <DataTableCell fill>
                   <DataTableMedia
                     title={
                       <DataTableLink href={null} onOpen={() => setSheet(index)}>
-                        {tx.counterparty ?? tx.label ?? tx.reference}
+                        {txTitle(tx)}
                       </DataTableLink>
                     }
-                    subtitle={[tx.reference, tx.ignoreReason]
+                    subtitle={[txSubtitle(tx), tx.ignoreReason]
                       .filter(Boolean)
                       .join(" · ")}
                   />
@@ -294,7 +298,7 @@ export function TransactionsTable({
                     EMPTY_CELL
                   )}
                 </DataTableCell>
-                <DataTableCell>
+                <DataTableCell hideBelow="sm">
                   <span className="flex items-center gap-2">
                     <StatusBadge tone={toneOf(state, double.has(tx.id), best)}>
                       {labelOf(state, double.has(tx.id), best)}
@@ -314,7 +318,7 @@ export function TransactionsTable({
                 {canManage && (
                   <DataTableActionsCell>
                     <RowActions
-                      label={t.rowActions(tx.counterparty ?? tx.label ?? "")}
+                      label={t.rowActions(txTitle(tx))}
                       reveal
                       actions={actionsOf(tx)}
                     />
@@ -329,9 +333,7 @@ export function TransactionsTable({
         <FinanceSheet
           open
           onClose={() => setSheet(null)}
-          title={
-            transactions[sheet].counterparty ?? transactions[sheet].label ?? ""
-          }
+          title={txTitle(transactions[sheet])}
           index={sheet}
           total={transactions.length}
           onMove={setSheet}
@@ -352,7 +354,7 @@ export function TransactionsTable({
           onOpenChange={(next) => !next && close()}
           title={t.matchForm.title}
           description={t.matchForm.description(
-            open.tx.counterparty ?? open.tx.label ?? "",
+            txTitle(open.tx),
             amount(txLeft(open.tx)),
           )}
           closeLabel={fr.dialogs.close}

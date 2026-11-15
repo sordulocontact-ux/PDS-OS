@@ -50,7 +50,7 @@ export const financeReceipts = {
     reading: "Lecture…",
     toCheck: "À vérifier",
     proposed: "Proposition",
-    waiting: "En attente",
+    waiting: "Sans dépense",
     other: "Autre document",
     attached: "Rattaché",
     dismissed: "Écarté",
@@ -88,6 +88,7 @@ export const financeReceipts = {
     preview: "Aperçu du document",
     openFile: "Ouvrir le fichier",
     read: "Ce que PDS OS a lu",
+    readIn: { text: "Lu dans le PDF", photo: "Lu sur la photo, à vérifier" },
     values: {
       vendor: "Fournisseur",
       amount: "Montant TTC",

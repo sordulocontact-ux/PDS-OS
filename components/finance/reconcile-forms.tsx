@@ -42,7 +42,7 @@ export function BankImportForm({ onDone }: { onDone: () => void }) {
   return (
     <SmallForm
       submit={submit}
-      saveLabel={t.save(read.rows.length)}
+      saveLabel={t.save}
       savingLabel={t.saving}
       onCancel={onDone}
       onSubmit={() => {

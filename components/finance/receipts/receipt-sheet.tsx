@@ -22,6 +22,8 @@ import { formatAmount } from "@/lib/utils/money";
 
 const t = financeReceipts;
 const s = t.sheet;
+/** Figures and dates in Geist Mono; names and references stay text. */
+const NUMERIC = new Set<ProofValue>(["amount", "vat", "issuedOn"]);
 const amount = (cents: number) => formatAmount(cents, { ht: false });
 
 function sourceText(source: ValueSource) {
@@ -112,6 +114,24 @@ export function ReceiptSheet({
   canManage: boolean;
 }) {
   const { proof } = row;
+  // The source said once, in the title, when most values share it; under a
+  // value only when it differs.
+  const shown = PROOF_VALUES.flatMap((key) => {
+    const value = valueText(row, key);
+    const source = valueSource(proof, key);
+    if (
+      !value &&
+      source.kind === "none" &&
+      key !== "amount" &&
+      key !== "issuedOn"
+    )
+      return [];
+    return [{ key, value, source }];
+  });
+  const counts = new Map<string, number>();
+  for (const f of shown)
+    counts.set(f.source.kind, (counts.get(f.source.kind) ?? 0) + 1);
+  const dominant = [...counts.entries()].sort((x, y) => y[1] - x[1])[0]?.[0];
   return (
     <>
       <SheetHead
@@ -137,33 +157,29 @@ export function ReceiptSheet({
       <ReceiptPreview proof={proof} />
       <section className="flex flex-col gap-3">
         <h3 className="text-caption font-semibold text-[color:var(--text-secondary)]">
-          {s.read}
+          {dominant === "text"
+            ? s.readIn.text
+            : dominant === "photo"
+              ? s.readIn.photo
+              : s.read}
         </h3>
         <SheetFacts
-          facts={PROOF_VALUES.flatMap((key) => {
-            const value = valueText(row, key);
-            const source = valueSource(proof, key);
-            if (
-              !value &&
-              source.kind === "none" &&
-              key !== "amount" &&
-              key !== "issuedOn"
-            )
-              return [];
-            return [
-              {
-                label: s.values[key],
-                value: (
-                  <span className="flex flex-col gap-0.5">
-                    <span className="tabular-nums">{value || "—"}</span>
-                    <span className="text-caption text-[color:var(--text-tertiary)]">
-                      {sourceText(source)}
-                    </span>
+          facts={shown.map(({ key, value, source }) => ({
+            label: s.values[key],
+            value: (
+              <span className="flex flex-col gap-0.5">
+                <span className={NUMERIC.has(key) ? "tabular-nums" : undefined}>
+                  {value || "—"}
+                </span>
+                {(source.kind !== dominant ||
+                  (dominant !== "text" && dominant !== "photo")) && (
+                  <span className="text-caption text-[color:var(--text-tertiary)]">
+                    {sourceText(source)}
                   </span>
-                ),
-              },
-            ];
-          })}
+                )}
+              </span>
+            ),
+          }))}
         />
       </section>
       {row.state === "proposed" && row.matches[0] ? (

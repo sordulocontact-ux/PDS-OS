@@ -39,6 +39,7 @@ export function FinanceFrame({
   section,
   title,
   action,
+  above,
   header = true,
   children,
 }: {
@@ -46,6 +47,8 @@ export function FinanceFrame({
   // A page under a section (an envelope) names itself; else the section.
   title?: string;
   action?: ReactNode;
+  // A back link over the title (an envelope's page).
+  above?: ReactNode;
   header?: boolean;
   children: ReactNode;
 }) {
@@ -64,6 +67,7 @@ export function FinanceFrame({
                 !(header && (title || action)) && "md:hidden",
               )}
             >
+              {header && above}
               {header &&
                 (title ? (
                   <PageHeader title={title} action={action} />

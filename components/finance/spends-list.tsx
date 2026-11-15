@@ -20,10 +20,10 @@ const amount = (cents: number) => formatAmount(cents, { ht: false });
 
 /**
  * Finance › Dépenses as the proto's page (Sacha 15/11/2026): one list, the
- * search with the filters beside it (envelope, status, without proof, set
+ * search with the filters beside it (budget, status, without proof, set
  * in the address by the page), then the table and, under it, the total of
- * what is listed (Ibé's « prévu, engagé, facturé et payé », HT, and the
- * whole TTC), following the search too.
+ * what is listed (Ibé's « prévu, engagé, facturé et payé », each said HT, and
+ * the whole TTC), following the search too.
  */
 export function SpendsList({
   spends,
@@ -101,18 +101,19 @@ function Total({ spends }: { spends: FinanceSpend[] }) {
   return (
     <p
       aria-label={t.total.label}
-      className="flex flex-wrap items-baseline justify-end gap-x-4 gap-y-1 px-1 text-body-sm text-[color:var(--text-secondary)] tabular-nums"
+      className="flex flex-wrap items-baseline justify-end gap-x-4 gap-y-1 px-1 text-body-sm text-[color:var(--text-secondary)]"
     >
       <span>{t.total.count(spends.length)}</span>
       {parts
         .filter(([, cents]) => cents > 0)
         .map(([label, cents]) => (
           <span key={label}>
-            {label} {amount(cents)}
+            {label} <span className="tabular-nums">{amount(cents)}</span>{" "}
+            {t.total.htSuffix}
           </span>
         ))}
       <span className="text-[color:var(--text-primary)]">
-        {amount(ttc)} {t.total.ttc}
+        <span className="tabular-nums">{amount(ttc)}</span> {t.total.ttc}
       </span>
     </p>
   );

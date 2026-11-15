@@ -12,6 +12,12 @@ import { formatAmount } from "@/lib/utils/money";
 
 const t = financeReceipts;
 
+/** The line that names a proof: its supplier, else « Fournisseur à lire »;
+ * a document that is no proof is named by its file. */
+export const proofTitle = (row: ProofRow) =>
+  row.proof.values.vendor ??
+  (row.state === "other" ? row.proof.fileName : t.card.unknownVendor);
+
 export const proofFrom = (row: ProofRow) =>
   row.proof.from ?? row.proof.emailFrom ?? t.sheet.someone;
 
@@ -57,9 +63,7 @@ export function ReceiptCard({
       </StatusBadge>
       <div className="flex flex-1 flex-col gap-1.5 p-3">
         <p className="flex items-baseline justify-between gap-3">
-          <span className="truncate font-medium">
-            {proof.values.vendor ?? t.card.unknownVendor}
-          </span>
+          <span className="truncate font-medium">{proofTitle(row)}</span>
           <span className="shrink-0 tabular-nums">
             {proof.values.amountCents !== null
               ? formatAmount(proof.values.amountCents, { ht: false })
@@ -67,10 +71,15 @@ export function ReceiptCard({
           </span>
         </p>
         <p className="truncate text-caption text-[color:var(--text-tertiary)]">
-          {t.card.from(
-            formatDay(proof.receivedAt.slice(0, 10), { weekday: false }),
-            proofFrom(row),
-          )}
+          {[
+            row.state === "other" && t.kinds.other,
+            t.card.from(
+              formatDay(proof.receivedAt.slice(0, 10), { weekday: false }),
+              proofFrom(row),
+            ),
+          ]
+            .filter(Boolean)
+            .join(" · ")}
         </p>
         <p className="line-clamp-2 text-caption text-[color:var(--text-secondary)]">
           {spend ? (
@@ -80,7 +89,7 @@ export function ReceiptCard({
                 {spend.label}
               </span>
             </>
-          ) : (
+          ) : row.state === "other" ? null : (
             t.card.waiting
           )}
         </p>

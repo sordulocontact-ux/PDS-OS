@@ -4,8 +4,7 @@ import { useEffect, useRef } from "react";
 
 import { SheetFacts, SheetHead } from "@/components/finance/finance-sheet";
 import { SignedAmount } from "@/components/finance/signed-amount";
-import { ViewLink } from "@/components/ui/view-link";
-import type { PlanningDay } from "@/lib/finance/planning";
+import type { PlanningDay, PlanningMove } from "@/lib/finance/planning";
 import { financePlanning } from "@/lib/i18n/fr/finance-planning";
 import { cn } from "@/lib/utils";
 import { formatShortDay } from "@/lib/utils/day";
@@ -17,16 +16,19 @@ const t = financePlanning;
 
 /**
  * A day of the Planning in Finance's side sheet: the balance before and
- * after it, what came in and went out, then each move with where it comes
- * from (its invoice, spend or funding opens) and the balance after it. The
- * move clicked in the grid is shown selected.
+ * after it (the large figure is the balance at the end of the day), what
+ * came in and went out, then each move with where it comes from and the
+ * balance after it; a move opens its record in this same panel, without
+ * leaving the Planning. The move clicked in the grid is shown selected.
  */
 export function PlanningDaySheet({
   day,
   focus,
+  onOpenMove,
 }: {
   day: PlanningDay;
   focus: string | null;
+  onOpenMove: (move: PlanningMove) => void;
 }) {
   const list = useRef<HTMLOListElement>(null);
   useEffect(() => {
@@ -44,22 +46,35 @@ export function PlanningDaySheet({
       <SheetHead
         eyebrow={s.eyebrow(day.moves.length)}
         amount={day.afterCents === null ? undefined : amount(day.afterCents)}
-        caption={<PlanningMarks day={day} />}
+        caption={
+          <>
+            <span>{s.endOfDay}</span>
+            <PlanningMarks day={day} />
+          </>
+        }
       />
       <SheetFacts
         facts={[
           { label: s.before, value: money(day.beforeCents) },
           {
             label: s.in,
-            value: (
-              <SignedAmount event={{ direction: "in", cents: day.inCents }} />
-            ),
+            value:
+              day.inCents > 0 ? (
+                <SignedAmount event={{ direction: "in", cents: day.inCents }} />
+              ) : (
+                s.none
+              ),
           },
           {
             label: s.out,
-            value: (
-              <SignedAmount event={{ direction: "out", cents: day.outCents }} />
-            ),
+            value:
+              day.outCents > 0 ? (
+                <SignedAmount
+                  event={{ direction: "out", cents: day.outCents }}
+                />
+              ) : (
+                s.none
+              ),
           },
           {
             label: s.after,
@@ -88,11 +103,12 @@ export function PlanningDaySheet({
                 data-move={m.key}
                 className="border-b border-[color:var(--border-hairline)] last:border-b-0"
               >
-                <ViewLink
-                  href={m.href}
+                <button
+                  type="button"
+                  onClick={() => onOpenMove(m)}
                   aria-label={`${m.label}, ${s.open(origin)}`}
                   className={cn(
-                    "-mx-2 flex items-start gap-3 rounded-md px-2 py-2.5 outline-none focus-visible:outline-2 focus-visible:outline-[color:var(--focus-ring)] [@media(hover:hover)]:hover:bg-[var(--control-bg-hover)]",
+                    "-mx-2 flex w-[calc(100%+1rem)] items-start gap-3 rounded-md px-2 py-2.5 text-left outline-none focus-visible:outline-2 focus-visible:outline-[color:var(--focus-ring)] [@media(hover:hover)]:hover:bg-[var(--control-bg-hover)]",
                     m.key === focus && "bg-[var(--selection-bg)]",
                   )}
                 >
@@ -101,9 +117,10 @@ export function PlanningDaySheet({
                     <span className="text-caption text-[color:var(--text-tertiary)]">
                       {[
                         origin,
-                        m.real ? t.real : t.forecast,
-                        m.dueOn &&
-                          t.lateSince(formatShortDay(m.dueOn, { bare: true })),
+                        m.dueOn
+                          ? t.lateSince(formatShortDay(m.dueOn, { bare: true }))
+                          : m.origin !== "paid" &&
+                            (m.real ? t.state.real : t.state.forecast),
                       ]
                         .filter(Boolean)
                         .join(" · ")}
@@ -112,12 +129,15 @@ export function PlanningDaySheet({
                   <span className="flex shrink-0 flex-col items-end gap-0.5">
                     <SignedAmount event={m} />
                     {m.balanceCents !== null && (
-                      <span className="text-caption text-[color:var(--text-tertiary)] tabular-nums">
-                        {s.balanceAfter(amount(m.balanceCents))}
+                      <span className="text-caption text-[color:var(--text-tertiary)]">
+                        {s.balanceAfter}{" "}
+                        <span className="tabular-nums">
+                          {amount(m.balanceCents)}
+                        </span>
                       </span>
                     )}
                   </span>
-                </ViewLink>
+                </button>
               </li>
             );
           })}

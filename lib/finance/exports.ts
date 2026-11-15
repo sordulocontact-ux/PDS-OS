@@ -177,7 +177,7 @@ export async function financeCsv(
         : "",
       financeExports.entities[
         e.entity as keyof typeof financeExports.entities
-      ] ?? e.entity,
+      ] ?? financeExports.entityOther,
       financeExports.actions[e.action as keyof typeof financeExports.actions] ??
         e.action,
       e.before ? JSON.stringify(e.before) : "",

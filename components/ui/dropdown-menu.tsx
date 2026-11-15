@@ -3,6 +3,7 @@
 import { Menu as MenuPrimitive } from "@base-ui/react/menu";
 import { IconCheck } from "nucleo-sharp-essential";
 
+import { useSectionThemeClass } from "@/components/ui/dialog";
 import { popupMotion } from "@/components/ui/popup-motion";
 import { cn } from "@/lib/utils";
 
@@ -25,6 +26,8 @@ function DropdownMenuContent({
   align?: MenuPrimitive.Positioner.Props["align"];
   sideOffset?: number;
 }) {
+  // In a portal, the menu takes its section's theme (Finance's smaller text).
+  const section = useSectionThemeClass();
   return (
     <MenuPrimitive.Portal>
       <MenuPrimitive.Positioner
@@ -38,6 +41,7 @@ function DropdownMenuContent({
           className={cn(
             "flex min-w-44 flex-col rounded-[var(--radius-xl)] border border-border bg-popover p-1 text-popover-foreground shadow-elevation-1 outline-none",
             popupMotion,
+            section,
             className,
           )}
           {...props}

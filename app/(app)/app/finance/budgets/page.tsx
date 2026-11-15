@@ -2,11 +2,12 @@ import { IconChartBarTrendUp } from "nucleo-sharp-essential";
 
 import { FormMessage } from "@/components/auth/form-message";
 import {
-  NewCostCenterButton,
+  NewBudgetButton,
   NewFromTemplateButton,
 } from "@/components/finance/budget-actions";
 import { EnvelopesTable } from "@/components/finance/envelopes-table";
 import { FinanceFrame } from "@/components/finance/finance-frame";
+import { PlanShowButton } from "@/components/finance/funding-buttons";
 import { EmptyNote, EmptyState } from "@/components/shell/empty-state";
 import { MetricCard } from "@/components/ui/metric-card";
 import { SegmentedLinks } from "@/components/ui/segmented-control";
@@ -27,7 +28,7 @@ const TYPES = {
   tous: null,
   projets: "project",
   artistes: "artist",
-  centres: "cost_center",
+  autres: "cost_center",
 } as const satisfies Record<string, EnvelopeKind | null>;
 type TypeKey = keyof typeof TYPES;
 const asType = (value: unknown): TypeKey =>
@@ -36,16 +37,16 @@ const TYPE_LABEL: Record<TypeKey, string> = {
   tous: t.kinds.all,
   projets: t.kinds.project,
   artistes: t.kinds.artist,
-  centres: t.kinds.cost_center,
+  autres: t.kinds.cost_center,
 };
 
 /**
  * Finance › Budgets, laid out as the proto's list (Sacha 15/11/2026): the
- * count and the rule of the figures on the left, the type filter and the
- * Finance's actions on the same line, then one row per envelope (budget,
- * engaged + invoiced + paid, what is left, share consumed). Each envelope
- * opens its page, which has every figure of Ibé's ticket, the split by
- * poste and the months; the cost-center templates close the page.
+ * type filter (Tous, Projets, Artistes, Autres) and the Finance's actions on
+ * the same line, wrapping on a phone, then one row per budget (amount,
+ * spent, what is left, share used). Each budget opens its page, which has
+ * every figure of Ibé's ticket, the split by poste and the months; the
+ * templates close the page.
  */
 export default async function FinanceBudgetsPage({
   searchParams,
@@ -64,8 +65,13 @@ export default async function FinanceBudgetsPage({
     .filter((r) => r.currentCents !== null || r.totals.lines > 0)
     .sort((a, b) => b.engagedCents - a.engagedCents);
   const empty = data.envelopes.length === 0 && !data.error;
+  // « Planifier une émission » opens its form here, beside « Nouveau budget »
+  // (the page's main action), both at 40 px.
   const actions = canManage ? (
-    <NewCostCenterButton templates={data.templates} />
+    <>
+      <PlanShowButton formats={data.formats} variant="outline" />
+      <NewBudgetButton templates={data.templates} />
+    </>
   ) : undefined;
 
   return (
@@ -89,8 +95,11 @@ export default async function FinanceBudgetsPage({
                 current: type === key,
               }))}
             />
-            <span className="flex-1" />
-            {actions && <div className="shrink-0">{actions}</div>}
+            {actions && (
+              <div className="ml-auto flex flex-wrap items-center gap-2">
+                {actions}
+              </div>
+            )}
           </div>
           {rows.length === 0 ? (
             <EmptyNote>{t.emptyView}</EmptyNote>
