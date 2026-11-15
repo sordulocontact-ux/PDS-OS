@@ -4,16 +4,8 @@ import { FormMessage } from "@/components/auth/form-message";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { MetricCard } from "@/components/ui/metric-card";
 import { requirePermission } from "@/lib/auth/dal";
-import {
-  financeAlerts as alertsOf,
-  severityOf,
-  type AlertSeverity,
-} from "@/lib/finance/alerts";
-import { loadBudgets } from "@/lib/finance/budget-queries";
-import { envelopeRow } from "@/lib/finance/envelopes";
-import { loadReconciliation } from "@/lib/finance/reconcile-queries";
-import { addDays, computeTreasury } from "@/lib/finance/treasury";
-import { loadTreasury } from "@/lib/finance/treasury-queries";
+import { severityOf, type AlertSeverity } from "@/lib/finance/alerts";
+import { loadFinanceWatch } from "@/lib/finance/watch-queries";
 import { financeAlerts as t } from "@/lib/i18n/fr/finance-alerts";
 import { treasury as treasuryText } from "@/lib/i18n/fr/treasury";
 import { parisPlace } from "@/lib/utils/calendar-period";
@@ -21,7 +13,6 @@ import { allInOrder } from "@/lib/utils/parallel";
 
 export const metadata = { title: t.title };
 
-const HORIZON = 90;
 const GROUPS: AlertSeverity[] = ["danger", "warning", "info"];
 
 /**
@@ -31,28 +22,15 @@ const GROUPS: AlertSeverity[] = ["danger", "warning", "info"];
  */
 export default async function FinanceAlertsPage() {
   const today = parisPlace(new Date()).day;
-  const [, data, budgets] = await allInOrder([
+  const [, watch] = await allInOrder([
     requirePermission("read_finance"),
-    loadTreasury(addDays(today, HORIZON)),
-    loadBudgets(),
+    loadFinanceWatch(today),
   ]);
-  const bank = await loadReconciliation(data.incomes);
-  const treasury = computeTreasury({ ...data, today, horizon: HORIZON });
-  const alerts = alertsOf({
-    treasury,
-    incomes: data.incomes,
-    spends: budgets.spends,
-    envelopes: budgets.envelopes.map((e) => envelopeRow(e, budgets.spends)),
-    transactions: bank.transactions,
-    engines: data.engines,
-    today,
-    simulate: (engines) =>
-      computeTreasury({ ...data, engines, today, horizon: HORIZON }),
-  });
+  const { alerts } = watch;
 
   return (
     <FinanceFrame section="alerts">
-      {(data.error || budgets.error || bank.error) && (
+      {watch.error && (
         <FormMessage kind="error">{treasuryText.loadError}</FormMessage>
       )}
       {alerts.length === 0 ? (

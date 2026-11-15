@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { EnvelopeActions } from "@/components/finance/budget-actions";
+import { EnvelopeFigures } from "@/components/finance/envelope-figures";
 import { FinanceFrame } from "@/components/finance/finance-frame";
 import { PostPie } from "@/components/finance/post-pie";
 import { PostsTable } from "@/components/finance/posts-table";
@@ -9,12 +10,23 @@ import { SpendsTable } from "@/components/finance/spends-table";
 import { BackLink } from "@/components/shell/back-link";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { MetricCard } from "@/components/ui/metric-card";
+import { SegmentedLinks } from "@/components/ui/segmented-control";
 import { can } from "@/lib/auth/access";
 import { requirePermission } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { loadBudgets } from "@/lib/finance/budget-queries";
 import { kindOfSlug } from "@/lib/finance/envelope-slugs";
-import { byPost, envelopeRow, linesOf } from "@/lib/finance/envelopes";
+import {
+  byPost,
+  envelopeRow,
+  linesOf,
+  totalsOf,
+} from "@/lib/finance/envelopes";
+import {
+  SPEND_STAGES,
+  spendStage,
+  type SpendStage,
+} from "@/lib/finance/spends";
 import { loadTreasury } from "@/lib/finance/treasury-queries";
 import { financeBudgets as t } from "@/lib/i18n/fr/finance-budgets";
 import { parisPlace } from "@/lib/utils/calendar-period";
@@ -27,6 +39,16 @@ export const metadata = { title: t.title };
 const amount = (cents: number) => formatAmount(cents, { ht: false });
 const day = (value: string) => formatShortDay(value, { bare: true });
 
+// The URL's word for a status (`?statut=engage`), as the lists' `?vue=`.
+const STAGE_SLUG = {
+  planned: "prevu",
+  committed: "engage",
+  invoiced: "facture",
+  paid: "paye",
+} as const satisfies Record<SpendStage, string>;
+const asStage = (value: unknown): SpendStage | null =>
+  SPEND_STAGES.find((s) => STAGE_SLUG[s] === value) ?? null;
+
 /**
  * One envelope (Ibé's ticket, maquette 3, lot 4): its budget (initial and
  * revisions), what is engaged and left, the gap to the forecast, the share
@@ -36,11 +58,13 @@ const day = (value: string) => formatShortDay(value, { bare: true });
  */
 export default async function FinanceEnvelopePage({
   params,
+  searchParams,
 }: PageProps<"/app/finance/budgets/[kind]/[id]">) {
   const today = parisPlace(new Date()).day;
-  const [access, { kind: slug, id }, data, treasury] = await allInOrder([
+  const [access, { kind: slug, id }, query, data, treasury] = await allInOrder([
     requirePermission("read_finance"),
     params,
+    searchParams,
     loadBudgets(),
     loadTreasury(today),
   ]);
@@ -48,8 +72,14 @@ export default async function FinanceEnvelopePage({
   const envelope = data.envelopes.find((e) => e.kind === kind && e.id === id);
   if (!kind || !envelope) notFound();
   const row = envelopeRow(envelope, data.spends);
-  const lines = linesOf(envelope, data.spends);
+  // The status filter (lot 4): the figures, the pie and the lines follow it;
+  // what is left stays the envelope's, whole.
+  const stage = asStage(query.statut);
+  const lines = linesOf(envelope, data.spends).filter(
+    (s) => !stage || spendStage(s.status) === stage,
+  );
   const posts = byPost(lines);
+  const here = `${routes.financeBudgets}/${slug}/${id}`;
   const canManage = can(access, "manage_finance");
   // Who may write the envelope's lines: the Finance its cost centers, the
   // artists' budgets' readers an artist (a project's owner from its Budget).
@@ -95,51 +125,25 @@ export default async function FinanceEnvelopePage({
         </div>
       </div>
       {data.error && <FormMessage kind="error">{t.loadError}</FormMessage>}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <MetricCard
-          title={t.columns.budget}
-          value={
-            row.currentCents === null ? t.noBudget : amount(row.currentCents)
-          }
-          caption={
-            row.initialCents !== null && row.revisionsCents !== 0
-              ? `${t.initial(amount(row.initialCents))} · ${t.signed(
-                  amount(Math.abs(row.revisionsCents)),
-                  row.revisionsCents > 0,
-                )}`
-              : undefined
-          }
-        />
-        <MetricCard
-          title={t.tiles.engaged}
-          value={amount(row.engagedCents)}
-          caption={t.tiles.engagedHint(
-            amount(row.totals.invoicedCents),
-            amount(row.totals.paidCents),
-          )}
-        />
-        <MetricCard
-          title={t.tiles.rest}
-          value={row.restCents === null ? "—" : amount(row.restCents)}
-          caption={t.tiles.restHint(amount(row.totals.plannedCents))}
-          danger={(row.restCents ?? 0) < 0}
-        />
-        {share < 10000 ? (
-          <MetricCard
-            title={t.tiles.pdsPart}
-            value={amount(row.pdsPartCents)}
-            caption={t.tiles.pdsPartHint(share / 100)}
-          />
-        ) : (
-          <MetricCard
-            title={t.tiles.gap}
-            value={t.signed(amount(Math.abs(row.gapCents)), row.gapCents >= 0)}
-            caption={t.tiles.gapHint(amount(row.totals.forecastCents))}
-          />
-        )}
-      </div>
-      <div className="grid items-start gap-4 lg:grid-cols-2">
+      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+        <EnvelopeFigures row={row} totals={totalsOf(lines)} />
         <PostPie posts={posts} />
+      </div>
+      <div className="flex flex-wrap items-center gap-3">
+        <SegmentedLinks
+          label={t.filter.label}
+          options={[
+            { key: "all", href: here, label: t.filter.all, current: !stage },
+            ...SPEND_STAGES.map((s) => ({
+              key: s,
+              href: `${here}?statut=${STAGE_SLUG[s]}`,
+              label: t.filter[s],
+              current: stage === s,
+            })),
+          ]}
+        />
+      </div>
+      <div className="grid items-start gap-4">
         <MetricCard
           title={t.detail.revisions}
           count={envelope.revisions.length}

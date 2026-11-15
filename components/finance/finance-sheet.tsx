@@ -9,6 +9,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Kbd } from "@/components/ui/kbd";
 import { financeSheet } from "@/lib/i18n/fr/finance-home";
 
 const t = financeSheet;
@@ -113,14 +114,6 @@ export function FinanceSheet({
         </DialogPrimitive.Popup>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>
-  );
-}
-
-function Kbd({ children }: { children: ReactNode }) {
-  return (
-    <kbd className="inline-grid h-6 min-w-6 place-items-center rounded-md border border-[color:var(--border-default)] px-1.5 font-sans text-micro text-[color:var(--text-secondary)]">
-      {children}
-    </kbd>
   );
 }
 

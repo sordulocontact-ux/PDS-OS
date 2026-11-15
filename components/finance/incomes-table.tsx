@@ -34,6 +34,7 @@ import { FormDialog } from "@/components/ui/form-dialog";
 import { RowActions, type RowAction } from "@/components/ui/row-actions";
 import { FinanceSheet } from "@/components/finance/finance-sheet";
 import { IncomeSheet } from "@/components/finance/income-sheet";
+import { useSheetRow } from "@/components/finance/use-sheet-row";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "@/components/ui/toast";
 import { markInvoiceSent } from "@/lib/finance/invoice-actions";
@@ -137,7 +138,7 @@ export function IncomesTable({
   } | null>(null);
   const name = new Map(targets.map((x) => [x.id, x.name]));
   // The row open in the side sheet (lot 3, docs/FINANCE-V2.md).
-  const [sheet, setSheet] = useState<number | null>(null);
+  const [sheet, setSheet] = useSheetRow(incomes.map((row) => row.id));
   const targetOf = (income: Income) =>
     [income.projectId, income.artistId, income.dealId]
       .flatMap((id) => (id && name.get(id) ? [name.get(id)] : []))

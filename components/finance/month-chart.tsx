@@ -80,7 +80,7 @@ export function MonthChart({
       <figure className="flex flex-col gap-2">
         <div className="flex gap-2" aria-hidden={empty || undefined}>
           {/* The axis: three amounts, the gridlines drawn by the plot. */}
-          <div className="flex h-56 w-12 shrink-0 flex-col justify-between text-right text-caption text-[color:var(--text-tertiary)] tabular-nums">
+          <div className="flex h-56 w-12 shrink-0 flex-col justify-between text-right text-caption text-[color:var(--text-secondary)] tabular-nums">
             {ticks.map((tick) => (
               <span key={tick} className="-translate-y-1/2 last:translate-y-0">
                 {formatAmountCompact(tick)}
@@ -169,7 +169,7 @@ export function MonthChart({
             </ol>
             <ol
               aria-hidden
-              className="mt-2 flex gap-1 text-center text-caption text-[color:var(--text-tertiary)] sm:gap-2"
+              className="mt-2 flex gap-1 text-center text-caption text-[color:var(--text-secondary)] sm:gap-2"
             >
               {bars.map((bar) => (
                 <li key={bar.month} className="min-w-0 flex-1 truncate">

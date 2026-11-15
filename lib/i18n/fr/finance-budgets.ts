@@ -68,6 +68,32 @@ export const financeBudgets = {
   emptyView: "Aucune enveloppe ici.",
   loadError: "Les budgets n'ont pas pu être chargés.",
   back: "Budgets",
+  // The envelope's figures (new style, lot 4, docs/FINANCE-V2.md).
+  figures: {
+    rest: "Reste disponible",
+    restOf: (total: string, percent: number) =>
+      `sur ${total} · ${percent} % consommé`,
+    noEnvelope: "Sans enveloppe : rien ne limite ces dépenses.",
+    initial: "Budget initial",
+    revisions: "Révisions",
+    planned: "Prévu",
+    committed: "Engagé",
+    invoiced: "Facturé",
+    paid: "Payé",
+    rebill: "Refacturable",
+    gap: "Écart au prévisionnel",
+    pds: (percent: number) => `Part PDS (${percent} %)`,
+    used: (title: string, percent: number) =>
+      `${title} : ${percent} % du budget consommé`,
+  },
+  filter: {
+    label: "Statut des lignes",
+    all: "Toutes",
+    planned: "Prévu",
+    committed: "Engagé",
+    invoiced: "Facturé",
+    paid: "Payé",
+  },
   detail: {
     posts: "Postes et sous-postes",
     post: "Poste",

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { FinanceSidebar } from "@/components/finance/finance-sidebar";
+import { FinanceTopbar } from "@/components/finance/search/finance-topbar";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
 import { SectionTabs } from "@/components/shell/section-tabs";
@@ -27,7 +28,8 @@ const fr = { treasury };
  * its own head (the overview's greeting). Lot 2: a section's page shows no
  * title (the sidebar already says where one is, as in the proto) and opens
  * on its tools; its h1 stays for screen readers, its action on the right.
- * An envelope's page (`title`) keeps its name as a visible title.
+ * An envelope's page (`title`) keeps its name as a visible title. Lot 5:
+ * every page opens on the top bar (⌘K search, the page's action, alerts).
  */
 export function FinanceFrame({
   section,
@@ -50,14 +52,12 @@ export function FinanceFrame({
       <div className="min-w-0 flex-1">
         <PageContainer className="gap-6">
           <div className="flex flex-col gap-4">
+            <FinanceTopbar>{!title && header && action}</FinanceTopbar>
             {header &&
               (title ? (
                 <PageHeader title={title} action={action} />
               ) : (
-                <div className="flex items-center justify-end gap-3 empty:hidden">
-                  <h1 className="sr-only">{current?.label}</h1>
-                  {action}
-                </div>
+                <h1 className="sr-only">{current?.label}</h1>
               ))}
             <div className="md:hidden">
               <SectionTabs

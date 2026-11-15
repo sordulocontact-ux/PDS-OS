@@ -16,6 +16,7 @@ import {
 import { FinanceSheet } from "@/components/finance/finance-sheet";
 import { TransactionProposal } from "@/components/finance/transaction-proposal";
 import { TransactionSheet } from "@/components/finance/transaction-sheet";
+import { useSheetRow } from "@/components/finance/use-sheet-row";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   DataTable,
@@ -109,7 +110,7 @@ export function TransactionsTable({
   const c = t.columns;
   const [open, setOpen] = useState<Open>(null);
   // The row open in the side sheet (lot 3, docs/FINANCE-V2.md).
-  const [sheet, setSheet] = useState<number | null>(null);
+  const [sheet, setSheet] = useSheetRow(transactions.map((row) => row.id));
   const close = () => setOpen(null);
   const undo = useWriteSubmit(close, t.done.unmatched);
   const double = new Set(doubles);

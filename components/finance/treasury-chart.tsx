@@ -109,7 +109,7 @@ export function TreasuryChart({
       <div
         aria-hidden
         className={cn(
-          "flex w-14 shrink-0 flex-col justify-between text-right text-caption text-[color:var(--text-tertiary)] tabular-nums",
+          "flex w-14 shrink-0 flex-col justify-between text-right text-caption text-[color:var(--text-secondary)] tabular-nums",
           tall ? "h-72" : "h-56",
         )}
       >
@@ -245,7 +245,7 @@ export function TreasuryChart({
         </div>
         <div
           aria-hidden
-          className="relative mt-2 h-4 text-caption text-[color:var(--text-tertiary)]"
+          className="relative mt-2 h-4 text-caption text-[color:var(--text-secondary)]"
         >
           {todayIndex >= 0 && (
             <span

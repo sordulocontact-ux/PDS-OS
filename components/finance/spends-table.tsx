@@ -8,6 +8,7 @@ import { BudgetLineForm } from "@/components/budget/budget-line-form";
 import { FinanceSheet } from "@/components/finance/finance-sheet";
 import { IncomeForm } from "@/components/finance/income-form";
 import { SpendSheet } from "@/components/finance/spend-sheet";
+import { useSheetRow } from "@/components/finance/use-sheet-row";
 import {
   DataTable,
   DataTableActionsCell,
@@ -106,7 +107,7 @@ export function SpendsTable({
     spend: FinanceSpend;
   } | null>(null);
   // The row open in the side sheet (lot 3, docs/FINANCE-V2.md).
-  const [sheet, setSheet] = useState<number | null>(null);
+  const [sheet, setSheet] = useSheetRow(spends.map((row) => row.id));
   const envelopeOf = (spend: FinanceSpend) =>
     spend.target.kind === "off_budget"
       ? fr.budget.form.offBudget
