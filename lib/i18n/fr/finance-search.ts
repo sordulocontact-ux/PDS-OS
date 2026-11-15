@@ -4,7 +4,7 @@ const plural = (count: number, one: string, many: string) =>
   `${count} ${count > 1 ? many : one}`;
 
 export const financeSearch = {
-  open: "Rechercher",
+  open: "Rechercher une dépense, une facture, un budget…",
   placeholder: "Une page, un budget, une dépense, une facture…",
   label: "Rechercher dans Finance",
   close: "Fermer la recherche",

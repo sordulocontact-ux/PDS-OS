@@ -1,5 +1,7 @@
 "use client";
 
+import { IconCheck } from "nucleo-sharp-essential";
+
 import { SheetFacts, SheetHead } from "@/components/finance/finance-sheet";
 import { RecordHistory } from "@/components/finance/record-history";
 import { proofFrom } from "@/components/finance/receipts/receipt-card";
@@ -90,9 +92,17 @@ function Status({ row }: { row: ProofRow }) {
     <div className="flex flex-col gap-2">
       <p className={note}>{s.proposal}</p>
       <Spend spend={best.spend} />
-      <p className={note}>
-        {best.reasons.map((r) => t.reasons[r]).join(" · ")}
-      </p>
+      <ul className="flex flex-wrap gap-1.5">
+        {best.reasons.map((r) => (
+          <li
+            key={r}
+            className="flex items-center gap-1 rounded-pill bg-[var(--surface-soft)] px-2 py-0.5 text-caption text-[color:var(--text-secondary)]"
+          >
+            <IconCheck aria-hidden className="size-3.5" />
+            {t.reasons[r]}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -168,8 +178,18 @@ export function ReceiptSheet({
           })}
         />
       </section>
-      <Status row={row} />
-      {canManage && <ReceiptGestures row={row} choices={choices} />}
+      {row.state === "proposed" && row.matches[0] ? (
+        // The proposal and its gestures in one box (proto, « Correspond à »).
+        <section className="flex flex-col gap-4 rounded-[var(--radius-lg)] border border-[color:var(--selection)] p-4">
+          <Status row={row} />
+          {canManage && <ReceiptGestures row={row} choices={choices} />}
+        </section>
+      ) : (
+        <>
+          <Status row={row} />
+          {canManage && <ReceiptGestures row={row} choices={choices} />}
+        </>
+      )}
       <RecordHistory rowId={proof.id} />
     </>
   );

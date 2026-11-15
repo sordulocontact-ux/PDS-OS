@@ -13,6 +13,9 @@ import { useProofIntake } from "@/components/finance/receipts/use-proof-intake";
 import { useReceiptsLayout } from "@/components/finance/receipts/use-receipts-layout";
 import { EmptyState } from "@/components/shell/empty-state";
 import { CopyButton } from "@/components/ui/copy-button";
+import { routes } from "@/lib/auth/redirects";
+import { ViewLink } from "@/components/ui/view-link";
+import { buttonVariants } from "@/components/ui/button";
 import { SearchableList } from "@/components/ui/searchable-list";
 import {
   inProofView,
@@ -94,6 +97,16 @@ export function ReceiptsBox({
               icon={IconPaperclip}
               title={view === "a-traiter" ? t.emptyOpen : t.emptyAll}
               body={view === "a-traiter" ? t.emptyOpenBody : t.emptyAllBody}
+              action={
+                view === "a-traiter" && counts.rattaches > 0 ? (
+                  <ViewLink
+                    href={`${routes.financeReceipts}?vue=rattaches`}
+                    className={buttonVariants({ variant: "outline" })}
+                  >
+                    {t.showAttached}
+                  </ViewLink>
+                ) : undefined
+              }
             />
           </>
         }
@@ -139,7 +152,7 @@ export function ReceiptsBox({
 function ForwardLine({ address }: { address: string | null }) {
   if (!address) return null;
   return (
-    <p className="flex flex-wrap items-center gap-x-2 text-caption text-[color:var(--text-secondary)]">
+    <p className="flex flex-wrap items-baseline gap-x-1.5 text-body-sm text-[color:var(--text-secondary)]">
       {t.forward}
       <span className="font-medium text-[color:var(--text-primary)]">
         {address}
@@ -149,8 +162,9 @@ function ForwardLine({ address }: { address: string | null }) {
         label={t.copy}
         copiedLabel={t.copied}
         icon={null}
-        variant="outline"
+        variant="link"
         size="xs"
+        className="h-auto px-0 text-body-sm text-[color:var(--text-secondary)]"
       />
     </p>
   );

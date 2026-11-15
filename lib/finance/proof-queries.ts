@@ -115,3 +115,16 @@ export async function loadEnvelopeNames(): Promise<Map<string, string>> {
   if (error) console.error("loadEnvelopeNames:", error.message);
   return new Map((data ?? []).map((t) => [t.id, t.name] as const));
 }
+
+/** How many proofs are still « à traiter » (neither attached nor set
+ * aside): the count by Justificatifs in Finance's sidebar (lot 5). */
+export async function countOpenProofs(): Promise<number> {
+  const supabase = await createClient();
+  const { count, error } = await supabase
+    .from("finance_proofs")
+    .select("id", { count: "exact", head: true })
+    .is("line_id", null)
+    .is("dismissed_at", null);
+  if (error) console.error("countOpenProofs:", error.message);
+  return count ?? 0;
+}

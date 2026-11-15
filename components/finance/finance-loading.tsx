@@ -1,4 +1,5 @@
 import { FinanceSidebar } from "@/components/finance/finance-sidebar";
+import { FinanceTopbar } from "@/components/finance/search/finance-topbar";
 import { PageContainer } from "@/components/shell/page-container";
 import {
   LoadingRegion,
@@ -11,7 +12,7 @@ const fr = { auth };
 
 /**
  * A Finance page while it renders (every loading.tsx of the section): the
- * same frame as the page, its sidebar and `.finance-scope`, so nothing jumps
+ * same frame as the page, its sidebar, top band and `.finance-scope`, so nothing jumps
  * when it arrives, and no title, as a section's page has none (lot 2,
  * docs/FINANCE-V2.md). `home`: the overview's greeting and cards; `titled`:
  * an envelope's name; else a row of tiles over rows.
@@ -25,6 +26,7 @@ export function FinanceLoading({
     <div className="finance-scope flex flex-1">
       <FinanceSidebar />
       <div className="min-w-0 flex-1">
+        <FinanceTopbar />
         <LoadingRegion label={fr.auth.common.loading}>
           <PageContainer className="gap-6">
             {shape === "home" ? (

@@ -27,6 +27,7 @@ export const financeReceipts = {
   copy: "Copier",
   copied: "Adresse copiée",
   emptyOpen: "Tout est rattaché",
+  showAttached: "Voir les justificatifs rattachés",
   emptyOpenBody:
     "Les tickets déposés ou transférés par e-mail arrivent ici, lus, avec la dépense qui leur correspond.",
   emptyAll: "Aucun justificatif",

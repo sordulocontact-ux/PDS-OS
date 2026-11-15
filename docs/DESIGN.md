@@ -1014,10 +1014,19 @@ plan et lots dans `docs/FINANCE-V2.md`. **Écart voulu, limité à Finance** :
 - **Page d'un budget** (lot 4, `EnvelopeFigures`) : « Reste disponible » en grand avec une jauge (ambre à 82 %, rouge
   au-delà du budget), puis une bande de chiffres (budget initial, révisions, prévu, engagé, facturé, payé,
   refacturable, écart, part PDS) ; un filtre segmenté par statut pilote postes, camembert et lignes.
-- **Barre du haut** (lot 5, `FinanceTopbar`) : la recherche ⌘K à gauche (un faux champ ; la fenêtre est la modale
-  de l'app, posée en haut pour ne pas sauter quand la liste change), l'action de la page puis la cloche des alertes
-  (compteur encre, ton danger si une alerte est grave). Graphiques : axes et mois en `--text-secondary`.
-- **Justificatifs** (lot 6, proto page Justificatifs) : barre d'outils sans titre (recherche, vues segmentées avec
+- **Bandeau du haut** (lot 5, `FinanceTopbar`, comme le proto, Sacha 15/11/2026) : toute la largeur de la page,
+  56 px, filet fin dessous, collé en haut au défilement ; la recherche ⌘K sans contour sur toute la ligne (la fenêtre
+  est la modale de l'app, posée en haut pour ne pas sauter quand la liste change), la cloche des alertes à droite
+  (compteur encre, ton danger si une alerte est grave). L'action d'une page passe sous le bandeau, à droite. La
+  colonne Finance compte ce qui attend (Rapprochement, Justificatifs, Factures en retard). Graphiques : axes et mois
+  en `--text-secondary`.
+- **« Je veux… »** (lot 7, d'après l'assistant de Midday, Sacha 15/11/2026) : boîte de PO `flat` (angles droits,
+  icônes nues, envoi en carré noir) ; les propositions n'apparaissent qu'en tapant « je v… », en panneau du même gris
+  posé au-dessus du champ, sans le déplacer.
+- **Justificatifs** (lot 6, proto page Justificatifs ; alignée sur le proto le 15/11 : enveloppe en pastille, dépense
+  proposée en encre, adresse en texte courant avec « Copier » en lien, « Voir les justificatifs rattachés » dans le
+  vide, proposition de la fiche dans un cadre de sélection « Correspond à » avec ses raisons cochées et ses gestes ;
+  « Déposer » garde le trombone, Nucleo Essential n'ayant pas d'icône d'envoi) : barre d'outils sans titre (recherche, vues segmentées avec
   comptes, bascule Grille / Liste à icônes `IconImages2` / `IconUnorderedList`, « Déposer » en contour avec
   `IconPaperclip`), ligne « Transférez vos tickets et factures à … · Copier » ; grille de cartes (aperçu 144 px,
   statut posé sur l'aperçu, fournisseur et montant, date et expéditeur, dépense proposée ou rattachée, enveloppe,

@@ -16,6 +16,7 @@ function pulse(): Promise<FinancePulse> {
   if (!kept || Date.now() - kept.at > KEEP_MS) {
     const promise = readFinancePulse().catch((): FinancePulse => ({
       alerts: { count: 0, danger: 0 },
+      counts: { reconcile: 0, receipts: 0, incomes: 0 },
       items: [],
       error: true,
     }));

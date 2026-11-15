@@ -7,6 +7,8 @@ const plural = (count: number, one: string, many: string) =>
 export const treasury = {
   tabs: {
     label: "Sections de Finance",
+    // Said after a section's name when something waits in it.
+    waiting: (count: number) => `, ${count} à traiter`,
     overview: "Vue d'ensemble",
     treasury: "Trésorerie",
     budgets: "Budgets",

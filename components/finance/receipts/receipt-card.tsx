@@ -72,16 +72,23 @@ export function ReceiptCard({
             proofFrom(row),
           )}
         </p>
-        <p className="truncate text-caption text-[color:var(--text-secondary)]">
-          {spend
-            ? `${row.attached ? t.card.attachedTo : t.card.proposed} : ${spend.label}`
-            : t.card.waiting}
+        <p className="line-clamp-2 text-caption text-[color:var(--text-secondary)]">
+          {spend ? (
+            <>
+              {row.attached ? t.card.attachedTo : t.card.proposed} :{" "}
+              <span className="text-[color:var(--text-primary)]">
+                {spend.label}
+              </span>
+            </>
+          ) : (
+            t.card.waiting
+          )}
         </p>
         <div className="mt-auto flex items-center gap-2 pt-1">
           {spend && (
-            <span className="truncate text-caption text-[color:var(--text-tertiary)]">
+            <StatusBadge tone="neutral" size="sm" className="min-w-0 truncate">
               {spend.envelope}
-            </span>
+            </StatusBadge>
           )}
           <span className="flex-1" />
           {canManage && <ReceiptAction row={row} onCheck={onOpen} />}

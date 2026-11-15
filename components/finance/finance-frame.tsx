@@ -10,6 +10,7 @@ import {
   FINANCE_SECTIONS,
   type FinanceSection,
 } from "@/lib/ui/finance-sections";
+import { cn } from "@/lib/utils";
 
 const fr = { treasury };
 
@@ -29,7 +30,8 @@ const fr = { treasury };
  * title (the sidebar already says where one is, as in the proto) and opens
  * on its tools; its h1 stays for screen readers, its action on the right.
  * An envelope's page (`title`) keeps its name as a visible title. Lot 5:
- * every page opens on the top bar (⌘K search, the page's action, alerts).
+ * every page opens on the top band of the proto (⌘K search across the
+ * line, the alerts bell), the page's action under it on the right.
  */
 export function FinanceFrame({
   section,
@@ -50,14 +52,27 @@ export function FinanceFrame({
     <div className="finance-scope flex flex-1">
       <FinanceSidebar />
       <div className="min-w-0 flex-1">
+        <FinanceTopbar />
         <PageContainer className="gap-6">
-          <div className="flex flex-col gap-4">
-            <FinanceTopbar>{!title && header && action}</FinanceTopbar>
+          <div
+            className={cn(
+              "flex flex-col gap-4",
+              // Nothing but the phone's tabs: no room taken on a desktop.
+              !(header && (title || action)) && "md:hidden",
+            )}
+          >
             {header &&
               (title ? (
                 <PageHeader title={title} action={action} />
               ) : (
-                <h1 className="sr-only">{current?.label}</h1>
+                <>
+                  <h1 className="sr-only">{current?.label}</h1>
+                  {action && (
+                    <div className="flex items-center justify-end gap-3">
+                      {action}
+                    </div>
+                  )}
+                </>
               ))}
             <div className="md:hidden">
               <SectionTabs

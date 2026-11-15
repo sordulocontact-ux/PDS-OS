@@ -87,14 +87,15 @@ export function FinanceSearch({ pulse }: { pulse: FinancePulse | null }) {
       <button
         type="button"
         onClick={() => changeOpen(true)}
-        className="flex h-[var(--density-control-h)] w-full max-w-xs min-w-0 items-center gap-2 rounded-lg border border-input bg-[var(--control-bg)] px-3 text-left text-body-md text-[color:var(--text-tertiary)] transition-colors duration-[var(--duration-fast)] hover:border-[color:var(--border-default)]"
+        className="flex h-9 min-w-0 flex-1 items-center gap-2 rounded-md text-left text-body-md text-[color:var(--text-tertiary)] transition-colors duration-[var(--duration-fast)] outline-none hover:text-[color:var(--text-secondary)] focus-visible:ring-2 focus-visible:ring-ring"
       >
         <IconMagnifier
           aria-hidden
           className="size-4 shrink-0 text-[color:var(--text-secondary)]"
         />
-        <span className="min-w-0 flex-1 truncate">{t.open}</span>
+        <span className="min-w-0 truncate">{t.open}</span>
         <Kbd className="max-sm:hidden">⌘K</Kbd>
+        <span className="flex-1" />
       </button>
       <Dialog open={open} onOpenChange={changeOpen}>
         <DialogContent
