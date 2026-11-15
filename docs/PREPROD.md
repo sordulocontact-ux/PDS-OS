@@ -165,6 +165,24 @@ s'arrête si `malik.durand@preprod.pds` existe) :
 
 Joué sur la pré-prod le 12/11/2026, après ses 15 migrations du 10 au 12/11.
 
+## 5 quater. Les justificatifs de Finance (15/11/2026)
+
+`supabase/preprod/showcase-finance-proofs.sql` (Sacha : « rajoute les données ») ajoute trois dépenses hors budget
+(Ingé son, Réparation enceinte, Location plateau) et sept justificatifs, un par état de la boîte : proposés (SNCF reçu
+par e-mail de Claire, Studio Ombre, SonoFix), photo G7 à vérifier, Adobe en attente, Loca Plateau rattaché, devis
+écarté. Leurs fichiers (chemins fixes `<organisation>/seed-proof-*`) sont faits et déposés par
+`scripts/preprod-proof-files.mjs`, connecté comme Malik (business manager) avec `PREPROD_PASSWORD` : jamais une clé de
+service. La photo est gardée dans `supabase/preprod/files/`. `pnpm preprod:reset` joue les deux ; sur une base déjà en
+service :
+
+```bash
+psql "$PREPROD_DB_URL" -q -v ON_ERROR_STOP=1 -f supabase/preprod/showcase-finance-proofs.sql
+node scripts/preprod-proof-files.mjs
+```
+
+Il faut `PREPROD_SUPABASE_URL` et `PREPROD_ANON_KEY` dans `.env.preprod.local` (les valeurs « PRÉ-PROD — » de
+`.env.local`). Ajoute seulement, une fois (garde en tête du SQL) ; un fichier déjà déposé est gardé.
+
 ## 6. Développer sur la base de pré-prod (sans Docker)
 
 Décision du 26/10/2026 : la stack Supabase locale prend trop de mémoire, et personne d'autre que nous ne
