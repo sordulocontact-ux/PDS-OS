@@ -1,8 +1,7 @@
 "use client";
 
-import { IconCheck } from "nucleo-sharp-essential";
-
 import { SheetFacts, SheetHead } from "@/components/finance/finance-sheet";
+import { ReasonChips } from "@/components/finance/reason-chips";
 import { RecordHistory } from "@/components/finance/record-history";
 import { proofFrom } from "@/components/finance/receipts/receipt-card";
 import { ReceiptGestures } from "@/components/finance/receipts/receipt-gestures";
@@ -92,17 +91,7 @@ function Status({ row }: { row: ProofRow }) {
     <div className="flex flex-col gap-2">
       <p className={note}>{s.proposal}</p>
       <Spend spend={best.spend} />
-      <ul className="flex flex-wrap gap-1.5">
-        {best.reasons.map((r) => (
-          <li
-            key={r}
-            className="flex items-center gap-1 rounded-pill bg-[var(--surface-soft)] px-2 py-0.5 text-caption text-[color:var(--text-secondary)]"
-          >
-            <IconCheck aria-hidden className="size-3.5" />
-            {t.reasons[r]}
-          </li>
-        ))}
-      </ul>
+      <ReasonChips reasons={best.reasons.map((r) => t.reasons[r])} />
     </div>
   );
 }

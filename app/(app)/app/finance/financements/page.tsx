@@ -83,7 +83,7 @@ export default async function FinanceFundingsPage() {
       {(data.error || spends.error) && (
         <FormMessage kind="error">{t.loadError}</FormMessage>
       )}
-      <div className="grid items-start gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2">
         <OrchardCard
           trancheCents={engines.settings.orchardTrancheCents}
           counted={engines.settings.orchardTitlesCounted}
@@ -108,13 +108,13 @@ export default async function FinanceFundingsPage() {
       {formats.length === 0 ? (
         <EmptyNote>{t.formats.noFormat}</EmptyNote>
       ) : (
-        <div className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {formats.map((format) => (
             <MetricCard
               key={format.id}
               title={format.name}
               action={
-                <StatusBadge tone="neutral">
+                <StatusBadge tone="slate">
                   {t.formats.cost(amount(format.costCents))}
                 </StatusBadge>
               }

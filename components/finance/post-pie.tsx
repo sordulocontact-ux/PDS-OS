@@ -3,34 +3,31 @@ import type { PostRow } from "@/lib/finance/envelopes";
 import { budget } from "@/lib/i18n/fr/budget";
 import { financeBudgets } from "@/lib/i18n/fr/finance-budgets";
 import { formatAmount } from "@/lib/utils/money";
+import { PostLabel } from "@/components/finance/post-label";
+import { postShade } from "@/lib/ui/category-hues";
 
 const fr = { budget, financeBudgets };
 
 const amount = (cents: number) => formatAmount(cents, { ht: false });
 
-// The chart ramp (tokens --chart-*), darkest first: four postes and the rest.
-const SHADES = [
-  { stroke: "stroke-chart-5", fill: "bg-chart-5" },
-  { stroke: "stroke-chart-4", fill: "bg-chart-4" },
-  { stroke: "stroke-chart-3", fill: "bg-chart-3" },
-  { stroke: "stroke-chart-2", fill: "bg-chart-2" },
-  { stroke: "stroke-chart-1", fill: "bg-chart-1" },
-];
-const SHOWN = SHADES.length - 1;
+// The four largest postes, then the rest in one slice.
+const SHOWN = 4;
 // A circle of perimeter 100: each slice's length is its percent.
 const R = 15.915;
 
 /**
  * « Le camembert montre la répartition par poste » (Ibé's ticket): what the
- * lines cost now by poste, the four largest and the rest, in the chart's
- * one-ink ramp, each named with its amount and share in the legend (the
- * figures never ride on colour alone).
+ * lines cost now by poste, the four largest and the rest, each poste in its
+ * own shade (`postShade`, the same as its square in the spends' table),
+ * named with its amount and share in the legend (the figures never ride on
+ * colour alone).
  */
 export function PostPie({ posts }: { posts: PostRow[] }) {
   const t = fr.financeBudgets.pie;
   const total = posts.reduce((s, p) => s + p.totals.projectedCents, 0);
   const named = posts.slice(0, SHOWN).map((p) => ({
     key: p.family ?? "none",
+    family: p.family,
     label: p.family ? fr.budget.families[p.family] : t.none,
     cents: p.totals.projectedCents,
   }));
@@ -40,7 +37,7 @@ export function PostPie({ posts }: { posts: PostRow[] }) {
   const slices = [
     ...named,
     ...(restCents > 0
-      ? [{ key: "rest", label: t.rest, cents: restCents }]
+      ? [{ key: "rest", family: null, label: t.rest, cents: restCents }]
       : []),
   ].filter((s) => s.cents > 0);
   let offset = 25;
@@ -58,7 +55,7 @@ export function PostPie({ posts }: { posts: PostRow[] }) {
             className="size-36 shrink-0 -rotate-90"
             aria-hidden
           >
-            {slices.map((s, i) => {
+            {slices.map((s) => {
               const length = (s.cents / total) * 100;
               const circle = (
                 <circle
@@ -67,7 +64,7 @@ export function PostPie({ posts }: { posts: PostRow[] }) {
                   cy="21"
                   r={R}
                   fill="none"
-                  className={SHADES[i].stroke}
+                  className={postShade(s.family).stroke}
                   strokeWidth="6"
                   strokeDasharray={`${length} ${100 - length}`}
                   strokeDashoffset={offset}
@@ -78,18 +75,12 @@ export function PostPie({ posts }: { posts: PostRow[] }) {
             })}
           </svg>
           <ul className="grid w-full min-w-0 gap-2">
-            {slices.map((s, i) => (
+            {slices.map((s) => (
               <li
                 key={s.key}
                 className="flex items-center justify-between gap-3 text-body-md"
               >
-                <span className="flex min-w-0 items-center gap-2">
-                  <span
-                    aria-hidden
-                    className={`size-2.5 shrink-0 rounded-full ${SHADES[i].fill}`}
-                  />
-                  <span className="truncate">{s.label}</span>
-                </span>
+                <PostLabel family={s.family} label={s.label} />
                 <span className="shrink-0 text-[color:var(--text-secondary)] tabular-nums">
                   {amount(s.cents)} · {Math.round((s.cents / total) * 100)} %
                 </span>

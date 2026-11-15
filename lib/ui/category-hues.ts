@@ -1,3 +1,4 @@
+import { BUDGET_FAMILIES, type BudgetFamily } from "@/lib/budget/types";
 /**
  * Category hues of docs/DESIGN.md § 3 ter: tell categories apart at a glance
  * in a table (the stage a project is at, its type). A hue carries no state,
@@ -104,4 +105,26 @@ export function projectHue(projectId: string | null): Hue {
   let hash = 0;
   for (const char of projectId) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
   return titleHues[hash % (titleHues.length - 1)] ?? "sky";
+}
+
+/** A poste's shade, the same everywhere it shows (Finance › Dépenses' Poste
+ * column, a spend's sheet, the split by poste), as the proto's small square
+ * (Sacha 15/11/2026): the chart's one-ink ramp, given by the poste's place
+ * in BUDGET_FAMILIES so it never changes with the amounts. */
+const POST_SHADES = [
+  { fill: "bg-chart-5", stroke: "stroke-chart-5" },
+  { fill: "bg-chart-3", stroke: "stroke-chart-3" },
+  { fill: "bg-chart-4", stroke: "stroke-chart-4" },
+  { fill: "bg-chart-2", stroke: "stroke-chart-2" },
+  { fill: "bg-chart-1", stroke: "stroke-chart-1" },
+] as const;
+
+export function postShade(family: BudgetFamily | null) {
+  const index = family ? BUDGET_FAMILIES.indexOf(family) : -1;
+  return index < 0
+    ? {
+        fill: "bg-[var(--border-default)]",
+        stroke: "stroke-[var(--border-default)]",
+      }
+    : POST_SHADES[index % POST_SHADES.length];
 }

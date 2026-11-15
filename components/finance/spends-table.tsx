@@ -9,6 +9,7 @@ import {
 } from "nucleo-sharp-essential";
 import { BudgetLineForm } from "@/components/budget/budget-line-form";
 import { FinanceSheet } from "@/components/finance/finance-sheet";
+import { PostLabel } from "@/components/finance/post-label";
 import { IncomeForm } from "@/components/finance/income-form";
 import { SpendSheet } from "@/components/finance/spend-sheet";
 import type { SpendColumn } from "@/components/finance/spend-columns";
@@ -42,10 +43,11 @@ import { budget } from "@/lib/i18n/fr/budget";
 import { dialogs } from "@/lib/i18n/fr/dialogs";
 import { financeSpends } from "@/lib/i18n/fr/finance-spends";
 import { treasury } from "@/lib/i18n/fr/treasury";
-import { budgetTargetHue } from "@/lib/ui/category-hues";
 import { spendCashTone } from "@/lib/ui/state-tones";
 import { formatDay } from "@/lib/utils/day";
 import { formatAmount } from "@/lib/utils/money";
+import { cn } from "@/lib/utils";
+import { routes } from "@/lib/auth/redirects";
 
 const fr = { budget, dialogs, financeSpends, treasury };
 
@@ -190,27 +192,31 @@ export function SpendsTable({
                   />
                 </DataTableCell>
                 <DataTableCell hideBelow="lg">
-                  <span className="flex min-w-0 items-center gap-2">
-                    <StatusBadge
-                      tone={budgetTargetHue[spend.target.kind]}
-                      size="sm"
-                    >
-                      {fr.budget.form.targetKinds[spend.target.kind]}
-                    </StatusBadge>
-                    {spend.target.kind !== "off_budget" && (
-                      <span className="truncate text-[color:var(--text-secondary)]">
-                        {envelopeOf(spend)}
-                      </span>
+                  {/* The envelope's name alone (Sacha 15/11/2026). */}
+                  <span
+                    className={cn(
+                      "block truncate",
+                      spend.target.kind === "off_budget" &&
+                        "text-[color:var(--text-secondary)]",
                     )}
+                  >
+                    {envelopeOf(spend)}
                   </span>
                 </DataTableCell>
                 {show("post") && (
                   <DataTableCell hideBelow="xl">
-                    {spend.family
-                      ? spend.family === "other"
-                        ? (spend.familyDetail ?? EMPTY_CELL)
-                        : fr.budget.families[spend.family]
-                      : EMPTY_CELL}
+                    {spend.family ? (
+                      <PostLabel
+                        family={spend.family}
+                        label={
+                          spend.family === "other"
+                            ? (spend.familyDetail ?? fr.budget.families.other)
+                            : fr.budget.families[spend.family]
+                        }
+                      />
+                    ) : (
+                      EMPTY_CELL
+                    )}
                   </DataTableCell>
                 )}
                 {show("supplier") && (
@@ -238,9 +244,7 @@ export function SpendsTable({
                         className="size-4 text-[color:var(--text-secondary)]"
                       />
                     ) : proofExpected(spend) ? (
-                      <StatusBadge tone="warning" size="sm">
-                        {t.proofMissing}
-                      </StatusBadge>
+                      <StatusBadge tone="warning">{t.proofMissing}</StatusBadge>
                     ) : (
                       EMPTY_CELL
                     )}
@@ -285,6 +289,16 @@ export function SpendsTable({
             spend={spends[sheet]}
             envelope={envelopeOf(spends[sheet])}
             actions={canManage ? actionsOf(spends[sheet]) : []}
+            attachProof={
+              !canManage || spends[sheet].hasProof
+                ? undefined
+                : isFinanceTarget(spends[sheet].target)
+                  ? {
+                      onSelect: () =>
+                        setOpen({ kind: "edit", spend: spends[sheet] }),
+                    }
+                  : { href: routes.financeReceipts }
+            }
           />
         </FinanceSheet>
       )}

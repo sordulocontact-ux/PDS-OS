@@ -47,6 +47,8 @@ export function StatusBadge({
   return (
     <span
       data-slot="status-badge"
+      // Read by a section theme (Finance draws a state as a dot and its text).
+      data-tone={tone ?? "neutral"}
       className={cn(statusBadgeVariants({ tone, size }), className)}
       {...props}
     >

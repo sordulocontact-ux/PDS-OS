@@ -101,8 +101,10 @@ function DropdownMenuRadioItem({
   );
 }
 
-/** A choice that is on or off (the columns shown in a list): a tick when
- * on; the menu stays open while one ticks several. */
+/** A choice that is on or off (the columns shown in a list): a real box
+ * before its label, as the app's checkbox (sm: selection blue when ticked),
+ * as the proto (Sacha 15/11/2026); the menu stays open while one ticks
+ * several. */
 function DropdownMenuCheckboxItem({
   className,
   children,
@@ -112,15 +114,20 @@ function DropdownMenuCheckboxItem({
     <MenuPrimitive.CheckboxItem
       closeOnClick={false}
       className={cn(
-        "flex min-h-10 cursor-default items-center gap-2.5 rounded-lg px-3 text-[length:var(--type-body-md)] font-medium outline-none select-none data-[disabled]:opacity-40 data-[highlighted]:bg-[var(--control-bg-hover)] [&_svg]:size-5 [&_svg]:shrink-0",
+        "group/check flex min-h-10 cursor-default items-center gap-2.5 rounded-lg px-3 text-[length:var(--type-body-md)] font-medium outline-none select-none data-[disabled]:opacity-40 data-[highlighted]:bg-[var(--control-bg-hover)]",
         className,
       )}
       {...props}
     >
+      <span
+        aria-hidden
+        className="grid size-4 shrink-0 place-items-center rounded-sm border border-[color:var(--border-default)] bg-[var(--control-bg)] transition-colors duration-150 group-data-[checked]/check:border-selection group-data-[checked]/check:bg-selection-bg"
+      >
+        <MenuPrimitive.CheckboxItemIndicator>
+          <IconCheck aria-hidden className="size-3 text-selection" />
+        </MenuPrimitive.CheckboxItemIndicator>
+      </span>
       <span className="flex-1">{children}</span>
-      <MenuPrimitive.CheckboxItemIndicator>
-        <IconCheck aria-hidden />
-      </MenuPrimitive.CheckboxItemIndicator>
     </MenuPrimitive.CheckboxItem>
   );
 }

@@ -1341,6 +1341,85 @@ button[data-busy]::before {
   font-size: var(--type-body-md);
   line-height: var(--type-body-md-lh);
 }
+/* Les chiffres de Finance dans la deuxième typo du proto, Geist Mono (Sacha,
+   15/11/2026 : « la deuxième typo pour les chiffres, je l'aime vraiment
+   bien ») : montants, dates, comptes et axes, tout ce qui s'aligne déjà en
+   tabular-nums, resserré comme dans le proto ; jamais un grand chiffre de titre
+   (display, figure), qui garde la typo du texte, comme le proto. */
+.finance-scope
+  .tabular-nums:not(
+    [class*="text-display"],
+    [class*="text-figure"],
+    [class*="type-display"],
+    [class*="type-figure"],
+    [class*="text-display"] *,
+    [class*="text-figure"] *
+  ) {
+  font-family: var(--font-mono);
+  /* A monospace reads larger at one size: a step down, as the proto (13 px
+     beside 14 px text). */
+  font-size: 0.93em;
+  letter-spacing: -0.02em;
+}
+/* Un état en Finance : un point de couleur et son texte, sans fond, comme le
+   proto avant le design system (Sacha, 15/11/2026 : « plus clair » que les
+   badges). Le texte reste à l'encre, sauf avertissement et danger. Les
+   teintes de catégorie (projet, artiste…) gardent leur pastille. */
+.finance-scope
+  [data-slot="status-badge"]:is(
+    [data-tone="neutral"],
+    [data-tone="info"],
+    [data-tone="success"],
+    [data-tone="warning"],
+    [data-tone="danger"],
+    [data-tone="action"]
+  ) {
+  --state-dot: var(--text-tertiary);
+  height: auto;
+  padding-inline: 0;
+  gap: 6px;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: var(--type-body-sm);
+  line-height: var(--type-body-sm-lh);
+  font-weight: inherit;
+}
+.finance-scope [data-slot="status-badge"][data-tone="info"] {
+  --state-dot: var(--tone-info-fg);
+}
+.finance-scope [data-slot="status-badge"][data-tone="success"] {
+  --state-dot: var(--tone-success-fg);
+}
+.finance-scope [data-slot="status-badge"][data-tone="action"] {
+  --state-dot: var(--selection);
+}
+.finance-scope [data-slot="status-badge"][data-tone="warning"] {
+  --state-dot: var(--tone-warning-fg);
+  color: var(--tone-warning-fg);
+}
+.finance-scope [data-slot="status-badge"][data-tone="danger"] {
+  --state-dot: var(--tone-danger-fg);
+  color: var(--tone-danger-fg);
+}
+.finance-scope
+  [data-slot="status-badge"]:is(
+    [data-tone="neutral"],
+    [data-tone="info"],
+    [data-tone="success"],
+    [data-tone="warning"],
+    [data-tone="danger"],
+    [data-tone="action"]
+  )::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: var(--state-dot);
+}
+.finance-scope [data-slot="status-badge"] > .rounded-full[aria-hidden] {
+  display: none;
+}
 /* Boutons et tableaux : la forme du design system (bouton en pilule, tableau à
    bandeau d'en-tête, sans filets verticaux), aux tailles de Finance (Sacha,
    15/11/2026 : « les tableaux et les boutons du DS », puis « une version plus

@@ -1,6 +1,6 @@
 import { RecordHistory } from "@/components/finance/record-history";
 import { SheetFacts, SheetHead } from "@/components/finance/finance-sheet";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import type { RowAction } from "@/components/ui/row-actions";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { spendDay, spendTtc, type FinanceSpend } from "@/lib/finance/spends";
@@ -10,6 +10,9 @@ import { treasury } from "@/lib/i18n/fr/treasury";
 import { spendCashTone } from "@/lib/ui/state-tones";
 import { formatDay } from "@/lib/utils/day";
 import { formatAmount } from "@/lib/utils/money";
+import { IconPaperclip } from "nucleo-sharp-essential";
+import { PostLabel } from "@/components/finance/post-label";
+import { ViewLink } from "@/components/ui/view-link";
 
 const t = financeSheet.spend;
 const amount = (cents: number) => formatAmount(cents, { ht: false });
@@ -21,10 +24,14 @@ export function SpendSheet({
   spend,
   envelope,
   actions,
+  attachProof,
 }: {
   spend: FinanceSpend;
   envelope: string;
   actions: RowAction[];
+  // How to give it its proof when it has none: its form (a Finance spend),
+  // else Finance › Justificatifs, where the dropped file is matched to it.
+  attachProof?: { onSelect: () => void } | { href: string };
 }) {
   const post = spend.family
     ? spend.family === "other"
@@ -34,14 +41,12 @@ export function SpendSheet({
   return (
     <>
       <SheetHead
-        eyebrow={[budget.form.targetKinds[spend.target.kind], envelope]
-          .filter(Boolean)
-          .join(" · ")}
+        eyebrow={envelope}
         amount={amount(spendTtc(spend))}
         caption={
           <>
             {spend.vatBp !== null && <span>{t.ht(amount(spend.cents))}</span>}
-            <StatusBadge tone={spendCashTone[spend.status]} size="sm">
+            <StatusBadge tone={spendCashTone[spend.status]}>
               {treasury.spendStates[spend.status]}
             </StatusBadge>
           </>
@@ -50,7 +55,14 @@ export function SpendSheet({
       <SheetFacts
         facts={[
           { label: t.envelope, value: envelope },
-          { label: t.post, value: post ?? financeSheet.none },
+          {
+            label: t.post,
+            value: post ? (
+              <PostLabel family={spend.family} label={post} />
+            ) : (
+              financeSheet.none
+            ),
+          },
           { label: t.supplier, value: spend.supplier ?? financeSheet.none },
           { label: t.due, value: formatDay(spendDay(spend)) },
           {
@@ -64,8 +76,30 @@ export function SpendSheet({
           {
             label: t.proof,
             value: spend.proof?.name ?? (
-              <span className="text-[color:var(--tone-warning-fg)]">
-                {t.proofMissing}
+              <span className="flex flex-wrap items-center gap-2">
+                <StatusBadge tone="warning">{t.proofMissing}</StatusBadge>
+                {attachProof &&
+                  ("href" in attachProof ? (
+                    <ViewLink
+                      href={attachProof.href}
+                      className={buttonVariants({
+                        variant: "outline",
+                        size: "sm",
+                      })}
+                    >
+                      <IconPaperclip aria-hidden data-icon="inline-start" />
+                      {t.attachProof}
+                    </ViewLink>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={attachProof.onSelect}
+                    >
+                      <IconPaperclip aria-hidden data-icon="inline-start" />
+                      {t.attachProof}
+                    </Button>
+                  ))}
               </span>
             ),
           },

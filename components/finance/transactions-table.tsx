@@ -2,12 +2,13 @@
 
 import {
   IconArrowDottedRotateAnticlockwise,
+  IconPlus,
   IconLink,
   IconPaperclip,
 } from "nucleo-sharp-essential";
 import { useState } from "react";
 
-import { IconBan } from "@/components/icons";
+import { IconBan, IconUpload } from "@/components/icons";
 import {
   BankImportForm,
   IgnoreForm,
@@ -71,7 +72,8 @@ export function ReconcileButtons() {
     <div className="flex flex-wrap gap-2">
       <DialogButton
         label={t.add}
-        size="lg"
+        icon={IconPlus}
+        iconOnly
         title={t.manualForm.title}
         description={t.manualForm.description}
       >
@@ -79,8 +81,9 @@ export function ReconcileButtons() {
       </DialogButton>
       <DialogButton
         label={t.import}
+        icon={IconUpload}
+        iconOnly
         variant="default"
-        size="lg"
         title={t.importForm.title}
         description={t.importForm.description}
       >

@@ -19,10 +19,6 @@ export const financeBudgets = {
     artist: "Artiste",
     cost_center: "Centre de coût",
   },
-  list: {
-    count: (count: number) => plural(count, "enveloppe", "enveloppes"),
-    rule: "le reste baisse à l'engagement, la trésorerie au paiement.",
-  },
   templates: {
     title: (name: string) => `Modèle ${name}`,
     lines: (count: number) => plural(count, "ligne", "lignes"),

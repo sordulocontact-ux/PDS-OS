@@ -5,6 +5,11 @@ import { useState, type ComponentType, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { dialogs } from "@/lib/i18n/fr/dialogs";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const fr = { dialogs };
 
@@ -22,6 +27,7 @@ export function DialogButton({
   title,
   description,
   wide = false,
+  iconOnly = false,
   children,
 }: {
   label: string;
@@ -32,22 +38,45 @@ export function DialogButton({
   title: string;
   description: string;
   wide?: boolean;
+  // Its icon alone, its label in a tooltip shown fast and to screen readers
+  // (a list's tools, as the proto, Sacha 15/11/2026). Needs `icon`.
+  iconOnly?: boolean;
   children: ReactNode | ((close: () => void) => ReactNode);
 }) {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
   return (
     <>
-      <Button
-        type="button"
-        variant={variant}
-        size={size}
-        className="relative z-10"
-        onClick={() => setOpen(true)}
-      >
-        {Icon && <Icon aria-hidden data-icon="inline-start" />}
-        {label}
-      </Button>
+      {iconOnly && Icon ? (
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                type="button"
+                variant={variant}
+                size="icon"
+                aria-label={label}
+                className="relative z-10"
+                onClick={() => setOpen(true)}
+              />
+            }
+          >
+            <Icon aria-hidden />
+          </TooltipTrigger>
+          <TooltipContent side="bottom">{label}</TooltipContent>
+        </Tooltip>
+      ) : (
+        <Button
+          type="button"
+          variant={variant}
+          size={size}
+          className="relative z-10"
+          onClick={() => setOpen(true)}
+        >
+          {Icon && <Icon aria-hidden data-icon="inline-start" />}
+          {label}
+        </Button>
+      )}
       <FormDialog
         open={open}
         onOpenChange={setOpen}

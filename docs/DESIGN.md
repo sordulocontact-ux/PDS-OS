@@ -1076,6 +1076,15 @@ plan et lots dans `docs/FINANCE-V2.md`. **Écart voulu, limité à Finance** :
   puis « +N », et en bas à droite le solde de fin de journée en `text-micro` gris quand il bouge (ambre sous la réserve).
   Un clic sur un jour ou une pastille ouvre le jour dans la fiche latérale (`FinanceSheet`, ↑ ↓ = jour avec mouvements
   précédent / suivant ; la pastille cliquée y est sélectionnée).
+- **Retours du 15/11/2026 (soir)** : un état s'écrit en point de couleur et texte, sans fond (le proto avant le design
+  system ; texte à l'encre, orange ou rouge pour avertissement et danger ; règle `.finance-scope` lisant `data-tone` de
+  `StatusBadge`, les teintes de catégorie gardent leur pastille) ; les petits chiffres (montants, dates, comptes, axes,
+  tout `tabular-nums` hors grands chiffres de titre) en Geist Mono un cran plus petit ; un poste a sa teinte fixe et son
+  carré (`postShade`, `PostLabel`) dans le tableau, la fiche et le camembert ; l'enveloppe s'écrit par son seul nom ;
+  la fiche à droite sans ombre, sur le voile sombre de l'app (`--glass-scrim`) ; la fiche d'une opération bancaire suit
+  le proto (cadre « Encaissement de / Paiement de », raisons cochées, « Valider le rapprochement », « Choisir autre
+  chose ») ; une dépense sans justificatif a « Joindre le justificatif » dans sa fiche ; les actions d'une liste peuvent
+  n'être qu'une icône avec une infobulle rapide (`DialogButton iconOnly`, Rapprochement).
 - Touche du clavier nommée à l'écran : `Kbd` (`components/ui/kbd.tsx`, `raised` pour l'accueil).
 
 ### Arrondis

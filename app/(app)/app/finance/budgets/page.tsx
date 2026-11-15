@@ -89,9 +89,7 @@ export default async function FinanceBudgetsPage({
                 current: type === key,
               }))}
             />
-            <p className="min-w-0 flex-1 truncate text-body-md text-[color:var(--text-secondary)]">
-              {t.list.count(rows.length)} · {t.list.rule}
-            </p>
+            <span className="flex-1" />
             {actions && <div className="shrink-0">{actions}</div>}
           </div>
           {rows.length === 0 ? (

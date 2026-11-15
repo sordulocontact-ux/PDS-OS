@@ -144,6 +144,7 @@ export const financeSheet = {
     rebillMissing: "Oui, sans remboursement prévu",
     proof: "Justificatif",
     proofMissing: "Manquant",
+    attachProof: "Joindre le justificatif",
     note: "Note",
     bank: "Rapprochée de la banque",
     ht: (amount: string) => `${amount} HT`,
@@ -158,6 +159,10 @@ export const financeSheet = {
     matched: "Rapprochée avec",
     ignored: "Ignorée",
     proposal: "Proposition",
+    incomeOf: "Encaissement de",
+    spendOf: "Paiement de",
+    acceptMatch: "Valider le rapprochement",
+    chooseOther: "Choisir autre chose",
     never:
       "Un paiement règle une dépense existante : il n'en crée jamais une deuxième.",
   },
