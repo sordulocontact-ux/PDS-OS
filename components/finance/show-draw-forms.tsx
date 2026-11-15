@@ -58,16 +58,21 @@ function Select({
 export function ShowForm({
   show,
   formats,
+  initialFormatId,
   onDone,
 }: {
   show: Show | null;
   formats: ShowFormat[];
+  // A format's card plans a show of that format.
+  initialFormatId?: string;
   onDone: () => void;
 }) {
   const t = fr.fundings.shows.form;
   const submit = useWriteSubmit(onDone, "");
   const live = formats.filter((f) => !f.archived || f.id === show?.formatId);
-  const [formatId, setFormatId] = useState(show?.formatId ?? live[0]?.id ?? "");
+  const [formatId, setFormatId] = useState(
+    show?.formatId ?? initialFormatId ?? live[0]?.id ?? "",
+  );
   const [label, setLabel] = useState(show?.label ?? "");
   const [day, setDay] = useState(show?.plannedOn ?? "");
   const [tried, setTried] = useState(false);

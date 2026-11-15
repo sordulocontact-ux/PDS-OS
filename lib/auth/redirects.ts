@@ -134,6 +134,8 @@ export const routes = {
   // (?type=), the money in (?vue=), the spends (?vue=).
   finance: "/app/finance",
   financeTreasury: "/app/finance/tresorerie",
+  // The month's moves as a calendar (?mois=YYYY-MM).
+  financePlanning: "/app/finance/planning",
   financeBudgets: "/app/finance/budgets",
   financeIncomes: "/app/finance/encaissements",
   financeSpends: "/app/finance/depenses",

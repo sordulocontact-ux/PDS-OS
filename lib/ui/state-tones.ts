@@ -1349,3 +1349,13 @@ export const proofStateTone = {
   attached: "success",
   dismissed: "neutral",
 } as const satisfies Record<string, Tone>;
+
+/** A day of Finance › Planning (lib/finance/planning.ts): the day the
+ * balance goes under the minimum reserve waits for the Finance's action;
+ * the forecast's low point says itself, in danger when it is under the
+ * reserve. */
+export const planningMarkTone = {
+  reserve: "warning",
+  low: "neutral",
+  low_under: "danger",
+} as const satisfies Record<string, Tone>;

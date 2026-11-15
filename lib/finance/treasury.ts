@@ -63,7 +63,7 @@ export type TreasuryEvent = {
   artistId: string | null;
   source:
     | { kind: "income"; id: string; state: IncomeState }
-    | { kind: "spend"; status: FinanceLine["status"] }
+    | { kind: "spend"; id: string; status: FinanceLine["status"] }
     // Lot 5: an Orchard advance, a show's cost, a Pay Later installment.
     | { kind: "engine"; engine: EngineMove["engine"] };
 };
@@ -141,7 +141,7 @@ export function treasuryEvents(
         cents: line.cents,
         projectId: line.projectId,
         artistId: line.artistId,
-        source: { kind: "spend", status: line.status },
+        source: { kind: "spend", id: line.id, status: line.status },
       },
     ];
   });
@@ -187,7 +187,9 @@ export function computeTreasury({
   upcoming: FinanceLine[];
   engines?: EngineData;
   today: string;
-  horizon: TreasuryHorizon;
+  // 30, 60 or 90 days on Trésorerie; the Planning reads up to the end of
+  // the month it shows (at most 180 days).
+  horizon: number;
 }): Treasury | null {
   if (!statement) return null;
   const until = addDays(today, horizon);

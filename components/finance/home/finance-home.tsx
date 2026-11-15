@@ -23,6 +23,7 @@ import { financeHome } from "@/lib/i18n/fr/finance-home";
 import { cn } from "@/lib/utils";
 import { formatDay } from "@/lib/utils/day";
 import { formatAmount } from "@/lib/utils/money";
+import { spendsHref } from "@/lib/finance/spend-links";
 
 const t = financeHome;
 const amount = (cents: number) => formatAmount(cents, { ht: false });
@@ -188,7 +189,7 @@ export function FinanceHome({
         <SentenceCard
           icon={IconMoneyBillCoin}
           title={t.outgoing.title}
-          href={`${routes.financeSpends}?vue=a-payer`}
+          href={spendsHref({ statut: "facture" })}
           foot={t.outgoing.open}
           figure={{ text: amount(view.outgoing.cents) }}
         >

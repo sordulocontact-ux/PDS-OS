@@ -2,33 +2,26 @@ import { IconCreditCard } from "nucleo-sharp-essential";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { FinanceFrame } from "@/components/finance/finance-frame";
-import {
-  ReconcileButtons,
-  TransactionsTable,
-} from "@/components/finance/transactions-table";
+import { ReconcileButtons } from "@/components/finance/transactions-table";
+import { TransactionsList } from "@/components/finance/transactions-list";
 import { EmptyNote, EmptyState } from "@/components/shell/empty-state";
-import { DataTableViews } from "@/components/ui/data-table";
-import { MetricCard } from "@/components/ui/metric-card";
+import { SegmentedLinks } from "@/components/ui/segmented-control";
 import { can } from "@/lib/auth/access";
 import { requirePermission } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import {
   possibleDuplicates,
-  suggestionsFor,
-  txLeft,
   txState,
   type BankTransaction,
 } from "@/lib/finance/reconcile";
 import { loadReconciliation } from "@/lib/finance/reconcile-queries";
+import { loadSpends } from "@/lib/finance/spend-queries";
 import { loadTreasury } from "@/lib/finance/treasury-queries";
 import { reconcile as t } from "@/lib/i18n/fr/reconcile";
 import { parisPlace } from "@/lib/utils/calendar-period";
-import { formatAmount } from "@/lib/utils/money";
 import { allInOrder } from "@/lib/utils/parallel";
 
 export const metadata = { title: t.title };
-
-const amount = (cents: number) => formatAmount(cents, { ht: false });
 
 const VIEWS = ["a-rapprocher", "rapprochees", "ignorees"] as const;
 type View = (typeof VIEWS)[number];
@@ -46,10 +39,11 @@ export default async function FinanceReconcilePage({
   searchParams,
 }: PageProps<"/app/finance/rapprochement">) {
   const today = parisPlace(new Date()).day;
-  const [access, params, treasury] = await allInOrder([
+  const [access, params, treasury, spends] = await allInOrder([
     requirePermission("read_finance"),
     searchParams,
     loadTreasury(today),
+    loadSpends(),
   ]);
   const data = await loadReconciliation(treasury.incomes);
   const view = asView(params.vue);
@@ -67,15 +61,8 @@ export default async function FinanceReconcilePage({
     rapprochees: t.views.matched,
     ignorees: t.views.ignored,
   };
-  const open = lists["a-rapprocher"];
-  const month = today.slice(0, 7);
-  const matchedThisMonth = lists.rapprochees.filter((tx) =>
-    tx.bookedOn.startsWith(month),
-  );
-  const suggested = open.filter(
-    (tx) => suggestionsFor(tx, data.candidates).length > 0,
-  );
   const doubles = possibleDuplicates(data.transactions);
+  const proofLines = spends.spends.filter((x) => x.hasProof).map((x) => x.id);
 
   // New style (docs/FINANCE-V2.md, lot 2): the actions sit on the tabs' row;
   // in the frame's head only while there is no list yet.
@@ -94,58 +81,35 @@ export default async function FinanceReconcilePage({
           body={t.emptyBody}
         />
       ) : (
-        <>
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            <MetricCard
-              title={t.tiles.open}
-              value={amount(open.reduce((s, tx) => s + txLeft(tx), 0))}
-              caption={t.tiles.openHint(open.length)}
-              href={`${routes.financeReconcile}?vue=a-rapprocher`}
-              current={view === "a-rapprocher"}
-            />
-            <MetricCard
-              title={t.tiles.suggested}
-              value={String(suggested.length)}
-              caption={t.tiles.suggestedHint}
-            />
-            <MetricCard
-              title={t.tiles.matched}
-              value={amount(
-                matchedThisMonth.reduce((s, tx) => s + Math.abs(tx.cents), 0),
-              )}
-              caption={t.tiles.matchedHint(matchedThisMonth.length)}
-              href={`${routes.financeReconcile}?vue=rapprochees`}
-              current={view === "rapprochees"}
-            />
-            <MetricCard
-              title={t.tiles.doubles}
-              value={String(doubles.size)}
-              caption={t.tiles.doublesHint}
-              danger={doubles.size > 0}
-            />
-          </div>
-          <DataTableViews
-            label={t.views.label}
-            action={action}
-            views={VIEWS.map((key) => ({
-              href: `${routes.financeReconcile}?vue=${key}`,
-              label: labels[key],
-              count: lists[key].length,
-              current: view === key,
-            }))}
-          >
-            {lists[view].length === 0 ? (
-              <EmptyNote>{t.emptyView}</EmptyNote>
-            ) : (
-              <TransactionsTable
-                transactions={lists[view]}
-                candidates={data.candidates}
-                doubles={[...doubles]}
-                canManage={canManage}
+        <TransactionsList
+          transactions={lists[view]}
+          candidates={data.candidates}
+          doubles={[...doubles]}
+          proofLines={proofLines}
+          canManage={canManage}
+          empty={<EmptyNote>{t.emptyView}</EmptyNote>}
+          filters={
+            <>
+              <SegmentedLinks
+                label={t.views.label}
+                options={VIEWS.map((key) => ({
+                  key,
+                  href: `${routes.financeReconcile}?vue=${key}`,
+                  label: (
+                    <>
+                      {labels[key]}
+                      <span className="text-[color:var(--text-tertiary)] tabular-nums">
+                        {lists[key].length}
+                      </span>
+                    </>
+                  ),
+                  current: view === key,
+                }))}
               />
-            )}
-          </DataTableViews>
-        </>
+              {action}
+            </>
+          }
+        />
       )}
     </FinanceFrame>
   );

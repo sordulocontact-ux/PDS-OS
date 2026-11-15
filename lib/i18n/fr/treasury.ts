@@ -11,6 +11,7 @@ export const treasury = {
     waiting: (count: number) => `, ${count} à traiter`,
     overview: "Vue d'ensemble",
     treasury: "Trésorerie",
+    planning: "Planning",
     budgets: "Budgets",
     incomes: "Factures",
     fundings: "Financements",
@@ -238,6 +239,25 @@ export const treasury = {
       state: "État",
       amount: "Montant",
       actions: "Actions",
+      // The proto's columns (Sacha 15/11/2026).
+      invoice: "Facture",
+      client: "Client",
+      status: "Statut",
+      reminder: "Relance",
+      left: "Reste TTC",
+      total: "Montant TTC",
+    },
+    // The days under a due day, computed by the code from today.
+    dueIn: {
+      ago: (days: number) => `il y a ${days} j`,
+      ahead: (days: number) => `dans ${days} j`,
+      today: "aujourd'hui",
+    },
+    chase: {
+      last: (day: string) => `Dernière le ${day}`,
+      never: "Jamais",
+      next: (action: string, parts: string[]) =>
+        ["Prochaine : " + action, ...parts].join(" · "),
     },
     emptyTitle: "Aucune entrée d'argent",
     emptyBody:

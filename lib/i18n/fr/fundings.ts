@@ -18,14 +18,16 @@ export const fundings = {
     pay_later: "Pay Later",
   },
   orchard: {
-    title: "Avances The Orchard",
-    caption: (amount: string, per: number) =>
-      `${amount} tous les ${per} titres livrés`,
+    title: "The Orchard · avances",
+    caption: (per: number) => `tous les ${per} titres livrés`,
     counted: (count: number, per: number) => `${count} sur ${per} titres`,
-    next: (amount: string, day: string) =>
-      `Prochaine avance : ${amount} le ${day}`,
-    nextUnknown: "Aucune avance prévue avec les émissions planifiées",
-    due: "Une tranche est déjà complète : avance attendue",
+    countedLine: (count: number, per: number) =>
+      `Titres comptés vers la prochaine avance : ${count} / ${per}`,
+    planned: "Avance prévue",
+    // The show whose provisional titles complete the tranche.
+    plannedBy: (show: string) => `Avec « ${show} »`,
+    due: "Tranche déjà complète : avance attendue",
+    nextUnknown: "Aucune avance prévue avec les émissions planifiées.",
     edit: "Régler",
     form: {
       title: "Règle The Orchard",
@@ -41,18 +43,14 @@ export const fundings = {
   },
   shows: {
     title: "Émissions et lives",
-    caption:
-      "Leur coût et leurs titres provisoires entrent dans la trésorerie à leur date.",
-    empty: "Aucune émission planifiée.",
-    columns: {
-      label: "Émission",
-      day: "Date",
-      cost: "Coût",
-      titles: "Titres provisoires",
-      actions: "Actions",
-    },
     budgetOpen: "Budget ouvert",
-    plan: "Planifier",
+    planned: "Prévue",
+    onDay: (day: string, titles: number) =>
+      titles
+        ? `${day} · ${plural(titles, "titre provisoire", "titres provisoires")}`
+        : day,
+    noShows: "Aucune émission planifiée.",
+    plan: "Nouvelle émission",
     move: "Changer la date",
     cancel: "Annuler l'émission",
     cancelTitle: "Annuler cette émission ?",
@@ -78,12 +76,10 @@ export const fundings = {
     },
   },
   formats: {
-    title: "Formats",
     add: "Nouveau format",
-    line: (cost: string, titles: number) =>
-      titles
-        ? `${cost} · ${plural(titles, "titre provisoire", "titres provisoires")}`
-        : cost,
+    cost: (amount: string) => `${amount} / émission`,
+    noFormat:
+      "Aucun format : un format donne son coût et ses titres provisoires.",
     form: {
       title: "Nouveau format",
       description:
@@ -104,9 +100,14 @@ export const fundings = {
     title: "Pay Later",
     empty: "Aucune ligne de crédit.",
     noDraws: "Aucun tirage.",
-    available: (amount: string, limit: string) =>
-      `${amount} disponibles sur ${limit}`,
-    used: (amount: string) => `${amount} à rembourser`,
+    figures: { total: "Crédit total", used: "Utilisé", free: "Disponible" },
+    summary: (amount: string, fee: string) =>
+      `Mensualité ${amount} dont ${fee} d'intérêts`,
+    progress: (paid: number, total: number) => `${paid} payées sur ${total}`,
+    nextDay: (day: string) => `prochaine le ${day}`,
+    installment: (n: number, of: number) => `Mensualité ${n}/${of}`,
+    noInstallments: "Aucune mensualité à venir.",
+    draws: "Tirages",
     addLine: "Nouvelle ligne de crédit",
     draw: "Nouveau tirage",
     remove: "Retirer le tirage",
@@ -162,8 +163,7 @@ export const fundings = {
     },
   },
   rebill: {
-    title: "Remboursements",
-    caption: "Ce que des clients ou partenaires doivent rembourser au label.",
+    title: "Remboursements et réserve",
     expected: (count: number) =>
       plural(count, "refacturation attendue", "refacturations attendues"),
     missing: (count: number) =>
@@ -172,16 +172,13 @@ export const fundings = {
         "dépense refacturable sans remboursement",
         "dépenses refacturables sans remboursement",
       ),
-    open: "Dépenses",
-    incomes: "Voir les factures",
     none: "Rien à rembourser.",
+    row: "Remboursements à refacturer",
   },
   reserve: {
     title: "Réserve",
     caption: (amount: string) => `Réserve minimale ${amount}`,
-    low: (amount: string, day: string) => `Point bas prévu ${amount} le ${day}`,
     none: "Aucune réserve minimale.",
-    open: "Trésorerie",
   },
   loadError: "Les financements n'ont pas pu être chargés.",
   errors: {

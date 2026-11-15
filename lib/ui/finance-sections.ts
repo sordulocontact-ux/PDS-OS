@@ -2,6 +2,7 @@
 // menu), grouped for the second sidebar (Sacha 13/11/2026: « double
 // sidebar comme le projet »). Client-safe.
 import {
+  IconCalendarDays,
   IconChartBarTrendUp,
   IconCreditCard,
   IconFile,
@@ -40,6 +41,14 @@ export const FINANCE_SECTIONS = [
     href: routes.financeTreasury,
     group: "steer",
     icon: IconChartBarTrendUp,
+  },
+  {
+    // Every move of a month as a calendar (Sacha 15/11/2026, after Midday).
+    key: "planning",
+    label: t.planning,
+    href: routes.financePlanning,
+    group: "steer",
+    icon: IconCalendarDays,
   },
   {
     key: "reconcile",

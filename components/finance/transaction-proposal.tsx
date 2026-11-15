@@ -27,12 +27,15 @@ export function TransactionProposal({
   candidates,
   canManage,
   full = false,
+  withAccept = true,
   onAccept,
 }: {
   tx: BankTransaction;
   candidates: Candidate[];
   canManage: boolean;
   full?: boolean;
+  // False where « Valider » stands in its own column (the table's Statut).
+  withAccept?: boolean;
   onAccept: (candidate: Candidate) => void;
 }) {
   const t = fr.reconcile;
@@ -81,7 +84,7 @@ export function TransactionProposal({
           ].join(" · ")}
         </span>
       </span>
-      {canManage && (
+      {canManage && withAccept && (
         <Button
           type="button"
           size="xs"

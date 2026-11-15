@@ -19,24 +19,14 @@ export const financeBudgets = {
     artist: "Artiste",
     cost_center: "Centre de coût",
   },
-  tiles: {
-    envelopes: "Enveloppes actives",
-    envelopesHint: (count: number, revisions: string | null) =>
-      [
-        plural(count, "enveloppe", "enveloppes"),
-        revisions && `révisions ${revisions}`,
-      ]
-        .filter(Boolean)
-        .join(" · "),
-    engaged: "Engagé",
-    engagedHint: (invoiced: string, paid: string) =>
-      `dont ${invoiced} facturés, ${paid} payés`,
-    rest: "Reste disponible",
-    restHint: (planned: string) => `${planned} encore prévus`,
-    gap: "Écart au prévisionnel",
-    gapHint: (forecast: string) => `sur ${forecast} prévus à la saisie`,
-    pdsPart: "Part PDS",
-    pdsPartHint: (percent: number) => `${percent} % financés par PDS`,
+  list: {
+    count: (count: number) => plural(count, "enveloppe", "enveloppes"),
+    rule: "le reste baisse à l'engagement, la trésorerie au paiement.",
+  },
+  templates: {
+    title: (name: string) => `Modèle ${name}`,
+    lines: (count: number) => plural(count, "ligne", "lignes"),
+    use: "Nouveau centre de coût depuis le modèle",
   },
   pie: {
     title: "Répartition par poste",
@@ -50,15 +40,13 @@ export const financeBudgets = {
   },
   columns: {
     envelope: "Enveloppe",
+    type: "Type",
     budget: "Budget",
-    planned: "Prévu",
-    engaged: "Engagé",
-    invoiced: "Facturé",
-    paid: "Payé",
-    rest: "Reste",
-    rebillable: "Refacturable",
-    gap: "Écart",
+    used: "Engagé + facturé + payé",
+    rest: "Reste disponible",
+    consumed: "Consommé",
   },
+  percent: (value: number) => `${value} %`,
   initial: (amount: string) => `Initial ${amount}`,
   noBudget: "Sans enveloppe",
   over: (amount: string) => `Dépassé de ${amount}`,

@@ -1,4 +1,4 @@
-import { BUDGET_ALERT_SHARE } from "@/lib/finance/cockpit";
+import { ConsumptionMeter } from "@/components/finance/consumption-meter";
 import type { EnvelopeRow, Totals } from "@/lib/finance/envelopes";
 import { financeBudgets } from "@/lib/i18n/fr/finance-budgets";
 import { cn } from "@/lib/utils";
@@ -68,26 +68,11 @@ export function EnvelopeFigures({
           )}
         </div>
         {budget !== null && (
-          <div
-            role="meter"
-            aria-label={t.used(row.name, percent)}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={Math.min(100, percent)}
-            className="mb-2 h-2 min-w-48 flex-1 overflow-hidden rounded-full bg-[var(--surface-sunken)]"
-          >
-            <span
-              className={cn(
-                "block h-full rounded-full",
-                share >= 1
-                  ? "bg-[var(--error)]"
-                  : share >= BUDGET_ALERT_SHARE
-                    ? "bg-[var(--tone-warning-fg)]"
-                    : "bg-[var(--text-primary)]",
-              )}
-              style={{ width: `${Math.min(100, share * 100)}%` }}
-            />
-          </div>
+          <ConsumptionMeter
+            share={share}
+            label={t.used(row.name, percent)}
+            className="mb-2 h-2 min-w-48 flex-1"
+          />
         )}
       </div>
       <dl className="grid grid-cols-2 border-t border-[color:var(--border-hairline)] sm:grid-cols-3 lg:grid-cols-4">

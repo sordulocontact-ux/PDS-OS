@@ -22,6 +22,7 @@ import { envelopeRow } from "@/lib/finance/envelopes";
 import { loadSpends } from "@/lib/finance/spend-queries";
 import { spendStage, spendTtc } from "@/lib/finance/spends";
 import { assistantReadFinance } from "@/lib/i18n/fr/assistant-read-finance";
+import { spendsHref } from "@/lib/finance/spend-links";
 
 const fr = { assistantReadFinance };
 
@@ -162,7 +163,7 @@ export async function readNoProof(): Promise<ReadResult> {
     sources: [
       {
         label: fr.assistantReadFinance.sources.noProof,
-        href: `${routes.financeSpends}?vue=sans-justificatif`,
+        href: spendsHref({ justificatif: "sans" }),
       },
     ],
   };

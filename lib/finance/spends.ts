@@ -57,6 +57,12 @@ export type SpendStage = (typeof SPEND_STAGES)[number];
 export const spendStage = (status: BudgetStatus): SpendStage =>
   status === "proposed" ? "planned" : status;
 
+/** Invoiced or paid: its proof is due (« sans justificatif », the alerts). */
+export const proofExpected = (spend: Pick<FinanceSpend, "status">) => {
+  const stage = spendStage(spend.status);
+  return stage === "invoiced" || stage === "paid";
+};
+
 /** A rebillable spend with no expected income to pay it back (« dépense
  * refacturable sans remboursement planifié »). */
 export const rebillMissing = (spend: FinanceSpend) =>

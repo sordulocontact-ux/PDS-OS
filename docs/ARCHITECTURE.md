@@ -3663,6 +3663,26 @@ justificatif », P2 du ticket Cockpit Finance).
   facture ; puis `attachToCreatedSpend`. Sur un projet ou un artiste, le fichier n'est pas porté par le formulaire :
   la nouvelle dépense est proposée en premier, un clic la rattache.
 
+**Planning de Finance (15/11/2026)**
+
+- **Planning** (`/app/finance/planning?mois=YYYY-MM`, `routes.financePlanning`, section `planning` de
+  `lib/ui/finance-sections.ts`, `read_finance`) : `lib/finance/planning.ts` (`planningDays`, pur, client-safe) pose sur
+  chaque jour du mois ce que `computeTreasury` compte déjà. Jusqu'à aujourd'hui le réel : chaque encaissement d'une
+  entrée (`incomes[].receipts`, avec son libellé), les dépenses payées par jour (`paid`, agrégées : la fonction
+  `finance_cash_out` ne donne pas les lignes), les mensualités Pay Later échues (`installmentsPaid`) ; un réel daté plus
+  tard compte aujourd'hui, comme dans le solde. Dès aujourd'hui la prévision : `treasury.events` (le retard compté
+  aujourd'hui, `dueOn`). Solde avant / après un jour = `treasury.points` de la veille et du jour (sur aujourd'hui, le
+  point de la prévision passe après le réel) : pas de solde avant le début des points (relevé ou 30 jours en arrière).
+  Point bas = `treasury.low` s'il est sous le solde d'aujourd'hui ; « Sous la réserve » = le jour où le solde de fin de
+  journée passe sous `reserveCents`. Rien n'est stocké, aucune migration.
+- Horizon : `computeTreasury` accepte maintenant tout nombre de jours (`horizon: number`, Trésorerie garde 30/60/90) ;
+  le Planning lit au moins 90 jours (même point bas que Trésorerie par défaut), jusqu'à la fin de la grille affichée,
+  au plus 180 ; au-delà, un message dit où s'arrête la prévision. `loadTreasury(until)` lit les dépenses à payer jusqu'à
+  `until` (200 au plus, `p_limit` de `finance_lines`).
+- Liens d'un mouvement : facture → `incomeHref(id, état)` (Factures, la vue de l'état, `?ouvrir=`), dépense →
+  `spendsHref({ ouvrir })` (la source `spend` d'un événement porte maintenant l'`id` de la ligne), dépenses payées →
+  `spendsHref({ statut: "paye" })`, moteurs (Orchard, émission, Pay Later) → Financements. `incomeHref` est la règle unique (`lib/finance/income-links.ts`), aussi pour la recherche ⌘K.
+
 **Résumé de la semaine de Finance (lot 7 du nouveau style, 15/11/2026)**
 
 - **Le code choisit les chiffres** (`lib/assistant/finance-brief/slots.ts`, `briefSlots`) : une liste de « slots », chacun

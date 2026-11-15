@@ -1341,33 +1341,7 @@ button[data-busy]::before {
   font-size: var(--type-body-md);
   line-height: var(--type-body-md-lh);
 }
-/* Le bouton est en pilule par une classe fixe (rounded-full) : en Finance, il
-   prend l'arrondi des champs, lien stylé en bouton compris (buttonVariants). */
-.finance-scope :is([data-slot="button"], .group\/button) {
-  border-radius: var(--radius-lg);
-}
-/* Tableaux de Finance (lot 2) : en-tête sans bandeau, en 13 px gris ; filets
-   verticaux entre les colonnes ; cellules en 14 px. Les tableaux posés dans
-   une carte de section (table-flat) gardent leur forme nue. */
-.finance-scope [data-slot="table-header"] [data-slot="table-row"] {
-  background: transparent;
-}
-.finance-scope [data-slot="table-head"] {
-  height: 40px;
-  font-size: var(--type-colhead);
-  line-height: var(--type-colhead-lh);
-  color: var(--text-tertiary);
-  font-weight: 450;
-}
-.finance-scope [data-slot="table-cell"] {
-  font-size: var(--type-body-sm);
-  line-height: var(--type-body-sm-lh);
-}
-.finance-scope
-  :is(
-    [data-slot="table-head"] + [data-slot="table-head"],
-    [data-slot="table-cell"] + [data-slot="table-cell"]
-  ):not(.section-card *) {
-  border-left: 1px solid var(--border-hairline);
-  padding-left: 14px;
-}
+/* Boutons et tableaux : la forme du design system (bouton en pilule, tableau à
+   bandeau d'en-tête, sans filets verticaux), aux tailles de Finance (Sacha,
+   15/11/2026 : « les tableaux et les boutons du DS », puis « une version plus
+   petite, cohérente avec la page ») : aucune règle de forme propre à Finance. */

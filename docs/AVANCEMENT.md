@@ -2355,3 +2355,14 @@ les modules à parcours (proto « Mise en page des modules », version « Propos
       Rapports du proto (dépenses par poste filtrées par enveloppe, disponible sur les budgets) ; graphique du solde d'après
       la maquette Figma de Sacha : barres par semaine, entrées au-dessus, sorties en dessous, prévu plus clair, solde
       par-dessus sur son axe à droite (`TreasuryChart`, `treasuryWeeks`) ; contrôles segmentés à la hauteur des champs.
+- [x] **Finance › Planning** (15/11/2026, demande de Sacha « un vrai calendrier », d'après Midday) : nouvelle section entre
+  Trésorerie et Rapprochement ; mois en grille lundi → dimanche (liste par jour sur téléphone), mouvements réels puis
+  prévus en pastilles, solde de fin de journée, passage sous la réserve et point bas marqués, détail du jour dans la
+  fiche latérale avec le lien vers la facture, la dépense ou le financement ; navigation au clavier. Calculs :
+  `computeTreasury` seul. Reste : le détail des dépenses payées des jours passés (une ligne agrégée par jour), un écran de
+  chargement en forme de grille (`FinanceLoading` garde la forme liste).
+- [x] **Finance, pages comme le proto (15/11/2026)** — Dépenses en une liste filtrée (enveloppe, statut, sans justificatif,
+      colonnes au choix, total dessous) ; Rapprochement sans cartes (recherche, vues segmentées, colonnes du proto, total) ;
+      Factures aux colonnes du proto (relance, « il y a N j ») ; Budgets en un tableau avec jauge « Consommé » et cartes
+      des modèles ; Financements en cartes The Orchard, Pay Later et par format ; boutons et tableaux du design system ;
+      vues des listes en filtre segmenté (`DataTableViews segmented`).

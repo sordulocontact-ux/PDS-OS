@@ -38,16 +38,19 @@ const positive = (value: string) => {
  * live, a shooting: its lines copied as planned spends). */
 export function CostCenterForm({
   templates,
+  initialTemplateId = "",
   onDone,
 }: {
   templates: BudgetTemplate[];
+  // A template's card opens the form already on it.
+  initialTemplateId?: string;
   onDone: () => void;
 }) {
   const t = fr.financeBudgets.centerForm;
   const submit = useWriteSubmit(onDone, "");
   const [name, setName] = useState("");
   const [value, setValue] = useState("");
-  const [templateId, setTemplateId] = useState("");
+  const [templateId, setTemplateId] = useState(initialTemplateId);
   const [tried, setTried] = useState(false);
   const template = templates.find((x) => x.id === templateId);
   const total = template?.lines.reduce((s, l) => s + l.cents, 0) ?? 0;

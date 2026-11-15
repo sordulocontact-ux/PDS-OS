@@ -3,6 +3,7 @@
 import {
   IconArrowDottedRotateAnticlockwise,
   IconLink,
+  IconPaperclip,
 } from "nucleo-sharp-essential";
 import { useState } from "react";
 
@@ -14,9 +15,11 @@ import {
   MatchForm,
 } from "@/components/finance/reconcile-forms";
 import { FinanceSheet } from "@/components/finance/finance-sheet";
+import { SignedAmount } from "@/components/finance/signed-amount";
 import { TransactionProposal } from "@/components/finance/transaction-proposal";
 import { TransactionSheet } from "@/components/finance/transaction-sheet";
 import { useSheetRow } from "@/components/finance/use-sheet-row";
+import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   DataTable,
@@ -29,6 +32,7 @@ import {
   DataTableLink,
   DataTableMedia,
   DataTableRow,
+  EMPTY_CELL,
 } from "@/components/ui/data-table";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { FormDialog } from "@/components/ui/form-dialog";
@@ -37,10 +41,13 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "@/components/ui/toast";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import {
+  suggestionsFor,
   txLeft,
   txState,
   type BankTransaction,
   type Candidate,
+  type Suggestion,
+  type TxState,
   type TransactionMatch,
 } from "@/lib/finance/reconcile";
 import {
@@ -99,14 +106,44 @@ export function TransactionsTable({
   transactions,
   candidates,
   doubles,
+  proofLines,
   canManage,
 }: {
   transactions: BankTransaction[];
   candidates: Candidate[];
   doubles: string[];
+  // Ids of the spends whose proof is attached (their paperclip).
+  proofLines: string[];
   canManage: boolean;
 }) {
   const t = fr.reconcile;
+  const withProof = new Set(proofLines);
+  const labelOf = (state: TxState, double: boolean, best?: Suggestion) =>
+    state === "ignored"
+      ? t.states.ignored
+      : state === "matched"
+        ? t.states.matched
+        : double
+          ? t.states.double
+          : state === "partial"
+            ? t.states.partial
+            : best
+              ? t.states.proposal
+              : t.states.open;
+  const toneOf = (
+    state: TxState,
+    double: boolean,
+    best?: Suggestion,
+  ): "neutral" | "info" | "warning" | "success" =>
+    state === "matched"
+      ? "success"
+      : state === "ignored"
+        ? "neutral"
+        : double
+          ? "warning"
+          : state === "partial" || best
+            ? "info"
+            : "neutral";
   const c = t.columns;
   const [open, setOpen] = useState<Open>(null);
   // The row open in the side sheet (lot 3, docs/FINANCE-V2.md).
@@ -178,45 +215,39 @@ export function TransactionsTable({
     <>
       <DataTable framed>
         <DataTableHeader>
-          <DataTableHead fill>{c.transaction}</DataTableHead>
-          <DataTableHead fill hideBelow="md">
-            {c.suggestion}
-          </DataTableHead>
+          <DataTableHead>{c.date}</DataTableHead>
+          <DataTableHead fill>{c.party}</DataTableHead>
           <DataTableHead align="end">{c.amount}</DataTableHead>
+          <DataTableHead fill hideBelow="md">
+            {c.match}
+          </DataTableHead>
+          <DataTableHead hideBelow="lg">{c.proof}</DataTableHead>
+          <DataTableHead>{c.status}</DataTableHead>
           {canManage && <DataTableActionsHead label={c.actions} />}
         </DataTableHeader>
         <DataTableBody>
           {transactions.map((tx, index) => {
             const state = txState(tx);
+            const best =
+              state === "open" || state === "partial"
+                ? suggestionsFor(tx, candidates)[0]
+                : undefined;
+            const proof = tx.matches.some(
+              (m) => m.kind === "spend" && withProof.has(m.targetId),
+            );
             return (
               <DataTableRow key={tx.id}>
+                <DataTableCell className="tabular-nums">
+                  {formatShortDay(tx.bookedOn, { bare: true })}
+                </DataTableCell>
                 <DataTableCell fill>
                   <DataTableMedia
                     title={
-                      <span className="flex min-w-0 items-center gap-2">
-                        <DataTableLink
-                          href={null}
-                          onOpen={() => setSheet(index)}
-                        >
-                          {tx.counterparty ?? tx.label ?? tx.reference}
-                        </DataTableLink>
-                        {state === "partial" && (
-                          <StatusBadge tone="info">
-                            {t.states.partial}
-                          </StatusBadge>
-                        )}
-                        {double.has(tx.id) && (
-                          <StatusBadge tone="warning">
-                            {t.states.double}
-                          </StatusBadge>
-                        )}
-                      </span>
+                      <DataTableLink href={null} onOpen={() => setSheet(index)}>
+                        {tx.counterparty ?? tx.label ?? tx.reference}
+                      </DataTableLink>
                     }
-                    subtitle={[
-                      formatShortDay(tx.bookedOn, { bare: true }),
-                      tx.reference,
-                      tx.ignoreReason,
-                    ]
+                    subtitle={[tx.reference, tx.ignoreReason]
                       .filter(Boolean)
                       .join(" · ")}
                   />
@@ -233,25 +264,48 @@ export function TransactionsTable({
                     </div>
                   )}
                 </DataTableCell>
+                <DataTableCell align="end">
+                  <SignedAmount
+                    event={{
+                      direction: tx.cents > 0 ? "in" : "out",
+                      cents: Math.abs(tx.cents),
+                    }}
+                  />
+                </DataTableCell>
                 <DataTableCell fill hideBelow="md">
                   <TransactionProposal
                     tx={tx}
                     candidates={candidates}
                     canManage={canManage}
+                    withAccept={false}
                     onAccept={(candidate) => accept(tx, candidate)}
                   />
                 </DataTableCell>
-                <DataTableCell
-                  align="end"
-                  className="whitespace-nowrap tabular-nums"
-                >
-                  <span
-                    className={
-                      tx.cents > 0 ? "text-[color:var(--tone-success-fg)]" : ""
-                    }
-                  >
-                    {tx.cents > 0 ? "+" : "−"}
-                    {amount(Math.abs(tx.cents))}
+                <DataTableCell hideBelow="lg">
+                  {proof ? (
+                    <IconPaperclip
+                      aria-label={t.proofAttached}
+                      className="size-4 text-[color:var(--text-secondary)]"
+                    />
+                  ) : (
+                    EMPTY_CELL
+                  )}
+                </DataTableCell>
+                <DataTableCell>
+                  <span className="flex items-center gap-2">
+                    <StatusBadge tone={toneOf(state, double.has(tx.id), best)}>
+                      {labelOf(state, double.has(tx.id), best)}
+                    </StatusBadge>
+                    {best && canManage && (
+                      <Button
+                        type="button"
+                        size="xs"
+                        className="relative z-10 hidden md:inline-flex"
+                        onClick={() => accept(tx, best.candidate)}
+                      >
+                        {t.accept}
+                      </Button>
+                    )}
                   </span>
                 </DataTableCell>
                 {canManage && (

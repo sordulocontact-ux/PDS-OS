@@ -37,15 +37,18 @@ export function periodLabel(period: CalendarPeriod): string {
 /**
  * A calendar's bar, as in Teams: « Aujourd'hui », previous and next
  * period, what is shown, and the period (Semaine, Mois). Every choice is a
- * link: the URL holds the view. The Calls and the Calendrier.
+ * link: the URL holds the view. The Calls and the Calendrier; Finance's
+ * Planning without the period's choice (`modes={false}`: months only).
  */
 export function CalendarToolbar({
   period,
   hrefOf,
+  modes = true,
 }: {
   period: CalendarPeriod;
   // The calendar's URL for a mode and a date (null: today).
   hrefOf: (mode: CalendarMode, date: string | null) => string;
+  modes?: boolean;
 }) {
   const t = fr.calendar.period;
   return (
@@ -73,6 +76,7 @@ export function CalendarToolbar({
       <h2 className="text-lg font-semibold first-letter:uppercase">
         {periodLabel(period)}
       </h2>
+      {modes && (
       <div className="ml-auto">
         <ViewToggle
           label={t.modes.label}
@@ -83,6 +87,7 @@ export function CalendarToolbar({
           }))}
         />
       </div>
+      )}
     </div>
   );
 }

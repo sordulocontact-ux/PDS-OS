@@ -1,11 +1,12 @@
 import { IconChartBarTrendUp } from "nucleo-sharp-essential";
 
 import { FormMessage } from "@/components/auth/form-message";
-import { NewCostCenterButton } from "@/components/finance/budget-actions";
+import {
+  NewCostCenterButton,
+  NewFromTemplateButton,
+} from "@/components/finance/budget-actions";
 import { EnvelopesTable } from "@/components/finance/envelopes-table";
 import { FinanceFrame } from "@/components/finance/finance-frame";
-import { MonthChart } from "@/components/finance/month-chart";
-import { PostPie } from "@/components/finance/post-pie";
 import { EmptyNote, EmptyState } from "@/components/shell/empty-state";
 import { MetricCard } from "@/components/ui/metric-card";
 import { SegmentedLinks } from "@/components/ui/segmented-control";
@@ -13,17 +14,8 @@ import { can } from "@/lib/auth/access";
 import { requirePermission } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { loadBudgets } from "@/lib/finance/budget-queries";
-import {
-  byPost,
-  envelopeRow,
-  linesOf,
-  spendMonthBars,
-  totalsOf,
-  type EnvelopeKind,
-} from "@/lib/finance/envelopes";
-import { chartMonths } from "@/lib/finance/period";
+import { envelopeRow, type EnvelopeKind } from "@/lib/finance/envelopes";
 import { financeBudgets as t } from "@/lib/i18n/fr/finance-budgets";
-import { parisPlace } from "@/lib/utils/calendar-period";
 import { formatAmount } from "@/lib/utils/money";
 import { allInOrder } from "@/lib/utils/parallel";
 
@@ -48,22 +40,22 @@ const TYPE_LABEL: Record<TypeKey, string> = {
 };
 
 /**
- * Finance › Budgets (Ibé's ticket, maquette 2, lot 4): the live envelopes
- * (projects, artists, cost centers) with « budget initial, révisions,
- * prévu, engagé, facturé, payé, reste, refacturable, écart au
- * prévisionnel », the split by poste and the months; every figure, the pie
- * and the chart computed from the same envelopes (« cohérents avec les
- * filtres actifs »). Each envelope opens its detail.
+ * Finance › Budgets, laid out as the proto's list (Sacha 15/11/2026): the
+ * count and the rule of the figures on the left, the type filter and the
+ * Finance's actions on the same line, then one row per envelope (budget,
+ * engaged + invoiced + paid, what is left, share consumed). Each envelope
+ * opens its page, which has every figure of Ibé's ticket, the split by
+ * poste and the months; the cost-center templates close the page.
  */
 export default async function FinanceBudgetsPage({
   searchParams,
 }: PageProps<"/app/finance/budgets">) {
-  const today = parisPlace(new Date()).day;
   const [access, params, data] = await allInOrder([
     requirePermission("read_finance"),
     searchParams,
     loadBudgets(),
   ]);
+  const canManage = can(access, "manage_finance");
   const type = asType(params.type);
   const kind = TYPES[type];
   const rows = data.envelopes
@@ -71,34 +63,15 @@ export default async function FinanceBudgetsPage({
     .map((e) => envelopeRow(e, data.spends))
     .filter((r) => r.currentCents !== null || r.totals.lines > 0)
     .sort((a, b) => b.engagedCents - a.engagedCents);
-  const lines = data.envelopes
-    .filter((e) => rows.some((r) => r.kind === e.kind && r.id === e.id))
-    .flatMap((e) => linesOf(e, data.spends));
-  const totals = totalsOf(lines);
-  const sum = (pick: (r: (typeof rows)[number]) => number) =>
-    rows.reduce((s, r) => s + pick(r), 0);
-  const envelopes = sum((r) => r.currentCents ?? 0);
-  const revisions = sum((r) => r.revisionsCents);
-  const engaged = sum((r) => r.engagedCents);
-  const rest = sum((r) => r.restCents ?? 0);
-  const gap = totals.projectedCents - totals.forecastCents;
-  const months = chartMonths(
-    { key: "tout", from: null, to: null, previous: null },
-    today,
-    lines.map((s) => s.spentOn.slice(0, 7)),
-  );
+  const empty = data.envelopes.length === 0 && !data.error;
+  const actions = canManage ? (
+    <NewCostCenterButton templates={data.templates} />
+  ) : undefined;
 
   return (
-    <FinanceFrame
-      section="budgets"
-      action={
-        can(access, "manage_finance") ? (
-          <NewCostCenterButton templates={data.templates} />
-        ) : undefined
-      }
-    >
+    <FinanceFrame section="budgets" action={empty ? actions : undefined}>
       {data.error && <FormMessage kind="error">{t.loadError}</FormMessage>}
-      {data.envelopes.length === 0 && !data.error ? (
+      {empty ? (
         <EmptyState
           icon={IconChartBarTrendUp}
           title={t.emptyTitle}
@@ -106,54 +79,46 @@ export default async function FinanceBudgetsPage({
         />
       ) : (
         <>
-          <SegmentedLinks
-            label={t.kinds.label}
-            options={(Object.keys(TYPES) as TypeKey[]).map((key) => ({
-              key,
-              href: `${routes.financeBudgets}?type=${key}`,
-              label: TYPE_LABEL[key],
-              current: type === key,
-            }))}
-          />
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            <MetricCard
-              title={t.tiles.envelopes}
-              value={amount(envelopes)}
-              caption={t.tiles.envelopesHint(
-                rows.length,
-                revisions
-                  ? t.signed(amount(Math.abs(revisions)), revisions > 0)
-                  : null,
-              )}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
+            <SegmentedLinks
+              label={t.kinds.label}
+              options={(Object.keys(TYPES) as TypeKey[]).map((key) => ({
+                key,
+                href: `${routes.financeBudgets}?type=${key}`,
+                label: TYPE_LABEL[key],
+                current: type === key,
+              }))}
             />
-            <MetricCard
-              title={t.tiles.engaged}
-              value={amount(engaged)}
-              caption={t.tiles.engagedHint(
-                amount(totals.invoicedCents),
-                amount(totals.paidCents),
-              )}
-            />
-            <MetricCard
-              title={t.tiles.rest}
-              value={amount(rest)}
-              caption={t.tiles.restHint(amount(totals.plannedCents))}
-              danger={rest < 0}
-            />
-            <MetricCard
-              title={t.tiles.gap}
-              value={t.signed(amount(Math.abs(gap)), gap >= 0)}
-              caption={t.tiles.gapHint(amount(totals.forecastCents))}
-            />
-          </div>
-          <div className="grid items-start gap-4 lg:grid-cols-[1fr_2fr]">
-            <PostPie posts={byPost(lines)} />
-            <MonthChart bars={spendMonthBars(lines, months)} highlight={null} />
+            <p className="min-w-0 flex-1 truncate text-body-md text-[color:var(--text-secondary)]">
+              {t.list.count(rows.length)} · {t.list.rule}
+            </p>
+            {actions && <div className="shrink-0">{actions}</div>}
           </div>
           {rows.length === 0 ? (
             <EmptyNote>{t.emptyView}</EmptyNote>
           ) : (
             <EnvelopesTable rows={rows} />
+          )}
+          {canManage && data.templates.length > 0 && (
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {data.templates.map((template) => (
+                <MetricCard
+                  key={template.id}
+                  title={t.templates.title(template.name)}
+                  value={amount(
+                    template.lines.reduce((s, l) => s + l.cents, 0),
+                  )}
+                  caption={t.templates.lines(template.lines.length)}
+                >
+                  <div>
+                    <NewFromTemplateButton
+                      template={template}
+                      templates={data.templates}
+                    />
+                  </div>
+                </MetricCard>
+              ))}
+            </div>
           )}
         </>
       )}

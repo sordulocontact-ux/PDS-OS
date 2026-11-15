@@ -101,6 +101,30 @@ function DropdownMenuRadioItem({
   );
 }
 
+/** A choice that is on or off (the columns shown in a list): a tick when
+ * on; the menu stays open while one ticks several. */
+function DropdownMenuCheckboxItem({
+  className,
+  children,
+  ...props
+}: MenuPrimitive.CheckboxItem.Props) {
+  return (
+    <MenuPrimitive.CheckboxItem
+      closeOnClick={false}
+      className={cn(
+        "flex min-h-10 cursor-default items-center gap-2.5 rounded-lg px-3 text-[length:var(--type-body-md)] font-medium outline-none select-none data-[disabled]:opacity-40 data-[highlighted]:bg-[var(--control-bg-hover)] [&_svg]:size-5 [&_svg]:shrink-0",
+        className,
+      )}
+      {...props}
+    >
+      <span className="flex-1">{children}</span>
+      <MenuPrimitive.CheckboxItemIndicator>
+        <IconCheck aria-hidden />
+      </MenuPrimitive.CheckboxItemIndicator>
+    </MenuPrimitive.CheckboxItem>
+  );
+}
+
 function DropdownMenuSeparator({
   className,
   ...props
@@ -115,6 +139,7 @@ function DropdownMenuSeparator({
 
 export {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroupLabel,
   DropdownMenuItem,

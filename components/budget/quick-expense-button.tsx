@@ -23,24 +23,39 @@ const fr = { budget, dialogs };
 export function QuickExpenseButton({
   compact = false,
   outline = false,
+  iconOnly = false,
 }: {
   compact?: boolean;
   // Among other actions of the same weight (Finance's overview).
   outline?: boolean;
+  // « + » alone at the end of a list's tools (Finance › Dépenses, as the
+  // proto), its name said by the tooltip and to screen readers.
+  iconOnly?: boolean;
 }) {
   const t = fr.budget;
   const [open, setOpen] = useState(false);
   return (
     <>
-      <Button
-        variant={compact || outline ? "outline" : "default"}
-        size={compact ? "sm" : "lg"}
-        aria-label={compact ? t.quickAddLabel : undefined}
-        onClick={() => setOpen(true)}
-      >
-        <IconPlus aria-hidden data-icon="inline-start" />
-        {compact ? t.quickAdd : t.add}
-      </Button>
+      {iconOnly ? (
+        <Button
+          size="icon"
+          aria-label={t.add}
+          title={t.add}
+          onClick={() => setOpen(true)}
+        >
+          <IconPlus aria-hidden />
+        </Button>
+      ) : (
+        <Button
+          variant={compact || outline ? "outline" : "default"}
+          size={compact ? "sm" : "lg"}
+          aria-label={compact ? t.quickAddLabel : undefined}
+          onClick={() => setOpen(true)}
+        >
+          <IconPlus aria-hidden data-icon="inline-start" />
+          {compact ? t.quickAdd : t.add}
+        </Button>
+      )}
       <FormDialog
         open={open}
         onOpenChange={setOpen}

@@ -41,10 +41,11 @@ import { markInvoiceSent } from "@/lib/finance/invoice-actions";
 import {
   awaitedOn,
   creditedCents,
-  daysLate,
   incomeState,
+  isOpen,
   lastReminder,
   receivedCents,
+  remainingCents,
   type Income,
 } from "@/lib/finance/money-in";
 import type { FinanceTarget } from "@/lib/finance/treasury-queries";
@@ -52,6 +53,7 @@ import { clientInvoices } from "@/lib/i18n/fr/client-invoices";
 import { dialogs } from "@/lib/i18n/fr/dialogs";
 import { treasury } from "@/lib/i18n/fr/treasury";
 import { incomeStateTone } from "@/lib/ui/state-tones";
+import { daysBetween } from "@/lib/utils/calendar-period";
 import { formatDay, formatShortDay } from "@/lib/utils/day";
 import { formatAmount } from "@/lib/utils/money";
 
@@ -108,9 +110,10 @@ export function IncomeAddButton({
 /**
  * The money coming in, one row per income: what and from whom, its project
  * or artist, the day it is awaited, its state, what it received of its
- * amount. `followUp` (the late ones, « Relances » of Ibé's ticket): how
- * late, who follows it, the last reminder and the next action instead of
- * the target and the state. The Finance acts from « ⋯ ».
+ * amount, as the proto's columns: the invoice (number first), the client with
+ * its project or artist, the due day with the days to or past it, the state,
+ * for a late one the last reminder and the next action (« Relances » of Ibé's
+ * ticket, with who follows it), what is left TTC. The Finance acts from « ⋯ ».
  */
 export function IncomesTable({
   incomes,
@@ -119,7 +122,6 @@ export function IncomesTable({
   canManage,
   organizationId,
   ownerId,
-  followUp = false,
 }: {
   incomes: Income[];
   targets: FinanceTarget[];
@@ -127,11 +129,9 @@ export function IncomesTable({
   canManage: boolean;
   organizationId: string;
   ownerId: string | null;
-  followUp?: boolean;
 }) {
   const t = fr.treasury;
   const c = t.incomes.columns;
-  const u = fr.clientInvoices.followUp;
   const [open, setOpen] = useState<{
     kind: IncomeDialogKind;
     income: Income;
@@ -240,113 +240,102 @@ export function IncomesTable({
     <>
       <DataTable framed>
         <DataTableHeader>
-          <DataTableHead fill>{c.label}</DataTableHead>
-          {followUp ? (
-            <>
-              <DataTableHead hideBelow="sm">{u.columns.late}</DataTableHead>
-              <DataTableHead hideBelow="lg">{u.columns.owner}</DataTableHead>
-              <DataTableHead hideBelow="md">{u.columns.last}</DataTableHead>
-              <DataTableHead hideBelow="lg">{u.columns.next}</DataTableHead>
-            </>
-          ) : (
-            <>
-              <DataTableHead hideBelow="lg">{c.target}</DataTableHead>
-              <DataTableHead hideBelow="sm">{c.due}</DataTableHead>
-              <DataTableHead hideBelow="md">{c.state}</DataTableHead>
-            </>
-          )}
-          <DataTableHead align="end">{c.amount}</DataTableHead>
+          <DataTableHead fill>{c.invoice}</DataTableHead>
+          <DataTableHead hideBelow="lg">{c.client}</DataTableHead>
+          <DataTableHead hideBelow="sm">{c.due}</DataTableHead>
+          <DataTableHead hideBelow="md">{c.status}</DataTableHead>
+          <DataTableHead hideBelow="lg">{c.reminder}</DataTableHead>
+          <DataTableHead align="end">
+            {incomes.some(isOpen) ? c.left : c.total}
+          </DataTableHead>
           {canManage && <DataTableActionsHead label={c.actions} />}
         </DataTableHeader>
         <DataTableBody>
           {incomes.map((income, index) => {
             const state = incomeState(income, today);
             const received = receivedCents(income);
-            const target =
-              [income.projectId, income.artistId, income.dealId]
-                .flatMap((id) => (id && name.get(id) ? [name.get(id)] : []))
-                .join(" · ") || EMPTY_CELL;
+            const open = isOpen(income);
+            const gap = daysBetween(today, awaitedOn(income));
             const last = lastReminder(income);
+            const nextParts = [
+              income.nextActionOn ? short(income.nextActionOn) : null,
+              (income.ownerId && name.get(income.ownerId)) || null,
+            ].filter((part): part is string => Boolean(part));
             return (
               <DataTableRow key={income.id}>
                 <DataTableCell fill>
                   <DataTableMedia
                     title={
                       <DataTableLink href={null} onOpen={() => setSheet(index)}>
-                        {income.label}
+                        {income.invoiceNumber ?? income.label}
                       </DataTableLink>
                     }
-                    subtitle={[
-                      t.kinds[income.kind],
-                      income.payer,
-                      income.invoiceNumber &&
-                        t.incomes.invoice(income.invoiceNumber),
-                    ]
-                      .filter(Boolean)
-                      .join(" · ")}
+                    subtitle={
+                      income.invoiceNumber ? income.label : t.kinds[income.kind]
+                    }
                   />
                 </DataTableCell>
-                {followUp ? (
-                  <>
-                    <DataTableCell hideBelow="sm" className="tabular-nums">
-                      <span className="text-[color:var(--error)]">
-                        {u.days(daysLate(income, today))}
-                      </span>
-                    </DataTableCell>
-                    <DataTableCell
-                      hideBelow="lg"
-                      className="text-[color:var(--text-secondary)]"
-                    >
+                <DataTableCell hideBelow="lg">
+                  <DataTableMedia
+                    title={
                       <span className="truncate">
-                        {(income.ownerId && name.get(income.ownerId)) ||
-                          EMPTY_CELL}
+                        {income.payer ?? EMPTY_CELL}
                       </span>
-                    </DataTableCell>
-                    <DataTableCell hideBelow="md">
-                      <span className="truncate">
-                        {last
-                          ? u.lastOn(
-                              short(last.remindedOn),
-                              fr.clientInvoices.channels[last.channel],
-                            )
-                          : u.never}
-                      </span>
-                    </DataTableCell>
-                    <DataTableCell hideBelow="lg">
-                      <span className="truncate">
-                        {income.nextAction
-                          ? u.nextOn(
-                              income.nextAction,
-                              income.nextActionOn
-                                ? short(income.nextActionOn)
-                                : null,
-                            )
-                          : EMPTY_CELL}
-                      </span>
-                    </DataTableCell>
-                  </>
-                ) : (
-                  <>
-                    <DataTableCell
-                      hideBelow="lg"
-                      className="text-[color:var(--text-secondary)]"
-                    >
-                      <span className="truncate">{target}</span>
-                    </DataTableCell>
-                    <DataTableCell hideBelow="sm" className="tabular-nums">
-                      {formatDay(awaitedOn(income), { weekday: false })}
-                    </DataTableCell>
-                    <DataTableCell hideBelow="md">
-                      <StatusBadge tone={incomeStateTone[state]}>
-                        {t.states[state]}
-                      </StatusBadge>
-                    </DataTableCell>
-                  </>
-                )}
+                    }
+                    subtitle={targetOf(income)}
+                  />
+                </DataTableCell>
+                <DataTableCell hideBelow="sm" className="tabular-nums">
+                  <DataTableMedia
+                    title={formatDay(awaitedOn(income), { weekday: false })}
+                    subtitle={
+                      open
+                        ? gap < 0
+                          ? t.incomes.dueIn.ago(-gap)
+                          : gap > 0
+                            ? t.incomes.dueIn.ahead(gap)
+                            : t.incomes.dueIn.today
+                        : undefined
+                    }
+                  />
+                </DataTableCell>
+                <DataTableCell hideBelow="md">
+                  <StatusBadge tone={incomeStateTone[state]}>
+                    {t.states[state]}
+                  </StatusBadge>
+                </DataTableCell>
+                <DataTableCell hideBelow="lg">
+                  {state === "late" ? (
+                    <DataTableMedia
+                      title={
+                        last
+                          ? t.incomes.chase.last(short(last.remindedOn))
+                          : t.incomes.chase.never
+                      }
+                      subtitle={
+                        income.nextAction
+                          ? t.incomes.chase.next(income.nextAction, nextParts)
+                          : undefined
+                      }
+                    />
+                  ) : (
+                    EMPTY_CELL
+                  )}
+                </DataTableCell>
                 <DataTableCell align="end" className="tabular-nums">
-                  {received > 0 && state !== "received"
-                    ? t.incomes.partOf(amount(received), amount(income.cents))
-                    : amount(income.cents)}
+                  <span className="grid justify-items-end">
+                    <span>
+                      {amount(open ? remainingCents(income) : income.cents)}
+                    </span>
+                    {open && received > 0 && (
+                      <span className="text-caption text-[color:var(--text-secondary)]">
+                        {t.incomes.partOf(
+                          amount(received),
+                          amount(income.cents),
+                        )}
+                      </span>
+                    )}
+                  </span>
                 </DataTableCell>
                 {canManage && (
                   <DataTableActionsCell>

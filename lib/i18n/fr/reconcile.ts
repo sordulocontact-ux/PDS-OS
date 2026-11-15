@@ -32,10 +32,28 @@ export const reconcile = {
     suggestion: "Proposition",
     amount: "Montant",
     actions: "Actions",
+    date: "Date",
+    party: "Tiers",
+    match: "Rapprochement",
+    proof: "Justificatif",
+    status: "Statut",
   },
   states: {
     partial: "Partielle",
     double: "Doublon possible",
+    proposal: "Proposition",
+    matched: "Rapprochée",
+    ignored: "Ignorée",
+    open: "À rapprocher",
+  },
+  proofAttached: "Justificatif joint",
+  searchLabel: "Rechercher une transaction",
+  search: "Rechercher un tiers, une référence",
+  noResult: (query: string) =>
+    `Aucune transaction ne correspond à « ${query} ».`,
+  total: {
+    label: "Total des transactions listées",
+    count: (count: number) => plural(count, "opération", "opérations"),
   },
   reasons: {
     amount: "même montant",

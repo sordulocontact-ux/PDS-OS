@@ -1,13 +1,17 @@
 "use client";
 
-import { IconPenWriting2 } from "nucleo-sharp-essential";
 import { useState } from "react";
 
-import { IconArrowDottedRotateAnticlockwise } from "nucleo-sharp-essential";
+import {
+  IconArrowDottedRotateAnticlockwise,
+  IconPaperclip,
+  IconPenWriting2,
+} from "nucleo-sharp-essential";
 import { BudgetLineForm } from "@/components/budget/budget-line-form";
 import { FinanceSheet } from "@/components/finance/finance-sheet";
 import { IncomeForm } from "@/components/finance/income-form";
 import { SpendSheet } from "@/components/finance/spend-sheet";
+import type { SpendColumn } from "@/components/finance/spend-columns";
 import { useSheetRow } from "@/components/finance/use-sheet-row";
 import {
   DataTable,
@@ -27,6 +31,7 @@ import { RowActions, type RowAction } from "@/components/ui/row-actions";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { isFinanceTarget, type BudgetLine } from "@/lib/budget/types";
 import {
+  proofExpected,
   rebillMissing,
   spendDay,
   spendTtc,
@@ -92,13 +97,18 @@ export function SpendsTable({
   canManage,
   organizationId,
   ownerId,
+  columns,
 }: {
   spends: FinanceSpend[];
   targets: FinanceTarget[];
   canManage: boolean;
   organizationId: string;
   ownerId: string | null;
+  // The columns one may hide that are shown (Dépenses' « Colonnes »);
+  // all of them when absent.
+  columns?: Set<SpendColumn>;
 }) {
+  const show = (column: SpendColumn) => !columns || columns.has(column);
   const t = fr.financeSpends;
   const c = t.columns;
   const name = new Map(targets.map((x) => [x.id, x.name]));
@@ -144,8 +154,19 @@ export function SpendsTable({
         <DataTableHeader>
           <DataTableHead fill>{c.label}</DataTableHead>
           <DataTableHead hideBelow="lg">{c.envelope}</DataTableHead>
-          <DataTableHead hideBelow="sm">{c.day}</DataTableHead>
-          <DataTableHead hideBelow="md">{c.state}</DataTableHead>
+          {show("post") && (
+            <DataTableHead hideBelow="xl">{c.post}</DataTableHead>
+          )}
+          {show("supplier") && (
+            <DataTableHead hideBelow="xl">{c.supplier}</DataTableHead>
+          )}
+          {show("day") && <DataTableHead hideBelow="sm">{c.day}</DataTableHead>}
+          {show("state") && (
+            <DataTableHead hideBelow="md">{c.state}</DataTableHead>
+          )}
+          {show("proof") && (
+            <DataTableHead hideBelow="lg">{c.proof}</DataTableHead>
+          )}
           <DataTableHead align="end">{c.amount}</DataTableHead>
           {canManage && <DataTableActionsHead label={c.actions} />}
         </DataTableHeader>
@@ -161,16 +182,11 @@ export function SpendsTable({
                         {spend.label}
                       </DataTableLink>
                     }
-                    subtitle={[
-                      spend.family &&
-                        (spend.family === "other"
-                          ? spend.familyDetail
-                          : fr.budget.families[spend.family]),
-                      spend.supplier,
-                      spend.rebillable && t.rebillable,
-                    ]
-                      .filter(Boolean)
-                      .join(" · ")}
+                    subtitle={
+                      [spend.subpost, spend.rebillable && t.rebillable]
+                        .filter(Boolean)
+                        .join(" · ") || null
+                    }
                   />
                 </DataTableCell>
                 <DataTableCell hideBelow="lg">
@@ -188,14 +204,48 @@ export function SpendsTable({
                     )}
                   </span>
                 </DataTableCell>
-                <DataTableCell hideBelow="sm" className="tabular-nums">
-                  {formatDay(spendDay(spend), { weekday: false })}
-                </DataTableCell>
-                <DataTableCell hideBelow="md">
-                  <StatusBadge tone={spendCashTone[spend.status]}>
-                    {fr.treasury.spendStates[spend.status]}
-                  </StatusBadge>
-                </DataTableCell>
+                {show("post") && (
+                  <DataTableCell hideBelow="xl">
+                    {spend.family
+                      ? spend.family === "other"
+                        ? (spend.familyDetail ?? EMPTY_CELL)
+                        : fr.budget.families[spend.family]
+                      : EMPTY_CELL}
+                  </DataTableCell>
+                )}
+                {show("supplier") && (
+                  <DataTableCell hideBelow="xl">
+                    {spend.supplier ?? EMPTY_CELL}
+                  </DataTableCell>
+                )}
+                {show("day") && (
+                  <DataTableCell hideBelow="sm" className="tabular-nums">
+                    {formatDay(spendDay(spend), { weekday: false })}
+                  </DataTableCell>
+                )}
+                {show("state") && (
+                  <DataTableCell hideBelow="md">
+                    <StatusBadge tone={spendCashTone[spend.status]}>
+                      {fr.treasury.spendStates[spend.status]}
+                    </StatusBadge>
+                  </DataTableCell>
+                )}
+                {show("proof") && (
+                  <DataTableCell hideBelow="lg">
+                    {spend.hasProof ? (
+                      <IconPaperclip
+                        aria-label={t.proofAttached}
+                        className="size-4 text-[color:var(--text-secondary)]"
+                      />
+                    ) : proofExpected(spend) ? (
+                      <StatusBadge tone="warning" size="sm">
+                        {t.proofMissing}
+                      </StatusBadge>
+                    ) : (
+                      EMPTY_CELL
+                    )}
+                  </DataTableCell>
+                )}
                 <DataTableCell align="end" className="tabular-nums">
                   <span className="grid justify-items-end">
                     <span>{amount(spendTtc(spend))}</span>

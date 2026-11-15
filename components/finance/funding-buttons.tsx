@@ -38,30 +38,45 @@ export function OrchardSettingsButton({
   );
 }
 
-/** « Planifier » a show, « Nouveau format ». */
-export function ShowButtons({ formats }: { formats: ShowFormat[] }) {
-  const t = fr.fundings;
+/** « Nouveau format » (the Finance): what a kind of show costs and gives. */
+export function NewFormatButton() {
+  const t = fr.fundings.formats;
   return (
-    <div className="flex flex-wrap gap-2">
-      <DialogButton
-        label={t.formats.add}
-        title={t.formats.form.title}
-        description={t.formats.form.description}
-      >
-        {(close) => <ShowFormatForm onDone={close} />}
-      </DialogButton>
-      {formats.some((f) => !f.archived) && (
-        <DialogButton
-          label={t.shows.plan}
-          icon={IconPlus}
-          variant="default"
-          title={t.shows.form.title}
-          description={t.shows.form.description}
-        >
-          {(close) => <ShowForm show={null} formats={formats} onDone={close} />}
-        </DialogButton>
+    <DialogButton
+      label={t.add}
+      title={t.form.title}
+      description={t.form.description}
+    >
+      {(close) => <ShowFormatForm onDone={close} />}
+    </DialogButton>
+  );
+}
+
+/** « Nouvelle émission » on a format's card: the show form on that format. */
+export function PlanShowButton({
+  format,
+  formats,
+}: {
+  format: ShowFormat;
+  formats: ShowFormat[];
+}) {
+  const t = fr.fundings.shows;
+  return (
+    <DialogButton
+      label={t.plan}
+      icon={IconPlus}
+      title={t.form.title}
+      description={t.form.description}
+    >
+      {(close) => (
+        <ShowForm
+          show={null}
+          formats={formats}
+          initialFormatId={format.id}
+          onDone={close}
+        />
       )}
-    </div>
+    </DialogButton>
   );
 }
 

@@ -6,6 +6,7 @@ import type { WatchItem } from "@/lib/finance/cockpit";
 import { treasury as treasuryText } from "@/lib/i18n/fr/treasury";
 import { formatShortDay } from "@/lib/utils/day";
 import { formatAmount } from "@/lib/utils/money";
+import { OFF_BUDGET_SLUG, spendsHref } from "@/lib/finance/spend-links";
 
 const fr = { treasury: treasuryText };
 
@@ -71,7 +72,7 @@ export function WatchCard({
       case "off_budget":
         return {
           key: "off-budget",
-          href: `${routes.financeSpends}?vue=hors-budget`,
+          href: spendsHref({ enveloppe: OFF_BUDGET_SLUG }),
           main: w.offBudget(item.count),
           sub: w.offBudgetSub(amount(item.cents)),
           end: <StatusBadge tone="warning">{w.toVerify}</StatusBadge>,
@@ -79,7 +80,7 @@ export function WatchCard({
       case "rebill":
         return {
           key: "rebill",
-          href: `${routes.financeSpends}?vue=a-refacturer`,
+          href: spendsHref({ statut: "a-refacturer" }),
           main: w.rebill(item.count),
           sub: w.rebillSub,
           end: <StatusBadge tone="warning">{w.toVerify}</StatusBadge>,

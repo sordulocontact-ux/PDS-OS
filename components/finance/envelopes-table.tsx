@@ -1,4 +1,8 @@
 import {
+  ConsumptionMeter,
+  consumedTone,
+} from "@/components/finance/consumption-meter";
+import {
   DataTable,
   DataTableBody,
   DataTableCell,
@@ -13,6 +17,8 @@ import { routes } from "@/lib/auth/redirects";
 import { ENVELOPE_SLUG } from "@/lib/finance/envelope-slugs";
 import type { EnvelopeRow } from "@/lib/finance/envelopes";
 import { financeBudgets } from "@/lib/i18n/fr/finance-budgets";
+import { cn } from "@/lib/utils";
+import { formatDay } from "@/lib/utils/day";
 import { formatAmount } from "@/lib/utils/money";
 
 const fr = { financeBudgets };
@@ -36,9 +42,12 @@ export function SignedGap({ cents }: { cents: number }) {
 }
 
 /**
- * Every envelope with the ticket's figures (« budget initial, révisions,
- * prévu, engagé, facturé, payé, reste disponible, refacturable, écart au
- * prévisionnel »), HT, one row each, opening its detail.
+ * Every envelope as the proto's Budgets list: its name (with its period or
+ * its initial amount once revised), its type, the budget, what is engaged +
+ * invoiced + paid, what is left (red once over) and the share consumed with
+ * its gauge. Each row opens the envelope's page, which carries every other
+ * figure of the ticket (initial budget, revisions, planned, invoiced, paid,
+ * rebillable, gap, PDS share: `EnvelopeFigures`).
  */
 export function EnvelopesTable({ rows }: { rows: EnvelopeRow[] }) {
   const t = fr.financeBudgets;
@@ -47,93 +56,114 @@ export function EnvelopesTable({ rows }: { rows: EnvelopeRow[] }) {
     <DataTable framed>
       <DataTableHeader>
         <DataTableHead fill>{c.envelope}</DataTableHead>
+        <DataTableHead hideBelow="lg">{c.type}</DataTableHead>
         <DataTableHead align="end" hideBelow="sm">
           {c.budget}
         </DataTableHead>
-        <DataTableHead align="end" hideBelow="lg">
-          {c.planned}
-        </DataTableHead>
-        <DataTableHead align="end">{c.engaged}</DataTableHead>
-        <DataTableHead align="end" hideBelow="xl">
-          {c.invoiced}
-        </DataTableHead>
-        <DataTableHead align="end" hideBelow="xl">
-          {c.paid}
-        </DataTableHead>
+        <DataTableHead align="end">{c.used}</DataTableHead>
         <DataTableHead align="end" hideBelow="md">
           {c.rest}
         </DataTableHead>
-        <DataTableHead align="end" hideBelow="xl">
-          {c.rebillable}
-        </DataTableHead>
-        <DataTableHead align="end" hideBelow="lg">
-          {c.gap}
+        <DataTableHead hideBelow="md" className="w-[22%]">
+          {c.consumed}
         </DataTableHead>
       </DataTableHeader>
       <DataTableBody>
-        {rows.map((row) => (
-          <DataTableRow key={`${row.kind}:${row.id}`}>
-            <DataTableCell fill>
-              <DataTableMedia
-                title={
-                  <DataTableLink
-                    href={routes.financeBudget(ENVELOPE_SLUG[row.kind], row.id)}
-                  >
-                    {row.name}
-                  </DataTableLink>
-                }
-                subtitle={t.kindOne[row.kind]}
-              />
-            </DataTableCell>
-            <DataTableCell align="end" hideBelow="sm" className="tabular-nums">
-              {row.currentCents === null ? (
-                <span className="text-[color:var(--text-secondary)]">
-                  {t.noBudget}
-                </span>
-              ) : (
-                <span className="grid justify-items-end">
-                  <span>{amount(row.currentCents)}</span>
-                  {row.revisionsCents !== 0 && row.initialCents !== null && (
-                    <span className="text-caption text-[color:var(--text-secondary)]">
-                      {t.initial(amount(row.initialCents))}
+        {rows.map((row) => {
+          const budget = row.currentCents;
+          const share = budget ? row.engagedCents / budget : 0;
+          const percent = Math.round(share * 100);
+          const tone = consumedTone(share);
+          const subtitle = row.period
+            ? t.detail.period(
+                formatDay(row.period.startsOn, { weekday: false }),
+                row.period.endsOn
+                  ? formatDay(row.period.endsOn, { weekday: false })
+                  : null,
+              )
+            : row.revisionsCents !== 0 && row.initialCents !== null
+              ? t.initial(amount(row.initialCents))
+              : undefined;
+          return (
+            <DataTableRow key={`${row.kind}:${row.id}`}>
+              <DataTableCell fill>
+                <DataTableMedia
+                  title={
+                    <DataTableLink
+                      href={routes.financeBudget(
+                        ENVELOPE_SLUG[row.kind],
+                        row.id,
+                      )}
+                    >
+                      {row.name}
+                    </DataTableLink>
+                  }
+                  subtitle={subtitle}
+                />
+              </DataTableCell>
+              <DataTableCell
+                hideBelow="lg"
+                className="text-[color:var(--text-secondary)]"
+              >
+                {t.kindOne[row.kind]}
+              </DataTableCell>
+              <DataTableCell
+                align="end"
+                hideBelow="sm"
+                className="tabular-nums"
+              >
+                {budget === null ? (
+                  <span className="text-[color:var(--text-secondary)]">
+                    {t.noBudget}
+                  </span>
+                ) : (
+                  amount(budget)
+                )}
+              </DataTableCell>
+              <DataTableCell align="end" className="tabular-nums">
+                {amount(row.engagedCents)}
+              </DataTableCell>
+              <DataTableCell
+                align="end"
+                hideBelow="md"
+                className="tabular-nums"
+              >
+                {row.restCents === null ? (
+                  EMPTY_CELL
+                ) : row.restCents < 0 ? (
+                  <span className="text-[color:var(--error)]">
+                    {t.over(amount(-row.restCents))}
+                  </span>
+                ) : (
+                  amount(row.restCents)
+                )}
+              </DataTableCell>
+              <DataTableCell hideBelow="md">
+                {budget === null ? (
+                  EMPTY_CELL
+                ) : (
+                  <div className="flex flex-col gap-1.5">
+                    <span
+                      className={cn(
+                        "tabular-nums",
+                        tone === "error" && "text-[color:var(--error)]",
+                        tone === "warning" &&
+                          "text-[color:var(--tone-warning-fg)]",
+                        tone === "ink" && "text-[color:var(--text-secondary)]",
+                      )}
+                    >
+                      {t.percent(percent)}
                     </span>
-                  )}
-                </span>
-              )}
-            </DataTableCell>
-            <DataTableCell align="end" hideBelow="lg" className="tabular-nums">
-              {amount(row.totals.plannedCents)}
-            </DataTableCell>
-            <DataTableCell align="end" className="tabular-nums">
-              {amount(row.engagedCents)}
-            </DataTableCell>
-            <DataTableCell align="end" hideBelow="xl" className="tabular-nums">
-              {amount(row.totals.invoicedCents)}
-            </DataTableCell>
-            <DataTableCell align="end" hideBelow="xl" className="tabular-nums">
-              {amount(row.totals.paidCents)}
-            </DataTableCell>
-            <DataTableCell align="end" hideBelow="md" className="tabular-nums">
-              {row.restCents === null ? (
-                EMPTY_CELL
-              ) : row.restCents < 0 ? (
-                <span className="text-[color:var(--error)]">
-                  {t.over(amount(-row.restCents))}
-                </span>
-              ) : (
-                amount(row.restCents)
-              )}
-            </DataTableCell>
-            <DataTableCell align="end" hideBelow="xl" className="tabular-nums">
-              {row.totals.rebillableCents
-                ? amount(row.totals.rebillableCents)
-                : EMPTY_CELL}
-            </DataTableCell>
-            <DataTableCell align="end" hideBelow="lg" className="tabular-nums">
-              <SignedGap cents={row.gapCents} />
-            </DataTableCell>
-          </DataTableRow>
-        ))}
+                    <ConsumptionMeter
+                      share={share}
+                      label={t.figures.used(row.name, percent)}
+                    />
+                  </div>
+                )}
+              </DataTableCell>
+            </DataTableRow>
+          );
+        })}
       </DataTableBody>
     </DataTable>
   );

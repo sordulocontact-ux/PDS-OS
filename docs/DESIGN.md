@@ -994,7 +994,7 @@ plan et lots dans `docs/FINANCE-V2.md`. **Écart voulu, limité à Finance** :
 - **Un thème de section** : `FinanceFrame` pose `.finance-scope`, dont le bloc dans `app/globals.css` redéfinit
   `--type-*` (texte courant 15 px, cellules et boutons 14 px, légendes 13 px, titres de page 28 px, salutation
   36 px), `--font-weight-*` (regular par défaut ; medium et semi-bold descendent d'un cran) et `--radius-*`
-  (cartes et tableaux 8 px, boutons, liens-boutons et champs 6 px). Aucun composant n'est recopié : tout ce qui
+  (cartes 8 px, champs 6 px ; les boutons gardent la pilule du design system, Sacha 15/11/2026). Aucun composant n'est recopié : tout ce qui
   est posé dans Finance prend ces valeurs ; les modales et menus, en portail, gardent le style de l'app. Les
   règles « medium minimum » et « 16 px courant » (§ 2) ne valent donc pas dans Finance.
 - **Navigation** : liste plate à icônes (plus de groupes titrés).
@@ -1004,8 +1004,16 @@ plan et lots dans `docs/FINANCE-V2.md`. **Écart voulu, limité à Finance** :
 - **Pages de section sans titre visible** (lot 2) : `FinanceFrame` garde le h1 pour les lecteurs d'écran ; l'action va sur
   la ligne des onglets (`DataTableViews action`) quand la page en a, sinon en haut à droite ; la page d'une enveloppe
   garde son nom en titre.
-- **Tableaux** (lot 2, même bloc de `app/globals.css`) : en-tête sans bandeau gris, en 13 px gris ; filets verticaux entre
-  les colonnes ; cellules en 14 px. Un tableau posé dans une carte de section garde sa forme nue.
+- **Tableaux et boutons** : ceux du design system (tableau à bandeau d'en-tête, sans filets verticaux ; bouton en pilule),
+  aux tailles de Finance (Sacha, 15/11/2026 : « remets les tableaux et les boutons du DS », puis « une version plus petite,
+  cohérente avec la page »). Les onglets d'une liste de Finance passent en filtre segmenté compact sur la ligne de
+  l'action (`DataTableViews segmented`), sans trait sous les onglets qui frôlait le bouton.
+- **Dépenses** (15/11/2026, comme le proto) : une seule liste, la dernière échéance d'abord ; recherche, filtres
+  Enveloppe (dont « Hors budget ») et Statut (dont « À refacturer ») dans l'URL, « Toutes / Sans justificatif » en
+  segmenté, « + » seul en bouton principal au bout ; colonnes Dépense, Enveloppe, Poste, Fournisseur (très grand
+  écran), Échéance, Statut, Justificatif (trombone, « Manquant » pour une dépense facturée ou payée), TTC ; le total
+  de la liste dessous (nombre, prévu, engagé, facturé, payé HT, total TTC), qui suit aussi la recherche. Plus de
+  cartes chiffrées ni d'onglets ; les liens des autres pages passent par `spendsHref` (`lib/finance/spend-links.ts`).
 - **Fiche latérale** (lot 3, `FinanceSheet`) : une ligne de dépense, d'opération bancaire ou de facture s'ouvre à droite
   (560 px, pleine largeur sur téléphone), la liste visible sous un voile léger ; ↑ ↓ passe à la ligne voisine, Échap
   ferme. Écart voulu à « une seule modale » (07/11), Finance seulement : la modale reste pour un geste (« Modifier »
@@ -1029,6 +1037,45 @@ plan et lots dans `docs/FINANCE-V2.md`. **Écart voulu, limité à Finance** :
   « Déposer » garde le trombone, Nucleo Essential n'ayant pas d'icône d'envoi) : barre d'outils sans titre (recherche, vues segmentées avec
   comptes, « Déposer » en bouton principal (`IconPaperclip`, Sacha 15/11/2026 : c'est le geste de la page) ; la liste seule (la vue Grille, `ReceiptCard`, est mise de côté le 15/11/2026, gardée dans le code). Glisser des fichiers n'importe où sur la page pose un voile pointillé.
   Entrée de navigation « Justificatifs » (`IconPaperclip`) après Rapprochement.
+- **Rapprochement** : plus de cartes chiffrées. Une ligne d'outils : recherche (`SearchableList`) à gauche ; à droite
+  les vues en filtre segmenté avec comptes (À rapprocher, Rapprochées, Ignorées) puis « Importer un relevé » et
+  « Ajouter une transaction ». Colonnes : Date, Tiers (référence dessous), Montant (`SignedAmount`), Rapprochement
+  (proposition et raisons, ou ce qui est rapproché), Justificatif (trombone si la dépense reliée a le sien), Statut
+  (badge + « Valider » quand il y a une proposition). Sous la liste : « N opérations » et la somme signée de ce qui est
+  listé (suit la recherche). Écart : « Prêtes pour le comptable » du proto non repris (aucune règle métier derrière).
+  Le compteur « Doublons possibles » des anciennes cartes devient le badge « Doublon possible » de la ligne.
+- **Factures** : la barre était déjà au format du proto ; colonnes Facture (numéro d'abord, libellé dessous, sans
+  numéro : libellé et nature), Client (payeur, projet/artiste dessous), Échéance (date et « il y a N j » / « dans N j »
+  calculés par le code pour une entrée ouverte), Statut, Relance (en retard seulement : « Dernière le … » ou « Jamais »,
+  puis « Prochaine : action · date · responsable »), Reste TTC (« X sur Y » dessous si partiel ; « Montant TTC » quand la
+  liste n'a plus d'entrée ouverte). La vue « En retard » n'a plus ses colonnes propres : même tableau partout.
+- **Budgets** (`budgetList()` / `budgetsTable()` du proto) : une seule ligne en tête, le filtre par type
+  (segmenté), le compte et la règle (« le reste baisse à l'engagement, la trésorerie au paiement »),
+  les actions à droite. Ni cartes chiffrées, ni camembert, ni graphique par mois sur la liste : ils sont
+  dans Trésorerie et sur la page d'une enveloppe, qui garde tous les chiffres du ticket (`EnvelopeFigures`).
+  Tableau : Enveloppe, Type, Budget, Engagé + facturé + payé, Reste disponible (rouge si dépassé),
+  Consommé (pourcentage + jauge : encre, ambre dès `BUDGET_ALERT_SHARE` = 82 %, rouge à 100 % et plus).
+  Chaque ligne ouvre l'enveloppe. Sous le tableau, une carte par modèle de centre de coût.
+- **Financements** (`fundPage()`) : deux grandes cartes (The Orchard · avances, Pay Later), puis une carte
+  par format d'émission (coût en pastille, émissions en lignes avec badge, bouton « Nouvelle émission »),
+  puis les tirages Pay Later (tableau, pour retirer un tirage saisi par erreur) et une carte
+  « Remboursements et réserve » en deux lignes de lien. Les émissions se déplacent ou s'annulent
+  depuis « ⋯ » sur leur ligne.
+- Ce qui n'est pas repris du proto : « J4Y · part financée » (la part PDS se règle sur la page de
+  l'enveloppe), « Aides et subventions », avances Orchard « reçues » (le moteur ne les connaît pas :
+  les titres comptés depuis la dernière avance les remplacent).
+- **Planning** (Sacha 15/11/2026, « un vrai calendrier », comme Midday ; entrée de navigation `IconCalendarDays`
+  entre Trésorerie et Rapprochement, icône déjà comptée dans la licence) : la barre des calendriers de l'app
+  (`CalendarToolbar modes={false}` : « Aujourd'hui », mois précédent / suivant, le mois en titre), à droite les entrées et
+  sorties du mois. Dessous, le mois en grille lundi → dimanche (semaines entières, les jours des mois voisins vides sur
+  `--surface-soft`), à partir de `lg` ; en dessous, une liste des seuls jours qui ont des mouvements (aucun défilement
+  horizontal). Un jour : son numéro (cercle encre aujourd'hui), ses marques (`StatusBadge sm`, tons
+  `planningMarkTone` : « Sous la réserve » en avertissement le jour où le solde y passe, « Point bas » neutre, en danger
+  s'il est sous la réserve), trois mouvements en pastilles (`PlanningPill` : fond `--surface-soft`, libellé tronqué en
+  gris, `SignedAmount size="sm"`, point `StatusDot` du ton « en retard » pour un mouvement en retard compté aujourd'hui),
+  puis « +N », et en bas à droite le solde de fin de journée en `text-micro` gris quand il bouge (ambre sous la réserve).
+  Un clic sur un jour ou une pastille ouvre le jour dans la fiche latérale (`FinanceSheet`, ↑ ↓ = jour avec mouvements
+  précédent / suivant ; la pastille cliquée y est sélectionnée).
 - Touche du clavier nommée à l'écran : `Kbd` (`components/ui/kbd.tsx`, `raised` pour l'accueil).
 
 ### Arrondis

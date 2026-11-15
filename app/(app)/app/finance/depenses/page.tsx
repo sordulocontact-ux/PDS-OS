@@ -3,50 +3,52 @@ import { IconMoneyBillCoin } from "nucleo-sharp-essential";
 import { FormMessage } from "@/components/auth/form-message";
 import { QuickExpenseButton } from "@/components/budget/quick-expense-button";
 import { FinanceFrame } from "@/components/finance/finance-frame";
-import { SpendsTable } from "@/components/finance/spends-table";
+import { SpendsList } from "@/components/finance/spends-list";
 import { EmptyNote, EmptyState } from "@/components/shell/empty-state";
-import { DataTableViews } from "@/components/ui/data-table";
-import { MetricCard } from "@/components/ui/metric-card";
+import { SegmentedLinks } from "@/components/ui/segmented-control";
+import { UrlFilters } from "@/components/ui/url-filters";
 import { can } from "@/lib/auth/access";
 import { requirePermission } from "@/lib/auth/dal";
-import { routes } from "@/lib/auth/redirects";
+import {
+  OFF_BUDGET_SLUG,
+  SPEND_STATUS_SLUGS,
+  spendsHref,
+  type SpendStatusSlug,
+} from "@/lib/finance/spend-links";
 import { loadSpends } from "@/lib/finance/spend-queries";
 import {
+  proofExpected,
   rebillMissing,
+  spendDay,
   spendStage,
-  spendTtc,
   type FinanceSpend,
   type SpendStage,
 } from "@/lib/finance/spends";
 import { loadTreasury } from "@/lib/finance/treasury-queries";
 import { financeSpends as t } from "@/lib/i18n/fr/finance-spends";
+import { budget } from "@/lib/i18n/fr/budget";
 import { parisPlace } from "@/lib/utils/calendar-period";
-import { formatAmount } from "@/lib/utils/money";
 import { allInOrder } from "@/lib/utils/parallel";
 
 export const metadata = { title: t.title };
 
-const amount = (cents: number) => formatAmount(cents, { ht: false });
-
-const VIEWS = [
-  "a-payer",
-  "engagees",
-  "prevues",
-  "payees",
-  "hors-budget",
-  "a-refacturer",
-] as const;
-type View = (typeof VIEWS)[number];
-const asView = (value: unknown): View =>
-  VIEWS.find((v) => v === value) ?? "a-payer";
+const STAGE_OF: Partial<Record<SpendStatusSlug, SpendStage>> = {
+  prevu: "planned",
+  engage: "committed",
+  facture: "invoiced",
+  paye: "paid",
+};
+const asStatus = (value: unknown): SpendStatusSlug | null =>
+  SPEND_STATUS_SLUGS.find((s) => s === value) ?? null;
 
 /**
- * Finance › Dépenses (Ibé's ticket, maquette 4, lot 3): every spend of the
- * label, « prévu, engagé, facturé et payé », whatever its envelope
- * (project, artist, cost center, « Hors budget »). The Finance enters the
- * spends of its own envelopes here (« + Dépense », the one spend form) and
- * plans the rebilling of a rebillable spend. Not the team's Dépenses page
- * (/app/expenses), which stays apart.
+ * Finance › Dépenses (Ibé's ticket, maquette 4, lot 3), laid out as the
+ * proto's page (Sacha 15/11/2026): every spend of the label in one list,
+ * the latest due first, filtered in the address by envelope (« Hors budget »
+ * among them), by status (« À refacturer » among them) and « Sans
+ * justificatif » (invoiced or paid without its proof); the search beside;
+ * « prévu, engagé, facturé et payé » in the total under the list. Not the
+ * team's Dépenses page (/app/expenses), which stays apart.
  */
 export default async function FinanceSpendsPage({
   searchParams,
@@ -58,109 +60,133 @@ export default async function FinanceSpendsPage({
     loadSpends(),
     loadTreasury(today),
   ]);
-  const view = asView(params.vue);
   const canManage = can(access, "manage_finance");
   const live = data.spends.filter((s) => !s.refused);
-  const of = (stage: SpendStage) =>
-    live.filter((s) => spendStage(s.status) === stage);
-  const month = today.slice(0, 7);
-  const paidThisMonth = of("paid").filter((s) => s.spentOn.startsWith(month));
-  const sum = (list: FinanceSpend[]) =>
-    list.reduce((total, s) => total + spendTtc(s), 0);
-  const lists: Record<View, FinanceSpend[]> = {
-    "a-payer": of("invoiced"),
-    engagees: of("committed"),
-    prevues: of("planned"),
-    payees: of("paid"),
-    "hors-budget": live.filter((s) => s.target.kind === "off_budget"),
-    "a-refacturer": live.filter(rebillMissing),
-  };
-  const labels: Record<View, string> = {
-    "a-payer": t.views.toPay,
-    engagees: t.views.committed,
-    prevues: t.views.planned,
-    payees: t.views.paid,
-    "hors-budget": t.views.offBudget,
-    "a-refacturer": t.views.rebill,
-  };
-  const tiles: {
-    key: string;
-    title: string;
-    list: FinanceSpend[];
-    view: View;
-  }[] = [
-    {
-      key: "planned",
-      title: t.tiles.planned,
-      list: of("planned"),
-      view: "prevues",
-    },
-    {
-      key: "committed",
-      title: t.tiles.committed,
-      list: of("committed"),
-      view: "engagees",
-    },
-    {
-      key: "invoiced",
-      title: t.tiles.invoiced,
-      list: of("invoiced"),
-      view: "a-payer",
-    },
-    { key: "paid", title: t.tiles.paid, list: paidThisMonth, view: "payees" },
-  ];
+  const status = asStatus(params.statut);
+  const envelope =
+    typeof params.enveloppe === "string" ? params.enveloppe : null;
+  const withoutProof = params.justificatif === "sans";
+  const missing = (s: FinanceSpend) => !s.hasProof && proofExpected(s);
 
-  // New style (docs/FINANCE-V2.md, lot 2): the action sits on the tabs' row;
-  // in the frame's head only while there is no list yet.
+  const shown = live
+    .filter((s) =>
+      envelope === null
+        ? true
+        : envelope === OFF_BUDGET_SLUG
+          ? s.target.kind === "off_budget"
+          : s.target.id === envelope,
+    )
+    .filter((s) =>
+      status === null
+        ? true
+        : status === "a-refacturer"
+          ? rebillMissing(s)
+          : spendStage(s.status) === STAGE_OF[status],
+    )
+    .filter((s) => !withoutProof || missing(s))
+    .sort((a, b) => spendDay(b).localeCompare(spendDay(a)));
+
+  // The envelopes some spend is on, named, then « Hors budget ».
+  const names = new Map(treasury.targets.map((x) => [x.id, x.name]));
+  const envelopes = [
+    ...new Set(
+      live
+        .filter((s) => s.target.kind !== "off_budget")
+        .map((s) => s.target.id),
+    ),
+  ]
+    .map((id) => ({ value: id, label: names.get(id) ?? id }))
+    .sort((a, b) => a.label.localeCompare(b.label, "fr"));
+  const keep = {
+    enveloppe: envelope,
+    statut: status,
+    justificatif: withoutProof ? "sans" : null,
+  };
   const action = canManage ? <QuickExpenseButton /> : undefined;
-  const empty = data.spends.length === 0 && !data.error;
+  const add = canManage ? <QuickExpenseButton iconOnly /> : undefined;
+  const nothing = data.spends.length === 0 && !data.error;
 
   return (
-    <FinanceFrame section="spends" action={empty ? action : undefined}>
+    <FinanceFrame section="spends" action={nothing ? action : undefined}>
       {data.error && <FormMessage kind="error">{t.loadError}</FormMessage>}
-      {empty ? (
+      {nothing ? (
         <EmptyState
           icon={IconMoneyBillCoin}
           title={t.emptyTitle}
           body={t.emptyBody}
         />
       ) : (
-        <>
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            {tiles.map((tile) => (
-              <MetricCard
-                key={tile.key}
-                title={tile.title}
-                value={amount(sum(tile.list))}
-                caption={t.tiles.count(tile.list.length)}
-                href={`${routes.financeSpends}?vue=${tile.view}`}
-                current={view === tile.view}
+        <SpendsList
+          spends={shown}
+          targets={treasury.targets}
+          canManage={canManage}
+          organizationId={access.organizationId ?? ""}
+          ownerId={access.personId}
+          empty={<EmptyNote>{t.emptyView}</EmptyNote>}
+          add={add}
+          filters={
+            <>
+              <UrlFilters
+                path={spendsHref({})}
+                params={{ justificatif: keep.justificatif }}
+                inline={2}
+                groups={[
+                  {
+                    key: "enveloppe",
+                    label: t.filters.envelope,
+                    allLabel: t.filters.allEnvelopes,
+                    options: [
+                      ...envelopes,
+                      { value: OFF_BUDGET_SLUG, label: budget.form.offBudget },
+                    ],
+                    current: envelope,
+                  },
+                  {
+                    key: "statut",
+                    label: t.filters.status,
+                    allLabel: t.filters.allStatuses,
+                    options: SPEND_STATUS_SLUGS.map((s) => ({
+                      value: s,
+                      label: t.filters.statuses[s],
+                    })),
+                    current: status,
+                  },
+                ]}
               />
-            ))}
-          </div>
-          <DataTableViews
-            label={t.views.label}
-            action={action}
-            views={VIEWS.map((key) => ({
-              href: `${routes.financeSpends}?vue=${key}`,
-              label: labels[key],
-              count: lists[key].length,
-              current: view === key,
-            }))}
-          >
-            {lists[view].length === 0 ? (
-              <EmptyNote>{t.emptyView}</EmptyNote>
-            ) : (
-              <SpendsTable
-                spends={lists[view]}
-                targets={treasury.targets}
-                canManage={canManage}
-                organizationId={access.organizationId ?? ""}
-                ownerId={access.personId}
+              <SegmentedLinks
+                label={t.proofView.label}
+                options={[
+                  {
+                    key: "all",
+                    href: spendsHref({
+                      enveloppe: keep.enveloppe ?? undefined,
+                      statut: keep.statut ?? undefined,
+                    }),
+                    label: t.proofView.all,
+                    current: !withoutProof,
+                  },
+                  {
+                    key: "missing",
+                    href: spendsHref({
+                      enveloppe: keep.enveloppe ?? undefined,
+                      statut: keep.statut ?? undefined,
+                      justificatif: "sans",
+                    }),
+                    label: (
+                      <>
+                        {t.proofView.missing}
+                        <span className="text-[color:var(--text-tertiary)] tabular-nums">
+                          {live.filter(missing).length}
+                        </span>
+                      </>
+                    ),
+                    current: withoutProof,
+                  },
+                ]}
               />
-            )}
-          </DataTableViews>
-        </>
+            </>
+          }
+        />
       )}
     </FinanceFrame>
   );

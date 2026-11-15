@@ -12,7 +12,7 @@ informations, les calculs restent dans `lib/finance/` (aucun chiffre écrit par 
   les tons d'état de l'app ; gris et bordures de `app/globals.css` (v5).
 - **Plus petit, plus léger** : texte courant 15 px, cellules 14 px, légendes 13 px ; regular par défaut, medium
   pour ce qui ressort (v3-v5). Titres en Google Sans Flex.
-- **Arrondis légers** : cartes et tableaux 8 px, boutons et champs 6 px, modales 12 px (v2).
+- **Arrondis légers** : cartes 8 px, champs 6 px, modales 12 px (v2) ; boutons et tableaux du design system (15/11/2026).
 - **Pas de titre ni de phrase d'intro sur une liste** : la barre d'outils d'abord (recherche à gauche, filtre
   segmenté et actions à droite).
 - **Vue d'ensemble en cartes-phrases** (v6, v8) : chaque carte dit une chose avec son chiffre en gras et mène à
@@ -59,3 +59,4 @@ calendrier financier. Le même graphique sert à la Vue d'ensemble.
 | 5 | Graphiques lisibles (axes et mois en gris secondaire, 13 px) ; **barre du haut** de toute page Finance (`FinanceTopbar`) : recherche **⌘K** (`FinanceSearch` : pages, budgets, dépenses, factures, par nom, montant ou numéro ; une dépense ou une facture s'ouvre dans sa fiche par `?ouvrir=`) et **cloche** des alertes avec leur nombre, rouge si l'une est grave ; lus après l'affichage (`readFinancePulse`, gardé 60 s), alertes calculées par `loadFinanceWatch` comme la page Alertes | fait le 15/11/2026 |
 | 6 | Boîte à justificatifs : section « Justificatifs » (dépôt par bouton ou glisser-déposer partout sur la page, adresse po+justificatifs@, lecture vérifiée, rattachement proposé par le code, grille / liste, fiche latérale) | fait le 15/11/2026 ; reste : WhatsApp, blocage d'un expéditeur, « Autres documents » en onglet, rapprochement d'un justificatif avec une opération bancaire |
 | 7 | PO dans Finance : « Je veux… » sous les actions rapides (suggestions selon le poste, champ « Je veux… », ouvre PO avec la question posée) ; carte « Résumé de la semaine » rédigée par PO à partir des chiffres du code, vérifiée par le code, en cache par jour (`finance_briefs`) ; lecture `finance` de PO | fait le 15/11/2026 ; la suggestion « voir ce que change le décalage de l'émission #10 » du proto (poste Finance) n'est pas reprise : PO ne simule pas un décalage |
+| 8 | Planning : le mois en calendrier (Sacha 15/11/2026, mieux que la liste par mois du proto) | fait le 15/11/2026 ; reste le détail des dépenses payées passées (agrégées par jour) |

@@ -50,18 +50,46 @@ export function NewCostCenterButton({
   const t = fr.financeBudgets;
   return (
     <div className="flex flex-wrap gap-2">
-      <PlanShowLink size="lg" />
+      <PlanShowLink />
       <DialogButton
         label={t.actions.newCenter}
         icon={IconPlus}
         variant="default"
-        size="lg"
+        size="default"
         title={t.centerForm.title}
         description={t.centerForm.description}
       >
         {(close) => <CostCenterForm templates={templates} onDone={close} />}
       </DialogButton>
     </div>
+  );
+}
+
+/** A template's card: « Nouveau centre de coût depuis le modèle », the form
+ * opening on that template (its lines become the center's planned lines). */
+export function NewFromTemplateButton({
+  template,
+  templates,
+}: {
+  template: BudgetTemplate;
+  templates: BudgetTemplate[];
+}) {
+  const t = fr.financeBudgets;
+  return (
+    <DialogButton
+      label={t.templates.use}
+      size="sm"
+      title={t.centerForm.title}
+      description={t.centerForm.description}
+    >
+      {(close) => (
+        <CostCenterForm
+          templates={templates}
+          initialTemplateId={template.id}
+          onDone={close}
+        />
+      )}
+    </DialogButton>
   );
 }
 

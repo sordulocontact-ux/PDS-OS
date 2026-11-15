@@ -127,6 +127,7 @@ export default async function FinanceIncomesPage({
             />
           </div>
           <DataTableViews
+            segmented
             label={v.views.label}
             action={action}
             views={VIEWS.map((key) => ({
@@ -146,7 +147,6 @@ export default async function FinanceIncomesPage({
                 canManage={canManage}
                 organizationId={access.organizationId ?? ""}
                 ownerId={access.personId}
-                followUp={view === "retard"}
               />
             )}
           </DataTableViews>

@@ -34,6 +34,7 @@ import {
 } from "@/lib/finance/treasury";
 import { loadTreasury } from "@/lib/finance/treasury-queries";
 import { assistantReadFinance } from "@/lib/i18n/fr/assistant-read-finance";
+import { spendsHref } from "@/lib/finance/spend-links";
 
 const fr = { assistantReadFinance };
 
@@ -195,7 +196,7 @@ export async function readToPay(horizon: number): Promise<ReadResult> {
     sources: [
       {
         label: fr.assistantReadFinance.sources.toPay,
-        href: `${routes.financeSpends}?vue=a-payer`,
+        href: spendsHref({ statut: "facture" }),
       },
     ],
   };
