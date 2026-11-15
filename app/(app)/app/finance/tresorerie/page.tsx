@@ -1,7 +1,6 @@
 import { FormMessage } from "@/components/auth/form-message";
-import { EnvelopesTable } from "@/components/finance/envelopes-table";
+import { BudgetsCard } from "@/components/finance/budgets-card";
 import { FinanceFrame } from "@/components/finance/finance-frame";
-import { FlowBars } from "@/components/finance/flow-bars";
 import { PostPie } from "@/components/finance/post-pie";
 import { TreasuryCalendar } from "@/components/finance/treasury-calendar";
 import { TreasuryCard } from "@/components/finance/treasury-card";
@@ -9,7 +8,6 @@ import {
   ReserveButton,
   StatementButton,
 } from "@/components/finance/treasury-forms";
-import { MetricCard, MetricCardLink } from "@/components/ui/metric-card";
 import { SegmentedLinks } from "@/components/ui/segmented-control";
 import { UrlFilters } from "@/components/ui/url-filters";
 import { can } from "@/lib/auth/access";
@@ -17,7 +15,6 @@ import { requirePermission } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { loadBudgets } from "@/lib/finance/budget-queries";
 import { byPost, envelopeRow, linesOf } from "@/lib/finance/envelopes";
-import { monthFlows } from "@/lib/finance/flows";
 import { spendStage } from "@/lib/finance/spends";
 import {
   TREASURY_HORIZONS,
@@ -36,10 +33,10 @@ export const metadata = { title: t.titles.treasury };
  * Finance › Trésorerie (Ibé's ticket, maquette 6), laid out as the proto's
  * Rapports page (Sacha 15/11/2026: « la page Rapports est mieux designée »):
  * the horizon (?horizon=) and an envelope (?enveloppe=) on top; the balance,
- * the low point against the minimum reserve and the curve; money in and out
- * by month beside the spends by poste (of the envelope chosen, what is
- * committed, invoiced or paid); the live budgets; then every move the
- * forecast counts. The Finance updates the balance and the reserve here.
+ * the low point against the minimum reserve, money in and out by week and
+ * the balance over them (Sacha's Figma); the spends by poste (of the
+ * envelope chosen, what is committed, invoiced or paid) beside what the
+ * live budgets still allow; then every move the forecast counts. The Finance updates the balance and the reserve here.
  */
 export default async function FinanceTreasuryPage({
   searchParams,
@@ -94,20 +91,22 @@ export default async function FinanceTreasuryPage({
             current: days === horizon,
           }))}
         />
-        <UrlFilters
-          path={routes.financeTreasury}
-          params={{ horizon: String(horizon) }}
-          inline={1}
-          groups={[
-            {
-              key: "enveloppe",
-              label: t.envelopeFilter.label,
-              allLabel: t.envelopeFilter.all,
-              options: live.map((e) => ({ value: e.id, label: e.name })),
-              current: chosen?.id ?? null,
-            },
-          ]}
-        />
+        <div className="w-full max-w-64">
+          <UrlFilters
+            path={routes.financeTreasury}
+            params={{ horizon: String(horizon) }}
+            inline={1}
+            groups={[
+              {
+                key: "enveloppe",
+                label: t.envelopeFilter.label,
+                allLabel: t.envelopeFilter.all,
+                options: live.map((e) => ({ value: e.id, label: e.name })),
+                current: chosen?.id ?? null,
+              },
+            ]}
+          />
+        </div>
       </div>
       <TreasuryCard
         treasury={treasury}
@@ -116,28 +115,23 @@ export default async function FinanceTreasuryPage({
         detailed
       />
       <div className="grid items-start gap-4 lg:grid-cols-2">
-        <FlowBars
-          flows={monthFlows({
-            receipts: data.receipts,
-            paid: data.paid,
-            treasury,
-            today,
-          })}
-        />
         <PostPie posts={byPost(spent)} />
+        <BudgetsCard
+          availableCents={rows.reduce(
+            (sum, r) => sum + Math.max(r.restCents ?? 0, 0),
+            0,
+          )}
+          activeEnvelopes={rows.length}
+          budgets={rows.slice(0, 5).map((r) => ({
+            id: r.id,
+            envelopeCents: r.currentCents,
+            engagedCents: r.engagedCents,
+            estimatedCents: r.totals.plannedCents,
+            restCents: r.restCents,
+          }))}
+          names={new Map(rows.map((r) => [r.id, r.name] as const))}
+        />
       </div>
-      {rows.length > 0 && (
-        <MetricCard
-          title={t.activeBudgets.title}
-          action={
-            <MetricCardLink href={routes.financeBudgets}>
-              {t.activeBudgets.open}
-            </MetricCardLink>
-          }
-        >
-          <EnvelopesTable rows={rows} />
-        </MetricCard>
-      )}
       {treasury && <TreasuryCalendar treasury={treasury} names={names} />}
     </FinanceFrame>
   );

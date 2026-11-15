@@ -609,7 +609,7 @@ Refonte du 27/10/2026, d'après `docs/VISION-UX.md` § 2 (les cinq questions) :
   du 05/11/2026) : **tout choix unique parmi quelques-uns**, dans un formulaire (`ChipChoice` : type
   d'un contact, format, priorité) comme pour une vue de page dans l'URL (`ViewToggle`, historiques,
   versions). Un cadre à filet `border` sur `--control-bg`, rayon `--radius-xl`, 4 px de marge ;
-  segments 36 px, 14 px medium, encre secondaire ; le choisi en encre pleine sur `--control-bg-soft`,
+  cadre de la hauteur d'un champ ou d'un bouton (`--density-control-h`, 40 px : segments de 30 px dans le cadre à filet et sa marge de 4 px, Sacha 15/11/2026, « la même hauteur partout » sur une ligne d'outils), 14 px medium, encre secondaire ; le choisi en encre pleine sur `--control-bg-soft`,
   rayon `--radius-md`, fond qui **glisse** d'un segment à l'autre (`clip-path`, `--duration-slide`,
   `--ease-standard`, posé d'un coup si le mouvement est réduit). Remplace les pastilles pour ces cas.
 - **Pastilles** (`FilterChip`) : seulement des filtres ou des choix **qui se combinent**.

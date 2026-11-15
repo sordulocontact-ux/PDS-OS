@@ -129,27 +129,19 @@ export const treasury = {
     low: "Point bas",
     summary: (today: string, low: string, lowDay: string) =>
       `Solde aujourd'hui ${today}, point bas prévu ${low} le ${lowDay}.`,
-  },
-
-  // « Entrées et sorties » by month (Trésorerie, after the proto's Rapports).
-  flows: {
-    title: "Entrées et sorties",
+    // The weekly bars (Sacha's Figma, 15/11/2026).
     in: "Entrées",
     out: "Sorties",
-    legend: "Légende des entrées et sorties",
-    ahead: "prévu",
-    month: (
-      month: string,
-      inAmount: string,
-      outAmount: string,
-      ahead: boolean,
-    ) =>
-      `${month}${ahead ? " (prévu)" : ""} : entrées ${inAmount}, sorties ${outAmount}`,
-    empty: "Aucun mouvement sur la période.",
+    aheadLegend: "Prévu (clair)",
+    balanceReal: "Solde",
+    balanceForecast: "Solde prévu",
+    week: (from: string, to: string) => `Semaine du ${from} au ${to}`,
+    ahead: (amount: string) => `dont ${amount} prévus`,
+    balanceAfter: "Solde en fin de semaine",
   },
+
   // The envelope whose spends the split by poste shows.
   envelopeFilter: { label: "Enveloppe", all: "Toutes les enveloppes" },
-  activeBudgets: { title: "Budgets actifs", open: "Tous les budgets" },
   page: {
     balance: {
       title: "Solde aujourd'hui",
