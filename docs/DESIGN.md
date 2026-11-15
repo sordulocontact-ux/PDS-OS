@@ -1004,7 +1004,7 @@ plan et lots dans `docs/FINANCE-V2.md`. **Écart voulu, limité à Finance** :
 - **Pages de section sans titre visible** (lot 2) : `FinanceFrame` garde le h1 pour les lecteurs d'écran ; l'action va sur
   la ligne des onglets (`DataTableViews action`) quand la page en a, sinon en haut à droite ; la page d'une enveloppe
   garde son nom en titre.
-- **Tableaux et boutons** : ceux du design system (tableau à bandeau d'en-tête, sans filets verticaux ; bouton en pilule),
+- **Tableaux et boutons** : ceux du design system (tableau à bandeau d'en-tête et filet vertical entre les colonnes, 14 px de part et d'autre, dans toute l'app depuis le 15/11/2026 ; bouton en pilule),
   aux tailles de Finance (Sacha, 15/11/2026 : « remets les tableaux et les boutons du DS », puis « une version plus petite,
   cohérente avec la page »). Les onglets d'une liste de Finance passent en filtre segmenté compact sur la ligne de
   l'action (`DataTableViews segmented`), sans trait sous les onglets qui frôlait le bouton.

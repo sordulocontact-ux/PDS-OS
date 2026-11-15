@@ -43,8 +43,8 @@ restent dans le code pour la future vue d'ensemble générale (accueil) ; leur a
 `app/(app)/app/finance/page.tsx` du commit `7c071e76`. **Trésorerie** prend le dessin de la page Rapports du proto :
 horizon et enveloppe en haut ; le solde et un seul graphique, d'après la maquette Figma de Sacha (15/11/2026) : une
 barre par semaine, entrées au-dessus du zéro en encre, sorties en dessous en gris, le prévu plus clair dans la même
-barre, le solde par-dessus (réel plein, prévu en tirets, réserve, point bas) sur son axe à droite, les deux axes sur
-les mêmes lignes (`TreasuryChart`, `treasuryWeeks` calculé par `computeTreasury`) ; puis les dépenses par poste de
+barre, au-dessus, le solde seul sur son axe (réel plein, prévu en tirets, réserve, point bas) ; en dessous, la bande des barres sur
+son propre axe (deux axes sur un graphique étaient illisibles) (`TreasuryChart`, `treasuryWeeks` calculé par `computeTreasury`) ; puis les dépenses par poste de
 l'enveloppe choisie (engagé, facturé, payé) à côté de « Disponible sur les budgets » (`BudgetsCard`) ; puis le
 calendrier financier. Le même graphique sert à la Vue d'ensemble.
 

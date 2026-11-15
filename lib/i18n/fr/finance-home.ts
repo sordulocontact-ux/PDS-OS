@@ -122,12 +122,7 @@ export const financeHome = {
 /** Finance's side sheet (lot 3, docs/FINANCE-V2.md): a row opened on the
  * right, the list still in sight. */
 export const financeSheet = {
-  position: (index: number, total: number) => `${index} sur ${total}`,
-  previous: "Ligne précédente",
-  next: "Ligne suivante",
   close: "Fermer",
-  keys: "ligne précédente ou suivante",
-  escape: "fermer",
   history: "Historique",
   historyEmpty: "Aucune modification enregistrée.",
   historyLoading: "Lecture de l'historique…",

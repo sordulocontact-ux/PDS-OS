@@ -69,7 +69,12 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
     <th
       data-slot="table-head"
       className={cn(
-        "h-10 px-2 text-left align-middle font-medium whitespace-nowrap text-foreground [&:has([role=checkbox])]:pr-0",
+        // A hairline between columns, 14 px on each side (Sacha 15/11/2026,
+        // « des traits de séparation comme on avait fait de base » in
+        // Finance), drawn on each cell's right but the last so a column hidden on
+        // a small screen leaves no double rule; a bare table in a section card
+        // keeps none.
+        "h-10 px-3.5 text-left align-middle font-medium whitespace-nowrap text-foreground [&:has([role=checkbox])]:pr-0 not-last:border-r not-last:border-[color:var(--border-hairline)] in-[.section-card_.table-flat]:border-r-0",
         className
       )}
       {...props}
@@ -82,7 +87,7 @@ function TableCell({ className, ...props }: React.ComponentProps<"td">) {
     <td
       data-slot="table-cell"
       className={cn(
-        "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0",
+        "px-3.5 py-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 not-last:border-r not-last:border-[color:var(--border-hairline)] in-[.section-card_.table-flat]:border-r-0",
         className
       )}
       {...props}

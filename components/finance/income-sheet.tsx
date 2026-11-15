@@ -61,7 +61,6 @@ export function IncomeSheet({
         eyebrow={[treasury.kinds[income.kind], income.payer]
           .filter(Boolean)
           .join(" · ")}
-        title={income.label}
         amount={amount(income.cents)}
         caption={
           <>

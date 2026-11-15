@@ -26,8 +26,11 @@ export function ContextSidebar({
 }) {
   return (
     <nav aria-label={label} aria-busy={busy || undefined} className={frame}>
-      <div className="mb-1.5 border-b border-[color:var(--border-hairline)] pb-1.5">
-        {head}
+      {/* The head's rule runs the column's whole width, at the height of a
+          page's top band (Finance's search, 56 px): the two rules meet on one
+          line (Sacha 15/11/2026). It overflows the column's padding. */}
+      <div className="-mx-2 -mt-2 mb-1.5 flex min-h-14 shrink-0 items-center border-b border-[color:var(--border-hairline)] px-2">
+        <div className="min-w-0 flex-1">{head}</div>
       </div>
       {children}
     </nav>

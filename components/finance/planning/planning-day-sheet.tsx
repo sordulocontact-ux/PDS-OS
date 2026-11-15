@@ -10,7 +10,7 @@ import { financePlanning } from "@/lib/i18n/fr/finance-planning";
 import { cn } from "@/lib/utils";
 import { formatShortDay } from "@/lib/utils/day";
 
-import { amount, dayName } from "./planning-format";
+import { amount } from "./planning-format";
 import { PlanningMarks } from "./planning-pill";
 
 const t = financePlanning;
@@ -43,7 +43,6 @@ export function PlanningDaySheet({
     <>
       <SheetHead
         eyebrow={s.eyebrow(day.moves.length)}
-        title={dayName(day.day)}
         amount={day.afterCents === null ? undefined : amount(day.afterCents)}
         caption={<PlanningMarks day={day} />}
       />

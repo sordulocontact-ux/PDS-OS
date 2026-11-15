@@ -1,23 +1,20 @@
 "use client";
 
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
-import {
-  IconChevronDown,
-  IconChevronUp,
-  IconXmark,
-} from "nucleo-sharp-essential";
+import { IconXmark } from "nucleo-sharp-essential";
 import { useEffect, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Kbd } from "@/components/ui/kbd";
 import { financeSheet } from "@/lib/i18n/fr/finance-home";
 
 const t = financeSheet;
 
 /**
- * Finance's side sheet (lot 3, docs/FINANCE-V2.md, after Midday): a row of a
- * list opens on the right, the list still in sight under a light veil; ↑ ↓
- * (keys or buttons) go to the row before or after without closing, Échap
+ * Finance's side sheet (lot 3, docs/FINANCE-V2.md), drawn as Midday's right
+ * panels (Sacha 15/11/2026): a panel floating on the right with a margin
+ * around it, the row's name as its title beside the close button, then its
+ * content; no counter, no arrows. The list stays in sight under a light
+ * veil; ↑ ↓ still go to the row before or after from the keyboard, Échap
  * closes. Deliberate gap from « one modal » (Sacha 07/11/2026), Finance
  * only (DESIGN.md). Under `sm`, it takes the whole width. Inside
  * `.finance-scope`, as its page, though it is drawn in a portal.
@@ -67,49 +64,27 @@ export function FinanceSheet({
         <DialogPrimitive.Backdrop className="fixed inset-0 z-50 bg-[color-mix(in_srgb,var(--surface-page)_45%,transparent)] transition-opacity duration-[var(--duration-base)] data-ending-style:opacity-0 data-starting-style:opacity-0" />
         <DialogPrimitive.Popup
           data-slot="finance-sheet"
-          className="finance-scope fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l border-[color:var(--border-default)] bg-[var(--surface-raised)] text-foreground shadow-elevation-modal transition-[translate,opacity] duration-[var(--duration-base)] ease-[var(--ease-out)] outline-none data-ending-style:translate-x-6 data-ending-style:opacity-0 data-starting-style:translate-x-6 data-starting-style:opacity-0 motion-reduce:transition-opacity sm:w-[min(560px,100%)]"
+          className="finance-scope fixed inset-0 z-50 flex flex-col border border-[color:var(--border-default)] bg-[var(--surface-raised)] text-foreground shadow-elevation-modal transition-[translate,opacity] duration-[var(--duration-base)] ease-[var(--ease-out)] outline-none data-ending-style:translate-x-6 data-ending-style:opacity-0 data-starting-style:translate-x-6 data-starting-style:opacity-0 motion-reduce:transition-opacity sm:inset-y-3 sm:right-3 sm:left-auto sm:w-[min(520px,calc(100%-1.5rem))] sm:rounded-[var(--radius-xl)]"
         >
-          <div className="flex items-center gap-2 border-b border-[color:var(--border-hairline)] px-4 py-3">
-            <DialogPrimitive.Title className="sr-only">
+          <div className="flex items-start gap-3 px-6 pt-6 pb-2">
+            <DialogPrimitive.Title className="min-w-0 flex-1 text-display-sm font-medium break-words">
               {title}
             </DialogPrimitive.Title>
-            <span className="flex-1 text-caption text-[color:var(--text-tertiary)] tabular-nums">
-              {t.position(index + 1, total)}
-            </span>
-            <Button
-              variant="outline"
-              size="icon-sm"
-              aria-label={t.previous}
-              disabled={index <= 0}
-              onClick={() => onMove(index - 1)}
-            >
-              <IconChevronUp aria-hidden />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon-sm"
-              aria-label={t.next}
-              disabled={index >= total - 1}
-              onClick={() => onMove(index + 1)}
-            >
-              <IconChevronDown aria-hidden />
-            </Button>
             <DialogPrimitive.Close
-              render={<Button variant="ghost" size="icon-sm" />}
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  className="-mt-1 -mr-2"
+                />
+              }
             >
               <IconXmark aria-hidden />
               <span className="sr-only">{t.close}</span>
             </DialogPrimitive.Close>
           </div>
-          <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-6 py-5">
+          <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-6 pt-2 pb-6">
             {children}
-          </div>
-          <div className="hidden items-center gap-2 border-t border-[color:var(--border-hairline)] px-4 py-2.5 text-caption text-[color:var(--text-tertiary)] sm:flex">
-            <Kbd>↑</Kbd>
-            <Kbd>↓</Kbd>
-            <span className="flex-1">{t.keys}</span>
-            <Kbd>Échap</Kbd>
-            <span>{t.escape}</span>
           </div>
         </DialogPrimitive.Popup>
       </DialogPrimitive.Portal>
@@ -117,16 +92,14 @@ export function FinanceSheet({
   );
 }
 
-/** The head of a sheet: where the row belongs, its name, its amount large,
- * and a line under it (excl. tax, a state). */
+/** The head of a sheet's content: where the row belongs, its amount large,
+ * and a line under it (excl. tax, a state). Its name is the sheet's title. */
 export function SheetHead({
   eyebrow,
-  title,
   amount,
   caption,
 }: {
   eyebrow: ReactNode;
-  title: ReactNode;
   amount?: string;
   caption?: ReactNode;
 }) {
@@ -135,7 +108,6 @@ export function SheetHead({
       <p className="text-caption text-[color:var(--text-tertiary)]">
         {eyebrow}
       </p>
-      <h2 className="text-display-sm font-semibold">{title}</h2>
       {amount && <p className="text-display-lg tabular-nums">{amount}</p>}
       {caption && (
         <div className="flex flex-wrap items-center gap-2 text-caption text-[color:var(--text-secondary)]">

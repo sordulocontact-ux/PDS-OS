@@ -37,7 +37,6 @@ export function SpendSheet({
         eyebrow={[budget.form.targetKinds[spend.target.kind], envelope]
           .filter(Boolean)
           .join(" · ")}
-        title={spend.label}
         amount={amount(spendTtc(spend))}
         caption={
           <>

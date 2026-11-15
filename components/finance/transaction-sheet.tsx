@@ -41,7 +41,6 @@ export function TransactionSheet({
     <>
       <SheetHead
         eyebrow={t.eyebrow(formatDay(tx.bookedOn))}
-        title={tx.counterparty ?? tx.label ?? tx.reference ?? ""}
         amount={`${tx.cents > 0 ? "+" : "−"}${amount(Math.abs(tx.cents))}`}
         caption={
           <>

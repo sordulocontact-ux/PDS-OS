@@ -130,7 +130,6 @@ export function ReceiptSheet({
           proofFrom(row),
           formatDay(proof.receivedAt.slice(0, 10)),
         )}
-        title={proof.values.vendor ?? proof.fileName}
         amount={
           proof.values.amountCents !== null
             ? amount(proof.values.amountCents)

@@ -20,6 +20,7 @@ import { financeReceipts } from "@/lib/i18n/fr/finance-receipts";
 import { proofStateTone } from "@/lib/ui/state-tones";
 import { formatDay } from "@/lib/utils/day";
 import { formatAmount } from "@/lib/utils/money";
+import { cn } from "@/lib/utils";
 
 const t = financeReceipts;
 
@@ -95,7 +96,16 @@ export function ReceiptsTable({
               </DataTableCell>
               <DataTableCell>
                 <span className="flex items-center gap-2">
-                  <StatusBadge tone={proofStateTone[row.state]}>
+                  <StatusBadge
+                    tone={proofStateTone[row.state]}
+                    // On a phone the gesture alone, which says the state.
+                    className={cn(
+                      canManage &&
+                        (row.state === "toCheck" ||
+                          (row.state === "proposed" && row.matches[0])) &&
+                        "max-sm:hidden",
+                    )}
+                  >
                     {t.states[row.state]}
                   </StatusBadge>
                   {canManage && (
