@@ -1336,3 +1336,16 @@ export const googleServiceTone = {
   unreachable: "danger",
   off: "neutral",
 } as const satisfies Record<string, Tone>;
+
+/** A proof of Finance › Justificatifs (lib/finance/proofs.ts): read, to
+ * check by a person, a spend proposed (same word and tone as Rapprochement's
+ * proposal), waiting for its spend, attached, set aside. */
+export const proofStateTone = {
+  reading: "neutral",
+  toCheck: "warning",
+  proposed: "action",
+  waiting: "neutral",
+  other: "neutral",
+  attached: "success",
+  dismissed: "neutral",
+} as const satisfies Record<string, Tone>;

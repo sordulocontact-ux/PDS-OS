@@ -58,6 +58,7 @@ export function BudgetLineForm({
   levers = [],
   deliverables = [],
   organizationId = null,
+  storedProof,
   onDone,
   onCancel = onDone,
 }: {
@@ -70,6 +71,9 @@ export function BudgetLineForm({
   deliverables?: BudgetDeliverable[];
   // Where a proof is uploaded; no proof field without it.
   organizationId?: string | null;
+  // A file already kept in finance-files (a proof of Finance › Justificatifs,
+  // « Créer la dépense »): a Finance spend's proof when no other is chosen.
+  storedProof?: { path: string; name: string };
   onDone: () => void;
   onCancel?: () => void;
 }) {
@@ -128,7 +132,8 @@ export function BudgetLineForm({
       // The proof first: the line keeps the file it was saved with (a
       // Finance spend's in finance-files, the others in their library).
       let attachmentFileId = "";
-      let financeProof: { path: string; name: string } | undefined;
+      let financeProof: { path: string; name: string } | undefined =
+        storedProof && isFinanceTarget(target) ? storedProof : undefined;
       if (proof && organizationId) {
         if (isFinanceTarget(target)) {
           const stored = await uploadFinanceFile(organizationId, proof);

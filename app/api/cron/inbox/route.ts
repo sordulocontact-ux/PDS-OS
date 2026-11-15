@@ -1,5 +1,6 @@
 import { cronJson as json, isCronAuthorized } from "@/lib/cron/auth";
 import { getServerEnv } from "@/lib/env";
+import { fileEmailedProofs } from "@/lib/finance/proof-email";
 import { fileClearanceReplies } from "@/lib/legal/clearance/inbox-replies";
 import { sendPendingPushes } from "@/lib/notifications/push";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -8,7 +9,9 @@ import { createAdminClient } from "@/lib/supabase/admin";
  * Every 10 minutes (pg_cron → public.poll_inbox, secrets in Vault): the
  * replies to the authorisation requests read in PO's mailbox and filed in
  * their journal (lib/legal/clearance/inbox-replies.ts), their responsible
- * told. Not triggered by a user: service role (cron only).
+ * told; then the tickets and invoices sent to po+justificatifs@, filed in
+ * Finance › Justificatifs (lib/finance/proof-email.ts). Not triggered by a
+ * user: service role (cron only).
  */
 
 export const maxDuration = 60;
@@ -30,10 +33,18 @@ export async function GET(request: Request) {
     return json({ error: "unauthorized" }, 401);
   }
   const result = await fileClearanceReplies();
+  // The box of proofs never stops the replies: its failure is only logged.
+  const proofs = await fileEmailedProofs().catch((error: unknown) => {
+    console.error(
+      "cron inbox proofs:",
+      error instanceof Error ? error.message.slice(0, 200) : "unknown",
+    );
+    return null;
+  });
   if (!result) return json({ error: "inbox_unavailable" }, 503);
   if (result.filed > 0) {
     const supabase = createAdminClient();
     if (supabase) await sendPendingPushes(supabase);
   }
-  return json(result);
+  return json({ ...result, proofs: proofs?.filed ?? null });
 }

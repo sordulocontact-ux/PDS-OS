@@ -61,7 +61,7 @@ export function txState(tx: BankTransaction): TxState {
   return used > 0 ? "partial" : "open";
 }
 
-const fold = (value: string | null) =>
+export const fold = (value: string | null) =>
   (value ?? "")
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "")
@@ -69,7 +69,7 @@ const fold = (value: string | null) =>
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
 
-const days = (a: string, b: string) =>
+export const days = (a: string, b: string) =>
   Math.abs(Date.parse(`${a}T00:00:00Z`) - Date.parse(`${b}T00:00:00Z`)) /
   86400000;
 
@@ -86,7 +86,9 @@ const COMMON = new Set([
   "and",
 ]);
 
-function sameParty(a: string | null, b: string | null) {
+/** Two names share a word that says who (not « SAS », « the »…). Also
+ * used by the box of proofs (proof-match.ts). */
+export function sameParty(a: string | null, b: string | null) {
   const words = (v: string | null) =>
     fold(v)
       .split(" ")

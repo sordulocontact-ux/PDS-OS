@@ -7,6 +7,7 @@ import {
   IconFile,
   IconMoneyBillCoin,
   IconPaperPlane2,
+  IconPaperclip,
   IconPiggyBank,
   IconSquareActivityChart,
   IconTriangleWarning,
@@ -46,6 +47,14 @@ export const FINANCE_SECTIONS = [
     href: routes.financeReconcile,
     group: "bank",
     icon: IconCreditCard,
+  },
+  {
+    // The box of proofs (lot 6): tickets and invoices, read, attached.
+    key: "receipts",
+    label: t.receipts,
+    href: routes.financeReceipts,
+    group: "spend",
+    icon: IconPaperclip,
   },
   {
     key: "spends",

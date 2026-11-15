@@ -13,6 +13,7 @@ export const treasury = {
     incomes: "Factures",
     fundings: "Financements",
     reconcile: "Rapprochement",
+    receipts: "Justificatifs",
     alerts: "Alertes",
     exports: "Exports",
     // The second sidebar's groups.

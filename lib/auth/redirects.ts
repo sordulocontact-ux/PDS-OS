@@ -139,6 +139,7 @@ export const routes = {
   financeSpends: "/app/finance/depenses",
   financeFundings: "/app/finance/financements",
   financeReconcile: "/app/finance/rapprochement",
+  financeReceipts: "/app/finance/justificatifs",
   financeAlerts: "/app/finance/alertes",
   financeExports: "/app/finance/exports",
   // A CSV of Finance (lot 7): ?type=depenses|factures|encaissements|banque|historique.
