@@ -42,6 +42,7 @@ export async function WorkflowGate({
     !applicableWorkflows({
       type: project.type,
       masterCount: project.masters.length,
+      collective: project.collective,
     }).includes("distribution")
   )
     notFound();

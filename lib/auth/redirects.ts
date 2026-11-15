@@ -233,6 +233,19 @@ export const routes = {
   projectsNewFromSelection: (selectionId: string) =>
     `/app/projects/new?selection=${selectionId}`,
   project: (id: string) => `/app/projects/${id}`,
+  // « Titres et artistes » of a collective (lot 6 of docs/pds-mic-plan.md).
+  projectTitles: (id: string) => `/app/projects/${id}/titles`,
+  // A collective's releases (lot 13 of docs/pds-mic-plan.md).
+  projectReleases: (id: string) => `/app/projects/${id}/releases`,
+  // A collective's Plans de sortie, one per title (lot 14).
+  projectReleasePlans: (id: string) => `/app/projects/${id}/release-plans`,
+  projectReleasePlan: (id: string, titleId: string) =>
+    `/app/projects/${id}/release-plans/${titleId}`,
+  // A version of a title's plan: its HTML, ?format=pdf its PDF.
+  titlePlanVersion: (projectId: string, versionId: string) =>
+    `/api/projects/${projectId}/title-plans/${versionId}`,
+  // The shared link of a title's plan version (read without an account).
+  sharedTitlePlan: (token: string) => `/t/${token}`,
   // The Cadrage's entry: it opens the step that waits for the viewer.
   projectFraming: (id: string) => `/app/projects/${id}/framing`,
   // One step of the Cadrage (lib/framing/journey.ts): start, dimensions,

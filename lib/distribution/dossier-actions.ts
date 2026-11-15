@@ -27,6 +27,7 @@ const id = z.uuid();
 /** « Soumettre la Vn à Claire Morel ». */
 export async function submitDossier(input: {
   projectId: string;
+  releaseId?: string | null;
   number: number;
   validator: string;
 }): Promise<WriteResult> {
@@ -36,13 +37,18 @@ export async function submitDossier(input: {
     input.projectId,
     ["distribution"],
     t.submitted(input.number, input.validator),
-    () => submitDistributionVersion({ projectId: input.projectId }),
+    () =>
+      submitDistributionVersion({
+        projectId: input.projectId,
+        releaseId: input.releaseId,
+      }),
   );
 }
 
 /** « Valider la Vn » / « Refuser » (motif), by the validator asked. */
 export async function decideDossier(input: {
   projectId: string;
+  releaseId?: string | null;
   versionId: string;
   number: number;
   approve: boolean;
@@ -61,6 +67,7 @@ export async function decideDossier(input: {
     () =>
       decideDistributionVersion({
         projectId: input.projectId,
+        releaseId: input.releaseId,
         versionId: input.versionId,
         approve: input.approve,
         note: input.note,
@@ -72,6 +79,7 @@ export async function decideDossier(input: {
 /** « Préparer la Vn » after a correction at the source. */
 export async function prepareNextDossier(input: {
   projectId: string;
+  releaseId?: string | null;
   number: number;
   note: string;
   modules?: string[];
@@ -85,6 +93,7 @@ export async function prepareNextDossier(input: {
     () =>
       prepareDistributionVersion({
         projectId: input.projectId,
+        releaseId: input.releaseId,
         note: input.note,
         modules: input.modules,
       }),
@@ -94,6 +103,7 @@ export async function prepareNextDossier(input: {
 /** « Accorder la dérogation » (the direction). */
 export async function grantDerogation(input: {
   projectId: string;
+  releaseId?: string | null;
   scope: DerogationScope[];
   risk: string;
   reason: string;
@@ -112,6 +122,7 @@ export async function grantDerogation(input: {
 /** « Retirer la dérogation » not used yet. */
 export async function revokeDerogation(input: {
   projectId: string;
+  releaseId?: string | null;
 }): Promise<WriteResult> {
   if (!id.safeParse(input.projectId).success)
     return { ok: false, error: fr.distribution.validation.errors.invalid };

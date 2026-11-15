@@ -20,6 +20,7 @@ import { removeProof, uploadProof } from "@/lib/distribution/upload-proof";
 import { distribution } from "@/lib/i18n/fr/distribution";
 import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
 import { cn } from "@/lib/utils";
+import { useDistributionRelease } from "@/components/distribution/frame/release-scope";
 
 const fr = { distribution, distributionJourney };
 
@@ -46,6 +47,7 @@ export function OrchardForm({
   left: Answer[];
   today: string;
 }) {
+  const releaseId = useDistributionRelease();
   const [ticked, setTicked] = useState<Partial<Record<Answer, boolean>>>({});
   const [dates, setDates] = useState<Partial<Record<Answer, string>>>({});
   // A file of its own, or false: the shared one was removed from this line.
@@ -102,6 +104,7 @@ export function OrchardForm({
       }
       const result = await declareAnswers({
         projectId,
+        releaseId,
         source,
         items: chosen.map((k) => {
           const proof = proofOf(k);

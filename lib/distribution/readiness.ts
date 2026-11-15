@@ -9,6 +9,7 @@
 import { routes } from "@/lib/auth/redirects";
 import type { SheetStatus } from "@/lib/design/states";
 import { distribution } from "@/lib/i18n/fr/distribution";
+import { withRelease } from "@/lib/distribution/scope";
 import { withReturn } from "@/lib/ui/return-to";
 import { masterStepHref } from "@/lib/ui/master-steps";
 import { formatShortDay } from "@/lib/utils/day";
@@ -76,6 +77,41 @@ export type ReadinessTitle = {
     listenUrl: string | null;
     downloadUrl: string | null;
   } | null;
+  // A collective's track (lot 15): as the platforms receive it — the
+  // project's artist as main artist, the title's confirmed guests in
+  // featuring, « Marina (feat. Lou Vega) » (décision 10).
+  delivery?: TrackDelivery;
+};
+
+export type TrackDelivery = {
+  title: string;
+  main: string;
+  featuring: string[];
+  // The project's artist is not a main credit of the title in the Catalogue.
+  missingMain: boolean;
+  // Confirmed guests not credited in featuring in the Catalogue.
+  missingFeaturing: string[];
+  // « feat. … » written in the Catalogue's title, taken out (the
+  // Distribution writes it under the platforms' rules).
+  cleaned: boolean;
+};
+
+/** A collective's release (lot 15): what its deposit also waits for. */
+export type ReadinessCollective = {
+  kind: "title" | "compilation";
+  // « Titres et artistes », where names are settled; « Participations et
+  // contrats » (Juridique), where contracts and waivers are.
+  titlesHref: string;
+  contractsHref: string;
+  // Confirmed participations without a signed contract nor a release
+  // waiver, named; null: none.
+  contracts: string | null;
+  // The release's titles still under a provisional name (lot 7).
+  provisional: string[];
+  // The compilation's active titles not in the Catalogue yet.
+  withoutMaster: string[];
+  // A title's release: its title's cover in the Catalogue.
+  catalogCover: { masterId: string; fileName: string | null } | null;
 };
 
 /** A borrowing not secured at the Juridique (distribution_legal_blockers):
@@ -114,6 +150,9 @@ export type ReadinessInput = {
   } | null;
   // The release date, from the project (lib/projects/dates.ts).
   releaseDate: { date: string; source: string } | null;
+  collective?: ReadinessCollective | null;
+  // A collective's release (lot 15), kept in this module's addresses.
+  releaseId?: string | null;
 };
 
 export type Readiness = {
@@ -144,7 +183,10 @@ export function distributionReadiness(
   const many = input.titles.length > 1;
   // A title's page, opened from here, brings back to this step once
   // corrected (PROJ-BUG-10).
-  const back = routes.projectReleaseStep(input.projectId, "preparation");
+  const back = withRelease(
+    routes.projectReleaseStep(input.projectId, "preparation"),
+    input.releaseId,
+  );
   // Sources say their date short (« le 12/10 », C0 decision 8).
   const short = (at: string) => formatShortDay(at, { bare: true });
   const updated = (at: string | null, where: string) =>
@@ -209,8 +251,12 @@ export function distributionReadiness(
     detail: input.release?.upc ?? d.upcLater,
     source: null,
     // Typed in the Paramètres de distribution, checked by the code.
-    href: routes.projectReleaseStep(input.projectId, "params"),
+    href: withRelease(
+      routes.projectReleaseStep(input.projectId, "params"),
+      input.releaseId,
+    ),
   });
+  items.push(...platformItems(input, back));
 
   for (const title of input.titles)
     items.push({
@@ -254,13 +300,23 @@ export function distributionReadiness(
     });
 
   items.push(...legalItems(input));
-  items.push(coverItem(input, formatDate));
+  items.push(...collectiveItems(input, back));
+  items.push(
+    input.collective?.kind === "title"
+      ? titleCoverItem(input.collective, back)
+      : coverItem(input, formatDate),
+  );
 
   const release = input.release;
   const date = input.releaseDate;
   // The project's dates are changed on the project (Lancement), confirmed
   // by the Cadrage: never here.
-  const projectHref = routes.project(input.projectId);
+  // A collective's title release (lot 15): its date is set in « Sorties »
+  // (the compilation's is the project's due date, as before).
+  const titleRelease = input.collective?.kind === "title";
+  const projectHref = titleRelease
+    ? routes.projectReleases(input.projectId)
+    : routes.project(input.projectId);
   items.push(
     {
       key: "release",
@@ -270,7 +326,10 @@ export function distributionReadiness(
       state: release ? "validated" : "missing",
       blocking: true,
       detail: release ? d.releaseTitle(release.title) : d.releaseMissing,
-      source: release ? (date?.source ?? d.releaseSource) : null,
+      source: release
+        ? (date?.source ??
+          (titleRelease ? t.collective.releaseSource : d.releaseSource))
+        : null,
       href: projectHref,
     },
     {
@@ -280,7 +339,11 @@ export function distributionReadiness(
       subject: null,
       state: date ? "validated" : "missing",
       blocking: true,
-      detail: date ? formatDate(date.date) : d.dateMissing,
+      detail: date
+        ? formatDate(date.date)
+        : titleRelease
+          ? t.collective.dateMissing
+          : d.dateMissing,
       source: date?.source ?? null,
       href: projectHref,
     },
@@ -297,6 +360,110 @@ export function distributionReadiness(
     next: blockers[0] ?? null,
     state:
       blockers.length === 0 ? "ready" : ready === 0 ? "to_prepare" : "partial",
+  };
+}
+
+/** A collective's tracks as the platforms receive them (lot 15, décision
+ * 10): the project's artist as main artist, the confirmed guests in
+ * featuring and in the title. The rule is applied to the delivery file;
+ * what the Catalogue lacks for it blocks. */
+function platformItems(input: ReadinessInput, back: string): ReadinessItem[] {
+  const t = fr.distribution.readiness;
+  const c = t.collective;
+  const many = input.titles.length > 1;
+  return input.titles.flatMap((title) => {
+    const d = title.delivery;
+    if (!d) return [];
+    const missing = d.missingMain || d.missingFeaturing.length > 0;
+    return [
+      {
+        key: `platforms-${title.id}`,
+        module: "catalog" as const,
+        label: t.items.platformCredits,
+        subject: many ? title.label : null,
+        state: missing ? ("missing" as const) : ("available" as const),
+        blocking: true,
+        detail: d.missingMain
+          ? c.missingMain(d.main)
+          : d.missingFeaturing.length
+            ? c.missingFeaturing(d.missingFeaturing.join(", "))
+            : c.delivered(d.title, d.main, d.featuring),
+        source: d.cleaned ? c.cleaned : c.rules,
+        href: withReturn(routes.masterCredits(title.id), back),
+      },
+    ];
+  });
+}
+
+/** What a collective's release also waits for (lot 15): its titles named,
+ * in the Catalogue, their contracts signed or waived (lot 12). */
+function collectiveItems(input: ReadinessInput, back: string): ReadinessItem[] {
+  const collective = input.collective;
+  if (!collective) return [];
+  const t = fr.distribution.readiness;
+  const c = t.collective;
+  const titles = withReturn(collective.titlesHref, back);
+  return [
+    ...collective.provisional.map((label) => ({
+      key: `provisional-${label}`,
+      module: "project" as const,
+      label: t.items.provisional,
+      subject: label,
+      state: "missing" as const,
+      blocking: true,
+      detail: c.provisional(),
+      source: c.contractsSource,
+      href: titles,
+    })),
+    ...collective.withoutMaster.map((label) => ({
+      key: `track-${label}`,
+      module: "catalog" as const,
+      label: t.items.trackInCatalogue,
+      subject: label,
+      state: "missing" as const,
+      blocking: true,
+      detail: c.withoutMaster(label),
+      source: c.contractsSource,
+      href: titles,
+    })),
+    {
+      key: "contracts",
+      module: "legal" as const,
+      label: t.items.contracts,
+      subject: null,
+      state: collective.contracts
+        ? ("missing" as const)
+        : ("validated" as const),
+      blocking: true,
+      detail: collective.contracts
+        ? c.contractsMissing(collective.contracts)
+        : c.contractsOk,
+      source: c.contractsWhere,
+      href: withReturn(collective.contractsHref, back),
+    },
+  ];
+}
+
+/** A title's release (lot 15): its title's cover, in the Catalogue. */
+function titleCoverItem(
+  collective: ReadinessCollective,
+  back: string,
+): ReadinessItem {
+  const t = fr.distribution.readiness;
+  const c = t.collective;
+  const cover = collective.catalogCover;
+  return {
+    key: "cover",
+    module: "catalog",
+    label: t.items.titleCover,
+    subject: null,
+    state: cover?.fileName ? "available" : "missing",
+    blocking: true,
+    detail: cover?.fileName ? c.coverFile(cover.fileName) : c.coverNone,
+    source: c.coverSource,
+    href: cover
+      ? withReturn(routes.masterFiles(cover.masterId), back)
+      : collective.titlesHref,
   };
 }
 

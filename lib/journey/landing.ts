@@ -38,10 +38,16 @@ export const masterEntry = (projectId: string, steps: JourneyStep[]) =>
 export const reviewEntry = (projectId: string, steps: JourneyStep[]) =>
   reviewStepHref(projectId, (entryStep(steps)?.key ?? "closure") as ReviewKey);
 
-export const distributionEntry = (projectId: string, steps: JourneyStep[]) =>
+export const distributionEntry = (
+  projectId: string,
+  steps: JourneyStep[],
+  // A collective's release (lot 15).
+  releaseId: string | null = null,
+) =>
   distributionStepHref(
     projectId,
     (entryStep(steps)?.key ?? "prep") as DistributionKey,
+    releaseId,
   );
 
 /** The Production's entry: the viewer's deliverable, else the first one in

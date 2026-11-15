@@ -11,6 +11,7 @@ import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { decideLift, requestLift } from "@/lib/distribution/closure-gestures";
 import { removeProof, uploadProof } from "@/lib/distribution/upload-proof";
 import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
+import { useDistributionRelease } from "@/components/distribution/frame/release-scope";
 
 const fr = { distributionJourney };
 
@@ -31,6 +32,7 @@ export function RequestLift({
   organizationId: string | null;
   reserveId: string;
 }) {
+  const releaseId = useDistributionRelease();
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [url, setUrl] = useState("");
@@ -63,6 +65,7 @@ export function RequestLift({
       }
       const result = await requestLift({
         projectId,
+        releaseId,
         reserveId,
         note: note.trim(),
         proofPath,
@@ -128,6 +131,7 @@ export function DecideLift({
   projectId: string;
   reserveId: string;
 }) {
+  const releaseId = useDistributionRelease();
   const [note, setNote] = useState("");
   const [missing, setMissing] = useState(false);
   const { pending, error, run } = useWriteSubmit(
@@ -139,7 +143,13 @@ export function DecideLift({
     setMissing(lacking);
     if (!lacking)
       run(() =>
-        decideLift({ projectId, reserveId, approve, note: note.trim() }),
+        decideLift({
+          projectId,
+          releaseId,
+          reserveId,
+          approve,
+          note: note.trim(),
+        }),
       );
   };
   return (

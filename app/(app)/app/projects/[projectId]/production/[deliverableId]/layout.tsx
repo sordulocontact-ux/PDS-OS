@@ -1,4 +1,9 @@
 import { ProjectHeader } from "@/components/projects/project-header";
+import { TitleScopeLine } from "@/components/projects/titles/title-scope";
+import { requireApproved } from "@/lib/auth/dal";
+import { canEditProject } from "@/lib/projects/edit-access";
+import { requireLaunchedProject } from "@/lib/projects/queries";
+import { loadTitleScopes, scopeOf } from "@/lib/projects/title-scopes";
 import {
   DeliverableBar,
   deliverableLine,
@@ -41,10 +46,14 @@ export default async function ProductionSheetLayout({
   params,
 }: LayoutProps<"/app/projects/[projectId]/production/[deliverableId]">) {
   const { projectId, deliverableId } = await params;
-  const [{ data, steps }, deliverables] = await Promise.all([
-    journeyContext(projectId, deliverableId),
-    productionDeliverables(projectId),
-  ]);
+  const [{ data, steps }, deliverables, scopes, access, project] =
+    await Promise.all([
+      journeyContext(projectId, deliverableId),
+      productionDeliverables(projectId),
+      loadTitleScopes(projectId),
+      requireApproved(),
+      requireLaunchedProject(projectId),
+    ]);
   const started = Boolean(data.heritage.fiche || data.heritage.source);
   const sheet = data.sheet;
   const organized = Boolean(sheet?.organization.kind);
@@ -119,6 +128,19 @@ export default async function ProductionSheetLayout({
         // Before « Qui produit ? », the project's own facts (proto).
         facts={organized ? facts : undefined}
       />
+      {/* A collective: the titles the deliverable targets (lot 10). */}
+      {scopes && (
+        <TitleScopeLine
+          action={{
+            projectId,
+            deliverableId,
+            name: data.deliverable.title,
+          }}
+          scope={scopeOf(scopes.deliverables, deliverableId)}
+          titles={scopes.titles}
+          canEdit={canEditProject(access, project)}
+        />
+      )}
       <SheetNotices data={data} />
       <ModuleAttention
         stepRef={productionStepRef(projectId, deliverableId, "organisation")}

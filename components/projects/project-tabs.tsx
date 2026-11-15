@@ -18,17 +18,20 @@ export function ProjectTabs({
   canSeeLegal,
   canSeeBudget = true,
   workflows,
+  collective = false,
 }: {
   projectId: string;
   canSeeLegal: boolean;
   canSeeBudget?: boolean;
   workflows?: readonly string[];
+  collective?: boolean;
 }) {
   const pathname = usePathname();
   const sections = projectSections(projectId, {
     legal: canSeeLegal,
     budget: canSeeBudget,
     workflows,
+    collective,
   });
   const open = sections.find((section) => section.match(pathname));
   const currentTab = open?.tabParent ?? open?.key;

@@ -23,7 +23,7 @@ import { createClient } from "@/lib/supabase/server";
 // Artist page queries, with the user's session: RLS decides what is visible
 // (contacts only with manage_catalog, projects only those the viewer sees).
 
-const ARTIST_SELECT = `id, organization_id, name, relation, legal_name, country_code, bio, notes, picture_url, picture_path, deezer_id, deezer_url, credits:master_artists!master_artists_artist_same_org(master:masters!master_artists_master_same_org(id, title, variant, variant_label, audio_state, isrc, duration_seconds, final_validated_at, source_master_id, demo_status, archived_at, ${CREDITS_SELECT}, links:project_masters!project_masters_master_same_org(project:projects!project_masters_project_same_org(id, archived_at)))), named:projects!projects_artist_same_org(id, archived_at), ${PARTICIPATIONS_SELECT}`;
+const ARTIST_SELECT = `id, organization_id, name, relation, legal_name, country_code, bio, notes, picture_url, picture_path, deezer_id, deezer_url, credits:master_artists!master_artists_artist_same_org(master:masters!master_artists_master_same_org(id, title, variant, variant_label, audio_state, isrc, duration_seconds, final_validated_at, source_master_id, demo_status, title_is_provisional, archived_at, ${CREDITS_SELECT}, links:project_masters!project_masters_master_same_org(project:projects!project_masters_project_same_org(id, archived_at)))), named:projects!projects_artist_same_org(id, archived_at), ${PARTICIPATIONS_SELECT}`;
 
 // Cached per request: the layout and the tab pages read the same artist.
 export const getArtist = trackedCache(

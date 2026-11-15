@@ -152,3 +152,70 @@ export async function reactivateProjectTitle(input: {
   refresh(projectId.data);
   return { ok: true };
 }
+
+// Lot 7 (voie A, docs/pds-mic-plan.md § 3.3): a title without a master gets
+// its title in the Catalogue, provisional, at its first audio; or takes a
+// title the Catalogue already has.
+
+function catalogError(where: string, error: RpcError): string {
+  const t = fr.projectTitles.errors;
+  if (error.message.includes("title_has_master")) return t.hasMaster;
+  if (error.message.includes("main_artist_required"))
+    return t.mainArtistRequired;
+  return titleError(where, error);
+}
+
+/** « Déposer un audio » on a title without a master: its title is created
+ * in the Catalogue under a provisional name (or the one it has is kept),
+ * where its audio goes. Returns that title. */
+export async function startTitleWork(input: {
+  projectId: string;
+  titleId: string;
+}): Promise<{ ok: true; masterId: string } | { ok: false; error: string }> {
+  const t = fr.projectTitles.errors;
+  await requireApproved();
+  const projectId = idSchema.safeParse(input.projectId);
+  const titleId = idSchema.safeParse(input.titleId);
+  if (!projectId.success || !titleId.success)
+    return { ok: false, error: t.failed };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("ensure_project_title_master", {
+    p_title_id: titleId.data,
+  });
+  if (error || !data)
+    return {
+      ok: false,
+      error: error ? catalogError("startTitleWork", error) : t.failed,
+    };
+  refresh(projectId.data);
+  revalidatePath(routes.demos);
+  return { ok: true, masterId: data };
+}
+
+/** « Rattacher un titre du Catalogue » to a title that has none yet. */
+export async function attachCatalogTitle(input: {
+  projectId: string;
+  titleId: string;
+  masterId: string;
+}): Promise<WriteResult> {
+  const t = fr.projectTitles.errors;
+  await requireApproved();
+  const projectId = idSchema.safeParse(input.projectId);
+  const titleId = idSchema.safeParse(input.titleId);
+  const masterId = idSchema.safeParse(input.masterId);
+  if (!projectId.success || !titleId.success)
+    return { ok: false, error: t.failed };
+  if (!masterId.success) return { ok: false, error: t.masterRequired };
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("attach_master_to_project_title", {
+    p_title_id: titleId.data,
+    p_master_id: masterId.data,
+  });
+  if (error)
+    return { ok: false, error: catalogError("attachCatalogTitle", error) };
+  refresh(projectId.data);
+  revalidatePath(routes.master(masterId.data), "layout");
+  return { ok: true };
+}

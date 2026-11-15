@@ -67,6 +67,10 @@ export const sessions = {
     titles: "Titres ou maquettes",
     titlesPlaceholder: "Choisir des titres",
     titlesHint: "Leur projet est rattaché tout seul à la session.",
+    // A title of a collective not in the Catalogue yet (lot 7): created
+    // there under a provisional name when the session is saved.
+    waitingTitle: (label: string, project: string) =>
+      `${label} · ${project} (pas encore au Catalogue)`,
     projects: "Projets",
     projectsPlaceholder: "Choisir des projets",
     projectsHint:

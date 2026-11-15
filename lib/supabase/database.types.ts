@@ -758,6 +758,7 @@ export type Database = {
           owner_person_id: string
           position: number
           project_id: string
+          release_id: string | null
           status: string
         }
         Insert: {
@@ -784,6 +785,7 @@ export type Database = {
           owner_person_id: string
           position: number
           project_id: string
+          release_id?: string | null
           status?: string
         }
         Update: {
@@ -810,9 +812,17 @@ export type Database = {
           owner_person_id?: string
           position?: number
           project_id?: string
+          release_id?: string | null
           status?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "distribution_reserves_release"
+            columns: ["release_id", "project_id"]
+            isOneToOne: false
+            referencedRelation: "releases"
+            referencedColumns: ["id", "project_id"]
+          },
           {
             foreignKeyName: "distribution_reserves_closure_id_fkey"
             columns: ["closure_id"]
@@ -859,6 +869,7 @@ export type Database = {
           organization_id: string
           project_id: string
           reason: string
+          release_id: string | null
           revoked_at: string | null
           revoked_by: string | null
           risk: string
@@ -874,6 +885,7 @@ export type Database = {
           organization_id: string
           project_id: string
           reason: string
+          release_id?: string | null
           revoked_at?: string | null
           revoked_by?: string | null
           risk: string
@@ -889,6 +901,7 @@ export type Database = {
           organization_id?: string
           project_id?: string
           reason?: string
+          release_id?: string | null
           revoked_at?: string | null
           revoked_by?: string | null
           risk?: string
@@ -897,6 +910,13 @@ export type Database = {
           version_number?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "distribution_derogations_release"
+            columns: ["release_id", "project_id"]
+            isOneToOne: false
+            referencedRelation: "releases"
+            referencedColumns: ["id", "project_id"]
+          },
           {
             foreignKeyName: "distribution_derogations_granted_by_fkey"
             columns: ["granted_by"]
@@ -1508,6 +1528,7 @@ export type Database = {
           proposed_at: string
           proposed_by: string
           reason_kind: string | null
+          release_id: string | null
           reopen_note: string | null
           reopened_at: string | null
           reopened_by: string | null
@@ -1529,6 +1550,7 @@ export type Database = {
           proposed_at?: string
           proposed_by: string
           reason_kind?: string | null
+          release_id?: string | null
           reopen_note?: string | null
           reopened_at?: string | null
           reopened_by?: string | null
@@ -1550,6 +1572,7 @@ export type Database = {
           proposed_at?: string
           proposed_by?: string
           reason_kind?: string | null
+          release_id?: string | null
           reopen_note?: string | null
           reopened_at?: string | null
           reopened_by?: string | null
@@ -1559,6 +1582,13 @@ export type Database = {
           version_number?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "distribution_closures_release"
+            columns: ["release_id", "project_id"]
+            isOneToOne: false
+            referencedRelation: "releases"
+            referencedColumns: ["id", "project_id"]
+          },
           {
             foreignKeyName: "distribution_closures_decided_by_fkey"
             columns: ["decided_by"]
@@ -1608,6 +1638,7 @@ export type Database = {
           owner_person_id: string | null
           platform: string | null
           project_id: string
+          release_id: string | null
           reported_at: string
           reported_by: string
           severity: string
@@ -1629,6 +1660,7 @@ export type Database = {
           owner_person_id?: string | null
           platform?: string | null
           project_id: string
+          release_id?: string | null
           reported_at?: string
           reported_by: string
           severity: string
@@ -1650,6 +1682,7 @@ export type Database = {
           owner_person_id?: string | null
           platform?: string | null
           project_id?: string
+          release_id?: string | null
           reported_at?: string
           reported_by?: string
           severity?: string
@@ -1661,6 +1694,13 @@ export type Database = {
           version_number?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "distribution_anomalies_release"
+            columns: ["release_id", "project_id"]
+            isOneToOne: false
+            referencedRelation: "releases"
+            referencedColumns: ["id", "project_id"]
+          },
           {
             foreignKeyName: "distribution_anomalies_owner_person_id_fkey"
             columns: ["owner_person_id"]
@@ -1709,6 +1749,7 @@ export type Database = {
           proof_name: string | null
           proof_path: string | null
           proof_url: string | null
+          release_id: string | null
           territory: string | null
           updated_at: string
           url: string | null
@@ -1734,6 +1775,7 @@ export type Database = {
           proof_name?: string | null
           proof_path?: string | null
           proof_url?: string | null
+          release_id?: string | null
           territory?: string | null
           updated_at?: string
           url?: string | null
@@ -1759,6 +1801,7 @@ export type Database = {
           proof_name?: string | null
           proof_path?: string | null
           proof_url?: string | null
+          release_id?: string | null
           territory?: string | null
           updated_at?: string
           url?: string | null
@@ -1768,6 +1811,13 @@ export type Database = {
           verified_by?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "distribution_platforms_release"
+            columns: ["release_id", "project_id"]
+            isOneToOne: false
+            referencedRelation: "releases"
+            referencedColumns: ["id", "project_id"]
+          },
           {
             foreignKeyName: "distribution_platforms_available_declared_by_fkey"
             columns: ["available_declared_by"]
@@ -1812,6 +1862,8 @@ export type Database = {
           proof_name: string | null
           proof_path: string | null
           proof_url: string | null
+          release_id: string | null
+          scope_id: string | null
           source: string | null
           version_number: number
           withdraw_note: string | null
@@ -1831,6 +1883,8 @@ export type Database = {
           proof_name?: string | null
           proof_path?: string | null
           proof_url?: string | null
+          release_id?: string | null
+          scope_id?: never
           source?: string | null
           version_number: number
           withdraw_note?: string | null
@@ -1850,6 +1904,8 @@ export type Database = {
           proof_name?: string | null
           proof_path?: string | null
           proof_url?: string | null
+          release_id?: string | null
+          scope_id?: never
           source?: string | null
           version_number?: number
           withdraw_note?: string | null
@@ -1857,6 +1913,13 @@ export type Database = {
           withdrawn_by?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "distribution_declarations_release"
+            columns: ["release_id", "project_id"]
+            isOneToOne: false
+            referencedRelation: "releases"
+            referencedColumns: ["id", "project_id"]
+          },
           {
             foreignKeyName: "distribution_declarations_declared_by_fkey"
             columns: ["declared_by"]
@@ -1898,6 +1961,8 @@ export type Database = {
           organization_id: string
           project_id: string
           refusal_modules: string[] | null
+          release_id: string | null
+          scope_id: string | null
           snapshot: Json
           status: string
           submitted_at: string
@@ -1915,6 +1980,8 @@ export type Database = {
           organization_id: string
           project_id: string
           refusal_modules?: string[] | null
+          release_id?: string | null
+          scope_id?: never
           snapshot: Json
           status?: string
           submitted_at?: string
@@ -1932,6 +1999,8 @@ export type Database = {
           organization_id?: string
           project_id?: string
           refusal_modules?: string[] | null
+          release_id?: string | null
+          scope_id?: never
           snapshot?: Json
           status?: string
           submitted_at?: string
@@ -1940,6 +2009,13 @@ export type Database = {
           validator_person_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "distribution_versions_release"
+            columns: ["release_id", "project_id"]
+            isOneToOne: false
+            referencedRelation: "releases"
+            referencedColumns: ["id", "project_id"]
+          },
           {
             foreignKeyName: "distribution_versions_decided_by_fkey"
             columns: ["decided_by"]
@@ -1986,6 +2062,7 @@ export type Database = {
           note: string | null
           organization_id: string
           project_id: string
+          release_id: string | null
           result: string
           version_number: number | null
         }
@@ -1997,6 +2074,7 @@ export type Database = {
           note?: string | null
           organization_id: string
           project_id: string
+          release_id?: string | null
           result?: string
           version_number?: number | null
         }
@@ -2008,10 +2086,18 @@ export type Database = {
           note?: string | null
           organization_id?: string
           project_id?: string
+          release_id?: string | null
           result?: string
           version_number?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "distribution_checks_release"
+            columns: ["release_id", "project_id"]
+            isOneToOne: false
+            referencedRelation: "releases"
+            referencedColumns: ["id", "project_id"]
+          },
           {
             foreignKeyName: "distribution_checks_checked_by_fkey"
             columns: ["checked_by"]
@@ -5226,6 +5312,85 @@ export type Database = {
           },
         ]
       }
+      deliverable_titles: {
+        Row: {
+          activation_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          organization_id: string
+          project_id: string
+          scope: string
+          strategy_deliverable_id: string | null
+          title_id: string | null
+        }
+        Insert: {
+          activation_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id: string
+          project_id: string
+          scope: string
+          strategy_deliverable_id?: string | null
+          title_id?: string | null
+        }
+        Update: {
+          activation_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id?: string
+          project_id?: string
+          scope?: string
+          strategy_deliverable_id?: string | null
+          title_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deliverable_titles_activation_same_org"
+            columns: ["activation_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_activations"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "deliverable_titles_activation_same_org"
+            columns: ["activation_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_review_activations"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "deliverable_titles_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deliverable_titles_deliverable_same_org"
+            columns: ["strategy_deliverable_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "strategy_deliverables"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "deliverable_titles_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "deliverable_titles_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "project_titles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deliverable_deliveries: {
         Row: {
           approved_at: string | null
@@ -6647,6 +6812,7 @@ export type Database = {
           preorder_on: string | null
           price_tier: string | null
           project_id: string
+          release_id: string | null
           territories: string[]
           territory_mode: string
           updated_at: string
@@ -6667,6 +6833,7 @@ export type Database = {
           preorder_on?: string | null
           price_tier?: string | null
           project_id: string
+          release_id?: string | null
           territories?: string[]
           territory_mode?: string
           updated_at?: string
@@ -6687,12 +6854,20 @@ export type Database = {
           preorder_on?: string | null
           price_tier?: string | null
           project_id?: string
+          release_id?: string | null
           territories?: string[]
           territory_mode?: string
           updated_at?: string
           validator_person_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "distribution_dossiers_release"
+            columns: ["release_id", "project_id"]
+            isOneToOne: false
+            referencedRelation: "releases"
+            referencedColumns: ["id", "project_id"]
+          },
           {
             foreignKeyName: "distribution_dossiers_cover_same_org"
             columns: ["cover_sheet_id", "organization_id"]
@@ -6732,6 +6907,7 @@ export type Database = {
           kind: string
           organization_id: string
           project_id: string
+          release_id: string | null
         }
         Insert: {
           actor?: string | null
@@ -6741,6 +6917,7 @@ export type Database = {
           kind: string
           organization_id: string
           project_id: string
+          release_id?: string | null
         }
         Update: {
           actor?: string | null
@@ -6750,8 +6927,16 @@ export type Database = {
           kind?: string
           organization_id?: string
           project_id?: string
+          release_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "distribution_events_release"
+            columns: ["release_id", "project_id"]
+            isOneToOne: false
+            referencedRelation: "releases"
+            referencedColumns: ["id", "project_id"]
+          },
           {
             foreignKeyName: "distribution_events_actor_fkey"
             columns: ["actor"]
@@ -11055,6 +11240,180 @@ export type Database = {
           },
         ]
       }
+      master_file_requests: {
+        Row: {
+          cancelled_at: string | null
+          cancelled_by: string | null
+          created_at: string
+          id: string
+          note: string | null
+          organization_id: string
+          project_id: string
+          received_at: string | null
+          received_file_id: string | null
+          replaced: boolean
+          requested_by: string
+          requested_to: string
+          slot_expires_at: string | null
+          slot_path: string | null
+          title_id: string
+        }
+        Insert: {
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          created_at?: string
+          id?: string
+          note?: string | null
+          organization_id: string
+          project_id: string
+          received_at?: string | null
+          received_file_id?: string | null
+          replaced?: boolean
+          requested_by: string
+          requested_to: string
+          slot_expires_at?: string | null
+          slot_path?: string | null
+          title_id: string
+        }
+        Update: {
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          created_at?: string
+          id?: string
+          note?: string | null
+          organization_id?: string
+          project_id?: string
+          received_at?: string | null
+          received_file_id?: string | null
+          replaced?: boolean
+          requested_by?: string
+          requested_to?: string
+          slot_expires_at?: string | null
+          slot_path?: string | null
+          title_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "master_file_requests_cancelled_by_fkey"
+            columns: ["cancelled_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "master_file_requests_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "master_file_requests_received_file_id_fkey"
+            columns: ["received_file_id"]
+            isOneToOne: false
+            referencedRelation: "master_files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "master_file_requests_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "master_file_requests_requested_to_fkey"
+            columns: ["requested_to"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "master_file_requests_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "project_titles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      participation_waivers: {
+        Row: {
+          due_on: string
+          granted_at: string
+          granted_by: string
+          id: string
+          organization_id: string
+          participation_id: string
+          project_id: string
+          reason: string
+          revoke_reason: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          risk: string | null
+          scope: string
+        }
+        Insert: {
+          due_on: string
+          granted_at?: string
+          granted_by: string
+          id?: string
+          organization_id: string
+          participation_id: string
+          project_id: string
+          reason: string
+          revoke_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          risk?: string | null
+          scope: string
+        }
+        Update: {
+          due_on?: string
+          granted_at?: string
+          granted_by?: string
+          id?: string
+          organization_id?: string
+          participation_id?: string
+          project_id?: string
+          reason?: string
+          revoke_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          risk?: string | null
+          scope?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "participation_waivers_granted_by_fkey"
+            columns: ["granted_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "participation_waivers_participation_id_fkey"
+            columns: ["participation_id"]
+            isOneToOne: false
+            referencedRelation: "title_participations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "participation_waivers_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "participation_waivers_revoked_by_fkey"
+            columns: ["revoked_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       master_flow_sources: {
         Row: {
           created_at: string
@@ -12328,6 +12687,7 @@ export type Database = {
           rights_year: number | null
           source_master_id: string | null
           title: string
+          title_is_provisional: boolean
           updated_at: string
           variant: string
           variant_label: string | null
@@ -12353,6 +12713,7 @@ export type Database = {
           rights_year?: number | null
           source_master_id?: string | null
           title: string
+          title_is_provisional?: boolean
           updated_at?: string
           variant?: string
           variant_label?: string | null
@@ -12378,6 +12739,7 @@ export type Database = {
           rights_year?: number | null
           source_master_id?: string | null
           title?: string
+          title_is_provisional?: boolean
           updated_at?: string
           variant?: string
           variant_label?: string | null
@@ -17400,7 +17762,7 @@ export type Database = {
           organization_id: string
           project_id: string
           seq: number
-          title_id: string
+          title_id: string | null
         }
         Insert: {
           actor_person_id?: string | null
@@ -17411,7 +17773,7 @@ export type Database = {
           organization_id: string
           project_id: string
           seq?: never
-          title_id: string
+          title_id?: string | null
         }
         Update: {
           actor_person_id?: string | null
@@ -17422,7 +17784,7 @@ export type Database = {
           organization_id?: string
           project_id?: string
           seq?: never
-          title_id?: string
+          title_id?: string | null
         }
         Relationships: [
           {
@@ -17534,6 +17896,7 @@ export type Database = {
           artist_id: string | null
           budget_cents: number | null
           collective: boolean
+          collective_release_mode: string | null
           content_format_id: string | null
           cover_path: string | null
           created_at: string
@@ -17555,6 +17918,7 @@ export type Database = {
           artist_id?: string | null
           budget_cents?: number | null
           collective?: boolean
+          collective_release_mode?: string | null
           content_format_id?: string | null
           cover_path?: string | null
           created_at?: string
@@ -17576,6 +17940,7 @@ export type Database = {
           artist_id?: string | null
           budget_cents?: number | null
           collective?: boolean
+          collective_release_mode?: string | null
           content_format_id?: string | null
           cover_path?: string | null
           created_at?: string
@@ -17715,6 +18080,8 @@ export type Database = {
       }
       releases: {
         Row: {
+          archived_at: string | null
+          archived_by: string | null
           created_at: string
           created_by: string | null
           delivered_on: string | null
@@ -17732,6 +18099,7 @@ export type Database = {
           organization_id: string
           planned_release_date: string | null
           project_id: string
+          project_title_id: string | null
           smartlink_enabled: boolean
           smartlink_token: string
           spotify_url: string | null
@@ -17740,6 +18108,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          archived_at?: string | null
+          archived_by?: string | null
           created_at?: string
           created_by?: string | null
           delivered_on?: string | null
@@ -17757,6 +18127,7 @@ export type Database = {
           organization_id: string
           planned_release_date?: string | null
           project_id: string
+          project_title_id?: string | null
           smartlink_enabled?: boolean
           smartlink_token?: string
           spotify_url?: string | null
@@ -17765,6 +18136,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          archived_at?: string | null
+          archived_by?: string | null
           created_at?: string
           created_by?: string | null
           delivered_on?: string | null
@@ -17782,6 +18155,7 @@ export type Database = {
           organization_id?: string
           planned_release_date?: string | null
           project_id?: string
+          project_title_id?: string | null
           smartlink_enabled?: boolean
           smartlink_token?: string
           spotify_url?: string | null
@@ -17790,6 +18164,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "releases_project_title_id_fkey"
+            columns: ["project_title_id"]
+            isOneToOne: false
+            referencedRelation: "project_titles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "releases_created_by_fkey"
             columns: ["created_by"]
@@ -17907,6 +18288,7 @@ export type Database = {
           revoked_at: string | null
           scope: string
           token: string
+          title_plan_version_id: string | null
         }
         Insert: {
           created_at?: string
@@ -17919,6 +18301,7 @@ export type Database = {
           revoked_at?: string | null
           scope: string
           token?: string
+          title_plan_version_id?: string | null
         }
         Update: {
           created_at?: string
@@ -17931,8 +18314,16 @@ export type Database = {
           revoked_at?: string | null
           scope?: string
           token?: string
+          title_plan_version_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "share_links_title_plan_same_org"
+            columns: ["title_plan_version_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "title_release_plan_versions"
+            referencedColumns: ["id", "organization_id"]
+          },
           {
             foreignKeyName: "share_links_created_by_fkey"
             columns: ["created_by"]
@@ -19280,6 +19671,224 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "project_titles"
             referencedColumns: ["id", "project_id"]
+          },
+        ]
+      }
+      title_release_plan_events: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          from_status: string | null
+          id: string
+          note: string | null
+          organization_id: string
+          plan_id: string
+          project_id: string
+          reason: string | null
+          to_status: string
+          version_id: string | null
+        }
+        ComputedFields: never
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          from_status?: string | null
+          id?: string
+          note?: string | null
+          organization_id: string
+          plan_id: string
+          project_id: string
+          reason?: string | null
+          to_status: string
+          version_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          from_status?: string | null
+          id?: string
+          note?: string | null
+          organization_id?: string
+          plan_id?: string
+          project_id?: string
+          reason?: string | null
+          to_status?: string
+          version_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "title_release_plan_events_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "title_release_plan_events_plan_same_org"
+            columns: ["plan_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "title_release_plans"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "title_release_plan_events_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "title_release_plan_events_version_same_org"
+            columns: ["version_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "title_release_plan_versions"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      title_release_plan_versions: {
+        Row: {
+          config: NonNullable<Json>
+          content: NonNullable<Json>
+          created_at: string
+          created_by: string | null
+          id: string
+          note: string | null
+          organization_id: string
+          plan_id: string
+          project_id: string
+          sources: NonNullable<Json>
+          status: string
+          version: number
+        }
+        ComputedFields: never
+        Insert: {
+          config?: NonNullable<Json>
+          content: NonNullable<Json>
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          organization_id: string
+          plan_id: string
+          project_id: string
+          sources?: NonNullable<Json>
+          status: string
+          version: number
+        }
+        Update: {
+          config?: NonNullable<Json>
+          content?: NonNullable<Json>
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          organization_id?: string
+          plan_id?: string
+          project_id?: string
+          sources?: NonNullable<Json>
+          status?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "title_release_plan_versions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "title_release_plan_versions_plan_same_org"
+            columns: ["plan_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "title_release_plans"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "title_release_plan_versions_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      title_release_plans: {
+        Row: {
+          archived_reason: string | null
+          config: NonNullable<Json>
+          config_updated_at: string | null
+          config_updated_by: string | null
+          created_at: string
+          id: string
+          organization_id: string
+          project_id: string
+          status: string
+          status_before_archive: string | null
+          status_changed_at: string
+          status_changed_by: string | null
+          title_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          archived_reason?: string | null
+          config?: NonNullable<Json>
+          config_updated_at?: string | null
+          config_updated_by?: string | null
+          created_at?: string
+          id?: string
+          organization_id: string
+          project_id: string
+          status?: string
+          status_before_archive?: string | null
+          status_changed_at?: string
+          status_changed_by?: string | null
+          title_id: string
+        }
+        Update: {
+          archived_reason?: string | null
+          config?: NonNullable<Json>
+          config_updated_at?: string | null
+          config_updated_by?: string | null
+          created_at?: string
+          id?: string
+          organization_id?: string
+          project_id?: string
+          status?: string
+          status_before_archive?: string | null
+          status_changed_at?: string
+          status_changed_by?: string | null
+          title_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "title_release_plans_config_updated_by_fkey"
+            columns: ["config_updated_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "title_release_plans_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "title_release_plans_status_changed_by_fkey"
+            columns: ["status_changed_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "title_release_plans_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: true
+            referencedRelation: "project_titles"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -21989,7 +22598,11 @@ export type Database = {
         Returns: Json
       }
       distribution_status_rows: {
-        Args: { p_project_id: string; p_reference_platforms: string[] }
+        Args: {
+          p_project_id: string
+          p_reference_platforms: string[]
+          p_release_id?: string
+        }
         Returns: Json
       }
       declare_influence_agreement_sent: {
@@ -22027,7 +22640,7 @@ export type Database = {
         Returns: boolean
       }
       distribution_accepted: {
-        Args: { p_project_id: string }
+        Args: { p_project_id: string; p_release_id?: string }
         Returns: boolean
       }
       distribution_snapshot_fields: {
@@ -22039,11 +22652,11 @@ export type Database = {
         Returns: string[]
       }
       distribution_working_number: {
-        Args: { p_project_id: string }
+        Args: { p_project_id: string; p_release_id?: string }
         Returns: number
       }
       distribution_submit_blockers: {
-        Args: { p_project_id: string; p_snapshot: Json }
+        Args: { p_project_id: string; p_release_id?: string; p_snapshot: Json }
         Returns: string[]
       }
       decide_distribution_reserve_lift: {
@@ -22057,6 +22670,145 @@ export type Database = {
       poll_inbox: { Args: never; Returns: undefined }
       promote_demo: {
         Args: { p_master_id: string; p_title: string }
+        Returns: undefined
+      }
+      ensure_project_title_master: {
+        Args: { p_title_id: string }
+        Returns: string
+      }
+      attach_master_to_project_title: {
+        Args: { p_master_id: string; p_title_id: string }
+        Returns: undefined
+      }
+      provisional_title_name: {
+        Args: { p_title_id: string }
+        Returns: string
+      }
+      request_project_master_invoices: {
+        Args: { p_project_id: string }
+        Returns: undefined
+      }
+      request_master_files: {
+        Args: {
+          p_note?: string
+          p_person_id: string
+          p_project_id: string
+          p_title_ids: string[]
+        }
+        Returns: number
+      }
+      cancel_master_file_request: {
+        Args: { p_request_id: string }
+        Returns: undefined
+      }
+      list_file_request_recipients: {
+        Args: { p_project_id: string }
+        Returns: {
+          first_name: string
+          last_name: string
+          person_id: string
+          reason: string
+        }[]
+      }
+      file_request_recipient_ok: {
+        Args: { p_person_id: string; p_project_id: string }
+        Returns: boolean
+      }
+      is_open_file_request_slot: { Args: { p_path: string }; Returns: boolean }
+      open_file_request_delivery: {
+        Args: { p_extension: string; p_file_name: string; p_request_id: string }
+        Returns: string
+      }
+      record_file_request_delivery: {
+        Args: {
+          p_audio_state: string
+          p_bytes: number
+          p_file_name: string
+          p_mime: string
+          p_path: string
+        }
+        Returns: string
+      }
+      grant_participation_waiver: {
+        Args: {
+          p_due_on: string
+          p_participation_id: string
+          p_reason: string
+          p_risk?: string
+          p_scope: string
+        }
+        Returns: string
+      }
+      revoke_participation_waiver: {
+        Args: { p_reason?: string; p_waiver_id: string }
+        Returns: undefined
+      }
+      list_contract_gaps: {
+        Args: {
+          p_project_id: string
+          p_scope: string
+          p_strategy_deliverable_id?: string
+        }
+        Returns: {
+          artist_name: string
+          master_title: string
+          participation_id: string
+          title_id: string
+          title_position: number
+          working_title: string
+        }[]
+      }
+      set_collective_release_mode: {
+        Args: { p_mode: string; p_project_id: string }
+        Returns: undefined
+      }
+      next_release_date: { Args: { p_project_id: string }; Returns: string }
+      get_shared_title_release_plan: {
+        Args: { p_token: string }
+        Returns: Json
+      }
+      record_title_release_plan_version: {
+        Args: {
+          p_content: Json
+          p_from: string
+          p_note?: string
+          p_plan_id: string
+          p_sources?: Json
+        }
+        Returns: string
+      }
+      revoke_title_release_plan_link: {
+        Args: { p_version_id: string }
+        Returns: undefined
+      }
+      save_title_release_plan: {
+        Args: { p_patch: Json; p_plan_id: string }
+        Returns: undefined
+      }
+      set_title_release_plan_status: {
+        Args: {
+          p_from: string
+          p_note?: string
+          p_plan_id: string
+          p_to: string
+        }
+        Returns: undefined
+      }
+      share_title_release_plan_version: {
+        Args: { p_version_id: string }
+        Returns: string
+      }
+      title_release_plan_target_date: {
+        Args: { p_title_id: string }
+        Returns: string
+      }
+      set_marketing_title_scope: {
+        Args: {
+          p_activation_id?: string
+          p_scope: string
+          p_strategy_deliverable_id?: string
+          p_title_ids?: string[]
+        }
         Returns: undefined
       }
       reactivate_project_title: {
@@ -22157,7 +22909,7 @@ export type Database = {
         Returns: undefined
       }
       revoke_distribution_derogation: {
-        Args: { p_project_id: string }
+        Args: { p_project_id: string; p_release_id?: string }
         Returns: undefined
       }
       grant_distribution_derogation: {
@@ -22165,6 +22917,7 @@ export type Database = {
           p_due_on: string
           p_project_id: string
           p_reason: string
+          p_release_id?: string
           p_risk: string
           p_scope: string[]
         }
@@ -22677,7 +23430,7 @@ export type Database = {
         Returns: undefined
       }
       reopen_distribution_closure: {
-        Args: { p_note: string; p_project_id: string }
+        Args: { p_note: string; p_project_id: string; p_release_id?: string }
         Returns: undefined
       }
       propose_distribution_closure: {
@@ -22686,12 +23439,13 @@ export type Database = {
           p_kind: string
           p_project_id: string
           p_reason_kind?: string
+          p_release_id?: string
           p_reserves: Json
         }
         Returns: undefined
       }
       distribution_closure_ready: {
-        Args: { p_project_id: string }
+        Args: { p_project_id: string; p_release_id?: string }
         Returns: boolean
       }
       decide_distribution_closure: {
@@ -22728,6 +23482,7 @@ export type Database = {
           p_kind: string
           p_platform: string
           p_project_id: string
+          p_release_id?: string
           p_severity: string
           p_source_module: string
         }
@@ -22737,7 +23492,12 @@ export type Database = {
         | { Args: { p_body: string; p_delay_days?: number | null; p_kind: string; p_token: string }; Returns: string }
         | { Args: { p_body: string; p_contact_token: string; p_delay_days: number | null; p_item_id: string; p_kind: string }; Returns: string }
       prepare_distribution_version: {
-        Args: { p_modules?: string[]; p_note: string; p_project_id: string }
+        Args: {
+          p_modules?: string[]
+          p_note: string
+          p_project_id: string
+          p_release_id?: string
+        }
         Returns: undefined
       }
       decide_marketing_report: {
@@ -22779,6 +23539,7 @@ export type Database = {
           p_compliance_note: string
           p_platform: string
           p_project_id: string
+          p_release_id?: string
           p_verification: string
           p_verification_note: string
         }
@@ -22790,6 +23551,7 @@ export type Database = {
           p_label: string
           p_platform: string
           p_project_id: string
+          p_release_id?: string
           p_url: string
         }
         Returns: undefined
@@ -22799,11 +23561,11 @@ export type Database = {
         Returns: undefined
       }
       distribution_current_version: {
-        Args: { p_project_id: string }
+        Args: { p_project_id: string; p_release_id?: string }
         Returns: number
       }
       declare_distribution_answers: {
-        Args: { p_items: Json; p_project_id: string }
+        Args: { p_items: Json; p_project_id: string; p_release_id?: string }
         Returns: number
       }
       attach_distribution_declaration_proof: {
@@ -22820,6 +23582,7 @@ export type Database = {
           p_module: string
           p_note: string
           p_project_id: string
+          p_release_id?: string
           p_severity: string
         }
         Returns: string
@@ -22832,6 +23595,7 @@ export type Database = {
           p_proof_name?: string
           p_proof_path?: string
           p_proof_url?: string
+          p_release_id?: string
           p_territory?: string
           p_url: string | null
         }
@@ -22847,6 +23611,7 @@ export type Database = {
           p_platform: string
           p_problem: string
           p_project_id: string
+          p_release_id?: string
           p_url: string | null
         }
         Returns: string
@@ -22856,6 +23621,7 @@ export type Database = {
           p_preorder: boolean | null
           p_preorder_on: string | null
           p_project_id: string
+          p_release_id?: string
           p_validator: string | null
         }
         Returns: undefined
@@ -22870,7 +23636,7 @@ export type Database = {
         }[]
       }
       distribution_cover: {
-        Args: { p_project_id: string }
+        Args: { p_project_id: string; p_release_id?: string }
         Returns: {
           chosen: boolean
           deliverable_id: string | null
@@ -22890,6 +23656,7 @@ export type Database = {
           p_proof_name?: string
           p_proof_path?: string
           p_proof_url?: string
+          p_release_id?: string
           p_source?: string
         }
         Returns: string
@@ -22909,11 +23676,15 @@ export type Database = {
         Returns: string
       }
       submit_distribution_version: {
-        Args: { p_project_id: string; p_snapshot: Json }
+        Args: { p_project_id: string; p_release_id?: string; p_snapshot: Json }
         Returns: number
       }
       set_distribution_validator: {
-        Args: { p_person_id: string; p_project_id: string }
+        Args: {
+          p_person_id: string
+          p_project_id: string
+          p_release_id?: string
+        }
         Returns: undefined
       }
       record_distribution_check: {
@@ -22921,9 +23692,38 @@ export type Database = {
           p_key: string
           p_note: string
           p_project_id: string
+          p_release_id?: string
           p_result: string
         }
         Returns: undefined
+      }
+      release_submission_blockers: {
+        Args: { p_release_id: string }
+        Returns: {
+          code: string
+          detail: string | null
+        }[]
+      }
+      release_distribution_states: {
+        Args: { p_project_id: string }
+        Returns: {
+          accepted: boolean
+          closure_status: string | null
+          deposited: boolean
+          params_confirmed: boolean
+          release_id: string
+          superseded: boolean
+          version_number: number | null
+          version_status: string | null
+        }[]
+      }
+      can_check_distribution_scope: {
+        Args: { p_project_id: string; p_release_id: string }
+        Returns: boolean
+      }
+      distribution_scope_editable: {
+        Args: { p_project_id: string; p_release_id: string }
+        Returns: boolean
       }
       distribution_log: {
         Args: {
@@ -22931,6 +23731,7 @@ export type Database = {
           p_kind: string
           p_organization_id: string
           p_project_id: string
+          p_release_id?: string
         }
         Returns: undefined
       }

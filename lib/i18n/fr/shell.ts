@@ -493,6 +493,13 @@ export const shell = {
         steering: "Pilotage",
       },
       overview: "Vue d'ensemble",
+      // A collective's titles and their artists (lot 6 of
+      // docs/pds-mic-plan.md); no entry for any other project.
+      titles: "Titres et artistes",
+      // A collective's releases (lot 13).
+      releases: "Sorties",
+      // Its titles' Plans de sortie (lot 14).
+      releasePlans: "Plans de sortie",
       framing: "Cadrage",
       master: "Master",
       legal: "Juridique",

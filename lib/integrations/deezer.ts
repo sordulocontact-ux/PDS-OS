@@ -47,6 +47,26 @@ export async function findAlbumUpc(albumId: number): Promise<string | null> {
   return parsed.success ? (parsed.data.upc ?? null) : null;
 }
 
+const albumByUpcSchema = z.object({
+  id: z.number(),
+  title: z.string(),
+  link: z.url(),
+  release_date: z.string().optional(),
+  cover_medium: z.url().optional(),
+  artist: z.object({ name: z.string() }),
+});
+
+export type DeezerAlbum = z.infer<typeof albumByUpcSchema>;
+
+/** An album by its UPC (a collective's compilation, lot 13); null when
+ * nothing matches. */
+export async function findAlbumByUpc(upc: string): Promise<DeezerAlbum | null> {
+  const parsed = albumByUpcSchema.safeParse(
+    await fetchJson("deezer", `${BASE}/album/upc:${upc}`),
+  );
+  return parsed.success ? parsed.data : null;
+}
+
 // Artists ---------------------------------------------------------------------
 
 const artistSchema = z.object({

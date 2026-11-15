@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import { releaseArg } from "@/lib/distribution/scope";
+
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import {
@@ -62,6 +64,7 @@ const source = z
 
 const depositSchema = z.object({
   projectId: z.uuid(),
+  releaseId: z.uuid().nullable().optional(),
   declaredOn: date,
   orchardId: z.string().trim().max(100),
   source,
@@ -84,6 +87,7 @@ export async function declareDeposit(
       const supabase = await createClient();
       const { error } = await supabase.rpc("declare_distribution", {
         p_project_id: v.projectId,
+        ...releaseArg(v.releaseId),
         p_kind: "deposit",
         p_declared_on: v.declaredOn ?? undefined,
         p_orchard_id: v.orchardId,
@@ -98,6 +102,7 @@ export async function declareDeposit(
 
 const answersSchema = z.object({
   projectId: z.uuid(),
+  releaseId: z.uuid().nullable().optional(),
   items: z
     .array(
       z.object({
@@ -118,7 +123,7 @@ export async function declareAnswers(
   await requireApproved();
   const p = answersSchema.safeParse(input);
   if (!p.success) return { ok: false, error: t.nothingTicked };
-  const { projectId, items, source: said } = p.data;
+  const { projectId, releaseId, items, source: said } = p.data;
   return withOutcome(
     projectId,
     ["distribution"],
@@ -129,6 +134,7 @@ export async function declareAnswers(
       const supabase = await createClient();
       const { error } = await supabase.rpc("declare_distribution_answers", {
         p_project_id: projectId,
+        ...releaseArg(releaseId),
         p_items: items.map((i) => ({
           kind: i.kind,
           declared_on: i.declaredOn,
@@ -144,6 +150,7 @@ export async function declareAnswers(
 
 const attachSchema = z.object({
   projectId: z.uuid(),
+  releaseId: z.uuid().nullable().optional(),
   declarationId: z.uuid(),
   ...proof,
 });
@@ -171,6 +178,7 @@ export async function attachProof(
 
 const correctionsSchema = z.object({
   projectId: z.uuid(),
+  releaseId: z.uuid().nullable().optional(),
   note: z.string().trim().min(1).max(1000),
   kind: z.enum(ANOMALY_KINDS),
   module: z.enum(ANOMALY_MODULES),
@@ -195,6 +203,7 @@ export async function declareCorrections(
       const supabase = await createClient();
       const { error } = await supabase.rpc("declare_distribution_corrections", {
         p_project_id: v.projectId,
+        ...releaseArg(v.releaseId),
         p_note: v.note,
         p_kind: v.kind,
         p_module: v.module,

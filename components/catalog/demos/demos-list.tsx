@@ -62,11 +62,18 @@ export function DemosList({
                   {demo.artists}
                 </DataTableCell>
                 <DataTableCell fill>
-                  {demo.demoStatus && (
-                    <StatusBadge tone={demoStatusTone[demo.demoStatus]}>
-                      {t.statuses[demo.demoStatus]}
-                    </StatusBadge>
-                  )}
+                  <span className="flex flex-wrap gap-1.5">
+                    {demo.demoStatus && (
+                      <StatusBadge tone={demoStatusTone[demo.demoStatus]}>
+                        {t.statuses[demo.demoStatus]}
+                      </StatusBadge>
+                    )}
+                    {demo.provisional && (
+                      <StatusBadge tone="warning" title={t.provisionalHint}>
+                        {t.provisional}
+                      </StatusBadge>
+                    )}
+                  </span>
                 </DataTableCell>
               </DataTableRow>
             ))}

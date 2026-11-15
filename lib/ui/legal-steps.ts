@@ -54,6 +54,14 @@ export type LegalDemarcheKind = (typeof LEGAL_DEMARCHE_KINDS)[number];
 
 export const LEGAL_READY_KEY = "ready";
 
+// A collective's participations, their contracts and deals (lot 11 of
+// docs/pds-mic-plan.md): a page of the section, reached from the foot of
+// its journey, not a step.
+export const LEGAL_PARTICIPATIONS_KEY = "participations";
+
+export const legalParticipationsHref = (projectId: string) =>
+  `${routes.projectLegal(projectId)}/${LEGAL_PARTICIPATIONS_KEY}`;
+
 /** A démarche's ref as a URL segment: ids stay as they are, a person's key
  * (`contact:<id>`, `artist:<id>` or a normalized name) becomes a slug. */
 export function legalRefSlug(ref: string): string {
@@ -77,7 +85,8 @@ export type LegalRoute =
   | { type: "step"; key: LegalStepKey }
   | { type: "branch"; key: LegalBranchPage }
   | { type: "demarche"; kind: LegalDemarcheKind; slug: string }
-  | { type: "ready" };
+  | { type: "ready" }
+  | { type: "participations" };
 
 /** What a URL's segments below /legal open: a step of the Dossier, a
  * démarche, « Prêt pour la sortie » or a former branch page (redirected to
@@ -93,6 +102,7 @@ export function legalRouteOf(
     return kind ? { type: "demarche", kind, slug: second } : null;
   }
   if (first === LEGAL_READY_KEY) return { type: "ready" };
+  if (first === LEGAL_PARTICIPATIONS_KEY) return { type: "participations" };
   const step = LEGAL_BUILT_STEPS.find((key) => key === first);
   if (step) return { type: "step", key: step };
   const branch = LEGAL_BRANCH_PAGES.find((key) => key === first);

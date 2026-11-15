@@ -10,6 +10,19 @@ const lowerFirst = (text: string) =>
 export const masterJourney = {
   module: "Master",
   facts: { masterFinal: "Master final attendu le" },
+  // Projet collectif, lot 9: the overview at the head of the Master.
+  overview: {
+    label: "Où en sont les titres",
+    source: "Attendent leur source",
+    mix: "Attendent un mix",
+    mastering: "Attendent un mastering",
+    validation: "Attendent une validation",
+    none: "Aucun titre",
+    more: (count: number) => `et ${count} autre${count > 1 ? "s" : ""}`,
+    // Lot 9 bis: among the titles waiting for their source.
+    requested: (count: number) =>
+      `dont ${count} demandé${count > 1 ? "s" : ""}`,
+  },
   roles: {
     owner: "Responsable du Master",
     ownerWhat: "Confirme la source, remplit le Brief, envoie les dossiers",
@@ -83,6 +96,11 @@ export const masterJourney = {
         ? `Importer la version de départ de ${titles(n)}`
         : "Importer la version de départ du mix",
     replaceSource: "Remplacer la source du master",
+    // Lot 9 bis: the files asked of a member of the team.
+    depositFiles: (n: number) =>
+      n > 1
+        ? `Déposer les fichiers demandés de ${titles(n)}`
+        : "Déposer le fichier demandé",
     recordVocals: (pending: string | null) =>
       pending
         ? `Enregistrer les voix définitives (${pending})`
@@ -154,6 +172,23 @@ export const masterJourney = {
     of: (title: string) => `« ${title} »`,
     sourceConfirmed: (file: string, title: string | null) =>
       `Source confirmée : ${file}${title ? ` (« ${title} »)` : ""}`,
+    // A collective's title: its name in the project, then the Catalogue's.
+    titleInCatalogue: (label: string, catalogue: string) =>
+      `${label} · ${catalogue} au Catalogue`,
+    // Lot 12 bis: « Demander des fichiers » (lot 9 bis).
+    filesRequested: (
+      person: string,
+      title: string | null,
+      note: string | null,
+    ) =>
+      `Fichiers demandés à ${person}${title ? ` (« ${title} »)` : ""}${note ? ` · ${note}` : ""}`,
+    filesReceived: (file: string, title: string | null) =>
+      `Fichier demandé reçu : ${file}${title ? ` (« ${title} »)` : ""}`,
+    filesAskedOf: (person: string) => `Fichiers demandés à ${person}`,
+    filesCancelled: (person: string, title: string | null) =>
+      `Demande de fichiers à ${person} annulée${title ? ` (« ${title} »)` : ""}`,
+    filesReplaced: (person: string, title: string | null) =>
+      `Demande de fichiers à ${person} remplacée${title ? ` (« ${title} »)` : ""}`,
     sourceChosen: (choice: string) => `Choix · ${choice}`,
     existingMix: (file: string) => `Mix déclaré mix final : ${file}`,
     briefSaved: "Brief enregistré",

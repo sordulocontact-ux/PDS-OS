@@ -17,8 +17,10 @@ import { loadStepView } from "@/lib/master-workflow/transmission";
 import { isWorkflowLaunched, planLaunchedAt } from "@/lib/plan/queries";
 import { fr } from "@/lib/i18n/fr";
 import { getProject } from "@/lib/projects/queries";
+import { countedTitlesProject } from "@/lib/projects/counted-titles";
 import { byProjectVersion } from "@/lib/projects/version-cache";
 import { REFERENCE_PLATFORMS } from "@/lib/distribution/platforms";
+import { releaseArg } from "@/lib/distribution/scope";
 import { formatDate } from "@/lib/release/format";
 import {
   distributionCover,
@@ -237,13 +239,45 @@ type DistributionRows = {
   params_confirmed_at: string | null;
 };
 
+// A collective's Distribution is held release by release (lot 15): its
+// state is the least advanced of its live releases' (archived ones and
+// abandoned titles' left out).
 async function distributionFacts(projectId: string) {
+  const supabase = await createClient();
+  const { data: project } = await supabase
+    .from("projects")
+    .select("collective")
+    .eq("id", projectId)
+    .maybeSingle();
+  if (!project?.collective) return distributionFactsOf(projectId, null);
+  const { data: releases } = await supabase
+    .from("releases")
+    .select("id, project_titles(status)")
+    .eq("project_id", projectId)
+    .is("archived_at", null);
+  const live = (releases ?? []).filter(
+    (r) => r.project_titles?.status !== "abandoned",
+  );
+  if (live.length === 0) return distributionFactsOf(projectId, null);
+  const all = await Promise.all(
+    live.map((r) => distributionFactsOf(projectId, r.id)),
+  );
+  return all.reduce((least, facts) =>
+    facts.state.done.length < least.state.done.length ? facts : least,
+  );
+}
+
+async function distributionFactsOf(
+  projectId: string,
+  releaseId: string | null,
+) {
   const supabase = await createClient();
   const [rows, launchedAt, cover, blockers] = await Promise.all([
     supabase
       .rpc("distribution_status_rows", {
         p_project_id: projectId,
         p_reference_platforms: [...REFERENCE_PLATFORMS],
+        ...releaseArg(releaseId),
       })
       .then(({ data, error }) => {
         if (error) console.error("distributionFacts:", error.message);
@@ -251,7 +285,7 @@ async function distributionFacts(projectId: string) {
       }),
     // The Distribution starts with the plan (lib/distribution/journey-context.ts).
     planLaunchedAt(projectId),
-    distributionCover(projectId),
+    distributionCover(projectId, releaseId),
     distributionLegalBlockers(projectId),
   ]);
   const open = rows?.closure ?? null;
@@ -336,8 +370,11 @@ async function distributionFacts(projectId: string) {
 // Each workflow's facts kept on their own, with the tables they read
 // (lib/projects/version-cache.ts): a write in the Cadrage no longer reads the
 // Master, the Juridique and the Distribution again.
-const projectOf = async (projectId: string) =>
-  (await getProject(projectId)) ?? null;
+// A collective's abandoned titles leave the counts (lot 9).
+const projectOf = async (projectId: string) => {
+  const project = await getProject(projectId);
+  return project ? countedTitlesProject(project) : null;
+};
 const keptMasterFacts = byProjectVersion("wf-master", async (projectId) => {
   const [access, project] = await Promise.all([
     requireApproved(),
@@ -345,8 +382,10 @@ const keptMasterFacts = byProjectVersion("wf-master", async (projectId) => {
   ]);
   return project ? masterFacts(project, access.personId) : null;
 });
+// The Juridique keeps every title (abandoned ones too) until it is read by
+// participation (lot 11).
 const keptLegalFacts = byProjectVersion("wf-legal", async (projectId) => {
-  const project = await projectOf(projectId);
+  const project = await getProject(projectId);
   return project ? legalFacts(project) : null;
 });
 const keptDistributionFacts = byProjectVersion(
@@ -369,14 +408,16 @@ export const loadWorkflowStates = trackedCache(
   byProjectVersion(
     "workflow-states",
     async (projectId: string): Promise<WorkflowStates | null> => {
-      const [access, project] = await Promise.all([
+      const [access, read] = await Promise.all([
         requireApproved(),
         getProject(projectId),
       ]);
-      if (!project || project.stages.length === 0) return null;
+      if (!read || read.stages.length === 0) return null;
+      const project = countedTitlesProject(read);
       const workflows = applicableWorkflows({
         type: project.type,
         masterCount: project.masters.length,
+        collective: project.collective,
       });
       const has = (workflow: WorkflowKey) => workflows.includes(workflow);
       const legalAllowed = can(access, "manage_legal");

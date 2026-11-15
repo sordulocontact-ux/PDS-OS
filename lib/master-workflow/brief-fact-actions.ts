@@ -18,6 +18,7 @@ import { calendarInOrder, isIsoDate } from "@/lib/master-workflow/calendar";
 import { missingSentence } from "@/lib/master-workflow/brief-rules";
 import { addContactRole } from "@/lib/network/add-role";
 import { getProject } from "@/lib/projects/queries";
+import { countedTitlesProject } from "@/lib/projects/counted-titles";
 import { createClient } from "@/lib/supabase/server";
 import { formatShortDay } from "@/lib/utils/day";
 import type { WriteResult } from "@/lib/utils/write-result";
@@ -281,8 +282,10 @@ export async function recordBrief(projectId: string): Promise<WriteResult> {
   const id = z.uuid().safeParse(projectId);
   const access = await requireApproved();
   if (!id.success) return { ok: false, error: t.errors.failed };
-  const project = await getProject(id.data);
-  if (!project) return { ok: false, error: t.errors.failed };
+  const read = await getProject(id.data);
+  if (!read) return { ok: false, error: t.errors.failed };
+  // The same titles as the Brief step shows (lot 9).
+  const project = countedTitlesProject(read);
   const step = await loadBriefStep(project, access, null);
   const missing = missingSentence(step.missing);
   if (missing) return { ok: false, error: missing };

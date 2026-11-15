@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { ProjectHeader } from "@/components/projects/project-header";
+import { TitleScopeLine } from "@/components/projects/titles/title-scope";
 import { ProjectNowCard } from "@/components/shell/journey/project-now-card";
 import { loadActivationsBoard } from "@/lib/activations/board";
 import { loadActivationFiche } from "@/lib/activations/fiche";
@@ -12,7 +13,9 @@ import { routes } from "@/lib/auth/redirects";
 import { activationJourney } from "@/lib/i18n/fr/activation-journey";
 import { activations } from "@/lib/i18n/fr/activations";
 import { activationsJourneys } from "@/lib/journey/activations";
+import { canEditProject } from "@/lib/projects/edit-access";
 import { requireLaunchedProject } from "@/lib/projects/queries";
+import { loadTitleScopes, scopeOf } from "@/lib/projects/title-scopes";
 import { personName } from "@/lib/projects/types";
 import type { CrumbOption } from "@/lib/ui/module-frame";
 import { allInOrder } from "@/lib/utils/parallel";
@@ -38,12 +41,13 @@ export async function ActivationPageView({
   projectId: string;
   activationId: string;
 }) {
-  const [access, , board, people, journeys] = await allInOrder([
+  const [access, project, board, people, journeys, scopes] = await allInOrder([
     requireApproved(),
     requireLaunchedProject(projectId),
     loadActivationsBoard(projectId),
     loadActivationPeople(projectId),
     activationsJourneys(projectId),
+    loadTitleScopes(projectId),
   ]);
   const open = board.summaries.find((a) => a.id === activationId);
   if (!open) notFound();
@@ -75,6 +79,15 @@ export async function ActivationPageView({
         // Its title is the page's (the header's), its state beside it.
         status={fiche ? activationPill(fiche.activation) : undefined}
       />
+      {/* A collective: the titles it targets (lot 10). */}
+      {scopes && (
+        <TitleScopeLine
+          action={{ projectId, activationId: open.id, name: open.title }}
+          scope={scopeOf(scopes.activations, open.id)}
+          titles={scopes.titles}
+          canEdit={canEditProject(access, project)}
+        />
+      )}
       <ProjectNowCard
         projectId={projectId}
         steps={steps}

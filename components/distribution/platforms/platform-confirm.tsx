@@ -11,6 +11,7 @@ import { confirmPlatform } from "@/lib/distribution/platform-gestures";
 import { removeProof, uploadProof } from "@/lib/distribution/upload-proof";
 import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
 import { todayInParis } from "@/lib/insights/dates";
+import { useDistributionRelease } from "@/components/distribution/frame/release-scope";
 
 const fr = { distributionJourney };
 
@@ -46,6 +47,7 @@ export function PlatformConfirm({
   done: string;
   onCancel: () => void;
 }) {
+  const releaseId = useDistributionRelease();
   const today = todayInParis();
   const [territory, setTerritory] = useState(proposed);
   const [observedOn, setObservedOn] = useState(today);
@@ -72,6 +74,7 @@ export function PlatformConfirm({
       }
       const result = await confirmPlatform({
         projectId,
+        releaseId,
         platform,
         url,
         territory: territory.trim(),

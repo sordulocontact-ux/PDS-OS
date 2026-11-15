@@ -32,13 +32,26 @@ export type MasterHistoryItem = {
   who: string | null;
   at: string;
   cause: string | null;
+  // The title it concerns, when it concerns one (a collective's step shows
+  // its active title's only, lot 8).
+  masterId?: string;
 };
 
 export function masterHistory(facts: MasterJourneyFacts): MasterHistoryItem[] {
   const items: MasterHistoryItem[] = [];
   const several = facts.titles.length > 1;
-  const titleOf = (id: string) =>
-    several ? (facts.titles.find((x) => x.id === id)?.title ?? null) : null;
+  // A collective names a title as the project does, its name in the
+  // Catalogue after it only when different (« Ballade du port · Velours au
+  // Catalogue »); any other project, its title in the Catalogue.
+  const titleOf = (id: string) => {
+    if (!several) return null;
+    const title = facts.titles.find((x) => x.id === id);
+    if (!title) return null;
+    if (!title.projectLabel) return title.title;
+    return title.catalogueName
+      ? t.titleInCatalogue(title.projectLabel, title.catalogueName)
+      : title.projectLabel;
+  };
   const engineerOf = (stage: "mix" | "mastering") =>
     facts.transmissions.find((x) => x.role === stage)?.contactName ?? null;
   const linked = (name: string | null) => (name ? t.viaLink(name) : null);
@@ -47,12 +60,50 @@ export function masterHistory(facts: MasterJourneyFacts): MasterHistoryItem[] {
     for (const s of title.sources)
       items.push({
         key: `src-${s.fileId}-${s.confirmedAt}`,
+        masterId: title.id,
         step: "source",
         text: t.sourceConfirmed(s.fileName, titleOf(title.id)),
         who: s.confirmedBy,
         at: s.confirmedAt,
         cause: null,
       });
+
+  // « Demander des fichiers » (lot 9 bis), on the title it concerns:
+  // asked, then received, cancelled or replaced (lot 12 bis).
+  for (const r of facts.fileRequestLog) {
+    const title = titleOf(r.masterId);
+    items.push({
+      key: `freq-${r.id}`,
+      masterId: r.masterId,
+      step: "source",
+      text: t.filesRequested(r.name, title, r.note),
+      who: r.requestedByName,
+      at: r.createdAt,
+      cause: null,
+    });
+    if (r.receivedAt)
+      items.push({
+        key: `freq-${r.id}-received`,
+        masterId: r.masterId,
+        step: "source",
+        text: t.filesReceived(r.receivedFileName ?? "—", title),
+        who: r.receivedBy,
+        at: r.receivedAt,
+        cause: t.filesAskedOf(r.name),
+      });
+    else if (r.cancelledAt)
+      items.push({
+        key: `freq-${r.id}-closed`,
+        masterId: r.masterId,
+        step: "source",
+        text: r.replaced
+          ? t.filesReplaced(r.name, title)
+          : t.filesCancelled(r.name, title),
+        who: r.cancelledBy,
+        at: r.cancelledAt,
+        cause: null,
+      });
+  }
 
   if (facts.brief?.recordedAt)
     items.push({
@@ -134,6 +185,7 @@ export function masterHistory(facts: MasterJourneyFacts): MasterHistoryItem[] {
     if (v.declared) {
       items.push({
         key: `${v.id}-declared`,
+        masterId: v.masterId,
         step: "source",
         text: t.existingMix(v.fileName),
         who: v.decidedBy,
@@ -144,6 +196,7 @@ export function masterHistory(facts: MasterJourneyFacts): MasterHistoryItem[] {
     }
     items.push({
       key: `${v.id}-dep`,
+      masterId: v.masterId,
       step: v.stage,
       text: t.deposited(label, v.number, titleOf(v.masterId)),
       who: v.createdBy ?? linked(engineerOf(v.stage)),
@@ -153,6 +206,7 @@ export function masterHistory(facts: MasterJourneyFacts): MasterHistoryItem[] {
     if (v.feedbackSentAt)
       items.push({
         key: `${v.id}-fb`,
+        masterId: v.masterId,
         step: v.stage,
         text: t.feedbackSent(label, v.number),
         who: null,
@@ -162,6 +216,7 @@ export function masterHistory(facts: MasterJourneyFacts): MasterHistoryItem[] {
     if (v.decision && v.decidedAt) {
       items.push({
         key: `${v.id}-dec`,
+        masterId: v.masterId,
         step: v.stage,
         text:
           v.decision === "changes_requested"
@@ -174,6 +229,7 @@ export function masterHistory(facts: MasterJourneyFacts): MasterHistoryItem[] {
       if (v.reopenedAt)
         items.push({
           key: `${v.id}-reopen`,
+          masterId: v.masterId,
           step: v.stage,
           text: t.reopened(label, v.reopenReason ?? ""),
           who: null,
@@ -183,6 +239,7 @@ export function masterHistory(facts: MasterJourneyFacts): MasterHistoryItem[] {
       if (v.decision === "approved" && v.stage === "mastering")
         items.push({
           key: `${v.id}-cat`,
+          masterId: v.masterId,
           step: "final",
           text: t.catalogued(v.number),
           who: t.pdsName,
@@ -195,6 +252,7 @@ export function masterHistory(facts: MasterJourneyFacts): MasterHistoryItem[] {
   for (const r of facts.received)
     items.push({
       key: `rec-${r.masterId}-${r.deliverable}`,
+      masterId: r.masterId,
       step: "final",
       text: t.deliverable(
         fr.masterWorkflow.brief.deliverables[

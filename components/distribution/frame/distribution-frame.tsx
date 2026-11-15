@@ -1,4 +1,13 @@
+import { notFound, redirect } from "next/navigation";
+
 import { WorkflowLocked } from "@/components/plan/workflow-locked";
+import { DistributionReleaseProvider } from "@/components/distribution/frame/release-scope";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
+import { ToneCallout } from "@/components/ui/tone-callout";
+import { ViewLink } from "@/components/ui/view-link";
+import { routes } from "@/lib/auth/redirects";
+import { distribution } from "@/lib/i18n/fr/distribution";
+import { getProject } from "@/lib/projects/queries";
 import { ProjectHeader } from "@/components/projects/project-header";
 import { JourneyLayout } from "@/components/shell/journey/journey-layout";
 import { JourneySpine } from "@/components/shell/journey/journey-spine";
@@ -7,6 +16,7 @@ import { DistributionRolesButton } from "@/components/distribution/frame/distrib
 import { distributionStatus } from "@/lib/distribution/journey";
 import {
   distributionContext,
+  distributionLaunched,
   type DistributionContext,
 } from "@/lib/distribution/journey-context";
 import { isOpen } from "@/lib/distribution/anomalies";
@@ -18,25 +28,43 @@ import { stepChoiceKey } from "@/lib/step-tools/model";
 import { workflowStatusTone } from "@/lib/ui/state-tones";
 import { formatDay } from "@/lib/utils/day";
 
-const fr = { distributionJourney };
+const fr = { distribution, distributionJourney };
 
 const t = fr.distributionJourney;
 
-/** « « Néons » · Mona Lys · single », Master final, Sortie, Distributeur. */
+/** « « Néons » · Mona Lys · single », Master final, Sortie, Distributeur.
+ * A collective's release (lot 15): « « Marina » · sortie du titre · PDS ». */
 function factsOf(ctx: DistributionContext): ModuleFact[] {
-  const { project, dates } = ctx;
+  const { project, dates, release } = ctx;
   const format = projectFormatLabel({
     type: project.type,
     musicFormat: project.musicFormat,
     contentFormatName: project.contentFormat?.name ?? null,
   });
   return [
-    {
-      key: "project",
-      value: [`« ${project.title} »`, project.artistName, format?.toLowerCase()]
-        .filter(Boolean)
-        .join(" · "),
-    },
+    release
+      ? {
+          key: "project",
+          value: [
+            `« ${release.label} »`,
+            release.kind === "title"
+              ? t.facts.titleRelease
+              : t.facts.compilation(project.masters.length),
+            project.artistName,
+          ]
+            .filter(Boolean)
+            .join(" · "),
+        }
+      : {
+          key: "project",
+          value: [
+            `« ${project.title} »`,
+            project.artistName,
+            format?.toLowerCase(),
+          ]
+            .filter(Boolean)
+            .join(" · "),
+        },
     ...(dates.masterFinal
       ? [
           {
@@ -70,16 +98,30 @@ function factsOf(ctx: DistributionContext): ModuleFact[] {
  */
 export async function DistributionFrame({
   projectId,
+  releaseId = null,
   shownKey,
   children,
 }: {
   projectId: string;
+  // A collective's release (lot 15, `?sortie=`); none: a simple project.
+  releaseId?: string | null;
   // The step shown on the right; none for a view.
   shownKey?: string;
   children: (ctx: DistributionContext) => React.ReactNode;
 }) {
-  const ctx = await distributionContext(projectId);
+  // A collective's Distribution is a release's (lot 15): without one, the
+  // choice is made in « Sorties »; a release not of the project is not found.
+  const read = await getProject(projectId);
+  if (read?.collective && !releaseId)
+    redirect(routes.projectReleases(projectId));
+  const ctx = await distributionContext(
+    projectId,
+    read?.collective ? releaseId : null,
+  );
+  if (!ctx && read?.collective && (await distributionLaunched(projectId)))
+    notFound();
   if (!ctx) return <WorkflowLocked projectId={projectId} title={t.module} />;
+  const scope = ctx.releaseId;
   const status = distributionStatus(ctx.steps);
   const open = ctx.anomalies.filter(isOpen).length;
   const stepRef = {
@@ -91,7 +133,25 @@ export async function DistributionFrame({
     key: stepChoiceKey({ module: "distribution", stepKey: s.key }),
     label: s.title,
   }));
-  const actions = <DistributionRolesButton ctx={ctx} />;
+  const actions = (
+    <>
+      {ctx.release && (
+        <ViewLink
+          href={routes.projectReleases(projectId)}
+          className={buttonVariants({ variant: "ghost", size: "sm" })}
+        >
+          <ButtonRoll>{t.releases}</ButtonRoll>
+        </ViewLink>
+      )}
+      <DistributionRolesButton ctx={ctx} />
+    </>
+  );
+  // A release archived or its title abandoned: read only (lot 15).
+  const readOnly = ctx.release?.readOnly ? (
+    <ToneCallout tone="neutral">
+      {fr.distribution.validation.gate.readOnly[ctx.release.readOnly]}
+    </ToneCallout>
+  ) : null;
   // Blockers and noted information of the module (sub-lot C6).
   const attention = (
     <ModuleAttention
@@ -103,51 +163,60 @@ export async function DistributionFrame({
   const shown = ctx.steps.find((s) => s.key === shownKey);
   if (!shown)
     return (
-      <div className="flex flex-col gap-5">
-        <ProjectHeader
-          projectId={projectId}
-          title={t.module}
-          status={{ label: t.status[status], tone: workflowStatusTone[status] }}
-          facts={factsOf(ctx)}
-          steps={ctx.steps}
-          actions={actions}
-        />
-        {attention}
-        {children(ctx)}
-      </div>
-    );
-  return (
-    <JourneyLayout
-      spine={
-        <JourneySpine
-          steps={ctx.steps}
-          openKey={shown.key}
-          footer={[
-            {
-              href: distributionViewHref(projectId, "anomalies"),
-              label: open ? t.footer.anomaliesOpen(open) : t.footer.anomalies,
-            },
-            {
-              href: distributionViewHref(projectId, "history"),
-              label: t.footer.history,
-            },
-          ]}
-        />
-      }
-      head={
-        <>
+      <DistributionReleaseProvider releaseId={scope}>
+        <div className="flex flex-col gap-5">
           <ProjectHeader
             projectId={projectId}
-            head={shown}
+            title={t.module}
+            status={{
+              label: t.status[status],
+              tone: workflowStatusTone[status],
+            }}
             facts={factsOf(ctx)}
             steps={ctx.steps}
             actions={actions}
           />
           {attention}
-        </>
-      }
-    >
-      {children(ctx)}
-    </JourneyLayout>
+          {readOnly}
+          {children(ctx)}
+        </div>
+      </DistributionReleaseProvider>
+    );
+  return (
+    <DistributionReleaseProvider releaseId={scope}>
+      <JourneyLayout
+        spine={
+          <JourneySpine
+            steps={ctx.steps}
+            openKey={shown.key}
+            footer={[
+              {
+                href: distributionViewHref(projectId, "anomalies", scope),
+                label: open ? t.footer.anomaliesOpen(open) : t.footer.anomalies,
+              },
+              {
+                href: distributionViewHref(projectId, "history", scope),
+                label: t.footer.history,
+              },
+            ]}
+          />
+        }
+        head={
+          <>
+            <ProjectHeader
+              projectId={projectId}
+              head={shown}
+              facts={factsOf(ctx)}
+              steps={ctx.steps}
+              actions={actions}
+            />
+            {attention}
+            {readOnly}
+          </>
+        }
+      >
+        {children(ctx)}
+      </JourneyLayout>
+    </DistributionReleaseProvider>
   );
 }

@@ -714,7 +714,15 @@ export const distributionJourney = {
     masterFinal: "Master final",
     release: "Sortie",
     distributor: "Distributeur",
+    // A collective's release (lot 15).
+    titleReleaseSource: "Date de la sortie du titre",
+    compilationSource: "Échéance du projet (compilation)",
+    titleRelease: "sortie du titre",
+    compilation: (n: number) =>
+      n > 1 ? `compilation de ${n} titres` : "compilation",
   },
+  // Back to the choice of a collective's release (lot 15).
+  releases: "Sorties",
   views: {
     anomalies: "Anomalies",
     history: "Historique de la distribution",

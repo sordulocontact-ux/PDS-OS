@@ -17,6 +17,11 @@ export const demos = {
   },
   // The badge of a maquette's page and lists (« Maquette · Brouillon »).
   badge: (status: string) => `Maquette · ${status}`,
+  // A title of a collective created at its first audio (projet collectif,
+  // lot 7): its name waits for the project to name it.
+  provisional: "Nom provisoire",
+  provisionalHint:
+    "Nom donné par PDS OS en attendant le vrai : il changera quand le titre sera nommé dans son projet collectif.",
   views: {
     label: "Statut des maquettes",
     active: "En cours",

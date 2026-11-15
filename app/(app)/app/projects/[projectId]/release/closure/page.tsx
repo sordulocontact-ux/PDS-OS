@@ -10,6 +10,7 @@ import { DistributionStep } from "@/components/distribution/frame/distribution-s
 import { ReturnCallout } from "@/components/ui/return-callout";
 import { fr } from "@/lib/i18n/fr";
 import { isUuid } from "@/lib/release/uuid";
+import { releaseParamOf } from "@/lib/distribution/scope";
 
 const t = fr.distributionJourney;
 
@@ -20,11 +21,18 @@ export const metadata: Metadata = {
 // Distribution › Clôture: normal, or with arbitrated reserves; validated.
 export default async function DistributionClosurePage({
   params,
+  searchParams,
 }: PageProps<"/app/projects/[projectId]/release/closure">) {
   const { projectId } = await params;
+  // A collective's release (lot 15).
+  const releaseId = releaseParamOf(await searchParams);
   if (!isUuid(projectId)) notFound();
   return (
-    <DistributionFrame projectId={projectId} shownKey="closure">
+    <DistributionFrame
+      projectId={projectId}
+      releaseId={releaseId}
+      shownKey="closure"
+    >
       {(ctx) => {
         const back = closureReturn(ctx);
         const current = ctx.closure.current;

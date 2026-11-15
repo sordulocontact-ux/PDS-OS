@@ -48,16 +48,18 @@ export type WorkflowState = {
 };
 
 /** Which workflows a project has, from its data (ticket § 13): the Master
- * needs titles, the Distribution is a music release's. */
+ * needs titles, the Distribution is a music release's — and a collective's
+ * whatever its type, release by release (décision 9, lot 15). */
 export function applicableWorkflows(project: {
   type: string;
   masterCount: number;
+  collective?: boolean;
 }): WorkflowKey[] {
   return WORKFLOWS.filter((workflow) =>
     workflow === "master"
       ? project.masterCount > 0
       : workflow === "distribution"
-        ? project.type === "music_release"
+        ? project.type === "music_release" || project.collective === true
         : true,
   );
 }

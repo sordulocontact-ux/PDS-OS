@@ -250,7 +250,7 @@ export const getProject = trackedCache(
       supabase
         .from("projects")
         .select(
-          `id, title, type, music_format, collective, artist_id, created_at, due_date, budget_cents, priority, initial_context, owner_person_id, master_validator_person_id, cover_path, artist:artists!projects_artist_same_org(name), owner:people!projects_owner_person_id_fkey(first_name, last_name), ${FORMAT_SELECT}, ${MASTERS_SELECT}, ${STAGES_SELECT}, ${ASSIGNMENTS_SELECT}`,
+          `id, title, type, music_format, collective, artist_id, created_at, due_date, budget_cents, priority, initial_context, owner_person_id, master_validator_person_id, cover_path, artist:artists!projects_artist_same_org(name), owner:people!projects_owner_person_id_fkey(first_name, last_name), ${FORMAT_SELECT}, ${MASTERS_SELECT}, ${STAGES_SELECT}, ${ASSIGNMENTS_SELECT}, titles:project_titles!project_titles_project_same_org(master_id, status)`,
         )
         .eq("id", projectId)
         .is("archived_at", null)
@@ -302,6 +302,11 @@ export const getProject = trackedCache(
       priority: isPriority(data.priority) ? data.priority : null,
       initialContext: data.initial_context,
       masters: masters.map(masterOption),
+      abandonedMasterIds: data.collective
+        ? data.titles.flatMap((t) =>
+            t.status === "abandoned" && t.master_id ? [t.master_id] : [],
+          )
+        : [],
       stages,
       currentStage: currentStageOf(stages),
     };

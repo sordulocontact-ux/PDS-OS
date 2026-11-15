@@ -54,7 +54,7 @@ export function toCredits(raw: RawCredit[]): Credit[] {
 
 // The columns of a title every list reads.
 export const MASTER_COLUMNS =
-  "id, title, variant, variant_label, audio_state, isrc, duration_seconds, final_validated_at, source_master_id, demo_status";
+  "id, title, variant, variant_label, audio_state, isrc, duration_seconds, final_validated_at, source_master_id, demo_status, title_is_provisional";
 
 export type RawMaster = {
   id: string;
@@ -67,6 +67,7 @@ export type RawMaster = {
   final_validated_at: string | null;
   source_master_id: string | null;
   demo_status: string | null;
+  title_is_provisional: boolean;
   credits: RawCredit[];
 };
 
@@ -83,6 +84,7 @@ export function toMasterListItem(row: RawMaster): MasterListItem {
     finalValidatedAt: row.final_validated_at,
     sourceMasterId: row.source_master_id,
     demoStatus: demoStatusOf(row.demo_status),
+    provisional: row.title_is_provisional,
   };
 }
 

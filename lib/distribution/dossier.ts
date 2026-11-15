@@ -57,6 +57,8 @@ const yesNo = z
 export const dossierParamsSchema = z
   .object({
     projectId: z.uuid(),
+    // A collective's release (lot 15).
+    releaseId: z.uuid().nullable().optional(),
     territoryMode: z.enum(TERRITORY_MODES),
     territories: z
       .array(z.string().refine((code) => COUNTRY_CODES.has(code)))

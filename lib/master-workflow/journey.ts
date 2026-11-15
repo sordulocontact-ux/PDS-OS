@@ -169,7 +169,7 @@ export function masterJourney(input: MasterJourneyInput): MasterJourneyStep[] {
   // Nothing at the Catalogue for any of them: the gesture is the import
   // (Akili, 02/11/2026: « on ne sait pas quoi faire en arrivant »).
   const nothingToConfirm = toConfirm.every((x) => x.audio.length === 0);
-  const sourceActions: Action[] =
+  const ownSourceActions: Action[] =
     toConfirm.length > 0
       ? ownerDoes(
           nothingToConfirm
@@ -188,6 +188,22 @@ export function masterJourney(input: MasterJourneyInput): MasterJourneyStep[] {
               },
             ]
           : [];
+  // Files asked of a member of the team (lot 9 bis): theirs to deposit, one
+  // action per person, for the titles still waiting for their source.
+  const asked = new Map<string, { name: string; count: number }>();
+  for (const r of facts.fileRequests) {
+    if (!toConfirm.some((x) => x.id === r.masterId)) continue;
+    const seen = asked.get(r.personId);
+    asked.set(r.personId, { name: r.name, count: (seen?.count ?? 0) + 1 });
+  }
+  const sourceActions: Action[] = [
+    ...ownSourceActions,
+    ...[...asked].map(([personId, { name, count }]) => ({
+      who: { name, personId },
+      todo: t.todo.depositFiles(count),
+      lead: true,
+    })),
+  ];
   const waitForVocals = awaited.some((x) => x.sources[0]?.plan === "wait");
   const allDeclared =
     inFlow.length > 0 &&

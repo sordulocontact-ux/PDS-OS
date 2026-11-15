@@ -8,6 +8,12 @@ import {
   masterTransmissionRows,
   masterVersionRows,
 } from "@/lib/master-workflow/shared-rows";
+import { loadProjectTitles } from "@/lib/projects/titles";
+import {
+  masterNameOf,
+  projectTitleLabel,
+  type ProjectTitle,
+} from "@/lib/projects/title-rules";
 import { createClient } from "@/lib/supabase/server";
 
 // What the Master's journey reads (lib/master-workflow/journey.ts), in one
@@ -79,6 +85,10 @@ export type MasterJourneyFacts = {
   titles: Array<{
     id: string;
     title: string;
+    // A collective (its Historique): the title's name in the project, and
+    // its name in the Catalogue when different (never a provisional one).
+    projectLabel?: string;
+    catalogueName?: string | null;
     artists: string;
     audio: JourneyAudio[];
     // Newest first: the first is the current source.
@@ -135,6 +145,11 @@ export type MasterJourneyFacts = {
     appliedAt: string | null;
   }>;
   exchanges: Array<{ title: string; occurredAt: string; status: string }>;
+  // A collective's files asked of a member of the team (lot 9 bis), the open
+  // lines only: one per title, its title by the master.
+  fileRequests: JourneyFileRequest[];
+  // Every line, open or closed, for the Historique du master (lot 12 bis).
+  fileRequestLog: JourneyFileRequestLog[];
   planLaunchedAt: string | null;
   // The Master's budget lines (owner and direction only, RLS): a rate
   // proposed by the engineer waits for « Accepter le tarif ».
@@ -142,6 +157,30 @@ export type MasterJourneyFacts = {
   // The engineers' invoices (owner and direction only, RLS).
   invoices: JourneyInvoice[];
   failed: boolean;
+};
+
+export type JourneyFileRequest = {
+  id: string;
+  masterId: string;
+  // The person asked.
+  personId: string;
+  name: string;
+  requestedBy: string;
+  requestedByName: string;
+  note: string | null;
+  createdAt: string;
+};
+
+/** A line of « Demander des fichiers » as the history tells it: asked,
+ * then received (by which file, deposited by whom), or cancelled or
+ * replaced. */
+export type JourneyFileRequestLog = JourneyFileRequest & {
+  receivedAt: string | null;
+  receivedFileName: string | null;
+  receivedBy: string | null;
+  cancelledAt: string | null;
+  cancelledBy: string | null;
+  replaced: boolean;
 };
 
 export type JourneyInvoice = {
@@ -161,9 +200,28 @@ export type JourneyInvoice = {
   paidBy: string | null;
 };
 
+/** A collective's title as the project names it (projectTitleLabel), and
+ * its name in the Catalogue when it differs; nothing for another project. */
+function titleNamesOf(titles: ProjectTitle[], masterId: string) {
+  const title = titles.find((x) => x.master?.id === masterId);
+  if (!title) return {};
+  const catalogue = masterNameOf(title.master);
+  const projectLabel = projectTitleLabel({
+    position: title.position,
+    workingTitle: title.workingTitle,
+    masterTitle: catalogue,
+  });
+  return {
+    projectLabel,
+    catalogueName: catalogue && catalogue !== projectLabel ? catalogue : null,
+  };
+}
+
 export async function loadMasterJourneyFacts(project: {
   id: string;
   masters: Array<{ id: string; title: string; artists: string }>;
+  // Only a collective asks for files (lot 9 bis).
+  collective?: boolean;
 }): Promise<MasterJourneyFacts> {
   const supabase = await createClient();
   const ids = project.masters.map((m) => m.id);
@@ -182,6 +240,8 @@ export async function loadMasterJourneyFacts(project: {
     plan,
     rates,
     invoices,
+    fileRequests,
+    projectTitles,
   ] = await Promise.all([
     ids.length
       ? supabase
@@ -251,6 +311,17 @@ export async function loadMasterJourneyFacts(project: {
       .eq("project_id", project.id)
       .eq("origin", "master")
       .order("requested_at"),
+    project.collective
+      ? supabase
+          .from("master_file_requests")
+          .select(
+            "id, requested_to, requested_by, note, created_at, received_at, cancelled_at, replaced, title:project_titles!master_file_requests_title_id_fkey(master_id), asked:people!master_file_requests_requested_to_fkey(first_name, last_name), asker:people!master_file_requests_requested_by_fkey(first_name, last_name), canceller:people!master_file_requests_cancelled_by_fkey(first_name, last_name), file:master_files!master_file_requests_received_file_id_fkey(file_name, uploader:people!master_files_created_by_fkey(first_name, last_name))",
+          )
+          .eq("project_id", project.id)
+          .order("created_at")
+      : none,
+    // A collective names its titles as the project does (lot 12 bis fix).
+    project.collective ? loadProjectTitles(project.id) : Promise.resolve([]),
   ]);
   // Whether a new RIB waits, per engineer (never a digit): few rows, only
   // once an invoice was received with a new RIB.
@@ -271,15 +342,41 @@ export async function loadMasterJourneyFacts(project: {
     brief.error,
     transmissions.error,
     versions.error,
+    fileRequests.error,
   ].filter(Boolean);
   if (errors.length)
     console.error("loadMasterJourneyFacts:", errors[0]?.message);
 
   const b = brief.data;
   const creative = creatives[0];
+  const fileRequestLog: JourneyFileRequestLog[] = (
+    fileRequests.data ?? []
+  ).flatMap((r) =>
+    r.title?.master_id
+      ? [
+          {
+            id: r.id,
+            masterId: r.title.master_id,
+            personId: r.requested_to,
+            name: nameOf(r.asked) ?? "—",
+            requestedBy: r.requested_by,
+            requestedByName: nameOf(r.asker) ?? "—",
+            note: r.note,
+            createdAt: r.created_at,
+            receivedAt: r.received_at,
+            receivedFileName: r.file?.file_name ?? null,
+            receivedBy: nameOf(r.file?.uploader ?? null),
+            cancelledAt: r.cancelled_at,
+            cancelledBy: nameOf(r.canceller),
+            replaced: r.replaced,
+          },
+        ]
+      : [],
+  );
   return {
     titles: project.masters.map((m) => ({
       ...m,
+      ...titleNamesOf(projectTitles, m.id),
       audio: (files.data ?? []).flatMap((f) => {
         const state = audioStateOf(f.audio_state);
         return f.master_id === m.id && state
@@ -421,6 +518,10 @@ export async function loadMasterJourneyFacts(project: {
           ]
         : [],
     ),
+    fileRequests: fileRequestLog.filter(
+      (r) => r.receivedAt === null && r.cancelledAt === null,
+    ),
+    fileRequestLog,
     planLaunchedAt: plan.data?.launched_at ?? null,
     rates: (rates.data ?? []).flatMap((r) =>
       r.master_role === "mix" || r.master_role === "mastering"

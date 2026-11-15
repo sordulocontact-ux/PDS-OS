@@ -1,4 +1,5 @@
 import { routes } from "@/lib/auth/redirects";
+import { withRelease } from "@/lib/distribution/scope";
 import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
 
 const fr = { distributionJourney };
@@ -42,30 +43,37 @@ export const distributionPages = (projectId: string) => [
   routes.projectRelease(projectId),
 ];
 
+// A collective's release (lot 15) stays in the address: `releaseId`.
 export function distributionStepHref(
   projectId: string,
   step: DistributionStep,
+  releaseId?: string | null,
 ): string {
-  return routes.projectReleaseStep(projectId, SLUG[step]);
+  return withRelease(
+    routes.projectReleaseStep(projectId, SLUG[step]),
+    releaseId,
+  );
 }
 
 export function distributionViewHref(
   projectId: string,
   view: DistributionView,
+  releaseId?: string | null,
 ): string {
-  return routes.projectReleaseStep(projectId, view);
+  return withRelease(routes.projectReleaseStep(projectId, view), releaseId);
 }
 
 /** The steps as crumbs (the open one ends the trail). */
 export function distributionSteps(
   projectId: string,
   done: readonly string[] = [],
+  releaseId?: string | null,
 ) {
   const t = fr.distributionJourney.steps;
   return DISTRIBUTION_STEPS.map((key) => ({
     key,
     label: t[key].title,
-    href: distributionStepHref(projectId, key),
+    href: distributionStepHref(projectId, key, releaseId),
     built: true,
     done: done.includes(key),
   }));

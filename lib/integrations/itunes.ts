@@ -15,6 +15,7 @@ const resultSchema = z.object({
     z.object({
       wrapperType: z.string(),
       trackViewUrl: z.url().optional(),
+      collectionViewUrl: z.url().optional(),
       trackNumber: z.number().optional(),
       discNumber: z.number().optional(),
     }),
@@ -42,4 +43,16 @@ export async function findAppleMusicTrack(
       (r.discNumber ?? 1) === position.disc,
   );
   return track?.trackViewUrl ?? null;
+}
+
+/** The album itself, by its UPC (a collective's compilation, lot 13). */
+export async function findAppleMusicAlbum(upc: string): Promise<string | null> {
+  const url = new URL("https://itunes.apple.com/lookup");
+  url.search = new URLSearchParams({ upc, country: "FR" }).toString();
+  const parsed = resultSchema.safeParse(await fetchJson("itunes", url));
+  if (!parsed.success) return null;
+  return (
+    parsed.data.results.find((r) => r.wrapperType === "collection")
+      ?.collectionViewUrl ?? null
+  );
 }

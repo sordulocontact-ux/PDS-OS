@@ -1,7 +1,11 @@
 // The titles of a collective project (docs/pds-mic-plan.md, lot 2): the
-// minimal list on its overview, its four gestures, their history.
+// view « Titres et artistes » (lot 6), its gestures, their history.
+// « de » elides before a vowel: « Ouvrir le deal d'Iris Moon ».
+const de = (name: string) =>
+  /^[aeiouyàâéèêëîïôûüh]/i.test(name) ? `d'${name}` : `de ${name}`;
+
 export const projectTitles = {
-  title: "Titres",
+  title: "Titres et artistes",
   empty: "Aucun titre pour l'instant.",
   // « Titre 3 · sans nom »: a title without a working title nor a master.
   unnamed: (position: number) => `Titre ${position} · sans nom`,
@@ -17,6 +21,9 @@ export const projectTitles = {
     `Catalogue : ${title} · ${demoBadge}`,
   inCatalog: "Au Catalogue",
   notInCatalog: "Pas encore au Catalogue",
+  // Lot 7: its title in the Catalogue under a provisional name.
+  catalogProvisional: (name: string) =>
+    `Au Catalogue sous un nom provisoire : ${name}`,
   // « Le 11/11 · « Pas retenu » »: the date first, a long reason is cut
   // after two lines; the status already says « Abandonné ».
   abandonedOn: (day: string, reason: string) => `Le ${day} · « ${reason} »`,
@@ -36,11 +43,67 @@ export const projectTitles = {
     submit: "Ajouter le titre",
     done: "Titre ajouté.",
   },
+  // Lot 10: the titles a marketing action targets (deliverable_titles).
+  scope: {
+    label: "Titres visés",
+    kinds: {
+      project: "Tout le projet",
+      all_titles: "Tous les titres",
+      titles: "Certains titres",
+      none: "Aucun titre",
+    },
+    abandoned: (label: string) => `${label} (abandonné)`,
+    edit: "Modifier",
+    editLabel: (action: string) =>
+      `Modifier les titres visés par « ${action} »`,
+    button: "Titres",
+    title: (action: string) => `Titres visés par « ${action} »`,
+    description:
+      "Une action peut valoir pour tout le projet, pour tous ses titres, pour certains, ou pour aucun : elle n'est jamais copiée par titre.",
+    choice: "Périmètre",
+    pick: "Titres",
+    // What the chips chose, in words (a chip alone does not say it).
+    picked: (labels: string[]) =>
+      labels.length === 0
+        ? "Aucun titre choisi."
+        : `${labels.length} titre${labels.length > 1 ? "s" : ""} : ${labels.join(", ")}.`,
+    noTitle:
+      "Le projet n'a pas encore de titre : « Tous les titres » vaudra pour ceux qui viendront.",
+    submit: "Enregistrer",
+    done: "Titres visés enregistrés.",
+    // The filter of a list by title.
+    filter: "Titre",
+    // Not « Tous les titres », which is a scope.
+    filterAll: "Tous titres confondus",
+    errors: {
+      failed: "Les titres visés n'ont pas pu être enregistrés. Réessayez.",
+      titlesRequired: "Choisissez au moins un titre.",
+      abandoned: "Ce titre est abandonné : il n'est plus proposé.",
+      titleNotFound: "Ce titre n'existe plus dans le projet.",
+    },
+  },
+  // Lot 7 (voie A): a title not in the Catalogue yet.
+  catalogStart: {
+    action: "Déposer un audio",
+    done: "Titre créé au Catalogue sous un nom provisoire : déposez l'audio.",
+  },
+  catalogAttach: {
+    action: "Rattacher un titre du Catalogue",
+    title: (label: string) => `Rattacher un titre du Catalogue à « ${label} »`,
+    description:
+      "Le titre du projet prend ce titre du Catalogue, ses fichiers et ses crédits ; son titre de travail reste le sien.",
+    placeholder: "Choisir un titre",
+    submit: "Rattacher le titre",
+    done: "Titre du Catalogue rattaché.",
+  },
   rename: {
     action: "Renommer",
     title: "Renommer le titre",
     description:
       "Le titre de travail sert dans le projet. Laissé vide, le titre redevient « sans nom » ou reprend son nom au Catalogue.",
+    // Lot 7: its title in the Catalogue is provisional and takes the name.
+    descriptionProvisional:
+      "Son titre au Catalogue porte encore un nom provisoire : il prendra ce nom, et ne sera plus provisoire.",
     submit: "Renommer",
     done: "Titre renommé.",
   },
@@ -59,6 +122,110 @@ export const projectTitles = {
   reactivate: {
     action: "Réactiver",
     done: "Titre réactivé.",
+  },
+  // The title's page in the Catalogue, from its « ⋯ ».
+  openCatalog: "Voir au Catalogue",
+
+  // « Titres et artistes » (lot 6): one row per title, under it one row
+  // per participation; where each stands, computed (lib/projects/
+  // title-board-rules.ts).
+  board: {
+    facts: {
+      mainArtist: "Artiste principal",
+      titles: "Titres",
+      // « 3 en cours, 1 prévu »; nothing yet: « aucun ».
+      titleCounts: (active: number, planned: number, abandoned: number) =>
+        [
+          active > 0 ? `${active} en cours` : null,
+          planned > 0 ? `${planned} prévu${planned > 1 ? "s" : ""}` : null,
+          abandoned > 0
+            ? `${abandoned} abandonné${abandoned > 1 ? "s" : ""}`
+            : null,
+        ]
+          .filter(Boolean)
+          .join(", ") || "aucun",
+      // « Artistes du projet » (projectArtists), the main one included.
+      artists: "Artistes",
+    },
+    label: "Titres et artistes du projet",
+    columns: {
+      title: "Titre ou artiste",
+      status: "Statut",
+      contract: "Contrat",
+      negotiation: "Négociation",
+      // Who the deal is given to, in the Business module's words (« le
+      // responsable » is the project's owner everywhere else).
+      owner: "Négocié par",
+      master: "Master",
+      distribution: "Distribution",
+      actions: "Actions",
+    },
+    // The abandoned titles, after the others.
+    abandonedGroup: "Abandonnés",
+    // A title without any artist yet.
+    noArtist: "Aucun artiste invité",
+    contract: {
+      // Confirmed without a contract (décision 6): missing, never red (the
+      // same word as the Juridique's « Participations et contrats », lot 11).
+      missing: "Manquant",
+      // Linked, the viewer may not read it.
+      hidden: "Lié",
+    },
+    negotiation: {
+      // The viewer reads every deal of the project: none for this one.
+      none: "Pas de dossier",
+      // As the Deals page says it.
+      unassigned: "À affecter",
+      // The link to the deal, for a screen reader: the artist and the step.
+      link: (artist: string, stage: string) =>
+        `Ouvrir le deal ${de(artist)}, étape ${stage}`,
+    },
+    master: {
+      todo: "À mixer",
+      mixed: "Mix validé",
+      final: "Master final",
+      // « Mix V2 à valider », « Master V3 attendu » (after changes asked on
+      // the V2).
+      pending: (round: "mix" | "mastering", number: number) =>
+        `${round === "mix" ? "Mix" : "Master"} V${number} à valider`,
+      retake: (round: "mix" | "mastering", number: number) =>
+        `${round === "mix" ? "Mix" : "Master"} V${number + 1} attendu`,
+    },
+    // Each title's release deposit (lot 15): its own, else the
+    // compilation's it goes out with.
+    distribution: {
+      withCompilation: (state: string) => `Avec la compilation · ${state}`,
+    },
+    // Under the name on a small screen, the columns it hides.
+    caption: {
+      contract: "Contrat",
+      negotiation: "Négociation",
+      master: "Master",
+      distribution: "Distribution",
+    },
+    empty: {
+      title: "Aucun titre pour l'instant",
+      body: "Ajoutez le premier titre : son nom peut attendre.",
+      readOnly: "Le responsable du projet ajoute les titres ici.",
+    },
+  },
+
+  // « Changer l'artiste principal » (lot 6), through set_project_main_artist.
+  mainArtist: {
+    action: "Changer l'artiste principal",
+    title: "Changer l'artiste principal",
+    description: (current: string | null) =>
+      `${current ? `Aujourd'hui : ${current}. ` : ""}Il est crédité en tête sur chaque titre ; les crédits déjà inscrits au Catalogue et l'identité choisie en Conception restent tels quels.`,
+    label: "Artiste principal",
+    placeholder: "Choisir un artiste",
+    search: "Chercher un artiste",
+    empty: "Aucun artiste trouvé.",
+    submit: "Changer l'artiste principal",
+    done: "Artiste principal changé.",
+    same: "C'est déjà l'artiste principal : choisissez-en un autre.",
+    artistRequired: "Choisissez le nouvel artiste principal.",
+    failed: "L'artiste principal n'a pas pu être changé. Réessayez.",
+    notFound: "Ce projet n'existe plus ou ne vous est plus visible.",
   },
 
   // The artists of each title (lot 3): their participations.
@@ -111,7 +278,7 @@ export const projectTitles = {
     status: {
       action: "Changer le statut",
       title: (artist: string, label: string) =>
-        `Participation de ${artist} à « ${label} »`,
+        `Participation ${de(artist)} à « ${label} »`,
       // A credit is never removed by a participation (décision 10): said
       // before confirming, since withdrawing later keeps it; none is
       // written on a title a simple project shares.
@@ -129,6 +296,23 @@ export const projectTitles = {
       // The toast says where the participation now stands (« Participation
       // refusée »), the period added by the toast.
       changed: (status: string) => `Participation ${status.toLowerCase()}`,
+    },
+    // Détacher (lot 6): the participation is withdrawn, never deleted.
+    withdraw: {
+      action: "Retirer du titre",
+      title: (artist: string, label: string) =>
+        `Retirer ${artist} de « ${label} »`,
+      description:
+        "Sa participation passe en « Retirée » : elle reste listée et dans l'historique, et les crédits déjà inscrits au Catalogue restent. Vous pourrez la rattacher ensuite.",
+      submit: "Retirer du titre",
+      pending: "Retrait…",
+      done: "Participation retirée",
+    },
+    // Rattacher (lot 6): a declined or withdrawn participation comes back,
+    // proposed.
+    reattach: {
+      action: "Rattacher au titre",
+      done: "Participation rattachée, à nouveau proposée",
     },
     // The toast of a gesture that credited the title (its `done`, the
     // period added by the toast): « Participation confirmée · 2 crédits
@@ -190,14 +374,27 @@ export const projectTitles = {
       "Un single n'a qu'un titre du Catalogue : changez le format du projet pour en ajouter un autre.",
     abandoned: "Ce titre est abandonné : réactivez-le avant de le modifier.",
     notAbandoned: "Ce titre n'est pas abandonné.",
+    // Lot 7: a title of the Catalogue for a title of the project.
+    hasMaster: "Ce titre est déjà au Catalogue.",
+    masterRequired: "Choisissez un titre du Catalogue.",
+    mainArtistRequired:
+      "Le projet n'a pas d'artiste principal : choisissez-en un avant de créer le titre au Catalogue.",
     // update_project on a collective (the project's edit form).
     keptInProject:
-      "Un titre du projet collectif n'est pas retiré : abandonnez-le depuis la liste des titres de la Vue d'ensemble.",
+      "Un titre du projet collectif n'est pas retiré : abandonnez-le depuis « Titres et artistes ».",
   },
   // The project's Activité (lib/overview/activity.ts).
   events: {
     added: (label: string) => `Titre ajouté · ${label}`,
     renamed: (from: string, to: string) => `Titre renommé · ${from} → ${to}`,
+    // The provisional title of the Catalogue named by the same gesture.
+    renamedInCatalog: (from: string, to: string) =>
+      `Titre nommé · ${from} → ${to}, au Catalogue aussi`,
+    // Lot 7: its title created in the Catalogue (provisional), or attached.
+    cataloged: (label: string) =>
+      `Titre créé au Catalogue sous un nom provisoire · ${label}`,
+    masterAttached: (label: string, master: string) =>
+      `Titre du Catalogue rattaché · ${label} → ${master}`,
     abandoned: (label: string, reason: string) =>
       `Titre abandonné · ${label} · « ${reason} »`,
     reactivated: (label: string) => `Titre réactivé · ${label}`,
@@ -215,5 +412,27 @@ export const projectTitles = {
       from: string,
       to: string,
     ) => `Participation · ${artist} · ${label} · ${from} → ${to}`,
+    // « Artiste principal · PDS → Nadia Sel » (lot 6).
+    mainArtistChanged: (from: string | null, to: string) =>
+      from
+        ? `Artiste principal · ${from} → ${to}`
+        : `Artiste principal · ${to}`,
+    // « Dérogation de tournage accordée · Nadia Benali · Titre 2 · jusqu'au
+    // 30 nov. 2026 · le contrat part lundi » (lot 12).
+    waiverGranted: (
+      scope: string,
+      artist: string,
+      label: string,
+      due: string,
+      reason: string,
+    ) =>
+      `Dérogation ${scope} accordée · ${artist} · ${label} · jusqu'au ${due}${reason ? ` · ${reason}` : ""}`,
+    waiverRevoked: (
+      scope: string,
+      artist: string,
+      label: string,
+      reason: string | null,
+    ) =>
+      `Dérogation ${scope} révoquée · ${artist} · ${label}${reason ? ` · ${reason}` : ""}`,
   },
 } as const;

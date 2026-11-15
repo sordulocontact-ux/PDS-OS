@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 
 import { DependencyRows } from "@/components/overview/dependency-rows";
+import { ContractGapsCallout } from "@/components/legal/contract-gaps-notice";
+import { loadContractGaps } from "@/lib/legal/contract-gaps";
 import { FramingDeliverable } from "@/components/overview/framing-deliverable";
 import { OverviewNow } from "@/components/overview/overview-now";
 import { OverviewProgress } from "@/components/overview/overview-progress";
@@ -10,15 +12,16 @@ import { HandoverFacts } from "@/components/projects/handover-facts";
 import { ProjectCover } from "@/components/projects/project-cover";
 import { ProjectCoverEdit } from "@/components/projects/project-cover-edit";
 import { ProjectHeader } from "@/components/projects/project-header";
-import { ProjectTitles } from "@/components/projects/project-titles";
+import { TitlesActions } from "@/components/projects/titles/titles-actions";
+import { TitlesBoard } from "@/components/projects/titles/titles-board";
 import { UnlaunchedOverview } from "@/components/projects/unlaunched-overview";
+import { PageSection } from "@/components/shell/page-section";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { BlockFact } from "@/components/ui/fact-block";
 import { ViewLink } from "@/components/ui/view-link";
 import { can, type Access } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
-import { listArtistOptions, listMasterOptions } from "@/lib/catalog/queries";
 import { fr } from "@/lib/i18n/fr";
 import { workflowCards } from "@/lib/overview/cards";
 import { overviewDependencies } from "@/lib/overview/dependencies";
@@ -32,7 +35,7 @@ import { canEditProject } from "@/lib/projects/edit-access";
 import { projectCoverUrls } from "@/lib/projects/covers";
 import { projectKindLabel } from "@/lib/projects/labels";
 import { getProject, listAssignablePeople } from "@/lib/projects/queries";
-import { loadProjectTitles } from "@/lib/projects/titles";
+import { loadTitleBoard, titleBoardChoices } from "@/lib/projects/title-board";
 import type { ProjectDetail } from "@/lib/projects/types";
 import { projectCollectiveHue } from "@/lib/ui/category-hues";
 import { allInOrder } from "@/lib/utils/parallel";
@@ -106,16 +109,24 @@ export default async function ProjectOverviewPage({
     );
   }
 
-  const [all, flows, launchedAt, creatives, covers, titles] = await Promise.all(
-    [
+  // A collective's titles have their own section once launched (« Titres
+  // et artistes », lot 6 of docs/pds-mic-plan.md), not the overview.
+  const [all, flows, launchedAt, creatives, covers, shootGaps, releaseGaps] =
+    await Promise.all([
       loadShellJourneys(project.id),
       loadWorkflowStates(project.id),
       planLaunchedAt(project.id),
       listProjectCreatives(project.id),
       projectCoverUrls([coverSource(project)], "full"),
-      collectiveTitles(project, access),
-    ],
-  );
+      // A collective (lot 12): the missing participation contracts, said
+      // upstream (décision 6).
+      project.collective
+        ? loadContractGaps(project.id, "shoot")
+        : Promise.resolve([]),
+      project.collective
+        ? loadContractGaps(project.id, "release")
+        : Promise.resolve([]),
+    ]);
   const framing =
     all.journeys.find((journey) => journey.module === "framing")?.steps ?? [];
   const brief = framing.find((step) => step.key === "brief");
@@ -175,6 +186,12 @@ export default async function ProjectOverviewPage({
           </>
         }
       />
+      <ContractGapsCallout
+        projectId={project.id}
+        shoot={shootGaps}
+        release={releaseGaps}
+        canOpenLegal={can(access, "manage_legal")}
+      />
       {/* Two zones, one title each (retour d'Akili du 05/11/2026, proto
           « Vue d'ensemble » validated 10/11): what the viewer does now,
           where the project stands. */}
@@ -193,7 +210,6 @@ export default async function ProjectOverviewPage({
           <OverviewProgress framing={framing} />
         )}
       </div>
-      {titles}
       {launchedAt && flows ? (
         <DependencyRows deps={deps} />
       ) : (
@@ -218,42 +234,48 @@ function projectSubtitle(project: ProjectDetail): string {
 }
 
 /**
- * The titles of a collective and their artists (docs/pds-mic-plan.md, lots
- * 2 and 3), the minimal list until the « Titres et artistes » view (lot 6);
- * nothing for any other project. Written by its owner once launched, by
- * whoever creates projects before (same rule as add_project_title and
- * add_title_participation, which enforce it).
+ * Before its launch, a collective has no sections: its « Titres et
+ * artistes » (docs/pds-mic-plan.md, lot 6) shows here, under the handover —
+ * the same table and gestures, written by whoever creates projects (same
+ * rule as add_project_title and add_title_participation, which enforce it);
+ * its main artist is changed in the project's form. Nothing for any other
+ * project.
  */
 async function collectiveTitles(project: ProjectDetail, access: Access) {
   if (!project.collective) return null;
-  const canManage =
-    canEditProject(access, project) ||
-    (project.stages.length === 0 && can(access, "create_projects"));
-  const [titles, masters, artists] = await Promise.all([
-    loadProjectTitles(project.id),
-    canManage ? listMasterOptions() : Promise.resolve([]),
-    canManage ? listArtistOptions() : Promise.resolve([]),
-  ]);
-  const inProject = new Set(titles.map((title) => title.master?.id));
-  const masterOptions = Object.fromEntries(
-    masters
-      .filter((master) => !inProject.has(master.id))
-      .map((master) => [
-        master.id,
-        master.artists ? `${master.title} · ${master.artists}` : master.title,
-      ]),
+  const canManage = can(access, "create_projects");
+  const board = await loadTitleBoard(project, access);
+  const { masterOptions, artists } = await titleBoardChoices(
+    project,
+    board.titles,
+    canManage,
   );
   return (
-    <ProjectTitles
-      projectId={project.id}
-      titles={titles}
-      canManage={canManage}
-      masterOptions={masterOptions}
-      artists={{
-        options: Object.fromEntries(artists.map((a) => [a.id, a.name])),
-        mainArtistId: project.artistId,
-      }}
-    />
+    <PageSection
+      id="titles"
+      title={fr.projectTitles.title}
+      action={
+        canManage ? (
+          <TitlesActions
+            projectId={project.id}
+            masterOptions={masterOptions}
+            artists={artists}
+            mainArtist={false}
+          />
+        ) : undefined
+      }
+    >
+      <TitlesBoard
+        projectId={project.id}
+        titles={board.titles}
+        dealReach={board.dealReach}
+        canManage={canManage}
+        artists={artists}
+        masterOptions={masterOptions}
+        // No workflow before the launch: nothing to open yet.
+        links={{ master: null, distribution: null }}
+      />
+    </PageSection>
   );
 }
 

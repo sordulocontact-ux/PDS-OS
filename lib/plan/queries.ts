@@ -228,6 +228,7 @@ export async function distributionLocked(projectId: string): Promise<boolean> {
     .from("releases")
     .select("id")
     .eq("project_id", projectId)
+    .is("archived_at", null)
     .limit(1)
     .maybeSingle();
   if (error) console.error("distributionLocked:", error.message);

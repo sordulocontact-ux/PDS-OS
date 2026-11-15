@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import { releaseArg } from "@/lib/distribution/scope";
+
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { ANOMALY_MODULES } from "@/lib/distribution/anomalies";
@@ -52,6 +54,7 @@ const ok = (projectId: string): WriteResult => {
 
 const confirmSchema = z.object({
   projectId: z.uuid(),
+  releaseId: z.uuid().nullable().optional(),
   platform: platformKey,
   url: https,
   // What the person saw (recette DIST-005): territory, day, proof.
@@ -77,6 +80,7 @@ export async function confirmPlatform(
     const supabase = await createClient();
     const { error } = await supabase.rpc("confirm_distribution_platform", {
       p_project_id: v.projectId,
+      ...releaseArg(v.releaseId),
       p_platform: v.platform,
       p_url: v.url || null,
       p_territory: v.territory,
@@ -91,6 +95,7 @@ export async function confirmPlatform(
 
 const problemSchema = z.object({
   projectId: z.uuid(),
+  releaseId: z.uuid().nullable().optional(),
   platform: platformKey,
   problem: z.enum(["unavailable", "non_compliant"]),
   note: z.string().trim().min(1).max(1000),
@@ -123,6 +128,7 @@ export async function reportPlatformProblem(
       "report_distribution_platform_problem",
       {
         p_project_id: v.projectId,
+        ...releaseArg(v.releaseId),
         p_platform: v.platform,
         p_problem: v.problem,
         p_note: v.note,

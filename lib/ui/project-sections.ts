@@ -71,14 +71,22 @@ const below =
 // Without `budget` (neither the owner nor the direction), the Budget is not
 // listed at all (UX test of 09/10/2026: the creative director read it).
 // `workflows`: the ones this project has (lib/workflow-status/rules.ts,
-// from its data); all four when not given.
+// from its data); all four when not given. `collective`: a collective
+// project (lot 6 of docs/pds-mic-plan.md) has « Titres et artistes » right
+// after its overview; no other project has it.
 export function projectSections(
   projectId: string,
   {
     legal,
     budget = true,
     workflows = ["master", "legal", "marketing", "distribution"],
-  }: { legal: boolean; budget?: boolean; workflows?: readonly string[] },
+    collective = false,
+  }: {
+    legal: boolean;
+    budget?: boolean;
+    workflows?: readonly string[];
+    collective?: boolean;
+  },
 ): ProjectSection[] {
   const t = fr.shell.project.sidebar;
   const section = (
@@ -106,6 +114,32 @@ export function projectSections(
         p === routes.project(projectId) ||
         below(routes.projectClosure(projectId))(p),
     },
+    // What a collective holds, above its Cadrage and every workflow: its
+    // titles, their artists and where each one stands.
+    ...(collective
+      ? [
+          {
+            key: "titles",
+            label: t.titles,
+            href: routes.projectTitles(projectId),
+            match: below(routes.projectTitles(projectId)),
+          },
+          // Its releases: per title and/or the compilation (lot 13).
+          {
+            key: "releases",
+            label: t.releases,
+            href: routes.projectReleases(projectId),
+            match: below(routes.projectReleases(projectId)),
+          },
+          // Its titles' Plans de sortie (lot 14).
+          {
+            key: "release-plans",
+            label: t.releasePlans,
+            href: routes.projectReleasePlans(projectId),
+            match: below(routes.projectReleasePlans(projectId)),
+          },
+        ]
+      : []),
     // The Plan du projet is the Cadrage's fourth step (/framing/plan,
     // docs/ARCHITECTURE.md § 6 ter): no section of its own.
     {

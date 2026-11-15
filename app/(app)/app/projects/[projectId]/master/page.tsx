@@ -9,8 +9,15 @@ import { masterJourneyContext } from "@/lib/master-workflow/journey-context";
 // Source step now.
 export default async function ProjectMasterPage({
   params,
+  searchParams,
 }: PageProps<"/app/projects/[projectId]/master">) {
-  const { projectId } = await params;
+  const [{ projectId }, { titre }] = await Promise.all([params, searchParams]);
   const { steps } = await masterJourneyContext(projectId);
-  redirect(masterEntry(projectId, steps));
+  const entry = masterEntry(projectId, steps);
+  // A collective's title, from « Titres et artistes » (lot 8), kept.
+  redirect(
+    typeof titre === "string" && /^[0-9a-f-]{36}$/.test(titre)
+      ? `${entry}${entry.includes("?") ? "&" : "?"}titre=${titre}`
+      : entry,
+  );
 }

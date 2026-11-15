@@ -227,13 +227,14 @@ export async function loadConception(
       .select("id, title, occurs_on, deliverable_id")
       .eq("project_id", projectId)
       .order("occurs_on"),
+    // « The » release date (lot 13): a simple project's release, a
+    // collective's earliest live release.
     supabase
-      .from("releases")
-      .select("planned_release_date")
-      .eq("project_id", projectId)
-      .order("created_at")
-      .limit(1)
-      .maybeSingle(),
+      .rpc("next_release_date", { p_project_id: projectId })
+      .then(({ data, error }) => ({
+        data: { planned_release_date: data ?? null },
+        error,
+      })),
     supabase
       .from("levers")
       .select("id, label")

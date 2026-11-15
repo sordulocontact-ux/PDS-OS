@@ -1269,6 +1269,17 @@ export const projectTitleTone: Record<string, Tone> = {
   abandoned: "neutral",
 };
 
+/** A participation of an artist in a title (lot 3): proposed and invited
+ * wait for an answer, confirmed is settled, declined is a refusal,
+ * withdrawn is set aside (§ 3). */
+export const participationStatusTone: Record<string, Tone> = {
+  proposed: "warning",
+  invited: "warning",
+  confirmed: "success",
+  declined: "danger",
+  withdrawn: "neutral",
+};
+
 /** A term of a deal (BIZ 3): PDS's proposal waits for the artist's side, a
  * counter-proposal waits for PDS, confirmed is settled, to define is
  * nothing yet. */

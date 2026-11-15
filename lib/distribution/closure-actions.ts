@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import { releaseArg } from "@/lib/distribution/scope";
+
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import {
@@ -13,7 +15,7 @@ import {
 import { loadClosureView } from "@/lib/distribution/closure-queries";
 import type { DistributionResult } from "@/lib/distribution/result";
 import { fr } from "@/lib/i18n/fr";
-import { getProject } from "@/lib/projects/queries";
+import { distributionProject } from "@/lib/distribution/release-scope";
 import type { Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -71,6 +73,7 @@ const reserveInput = z.object({
 
 const proposeSchema = z.object({
   projectId: z.uuid(),
+  releaseId: z.uuid().nullable().optional(),
   kind: z.enum(CLOSURE_KINDS),
   arbitration: z.string().trim().max(2000),
   acknowledged: z.boolean(),
@@ -96,9 +99,10 @@ export async function proposeDistributionClosure(
     return { ok: false, error: e.reasonRequired };
   if ((v.kind === "cancelled" || v.kind === "abandoned") && !v.reasonKind)
     return { ok: false, error: e.reasonKindRequired };
-  const project = await getProject(v.projectId);
-  if (!project || project.stages.length === 0)
-    return { ok: false, error: e.generic };
+  // A collective's abandoned titles leave the checks (lot 9); its closure
+  // is a release's (lot 15).
+  const project = await distributionProject(v.projectId, v.releaseId);
+  if (!project) return { ok: false, error: e.generic };
   const view = await loadClosureView(project, access);
   if (v.kind === "normal" && !view.readiness.normalPossible)
     return { ok: false, error: e.conditionsNotMet };
@@ -123,6 +127,7 @@ export async function proposeDistributionClosure(
   const supabase = await createClient();
   const { error } = await supabase.rpc("propose_distribution_closure", {
     p_project_id: project.id,
+    ...releaseArg(v.releaseId),
     p_kind: v.kind,
     p_reserves: (v.kind === "reserves" ? reserves : []) as unknown as Json,
     p_arbitration: v.kind === "normal" ? "" : v.arbitration,
@@ -136,6 +141,7 @@ export async function proposeDistributionClosure(
 
 const decideSchema = z.object({
   projectId: z.uuid(),
+  releaseId: z.uuid().nullable().optional(),
   closureId: z.uuid(),
   approve: z.boolean(),
   note: z.string().trim().max(2000),
@@ -162,16 +168,22 @@ export async function decideDistributionClosure(
 /** « Rouvrir »: a new event, the decision kept. */
 export async function reopenDistributionClosure(input: {
   projectId: string;
+  releaseId?: string | null;
   note: string;
 }): Promise<DistributionResult> {
   await requireApproved();
   const parsed = z
-    .object({ projectId: z.uuid(), note: z.string().trim().min(1).max(2000) })
+    .object({
+      projectId: z.uuid(),
+      releaseId: z.uuid().nullable().optional(),
+      note: z.string().trim().min(1).max(2000),
+    })
     .safeParse(input);
   if (!parsed.success) return { ok: false, error: e.reasonRequired };
   const supabase = await createClient();
   const { error } = await supabase.rpc("reopen_distribution_closure", {
     p_project_id: parsed.data.projectId,
+    ...releaseArg(parsed.data.releaseId),
     p_note: parsed.data.note,
   });
   return error ? failure(error) : done(parsed.data.projectId);
@@ -179,6 +191,7 @@ export async function reopenDistributionClosure(input: {
 
 const liftSchema = z.object({
   projectId: z.uuid(),
+  releaseId: z.uuid().nullable().optional(),
   reserveId: z.uuid(),
   note: z.string().trim().max(1000),
   proofPath: z.string().max(300),
@@ -212,6 +225,7 @@ export async function requestReserveLift(
 
 const liftDecisionSchema = z.object({
   projectId: z.uuid(),
+  releaseId: z.uuid().nullable().optional(),
   reserveId: z.uuid(),
   approve: z.boolean(),
   note: z.string().trim().max(1000),

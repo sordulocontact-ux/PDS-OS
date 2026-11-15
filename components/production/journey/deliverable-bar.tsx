@@ -6,6 +6,8 @@ import { productionJourney } from "@/lib/i18n/fr/production-journey";
 import { productionLight } from "@/lib/i18n/fr/production-light";
 import { loadProjectJourneys } from "@/lib/journey/project";
 import { productionDeliverables } from "@/lib/journey/production";
+import { titleScopeLabel } from "@/lib/projects/title-scope-rules";
+import { loadTitleScopes, scopeOf } from "@/lib/projects/title-scopes";
 
 const fr = { productionJourney, productionLight };
 
@@ -35,9 +37,10 @@ async function LoadedDeliverableBar({
   projectId: string;
   current: string;
 }) {
-  const [list, journeys] = await Promise.all([
+  const [list, journeys, scopes] = await Promise.all([
     productionDeliverables(projectId),
     loadProjectJourneys(projectId),
+    loadTitleScopes(projectId),
   ]);
   if (list.length === 0) return null;
   const mine = (id: string) =>
@@ -50,7 +53,10 @@ async function LoadedDeliverableBar({
       items={list.map((d) => ({
         key: d.id,
         title: d.title,
-        sub: deliverableLine(d),
+        // A collective: the titles it targets too (lot 10).
+        sub: scopes
+          ? `${deliverableLine(d)} · ${titleScopeLabel(scopeOf(scopes.deliverables, d.id), scopes.titles)}`
+          : deliverableLine(d),
         href: routes.projectProductionSheet(projectId, d.id),
         mine: mine(d.id),
       }))}
