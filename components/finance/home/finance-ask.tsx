@@ -57,14 +57,14 @@ export function FinanceAsk({ suggestions }: { suggestions: string[] }) {
       {shown.length > 0 && (
         <ul
           aria-label={t.suggestions}
-          className="absolute inset-x-0 bottom-full z-10 mb-2 flex flex-col rounded-lg border border-[color:var(--border-hairline)] bg-card p-1.5 shadow-elevation-2"
+          className="absolute inset-x-0 bottom-full z-10 mb-1 flex flex-col p-1.5 [background:linear-gradient(var(--surface-tint),var(--surface-tint)),var(--background)]"
         >
           {shown.map((rest) => (
             <li key={rest}>
               <button
                 type="button"
                 onClick={() => ask(`${t.want} ${rest}`)}
-                className="w-full rounded-md px-2 py-2 text-left text-body-md text-[color:var(--text-tertiary)] transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:bg-[var(--surface-soft)] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                className="w-full px-3 py-2.5 text-left text-body-md text-[color:var(--text-secondary)] transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:bg-[var(--surface-tint)] focus-visible:bg-[var(--surface-tint)] focus-visible:outline-none"
               >
                 <span className="font-medium text-[color:var(--text-primary)]">
                   {t.want}
@@ -81,6 +81,7 @@ export function FinanceAsk({ suggestions }: { suggestions: string[] }) {
         onStop={() => {}}
         busy={false}
         compact
+        flat
         onType={setTyped}
       />
       <p className="text-center text-caption text-[color:var(--text-tertiary)]">

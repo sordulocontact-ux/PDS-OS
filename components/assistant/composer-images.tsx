@@ -74,8 +74,11 @@ export function ComposerImages({
  * family (a white square with a hairline). */
 export function AttachImageButton({
   onFiles,
+  quiet = false,
 }: {
   onFiles: (files: File[]) => void;
+  // A bare icon, no box (Finance's « Je veux… », after Midday).
+  quiet?: boolean;
 }) {
   const t = fr.assistant.images;
   const fileRef = useRef<HTMLInputElement>(null);
@@ -95,11 +98,14 @@ export function AttachImageButton({
       <Button
         type="button"
         size="icon-sm"
-        variant="outline"
+        variant={quiet ? "ghost" : "outline"}
         onClick={() => fileRef.current?.click()}
         aria-label={t.add}
         title={t.add}
-        className="shrink-0 border-[color:var(--border-hairline)]"
+        className={cn(
+          "shrink-0",
+          !quiet && "border-[color:var(--border-hairline)]",
+        )}
       >
         <IconPaperclip aria-hidden className="size-5" />
       </Button>

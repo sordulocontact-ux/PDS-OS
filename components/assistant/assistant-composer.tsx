@@ -50,6 +50,7 @@ export function AssistantComposer({
   autoFocus = false,
   placeholder = fr.assistant.placeholder,
   onType,
+  flat = false,
 }: {
   onAsk: (question: string, images: FileUIPart[]) => void;
   onStop: () => void;
@@ -60,6 +61,9 @@ export function AssistantComposer({
   placeholder?: string;
   // What is typed, as it is typed (Finance's « Je veux… » suggestions).
   onType?: (text: string) => void;
+  // Square corners and bare icons, the send button a black square (Finance's
+  // « Je veux… », after Midday's assistant box, Sacha 15/11/2026).
+  flat?: boolean;
 }) {
   const t = fr.assistant;
   const [input, setInput] = useState("");
@@ -131,11 +135,12 @@ export function AssistantComposer({
         {...drop.handlers}
         aria-describedby={images.error ? "assistant-images-error" : undefined}
         className={cn(
-          "flex flex-col rounded-2xl border border-transparent bg-[var(--surface-tint)] transition-[border-color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] has-[textarea:focus-visible]:border-ring",
+          "flex flex-col border border-transparent bg-[var(--surface-tint)] transition-[border-color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] has-[textarea:focus-visible]:border-ring",
           // An image held over the box: it takes it.
           drop.dragging && "border-ring",
           // Compact: at the foot of a conversation, where the answers need the room.
           compact ? "min-h-28 gap-3 p-4" : "min-h-51 gap-4 p-6",
+          flat ? "rounded-none" : "rounded-2xl",
         )}
       >
         <ComposerImages images={images.images} onRemove={images.remove} />
@@ -162,7 +167,9 @@ export function AssistantComposer({
           aria-busy={voice.phase === "transcribing"}
         />
         <div className="flex items-center gap-2">
-          {!listening && <AttachImageButton onFiles={images.add} />}
+          {!listening && (
+            <AttachImageButton onFiles={images.add} quiet={flat} />
+          )}
           <span className="grow" />
           {listening ? (
             <VoiceInputBar
@@ -178,6 +185,7 @@ export function AssistantComposer({
                 phase={voice.phase}
                 onToggle={voice.toggle}
                 disabled={busy}
+                quiet={flat}
               />
               {busy ? (
                 <Button
@@ -195,7 +203,7 @@ export function AssistantComposer({
                   type="submit"
                   size="icon-sm"
                   aria-label={t.send}
-                  className="shrink-0"
+                  className={cn("shrink-0", flat && "rounded-none")}
                 >
                   <IconArrowUp aria-hidden className="size-5" />
                 </Button>
