@@ -2393,3 +2393,22 @@ Retour d'Ibé : le financement The Orchard est un crédit versé par tranches de
 - **Reste** : recoupement de l'avance sur les redevances (aucune donnée de redevances dans PDS OS) ; migration à
   pousser en pré-prod et en prod.
 
+
+## Style de Finance dans toute l'app, ancien style gardé (16/11/2026)
+
+Demande de Sacha : le style de Finance (d'après Midday) sur toute l'app, l'ancien gardé tant qu'Ibé n'a pas validé
+(`docs/STYLE-FINANCE-PARTOUT.md` § 13). Commits `5afbb182` à `2bc9e576` sur `pre-prod`.
+
+- **Interrupteur** : Réglages › Style de l'interface (Nouveau par défaut / Ancien), cookie `pds-style` lu avant le
+  premier affichage ; ancien style entier dans `:root[data-style="classic"]` et les variantes `classic:`.
+- **Lots 0 à 2** : tokens de Finance dans `:root`/`@theme`, état en point + mot et chiffres en Geist Mono partout,
+  modales en panneau à droite (⌘K, visionneuse, présentation, PO, menu du téléphone restent centrés), composants
+  remontés (`SideSheet`, `LinkRows`, `SignedAmount`, `RestAmount`, `SectionTopbar`, `SectionLoading`).
+- **Lot 3** : `SectionFrame` sur toutes les sections hors projet (bandeau avec la recherche ⌘K de l'app
+  `AppSearch`, pages listes sans titre visible, vues en segmenté et action sur une ligne).
+- **Lots 4 et 5** : pages de projet, accueil, Travail, Calendrier, Réglages, PO, notifications, pages publiques :
+  `StatCards` (cartes chiffre en nouveau style), grille de densité en `modern:`, une seule action noire.
+- **Reste** : lot 6 (suppression de l'ancien style) après la décision d'Ibé ; fiche latérale pour les lignes qui
+  ouvrent encore une page entière (choix au cas par cas) ; onglets des fiches artiste et titre (`ArtistTabs`,
+  `MasterTabs`) à passer en segmenté si Sacha le veut ; vérification à l'œil des pages de projet avec un compte qui
+  en voit (le compte de test `glen@pds.test` n'en voit aucun).
