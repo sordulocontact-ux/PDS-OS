@@ -62,8 +62,7 @@ export const fundings = {
     form: {
       title: "Planifier une émission",
       moveTitle: "Changer la date",
-      description:
-        "Un format, un nom et une date : son coût et ses titres suivent.",
+      description: "",
       format: "Format",
       label: "Nom",
       day: "Date",
@@ -91,8 +90,7 @@ export const fundings = {
       "Aucun format : un format donne son coût et ses titres provisoires.",
     form: {
       title: "Nouveau format d'émission",
-      description:
-        "Une émission, un live, un tournage : ce qu'il coûte et les titres qu'il donne.",
+      description: "",
       name: "Nom",
       cost: "Coût par émission",
       titles: "Titres provisoires par émission",
@@ -136,7 +134,7 @@ export const fundings = {
     done: "Remboursé",
     lineForm: {
       title: "Nouveau crédit Pay Later",
-      description: "Un Pay Later et son plafond.",
+      description: "",
       name: "Nom",
       limit: "Plafond",
       save: "Créer",

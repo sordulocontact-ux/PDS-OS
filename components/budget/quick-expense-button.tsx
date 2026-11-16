@@ -88,7 +88,6 @@ export function QuickExpenseDialog({
       open={open}
       onOpenChange={onOpenChange}
       title={t.form.quickTitle}
-      description={t.form.quickDescription}
       closeLabel={fr.dialogs.close}
     >
       <Loaded

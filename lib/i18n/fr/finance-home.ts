@@ -77,8 +77,8 @@ export const financeHome = {
     title: "Budgets",
     top: (title: string, percent: number) => `${title} a consommé ${percent} %`,
     rest: (amount: string, count: number) =>
-      ` ; ${amount} disponibles sur ${plural(count, "enveloppe", "enveloppes")}.`,
-    none: "Aucune enveloppe de projet en cours.",
+      ` ; ${amount} disponibles sur ${plural(count, "budget", "budgets")}.`,
+    none: "Aucun budget de projet en cours.",
     bar: (title: string, percent: number) => `${title} : ${percent} %`,
     open: "Voir les budgets",
   },

@@ -264,7 +264,7 @@ export const treasury = {
   incomeForm: {
     newTitle: "Ajouter une entrée",
     editTitle: "Modifier l'entrée",
-    description: "L'argent attendu sur le compte, puis sa facture.",
+    description: "",
     label: "Libellé",
     kind: "Nature",
     amount: "Montant attendu TTC",
@@ -334,7 +334,7 @@ export const treasury = {
 
   statementForm: {
     title: "Mettre à jour le solde",
-    description: "Le solde affiché par la banque, à une date.",
+    description: "",
     amount: "Solde du compte",
     asOf: "Date du relevé",
     note: "Note",

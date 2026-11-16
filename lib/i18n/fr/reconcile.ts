@@ -98,7 +98,7 @@ export const reconcile = {
   },
   manualForm: {
     title: "Ajouter une opération",
-    description: "Un mouvement du compte, tel que la banque le montre.",
+    description: "",
     direction: "Sens",
     in: "Entrée d'argent",
     out: "Sortie d'argent",

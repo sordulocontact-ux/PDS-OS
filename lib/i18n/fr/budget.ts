@@ -146,8 +146,8 @@ export const budget = {
     targetNone: "Aucun projet ni artiste ne correspond.",
     // For the Finance, who also has cost centers and « Hors budget » (UX test of 15/11/2026).
     finance: {
-      targetPlaceholder: "Projet, artiste, centre de coût ou hors budget",
-      targetSearch: "Rechercher un projet, un artiste, un centre de coût…",
+      targetPlaceholder: "Projet, artiste, autre budget ou hors budget",
+      targetSearch: "Rechercher un projet, un artiste, un budget…",
       targetNone:
         "Rien ne correspond. Une dépense de structure (loyer, abonnement) va dans « Hors budget ».",
     },
@@ -166,10 +166,7 @@ export const budget = {
     // « loyer », « structure », « aucun ».
     offBudgetOption: "Loyer, abonnement, frais de structure (aucun projet)",
     subpost: "Sous-poste",
-    offBudgetHint:
-      "Sur aucune enveloppe : la Vue d'ensemble de Finance la signale.",
-    quickDescription:
-      "Le ticket en photo si vous l'avez, le montant, ce que c'est et pour qui : déjà payée par défaut.",
+    offBudgetHint: "Sur aucun budget : les Alertes de Finance la signalent.",
     noTargets:
       "Vous ne menez aucun projet et ne lisez pas le budget des artistes : aucune dépense à saisir ici.",
     spentOnMissing: "Indiquez le jour de la dépense.",
@@ -231,6 +228,6 @@ export const budget = {
     noMatch: "Aucun résultat",
     rebillable: "Refacturable",
     rebillableHint:
-      "Refacturée à un client ou un partenaire : une recette attendue est prévue pour elle.",
+      "Refacturée à un client ou un partenaire : une entrée attendue est prévue pour elle.",
   },
 } as const;
