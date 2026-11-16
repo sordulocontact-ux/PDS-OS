@@ -34,9 +34,7 @@ export function BudgetProofField({
       <FilePickField
         id="budget-proof"
         label={t.attachment}
-        hint={
-          target?.kind === "artist" ? t.attachmentHintArtist : t.attachmentHint
-        }
+        hint={target?.kind === "artist" ? t.attachmentHintArtist : undefined}
         accept={PROOF_ACCEPT}
         chosenLabel={(name) => t.attachmentKept(name)}
         file={file}

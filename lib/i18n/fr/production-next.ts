@@ -35,6 +35,7 @@ export const productionNext = {
     callSheet: "Préproduction › Feuille de service",
     readiness: "Préproduction › Contrôle avant tournage",
     shootState: "Tournage › État du tournage",
+    participations: "Juridique › Participations et contrats",
     shootFiles: "Tournage › Rushes, sources et sauvegarde",
     incidents: "Tournage › Incidents",
     steps: "Postproduction › Étapes",
@@ -152,6 +153,14 @@ export const productionNext = {
       title: "Déclarer la fiche prête pour tournage",
       why: "Tous les contrôles requis sont confirmés. Le tournage pourra ensuite être lancé.",
       link: "Ouvrir le contrôle avant tournage",
+    },
+    // Lot 12 bis: a collective's shoot waits for its participation
+    // contracts (signed, or a waiver of the direction).
+    contracts: {
+      title: "Faire signer les contrats avant le tournage",
+      why: (names: string) =>
+        `Tournage bloqué : contrat non signé de ${names}. Faites-les signer, ou demandez à la direction une dérogation de tournage.`,
+      link: "Ouvrir Participations et contrats",
     },
     launch: {
       title: "Lancer le tournage",

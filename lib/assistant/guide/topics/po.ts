@@ -25,14 +25,20 @@ export const poTopics: GuideTopic[] = [
       "espace espace",
       "dictee",
       "micro",
+      "image",
+      "capture",
+      "photo",
+      "joindre",
       "chat",
       "sais faire",
       "tu peux",
       "capable",
+      "je veux",
+      "resume de la semaine",
     ],
     nav: "/app/assistant",
     facts: [
-      "PO est l'assistant de PDS OS. Il lit les données que vous pouvez voir (projets, étapes, Brief, tâches, validations, calls et comptes rendus, artistes, fiches des titres, équipe, contrats, Juridique, Master, Distribution, Marketing, budget, calendrier, fichiers, Réseau, notifications, deals) et répond avec les faits qu'il a lus (« A lu … données », replié au-dessus de la réponse) et les liens (« Sources », sous la réponse). Il sait aussi retrouver où se trouve un élément et expliquer comment marche l'application.",
+      "PO est l'assistant de PDS OS. Il lit les données que vous pouvez voir (projets, étapes, Brief, tâches, validations, calls et comptes rendus, artistes, fiches des titres, équipe, contrats, Juridique, Master, Distribution, Marketing, budget, calendrier, fichiers, Réseau, notifications, deals, et la Finance pour qui la lit : trésorerie et point bas, factures en retard, dépenses à payer, enveloppes, justificatifs manquants) et répond avec les faits qu'il a lus (« A lu … données », replié au-dessus de la réponse) et les liens (« Sources », sous la réponse). Il sait aussi retrouver où se trouve un élément et expliquer comment marche l'application.",
       "Il prépare des créations et des modifications (artiste, titre et sa fiche, projet, contrat, modèle de contrat, contact du Réseau, tâche, dépense, réunion, retour sur l'application) : il ouvre le vrai formulaire pré-rempli, et c'est vous qui relisez et enregistrez.",
       "Après le call d'un deal, il lit la transcription et propose sur la page du deal ce qui a changé (un terme, une étape, la prochaine action), avec le passage où c'est dit : « Vérifier » ouvre le vrai formulaire pré-rempli, vous corrigez et enregistrez, ou vous l'écartez. Il ne change jamais un deal lui-même.",
       "Il ne décide jamais : valider une étape, transmettre un projet, soumettre, envoyer ou signer un contrat restent vos gestes, sur la page concernée. Il n'écrit aucune clause juridique et ne cherche pas sur Internet.",
@@ -42,6 +48,7 @@ export const poTopics: GuideTopic[] = [
       "Quand une réponse reste sans résultat, PDS OS le compte de façon anonyme, sans le texte de la question ni le nom de la personne, pour savoir où PO doit progresser.",
       "Chaque conversation est enregistrée après chaque réponse, dans l'historique de la page PO. Elle est privée : vous seul la lisez, même le directeur général n'y a pas accès. Elle est gardée jusqu'à ce que vous la supprimiez. Supprimer une conversation ne touche à rien de ce que PO a aidé à créer.",
       "Chaque message à PO compte pour une requête de votre limite du jour. Le compteur repart à zéro à minuit, heure de Paris. Votre utilisation se lit dans Paramètres (menu de votre compte, en bas de la barre latérale) ; le directeur général règle la limite de chacun dans Équipe.",
+      "Vous pouvez joindre des images à une question (captures d'écran, photos, documents) : le trombone de la zone de saisie, un glisser-déposer ou ⌘V / Ctrl+V. PNG, JPEG, WebP ou GIF, 4 par question et 12 par conversation. PO les lit pour vous répondre ; un fait de PDS OS reste lu dans l'application. Comme la conversation, elles sont privées et supprimées avec elle.",
       "Deux appuis rapides sur Espace, depuis n'importe quelle page, ouvrent PO dans une fenêtre : il écoute tout de suite, votre demande part dès la fin de la dictée, et il sait sur quelle page vous êtes. Échap annule. Ces conversations sont enregistrées aussi, avec la page d'ouverture.",
     ],
     faq: [
@@ -60,6 +67,10 @@ export const poTopics: GuideTopic[] = [
       {
         q: "Combien de questions puis-je poser à PO ?",
         a: "Autant que votre limite du jour, visible dans Paramètres. Le directeur général peut l'augmenter dans Équipe.",
+      },
+      {
+        q: "Puis-je montrer une image à PO ?",
+        a: "Oui : le trombone de la zone de saisie, un glisser-déposer ou ⌘V / Ctrl+V. 4 images par question, 12 par conversation.",
       },
       {
         q: "PO peut-il valider, envoyer ou signer à ma place ?",

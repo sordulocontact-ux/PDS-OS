@@ -81,6 +81,7 @@ export default async function FramingPlanPage({
     const applies = applicableWorkflows({
       type: project.type,
       masterCount: project.masters.length,
+      collective: project.collective,
     });
     const absent = (["strategy", "master", "legal"] as const).filter(
       (w) =>

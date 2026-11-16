@@ -30,9 +30,11 @@ async function launch(): Promise<Browser> {
 const PAGE_NUMBERS =
   '<div style="width:100%;font-size:9px;text-align:center;color:#767676;font-family:system-ui,sans-serif"><span class="pageNumber"></span> / <span class="totalPages"></span></div>';
 
+// `cssPage`: the page size and margins the HTML sets itself (@page), as the
+// 16:9 Plan de sortie of a title (lot 14); A4 with margins otherwise.
 export async function htmlToPdf(
   html: string,
-  options: { pageNumbers?: boolean } = {},
+  options: { pageNumbers?: boolean; cssPage?: boolean } = {},
 ): Promise<Uint8Array> {
   const browser = await launch();
   try {
@@ -41,9 +43,21 @@ export async function htmlToPdf(
     // The fonts come from Google Fonts: printed only once they are ready.
     await page.evaluate(() => document.fonts.ready);
     const pdf = await page.pdf({
-      format: "A4",
       printBackground: true,
-      margin: { top: "18mm", bottom: "18mm", left: "16mm", right: "16mm" },
+      ...(options.cssPage
+        ? {
+            preferCSSPageSize: true,
+            margin: { top: 0, bottom: 0, left: 0, right: 0 },
+          }
+        : {
+            format: "A4",
+            margin: {
+              top: "18mm",
+              bottom: "18mm",
+              left: "16mm",
+              right: "16mm",
+            },
+          }),
       ...(options.pageNumbers
         ? {
             displayHeaderFooter: true,

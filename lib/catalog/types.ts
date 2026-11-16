@@ -67,6 +67,9 @@ export type MasterListItem = MasterOption & {
   // A maquette's status; null for an official master (docs/ARCHITECTURE.md
   // § 2 sexies bis).
   demoStatus: DemoStatus | null;
+  // A name PDS OS gave a title of a collective while waiting for the real
+  // one (projet collectif, lot 7): signalled wherever the title is listed.
+  provisional: boolean;
 };
 
 /** A row of the masters list: the master and the release shown for it. */

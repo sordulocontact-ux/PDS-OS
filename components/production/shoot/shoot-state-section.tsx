@@ -29,6 +29,7 @@ export function ShootStateSection({
   shoot,
   shootDate,
   ready,
+  contractBlocked = null,
   preproductionHref,
   canOrganize,
 }: {
@@ -38,6 +39,9 @@ export function ShootStateSection({
   // The effective date (Production's, else the Fiche's).
   shootDate: string | null;
   ready: boolean;
+  // A collective (lot 12): the shoot is refused while a contract of the
+  // titles shot is missing; the notice says which, in place of « Lancer ».
+  contractBlocked?: React.ReactNode;
   preproductionHref: string;
   canOrganize: boolean;
 }) {
@@ -64,7 +68,8 @@ export function ShootStateSection({
             {t.labels[shoot.state]}
           </StatusBadge>
         </div>
-        {ready && notStarted && canOrganize && (
+        {ready && notStarted && contractBlocked}
+        {ready && notStarted && canOrganize && !contractBlocked && (
           <div>
             <LaunchShootButton projectId={projectId} sheetId={sheetId} />
           </div>

@@ -3,6 +3,7 @@
 import { Menu as MenuPrimitive } from "@base-ui/react/menu";
 import { IconCheck } from "nucleo-sharp-essential";
 
+import { useSectionThemeClass } from "@/components/ui/dialog";
 import { popupMotion } from "@/components/ui/popup-motion";
 import { cn } from "@/lib/utils";
 
@@ -25,6 +26,8 @@ function DropdownMenuContent({
   align?: MenuPrimitive.Positioner.Props["align"];
   sideOffset?: number;
 }) {
+  // In a portal, the menu takes its section's theme (Finance's smaller text).
+  const section = useSectionThemeClass();
   return (
     <MenuPrimitive.Portal>
       <MenuPrimitive.Positioner
@@ -38,6 +41,7 @@ function DropdownMenuContent({
           className={cn(
             "flex min-w-44 flex-col rounded-[var(--radius-xl)] border border-border bg-popover p-1 text-popover-foreground shadow-elevation-1 outline-none",
             popupMotion,
+            section,
             className,
           )}
           {...props}
@@ -101,6 +105,37 @@ function DropdownMenuRadioItem({
   );
 }
 
+/** A choice that is on or off (the columns shown in a list): a real box
+ * before its label, as the app's checkbox (sm: selection blue when ticked),
+ * as the proto (Sacha 15/11/2026); the menu stays open while one ticks
+ * several. */
+function DropdownMenuCheckboxItem({
+  className,
+  children,
+  ...props
+}: MenuPrimitive.CheckboxItem.Props) {
+  return (
+    <MenuPrimitive.CheckboxItem
+      closeOnClick={false}
+      className={cn(
+        "group/check flex min-h-10 cursor-default items-center gap-2.5 rounded-lg px-3 text-[length:var(--type-body-md)] font-medium outline-none select-none data-[disabled]:opacity-40 data-[highlighted]:bg-[var(--control-bg-hover)]",
+        className,
+      )}
+      {...props}
+    >
+      <span
+        aria-hidden
+        className="grid size-4 shrink-0 place-items-center rounded-sm border border-[color:var(--border-default)] bg-[var(--control-bg)] transition-colors duration-150 group-data-[checked]/check:border-selection group-data-[checked]/check:bg-selection-bg"
+      >
+        <MenuPrimitive.CheckboxItemIndicator>
+          <IconCheck aria-hidden className="size-3 text-selection" />
+        </MenuPrimitive.CheckboxItemIndicator>
+      </span>
+      <span className="flex-1">{children}</span>
+    </MenuPrimitive.CheckboxItem>
+  );
+}
+
 function DropdownMenuSeparator({
   className,
   ...props
@@ -115,6 +150,7 @@ function DropdownMenuSeparator({
 
 export {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroupLabel,
   DropdownMenuItem,

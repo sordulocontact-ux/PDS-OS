@@ -37,42 +37,47 @@ export function periodLabel(period: CalendarPeriod): string {
 /**
  * A calendar's bar, as in Teams: « Aujourd'hui », previous and next
  * period, what is shown, and the period (Semaine, Mois). Every choice is a
- * link: the URL holds the view. The Calls and the Calendrier.
+ * link: the URL holds the view. The Calls and the Calendrier; Finance's
+ * Planning without the period's choice (`modes={false}`: months only).
+ * Its buttons are 40 px, as every toolbar's (16/11/2026).
  */
 export function CalendarToolbar({
   period,
   hrefOf,
+  modes = true,
 }: {
   period: CalendarPeriod;
   // The calendar's URL for a mode and a date (null: today).
   hrefOf: (mode: CalendarMode, date: string | null) => string;
+  modes?: boolean;
 }) {
   const t = fr.calendar.period;
   return (
     <div className="flex flex-wrap items-center gap-2">
       <ViewLink
         href={hrefOf(period.mode, null)}
-        className={buttonVariants({ variant: "outline", size: "sm" })}
+        className={buttonVariants({ variant: "outline", size: "default" })}
       >
         <ButtonRoll>{t.today}</ButtonRoll>
       </ViewLink>
       <ViewLink
         href={hrefOf(period.mode, period.previous)}
         aria-label={t.previous[period.mode]}
-        className={buttonVariants({ variant: "ghost", size: "icon-sm" })}
+        className={buttonVariants({ variant: "ghost", size: "icon" })}
       >
         <IconChevronLeft aria-hidden />
       </ViewLink>
       <ViewLink
         href={hrefOf(period.mode, period.next)}
         aria-label={t.next[period.mode]}
-        className={buttonVariants({ variant: "ghost", size: "icon-sm" })}
+        className={buttonVariants({ variant: "ghost", size: "icon" })}
       >
         <IconChevronRight aria-hidden />
       </ViewLink>
       <h2 className="text-lg font-semibold first-letter:uppercase">
         {periodLabel(period)}
       </h2>
+      {modes && (
       <div className="ml-auto">
         <ViewToggle
           label={t.modes.label}
@@ -83,6 +88,7 @@ export function CalendarToolbar({
           }))}
         />
       </div>
+      )}
     </div>
   );
 }

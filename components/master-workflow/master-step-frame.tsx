@@ -10,10 +10,15 @@ import {
 } from "@/components/shell/module/step-tools-block";
 import { ContactLinksSection } from "@/components/portal/contact-links-section";
 import { WhoDoesWhatButton } from "@/components/shell/module/who-does-what-button";
+import { TitlesOverview } from "@/components/master-workflow/titles-overview";
 import { masterJourney } from "@/lib/i18n/fr/master-journey";
 import { masterHistory } from "@/lib/master-workflow/history";
 import { masterJourneyContext } from "@/lib/master-workflow/journey-context";
 import { masterRoles } from "@/lib/master-workflow/roles";
+import {
+  titleCrumb,
+  type MasterTitleScope,
+} from "@/lib/master-workflow/title-scope";
 import { stepChoiceKey, type StepRef } from "@/lib/step-tools/model";
 import { projectHeaderData } from "@/lib/projects/header";
 import type { ModuleFact } from "@/lib/ui/module-frame";
@@ -59,15 +64,30 @@ export async function MasterStepFrame({
   stepKey,
   children,
   slots,
+  titleScope = null,
 }: {
   projectId: string;
   stepKey: MasterStepKey;
   children: React.ReactNode;
   slots?: Omit<React.ComponentProps<typeof StepPanel>, "step" | "steps">;
+  // A collective (lot 8): the title the page shows, named in the trail
+  // (Master ▸ titre ▸ étape) with its siblings, kept from step to step.
+  titleScope?: MasterTitleScope | null;
 }) {
-  const { steps, facts: rows, project } = await masterJourneyContext(projectId);
+  const {
+    steps,
+    facts: rows,
+    project,
+    access,
+  } = await masterJourneyContext(projectId);
   const step = steps.find((s) => s.key === stepKey);
   if (!step) return null;
+  const titled = titleScope
+    ? steps.map((s) => ({
+        ...s,
+        href: `${s.href}?titre=${titleScope.active.masterId}`,
+      }))
+    : steps;
   // Blockers and noted information of the step (C6).
   const stepRef: StepRef = { projectId, module: "master", stepKey };
   const choices = steps.map((s) => ({
@@ -75,14 +95,21 @@ export async function MasterStepFrame({
     label: s.title,
   }));
   const history = masterHistory(rows)
-    .filter((item) => item.step === stepKey)
+    .filter(
+      (item) =>
+        item.step === stepKey &&
+        // A collective: the active title's, and the project's own (lot 8).
+        (!titleScope ||
+          !item.masterId ||
+          item.masterId === titleScope.active.masterId),
+    )
     .reverse();
   const roles = masterRoles(rows, project.ownerName);
   return (
     <JourneyLayout
       spine={
         <JourneySpine
-          steps={steps}
+          steps={titled}
           openKey={stepKey}
           footer={{
             href: masterStepHref(projectId, "history"),
@@ -96,6 +123,11 @@ export async function MasterStepFrame({
             projectId={projectId}
             steps={steps}
             head={step}
+            extraCrumbs={
+              titleScope
+                ? [titleCrumb(projectId, stepKey, titleScope)]
+                : undefined
+            }
             facts={masterFacts(projectId)}
             actions={
               <WhoDoesWhatButton
@@ -114,12 +146,23 @@ export async function MasterStepFrame({
             modules={["master"]}
             steps={choices}
           />
+          {/* A collective: where its titles stand, at a glance (lot 9). */}
+          {titleScope && (
+            <TitlesOverview
+              projectId={projectId}
+              scope={titleScope}
+              canRequest={
+                project.ownerPersonId !== null &&
+                project.ownerPersonId === access.personId
+              }
+            />
+          )}
         </>
       }
     >
       <StepPanel
         step={step}
-        steps={steps}
+        steps={titled}
         blockedLabel={t.blocked}
         history={<StepHistory items={history} />}
         {...slots}

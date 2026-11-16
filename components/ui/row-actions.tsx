@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { IconDots } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -14,7 +16,9 @@ export type RowAction = {
   key: string;
   label: string;
   icon: React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
-  onSelect: () => void;
+  // A gesture (`onSelect`) or a place to go (`href`, a link row).
+  onSelect?: () => void;
+  href?: string;
 };
 
 // `reveal`: with a mouse, the button shows only while its row
@@ -54,8 +58,12 @@ export function RowActions({
         <IconDots aria-hidden className="size-5" />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        {actions.map(({ key, label: itemLabel, icon: Icon, onSelect }) => (
-          <DropdownMenuItem key={key} onClick={onSelect}>
+        {actions.map(({ key, label: itemLabel, icon: Icon, onSelect, href }) => (
+          <DropdownMenuItem
+            key={key}
+            onClick={onSelect}
+            render={href ? <Link href={href} /> : undefined}
+          >
             <Icon aria-hidden />
             {itemLabel}
           </DropdownMenuItem>

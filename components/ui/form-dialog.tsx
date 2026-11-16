@@ -23,13 +23,15 @@ export function FormDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
-  description: string;
+  // Only when it says something the title does not.
+  description?: string;
   // Accessible name of the ✕ button.
   closeLabel: string;
   // A DialogTrigger, when the modal opens from its own button.
   trigger?: React.ReactNode;
-  // `wide`: a longer form laid out wider rather than taller (feedback).
-  // `medium`: one column with room to breathe (a contact of the Réseau).
+  // `wide`: a longer form laid out wider rather than taller.
+  // `medium`: one column with room to breathe (a contact of the Réseau, a
+  // feedback).
   size?: "default" | "medium" | "wide";
   children: React.ReactNode;
 }) {
@@ -48,7 +50,7 @@ export function FormDialog({
       >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
+          {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
         {open && <div className="flex flex-col gap-6">{children}</div>}
       </DialogContent>

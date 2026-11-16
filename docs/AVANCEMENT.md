@@ -2254,3 +2254,128 @@ les modules à parcours (proto « Mise en page des modules », version « Propos
   dépenses par mois, par poste, par artiste, budgets des projets et enveloppes des artistes, À payer, plus grosses
   dépenses, sans justificatif. Dépenses inchangée. Sujet « Finance » du guide de PO. Reste : passage navigateur
   (extension Chrome non connectée pendant le lot), pousser la migration en prod avec accord.
+- [x] **Cockpit Finance, lot 1 : trésorerie et argent entrant** (13/11/2026, ticket d'Ibé) — Finance en
+      onglets (Vue d'ensemble, Trésorerie, Budgets, Factures & encaissements, Dépenses), solde du compte
+      par relevé, réserve minimale, entrées d'argent et encaissements partiels, prévision 30/60/90 jours,
+      point bas, calendrier financier, historique ; `manage_finance` (direction, business managers,
+      business) ; migration `20261113100101_treasury.sql`, pgTAP `treasury.test.sql` (22). Reste : lots
+      Factures clients, Dépenses, Budgets détaillés, Rapprochement Qonto / alertes / moteurs.
+      Même jour, mise en page refaite d'après Midday (Sacha : « assez mal construit ») : cartes chiffre
+      `MetricCard` partout, solde et courbe en tête, À encaisser / À payer / Disponible côte à côte,
+      courbe d'une seule encre (`docs/DESIGN.md` « Finance : cartes chiffre »).
+- [x] **Cockpit Finance, lot 2 : factures clients et avoirs** (13/11/2026) — facture d'une entrée : TVA (HT
+      calculé), deal, responsable, envoi, PDF (bucket `finance-files`) ; états Brouillon / Envoyée / Avoir ;
+      avoirs ; relances notées (vue En retard : retard, responsable, dernière relance, prochaine action) ;
+      migration `20261113200102_client_invoices.sql`, pgTAP `client_invoices.test.sql` (18).
+- [x] **Cockpit Finance, lot 3 : dépenses contextualisées** (13/11/2026) — centres de coût, « hors budget »
+      (alerte), TVA / TTC, fournisseur, échéance, valideur, refacturable (recette prévue, alerte sinon) dans le
+      formulaire unique de dépense ; onglet Finance › Dépenses (`/app/finance/depenses`) ; trésorerie en TTC ;
+      migration `20261113300101_finance_spends.sql`, pgTAP `finance_spends.test.sql` (14).
+- [x] **Cockpit Finance, lot 4 : budgets détaillés** (13/11/2026) — onglet Budgets refait (enveloppes projets,
+      artistes, centres de coût : initial, révisions, prévu, engagé, facturé, payé, reste, refacturable, écart ;
+      camembert par poste ; mois par mois), détail d'une enveloppe (postes et sous-postes, révisions tracées,
+      part PDS), import ligne par ligne, modèles réutilisables ; migration `20261113400101_finance_budgets.sql`,
+      pgTAP `finance_budgets.test.sql` (11).
+- [x] **Cockpit Finance, lot 5 : financements et moteurs** (13/11/2026) — onglet Financements : avances The
+      Orchard calculées par tranche de titres, émissions et lives planifiés (coût et titres provisoires à leur
+      date, déplacer = la trésorerie suit), Pay Later (lignes de crédit, tirages, mensualités, crédit disponible ;
+      la dépense financée sort par ses mensualités), remboursements, réserve ; migration
+      `20261113500101_finance_fundings.sql`, pgTAP `finance_fundings.test.sql` (9).
+- [x] **Cockpit Finance, lot 6 : rapprochement bancaire** (13/11/2026) — onglet Rapprochement : import CSV de
+      Qonto (ou ajout à la main), propositions par montant, référence, tiers et date, validation humaine,
+      encaissement ou lien de dépense créé sans double comptage, rapprochements partiels et multiples,
+      doublons possibles ; migration `20261113600101_finance_reconciliation.sql`, pgTAP
+      `finance_reconciliation.test.sql` (12).
+- [x] **Cockpit Finance, lot 7 : alertes, exports, historique** (13/11/2026) — onglet Alertes (réserve, budgets à
+      82 %, échéances, factures et dépenses possiblement dupliquées, refacturables, hors budget, justificatifs,
+      banque à rapprocher, décalage d'émission qui remonte le point bas) ; onglet Exports (CSV dépenses, factures
+      et avoirs, encaissements, banque, historique ; historique des 100 dernières modifications) ; migration
+      `20261113700101_finance_alerts.sql`. Le ticket Finance d'Ibé est couvert ; reste P2 : synchronisation
+      automatique Qonto, récupération des justificatifs.
+- [x] **Finance : correctifs du test UX du 15/11/2026** (`ux-tests/2026-11-15-finance-collectifs/rapport.md`) —
+      accueil : « N alertes Finance urgentes » en lien vers Alertes pour qui lit Finance (SQL
+      `finance_urgent_count()`, migration `20261115100101_finance_home_alerts.sql`, pgTAP
+      `finance_home_alerts.test.sql` (3)) ; « Pour » d'une dépense : textes de la Finance (centre de coût,
+      hors budget), « Loyer, abonnement, frais de structure (aucun projet) » juste après les récents, trouvé
+      aussi par « hors budget » (`SearchSelect keywords`) ; « Planifier une émission » sur Budgets et sur un
+      centre de coût, « Renommer » un centre de coût ; proposition de rapprochement en entier sous la
+      transaction sur écran étroit (`TransactionProposal`) ; Espace Espace ignoré quand le premier Espace a
+      fait défiler la page ; lien « Aller au contenu » au premier Tab ; « Saisir la facture » dans « ⋯ »
+      d'une entrée prévue ; onglets trop larges : fondu au bord et onglet courant ramené dans la vue
+      (`TabBar`, partout) ; « Nouvelle recette » au lieu d'« Entrée prévue » ; Projets vide expliqué ;
+      Exports : « tout l'historique ».
+
+## Images dans une conversation avec PO, choix segmentés des Retours (13/11/2026, branche `pre-prod`)
+
+- [x] **Images jointes à une question à PO** (docs/ASSISTANT.md § 2 quinquies) — trombone, glisser-déposer
+      ou ⌘V dans la zone de saisie (page PO, accueil, fenêtre Espace Espace), vignettes retirables, image
+      dans la bulle (agrandie au clic) ; bucket privé `assistant-images` (`<person_id>/<uuid>`), le message
+      garde l'adresse et `/api/assistant` relit l'image avec la session pour le modèle ; 4 par question,
+      12 par conversation ; supprimées avec la conversation ; migration `20261113800101_assistant_images.sql`,
+      pgTAP `assistant-images.test.sql` (4).
+- [x] **Retours : type et priorité en contrôle segmenté** — `ChipChoice fill` au fond qui glisse à la place
+      des cartes de choix dans la fenêtre de retour, la modification d'un sujet et la confirmation d'une
+      décision (indication du choix retenu dessous) ; boutons `DialogFormActions` ; priorité manquante dite
+      sous le choix au lieu d'un bouton désactivé.
+- [x] **Finance, nouveau style, lot 1 (15/11/2026, `docs/FINANCE-V2.md`)** — thème de section `.finance-scope`
+      (tailles, graisses et arrondis d'un cran plus bas, `app/globals.css`) ; navigation à icônes en liste plate ;
+      Vue d'ensemble en cartes-phrases (`FinanceHome`, `SentenceCard`, `TreasurySpark`, horizon `?horizon=`) ;
+      `CockpitOverview`, `FlowCard`, `BudgetsCard`, `WatchCard` retirés.
+- [x] **Finance, nouveau style, lot 2 (15/11/2026)** — pages de section sans titre visible (h1 gardé pour les lecteurs
+      d'écran) ; action sur la ligne des onglets de Dépenses, Rapprochement et Factures & encaissements ; tableaux de
+      Finance en filets fins (en-tête sans bandeau, 13 px gris ; filets verticaux ; cellules 14 px).
+- [x] **Finance, nouveau style, lot 3 (15/11/2026)** — fiche latérale `FinanceSheet` (↑ ↓, Échap) pour une dépense
+      (`SpendSheet`), une opération bancaire (`TransactionSheet`, proposition et « Valider » dedans) et une entrée
+      d'argent (`IncomeSheet`, relances et encaissements) ; historique de l'enregistrement (`RecordHistory`,
+      `loadRowHistory`) ; `DataTableLink onOpen` ; chargement sans titre (`FinanceLoading`) ; graisse de base 450 ;
+      « Factures & encaissements » devient « Factures ».
+- [x] **Finance, nouveau style, lot 4 (15/11/2026)** — page d'un budget : `EnvelopeFigures` (reste disponible et sa
+      jauge, bande des chiffres), filtre par statut `?statut=` qui pilote postes, camembert et lignes.
+- [x] **Finance, nouveau style, lot 5 (15/11/2026)** — barre du haut `FinanceTopbar` : recherche ⌘K (`FinanceSearch`,
+      `SearchResults`, index `financeSearchIndex`), cloche des alertes (`readFinancePulse`, `loadFinanceWatch` partagé
+      avec la page Alertes) ; `?ouvrir=<id>` ouvre une dépense, une facture ou une opération dans sa fiche
+      (`useSheetRow`) ; axes des graphiques en gris secondaire ; composant commun `Kbd`. Sans migration.
+- [x] **Finance, nouveau style, lot 6 (15/11/2026) : boîte à justificatifs** — migration
+      `20261115600101_finance_receipts.sql` (table `finance_proofs`, `attach_finance_proof`,
+      `finance_proof_sender`), 17 tests pgTAP ; section Justificatifs (dépôt, e-mail po+justificatifs@, lecture
+      vérifiée dans le texte, rapprochement par le code, Rattacher / Choisir une autre dépense / Créer la dépense /
+      Écarter, grille et liste, fiche latérale, historique) ; guide de PO mis à jour. Reste : voir la ligne 6 de
+      FINANCE-V2.
+- [x] **Finance, nouveau style, lot 7 (15/11/2026) : PO dans Finance** « Je veux… » sur la Vue d'ensemble (3
+      suggestions par poste et un champ, qui ouvrent PO avec la question posée) ; lecture `finance` de PO
+      (trésorerie et point bas, entrées en retard, à payer, enveloppes, justificatifs) ; carte « Résumé de la
+      semaine » rédigée par PO à partir des slots du code, vérifiée nombre par nombre, gardée par jour dans
+      `finance_briefs` (migration `20261115770101`, 11 tests pgTAP verts en local), payée par le membre qui la
+      déclenche ; guide de PO (`topics/po.ts`) et sujet Finance mis à jour. Reste : migration à pousser en pré-prod
+      puis en prod avec accord ; questions tests 41-43 à ajouter à `scripts/eval-po-cases.mjs` et à jouer ; voir la
+      carte en vrai navigateur (temps de génération avec Haiku).
+
+- [x] **Finance, retour du 15/11/2026** — Vue d'ensemble globale de la Finance de nouveau (`CockpitOverview` restauré) ;
+      cartes-phrases, résumé de la semaine et « Je veux… » gardés pour l'accueil ; Trésorerie au dessin de la page
+      Rapports du proto (dépenses par poste filtrées par enveloppe, disponible sur les budgets) ; graphique du solde d'après
+      la maquette Figma de Sacha : barres par semaine, entrées au-dessus, sorties en dessous, prévu plus clair, solde
+      remplacé le soir même par la courbe seule et les barres par mois du proto (`FlowBars`, `monthFlows`) ; contrôles segmentés à la hauteur des champs.
+- [x] **Finance › Planning** (15/11/2026, demande de Sacha « un vrai calendrier », d'après Midday) : nouvelle section entre
+  Trésorerie et Rapprochement ; mois en grille lundi → dimanche (liste par jour sur téléphone), mouvements réels puis
+  prévus en pastilles, solde de fin de journée, passage sous la réserve et point bas marqués, détail du jour dans la
+  fiche latérale avec le lien vers la facture, la dépense ou le financement ; navigation au clavier. Calculs :
+  `computeTreasury` seul. Reste : le détail des dépenses payées des jours passés (une ligne agrégée par jour), un écran de
+  chargement en forme de grille (`FinanceLoading` garde la forme liste).
+- [x] **Finance, pages comme le proto (15/11/2026)** — Dépenses en une liste filtrée (enveloppe, statut, sans justificatif,
+      colonnes au choix, total dessous) ; Rapprochement sans cartes (recherche, vues segmentées, colonnes du proto, total) ;
+      Factures aux colonnes du proto (relance, « il y a N j ») ; Budgets en un tableau avec jauge « Consommé » et cartes
+      des modèles ; Financements en cartes The Orchard, Pay Later et par format ; boutons et tableaux du design system ;
+      vues des listes en filtre segmenté (`DataTableViews segmented`).
+- [x] **Finance, corrections du test UX (16/11/2026)** :
+      - **Mots et boutons.** Vocabulaire unique (budget, Autre, entrée, opération, rattacher), une action noire par page ou fiche et le reste dans « ⋯ ».
+      - **Sur place.** Formulaires et fiches dans le panneau de droite, depuis Budgets, le calendrier de Trésorerie et le Planning.
+      - **Vue d'ensemble.** Chiffres cohérents avec Trésorerie et Alertes, petite courbe.
+      - **Budgets.** Budget en noir « Ajouter une dépense », filtre au-dessus des postes.
+      - **Financements.** Boutons en barre.
+      - **Factures.** Barre comme Dépenses, « Pas envoyée ».
+      - **Justificatifs.** « Sans dépense », ouverture par `?ouvrir=`.
+      - **Dépenses.** Justificatif « Pas encore / Manquant », HT/TTC, impasse projet/artiste levée.
+      - **Historique.** Nommé et paginé.
+      - **⌘K.** Justificatifs, opérations et montants cherchables.
+      - **Menus.** Au thème de Finance.
+      - **Reste.** Unité d'un format d'émission à stocker (migration), gestes d'écriture dans les fiches ouvertes depuis un calendrier (lecture + justificatif aujourd'hui).

@@ -84,10 +84,12 @@ select is((select count(*)::int from public.memberships where id = (select id fr
 select is(public.role_permissions('general_director'),
           array['administer', 'assign_projects', 'validate', 'manage_catalog', 'create_projects',
                 'view_all_projects', 'archive_records', 'read_feedback', 'manage_network',
-                'manage_contracts', 'manage_legal'],
+                'manage_contracts', 'manage_legal', 'manage_sessions', 'read_artist_budgets',
+                'manage_artist_budgets', 'read_finance', 'manage_finance'],
           'the general director administers, assigns and creates projects, validates, manages the catalog, archives, reads feedback, keeps the network, the contracts and the legal side');
 select is(public.role_permissions('project_manager'),
-          array['pilot_projects', 'manage_catalog', 'manage_network', 'manage_contracts', 'manage_legal'],
+          array['pilot_projects', 'manage_catalog', 'manage_network', 'manage_contracts', 'manage_legal',
+                'manage_sessions', 'read_artist_budgets'],
           'a project manager pilots projects and keeps the catalog, the network, the contracts and the legal side');
 select is(public.role_permissions('creative_director'), array['creative_work', 'manage_network'],
           'the creative director does creative work and keeps the network');

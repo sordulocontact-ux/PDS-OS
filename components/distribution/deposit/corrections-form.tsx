@@ -21,6 +21,7 @@ import {
 import { declareCorrections } from "@/lib/distribution/declare-actions";
 import { distribution } from "@/lib/i18n/fr/distribution";
 import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
+import { useDistributionRelease } from "@/components/distribution/frame/release-scope";
 
 const fr = { distribution, distributionJourney };
 
@@ -41,6 +42,7 @@ export function CorrectionsForm({
   // The number of the version that will be prepared.
   next: number;
 }) {
+  const releaseId = useDistributionRelease();
   const [note, setNote] = useState("");
   const [kind, setKind] = useState<AnomalyKind>("credit_isrc");
   const [module, setModule] = useState<AnomalyModule>(
@@ -115,6 +117,7 @@ export function CorrectionsForm({
               run(() =>
                 declareCorrections({
                   projectId,
+                  releaseId,
                   note: note.trim(),
                   kind,
                   module,

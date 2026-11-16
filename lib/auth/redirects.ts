@@ -80,6 +80,10 @@ export const PERMISSIONS = [
   // Reads the Finance page: every total of the team's spending (the
   // direction, business managers and business, Sacha 12/11/2026).
   "read_finance",
+  // Writes the treasury and the money in: the balance, the reserve, the
+  // incomes and their receipts (the direction and the Finance, Ibé's ticket
+  // « Cockpit Finance » and Sacha, 13/11/2026).
+  "manage_finance",
 ] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 
@@ -125,8 +129,26 @@ export const routes = {
   files: "/app/files",
   // Every spend the reader may see, projects and artists (BUD 3).
   expenses: "/app/expenses",
-  // The team's spending as a whole (?periode=mois|trimestre|annee|tout).
+  // Finance (Ibé's ticket « Cockpit Finance », 13/11/2026): the overview,
+  // the treasury (?horizon=30|60|90), the budgets
+  // (?type=), the money in (?vue=), the spends (?vue=).
   finance: "/app/finance",
+  financeTreasury: "/app/finance/tresorerie",
+  // The month's moves as a calendar (?mois=YYYY-MM).
+  financePlanning: "/app/finance/planning",
+  financeBudgets: "/app/finance/budgets",
+  financeIncomes: "/app/finance/encaissements",
+  financeSpends: "/app/finance/depenses",
+  financeFundings: "/app/finance/financements",
+  financeReconcile: "/app/finance/rapprochement",
+  financeReceipts: "/app/finance/justificatifs",
+  financeAlerts: "/app/finance/alertes",
+  financeExports: "/app/finance/exports",
+  // A CSV of Finance (lot 7): ?type=depenses|factures|encaissements|banque|historique.
+  financeExport: (type: string) => `/api/finance/export?type=${type}`,
+  // One envelope (lot 4): projet | artiste | centre.
+  financeBudget: (kind: "projet" | "artiste" | "centre", id: string) =>
+    `/app/finance/budgets/${kind}/${id}`,
   // The Business module's deals (BIZ 2 to 4): the list, a deal's page.
   deals: "/app/deals",
   deal: (dealId: string) => `/app/deals/${dealId}`,
@@ -214,6 +236,19 @@ export const routes = {
   projectsNewFromSelection: (selectionId: string) =>
     `/app/projects/new?selection=${selectionId}`,
   project: (id: string) => `/app/projects/${id}`,
+  // « Titres et artistes » of a collective (lot 6 of docs/pds-mic-plan.md).
+  projectTitles: (id: string) => `/app/projects/${id}/titles`,
+  // A collective's releases (lot 13 of docs/pds-mic-plan.md).
+  projectReleases: (id: string) => `/app/projects/${id}/releases`,
+  // A collective's Plans de sortie, one per title (lot 14).
+  projectReleasePlans: (id: string) => `/app/projects/${id}/release-plans`,
+  projectReleasePlan: (id: string, titleId: string) =>
+    `/app/projects/${id}/release-plans/${titleId}`,
+  // A version of a title's plan: its HTML, ?format=pdf its PDF.
+  titlePlanVersion: (projectId: string, versionId: string) =>
+    `/api/projects/${projectId}/title-plans/${versionId}`,
+  // The shared link of a title's plan version (read without an account).
+  sharedTitlePlan: (token: string) => `/t/${token}`,
   // The Cadrage's entry: it opens the step that waits for the viewer.
   projectFraming: (id: string) => `/app/projects/${id}/framing`,
   // One step of the Cadrage (lib/framing/journey.ts): start, dimensions,

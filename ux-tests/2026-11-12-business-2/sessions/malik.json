@@ -1,0 +1,125 @@
+{
+  "persona_id": "malik",
+  "fenetre": "1366x768",
+  "mode_perception": "visuel",
+  "presentation": "Moi c'est Malik, business manager chez PDS, je passe mes journées au téléphone avec les managers d'artistes. Je note vite et je raccroche, d'habitude dans WhatsApp et un Google Sheets.",
+  "premiere_impression": "Deux actions m'attendent : rappeler Camille pour Mona Lys (royalties 20 %, avance 15 000) avant vendredi, et prendre contact avec Sélène Vega pour PDS MIC 5. J'ai compris que c'est ma liste de choses à faire sur mes négos.",
+  "taches": [
+    {
+      "id": "T1",
+      "issue_declaree": "succes",
+      "pense_avoir_reussi": true,
+      "seq": 6,
+      "nb_actions": 0,
+      "moment_le_plus_penible": "Rien de pénible, j'ai juste lu l'écran.",
+      "incidents": [],
+      "verbatims": [
+        "Ok, deux actions : rappeler Camille, et Sélène à contacter."
+      ]
+    },
+    {
+      "id": "T2",
+      "issue_declaree": "succes_difficile",
+      "pense_avoir_reussi": true,
+      "seq": 5,
+      "nb_actions": 14,
+      "moment_le_plus_penible": "Ne pas savoir où noter ce que Sélène m'a dit : il a fallu descendre dans la fiche pour trouver les termes, et le gros bouton du haut proposait « Le call est prévu » alors que le call est déjà fait.",
+      "incidents": [
+        {
+          "etape": "Ouvrir la ligne Sélène depuis l'accueil",
+          "ecran": "Accueil",
+          "voulait": "Ouvrir la ligne Prendre contact",
+          "a_fait": "Cliqué au milieu de la ligne, sur la petite barre du bas",
+          "attendait": "La fiche s'ouvre",
+          "resultat": "Rien, il a fallu recliquer plus à gauche",
+          "emotion": "agacement léger",
+          "verbatim": "Rien... ah j'ai cliqué sur leur petite barre."
+        },
+        {
+          "etape": "Trouver où noter les 30 % et 3 000 €",
+          "ecran": "Fiche du deal",
+          "voulait": "Noter l'accord",
+          "a_fait": "Ignoré le bouton « Le call est prévu », scrollé jusqu'à Termes négociés",
+          "attendait": "Un champ ou une note visible en haut",
+          "resultat": "Trouvé en descendant",
+          "emotion": "hésitation",
+          "verbatim": "Le call est prévu ? Mais je viens de l'avoir. Bon, je descends."
+        },
+        {
+          "etape": "Choisir l'état du terme",
+          "ecran": "Fenêtre Part du master",
+          "voulait": "Dire qu'elle est d'accord",
+          "a_fait": "Choisi Confirmé",
+          "attendait": "Un simple champ de valeur",
+          "resultat": "Enregistré, étiquette verte Confirmé",
+          "emotion": "doute",
+          "verbatim": "Proposé par PDS, contre-proposition, confirmé... elle est d'accord, donc confirmé."
+        },
+        {
+          "etape": "Faire en sorte que Claire valide",
+          "ecran": "Fiche du deal, haut",
+          "voulait": "Que Claire soit prévenue",
+          "a_fait": "Cliqué Proposer l'accord de principe, apparu après les termes",
+          "attendait": "Un bouton envoyer à Claire",
+          "resultat": "Accord de principe à valider, la direction est prévenue",
+          "emotion": "soulagement mais pas sûr",
+          "verbatim": "Attends, Claire a vraiment reçu quelque chose ou pas ?"
+        },
+        {
+          "etape": "Interruption téléphone",
+          "ecran": "Fenêtre Avance ou cachet",
+          "voulait": "Reprendre après l'appel",
+          "a_fait": "Attendu 10 s",
+          "attendait": "Retrouver ma saisie",
+          "resultat": "Saisie intacte",
+          "emotion": "neutre",
+          "verbatim": "Ok, c'est toujours là."
+        }
+      ],
+      "verbatims": [
+        "Ok, ça c'est fait.",
+        "Attends, il a enregistré là ou pas ? Ah oui, Terme enregistré."
+      ]
+    },
+    {
+      "id": "T3",
+      "issue_declaree": "succes",
+      "pense_avoir_reussi": true,
+      "seq": 6,
+      "nb_actions": 10,
+      "moment_le_plus_penible": "Choisir Sélène dans une liste d'artistes avec Lila Vega juste au-dessus, et la mention jaune Sans justificatif alors que je n'ai pas de ticket.",
+      "incidents": [
+        {
+          "etape": "Enregistrer la dépense",
+          "ecran": "Dépenses",
+          "voulait": "Déclarer 45 € de taxi",
+          "a_fait": "Rempli le formulaire sans ticket",
+          "attendait": "Une dépense normale",
+          "resultat": "Ligne ajoutée avec l'étiquette jaune Sans justificatif",
+          "emotion": "doute",
+          "verbatim": "Sans justificatif... c'est un problème ? Je l'ai pas, le ticket."
+        },
+        {
+          "etape": "Rattacher au deal",
+          "ecran": "Formulaire dépense",
+          "voulait": "Lier au deal PDS MIC 5",
+          "a_fait": "Choisi l'artiste Sélène Vega",
+          "attendait": "Une option deal ou projet",
+          "resultat": "Pas de lien visible avec le deal",
+          "emotion": "incertitude",
+          "verbatim": "Je sais pas si ça se retrouve dans le deal."
+        }
+      ],
+      "verbatims": ["Taxi, ok, il me propose Transport, parfait."]
+    }
+  ],
+  "sus": [3, 2, 4, 2, 4, 2, 4, 2, 3, 2],
+  "entretien": {
+    "raconter": "J'ai noté mon accord avec Sélène (30 % master, 3 000 € de cachet), je l'ai envoyé à Claire, puis j'ai déclaré mon taxi de 45 €.",
+    "agace": "Le bouton du haut qui parlait d'un call alors que c'était fait, et devoir descendre pour trouver où noter. J'ai aussi hésité sur Confirmé ou Proposé.",
+    "pas_sur_que_ca_marche": "Si Claire avait vraiment reçu quelque chose. L'écran dit « la direction est prévenue » mais je ne vois pas de message. Pareil pour la dépense : je ne sais pas si elle est rattachée au deal.",
+    "pratique": "Les messages « enregistré » qui apparaissent, et le poste Transport proposé tout seul pour le taxi.",
+    "utiliserait": "Peut-être, si c'est aussi rapide que WhatsApp : ça me sert pour que Claire suive. Mais pour l'instant je noterais encore d'abord dans mes notes.",
+    "un_mot": "Correct"
+  }
+}

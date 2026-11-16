@@ -17,6 +17,11 @@ import { cycleState, type CycleState } from "@/lib/distribution/tracking";
 import { loadTrackingView } from "@/lib/distribution/tracking-queries";
 import { loadMembers } from "@/lib/framing/related";
 import type { ProjectDetail } from "@/lib/projects/types";
+import {
+  inScope,
+  releaseIdOf,
+  type ScopedProject,
+} from "@/lib/distribution/scope";
 import { createClient } from "@/lib/supabase/server";
 
 // A capture opens for an hour after the page is read.
@@ -40,32 +45,44 @@ export type PlatformsView = {
 /** The platforms of a release and its public availability, read with the
  * viewer's session; the detection's links come as suggestions only. */
 export const loadPlatformsView = trackedCache(async function loadPlatformsView(
-  project: ProjectDetail,
+  project: ProjectDetail & ScopedProject,
   access: Access,
 ): Promise<PlatformsView> {
   const supabase = await createClient();
+  const releaseId = releaseIdOf(project);
+  const releases = supabase
+    .from("releases")
+    .select("id, release_links(platform, url, first_seen_at)")
+    .eq("project_id", project.id);
   const [rows, release, members, tracking, dossier] = await Promise.all([
-    supabase
-      .from("distribution_platforms")
-      .select(
-        "platform, label, url, available_declared_at, available_declared_by, verification, verification_note, verified_by, verified_at, compliance, compliance_note, compliance_by, compliance_at, territory, observed_on, proof_path, proof_name, proof_url, created_at",
-      )
-      .eq("project_id", project.id)
-      .order("created_at"),
-    supabase
-      .from("releases")
-      .select("id, release_links(platform, url, first_seen_at)")
-      .eq("project_id", project.id)
-      .order("created_at", { ascending: true })
-      .limit(1)
-      .maybeSingle(),
+    inScope(
+      supabase
+        .from("distribution_platforms")
+        .select(
+          "platform, label, url, available_declared_at, available_declared_by, verification, verification_note, verified_by, verified_at, compliance, compliance_note, compliance_by, compliance_at, territory, observed_on, proof_path, proof_name, proof_url, created_at",
+        )
+        .eq("project_id", project.id),
+      releaseId,
+    ).order("created_at"),
+    (releaseId
+      ? // A collective's release (lot 15): its own links.
+        releases.eq("id", releaseId)
+      : // The project's release (lot 13): never a title's, never archived.
+        releases
+          .is("project_title_id", null)
+          .is("archived_at", null)
+          .order("created_at", { ascending: true })
+          .limit(1)
+    ).maybeSingle(),
     loadMembers(access),
     loadTrackingView(project, access),
-    supabase
-      .from("distribution_dossiers")
-      .select("validator_person_id")
-      .eq("project_id", project.id)
-      .maybeSingle(),
+    inScope(
+      supabase
+        .from("distribution_dossiers")
+        .select("validator_person_id")
+        .eq("project_id", project.id),
+      releaseId,
+    ).maybeSingle(),
   ]);
   // The owner, or the designated validator (can_check_distribution).
   const canCheck =

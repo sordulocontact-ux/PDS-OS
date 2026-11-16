@@ -126,6 +126,7 @@ export function DimensionWork({
           levers={data.levers}
           members={data.members}
           milestones={data.milestones}
+          titleScopes={data.titleScopes}
           projectId={projectId}
         />
       );

@@ -41,6 +41,9 @@ type ColumnProps = {
 const column = ({ hideBelow: hide, fill, align }: ColumnProps) =>
   cn(
     !fill && "w-48",
+    // On a phone a long title is cut (`truncate`) instead of pushing the
+    // amount out of the frame (Finance UX test, 16/11/2026).
+    fill && "max-sm:w-full max-sm:max-w-0",
     hide && hideBelow[hide],
     // Its gap to the next column stays (« ValeurSource », 10/11/2026); the
     // last column's padding is the row's inset (ROW_INSET).
@@ -104,7 +107,7 @@ export function DataTableHead({
   return (
     <TableHead
       className={cn(
-        "h-11 px-0 pr-5 text-[length:var(--type-body-md)] font-medium text-[color:var(--text-secondary)]",
+        "h-11 px-3.5 text-[length:var(--type-body-md)] font-medium text-[color:var(--text-secondary)]",
         column(columnProps),
         className,
       )}
@@ -150,15 +153,23 @@ export function DataTableRow({
   );
 }
 
+// `colSpan`: a cell over several columns (a row of another kind in the same
+// table: a title's facts across its participations' columns).
 export function DataTableCell({
   children,
   className,
+  colSpan,
   ...columnProps
-}: ColumnProps & { children: React.ReactNode; className?: string }) {
+}: ColumnProps & {
+  children: React.ReactNode;
+  className?: string;
+  colSpan?: number;
+}) {
   return (
     <TableCell
+      colSpan={colSpan}
       className={cn(
-        "px-0 py-3 pr-5 text-[length:var(--type-body-md)] font-medium",
+        "px-3.5 py-3 text-[length:var(--type-body-md)] font-medium",
         column(columnProps),
         className,
       )}
@@ -176,17 +187,32 @@ export function DataTableCell({
 export function DataTableLink({
   href,
   newTab = false,
+  onOpen,
   children,
 }: {
   href: string | null;
   // A file opened in the browser, outside the app: a plain link, new tab.
   newTab?: boolean;
+  // The row opens a panel on the page (Finance's side sheet) instead of a
+  // page: a button covering the row, `href` then null.
+  onOpen?: () => void;
   children: React.ReactNode;
 }) {
-  if (href === null) return <span className="truncate">{children}</span>;
   const link = { "data-row-link": "" };
   const className =
     "truncate outline-none after:absolute after:inset-0 hover:underline focus-visible:underline";
+  if (onOpen)
+    return (
+      <button
+        type="button"
+        onClick={onOpen}
+        className={cn(className, "min-w-0 text-left")}
+        {...link}
+      >
+        {children}
+      </button>
+    );
+  if (href === null) return <span className="truncate">{children}</span>;
   if (newTab)
     return (
       <a

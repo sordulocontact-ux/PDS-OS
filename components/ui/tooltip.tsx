@@ -11,7 +11,14 @@ import { cn } from "@/lib/utils";
 
 const TooltipProvider = TooltipPrimitive.Provider;
 const Tooltip = TooltipPrimitive.Root;
-const TooltipTrigger = TooltipPrimitive.Trigger;
+// Shown fast (Sacha 15/11/2026: an icon button's name « au survol,
+// rapidement »), as soon as the pointer rests.
+function TooltipTrigger({
+  delay = 150,
+  ...props
+}: TooltipPrimitive.Trigger.Props) {
+  return <TooltipPrimitive.Trigger delay={delay} {...props} />;
+}
 
 function TooltipContent({
   className,

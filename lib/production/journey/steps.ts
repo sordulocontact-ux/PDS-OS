@@ -427,7 +427,10 @@ function stepsOf(i: JourneyInput): Def[] {
       role("valid", owner, r.owner),
     ],
     done: shot,
-    act: () => (ext ? actor(owner, t.todo.shootDone) : i.later),
+    // An external company's shoot is confirmed by the owner, unless a
+    // participation contract blocks it (lot 12 bis): then what to do.
+    act: () =>
+      ext && !i.contractBlocked ? actor(owner, t.todo.shootDone) : i.later,
     summary: shot ? t.summary.shot : null,
   };
 

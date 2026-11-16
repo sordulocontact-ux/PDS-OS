@@ -17,6 +17,7 @@ import { reportPlatformProblem } from "@/lib/distribution/platform-gestures";
 import { distribution } from "@/lib/i18n/fr/distribution";
 import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
 import { todayInParis } from "@/lib/insights/dates";
+import { useDistributionRelease } from "@/components/distribution/frame/release-scope";
 
 const fr = { distribution, distributionJourney };
 
@@ -47,6 +48,7 @@ export function PlatformProblem({
   ownerPersonId: string | null;
   onCancel: () => void;
 }) {
+  const releaseId = useDistributionRelease();
   const [problem, setProblem] = useState<
     "unavailable" | "non_compliant" | null
   >(null);
@@ -75,6 +77,7 @@ export function PlatformProblem({
     run(() =>
       reportPlatformProblem({
         projectId,
+        releaseId,
         platform,
         problem,
         note: note.trim(),

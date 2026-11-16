@@ -3,6 +3,7 @@ import "server-only";
 import { distributionContext } from "@/lib/distribution/journey-context";
 import { fr } from "@/lib/i18n/fr";
 import { getProject } from "@/lib/projects/queries";
+import { countedTitlesProject } from "@/lib/projects/counted-titles";
 import { applicableWorkflows } from "@/lib/workflow-status/rules";
 
 import type { ModuleJourney } from "./types";
@@ -16,12 +17,15 @@ import type { ModuleJourney } from "./types";
 export async function distributionJourneys(
   projectId: string,
 ): Promise<ModuleJourney[]> {
-  const project = await getProject(projectId);
+  const read = await getProject(projectId);
+  // A collective's abandoned titles leave the counts (lot 9).
+  const project = read ? countedTitlesProject(read) : null;
   if (
     !project ||
     !applicableWorkflows({
       type: project.type,
       masterCount: project.masters.length,
+      collective: project.collective,
     }).includes("distribution")
   )
     return [];

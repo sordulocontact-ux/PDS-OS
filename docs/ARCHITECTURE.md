@@ -57,10 +57,19 @@ service role n'est utilisée que par le cron (`lib/supabase/admin.ts`).
 | `…20261105110101_delete_call` (**non appliquée**) | Suppression d'une réunion / d'un call (retour d'Ibé, 02/11/2026) : `delete_call(p_call_id)` (SECURITY DEFINER, `archive_records` = DG, `can_see_call`) supprime l'appel avec ses invités, prises d'enregistrement, transcriptions et comptes rendus ; refus `call_in_use` si une tâche, un besoin ou un Brief Master en dépend. UI : « Supprimer la réunion » dans le « ⋯ » de la page (`CallSheetMenu`), action `lib/calls/delete-actions.ts`. Les objets audio du bucket restent à nettoyer. |
 | `…20261107180101_call_owner_deletes` | Suppression d'un call ouverte à **son responsable** (retour d'Akili, 07/11/2026) : `delete_call` accepte la direction (`archive_records`) **ou** `is_call_owner` (responsable du projet, créateur d'une réunion) ; le reste inchangé. L'écran suit `lib/calls/delete-rule.ts` (`canDeleteCall`, ligne par ligne dans les listes) ; `deleteCall` annule aussi l'événement Google d'un call à venir. Test : `call-delete.test.sql`. |
 | `…20261111100101_collective_projects` | **Projet collectif, lot 1** (`docs/pds-mic-plan.md`) : `projects.collective` (faux par défaut, aucun projet existant modifié, posé à la main tant que le formulaire de création ne le propose pas ; aucun droit colonne). L'artiste principal d'un collectif est `projects.artist_id` ; pas de défaut en base (PDS sera proposé par le formulaire). `project_artist_name` / `project_artist_id` lisent **d'abord** l'artiste principal **pour un collectif seulement** (règle inchangée pour les autres projets) : recherche, smartlink et identité de la Conception suivent ; côté code, `artistNameOf` (`lib/projects/queries.ts`), `projectArtist` (plan de sortie, dossier de presse) et les KPI Deezer font de même. `set_project_main_artist(p_project_id, p_artist_id)` : responsable du collectif, ou `create_projects` avant lancement ; refus `not_collective`, `artist_required`, `artist_not_found` (autre organisation ou archivé). L'identité déjà choisie dans la Conception est gardée quand l'artiste principal change ; le Brief créatif et l'ordre du jour du call créatif signalent qu'elle ne correspond plus (`lib/design/identity-mismatch.ts`, collectif seulement). Badge « Projet collectif » (liste Projets, en-tête de la vue d'ensemble). Test : `collective-projects.test.sql`. |
-| `…20261111120101_project_titles` | **Projet collectif, lot 2** (`docs/pds-mic-plan.md` § 3) : `project_titles` (position = « Titre 3 », `working_title` nul = « Titre 3 · sans nom » dit par le code, `master_id` nul tant que le titre n'est pas au Catalogue, statut `planned` / `active` / `abandoned`, abandon daté avec auteur et motif obligatoire) ; clé `(project_id, master_id)` vers `project_masters` **on delete restrict** (différable seulement pour l'écriture du titre et de son lien dans `add_project_title`) : le lien dont part l'historique Master d'un titre ne se supprime plus. **Collectif seulement** (trigger `a_check_collective`) : chaque lien a son titre (trigger `b_title` sur `project_masters`, rattrapage quand un projet devient collectif et pour ceux qui l'étaient). Écriture par fonctions seules : `add_project_title` (avant ou **après le lancement**, ajout seul ; avec un titre du Catalogue, le lien est créé, forme du projet vérifiée : un single garde un master), `rename_project_title`, `abandon_project_title` (motif obligatoire ; maquette en brouillon ou en développement passée en « abandonnée », statut d'avant gardé ; **maquette validée jamais touchée**, master promu laissé tel quel : seul le titre est abandonné, décision 8 ; rien d'autre touché), `reactivate_project_title` (retour `active` avec master, `planned` sans ; maquette rendue au statut que l'abandon lui avait pris, si personne ne l'a changée). Droits : responsable une fois lancé, `create_projects` avant. Historique en ajout seul `project_title_events` (ajouté, renommé, abandonné avec motif, réactivé), lu dans l'Activité du projet. `update_project` d'un collectif garde ses liens (refus `collective_title_kept` si le formulaire en retire un) ; `delete_project_row` vide les deux tables avant le projet. Lecture RLS par `visible_project_ids()`, déclencheurs `zz_project_live` posés par nom (pas `attach_project_live()`, qui l'aurait aussi posé sur `personal_tasks`). Liste minimale sur la Vue d'ensemble (`ProjectTitles`) en attendant la vue du lot 6. Test : `project-titles.test.sql`. |
-| `…20261111140101_title_participations` | **Projet collectif, lot 3** (`docs/pds-mic-plan.md` § 3) : `title_participations` (un artiste sur un titre du collectif : rôle `main` / `featuring`, `featuring` par défaut ; statut `proposed` / `invited` / `confirmed` / `declined` / `withdrawn` ; interlocuteur `contact_id` et contrat `contract_id` facultatifs, clés composites même organisation, contrat supprimé = lien coupé ; qui a donné le statut et quand ; note). Un artiste une fois par titre, sur autant de titres que voulu ; l'artiste principal du projet n'est pas une participation (`main_artist_not_participant`). **Collectif seulement**, ajout à tout moment (même après le lancement), jamais supprimée : refusée ou retirée, elle reste ; **id stable** (un changement de statut met la ligne à jour, rien ne la recrée ni ne la supprime hors `delete_project_row`) : le module Business y pointe son dossier de négociation, le statut reste simple. Écriture par fonctions seules : `add_title_participation` (renvoie l'id et le nombre de crédits écrits) et `set_title_participation_status` (tout autre statut, `status_unchanged` sinon), droits de `lock_project_title` (responsable une fois lancé, `create_projects` avant), titre abandonné refusé. **Confirmée sur un titre qui a son master** : `credit_title_participations` écrit les crédits manquants dans `master_artists`, l'artiste principal en `main` **en tête** puis l'artiste avec son rôle après les autres, jamais un crédit retiré ni changé ; **master aussi dans un projet non collectif** (le même titre dans le single d'un artiste) : **aucun crédit automatique**, ni l'artiste principal ni l'invité (client, 11/11/2026, décision 10 ; `master_in_simple_project`) ; `project_title_shared_projects(p_project_id)` (SECURITY DEFINER, pour qui voit le collectif) dit quels titres sont partagés et avec quel projet, le nom seulement si la personne le voit, pour l'avertissement « Crédits à vérifier au Catalogue : ce titre est aussi dans le projet … » ; même chose quand un master est relié plus tard au titre (trigger `c_credit_participations` sur `project_titles.master_id`, pour le lot 7). `contact_id` lu sous RLS seulement : aucune fonction SECURITY DEFINER ne lit le Réseau ni ne renvoie l'interlocuteur (sa validité tient à la clé). Historique dans `project_title_events` (`participation_added`, `participation_status`, l'artiste nommé, jamais l'interlocuteur), lu dans l'Activité. « Les artistes du projet » sont calculés (`projectArtists`, `lib/projects/participation-rules.ts`) : participations ni refusées ni retirées des titres non abandonnés, plus les crédits des titres actifs ; jamais stockés. La fiche artiste compte les collectifs où l'artiste a une telle participation (`participationProjectIds`). `delete_project_row` vide la table avant les titres ; artiste ou contact nommé par une participation : suppression refusée (« encore utilisé »). UI : artistes sous chaque titre de `ProjectTitles`, avertissement des titres partagés. Test : `title-participations.test.sql`. |
+| `…20261111120101_project_titles` | **Projet collectif, lot 2** (`docs/pds-mic-plan.md` § 3) : `project_titles` (position = « Titre 3 », `working_title` nul = « Titre 3 · sans nom » dit par le code, `master_id` nul tant que le titre n'est pas au Catalogue, statut `planned` / `active` / `abandoned`, abandon daté avec auteur et motif obligatoire) ; clé `(project_id, master_id)` vers `project_masters` **on delete restrict** (différable seulement pour l'écriture du titre et de son lien dans `add_project_title`) : le lien dont part l'historique Master d'un titre ne se supprime plus. **Collectif seulement** (trigger `a_check_collective`) : chaque lien a son titre (trigger `b_title` sur `project_masters`, rattrapage quand un projet devient collectif et pour ceux qui l'étaient). Écriture par fonctions seules : `add_project_title` (avant ou **après le lancement**, ajout seul ; avec un titre du Catalogue, le lien est créé, forme du projet vérifiée : un single garde un master), `rename_project_title`, `abandon_project_title` (motif obligatoire ; maquette en brouillon ou en développement passée en « abandonnée », statut d'avant gardé ; **maquette validée jamais touchée**, master promu laissé tel quel : seul le titre est abandonné, décision 8 ; rien d'autre touché), `reactivate_project_title` (retour `active` avec master, `planned` sans ; maquette rendue au statut que l'abandon lui avait pris, si personne ne l'a changée). Droits : responsable une fois lancé, `create_projects` avant. Historique en ajout seul `project_title_events` (ajouté, renommé, abandonné avec motif, réactivé), lu dans l'Activité du projet. `update_project` d'un collectif garde ses liens (refus `collective_title_kept` si le formulaire en retire un) ; `delete_project_row` vide les deux tables avant le projet. Lecture RLS par `visible_project_ids()`, déclencheurs `zz_project_live` posés par nom (pas `attach_project_live()`, qui l'aurait aussi posé sur `personal_tasks`). Gestes dans « Titres et artistes » (lot 6, `components/projects/titles/`), qui remplace la liste minimale de la Vue d'ensemble. Test : `project-titles.test.sql`. |
+| `…20261111140101_title_participations` | **Projet collectif, lot 3** (`docs/pds-mic-plan.md` § 3) : `title_participations` (un artiste sur un titre du collectif : rôle `main` / `featuring`, `featuring` par défaut ; statut `proposed` / `invited` / `confirmed` / `declined` / `withdrawn` ; interlocuteur `contact_id` et contrat `contract_id` facultatifs, clés composites même organisation, contrat supprimé = lien coupé ; qui a donné le statut et quand ; note). Un artiste une fois par titre, sur autant de titres que voulu ; l'artiste principal du projet n'est pas une participation (`main_artist_not_participant`). **Collectif seulement**, ajout à tout moment (même après le lancement), jamais supprimée : refusée ou retirée, elle reste ; **id stable** (un changement de statut met la ligne à jour, rien ne la recrée ni ne la supprime hors `delete_project_row`) : le module Business y pointe son dossier de négociation, le statut reste simple. Écriture par fonctions seules : `add_title_participation` (renvoie l'id et le nombre de crédits écrits) et `set_title_participation_status` (tout autre statut, `status_unchanged` sinon), droits de `lock_project_title` (responsable une fois lancé, `create_projects` avant), titre abandonné refusé. **Confirmée sur un titre qui a son master** : `credit_title_participations` écrit les crédits manquants dans `master_artists`, l'artiste principal en `main` **en tête** puis l'artiste avec son rôle après les autres, jamais un crédit retiré ni changé ; **master aussi dans un projet non collectif** (le même titre dans le single d'un artiste) : **aucun crédit automatique**, ni l'artiste principal ni l'invité (client, 11/11/2026, décision 10 ; `master_in_simple_project`) ; `project_title_shared_projects(p_project_id)` (SECURITY DEFINER, pour qui voit le collectif) dit quels titres sont partagés et avec quel projet, le nom seulement si la personne le voit, pour l'avertissement « Crédits à vérifier au Catalogue : ce titre est aussi dans le projet … » ; même chose quand un master est relié plus tard au titre (trigger `c_credit_participations` sur `project_titles.master_id`, pour le lot 7). `contact_id` lu sous RLS seulement : aucune fonction SECURITY DEFINER ne lit le Réseau ni ne renvoie l'interlocuteur (sa validité tient à la clé). Historique dans `project_title_events` (`participation_added`, `participation_status`, l'artiste nommé, jamais l'interlocuteur), lu dans l'Activité. « Les artistes du projet » sont calculés (`projectArtists`, `lib/projects/participation-rules.ts`) : participations ni refusées ni retirées des titres non abandonnés, plus les crédits des titres actifs ; jamais stockés. La fiche artiste compte les collectifs où l'artiste a une telle participation (`participationProjectIds`). `delete_project_row` vide la table avant les titres ; artiste ou contact nommé par une participation : suppression refusée (« encore utilisé »). UI : « Titres et artistes » (lot 6), une ligne par participation sous son titre, avertissement des titres partagés. Test : `title-participations.test.sql`. |
 | `…20261111233101_artist_selections` | **Projet collectif, lot 4** (`docs/pds-mic-plan.md` § 3.1 ; d'abord numérotée `200101`, comme `budget_artist_lines` du Budget, puis `232101`, comme `deal_notifications` ; `233101` depuis le 12/11) : sélections d'artistes dans le Catalogue, avant tout projet. `artist_selections` (nom 120 caractères au plus, note, **responsable** `owner_person_id` = « Mes sélections » : sa créatrice, puis la personne à qui elle est transmise ; `transmitted_by` / `transmitted_at` de la dernière transmission ; `archived_at` prévu, sans geste) et `artist_selection_items` (artistes ordonnés, chacun une fois ; un artiste supprimé du Catalogue en sort, `on delete cascade` ; un artiste archivé reste mais n'est ni montré ni proposé). **Lues par tout membre actif** (`is_active_member`, comme les artistes), écrites par fonctions seules, pour qui a `manage_catalog` (direction et chefs de projet ; ni directeur créatif ni postes Business) : `create_artist_selection` (nom + premiers artistes, aucun possible), `rename_artist_selection`, `add_artists_to_selection` (à la fin, ceux déjà présents ignorés, renvoie le nombre ajouté), `remove_artist_from_selection`, `transmit_artist_selection` (à un membre actif qui a `manage_catalog`, jamais sa responsable actuelle ; notification `selection_transmitted`, sujet = la sélection, sans projet), `list_selection_recipients`. **Aucun projet créé** (conversion au lot 5, copie sans lien vivant). UI : bouton « Sélections » de la page Artistes → `/app/catalog/artists/selections` (onglets Mes sélections / Toutes pour `manage_catalog`, une seule liste sinon) et la page d'une sélection (Ajouter des artistes, Transmettre, Renommer, Retirer). La cloche nomme la sélection (`loadSelectionNames`, `lib/notifications/queries.ts`). Test : `artist-selections.test.sql`. |
 | `…20261111235101_collective_project_creation` | **Projet collectif, lot 5** (`docs/pds-mic-plan.md` § 8) : création d'un collectif depuis le formulaire « Nouveau projet » ou depuis une sélection. `create_collective_project(p_organization_id, p_title, p_type, p_main_artist_id, p_assignee_person_id, p_selection_id, …)` (SECURITY DEFINER) : projet **collectif dès sa première ligne**, artiste principal obligatoire (`artist_required`, `artist_not_found`), mêmes règles de forme que `create_project` (masters d'une sortie musicale → titres par le trigger du lot 2), transmission, direction créative ; une sélection donnée : **ses artistes vivants copiés**, chacun avec un titre sans nom (`add_project_title`, prévu) et une participation proposée en featuring (`add_title_participation`), dans l'ordre de la sélection, l'artiste principal et les archivés écartés ; **aucun lien gardé** avec la sélection. Droits : `create_projects` (transmis au chef de projet choisi), ou **la responsable de la sélection convertie si elle a `manage_catalog`** (sans `create_projects` pour le reste) : elle est alors la cheffe de projet, seule possible (`assignee_not_self`), transmission à elle-même acceptée aussitôt par `respond_to_assignment` (projet lancé, historique gardé, aucune notification à soi). `update_project` : l'artiste principal d'un collectif n'est plus écrit par le champ « Artiste » (vidé, il l'effaçait, relevé au lot 1) ; changé par `set_project_main_artist`, absent = gardé. **L'artiste principal n'est jamais invité du projet** : `set_project_main_artist` refuse un artiste ayant une participation ni refusée ni retirée sur un titre du projet, même abandonné (`main_artist_is_guest`), et `set_title_participation_status` ne remet pas en proposée / invitée / confirmée une participation de l'artiste principal (`main_artist_not_participant`). Aucune table ajoutée (`delete_project_row` inchangé). UI : option « Projet collectif » du formulaire (`CollectiveOption`, modèle PDS Mic proposé : contenu, format « PDS Mic » trouvé par son nom, artiste principal = l'artiste nommé comme l'organisation, `lib/projects/collective-rules.ts`), sélection et aperçu des artistes importés (`CollectiveSelectionField`), chef de projet proposé = responsable de la sélection ; « Créer le projet » sur la page d'une sélection (`/app/projects/new?selection=…`, ouverte aussi à sa responsable) ; outil de PO `propose_project` (`collective`, `selection`). Test : `collective-project-creation.test.sql`. |
+| `…20261113170101_main_artist_history` | **Projet collectif, lot 6** (`docs/pds-mic-plan.md` ; demande du 13/11/2026) : le changement d'artiste principal d'un collectif va dans l'**Activité** du projet. `project_title_events` devient le journal de composition du collectif : `title_id` peut être nul, pour le seul type `main_artist_changed` (contrainte `project_title_events_title_check`), `detail` = `from` / `to` (noms des artistes à ce moment). `set_project_main_artist` l'écrit quand l'artiste change vraiment (le même artiste n'écrit rien), avec son auteur ; tous les chemins y passent (« Changer l'artiste principal » après lancement, `update_project` avant). Un projet simple n'a pas d'artiste principal à changer (`not_collective`) : rien ne change pour lui. Aucune table : `delete_project_row` vide déjà ce journal. Lu par `lib/overview/activity.ts` (« Artiste principal · PDS → Mona Lys »), chaque ligne du journal menant à « Titres et artistes ». Test : `title-board.test.sql`. |
+| `…20261113180101_provisional_titles` | **Projet collectif, lot 7** (`docs/pds-mic-plan.md` § 3.3, décision 3, voie A) : `masters.title_is_provisional` (faux par défaut, jamais écrit par le navigateur : aucun droit de colonne ; tout renommage du master le termine, trigger `b_provisional_named`, que ce soit le nommage du titre dans le projet, le formulaire du Catalogue ou `promote_demo`). `ensure_project_title_master(p_title_id)` : un titre du collectif sans master en reçoit un à son premier audio ou à sa première session, maquette `draft` nommée « Sans titre · Artiste · Projet » (`provisional_title_name` : le premier artiste en jeu du titre, sinon l'artiste principal), créditée à l'artiste principal en `main` (les invités confirmés suivent en `featuring` par `c_credit_participations`, lot 3), reliée au projet (`project_masters`, l'historique Master est gardé) ; le titre devient actif ; renvoie le master (celui qu'il a déjà s'il en a un). Droits : qui écrit les titres du collectif, ou qui tient les sessions (`manage_sessions`) sur un projet qu'il voit. `rename_project_title` nomme aussi le master provisoire (détail `master_named`). `attach_master_to_project_title(p_title_id, p_master_id)` : un titre du Catalogue pour un titre du projet qui n'en a pas (mêmes contrôles qu'`add_project_title` ; `title_has_master`, `title_abandoned`). Journal : types `cataloged` et `master_attached`, `master_provisional` dans l'instantané (l'Activité garde « Titre 3 · sans nom »). Aucune table : `delete_project_row` inchangé. Code : `lib/projects/title-actions.ts` (`startTitleWork`, `attachCatalogTitle`), `masterNameOf` (`title-rules.ts`), sessions (`pt:` + id dans les titres du formulaire, `lib/sessions/form-data.ts`, `actions.ts`), Catalogue (`provisional` sur `MasterListItem`, badge « Nom provisoire » dans les Maquettes et l'en-tête), « Rattacher à un projet existant » (`listLinkableProjects(masterId, access)` : aussi les collectifs dont la personne écrit les titres, lancés ou non, de tout type). Test : `provisional-titles.test.sql`. |
+| `…20261113190101_abandoned_titles_counts` | **Projet collectif, lot 9** (`docs/pds-mic-plan.md` § 6, risque 5) : un titre abandonné sort des comptes « tous les titres » sans être délié (`project_masters`, versions et historique gardés, réactivation qui le ramène). Facture de l'ingénieur : `request_project_master_invoices(p_project_id)` (chaque ingénieur externe une fois que chaque titre du tour a son Master final, les titres abandonnés d'un collectif exclus, au moins un Master final validé), appelée par la validation d'un Master final (`request_master_invoices`, comme avant) **et** par `abandon_project_title` (redéfinie : l'abandon du dernier titre en attente envoie la facture). Côté code, `ProjectDetail.abandonedMasterIds` (vide hors collectif) et `countedTitlesProject` (`lib/projects/counted-titles.ts`) retirent ces titres aux entrées du Master (`masterJourneyContext`, envoi du paquet, faits du Brief), de l'état des workflows (Master ; le Juridique garde tous les titres jusqu'au lot 11) et de la Distribution (contexte, parcours, actions de clôture, paramètres, validation) ; `getProject().masters` reste complet (formulaire d'édition). Le sélecteur du Master (lot 8) ne les propose plus ; « Titres et artistes » n'ouvre plus le Master sur eux. Vue consolidée en tête du Master d'un collectif (`TitlesOverview`, `StatTiles`) : titres qui attendent leur source, un mix, un mastering, une validation (`titleWaitings`), chaque chiffre ouvrant le premier de ses titres. Test : `collective-master.test.sql`. |
+| `…20261113200101_deliverable_titles` | **Projet collectif, lot 10** (`docs/pds-mic-plan.md` § 3.1, § 3.2, principe 3) : `deliverable_titles`, les titres que vise une action marketing d'un collectif, sans jamais la dupliquer ni rien créer par titre. Une action = un livrable engagé de la Stratégie (`strategy_deliverable_id`, celui que travaillent la Conception et la Production) ou une activation (`activation_id`), un seul des deux. Aucune ligne : **tout le projet** (comportement actuel, par défaut) ; une ligne `all_titles` : tous les titres (ceux ajoutés plus tard aussi) ; une ligne par titre `titles` ; une ligne `none` : aucun titre. Un livrable de Conception « à qualifier » n'est pas encore une action. RLS forcée (lecture : qui voit le projet), écriture par `set_marketing_title_scope(p_scope, p_title_ids, p_strategy_deliverable_id, p_activation_id)` seule (responsable du projet, collectif seulement, lignes remplacées d'un coup ; un titre du projet ; un titre abandonné déjà visé peut rester, jamais visé de nouveau), `zz_project_live`, entrée dans `delete_project_row` (redéfinie depuis `20261112010101`). Code : `lib/projects/title-scope-rules.ts` (`titleScopeLabel`, `titleScopeCovers` : le filtre garde tout le projet, tous les titres et la sélection qui contient le titre), `title-scopes.ts` (`loadTitleScopes`, nul hors collectif), `title-scope-actions.ts` ; `TitleScopeLine` / `TitleScopeButton` (`components/projects/titles/title-scope.tsx`) sur la page d'une activation, d'un livrable en Production et dans les livrables de la Stratégie ; périmètre sous chaque activation et dans la barre des livrables de la Production ; filtre « Titre » (`?titre=`) de la liste des activations. Test : `deliverable-titles.test.sql`. |
+| `…20261114100101_master_file_requests` | **Projet collectif, lot 9 bis** (décision du 14/11/2026 : un membre de l'équipe, la source seulement) : « Demander des fichiers » dans le Master d'un collectif. `master_file_requests` = **une ligne par titre** demandé (`title_id`, `requested_to`, `requested_by`, message, `received_at` / `received_file_id`, `cancelled_at` / `cancelled_by`, `replaced`) ; une seule ouverte par titre (index partiel), redemander à quelqu'un d'autre ferme l'ancienne (`replaced`, gardée). **Reçue toute seule** : déclencheur `z_receive_file_requests` sur `master_files` (premier fichier audio de ce titre, quel que soit le chemin ; un autre titre ou un fichier non audio n'y touche pas), auteur prévenu (`master_files_received`). `request_master_files(p_project_id, p_title_ids, p_person_id, p_note)` : responsable, collectif lancé, titres vivants du Master (`title_abandoned`, `title_not_in_master`), personne prévenue (`master_files_requested`) ; `cancel_master_file_request` (auteur ou responsable) ; `list_file_request_recipients` / `file_request_recipient_ok` : équipe (`project_creatives`), ingénieur interne du Master, direction, jamais soi-même ni un contact. Dépôt de la personne sollicitée **sans droit sur le Catalogue** : chemin `master-files` à usage unique d'une heure sur sa ligne (`open_file_request_delivery`, `record_file_request_delivery` : mise à plat ou maquette, taille vérifiée ; politique de stockage `is_open_file_request_slot`), même patron que `master_member_slots`. RLS forcée, `zz_project_live`, entrée dans `delete_project_row`. Code : `lib/master-workflow/file-requests.ts`, `file-request-actions.ts`, `journey-facts.ts` (`fileRequests`, collectif seulement), `journey.ts` (« Déposer les fichiers demandés de N titres » pour la personne, étape Source), `title-scope.ts` (`request`, « dont N demandés »), `components/master-workflow/file-requests/`. Test : `master-file-requests.test.sql`. |
+| `…20261114110101_participation_waivers` | **Projet collectif, lot 12** (`docs/pds-mic-plan.md` décision 6, § 0 bis « Où est l'étape tournage », principe 5) : contrat de participation manquant. `participation_waivers` **en ajout seul** (périmètre `shoot` ou `release`, l'un ne couvre pas l'autre ; motif obligatoire, risque, **échéance obligatoire** : passée, elle ne couvre plus ; `granted_by` / `granted_at` ; révocation `revoked_by` / `revoked_at` / `revoke_reason` sans rien écraser, trigger `a_append_only`). **Générique pour le module Business** (PDSBIZ-010, exceptions avant signature) : le réutiliser en étendant `participation_waivers_scope_check`, pas de seconde table. Couverture : `participation_covered` (contrat `title_participations.contract_id` au statut `signed`, ou dérogation ouverte du périmètre) ; `contract_gaps(p_project_id, p_scope, p_strategy_deliverable_id)` (interne) et `list_contract_gaps` (qui voit le collectif ; noms d'artistes et de titres seulement) : participations **confirmées** des titres **non abandonnés** concernés (titres visés par le livrable, `deliverable_titles` ; `none` = aucun ; sans ciblage = tous) non couvertes. `grant_participation_waiver` / `revoke_participation_waiver` : **direction seule** (`validate`), participation confirmée d'un titre vivant, contrat non signé (`contract_signed`), une seule ouverte par périmètre (`waiver_open`) ; journal du collectif (`waiver_granted`, `waiver_revoked`, lus dans l'Activité), responsable prévenue (`participation_waiver_granted` / `_revoked`). **Verrous, collectif seulement** (projet simple inchangé) : `c_contract_check` sur `production_shoots` (même transition que `not_ready` : départ ou tournage déclaré tenu) et sur `distribution_versions` (soumission ; tous les titres, par sortie au lot 15) refusent `contract_missing`, les contrats manquants nommés dans DETAIL. RLS forcée, `zz_project_live`, entrée dans `delete_project_row`. Code : `lib/legal/contract-gaps.ts`, `waiver-actions.ts` ; avertissement en amont (`ContractGapsCallout` en Vue d'ensemble, alerte « Contrat manquant » sur le titre de « Titres et artistes », information avant « Prête pour tournage ») ; tournage bloqué (`ShootContractNotice` à la place de « Lancer le tournage » / « Confirmer que le tournage a eu lieu ») ; refus nommés (`shootFailure`, validation de la Distribution, porte de soumission) ; gestes de la direction dans « Participations et contrats » du Juridique (lot 11 : `/legal/participations`, une ligne par participation, contrat, deal du module Business lu sous ses droits, `createDeal` de Sacha pour ouvrir un dossier). Test : `participation-waivers.test.sql` (et `legal-participations.test.sql` pour le lot 11). |
+| `…20261114120101_title_releases` | **Projet collectif, lot 13** (`docs/pds-mic-plan.md` décision 7, § 3 bis points 1 à 6 et 8) : sorties par titre et compilation. `projects.collective_release_mode` (`singles` par défaut, `compilation`, `singles_then_compilation` ; collectifs déjà lancés avec leur sortie de projet : `singles_then_compilation`) ; `releases.project_title_id` (nul = sortie du projet : projet simple, compilation d'un collectif ; renseigné = sortie d'un titre, `releases_project_title_key`) et `archived_at` / `archived_by` (lecture seule, droits de colonne). `ensure_title_release` / `ensure_compilation_release` (idempotentes, plan lancé ; déclencheur `z_title_release` sur `project_titles`, `release_on_plan_launch` redéfini pour un collectif) ; `b_release_date` et `z_release_date_sync` ne touchent que la sortie du projet ; `set_collective_release_mode` (droits de `lock_project_titles`, archive / ramène, refus `compilation_submitted`, `single_released`, journal `release_mode_changed`, `title_id` nul permis) ; `next_release_date` (date la plus proche des sorties vivantes, titres abandonnés exclus) ; verrou de sortie du lot 12 sur `releases` (`c_contract_check` : livrée ou confirmée en ligne, contrats du titre ou de tous les titres vivants). Code : `loadRelease` / `PROJECT_RELEASE` (`lib/release/queries.ts`, échoue pour un collectif sans sélecteur), les lectures en `limit 1` remplacées, `releaseLookups` (ISRC du master du titre, UPC de la compilation ; `detectReleaseByUpc`, `findAlbumByUpc`, `findAppleMusicAlbum`), `setReleaseUpc(…, releaseId)`, page « Sorties » (`/app/projects/[id]/releases`, `components/projects/releases/`, `lib/release/collective-*.ts`). Test : `title-releases.test.sql`. |
+| `…20261114130101_title_release_plans` | **Projet collectif, lot 14** (`docs/pds-mic-plan.md` § 3.1 « Sortie ≠ plan de sortie ») : le plan de sortie éditorial de chaque titre d'un collectif, à partager avec l'artiste (modèle du plan Jeho). `title_release_plans` (un par titre, né « Brouillon » avec lui par `ensure_title_release_plan` et le déclencheur `z_title_release_plan` ; statuts `draft` › `provisional` › `internal` › `ready_to_share` › `revised` › `active` › `archived`, `status_before_archive` + `archived_reason` `title_abandoned` / `closed` ; brouillon `config` jsonb), `title_release_plan_versions` (ajout seul : `content` = le document, seul lu par un lien ; `config` = le brouillon d'où il vient ; `sources` = les actions lues, pour signaler un changement ; statut `internal` / `revised`, auteur, date, note) et `title_release_plan_events` (journal des statuts, raisons `title_abandoned`, `title_reactivated`, `shared`, `unshared`). Gestes, **responsable du projet seule** (`lock_title_release_plan`) : `save_title_release_plan` (fusion par clé, jamais sur un plan archivé), `set_title_release_plan_status` (`p_from` contre deux onglets ; planning provisoire avec une date cible `title_release_plan_target_date` = sortie du titre, ou compilation en mode `compilation` ; archivage avec bilan ; réouverture), `record_title_release_plan_version`, `share_title_release_plan_version` (dernière version d'un plan prêt, révisé ou actif ; jeton réutilisé), `revoke_title_release_plan_link`, `get_shared_title_release_plan` (anon, le document seul). `share_links.title_plan_version_id` + portée `title_release_plan`. Titre abandonné → plan archivé, réactivé → statut d'avant. RLS forcée, `zz_project_live`, entrée dans `delete_project_row`. Code : `lib/projects/title-plan/` (modèle, construction, rendu 16:9 `html.ts`, polices `fonts.ts`, logo `pds-logo.ts`), pages « Plans de sortie » (`/app/projects/[id]/release-plans`, `components/projects/release-plans/`), lien public `/t/[token]`, version et PDF `/api/projects/[id]/title-plans/[versionId]` (`htmlToPdf(…, { cssPage: true })`). Test : `title-release-plans.test.sql`. |
+| `…20261114140101_release_distribution` | **Projet collectif, lot 15** (`docs/pds-mic-plan.md` § 3 bis point 7) : la **Distribution par sortie**. `release_id` (nul = dépôt d'un projet simple, inchangé) sur les dix tables de la Distribution, clé `(release_id, project_id)` → `releases (id, project_id)` ; chaque unique `(project_id, …)` doublé d'un index partiel `(release_id, …) where release_id is not null` ; les déclarations suivent leur version par la clé calculée `scope_id` = `coalesce(release_id, project_id)`. Garde-fou `distribution_release_scope` : un collectif écrit toujours avec sa sortie, un projet simple jamais. Les fonctions qui visent un projet prennent `p_release_id` (nul par défaut ; `distribution_scope_check` : `release_required`, `release_not_found`) ; celles qui visent une ligne lisent sa sortie. `can_check_distribution_scope`, `distribution_scope_editable` (politique de mise à jour du dossier par sortie). Soumission d'une sortie refusée : `release_submission_blockers` (`release_archived`, `title_abandoned`, `title_provisional`, `contract_missing` via `release_contract_gaps_text`) ; `release_titles`, `release_provisional_titles_text`. Écrans : `release_distribution_states` (« Sorties », « Titres et artistes »). `set_collective_release_mode` : « compilation soumise » lit la compilation, une sortie de titre soumise est « partie ». Code : `lib/distribution/scope.ts` (`?sortie=`, `inScope`, `releaseArg`), `lib/distribution/release-scope.ts` (la sortie et ses pistes), crédits pour les plateformes (`trackDelivery`). Test : `release-distribution.test.sql`. |
 | `…260927001101_framing_team_roles`, `…001201_framing_constraints`, `…001401_framing_guided_review` | Cadrage en relecture guidée (§ 6) : `project_team_members.role_key` (rôle fixe, au plus une ligne par rôle ; une personne peut cumuler plusieurs rôles, une ligne chacun, et « Attribuer » propose aussi les directeurs créatifs, du projet puis de l'organisation pour la direction artistique ou créative, `assignRole` avec `personId` : Sacha, 10/10/2026), table `framing_constraints` (une ligne par contrainte typée, provenance, relue comme les besoins), source `voice` et changement de type autorisés, droits colonne sur `role_key`, lignes figées une fois le Cadrage soumis (`framing_is_editable`). |
 | `…260927001101_security_audit_fixes` | Correctifs de l'audit back du 27/09 : lecture des objets `artist-files` en **positif** (`manage_catalog`, ou une ligne `artist_files` visible — les contrats restent cachés) ; **Cadrage figé une fois soumis** (`framing_is_editable` : Brief, besoins, équipe écrits seulement en `not_started` / `in_progress`, policies restrictives insert + update) ; `project_masters` modifiable seulement avant lancement, sur un projet et un master non archivés (`project_masters_editable`) ; Web Push protégé par un secret serveur (§ 8 bis). Tests : `security-audit.test.sql`. |
 | `…260927004101_project_drafts` | Brouillons du formulaire « Nouveau projet » (retour n°6, § 2 octies) : `project_drafts.form_values` (objet JSON, 64 Ko au plus), auteur posé par trigger ; lus, modifiés et supprimés par leur auteur seul, tant qu'il a `create_projects`. Tests : `project-drafts.test.sql`. |
@@ -1741,6 +1750,14 @@ change dans Équipe, et voit son utilisation dans ses paramètres, comme dans Cl
   (`timed` / `found` / `missing`) — une citation introuvable signale un élément inventé.
 - Préparation de call (labo) : `call-prep.ts`, champs vides du Brief calculés par le code.
 
+- **Résumé de la semaine de Finance** (lot 7) : la génération prend **une requête au membre dont la visite la déclenche**
+  (`extract` → `takeAiRequest`), au plus une fois par jour et par jeu de chiffres pour tout le label (6 au plus par jour) ;
+  les autres lecteurs lisent le résumé gardé sans rien payer. Pourquoi : la règle « une requête = un appel au modèle » reste
+  vraie sans exception, aucune `service_role` dans un chemin déclenché par un utilisateur (règle 3), et le coût est
+  négligeable (une requête sur 200 par jour, pour une personne). Limite atteinte → **silencieux**, comme les autres appels
+  qui retombent déjà sans message : la carte garde la phrase du code (« Calculé par PDS OS »), rien n'est gardé, la visite
+  suivante réessaie.
+
 ---
 
 ## 6. Cadrage intelligent (étape 1)
@@ -3366,6 +3383,334 @@ Demande de Sacha : « une vue finance complète, une sorte de dashboard financie
   (`FinanceLinesCard`, `ListCard`). Liens vers le Budget d'un projet seulement pour `view_all_projects`, vers
   celui d'un artiste et Dépenses pour `read_artist_budgets` : les autres lisent les totaux sans ouvrir les lignes.
 - pgTAP : `finance.test.sql` (14).
+
+### Cockpit Finance, lot 1 : trésorerie et argent entrant (13/11/2026, ticket d'Ibé)
+
+Ticket « PDS OS — Cockpit Finance » d'Ibé (13/11/2026, PDF de 7 maquettes) : « combien avons-nous,
+qu'est-ce qui va entrer ou sortir, et où faut-il agir ? ». « La Finance » du ticket = les postes
+`business_manager` et `business` (Sacha, 13/11). Lot 1 sur 5 (ordre choisi par Claude) : trésorerie et
+argent entrant ; suivront Factures clients complètes (PDF, avoirs, relances, deal), Dépenses (HT/TTC,
+fournisseur, refacturable, hors budget), Budgets détaillés (révisions, import, modèles, centres de coût,
+part financée), puis Rapprochement Qonto, alertes et moteurs (Orchard, Pay Later).
+
+- **Section** : `/app/finance` = Vue d'ensemble, `tresorerie` (`?horizon=30|60|90`), `budgets` (l'ancienne
+  page, `?periode=`), `encaissements` (`?vue=a-encaisser|retard|encaissees|annulees`). Cadre commun
+  `FinanceFrame` (titre « Finance », action de la page, onglets `SectionTabs` au lieu du menu latéral des
+  maquettes) ; `/app/expenses` prend ce cadre pour qui a `read_finance` (onglet « Dépenses »).
+- **Droits** : `manage_finance` (nouvelle, direction + business managers + business) écrit ; `read_finance`
+  lit. Les deux sont retirées de l'accès en production (`OFF_IN_PRODUCTION`, `lib/auth/access.ts`) tant que
+  Sacha garde Finance cachée sur `main`.
+- **Tables** (`20261113100101_treasury.sql`) : `treasury_balances` (relevé du compte : solde, date ; jamais
+  modifié, le plus récent fait foi), `treasury_settings` (réserve minimale), `finance_incomes` (entrée
+  d'argent : libellé, nature, montant, payeur contact ou nom seul, projet, artiste, date prévue, facture
+  numéro / émission / échéance, annulation avec motif ; jamais supprimée), `finance_receipts` (encaissements,
+  partiels et multiples ; triggers : jamais au-delà du montant, rien sur une entrée annulée, montant jamais
+  sous l'encaissé, entrée encaissée jamais annulée), `finance_events` (historique avant / après / auteur,
+  écrit par trigger sur les quatre). Clés composites par organisation ; projet, artiste ou contact supprimé
+  → `set null` (l'argent reste), donc rien à ajouter dans `delete_project_row`.
+- **Fonctions** : `finance_cash_out()` (dépenses par jour : payée à sa date, à payer à l'échéance de sa
+  facture sinon à sa date, devis refusé exclu), `finance_lines('upcoming', …, p_to)` (dépenses non payées
+  une à une), `finance_targets()` (noms des projets et artistes pour qui lit Finance).
+- **Calculs** (code, `lib/finance/treasury.ts`, `money-in.ts`, `cockpit.ts`) : solde du jour = dernier relevé
+  + encaissements − dépenses payées datées après lui (une dépense payée datée plus tard compte aujourd'hui) ;
+  prévision = + reste de chaque entrée ouverte à son échéance (sinon date prévue), − chaque dépense non payée
+  à son échéance ; ce qui est en retard compte aujourd'hui. Courbe en marches (30 jours de réel, puis
+  l'horizon), point bas, réserve. État d'une entrée calculé : prévue, facturée, en retard (date dépassée),
+  partiellement encaissée, encaissée, annulée (`incomeStateTone`). « Disponible sur les budgets » = reste des
+  enveloppes de projets en cours (celles des artistes non ajoutées : leurs projets les consomment déjà).
+  « À surveiller » : passage sous la réserve, entrées en retard, budgets ≥ 82 % ou dépassés, dépenses sans
+  justificatif.
+- **Limite connue** : les dépenses sont saisies HT, le solde bancaire est TTC ; la prévision prend les
+  dépenses telles quelles jusqu'au lot Dépenses (HT/TTC). Montants de la trésorerie affichés sans « HT ».
+- **Écran** : `CockpitOverview` (4 tuiles, `TreasuryCard` + « À surveiller », « Budgets à surveiller »,
+  « Prochaines opérations »), `TreasuryChart` (SVG client, réel à l'encre, prévu `--tone-info-fg`, réserve
+  pointillée `--tone-warning-fg`, point bas, infobulle au survol, au toucher et aux flèches), `TreasuryCalendar`,
+  `IncomesTable` (« ⋯ » Enregistrer un encaissement / Modifier / Annuler l'entrée), `IncomeForm`
+  (`PersonPickerField` pour le payeur), `ReceiptForm`, `StatementButton`, `ReserveButton`.
+- pgTAP : `treasury.test.sql` (22).
+
+### Cockpit Finance, lot 2 : factures clients et avoirs (13/11/2026)
+
+Ticket : « Une facture est reliée au client, au deal et/ou projet, au budget de recette, au montant HT/TTC,
+à la date d'émission, à l'échéance et au PDF. États : brouillon, envoyée, partiellement encaissée,
+encaissée, en retard, annulée ou avoir. » ; « Relances : échéance, jours de retard, responsable, dernière
+relance et prochaine action. Aucune relance […] n'est envoyée automatiquement sans validation. »
+
+- **Choix** : une entrée (`finance_incomes`) = la recette prévue, sa facture vit sur elle (une facture par
+  entrée ; une seconde facture pour le même argent = une seconde entrée). Le PDF est celui de l'outil de
+  facturation ou du comptable, déposé : PDS OS ne rédige ni ne numérote une facture (« l'expert-comptable
+  conserve la comptabilité officielle »).
+- **Migration** `20261113200102_client_invoices.sql` : `finance_incomes` + `vat_bp` (TVA en points de base,
+  le HT en découle : `htCents`), `deal_id`, `owner_person_id` (responsable), `sent_on` (envoyée ; exige un
+  numéro, jamais avant l'émission), `file_path` / `file_name`, `next_action` / `next_action_on` ;
+  `finance_reminders` (relance faite : date, canal, note ; ajout et retrait par la Finance) ;
+  `finance_credit_notes` (avoir : numéro, date, montant, motif, PDF ; jamais modifié ni supprimé ; refusé
+  sans facture, avant elle, ou au-delà du reste). Encaissements + avoirs ≤ montant
+  (`finance_income_settled`), entrée avec avoir jamais annulée. Bucket privé `finance-files`
+  (`<org>/<uuid>.<ext>`, PDF/PNG/JPEG, 20 Mo) : dépôt `manage_finance`, lecture `read_finance`
+  (`finance_file_allowed`). `finance_targets()` nomme aussi les deals et les membres qui lisent Finance.
+- **Code** : `lib/finance/money-in.ts` (états `expected` / `draft` / `sent` / `late` / `partial` /
+  `received` / `credited` / `cancelled`, reste = montant − encaissé − avoirs), `invoice-actions.ts`
+  (`markInvoiceSent`, `addReminder`, `removeReminder`, `addCreditNote`), `write-helpers.ts` (analyse et
+  refus SQL communs à toutes les écritures de Finance), `upload-file.ts` (dépôt du navigateur, comme une
+  pochette). Écran : `IncomesTable` (« ⋯ » encaissement, Marquer envoyée, Noter une relance, Émettre un avoir,
+  Ouvrir la facture, Modifier, Annuler ; `followUp` dans la vue En retard), `IncomeDialog`, `IncomeForm` +
+  `InvoiceSection`, `ReminderForm`, `CreditNoteForm`, `TargetSelect`, `FinanceFileField`.
+- **Reste à trancher** : un avoir après encaissement (remboursement du client) n'est pas modélisé ; on
+  retire l'encaissement ou on attend le rapprochement Qonto.
+- pgTAP : `client_invoices.test.sql` (18).
+
+### Cockpit Finance, lot 3 : dépenses contextualisées (13/11/2026)
+
+Ticket : « Créer une dépense : libellé, montant HT/TTC ; projet, artiste ou centre de coût ; poste et
+fournisseur ; date prévue et échéance ; statut prévu, commandé, facturé, payé ; financement, refacturable,
+justificatif ; valideur et commentaire » ; « rattachement obligatoire à une enveloppe ou à « hors budget »
+avec alerte » ; « une dépense refacturable doit créer une recette attendue distincte ».
+
+- **Choix** : une dépense reste une ligne `budget_lines` (quatre objets : budget, dépense, facture,
+  paiement) ; le montant reste HT comme tout budget, la TVA donne le TTC. Les règles d'un projet ne bougent
+  pas (son responsable écrit ; le DG lit et valide sans écrire, `budget.test.sql`) : la Finance écrit
+  seulement ses centres de coût et le hors budget, et lit tout par `finance_spends()`. Le « Financement »
+  de la dépense arrive avec le lot Financements.
+- **Migration** `20261113300101_finance_spends.sql` : `finance_cost_centers` (nom, enveloppe, archivage ;
+  `manage_finance`) ; `budget_lines` + `cost_center_id`, `off_budget` (contrainte : une enveloppe, ou aucune
+  si hors budget), `vat_bp`, `supplier_contact_id` / `supplier_name`, `due_on`, `rebillable`, `proof_path` /
+  `proof_name` (justificatif d'une dépense Finance, bucket `finance-files`), `validator_person_id` ;
+  politiques `budget_lines_*_finance` (lignes sans projet ni artiste) ; historique `finance_events` sur
+  toutes les lignes ; `finance_incomes.source_line_id` (la recette qui refacture une dépense) ;
+  `budget_line_ttc`, `finance_cash_out` / `finance_lines` en TTC et avec l'échéance de la ligne ;
+  `finance_spends()` ; `finance_targets()` + centres de coût.
+- **Code** : `BudgetTarget` a quatre genres (`project`, `artist`, `cost_center`, `off_budget`,
+  `isFinanceTarget`) ; le formulaire unique `BudgetLineForm` gagne `BudgetSpendDetails` (TVA et TTC,
+  échéance, fournisseur `PersonPickerField`, valideur parmi les membres, refacturable) partout ;
+  `saveBudgetLine` écrit ces champs et, pour la Finance, prévoit la recette de refacturation
+  (`lib/finance/rebilling.ts`) ; `loadExpenseTargets` propose centres de coût et « Hors budget » à la Finance
+  (avertissement sous le champ). Onglet `/app/finance/depenses` (`?vue=a-payer|engagees|prevues|payees|
+  hors-budget|a-refacturer`) : 4 `MetricCard` cliquables, `SpendsTable` (enveloppe, échéance, état, TTC et
+  HT ; « ⋯ » Modifier une dépense Finance, Planifier le remboursement → `IncomeForm` pré-rempli). La page
+  Dépenses de l'équipe (`/app/expenses`) reprend son cadre propre. À surveiller : hors budget, refacturables
+  sans remboursement.
+- pgTAP : `finance_spends.test.sql` (14) ; `team.test.sql` remis à jour (permissions actuelles).
+
+### Cockpit Finance, lot 4 : budgets détaillés (13/11/2026)
+
+Ticket : « Chaque enveloppe affiche : budget initial, révisions, prévu, engagé, facturé, payé, reste
+disponible, remboursable/refacturable et écart au prévisionnel. Le camembert montre la répartition par
+poste. » ; « J4Y : part financée par PDS réglable de 0 à 100 % » ; « Dioo : saisie ou import ligne par
+ligne » ; « PDS MIC 7 600 € / émission : modèle réutilisable » ; « postes et sous-postes ».
+
+- **Migration** `20261113400101_finance_budgets.sql` : `budget_lines.forecast_cents` (montant à la saisie,
+  posé par trigger, jamais écrit par un client : l'écart au prévisionnel = ce que coûtent les lignes
+  aujourd'hui − leur prévisionnel) et `subpost` (sous-poste) ; `budget_revisions` (avant, après, auteur,
+  motif) écrite par trigger sur `projects.budget_cents`, `artist_budgets.amount_cents`,
+  `finance_cost_centers.budget_cents`, motif par `revise_cost_center()` ; `finance_envelope_shares` (part
+  PDS, 100 % par défaut) ; `finance_budget_templates` (lignes à recopier) ; `finance_spends()` + prévisionnel
+  et sous-poste.
+- **Code** : `lib/finance/envelopes.ts` (totaux par étape, ligne d'une enveloppe — un artiste compte ses
+  dépenses directes de la période de son enveloppe —, par poste puis sous-poste, barres mensuelles),
+  `budget-queries.ts`, `budget-actions.ts` (centre de coût vide ou depuis un modèle, révision motivée, part
+  PDS, modèle, import), `budget-import.ts` (tableau collé ou .csv : séparateur tab / ; / ,, en-têtes
+  reconnus, poste rapproché des 16 postes sinon « Autre » précisé, statut lu, lignes fautives dites, jamais
+  devinées). Sous-poste dans le formulaire unique de dépense.
+- **Écrans** : `/app/finance/budgets?type=tous|projets|artistes|centres` (4 `MetricCard`, `PostPie`,
+  `MonthChart`, `EnvelopesTable`, tous calculés sur les mêmes enveloppes) ; `/app/finance/budgets/
+  <projet|artiste|centre>/<id>` (budget et révisions, engagé, reste, part PDS ou écart, camembert, révisions,
+  `PostsTable`, `SpendsTable` des lignes ; `EnvelopeActions`). L'ancien contenu de l'onglet
+  (`FinanceOverview`, `EnvelopeTable`, `FinanceLinesCard`, `lib/finance/view.ts`) est supprimé.
+- **Limites** : l'import et le modèle écrivent là où le lecteur écrit (centres de coût pour la Finance,
+  artistes pour qui lit leurs budgets) ; un projet s'importe depuis son Budget par son responsable (pas
+  encore de bouton là). Une révision de projet ou d'artiste est tracée sans motif (saisie sur leurs pages).
+- pgTAP : `finance_budgets.test.sql` (11).
+
+### Cockpit Finance, lot 5 : financements et moteurs (13/11/2026)
+
+Ticket : « Moteurs automatiques : Orchard 52 000 € tous les 12 titres ; PDS MIC 7 600 € et 10 titres
+provisoires par émission ; PDS SHOW 5 500 € par live ; Pay Later : mensualités, intérêts, crédit
+disponible » ; « Déplacer une émission de mars à avril doit recalculer instantanément la trésorerie ».
+
+- **Choix** : la base ne garde que les faits saisis par la Finance ; ce qu'ils provoquent est calculé à
+  chaque lecture (`lib/finance/engines.ts`), jamais stocké. Les titres comptés pour The Orchard sont saisis
+  (« titres livrés depuis la dernière avance », remis à zéro quand l'avance arrive, l'avance reçue se saisit
+  comme une entrée) : aucune règle ne dit encore quels titres du Catalogue comptent (point à trancher).
+- **Migration** `20261113500101_finance_fundings.sql` : `finance_engine_settings` (avance par tranche, titres
+  par tranche, titres comptés), `finance_show_formats` (coût, titres provisoires), `finance_shows` (date ;
+  `cost_center_id` quand son budget est ouvert : ses lignes comptent alors à la place du coût du format),
+  `finance_credit_lines` (plafond), `finance_credit_draws` (montant, date, mensualités, frais en points de
+  base ; jamais au-delà du crédit disponible, `credit_over_limit`) ; une dépense payée par un tirage sort de
+  `finance_cash_out` / `finance_lines` (elle sort par ses mensualités).
+- **Calcul** : avances = titres comptés puis titres provisoires des émissions à venir dans l'ordre des dates,
+  une avance chaque fois qu'une tranche est atteinte (le jour de l'émission) ; coût des émissions sans budget
+  ouvert à leur date ; mensualités = (montant + frais) / n, mensuelles dès le mois suivant le tirage ; crédit
+  utilisé = capital pas encore remboursé. `computeTreasury` et `cockpit` ajoutent ces mouvements
+  (`source.kind = "engine"`), les mensualités passées depuis le relevé sortent du solde réel.
+- **Écran** `/app/finance/financements` : cartes Orchard (compte, prochaine avance, « Régler »), Pay Later
+  (disponible), Remboursements (refacturations attendues, refacturables sans remboursement), Réserve (point
+  bas) ; Émissions et lives (`ShowsTable` : changer la date, annuler ; formats) ; Pay Later (`DrawsTable`,
+  nouvelle ligne de crédit, nouveau tirage depuis une dépense).
+- pgTAP : `finance_fundings.test.sql` (9).
+
+### Cockpit Finance, lot 6 : rapprochement bancaire (13/11/2026)
+
+Ticket : « MVP : import CSV ou ajout manuel, rapprochement proposé, validation humaine » ; « selon le
+montant, la date, le tiers et la référence » ; « paiements partiels et multiples » ; « la transaction
+Qonto de 400 € est rapprochée de la facture et ne crée pas une seconde dépense » ; « détection de
+doublons ».
+
+- **Migration** `20261113600101_finance_reconciliation.sql` : `finance_bank_transactions` (jour, montant signé,
+  contrepartie, référence, libellé, `external_id` unique par organisation = un import n'entre jamais deux
+  fois, source csv / manuelle, ignorée avec motif ; jour et montant figés) ; `finance_receipts.transaction_id`
+  (un crédit devient l'encaissement d'une entrée) ; `finance_spend_matches` (un débit relié à une dépense) ;
+  garde : une transaction règle au plus son montant, dans son sens, jamais une fois ignorée ; une transaction
+  rapprochée ne s'ignore pas. `finance_cash_out` / `finance_lines` : une dépense rapprochée en entier compte
+  payée le jour de sa dernière transaction (sans réécrire la ligne, qui garde ses auteurs) ;
+  `finance_match_candidates()` (dépenses engagées, facturées ou payées pas encore rapprochées en entier).
+- **Code** : `bank-import.ts` (export CSV de Qonto en français ou anglais, ou d'une autre banque : en-têtes
+  reconnus, montant signé ou débit / crédit, lignes illisibles dites), `reconcile.ts` (propositions notées :
+  même montant 50, référence = numéro de facture 40, même tiers 25, date à 10 jours 10 à 15 ; trois au plus,
+  jamais sous 25 ; doublons possibles = même jour, montant et tiers), `reconcile-queries.ts`,
+  `reconcile-actions.ts` (import, ajout, rapprocher, défaire, ignorer / remettre).
+- **Écran** `/app/finance/rapprochement?vue=a-rapprocher|rapprochees|ignorees` : 4 `MetricCard` (à rapprocher,
+  propositions, rapproché ce mois, doublons possibles), `TransactionsTable` (proposition et ses raisons,
+  « Valider » ; « ⋯ » Rapprocher…, Défaire, Ignorer, Remettre), `ReconcileButtons` (importer un relevé,
+  ajouter une transaction).
+- **Suite (P2 du ticket)** : synchronisation automatique avec l'API Qonto, justificatifs ; l'export comptable
+  est au lot 7.
+- pgTAP : `finance_reconciliation.test.sql` (12).
+
+### Finance en double colonne (13/11/2026, Sacha)
+
+« Double sidebar comme le projet » : `FinanceFrame` pose `FinanceSidebar` (sections et groupes dans
+`lib/ui/finance-sections.ts` : Piloter, Dépenser, Encaisser et financer, Banque et comptabilité) contre la barre
+principale, repliée en icônes sur `/app/finance/*` comme dans un projet (`CollapsedNavProvider`) ; la colonne
+commune est `components/shell/context-sidebar.tsx`, partagée avec `ProjectSidebar`. Le titre de la page est sa
+section (une enveloppe : son nom). Téléphone : la rangée d'onglets.
+
+### Cockpit Finance, lot 7 : alertes, exports, historique (13/11/2026)
+
+Ticket : « Alertes utiles : passage sous la réserve minimale ; budget consommé à 82 % ou dépassement ;
+facture potentiellement dupliquée ; dépense refacturable sans remboursement planifié ; impact positif
+d'un décalage de planning » ; « export comptable » ; « Historique : auteur, date, ancienne valeur, nouvelle
+valeur ».
+
+- **Alertes** (`lib/finance/alerts.ts`, `/app/finance/alertes`, groupées À traiter / À vérifier / Pistes,
+  `AlertsList` sur `LinkRows`, la ligne commune avec « À surveiller » de la Vue d'ensemble, qui mène à la page) :
+  réserve, enveloppes ≥ 82 % ou dépassées (projets, artistes, centres de coût), entrées en retard, factures à
+  payer sous 7 jours ou échues, factures possiblement dupliquées (même numéro, ou même client et montant à
+  30 jours), dépenses possiblement dupliquées (même enveloppe, libellé et montant à 7 jours), refacturables
+  sans remboursement, hors budget, sans justificatif, transactions à rapprocher depuis plus de 7 jours, et
+  « Décaler <émission> au … » quand reporter une émission d'un mois remonte le point bas au-dessus de la
+  réserve (simulation de la trésorerie avec l'émission déplacée).
+- **Migration** `20261113700101_finance_alerts.sql` : `finance_spends()` + `matched_cents` ; une dépense
+  rapprochée en entier se lit payée dans Finance (`paidByBank`), jamais « à payer ».
+- **Exports** (`lib/finance/exports.ts`, route `/api/finance/export?type=depenses|factures|encaissements|banque|
+  historique`, `read_finance`, lu avec la session) : CSV « ; » avec BOM, montants à la virgule, pour
+  l'expert-comptable. Page `/app/finance/exports` : un téléchargement par sujet.
+- **Historique** (`lib/finance/history.ts`) : les 100 dernières lignes de `finance_events` (qui, quand, quelle
+  donnée, quels champs) sur la page Exports, et en entier dans l'export « historique ».
+- **Accueil** (test UX du 15/11/2026) : `finance_urgent_count()` (SQL, `security definer`, 0 sans
+  `read_finance`) compte les enveloppes dépassées (projets, centres de coût), les entrées échues non reçues et
+  les dépenses facturées échues non payées, sans lire toute la trésorerie ; `HomeSummary` l'ajoute au résumé
+  (« · 2 alertes Finance urgentes », seul si rien d'autre n'attend), en lien vers Alertes. Même périmètre que le
+  groupe « À traiter » de `alerts.ts` hors réserve (calculée par la trésorerie) : à garder alignés.
+
+**Justificatifs** (`/app/finance/justificatifs`, lot 6 du nouveau style ; Ibé : « chaque dépense garde son
+justificatif », P2 du ticket Cockpit Finance).
+
+- **SQL** (`20261115600101_finance_receipts.sql`, tests `supabase/tests/finance_receipts.test.sql`, 17 tests) :
+  table `finance_proofs` (le nom `finance_receipts` est déjà pris par les encaissements). Fichier dans le bucket
+  `finance-files` sous l'organisation, source `upload` | `email` (Message-ID + rang de la pièce jointe, unique), qui
+  l'a déposé ou envoyé (`uploaded_by`, posé par trigger pour un dépôt), lecture `read_state` pending | read | failed,
+  `read_values` (ce que la lecture a donné, avant toute correction), type receipt | invoice | other, cinq valeurs
+  (fournisseur, montant TTC en centimes, TVA, date, référence) chacune avec son drapeau `*_verified`, vérification
+  humaine (`checked_by`/`checked_at`, posés par trigger), rattachement (`line_id`, `attached_by`/`attached_at`), écart
+  avec motif (`dismissed_*`). **Aucun état stocké** : À vérifier / Proposition / En attente / Rattaché / Écarté sont
+  calculés (`lib/finance/proofs.ts`, `proofState`).
+- **RLS** : lecture `read_finance`, ou le membre qui l'a envoyé par e-mail (ses propres justificatifs) ; dépôt, lecture
+  et vérification `manage_finance` (colonnes accordées une à une) ; jamais de suppression (« Écarter » à la place, le
+  fichier reste). Un justificatif rattaché est figé (`proof_attached`) ; sa dépense supprimée, il revient « à traiter ».
+  Pas lié à un projet → pas dans `delete_project_row`.
+- **`attach_finance_proof(proof, line)`** (definer, `manage_finance`) : pose le fichier comme justificatif de la
+  dépense (`budget_lines.proof_path/proof_name`, le chemin existant d'une dépense Finance) et ne touche à rien
+  d'autre de la ligne ; **aussi pour une dépense de projet ou d'artiste** (que la Finance n'écrit pas par RLS), parce
+  que seul le justificatif change. Refuse : valeurs non vérifiées ni contrôlées (`proof_unchecked` : montant et date
+  retrouvés dans le texte, ou `checked_at`), dépense qui a déjà un justificatif (`line_has_proof`, pièce du projet, de
+  l'artiste, fichier de facture compris), refusée, écarté, déjà rattaché. Une dépense créée avec ce fichier
+  (« Créer la dépense ») est reconnue par le fichier.
+- **Lecture** (`lib/finance/proof-actions.ts` `readProof`) : texte du PDF par `unpdf` (`sourceText`), lecture
+  structurée par `lib/ai/llm.ts` (`receiptReadingSchema`, `RECEIPT_READING_INSTRUCTIONS`, document passé en donnée
+  dans `<data>`) ; le modèle **recopie** chaque valeur, le code la parse (`parseSaidEuros`, `parseSaidDate`, année
+  sur deux chiffres acceptée) et la marque vérifiée seulement si la copie figure dans le texte
+  (`lib/finance/proof-verify.ts`, logique de `verbatim.ts`). Photo : lue comme image, rien n'est vérifié (« À vérifier :
+  photo ») ; PDF scanné sans texte : `failed`, la personne saisit montant et date.
+- **Quota de PO** (§ 5 bis) : une lecture = une requête, **payée par le membre qui dépose** le fichier ; pour un
+  justificatif arrivé par e-mail (cron, sans session), par **le membre de la Finance qui ouvre la boîte** : la page
+  lit les justificatifs « à lire » (5 au plus par ouverture). Limite atteinte : le justificatif reste « à lire », le
+  message de quota s'affiche, il sera lu à la prochaine ouverture.
+- **Rapprochement proposé par le code** (`lib/finance/proof-match.ts`, jamais l'IA) avec les dépenses sans
+  justificatif ni refus : même montant TTC 50, référence dans le libellé ou la note 40, même fournisseur (mots
+  communs, `sameParty` de `reconcile.ts`) 25, date à 3 jours 15 / à 10 jours 10 ; proposé à partir de 40, trois au
+  plus. Calculé à chaque lecture de la page (`lib/finance/proof-view.ts`) : une nouvelle dépense est proposée dès
+  qu'elle existe, sans alerte.
+- **E-mail** (`lib/finance/proof-email.ts`, appelé par `/api/cron/inbox` après les réponses juridiques, échec
+  seulement journalisé) : les messages des 14 derniers jours adressés à `po+justificatifs@<domaine de po>`
+  (`lib/finance/proof-address.ts`), dont l'expéditeur est un membre approuvé (`finance_proof_sender`, service_role
+  seul) : chaque PDF, PNG ou JPEG joint (20 Mo, 10 par message) est rangé dans `finance-files` et devient un
+  justificatif « à lire ». Un message d'un inconnu reste dans po@. `lib/email/inbox.ts` lit maintenant aussi les
+  images jointes (`images`).
+- **Créer la dépense** : le formulaire unique de dépense (`BudgetLineForm`, nouvelle prop `storedProof` : un fichier
+  déjà dans `finance-files` devient le justificatif d'une dépense Finance), pré-rempli : fournisseur en libellé,
+  montant HT calculé par le code (TTC − TVA lue, sinon TTC / 1,2), date, payée pour un ticket, facturée pour une
+  facture ; puis `attachToCreatedSpend`. Sur un projet ou un artiste, le fichier n'est pas porté par le formulaire :
+  la nouvelle dépense est proposée en premier, un clic la rattache.
+
+**Planning de Finance (15/11/2026)**
+
+- **Planning** (`/app/finance/planning?mois=YYYY-MM`, `routes.financePlanning`, section `planning` de
+  `lib/ui/finance-sections.ts`, `read_finance`) : `lib/finance/planning.ts` (`planningDays`, pur, client-safe) pose sur
+  chaque jour du mois ce que `computeTreasury` compte déjà. Jusqu'à aujourd'hui le réel : chaque encaissement d'une
+  entrée (`incomes[].receipts`, avec son libellé), les dépenses payées par jour (`paid`, agrégées : la fonction
+  `finance_cash_out` ne donne pas les lignes), les mensualités Pay Later échues (`installmentsPaid`) ; un réel daté plus
+  tard compte aujourd'hui, comme dans le solde. Dès aujourd'hui la prévision : `treasury.events` (le retard compté
+  aujourd'hui, `dueOn`). Solde avant / après un jour = `treasury.points` de la veille et du jour (sur aujourd'hui, le
+  point de la prévision passe après le réel) : pas de solde avant le début des points (relevé ou 30 jours en arrière).
+  Point bas = `treasury.low` s'il est sous le solde d'aujourd'hui ; « Sous la réserve » = le jour où le solde de fin de
+  journée passe sous `reserveCents`. Rien n'est stocké, aucune migration.
+- Horizon : `computeTreasury` accepte maintenant tout nombre de jours (`horizon: number`, Trésorerie garde 30/60/90) ;
+  le Planning lit au moins 90 jours (même point bas que Trésorerie par défaut), jusqu'à la fin de la grille affichée,
+  au plus 180 ; au-delà, un message dit où s'arrête la prévision. `loadTreasury(until)` lit les dépenses à payer jusqu'à
+  `until` (200 au plus, `p_limit` de `finance_lines`).
+- Liens d'un mouvement : facture → `incomeHref(id, état)` (Factures, la vue de l'état, `?ouvrir=`), dépense →
+  `spendsHref({ ouvrir })` (la source `spend` d'un événement porte maintenant l'`id` de la ligne), dépenses payées →
+  `spendsHref({ statut: "paye" })`, moteurs (Orchard, émission, Pay Later) → Financements. `incomeHref` est la règle unique (`lib/finance/income-links.ts`), aussi pour la recherche ⌘K.
+
+**Résumé de la semaine de Finance (lot 7 du nouveau style, 15/11/2026)**
+
+- **Le code choisit les chiffres** (`lib/assistant/finance-brief/slots.ts`, `briefSlots`) : une liste de « slots », chacun
+  avec la phrase que dirait le code et ses chiffres affichés : passage sous la réserve (date, sur 90 jours), entrées et
+  sorties de la semaine (encaissements et dépenses payées des 7 derniers jours), entrées en retard (nombre, montant),
+  enveloppe de projet la plus consommée si ≥ 82 %, dépenses sans justificatif, « la réserve tient ». Calculés dans la page
+  à partir des mêmes données que les cartes.
+- **PO rédige** (`generate.ts`, `extract` de `lib/ai/llm.ts`, schéma `lib/ai/schemas/finance-brief.ts`, consignes
+  `lib/assistant/finance-brief/instructions.ts`) : les slots partent en message utilisateur dans `<data>` (un nom de projet
+  est une donnée), 2 ou 3 phrases, chiffres recopiés tels quels. Jamais la date du jour.
+- **Le code vérifie** (`verify.ts`, `checkedBrief`) : chaque nombre du texte (montants, nombres, pourcentages, jours et
+  mois d'une date) doit figurer dans les slots ; refus d'un nombre en lettres (deux, trois…, sauf « un/une »), d'un mois
+  absent des slots, de « demain / hier », de Markdown restant ou d'un lien, de plus de 3 phrases ou 400 caractères ; les
+  `**` du modèle sont retirés (le gras des chiffres est posé par la carte). Refusé → la phrase du code, rien n'est gardé.
+  Un texte gardé est **revérifié à chaque lecture**. Limite connue : un nombre juste mis à la mauvaise place (montant des
+  entrées dit pour les sorties) passe la vérification, comme chez Midday (« All figures must match exactly »).
+- **Cache** : table `finance_briefs` (migration `20261115770101_finance_briefs.sql`, tests
+  `supabase/tests/finance_briefs.test.sql`) : une ligne par organisation, jour de Paris et empreinte (sha256 des slots).
+  Mêmes chiffres = même résumé toute la journée pour toute l'équipe ; des chiffres qui changent (un encaissement) en font
+  écrire un nouveau, **6 par jour au plus** côté code (12 refusés par la base), sinon la phrase du code. Lecture
+  `read_finance` ; écriture par le membre lui-même, du jour seulement, jamais modifiée ni supprimée par un client ; les
+  lignes de plus de 30 jours partent à l'insertion suivante. Pas de `service_role`, pas de localStorage.
+- **Jamais bloquant** : la carte est dans un `Suspense` dont le repli est la même carte avec la phrase du code ; la
+  génération attend 12 s au plus (passé ce délai la phrase du code reste, et le résumé est gardé pour la visite suivante
+  s'il arrive). Pied de carte : « Chiffres du code, phrase de PO » ou « Calculé par PDS OS ».
+- Essai du 15/11 sur un jeu de slots : Claude Haiku 5.5 (production) passe la vérification 3 fois sur 3 ; ministral
+  (local) écrivait du Markdown (retiré depuis) et parfois une cause inventée (« bloquent les flux ») que la vérification
+  des nombres ne voit pas.
 
 ## 8 quater. Retours sur l'application (`/app/feedback`)
 
@@ -5050,6 +5395,7 @@ est la préparation », modale de transmission, `BriefForm` : retirés de l'écr
   `/master` redirige vers l'étape qui attend la personne ; `/master/source`, `/brief`, `/mix`,
   `/mastering`, `/final`, `/history` (filtre `?par=`, CSV). Historique reconstruit des tables
   (`lib/master-workflow/history.ts`), sans journal à part.
+- **Projet collectif, titre par titre** (lot 8 de `docs/pds-mic-plan.md`, 13/11/2026, sans migration) : pour un collectif seulement, chaque étape montre **un titre à la fois** (`?titre=<master>`), choisi dans le fil d'Ariane « Master ▸ titre ▸ étape » (`CrumbSwitcher` : les titres du Master dans l'ordre du projet, leur état Master en gris, coche du Master final, « Abandonné » ; recherche au-delà de 9) et gardé d'étape en étape (chevrons et `StepPanel` reçoivent l'URL avec `?titre`). `loadMasterTitleScope` (`lib/master-workflow/title-scope.ts`, nul pour tout autre projet) : titre de l'URL, sinon le premier dont une version attend une décision (Mixage, Mastering), la règle de la Source (`pickSourceTitle`), ou le premier titre vivant ; nom du titre dans le projet (jamais un nom provisoire). Filtré au titre actif : sources (Source), versions, retours, commentaires et décisions (`loadRoundStep(…, masterId)`, « Mix non nécessaire »), Master final et ses livrables (`FinalStep` avec `whole` pour le bilan de tous les titres). Restent ceux du projet : le Brief (décision 4), le paquet, le lien, le tarif, l'ingénieur, le fil, la facture, l'Historique ; « tout est validé » (`RoundStepView.finished`) compte tous les titres du tour. `/master?titre=` garde le titre jusqu'à l'étape ; la ligne d'un titre de « Titres et artistes » y mène. Un collectif de type Contenu a son Master dès qu'il a un titre au Catalogue (`applicableWorkflows`, inchangé). Projet simple : rien ne change (pas de segment de titre, pastilles de la Source). Test : `collective-master.test.sql`.
 - **Source** (`source-step.ts`, `components/master-workflow/source/`, migration `20261019080101`) :
   versions candidates = maquettes et mises à plat, **la plus récente détectée** (proto, ticket § 1) ; un
   mix trouvé au Catalogue se propose comme mix final avec motif **obligatoire** (`declare_mix_final`
@@ -7961,3 +8307,6 @@ clés VAPID et `PUSH_CLAIM_SECRET` (≥ 32 car., même valeur que le secret Vaul
   avait reconstruit la liste avec ses seuls quatre types et cassé tous les autres déclencheurs). Toute
   migration ajoute ses types par `select public.add_notification_kinds(array['…'])`
   (`20261018000101`), qui relit tous les noms quelle que soit la forme et les réunit.
+- `finance_receipts` = encaissements des recettes, pas les justificatifs : la boîte est `finance_proofs`.
+- Le lien signé d'un justificatif posé par la Finance sur une dépense de projet vient de `finance-files` (lecture
+  `read_finance`) : le chef de projet voit son nom dans son Budget, sans lien.

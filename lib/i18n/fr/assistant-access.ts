@@ -33,7 +33,9 @@ export const assistantAccess = {
       "ouvrir et modifier l'enveloppe budgétaire d'un artiste",
     open_deals: "ouvrir un deal sur un artiste, qui vous est confié",
     read_finance:
-      "voir la page Finance : les dépenses de toute l'équipe, tous projets et artistes confondus",
+      "voir Finance : la trésorerie, les entrées d'argent et les dépenses de toute l'équipe",
+    manage_finance:
+      "mettre à jour le solde du compte et la réserve, saisir les entrées d'argent et leurs encaissements",
   } as Record<string, string>,
   // A permission the page needs: granted, or who holds it.
   youCan: (what: string) => `Votre poste vous permet de ${what}.`,

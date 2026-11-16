@@ -31,10 +31,13 @@ export function VoiceInputButton({
   onToggle,
   disabled,
   startLabel = fr.voice.input.start,
+  quiet = false,
 }: {
   phase: VoiceInputPhase;
   onToggle: () => void;
   disabled?: boolean;
+  // A bare icon at rest, no box (Finance's « Je veux… », after Midday).
+  quiet?: boolean;
   // What the microphone does at rest, for a screen reader.
   startLabel?: string;
 }) {
@@ -51,7 +54,7 @@ export function VoiceInputButton({
       type="button"
       size="icon-sm"
       // Filled while listening: the state reads without color (DESIGN.md § 1).
-      variant={listening ? "default" : "outline"}
+      variant={listening ? "default" : quiet ? "ghost" : "outline"}
       aria-label={listening ? t.stop : startLabel}
       aria-pressed={listening}
       title={supported ? undefined : fr.voice.unsupported}
@@ -65,7 +68,7 @@ export function VoiceInputButton({
       // White square with a hairline at rest (Figma "Desktop - 11").
       className={cn(
         "shrink-0",
-        !listening && "border-[color:var(--border-hairline)]",
+        !listening && !quiet && "border-[color:var(--border-hairline)]",
       )}
     >
       <IconMicrophone aria-hidden className="size-5" />

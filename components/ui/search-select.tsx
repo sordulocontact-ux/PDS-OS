@@ -32,7 +32,8 @@ const fold = (text: string) =>
  * chooses, Échap closes. `fill`: as wide and as high as every field of a
  * form (docs/DESIGN.md « Largeur d'un champ »). `badge`: a tag after a
  * choice's name (« Projet », « Artiste »), in the list and the closed box;
- * the search reads the name only.
+ * `keywords`: words a choice is also found by (its badge's text, « Hors
+ * budget »), never shown.
  */
 export function SearchSelect({
   id,
@@ -49,6 +50,7 @@ export function SearchSelect({
   invalid = false,
   describedBy,
   badge,
+  keywords,
 }: {
   id: string;
   label: string;
@@ -67,6 +69,7 @@ export function SearchSelect({
   invalid?: boolean;
   describedBy?: string;
   badge?: (value: string) => ReactNode;
+  keywords?: (value: string) => string;
 }) {
   const items = useMemo<Option[]>(
     () => Object.entries(options).map(([key, text]) => ({ value: key, label: text })),
@@ -81,7 +84,11 @@ export function SearchSelect({
       onValueChange={(next) => next && onChange(next.value)}
       itemToStringLabel={(item) => item.label}
       isItemEqualToValue={(item, current) => item.value === current.value}
-      filter={(item, query) => fold(item.label).includes(fold(query))}
+      filter={(item, query) =>
+        fold(`${item.label} ${keywords?.(item.value) ?? ""}`).includes(
+          fold(query),
+        )
+      }
       autoHighlight
       disabled={disabled}
     >

@@ -1,6 +1,7 @@
 "use client";
 
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
+import { createContext, useContext } from "react";
 import { IconXmark } from "nucleo-sharp-essential";
 
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,35 @@ const pop =
 const scrimMotion =
   "transition-[opacity,backdrop-filter] data-starting-style:backdrop-blur-[0px] data-ending-style:backdrop-blur-[0px]";
 
+// Where a section opens its modals (Sacha 15/11/2026: in Finance, every
+// form opens as the panel on the right, over the sheet it comes from, so one
+// stays where one is). `className` scopes the panel to its section's theme,
+// as it is drawn in a portal.
+type DialogSide = { side: "center" | "right"; className?: string };
+const DialogSideContext = createContext<DialogSide>({ side: "center" });
+function DialogSideProvider({
+  side,
+  className,
+  children,
+}: DialogSide & { children: React.ReactNode }) {
+  return (
+    <DialogSideContext.Provider value={{ side, className }}>
+      {children}
+    </DialogSideContext.Provider>
+  );
+}
+
+/** The theme class of the section the component is drawn in, for what it
+ * opens in a portal (a menu): undefined outside a section that sets one. */
+function useSectionThemeClass() {
+  return useContext(DialogSideContext).className;
+}
+
+// The panel on the right: floating with a margin, a hairline, no shadow,
+// the app's dark scrim; full screen on phones (Finance's side sheet).
+const rightPanel =
+  "fixed inset-0 z-50 flex flex-col gap-5 overflow-y-auto border border-[color:var(--border-default)] bg-[var(--surface-raised)] p-6 text-foreground outline-none transition-[translate,opacity] duration-[var(--duration-base)] ease-[var(--ease-out)] data-ending-style:translate-x-6 data-ending-style:opacity-0 data-starting-style:translate-x-6 data-starting-style:opacity-0 motion-reduce:transition-opacity sm:inset-y-3 sm:right-3 sm:left-auto sm:w-[min(520px,calc(100%-1.5rem))] sm:rounded-[var(--radius-xl)]";
+
 const Dialog = DialogPrimitive.Root;
 const DialogTrigger = DialogPrimitive.Trigger;
 
@@ -36,8 +66,11 @@ function DialogContent({
   closeLabel,
   showClose = true,
   instant = false,
+  side: sideProp,
   ...props
 }: DialogPrimitive.Popup.Props & {
+  // Overrides the section's choice (a search stays centred).
+  side?: "center" | "right";
   closeLabel: string;
   // False when the content has its own way out (the presentation's « Passer »).
   showClose?: boolean;
@@ -45,6 +78,35 @@ function DialogContent({
   // be there the moment the keys are pressed.
   instant?: boolean;
 }) {
+  const section = useContext(DialogSideContext);
+  const side = sideProp ?? section.side;
+  if (side === "right")
+    return (
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Backdrop className="fixed inset-0 z-50 bg-[var(--glass-scrim)] transition-opacity duration-[var(--duration-base)] data-ending-style:opacity-0 data-starting-style:opacity-0" />
+        <DialogPrimitive.Popup
+          data-slot="dialog-content"
+          className={cn(rightPanel, section.className, className)}
+          {...props}
+        >
+          {children}
+          {showClose && (
+            <DialogPrimitive.Close
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  className="absolute top-5 right-4"
+                />
+              }
+            >
+              <IconXmark aria-hidden />
+              <span className="sr-only">{closeLabel}</span>
+            </DialogPrimitive.Close>
+          )}
+        </DialogPrimitive.Popup>
+      </DialogPrimitive.Portal>
+    );
   return (
     <DialogPrimitive.Portal>
       <DialogPrimitive.Backdrop
@@ -118,6 +180,8 @@ function DialogDescription({
 export {
   Dialog,
   DialogContent,
+  DialogSideProvider,
+  useSectionThemeClass,
   DialogDescription,
   DialogHeader,
   DialogTitle,

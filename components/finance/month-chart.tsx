@@ -1,5 +1,5 @@
 import { MonthChartTable } from "@/components/finance/month-chart-table";
-import { PageSection } from "@/components/shell/page-section";
+import { MetricCard } from "@/components/ui/metric-card";
 import type { MonthBar } from "@/lib/finance/aggregate";
 import type { Month } from "@/lib/finance/period";
 import { finance } from "@/lib/i18n/fr/finance";
@@ -26,7 +26,7 @@ export const monthName = (month: Month, style: "short" | "long") =>
   }).format(new Date(`${month}-01T12:00:00Z`));
 
 /** A round top for the axis: 1, 2, 2.5 or 5 times a power of ten. */
-function niceMax(value: number): number {
+export function niceMax(value: number): number {
   if (value <= 0) return 1;
   const power = 10 ** Math.floor(Math.log10(value));
   const step = [1, 2, 2.5, 5, 10].find((s) => s * power >= value) ?? 10;
@@ -58,10 +58,9 @@ export function MonthChart({
     !highlight || (month >= highlight.from && month <= highlight.to);
 
   return (
-    <PageSection
-      id="finance-chart"
+    <MetricCard
       title={t.title}
-      action={
+      legend={
         <ul
           aria-label={t.legendLabel}
           className="flex flex-wrap gap-x-4 gap-y-1 text-caption text-[color:var(--text-secondary)]"
@@ -81,7 +80,7 @@ export function MonthChart({
       <figure className="flex flex-col gap-2">
         <div className="flex gap-2" aria-hidden={empty || undefined}>
           {/* The axis: three amounts, the gridlines drawn by the plot. */}
-          <div className="flex h-56 w-12 shrink-0 flex-col justify-between text-right text-caption text-[color:var(--text-tertiary)] tabular-nums">
+          <div className="flex h-56 w-12 shrink-0 flex-col justify-between text-right text-caption text-[color:var(--text-secondary)] tabular-nums">
             {ticks.map((tick) => (
               <span key={tick} className="-translate-y-1/2 last:translate-y-0">
                 {formatAmountCompact(tick)}
@@ -170,7 +169,7 @@ export function MonthChart({
             </ol>
             <ol
               aria-hidden
-              className="mt-2 flex gap-1 text-center text-caption text-[color:var(--text-tertiary)] sm:gap-2"
+              className="mt-2 flex gap-1 text-center text-caption text-[color:var(--text-secondary)] sm:gap-2"
             >
               {bars.map((bar) => (
                 <li key={bar.month} className="min-w-0 flex-1 truncate">
@@ -192,6 +191,6 @@ export function MonthChart({
         )}
         <MonthChartTable bars={bars} series={SERIES} monthName={monthName} />
       </figure>
-    </PageSection>
+    </MetricCard>
   );
 }

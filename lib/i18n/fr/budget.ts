@@ -136,7 +136,6 @@ export const budget = {
     amount: "Montant HT (€)",
     followsInvoice:
       "Le montant et l'état suivent la facture : ils changent quand elle est reçue, puis payée.",
-    amountHint: "Par exemple 1500 ou 1 500,50.",
     labelMissing:
       "Dites ce qu'est la dépense, par exemple « Repas après la session ».",
     spentOn: "Date",
@@ -145,13 +144,29 @@ export const budget = {
     targetPlaceholder: "Choisir un projet ou un artiste",
     targetSearch: "Rechercher un projet ou un artiste",
     targetNone: "Aucun projet ni artiste ne correspond.",
-    targetMissing: "Dites à quel projet ou à quel artiste va la dépense.",
+    // For the Finance, who also has cost centers and « Hors budget » (UX test of 15/11/2026).
+    finance: {
+      targetPlaceholder: "Projet, artiste, autre budget ou hors budget",
+      targetSearch: "Rechercher un projet, un artiste, un budget…",
+      targetNone:
+        "Rien ne correspond. Une dépense de structure (loyer, abonnement) va dans « Hors budget ».",
+    },
+    targetMissing: "Choisissez à quoi va la dépense.",
     // Its kind as a badge after the name (Sacha 11/11/2026), « récent » beside.
-    targetKinds: { project: "Projet", artist: "Artiste" },
+    targetKinds: {
+      project: "Projet",
+      artist: "Artiste",
+      cost_center: "Autre budget",
+      off_budget: "Hors budget",
+    },
     targetRecent: "récent",
     quickTitle: "Nouvelle dépense",
-    quickDescription:
-      "Le ticket en photo si vous l'avez, le montant, ce que c'est et pour qui : déjà payée par défaut.",
+    offBudget: "Hors budget",
+    // Its line in « Pour », beside its « Hors budget » badge: found by
+    // « loyer », « structure », « aucun ».
+    offBudgetOption: "Loyer, abonnement, frais de structure (aucun projet)",
+    subpost: "Sous-poste",
+    offBudgetHint: "Sur aucun budget : les Alertes de Finance la signalent.",
     noTargets:
       "Vous ne menez aucun projet et ne lisez pas le budget des artistes : aucune dépense à saisir ici.",
     spentOnMissing: "Indiquez le jour de la dépense.",
@@ -171,8 +186,6 @@ export const budget = {
     linkSuggestion: (label: string) =>
       `Proposé : ${label} (même mot dans le libellé).`,
     attachment: "Justificatif (photo du ticket, facture)",
-    attachmentHint:
-      "Rangé dans les Fichiers du projet, catégorie Autres : jamais déposé deux fois.",
     // An artist's spend: the receipt is kept with the artist, read by the
     // budget's readers only.
     attachmentHintArtist:
@@ -198,5 +211,23 @@ export const budget = {
     confirm: "Supprimer",
     deleting: "Suppression…",
     deleted: "Dépense supprimée.",
+  },
+  // A rebillable spend's expected income (Finance, lot 3).
+  rebilling: {
+    label: (spend: string) => `Refacturation · ${spend}`,
+  },
+  // What the Finance needs of a spend (lot 3 of the Finance, 13/11/2026).
+  spendDetails: {
+    title: "Facturation",
+    ttc: (amount: string) => `Soit ${amount} TTC`,
+    dueOn: "Échéance",
+    supplier: "Fournisseur",
+    validator: "Valideur",
+    none: "Aucun",
+    search: "Rechercher",
+    noMatch: "Aucun résultat",
+    rebillable: "Refacturable",
+    rebillableHint:
+      "Refacturée à un client ou un partenaire : une entrée attendue est prévue pour elle.",
   },
 } as const;

@@ -5,6 +5,7 @@
 // delivery decisions), never from PO.
 
 import { routes } from "@/lib/auth/redirects";
+import { legalParticipationsHref } from "@/lib/ui/legal-steps";
 import { productionNext as frProductionNext } from "@/lib/i18n/fr/production-next";
 
 import { blank, nextContext, nobody } from "./context";
@@ -89,6 +90,24 @@ export function productionNext(input: NextInput): ProductionNext {
     case "preproduction":
       return preproductionNext(ctx);
     case "ready":
+      // A collective (lot 12 bis): the shoot is refused while a contract of
+      // the titles shot is not signed nor waived; that comes first.
+      if (input.contractGaps)
+        return {
+          ...owner({
+            ...blank,
+            kind: "act",
+            dueKey: "shoot",
+            title: t.steps.contracts.title,
+            why: t.steps.contracts.why(input.contractGaps),
+            link: {
+              label: t.steps.contracts.link,
+              href: legalParticipationsHref(input.projectId),
+              place: t.places.participations,
+            },
+          }),
+          blockedBy: "contracts",
+        };
       return owner({
         ...blank,
         kind: "act",

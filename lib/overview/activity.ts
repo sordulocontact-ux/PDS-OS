@@ -14,6 +14,7 @@ import {
   participationStatusOf,
 } from "@/lib/projects/participation-rules";
 import { projectTitleLabel } from "@/lib/projects/title-rules";
+import { formatShortDate } from "@/lib/release/format";
 import type { ProjectDetail } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -44,7 +45,8 @@ const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
  * manage_legal, as its pages), the Distribution's (distribution_events),
  * a collective's titles (project_title_events: added, renamed, abandoned
  * with its reason, reactivated; an artist added to a title, its status
- * changed).
+ * changed; the main artist changed, old → new), each to « Titres et
+ * artistes ».
  * Read with the viewer's session: what RLS hides stays hidden. The Master
  * has no journal of its own yet. Nothing rewritten, nothing invented.
  */
@@ -184,7 +186,11 @@ export async function loadProjectActivity(
       workflow: fr.projectShell.activity.project,
       text: titleEventText(row.kind, record(row.detail)),
       who: person(row.actor_person_id),
-      href: routes.project(project.id),
+      // The release mode leads to the collective's « Sorties » (lot 13).
+      href:
+        row.kind === "release_mode_changed"
+          ? routes.projectReleases(project.id)
+          : routes.projectTitles(project.id),
     })),
     ...(distribution.data ?? []).map((row) => ({
       id: `distribution:${row.id}`,
@@ -213,7 +219,9 @@ function titleEventText(kind: string, detail: Record<string, unknown>): string {
   const status = (value: unknown) =>
     p.statuses[participationStatusOf(text(value) ?? "")];
   const position = typeof detail.position === "number" ? detail.position : 0;
-  const masterTitle = text(detail.master_title);
+  // A provisional name of the Catalogue is not the title's name (lot 7).
+  const masterTitle =
+    detail.master_provisional === true ? null : text(detail.master_title);
   const label = (workingTitle: string | null) =>
     projectTitleLabel({ position, workingTitle, masterTitle });
   const current = label(text(detail.working_title));
@@ -221,7 +229,25 @@ function titleEventText(kind: string, detail: Record<string, unknown>): string {
     case "added":
       return t.added(current);
     case "renamed":
-      return t.renamed(label(text(detail.from)), label(text(detail.to)));
+      return (detail.master_named === true ? t.renamedInCatalog : t.renamed)(
+        projectTitleLabel({
+          position,
+          workingTitle: text(detail.from),
+          masterTitle: detail.master_named === true ? null : masterTitle,
+        }),
+        label(text(detail.to)),
+      );
+    case "cataloged":
+      return t.cataloged(current);
+    case "master_attached":
+      return t.masterAttached(
+        projectTitleLabel({
+          position,
+          workingTitle: text(detail.working_title),
+          masterTitle: null,
+        }),
+        text(detail.master_title) ?? "",
+      );
     case "abandoned":
       return t.abandoned(current, text(detail.reason) ?? "");
     case "reactivated":
@@ -240,6 +266,33 @@ function titleEventText(kind: string, detail: Record<string, unknown>): string {
         status(detail.from),
         status(detail.to),
       );
+    case "main_artist_changed":
+      return t.mainArtistChanged(text(detail.from), text(detail.to) ?? "");
+    // Lot 13: the collective's release mode.
+    case "release_mode_changed": {
+      const modes = fr.collectiveReleases.modes;
+      return fr.collectiveReleases.event(
+        modes[text(detail.from) ?? ""] ?? "—",
+        modes[text(detail.to) ?? ""] ?? "—",
+      );
+    }
+    // Lot 12: the direction's waivers of a missing contract.
+    case "waiver_granted":
+    case "waiver_revoked": {
+      const w = fr.participationWaivers.scopeOf;
+      const scope = detail.scope === "release" ? w.release : w.shoot;
+      const artist = text(detail.artist) ?? "";
+      if (kind === "waiver_revoked")
+        return t.waiverRevoked(scope, artist, current, text(detail.reason));
+      const due = text(detail.due_on);
+      return t.waiverGranted(
+        scope,
+        artist,
+        current,
+        due ? formatShortDate(due) : "",
+        text(detail.reason) ?? "",
+      );
+    }
     default:
       return "";
   }

@@ -5,6 +5,7 @@ import { IconBell, IconCheck } from "nucleo-sharp-essential";
 import { usePushSubscription } from "@/components/notifications/use-push-subscription";
 import { Button } from "@/components/ui/button";
 import { DialogTitle } from "@/components/ui/dialog";
+import { Kbd } from "@/components/ui/kbd";
 import { notifications } from "@/lib/i18n/fr/notifications";
 import { onboarding } from "@/lib/i18n/fr/onboarding";
 
@@ -83,22 +84,14 @@ export function OnboardingText({
           <p className={note}>
             {t.poQuestion}{" "}
             <span className="mx-0.5 inline-flex gap-1 align-middle">
-              <Key>{t.poSpace}</Key>
-              <Key>{t.poSpace}</Key>
+              <Kbd raised>{t.poSpace}</Kbd>
+              <Kbd raised>{t.poSpace}</Kbd>
             </span>{" "}
             {t.poOpens}
           </p>
         </>
       )}
     </div>
-  );
-}
-
-function Key({ children }: { children: React.ReactNode }) {
-  return (
-    <kbd className="inline-grid h-6 place-items-center rounded-md border border-b-2 border-[color:var(--border-default)] bg-[var(--surface-raised)] px-2 font-[inherit] text-[length:var(--type-micro)] leading-none text-[color:var(--text-primary)]">
-      {children}
-    </kbd>
   );
 }
 

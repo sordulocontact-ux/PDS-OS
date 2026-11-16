@@ -1,6 +1,7 @@
 "use client";
 
 import { ProjectNavChips } from "@/components/projects/project-nav-chips";
+import { ContextSidebar } from "@/components/shell/context-sidebar";
 import {
   ProjectNavList,
   type ProjectNavState,
@@ -18,6 +19,8 @@ export type ProjectNavProps = ProjectNavState & {
   canSeeLegal: boolean;
   canSeeBudget?: boolean;
   workflows?: readonly string[];
+  // A collective: « Titres et artistes » after the overview (lot 6).
+  collective?: boolean;
   // Where each entry opens, from the journeys (lib/journey/landing.ts):
   // straight to its step, not through the module's redirecting page.
   entries?: Record<string, string>;
@@ -30,12 +33,14 @@ const navItems = ({
   canSeeLegal,
   canSeeBudget = true,
   workflows,
+  collective = false,
   entries = {},
 }: ProjectNavProps) =>
   projectSections(projectId, {
     legal: canSeeLegal,
     budget: canSeeBudget,
     workflows,
+    collective,
   })
     .filter((section) => !section.hidden)
     .map((section) => ({
@@ -49,23 +54,22 @@ const navItems = ({
 // Pilotage. Same sticky geometry as the main Sidebar, right against it.
 export function ProjectSidebar(props: ProjectNavProps) {
   return (
-    <nav
-      aria-label={fr.shell.project.sidebar.label}
-      className="sticky top-[var(--shell-inset)] hidden h-[calc(100dvh-2*var(--shell-inset))] w-[var(--project-nav-width)] shrink-0 flex-col overflow-y-auto border-r border-[color:var(--border-hairline)] bg-[var(--surface-page)] p-2 text-sidebar-foreground md:flex"
-    >
-      <div className="mb-1.5 border-b border-[color:var(--border-hairline)] pb-1.5">
+    <ContextSidebar
+      label={fr.shell.project.sidebar.label}
+      head={
         <ProjectSwitcher
           projectId={props.projectId}
           projectTitle={props.projectTitle}
         />
-      </div>
+      }
+    >
       <ProjectNavList
         items={navItems(props)}
         statuses={props.statuses}
         counts={props.counts}
         reasons={props.reasons}
       />
-    </nav>
+    </ContextSidebar>
   );
 }
 
@@ -77,20 +81,19 @@ export function ProjectSidebarSkeleton({
   projectTitle,
 }: Pick<ProjectNavProps, "projectId" | "projectTitle">) {
   return (
-    <nav
-      aria-label={fr.shell.project.sidebar.label}
-      aria-busy="true"
-      className="sticky top-[var(--shell-inset)] hidden h-[calc(100dvh-2*var(--shell-inset))] w-[var(--project-nav-width)] shrink-0 flex-col overflow-y-auto border-r border-[color:var(--border-hairline)] bg-[var(--surface-page)] p-2 text-sidebar-foreground md:flex"
-    >
-      <div className="mb-1.5 border-b border-[color:var(--border-hairline)] pb-1.5">
+    <ContextSidebar
+      label={fr.shell.project.sidebar.label}
+      busy
+      head={
         <ProjectSwitcher projectId={projectId} projectTitle={projectTitle} />
-      </div>
+      }
+    >
       <div className="flex flex-col gap-1.5 p-1">
         {Array.from({ length: 9 }, (_, i) => (
           <Skeleton key={i} className="h-8" />
         ))}
       </div>
-    </nav>
+    </ContextSidebar>
   );
 }
 

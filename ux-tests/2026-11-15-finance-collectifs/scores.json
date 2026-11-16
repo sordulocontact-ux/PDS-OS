@@ -1,0 +1,82 @@
+{
+  "taches": {
+    "T1": {
+      "participants": 4,
+      "succes_declares": 3,
+      "succes_reels": 3,
+      "verifies": 4,
+      "faux_succes": 0,
+      "seq_moyen": 4,
+      "actions_moyennes": 15.2,
+      "ratio_chemin_optimal": null
+    },
+    "T2": {
+      "participants": 4,
+      "succes_declares": 3,
+      "succes_reels": 2,
+      "verifies": 4,
+      "faux_succes": 1,
+      "seq_moyen": 3.25,
+      "actions_moyennes": 16,
+      "ratio_chemin_optimal": null
+    },
+    "T3": {
+      "participants": 4,
+      "succes_declares": 2,
+      "succes_reels": 2,
+      "verifies": 4,
+      "faux_succes": 0,
+      "seq_moyen": 3,
+      "actions_moyennes": 17.5,
+      "ratio_chemin_optimal": null
+    },
+    "T4": {
+      "participants": 3,
+      "succes_declares": 2,
+      "succes_reels": 2,
+      "verifies": 3,
+      "faux_succes": 0,
+      "seq_moyen": 4,
+      "actions_moyennes": 12.7,
+      "ratio_chemin_optimal": null
+    }
+  },
+  "personas": {
+    "claire": {
+      "taches": 4,
+      "succes_reels": 4,
+      "succes_declares": 4,
+      "seq_moyen": 4,
+      "sus": 57.5,
+      "un_mot": "Complet mais long"
+    },
+    "elise": {
+      "taches": 4,
+      "succes_reels": 4,
+      "succes_declares": 4,
+      "seq_moyen": 5.5,
+      "sus": 72.5,
+      "un_mot": "prometteur"
+    },
+    "lina": {
+      "taches": 3,
+      "succes_reels": 0,
+      "succes_declares": 0,
+      "seq_moyen": 1.33,
+      "sus": 37.5,
+      "un_mot": "Bloquée"
+    },
+    "malik": {
+      "taches": 4,
+      "succes_reels": 1,
+      "succes_declares": 2,
+      "seq_moyen": 2.75,
+      "sus": 35.0,
+      "un_mot": "bloqué"
+    }
+  },
+  "global": {
+    "sus_moyen": 50.6,
+    "participants": 4
+  }
+}

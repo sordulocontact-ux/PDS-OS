@@ -9,7 +9,7 @@ import { uploadCatalogFile } from "@/lib/catalog/upload-file";
  */
 export function uploadBudgetProof(input: {
   organizationId: string;
-  target: BudgetTarget;
+  target: BudgetTarget & { kind: "project" | "artist" };
   description: string;
   file: File;
 }) {

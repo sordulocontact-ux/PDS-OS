@@ -6,6 +6,7 @@ import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { attachProof } from "@/lib/distribution/declare-actions";
 import { removeProof, uploadProof } from "@/lib/distribution/upload-proof";
 import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
+import { useDistributionRelease } from "@/components/distribution/frame/release-scope";
 
 const fr = { distributionJourney };
 
@@ -22,6 +23,7 @@ export function AddProof({
   organizationId: string;
   declarationId: string;
 }) {
+  const releaseId = useDistributionRelease();
   const { pending, error, run } = useWriteSubmit(() => {}, t.proofAdded);
   return (
     <span className="flex flex-col gap-1">
@@ -51,6 +53,7 @@ export function AddProof({
                 if ("error" in up) return { ok: false, error: up.error };
                 const result = await attachProof({
                   projectId,
+                  releaseId,
                   declarationId,
                   proofPath: up.path,
                   proofName: up.name,

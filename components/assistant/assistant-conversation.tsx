@@ -1,6 +1,7 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
+import type { FileUIPart } from "ai";
 import { IconPlus } from "nucleo-sharp-essential";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -11,6 +12,7 @@ import { AssistantThread } from "@/components/assistant/assistant-thread";
 import { ConversationHeader } from "@/components/assistant/conversation-header";
 import { ConversationHistory } from "@/components/assistant/conversation-history";
 import { ConversationStart } from "@/components/assistant/conversation-start";
+import { questionOf } from "@/components/assistant/question";
 import {
   startSharedChat,
   useConversationChat,
@@ -83,8 +85,8 @@ export function AssistantConversation({
       : [{ id: chat.id, title, at: new Date().toISOString() }, ...conversations]
   ).filter((c) => !deleted.includes(c.id));
 
-  function ask(text: string) {
-    if (!busy) void sendMessage({ text });
+  function ask(text: string, images: FileUIPart[]) {
+    if (!busy) void sendMessage(questionOf(text, images));
   }
 
   function restart() {

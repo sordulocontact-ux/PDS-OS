@@ -56,4 +56,10 @@ supabase db reset --db-url "$PREPROD_DB_URL" --no-seed --yes
   cat supabase/preprod/showcase-business.sql
 } | "$PSQL" "$PREPROD_DB_URL" -q -v ON_ERROR_STOP=1 >/dev/null
 
+# Finance › Justificatifs: three spends and seven proofs in every state, then
+# their files, uploaded as the business manager (needs PREPROD_SUPABASE_URL
+# and PREPROD_ANON_KEY, supabase/preprod/showcase-finance-proofs.sql).
+"$PSQL" "$PREPROD_DB_URL" -q -v ON_ERROR_STOP=1 -f supabase/preprod/showcase-finance-proofs.sql >/dev/null
+node scripts/preprod-proof-files.mjs >/dev/null
+
 echo "Pré-prod remise à zéro : comptes de test et moments prêts."

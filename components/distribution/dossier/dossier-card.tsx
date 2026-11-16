@@ -103,7 +103,10 @@ export function DossierCard(props: DossierCardProps) {
                 </p>
               )}
               {group.fields.map((field) =>
-                PARAM_OF[field.key] ? (
+                // A title's release (lot 15): its cover is the title's, read
+                // in the Catalogue — not a parameter to choose.
+                PARAM_OF[field.key] &&
+                !(field.key === "cover" && props.params.coverFromTitle) ? (
                   <ParamField
                     key={field.key}
                     data={

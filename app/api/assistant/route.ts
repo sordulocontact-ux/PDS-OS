@@ -13,6 +13,7 @@ import { z } from "zod";
 import { saveConversation } from "@/lib/assistant/conversations";
 import { recordUnanswered } from "@/lib/assistant/gaps";
 import { guideMap } from "@/lib/assistant/guide";
+import { checkImages, withImageData } from "@/lib/assistant/images";
 import { pageContext } from "@/lib/assistant/page-context";
 import { isTestDataEnabled } from "@/lib/assistant/test-data/tool";
 import { createAssistantTools } from "@/lib/assistant/tools";
@@ -64,10 +65,15 @@ export async function POST(request: Request) {
   if (!parsed.success)
     return Response.json({ error: "invalid_input" }, { status: 400 });
 
-  // The client cannot inject a system message: only user and assistant turns are kept.
-  const messages = (parsed.data.messages as UIMessage[]).filter(
-    (m) => m.role !== "system",
+  // The client cannot inject a system message: only user and assistant turns
+  // are kept, and an image only as the sender's own (§ 2 quinquies).
+  const images = checkImages(
+    (parsed.data.messages as UIMessage[]).filter((m) => m.role !== "system"),
+    access.personId ?? "",
   );
+  if (!images.ok)
+    return Response.json({ error: images.error }, { status: 400 });
+  const messages = images.messages;
   const tooLong = messages.some(
     (m) =>
       m.role === "user" &&
@@ -102,21 +108,24 @@ export async function POST(request: Request) {
       appMap: guideMap(),
     }),
   );
+  // Made now, while the request's cookies are readable: the images are read
+  // with the member's session, and the turns saved with it (§ 2 ter).
+  const supabase = await createClient();
   const result = streamText({
     model,
     ...settings,
-    messages: await convertToModelMessages(messages),
+    messages: await convertToModelMessages(
+      await withImageData(supabase, messages),
+    ),
     tools: createAssistantTools(access, userTexts, parsed.data.page ?? null),
     // A question across workflows (Master, Juridique, Distribution) takes
     // several reads: 8 steps (audit of PO § 3.3), to be measured.
     stopWhen: isStepCount(8),
   });
 
-  // Saved after every answer, with the member's session (client made now,
-  // while the request's cookies are readable): the history (§ 2 ter).
+  // Saved after every answer, with the member's session: the history (§ 2 ter).
   const conversationId = z.uuid().safeParse(parsed.data.id);
   const organizationId = access.organizationId;
-  const supabase = await createClient();
 
   return createUIMessageStreamResponse({
     stream: toUIMessageStream({

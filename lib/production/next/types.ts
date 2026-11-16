@@ -37,6 +37,9 @@ export type ProductionNext = {
   done: string | null;
   // Its due date, read in the backward schedule (ISO date), if any.
   due: string | null;
+  // A collective's shoot waits for participation contracts (lot 12 bis):
+  // the journey says it instead of « lancer le tournage ».
+  blockedBy?: "contracts";
 };
 
 export type NextPerson = { name: string | null; isViewer: boolean };
@@ -44,6 +47,10 @@ export type NextPerson = { name: string | null; isViewer: boolean };
 /** What each phase needs to know, read only for the phase reached. */
 export type NextInput = {
   projectId: string;
+  // A collective (lot 12): the confirmed participations of the titles this
+  // deliverable targets with neither their contract signed nor an open
+  // waiver of the shoot, named; null or absent: nothing blocks.
+  contractGaps?: string | null;
   // The backward schedule's dates (lib/production/preprod/schedule.ts).
   due: Partial<Record<ScheduleStep, string>>;
   deliverableId: string;

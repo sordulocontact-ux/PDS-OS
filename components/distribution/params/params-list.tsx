@@ -58,13 +58,20 @@ export function ParamsList({
       );
       return;
     }
-    run(() => confirmDistributionParams({ projectId: data.projectId }));
+    run(() =>
+      confirmDistributionParams({
+        projectId: data.projectId,
+        releaseId: data.releaseId,
+      }),
+    );
   };
 
   return (
     <div className="flex flex-col gap-3.5">
       <FactRows>
-        {PARAM_KEYS.map((key) => (
+        {PARAM_KEYS.filter(
+          (key) => !(key === "cover" && data.coverFromTitle),
+        ).map((key) => (
           <ParamField key={key} data={data} field={key} missing={reason(key)} />
         ))}
         <UpcField data={data} />

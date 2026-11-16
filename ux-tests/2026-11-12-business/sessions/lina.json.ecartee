@@ -1,0 +1,15 @@
+{
+  "persona_id": "lina",
+  "fenetre": "1440x900",
+  "mode_perception": "lecteur_ecran",
+  "presentation": "Je m'appelle Lina Haddad, je suis cheffe de projet chez PDS et je pilote Minuit pile de Mona Lys. J'ouvre l'app pour déclarer une avance de frais et savoir où en est la négociation de mon artiste.",
+  "premiere_impression": null,
+  "bloque_environnement": "Le changement de compte via la barre de l'équipe est resté sur « Connexion… » plus de 50 s ; la page n'a jamais changé (fiche d'un deal sous le compte de Claire Morel). Aucune tâche tentée.",
+  "taches": [
+    {"id": "T1", "issue_declaree": "abandon", "pense_avoir_reussi": false, "seq": null, "nb_actions": 0, "moment_le_plus_penible": "Je suis restée devant « Connexion… » sans que rien ne bouge.", "incidents": [{"etape": "connexion sous Lina", "ecran": "http://localhost:3000/app/deals/83467ff2-b8d5-4456-a518-144be60c4740", "voulait": "passer sous mon compte", "a_fait": "choisi Lina Haddad dans la barre, attendu, Échap, retapé l'adresse de départ deux fois", "attendait": "arriver sur mon accueil", "resultat": "reste sur « Connexion… », même page", "emotion": "perplexe", "verbatim": "Ça dit « Connexion… » depuis une minute, je ne sais pas si ça marche."}], "verbatims": []},
+    {"id": "T2", "issue_declaree": "abandon", "pense_avoir_reussi": false, "seq": null, "nb_actions": 0, "moment_le_plus_penible": "Non faite, bloquée avant.", "incidents": [], "verbatims": []},
+    {"id": "T3", "issue_declaree": "abandon", "pense_avoir_reussi": false, "seq": null, "nb_actions": 0, "moment_le_plus_penible": "Non faite, bloquée avant.", "incidents": [], "verbatims": []}
+  ],
+  "sus": [null, null, null, null, null, null, null, null, null, null],
+  "entretien": {"raconter": null, "agace": null, "pas_sur_que_ca_marche": "Le changement de compte : « Connexion… » sans fin.", "pratique": null, "utiliserait": null, "un_mot": null}
+}

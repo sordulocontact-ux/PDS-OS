@@ -233,6 +233,17 @@ par les tickets ou laissé « à confirmer », donc décidé provisoirement ou r
   justificatifs sont lus par le responsable du projet et la direction (`can_read_project_budget`).
   Depuis le 12/11/2026, la page **Finance** (`read_finance` : direction, business managers, business,
   décision de Sacha) montre les totaux de toute l'équipe, sans ouvrir l'accès aux lignes elles-mêmes.
+  Depuis le 13/11/2026 (ticket « Cockpit Finance » d'Ibé), « la Finance » = business managers et poste
+  business (Sacha) : avec la direction, ils saisissent le solde du compte, la réserve minimale et l'argent
+  entrant (`manage_finance`). Point à trancher : montants des entrées et relevés en TTC, dépenses en HT
+  jusqu'au lot Dépenses.
+  Lots 2 à 7 du même ticket (13/11/2026, décisions de Claude, à confirmer avec Ibé) : une entrée porte au
+  plus une facture (une seconde facture = une seconde entrée) et PDS OS garde le PDF sans rédiger de facture ;
+  un avoir ne couvre que ce qui n'est pas encaissé (le remboursement d'un client qui a déjà payé n'est pas
+  modélisé) ; les dépenses restent HT, leur TVA donne le TTC que la trésorerie retire ; la Finance écrit ses
+  centres de coût et le hors budget, une dépense de projet reste écrite par son responsable ; les titres comptés
+  pour l'avance The Orchard sont saisis par la Finance (quels titres du Catalogue comptent : point à trancher) ;
+  le rapprochement est fait à la main sur l'export CSV de Qonto (synchronisation automatique : P2 du ticket).
 - **Agence** : Google Sheets lu par son export CSV public (le tableau doit être partagé « lecteur
   avec le lien ») ; pas de synchronisation planifiée ni d'OCR des PDF (après MVP).
 - **Réseau** : fusion de doublons, historique daté des rattachements d'un journaliste à ses médias,

@@ -1,0 +1,8 @@
+{
+  "chemins_optimaux": {},
+  "succes_reel": {
+    "malik": { "T1": true, "T2": true, "T3": true, "T4": true, "T5": true },
+    "elise": { "T1": false, "T2": true, "T3": false, "T4": false },
+    "claire": { "T1": true, "T2": true, "T3": true, "T4": true }
+  }
+}

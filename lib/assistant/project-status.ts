@@ -21,7 +21,7 @@ import { loadFraming } from "@/lib/framing/queries";
 import { isOverdue, todayInParis } from "@/lib/insights/dates";
 import { loadShellActions } from "@/lib/overview/journeys";
 import { getProject } from "@/lib/projects/queries";
-import { getProjectRelease } from "@/lib/release/queries";
+import { getProjectRelease, PROJECT_RELEASE } from "@/lib/release/queries";
 import { createClient } from "@/lib/supabase/server";
 
 /** Facts about one project, assembled from the existing page queries. */
@@ -32,7 +32,9 @@ export async function projectStatus(projectId: string, access: Access) {
   const [framing, knowledge, release, journeys] = await Promise.all([
     loadFraming(projectId, access),
     loadFramingKnowledge(projectId, access),
-    createClient().then((supabase) => getProjectRelease(supabase, projectId)),
+    createClient().then((supabase) =>
+      getProjectRelease(supabase, projectId, PROJECT_RELEASE),
+    ),
     // Who does what now: the project's journeys, as its Travail reads them.
     loadShellActions(projectId),
   ]);

@@ -14,6 +14,8 @@
    ========================================================================== */
 
 :root {
+  /* A button's radius: the pill, or a section's own style (Finance). */
+  --button-radius: 999px;
   /* --- Encre et gris ----------------------------------------------------- */
   --po-black: #000000;
   --po-ink-900: #000000;
@@ -1283,3 +1285,149 @@ button[data-busy]::before {
     translate: none;
   }
 }
+
+/* --- Finance, nouveau style (Sacha, 15/11/2026 ; docs/FINANCE-V2.md) -------
+   Écart voulu, limité à la section Finance : FinanceFrame pose .finance-scope
+   et ce bloc redéfinit les variables qui pilotent déjà les composants, comme
+   :root.dark redéfinit les couleurs. Un cran plus petit et plus léger (texte
+   courant 15 px en 450, ce qui ressort en 550), arrondis légers
+   (cartes 8 px, boutons et champs 6 px). Les modales et menus, en portail hors
+   de la page, gardent le style de l'app. */
+.finance-scope {
+  --type-display-xl: 36px;
+  --type-display-xl-lh: 42px;
+  --type-display-lg: 28px;
+  --type-display-lg-lh: 34px;
+  --type-display-md: 24px;
+  --type-display-md-lh: 30px;
+  --type-display-module: 24px;
+  --type-display-module-lh: 30px;
+  --type-display-sm: 18px;
+  --type-display-sm-lh: 26px;
+  --type-figure-xl: 28px;
+  --type-figure-xl-lh: 32px;
+  --type-figure-lg: 20px;
+  --type-figure-lg-lh: 26px;
+  --type-figure-md: 15px;
+  --type-figure-md-lh: 20px;
+  --type-body-xl: 18px;
+  --type-body-xl-lh: 26px;
+  --type-body-lg: 16px;
+  --type-body-lg-lh: 24px;
+  --type-body-md: 15px;
+  --type-body-md-lh: 22px;
+  --type-body-sm: 14px;
+  --type-body-sm-lh: 20px;
+  --type-caption: 13px;
+  --type-caption-lh: 18px;
+  --type-micro: 12px;
+  --type-micro-lh: 16px;
+  --type-colhead: 13px;
+  --type-colhead-lh: 18px;
+  --type-body-tracking: -0.01em;
+  /* Plus léger que l'app, sans être maigre : 450 par défaut (Google Sans
+     Flex est variable), et ce qui ressort à 550 (Sacha, 15/11/2026 : « les
+     textes sont quand même très fins » à 400). */
+  --font-weight-normal: 450;
+  --font-weight-medium: 450;
+  --font-weight-semibold: 550;
+  --font-weight-bold: 650;
+  --fw-semibold: 550;
+  --fw-bold: 650;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
+  --radius-2xl: 8px;
+  --radius-3xl: 12px;
+  --radius-4xl: 12px;
+  font-weight: 450;
+  font-size: var(--type-body-md);
+  line-height: var(--type-body-md-lh);
+}
+/* Les boutons de Finance, moins arrondis, comme le proto (Sacha, 15/11/2026 :
+   « un nouveau style de bouton, beaucoup moins arrondi ») : 6 px, l'arrondi
+   des champs. */
+.finance-scope {
+  --button-radius: 6px;
+}
+/* Les chiffres de Finance dans la deuxième typo du proto, Geist Mono (Sacha,
+   15/11/2026 : « la deuxième typo pour les chiffres, je l'aime vraiment
+   bien ») : montants, dates, comptes et axes, tout ce qui s'aligne déjà en
+   tabular-nums, resserré comme dans le proto ; jamais un grand chiffre de titre
+   (display, figure), qui garde la typo du texte, comme le proto. */
+.finance-scope
+  .tabular-nums:not(
+    [class*="text-display"],
+    [class*="text-figure"],
+    [class*="type-display"],
+    [class*="type-figure"],
+    [class*="text-display"] *,
+    [class*="text-figure"] *
+  ) {
+  font-family: var(--font-mono);
+  /* Each figure keeps the size its own class gives it (a size here would
+     override them all); only tightened, as the proto. */
+  letter-spacing: -0.03em;
+}
+/* Un état en Finance : un point de couleur et son texte, sans fond, comme le
+   proto avant le design system (Sacha, 15/11/2026 : « plus clair » que les
+   badges). Le texte reste à l'encre, sauf avertissement et danger. Les
+   teintes de catégorie (projet, artiste…) gardent leur pastille. */
+.finance-scope
+  [data-slot="status-badge"]:is(
+    [data-tone="neutral"],
+    [data-tone="info"],
+    [data-tone="success"],
+    [data-tone="warning"],
+    [data-tone="danger"],
+    [data-tone="action"]
+  ) {
+  --state-dot: var(--text-tertiary);
+  height: auto;
+  padding-inline: 0;
+  gap: 6px;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: var(--type-body-sm);
+  line-height: var(--type-body-sm-lh);
+  font-weight: inherit;
+}
+.finance-scope [data-slot="status-badge"][data-tone="info"] {
+  --state-dot: var(--tone-info-fg);
+}
+.finance-scope [data-slot="status-badge"][data-tone="success"] {
+  --state-dot: var(--tone-success-fg);
+}
+.finance-scope [data-slot="status-badge"][data-tone="action"] {
+  --state-dot: var(--selection);
+}
+.finance-scope [data-slot="status-badge"][data-tone="warning"] {
+  --state-dot: var(--tone-warning-fg);
+  color: var(--tone-warning-fg);
+}
+.finance-scope [data-slot="status-badge"][data-tone="danger"] {
+  --state-dot: var(--tone-danger-fg);
+  color: var(--tone-danger-fg);
+}
+.finance-scope
+  [data-slot="status-badge"]:is(
+    [data-tone="neutral"],
+    [data-tone="info"],
+    [data-tone="success"],
+    [data-tone="warning"],
+    [data-tone="danger"],
+    [data-tone="action"]
+  )::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: var(--state-dot);
+}
+.finance-scope [data-slot="status-badge"] > .rounded-full[aria-hidden] {
+  display: none;
+}
+/* Boutons et tableaux : la forme du design system (bouton en pilule, tableau à
+   bandeau d'en-tête, sans filets verticaux), aux tailles de Finance (Sacha,
+   15/11/2026 : « les tableaux et les boutons du DS », puis « une version plus
+   petite, cohérente avec la page ») : aucune règle de forme propre à Finance. */

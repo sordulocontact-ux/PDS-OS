@@ -30,6 +30,7 @@ import {
 import { distribution } from "@/lib/i18n/fr/distribution";
 import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
 import { todayInParis } from "@/lib/insights/dates";
+import { useDistributionRelease } from "@/components/distribution/frame/release-scope";
 
 const fr = { distribution, distributionJourney };
 
@@ -57,6 +58,7 @@ export function ProposeClosure({
   validator: string;
   direction: string;
 }) {
+  const releaseId = useDistributionRelease();
   const [drafts, setDrafts] = useState<ReserveDraft[]>(() =>
     reserves.map((r) => draftOf(r, ownerPersonId)),
   );
@@ -82,6 +84,7 @@ export function ProposeClosure({
     run(() =>
       proposeClosure({
         projectId,
+        releaseId,
         kind: n ? "reserves" : "normal",
         arbitration: arbitration.trim(),
         acknowledged: ack,
@@ -173,6 +176,7 @@ export function DecideClosure({
   closureId: string;
   owner: string;
 }) {
+  const releaseId = useDistributionRelease();
   return (
     <DecisionPanel
       id="closure-decision"
@@ -186,6 +190,7 @@ export function DecideClosure({
       onDecide={(kind, comment) =>
         decideClosure({
           projectId,
+          releaseId,
           closureId,
           approve: kind === "approve",
           note: comment,
@@ -197,6 +202,7 @@ export function DecideClosure({
 }
 
 export function ReopenClosure({ projectId }: { projectId: string }) {
+  const releaseId = useDistributionRelease();
   const [note, setNote] = useState("");
   const [missing, setMissing] = useState(false);
   const { pending, error, run } = useWriteSubmit(() => setNote(""), t.reopened);
@@ -222,7 +228,9 @@ export function ReopenClosure({ projectId }: { projectId: string }) {
             const lacking = !note.trim();
             setMissing(lacking);
             if (!lacking)
-              run(() => reopenClosure({ projectId, note: note.trim() }));
+              run(() =>
+                reopenClosure({ projectId, releaseId, note: note.trim() }),
+              );
           }}
         >
           {t.reopenButton}

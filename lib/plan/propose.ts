@@ -102,6 +102,7 @@ export function proposePlan(k: FramingKnowledge): ProposedItem[] {
   const applies = applicableWorkflows({
     type: k.project.type,
     masterCount: k.titles.length,
+    collective: k.project.collective,
   });
   const music = applies.includes("distribution");
   const items: ProposedItem[] = [];

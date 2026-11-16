@@ -99,14 +99,13 @@ export async function loadFormalities(
       .eq("role", "publisher")
       .order("share", { ascending: false }),
     // The planned release: the first exploitation proposed (JUR-02).
+    // (lot 13: a collective's earliest live release, never an archived one)
     supabase
-      .from("releases")
-      .select("planned_release_date")
-      .eq("project_id", project.id)
-      .not("planned_release_date", "is", null)
-      .order("planned_release_date")
-      .limit(1)
-      .maybeSingle(),
+      .rpc("next_release_date", { p_project_id: project.id })
+      .then(({ data, error }) => ({
+        data: data ? { planned_release_date: data } : null,
+        error,
+      })),
     // The distribution's territories: the territories ceded proposed.
     supabase
       .from("distribution_dossiers")

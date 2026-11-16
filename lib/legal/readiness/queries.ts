@@ -61,6 +61,7 @@ export async function loadReadinessInputs(
         .from("releases")
         .select("delivered_on")
         .eq("project_id", project.id)
+        .is("archived_at", null)
         .not("delivered_on", "is", null)
         .order("delivered_on")
         .limit(1)

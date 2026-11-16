@@ -6,6 +6,7 @@ import { contractsTool } from "@/lib/assistant/read/contracts";
 import { dealsTool } from "@/lib/assistant/read/deals";
 import { distributionStatusTool } from "@/lib/assistant/read/distribution";
 import { filesTool } from "@/lib/assistant/read/files";
+import { financeTool } from "@/lib/assistant/read/finance";
 import { legalStatusTool } from "@/lib/assistant/read/legal";
 import { marketingStatusTool } from "@/lib/assistant/read/marketing";
 import { masterStatusTool } from "@/lib/assistant/read/master";
@@ -35,5 +36,6 @@ export function readTools(access: Access, pagePath: string | null) {
     files: filesTool(),
     notifications: notificationsTool(access),
     deals: dealsTool(access),
+    finance: financeTool(access),
   };
 }

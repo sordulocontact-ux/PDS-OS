@@ -1,0 +1,95 @@
+{
+  "persona_id": "elise",
+  "fenetre": "1440x900",
+  "mode_perception": "visuel",
+  "presentation": "Je m'appelle Élise, 27 ans, business developer chez PDS. Je viens de HubSpot et Notion, et je veux faire avancer mes pistes moi-même.",
+  "premiere_impression": null,
+  "taches": [
+    {
+      "id": "T1",
+      "issue_declaree": "echec",
+      "pense_avoir_reussi": false,
+      "seq": 3,
+      "nb_actions": 4,
+      "moment_le_plus_penible": "Un bouton « Ouvrir un deal » qui répond que je n'ai pas le droit.",
+      "incidents": [
+        {
+          "etape": "Ouvrir un deal",
+          "ecran": "Deals",
+          "voulait": "créer le deal avec Zéphyr Vega",
+          "a_fait": "clic sur « Ouvrir un deal »",
+          "attendait": "un formulaire",
+          "resultat": "fenêtre : seule la direction ou le responsable du projet ouvre un deal",
+          "emotion": "agacement",
+          "verbatim": "Ah, donc je peux pas ? Ok, mais pourquoi ce bouton est là alors ?"
+        },
+        {
+          "etape": "Chercher le projet",
+          "ecran": "Projets",
+          "voulait": "trouver PDS MIC 5",
+          "a_fait": "clic sur Projets, rien, nouveau clic",
+          "attendait": "la liste des projets",
+          "resultat": "plus de 4 s sans réaction puis « Aucun projet pour l'instant »",
+          "emotion": "attente",
+          "verbatim": "Ça a pas pris mon clic ?"
+        }
+      ],
+      "verbatims": [
+        "Sur HubSpot je le crée moi-même.",
+        "Bon, je demande à Claire."
+      ]
+    },
+    {
+      "id": "T2",
+      "issue_declaree": "succes",
+      "pense_avoir_reussi": true,
+      "seq": 7,
+      "nb_actions": 4,
+      "moment_le_plus_penible": "Aucun, la recherche trouve tout de suite.",
+      "incidents": [],
+      "verbatims": ["06 11 42 87 30, et la note dit de ne passer que par elle."]
+    },
+    {
+      "id": "T3",
+      "issue_declaree": "echec",
+      "pense_avoir_reussi": false,
+      "seq": 3,
+      "nb_actions": 4,
+      "moment_le_plus_penible": "Pas de bouton pour reprendre le deal, alors que l'artiste revient.",
+      "incidents": [
+        {
+          "etape": "Reprendre la négociation",
+          "ecran": "Fiche du deal abandonné",
+          "voulait": "rouvrir le deal",
+          "a_fait": "ouvert Deals > Abandonnés > Rivo Blanc",
+          "attendait": "un bouton Reprendre",
+          "resultat": "message : un deal abandonné ne se rouvre pas, la direction en ouvre un nouveau",
+          "emotion": "résignation",
+          "verbatim": "Ok, donc c'est pas à moi, au moins c'est dit clairement."
+        }
+      ],
+      "verbatims": ["Dans HubSpot je rouvre en un clic."]
+    },
+    {
+      "id": "T4",
+      "issue_declaree": "succes",
+      "pense_avoir_reussi": true,
+      "seq": 6,
+      "nb_actions": 2,
+      "moment_le_plus_penible": "Voir que le call tombe un dimanche.",
+      "incidents": [],
+      "verbatims": [
+        "Accord de principe validé, call le 15 novembre de 12h à 12h30, un dimanche, bizarre."
+      ]
+    }
+  ],
+  "sus": [4, 2, 4, 1, 4, 2, 4, 2, 4, 1],
+  "entretien": {
+    "raconter": "J'ai cherché deux deals et un numéro. Le numéro et l'état de Lila, en deux clics. Les deux autres, l'outil m'a dit que je n'avais pas le droit.",
+    "agace": "Le bouton « Ouvrir un deal » alors que je ne peux pas, et la page Projets lente à répondre.",
+    "pas_sur_que_ca_marche": "Le clic sur Projets : je ne savais pas s'il avait pris.",
+    "pratique": "La recherche dans Réseau et la fiche de Lila où tout est au même endroit.",
+    "utiliserait": "Oui pour suivre les deals, mais si je dois toujours demander à Claire pour en ouvrir un, je garde ma méthode pour démarrer.",
+    "un_mot": "Bridé"
+  }
+}

@@ -133,13 +133,13 @@ export async function applyDelayDates(
         )
         .eq("project_id", projectId)
         .maybeSingle(),
+      // « The » release date (lot 13): a collective's earliest release.
       supabase
-        .from("releases")
-        .select("planned_release_date")
-        .eq("project_id", projectId)
-        .order("created_at")
-        .limit(1)
-        .maybeSingle(),
+        .rpc("next_release_date", { p_project_id: projectId })
+        .then(({ data, error }) => ({
+          data: { planned_release_date: data ?? null },
+          error,
+        })),
     ]);
   if (!message?.delay_days || !brief) return { ok: false, error: t.failed };
   const { impacts } = delayImpact({

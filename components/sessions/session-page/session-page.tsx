@@ -7,6 +7,7 @@ import {
 } from "@/components/sessions/sessions-table";
 import { LinksSection } from "@/components/sessions/session-page/links-section";
 import { ReportSection } from "@/components/sessions/session-page/report-section";
+import { SessionContractWarnings } from "@/components/sessions/session-page/session-contract-warnings";
 import { SessionHeaderActions } from "@/components/sessions/session-page/session-header-actions";
 import { TitlesSection } from "@/components/sessions/session-page/titles-section";
 import { BackLink } from "@/components/shell/back-link";
@@ -122,6 +123,9 @@ export function SessionPageView({
 
   const body = (
     <div className="flex flex-col gap-[var(--section-gap)]">
+      {/* A collective's contracts not signed (lot 12 bis): said, never
+          blocking the recording. */}
+      <SessionContractWarnings session={session} access={access} />
       {before ? (
         <PageSection
           card

@@ -36,6 +36,9 @@ export type InboxMessage = {
   attachments: string[];
   // The PDFs joined, read: a signed contract coming back (Sacha, 09/11/2026).
   pdfs: Array<{ name: string; content: Uint8Array }>;
+  // The photos joined (PNG, JPEG): a ticket sent to the box of proofs
+  // (lib/finance/proof-email.ts).
+  images: Array<{ name: string; type: string; content: Uint8Array }>;
   // The whole message as received (.eml): the proof of where a file came from.
   source: Uint8Array;
 };
@@ -129,6 +132,21 @@ export async function withInbox<T>(
             )
             .map((a) => ({
               name: a.filename || "Contrat signé.pdf",
+              content: new Uint8Array(a.content),
+            })),
+          images: parsed.attachments
+            .filter(
+              (a) =>
+                (a.contentType === "image/png" ||
+                  a.contentType === "image/jpeg") &&
+                a.size > 0 &&
+                a.size <= MAX_FILE,
+            )
+            .map((a) => ({
+              name:
+                a.filename ||
+                (a.contentType === "image/png" ? "Photo.png" : "Photo.jpg"),
+              type: a.contentType,
               content: new Uint8Array(a.content),
             })),
           source: new Uint8Array(m.source),

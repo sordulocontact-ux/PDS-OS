@@ -71,8 +71,9 @@ export const NAV_ITEMS: readonly NavItem[] = [
     icon: IconMoneyBillCoin,
     permission: "read_artist_budgets",
   },
-  // The team's spending as a whole (Sacha 12/11/2026): the direction, the
-  // business managers and business.
+  // Finance (Ibé's ticket « Cockpit Finance », 13/11/2026): the treasury,
+  // the money in, the budgets; the direction and the Finance (business
+  // managers, business).
   {
     href: routes.finance,
     label: fr.shell.nav.finance,

@@ -68,11 +68,31 @@ export async function saveStudioSession(
       .single();
     if (error) return failedState("saveStudioSession", formData, error);
     sessionId = created.id;
-    if (data.titleIds.length) {
+    // A title of a collective not in the Catalogue yet gets its title there,
+    // provisional, at its first session (lot 7).
+    const masterIds: string[] = [];
+    for (const id of data.titleIds) {
+      if (!id.startsWith("pt:")) {
+        masterIds.push(id);
+        continue;
+      }
+      const { data: masterId, error: titleError } = await supabase.rpc(
+        "ensure_project_title_master",
+        { p_title_id: id.slice(3) },
+      );
+      if (titleError || !masterId)
+        return failedState(
+          "saveStudioSession",
+          formData,
+          titleError ?? { message: "ensure_project_title_master" },
+        );
+      masterIds.push(masterId);
+    }
+    if (masterIds.length) {
       const { error: titlesError } = await supabase
         .from("master_session_titles")
         .insert(
-          data.titleIds.map((masterId) => ({
+          [...new Set(masterIds)].map((masterId) => ({
             session_id: sessionId!,
             master_id: masterId,
             organization_id: organizationId,

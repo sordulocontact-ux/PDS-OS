@@ -6,6 +6,7 @@ import { DistributionStep } from "@/components/distribution/frame/distribution-s
 import { ParamsList } from "@/components/distribution/params/params-list";
 import { fr } from "@/lib/i18n/fr";
 import { isUuid } from "@/lib/release/uuid";
+import { releaseParamOf } from "@/lib/distribution/scope";
 
 const t = fr.distributionJourney;
 
@@ -17,11 +18,18 @@ export const metadata: Metadata = {
 // distribution itself, confirmed in one gesture.
 export default async function DistributionParamsPage({
   params,
+  searchParams,
 }: PageProps<"/app/projects/[projectId]/release/params">) {
   const { projectId } = await params;
+  // A collective's release (lot 15).
+  const releaseId = releaseParamOf(await searchParams);
   if (!isUuid(projectId)) notFound();
   return (
-    <DistributionFrame projectId={projectId} shownKey="params">
+    <DistributionFrame
+      projectId={projectId}
+      releaseId={releaseId}
+      shownKey="params"
+    >
       {(ctx) => (
         <DistributionStep ctx={ctx} stepKey="params">
           <ParamsList

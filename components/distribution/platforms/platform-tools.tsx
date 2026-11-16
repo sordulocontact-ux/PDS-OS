@@ -10,6 +10,7 @@ import { checkRelease } from "@/app/(app)/app/projects/[projectId]/release/actio
 import { saveDistributionPlatform } from "@/lib/distribution/platforms-actions";
 import { declareDistribution } from "@/lib/distribution/tracking-actions";
 import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
+import { useDistributionRelease } from "@/components/distribution/frame/release-scope";
 
 const fr = { distributionJourney };
 
@@ -18,6 +19,7 @@ const t = fr.distributionJourney.platforms;
 /** « Ajouter une plateforme », in the head of the list (rule 17): its name
  * and, if known, its official link. */
 export function AddPlatform({ projectId }: { projectId: string }) {
+  const releaseId = useDistributionRelease();
   const [open, setOpen] = useState(false);
   const [nameError, setNameError] = useState<string>();
   const [urlError, setUrlError] = useState<string>();
@@ -45,6 +47,7 @@ export function AddPlatform({ projectId }: { projectId: string }) {
         run(() =>
           saveDistributionPlatform({
             projectId,
+            releaseId,
             platform: "",
             label: name,
             url,
@@ -88,6 +91,7 @@ export function AddPlatform({ projectId }: { projectId: string }) {
 
 /** « Déclarer la disponibilité publique »: said, never read as verified. */
 export function DeclareAvailability({ projectId }: { projectId: string }) {
+  const releaseId = useDistributionRelease();
   const { pending, error, run } = useWriteSubmit(() => {}, t.declared);
   return (
     <span className="flex flex-col gap-1">
@@ -99,6 +103,7 @@ export function DeclareAvailability({ projectId }: { projectId: string }) {
           run(() =>
             declareDistribution({
               projectId,
+              releaseId,
               kind: "available",
               declaredOn: "",
               orchardId: "",

@@ -83,9 +83,17 @@ export default async function MasterLayout({
         }
         badge={
           demo ? (
-            <StatusBadge tone={demoStatusTone[demo]}>
-              {fr.demos.badge(fr.demos.statuses[demo])}
-            </StatusBadge>
+            <>
+              <StatusBadge tone={demoStatusTone[demo]}>
+                {fr.demos.badge(fr.demos.statuses[demo])}
+              </StatusBadge>
+              {/* A title of a collective named for now by PDS OS (lot 7). */}
+              {master.provisional && (
+                <StatusBadge tone="warning" title={fr.demos.provisionalHint}>
+                  {fr.demos.provisional}
+                </StatusBadge>
+              )}
+            </>
           ) : (
             master.audioState && (
               <TitleAudioState

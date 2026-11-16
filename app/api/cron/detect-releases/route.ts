@@ -1,6 +1,6 @@
 import { cronJson as json, isCronAuthorized } from "@/lib/cron/auth";
 import { getServerEnv } from "@/lib/env";
-import { releaseIsrcs } from "@/lib/release/isrc";
+import { releaseLookups } from "@/lib/release/isrc";
 import { detectAndRecord } from "@/lib/release/persist";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -50,15 +50,18 @@ export async function GET(request: Request) {
 
   const { data: releases, error } = await supabase
     .from("releases")
-    .select("id, project_id, isrc, spotify_url")
+    .select("id, project_id, project_title_id, isrc, upc, spotify_url")
+    // A line a collective's mode no longer uses is not checked (lot 13).
+    .is("archived_at", null)
     .order("last_checked_at", { ascending: true, nullsFirst: true });
   if (error) {
     console.error("cron detect-releases:", error.code, error.message);
     return json({ error: "query_failed" }, 500);
   }
 
-  // The Catalogue's ISRC (lib/release/isrc.ts): releases without one wait.
-  const isrcs = await releaseIsrcs(supabase, releases);
+  // The Catalogue's ISRC, or a collective's compilation's UPC
+  // (lib/release/isrc.ts): releases without one wait.
+  const lookups = await releaseLookups(supabase, releases);
   const startedAt = Date.now();
   const summary = {
     total: releases.length,
@@ -75,12 +78,12 @@ export async function GET(request: Request) {
     }
     if (index > 0)
       await new Promise((resolve) => setTimeout(resolve, PAUSE_MS));
-    const isrc = isrcs.get(release.id);
-    if (!isrc) continue;
+    const lookup = lookups.get(release.id);
+    if (!lookup) continue;
 
     const outcome = await detectAndRecord(supabase, {
       id: release.id,
-      isrc,
+      lookup,
       spotifyUrl: release.spotify_url,
     }).catch(() => ({ ok: false as const }));
 

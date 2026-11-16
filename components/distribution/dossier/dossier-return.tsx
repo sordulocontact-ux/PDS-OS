@@ -17,6 +17,7 @@ const t = fr.distributionJourney.dossier;
 export function DossierReturn({
   projectId,
   firstMasterId,
+  releaseId = null,
   by,
   outcome,
   note,
@@ -24,6 +25,8 @@ export function DossierReturn({
 }: {
   projectId: string;
   firstMasterId: string | null;
+  // A collective's release (lot 15).
+  releaseId?: string | null;
   by: string;
   outcome: string;
   note: string;
@@ -57,7 +60,7 @@ export function DossierReturn({
           {fixable.map((m) => (
             <ViewLink
               key={m}
-              href={moduleHref(m, { projectId, firstMasterId })}
+              href={moduleHref(m, { projectId, firstMasterId, releaseId })}
               className={buttonVariants({ variant: "outline", size: "sm" })}
             >
               <ButtonRoll>

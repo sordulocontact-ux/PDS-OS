@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import { releaseArg } from "@/lib/distribution/scope";
+
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { isProofPath } from "@/lib/distribution/proof-rules";
@@ -42,6 +44,7 @@ function done(projectId: string): DistributionResult {
 
 const declareSchema = z.object({
   projectId: z.uuid(),
+  releaseId: z.uuid().nullable().optional(),
   kind: z.enum(DECLARATION_KINDS),
   declaredOn: z
     .string()
@@ -78,6 +81,7 @@ export async function declareDistribution(
   const supabase = await createClient();
   const { error } = await supabase.rpc("declare_distribution", {
     p_project_id: v.projectId,
+    ...releaseArg(v.releaseId),
     p_kind: v.kind,
     p_declared_on: v.declaredOn ?? undefined,
     p_orchard_id: v.kind === "deposit" ? v.orchardId : "",
@@ -92,6 +96,7 @@ export async function declareDistribution(
 /** « Retirer » a declaration made by mistake: kept in the history. */
 export async function withdrawDistributionDeclaration(input: {
   projectId: string;
+  releaseId?: string | null;
   declarationId: string;
   note: string;
 }): Promise<DistributionResult> {
@@ -99,6 +104,7 @@ export async function withdrawDistributionDeclaration(input: {
   const parsed = z
     .object({
       projectId: z.uuid(),
+      releaseId: z.uuid().nullable().optional(),
       declarationId: z.uuid(),
       note: z.string().trim().min(1).max(1000),
     })

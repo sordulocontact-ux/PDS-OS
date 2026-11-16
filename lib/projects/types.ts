@@ -241,6 +241,11 @@ export type ProjectDetail = {
   // What was known when the project was transmitted; not the framing Brief.
   initialContext: string | null;
   masters: MasterOption[];
+  // A collective's titles abandoned (lot 2): their masters stay linked and
+  // listed above, but leave the counts of « all the titles » (Master,
+  // Distribution, workflows' states; lot 9, countedTitlesProject). Empty for
+  // any other project.
+  abandonedMasterIds: string[];
   stages: ProjectStage[];
   currentStage: ProjectStage | null;
 };

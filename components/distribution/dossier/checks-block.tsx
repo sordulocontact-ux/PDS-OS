@@ -13,6 +13,7 @@ import { recordDistributionCheck } from "@/lib/distribution/validation-actions";
 import { distribution } from "@/lib/i18n/fr/distribution";
 import { distributionJourney } from "@/lib/i18n/fr/distribution-journey";
 import { cn } from "@/lib/utils";
+import { useDistributionRelease } from "@/components/distribution/frame/release-scope";
 
 const fr = { distribution, distributionJourney };
 
@@ -44,10 +45,13 @@ export function ChecksBlock({
   projectId,
   checks,
   editable,
+  coverFromTitle = false,
 }: {
   projectId: string;
   checks: CheckLine[];
   editable: boolean;
+  // A title's release (lot 15): its cover is the title's, in the Catalogue.
+  coverFromTitle?: boolean;
 }) {
   const recorded = checks.filter((k) => k.result !== "unchecked").length;
   return (
@@ -70,6 +74,7 @@ export function ChecksBlock({
             projectId={projectId}
             check={check}
             editable={editable}
+            coverFromTitle={coverFromTitle}
           />
         ))}
       </FactRows>
@@ -81,11 +86,14 @@ function CheckRow({
   projectId,
   check,
   editable,
+  coverFromTitle,
 }: {
   projectId: string;
   check: CheckLine;
   editable: boolean;
+  coverFromTitle: boolean;
 }) {
+  const releaseId = useDistributionRelease();
   const [changing, setChanging] = useState(false);
   const [noting, setNoting] = useState(false);
   const [note, setNote] = useState("");
@@ -99,6 +107,7 @@ function CheckRow({
     run(() =>
       recordDistributionCheck({
         projectId,
+        releaseId,
         key: check.key,
         result,
         note: text,
@@ -112,7 +121,11 @@ function CheckRow({
       value={<b className="font-semibold">{item.label}</b>}
       sourceNode={
         <span className="flex flex-col gap-0.5 text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-secondary)]">
-          <span>{item.what}</span>
+          <span>
+            {check.key === "visual" && coverFromTitle
+              ? c.visualTitleWhat
+              : item.what}
+          </span>
           <span>
             {c.computedLabel} :{" "}
             <span

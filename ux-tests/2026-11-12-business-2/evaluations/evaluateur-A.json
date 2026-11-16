@@ -1,0 +1,90 @@
+[
+  {
+    "probleme_id": "Q1",
+    "frequence": "occasionnel",
+    "impact": "fort",
+    "persistance": "difficile",
+    "note": 3,
+    "justification": "La DG croit avoir réussi (projet et deal créés) alors que le deal n'est pas lié à la participation, ce qui contredit la règle d'une seule source pour le contrat. Rien ne signale l'oubli et elle ne peut pas le deviner."
+  },
+  {
+    "probleme_id": "Q2",
+    "frequence": "frequent",
+    "impact": "moyen",
+    "persistance": "modere",
+    "note": 3,
+    "justification": "L'erreur hors écran laisse l'utilisatrice sans retour et dans le doute sur l'enregistrement, et elle a fait échouer un premier essai d'une tâche cœur (créer un projet). Observé dans deux sessions."
+  },
+  {
+    "probleme_id": "Q3",
+    "frequence": "rare",
+    "impact": "fort",
+    "persistance": "modere",
+    "note": 2,
+    "justification": "Non reproduit par l'analyste et rien n'a été enregistré, donc possible effet d'une suggestion ou d'un préremplissage trompeur plutôt qu'un défaut certain. Le doute a pourtant fait abandonner la tâche, d'où un mineur à surveiller."
+  },
+  {
+    "probleme_id": "Q4",
+    "frequence": "frequent",
+    "impact": "fort",
+    "persistance": "difficile",
+    "note": 3,
+    "justification": "Sans contour de focus sur toute l'app, l'utilisatrice clavier valide le mauvais bouton, perd ses saisies et n'aboutit qu'au troisième essai. Régression d'accessibilité vérifiée, qui bloque une tâche cœur pour ce profil."
+  },
+  {
+    "probleme_id": "Q5",
+    "frequence": "occasionnel",
+    "impact": "faible",
+    "persistance": "facile",
+    "note": 2,
+    "justification": "Le focus qui repart en haut de la fenêtre désoriente l'utilisatrice clavier, mais elle peut reprendre sa place. Gêne réelle, sans blocage."
+  },
+  {
+    "probleme_id": "Q6",
+    "frequence": "occasionnel",
+    "impact": "moyen",
+    "persistance": "modere",
+    "note": 3,
+    "justification": "Le texte de validation attribue la confirmation à la mauvaise personne : la décision de la direction se prend sur une information fausse. La DG a réussi sans voir le risque que cela devienne le résultat enregistré."
+  },
+  {
+    "probleme_id": "Q7",
+    "frequence": "occasionnel",
+    "impact": "moyen",
+    "persistance": "modere",
+    "note": 2,
+    "justification": "Le nom d'artiste non cliquable est une affordance attendue qui manque ; la DG a contourné par le filtre artiste après avoir hésité. Tâche réussie avec difficulté (SEQ 4)."
+  },
+  {
+    "probleme_id": "Q8",
+    "frequence": "frequent",
+    "impact": "faible",
+    "persistance": "facile",
+    "note": 1,
+    "justification": "Le titre d'onglet générique ne dit pas quel deal est ouvert, ce qui gêne surtout l'orientation par lecteur d'écran et la multi-fenêtre. Cosmétique."
+  },
+  {
+    "probleme_id": "Q9",
+    "frequence": "occasionnel",
+    "impact": "moyen",
+    "persistance": "modere",
+    "note": 2,
+    "justification": "Deux totaux voisins qui diffèrent de 400 € (estimations comptées ou non) minent la confiance dans un chiffre budgétaire, d'autant que l'écart n'est pas expliqué sur l'écran. Pas de blocage de tâche."
+  },
+  {
+    "probleme_id": "Q10",
+    "frequence": "occasionnel",
+    "impact": "faible",
+    "persistance": "facile",
+    "note": 2,
+    "justification": "Le bouton principal propose une étape déjà passée, le gestionnaire doit chercher les termes plus bas, puis la suite est fluide. Détour mineur pour un utilisateur pressé."
+  },
+  {
+    "probleme_id": "Q11",
+    "frequence": "frequent",
+    "impact": "faible",
+    "persistance": "facile",
+    "note": 0,
+    "justification": "Mesuré sur un build de production local avec une machine chargée, donc artefact d'environnement non représentatif de la prod. Aucun geste d'écriture n'a dépassé 2 s hors premiers affichages."
+  }
+]

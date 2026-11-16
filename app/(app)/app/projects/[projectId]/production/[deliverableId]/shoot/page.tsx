@@ -10,6 +10,9 @@ import { ShootStateSection } from "@/components/production/shoot/shoot-state-sec
 import { ShootDay } from "@/components/production/shoot/shoot-day";
 import { ConfirmShootButton } from "@/components/production/shoot/confirm-shoot-button";
 import { ToneCallout } from "@/components/ui/tone-callout";
+import { ShootContractNotice } from "@/components/legal/contract-gaps-notice";
+import { can } from "@/lib/auth/access";
+import { loadContractGaps } from "@/lib/legal/contract-gaps";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
@@ -39,7 +42,7 @@ export default async function ProductionShootPage({
   params,
 }: PageProps<"/app/projects/[projectId]/production/[deliverableId]/shoot">) {
   const { projectId, deliverableId } = await params;
-  const [access] = await allInOrder([
+  const [access, project] = await allInOrder([
     requireApproved(),
     requireLaunchedProject(projectId),
   ]);
@@ -48,9 +51,14 @@ export default async function ProductionShootPage({
   const sheet = data.sheet;
   if (!sheet) redirect(routes.projectProductionSheet(projectId, deliverableId));
 
-  const [shootData, preprod] = await Promise.all([
+  const [shootData, preprod, contractGaps] = await Promise.all([
     shootFor(projectId, deliverableId, access),
     preprodFor(projectId, deliverableId, access),
+    // A collective (lot 12): the shoot waits for the contracts of the titles
+    // this deliverable targets (signed, or a waiver of the shoot).
+    project.collective
+      ? loadContractGaps(projectId, "shoot", deliverableId)
+      : Promise.resolve([]),
   ]);
   if (!shootData) notFound();
   const { shoot, incidents, equipment, openTaskTitles } = shootData;
@@ -76,6 +84,14 @@ export default async function ProductionShootPage({
         ? t.readOnly
         : null;
   const common = { projectId, sheetId: sheet.id, canOrganize };
+  const contractNotice =
+    contractGaps.length > 0 ? (
+      <ShootContractNotice
+        projectId={projectId}
+        gaps={contractGaps}
+        canOpenLegal={can(access, "manage_legal")}
+      />
+    ) : null;
 
   const { step: journeyStep, steps: journeySteps } = await stepContext(
     projectId,
@@ -107,9 +123,10 @@ export default async function ProductionShootPage({
                 sheet.logistics.locationName,
               )}
             </p>
-            {canOrganize && journeyStep.status !== "upcoming" && (
-              <ConfirmShootButton projectId={projectId} sheetId={sheet.id} />
-            )}
+            {contractNotice ??
+              (canOrganize && journeyStep.status !== "upcoming" && (
+                <ConfirmShootButton projectId={projectId} sheetId={sheet.id} />
+              ))}
           </>
         )}
         <IncidentsSection
@@ -134,6 +151,7 @@ export default async function ProductionShootPage({
         shoot={shoot}
         shootDate={shootDate}
         ready={sheet.readyAt !== null}
+        contractBlocked={contractNotice}
         preproductionHref={routes.projectProductionStep(
           projectId,
           deliverableId,

@@ -23,7 +23,7 @@ export function FilePickField({
 }: {
   id: string;
   label: string;
-  hint: string;
+  hint?: string;
   // The formats offered by the picker (the caller still checks the file).
   accept?: string;
   disabled?: boolean;

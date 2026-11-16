@@ -2,6 +2,7 @@ import "server-only";
 
 import { trackedCache } from "@/lib/projects/live-deps";
 
+import { releaseArg } from "@/lib/distribution/scope";
 import { createClient } from "@/lib/supabase/server";
 
 // Read once per request: the workflow statuses and the Distribution's
@@ -9,10 +10,15 @@ import { createClient } from "@/lib/supabase/server";
 // docs/ARCHITECTURE.md § 3 bis).
 
 /** The cover delivered by the Production (distribution_cover). */
-export const distributionCover = trackedCache(async (projectId: string) => {
-  const supabase = await createClient();
-  return supabase.rpc("distribution_cover", { p_project_id: projectId });
-});
+export const distributionCover = trackedCache(
+  async (projectId: string, releaseId: string | null = null) => {
+    const supabase = await createClient();
+    return supabase.rpc("distribution_cover", {
+      p_project_id: projectId,
+      ...releaseArg(releaseId),
+    });
+  },
+);
 
 /** The borrowings still to secure, readable without the Juridique
  * (distribution_legal_blockers). */

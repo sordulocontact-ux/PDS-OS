@@ -203,6 +203,7 @@ export function DossierStep({ ctx }: { ctx: DistributionContext }) {
       <ChecksBlock
         projectId={ctx.project.id}
         checks={checks}
+        coverFromTitle={ctx.paramsData.coverFromTitle}
         // The validator records the checks left while the version waits.
         editable={
           (!open && v.canCheck) || (open?.status === "pending" && v.canDecide)

@@ -10,6 +10,7 @@ import {
 } from "@/components/distribution/dossier/dossier-step";
 import { fr } from "@/lib/i18n/fr";
 import { isUuid } from "@/lib/release/uuid";
+import { releaseParamOf } from "@/lib/distribution/scope";
 
 export const metadata: Metadata = {
   title: `${fr.distributionJourney.steps.dossier.title} · ${fr.app.name}`,
@@ -19,11 +20,18 @@ export const metadata: Metadata = {
 // its submission and its decision on the evidence.
 export default async function DistributionDossierPage({
   params,
+  searchParams,
 }: PageProps<"/app/projects/[projectId]/release/dossier">) {
   const { projectId } = await params;
+  // A collective's release (lot 15).
+  const releaseId = releaseParamOf(await searchParams);
   if (!isUuid(projectId)) notFound();
   return (
-    <DistributionFrame projectId={projectId} shownKey="dossier">
+    <DistributionFrame
+      projectId={projectId}
+      releaseId={releaseId}
+      shownKey="dossier"
+    >
       {(ctx) => {
         const back = dossierReturn(ctx);
         return (
@@ -35,6 +43,7 @@ export default async function DistributionDossierPage({
                 <DossierReturn
                   projectId={projectId}
                   firstMasterId={ctx.project.masters[0]?.id ?? null}
+                  releaseId={ctx.releaseId}
                   {...back}
                 />
               ) : undefined

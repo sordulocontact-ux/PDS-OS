@@ -1,9 +1,16 @@
 import "server-only";
 
 import { getServerEnv } from "@/lib/env";
-import { findAlbumUpc, findTrackByIsrc } from "@/lib/integrations/deezer";
+import {
+  findAlbumByUpc,
+  findAlbumUpc,
+  findTrackByIsrc,
+} from "@/lib/integrations/deezer";
 import { IntegrationError } from "@/lib/integrations/http";
-import { findAppleMusicTrack } from "@/lib/integrations/itunes";
+import {
+  findAppleMusicAlbum,
+  findAppleMusicTrack,
+} from "@/lib/integrations/itunes";
 import { findStreamingUrls } from "@/lib/integrations/musicbrainz";
 import { resolveLinks } from "@/lib/integrations/odesli";
 import { platformOf, type Platform } from "@/lib/release/platforms";
@@ -144,6 +151,79 @@ export async function detectRelease(isrc: string): Promise<ReleaseDetection> {
           album: track.album.title,
           releaseDate: track.release_date ?? null,
           coverUrl: track.album.cover_medium ?? null,
+        }
+      : null,
+    links,
+    smartlinkUrl,
+    steps,
+  };
+}
+
+/**
+ * A collective's compilation (lot 13, docs/pds-mic-plan.md § 3 bis point 4):
+ * looked up by its UPC only — Deezer's album, iTunes' album, then Odesli —
+ * never by the ISRC of one of its titles, which would find that title's own
+ * release.
+ */
+export async function detectReleaseByUpc(
+  upc: string,
+): Promise<ReleaseDetection> {
+  const steps: Step[] = [];
+  const links: ReleaseDetection["links"] = [];
+  const add = (url: string | null | undefined, source: Source) => {
+    const platform = url ? platformOf(url) : null;
+    if (url && platform && !links.some((link) => link.platform === platform)) {
+      links.push({ platform, url, source });
+    }
+  };
+  const album = await step(
+    steps,
+    "deezer",
+    () => findAlbumByUpc(upc),
+    (a) => a === null,
+  );
+  add(album?.link, "deezer");
+  await step(
+    steps,
+    "itunes",
+    () => findAppleMusicAlbum(upc),
+    (url) => url === null,
+  ).then((url) => add(url, "itunes"));
+  steps.push({
+    source: "musicbrainz",
+    status: "skipped",
+    detail: "isrc_only",
+    durationMs: 0,
+  });
+  let smartlinkUrl: string | null = null;
+  const odesliKey = getServerEnv().ODESLI_API_KEY;
+  if (!odesliKey) {
+    steps.push({
+      source: "odesli",
+      status: "skipped",
+      detail: "no_key",
+      durationMs: 0,
+    });
+  } else if (links[0]) {
+    const result = await step(
+      steps,
+      "odesli",
+      () => resolveLinks(links[0].url, odesliKey),
+      (r) => r.urls.length === 0,
+    );
+    smartlinkUrl = result?.pageUrl ?? null;
+    for (const url of result?.urls ?? []) add(url, "odesli");
+  }
+  return {
+    isrc: "",
+    online: links.length > 0,
+    track: album
+      ? {
+          title: album.title,
+          artist: album.artist.name,
+          album: album.title,
+          releaseDate: album.release_date ?? null,
+          coverUrl: album.cover_medium ?? null,
         }
       : null,
     links,

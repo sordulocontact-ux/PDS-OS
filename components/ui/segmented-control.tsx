@@ -33,7 +33,9 @@ const segmentClass = (active: boolean, fill: boolean, bare = false) =>
   cn(
     "relative inline-flex items-center justify-center gap-1.5 rounded-[var(--radius-md)] font-medium whitespace-nowrap no-underline transition-[background-color,color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-40",
     // Bare: a menu's tabs, smaller (the notifications, Sacha 06/11/2026).
-    bare ? "min-h-7 px-2.5 text-xs" : "min-h-9 px-4 text-sm",
+    bare
+      ? "min-h-7 px-2.5 text-xs"
+      : "h-[calc(var(--density-control-h)-10px)] px-4 text-sm",
     fill && "flex-1",
     // Its own ground until the sliding one is measured (server HTML).
     active

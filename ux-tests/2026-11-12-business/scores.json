@@ -1,0 +1,84 @@
+{
+  "taches": {
+    "T1": {
+      "participants": 3,
+      "succes_declares": 2,
+      "succes_reels": 2,
+      "verifies": 3,
+      "faux_succes": 0,
+      "seq_moyen": 4.67,
+      "actions_moyennes": 8.3,
+      "ratio_chemin_optimal": null
+    },
+    "T2": {
+      "participants": 3,
+      "succes_declares": 3,
+      "succes_reels": 3,
+      "verifies": 3,
+      "faux_succes": 0,
+      "seq_moyen": 4.67,
+      "actions_moyennes": 10.3,
+      "ratio_chemin_optimal": null
+    },
+    "T3": {
+      "participants": 3,
+      "succes_declares": 2,
+      "succes_reels": 2,
+      "verifies": 3,
+      "faux_succes": 0,
+      "seq_moyen": 3.67,
+      "actions_moyennes": 8.7,
+      "ratio_chemin_optimal": null
+    },
+    "T4": {
+      "participants": 3,
+      "succes_declares": 2,
+      "succes_reels": 2,
+      "verifies": 3,
+      "faux_succes": 0,
+      "seq_moyen": 4,
+      "actions_moyennes": 8.7,
+      "ratio_chemin_optimal": null
+    },
+    "T5": {
+      "participants": 1,
+      "succes_declares": 1,
+      "succes_reels": 1,
+      "verifies": 1,
+      "faux_succes": 0,
+      "seq_moyen": 5,
+      "actions_moyennes": 14,
+      "ratio_chemin_optimal": null
+    }
+  },
+  "personas": {
+    "claire": {
+      "taches": 4,
+      "succes_reels": 4,
+      "succes_declares": 4,
+      "seq_moyen": 4.25,
+      "sus": 47.5,
+      "un_mot": "Prudent"
+    },
+    "elise": {
+      "taches": 4,
+      "succes_reels": 1,
+      "succes_declares": 1,
+      "seq_moyen": 3.25,
+      "sus": 47.5,
+      "un_mot": "Verrouillé"
+    },
+    "malik": {
+      "taches": 5,
+      "succes_reels": 5,
+      "succes_declares": 5,
+      "seq_moyen": 5.2,
+      "sus": 65.0,
+      "un_mot": "Correct"
+    }
+  },
+  "global": {
+    "sus_moyen": 53.3,
+    "participants": 3
+  }
+}

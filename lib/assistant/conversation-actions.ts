@@ -2,14 +2,16 @@
 
 import { z } from "zod";
 
+import { imagePathsOf, removeAssistantImages } from "@/lib/assistant/images";
 import { requireApproved } from "@/lib/auth/dal";
 import { assistant } from "@/lib/i18n/fr/assistant";
 import { createClient } from "@/lib/supabase/server";
 import type { WriteResult } from "@/lib/utils/write-result";
 
 /** Deletes one of the viewer's conversations with PO (RLS: their own
- * only). The history drops it at once; no page is read again (the open one
- * may be the deleted conversation). */
+ * only), and the images joined to it (§ 2 quinquies). The history drops it
+ * at once; no page is read again (the open one may be the deleted
+ * conversation). */
 export async function deleteConversation(id: string): Promise<WriteResult> {
   await requireApproved();
   const t = assistant.history;
@@ -21,8 +23,9 @@ export async function deleteConversation(id: string): Promise<WriteResult> {
     .from("assistant_conversations")
     .delete()
     .eq("id", id)
-    .select("id");
+    .select("messages");
   if (error || data.length === 0) return { ok: false, error: t.deleteFailed };
+  await removeAssistantImages(supabase, imagePathsOf(data[0].messages));
 
   return { ok: true };
 }

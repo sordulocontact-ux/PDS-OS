@@ -144,7 +144,8 @@ export function FeedbackProvider({
               : dialog.description
           }
           closeLabel={dialog.close}
-          size="wide"
+          // One column: a short form, no need for the wide window (13/11/2026).
+          size="medium"
         >
           {opening && (
             <FeedbackForm

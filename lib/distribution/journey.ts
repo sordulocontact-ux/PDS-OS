@@ -27,6 +27,8 @@ const t = fr.distributionJourney;
 
 export type DistributionJourneyInput = {
   projectId: string;
+  // A collective's release (lot 15), kept in every step's address.
+  releaseId?: string | null;
   // The project's responsible; `viewer` = the one looking.
   owner: JourneyPerson | null;
   // The validator designated in the parameters, else the one proposed.
@@ -233,7 +235,7 @@ export function distributionJourney(
     const isValidated = key === "dossier" || key === "closure";
     return {
       key,
-      href: distributionStepHref(i.projectId, key),
+      href: distributionStepHref(i.projectId, key, i.releaseId),
       title: t.steps[key].title,
       why: t.steps[key].why,
       status: st,

@@ -10,9 +10,20 @@ const e = fr.productionShoot.errors;
 export function shootFailure(error: {
   code?: string;
   message?: string;
+  // The missing contracts, named by the database (lot 12).
+  details?: string | null;
 }): PrepResult {
   const message = error.message ?? "";
   if (message.includes("not_ready")) return { ok: false, error: e.notReady };
+  // A collective (lot 12): a confirmed participation of the titles shot has
+  // neither its contract signed nor an open waiver of the shoot.
+  if (message.includes("contract_missing"))
+    return {
+      ok: false,
+      error: fr.participationWaivers.refused.shoot(
+        error.details || fr.participationWaivers.refused.someone,
+      ),
+    };
   if (message.includes("missing_sequences_required"))
     return { ok: false, error: e.missingSequences };
   if (message.includes("shoot_not_ended"))

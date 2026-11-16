@@ -6,6 +6,11 @@ import { loadActivationsBoard } from "@/lib/activations/board";
 import type { ActivationFilter } from "@/lib/activations/journey";
 import { loadLevers } from "@/lib/activations/levers";
 import { loadActivationPeople } from "@/lib/activations/people";
+import {
+  titleScopeCovers,
+  titleScopeLabel,
+} from "@/lib/projects/title-scope-rules";
+import { loadTitleScopes, scopeOf } from "@/lib/projects/title-scopes";
 import { requireApproved } from "@/lib/auth/dal";
 import { activationJourney } from "@/lib/i18n/fr/activation-journey";
 import { activationsJourneys } from "@/lib/journey/activations";
@@ -33,16 +38,20 @@ const t = fr.activationJourney;
 export async function ActivationsIndex({
   projectId,
   filter,
+  titleId = null,
 }: {
   projectId: string;
   filter: ActivationFilter;
+  // A collective (lot 10): the title the list is filtered on (`?titre=`).
+  titleId?: string | null;
 }) {
-  const [access, project, board, people, journeys] = await allInOrder([
+  const [access, project, board, people, journeys, scopes] = await allInOrder([
     requireApproved(),
     requireLaunchedProject(projectId),
     loadActivationsBoard(projectId),
     loadActivationPeople(projectId),
     activationsJourneys(projectId),
+    loadTitleScopes(projectId),
   ]);
   const levers = await loadLevers(projectId, board.data.activations);
   const canCreate = canEditProject(access, project);
@@ -57,7 +66,19 @@ export async function ActivationsIndex({
   const rows = board.summaries.map((a) => ({
     ...a,
     ownerName: a.ownerPersonId ? people.person(a.ownerPersonId).name : null,
+    // A collective: the titles it targets, in words (lot 10).
+    scope: scopes
+      ? titleScopeLabel(scopeOf(scopes.activations, a.id), scopes.titles)
+      : null,
   }));
+  // Filtered on a live title of the collective (an unknown one: no filter).
+  const title =
+    scopes?.titles.find((x) => x.id === titleId && !x.abandoned) ?? null;
+  const shown = title
+    ? rows.filter((a) =>
+        titleScopeCovers(scopeOf(scopes!.activations, a.id), title.id),
+      )
+    : rows;
   return (
     <div className="flex flex-col gap-5">
       <ProjectHeader projectId={projectId} />
@@ -75,8 +96,16 @@ export async function ActivationsIndex({
       {rows.length > 0 ? (
         <ActivationsTable
           projectId={projectId}
-          rows={rows}
+          rows={shown}
           filter={filter}
+          titles={
+            scopes
+              ? {
+                  options: scopes.titles.filter((x) => !x.abandoned),
+                  current: title?.id ?? null,
+                }
+              : null
+          }
           action={
             canCreate && (
               <NewActivationButton

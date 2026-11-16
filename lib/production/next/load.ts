@@ -25,6 +25,9 @@ import {
   shootFor,
 } from "@/lib/production/tab-data";
 
+import { gapNames, loadContractGaps } from "@/lib/legal/contract-gaps";
+import { requireLaunchedProject } from "@/lib/projects/queries";
+
 import { productionNext } from "./compute";
 import type { NextInput, ProductionNext } from "./types";
 
@@ -48,11 +51,20 @@ export async function loadProductionNext(
 ): Promise<ProductionNext> {
   const sheet = data.sheet;
   const args = [projectId, deliverableId, access] as const;
-  const [preprod, shoot, post, delivery] = await Promise.all([
+  const [preprod, shoot, post, delivery, contractGaps] = await Promise.all([
     sheet && PREPARING.includes(phase) ? preprodFor(...args) : null,
     sheet && AFTER_SHOOT.includes(phase) ? shootFor(...args) : null,
     sheet && POST.includes(phase) ? postFor(...args) : null,
     sheet && DELIVERY.includes(phase) ? deliveryFor(...args) : null,
+    // A collective, ready to shoot (lot 12 bis): the contracts the shoot
+    // waits for (list_contract_gaps, the lock's own rule).
+    sheet && phase === "ready"
+      ? requireLaunchedProject(projectId).then((project) =>
+          project.collective
+            ? loadContractGaps(projectId, "shoot", deliverableId)
+            : [],
+        )
+      : [],
   ]);
   const ownerIsViewer = data.canOpen || data.canOrganize;
   const today = todayInParis();
@@ -62,6 +74,7 @@ export async function loadProductionNext(
 
   const input: NextInput = {
     projectId,
+    contractGaps: contractGaps.length ? gapNames(contractGaps) : null,
     due,
     deliverableId,
     phase,

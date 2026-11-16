@@ -1,0 +1,107 @@
+{
+  "persona_id": "claire-b",
+  "fenetre": "1280x800",
+  "mode_perception": "visuel",
+  "presentation": "Je m'appelle Claire Morel, je suis directrice générale de PDS et je signe les accords et les budgets. L'informatique n'est pas mon fort : je préfère les écrans que je connais et je ne valide rien que je n'ai pas relu.",
+  "premiere_impression": null,
+  "taches": [
+    {
+      "id": "T1",
+      "issue_declaree": "succes_difficile",
+      "pense_avoir_reussi": true,
+      "seq": 4,
+      "nb_actions": 22,
+      "moment_le_plus_penible": "Clic sur Créer le projet sans réaction visible en bas ; l'erreur sur les titres était affichée tout en haut de la page.",
+      "incidents": [
+        {
+          "etape": "Reprise du brouillon",
+          "ecran": "Liste Projets puis Nouveau projet",
+          "voulait": "Savoir si le brouillon était le mien et ne pas faire de doublon",
+          "a_fait": "Ouvert le brouillon PDS MIC 5",
+          "attendait": "Voir mes artistes invités déjà saisis",
+          "resultat": "Brouillon sans artistes invités, titre vide",
+          "emotion": "inquiétude",
+          "verbatim": "Je ne voudrais pas faire un doublon."
+        },
+        {
+          "etape": "Saisie des artistes",
+          "ecran": "Nouveau projet",
+          "voulait": "Ajouter Sélène Vega, Zéphyr Vega et Rivo Blanc",
+          "a_fait": "Lu tout le formulaire, rien trouvé ; lu la phrase sur les artistes à ajouter dans le projet",
+          "attendait": "Un champ Artistes invités",
+          "resultat": "Aucun champ ; seulement un champ Titres obligatoire",
+          "emotion": "perplexité",
+          "verbatim": "Où est-ce que je mets mes trois artistes ?"
+        },
+        {
+          "etape": "Créer le projet",
+          "ecran": "Bas du formulaire",
+          "voulait": "Valider la création",
+          "a_fait": "Clic sur Créer le projet",
+          "attendait": "Une confirmation ou une erreur près du bouton",
+          "resultat": "Bouton qui tourne environ 3 s puis rien ; erreur en rouge tout en haut, hors écran",
+          "emotion": "attente",
+          "verbatim": "Est-ce que c'est enregistré, là ?"
+        },
+        {
+          "etape": "Choix des titres",
+          "ecran": "Champ Titres",
+          "voulait": "Rattacher les artistes",
+          "a_fait": "Cherché Vega et Rivo, choisi Ciel bas, Mirage, Rive gauche",
+          "attendait": "Ajouter des artistes",
+          "resultat": "Titres existants rattachés ; la liste se rouvre après chaque choix",
+          "emotion": "doute",
+          "verbatim": "Je ne suis pas sûre que ça ait pris."
+        },
+        {
+          "etape": "Après création",
+          "ecran": "Page du projet",
+          "voulait": "Vérifier que les trois artistes y sont",
+          "a_fait": "Lu la page",
+          "attendait": "Une ligne Artistes invités",
+          "resultat": "Seuls les titres sont listés ; pas de ligne Artistes",
+          "emotion": "doute",
+          "verbatim": "J'espère que c'est ça."
+        }
+      ],
+      "verbatims": [
+        "Je ne voudrais pas faire un doublon.",
+        "Est-ce que c'est enregistré, là ?",
+        "Je demanderai à Lina si on peut voir les artistes."
+      ]
+    },
+    {
+      "id": "T2",
+      "issue_declaree": "succes",
+      "pense_avoir_reussi": true,
+      "seq": 6,
+      "nb_actions": 8,
+      "moment_le_plus_penible": "Deux projets au nom proche (PDS Mic et PDS MIC 5) dans la liste.",
+      "incidents": [
+        {
+          "etape": "Choix du projet",
+          "ecran": "Nouveau deal",
+          "voulait": "Sélectionner PDS MIC 5",
+          "a_fait": "Tapé PDS MIC dans la recherche",
+          "attendait": "Un seul résultat",
+          "resultat": "Deux projets proches ; choisi le 5",
+          "emotion": "prudence",
+          "verbatim": "Il y en a deux, je prends le 5."
+        }
+      ],
+      "verbatims": [
+        "Deal créé, c'est écrit, ça me rassure.",
+        "Je relis : Malik Durand, c'est bien lui."
+      ]
+    }
+  ],
+  "sus": null,
+  "entretien": {
+    "raconter": null,
+    "agace": "Ne pas pouvoir indiquer mes artistes à la création du projet, et l'erreur sur les titres affichée tout en haut de la page alors que le bouton est en bas.",
+    "pas_sur_que_ca_marche": null,
+    "pratique": "La fenêtre Nouveau deal : des listes où choisir et un message Deal créé clair avec le récapitulatif.",
+    "utiliserait": null,
+    "un_mot": null
+  }
+}

@@ -1,0 +1,126 @@
+{
+  "persona_id": "claire",
+  "fenetre": "390x844 puis 1440x900",
+  "mode_perception": "visuel",
+  "presentation": "Claire Morel, DG de PDS, ouvre l'app entre deux rendez-vous pour repérer un souci d'argent puis créer le projet PDS MIC #9. Largeur réelle observée environ 748 px sur toutes les tâches, le redimensionnement n'a pas changé l'affichage.",
+  "premiere_impression": null,
+  "taches": [
+    {
+      "id": "T1",
+      "issue_declaree": "succes",
+      "pense_avoir_reussi": true,
+      "seq": 5,
+      "nb_actions": 6,
+      "moment_le_plus_penible": "L'accueil ne dit rien de l'argent, il faut deviner Finance puis Alertes.",
+      "incidents": [
+        {
+          "etape": "Accueil",
+          "ecran": "/app",
+          "voulait": "voir s'il y a un souci d'argent",
+          "a_fait": "ouvert le menu puis Finance",
+          "attendait": "une alerte argent sur l'accueil",
+          "resultat": "Accueil dit « rien ne vous attend »",
+          "emotion": "neutre",
+          "verbatim": "Rien ne vous attend ? Et l'argent alors ?"
+        }
+      ],
+      "verbatims": [
+        "Le plus urgent : Ciel ouvert dépasse son enveloppe de 30 778 euros."
+      ]
+    },
+    {
+      "id": "T2",
+      "issue_declaree": "succes_difficile",
+      "pense_avoir_reussi": true,
+      "seq": 4,
+      "nb_actions": 4,
+      "moment_le_plus_penible": "L'onglet Exports est caché à droite de la barre d'onglets, il faut la faire glisser.",
+      "incidents": [
+        {
+          "etape": "Chercher la liste des factures",
+          "ecran": "/app/finance/encaissements",
+          "voulait": "une liste de factures à donner au comptable",
+          "a_fait": "regardé Factures & encaissements puis fait défiler les onglets",
+          "attendait": "un bouton export ici",
+          "resultat": "trouvé Exports > Factures clients et avoirs, arrêt avant Télécharger",
+          "emotion": "hésitante",
+          "verbatim": "C'est pour toute l'année ou tout l'historique ? Je ne sais pas."
+        }
+      ],
+      "verbatims": ["Je m'arrête avant de télécharger."]
+    },
+    {
+      "id": "T3",
+      "issue_declaree": "succes_difficile",
+      "pense_avoir_reussi": true,
+      "seq": 3,
+      "nb_actions": 30,
+      "moment_le_plus_penible": "Les titres inventés : fenêtre longue, et le titre créé n'apparaît pas dans le champ, il faut le retaper.",
+      "incidents": [
+        {
+          "etape": "Créer le projet sans titres",
+          "ecran": "/app/projects/new",
+          "voulait": "valider le projet",
+          "a_fait": "cliqué Créer le projet",
+          "attendait": "un message clair",
+          "resultat": "l'écran remonte sur le champ Titres en rouge, sans explication visible",
+          "emotion": "perdue",
+          "verbatim": "Il s'est passé quoi là ?"
+        },
+        {
+          "etape": "Créer un titre",
+          "ecran": "fenêtre Nouveau titre",
+          "voulait": "ajouter Feu de joie",
+          "a_fait": "rempli titre et artiste, créé",
+          "attendait": "le titre ajouté au projet",
+          "resultat": "champ Titres resté vide, titre à retaper et sélectionner",
+          "emotion": "agacée",
+          "verbatim": "Je l'ai créé et il n'y est pas ?"
+        },
+        {
+          "etape": "Page du projet",
+          "ecran": "Titres et artistes",
+          "voulait": "voir mes deux titres avec leur artiste",
+          "a_fait": "regardé la liste",
+          "attendait": "Feu de joie avec Lila Vega",
+          "resultat": "mes titres sans artiste invité, et deux titres sans nom en plus",
+          "emotion": "confuse",
+          "verbatim": "C'est quoi Titre 3 et Titre 4 ? Je n'ai rien demandé."
+        }
+      ],
+      "verbatims": [
+        "Je choisis Lina comme chef de projet, c'est la seule que je connais."
+      ]
+    },
+    {
+      "id": "T4",
+      "issue_declaree": "succes_difficile",
+      "pense_avoir_reussi": true,
+      "seq": 4,
+      "nb_actions": 2,
+      "moment_le_plus_penible": "Pas d'écran master dédié visible ; je ne sais pas si la ligne Master : À mixer est tout le suivi.",
+      "incidents": [
+        {
+          "etape": "Chercher le suivi master",
+          "ecran": "page projet",
+          "voulait": "suivi du master par titre",
+          "a_fait": "fait défiler jusqu'à Titres et artistes",
+          "attendait": "un onglet Master",
+          "resultat": "ligne Master : À mixer sous chaque titre",
+          "emotion": "hésitante",
+          "verbatim": "C'est tout ? Un titre à mixer, c'est le suivi ?"
+        }
+      ],
+      "verbatims": ["Mes deux titres sont à mixer, statut en cours."]
+    }
+  ],
+  "sus": [3, 3, 3, 2, 3, 3, 3, 2, 3, 2],
+  "entretien": {
+    "raconter": "J'ai regardé les alertes d'argent, trouvé où récupérer les factures clients pour le comptable sans télécharger, créé un projet de compilation avec deux titres, et regardé l'état des masters.",
+    "agace": "Créer un titre : il ne se met pas dans le projet tout de suite, et les titres sans nom que je n'ai pas demandés.",
+    "pas_sur_que_ca_marche": "Après Créer le titre, rien n'indiquait qu'il était pris en compte ; et en créant le projet, ce qui est transmis à Lina.",
+    "pratique": "Les alertes d'argent claires avec les montants, et l'export pour le comptable.",
+    "utiliserait": "Peut-être pour l'argent, si l'accueil me le montrait directement ; pour créer un projet c'est trop long.",
+    "un_mot": "Complet mais long"
+  }
+}

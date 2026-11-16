@@ -1,0 +1,164 @@
+{
+  "persona_id": "claire",
+  "fenetre": "1280x800",
+  "mode_perception": "visuel",
+  "presentation": "Je suis Claire, directrice générale de PDS. J'ouvre l'outil aujourd'hui parce que mes négociateurs attendent mes validations et que je dois garder la main sur les budgets des artistes, sans rien valider que je n'aie relu.",
+  "premiere_impression": null,
+  "taches": [
+    {
+      "id": "T1",
+      "issue_declaree": "succes_difficile",
+      "pense_avoir_reussi": true,
+      "seq": 5,
+      "nb_actions": 8,
+      "moment_le_plus_penible": "Deux lignes presque identiques « Valider l'accord de principe » sur l'accueil, et un bouton qui valide d'un seul clic sans confirmation.",
+      "incidents": [
+        {
+          "etape": "Choix du dossier à valider",
+          "ecran": "http://localhost:3000/app",
+          "voulait": "Trouver l'accord de Nahel Nuit",
+          "a_fait": "A hésité entre la grande carte (Lila Vega) et la petite ligne (Nahel Nuit)",
+          "attendait": "Une seule demande clairement à mon nom",
+          "resultat": "A fini par cliquer la bonne ligne après lecture du nom",
+          "emotion": "inquiète",
+          "verbatim": "Je ne voudrais pas valider la mauvaise."
+        },
+        {
+          "etape": "Validation",
+          "ecran": "http://localhost:3000/app/deals/64d8f997-33ed-43c0-b350-c81e1246adb7",
+          "voulait": "Valider après relecture",
+          "a_fait": "A cliqué sur Valider l'accord de principe",
+          "attendait": "Une question de confirmation ou un message",
+          "resultat": "Rond qui tourne, puis la page change sans message clair",
+          "emotion": "incertaine",
+          "verbatim": "Est-ce que c'est enregistré, là ?"
+        }
+      ],
+      "verbatims": [
+        "Alors… où est-ce que je vois ce qu'il a négocié ?",
+        "40 %, 20 %, 8 000 euros, c'est bien ça, je peux valider."
+      ]
+    },
+    {
+      "id": "T2",
+      "issue_declaree": "succes_difficile",
+      "pense_avoir_reussi": true,
+      "seq": 4,
+      "nb_actions": 9,
+      "moment_le_plus_penible": "Trouver le bouton « Changer » tout en bas de la page, et ne pas pouvoir dire que c'est seulement pour deux semaines.",
+      "incidents": [
+        {
+          "etape": "Chercher où changer la personne",
+          "ecran": "http://localhost:3000/app/deals/96f969db-1c6a-472a-b0f0-89d0004765e0",
+          "voulait": "Confier le dossier à Élise",
+          "a_fait": "A fait défiler très bas jusqu'à « Négocié par » sans toucher au gros bouton de validation du haut",
+          "attendait": "Une option près du nom de la personne en haut",
+          "resultat": "Trouvé « Changer » après plusieurs défilements",
+          "emotion": "inquiète",
+          "verbatim": "Je ne touche pas à ce bouton du haut, je n'ai rien relu."
+        },
+        {
+          "etape": "Durée de deux semaines",
+          "ecran": "Fenêtre « Confier ce deal »",
+          "voulait": "Indiquer que c'est temporaire",
+          "a_fait": "A confié le deal sans pouvoir préciser de dates",
+          "attendait": "Une période",
+          "resultat": "Changement définitif",
+          "emotion": "gênée",
+          "verbatim": "Il faudra que je pense à le rendre à Malik."
+        }
+      ],
+      "verbatims": [
+        "Où est-ce que je dis que c'est Élise qui s'en occupe ?",
+        "Il n'y a pas de dates, c'est pour toujours."
+      ]
+    },
+    {
+      "id": "T3",
+      "issue_declaree": "succes_difficile",
+      "pense_avoir_reussi": true,
+      "seq": 3,
+      "nb_actions": 14,
+      "moment_le_plus_penible": "Ne pas savoir s'il fallait augmenter l'enveloppe ou la ligne Coaching pour « prévoir 5 000 € ».",
+      "incidents": [
+        {
+          "etape": "Trouver le budget",
+          "ecran": "http://localhost:3000/app/expenses",
+          "voulait": "Voir ce qui reste pour Mona Lys",
+          "a_fait": "A ouvert « Dépenses », une liste de lignes sans reste",
+          "attendait": "Un budget par artiste",
+          "resultat": "Retour arrière vers Artistes puis Mona Lys puis onglet Business",
+          "emotion": "perdue",
+          "verbatim": "Ce n'est pas ça, je ne vois pas ce qui reste."
+        },
+        {
+          "etape": "Lire le reste",
+          "ecran": "http://localhost:3000/app/catalog/artists/d0a3779e-594c-43ce-9136-a0f738f8db63/business",
+          "voulait": "Le montant restant",
+          "a_fait": "A lu l'enveloppe",
+          "attendait": "Un chiffre positif",
+          "resultat": "Reste : -7 178 € HT, dépassement",
+          "emotion": "choquée",
+          "verbatim": "Moins 7 178 euros ? Le budget est déjà dépassé."
+        },
+        {
+          "etape": "Ajouter 5 000 €",
+          "ecran": "Fenêtre « Modifier l'enveloppe »",
+          "voulait": "Prévoir 5 000 € pour des cours de chant",
+          "a_fait": "Enveloppe 40 000 mise à 45 000 et ligne Coaching à 5 000",
+          "attendait": "Un geste simple « ajouter une dépense prévue »",
+          "resultat": "Enregistré : enveloppe 45 000, reste -2 178",
+          "emotion": "doute",
+          "verbatim": "Je crois que c'est bon, mais je ne suis pas sûre d'avoir bien fait."
+        }
+      ],
+      "verbatims": [
+        "Je ne voudrais pas toucher au budget sans comprendre.",
+        "Il reste moins 7 178 euros."
+      ]
+    },
+    {
+      "id": "T4",
+      "issue_declaree": "succes_difficile",
+      "pense_avoir_reussi": true,
+      "seq": 5,
+      "nb_actions": 6,
+      "moment_le_plus_penible": "Attendre sans rien voir bouger, puis ne pas savoir où est le document téléchargé ni s'il est complet.",
+      "incidents": [
+        {
+          "etape": "Ouvrir les accords signés",
+          "ecran": "http://localhost:3000/app/deals?vue=signed",
+          "voulait": "Voir l'onglet Signés",
+          "a_fait": "A cliqué une première fois, sans effet visible",
+          "attendait": "Un changement immédiat",
+          "resultat": "Il a fallu recliquer",
+          "emotion": "agacée",
+          "verbatim": "J'ai dû mal cliquer."
+        },
+        {
+          "etape": "Exporter",
+          "ecran": "http://localhost:3000/app/deals/83467ff2-b8d5-4456-a518-144be60c4740",
+          "voulait": "Un document récapitulatif",
+          "a_fait": "A cliqué « Exporter en PDF » du Deal memo",
+          "attendait": "Voir le document",
+          "resultat": "« PDF téléchargé » après une longue attente, document non ouvert",
+          "emotion": "incertaine",
+          "verbatim": "Je ne sais pas si ça contient tout ce qui a été convenu."
+        }
+      ],
+      "verbatims": [
+        "Deal memo, je ne sais pas trop ce que c'est, mais c'est le seul document que je vois.",
+        "Ça dit « PDF téléchargé », où est-il ?"
+      ]
+    }
+  ],
+  "sus": [3, 3, 3, 3, 3, 3, 3, 3, 2, 3],
+  "entretien": {
+    "raconter": "C'est un outil où mes négociateurs proposent leurs accords, où je les valide et où je suis les budgets des artistes.",
+    "agace": "La lenteur, les deux boutons de validation presque identiques, l'absence de message après avoir validé, et tout ce qu'il faut faire défiler.",
+    "pas_sur_que_ca_marche": "Après avoir validé Nahel Nuit, et après avoir changé le budget de Mona Lys.",
+    "pratique": "Voir les chiffres négociés juste avant de valider, et l'historique en bas de page.",
+    "utiliserait": "Peut-être pour les validations, mais pour le budget je demanderais encore à Malik.",
+    "un_mot": "Prudent"
+  }
+}

@@ -5,6 +5,7 @@ import { AnswerActions } from "@/components/assistant/answer-actions";
 import { AnswerText } from "@/components/assistant/answer-text";
 import { DraftCard } from "@/components/assistant/draft-card";
 import { evidenceOf } from "@/components/assistant/tool-output";
+import { ImageGallery } from "@/components/ui/image-gallery";
 import { proposalOf } from "@/lib/assistant/drafts";
 import { assistant } from "@/lib/i18n/fr/assistant";
 
@@ -55,10 +56,30 @@ export function AssistantMessage({
     const text = message.parts
       .map((p) => (p.type === "text" ? p.text : ""))
       .join("");
+    // Read back from their address, with the viewer's session (§ 2 quinquies).
+    const images = message.parts.flatMap((p) =>
+      p.type === "file" && p.mediaType.startsWith("image/") ? [p.url] : [],
+    );
     return (
-      <div className="ml-auto max-w-[85%] rounded-2xl bg-muted px-4 py-2 text-sm whitespace-pre-wrap">
+      <div className="ml-auto grid max-w-[85%] justify-items-end gap-2">
         <span className="sr-only">{t.you} : </span>
-        {text}
+        {images.length > 0 && (
+          <ImageGallery
+            images={images.map((url, index) => ({
+              key: url,
+              src: url,
+              alt: t.images.image(index + 1),
+              openLabel: t.images.open(index + 1),
+              title: t.images.viewerTitle(index + 1, images.length),
+            }))}
+            labels={t.images.viewer}
+          />
+        )}
+        {text && (
+          <div className="rounded-2xl bg-muted px-4 py-2 text-sm whitespace-pre-wrap">
+            {text}
+          </div>
+        )}
       </div>
     );
   }

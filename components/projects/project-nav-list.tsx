@@ -4,9 +4,13 @@ import { IconLock } from "nucleo-sharp-essential";
 import { usePathname } from "next/navigation";
 import { useId } from "react";
 
+import {
+  contextNavItem,
+  ContextNavGroupTitle,
+  ContextNavLink,
+} from "@/components/shell/context-sidebar";
 import { MineBadge } from "@/components/ui/mine-badge";
 import { StatusDot } from "@/components/ui/status-dot";
-import { ViewLink } from "@/components/ui/view-link";
 import { shell } from "@/lib/i18n/fr/shell";
 import { workflowStatus } from "@/lib/i18n/fr/workflow-status";
 import type {
@@ -44,11 +48,6 @@ function toBlocks(items: ProjectSection[]): Block[] {
   }
   return blocks;
 }
-
-// Proto « Projet complet » (`.pitem`): 38 px, 15 px grey at rest, sunken
-// grey and ink when open.
-const item =
-  "relative flex min-h-9.5 w-full items-center gap-2.5 rounded-lg px-2.5 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] no-underline";
 
 /** The status dot of an entry, said in its label; a workflow not started
  * says why (before the plan, left out of it, waiting in it). */
@@ -93,12 +92,9 @@ export function ProjectNavList({
       {toBlocks(items).map((block) => (
         <div key={block.group ?? "top"} className="flex flex-col">
           {block.group && (
-            <p
-              id={`${idPrefix}-${block.group}`}
-              className="px-2.5 pt-3 pb-1 text-[length:var(--type-micro)] leading-[var(--type-micro-lh)] text-[color:var(--text-tertiary)]"
-            >
+            <ContextNavGroupTitle id={`${idPrefix}-${block.group}`}>
               {groups[block.group]}
-            </p>
+            </ContextNavGroupTitle>
           )}
           <ul
             className="flex flex-col gap-px"
@@ -116,7 +112,7 @@ export function ProjectNavList({
                       aria-disabled
                       title={fr.shell.project.sidebar.restricted}
                       className={cn(
-                        item,
+                        contextNavItem,
                         "cursor-not-allowed text-[color:var(--text-muted)]",
                       )}
                     >
@@ -131,22 +127,13 @@ export function ProjectNavList({
               const active = section.match(pathname);
               return (
                 <li key={section.key}>
-                  <ViewLink
-                    href={section.href}
-                    aria-current={active ? "page" : undefined}
-                    className={cn(
-                      item,
-                      "text-[color:var(--text-secondary)] transition-[background-color,color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:bg-[var(--surface-soft)] hover:text-[color:var(--text-primary)]",
-                      active &&
-                        "bg-[var(--surface-sunken)] text-[color:var(--text-primary)] hover:bg-[var(--surface-sunken)]",
-                    )}
-                  >
+                  <ContextNavLink href={section.href} active={active}>
                     {status && (
                       <NavDot status={status} reason={reasons[section.key]} />
                     )}
                     <span className="min-w-0 flex-1">{section.label}</span>
                     <MineBadge count={counts[section.key] ?? 0} />
-                  </ViewLink>
+                  </ContextNavLink>
                 </li>
               );
             })}

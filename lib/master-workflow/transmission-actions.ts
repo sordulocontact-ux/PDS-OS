@@ -10,6 +10,7 @@ import { transmissionExpiry } from "@/lib/master-workflow/link-expiry";
 import { loadStepView } from "@/lib/master-workflow/transmission";
 import type { MasterPackage } from "@/lib/master-workflow/transmission-types";
 import { getProject } from "@/lib/projects/queries";
+import { countedTitlesProject } from "@/lib/projects/counted-titles";
 import { createClient } from "@/lib/supabase/server";
 
 // Who it went to and for which project, for the e-mail (sendRound).
@@ -53,8 +54,10 @@ export async function transmitPackage(
   if (!input.success) return { ok: false, error: t.failed };
 
   const access = await requireApproved();
-  const project = await getProject(input.data.projectId);
-  if (!project) return { ok: false, error: t.failed };
+  const read = await getProject(input.data.projectId);
+  if (!read) return { ok: false, error: t.failed };
+  // The package leaves without a collective's abandoned titles (lot 9).
+  const project = countedTitlesProject(read);
   const view = await loadStepView(project, access, input.data.role);
   if (!view.canEdit) return { ok: false, error: t.forbidden };
   if (view.blockers.length > 0 || !view.brief || !view.engineer)

@@ -316,9 +316,13 @@ export const loadJourney = trackedCache(
       },
       phase,
       closed: Boolean(sheet?.closedAt),
-      blockedSteps: tools.blockers
-        .filter((b) => !b.lifted && here(b))
-        .map((b) => b.stepKey),
+      blockedSteps: [
+        ...tools.blockers
+          .filter((b) => !b.lifted && here(b))
+          .map((b) => b.stepKey),
+        // Lot 12 bis: a participation contract blocks the shoot.
+        ...(next?.blockedBy === "contracts" ? ["shoot"] : []),
+      ],
       // A revision asked on a validated quote: « À revoir », nothing blocked.
       // A place replaced: what it asked to review (proto rule 14).
       reworkSteps: [
@@ -328,6 +332,7 @@ export const loadJourney = trackedCache(
         // A change after the preparation reopens it (recette 23/10,
         // MKT-PROD-001, in SQL): the step is current again, not « à revoir ».
       ],
+      contractBlocked: next?.blockedBy === "contracts",
       later:
         next?.who && next.kind !== "done"
           ? {

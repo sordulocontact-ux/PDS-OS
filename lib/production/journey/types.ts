@@ -138,4 +138,7 @@ export type JourneyInput = {
   // During the shoot, the post and the delivery: who is expected, from the
   // detailed next action (lib/production/next).
   later: JourneyActor | null;
+  // A collective's shoot waits for participation contracts (lot 12 bis):
+  // `later` says what to do, the step is marked blocked.
+  contractBlocked?: boolean;
 };

@@ -11,6 +11,10 @@ import {
   type Classification,
 } from "@/components/budget/budget-classification-fields";
 import { BudgetProofField } from "@/components/budget/budget-proof-field";
+import {
+  BudgetSpendDetails,
+  type SpendDetails,
+} from "@/components/budget/budget-spend-details";
 import { BudgetStatusDateFields } from "@/components/budget/budget-status-date-fields";
 import {
   BudgetTargetField,
@@ -21,6 +25,7 @@ import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { saveBudgetLine } from "@/lib/budget/actions";
 import {
   centsToInput,
+  isFinanceTarget,
   type BudgetDeliverable,
   type BudgetLever,
   type BudgetLine,
@@ -29,6 +34,8 @@ import {
 } from "@/lib/budget/types";
 import { lineFormErrors, type BudgetLineInitial } from "@/lib/budget/line-form";
 import { uploadBudgetProof } from "@/lib/budget/upload-proof";
+import { uploadFinanceFile } from "@/lib/finance/upload-file";
+import { parseEurosToCents } from "@/lib/projects/schemas";
 import { budget } from "@/lib/i18n/fr/budget";
 import { todayInParis } from "@/lib/insights/dates";
 
@@ -51,6 +58,7 @@ export function BudgetLineForm({
   levers = [],
   deliverables = [],
   organizationId = null,
+  storedProof,
   onDone,
   onCancel = onDone,
 }: {
@@ -63,6 +71,9 @@ export function BudgetLineForm({
   deliverables?: BudgetDeliverable[];
   // Where a proof is uploaded; no proof field without it.
   organizationId?: string | null;
+  // A file already kept in finance-files (a proof of Finance › Justificatifs,
+  // « Créer la dépense »): a Finance spend's proof when no other is chosen.
+  storedProof?: { path: string; name: string };
   onDone: () => void;
   onCancel?: () => void;
 }) {
@@ -75,12 +86,22 @@ export function BudgetLineForm({
     status: line?.status ?? initial?.status ?? "planned",
     spentOn: line?.spentOn ?? initial?.spentOn ?? todayInParis(),
     note: line?.note ?? initial?.note ?? "",
+    subpost: line?.subpost ?? "",
   });
   const [classification, setClassification] = useState<Classification>({
     family: line?.family ?? initial?.family ?? NONE,
     familyDetail: line?.familyDetail ?? "",
     leverId: line?.leverId ?? NONE,
     deliverableId: line?.deliverableId ?? NONE,
+  });
+  const [details, setDetails] = useState<SpendDetails>({
+    // A new spend: 20 %, the common rate; an old one keeps « not given ».
+    vat: line ? (line.vatBp === null ? "" : String(line.vatBp)) : "2000",
+    supplierContactId: line?.supplierContactId ?? "",
+    supplierName: line?.supplierContactId ? "" : (line?.supplierName ?? ""),
+    dueOn: line?.dueOn ?? "",
+    rebillable: line?.rebillable ?? false,
+    validatorId: line?.validatorId ?? "",
   });
   const [proof, setProof] = useState<File | null>(null);
   const [chosen, setChosen] = useState("");
@@ -108,17 +129,29 @@ export function BudgetLineForm({
       return;
     }
     submit.run(async () => {
-      // The proof first: the line keeps the file it was saved with.
+      // The proof first: the line keeps the file it was saved with (a
+      // Finance spend's in finance-files, the others in their library).
       let attachmentFileId = "";
+      let financeProof: { path: string; name: string } | undefined =
+        storedProof && isFinanceTarget(target) ? storedProof : undefined;
       if (proof && organizationId) {
-        const uploaded = await uploadBudgetProof({
-          organizationId,
-          target,
-          description: t.attachmentOf(v.label),
-          file: proof,
-        });
-        if (!uploaded.ok) return { ok: false, error: t.attachmentFailed };
-        attachmentFileId = uploaded.id;
+        if (isFinanceTarget(target)) {
+          const stored = await uploadFinanceFile(organizationId, proof);
+          if (!stored.ok) return { ok: false, error: t.attachmentFailed };
+          financeProof = { path: stored.path, name: stored.name };
+        } else {
+          const uploaded = await uploadBudgetProof({
+            organizationId,
+            target: {
+              kind: target.kind as "project" | "artist",
+              id: target.id,
+            },
+            description: t.attachmentOf(v.label),
+            file: proof,
+          });
+          if (!uploaded.ok) return { ok: false, error: t.attachmentFailed };
+          attachmentFileId = uploaded.id;
+        }
       }
       return saveBudgetLine(target, {
         id: line?.id,
@@ -128,9 +161,17 @@ export function BudgetLineForm({
         spentOn: v.spentOn,
         family: none(classification.family),
         familyDetail: classification.familyDetail,
+        subpost: v.subpost,
         leverId: onProject ? none(classification.leverId) : "",
         deliverableId: onProject ? none(classification.deliverableId) : "",
         attachmentFileId,
+        proof: financeProof,
+        vatBp: details.vat === "" ? null : Number(details.vat),
+        supplierContactId: details.supplierContactId,
+        supplierName: details.supplierName,
+        dueOn: details.dueOn,
+        rebillable: details.rebillable,
+        validatorId: details.validatorId,
         note: v.note,
       });
     });
@@ -155,7 +196,7 @@ export function BudgetLineForm({
         readOnly={followsInvoice}
         value={v.amount}
         error={shown.amount}
-        hint={followsInvoice ? t.followsInvoice : t.amountHint}
+        hint={followsInvoice ? t.followsInvoice : undefined}
         onChange={(e) => setV({ ...v, amount: e.target.value })}
       />
       <Field
@@ -176,6 +217,14 @@ export function BudgetLineForm({
         detailError={Boolean(shown.detail)}
         afterFamily={
           <>
+            <Field
+              name="subpost"
+              label={t.subpost}
+              maxLength={120}
+              autoComplete="off"
+              value={v.subpost}
+              onChange={(e) => setV({ ...v, subpost: e.target.value })}
+            />
             {/* « projet ou artiste » right after the poste (BUD 4). */}
             {!fixedTarget && (
               <BudgetTargetField
@@ -195,6 +244,11 @@ export function BudgetLineForm({
             />
           </>
         }
+      />
+      <BudgetSpendDetails
+        value={details}
+        amountCents={parseEurosToCents(v.amount) ?? null}
+        onChange={setDetails}
       />
       <TextareaField
         name="note"

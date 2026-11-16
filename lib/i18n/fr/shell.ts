@@ -12,6 +12,8 @@ export const shell = {
     expand: (title: string) => `Déplier « ${title} »`,
   },
   brand: "PDS OS",
+  // First Tab of every page: straight to its content (UX test of 15/11/2026).
+  skipToContent: "Aller au contenu",
   nav: {
     label: "Navigation principale",
     home: "Accueil",
@@ -66,6 +68,12 @@ export const shell = {
     welcomeAnonymous: "Bonjour",
     // Under the greeting: what waits, counted by code (docs/VISION-UX.md § 2).
     body: "Suivez chaque sortie, du cadrage au bilan",
+    // After the summary, for whoever reads Finance (UX test of 15/11/2026).
+    // Alone (nothing else waits), it starts the sentence.
+    financeUrgent: (count: number, alone: boolean) =>
+      count === 1
+        ? `${alone ? "Une" : "une"} alerte Finance urgente`
+        : `${count} alertes Finance urgentes`,
     summary: (mine: number, toValidate: number) => {
       if (mine === 0) return "Rien ne vous attend pour l'instant";
       if (toValidate === mine)
@@ -221,7 +229,9 @@ export const shell = {
     emptyTitle: "Aucun projet pour l'instant",
     emptyBody:
       "Créez le premier projet pour commencer à suivre une sortie, du cadrage au bilan.",
-    emptyBodyReadOnly: "Les projets apparaîtront ici dès qu'ils seront créés.",
+    // Whoever cannot create one (UX test of 15/11/2026): who does, and what lands here.
+    emptyBodyReadOnly:
+      "La direction crée les projets. Ceux qu'elle vous confie, ou que vous suivez, apparaîtront ici.",
     loadError: "Impossible de charger les projets. Rechargez la page.",
   },
 
@@ -493,6 +503,13 @@ export const shell = {
         steering: "Pilotage",
       },
       overview: "Vue d'ensemble",
+      // A collective's titles and their artists (lot 6 of
+      // docs/pds-mic-plan.md); no entry for any other project.
+      titles: "Titres et artistes",
+      // A collective's releases (lot 13).
+      releases: "Sorties",
+      // Its titles' Plans de sortie (lot 14).
+      releasePlans: "Plans de sortie",
       framing: "Cadrage",
       master: "Master",
       legal: "Juridique",
