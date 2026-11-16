@@ -31,6 +31,7 @@ export function PostPie({
     <MetricCard title={t.title} caption={t.caption} action={action}>
       <DonutChart
         empty={t.empty}
+        totalLabel={t.total}
         slices={[
           ...posts.slice(0, SHOWN).map((p) => ({
             key: p.family ?? "none",

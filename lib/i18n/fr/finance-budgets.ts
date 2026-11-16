@@ -29,12 +29,14 @@ export const financeBudgets = {
     caption: "Ce que coûtent les lignes aujourd'hui, HT.",
     none: "Sans poste",
     rest: "Autres postes",
+    total: "Total",
     empty: "Aucune ligne.",
   },
   split: {
     title: "Répartition des budgets",
     caption: "Le montant de chaque budget, HT.",
     rest: "Autres budgets",
+    total: "Total des budgets",
     empty: "Aucun budget chiffré.",
   },
   chart: {

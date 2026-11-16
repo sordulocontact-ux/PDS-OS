@@ -27,6 +27,7 @@ export function BudgetsPie({ rows }: { rows: EnvelopeRow[] }) {
     <MetricCard title={t.title} caption={t.caption}>
       <DonutChart
         empty={t.empty}
+        totalLabel={t.total}
         slices={[
           ...sized.slice(0, SHOWN).map((r, i) => ({
             key: r.id,
