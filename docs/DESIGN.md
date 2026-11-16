@@ -95,6 +95,10 @@ Le composant Nucleo n'ajoute pas `aria-hidden` tout seul :
 
 ## 2. Typographie
 
+> **Depuis le 16/11/2026, le style de Finance est celui de toute l'app** (`docs/STYLE-FINANCE-PARTOUT.md`,
+> qui fait foi sur ce fichier où ils diffèrent). L'ancien style reste entier derrière l'interrupteur de
+> Réglages tant qu'Ibé n'a pas validé (§ 13 du guide) : ses valeurs sont **entre parenthèses** ci-dessous.
+
 ### Familles
 
 - **Google Sans Flex** pour tout : titres, texte, boutons, tableaux. Licence OFL,
@@ -112,14 +116,17 @@ Tokens dans `app/globals.css` (`--type-*`), classes Tailwind `text-display-*`,
 
 | Usage                                         | Token          | Taille | Graisse |
 | --------------------------------------------- | -------------- | ------ | ------- |
-| Salutation de l'accueil                       | `display-xl`   | 46 px  | medium  |
-| Titre de page                                 | `display-lg`   | 36 px  | medium  |
-| Sous-titre de l'accueil                       | `body-xl`      | 22 px  | medium  |
-| Texte d'introduction sous le titre, bouton `lg`, champ de recherche | `body-lg` | 18 px | medium |
-| Texte courant, cellules et en-têtes de tableau | `body-md`     | 16 px  | medium / semi-bold |
-| Ligne secondaire (version d'un master…), libellé d'une carte de l'accueil | `caption` | 14 px | medium |
+| Salutation de l'accueil                       | `display-xl`   | 36 px (46)  | 500  |
+| Titre de page                                 | `display-lg`   | 28 px (36)  | 500  |
+| Sous-titre de l'accueil                       | `body-xl`      | 18 px (22)  | 450 (500)  |
+| Texte d'introduction sous le titre, champ de recherche | `body-lg` | 16 px (18) | 450 (500) |
+| Texte courant, cellules et en-têtes de tableau | `body-md`     | 15 px (16)  | 450 / 550 (500 / 600) |
+| Bouton, navigation, état                      | `body-sm`      | 14 px (15)  | 550 (600) |
+| Légende, sous-ligne, titre gris d'une carte    | `caption`      | 13 px (14)  | 450 (500) |
+| Micro-chiffre d'un graphique ou d'un calendrier | `micro`       | 12 px (13)  | 450 (500) |
 
-**Taille : 16 px pour le texte courant, 14 px au plus petit** (hors pastille de
+**Taille : 15 px pour le texte courant, 13 px pour une légende, 12 px seulement pour un
+micro-chiffre** (style classique : 16 px courant, 14 px au plus petit, hors pastille de
 compteur). Échelle agrandie d'un facteur 8/7 le 27/09/2026 à la demande de Sacha (14 → 16,
 12 → 14), rapports entre paliers conservés : display 46 / 36 / 28 / 20, chiffres 32 / 22 /
 16, texte 22 / 18 / 16 / 15, légende et en-tête de colonne 14, surtitre 13. Les classes
@@ -135,7 +142,9 @@ les **sources** (« Catalogue · le 02/10 », sous une valeur), les **libellés 
 (`--type-display-module`, classe `text-display-module`), et c'est aussi le titre de l'étape ouverte ;
 la carte « Maintenant » à 22 px (`text-figure-lg`).
 
-**Graisse : medium (500) au minimum, partout.** Jamais de regular ni plus léger (demande
+**Graisse (nouveau style) : 450 par défaut, 550 pour ce qui ressort, 650 rare** ; `font-medium`
+vaut le texte courant ; la hiérarchie se fait par la taille et le gris (§ 2.2 du guide). **Style
+classique :** **Graisse : medium (500) au minimum, partout.** Jamais de regular ni plus léger (demande
 de Sacha, 27/09/2026) ; semi-bold (600) et bold (700) si besoin de hiérarchie. `body`
 est en medium, et `font-normal` / `font-light` sont ramenés à 500 dans le bloc `@theme`
 de `app/globals.css` : une classe héritée de shadcn ne peut pas réintroduire du 400.
@@ -905,6 +914,12 @@ composant par motif, dans `components/ui/` (`docs/COMPOSANTS.md`) :
 
 ### Modale : une seule, « verre »
 
+> **Nouveau style (16/11/2026, `docs/STYLE-FINANCE-PARTOUT.md` § 6.7, 6.8 et 13)** : formulaires et gestes
+> s'ouvrent en **panneau à droite** (520 px, à 12 px des bords, arrondi 8, filet, sans ombre, voile sombre ;
+> `size` `medium`/`wide` pour un formulaire long), le détail d'une ligne en **fiche latérale** (`SideSheet`).
+> Le verre centré ne reste que pour ⌘K, la visionneuse, la présentation, PO et le menu du téléphone
+> (`side="center"`). Ce qui suit décrit le **style classique**, gardé derrière l'interrupteur de Réglages.
+
 **Toute modale du site est la fenêtre « verre »** d'Espace Espace (décision de Sacha,
 27/09/2026) : modifier un artiste, un master, un projet, confirmer, transmettre, créer
 depuis un sélecteur… Il n'existe **pas** d'autre apparence de modale ; `DialogContent`
@@ -987,6 +1002,10 @@ modèle. Écart voulu, propre à Finance : toute la section se lit en **cartes d
   `cn` ne garde qu'une classe `text-*` et effacerait la taille.
 
 ### Finance, nouveau style d'après Midday (15/11/2026)
+
+> Devenu le style de **toute l'app** le 16/11/2026 (`docs/STYLE-FINANCE-PARTOUT.md`) : ce n'est plus un écart.
+> `.finance-scope` ne sert plus qu'au style classique, où Finance garde ce style. Boutons à 6 px depuis le
+> 16/11 (commit `c2cfc7f7`), fiche latérale à 520 px.
 
 Sacha a choisi de développer dans Finance le style du proto `docs/protos/finance-midday.html` (version v8),
 plan et lots dans `docs/FINANCE-V2.md`. **Écart voulu, limité à Finance** :
@@ -1101,12 +1120,16 @@ plan et lots dans `docs/FINANCE-V2.md`. **Écart voulu, limité à Finance** :
 
 | Élément                                            | Classe        | Rayon   |
 | -------------------------------------------------- | ------------- | ------- |
-| Bouton-icône, élément de navigation, ligne de carte | `rounded-lg`  | 8 px    |
-| Carte de l'accueil, saisie de PO                   | `rounded-2xl` | 12 px   |
+| Bouton-icône, champ, élément de navigation, ligne de carte | `rounded-lg`  | 6 px (8)    |
+| Tableau, fiche et panneau de droite                | `rounded-xl`  | 8 px (10)   |
+| Carte, saisie de PO                                | `rounded-2xl` | 8 px (12)   |
+| Modale centrée                                     | `rounded-3xl` | 12 px (16)  |
 | Barres latérales : aucun arrondi (collées au bord) | —             | 0       |
-| Bouton à libellé, suggestion, badge, filtre        | pilule        | 999 px  |
+| Bouton à libellé                                   | `--button-radius` | 6 px (pilule) |
+| Badge compteur, puce, interrupteur                 | pilule        | 999 px  |
 
-Rien au-delà de 16 px, sauf la pilule. Piège : le `Button` utilise `rounded-full` et
+Nouveau style : rien au-delà de 12 px, sauf la pilule (badges et puces, jamais un bouton). Entre
+parenthèses : le style classique, rien au-delà de 16 px. Piège : le `Button` utilise `rounded-full` et
 non `rounded-pill`, car Tailwind trie les arrondis par nom et `rounded-pill` passerait
 après le `rounded-lg` des tailles icône.
 

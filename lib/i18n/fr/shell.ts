@@ -626,4 +626,28 @@ export const shell = {
       moreSections: "Aussi dans ce projet",
     },
   },
+  // The app's ⌘K search (components/shell/app-search.tsx).
+  appSearch: {
+    open: "Rechercher…",
+    placeholder: "Rechercher une page, un projet, un artiste, un titre…",
+    label: "Rechercher dans PDS OS",
+    close: "Fermer la recherche",
+    loading: "Recherche…",
+    error: "La recherche n'a pas pu être chargée.",
+    none: (query: string) => `Rien ne correspond à « ${query} ».`,
+    groups: {
+      page: "Pages",
+      project: "Projets",
+      artist: "Artistes",
+      master: "Catalogue",
+      contact: "Réseau",
+      contract: "Contrats",
+      deal: "Deals",
+      call: "Calls",
+      session: "Sessions studio",
+    },
+    untitled: "Sans titre",
+    session: "Session studio",
+    keys: { move: "pour choisir", open: "pour ouvrir" },
+  },
 } as const;

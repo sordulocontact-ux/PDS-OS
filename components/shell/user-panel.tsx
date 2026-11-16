@@ -33,13 +33,13 @@ export function UserPanel({
       <FeedbackNavButton />
       <ReplayOnboardingButton />
       <Link href={routes.settings} data-close-nav className={navItemClass}>
-        <IconGauge3 className="size-5 shrink-0" aria-hidden />
+        <IconGauge3 className="size-5 shrink-0 modern:size-4" aria-hidden />
         {fr.aiUsage.settings.navLink}
       </Link>
       <ThemeChips />
       <SignOutButton
         variant="ghost"
-        className="h-10 w-full justify-start gap-2 rounded-lg px-4 text-[length:var(--type-body-md)] leading-[var(--type-body-md-lh)] text-[color:var(--nav-fg)] hover:bg-[var(--nav-item-hover-bg)] active:bg-[var(--nav-item-active-bg)] [&_svg:not([class*='size-'])]:size-5"
+        className="h-10 w-full justify-start gap-2 rounded-lg px-4 text-[length:var(--type-body-md)] leading-[var(--type-body-md-lh)] text-[color:var(--nav-fg)] hover:bg-[var(--nav-item-hover-bg)] active:bg-[var(--nav-item-active-bg)] modern:px-3 modern:text-[length:var(--type-body-sm)] modern:leading-[var(--type-body-sm-lh)] [&_svg:not([class*='size-'])]:size-5 modern:[&_svg:not([class*='size-'])]:size-4"
       />
     </div>
   );

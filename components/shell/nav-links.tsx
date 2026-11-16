@@ -101,7 +101,7 @@ export function NavLinks({
                   "cursor-not-allowed text-[color:var(--nav-fg-muted)] hover:bg-transparent",
               )}
             >
-              <Icon className="size-5 shrink-0" aria-hidden />
+              <Icon className="size-5 shrink-0 modern:size-4" aria-hidden />
               {!collapsed && item.label}
               {!collapsed && count > 0 && (
                 <CountBadge count={count} className="ml-auto" />

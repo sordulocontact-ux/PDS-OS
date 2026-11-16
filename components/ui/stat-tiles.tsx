@@ -20,7 +20,10 @@ export type StatTile = {
 // an href is a stretched link: the whole tile is clickable, dt/dd stay put.
 // The columns follow the room the tiles have (container queries), not the
 // screen: the same tiles fit a page and a side panel. Literal classes:
-// Tailwind only generates what it reads in full.
+// Tailwind only generates what it reads in full. New style
+// (docs/STYLE-FINANCE-PARTOUT.md § 6.5): each tile has a figure card's
+// anatomy, the small grey title above, the figure large under it, 20 px
+// inside, 16 px between the tiles.
 const columnClasses = {
   3: "@md:grid-cols-3",
   4: "@xl:grid-cols-4",
@@ -39,12 +42,17 @@ export function StatTiles({
 }) {
   return (
     <div className="@container">
-    <dl className={cn("grid grid-cols-2 gap-3", columnClasses[columns])}>
+    <dl
+      className={cn(
+        "grid grid-cols-2 gap-3 modern:gap-4",
+        columnClasses[columns],
+      )}
+    >
       {stats.map((stat) => (
         <div
           key={stat.label}
           className={cn(
-            "relative flex min-w-0 flex-col-reverse gap-1 rounded-2xl border border-border p-3 bg-card",
+            "relative flex min-w-0 flex-col-reverse gap-1 rounded-2xl border border-border p-3 bg-card modern:flex-col modern:gap-2 modern:p-5",
             stat.href &&
               "transition-colors focus-within:ring-3 focus-within:ring-ring/50 hover:bg-muted",
             // An active filter is in ink, like an active FilterChip.
@@ -59,7 +67,7 @@ export function StatTiles({
               </span>
             )}
           </dt>
-          <dd className="text-body-xl font-medium tabular-nums">
+          <dd className="text-body-xl font-medium tabular-nums modern:text-display-md">
             {stat.href && stat.view ? (
               <ViewLink
                 href={stat.href}

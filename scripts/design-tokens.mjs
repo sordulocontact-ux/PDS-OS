@@ -134,6 +134,8 @@ function pathOf(name) {
   if (n.startsWith("space-")) return ["space", strip(n, "space-")];
   if (n.startsWith("stack-") || n === "section-gap") return ["space", n];
   if (n === "radius") return ["radius", "base"];
+  // A labelled button's radius (6 px since 16/11/2026, the pill before).
+  if (n === "button-radius") return ["radius", "button"];
   if (n.startsWith("radius-")) return ["radius", strip(n, "radius-")];
   if (n.startsWith("elevation-")) return ["elevation", strip(n, "elevation-")];
   if (n.startsWith("duration-"))
