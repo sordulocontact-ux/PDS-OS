@@ -5,9 +5,11 @@ import {
   NewBudgetButton,
   NewFromTemplateButton,
 } from "@/components/finance/budget-actions";
+import { BudgetsPie } from "@/components/finance/budgets-pie";
 import { EnvelopesTable } from "@/components/finance/envelopes-table";
 import { FinanceFrame } from "@/components/finance/finance-frame";
 import { PlanShowButton } from "@/components/finance/funding-buttons";
+import { PostPie } from "@/components/finance/post-pie";
 import { EmptyNote, EmptyState } from "@/components/shell/empty-state";
 import { MetricCard } from "@/components/ui/metric-card";
 import { SegmentedLinks } from "@/components/ui/segmented-control";
@@ -15,7 +17,12 @@ import { can } from "@/lib/auth/access";
 import { requirePermission } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { loadBudgets } from "@/lib/finance/budget-queries";
-import { envelopeRow, type EnvelopeKind } from "@/lib/finance/envelopes";
+import {
+  byPost,
+  envelopeRow,
+  linesOf,
+  type EnvelopeKind,
+} from "@/lib/finance/envelopes";
 import { financeBudgets as t } from "@/lib/i18n/fr/finance-budgets";
 import { formatAmount } from "@/lib/utils/money";
 import { allInOrder } from "@/lib/utils/parallel";
@@ -44,7 +51,8 @@ const TYPE_LABEL: Record<TypeKey, string> = {
  * Finance › Budgets, laid out as the proto's list (Sacha 15/11/2026): the
  * type filter (Tous, Projets, Artistes, Autres) and the Finance's actions on
  * the same line, wrapping on a phone, then one row per budget (amount,
- * spent, what is left, share used). Each budget opens its page, which has
+ * spent, what is left, share used), under the split of the budgets and of
+ * their lines by poste (Ibé 16/11/2026). Each budget opens its page, which has
  * every figure of Ibé's ticket, the split by poste and the months; the
  * templates close the page.
  */
@@ -104,7 +112,17 @@ export default async function FinanceBudgetsPage({
           {rows.length === 0 ? (
             <EmptyNote>{t.emptyView}</EmptyNote>
           ) : (
-            <EnvelopesTable rows={rows} />
+            <>
+              {/* The overall view (Ibé 16/11/2026): how the budgets shown
+                  split between them, and their lines by poste. */}
+              <div className="grid items-start gap-4 lg:grid-cols-2">
+                <BudgetsPie rows={rows} />
+                <PostPie
+                  posts={byPost(rows.flatMap((r) => linesOf(r, data.spends)))}
+                />
+              </div>
+              <EnvelopesTable rows={rows} />
+            </>
           )}
           {canManage && data.templates.length > 0 && (
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">

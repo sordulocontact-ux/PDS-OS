@@ -2,18 +2,17 @@
 
 import { useState, type KeyboardEvent, type PointerEvent } from "react";
 
+import { DayAxis } from "@/components/ui/day-axis";
 import type { TreasuryPoint } from "@/lib/finance/treasury";
 import { treasury } from "@/lib/i18n/fr/treasury";
 import { cn } from "@/lib/utils";
 import { formatShortDay } from "@/lib/utils/day";
+import { dayTicks } from "@/lib/utils/day-ticks";
 import { formatAmount, formatAmountCompact } from "@/lib/utils/money";
 
 const fr = { treasury };
 
 const amount = (cents: number) => formatAmount(cents, { ht: false });
-
-// Under this share of the chart's width (%), two names under the axis touch.
-const NAME_GAP = 20;
 
 /** Round bounds and four steps: 1, 2, 2.5 or 5 times a power of ten. */
 function axis(low: number, high: number) {
@@ -58,7 +57,11 @@ export function TreasuryChart({
   const t = fr.treasury.chart;
   const [active, setActive] = useState<number | null>(null);
   const values = points.map((p) => p.cents);
-  const { bottom, top, ticks } = axis(
+  const {
+    bottom,
+    top,
+    ticks: levels,
+  } = axis(
     Math.min(...values, reserveCents, 0),
     Math.max(...values, reserveCents),
   );
@@ -79,13 +82,9 @@ export function TreasuryChart({
     ),
   ];
   const shown = active === null ? null : points[active];
-  // A month's name is left out when it would touch « Aujourd'hui »: a share
-  // of the width, so a phone's narrow chart drops it sooner than a desktop's.
-  const months = points.flatMap((p, i) =>
-    p.day.endsWith("-01") && Math.abs(x(i) - x(todayIndex)) >= NAME_GAP
-      ? [{ i, day: p.day }]
-      : [],
-  );
+  // A day named every week or two under the axis, with its grid line
+  // (Ibé 16/11/2026: see the days or the months).
+  const ticks = dayTicks(points.map((p) => p.day));
 
   function pick(event: PointerEvent<HTMLDivElement>) {
     const box = event.currentTarget.getBoundingClientRect();
@@ -118,7 +117,7 @@ export function TreasuryChart({
           tall ? "h-72" : "h-56",
         )}
       >
-        {ticks.map((tick) => (
+        {levels.map((tick) => (
           <span
             key={tick}
             className="-translate-y-1/2 first:translate-y-0 last:translate-y-0"
@@ -151,7 +150,7 @@ export function TreasuryChart({
             preserveAspectRatio="none"
             className="absolute inset-0 size-full overflow-visible"
           >
-            {ticks.map((tick) => (
+            {levels.map((tick) => (
               <line
                 key={tick}
                 x1="0"
@@ -161,6 +160,18 @@ export function TreasuryChart({
                 vectorEffect="non-scaling-stroke"
                 strokeDasharray="2 4"
                 className="stroke-[var(--border-default)]"
+              />
+            ))}
+            {ticks.map((tick) => (
+              <line
+                key={tick.day}
+                x1={tick.at * 100}
+                x2={tick.at * 100}
+                y1="0"
+                y2="100"
+                vectorEffect="non-scaling-stroke"
+                strokeDasharray="2 4"
+                className="stroke-[var(--border-hairline)]"
               />
             ))}
             {reserveCents > 0 && (
@@ -248,35 +259,14 @@ export function TreasuryChart({
             </>
           )}
         </div>
-        <div
-          aria-hidden
-          className="relative mt-2 h-4 text-caption text-[color:var(--text-secondary)]"
-        >
-          {todayIndex >= 0 && (
-            <span
-              className={cn(
-                "absolute whitespace-nowrap",
-                // At the very start (no real days yet), it starts there.
-                todayIndex > 2 && "-translate-x-1/2",
-              )}
-              style={{ left: `${x(todayIndex)}%` }}
-            >
-              {t.today}
-            </span>
-          )}
-          {months.map((m) => (
-            <span
-              key={m.day}
-              className="absolute -translate-x-1/2 capitalize"
-              style={{ left: `${x(m.i)}%` }}
-            >
-              {new Intl.DateTimeFormat("fr-FR", {
-                month: "short",
-                timeZone: "UTC",
-              }).format(new Date(`${m.day}T12:00:00Z`))}
-            </span>
-          ))}
-        </div>
+        <DayAxis
+          ticks={ticks}
+          marker={
+            todayIndex >= 0
+              ? { at: todayIndex / last, label: t.today }
+              : undefined
+          }
+        />
       </div>
     </div>
   );

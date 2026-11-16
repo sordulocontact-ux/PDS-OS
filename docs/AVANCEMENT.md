@@ -2412,3 +2412,18 @@ Demande de Sacha : le style de Finance (d'après Midday) sur toute l'app, l'anci
   ouvrent encore une page entière (choix au cas par cas) ; onglets des fiches artiste et titre (`ArtistTabs`,
   `MasterTabs`) à passer en segmenté si Sacha le veut ; vérification à l'œil des pages de projet avec un compte qui
   en voit (le compte de test `glen@pds.test` n'en voit aucun).
+
+## Graphiques de Finance : jours sous la courbe, camembert des budgets (16/11/2026, branche `pre-prod`)
+
+Retour d'Ibé du 16/11 : « pas assez de données sur la courbe […] qu'on voie soit les jours, soit les mois » et « un
+graphique en camembert pour les budgets, histoire d'avoir une vue un peu plus globale ».
+
+- **Courbes** : `TreasuryChart` (Trésorerie) et `TreasurySpark` (Vue d'ensemble) nomment leurs jours sous l'axe
+  (« 23 nov. », chaque lundi jusqu'à 11 semaines, un lundi sur deux au-delà, soit 7 à 9 repères ; un sur deux au
+  téléphone) avec une ligne de grille verticale à chaque repère. `dayTicks` (`lib/utils/day-ticks.ts`), `DayAxis`
+  (`components/ui/day-axis.tsx`). La petite courbe de la Vue d'ensemble reste sans montants (décision de Sacha du 16/11).
+- **Budgets** : au-dessus de la liste, « Répartition des budgets » (`BudgetsPie`) et « Répartition par poste »
+  (`PostPie`) des budgets montrés, selon le filtre de type. Les deux camemberts passent par `DonutChart`
+  (`components/ui/donut-chart.tsx`), aussi utilisé par Trésorerie et la page d'un budget.
+- Vérifié par le build, pas encore dans un navigateur.
+

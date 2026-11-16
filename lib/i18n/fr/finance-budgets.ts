@@ -31,6 +31,12 @@ export const financeBudgets = {
     rest: "Autres postes",
     empty: "Aucune ligne.",
   },
+  split: {
+    title: "Répartition des budgets",
+    caption: "Le montant de chaque budget, HT.",
+    rest: "Autres budgets",
+    empty: "Aucun budget chiffré.",
+  },
   chart: {
     title: "Mois par mois",
   },

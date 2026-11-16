@@ -119,6 +119,11 @@ const POST_SHADES = [
   { fill: "bg-chart-1", stroke: "stroke-chart-1" },
 ] as const;
 
+/** A slice's shade by its place, darkest first (the split of the budgets):
+ * the same ramp as the postes, cycling past five. */
+export const rampShade = (index: number) =>
+  POST_SHADES[index % POST_SHADES.length];
+
 export function postShade(family: BudgetFamily | null) {
   const index = family ? BUDGET_FAMILIES.indexOf(family) : -1;
   return index < 0
