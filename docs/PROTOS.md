@@ -191,3 +191,42 @@ la direction, le Plan du projet), `master-v2.html`, `juridique-v2.html` et `dist
   « Recommandé » et sa raison ; préparation d'un call (participants en pastilles, date, heure, format, ordre du
   jour modifiable et déplaçable, récapitulatif avant création) partout : Cadrage, Stratégie, Conception,
   Production, Master.
+
+## 8. Le proto « capturé » de Finance (`docs/protos/finance.html`, 16/11/2026)
+
+Demande de Sacha : un proto **identique au pixel près à l'app**, pour qu'Ibé voie comment marche
+Finance sans rien ajouter en prod. On ne le redessine donc pas : on le **capture** dans l'app réelle.
+
+- **Capture** (`docs/protos/src/finance-capture/crawl.cjs`) : sur l'app locale (`pnpm build`, puis
+  `PORT=3100 pnpm start`, compte du seed), un Chrome sans écran ouvre chaque page de Finance et
+  enregistre son DOM. Il clique ensuite chaque contrôle, ce qui ouvre fiches, formulaires, menus,
+  listes et infobulles, jusqu'à trois niveaux, et note ce que fait chaque clic : ouvrir, naviguer,
+  passer à un onglet. Trois crawlers tournent en parallèle, un par groupe de pages (`TAG=a|b|c`).
+  Un crawl interrompu reprend où il en était.
+- **Jamais un geste d'écriture** : les libellés de `WRITES` (Enregistrer, Rattacher, Valider,
+  Supprimer, Joindre…, libellé doublé pour les lecteurs d'écran ramené à un seul) ne sont pas
+  cliqués. Le proto y répond par le toast de l'app.
+  - **Piège du 16/11** : « Rattacher Rattacher » avait échappé au garde-fou et rattaché trois
+    justificatifs dans la base **locale**, remis à la main.
+  - **À faire à chaque capture** : vérifier que `finance_events` n'a rien reçu pendant le crawl.
+- **Assemblage** (`build.cjs <sortie.html>`) : un seul fichier de 6 à 7 Mo, avec les feuilles de
+  style et les polices de l'app en ligne et les états en gzip, décompressés par
+  `DecompressionStream`.
+- **Moteur** (`runtime.js`) :
+  - liens routés dans le proto (`#/app/finance/...`) ;
+  - fiches et formulaires rejoués ;
+  - menus et listes recalés sous leur bouton ;
+  - infobulles ;
+  - recherche filtrée en tapant, ⌘K ;
+  - menu Colonnes ;
+  - thème clair ou sombre ;
+  - fichier choisi pour « Déposer » ou « Joindre » ;
+  - Échap et voile qui ferment.
+- **Limites** : un enregistrement ne change pas les listes, et la courbe de Trésorerie ne réagit
+  pas au survol. Hors Finance, un lien répond « Le prototype montre la Finance ».
+- **Refaire après une évolution de Finance** : rebuild, serveur sur 3100, les trois crawlers
+  (commandes en tête de `crawl.cjs`), puis `build.cjs`. Recopier le résultat dans `docs/protos/`
+  et sur le Bureau.
+- **Test** : `node docs/protos/tests/finance-app.cjs` ouvre une fiche, le menu Colonnes, les filtres,
+  un budget et son « ⋯ », une facture, un formulaire de Financements et le dépôt d'un justificatif.
+  Pour tester une autre copie : `PROTO=<fichier dans docs/protos>`.
