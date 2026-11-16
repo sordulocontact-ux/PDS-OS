@@ -1,5 +1,5 @@
 import { RecordHistory } from "@/components/finance/record-history";
-import { SheetFacts, SheetHead } from "@/components/finance/finance-sheet";
+import { SheetFacts, SheetHead } from "@/components/ui/side-sheet";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";

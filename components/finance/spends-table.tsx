@@ -8,7 +8,7 @@ import {
   IconPenWriting2,
 } from "nucleo-sharp-essential";
 import { BudgetLineForm } from "@/components/budget/budget-line-form";
-import { FinanceSheet } from "@/components/finance/finance-sheet";
+import { SideSheet } from "@/components/ui/side-sheet";
 import { PostLabel } from "@/components/finance/post-label";
 import { IncomeForm } from "@/components/finance/income-form";
 import { SpendSheet } from "@/components/finance/spend-sheet";
@@ -297,7 +297,7 @@ export function SpendsTable({
         </DataTableBody>
       </DataTable>
       {sheet !== null && spends[sheet] && (
-        <FinanceSheet
+        <SideSheet
           open
           onClose={() => setSheet(null)}
           title={spends[sheet].label}
@@ -311,7 +311,7 @@ export function SpendsTable({
             actions={canManage ? actionsOf(spends[sheet]) : []}
             proofIn={canManage && organizationId ? organizationId : undefined}
           />
-        </FinanceSheet>
+        </SideSheet>
       )}
       {open && (
         <FormDialog

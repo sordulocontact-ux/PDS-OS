@@ -7,6 +7,7 @@ import { PageSection } from "@/components/shell/page-section";
 import { SkeletonRows } from "@/components/ui/skeleton";
 import { BillingForm } from "@/components/settings/billing-form";
 import { DistributionForm } from "@/components/settings/distribution-form";
+import { StyleChoice } from "@/components/settings/style-choice";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
@@ -62,6 +63,14 @@ export default async function SettingsPage({
         ) : (
           <FormMessage kind="error">{t.usage.loadError}</FormMessage>
         )}
+      </PageSection>
+      <PageSection
+        id="style"
+        title={fr.shell.designStyle.title}
+        description={fr.shell.designStyle.description}
+        card
+      >
+        <StyleChoice />
       </PageSection>
       <PageSection
         id="connections"

@@ -3,7 +3,7 @@
 import { IconChevronLeft } from "nucleo-sharp-essential";
 import { useState } from "react";
 
-import { FinanceSheet } from "@/components/finance/finance-sheet";
+import { SideSheet } from "@/components/ui/side-sheet";
 import {
   MoveRecord,
   type MoveRecordData,
@@ -81,7 +81,7 @@ export function PlanningBoard({
           />
         )}
       </div>
-      <FinanceSheet
+      <SideSheet
         open={shown !== null && Boolean(open?.shown)}
         onClose={() => setOpen((o) => o && { ...o, shown: false })}
         title={record ? record.label : shown ? dayName(shown.day) : ""}
@@ -119,7 +119,7 @@ export function PlanningBoard({
               onOpenMove={setRecord}
             />
           ))}
-      </FinanceSheet>
+      </SideSheet>
     </>
   );
 }

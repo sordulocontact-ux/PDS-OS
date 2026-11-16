@@ -1,6 +1,6 @@
 "use client";
 
-import { SheetFacts, SheetHead } from "@/components/finance/finance-sheet";
+import { SheetFacts, SheetHead } from "@/components/ui/side-sheet";
 import { ReasonChips } from "@/components/finance/reason-chips";
 import { RecordHistory } from "@/components/finance/record-history";
 import { proofFrom } from "@/components/finance/receipts/receipt-card";

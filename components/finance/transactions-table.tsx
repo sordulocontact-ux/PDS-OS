@@ -15,8 +15,8 @@ import {
   ManualTransactionForm,
   MatchForm,
 } from "@/components/finance/reconcile-forms";
-import { FinanceSheet } from "@/components/finance/finance-sheet";
-import { SignedAmount } from "@/components/finance/signed-amount";
+import { SideSheet } from "@/components/ui/side-sheet";
+import { SignedAmount } from "@/components/ui/signed-amount";
 import { TransactionProposal } from "@/components/finance/transaction-proposal";
 import {
   TransactionSheet,
@@ -330,7 +330,7 @@ export function TransactionsTable({
         </DataTableBody>
       </DataTable>
       {sheet !== null && transactions[sheet] && (
-        <FinanceSheet
+        <SideSheet
           open
           onClose={() => setSheet(null)}
           title={txTitle(transactions[sheet])}
@@ -346,7 +346,7 @@ export function TransactionsTable({
             actions={canManage ? actionsOf(transactions[sheet]) : []}
             onAccept={(candidate) => accept(transactions[sheet], candidate)}
           />
-        </FinanceSheet>
+        </SideSheet>
       )}
       {open?.kind === "match" && (
         <FormDialog

@@ -2,7 +2,7 @@ import { DrawsTable } from "@/components/finance/draws-table";
 import { OrchardCard, PayLaterCard } from "@/components/finance/engine-cards";
 import { FinanceFrame } from "@/components/finance/finance-frame";
 import { FundingActions } from "@/components/finance/funding-buttons";
-import { LinkRows } from "@/components/finance/link-rows";
+import { LinkRows } from "@/components/ui/link-rows";
 import { ShowsList } from "@/components/finance/shows-list";
 import { FormMessage } from "@/components/auth/form-message";
 import { EmptyNote } from "@/components/shell/empty-state";

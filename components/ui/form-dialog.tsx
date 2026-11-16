@@ -40,6 +40,7 @@ export function FormDialog({
       {trigger}
       <DialogContent
         closeLabel={closeLabel}
+        size={size}
         className={
           size === "wide"
             ? "sm:max-w-[var(--dialog-width-wide)]"

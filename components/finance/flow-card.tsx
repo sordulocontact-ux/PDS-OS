@@ -1,4 +1,4 @@
-import { SignedAmount } from "@/components/finance/signed-amount";
+import { SignedAmount } from "@/components/ui/signed-amount";
 import { MetricCard, MetricCardLink } from "@/components/ui/metric-card";
 import type { Flow } from "@/lib/finance/cockpit";
 import { treasury as treasuryText } from "@/lib/i18n/fr/treasury";

@@ -63,7 +63,7 @@ export function MobileNav({
           />
         )}
       </DialogTrigger>
-      <DialogContent closeLabel={fr.dialogs.close}>
+      <DialogContent side="center" closeLabel={fr.dialogs.close}>
         <DialogHeader>
           <DialogTitle className="text-[color:var(--nav-fg)]">
             <PdsLogo className="w-8" />

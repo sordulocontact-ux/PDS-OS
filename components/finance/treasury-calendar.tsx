@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 
-import { FinanceSheet } from "@/components/finance/finance-sheet";
+import { SideSheet } from "@/components/ui/side-sheet";
 import {
   MoveRecord,
   type MoveRecordData,
 } from "@/components/finance/move-record";
-import { SignedAmount } from "@/components/finance/signed-amount";
+import { SignedAmount } from "@/components/ui/signed-amount";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import {
@@ -173,7 +173,7 @@ export function TreasuryCalendar({
         </DataTable>
       )}
       {open && sheet !== null && (
-        <FinanceSheet
+        <SideSheet
           open
           onClose={() => setSheet(null)}
           title={open.label}
@@ -193,7 +193,7 @@ export function TreasuryCalendar({
             }}
             data={data}
           />
-        </FinanceSheet>
+        </SideSheet>
       )}
     </PageSection>
   );

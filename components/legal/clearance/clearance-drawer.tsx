@@ -67,6 +67,7 @@ export function ClearanceDrawer({
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent
+          size="wide"
           closeLabel={fr.dialogs.close}
           className="sm:max-w-[var(--dialog-width-wide)]"
         >

@@ -62,6 +62,15 @@ export const shell = {
     light: "Clair",
     dark: "Sombre",
   },
+  // Réglages: the new style or the classic one, while Ibé decides
+  // (lib/ui/design-style.ts).
+  designStyle: {
+    title: "Style de l'interface",
+    description: "Le nouveau style, ou celui d'avant pour comparer",
+    label: "Style de l'interface",
+    modern: "Nouveau",
+    classic: "Ancien",
+  },
 
   home: {
     welcome: (firstName: string) => `Bonjour ${firstName}`,

@@ -83,7 +83,12 @@ export function AssistantLauncher() {
 
   return (
     <Dialog open={launcherOpen} onOpenChange={setLauncherOpen}>
-      <DialogContent closeLabel={t.close} className="sm:max-w-2xl" instant>
+      <DialogContent
+        side="center"
+        closeLabel={t.close}
+        className="sm:max-w-2xl"
+        instant
+      >
         <DialogHeader>
           <DialogTitle>{t.title}</DialogTitle>
           {/* Read by a screen reader; on screen, the listening composer

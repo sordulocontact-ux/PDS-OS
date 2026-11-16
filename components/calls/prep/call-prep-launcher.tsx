@@ -70,6 +70,7 @@ export function CallPrepLauncher({
       {button}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent
+          size="medium"
           closeLabel={fr.dialogs.close}
           className="sm:max-w-[var(--dialog-width-medium)]"
         >

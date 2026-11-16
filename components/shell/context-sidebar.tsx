@@ -37,10 +37,11 @@ export function ContextSidebar({
   );
 }
 
-// Proto « Projet complet » (`.pitem`): 38 px, 15 px grey at rest, sunken
-// grey and ink when open.
+// Proto « Projet complet » (`.pitem`): grey at rest, sunken grey and ink
+// when open; 40 px in the new style (docs/STYLE-FINANCE-PARTOUT.md § 4.2),
+// 38 in the classic one.
 export const contextNavItem =
-  "relative flex min-h-9.5 w-full items-center gap-2.5 rounded-lg px-2.5 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] no-underline";
+  "relative flex min-h-9.5 w-full items-center gap-2.5 rounded-lg px-2.5 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] no-underline modern:min-h-10 modern:gap-2";
 
 /** A group's title in the column, 13 px. */
 export function ContextNavGroupTitle({

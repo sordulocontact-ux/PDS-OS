@@ -1,5 +1,5 @@
 import { MetricCard, MetricCardLink } from "@/components/ui/metric-card";
-import { RestAmount } from "@/components/finance/rest-amount";
+import { RestAmount } from "@/components/ui/rest-amount";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { routes } from "@/lib/auth/redirects";
 import type { BudgetRow } from "@/lib/finance/aggregate";

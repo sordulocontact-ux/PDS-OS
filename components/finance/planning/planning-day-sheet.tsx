@@ -2,8 +2,8 @@
 
 import { useEffect, useRef } from "react";
 
-import { SheetFacts, SheetHead } from "@/components/finance/finance-sheet";
-import { SignedAmount } from "@/components/finance/signed-amount";
+import { SheetFacts, SheetHead } from "@/components/ui/side-sheet";
+import { SignedAmount } from "@/components/ui/signed-amount";
 import type { PlanningDay, PlanningMove } from "@/lib/finance/planning";
 import { financePlanning } from "@/lib/i18n/fr/finance-planning";
 import { cn } from "@/lib/utils";

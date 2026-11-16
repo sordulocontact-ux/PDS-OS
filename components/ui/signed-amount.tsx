@@ -1,15 +1,15 @@
-import type { TreasuryEvent } from "@/lib/finance/treasury";
 import { cn } from "@/lib/utils";
 import { formatAmount } from "@/lib/utils/money";
 
 /** An amount that comes in reads in green with its « + », one that goes
- * out with its « − »: the sign carries the meaning, the colour adds to it.
- * `sm`: inside a day of the Planning. */
+ * out with its « − »: the sign carries the meaning, the colour adds to it
+ * (docs/STYLE-FINANCE-PARTOUT.md § 6.10). `sm`: inside a day of a
+ * calendar. */
 export function SignedAmount({
   event,
   size = "md",
 }: {
-  event: Pick<TreasuryEvent, "direction" | "cents">;
+  event: { direction: "in" | "out"; cents: number };
   size?: "sm" | "md";
 }) {
   return (

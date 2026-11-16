@@ -142,6 +142,7 @@ export function AssistantProvider({
         onOpenChange={(open) => !open && setReviewing(null)}
       >
         <DialogContent
+          side="center"
           closeLabel={fr.dialogs.close}
           className="sm:max-w-[var(--dialog-width-medium)]"
         >

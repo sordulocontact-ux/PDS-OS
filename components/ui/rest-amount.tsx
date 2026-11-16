@@ -1,13 +1,14 @@
-import { financeBudgets } from "@/lib/i18n/fr/finance-budgets";
+import { core } from "@/lib/i18n/fr/core";
 import { cn } from "@/lib/utils";
 import { formatAmount } from "@/lib/utils/money";
 
-const t = financeBudgets;
+const t = core.amounts;
 
 /**
  * What is left of a budget: « Reste 3 400 € » (or the amount alone,
- * `bare`), « Dépassé de 30 778 € » in red once spent beyond it. Only the
- * figure is in Finance's figure font: the words stay text (Sacha 15/11/2026).
+ * `bare`), « Dépassé de 30 778 € » in red once spent beyond it, never a
+ * negative rest. Only the figure is in the figure font: the words stay
+ * text (Sacha 15/11/2026; docs/STYLE-FINANCE-PARTOUT.md § 6.10).
  */
 export function RestAmount({
   cents,

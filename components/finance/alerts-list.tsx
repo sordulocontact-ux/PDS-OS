@@ -1,4 +1,4 @@
-import { LinkRows, type LinkRow } from "@/components/finance/link-rows";
+import { LinkRows, type LinkRow } from "@/components/ui/link-rows";
 import { routes } from "@/lib/auth/redirects";
 import type { Alert } from "@/lib/finance/alerts";
 import { ENVELOPE_SLUG } from "@/lib/finance/envelope-slugs";

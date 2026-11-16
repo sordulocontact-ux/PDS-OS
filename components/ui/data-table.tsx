@@ -169,7 +169,8 @@ export function DataTableCell({
     <TableCell
       colSpan={colSpan}
       className={cn(
-        "px-3.5 py-3 text-[length:var(--type-body-md)] font-medium",
+        // 48 px a row in the new style (docs/STYLE-FINANCE-PARTOUT.md § 4.2).
+        "px-3.5 py-3 text-[length:var(--type-body-md)] font-medium modern:h-12",
         column(columnProps),
         className,
       )}

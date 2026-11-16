@@ -1,4 +1,4 @@
-import { SignedAmount } from "@/components/finance/signed-amount";
+import { SignedAmount } from "@/components/ui/signed-amount";
 import type { PlanningDay } from "@/lib/finance/planning";
 import { financePlanning } from "@/lib/i18n/fr/finance-planning";
 

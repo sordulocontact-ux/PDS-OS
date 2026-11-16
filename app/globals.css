@@ -6,6 +6,12 @@
 @import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
+/* The two styles while Ibé decides (lib/ui/design-style.ts,
+   docs/STYLE-FINANCE-PARTOUT.md § 13): `modern:` draws only in the new style
+   (the default), `classic:` only in the old one, kept until it is validated
+   or dropped. Grep both to remove the losing one. */
+@custom-variant modern (&:where(:root:not([data-style="classic"]) *));
+@custom-variant classic (&:where([data-style="classic"] *));
 
 /* ==========================================================================
    1 — TOKENS PO
@@ -14,8 +20,9 @@
    ========================================================================== */
 
 :root {
-  /* A button's radius: the pill, or a section's own style (Finance). */
-  --button-radius: 999px;
+  /* A button's radius: 6 px, the radius of a field (Finance's style, made
+     the app's on 16/11/2026; the pill before, kept in the classic style). */
+  --button-radius: 6px;
   /* --- Encre et gris ----------------------------------------------------- */
   --po-black: #000000;
   --po-ink-900: #000000;
@@ -174,53 +181,59 @@
   --surface-glass: color-mix(in srgb, var(--surface-raised) 88%, transparent);
 
   /* --- Graisses : medium au minimum, jamais de regular (DESIGN.md § 2) ---- */
+  /* Style Finance (16/11/2026, docs/STYLE-FINANCE-PARTOUT.md § 2.2) : texte
+     à 450, ce qui ressort à 550 ; les titres display gardent 500. */
+  --fw-body: 450;
   --fw-medium: 500;
-  --fw-semibold: 600;
-  --fw-bold: 700;
+  --fw-semibold: 550;
+  --fw-bold: 650;
 
   /* --- Échelle typographique (taille / interligne) ------------------------ */
   /* Agrandie d'un facteur 8/7 le 27/09/2026 (14 → 16, 12 → 14) pour la
      lisibilité ; les rapports entre paliers sont conservés (DESIGN.md § 2). */
-  --type-display-xl: 46px;
-  --type-display-xl-lh: 52px;
-  --type-display-lg: 36px;
-  --type-display-lg-lh: 42px;
-  --type-display-md: 28px;
-  --type-display-md-lh: 34px;
-  /* Titre d'une page de module (h1 de ModuleHeader) : 28 px depuis que c'est
-     le nom de l'étape ouverte (Sacha, 10/11/2026 ; 30 px avant). */
-  --type-display-module: 28px;
-  --type-display-module-lh: 34px;
-  --type-display-sm: 20px;
-  --type-display-sm-lh: 28px;
-  --type-figure-xl: 32px;
-  --type-figure-xl-lh: 36px;
-  --type-figure-lg: 22px;
-  --type-figure-lg-lh: 28px;
-  --type-figure-md: 16px;
-  --type-figure-md-lh: 22px;
-  --type-body-xl: 22px;
-  --type-body-xl-lh: 30px;
-  --type-body-lg: 18px;
-  --type-body-lg-lh: 26px;
-  --type-body-md: 16px;
-  --type-body-md-lh: 24px;
-  --type-body-sm: 15px;
-  --type-body-sm-lh: 22px;
-  --type-caption: 14px;
-  --type-caption-lh: 20px;
-  /* 13 px : seulement les sources, les libellés de la grille d'une étape et
-     les pastilles (décision C0, DESIGN.md § 2), jamais un texte courant. */
-  --type-micro: 13px;
-  --type-micro-lh: 18px;
+  /* Style Finance (16/11/2026, docs/STYLE-FINANCE-PARTOUT.md § 2.1) : un cran
+     plus petit, texte courant 15 px ; l'échelle d'avant est gardée dans le
+     style classique, plus bas. */
+  --type-display-xl: 36px;
+  --type-display-xl-lh: 42px;
+  --type-display-lg: 28px;
+  --type-display-lg-lh: 34px;
+  --type-display-md: 24px;
+  --type-display-md-lh: 30px;
+  /* Titre d'une page de module (h1 de ModuleHeader) : le nom de l'étape
+     ouverte. */
+  --type-display-module: 24px;
+  --type-display-module-lh: 30px;
+  --type-display-sm: 18px;
+  --type-display-sm-lh: 26px;
+  --type-figure-xl: 28px;
+  --type-figure-xl-lh: 32px;
+  --type-figure-lg: 20px;
+  --type-figure-lg-lh: 26px;
+  --type-figure-md: 15px;
+  --type-figure-md-lh: 20px;
+  --type-body-xl: 18px;
+  --type-body-xl-lh: 26px;
+  --type-body-lg: 16px;
+  --type-body-lg-lh: 24px;
+  --type-body-md: 15px;
+  --type-body-md-lh: 22px;
+  --type-body-sm: 14px;
+  --type-body-sm-lh: 20px;
+  --type-caption: 13px;
+  --type-caption-lh: 18px;
+  /* 12 px : seulement les micro-chiffres d'un graphique ou d'un calendrier,
+     jamais un texte de phrase. */
+  --type-micro: 12px;
+  --type-micro-lh: 16px;
   --type-eyebrow: 13px;
   --type-eyebrow-lh: 16px;
   --type-eyebrow-tracking: 0.09em;
-  --type-colhead: 14px;
-  --type-colhead-lh: 20px;
+  --type-colhead: 13px;
+  --type-colhead-lh: 18px;
   --type-colhead-tracking: 0.01em;
   --type-display-tracking: -0.04em;
-  --type-body-tracking: -0.02em;
+  --type-body-tracking: -0.01em;
 
   /* --- Espacement -------------------------------------------------------- */
   --space-0: 0px;
@@ -676,22 +689,28 @@
    utilitaires. Arrondis (DESIGN.md § 4) : cartes et saisie 12 px (2xl), barre
    latérale 16 px (3xl), rien au-delà sauf la pilule, d'où 4xl plafonné. */
 @theme {
-  /* Rien sous medium (DESIGN.md § 2) : font-normal et plus léger rendent en
-     medium, même ajoutés par un composant shadcn. */
-  --font-weight-thin: 500;
-  --font-weight-extralight: 500;
-  --font-weight-light: 500;
-  --font-weight-normal: 500;
+  /* Rien sous 450 (style Finance, docs/STYLE-FINANCE-PARTOUT.md § 2.2) :
+     font-normal et plus léger rendent à 450, même ajoutés par un composant
+     shadcn ; font-medium vaut le texte courant, ce qui ressort est semibold. */
+  --font-weight-thin: 450;
+  --font-weight-extralight: 450;
+  --font-weight-light: 450;
+  --font-weight-normal: 450;
+  --font-weight-medium: 450;
+  --font-weight-semibold: 550;
+  --font-weight-bold: 650;
 
+  /* Arrondis du style Finance (§ 2.3) : champ, bouton-icône et ligne 6,
+     tableau, carte et panneau 8, modale centrée 12. */
   --radius-none: 0px;
   --radius-xs: 2px;
   --radius-sm: 4px;
   --radius-md: 6px;
-  --radius-lg: 8px;
-  --radius-xl: 10px;
-  --radius-2xl: 12px;
-  --radius-3xl: 16px;
-  --radius-4xl: 16px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
+  --radius-2xl: 8px;
+  --radius-3xl: 12px;
+  --radius-4xl: 12px;
   --radius-pill: 999px;
 
   --ease-standard: cubic-bezier(0.2, 0, 0.2, 1);
@@ -773,7 +792,7 @@
     color: var(--text-primary);
     font-size: var(--type-body-md);
     line-height: var(--type-body-md-lh);
-    font-weight: var(--fw-medium);
+    font-weight: var(--fw-body);
   }
 
   /* -2 % on every element (DESIGN.md § 2), not on body alone: an inherited em
@@ -1286,7 +1305,69 @@ button[data-busy]::before {
   }
 }
 
+/* --- Style classique : l'app jusqu'au 16/11/2026 ----------------------------
+   Gardé tel quel tant qu'Ibé n'a pas validé le style de Finance étendu à toute
+   l'app (Sacha, 16/11/2026 ; docs/STYLE-FINANCE-PARTOUT.md § 13). Posé par
+   <html data-style="classic"> (lib/ui/design-style.ts, interrupteur dans
+   Réglages). Il remet les valeurs d'avant : 16 px courant, medium (500) au
+   minimum, cartes 12, boutons en pilule. Finance garde son propre style
+   (.finance-scope, ci-dessous), comme avant. Style validé : supprimer ce bloc
+   et les classes `classic:` ; refusé : remettre ces valeurs dans :root et
+   @theme, et supprimer les classes `modern:`. */
+:root[data-style="classic"] {
+  --button-radius: 999px;
+  --fw-body: 500;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --font-weight-thin: 500;
+  --font-weight-extralight: 500;
+  --font-weight-light: 500;
+  --font-weight-normal: 500;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-2xl: 12px;
+  --radius-3xl: 16px;
+  --radius-4xl: 16px;
+  --type-display-xl: 46px;
+  --type-display-xl-lh: 52px;
+  --type-display-lg: 36px;
+  --type-display-lg-lh: 42px;
+  --type-display-md: 28px;
+  --type-display-md-lh: 34px;
+  --type-display-module: 28px;
+  --type-display-module-lh: 34px;
+  --type-display-sm: 20px;
+  --type-display-sm-lh: 28px;
+  --type-figure-xl: 32px;
+  --type-figure-xl-lh: 36px;
+  --type-figure-lg: 22px;
+  --type-figure-lg-lh: 28px;
+  --type-figure-md: 16px;
+  --type-figure-md-lh: 22px;
+  --type-body-xl: 22px;
+  --type-body-xl-lh: 30px;
+  --type-body-lg: 18px;
+  --type-body-lg-lh: 26px;
+  --type-body-md: 16px;
+  --type-body-md-lh: 24px;
+  --type-body-sm: 15px;
+  --type-body-sm-lh: 22px;
+  --type-caption: 14px;
+  --type-caption-lh: 20px;
+  --type-micro: 13px;
+  --type-micro-lh: 18px;
+  --type-colhead: 14px;
+  --type-colhead-lh: 20px;
+  --type-body-tracking: -0.02em;
+}
+
 /* --- Finance, nouveau style (Sacha, 15/11/2026 ; docs/FINANCE-V2.md) -------
+   Devenu le style de toute l'app le 16/11/2026 (:root, plus haut) ; ce bloc
+   ne sert plus qu'au style classique, où Finance garde son style d'avant.
    Écart voulu, limité à la section Finance : FinanceFrame pose .finance-scope
    et ce bloc redéfinit les variables qui pilotent déjà les composants, comme
    :root.dark redéfinit les couleurs. Un cran plus petit et plus léger (texte
@@ -1354,7 +1435,7 @@ button[data-busy]::before {
    bien ») : montants, dates, comptes et axes, tout ce qui s'aligne déjà en
    tabular-nums, resserré comme dans le proto ; jamais un grand chiffre de titre
    (display, figure), qui garde la typo du texte, comme le proto. */
-.finance-scope
+:is(:root:not([data-style="classic"]), .finance-scope)
   .tabular-nums:not(
     [class*="text-display"],
     [class*="text-figure"],
@@ -1372,7 +1453,7 @@ button[data-busy]::before {
    proto avant le design system (Sacha, 15/11/2026 : « plus clair » que les
    badges). Le texte reste à l'encre, sauf avertissement et danger. Les
    teintes de catégorie (projet, artiste…) gardent leur pastille. */
-.finance-scope
+:is(:root:not([data-style="classic"]), .finance-scope)
   [data-slot="status-badge"]:is(
     [data-tone="neutral"],
     [data-tone="info"],
@@ -1391,24 +1472,29 @@ button[data-busy]::before {
   line-height: var(--type-body-sm-lh);
   font-weight: inherit;
 }
-.finance-scope [data-slot="status-badge"][data-tone="info"] {
+:is(:root:not([data-style="classic"]), .finance-scope)
+  [data-slot="status-badge"][data-tone="info"] {
   --state-dot: var(--tone-info-fg);
 }
-.finance-scope [data-slot="status-badge"][data-tone="success"] {
+:is(:root:not([data-style="classic"]), .finance-scope)
+  [data-slot="status-badge"][data-tone="success"] {
   --state-dot: var(--tone-success-fg);
 }
-.finance-scope [data-slot="status-badge"][data-tone="action"] {
+:is(:root:not([data-style="classic"]), .finance-scope)
+  [data-slot="status-badge"][data-tone="action"] {
   --state-dot: var(--selection);
 }
-.finance-scope [data-slot="status-badge"][data-tone="warning"] {
+:is(:root:not([data-style="classic"]), .finance-scope)
+  [data-slot="status-badge"][data-tone="warning"] {
   --state-dot: var(--tone-warning-fg);
   color: var(--tone-warning-fg);
 }
-.finance-scope [data-slot="status-badge"][data-tone="danger"] {
+:is(:root:not([data-style="classic"]), .finance-scope)
+  [data-slot="status-badge"][data-tone="danger"] {
   --state-dot: var(--tone-danger-fg);
   color: var(--tone-danger-fg);
 }
-.finance-scope
+:is(:root:not([data-style="classic"]), .finance-scope)
   [data-slot="status-badge"]:is(
     [data-tone="neutral"],
     [data-tone="info"],
@@ -1424,10 +1510,12 @@ button[data-busy]::before {
   border-radius: 999px;
   background: var(--state-dot);
 }
-.finance-scope [data-slot="status-badge"] > .rounded-full[aria-hidden] {
+:is(:root:not([data-style="classic"]), .finance-scope)
+  [data-slot="status-badge"]
+  > .rounded-full[aria-hidden] {
   display: none;
 }
-/* Boutons et tableaux : la forme du design system (bouton en pilule, tableau à
-   bandeau d'en-tête, sans filets verticaux), aux tailles de Finance (Sacha,
-   15/11/2026 : « les tableaux et les boutons du DS », puis « une version plus
-   petite, cohérente avec la page ») : aucune règle de forme propre à Finance. */
+/* Les deux règles de forme ci-dessus (chiffres en Geist Mono, état en point et
+   mot) valent dans toute l'app depuis le 16/11/2026, et dans Finance seule en
+   style classique. Boutons (6 px) et tableaux : ceux du design system, aux
+   tailles des tokens. */

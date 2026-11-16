@@ -4,7 +4,7 @@ import { IconPaperclip } from "nucleo-sharp-essential";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
-import { FinanceSheet } from "@/components/finance/finance-sheet";
+import { SideSheet } from "@/components/ui/side-sheet";
 import { ReceiptSheet } from "@/components/finance/receipts/receipt-sheet";
 import { ReceiptsDropLayer } from "@/components/finance/receipts/receipts-drop-layer";
 import { ReceiptsTable } from "@/components/finance/receipts/receipts-table";
@@ -182,7 +182,7 @@ function Sheet({
   if (index < 0) return null;
   const row = rows[index];
   return (
-    <FinanceSheet
+    <SideSheet
       open
       onClose={() => onOpen(null)}
       title={row.proof.values.vendor ?? row.proof.fileName}
@@ -191,6 +191,6 @@ function Sheet({
       onMove={(to) => onOpen(rows[to]?.proof.id ?? null)}
     >
       <ReceiptSheet row={row} choices={choices} canManage={canManage} />
-    </FinanceSheet>
+    </SideSheet>
   );
 }

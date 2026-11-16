@@ -1,4 +1,4 @@
-import { LinkRows, type LinkRow } from "@/components/finance/link-rows";
+import { LinkRows, type LinkRow } from "@/components/ui/link-rows";
 import { ConfirmButton } from "@/components/ui/confirm-button";
 import { MetricCard } from "@/components/ui/metric-card";
 import { ProgressBar } from "@/components/ui/progress-bar";

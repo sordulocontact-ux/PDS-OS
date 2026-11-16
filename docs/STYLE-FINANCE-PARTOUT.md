@@ -515,3 +515,40 @@ bandeau du design system, cellules à 15 px).
   rajouter à la main, utiliser `framed` si la page en veut.
 - **Fichiers longs** : remonter un composant ne doit pas faire passer un fichier au-delà de ~200 lignes ; découper.
 - **Travail en parallèle** dans le même dépôt : ne formater et committer que ses fichiers (mémoire).
+
+---
+
+## 13. Les deux styles tant qu'Ibé n'a pas validé (16/11/2026)
+
+Décision de Sacha (16/11/2026) : le nouveau style est posé sur **toute** l'app, mais l'ancien reste **entier**
+derrière un interrupteur, pour qu'Ibé compare. S'il valide, on supprime l'ancien ; s'il refuse, on revient à
+l'ancien. Le lot 6 (nettoyage) attend donc sa décision.
+
+- **Qui choisit** : chacun, dans **Réglages › Style de l'interface** (Nouveau / Ancien), gardé dans le cookie
+  `pds-style` de son navigateur (`components/settings/style-choice.tsx`). **Par défaut : le nouveau.**
+- **Comment c'est posé** : un script dans `<head>` (`lib/ui/design-style.ts`) lit le cookie avant le premier
+  affichage et pose `<html data-style="classic">`. Rien ne clignote.
+- **Ce qui suit le style** :
+  - les **tokens** : les valeurs du § 2 sont celles de `:root` et `@theme` ; les valeurs d'avant sont gardées
+    telles quelles dans le bloc `:root[data-style="classic"]` d'`app/globals.css` (la trace de l'ancien
+    design) ;
+  - les **règles de forme** (état en point + mot, chiffres en Geist Mono) : toute l'app en nouveau style,
+    Finance seule en classique ;
+  - les **variantes Tailwind** `modern:` (nouveau style seulement) et `classic:` (ancien seulement), pour
+    tout écart de structure dessiné par le serveur (titre d'une page liste masqué, bandeau du haut, onglets
+    ou segmenté) ;
+  - **`useDesignStyle()`** (`components/shell/use-design-style.ts`) pour ce que le client seul dessine : les
+    modales s'ouvrent **à droite** en nouveau style, **au centre** (verre) en classique ; ⌘K, la
+    visionneuse, la présentation, PO et le menu du téléphone restent centrés dans les deux (`side="center"`).
+- **Finance en classique** reste exactement comme le 16/11 au matin : `.finance-scope` et son
+  `DialogSideProvider side="right"` sont gardés.
+- **Validé** : supprimer le bloc `:root[data-style="classic"]`, `.finance-scope`, toutes les classes
+  `classic:` (et le préfixe `modern:` des autres), le script, l'interrupteur et `useDesignStyle`.
+  **Refusé** : remettre les valeurs du bloc classique dans `:root`/`@theme`, supprimer les classes `modern:`
+  et le reste ci-dessus. Les deux se trouvent par `grep -rn "classic:\|modern:\|useDesignStyle"`.
+- **Composants remontés au lot 1** : `SideSheet` (`components/ui/side-sheet.tsx`, ex-`FinanceSheet`, avec
+  `SheetHead`, `SheetFacts`), `LinkRows`, `SignedAmount`, `RestAmount` (`components/ui/`), `SectionTopbar`,
+  `SectionLoading` (`components/shell/`), la classe du panneau de droite (`components/ui/side-panel-class.ts`,
+  `size` de `DialogContent` pour un formulaire long : `medium`, `wide`).
+- **Pages listes** : `PageHeader list` (titre pour les lecteurs d'écran seulement en nouveau style, action
+  seule à droite), `PageLoading list`, `DataTableViews` en segmenté en nouveau style et en onglets en classique.

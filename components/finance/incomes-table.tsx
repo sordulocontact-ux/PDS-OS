@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/data-table";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { RowActions, type RowAction } from "@/components/ui/row-actions";
-import { FinanceSheet } from "@/components/finance/finance-sheet";
+import { SideSheet } from "@/components/ui/side-sheet";
 import { IncomeSheet } from "@/components/finance/income-sheet";
 import { useSheetRow } from "@/components/finance/use-sheet-row";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -380,7 +380,7 @@ export function IncomesTable({
         </DataTableBody>
       </DataTable>
       {sheet !== null && incomes[sheet] && (
-        <FinanceSheet
+        <SideSheet
           open
           onClose={() => setSheet(null)}
           title={incomes[sheet].label}
@@ -394,7 +394,7 @@ export function IncomesTable({
             today={today}
             actions={canManage ? actionsOf(incomes[sheet]) : []}
           />
-        </FinanceSheet>
+        </SideSheet>
       )}
       {open && (
         <IncomeDialog

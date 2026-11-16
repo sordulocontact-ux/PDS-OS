@@ -4,7 +4,7 @@ import { IconCalendarDays } from "nucleo-sharp-essential";
 import { useState } from "react";
 
 import { IconBan } from "@/components/icons";
-import { LinkRows, type LinkRow } from "@/components/finance/link-rows";
+import { LinkRows, type LinkRow } from "@/components/ui/link-rows";
 import { ShowForm } from "@/components/finance/show-draw-forms";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { FormDialog } from "@/components/ui/form-dialog";

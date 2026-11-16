@@ -5,23 +5,27 @@ import { IconXmark } from "nucleo-sharp-essential";
 import { useEffect, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
-import { financeSheet } from "@/lib/i18n/fr/finance-home";
+import { useSectionThemeClass } from "@/components/ui/dialog";
+import {
+  sidePanelClass,
+  sidePanelScrimClass,
+} from "@/components/ui/side-panel-class";
+import { core } from "@/lib/i18n/fr/core";
 import { cn } from "@/lib/utils";
 
-const t = financeSheet;
+const t = core.dialogs;
 
 /**
- * Finance's side sheet (lot 3, docs/FINANCE-V2.md), drawn as Midday's right
- * panels (Sacha 15/11/2026): a panel floating on the right with a margin,
- * a hairline and no drop shadow,
- * around it, the row's name as its title beside the close button, then its
- * content; no counter, no arrows. The list stays in sight under the app's
- * dark scrim (Sacha 15/11/2026: darken, not lighten); ↑ ↓ still go to the row before or after from the keyboard, Échap
- * closes. Deliberate gap from « one modal » (Sacha 07/11/2026), Finance
- * only (DESIGN.md). Under `sm`, it takes the whole width. Inside
- * `.finance-scope`, as its page, though it is drawn in a portal.
+ * The side sheet: the detail of a row one consults (docs/STYLE-FINANCE-
+ * PARTOUT.md § 6.7; born in Finance, lot 3 of docs/FINANCE-V2.md, after
+ * Midday's right panels). A panel floating on the right (sidePanelClass),
+ * the row's name as its title beside the close button, then its content; no
+ * counter, no arrows. The list stays in sight under the app's dark scrim;
+ * ↑ ↓ go to the row before or after from the keyboard, Échap closes. Under
+ * `sm`, it takes the whole width. It takes its section's theme
+ * (useSectionThemeClass), though it is drawn in a portal.
  */
-export function FinanceSheet({
+export function SideSheet({
   open,
   onClose,
   title,
@@ -56,6 +60,7 @@ export function FinanceSheet({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open, index, total, onMove]);
+  const theme = useSectionThemeClass();
 
   return (
     <DialogPrimitive.Root
@@ -63,10 +68,10 @@ export function FinanceSheet({
       onOpenChange={(next) => !next && onClose()}
     >
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Backdrop className="fixed inset-0 z-50 bg-[var(--glass-scrim)] transition-opacity duration-[var(--duration-base)] data-ending-style:opacity-0 data-starting-style:opacity-0" />
+        <DialogPrimitive.Backdrop className={sidePanelScrimClass} />
         <DialogPrimitive.Popup
-          data-slot="finance-sheet"
-          className="finance-scope fixed inset-0 z-50 flex flex-col border border-[color:var(--border-default)] bg-[var(--surface-raised)] text-foreground transition-[translate,opacity] duration-[var(--duration-base)] ease-[var(--ease-out)] outline-none data-ending-style:translate-x-6 data-ending-style:opacity-0 data-starting-style:translate-x-6 data-starting-style:opacity-0 motion-reduce:transition-opacity sm:inset-y-3 sm:right-3 sm:left-auto sm:w-[min(520px,calc(100%-1.5rem))] sm:rounded-[var(--radius-xl)]"
+          data-slot="side-sheet"
+          className={cn(sidePanelClass, theme)}
         >
           <div className="flex items-start gap-3 px-6 pt-6 pb-2">
             <DialogPrimitive.Title className="min-w-0 flex-1 text-display-sm font-medium break-words">

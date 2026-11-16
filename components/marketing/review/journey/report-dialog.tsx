@@ -43,6 +43,7 @@ export default function ReportDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
+        size="wide"
         closeLabel={fr.dialogs.close}
         className="sm:max-w-[var(--dialog-width-wide)]"
       >

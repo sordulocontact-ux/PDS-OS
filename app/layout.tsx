@@ -5,6 +5,7 @@ import { EntrySplash } from "@/components/shell/entry-splash";
 import { ThemeProvider } from "@/components/shell/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { fr } from "@/lib/i18n/fr";
+import { designStyleScript } from "@/lib/ui/design-style";
 
 import "./globals.css";
 
@@ -34,9 +35,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="fr"
       className={`${googleSansFlex.variable} ${geistMono.variable} h-full antialiased`}
-      // next-themes sets the "dark" class before the first paint.
+      // next-themes sets the "dark" class before the first paint, the style
+      // script its data-style.
       suppressHydrationWarning
     >
+      <head>
+        {/* The style chosen in Réglages, before the first paint
+            (lib/ui/design-style.ts). */}
+        <script dangerouslySetInnerHTML={{ __html: designStyleScript }} />
+      </head>
       <body className="flex min-h-full flex-col">
         <EntrySplash />
         <ThemeProvider>

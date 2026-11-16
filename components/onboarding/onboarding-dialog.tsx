@@ -78,6 +78,7 @@ export function OnboardingDialog({
       }}
     >
       <DialogContent
+        side="center"
         closeLabel={t.skip}
         showClose={false}
         initialFocus={primary}

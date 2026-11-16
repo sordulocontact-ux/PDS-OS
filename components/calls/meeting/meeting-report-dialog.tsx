@@ -66,7 +66,11 @@ export function MeetingReportDialog({ meeting }: { meeting: MeetingData }) {
         {t.readReport}
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent closeLabel={t.close} className="sm:max-w-3xl">
+        <DialogContent
+          size="wide"
+          closeLabel={t.close}
+          className="sm:max-w-3xl"
+        >
           <DialogHeader>
             <DialogTitle>{t.title(meeting.name)}</DialogTitle>
             <DialogDescription className="flex flex-col gap-0.5 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">

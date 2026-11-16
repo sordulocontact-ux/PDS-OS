@@ -183,7 +183,7 @@ export function AssistantConversation({
       </div>
 
       <Dialog open={historyOpen} onOpenChange={setHistoryOpen}>
-        <DialogContent closeLabel={fr.dialogs.close}>
+        <DialogContent side="center" closeLabel={fr.dialogs.close}>
           <DialogHeader>
             <DialogTitle>{t.history.title}</DialogTitle>
           </DialogHeader>

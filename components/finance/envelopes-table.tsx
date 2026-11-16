@@ -13,7 +13,7 @@ import {
   DataTableRow,
   EMPTY_CELL,
 } from "@/components/ui/data-table";
-import { RestAmount } from "@/components/finance/rest-amount";
+import { RestAmount } from "@/components/ui/rest-amount";
 import { routes } from "@/lib/auth/redirects";
 import { ENVELOPE_SLUG } from "@/lib/finance/envelope-slugs";
 import type { EnvelopeRow } from "@/lib/finance/envelopes";

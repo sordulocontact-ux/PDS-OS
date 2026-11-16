@@ -1,4 +1,4 @@
-import { SignedAmount } from "@/components/finance/signed-amount";
+import { SignedAmount } from "@/components/ui/signed-amount";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { StatusDot } from "@/components/ui/status-dot";
 import type { PlanningDay, PlanningMove } from "@/lib/finance/planning";

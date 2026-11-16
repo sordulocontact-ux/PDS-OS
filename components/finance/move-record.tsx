@@ -1,6 +1,6 @@
 "use client";
 
-import { SheetHead } from "@/components/finance/finance-sheet";
+import { SheetHead } from "@/components/ui/side-sheet";
 import { IconArrowUpRight } from "@/components/icons";
 import { IncomeSheet } from "@/components/finance/income-sheet";
 import { SpendSheet } from "@/components/finance/spend-sheet";

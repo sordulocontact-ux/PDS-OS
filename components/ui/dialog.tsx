@@ -5,6 +5,12 @@ import { createContext, useContext } from "react";
 import { IconXmark } from "nucleo-sharp-essential";
 
 import { Button } from "@/components/ui/button";
+import { useDesignStyle } from "@/components/shell/use-design-style";
+import {
+  panelWidth,
+  sidePanelClass,
+  sidePanelScrimClass,
+} from "@/components/ui/side-panel-class";
 import { cn } from "@/lib/utils";
 
 // The one modal of the app (docs/DESIGN.md § 4, « Modale »): the light
@@ -31,9 +37,11 @@ const scrimMotion =
 // Where a section opens its modals (Sacha 15/11/2026: in Finance, every
 // form opens as the panel on the right, over the sheet it comes from, so one
 // stays where one is). `className` scopes the panel to its section's theme,
-// as it is drawn in a portal.
-type DialogSide = { side: "center" | "right"; className?: string };
-const DialogSideContext = createContext<DialogSide>({ side: "center" });
+// as it is drawn in a portal. Without a section's choice, the style's: the
+// panel on the right in the new style, everywhere (docs/STYLE-FINANCE-
+// PARTOUT.md § 6.8), the centred glass in the classic one.
+type DialogSide = { side?: "center" | "right"; className?: string };
+const DialogSideContext = createContext<DialogSide>({});
 function DialogSideProvider({
   side,
   className,
@@ -52,10 +60,9 @@ function useSectionThemeClass() {
   return useContext(DialogSideContext).className;
 }
 
-// The panel on the right: floating with a margin, a hairline, no shadow,
-// the app's dark scrim; full screen on phones (Finance's side sheet).
-const rightPanel =
-  "fixed inset-0 z-50 flex flex-col gap-5 overflow-y-auto border border-[color:var(--border-default)] bg-[var(--surface-raised)] p-6 text-foreground outline-none transition-[translate,opacity] duration-[var(--duration-base)] ease-[var(--ease-out)] data-ending-style:translate-x-6 data-ending-style:opacity-0 data-starting-style:translate-x-6 data-starting-style:opacity-0 motion-reduce:transition-opacity sm:inset-y-3 sm:right-3 sm:left-auto sm:w-[min(520px,calc(100%-1.5rem))] sm:rounded-[var(--radius-xl)]";
+// The panel on the right, as the side sheet (side-panel-class.ts), its
+// content padded and scrolling.
+const rightPanel = cn(sidePanelClass, "gap-5 overflow-y-auto p-6");
 
 const Dialog = DialogPrimitive.Root;
 const DialogTrigger = DialogPrimitive.Trigger;
@@ -67,10 +74,15 @@ function DialogContent({
   showClose = true,
   instant = false,
   side: sideProp,
+  size = "default",
   ...props
 }: DialogPrimitive.Popup.Props & {
-  // Overrides the section's choice (a search stays centred).
+  // Overrides the section's and the style's choice: the ⌘K search, the
+  // image viewer, the presentation and PO stay centred.
   side?: "center" | "right";
+  // The width of the panel on the right for a longer form; the centred
+  // modal takes its width from `className`, as before.
+  size?: keyof typeof panelWidth;
   closeLabel: string;
   // False when the content has its own way out (the presentation's « Passer »).
   showClose?: boolean;
@@ -79,14 +91,21 @@ function DialogContent({
   instant?: boolean;
 }) {
   const section = useContext(DialogSideContext);
-  const side = sideProp ?? section.side;
+  const style = useDesignStyle();
+  const side =
+    sideProp ?? section.side ?? (style === "classic" ? "center" : "right");
   if (side === "right")
     return (
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Backdrop className="fixed inset-0 z-50 bg-[var(--glass-scrim)] transition-opacity duration-[var(--duration-base)] data-ending-style:opacity-0 data-starting-style:opacity-0" />
+        <DialogPrimitive.Backdrop className={sidePanelScrimClass} />
         <DialogPrimitive.Popup
           data-slot="dialog-content"
-          className={cn(rightPanel, section.className, className)}
+          className={cn(
+            rightPanel,
+            panelWidth[size],
+            section.className,
+            className,
+          )}
           {...props}
         >
           {children}

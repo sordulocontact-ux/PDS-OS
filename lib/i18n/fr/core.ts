@@ -10,6 +10,11 @@ export const core = {
     close: "Fermer",
     saving: "Enregistrement…",
   },
+  // What is left of a budget (components/ui/rest-amount.tsx).
+  amounts: {
+    restWord: "Reste",
+    overWord: "Dépassé de",
+  },
   // « ‹ 3 sur 8 › » (components/ui/rank-arrows.tsx).
   rankArrows: {
     rank: (n: number, total: number) => `${n} sur ${total}`,

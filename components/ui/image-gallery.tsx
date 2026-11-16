@@ -91,6 +91,7 @@ export function ImageViewer({
       onOpenChange={(next) => !next && onIndexChange(null)}
     >
       <DialogContent
+side="center"
         closeLabel={labels.close}
         className="sm:max-w-[var(--dialog-width-viewer)]"
         onKeyDown={(event) => {
