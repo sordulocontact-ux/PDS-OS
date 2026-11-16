@@ -16,6 +16,7 @@ export function PageHeader({
   leading,
   badge,
   list = false,
+  toolsAction = false,
 }: {
   title: string;
   description?: string;
@@ -23,13 +24,17 @@ export function PageHeader({
   leading?: React.ReactNode;
   badge?: React.ReactNode;
   list?: boolean;
+  // The action also sits on the list's tools line (DataTableViews
+  // `pageAction`): shown here in the classic style only.
+  toolsAction?: boolean;
 }) {
+  const ownAction = action && !(list && toolsAction);
   return (
     <div
       className={cn(
         "flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between",
         list && "modern:flex-row modern:justify-end",
-        list && !action && "modern:sr-only",
+        list && !ownAction && "modern:sr-only",
       )}
     >
       <div
@@ -60,7 +65,11 @@ export function PageHeader({
           )}
         </TitleBlock>
       </div>
-      {action && <div className="shrink-0">{action}</div>}
+      {action && (
+        <div className={cn("shrink-0", !ownAction && "modern:hidden")}>
+          {action}
+        </div>
+      )}
     </div>
   );
 }

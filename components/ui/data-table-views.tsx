@@ -18,16 +18,21 @@ export function DataTableViews({
   label,
   views,
   action,
+  pageAction,
   segmented = false,
   children,
 }: {
   label: string;
   views: TabBarItem[];
   action?: ReactNode;
+  // The page's own action, at the end of the views' line in the new style
+  // (SectionFrame `toolsAction`): the page's header shows it in the classic
+  // style.
+  pageAction?: ReactNode;
   segmented?: boolean;
   children: ReactNode;
 }) {
-  if (views.length < 2 && !action) return children;
+  if (views.length < 2 && !action && !pageAction) return children;
   const linked = views.every((v) => v.href);
   const bar = linked && (
     <div
@@ -57,7 +62,12 @@ export function DataTableViews({
           }))}
         />
       )}
-      {action && <div className="ml-auto shrink-0">{action}</div>}
+      {(action || pageAction) && (
+        <div className="ml-auto flex shrink-0 items-center gap-3">
+          {action}
+          {pageAction && <div className="classic:hidden">{pageAction}</div>}
+        </div>
+      )}
     </div>
   );
   if (segmented && linked)

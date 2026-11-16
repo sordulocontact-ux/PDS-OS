@@ -8,6 +8,7 @@ import { NewContactButton } from "@/components/network/new-contact-button";
 import { EmptyState } from "@/components/shell/empty-state";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
+import { SectionFrame } from "@/components/shell/section-frame";
 import { DataTableViews } from "@/components/ui/data-table";
 import { archiveFilterGroup } from "@/lib/archive/filter";
 import { isArchivedView } from "@/lib/archive/types";
@@ -112,12 +113,12 @@ export default async function NetworkPage({
   );
 
   return (
-    <PageContainer>
-      <PageHeader
-        title={t.title}
-        description={t.description}
-        action={all.length > 0 ? newButton : null}
-      />
+    <SectionFrame
+      title={t.title}
+      description={t.description}
+      action={all.length > 0 ? newButton : null}
+      toolsAction
+    >
       {all.length === 0 && !archived && !canArchive ? (
         <EmptyState
           icon={IconNodes}
@@ -128,6 +129,7 @@ export default async function NetworkPage({
       ) : (
         <DataTableViews
           label={t.viewsLabel}
+          pageAction={all.length > 0 ? newButton : null}
           views={[
             {
               href: viewHref(routes.network, { view, ...filters }),
@@ -169,7 +171,7 @@ export default async function NetworkPage({
           )}
         </DataTableViews>
       )}
-    </PageContainer>
+    </SectionFrame>
   );
 }
 

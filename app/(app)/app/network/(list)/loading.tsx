@@ -6,6 +6,8 @@ export default function NetworkLoading() {
     <PageLoading
       title={fr.network.title}
       description={fr.network.description}
+      section
+      list
     />
   );
 }
