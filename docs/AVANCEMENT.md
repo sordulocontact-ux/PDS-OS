@@ -2379,3 +2379,17 @@ les modules à parcours (proto « Mise en page des modules », version « Propos
       - **⌘K.** Justificatifs, opérations et montants cherchables.
       - **Menus.** Au thème de Finance.
       - **Reste.** Unité d'un format d'émission à stocker (migration), gestes d'écriture dans les fiches ouvertes depuis un calendrier (lecture + justificatif aujourd'hui).
+
+## Contrat The Orchard dans Financements (16/11/2026, branche `pre-prod`)
+
+Retour d'Ibé : le financement The Orchard est un crédit versé par tranches de titres livrés, à relier à PO.
+
+- **Contrat** (« ⋯ » › Modifier le contrat The Orchard) : montant total, avance par tranche, titres par tranche,
+  début du contrat, titres livrés hors PDS OS, avances déjà reçues.
+- **Titres comptés tout seuls** depuis les dépôts déclarés dans la Distribution (un titre une fois), liste
+  « Titres livrés à The Orchard ».
+- **Carte** : contrat, reçu, reste à recevoir ; « Avance attendue » + « Avance reçue » ; avances suivantes
+  jusqu'au total. Alerte « Avance The Orchard attendue ». PO : sujet `the_orchard` de sa lecture Finance.
+- **Reste** : recoupement de l'avance sur les redevances (aucune donnée de redevances dans PDS OS) ; migration à
+  pousser en pré-prod et en prod.
+

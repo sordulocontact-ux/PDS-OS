@@ -15,6 +15,7 @@ export const assistantReadFinance = {
     toPay: "Finance · Dépenses à payer",
     budgets: "Finance · Budgets",
     noProof: "Finance · Dépenses sans justificatif",
+    orchard: "Finance · Financements",
   },
   treasury: {
     noStatement:
@@ -130,5 +131,33 @@ export const assistantReadFinance = {
     line: (label: string, supplier: string, amount: string, day: string) =>
       `${label}${supplier} : ${amount}, du ${day}`,
     supplier: (name: string) => ` (${name})`,
+  },
+  orchard: {
+    contract: (tranche: string, per: number, total: string | null) =>
+      total
+        ? `Contrat The Orchard de ${total} : une avance de ${tranche} tous les ${per} titres livrés.`
+        : `Contrat The Orchard : une avance de ${tranche} tous les ${per} titres livrés, sans montant total saisi.`,
+    received: (count: number, received: string, left: string | null) =>
+      `${plural(count, "avance reçue", "avances reçues")} (${received})${left === null ? "" : `, reste ${left} à recevoir`}.`,
+    complete:
+      "Le contrat est entièrement versé : plus aucune avance n'est attendue.",
+    delivered: (
+      total: number,
+      fromDistribution: number,
+      since: string | null,
+      outside: number,
+    ) =>
+      `${plural(total, "titre livré", "titres livrés")} : ${fromDistribution} déposés par la Distribution${since ? ` depuis le ${since}` : " (aucune date de début du contrat saisie, rien n'est compté par la Distribution)"}, ${outside} saisis hors PDS OS.`,
+    toward: (counted: number, per: number) =>
+      `Vers la prochaine avance : ${counted} titres sur ${per}, il en manque ${per - counted}.`,
+    due: (count: number, amount: string) =>
+      `${count > 1 ? `${count} tranches complètes` : "Tranche complète"} : ${amount} attendus de The Orchard, pas encore marqués reçus.`,
+    next: (label: string, day: string, amount: string, show: string) =>
+      `${label} prévue le ${day} : ${amount}, déclenchée par les titres provisoires de « ${show} ».`,
+    noNext: "Aucune autre avance n'est prévue avec les émissions planifiées.",
+    deliveriesTitle: (count: number) =>
+      `${plural(count, "dépôt compté", "dépôts comptés")}, du plus récent :`,
+    delivery: (day: string, name: string, titles: number) =>
+      `${day} · ${name} : ${plural(titles, "titre", "titres")}`,
   },
 } as const;

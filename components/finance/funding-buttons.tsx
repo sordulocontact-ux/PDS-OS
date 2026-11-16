@@ -9,9 +9,9 @@ import { useState } from "react";
 
 import {
   CreditLineForm,
-  EngineSettingsForm,
   ShowFormatForm,
 } from "@/components/finance/funding-forms";
+import { OrchardContractForm } from "@/components/finance/orchard-contract-form";
 import { DrawForm, ShowForm } from "@/components/finance/show-draw-forms";
 import { IconCopy } from "@/components/icons";
 import { DialogButton } from "@/components/ui/dialog-button";
@@ -113,7 +113,7 @@ export function FundingActions({
     settings: {
       title: f.orchard.form.title,
       description: f.orchard.form.description,
-      form: <EngineSettingsForm settings={settings} onDone={close} />,
+      form: <OrchardContractForm settings={settings} onDone={close} />,
     },
   };
   return (

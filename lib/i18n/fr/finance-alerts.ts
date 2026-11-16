@@ -46,6 +46,11 @@ export const financeAlerts = {
   toReconcile: (count: number) =>
     plural(count, "opération à rattacher", "opérations à rattacher"),
   toReconcileSub: (day: string) => `La plus ancienne du ${day}`,
+  orchardDue: (amount: string) => `Avance The Orchard attendue : ${amount}`,
+  orchardDueSub: (count: number) =>
+    count > 1
+      ? `${count} tranches de titres livrées, pas encore reçues`
+      : "Tranche de titres livrée, pas encore reçue",
   shift: (label: string, to: string) => `Décaler ${label} au ${to}`,
   shiftSub: (gain: string) =>
     `Relèverait le point bas de ${gain}, au-dessus de la réserve`,

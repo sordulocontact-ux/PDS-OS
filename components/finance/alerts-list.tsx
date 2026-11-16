@@ -98,6 +98,13 @@ function rowOf(alert: Alert, index: number): LinkRow {
         main: t.toReconcile(alert.count),
         sub: t.toReconcileSub(day(alert.oldest)),
       };
+    case "orchard_due":
+      return {
+        key,
+        href: routes.financeFundings,
+        main: t.orchardDue(amount(alert.cents)),
+        sub: t.orchardDueSub(alert.count),
+      };
     case "shift":
       return {
         key,

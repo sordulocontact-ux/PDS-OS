@@ -6,6 +6,7 @@ import { requireApproved } from "@/lib/auth/dal";
 import {
   cents,
   failure,
+  optionalDay,
   optionalId,
   positiveEuros,
   refresh,
@@ -27,19 +28,26 @@ async function organization() {
 }
 
 const settingsInput = z.object({
-  tranche: z.string().transform((v, ctx) => {
+  tranche: positiveEuros,
+  // Empty: no total (the advances never stop).
+  contract: z.string().transform((v, ctx) => {
+    if (!v.trim()) return null;
     const c = cents(v);
-    if (c === null || c < 0) {
+    if (c === null || c <= 0) {
       ctx.addIssue({ code: "custom" });
       return z.NEVER;
     }
     return c;
   }),
   per: z.number().int().min(1).max(1000),
+  countsFrom: optionalDay,
   counted: z.number().int().min(0).max(100000),
+  received: z.number().int().min(0).max(1000),
 });
 
-/** The Orchard rule and the titles counted since its last advance. */
+/** The Orchard contract: its total, the advance and its titles, the day
+ * the Distribution's deposits count from, the titles delivered outside PDS
+ * OS and the advances already received (Ibé, 16/11/2026). */
 export async function saveEngineSettings(
   input: z.input<typeof settingsInput>,
 ): Promise<WriteResult> {
@@ -51,14 +59,39 @@ export async function saveEngineSettings(
     {
       organization_id: organizationId,
       orchard_tranche_cents: p.data.tranche,
+      orchard_contract_cents: p.data.contract,
       orchard_titles_per_tranche: p.data.per,
+      orchard_counts_from: p.data.countsFrom,
       orchard_titles_counted: p.data.counted,
+      orchard_advances_received: p.data.received,
     },
     { onConflict: "organization_id" },
   );
   if (error) return failure(error, "saveEngineSettings");
   refresh();
   return { ok: true, done: done.settings };
+}
+
+/** « Avance reçue »: one more advance paid by The Orchard. `seen`: the
+ * number the page showed, so a second click (or a colleague's) never
+ * counts it twice. */
+export async function markOrchardAdvanceReceived(
+  seen: number,
+): Promise<WriteResult> {
+  const organizationId = await organization();
+  const n = z.number().int().min(0).max(999).safeParse(seen);
+  if (!n.success || !organizationId) return { ok: false, error: t.invalid };
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("finance_engine_settings")
+    .update({ orchard_advances_received: n.data + 1 })
+    .eq("organization_id", organizationId)
+    .eq("orchard_advances_received", n.data)
+    .select("id");
+  if (error) return failure(error, "markOrchardAdvanceReceived");
+  if (!data?.length) return { ok: false, error: fundings.orchard.stale };
+  refresh();
+  return { ok: true, done: done.received };
 }
 
 const formatInput = z.object({

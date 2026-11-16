@@ -24,22 +24,68 @@ export const fundings = {
     counted: (count: number, per: number) => `${count} sur ${per} titres`,
     countedLine: (count: number, per: number) =>
       `Titres comptés vers la prochaine avance : ${count} / ${per}`,
+    // Where the titles come from: the Distribution since the contract's
+    // start, and those delivered outside PDS OS.
+    origin: (delivered: number, fromDistribution: number, outside: number) =>
+      [
+        plural(delivered, "titre livré", "titres livrés"),
+        fromDistribution > 0 && `${fromDistribution} par la Distribution`,
+        outside > 0 && `${outside} hors PDS OS`,
+      ]
+        .filter(Boolean)
+        .join(" · "),
+    figures: {
+      contract: "Contrat",
+      received: "Reçu",
+      left: "Reste à recevoir",
+    },
+    complete: "Contrat entièrement versé.",
     planned: "Avance prévue",
+    trancheOf: (n: number, of: number | null) =>
+      of === null ? `Avance n° ${n}` : `Avance ${n}/${of}`,
     // The show whose provisional titles complete the tranche.
-    plannedBy: (show: string) => `Avance déclenchée par « ${show} »`,
-    due: "Tranche déjà complète : avance attendue",
+    plannedBy: (show: string) => `Déclenchée par « ${show} »`,
+    due: "Tranche complète : avance attendue",
     nextUnknown: "Aucune avance prévue avec les émissions planifiées.",
-    edit: "Modifier la règle",
+    received: "Avance reçue",
+    receivedTitle: "Marquer l'avance comme reçue ?",
+    receivedBody: (amount: string) =>
+      `L'avance de ${amount} compte comme versée par The Orchard et sort des prévisions.`,
+    receivedConfirm: "Avance reçue",
+    receivedPending: "Enregistrement…",
+    stale: "Les avances ont changé entre-temps : rechargez la page.",
+    edit: "Modifier le contrat The Orchard",
+    deliveries: {
+      title: "Titres livrés à The Orchard",
+      row: (project: string, release: string | null) =>
+        release ? `${project} · ${release}` : project,
+      sub: (day: string, titles: number) =>
+        `Déposé le ${day} · ${plural(titles, "titre", "titres")}`,
+    },
     form: {
-      title: "Règle The Orchard",
+      title: "Contrat The Orchard",
       description:
-        "L'avance par tranche, les titres d'une tranche, et ceux livrés depuis la dernière avance (à remettre à zéro quand elle arrive).",
+        "Les avances sont versées par tranche de titres livrés, jusqu'au montant du contrat.",
+      contract: "Montant du contrat",
+      contractHint: "Vide : les avances continuent sans limite.",
       tranche: "Avance par tranche",
       per: "Titres par tranche",
-      counted: "Titres livrés depuis la dernière avance",
+      countsFrom: "Début du contrat",
+      countsFromHint:
+        "Les titres déposés dans The Orchard depuis cette date sont comptés par la Distribution.",
+      counted: "Titres livrés hors PDS OS",
+      countedHint:
+        "Avant le début du suivi ici, ou déposés sans passer par la Distribution.",
+      received: "Avances déjà reçues",
       save: "Enregistrer",
       saving: "Enregistrement…",
-      error: "Des nombres positifs.",
+      errors: {
+        contract: "Un montant en euros, ou rien.",
+        tranche: "Indiquez un montant en euros.",
+        per: "Un nombre de 1 à 1 000.",
+        counted: "Un nombre positif.",
+        received: "Un nombre de 0 à 1 000.",
+      },
     },
   },
   shows: {
@@ -192,7 +238,8 @@ export const fundings = {
     overLimit: "Cette dépense dépasserait le crédit disponible.",
   },
   done: {
-    settings: "Règle enregistrée",
+    settings: "Contrat The Orchard enregistré",
+    received: "Avance The Orchard reçue",
     format: "Format créé",
     show: "Émission enregistrée",
     showCancelled: "Émission annulée",

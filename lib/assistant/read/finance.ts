@@ -9,6 +9,7 @@ import {
   readToPay,
   readTreasury,
 } from "@/lib/assistant/read/finance-cash";
+import { readOrchard } from "@/lib/assistant/read/finance-orchard";
 import { readFailed, type ReadResult } from "@/lib/assistant/read/target";
 import { can, type Access } from "@/lib/auth/access";
 import { assistantReadFinance } from "@/lib/i18n/fr/assistant-read-finance";
@@ -21,6 +22,7 @@ export const FINANCE_SUBJECTS = [
   "a_payer",
   "budgets",
   "justificatifs",
+  "the_orchard",
 ] as const;
 type Subject = (typeof FINANCE_SUBJECTS)[number];
 
@@ -43,13 +45,15 @@ export async function readFinance(
       return readBudgets(options.envelope);
     case "justificatifs":
       return readNoProof();
+    case "the_orchard":
+      return readOrchard();
   }
 }
 
 export function financeTool(access: Access) {
   return tool({
     description:
-      "Lit la Finance du label (direction et Finance seulement), calculée par l'application : « tresorerie » = solde du compte, solde prévu, point bas et réserve sur 30, 60 ou 90 jours, et les mouvements qui y mènent ; « encaissements » = entrées d'argent et factures clients en retard (jours de retard, dernière relance) et à venir ; « a_payer » = dépenses à payer d'ici l'horizon ; « budgets » = une enveloppe nommée (projet, artiste ou centre de coût : montant, engagé, reste ou dépassement) ou toutes les enveloppes ; « justificatifs » = dépenses facturées ou payées sans justificatif. À appeler pour « point bas de trésorerie », « factures en retard », « combien il reste sur J4Y », « qu'est-ce qu'on doit payer ce mois-ci ».",
+      "Lit la Finance du label (direction et Finance seulement), calculée par l'application : « tresorerie » = solde du compte, solde prévu, point bas et réserve sur 30, 60 ou 90 jours, et les mouvements qui y mènent ; « encaissements » = entrées d'argent et factures clients en retard (jours de retard, dernière relance) et à venir ; « a_payer » = dépenses à payer d'ici l'horizon ; « budgets » = une enveloppe nommée (projet, artiste ou centre de coût : montant, engagé, reste ou dépassement) ou toutes les enveloppes ; « justificatifs » = dépenses facturées ou payées sans justificatif ; « the_orchard » = le contrat The Orchard : montant, avances reçues et reste, titres livrés (comptés par la Distribution depuis le début du contrat, plus ceux saisis hors PDS OS), combien il en manque pour la prochaine avance, avance attendue, prochaine avance prévue et dépôts comptés. À appeler pour « point bas de trésorerie », « factures en retard », « combien il reste sur J4Y », « qu'est-ce qu'on doit payer ce mois-ci », « combien de sons avant la prochaine avance Orchard ? », « on a touché combien de The Orchard ? ».",
     inputSchema: z.object({
       subject: z.enum(FINANCE_SUBJECTS),
       horizon: z

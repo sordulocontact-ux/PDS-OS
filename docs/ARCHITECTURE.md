@@ -3548,6 +3548,23 @@ disponible » ; « Déplacer une émission de mars à avril doit recalculer inst
   bas) ; Émissions et lives (`ShowsTable` : changer la date, annuler ; formats) ; Pay Later (`DrawsTable`,
   nouvelle ligne de crédit, nouveau tirage depuis une dépense).
 - pgTAP : `finance_fundings.test.sql` (9).
+- **Contrat The Orchard (retour d'Ibé du 16/11/2026)** : « comme un crédit versé en plusieurs fois » (contrat de
+  100 000 €, 25 000 € dès que 12 sons sont livrés), « relié à PO qui sait quand les X sons sont atteints ». Migration
+  `20261116100101_finance_orchard_contract.sql` : `orchard_contract_cents` (total, vide = sans limite),
+  `orchard_counts_from` (début du contrat), `orchard_advances_received` (avances reçues, saisies, jamais remises à
+  zéro) ; `orchard_titles_counted` devient « titres livrés hors PDS OS ». **Comptage par le code**
+  (`finance_orchard_deliveries`, security definer, `read_finance`) : depuis le début du contrat, chaque master
+  déposé dans The Orchard par la Distribution (`distribution_declarations` `deposit` non retirée) compte le jour du
+  premier dépôt encore debout de sa portée, **une seule fois** (un titre sorti seul puis dans la compilation) ;
+  projet simple = ses `project_masters`, sortie d'un titre = son master, compilation = les titres non abandonnés.
+  Les masters sont ceux du projet au moment de la lecture, pas de l'instantané déposé (choix). Calcul
+  (`orchardAdvances`) : tranches = ⌈contrat / avance⌉, la dernière = le reste ; tranches gagnées non reçues =
+  « avance attendue » aujourd'hui (alerte `orchard_due`, geste « Avance reçue » de la carte, garde du nombre vu) ;
+  puis les émissions planifiées jusqu'au total. PO lit tout par `read_finance` sujet `the_orchard`
+  (`lib/assistant/read/finance-orchard.ts`). Sans date de début, rien n'est lu de la Distribution et une ligne
+  existante calcule exactement comme avant. **Hors périmètre** : le recoupement de l'avance sur les revenus
+  (« crédit ») — PDS OS ne lit aucun relevé de redevances The Orchard. pgTAP : 4 tests dans
+  `distribution.test.sql`.
 
 ### Cockpit Finance, lot 6 : rapprochement bancaire (13/11/2026)
 

@@ -22,6 +22,7 @@ import { addDays } from "@/lib/finance/treasury";
 import { loadTreasury } from "@/lib/finance/treasury-queries";
 import { fundings as t } from "@/lib/i18n/fr/fundings";
 import { parisPlace } from "@/lib/utils/calendar-period";
+import { formatShortDay } from "@/lib/utils/day";
 import { formatAmount } from "@/lib/utils/money";
 import { allInOrder } from "@/lib/utils/parallel";
 
@@ -33,7 +34,8 @@ const HORIZON = 90;
 /**
  * Finance › Financements (Ibé's ticket, maquette 7, lot 5), laid out as the
  * proto's page (Sacha 15/11/2026): two cards for the engines (The Orchard's
- * advances and its title count, Pay Later's credit and installments), a
+ * contract, advances and title count, Pay Later's credit and installments),
+ * the titles the Distribution delivered to The Orchard (16/11/2026), a
  * card per show format with its planned shows, then the Pay Later draws
  * (where one entered by mistake is removed) and a line each for the
  * rebillings and the reserve. The engines compute; the Finance enters the
@@ -90,8 +92,8 @@ export default async function FinanceFundingsPage() {
       <div className="grid gap-4 lg:grid-cols-2">
         <OrchardCard
           trancheCents={engines.settings.orchardTrancheCents}
-          counted={engines.settings.orchardTitlesCounted}
           orchard={orchard}
+          canManage={canManage}
         />
         <PayLaterCard
           limitCents={limit}
@@ -126,6 +128,21 @@ export default async function FinanceFundingsPage() {
             </MetricCard>
           ))}
         </div>
+      )}
+      {engines.orchardDeliveries.length > 0 && (
+        <PageSection id="orchard" title={t.orchard.deliveries.title}>
+          <LinkRows
+            rows={engines.orchardDeliveries.map((d) => ({
+              key: `${d.projectId}-${d.release ?? ""}-${d.day}`,
+              href: null,
+              main: t.orchard.deliveries.row(d.project, d.release),
+              sub: t.orchard.deliveries.sub(
+                formatShortDay(d.day, { bare: true }),
+                d.titles,
+              ),
+            }))}
+          />
+        </PageSection>
       )}
       {engines.draws.length > 0 && (
         <PageSection id="pay-later" title={t.payLater.draws}>

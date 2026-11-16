@@ -7,14 +7,34 @@
 export type EngineSettings = {
   orchardTrancheCents: number;
   orchardTitlesPerTranche: number;
-  // Titles delivered since the last advance.
+  // Titles delivered outside PDS OS' Distribution (before the contract was
+  // followed here, or never deposited through it).
   orchardTitlesCounted: number;
+  // The contract's total: the advances stop once it is paid (null: none).
+  orchardContractCents: number | null;
+  // From this day the Distribution's deposits count (null: they do not).
+  orchardCountsFrom: string | null;
+  // The advances The Orchard has paid so far.
+  orchardAdvancesReceived: number;
 };
 
 export const DEFAULT_ENGINE_SETTINGS: EngineSettings = {
   orchardTrancheCents: 5200000,
   orchardTitlesPerTranche: 12,
   orchardTitlesCounted: 0,
+  orchardContractCents: null,
+  orchardCountsFrom: null,
+  orchardAdvancesReceived: 0,
+};
+
+/** A deposit at The Orchard and the titles it delivered for the first time
+ * (finance_orchard_deliveries, since the contract's start). */
+export type OrchardDelivery = {
+  projectId: string;
+  project: string;
+  release: string | null;
+  day: string;
+  titles: number;
 };
 
 export type ShowFormat = {
@@ -60,6 +80,7 @@ export type EngineData = {
   shows: Show[];
   creditLines: CreditLine[];
   draws: CreditDraw[];
+  orchardDeliveries: OrchardDelivery[];
 };
 
 export const EMPTY_ENGINES: EngineData = {
@@ -68,6 +89,7 @@ export const EMPTY_ENGINES: EngineData = {
   shows: [],
   creditLines: [],
   draws: [],
+  orchardDeliveries: [],
 };
 
 /** A move the engines make: an Orchard advance in, a show's cost out, a
@@ -131,31 +153,84 @@ export const liveShows = (data: EngineData) =>
     .filter((s) => !s.cancelled)
     .sort((a, b) => a.plannedOn.localeCompare(b.plannedOn));
 
+/** The contract's tranches: how many (null: no total) and the amount of
+ * the n-th (0-based), the last one being what is left of the total. */
+export function orchardTranches(settings: EngineSettings) {
+  const { orchardTrancheCents: cents, orchardContractCents: total } = settings;
+  const count = total === null || cents <= 0 ? null : Math.ceil(total / cents);
+  const amountOf = (n: number) =>
+    total === null ? cents : Math.max(0, Math.min(cents, total - n * cents));
+  return { count, amountOf };
+}
+
 /**
- * The Orchard advances the planned shows trigger: the titles counted since
- * the last advance, then each show's provisional titles in date order;
- * every time the count reaches a tranche, an advance on that show's day.
+ * The Orchard contract (Ibé, 16/11/2026: « un crédit versé en plusieurs
+ * fois », 25 000 € each time 12 titles are delivered, up to the contract's
+ * total). The titles delivered are those the Distribution deposited since
+ * the contract's start plus those delivered outside PDS OS; each full
+ * tranche not received yet is due today; then each planned show's
+ * provisional titles, in date order, trigger the next ones on its day,
+ * until the total is reached.
  */
 export function orchardAdvances(data: EngineData, today: string) {
-  const { orchardTitlesPerTranche: per, orchardTrancheCents: cents } =
-    data.settings;
+  const { settings } = data;
+  const per = settings.orchardTitlesPerTranche;
+  const { count, amountOf } = orchardTranches(settings);
+  const cap = count ?? Number.POSITIVE_INFINITY;
+  const fromDistribution = data.orchardDeliveries.reduce(
+    (sum, d) => sum + d.titles,
+    0,
+  );
+  const delivered = fromDistribution + settings.orchardTitlesCounted;
+  const received = Math.min(settings.orchardAdvancesReceived, cap);
+  const earned = Math.min(Math.floor(delivered / per), cap);
+  const advances: {
+    day: string;
+    cents: number;
+    show: Show | null;
+    n: number;
+  }[] = [];
+  // Already a full tranche delivered and not received: due now.
+  for (let n = received; n < earned; n++)
+    advances.push({ day: today, cents: amountOf(n), show: null, n });
+  let next = Math.max(earned, received);
+  // The titles delivered toward the next tranche.
+  const counted = next >= cap ? 0 : Math.max(0, delivered - next * per);
+  let pending = counted;
   const formats = new Map(data.formats.map((f) => [f.id, f]));
-  let counted = data.settings.orchardTitlesCounted;
-  const advances: { day: string; cents: number; show: Show | null }[] = [];
-  // Already a full tranche counted: due now.
-  while (counted >= per) {
-    advances.push({ day: today, cents, show: null });
-    counted -= per;
-  }
   for (const show of liveShows(data)) {
-    if (show.plannedOn < today) continue;
-    counted += formats.get(show.formatId)?.provisionalTitles ?? 0;
-    while (counted >= per) {
-      advances.push({ day: show.plannedOn, cents, show });
-      counted -= per;
+    if (show.plannedOn < today || next >= cap) continue;
+    pending += formats.get(show.formatId)?.provisionalTitles ?? 0;
+    while (pending >= per && next < cap) {
+      advances.push({
+        day: show.plannedOn,
+        cents: amountOf(next),
+        show,
+        n: next,
+      });
+      next += 1;
+      pending -= per;
     }
   }
-  return { advances, counted, per };
+  let receivedCents = 0;
+  for (let n = 0; n < received; n++) receivedCents += amountOf(n);
+  return {
+    advances: advances.filter((a) => a.cents > 0),
+    per,
+    counted,
+    delivered,
+    fromDistribution,
+    received,
+    due: Math.max(0, earned - received),
+    tranches: count,
+    contractCents: settings.orchardContractCents,
+    receivedCents,
+    leftCents:
+      settings.orchardContractCents === null
+        ? null
+        : Math.max(0, settings.orchardContractCents - receivedCents),
+    complete: count !== null && received >= count,
+  };
 }
 
 /** Every move the engines make from today up to `until`. */

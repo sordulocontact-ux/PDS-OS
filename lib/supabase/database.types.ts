@@ -22000,6 +22000,9 @@ export type Database = {
       finance_engine_settings: {
         Row: {
           id: string
+          orchard_advances_received: number
+          orchard_contract_cents: number | null
+          orchard_counts_from: string | null
           orchard_titles_counted: number
           orchard_titles_per_tranche: number
           orchard_tranche_cents: number
@@ -22009,6 +22012,9 @@ export type Database = {
         }
         Insert: {
           id?: string
+          orchard_advances_received?: number
+          orchard_contract_cents?: number | null
+          orchard_counts_from?: string | null
           orchard_titles_counted?: number
           orchard_titles_per_tranche?: number
           orchard_tranche_cents?: number
@@ -22018,6 +22024,9 @@ export type Database = {
         }
         Update: {
           id?: string
+          orchard_advances_received?: number
+          orchard_contract_cents?: number | null
+          orchard_counts_from?: string | null
           orchard_titles_counted?: number
           orchard_titles_per_tranche?: number
           orchard_tranche_cents?: number
@@ -24668,6 +24677,16 @@ export type Database = {
           project_id: string
           spent_on: string
           status: string
+        }[]
+      }
+      finance_orchard_deliveries: {
+        Args: never
+        Returns: {
+          delivered_on: string
+          project_id: string
+          project_title: string
+          release_title: string | null
+          titles: number
         }[]
       }
       finance_month_totals: {

@@ -1,11 +1,12 @@
 // « Alertes utiles » of Ibé's ticket « Cockpit Finance » (lot 7): passing
 // under the reserve, a budget at 82 % or over, the due days, a possibly
 // duplicated invoice, a rebillable spend not paid back, a spend on no
-// envelope, the bank to reconcile, the positive impact of moving a show.
+// envelope, the bank to reconcile, an Orchard advance due (16/11/2026), the
+// positive impact of moving a show.
 // Computed from what Finance reads, never stored. Client-safe, pure code.
 
 import { BUDGET_ALERT_SHARE } from "@/lib/finance/cockpit";
-import type { EngineData } from "@/lib/finance/engines";
+import { orchardAdvances, type EngineData } from "@/lib/finance/engines";
 import type { EnvelopeRow } from "@/lib/finance/envelopes";
 import {
   daysLate,
@@ -41,6 +42,7 @@ export type Alert =
   | { kind: "off_budget"; spend: FinanceSpend }
   | { kind: "no_proof"; count: number }
   | { kind: "to_reconcile"; count: number; oldest: string }
+  | { kind: "orchard_due"; count: number; cents: number }
   | {
       kind: "shift";
       showLabel: string;
@@ -240,6 +242,17 @@ export function financeAlerts({
       oldest: waiting[0].bookedOn,
     });
 
+  // A tranche of The Orchard's contract delivered and not received yet.
+  const orchard = orchardAdvances(engines, today);
+  if (orchard.due > 0)
+    alerts.push({
+      kind: "orchard_due",
+      count: orchard.due,
+      cents: orchard.advances
+        .filter((a) => a.show === null)
+        .reduce((sum, a) => sum + a.cents, 0),
+    });
+
   // A show moved a month later that lifts the low point over the reserve.
   if (below && treasury && simulate) {
     for (const show of engines.shows) {
@@ -275,6 +288,7 @@ export const alertCents = (alert: Alert) => {
   switch (alert.kind) {
     case "below_reserve":
     case "late_income":
+    case "orchard_due":
       return alert.cents;
     case "to_pay":
     case "rebill":

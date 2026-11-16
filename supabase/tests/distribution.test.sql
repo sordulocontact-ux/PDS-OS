@@ -5,12 +5,13 @@
 -- lot 4, the declared deposit and answers (20261011100301_distribution_tracking.sql);
 -- lot 5, the platforms (20261011100401_distribution_platforms.sql); lot 6,
 -- anomalies and new versions (20261011100501_distribution_anomalies.sql); lot 7,
--- the closure (20261011100601_distribution_closure.sql).
+-- the closure (20261011100601_distribution_closure.sql). The titles Finance's
+-- Orchard contract counts from the deposits (20261116100101_finance_orchard_contract.sql).
 -- Fixture « Piégée » (simulation): Dioo, PDS Records, sortie 27/11/2026.
 -- Nothing is sent to The Orchard: these tables only keep what people say.
 -- Run with `supabase test db`.
 begin;
-select plan(110);
+select plan(114);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -437,6 +438,42 @@ select is((select array_agg(kind order by kind)::text from public.distribution_e
             where project_id = pg_temp.id_of('project') and kind like 'closure.%'),
           '{closure.closed,closure.closed,closure.proposed,closure.proposed,closure.reopened}',
           'every closure step is in the history');
+
+
+-- The Orchard contract counts the titles deposited since its start (Ibé, 16/11/2026) --
+reset role;
+insert into public.masters (organization_id, title)
+values (pg_temp.id_of('org'), 'Piégée master ' || (select v from vars where k = 'tag'));
+insert into public.project_masters (organization_id, project_id, master_id, position)
+select pg_temp.id_of('org'), pg_temp.id_of('project'), id,
+       coalesce((select max(position) from public.project_masters
+                  where project_id = pg_temp.id_of('project')), 0) + 1
+  from public.masters where title = 'Piégée master ' || (select v from vars where k = 'tag');
+insert into public.finance_engine_settings (organization_id, orchard_counts_from)
+values (pg_temp.id_of('org'), current_date - 1)
+on conflict (organization_id) do update set orchard_counts_from = current_date - 1;
+select pg_temp.act_as(pg_temp.id_of('director'));
+select is((select titles from public.finance_orchard_deliveries()
+            where project_id = pg_temp.id_of('project')),
+          (select count(*)::int from public.project_masters where project_id = pg_temp.id_of('project')),
+          'the Finance counts the titles of a deposit since the contract''s start');
+select is((select delivered_on from public.finance_orchard_deliveries()
+            where project_id = pg_temp.id_of('project')),
+          (select coalesce(declared_on, (declared_at at time zone 'Europe/Paris')::date)
+             from public.distribution_declarations
+            where project_id = pg_temp.id_of('project') and kind = 'deposit' and withdrawn_at is null
+            order by declared_at limit 1),
+          'on the day of its first deposit still standing');
+select pg_temp.act_as(pg_temp.id_of('manager'));
+select is((select count(*)::int from public.finance_orchard_deliveries()), 0,
+          'nothing for whoever does not read Finance');
+reset role;
+update public.finance_engine_settings set orchard_counts_from = current_date + 1
+ where organization_id = pg_temp.id_of('org');
+select pg_temp.act_as(pg_temp.id_of('director'));
+select is((select count(*)::int from public.finance_orchard_deliveries()
+            where project_id = pg_temp.id_of('project')), 0,
+          'a deposit before the contract''s start does not count');
 
 select * from finish();
 rollback;
