@@ -86,7 +86,10 @@ export async function ReservesStep({ ctx }: { ctx: ReviewContext }) {
               viewer.personId !== null &&
               viewer.personId === r.followUp.personId;
             return (
-              <li key={r.id} className="flex flex-col gap-3 px-4 py-3.5">
+              <li
+                key={r.id}
+                className="flex flex-col gap-3 px-4 py-3.5 modern:py-4"
+              >
                 <div className="flex items-start gap-3">
                   <div className="flex min-w-0 flex-1 flex-col">
                     <span className="text-[length:var(--type-micro)] leading-[var(--type-micro-lh)] text-[color:var(--text-tertiary)]">

@@ -1,6 +1,7 @@
 "use client";
 
 import { FieldError } from "@/components/auth/form-message";
+import { useDesignStyle } from "@/components/shell/use-design-style";
 import { Button } from "@/components/ui/button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import {
@@ -39,10 +40,11 @@ export function SheetActions({
   newVersion: number | null;
 }) {
   const { pending, error, run } = useWriteSubmit(() => undefined, "");
+  const modern = useDesignStyle() === "modern";
   if (!submit && !transfer && newVersion === null) return null;
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex flex-wrap items-center gap-2.5">
+      <div className="flex flex-wrap items-center gap-2.5 modern:gap-2">
         {submit && (
           <Button
             size="sm"
@@ -60,6 +62,8 @@ export function SheetActions({
         {transfer && (
           <Button
             size="sm"
+            // One black action per screen in the new style.
+            variant={modern && submit ? "outline" : "default"}
             disabled={pending}
             onClick={() =>
               run(() => transferSheet({ projectId, sheetId, title }))

@@ -152,7 +152,7 @@ function ReadAnswer({
     ? formatShortDay(question.answeredAt, { bare: true })
     : "";
   return (
-    <div className="flex flex-col gap-2.5">
+    <div className="flex flex-col gap-2.5 modern:gap-2">
       {pending && (
         <ToneCallout tone="info">
           {a.answered(question.askedTo.name, day)}

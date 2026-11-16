@@ -93,7 +93,7 @@ function IncidentItem({
     { label: t.resolution, value: i.resolution },
   ].filter((d) => d.value !== null);
   return (
-    <li className="flex flex-col gap-3 px-4 py-3.5">
+    <li className="flex flex-col gap-3 px-4 py-3.5 modern:py-4">
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 flex-col gap-2">
           <span className="text-sm font-semibold break-words">{i.title}</span>

@@ -81,7 +81,7 @@ export function StrategyDocumentRows({
   );
   return (
     <StepSection title={t.documents}>
-      <div className="flex flex-col gap-2.5">
+      <div className="flex flex-col gap-2.5 modern:gap-2">
         <DocumentCard
           name={t.brief(approved.version)}
           line={t.briefFor}

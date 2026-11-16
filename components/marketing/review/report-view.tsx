@@ -41,7 +41,7 @@ export function ReportView({
     snapshot.activations.find((a) => a.id === id)?.title ?? "";
 
   return (
-    <div className="flex flex-col gap-3.5">
+    <div className="flex flex-col gap-3.5 modern:gap-4">
       {has("summary") && (
         <StepSection id="summary" title={t.sections.summary}>
           <p className="text-body-sm whitespace-pre-line">

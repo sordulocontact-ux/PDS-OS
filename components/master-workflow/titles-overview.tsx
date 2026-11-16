@@ -1,4 +1,4 @@
-import { StatTiles } from "@/components/ui/stat-tiles";
+import { StatCards } from "@/components/ui/stat-cards";
 import { RequestFilesButton } from "@/components/master-workflow/file-requests/request-files-button";
 import { masterJourney } from "@/lib/i18n/fr/master-journey";
 import { loadFileRequestRecipients } from "@/lib/master-workflow/file-requests";
@@ -41,7 +41,7 @@ export async function TitlesOverview({
       : [];
   return (
     <section aria-label={t.label} className="flex flex-col gap-3">
-      <StatTiles
+      <StatCards
         stats={titleWaitings(projectId, scope).map((w) => {
           // « dont N demandés » takes a name's room (close heights).
           const shown = w.requested > 0 ? SHOWN - 1 : SHOWN;

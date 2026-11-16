@@ -63,7 +63,7 @@ export function DeliverableItem({
   const name = deliverableTitle(d.title, d.quantity);
   return (
     // A row of the lever's `Rows` (its frame and hairlines).
-    <li className="flex flex-wrap items-start justify-between gap-3 px-3.5 py-3">
+    <li className="flex flex-wrap items-start justify-between gap-3 px-3.5 py-3 modern:px-3">
       <div className="flex min-w-0 items-start gap-3">
         {canEdit && onToggle && (
           <Checkbox

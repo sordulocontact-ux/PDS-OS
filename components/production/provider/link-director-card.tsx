@@ -45,7 +45,7 @@ export function linkDirectorCard(
               {list.map((d) => (
                 <li
                   key={`${d.name}-${d.proposedAt}`}
-                  className="flex flex-wrap items-start justify-between gap-2 rounded-lg bg-[var(--surface-soft)] px-3 py-2.5"
+                  className="flex flex-wrap items-start justify-between gap-2 rounded-lg bg-[var(--surface-soft)] px-3 py-2.5 modern:py-3"
                 >
                   <span className="flex min-w-0 flex-1 flex-col gap-0.5 break-words">
                     <span>

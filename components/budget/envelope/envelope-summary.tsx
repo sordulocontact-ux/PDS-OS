@@ -1,4 +1,4 @@
-import { StatTiles } from "@/components/ui/stat-tiles";
+import { StatCards } from "@/components/ui/stat-cards";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { EnvelopeView } from "@/lib/budget/envelope";
 import { formatEuros } from "@/lib/budget/types";
@@ -22,7 +22,7 @@ export function EnvelopeSummary({
   const t = fr.artistBudget.tiles;
   return (
     <div className="flex flex-col gap-3">
-      <StatTiles
+      <StatCards
         columns={4}
         stats={[
           { label: t.amount, value: formatEuros(amountCents) },

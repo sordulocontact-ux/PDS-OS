@@ -158,7 +158,7 @@ export function UnlaunchedOverview({
 
       <section
         aria-labelledby="handover-title"
-        className="flex flex-col gap-3.5"
+        className="flex flex-col gap-3.5 modern:gap-3"
       >
         <h2 id="handover-title" className={factBlockTitleClass}>
           {title}

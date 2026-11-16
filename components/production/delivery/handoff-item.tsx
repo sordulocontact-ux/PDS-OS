@@ -38,7 +38,7 @@ export function HandoffItem({
   const version =
     h.versionNumber !== null ? t.versionValue(h.versionNumber) : null;
   return (
-    <li className="flex flex-col gap-2 px-4 py-3.5">
+    <li className="flex flex-col gap-2 px-4 py-3.5 modern:py-4">
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 flex-col gap-0.5">
           {deliverable && (

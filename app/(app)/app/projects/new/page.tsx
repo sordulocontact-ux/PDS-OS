@@ -3,8 +3,7 @@ import { redirect } from "next/navigation";
 import { FormMessage } from "@/components/auth/form-message";
 import { CreateProjectForm } from "@/components/projects/create-project-form";
 import { BackLink } from "@/components/shell/back-link";
-import { PageContainer } from "@/components/shell/page-container";
-import { PageHeader } from "@/components/shell/page-header";
+import { SectionFrame } from "@/components/shell/section-frame";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
@@ -84,26 +83,30 @@ export default async function NewProjectPage({
   const holder = !direction ? (collective?.holder ?? null) : null;
 
   return (
-    <PageContainer className="max-w-2xl">
-      <BackLink
-        href={
-          fromSelection
-            ? routes.artistSelection(fromSelection.id)
+    <SectionFrame
+      list={false}
+      className="max-w-2xl"
+      title={t.title}
+      description={holder ? t.collective.subtitle : t.subtitle}
+      above={
+        <BackLink
+          href={
+            fromSelection
+              ? routes.artistSelection(fromSelection.id)
+              : fromMaster
+                ? routes.master(fromMaster.id)
+                : routes.projects
+          }
+        >
+          {fromSelection
+            ? t.collective.backToSelection(fromSelection.name)
             : fromMaster
-              ? routes.master(fromMaster.id)
-              : routes.projects
-        }
-      >
-        {fromSelection
-          ? t.collective.backToSelection(fromSelection.name)
-          : fromMaster
-            ? fr.catalog.master.backTo(fromMaster.title)
-            : fr.shell.project.back}
-      </BackLink>
-      <PageHeader
-        title={t.title}
-        description={holder ? t.collective.subtitle : t.subtitle}
-      />
+              ? fr.catalog.master.backTo(fromMaster.title)
+              : fr.shell.project.back}
+        </BackLink>
+      }
+    >
+      {" "}
       {draftId && !draft && direction && (
         <FormMessage kind="error">{t.draft.notFound}</FormMessage>
       )}
@@ -151,6 +154,6 @@ export default async function NewProjectPage({
                 : { title: "", type: null, masterIds: [] }
         }
       />
-    </PageContainer>
+    </SectionFrame>
   );
 }

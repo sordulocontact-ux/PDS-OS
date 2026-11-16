@@ -67,7 +67,7 @@ export function DeadlineLines({
                 disabled={!editable}
                 onClick={() => setEditing(d)}
                 className={cn(
-                  "-mx-3 grid w-[calc(100%+1.5rem)] gap-1 rounded-lg px-3 py-2.5 text-left sm:grid-cols-[14rem_minmax(0,1fr)] sm:gap-4",
+                  "-mx-3 grid w-[calc(100%+1.5rem)] gap-1 rounded-lg px-3 py-2.5 text-left sm:grid-cols-[14rem_minmax(0,1fr)] sm:gap-4 modern:py-3",
                   editable &&
                     "hover:bg-[var(--control-bg-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
                 )}

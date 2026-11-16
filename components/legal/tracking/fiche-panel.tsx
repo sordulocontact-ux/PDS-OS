@@ -150,7 +150,7 @@ export function FichePanel({
     row.state === "revoked"
   )
     return (
-      <div className="flex flex-col gap-3.5">
+      <div className="flex flex-col gap-3.5 modern:gap-4">
         <StepSection title={p.known}>
           <KnownRows row={row} />
         </StepSection>
@@ -184,7 +184,7 @@ export function FichePanel({
   // A complement asked: the person answers on their link (JUR-06).
   if (row.state === "action_required" && row.complement)
     return (
-      <div className="flex flex-col gap-3.5">
+      <div className="flex flex-col gap-3.5 modern:gap-4">
         <ToneCallout tone="info">
           {p.waitingComplement(
             row.name,
@@ -205,7 +205,7 @@ export function FichePanel({
     const validate = (accept: boolean) =>
       decide(() => reviewLegalForm(projectId, row.formId!, accept));
     return (
-      <div className="flex flex-col gap-3.5">
+      <div className="flex flex-col gap-3.5 modern:gap-4">
         {corrections.length > 0 && (
           <StepSection title={p.corrections}>
             <FactRows>
@@ -257,7 +257,7 @@ export function FichePanel({
   }
 
   return (
-    <div className="flex flex-col gap-3.5">
+    <div className="flex flex-col gap-3.5 modern:gap-4">
       <ToneCallout tone="success">
         <span className="font-medium">{p.complete}</span> — {p.completeBody}
       </ToneCallout>

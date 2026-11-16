@@ -51,6 +51,7 @@ export function ProjectsBrowser({
   rights,
   archivedHref,
   liveHref,
+  pageAction,
 }: {
   projects: ProjectListItem[];
   drafts: ProjectDraftItem[];
@@ -60,6 +61,8 @@ export function ProjectsBrowser({
   rights: RecordRights;
   archivedHref: string;
   liveHref: string;
+  // The page's action, at the end of the views' line in the new style.
+  pageAction?: React.ReactNode;
 }) {
   const t = fr.shell.projects;
   const f = t.filters;
@@ -231,7 +234,11 @@ export function ProjectsBrowser({
   ];
 
   return (
-    <DataTableViews label={fr.records.view.label} views={tabs}>
+    <DataTableViews
+      label={fr.records.view.label}
+      views={tabs}
+      pageAction={pageAction}
+    >
       <ListToolbar
         search={
           <SearchField

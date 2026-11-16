@@ -106,7 +106,7 @@ function Row({
       : fr.legal.plan.noPrereq,
   ].filter(Boolean);
   return (
-    <li className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2 px-3.5 py-3">
+    <li className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2 px-3.5 py-3 modern:px-4">
       <div className="flex min-w-0 flex-1 basis-72 flex-col gap-0.5">
         <span className="text-[length:var(--type-micro)] leading-[var(--type-micro-lh)] text-[color:var(--text-secondary)]">
           {fr.legal.plan.groups[demarche.items[0]?.kind ?? "contract"]} ·{" "}

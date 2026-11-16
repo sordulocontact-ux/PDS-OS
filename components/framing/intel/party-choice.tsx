@@ -108,7 +108,10 @@ export function PartyChoice({
   );
 
   return (
-    <div className="flex flex-col gap-2.5" aria-busy={pending || undefined}>
+    <div
+      className="flex flex-col gap-2.5 modern:gap-2"
+      aria-busy={pending || undefined}
+    >
       <SegmentedControl<DocumentStatus>
         aria-label={t.statusFor(line.name)}
         options={statuses.map((value) => ({

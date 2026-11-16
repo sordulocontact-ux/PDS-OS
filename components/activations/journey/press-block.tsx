@@ -3,7 +3,7 @@ import { MessagesSection } from "@/components/activations/messages/messages-sect
 import { PrepareDraftsButton } from "@/components/activations/press/prepare-drafts-button";
 import { PressTarget } from "@/components/activations/press/press-target";
 import { AddTargetButton } from "@/components/activations/targets/add-target-button";
-import { StatTiles } from "@/components/ui/stat-tiles";
+import { StatCards } from "@/components/ui/stat-cards";
 import { VersionCard } from "@/components/ui/version-card";
 import type { ActivationFiche } from "@/lib/activations/fiche";
 import { loadActivationFiles } from "@/lib/activations/files/queries";
@@ -174,7 +174,7 @@ export async function PressBlock({
         />
       </div>
       <h4 className="pt-2 font-semibold">{t.report}</h4>
-      <StatTiles
+      <StatCards
         columns={4}
         stats={[
           { label: t.tiles.targets, value: String(targets.length) },

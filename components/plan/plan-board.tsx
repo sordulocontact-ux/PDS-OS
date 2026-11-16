@@ -352,7 +352,7 @@ export function PlanBoard({
       {removed.length > 0 && (
         <section
           aria-labelledby="plan-removed"
-          className="flex flex-col gap-2 border-t border-[color:var(--border-hairline)] pt-3.5"
+          className="flex flex-col gap-2 border-t border-[color:var(--border-hairline)] pt-3.5 modern:pt-3"
         >
           <h4 id="plan-removed" className="font-semibold">
             {t.removedTitle}

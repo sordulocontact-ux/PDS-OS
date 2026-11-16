@@ -42,7 +42,7 @@ export function RecapForm({
   return (
     <form
       noValidate
-      className="flex flex-col gap-3 rounded-xl bg-[var(--surface-soft)] p-3.5"
+      className="flex flex-col gap-3 rounded-xl bg-[var(--surface-soft)] p-3.5 modern:p-4"
       onSubmit={(event) => {
         event.preventDefault();
         const text = String(

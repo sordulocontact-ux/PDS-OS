@@ -38,7 +38,7 @@ export function LightControlForm({
         if (all) run(() => confirmLightCheck({ projectId, sheetId }));
       }}
     >
-      <fieldset className="flex flex-col gap-2.5">
+      <fieldset className="flex flex-col gap-2.5 modern:gap-2">
         <legend className="mb-1 font-semibold">{t.manual}</legend>
         {points.map((p, i) => (
           <CheckboxField

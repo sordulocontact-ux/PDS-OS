@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 const rowClass = (selected: boolean) =>
   cn(
-    "-mx-3 flex w-[calc(100%+1.5rem)] items-start gap-3 rounded-lg px-3 py-2.5 text-left text-body-lg font-semibold text-foreground transition-[background-color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] outline-none hover:bg-[var(--control-bg-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-40",
+    "-mx-3 flex w-[calc(100%+1.5rem)] items-start gap-3 rounded-lg px-3 py-2.5 modern:py-3 text-left text-body-lg font-semibold text-foreground transition-[background-color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] outline-none hover:bg-[var(--control-bg-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-40",
     selected && "bg-[var(--surface-sunken)] hover:bg-[var(--surface-sunken)]",
   );
 

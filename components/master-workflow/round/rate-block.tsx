@@ -73,7 +73,7 @@ export function RateBlock({
               )
             }
           >
-            <div className="flex flex-col gap-3 p-3.5">
+            <div className="flex flex-col gap-3 p-3.5 modern:p-4">
               <div className="flex flex-wrap items-center gap-3">
                 <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                   <b className="text-[length:var(--type-body-lg)] leading-[var(--type-body-lg-lh)] font-semibold tabular-nums">

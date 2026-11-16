@@ -52,7 +52,12 @@ export function PlanColumns({
           />
         )}
       </div>
-      <div className={cn("flex min-w-0 flex-col gap-2.5", !last && "pb-6")}>
+      <div
+        className={cn(
+          "flex min-w-0 flex-col gap-2.5 modern:gap-2",
+          !last && "pb-6",
+        )}
+      >
         {content}
       </div>
     </li>
@@ -65,7 +70,7 @@ export function PlanColumns({
           index === groups.length - 1 && !targetDate,
           <section
             aria-labelledby={`plan-${column}`}
-            className="flex min-w-0 flex-col gap-2.5"
+            className="flex min-w-0 flex-col gap-2.5 modern:gap-2"
           >
             <h4
               id={`plan-${column}`}
@@ -78,7 +83,7 @@ export function PlanColumns({
             </h4>
             <ul
               className={cn(
-                "grid gap-2.5",
+                "grid gap-2.5 modern:gap-2",
                 column !== "anticipate" && "@xl:grid-cols-2",
               )}
             >

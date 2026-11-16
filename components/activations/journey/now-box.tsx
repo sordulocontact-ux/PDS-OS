@@ -56,7 +56,7 @@ export function NowBox({
     <section
       id="now"
       aria-label={t.title}
-      className="flex scroll-mt-5 flex-col gap-2.5 rounded-xl bg-[var(--surface-soft)] p-4"
+      className="flex scroll-mt-5 flex-col gap-2.5 rounded-xl bg-[var(--surface-soft)] p-4 modern:gap-2"
     >
       <h3 className="text-[length:var(--type-body-sm)] font-semibold text-[color:var(--text-tertiary)]">
         {t.title}

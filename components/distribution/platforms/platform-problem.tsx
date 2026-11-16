@@ -91,7 +91,7 @@ export function PlatformProblem({
     );
   };
   return (
-    <div className="flex flex-col gap-2.5">
+    <div className="flex flex-col gap-2.5 modern:gap-2">
       <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
         {t.problemBody}
       </p>

@@ -9,7 +9,7 @@ const t = fr.activationJourney.derived;
  * counted, what is missing, and that no single link stands for it all. */
 export function DerivedProofBox({ proof }: { proof: DerivedProof }) {
   return (
-    <div className="flex flex-col gap-2 rounded-xl border border-[color:var(--border-hairline)] bg-card p-3.5">
+    <div className="flex flex-col gap-2 rounded-xl border border-[color:var(--border-hairline)] bg-card p-3.5 modern:p-4">
       <h4 className="text-[length:var(--type-body-sm)] font-semibold">
         {t.title}
       </h4>

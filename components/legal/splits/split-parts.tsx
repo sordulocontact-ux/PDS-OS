@@ -54,7 +54,7 @@ export function SplitParts({
       {rows.map((row) => (
         <div
           key={row.id}
-          className="grid grid-cols-[minmax(0,1fr)_8rem] items-start gap-3 border-b border-[color:var(--border-hairline)] px-3.5 py-2.75"
+          className="grid grid-cols-[minmax(0,1fr)_8rem] items-start gap-3 border-b border-[color:var(--border-hairline)] px-3.5 py-2.75 modern:px-4 modern:py-3"
         >
           <span className="flex min-w-0 flex-col gap-0.5 pt-2">
             <label htmlFor={row.id} className="font-semibold break-words">
@@ -91,7 +91,7 @@ export function SplitParts({
           </div>
         </div>
       ))}
-      <div className="flex flex-col gap-1 px-3.5 py-2.75">
+      <div className="flex flex-col gap-1 px-3.5 py-2.75 modern:px-4 modern:py-3">
         <span
           aria-live="polite"
           className={cn(

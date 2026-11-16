@@ -28,7 +28,7 @@ export function ModuleLine({
 }) {
   const who = action.who;
   return (
-    <div className="flex items-center gap-2.5 rounded-lg bg-card px-3 py-2.5 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)]">
+    <div className="flex items-center gap-2.5 rounded-lg bg-card px-3 py-2.5 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] modern:gap-2 modern:py-3">
       <span
         aria-hidden
         className="grid size-6 shrink-0 place-items-center rounded-full bg-[var(--surface-sunken)] text-[length:var(--type-micro)] leading-[var(--type-micro-lh)] font-semibold"

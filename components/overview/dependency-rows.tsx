@@ -13,7 +13,7 @@ export function DependencyRows({ deps }: { deps: OverviewDependency[] }) {
   if (deps.length === 0) return null;
   return (
     <ContentCard title={t.title} quietTitle className="p-6">
-      <ul className="flex flex-col gap-3.5">
+      <ul className="flex flex-col gap-3.5 modern:gap-3">
         {deps.map((dep) => (
           <li
             key={dep.key}

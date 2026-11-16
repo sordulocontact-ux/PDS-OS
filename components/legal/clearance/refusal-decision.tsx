@@ -43,7 +43,7 @@ function Choice({
   return (
     <form
       noValidate
-      className="flex flex-col gap-3 rounded-xl border border-[color:var(--border-hairline)] bg-card p-3.5"
+      className="flex flex-col gap-3 rounded-xl border border-[color:var(--border-hairline)] bg-card p-3.5 modern:p-4"
       onSubmit={(event) => {
         event.preventDefault();
         setTried(true);

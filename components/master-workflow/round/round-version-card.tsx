@@ -100,7 +100,7 @@ export function RoundVersionCard({
         ) : null
       }
     >
-      <div className="flex flex-col gap-3 p-3.5">
+      <div className="flex flex-col gap-3 p-3.5 modern:p-4">
         <AudioFile
           label={t.versions.name(label, v.number)}
           name={v.fileName}

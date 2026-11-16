@@ -147,7 +147,7 @@ export function PlanForm({
   );
 
   return (
-    <div className="flex flex-col gap-3.5">
+    <div className="flex flex-col gap-3.5 modern:gap-4">
       {section(true)}
       {section(false)}
       <Fold

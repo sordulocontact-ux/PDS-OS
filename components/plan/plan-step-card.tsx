@@ -60,8 +60,8 @@ export function PlanStepCard({
       className={cn(
         "flex min-w-0 scroll-mt-24 flex-col gap-3",
         muted
-          ? "rounded-lg bg-[var(--surface-soft)] px-3.5 py-2.5"
-          : "rounded-xl border border-[color:var(--border-hairline)] bg-card p-3.5",
+          ? "rounded-lg bg-[var(--surface-soft)] px-3.5 py-2.5 modern:px-3 modern:py-3"
+          : "rounded-xl border border-[color:var(--border-hairline)] bg-card p-3.5 modern:p-4",
       )}
     >
       <div className="flex items-start justify-between gap-3">

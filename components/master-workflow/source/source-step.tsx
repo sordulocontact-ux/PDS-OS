@@ -99,7 +99,7 @@ function TitleSource({
             line={t.stems.value(title.stems.count, title.stems.latest)}
             icon={IconDisc}
           >
-            <div className="p-3.5 empty:hidden">
+            <div className="p-3.5 empty:hidden modern:p-4">
               <SourceAudioFile
                 name={title.newer.fileName}
                 listenUrl={title.newer.listenUrl}
@@ -138,7 +138,7 @@ function TitleSource({
           )}
           icon={IconDisc}
         >
-          <div className="p-3.5 empty:hidden">
+          <div className="p-3.5 empty:hidden modern:p-4">
             <SourceAudioFile
               name={current.fileName}
               listenUrl={current.version?.listenUrl ?? null}

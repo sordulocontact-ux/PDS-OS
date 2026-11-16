@@ -1,4 +1,4 @@
-import { StatTiles } from "@/components/ui/stat-tiles";
+import { StatCards } from "@/components/ui/stat-cards";
 import { formatEuros } from "@/lib/budget/types";
 import { marketingReview } from "@/lib/i18n/fr/marketing-review";
 import {
@@ -63,7 +63,7 @@ export function DashboardFigures({
             </div>
           )}
           {!(group === "budget" && budgetRestricted) && (
-            <StatTiles
+            <StatCards
               columns={FIGURE_GROUPS[group].length === 5 ? 5 : 4}
               stats={FIGURE_GROUPS[group].map((key) => ({
                 label: t.figures[key],

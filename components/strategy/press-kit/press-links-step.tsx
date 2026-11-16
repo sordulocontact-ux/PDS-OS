@@ -62,7 +62,7 @@ export function PressLinksStep({
               {links.map((link) => (
                 <li
                   key={link.url}
-                  className="flex items-center justify-between gap-3 px-3.5 py-3"
+                  className="flex items-center justify-between gap-3 px-3.5 py-3 modern:px-3"
                 >
                   <span className="flex min-w-0 flex-col">
                     <span className="font-semibold">{link.label}</span>
@@ -136,7 +136,7 @@ export function PressLinksStep({
             {contacts.map((c, i) => (
               <li
                 key={`${c.name}-${i}`}
-                className="flex items-center justify-between gap-3 px-3.5 py-3"
+                className="flex items-center justify-between gap-3 px-3.5 py-3 modern:px-3"
               >
                 <span className="flex min-w-0 flex-col">
                   <span className="font-semibold">{c.name}</span>

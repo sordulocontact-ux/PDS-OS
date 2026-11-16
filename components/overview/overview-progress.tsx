@@ -55,7 +55,7 @@ export function OverviewProgress(
           return (
             <li
               key={step.key}
-              className="relative grid grid-cols-[1.375rem_minmax(0,1fr)] gap-3.5 pb-4 last:pb-0"
+              className="relative grid grid-cols-[1.375rem_minmax(0,1fr)] gap-3.5 pb-4 last:pb-0 modern:gap-3"
             >
               {index < steps.length - 1 && (
                 <span
@@ -131,7 +131,7 @@ function StepMark({ state }: { state: State }) {
 function WorkflowRows({ cards }: { cards: WorkflowCard[] }) {
   const t = fr.projectShell.overview.progress;
   const line =
-    "grid grid-cols-[1.5rem_minmax(0,1fr)_1rem] items-center gap-3.5 px-2 py-2.5";
+    "grid grid-cols-[1.5rem_minmax(0,1fr)_1rem] items-center gap-3.5 modern:gap-3 px-2 py-2.5 modern:py-3";
   return (
     <ul className="-mx-2 flex flex-col gap-1">
       {cards.map((card) => {

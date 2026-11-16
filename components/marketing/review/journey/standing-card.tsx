@@ -43,9 +43,9 @@ export function StandingCard({
   return (
     <section
       aria-labelledby="review-standing"
-      className="flex min-w-0 flex-col gap-3.5 rounded-2xl border border-[color:var(--border-hairline)] bg-card p-5"
+      className="flex min-w-0 flex-col gap-3.5 rounded-2xl border border-[color:var(--border-hairline)] bg-card p-5 modern:gap-4"
     >
-      <div className="flex flex-wrap items-center justify-between gap-2.5">
+      <div className="flex flex-wrap items-center justify-between gap-2.5 modern:gap-2">
         <h2
           id="review-standing"
           className="text-[length:var(--type-body-xl)] leading-[var(--type-body-xl-lh)] font-medium"

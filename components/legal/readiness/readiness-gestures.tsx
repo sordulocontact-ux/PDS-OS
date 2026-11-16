@@ -64,7 +64,7 @@ export function SacemPolicyToggle({
 }) {
   const [pending, startTransition] = useTransition();
   return (
-    <label className="flex w-fit items-center gap-2.5 text-[length:var(--type-body-sm)] font-medium">
+    <label className="flex w-fit items-center gap-2.5 text-[length:var(--type-body-sm)] font-medium modern:gap-2">
       <Checkbox
         checked={sacemBlocks}
         disabled={pending}

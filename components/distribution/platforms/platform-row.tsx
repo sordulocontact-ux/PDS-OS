@@ -105,7 +105,7 @@ export function PlatformRow({
   };
 
   return (
-    <div className="flex flex-col gap-2 border-b border-[color:var(--border-hairline)] px-3.5 py-3 last:border-b-0">
+    <div className="flex flex-col gap-2 border-b border-[color:var(--border-hairline)] px-3.5 py-3 last:border-b-0 modern:px-4">
       <div className="flex flex-wrap items-center gap-2">
         <b className="font-semibold">{line.name}</b>
         {line.extra && (

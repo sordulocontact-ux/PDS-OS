@@ -102,7 +102,7 @@ export function DimensionGroup({
   const saysEmpty = empty && view.key === "levers";
   const adds = canEdit && view.canAdd && !listed;
   const after = (saysEmpty || view.budget || extra || details || adds) && (
-    <div className="flex flex-col gap-5 border-t border-[color:var(--border-hairline)] px-3.5 py-4 first:border-t-0">
+    <div className="flex flex-col gap-5 border-t border-[color:var(--border-hairline)] px-3.5 py-4 first:border-t-0 modern:px-3">
       {saysEmpty && (
         <p className="text-caption text-muted-foreground">
           {exchange ? fr.decisions.proposal.nothingSaid : t.nothingYet}

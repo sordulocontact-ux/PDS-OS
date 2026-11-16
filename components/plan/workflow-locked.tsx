@@ -44,7 +44,7 @@ export function WorkflowLocked({
         status={{ label: t.status.notStarted, tone: "neutral" }}
       />
       <ContentCard label={body}>
-        <p className="flex items-start gap-2.5 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)]">
+        <p className="flex items-start gap-2.5 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] modern:gap-2">
           <IconLock aria-hidden className="mt-0.5 size-3.5 shrink-0" />
           {body}
         </p>

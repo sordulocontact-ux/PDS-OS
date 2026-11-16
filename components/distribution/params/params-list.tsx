@@ -67,7 +67,7 @@ export function ParamsList({
   };
 
   return (
-    <div className="flex flex-col gap-3.5">
+    <div className="flex flex-col gap-3.5 modern:gap-4">
       <FactRows>
         {PARAM_KEYS.filter(
           (key) => !(key === "cover" && data.coverFromTitle),

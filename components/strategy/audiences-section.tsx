@@ -37,7 +37,7 @@ export function AudiencesSection({
   const [editing, setEditing] = useState<string | null>(null);
   const [adding, setAdding] = useState<string | null>(null);
 
-  const row = "flex flex-col gap-1.5 px-3.5 py-3";
+  const row = "flex flex-col gap-1.5 px-3.5 modern:px-3 py-3";
   const label = "text-[color:var(--text-secondary)]";
   const toFill = (
     <span className="text-[color:var(--text-tertiary)]">{t.toFill}</span>
@@ -52,7 +52,11 @@ export function AudiencesSection({
         <Rows label={t.title}>
           {audiences.map((a) =>
             editing === a.id ? (
-              <li key={a.id} id={`audience-${a.id}`} className="p-3.5">
+              <li
+                key={a.id}
+                id={`audience-${a.id}`}
+                className="p-3.5 modern:p-4"
+              >
                 <AudienceForm
                   projectId={projectId}
                   audience={a}
@@ -109,7 +113,7 @@ export function AudiencesSection({
             ),
           )}
           {canEdit && adding !== null && (
-            <li id="audience-new" className="p-3.5">
+            <li id="audience-new" className="p-3.5 modern:p-4">
               <AudienceForm
                 projectId={projectId}
                 audience={null}

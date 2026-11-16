@@ -30,7 +30,7 @@ export function LinkTaskRow({
 }) {
   const { pending, run } = useLinkSubmit();
   return (
-    <li className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-[var(--surface-soft)] px-3 py-2.5">
+    <li className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-[var(--surface-soft)] px-3 py-2.5 modern:py-3">
       <span className="flex min-w-0 flex-1 flex-col">
         <span>{title}</span>
         <span className="text-caption text-[color:var(--text-tertiary)]">

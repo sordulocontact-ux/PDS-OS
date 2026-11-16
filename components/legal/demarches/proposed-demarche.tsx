@@ -17,7 +17,7 @@ export function ProposedDemarche({ demarche }: { demarche: Demarche }) {
   const who = (by: string) =>
     by === "them" ? demarche.subject : (t.who[by] ?? t.owner);
   return (
-    <div className="flex flex-col gap-3.5">
+    <div className="flex flex-col gap-3.5 modern:gap-4">
       <ToneCallout tone="info">{t.note}</ToneCallout>
       <StepSection title={t.comes}>
         <ol className="flex flex-col gap-1.5 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)]">

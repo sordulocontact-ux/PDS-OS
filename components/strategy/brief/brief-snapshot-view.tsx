@@ -104,7 +104,7 @@ export function BriefSnapshotView({
             ),
           }))}
         />
-        <div className="border-t border-[color:var(--border-hairline)] py-3.5">
+        <div className="border-t border-[color:var(--border-hairline)] py-3.5 modern:py-3">
           <Fold summary={s.details}>
             {snapshot.sections.map((section, index) => {
               const name = fr.strategyPilot.dimensions[section.dimension];

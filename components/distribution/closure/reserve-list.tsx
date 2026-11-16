@@ -37,7 +37,7 @@ export function ReserveList({
 }) {
   const open = rows.filter((r) => r.status !== "lifted").length;
   return (
-    <section className="flex flex-col gap-2.5">
+    <section className="flex flex-col gap-2.5 modern:gap-2">
       <h3 className="text-[length:var(--type-body-md)] font-semibold">
         {t.reserves}
       </h3>
@@ -50,7 +50,7 @@ export function ReserveList({
         {rows.map((r) => (
           <li
             key={r.id}
-            className="flex flex-col gap-2 border-b border-[color:var(--border-hairline)] px-3.5 py-3 last:border-b-0"
+            className="flex flex-col gap-2 border-b border-[color:var(--border-hairline)] px-3.5 py-3 last:border-b-0 modern:px-4"
           >
             <div className="flex flex-wrap items-center gap-2">
               <b className="min-w-0 font-semibold">{r.label}</b>

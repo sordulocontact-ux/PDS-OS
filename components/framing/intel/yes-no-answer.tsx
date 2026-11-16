@@ -40,7 +40,7 @@ export function YesNoAnswer({
   const { pending, run } = useFramingAction();
   const [choice, setChoice] = useState<YesNo | null>(null);
   return (
-    <div className="flex flex-col gap-3.5">
+    <div className="flex flex-col gap-3.5 modern:gap-3">
       <YesNoChoice
         name={`yes-no-${questionKey}`}
         legend={t.yesNoLegend}

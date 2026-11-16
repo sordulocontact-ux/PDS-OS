@@ -65,7 +65,7 @@ function Known({ fact }: { fact: KnownFact }) {
         )}
         {parts.length > 0 && (
           <Fold summary={t.moreParts(parts.length)}>
-            <dl className="flex flex-col gap-2.5">
+            <dl className="flex flex-col gap-2.5 modern:gap-2">
               {parts.map((part) => (
                 <div key={part.label} className="flex min-w-0 flex-col gap-0.5">
                   <dt className="text-caption text-[color:var(--text-secondary)]">

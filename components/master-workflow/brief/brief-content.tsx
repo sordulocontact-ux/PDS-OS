@@ -73,7 +73,7 @@ export function BriefContent(props: Props) {
       : null;
   return (
     <>
-      <section className="flex flex-col gap-2.5">
+      <section className="flex flex-col gap-2.5 modern:gap-2">
         <h3 className={sectionTitle}>{t.sections.direction}</h3>
         <FactRows>
           {(["direction", "references", "constraints"] as const).map((f) => (
@@ -98,7 +98,7 @@ export function BriefContent(props: Props) {
         </FactRows>
       </section>
 
-      <section className="flex flex-col gap-2.5">
+      <section className="flex flex-col gap-2.5 modern:gap-2">
         <h3 className={sectionTitle}>{t.sections.deliverables}</h3>
         <Deliverables {...props} />
         <FactRows>
@@ -126,7 +126,7 @@ export function BriefContent(props: Props) {
         </FactRows>
       </section>
 
-      <section className="flex flex-col gap-2.5">
+      <section className="flex flex-col gap-2.5 modern:gap-2">
         <h3 className={sectionTitle}>{t.sections.dates}</h3>
         <FactRows>
           {BRIEF_DATES.map((key) => {
@@ -168,7 +168,7 @@ export function BriefContent(props: Props) {
         </FactRows>
       </section>
 
-      <section className="flex flex-col gap-2.5">
+      <section className="flex flex-col gap-2.5 modern:gap-2">
         <h3 className={sectionTitle}>{t.sections.message}</h3>
         <FactRows>
           <FactRow

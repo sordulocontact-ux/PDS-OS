@@ -68,7 +68,7 @@ export function ReserveRows({
       {/* One row per reserve, joined in one hairline frame. */}
       <Rows label={t.title}>
         {rows.map((row, index) => (
-          <li key={row.id} className="flex flex-col gap-3 p-3.5">
+          <li key={row.id} className="flex flex-col gap-3 p-3.5 modern:p-4">
             <div className="flex items-center justify-between gap-2">
               <span className="text-body-md font-medium">
                 {t.number(index + 1)}

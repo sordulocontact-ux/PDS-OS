@@ -104,7 +104,7 @@ export function StrategyAddForm({
     <form
       noValidate
       action={submit}
-      className="flex flex-col gap-2.5"
+      className="flex flex-col gap-2.5 modern:gap-2"
       aria-busy={pending || undefined}
     >
       {dimension === "levers" && (
@@ -120,7 +120,7 @@ export function StrategyAddForm({
           onChange={setLever}
         />
       )}
-      <div className="grid gap-2.5 sm:grid-cols-2">
+      <div className="grid gap-2.5 sm:grid-cols-2 modern:gap-2">
         {(dimension !== "levers" || lever === "other") && (
           <Field
             id={id("text")}

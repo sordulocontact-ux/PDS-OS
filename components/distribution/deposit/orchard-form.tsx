@@ -143,7 +143,7 @@ export function OrchardForm({
             <div
               key={k}
               className={cn(
-                "flex flex-wrap items-start gap-3 border-b border-[color:var(--border-hairline)] px-3.5 py-3 last:border-b-0",
+                "flex flex-wrap items-start gap-3 border-b border-[color:var(--border-hairline)] px-3.5 py-3 last:border-b-0 modern:px-4",
                 !enabled && "opacity-50",
               )}
             >
@@ -164,7 +164,7 @@ export function OrchardForm({
                 <span className="flex flex-wrap items-center gap-2">
                   <Input
                     type="date"
-                    className="h-9 w-auto"
+                    className="h-9 w-auto modern:h-10"
                     aria-label={t.dateOf(label)}
                     value={dates[k] ?? today}
                     max={today}

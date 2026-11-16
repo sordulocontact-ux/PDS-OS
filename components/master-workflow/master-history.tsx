@@ -46,7 +46,7 @@ export async function MasterHistory({
         aria-labelledby="master-history-title"
         className="flex min-w-0 flex-col gap-4 rounded-2xl border border-[color:var(--border-hairline)] bg-card p-5"
       >
-        <div className="flex flex-wrap items-center justify-between gap-2.5">
+        <div className="flex flex-wrap items-center justify-between gap-2.5 modern:gap-2">
           <h2
             id="master-history-title"
             className="text-[length:var(--type-figure-lg)] leading-[var(--type-figure-lg-lh)] font-medium tracking-[var(--type-display-tracking)]"

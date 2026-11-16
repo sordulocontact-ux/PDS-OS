@@ -598,7 +598,7 @@ function ActionGroup({
             return (
               <li
                 key={action.key}
-                className="flex items-start justify-between gap-3 rounded-xl border border-border px-3 py-2.5"
+                className="flex items-start justify-between gap-3 rounded-xl border border-border px-3 py-2.5 modern:py-3"
               >
                 <span className="flex min-w-0 flex-col gap-0.5">
                   <span className="break-words">{action.title}</span>

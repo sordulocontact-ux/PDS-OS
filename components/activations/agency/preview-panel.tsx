@@ -6,7 +6,7 @@ import { toast } from "@/components/ui/toast";
 import { ActivationSection } from "@/components/activations/activation-section";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { StatTiles } from "@/components/ui/stat-tiles";
+import { StatCards } from "@/components/ui/stat-cards";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import type { SnapshotRowRecord } from "@/lib/activations/agency/queries";
@@ -88,7 +88,7 @@ export function PreviewPanel({
       description={t.description}
     >
       <div className="flex flex-col gap-4">
-        <StatTiles
+        <StatCards
           columns={5}
           stats={[
             { label: t.added, value: String(count("added")) },

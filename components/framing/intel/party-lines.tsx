@@ -67,7 +67,7 @@ export function PartyLines({
             const d = line.decision;
             const status = d?.document_status as DocumentStatus | undefined;
             return (
-              <li key={line.key} className="flex flex-col gap-2.5">
+              <li key={line.key} className="flex flex-col gap-2.5 modern:gap-2">
                 {/* The party and where it was found, read as one block. */}
                 <div className="flex flex-col gap-0.5">
                   <span className="flex flex-wrap items-center justify-between gap-2">

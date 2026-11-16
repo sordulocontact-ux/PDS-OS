@@ -59,7 +59,7 @@ export function ProjectSwitcher({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
         aria-label={t.open(projectTitle)}
-        className="flex h-10 w-full min-w-0 cursor-pointer items-center gap-2 rounded-lg px-2.5 text-left text-body-md font-semibold text-[color:var(--nav-fg)] transition-[background-color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:bg-[var(--nav-item-hover-bg)] aria-expanded:bg-[var(--nav-item-active-bg)]"
+        className="flex h-10 w-full min-w-0 cursor-pointer items-center gap-2 rounded-lg px-2.5 text-left text-body-md font-semibold text-[color:var(--nav-fg)] transition-[background-color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:bg-[var(--nav-item-hover-bg)] aria-expanded:bg-[var(--nav-item-active-bg)] modern:px-2"
       >
         <span className="min-w-0 flex-1 truncate" title={projectTitle}>
           {projectTitle}

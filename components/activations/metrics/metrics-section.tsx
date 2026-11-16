@@ -8,7 +8,7 @@ import {
   DataTableHeader,
   DataTableRow,
 } from "@/components/ui/data-table";
-import { StatTiles } from "@/components/ui/stat-tiles";
+import { StatCards } from "@/components/ui/stat-cards";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { MetricSource } from "@/lib/activations/model";
 import { formatMetric, metricTotals } from "@/lib/activations/totals";
@@ -104,7 +104,7 @@ export function MetricsSection({
       ) : (
         <div className="flex flex-col gap-4">
           {totals.some((total) => total.count > 1) && (
-            <StatTiles
+            <StatCards
               stats={totals.map((total) => ({
                 label: name(total),
                 value:

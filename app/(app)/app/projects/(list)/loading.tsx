@@ -6,6 +6,8 @@ export default function ProjectsLoading() {
     <PageLoading
       title={fr.shell.projects.title}
       description={fr.shell.projects.subtitle}
+      section
+      list
     />
   );
 }

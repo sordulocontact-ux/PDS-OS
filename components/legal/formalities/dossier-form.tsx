@@ -166,7 +166,7 @@ export function DossierForm({
   const signed = f.signatures.filter((x) => x.status === "signed").length;
 
   return (
-    <div ref={root} className="flex flex-col gap-3.5">
+    <div ref={root} className="flex flex-col gap-3.5 modern:gap-4">
       {generated.includes(f.status) && (
         <ToneCallout tone="warning">{t.page.editWarning(signed)}</ToneCallout>
       )}

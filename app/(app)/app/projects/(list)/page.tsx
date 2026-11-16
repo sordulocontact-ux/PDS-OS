@@ -10,8 +10,7 @@ import { archiveViews } from "@/components/archive/archive-views";
 import { FormMessage } from "@/components/auth/form-message";
 import { ProjectsBrowser } from "@/components/projects/projects-browser";
 import { EmptyState } from "@/components/shell/empty-state";
-import { PageContainer } from "@/components/shell/page-container";
-import { PageHeader } from "@/components/shell/page-header";
+import { SectionFrame } from "@/components/shell/section-frame";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { DataTableViews } from "@/components/ui/data-table";
 import { countRecords } from "@/lib/archive/queries";
@@ -61,12 +60,12 @@ export default async function ProjectsPage({
   ) : null;
 
   return (
-    <PageContainer>
-      <PageHeader
-        title={t.title}
-        description={t.subtitle}
-        action={listed ? newProject : null}
-      />
+    <SectionFrame
+      title={t.title}
+      description={t.subtitle}
+      action={listed ? newProject : null}
+      toolsAction
+    >
       {error ? (
         <FormMessage kind="error">{t.loadError}</FormMessage>
       ) : !listed && !archived && !counts?.archived ? (
@@ -97,6 +96,7 @@ export default async function ProjectsPage({
             archivedCount={counts ? counts.archived : null}
             archivedHref={viewHref(routes.projects, { view: "archived" })}
             liveHref={routes.projects}
+            pageAction={listed ? newProject : null}
             rights={{
               canEdit: can(access, "create_projects"),
               canArchive,
@@ -105,6 +105,6 @@ export default async function ProjectsPage({
           />
         </Suspense>
       )}
-    </PageContainer>
+    </SectionFrame>
   );
 }

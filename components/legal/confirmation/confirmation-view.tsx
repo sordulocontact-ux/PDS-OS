@@ -83,7 +83,7 @@ export function ConfirmationView({
           </Link>
         </ToneCallout>
         <Fold summary={t.confirmedTitle}>
-          <div className="flex flex-col gap-3.5 pt-3">
+          <div className="flex flex-col gap-3.5 pt-3 modern:gap-4">
             <SynthesisSections
               sections={c.sections}
               tagged={tagged}

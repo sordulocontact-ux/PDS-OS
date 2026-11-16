@@ -67,7 +67,7 @@ export function KpiItem({
 
   return (
     // A row of the KPIs' `Rows` (its frame and hairlines).
-    <li className="flex flex-wrap items-start justify-between gap-3 px-3.5 py-3">
+    <li className="flex flex-wrap items-start justify-between gap-3 px-3.5 py-3 modern:px-3">
       <div className="flex min-w-0 flex-col gap-1">
         <div className="flex flex-wrap items-center gap-2">
           <span className="font-semibold break-words">{kpi.label}</span>

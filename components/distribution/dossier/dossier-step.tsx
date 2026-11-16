@@ -176,7 +176,7 @@ export function DossierStep({ ctx }: { ctx: DistributionContext }) {
       {open?.status === "approved" &&
         v.canEdit &&
         (v.drift.length > 0 ? (
-          <section className="flex flex-col gap-2.5">
+          <section className="flex flex-col gap-2.5 modern:gap-2">
             <h3 className="text-[length:var(--type-body-md)] font-semibold">
               {t.prepareTitle(number + 1)}
             </h3>

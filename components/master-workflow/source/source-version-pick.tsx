@@ -64,7 +64,7 @@ export function SourceVersionPick({
         )}
       >
         {chosen.listenUrl && (
-          <div className="p-3.5">
+          <div className="p-3.5 modern:p-4">
             <SourceAudioFile
               name={chosen.fileName}
               listenUrl={chosen.listenUrl}

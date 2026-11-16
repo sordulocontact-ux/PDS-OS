@@ -184,7 +184,7 @@ export default async function FramingBriefPage({
         {older.map((b) => (
           <li
             key={b.id}
-            className="flex flex-col gap-1 rounded-lg border border-[color:var(--border-hairline)] bg-card px-3.5 py-3 text-body-sm"
+            className="flex flex-col gap-1 rounded-lg border border-[color:var(--border-hairline)] bg-card px-3.5 py-3 text-body-sm modern:px-3"
           >
             <span>
               <span className="font-semibold">{t.versionTitle(b.version)}</span>

@@ -71,7 +71,7 @@ export function VersionFeedback({
   const send = useWriteSubmit(() => undefined, t.transmit.done);
   return (
     <>
-      <section className="flex flex-col gap-3 border-t border-[color:var(--border-hairline)] p-3.5">
+      <section className="flex flex-col gap-3 border-t border-[color:var(--border-hairline)] p-3.5 modern:p-4">
         <VersionComments
           comments={version.comments}
           engineer={engineer}

@@ -141,7 +141,9 @@ function ReportBody({
           }
         />
       </FactRows>
-      <div className={flush ? "flex flex-col gap-3 p-3.5" : "contents"}>
+      <div
+        className={flush ? "flex flex-col gap-3 p-3.5 modern:p-4" : "contents"}
+      >
         {decision && (
           <p className="text-[length:var(--type-micro)] leading-[var(--type-micro-lh)] text-[color:var(--text-tertiary)]">
             {decision.validatorName} : « {decision.comment} »

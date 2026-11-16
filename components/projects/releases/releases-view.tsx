@@ -383,11 +383,13 @@ function ReleaseRow({
         </span>
       </DataTableCell>
       <DataTableCell hideBelow="xl" className={COLUMN.upc}>
-        <span className={cn("tabular-nums", !release.upc && muted)}>{upc}</span>
+        <span className={cn("classic:tabular-nums", !release.upc && muted)}>
+          {upc}
+        </span>
       </DataTableCell>
       <DataTableCell hideBelow="xl" className={COLUMN.isrc}>
         {isrc ? (
-          <span className={cn("tabular-nums", !release.isrc && muted)}>
+          <span className={cn("classic:tabular-nums", !release.isrc && muted)}>
             {isrc}
           </span>
         ) : (

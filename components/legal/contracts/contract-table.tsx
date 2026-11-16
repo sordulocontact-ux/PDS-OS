@@ -44,7 +44,7 @@ export function ContractTable({ children }: { children: ReactNode }) {
         aria-hidden
         className={cn(
           line,
-          "hidden border-b border-[color:var(--border-hairline)] bg-[var(--surface-soft)] px-3.5 py-2 text-caption text-[color:var(--text-tertiary)] md:grid",
+          "hidden border-b border-[color:var(--border-hairline)] bg-[var(--surface-soft)] px-3.5 py-2 text-caption text-[color:var(--text-tertiary)] md:grid modern:px-4",
         )}
       >
         <span>{t.columns.person}</span>
@@ -130,7 +130,7 @@ export function ContractTableRow({
   );
   const frame = cn(
     line,
-    "w-full border-b border-[color:var(--border-hairline)] px-3.5 py-2.75 text-left text-body-sm last:border-b-0",
+    "w-full border-b border-[color:var(--border-hairline)] px-3.5 modern:px-4 py-2.75 modern:py-3 text-left text-body-sm last:border-b-0",
     // Open: light grey, never blue (docs/DESIGN.md § 3 bis, 09/11/2026).
     open && "bg-[var(--surface-sunken)]",
   );
@@ -155,7 +155,7 @@ export function ContractTableRow({
 /** The fields of an open row, under it, in the same frame. */
 export function ContractTableEditor({ children }: { children: ReactNode }) {
   return (
-    <div className="flex flex-col gap-3.5 border-b border-[color:var(--border-hairline)] bg-[var(--surface-soft)] px-3.5 py-3.5 last:border-b-0 md:col-span-full">
+    <div className="flex flex-col gap-3.5 border-b border-[color:var(--border-hairline)] bg-[var(--surface-soft)] px-3.5 py-3.5 last:border-b-0 md:col-span-full modern:gap-4 modern:px-4 modern:py-4">
       {children}
     </div>
   );

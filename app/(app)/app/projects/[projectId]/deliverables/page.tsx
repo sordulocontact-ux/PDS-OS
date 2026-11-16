@@ -4,7 +4,7 @@ import { DeliverablesTable } from "@/components/project-plan/deliverables-table"
 import { EditInStrategy } from "@/components/project-plan/edit-in-strategy";
 import { ProjectPageActions } from "@/components/projects/project-page-actions";
 import { EmptyState } from "@/components/shell/empty-state";
-import { StatTiles } from "@/components/ui/stat-tiles";
+import { StatCards } from "@/components/ui/stat-cards";
 import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
 import { loadProjectPlan } from "@/lib/project-plan/queries";
@@ -42,7 +42,7 @@ export default async function ProjectDeliverablesPage({
         <EmptyState icon={IconBox2} title={t.emptyTitle} body={t.emptyBody} />
       ) : (
         <>
-          <StatTiles
+          <StatCards
             stats={[
               { label: t.stats.total, value: String(deliverables.length) },
               { label: t.stats.overdue, value: String(count("overdue")) },

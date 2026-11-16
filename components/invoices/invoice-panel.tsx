@@ -39,7 +39,7 @@ export function InvoicePanel({
     return (
       <div
         id={invoiceAnchor(i.id)}
-        className="flex scroll-mt-24 flex-col gap-2.5"
+        className="flex scroll-mt-24 flex-col gap-2.5 modern:gap-2"
       >
         <FactRows>
           <FactRow

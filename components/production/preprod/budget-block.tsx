@@ -11,7 +11,7 @@ import {
   DataTableRow,
   EMPTY_CELL,
 } from "@/components/ui/data-table";
-import { StatTiles } from "@/components/ui/stat-tiles";
+import { StatCards } from "@/components/ui/stat-cards";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { formatEuros } from "@/lib/budget/types";
@@ -67,7 +67,7 @@ export function BudgetBlock({
         </h3>
         {canOrganize && <AddBudgetLineButton {...props} />}
       </div>
-      <StatTiles
+      <StatCards
         stats={[
           {
             label: t.tiles.envelope,

@@ -97,7 +97,7 @@ export function ReferenceAddForm({
     <form
       noValidate
       aria-busy={busy || undefined}
-      className="flex flex-col gap-3 rounded-xl bg-[var(--surface-soft)] p-3.5"
+      className="flex flex-col gap-3 rounded-xl bg-[var(--surface-soft)] p-3.5 modern:p-4"
       onSubmit={(e) => {
         e.preventDefault();
         void submit(e.currentTarget);

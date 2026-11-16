@@ -84,7 +84,7 @@ export function PlanItemRow({
   return (
     <>
       <FactRowFrame {...row} />
-      <div className="flex flex-col gap-3.5 border-b border-[color:var(--border-hairline)] bg-[var(--surface-soft)] px-3.5 py-3.5 last:border-b-0">
+      <div className="flex flex-col gap-3.5 border-b border-[color:var(--border-hairline)] bg-[var(--surface-soft)] px-3.5 py-3.5 last:border-b-0 modern:gap-4 modern:px-4 modern:py-4">
         <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
           {fr.legalDemarches.why[kind]}
         </p>

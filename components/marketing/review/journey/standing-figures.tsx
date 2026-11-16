@@ -48,14 +48,14 @@ export function StandingTiles({ groups }: { groups: StandingGroup[] }) {
     <>
       {groups.map((group) => (
         <StepSection key={group.key} title={group.label}>
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-2.5">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-2.5 modern:gap-2">
             {group.figures.map((figure) => (
               <button
                 key={figure.key}
                 type="button"
                 aria-label={t.open(`${group.label} · ${figure.label}`)}
                 onClick={() => setOpen(figure)}
-                className="flex flex-col items-start gap-1 rounded-lg border border-transparent bg-[var(--surface-soft)] px-3.5 py-3 text-left transition-colors duration-[var(--duration-fast)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--focus-ring)] [@media(hover:hover)]:hover:border-[color:var(--border-default)]"
+                className="flex flex-col items-start gap-1 rounded-lg border border-transparent bg-[var(--surface-soft)] px-3.5 py-3 text-left transition-colors duration-[var(--duration-fast)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--focus-ring)] modern:px-4 [@media(hover:hover)]:hover:border-[color:var(--border-default)]"
               >
                 <span className="text-[length:var(--type-micro)] leading-[var(--type-micro-lh)] text-[color:var(--text-tertiary)]">
                   {figure.label}

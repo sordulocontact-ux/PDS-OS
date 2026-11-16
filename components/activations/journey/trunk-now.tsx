@@ -119,7 +119,7 @@ export async function TrunkNow({
         );
         if (pending.length > 0)
           return (
-            <div className="flex flex-col gap-2.5">
+            <div className="flex flex-col gap-2.5 modern:gap-2">
               <ToneCallout tone="warning">
                 {t.gesture.agencyPending(
                   joinList(
@@ -138,7 +138,7 @@ export async function TrunkNow({
           );
       }
       return (
-        <div className="flex flex-col gap-2.5">
+        <div className="flex flex-col gap-2.5 modern:gap-2">
           {note && <Note>{note}</Note>}
           <span className="text-[length:var(--type-micro)] leading-[var(--type-micro-lh)] text-[color:var(--text-tertiary)]">
             {t.gesture.doneNote}
@@ -183,7 +183,7 @@ export async function TrunkNow({
       );
     case "close":
       return (
-        <div className="flex flex-col gap-2.5">
+        <div className="flex flex-col gap-2.5 modern:gap-2">
           {a.reserves.length > 0 && (
             <Note>
               {t.gesture.closeReserves(a.reserves.map(reserveText).join(" · "))}

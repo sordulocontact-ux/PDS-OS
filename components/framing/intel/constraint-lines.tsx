@@ -62,7 +62,7 @@ export function ConstraintLines({
                 disabled={!editable}
                 onClick={() => setEditing(c)}
                 className={cn(
-                  "-mx-3 grid w-[calc(100%+1.5rem)] gap-1 rounded-lg px-3 py-2.5 text-left",
+                  "-mx-3 grid w-[calc(100%+1.5rem)] gap-1 rounded-lg px-3 py-2.5 text-left modern:py-3",
                   scope === "budget" &&
                     "sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-4",
                   editable &&

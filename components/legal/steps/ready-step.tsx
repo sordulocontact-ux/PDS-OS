@@ -6,7 +6,7 @@ import {
 import { LegalStepFrame } from "@/components/legal/legal-step-frame";
 import { StepSection } from "@/components/shell/journey/step-section";
 import { Fold } from "@/components/ui/fold";
-import { StatTiles } from "@/components/ui/stat-tiles";
+import { StatCards } from "@/components/ui/stat-cards";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { legalDemarches } from "@/lib/i18n/fr/legal-demarches";
 import { legalReadiness } from "@/lib/i18n/fr/legal-readiness";
@@ -41,7 +41,7 @@ export async function ReadyStep({ projectId }: { projectId: string }) {
   return (
     <LegalStepFrame projectId={projectId} stepKey={LEGAL_READY_KEY}>
       {r && (
-        <div className="flex flex-col gap-3.5">
+        <div className="flex flex-col gap-3.5 modern:gap-4">
           <Verdict r={r} canDecide={canDecide} />
           {!r.validated &&
             canDecide &&
@@ -55,7 +55,7 @@ export async function ReadyStep({ projectId }: { projectId: string }) {
             ) : (
               <p className={muted}>{t.validate.closed}</p>
             ))}
-          <StatTiles
+          <StatCards
             columns={3}
             stats={[
               {
@@ -100,7 +100,7 @@ export async function ReadyStep({ projectId }: { projectId: string }) {
                   />
                 ) : null;
               })}
-              <section className="flex flex-col gap-1.5 rounded-xl bg-[var(--surface-soft)] p-3.5">
+              <section className="flex flex-col gap-1.5 rounded-xl bg-[var(--surface-soft)] p-3.5 modern:p-4">
                 <h4 className="text-[length:var(--type-body-sm)] font-semibold">
                   {t.policy.title}
                 </h4>

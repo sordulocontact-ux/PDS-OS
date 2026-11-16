@@ -1,4 +1,5 @@
-import { StatTiles } from "@/components/ui/stat-tiles";
+import { StatCards } from "@/components/ui/stat-cards";
+import { RestAmount } from "@/components/ui/rest-amount";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatEuros, type BudgetTotals } from "@/lib/budget/types";
 import { budget } from "@/lib/i18n/fr/budget";
@@ -22,10 +23,19 @@ export function BudgetSummary({
       : cents < 0
         ? t.tiles.overrunOf(formatEuros(-cents))
         : t.tiles.restOf(formatEuros(cents));
+  // The new style's card: the rest by `RestAmount`, then the hint.
+  const caption = (cents: number | null, hint: string): React.ReactNode =>
+    cents === null ? (
+      hint
+    ) : (
+      <>
+        <RestAmount cents={cents} /> · {hint}
+      </>
+    );
   const remaining = totals.remaining.committed;
   return (
     <div className="flex flex-col gap-3">
-      <StatTiles
+      <StatCards
         columns={4}
         stats={[
           {
@@ -42,6 +52,7 @@ export function BudgetSummary({
             hint: [rest(totals.remaining.forecast), t.tiles.hints.forecast]
               .filter(Boolean)
               .join(" · "),
+            caption: caption(totals.remaining.forecast, t.tiles.hints.forecast),
           },
           {
             label: t.tiles.committed,
@@ -49,6 +60,10 @@ export function BudgetSummary({
             hint: [rest(totals.remaining.committed), t.tiles.hints.committed]
               .filter(Boolean)
               .join(" · "),
+            caption: caption(
+              totals.remaining.committed,
+              t.tiles.hints.committed,
+            ),
           },
           {
             label: t.tiles.real,
@@ -56,6 +71,7 @@ export function BudgetSummary({
             hint: [rest(totals.remaining.real), t.tiles.hints.real]
               .filter(Boolean)
               .join(" · "),
+            caption: caption(totals.remaining.real, t.tiles.hints.real),
           },
         ]}
       />

@@ -21,14 +21,14 @@ export function UpstreamBlock({ chains }: { chains: UpstreamChain[] }) {
     <StrategyPart id="upstream-title" title={t.title} description={t.note}>
       <Rows label={t.title}>
         {chains.length === 0 ? (
-          <li className="px-3.5 py-3 text-caption text-muted-foreground">
+          <li className="px-3.5 py-3 text-caption text-muted-foreground modern:px-3">
             {t.none}
           </li>
         ) : (
           chains.map((c) => (
             <li
               key={c.deliverableId}
-              className="flex flex-col gap-1 px-3.5 py-3 text-body-sm"
+              className="flex flex-col gap-1 px-3.5 py-3 text-body-sm modern:px-3"
             >
               <b className="font-semibold">{c.deliverableTitle}</b>
               <span className="text-caption text-muted-foreground">

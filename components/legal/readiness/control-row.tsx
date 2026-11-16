@@ -41,7 +41,7 @@ export function ControlRow({
           ? "danger"
           : "neutral";
   return (
-    <li className="flex flex-col gap-1.5 px-3.5 py-3">
+    <li className="flex flex-col gap-1.5 px-3.5 py-3 modern:px-4">
       <span className="text-[length:var(--type-micro)] leading-[var(--type-micro-lh)] text-[color:var(--text-secondary)]">
         {t.domains[c.domain]} · {weight}
       </span>

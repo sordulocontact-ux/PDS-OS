@@ -120,7 +120,7 @@ export function ObjectivesSection({
           <Rows label={t.kpisTitle}>
             {objectives.map((o) =>
               editing === o.id ? (
-                <li key={o.id} className="p-3.5">
+                <li key={o.id} className="p-3.5 modern:p-4">
                   <ObjectiveForm
                     idPrefix={`objective-${o.id}`}
                     initial={{

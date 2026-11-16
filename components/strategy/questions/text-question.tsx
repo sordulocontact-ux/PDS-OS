@@ -113,7 +113,7 @@ export function TextQuestion({
       why={question.proposed ? t.whyProposed : t.why}
     >
       {question.proposed && !editing ? (
-        <div className="flex flex-col gap-1 rounded-lg bg-[var(--surface-soft)] px-3.5 py-3">
+        <div className="flex flex-col gap-1 rounded-lg bg-[var(--surface-soft)] px-3.5 py-3 modern:px-3">
           <span className="text-caption text-[color:var(--text-secondary)]">
             {t.proposal}
           </span>

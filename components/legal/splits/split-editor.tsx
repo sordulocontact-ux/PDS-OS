@@ -87,7 +87,7 @@ export function SplitEditor({
   }
 
   return (
-    <div ref={root} className="flex flex-col gap-3.5">
+    <div ref={root} className="flex flex-col gap-3.5 modern:gap-4">
       <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
         {t.intro}
       </p>

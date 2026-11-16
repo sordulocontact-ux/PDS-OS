@@ -75,7 +75,7 @@ export function UpstreamChains({
           {chains.map((chain) => (
             <li
               key={chain.deliverableId}
-              className="flex flex-col gap-3 rounded-2xl bg-[var(--surface-tint)] px-4 py-3.5"
+              className="flex flex-col gap-3 rounded-2xl bg-[var(--surface-tint)] px-4 py-3.5 modern:py-3"
             >
               <span className="flex min-w-0 flex-col gap-0.5">
                 <span className="font-semibold break-words">

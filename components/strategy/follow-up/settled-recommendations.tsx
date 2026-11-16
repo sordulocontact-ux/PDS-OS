@@ -33,7 +33,7 @@ export function SettledRecommendations({
           <li
             key={item.id}
             id={`reco-${item.id}`}
-            className="flex scroll-mt-6 flex-col gap-2 px-3.5 py-3"
+            className="flex scroll-mt-6 flex-col gap-2 px-3.5 py-3 modern:px-3"
           >
             <div className="flex flex-wrap items-center gap-2 text-caption text-muted-foreground">
               {item.level && (

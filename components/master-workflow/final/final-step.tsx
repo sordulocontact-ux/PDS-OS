@@ -162,7 +162,7 @@ function TitleFinal({
         </>
       )}
       {title.deliverables.length > 0 && (
-        <section className="flex flex-col gap-2.5">
+        <section className="flex flex-col gap-2.5 modern:gap-2">
           <h3 className={h3}>{t.deliverables}</h3>
           <FactRows>
             {title.deliverables.map((d) => (

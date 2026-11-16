@@ -63,7 +63,7 @@ export type DossierCardProps = {
 export function DossierCard(props: DossierCardProps) {
   const { sections, mode } = props;
   return (
-    <section className="flex flex-col gap-3.5 rounded-2xl border border-[color:var(--border-default)] bg-card p-4">
+    <section className="flex flex-col gap-3.5 rounded-2xl border border-[color:var(--border-default)] bg-card p-4 modern:gap-4">
       <div className="flex flex-wrap items-center gap-3">
         <IconFile
           aria-hidden
@@ -98,7 +98,7 @@ export function DossierCard(props: DossierCardProps) {
           {section.groups.map((group) => (
             <FactRows key={group.key}>
               {group.title && (
-                <p className="border-b border-[color:var(--border-hairline)] px-3.5 py-2 text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] font-semibold">
+                <p className="border-b border-[color:var(--border-hairline)] px-3.5 py-2 text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] font-semibold modern:px-4">
                   {group.title}
                 </p>
               )}

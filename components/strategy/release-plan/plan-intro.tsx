@@ -44,7 +44,7 @@ export function PlanIntro({
   const t = fr.strategyReleasePlan.intro;
   return (
     <StepSection title={title ?? t.title} description={body ?? t.body}>
-      <div className="flex flex-col gap-7">
+      <div className="flex flex-col gap-7 modern:gap-6">
         <StrategyPart title={t.known} description={t.knownHint}>
           <KnownFacts facts={known} />
         </StrategyPart>

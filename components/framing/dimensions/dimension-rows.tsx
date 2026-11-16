@@ -112,7 +112,7 @@ export function DimensionRows({
               <>
                 <ResultLine
                   at={at}
-                  className="border-t border-[color:var(--border-hairline)] px-3.5 py-3"
+                  className="border-t border-[color:var(--border-hairline)] px-3.5 py-3 modern:px-3"
                 />
                 {checked.length > 0 && (
                   <ConfirmDimension
@@ -191,7 +191,7 @@ export function DimensionRows({
                 return (
                   <Fragment key={q.key}>
                     {row}
-                    <div className="border-b border-[color:var(--border-hairline)] px-3.5 py-3.5 last:border-b-0">
+                    <div className="border-b border-[color:var(--border-hairline)] px-3.5 py-3.5 last:border-b-0 modern:px-3 modern:py-3">
                       <PartyLines
                         projectId={projectId}
                         board={parties.board}

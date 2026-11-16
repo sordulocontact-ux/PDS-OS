@@ -157,7 +157,7 @@ export function DeliverablesSection({
                 <Rows label={lever.label}>
                   {own.map((d) =>
                     editing === d.id ? (
-                      <li key={d.id} className="p-3.5">
+                      <li key={d.id} className="p-3.5 modern:p-4">
                         <DeliverableForm
                           idPrefix={`deliverable-${d.id}`}
                           initial={{

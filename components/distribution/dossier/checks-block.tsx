@@ -55,7 +55,7 @@ export function ChecksBlock({
 }) {
   const recorded = checks.filter((k) => k.result !== "unchecked").length;
   return (
-    <section className="flex flex-col gap-2.5">
+    <section className="flex flex-col gap-2.5 modern:gap-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-[length:var(--type-body-md)] leading-[var(--type-body-md-lh)] font-semibold">
           {t.title}

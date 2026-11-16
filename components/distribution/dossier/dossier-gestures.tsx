@@ -46,7 +46,7 @@ export function SubmitDossier({
     t.submitted(number, validator),
   );
   return (
-    <div className="flex flex-col gap-2.5">
+    <div className="flex flex-col gap-2.5 modern:gap-2">
       <FormMessage kind="error">{refusal ?? error}</FormMessage>
       <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
         {t.submitNote(validator)}
@@ -153,7 +153,7 @@ export function PrepareNext({
   const [missing, setMissing] = useState(false);
   const { pending, error, run } = useWriteSubmit(() => {}, t.prepared(number));
   return (
-    <div className="flex flex-col gap-2.5">
+    <div className="flex flex-col gap-2.5 modern:gap-2">
       <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
         {t.prepareBody(number - 1)}
       </p>

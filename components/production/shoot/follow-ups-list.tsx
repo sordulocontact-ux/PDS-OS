@@ -33,7 +33,7 @@ export function FollowUpsList({
           {followUps.map((f) => (
             <li
               key={f.key}
-              className="flex flex-wrap items-center justify-between gap-3 px-4 py-3.5"
+              className="flex flex-wrap items-center justify-between gap-3 px-4 py-3.5 modern:py-4"
             >
               <div className="flex min-w-0 flex-col gap-0.5">
                 <span className="text-sm font-medium break-words">

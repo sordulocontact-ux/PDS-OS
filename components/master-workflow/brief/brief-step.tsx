@@ -123,7 +123,7 @@ export function BriefStep({
   };
   // The people first, as soon as the Master opens (Ibé, 02/11/2026).
   const people = (
-    <section className="flex flex-col gap-2.5">
+    <section className="flex flex-col gap-2.5 modern:gap-2">
       <h3 className={sectionTitle}>{t.sections.people}</h3>
       <BriefPeople {...facts} />
     </section>
@@ -216,7 +216,7 @@ export function BriefStep({
               {t.document.sent(formatShortDay(step.sentAt))}
             </ToneCallout>
           )}
-          <section className="flex flex-col gap-2.5">
+          <section className="flex flex-col gap-2.5 modern:gap-2">
             <h3 className={sectionTitle}>{t.sections.conditions}</h3>
             <BriefConditions {...facts} />
           </section>

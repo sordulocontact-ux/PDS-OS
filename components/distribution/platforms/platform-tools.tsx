@@ -33,7 +33,7 @@ export function AddPlatform({ projectId }: { projectId: string }) {
   return (
     <form
       noValidate
-      className="flex w-full flex-col gap-2.5 rounded-xl border border-[color:var(--border-hairline)] bg-card p-3.5"
+      className="flex w-full flex-col gap-2.5 rounded-xl border border-[color:var(--border-hairline)] bg-card p-3.5 modern:gap-2 modern:p-4"
       onSubmit={(event) => {
         event.preventDefault();
         const form = new FormData(event.currentTarget);

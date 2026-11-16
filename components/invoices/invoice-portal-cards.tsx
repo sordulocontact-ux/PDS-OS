@@ -80,7 +80,7 @@ export function invoicePortalCards({
             {master ? t.introMaster(project) : t.introContract}
           </p>
           {data.billTo && (
-            <section className="flex flex-col gap-2.5">
+            <section className="flex flex-col gap-2.5 modern:gap-2">
               <h3 className={h3}>{t.billTo}</h3>
               <FactRows>
                 <FactRow label={t.legalName} value={data.billTo.legalName} />

@@ -1,4 +1,4 @@
-import { StatTiles } from "@/components/ui/stat-tiles";
+import { StatCards } from "@/components/ui/stat-cards";
 import { InfoRow, Rows } from "@/components/ui/rows";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatEuros } from "@/lib/budget/types";
@@ -21,7 +21,7 @@ export function BudgetBlock({ budget }: { budget: BudgetView }) {
   const b = budget;
   return (
     <>
-      <StatTiles
+      <StatCards
         columns={5}
         stats={[
           {

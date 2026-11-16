@@ -58,7 +58,7 @@ export function PrivateLinkCard({
 }) {
   return (
     <div className="flex min-w-0 flex-col rounded-xl border border-[color:var(--border-hairline)] bg-card">
-      <div className="flex items-center gap-3 rounded-t-xl border-b border-[color:var(--border-hairline)] bg-[var(--surface-soft)] px-3.5 py-3">
+      <div className="flex items-center gap-3 rounded-t-xl border-b border-[color:var(--border-hairline)] bg-[var(--surface-soft)] px-3.5 py-3 modern:px-4">
         <IconLink aria-hidden className="size-4 shrink-0" />
         <span className="min-w-0 flex-1 font-semibold break-words">
           {t.linkOf(name)}
@@ -67,7 +67,7 @@ export function PrivateLinkCard({
           {t.linkState[state]}
         </StatusBadge>
       </div>
-      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 p-3.5">
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 p-3.5 modern:p-4">
         {url ? (
           <LinkPill url={url} copyLabel={t.copy} copiedLabel={t.copied} />
         ) : (

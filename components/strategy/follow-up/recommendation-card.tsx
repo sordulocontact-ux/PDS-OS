@@ -61,7 +61,7 @@ export function RecommendationCard({
     <li
       id={anchor}
       // A row of the recommendations' `Rows` (its frame and hairlines).
-      className="flex scroll-mt-6 flex-col gap-3 p-3.5"
+      className="flex scroll-mt-6 flex-col gap-3 p-3.5 modern:p-4"
     >
       <div className="flex flex-wrap items-center gap-2">
         <StatusBadge tone={recommendationLevelTone[rec.level]} size="sm">
