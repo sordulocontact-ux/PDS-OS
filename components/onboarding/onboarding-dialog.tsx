@@ -140,7 +140,7 @@ export function OnboardingDialog({
 
         <div
           inert
-          className="relative order-first m-2 mb-0 grid min-w-0 place-items-center overflow-hidden rounded-[10px] border border-[color:var(--border-hairline)] bg-[var(--surface-app)] px-4 pt-7 pb-5 md:order-none md:mb-2 md:p-7"
+          className="relative order-first m-2 mb-0 grid min-w-0 place-items-center overflow-hidden rounded-[10px] border border-[color:var(--border-hairline)] bg-[var(--surface-app)] px-4 pt-7 pb-5 md:order-none md:mb-2 md:p-7 modern:rounded-lg"
         >
           {step > 0 && (
             <span className="absolute top-2 right-3 text-[length:var(--type-micro)] leading-[var(--type-micro-lh)] text-[color:var(--text-tertiary)]">

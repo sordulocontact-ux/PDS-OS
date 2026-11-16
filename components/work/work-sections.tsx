@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { PageHeader } from "@/components/shell/page-header";
 import { AddTaskButton } from "@/components/work/add-task-button";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 import { TabBar } from "@/components/ui/tab-bar";
 import { work } from "@/lib/i18n/fr/work";
 import { cn } from "@/lib/utils";
@@ -58,21 +59,38 @@ export function WorkSections({
     );
   };
 
+  const add = <AddTaskButton today={today} onAdded={() => select("tasks")} />;
+
   return (
     <>
       <PageHeader
         title={title}
         description={descriptions[section]}
-        action={<AddTaskButton today={today} onAdded={() => select("tasks")} />}
+        action={add}
+        list
+        toolsAction
       />
-      <TabBar
-        label={t.label}
-        items={WORK_SECTIONS.map((key) => ({
-          label: t[key],
-          current: section === key,
-          onSelect: () => select(key),
-        }))}
-      />
+      {/* The new style: the two sections as a segmented filter, the action
+          at the end of its line; the classic style keeps the tabs. */}
+      <div className="flex flex-wrap items-center gap-3 classic:hidden">
+        <SegmentedControl
+          aria-label={t.label}
+          options={WORK_SECTIONS.map((key) => ({ value: key, label: t[key] }))}
+          value={section}
+          onChange={(next) => next && select(next)}
+        />
+        <div className="ml-auto shrink-0">{add}</div>
+      </div>
+      <div className="modern:hidden">
+        <TabBar
+          label={t.label}
+          items={WORK_SECTIONS.map((key) => ({
+            label: t[key],
+            current: section === key,
+            onSelect: () => select(key),
+          }))}
+        />
+      </div>
       {/* Both kept mounted: their state (search, filters, a task being
           written) survives a switch. */}
       <div

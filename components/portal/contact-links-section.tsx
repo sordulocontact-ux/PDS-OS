@@ -117,7 +117,7 @@ export async function ContactLinkOffer({
   const row = rows.find((r) => r.contactId === contactId);
   if (!row) return null;
   return (
-    <div className="flex flex-wrap items-start justify-between gap-3 rounded-lg bg-[var(--surface-soft)] px-3 py-2.5">
+    <div className="flex flex-wrap items-start justify-between gap-3 rounded-lg bg-[var(--surface-soft)] px-3 py-2.5 modern:py-2">
       <span className="flex min-w-0 flex-1 flex-col gap-1">
         <span>{t.offer(row.name)}</span>
         <span className="text-caption text-muted-foreground">

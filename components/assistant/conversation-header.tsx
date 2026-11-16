@@ -47,7 +47,7 @@ export function ConversationHeader({
           aria-label={t.history.open}
           className="md:hidden"
         >
-          <IconUnorderedList aria-hidden className="size-5" />
+          <IconUnorderedList aria-hidden className="size-5 modern:size-4" />
         </Button>
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           {origin && (
@@ -74,7 +74,7 @@ export function ConversationHeader({
           aria-label={t.conversation.new}
           className="md:hidden"
         >
-          <IconPlus aria-hidden className="size-5" />
+          <IconPlus aria-hidden className="size-5 modern:size-4" />
         </Button>
       </div>
     </header>

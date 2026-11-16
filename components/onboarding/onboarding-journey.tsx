@@ -43,7 +43,7 @@ export function OnboardingJourney({
   }, [steps.length]);
 
   return (
-    <div className="onboarding-rise rounded-[14px] border border-[color:var(--border-default)] bg-[var(--surface-raised)] p-[18px]">
+    <div className="onboarding-rise rounded-[14px] border border-[color:var(--border-default)] bg-[var(--surface-raised)] p-[18px] modern:rounded-xl modern:p-5">
       <div className="mb-1.5 flex items-baseline justify-between gap-2">
         <b className="font-semibold">{t.journeyProject}</b>
         <span className="text-[length:var(--type-micro)] text-[color:var(--text-tertiary)]">
@@ -105,7 +105,7 @@ export function OnboardingJourney({
                 name={mine ? name : person}
                 pictureUrl={null}
                 className={cn(
-                  "size-[26px] text-[11px] tracking-normal",
+                  "size-[26px] text-[11px] tracking-normal modern:text-[length:var(--type-micro)]",
                   mine && "bg-[var(--selection)] text-white",
                 )}
               />

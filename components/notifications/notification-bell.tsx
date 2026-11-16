@@ -60,7 +60,7 @@ export function NotificationBell({
       >
         <IconBell
           aria-hidden
-          className={variant === "nav" ? "size-4" : "size-5"}
+          className={variant === "nav" ? "size-4" : "size-5 modern:size-4"}
         />
         {unreadCount > 0 &&
           (variant === "nav" ? (

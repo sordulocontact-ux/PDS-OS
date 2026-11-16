@@ -67,7 +67,7 @@ export function PortalSections({
           {todo.map((c) => (
             <li
               key={c.id}
-              className="flex items-center gap-3 rounded-lg bg-[var(--surface-soft)] px-3 py-2.5"
+              className="flex items-center gap-3 rounded-lg bg-[var(--surface-soft)] px-3 py-2.5 modern:py-2"
             >
               <span className="min-w-0 flex-1">
                 <b className="font-semibold">{c.action?.label ?? c.title}</b>
@@ -76,7 +76,7 @@ export function PortalSections({
               </span>
               <a
                 href={`#${c.id}`}
-                className="rounded-full px-3 py-1 text-body-sm font-medium hover:bg-[var(--control-bg-hover)]"
+                className="rounded-full px-3 py-1 text-body-sm font-medium hover:bg-[var(--control-bg-hover)] modern:rounded-lg"
               >
                 {t.see}
               </a>
@@ -85,7 +85,7 @@ export function PortalSections({
         </ul>
       )}
       {workflows.map((w) => (
-        <div key={w ?? "one"} className="flex flex-col gap-[18px]">
+        <div key={w ?? "one"} className="flex flex-col gap-[18px] modern:gap-4">
           {(grouped || workflows.length > 1) && w && (
             <GroupTitle>{t.workflows[w]}</GroupTitle>
           )}

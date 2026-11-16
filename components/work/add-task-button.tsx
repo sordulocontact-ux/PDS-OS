@@ -4,6 +4,7 @@ import { IconPlus } from "nucleo-sharp-essential";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { useDesignStyle } from "@/components/shell/use-design-style";
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { dialogs } from "@/lib/i18n/fr/dialogs";
@@ -29,9 +30,16 @@ export function AddTaskButton({
   const t = fr.work.tasks.form;
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  // The page's one action: black in the new style (docs/STYLE-FINANCE-PARTOUT.md
+  // § 6.9), a small outline button as before in the classic one.
+  const modern = useDesignStyle() === "modern";
   return (
     <>
-      <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
+      <Button
+        variant={modern ? "default" : "outline"}
+        size={modern ? "default" : "sm"}
+        onClick={() => setOpen(true)}
+      >
         <IconPlus aria-hidden data-icon="inline-start" />
         {t.open}
       </Button>

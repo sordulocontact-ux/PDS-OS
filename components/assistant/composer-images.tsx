@@ -107,7 +107,7 @@ export function AttachImageButton({
           !quiet && "border-[color:var(--border-hairline)]",
         )}
       >
-        <IconPaperclip aria-hidden className="size-5" />
+        <IconPaperclip aria-hidden className="size-5 modern:size-4" />
       </Button>
     </>
   );

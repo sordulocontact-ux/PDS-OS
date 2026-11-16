@@ -65,7 +65,7 @@ export function NotificationRow({
       // Relative: the « Non lue » read aloud (sr-only, absolute) stays in its
       // row, clipped by the list, instead of hanging under the page and
       // making it scroll (Sacha, 06/11/2026).
-      className="relative flex items-start gap-2.5 rounded-[var(--radius-md)] px-3 py-2 no-underline transition-colors duration-[var(--duration-fast)] hover:bg-[var(--control-bg-hover)] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring"
+      className="relative flex items-start gap-2.5 rounded-[var(--radius-md)] px-3 py-2 no-underline transition-colors duration-[var(--duration-fast)] hover:bg-[var(--control-bg-hover)] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring modern:gap-2"
     >
       {/* Sized to the avatar (never stretched to the row), so the badge
           stays on its corner however long the text. */}
@@ -91,7 +91,7 @@ export function NotificationRow({
         <span className="flex items-baseline gap-2">
           <span
             className={cn(
-              "min-w-0 flex-1 truncate text-xs",
+              "min-w-0 flex-1 truncate text-xs modern:text-caption",
               item.read ? "font-medium" : "font-semibold",
             )}
           >
@@ -99,7 +99,7 @@ export function NotificationRow({
           </span>
           <time
             dateTime={item.createdAt}
-            className="shrink-0 text-xs text-[color:var(--text-tertiary)] tabular-nums"
+            className="shrink-0 text-xs text-[color:var(--text-tertiary)] tabular-nums modern:text-caption"
           >
             {notificationAgo(item.createdAt, now)}
           </time>
@@ -114,7 +114,7 @@ export function NotificationRow({
         </span>
         <span
           className={cn(
-            "line-clamp-2 text-xs",
+            "line-clamp-2 text-xs modern:text-caption",
             item.read
               ? "text-[color:var(--text-tertiary)]"
               : "text-[color:var(--text-secondary)]",

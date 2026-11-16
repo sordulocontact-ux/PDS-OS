@@ -164,7 +164,7 @@ function Asked({ asked }: { asked: ContactCallRequests["asked"] }) {
         {asked.map((a) => (
           <li
             key={a.id}
-            className="flex items-start justify-between gap-3 border-t border-[color:var(--border-hairline)] py-2.5 first:border-t-0"
+            className="flex items-start justify-between gap-3 border-t border-[color:var(--border-hairline)] py-2.5 first:border-t-0 modern:py-2"
           >
             <span className="flex min-w-0 flex-col gap-0.5">
               <span>

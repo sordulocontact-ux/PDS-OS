@@ -6,8 +6,7 @@ import { CalendarMonth } from "@/components/calendar/calendar-board";
 import { CallsCalendar } from "@/components/calls/calendar/calls-calendar";
 import { MeetingComposerProvider } from "@/components/calls/new-meeting-button";
 import { EmptyNote } from "@/components/shell/empty-state";
-import { PageContainer } from "@/components/shell/page-container";
-import { PageHeader } from "@/components/shell/page-header";
+import { SectionFrame } from "@/components/shell/section-frame";
 import { CalendarToolbar } from "@/components/ui/calendar-toolbar";
 import { LoadingRegion, Skeleton } from "@/components/ui/skeleton";
 import { ViewToggle } from "@/components/ui/view-toggle";
@@ -69,28 +68,27 @@ export default async function CalendarPage({
     });
 
   return (
-    <PageContainer>
-      <PageHeader
-        title={t.title}
-        description={t.description}
-        action={
-          <ViewToggle
-            label={t.views.label}
-            options={[
-              {
-                href: hrefOf(period.mode, period.date, null),
-                label: t.views.all,
-                current: !mine,
-              },
-              {
-                href: hrefOf(period.mode, period.date, MINE),
-                label: t.views.mine,
-                current: mine,
-              },
-            ]}
-          />
-        }
-      />
+    <SectionFrame
+      title={t.title}
+      description={t.description}
+      action={
+        <ViewToggle
+          label={t.views.label}
+          options={[
+            {
+              href: hrefOf(period.mode, period.date, null),
+              label: t.views.all,
+              current: !mine,
+            },
+            {
+              href: hrefOf(period.mode, period.date, MINE),
+              label: t.views.mine,
+              current: mine,
+            },
+          ]}
+        />
+      }
+    >
       <section className="flex flex-col gap-3">
         <CalendarToolbar
           period={period}
@@ -113,7 +111,7 @@ export default async function CalendarPage({
           />
         </Suspense>
       </section>
-    </PageContainer>
+    </SectionFrame>
   );
 }
 

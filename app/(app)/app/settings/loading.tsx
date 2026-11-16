@@ -6,6 +6,7 @@ export default function SettingsLoading() {
     <PageLoading
       title={fr.aiUsage.settings.title}
       description={fr.aiUsage.settings.description}
+      section
     />
   );
 }

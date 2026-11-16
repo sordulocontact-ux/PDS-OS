@@ -8,7 +8,7 @@ const fr = { auth };
 export function HomeFeedSkeleton() {
   return (
     <LoadingRegion label={fr.auth.common.loading}>
-      <div className="flex flex-col gap-10">
+      <div className="flex flex-col gap-10 modern:gap-8">
         <Skeleton className="h-48 rounded-2xl" />
         <Skeleton className="h-40 rounded-2xl" />
       </div>

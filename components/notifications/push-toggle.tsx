@@ -15,15 +15,21 @@ export function PushToggle({ publicKey }: { publicKey: string | null }) {
   if (state === "loading") return null;
   if (state === "unsupported")
     return publicKey ? (
-      <p className="text-xs text-muted-foreground">{t.unsupported}</p>
+      <p className="text-xs text-muted-foreground modern:text-caption">
+        {t.unsupported}
+      </p>
     ) : null;
   if (state === "denied")
-    return <p className="text-xs text-muted-foreground">{t.denied}</p>;
+    return (
+      <p className="text-xs text-muted-foreground modern:text-caption">
+        {t.denied}
+      </p>
+    );
 
   if (state === "on")
     return (
       <div className="flex items-center justify-between gap-2">
-        <span className="flex items-center gap-2 text-xs text-muted-foreground">
+        <span className="flex items-center gap-2 text-xs text-muted-foreground modern:text-caption">
           <IconBell className="size-3.5" aria-hidden />
           {t.enabled}
         </span>
@@ -46,7 +52,10 @@ export function PushToggle({ publicKey }: { publicKey: string | null }) {
         {busy ? t.enabling : t.enable}
       </Button>
       {state === "failed" && (
-        <p role="alert" className="text-xs text-muted-foreground">
+        <p
+          role="alert"
+          className="text-xs text-muted-foreground modern:text-caption"
+        >
           {t.failed}
         </p>
       )}

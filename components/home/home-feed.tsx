@@ -42,7 +42,7 @@ export async function HomeFeed({ access }: { access: Access }) {
   const first = !lead && feed.projects.length === 0 && !feed.error;
 
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-10 modern:gap-8">
       {feed.error && (
         <FormMessage kind="error">{fr.work.journeys.partial}</FormMessage>
       )}

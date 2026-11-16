@@ -19,7 +19,7 @@ import type { OnboardingProfile } from "./onboarding-provider";
 const fr = { onboarding };
 
 const card =
-  "rounded-[14px] border border-[color:var(--border-default)] bg-[var(--surface-raised)] p-[18px]";
+  "rounded-[14px] border border-[color:var(--border-default)] bg-[var(--surface-raised)] p-[18px] modern:rounded-xl modern:p-5";
 const micro =
   "text-[length:var(--type-micro)] leading-[var(--type-micro-lh)] text-[color:var(--text-tertiary)]";
 
@@ -56,7 +56,7 @@ function MemberVisual({ profile }: { profile: OnboardingProfile }) {
   const t = fr.onboarding;
   return (
     <div className={`${card} onboarding-rise flex flex-col gap-4`}>
-      <div className="flex items-center gap-3.5">
+      <div className="flex items-center gap-3.5 modern:gap-4">
         <Avatar
           name={profile.name}
           pictureUrl={null}
@@ -74,7 +74,7 @@ function MemberVisual({ profile }: { profile: OnboardingProfile }) {
         </div>
       </div>
       <p className={micro}>{t.doesLabel}</p>
-      <ul className="onboarding-stagger flex flex-col gap-2.5 [--stagger-start:260ms] [--stagger-step:90ms]">
+      <ul className="onboarding-stagger flex flex-col gap-2.5 [--stagger-start:260ms] [--stagger-step:90ms] modern:gap-2">
         {t.variants[profile.variant].does.map((item) => (
           <li
             key={item}

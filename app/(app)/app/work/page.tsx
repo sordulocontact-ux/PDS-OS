@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
-import { PageContainer } from "@/components/shell/page-container";
+import { SectionFrame } from "@/components/shell/section-frame";
 import {
   LoadingRegion,
   Skeleton,
@@ -38,7 +38,7 @@ export default async function WorkPage({
       : null;
 
   return (
-    <PageContainer>
+    <SectionFrame title={t.title} header={false}>
       <WorkSections
         title={t.title}
         descriptions={{
@@ -82,6 +82,6 @@ export default async function WorkPage({
           </Suspense>
         }
       />
-    </PageContainer>
+    </SectionFrame>
   );
 }

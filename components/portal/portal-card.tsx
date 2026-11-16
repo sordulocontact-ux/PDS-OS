@@ -13,7 +13,7 @@ const TONE = { todo: "info", waiting: "neutral", done: "success" } as const;
 export type PortalAction = { label: string; due?: string | null };
 
 export const portalCardClass =
-  "flex min-w-0 scroll-mt-4 flex-col gap-3.5 rounded-xl border border-[color:var(--border-hairline)] bg-card p-5";
+  "flex min-w-0 scroll-mt-4 flex-col gap-3.5 modern:gap-4 rounded-xl border border-[color:var(--border-hairline)] bg-card p-5";
 
 /**
  * One step of a private page (proto portalCards): its title and its pill
@@ -50,7 +50,7 @@ export function PortalCard({
         className,
       )}
     >
-      <div className="flex flex-wrap items-center justify-between gap-2.5">
+      <div className="flex flex-wrap items-center justify-between gap-2.5 modern:gap-2">
         <h2 className="text-display-sm font-medium text-balance">{title}</h2>
         <StatusBadge size="sm" tone={TONE[state]}>
           {badge ?? t.states[state]}

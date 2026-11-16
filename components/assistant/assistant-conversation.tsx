@@ -126,7 +126,7 @@ export function AssistantConversation({
             disabled={!started}
             className="w-full justify-start"
           >
-            <IconPlus aria-hidden className="size-5" />
+            <IconPlus aria-hidden className="size-5 modern:size-4" />
             {t.conversation.new}
           </Button>
         </div>

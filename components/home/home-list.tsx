@@ -45,6 +45,8 @@ export function HomeSection({
             className={cn(
               caption,
               "text-foreground underline decoration-[color:var(--border-hover)] underline-offset-[3px]",
+              // The new style: a grey link, underlined on hover (MetricCardLink).
+              "modern:text-[color:var(--text-secondary)] modern:no-underline modern:hover:underline",
             )}
           >
             {action.label}
@@ -124,7 +126,10 @@ export function HomeRowText({ main, sub }: { main: ReactNode; sub?: string }) {
 export function HomeListNote({ children }: { children: ReactNode }) {
   return (
     <li
-      className={cn(caption, "px-4 py-2.5 text-[color:var(--text-secondary)]")}
+      className={cn(
+        caption,
+        "px-4 py-2.5 text-[color:var(--text-secondary)] modern:py-2",
+      )}
     >
       {children}
     </li>

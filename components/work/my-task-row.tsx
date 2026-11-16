@@ -60,7 +60,7 @@ export function TaskList({
         <li
           className={cn(
             caption,
-            "px-4 py-3.5 text-[color:var(--text-tertiary)]",
+            "px-4 py-3.5 text-[color:var(--text-tertiary)] modern:py-3",
           )}
         >
           {empty}

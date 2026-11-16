@@ -21,7 +21,7 @@ export function HomeFrame({
   children: React.ReactNode;
 }) {
   return (
-    <PageContainer className="items-center gap-10 py-10 md:py-24">
+    <PageContainer className="items-center gap-10 py-10 md:py-24 modern:gap-8">
       <header className="flex flex-col items-center gap-3 text-center">
         {title ? (
           <h1 className="font-display text-display-xl text-foreground">
@@ -35,7 +35,7 @@ export function HomeFrame({
         </p>
       </header>
 
-      <div className="flex w-full max-w-4xl flex-col gap-10">
+      <div className="flex w-full max-w-4xl flex-col gap-10 modern:gap-8">
         <AssistantPanel />
         {children}
       </div>

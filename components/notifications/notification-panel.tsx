@@ -69,7 +69,7 @@ export function NotificationPanel({
           <Button
             variant="ghost"
             size="xs"
-            className="text-[color:var(--selection)]"
+            className="text-[color:var(--selection)] modern:text-foreground"
             onClick={() => startTransition(() => markNotificationsRead(null))}
           >
             {t.markAllRead}
@@ -82,7 +82,7 @@ export function NotificationPanel({
           aria-expanded={settings}
           onClick={() => setSettings((open) => !open)}
         >
-          <IconGear2 aria-hidden className="size-3.5" />
+          <IconGear2 aria-hidden className="size-3.5 modern:size-4" />
         </Button>
       </div>
       {settings && (
@@ -122,7 +122,7 @@ export function NotificationPanel({
               <section key={group} aria-labelledby={`notifications-${group}`}>
                 <h3
                   id={`notifications-${group}`}
-                  className="px-3 pt-3 pb-1 text-xs font-medium text-[color:var(--text-tertiary)]"
+                  className="px-3 pt-3 pb-1 text-xs font-medium text-[color:var(--text-tertiary)] modern:text-caption"
                 >
                   {t.groups[group]}
                 </h3>

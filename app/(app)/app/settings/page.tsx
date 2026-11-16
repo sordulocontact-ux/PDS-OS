@@ -1,9 +1,8 @@
 import { Suspense } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
-import { PageContainer } from "@/components/shell/page-container";
-import { PageHeader } from "@/components/shell/page-header";
 import { PageSection } from "@/components/shell/page-section";
+import { SectionFrame } from "@/components/shell/section-frame";
 import { SkeletonRows } from "@/components/ui/skeleton";
 import { BillingForm } from "@/components/settings/billing-form";
 import { DistributionForm } from "@/components/settings/distribution-form";
@@ -46,8 +45,12 @@ export default async function SettingsPage({
   ]);
 
   return (
-    <PageContainer className="max-w-2xl">
-      <PageHeader title={t.title} description={t.description} />
+    <SectionFrame
+      title={t.title}
+      description={t.description}
+      list={false}
+      className="max-w-2xl"
+    >
       <PageSection
         id="ai-usage"
         title={t.usage.title}
@@ -102,6 +105,6 @@ export default async function SettingsPage({
           <DistributionForm initial={formats} />
         </PageSection>
       )}
-    </PageContainer>
+    </SectionFrame>
   );
 }

@@ -42,7 +42,7 @@ export function OnboardingText({
   ][step];
 
   return (
-    <div className="flex flex-col gap-3.5">
+    <div className="flex flex-col gap-3.5 modern:gap-4">
       <DialogTitle className="text-[length:var(--type-display-md)] leading-[var(--type-display-md-lh)] font-medium tracking-[var(--type-display-tracking)] text-balance md:text-[length:var(--type-display-lg)] md:leading-[var(--type-display-lg-lh)]">
         {title}
       </DialogTitle>
@@ -107,7 +107,7 @@ function OnboardingPush({ publicKey }: { publicKey: string | null }) {
   const text =
     "min-w-44 flex-1 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]";
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-xl bg-[var(--surface-soft)] px-3.5 py-3">
+    <div className="flex flex-wrap items-center gap-3 rounded-xl bg-[var(--surface-soft)] px-3.5 py-3 modern:px-4">
       {state === "denied" && <p className={text}>{push.denied}</p>}
       {state === "on" && (
         <>

@@ -184,7 +184,7 @@ export function WorkBrowser({
           navigation »): the same place as « Matrice | Liste » there. */}
       <SegmentedControl
         aria-label={t.viewsLabel}
-        className="self-start"
+        className="self-start modern:hidden"
         options={views}
         value={view}
         onChange={(next) => next && select(next)}
@@ -203,6 +203,14 @@ export function WorkBrowser({
         <FilterBar
           filters={controls}
           onClear={() => filter({ project: null, module: null, group: null })}
+        />
+        {/* The new style: the views on the tools' line (§ 6.1). */}
+        <SegmentedControl
+          aria-label={t.viewsLabel}
+          className="classic:hidden"
+          options={views}
+          value={view}
+          onChange={(next) => next && select(next)}
         />
       </ListToolbar>
       {groups.length === 0 ? (

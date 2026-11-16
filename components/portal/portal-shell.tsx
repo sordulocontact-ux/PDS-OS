@@ -46,11 +46,11 @@ export function PortalShell({
     : null;
   return (
     <main className="flex flex-1 flex-col bg-[var(--surface-app)]">
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-[color:var(--border-hairline)] bg-[var(--surface-page)] px-6 py-3.5">
-        <span className="flex min-w-0 items-center gap-2.5">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-[color:var(--border-hairline)] bg-[var(--surface-page)] px-6 py-3.5 modern:py-3">
+        <span className="flex min-w-0 items-center gap-2.5 modern:gap-2">
           <span
             aria-hidden
-            className="grid size-10 shrink-0 place-items-center rounded-[10px] bg-primary text-caption font-bold text-primary-foreground"
+            className="grid size-10 shrink-0 place-items-center rounded-[10px] bg-primary text-caption font-bold text-primary-foreground modern:rounded-lg modern:font-semibold"
           >
             PDS
           </span>
@@ -61,11 +61,11 @@ export function PortalShell({
           )}
         </span>
         <span className="inline-flex items-center gap-1.5 text-caption text-muted-foreground">
-          <IconLock aria-hidden className="size-3.5" />
+          <IconLock aria-hidden className="size-3.5 modern:size-4" />
           {t.lock}
         </span>
       </header>
-      <div className="mx-auto flex w-full max-w-[820px] flex-col gap-[18px] px-4 pt-7 pb-36">
+      <div className="mx-auto flex w-full max-w-[820px] flex-col gap-[18px] px-4 pt-7 pb-36 modern:gap-4 modern:pt-8">
         <div className="flex flex-col gap-1">
           {caption && (
             <p className="text-caption text-muted-foreground">{caption}</p>
@@ -76,7 +76,7 @@ export function PortalShell({
         {frame?.owner && (
           <section className={portalCardClass}>
             <h2 className="text-display-sm font-medium">{t.contact}</h2>
-            <span className="flex items-center gap-2.5">
+            <span className="flex items-center gap-2.5 modern:gap-2">
               <Avatar name={frame.owner} pictureUrl={null} className="size-7" />
               <span>
                 <b className="font-semibold">{frame.owner}</b>

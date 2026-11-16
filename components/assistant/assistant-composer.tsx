@@ -196,7 +196,7 @@ export function AssistantComposer({
                   aria-label={t.stop}
                   className="shrink-0 border-[color:var(--border-hairline)]"
                 >
-                  <IconStop aria-hidden className="size-5" />
+                  <IconStop aria-hidden className="size-5 modern:size-4" />
                 </Button>
               ) : (
                 <Button
@@ -205,7 +205,7 @@ export function AssistantComposer({
                   aria-label={t.send}
                   className={cn("shrink-0", flat && "rounded-none")}
                 >
-                  <IconArrowUp aria-hidden className="size-5" />
+                  <IconArrowUp aria-hidden className="size-5 modern:size-4" />
                 </Button>
               )}
             </>

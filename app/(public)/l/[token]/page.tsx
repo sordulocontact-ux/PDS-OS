@@ -38,7 +38,7 @@ export default async function SmartlinkPage({
         </header>
 
         {smartlink.links.length > 0 ? (
-          <ul className="grid gap-2.5">
+          <ul className="grid gap-2.5 modern:gap-2">
             {smartlink.links.map((link) => (
               <li key={link.platform}>
                 <a
