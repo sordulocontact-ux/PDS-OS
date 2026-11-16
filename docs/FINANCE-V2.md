@@ -1,5 +1,7 @@
 # Finance, nouveau style (d'après Midday)
 
+Pour étendre ce style à toute l'app : `docs/STYLE-FINANCE-PARTOUT.md` (16/11/2026).
+
 Décision de Sacha du 15/11/2026 : développer dans l'app le style du proto
 `docs/protos/finance-midday.html`, version **v8** (sélecteur « Version » du proto). Analyse et origine :
 `docs/ANALYSE-MIDDAY.md`. Ce document dit **quoi construire, dans quel ordre**, et ce qui est déjà fait.
