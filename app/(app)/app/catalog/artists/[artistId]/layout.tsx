@@ -11,8 +11,8 @@ import { ArtistTabs } from "@/components/catalog/artist-page/artist-tabs";
 import { ArtistIdentityNow } from "@/components/catalog/artist-page/identity-now";
 import { ExternalLink } from "@/components/catalog/artist-profile/external-link";
 import { BackLink } from "@/components/shell/back-link";
-import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
+import { SectionFrame } from "@/components/shell/section-frame";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
@@ -59,9 +59,13 @@ export default async function ArtistLayout({
   const showBusiness = await showsArtistBusiness(access, artist.id);
 
   return (
-    <PageContainer className="max-w-5xl">
-      <BackLink href={routes.artists}>{t.back}</BackLink>
-
+    <SectionFrame
+      title={artist.name}
+      list={false}
+      header={false}
+      above={<BackLink href={routes.artists}>{t.back}</BackLink>}
+      className="max-w-5xl"
+    >
       <div className="flex flex-col gap-4">
         <PageHeader
           title={artist.name}
@@ -133,6 +137,6 @@ export default async function ArtistLayout({
       <div className="-mt-2 flex flex-col gap-[var(--section-gap)]">
         {children}
       </div>
-    </PageContainer>
+    </SectionFrame>
   );
 }

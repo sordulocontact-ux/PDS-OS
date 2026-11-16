@@ -6,8 +6,7 @@ import { DemosList } from "@/components/catalog/demos/demos-list";
 import { TitleListViews } from "@/components/catalog/title/title-list-views";
 import { IconDisc } from "@/components/icons";
 import { EmptyState } from "@/components/shell/empty-state";
-import { PageContainer } from "@/components/shell/page-container";
-import { PageHeader } from "@/components/shell/page-header";
+import { SectionFrame } from "@/components/shell/section-frame";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { UrlFilters } from "@/components/ui/url-filters";
 import { can } from "@/lib/auth/access";
@@ -52,12 +51,12 @@ export default async function DemosPage({
   ) : null;
 
   return (
-    <PageContainer>
-      <PageHeader
-        title={fr.catalog.masters.title}
-        description={t.subtitle}
-        action={demos.length > 0 ? newDemo : null}
-      />
+    <SectionFrame
+      title={fr.catalog.masters.title}
+      description={t.subtitle}
+      action={demos.length > 0 ? newDemo : null}
+      toolsAction
+    >
       {error ? (
         <FormMessage kind="error">{t.loadError}</FormMessage>
       ) : (
@@ -67,6 +66,7 @@ export default async function DemosPage({
           demoCount={active.length}
           archived={false}
           filters={{}}
+          pageAction={demos.length > 0 ? newDemo : null}
         >
           {demos.length === 0 ? (
             <EmptyState
@@ -109,6 +109,6 @@ export default async function DemosPage({
           )}
         </TitleListViews>
       )}
-    </PageContainer>
+    </SectionFrame>
   );
 }

@@ -8,8 +8,7 @@ import {
 import { SelectionArtistsTable } from "@/components/catalog/selections/selection-artists-table";
 import { BackLink } from "@/components/shell/back-link";
 import { EmptyState } from "@/components/shell/empty-state";
-import { PageContainer } from "@/components/shell/page-container";
-import { PageHeader } from "@/components/shell/page-header";
+import { SectionFrame } from "@/components/shell/section-frame";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
@@ -66,26 +65,27 @@ export default async function ArtistSelectionPage({
       : null;
 
   return (
-    <PageContainer className="max-w-5xl">
-      <BackLink href={routes.artistSelections}>{t.back}</BackLink>
-      <PageHeader
-        title={selection.name}
-        description={describe(selection, access.personId)}
-        action={
-          canManage ? (
-            <SelectionActions
-              selectionId={selection.id}
-              name={selection.name}
-              holderPersonId={selection.holder.personId}
-              artists={artists}
-              inSelection={inSelection}
-              recipients={recipients}
-              emptySelection={empty}
-              createProjectHref={createProjectHref}
-            />
-          ) : null
-        }
-      />
+    <SectionFrame
+      list={false}
+      className="max-w-5xl"
+      above={<BackLink href={routes.artistSelections}>{t.back}</BackLink>}
+      title={selection.name}
+      description={describe(selection, access.personId)}
+      action={
+        canManage ? (
+          <SelectionActions
+            selectionId={selection.id}
+            name={selection.name}
+            holderPersonId={selection.holder.personId}
+            artists={artists}
+            inSelection={inSelection}
+            recipients={recipients}
+            emptySelection={empty}
+            createProjectHref={createProjectHref}
+          />
+        ) : null
+      }
+    >
       {empty ? (
         <EmptyState
           icon={IconMicrophone}
@@ -108,7 +108,7 @@ export default async function ArtistSelectionPage({
           canManage={canManage}
         />
       )}
-    </PageContainer>
+    </SectionFrame>
   );
 }
 

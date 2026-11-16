@@ -10,8 +10,7 @@ import { ContractStateBadge } from "@/components/contracts/contract-state-badge"
 import { EditContractButton } from "@/components/contracts/edit-contract-button";
 import { ContractNow } from "@/components/contracts/now/contract-now";
 import { BackLink } from "@/components/shell/back-link";
-import { PageContainer } from "@/components/shell/page-container";
-import { PageHeader } from "@/components/shell/page-header";
+import { SectionFrame } from "@/components/shell/section-frame";
 import { PageSection } from "@/components/shell/page-section";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { requireApproved } from "@/lib/auth/dal";
@@ -44,18 +43,18 @@ export default async function ContractPage({
   const p = t.page;
 
   return (
-    <PageContainer>
-      <BackLink href={routes.contracts}>{p.back}</BackLink>
-      <PageHeader
-        title={contract.title}
-        badge={<ContractStateBadge state={contract.state} size="md" />}
-        description={[t.types[contract.type], contract.parties.join(", ")]
-          .filter(Boolean)
-          .join(" · ")}
-        action={
-          contract.can.edit && <EditContractButton contractId={contract.id} />
-        }
-      />
+    <SectionFrame
+      list={false}
+      above={<BackLink href={routes.contracts}>{p.back}</BackLink>}
+      title={contract.title}
+      badge={<ContractStateBadge state={contract.state} size="md" />}
+      description={[t.types[contract.type], contract.parties.join(", ")]
+        .filter(Boolean)
+        .join(" · ")}
+      action={
+        contract.can.edit && <EditContractButton contractId={contract.id} />
+      }
+    >
       {origin && (
         // Where it comes from in the Juridique, and the way back (JUR-17).
         <ToneCallout
@@ -117,6 +116,6 @@ export default async function ContractPage({
           emptyBodyReadOnly={p.filesEmptyReadOnly}
         />
       </PageSection>
-    </PageContainer>
+    </SectionFrame>
   );
 }

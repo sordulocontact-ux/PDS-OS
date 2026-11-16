@@ -7,8 +7,7 @@ import {
 } from "@/components/feedback/feedback-view-toggle";
 import { NewFeedbackButton } from "@/components/feedback/new-feedback-button";
 import { FormMessage } from "@/components/auth/form-message";
-import { PageContainer } from "@/components/shell/page-container";
-import { PageHeader } from "@/components/shell/page-header";
+import { SectionFrame } from "@/components/shell/section-frame";
 import { PageSection } from "@/components/shell/page-section";
 import { can, type Access } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
@@ -35,12 +34,11 @@ export default async function FeedbackPage({
   const reader = can(access, "read_feedback");
 
   return (
-    <PageContainer>
-      <PageHeader
-        title={t.title}
-        description={reader ? t.subtitleReader : t.subtitle}
-        action={<NewFeedbackButton />}
-      />
+    <SectionFrame
+      title={t.title}
+      description={reader ? t.subtitleReader : t.subtitle}
+      action={<NewFeedbackButton />}
+    >
       {reader ? (
         <Inbox
           access={access}
@@ -49,7 +47,7 @@ export default async function FeedbackPage({
       ) : (
         <Mine access={access} />
       )}
-    </PageContainer>
+    </SectionFrame>
   );
 }
 

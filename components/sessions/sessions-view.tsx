@@ -30,6 +30,7 @@ export function SessionsView({
   path,
   canCreate,
   scope,
+  pageAction,
 }: {
   rows: StudioSessionRow[];
   error: boolean;
@@ -37,6 +38,9 @@ export function SessionsView({
   path: string;
   canCreate: boolean;
   scope?: { artistId: string } | { projectId: string };
+  // The menu's page action, at the end of the tabs' line in the new style
+  // (Sessions' SectionFrame `toolsAction`).
+  pageAction?: React.ReactNode;
 }) {
   const t = fr.sessions;
   if (error) return <FormMessage kind="error">{t.loadError}</FormMessage>;
@@ -78,6 +82,7 @@ export function SessionsView({
     <DataTableViews
       label={t.views.label}
       action={scope ? create : null}
+      pageAction={pageAction}
       views={SESSION_VIEWS.map((value) => ({
         href: viewHref(path, { vue: value === "upcoming" ? null : value }),
         label: t.views[value],

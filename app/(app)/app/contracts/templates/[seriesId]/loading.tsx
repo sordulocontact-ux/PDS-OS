@@ -4,5 +4,5 @@ import { PageLoading } from "@/components/shell/page-loading";
 // record's frame, so a missing record answers 404 (docs/ARCHITECTURE.md
 // § 3 bis).
 export default function Loading() {
-  return <PageLoading />;
+  return <PageLoading section />;
 }

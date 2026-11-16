@@ -6,8 +6,7 @@ import { ArtistListViews } from "@/components/catalog/artist-list-views";
 import { ArtistsList } from "@/components/catalog/artists-list";
 import { NewArtistButton } from "@/components/catalog/new-artist-button";
 import { EmptyState } from "@/components/shell/empty-state";
-import { PageContainer } from "@/components/shell/page-container";
-import { PageHeader } from "@/components/shell/page-header";
+import { SectionFrame } from "@/components/shell/section-frame";
 import { LiveViewLink } from "@/components/archive/live-view-link";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { UrlFilters, type UrlFilterGroup } from "@/components/ui/url-filters";
@@ -97,25 +96,27 @@ export default async function ArtistsPage({
       />
     );
 
+  const action = (
+    <div className="flex flex-wrap gap-2">
+      {/* The selections of artists, before a project (lot 4 of
+          docs/pds-mic-plan.md): read by the whole team. */}
+      <Link
+        href={routes.artistSelections}
+        className={buttonVariants({ variant: "outline", size: "lg" })}
+      >
+        <ButtonRoll>{fr.artistSelections.open}</ButtonRoll>
+      </Link>
+      {canCreate && all.length > 0 && <NewArtistButton />}
+    </div>
+  );
+
   return (
-    <PageContainer>
-      <PageHeader
-        title={t.title}
-        description={t.subtitle}
-        action={
-          <div className="flex flex-wrap gap-2">
-            {/* The selections of artists, before a project (lot 4 of
-                docs/pds-mic-plan.md): read by the whole team. */}
-            <Link
-              href={routes.artistSelections}
-              className={buttonVariants({ variant: "outline", size: "lg" })}
-            >
-              <ButtonRoll>{fr.artistSelections.open}</ButtonRoll>
-            </Link>
-            {canCreate && all.length > 0 && <NewArtistButton />}
-          </div>
-        }
-      />
+    <SectionFrame
+      title={t.title}
+      description={t.subtitle}
+      action={action}
+      toolsAction
+    >
       {error ? (
         <FormMessage kind="error">{t.loadError}</FormMessage>
       ) : (
@@ -128,6 +129,7 @@ export default async function ArtistsPage({
             counts={counts}
             archived={archived}
             filters={{ titles }}
+            pageAction={action}
           >
             {all.length === 0 ? (
               empty
@@ -157,7 +159,7 @@ export default async function ArtistsPage({
           </ArtistListViews>
         </>
       )}
-    </PageContainer>
+    </SectionFrame>
   );
 }
 

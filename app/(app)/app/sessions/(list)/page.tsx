@@ -1,7 +1,6 @@
 import { SessionFormButton } from "@/components/sessions/session-form-button";
 import { SessionsView } from "@/components/sessions/sessions-view";
-import { PageContainer } from "@/components/shell/page-container";
-import { PageHeader } from "@/components/shell/page-header";
+import { SectionFrame } from "@/components/shell/section-frame";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
@@ -25,20 +24,23 @@ export default async function SessionsPage({
     searchParams,
   ]);
   const canCreate = can(access, "manage_sessions");
+  const action =
+    canCreate && sessions.length > 0 ? <SessionFormButton /> : null;
   return (
-    <PageContainer>
-      <PageHeader
-        title={fr.sessions.title}
-        description={fr.sessions.subtitle}
-        action={canCreate && sessions.length > 0 ? <SessionFormButton /> : null}
-      />
+    <SectionFrame
+      title={fr.sessions.title}
+      description={fr.sessions.subtitle}
+      action={action}
+      toolsAction={!error && sessions.length > 0}
+    >
       <SessionsView
+        pageAction={action}
         rows={sessions}
         error={error}
         view={sessionViewOf(params.vue)}
         path={routes.sessions}
         canCreate={canCreate}
       />
-    </PageContainer>
+    </SectionFrame>
   );
 }

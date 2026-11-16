@@ -8,6 +8,7 @@ import { TemplatesList } from "@/components/contracts/templates/templates-list";
 import { EmptyState } from "@/components/shell/empty-state";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
+import { SectionFrame } from "@/components/shell/section-frame";
 import { DataTableViews } from "@/components/ui/data-table";
 import { UrlFilters } from "@/components/ui/url-filters";
 import { can } from "@/lib/auth/access";
@@ -141,14 +142,15 @@ export default async function ContractsPage({
     );
 
   return (
-    <PageContainer>
-      <PageHeader
-        title={t.title}
-        description={onTemplates ? l.description : t.description}
-        action={all.length > 0 || templates.length > 0 ? action : null}
-      />
+    <SectionFrame
+      title={t.title}
+      description={onTemplates ? l.description : t.description}
+      action={all.length > 0 || templates.length > 0 ? action : null}
+      toolsAction
+    >
       <DataTableViews
         label={t.tabs.label}
+        pageAction={all.length > 0 || templates.length > 0 ? action : null}
         views={
           canTemplates
             ? [
@@ -170,6 +172,6 @@ export default async function ContractsPage({
       >
         {onTemplates ? templatesBody : contractsBody}
       </DataTableViews>
-    </PageContainer>
+    </SectionFrame>
   );
 }

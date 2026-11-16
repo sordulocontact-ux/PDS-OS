@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { CallPage } from "@/components/calls/call-page";
-import { PageContainer } from "@/components/shell/page-container";
+import { SectionFrame } from "@/components/shell/section-frame";
 import { requireApproved } from "@/lib/auth/dal";
 import { getVisibleCall } from "@/lib/calls/queries";
 import { fr } from "@/lib/i18n/fr";
@@ -29,13 +29,14 @@ export default async function CallsCallPage({
   const project = call.projectId ? await getProject(call.projectId) : null;
 
   return (
-    <PageContainer>
+    // The call draws its own head (CallHeader): the frame brings the top band.
+    <SectionFrame title={call.title} list={false} header={false}>
       <CallPage
         call={call}
         project={project}
         door={{ kind: "calls" }}
         meetFailed={meet === "failed"}
       />
-    </PageContainer>
+    </SectionFrame>
   );
 }

@@ -6,6 +6,8 @@ export default function ArtistsLoading() {
     <PageLoading
       title={fr.catalog.artists.title}
       description={fr.catalog.artists.subtitle}
+      section
+      list
     />
   );
 }

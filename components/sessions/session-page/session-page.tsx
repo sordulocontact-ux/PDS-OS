@@ -11,8 +11,7 @@ import { SessionContractWarnings } from "@/components/sessions/session-page/sess
 import { SessionHeaderActions } from "@/components/sessions/session-page/session-header-actions";
 import { TitlesSection } from "@/components/sessions/session-page/titles-section";
 import { BackLink } from "@/components/shell/back-link";
-import { PageContainer } from "@/components/shell/page-container";
-import { PageHeader } from "@/components/shell/page-header";
+import { SectionFrame } from "@/components/shell/section-frame";
 import { PageSection } from "@/components/shell/page-section";
 import { FactList } from "@/components/ui/fact-list";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -175,15 +174,16 @@ export function SessionPageView({
     );
 
   return (
-    <PageContainer className="max-w-5xl">
-      <BackLink href={back}>{backLabel}</BackLink>
-      <PageHeader
-        title={name}
-        badge={<StatusBadge tone={status.tone}>{status.label}</StatusBadge>}
-        description={when}
-        action={actions}
-      />
+    <SectionFrame
+      className="max-w-5xl"
+      list={false}
+      above={<BackLink href={back}>{backLabel}</BackLink>}
+      title={name}
+      badge={<StatusBadge tone={status.tone}>{status.label}</StatusBadge>}
+      description={when}
+      action={actions}
+    >
       {body}
-    </PageContainer>
+    </SectionFrame>
   );
 }

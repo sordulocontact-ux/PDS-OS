@@ -6,6 +6,8 @@ export default function CallsLoading() {
     <PageLoading
       title={fr.calls.all.title}
       description={fr.calls.all.description}
+      section
+      list
     />
   );
 }

@@ -3,8 +3,7 @@ import { IconFile } from "nucleo-sharp-essential";
 import { FormMessage } from "@/components/auth/form-message";
 import { LibraryList } from "@/components/library/library-list";
 import { EmptyState } from "@/components/shell/empty-state";
-import { PageContainer } from "@/components/shell/page-container";
-import { PageHeader } from "@/components/shell/page-header";
+import { SectionFrame } from "@/components/shell/section-frame";
 import { DataTableViews } from "@/components/ui/data-table";
 import { UrlFilters, type UrlFilterGroup } from "@/components/ui/url-filters";
 import { requireApproved } from "@/lib/auth/dal";
@@ -59,14 +58,12 @@ export default async function FilesPage({
     author: filterParam(params.author),
   };
   const filtering = Object.values(filters).some((value) => value !== null);
-  const header = <PageHeader title={t.title} description={t.description} />;
 
   if (library.error)
     return (
-      <PageContainer>
-        {header}
+      <SectionFrame title={t.title} description={t.description}>
         <FormMessage kind="error">{t.loadError}</FormMessage>
-      </PageContainer>
+      </SectionFrame>
     );
 
   const { files } = library;
@@ -79,8 +76,7 @@ export default async function FilesPage({
     : filtered;
 
   return (
-    <PageContainer>
-      {header}
+    <SectionFrame title={t.title} description={t.description}>
       {files.length === 0 ? (
         <EmptyState icon={IconFile} title={t.emptyTitle} body={t.emptyBody} />
       ) : (
@@ -133,7 +129,7 @@ export default async function FilesPage({
           )}
         </DataTableViews>
       )}
-    </PageContainer>
+    </SectionFrame>
   );
 }
 

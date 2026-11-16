@@ -6,8 +6,7 @@ import { NewSelectionButton } from "@/components/catalog/selections/new-selectio
 import { SelectionsTable } from "@/components/catalog/selections/selections-table";
 import { BackLink } from "@/components/shell/back-link";
 import { EmptyState } from "@/components/shell/empty-state";
-import { PageContainer } from "@/components/shell/page-container";
-import { PageHeader } from "@/components/shell/page-header";
+import { SectionFrame } from "@/components/shell/section-frame";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { DataTableViews } from "@/components/ui/data-table";
 import { can } from "@/lib/auth/access";
@@ -75,13 +74,13 @@ export default async function ArtistSelectionsPage({
   );
 
   return (
-    <PageContainer>
-      <BackLink href={routes.artists}>{t.backToArtists}</BackLink>
-      <PageHeader
-        title={t.title}
-        description={t.subtitle}
-        action={shown.length > 0 ? newButton : null}
-      />
+    <SectionFrame
+      title={t.title}
+      description={t.subtitle}
+      action={shown.length > 0 ? newButton : null}
+      list={false}
+      above={<BackLink href={routes.artists}>{t.backToArtists}</BackLink>}
+    >
       {error ? (
         <FormMessage kind="error">{t.loadError}</FormMessage>
       ) : (
@@ -116,6 +115,6 @@ export default async function ArtistSelectionsPage({
           )}
         </DataTableViews>
       )}
-    </PageContainer>
+    </SectionFrame>
   );
 }

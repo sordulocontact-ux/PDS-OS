@@ -6,6 +6,8 @@ export default function ContractsLoading() {
     <PageLoading
       title={fr.contracts.title}
       description={fr.contracts.description}
+      section
+      list
     />
   );
 }

@@ -1,7 +1,6 @@
 import { ReportView } from "@/components/calls/closure/report-view";
 import { EmptyNote } from "@/components/shell/empty-state";
-import { PageContainer } from "@/components/shell/page-container";
-import { PageHeader } from "@/components/shell/page-header";
+import { SectionFrame } from "@/components/shell/section-frame";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { formatDay } from "@/lib/assistant/facts";
 import { requireApproved } from "@/lib/auth/dal";
@@ -35,10 +34,9 @@ export default async function CallReportPage({
   const closure = closures[0];
   if (!closure)
     return (
-      <PageContainer>
-        <PageHeader title={t.page.title} />
+      <SectionFrame title={t.page.title} list={false}>
         <EmptyNote>{t.page.notShared}</EmptyNote>
-      </PageContainer>
+      </SectionFrame>
     );
   const scope: ReportScope =
     call || shares.some((s) => s.closureId === closure.id && s.scope === "full")
@@ -46,24 +44,24 @@ export default async function CallReportPage({
       : "summary";
   const content = scopedReport(closure.content, scope);
   return (
-    <PageContainer>
-      <PageHeader
-        title={closure.content.call?.title ?? t.page.title}
-        description={t.closedOn(
-          closure.version,
-          formatDay(closure.closedAt),
-          closure.closedByName,
-        )}
-        action={
-          <a
-            href={routes.callReportPdf(callId, closure.version, scope)}
-            className={buttonVariants({ size: "lg", variant: "outline" })}
-          >
-            <ButtonRoll>{t.pdf}</ButtonRoll>
-          </a>
-        }
-      />
+    <SectionFrame
+      list={false}
+      title={closure.content.call?.title ?? t.page.title}
+      description={t.closedOn(
+        closure.version,
+        formatDay(closure.closedAt),
+        closure.closedByName,
+      )}
+      action={
+        <a
+          href={routes.callReportPdf(callId, closure.version, scope)}
+          className={buttonVariants({ size: "lg", variant: "outline" })}
+        >
+          <ButtonRoll>{t.pdf}</ButtonRoll>
+        </a>
+      }
+    >
       <ReportView content={content} />
-    </PageContainer>
+    </SectionFrame>
   );
 }

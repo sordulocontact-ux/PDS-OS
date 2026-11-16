@@ -3,8 +3,7 @@ import { IconUserPlus } from "@/components/icons";
 import Link from "next/link";
 
 import { FormMessage } from "@/components/auth/form-message";
-import { PageContainer } from "@/components/shell/page-container";
-import { PageHeader } from "@/components/shell/page-header";
+import { SectionFrame } from "@/components/shell/section-frame";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { DataTableViews } from "@/components/ui/data-table";
 import { requireAdmin } from "@/lib/auth/dal";
@@ -40,29 +39,31 @@ export default async function MembersPage({
   const countOf = (status: MembershipStatus) =>
     rows.filter((row) => row.status === status).length;
 
-  return (
-    <PageContainer>
-      <PageHeader
-        title={t.title}
-        description={t.subtitle}
-        action={
-          <Link
-            href={routes.membersNew}
-            className={cn(buttonVariants({ size: "lg" }), "gap-2")}
-          >
-            <ButtonRoll>
-              <IconUserPlus className="size-4" aria-hidden />
-              {t.create}
-            </ButtonRoll>
-          </Link>
-        }
-      />
+  const action = (
+    <Link
+      href={routes.membersNew}
+      className={cn(buttonVariants({ size: "lg" }), "gap-2")}
+    >
+      <ButtonRoll>
+        <IconUserPlus className="size-4" aria-hidden />
+        {t.create}
+      </ButtonRoll>
+    </Link>
+  );
 
+  return (
+    <SectionFrame
+      title={t.title}
+      description={t.subtitle}
+      action={action}
+      toolsAction={!error}
+    >
       {error ? (
         <FormMessage kind="error">{t.loadError}</FormMessage>
       ) : (
         <DataTableViews
           label={t.segmentsLabel}
+          pageAction={action}
           views={MEMBERSHIP_STATUSES.map((status) => ({
             href: viewHref(routes.members, { status }),
             label: t.segments[status],
@@ -85,6 +86,6 @@ export default async function MembersPage({
           )}
         </DataTableViews>
       )}
-    </PageContainer>
+    </SectionFrame>
   );
 }

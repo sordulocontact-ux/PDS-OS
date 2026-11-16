@@ -7,8 +7,7 @@ import { LiveViewLink } from "@/components/archive/live-view-link";
 import { TitleListViews } from "@/components/catalog/title/title-list-views";
 import { IconDisc } from "@/components/icons";
 import { EmptyState } from "@/components/shell/empty-state";
-import { PageContainer } from "@/components/shell/page-container";
-import { PageHeader } from "@/components/shell/page-header";
+import { SectionFrame } from "@/components/shell/section-frame";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { UrlFilters, type UrlFilterGroup } from "@/components/ui/url-filters";
 import { archiveFilterGroup } from "@/lib/archive/filter";
@@ -117,12 +116,12 @@ export default async function MastersPage({
     );
 
   return (
-    <PageContainer>
-      <PageHeader
-        title={t.title}
-        description={t.subtitle}
-        action={all.length > 0 ? newMaster : null}
-      />
+    <SectionFrame
+      title={t.title}
+      description={t.subtitle}
+      action={all.length > 0 ? newMaster : null}
+      toolsAction
+    >
       {error ? (
         <FormMessage kind="error">{t.loadError}</FormMessage>
       ) : (
@@ -134,6 +133,7 @@ export default async function MastersPage({
           }
           archived={archived}
           filters={{ ...filters }}
+          pageAction={all.length > 0 ? newMaster : null}
         >
           {all.length === 0 ? (
             empty
@@ -161,7 +161,7 @@ export default async function MastersPage({
           )}
         </TitleListViews>
       )}
-    </PageContainer>
+    </SectionFrame>
   );
 }
 

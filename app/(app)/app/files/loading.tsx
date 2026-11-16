@@ -6,6 +6,8 @@ export default function FilesLoading() {
     <PageLoading
       title={fr.library.title}
       description={fr.library.description}
+      section
+      list
     />
   );
 }

@@ -6,6 +6,8 @@ export default function MembersLoading() {
     <PageLoading
       title={fr.auth.members.title}
       description={fr.auth.members.subtitle}
+      section
+      list
     />
   );
 }

@@ -1,8 +1,7 @@
 import { CaptureArtistsBench } from "@/components/labo/captures/capture-artists-bench";
 import { ShareShortcut } from "@/components/labo/captures/share-shortcut";
-import { PageContainer } from "@/components/shell/page-container";
-import { PageHeader } from "@/components/shell/page-header";
 import { PageSection } from "@/components/shell/page-section";
+import { SectionFrame } from "@/components/shell/section-frame";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
@@ -26,8 +25,7 @@ export default async function LaboPage({
   const t = fr.laboCaptures;
 
   return (
-    <PageContainer>
-      <PageHeader title={t.title} description={t.description} />
+    <SectionFrame title={t.title} description={t.description}>
       <ShareShortcut />
       <PageSection
         id="captures"
@@ -40,6 +38,6 @@ export default async function LaboPage({
           paste={params.coller === "1"}
         />
       </PageSection>
-    </PageContainer>
+    </SectionFrame>
   );
 }

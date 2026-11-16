@@ -6,8 +6,7 @@ import { DealsList } from "@/components/deals/deals-list";
 import { AskDealButton } from "@/components/deals/ask-deal-button";
 import { NewDealButton } from "@/components/deals/new-deal-button";
 import { EmptyState } from "@/components/shell/empty-state";
-import { PageContainer } from "@/components/shell/page-container";
-import { PageHeader } from "@/components/shell/page-header";
+import { SectionFrame } from "@/components/shell/section-frame";
 import { DataTableViews } from "@/components/ui/data-table";
 import { UrlFilters } from "@/components/ui/url-filters";
 import { can } from "@/lib/auth/access";
@@ -77,25 +76,26 @@ export default async function DealsPage({
   const ofView = deals.filter((d) => inDealView(d, view, today));
   const shown = filtered.filter((d) => inDealView(d, view, today));
 
+  const action = options ? (
+    <NewDealButton options={options} />
+  ) : (
+    directors && <AskDealButton directors={directors} />
+  );
+
   return (
-    <PageContainer>
-      <PageHeader
-        title={t.title}
-        description={t.description}
-        action={
-          options ? (
-            <NewDealButton options={options} />
-          ) : (
-            directors && <AskDealButton directors={directors} />
-          )
-        }
-      />
+    <SectionFrame
+      title={t.title}
+      description={t.description}
+      action={action}
+      toolsAction={deals.length > 0}
+    >
       {error && <FormMessage kind="error">{t.loadError}</FormMessage>}
       {deals.length === 0 ? (
         <EmptyState icon={IconScale} title={t.emptyTitle} body={t.emptyBody} />
       ) : (
         <DataTableViews
           label={t.views.label}
+          pageAction={action}
           views={DEAL_VIEWS.map((v) => ({
             href: viewHref(routes.deals, {
               ...filters,
@@ -134,6 +134,6 @@ export default async function DealsPage({
           />
         </DataTableViews>
       )}
-    </PageContainer>
+    </SectionFrame>
   );
 }

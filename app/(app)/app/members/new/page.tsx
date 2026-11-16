@@ -1,6 +1,5 @@
 import { BackLink } from "@/components/shell/back-link";
-import { PageContainer } from "@/components/shell/page-container";
-import { PageHeader } from "@/components/shell/page-header";
+import { SectionFrame } from "@/components/shell/section-frame";
 import { Card, CardContent } from "@/components/ui/card";
 import { requireAdmin } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
@@ -18,14 +17,18 @@ export default async function NewMemberPage() {
   const t = fr.auth.newMember;
 
   return (
-    <PageContainer className="max-w-2xl">
-      <BackLink href={routes.members}>{t.back}</BackLink>
-      <PageHeader title={t.title} description={t.subtitle} />
+    <SectionFrame
+      className="max-w-2xl"
+      list={false}
+      above={<BackLink href={routes.members}>{t.back}</BackLink>}
+      title={t.title}
+      description={t.subtitle}
+    >
       <Card>
         <CardContent>
           <InviteMemberForm />
         </CardContent>
       </Card>
-    </PageContainer>
+    </SectionFrame>
   );
 }

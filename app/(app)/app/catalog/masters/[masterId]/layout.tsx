@@ -10,9 +10,8 @@ import { MasterTabs } from "@/components/catalog/master-page/master-tabs";
 import { TitleAudioState } from "@/components/catalog/title/title-audio-state";
 import { TitleCover } from "@/components/catalog/title/title-cover";
 import { BackLink } from "@/components/shell/back-link";
-import { PageContainer } from "@/components/shell/page-container";
-import { PageHeader } from "@/components/shell/page-header";
 import { ReturnBanner } from "@/components/shell/return-banner";
+import { SectionFrame } from "@/components/shell/section-frame";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { can } from "@/lib/auth/access";
@@ -63,98 +62,100 @@ export default async function MasterLayout({
   const demo = master.demoStatus;
 
   return (
-    <PageContainer className="max-w-6xl">
-      <BackLink href={demo ? routes.demos : routes.masters}>
-        {demo ? fr.demos.back : t.back}
-      </BackLink>
-      <Suspense fallback={null}>
-        <ReturnBanner scope={master.id} />
-      </Suspense>
-      <PageHeader
-        title={master.title}
-        leading={
-          <TitleCover
-            masterId={master.id}
-            organizationId={access.organizationId}
-            title={master.title}
-            cover={covers.get(master.id) ?? null}
-            canEdit={canEdit}
-          />
-        }
-        badge={
-          demo ? (
-            <>
-              <StatusBadge tone={demoStatusTone[demo]}>
-                {fr.demos.badge(fr.demos.statuses[demo])}
+    <SectionFrame
+      list={false}
+      className="max-w-6xl"
+      above={
+        <>
+          <BackLink href={demo ? routes.demos : routes.masters}>
+            {demo ? fr.demos.back : t.back}
+          </BackLink>
+          <Suspense fallback={null}>
+            <ReturnBanner scope={master.id} />
+          </Suspense>
+        </>
+      }
+      title={master.title}
+      leading={
+        <TitleCover
+          masterId={master.id}
+          organizationId={access.organizationId}
+          title={master.title}
+          cover={covers.get(master.id) ?? null}
+          canEdit={canEdit}
+        />
+      }
+      badge={
+        demo ? (
+          <>
+            <StatusBadge tone={demoStatusTone[demo]}>
+              {fr.demos.badge(fr.demos.statuses[demo])}
+            </StatusBadge>
+            {/* A title of a collective named for now by PDS OS (lot 7). */}
+            {master.provisional && (
+              <StatusBadge tone="warning" title={fr.demos.provisionalHint}>
+                {fr.demos.provisional}
               </StatusBadge>
-              {/* A title of a collective named for now by PDS OS (lot 7). */}
-              {master.provisional && (
-                <StatusBadge tone="warning" title={fr.demos.provisionalHint}>
-                  {fr.demos.provisional}
-                </StatusBadge>
-              )}
-            </>
-          ) : (
-            master.audioState && (
-              <TitleAudioState
-                state={master.audioState}
-                validated={master.finalValidatedAt !== null}
-              />
-            )
-          )
-        }
-        description={[master.artists, variantText(master)]
-          .filter(Boolean)
-          .join(" · ")}
-        action={
-          <div className="flex flex-wrap gap-2">
-            {demo && (
-              <DemoActions
-                masterId={master.id}
-                title={master.title}
-                status={demo}
-                artistic={
-                  can(access, "validate") || can(access, "creative_work")
-                }
-                canManage={canEdit}
-                canPromote={can(access, "validate")}
-              />
             )}
-            {!demo && can(access, "create_projects") && (
-              <Link
-                href={routes.projectsNewFromMaster(master.id)}
-                // Secondary: the title's next action is « Maintenant »
-                // (proto docs/protos/titre.html, one primary per view).
-                className={buttonVariants({ size: "lg", variant: "outline" })}
-              >
-                <ButtonRoll>
-                  <IconPlus aria-hidden data-icon="inline-start" />
-                  {t.createProject}
-                </ButtonRoll>
-              </Link>
-            )}
-            <MasterActions
-              master={{
-                id: master.id,
-                title: master.title,
-                projectCount: master.projects.length,
-              }}
-              rights={{
-                canEdit,
-                canArchive: can(access, "archive_records"),
-                archived: false,
-              }}
-              leaveTo={routes.masters}
-              size="icon-lg"
+          </>
+        ) : (
+          master.audioState && (
+            <TitleAudioState
+              state={master.audioState}
+              validated={master.finalValidatedAt !== null}
             />
-          </div>
-        }
-      />
-
+          )
+        )
+      }
+      description={[master.artists, variantText(master)]
+        .filter(Boolean)
+        .join(" · ")}
+      action={
+        <div className="flex flex-wrap gap-2">
+          {demo && (
+            <DemoActions
+              masterId={master.id}
+              title={master.title}
+              status={demo}
+              artistic={can(access, "validate") || can(access, "creative_work")}
+              canManage={canEdit}
+              canPromote={can(access, "validate")}
+            />
+          )}
+          {!demo && can(access, "create_projects") && (
+            <Link
+              href={routes.projectsNewFromMaster(master.id)}
+              // Secondary: the title's next action is « Maintenant »
+              // (proto docs/protos/titre.html, one primary per view).
+              className={buttonVariants({ size: "lg", variant: "outline" })}
+            >
+              <ButtonRoll>
+                <IconPlus aria-hidden data-icon="inline-start" />
+                {t.createProject}
+              </ButtonRoll>
+            </Link>
+          )}
+          <MasterActions
+            master={{
+              id: master.id,
+              title: master.title,
+              projectCount: master.projects.length,
+            }}
+            rights={{
+              canEdit,
+              canArchive: can(access, "archive_records"),
+              archived: false,
+            }}
+            leaveTo={routes.masters}
+            size="icon-lg"
+          />
+        </div>
+      }
+    >
       <MasterTabs masterId={master.id} />
       <div className="-mt-2 flex flex-col gap-[var(--section-gap)]">
         {children}
       </div>
-    </PageContainer>
+    </SectionFrame>
   );
 }

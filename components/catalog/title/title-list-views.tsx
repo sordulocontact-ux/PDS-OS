@@ -25,6 +25,7 @@ export function TitleListViews({
   demoCount,
   archived,
   filters,
+  pageAction,
   children,
 }: {
   view: TitleView | "demos";
@@ -34,6 +35,8 @@ export function TitleListViews({
   archived: boolean;
   // The active filters (?audio=, ?artist=, ?project=), kept by the tabs.
   filters: Record<string, string | null>;
+  // The page's action, at the end of the views' line in the new style.
+  pageAction?: React.ReactNode;
   children: React.ReactNode;
 }) {
   const t = fr.catalog.masters.views;
@@ -41,6 +44,7 @@ export function TitleListViews({
   return (
     <DataTableViews
       label={t.label}
+      pageAction={pageAction}
       views={TITLE_VIEWS.map((value): TabBarItem => ({
         href: viewHref(routes.masters, {
           ...filters,

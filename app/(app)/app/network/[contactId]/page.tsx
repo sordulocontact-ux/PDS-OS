@@ -19,8 +19,7 @@ import { emailEnabled } from "@/lib/email/send";
 import { EditContactButton } from "@/components/network/edit-contact-button";
 import { BackLink } from "@/components/shell/back-link";
 import { ReturnBanner } from "@/components/shell/return-banner";
-import { PageContainer } from "@/components/shell/page-container";
-import { PageHeader } from "@/components/shell/page-header";
+import { SectionFrame } from "@/components/shell/section-frame";
 import { Avatar } from "@/components/ui/avatar";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
@@ -81,49 +80,53 @@ export default async function NetworkContactPage({
       : { deals: [], events: [] };
 
   return (
-    <PageContainer>
-      <BackLink href={routes.network}>{p.back}</BackLink>
-      {/* Opened from a contract of the Juridique to complete it (JUR-10). */}
-      <Suspense fallback={null}>
-        <ReturnBanner scope={contact.id} />
-      </Suspense>
-      <PageHeader
-        leading={
-          <Avatar
-            name={contact.name}
-            pictureUrl={contact.pictureUrl ?? null}
-            className="size-16 text-[length:var(--type-body-lg)]"
+    <SectionFrame
+      list={false}
+      above={
+        <>
+          <BackLink href={routes.network}>{p.back}</BackLink>
+          {/* Opened from a contract of the Juridique to complete it (JUR-10). */}
+          <Suspense fallback={null}>
+            <ReturnBanner scope={contact.id} />
+          </Suspense>
+        </>
+      }
+      leading={
+        <Avatar
+          name={contact.name}
+          pictureUrl={contact.pictureUrl ?? null}
+          className="size-16 text-[length:var(--type-body-lg)]"
+        />
+      }
+      title={contact.name}
+      badge={
+        isPrivate ? (
+          <StatusBadge tone="neutral">{t.privacy.badge}</StatusBadge>
+        ) : undefined
+      }
+      description={[
+        t.kinds[contact.kind],
+        rolesText(contact.roles),
+        contact.parentName && t.memberOf(contact.parentName),
+      ]
+        .filter(Boolean)
+        .join(" · ")}
+      action={
+        <div className="flex flex-wrap items-center gap-2">
+          {canEdit && <EditContactButton contactId={contact.id} />}
+          <ContactActions
+            contact={contact}
+            size="icon-lg"
+            leaveTo={routes.network}
+            rights={{
+              canEdit: can(access, "manage_network"),
+              canArchive: can(access, "archive_records"),
+              archived: contact.archived,
+            }}
           />
-        }
-        title={contact.name}
-        badge={
-          isPrivate ? (
-            <StatusBadge tone="neutral">{t.privacy.badge}</StatusBadge>
-          ) : undefined
-        }
-        description={[
-          t.kinds[contact.kind],
-          rolesText(contact.roles),
-          contact.parentName && t.memberOf(contact.parentName),
-        ]
-          .filter(Boolean)
-          .join(" · ")}
-        action={
-          <div className="flex flex-wrap items-center gap-2">
-            {canEdit && <EditContactButton contactId={contact.id} />}
-            <ContactActions
-              contact={contact}
-              size="icon-lg"
-              leaveTo={routes.network}
-              rights={{
-                canEdit: can(access, "manage_network"),
-                canArchive: can(access, "archive_records"),
-                archived: contact.archived,
-              }}
-            />
-          </div>
-        }
-      />
+        </div>
+      }
+    >
       {contact.archived && <ToneCallout>{p.archived}</ToneCallout>}
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
         <div className="flex min-w-0 flex-col gap-6">
@@ -168,6 +171,6 @@ export default async function NetworkContactPage({
           <ContactFiches projects={projects} />
         </div>
       </div>
-    </PageContainer>
+    </SectionFrame>
   );
 }

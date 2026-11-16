@@ -4,5 +4,5 @@ import { PageLoading } from "@/components/shell/page-loading";
 // group: the report has no record frame above it (it may be read without
 // seeing the call).
 export default function Loading() {
-  return <PageLoading />;
+  return <PageLoading section />;
 }

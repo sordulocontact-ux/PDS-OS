@@ -4,8 +4,7 @@ import { TemplateRowActions } from "@/components/contracts/templates/template-ro
 import { TemplateView } from "@/components/contracts/templates/template-view";
 import { TemplateValidateButton } from "@/components/contracts/templates/template-validate-button";
 import { BackLink } from "@/components/shell/back-link";
-import { PageContainer } from "@/components/shell/page-container";
-import { PageHeader } from "@/components/shell/page-header";
+import { SectionFrame } from "@/components/shell/section-frame";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { requireApproved } from "@/lib/auth/dal";
@@ -35,35 +34,39 @@ export default async function ContractTemplatePage({
   const t = fr.legalContracts.templates;
 
   return (
-    <PageContainer>
-      <BackLink href={routes.contractTemplateList}>{t.backToLibrary}</BackLink>
-      <PageHeader
-        title={`${template.name} · ${t.version(template.version)}`}
-        description={[fr.contracts.types[template.type], template.usage]
-          .filter(Boolean)
-          .join(" · ")}
-        badge={
-          <StatusBadge tone={templateStatusTone[template.status]}>
-            {t.states[template.status]}
-          </StatusBadge>
-        }
-        action={
-          <div className="flex items-center gap-2">
-            {template.can.validate && (
-              <TemplateValidateButton templateId={template.id} />
-            )}
-            <TemplateRowActions
-              template={template}
-              organizationId={access.organizationId}
-              size="icon-lg"
-            />
-          </div>
-        }
-      />
+    <SectionFrame
+      list={false}
+      above={
+        <BackLink href={routes.contractTemplateList}>
+          {t.backToLibrary}
+        </BackLink>
+      }
+      title={`${template.name} · ${t.version(template.version)}`}
+      description={[fr.contracts.types[template.type], template.usage]
+        .filter(Boolean)
+        .join(" · ")}
+      badge={
+        <StatusBadge tone={templateStatusTone[template.status]}>
+          {t.states[template.status]}
+        </StatusBadge>
+      }
+      action={
+        <div className="flex items-center gap-2">
+          {template.can.validate && (
+            <TemplateValidateButton templateId={template.id} />
+          )}
+          <TemplateRowActions
+            template={template}
+            organizationId={access.organizationId}
+            size="icon-lg"
+          />
+        </div>
+      }
+    >
       {template.status === "draft" && !template.can.validate && (
         <ToneCallout tone="info">{t.whoValidates}</ToneCallout>
       )}
       <TemplateView template={template} />
-    </PageContainer>
+    </SectionFrame>
   );
 }

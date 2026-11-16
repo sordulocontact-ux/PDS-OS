@@ -15,8 +15,7 @@ import { DealStages } from "@/components/deals/deal-stages";
 import { DealTerms } from "@/components/deals/deal-terms";
 import { NewDealButton } from "@/components/deals/new-deal-button";
 import { BackLink } from "@/components/shell/back-link";
-import { PageContainer } from "@/components/shell/page-container";
-import { PageHeader } from "@/components/shell/page-header";
+import { SectionFrame } from "@/components/shell/section-frame";
 import { PageSection } from "@/components/shell/page-section";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
@@ -119,12 +118,12 @@ export default async function DealPage({
   const s = t.page.sections;
 
   return (
-    <PageContainer>
-      <BackLink href={routes.deals}>{t.page.back}</BackLink>
-      <PageHeader
-        title={dealName(deal)}
-        badge={<DealStageBadge deal={deal} size="md" />}
-      />
+    <SectionFrame
+      list={false}
+      above={<BackLink href={routes.deals}>{t.page.back}</BackLink>}
+      title={dealName(deal)}
+      badge={<DealStageBadge deal={deal} size="md" />}
+    >
       <DealNow
         deal={deal}
         terms={terms}
@@ -186,6 +185,6 @@ export default async function DealPage({
       <PageSection id="historique" title={s.history}>
         <DealHistory deal={deal} events={events} />
       </PageSection>
-    </PageContainer>
+    </SectionFrame>
   );
 }

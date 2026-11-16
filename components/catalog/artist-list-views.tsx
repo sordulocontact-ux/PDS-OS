@@ -16,6 +16,7 @@ export function ArtistListViews({
   counts,
   archived,
   filters,
+  pageAction,
   children,
 }: {
   relation: ArtistRelation | null;
@@ -23,6 +24,8 @@ export function ArtistListViews({
   archived: boolean;
   // The active filters (?titles=), kept by the tabs.
   filters: Record<string, string | null>;
+  // The page's action, at the end of the views' line in the new style.
+  pageAction?: React.ReactNode;
   children: React.ReactNode;
 }) {
   const t = fr.catalog.relation.filter;
@@ -31,6 +34,7 @@ export function ArtistListViews({
   return (
     <DataTableViews
       label={t.label}
+      pageAction={pageAction}
       views={[
         {
           href: viewHref(routes.artists, { ...filters, view }),

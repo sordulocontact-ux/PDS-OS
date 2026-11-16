@@ -32,6 +32,7 @@ export function CallsListView({
   project,
   deleter,
   empty,
+  pageAction,
 }: {
   calls: CallListItem[];
   now: Date;
@@ -41,6 +42,9 @@ export function CallsListView({
   project: string | null;
   deleter: CallDeleter;
   empty: React.ReactNode;
+  // The page's own action, at the end of the tabs' line in the new style
+  // (Calls' SectionFrame `toolsAction`); a project's door gives none.
+  pageAction?: React.ReactNode;
 }) {
   if (calls.length === 0) return empty;
   const t = fr.calls.all;
@@ -68,6 +72,7 @@ export function CallsListView({
   return (
     <DataTableViews
       label={t.views.label}
+      pageAction={pageAction}
       views={[
         {
           href: listHref(null),

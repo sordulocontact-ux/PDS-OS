@@ -6,6 +6,8 @@ export default function DemosLoading() {
     <PageLoading
       title={fr.catalog.masters.title}
       description={fr.catalog.masters.subtitle}
+      section
+      list
     />
   );
 }

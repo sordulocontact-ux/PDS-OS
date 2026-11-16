@@ -1,7 +1,6 @@
 import { CreateMasterForm } from "@/components/catalog/create-master-form";
 import { BackLink } from "@/components/shell/back-link";
-import { PageContainer } from "@/components/shell/page-container";
-import { PageHeader } from "@/components/shell/page-header";
+import { SectionFrame } from "@/components/shell/section-frame";
 import { Card, CardContent } from "@/components/ui/card";
 import { requirePermission } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
@@ -35,30 +34,33 @@ export default async function NewMasterPage({
       : undefined;
 
   return (
-    <PageContainer className="max-w-2xl">
-      <BackLink
-        href={
-          original
-            ? routes.masterVariants(original.id)
+    <SectionFrame
+      list={false}
+      className="max-w-2xl"
+      title={demo ? fr.demos.newDemo : t.title}
+      description={demo ? fr.demos.createHint : t.subtitle}
+      above={
+        <BackLink
+          href={
+            original
+              ? routes.masterVariants(original.id)
+              : fromArtist
+                ? routes.artist(fromArtist.id)
+                : demo
+                  ? routes.demos
+                  : routes.masters
+          }
+        >
+          {original
+            ? fr.catalog.master.backTo(original.title)
             : fromArtist
-              ? routes.artist(fromArtist.id)
+              ? fr.catalog.artist.backTo(fromArtist.name)
               : demo
-                ? routes.demos
-                : routes.masters
-        }
-      >
-        {original
-          ? fr.catalog.master.backTo(original.title)
-          : fromArtist
-            ? fr.catalog.artist.backTo(fromArtist.name)
-            : demo
-              ? fr.demos.back
-              : fr.catalog.master.back}
-      </BackLink>
-      <PageHeader
-        title={demo ? fr.demos.newDemo : t.title}
-        description={demo ? fr.demos.createHint : t.subtitle}
-      />
+                ? fr.demos.back
+                : fr.catalog.master.back}
+        </BackLink>
+      }
+    >
       <Card>
         <CardContent>
           <CreateMasterForm
@@ -90,6 +92,6 @@ export default async function NewMasterPage({
           />
         </CardContent>
       </Card>
-    </PageContainer>
+    </SectionFrame>
   );
 }

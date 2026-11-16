@@ -10,8 +10,7 @@ import {
   NewMeetingButton,
 } from "@/components/calls/new-meeting-button";
 import { EmptyState } from "@/components/shell/empty-state";
-import { PageContainer } from "@/components/shell/page-container";
-import { PageHeader } from "@/components/shell/page-header";
+import { SectionFrame } from "@/components/shell/section-frame";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { CalendarToolbar } from "@/components/ui/calendar-toolbar";
 import { ViewToggle } from "@/components/ui/view-toggle";
@@ -89,40 +88,46 @@ export default async function CallsPage({
       mode: mode === "week" ? null : mode,
       date: date === today.day ? null : date,
     });
-  const header = (
-    <PageHeader
+  const action = (
+    <div className="flex flex-wrap items-center gap-3">
+      <ViewToggle
+        label={fr.calls.calendar.displays.label}
+        options={[
+          {
+            href: routes.calls,
+            label: fr.calls.calendar.displays.list,
+            current: list,
+          },
+          {
+            href: calendarHref("week", null),
+            label: fr.calls.calendar.displays.calendar,
+            current: !list,
+          },
+        ]}
+      />
+      <NewMeetingButton />
+    </div>
+  );
+  const frame = (props: {
+    toolsAction?: boolean;
+    children: React.ReactNode;
+  }) => (
+    <SectionFrame
       title={t.title}
       description={t.description}
-      action={
-        <div className="flex flex-wrap items-center gap-3">
-          <ViewToggle
-            label={fr.calls.calendar.displays.label}
-            options={[
-              {
-                href: routes.calls,
-                label: fr.calls.calendar.displays.list,
-                current: list,
-              },
-              {
-                href: calendarHref("week", null),
-                label: fr.calls.calendar.displays.calendar,
-                current: !list,
-              },
-            ]}
-          />
-          <NewMeetingButton />
-        </div>
-      }
-    />
+      action={action}
+      toolsAction={props.toolsAction}
+    >
+      {props.children}
+    </SectionFrame>
   );
 
   if (!calls) {
     return (
       <MeetingComposerProvider data={composer}>
-        <PageContainer>
-          {header}
-          <FormMessage kind="error">{t.loadError}</FormMessage>
-        </PageContainer>
+        {frame({
+          children: <FormMessage kind="error">{t.loadError}</FormMessage>,
+        })}
       </MeetingComposerProvider>
     );
   }
@@ -130,57 +135,61 @@ export default async function CallsPage({
   if (!list) {
     return (
       <MeetingComposerProvider data={composer}>
-        <PageContainer>
-          {header}
-          <section className="flex flex-col gap-3">
-            <CalendarToolbar period={period} hrefOf={calendarHref} />
-            <CallsCalendar
-              mode={period.mode}
-              days={period.days}
-              month={period.date.slice(0, 7)}
-              events={placeCalls(calls, now, access.personId)}
-              today={today}
-              weekHrefs={Object.fromEntries(
-                period.days.map((day) => [day, calendarHref("week", day)]),
-              )}
-            />
-          </section>
-        </PageContainer>
+        {frame({
+          children: (
+            <section className="flex flex-col gap-3">
+              <CalendarToolbar period={period} hrefOf={calendarHref} />
+              <CallsCalendar
+                mode={period.mode}
+                days={period.days}
+                month={period.date.slice(0, 7)}
+                events={placeCalls(calls, now, access.personId)}
+                today={today}
+                weekHrefs={Object.fromEntries(
+                  period.days.map((day) => [day, calendarHref("week", day)]),
+                )}
+              />
+            </section>
+          ),
+        })}
       </MeetingComposerProvider>
     );
   }
 
   return (
     <MeetingComposerProvider data={composer}>
-      <PageContainer>
-        {header}
-        <CallsListView
-          calls={calls}
-          now={now}
-          door={{ kind: "calls" }}
-          view={asCallView(params.view)}
-          project={filterParam(params.project)}
-          deleter={callDeleter(access)}
-          empty={
-            <EmptyState
-              icon={IconPhone}
-              title={t.emptyTitle}
-              body={t.emptyBody}
-              action={
-                <Link
-                  href={routes.projects}
-                  className={buttonVariants({ variant: "outline" })}
-                >
-                  <ButtonRoll>
-                    <IconFolderOpen aria-hidden data-icon="inline-start" />
-                    {t.openProjects}
-                  </ButtonRoll>
-                </Link>
-              }
-            />
-          }
-        />
-      </PageContainer>
+      {frame({
+        toolsAction: calls.length > 0,
+        children: (
+          <CallsListView
+            calls={calls}
+            pageAction={action}
+            now={now}
+            door={{ kind: "calls" }}
+            view={asCallView(params.view)}
+            project={filterParam(params.project)}
+            deleter={callDeleter(access)}
+            empty={
+              <EmptyState
+                icon={IconPhone}
+                title={t.emptyTitle}
+                body={t.emptyBody}
+                action={
+                  <Link
+                    href={routes.projects}
+                    className={buttonVariants({ variant: "outline" })}
+                  >
+                    <ButtonRoll>
+                      <IconFolderOpen aria-hidden data-icon="inline-start" />
+                      {t.openProjects}
+                    </ButtonRoll>
+                  </Link>
+                }
+              />
+            }
+          />
+        ),
+      })}
     </MeetingComposerProvider>
   );
 }
