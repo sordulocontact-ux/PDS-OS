@@ -7,6 +7,7 @@ import { deals as dealsFr } from "@/lib/i18n/fr/deals";
 import { shell } from "@/lib/i18n/fr/shell";
 import { createClient } from "@/lib/supabase/server";
 import { NAV_ITEMS, navItemAllowed } from "@/lib/ui/nav-items";
+import { formatShortDay } from "@/lib/utils/day";
 import { SEARCH_GROUPS, type SearchHit, type SearchResult } from "./types";
 
 const PER_GROUP = 6;
@@ -168,7 +169,7 @@ export async function appSearch(input: string): Promise<SearchResult> {
         id: `session:${r.id}`,
         group: "session",
         label: r.studio || r.engineer || shell.appSearch.session,
-        detail: r.session_date ?? "",
+        detail: r.session_date ? formatShortDay(r.session_date) : "",
         href: routes.session(r.id),
       }),
     ),
