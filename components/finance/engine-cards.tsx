@@ -1,8 +1,9 @@
+import { OrchardContractButton } from "@/components/finance/funding-buttons";
 import { LinkRows, type LinkRow } from "@/components/ui/link-rows";
 import { ConfirmButton } from "@/components/ui/confirm-button";
 import { MetricCard } from "@/components/ui/metric-card";
 import { ProgressBar } from "@/components/ui/progress-bar";
-import type { orchardAdvances } from "@/lib/finance/engines";
+import type { EngineSettings, orchardAdvances } from "@/lib/finance/engines";
 import { markOrchardAdvanceReceived } from "@/lib/finance/funding-actions";
 import type { payLaterSummary } from "@/lib/finance/pay-later";
 import { fundings } from "@/lib/i18n/fr/fundings";
@@ -65,11 +66,11 @@ function CardFigures({
  * engine.
  */
 export function OrchardCard({
-  trancheCents,
+  settings,
   orchard,
   canManage,
 }: {
-  trancheCents: number;
+  settings: EngineSettings;
   orchard: ReturnType<typeof orchardAdvances>;
   canManage: boolean;
 }) {
@@ -101,8 +102,11 @@ export function OrchardCard({
   return (
     <MetricCard
       title={t.title}
-      value={amount(trancheCents)}
+      value={amount(settings.orchardTrancheCents)}
       caption={t.caption(orchard.per)}
+      action={
+        canManage ? <OrchardContractButton settings={settings} /> : undefined
+      }
     >
       {orchard.contractCents !== null && (
         <CardFigures

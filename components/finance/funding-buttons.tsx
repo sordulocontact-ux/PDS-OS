@@ -56,21 +56,44 @@ export function PlanShowButton({
   );
 }
 
-type Gesture = "format" | "line" | "draw" | "settings";
+/**
+ * The The Orchard contract's form, from its card (Sacha 16/11/2026: hidden
+ * in the page's « ⋯ », nobody found it): « Renseigner le contrat » while
+ * no total is entered, « Modifier le contrat » then.
+ */
+export function OrchardContractButton({
+  settings,
+}: {
+  settings: EngineSettings;
+}) {
+  const t = fr.fundings.orchard;
+  return (
+    <DialogButton
+      label={settings.orchardContractCents === null ? t.setUp : t.editShort}
+      icon={IconSliders}
+      variant="outline"
+      title={t.form.title}
+      description={t.form.description}
+    >
+      {(close) => <OrchardContractForm settings={settings} onDone={close} />}
+    </DialogButton>
+  );
+}
+
+type Gesture = "format" | "line" | "draw";
 
 /**
  * The bar of Financements (top right, 40 px, as the other pages): «
  * Planifier une émission » in black, and a « ⋯ » with the rest: a new show
- * format, a new Pay Later credit, financing a spend, the Orchard rule.
+ * format, a new Pay Later credit, financing a spend. The Orchard contract
+ * is edited from its card (`OrchardContractButton`).
  */
 export function FundingActions({
   formats,
-  settings,
   lines,
   spends,
 }: {
   formats: ShowFormat[];
-  settings: EngineSettings;
   lines: CreditLine[];
   // The spends not paid yet nor financed already.
   spends: FinanceSpend[];
@@ -89,7 +112,6 @@ export function FundingActions({
     ...(lines.some((l) => !l.archived)
       ? [action("draw", f.payLater.draw, IconCalendarDays)]
       : []),
-    action("settings", f.orchard.edit, IconSliders),
   ];
   const dialog: Record<
     Gesture,
@@ -109,11 +131,6 @@ export function FundingActions({
       title: f.payLater.drawForm.title,
       description: f.payLater.drawForm.description,
       form: <DrawForm lines={lines} spends={spends} onDone={close} />,
-    },
-    settings: {
-      title: f.orchard.form.title,
-      description: f.orchard.form.description,
-      form: <OrchardContractForm settings={settings} onDone={close} />,
     },
   };
   return (

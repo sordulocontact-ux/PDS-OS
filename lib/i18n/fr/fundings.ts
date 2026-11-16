@@ -54,7 +54,8 @@ export const fundings = {
     receivedConfirm: "Avance reçue",
     receivedPending: "Enregistrement…",
     stale: "Les avances ont changé entre-temps : rechargez la page.",
-    edit: "Modifier le contrat The Orchard",
+    setUp: "Renseigner le contrat",
+    editShort: "Modifier le contrat",
     deliveries: {
       title: "Titres livrés à The Orchard",
       row: (project: string, release: string | null) =>

@@ -79,7 +79,6 @@ export default async function FinanceFundingsPage() {
         canManage ? (
           <FundingActions
             formats={engines.formats}
-            settings={engines.settings}
             lines={engines.creditLines}
             spends={drawable}
           />
@@ -91,7 +90,7 @@ export default async function FinanceFundingsPage() {
       )}
       <div className="grid gap-4 lg:grid-cols-2">
         <OrchardCard
-          trancheCents={engines.settings.orchardTrancheCents}
+          settings={engines.settings}
           orchard={orchard}
           canManage={canManage}
         />
