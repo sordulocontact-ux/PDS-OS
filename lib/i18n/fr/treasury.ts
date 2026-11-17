@@ -1,6 +1,8 @@
 /** Finance › the treasury and the money coming in (Ibé's ticket « Cockpit
  * Finance », 13/11/2026). */
 
+import { horizonSpan } from "@/lib/i18n/fr/horizon";
+
 const plural = (count: number, one: string, many: string) =>
   `${count} ${count > 1 ? many : one}`;
 
@@ -42,7 +44,7 @@ export const treasury = {
       title: "Solde du compte",
       caption: (day: string) => `D'après le relevé du ${day}`,
       ahead: (days: number, amount: string, delta: string) =>
-        `${amount} prévus dans ${days} jours (${delta})`,
+        `${amount} prévus dans ${horizonSpan(days)} (${delta})`,
       signed: (amount: string, up: boolean) => `${up ? "+" : "−"}${amount}`,
       open: "Trésorerie",
       openLabel: "Ouvrir la trésorerie et la courbe du solde",
@@ -61,8 +63,8 @@ export const treasury = {
       title: "À payer",
       caption: (count: number, days: number) =>
         count === 0
-          ? `Rien d'ici ${days} jours`
-          : `${plural(count, "dépense", "dépenses")} d'ici ${days} jours`,
+          ? `Rien d'ici ${horizonSpan(days)}`
+          : `${plural(count, "dépense", "dépenses")} d'ici ${horizonSpan(days)}`,
       late: (amount: string) => `dont ${amount} en retard`,
       empty: "Aucune dépense à payer.",
       all: "Tout voir",
@@ -130,7 +132,7 @@ export const treasury = {
       label: "Sur la période",
       in: "Entrées",
       out: "Sorties",
-      atHorizon: (days: number) => `Solde dans ${days} jours`,
+      atHorizon: (days: number) => `Solde dans ${horizonSpan(days)}`,
       low: "Point bas",
       lowOn: (day: string) => `le ${day}`,
       reserve: "Réserve minimale",
@@ -138,7 +140,7 @@ export const treasury = {
       below: "Sous la réserve",
     },
     horizon: "Horizon",
-    horizonOption: (days: number) => `${days} jours`,
+    horizonOption: (days: number) => horizonSpan(days),
     updateBalance: "Mettre à jour le solde",
     enterBalance: "Saisir le solde",
     reserve: "Réserve minimale",

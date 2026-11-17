@@ -2,6 +2,8 @@
  * docs/FINANCE-V2.md): sentences written by code, every figure and date
  * computed by lib/finance/ and only copied by the model. */
 
+import { horizonAhead, horizonSpan } from "@/lib/i18n/fr/horizon";
+
 const plural = (count: number, one: string, many: string) =>
   `${count} ${count > 1 ? many : one}`;
 
@@ -23,16 +25,16 @@ export const assistantReadFinance = {
     today: (amount: string, asOf: string) =>
       `Solde du compte aujourd'hui : ${amount} (dernier relevé du ${asOf}, plus les encaissements et moins les dépenses payées depuis).`,
     at: (days: number, amount: string) =>
-      `Solde prévu dans ${days} jours : ${amount}.`,
+      `Solde prévu dans ${horizonSpan(days)} : ${amount}.`,
     low: (days: number, amount: string, day: string) =>
-      `Point bas de trésorerie des ${days} prochains jours : ${amount}, le ${day}.`,
+      `Point bas de trésorerie sur ${horizonAhead(days)} : ${amount}, le ${day}.`,
     lowToday: (days: number, amount: string) =>
-      `Point bas de trésorerie des ${days} prochains jours : ${amount}, aujourd'hui (le solde ne descend pas plus bas).`,
+      `Point bas de trésorerie sur ${horizonAhead(days)} : ${amount}, aujourd'hui (le solde ne descend pas plus bas).`,
     noReserve: "Aucune réserve minimale n'est fixée.",
     below: (reserve: string, day: string) =>
       `Le solde passe sous la réserve de ${reserve} le ${day}, si rien ne bouge.`,
     held: (reserve: string, days: number) =>
-      `Le solde reste au-dessus de la réserve de ${reserve} sur les ${days} prochains jours.`,
+      `Le solde reste au-dessus de la réserve de ${reserve} sur ${horizonAhead(days)}.`,
     movesTitle: (count: number) =>
       `Jusqu'au point bas, ${plural(count, "mouvement prévu", "mouvements prévus")} :`,
     move: (day: string, label: string, amount: string, balance: string) =>
@@ -70,8 +72,8 @@ export const assistantReadFinance = {
   toPay: {
     total: (count: number, days: number, amount: string) =>
       count === 0
-        ? `Rien à payer d'ici ${days} jours.`
-        : `${plural(count, "dépense", "dépenses")} à payer d'ici ${days} jours, ${amount} au total :`,
+        ? `Rien à payer d'ici ${horizonSpan(days)}.`
+        : `${plural(count, "dépense", "dépenses")} à payer d'ici ${horizonSpan(days)}, ${amount} au total :`,
     lateTotal: (amount: string) => `Dont ${amount} déjà échus.`,
     line: (day: string, label: string, amount: string, late: boolean) =>
       `${day} · ${label} : ${amount}${late ? " (échue, comptée aujourd'hui)" : ""}`,

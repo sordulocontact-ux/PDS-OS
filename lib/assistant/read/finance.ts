@@ -53,7 +53,7 @@ export async function readFinance(
 export function financeTool(access: Access) {
   return tool({
     description:
-      "Lit la Finance du label (direction et Finance seulement), calculée par l'application : « tresorerie » = solde du compte, solde prévu, point bas et réserve sur 30, 60 ou 90 jours, et les mouvements qui y mènent ; « encaissements » = entrées d'argent et factures clients en retard (jours de retard, dernière relance) et à venir ; « a_payer » = dépenses à payer d'ici l'horizon ; « budgets » = une enveloppe nommée (projet, artiste ou centre de coût : montant, engagé, reste ou dépassement) ou toutes les enveloppes ; « justificatifs » = dépenses facturées ou payées sans justificatif ; « the_orchard » = le contrat The Orchard : montant, avances reçues et reste, titres livrés (comptés par la Distribution depuis le début du contrat, plus ceux saisis hors PDS OS), combien il en manque pour la prochaine avance, avance attendue, prochaine avance prévue et dépôts comptés. À appeler pour « point bas de trésorerie », « factures en retard », « combien il reste sur J4Y », « qu'est-ce qu'on doit payer ce mois-ci », « combien de sons avant la prochaine avance Orchard ? », « on a touché combien de The Orchard ? ».",
+      "Lit la Finance du label (direction et Finance seulement), calculée par l'application : « tresorerie » = solde du compte, solde prévu, point bas et réserve sur 1, 3 ou 6 mois ou 1 an, et les mouvements qui y mènent ; « encaissements » = entrées d'argent et factures clients en retard (jours de retard, dernière relance) et à venir ; « a_payer » = dépenses à payer d'ici l'horizon ; « budgets » = une enveloppe nommée (projet, artiste ou centre de coût : montant, engagé, reste ou dépassement) ou toutes les enveloppes ; « justificatifs » = dépenses facturées ou payées sans justificatif ; « the_orchard » = le contrat The Orchard : montant, avances reçues et reste, titres livrés (comptés par la Distribution depuis le début du contrat, plus ceux saisis hors PDS OS), combien il en manque pour la prochaine avance, avance attendue, prochaine avance prévue et dépôts comptés. À appeler pour « point bas de trésorerie », « factures en retard », « combien il reste sur J4Y », « qu'est-ce qu'on doit payer ce mois-ci », « combien de sons avant la prochaine avance Orchard ? », « on a touché combien de The Orchard ? ».",
     inputSchema: z.object({
       subject: z.enum(FINANCE_SUBJECTS),
       horizon: z
@@ -61,7 +61,7 @@ export function financeTool(access: Access) {
         .int()
         .optional()
         .describe(
-          "Horizon en jours pour tresorerie et a_payer : 30, 60 ou 90 (90 par défaut pour la trésorerie, 30 pour à payer)",
+          "Horizon en jours pour tresorerie et a_payer : 30 (1 mois), 90 (3 mois), 180 (6 mois) ou 365 (1 an) ; 90 par défaut pour la trésorerie, 30 pour à payer",
         ),
       envelope: z
         .string()

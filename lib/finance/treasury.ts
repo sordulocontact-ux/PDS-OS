@@ -30,7 +30,9 @@ import {
 } from "@/lib/finance/money-in";
 import type { FinanceLine } from "@/lib/finance/types";
 
-export const TREASURY_HORIZONS = [30, 60, 90] as const;
+// 1, 3 and 6 months and a year (Ibé, 17/11/2026: « des mois / année »; 30,
+// 60 and 90 days before), in days: the forecast counts days.
+export const TREASURY_HORIZONS = [30, 90, 180, 365] as const;
 export type TreasuryHorizon = (typeof TREASURY_HORIZONS)[number];
 export const DEFAULT_HORIZON: TreasuryHorizon = 90;
 
@@ -184,7 +186,7 @@ export function computeTreasury({
   upcoming: FinanceLine[];
   engines?: EngineData;
   today: string;
-  // 30, 60 or 90 days on Trésorerie; the Planning reads up to the end of
+  // TREASURY_HORIZONS on Trésorerie (up to a year); the Planning reads up to the end of
   // the month it shows (at most 180 days).
   horizon: number;
 }): Treasury | null {

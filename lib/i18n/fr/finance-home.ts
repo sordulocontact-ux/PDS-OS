@@ -3,6 +3,8 @@
  * each say one thing with its figure in bold and open its page. Every figure
  * is computed by code (lib/finance/treasury.ts, cockpit.ts). */
 
+import { horizonAhead, horizonSpan } from "@/lib/i18n/fr/horizon";
+
 const plural = (count: number, one: string, many: string) =>
   `${count} ${count > 1 ? many : one}`;
 
@@ -12,7 +14,7 @@ export const financeHome = {
   subWatch: (count: number) =>
     `, avec ${plural(count, "point à surveiller", "points à surveiller")}`,
   horizon: "Horizon de la prévision",
-  horizonDays: (days: number) => `${days} jours`,
+  horizonDays: (days: number) => horizonSpan(days),
   cards: "Finance en un coup d'œil",
   brief: {
     // Lot 7 (docs/FINANCE-V2.md): the week's summary, figures chosen by
@@ -21,7 +23,7 @@ export const financeHome = {
     belowReserve: (day: string) =>
       `Le solde passe sous la réserve le ${day} si rien ne bouge.`,
     reserveHeld: (days: number) =>
-      `La réserve tient sur les ${days} prochains jours.`,
+      `La réserve tient sur ${horizonAhead(days)}.`,
     lateCount: (count: number, amount: string) =>
       `${plural(count, "entrée en retard", "entrées en retard")}, ${amount} à relancer.`,
     week: (received: string, paid: string) =>
@@ -39,16 +41,16 @@ export const financeHome = {
   },
   treasury: {
     title: "Trésorerie",
-    // « Le solde est de 72 320 € ; dans 90 jours il sera de 71 790 €. »
+    // « Le solde est de 72 320 € ; dans 3 mois il sera de 71 790 €. »
     lead: "Le solde est de ",
-    middle: (days: number) => ` ; dans ${days} jours il sera de `,
+    middle: (days: number) => ` ; dans ${horizonSpan(days)} il sera de `,
     end: ".",
     noStatement: "Aucun relevé de compte : importez-en un pour voir le solde.",
     open: "Voir la trésorerie",
   },
   low: {
     title: "Point bas et réserve",
-    lead: (days: number) => `Le point bas des ${days} jours tombe le `,
+    lead: (days: number) => `Le point bas sur ${horizonSpan(days)} tombe le `,
     below: ", et le solde passe sous la réserve le ",
     held: ", au-dessus de la réserve de ",
     end: ".",
@@ -69,8 +71,8 @@ export const financeHome = {
     title: "À payer",
     count: (count: number, days: number) =>
       count === 0
-        ? `Rien à payer d'ici ${days} jours`
-        : `${plural(count, "dépense", "dépenses")} à payer d'ici ${days} jours`,
+        ? `Rien à payer d'ici ${horizonSpan(days)}`
+        : `${plural(count, "dépense", "dépenses")} à payer d'ici ${horizonSpan(days)}`,
     open: "Voir les dépenses à payer",
   },
   budgets: {

@@ -71,6 +71,12 @@ export default async function FinanceTreasuryPage({
     .filter((s) => !s.refused && spendStage(s.status) !== "planned");
   // The same budgets and the same figure as the overview's card.
   const rows = liveBudgetRows(budgets.envelopes, budgets.spends);
+  const flows = monthFlows({
+    receipts: data.receipts,
+    paid: data.paid,
+    treasury,
+    today,
+  });
   const p = t.page;
 
   return (
@@ -107,14 +113,11 @@ export default async function FinanceTreasuryPage({
           sorties » chart is the most readable): money in and out by month
           beside the spends by poste, then the budgets. */}
       <div className="grid items-start gap-4 lg:grid-cols-2">
-        <FlowBars
-          flows={monthFlows({
-            receipts: data.receipts,
-            paid: data.paid,
-            treasury,
-            today,
-          })}
-        />
+        {/* Past eight months (a horizon of six months or a year), the
+            bars take the card's whole row. */}
+        <div className={flows.length > 8 ? "lg:col-span-2" : undefined}>
+          <FlowBars flows={flows} />
+        </div>
         <PostPie
           posts={byPost(spent)}
           action={

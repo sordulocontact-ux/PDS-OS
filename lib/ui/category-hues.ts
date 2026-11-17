@@ -124,6 +124,26 @@ const POST_SHADES = [
 export const rampShade = (index: number) =>
   POST_SHADES[index % POST_SHADES.length];
 
+type Shade = { fill: string; stroke: string };
+
+/**
+ * The shades of slices drawn side by side, each its own (Sacha 17/11/2026:
+ * Studio and Production de contenus both black in the split by poste, the
+ * ramp having five shades for twelve postes): a slice keeps its shade when
+ * no slice before it took it, else the first of the ramp still free.
+ */
+export function distinctShades(shades: Shade[]): Shade[] {
+  const ramp: Shade[] = [...POST_SHADES, postShade(null)];
+  const taken = new Set<string>();
+  return shades.map((shade) => {
+    const free = taken.has(shade.stroke)
+      ? (ramp.find((r) => !taken.has(r.stroke)) ?? shade)
+      : shade;
+    taken.add(free.stroke);
+    return free;
+  });
+}
+
 export function postShade(family: BudgetFamily | null) {
   const index = family ? BUDGET_FAMILIES.indexOf(family) : -1;
   return index < 0

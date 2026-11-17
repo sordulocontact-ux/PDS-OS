@@ -3,9 +3,15 @@
 import { useState } from "react";
 
 import { cn } from "@/lib/utils";
-import { formatAmount } from "@/lib/utils/money";
+import { formatAmount, formatAmountCompact } from "@/lib/utils/money";
 
 const amount = (cents: number) => formatAmount(cents, { ht: false });
+// In the ring's middle, the amount without its cents (Sacha 17/11/2026:
+// « 72 042,49 € » ran over the ring), compact past a million.
+const middle = (cents: number) =>
+  cents >= 100_000_000
+    ? formatAmountCompact(cents)
+    : amount(Math.round(cents / 100) * 100);
 
 // A circle of perimeter 100: each slice's length is its percent.
 const R = 15.915;
@@ -95,7 +101,7 @@ export function DonutChart({
             {current ? current.label : totalLabel}
           </span>
           <span className="text-figure-lg font-medium">
-            {amount(current ? current.cents : total)}
+            {middle(current ? current.cents : total)}
           </span>
           {current && (
             <span className="text-caption text-[color:var(--text-secondary)] tabular-nums">
