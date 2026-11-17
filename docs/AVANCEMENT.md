@@ -2427,3 +2427,14 @@ graphique en camembert pour les budgets, histoire d'avoir une vue un peu plus gl
   (`components/ui/donut-chart.tsx`), aussi utilisé par Trésorerie et la page d'un budget.
 - Vérifié par le build, pas encore dans un navigateur.
 
+## Horizons en mois et en année, graphiques lisibles (17/11/2026, branche `pre-prod`)
+
+- **Horizons** (Ibé : « des mois / année ») : 1 mois, 3 mois, 6 mois, 1 an (`TREASURY_HORIZONS` = 30, 90, 180, 365
+  jours ; 60 retiré, un ancien lien `?horizon=60` retombe sur 3 mois). Textes par `horizonSpan` / `horizonAhead`
+  (`lib/i18n/fr/horizon.ts`) : « dans 3 mois », « d'ici 1 an », « sur les 6 mois à venir », aussi dans la lecture de PO.
+  Les courbes nomment le premier de chaque mois au-delà de 22 semaines (« déc. », « janv. 2027 »).
+- **Entrées et sorties** : plus de montant écrit au-dessus des barres (ils se chevauchaient) ; trois montants sur l'axe
+  et les deux montants d'un mois au survol ; la carte prend toute la largeur au-delà de 8 mois.
+- **Camemberts** : total du centre sans centimes (il débordait de l'anneau) ; jamais deux parts de la même teinte
+  (`distinctShades` : la rampe a cinq teintes pour douze postes).
+
