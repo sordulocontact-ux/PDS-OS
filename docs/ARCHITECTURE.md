@@ -3398,8 +3398,7 @@ part financée), puis Rapprochement Qonto, alertes et moteurs (Orchard, Pay Late
   `FinanceFrame` (titre « Finance », action de la page, onglets `SectionTabs` au lieu du menu latéral des
   maquettes) ; `/app/expenses` prend ce cadre pour qui a `read_finance` (onglet « Dépenses »).
 - **Droits** : `manage_finance` (nouvelle, direction + business managers + business) écrit ; `read_finance`
-  lit. Les deux sont retirées de l'accès en production (`OFF_IN_PRODUCTION`, `lib/auth/access.ts`) tant que
-  Sacha garde Finance cachée sur `main`.
+  lit. Cachées en production du 13 au 17/11/2026, ouvertes en prod le 17/11 (Sacha).
 - **Tables** (`20261113100101_treasury.sql`) : `treasury_balances` (relevé du compte : solde, date ; jamais
   modifié, le plus récent fait foi), `treasury_settings` (réserve minimale), `finance_incomes` (entrée
   d'argent : libellé, nature, montant, payeur contact ou nom seul, projet, artiste, date prévue, facture
