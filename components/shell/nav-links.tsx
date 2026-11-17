@@ -55,7 +55,7 @@ export function NavLinks({
 
   return (
     <nav aria-label={t.label}>
-      <ul className="flex flex-col gap-1">
+      <ul className="flex flex-col gap-1 modern:gap-0.5">
         {NAV_ITEMS.filter(
           (item) =>
             (!item.adminOnly || isAdmin) && navItemAllowed(item, permissions),
@@ -101,7 +101,7 @@ export function NavLinks({
                   "cursor-not-allowed text-[color:var(--nav-fg-muted)] hover:bg-transparent",
               )}
             >
-              <Icon className="size-5 shrink-0 modern:size-4" aria-hidden />
+              <Icon className="size-5 shrink-0 modern:size-4.5" aria-hidden />
               {!collapsed && item.label}
               {!collapsed && count > 0 && (
                 <CountBadge count={count} className="ml-auto" />

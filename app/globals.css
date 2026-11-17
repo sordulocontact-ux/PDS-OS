@@ -13,6 +13,15 @@
 @custom-variant modern (&:where(:root:not([data-style="classic"]) *));
 @custom-variant classic (&:where([data-style="classic"] *));
 
+/* A column that still scrolls (a short screen) without showing its bar: the
+   sidebars, whose 40 px rows can run past the screen (Sacha, 16/11/2026). */
+@utility scrollbar-hidden {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 /* ==========================================================================
    1 — TOKENS PO
    Source de vérité : DESIGN.md. Ne pas modifier une valeur ici sans l'y
@@ -266,8 +275,11 @@
   --project-nav-width: 200px;
   /* Barre du haut d'une page de projet, qui porte le fil d'Ariane (Figma PDS OS,
      nœud 304:20801, Sacha 29/10/2026) : alignée sur la ligne du sélecteur de
-     projet (8 + 40 + 6 px, plus son filet). */
-  --project-bar-height: 55px;
+     projet : 56 px filet compris, la hauteur de la tête de la colonne
+     (ContextSidebar, `min-h-14`) et du bandeau d'une section (SectionTopbar,
+     `h-14`) ; 55 px laissait les deux filets à 1 px l'un de l'autre (Sacha,
+     16/11/2026). */
+  --project-bar-height: 56px;
   /* Marge entre le bord de l'écran et les barres latérales : nulle depuis le
      07/10/2026, elles sont collées au bord et pleine hauteur (Figma « PDS OS »,
      nœud 47:12047). */

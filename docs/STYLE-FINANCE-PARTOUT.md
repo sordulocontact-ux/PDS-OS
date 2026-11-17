@@ -194,7 +194,7 @@ La cloche passe son compteur en ton danger **seulement** si une alerte est grave
 | Carte : chiffre → sa légende | 4 | `gap-1` |
 | Bandeau du haut | **56** de haut, filet dessous, collé au défilement | `FinanceTopbar` `h-14 sticky top-0` |
 | Colonne de navigation | 200 de large, `p-2`, tête de 56 alignée sur le bandeau | `ContextSidebar` |
-| Élément de navigation | **40** (aujourd'hui 38 : `min-h-9.5` → `min-h-10`), 14 px, icône 16, `gap-2.5`→`gap-2` | `contextNavItem` |
+| Élément de navigation | **36** (Sacha, 16/11/2026 : 40 faisait étiré, 32 en 14 px beaucoup trop petit ; 38-40 en classique). Barre principale : 15 px, icône 18, 2 px entre deux éléments ; colonne d'une section : 14 px, icône 16 | `navItemClass`, `contextNavItem` |
 | Bouton | 40 (défaut et `lg`), 32 (`sm`), 24 (`xs`) ; 14 px semi-bold (550) | `Button` |
 | Bouton-icône | 40 (`icon`, `icon-lg`), 32 (`icon-sm`), 24 (`icon-xs`), arrondi 6 | `Button` |
 | Champ, recherche | 40, arrondi 6, 15 px | `Field`, `FIELD_CONTROL` |
@@ -208,7 +208,7 @@ La cloche passe son compteur en ton danger **seulement** si une alerte est grave
 | Modale centrée | 520 (`--dialog-width`), arrondi 12 | `DialogContent side="center"` |
 | Infobulle | apparaît en 150 ms | `TooltipTrigger delay` |
 
-Les deux corrections signalées (élément de navigation 40, ligne 48) s'appliquent **aussi dans Finance** : c'est la
+Les deux corrections signalées (élément de navigation 36, ligne 48) s'appliquent **aussi dans Finance** : c'est la
 même règle partout.
 
 ### 4.3 Les tokens `--density-*`

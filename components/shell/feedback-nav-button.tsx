@@ -21,7 +21,7 @@ export function FeedbackNavButton() {
       onClick={() => open()}
       className={cn(navItemClass, "w-full cursor-pointer text-left")}
     >
-      <IconMsgSmile className="size-5 shrink-0 modern:size-4" aria-hidden />
+      <IconMsgSmile className="size-5 shrink-0 modern:size-4.5" aria-hidden />
       {fr.feedback.navLink}
     </button>
   );

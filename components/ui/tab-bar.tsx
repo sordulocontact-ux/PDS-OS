@@ -4,7 +4,9 @@ import { useEffect, useLayoutEffect, useRef } from "react";
 
 import { ButtonRoll } from "@/components/ui/button";
 import { tabLinkClass } from "@/components/ui/tab-link";
+import { scrollFadeX, useScrollFade } from "@/components/ui/use-scroll-fade";
 import { ViewLink } from "@/components/ui/view-link";
+import { cn } from "@/lib/utils";
 
 // A link when the view is in the URL (shareable, Back works), a toggle
 // button when the page filters in place (onSelect).
@@ -90,7 +92,8 @@ export function TabBar({ label, items }: { label: string; items: TabBarItem[] })
 
   // Too narrow for every tab (UX test of 15/11/2026: « Exports » hidden at
   // the end): the current tab scrolled into view, and the edge with more
-  // tabs fades out (`data-fade`).
+  // tabs fades out (useScrollFade).
+  useScrollFade(barRef, "x");
   useEffect(() => {
     const bar = barRef.current;
     const list = listRef.current;
@@ -101,22 +104,6 @@ export function TabBar({ label, items }: { label: string; items: TabBarItem[] })
       if (right > bar.scrollLeft + bar.clientWidth)
         bar.scrollLeft = right - bar.clientWidth + 16;
     }
-    const edges = () => {
-      const start = bar.scrollLeft > 1;
-      const end = bar.scrollLeft + bar.clientWidth < bar.scrollWidth - 1;
-      const fade = start && end ? "both" : start ? "start" : end ? "end" : "";
-      if (fade) bar.dataset.fade = fade;
-      else delete bar.dataset.fade;
-    };
-    edges();
-    bar.addEventListener("scroll", edges, { passive: true });
-    const observer = new ResizeObserver(edges);
-    observer.observe(bar);
-    observer.observe(list);
-    return () => {
-      bar.removeEventListener("scroll", edges);
-      observer.disconnect();
-    };
   }, [active]);
 
   const Bar = items.some((item) => item.href) ? "nav" : "div";
@@ -126,7 +113,10 @@ export function TabBar({ label, items }: { label: string; items: TabBarItem[] })
       ref={barRef}
       aria-label={label}
       role={Bar === "div" ? "group" : undefined}
-      className="-mx-4 min-w-0 overflow-x-auto px-4 shadow-[inset_0_-1px_0_var(--border-hairline)] data-[fade=both]:[mask-image:linear-gradient(to_right,transparent,black_2.5rem,black_calc(100%-2.5rem),transparent)] data-[fade=end]:[mask-image:linear-gradient(to_right,black_calc(100%-2.5rem),transparent)] data-[fade=start]:[mask-image:linear-gradient(to_left,black_calc(100%-2.5rem),transparent)] md:mx-0 md:px-0"
+      className={cn(
+        "-mx-4 min-w-0 overflow-x-auto px-4 shadow-[inset_0_-1px_0_var(--border-hairline)] md:mx-0 md:px-0",
+        scrollFadeX,
+      )}
     >
       {/* The positioned box: tabs are measured from it. */}
       <div className="relative w-fit">

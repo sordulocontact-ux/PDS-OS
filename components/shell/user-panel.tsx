@@ -33,7 +33,7 @@ export function UserPanel({
       <FeedbackNavButton />
       <ReplayOnboardingButton />
       <Link href={routes.settings} data-close-nav className={navItemClass}>
-        <IconGauge3 className="size-5 shrink-0 modern:size-4" aria-hidden />
+        <IconGauge3 className="size-5 shrink-0 modern:size-4.5" aria-hidden />
         {fr.aiUsage.settings.navLink}
       </Link>
       <ThemeChips />

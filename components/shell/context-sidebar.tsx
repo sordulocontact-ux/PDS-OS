@@ -1,5 +1,8 @@
 "use client";
 
+import { useRef } from "react";
+
+import { scrollFadeY, useScrollFade } from "@/components/ui/use-scroll-fade";
 import { ViewLink } from "@/components/ui/view-link";
 import { cn } from "@/lib/utils";
 
@@ -8,10 +11,11 @@ import { cn } from "@/lib/utils";
 // it is shown (use-collapsed-nav.tsx). Desktop only; small screens get the
 // section's own row of tabs or chips.
 const frame =
-  "sticky top-[var(--shell-inset)] hidden h-[calc(100dvh-2*var(--shell-inset))] w-[var(--project-nav-width)] shrink-0 flex-col overflow-y-auto border-r border-[color:var(--border-hairline)] bg-[var(--surface-page)] p-2 text-sidebar-foreground md:flex";
+  "sticky top-[var(--shell-inset)] hidden h-[calc(100dvh-2*var(--shell-inset))] w-[var(--project-nav-width)] shrink-0 flex-col overflow-hidden border-r border-[color:var(--border-hairline)] bg-[var(--surface-page)] p-2 text-sidebar-foreground md:flex";
 
 /** The column itself: its head on a hairline (a switcher, a title), then
- * its entries. */
+ * its entries, which scroll under the head on a short screen and fade at
+ * the edge with more, as the main sidebar's. */
 export function ContextSidebar({
   label,
   head,
@@ -24,6 +28,8 @@ export function ContextSidebar({
   busy?: boolean;
   children: React.ReactNode;
 }) {
+  const entriesRef = useRef<HTMLDivElement>(null);
+  useScrollFade(entriesRef, "y");
   return (
     <nav aria-label={label} aria-busy={busy || undefined} className={frame}>
       {/* The head's rule runs the column's whole width, at the height of a
@@ -32,16 +38,21 @@ export function ContextSidebar({
       <div className="-mx-2 -mt-2 mb-1.5 flex min-h-14 shrink-0 items-center border-b border-[color:var(--border-hairline)] px-2">
         <div className="min-w-0 flex-1">{head}</div>
       </div>
-      {children}
+      <div
+        ref={entriesRef}
+        className={cn("-mx-2 flex min-h-0 flex-1 flex-col px-2", scrollFadeY)}
+      >
+        {children}
+      </div>
     </nav>
   );
 }
 
 // Proto « Projet complet » (`.pitem`): grey at rest, sunken grey and ink
-// when open; 40 px in the new style (docs/STYLE-FINANCE-PARTOUT.md § 4.2),
+// when open; 36 px in the new style (docs/STYLE-FINANCE-PARTOUT.md § 4.2),
 // 38 in the classic one.
 export const contextNavItem =
-  "relative flex min-h-9.5 w-full items-center gap-2.5 rounded-lg px-2.5 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] no-underline modern:min-h-10 modern:gap-2";
+  "relative flex min-h-9.5 w-full items-center gap-2.5 rounded-lg px-2.5 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] no-underline modern:min-h-9 modern:gap-2";
 
 /** A group's title in the column, 13 px. */
 export function ContextNavGroupTitle({

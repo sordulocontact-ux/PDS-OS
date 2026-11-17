@@ -320,9 +320,10 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   `components/shell/sidebar.tsx`.
 - En haut, le monogramme PDS OS (`PdsLogo`, `Logo.svg` du 30/10/2026, 36 px de large, couleur
   `--nav-brand-fg`) dans un carré noir de 60 px arrondi 16 px (`--nav-brand-bg`) et le bouton pour replier / déplier (icône 20 px). Dessous, la navigation
-  (`lib/ui/nav-items.ts`) : éléments de 40 px, icône 20 px, fond `--nav-item-active-bg`
+  (`lib/ui/nav-items.ts`) : éléments de 40 px, icône 20 px (nouveau style : 36 px, texte 15, icône 18, 2 px entre eux), fond `--nav-item-active-bg`
   sur la page ouverte, `--nav-item-hover-bg` au survol. Repliée : icônes seules,
-  centrées, libellé en `Tooltip`. En bas, sur un filet : l'avatar (initiales) et le nom
+  centrées, libellé en `Tooltip`. Sur un écran trop court, seules les pages défilent, sans barre, avec un
+  fondu au bord qui en cache (`useScrollFade`, comme Vercel et Supabase) ; le logo et le compte restent fixes. En bas, sur un filet : l'avatar (initiales) et le nom
   de la personne connectée, qui ouvrent un menu (nom, email, « Envoyer un retour »,
   « Se déconnecter » ; `AccountMenu`), et la cloche ronde à droite, point bleu
   `--nav-unread-dot` s'il y a du non lu. Repliée : la cloche au-dessus de l'avatar
@@ -358,7 +359,7 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   18/10/2026, proto « Projet complet ») : remplace le titre de section (`ProjectPageTitle`, 28 px,
   fil dans le h1) et les chevrons (`SectionSteps`). De haut en bas :
   1. **fil d'Ariane dans la barre du haut** (Figma PDS OS 304:20801, Sacha 29/10/2026) : une barre
-     de `--project-bar-height` (55 px, alignée sur la ligne du sélecteur de projet) avec un filet
+     de `--project-bar-height` (56 px filet compris, aligné sur la tête de la colonne du projet et le bandeau d'une section) avec un filet
      dessous, sur toute la largeur de la colonne ; le fil à 24 px du bord, 16 px medium
      `--text-tertiary`, séparateur « / » : « Module / [sous-module /] Étape », **sans le projet**
      (la barre latérale du projet le nomme) ; chaque segment sauf le dernier est un lien, le

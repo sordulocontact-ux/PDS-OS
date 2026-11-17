@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRef } from "react";
 
 import { IconSidebar } from "@/components/icons";
 import { AccountMenu } from "@/components/shell/account-menu";
@@ -8,6 +9,7 @@ import { NavLinks } from "@/components/shell/nav-links";
 import { PdsLogo } from "@/components/shell/pds-logo";
 import { useCollapsedNav } from "@/components/shell/use-collapsed-nav";
 import { Button } from "@/components/ui/button";
+import { scrollFadeY, useScrollFade } from "@/components/ui/use-scroll-fade";
 import { routes, type Permission } from "@/lib/auth/redirects";
 import { shell } from "@/lib/i18n/fr/shell";
 import { cn } from "@/lib/utils";
@@ -19,6 +21,9 @@ const fr = { shell };
 // docs/DESIGN.md § 4): the "PDS" square and the collapse button, the
 // navigation, then the account and the bell. Collapsed by default inside a
 // project; the IconSidebar button overrides it for the current visit only.
+// On a short screen the head and the account stay put and only the pages
+// scroll between them, fading at the edge with more (Sacha, 16/11/2026, as
+// Vercel's and Supabase's).
 export function Sidebar({
   isAdmin,
   permissions,
@@ -36,44 +41,50 @@ export function Sidebar({
 }) {
   const { collapsed, toggle } = useCollapsedNav();
   const t = fr.shell.nav;
+  const pagesRef = useRef<HTMLDivElement>(null);
+  useScrollFade(pagesRef, "y");
 
   return (
     <aside
       className={cn(
-        "sticky top-[var(--shell-inset)] hidden h-[calc(100dvh-2*var(--shell-inset))] shrink-0 flex-col justify-between gap-6 overflow-y-auto border-r border-[color:var(--nav-border)] bg-sidebar p-2 text-sidebar-foreground transition-[width] duration-[var(--duration-fast)] ease-[var(--ease-standard)] md:flex",
+        "sticky top-[var(--shell-inset)] hidden h-[calc(100dvh-2*var(--shell-inset))] shrink-0 flex-col gap-6 overflow-hidden border-r border-[color:var(--nav-border)] bg-sidebar p-2 text-sidebar-foreground transition-[width] duration-[var(--duration-fast)] ease-[var(--ease-standard)] md:flex",
         collapsed ? "w-[var(--nav-width-collapsed)]" : "w-[var(--nav-width)]",
       )}
     >
-      <div className="flex flex-col gap-6">
-        <div
-          className={cn(
-            "flex items-center",
-            collapsed ? "flex-col gap-1" : "justify-between px-4 pt-4",
-          )}
-        >
-          {/* Always there, even collapsed (proto « Projet complet »: 40 px
-              ink square); full width, the larger square of the Figma. */}
+      {/* The head keeps its height either way and the button its line, so
+          nothing under it moves when the column collapses; collapsed, the
+          logo goes and the button alone stays (Sacha, 17/11/2026), Accueil
+          leading home. */}
+      <div
+        className={cn(
+          "flex h-19 shrink-0 items-center pt-4",
+          collapsed ? "justify-center" : "justify-between px-4",
+        )}
+      >
+        {!collapsed && (
           <Link
             href={routes.app}
             aria-label={fr.shell.brand}
-            className={cn(
-              "flex items-center justify-center bg-[var(--nav-brand-bg)] text-[color:var(--nav-brand-fg)]",
-              collapsed ? "size-10 rounded-xl" : "size-15 rounded-2xl",
-            )}
+            className="flex size-15 items-center justify-center rounded-2xl bg-[var(--nav-brand-bg)] text-[color:var(--nav-brand-fg)]"
           >
-            <PdsLogo entryLanding className={collapsed ? "w-6" : "w-9"} />
+            <PdsLogo entryLanding className="w-9" />
           </Link>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="hover:bg-[var(--nav-item-hover-bg)]"
-            aria-label={collapsed ? t.expand : t.collapse}
-            onClick={toggle}
-          >
-            {/* 20 px icon, as in the navigation. */}
-            <IconSidebar aria-hidden className="size-5" />
-          </Button>
-        </div>
+        )}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="hover:bg-[var(--nav-item-hover-bg)]"
+          aria-label={collapsed ? t.expand : t.collapse}
+          onClick={toggle}
+        >
+          {/* 20 px icon, as in the navigation. */}
+          <IconSidebar aria-hidden className="size-5" />
+        </Button>
+      </div>
+      <div
+        ref={pagesRef}
+        className={cn("-mx-2 min-h-0 flex-1 px-2", scrollFadeY)}
+      >
         <NavLinks
           isAdmin={isAdmin}
           permissions={permissions}
@@ -83,7 +94,7 @@ export function Sidebar({
       </div>
       <div
         className={cn(
-          "flex items-center gap-2 border-t border-[color:var(--nav-border)] pt-2",
+          "flex shrink-0 items-center gap-2 border-t border-[color:var(--nav-border)] pt-2",
           // Collapsed, the bell stays reachable above the avatar.
           collapsed && "flex-col",
         )}
