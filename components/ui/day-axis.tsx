@@ -30,6 +30,9 @@ function tickName(tick: DayTick) {
 // (« Aujourd'hui »): a desktop's wide chart, then a phone's narrow one.
 const GAP = 0.08;
 const PHONE_GAP = 0.2;
+// Two names never closer than this share of the width (Sacha 17/11/2026:
+// a year's names ran into each other): one of them is left out.
+const MIN_APART = 0.06;
 
 /**
  * The names under a chart's time axis (`dayTicks`): « 17 nov. », the day
@@ -48,6 +51,15 @@ export function DayAxis({
 }) {
   const near = (at: number, gap: number) =>
     marker !== undefined && Math.abs(at - marker.at) < gap;
+  // The names kept, in order: none too close to the marker or to the name
+  // before it.
+  const kept = ticks.reduce<DayTick[]>(
+    (list, t) =>
+      near(t.at, GAP) || (list.length > 0 && t.at - list[list.length - 1].at < MIN_APART)
+        ? list
+        : [...list, t],
+    [],
+  );
   const edge = (at: number) =>
     at < 0.04 ? "" : at > 0.96 ? "-translate-x-full" : "-translate-x-1/2";
   return (
@@ -63,9 +75,7 @@ export function DayAxis({
           {marker.label}
         </span>
       )}
-      {ticks
-        .filter((t) => !near(t.at, GAP))
-        .map((t, i) => (
+      {kept.map((t, i) => (
           <span
             key={t.day}
             className={cn(
