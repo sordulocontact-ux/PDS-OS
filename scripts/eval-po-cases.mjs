@@ -83,10 +83,47 @@ export const CASES = [
     tools: ["calendar", "my_todo"],
   },
   {
-    id: "07-hors-sujet",
+    // Since 18/11/2026 PO answers general questions (wave 1 of the study).
+    id: "07-culture-generale",
     question: "Quelle est la capitale de l'Australie ?",
-    noTools: ["explain_notion", "search_everything"],
-    never: /canberra/i,
+    noTools: ["report_gap", "search_everything"],
+    says: /canberra/i,
+  },
+  {
+    id: "ecrire-mail",
+    question:
+      "Écris un mail court à notre ingé son pour lui demander la V2 du mix pour vendredi.",
+    noTools: ["report_gap"],
+    says: /mix/i,
+    never: /\b20\d\d\b/,
+  },
+  {
+    id: "traduire",
+    question:
+      "Traduis en anglais : le single sort le mois prochain, on prépare la campagne.",
+    noTools: ["report_gap"],
+    says: /single|campaign/i,
+  },
+  {
+    id: "graphique-tresorerie",
+    question: "Montre-moi la trésorerie sur 3 mois en graphique.",
+    tools: ["show_chart"],
+  },
+  {
+    id: "export-titres",
+    question: "Exporte tous les titres du catalogue en Excel.",
+    tools: ["export_list"],
+  },
+  {
+    id: "pdf-texte",
+    question:
+      "Mets ce texte en PDF : Point hebdo. Tout avance, rien ne bloque.",
+    tools: ["make_pdf"],
+  },
+  {
+    id: "internet",
+    question: "Cherche sur Internet le contact presse de Konbini.",
+    tools: ["report_gap"],
   },
   {
     id: "09-streams",

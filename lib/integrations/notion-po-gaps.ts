@@ -14,6 +14,8 @@ export type PoGapRow = {
   at: string;
   part: string | null;
   cause: string;
+  // What was asked, by kind (report_gap); null for a read that found nothing.
+  kind: string | null;
   tools: string;
   page: string | null;
   environment: string;
@@ -38,6 +40,7 @@ export async function createPoGapRow(row: PoGapRow): Promise<void> {
       Date: { date: { start: row.at } },
       ...(row.part && { Partie: { select: { name: row.part } } }),
       Cause: { select: { name: row.cause } },
+      ...(row.kind && { Demande: { select: { name: row.kind } } }),
       "Fonctions tentées": { rich_text: text(row.tools) },
       ...(row.page && { Page: { rich_text: text(row.page) } }),
       Environnement: { select: { name: row.environment } },

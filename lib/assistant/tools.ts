@@ -10,6 +10,7 @@ import {
   findMastersTool,
 } from "@/lib/assistant/catalog-tools";
 import { activityLine } from "@/lib/assistant/facts";
+import { reportGapTool } from "@/lib/assistant/gap-tool";
 import { guideTools } from "@/lib/assistant/guide-tools";
 import { readTools } from "@/lib/assistant/read";
 import { capped } from "@/lib/assistant/read/target";
@@ -17,6 +18,9 @@ import { myWorkFacts } from "@/lib/assistant/my-work";
 import { projectStatus } from "@/lib/assistant/project-status";
 import { workflowLines } from "@/lib/assistant/project-workflows";
 import { stepStatus } from "@/lib/assistant/step-status";
+import { showChartTool } from "@/lib/assistant/show/chart";
+import { exportListTool } from "@/lib/assistant/show/export";
+import { makePdfTool } from "@/lib/assistant/show/pdf";
 import { proposeArtistTool } from "@/lib/assistant/propose/artist";
 import { proposeContractTool } from "@/lib/assistant/propose/contract";
 import { proposeContractTemplateTool } from "@/lib/assistant/propose/contract-template";
@@ -56,7 +60,9 @@ import { createClient } from "@/lib/supabase/server";
  * draft may come from. `pagePath`: the page PO was opened from, joined to a
  * feedback draft. The director's feedback tools exist only for read_feedback.
  * Outside production only, create_test_data and fill_page_test_data write
- * fake records, the open page by default (§ 3 ter).
+ * fake records, the open page by default (§ 3 ter). show_chart, export_list
+ * and make_pdf add a chart or a file under the answer (`display`, § 3
+ * sexies); report_gap counts what PO cannot do yet (§ 4 bis).
  */
 export function createAssistantTools(
   access: Access,
@@ -67,6 +73,11 @@ export function createAssistantTools(
   return {
     ...guideTools(access, pagePath),
     ...readTools(access, pagePath),
+    // Charts, files and « not yet » (§ 3 sexies, § 4 bis).
+    show_chart: showChartTool(access, pagePath),
+    export_list: exportListTool(access),
+    make_pdf: makePdfTool(pagePath),
+    report_gap: reportGapTool(),
     find_artists: findArtistsTool(),
     find_masters: findMastersTool(),
     propose_artist: proposeArtistTool(context),

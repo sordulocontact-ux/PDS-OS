@@ -2438,3 +2438,28 @@ graphique en camembert pour les budgets, histoire d'avoir une vue un peu plus gl
 - **Camemberts** : total du centre sans centimes (il débordait de l'anneau) ; jamais deux parts de la même teinte
   (`distinctShades` : la rampe a cinq teintes pour douze postes).
 
+
+## PO assistant de travail : écrire, graphiques, exports, PDF (18/11/2026, branche `pre-prod`)
+
+Vague 1 de l'étude des usages de l'IA (`IA microsoft/ETUDE-USAGES-IA.md`, hors git ; Sacha : « que PDS OS remplace le
+Claude de l'entreprise »). Détail : `docs/ASSISTANT.md` § 1, 3 sexies, 4 bis.
+
+- **Tâches de travail** : PO écrit, réécrit, corrige, traduit, résume un texte collé, explique (une clause collée :
+  « à faire relire par le Juridique »), trouve des idées ; sans fonction. Ce qu'il ne sait pas reste entre crochets.
+  Hors sujet réduit à la vie personnelle et à l'actualité.
+- **Tableaux** : dès 3 éléments comparables, tableau Markdown dessiné en `DataTable` (`AnswerTable`), la ligne ouvre
+  l'élément quand son nom est celui d'une source du code.
+- **Graphiques** `show_chart` : trésorerie, entrées et sorties, dépenses par poste, budgets, budget d'un projet,
+  parts d'un titre ; composants de Finance (`AnswerChart`), découpage du camembert partagé (`lib/finance/post-slices.ts`).
+- **Fichiers** : `export_list` (CSV de titres, artistes, projets, contacts, contrats, fichiers et des exports de Finance,
+  `GET /api/assistant/export`, `lib/utils/csv.ts` partagé avec l'Export comptable) ; `make_pdf` (texte quelconque via
+  `POST /api/assistant/pdf` et `lib/pdf/text-document.ts`, ou Brief Mix/Master, dossier de distribution, compte rendu,
+  contrat par leurs routes). Carte « Télécharger » (`AnswerFile`, `downloadPdf` options `init` / `csv`).
+- **Ce que le modèle relit** : `toModelOutput` (`lib/assistant/show/model-output.ts`) retire les points de la courbe et le
+  texte d'un PDF des tours suivants.
+- **Questions sans réponse** : `report_gap` avec le genre de la demande, colonne « Demande » et cause « Pas encore
+  possible » ajoutées à la base Notion ; « Aucune fonction appelée » n'est plus écrite (elle comptait aussi les
+  salutations).
+- Questions tests 7 et 50 à 56 (`scripts/eval-po-cases.mjs`), le gras et les tableaux ne sont plus comptés comme
+  Markdown fautif. Vérifié : build, typecheck, lint, et un PDF de texte réel produit en local (titres, listes, tableau,
+  texte échappé). Pas encore rejoué dans le navigateur ni par `pnpm eval:po`.

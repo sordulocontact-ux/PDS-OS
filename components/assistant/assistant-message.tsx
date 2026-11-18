@@ -2,10 +2,13 @@ import type { UIMessage } from "ai";
 import { IconChevronRight, IconLoader } from "nucleo-sharp-essential";
 
 import { AnswerActions } from "@/components/assistant/answer-actions";
+import { AnswerChart } from "@/components/assistant/answer-chart";
+import { AnswerFile } from "@/components/assistant/answer-file";
 import { AnswerText } from "@/components/assistant/answer-text";
 import { DraftCard } from "@/components/assistant/draft-card";
 import { evidenceOf } from "@/components/assistant/tool-output";
 import { ImageGallery } from "@/components/ui/image-gallery";
+import { displayOf } from "@/lib/assistant/display";
 import { proposalOf } from "@/lib/assistant/drafts";
 import { assistant } from "@/lib/i18n/fr/assistant";
 
@@ -101,11 +104,17 @@ export function AssistantMessage({
     .filter((p) => !proposalOf(p.output))
     .map((p) => evidenceOf(p.output));
   const facts = evidence.flatMap((e) => e.facts);
-  const sources = [
+  const links = [
     ...new Map(
       evidence.flatMap((e) => e.sources).map((s) => [s.href, s]),
     ).values(),
-  ].slice(0, 8);
+  ];
+  const sources = links.slice(0, 8);
+  // Charts and files built by code (show_chart, export_list, make_pdf).
+  const displays = done.flatMap((p) => {
+    const display = displayOf(p.output);
+    return display ? [{ toolCallId: p.toolCallId, display }] : [];
+  });
 
   return (
     <div className="grid max-w-[95%] gap-3">
@@ -145,7 +154,14 @@ export function AssistantMessage({
           {t.tools[p.type.replace(/^tool-/, "")] ?? t.thinking}
         </p>
       ))}
-      {answer && <AnswerText text={answer} />}
+      {answer && <AnswerText text={answer} links={links} />}
+      {displays.map(({ toolCallId, display }) =>
+        display.kind === "file" ? (
+          <AnswerFile key={toolCallId} file={display} />
+        ) : (
+          <AnswerChart key={toolCallId} chart={display} />
+        ),
+      )}
       {drafts.map((d) => (
         <DraftCard key={d.toolCallId} {...d} />
       ))}

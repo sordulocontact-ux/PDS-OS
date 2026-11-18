@@ -21,6 +21,9 @@ export const assistant = {
     propose_project: "Préparation du projet",
     create_test_data: "Création des données de test",
     fill_page_test_data: "Remplissage de la page avec des données de test",
+    show_chart: "Préparation du graphique",
+    export_list: "Préparation de l'export",
+    make_pdf: "Préparation du PDF",
   } as Record<string, string>,
   // Development only: fake records written straight away (docs/ASSISTANT.md § 3 ter).
   testData: {

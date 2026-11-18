@@ -102,7 +102,8 @@ function check(test, { tools, text }) {
   if (test.never && test.never.test(text))
     failures.push(`interdit ${test.never}`);
   if (/https?:\/\//.test(text)) failures.push("URL écrite par le modèle");
-  if (/\*\*|^#/m.test(text)) failures.push("Markdown");
+  // Bold (**…**) and tables (| … |) are allowed since 18/11/2026; titles not.
+  if (/^#/m.test(text)) failures.push("Markdown");
   if (!text) failures.push("réponse vide");
   return failures;
 }

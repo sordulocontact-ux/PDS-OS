@@ -29,11 +29,14 @@ export async function downloadPdf(
   href: string,
   fileName: string,
   failedLabel: string,
+  // A POST with a body (a text PO laid out, /api/assistant/pdf); `csv`:
+  // the file is a CSV, saved as it comes (PO's exports).
+  options: { init?: RequestInit; csv?: boolean } = {},
 ): Promise<boolean> {
   const t = fr.pdf;
   let blob: Blob;
   try {
-    const response = await fetch(href, { cache: "no-store" });
+    const response = await fetch(href, { cache: "no-store", ...options.init });
     if (response.status === 401) {
       toast.error(t.expired);
       return false;
@@ -45,7 +48,7 @@ export async function downloadPdf(
       return false;
     }
     blob = await response.blob();
-    if (!(await isPdf(blob))) {
+    if (!options.csv && !(await isPdf(blob))) {
       console.error(
         "[pdf] not a PDF",
         response.headers.get("content-type"),
@@ -71,7 +74,7 @@ export async function downloadPdf(
     link.click();
     link.remove();
     window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
-    toast.success(t.ready);
+    toast.success(options.csv ? t.fileReady : t.ready);
     return true;
   } catch (error) {
     console.error("[pdf] download failed", error);

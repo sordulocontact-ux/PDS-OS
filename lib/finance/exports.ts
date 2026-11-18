@@ -9,6 +9,7 @@ import { spendTtc } from "@/lib/finance/spends";
 import { loadTreasury } from "@/lib/finance/treasury-queries";
 import { treasury } from "@/lib/i18n/fr/treasury";
 import { createClient } from "@/lib/supabase/server";
+import { csv, csvEuros } from "@/lib/utils/csv";
 
 // « Export comptable » (Ibé's ticket, lot 7): Finance's figures as CSV for
 // the accountant, who keeps the official accounts. Read with the session:
@@ -25,18 +26,7 @@ export type ExportType = (typeof EXPORT_TYPES)[number];
 
 const t = financeExports.columns;
 
-// Euros with a comma, as French spreadsheets read them.
-const euros = (cents: number | null) =>
-  cents === null ? "" : (cents / 100).toFixed(2).replace(".", ",");
-
-function csv(rows: (string | number | null)[][]): string {
-  const cell = (v: string | number | null) => {
-    const s = v === null ? "" : String(v);
-    return /[;"\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-  };
-  // A BOM, for Excel to read the accents.
-  return `﻿${rows.map((r) => r.map(cell).join(";")).join("\r\n")}\r\n`;
-}
+const euros = csvEuros;
 
 export async function financeCsv(
   type: ExportType,

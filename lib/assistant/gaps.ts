@@ -2,6 +2,7 @@ import "server-only";
 
 import { getToolName, isToolUIPart, type UIMessage } from "ai";
 
+import { GAP_KINDS, type GapKind } from "@/lib/assistant/gap-tool";
 import { getServerEnv } from "@/lib/env";
 import { appPartOf } from "@/lib/feedback/app-part";
 import { assistant } from "@/lib/i18n/fr/assistant";
@@ -17,12 +18,18 @@ const fr = { assistant, assistantGaps, feedback };
 /**
  * PO's unanswered questions, counted without reading the conversations
  * (audit of PO § 4.1, Sacha 07/11/2026: stored in Notion). From the last
- * answer only, by code: no function called, or a function that found
- * nothing (`gap: "missing"`) or failed (`gap: "failed"`). The row keeps
- * the part of the app, the page with its ids masked, the functions tried
- * and the time; never the question, the answer or the person.
+ * answer only, by code: PO said it cannot do it yet (report_gap, with the
+ * kind of request), or every function it called found nothing (`gap:
+ * "missing"`) or failed (`gap: "failed"`). An answer without any function
+ * is no longer counted (18/11/2026): writing, translating or explaining
+ * need none. The row keeps the part of the app, the page with its ids
+ * masked, the functions tried and the time; never the question, the
+ * answer or the person.
  */
 type Cause = keyof typeof assistantGaps.causes;
+type Gap = { cause: Cause; kind: GapKind | null; tools: string[] };
+
+const REPORT = "report_gap";
 
 function gapOf(output: unknown): "missing" | "failed" | null {
   if (typeof output !== "object" || output === null) return null;
@@ -35,20 +42,33 @@ function gapOf(output: unknown): "missing" | "failed" | null {
     : null;
 }
 
-export function unansweredOf(
-  messages: UIMessage[],
-): { cause: Cause; tools: string[] } | null {
+function kindOf(output: unknown): GapKind {
+  const kind = (output as { kind?: unknown } | null)?.kind;
+  return GAP_KINDS.includes(kind as GapKind) ? (kind as GapKind) : "autre";
+}
+
+export function unansweredOf(messages: UIMessage[]): Gap | null {
   const last = messages.at(-1);
   if (!last || last.role !== "assistant") return null;
   const calls = last.parts.filter(isToolUIPart);
-  if (calls.length === 0) return { cause: "none", tools: [] };
-  const tools = [...new Set(calls.map(getToolName))];
-  const gaps = calls.map((part) =>
+  const reported = calls.find(
+    (p) => getToolName(p) === REPORT && p.state === "output-available",
+  );
+  const reads = calls.filter((p) => getToolName(p) !== REPORT);
+  const tools = [...new Set(reads.map(getToolName))];
+  if (reported)
+    return { cause: "cannot", kind: kindOf(reported.output), tools };
+  if (reads.length === 0) return null;
+  const gaps = reads.map((part) =>
     part.state === "output-available" ? gapOf(part.output) : null,
   );
   // Answered when one function found what was asked.
   if (gaps.some((g) => g === null)) return null;
-  return { cause: gaps.includes("failed") ? "failed" : "missing", tools };
+  return {
+    cause: gaps.includes("failed") ? "failed" : "missing",
+    kind: null,
+    tools,
+  };
 }
 
 const UUID = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi;
@@ -70,12 +90,14 @@ export async function recordUnanswered(
   const t = fr.assistantGaps;
   const part = appPartOf(pagePath);
   const partLabel = part ? fr.feedback.notion.parts[part] : null;
+  const kind = gap.kind ? t.kinds[gap.kind] : null;
   try {
     await createPoGapRow({
-      title: t.title(t.causes[gap.cause], partLabel),
+      title: t.title(kind ?? t.causes[gap.cause], partLabel),
       at: new Date().toISOString(),
       part: partLabel,
       cause: t.causes[gap.cause],
+      kind,
       tools: gap.tools.join(", ") || t.noTool,
       page: pagePath ? pagePath.replace(UUID, "…").slice(0, 200) : null,
       environment: environment(),

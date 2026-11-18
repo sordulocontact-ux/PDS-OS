@@ -2,6 +2,7 @@ import "server-only";
 
 import { pageRecord } from "@/lib/assistant/page-context";
 import { findNamed } from "@/lib/assistant/propose/match";
+import type { Display } from "@/lib/assistant/display";
 import type { Source } from "@/lib/assistant/sources";
 import { routes } from "@/lib/auth/redirects";
 import { assistantRead } from "@/lib/i18n/fr/assistant-read";
@@ -21,6 +22,8 @@ export type ReadResult = {
   // Nothing found or a failed read: counted in Notion, never with the
   // question (lib/assistant/gaps.ts).
   gap?: "missing" | "failed";
+  // A chart or a file shown under the answer (lib/assistant/display.ts).
+  display?: Display;
 };
 
 export const readFailed = (): ReadResult => ({

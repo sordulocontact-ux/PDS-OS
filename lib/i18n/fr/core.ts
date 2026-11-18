@@ -28,6 +28,7 @@ export const core = {
   // generation and the download fail separately (PROJ-BUG-05).
   pdf: {
     ready: "PDF téléchargé.",
+    fileReady: "Fichier téléchargé.",
     expired: "Votre session a expiré. Reconnectez-vous, puis réessayez.",
     notPdf:
       "Le serveur n'a pas renvoyé de PDF : rien n'a été téléchargé. Réessayez.",
