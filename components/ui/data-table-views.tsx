@@ -95,7 +95,16 @@ export function DataTableViews({
         ) : (
           <span />
         )}
-        {action && <div className="shrink-0">{action}</div>}
+        {/* Views filtered in place keep this line in the new style too: the
+            page's action goes at its end, or it would be shown nowhere. */}
+        {(action || (!linked && pageAction)) && (
+          <div className="flex shrink-0 items-center gap-3">
+            {action}
+            {!linked && pageAction && (
+              <div className="classic:hidden">{pageAction}</div>
+            )}
+          </div>
+        )}
       </div>
       {children}
     </div>
