@@ -6,9 +6,9 @@ import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
-import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
+import { ViewLink } from "@/components/ui/view-link";
 import { setDealNextAction } from "@/lib/deals/actions";
 import type { Deal } from "@/lib/deals/types";
 import { deals } from "@/lib/i18n/fr/deals";
@@ -101,32 +101,35 @@ export function DealNextAction({
   const [open, setOpen] = useState(false);
   return (
     <>
-      <FactRows>
-        <FactRow
-          label={t.action}
-          value={deal.nextAction ?? t.none}
-          source={deal.nextActionOn ? formatDay(deal.nextActionOn) : null}
-          side={
-            deal.canWrite ? (
-              <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
-                {t.edit}
-              </Button>
-            ) : null
-          }
-        />
-        <FactRow
-          label={t.followUp}
-          value={deal.followUpOn ? formatDay(deal.followUpOn) : t.none}
-        />
-        {nextCall && (
-          <FactRow
-            label={t.call}
-            value={nextCall.label}
-            href={nextCall.href}
-            hrefLabel={nextCall.label}
-          />
+      {/* One sentence, not a table (Sacha 20/11/2026): the action and its
+          day, then the follow-up and the next call. */}
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex min-w-0 flex-col gap-1">
+          <p className="text-body-md font-medium text-pretty">
+            {deal.nextAction ?? t.noneAction}
+            {deal.nextActionOn && ` · ${formatDay(deal.nextActionOn)}`}
+          </p>
+          {(deal.followUpOn || nextCall) && (
+            <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
+              {deal.followUpOn && t.followUpOn(formatDay(deal.followUpOn))}
+              {deal.followUpOn && nextCall && " · "}
+              {nextCall && (
+                <ViewLink
+                  href={nextCall.href}
+                  className="underline-offset-2 hover:underline"
+                >
+                  {t.callOn(nextCall.label)}
+                </ViewLink>
+              )}
+            </p>
+          )}
+        </div>
+        {deal.canWrite && (
+          <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
+            {t.edit}
+          </Button>
         )}
-      </FactRows>
+      </div>
       <FormDialog
         open={open}
         onOpenChange={setOpen}

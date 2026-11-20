@@ -7928,7 +7928,7 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   action, sinon relance à venir, sinon le geste de l'étape ; rien pendant que la direction décide l'accord),
   et pour la direction chaque accord de principe à valider. Page `/app/deals/[dealId]` (introuvable pour qui ne
   lit pas le deal) : étape à côté du titre, « Maintenant » seulement si le lecteur a un geste, Prochaine
-  action, Termes négociés, Étapes, Informations (projet en lien seulement s'il est visible, contrat lu sur la
+  action, Termes négociés, Informations (projet en lien seulement s'il est visible, contrat lu sur la
   participation, négociateur et « Changer »), Historique. « Nouveau deal » (direction, chef de projet sur ses
   projets) : participation d'un collectif (sans deal vivant), sinon projet et/ou artiste choisis parmi
   l'existant, négociateur parmi les membres qui négocient (`loadNewDealOptions`).

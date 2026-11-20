@@ -89,6 +89,9 @@ export const deals = {
   // The terms of lib/deals/terms.ts (BIZ 3): one label per key.
   terms: {
     title: "Termes négociés",
+    // The terms still to define, on one line (Sacha 20/11/2026).
+    toDefine: "À définir :",
+    noneWritten: "Aucun terme négocié pour l'instant. À définir :",
     labels: {
       songwriting_split: "Splits auteur-compositeur",
       master_split: "Part du master",
@@ -270,7 +273,6 @@ export const deals = {
     signedNote: "Deal signé : son dossier reste consultable dans « Dossier ».",
     sections: {
       next: "Prochaine action",
-      stages: "Étapes",
       info: "Informations",
       history: "Historique",
     },
@@ -282,13 +284,16 @@ export const deals = {
         "Si personne n'a répondu d'ici là : PDS OS vous rappelle de relancer.",
       call: "Prochain call",
       none: "Aucune",
+      // The next action in one sentence (Sacha 20/11/2026: too many tables).
+      noneAction: "Aucune prochaine action",
+      followUpOn: (day: string) => `Relancer le ${day}`,
+      callOn: (slot: string) => `Prochain call : ${slot}`,
       edit: "Modifier",
       editTitle: "Prochaine action et relance",
       editDescription:
         "Ce que vous ferez ensuite, et quand relancer : PDS OS vous le rappelle le jour venu.",
       submit: "Enregistrer",
     },
-    stageStates: { done: "Fait", current: "En cours", later: "À venir" },
     info: {
       kind: "Type",
       project: "Projet",

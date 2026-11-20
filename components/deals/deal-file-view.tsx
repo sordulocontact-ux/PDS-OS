@@ -3,7 +3,6 @@ import { DealContacts } from "@/components/deals/deal-contacts";
 import { DealHistory } from "@/components/deals/deal-history";
 import { DealInfo } from "@/components/deals/deal-info";
 import { DealMemoSections } from "@/components/deals/deal-memo-sections";
-import { DealStages } from "@/components/deals/deal-stages";
 import { DealTerms } from "@/components/deals/deal-terms";
 import { PageSection } from "@/components/shell/page-section";
 import type { Access } from "@/lib/auth/access";
@@ -19,8 +18,9 @@ import { deals as t } from "@/lib/i18n/fr/deals";
  * « Dossier » of a deal, to read (Ibé 18/11/2026: « tu ne sais pas si tu
  * dois remplir ce qu'il y a en bas »): what it is about and who negotiates
  * it (« Changer » stays for whoever assigns), its terms, people, calls,
- * deal memo and contract, stages and history — without the gestures, which
- * are in « À faire » (DealTodoView).
+ * deal memo and contract, and its history (each stage reached is in it; the
+ * current one is beside the title) — without the gestures, which are in
+ * « À faire » (DealTodoView).
  */
 export function DealFileView({
   access,
@@ -55,9 +55,6 @@ export function DealFileView({
         <DealCalls calls={calls} />
       </PageSection>
       <DealMemoSections access={access} deal={deal} terms={terms} readOnly />
-      <PageSection id="etapes" title={s.stages}>
-        <DealStages deal={deal} events={events} />
-      </PageSection>
       <PageSection id="historique" title={s.history}>
         <DealHistory deal={deal} events={events} />
       </PageSection>

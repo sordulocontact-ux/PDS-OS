@@ -2499,6 +2499,9 @@ cliquer et tout s'enchaîner »).
 - **Fiche** : deux vues. « À faire » = le geste de l'étape, les propositions de PO, la prochaine action, puis seulement
   ce que l'étape travaille (contacts et calls pour prendre contact, termes à négocier, deal memo et contrat).
   « Dossier » (`?vue=dossier`) = tout le deal en lecture.
+- **Moins de tableaux** (Sacha, même jour : « trop de tableaux, c'est ça qui rend la lecture compliquée ») : termes
+  « À définir » réunis sur une ligne de boutons (seuls les termes écrits restent en lignes), prochaine action en une
+  phrase, section « Étapes » retirée du Dossier (le badge du titre et l'historique la disent ; `DealStages` supprimé).
 - Tests : les 10 fichiers des deals au vert en local (accord sans terme, signature à la main sans contrat, signature
   qui suit le contrat). Migration **à pousser en prod** avec la précédente (`20261120100101`).
 
