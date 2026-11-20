@@ -5,7 +5,7 @@
 -- another project refused; delete_project_row takes a project's deals.
 -- Run with `supabase test db`.
 begin;
-select plan(54);
+select plan(57);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -198,6 +198,9 @@ select throws_ok($$ select public.set_deal_stage(pg_temp.id_of('d1'), 'contracti
   'P0001', 'agreement_not_validated', 'no contracting before a validated agreement');
 select throws_ok($$ select public.set_deal_stage(pg_temp.id_of('d1'), 'abandoned') $$,
   '22023', 'invalid_stage', 'abandoning has its own gesture');
+select throws_ok($$ select public.set_deal_stage(pg_temp.id_of('d1'), 'agreement') $$,
+  'P0001', 'agreement_needs_terms', 'no accord de principe before a term is confirmed');
+select public.set_deal_term(pg_temp.id_of('d1'), 'royalties', '{"units": 200000}', 'confirmed');
 select lives_ok($$ select public.set_deal_stage(pg_temp.id_of('d1'), 'agreement') $$,
   'the assignee proposes the accord de principe');
 select is((pg_temp.deal('d1')).agreement_status, 'pending', 'it waits for the direction');
@@ -229,8 +232,23 @@ select pg_temp.act_as(pg_temp.id_of('glen'));
 select throws_ok($$ select public.set_deal_stage(pg_temp.id_of('d1'), 'signed') $$,
   'P0001', 'not_contracting', 'signed comes after contracting');
 select public.set_deal_stage(pg_temp.id_of('d1'), 'contracting');
-select lives_ok($$ select public.set_deal_stage(pg_temp.id_of('d1'), 'signed') $$,
-  'then signed');
+select throws_ok($$ select public.set_deal_stage(pg_temp.id_of('d1'), 'signed') $$,
+  'P0001', 'contract_not_signed', 'never signed by hand without its signed contract');
+reset role;
+-- The participation's contract, then its signature: the deal follows.
+insert into public.contracts (organization_id, title, type, artist_id, owner_person_id)
+select pg_temp.id_of('org'), 'Contrat p1 ' || pg_temp.tag(), 'artist', tp.artist_id,
+       pg_temp.id_of('director_person')
+  from public.title_participations tp where tp.id = pg_temp.id_of('p1');
+insert into ids select 'k1', id from public.contracts where title = 'Contrat p1 ' || pg_temp.tag();
+update public.title_participations set contract_id = pg_temp.id_of('k1') where id = pg_temp.id_of('p1');
+update public.contracts set status = 'signed', signed_on = current_date where id = pg_temp.id_of('k1');
+select is((pg_temp.deal('d1')).stage, 'signed', 'its contract signed, the deal is signed');
+select ok(exists (select 1 from public.deal_events
+                   where deal_id = pg_temp.id_of('d1') and kind = 'stage' and to_stage = 'signed'
+                     and detail ->> 'contract' = 'signed'),
+  'with its journal line');
+select pg_temp.act_as(pg_temp.id_of('glen'));
 select throws_ok($$ select public.set_deal_stage(pg_temp.id_of('d1'), 'negotiation') $$,
   'P0001', 'deal_closed', 'a signed deal no longer moves');
 reset role;

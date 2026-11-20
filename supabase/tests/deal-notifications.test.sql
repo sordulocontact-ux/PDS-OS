@@ -96,6 +96,7 @@ reset role;
 select is(pg_temp.told('glen_person', 'deal_assigned'), 1, 'the assignee is told his new deal');
 
 select pg_temp.act_as(pg_temp.id_of('glen'));
+select public.set_deal_term(pg_temp.id_of('d1'), 'royalties', '{"units": 200000}', 'confirmed');
 select public.set_deal_stage(pg_temp.id_of('d1'), 'agreement');
 reset role;
 select is(pg_temp.told('director_person', 'deal_agreement_proposed'), 1,

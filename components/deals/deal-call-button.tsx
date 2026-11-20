@@ -32,12 +32,19 @@ export type DealCallFormData = {
  * as the code will write it — the context, then the terms not confirmed.
  * No member is invited: whoever reads the deal sees the call.
  */
-export function DealCallButton({ data }: { data: DealCallFormData }) {
+export function DealCallButton({
+  data,
+  variant = "outline",
+}: {
+  data: DealCallFormData;
+  // "default": the main gesture of a deal to contact (its « Maintenant »).
+  variant?: "default" | "outline";
+}) {
   const t = fr.dealCalls.prepare;
   const [open, setOpen] = useState(false);
   return (
     <>
-      <Button variant="outline" onClick={() => setOpen(true)}>
+      <Button variant={variant} onClick={() => setOpen(true)}>
         {t.button}
       </Button>
       <FormDialog

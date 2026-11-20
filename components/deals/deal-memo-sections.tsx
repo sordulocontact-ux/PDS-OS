@@ -18,21 +18,25 @@ import { dealMemos } from "@/lib/i18n/fr/deal-memos";
 /**
  * The deal memo and the contract of a deal's page (BIZ 7): the latest memo
  * and its versions, then the contract and, once a memo is validated and a
- * contract linked, the comparison term by term.
+ * contract linked, the comparison term by term. `readOnly`: the deal's
+ * « Dossier », read without its gestures (they are in « À faire »).
  */
 export async function DealMemoSections({
   access,
   deal,
   terms,
+  readOnly = false,
 }: {
   access: Access;
   deal: Deal;
   terms: DealTerm[];
+  readOnly?: boolean;
 }) {
+  const canWrite = deal.canWrite && !readOnly;
   const [memos, contract, options] = await Promise.all([
     loadDealMemos(deal.id, deal.kind),
     loadDealContract(deal.id),
-    deal.canWrite && !deal.participationId
+    canWrite && !deal.participationId
       ? loadDealContractOptions(deal.id)
       : Promise.resolve(null),
   ]);
@@ -43,6 +47,7 @@ export async function DealMemoSections({
       : [];
   // Checks go on while contracting and once signed, never on an abandoned deal.
   const canCheck =
+    !readOnly &&
     deal.stage !== "abandoned" &&
     (can(access, "validate") ||
       (deal.assignee?.id === access.personId && can(access, "negotiate")));
@@ -55,8 +60,10 @@ export async function DealMemoSections({
           dealName={dealName(deal)}
           memos={memos}
           changed={memos[0] ? changedSince(memos[0], terms) : false}
-          canWrite={deal.canWrite}
-          canValidate={can(access, "validate") && !isClosedStage(deal.stage)}
+          canWrite={canWrite}
+          canValidate={
+            !readOnly && can(access, "validate") && !isClosedStage(deal.stage)
+          }
         />
       </PageSection>
       <PageSection id="contrat" title={dealMemos.contract.section}>

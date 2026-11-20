@@ -27,15 +27,21 @@ export const NEXT_STAGE: Partial<Record<Deal["stage"], Deal["stage"]>> = {
 };
 
 /**
- * The stage the main button proposes: the next one by order, except that
- * a deal whose terms already hold (one confirmed) before its negotiation
- * started goes straight to its accord de principe — one gesture, not two
- * (UX test of 12/11/2026).
+ * The stage the main button proposes, only when something happened that
+ * makes it true (Ibé 18/11/2026: a button that only moved to the next
+ * stage let a deal go from « À contacter » to « Signé » in a few clicks).
+ * « À contacter »: the call is prepared (`lead`), never declared; the
+ * negotiation: the accord once a term is confirmed; contracting: « Signé »
+ * comes with the signed contract (20261120110101). A deal whose terms
+ * already hold before its negotiation started goes straight to its accord
+ * de principe — one gesture, not two (UX test of 12/11/2026).
  */
 function nextStageOf(deal: Deal, terms: DealTerm[]): Deal["stage"] | null {
+  const confirmed = terms.some((term) => term.state === "confirmed");
   const early = deal.stage === "to_contact" || deal.stage === "call_planned";
-  if (early && terms.some((term) => term.state === "confirmed"))
-    return "agreement";
+  if (early && confirmed) return "agreement";
+  if (deal.stage === "to_contact" || deal.stage === "contracting") return null;
+  if (deal.stage === "negotiation" && !confirmed) return null;
   return NEXT_STAGE[deal.stage] ?? null;
 }
 
@@ -70,13 +76,14 @@ function TermsRecap({ terms }: { terms: DealTerm[] }) {
  * (or another, or abandons it) — or reads that the direction is warned.
  * An abandoned deal says it is final and what to do (`reopen`: « Ouvrir un
  * nouveau deal » for whoever may). Nothing for the project's owner, who
- * reads.
+ * reads. `lead`: « Préparer un call », the gesture of a deal to contact.
  */
 export function DealNow({
   deal,
   terms,
   proposer = null,
   reopen,
+  lead,
 }: {
   deal: Deal;
   terms: DealTerm[];
@@ -84,6 +91,7 @@ export function DealNow({
   // deal now: it may have changed hands since (UX test of 12/11/2026).
   proposer?: string | null;
   reopen?: ReactNode;
+  lead?: ReactNode;
 }) {
   const t = fr.deals.page;
   if (deal.canDecide)
@@ -120,10 +128,16 @@ export function DealNow({
   return (
     <NowFrame label={t.now}>
       <h2 className={heading}>
-        {deal.nextAction ?? (next ? t.advance[next] : t.why[deal.stage])}
+        {deal.nextAction ??
+          (next ? t.advance[next] : fr.deals.work.todo[deal.stage])}
       </h2>
       <p className={secondary}>{t.why[deal.stage]}</p>
-      <DealNowActions deal={deal} mode="move" next={next} />
+      <DealNowActions
+        deal={deal}
+        mode="move"
+        next={next}
+        lead={deal.stage === "to_contact" && !next ? lead : undefined}
+      />
     </NowFrame>
   );
 }

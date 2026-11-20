@@ -7879,7 +7879,13 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   de principe) → `contracting` → `signed`, ou `abandoned` (`abandon_deal`, motif obligatoire, deal et
   historique gardés). `set_deal_stage` va d'une étape ouverte à l'autre dans les deux sens ;
   `contracting` exige un accord **validé**, `signed` vient de `contracting` ; signé ou abandonné, le deal
-  ne bouge plus (`deal_closed`). **L'accord de principe est une étape** : l'affecté la propose
+  ne bouge plus (`deal_closed`). **Une étape dit ce qui s'est passé** (réunion avec Ibé du 18/11/2026,
+  `20261120110101_deal_stage_guards.sql` : le bouton « étape suivante » laissait cliquer un deal jusqu'à « Signé ») :
+  `agreement` exige un terme confirmé (`agreement_needs_terms`), `signed` le contrat du deal signé
+  (`deal_contract_id`, `contract_not_signed`), et le deal en contractualisation passe seul à `signed` quand son
+  contrat l'est (trigger `z_deal_follows_contract` sur `contracts`, ligne de journal `detail.contract = signed`).
+  Côté page, « Maintenant » ne propose plus que le vrai geste de l'étape (`DealNow` : « Préparer un call » à
+  contacter, l'accord dès qu'un terme est confirmé, rien en contractualisation). **L'accord de principe est une étape** : l'affecté la propose
   (`agreement_status = pending`), la direction (`validate`) la valide ou la renvoie en négociation avec un
   motif (`decide_deal_agreement`) ; la direction qui pose elle-même l'étape la valide d'emblée. Seuils de
   validation : plus tard.

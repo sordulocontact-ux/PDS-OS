@@ -2485,3 +2485,20 @@ PDSBIZ du 10/11 (« Moteur commun, dossiers typés »), que la V1 du 11/11 avait
 - Reste du même retour : le circuit du deal memo par mail (rangé dans le deal, validé par la direction, renvoyé),
   les personnes à mettre dans la boucle, la fiche « lire / agir ».
 
+
+## Deals : les étapes ne s'enchaînent plus, page « À faire » / « Dossier » (20/11/2026, branche `pre-prod`)
+
+Réunion avec Ibé du 18/11 (1:05:37 « tu ne sais pas si tu dois remplir ce qu'il y a en bas », 1:21:01 « on pouvait
+cliquer et tout s'enchaîner »).
+
+- **Bug** : le bouton principal faisait seulement « étape suivante » et réapparaissait au même endroit ; la direction
+  (accord validé d'office) allait d'« À contacter » à « Signé » sans call, terme ni contrat. Désormais (migration
+  `20261120110101_deal_stage_guards.sql`) : l'accord de principe exige un terme confirmé, « Signé » un contrat signé, et
+  le deal passe seul à « Signé » quand son contrat est signé. « Maintenant » propose le vrai geste : « Préparer un call »
+  à contacter, l'accord dès qu'un terme est confirmé, rien en contractualisation.
+- **Fiche** : deux vues. « À faire » = le geste de l'étape, les propositions de PO, la prochaine action, puis seulement
+  ce que l'étape travaille (contacts et calls pour prendre contact, termes à négocier, deal memo et contrat).
+  « Dossier » (`?vue=dossier`) = tout le deal en lecture.
+- Tests : les 10 fichiers des deals au vert en local (accord sans terme, signature à la main sans contrat, signature
+  qui suit le contrat). Migration **à pousser en prod** avec la précédente (`20261120100101`).
+

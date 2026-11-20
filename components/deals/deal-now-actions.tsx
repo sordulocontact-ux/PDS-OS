@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { DealStageForm } from "@/components/deals/deal-stage-form";
@@ -24,17 +24,20 @@ type Open = "refuse" | "stage" | "abandon" | null;
 /**
  * The gestures of a deal's « Maintenant » (BIZ 4): the direction validates
  * the accord de principe or sends it back with a reason; the negotiator
- * moves to the next stage (main button), to another (outline), or abandons
- * the deal with a reason (text button beside the outline).
+ * moves to the next stage (main button) or does the stage's own gesture
+ * (`lead`: « Préparer un call »), moves to another stage (outline), or
+ * abandons the deal with a reason (text button beside the outline).
  */
 export function DealNowActions({
   deal,
   mode,
   next,
+  lead,
 }: {
   deal: Deal;
   mode: "decide" | "move" | "wait";
   next: DealStage | null;
+  lead?: ReactNode;
 }) {
   const t = fr.deals.page;
   const [open, setOpen] = useState<Open>(null);
@@ -112,6 +115,7 @@ export function DealNowActions({
                 {t.advance[next]}
               </Button>
             )}
+            {mode === "move" && !next && lead}
             <Button variant="outline" onClick={() => setOpen("stage")}>
               {t.otherStage}
             </Button>

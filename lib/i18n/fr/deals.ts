@@ -219,14 +219,15 @@ export const deals = {
     } as Record<string, string>,
     why: {
       to_contact:
-        "Premier contact avec l'artiste ou son entourage, pour caler un call.",
+        "Premier contact avec l'artiste, son entourage, le label ou la marque : préparez le call, le deal passe à « Call prévu ».",
       call_planned:
         "Le call est calé : préparez-le, puis ouvrez la négociation.",
       negotiation:
-        "Les termes se négocient : notez chaque proposition et contre-proposition.",
+        "Notez chaque proposition et contre-proposition dans les termes ; l'accord de principe se propose dès qu'un terme est confirmé.",
       agreement:
         "Les termes tiennent : la direction valide l'accord de principe avant le contrat.",
-      contracting: "L'accord est validé : le contrat se prépare et se signe.",
+      contracting:
+        "L'accord est validé : le deal passe à « Signé » dès que son contrat est signé.",
     } as Record<string, string>,
     waitDirection:
       "La direction est prévenue : elle valide l'accord de principe ou le renvoie en négociation.",
@@ -252,7 +253,7 @@ export const deals = {
     otherStage: "Changer d'étape",
     otherStageTitle: "Changer d'étape",
     otherStageDescription:
-      "Revenir à une étape, ou en passer une. La contractualisation attend un accord validé.",
+      "Revenir à une étape, ou en passer une. L'accord de principe attend un terme confirmé, la contractualisation un accord validé, « Signé » un contrat signé.",
     stage: "Étape",
     note: "Pourquoi",
     stageSubmit: "Changer d'étape",
@@ -262,6 +263,11 @@ export const deals = {
       "Le deal et son historique restent ; il ne change plus ensuite.",
     abandonReason: "Pourquoi ce deal s'arrête",
     abandonSubmit: "Abandonner le deal",
+    // The deal's two views (Ibé 18/11/2026: « on ne sait pas si on doit
+    // remplir ce qu'il y a en bas »): what to do now, and the file to read.
+    tabs: { label: "Vues du deal", todo: "À faire", file: "Dossier" },
+    // A signed deal: nothing left to do.
+    signedNote: "Deal signé : son dossier reste consultable dans « Dossier ».",
     sections: {
       next: "Prochaine action",
       stages: "Étapes",
@@ -402,6 +408,10 @@ export const deals = {
     agreementNotValidated:
       "La contractualisation attend un accord de principe validé par la direction.",
     notContracting: "Un deal est signé après la contractualisation.",
+    agreementNeedsTerms:
+      "Confirmez au moins un terme avant de proposer l'accord de principe.",
+    contractNotSigned:
+      "Le deal passe à « Signé » quand son contrat est signé : faites signer le contrat d'abord.",
     noAgreementPending: "Aucun accord de principe n'attend de décision.",
     reasonRequired: "Dites pourquoi.",
     nextActionUnchanged: "Rien n'a changé.",

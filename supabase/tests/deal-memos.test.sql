@@ -167,6 +167,7 @@ reset role;
 
 -- The direction proposing the accord validates its memo at once.
 select pg_temp.act_as(pg_temp.id_of('director'));
+select public.set_deal_term(pg_temp.id_of('d4'), 'royalties', '{"units": 200000}', 'confirmed');
 select public.set_deal_stage(pg_temp.id_of('d4'), 'agreement');
 select is((select status from public.deal_memos where deal_id = pg_temp.id_of('d4')), 'validated',
   'the direction''s accord makes a validated memo');
