@@ -1,7 +1,6 @@
 "use client";
 
-import { FieldError } from "@/components/auth/form-message";
-import { SearchSelect } from "@/components/ui/search-select";
+import { SinglePicker } from "@/components/catalog/single-picker";
 import type { NewDealOptions } from "@/lib/deals/new-deal-options";
 import { deals } from "@/lib/i18n/fr/deals";
 import { cn } from "@/lib/utils";
@@ -10,13 +9,19 @@ const fr = { deals };
 
 export type NewDealSubject = "participation" | "project" | "artist";
 
+const optionsOf = (list: Record<string, string>) =>
+  Object.entries(list).map(([id, label]) => ({ id, label }));
+
 /**
  * What a new deal is about (BIZ 4): a participation of a collective, else a
- * project and/or an artist. For a music deal they are required as the
- * database asks (the direction may name an artist alone, a project manager
- * his project, the business manager an artist); beside a label or a brand
- * they are optional (Ibé 18/11/2026). `missing`: the form's missing
- * choices, in red.
+ * project and/or an artist. Each is searched, then shown as a card with a ✕
+ * that takes it back (Sacha 20/11/2026: an optional choice must be
+ * removable, like the label or brand above it). For a music deal they are
+ * required as the database asks (the direction may name an artist alone, a
+ * project manager his project, the business manager an artist); beside a
+ * label or a brand they are optional (Ibé 18/11/2026). `missing`: the
+ * form's missing choices, in red. Each field sits in a `#new-deal-…` box
+ * the form focuses.
  */
 export function NewDealSubjectFields({
   options,
@@ -36,96 +41,77 @@ export function NewDealSubjectFields({
   const t = fr.deals.create;
   const projectRequired = music && !options.artistAlone;
   const artistRequired = music && options.own;
-  // An optional choice can be taken back: « Aucun projet » first, as the
-  // other optional menus of the app (Finance, a task's project).
-  const optional = (none: string, list: Record<string, string>) => ({
-    "": none,
-    ...list,
-  });
-  return byParticipation ? (
-    <div className="flex flex-col gap-1.5">
-      <SearchSelect
-        id="new-deal-participation"
-        label={t.participation}
-        options={options.participations}
-        value={values.participation}
-        onChange={(v) => {
-          onChange("participation", v);
-        }}
-        placeholder={t.participationPlaceholder}
-        searchPlaceholder={t.participationSearch}
-        emptyLabel={t.participationEmpty}
-        required
-        invalid={missing.includes("participation")}
-        describedBy="new-deal-participation-error"
-        fill
-      />
-      {missing.includes("participation") ? (
-        <FieldError id="new-deal-participation-error">
-          {t.required.participation}
-        </FieldError>
-      ) : (
-        <p className="text-xs text-muted-foreground">{t.participationHint}</p>
-      )}
-    </div>
-  ) : (
-    <>
-      {/* The business manager opens an artist's deal: no project. */}
-      <div className={cn("flex flex-col gap-1.5", options.own && "hidden")}>
-        <SearchSelect
-          id={options.artistAlone ? "new-deal-subject" : "new-deal-project"}
-          label={t.project}
-          options={
-            projectRequired
-              ? options.projects
-              : optional(t.noProject, options.projects)
+  const common = {
+    noResultLabel: t.noResult,
+    allSelectedLabel: t.allSelected,
+    removeLabel: t.remove,
+  };
+
+  if (byParticipation)
+    return (
+      <div id="new-deal-participation" className="flex flex-col gap-1.5">
+        <SinglePicker
+          {...common}
+          name="participationId"
+          legend={t.participation}
+          required
+          options={optionsOf(options.participations)}
+          selectedId={values.participation || null}
+          onSelect={(id) => onChange("participation", id ?? "")}
+          searchLabel={t.participationSearch}
+          placeholder={t.participationPlaceholder}
+          error={
+            missing.includes("participation")
+              ? t.required.participation
+              : undefined
           }
-          value={values.project}
-          onChange={(v) => {
-            onChange("project", v);
-          }}
-          placeholder={t.projectPlaceholder}
-          searchPlaceholder={t.projectSearch}
-          emptyLabel={t.projectEmpty}
-          required={projectRequired}
-          invalid={music && missing.length > 0}
-          describedBy="new-deal-subject-error"
-          fill
         />
-        <FieldError id="new-deal-subject-error">
-          {missing.includes("project")
-            ? t.required.project
-            : missing.includes("subject")
-              ? t.required.subject
-              : undefined}
-        </FieldError>
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <SearchSelect
-          id="new-deal-artist"
-          label={t.artist}
-          options={
-            artistRequired
-              ? options.artists
-              : optional(t.noArtist, options.artists)
-          }
-          value={values.artist}
-          onChange={(v) => {
-            onChange("artist", v);
-          }}
-          placeholder={t.artistPlaceholder}
-          searchPlaceholder={t.artistSearch}
-          emptyLabel={t.artistEmpty}
-          required={artistRequired}
-          invalid={artistRequired && missing.length > 0}
-          describedBy={artistRequired ? "new-deal-artist-error" : undefined}
-          fill
-        />
-        {artistRequired && (
-          <FieldError id="new-deal-artist-error">
-            {missing.length > 0 ? t.required.artist : undefined}
-          </FieldError>
+        {!missing.includes("participation") && (
+          <p className="text-xs text-muted-foreground">{t.participationHint}</p>
         )}
+      </div>
+    );
+
+  const projectError = missing.includes("project")
+    ? t.required.project
+    : missing.includes("subject")
+      ? t.required.subject
+      : undefined;
+  return (
+    <>
+      {/* The business manager opens a deal without a project. */}
+      <div
+        id={options.artistAlone ? "new-deal-subject" : "new-deal-project"}
+        className={cn(options.own && "hidden")}
+      >
+        <SinglePicker
+          {...common}
+          name="projectId"
+          legend={t.project}
+          required={projectRequired}
+          options={optionsOf(options.projects)}
+          selectedId={values.project || null}
+          onSelect={(id) => onChange("project", id ?? "")}
+          searchLabel={t.projectSearch}
+          placeholder={t.projectPlaceholder}
+          error={music ? projectError : undefined}
+        />
+      </div>
+      <div id="new-deal-artist">
+        <SinglePicker
+          {...common}
+          name="artistId"
+          legend={t.artist}
+          required={artistRequired}
+          options={optionsOf(options.artists)}
+          selectedId={values.artist || null}
+          onSelect={(id) => onChange("artist", id ?? "")}
+          searchLabel={t.artistSearch}
+          placeholder={t.artistPlaceholder}
+          error={
+            artistRequired && missing.length > 0 ? t.required.artist : undefined
+          }
+        />
       </div>
     </>
   );

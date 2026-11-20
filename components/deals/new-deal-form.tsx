@@ -82,7 +82,7 @@ export function NewDealForm({
         if (lacking.length > 0) {
           document
             .querySelector<HTMLElement>(
-              `#new-deal-${lacking[0]}, #new-deal-${lacking[0]} input`,
+              `#new-deal-${lacking[0]} input, #new-deal-${lacking[0]} button`,
             )
             ?.focus();
           return;

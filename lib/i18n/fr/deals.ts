@@ -173,12 +173,14 @@ export const deals = {
     projectPlaceholder: "Choisir un projet",
     projectSearch: "Rechercher un projet",
     projectEmpty: "Aucun projet ne correspond.",
-    noProject: "Aucun projet",
     artist: "Artiste",
     artistPlaceholder: "Choisir un artiste",
     artistSearch: "Rechercher un artiste",
     artistEmpty: "Aucun artiste ne correspond.",
-    noArtist: "Aucun artiste",
+    // The search of a participation, a project or an artist (SinglePicker).
+    noResult: (query: string) => `Aucun résultat pour « ${query} ».`,
+    allSelected: "Tout est déjà choisi.",
+    remove: (label: string) => `Retirer ${label}`,
     assignee: "Négocié par",
     assigneeHint:
       "Un membre qui négocie ; laissez vide pour l'affecter plus tard.",
