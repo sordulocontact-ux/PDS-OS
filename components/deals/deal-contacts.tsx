@@ -92,10 +92,20 @@ export function DealContacts({
   canWrite: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const addButton = canWrite && (
+    <Button
+      variant="outline"
+      size="sm"
+      className="self-start"
+      onClick={() => setOpen(true)}
+    >
+      {t.add}
+    </Button>
+  );
   return (
     <div className="flex flex-col gap-3">
       {contacts.length === 0 ? (
-        <EmptyNote>{t.empty}</EmptyNote>
+        <EmptyNote action={addButton}>{t.empty}</EmptyNote>
       ) : (
         <div className="@container w-full">
           <div className="grid grid-cols-1 gap-3 @2xl:grid-cols-2">
@@ -125,16 +135,7 @@ export function DealContacts({
           </div>
         </div>
       )}
-      {canWrite && (
-        <Button
-          variant="outline"
-          size="sm"
-          className="self-start"
-          onClick={() => setOpen(true)}
-        >
-          {t.add}
-        </Button>
-      )}
+      {contacts.length > 0 && addButton}
       <FormDialog
         open={open}
         onOpenChange={setOpen}

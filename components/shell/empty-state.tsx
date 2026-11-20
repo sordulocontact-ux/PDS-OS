@@ -48,12 +48,31 @@ export function EmptyState({
 }
 
 // A list still empty inside a section (contacts, tracks, shares): one line
-// in the same dashed frame, without icon or title.
-export function EmptyNote({ children }: { children: React.ReactNode }) {
+// in the same dashed frame, without icon or title. `action`: the button that
+// fills it, inside the frame under the line, both centred (Sacha 20/11/2026,
+// Mobbin: Cloudflare, Mercury, v0 — never a button left under the frame).
+export function EmptyNote({
+  children,
+  action,
+}: {
+  children: React.ReactNode;
+  action?: React.ReactNode;
+}) {
+  // On a section card, a plain line: no frame inside a card.
+  const frame =
+    "rounded-xl border border-dashed border-border bg-card p-4 text-sm text-muted-foreground in-[.section-card]:border-0 in-[.section-card]:p-0";
+  if (!action) return <p className={frame}>{children}</p>;
   return (
-    // On a section card, a plain line: no frame inside a card.
-    <p className="rounded-xl border border-dashed border-border bg-card p-4 text-sm text-muted-foreground in-[.section-card]:border-0 in-[.section-card]:p-0">
-      {children}
-    </p>
+    <div
+      className={cn(
+        frame,
+        "flex flex-col items-center gap-3 text-center in-[.section-card]:items-start in-[.section-card]:text-left",
+      )}
+    >
+      <p>{children}</p>
+      {/* Its own box: a button laid out on a page's left (self-start)
+          still sits in the middle here. */}
+      <div>{action}</div>
+    </div>
   );
 }

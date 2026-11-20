@@ -104,21 +104,19 @@ export function DealNextAction({
     <>
       {/* One sentence, not a table (Sacha 20/11/2026): the action and its
           day, then the follow-up and the next call. None: the empty note of
-          the deal's other sections, its button under it (Sacha 20/11/2026). */}
+          the deal's other sections, its button inside (Sacha 20/11/2026). */}
       {!deal.nextAction && !deal.followUpOn && !nextCall ? (
-        <div className="flex flex-col gap-3">
-          <EmptyNote>{t.noneAction}</EmptyNote>
-          {deal.canWrite && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="self-start"
-              onClick={() => setOpen(true)}
-            >
-              {t.add}
-            </Button>
-          )}
-        </div>
+        <EmptyNote
+          action={
+            deal.canWrite && (
+              <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
+                {t.add}
+              </Button>
+            )
+          }
+        >
+          {t.noneAction}
+        </EmptyNote>
       ) : (
         <div className="flex items-start justify-between gap-4">
           <div className="flex min-w-0 flex-col gap-1">

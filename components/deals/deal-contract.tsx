@@ -162,11 +162,10 @@ export function DealContract({
           }
         />
       ) : (
-        <div className="flex flex-col gap-3">
-          <EmptyNote>{participation ? t.noneParticipation : t.none}</EmptyNote>
-          {canLink &&
-            (empty ? <EmptyNote>{t.noOption}</EmptyNote> : linkButton)}
-        </div>
+        <EmptyNote action={canLink && !empty && linkButton}>
+          {participation ? t.noneParticipation : t.none}
+          {canLink && empty && ` ${t.noOption}`}
+        </EmptyNote>
       )}
       <FormDialog
         open={open}

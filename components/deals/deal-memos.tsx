@@ -78,13 +78,7 @@ export function DealMemos({
       {t.create}
     </Button>
   );
-  if (!latest)
-    return (
-      <div className="flex flex-col gap-3">
-        <EmptyNote>{t.none}</EmptyNote>
-        {newButton && <span className="self-start">{newButton}</span>}
-      </div>
-    );
+  if (!latest) return <EmptyNote action={newButton}>{t.none}</EmptyNote>;
 
   const meta = (memo: DealMemo) =>
     memo.validatedAt

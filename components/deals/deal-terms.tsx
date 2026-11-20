@@ -3,7 +3,9 @@
 import { useState } from "react";
 
 import { TermForm } from "@/components/deals/term-form";
+import { EmptyNote } from "@/components/shell/empty-state";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { FactCard, FactCards } from "@/components/ui/fact-card";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { formatTermValue } from "@/lib/deals/term-format";
@@ -40,6 +42,22 @@ export function DealTerms({
   const written = terms.filter((term) => term.state !== "to_define");
   const toDefine = terms.filter((term) => term.state === "to_define");
   const label = (term: DealTerm) => t.labels[term.key] ?? term.key;
+  const toDefineButtons = (className?: string) => (
+    <div className={cn("flex flex-wrap gap-1.5", className)}>
+      {toDefine.map((term) => (
+        <Button
+          key={term.key}
+          type="button"
+          variant="outline"
+          size="xs"
+          onClick={() => setOpen(term)}
+          aria-label={t.editTitle(label(term))}
+        >
+          {label(term)}
+        </Button>
+      ))}
+    </div>
+  );
   return (
     <div className="flex flex-col gap-3">
       {written.length > 0 && (
@@ -73,30 +91,23 @@ export function DealTerms({
           })}
         </FactCards>
       )}
-      {toDefine.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
-            {written.length === 0 ? t.noneWritten : t.toDefine}
+      {toDefine.length > 0 &&
+        (written.length === 0 ? (
+          // None written yet: the empty note of the deal's other sections,
+          // the terms to define as its buttons (Sacha 20/11/2026).
+          <EmptyNote action={canWrite && toDefineButtons("justify-center")}>
+            {t.noneWritten}
             {!canWrite && ` ${toDefine.map(label).join(", ")}`}
-          </p>
-          {canWrite && (
-            <div className="flex flex-wrap gap-2">
-              {toDefine.map((term) => (
-                <Button
-                  key={term.key}
-                  type="button"
-                  variant="outline"
-                  size="xs"
-                  onClick={() => setOpen(term)}
-                  aria-label={t.editTitle(label(term))}
-                >
-                  {label(term)}
-                </Button>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+          </EmptyNote>
+        ) : (
+          <div className="flex flex-col gap-2">
+            <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
+              {t.toDefine}
+              {!canWrite && ` ${toDefine.map(label).join(", ")}`}
+            </p>
+            {canWrite && toDefineButtons()}
+          </div>
+        ))}
       <FormDialog
         open={open !== null}
         onOpenChange={(next) => !next && setOpen(null)}
