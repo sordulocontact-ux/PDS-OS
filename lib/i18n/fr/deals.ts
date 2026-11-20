@@ -3,11 +3,11 @@ export const deals = {
   // The Deals page (BIZ 4): one list, tabs and filters.
   title: "Deals",
   description:
-    "Les négociations des artistes : qui négocie, où en est chaque deal, la prochaine action.",
+    "Les négociations avec les artistes, les labels et les marques : qui négocie, où en est chaque deal, la prochaine action.",
   loadError: "Impossible de charger les deals. Rechargez la page.",
   emptyTitle: "Aucun deal pour l'instant",
   emptyBody:
-    "Un deal s'ouvre pour un artiste d'un projet ; il apparaît ici pour la personne qui le négocie, la direction et le responsable du projet.",
+    "Un deal s'ouvre pour un artiste, avec un label ou une marque ; il apparaît ici pour la personne qui le négocie, la direction et le responsable du projet.",
   filtersEmpty: "Aucun deal avec ces filtres",
   filtersEmptyBody: "Retirez un filtre pour revoir les deals.",
   views: {
@@ -19,7 +19,7 @@ export const deals = {
   },
   search: {
     label: "Rechercher un deal",
-    placeholder: "Rechercher un artiste, un titre, un projet",
+    placeholder: "Rechercher un artiste, un label, une marque, un projet",
     noResult: (query: string) => `Aucun deal ne correspond à « ${query} ».`,
   },
   filters: {
@@ -43,8 +43,8 @@ export const deals = {
   },
   kinds: {
     music: "Musique",
-    brand_partnership: "Partenariat de marque",
     label: "Label",
+    brand_partnership: "Partenariat de marque",
   },
   stages: {
     to_contact: "À contacter",
@@ -99,6 +99,21 @@ export const deals = {
       duration: "Durée",
       exclusivity: "Exclusivité",
       promo: "Promo",
+      // Label (ticket PDSBIZ, « Dossier Label / partenariat »).
+      deal_nature: "Nature de l'accord",
+      scope: "Périmètre",
+      minimum_guarantee: "Minimum garanti",
+      options: "Options",
+      commitments: "Engagements",
+      conditions: "Conditions et résiliation",
+      // Brand (ticket PDSBIZ, « Dossier Influence »).
+      campaign: "Campagne",
+      deliverables: "Livrables",
+      schedule: "Calendrier et validation",
+      fee: "Fee",
+      usage_rights: "Droits d'usage",
+      paid_media: "Paid media et whitelisting",
+      obligations: "Annulation et reporting",
     } as Record<string, string>,
     states: {
       pds_proposal: "Proposé par PDS",
@@ -123,7 +138,6 @@ export const deals = {
       percent: "Part (%)",
       amount: "Montant HT (€)",
       mode: "Nature",
-      yesno: "Exclusif",
       detail: "Précision",
       role: "Rôle",
       share: "Part (%)",
@@ -137,10 +151,13 @@ export const deals = {
     button: "Nouveau deal",
     title: "Nouveau deal",
     description:
-      "Un deal musical pour un artiste : choisissez parmi ce qui existe, puis qui le négocie.",
+      "Pour un artiste, avec un label ou une marque : choisissez parmi ce qui existe, puis qui le négocie.",
     // The business manager's own deal (Ibé 12/11/2026).
     ownDescription:
-      "Un deal musical pour un artiste du Catalogue : vous le négociez. Un deal de projet ou de PDS MIC vous est confié par la direction ou le chef de projet.",
+      "Un deal que vous négociez, pour un artiste ou avec un label ou une marque. Un deal de projet ou de PDS MIC vous est confié par la direction ou le chef de projet.",
+    kind: "Type de deal",
+    // Who a label or brand deal is negotiated with (Ibé 18/11/2026).
+    counterpart: { label: "Label", brand_partnership: "Marque" },
     for: "Pour",
     forParticipation: "Un artiste d'un projet collectif",
     forOther: "Un projet ou un artiste",
@@ -171,6 +188,10 @@ export const deals = {
       project: "Choisissez le projet.",
       subject: "Choisissez un projet ou un artiste.",
       artist: "Choisissez l'artiste.",
+      counterpart: {
+        label: "Choisissez le label.",
+        brand_partnership: "Choisissez la marque.",
+      },
     },
     missingCount: (count: number) =>
       count === 1 ? "1 champ manque." : `${count} champs manquent.`,
@@ -263,6 +284,10 @@ export const deals = {
       project: "Projet",
       title: "Titre",
       artist: "Artiste",
+      counterpart: { label: "Label", brand_partnership: "Marque" } as Record<
+        string,
+        string
+      >,
       participation: "Participation",
       assignee: "Négocié par",
       unassigned: "À affecter",
@@ -344,7 +369,11 @@ export const deals = {
     forbidden: "Vous n'avez pas le droit de faire ce geste sur ce deal.",
     notFound: "Ce deal est introuvable.",
     closed: "Ce deal est clos : signé ou abandonné, il ne change plus.",
-    kindUnavailable: "Seuls les deals musicaux se créent pour l'instant.",
+    counterpartRequired: "Choisissez le label ou la marque du deal.",
+    counterpartNotFound:
+      "Ce label ou cette marque est introuvable dans le Réseau.",
+    participationMusicOnly:
+      "Une participation à un projet collectif se négocie en deal musical.",
     subjectRequired: "Choisissez un artiste, un projet ou une participation.",
     participationNotFound: "Cette participation est introuvable.",
     participationOtherProject:

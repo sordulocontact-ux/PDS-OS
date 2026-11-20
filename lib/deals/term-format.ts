@@ -40,6 +40,8 @@ export function formatTermValue(
       const v = value as TermValue<"money">;
       return t.money[v.mode](formatAmount(v.cents));
     }
+    case "amount":
+      return formatAmount((value as TermValue<"amount">).cents);
     case "yesno": {
       const v = value as TermValue<"yesno">;
       return [v.yes ? t.yes : t.no, v.detail].filter(Boolean).join(" · ");

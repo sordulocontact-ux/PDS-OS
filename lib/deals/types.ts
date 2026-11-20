@@ -35,13 +35,14 @@ export function isDealStage(value: unknown): value is DealStage {
 export const isClosedStage = (stage: DealStage) =>
   stage === "signed" || stage === "abandoned";
 
-/** Ready for several kinds; only « music » is created in V1 (never
- * « influence »: the word is the influence PDS buys, lib/activations). */
-export const DEAL_KINDS = ["music", "brand_partnership", "label"] as const;
+/** The kinds of deal (never « influence »: the word is the influence PDS
+ * buys, lib/activations). A label or brand deal names the organization PDS
+ * negotiates with (its counterpart, Ibé 18/11/2026). */
+export const DEAL_KINDS = ["music", "label", "brand_partnership"] as const;
 export type DealKind = (typeof DEAL_KINDS)[number];
-export const CREATABLE_DEAL_KINDS = [
-  "music",
-] as const satisfies readonly DealKind[];
+
+/** Whether a kind is negotiated with an organization of the Réseau. */
+export const hasCounterpart = (kind: DealKind) => kind !== "music";
 
 export type AgreementStatus = "pending" | "validated";
 
@@ -59,6 +60,9 @@ export type Deal = {
   projectVisible: boolean;
   artistId: string | null;
   artistName: string | null;
+  // The organization of the Réseau a label or brand deal is negotiated with.
+  counterpartId: string | null;
+  counterpartName: string | null;
   // The participation's title: its name, else « Titre n ».
   titleLabel: string | null;
   titlePosition: number | null;

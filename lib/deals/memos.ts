@@ -49,7 +49,7 @@ export type MemoCheck = {
 export type CompareRow = {
   term: MemoTerm;
   // What the code reads on the contract: only its amount, against an
-  // advance or a fee.
+  // advance, a fee or an amount (a minimum guarantee, a brand's fee).
   amount: { contractCents: number; same: boolean } | null;
   check: MemoCheck | null;
   // The contract contradicts the memo: the amount entered differs, or a
@@ -66,8 +66,9 @@ export function compareMemo(
   const byKey = new Map(checks.map((c) => [c.key, c]));
   return memo.terms.map((term) => {
     const cents =
-      term.format === "money" && contract.amountCents !== null
-        ? (term.value as TermValue<"money">).cents
+      (term.format === "money" || term.format === "amount") &&
+      contract.amountCents !== null
+        ? (term.value as TermValue<"money" | "amount">).cents
         : null;
     const amount =
       cents !== null && contract.amountCents !== null

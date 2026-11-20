@@ -2463,3 +2463,25 @@ Claude de l'entreprise »). Détail : `docs/ASSISTANT.md` § 1, 3 sexies, 4 bis.
 - Questions tests 7 et 50 à 56 (`scripts/eval-po-cases.mjs`), le gras et les tableaux ne sont plus comptés comme
   Markdown fautif. Vérifié : build, typecheck, lint, et un PDF de texte réel produit en local (titres, listes, tableau,
   texte échappé). Pas encore rejoué dans le navigateur ni par `pnpm eval:po`.
+
+
+## Deals Label et Partenariat de marque (20/11/2026, branche `pre-prod`)
+
+Réunion avec Ibé du 18/11 (« un deal maison de disques, nouvelle opportunité de deal pour tel artiste ») et son ticket
+PDSBIZ du 10/11 (« Moteur commun, dossiers typés »), que la V1 du 11/11 avait limité au type Musique. Détail :
+`docs/ARCHITECTURE.md` § 8 quaterdecies.
+
+- **Trois types de deal** dans « Nouveau deal » : Musique (inchangé), Label, Partenariat de marque. Un deal Label ou
+  Partenariat de marque nomme sa structure du Réseau (`deals.counterpart_contact_id`), choisie ou créée depuis le
+  formulaire ; artiste et projet facultatifs. Le business manager l'ouvre seul pour un deal sans projet.
+- **Termes de chaque type** (blocs du ticket) : Label = nature de l'accord, périmètre, minimum garanti, royalties, durée,
+  territoires, options, engagements, conditions et résiliation ; Partenariat de marque = campagne, livrables,
+  calendrier et validation, fee, droits d'usage, paid media et whitelisting, exclusivité, annulation et reporting.
+  Format `amount` ajouté (montant seul) ; la question d'un oui/non est le libellé du terme.
+- Page du deal : ligne « Label » ou « Marque » vers la fiche du Réseau ; liste et PO nomment le deal « Universal · Jay ».
+  Guide de PO (`business.ts`) à jour.
+- Migration `20261120100101_deal_counterparts.sql` (**à pousser en prod** avec la prochaine fusion dans `main`). Tests :
+  `deals-counterparts.test.sql` (13) et les 9 autres fichiers des deals, 219 tests au vert en local.
+- Reste du même retour : le circuit du deal memo par mail (rangé dans le deal, validé par la direction, renvoyé),
+  les personnes à mettre dans la boucle, la fiche « lire / agir ».
+

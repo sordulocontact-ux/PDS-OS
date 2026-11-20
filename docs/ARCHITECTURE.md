@@ -7855,8 +7855,20 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
 
 - **Un deal n'est pas un projet** (BIZ 2, `20261111230101_deals.sql`) : table `deals` à part, avec ses
   droits. Dans un projet lancé seul le responsable écrit ; Glen n'en est pas responsable, il écrit **sur le
-  deal**, jamais dans le projet. Type `kind` (`music` seul créable en V1 ; `brand_partnership`, `label`
-  plus tard ; jamais « influence », le mot est celui de l'influence achetée, `lib/activations/influence`).
+  deal**, jamais dans le projet. Type `kind` : `music`, `label`, `brand_partnership` (jamais « influence », le
+  mot est celui de l'influence achetée, `lib/activations/influence`).
+- **Deals Label et Partenariat de marque** (réunion avec Ibé du 18/11/2026, ticket PDSBIZ-002,
+  `20261120100101_deal_counterparts.sql`) : `deals.counterpart_contact_id`, la structure du Réseau avec qui PDS
+  négocie (label, marque), clé composite `deals_counterpart_same_org` vers `network_contacts` (un contact encore
+  nommé par un deal ne se supprime pas). Obligatoire hors `music` (`deals_counterpart_check`), une participation
+  reste un deal `music` (`deals_participation_kind_check`). `create_deal(…, p_counterpart_contact_id)` : structure
+  (`kind = 'organization'`) non archivée de la même organisation (`counterpart_required`, `counterpart_not_found`,
+  `participation_music_only`) ; artiste et projet facultatifs à côté ; un projet collectif peut être nommé (seul un
+  deal `music` passe par la participation). Qui ouvre un deal ne change pas (direction, responsable du projet, business
+  manager pour un deal sans projet). Formulaire : type d'abord (`ChipChoice`), puis `DealCounterpartField`
+  (`PersonPickerField` des structures, création dans le Réseau sans quitter le formulaire), puis
+  `NewDealSubjectFields`. Nom d'un deal : « Universal · Jay » (`dealName`). Termes par type dans
+  `lib/deals/terms.ts` (format `amount` ajouté : minimum garanti, fee). Test : `deals-counterparts.test.sql`.
 - **Rattachement** : `participation_id` (→ `title_participations`, PDS MIC), qui fixe `project_id` et
   `artist_id` à la création (un projet ou un artiste donné à côté doit être le même :
   `participation_other_project`, `participation_other_artist`) ; sinon `project_id` et/ou `artist_id`.

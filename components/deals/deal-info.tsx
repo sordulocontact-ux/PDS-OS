@@ -7,7 +7,8 @@ import { deals } from "@/lib/i18n/fr/deals";
 const fr = { deals };
 
 /**
- * What a deal is about and who negotiates it (BIZ 4): its kind, project
+ * What a deal is about and who negotiates it (BIZ 4): its kind, the label
+ * or brand it is negotiated with (a link to the Réseau), project
  * (a link only for whoever sees the project), title, artist, the
  * participation, the negotiator (« Changer » for who assigns). The contract
  * has its own section (BIZ 7, DealContract).
@@ -28,6 +29,14 @@ export function DealInfo({
   return (
     <FactRows>
       <FactRow label={t.kind} value={fr.deals.kinds[deal.kind]} />
+      {deal.counterpartName && deal.counterpartId && (
+        <FactRow
+          label={t.counterpart[deal.kind] ?? t.counterpart.label}
+          value={deal.counterpartName}
+          href={routes.networkContact(deal.counterpartId)}
+          hrefLabel={deal.counterpartName}
+        />
+      )}
       {deal.projectTitle && (
         <FactRow
           label={t.project}

@@ -16,7 +16,7 @@ import { createClient } from "@/lib/supabase/server";
 // name even to whoever does not see the project, never a contact).
 
 const SELECT =
-  "id, kind, stage, agreement_status, participation_id, project_id, artist_id, assignee_person_id, next_action, next_action_on, follow_up_on, abandon_reason, stage_changed_at, created_at, artist:artists!deals_artist_same_org(name), assignee:people!deals_assignee_person_id_fkey(first_name, last_name)";
+  "id, kind, stage, agreement_status, participation_id, project_id, artist_id, assignee_person_id, next_action, next_action_on, follow_up_on, abandon_reason, stage_changed_at, created_at, counterpart_contact_id, artist:artists!deals_artist_same_org(name), counterpart:network_contacts!deals_counterpart_same_org(name), assignee:people!deals_assignee_person_id_fkey(first_name, last_name)";
 
 type Row = {
   id: string;
@@ -33,7 +33,9 @@ type Row = {
   abandon_reason: string | null;
   stage_changed_at: string;
   created_at: string;
+  counterpart_contact_id: string | null;
   artist: { name: string } | null;
+  counterpart: { name: string } | null;
   assignee: { first_name: string; last_name: string | null } | null;
 };
 
@@ -90,6 +92,8 @@ async function withContext(access: Access, rows: Row[]): Promise<Deal[]> {
         projectVisible: c?.project_visible ?? false,
         artistId: r.artist_id,
         artistName: r.artist?.name ?? null,
+        counterpartId: r.counterpart_contact_id,
+        counterpartName: r.counterpart?.name ?? null,
         titleLabel: c?.title_label ?? null,
         titlePosition: c?.title_position ?? null,
         participationStatus: c?.participation_status ?? null,

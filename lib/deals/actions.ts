@@ -7,7 +7,7 @@ import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { settleProposal } from "@/lib/deals/call-settle";
 import { dealFailure } from "@/lib/deals/errors";
-import { MOVABLE_DEAL_STAGES } from "@/lib/deals/types";
+import { DEAL_KINDS, MOVABLE_DEAL_STAGES } from "@/lib/deals/types";
 import { deals } from "@/lib/i18n/fr/deals";
 import { schedulePendingPushes } from "@/lib/notifications/push";
 import { createClient } from "@/lib/supabase/server";
@@ -60,6 +60,9 @@ function refresh(dealId?: string) {
 }
 
 const createInput = z.object({
+  kind: z.enum(DEAL_KINDS).default("music"),
+  // The label or the brand of a label or brand deal (the Réseau).
+  counterpartId: optionalId,
   participationId: optionalId,
   projectId: optionalId,
   artistId: optionalId,
@@ -69,7 +72,8 @@ const createInput = z.object({
 });
 export type CreateDealInput = z.input<typeof createInput>;
 
-/** « Nouveau deal » (the direction, the owner of the linked project). */
+/** « Nouveau deal » (the direction, the owner of the linked project, the
+ * business manager for his own): music, label or brand. */
 export async function createDeal(
   input: CreateDealInput,
 ): Promise<WriteResult & { dealId?: string }> {
@@ -82,7 +86,8 @@ export async function createDeal(
     p_project_id: p.data.projectId ?? undefined,
     p_artist_id: p.data.artistId ?? undefined,
     p_assignee_person_id: p.data.assigneeId ?? undefined,
-    p_kind: "music",
+    p_kind: p.data.kind,
+    p_counterpart_contact_id: p.data.counterpartId ?? undefined,
     p_next_action: p.data.nextAction ?? undefined,
     p_next_action_on: p.data.nextActionOn ?? undefined,
   });

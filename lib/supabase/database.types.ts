@@ -562,6 +562,7 @@ export type Database = {
           agreement_decided_by: string | null
           agreement_status: string | null
           artist_id: string | null
+          counterpart_contact_id: string | null
           assignee_person_id: string | null
           created_at: string
           created_by: string | null
@@ -588,6 +589,7 @@ export type Database = {
           agreement_decided_by?: string | null
           agreement_status?: string | null
           artist_id?: string | null
+          counterpart_contact_id?: string | null
           assignee_person_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -614,6 +616,7 @@ export type Database = {
           agreement_decided_by?: string | null
           agreement_status?: string | null
           artist_id?: string | null
+          counterpart_contact_id?: string | null
           assignee_person_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -658,6 +661,13 @@ export type Database = {
             columns: ["artist_id", "organization_id"]
             isOneToOne: false
             referencedRelation: "artists"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "deals_counterpart_same_org"
+            columns: ["counterpart_contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
             referencedColumns: ["id", "organization_id"]
           },
           {
@@ -22596,6 +22606,7 @@ export type Database = {
         Args: {
           p_artist_id?: string
           p_assignee_person_id?: string
+          p_counterpart_contact_id?: string
           p_kind?: string
           p_next_action?: string
           p_next_action_on?: string

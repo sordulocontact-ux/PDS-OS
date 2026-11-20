@@ -77,7 +77,10 @@ export async function readDeals(
       t.count(kept.length),
       ...shown.flatMap((d) => [
         t.line(
-          dealName(d),
+          // A label or brand deal says its kind (« Universal · Jay · Label »).
+          d.kind === "music"
+            ? dealName(d)
+            : `${dealName(d)} · ${fr.deals.kinds[d.kind]}`,
           fr.deals.stages[d.stage],
           d.assignee?.name ?? t.unassigned,
         ),

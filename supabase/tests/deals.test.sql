@@ -103,7 +103,7 @@ select throws_ok($$ select public.create_deal(p_participation_id => pg_temp.id_o
                                               p_assignee_person_id => pg_temp.id_of('creative_person')) $$,
   '22023', 'assignee_cannot_negotiate', 'a deal is given to a member who negotiates only');
 select throws_ok($$ select public.create_deal(p_participation_id => pg_temp.id_of('p1'), p_kind => 'label') $$,
-  '22023', 'deal_kind_unavailable', 'only a music deal is created in V1');
+  '22023', 'participation_music_only', 'a participation is negotiated as a music deal');
 select throws_ok($$ select public.create_deal() $$,
   '22023', 'deal_subject_required', 'a deal is about something');
 insert into ids select 'd1', public.create_deal(

@@ -30,6 +30,10 @@ export function readTermValue(
         ? null
         : { mode, cents };
     }
+    case "amount": {
+      const cents = parseAmount(text(data, "amount"));
+      return cents === null ? null : { cents };
+    }
     case "yesno": {
       const yes = text(data, "yesno");
       if (yes !== "yes" && yes !== "no") return null;
@@ -60,6 +64,8 @@ export function termInputs(
       const v = value as TermValue<"money">;
       return { amount: amountInput(v.cents), mode: v.mode };
     }
+    case "amount":
+      return { amount: amountInput((value as TermValue<"amount">).cents) };
     case "yesno": {
       const v = value as TermValue<"yesno">;
       return { yesno: v.yes ? "yes" : "no", detail: v.detail ?? "" };

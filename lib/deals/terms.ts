@@ -17,6 +17,8 @@ export type TermFormat =
   | "percent"
   // An advance or a fee, in cents.
   | "money"
+  // An amount alone, in cents (a minimum guarantee, a brand's fee).
+  | "amount"
   // Yes or no, with a detail (exclusivity: on what, how long).
   | "yesno"
   // Shares by role, with the Juridique's roles (legal_split_entries.role).
@@ -24,8 +26,9 @@ export type TermFormat =
 
 export type TermDefinition = { key: string; format: TermFormat };
 
-/** The terms of each kind of deal, in their order on the page. Only
- * « music » is created in V1: the other kinds have none yet. */
+/** The terms of each kind of deal, in their order on the page. Label and
+ * brand: the blocks of Ibé's ticket PDSBIZ (« Dossier Label / partenariat »,
+ * « Dossier Influence »), 18/11/2026. */
 export const DEAL_TERMS: Record<DealKind, readonly TermDefinition[]> = {
   music: [
     { key: "songwriting_split", format: "split" },
@@ -38,8 +41,35 @@ export const DEAL_TERMS: Record<DealKind, readonly TermDefinition[]> = {
     { key: "exclusivity", format: "yesno" },
     { key: "promo", format: "text" },
   ],
-  brand_partnership: [],
-  label: [],
+  label: [
+    // Licence, distribution, catalogue, coproduction, partenariat…
+    { key: "deal_nature", format: "text" },
+    { key: "scope", format: "text" },
+    { key: "minimum_guarantee", format: "amount" },
+    { key: "royalties", format: "percent" },
+    { key: "duration", format: "text" },
+    { key: "territories", format: "text" },
+    { key: "options", format: "text" },
+    // Delivery, marketing, financing, approval and release.
+    { key: "commitments", format: "text" },
+    // Conditions précédentes, termination, renewal.
+    { key: "conditions", format: "text" },
+  ],
+  brand_partnership: [
+    // The campaign and its objective.
+    { key: "campaign", format: "text" },
+    // By channel, how many contents.
+    { key: "deliverables", format: "text" },
+    // Calendar and the brand's content approval.
+    { key: "schedule", format: "text" },
+    { key: "fee", format: "amount" },
+    // Usage rights, their duration and territories.
+    { key: "usage_rights", format: "text" },
+    { key: "paid_media", format: "yesno" },
+    { key: "exclusivity", format: "yesno" },
+    // Cancellation, reporting, the brand's obligations.
+    { key: "obligations", format: "text" },
+  ],
 };
 
 export function termOf(kind: DealKind, key: string): TermDefinition | null {
@@ -65,6 +95,9 @@ export const TERM_VALUES = {
   percent: z.object({ units }),
   money: z.object({
     mode: z.enum(["advance", "fee"]),
+    cents: z.number().int().nonnegative().max(100_000_000_000),
+  }),
+  amount: z.object({
     cents: z.number().int().nonnegative().max(100_000_000_000),
   }),
   yesno: z.object({

@@ -15,19 +15,24 @@ const fr = { deals, legalSplits };
 
 /**
  * The value of a term in its format (BIZ 3), prefilled: free words, a share,
- * an advance or a fee, yes or no with a detail, or shares by the
- * Juridique's roles (one field per role, empty = not in the deal). Names
- * read back by lib/deals/term-input.ts.
+ * an advance or a fee, an amount, yes or no with a detail (asked with the
+ * term's own label), or shares by the Juridique's roles (one field per
+ * role, empty = not in the deal). Names read back by
+ * lib/deals/term-input.ts.
  */
 export function TermValueFields({
   id,
   format,
   value,
+  label,
   error,
 }: {
   id: string;
   format: TermFormat;
   value: TermValue | null;
+  // The term's label: the question of a yes or no (« Exclusivité »,
+  // « Paid media et whitelisting »).
+  label: string;
   error?: string;
 }) {
   const t = fr.deals.terms;
@@ -90,11 +95,23 @@ export function TermValueFields({
           />
         </>
       )}
+      {format === "amount" && (
+        <Field
+          id={`${id}-amount`}
+          name="amount"
+          label={t.fields.amount}
+          required
+          inputMode="decimal"
+          suffix="€"
+          defaultValue={start.amount}
+          error={error}
+        />
+      )}
       {format === "yesno" && (
         <>
           <ChipChoice
             name="yesno"
-            legend={t.fields.yesno}
+            legend={label}
             required
             options={[
               { value: "yes" as const, label: t.yes },

@@ -86,6 +86,10 @@ function valueOf(
           ? null
           : { mode: mode === "fee" ? "fee" : "advance", cents };
       }
+      case "amount": {
+        const cents = parseSaidEuros(value);
+        return cents === null ? null : { cents };
+      }
       case "yesno": {
         const yes = said.yes.trim();
         return yes === "yes" || yes === "no"

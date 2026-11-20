@@ -77,6 +77,7 @@ export function TermForm({
           id={`term-${term.key}`}
           format={term.format}
           value={term.value}
+          label={fr.deals.terms.labels[term.key] ?? term.key}
           error={missing ? fr.deals.errors.termValueRequired : undefined}
         />
       )}
