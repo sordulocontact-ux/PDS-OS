@@ -3,14 +3,14 @@
 import { useState, type FormEvent } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
+import { ContactCard } from "@/components/network/contact-card";
 import { PersonPickerField } from "@/components/network/person-picker-field";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { Button } from "@/components/ui/button";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
-import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { FormDialog } from "@/components/ui/form-dialog";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { routes } from "@/lib/auth/redirects";
 import {
   linkDealContact,
   unlinkDealContact,
@@ -76,8 +76,9 @@ function RemoveButton({ dealId, id }: { dealId: string; id: string }) {
 }
 
 /**
- * The people of a deal (BIZ 8): each with its roles, and its coordinates
- * when the reader may read them (« Coordonnées privées » otherwise). Whoever
+ * The people of a deal (BIZ 8), one `ContactCard` each (Sacha 20/11/2026,
+ * proto « Fiche d'un deal » v2): its roles, its e-mail when the reader may
+ * read it (« Coordonnées privées » otherwise), « Voir la fiche ». Whoever
  * writes the deal adds a contact of the Réseau (PersonPickerField) or takes
  * one off; a private contact is shared by its owner or the direction only.
  */
@@ -96,28 +97,33 @@ export function DealContacts({
       {contacts.length === 0 ? (
         <EmptyNote>{t.empty}</EmptyNote>
       ) : (
-        <FactRows className="w-full">
-          {contacts.map((c) => (
-            <FactRow
-              key={c.id}
-              label={c.name}
-              value={
-                c.hidden
-                  ? t.hidden
-                  : [c.email, c.phone].filter(Boolean).join(" · ") || null
-              }
-              source={c.roles || null}
-              state={
-                c.isPrivate ? { tone: "neutral", label: t.privateBadge } : null
-              }
-              href={routes.networkContact(c.id)}
-              hrefLabel={c.name}
-              side={
-                canWrite ? <RemoveButton dealId={dealId} id={c.id} /> : null
-              }
-            />
-          ))}
-        </FactRows>
+        <div className="@container w-full">
+          <div className="grid grid-cols-1 gap-3 @2xl:grid-cols-2">
+            {contacts.map((c) => (
+              <ContactCard
+                key={c.id}
+                name={c.name}
+                kind="person"
+                contactId={c.id}
+                email={c.hidden ? null : c.email}
+                hidden={c.hidden ? t.hidden : undefined}
+                context={c.roles || undefined}
+                action={
+                  (c.isPrivate || canWrite) && (
+                    <span className="flex items-center gap-2">
+                      {c.isPrivate && (
+                        <StatusBadge tone="neutral" size="sm">
+                          {t.privateBadge}
+                        </StatusBadge>
+                      )}
+                      {canWrite && <RemoveButton dealId={dealId} id={c.id} />}
+                    </span>
+                  )
+                }
+              />
+            ))}
+          </div>
+        </div>
       )}
       {canWrite && (
         <Button variant="outline" size="sm" onClick={() => setOpen(true)}>

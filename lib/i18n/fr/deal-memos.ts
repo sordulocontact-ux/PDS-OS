@@ -33,6 +33,7 @@ export const dealMemos = {
     signedOn: (day: string) => `Signé le ${day}`,
     amount: "Montant saisi sur le contrat",
     open: (title: string) => `Ouvrir le contrat « ${title} »`,
+    openShort: "Ouvrir",
     link: "Lier un contrat",
     change: "Changer",
     unlink: "Retirer le lien",

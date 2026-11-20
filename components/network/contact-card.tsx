@@ -15,7 +15,9 @@ const fr = { network };
  * person or a structure as its icon, the name, one short line — what they
  * are here, then their e-mail address — and on the right the state the
  * module gives plus « Voir la fiche ». A name kept without a fiche says so
- * (its module may add « Ajouter au Réseau » in `action`).
+ * (its module may add « Ajouter au Réseau » in `action`). `hidden`: said
+ * instead of the address when the reader may not read it (a private
+ * contact's « Coordonnées privées », BIZ 8).
  */
 export function ContactCard({
   name,
@@ -24,6 +26,7 @@ export function ContactCard({
   email,
   context,
   action,
+  hidden,
 }: {
   name: string;
   // Null: a name only, not in the Réseau.
@@ -34,11 +37,12 @@ export function ContactCard({
   context?: string;
   // The module's state of this contact (a `StatusBadge`).
   action?: ReactNode;
+  hidden?: string;
 }) {
   const t = fr.network.card;
   // A name kept without a fiche may still have the address it was e-mailed
   // to (the borrowing keeps it).
-  const address = email ?? (contactId ? t.noEmail : t.nameOnly);
+  const address = hidden ?? email ?? (contactId ? t.noEmail : t.nameOnly);
   return (
     <DocumentCard
       name={name}

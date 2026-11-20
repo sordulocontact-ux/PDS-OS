@@ -2505,3 +2505,16 @@ cliquer et tout s'enchaîner »).
 - Tests : les 10 fichiers des deals au vert en local (accord sans terme, signature à la main sans contrat, signature
   qui suit le contrat). Migration **à pousser en prod** avec la précédente (`20261120100101`).
 
+
+## Fiche d'un deal en cartes (20/11/2026, branche `pre-prod`)
+
+Sacha : « il y a pas un autre moyen que des tableaux ? des cards ? » ; proto « Fiche d'un deal » (v1 tableaux, v2 cartes,
+`docs/protos/fiche-deal.html`), v2 retenue (« code les »). Une forme par contenu, avec les briques existantes :
+
+- **Frise des étapes** en tête de « À faire » : `PhaseStrip big` avec le jour de chaque étape atteinte (prop `dates`).
+- **Termes négociés** et rappel de l'accord pour la direction : nouvelles `FactCard` / `FactCards` (`components/ui/`).
+- **Propositions de PO**, **deal memo**, **contrat** : `DocumentCard` (le memo repliable, ses termes dedans).
+- **Calls** : frise datée. **Personnes** : `ContactCard` (prop `hidden` pour « Coordonnées privées »).
+- **Informations** du Dossier : `FactCards` (« Changer » le négociateur dans la carte).
+- Reste en lignes : la comparaison du contrat au deal memo (un verdict par terme) et l'historique par jour.
+

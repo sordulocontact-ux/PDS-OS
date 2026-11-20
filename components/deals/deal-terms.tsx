@@ -4,10 +4,10 @@ import { useState } from "react";
 
 import { TermForm } from "@/components/deals/term-form";
 import { Button } from "@/components/ui/button";
-import { FactRow, FactRows } from "@/components/ui/fact-row";
+import { FactCard, FactCards } from "@/components/ui/fact-card";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { formatTermValue } from "@/lib/deals/term-format";
-import type { DealTerm } from "@/lib/deals/terms";
+import type { DealTerm, TermFormat } from "@/lib/deals/terms";
 import { dialogs } from "@/lib/i18n/fr/dialogs";
 import { deals } from "@/lib/i18n/fr/deals";
 import { dealTermTone } from "@/lib/ui/state-tones";
@@ -15,12 +15,15 @@ import { formatInstantDay } from "@/lib/utils/instant";
 
 const fr = { deals, dialogs };
 
+// Words, not a figure: shown at reading size in their card.
+const TEXT_FORMATS = new Set<TermFormat>(["text", "yesno", "split"]);
+
 /**
- * The terms negotiated in a deal (BIZ 3): the ones written, one row each in
- * the configured order — its value, its state as a pill, who changed it last
- * and when under it; then the ones still to define on one line (Sacha
+ * The terms negotiated in a deal (BIZ 3): the ones written, one card each in
+ * the configured order (Sacha 20/11/2026, proto « Fiche d'un deal » v2) — its
+ * value, its state as a dot, who changed it last and when; then the ones still to define on one line (Sacha
  * 20/11/2026: nine rows « À définir » made the page a table), each a
- * button for whoever writes the deal. A row or a button opens the term in a
+ * button for whoever writes the deal. A card or a button opens the term in a
  * dialog; the history is in the deal's journal.
  */
 export function DealTerms({
@@ -40,16 +43,17 @@ export function DealTerms({
   return (
     <div className="flex flex-col gap-3">
       {written.length > 0 && (
-        <FactRows>
+        <FactCards>
           {written.map((term) => {
-            const label = t.labels[term.key] ?? term.key;
+            const name = label(term);
             return (
-              <FactRow
+              <FactCard
                 key={term.key}
-                label={label}
+                label={name}
                 value={
                   formatTermValue(term.format, term.value) ?? t.states.to_define
                 }
+                text={TEXT_FORMATS.has(term.format)}
                 state={{
                   tone: dealTermTone[term.state],
                   label: t.states[term.state],
@@ -63,11 +67,11 @@ export function DealTerms({
                     : null
                 }
                 onClick={canWrite ? () => setOpen(term) : undefined}
-                hrefLabel={canWrite ? t.editTitle(label) : undefined}
+                actionLabel={canWrite ? t.editTitle(name) : undefined}
               />
             );
           })}
-        </FactRows>
+        </FactCards>
       )}
       {toDefine.length > 0 && (
         <div className="flex flex-col gap-2">

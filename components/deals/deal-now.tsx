@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 import { DealNowActions } from "@/components/deals/deal-now-actions";
 import { NowFrame } from "@/components/shell/journey/now-card";
-import { FactRow, FactRows } from "@/components/ui/fact-row";
+import { FactCard, FactCards } from "@/components/ui/fact-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatTermValue } from "@/lib/deals/term-format";
 import type { DealTerm } from "@/lib/deals/terms";
@@ -55,15 +55,16 @@ function TermsRecap({ terms }: { terms: DealTerm[] }) {
   if (confirmed.length === 0) return <p className={secondary}>{t.recapNone}</p>;
   return (
     <div className="flex flex-col gap-2">
-      <FactRows>
+      <FactCards>
         {confirmed.map((term) => (
-          <FactRow
+          <FactCard
             key={term.key}
             label={fr.deals.terms.labels[term.key] ?? term.key}
             value={formatTermValue(term.format, term.value) ?? ""}
+            text={term.format === "text" || term.format === "split"}
           />
         ))}
-      </FactRows>
+      </FactCards>
       {others > 0 && <p className={secondary}>{t.recapOthers(others)}</p>}
     </div>
   );

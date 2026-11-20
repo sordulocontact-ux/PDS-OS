@@ -13,14 +13,22 @@ import { DealNow } from "@/components/deals/deal-now";
 import { DealTerms } from "@/components/deals/deal-terms";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
+import { PhaseStrip } from "@/components/ui/phase-strip";
 import type { Access } from "@/lib/auth/access";
 import type { DealCall, DealCallProposal } from "@/lib/deals/call-queries";
 import type { DealContact } from "@/lib/deals/contact-queries";
 import type { DealTerm } from "@/lib/deals/terms";
-import { isClosedStage, type Deal, type DealStage } from "@/lib/deals/types";
+import {
+  isClosedStage,
+  MOVABLE_DEAL_STAGES,
+  type Deal,
+  type DealEvent,
+  type DealStage,
+} from "@/lib/deals/types";
 import { dealCalls } from "@/lib/i18n/fr/deal-calls";
 import { dealContacts } from "@/lib/i18n/fr/deal-contacts";
 import { deals as t } from "@/lib/i18n/fr/deals";
+import { formatShortDay } from "@/lib/utils/day";
 
 // What each stage works on, under its « Maintenant » (Ibé 18/11/2026: one
 // view to act, the rest in « Dossier »).
@@ -31,8 +39,38 @@ const WORKS: Record<"terms" | "contacts" | "calls" | "memo", DealStage[]> = {
   memo: ["agreement", "contracting"],
 };
 
+/** The deal's stages as a frieze, each reached one with its day (its
+ * journal, the latest first); signed, all done; abandoned, its word only. */
+function StageFrieze({ deal, events }: { deal: Deal; events: DealEvent[] }) {
+  const index = MOVABLE_DEAL_STAGES.indexOf(
+    deal.stage as (typeof MOVABLE_DEAL_STAGES)[number],
+  );
+  const current =
+    deal.stage === "abandoned"
+      ? -1
+      : deal.stage === "signed"
+        ? MOVABLE_DEAL_STAGES.length
+        : index;
+  const reached = (stage: DealStage) => {
+    const at = events.find((e) => e.toStage === stage)?.createdAt;
+    return at ? formatShortDay(at, { bare: true }) : null;
+  };
+  return (
+    <PhaseStrip
+      big
+      phases={MOVABLE_DEAL_STAGES.map((stage) => t.stages[stage])}
+      current={current}
+      label={t.stages[deal.stage]}
+      dates={MOVABLE_DEAL_STAGES.map((stage, i) =>
+        i <= index || deal.stage === "signed" ? reached(stage) : null,
+      )}
+    />
+  );
+}
+
 /**
- * « À faire » of a deal: its « Maintenant » (the stage's own gesture), PO's
+ * « À faire » of a deal: its stages as a frieze (Sacha 20/11/2026, proto
+ * « Fiche d'un deal » v2), its « Maintenant » (the stage's own gesture), PO's
  * proposals from its calls, the next action, then only what its stage
  * works on — the people and the call to contact, the terms to negotiate,
  * the deal memo and the contract to agree and sign. Everything else is in
@@ -42,6 +80,7 @@ export function DealTodoView({
   access,
   deal,
   terms,
+  events,
   proposer,
   reopen,
   callForm,
@@ -53,6 +92,7 @@ export function DealTodoView({
   access: Access;
   deal: Deal;
   terms: DealTerm[];
+  events: DealEvent[];
   proposer: string | null;
   reopen: ReactNode;
   callForm: DealCallFormData | null;
@@ -65,6 +105,7 @@ export function DealTodoView({
   const works = (what: keyof typeof WORKS) => WORKS[what].includes(deal.stage);
   return (
     <>
+      <StageFrieze deal={deal} events={events} />
       <DealNow
         deal={deal}
         terms={terms}

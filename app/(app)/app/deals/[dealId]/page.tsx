@@ -156,9 +156,7 @@ async function DealTodo({
 }: Omit<
   Parameters<typeof DealTodoView>[0],
   "proposer" | "reopen" | "callForm" | "nextCall"
-> & {
-  events: Awaited<ReturnType<typeof loadDealEvents>>;
-}) {
+>) {
   const callForm = await callFormFor(deal, terms);
   // An abandoned deal: the direction opens a new one for its artist.
   const reopenOptions =
@@ -172,6 +170,7 @@ async function DealTodo({
       access={access}
       deal={deal}
       terms={terms}
+      events={events}
       // The events come newest first: the last proposal of the accord.
       proposer={
         events.find((e) => e.kind === "stage" && e.toStage === "agreement")

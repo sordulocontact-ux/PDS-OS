@@ -6,13 +6,16 @@ import { cn } from "@/lib/utils";
  * current phase's label after them (a line of a list). `big`: full width,
  * each segment with its name under a 4 px rule (the open item's head).
  * `current`: index of the current phase, `phases.length` when all are done,
- * -1 for none (cancelled: only `label` shows).
+ * -1 for none (cancelled: only `label` shows). `dates` (big only): the day
+ * each phase was reached, under its name (« 12/11 »), null for one to come
+ * (docs/VISION-UX.md rule 7: a frieze whose points carry their date).
  */
 export function PhaseStrip({
   phases,
   current,
   label,
   big = false,
+  dates,
   className,
 }: {
   phases: readonly string[];
@@ -20,6 +23,7 @@ export function PhaseStrip({
   // The label said after a small frieze and read by assistive tech.
   label: string;
   big?: boolean;
+  dates?: readonly (string | null)[];
   className?: string;
 }) {
   if (current < 0)
@@ -60,6 +64,11 @@ export function PhaseStrip({
             )}
           >
             {phase}
+            {dates?.[i] && (
+              <span className="block font-normal text-[color:var(--text-tertiary)] tabular-nums">
+                {dates[i]}
+              </span>
+            )}
           </span>
         ) : (
           <span

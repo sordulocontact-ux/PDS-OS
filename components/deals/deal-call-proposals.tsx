@@ -1,12 +1,14 @@
 "use client";
 
+import { IconSparkle3 } from "nucleo-sharp-essential";
 import { useState } from "react";
 
 import { NextActionForm } from "@/components/deals/deal-next-action";
 import { DealStageForm } from "@/components/deals/deal-stage-form";
 import { TermForm } from "@/components/deals/term-form";
 import { Button } from "@/components/ui/button";
-import { FactRow, FactRows } from "@/components/ui/fact-row";
+import { DocumentCard } from "@/components/ui/document-card";
+import { FactSourceText } from "@/components/ui/fact-row-frame";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { routes } from "@/lib/auth/redirects";
@@ -103,8 +105,8 @@ function DismissButton({ dealId, id }: { dealId: string; id: string }) {
 }
 
 /**
- * PO's proposals from the deal's calls (BIZ 6), each with the passage it
- * comes from. « Vérifier » opens the deal's real form prefilled with it:
+ * PO's proposals from the deal's calls (BIZ 6), one card each with the
+ * passage it comes from (Sacha 20/11/2026, proto « Fiche d'un deal » v2). « Vérifier » opens the deal's real form prefilled with it:
  * the person corrects and saves (the proposal is then applied); « Écarter »
  * sets it aside. PO never changes the deal by itself.
  */
@@ -118,17 +120,22 @@ export function DealCallProposals({
   const [open, setOpen] = useState<DealCallProposal | null>(null);
   return (
     <>
-      <FactRows>
+      <div className="flex flex-col gap-3">
         {proposals.map((p) => (
-          <FactRow
+          <DocumentCard
             key={p.id}
-            value={textOf(deal, p)}
-            source={{
-              quote: p.quote,
-              from: t.from(p.callTitle, formatInstantDay(p.callAt)),
-              href: routes.call(p.callId),
-            }}
-            side={
+            name={textOf(deal, p)}
+            icon={IconSparkle3}
+            line={
+              <FactSourceText
+                source={{
+                  quote: p.quote,
+                  from: t.from(p.callTitle, formatInstantDay(p.callAt)),
+                  href: routes.call(p.callId),
+                }}
+              />
+            }
+            action={
               deal.canWrite ? (
                 <div className="flex items-center gap-2">
                   <Button
@@ -144,7 +151,7 @@ export function DealCallProposals({
             }
           />
         ))}
-      </FactRows>
+      </div>
       <FormDialog
         open={open !== null}
         onOpenChange={(next) => !next && setOpen(null)}

@@ -2,10 +2,10 @@
 
 import { EmptyNote } from "@/components/shell/empty-state";
 import { Button } from "@/components/ui/button";
+import { DocumentCard } from "@/components/ui/document-card";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { PdfExportButton } from "@/components/ui/pdf-export-button";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { ToneCallout } from "@/components/ui/tone-callout";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { routes } from "@/lib/auth/redirects";
 import { createDealMemo, validateDealMemo } from "@/lib/deals/memo-actions";
@@ -42,8 +42,9 @@ function MemoPdf({
 }
 
 /**
- * The deal memo (BIZ 7): the latest photo of the terms — its number, status,
- * who made and validated it, its terms — with its PDF; « Valider » for the
+ * The deal memo (BIZ 7) as a document card (Sacha 20/11/2026, proto « Fiche
+ * d'un deal » v2): the latest photo of the terms — its number, who made and
+ * validated it, its status, its terms folded inside — with its PDF; « Valider » for the
  * direction on the latest draft, « Nouveau deal memo » for whoever writes
  * the deal. A memo never changes: the terms moved since are said, and a new
  * memo photographs them. The earlier versions stay below, each with its PDF.
@@ -85,82 +86,79 @@ export function DealMemos({
       </div>
     );
 
+  const meta = (memo: DealMemo) =>
+    memo.validatedAt
+      ? t.validatedBy(memo.validatedBy, formatInstantDay(memo.validatedAt))
+      : t.meta(memo.createdBy, formatInstantDay(memo.createdAt));
+  const badge = (memo: DealMemo) => (
+    <StatusBadge tone={dealMemoTone[memo.status]} size="sm">
+      {t.statuses[memo.status]}
+    </StatusBadge>
+  );
+
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-body-lg font-semibold">
-              {t.name(latest.number)}
-            </span>
-            <StatusBadge tone={dealMemoTone[latest.status]}>
-              {t.statuses[latest.status]}
-            </StatusBadge>
-          </div>
-          <p className="text-body-sm text-[color:var(--text-secondary)]">
-            {latest.validatedAt
-              ? t.validatedBy(
-                  latest.validatedBy,
-                  formatInstantDay(latest.validatedAt),
-                )
-              : t.meta(latest.createdBy, formatInstantDay(latest.createdAt))}
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <MemoPdf dealId={dealId} dealName={dealName} memo={latest} />
-          {newButton}
-          {canValidate && latest.status === "draft" && (
-            <Button
-              size="sm"
-              disabled={validate.pending}
-              onClick={() =>
-                validate.run(() => validateDealMemo(dealId, latest.id))
-              }
-            >
-              {t.validate}
-            </Button>
-          )}
-        </div>
-      </div>
-      {changed && <ToneCallout tone="warning">{t.changed}</ToneCallout>}
-      {latest.terms.length === 0 ? (
-        <EmptyNote>{t.noTerms}</EmptyNote>
-      ) : (
-        <FactRows>
-          {latest.terms.map((term) => (
-            <FactRow
-              key={term.key}
-              label={fr.deals.terms.labels[term.key] ?? term.key}
-              value={formatTermValue(term.format, term.value)}
-              state={{
-                tone: dealTermTone[term.state],
-                label: fr.deals.terms.states[term.state],
-              }}
-            />
-          ))}
-        </FactRows>
-      )}
+    <div className="flex flex-col gap-3">
+      <DocumentCard
+        name={t.name(latest.number)}
+        line={meta(latest)}
+        collapsible={latest.terms.length > 0}
+        defaultOpen={false}
+        change={changed ? t.changed : undefined}
+        action={
+          <span className="flex flex-wrap items-center gap-2">
+            {badge(latest)}
+            <MemoPdf dealId={dealId} dealName={dealName} memo={latest} />
+            {newButton}
+            {canValidate && latest.status === "draft" && (
+              <Button
+                size="sm"
+                disabled={validate.pending}
+                onClick={() =>
+                  validate.run(() => validateDealMemo(dealId, latest.id))
+                }
+              >
+                {t.validate}
+              </Button>
+            )}
+          </span>
+        }
+      >
+        {latest.terms.length > 0 && (
+          <FactRows className="rounded-none border-0">
+            {latest.terms.map((term) => (
+              <FactRow
+                key={term.key}
+                label={fr.deals.terms.labels[term.key] ?? term.key}
+                value={formatTermValue(term.format, term.value)}
+                state={{
+                  tone: dealTermTone[term.state],
+                  label: fr.deals.terms.states[term.state],
+                }}
+              />
+            ))}
+          </FactRows>
+        )}
+      </DocumentCard>
       {older.length > 0 && (
         <details className="group flex flex-col gap-2">
           <summary className="w-fit cursor-pointer text-body-md font-medium text-[color:var(--text-secondary)]">
             {t.older}
           </summary>
-          <FactRows className="mt-2">
+          <div className="mt-2 flex flex-col gap-2">
             {older.map((memo) => (
-              <FactRow
+              <DocumentCard
                 key={memo.id}
-                label={t.name(memo.number)}
-                value={t.meta(memo.createdBy, formatInstantDay(memo.createdAt))}
-                state={{
-                  tone: dealMemoTone[memo.status],
-                  label: t.statuses[memo.status],
-                }}
-                side={
-                  <MemoPdf dealId={dealId} dealName={dealName} memo={memo} />
+                name={t.name(memo.number)}
+                line={meta(memo)}
+                action={
+                  <span className="flex flex-wrap items-center gap-2">
+                    {badge(memo)}
+                    <MemoPdf dealId={dealId} dealName={dealName} memo={memo} />
+                  </span>
                 }
               />
             ))}
-          </FactRows>
+          </div>
         </details>
       )}
     </div>

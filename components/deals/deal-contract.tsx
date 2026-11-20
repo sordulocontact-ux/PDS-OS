@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
@@ -7,8 +8,9 @@ import { OptionSelect } from "@/components/projects/option-select";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { Button } from "@/components/ui/button";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
-import { FactRow, FactRows } from "@/components/ui/fact-row";
+import { DocumentCard } from "@/components/ui/document-card";
 import { FormDialog } from "@/components/ui/form-dialog";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { routes } from "@/lib/auth/redirects";
 import { linkDealContract } from "@/lib/deals/memo-actions";
@@ -73,7 +75,9 @@ function LinkForm({
  * The deal's contract (BIZ 7): a participation's deal shows the
  * participation's (never copied); any other deal names one main contract
  * among those of its project or artist (« Lier un contrat », « Changer »,
- * « Retirer le lien »). Its name opens it in Contrats for whoever may.
+ * « Retirer le lien »). A document card (Sacha 20/11/2026, proto « Fiche
+ * d'un deal » v2): its kind, signature day and amount entered under its
+ * name, its state and « Ouvrir » (in Contrats, for whoever may) on the right.
  */
 export function DealContract({
   dealId,
@@ -100,55 +104,58 @@ export function DealContract({
   return (
     <>
       {contract ? (
-        <FactRows>
-          <FactRow
-            label={
-              contract.source === "participation"
-                ? t.fromParticipation
-                : fr.contracts.types[
-                    contract.type as keyof typeof fr.contracts.types
-                  ]
-            }
-            value={contract.title}
-            state={{
-              tone: contractStateTone[contract.status] ?? "neutral",
-              label:
-                fr.contracts.states[
+        <DocumentCard
+          name={contract.title}
+          line={[
+            contract.source === "participation"
+              ? t.fromParticipation
+              : fr.contracts.types[
+                  contract.type as keyof typeof fr.contracts.types
+                ],
+            contract.signedOn ? t.signedOn(formatDay(contract.signedOn)) : null,
+            contract.amountCents !== null
+              ? `${t.amount} : ${formatAmount(contract.amountCents)}`
+              : null,
+          ]
+            .filter(Boolean)
+            .join(" · ")}
+          action={
+            <span className="flex flex-wrap items-center gap-2">
+              <StatusBadge
+                tone={contractStateTone[contract.status] ?? "neutral"}
+                size="sm"
+              >
+                {fr.contracts.states[
                   contract.status as keyof typeof fr.contracts.states
-                ] ?? contract.status,
-            }}
-            source={
-              contract.signedOn
-                ? t.signedOn(formatDay(contract.signedOn))
-                : null
-            }
-            href={contract.visible ? routes.contract(contract.id) : null}
-            hrefLabel={t.open(contract.title)}
-            side={
-              canLink ? (
-                <div className="flex items-center gap-2">
-                  {linkButton}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    disabled={unlink.pending}
-                    onClick={() =>
-                      unlink.run(() => linkDealContract(dealId, null))
-                    }
-                  >
-                    {t.unlink}
-                  </Button>
-                </div>
-              ) : null
-            }
-          />
-          {contract.amountCents !== null && (
-            <FactRow
-              label={t.amount}
-              value={formatAmount(contract.amountCents)}
-            />
-          )}
-        </FactRows>
+                ] ?? contract.status}
+              </StatusBadge>
+              {contract.visible && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  nativeButton={false}
+                  render={<Link href={routes.contract(contract.id)} />}
+                  aria-label={t.open(contract.title)}
+                >
+                  {t.openShort}
+                </Button>
+              )}
+              {canLink && linkButton}
+              {canLink && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  disabled={unlink.pending}
+                  onClick={() =>
+                    unlink.run(() => linkDealContract(dealId, null))
+                  }
+                >
+                  {t.unlink}
+                </Button>
+              )}
+            </span>
+          }
+        />
       ) : (
         <div className="flex flex-col items-start gap-3">
           <EmptyNote>{participation ? t.noneParticipation : t.none}</EmptyNote>
