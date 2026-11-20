@@ -173,10 +173,12 @@ export const deals = {
     projectPlaceholder: "Choisir un projet",
     projectSearch: "Rechercher un projet",
     projectEmpty: "Aucun projet ne correspond.",
+    noProject: "Aucun projet",
     artist: "Artiste",
     artistPlaceholder: "Choisir un artiste",
     artistSearch: "Rechercher un artiste",
     artistEmpty: "Aucun artiste ne correspond.",
+    noArtist: "Aucun artiste",
     assignee: "Négocié par",
     assigneeHint:
       "Un membre qui négocie ; laissez vide pour l'affecter plus tard.",

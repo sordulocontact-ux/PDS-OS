@@ -34,6 +34,14 @@ export function NewDealSubjectFields({
   missing: string[];
 }) {
   const t = fr.deals.create;
+  const projectRequired = music && !options.artistAlone;
+  const artistRequired = music && options.own;
+  // An optional choice can be taken back: « Aucun projet » first, as the
+  // other optional menus of the app (Finance, a task's project).
+  const optional = (none: string, list: Record<string, string>) => ({
+    "": none,
+    ...list,
+  });
   return byParticipation ? (
     <div className="flex flex-col gap-1.5">
       <SearchSelect
@@ -67,7 +75,11 @@ export function NewDealSubjectFields({
         <SearchSelect
           id={options.artistAlone ? "new-deal-subject" : "new-deal-project"}
           label={t.project}
-          options={options.projects}
+          options={
+            projectRequired
+              ? options.projects
+              : optional(t.noProject, options.projects)
+          }
           value={values.project}
           onChange={(v) => {
             onChange("project", v);
@@ -75,7 +87,7 @@ export function NewDealSubjectFields({
           placeholder={t.projectPlaceholder}
           searchPlaceholder={t.projectSearch}
           emptyLabel={t.projectEmpty}
-          required={music && !options.artistAlone}
+          required={projectRequired}
           invalid={music && missing.length > 0}
           describedBy="new-deal-subject-error"
           fill
@@ -92,7 +104,11 @@ export function NewDealSubjectFields({
         <SearchSelect
           id="new-deal-artist"
           label={t.artist}
-          options={options.artists}
+          options={
+            artistRequired
+              ? options.artists
+              : optional(t.noArtist, options.artists)
+          }
           value={values.artist}
           onChange={(v) => {
             onChange("artist", v);
@@ -100,14 +116,12 @@ export function NewDealSubjectFields({
           placeholder={t.artistPlaceholder}
           searchPlaceholder={t.artistSearch}
           emptyLabel={t.artistEmpty}
-          required={music && options.own}
-          invalid={music && options.own && missing.length > 0}
-          describedBy={
-            music && options.own ? "new-deal-artist-error" : undefined
-          }
+          required={artistRequired}
+          invalid={artistRequired && missing.length > 0}
+          describedBy={artistRequired ? "new-deal-artist-error" : undefined}
           fill
         />
-        {music && options.own && (
+        {artistRequired && (
           <FieldError id="new-deal-artist-error">
             {missing.length > 0 ? t.required.artist : undefined}
           </FieldError>
