@@ -28,6 +28,30 @@ export const legalContracts = {
   } as Record<string, string>,
   // JUR-16: a value that does not apply to the person, as the contract says it.
   notApplicable: "Sans objet",
+  // The language of a template, and of the contracts made from it (Ibé,
+  // 18/11/2026).
+  languages: { fr: "Français", en: "Anglais" },
+  // What the code writes itself in an English contract (never a clause):
+  // a value that does not apply, the person's status, the credited roles.
+  inEnglish: {
+    notApplicable: "N/A",
+    entityType: { person: "Individual", company: "Company" } as Record<
+      string,
+      string
+    >,
+    roles: {
+      composer: "Composer",
+      lyricist: "Lyricist",
+      arranger: "Arranger",
+      producer: "Producer",
+      co_producer: "Co-producer",
+      recording_engineer: "Recording engineer",
+      mix_engineer: "Mixing engineer",
+      mastering_engineer: "Mastering engineer",
+      musician: "Musician",
+      other: "Other",
+    } as Record<string, string>,
+  },
   checklist: {
     status: {
       filled: "Rempli",
@@ -115,7 +139,7 @@ export const legalContracts = {
     retired: "Modèle retiré.",
     retiredBecause: (reason: string) => `Retiré ou refusé : ${reason}`,
     whoValidates:
-      "À valider par le directeur général : tant qu'il n'est pas validé, ce modèle n'est proposé pour aucun contrat.",
+      "À valider par le business manager : tant qu'il n'est pas validé, ce modèle n'est proposé pour aucun contrat.",
     backToLibrary: "Tous les modèles",
     validateTitle: "Valider ce modèle ?",
     validateBody:
@@ -128,6 +152,7 @@ export const legalContracts = {
       name: "Nom",
       type: "Type de contrat",
       roles: "Rôles concernés",
+      language: "Langue du contrat",
       usage: "Usage",
       body: "Texte du modèle",
       submit: "Enregistrer le modèle",
@@ -202,14 +227,23 @@ export const legalContracts = {
     versions: "Versions",
     validatedBy: (name: string, date: string) =>
       `Validé par ${name} le ${date}`,
-    usesFields: "Champs injectés",
+    // The template as a document (Ibé, 18/11/2026: « recevoir le modèle en
+    // PDF, pas un truc avec les écritures »): its values as blanks to fill,
+    // « Modifier » opening the source document, where it is changed.
+    document: {
+      name: (name: string, version: string) => `${name} · ${version}`,
+      pdf: "Voir le PDF",
+      edit: "Modifier",
+      editLabel: (name: string) => `Modifier le document source : ${name}`,
+      frameTitle: (name: string) => `Aperçu du modèle « ${name} »`,
+    },
     confirmRetireTitle: "Retirer ce modèle ?",
     confirmRetireBody:
       "Il ne sera plus proposé. Les contrats déjà générés depuis lui ne changent pas.",
     cancel: "Annuler",
     close: "Fermer",
     failed: "L'action n'a pas pu être faite. Réessayez.",
-    forbidden: "Seul le directeur général valide un modèle.",
+    forbidden: "Seuls le business manager et la direction valident un modèle.",
   },
   agreements: {
     title: "Contrats",

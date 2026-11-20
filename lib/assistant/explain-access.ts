@@ -141,7 +141,7 @@ function pageFacts(
   if (path.startsWith("/app/contracts/templates"))
     return [
       need("manage_legal", t.templates),
-      need("validate", t.validateTemplate),
+      need("validate_contracts", t.validateTemplate),
     ];
   if (path.startsWith("/app/contracts"))
     return [need("manage_contracts", t.contracts)];

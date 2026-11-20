@@ -4,6 +4,7 @@ import { IconOffice, IconUser } from "nucleo-sharp-essential";
 
 import { RecordSelection } from "@/components/archive/record-selection";
 import { ContactActions } from "@/components/network/contact-actions";
+import { AddToListButton } from "@/components/network/lists/add-to-list-button";
 import { Avatar } from "@/components/ui/avatar";
 import {
   DataTable,
@@ -24,6 +25,7 @@ import type { RecordRights } from "@/lib/archive/types";
 import { routes } from "@/lib/auth/redirects";
 import { network } from "@/lib/i18n/fr/network";
 import { records } from "@/lib/i18n/fr/records";
+import type { NetworkListOption } from "@/lib/network/lists-types";
 import {
   relationsText,
   rolesText,
@@ -34,20 +36,24 @@ const fr = { network, records };
 
 // The network, by name: a person or an organization (its icon), what it
 // does, how to reach it; the row opens its page, "⋯" edits, archives or
-// deletes it, checkboxes delete several at once (director).
+// deletes it, checkboxes delete several at once (director) and add them to
+// a list (`lists`: who manages the Réseau, Ibé 18/11/2026).
 export function NetworkTable({
   contacts,
   projects,
   rights,
+  lists = null,
 }: {
   contacts: NetworkContactRow[];
   // Each contact's projects, by title.
   projects: Record<string, string[]>;
   rights: RecordRights;
+  // The lists the ticked people can join; null: no « Ajouter à une liste ».
+  lists?: NetworkListOption[] | null;
 }) {
   const t = fr.network;
   const selection = fr.records.selection;
-  const withSelection = rights.canArchive;
+  const withSelection = rights.canArchive || lists !== null;
 
   const table = (
     <DataTable>
@@ -158,7 +164,12 @@ export function NetworkTable({
   );
 
   return withSelection ? (
-    <RecordSelection kind="contact" archived={rights?.archived}>
+    <RecordSelection
+      kind="contact"
+      archived={rights?.archived}
+      manage={rights.canArchive}
+      actions={lists && <AddToListButton lists={lists} />}
+    >
       {table}
     </RecordSelection>
   ) : (

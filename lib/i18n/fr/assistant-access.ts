@@ -12,7 +12,7 @@ export const assistantAccess = {
     administer: "gérer l'équipe et les accès",
     assign_projects: "transmettre un projet à un chef de projet",
     validate:
-      "valider ce qu'on soumet (Brief, étapes, contrats, modèles de contrat, accords de principe des deals)",
+      "valider ce qu'on soumet (Brief, étapes, accords de principe des deals) et signer les contrats pour PDS",
     pilot_projects: "mener les projets dont on est responsable",
     creative_work:
       "valider les maquettes et déposer des fichiers dans les projets",
@@ -36,6 +36,8 @@ export const assistantAccess = {
       "voir Finance : la trésorerie, les entrées d'argent et les dépenses de toute l'équipe",
     manage_finance:
       "mettre à jour le solde du compte et la réserve, saisir les entrées d'argent et leurs encaissements",
+    validate_contracts:
+      "valider ou refuser les modèles de contrat et les contrats soumis",
   } as Record<string, string>,
   // A permission the page needs: granted, or who holds it.
   youCan: (what: string) => `Votre poste vous permet de ${what}.`,

@@ -10,13 +10,17 @@ import { templateSourceUrl } from "@/lib/legal/contracts/template-source";
 
 const fr = { legalContracts };
 
-/** The file a template was imported from, downloaded by a short-lived link. */
+/** The file a template was imported from, downloaded by a short-lived link.
+ * `label`: says what opening it is for (« Modifier »: the template is changed
+ * in its source document, Ibé 18/11/2026) instead of the file's name. */
 export function TemplateSourceLink({
   templateId,
   name,
+  label,
 }: {
   templateId: string;
   name: string;
+  label?: string;
 }) {
   const t = fr.legalContracts.templates.source;
   const [pending, startTransition] = useTransition();
@@ -27,7 +31,11 @@ export function TemplateSourceLink({
       size="sm"
       className="max-w-full self-start"
       disabled={pending}
-      aria-label={`${t.open} : ${name}`}
+      aria-label={
+        label
+          ? fr.legalContracts.templates.document.editLabel(name)
+          : `${t.open} : ${name}`
+      }
       onClick={() =>
         startTransition(async () => {
           const result = await templateSourceUrl(templateId);
@@ -36,8 +44,8 @@ export function TemplateSourceLink({
         })
       }
     >
-      <IconPaperclip aria-hidden />
-      <span className="truncate">{name}</span>
+      {!label && <IconPaperclip aria-hidden />}
+      <span className="truncate">{label ?? name}</span>
     </Button>
   );
 }

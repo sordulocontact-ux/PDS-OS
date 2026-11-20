@@ -3,6 +3,7 @@
 import { NetworkTable } from "@/components/network/network-table";
 import { SearchableList } from "@/components/ui/searchable-list";
 import type { RecordRights } from "@/lib/archive/types";
+import type { NetworkListOption } from "@/lib/network/lists-types";
 import { network } from "@/lib/i18n/fr/network";
 import { rolesText, type NetworkContactRow } from "@/lib/network/types";
 
@@ -14,12 +15,15 @@ export function NetworkList({
   contacts,
   projects,
   rights,
+  lists = null,
   filters,
   empty,
 }: {
   contacts: NetworkContactRow[];
   projects: Record<string, string[]>;
   rights: RecordRights;
+  // « Ajouter à une liste » on the ticked people (NetworkTable).
+  lists?: NetworkListOption[] | null;
   // The page's filters, beside the search; what stands for no row at all.
   filters?: React.ReactNode;
   empty?: React.ReactNode;
@@ -44,7 +48,12 @@ export function NetworkList({
       empty={empty}
     >
       {(visible) => (
-        <NetworkTable contacts={visible} projects={projects} rights={rights} />
+        <NetworkTable
+          contacts={visible}
+          projects={projects}
+          rights={rights}
+          lists={lists}
+        />
       )}
     </SearchableList>
   );

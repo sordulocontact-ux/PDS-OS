@@ -85,6 +85,8 @@ export function DealNow({
   proposer = null,
   reopen,
   lead,
+  planCall,
+  nextCall = null,
 }: {
   deal: Deal;
   terms: DealTerm[];
@@ -93,6 +95,10 @@ export function DealNow({
   proposer?: string | null;
   reopen?: ReactNode;
   lead?: ReactNode;
+  // « Caler le call » of the project's owner (deal.canPlanCall), and the
+  // next call already planned (its day and hour).
+  planCall?: ReactNode;
+  nextCall?: string | null;
 }) {
   const t = fr.deals.page;
   if (deal.canDecide)
@@ -115,6 +121,20 @@ export function DealNow({
         <h2 className={heading}>{t.abandonedTitle}</h2>
         <p className={secondary}>{t.abandonedBody(deal.abandonReason)}</p>
         {reopen}
+      </NowFrame>
+    );
+  // The project's owner calls the negotiation, never writes it (Ibé
+  // 18/11/2026): her gesture until the accord, the button in its place.
+  if (deal.canPlanCall && planCall)
+    return (
+      <NowFrame label={t.now}>
+        <h2 className={heading}>
+          {nextCall
+            ? t.planCall.planned(nextCall)
+            : t.planCall.title(deal.assignee?.name ?? null)}
+        </h2>
+        <p className={secondary}>{t.planCall.why}</p>
+        <div>{planCall}</div>
       </NowFrame>
     );
   if (!deal.canWrite) return null;

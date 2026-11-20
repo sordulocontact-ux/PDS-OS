@@ -67,6 +67,8 @@ export async function loadContractPage(
   const returned = generated
     ? Boolean(proof?.deposit || (proof?.signed && proof.evidence))
     : Boolean(proof?.signed);
+  // Signing for PDS stays the direction's (« validate »); validating the
+  // contract is validate_contracts (contract.can.decide).
   const canValidate = can(access, "validate");
   const now = contractNowOf({
     state: contract.state,

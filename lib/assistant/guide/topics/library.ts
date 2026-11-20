@@ -126,6 +126,11 @@ export const libraryTopics: GuideTopic[] = [
       "contact prive",
       "prive",
       "coordonnees",
+      "liste de personnes",
+      "mes listes",
+      "campagne",
+      "influenceurs",
+      "medias",
     ],
     nav: "/app/network",
     facts: [
@@ -138,11 +143,21 @@ export const libraryTopics: GuideTopic[] = [
       "Un contact peut être rendu privé (« Rendre privé », dans Confidentialité sur sa fiche) par la personne qui l'a créé ou par la direction. Son nom, ses métiers et son organisation restent dans le Réseau pour tous ; ses coordonnées (e-mail, téléphone, ville, notes) et ses échanges ne sont lus que par sa propriétaire, la direction et les personnes des deals où il est partagé.",
       "Un contact privé se partage deal par deal, en l'ajoutant aux contacts d'un deal : seule sa propriétaire, ou la direction, peut le faire. Partages, retraits et refus sont notés dans son journal. « Rendre partagé » remet ses coordonnées dans le Réseau.",
       "Pour qui ne lit pas ses coordonnées, PDS OS n'envoie rien à un contact privé et ne l'invite pas à un call : la fiche dit « Coordonnées privées ».",
+      "Mes listes (bouton à côté de « Nouveau contact ») : des listes de personnes du Réseau, par exemple des artistes pour un projet, des influenceurs pour une campagne ou les médias qui correspondent à un artiste. Pas de fichiers dans une liste.",
+      "Une liste se crée en cochant des personnes dans le Réseau puis « Ajouter à une liste », ou par « Nouvelle liste » dans Mes listes. Elle reste visible par son auteur seul, direction comprise, ou elle est partagée avec l'équipe.",
+      "Chaque personne d'une liste a une réponse : « Pas encore répondu » ou « A répondu », changée d'un clic sur la pastille.",
+      "Les personnes d'une liste s'ajoutent et se retirent par son auteur, et par toute l'équipe une fois partagée. Seul son auteur la renomme, la partage ou la garde pour lui, et la supprime ; ses personnes restent dans le Réseau.",
+      "Une liste partagée est « À valider » jusqu'à ce que la direction la valide ; partagée par la direction, elle est validée d'emblée.",
+      "« Créer un projet » sur une liste (pour qui crée des projets) ouvre le formulaire de nouveau projet pré-rempli avec ses artistes du Catalogue : plusieurs artistes donnent un projet collectif. Les personnes qui ne sont pas au Catalogue sont signalées et non reprises.",
     ],
     faq: [
       {
         q: "Comment ajouter un artiste repéré ?",
         a: "Depuis la page Repérage, « Ajouter au Réseau » l'enregistre dans l'onglet Artistes repérés.",
+      },
+      {
+        q: "Comment faire une liste de personnes du Réseau ?",
+        a: "Dans le Réseau, cochez les personnes puis « Ajouter à une liste » dans la barre en bas : une liste existante ou une nouvelle, pour vous ou partagée avec l'équipe. Elles sont ensuite dans Mes listes.",
       },
     ],
     permissions: ["manage_network"],

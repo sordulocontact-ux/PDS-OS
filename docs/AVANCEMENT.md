@@ -2506,6 +2506,18 @@ cliquer et tout s'enchaîner »).
   qui suit le contrat). Migration **à pousser en prod** avec la précédente (`20261120100101`).
 
 
+## Finance : supprimer un budget, sous-budgets (20/11/2026, branche `pre-prod`, lot A des retours d'Ibé du 18/11)
+
+- « Dans Finance on ne peut pas supprimer des budgets » : « ⋯ » › **Supprimer le budget** sur un budget « Autre » (fait à la
+  main) ; supprimé si inutilisé, **archivé** si une dépense ou une émission le tient (`remove_cost_center`) ; droit
+  `manage_finance` ; budgets de projet et d'artiste inchangés (ils partent avec leur projet / artiste).
+- « Un budget de 20 000, dont 10 000 de marketing et 10 000 d'enregistrement » : **sous-budgets** nommés avec un montant
+  sur tout budget (`finance_budget_parts`), dépensé et reste par sous-budget, part non répartie ; dépenses rattachées
+  depuis « ⋯ » du sous-budget (`assign_budget_part`), pré-cochées si leur sous-poste porte le nom. PO le lit.
+- Migration `20261120120101_finance_budget_envelopes.sql` **à pousser en prod** ; test `supabase/tests/finance-budget-envelopes.test.sql`.
+- Reste : champ « Sous-budget » dans le formulaire de dépense (`BudgetLineForm`), le rattachement ne se fait aujourd'hui que
+  depuis le sous-budget.
+
 ## Fiche d'un deal en cartes (20/11/2026, branche `pre-prod`)
 
 Sacha : « il y a pas un autre moyen que des tableaux ? des cards ? » ; proto « Fiche d'un deal » (v1 tableaux, v2 cartes,
@@ -2518,3 +2530,75 @@ Sacha : « il y a pas un autre moyen que des tableaux ? des cards ? » ; proto �
 - **Informations** du Dossier : `FactCards` (« Changer » le négociateur dans la carte).
 - Reste en lignes : la comparaison du contrat au deal memo (un verdict par terme) et l'historique par jour.
 
+## Réseau : listes de personnes (20/11/2026, branche `pre-prod`, lot E des retours d'Ibé du 18/11)
+
+- « Créer des listes de réseau » (réunion du 18/11, 5:15 à 9:03) : dans le Réseau, cocher des personnes puis
+  **« Ajouter à une liste »** (existante ou nouvelle, « Partager avec l'équipe » ou pour soi) ; **« Mes listes »**
+  (`/app/network/lists`, Toutes / Pour moi / Partagées) ; page d'une liste : ses personnes et leur **réponse**
+  (« Pas encore répondu » / « A répondu », le sablier et la coche d'Ibé, un clic), « Ajouter des personnes »,
+  « Retirer de la liste », renommer, partager, supprimer. Une liste partagée est **« À valider »** jusqu'à
+  « Valider la liste » par la direction (validée d'emblée si la direction la partage).
+- **« Créer un projet »** depuis une liste : le vrai formulaire pré-rempli (plusieurs artistes du Catalogue = projet
+  collectif PDS Mic avec invités, un seul = l'artiste du projet ; les personnes hors Catalogue nommées au-dessus).
+- Migration `20261120160101_network_lists.sql` **à pousser en prod** ; test `supabase/tests/network-lists.test.sql`
+  (45 tests). Détail : `docs/ARCHITECTURE.md` § 8 quinquies.
+- Reste (hors périmètre) : PO qui crée une liste depuis une note collée ; vue « dossiers » façon Drive.
+
+## Contrats : business manager, modèle en PDF, langue (20/11/2026, branche `pre-prod`, lot B des retours d'Ibé du 18/11)
+
+- « Il faudrait que la personne qui valide soit le business manager » (55:19, 59:48, 1:19:45) : nouvelle permission
+  `validate_contracts` (DG et business manager) pour valider ou refuser un modèle, approuver un contrat ou demander des
+  modifications ; le business manager lit tous les modèles, leur fichier source et tous les contrats ; onglet Modèles
+  ouvert sans « Nouveau modèle ». Signer pour PDS reste la direction.
+- « Recevoir le modèle en PDF, pas un truc avec les écritures » (55:32 à 58:37) : la page d'un modèle montre le
+  document (aperçu, valeurs en blancs libellés), « Voir le PDF » et « Modifier » qui ouvre le document source ;
+  « Champs injectés », texte à pastilles et description (usage) retirés de la lecture.
+- « Sélectionner la langue du contrat » (48:12) : « Langue du contrat » (Français / Anglais) à l'import d'un modèle ;
+  un contrat suit la langue de son modèle, choisi dans les contrats à prévoir (« · Anglais »).
+- Migration `20261120130101_contract_templates_business.sql` **à pousser en prod** ; test
+  `supabase/tests/contract-templates-business.test.sql` (19 tests) ; `team.test.sql` mis à jour (permissions de la DG).
+  Détail : `docs/ARCHITECTURE.md` § 8 sexies ; points à confirmer : `docs/CONTEXTE-PROJET.md` § 2.
+
+
+## Call de négociation avant tout contrat (20/11/2026, branche `pre-prod`, lot C des retours d'Ibé du 18/11)
+
+- Réunion du 18/11 (52:10 « on a oublié l'étape avec le business manager », 1:00:07 à 1:04:28, 1:17:44 à 1:19:23) :
+  dès que l'artiste est d'accord, la cheffe de projet cale un call entre le business manager et le manager de
+  l'artiste, sur les créneaux libres du business manager ; elle n'est pas dans le call et ne modifie jamais le deal.
+- **« Caler le call »** (`NegotiationCallButton`) : « Maintenant » du responsable du projet sur un deal Musique avant
+  l'accord ; créneaux libres du business manager (d'après ses calls dans PDS OS, 10 h-18 h, jours ouvrés ; son agenda
+  Google n'est pas lu), puis le formulaire de call (invités, Meet). Sur une participation sans deal, le geste ouvre le
+  deal et le confie au business manager choisi. Le call reste celui du deal : le business manager l'enregistre.
+- **Accord validé → le responsable du projet est prévenu** (`deal_agreement_validated`, « place au contrat »).
+- **Pour Maël** : `participation_deal_state` / `project_participation_deal_states` (SQL) et
+  `loadParticipationDealStates` (étape, accord validé, prochain call, droit de caler le call), à brancher sur la
+  colonne « Taux / accord » et le bouton du tableau « Titres et artistes ».
+- Migration `20261120140101_deal_negotiation_call.sql` **à pousser en prod** ; test
+  `supabase/tests/deal-negotiation-call.test.sql` (29 tests). Détail : `docs/ARCHITECTURE.md` § 8 quaterdecies.
+- Reste : lire l'agenda Google du business manager (`calendar.freebusy` sur le nouveau jeton de po@), notifier le
+  business manager qu'un call lui est calé (nouveau type de notification), pré-remplir le contact de la participation
+  comme invité (`CallPlanForm` ne prend pas d'invités par défaut), garde SQL « pas de contrat avant l'accord » côté
+  contrats des participations.
+
+
+## Circuit du deal memo par e-mail (20/11/2026, branche `pre-prod`, lot D des retours d'Ibé du 18/11)
+
+- Réunion du 18/11 (1:10:43 à 1:16:42, 1:21:49 à 1:22:44) : le label ou la marque envoie son deal memo par e-mail
+  après l'accord sur les termes ; il doit se ranger dans le deal « comme les masters », avec une notification ; le
+  business manager le montre à la direction, qui valide ou demande des modifications (par écrit, après un appel), puis
+  il renvoie l'accord validé par e-mail ; on peut mettre des personnes dans la boucle (le DG du label producteur).
+  La partie juridique d'un deal reste sur la page du deal.
+- **Réception** : adresse du deal `po+deal-<id>@` (montrée sous le deal memo, « Copier ») ou adresse connue du deal
+  avant la contractualisation ; seul un e-mail avec PDF devient un deal memo « À valider » (PDF dans `deal-files`,
+  objet et texte de l'e-mail gardés), la personne qui négocie est prévenue. Cron `/api/cron/inbox` existant.
+- **Circuit** : « Montrer à la direction » → « Valider » ou « Demander des modifications » (motif) → « Renvoyer
+  l'accord validé » (e-mail depuis po@, PDF joint, adresse de l'expéditeur pré-remplie ; « Envoyé autrement » en
+  recours). Chaque étape notifie (5 nouveaux types) et entre dans l'historique du deal.
+- **Dans la boucle** : un contact du Réseau (copie de l'accord renvoyé) ou un membre qui lit déjà le deal (prévenu à
+  chaque étape).
+- Migration `20261120150101_deal_memo_mail.sql` **à pousser en prod** (crée le bucket `deal-files`) ; test
+  `supabase/tests/deal-memo-mail.test.sql` (42 tests). Détail : `docs/ARCHITECTURE.md` § 8 quaterdecies.
+- Reste : le contenu du deal memo (exemple attendu d'Ibé, rien n'en est lu ni présumé) ; un vrai `Cc` dans
+  `lib/email/send.ts` (une copie séparée par contact aujourd'hui) ; textes des 5 notifications et lignes d'historique
+  des nouveaux types (fichiers partagés, à faire) ; dépôt à la main d'un memo reçu ailleurs (WhatsApp) : aujourd'hui,
+  le transférer par e-mail à l'adresse du deal.

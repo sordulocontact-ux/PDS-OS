@@ -34,7 +34,7 @@ export const metadata = { title: `${fr.contracts.title} · ${fr.app.name}` };
 
 /**
  * Contracts and their templates, one page (Sacha, 30/10/2026): two tabs,
- * Contrats and Modèles (manage_legal, ?tab=templates). Contracts: the ones
+ * Contrats and Modèles (manage_legal or validate_contracts, ?tab=templates). Contracts: the ones
  * the viewer follows, the direction's all, those of the projects they own;
  * « Filtres » by state (?view=, the former tabs), type, project, artist and
  * owner. Templates (ticket Juridique 03): by state and type. Each with an
@@ -49,7 +49,12 @@ export default async function ContractsPage({
     searchParams,
   ]);
   const t = fr.contracts;
-  const canTemplates = can(access, "manage_legal") && !!access.organizationId;
+  // The library: whoever writes templates (manage_legal) or validates them
+  // (validate_contracts: the business manager, Ibé 18/11/2026).
+  const canWriteTemplates = can(access, "manage_legal");
+  const canTemplates =
+    (canWriteTemplates || can(access, "validate_contracts")) &&
+    !!access.organizationId;
   const organizationId = access.organizationId ?? "";
   const templates = canTemplates ? await listTemplateSeries(access) : [];
   const onTemplates = canTemplates && params.tab === "templates";
@@ -78,7 +83,9 @@ export default async function ContractsPage({
   const shownTemplates = templates.filter((x) => matchesTemplate(x, tFilters));
   const filtering = Object.values(filters).some((v) => v !== null);
   const action = onTemplates ? (
-    <TemplateFormButton organizationId={organizationId} />
+    canWriteTemplates ? (
+      <TemplateFormButton organizationId={organizationId} />
+    ) : null
   ) : canCreate ? (
     <NewContractButton />
   ) : null;

@@ -146,7 +146,8 @@ export async function getContract(
     can: {
       edit: base.canEdit,
       submit: owner && status === "draft",
-      decide: can(access, "validate") && status === "in_review",
+      // The business manager, the direction supervising (Ibé, 18/11/2026).
+      decide: can(access, "validate_contracts") && status === "in_review",
       send: owner && status === "approved",
       sign: writer && (status === "approved" || status === "sent"),
       terminate: writer && status === "signed",

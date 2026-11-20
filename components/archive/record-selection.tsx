@@ -22,22 +22,34 @@ const fr = { records };
  * Selection of a main list (artists, titles, projects, network): checkboxes
  * in the table (SelectAllHead, SelectRowCell), and a bar floating at the
  * bottom of the screen once a row is ticked, to archive (or restore, in the
- * archive) or delete them together.
+ * archive) or delete them together. `actions`: the list's own gestures on
+ * the selection, first in the bar (« Ajouter à une liste » of the Réseau);
+ * `manage` false: no archiving nor deleting (who does not hold the right
+ * still selects for `actions`).
  */
 export function RecordSelection({
   kind,
   archived = false,
+  actions,
+  manage = true,
   children,
 }: {
   kind: ArchiveKind;
   // The list shows the archive: the selection is restored, not archived.
   archived?: boolean;
+  actions?: React.ReactNode;
+  manage?: boolean;
   children: React.ReactNode;
 }) {
   return (
     <RowSelection>
       {children}
-      <SelectionBar kind={kind} archived={archived} />
+      <SelectionBar
+        kind={kind}
+        archived={archived}
+        actions={actions}
+        manage={manage}
+      />
     </RowSelection>
   );
 }
@@ -47,9 +59,13 @@ type Confirming = "none" | "archive" | "delete";
 function SelectionBar({
   kind,
   archived,
+  actions,
+  manage,
 }: {
   kind: ArchiveKind;
   archived: boolean;
+  actions?: React.ReactNode;
+  manage: boolean;
 }) {
   const t = fr.records;
   const { selected, clear, toggle } = useRowSelection();
@@ -108,7 +124,8 @@ function SelectionBar({
           >
             {t.selection.count(count)}
           </span>
-          {archivable.length > 0 && (
+          {actions}
+          {manage && archivable.length > 0 && (
             <Button
               type="button"
               variant="secondary"
@@ -126,15 +143,17 @@ function SelectionBar({
               {archived ? t.selection.restore : t.selection.archive}
             </Button>
           )}
-          <Button
-            type="button"
-            variant="destructive"
-            size="sm"
-            onClick={() => setOpen("delete")}
-          >
-            <IconTrash aria-hidden data-icon="inline-start" />
-            {t.selection.delete}
-          </Button>
+          {manage && (
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              onClick={() => setOpen("delete")}
+            >
+              <IconTrash aria-hidden data-icon="inline-start" />
+              {t.selection.delete}
+            </Button>
+          )}
           <Button
             type="button"
             variant="ghost"

@@ -5,6 +5,7 @@ import {
   AddEnvelopeSpendButton,
   EnvelopeMenu,
 } from "@/components/finance/budget-actions";
+import { BudgetParts } from "@/components/finance/budget-parts";
 import { EnvelopeFigures } from "@/components/finance/envelope-figures";
 import { FinanceFrame } from "@/components/finance/finance-frame";
 import { PostPie } from "@/components/finance/post-pie";
@@ -170,6 +171,13 @@ export default async function FinanceEnvelopePage({
           </MetricCard>
         </div>
       )}
+      <BudgetParts
+        kind={kind}
+        id={id}
+        budgetCents={envelope.currentCents}
+        spends={all}
+        canManage={canManage}
+      />
       {all.length === 0 ? (
         <EmptyNote>{t.detail.noLines}</EmptyNote>
       ) : (

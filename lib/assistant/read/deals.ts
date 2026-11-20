@@ -16,6 +16,7 @@ import { dealName } from "@/lib/deals/names";
 import { loadDeals } from "@/lib/deals/queries";
 import { formatTermValue, parseTermValue } from "@/lib/deals/term-format";
 import { termOf } from "@/lib/deals/terms";
+import { dealMemos } from "@/lib/i18n/fr/deal-memos";
 import { deals } from "@/lib/i18n/fr/deals";
 import { createClient } from "@/lib/supabase/server";
 
@@ -63,13 +64,29 @@ export async function readDeals(
         // BIZ 7: its deal memos, the latest first.
         supabase
           .from("deal_memos")
-          .select("deal_id, number, status")
+          .select(
+            "deal_id, number, status, source, submitted_at, changes_reason, sent_at",
+          )
           .in("deal_id", ids)
           .order("number", { ascending: false }),
       ])
     : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }];
   const memoOf = (id: string) =>
     (memos ?? []).find((memo) => memo.deal_id === id);
+  // The latest memo, then its circuit by e-mail: received, shown to the
+  // direction, changes asked, the agreement sent back.
+  const memoLines = (id: string): string[] => {
+    const memo = memoOf(id);
+    if (!memo) return [];
+    const r = dealMemos.read;
+    return [
+      t.memo(memo.number, memo.status === "validated"),
+      memo.source === "email" ? r.received : null,
+      memo.submitted_at ? r.submitted : null,
+      memo.changes_reason ? r.changes(memo.changes_reason) : null,
+      memo.sent_at ? r.sent : null,
+    ].filter((line): line is string => Boolean(line));
+  };
   const countOf = (rows: { deal_id: string | null }[] | null, id: string) =>
     (rows ?? []).filter((row) => row.deal_id === id).length;
   return {
@@ -94,9 +111,7 @@ export async function readDeals(
           : []),
         ...(d.followUpOn ? [t.followUp(formatDay(d.followUpOn))] : []),
         ...(d.abandonReason ? [t.abandoned(d.abandonReason)] : []),
-        ...(memoOf(d.id)
-          ? [t.memo(memoOf(d.id)!.number, memoOf(d.id)!.status === "validated")]
-          : []),
+        ...memoLines(d.id),
         ...(countOf(calls, d.id) > 0
           ? [t.calls(countOf(calls, d.id), countOf(proposals, d.id))]
           : []),

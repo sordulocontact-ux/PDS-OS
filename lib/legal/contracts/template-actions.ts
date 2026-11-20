@@ -10,6 +10,7 @@ import { catalogIdSchema } from "@/lib/catalog/schemas";
 import { CONTRACT_TYPES } from "@/lib/contracts/types";
 import { fr } from "@/lib/i18n/fr";
 import { unknownPlaceholders } from "@/lib/legal/contracts/fields";
+import { CONTRACT_LANGUAGES } from "@/lib/legal/contracts/language";
 import { FORM_ROLES } from "@/lib/legal/forms/definition";
 import { schedulePendingPushes } from "@/lib/notifications/push";
 import { createClient } from "@/lib/supabase/server";
@@ -23,6 +24,8 @@ const templateSchema = z.object({
   seriesId: catalogIdSchema.nullable(),
   name: z.string().trim().min(1).max(200),
   type: z.enum(CONTRACT_TYPES),
+  // The language it is written in (Ibé, 18/11/2026); never translated.
+  language: z.enum(CONTRACT_LANGUAGES).default("fr"),
   roles: z.array(z.enum(FORM_ROLES)).min(1).max(FORM_ROLES.length),
   usage: z.string().trim().max(500),
   body: z.string().min(1).max(200_000),
@@ -70,6 +73,7 @@ export async function createContractTemplate(
       p_body: parsed.data.body,
       p_source_path: parsed.data.source?.path,
       p_source_name: parsed.data.source?.name,
+      p_language: parsed.data.language,
     },
   );
   if (error) {

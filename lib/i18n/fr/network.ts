@@ -1,3 +1,4 @@
+import { networkLists } from "./network-lists";
 import { networkPrivacy } from "./network-privacy";
 
 /** Network: the people and organizations PDS works with. */
@@ -391,4 +392,6 @@ export const network = {
   },
   // Private contacts (BIZ 8).
   privacy: networkPrivacy,
+  // Lists of contacts (Ibé, 18/11/2026).
+  lists: networkLists,
 } as const;

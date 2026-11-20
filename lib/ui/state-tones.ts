@@ -1359,3 +1359,18 @@ export const planningMarkTone = {
   low: "neutral",
   low_under: "danger",
 } as const satisfies Record<string, Tone>;
+
+/** A list of the Réseau (Ibé, 18/11/2026): for its author alone, shared and
+ * waiting for the direction's decision, validated. */
+export const networkListStateTone = {
+  private: "neutral",
+  toValidate: "action",
+  validated: "success",
+} as const satisfies Record<string, Tone>;
+
+/** A person of a list: not replied yet (Ibé's hourglass, waiting for them),
+ * replied (his green tick). */
+export const networkListReplyTone = {
+  waiting: "warning",
+  replied: "success",
+} as const satisfies Record<string, Tone>;

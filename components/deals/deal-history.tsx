@@ -30,6 +30,22 @@ function lineOf(event: DealEvent, deal: Deal): string {
       return t.memo(Boolean(event.detail.agreement));
     case "memo_validated":
       return t.memoValidated;
+    case "memo_received":
+      return t.memoReceived(
+        String(event.detail.number ?? ""),
+        String(event.detail.from ?? ""),
+      );
+    case "memo_submitted":
+      return t.memoSubmitted(String(event.detail.number ?? ""));
+    case "memo_changes_requested":
+      return t.memoChangesRequested(String(event.detail.number ?? ""));
+    case "memo_sent":
+      return t.memoSent(
+        String(event.detail.number ?? ""),
+        String(event.detail.to ?? ""),
+      );
+    case "memo_loop":
+      return t.memoLoop(event.detail.added === true);
     case "contract_linked":
       return event.detail.contract ? t.contractLinked : t.contractUnlinked;
     case "contract_check": {

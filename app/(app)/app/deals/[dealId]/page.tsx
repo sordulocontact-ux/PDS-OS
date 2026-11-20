@@ -21,6 +21,7 @@ import {
   nextDealCall,
 } from "@/lib/deals/call-queries";
 import { loadDealContacts } from "@/lib/deals/contact-queries";
+import { loadDealNegotiationCall } from "@/lib/deals/negotiation-call";
 import { loadNewDealOptions } from "@/lib/deals/new-deal-options";
 import { dealName } from "@/lib/deals/names";
 import { loadDeal, loadDealEvents } from "@/lib/deals/queries";
@@ -143,8 +144,9 @@ export default async function DealPage({
   );
 }
 
-/** « À faire », with what only it needs: the call form, the next call, a
- * new deal after an abandoned one. */
+/** « À faire », with what only it needs: the call form (« Caler le call »
+ * for the project's owner), the next call, a new deal after an abandoned
+ * one. */
 async function DealTodo({
   access,
   deal,
@@ -155,9 +157,12 @@ async function DealTodo({
   contacts,
 }: Omit<
   Parameters<typeof DealTodoView>[0],
-  "proposer" | "reopen" | "callForm" | "nextCall"
+  "proposer" | "reopen" | "callForm" | "negotiationCall" | "nextCall"
 >) {
-  const callForm = await callFormFor(deal, terms);
+  const [callForm, negotiationCall] = await Promise.all([
+    callFormFor(deal, terms),
+    loadDealNegotiationCall(deal),
+  ]);
   // An abandoned deal: the direction opens a new one for its artist.
   const reopenOptions =
     deal.stage === "abandoned" && can(access, "validate")
@@ -186,6 +191,7 @@ async function DealTodo({
         )
       }
       callForm={callForm}
+      negotiationCall={negotiationCall}
       proposals={proposals}
       contacts={contacts}
       calls={calls}

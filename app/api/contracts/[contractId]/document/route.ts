@@ -35,7 +35,11 @@ export async function GET(
   let pdf: Uint8Array;
   try {
     pdf = await htmlToPdf(
-      documentHtml({ title: contract.title, body: document.latest.body }),
+      documentHtml({
+        title: contract.title,
+        body: document.latest.body,
+        language: document.language,
+      }),
     );
   } catch (error) {
     console.error("[contract-document] pdf failed:", error);

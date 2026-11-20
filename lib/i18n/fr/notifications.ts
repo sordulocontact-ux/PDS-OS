@@ -218,6 +218,16 @@ export const notifications = {
       `${actor} renvoie l'accord de principe en négociation${dealOf(project)} : voyez pourquoi.`,
     deal_follow_up_due: (_actor: string, project: string) =>
       `Une relance est due aujourd'hui${dealOf(project)}.`,
+    deal_memo_received: (_actor: string, project: string) =>
+      `Un deal memo est arrivé par e-mail${dealOf(project)} : à montrer à la direction.`,
+    deal_memo_submitted: (actor: string, project: string) =>
+      `${actor} vous montre un deal memo${dealOf(project)} : à valider.`,
+    deal_memo_changes_requested: (actor: string, project: string) =>
+      `${actor} demande des modifications au deal memo${dealOf(project)} : voyez pourquoi.`,
+    deal_memo_validated: (actor: string, project: string) =>
+      `${actor} a validé le deal memo${dealOf(project)} : renvoyez l'accord.`,
+    deal_memo_sent: (actor: string, project: string) =>
+      `${actor} a renvoyé l'accord validé${dealOf(project)}.`,
     // A selection of artists handed over (lot 4 of docs/pds-mic-plan.md):
     // no project yet.
     selection_transmitted: (actor: string, selection: string) =>

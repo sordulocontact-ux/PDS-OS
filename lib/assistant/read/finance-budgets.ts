@@ -16,15 +16,18 @@ import {
   type ReadResult,
 } from "@/lib/assistant/read/target";
 import { routes } from "@/lib/auth/redirects";
+import { splitBudget } from "@/lib/finance/budget-envelope";
+import { loadBudgetParts } from "@/lib/finance/budget-envelope-queries";
 import { loadBudgets } from "@/lib/finance/budget-queries";
 import { ENVELOPE_SLUG } from "@/lib/finance/envelope-slugs";
 import { envelopeRow } from "@/lib/finance/envelopes";
 import { loadSpends } from "@/lib/finance/spend-queries";
 import { spendStage, spendTtc } from "@/lib/finance/spends";
 import { assistantReadFinance } from "@/lib/i18n/fr/assistant-read-finance";
+import { financeBudgets } from "@/lib/i18n/fr/finance-budgets";
 import { spendsHref } from "@/lib/finance/spend-links";
 
-const fr = { assistantReadFinance };
+const fr = { assistantReadFinance, financeBudgets };
 
 export async function readBudgets(
   name: string | undefined,
@@ -62,6 +65,38 @@ export async function readBudgets(
         sources: [source],
       };
     const rest = row.restCents ?? 0;
+    const cut = await loadBudgetParts(row.kind, row.id);
+    const parts = splitBudget(
+      cut.parts,
+      data.spends.filter(
+        (s) => s.target.kind === row.kind && s.target.id === row.id,
+      ),
+      cut.partOf,
+      row.currentCents,
+    );
+    const p = fr.financeBudgets.partsRead;
+    const partFacts = cut.error
+      ? []
+      : [
+          ...parts.rows.map((r) =>
+            p.line(
+              r.name,
+              ht(r.amountCents),
+              ht(r.spentCents),
+              r.restCents < 0
+                ? p.over(ht(-r.restCents))
+                : p.rest(ht(r.restCents)),
+            ),
+          ),
+          ...(parts.rows.length > 0 && parts.unallocatedCents !== null
+            ? [
+                p.unallocated(
+                  ht(Math.max(parts.unallocatedCents, 0)),
+                  ht(parts.looseSpentCents),
+                ),
+              ]
+            : []),
+        ];
     return {
       facts: [
         ...notes,
@@ -84,6 +119,7 @@ export async function readBudgets(
         t.planned(ht(row.totals.plannedCents)),
         rest < 0 ? t.overrun(ht(-rest)) : t.rest(ht(rest)),
         `${t.lines(row.totals.lines)}.`,
+        ...partFacts,
       ],
       sources: [source],
     };

@@ -234,6 +234,14 @@ export const deals = {
       contracting:
         "L'accord est validé : le deal passe à « Signé » dès que son contrat est signé.",
     } as Record<string, string>,
+    // « Maintenant » of the project's owner on a music deal before its
+    // accord (Ibé 18/11/2026): she calls the negotiation, never writes it.
+    planCall: {
+      title: (who: string | null) =>
+        who ? `Caler le call avec ${who}` : "Caler le call de négociation",
+      planned: (when: string) => `Call prévu : ${when}`,
+      why: "Aucun contrat ne part avant l'accord de principe validé par la direction : vous en êtes prévenu, puis vous lancez les contrats.",
+    },
     waitDirection:
       "La direction est prévenue : elle valide l'accord de principe ou le renvoie en négociation.",
     // The terms the direction validates, recalled above its button (UX test
@@ -336,6 +344,17 @@ export const deals = {
           ? "Deal memo pris à l'accord de principe"
           : "Nouveau deal memo",
       memoValidated: "Deal memo validé",
+      memoReceived: (n: string, from: string) =>
+        `Deal memo n°${n} reçu par e-mail${from ? ` de ${from}` : ""}`,
+      memoSubmitted: (n: string) => `Deal memo n°${n} montré à la direction`,
+      memoChangesRequested: (n: string) =>
+        `Modifications demandées au deal memo n°${n}`,
+      memoSent: (n: string, to: string) =>
+        to
+          ? `Accord du deal memo n°${n} renvoyé à ${to}`
+          : `Accord du deal memo n°${n} renvoyé autrement`,
+      memoLoop: (added: boolean) =>
+        added ? "Ajouté à la boucle" : "Retiré de la boucle",
       contractLinked: "Contrat lié",
       contractUnlinked: "Lien du contrat retiré",
       contractCheck: (label: string, different: boolean) =>

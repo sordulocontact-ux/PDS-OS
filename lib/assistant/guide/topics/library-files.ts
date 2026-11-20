@@ -24,18 +24,28 @@ export const libraryFilesTopics: GuideTopic[] = [
       "La page a deux onglets : Contrats et Modèles.",
       "Un contrat a un titre, un type (contrat d'artiste, licence, distribution, édition, coproduction, droit à l'image, prestation, partenariat, autre), des parties du Réseau, un responsable, une échéance et des versions de fichiers.",
       "Vues : Tous, En préparation, À valider, À signer, Signés, Résiliés.",
-      "Parcours : en préparation, soumis, validé par la direction (ou modifications demandées avec un commentaire), envoyé pour signature, signé avec sa date, éventuellement résilié.",
+      "Parcours : en préparation, soumis, validé par le business manager (ou modifications demandées avec un commentaire), envoyé pour signature, signé avec sa date, éventuellement résilié. La direction peut aussi valider : elle supervise. Signer pour PDS reste la direction.",
       "Un contrat est figé pendant sa relecture et une fois résilié. « Expiré » est calculé : un contrat signé dont la date de fin est passée.",
-      "Un modèle validé ne change jamais : une correction est une nouvelle version, à valider à son tour. Les contrats d'un projet se génèrent depuis les modèles dans son Juridique.",
-      "PO n'écrit ni modèle ni clause.",
+      "Un modèle se lit comme un document : son texte tel quel, chaque valeur à remplir montrée comme un blanc avec ce qui y va (« Nom civil »), et « Voir le PDF ». Le business manager le valide ou le refuse avec sa raison.",
+      "Un modèle ne se modifie pas dans PDS OS : « Modifier » ouvre son document source ; une fois corrigé, il s'importe en nouvelle version (« ⋯ › Nouvelle version »), à valider à son tour. Un modèle validé ne change jamais. Les contrats d'un projet se génèrent depuis les modèles dans son Juridique.",
+      "Un modèle est en français ou en anglais, dit à son import. Un contrat est dans la langue de son modèle : pour un artiste anglais, on choisit le modèle en anglais dans les contrats à prévoir du Juridique.",
+      "PO n'écrit ni modèle ni clause, et ne traduit jamais un contrat.",
     ],
     faq: [
       {
         q: "Qui valide un contrat ?",
-        a: "La direction.",
+        a: "Le business manager. La direction peut aussi valider : elle supervise. Les deux sont prévenus quand un contrat est soumis.",
+      },
+      {
+        q: "Qui valide un modèle de contrat ?",
+        a: "Le business manager, dans l'onglet Modèles de la page Contrats ; la direction peut aussi le faire.",
+      },
+      {
+        q: "Comment faire un contrat en anglais ?",
+        a: "Importer le modèle en anglais (« Langue du contrat » : Anglais), le faire valider, puis le choisir pour la personne dans les contrats à prévoir du Juridique. PO ne traduit pas un modèle français.",
       },
     ],
-    permissions: ["manage_contracts", "validate"],
+    permissions: ["manage_contracts", "validate_contracts"],
   },
   {
     key: "files",

@@ -220,6 +220,26 @@ Décisions prises en construisant le lot (`docs/ARCHITECTURE.md` § 8 undecies),
   confirmer avec un juriste pour les œuvres où le partage Phono diffère de la répartition de
   l'édition.
 
+### Contrats : business manager et langue (réunion d'Ibé du 18/11/2026)
+
+Décidé par Ibé : le business manager valide les modèles de contrat et les contrats envoyés
+(« c'est le business manager qui va valider »), la DG « peut superviser » ; le modèle se lit en PDF
+et se corrige dans son document source ; un contrat doit pouvoir être en anglais pour un artiste
+anglais. Décisions prises sans Ibé, à confirmer :
+
+- **Les deux sont prévenus** quand un contrat est soumis ou qu'un modèle est demandé : le business
+  manager et la DG (elle supervise) ; chacun peut valider.
+- **Signer pour PDS** (contre-signature après le retour signé de la personne) **reste la direction** :
+  Ibé a parlé de valider, pas de qui signe pour la société (représentant légal). À trancher si le
+  business manager doit aussi signer.
+- **Contrat d'autorisation** (Autorisations d'utilisation, « Négocier ») : sa validation reste la
+  direction ; à dire s'il passe aussi au business manager.
+- **Langue = celle du modèle** : un modèle est en français ou en anglais (déclaré à l'import), le
+  contrat suit son modèle ; aucune traduction, ni par PO ni par le code, des clauses. Seul ce que le
+  code écrit lui-même dans un contrat anglais l'est en anglais (« N/A », Individual / Company, rôles
+  crédités Composer, Lyricist…, montant « €1,500.00 excl. VAT ») : libellés à faire relire par un
+  juriste anglophone avant le premier contrat anglais.
+
 ### Points à trancher : Marketing / Activations (tickets du 11/10/2026)
 
 Construit sur le socle MVP des trois tickets (`docs/ARCHITECTURE.md` § 8 duodecies). Non prévu

@@ -14,16 +14,15 @@ import { TemplateView } from "@/components/contracts/templates/template-view";
 import { ReasonForm } from "@/components/ui/reason-form";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { RowActions, type RowAction } from "@/components/ui/row-actions";
-import { contracts } from "@/lib/i18n/fr/contracts";
 import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
 import { records } from "@/lib/i18n/fr/records";
 import { setContractTemplateStatus } from "@/lib/legal/contracts/template-actions";
 import type { TemplateSeries } from "@/lib/legal/contracts/templates";
 
-const fr = { contracts, legalContracts, records };
+const fr = { legalContracts, records };
 
-/** « ⋯ » of a template: read it, start a new version, validate (the
- * director), retire. */
+/** « ⋯ » of a template: read it, start a new version, validate or refuse
+ * (the business manager, the direction supervising), retire. */
 export function TemplateRowActions({
   template,
   organizationId,
@@ -109,7 +108,6 @@ export function TemplateRowActions({
         open={open === "view"}
         onOpenChange={(next) => !next && setOpen(null)}
         title={title}
-        description={template.usage ?? fr.contracts.types[template.type]}
         closeLabel={t.close}
         size="wide"
       >
@@ -129,6 +127,7 @@ export function TemplateRowActions({
             seriesId: template.seriesId,
             name: template.name,
             type: template.type,
+            language: template.language,
             roles: template.roles,
             usage: template.usage ?? "",
             body: template.body,

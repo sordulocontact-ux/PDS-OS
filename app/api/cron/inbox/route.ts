@@ -1,4 +1,5 @@
 import { cronJson as json, isCronAuthorized } from "@/lib/cron/auth";
+import { fileEmailedDealMemos } from "@/lib/email/deal-memo-inbox";
 import { getServerEnv } from "@/lib/env";
 import { fileEmailedProofs } from "@/lib/finance/proof-email";
 import { fileClearanceReplies } from "@/lib/legal/clearance/inbox-replies";
@@ -10,8 +11,10 @@ import { createAdminClient } from "@/lib/supabase/admin";
  * replies to the authorisation requests read in PO's mailbox and filed in
  * their journal (lib/legal/clearance/inbox-replies.ts), their responsible
  * told; then the tickets and invoices sent to po+justificatifs@, filed in
- * Finance › Justificatifs (lib/finance/proof-email.ts). Not triggered by a
- * user: service role (cron only).
+ * Finance › Justificatifs (lib/finance/proof-email.ts); then the deal memos
+ * sent by a label or a brand, filed in their deal, the negotiator told
+ * (lib/email/deal-memo-inbox.ts). Not triggered by a user: service role
+ * (cron only).
  */
 
 export const maxDuration = 60;
@@ -41,10 +44,22 @@ export async function GET(request: Request) {
     );
     return null;
   });
+  // Nor do the deal memos: their failure is only logged.
+  const memos = await fileEmailedDealMemos().catch((error: unknown) => {
+    console.error(
+      "cron inbox deal memos:",
+      error instanceof Error ? error.message.slice(0, 200) : "unknown",
+    );
+    return null;
+  });
   if (!result) return json({ error: "inbox_unavailable" }, 503);
-  if (result.filed > 0) {
+  if (result.filed > 0 || (memos?.filed ?? 0) > 0) {
     const supabase = createAdminClient();
     if (supabase) await sendPendingPushes(supabase);
   }
-  return json({ ...result, proofs: proofs?.filed ?? null });
+  return json({
+    ...result,
+    proofs: proofs?.filed ?? null,
+    dealMemos: memos?.filed ?? null,
+  });
 }

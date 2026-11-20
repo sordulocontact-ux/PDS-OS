@@ -18,10 +18,11 @@ export const metadata = {
 };
 
 /**
- * One contract template, its own page (JUR-19): its text, the values it
- * injects, its source file and versions, who validated it and when; the
- * director validates a draft here. Reserved to manage_legal, like the
- * library.
+ * One contract template, its own page (JUR-19): the template as a document
+ * (Ibé, 18/11/2026: the PDF, its values as blanks), « Modifier » opening its
+ * source document, its versions, who validated it and when; the business
+ * manager (or the direction, who supervises) validates a draft here.
+ * Reserved to manage_legal and validate_contracts.
  */
 export default async function ContractTemplatePage({
   params,
@@ -29,7 +30,8 @@ export default async function ContractTemplatePage({
   const access = await requireApproved();
   const { seriesId } = await params;
   const template = await findTemplateSeries(seriesId);
-  // Never without manage_legal and an organization (findTemplateSeries).
+  // Never without manage_legal or validate_contracts, and an organization
+  // (findTemplateSeries).
   if (!template || !access.organizationId) notFound();
   const t = fr.legalContracts.templates;
 
@@ -42,9 +44,6 @@ export default async function ContractTemplatePage({
         </BackLink>
       }
       title={`${template.name} · ${t.version(template.version)}`}
-      description={[fr.contracts.types[template.type], template.usage]
-        .filter(Boolean)
-        .join(" · ")}
       badge={
         <StatusBadge tone={templateStatusTone[template.status]}>
           {t.states[template.status]}

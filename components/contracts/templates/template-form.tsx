@@ -16,12 +16,17 @@ import {
 } from "@/components/contracts/templates/value-suggestions";
 import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
+import { ChipChoice } from "@/components/ui/chip-choice";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { CONTRACT_TYPES, type ContractType } from "@/lib/contracts/types";
 import { contracts } from "@/lib/i18n/fr/contracts";
 import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
 import { legalDocuments } from "@/lib/i18n/fr/legal-documents";
 import { legalForms } from "@/lib/i18n/fr/legal-forms";
+import {
+  CONTRACT_LANGUAGES,
+  type ContractLanguage,
+} from "@/lib/legal/contracts/language";
 import { createContractTemplate } from "@/lib/legal/contracts/template-actions";
 import type { TemplateAbout } from "@/lib/legal/contracts/template-values";
 import type { TemplateSource } from "@/lib/legal/contracts/upload-source";
@@ -35,6 +40,8 @@ export type TemplateDraft = {
   seriesId: string | null;
   name: string;
   type: ContractType;
+  // French when not given (Ibé, 18/11/2026: the contract's language).
+  language?: ContractLanguage;
   roles: FormRole[];
   usage: string;
   body: string;
@@ -85,6 +92,10 @@ export function TemplateForm({
   });
   // Remounts those fields with what PO proposed.
   const [aboutKey, setAboutKey] = useState(0);
+  // The language the imported contract is written in: never translated.
+  const [language, setLanguage] = useState<ContractLanguage>(
+    initial?.language ?? "fr",
+  );
   const [proposed, setProposed] = useState(false);
 
   // Only what is still empty: what the person chose is kept.
@@ -110,6 +121,7 @@ export function TemplateForm({
         seriesId: initial?.seriesId ?? null,
         name: String(form.get("name") ?? ""),
         type: String(form.get("type") ?? "") as ContractType,
+        language,
         roles: jsonListOf(form.get("roles")) as FormRole[],
         usage: String(form.get("usage") ?? ""),
         body: String(form.get("body") ?? ""),
@@ -179,6 +191,17 @@ export function TemplateForm({
             FORM_ROLES.map((role) => [role, fr.legalForms.roles[role]]),
           )}
           defaultValue={about.roles}
+        />
+        <ChipChoice
+          name="language"
+          legend={t.form.language}
+          required
+          options={CONTRACT_LANGUAGES.map((value) => ({
+            value,
+            label: fr.legalContracts.languages[value],
+          }))}
+          value={language}
+          onChange={(next) => next && setLanguage(next)}
         />
         <Field
           name="usage"

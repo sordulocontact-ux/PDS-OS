@@ -14,6 +14,14 @@ export const DEAL_STAGES = [
 ] as const;
 export type DealStage = (typeof DEAL_STAGES)[number];
 
+/** The stages whose call of negotiation is still to hold (Ibé 18/11/2026:
+ * the call before any contract). */
+export const NEGOTIATION_CALL_STAGES = [
+  "to_contact",
+  "call_planned",
+  "negotiation",
+] as const satisfies readonly DealStage[];
+
 /** The stages a deal moves between by « Passer à l'étape » (set_deal_stage). */
 export const MOVABLE_DEAL_STAGES = [
   "to_contact",
@@ -80,6 +88,10 @@ export type Deal = {
   canWrite: boolean;
   canAssign: boolean;
   canDecide: boolean;
+  // « Caler le call »: the project's owner, who reads the deal without
+  // writing it, plans the call of a music deal before its accord
+  // (can_plan_negotiation_call, 20261120140101).
+  canPlanCall: boolean;
 };
 
 /** A line of a deal's journal. */
@@ -99,7 +111,13 @@ export type DealEvent = {
     | "memo"
     | "memo_validated"
     | "contract_linked"
-    | "contract_check";
+    | "contract_check"
+    // A deal memo by e-mail (20261120150101).
+    | "memo_received"
+    | "memo_submitted"
+    | "memo_changes_requested"
+    | "memo_sent"
+    | "memo_loop";
   fromStage: DealStage | null;
   toStage: DealStage | null;
   reason: string | null;

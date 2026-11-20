@@ -84,6 +84,9 @@ export const PERMISSIONS = [
   // incomes and their receipts (the direction and the Finance, Ibé's ticket
   // « Cockpit Finance » and Sacha, 13/11/2026).
   "manage_finance",
+  // Validates the contract templates and the contracts submitted (the
+  // business manager, the direction supervising: Ibé, 18/11/2026).
+  "validate_contracts",
 ] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 

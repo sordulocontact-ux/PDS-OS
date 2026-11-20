@@ -3728,6 +3728,31 @@ justificatif », P2 du ticket Cockpit Finance).
   (local) écrivait du Markdown (retiré depuis) et parfois une cause inventée (« bloquent les flux ») que la vérification
   des nombres ne voit pas.
 
+**Supprimer un budget et le découper en sous-budgets (retours d'Ibé du 18/11/2026, migration
+`20261120120101_finance_budget_envelopes.sql`, `lib/finance/budget-envelope*.ts`).**
+- **Supprimer** : seul un budget fait à la main (centre de coût, « Autre ») se supprime, par `remove_cost_center` (SQL,
+  `security definer`) : **supprimé** s'il n'a aucune dépense ni émission prévue, **archivé** sinon (`archived_at` : il sort
+  de la liste, dépenses et historique restent lisibles). Droit : `manage_finance` (celui qui crée, renomme et révise un
+  centre de coût), pas `archive_records` : ce n'est pas un enregistrement du catalogue. Un budget de projet n'a pas de
+  geste de suppression (il part avec son projet, `delete_records`), celui d'un artiste non plus. « ⋯ » › « Supprimer
+  le budget » (`RemoveBudgetDialog`, `ConfirmDialog`), puis retour à la liste.
+- **Sous-budgets** : table `finance_budget_parts` (budget visé par `target_kind` + `target_id` comme `finance_envelope_shares`,
+  nom unique par budget, montant). Valable pour tout budget (projet, artiste, autre). « Envelope » désigne déjà un budget
+  entier dans le code : une tranche s'appelle **part**. Lecture `read_finance`, écriture `manage_finance` directe sous RLS.
+  Une dépense entre dans une part par `budget_lines.part_id`, écrit **seulement** par `assign_budget_part` (la Finance trie
+  les budgets de projet et d'artiste dont elle ne peut pas écrire les lignes ; refusée si la ligne n'est pas du budget de
+  la part) ; `finance_budget_part_lines()` lit ce lien pour la Finance. Supprimer une part remet ses dépenses en « non
+  réparti » (clé `on delete set null`). Un projet ou un artiste supprimé emporte ses parts (trigger `z_drop_parts`).
+  Aucune table liée à un projet n'est ajoutée au sens de `delete_project_row` (pas de clé vers le projet) : pas de
+  `attach_project_live`.
+- **Calculs en code** (`splitBudget`) : dépensé d'une part = engagé + facturé + payé de ses dépenses (comme le budget, un
+  devis refusé ne compte pas), reste = montant − dépensé ; **non réparti** = budget − somme des parts, plus ce que les
+  dépenses sans part ont dépensé. Les parts peuvent dépasser le budget (révisé après coup) : non refusé, la ligne dit
+  « Dépassé de … » en rouge. Les sous-postes existants ne portent pas de montant : réutilisés seulement pour **pré-cocher**
+  les dépenses dont le sous-poste porte le nom de la part (« Rattacher des dépenses »).
+- Pas encore dans le formulaire de dépense (`BudgetLineForm`, `lib/budget/`) : le rattachement se fait depuis la ligne du
+  sous-budget. Lu par PO (`readBudgets`, un budget nommé : une phrase par part et le non réparti).
+
 ## 8 quater. Retours sur l'application (`/app/feedback`)
 
 Circuit : l'équipe écrit au **DG**, chaque retour devient un sujet « À examiner », le DG
@@ -3895,6 +3920,34 @@ choisit ce qui est utile et le **transmet** avec une priorité à l'équipe qui 
 **Contacts privés** (BIZ 8, 12/11/2026) : l'identité d'un contact reste lue par tous ; les coordonnées et
 les échanges d'un contact privé ne sont lus que par sa propriétaire, la direction et les lecteurs d'un deal
 où il est partagé. Détail et chemins touchés : § 8 quaterdecies.
+
+**Listes de personnes** (réunion avec Ibé du 18/11/2026, 5:15 à 9:03 et 24:31 ;
+`…20261120160101_network_lists.sql`, test `network-lists.test.sql`) : dans le Réseau, on coche des
+personnes puis **« Ajouter à une liste »** (barre de sélection, `RecordSelection actions`, ouverte à tout
+membre `manage_network` ; archiver et supprimer restent au DG, `manage`), vers une liste existante ou une
+nouvelle (nom, « Partager avec l'équipe »). **« Mes listes »** (`/app/network/lists`, bouton à côté de
+« Nouveau contact ») : onglets Toutes / Pour moi / Partagées, une ligne par liste (premiers noms, nombre,
+« n sur N » ont répondu, état, auteur). `network_lists` (nom, auteur `owner_person_id`, `shared`,
+validation) et `network_list_contacts` (contact, **réponse** `waiting` / `replied` : le sablier et la coche
+verte des notes d'Ibé, qui l'a changée et quand). **Lecture** (`can_read_network_list`) : une liste « Pour
+moi » par son auteur seul, direction comprise ; une liste partagée par tout membre actif. **Écriture**,
+fonctions SQL seulement (tables en lecture seule) : ses personnes et leur réponse par son auteur, et par
+tout membre `manage_network` une fois partagée (une liste d'équipe s'entretient à plusieurs) ; renommer,
+partager / garder pour soi, supprimer : son auteur ; **« Valider la liste »** / « Retirer la validation » :
+la direction (`validate`), sur une liste partagée (« elle est validée ou non », Ibé) ; partagée par la
+direction, elle est validée d'emblée ; gardée de nouveau pour soi, elle perd sa validation. États « Pour moi »,
+« À valider », « Validée » (`networkListStateTone`), réponses « Pas encore répondu » / « A répondu »
+(`networkListReplyTone`), changées d'un clic sur la pastille (`ReplyToggle`, optimiste). Une liste ne
+garde que l'id du contact : ses coordonnées sont lues par le Réseau avec la session (`listNetworkContacts`,
+un contact privé reste masqué) ; un contact archivé n'est ni montré ni compté, un contact supprimé quitte
+les listes (`on delete cascade` : une liste ne protège jamais un contact). Pas de fichier dans une liste.
+**« Créer un projet »** (qui crée des projets, dès qu'une personne de la liste est un artiste du Catalogue,
+`artist_id`) : `/app/network/lists/[id]/project` ouvre le vrai formulaire de projet pré-rempli (nom de la
+liste ; plusieurs artistes = projet collectif sur le modèle PDS Mic, artiste maison principal, les autres
+en invités `guestArtistIds` ; un seul = l'artiste du projet), sans lien vivant ; les personnes hors
+Catalogue sont nommées au-dessus du formulaire. Code : `lib/network/lists*.ts`,
+`components/network/lists/`, textes `fr.network.lists` (`lib/i18n/fr/network-lists.ts`). Hors périmètre :
+PO qui crée une liste depuis une note collée, dossiers façon Drive.
 
 Ajouts du MVP du 15 octobre (`…260929000101` à `…000301`, tests
 `supabase/tests/network-contracts-meetings.test.sql`).
@@ -4690,7 +4743,8 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
     insérée au curseur par les boutons groupés au-dessus (La personne / Le projet / L'accord,
     `CONTRACT_FIELD_GROUPS`) ; le texte enregistré est relu du DOM (`serialize`, pastille →
     `{{id}}`, `<br>` → `\n`), le format en base ne change pas. Collage en texte brut, `{{id}}`
-    collés convertis en pastilles, pas de gras. Le même rendu en lecture (`TemplateBody`).
+    collés convertis en pastilles, pas de gras. En lecture, plus de texte à pastilles depuis le
+    18/11/2026 : le modèle se lit comme un document (voir « Modèles en document »).
   - **Partir d'un contrat déjà rempli** (« Repérer les valeurs », `suggestTemplateValues`) :
     on colle le contrat d'une vraie personne ; le **code** repère ce qui a une forme
     (e-mail, téléphone, SIRET, IPI : `value-patterns.ts`), **PO** les noms, l'adresse, les
@@ -5183,6 +5237,37 @@ la personne (`/c/`). Migration `20261020070101_signed_returns.sql`, pgTAP `signe
 - **Modèles (JUR-19)** : le DG refuse un brouillon avec sa raison
   (`set_contract_template_status(id, status, reason)`, `retired_reason` / `retired_by`, migration
   `20261012100501`), visible sur la page du modèle ; retirer peut dire pourquoi.
+- **Business manager, modèles en document, langue (réunion d'Ibé du 18/11/2026, migration
+  `20261120130101`)** :
+  - **Qui valide** : permission `validate_contracts` (DG et `business_manager`, `role_permissions`)
+    à la place de `validate` pour valider ou refuser un modèle (`set_contract_template_status`),
+    approuver un contrat ou demander des modifications (`advance_contract` `approve` /
+    `request_changes`, `contract.can.decide`) ; notifiés à la soumission d'un contrat et à la
+    demande d'un modèle : tous ceux qui la tiennent (le business manager, et la DG qui
+    supervise). Elle ouvre aussi la lecture : tous les modèles et leur fichier source (RLS
+    `contract_templates`, bucket `contract-template-sources`), tous les contrats de
+    l'organisation (`can_see_contract`, `contracts_select_visible`) et l'onglet Modèles de la
+    page Contrats (sans « Nouveau modèle », réservé à `manage_legal`). **Signer pour PDS**
+    (`countersign`) reste `validate` (la direction). Retirer un modèle validé reste `manage_legal`.
+  - **Modèle en document** (« recevoir le modèle en PDF, pas un truc avec les écritures ») :
+    `TemplateView` = une `DocumentCard` (nom · version, type · langue, « Voir le PDF » et
+    « Modifier » en contour) avec l'aperçu en `iframe` sandbox ; `templateHtml`
+    (`lib/legal/contracts/document-pdf.ts`) écrit le texte tel quel, chaque valeur en **blanc
+    libellé** (« Nom civil ») ; la route `/api/contracts/templates/[templateId]` sert le PDF
+    (`?view=1` dans l'onglet, Playwright) et la même page en HTML (`?format=html`, en-tête CSP
+    `sandbox`) ; liens dans `lib/contracts/template-links.ts`. « Champs injectés » et le texte à
+    pastilles ne sont plus montrés ; l'usage (description) n'est plus affiché, la ligne dit
+    type · langue. **Le modèle ne se modifie plus dans PDS OS** : « Modifier » (si fichier source
+    et `manage_legal`) ouvre le document source ; corrigé, il revient par « Nouvelle version ».
+    L'éditeur à pastilles reste dans le formulaire d'import pour placer les valeurs.
+  - **Langue** (`contract_templates.language`, `fr` / `en`, `lib/legal/contracts/language.ts`) :
+    choisie à l'import (`ChipChoice` « Langue du contrat », français par défaut), passée à
+    `create_contract_template(…, p_language)`. Un contrat est dans la langue de son modèle
+    (aucune colonne sur le contrat) : choisir le modèle dans les contrats à prévoir choisit la
+    langue (« · Anglais » dans la liste, le français proposé d'abord). Le PDF du contrat porte
+    `lang` (`documentHtml`), et ce que le code écrit lui-même dans un contrat anglais l'est en
+    anglais (`fieldValues` : « N/A », Individual / Company, rôles crédités, montant
+    « €1,500.00 excl. VAT », `legalContracts.inEnglish`). Aucune clause n'est traduite.
 - **Liens stables (JUR-27)** : une nouvelle version d'une répartition garde le lien déjà envoyé
   à chaque personne (même contact, sinon même nom) : il ouvre la nouvelle version, les réponses
   aux versions précédentes restent avec leur preuve ; seul un nouveau venu reçoit un lien
@@ -7990,6 +8075,50 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   « Différent ») sont signalés en tête ; **jamais de correction automatique**. Journal : `memo`,
   `memo_validated`, `contract_linked`, `contract_check`. Le contrat a quitté « Informations » pour sa section.
   Test : `supabase/tests/deal-memos.test.sql`.
+- **Circuit du deal memo par e-mail** (réunion avec Ibé du 18/11/2026, 1:10:43 à 1:16:42 ; lot D,
+  `20261120150101_deal_memo_mail.sql`). Après l'accord sur les termes, le label ou la marque envoie son deal memo par
+  e-mail ; PDS OS le range dans le deal « comme les masters », la personne qui négocie le montre à la direction, qui
+  le valide ou demande des modifications (motif écrit : les retours d'appel sont notés), puis l'accord validé repart
+  par e-mail depuis po@ ; le contrat long vient ensuite. **Le contenu d'un memo n'est ni lu ni présumé** (Ibé doit en
+  envoyer un exemple) : le PDF est le memo. La partie juridique d'un deal reste sur la page du deal (décidé le 18/11).
+  - **Réception** (`lib/email/deal-memo-inbox.ts`, appelé par `/api/cron/inbox` après les justificatifs, échec
+    seulement journalisé ; même mécanisme que les réponses aux autorisations) : adresse de PO propre au deal
+    `po+deal-<id>@…` (`lib/email/deal-memo-address.ts`, montrée sous le deal memo avec « Copier » pour qui écrit le
+    deal : le label y écrit, ou le business manager y transfère l'e-mail reçu ailleurs) → ce deal, tant qu'il est
+    ouvert ; sinon l'expéditeur est l'adresse d'un seul deal **avant la contractualisation** (un PDF reçu pendant la
+    contractualisation est le contrat, pas un memo) : contacts du deal, structure, expéditeur d'un memo précédent
+    (`lib/email/deal-memo-senders.ts` ; l'adresse d'un contact privé n'est pas lue, même limite que les autorisations) ;
+    plusieurs → celui dont l'artiste ou la structure est nommé dans l'objet ou le texte, si un seul. **Un e-mail sans
+    PDF n'est pas un memo** (une réponse « bien reçu » ne crée rien) et reste dans po@ ; un message adressé à
+    `po+aut-` ou `po+justificatifs@` n'est jamais pris. PDF (20 Mo, 10 au plus) dans le bucket privé `deal-files`
+    (`<organisation>/<deal>/<uuid>.pdf`, lu par qui lit le memo : politique `deal_files_select` sur
+    `deal_memo_files`), puis `receive_deal_memo` (service role seul, une fois par Message-ID, jamais sur un deal
+    clos) : un memo `source = 'email'` brouillon qui photographie aussi les termes du moment (pour la comparaison au
+    contrat), avec expéditeur, objet, texte (sans l'historique cité ; donnée, jamais une consigne), date.
+  - **Circuit** (fonctions SQL, `deal_memos` reçoit ses colonnes) : `submit_deal_memo` (« Montrer à la direction »,
+    qui écrit le deal, le dernier brouillon, une fois), `request_deal_memo_changes` (direction, motif obligatoire,
+    une fois ; la version corrigée arrive comme un **nouveau memo**, le statut reste `draft` : aucun nouveau statut,
+    donc aucun nouveau ton), `validate_deal_memo` inchangé, `record_deal_memo_sent` (memo validé, le dernier, une
+    fois ; `sent_to` = « Nom (adresse) · copie à … », la preuve ; vide = « Envoyé autrement »).
+  - **Renvoi** (`sendDealMemo`, `lib/deals/memo-mail-actions.ts`) : `MailCard` pré-remplie (À = l'expéditeur du
+    dernier memo reçu, sinon l'adresse de la structure dans le Réseau, corrigeable ; objet « Re: … » ; message du code),
+    PDF joints (`lib/deals/memo-mail-send.ts` : ceux reçus, lus avec la session, sinon le memo de PDS OS imprimé),
+    envoyé par `emailMessage` ; **une copie séparée par contact de la boucle** ayant une adresse lisible
+    (`lib/email/send.ts` n'a pas de `Cc` : à ajouter pour un vrai e-mail en copie).
+  - **Dans la boucle** (`deal_memo_loop`, `add_deal_loop` / `remove_deal_loop` par qui écrit le deal ouvert) : un
+    contact du Réseau (copie de l'accord renvoyé ; choisi par `PersonPickerField`, contacts et structure du deal en
+    tête) ou un membre **qui lit déjà le deal** (`deal_readable_by`, `list_deal_loop_members` ; jamais un droit de
+    lecture en plus), prévenu à chaque étape.
+  - **Notifications** (trigger `z_notify_memo` sur `deal_events`, fonction à part de `deal_events_notify`) :
+    `deal_memo_received` (affecté, sinon la direction), `deal_memo_submitted` (direction), `deal_memo_changes_requested`
+    et `deal_memo_validated` (affecté et qui l'a montré ; pas pour la validation venue de l'accord de principe, déjà
+    dite), `deal_memo_sent` (direction), plus les membres de la boucle. Journal : `memo_received`, `memo_submitted`,
+    `memo_changes_requested`, `memo_sent`, `memo_loop`, ajoutés par **`add_deal_event_kinds(text[])`** (lit la
+    contrainte, fusionne, la repose, comme `add_notification_kinds`) : **toute migration qui ajoute un type au journal
+    d'un deal passe par elle**, jamais en réécrivant `deal_events_kind_check`.
+  - Page : `DealMemos` → `DealMemoCard` (PDF reçu « Ouvrir le PDF », objet et message repliés, demande de
+    modifications signée en bandeau) + `DealMemoGestures` ; section « Dans la boucle » (`DealMemoLoop`). PO lit l'état
+    du circuit (`lib/assistant/read/deals.ts`). Test : `supabase/tests/deal-memo-mail.test.sql`.
 - **Contacts privés** (BIZ 8, `20261112030101_private_contacts.sql`). L'**identité** d'un contact (nom, type,
   métiers, organisation, artiste, photo, comptes publics, site) reste partagée : tout membre la lit,
   `PersonPickerField` marche pour tous. Ses **coordonnées** (e-mail, téléphone, ville = l'adresse, notes) et
@@ -8033,6 +8162,43 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   (`DealsTable groups`), avec étape, prochaine action, **contrat** (`read_deal_contract`, `DealsTable
   contracts`), projet dans le nom du deal, négociateur ; jamais un contact. `routes.artistBudget` mène à
   `…/business#budget` (lien « Budget de l'artiste » d'un projet).
+- **Call de négociation avant tout contrat** (réunion avec Ibé du 18/11/2026, 52:10, 1:00:07 à 1:04:28, 1:17:44 à
+  1:19:23 ; `20261120140101_deal_negotiation_call.sql`) : dès que l'artiste est d'accord, la cheffe de projet cale un call
+  entre le business manager et le manager (ou producteur) de l'artiste ; elle n'est pas dedans. **Décision (droits)** :
+  `can_plan_negotiation_call(deal)` = deal `music` encore avant l'accord (`to_contact`, `call_planned`, `negotiation`)
+  et lecteur qui écrit le deal **ou responsable de son projet**. La cheffe de projet **planifie** le call sans jamais
+  écrire le deal (étape, termes, accord restent au négociateur et à la direction) ; le call reste celui du deal :
+  `is_call_owner` inchangé, c'est le négociateur qui l'enregistre et le traite. Gestes SQL (SECURITY DEFINER) :
+  `plan_deal_negotiation_call(p_title, p_occurred_at, p_ends_at, p_deal_id | p_participation_id, p_assignee_person_id,
+  p_meeting_url, p_agenda, p_guests)` → id du call : sur un deal, ou sur une participation sans deal vivant (le deal est
+  ouvert par `create_deal`, mêmes règles) ; confie le deal au négociateur choisi s'il n'en a pas (journal `assigned`,
+  notification `deal_assigned`), écrit le call, ses invités (`call_guests`) et fait passer un deal « À contacter » à
+  « Call prévu » (journal `stage`, `detail.call`). Erreurs : `negotiator_required`, `negotiator_changed`,
+  `negotiation_call_music_only`, `negotiation_call_too_late`, `invalid_slot`, `link_invalid`, `title_required`.
+  `set_deal_negotiation_call_link` : le lien Meet donné par Google, écrit une fois par qui a calé le call. Créneaux :
+  `negotiator_free_slots(p_person_id, p_days = 5, p_minutes = 30)` pour qui a `pilot_projects` ou `validate`, sur un
+  membre qui a `negotiate` : les prochains jours ouvrés, à l'heure de 10 h à 18 h (Paris), moins les calls que PDS OS
+  lui connaît (calls de ses deals, calls qu'il a créés ou où il est invité) ; **seuls les créneaux libres sortent de la
+  base**. **Son agenda Google n'est pas lu** (§ 4 quater : la clé du domaine ne lit que l'adresse du membre connecté ;
+  piste : `calendar.freebusy` sur le jeton de po@, à ajouter au nouveau jeton à faire avec Ibé). Jours fériés non
+  retirés. Code : `lib/calendar/free-slots.ts` (`loadNegotiatorFreeDays`), `lib/deals/negotiation-call.ts`
+  (`loadDealNegotiationCall`, `loadParticipationNegotiationCall`), `negotiation-call-actions.ts`
+  (`planNegotiationCall` : formulaire de Calls, ordre du jour de `call-prep.ts`, invitation Meet au négociateur et aux
+  invités, jamais à la cheffe de projet ; la page reste) ; `NegotiationCallButton` (créneaux en boutons par jour,
+  `NegotiationCallSlots`, puis `CallPlanForm`). Page du deal : `Deal.canPlanCall` (responsable du projet qui n'écrit
+  pas le deal) → sa « Maintenant » « Caler le call avec Glen » (ou « Call prévu : … » une fois calé, bouton en
+  contour à la même place). **L'accord validé prévient le responsable du projet** (trigger `z_notify_owner` sur
+  `deal_events`, type existant `deal_agreement_validated`, « place au contrat » ; aussi quand la direction pose et
+  valide l'accord d'emblée ; jamais deux fois s'il négocie lui-même).
+  **Pour Maël (tableau « Titres et artistes »)** : `project_participation_deal_states(p_project_id)` et
+  `participation_deal_state(p_participation_id)`, pour qui voit le projet (`can_see_project`), une ligne par
+  participation : `deal_id`, `stage`, `agreement_status`, `agreement_validated` (**les contrats attendent ce
+  booléen**), `next_call_at`, `last_call_at`, `can_plan_call` (le lecteur peut caler le call : sur le deal, ou sur la
+  participation sans deal vivant, encore en jeu, pour la direction ou le responsable du projet). Deal vivant, sinon le
+  dernier abandonné, sinon aucun (`deal_id` nul). Lecture TS : `loadParticipationDealStates(projectId)`
+  (`lib/deals/participation-states.ts`, `Map` par participation). Bouton : `<NegotiationCallButton
+  data={await loadParticipationNegotiationCall(participationId, artistName)} />` quand `canPlanCall` sans `dealId`,
+  sinon `loadDealNegotiationCall(deal)`. Test : `supabase/tests/deal-negotiation-call.test.sql`.
 - **Pas encore** : BIZ 5 (colonne « Négociation » de la vue Titres et artistes de Maël),
   e-mails (BIZ 9), seuils de validation.
 - Code : `lib/deals/types.ts` (étapes), `actions.ts` (un geste = une fonction SQL, `WriteResult`, push après

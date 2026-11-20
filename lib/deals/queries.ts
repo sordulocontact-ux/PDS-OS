@@ -4,6 +4,7 @@ import { can, type Access } from "@/lib/auth/access";
 import {
   DEAL_KINDS,
   isDealStage,
+  NEGOTIATION_CALL_STAGES,
   type Deal,
   type DealEvent,
   type DealKind,
@@ -122,6 +123,14 @@ async function withContext(access: Access, rows: Row[]): Promise<Deal[]> {
           director &&
           r.stage === "agreement" &&
           r.agreement_status === "pending",
+        // Whoever writes the deal prepares its call himself (« Préparer un
+        // call »); the database decides again (plan_deal_negotiation_call).
+        canPlanCall:
+          owner &&
+          !director &&
+          r.kind === "music" &&
+          (NEGOTIATION_CALL_STAGES as readonly string[]).includes(r.stage) &&
+          !(me !== null && r.assignee_person_id === me),
       },
     ];
   });

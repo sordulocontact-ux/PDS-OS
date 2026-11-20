@@ -1,6 +1,10 @@
 import "server-only";
 
 import { fr } from "@/lib/i18n/fr";
+import {
+  asContractLanguage,
+  type ContractLanguage,
+} from "@/lib/legal/contracts/language";
 import { personName } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -21,6 +25,8 @@ export type ContractDocument = {
   latest: DocumentVersion;
   versions: DocumentVersion[];
   template: { name: string; version: number } | null;
+  // Its template's language (Ibé, 18/11/2026): the PDF's.
+  language: ContractLanguage;
   fields: Array<{ id: string; label: string; value: string; source: string }>;
   events: Array<{
     id: string;
@@ -77,7 +83,7 @@ export async function getContractDocument(
   const [template, people] = await Promise.all([
     supabase
       .from("contract_templates")
-      .select("name, version")
+      .select("name, version, language")
       .eq("id", rows[0].template_id)
       .maybeSingle(),
     peopleIds.length > 0
@@ -113,6 +119,7 @@ export async function getContractDocument(
     template: template.data
       ? { name: template.data.name, version: rows[0].template_version }
       : null,
+    language: asContractLanguage(template.data?.language),
     fields: Object.entries(injected).map(([id, v]) => ({
       id,
       label: fr.legalContracts.fields[id] ?? id,

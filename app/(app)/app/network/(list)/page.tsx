@@ -1,4 +1,5 @@
 import { IconBoxArchive, IconNodes } from "nucleo-sharp-essential";
+import Link from "next/link";
 
 import { LiveViewLink } from "@/components/archive/live-view-link";
 import { FormMessage } from "@/components/auth/form-message";
@@ -6,6 +7,7 @@ import { UrlFilters, type UrlFilterGroup } from "@/components/ui/url-filters";
 import { NetworkList } from "@/components/network/network-list";
 import { NewContactButton } from "@/components/network/new-contact-button";
 import { EmptyState } from "@/components/shell/empty-state";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
 import { SectionFrame } from "@/components/shell/section-frame";
@@ -17,6 +19,8 @@ import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { loadContactProjectTitles } from "@/lib/network/contact-projects";
+import { listNetworkListOptions } from "@/lib/network/lists";
+import { networkListRoutes } from "@/lib/network/lists-types";
 import { listNetworkContacts } from "@/lib/network/queries";
 import {
   asNetworkDomain,
@@ -52,15 +56,32 @@ export default async function NetworkPage({
   const domain = asNetworkDomain(params.domain);
   const relation = asNetworkRelation(params.relation);
   const city = typeof params.city === "string" ? params.city : null;
-  const [all, projectsOf] = await Promise.all([
+  const canWrite = can(access, "manage_network") && !archived;
+  const [all, projectsOf, lists] = await Promise.all([
     listNetworkContacts(archived),
     loadContactProjectTitles(),
+    // « Ajouter à une liste » on the people ticked (Ibé, 18/11/2026).
+    canWrite ? listNetworkListOptions() : null,
   ]);
   const projects = Object.fromEntries(
     [...projectsOf].map(([id, list]) => [id, list.map((p) => p.title)]),
   );
-  const canWrite = can(access, "manage_network") && !archived;
   const newButton = canWrite ? <NewContactButton /> : null;
+  // « Mes listes » (Ibé, 18/11/2026), beside « Nouveau contact ».
+  const listsLink = (
+    <Link
+      href={networkListRoutes.lists}
+      className={buttonVariants({ variant: "outline", size: "lg" })}
+    >
+      <ButtonRoll>{t.lists.open}</ButtonRoll>
+    </Link>
+  );
+  const action = (
+    <div className="flex flex-wrap gap-2">
+      {listsLink}
+      {all && all.length > 0 && newButton}
+    </div>
+  );
 
   if (!all)
     return (
@@ -116,7 +137,7 @@ export default async function NetworkPage({
     <SectionFrame
       title={t.title}
       description={t.description}
-      action={all.length > 0 ? newButton : null}
+      action={action}
       toolsAction
     >
       {all.length === 0 && !archived && !canArchive ? (
@@ -129,7 +150,7 @@ export default async function NetworkPage({
       ) : (
         <DataTableViews
           label={t.viewsLabel}
-          pageAction={all.length > 0 ? newButton : null}
+          pageAction={action}
           views={[
             {
               href: viewHref(routes.network, { view, ...filters }),
@@ -156,6 +177,7 @@ export default async function NetworkPage({
                 canArchive,
                 archived,
               }}
+              lists={lists}
               filters={
                 <UrlFilters
                   path={routes.network}

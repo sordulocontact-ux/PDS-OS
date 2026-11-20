@@ -1,22 +1,21 @@
 "use client";
 
+import { DealMemoCard } from "@/components/deals/deal-memo-card";
+import {
+  DealMemoGestures,
+  type MemoSendSetup,
+} from "@/components/deals/deal-memo-gestures";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { Button } from "@/components/ui/button";
-import { DocumentCard } from "@/components/ui/document-card";
-import { FactRow, FactRows } from "@/components/ui/fact-row";
+import { CopyButton } from "@/components/ui/copy-button";
 import { PdfExportButton } from "@/components/ui/pdf-export-button";
-import { StatusBadge } from "@/components/ui/status-badge";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { routes } from "@/lib/auth/redirects";
-import { createDealMemo, validateDealMemo } from "@/lib/deals/memo-actions";
+import { createDealMemo } from "@/lib/deals/memo-actions";
 import type { DealMemo } from "@/lib/deals/memos";
-import { formatTermValue } from "@/lib/deals/term-format";
 import { dealMemos } from "@/lib/i18n/fr/deal-memos";
-import { deals } from "@/lib/i18n/fr/deals";
-import { dealMemoTone, dealTermTone } from "@/lib/ui/state-tones";
-import { formatInstantDay } from "@/lib/utils/instant";
 
-const fr = { dealMemos, deals };
+const fr = { dealMemos };
 const t = fr.dealMemos;
 
 function MemoPdf({
@@ -41,13 +40,33 @@ function MemoPdf({
   );
 }
 
+/** PO's address of the deal, where the label sends its memo or the business
+ * manager forwards it (réunion avec Ibé du 18/11/2026). */
+function DealAddress({ address }: { address: string }) {
+  return (
+    <p className="flex flex-wrap items-center gap-2 text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
+      <span className="min-w-0 break-all">{t.address.label(address)}</span>
+      <CopyButton
+        value={address}
+        label={t.address.copy}
+        copiedLabel={t.address.copied}
+        ariaLabel={t.address.aria}
+        variant="outline"
+        size="sm"
+      />
+    </p>
+  );
+}
+
 /**
- * The deal memo (BIZ 7) as a document card (Sacha 20/11/2026, proto « Fiche
- * d'un deal » v2): the latest photo of the terms — its number, who made and
- * validated it, its status, its terms folded inside — with its PDF; « Valider » for the
- * direction on the latest draft, « Nouveau deal memo » for whoever writes
- * the deal. A memo never changes: the terms moved since are said, and a new
- * memo photographs them. The earlier versions stay below, each with its PDF.
+ * The deal memo (BIZ 7) as document cards (Sacha 20/11/2026, proto « Fiche
+ * d'un deal » v2): the latest — received by e-mail from the label or the
+ * brand and filed here by PDS OS (réunion avec Ibé du 18/11/2026), or a
+ * photo of the terms made here — with its gestures (`DealMemoGestures`:
+ * show it to the direction, validate or ask for changes, send the agreement
+ * back), « Nouveau deal memo » for whoever writes the deal. A memo never
+ * changes: the next version is a new memo. The earlier ones stay below.
+ * `address`: PO's address of the deal, for whoever writes it.
  */
 export function DealMemos({
   dealId,
@@ -56,6 +75,8 @@ export function DealMemos({
   changed,
   canWrite,
   canValidate,
+  send,
+  address,
 }: {
   dealId: string;
   dealName: string;
@@ -64,9 +85,10 @@ export function DealMemos({
   changed: boolean;
   canWrite: boolean;
   canValidate: boolean;
+  send: MemoSendSetup;
+  address: string | null;
 }) {
   const create = useWriteSubmit(undefined, t.created);
-  const validate = useWriteSubmit(undefined, t.validated);
   const [latest, ...older] = memos;
   const newButton = canWrite && (
     <Button
@@ -78,61 +100,43 @@ export function DealMemos({
       {t.create}
     </Button>
   );
-  if (!latest) return <EmptyNote action={newButton}>{t.none}</EmptyNote>;
+  const addressLine = canWrite && address && <DealAddress address={address} />;
+  if (!latest)
+    return (
+      <div className="flex flex-col gap-2">
+        <EmptyNote action={newButton}>
+          {address ? t.noneByEmail : t.none}
+        </EmptyNote>
+        {addressLine}
+      </div>
+    );
 
-  const meta = (memo: DealMemo) =>
-    memo.validatedAt
-      ? t.validatedBy(memo.validatedBy, formatInstantDay(memo.validatedAt))
-      : t.meta(memo.createdBy, formatInstantDay(memo.createdAt));
-  const badge = (memo: DealMemo) => (
-    <StatusBadge tone={dealMemoTone[memo.status]} size="sm">
-      {t.statuses[memo.status]}
-    </StatusBadge>
-  );
+  const pdf = (memo: DealMemo) =>
+    memo.source === "pds" ? (
+      <MemoPdf dealId={dealId} dealName={dealName} memo={memo} />
+    ) : undefined;
 
   return (
     <div className="flex flex-col gap-3">
-      <DocumentCard
-        name={t.name(latest.number)}
-        line={meta(latest)}
-        collapsible={latest.terms.length > 0}
-        defaultOpen={false}
-        change={changed ? t.changed : undefined}
-        action={
-          <span className="flex flex-wrap items-center gap-2">
-            {badge(latest)}
-            <MemoPdf dealId={dealId} dealName={dealName} memo={latest} />
+      <DealMemoCard
+        memo={latest}
+        changed={changed}
+        open={pdf(latest)}
+        actions={
+          <>
+            <DealMemoGestures
+              dealId={dealId}
+              dealName={dealName}
+              memo={latest}
+              canWrite={canWrite}
+              canValidate={canValidate}
+              send={send}
+            />
             {newButton}
-            {canValidate && latest.status === "draft" && (
-              <Button
-                size="sm"
-                disabled={validate.pending}
-                onClick={() =>
-                  validate.run(() => validateDealMemo(dealId, latest.id))
-                }
-              >
-                {t.validate}
-              </Button>
-            )}
-          </span>
+          </>
         }
-      >
-        {latest.terms.length > 0 && (
-          <FactRows className="rounded-none border-0">
-            {latest.terms.map((term) => (
-              <FactRow
-                key={term.key}
-                label={fr.deals.terms.labels[term.key] ?? term.key}
-                value={formatTermValue(term.format, term.value)}
-                state={{
-                  tone: dealTermTone[term.state],
-                  label: fr.deals.terms.states[term.state],
-                }}
-              />
-            ))}
-          </FactRows>
-        )}
-      </DocumentCard>
+      />
+      {addressLine}
       {older.length > 0 && (
         <details className="group flex flex-col gap-2">
           <summary className="w-fit cursor-pointer text-body-md font-medium text-[color:var(--text-secondary)]">
@@ -140,17 +144,7 @@ export function DealMemos({
           </summary>
           <div className="mt-2 flex flex-col gap-2">
             {older.map((memo) => (
-              <DocumentCard
-                key={memo.id}
-                name={t.name(memo.number)}
-                line={meta(memo)}
-                action={
-                  <span className="flex flex-wrap items-center gap-2">
-                    {badge(memo)}
-                    <MemoPdf dealId={dealId} dealName={dealName} memo={memo} />
-                  </span>
-                }
-              />
+              <DealMemoCard key={memo.id} memo={memo} open={pdf(memo)} />
             ))}
           </div>
         </details>

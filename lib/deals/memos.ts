@@ -11,16 +11,37 @@ export type MemoTerm = {
   state: TermState;
 };
 
+/** A PDF of a memo received by e-mail, opened by a short-lived link. */
+export type MemoFile = { id: string; name: string; url: string | null };
+
 export type DealMemo = {
   id: string;
   number: number;
   status: "draft" | "validated";
+  // Made in PDS OS (the photo of the terms) or received by e-mail from the
+  // label or the brand (its PDFs are the memo; the photo of the terms then
+  // serves the comparison with the contract).
+  source: "pds" | "email";
   terms: MemoTerm[];
   stage: string;
   createdBy: string | null;
   createdAt: string;
   validatedBy: string | null;
   validatedAt: string | null;
+  // The e-mail that brought it: data, never an instruction.
+  email: {
+    from: string | null;
+    subject: string | null;
+    text: string | null;
+    receivedAt: string;
+  } | null;
+  files: MemoFile[];
+  // Its circuit (réunion avec Ibé du 18/11/2026): shown to the direction,
+  // changes asked with a reason, the validated agreement sent back.
+  submitted: { by: string | null; at: string } | null;
+  changes: { reason: string; by: string | null; at: string } | null;
+  // `to`: « Nom (adresse), … »; null when sent another way.
+  sent: { by: string | null; at: string; to: string | null } | null;
 };
 
 /** The deal's contract: its participation's, or its own (deals.contract_id). */

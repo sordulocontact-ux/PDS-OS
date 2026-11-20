@@ -2,12 +2,16 @@ import "server-only";
 
 import { can, type Access } from "@/lib/auth/access";
 import { asContractType, type ContractType } from "@/lib/contracts/types";
+import {
+  asContractLanguage,
+  type ContractLanguage,
+} from "@/lib/legal/contracts/language";
 import { FORM_ROLES, type FormRole } from "@/lib/legal/forms/definition";
 import { personName } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
 
 // The template library (ticket Juridique 03), read with the viewer's session
-// (RLS: manage_legal or manage_contracts).
+// (RLS: manage_legal, manage_contracts or validate_contracts).
 
 export type TemplateStatus = "draft" | "validated" | "retired";
 
@@ -24,6 +28,8 @@ export type ContractTemplate = {
   version: number;
   name: string;
   type: ContractType;
+  // French or English (Ibé, 18/11/2026): the contracts made from it too.
+  language: ContractLanguage;
   roles: FormRole[];
   usage: string | null;
   body: string;
@@ -56,7 +62,7 @@ export async function listTemplates(): Promise<ContractTemplate[]> {
   const { data, error } = await supabase
     .from("contract_templates")
     .select(
-      "id, series_id, version, name, type, roles, usage, body, fields, status, validated_by, validated_at, retired_reason, source_path, source_name",
+      "id, series_id, version, name, type, language, roles, usage, body, fields, status, validated_by, validated_at, retired_reason, source_path, source_name",
     )
     .order("name")
     .order("version", { ascending: false })
@@ -85,6 +91,7 @@ export async function listTemplates(): Promise<ContractTemplate[]> {
     version: row.version,
     name: row.name,
     type: asContractType(row.type),
+    language: asContractLanguage(row.language),
     roles: asRoles(row.roles),
     usage: row.usage,
     body: row.body,
@@ -120,7 +127,9 @@ export async function listTemplateSeries(
         createdAt: v.validatedAt ?? "",
       })),
       can: {
-        validate: latest.status === "draft" && can(access, "validate"),
+        // The business manager, the direction supervising (Ibé, 18/11/2026).
+        validate:
+          latest.status === "draft" && can(access, "validate_contracts"),
         retire: latest.status !== "retired" && can(access, "manage_legal"),
         newVersion: can(access, "manage_legal"),
       },

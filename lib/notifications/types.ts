@@ -178,6 +178,13 @@ export const NOTIFICATION_KINDS = [
   "deal_agreement_validated",
   "deal_agreement_refused",
   "deal_follow_up_due",
+  // A deal memo by e-mail (20261120150101): received, shown to the
+  // direction, sent back for changes, validated, its agreement sent back.
+  "deal_memo_received",
+  "deal_memo_submitted",
+  "deal_memo_changes_requested",
+  "deal_memo_validated",
+  "deal_memo_sent",
   // A selection of artists handed over (lot 4 of docs/pds-mic-plan.md): its
   // page in the Catalogue, no project (the subject is the selection).
   "selection_transmitted",
@@ -267,6 +274,11 @@ export function notificationHref(
     return routes.callReport(subjectId);
   // A deal opens its page, with or without a project (BIZ 4).
   if (kind.startsWith("deal_") && subjectId) return routes.deal(subjectId);
+  // A template to validate: its page (the subject is the version), which
+  // the business manager reads — not the project's Plan d'action, which he
+  // does not (20261120130101).
+  if (kind === "legal_template_to_validate" && subjectId)
+    return routes.contractTemplate(subjectId);
   if (kind === "selection_transmitted")
     return subjectId
       ? routes.artistSelection(subjectId)

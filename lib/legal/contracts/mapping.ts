@@ -126,14 +126,26 @@ export function agreementRows(input: MappingInput): AgreementRow[] {
             c.id !== need?.contractId && c.partyIds.includes(person.contactId!),
         ) ?? null)
       : null;
+    // Choosing the template chooses the contract's language (Ibé,
+    // 18/11/2026): an English one says so, and French comes first, so the
+    // template proposed stays a French one unless only English fits.
     const compatible = validated
       .filter((t) => overlap(t.roles, person.formRoles) > 0)
       .sort(
         (a, b) =>
           overlap(b.roles, person.formRoles) -
-          overlap(a.roles, person.formRoles),
+            overlap(a.roles, person.formRoles) ||
+          Number(a.language === "en") - Number(b.language === "en"),
       )
-      .map((t) => ({ id: t.id, label: `${t.name} · v${t.version}` }));
+      .map((t) => ({
+        id: t.id,
+        label: [
+          `${t.name} · v${t.version}`,
+          t.language === "en" ? fr.legalContracts.languages.en : null,
+        ]
+          .filter(Boolean)
+          .join(" · "),
+      }));
     const ficheFee = person.contactId
       ? (input.ficheFeeOf.get(person.contactId) ?? null)
       : null;
@@ -145,7 +157,11 @@ export function agreementRows(input: MappingInput): AgreementRow[] {
       ? input.contextOf.get(person.contactId)
       : undefined;
     const values = ctx
-      ? fieldValues({ ...ctx, feeCents: need?.feeCents ?? null })
+      ? fieldValues({
+          ...ctx,
+          feeCents: need?.feeCents ?? null,
+          language: template?.language ?? "fr",
+        })
       : null;
     const fields: AgreementField[] = (template?.fields ?? []).map((id) => {
       const found = values && isContractField(id) ? values[id] : null;

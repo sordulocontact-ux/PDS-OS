@@ -440,47 +440,193 @@ export type Database = {
           },
         ]
       }
+      deal_memo_files: {
+        Row: {
+          created_at: string
+          file_name: string
+          id: string
+          memo_id: string
+          organization_id: string
+          path: string
+          size_bytes: number | null
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          id?: string
+          memo_id: string
+          organization_id: string
+          path: string
+          size_bytes?: number | null
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          id?: string
+          memo_id?: string
+          organization_id?: string
+          path?: string
+          size_bytes?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_memo_files_memo_same_org"
+            columns: ["memo_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "deal_memos"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      deal_memo_loop: {
+        Row: {
+          added_by: string | null
+          contact_id: string | null
+          created_at: string
+          deal_id: string
+          id: string
+          organization_id: string
+          person_id: string | null
+        }
+        Insert: {
+          added_by?: string | null
+          contact_id?: string | null
+          created_at?: string
+          deal_id: string
+          id?: string
+          organization_id: string
+          person_id?: string | null
+        }
+        Update: {
+          added_by?: string | null
+          contact_id?: string | null
+          created_at?: string
+          deal_id?: string
+          id?: string
+          organization_id?: string
+          person_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_memo_loop_added_by_fkey"
+            columns: ["added_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_memo_loop_contact_same_org"
+            columns: ["contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "deal_memo_loop_deal_same_org"
+            columns: ["deal_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "deal_memo_loop_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deal_memos: {
         Row: {
+          changes_at: string | null
+          changes_by: string | null
+          changes_reason: string | null
           created_at: string
           created_by: string | null
           deal_id: string
+          email_from: string | null
+          email_message_id: string | null
+          email_subject: string | null
+          email_text: string | null
           id: string
           number: number
           organization_id: string
+          received_at: string | null
+          sent_at: string | null
+          sent_by: string | null
+          sent_to: string | null
+          source: string
           stage: string
           status: string
+          submitted_at: string | null
+          submitted_by: string | null
           terms: Json
           validated_at: string | null
           validated_by: string | null
         }
         Insert: {
+          changes_at?: string | null
+          changes_by?: string | null
+          changes_reason?: string | null
           created_at?: string
           created_by?: string | null
           deal_id: string
+          email_from?: string | null
+          email_message_id?: string | null
+          email_subject?: string | null
+          email_text?: string | null
           id?: string
           number: number
           organization_id: string
+          received_at?: string | null
+          sent_at?: string | null
+          sent_by?: string | null
+          sent_to?: string | null
+          source?: string
           stage: string
           status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
           terms?: Json
           validated_at?: string | null
           validated_by?: string | null
         }
         Update: {
+          changes_at?: string | null
+          changes_by?: string | null
+          changes_reason?: string | null
           created_at?: string
           created_by?: string | null
           deal_id?: string
+          email_from?: string | null
+          email_message_id?: string | null
+          email_subject?: string | null
+          email_text?: string | null
           id?: string
           number?: number
           organization_id?: string
+          received_at?: string | null
+          sent_at?: string | null
+          sent_by?: string | null
+          sent_to?: string | null
+          source?: string
           stage?: string
           status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
           terms?: Json
           validated_at?: string | null
           validated_by?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "deal_memos_changes_by_fkey"
+            columns: ["changes_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "deal_memos_created_by_fkey"
             columns: ["created_by"]
@@ -494,6 +640,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "deals"
             referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "deal_memos_sent_by_fkey"
+            columns: ["sent_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_memos_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "deal_memos_validated_by_fkey"
@@ -4026,6 +4186,7 @@ export type Database = {
           note: string | null
           off_budget: boolean
           organization_id: string
+          part_id: string | null
           project_id: string | null
           proof_name: string | null
           proof_path: string | null
@@ -4066,6 +4227,7 @@ export type Database = {
           note?: string | null
           off_budget?: boolean
           organization_id: string
+          part_id?: string | null
           project_id?: string | null
           proof_name?: string | null
           proof_path?: string | null
@@ -4106,6 +4268,7 @@ export type Database = {
           note?: string | null
           off_budget?: boolean
           organization_id?: string
+          part_id?: string | null
           project_id?: string | null
           proof_name?: string | null
           proof_path?: string | null
@@ -5077,6 +5240,7 @@ export type Database = {
       }
       contract_templates: {
         Row: {
+          language: string
           requested_for: string | null
           requested_key: string | null
           requested_project_id: string | null
@@ -5102,6 +5266,7 @@ export type Database = {
           version: number
         }
         Insert: {
+          language?: string
           requested_for?: string | null
           requested_key?: string | null
           requested_project_id?: string | null
@@ -5127,6 +5292,7 @@ export type Database = {
           version: number
         }
         Update: {
+          language?: string
           requested_for?: string | null
           requested_key?: string | null
           requested_project_id?: string | null
@@ -13348,6 +13514,129 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "network_contacts"
             referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      network_list_contacts: {
+        Row: {
+          added_by: string | null
+          contact_id: string
+          created_at: string
+          list_id: string
+          organization_id: string
+          reply: string
+          reply_changed_at: string | null
+          reply_changed_by: string | null
+        }
+        Insert: {
+          added_by?: string | null
+          contact_id: string
+          created_at?: string
+          list_id: string
+          organization_id: string
+          reply?: string
+          reply_changed_at?: string | null
+          reply_changed_by?: string | null
+        }
+        Update: {
+          added_by?: string | null
+          contact_id?: string
+          created_at?: string
+          list_id?: string
+          organization_id?: string
+          reply?: string
+          reply_changed_at?: string | null
+          reply_changed_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "network_list_contacts_added_by_fkey"
+            columns: ["added_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "network_list_contacts_contact_same_org"
+            columns: ["contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "network_list_contacts_list_same_org"
+            columns: ["list_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_lists"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "network_list_contacts_reply_changed_by_fkey"
+            columns: ["reply_changed_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      network_lists: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          organization_id: string
+          owner_person_id: string
+          shared: boolean
+          shared_at: string | null
+          updated_at: string
+          validated_at: string | null
+          validated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          organization_id: string
+          owner_person_id: string
+          shared?: boolean
+          shared_at?: string | null
+          updated_at?: string
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          organization_id?: string
+          owner_person_id?: string
+          shared?: boolean
+          shared_at?: string | null
+          updated_at?: string
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "network_lists_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "network_lists_owner_person_id_fkey"
+            columns: ["owner_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "network_lists_validated_by_fkey"
+            columns: ["validated_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -21843,6 +22132,50 @@ export type Database = {
           },
         ]
       }
+      finance_budget_parts: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          organization_id: string
+          target_id: string
+          target_kind: string
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          target_id: string
+          target_kind: string
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          target_id?: string
+          target_kind?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "finance_budget_parts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       finance_envelope_shares: {
         Row: {
           id: string
@@ -22671,6 +23004,45 @@ export type Database = {
         Args: { p_memo_id: string }
         Returns: undefined
       }
+      add_deal_loop: {
+        Args: { p_contact_id?: string; p_deal_id: string; p_person_id?: string }
+        Returns: string
+      }
+      list_deal_loop_members: {
+        Args: { p_deal_id: string }
+        Returns: {
+          name: string
+          person_id: string
+        }[]
+      }
+      receive_deal_memo: {
+        Args: {
+          p_deal_id: string
+          p_files: Json
+          p_from: string
+          p_message_id: string
+          p_received_at: string
+          p_subject: string
+          p_text: string
+        }
+        Returns: string
+      }
+      record_deal_memo_sent: {
+        Args: { p_memo_id: string; p_sent_to: string }
+        Returns: undefined
+      }
+      remove_deal_loop: {
+        Args: { p_loop_id: string }
+        Returns: undefined
+      }
+      request_deal_memo_changes: {
+        Args: { p_memo_id: string; p_reason: string }
+        Returns: undefined
+      }
+      submit_deal_memo: {
+        Args: { p_memo_id: string }
+        Returns: undefined
+      }
       can_read_contact_details: {
         Args: { p_contact_id: string }
         Returns: boolean
@@ -22714,6 +23086,58 @@ export type Database = {
           title_label: string
           title_position: number
         }[]
+      }
+      // 20261120140101_deal_negotiation_call.sql (added by hand).
+      negotiator_free_slots: {
+        Args: { p_days?: number; p_minutes?: number; p_person_id: string }
+        Returns: { ends_at: string; starts_at: string }[]
+      }
+      participation_deal_state: {
+        Args: { p_participation_id: string }
+        Returns: {
+          agreement_status: string | null
+          agreement_validated: boolean
+          can_plan_call: boolean
+          deal_id: string | null
+          last_call_at: string | null
+          next_call_at: string | null
+          stage: string | null
+        }[]
+      }
+      plan_deal_negotiation_call: {
+        Args: {
+          p_agenda?: Json
+          p_assignee_person_id?: string
+          p_deal_id?: string
+          p_ends_at: string
+          p_guests?: Json
+          p_meeting_url?: string
+          p_occurred_at: string
+          p_participation_id?: string
+          p_title: string
+        }
+        Returns: string
+      }
+      project_participation_deal_states: {
+        Args: { p_project_id: string }
+        Returns: {
+          agreement_status: string | null
+          agreement_validated: boolean
+          can_plan_call: boolean
+          deal_id: string | null
+          last_call_at: string | null
+          next_call_at: string | null
+          participation_id: string
+          stage: string | null
+        }[]
+      }
+      set_deal_negotiation_call_link: {
+        Args: {
+          p_call_id: string
+          p_google_event_id: string
+          p_meeting_url: string
+        }
+        Returns: undefined
       }
       set_deal_next_action: {
         Args: {
@@ -23104,6 +23528,44 @@ export type Database = {
       }
       transmit_artist_selection: {
         Args: { p_person_id: string; p_selection_id: string }
+        Returns: undefined
+      }
+      add_contacts_to_network_list: {
+        Args: { p_contact_ids: string[]; p_list_id: string }
+        Returns: number
+      }
+      can_read_network_list: {
+        Args: { p_org: string; p_owner: string; p_shared: boolean }
+        Returns: boolean
+      }
+      create_network_list: {
+        Args: {
+          p_contact_ids?: string[]
+          p_name: string
+          p_organization_id: string
+          p_shared?: boolean
+        }
+        Returns: string
+      }
+      delete_network_list: { Args: { p_list_id: string }; Returns: undefined }
+      remove_contact_from_network_list: {
+        Args: { p_contact_id: string; p_list_id: string }
+        Returns: undefined
+      }
+      rename_network_list: {
+        Args: { p_list_id: string; p_name: string }
+        Returns: undefined
+      }
+      set_network_list_reply: {
+        Args: { p_contact_id: string; p_list_id: string; p_reply: string }
+        Returns: undefined
+      }
+      set_network_list_shared: {
+        Args: { p_list_id: string; p_shared: boolean }
+        Returns: undefined
+      }
+      set_network_list_validated: {
+        Args: { p_list_id: string; p_validated: boolean }
         Returns: undefined
       }
       receive_clearance_reply: {
@@ -24316,6 +24778,7 @@ export type Database = {
           p_name: string
           p_organization_id: string
           p_roles: string[]
+          p_language?: string
           p_series_id: string | null
           p_source_name?: string
           p_source_path?: string
@@ -27969,6 +28432,21 @@ export type Database = {
       revise_cost_center: {
         Args: { p_cents: number; p_id: string; p_reason: string }
         Returns: undefined
+      }
+      assign_budget_part: {
+        Args: { p_line_ids: string[]; p_part_id: string | null }
+        Returns: number
+      }
+      finance_budget_part_lines: {
+        Args: never
+        Returns: {
+          line_id: string
+          part_id: string
+        }[]
+      }
+      remove_cost_center: {
+        Args: { p_id: string }
+        Returns: string
       }
       finance_line_matched: {
         Args: { p_line: string }

@@ -23,6 +23,31 @@ export const dealCalls = {
     pending: "Création…",
     cancel: "Annuler",
   },
+  // « Caler le call » (Ibé 18/11/2026): the project's owner plans the call
+  // of negotiation between the business manager and the artist's side, on
+  // his free slots; she is not in the call.
+  negotiation: {
+    button: "Caler le call",
+    dialogTitle: "Caler le call",
+    description: (who: string | null) =>
+      `Entre ${who ?? "le business manager"} et le manager de l'artiste. Vous n'êtes pas dans le call.`,
+    who: "Business manager",
+    noNegotiator:
+      "Aucun membre ne négocie : la direction donne le poste de business manager dans Équipe.",
+    slotsTitle: (who: string) => `Créneaux libres de ${who}`,
+    slotsSource: "D'après ses calls dans PDS OS, de 10 h à 18 h.",
+    slotsNone: "Aucun créneau libre ces prochains jours.",
+    slotsError: "Ses créneaux n'ont pas pu être lus.",
+    slot: (day: string, hour: string) => `${day} à ${hour}`,
+    other: "Autre horaire",
+    back: "Autres créneaux",
+    titlePlaceholder: "Call avec le manager",
+    participantsHint:
+      "Le manager ou le producteur de l'artiste, du Réseau ou par e-mail.",
+    submit: "Caler le call",
+    pending: "Calage…",
+    done: "Call calé",
+  },
   // PO's proposals from a call's report (lib/deals/call-proposals.ts).
   proposals: {
     title: "Propositions des calls",

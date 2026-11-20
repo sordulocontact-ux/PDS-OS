@@ -11,12 +11,14 @@ import { DealMemoSections } from "@/components/deals/deal-memo-sections";
 import { DealNextAction } from "@/components/deals/deal-next-action";
 import { DealNow } from "@/components/deals/deal-now";
 import { DealTerms } from "@/components/deals/deal-terms";
+import { NegotiationCallButton } from "@/components/deals/negotiation-call-button";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { StepFrieze } from "@/components/ui/step-frieze";
 import type { Access } from "@/lib/auth/access";
 import type { DealCall, DealCallProposal } from "@/lib/deals/call-queries";
 import type { DealContact } from "@/lib/deals/contact-queries";
+import type { NegotiationCallData } from "@/lib/deals/negotiation-call";
 import type { DealTerm } from "@/lib/deals/terms";
 import {
   isClosedStage,
@@ -36,7 +38,8 @@ const WORKS: Record<"terms" | "contacts" | "calls" | "memo", DealStage[]> = {
   terms: ["to_contact", "call_planned", "negotiation", "agreement"],
   contacts: ["to_contact", "call_planned"],
   calls: ["to_contact", "call_planned", "negotiation"],
-  memo: ["agreement", "contracting"],
+  // A deal memo can arrive by e-mail while negotiating (20261120150101).
+  memo: ["negotiation", "agreement", "contracting"],
 };
 
 /** The deal's stages as a frieze of points, each reached one with its day
@@ -89,6 +92,7 @@ export function DealTodoView({
   proposer,
   reopen,
   callForm,
+  negotiationCall,
   proposals,
   contacts,
   calls,
@@ -101,6 +105,8 @@ export function DealTodoView({
   proposer: string | null;
   reopen: ReactNode;
   callForm: DealCallFormData | null;
+  // « Caler le call » of the project's owner (loadDealNegotiationCall).
+  negotiationCall: NegotiationCallData | null;
   proposals: DealCallProposal[];
   contacts: DealContact[];
   calls: DealCall[];
@@ -117,6 +123,15 @@ export function DealTodoView({
         proposer={proposer}
         reopen={reopen}
         lead={callForm && <DealCallButton data={callForm} variant="default" />}
+        planCall={
+          negotiationCall && (
+            <NegotiationCallButton
+              data={negotiationCall}
+              variant={nextCall ? "outline" : "default"}
+            />
+          )
+        }
+        nextCall={nextCall?.label ?? null}
       />
       {deal.stage === "signed" && <EmptyNote>{t.page.signedNote}</EmptyNote>}
       {proposals.length > 0 && (

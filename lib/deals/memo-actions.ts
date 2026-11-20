@@ -1,42 +1,19 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-import { requireApproved } from "@/lib/auth/dal";
-import { routes } from "@/lib/auth/redirects";
-import { dealFailure } from "@/lib/deals/errors";
+import { runMemoGesture, uuid } from "@/lib/deals/memo-run";
 import { dealMemos } from "@/lib/i18n/fr/deal-memos";
 import { deals } from "@/lib/i18n/fr/deals";
-import { createClient } from "@/lib/supabase/server";
+import { schedulePendingPushes } from "@/lib/notifications/push";
 import type { WriteResult } from "@/lib/utils/write-result";
 
 // The deal memo and the contract (BIZ 7): one gesture = one SQL function,
 // with the user's session; the database decides who may.
 
 const t = dealMemos;
-const id = z.uuid();
-
-function failure(where: string, error: { code?: string; message?: string }) {
-  return t.errors[error.message ?? ""] ?? dealFailure(where, error);
-}
-
-async function run(
-  dealId: string,
-  where: string,
-  done: string,
-  call: (
-    supabase: Awaited<ReturnType<typeof createClient>>,
-  ) => PromiseLike<{ error: { code?: string; message?: string } | null }>,
-): Promise<WriteResult> {
-  await requireApproved();
-  if (!id.safeParse(dealId).success)
-    return { ok: false, error: deals.errors.invalid };
-  const { error } = await call(await createClient());
-  if (error) return { ok: false, error: failure(where, error) };
-  revalidatePath(routes.deal(dealId));
-  return { ok: true, done };
-}
+const id = uuid;
+const run = runMemoGesture;
 
 /** « Nouveau deal memo »: a draft photo of the terms now. */
 export async function createDealMemo(dealId: string): Promise<WriteResult> {
@@ -52,9 +29,12 @@ export async function validateDealMemo(
 ): Promise<WriteResult> {
   if (!id.safeParse(memoId).success)
     return { ok: false, error: deals.errors.invalid };
-  return run(dealId, "validateDealMemo", t.validated, (s) =>
+  const result = await run(dealId, "validateDealMemo", t.validated, (s) =>
     s.rpc("validate_deal_memo", { p_memo_id: memoId }),
   );
+  // The negotiator and the loop are told (deal_memo_validated).
+  if (result.ok) await schedulePendingPushes();
+  return result;
 }
 
 /** « Lier un contrat » (null: the link is taken off). */

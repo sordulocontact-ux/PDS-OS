@@ -114,6 +114,65 @@ export const financeBudgets = {
     share: "Part financée par PDS",
     template: "Enregistrer comme modèle",
     import: "Importer des lignes",
+    addPart: "Ajouter un sous-budget",
+    removeBudget: "Supprimer le budget",
+  },
+  // A budget cut into named parts (retour d'Ibé du 18/11/2026).
+  parts: {
+    title: "Sous-budgets",
+    part: "Sous-budget",
+    amount: "Montant",
+    spent: "Dépensé",
+    rest: "Reste",
+    unallocated: "Non réparti",
+    // The cell of what no part holds: « 3 000 € » to cut, or « Dépassé de … ».
+    toAllocate: "À répartir",
+    rowActions: (name: string) => `Actions pour « ${name} »`,
+    edit: "Modifier",
+    attach: "Rattacher des dépenses",
+    remove: "Supprimer",
+  },
+  // What PO says of a cut budget (computed by code, lib/assistant/read).
+  partsRead: {
+    line: (name: string, amount: string, spent: string, rest: string) =>
+      `Sous-budget « ${name} » : ${amount}, dépensé ${spent}, ${rest}.`,
+    unallocated: (amount: string, spent: string) =>
+      `Non réparti : ${amount} du budget, ${spent} dépensés hors sous-budget.`,
+    over: (amount: string) => `dépassé de ${amount}`,
+    rest: (amount: string) => `reste ${amount}`,
+  },
+  partForm: {
+    addTitle: "Ajouter un sous-budget",
+    editTitle: "Modifier le sous-budget",
+    name: "Nom",
+    amount: "Montant",
+    save: "Enregistrer",
+    saving: "Enregistrement…",
+    errors: { name: "Donnez un nom.", amount: "Indiquez un montant en euros." },
+  },
+  attachForm: {
+    title: (name: string) => `Dépenses de « ${name} »`,
+    none: "Aucune dépense dans ce budget.",
+    inPart: (name: string) => `Dans « ${name} »`,
+    save: "Enregistrer",
+    saving: "Enregistrement…",
+  },
+  removePart: {
+    title: "Supprimer ce sous-budget ?",
+    body: "Ses dépenses restent dans le budget, sans sous-budget.",
+    confirm: "Supprimer",
+    pending: "Suppression…",
+  },
+  removeBudget: {
+    title: "Supprimer ce budget ?",
+    body: "Sans dépense, il est supprimé. Avec des dépenses, il est archivé : il quitte la liste et ses dépenses restent consultables.",
+    confirm: "Supprimer",
+    pending: "Suppression…",
+  },
+  errors: {
+    nameTaken: "Un budget porte déjà ce nom.",
+    partNameTaken: "Ce budget a déjà un sous-budget de ce nom.",
+    partOther: "Une dépense d'un autre budget ne peut pas y entrer.",
   },
   centerForm: {
     title: "Nouveau budget",
@@ -176,15 +235,18 @@ export const financeBudgets = {
     saving: "Import…",
     empty: "Collez au moins une ligne.",
   },
-  errors: {
-    nameTaken: "Un budget porte déjà ce nom.",
-  },
   done: {
     center: "Budget créé",
     renamed: "Budget renommé",
     revised: "Budget révisé",
     share: "Part PDS enregistrée",
     template: "Modèle enregistré",
+    partAdded: "Sous-budget ajouté",
+    partSaved: "Sous-budget enregistré",
+    partDeleted: "Sous-budget supprimé",
+    partSpends: "Dépenses rattachées",
+    removed: "Budget supprimé",
+    archived: "Budget archivé",
     imported: (count: number) =>
       `${plural(count, "ligne importée", "lignes importées")}`,
   },

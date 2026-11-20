@@ -97,7 +97,13 @@ export function ContractDocumentSection({
     >
       <DocumentCard
         name={d.name(title, latest.version)}
-        line={signedBy ? d.signedLine(signedBy) : d.draftLine}
+        // An English contract says so (Ibé, 18/11/2026); French goes unsaid.
+        line={[
+          signedBy ? d.signedLine(signedBy) : d.draftLine,
+          document.language === "en" ? fr.legalContracts.languages.en : null,
+        ]
+          .filter(Boolean)
+          .join(" · ")}
         action={
           <div className="flex flex-wrap gap-2">
             <PdfExportButton
