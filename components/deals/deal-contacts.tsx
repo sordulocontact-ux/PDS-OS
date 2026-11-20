@@ -93,7 +93,7 @@ export function DealContacts({
 }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="flex flex-col items-start gap-3">
+    <div className="flex flex-col gap-3">
       {contacts.length === 0 ? (
         <EmptyNote>{t.empty}</EmptyNote>
       ) : (
@@ -126,7 +126,12 @@ export function DealContacts({
         </div>
       )}
       {canWrite && (
-        <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
+        <Button
+          variant="outline"
+          size="sm"
+          className="self-start"
+          onClick={() => setOpen(true)}
+        >
           {t.add}
         </Button>
       )}

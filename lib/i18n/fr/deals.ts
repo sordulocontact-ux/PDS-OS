@@ -287,7 +287,8 @@ export const deals = {
       call: "Prochain call",
       none: "Aucune",
       // The next action in one sentence (Sacha 20/11/2026: too many tables).
-      noneAction: "Aucune prochaine action",
+      noneAction: "Aucune prochaine action.",
+      add: "Ajouter une prochaine action",
       followUpOn: (day: string) => `Relancer le ${day}`,
       callOn: (slot: string) => `Prochain call : ${slot}`,
       edit: "Modifier",

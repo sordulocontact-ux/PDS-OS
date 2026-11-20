@@ -96,7 +96,12 @@ export function DealContract({
   const canLink = !participation && options !== null;
   const empty = Object.keys(options ?? {}).length === 0;
   const linkButton = canLink && (
-    <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
+    <Button
+      variant="outline"
+      size="sm"
+      className="self-start"
+      onClick={() => setOpen(true)}
+    >
       {contract ? t.change : t.link}
     </Button>
   );
@@ -157,7 +162,7 @@ export function DealContract({
           }
         />
       ) : (
-        <div className="flex flex-col items-start gap-3">
+        <div className="flex flex-col gap-3">
           <EmptyNote>{participation ? t.noneParticipation : t.none}</EmptyNote>
           {canLink &&
             (empty ? <EmptyNote>{t.noOption}</EmptyNote> : linkButton)}

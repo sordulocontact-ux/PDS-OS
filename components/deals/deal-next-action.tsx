@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
+import { EmptyNote } from "@/components/shell/empty-state";
 import { Button } from "@/components/ui/button";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { FormDialog } from "@/components/ui/form-dialog";
@@ -102,34 +103,51 @@ export function DealNextAction({
   return (
     <>
       {/* One sentence, not a table (Sacha 20/11/2026): the action and its
-          day, then the follow-up and the next call. */}
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex min-w-0 flex-col gap-1">
-          <p className="text-body-md font-medium text-pretty">
-            {deal.nextAction ?? t.noneAction}
-            {deal.nextActionOn && ` · ${formatDay(deal.nextActionOn)}`}
-          </p>
-          {(deal.followUpOn || nextCall) && (
-            <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
-              {deal.followUpOn && t.followUpOn(formatDay(deal.followUpOn))}
-              {deal.followUpOn && nextCall && " · "}
-              {nextCall && (
-                <ViewLink
-                  href={nextCall.href}
-                  className="underline-offset-2 hover:underline"
-                >
-                  {t.callOn(nextCall.label)}
-                </ViewLink>
-              )}
-            </p>
+          day, then the follow-up and the next call. None: the empty note of
+          the deal's other sections, its button under it (Sacha 20/11/2026). */}
+      {!deal.nextAction && !deal.followUpOn && !nextCall ? (
+        <div className="flex flex-col gap-3">
+          <EmptyNote>{t.noneAction}</EmptyNote>
+          {deal.canWrite && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="self-start"
+              onClick={() => setOpen(true)}
+            >
+              {t.add}
+            </Button>
           )}
         </div>
-        {deal.canWrite && (
-          <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
-            {t.edit}
-          </Button>
-        )}
-      </div>
+      ) : (
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex min-w-0 flex-col gap-1">
+            <p className="text-body-md font-medium text-pretty">
+              {deal.nextAction ?? t.noneAction}
+              {deal.nextActionOn && ` · ${formatDay(deal.nextActionOn)}`}
+            </p>
+            {(deal.followUpOn || nextCall) && (
+              <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
+                {deal.followUpOn && t.followUpOn(formatDay(deal.followUpOn))}
+                {deal.followUpOn && nextCall && " · "}
+                {nextCall && (
+                  <ViewLink
+                    href={nextCall.href}
+                    className="underline-offset-2 hover:underline"
+                  >
+                    {t.callOn(nextCall.label)}
+                  </ViewLink>
+                )}
+              </p>
+            )}
+          </div>
+          {deal.canWrite && (
+            <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
+              {t.edit}
+            </Button>
+          )}
+        </div>
+      )}
       <FormDialog
         open={open}
         onOpenChange={setOpen}

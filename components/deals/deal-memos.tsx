@@ -80,9 +80,9 @@ export function DealMemos({
   );
   if (!latest)
     return (
-      <div className="flex flex-col items-start gap-3">
+      <div className="flex flex-col gap-3">
         <EmptyNote>{t.none}</EmptyNote>
-        {newButton}
+        {newButton && <span className="self-start">{newButton}</span>}
       </div>
     );
 
