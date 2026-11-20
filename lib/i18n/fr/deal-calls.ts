@@ -17,7 +17,6 @@ export const dealCalls = {
     contextTopic: "Où en est le deal",
     contextStage: (stage: string) => `Étape : ${stage}`,
     lastSaid: (state: string, value: string) => `${state} : ${value}`,
-    toDefine: "À définir",
     nothingToNegotiate: "Tous les termes sont confirmés.",
     submit: "Créer le call",
     pending: "Création…",

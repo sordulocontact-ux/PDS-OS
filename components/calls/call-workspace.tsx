@@ -145,6 +145,8 @@ export function CallWorkspace({
             />
           )}
           {data.meeting && <CallReportCard meeting={data.meeting} />}
+          {transcript && <CallTranscriptCard transcript={transcript} />}
+          {/* Last and folded (Sacha 20/11/2026: « prend trop de place »). */}
           {call.agenda && (
             <CallAgenda
               callId={call.id}
@@ -154,7 +156,6 @@ export function CallWorkspace({
               edited={call.agendaEdited}
             />
           )}
-          {transcript && <CallTranscriptCard transcript={transcript} />}
         </div>
         <CallSide
           call={call}

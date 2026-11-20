@@ -28,16 +28,18 @@ export function dealCallAgenda(
       minutes: 5,
       questions: [t.contextStage(fr.deals.stages[deal.stage])],
     },
+    // A term with nothing said yet is the point alone: no « À définir »
+    // under it, the call is there for that (Sacha 20/11/2026).
     ...termsToNegotiate(terms).map((term) => {
       const value = formatTermValue(term.format, term.value);
       return {
         topic: fr.deals.terms.labels[term.key] ?? term.key,
         minutes: 5,
-        questions: [
-          value
-            ? t.lastSaid(fr.deals.terms.states[term.state], value)
-            : t.toDefine,
-        ],
+        ...(value
+          ? {
+              questions: [t.lastSaid(fr.deals.terms.states[term.state], value)],
+            }
+          : {}),
       };
     }),
   ];

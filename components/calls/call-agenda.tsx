@@ -43,6 +43,7 @@ export function CallAgenda({
   const t = fr.calls.agenda;
   const dimensions = fr.framingIntel.dimensions;
   const [editing, setEditing] = useState(false);
+  const [touched, setTouched] = useState(false);
   const [draft, setDraft] = useState<AgendaDraftItem[]>([]);
   const [pending, setPending] = useState(false);
   // The points as the common agenda editor holds them; questions and the
@@ -69,9 +70,14 @@ export function CallAgenda({
 
   if (!editing) {
     return (
+      // Folded until it is opened (Sacha 20/11/2026); open again after an
+      // edit, where it was. Keyed so each mode starts with its own state.
       <PageSection
+        key={touched ? "read-open" : "read"}
         id="call-agenda"
         title={t.title}
+        collapsible
+        defaultOpen={touched}
         description={
           durationMinutes !== null ? t.total(durationMinutes) : undefined
         }
@@ -84,6 +90,7 @@ export function CallAgenda({
               onClick={() => {
                 setDraft(toDraft());
                 setEditing(true);
+                setTouched(true);
               }}
             >
               {t.edit}
@@ -136,7 +143,7 @@ export function CallAgenda({
   };
 
   return (
-    <PageSection id="call-agenda" title={t.title} card>
+    <PageSection key="edit" id="call-agenda" title={t.title} card>
       <AgendaList
         id={`agenda-${callId}`}
         items={draft}
