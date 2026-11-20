@@ -2511,7 +2511,7 @@ cliquer et tout s'enchaîner »).
 Sacha : « il y a pas un autre moyen que des tableaux ? des cards ? » ; proto « Fiche d'un deal » (v1 tableaux, v2 cartes,
 `docs/protos/fiche-deal.html`), v2 retenue (« code les »). Une forme par contenu, avec les briques existantes :
 
-- **Frise des étapes** en tête de « À faire » : `PhaseStrip big` avec le jour de chaque étape atteinte (prop `dates`).
+- **Frise des étapes** en tête de « À faire » : `StepFrieze` (points reliés du proto, cochés avec le jour où chaque étape a été atteinte ; remplace `PhaseStrip big`, Sacha 20/11 : « c'est pas la bonne frise »).
 - **Termes négociés** et rappel de l'accord pour la direction : nouvelles `FactCard` / `FactCards` (`components/ui/`).
 - **Propositions de PO**, **deal memo**, **contrat** : `DocumentCard` (le memo repliable, ses termes dedans).
 - **Calls** : frise datée. **Personnes** : `ContactCard` (prop `hidden` pour « Coordonnées privées »).

@@ -211,6 +211,8 @@ export const deals = {
   // A deal's page (BIZ 4).
   page: {
     back: "Deals",
+    frieze: "Étapes du deal",
+    stageReached: "atteinte",
     now: "Maintenant",
     toValidate: "À valider",
     advance: {

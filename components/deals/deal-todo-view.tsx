@@ -13,7 +13,7 @@ import { DealNow } from "@/components/deals/deal-now";
 import { DealTerms } from "@/components/deals/deal-terms";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
-import { PhaseStrip } from "@/components/ui/phase-strip";
+import { StepFrieze } from "@/components/ui/step-frieze";
 import type { Access } from "@/lib/auth/access";
 import type { DealCall, DealCallProposal } from "@/lib/deals/call-queries";
 import type { DealContact } from "@/lib/deals/contact-queries";
@@ -39,31 +39,36 @@ const WORKS: Record<"terms" | "contacts" | "calls" | "memo", DealStage[]> = {
   memo: ["agreement", "contracting"],
 };
 
-/** The deal's stages as a frieze, each reached one with its day (its
- * journal, the latest first); signed, all done; abandoned, its word only. */
+/** The deal's stages as a frieze of points, each reached one with its day
+ * (its journal, the latest first); signed, all done. Abandoned: none (the
+ * word is beside the title, the way there in « Dossier »). */
 function StageFrieze({ deal, events }: { deal: Deal; events: DealEvent[] }) {
-  const index = MOVABLE_DEAL_STAGES.indexOf(
-    deal.stage as (typeof MOVABLE_DEAL_STAGES)[number],
-  );
-  const current =
-    deal.stage === "abandoned"
-      ? -1
-      : deal.stage === "signed"
-        ? MOVABLE_DEAL_STAGES.length
-        : index;
+  if (deal.stage === "abandoned") return null;
+  const index =
+    deal.stage === "signed"
+      ? MOVABLE_DEAL_STAGES.length
+      : MOVABLE_DEAL_STAGES.indexOf(
+          deal.stage as (typeof MOVABLE_DEAL_STAGES)[number],
+        );
   const reached = (stage: DealStage) => {
     const at = events.find((e) => e.toStage === stage)?.createdAt;
     return at ? formatShortDay(at, { bare: true }) : null;
   };
   return (
-    <PhaseStrip
-      big
-      phases={MOVABLE_DEAL_STAGES.map((stage) => t.stages[stage])}
-      current={current}
-      label={t.stages[deal.stage]}
-      dates={MOVABLE_DEAL_STAGES.map((stage, i) =>
-        i <= index || deal.stage === "signed" ? reached(stage) : null,
-      )}
+    <StepFrieze
+      label={t.page.frieze}
+      doneLabel={t.page.stageReached}
+      steps={MOVABLE_DEAL_STAGES.map((stage, i) => ({
+        key: stage,
+        label: t.stages[stage],
+        state:
+          i < index || deal.stage === "signed"
+            ? "done"
+            : i === index
+              ? "current"
+              : "todo",
+        date: i <= index ? reached(stage) : null,
+      }))}
     />
   );
 }
