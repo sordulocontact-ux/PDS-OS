@@ -526,8 +526,9 @@ l'ancien. Le lot 6 (nettoyage) attend donc sa décision.
 
 - **Qui choisit** : chacun, dans **Réglages › Style de l'interface** (Nouveau / Ancien), gardé dans le cookie
   `pds-style` de son navigateur (`components/settings/style-choice.tsx`). **Par défaut : le nouveau.**
-- **Comment c'est posé** : un script dans `<head>` (`lib/ui/design-style.ts`) lit le cookie avant le premier
-  affichage et pose `<html data-style="classic">`. Rien ne clignote.
+- **Comment c'est posé** : la mise en page racine (`app/layout.tsx`) lit le cookie côté serveur et pose
+  `<html data-style="classic">` dans le HTML même (`designStyleAttribute`, `lib/ui/design-style.ts`). Rien ne
+  clignote, et plus de script en ligne (React 19.2 le signalait, 20/11/2026).
 - **Ce qui suit le style** :
   - les **tokens** : les valeurs du § 2 sont celles de `:root` et `@theme` ; les valeurs d'avant sont gardées
     telles quelles dans le bloc `:root[data-style="classic"]` d'`app/globals.css` (la trace de l'ancien

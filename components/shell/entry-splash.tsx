@@ -1,4 +1,5 @@
 import { EntrySplashPlayer } from "@/components/shell/entry-splash-player";
+import { BeforePaintScript } from "@/components/ui/before-paint-script";
 import { routes } from "@/lib/auth/redirects";
 
 // Where someone enters the app. Shared pages (/d, /s…) and the other screens of
@@ -15,7 +16,7 @@ const decide = `(function(){try{var p=location.pathname;var a=${JSON.stringify(E
 export function EntrySplash() {
   return (
     <>
-      <script dangerouslySetInnerHTML={{ __html: decide }} />
+      <BeforePaintScript code={decide} />
       <EntrySplashPlayer />
     </>
   );

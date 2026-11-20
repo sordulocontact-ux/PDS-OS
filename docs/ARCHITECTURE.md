@@ -8226,6 +8226,15 @@ clés VAPID et `PUSH_CLAIM_SECRET` (≥ 32 car., même valeur que le secret Vaul
 
 ## 12. Pièges rencontrés (à ne pas redécouvrir)
 
+- **Un `<script>` en ligne dans la racine fait crier React 19.2** (20/11/2026) : « Encountered a script tag while
+  rendering React component » dès que React recrée la balise côté client (racine remontée en développement,
+  erreur de racine). Ce qui se sait côté serveur se pose dans le HTML sans script (style d'interface : cookie lu
+  par `app/layout.tsx`). Ce qui dépend du navigateur (écran d'entrée, thème de `next-themes`) passe par
+  `BeforePaintScript` / `beforePaintScriptType()` (`components/ui/before-paint-script.tsx`) : JavaScript dans le
+  HTML du serveur, bloc de données (`text/plain`) côté client, `suppressHydrationWarning`. Ni `next/script`
+  `beforeInteractive` (même balise rendue par React, et un script en ligne n'y tourne qu'au démarrage de Next,
+  après le premier affichage).
+
 - **Claude refuse un schéma de sortie trop gros** (prod, 10/11/2026) : en sortie structurée stricte,
   Anthropic compile le schéma en grammaire et répond `400 The compiled grammar is too large` (le compte
   rendu de call, Brief + Stratégie). `lib/ai/llm.ts` rejoue alors la même demande par un outil `json`
