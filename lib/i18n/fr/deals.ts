@@ -89,6 +89,9 @@ export const deals = {
   // The terms of lib/deals/terms.ts (BIZ 3): one label per key.
   terms: {
     title: "Termes négociés",
+    // « Noter un terme » in « Maintenant » (NoteTermButton).
+    note: "Noter un terme",
+    which: "Quel terme ?",
     // The terms still to define, on one line (Sacha 20/11/2026).
     toDefine: "À définir :",
     noneWritten: "Aucun terme négocié pour l'instant. À définir :",
@@ -221,18 +224,6 @@ export const deals = {
       agreement: "Proposer l'accord de principe",
       contracting: "Passer à la contractualisation",
       signed: "Marquer comme signé",
-    } as Record<string, string>,
-    why: {
-      to_contact:
-        "Premier contact avec l'artiste, son entourage, le label ou la marque : préparez le call, le deal passe à « Call prévu ».",
-      call_planned:
-        "Le call est calé : préparez-le, puis ouvrez la négociation.",
-      negotiation:
-        "Notez chaque proposition et contre-proposition dans les termes ; l'accord de principe se propose dès qu'un terme est confirmé.",
-      agreement:
-        "Les termes tiennent : la direction valide l'accord de principe avant le contrat.",
-      contracting:
-        "L'accord est validé : le deal passe à « Signé » dès que son contrat est signé.",
     } as Record<string, string>,
     // « Maintenant » of the project's owner on a music deal before its
     // accord (Ibé 18/11/2026): she calls the negotiation, never writes it.

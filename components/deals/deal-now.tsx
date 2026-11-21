@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { DealNowActions } from "@/components/deals/deal-now-actions";
+import { NoteTermButton } from "@/components/deals/note-term-button";
 import { NowFrame } from "@/components/shell/journey/now-card";
 import { FactCard, FactCards } from "@/components/ui/fact-card";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -163,12 +164,18 @@ export function DealNow({
         {deal.nextAction ??
           (next ? t.advance[next] : fr.deals.work.todo[deal.stage])}
       </h2>
-      <p className={secondary}>{t.why[deal.stage]}</p>
       <DealNowActions
         deal={deal}
         mode="move"
         next={next}
-        lead={deal.stage === "to_contact" && !next ? lead : undefined}
+        lead={
+          deal.stage === "to_contact" && !next ? (
+            lead
+          ) : deal.stage === "negotiation" && !next ? (
+            // The negotiation's gesture: a term said (Sacha 21/11/2026).
+            <NoteTermButton dealId={deal.id} terms={terms} />
+          ) : undefined
+        }
       />
     </NowFrame>
   );
