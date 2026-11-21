@@ -12,6 +12,7 @@ import {
   PARTICIPATION_ROLES,
   PARTICIPATION_STATUSES,
 } from "@/lib/projects/participation-rules";
+import { NEW_CONTACT_ROLES } from "@/lib/projects/recap-rules";
 import { createClient } from "@/lib/supabase/server";
 import type { WriteDone, WriteResult } from "@/lib/utils/write-result";
 
@@ -26,6 +27,7 @@ import type { WriteDone, WriteResult } from "@/lib/utils/write-result";
 const idSchema = z.uuid();
 const roleSchema = z.enum(PARTICIPATION_ROLES);
 const statusSchema = z.enum(PARTICIPATION_STATUSES);
+const newContactRoleSchema = z.enum(NEW_CONTACT_ROLES);
 
 type RpcError = { code?: string; message: string };
 
@@ -199,8 +201,9 @@ export async function setParticipationContact(input: {
 
 /**
  * « Nouveau contact » from the recap: a contact of the Réseau (shared, a
- * person, « Manager »), created with the user's session (manage_network),
- * then set as the participation's interlocutor. The right to write the
+ * person, with the role chosen: manager, producer or other), created with
+ * the user's session (manage_network), then set as the participation's
+ * interlocutor. The right to write the
  * participation is checked first, so that a refusal leaves no contact
  * behind.
  */
@@ -209,6 +212,9 @@ export async function createParticipationContact(input: {
   participationId: string;
   name: string;
   phone: string;
+  // Its role for the artist (manager, producer, other): written in the
+  // roles of the contact in the Réseau.
+  role: string;
 }): Promise<
   (WriteDone & { contactId: string }) | { ok: false; error: string }
 > {
@@ -229,6 +235,8 @@ export async function createParticipationContact(input: {
     };
   const phone = phoneSchema.safeParse(input.phone);
   if (!phone.success) return { ok: false, error: r.phoneTooLong };
+  const role = newContactRoleSchema.safeParse(input.role);
+  if (!role.success) return { ok: false, error: r.failed };
 
   const supabase = await createClient();
   // Rewriting the interlocutor it has checks who may write it, and that
@@ -256,7 +264,7 @@ export async function createParticipationContact(input: {
       kind: "person",
       name: name.data,
       phone: phone.data,
-      roles: ["manager"],
+      roles: [role.data],
     })
     .select("id")
     .single();

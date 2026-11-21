@@ -48,6 +48,9 @@ import type {
   TitleBoard,
 } from "@/lib/projects/title-board-rules";
 import type { Tone } from "@/lib/ui/state-tones";
+import { network } from "@/lib/i18n/fr/network";
+import { projectTitles } from "@/lib/i18n/fr/project-titles";
+import type { NetworkRole } from "@/lib/network/types";
 import { normalizeSearch } from "@/lib/utils/search";
 
 // ----------------------------------------------------------- Contact state
@@ -107,7 +110,36 @@ export type ContactRow = {
   name: string;
   phone: string | null;
   hidden: boolean;
+  // network_contacts.roles (a role is no private detail).
+  roles: readonly NetworkRole[];
 };
+
+/** What the recap says a contact is for the artist (Ibé 21/11: « Thibaud
+ * manager », « Producteur JL »): the most relevant of its roles, a manager,
+ * then a producer, else the first; « other » says nothing. Null: none. */
+export function contactRoleOf(
+  roles: readonly NetworkRole[],
+): NetworkRole | null {
+  const known = roles.filter((role) => role !== "other");
+  return (
+    known.find((role) => role === "manager") ??
+    known.find((role) => role === "producer") ??
+    known[0] ??
+    null
+  );
+}
+
+/** The roles offered for a new contact: the two Ibé names, and the rest. */
+export const NEW_CONTACT_ROLES = ["manager", "producer", "other"] as const;
+export type NewContactRole = (typeof NEW_CONTACT_ROLES)[number];
+
+/** A role in the recap's words: « Producteur » for `producer` (the Réseau
+ * says « Réalisateur·rice »), « Manager » for `manager` (« Management »),
+ * the Réseau's words for the others. */
+export function contactRoleLabel(role: NetworkRole): string {
+  const own = projectTitles.recap.contact.roles;
+  return role in own ? own[role as keyof typeof own] : network.roles[role];
+}
 
 /**
  * Who to call for the artist (the Excel's « Contact »: the manager's
@@ -123,6 +155,8 @@ export type RecapContact = {
   name: string;
   phone: string | null;
   hidden: boolean;
+  // What it is for the artist; null: no role known (« Contact »).
+  role: NetworkRole | null;
   source: "participation" | "catalog";
   href: string;
 };
@@ -168,6 +202,7 @@ export function recapContact(input: {
       name: input.participation.name,
       phone: input.participation.phone,
       hidden: input.participation.hidden,
+      role: contactRoleOf(input.participation.roles),
       source: "participation",
       href: routes.networkContact(input.participation.id),
     };
@@ -180,6 +215,8 @@ export function recapContact(input: {
       name: input.managerContact.name,
       phone: input.managerContact.phone,
       hidden: input.managerContact.hidden,
+      // The Catalogue's manager of the artist, whatever the Réseau says.
+      role: "manager",
       source: "catalog",
       href: routes.networkContact(input.managerContact.id),
     };
@@ -189,6 +226,7 @@ export function recapContact(input: {
     name: input.manager.name,
     phone: input.manager.phone,
     hidden: false,
+    role: "manager",
     source: "catalog",
     href: routes.artist(input.artistId),
   };

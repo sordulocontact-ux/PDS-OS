@@ -16,6 +16,7 @@ import {
 import { loadParticipationDealStates } from "@/lib/deals/participation-states";
 import type { FormSubmission } from "@/lib/legal/forms/queries";
 import { withPrivateDetails } from "@/lib/network/private-details";
+import { networkRolesOf } from "@/lib/network/types";
 import {
   artistsAwaitingAgreement,
   beatmakersOf,
@@ -265,7 +266,7 @@ export async function loadTitleRecap(
   const contacts = contactIds.length
     ? await supabase
         .from("network_contacts")
-        .select("id, name, phone, private_owner_person_id")
+        .select("id, name, phone, roles, private_owner_person_id")
         .in("id", contactIds)
     : none;
   if (contacts.error)
@@ -279,6 +280,7 @@ export async function loadTitleRecap(
         name: c.name,
         phone: coordinates.hidden.has(c.id) ? null : (c.phone ?? null),
         hidden: coordinates.hidden.has(c.id),
+        roles: networkRolesOf(c.roles),
       },
     ]),
   );

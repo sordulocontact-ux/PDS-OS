@@ -396,9 +396,14 @@ export const projectTitles = {
       callToPlan: "Call à caler",
     },
     contact: {
-      // Under the artist's name, before the contact's name.
+      // Under the artist's name, before the contact's name, when its role
+      // is not known.
       label: "Contact",
-      title: "Contact du manager",
+      // What the contact is for the artist, in Ibé's words (the Réseau says
+      // « Réalisateur·rice » for a producer, « Management » for a manager);
+      // the other roles are the Réseau's.
+      roles: { manager: "Manager", producer: "Producteur" },
+      title: "Contact de l'artiste",
       add: "Ajouter le contact",
       edit: (artist: string) => `Modifier le contact ${de(artist)}`,
       call: (name: string) => `Appeler ${name}`,
@@ -415,9 +420,12 @@ export const projectTitles = {
       pick: "Contact du Réseau",
       pickRequired: "Choisissez un contact du Réseau.",
       pickSubmit: "Choisir ce contact",
-      picked: "Contact du manager changé.",
+      picked: "Contact de l'artiste changé.",
       name: "Nom",
       newPhone: "Numéro",
+      // The new contact's role (written in its roles in the Réseau).
+      role: "Rôle",
+      newRoles: { manager: "Manager", producer: "Producteur", other: "Autre" },
       createSubmit: "Ajouter au Réseau",
       created: "Contact ajouté au Réseau.",
     },

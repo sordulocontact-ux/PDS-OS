@@ -10,6 +10,7 @@ import { NegotiationCallButton } from "@/components/deals/negotiation-call-butto
 import { PersonPickerField } from "@/components/network/person-picker-field";
 import { caption, factsClass } from "@/components/projects/titles/recap-facts";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { ChipChoice } from "@/components/ui/chip-choice";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { SegmentedControl } from "@/components/ui/segmented-control";
@@ -39,7 +40,13 @@ import {
   setParticipationContact,
   setParticipationNote,
 } from "@/lib/projects/participation-actions";
-import type { RecapAccord, RecapContact } from "@/lib/projects/recap-rules";
+import {
+  contactRoleLabel,
+  NEW_CONTACT_ROLES,
+  type NewContactRole,
+  type RecapAccord,
+  type RecapContact,
+} from "@/lib/projects/recap-rules";
 import { cn } from "@/lib/utils";
 
 // What the collective's recap edits in place (retours d'Ibé du 18/11/2026,
@@ -297,10 +304,10 @@ function IconAction({
 
 /**
  * Who to call for the artist (the Excel's « Contact »), under the artist's
- * name: « Contact », name, number, and « Appeler » / « WhatsApp »; a
+ * name: its role (« Manager », « Producteur », else « Contact »), name, number, and « Appeler » / « WhatsApp »; a
  * private contact's coordinates the reader may not read stay « Coordonnées
  * privées ». For whoever writes the title (another contact of the Réseau, a
- * new one) or the Réseau (the number): « Contact du manager » in a modal;
+ * new one) or the Réseau (the number): « Contact de l'artiste » in a modal;
  * none yet: « Ajouter le contact ». None and nothing to do: nothing.
  */
 export function ContactFacts({
@@ -358,7 +365,9 @@ export function ContactFacts({
   const whatsapp = contact.phone ? whatsappNumber(contact.phone) : null;
   return (
     <span className={factsClass(true)}>
-      <span className={caption}>{t.label}</span>
+      <span className={caption}>
+        {contact.role ? contactRoleLabel(contact.role) : t.label}
+      </span>
       <span className="max-w-full break-words" title={contact.name}>
         {contact.name}
       </span>
@@ -423,7 +432,7 @@ function contactModes(input: {
   ];
 }
 
-/** « Contact du manager »: one gesture at a time, chosen in segments when
+/** « Contact de l'artiste »: one gesture at a time, chosen in segments when
  * there are several (the number first, once there is a contact). */
 function ContactForm({
   projectId,
@@ -579,8 +588,9 @@ function PickForm({
   );
 }
 
-/** A new contact of the Réseau (a manager: name and number), made the
- * artist's interlocutor. The name is asked again in red when left empty. */
+/** A new contact of the Réseau (name, number and role: a manager, a
+ * producer or another), made the artist's interlocutor. The name is asked
+ * again in red when left empty. */
 function CreateForm({
   projectId,
   participationId,
@@ -593,6 +603,7 @@ function CreateForm({
   const t = fr.projectTitles.recap;
   const { pending, error, run } = useWriteSubmit(onDone, t.contact.created);
   const [missing, setMissing] = useState(false);
+  const [role, setRole] = useState<NewContactRole>("manager");
   return (
     <form
       noValidate
@@ -611,6 +622,7 @@ function CreateForm({
             participationId,
             name,
             phone,
+            role,
           }),
         );
       }}
@@ -632,6 +644,17 @@ function CreateForm({
         type="tel"
         autoComplete="off"
         maxLength={40}
+      />
+      <ChipChoice<NewContactRole>
+        name="contactRole"
+        legend={t.contact.role}
+        options={NEW_CONTACT_ROLES.map((value) => ({
+          value,
+          label: t.contact.newRoles[value],
+        }))}
+        value={role}
+        onChange={(next) => next && setRole(next)}
+        fill
       />
       {error && <FormMessage kind="error">{error}</FormMessage>}
       <DialogFormActions
