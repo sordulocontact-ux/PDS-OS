@@ -23087,6 +23087,11 @@ export type Database = {
           title_position: number
         }[]
       }
+      // 20261121110101_reschedule_call.sql (added by hand).
+      reschedule_call: {
+        Args: { p_call_id: string; p_ends_at: string; p_starts_at: string }
+        Returns: string
+      }
       // 20261121100101_negotiator_free_slots_any_month.sql (added by hand).
       negotiator_free_slots: {
         Args: {

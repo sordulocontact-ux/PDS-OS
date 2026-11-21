@@ -4,6 +4,7 @@ import { callState, CallStatusBadge } from "@/components/calls/call-badges";
 import { CallProjectPill } from "@/components/calls/call-project-pill";
 import { CallSheetMenu } from "@/components/calls/call-sheet-menu";
 import { JoinCallLink } from "@/components/calls/join-call-link";
+import { RescheduleCallButton } from "@/components/calls/reschedule-call-button";
 import { ProjectHeader } from "@/components/projects/project-header";
 import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
@@ -24,7 +25,8 @@ const fr = { calls, shell };
  * - from its project: the project's module header — trail « Calls / title »
  *   in the top bar, the title as the h1 with its state, when and who
  *   organizes as its facts.
- * On the right, « Rejoindre » while it is to come and « ⋯ » (CallSheetMenu).
+ * On the right, « Rejoindre » while it is to come, « Modifier l'horaire »
+ * for whoever may move it, and « ⋯ » (CallSheetMenu).
  */
 export function CallHeader({
   call,
@@ -35,6 +37,7 @@ export function CallHeader({
   upcoming,
   closed,
   deletable,
+  reschedulable = false,
 }: {
   call: CallDetail;
   project: { id: string; title: string } | null;
@@ -46,12 +49,24 @@ export function CallHeader({
   closed: boolean;
   // « Supprimer la réunion » in its « ⋯ » (lib/calls/delete-rule.ts).
   deletable: boolean;
+  // « Modifier l'horaire »: whoever may move it, before it is recorded.
+  reschedulable?: boolean;
 }) {
   const back = callsHref(door);
   const actions = (
     <div className="flex shrink-0 items-center gap-2">
       {call.meetingUrl && upcoming && (
         <JoinCallLink url={call.meetingUrl} title={call.title} />
+      )}
+      {reschedulable && (
+        <RescheduleCallButton
+          call={{
+            id: call.id,
+            occurredAt: call.occurredAt,
+            endsAt: call.endsAt,
+          }}
+          size="default"
+        />
       )}
       <CallSheetMenu
         call={{

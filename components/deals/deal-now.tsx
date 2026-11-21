@@ -124,15 +124,11 @@ export function DealNow({
       </NowFrame>
     );
   // The project's owner calls the negotiation, never writes it (Ibé
-  // 18/11/2026): her gesture until the accord. A call already planned is
-  // said, without the button (Sacha 21/11/2026: « je l'ai déjà fait »); once
-  // held, the button comes back for the next one.
+  // 18/11/2026): her gesture until the accord. A call already planned: no
+  // gesture, no frame (Sacha 21/11/2026: « cette frame ne sert à rien »), the
+  // call's card is in « Prochaine action »; once held, the button comes back.
   if (deal.canPlanCall && planCall)
-    return nextCall ? (
-      <NowFrame label={t.now} quiet>
-        <h2 className={heading}>{t.planCall.planned(nextCall)}</h2>
-      </NowFrame>
-    ) : (
+    return nextCall ? null : (
       <NowFrame label={t.now}>
         <h2 className={heading}>
           {t.planCall.title(deal.assignee?.name ?? null)}

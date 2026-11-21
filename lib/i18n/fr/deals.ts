@@ -239,7 +239,6 @@ export const deals = {
     planCall: {
       title: (who: string | null) =>
         who ? `Caler le call avec ${who}` : "Caler le call de négociation",
-      planned: (when: string) => `Call prévu : ${when}`,
     },
     waitDirection:
       "La direction est prévenue : elle valide l'accord de principe ou le renvoie en négociation.",

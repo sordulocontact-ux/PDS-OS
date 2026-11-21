@@ -44,7 +44,12 @@ export function RescheduleDialog({
     >
       {event && (
         <RescheduleForm
-          event={event}
+          id={event.call.id}
+          initial={{
+            date: event.day,
+            start: clock(event.start),
+            end: clock(event.end),
+          }}
           onCancel={onClose}
           onSave={(place) => {
             onSave(event, place);
@@ -56,22 +61,24 @@ export function RescheduleDialog({
   );
 }
 
-function RescheduleForm({
-  event,
+/** The day and the two times of a call, as in Teams: the calendar's
+ * dialog and the call page's « Modifier l'horaire » (RescheduleCallButton). */
+export function RescheduleForm({
+  id,
+  initial,
+  pending = false,
   onCancel,
   onSave,
 }: {
-  event: CalendarEvent;
+  id: string;
+  initial: SlotInput;
+  pending?: boolean;
   onCancel: () => void;
   onSave: (place: Place) => void;
 }) {
   const t = fr.calls.calendar.reschedule;
   const s = fr.calls.schedule;
-  const [slot, setSlot] = useState<SlotInput>({
-    date: event.day,
-    start: clock(event.start),
-    end: clock(event.end),
-  });
+  const [slot, setSlot] = useState<SlotInput>(initial);
   const [tried, setTried] = useState(false);
   const errors: SlotErrors = !tried
     ? {}
@@ -101,7 +108,7 @@ function RescheduleForm({
       }}
     >
       <CallSlotFields
-        idPrefix={`reschedule-${event.call.id}`}
+        idPrefix={`reschedule-${id}`}
         slot={slot}
         onChange={setSlot}
         errors={errors}
@@ -113,8 +120,8 @@ function RescheduleForm({
         <Button type="button" variant="ghost" size="lg" onClick={onCancel}>
           {t.cancel}
         </Button>
-        <Button type="submit" size="lg">
-          {t.save}
+        <Button type="submit" size="lg" aria-busy={pending || undefined}>
+          {pending ? t.saving : t.save}
         </Button>
       </div>
     </form>

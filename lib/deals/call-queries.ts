@@ -28,6 +28,8 @@ export type DealCall = {
   status: CallStatus;
   audioPath: string | null;
   closed: boolean;
+  // Who planned it: the project's owner may move a call she planned.
+  createdBy: string | null;
 };
 
 export async function loadDealCalls(dealId: string): Promise<DealCall[]> {
@@ -35,7 +37,7 @@ export async function loadDealCalls(dealId: string): Promise<DealCall[]> {
   const { data, error } = await supabase
     .from("calls")
     .select(
-      "id, title, occurred_at, ends_at, duration_minutes, status, audio_path, closures:call_closures!call_closures_call_same_org(id)",
+      "id, title, occurred_at, ends_at, duration_minutes, status, audio_path, created_by, closures:call_closures!call_closures_call_same_org(id)",
     )
     .eq("deal_id", dealId)
     .order("occurred_at", { ascending: false })
@@ -50,6 +52,7 @@ export async function loadDealCalls(dealId: string): Promise<DealCall[]> {
     status: asCallStatus(c.status),
     audioPath: c.audio_path,
     closed: c.closures.length > 0,
+    createdBy: c.created_by,
   }));
 }
 

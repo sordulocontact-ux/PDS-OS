@@ -1,7 +1,7 @@
 import { CallHeader } from "@/components/calls/call-header";
 import { CallWorkspace } from "@/components/calls/call-workspace";
 import { EditAccessProvider } from "@/components/projects/edit-access";
-import { can } from "@/lib/auth/access";
+import { can, type Access } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { callDeleter, canDeleteCall } from "@/lib/calls/delete-rule";
@@ -19,6 +19,7 @@ import {
 import { loadMembers } from "@/lib/framing/related";
 import { dealName } from "@/lib/deals/names";
 import { loadDeal } from "@/lib/deals/queries";
+import { isClosedStage, type Deal } from "@/lib/deals/types";
 import { calls } from "@/lib/i18n/fr/calls";
 import { canEditProject } from "@/lib/projects/edit-access";
 import type { ProjectDetail } from "@/lib/projects/types";
@@ -137,6 +138,7 @@ export async function CallPage({
           organizer={organizer}
           upcoming={isUpcoming(call, now)}
           closed={data.closures.length > 0}
+          reschedulable={canRescheduleCall(access, call, deal, canEdit)}
           deletable={canDeleteCall(callDeleter(access), {
             ownerPersonId: project
               ? project.ownerPersonId
@@ -172,5 +174,24 @@ export async function CallPage({
     page
   ) : (
     <EditAccessProvider canEdit={canEdit}>{page}</EditAccessProvider>
+  );
+}
+
+/** « Modifier l'horaire » (reschedule_call decides again): whoever works on
+ * the call, and whoever planned a deal's call (« Caler le call ») while the
+ * deal is open; never once something is recorded. */
+function canRescheduleCall(
+  access: Access,
+  call: CallDetail,
+  deal: Deal | null,
+  canEdit: boolean,
+): boolean {
+  if (call.audioPath) return false;
+  if (canEdit) return true;
+  return (
+    deal !== null &&
+    !isClosedStage(deal.stage) &&
+    access.personId !== null &&
+    call.createdBy === access.personId
   );
 }

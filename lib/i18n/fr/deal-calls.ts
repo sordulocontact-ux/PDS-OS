@@ -3,6 +3,7 @@
 export const dealCalls = {
   section: "Calls",
   empty: "Aucun call pour ce deal.",
+  actions: (title: string) => `Actions pour « ${title} »`,
   prepare: {
     button: "Préparer un call",
     dialogTitle: "Préparer un call",

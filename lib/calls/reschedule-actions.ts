@@ -13,10 +13,11 @@ export type RescheduleResult =
   { ok: true; googleFailed: boolean } | { ok: false; error: CallErrorCode };
 
 /**
- * Moves or stretches a call in the calendar (drag, resize, « Modifier
- * l'horaire »), as in Teams. Only whoever works on it (RLS: is_call_owner),
- * and only before anything is recorded. Its Google event follows, and Google
- * tells the guests; Google refusing never undoes the move.
+ * Moves or stretches a call (the calendar's drag and resize, « Modifier
+ * l'horaire » there and on the call's page), as in Teams. The database
+ * decides who may (reschedule_call: whoever works on it, and whoever planned
+ * a deal's call) and refuses once anything is recorded. Its Google event
+ * follows, and Google tells the guests; Google refusing never undoes it.
  */
 export async function rescheduleCall(
   callId: string,
@@ -36,18 +37,18 @@ export async function rescheduleCall(
     return { ok: false, error: "slot_too_long" };
 
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("calls")
-    .update({ occurred_at: start.toISOString(), ends_at: end.toISOString() })
-    .eq("id", callId)
-    .is("audio_path", null)
-    .select("google_event_id");
-  if (error || !data?.length) {
-    if (error) console.error("[calls] reschedule failed:", error.message);
+  const { data: eventId, error } = await supabase.rpc("reschedule_call", {
+    p_call_id: callId,
+    p_starts_at: start.toISOString(),
+    p_ends_at: end.toISOString(),
+  });
+  if (error) {
+    if (error.message === "invalid_slot")
+      return { ok: false, error: "date_invalid" };
+    console.error("[calls] reschedule failed:", error.message);
     return { ok: false, error: "forbidden" };
   }
   let googleFailed = false;
-  const eventId = data[0].google_event_id;
   if (eventId) {
     try {
       await moveMeetEvent({ eventId, start, end });

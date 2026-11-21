@@ -5,7 +5,11 @@ import {
   type DealCallFormData,
 } from "@/components/deals/deal-call-button";
 import { DealCallProposals } from "@/components/deals/deal-call-proposals";
-import { DealCallCard, DealCalls } from "@/components/deals/deal-calls";
+import {
+  DealCallCard,
+  DealCalls,
+  dealCallMovable,
+} from "@/components/deals/deal-calls";
 import { DealContacts } from "@/components/deals/deal-contacts";
 import { DealMemoSections } from "@/components/deals/deal-memo-sections";
 import { DealNextAction } from "@/components/deals/deal-next-action";
@@ -118,6 +122,7 @@ export function DealTodoView({
 }) {
   const s = t.page.sections;
   const upcomingCall = nextDealCall(calls);
+  const movable = dealCallMovable(deal, access.personId);
   const works = (what: keyof typeof WORKS) => WORKS[what].includes(deal.stage);
   return (
     <>
@@ -145,7 +150,11 @@ export function DealTodoView({
             deal={deal}
             call={
               upcomingCall && (
-                <DealCallCard call={upcomingCall} now={new Date()} />
+                <DealCallCard
+                  call={upcomingCall}
+                  now={new Date()}
+                  movable={movable(upcomingCall)}
+                />
               )
             }
           />
@@ -175,7 +184,7 @@ export function DealTodoView({
             deal.stage !== "to_contact" && <DealCallButton data={callForm} />
           }
         >
-          <DealCalls calls={calls} />
+          <DealCalls calls={calls} movable={movable} />
         </PageSection>
       )}
       {works("memo") && (
