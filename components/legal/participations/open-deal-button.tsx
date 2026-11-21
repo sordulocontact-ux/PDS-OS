@@ -55,7 +55,6 @@ export function OpenDealButton({
         open={open}
         onOpenChange={setOpen}
         title={t.title(artist, title)}
-        description={t.description}
         closeLabel={fr.dialogs.close}
       >
         {open && (
@@ -102,7 +101,6 @@ function OpenDealForm({
           id={`open-deal-${participationId}`}
           name="assigneeId"
           label={t.negotiator}
-          hint={t.negotiatorHint}
           items={{
             [NOBODY]: t.negotiatorNone,
             ...Object.fromEntries(negotiators.map((n) => [n.id, n.name])),

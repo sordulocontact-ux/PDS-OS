@@ -8,8 +8,6 @@ const de = (name: string) =>
 export const legalParticipations = {
   title: "Participations et contrats",
   link: "Participations et contrats",
-  description:
-    "Chaque artiste sur chaque titre : son contrat de participation et son dossier de négociation. Un même artiste sur deux titres a deux lignes, deux dossiers et deux contrats.",
   facts: {
     signed: "Contrats signés",
     signedValue: (signed: number, confirmed: number) =>
@@ -39,7 +37,7 @@ export const legalParticipations = {
   noParticipation: "Aucun artiste invité sur ce titre.",
   empty: {
     title: "Aucun artiste invité pour l'instant",
-    body: "Invitez des artistes sur les titres depuis Titres et artistes : chaque participation aura ici son contrat et son dossier de négociation.",
+    body: "Invitez des artistes sur les titres depuis Titres et artistes.",
     link: "Ouvrir Titres et artistes",
   },
   contract: {
@@ -60,11 +58,7 @@ export const legalParticipations = {
       `Ouvrir un dossier de négociation pour ${artist} sur ${title}`,
     title: (artist: string, title: string) =>
       `Ouvrir le dossier de négociation ${de(artist)} · ${title}`,
-    description:
-      "Le dossier (deal) se crée dans le module Business, rattaché à cette participation. Si l'artiste a déjà accepté, il démarre en négociation.",
     negotiator: "Négocié par",
-    negotiatorHint:
-      "Facultatif : la personne qui négociera. Vous pourrez l'affecter plus tard depuis le deal.",
     negotiatorNone: "À affecter plus tard",
     submit: "Ouvrir le dossier",
     done: "Dossier de négociation ouvert.",

@@ -138,7 +138,8 @@ function nextOf(
  * next action. A row opens its deal (Business module) when the viewer reads
  * it; the contract's pill opens the contract. Without a live deal, « Ouvrir
  * un dossier » for whoever may create one (create_deal). The same artist on
- * two titles: two rows, two deals, two contracts. No contact is shown.
+ * two titles: two rows and two deals, one contract (the person's). No
+ * contact is shown.
  */
 export function ParticipationsView({
   projectId,
