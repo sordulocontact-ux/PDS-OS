@@ -2669,13 +2669,17 @@ tableau CONTRATS : contrat coproduction 50/50, envoyé ?, en attente de retour, 
   un seul corps de tableau, filet entre deux titres, colonne « ⋯ » seulement pour qui écrit (`ceb5a8d5`, `2233c7a0`).
 - **Fiche en trois mots** comme l'Excel (Oui / Non / En attente) : « Fiche · À envoyer », « En attente », « Remplie »
   (« Remplie, à valider » au survol) ; fiche révoquée ou lien expiré = « À envoyer » (`2de58dc5`).
-- **Contrat** : « Envoyé · en attente de retour », « Retour reçu · à contresigner », « Retour reçu · à vérifier »
-  (contresigné, signature pas encore vérifiée), « Signé » (`45fe46fd`).
+- **Contrat** : « Envoyé · en attente de retour », « Retour reçu · à contresigner », puis « Signé » dès que PDS a
+  contresigné (la vérification de signature reste dans le Juridique) (`45fe46fd`, `fc9f72a2`).
 - **Son reçu** : la cellule Mix dit « Son reçu » / « Son attendu » d'après la source confirmée au Master
   (`master_flow_sources`), sans champ en plus ; un titre sans master reste « — » (`49f6df1e`).
-- **Qui est le contact** : « Manager · … », « Producteur · … » (rôles du Réseau ; le Réseau libelle `producer`
-  « Réalisateur·rice », le récap dit « Producteur ») ; « Nouveau contact » demande le rôle ; modale « Contact de
-  l'artiste » (`3200bb95`).
+- **Qui est le contact** : « Manager · … », « Producteur · … » (`3200bb95`, `2ebcf7d3`). Le « Producteur » d'Ibé est le
+  producteur côté label (celui qui négocie le 50/50) : aucun rôle de personne du Réseau ne convient (`producer` =
+  réalisateur·rice ; `label` et `production_company` sont des rôles d'organisation), c'est donc un **libellé libre de la
+  participation** (`title_participations.contact_label`, 40 caractères, `set_title_participation_contact(…, p_label)`) ;
+  « Nouveau contact » et « Autre contact » demandent Manager / Producteur / Autre ; modale « Contact de l'artiste ».
+  Migration `20261121220101_participation_contact_label.sql` **à pousser en prod par Sacha** (tests dans
+  `collective-recap.test.sql`, 56).
 - **« Participations et contrats »** : bouton en contour dans l'en-tête de chaque étape du Juridique d'un collectif
   (avant : caché en pied de colonne, introuvable en réunion) (`39f8c459`).
 - **Confidentialité** : le récap ne lit plus la soumission complète d'une fiche (seulement de quoi calculer son état,
@@ -2685,3 +2689,13 @@ tableau CONTRATS : contrat coproduction 50/50, envoyé ?, en attente de retour, 
   1000 contacts du Réseau pour « Caler le call » (aussi sur la page d'un deal) ; `privateDetailsOf` lit `city` et
   `notes` côté serveur ; une fonction SQL qui renvoie l'état d'une fiche éviterait toute lecture de la soumission.
 - Attendent la réponse d'Ibé (23/11) : Lyrics, Réseaux, « personnes sur place ».
+- **Démo « Assurance 30 »** (`0771fa0e`) : le script ajoute, rejouable sur un projet déjà créé, de quoi voir chaque
+  état : fiche « En attente » (Selma), « Remplie » (Elio, Ysolde, Tiago) ; contrat « Envoyé · en attente de retour »
+  (Elio), « Retour reçu · à contresigner » (Ysolde Marnay, titre « Marée haute »), « Signé » (Tiago Lestrel, « Dernier
+  métro ») ; « Son reçu » (« Cap sur demain »), « Son attendu » (« Marée haute »). Deux invités inventés ajoutés, un
+  modèle « Contrat d'artiste invité » créé s'il n'y en a pas de validé ; les copies signées n'ont pas de fichier derrière.
+- **« Voir comme » (barre de pré-prod, hors PDS Mic, non corrigé)** : bascule parfois sans effet. Constat : lors des
+  essais ratés, aucune connexion n'arrive à Supabase Auth ; `switchPreprodAccount` (`lib/preprod/actions.ts`) sort en
+  silence quand `getClaims()` ne rend rien (session en cours de renouvellement : un jeton de Claire a été révoqué pendant
+  ces essais) et la barre ne dit rien. Piste : ne pas exiger la session courante (la barre n'existe qu'en pré-prod) et
+  afficher une erreur si la connexion échoue.

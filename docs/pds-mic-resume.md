@@ -368,7 +368,8 @@ reconstruite après une remise à zéro faite par erreur (voir `lot-15.md`). Dé
 ## Règles à tenir à chaque lot
 
 - Le récap suit l'Excel d'Ibé (21/11) : fiche « À envoyer / En attente / Remplie », contrat envoyé / retour reçu /
-  signé, « Son reçu » lu au Master (jamais un champ en double), rôle du contact (Manager / Producteur). Il ne lit
+  signé, « Son reçu » lu au Master (jamais un champ en double), rôle du contact (« Producteur » = libellé libre
+  `title_participations.contact_label`, migration `20261121220101`, pas le rôle `producer` du Réseau). Il ne lit
   **jamais** les données personnelles d'une fiche (naissance, sécu, adresse, RIB) : garde-fou `privateReadsOf`.
 
 - Toute règle nouvelle ne joue que si `projects.collective = true` ; un projet simple ne change pas
