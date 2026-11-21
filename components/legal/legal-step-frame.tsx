@@ -2,7 +2,9 @@ import { ProjectHeader } from "@/components/projects/project-header";
 import { JourneyLayout } from "@/components/shell/journey/journey-layout";
 import { JourneySpine } from "@/components/shell/journey/journey-spine";
 import { ModuleAttention } from "@/components/shell/module/module-attention";
+import { buttonVariants, ButtonRoll } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { ViewLink } from "@/components/ui/view-link";
 import {
   StepBlockers,
   StepToolsBlock,
@@ -37,7 +39,8 @@ const fr = { legalHistory, legalJourney, legalParticipations };
  * tags in the État des lieux) and in the trail, as the Master does, and no
  * longer repeats it in its own title. A step of the spine only (« Rattacher
  * le titre au Catalogue », `attach:<id>`) has no tools: nothing to report
- * or note on it.
+ * or note on it. « Participations et contrats » is a button of the head, on
+ * every step of a collective's Juridique.
  */
 export async function LegalStepFrame({
   projectId,
@@ -78,21 +81,10 @@ export async function LegalStepFrame({
           steps={spine}
           openKey={stepKey}
           foldable={layout?.foldable}
-          footer={[
-            {
-              href: routes.projectLegalStep(projectId, "history"),
-              label: fr.legalHistory.link,
-            },
-            // A collective: each participation's contract and deal (lot 11).
-            ...(project.collective
-              ? [
-                  {
-                    href: legalParticipationsHref(projectId),
-                    label: fr.legalParticipations.link,
-                  },
-                ]
-              : []),
-          ]}
+          footer={{
+            href: routes.projectLegalStep(projectId, "history"),
+            label: fr.legalHistory.link,
+          }}
         />
       }
       head={
@@ -114,6 +106,20 @@ export async function LegalStepFrame({
               ) : undefined
             }
             extraCrumbs={title ? [{ label: title.label }] : undefined}
+            // A collective (Ibé and Maël did not find it at the foot of the
+            // spine, 21/11/2026): each participation's contract and deal
+            // (lot 11), on every page of its Juridique. The frame is only
+            // read with manage_legal (legalJourneyContext: 404 otherwise).
+            actions={
+              project.collective ? (
+                <ViewLink
+                  href={legalParticipationsHref(projectId)}
+                  className={buttonVariants({ variant: "outline", size: "sm" })}
+                >
+                  <ButtonRoll>{fr.legalParticipations.link}</ButtonRoll>
+                </ViewLink>
+              ) : undefined
+            }
           />
           {own && (
             <ModuleAttention
