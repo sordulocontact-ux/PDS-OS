@@ -86,8 +86,9 @@ export function CallPlanForm({
   pendingLabel: string;
   cancelLabel: string;
   onCancel?: () => void;
-  // Created from PO's panel: the page stays and gets the new call's id.
-  onSaved?: (id: string) => void;
+  // Created from PO's panel: the page stays and gets the new call's id
+  // (and whether Google refused its Meet).
+  onSaved?: (id: string, meetFailed: boolean) => void;
   // Buttons on the right (modal) or the left (card in a page).
   footer?: "start" | "end";
   // Below the fields, above the buttons (a deal call's agenda, folded).
@@ -124,7 +125,7 @@ export function CallPlanForm({
   );
 
   useEffect(() => {
-    if (state?.ok && state.id) onSaved?.(state.id);
+    if (state?.ok && state.id) onSaved?.(state.id, state.meetFailed === true);
     // onSaved changes with each render of the parent; the result is what counts.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);

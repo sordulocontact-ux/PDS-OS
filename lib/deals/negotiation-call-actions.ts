@@ -47,16 +47,17 @@ const targetSchema = z.object({
 const field = (form: FormData, key: string) =>
   String(form.get(key) ?? "").trim() || undefined;
 
-/** The Meet event of the call, inviting its negotiator and guests (never
- * whoever planned it: she is not in the call). A refusal keeps the call. */
+/** The Meet event of the call, inviting whoever planned it (she runs the
+ * call, Sacha 21/11/2026), its negotiator and guests. A refusal keeps the
+ * call and is said (false). */
 async function attachMeet(input: {
   callId: string;
   title: string;
   slot: { start: Date; end: Date };
-  negotiatorId: string | null;
+  memberIds: string[];
   guests: Awaited<ReturnType<typeof resolveGuests>>;
-}): Promise<void> {
-  if (!input.guests.ok) return;
+}): Promise<boolean> {
+  if (!input.guests.ok) return false;
   const supabase = await createClient();
   try {
     const event = await createMeetEvent({
@@ -67,7 +68,7 @@ async function attachMeet(input: {
       end: input.slot.end,
       guests: await eventGuestsOf(
         supabase,
-        input.negotiatorId ? [input.negotiatorId] : [],
+        input.memberIds,
         input.guests.guests,
       ),
     });
@@ -80,8 +81,10 @@ async function attachMeet(input: {
     await turnOnAutoTranscription(event.meetUrl).catch((e: unknown) =>
       console.warn("[deals] meet auto transcription not turned on:", e),
     );
+    return true;
   } catch (error) {
     console.error("[deals] negotiation call meet failed:", error);
+    return false;
   }
 }
 
@@ -163,19 +166,26 @@ export async function planNegotiationCall(
   const planned = call?.deal_id
     ? (deal ?? (await loadDeal(access, call.deal_id)))
     : null;
-  if (google)
-    await attachMeet({
+  const negotiatorId = planned?.assignee?.id ?? assigneeId ?? null;
+  const meetFailed =
+    google &&
+    !(await attachMeet({
       callId,
       title,
       slot: slot.slot,
-      negotiatorId: planned?.assignee?.id ?? assigneeId ?? null,
+      memberIds: [
+        ...(access.personId ? [access.personId] : []),
+        ...(negotiatorId && negotiatorId !== access.personId
+          ? [negotiatorId]
+          : []),
+      ],
       guests,
-    });
+    }));
   // Giving the deal notifies its negotiator (deal_assigned).
   await schedulePendingPushes();
   if (planned) revalidatePath(routes.deal(planned.id));
   revalidatePath(routes.deals);
-  return { ok: true, id: callId };
+  return { ok: true, id: callId, meetFailed };
 }
 
 /** The free slots of a business manager in one month, read when « Caler le

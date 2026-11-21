@@ -1,7 +1,7 @@
 import { CallHeader } from "@/components/calls/call-header";
 import { CallWorkspace } from "@/components/calls/call-workspace";
 import { EditAccessProvider } from "@/components/projects/edit-access";
-import { can, type Access } from "@/lib/auth/access";
+import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { callDeleter, canDeleteCall } from "@/lib/calls/delete-rule";
@@ -19,7 +19,6 @@ import {
 import { loadMembers } from "@/lib/framing/related";
 import { dealName } from "@/lib/deals/names";
 import { loadDeal } from "@/lib/deals/queries";
-import { isClosedStage, type Deal } from "@/lib/deals/types";
 import { calls } from "@/lib/i18n/fr/calls";
 import { canEditProject } from "@/lib/projects/edit-access";
 import type { ProjectDetail } from "@/lib/projects/types";
@@ -95,11 +94,12 @@ export async function CallPage({
   const supabase = await createClient();
   const deal = call.dealId ? await loadDeal(access, call.dealId) : null;
   const canEdit = deal
-    ? deal.canWrite
+    ? deal.canWrite ||
+      deal.ownsProject ||
+      (access.personId !== null && call.createdBy === access.personId)
     : project
       ? canEditProject(access, project)
       : access.personId !== null && call.createdBy === access.personId;
-  const canArrange = canArrangeCall(access, call, deal, canEdit);
   const [transcript, report, audioUrls, members, taskProjects, deliverableId] =
     await Promise.all([
       loadLatestTranscript(supabase, call.id),
@@ -139,7 +139,7 @@ export async function CallPage({
           organizer={organizer}
           upcoming={isUpcoming(call, now)}
           closed={data.closures.length > 0}
-          reschedulable={canArrange && !call.audioPath}
+          reschedulable={canEdit && !call.audioPath}
           deletable={canDeleteCall(callDeleter(access), {
             ownerPersonId: project
               ? project.ownerPersonId
@@ -150,7 +150,6 @@ export async function CallPage({
       transcript={transcript}
       audioUrls={audioUrls}
       canEdit={canEdit}
-      canArrange={canArrange}
       where={deal ? dealName(deal) : (project?.title ?? fr.calls.all.internal)}
       organizer={organizer}
       module={
@@ -176,23 +175,5 @@ export async function CallPage({
     page
   ) : (
     <EditAccessProvider canEdit={canEdit}>{page}</EditAccessProvider>
-  );
-}
-
-/** Who arranges a call — its slot, people, agenda, link (can_arrange_call
- * decides again): whoever works on it, and whoever planned a deal's call
- * (« Caler le call ») while the deal is open (Sacha 21/11/2026). */
-function canArrangeCall(
-  access: Access,
-  call: CallDetail,
-  deal: Deal | null,
-  canEdit: boolean,
-): boolean {
-  if (canEdit) return true;
-  return (
-    deal !== null &&
-    !isClosedStage(deal.stage) &&
-    access.personId !== null &&
-    call.createdBy === access.personId
   );
 }

@@ -94,8 +94,9 @@ export function NegotiationCallButton({
               pendingLabel={t.pending}
               cancelLabel={t.back}
               onCancel={() => setSlot(null)}
-              onSaved={() => {
-                toast.success(t.done);
+              onSaved={(_id, meetFailed) => {
+                if (meetFailed) toast.warning(t.meetFailed);
+                else toast.success(t.done);
                 close();
               }}
               extra={

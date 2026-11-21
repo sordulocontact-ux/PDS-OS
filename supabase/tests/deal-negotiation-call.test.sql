@@ -6,7 +6,7 @@
 -- owner is told when the accord is validated.
 -- Run with `supabase test db`.
 begin;
-select plan(43);
+select plan(42);
 
 -- Fixtures (as deal-calls.test.sql) ------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -133,8 +133,8 @@ select is((select count(*)::int from public.deal_events
             where deal_id = pg_temp.id_of('d1') and kind = 'stage' and to_stage = 'call_planned'
               and detail ->> 'call' = pg_temp.id_of('k1')::text),
   1, 'its journal says which call');
-select ok(not public.is_call_owner(pg_temp.id_of('k1')),
-  'she does not record or process it (she is not in the call)');
+select ok(public.is_call_owner(pg_temp.id_of('k1')),
+  'she runs the call she planned: records and processes it (Sacha 21/11/2026)');
 select ok(not exists (select 1 from public.negotiator_free_slots(pg_temp.id_of('glen_person'))
                        where starts_at = (select v::timestamptz from vars where k = 'slot')),
   'the slot taken is no longer free');
@@ -166,8 +166,6 @@ update public.calls set agenda = '[{"topic": "Avance", "minutes": 10}]'::jsonb, 
  where id = pg_temp.id_of('k1');
 select is((select title from public.calls where id = pg_temp.id_of('k1')), 'Call · Nadia (2)',
   'she changes its name and agenda');
-select throws_ok($$ update public.calls set status = 'transcribed' where id = pg_temp.id_of('k1') $$,
-  '42501', 'forbidden', 'never its recording or processing');
 reset role;
 
 select pg_temp.act_as(pg_temp.id_of('glen'));

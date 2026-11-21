@@ -119,6 +119,7 @@ async function withContext(access: Access, rows: Row[]): Promise<Deal[]> {
               r.assignee_person_id === me &&
               can(access, "negotiate"))),
         canAssign: open && (director || owner),
+        ownsProject: owner,
         canDecide:
           director &&
           r.stage === "agreement" &&

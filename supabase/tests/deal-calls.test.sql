@@ -139,13 +139,14 @@ reset role;
 select pg_temp.act_as(pg_temp.id_of('owner'));
 select is((select count(*)::int from public.calls where id = pg_temp.id_of('k1')), 1,
   'the project''s owner reads the call (he reads the deal)');
-select ok(not public.is_call_owner(pg_temp.id_of('k1')), 'but does not work on it');
+select ok(public.is_call_owner(pg_temp.id_of('k1')),
+  'and runs it: she makes the meeting (Sacha 21/11/2026)');
 select is((select count(*)::int from public.calls
             where project_id = pg_temp.id_of('c1') and id = pg_temp.id_of('k1')), 0,
   'the deal''s call is not among the project''s calls');
-select throws_ok($$ insert into public.transcripts (organization_id, call_id, text, provider, model)
+select lives_ok($$ insert into public.transcripts (organization_id, call_id, text, provider, model)
   values (pg_temp.id_of('org'), pg_temp.id_of('k1'), 'x', 'test', 'test') $$,
-  '42501', null, 'nor writes its transcript');
+  'and writes its transcript');
 reset role;
 select pg_temp.act_as(pg_temp.id_of('other_pm'));
 select is((select count(*)::int from public.calls where id = pg_temp.id_of('k1')), 0,
