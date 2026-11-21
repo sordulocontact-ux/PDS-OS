@@ -136,9 +136,11 @@ export function DealNow({
   // The project's owner calls the negotiation, never writes it (Ibé
   // 18/11/2026): her gesture until the accord. A call already planned: no
   // gesture, no frame (Sacha 21/11/2026: « cette frame ne sert à rien »), the
-  // call's card is in « Prochaine action »; once held, the button comes back.
+  // call's card is in « Prochaine action ». Held while the deal is still
+  // « Call prévu »: the negotiator starts the negotiation, nothing to plan.
+  // In negotiation, the button comes back for the next call.
   if (deal.canPlanCall && planCall)
-    return nextCall ? null : (
+    return nextCall || (callHeld && deal.stage === "call_planned") ? null : (
       <NowFrame label={t.now}>
         <h2 className={heading}>
           {t.planCall.title(deal.assignee?.name ?? null)}
