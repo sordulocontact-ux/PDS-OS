@@ -117,12 +117,13 @@ export function DataTableHead({
   );
 }
 
-// A hairline between rows, none under the last (the frame closes it). On the
+// A hairline between rows, none under the last (the frame closes it); on a
+// merged <th scope="rowgroup"> too (« Titres et artistes »). On the
 // cells: the shadcn body strips every border of its last row, the one above
 // it included.
 export function DataTableBody({ children }: { children: React.ReactNode }) {
   return (
-    <TableBody className="[&>tr+tr>td]:border-t [&>tr+tr>td]:border-[color:var(--border-hairline)] in-[.section-card_.table-flat]:[&>tr+tr>td]:border-transparent">
+    <TableBody className="[&>tr+tr>:is(td,th)]:border-t [&>tr+tr>:is(td,th)]:border-[color:var(--border-hairline)] in-[.section-card_.table-flat]:[&>tr+tr>:is(td,th)]:border-transparent">
       {children}
     </TableBody>
   );

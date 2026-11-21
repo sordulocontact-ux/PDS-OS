@@ -119,8 +119,9 @@ export type BoardLinks = {
 
 /** Which artists' columns the table has: Artiste and Statut always; Accord
  * when the reader sees deals (dealReach, lot 6); Juridique with
- * manage_legal. */
-type Columns = { accord: boolean; legal: boolean };
+ * manage_legal; « ⋯ » of the artists for whoever writes the titles (none
+ * for a reader: no empty column on the right). */
+type Columns = { accord: boolean; legal: boolean; actions: boolean };
 
 // The artists' columns at full width (Artiste, Statut, Accord, Juridique).
 const dataColumnCount = (columns: Columns) =>
@@ -230,25 +231,35 @@ const TITLE_CELL = "whitespace-normal align-top bg-[var(--surface-soft)]";
 // A row of the board. Not DataTableRow: no link covers a row here (the
 // title's cell, in the first row of its group, spans the others, which a
 // covering link would lie over), so nothing lights up under the pointer and
-// no row is made a containing block. No hairline at the top of a group's
-// first artist row (`data-lead`): the title's own row above it is hidden
-// from 624 px, and under it the soft ground already sets it apart.
+// no row is made a containing block. Every title in one body: the table's
+// own hairline (DataTableBody) sets two titles apart, at the top of a
+// group's first artist row (`data-lead`) from 624 px, where the title's own
+// row above it is hidden; under 624 px that row carries it and the first
+// artist row has none (the soft ground of the title already sets it apart).
+// None under the header (`data-first`).
 const ROW = cn(
-  "border-0 hover:bg-transparent has-aria-expanded:bg-transparent [&[data-lead]>td]:border-t-0",
+  "border-0 hover:bg-transparent has-aria-expanded:bg-transparent @max-[624px]:[&[data-lead]>*]:border-t-0 [&[data-first]>*]:border-t-0",
   ROW_INSET,
 );
 
 function Row({
   lead = false,
+  first = false,
   className,
   children,
 }: {
   lead?: boolean;
+  // The first title's first artist row: no hairline under the header.
+  first?: boolean;
   className?: string;
   children: ReactNode;
 }) {
   return (
-    <TableRow data-lead={lead ? "" : undefined} className={cn(ROW, className)}>
+    <TableRow
+      data-lead={lead ? "" : undefined}
+      data-first={lead && first ? "" : undefined}
+      className={cn(ROW, className)}
+    >
       {children}
     </TableRow>
   );
@@ -273,18 +284,6 @@ function StackedFact({
       <span className={caption}>{label}</span>
       {children}
     </span>
-  );
-}
-
-/** Space between two titles: their groups apart without a rule
- * (no-dividers), the table kept as one so that its columns stay aligned. */
-function GroupGap({ columns }: { columns: number }) {
-  return (
-    <tbody aria-hidden>
-      <tr>
-        <td colSpan={columns} className="h-3 p-0" />
-      </tr>
-    </tbody>
   );
 }
 
@@ -341,10 +340,11 @@ export function TitlesBoard({
   const columns: Columns = {
     accord: recap.dealReach !== "none",
     legal: recap.canReadLegal,
+    actions: canManage,
   };
-  // Every column, hidden ones included (a gap or a group row spans them):
-  // the title's, the artists', « ⋯ ».
-  const allColumns = dataColumnCount(columns) + 2;
+  // Every column, hidden ones included (a group row spans them): the
+  // title's, the artists', « ⋯ » when there is one.
+  const allColumns = dataColumnCount(columns) + 1 + Number(columns.actions);
 
   // The counters filter the artists; a title stays while one of its
   // artists does (titles abandoned are out of the counts, so of the
@@ -395,11 +395,11 @@ export function TitlesBoard({
     );
 
   const total = CONTACT_STATES.reduce((sum, s) => sum + recap.counts[s], 0);
-  const rows = (list: typeof groups) =>
-    list.map(({ title, participations }) => (
+  const rows = (list: typeof groups, first: boolean) =>
+    list.map(({ title, participations }, index) => (
       <Fragment key={title.id}>
-        <GroupGap columns={allColumns} />
         <TitleGroup
+          first={first && index === 0}
           projectId={projectId}
           title={title}
           participations={participations}
@@ -473,25 +473,24 @@ export function TitlesBoard({
                   {r.columns.legal}
                 </DataTableHead>
               )}
-              <DataTableActionsHead label={t.columns.actions} />
+              {columns.actions && (
+                <DataTableActionsHead label={t.columns.actions} />
+              )}
             </DataTableHeader>
-            {rows(live)}
-            {abandoned.length > 0 && (
-              <>
-                <GroupGap columns={allColumns} />
-                <DataTableBody>
-                  <DataTableGroupRow columns={allColumns}>
-                    <span className="text-[length:var(--type-body-md)] font-semibold">
-                      {t.abandonedGroup}
-                      <span className="ml-1.5 font-medium text-[color:var(--text-tertiary)]">
-                        {abandoned.length}
-                      </span>
+            <DataTableBody>
+              {rows(live, true)}
+              {abandoned.length > 0 && (
+                <DataTableGroupRow columns={allColumns}>
+                  <span className="text-[length:var(--type-body-md)] font-semibold">
+                    {t.abandonedGroup}
+                    <span className="ml-1.5 font-medium text-[color:var(--text-tertiary)]">
+                      {abandoned.length}
                     </span>
-                  </DataTableGroupRow>
-                </DataTableBody>
-              </>
-            )}
-            {rows(abandoned)}
+                  </span>
+                </DataTableGroupRow>
+              )}
+              {rows(abandoned, live.length === 0)}
+            </DataTableBody>
           </DataTable>
         </div>
       )}
@@ -516,9 +515,11 @@ type GroupProps = {
   masterOptions: Record<string, string>;
   links: BoardLinks;
   today: string;
+  // The table's first title (no hairline under the header).
+  first: boolean;
 };
 
-/** A title's group, its own <tbody>: the title's cell (a <th> over the
+/** A title's group, its rows in the board's body: the title's cell (a <th> over the
  * group, `rowgroup`) in its first row, spanning its artists' rows, or «
  * Aucun artiste invité » (with « Ajouter un artiste » for whoever writes).
  * Under 624 px the same cell on a row of its own above them. Holds the
@@ -610,10 +611,14 @@ function TitleGroup(props: GroupProps) {
   );
 
   return (
-    <DataTableBody>
+    <>
       <Row className={TIER.stacked}>
-        {/* Across the table's two columns there (Artiste, « ⋯ »). */}
-        <DataTableCell scope="rowgroup" colSpan={2} className={TITLE_CELL}>
+        {/* Across the table's columns there (Artiste, « ⋯ » if any). */}
+        <DataTableCell
+          scope="rowgroup"
+          colSpan={columns.actions ? 2 : 1}
+          className={TITLE_CELL}
+        >
           {block}
         </DataTableCell>
       </Row>
@@ -623,6 +628,7 @@ function TitleGroup(props: GroupProps) {
           projectId={projectId}
           participation={participation}
           titleCell={index === 0 ? titleCell : null}
+          first={props.first}
           label={label}
           credit={credit}
           columns={columns}
@@ -642,7 +648,7 @@ function TitleGroup(props: GroupProps) {
         />
       ))}
       {participations.length === 0 && (
-        <Row lead>
+        <Row lead first={props.first}>
           {titleCell}
           {/* Over the artists' columns shown at each tier (TIER): 1 under
               624 px, Artiste and Statut to 976, then all of them. */}
@@ -661,10 +667,12 @@ function TitleGroup(props: GroupProps) {
           >
             {noArtist}
           </DataTableCell>
-          <DataTableActionsCell>{null}</DataTableActionsCell>
+          {columns.actions && (
+            <DataTableActionsCell>{null}</DataTableActionsCell>
+          )}
         </Row>
       )}
-    </DataTableBody>
+    </>
   );
 }
 
@@ -857,6 +865,7 @@ function ParticipationRow({
   projectId,
   participation,
   titleCell,
+  first,
   label,
   credit,
   columns,
@@ -870,6 +879,7 @@ function ParticipationRow({
   projectId: string;
   participation: RecapParticipation;
   titleCell: ReactNode;
+  first: boolean;
   label: string;
   credit: Credit;
   columns: Columns;
@@ -906,7 +916,7 @@ function ParticipationRow({
   );
 
   return (
-    <Row lead={titleCell !== null}>
+    <Row lead={titleCell !== null} first={first}>
       {titleCell}
       <DataTableCell fill className={ARTIST_CELL}>
         <span className="flex min-w-0 flex-col gap-0.5">
@@ -998,16 +1008,18 @@ function ParticipationRow({
           {legal(false)}
         </DataTableCell>
       )}
-      <DataTableActionsCell>
-        {canManage && (
-          <ParticipationActions
-            projectId={projectId}
-            participation={participation}
-            label={label}
-            credit={credit}
-          />
-        )}
-      </DataTableActionsCell>
+      {columns.actions && (
+        <DataTableActionsCell>
+          {canManage && (
+            <ParticipationActions
+              projectId={projectId}
+              participation={participation}
+              label={label}
+              credit={credit}
+            />
+          )}
+        </DataTableActionsCell>
+      )}
     </Row>
   );
 }
