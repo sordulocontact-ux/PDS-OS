@@ -76,10 +76,14 @@ export async function updateArtist(
     .select("id")
     .maybeSingle();
 
-  if (error?.code === UNIQUE_VIOLATION) {
+  // `artist_name_taken`: the database's guard on a normalized name.
+  if (
+    error?.code === UNIQUE_VIOLATION ||
+    error?.message.includes("artist_name_taken")
+  ) {
     return {
       status: "error",
-      fieldErrors: { name: fr.catalog.artistForm.duplicate },
+      fieldErrors: { name: fr.catalog.artistForm.nameTaken(name) },
       values: retainedValues(formData),
     };
   }

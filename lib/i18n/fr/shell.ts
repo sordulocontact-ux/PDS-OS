@@ -382,12 +382,8 @@ export const shell = {
       // The guests named in the form (test UX du 12/11/2026: a collective
       // was created without them), beside or instead of a selection.
       guestsField: "Artistes invités",
-      guestsSearch: "Ajouter un artiste invité",
-      guestsPlaceholder: "Rechercher un artiste…",
-      guestsNoResult: (query: string) =>
-        `Aucun artiste ne s'appelle « ${query} ».`,
-      guestsAllSelected: "Tous les artistes sont déjà invités.",
-      guestRemove: (name: string) => `Retirer ${name}`,
+      guestAlready: (name: string) => `${name} est déjà invité.`,
+      guestIsMain: (name: string) => `${name} est l'artiste principal.`,
       guestsFieldHint:
         "Chacun reçoit un titre sans nom et une participation proposée : sa négociation s'ouvre ensuite depuis Deals.",
     },

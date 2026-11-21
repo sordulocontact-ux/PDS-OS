@@ -177,6 +177,8 @@ export function CollectiveGuestsField({
         value={value.filter((a) => a.id !== mainArtistId)}
         onChange={onChange}
         legend={t.guestsField}
+        chosenNote={t.guestAlready}
+        excludedNote={t.guestIsMain}
         hint={t.guestsFieldHint}
         error={error}
       />

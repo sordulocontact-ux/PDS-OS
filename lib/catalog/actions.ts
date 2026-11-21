@@ -74,6 +74,18 @@ export async function createArtist(
     .select("id, name")
     .single();
 
+  // `artist_name_taken`: the guard of the database (a name, normalized, that
+  // the organization already holds); `artists_org_name_key`: the same, raw.
+  if (error?.message.includes("artist_name_taken")) {
+    return {
+      status: "error",
+      fieldErrors: {
+        name: fr.catalog.artistForm.nameTaken(parsed.data.name),
+      },
+      values: retainedValues(formData),
+      existing: (await findArtistByName(parsed.data.name)) ?? undefined,
+    };
+  }
   if (error?.code === UNIQUE_VIOLATION) {
     const sameDeezer = error.message.includes("artists_org_deezer_key");
     const existing =
@@ -85,7 +97,7 @@ export async function createArtist(
       fieldErrors: {
         name: sameDeezer
           ? fr.catalog.artistForm.deezerDuplicate
-          : fr.catalog.artistForm.duplicate,
+          : fr.catalog.artistForm.nameTaken(parsed.data.name),
       },
       values: retainedValues(formData),
       existing: existing ?? undefined,
