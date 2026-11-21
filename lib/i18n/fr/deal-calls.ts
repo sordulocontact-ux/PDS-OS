@@ -43,8 +43,6 @@ export const dealCalls = {
     other: "Autre horaire",
     back: "Autres créneaux",
     titlePlaceholder: "Call avec le manager",
-    participantsHint:
-      "Le manager ou le producteur de l'artiste, du Réseau ou par e-mail.",
     submit: "Caler le call",
     pending: "Calage…",
     done: "Call calé",

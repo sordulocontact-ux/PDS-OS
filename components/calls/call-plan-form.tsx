@@ -79,7 +79,7 @@ export function CallPlanForm({
   memberDetail: string;
   defaultMemberIds: string[];
   contacts: CallContact[];
-  participantsHint: string;
+  participantsHint?: string;
   googleMeet: boolean;
   defaultUrl?: string;
   submitLabel: string;

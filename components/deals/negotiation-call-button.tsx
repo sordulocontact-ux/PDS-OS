@@ -85,7 +85,6 @@ export function NegotiationCallButton({
               memberDetail=""
               defaultMemberIds={[]}
               contacts={data.contacts}
-              participantsHint={t.participantsHint}
               googleMeet={data.googleMeet}
               submitLabel={t.submit}
               pendingLabel={t.pending}
