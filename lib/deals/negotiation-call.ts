@@ -2,6 +2,7 @@ import "server-only";
 
 import {
   loadNegotiatorFreeDays,
+  monthEnd,
   type FreeDay,
 } from "@/lib/calendar/free-slots";
 import { loadCallContacts, type CallContact } from "@/lib/calls/invite";
@@ -13,8 +14,10 @@ import {
 import { dealName } from "@/lib/deals/names";
 import type { DealTerm } from "@/lib/deals/terms";
 import type { Deal } from "@/lib/deals/types";
+import { todayInParis } from "@/lib/insights/dates";
 import { googleMeetConfigured } from "@/lib/integrations/google-calendar";
 import { personName } from "@/lib/projects/types";
+import { addMonths, monthOf } from "@/lib/utils/date-input";
 import { createClient } from "@/lib/supabase/server";
 
 /** A member who may hold the call, with his free slots. */
@@ -44,10 +47,15 @@ export type NegotiationCallData = {
 async function withSlots(
   people: { id: string; name: string }[],
 ): Promise<CallNegotiator[]> {
+  const today = todayInParis();
   return Promise.all(
     people.map(async (p) => ({
       ...p,
-      ...(await loadNegotiatorFreeDays(p.id)),
+      // This month and the next; the calendar reads the others when shown.
+      ...(await loadNegotiatorFreeDays(p.id, {
+        from: today,
+        to: monthEnd(addMonths(monthOf(today), 1)),
+      })),
     })),
   );
 }

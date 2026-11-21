@@ -4,6 +4,11 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { getAccess } from "@/lib/auth/dal";
+import {
+  loadNegotiatorFreeDays,
+  monthEnd,
+  type FreeDay,
+} from "@/lib/calendar/free-slots";
 import { routes } from "@/lib/auth/redirects";
 import type { ActionResult, CallErrorCode } from "@/lib/calls/constants";
 import { meetingUrlSchema } from "@/lib/calls/plan-call";
@@ -171,4 +176,23 @@ export async function planNegotiationCall(
   if (planned) revalidatePath(routes.deal(planned.id));
   revalidatePath(routes.deals);
   return { ok: true, id: callId };
+}
+
+/** The free slots of a business manager in one month, read when « Caler le
+ * call »'s calendar shows it (up to five years ahead, Sacha 21/11/2026);
+ * the database decides who may read them (negotiator_free_slots). */
+export async function negotiatorFreeMonth(
+  personId: string,
+  month: string,
+): Promise<{ days: FreeDay[]; error: boolean }> {
+  const access = await getAccess();
+  const input = z
+    .object({ personId: z.uuid(), month: z.string().regex(/^\d{4}-\d{2}-01$/) })
+    .safeParse({ personId, month });
+  if (access.state !== "approved" || !input.success)
+    return { days: [], error: true };
+  return loadNegotiatorFreeDays(input.data.personId, {
+    from: input.data.month,
+    to: monthEnd(input.data.month),
+  });
 }

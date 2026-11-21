@@ -2,6 +2,7 @@ import "server-only";
 
 import { toParisLocalInput } from "@/lib/calls/format";
 import { createClient } from "@/lib/supabase/server";
+import { addDays, addMonths } from "@/lib/utils/date-input";
 import { formatDay } from "@/lib/utils/day";
 
 // The working day of the slots, its end in Paris (« HH:mm »).
@@ -14,10 +15,14 @@ export type FreeSlot = { local: string; end: string; label: string };
 /** The free slots of one day, « Lun. 23/11/2026 ». */
 export type FreeDay = { day: string; label: string; slots: FreeSlot[] };
 
+/** The last day of the month of `month` ("YYYY-MM-01"). */
+export const monthEnd = (month: string) => addDays(addMonths(month, 1), -1);
+
 /**
  * The free slots of a member who negotiates, for whoever plans his calls
  * (Ibé 18/11/2026: « aller voir les dispos du business manager sur son
- * agenda »): the next working days, on the hour from 10:00 to 18:00 Paris,
+ * agenda »): the working days of a period (two months at most, up to five
+ * years ahead, Sacha 21/11/2026), on the hour from 10:00 to 18:00 Paris,
  * minus the calls PDS OS knows he is in. Computed by the database
  * (negotiator_free_slots): only the free slots leave it, never what fills
  * the others. His Google agenda is not read (docs/ARCHITECTURE.md § 4
@@ -25,10 +30,13 @@ export type FreeDay = { day: string; label: string; slots: FreeSlot[] };
  */
 export async function loadNegotiatorFreeDays(
   personId: string,
+  period: { from: string; to: string },
 ): Promise<{ days: FreeDay[]; error: boolean }> {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("negotiator_free_slots", {
     p_person_id: personId,
+    p_from: period.from,
+    p_to: period.to,
   });
   if (error) {
     console.error("loadNegotiatorFreeDays:", error.message);

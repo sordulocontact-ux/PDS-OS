@@ -6,7 +6,7 @@
 -- owner is told when the accord is validated.
 -- Run with `supabase test db`.
 begin;
-select plan(29);
+select plan(32);
 
 -- Fixtures (as deal-calls.test.sql) ------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -96,6 +96,16 @@ select is((select count(*)::int from public.negotiator_free_slots(pg_temp.id_of(
   0, 'only slots to come, on working days');
 insert into vars select 'slot', min(starts_at)::text
   from public.negotiator_free_slots(pg_temp.id_of('glen_person'));
+select ok((select count(*) from public.negotiator_free_slots(pg_temp.id_of('glen_person'),
+             (current_date + interval '4 years')::date, (current_date + interval '4 years 1 month')::date)) > 0,
+  'any month up to five years ahead has its free slots');
+select is((select count(*)::int from public.negotiator_free_slots(pg_temp.id_of('glen_person'),
+             (current_date + interval '6 years')::date, (current_date + interval '6 years 1 month')::date)),
+  0, 'nothing beyond five years');
+select is((select count(*)::int from public.negotiator_free_slots(pg_temp.id_of('glen_person'),
+             current_date, (current_date + interval '1 year')::date)
+            where starts_at > now() + interval '63 days'),
+  0, 'two months at most a call');
 select throws_ok($$ select * from public.negotiator_free_slots(pg_temp.id_of('creative_person')) $$,
   '42501', null, 'never the slots of a member who does not negotiate');
 reset role;

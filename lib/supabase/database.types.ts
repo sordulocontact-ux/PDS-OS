@@ -23087,9 +23087,14 @@ export type Database = {
           title_position: number
         }[]
       }
-      // 20261120140101_deal_negotiation_call.sql (added by hand).
+      // 20261121100101_negotiator_free_slots_any_month.sql (added by hand).
       negotiator_free_slots: {
-        Args: { p_days?: number; p_minutes?: number; p_person_id: string }
+        Args: {
+          p_from?: string
+          p_minutes?: number
+          p_person_id: string
+          p_to?: string
+        }
         Returns: { ends_at: string; starts_at: string }[]
       }
       participation_deal_state: {

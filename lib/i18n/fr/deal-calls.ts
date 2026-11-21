@@ -32,7 +32,7 @@ export const dealCalls = {
     noNegotiator:
       "Aucun membre ne négocie : la direction donne le poste de business manager dans Équipe.",
     slotsTitle: (who: string) => `Créneaux libres de ${who}`,
-    slotsNone: "Aucun créneau libre ces prochains jours.",
+    slotsNone: "Aucun créneau libre ce mois-ci.",
     slotsError: "Ses créneaux n'ont pas pu être lus.",
     slotsOf: (day: string) => `Créneaux du ${day}`,
     slot: (day: string, hour: string) => `${day} à ${hour}`,

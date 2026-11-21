@@ -8176,8 +8176,10 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   « Call prévu » (journal `stage`, `detail.call`). Erreurs : `negotiator_required`, `negotiator_changed`,
   `negotiation_call_music_only`, `negotiation_call_too_late`, `invalid_slot`, `link_invalid`, `title_required`.
   `set_deal_negotiation_call_link` : le lien Meet donné par Google, écrit une fois par qui a calé le call. Créneaux :
-  `negotiator_free_slots(p_person_id, p_days = 5, p_minutes = 30)` pour qui a `pilot_projects` ou `validate`, sur un
-  membre qui a `negotiate` : les prochains jours ouvrés, à l'heure de 10 h à 18 h (Paris), moins les calls que PDS OS
+  `negotiator_free_slots(p_person_id, p_from, p_to, p_minutes = 30)` (migration `20261121100101`) pour qui a
+  `pilot_projects` ou `validate`, sur un membre qui a `negotiate` : les jours ouvrés de la période (deux mois au plus
+  par appel, jusqu'à 5 ans, Sacha 21/11/2026 ; la page lit ce mois et le suivant, le calendrier lit chaque autre mois
+  quand il l'affiche par `negotiatorFreeMonth`), à l'heure de 10 h à 18 h (Paris), moins les calls que PDS OS
   lui connaît (calls de ses deals, calls qu'il a créés ou où il est invité) ; **seuls les créneaux libres sortent de la
   base**. **Son agenda Google n'est pas lu** (§ 4 quater : la clé du domaine ne lit que l'adresse du membre connecté ;
   piste : `calendar.freebusy` sur le jeton de po@, à ajouter au nouveau jeton à faire avec Ibé). Jours fériés non
