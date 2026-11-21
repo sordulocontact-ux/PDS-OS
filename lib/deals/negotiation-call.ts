@@ -44,7 +44,9 @@ export type NegotiationCallData = {
   topics: string[];
 };
 
-async function withSlots(
+/** Members who may hold a call, with their free slots (this month and the
+ * next). */
+export async function withSlots(
   people: { id: string; name: string }[],
 ): Promise<CallNegotiator[]> {
   const today = todayInParis();

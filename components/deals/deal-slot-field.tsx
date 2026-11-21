@@ -2,13 +2,18 @@
 
 import { useState, useTransition } from "react";
 
+import { FieldError } from "@/components/auth/form-message";
+import {
+  CallSlotFields,
+  type SlotErrors,
+} from "@/components/calls/call-slot-fields";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { ChipChoice } from "@/components/ui/chip-choice";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import type { FreeDay, FreeSlot } from "@/lib/calendar/free-slots";
+import type { SlotInput } from "@/lib/calls/slot";
 import type { CallNegotiator } from "@/lib/deals/negotiation-call";
 import { negotiatorFreeMonth } from "@/lib/deals/negotiation-call-actions";
 import { todayInParis } from "@/lib/insights/dates";
@@ -33,14 +38,17 @@ const capitalize = (text: string) =>
  * day's hours in a column on the right; on a phone, one under the other.
  * Up to five years ahead: a month not yet read is read when shown
  * (negotiatorFreeMonth). */
-function DaySlots({
+function FreeSlotPicker({
   personId,
   initial,
+  selected,
   onPick,
 }: {
   personId: string;
   // This month and the next, read by the server.
   initial: FreeDay[];
+  // The slot picked ("YYYY-MM-DDTHH:mm"), shown pressed.
+  selected: string | null;
   onPick: (slot: FreeSlot) => void;
 }) {
   const t = fr.dealCalls.negotiation;
@@ -50,8 +58,9 @@ function DaySlots({
     () => new Set([monthOf(today), addMonths(monthOf(today), 1)]),
   );
   const [failed, setFailed] = useState(false);
-  const [chosen, setChosen] = useState<string | null>(initial[0]?.day ?? null);
-  const [month, setMonth] = useState(monthOf(initial[0]?.day ?? today));
+  const first = selected?.slice(0, 10) ?? initial[0]?.day ?? null;
+  const [chosen, setChosen] = useState<string | null>(first);
+  const [month, setMonth] = useState(monthOf(first ?? today));
   const [pending, startTransition] = useTransition();
 
   const show = (next: string) => {
@@ -113,7 +122,8 @@ function DaySlots({
               <li key={slot.local}>
                 <Button
                   type="button"
-                  variant="outline"
+                  variant={slot.local === selected ? "default" : "outline"}
+                  aria-pressed={slot.local === selected}
                   aria-label={t.slot(day.label, slot.label)}
                   onClick={() => onPick(slot)}
                   className="w-full tabular-nums"
@@ -130,64 +140,87 @@ function DaySlots({
 }
 
 /**
- * The first step of « Caler le call »: who holds it (when the deal has no
- * negotiator yet), then his free slots as in Calendly (DaySlots), each
- * a button that opens the call form on it; « Autre horaire » opens it empty.
+ * The slot of a deal's call, in the call form (Sacha 21/11/2026: « les
+ * dispos direct ici »): the business manager's free slots as in Calendly in
+ * place of the day and times; « Autre horaire » gives the fields back for a
+ * slot of one's own. His slots unreadable: the fields, and why.
  */
-export function NegotiationCallSlots({
-  negotiators,
-  fixed,
-  who,
-  onWho,
-  onPick,
+export function DealSlotField({
+  idPrefix,
+  negotiator,
+  slot,
+  onChange,
+  errors,
 }: {
-  negotiators: CallNegotiator[];
-  fixed: boolean;
-  who: string | null;
-  onWho: (id: string | null) => void;
-  onPick: (slot: FreeSlot | "other") => void;
+  idPrefix: string;
+  negotiator: CallNegotiator;
+  slot: SlotInput;
+  onChange: (slot: SlotInput) => void;
+  errors: SlotErrors;
 }) {
   const t = fr.dealCalls.negotiation;
-  if (negotiators.length === 0) return <EmptyNote>{t.noNegotiator}</EmptyNote>;
-  const negotiator = negotiators.find((n) => n.id === who) ?? null;
-  return (
-    <div className="flex flex-col gap-6">
-      {!fixed && negotiators.length > 1 && (
-        <ChipChoice
-          name="negotiator"
-          legend={t.who}
-          required
-          options={negotiators.map((n) => ({ value: n.id, label: n.name }))}
-          value={who}
-          onChange={onWho}
+  const [manual, setManual] = useState(negotiator.error);
+  const missing = errors.date ?? errors.start ?? errors.end;
+  if (manual)
+    return (
+      <div className="flex flex-col gap-3">
+        {negotiator.error && (
+          <ToneCallout tone="warning">{t.slotsError}</ToneCallout>
+        )}
+        <CallSlotFields
+          idPrefix={idPrefix}
+          slot={slot}
+          onChange={onChange}
+          errors={errors}
         />
-      )}
-      {negotiator && (
-        <section
-          aria-label={t.slotsTitle(negotiator.name)}
-          className="flex flex-col gap-4"
-        >
-          {negotiator.error ? (
-            <ToneCallout tone="warning">{t.slotsError}</ToneCallout>
-          ) : (
-            <DaySlots
-              key={negotiator.id}
-              personId={negotiator.id}
-              initial={negotiator.days}
-              onPick={onPick}
-            />
-          )}
+        {!negotiator.error && (
           <div>
             <Button
               type="button"
               variant="outline"
-              onClick={() => onPick("other")}
+              size="sm"
+              onClick={() => setManual(false)}
             >
-              {t.other}
+              {t.back}
             </Button>
           </div>
-        </section>
+        )}
+      </div>
+    );
+  const selected =
+    slot.date && slot.start ? `${slot.date}T${slot.start}` : null;
+  return (
+    <fieldset
+      aria-label={t.slotsTitle(negotiator.name)}
+      aria-invalid={missing ? true : undefined}
+      tabIndex={-1}
+      className="flex flex-col gap-3 outline-none"
+    >
+      <FreeSlotPicker
+        personId={negotiator.id}
+        initial={negotiator.days}
+        selected={selected}
+        onPick={(picked) =>
+          onChange({
+            date: picked.local.slice(0, 10),
+            start: picked.local.slice(11),
+            end: picked.end,
+          })
+        }
+      />
+      {missing && (
+        <FieldError id={`${idPrefix}-slot-error`}>{t.slotMissing}</FieldError>
       )}
-    </div>
+      <div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => setManual(true)}
+        >
+          {t.other}
+        </Button>
+      </div>
+    </fieldset>
   );
 }

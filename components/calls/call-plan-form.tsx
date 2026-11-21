@@ -23,7 +23,12 @@ import type { ActionResult } from "@/lib/calls/constants";
 import type { CallContact } from "@/lib/calls/invite";
 import { participantPool, type ParticipantsForm } from "@/lib/calls/prep/pool";
 import type { PrepPerson } from "@/lib/calls/prep/types";
-import { instantOf, slotFrom, slotMinutes } from "@/lib/calls/slot";
+import {
+  instantOf,
+  slotFrom,
+  slotMinutes,
+  type SlotInput,
+} from "@/lib/calls/slot";
 import { calls } from "@/lib/i18n/fr/calls";
 import { cn } from "@/lib/utils";
 
@@ -63,6 +68,7 @@ export function CallPlanForm({
   footer = "end",
   extra,
   people: current,
+  slotField,
 }: {
   action: (
     previous: ActionResult | null,
@@ -97,6 +103,14 @@ export function CallPlanForm({
   // « Modifier le call »: the choices and who takes part now, read by the
   // server (loadCallEdit), in place of members / contacts.
   people?: ParticipantsForm;
+  // In place of the day and times (a deal's call: the business manager's
+  // free slots, DealSlotField).
+  slotField?: (field: {
+    idPrefix: string;
+    slot: SlotInput;
+    onChange: (slot: SlotInput) => void;
+    errors: SlotErrors;
+  }) => React.ReactNode;
 }) {
   const t = fr.calls.schedule;
   const idPrefix = useId();
@@ -218,12 +232,16 @@ export function CallPlanForm({
         hiddenNames
         filesEmails={false}
       />
-      <CallSlotFields
-        idPrefix={idPrefix}
-        slot={slot}
-        onChange={setSlot}
-        errors={errors}
-      />
+      {slotField ? (
+        slotField({ idPrefix, slot, onChange: setSlot, errors })
+      ) : (
+        <CallSlotFields
+          idPrefix={idPrefix}
+          slot={slot}
+          onChange={setSlot}
+          errors={errors}
+        />
+      )}
       {past && (
         <ToneCallout tone="warning">
           {googleMeet && google ? t.pastSlotGoogle : t.pastSlot}

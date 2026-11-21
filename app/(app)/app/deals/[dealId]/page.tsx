@@ -21,7 +21,10 @@ import {
   nextDealCall,
 } from "@/lib/deals/call-queries";
 import { loadDealContacts } from "@/lib/deals/contact-queries";
-import { loadDealNegotiationCall } from "@/lib/deals/negotiation-call";
+import {
+  loadDealNegotiationCall,
+  withSlots,
+} from "@/lib/deals/negotiation-call";
 import { loadNewDealOptions } from "@/lib/deals/new-deal-options";
 import { dealName } from "@/lib/deals/names";
 import { loadDeal, loadDealEvents } from "@/lib/deals/queries";
@@ -50,6 +53,7 @@ async function negotiatorsFor(canAssign: boolean) {
 async function callFormFor(
   deal: Deal,
   terms: DealTerm[],
+  me: string | null,
 ): Promise<DealCallFormData | null> {
   if (!deal.canWrite) return null;
   return {
@@ -60,6 +64,11 @@ async function callFormFor(
     defaultOccurredAt: nextRoundHourInput(new Date()),
     topics: dealCallTopics(deal, terms),
     negotiator: deal.assignee,
+    // His free slots when someone else plans the call (the direction).
+    slots:
+      deal.assignee && deal.assignee.id !== me
+        ? await withSlots([deal.assignee])
+        : [],
   };
 }
 
@@ -159,7 +168,7 @@ async function DealTodo({
   "proposer" | "reopen" | "callForm" | "negotiationCall" | "nextCall"
 >) {
   const [callForm, negotiationCall] = await Promise.all([
-    callFormFor(deal, terms),
+    callFormFor(deal, terms, access.personId),
     loadDealNegotiationCall(deal, terms),
   ]);
   // An abandoned deal: the direction opens a new one for its artist.

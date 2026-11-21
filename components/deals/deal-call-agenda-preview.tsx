@@ -6,8 +6,8 @@ const fr = { dealCalls };
 /**
  * The agenda a deal's call will have, as the code writes it (dealCallTopics),
  * in the call's dialog: last and folded, a chevron opens it (Sacha
- * 20/11/2026: « prend trop de place »). The same in « Préparer un call » and
- * « Caler le call ».
+ * 20/11/2026: « prend trop de place »). The same in every « Caler le call »
+ * (DealCallButton, NegotiationCallButton).
  */
 export function DealCallAgendaPreview({
   id,

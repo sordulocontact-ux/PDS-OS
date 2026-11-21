@@ -84,7 +84,7 @@ function TermsRecap({ terms }: { terms: DealTerm[] }) {
  * (or another, or abandons it) — or reads that the direction is warned.
  * An abandoned deal says it is final and what to do (`reopen`: « Ouvrir un
  * nouveau deal » for whoever may). Nothing for the project's owner, who
- * reads. `lead`: « Préparer un call », the gesture of a deal to contact.
+ * reads. `lead`: « Caler le call », the gesture of a deal to contact.
  */
 export function DealNow({
   deal,

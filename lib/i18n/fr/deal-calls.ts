@@ -1,23 +1,16 @@
-/** The calls of a deal (BIZ 6): « Préparer un call », its list, PO's
- * proposals from its report. */
+/** The calls of a deal (BIZ 6): « Caler le call » (the same for everyone
+ * since 21/11/2026), its list, PO's proposals from its report. */
 export const dealCalls = {
   section: "Calls",
   empty: "Aucun call pour ce deal.",
   actions: (title: string) => `Actions pour « ${title} »`,
   prepare: {
-    button: "Préparer un call",
-    dialogTitle: "Préparer un call",
-    description:
-      "Le call reprend le contexte du deal et les termes encore à négocier ; vous enregistrez l'échange depuis sa page.",
     title: (name: string) => `Call · ${name}`,
-    titlePlaceholder: "Call avec le manager",
     agendaTitle: "Ordre du jour",
     contextTopic: "Où en est le deal",
     contextStage: (stage: string) => `Étape : ${stage}`,
     lastSaid: (state: string, value: string) => `${state} : ${value}`,
     nothingToNegotiate: "Tous les termes sont confirmés.",
-    submit: "Créer le call",
-    pending: "Création…",
     cancel: "Annuler",
   },
   // « Caler le call » (Ibé 18/11/2026): the project's owner plans the call
@@ -37,7 +30,8 @@ export const dealCalls = {
     slotsOf: (day: string) => `Créneaux du ${day}`,
     slot: (day: string, hour: string) => `${day} à ${hour}`,
     other: "Autre horaire",
-    back: "Autres créneaux",
+    back: "Créneaux libres",
+    slotMissing: "Choisissez un créneau.",
     titlePlaceholder: "Call avec le manager",
     submit: "Caler le call",
     pending: "Calage…",

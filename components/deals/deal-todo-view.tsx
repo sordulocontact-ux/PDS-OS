@@ -180,7 +180,7 @@ export function DealTodoView({
         <PageSection
           id="calls"
           title={dealCalls.section}
-          // « À contacter »: « Préparer un call » is already the main gesture.
+          // « À contacter »: « Caler le call » is already the main gesture.
           action={
             callForm &&
             deal.stage !== "to_contact" && <DealCallButton data={callForm} />

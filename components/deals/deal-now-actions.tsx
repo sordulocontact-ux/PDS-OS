@@ -25,7 +25,7 @@ type Open = "refuse" | "stage" | "abandon" | null;
  * The gestures of a deal's « Maintenant » (BIZ 4): the direction validates
  * the accord de principe or sends it back with a reason; the negotiator
  * moves to the next stage (main button) or does the stage's own gesture
- * (`lead`: « Préparer un call »), moves to another stage (outline), or
+ * (`lead`: « Caler le call »), moves to another stage (outline), or
  * abandons the deal with a reason (text button beside the outline).
  */
 export function DealNowActions({
