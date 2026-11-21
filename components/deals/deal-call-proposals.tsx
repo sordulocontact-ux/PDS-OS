@@ -76,7 +76,7 @@ function ProposalForm({
   );
 }
 
-function DismissButton({ dealId, id }: { dealId: string; id: string }) {
+export function DismissButton({ dealId, id }: { dealId: string; id: string }) {
   const { pending, run } = useWriteSubmit(() => {}, t.dismissed);
   return (
     <Button

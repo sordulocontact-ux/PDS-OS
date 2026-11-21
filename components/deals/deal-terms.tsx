@@ -1,21 +1,28 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 
+import { DismissButton } from "@/components/deals/deal-call-proposals";
 import { TermForm } from "@/components/deals/term-form";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { FactCard, FactCards } from "@/components/ui/fact-card";
+import { FactSourceText } from "@/components/ui/fact-row-frame";
 import { FormDialog } from "@/components/ui/form-dialog";
+import { routes } from "@/lib/auth/redirects";
+import type { DealCallProposal } from "@/lib/deals/call-queries";
 import { formatTermValue } from "@/lib/deals/term-format";
 import type { DealTerm, TermFormat } from "@/lib/deals/terms";
+import { dealCalls } from "@/lib/i18n/fr/deal-calls";
 import { dialogs } from "@/lib/i18n/fr/dialogs";
 import { deals } from "@/lib/i18n/fr/deals";
 import { dealTermTone } from "@/lib/ui/state-tones";
 import { formatInstantDay } from "@/lib/utils/instant";
 
-const fr = { deals, dialogs };
+const fr = { dealCalls, deals, dialogs };
+
+type TermProposal = Extract<DealCallProposal, { kind: "term" }>;
 
 // Words, not a figure: shown at reading size in their card.
 const TEXT_FORMATS = new Set<TermFormat>(["text", "yesno", "split"]);
@@ -26,28 +33,31 @@ const TEXT_FORMATS = new Set<TermFormat>(["text", "yesno", "split"]);
  * value, its state as a dot, who changed it last and when; then the ones still to define on one line (Sacha
  * 20/11/2026: nine rows « À définir » made the page a table), each a
  * button for whoever writes the deal. A card or a button opens the term in a
- * dialog; the history is in the deal's journal. PO's proposals from the
- * deal's calls come first, in place of their terms (Sacha 21/11/2026: « une
- * section complète », the proposal is the negotiated term).
+ * dialog; the history is in the deal's journal. What PO read in the deal's
+ * calls is the card of its term, first, in the same grid (Sacha 21/11/2026:
+ * « une section complète »): the value proposed, the passage it comes from,
+ * « Vérifier » opens the term's form prefilled, « Écarter » sets it aside.
  */
 export function DealTerms({
   dealId,
   terms,
   canWrite,
-  proposals,
-  proposedKeys = [],
+  proposals = [],
 }: {
   dealId: string;
   terms: DealTerm[];
   canWrite: boolean;
-  // PO's term proposals (DealCallProposals), rendered by the caller.
-  proposals?: ReactNode;
-  // Their terms: shown as the proposal, not a second time.
-  proposedKeys?: string[];
+  // PO's term proposals from the deal's calls, still to check.
+  proposals?: TermProposal[];
 }) {
   const t = fr.deals.terms;
-  const [open, setOpen] = useState<DealTerm | null>(null);
-  const shown = terms.filter((term) => !proposedKeys.includes(term.key));
+  const [open, setOpen] = useState<{
+    term: DealTerm;
+    proposalId?: string;
+  } | null>(null);
+  const proposedKeys = new Set(proposals.map((p) => p.termKey));
+  const termOfKey = new Map(terms.map((term) => [term.key, term]));
+  const shown = terms.filter((term) => !proposedKeys.has(term.key));
   const written = shown.filter((term) => term.state !== "to_define");
   const toDefine = shown.filter((term) => term.state === "to_define");
   const label = (term: DealTerm) => t.labels[term.key] ?? term.key;
@@ -59,7 +69,7 @@ export function DealTerms({
           type="button"
           variant="outline"
           size="xs"
-          onClick={() => setOpen(term)}
+          onClick={() => setOpen({ term })}
           aria-label={t.editTitle(label(term))}
         >
           {label(term)}
@@ -69,9 +79,56 @@ export function DealTerms({
   );
   return (
     <div className="flex flex-col gap-3">
-      {proposals}
-      {written.length > 0 && (
+      {(proposals.length > 0 || written.length > 0) && (
         <FactCards>
+          {proposals.map((p) => {
+            const term = termOfKey.get(p.termKey);
+            if (!term) return null;
+            return (
+              <FactCard
+                key={p.id}
+                proposed
+                label={label(term)}
+                value={formatTermValue(term.format, p.value) ?? ""}
+                text={TEXT_FORMATS.has(term.format)}
+                state={{
+                  tone: dealTermTone[p.state],
+                  label: t.states[p.state],
+                }}
+                quote={
+                  <FactSourceText
+                    source={{
+                      quote: p.quote,
+                      from: fr.dealCalls.proposals.from(
+                        p.callTitle,
+                        formatInstantDay(p.callAt),
+                      ),
+                      href: routes.call(p.callId),
+                    }}
+                  />
+                }
+                action={
+                  canWrite && (
+                    <span className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          setOpen({
+                            term: { ...term, value: p.value, state: p.state },
+                            proposalId: p.id,
+                          })
+                        }
+                      >
+                        {fr.dealCalls.proposals.check}
+                      </Button>
+                      <DismissButton dealId={dealId} id={p.id} />
+                    </span>
+                  )
+                }
+              />
+            );
+          })}
           {written.map((term) => {
             const name = label(term);
             return (
@@ -94,7 +151,7 @@ export function DealTerms({
                       )
                     : null
                 }
-                onClick={canWrite ? () => setOpen(term) : undefined}
+                onClick={canWrite ? () => setOpen({ term }) : undefined}
                 actionLabel={canWrite ? t.editTitle(name) : undefined}
               />
             );
@@ -102,7 +159,7 @@ export function DealTerms({
         </FactCards>
       )}
       {toDefine.length > 0 &&
-        (written.length === 0 && proposedKeys.length === 0 ? (
+        (written.length === 0 && proposals.length === 0 ? (
           // None written yet: the empty note of the deal's other sections,
           // the terms to define as its buttons (Sacha 20/11/2026).
           <EmptyNote action={canWrite && toDefineButtons("justify-center")}>
@@ -121,12 +178,19 @@ export function DealTerms({
       <FormDialog
         open={open !== null}
         onOpenChange={(next) => !next && setOpen(null)}
-        title={open ? t.editTitle(t.labels[open.key] ?? open.key) : ""}
-        description={open ? t.states[open.state] : ""}
+        title={
+          open ? t.editTitle(t.labels[open.term.key] ?? open.term.key) : ""
+        }
+        description={open ? t.states[open.term.state] : ""}
         closeLabel={fr.dialogs.close}
       >
         {open && (
-          <TermForm dealId={dealId} term={open} onDone={() => setOpen(null)} />
+          <TermForm
+            dealId={dealId}
+            term={open.term}
+            proposalId={open.proposalId}
+            onDone={() => setOpen(null)}
+          />
         )}
       </FormDialog>
     </div>

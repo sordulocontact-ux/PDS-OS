@@ -8052,7 +8052,7 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   si le terme existe, le passage est trouvé mot pour mot, chaque chiffre vient du passage
   (`parseSaidEuros`, `unitsOf`) et la date dite est résolue par le code (`resolveSaidDate`). Page du deal :
   chaque proposition dans la section de ce qu'elle change (`DealCallProposals`, 21/11/2026) : celle d'un terme
-  en tête de « Termes négociés », **à la place du terme** (`DealTerms proposals` / `proposedKeys`), celle de la
+  = **la carte de ce terme** en tête de la grille de « Termes négociés » (`DealTerms proposals`, `FactCard proposed`), celle de la
   prochaine action dans « Prochaine action » ; ordre des sections de « À faire » selon l'étape (`WORKS` de
   `deal-todo-view.tsx` : calls en tête à « Call prévu », termes en tête en négociation). « Vérifier » ouvre le **vrai formulaire** pré-rempli
   (`TermForm`, `NextActionForm`, `proposalId`), l'enregistrer applique la proposition

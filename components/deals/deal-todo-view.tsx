@@ -128,7 +128,9 @@ export function DealTodoView({
   const s = t.page.sections;
   const upcomingCall = nextDealCall(calls);
   const movable = dealCallMovable(deal, access.personId);
-  const termProposals = proposals.filter((p) => p.kind === "term");
+  const termProposals = proposals.flatMap((p) =>
+    p.kind === "term" ? [p] : [],
+  );
   const nextProposals = proposals.filter((p) => p.kind === "next_action");
   // Calls right above: the next one is not repeated beside the action.
   const callsFirst = WORKS[deal.stage]?.[0] === "calls";
@@ -161,14 +163,7 @@ export function DealTodoView({
           dealId={deal.id}
           terms={terms}
           canWrite={deal.canWrite}
-          proposedKeys={termProposals.flatMap((p) =>
-            p.kind === "term" ? [p.termKey] : [],
-          )}
-          proposals={
-            termProposals.length > 0 && (
-              <DealCallProposals deal={deal} proposals={termProposals} />
-            )
-          }
+          proposals={termProposals}
         />
       </PageSection>
     ),

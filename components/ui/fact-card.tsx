@@ -1,3 +1,4 @@
+import { IconSparkle3 } from "nucleo-sharp-essential";
 import type { ReactNode } from "react";
 
 import { StatusDot } from "@/components/ui/status-dot";
@@ -11,7 +12,10 @@ import type { Tone } from "@/lib/ui/state-tones";
  * and who wrote it, on one line at the bottom. `onClick` makes the whole
  * card the button that opens it (its words in `actionLabel`, for a screen
  * reader). `action`: a button of its own at the bottom right (« Changer »),
- * never with `onClick`. Laid out by `FactCards`.
+ * never with `onClick`. `proposed`: a value PO read and a person checks (a
+ * deal's term from its call, Sacha 21/11/2026) — dashed frame, sparkle
+ * before the label, the passage it comes from in `quote`. Laid out by
+ * `FactCards`.
  */
 export function FactCard({
   label,
@@ -22,6 +26,8 @@ export function FactCard({
   onClick,
   actionLabel,
   action,
+  proposed = false,
+  quote,
 }: {
   label: string;
   value: ReactNode;
@@ -32,10 +38,14 @@ export function FactCard({
   onClick?: () => void;
   actionLabel?: string;
   action?: ReactNode;
+  proposed?: boolean;
+  // Where a proposed value comes from (FactSourceText).
+  quote?: ReactNode;
 }) {
   const body = (
     <>
-      <span className="text-caption text-[color:var(--text-secondary)]">
+      <span className="flex items-center gap-1.5 text-caption text-[color:var(--text-secondary)]">
+        {proposed && <IconSparkle3 aria-hidden className="size-3.5 shrink-0" />}
         {label}
       </span>
       <span
@@ -46,6 +56,7 @@ export function FactCard({
       >
         {value}
       </span>
+      {quote}
       {(state || source || action) && (
         <span className="mt-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-1 pt-1">
           {state && <StatusDot tone={state.tone} label={state.label} showLabel />}
@@ -59,8 +70,12 @@ export function FactCard({
       )}
     </>
   );
-  const frame =
-    "flex min-w-0 flex-col gap-1.5 rounded-xl border border-[color:var(--border-hairline)] bg-card p-4 text-left";
+  const frame = cn(
+    "flex min-w-0 flex-col gap-1.5 rounded-xl border bg-card p-4 text-left",
+    proposed
+      ? "border-dashed border-[color:var(--border-default)]"
+      : "border-[color:var(--border-hairline)]",
+  );
   if (!onClick) return <div className={frame}>{body}</div>;
   return (
     <button
