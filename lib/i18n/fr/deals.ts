@@ -432,6 +432,8 @@ export const deals = {
     agreementNotValidated:
       "La contractualisation attend un accord de principe validé par la direction.",
     notContracting: "Un deal est signé après la contractualisation.",
+    negotiationNeedsCall:
+      "La négociation commence après un call : attendez que le call prévu ait eu lieu.",
     agreementNeedsTerms:
       "Confirmez au moins un terme avant de proposer l'accord de principe.",
     contractNotSigned:

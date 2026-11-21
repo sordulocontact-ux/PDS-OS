@@ -83,6 +83,13 @@ insert into k values
 
 -- Mona Lys, Minuit pile: in negotiation, terms in every state, overdue follow-up.
 select pg_temp.as_user('malik.durand@preprod.pds');
+-- A negotiation follows a call that took place (20261121140101).
+insert into public.calls (organization_id, project_id, deal_id, title, occurred_at, ends_at,
+  status, consent, created_by)
+values (pg_temp.k('org'), null, pg_temp.k('d:mona'), 'Premier call avec Camille',
+        date_trunc('day', now()) - interval '6 days' + interval '11 hours',
+        date_trunc('day', now()) - interval '6 days' + interval '11 hours 30 minutes',
+        'draft', 'granted', pg_temp.k('malik.durand'));
 select public.set_deal_stage(pg_temp.k('d:mona'), 'negotiation', 'Premier call fait avec Camille.');
 select public.set_deal_term(pg_temp.k('d:mona'), 'master_split', '{"units": 500000}', 'pds_proposal');
 select public.set_deal_term(pg_temp.k('d:mona'), 'royalties', '{"units": 180000}', 'counter_proposal');
@@ -104,6 +111,12 @@ values (pg_temp.k('org'), null, pg_temp.k('d:lila'), 'Call — Lila Vega, premi�
 
 -- Nahel Nuit: Élise proposes an accord de principe, Claire has to decide it.
 select pg_temp.as_user('elise.fabre@preprod.pds');
+insert into public.calls (organization_id, project_id, deal_id, title, occurred_at, ends_at,
+  status, consent, created_by)
+values (pg_temp.k('org'), null, pg_temp.k('d:nahel'), 'Call avec le manager de Nahel',
+        date_trunc('day', now()) - interval '4 days' + interval '15 hours',
+        date_trunc('day', now()) - interval '4 days' + interval '15 hours 30 minutes',
+        'draft', 'granted', pg_temp.k('elise.fabre'));
 select public.set_deal_stage(pg_temp.k('d:nahel'), 'negotiation', null);
 select public.set_deal_term(pg_temp.k('d:nahel'), 'master_split', '{"units": 400000}', 'confirmed');
 select public.set_deal_term(pg_temp.k('d:nahel'), 'royalties', '{"units": 200000}', 'confirmed');

@@ -6,7 +6,7 @@
 -- owner is told when the accord is validated.
 -- Run with `supabase test db`.
 begin;
-select plan(42);
+select plan(43);
 
 -- Fixtures (as deal-calls.test.sql) ------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -174,6 +174,8 @@ select lives_ok($$ select public.reschedule_call(pg_temp.id_of('k1'),
   (select v::timestamptz from vars where k = 'slot'),
   (select v::timestamptz + interval '30 minutes' from vars where k = 'slot')) $$,
   'the negotiator moves it too (back to its first slot)');
+select throws_ok($$ select public.set_deal_stage(pg_temp.id_of('d1'), 'negotiation') $$,
+  'P0001', 'negotiation_needs_call', 'no negotiation before the call took place');
 reset role;
 select pg_temp.act_as(pg_temp.id_of('other_pm'));
 select throws_ok($$ select public.plan_deal_negotiation_call('x', pg_temp.at(1), pg_temp.at(2),

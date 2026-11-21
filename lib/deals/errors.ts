@@ -28,6 +28,7 @@ const MESSAGES: Record<string, string> = {
   agreement_not_validated: t.agreementNotValidated,
   not_contracting: t.notContracting,
   agreement_needs_terms: t.agreementNeedsTerms,
+  negotiation_needs_call: t.negotiationNeedsCall,
   contract_not_signed: t.contractNotSigned,
   no_agreement_pending: t.noAgreementPending,
   reason_required: t.reasonRequired,

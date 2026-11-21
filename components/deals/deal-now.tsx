@@ -36,11 +36,18 @@ export const NEXT_STAGE: Partial<Record<Deal["stage"], Deal["stage"]>> = {
  * already hold before its negotiation started goes straight to its accord
  * de principe — one gesture, not two (UX test of 12/11/2026).
  */
-function nextStageOf(deal: Deal, terms: DealTerm[]): Deal["stage"] | null {
+function nextStageOf(
+  deal: Deal,
+  terms: DealTerm[],
+  callHeld: boolean,
+): Deal["stage"] | null {
   const confirmed = terms.some((term) => term.state === "confirmed");
   const early = deal.stage === "to_contact" || deal.stage === "call_planned";
   if (early && confirmed) return "agreement";
   if (deal.stage === "to_contact" || deal.stage === "contracting") return null;
+  // The negotiation follows a call that took place (Sacha 21/11/2026,
+  // negotiation_needs_call).
+  if (deal.stage === "call_planned" && !callHeld) return null;
   if (deal.stage === "negotiation" && !confirmed) return null;
   return NEXT_STAGE[deal.stage] ?? null;
 }
@@ -87,6 +94,7 @@ export function DealNow({
   lead,
   planCall,
   nextCall = null,
+  callHeld = false,
 }: {
   deal: Deal;
   terms: DealTerm[];
@@ -98,6 +106,8 @@ export function DealNow({
   // « Caler le call » of the project's owner (deal.canPlanCall), and the
   // next call already planned (its day and hour).
   planCall?: ReactNode;
+  // A call of the deal took place: « Négociation » may follow.
+  callHeld?: boolean;
   nextCall?: string | null;
 }) {
   const t = fr.deals.page;
@@ -144,7 +154,7 @@ export function DealNow({
         <DealNowActions deal={deal} mode="wait" next={null} />
       </NowFrame>
     );
-  const next = nextStageOf(deal, terms);
+  const next = nextStageOf(deal, terms, callHeld);
   return (
     <NowFrame label={t.now}>
       <h2 className={heading}>

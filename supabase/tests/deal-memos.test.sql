@@ -112,6 +112,9 @@ insert into public.financial_needs (organization_id, contract_id, contact_id, am
 values (pg_temp.id_of('org'), pg_temp.id_of('k_nadia'), pg_temp.id_of('contact'), 300000);
 
 -- The memo at the accord de principe ----------------------------------------------------------
+-- A negotiation follows a call that took place (20261121140101).
+insert into public.calls (organization_id, deal_id, title, occurred_at)
+values (pg_temp.id_of('org'), pg_temp.id_of('d1'), 'Premier call', now() - interval '1 day');
 select pg_temp.act_as(pg_temp.id_of('glen'));
 select public.set_deal_term(pg_temp.id_of('d1'), 'advance', '{"mode": "advance", "cents": 200000}', 'confirmed');
 select public.set_deal_stage(pg_temp.id_of('d1'), 'negotiation');

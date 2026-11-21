@@ -143,3 +143,10 @@ export function nextDealCall(calls: DealCall[]): DealCall | null {
       .sort((a, b) => a.occurredAt.localeCompare(b.occurredAt))[0] ?? null
   );
 }
+
+/** A call of the deal took place (its start passed): « Négociation » may
+ * follow (negotiation_needs_call, Sacha 21/11/2026). */
+export function dealCallHeld(calls: DealCall[]): boolean {
+  const now = Date.now();
+  return calls.some((c) => Date.parse(c.occurredAt) <= now);
+}

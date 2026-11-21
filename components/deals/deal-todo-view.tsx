@@ -21,6 +21,7 @@ import { PageSection } from "@/components/shell/page-section";
 import { StepFrieze } from "@/components/ui/step-frieze";
 import type { Access } from "@/lib/auth/access";
 import {
+  dealCallHeld,
   nextDealCall,
   type DealCall,
   type DealCallProposal,
@@ -137,6 +138,7 @@ export function DealTodoView({
           negotiationCall && <NegotiationCallButton data={negotiationCall} />
         }
         nextCall={nextCall?.label ?? null}
+        callHeld={dealCallHeld(calls)}
       />
       {deal.stage === "signed" && <EmptyNote>{t.page.signedNote}</EmptyNote>}
       {proposals.length > 0 && (

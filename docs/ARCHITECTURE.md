@@ -7966,7 +7966,8 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   `contracting` exige un accord **validé**, `signed` vient de `contracting` ; signé ou abandonné, le deal
   ne bouge plus (`deal_closed`). **Une étape dit ce qui s'est passé** (réunion avec Ibé du 18/11/2026,
   `20261120110101_deal_stage_guards.sql` : le bouton « étape suivante » laissait cliquer un deal jusqu'à « Signé ») :
-  `agreement` exige un terme confirmé (`agreement_needs_terms`), `signed` le contrat du deal signé
+  `agreement` exige un terme confirmé (`agreement_needs_terms`), `negotiation` un call du deal qui a eu lieu
+  (`negotiation_needs_call`, Sacha 21/11/2026, migration `20261121140101`), `signed` le contrat du deal signé
   (`deal_contract_id`, `contract_not_signed`), et le deal en contractualisation passe seul à `signed` quand son
   contrat l'est (trigger `z_deal_follows_contract` sur `contracts`, ligne de journal `detail.contract = signed`).
   Côté page, « Maintenant » ne propose plus que le vrai geste de l'étape (`DealNow` : « Préparer un call » à
