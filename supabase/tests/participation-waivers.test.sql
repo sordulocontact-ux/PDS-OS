@@ -195,9 +195,13 @@ select is((select count(*)::int from public.contract_gaps(pg_temp.id_of('c1'), '
 insert into public.contracts (organization_id, title, type, status, signed_on, project_id, owner_person_id)
 values (pg_temp.id_of('org'), 'Participation ' || pg_temp.tag(), 'other', 'signed', current_date,
         pg_temp.id_of('c1'), pg_temp.id_of('owner_person'));
+-- The fixture links a contract without a deal (20261121210101 refuses it
+-- before the accord, tested in collective-title-contracts.test.sql).
+alter table public.title_participations disable trigger b_agreement_before_contract;
 update public.title_participations
    set contract_id = (select id from public.contracts where title = 'Participation ' || pg_temp.tag())
  where id = pg_temp.id_of('p_nadia');
+alter table public.title_participations enable trigger b_agreement_before_contract;
 select is((select count(*)::int from public.contract_gaps(pg_temp.id_of('c1'), 'release')),
   0, 'the contract signed covers the release');
 select pg_temp.act_as(pg_temp.id_of('director'));

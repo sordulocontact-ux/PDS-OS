@@ -98,7 +98,11 @@ insert into public.contracts (organization_id, title, type, status, project_id, 
 values (pg_temp.id_of('org'), 'Participation ' || pg_temp.tag(), 'other', 'sent',
         pg_temp.id_of('c1'), pg_temp.id_of('owner_person'));
 insert into ids select 'k1', id from public.contracts where title = 'Participation ' || pg_temp.tag();
+-- The fixture links a contract without a deal (20261121210101 refuses it
+-- before the accord, tested in collective-title-contracts.test.sql).
+alter table public.title_participations disable trigger b_agreement_before_contract;
 update public.title_participations set contract_id = pg_temp.id_of('k1') where id = pg_temp.id_of('p1');
+alter table public.title_participations enable trigger b_agreement_before_contract;
 select pg_temp.act_as(pg_temp.id_of('owner'));
 insert into ids select 'd1', public.create_deal(
   p_participation_id => pg_temp.id_of('p1'),

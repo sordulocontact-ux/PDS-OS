@@ -323,8 +323,12 @@ with c as (
           pg_temp.id_of('collective'), pg_temp.id_of('owner_person'))
   returning id)
 insert into ids select 'contract', id from c;
+-- The fixture links a contract without a deal (20261121210101 refuses it
+-- before the accord, tested in collective-title-contracts.test.sql).
+alter table public.title_participations disable trigger b_agreement_before_contract;
 update public.title_participations set contract_id = pg_temp.id_of('contract')
  where id = (pg_temp.part(pg_temp.id_of('t1'), 'sami')).id;
+alter table public.title_participations enable trigger b_agreement_before_contract;
 select is((pg_temp.part(pg_temp.id_of('t1'), 'sami')).contract_id, pg_temp.id_of('contract'),
           'a participation holds its contract');
 delete from public.contracts where id = pg_temp.id_of('contract');

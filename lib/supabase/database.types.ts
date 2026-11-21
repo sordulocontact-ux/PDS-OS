@@ -18122,6 +18122,7 @@ export type Database = {
           organization_id: string
           position: number
           project_id: string
+          release_decision: boolean | null
           status: string
           updated_at: string
           working_title: string | null
@@ -18138,6 +18139,7 @@ export type Database = {
           organization_id: string
           position: number
           project_id: string
+          release_decision?: boolean | null
           status?: string
           updated_at?: string
           working_title?: string | null
@@ -18154,6 +18156,7 @@ export type Database = {
           organization_id?: string
           position?: number
           project_id?: string
+          release_decision?: boolean | null
           status?: string
           updated_at?: string
           working_title?: string | null
@@ -19866,6 +19869,61 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "strategy_document_reserves"
             referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      title_contract_needs: {
+        Row: {
+          confirmed_at: string
+          confirmed_by: string | null
+          id: string
+          kind: string
+          needed: boolean
+          organization_id: string
+          project_id: string
+          project_title_id: string
+        }
+        Insert: {
+          confirmed_at?: string
+          confirmed_by?: string | null
+          id?: string
+          kind: string
+          needed: boolean
+          organization_id: string
+          project_id: string
+          project_title_id: string
+        }
+        Update: {
+          confirmed_at?: string
+          confirmed_by?: string | null
+          id?: string
+          kind?: string
+          needed?: boolean
+          organization_id?: string
+          project_id?: string
+          project_title_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "title_contract_needs_confirmed_by_fkey"
+            columns: ["confirmed_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "title_contract_needs_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "title_contract_needs_title"
+            columns: ["project_title_id", "project_id"]
+            isOneToOne: false
+            referencedRelation: "project_titles"
+            referencedColumns: ["id", "project_id"]
           },
         ]
       }
@@ -23480,6 +23538,14 @@ export type Database = {
         Args: { p_title_id: string }
         Returns: undefined
       }
+      set_title_participation_contact: {
+        Args: { p_contact_id: string | null; p_participation_id: string }
+        Returns: undefined
+      }
+      set_title_participation_note: {
+        Args: { p_note: string | null; p_participation_id: string }
+        Returns: undefined
+      }
       set_title_participation_status: {
         Args: { p_note?: string; p_participation_id: string; p_status: string }
         Returns: number
@@ -24577,6 +24643,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      set_project_title_release: {
+        Args: { p_release: boolean | null; p_title_id: string }
+        Returns: undefined
+      }
       set_release_policy: {
         Args: { p_organization_id: string; p_sacem_blocks: boolean }
         Returns: undefined
@@ -24765,6 +24835,10 @@ export type Database = {
       }
       confirm_release_online: {
         Args: { p_online_on: string; p_release_id: string; p_url: string }
+        Returns: undefined
+      }
+      confirm_title_contract_needs: {
+        Args: { p_kinds: string[]; p_title_id: string }
         Returns: undefined
       }
       consolidate_split_version: {
