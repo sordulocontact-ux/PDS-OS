@@ -12,6 +12,10 @@ import {
   dealCallTopics,
 } from "@/lib/deals/call-prep";
 import { dealName } from "@/lib/deals/names";
+import {
+  contactsFirst as orderContacts,
+  type SharedNegotiationCall,
+} from "@/lib/deals/negotiation-call-rules";
 import type { DealTerm } from "@/lib/deals/terms";
 import type { Deal } from "@/lib/deals/types";
 import { todayInParis } from "@/lib/insights/dates";
@@ -73,12 +77,7 @@ async function negotiatorsOf(): Promise<{ id: string; name: string }[]> {
 
 /** The guests to pick from, the participation's contact first. */
 async function contactsFirst(contactId: string | null): Promise<CallContact[]> {
-  const contacts = await loadCallContacts();
-  if (!contactId) return contacts;
-  return [
-    ...contacts.filter((c) => c.contactId === contactId),
-    ...contacts.filter((c) => c.contactId !== contactId),
-  ];
+  return orderContacts(await loadCallContacts(), contactId);
 }
 
 /** The participation's contact (the artist's manager, if noted). */
@@ -146,5 +145,39 @@ export async function loadParticipationNegotiationCall(
     contacts,
     googleMeet: googleMeetConfigured(),
     topics: dealCallTopics({ stage: "to_contact" }, blankDealTerms()),
+  };
+}
+
+/**
+ * What every row of a list shares for « Caler le call » (the collective's
+ * recap, retours d'Ibé du 18/11/2026), read once rather than per row: the
+ * negotiators a deal may be given to and the negotiators of the rows' deals
+ * (`assigneeIds`), each with his free slots, and the Réseau's contacts. Each
+ * row's data: negotiationCallData (lib/deals/negotiation-call-rules.ts).
+ * Call it only when a row may plan its call (participation_deal_state's
+ * `can_plan_call`).
+ */
+export async function loadSharedNegotiationCall(
+  assignees: ReadonlyArray<{ id: string; name: string }>,
+): Promise<SharedNegotiationCall> {
+  const [people, contacts] = await Promise.all([
+    negotiatorsOf(),
+    loadCallContacts(),
+  ]);
+  const listed = new Set(people.map((p) => p.id));
+  const others = [
+    ...new Map(
+      assignees.filter((a) => !listed.has(a.id)).map((a) => [a.id, a]),
+    ).values(),
+  ];
+  const [negotiators, extra] = await Promise.all([
+    withSlots(people),
+    withSlots(others),
+  ]);
+  return {
+    negotiators,
+    assignees: extra,
+    contacts,
+    googleMeet: googleMeetConfigured(),
   };
 }

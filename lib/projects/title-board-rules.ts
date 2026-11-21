@@ -174,6 +174,8 @@ export type ParticipationDeal = {
   // The accord de principe proposed or validated (its pill says which).
   agreementStatus: AgreementStatus | null;
   assignee: string | null;
+  // Who it is given to (« Caler le call » plans on his free slots).
+  assigneeId: string | null;
   stageChangedAt: string;
   // The next action and its date, the follow-up date (lot 11: the
   // Juridique's follow-up, as the Deals page says them).

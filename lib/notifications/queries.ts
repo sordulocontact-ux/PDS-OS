@@ -1,11 +1,13 @@
 import "server-only";
 
 import { REQUEST_KINDS } from "@/lib/notifications/families";
+import { loadParticipationSubjects } from "@/lib/notifications/subjects";
 import {
   isNotificationKind,
   notificationHref,
   notificationText,
   type NotificationItem,
+  type NotificationSubject,
   type StageKey,
 } from "@/lib/notifications/types";
 import { personName } from "@/lib/projects/types";
@@ -110,13 +112,15 @@ function toItem(
   target?: string,
   // What a notification without a project names (a selection of artists).
   subjectName?: string,
+  // What its text names: a participation's artist and title.
+  subject?: NotificationSubject,
 ): NotificationItem | null {
   if (!isNotificationKind(row.kind)) return null;
   const actor = row.actor
     ? personName(row.actor.first_name, row.actor.last_name)
     : null;
   const project = row.project?.title ?? subjectName ?? null;
-  const text = notificationText(row.kind, actor, project);
+  const text = notificationText(row.kind, actor, project, subject);
   const named = actor !== null && text.startsWith(`${actor} `);
   return {
     id: row.id,
@@ -173,10 +177,11 @@ export async function loadNotifications(limit = 20): Promise<{
   const validationIds = rows
     .filter((r) => r.kind.startsWith("validation_") && r.subject_id)
     .map((r) => r.subject_id!);
-  const [stageKeys, targets, selections] = await Promise.all([
+  const [stageKeys, targets, selections, participations] = await Promise.all([
     loadStageKeys(supabase, validationIds),
     loadStepTargets(supabase, rows),
     loadSelectionNames(supabase, rows),
+    loadParticipationSubjects(supabase, rows),
   ]);
   return {
     items: rows.flatMap(
@@ -186,6 +191,7 @@ export async function loadNotifications(limit = 20): Promise<{
           row.subject_id ? (stageKeys.get(row.subject_id) ?? null) : null,
           row.subject_id ? targets.get(row.subject_id) : undefined,
           row.subject_id ? selections.get(row.subject_id) : undefined,
+          row.subject_id ? participations.get(row.subject_id) : undefined,
         ) ?? [],
     ),
     unreadCount: unread.count ?? 0,
@@ -204,21 +210,24 @@ export async function loadNotification(
     .maybeSingle();
   if (error || !data) return null;
   const row = data as Row;
-  const [stageKeys, targets, selections] = row.subject_id
+  const [stageKeys, targets, selections, participations] = row.subject_id
     ? await Promise.all([
         loadStageKeys(supabase, [row.subject_id]),
         loadStepTargets(supabase, [row]),
         loadSelectionNames(supabase, [row]),
+        loadParticipationSubjects(supabase, [row]),
       ])
     : [
         new Map<string, StageKey>(),
         new Map<string, string>(),
         new Map<string, string>(),
+        new Map<string, NotificationSubject>(),
       ];
   return toItem(
     row,
     row.subject_id ? (stageKeys.get(row.subject_id) ?? null) : null,
     row.subject_id ? targets.get(row.subject_id) : undefined,
     row.subject_id ? selections.get(row.subject_id) : undefined,
+    row.subject_id ? participations.get(row.subject_id) : undefined,
   );
 }

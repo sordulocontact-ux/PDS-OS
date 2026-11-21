@@ -45,8 +45,8 @@ const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
  * manage_legal, as its pages), the Distribution's (distribution_events),
  * a collective's titles (project_title_events: added, renamed, abandoned
  * with its reason, reactivated; an artist added to a title, its status
- * changed; the main artist changed, old → new), each to « Titres et
- * artistes ».
+ * changed; the main artist changed, old → new; its release decided, its
+ * contracts confirmed), each to « Titres et artistes ».
  * Read with the viewer's session: what RLS hides stays hidden. The Master
  * has no journal of its own yet. Nothing rewritten, nothing invented.
  */
@@ -274,6 +274,34 @@ function titleEventText(kind: string, detail: Record<string, unknown>): string {
       return fr.collectiveReleases.event(
         modes[text(detail.from) ?? ""] ?? "—",
         modes[text(detail.to) ?? ""] ?? "—",
+      );
+    }
+    // The recap (retours d'Ibé du 18/11/2026): the title comes out or not,
+    // the contracts the Juridique confirmed it needs.
+    case "release_decided": {
+      const r = fr.projectTitles.recap.events;
+      const said = (value: unknown) =>
+        value === true
+          ? r.release.yes
+          : value === false
+            ? r.release.no
+            : r.release.undecided;
+      return r.releaseDecided(
+        current,
+        detail.from === true || detail.from === false
+          ? said(detail.from)
+          : null,
+        said(detail.to),
+      );
+    }
+    case "contract_needs_confirmed": {
+      const r = fr.projectTitles.recap.events;
+      const kinds = Array.isArray(detail.kinds) ? detail.kinds : [];
+      return r.contractNeedsConfirmed(
+        current,
+        kinds.flatMap((kind) =>
+          typeof kind === "string" ? [r.contractKinds[kind] ?? kind] : [],
+        ),
       );
     }
     // Lot 12: the direction's waivers of a missing contract.

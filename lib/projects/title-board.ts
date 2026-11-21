@@ -52,7 +52,7 @@ export async function loadTitleBoard(
     supabase
       .from("deals")
       .select(
-        "id, participation_id, stage, agreement_status, stage_changed_at, next_action, next_action_on, follow_up_on, assignee:people!deals_assignee_person_id_fkey(first_name, last_name)",
+        "id, participation_id, stage, agreement_status, stage_changed_at, next_action, next_action_on, follow_up_on, assignee_person_id, assignee:people!deals_assignee_person_id_fkey(first_name, last_name)",
       )
       .eq("project_id", project.id)
       .not("participation_id", "is", null),
@@ -158,6 +158,7 @@ export async function loadTitleBoard(
       assignee: row.assignee
         ? personName(row.assignee.first_name, row.assignee.last_name)
         : null,
+      assigneeId: row.assignee_person_id,
       stageChangedAt: row.stage_changed_at,
       nextAction: row.next_action,
       nextActionOn: row.next_action_on,

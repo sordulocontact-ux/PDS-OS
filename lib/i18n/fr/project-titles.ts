@@ -367,6 +367,51 @@ export const projectTitles = {
     },
   },
 
+  // The recap of a collective (retours d'Ibé du 18/11/2026, lot 2): « Titres
+  // et artistes » read as the team's Excel (lib/projects/recap-rules.ts),
+  // its gestures (contact, number, note, release) and their history.
+  recap: {
+    // A participation's status in the Excel's words (orange, then green).
+    contactStates: {
+      to_contact: "À contacter",
+      contacted: "Contacté",
+      agreed: "D'accord",
+    },
+    // A guest's contract waits for their accord (§ 3.5).
+    waitingAgreement: "En attente de l'accord",
+    // The number changed here is the Réseau's.
+    phoneChanged: "Numéro changé dans le Réseau",
+    errors: {
+      failed: "La modification n'a pas pu être enregistrée. Réessayez.",
+      networkForbidden:
+        "Vous ne pouvez pas modifier le Réseau : un membre qui le gère peut ajouter ce contact.",
+      nameRequired: "Donnez le nom du contact.",
+      nameTooLong: "Le nom fait 200 caractères au plus.",
+      phoneTooLong: "Le numéro fait 40 caractères au plus.",
+      contactNotFound: "Ce contact n'existe plus dans le Réseau.",
+      // A private contact (BIZ 8): its owner and the direction only.
+      phonePrivate:
+        "Coordonnées privées : seuls la personne qui suit ce contact et la direction peuvent changer son numéro.",
+      releaseUnchanged: "La sortie de ce titre est déjà enregistrée ainsi.",
+    },
+    // The project's Activité (lib/overview/activity.ts).
+    events: {
+      // « Sortie · Titre de Jay (à nommer) : oui », « … : oui → non ».
+      releaseDecided: (label: string, from: string | null, to: string) =>
+        `Sortie · ${label} : ${from ? `${from} → ${to}` : to}`,
+      release: { yes: "oui", no: "non", undecided: "pas décidé" },
+      // « Contrats du titre confirmés · Néons · Production, Édition ».
+      contractNeedsConfirmed: (label: string, kinds: string[]) =>
+        `Contrats du titre confirmés · ${label} · ${kinds.length ? kinds.join(", ") : "aucun"}`,
+      contractKinds: {
+        production: "Production",
+        image_rights: "Droit à l'image",
+        publishing: "Édition",
+        beatmaker: "Beatmaker",
+      } as Record<string, string>,
+    },
+  },
+
   errors: {
     failed: "Le titre n'a pas pu être enregistré. Réessayez.",
     notCollective: "Seul un projet collectif a des titres.",

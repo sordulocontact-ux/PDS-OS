@@ -175,6 +175,20 @@ export async function planNegotiationCall(
   await schedulePendingPushes();
   if (planned) revalidatePath(routes.deal(planned.id));
   revalidatePath(routes.deals);
+  // A collective's recap (« Titres et artistes », its overview) shows the
+  // call planned in place of the button.
+  const projectId =
+    planned?.projectId ??
+    (participationId
+      ? ((
+          await supabase
+            .from("title_participations")
+            .select("project_id")
+            .eq("id", participationId)
+            .maybeSingle()
+        ).data?.project_id ?? null)
+      : null);
+  if (projectId) revalidatePath(routes.project(projectId), "layout");
   return { ok: true, id: callId };
 }
 

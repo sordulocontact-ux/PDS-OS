@@ -68,9 +68,12 @@ const FAMILIES: [RegExp, NotificationFamily][] = [
     /feedback|signal|shared|clarification|blocker_reported|note_|reminder/,
     "message",
   ],
-  [/rejected|refused|changes|discarded|withdrawn|suspended/, "changes"],
   [
-    /approved|validated|accepted|signed|done|decided|lifted|granted|launched$/,
+    /rejected|refused|declined|changes|discarded|withdrawn|suspended/,
+    "changes",
+  ],
+  [
+    /approved|validated|accepted|confirmed|signed|done|decided|lifted|granted|launched$/,
     "done",
   ],
   [/assigned|added|invited|organized|proposed$|transmitted$/, "added"],

@@ -188,6 +188,10 @@ export const NOTIFICATION_KINDS = [
   // A selection of artists handed over (lot 4 of docs/pds-mic-plan.md): its
   // page in the Catalogue, no project (the subject is the selection).
   "selection_transmitted",
+  // A guest of a collective agreed or declined (retours d'Ibé du
+  // 18/11/2026): to the project's owner, « Titres et artistes ».
+  "participation_confirmed",
+  "participation_declined",
 ] as const;
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
 
@@ -215,14 +219,30 @@ export type NotificationItem = {
   read: boolean;
 };
 
+/** What a notification is about, named when its text needs it: a
+ * collective's participation, its artist and title (loadParticipation
+ * Subjects). */
+export type NotificationSubject = { artist: string; title: string };
+
 // The text is written here, from the kind and the linked objects: the
 // database stores identifiers only.
 export function notificationText(
   kind: NotificationKind,
   actorName: string | null,
   projectTitle: string | null,
+  about?: NotificationSubject | null,
 ): string {
   const t = fr.notifications;
+  // « Jay est d'accord pour Titre de Jay (à nommer) · Assurance 30. »
+  if (
+    about &&
+    (kind === "participation_confirmed" || kind === "participation_declined")
+  )
+    return t.participation[kind](
+      about.artist,
+      about.title,
+      projectTitle ?? t.aProject,
+    );
   // A selection of artists has no project: its own name, else a plain text.
   const subject =
     kind === "selection_transmitted" ? projectTitle || "" : projectTitle;
@@ -357,6 +377,9 @@ export function notificationHref(
   // The mastering has its own step (ticket « Architecture globale »).
   if (kind.startsWith("master_mastering_"))
     return routes.projectMasterStep(projectId, "mastering");
+  // A guest agreed or declined: the collective's recap.
+  if (kind === "participation_confirmed" || kind === "participation_declined")
+    return routes.projectTitles(projectId);
   // Lot 12: the participations' contracts and waivers, in the Juridique.
   if (kind.startsWith("participation_waiver_"))
     return legalParticipationsHref(projectId);
