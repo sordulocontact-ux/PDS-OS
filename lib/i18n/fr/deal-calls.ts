@@ -11,8 +11,6 @@ export const dealCalls = {
       "Le call reprend le contexte du deal et les termes encore à négocier ; vous enregistrez l'échange depuis sa page.",
     title: (name: string) => `Call · ${name}`,
     titlePlaceholder: "Call avec le manager",
-    participantsHint:
-      "Les invités du Réseau ou par e-mail. Les membres qui lisent le deal voient le call.",
     agendaTitle: "Ordre du jour",
     contextTopic: "Où en est le deal",
     contextStage: (stage: string) => `Étape : ${stage}`,

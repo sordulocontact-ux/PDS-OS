@@ -59,6 +59,7 @@ async function callFormFor(
     googleMeet: googleMeetConfigured(),
     defaultOccurredAt: nextRoundHourInput(new Date()),
     topics: dealCallTopics(deal, terms),
+    negotiator: deal.assignee,
   };
 }
 

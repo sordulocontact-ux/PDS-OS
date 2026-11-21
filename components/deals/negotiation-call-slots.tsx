@@ -111,10 +111,10 @@ export function NegotiationCallSlots({
         />
       )}
       {negotiator && (
-        <section className="flex flex-col gap-4">
-          <h3 className="text-body-md font-semibold">
-            {t.slotsTitle(negotiator.name)}
-          </h3>
+        <section
+          aria-label={t.slotsTitle(negotiator.name)}
+          className="flex flex-col gap-4"
+        >
           {negotiator.error ? (
             <ToneCallout tone="warning">{t.slotsError}</ToneCallout>
           ) : negotiator.days.length === 0 ? (

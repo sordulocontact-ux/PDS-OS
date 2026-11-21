@@ -81,9 +81,13 @@ export function NegotiationCallButton({
               titlePlaceholder={t.titlePlaceholder}
               defaultOccurredAt={slot === "other" ? "" : slot.local}
               defaultEnd={slot === "other" ? undefined : slot.end}
-              members={[]}
-              memberDetail=""
-              defaultMemberIds={[]}
+              members={
+                negotiator
+                  ? [{ personId: negotiator.id, name: negotiator.name }]
+                  : []
+              }
+              memberDetail={t.who}
+              defaultMemberIds={negotiator ? [negotiator.id] : []}
               contacts={data.contacts}
               googleMeet={data.googleMeet}
               submitLabel={t.submit}

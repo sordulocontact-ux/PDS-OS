@@ -70,7 +70,10 @@ export async function planCall(
   const guests = await resolveGuests(session.supabase, guestInput);
   if (!guests.ok) return guests;
   const me = session.access.personId;
-  const attendees = deal ? [] : picked.filter((id) => id !== me);
+  const invited = picked.filter((id) => id !== me);
+  // A deal's call is seen by whoever reads the deal: its members (its
+  // business manager) are only invited to its Meet.
+  const attendees = deal ? [] : invited;
 
   const organizationId = session.access.organizationId!;
   const { data, error } = await session.supabase
@@ -132,7 +135,7 @@ export async function planCall(
       callId: data.id,
       title,
       slot: slot.slot,
-      memberIds: me ? [me, ...attendees] : attendees,
+      memberIds: me ? [me, ...invited] : invited,
       guests: guests.guests,
     }));
   return { ok: true, id: data.id, meetFailed };

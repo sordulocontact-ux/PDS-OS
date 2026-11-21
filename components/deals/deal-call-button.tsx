@@ -24,13 +24,16 @@ export type DealCallFormData = {
   defaultOccurredAt: string;
   // The points the code puts on its agenda (lib/deals/call-prep.ts).
   topics: string[];
+  // The deal's business manager: in the call by default (Sacha 21/11/2026).
+  negotiator: { id: string; name: string } | null;
 };
 
 /**
  * « Préparer un call » of a deal (BIZ 6): the call form of Calls (name,
  * guests from the Réseau or by e-mail, slot, video link), its agenda folded
  * at the bottom (DealCallAgendaPreview), as the code will write it.
- * No member is invited: whoever reads the deal sees the call.
+ * The deal's business manager is among the participants by default (invited
+ * to the Meet); whoever reads the deal sees the call.
  */
 export function DealCallButton({
   data,
@@ -62,11 +65,14 @@ export function DealCallButton({
             defaultTitle={data.title}
             titlePlaceholder={t.titlePlaceholder}
             defaultOccurredAt={data.defaultOccurredAt}
-            members={[]}
-            memberDetail=""
-            defaultMemberIds={[]}
+            members={
+              data.negotiator
+                ? [{ personId: data.negotiator.id, name: data.negotiator.name }]
+                : []
+            }
+            memberDetail={fr.dealCalls.negotiation.who}
+            defaultMemberIds={data.negotiator ? [data.negotiator.id] : []}
             contacts={data.contacts}
-            participantsHint={t.participantsHint}
             googleMeet={data.googleMeet}
             submitLabel={t.submit}
             pendingLabel={t.pending}
