@@ -155,7 +155,7 @@ export async function CallPage({
       module={
         deal
           ? {
-              href: `${routes.deal(deal.id)}#propositions`,
+              href: `${routes.deal(deal.id)}#termes`,
               name: fr.calls.page.modules.deal,
             }
           : project

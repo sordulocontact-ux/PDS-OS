@@ -8051,7 +8051,10 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   le deal passe tout seul en négociation et les anciennes propositions d'étape ne s'affichent plus) que le code garde seulement
   si le terme existe, le passage est trouvé mot pour mot, chaque chiffre vient du passage
   (`parseSaidEuros`, `unitsOf`) et la date dite est résolue par le code (`resolveSaidDate`). Page du deal :
-  « Propositions des calls » (`DealCallProposals`) : « Vérifier » ouvre le **vrai formulaire** pré-rempli
+  chaque proposition dans la section de ce qu'elle change (`DealCallProposals`, 21/11/2026) : celle d'un terme
+  en tête de « Termes négociés », **à la place du terme** (`DealTerms proposals` / `proposedKeys`), celle de la
+  prochaine action dans « Prochaine action » ; ordre des sections de « À faire » selon l'étape (`WORKS` de
+  `deal-todo-view.tsx` : calls en tête à « Call prévu », termes en tête en négociation). « Vérifier » ouvre le **vrai formulaire** pré-rempli
   (`TermForm`, `NextActionForm`, `proposalId`), l'enregistrer applique la proposition
   (`settle_deal_call_proposal` `applied`) ; « Écarter » la met de côté. PO ne change jamais un deal ; la
   « Maintenant » du call renvoie au deal (`CallModule` « le deal », compte des propositions en attente).

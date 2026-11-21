@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 import { TermForm } from "@/components/deals/term-form";
 import { EmptyNote } from "@/components/shell/empty-state";
@@ -26,21 +26,30 @@ const TEXT_FORMATS = new Set<TermFormat>(["text", "yesno", "split"]);
  * value, its state as a dot, who changed it last and when; then the ones still to define on one line (Sacha
  * 20/11/2026: nine rows « À définir » made the page a table), each a
  * button for whoever writes the deal. A card or a button opens the term in a
- * dialog; the history is in the deal's journal.
+ * dialog; the history is in the deal's journal. PO's proposals from the
+ * deal's calls come first, in place of their terms (Sacha 21/11/2026: « une
+ * section complète », the proposal is the negotiated term).
  */
 export function DealTerms({
   dealId,
   terms,
   canWrite,
+  proposals,
+  proposedKeys = [],
 }: {
   dealId: string;
   terms: DealTerm[];
   canWrite: boolean;
+  // PO's term proposals (DealCallProposals), rendered by the caller.
+  proposals?: ReactNode;
+  // Their terms: shown as the proposal, not a second time.
+  proposedKeys?: string[];
 }) {
   const t = fr.deals.terms;
   const [open, setOpen] = useState<DealTerm | null>(null);
-  const written = terms.filter((term) => term.state !== "to_define");
-  const toDefine = terms.filter((term) => term.state === "to_define");
+  const shown = terms.filter((term) => !proposedKeys.includes(term.key));
+  const written = shown.filter((term) => term.state !== "to_define");
+  const toDefine = shown.filter((term) => term.state === "to_define");
   const label = (term: DealTerm) => t.labels[term.key] ?? term.key;
   const toDefineButtons = (className?: string) => (
     <div className={cn("flex flex-wrap gap-1.5", className)}>
@@ -60,6 +69,7 @@ export function DealTerms({
   );
   return (
     <div className="flex flex-col gap-3">
+      {proposals}
       {written.length > 0 && (
         <FactCards>
           {written.map((term) => {
@@ -92,7 +102,7 @@ export function DealTerms({
         </FactCards>
       )}
       {toDefine.length > 0 &&
-        (written.length === 0 ? (
+        (written.length === 0 && proposedKeys.length === 0 ? (
           // None written yet: the empty note of the deal's other sections,
           // the terms to define as its buttons (Sacha 20/11/2026).
           <EmptyNote action={canWrite && toDefineButtons("justify-center")}>

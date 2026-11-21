@@ -92,7 +92,10 @@ function DismissButton({ dealId, id }: { dealId: string; id: string }) {
 
 /**
  * PO's proposals from the deal's calls (BIZ 6), one card each with the
- * passage it comes from (Sacha 20/11/2026, proto « Fiche d'un deal » v2). « Vérifier » opens the deal's real form prefilled with it:
+ * passage it comes from (Sacha 20/11/2026, proto « Fiche d'un deal » v2),
+ * each in the section of what it changes: a term's in « Termes négociés »
+ * in place of the term, the next action's in « Prochaine action » (Sacha
+ * 21/11/2026). « Vérifier » opens the deal's real form prefilled with it:
  * the person corrects and saves (the proposal is then applied); « Écarter »
  * sets it aside. PO never changes the deal by itself.
  */

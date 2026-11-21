@@ -39,9 +39,9 @@ export const dealCalls = {
     meetFailed:
       "Call calé, mais Google n'a pas créé de lien Meet : ajoutez un lien de visio sur la page du call.",
   },
-  // PO's proposals from a call's report (lib/deals/call-proposals.ts).
+  // PO's proposals from a call's report (lib/deals/call-proposals.ts), in
+  // « Termes négociés » and « Prochaine action ».
   proposals: {
-    title: "Propositions des calls",
     from: (call: string, day: string) => `D'après « ${call} », ${day}`,
     term: (label: string, value: string, state: string) =>
       `${label} : ${value} (${state})`,
