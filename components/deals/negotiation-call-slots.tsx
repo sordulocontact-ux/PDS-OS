@@ -15,8 +15,6 @@ import { dealCalls } from "@/lib/i18n/fr/deal-calls";
 
 const fr = { dealCalls };
 
-const secondary = "text-body-sm text-[color:var(--text-secondary)]";
-
 const longDay = new Intl.DateTimeFormat("fr-FR", {
   weekday: "long",
   day: "numeric",
@@ -114,12 +112,9 @@ export function NegotiationCallSlots({
       )}
       {negotiator && (
         <section className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <h3 className="text-body-md font-semibold">
-              {t.slotsTitle(negotiator.name)}
-            </h3>
-            <p className={secondary}>{t.slotsSource}</p>
-          </div>
+          <h3 className="text-body-md font-semibold">
+            {t.slotsTitle(negotiator.name)}
+          </h3>
           {negotiator.error ? (
             <ToneCallout tone="warning">{t.slotsError}</ToneCallout>
           ) : negotiator.days.length === 0 ? (

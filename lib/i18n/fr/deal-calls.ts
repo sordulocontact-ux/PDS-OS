@@ -34,7 +34,6 @@ export const dealCalls = {
     noNegotiator:
       "Aucun membre ne négocie : la direction donne le poste de business manager dans Équipe.",
     slotsTitle: (who: string) => `Créneaux libres de ${who}`,
-    slotsSource: "D'après ses calls dans PDS OS, de 10 h à 18 h.",
     slotsNone: "Aucun créneau libre ces prochains jours.",
     slotsError: "Ses créneaux n'ont pas pu être lus.",
     slotsOf: (day: string) => `Créneaux du ${day}`,
