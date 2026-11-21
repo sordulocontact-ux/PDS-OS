@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
@@ -87,19 +87,27 @@ export function NextActionForm({
 }
 
 /**
- * A deal's next action and its follow-up date (BIZ 4); whoever writes the
- * deal changes them in a dialog. The next call is not repeated here: it is
- * in « Calls » (Sacha 21/11/2026).
+ * A deal's next action and its follow-up date (BIZ 4), then the next call
+ * as its card (Sacha 21/11/2026: « autant mettre la card des calls »);
+ * whoever writes the deal changes the action in a dialog.
  */
-export function DealNextAction({ deal }: { deal: Deal }) {
+export function DealNextAction({
+  deal,
+  call,
+}: {
+  deal: Deal;
+  // The next call to hold, as its card (DealCallCard), rendered by the server.
+  call?: ReactNode;
+}) {
   const t = fr.deals.page.next;
   const [open, setOpen] = useState(false);
+  const none = !deal.nextAction && !deal.followUpOn;
   return (
-    <>
+    <div className="flex flex-col gap-2">
       {/* One sentence, not a table (Sacha 20/11/2026): the action and its
-          day, then the follow-up. None: the empty note of the deal's other
-          sections, its button inside (Sacha 20/11/2026). */}
-      {!deal.nextAction && !deal.followUpOn ? (
+          day, then the follow-up. None and no call: the empty note of the
+          deal's other sections, its button inside (Sacha 20/11/2026). */}
+      {none && call ? null : none ? (
         <EmptyNote
           action={
             deal.canWrite && (
@@ -140,6 +148,14 @@ export function DealNextAction({ deal }: { deal: Deal }) {
           )}
         </div>
       )}
+      {call}
+      {none && call && deal.canWrite && (
+        <div>
+          <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
+            {t.add}
+          </Button>
+        </div>
+      )}
       <FormDialog
         open={open}
         onOpenChange={setOpen}
@@ -149,6 +165,6 @@ export function DealNextAction({ deal }: { deal: Deal }) {
       >
         {open && <NextActionForm deal={deal} onDone={() => setOpen(false)} />}
       </FormDialog>
-    </>
+    </div>
   );
 }

@@ -5,7 +5,7 @@ import {
   type DealCallFormData,
 } from "@/components/deals/deal-call-button";
 import { DealCallProposals } from "@/components/deals/deal-call-proposals";
-import { DealCalls } from "@/components/deals/deal-calls";
+import { DealCallCard, DealCalls } from "@/components/deals/deal-calls";
 import { DealContacts } from "@/components/deals/deal-contacts";
 import { DealMemoSections } from "@/components/deals/deal-memo-sections";
 import { DealNextAction } from "@/components/deals/deal-next-action";
@@ -16,7 +16,11 @@ import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { StepFrieze } from "@/components/ui/step-frieze";
 import type { Access } from "@/lib/auth/access";
-import type { DealCall, DealCallProposal } from "@/lib/deals/call-queries";
+import {
+  nextDealCall,
+  type DealCall,
+  type DealCallProposal,
+} from "@/lib/deals/call-queries";
 import type { DealContact } from "@/lib/deals/contact-queries";
 import type { NegotiationCallData } from "@/lib/deals/negotiation-call";
 import type { DealTerm } from "@/lib/deals/terms";
@@ -113,6 +117,7 @@ export function DealTodoView({
   nextCall: { label: string; href: string } | null;
 }) {
   const s = t.page.sections;
+  const upcomingCall = nextDealCall(calls);
   const works = (what: keyof typeof WORKS) => WORKS[what].includes(deal.stage);
   return (
     <>
@@ -136,7 +141,14 @@ export function DealTodoView({
       )}
       {!isClosedStage(deal.stage) && (
         <PageSection id="prochaine-action" title={s.next}>
-          <DealNextAction deal={deal} />
+          <DealNextAction
+            deal={deal}
+            call={
+              upcomingCall && (
+                <DealCallCard call={upcomingCall} now={new Date()} />
+              )
+            }
+          />
         </PageSection>
       )}
       {works("terms") && (
