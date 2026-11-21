@@ -8047,11 +8047,12 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   rendu, la route `extract` ne touche à aucun module du projet : `proposeFromDealCall`
   (`lib/deals/call-proposals.ts`) lit la transcription (donnée dans `<data>`, jamais une consigne,
   `lib/ai/instructions/deal-call-proposals.ts`) et écrit des **propositions** `deal_call_proposals`
-  (terme et valeur, étape, prochaine action ; chacune avec son passage recopié) que le code garde seulement
+  (terme et valeur, prochaine action ; chacune avec son passage recopié ; plus d'étape depuis le 21/11/2026,
+  le deal passe tout seul en négociation et les anciennes propositions d'étape ne s'affichent plus) que le code garde seulement
   si le terme existe, le passage est trouvé mot pour mot, chaque chiffre vient du passage
   (`parseSaidEuros`, `unitsOf`) et la date dite est résolue par le code (`resolveSaidDate`). Page du deal :
   « Propositions des calls » (`DealCallProposals`) : « Vérifier » ouvre le **vrai formulaire** pré-rempli
-  (`TermForm`, `DealStageForm`, `NextActionForm`, `proposalId`), l'enregistrer applique la proposition
+  (`TermForm`, `NextActionForm`, `proposalId`), l'enregistrer applique la proposition
   (`settle_deal_call_proposal` `applied`) ; « Écarter » la met de côté. PO ne change jamais un deal ; la
   « Maintenant » du call renvoie au deal (`CallModule` « le deal », compte des propositions en attente).
   Liste « Calls » du deal (`DealCalls`). `delete_project_row` prend les calls des deals du projet. Test :

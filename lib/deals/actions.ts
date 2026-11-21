@@ -124,7 +124,6 @@ export async function setDealStage(
   dealId: string,
   stage: string,
   note?: string | null,
-  proposalId?: string | null,
 ): Promise<WriteResult> {
   await requireApproved();
   const deal = id.safeParse(dealId);
@@ -139,7 +138,6 @@ export async function setDealStage(
     p_note: why.data ?? undefined,
   });
   if (error) return { ok: false, error: dealFailure("setDealStage", error) };
-  await applied(supabase, proposalId);
   await schedulePendingPushes();
   refresh(deal.data);
   return { ok: true, done: t.done.stage(t.stages[to.data]) };

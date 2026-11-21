@@ -20,11 +20,7 @@ import {
   type TermState,
   type TermValue,
 } from "@/lib/deals/terms";
-import {
-  DEAL_KINDS,
-  MOVABLE_DEAL_STAGES,
-  type DealKind,
-} from "@/lib/deals/types";
+import { DEAL_KINDS, type DealKind } from "@/lib/deals/types";
 import { deals } from "@/lib/i18n/fr/deals";
 import { todayInParis } from "@/lib/insights/dates";
 import { SPLIT_ROLES, unitsOf } from "@/lib/legal/splits/shares";
@@ -112,9 +108,9 @@ function valueOf(
   return checked.success ? (checked.data as TermValue) : null;
 }
 
-/** What the model is given: the terms and stages as keys, then the
- * transcript, all as data. */
-function inputOf(kind: DealKind, stage: string, transcript: Transcript) {
+/** What the model is given: the terms as keys, then the transcript, all
+ * as data. */
+function inputOf(kind: DealKind, transcript: Transcript) {
   const t = deals;
   return [
     "<terms>",
@@ -122,10 +118,6 @@ function inputOf(kind: DealKind, stage: string, transcript: Transcript) {
       (term) => `${term.key} : ${t.terms.labels[term.key] ?? term.key}`,
     ),
     "</terms>",
-    "<stages>",
-    ...MOVABLE_DEAL_STAGES.map((s) => `${s} : ${t.stages[s]}`),
-    `Étape actuelle : ${stage}`,
-    "</stages>",
     "<transcript>",
     transcript.text,
     "</transcript>",
@@ -135,7 +127,7 @@ function inputOf(kind: DealKind, stage: string, transcript: Transcript) {
 /**
  * Right after a deal's call report is saved (BIZ 6), PO reads the
  * transcript and proposes what changed in the negotiation: a term's value,
- * a stage, the next action. The code keeps only what it can verify — a known
+ * the next action (no stage: the deal moves by itself, 21/11/2026). The code keeps only what it can verify — a known
  * term, a quote found verbatim, every figure taken from it, a date said and
  * resolved by code — and writes them « proposé » under the user's session
  * (RLS: whoever works on the call). A person confirms each in the deal's
@@ -174,7 +166,7 @@ export async function proposeFromDealCall(
   try {
     ({ output } = await extract(
       dealCallProposalsSchema,
-      inputOf(kind, deal.stage, transcript),
+      inputOf(kind, transcript),
       DEAL_CALL_PROPOSALS_INSTRUCTIONS,
     ));
   } catch (error) {
@@ -211,11 +203,6 @@ export async function proposeFromDealCall(
       quote,
     });
   }
-
-  const stage = MOVABLE_DEAL_STAGES.find((s) => s === output.stage.trim());
-  const stageQuote = verified(output.stageQuote, transcript);
-  if (stage && stage !== deal.stage && stageQuote)
-    rows.push({ ...base, kind: "stage", stage, quote: stageQuote });
 
   const action = output.nextAction.trim();
   const actionQuote = verified(output.nextActionQuote, transcript);

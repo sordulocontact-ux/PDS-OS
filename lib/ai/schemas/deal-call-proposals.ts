@@ -2,7 +2,8 @@ import { z } from "zod";
 
 /**
  * What PO reads in the transcript of a deal's call (BIZ 6): the terms whose
- * value was said, a stage the negotiation reached, the next action. Each with
+ * value was said and the next action (no stage since 21/11/2026: the deal
+ * moves by itself, Sacha « ça sert à rien »). Each with
  * the verbatim passage it comes from. Never a value, a date or a number of
  * its own: the code keeps only what it finds in the passage
  * (lib/deals/call-proposals.ts), and a person confirms every proposal in the
@@ -63,14 +64,6 @@ export const dealCallProposalsSchema = z.object({
       }),
     )
     .default([]),
-  stage: z
-    .string()
-    .describe(
-      "Clé d'une étape de <stages> que la négociation a clairement atteinte pendant le call, ou vide.",
-    ),
-  stageQuote: z
-    .string()
-    .describe("Passage recopié mot pour mot qui le montre, ou vide."),
   nextAction: z
     .string()
     .describe(

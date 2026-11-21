@@ -4,7 +4,6 @@ import { IconSparkle3 } from "nucleo-sharp-essential";
 import { useState } from "react";
 
 import { NextActionForm } from "@/components/deals/deal-next-action";
-import { DealStageForm } from "@/components/deals/deal-stage-form";
 import { TermForm } from "@/components/deals/term-form";
 import { Button } from "@/components/ui/button";
 import { DocumentCard } from "@/components/ui/document-card";
@@ -27,9 +26,8 @@ const fr = { dealCalls, deals, dialogs };
 const t = fr.dealCalls.proposals;
 
 /** The proposal in words: « Avance ou cachet : Avance de 2 000 € HT
- * (Contre-proposition) », « Passer à l'étape … », « Prochaine action : … ». */
+ * (Contre-proposition) », « Prochaine action : … ». */
 function textOf(deal: Deal, p: DealCallProposal): string {
-  if (p.kind === "stage") return t.stage(fr.deals.stages[p.stage]);
   if (p.kind === "next_action")
     return t.next(p.action, p.on ? formatDay(p.on) : null);
   const term = termOf(deal.kind, p.termKey);
@@ -50,18 +48,6 @@ function ProposalForm({
   proposal: DealCallProposal;
   onDone: () => void;
 }) {
-  if (proposal.kind === "stage")
-    return (
-      <DealStageForm
-        deal={deal}
-        proposal={{
-          id: proposal.id,
-          stage: proposal.stage,
-          note: proposal.quote,
-        }}
-        onDone={onDone}
-      />
-    );
   if (proposal.kind === "next_action")
     return (
       <NextActionForm

@@ -8,11 +8,7 @@ import {
   type TermState,
   type TermValue,
 } from "@/lib/deals/terms";
-import {
-  isDealStage,
-  type DealKind,
-  type MovableDealStage,
-} from "@/lib/deals/types";
+import type { DealKind } from "@/lib/deals/types";
 import { createClient } from "@/lib/supabase/server";
 
 // Read with the user's session: a deal's calls and proposals are seen by
@@ -70,7 +66,6 @@ export type DealCallProposal = {
       value: TermValue;
       state: Exclude<TermState, "to_define">;
     }
-  | { kind: "stage"; stage: MovableDealStage }
   | { kind: "next_action"; action: string; on: string | null }
 );
 
@@ -93,6 +88,9 @@ export async function loadDealCallProposals(
     )
     .eq("deal_id", dealId)
     .eq("status", "proposed")
+    // No stage proposals since 21/11/2026 (the deal moves by itself): the
+    // older ones are not shown.
+    .neq("kind", "stage")
     .order("created_at");
   if (error) console.error("loadDealCallProposals:", error.message);
   return (data ?? []).flatMap((p): DealCallProposal[] => {
@@ -118,8 +116,6 @@ export async function loadDealCallProposals(
           ]
         : [];
     }
-    if (p.kind === "stage" && isDealStage(p.stage) && p.stage !== "abandoned")
-      return [{ ...base, kind: "stage", stage: p.stage }];
     if (p.kind === "next_action" && p.next_action)
       return [
         {

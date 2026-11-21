@@ -45,7 +45,6 @@ export const dealCalls = {
     from: (call: string, day: string) => `D'après « ${call} », ${day}`,
     term: (label: string, value: string, state: string) =>
       `${label} : ${value} (${state})`,
-    stage: (stage: string) => `Passer à l'étape « ${stage} »`,
     next: (action: string, day: string | null) =>
       day
         ? `Prochaine action : ${action} · ${day}`
