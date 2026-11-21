@@ -18,7 +18,8 @@ const fr = { legalDemarches };
  * title not in the Catalogue yet (§ 3.6 of Ibé's 18/11): the project's
  * owner attaches it here (who writes the titles, the database deciding
  * again); anyone else reads who does. Once it has a master, the address
- * opens the title's first démarche, else the Juridique's entry.
+ * opens the title's first démarche, else the Juridique's entry; an address
+ * of no title of the project answers 404.
  */
 export async function AttachTitleStep({
   projectId,
@@ -31,7 +32,7 @@ export async function AttachTitleStep({
     legalJourneyContext(projectId),
     legalTitleLayout(projectId),
   ]);
-  if (!layout) notFound();
+  if (!layout || !layout.titleIds.includes(titleId)) notFound();
   const key = legalAttachKey(titleId);
   if (!layout.steps.some((s) => s.key === key)) {
     const first = layout.steps.find(

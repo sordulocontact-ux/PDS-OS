@@ -56,8 +56,12 @@ async function loadFor(projectId: string) {
   };
 }
 
-function errorOf(message: string): string {
+function errorOf(message: string, detail?: string | null): string {
   const t = fr.legalContracts.agreements.errors;
+  // No contract before the accord of a guest artist (§ 3.5): the titles
+  // concerned come as the refusal's detail.
+  if (message.includes("agreement_not_validated"))
+    return t.notValidated(detail?.trim() || null);
   if (message.includes("contract_fields_missing")) return t.missing;
   if (message.includes("template_not_validated")) return t.template;
   if (message.includes("mapping_template_not_validated")) return t.template;
@@ -179,6 +183,14 @@ export async function generateLegalContract(
   if (!row) return { ok: false, error: fr.auth.errors.forbidden };
   if (row.state !== "ready_to_generate")
     return { ok: false, error: errorOf("contract_fields_missing") };
+  if (row.awaitingAgreement)
+    return {
+      ok: false,
+      error: errorOf(
+        "agreement_not_validated",
+        row.awaitingAgreement.join(", "),
+      ),
+    };
 
   return legalOutcome(
     loaded.project.id,
@@ -191,7 +203,10 @@ export async function generateLegalContract(
       });
       if (error || !data) {
         if (error) console.error("generateLegalContract:", error.message);
-        return { ok: false, error: errorOf(error?.message ?? "") };
+        return {
+          ok: false,
+          error: errorOf(error?.message ?? "", error?.details),
+        };
       }
       revalidatePath(routes.projectLegal(loaded.project.id), "layout");
       revalidatePath(routes.contracts, "layout");

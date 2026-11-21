@@ -12,10 +12,12 @@
 // client-safe; read by lib/legal/title-layout.ts.
 //
 // A title's group is where what belongs to that title alone goes: its
-// contracts and « En attente de l'accord » (lot L3b) are steps of the
-// démarches given to it here (`titleOfDemarche`), or steps added to its
-// group by `layoutByTitle` (`extra`), as the attach step is.
+// démarches (`titleOfDemarche`), and the steps added to its group by
+// `layoutByTitle` (`extra`): « Contrats du titre » (§ 3.4, with « En
+// attente de l'accord » of its guests, § 3.5), after the attach step and
+// before the démarches.
 
+import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
 import { legalDemarches } from "@/lib/i18n/fr/legal-demarches";
 import { joinArtistNames } from "@/lib/projects/participation-rules";
 import {
@@ -24,16 +26,22 @@ import {
   titleGuestNames,
   type ProjectTitle,
 } from "@/lib/projects/title-rules";
+import {
+  awaitingNames,
+  type TitleContractNeeds,
+} from "@/lib/legal/title-contracts-rules";
 import { titleHue, type Hue } from "@/lib/ui/category-hues";
 import type { JourneyStep } from "@/lib/ui/journey";
 import {
   legalAttachHref,
   legalAttachKey,
+  legalTitleContractsHref,
+  legalTitleContractsKey,
   LEGAL_READY_KEY,
   type LegalDemarcheKind,
 } from "@/lib/ui/legal-steps";
 
-const fr = { legalDemarches };
+const fr = { legalContracts, legalDemarches };
 
 const t = fr.legalDemarches;
 
@@ -131,6 +139,8 @@ export type StepTitle = {
 };
 
 export type TitleLayout = {
+  // Every title of the project (abandoned ones too), by project title id.
+  titleIds: string[];
   // The spine's steps: the Dossier, « Projet », each title, the Sortie.
   steps: JourneyStep[];
   // The titles' groups, folded but the one of the open step.
@@ -179,13 +189,47 @@ function attachStep(projectId: string, title: LegalTitle): JourneyStep {
   };
 }
 
+/** « Contrats du titre »: the first step of a live title's group after its
+ * attach step, done once the Juridique confirmed the contracts it needs.
+ * `awaiting`: the guests of the title whose accord is awaited, said in the
+ * journey while it lasts (no contract goes before the accord). A step of the
+ * spine only: it has no tools of its own. */
+export function titleContractsStep(
+  projectId: string,
+  title: LegalTitle,
+  needs: TitleContractNeeds,
+  awaiting: readonly string[],
+): JourneyStep {
+  const tc = t.titleContracts;
+  return {
+    key: legalTitleContractsKey(title.id),
+    href: legalTitleContractsHref(projectId, title.id),
+    title: tc.title,
+    why: "",
+    status: needs.confirmed ? "done" : "current",
+    owner: null,
+    validator: null,
+    prereq: [],
+    next: [],
+    actor: null,
+    summary:
+      awaiting.length > 0
+        ? fr.legalContracts.agreements.awaitingOf(awaitingNames(awaiting))
+        : needs.confirmed
+          ? needs.kinds.length > 0
+            ? needs.kinds.map((kind) => tc.kinds[kind]).join(", ")
+            : tc.none
+          : null,
+  };
+}
+
 /**
  * The Juridique's journey of a collective, regrouped: `steps` as
  * legalJourney built them (Dossier, démarches, Sortie), each démarche put
  * in « Projet » or in its title's group (`anchors`, by step key). A title
  * without a master and not abandoned starts with its attach step; a title
  * with nothing in it has no group. `extra`: more steps of a title's group,
- * after its démarches (lot L3b).
+ * after its attach step and before its démarches (« Contrats du titre »).
  */
 export function layoutByTitle(input: {
   projectId: string;
@@ -199,12 +243,7 @@ export function layoutByTitle(input: {
   const project: JourneyStep[] = [];
   const release: JourneyStep[] = [];
   const byTitle = new Map<string, JourneyStep[]>(
-    input.titles.map((title) => [
-      title.id,
-      title.masterId || title.abandoned
-        ? []
-        : [attachStep(input.projectId, title)],
-    ]),
+    input.titles.map((title) => [title.id, []]),
   );
   for (const step of input.steps) {
     const anchor = anchorOf.get(step.key);
@@ -223,8 +262,11 @@ export function layoutByTitle(input: {
   const foldable: string[] = [];
   const grouped = input.titles.flatMap((title) => {
     const own = [
-      ...(byTitle.get(title.id) ?? []),
+      ...(title.masterId || title.abandoned
+        ? []
+        : [attachStep(input.projectId, title)]),
       ...(input.extra?.[title.id] ?? []),
+      ...(byTitle.get(title.id) ?? []),
     ];
     if (own.length === 0) return [];
     const groupKey = titleGroupKey(title.id);
@@ -240,6 +282,7 @@ export function layoutByTitle(input: {
     });
   });
   return {
+    titleIds: input.titles.map((title) => title.id),
     steps: [...dossier, ...project, ...grouped, ...release],
     foldable,
     titleOf,

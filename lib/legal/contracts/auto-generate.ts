@@ -4,6 +4,7 @@ import { can, type Access } from "@/lib/auth/access";
 import { fr } from "@/lib/i18n/fr";
 import type { AgreementRow } from "@/lib/legal/contracts/mapping";
 import { loadAgreements, type Agreements } from "@/lib/legal/contracts/queries";
+import { agreementsToGenerate } from "@/lib/legal/title-contracts-rules";
 import { createClient } from "@/lib/supabase/server";
 
 // « Dès que les prérequis d'un accord sont disponibles, PO duplique le
@@ -26,15 +27,16 @@ export function contractFieldsOf(row: AgreementRow) {
   );
 }
 
-/** Generates the agreements that are ready; how many were. */
+/** Generates the agreements that are ready; how many were. A guest artist's
+ * waiting for their accord (Ibé, 18/11/2026, § 3.5) is left out before the
+ * database is asked; its refusal, if it comes anyway (the accord changed
+ * since the page was read), is the same expected skip. */
 export async function generateReadyAgreements(
   agreements: Agreements,
   access: Access,
 ): Promise<number> {
   if (!can(access, "manage_contracts")) return 0;
-  const ready = agreements.rows.filter(
-    (r) => r.state === "ready_to_generate" && r.needId,
-  );
+  const ready = agreementsToGenerate(agreements.rows);
   if (ready.length === 0) return 0;
   const supabase = await createClient();
   let made = 0;
@@ -46,7 +48,10 @@ export async function generateReadyAgreements(
     });
     if (!error) made += 1;
     // Another tab did it at the same moment: nothing to say.
-    else if (!error.message.includes("agreement_already_generated"))
+    else if (
+      !error.message.includes("agreement_already_generated") &&
+      !error.message.includes("agreement_not_validated")
+    )
       console.error("generateReadyAgreements:", error.message);
   }
   return made;

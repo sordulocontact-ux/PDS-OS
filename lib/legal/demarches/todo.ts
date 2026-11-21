@@ -7,6 +7,7 @@
 
 import { legalDemarches } from "@/lib/i18n/fr/legal-demarches";
 import type { BoardRow } from "@/lib/legal/plan/board";
+import { isAwaitingAgreement } from "@/lib/legal/title-contracts-rules";
 
 const fr = { legalDemarches };
 
@@ -84,7 +85,8 @@ export function expectedOf(row: BoardRow): Expected | null {
         case "needs_info":
           return owner(t.missing(a.name));
         case "ready_to_generate":
-          return owner(t.generate(a.name));
+          // A guest's contract waits for their accord: nobody acts on it.
+          return isAwaitingAgreement(a) ? null : owner(t.generate(a.name));
         case "draft":
           return owner(t.submit(a.name));
         case "review_required":

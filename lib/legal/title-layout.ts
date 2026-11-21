@@ -6,11 +6,17 @@ import { legalClearanceRows } from "@/lib/legal/shared-rows";
 import {
   layoutByTitle,
   legalTitlesOf,
+  titleContractsStep,
   type DemarcheAnchor,
   type TitleLayout,
 } from "@/lib/legal/title-groups";
+import {
+  legalProjectTitles,
+  loadAwaitingAgreements,
+  loadTitleContractNeeds,
+} from "@/lib/legal/title-contracts";
+import { awaitingOnTitle } from "@/lib/legal/title-contracts-rules";
 import { trackedCache } from "@/lib/projects/live-deps";
-import { loadProjectTitles } from "@/lib/projects/titles";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -20,15 +26,19 @@ import { createClient } from "@/lib/supabase/server";
  * Read with the viewer's session, once per render: the project's titles
  * and their guests, its borrowings' masters, and the artist page each guest
  * is linked to in the Réseau (network_contacts.artist_id, ids only: no
- * contact is shown from here).
+ * contact is shown from here). Each live title's group starts with its
+ * contracts (« Contrats du titre », § 3.4 of Ibé's 18/11), which says « En
+ * attente de l'accord » of its guests while it lasts (§ 3.5).
  */
 export const legalTitleLayout = trackedCache(
   async (projectId: string): Promise<TitleLayout | null> => {
     const ctx = await legalJourneyContext(projectId);
     if (!ctx.project.collective) return null;
-    const [titles, clearances] = await Promise.all([
-      loadProjectTitles(projectId),
+    const [titles, clearances, needs, awaiting] = await Promise.all([
+      legalProjectTitles(projectId),
       legalClearanceRows(projectId),
+      loadTitleContractNeeds(projectId),
+      loadAwaitingAgreements(projectId),
     ]);
     if (clearances.error)
       console.error("legalTitleLayout clearances:", clearances.error.message);
@@ -69,11 +79,27 @@ export const legalTitleLayout = trackedCache(
       artistIds:
         d.kind === "person" ? personArtists(d, ctx.forms, artistsOf) : [],
     }));
+    const extra = Object.fromEntries(
+      legalTitles
+        .filter((title) => !title.abandoned)
+        .map((title) => [
+          title.id,
+          [
+            titleContractsStep(
+              projectId,
+              title,
+              needs.get(title.id) ?? { confirmed: false, kinds: [] },
+              awaitingOnTitle(awaiting.guests, title.id),
+            ),
+          ],
+        ]),
+    );
     return layoutByTitle({
       projectId,
       steps: ctx.steps,
       anchors,
       titles: legalTitles,
+      extra,
     });
   },
 );

@@ -9,6 +9,7 @@
 // someone outside through their link. Pure, never stored, never PO's.
 
 import { legal } from "@/lib/i18n/fr/legal";
+import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
 import { legalDemarches } from "@/lib/i18n/fr/legal-demarches";
 import { legalJourney } from "@/lib/i18n/fr/legal-journey";
 import type { FormRow } from "@/lib/legal/forms/queries";
@@ -28,9 +29,11 @@ import {
   type LegalDemarcheKind,
 } from "@/lib/ui/legal-steps";
 
+import { isAwaitingAgreement } from "@/lib/legal/title-contracts-rules";
+
 import { bare, expectedOf } from "./todo";
 
-const fr = { legal, legalDemarches, legalJourney };
+const fr = { legal, legalContracts, legalDemarches, legalJourney };
 
 const t = fr.legalDemarches;
 
@@ -289,7 +292,16 @@ export function launchedDemarches(input: {
           ? doneSummary(kind, parts)
           : state.status === "obsolete"
             ? t.obsolete(own?.reason ?? "")
-            : null,
+            : // A guest's contract waits for their accord (§ 3.5): said in
+              // the journey, where nobody acts.
+              !state.actor &&
+                parts.some(
+                  (p) =>
+                    p.panel.kind === "contract" &&
+                    isAwaitingAgreement(p.panel.row),
+                )
+              ? fr.legalContracts.agreements.awaiting
+              : null,
       group: t.groups.tracking,
       alert: state.alert,
       due: own?.dueOn ?? null,

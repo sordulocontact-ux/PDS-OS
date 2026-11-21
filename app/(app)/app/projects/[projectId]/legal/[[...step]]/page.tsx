@@ -16,6 +16,7 @@ import { FramingStep } from "@/components/legal/steps/framing-step";
 import { InventoryStep } from "@/components/legal/steps/inventory-step";
 import { PlanStep } from "@/components/legal/steps/plan-step";
 import { ReadyStep } from "@/components/legal/steps/ready-step";
+import { TitleContractsStep } from "@/components/legal/steps/title-contracts-step";
 import { demarcheTarget, entryHref } from "@/lib/legal/demarches/where";
 import { isMonth } from "@/lib/legal/history/filter";
 import { loadLegalHistory } from "@/lib/legal/history/queries";
@@ -28,7 +29,8 @@ import { legalRouteOf } from "@/lib/ui/legal-steps";
 // Dossier's steps (/legal/inventory, /framing, /confirmation, /plan), one
 // step per démarche (/legal/person/<ref>, /clearance/<id>, /split/<title>,
 // /sacem/<title>), a collective's title to attach to the Catalogue
-// (/legal/attach/<title>) and « Prêt pour la sortie » (/legal/ready) share
+// (/legal/attach/<title>), its contracts (/legal/title-contracts/<title>)
+// and « Prêt pour la sortie » (/legal/ready) share
 // the guided frame. The former Suivi and branch pages (/legal/tracking, /forms,
 // /contracts, /splits, /clearances, /formalities) redirect to the démarche
 // they were about: notifications and tasks keep working. Reserved to
@@ -87,6 +89,9 @@ export default async function ProjectLegalPage({
   // A collective's title not in the Catalogue yet (Ibé, 18/11/2026).
   if (route.type === "attach")
     return <AttachTitleStep projectId={projectId} titleId={route.titleId} />;
+  // The contracts a collective's title needs (Ibé, 18/11/2026, § 3.4).
+  if (route.type === "titleContracts")
+    return <TitleContractsStep projectId={projectId} titleId={route.titleId} />;
   if (route.type === "step") {
     const key = route.key;
     if (key === "inventory")

@@ -57,6 +57,9 @@ export type InventoryRows = {
     role: FormRole;
   }>;
   failed: Partial<Record<LegalSectionKey, boolean>>;
+  // A collective (retours d'Ibé du 18/11/2026): its people are merged by
+  // name across a credit and a guest artist (lib/legal/forms/people.ts).
+  collective: boolean;
 };
 
 function failed(scope: string, error: { message: string } | null): boolean {
@@ -71,12 +74,12 @@ export const readInventoryRows = memoPerRequest(
   (
     projectId: string,
     // The project's titles in its order, with their credited artists.
-    projectMasters: Array<{ id: string; artists: string }>,
+    projectMasters: Array<{ id: string; artists: string; title?: string }>,
     readSplits: boolean,
   ) =>
     JSON.stringify([
       projectId,
-      projectMasters.map((m) => [m.id, m.artists]),
+      projectMasters.map((m) => [m.id, m.artists, m.title]),
       readSplits,
     ]),
   readRows,
@@ -84,12 +87,15 @@ export const readInventoryRows = memoPerRequest(
 
 async function readRows(
   projectId: string,
-  projectMasters: Array<{ id: string; artists: string }>,
+  projectMasters: Array<{ id: string; artists: string; title?: string }>,
   readSplits: boolean,
 ): Promise<InventoryRows> {
   const supabase = await createClient();
   const masterIds = projectMasters.map((master) => master.id);
   const artistsOf = new Map(projectMasters.map((m) => [m.id, m.artists]));
+  // The title as the project names it (a collective's provisional master
+  // is « Titre 3 (à nommer) »), given by the caller, else the master's own.
+  const titleOf = new Map(projectMasters.map((m) => [m.id, m.title]));
   const titled = masterIds.length > 0;
   const none = Promise.resolve({ data: [], error: null });
   // Not legal_parties: the parties are qualified one by one (below), an
@@ -112,6 +118,7 @@ async function readRows(
     briefLegal,
     projectContacts,
     legalParties,
+    project,
   ] = await Promise.all([
     titled
       ? supabase
@@ -192,15 +199,21 @@ async function readRows(
       .select("id, party_key, name, document_status")
       .eq("project_id", projectId)
       .order("created_at"),
+    supabase
+      .from("projects")
+      .select("collective")
+      .eq("id", projectId)
+      .maybeSingle(),
   ]);
   failed("legal parties", legalParties.error);
+  failed("project", project.error);
 
   const byId = new Map(
     (masters.data ?? []).map((row): [string, InventoryMaster] => [
       row.id,
       {
         id: row.id,
-        title: row.title,
+        title: titleOf.get(row.id) ?? row.title,
         artists: artistsOf.get(row.id) ?? "",
         position: masterIds.indexOf(row.id),
         isrc: row.isrc,
@@ -212,6 +225,7 @@ async function readRows(
   );
 
   return {
+    collective: project.data?.collective ?? false,
     titles: masterIds.flatMap((id) => byId.get(id) ?? []),
     projectContacts: (projectContacts.data ?? []).flatMap((row) => {
       const role = FORM_ROLES.find((r) => r === row.role);

@@ -11,6 +11,7 @@ import { routes } from "@/lib/auth/redirects";
 import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
 import { formatFee } from "@/lib/legal/contracts/fields";
 import type { AgreementRow } from "@/lib/legal/contracts/mapping";
+import { isAwaitingAgreement } from "@/lib/legal/title-contracts-rules";
 import { agreementTone } from "@/lib/ui/state-tones";
 
 const fr = { legalContracts };
@@ -59,10 +60,11 @@ export function AgreementList({
                 ? formatFee(row.proposal.feeCents, { ht: false })
                 : null
             }
-            state={{
-              tone: agreementTone[row.state],
-              label: t.states[row.state],
-            }}
+            state={
+              isAwaitingAgreement(row)
+                ? { tone: "warning", label: t.awaiting }
+                : { tone: agreementTone[row.state], label: t.states[row.state] }
+            }
             note={
               note.length > 0 || (row.template && existing) ? (
                 <>
@@ -79,7 +81,7 @@ export function AgreementList({
                 >
                   <ButtonRoll>{t.open}</ButtonRoll>
                 </Link>
-              ) : (
+              ) : isAwaitingAgreement(row) ? undefined : (
                 <GenerateDialog projectId={projectId} row={row} />
               )
             }

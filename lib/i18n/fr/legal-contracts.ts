@@ -328,6 +328,10 @@ export const legalContracts = {
       pendingTemplate: "Modèle en validation",
       existing: "Contrat existant",
     },
+    // Ibé, 18/11/2026, § 3.5: no contract before the accord of a guest
+    // artist. The titles concerned follow, when they are said.
+    awaiting: "En attente de l'accord",
+    awaitingOf: (names: string) => `En attente de l'accord · ${names}`,
     generate: "Générer le contrat",
     generating: "Génération…",
     open: "Ouvrir le contrat",
@@ -345,6 +349,10 @@ export const legalContracts = {
       template: "Le modèle n'est plus validé : choisissez-en un autre.",
       incompatible: "Ce modèle n'est pas prévu pour ces rôles.",
       already: "Ce contrat a déjà été généré.",
+      notValidated: (titles: string | null) =>
+        titles
+          ? `En attente de l'accord · ${titles}`
+          : "En attente de l'accord",
       fee: "Vérifiez les rémunérations (un montant en euros).",
       reason: "Dites pourquoi aucun accord n'est nécessaire.",
       failed: "L'action n'a pas pu être faite. Réessayez.",
