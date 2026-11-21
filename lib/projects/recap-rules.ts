@@ -15,6 +15,8 @@
 //   │       ├ contact                 RecapContact | null (none known)
 //   │       ├ fiche                   RecapFiche | null (no manage_legal)
 //   │       ├ contract                { state: RecapContract; href } | null
+//   │       │                         (Envoyé · Retour reçu · à contresigner
+//   │       │                         · Signé once PDS countersigned)
 //   │       └ accord                  RecapAccord | null (dealReach none)
 //   ├ dealReach                       as lot 6
 //   ├ counts                          { to_contact, contacted, agreed }
@@ -492,17 +494,18 @@ export function personKeyOf(input: {
 // ---------------------------------------------------------------- Contract
 
 /**
- * A contract sent whose signed copy is back (the table CONTRATS of the
- * Excel: « Contrat envoyé ? », « Contrat signé »). The person signs first,
- * then PDS (migration 20261107200101): the copy is back when the person
- * dropped it by their private link, or the team dropped it with the proof
- * « signé autrement » (the rule of the contract's page, contractNowOf);
- * - countersign: back, PDS has not signed yet (« à contresigner »);
- * - check: back and countersigned, the team checks the signature and marks
- *   the contract signed (« à vérifier »).
- * Null: not back (still « en attente de retour »), or not sent.
+ * A contract sent whose signed copy is back, PDS not yet signed (the table
+ * CONTRATS of the Excel: « Contrat envoyé ? », « Contrat signé »). The
+ * person signs first, then PDS (migration 20261107200101): the copy is back
+ * when the person dropped it by their private link, or the team dropped it
+ * with the proof « signé autrement » (the rule of the contract's page,
+ * contractNowOf). « Retour reçu · à contresigner »; once PDS has
+ * countersigned the recap says « Signé » (checking the signature stays in
+ * the Juridique, never in the recap).
+ * Null: not back (still « en attente de retour »), already countersigned,
+ * or not sent.
  */
-export type ContractBack = "countersign" | "check";
+export type ContractBack = "countersign";
 
 export type ContractProof = {
   // The signed copies of the contract (contract_files, category signed):
@@ -518,9 +521,19 @@ export function contractBackOf(
   input: ContractProof & { state: AgreementState },
 ): ContractBack | null {
   if (input.state !== "signature_pending") return null;
+  if (input.countersigned) return null;
   const back = input.signedViaLink || (input.signedFiles > 0 && input.evidence);
-  if (!back) return null;
-  return input.countersigned ? "check" : "countersign";
+  return back ? "countersign" : null;
+}
+
+/** The contract's state in the recap: PDS has countersigned a contract
+ * still « Envoyé »: « Signé » (the Juridique marks it signed after its
+ * check, the recap does not wait for it). */
+export function recapAgreementState(
+  state: AgreementState,
+  countersigned: boolean,
+): AgreementState {
+  return state === "signature_pending" && countersigned ? "signed" : state;
 }
 
 /**
@@ -564,7 +577,7 @@ export function recapContract(input: {
     });
     return {
       kind: "agreement",
-      state,
+      state: recapAgreementState(state, need.proof.countersigned),
       back: contractBackOf({ state, ...need.proof }),
     };
   }

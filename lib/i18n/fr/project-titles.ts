@@ -458,10 +458,9 @@ export const projectTitles = {
         ended: "Terminé",
       },
       // Sent, and the signed copy is back (the person signs first, then
-      // PDS): ContractBack.
+      // PDS): ContractBack. Countersigned: « Signé ».
       contractBack: {
         countersign: "Retour reçu · à contresigner",
-        check: "Retour reçu · à vérifier",
       },
       // A contract the reader may not read.
       hidden: "Lié",
