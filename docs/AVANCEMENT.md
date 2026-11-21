@@ -2657,3 +2657,31 @@ lundi 23/11/2026. Ne touche pas aux projets classiques.
   un contact créé depuis le récap n'est pas relié aux crédits ; une ligne de plan déjà lancée `contract:artist:<id>`
   devient orpheline après la fusion invité / contributeur ; les noms de sorties déjà stockés (`releases.title`) ne
   changent qu'au prochain `ensure_title_release` ; les homonymes déjà au Catalogue restent tels quels.
+
+## Récap des titres comparé à l'Excel de suivi d'Ibé (21/11/2026, branche `pre-prod`)
+
+Excel d'Ibé (onglet Cast : nom, tél, sortie label, taux, mix, questionnaire rempli, notes, questionnaire beatmaker… ;
+tableau CONTRATS : contrat coproduction 50/50, envoyé ?, en attente de retour, upload du son, signé) comparé au récap
+« Titres et artistes » ; un commit par point :
+
+- **Disposition « Titre à gauche »** (Maël : « pas aligné avec les colonnes, c'est bizarre ») : colonne Titre fusionnée
+  à gauche (nom, Catalogue, Nommer, Mix / Beatmaker / Sortie / Distribution empilés), une ligne par artiste à droite ;
+  un seul corps de tableau, filet entre deux titres, colonne « ⋯ » seulement pour qui écrit (`ceb5a8d5`, `2233c7a0`).
+- **Fiche en trois mots** comme l'Excel (Oui / Non / En attente) : « Fiche · À envoyer », « En attente », « Remplie »
+  (« Remplie, à valider » au survol) ; fiche révoquée ou lien expiré = « À envoyer » (`2de58dc5`).
+- **Contrat** : « Envoyé · en attente de retour », « Retour reçu · à contresigner », « Retour reçu · à vérifier »
+  (contresigné, signature pas encore vérifiée), « Signé » (`45fe46fd`).
+- **Son reçu** : la cellule Mix dit « Son reçu » / « Son attendu » d'après la source confirmée au Master
+  (`master_flow_sources`), sans champ en plus ; un titre sans master reste « — » (`49f6df1e`).
+- **Qui est le contact** : « Manager · … », « Producteur · … » (rôles du Réseau ; le Réseau libelle `producer`
+  « Réalisateur·rice », le récap dit « Producteur ») ; « Nouveau contact » demande le rôle ; modale « Contact de
+  l'artiste » (`3200bb95`).
+- **« Participations et contrats »** : bouton en contour dans l'en-tête de chaque étape du Juridique d'un collectif
+  (avant : caché en pied de colonne, introuvable en réunion) (`39f8c459`).
+- **Confidentialité** : le récap ne lit plus la soumission complète d'une fiche (seulement de quoi calculer son état,
+  aussitôt réduit à « champs requis remplis ou non ») ; aucune donnée personnelle de fiche (naissance, sécu, adresse,
+  RIB) n'est lue ni envoyée au navigateur ; garde-fou `privateReadsOf` (`2acd78d5`).
+- **À décider (hors récap)** : `loadCallContacts` (`lib/calls/invite.ts`) envoie au navigateur l'e-mail de jusqu'à
+  1000 contacts du Réseau pour « Caler le call » (aussi sur la page d'un deal) ; `privateDetailsOf` lit `city` et
+  `notes` côté serveur ; une fonction SQL qui renvoie l'état d'une fiche éviterait toute lecture de la soumission.
+- Attendent la réponse d'Ibé (23/11) : Lyrics, Réseaux, « personnes sur place ».

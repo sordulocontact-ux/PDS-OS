@@ -367,6 +367,10 @@ reconstruite après une remise à zéro faite par erreur (voir `lot-15.md`). Dé
 
 ## Règles à tenir à chaque lot
 
+- Le récap suit l'Excel d'Ibé (21/11) : fiche « À envoyer / En attente / Remplie », contrat envoyé / retour reçu /
+  signé, « Son reçu » lu au Master (jamais un champ en double), rôle du contact (Manager / Producteur). Il ne lit
+  **jamais** les données personnelles d'une fiche (naissance, sécu, adresse, RIB) : garde-fou `privateReadsOf`.
+
 - Toute règle nouvelle ne joue que si `projects.collective = true` ; un projet simple ne change pas
   (y compris quand il partage un master avec un collectif : aucun crédit automatique).
 - « Artistes du projet » = participations ni refusées ni retirées des titres non abandonnés, plus
