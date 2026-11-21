@@ -75,6 +75,7 @@ export async function ParticipationsPage({ projectId }: { projectId: string }) {
         projectId={projectId}
         titles={tracking.titles}
         dealReach={tracking.dealReach}
+        contracts={tracking.contracts}
         canCreate={tracking.canCreate}
         canWaive={can(access, "validate")}
         negotiators={tracking.negotiators}

@@ -334,6 +334,36 @@ export const projectTitles = {
     },
   },
 
+  // The state of a participation's contract (RecapContract), the same words
+  // wherever it shows: the recap and its compact version (after « Contrat ·
+  // »), « Participations et contrats ». Without repeating the word contract;
+  // the Juridique's own words stay its own (« Contrat nécessaire »).
+  participationContract: {
+    // By AgreementState.
+    states: {
+      unmapped: "À rédiger",
+      not_needed: "Non requis",
+      needs_info: "À rédiger",
+      ready_to_generate: "À rédiger",
+      draft: "Brouillon",
+      review_required: "À valider",
+      ready_for_signature: "À envoyer",
+      // The Excel's « Contrat envoyé ? » then « Contrat signé ».
+      signature_pending: "Envoyé · en attente de retour",
+      signed: "Signé",
+      ended: "Terminé",
+    },
+    // Sent, and the signed copy is back (the person signs first, then PDS):
+    // ContractBack. Countersigned: « Signé ».
+    back: {
+      countersign: "Retour reçu · à contresigner",
+    },
+    // A guest's contract waits for their accord (§ 3.5).
+    waitingAgreement: "En attente de l'accord",
+    // A contract the reader may not read.
+    hidden: "Lié",
+  },
+
   // The recap of a collective (retours d'Ibé du 18/11/2026, lot 2): « Titres
   // et artistes » read as the team's Excel (lib/projects/recap-rules.ts),
   // its gestures (contact, number, note, release) and their history.
@@ -344,8 +374,6 @@ export const projectTitles = {
       contacted: "Contacté",
       agreed: "D'accord",
     },
-    // A guest's contract waits for their accord (§ 3.5).
-    waitingAgreement: "En attente de l'accord",
     // The number changed here is the Réseau's.
     phoneChanged: "Numéro changé dans le Réseau",
     // The screen of the recap (lot L2b): its columns, the counters that
@@ -440,30 +468,8 @@ export const projectTitles = {
       },
       // The nuance of a fiche received and not yet validated, read on hover.
       ficheToValidate: "Remplie, à valider",
+      // The contract's state (participationContract) after « Contrat · ».
       contract: (state: string) => `Contrat · ${state}`,
-      // The contract's state after « Contrat · », without repeating the
-      // word (the Juridique's own words stay its own: « Contrat
-      // nécessaire »), by AgreementState.
-      contractStates: {
-        unmapped: "À rédiger",
-        not_needed: "Non requis",
-        needs_info: "À rédiger",
-        ready_to_generate: "À rédiger",
-        draft: "Brouillon",
-        review_required: "À valider",
-        ready_for_signature: "À envoyer",
-        // The Excel's « Contrat envoyé ? » then « Contrat signé ».
-        signature_pending: "Envoyé · en attente de retour",
-        signed: "Signé",
-        ended: "Terminé",
-      },
-      // Sent, and the signed copy is back (the person signs first, then
-      // PDS): ContractBack. Countersigned: « Signé ».
-      contractBack: {
-        countersign: "Retour reçu · à contresigner",
-      },
-      // A contract the reader may not read.
-      hidden: "Lié",
     },
     overview: {
       seeAll: "Tout voir",

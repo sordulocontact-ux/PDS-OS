@@ -8,7 +8,10 @@ import {
   negotiationTopics,
   type NegotiationCallTarget,
 } from "@/lib/deals/negotiation-call-rules";
-import { loadParticipationDealStates } from "@/lib/deals/participation-states";
+import {
+  loadParticipationDealStates,
+  type ParticipationDealState,
+} from "@/lib/deals/participation-states";
 import type { FormSubmission } from "@/lib/legal/forms/queries";
 import { withPrivateDetails } from "@/lib/network/private-details";
 import { networkRolesOf } from "@/lib/network/types";
@@ -29,10 +32,12 @@ import {
   type ContactRow,
   type FicheForm,
   type RecapAccord,
+  type RecapContract,
   type RecapCredit,
   type TitleRecap,
 } from "@/lib/projects/recap-rules";
 import { loadTitleBoard } from "@/lib/projects/title-board";
+import type { BoardTitle } from "@/lib/projects/title-board-rules";
 import {
   masterNameOf,
   projectTitleLabel,
@@ -84,7 +89,7 @@ export async function loadTitleRecap(
   const supabase = await createClient();
   const canReadLegal = can(access, "manage_legal");
   const none = { data: [], error: null };
-  const [board, titleRows, partRows, states, forms, needs] = await Promise.all([
+  const [board, titleRows, partRows, states, forms] = await Promise.all([
     loadTitleBoard(project, access),
     supabase
       .from("project_titles")
@@ -104,12 +109,6 @@ export async function loadTitleRecap(
           .eq("project_id", project.id)
           .order("created_at", { ascending: false })
       : Promise.resolve(none),
-    canReadLegal
-      ? supabase
-          .from("legal_agreement_needs")
-          .select("contact_id")
-          .eq("project_id", project.id)
-      : Promise.resolve(none),
   ]);
   // A failed read is not « not decided », « no note » or « no fiche »:
   // thrown to the error page rather than shown as empty.
@@ -117,7 +116,6 @@ export async function loadTitleRecap(
     titleRows,
     partRows,
     forms,
-    needs,
   }))
     if (result.error)
       throw new Error(`loadTitleRecap ${scope}: ${result.error.message}`);
@@ -155,53 +153,61 @@ export async function loadTitleRecap(
   const formIds = [...latestForms(forms.data ?? []).values()]
     .filter((f) => f.status === "action_required")
     .map((f) => f.id);
-  const [credits, artistPeople, managers, terms, submissions, call] =
-    await Promise.all([
-      masterIds.length
-        ? supabase
-            .from("master_contributors")
-            .select("master_id, name, role, contact_id, created_at")
-            .in("master_id", masterIds)
-            .order("created_at")
-        : Promise.resolve(none),
-      artistIds.length
-        ? supabase
-            .from("network_contacts")
-            .select("id, artist_id, created_at")
-            .in("artist_id", artistIds)
-            .is("archived_at", null)
-            .order("created_at")
-        : Promise.resolve(none),
-      // Read with manage_catalog only (RLS): none for anyone else.
-      artistIds.length
-        ? supabase
-            .from("artist_contacts")
-            .select(
-              "artist_id, role, name, phone, is_primary, created_at, contact_id",
-            )
-            .in("artist_id", artistIds)
-            .eq("role", "manager")
-        : Promise.resolve(none),
-      // Whoever reads the deal reads its terms (deal_terms_select).
-      dealIds.length && board.dealReach !== "none"
-        ? supabase
-            .from("deal_terms")
-            .select("deal_id, term_key, value, state")
-            .in("deal_id", dealIds)
-        : Promise.resolve(none),
-      formIds.length
-        ? // The content of a fiche is read for its state only, then redacted
-          // (redactedSubmission): never kept, shown or sent to the browser.
-          supabase
-            .from("legal_form_submissions")
-            .select("form_id, roles, person, corrections, created_at")
-            .in("form_id", formIds)
-            .order("created_at", { ascending: false })
-        : Promise.resolve(none),
-      planning.length && planCalls
-        ? loadSharedNegotiationCall(assignees)
-        : null,
-    ]);
+  const [
+    credits,
+    artistPeople,
+    managers,
+    terms,
+    submissions,
+    call,
+    contractStates,
+  ] = await Promise.all([
+    masterIds.length
+      ? supabase
+          .from("master_contributors")
+          .select("master_id, name, role, contact_id, created_at")
+          .in("master_id", masterIds)
+          .order("created_at")
+      : Promise.resolve(none),
+    artistIds.length
+      ? supabase
+          .from("network_contacts")
+          .select("id, artist_id, created_at")
+          .in("artist_id", artistIds)
+          .is("archived_at", null)
+          .order("created_at")
+      : Promise.resolve(none),
+    // Read with manage_catalog only (RLS): none for anyone else.
+    artistIds.length
+      ? supabase
+          .from("artist_contacts")
+          .select(
+            "artist_id, role, name, phone, is_primary, created_at, contact_id",
+          )
+          .in("artist_id", artistIds)
+          .eq("role", "manager")
+      : Promise.resolve(none),
+    // Whoever reads the deal reads its terms (deal_terms_select).
+    dealIds.length && board.dealReach !== "none"
+      ? supabase
+          .from("deal_terms")
+          .select("deal_id, term_key, value, state")
+          .in("deal_id", dealIds)
+      : Promise.resolve(none),
+    formIds.length
+      ? // The content of a fiche is read for its state only, then redacted
+        // (redactedSubmission): never kept, shown or sent to the browser.
+        supabase
+          .from("legal_form_submissions")
+          .select("form_id, roles, person, corrections, created_at")
+          .in("form_id", formIds)
+          .order("created_at", { ascending: false })
+      : Promise.resolve(none),
+    planning.length && planCalls ? loadSharedNegotiationCall(assignees) : null,
+    canReadLegal
+      ? loadContractStates(project.id, board.titles, states)
+      : new Map<string, RecapContract>(),
+  ]);
   for (const [scope, result] of Object.entries({
     credits,
     artistPeople,
@@ -280,7 +286,6 @@ export async function loadTitleRecap(
           submittedAt: s.created_at,
         }),
       );
-  const needed = new Set((needs.data ?? []).map((n) => n.contact_id));
   const ficheOf = (contactId: string | null, key: string) => {
     const form = contactId ? formOf.get(contactId) : undefined;
     return recapFiche(
@@ -320,10 +325,6 @@ export async function loadTitleRecap(
   }
   const releaseOf = new Map(
     (titleRows.data ?? []).map((t) => [t.id, t.release_decision]),
-  );
-  const pending = artistsAwaitingAgreement(
-    board.titles,
-    (id) => states.get(id)?.agreementValidated ?? false,
   );
 
   return {
@@ -452,12 +453,7 @@ export async function loadTitleRecap(
               fiche: canReadLegal ? ficheOf(person, key) : null,
               contract: canReadLegal
                 ? {
-                    state: recapContract({
-                      status: p.status,
-                      artistPending: pending.has(p.artist.id),
-                      contract: p.contract,
-                      needed: person !== null && needed.has(person),
-                    }),
+                    state: contractStates.get(p.id) ?? { kind: "none" },
                     href,
                   }
                 : null,
@@ -468,6 +464,60 @@ export async function loadTitleRecap(
       };
     }),
   };
+}
+
+/**
+ * The state of each participation's contract, by participation
+ * (RecapContract): its contract (the board's, title_participations.
+ * contract_id, the banner's and the locks' source), else « En attente de
+ * l'accord », else « À rédiger » (the Juridique planned the person's
+ * contract, or the participation is confirmed). Read by the recap and by
+ * « Participations et contrats », so both say the same. With manage_legal
+ * only (legal_agreement_needs under RLS); no contact returned, only which
+ * artists have a person with a need.
+ */
+export async function loadContractStates(
+  projectId: string,
+  titles: BoardTitle[],
+  states: Map<string, ParticipationDealState>,
+): Promise<Map<string, RecapContract>> {
+  const supabase = await createClient();
+  const needs = await supabase
+    .from("legal_agreement_needs")
+    .select("contact_id")
+    .eq("project_id", projectId);
+  if (needs.error)
+    throw new Error(`loadContractStates needs: ${needs.error.message}`);
+  const contactIds = [...new Set((needs.data ?? []).map((n) => n.contact_id))];
+  const people = contactIds.length
+    ? await supabase
+        .from("network_contacts")
+        .select("artist_id")
+        .in("id", contactIds)
+        .not("artist_id", "is", null)
+    : { data: [], error: null };
+  if (people.error)
+    throw new Error(`loadContractStates people: ${people.error.message}`);
+  const needed = new Set(
+    (people.data ?? []).flatMap((c) => (c.artist_id ? [c.artist_id] : [])),
+  );
+  const pending = artistsAwaitingAgreement(
+    titles,
+    (id) => states.get(id)?.agreementValidated ?? false,
+  );
+  return new Map(
+    titles.flatMap((title) =>
+      title.participations.map((p) => [
+        p.id,
+        recapContract({
+          status: p.status,
+          artistPending: pending.has(p.artist.id),
+          contract: p.contract,
+          needed: needed.has(p.artist.id),
+        }),
+      ]),
+    ),
+  );
 }
 
 type FormRowDb = {

@@ -609,6 +609,25 @@ export function recapContract(input: {
   return { kind: "none" };
 }
 
+/** The state of a participation's contract in words, the same wherever it
+ * shows (projectTitles.participationContract: the recap, its compact
+ * version, « Participations et contrats »); null: none expected. */
+export function recapContractWords(contract: RecapContract): string | null {
+  const words = projectTitles.participationContract;
+  switch (contract.kind) {
+    case "agreement":
+      return contract.back
+        ? words.back[contract.back]
+        : words.states[contract.state];
+    case "waiting_agreement":
+      return words.waitingAgreement;
+    case "hidden":
+      return words.hidden;
+    case "none":
+      return null;
+  }
+}
+
 /** The artists whose contract waits for an accord, as the database reads
  * it (artist_agreement_pending): a participation neither declined nor
  * withdrawn, on a title not abandoned, without its accord validated. */

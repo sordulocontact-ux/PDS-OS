@@ -7,6 +7,7 @@ import { projectTitles } from "@/lib/i18n/fr/project-titles";
 import type { ParticipationStatus } from "@/lib/projects/participation-rules";
 import {
   RECAP_FICHE_TONE,
+  recapContractWords,
   type RecapAccord,
   type RecapContract,
   type RecapFiche,
@@ -171,39 +172,41 @@ export function AccordFacts({
   );
 }
 
-/** The words of a person's contract, and its tone; null: none expected. */
+/** A participation's contract as a pill, the same in the recap and in
+ * « Participations et contrats »: its words (recapContractWords) and tone;
+ * null: none expected. */
+export function contractStatePill(
+  contract: RecapContract,
+): { words: string; tone: Tone } | null {
+  const words = recapContractWords(contract);
+  if (words === null) return null;
+  switch (contract.kind) {
+    case "agreement":
+      // Sent and the signed copy back: « Retour reçu · à contresigner ».
+      return {
+        words,
+        tone: contract.back ? "action" : agreementTone[contract.state],
+      };
+    case "waiting_agreement":
+      // § 3.5: no contract before the accord.
+      return { words, tone: "warning" };
+    default:
+      return { words, tone: "neutral" };
+  }
+}
+
+/** The recap's pill: « Contrat · À rédiger » (« En attente de l'accord »
+ * alone); null: none expected. */
 function contractPill(
   contract: RecapContract,
 ): { label: string; full: string; tone: Tone } | null {
-  const r = fr.projectTitles.recap;
-  switch (contract.kind) {
-    case "agreement": {
-      // The recap's own short words (« Contrat · À rédiger »), not the
-      // Juridique's (« Contrat · Contrat nécessaire »).
-      // Sent and the signed copy back: « Retour reçu · à contresigner ».
-      if (contract.back) {
-        const words = r.legal.contract(r.legal.contractBack[contract.back]);
-        return { label: words, full: words, tone: "action" };
-      }
-      const words = r.legal.contract(r.legal.contractStates[contract.state]);
-      return { label: words, full: words, tone: agreementTone[contract.state] };
-    }
-    case "waiting_agreement":
-      // § 3.5: no contract before the accord.
-      return {
-        label: r.waitingAgreement,
-        full: r.waitingAgreement,
-        tone: "warning",
-      };
-    case "hidden":
-      return {
-        label: r.legal.contract(r.legal.hidden),
-        full: r.legal.contract(r.legal.hidden),
-        tone: "neutral",
-      };
-    case "none":
-      return null;
-  }
+  const pill = contractStatePill(contract);
+  if (!pill) return null;
+  const label =
+    contract.kind === "waiting_agreement"
+      ? pill.words
+      : fr.projectTitles.recap.legal.contract(pill.words);
+  return { label, full: label, tone: pill.tone };
 }
 
 /** The artist's fiche and contract, two short pills, each opening the

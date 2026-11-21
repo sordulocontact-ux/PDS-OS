@@ -40,10 +40,6 @@ export const legalParticipations = {
     body: "Invitez des artistes sur les titres depuis Titres et artistes.",
     link: "Ouvrir Titres et artistes",
   },
-  contract: {
-    missing: "Manquant",
-    hidden: "Lié",
-  },
   negotiation: {
     none: "Pas de dossier de négociation",
     by: (name: string) => `par ${name}`,
