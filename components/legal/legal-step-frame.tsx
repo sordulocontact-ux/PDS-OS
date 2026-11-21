@@ -2,6 +2,7 @@ import { ProjectHeader } from "@/components/projects/project-header";
 import { JourneyLayout } from "@/components/shell/journey/journey-layout";
 import { JourneySpine } from "@/components/shell/journey/journey-spine";
 import { ModuleAttention } from "@/components/shell/module/module-attention";
+import { StatusBadge } from "@/components/ui/status-badge";
 import {
   StepBlockers,
   StepToolsBlock,
@@ -15,6 +16,7 @@ import { legalHistory } from "@/lib/i18n/fr/legal-history";
 import { legalJourney } from "@/lib/i18n/fr/legal-journey";
 import { legalParticipations } from "@/lib/i18n/fr/legal-participations";
 import { legalJourneyContext } from "@/lib/legal/journey-context";
+import { legalTitleLayout } from "@/lib/legal/title-layout";
 import { isLocked } from "@/lib/ui/journey";
 import { legalParticipationsHref } from "@/lib/ui/legal-steps";
 import { stepChoiceKey, type StepRef } from "@/lib/step-tools/model";
@@ -28,6 +30,14 @@ const fr = { legalHistory, legalJourney, legalParticipations };
  * its slots (« Déjà fait » at the bottom). `stepKey`: a step of the
  * Dossier, a démarche (« person:<ref> ») or « ready ». When the viewer
  * acts, the whole content comes first as their gesture (StepPanel `lead`).
+ *
+ * A collective (retour d'Ibé du 18/11/2026): the journey is grouped by
+ * title (lib/legal/title-layout.ts), each title's group folding; a step of
+ * a title's group names its title in a tag before its h1 (the hue of its
+ * tags in the État des lieux) and in the trail, as the Master does, and no
+ * longer repeats it in its own title. A step of the spine only (« Rattacher
+ * le titre au Catalogue », `attach:<id>`) has no tools: nothing to report
+ * or note on it.
  */
 export async function LegalStepFrame({
   projectId,
@@ -40,8 +50,14 @@ export async function LegalStepFrame({
   children: React.ReactNode;
 }) {
   const { steps, project } = await legalJourneyContext(projectId);
-  const step = steps.find((s) => s.key === stepKey);
+  const layout = project.collective ? await legalTitleLayout(projectId) : null;
+  const spine = layout?.steps ?? steps;
+  // The step as the spine shows it (in a title's group: without the
+  // title's name); `own`, the journey's, which the tools and Travail know.
+  const step = spine.find((s) => s.key === stepKey);
   if (!step) return null;
+  const own = steps.find((s) => s.key === stepKey);
+  const title = layout?.titleOf[stepKey];
   // The viewer's gesture comes first (« À vous », JUR-08): the step's content
   // is its lead, the grid folded under it (StepPanel), unless the page gives
   // its own lead.
@@ -59,8 +75,9 @@ export async function LegalStepFrame({
     <JourneyLayout
       spine={
         <JourneySpine
-          steps={steps}
+          steps={spine}
           openKey={stepKey}
+          foldable={layout?.foldable}
           footer={[
             {
               href: routes.projectLegalStep(projectId, "history"),
@@ -80,29 +97,50 @@ export async function LegalStepFrame({
       }
       head={
         <>
-          <ProjectHeader projectId={projectId} steps={steps} head={step} />
-          <ModuleAttention
-            stepRef={stepRef}
-            modules={["legal"]}
-            steps={choices}
+          <ProjectHeader
+            projectId={projectId}
+            steps={spine}
+            head={step}
+            media={
+              title ? (
+                // Narrow on a phone: the h1 keeps the width of the line.
+                <StatusBadge
+                  tone={title.hue ?? "neutral"}
+                  title={title.heading}
+                  className="max-w-36 shrink-0 truncate sm:max-w-64"
+                >
+                  {title.heading}
+                </StatusBadge>
+              ) : undefined
+            }
+            extraCrumbs={title ? [{ label: title.label }] : undefined}
           />
+          {own && (
+            <ModuleAttention
+              stepRef={stepRef}
+              modules={["legal"]}
+              steps={choices}
+            />
+          )}
         </>
       }
     >
       <StepPanel
-        step={step}
-        steps={steps}
+        step={own ?? step}
+        steps={own ? steps : spine}
         blockedLabel={fr.legalJourney.blocked}
         {...slots}
         {...(asLead && { lead: children })}
       >
-        <StepBlockers stepRef={stepRef} steps={choices} />
+        {own && <StepBlockers stepRef={stepRef} steps={choices} />}
         {!asLead && children}
-        <StepToolsBlock
-          stepRef={stepRef}
-          steps={choices}
-          locked={isLocked(step.status)}
-        />
+        {own && (
+          <StepToolsBlock
+            stepRef={stepRef}
+            steps={choices}
+            locked={isLocked(step.status)}
+          />
+        )}
       </StepPanel>
     </JourneyLayout>
   );

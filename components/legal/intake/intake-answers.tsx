@@ -94,12 +94,12 @@ export function IntakeAnswers({
           <ul className="flex flex-col gap-2 pt-3">
             {notAsked.map((q) => (
               <li
-                key={`${q.key}:${q.masterId ?? "project"}`}
+                key={`${q.key}:${q.masterId ?? "project"}:${q.label ?? ""}`}
                 className="flex flex-wrap items-start justify-between gap-2"
               >
                 <span className="flex min-w-0 flex-col">
                   <span className="text-[length:var(--type-body-sm)] break-words">
-                    {t.questions[q.key].ask(q.title ?? "")}
+                    {q.label ?? t.questions[q.key].ask(q.title ?? "")}
                   </span>
                   <span className="text-[length:var(--type-micro)] text-[color:var(--text-secondary)]">
                     {[q.value, q.source].filter(Boolean).join(" · ")}

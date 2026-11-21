@@ -18,6 +18,7 @@
 
 import { legal } from "@/lib/i18n/fr/legal";
 import type { PersonRole } from "@/lib/legal/intake/types";
+import { isMainArtist, type MainArtist } from "@/lib/legal/main-artist";
 import { normalizeSearch } from "@/lib/utils/search";
 
 const fr = { legal };
@@ -36,7 +37,15 @@ export type KnownPerson = {
 
 export type KnownRows = {
   // Artists of each title, in their order.
-  artists: Array<{ masterId: string; name: string; featuring: boolean }>;
+  artists: Array<{
+    masterId: string;
+    name: string;
+    featuring: boolean;
+    artistId?: string | null;
+  }>;
+  // A collective's main artist: not repeated on each title (§ 3.3 of Ibé's
+  // 18/11/2026), said once by the Cadrage (notAskedQuestions).
+  mainArtist?: MainArtist | null;
   // Engineers confirmed at the Cadrage, for the whole project.
   team: Array<{ role: PersonRole; name: string; contactId: string }>;
   sessions: Array<{ masterId: string; kind: string; engineer: string | null }>;
@@ -83,7 +92,10 @@ export function knownPeopleOf(
     };
 
     for (const artist of rows.artists)
-      if (artist.masterId === masterId)
+      if (
+        artist.masterId === masterId &&
+        !isMainArtist(rows.mainArtist ?? null, artist)
+      )
         add(artist.name, "performer", artist.featuring ? "featuring" : "title");
     for (const member of rows.team)
       add(member.name, member.role, "cadrage", member.contactId);

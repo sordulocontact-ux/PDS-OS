@@ -2,6 +2,7 @@ import "server-only";
 
 import { cadrageAnswers } from "@/lib/legal/intake/cadrage";
 import { loadKnownPeople } from "@/lib/legal/intake/known-queries";
+import { mainArtistOf } from "@/lib/legal/main-artist";
 import {
   answerKey,
   intakeQuestions,
@@ -45,17 +46,28 @@ export type Intake = {
 
 /** Once per request for the same project and titles (the Juridique's
  * journey, its steps done and the workflow statuses all read it). */
+type IntakeProject = {
+  id: string;
+  masters: Array<{ id: string; title: string }>;
+  // A collective's main artist, said once (lib/legal/main-artist.ts).
+  collective?: boolean;
+  artistId?: string | null;
+  artistName?: string | null;
+};
+
 export const loadIntake = memoPerRequest(
-  (project: { id: string; masters: Array<{ id: string; title: string }> }) =>
-    JSON.stringify([project.id, project.masters.map((m) => [m.id, m.title])]),
+  (project: IntakeProject) =>
+    JSON.stringify([
+      project.id,
+      project.masters.map((m) => [m.id, m.title]),
+      mainArtistOf(project),
+    ]),
   readIntake,
 );
 
-async function readIntake(project: {
-  id: string;
-  masters: Array<{ id: string; title: string }>;
-}): Promise<Intake> {
+async function readIntake(project: IntakeProject): Promise<Intake> {
   const supabase = await createClient();
+  const mainArtist = mainArtistOf(project);
   const masterIds = project.masters.map((m) => m.id);
   const titled = masterIds.length > 0;
   const none = Promise.resolve({ data: [], error: null });
@@ -119,7 +131,7 @@ async function readIntake(project: {
       .in("field_key", ["legal_agreements", "legal_blockers"])
       .eq("status", "confirmed"),
     // Who the titles and the Cadrage already name (people question).
-    loadKnownPeople(project.id, masterIds),
+    loadKnownPeople(project.id, masterIds, mainArtist),
   ]);
   failed("credits", credits.error);
   failed("publishers", publishers.error);
@@ -169,6 +181,7 @@ async function readIntake(project: {
     publishedTitles: new Set((publishers.data ?? []).map((r) => r.master_id)),
     hasContract: (contracts.count ?? 0) > 0,
     known,
+    mainArtist: mainArtist?.name || null,
     answers: answersOf,
   };
   return {

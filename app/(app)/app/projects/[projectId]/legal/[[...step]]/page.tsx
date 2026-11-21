@@ -9,6 +9,7 @@ import { allInOrder } from "@/lib/utils/parallel";
 
 import { HistoryView } from "@/components/legal/history/history-view";
 import { ParticipationsPage } from "@/components/legal/participations/participations-page";
+import { AttachTitleStep } from "@/components/legal/steps/attach-title-step";
 import { ConfirmationStep } from "@/components/legal/steps/confirmation-step";
 import { DemarcheStep } from "@/components/legal/steps/demarche-step";
 import { FramingStep } from "@/components/legal/steps/framing-step";
@@ -26,8 +27,9 @@ import { legalRouteOf } from "@/lib/ui/legal-steps";
 // complet »): /legal redirects to the step that awaits the viewer; the
 // Dossier's steps (/legal/inventory, /framing, /confirmation, /plan), one
 // step per démarche (/legal/person/<ref>, /clearance/<id>, /split/<title>,
-// /sacem/<title>) and « Prêt pour la sortie » (/legal/ready) share the
-// guided frame. The former Suivi and branch pages (/legal/tracking, /forms,
+// /sacem/<title>), a collective's title to attach to the Catalogue
+// (/legal/attach/<title>) and « Prêt pour la sortie » (/legal/ready) share
+// the guided frame. The former Suivi and branch pages (/legal/tracking, /forms,
 // /contracts, /splits, /clearances, /formalities) redirect to the démarche
 // they were about: notifications and tasks keep working. Reserved to
 // manage_legal: anyone else gets the same 404 as a missing page.
@@ -82,6 +84,9 @@ export default async function ProjectLegalPage({
   if (route.type === "ready") return <ReadyStep projectId={projectId} />;
   if (route.type === "participations")
     return <ParticipationsPage projectId={projectId} />;
+  // A collective's title not in the Catalogue yet (Ibé, 18/11/2026).
+  if (route.type === "attach")
+    return <AttachTitleStep projectId={projectId} titleId={route.titleId} />;
   if (route.type === "step") {
     const key = route.key;
     if (key === "inventory")

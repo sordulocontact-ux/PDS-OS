@@ -8,6 +8,7 @@ import {
   type SynthesisSection,
 } from "@/lib/legal/confirmation/synthesis";
 import { readInventoryRows } from "@/lib/legal/inventory-rows";
+import { mainArtistOf } from "@/lib/legal/main-artist";
 import { loadIntake } from "@/lib/legal/intake/queries";
 import {
   QUESTION_KEYS,
@@ -40,6 +41,10 @@ export async function loadConfirmation(
   project: {
     id: string;
     masters: Array<{ id: string; title: string; artists: string }>;
+    // A collective's main artist, said once (lib/legal/main-artist.ts).
+    collective?: boolean;
+    artistId?: string | null;
+    artistName?: string | null;
   },
   access: Access,
 ): Promise<Confirmation> {
@@ -116,6 +121,7 @@ export async function loadConfirmation(
       questions: intake.questions,
       answers,
       today: todayInParis(new Date()),
+      mainArtist: mainArtistOf(project),
     }),
   };
 }

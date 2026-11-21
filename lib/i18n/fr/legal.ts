@@ -46,6 +46,9 @@ export const legal = {
       credits: "Crédits",
       performer: "Artiste interprète",
       featuring: "Artiste interprète · Featuring",
+      // A collective's main artist, said once (Ibé, 18/11/2026); also at
+      // the Cadrage and the Confirmation.
+      mainArtist: "Artiste principal · tous les titres",
       noContract: "Aucun contrat",
       declarations: "Déclarations",
       secured: {

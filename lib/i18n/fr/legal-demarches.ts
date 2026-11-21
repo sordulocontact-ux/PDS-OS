@@ -31,6 +31,24 @@ export const legalDemarches = {
     tracking: "Suivi",
     proposed: "Suivi · démarches proposées",
     release: "Sortie",
+    // A collective (Ibé, 18/11/2026): what is the whole project's, then one
+    // group per title (« Néons · Jay »), the abandoned ones last.
+    project: "Projet",
+    titleWith: (title: string, artists: string) => `${title} · ${artists}`,
+    abandoned: (label: string) => `${label} (abandonné)`,
+  },
+  // In a title's group of a collective, the title is not said again.
+  inTitle: {
+    split: "Répartition de l'édition",
+    sacem: "Déclaration SACEM",
+  },
+  // A collective's title not in the Catalogue yet (§ 3.6 of Ibé's 18/11).
+  attach: {
+    title: "Rattacher le titre au Catalogue",
+    inCatalogue: "Déjà au Catalogue",
+    audio: "Pas encore au Catalogue",
+    onlyOwner: (name: string) =>
+      `${name}, responsable du projet, peut rattacher ce titre.`,
   },
   titles: {
     person: (name: string) => `${name} · fiche et contrat`,

@@ -106,6 +106,9 @@ export type NotAskedQuestion = {
   key: QuestionKey;
   masterId: string | null;
   title: string | null;
+  // Said instead of the question: a collective's main artist, once for
+  // every title (« PDS », its value « Artiste principal · tous les titres »).
+  label?: string;
   // What the data says, when it can be said (« Mona Lys, Karim Haddou »).
   value: string | null;
   source: string;

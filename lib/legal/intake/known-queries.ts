@@ -4,6 +4,7 @@ import {
   knownPeopleOf,
   type KnownPerson,
 } from "@/lib/legal/intake/known-people";
+import type { MainArtist } from "@/lib/legal/main-artist";
 import { createClient } from "@/lib/supabase/server";
 
 // Read with the viewer's session: the Cadrage juridique (questions) and the
@@ -22,6 +23,8 @@ function failed(scope: string, error: { message: string } | null) {
 export async function loadKnownPeople(
   projectId: string,
   masterIds: string[],
+  // A collective's main artist, left out of each title (known-people.ts).
+  mainArtist: MainArtist | null = null,
 ): Promise<Map<string, KnownPerson[]>> {
   if (masterIds.length === 0) return new Map();
   const supabase = await createClient();
@@ -29,7 +32,7 @@ export async function loadKnownPeople(
     supabase
       .from("master_artists")
       .select(
-        "master_id, position, role, artist:artists!master_artists_artist_same_org(name)",
+        "master_id, position, role, artist:artists!master_artists_artist_same_org(id, name)",
       )
       .in("master_id", masterIds)
       .order("position"),
@@ -55,6 +58,7 @@ export async function loadKnownPeople(
   failed("sessions", sessions.error);
 
   return knownPeopleOf(masterIds, {
+    mainArtist,
     artists: (artists.data ?? []).flatMap((row) =>
       row.artist
         ? [
@@ -62,6 +66,7 @@ export async function loadKnownPeople(
               masterId: row.master_id,
               name: row.artist.name,
               featuring: row.role === "featuring",
+              artistId: row.artist.id,
             },
           ]
         : [],
