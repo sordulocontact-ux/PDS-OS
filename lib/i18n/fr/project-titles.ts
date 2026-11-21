@@ -420,6 +420,15 @@ export const projectTitles = {
     },
     legal: {
       fiche: (state: string) => `Fiche · ${state}`,
+      // The fiche in the Excel's three words (RecapFicheState); the
+      // Juridique keeps its finer ones.
+      ficheStates: {
+        toSend: "À envoyer",
+        waiting: "En attente",
+        filled: "Remplie",
+      },
+      // The nuance of a fiche received and not yet validated, read on hover.
+      ficheToValidate: "Remplie, à valider",
       contract: (state: string) => `Contrat · ${state}`,
       // The contract's state after « Contrat · », without repeating the
       // word (the Juridique's own words stay its own: « Contrat

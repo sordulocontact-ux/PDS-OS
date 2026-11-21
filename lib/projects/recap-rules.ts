@@ -37,11 +37,7 @@ import {
   type AgreementState,
 } from "@/lib/legal/contracts/state";
 import type { FormState, FormSubmission } from "@/lib/legal/forms/queries";
-import {
-  ficheBadge,
-  ficheStatusOf,
-  type FicheStatus,
-} from "@/lib/legal/forms/state";
+import { ficheStatusOf, type FicheStatus } from "@/lib/legal/forms/state";
 import {
   isActiveParticipation,
   type ParticipationStatus,
@@ -221,11 +217,47 @@ const FORM_STATES: readonly FormState[] = [
   "revoked",
 ];
 
-/** The person's fiche on this project: its status and pill (as the
- * Juridique says it), and the person's démarche. */
+/**
+ * The fiche in the Excel's three words (Ibé, 21/11: « Questionnaire
+ * rempli : Oui / Non / En attente »), from the Juridique's finer status:
+ * - toSend « À envoyer »: nothing sent (to create, link to send, link
+ *   expired or revoked: to send again);
+ * - waiting « En attente »: sent, the person has to act (not opened,
+ *   opened, complement asked, incomplete, corrections asked);
+ * - filled « Remplie »: received (to validate, validated).
+ * The Juridique keeps its own words (« Complète · à valider »).
+ */
+export type RecapFicheState = "toSend" | "waiting" | "filled";
+
+const FICHE_STATE_OF: Record<FicheStatus, RecapFicheState> = {
+  toCreate: "toSend",
+  toSend: "toSend",
+  expired: "toSend",
+  revoked: "toSend",
+  sent: "waiting",
+  opened: "waiting",
+  complement: "waiting",
+  incomplete: "waiting",
+  corrections: "waiting",
+  toValidate: "filled",
+  validated: "filled",
+};
+
+export const recapFicheState = (status: FicheStatus): RecapFicheState =>
+  FICHE_STATE_OF[status];
+
+/** Waiting asks for attention, filled is done, to send is not started. */
+export const RECAP_FICHE_TONE: Record<RecapFicheState, Tone> = {
+  toSend: "neutral",
+  waiting: "warning",
+  filled: "success",
+};
+
+/** The person's fiche on this project: its status (as the Juridique says
+ * it), its state in the recap's three words, and the person's démarche. */
 export type RecapFiche = {
   status: FicheStatus;
-  badge: { label: string; tone: Tone };
+  state: RecapFicheState;
   href: string;
 };
 
@@ -262,7 +294,8 @@ export function recapFiche(
           : null,
     };
   }
-  return { status: ficheStatusOf(input), badge: ficheBadge(input), href };
+  const status = ficheStatusOf(input);
+  return { status, state: recapFicheState(status), href };
 }
 
 /** A person of the title in the recap (a beatmaker): name and fiche (null

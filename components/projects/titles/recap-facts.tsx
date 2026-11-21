@@ -5,10 +5,11 @@ import { ViewLink } from "@/components/ui/view-link";
 import { deals } from "@/lib/i18n/fr/deals";
 import { projectTitles } from "@/lib/i18n/fr/project-titles";
 import type { ParticipationStatus } from "@/lib/projects/participation-rules";
-import type {
-  RecapAccord,
-  RecapContract,
-  RecapFiche,
+import {
+  RECAP_FICHE_TONE,
+  type RecapAccord,
+  type RecapContract,
+  type RecapFiche,
 } from "@/lib/projects/recap-rules";
 import { cn } from "@/lib/utils";
 import { formatDay } from "@/lib/utils/day";
@@ -51,11 +52,6 @@ export const factsClass = (inline: boolean) =>
       : "flex min-w-0 flex-col items-start gap-1",
     WRAPPING_PILLS,
   );
-
-/** The first words of a state (« En attente · ouverte, pas renvoyée » →
- * « En attente »): a pill of the recap stays short, its whole label read
- * on hover and by a screen reader. */
-const short = (label: string) => label.split(" · ")[0];
 
 /** A pill, linked to its module when it has one. */
 function LinkedPill({
@@ -216,19 +212,11 @@ export function LegalFacts({
   contract: { state: RecapContract; href: string } | null;
   inline?: boolean;
 }) {
-  const r = fr.projectTitles.recap;
   const pill = contract ? contractPill(contract.state) : null;
   if (!fiche && !pill) return <span className={muted}>{EMPTY_CELL}</span>;
   return (
     <span className={factsClass(inline)}>
-      {fiche && (
-        <LinkedPill
-          href={fiche.href}
-          tone={fiche.badge.tone}
-          label={r.legal.fiche(short(fiche.badge.label))}
-          full={r.legal.fiche(fiche.badge.label)}
-        />
-      )}
+      {fiche && <FichePill fiche={fiche} />}
       {pill && contract && (
         <LinkedPill
           href={contract.href}
@@ -258,14 +246,19 @@ export function MixPill({
   );
 }
 
-/** A fiche's pill, as the Juridique says it, linked to the démarche. */
+/** A fiche's pill in the Excel's three words (« Fiche · En attente »),
+ * linked to the person's démarche. A fiche received and not yet validated
+ * says so on hover and to a screen reader. */
 export function FichePill({ fiche }: { fiche: RecapFiche }) {
+  const r = fr.projectTitles.recap.legal;
   return (
     <LinkedPill
       href={fiche.href}
-      tone={fiche.badge.tone}
-      label={fr.projectTitles.recap.legal.fiche(short(fiche.badge.label))}
-      full={fr.projectTitles.recap.legal.fiche(fiche.badge.label)}
+      tone={RECAP_FICHE_TONE[fiche.state]}
+      label={r.fiche(r.ficheStates[fiche.state])}
+      full={
+        fiche.status === "toValidate" ? r.fiche(r.ficheToValidate) : undefined
+      }
     />
   );
 }
