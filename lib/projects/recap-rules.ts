@@ -36,6 +36,7 @@ import {
   agreementStateOf,
   type AgreementState,
 } from "@/lib/legal/contracts/state";
+import { ficheNeeded } from "@/lib/legal/forms/completeness";
 import type { FormState, FormSubmission } from "@/lib/legal/forms/queries";
 import { ficheStatusOf, type FicheStatus } from "@/lib/legal/forms/state";
 import {
@@ -334,6 +335,92 @@ export function recapFiche(
   }
   const status = ficheStatusOf(input);
   return { status, state: recapFicheState(status), href };
+}
+
+/**
+ * A fiche received, reduced to what its state needs and nothing of what the
+ * person wrote (retour d'Ibé: the recap never shows a fiche's personal data:
+ * address, birth, social security, bank details). The state of a fiche
+ * (ficheStatusOf) asks only which required fields are filled and whether
+ * corrections were asked: each required field filled becomes « · », the
+ * corrections keep their names, no value; the contribution is not read. The
+ * result holds no word of the person, so nothing of it can be shown or
+ * sent to the browser.
+ */
+export function redactedSubmission(row: {
+  roles: string[];
+  person: Record<string, string>;
+  corrections: readonly string[];
+  submittedAt: string;
+}): FormSubmission {
+  const person: Record<string, string> = {};
+  // The kind of person (a company or not) is no private data: it says which
+  // fields are required.
+  if (row.person.entity_type) person.entity_type = row.person.entity_type;
+  for (const id of ficheNeeded(row.roles, row.person))
+    if ((row.person[id] ?? "").trim() !== "") person[id] = "·";
+  return {
+    roles: row.roles,
+    otherRole: null,
+    person,
+    contribution: {},
+    corrections: Object.fromEntries(
+      row.corrections.map((id) => [id, { before: "", after: "" }]),
+    ),
+    submittedAt: row.submittedAt,
+  };
+}
+
+/**
+ * What the recap never reads (the Juridique's personal data, retour d'Ibé du
+ * 18/11/2026): the tables of a person's private details, and the columns
+ * that hold them. `privateReadsOf` names what a `.select()` of the recap
+ * would take; the only table of a fiche's content the recap opens is
+ * legal_form_submissions, through redactedSubmission (its `person`,
+ * `corrections`), for the state of a fiche.
+ */
+export const RECAP_PRIVATE_TABLES = [
+  "contact_legal_details",
+  "network_contact_private_details",
+] as const;
+
+export const RECAP_PRIVATE_COLUMNS = [
+  // The fiche's fields (lib/legal/forms/definition.ts) and the identity.
+  "address",
+  "billing",
+  "siret",
+  "email",
+  "city",
+  "notes",
+  "birth_date",
+  "birth_place",
+  "social_security",
+  "ssn",
+  "iban",
+  "bic",
+  "rib",
+  "details",
+  "contribution",
+] as const;
+
+// The columns of a fiche's submission: its content, reduced on reading.
+const SUBMISSION_CONTENT = ["person", "corrections"];
+
+/** What a `.from(table).select(columns)` would take that the recap must
+ * not: the table itself, or a private column (embedded relations and
+ * aliases included). Empty: clean. */
+export function privateReadsOf(table: string, columns: string): string[] {
+  if ((RECAP_PRIVATE_TABLES as readonly string[]).includes(table))
+    return [table];
+  const names = columns
+    .split(/[\s,()]+/)
+    .map((token) => token.split(":").pop()!.split("!")[0])
+    .filter(Boolean);
+  return names.filter(
+    (name) =>
+      (RECAP_PRIVATE_COLUMNS as readonly string[]).includes(name) ||
+      (table !== "legal_form_submissions" && SUBMISSION_CONTENT.includes(name)),
+  );
 }
 
 /** A person of the title in the recap (a beatmaker): name and fiche (null

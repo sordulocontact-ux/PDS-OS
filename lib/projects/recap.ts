@@ -28,6 +28,7 @@ import {
   recapCounts,
   recapFiche,
   recapRate,
+  redactedSubmission,
   showPlanCall,
   type CatalogManager,
   type ContactRow,
@@ -55,6 +56,17 @@ const texts = (v: unknown): Record<string, string> =>
   Object.fromEntries(
     Object.entries(record(v)).map(([k, x]) => [k, String(x ?? "")]),
   );
+
+// PRIVACY (retours d'Ibé du 18/11/2026): the recap, in the page and in its
+// compact version, never reads, keeps or sends to the browser a person's
+// private data: birth date and place, social security number, address,
+// bank details, e-mail (tables legal_form_submissions, contact_legal_details,
+// fields of lib/legal/forms/definition.ts). A contact's name and phone are
+// expected (the Excel's TEL). The only read of a fiche's content is its
+// state (« À envoyer », « En attente », « Remplie »), reduced at once to
+// « which required fields are filled » (redactedSubmission). `privateReadsOf`
+// (recap-rules.ts) names what a `.select()` must not take: run it over every
+// `.select()` of this file, title-board.ts and titles.ts when one is added.
 
 /**
  * The collective's recap (retours d'Ibé du 18/11/2026, lot 2): the board of
@@ -195,11 +207,11 @@ export async function loadTitleRecap(
           .in("deal_id", dealIds)
       : Promise.resolve(none),
     formIds.length
-      ? supabase
+      ? // The content of a fiche is read for its state only, then redacted
+        // (redactedSubmission): never kept, shown or sent to the browser.
+        supabase
           .from("legal_form_submissions")
-          .select(
-            "form_id, roles, other_role, person, contribution, corrections, created_at",
-          )
+          .select("form_id, roles, person, corrections, created_at")
           .in("form_id", formIds)
           .order("created_at", { ascending: false })
       : Promise.resolve(none),
@@ -293,22 +305,15 @@ export async function loadTitleRecap(
   const submissionOf = new Map<string, FormSubmission>();
   for (const s of submissions.data ?? [])
     if (!submissionOf.has(s.form_id))
-      submissionOf.set(s.form_id, {
-        roles: s.roles,
-        otherRole: s.other_role,
-        person: texts(s.person),
-        contribution: texts(s.contribution),
-        corrections: Object.fromEntries(
-          Object.entries(record(s.corrections)).map(([k, v]) => [
-            k,
-            {
-              before: String(record(v).before ?? ""),
-              after: String(record(v).after ?? ""),
-            },
-          ]),
-        ),
-        submittedAt: s.created_at,
-      });
+      submissionOf.set(
+        s.form_id,
+        redactedSubmission({
+          roles: s.roles,
+          person: texts(s.person),
+          corrections: Object.keys(record(s.corrections)),
+          submittedAt: s.created_at,
+        }),
+      );
   const contractOf = new Map(
     (contracts.data ?? []).map((c) => [
       c.id,
