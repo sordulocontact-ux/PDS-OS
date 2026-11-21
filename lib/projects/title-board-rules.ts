@@ -160,9 +160,32 @@ export function titleMasterStatus(
 // ---------------------------------------------------------------- Contract
 
 /**
+ * What a contract's copies say (the table CONTRATS of Ibé's Excel): the
+ * person's signed copies (contract_files, category signed: how many, and
+ * whether one came by the person's link), the proof « signé autrement »
+ * (category evidence), and whether PDS has countersigned (pds_signed_at).
+ */
+export type ContractProof = {
+  signedFiles: number;
+  signedViaLink: boolean;
+  evidence: boolean;
+  countersigned: boolean;
+};
+
+export const NO_PROOF: ContractProof = {
+  signedFiles: 0,
+  signedViaLink: false,
+  evidence: false,
+  countersigned: false,
+};
+
+/**
  * A participation's contract (title_participations.contract_id, the only
- * source, plan § 0 ter):
- * - contract: linked and readable by the viewer, with its shown state;
+ * source, plan § 0 ter; set from the person's contract by the database once
+ * the accord is validated, migration 20261121230101: the recap, the banner,
+ * the locks and the deals read the same one):
+ * - contract: linked and readable by the viewer, with its shown state and
+ *   what its copies say;
  * - hidden: linked, but the viewer may not read contracts (RLS): said as
  *   linked, never as missing;
  * - missing: a confirmed participation without one (décision 6: shown as to
@@ -172,7 +195,13 @@ export function titleMasterStatus(
  * Waivers: participation_waivers (lot 12), beside it.
  */
 export type ParticipationContract =
-  | { kind: "contract"; id: string; title: string; state: ContractState }
+  | {
+      kind: "contract";
+      id: string;
+      title: string;
+      state: ContractState;
+      proof: ContractProof;
+    }
   | { kind: "hidden" }
   | { kind: "missing" }
   | { kind: "none" };
@@ -180,7 +209,12 @@ export type ParticipationContract =
 export function participationContract(input: {
   status: TitleParticipation["status"];
   contractId: string | null;
-  contract: { id: string; title: string; state: ContractState } | null;
+  contract: {
+    id: string;
+    title: string;
+    state: ContractState;
+    proof: ContractProof;
+  } | null;
 }): ParticipationContract {
   if (input.contractId)
     return input.contract

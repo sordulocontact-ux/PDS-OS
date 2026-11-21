@@ -11,9 +11,11 @@ import { isDealStage } from "@/lib/deals/types";
 import { canEditProject } from "@/lib/projects/edit-access";
 import {
   dealReach,
+  NO_PROOF,
   participationContract,
   participationDeal,
   titleMasterState,
+  type ContractProof,
   type ParticipationDeal,
   type ParticipationWaiver,
   type TitleBoard,
@@ -27,7 +29,9 @@ import { createClient } from "@/lib/supabase/server";
  * « Titres et artistes » of a collective (docs/pds-mic-plan.md, lot 6): its
  * titles and participations (loadProjectTitles), and for each one what the
  * other modules hold — the participation's contract (title_participations.
- * contract_id, the only source), its deal (Business module), the title's
+ * contract_id, the only source, set from the person's contract once the
+ * accord is validated) and what its copies say, its deal (Business
+ * module), the title's
  * versions in this project's Master and its audio in the Catalogue.
  * Everything read with the viewer's session: RLS decides what each person
  * sees (a contract or a deal they may not read stays unread, never guessed);
@@ -45,7 +49,7 @@ export async function loadTitleBoard(
       supabase
         .from("title_participations")
         .select(
-          "id, contract_id, contract:contracts!title_participations_contract_same_org(id, title, status, ends_on)",
+          "id, contract_id, contract:contracts!title_participations_contract_same_org(id, title, status, ends_on, pds_signed_at)",
         )
         .eq("project_id", project.id),
       // A participation's deal carries the project (deals_participation_
@@ -116,14 +120,47 @@ export async function loadTitleBoard(
   const masterIds = titles.flatMap((title) =>
     title.master ? [title.master.id] : [],
   );
-  const audio = masterIds.length
-    ? await supabase
-        .from("masters")
-        .select("id, audio_state")
-        .in("id", masterIds)
-    : { data: [], error: null };
+  // What the linked contracts' copies say (« Retour reçu »): which files
+  // exist, never their names or paths. Only contracts the viewer reads.
+  const contractIds = [
+    ...new Set(
+      (contracts.data ?? []).flatMap((row) =>
+        row.contract ? [row.contract.id] : [],
+      ),
+    ),
+  ];
+  const [audio, files] = await Promise.all([
+    masterIds.length
+      ? supabase.from("masters").select("id, audio_state").in("id", masterIds)
+      : { data: [], error: null },
+    contractIds.length
+      ? supabase
+          .from("contract_files")
+          .select("contract_id, category, via_contact_id")
+          .in("contract_id", contractIds)
+          .in("category", ["signed", "evidence"])
+      : { data: [], error: null },
+  ]);
   if (audio.error)
     throw new Error(`loadTitleBoard audio: ${audio.error.message}`);
+  if (files.error)
+    throw new Error(`loadTitleBoard contract files: ${files.error.message}`);
+  const proofOf = new Map<string, ContractProof>();
+  for (const row of contracts.data ?? [])
+    if (row.contract)
+      proofOf.set(row.contract.id, {
+        ...NO_PROOF,
+        countersigned: row.contract.pds_signed_at !== null,
+      });
+  for (const file of files.data ?? []) {
+    const proof = proofOf.get(file.contract_id);
+    if (!proof) continue;
+    if (file.category === "signed") {
+      proof.signedFiles += 1;
+      if (file.via_contact_id) proof.signedViaLink = true;
+    }
+    if (file.category === "evidence") proof.evidence = true;
+  }
   const finalInCatalogue = new Set(
     (audio.data ?? [])
       .filter((master) => master.audio_state === "final_master")
@@ -147,6 +184,7 @@ export async function loadTitleBoard(
                 },
                 today,
               ),
+              proof: proofOf.get(row.contract.id) ?? NO_PROOF,
             }
           : null,
       },

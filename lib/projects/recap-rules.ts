@@ -27,7 +27,6 @@
 // (lib/deals/negotiation-call-rules.ts), shown when accord.showPlanCall.
 
 import { routes } from "@/lib/auth/redirects";
-import type { ContractState } from "@/lib/contracts/types";
 import type {
   NegotiationCallTarget,
   SharedNegotiationCall,
@@ -48,6 +47,8 @@ import {
 import type {
   BoardParticipation,
   BoardTitle,
+  ContractProof,
+  ParticipationContract,
   TitleBoard,
 } from "@/lib/projects/title-board-rules";
 import type { Tone } from "@/lib/ui/state-tones";
@@ -535,16 +536,6 @@ export function personKeyOf(input: {
  */
 export type ContractBack = "countersign";
 
-export type ContractProof = {
-  // The signed copies of the contract (contract_files, category signed):
-  // how many, and whether one came by the person's link.
-  signedFiles: number;
-  signedViaLink: boolean;
-  // The proof « signé autrement » (category evidence) is kept.
-  evidence: boolean;
-  countersigned: boolean;
-};
-
 export function contractBackOf(
   input: ContractProof & { state: AgreementState },
 ): ContractBack | null {
@@ -565,13 +556,17 @@ export function recapAgreementState(
 }
 
 /**
- * The artist's contract on this project (one per person: legal_agreement_
- * needs → contracts), for a participation:
+ * The contract of a participation, as the banner and the locks read it
+ * (title_participations.contract_id: the person's contract, one per person,
+ * copied onto the participations it covers once their accord is validated,
+ * migration 20261121230101):
  * - agreement: where it stands (the Juridique's AgreementState: the
- *   contract's own state once drafted, « Contrat nécessaire » before);
- * - waiting_agreement: confirmed, and the artist has a participation in
- *   play whose accord is not validated: no contract before the accord
- *   (§ 3.5, the database refuses to draft it), « En attente de l'accord »;
+ *   contract's own state once linked, « À rédiger » before);
+ * - waiting_agreement: confirmed, no contract linked, and the artist has a
+ *   participation in play whose accord is not validated: no contract
+ *   before the accord (§ 3.5, the database refuses to draft or link it),
+ *   « En attente de l'accord ». A contract really linked wins: its state is
+ *   shown;
  * - hidden: a contract the reader may not read;
  * - none: not expected yet (proposed, invited) or no longer.
  */
@@ -586,32 +581,30 @@ export function recapContract(input: {
   // The artist has a participation in play (title not abandoned) whose
   // accord is not validated (artistsAwaitingAgreement).
   artistPending: boolean;
-  // The person's need, when the Juridique planned one.
-  need: {
-    contractId: string | null;
-    contract: ContractState | null;
-    // What the contract's files say (contractBackOf's input).
-    proof: ContractProof;
-  } | null;
+  // The participation's contract (loadTitleBoard).
+  contract: ParticipationContract;
+  // The Juridique planned the person's contract (legal_agreement_needs).
+  needed: boolean;
 }): RecapContract {
-  const { need } = input;
-  if (need?.contractId) {
-    if (!need.contract) return { kind: "hidden" };
+  const { contract } = input;
+  if (contract.kind === "hidden") return { kind: "hidden" };
+  if (contract.kind === "contract") {
     const state = agreementStateOf({
       mapped: true,
       mappingApproved: true,
-      contract: need.contract,
+      contract: contract.state,
       ready: false,
     });
     return {
       kind: "agreement",
-      state: recapAgreementState(state, need.proof.countersigned),
-      back: contractBackOf({ state, ...need.proof }),
+      state: recapAgreementState(state, contract.proof.countersigned),
+      back: contractBackOf({ state, ...contract.proof }),
     };
   }
   const confirmed = input.status === "confirmed";
   if (confirmed && input.artistPending) return { kind: "waiting_agreement" };
-  if (need) return { kind: "agreement", state: "needs_info", back: null };
+  if (input.needed)
+    return { kind: "agreement", state: "needs_info", back: null };
   if (confirmed) return { kind: "agreement", state: "unmapped", back: null };
   return { kind: "none" };
 }
