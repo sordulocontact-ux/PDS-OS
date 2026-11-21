@@ -4,6 +4,9 @@ import { toParisLocalInput } from "@/lib/calls/format";
 import { createClient } from "@/lib/supabase/server";
 import { formatDay } from "@/lib/utils/day";
 
+// The working day of the slots, its end in Paris (« HH:mm »).
+const DAY_END = "18:00";
+
 /** A free slot, as the call form takes it: "YYYY-MM-DDTHH:mm" in Paris,
  * its end "HH:mm", and the hour shown on its button. */
 export type FreeSlot = { local: string; end: string; label: string };
@@ -35,6 +38,8 @@ export async function loadNegotiatorFreeDays(
   for (const row of data ?? []) {
     const local = toParisLocalInput(new Date(row.starts_at));
     const end = toParisLocalInput(new Date(row.ends_at)).slice(11);
+    // The day closes at 18:00: no call starting at the closing hour.
+    if (end > DAY_END) continue;
     const day = local.slice(0, 10);
     const entry = days.get(day) ?? {
       day,

@@ -61,6 +61,7 @@ export function CallPlanForm({
   onCancel,
   onSaved,
   footer = "end",
+  extra,
 }: {
   action: (
     previous: ActionResult | null,
@@ -89,6 +90,8 @@ export function CallPlanForm({
   onSaved?: (id: string) => void;
   // Buttons on the right (modal) or the left (card in a page).
   footer?: "start" | "end";
+  // Below the fields, above the buttons (a deal call's agenda, folded).
+  extra?: React.ReactNode;
 }) {
   const t = fr.calls.schedule;
   const idPrefix = useId();
@@ -229,6 +232,7 @@ export function CallPlanForm({
         defaultUrl={defaultUrl}
         error={errors.link}
       />
+      {extra}
       {tried && missing > 0 ? (
         <FormMessage kind="error">{t.missingCount(missing)}</FormMessage>
       ) : (

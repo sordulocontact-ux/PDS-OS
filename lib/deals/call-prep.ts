@@ -4,7 +4,7 @@
 
 import type { AgendaItem } from "@/lib/calls/first-call-agenda";
 import { formatTermValue } from "@/lib/deals/term-format";
-import type { DealTerm } from "@/lib/deals/terms";
+import { DEAL_TERMS, type DealTerm } from "@/lib/deals/terms";
 import type { Deal } from "@/lib/deals/types";
 import { dealCalls } from "@/lib/i18n/fr/deal-calls";
 import { deals } from "@/lib/i18n/fr/deals";
@@ -44,6 +44,28 @@ export function dealCallAgenda(
     }),
   ];
 }
+
+/** The agenda as the call's dialog shows it, one line a point:
+ * « Avance · Contre-proposition : 15 000 € ». */
+export function dealCallTopics(
+  deal: Pick<Deal, "stage">,
+  terms: DealTerm[],
+): string[] {
+  return dealCallAgenda(deal, terms).map((item) =>
+    [item.topic, ...(item.questions ?? [])].join(" · "),
+  );
+}
+
+/** A participation's deal does not exist yet: its terms all to define. */
+export const blankDealTerms = (): DealTerm[] =>
+  DEAL_TERMS.music.map((term) => ({
+    key: term.key,
+    format: term.format,
+    value: null,
+    state: "to_define",
+    changedBy: null,
+    changedAt: null,
+  }));
 
 /** The call's default title: « Call · Nadia · Titre 2 ». */
 export const dealCallTitle = (name: string) => fr.dealCalls.prepare.title(name);

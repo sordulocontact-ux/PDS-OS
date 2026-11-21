@@ -14,10 +14,10 @@ import {
   slotOf,
   wantsGoogleMeet,
 } from "@/lib/calls/schedule";
-import { dealCallAgenda } from "@/lib/deals/call-prep";
+import { blankDealTerms, dealCallAgenda } from "@/lib/deals/call-prep";
 import { loadDeal } from "@/lib/deals/queries";
 import { loadDealTerms } from "@/lib/deals/term-queries";
-import { DEAL_TERMS, type DealTerm } from "@/lib/deals/terms";
+
 import { schedule } from "@/lib/i18n/fr/calls-schedule";
 import { createMeetEvent } from "@/lib/integrations/google-calendar";
 import { turnOnAutoTranscription } from "@/lib/integrations/google-meet";
@@ -41,17 +41,6 @@ const targetSchema = z.object({
 
 const field = (form: FormData, key: string) =>
   String(form.get(key) ?? "").trim() || undefined;
-
-/** A participation's deal does not exist yet: its terms all to define. */
-const blankTerms = (): DealTerm[] =>
-  DEAL_TERMS.music.map((term) => ({
-    key: term.key,
-    format: term.format,
-    value: null,
-    state: "to_define",
-    changedBy: null,
-    changedAt: null,
-  }));
 
 /** The Meet event of the call, inviting its negotiator and guests (never
  * whoever planned it: she is not in the call). A refusal keeps the call. */
@@ -133,7 +122,7 @@ export async function planNegotiationCall(
   if (dealId && !deal) return { ok: false, error: "not_found" };
   const agenda = deal
     ? dealCallAgenda(deal, await loadDealTerms(deal.id, deal.kind))
-    : dealCallAgenda({ stage: "to_contact" }, blankTerms());
+    : dealCallAgenda({ stage: "to_contact" }, blankDealTerms());
 
   const { data: callId, error } = await supabase.rpc(
     "plan_deal_negotiation_call",

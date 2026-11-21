@@ -14,7 +14,7 @@ import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { formatSlot, nextRoundHourInput } from "@/lib/calls/format";
 import { loadCallContacts } from "@/lib/calls/invite";
-import { dealCallAgenda, dealCallTitle } from "@/lib/deals/call-prep";
+import { dealCallTitle, dealCallTopics } from "@/lib/deals/call-prep";
 import {
   loadDealCallProposals,
   loadDealCalls,
@@ -58,9 +58,7 @@ async function callFormFor(
     contacts: await loadCallContacts(),
     googleMeet: googleMeetConfigured(),
     defaultOccurredAt: nextRoundHourInput(new Date()),
-    topics: dealCallAgenda(deal, terms).map((item) =>
-      [item.topic, ...(item.questions ?? [])].join(" · "),
-    ),
+    topics: dealCallTopics(deal, terms),
   };
 }
 
@@ -161,7 +159,7 @@ async function DealTodo({
 >) {
   const [callForm, negotiationCall] = await Promise.all([
     callFormFor(deal, terms),
-    loadDealNegotiationCall(deal),
+    loadDealNegotiationCall(deal, terms),
   ]);
   // An abandoned deal: the direction opens a new one for its artist.
   const reopenOptions =

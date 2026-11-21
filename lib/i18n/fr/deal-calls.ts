@@ -37,6 +37,8 @@ export const dealCalls = {
     slotsSource: "D'après ses calls dans PDS OS, de 10 h à 18 h.",
     slotsNone: "Aucun créneau libre ces prochains jours.",
     slotsError: "Ses créneaux n'ont pas pu être lus.",
+    day: "Jour",
+    slotsOf: (day: string) => `Créneaux du ${day}`,
     slot: (day: string, hour: string) => `${day} à ${hour}`,
     other: "Autre horaire",
     back: "Autres créneaux",

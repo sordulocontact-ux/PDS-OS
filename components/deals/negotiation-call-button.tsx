@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { CallPlanForm } from "@/components/calls/call-plan-form";
+import { DealCallAgendaPreview } from "@/components/deals/deal-call-agenda-preview";
 import { NegotiationCallSlots } from "@/components/deals/negotiation-call-slots";
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
@@ -94,6 +95,12 @@ export function NegotiationCallButton({
                 toast.success(t.done);
                 close();
               }}
+              extra={
+                <DealCallAgendaPreview
+                  id="negotiation-call-agenda"
+                  topics={data.topics}
+                />
+              }
             />
           ))}
       </FormDialog>

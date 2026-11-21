@@ -5,8 +5,13 @@ import {
   type FreeDay,
 } from "@/lib/calendar/free-slots";
 import { loadCallContacts, type CallContact } from "@/lib/calls/invite";
-import { dealCallTitle } from "@/lib/deals/call-prep";
+import {
+  blankDealTerms,
+  dealCallTitle,
+  dealCallTopics,
+} from "@/lib/deals/call-prep";
 import { dealName } from "@/lib/deals/names";
+import type { DealTerm } from "@/lib/deals/terms";
 import type { Deal } from "@/lib/deals/types";
 import { googleMeetConfigured } from "@/lib/integrations/google-calendar";
 import { personName } from "@/lib/projects/types";
@@ -32,6 +37,8 @@ export type NegotiationCallData = {
   negotiators: CallNegotiator[];
   contacts: CallContact[];
   googleMeet: boolean;
+  // The agenda the call will have, one line a point (dealCallTopics).
+  topics: string[];
 };
 
 async function withSlots(
@@ -86,6 +93,7 @@ async function participationContact(
  */
 export async function loadDealNegotiationCall(
   deal: Deal,
+  terms: DealTerm[],
 ): Promise<NegotiationCallData | null> {
   if (!deal.canPlanCall) return null;
   const people = deal.assignee ? [deal.assignee] : await negotiatorsOf();
@@ -104,6 +112,7 @@ export async function loadDealNegotiationCall(
     negotiators,
     contacts,
     googleMeet: googleMeetConfigured(),
+    topics: dealCallTopics(deal, terms),
   };
 }
 
@@ -128,5 +137,6 @@ export async function loadParticipationNegotiationCall(
     negotiators,
     contacts,
     googleMeet: googleMeetConfigured(),
+    topics: dealCallTopics({ stage: "to_contact" }, blankDealTerms()),
   };
 }

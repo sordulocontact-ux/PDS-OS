@@ -5,7 +5,7 @@ import { useState } from "react";
 import { CallPlanForm } from "@/components/calls/call-plan-form";
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
-import { FormSection } from "@/components/ui/form-section";
+import { DealCallAgendaPreview } from "@/components/deals/deal-call-agenda-preview";
 import type { CallContact } from "@/lib/calls/invite";
 import { createDealCall } from "@/lib/deals/call-actions";
 import { calls } from "@/lib/i18n/fr/calls";
@@ -28,8 +28,8 @@ export type DealCallFormData = {
 
 /**
  * « Préparer un call » of a deal (BIZ 6): the call form of Calls (name,
- * guests from the Réseau or by e-mail, slot, video link), its agenda shown
- * as the code will write it — the context, then the terms not confirmed.
+ * guests from the Réseau or by e-mail, slot, video link), its agenda folded
+ * at the bottom (DealCallAgendaPreview), as the code will write it.
  * No member is invited: whoever reads the deal sees the call.
  */
 export function DealCallButton({
@@ -56,38 +56,29 @@ export function DealCallButton({
         size="wide"
       >
         {open && (
-          <div className="flex flex-col gap-6">
-            <FormSection
-              title={t.agendaTitle}
-              description={
-                data.topics.length === 1 ? t.nothingToNegotiate : undefined
-              }
-              plain
-            >
-              <ul className="flex list-disc flex-col gap-1 pl-5 text-body-md text-[color:var(--text-secondary)]">
-                {data.topics.map((topic) => (
-                  <li key={topic}>{topic}</li>
-                ))}
-              </ul>
-            </FormSection>
-            <CallPlanForm
-              action={createDealCall}
-              hidden={{ dealId: data.dealId }}
-              defaultTitle={data.title}
-              titlePlaceholder={t.titlePlaceholder}
-              defaultOccurredAt={data.defaultOccurredAt}
-              members={[]}
-              memberDetail=""
-              defaultMemberIds={[]}
-              contacts={data.contacts}
-              participantsHint={t.participantsHint}
-              googleMeet={data.googleMeet}
-              submitLabel={t.submit}
-              pendingLabel={t.pending}
-              cancelLabel={t.cancel}
-              onCancel={() => setOpen(false)}
-            />
-          </div>
+          <CallPlanForm
+            action={createDealCall}
+            hidden={{ dealId: data.dealId }}
+            defaultTitle={data.title}
+            titlePlaceholder={t.titlePlaceholder}
+            defaultOccurredAt={data.defaultOccurredAt}
+            members={[]}
+            memberDetail=""
+            defaultMemberIds={[]}
+            contacts={data.contacts}
+            participantsHint={t.participantsHint}
+            googleMeet={data.googleMeet}
+            submitLabel={t.submit}
+            pendingLabel={t.pending}
+            cancelLabel={t.cancel}
+            onCancel={() => setOpen(false)}
+            extra={
+              <DealCallAgendaPreview
+                id={`deal-call-agenda-${data.dealId}`}
+                topics={data.topics}
+              />
+            }
+          />
         )}
       </FormDialog>
     </>
