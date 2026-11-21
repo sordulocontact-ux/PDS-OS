@@ -136,11 +136,11 @@ export function CollectiveSelectionField({
                 <NameChip key={artist.id} name={artist.name} />
               ))}
             </NameChips>
-            <p className="text-xs text-muted-foreground">
-              {t.guestsHint}
-              {preview.mainArtist &&
-                ` ${t.mainInSelection(preview.mainArtist.name)}`}
-            </p>
+            {preview.mainArtist && (
+              <p className="text-xs text-muted-foreground">
+                {t.mainInSelection(preview.mainArtist.name)}
+              </p>
+            )}
           </div>
         ))}
     </div>
@@ -179,7 +179,6 @@ export function CollectiveGuestsField({
         legend={t.guestsField}
         chosenNote={t.guestAlready}
         excludedNote={t.guestIsMain}
-        hint={t.guestsFieldHint}
         error={error}
       />
       <input

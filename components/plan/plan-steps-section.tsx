@@ -5,17 +5,11 @@ import {
   type StepRow,
 } from "@/components/plan/plan-steps-table";
 import { PageSection } from "@/components/shell/page-section";
-import type { BriefChange } from "@/lib/framing/brief-snapshot";
 import { framingIntel } from "@/lib/i18n/fr/framing-intel";
 import { planSteps } from "@/lib/i18n/fr/plan-steps";
 import { workflowStatus } from "@/lib/i18n/fr/workflow-status";
 import type { LaunchedPlan } from "@/lib/plan/queries";
-import {
-  stepIssues,
-  stepStatus,
-  workflowsToReview,
-  type PlanStep,
-} from "@/lib/plan/steps";
+import { stepStatus, type PlanStep } from "@/lib/plan/steps";
 import { formatDate } from "@/lib/release/format";
 import { workflowStatusTone } from "@/lib/ui/state-tones";
 import type { WorkflowStates } from "@/lib/workflow-status/load";
@@ -33,23 +27,18 @@ const GROUP: Record<CommonStatus, StepGroup> = {
 
 /**
  * The launched plan's steps on the overview (PROJ-UX-07): each one's real
- * state read from its workflow (an added step: its done mark), what does not
- * hold, and the plan's history; who launched it, and when.
+ * state read from its workflow (an added step: its done mark), and the plan's history; who launched it, and when.
  */
 export function PlanStepsSection({
   projectId,
   plan,
   flows,
-  drift,
-  targetDate,
   members,
   editable,
 }: {
   projectId: string;
   plan: LaunchedPlan;
   flows: WorkflowStates;
-  drift: BriefChange[];
-  targetDate: string | null;
   members: Array<{ personId: string; name: string }>;
   editable: boolean;
 }) {
@@ -69,12 +58,6 @@ export function PlanStepsSection({
     dependsOn: item.dependsOn,
     doneAt: item.doneAt,
   }));
-  const ctx = {
-    states: flows.states,
-    targetDate,
-    review: workflowsToReview(drift),
-    dependencies: flows.dependencies,
-  };
   const rows: StepRow[] = items.map((item, index) => {
     const step = steps[index];
     const status = stepStatus(step, flows.states);
@@ -103,7 +86,6 @@ export function PlanStepsSection({
       executor: item.executorName,
       dueDate: item.dueDate,
       dependsOn: item.dependsOn.map((w) => tp.workflows[w]),
-      issues: stepIssues(step, steps, ctx),
       values: {
         column: item.column,
         title: item.workflow === null ? item.title : null,

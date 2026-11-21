@@ -11,7 +11,6 @@ import { PlanStepForm } from "@/components/plan/plan-step-form";
 import { Button } from "@/components/ui/button";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { SunkCard } from "@/components/ui/sunk-card";
-import { ToneCallout } from "@/components/ui/tone-callout";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { framingIntel } from "@/lib/i18n/fr/framing-intel";
 import { framingJourney } from "@/lib/i18n/fr/framing-journey";
@@ -26,12 +25,8 @@ import {
   type ProposedItem,
 } from "@/lib/plan/propose";
 import type { PlanStepValues } from "@/lib/plan/step-actions";
-import { stepIssues, stepStatus, type PlanStep } from "@/lib/plan/steps";
-import type {
-  Dependency,
-  WorkflowKey,
-  WorkflowState,
-} from "@/lib/workflow-status/rules";
+import { stepStatus } from "@/lib/plan/steps";
+import type { WorkflowKey, WorkflowState } from "@/lib/workflow-status/rules";
 
 const fr = { framingIntel, planSteps, framingJourney };
 
@@ -44,9 +39,6 @@ type Draft = ProposedItem & {
 export type PlanContext = {
   states: Partial<Record<WorkflowKey, WorkflowState | "restricted">>;
   targetDate: string | null;
-  // The workflows a change of the validated Brief puts back to review.
-  review: Partial<Record<PlanWorkflow, string[]>>;
-  dependencies: Dependency[];
 };
 
 /**
@@ -54,7 +46,7 @@ export type PlanContext = {
  * Sacha 29/10/2026), in one card: « Proposée par PO à partir du Brief… »,
  * « Ajouter une étape » in its head, the four groups as stops on one line
  * to the target date (PlanColumns),
- * each step with its pilot, due date and what does not hold. Its own
+ * each step with its pilot and due date. Its own
  * « Modifier » opens a step in place; under the plan, what « Lancer le
  * plan » starts, said before the gesture. Nothing is recorded before it.
  */
@@ -99,24 +91,6 @@ export function PlanBoard({
   const nameOf = (id: string | null) =>
     members.find((m) => m.personId === id)?.name ?? null;
   const kept = drafts.filter((d) => !d.removed);
-  const asSteps: PlanStep[] = kept.map((d) => ({
-    key: d.key,
-    column: d.column,
-    workflow: d.workflow,
-    title: d.title,
-    ownerPersonId: d.ownerPersonId,
-    executorPersonId: d.executorPersonId,
-    dueDate: d.dueDate,
-    dependsOn: d.dependsOn,
-  }));
-  const review = new Map(
-    Object.entries(context.review) as Array<[PlanWorkflow, string[]]>,
-  );
-  const issuesOf = (step: PlanStep) =>
-    step.column === "anticipate" && !step.workflow
-      ? []
-      : stepIssues(step, asSteps, { ...context, review });
-  const issueCount = asSteps.reduce((n, s) => n + issuesOf(s).length, 0);
   const inColumn = (column: PlanColumn) =>
     kept.filter((d) => d.column === column).sort((a, b) => a.order - b.order);
   // Swaps a step with its neighbour in the same column.
@@ -242,9 +216,6 @@ export function PlanBoard({
 
   const footer = editable && (
     <>
-      {issueCount > 0 && (
-        <ToneCallout tone="warning">{ts.review.issues(issueCount)}</ToneCallout>
-      )}
       <FormMessage kind="error">{error}</FormMessage>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <Button
@@ -279,7 +250,6 @@ export function PlanBoard({
             PLAN_COLUMNS.map((column) => [
               column,
               inColumn(column).map((d, index, list) => {
-                const step = asSteps.find((x) => x.key === d.key)!;
                 const note = d.workflow === null && !d.added;
                 const open = editing === d.key;
                 return (
@@ -302,7 +272,6 @@ export function PlanBoard({
                     }
                     pilot={nameOf(d.ownerPersonId)}
                     dueDate={d.dueDate}
-                    issues={issuesOf(step)}
                     muted={note}
                     actions={
                       editable &&

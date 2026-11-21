@@ -363,8 +363,6 @@ export const shell = {
       // Under the selection chosen: who comes, and how.
       guests: (count: number) =>
         count === 1 ? "1 artiste importé" : `${count} artistes importés`,
-      guestsHint:
-        "Chacun reçoit un titre sans nom et une participation proposée. Les titres se nomment ensuite dans le projet, où d'autres s'ajoutent.",
       mainInSelection: (name: string) =>
         `${name}, artiste principal, n'est pas ajouté comme invité.`,
       emptySelection:
@@ -384,8 +382,6 @@ export const shell = {
       guestsField: "Artistes invités",
       guestAlready: (name: string) => `${name} est déjà invité.`,
       guestIsMain: (name: string) => `${name} est l'artiste principal.`,
-      guestsFieldHint:
-        "Chacun reçoit un titre sans nom et une participation proposée : sa négociation s'ouvre ensuite depuis Deals.",
     },
     // Creating transmits it to the chosen project manager (submitHint).
     submit: "Créer le projet",
