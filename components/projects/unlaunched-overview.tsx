@@ -31,6 +31,8 @@ const fr = { shell, transmission };
  * manager accepts, asks or refuses). No « À vous » line: the block and its
  * buttons say it (Sacha 30/10/2026). No history either: it is only the
  * transmission, said in the block (it stays in Équipe). No step, no section.
+ * A collective opens on its recap (retours d'Ibé du 18/11/2026, lot 2),
+ * right under its head and the answer received, before the handover.
  */
 export function UnlaunchedOverview({
   project,
@@ -56,7 +58,8 @@ export function UnlaunchedOverview({
   subtitle?: string;
   // « Projet collectif » on the right of the name (docs/pds-mic-plan.md).
   status?: React.ComponentProps<typeof ModuleHeader>["status"];
-  // A collective's titles (docs/pds-mic-plan.md, lot 2), under the handover.
+  // A collective's recap (docs/pds-mic-plan.md, lot 2; retours d'Ibé du
+  // 18/11/2026, lot 2), at the head.
   titles?: React.ReactNode;
 }) {
   const t = fr.transmission.page;
@@ -156,6 +159,8 @@ export function UnlaunchedOverview({
         </ToneCallout>
       )}
 
+      {titles}
+
       <section
         aria-labelledby="handover-title"
         className="flex flex-col gap-3.5 modern:gap-3"
@@ -211,7 +216,6 @@ export function UnlaunchedOverview({
             </div>
           ))}
       </section>
-      {titles}
     </div>
   );
 }

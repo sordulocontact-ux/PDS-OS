@@ -14,6 +14,7 @@ import { ProjectCoverEdit } from "@/components/projects/project-cover-edit";
 import { ProjectHeader } from "@/components/projects/project-header";
 import { TitlesActions } from "@/components/projects/titles/titles-actions";
 import { TitlesBoard } from "@/components/projects/titles/titles-board";
+import { TitlesRecapCompact } from "@/components/projects/titles/titles-recap-compact";
 import { UnlaunchedOverview } from "@/components/projects/unlaunched-overview";
 import { PageSection } from "@/components/shell/page-section";
 import { buttonVariants, ButtonRoll } from "@/components/ui/button";
@@ -35,7 +36,8 @@ import { canEditProject } from "@/lib/projects/edit-access";
 import { projectCoverUrls } from "@/lib/projects/covers";
 import { projectKindLabel } from "@/lib/projects/labels";
 import { getProject, listAssignablePeople } from "@/lib/projects/queries";
-import { loadTitleBoard, titleBoardChoices } from "@/lib/projects/title-board";
+import { loadTitleRecap } from "@/lib/projects/recap";
+import { titleBoardChoices } from "@/lib/projects/title-board";
 import type { ProjectDetail } from "@/lib/projects/types";
 import { projectCollectiveHue } from "@/lib/ui/category-hues";
 import { allInOrder } from "@/lib/utils/parallel";
@@ -51,7 +53,10 @@ import { loadWorkflowStates } from "@/lib/workflow-status/load";
  * one workflow hands another. No state pills, no rules between sections.
  * Everything read from the journeys and the workflows (docs/ARCHITECTURE.md
  * § 3 ter, § 8 ter), nothing stored. A project not accepted yet shows its
- * one gesture and what is transmitted (UnlaunchedOverview).
+ * one gesture and what is transmitted (UnlaunchedOverview). A collective
+ * opens on its recap (retours d'Ibé du 18/11/2026, lot 2): one row per
+ * artist, read only, « Tout voir » to « Titres et artistes »; what blocks
+ * the project comes under it, unchanged. Any other project: unchanged.
  */
 export default async function ProjectOverviewPage({
   params,
@@ -109,24 +114,36 @@ export default async function ProjectOverviewPage({
     );
   }
 
-  // A collective's titles have their own section once launched (« Titres
-  // et artistes », lot 6 of docs/pds-mic-plan.md), not the overview.
-  const [all, flows, launchedAt, creatives, covers, shootGaps, releaseGaps] =
-    await Promise.all([
-      loadShellJourneys(project.id),
-      loadWorkflowStates(project.id),
-      planLaunchedAt(project.id),
-      listProjectCreatives(project.id),
-      projectCoverUrls([coverSource(project)], "full"),
-      // A collective (lot 12): the missing participation contracts, said
-      // upstream (décision 6).
-      project.collective
-        ? loadContractGaps(project.id, "shoot")
-        : Promise.resolve([]),
-      project.collective
-        ? loadContractGaps(project.id, "release")
-        : Promise.resolve([]),
-    ]);
+  // A collective's titles have their own section once accepted (« Titres
+  // et artistes », lot 6 of docs/pds-mic-plan.md); the overview opens on
+  // their recap, read only (its « Caler le call » is not read).
+  const [
+    all,
+    flows,
+    launchedAt,
+    creatives,
+    covers,
+    shootGaps,
+    releaseGaps,
+    recap,
+  ] = await Promise.all([
+    loadShellJourneys(project.id),
+    loadWorkflowStates(project.id),
+    planLaunchedAt(project.id),
+    listProjectCreatives(project.id),
+    projectCoverUrls([coverSource(project)], "full"),
+    // A collective (lot 12): the missing participation contracts, said
+    // upstream (décision 6).
+    project.collective
+      ? loadContractGaps(project.id, "shoot")
+      : Promise.resolve([]),
+    project.collective
+      ? loadContractGaps(project.id, "release")
+      : Promise.resolve([]),
+    project.collective
+      ? loadTitleRecap(project, access, { planCalls: false })
+      : Promise.resolve(null),
+  ]);
   const framing =
     all.journeys.find((journey) => journey.module === "framing")?.steps ?? [];
   const brief = framing.find((step) => step.key === "brief");
@@ -186,6 +203,30 @@ export default async function ProjectOverviewPage({
           </>
         }
       />
+      {recap && (
+        <PageSection
+          id="titles"
+          title={fr.projectTitles.title}
+          action={
+            <ViewLink
+              href={routes.projectTitles(project.id)}
+              className={buttonVariants({ variant: "outline", size: "sm" })}
+            >
+              <ButtonRoll>{fr.projectTitles.recap.overview.seeAll}</ButtonRoll>
+            </ViewLink>
+          }
+        >
+          <TitlesRecapCompact
+            recap={recap}
+            href={routes.projectTitles(project.id)}
+            masterHref={
+              flows?.workflows.includes("master")
+                ? routes.projectMaster(project.id)
+                : null
+            }
+          />
+        </PageSection>
+      )}
       <ContractGapsCallout
         projectId={project.id}
         shoot={shootGaps}
@@ -234,17 +275,18 @@ function projectSubtitle(project: ProjectDetail): string {
 }
 
 /**
- * Before its launch, a collective has no sections: its « Titres et
- * artistes » (docs/pds-mic-plan.md, lot 6) shows here, under the handover —
- * the same table and gestures, written by whoever creates projects (same
- * rule as add_project_title and add_title_participation, which enforce it);
- * its main artist is changed in the project's form. Nothing for any other
+ * Before its acceptance, a collective has no sections (no « Titres et
+ * artistes » page): its recap (docs/pds-mic-plan.md, lot 6; retours d'Ibé
+ * du 18/11/2026, lot 2) shows here, at the head — the same table and
+ * gestures, written by whoever creates projects (same rule as
+ * add_project_title and add_title_participation, which enforce it); its
+ * main artist is changed in the project's form. Nothing for any other
  * project.
  */
 async function collectiveTitles(project: ProjectDetail, access: Access) {
   if (!project.collective) return null;
   const canManage = can(access, "create_projects");
-  const board = await loadTitleBoard(project, access);
+  const board = await loadTitleRecap(project, access);
   const { masterOptions, artists } = await titleBoardChoices(
     project,
     board.titles,
@@ -267,8 +309,7 @@ async function collectiveTitles(project: ProjectDetail, access: Access) {
     >
       <TitlesBoard
         projectId={project.id}
-        titles={board.titles}
-        dealReach={board.dealReach}
+        recap={board}
         canManage={canManage}
         artists={artists}
         masterOptions={masterOptions}

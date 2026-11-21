@@ -69,6 +69,9 @@ const texts = (v: unknown): Record<string, string> =>
 export async function loadTitleRecap(
   project: { id: string; ownerPersonId: string | null },
   access: Access,
+  // false: no row shows « Caler le call » (the overview's compact recap,
+  // read only), so its shared data (free slots, contacts) is not read.
+  { planCalls = true }: { planCalls?: boolean } = {},
 ): Promise<TitleRecap> {
   const supabase = await createClient();
   const canReadLegal = can(access, "manage_legal");
@@ -198,7 +201,9 @@ export async function loadTitleRecap(
             .select("id, status, ends_on")
             .in("id", contractIds)
         : Promise.resolve(none),
-      planning.length ? loadSharedNegotiationCall(assignees) : null,
+      planning.length && planCalls
+        ? loadSharedNegotiationCall(assignees)
+        : null,
     ]);
   for (const [scope, result] of Object.entries({
     credits,

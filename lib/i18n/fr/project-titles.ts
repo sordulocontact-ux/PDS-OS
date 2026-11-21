@@ -38,7 +38,7 @@ export const projectTitles = {
     button: "Ajouter un titre",
     title: "Ajouter un titre",
     description:
-      "Le nom peut attendre : le titre s'affichera « sans nom » jusqu'à ce que vous le renommiez.",
+      "Le nom peut attendre : le titre s'affiche « à nommer » jusque-là.",
     name: "Titre de travail",
     master: "Titre du Catalogue",
     noMaster: "Pas encore au Catalogue",
@@ -106,7 +106,7 @@ export const projectTitles = {
     action: "Renommer",
     title: "Renommer le titre",
     description:
-      "Le titre de travail sert dans le projet. Laissé vide, le titre redevient « sans nom » ou reprend son nom au Catalogue.",
+      "Le titre de travail sert dans le projet. Laissé vide, le titre redevient « à nommer » ou reprend son nom au Catalogue.",
     // Lot 7: its title in the Catalogue is provisional and takes the name.
     descriptionProvisional:
       "Son titre au Catalogue porte encore un nom provisoire : il prendra ce nom, et ne sera plus provisoire.",
@@ -154,32 +154,16 @@ export const projectTitles = {
       artists: "Artistes",
     },
     label: "Titres et artistes du projet",
+    // The other columns: recap.columns (lot L2b).
     columns: {
       title: "Titre ou artiste",
-      status: "Statut",
-      contract: "Contrat",
-      negotiation: "Négociation",
-      // Who the deal is given to, in the Business module's words (« le
-      // responsable » is the project's owner everywhere else).
-      owner: "Négocié par",
-      master: "Master",
-      distribution: "Distribution",
       actions: "Actions",
     },
     // The abandoned titles, after the others.
     abandonedGroup: "Abandonnés",
     // A title without any artist yet.
     noArtist: "Aucun artiste invité",
-    contract: {
-      // Confirmed without a contract (décision 6): missing, never red (the
-      // same word as the Juridique's « Participations et contrats », lot 11).
-      missing: "Manquant",
-      // Linked, the viewer may not read it.
-      hidden: "Lié",
-    },
     negotiation: {
-      // The viewer reads every deal of the project: none for this one.
-      none: "Pas de dossier",
       // As the Deals page says it.
       unassigned: "À affecter",
       // The link to the deal, for a screen reader: the artist and the step.
@@ -201,13 +185,6 @@ export const projectTitles = {
     // compilation's it goes out with.
     distribution: {
       withCompilation: (state: string) => `Avec la compilation · ${state}`,
-    },
-    // Under the name on a small screen, the columns it hides.
-    caption: {
-      contract: "Contrat",
-      negotiation: "Négociation",
-      master: "Master",
-      distribution: "Distribution",
     },
     empty: {
       title: "Aucun titre pour l'instant",
@@ -239,13 +216,14 @@ export const projectTitles = {
     // « Artistes du projet : PDS, Nadia, Sami » (computed, projectArtists).
     ofProject: (names: string) => `Artistes du projet : ${names}`,
     roles: { featuring: "Featuring", main: "Principal" },
-    // A participation's status, said of the participation (« Confirmée »).
+    // A participation's status in the team's words (retours d'Ibé du
+    // 18/11/2026: the Excel's orange, then green), said of the artist.
     statuses: {
-      proposed: "Proposée",
-      invited: "Invitée",
-      confirmed: "Confirmée",
-      declined: "Refusée",
-      withdrawn: "Retirée",
+      proposed: "À contacter",
+      invited: "Contacté",
+      confirmed: "D'accord",
+      declined: "A refusé",
+      withdrawn: "Retiré",
     },
     menu: (artist: string, label: string) =>
       `Actions pour ${artist} sur « ${label} »`,
@@ -262,11 +240,11 @@ export const projectTitles = {
         shared: string,
       ) =>
         mode === "manual"
-          ? `${shared}. Une participation confirmée n'y écrit aucun crédit automatiquement.`
+          ? `${shared}. « D'accord » n'y écrit aucun crédit automatiquement.`
           : `${main ? `${main}, artiste principal du projet, est crédité sur chaque titre. ` : ""}${
               mode === "now"
-                ? "Une participation confirmée crédite aussi l'artiste sur le titre au Catalogue."
-                : "Une participation confirmée créditera aussi l'artiste quand le titre sera au Catalogue."
+                ? "« D'accord », l'artiste est aussi crédité sur le titre au Catalogue."
+                : "« D'accord », l'artiste sera aussi crédité quand le titre sera au Catalogue."
             }`,
       artist: "Artiste",
       artistPlaceholder: "Choisir un artiste",
@@ -280,6 +258,16 @@ export const projectTitles = {
       status: "Statut",
       submit: "Ajouter l'artiste",
       done: "Artiste ajouté.",
+      // Décision 4.1: the same artist on two titles is allowed, confirmed
+      // first (« Jay est déjà invité sur Titre de Jay (à nommer). »).
+      alreadyInvited: (artist: string, labels: string[]) => {
+        const list =
+          labels.length === 1
+            ? labels[0]
+            : `${labels.slice(0, -1).join(", ")} et ${labels.at(-1)}`;
+        return `${artist} est déjà invité sur ${list}. L'inviter aussi sur ce titre ?`;
+      },
+      alreadyInvitedSubmit: "L'inviter aussi",
     },
     status: {
       action: "Changer le statut",
@@ -291,17 +279,17 @@ export const projectTitles = {
       description: (mode: "now" | "later" | "manual", shared: string) =>
         `${
           mode === "now"
-            ? "Confirmée, elle crédite l'artiste sur le titre au Catalogue, et ce crédit reste ensuite."
+            ? "« D'accord » crédite l'artiste sur le titre au Catalogue, et ce crédit reste ensuite."
             : mode === "later"
-              ? "Confirmée, elle créditera l'artiste quand le titre sera au Catalogue."
-              : `${shared}. Confirmée, elle n'écrit aucun crédit automatiquement.`
-        } Refusée ou retirée, elle reste listée et dans l'historique.`,
+              ? "« D'accord » créditera l'artiste quand le titre sera au Catalogue."
+              : `${shared}. « D'accord » n'écrit aucun crédit automatiquement.`
+        } « A refusé » ou « Retiré », l'artiste reste listé et dans l'historique.`,
       label: "Statut",
       submit: "Changer le statut",
       done: "Statut changé.",
-      // The toast says where the participation now stands (« Participation
-      // refusée »), the period added by the toast.
-      changed: (status: string) => `Participation ${status.toLowerCase()}`,
+      // The toast says where the artist now stands (« Statut changé :
+      // D'accord »), the period added by the toast.
+      changed: (status: string) => `Statut changé : ${status}`,
     },
     // Détacher (lot 6): the participation is withdrawn, never deleted.
     withdraw: {
@@ -309,7 +297,7 @@ export const projectTitles = {
       title: (artist: string, label: string) =>
         `Retirer ${artist} de « ${label} »`,
       description:
-        "Sa participation passe en « Retirée » : elle reste listée et dans l'historique, et les crédits déjà inscrits au Catalogue restent. Vous pourrez la rattacher ensuite.",
+        "L'artiste passe en « Retiré » : il reste listé et dans l'historique, et les crédits déjà inscrits au Catalogue restent. Vous pourrez le rattacher ensuite.",
       submit: "Retirer du titre",
       pending: "Retrait…",
       done: "Participation retirée",
@@ -318,7 +306,7 @@ export const projectTitles = {
     // proposed.
     reattach: {
       action: "Rattacher au titre",
-      done: "Participation rattachée, à nouveau proposée",
+      done: "Artiste rattaché, à nouveau « À contacter »",
     },
     // The toast of a gesture that credited the title (its `done`, the
     // period added by the toast): « Participation confirmée · 2 crédits
@@ -352,7 +340,7 @@ export const projectTitles = {
     // On a confirmed participation of such a title.
     sharedShort: "Crédits à vérifier au Catalogue",
     addedLead: "Artiste ajouté",
-    confirmedLead: "Participation confirmée",
+    confirmedLead: "Statut changé : D'accord",
     errors: {
       failed: "La participation n'a pas pu être enregistrée. Réessayez.",
       notFound:
@@ -381,6 +369,86 @@ export const projectTitles = {
     waitingAgreement: "En attente de l'accord",
     // The number changed here is the Réseau's.
     phoneChanged: "Numéro changé dans le Réseau",
+    // The screen of the recap (lot L2b): its columns, the counters that
+    // filter its artists, the title's facts in words on its band, and what
+    // is edited in place (contact, release, note).
+    columns: {
+      status: "Statut",
+      accord: "Accord",
+      contact: "Contact",
+      legal: "Juridique",
+      // The overview's compact recap: one row per artist.
+      artist: "Artiste",
+      mix: "Mix",
+    },
+    filters: "Filtrer les artistes par statut",
+    // No artist in the states chosen.
+    filteredEmpty: "Aucun artiste dans ce statut.",
+    facts: {
+      mix: "Mix",
+      beatmaker: "Beatmaker",
+      release: "Sortie",
+      distribution: "Distribution",
+    },
+    release: {
+      label: (title: string) => `Sortie de « ${title} »`,
+      yes: "Oui",
+      no: "Non",
+      undecided: "Pas décidé",
+    },
+    // « Nommer » on a title without a name (Ibé 18/11, 37:03).
+    name: {
+      action: "Nommer",
+      title: (label: string) => `Nommer « ${label} »`,
+      submit: "Nommer le titre",
+      done: "Titre nommé.",
+    },
+    note: {
+      add: "Ajouter une note",
+      edit: (artist: string) => `Modifier la note sur ${artist}`,
+      title: (artist: string) => `Note sur ${artist}`,
+      label: "Note",
+      submit: "Enregistrer la note",
+      done: "Note enregistrée.",
+    },
+    accord: {
+      // « Call le Sam. 05/12/2026 » (formatDay).
+      callOn: (day: string) => `Call le ${day}`,
+    },
+    contact: {
+      title: "Contact du manager",
+      add: "Ajouter le contact",
+      edit: (artist: string) => `Modifier le contact ${de(artist)}`,
+      call: (name: string) => `Appeler ${name}`,
+      whatsapp: (name: string) => `Écrire à ${name} sur WhatsApp`,
+      hidden: "Coordonnées privées",
+      modes: {
+        phone: "Numéro",
+        pick: "Autre contact",
+        create: "Nouveau contact",
+      },
+      modesLabel: "Que faire",
+      phone: (name: string) => `Numéro de ${name}`,
+      phoneSubmit: "Enregistrer le numéro",
+      pick: "Contact du Réseau",
+      pickRequired: "Choisissez un contact du Réseau.",
+      pickSubmit: "Choisir ce contact",
+      picked: "Contact du manager changé.",
+      name: "Nom",
+      newPhone: "Numéro",
+      createSubmit: "Ajouter au Réseau",
+      created: "Contact ajouté au Réseau.",
+    },
+    legal: {
+      fiche: (state: string) => `Fiche · ${state}`,
+      contract: (state: string) => `Contrat · ${state}`,
+      // A contract the reader may not read.
+      hidden: "Lié",
+    },
+    overview: {
+      seeAll: "Tout voir",
+      empty: "Aucun artiste invité pour l'instant.",
+    },
     errors: {
       failed: "La modification n'a pas pu être enregistrée. Réessayez.",
       networkForbidden:

@@ -11,6 +11,7 @@ import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { Label } from "@/components/ui/label";
 import { SearchSelect } from "@/components/ui/search-select";
 import { toast } from "@/components/ui/toast";
+import { ToneCallout } from "@/components/ui/tone-callout";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { dialogs } from "@/lib/i18n/fr/dialogs";
 import { projectTitles } from "@/lib/i18n/fr/project-titles";
@@ -44,7 +45,7 @@ export type ArtistChoices = {
   mainArtistId: string | null;
 };
 
-/** « Ajouter un titre »: a working title or none (« Titre 3 · sans nom »),
+/** « Ajouter un titre »: a working title or none (« Titre 3 (à nommer) »),
  * a title of the Catalogue or none yet. */
 export function AddTitleForm({
   projectId,
@@ -164,18 +165,26 @@ export function AttachCatalogTitleForm({
 }
 
 /** « Renommer »: left empty, the title takes its master's name back, or
- * « sans nom ». */
+ * « à nommer ». « Nommer » (a title without a name, lot L2b) is the same
+ * form, its own words given, with « Rattacher un titre du Catalogue » under
+ * the field when the title is not in the Catalogue yet (`onAttach`). */
 export function RenameTitleForm({
   projectId,
   title,
+  submitLabel,
+  doneMessage,
+  onAttach,
   onDone,
 }: {
   projectId: string;
   title: ProjectTitle;
+  submitLabel?: string;
+  doneMessage?: string;
+  onAttach?: () => void;
   onDone: () => void;
 }) {
   const t = fr.projectTitles.rename;
-  const { pending, error, run } = useWriteSubmit(onDone, t.done);
+  const { pending, error, run } = useWriteSubmit(onDone, doneMessage ?? t.done);
   return (
     <form
       noValidate
@@ -203,10 +212,17 @@ export function RenameTitleForm({
         maxLength={200}
         autoFocus
       />
+      {onAttach && (
+        <div>
+          <Button type="button" variant="outline" size="sm" onClick={onAttach}>
+            {fr.projectTitles.catalogAttach.action}
+          </Button>
+        </div>
+      )}
       {error && <FormMessage kind="error">{error}</FormMessage>}
       <DialogFormActions
         pending={pending}
-        submitLabel={t.submit}
+        submitLabel={submitLabel ?? t.submit}
         onCancel={onDone}
       />
     </form>
@@ -219,17 +235,24 @@ const START_STATUSES = ["proposed", "invited", "confirmed"] as const;
 
 /** « Ajouter un artiste » to a title (rattacher): the artist (searched among
  * the Catalogue's, less the main artist and those already on it), its role
- * (featuring by default: a guest), where it stands (proposed by default).
- * Nothing chosen: said in red at the first try, never a disabled button. */
+ * (featuring by default: a guest), where it stands (« À contacter » by
+ * default). Nothing chosen: said in red at the first try, never a disabled
+ * button. An artist already invited on another title of the project
+ * (décision 4.1: allowed) is confirmed first, in the form: « Jay est déjà
+ * invité sur Titre de Jay (à nommer). L'inviter aussi sur ce titre ? ». */
 export function AddParticipationForm({
   projectId,
   title,
   artists,
+  invitedOn = {},
   onDone,
 }: {
   projectId: string;
   title: ProjectTitle | { id: string; participations: TitleParticipation[] };
   artists: ArtistChoices;
+  // Artist id → the labels of the project's other titles where they are
+  // invited (a participation neither declined nor withdrawn).
+  invitedOn?: Record<string, string[]>;
   onDone: () => void;
 }) {
   const t = fr.projectTitles.participations;
@@ -237,6 +260,10 @@ export function AddParticipationForm({
   const [role, setRole] = useState<ParticipationRole>("featuring");
   const [status, setStatus] = useState<ParticipationStatus>("proposed");
   const [missing, setMissing] = useState(false);
+  // The artist whose second title was confirmed (asked once per artist).
+  const [confirmed, setConfirmed] = useState<string | null>(null);
+  const [asking, setAsking] = useState(false);
+  const elsewhere = artistId ? (invitedOn[artistId] ?? []) : [];
   const { pending, error, run } = useWriteSubmit(onDone, t.add.done);
   const taken = new Set(title.participations.map((p) => p.artist.id));
   const options = Object.fromEntries(
@@ -270,6 +297,10 @@ export function AddParticipationForm({
         // validation »).
         if (!artistId)
           return void document.getElementById("participation-artist")?.focus();
+        if (elsewhere.length > 0 && confirmed !== artistId) {
+          setConfirmed(artistId);
+          return setAsking(true);
+        }
         run(() =>
           addTitleParticipation({
             projectId,
@@ -293,6 +324,8 @@ export function AddParticipationForm({
           onChange={(next) => {
             setArtistId(next);
             setMissing(false);
+            setAsking(false);
+            setConfirmed(null);
           }}
           placeholder={t.add.artistPlaceholder}
           searchPlaceholder={t.add.artistSearch}
@@ -330,10 +363,15 @@ export function AddParticipationForm({
         onChange={(next) => next && setStatus(next)}
         fill
       />
+      {asking && elsewhere.length > 0 && (
+        <ToneCallout tone="warning" role="status">
+          {t.add.alreadyInvited(artists.options[artistId] ?? "", elsewhere)}
+        </ToneCallout>
+      )}
       {error && <FormMessage kind="error">{error}</FormMessage>}
       <DialogFormActions
         pending={pending}
-        submitLabel={t.add.submit}
+        submitLabel={asking ? t.add.alreadyInvitedSubmit : t.add.submit}
         onCancel={onDone}
       />
     </form>
