@@ -208,7 +208,7 @@ export async function loadProjectActivity(
 }
 
 /** One line of a collective's titles history: the title named as it was
- * then (« Titre 3 · sans nom » when it had no name); an artist's
+ * then (« Titre 3 (à nommer) » when it had no name); an artist's
  * participation by the artist's name then (never the interlocutor). */
 function titleEventText(kind: string, detail: Record<string, unknown>): string {
   const t = fr.projectTitles.events;

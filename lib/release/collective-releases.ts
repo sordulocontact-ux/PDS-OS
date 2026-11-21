@@ -5,7 +5,11 @@ import { can } from "@/lib/auth/access";
 import { loadContractGaps, type ContractGap } from "@/lib/legal/contract-gaps";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { loadProjectTitles } from "@/lib/projects/titles";
-import { masterNameOf, projectTitleLabel } from "@/lib/projects/title-rules";
+import {
+  masterNameOf,
+  projectTitleLabel,
+  titleGuestNames,
+} from "@/lib/projects/title-rules";
 import type { ProjectDetail } from "@/lib/projects/types";
 import {
   isReleaseMode,
@@ -13,7 +17,6 @@ import {
   type CollectiveRelease,
   type CollectiveReleases,
 } from "@/lib/release/collective-rules";
-import { fr } from "@/lib/i18n/fr";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -59,10 +62,6 @@ export async function loadCollectiveReleases(
     releaseDistributionOf(
       (deposits.data ?? []).find((d) => d.release_id === id),
     );
-  const provisionalOf = (list: typeof titles) =>
-    list
-      .filter((t) => t.master?.provisional)
-      .map((t) => fr.projectTitles.unnamed(t.position));
   if (releases.error)
     throw new Error(`loadCollectiveReleases: ${releases.error.message}`);
   const masterIds = titles.flatMap((t) => (t.master ? [t.master.id] : []));
@@ -77,7 +76,10 @@ export async function loadCollectiveReleases(
       position: t.position,
       workingTitle: t.workingTitle,
       masterTitle: masterNameOf(t.master),
+      artists: titleGuestNames(t.participations),
     });
+  const provisionalOf = (list: typeof titles) =>
+    list.filter((t) => t.master?.provisional).map(labelOf);
   const live = titles.filter((t) => t.status !== "abandoned");
   const gapsOf = (titleId: string | null): ContractGap[] =>
     titleId ? gaps.filter((g) => g.titleId === titleId) : gaps;

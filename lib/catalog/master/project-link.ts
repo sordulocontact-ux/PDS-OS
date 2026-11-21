@@ -1,7 +1,7 @@
 import "server-only";
 
 import { can, type Access } from "@/lib/auth/access";
-import { projectTitleLabel } from "@/lib/projects/title-rules";
+import { projectTitleLabel, titleGuestNames } from "@/lib/projects/title-rules";
 import { createClient } from "@/lib/supabase/server";
 
 export type LinkableProject = {
@@ -33,7 +33,7 @@ export async function listLinkableProjects(
   const { data, error } = await supabase
     .from("projects")
     .select(
-      "id, title, type, music_format, collective, owner_person_id, links:project_masters!project_masters_project_same_org(master_id), stages:project_stages(id), titles:project_titles!project_titles_project_same_org(id, position, working_title, master_id, status)",
+      "id, title, type, music_format, collective, owner_person_id, links:project_masters!project_masters_project_same_org(master_id), stages:project_stages(id), titles:project_titles!project_titles_project_same_org(id, position, working_title, master_id, status, participations:title_participations!title_participations_title(status, created_at, artist:artists!title_participations_artist_same_org(name)))",
     )
     .is("archived_at", null)
     .order("created_at", { ascending: false });
@@ -68,6 +68,13 @@ export async function listLinkableProjects(
                 position: t.position,
                 workingTitle: t.working_title,
                 masterTitle: null,
+                artists: titleGuestNames(
+                  [...t.participations]
+                    .sort((a, b) => a.created_at.localeCompare(b.created_at))
+                    .flatMap((p) =>
+                      p.artist ? [{ status: p.status, artist: p.artist }] : [],
+                    ),
+                ),
               }),
             }))
         : [],

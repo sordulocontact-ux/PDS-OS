@@ -40,7 +40,11 @@ import {
   type DealReach,
   type ParticipationContract,
 } from "@/lib/projects/title-board-rules";
-import { masterNameOf, projectTitleLabel } from "@/lib/projects/title-rules";
+import {
+  masterNameOf,
+  projectTitleLabel,
+  titleGuestNames,
+} from "@/lib/projects/title-rules";
 import { formatShortDate } from "@/lib/release/format";
 import {
   contractStateTone,
@@ -70,6 +74,7 @@ const labelOf = (title: BoardTitle) =>
     position: title.position,
     workingTitle: title.workingTitle,
     masterTitle: masterNameOf(title.master),
+    artists: titleGuestNames(title.participations),
   });
 
 /** The words of a participation's contract; null: not expected (« — »). */

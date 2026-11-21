@@ -6,7 +6,11 @@ import {
   titleMasterLabel,
   titleMasterState,
 } from "@/lib/projects/title-board-rules";
-import { masterNameOf, projectTitleLabel } from "@/lib/projects/title-rules";
+import {
+  masterNameOf,
+  projectTitleLabel,
+  titleGuestNames,
+} from "@/lib/projects/title-rules";
 import { loadProjectTitles } from "@/lib/projects/titles";
 import { createClient } from "@/lib/supabase/server";
 import type { MasterStepKey } from "@/lib/ui/master-steps";
@@ -19,7 +23,7 @@ export type MasterTitleChoice = {
   masterId: string;
   // Its title in the project (project_titles.id), stable.
   titleId: string;
-  // Its name in the project (« Titre 2 · sans nom », never a provisional
+  // Its name in the project (« Titre de Jay (à nommer) », never a provisional
   // name of the Catalogue, lot 7).
   label: string;
   // Where it stands in the Master (« Mix V2 à valider »); null: nothing yet.
@@ -109,6 +113,7 @@ export const loadMasterTitleScope = trackedCache(
             position: title.position,
             workingTitle: title.workingTitle,
             masterTitle: masterNameOf(title.master),
+            artists: titleGuestNames(title.participations),
           }),
           state: titleMasterLabel(state),
           done: state.kind === "final",

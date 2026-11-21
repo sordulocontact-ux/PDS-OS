@@ -7,8 +7,14 @@ const de = (name: string) =>
 export const projectTitles = {
   title: "Titres et artistes",
   empty: "Aucun titre pour l'instant.",
-  // « Titre 3 · sans nom »: a title without a working title nor a master.
-  unnamed: (position: number) => `Titre ${position} · sans nom`,
+  // A title without a working title nor a master (Ibé 18/11 : « pourquoi il
+  // y a titre sans nom ? ») is called by its guests: « Titre de Jay (à
+  // nommer) », « Titre d'Iris Moon & Jay (à nommer) » ; with no guest left,
+  // by its number: « Titre 3 (à nommer) ».
+  unnamed: (position: number) => `Titre ${position} (à nommer)`,
+  unnamedOf: (artists: string) => `Titre ${de(artists)} (à nommer)`,
+  // The number, kept as a secondary mark next to a label (« n° 2 »).
+  number: (position: number) => `n° ${position}`,
   statuses: {
     planned: "Prévu",
     active: "En cours",

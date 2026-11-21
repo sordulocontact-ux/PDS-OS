@@ -12,6 +12,7 @@ import { loadProjectTitles } from "@/lib/projects/titles";
 import {
   masterNameOf,
   projectTitleLabel,
+  titleGuestNames,
   type ProjectTitle,
 } from "@/lib/projects/title-rules";
 import { createClient } from "@/lib/supabase/server";
@@ -210,6 +211,7 @@ function titleNamesOf(titles: ProjectTitle[], masterId: string) {
     position: title.position,
     workingTitle: title.workingTitle,
     masterTitle: catalogue,
+    artists: titleGuestNames(title.participations),
   });
   return {
     projectLabel,
