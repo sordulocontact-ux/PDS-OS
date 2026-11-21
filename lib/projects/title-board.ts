@@ -39,37 +39,44 @@ export async function loadTitleBoard(
   access: Access,
 ): Promise<TitleBoard> {
   const supabase = await createClient();
-  const [titles, contracts, deals, versions, waivers] = await Promise.all([
-    loadProjectTitles(project.id),
-    supabase
-      .from("title_participations")
-      .select(
-        "id, contract_id, contract:contracts!title_participations_contract_same_org(id, title, status, ends_on)",
-      )
-      .eq("project_id", project.id),
-    // A participation's deal carries the project (deals_participation_
-    // project_check); the deals policy keeps only those the viewer reads.
-    supabase
-      .from("deals")
-      .select(
-        "id, participation_id, stage, agreement_status, stage_changed_at, next_action, next_action_on, follow_up_on, assignee_person_id, assignee:people!deals_assignee_person_id_fkey(first_name, last_name)",
-      )
-      .eq("project_id", project.id)
-      .not("participation_id", "is", null),
-    supabase
-      .from("master_mix_versions")
-      .select("master_id, stage, number, decision")
-      .eq("project_id", project.id),
-    // Lot 12: the waivers of the direction, read by whoever sees the
-    // project (principle 5: traced, never hidden).
-    supabase
-      .from("participation_waivers")
-      .select(
-        "id, participation_id, scope, reason, risk, due_on, granted_at, revoked_at, revoke_reason, granter:people!participation_waivers_granted_by_fkey(first_name, last_name), revoker:people!participation_waivers_revoked_by_fkey(first_name, last_name)",
-      )
-      .eq("project_id", project.id)
-      .order("granted_at", { ascending: false }),
-  ]);
+  const [titles, contracts, deals, versions, waivers, sources] =
+    await Promise.all([
+      loadProjectTitles(project.id),
+      supabase
+        .from("title_participations")
+        .select(
+          "id, contract_id, contract:contracts!title_participations_contract_same_org(id, title, status, ends_on)",
+        )
+        .eq("project_id", project.id),
+      // A participation's deal carries the project (deals_participation_
+      // project_check); the deals policy keeps only those the viewer reads.
+      supabase
+        .from("deals")
+        .select(
+          "id, participation_id, stage, agreement_status, stage_changed_at, next_action, next_action_on, follow_up_on, assignee_person_id, assignee:people!deals_assignee_person_id_fkey(first_name, last_name)",
+        )
+        .eq("project_id", project.id)
+        .not("participation_id", "is", null),
+      supabase
+        .from("master_mix_versions")
+        .select("master_id, stage, number, decision")
+        .eq("project_id", project.id),
+      // Lot 12: the waivers of the direction, read by whoever sees the
+      // project (principle 5: traced, never hidden).
+      supabase
+        .from("participation_waivers")
+        .select(
+          "id, participation_id, scope, reason, risk, due_on, granted_at, revoked_at, revoke_reason, granter:people!participation_waivers_granted_by_fkey(first_name, last_name), revoker:people!participation_waivers_revoked_by_fkey(first_name, last_name)",
+        )
+        .eq("project_id", project.id)
+        .order("granted_at", { ascending: false }),
+      // Which titles have their source confirmed (the Master's rule of « Attendent
+      // leur source »): the master only, grouped for every title.
+      supabase
+        .from("master_flow_sources")
+        .select("master_id")
+        .eq("project_id", project.id),
+    ]);
   // A failed read is not « no contract » nor « no deal »: thrown to the
   // error page rather than shown as missing.
   if (contracts.error)
@@ -80,6 +87,9 @@ export async function loadTitleBoard(
     throw new Error(`loadTitleBoard versions: ${versions.error.message}`);
   if (waivers.error)
     throw new Error(`loadTitleBoard waivers: ${waivers.error.message}`);
+  if (sources.error)
+    throw new Error(`loadTitleBoard sources: ${sources.error.message}`);
+  const sourced = new Set((sources.data ?? []).map((row) => row.master_id));
   const waiversOf = new Map<string, ParticipationWaiver[]>();
   for (const row of waivers.data ?? []) {
     if (row.scope !== "shoot" && row.scope !== "release") continue;
@@ -191,6 +201,7 @@ export async function loadTitleBoard(
           ? finalInCatalogue.has(title.master.id)
           : false,
         versions: title.master ? (versionsOf.get(title.master.id) ?? []) : [],
+        sourced: title.master ? sourced.has(title.master.id) : false,
       }),
       participations: title.participations.map((participation) => {
         const linked = contractOf.get(participation.id);

@@ -20,10 +20,7 @@ import type { DealStage } from "@/lib/deals/types";
 import { projectTitles } from "@/lib/i18n/fr/project-titles";
 import type { ParticipationStatus } from "@/lib/projects/participation-rules";
 import type { RecapAccord, TitleRecap } from "@/lib/projects/recap-rules";
-import {
-  titleMasterLabel,
-  titleMasterStatus,
-} from "@/lib/projects/title-board-rules";
+import { titleMixFact } from "@/lib/projects/title-board-rules";
 
 const fr = { projectTitles };
 
@@ -127,10 +124,11 @@ export function TitlesRecapCompact({
         {rows.map(({ title, participation }) => {
           const facts = participation.recap;
           const artist = participation.artist.name;
+          const mixFact = titleMixFact(title.masterState);
           const mix = (
             <MixPill
-              label={titleMasterLabel(title.masterState)}
-              status={titleMasterStatus(title.masterState)}
+              label={mixFact?.label ?? null}
+              status={mixFact?.status ?? null}
               href={
                 title.master && masterHref
                   ? `${masterHref}?titre=${title.master.id}`

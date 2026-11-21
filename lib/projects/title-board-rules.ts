@@ -29,12 +29,15 @@ export type TitleVersion = {
  * - final: its master final, validated here or already in the Catalogue;
  * - round: its latest version of the round it is in, and what was decided;
  * - mixed: its Mix final validated, the mastering not started;
- * - todo: in the Catalogue, no version yet.
+ * - todo: in the Catalogue, no version yet; `sourced`: its source is
+ *   confirmed in the Master (master_flow_sources, the rule of the Master's
+ *   « Attendent leur source »), undefined when not read (the Master's own
+ *   switcher, which keeps « À mixer »).
  * Only this title's versions are read (principle 1: never two titles).
  */
 export type TitleMasterState =
   | { kind: "none" }
-  | { kind: "todo" }
+  | { kind: "todo"; sourced?: boolean }
   | { kind: "mixed" }
   | { kind: "final"; before: boolean }
   | {
@@ -50,6 +53,7 @@ export function titleMasterState(input: {
   // audio_state): it had it before the workflow, or the workflow put it.
   finalInCatalogue: boolean;
   versions: TitleVersion[];
+  sourced?: boolean;
 }): TitleMasterState {
   if (!input.hasMaster) return { kind: "none" };
   const latest = (stage: TitleVersion["stage"]) =>
@@ -88,7 +92,7 @@ export function titleMasterState(input: {
       decision:
         mix.decision === "changes_requested" ? "changes_requested" : "pending",
     };
-  return { kind: "todo" };
+  return { kind: "todo", sourced: input.sourced };
 }
 
 /** The common status a title's Master state reads as (its pill's tone,
@@ -113,6 +117,27 @@ export function titleMasterLabel(state: TitleMasterState): string | null {
         ? t.pending(state.round, state.number)
         : t.retake(state.round, state.number);
   }
+}
+
+/**
+ * What the recap's Mix cell says of a title (the Excel's « Son reçu »):
+ * its Master state's words, except before its first mix, where it says
+ * whether the source is there (« Son reçu », « Son attendu »: the Master's
+ * own rule). No master in the Catalogue: nothing, as the Master says
+ * nothing of a title it does not hold.
+ */
+export function titleMixFact(state: TitleMasterState): {
+  label: string;
+  status: NonNullable<ReturnType<typeof titleMasterStatus>>;
+} | null {
+  const t = fr.projectTitles.board.master;
+  if (state.kind === "todo" && state.sourced !== undefined)
+    return state.sourced
+      ? { label: t.sourceReceived, status: "in_progress" }
+      : { label: t.sourceExpected, status: "waiting" };
+  const label = titleMasterLabel(state);
+  const status = titleMasterStatus(state);
+  return label && status ? { label, status } : null;
 }
 
 export function titleMasterStatus(

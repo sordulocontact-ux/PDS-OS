@@ -91,11 +91,7 @@ import {
   setTitleRelease,
   startTitleWork,
 } from "@/lib/projects/title-actions";
-import {
-  contractGap,
-  titleMasterLabel,
-  titleMasterStatus,
-} from "@/lib/projects/title-board-rules";
+import { contractGap, titleMixFact } from "@/lib/projects/title-board-rules";
 import { creditModeOf, masterNameOf } from "@/lib/projects/title-rules";
 import { projectTitleTone, type Tone } from "@/lib/ui/state-tones";
 import { cn } from "@/lib/utils";
@@ -726,8 +722,9 @@ function TitleBlock({
   const abandoned = title.status === "abandoned";
   const masterHref = masterHrefOf(title, links);
   // An abandoned title is out of the Master (lot 9): no state there.
-  const mix = abandoned ? null : titleMasterLabel(title.masterState);
-  const mixStatus = abandoned ? null : titleMasterStatus(title.masterState);
+  const mixFact = abandoned ? null : titleMixFact(title.masterState);
+  const mix = mixFact?.label ?? null;
+  const mixStatus = mixFact?.status ?? null;
   const distribution = links.distribution?.[title.id] ?? null;
   const shared =
     title.sharedWith && !abandoned

@@ -165,6 +165,9 @@ export const projectTitles = {
     },
     master: {
       todo: "À mixer",
+      // The recap's Mix cell before the first mix: is the source there?
+      sourceReceived: "Son reçu",
+      sourceExpected: "Son attendu",
       mixed: "Mix validé",
       final: "Master final",
       // « Mix V2 à valider », « Master V3 attendu » (after changes asked on
