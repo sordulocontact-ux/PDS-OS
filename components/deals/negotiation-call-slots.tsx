@@ -4,18 +4,31 @@ import { useState } from "react";
 
 import { EmptyNote } from "@/components/shell/empty-state";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import { ChipChoice } from "@/components/ui/chip-choice";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import type { FreeDay, FreeSlot } from "@/lib/calendar/free-slots";
 import type { CallNegotiator } from "@/lib/deals/negotiation-call";
+import { todayInParis } from "@/lib/insights/dates";
+import { monthOf } from "@/lib/utils/date-input";
 import { dealCalls } from "@/lib/i18n/fr/deal-calls";
 
 const fr = { dealCalls };
 
 const secondary = "text-body-sm text-[color:var(--text-secondary)]";
 
-/** One day at a time (Sacha 20/11/2026: 45 buttons were a wall): the
- * days as chips, the first chosen, then that day's slots. */
+const longDay = new Intl.DateTimeFormat("fr-FR", {
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+  timeZone: "UTC",
+});
+const capitalize = (text: string) =>
+  text.charAt(0).toUpperCase() + text.slice(1);
+
+/** As in Calendly (Sacha 21/11/2026): the month on the left, only the days
+ * with a free slot to choose (the first chosen), then that day's hours in a
+ * column on the right; on a phone, one under the other. */
 function DaySlots({
   days,
   onPick,
@@ -25,42 +38,50 @@ function DaySlots({
 }) {
   const t = fr.dealCalls.negotiation;
   const [chosen, setChosen] = useState(days[0].day);
+  const [month, setMonth] = useState(monthOf(days[0].day));
+  const free = new Set(days.map((d) => d.day));
   const day = days.find((d) => d.day === chosen) ?? days[0];
+  const title = capitalize(longDay.format(new Date(`${day.day}T00:00:00Z`)));
   return (
-    <div className="flex flex-col gap-4">
-      <ChipChoice
-        name="negotiation-day"
-        legend={t.day}
-        options={days.map((d) => ({ value: d.day, label: d.label }))}
-        value={day.day}
-        onChange={(value) => value && setChosen(value)}
-      />
-      <div
-        role="group"
-        aria-label={t.slotsOf(day.label)}
-        className="flex flex-wrap gap-2"
-      >
-        {day.slots.map((slot) => (
-          <Button
-            key={slot.local}
-            type="button"
-            variant="outline"
-            size="sm"
-            aria-label={t.slot(day.label, slot.label)}
-            onClick={() => onPick(slot)}
-            className="tabular-nums"
-          >
-            {slot.label}
-          </Button>
-        ))}
+    <div className="grid gap-4 sm:grid-cols-[auto_minmax(0,1fr)] sm:gap-6">
+      <div className="w-fit rounded-xl border border-[color:var(--border-hairline)]">
+        <Calendar
+          value={day.day}
+          today={todayInParis()}
+          month={month}
+          onMonthChange={setMonth}
+          onSelect={setChosen}
+          available={(d) => free.has(d)}
+        />
       </div>
+      <section
+        aria-label={t.slotsOf(title)}
+        className="flex min-w-0 flex-col gap-3"
+      >
+        <h4 className="text-body-md font-semibold">{title}</h4>
+        <ul className="flex flex-col gap-2">
+          {day.slots.map((slot) => (
+            <li key={slot.local}>
+              <Button
+                type="button"
+                variant="outline"
+                aria-label={t.slot(day.label, slot.label)}
+                onClick={() => onPick(slot)}
+                className="w-full tabular-nums"
+              >
+                {slot.label}
+              </Button>
+            </li>
+          ))}
+        </ul>
+      </section>
     </div>
   );
 }
 
 /**
  * The first step of « Caler le call »: who holds it (when the deal has no
- * negotiator yet), then his free slots, one day at a time (DaySlots), each
+ * negotiator yet), then his free slots as in Calendly (DaySlots), each
  * a button that opens the call form on it; « Autre horaire » opens it empty.
  */
 export function NegotiationCallSlots({

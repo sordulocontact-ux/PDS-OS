@@ -60,8 +60,8 @@ function moved(day: string, event: KeyboardEvent): string | null {
 /**
  * One month of days, Monday first, six weeks always (no jump in height from a
  * month to the next). The chosen day takes the selection blue (docs/DESIGN.md
- * § 3 bis), today a dot under its number; days outside `min`/`max` can be
- * reached by the keyboard but not chosen. Arrows, Home/End, PageUp/PageDown
+ * § 3 bis), today a dot under its number; days outside `min`/`max` (or not
+ * `available`) can be reached by the keyboard but not chosen. Arrows, Home/End, PageUp/PageDown
  * (Shift: a year) move; Enter or Space chooses.
  */
 export function Calendar({
@@ -73,6 +73,7 @@ export function Calendar({
   onMonthChange,
   onSelect,
   autoFocus = false,
+  available,
 }: {
   value: string;
   today: string;
@@ -83,6 +84,9 @@ export function Calendar({
   onMonthChange: (month: string) => void;
   onSelect: (day: string) => void;
   autoFocus?: boolean;
+  // Only these days can be chosen (free slots, as in Calendly): they stand
+  // out, every other day is struck like a day out of range.
+  available?: (day: string) => boolean;
 }) {
   const [active, setActive] = useState(() =>
     value && monthOf(value) === month ? value : monthOf(today) === month ? today : month,
@@ -168,7 +172,8 @@ export function Calendar({
             <tr key={week[0]}>
               {week.map((day) => {
                 const outside = monthOf(day) !== month;
-                const allowed = inRange(day, min, max);
+                const allowed =
+                  inRange(day, min, max) && (available?.(day) ?? true);
                 const selected = day === value;
                 const isToday = day === today;
                 return (
@@ -196,6 +201,7 @@ export function Calendar({
                           ? "cursor-pointer hover:bg-[var(--control-bg-hover)] active:bg-[var(--control-bg-pressed)]"
                           : "cursor-not-allowed text-[color:var(--text-muted)] line-through decoration-[color:var(--text-muted)]",
                         isToday && "font-semibold",
+                        available && allowed && "font-semibold",
                         selected &&
                           "border-[color:var(--selection-border)] bg-[var(--selection-bg)] font-semibold text-[color:var(--text-primary)] hover:bg-[var(--selection-bg)]",
                       )}
