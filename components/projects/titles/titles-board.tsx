@@ -58,15 +58,15 @@ import {
   DataTableGroupRow,
   DataTableHead,
   DataTableHeader,
-  DataTableLink,
-  DataTableRow,
   EMPTY_CELL,
+  ROW_INSET,
 } from "@/components/ui/data-table";
 import { FilterChip } from "@/components/ui/filter-chip";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { ReasonForm } from "@/components/ui/reason-form";
 import { RowActions, type RowAction } from "@/components/ui/row-actions";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { TableRow } from "@/components/ui/table";
 import { toast } from "@/components/ui/toast";
 import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
@@ -117,12 +117,12 @@ export type BoardLinks = {
   distribution: Record<string, TitleDepositLink> | null;
 };
 
-/** Which columns the table has, in the space of a project's page (1180 px:
- * 4 columns besides the name, docs/pds-mic-resume.md): Statut and Contact
- * always; Accord when the reader sees deals (dealReach, lot 6); Juridique
- * with manage_legal. */
+/** Which artists' columns the table has: Artiste and Statut always; Accord
+ * when the reader sees deals (dealReach, lot 6); Juridique with
+ * manage_legal. */
 type Columns = { accord: boolean; legal: boolean };
 
+// The artists' columns at full width (Artiste, Statut, Accord, Juridique).
 const dataColumnCount = (columns: Columns) =>
   2 + Number(columns.accord) + Number(columns.legal);
 
@@ -171,29 +171,96 @@ function detailOf(title: RecapTitle, label: string): string {
     : t.catalog(title.master.title);
 }
 
-// The columns of the artists' rows, shown from 1280 px; under it, said
-// under the name (`inline`). 720 px with the actions' column (48): in a
-// project's 1180 px the name keeps 460, in the 932 px of a 1280 px window
-// with both sidebars, 212. The cells wrap (their pills too, recap-facts):
-// nothing widens a column, so the table never scrolls sideways. `min-w-*`:
-// the name's `w-full` would otherwise squeeze them to their longest word.
+/** The title's Master, open on this title (lot 8), once it has a master; an
+ * abandoned title is out of it (lot 9). */
+const masterHrefOf = (title: RecapTitle, links: BoardLinks) =>
+  title.master && links.master && title.status !== "abandoned"
+    ? `${links.master}?titre=${title.master.id}`
+    : null;
+
+// The table's tiers, read on its own width (`@container` on its frame), not
+// the window's: what a 1280 px window leaves it depends on the sidebars
+// (932 px with both, the main one folded to icons; 782 with it open). Fixed
+// columns: Titre 248, Statut 128, Accord 176, Juridique 176, « ⋯ » 48;
+// Artiste takes the rest, never under 200 while the title's cell is merged.
+// - From 976 px, every column (776 fixed): Artiste 200 at 976, 404 in a
+//   project's 1180 (a window from 1528 px).
+// - From 624 px, Titre, Artiste, Statut (424 fixed): Artiste 200 at 624,
+//   508 in the 932 of a 1280 px window with both sidebars; Accord and
+//   Juridique under the name (still links and buttons).
+// - Under 624 (a phone, a tablet beside the sidebars): no merged cell; the
+//   title's own row across the table, then its artists, their status under
+//   the name too.
+// Every row has as many visible cells as the header at each tier, « ⋯ » of
+// an artist always last: a colSpan being the same at every width, a cell
+// whose span changes is written once per tier (the row « Aucun artiste »).
+// `min-w-*`: the artist's `w-full` would otherwise squeeze the fixed
+// columns to their longest word. The cells wrap (their pills too,
+// recap-facts): nothing widens a column, the table never scrolls sideways.
+// Literal classes: Tailwind only generates what it reads in full.
+const TIER = {
+  // The title's merged cell, Statut: from 624 px.
+  merged: "hidden @min-[624px]:table-cell",
+  // Accord, Juridique: from 976 px.
+  full: "hidden @min-[976px]:table-cell",
+  // From 624 to 976 px only.
+  between: "hidden @min-[624px]:table-cell @min-[976px]:hidden",
+  // Under 624 px only: the title's own row, a cell.
+  stacked: "@min-[624px]:hidden",
+} as const;
+
 const COLUMN = {
+  title: "w-62 min-w-62",
   status: "w-32 min-w-32",
   accord: "w-44 min-w-44 whitespace-normal",
-  contact: "w-48 min-w-48 whitespace-normal",
   legal: "w-44 min-w-44 whitespace-normal",
 } as const;
 
-// The name's cell wraps (the table's cells do not): its lines under the
-// name — detail, note, warning, the hidden columns — never widen the table
-// past a screen; the name itself stays on one line (DataTableLink). `max-w-0`
-// with `w-full`: it takes what the fixed columns leave (DataTableCell's
-// `fill` does it on a phone only), its content cut or wrapped, never
-// pushing the table wider than its frame.
-const NAME_CELL = "whitespace-normal sm:w-full sm:max-w-0";
+// The artist's cell takes what the fixed columns leave (`max-w-0` with
+// `w-full`: its content cut or wrapped, never pushing the table wider than
+// its frame). 16 px from the edge or from the title's cell, at every tier:
+// the row's inset (ROW_INSET) only reaches the first cell of a row, which is
+// the title's in the first row of a group and the artist's in the others.
+const ARTIST_CELL = "w-full max-w-0 whitespace-normal pl-4";
 
-/** Under 1280 px, a hidden column under the name: its label, its facts
- * (still links and buttons). */
+// The title's cell: a block on the soft ground, its facts stacked, from the
+// top of its artists' rows.
+const TITLE_CELL = "whitespace-normal align-top bg-[var(--surface-soft)]";
+
+// A row of the board. Not DataTableRow: no link covers a row here (the
+// title's cell, in the first row of its group, spans the others, which a
+// covering link would lie over), so nothing lights up under the pointer and
+// no row is made a containing block. No hairline at the top of a group's
+// first artist row (`data-lead`): the title's own row above it is hidden
+// from 624 px, and under it the soft ground already sets it apart.
+const ROW = cn(
+  "border-0 hover:bg-transparent has-aria-expanded:bg-transparent [&[data-lead]>td]:border-t-0",
+  ROW_INSET,
+);
+
+function Row({
+  lead = false,
+  className,
+  children,
+}: {
+  lead?: boolean;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <TableRow data-lead={lead ? "" : undefined} className={cn(ROW, className)}>
+      {children}
+    </TableRow>
+  );
+}
+
+// A name that opens its page (the title's Master, the artist's démarche):
+// the link is the name itself.
+const NAME_LINK =
+  "rounded-sm outline-none hover:underline focus-visible:underline";
+
+/** Under the name, a column folded there: its label, its facts (still
+ * links and buttons). */
 function StackedFact({
   label,
   children,
@@ -224,19 +291,20 @@ function GroupGap({ columns }: { columns: number }) {
 /**
  * « Titres et artistes » of a collective project, read as the team's Excel
  * (retours d'Ibé du 18/11/2026, lot 2; lot 6 of docs/pds-mic-plan.md): one
- * DataTable, one group per title — its row on the soft band (its label with
- * its guests, its status, « Nommer » while it has no name, its facts in
- * words: Mix, Beatmaker, Sortie, Distribution), then its artists — with
- * space between two groups and no rule. An artist's row: name and role,
- * its note under it; Statut (« À contacter », « Contacté », « D'accord »);
- * Accord (deal, rate, call; « Caler le call »); Contact (number, « Appeler
- * », « WhatsApp »); Juridique (fiche, contract). « Le tableau lit, les
- * modules font »: each cell leads to its module; only the contact, the
- * release and the note are edited here. Counters on top filter the
- * artists by status. The abandoned titles come last, under « Abandonnés ».
- * For whoever writes the project, each « ⋯ » as in lot 6. Under 1280 px,
- * the name and the status, the other columns under the name (still links
- * and buttons); on a phone, the status too.
+ * DataTable, one group per title, « Titre à gauche » — the title's cell on
+ * the left over all its artists' rows (its label and status, « Nommer »
+ * while it has no name, its place in the Catalogue, then Mix, Beatmaker,
+ * Sortie, Distribution, one under the other; its « ⋯ » at the top right),
+ * then one row per artist, every column aligned: Artiste (name and role,
+ * note, contact: number, « Appeler », « WhatsApp »), Statut (« À contacter
+ * », « Contacté », « D'accord »), Accord (deal, rate, call; « Caler le call
+ * »), Juridique (fiche, contract). Space between two groups, no rule. « Le
+ * tableau lit, les modules font »: each name and pill leads to its module;
+ * only the contact, the release and the note are edited here. Counters on
+ * top filter the artists by status. The abandoned titles come last, under «
+ * Abandonnés ». For whoever writes the project, each « ⋯ » as in lot 6.
+ * Narrower, Accord and Juridique under the artist's name, then the title on
+ * its own row (TIER).
  */
 export function TitlesBoard({
   projectId,
@@ -274,7 +342,8 @@ export function TitlesBoard({
     accord: recap.dealReach !== "none",
     legal: recap.canReadLegal,
   };
-  // Every column, hidden ones included (a gap or a group row spans them).
+  // Every column, hidden ones included (a gap or a group row spans them):
+  // the title's, the artists', « ⋯ ».
   const allColumns = dataColumnCount(columns) + 2;
 
   // The counters filter the artists; a title stays while one of its
@@ -380,46 +449,51 @@ export function TitlesBoard({
       {groups.length === 0 ? (
         <EmptyNote>{r.filteredEmpty}</EmptyNote>
       ) : (
-        <DataTable>
-          <DataTableHeader>
-            <DataTableHead fill>{t.columns.title}</DataTableHead>
-            {/* On a phone, the status under the name (room for the rest). */}
-            <DataTableHead hideBelow="sm" className={COLUMN.status}>
-              {r.columns.status}
-            </DataTableHead>
-            {columns.accord && (
-              <DataTableHead hideBelow="xl" className={COLUMN.accord}>
-                {r.columns.accord}
+        // The tiers read this frame's width (TIER); `isolate`: what stands
+        // above a row (`relative z-10`) stays inside the table.
+        <div className="@container isolate">
+          <DataTable>
+            <DataTableHeader>
+              <DataTableHead className={cn(COLUMN.title, TIER.merged)}>
+                {t.columns.title}
               </DataTableHead>
-            )}
-            <DataTableHead hideBelow="xl" className={COLUMN.contact}>
-              {r.columns.contact}
-            </DataTableHead>
-            {columns.legal && (
-              <DataTableHead hideBelow="xl" className={COLUMN.legal}>
-                {r.columns.legal}
+              <DataTableHead fill className="w-full max-w-0 pl-4">
+                {r.columns.artist}
               </DataTableHead>
-            )}
-            <DataTableActionsHead label={t.columns.actions} />
-          </DataTableHeader>
-          {rows(live)}
-          {abandoned.length > 0 && (
-            <>
-              <GroupGap columns={allColumns} />
-              <DataTableBody>
-                <DataTableGroupRow columns={allColumns}>
-                  <span className="text-[length:var(--type-body-md)] font-semibold">
-                    {t.abandonedGroup}
-                    <span className="ml-1.5 font-medium text-[color:var(--text-tertiary)]">
-                      {abandoned.length}
+              <DataTableHead className={cn(COLUMN.status, TIER.merged)}>
+                {r.columns.status}
+              </DataTableHead>
+              {columns.accord && (
+                <DataTableHead className={cn(COLUMN.accord, TIER.full)}>
+                  {r.columns.accord}
+                </DataTableHead>
+              )}
+              {columns.legal && (
+                <DataTableHead className={cn(COLUMN.legal, TIER.full)}>
+                  {r.columns.legal}
+                </DataTableHead>
+              )}
+              <DataTableActionsHead label={t.columns.actions} />
+            </DataTableHeader>
+            {rows(live)}
+            {abandoned.length > 0 && (
+              <>
+                <GroupGap columns={allColumns} />
+                <DataTableBody>
+                  <DataTableGroupRow columns={allColumns}>
+                    <span className="text-[length:var(--type-body-md)] font-semibold">
+                      {t.abandonedGroup}
+                      <span className="ml-1.5 font-medium text-[color:var(--text-tertiary)]">
+                        {abandoned.length}
+                      </span>
                     </span>
-                  </span>
-                </DataTableGroupRow>
-              </DataTableBody>
-            </>
-          )}
-          {rows(abandoned)}
-        </DataTable>
+                  </DataTableGroupRow>
+                </DataTableBody>
+              </>
+            )}
+            {rows(abandoned)}
+          </DataTable>
+        </div>
       )}
     </div>
   );
@@ -444,10 +518,12 @@ type GroupProps = {
   today: string;
 };
 
-/** A title's group, its own <tbody>: its row on the soft band, then its
- * artists, or « Aucun artiste invité » (with « Ajouter un artiste » for
- * whoever writes). Holds the title's dialogs (« ⋯ », « Nommer ») and its
- * release, saved at the click and shown at once. */
+/** A title's group, its own <tbody>: the title's cell (a <th> over the
+ * group, `rowgroup`) in its first row, spanning its artists' rows, or «
+ * Aucun artiste invité » (with « Ajouter un artiste » for whoever writes).
+ * Under 624 px the same cell on a row of its own above them. Holds the
+ * title's dialogs (« ⋯ », « Nommer »), once, and its release, saved at the
+ * choice and shown at once. */
 function TitleGroup(props: GroupProps) {
   const { projectId, title, participations, columns, canManage } = props;
   const label = title.recap.label;
@@ -467,63 +543,86 @@ function TitleGroup(props: GroupProps) {
       });
       if (!result.ok) toast.error(result.error);
     });
-  const facts = (inline: boolean) => (
-    <TitleFacts
+
+  // Rendered twice (the merged cell, the row of its own under 624 px), one
+  // shown: its menu and buttons open the dialogs held once below.
+  const block = (
+    <TitleBlock
       title={title}
       label={label}
       links={props.links}
+      canManage={canManage}
+      canReadLegal={props.canReadLegal}
+      today={props.today}
       release={releaseValueOf(release)}
       releasePending={releasePending}
       onRelease={pickRelease}
-      canEdit={canManage && !abandoned}
-      inline={inline}
+      onDialog={setDialog}
+      menu={
+        <TitleMenu
+          projectId={projectId}
+          title={title}
+          label={label}
+          canManage={canManage}
+          onDialog={setDialog}
+        />
+      }
     />
+  );
+  const titleCell = (
+    <DataTableCell
+      scope="rowgroup"
+      rowSpan={Math.max(participations.length, 1)}
+      className={cn(COLUMN.title, TIER.merged, TITLE_CELL)}
+    >
+      {block}
+      <TitleDialogs
+        projectId={projectId}
+        title={title}
+        label={label}
+        artists={props.artists}
+        invitedOn={props.invitedOn}
+        masterOptions={props.masterOptions}
+        canManage={canManage}
+        credit={credit}
+        dialog={dialog}
+        onDialog={setDialog}
+      />
+    </DataTableCell>
   );
 
   const noArtist = (
-    <span className="flex flex-wrap items-center gap-x-3 gap-y-2 pl-3 sm:pl-6">
+    <span className="flex flex-wrap items-center gap-x-3 gap-y-2">
       <span className={muted}>{fr.projectTitles.board.noArtist}</span>
-      {canManage && Object.keys(props.artists.options).length > 0 && (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="relative z-10"
-          onClick={() => setDialog("add")}
-        >
-          {fr.projectTitles.participations.add.action}
-        </Button>
-      )}
+      {canManage &&
+        !abandoned &&
+        Object.keys(props.artists.options).length > 0 && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setDialog("add")}
+          >
+            {fr.projectTitles.participations.add.action}
+          </Button>
+        )}
     </span>
   );
 
   return (
     <DataTableBody>
-      <TitleRow
-        {...props}
-        label={label}
-        facts={facts}
-        onDialog={setDialog}
-        actions={
-          <TitleActions
-            projectId={projectId}
-            title={title}
-            label={label}
-            artists={props.artists}
-            invitedOn={props.invitedOn}
-            masterOptions={props.masterOptions}
-            canManage={canManage}
-            credit={credit}
-            dialog={dialog}
-            onDialog={setDialog}
-          />
-        }
-      />
-      {participations.map((participation) => (
+      <Row className={TIER.stacked}>
+        {/* Across the table's two columns there (Artiste, « ⋯ »). */}
+        <DataTableCell scope="rowgroup" colSpan={2} className={TITLE_CELL}>
+          {block}
+        </DataTableCell>
+      </Row>
+      {participations.map((participation, index) => (
         <ParticipationRow
           key={participation.id}
           projectId={projectId}
           participation={participation}
+          titleCell={index === 0 ? titleCell : null}
           label={label}
           credit={credit}
           columns={columns}
@@ -542,148 +641,86 @@ function TitleGroup(props: GroupProps) {
           }
         />
       ))}
-      {title.participations.length === 0 && !abandoned && (
-        <DataTableRow>
-          {/* Over the status column too (no participation, no status), where
-              it is shown: the button never widens the table past a phone's
-              screen. Two cells for one, a colSpan being the same at every
-              width: 1 under 640 px, 2 from it, then the other columns from
-              1280 px, so that the row has as many cells as the header. */}
-          <DataTableCell fill className={cn(NAME_CELL, "sm:hidden")}>
+      {participations.length === 0 && (
+        <Row lead>
+          {titleCell}
+          {/* Over the artists' columns shown at each tier (TIER): 1 under
+              624 px, Artiste and Statut to 976, then all of them. */}
+          <DataTableCell className={cn(ARTIST_CELL, TIER.stacked)}>
             {noArtist}
           </DataTableCell>
           <DataTableCell
-            fill
             colSpan={2}
-            className={cn(NAME_CELL, "hidden sm:table-cell")}
+            className={cn("pl-4 whitespace-normal", TIER.between)}
           >
             {noArtist}
           </DataTableCell>
-          <DataTableCell hideBelow="xl" colSpan={dataColumnCount(columns) - 1}>
-            {null}
+          <DataTableCell
+            colSpan={dataColumnCount(columns)}
+            className={cn("pl-4 whitespace-normal", TIER.full)}
+          >
+            {noArtist}
           </DataTableCell>
           <DataTableActionsCell>{null}</DataTableActionsCell>
-        </DataTableRow>
+        </Row>
       )}
     </DataTableBody>
   );
 }
 
-/** A title's facts in words, apart from its artists' columns (Ibé 18/11,
- * 36:52: « pas aligné »): Mix (its Master), Beatmaker (their fiche, nothing
- * without one), Sortie (oui / non / pas décidé, edited here), Distribution
- * (once the project has one). */
-function TitleFacts({
+/** A label and its value in the title's cell, aligned with the others. */
+function TitleFact({ name, children }: { name: string; children: ReactNode }) {
+  return (
+    <>
+      <dt className={caption}>{name}</dt>
+      <dd className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1">
+        {children}
+      </dd>
+    </>
+  );
+}
+
+/** The title's cell, one under the other: its label (to its Master) and
+ * status, « ⋯ » at the top right; its number and place in the Catalogue
+ * (why it was abandoned); « Nommer » while it has no name (Ibé 18/11, 37:03:
+ * « il faut les mettre dans le catalogue d'abord ? »); then Mix (its
+ * Master), Beatmaker (their fiche; no line without one), Sortie (oui / non
+ * / pas décidé, edited here), Distribution (once the project has one); the
+ * warnings of a shared master and, for whoever does not read the
+ * Juridique, of contracts not signed. */
+function TitleBlock({
   title,
   label,
   links,
+  canManage,
+  canReadLegal,
+  today,
   release,
   releasePending,
   onRelease,
-  canEdit,
-  inline,
+  onDialog,
+  menu,
 }: {
   title: RecapTitle;
   label: string;
   links: BoardLinks;
+  canManage: boolean;
+  canReadLegal: boolean;
+  today: string;
   release: ReleaseValue;
   releasePending: boolean;
   onRelease: (value: ReleaseValue) => void;
-  canEdit: boolean;
-  inline: boolean;
+  onDialog: (dialog: Dialog) => void;
+  menu: ReactNode;
 }) {
-  const f = fr.projectTitles.recap.facts;
+  const t = fr.projectTitles;
+  const f = t.recap.facts;
   const abandoned = title.status === "abandoned";
+  const masterHref = masterHrefOf(title, links);
   // An abandoned title is out of the Master (lot 9): no state there.
   const mix = abandoned ? null : titleMasterLabel(title.masterState);
   const mixStatus = abandoned ? null : titleMasterStatus(title.masterState);
-  const masterHref =
-    title.master && links.master && !abandoned
-      ? `${links.master}?titre=${title.master.id}`
-      : null;
   const distribution = links.distribution?.[title.id] ?? null;
-  const fact = (key: string, name: string, value: ReactNode) => (
-    <span key={key} className="flex min-w-0 flex-wrap items-center gap-2">
-      <span className={caption}>{name}</span>
-      {value}
-    </span>
-  );
-  return (
-    <span
-      className={cn(
-        "flex min-w-0 flex-wrap items-center",
-        inline ? "gap-x-4 gap-y-2" : "gap-x-6 gap-y-2",
-      )}
-    >
-      {fact(
-        "mix",
-        f.mix,
-        <MixPill label={mix} status={mixStatus} href={masterHref} />,
-      )}
-      {title.recap.beatmakers.length > 0 &&
-        fact(
-          "beatmaker",
-          f.beatmaker,
-          title.recap.beatmakers.map((person) => (
-            <span
-              key={person.contactId ?? person.name}
-              className="flex min-w-0 items-center gap-1.5"
-            >
-              <span className="truncate text-[color:var(--text-secondary)]">
-                {person.name}
-              </span>
-              {person.fiche && <FichePill fiche={person.fiche} />}
-            </span>
-          )),
-        )}
-      {fact(
-        "release",
-        f.release,
-        <ReleaseChoice
-          label={label}
-          value={release}
-          canEdit={canEdit}
-          pending={releasePending}
-          onPick={onRelease}
-        />,
-      )}
-      {links.distribution !== null &&
-        fact(
-          "distribution",
-          f.distribution,
-          distribution ? (
-            <ViewLink href={distribution.href} className={PILL_LINK}>
-              <StatusBadge tone={distribution.tone} size="sm">
-                {distribution.label}
-              </StatusBadge>
-            </ViewLink>
-          ) : (
-            <span className={muted}>{EMPTY_CELL}</span>
-          ),
-        )}
-    </span>
-  );
-}
-
-function TitleRow({
-  title,
-  columns,
-  canManage,
-  canReadLegal,
-  links,
-  today,
-  label,
-  facts,
-  onDialog,
-  actions,
-}: GroupProps & {
-  label: string;
-  facts: (inline: boolean) => ReactNode;
-  onDialog: (dialog: Dialog) => void;
-  actions: ReactNode;
-}) {
-  const t = fr.projectTitles;
-  const abandoned = title.status === "abandoned";
   const shared =
     title.sharedWith && !abandoned
       ? t.participations.shared(title.sharedWith.names, title.sharedWith.hidden)
@@ -696,47 +733,37 @@ function TitleRow({
     : title.participations
         .filter((p) => contractGap(title, p, today) !== null)
         .map((p) => p.artist.name);
-  const name = (small: boolean) => (
-    <span className="flex min-w-0 flex-col gap-1">
-      <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-        <span
-          className={cn(
-            "flex min-w-0 font-semibold",
-            abandoned && "text-[color:var(--text-secondary)]",
-          )}
-        >
-          {/* The title's Master, once it has a master, open on this title
-              (lot 8); an abandoned title is out of it (lot 9). */}
-          <DataTableLink
-            href={
-              title.master && links.master && !abandoned
-                ? `${links.master}?titre=${title.master.id}`
-                : null
-            }
+  const warning = cn(
+    caption,
+    "flex items-start gap-1.5 text-[color:var(--tone-warning-fg)]",
+  );
+
+  return (
+    <div className="flex min-w-0 flex-col gap-1">
+      <div className="flex min-w-0 items-start justify-between gap-2">
+        <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+          <span
+            className={cn(
+              "min-w-0 font-semibold [overflow-wrap:anywhere]",
+              abandoned && "text-[color:var(--text-secondary)]",
+            )}
           >
-            {label}
-          </DataTableLink>
-        </span>
-        <StatusBadge tone={projectTitleTone[title.status]} size="sm">
-          {t.statuses[title.status]}
-        </StatusBadge>
-        {/* Ibé 18/11 (37:03): « il faut les mettre dans le catalogue
-            d'abord ? »: the title is named here. */}
-        {canManage && !abandoned && isUnnamed(title) && (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="relative z-10"
-            aria-label={t.recap.name.title(label)}
-            onClick={() => onDialog("name")}
-          >
-            {t.recap.name.action}
-          </Button>
-        )}
-      </span>
-      {/* Wraps rather than cut: on a phone « Maquette · En développement »
-          lost its status. */}
+            {masterHref ? (
+              <ViewLink href={masterHref} className={NAME_LINK}>
+                {label}
+              </ViewLink>
+            ) : (
+              label
+            )}
+          </span>
+          <StatusBadge tone={projectTitleTone[title.status]} size="sm">
+            {t.statuses[title.status]}
+          </StatusBadge>
+        </div>
+        <span className="-my-1.5 -mr-1.5 shrink-0">{menu}</span>
+      </div>
+      {/* Wraps rather than cut: « Maquette · En développement » keeps its
+          status. */}
       <span
         className={cn(caption, "line-clamp-2 break-words")}
         // The whole reason of an abandonment, when two lines cut it.
@@ -744,77 +771,92 @@ function TitleRow({
       >
         {detailOf(title, label)}
       </span>
+      {canManage && !abandoned && isUnnamed(title) && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="mt-1 self-start"
+          aria-label={t.recap.name.title(label)}
+          onClick={() => onDialog("name")}
+        >
+          {t.recap.name.action}
+        </Button>
+      )}
+      <dl className="mt-2 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-2">
+        <TitleFact name={f.mix}>
+          <MixPill label={mix} status={mixStatus} href={masterHref} />
+        </TitleFact>
+        {title.recap.beatmakers.length > 0 && (
+          <TitleFact name={f.beatmaker}>
+            <span className="flex min-w-0 flex-col items-start gap-1">
+              {title.recap.beatmakers.map((person) => (
+                <span
+                  key={person.contactId ?? person.name}
+                  className="flex max-w-full min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1"
+                >
+                  <span className="min-w-0 break-words text-[color:var(--text-secondary)]">
+                    {person.name}
+                  </span>
+                  {person.fiche && <FichePill fiche={person.fiche} />}
+                </span>
+              ))}
+            </span>
+          </TitleFact>
+        )}
+        <TitleFact name={f.release}>
+          <ReleaseChoice
+            label={label}
+            value={release}
+            canEdit={canManage && !abandoned}
+            pending={releasePending}
+            onPick={onRelease}
+          />
+        </TitleFact>
+        {links.distribution !== null && (
+          <TitleFact name={f.distribution}>
+            {distribution ? (
+              <ViewLink href={distribution.href} className={PILL_LINK}>
+                <StatusBadge
+                  tone={distribution.tone}
+                  size="sm"
+                  className="h-auto min-h-5 max-w-full py-0.5 text-left whitespace-normal"
+                >
+                  {distribution.label}
+                </StatusBadge>
+              </ViewLink>
+            ) : (
+              <span className={muted}>{EMPTY_CELL}</span>
+            )}
+          </TitleFact>
+        )}
+      </dl>
       {/* A simple project shares its master: no automatic credit, said
           where the title is (décision 10). */}
       {shared && (
-        <span
-          className={cn(
-            caption,
-            "flex items-start gap-1.5 text-[color:var(--tone-warning-fg)]",
-          )}
-        >
+        <span className={cn(warning, "mt-2")}>
           <IconTriangleWarning aria-hidden className="mt-0.5 size-4 shrink-0" />
           {`${shared}.`}
         </span>
       )}
       {missing.length > 0 && (
-        <span
-          className={cn(
-            caption,
-            "flex items-start gap-1.5 text-[color:var(--tone-warning-fg)]",
-          )}
-        >
+        <span className={cn(warning, "mt-2")}>
           <IconTriangleWarning aria-hidden className="mt-0.5 size-4 shrink-0" />
           {fr.participationWaivers.titleMissing(missing.join(", "))}
         </span>
       )}
-      {/* Under 1280 px, its facts under its name. */}
-      {small && <span className="mt-1">{facts(true)}</span>}
-    </span>
-  );
-  return (
-    <DataTableRow className="bg-[var(--surface-soft)] hover:bg-[var(--surface-soft)]">
-      {/* One of the three name cells is shown, and the row has as many cells
-          as the header (a colSpan is the same at every width):
-          - under 640 px, the name alone (the header has no status column
-            there: a colSpan of 2 would add a column, and push « ⋯ » out of
-            the artists' column);
-          - under 1280 px, over the status column too (it holds the
-            artists' statuses, nothing of the title's): its facts fit under
-            its name;
-          - from 1280 px, the name alone, then its facts across its
-            artists' columns, in words. */}
-      <DataTableCell fill className={cn(NAME_CELL, "sm:hidden")}>
-        {name(true)}
-      </DataTableCell>
-      <DataTableCell
-        fill
-        colSpan={2}
-        className={cn(NAME_CELL, "hidden sm:table-cell xl:hidden")}
-      >
-        {name(true)}
-      </DataTableCell>
-      <DataTableCell fill hideBelow="xl" className={NAME_CELL}>
-        {name(false)}
-      </DataTableCell>
-      <DataTableCell
-        hideBelow="xl"
-        colSpan={dataColumnCount(columns)}
-        className="whitespace-normal"
-      >
-        {facts(false)}
-      </DataTableCell>
-      <DataTableActionsCell>{actions}</DataTableActionsCell>
-    </DataTableRow>
+    </div>
   );
 }
 
-/** An artist on a title, under it: name and role, its note; Statut,
- * Accord, Contact, Juridique. The row opens the person's démarche in the
- * Juridique, else the deal. */
+/** An artist on a title, beside the title's cell (`titleCell`, given to
+ * the group's first row): name and role, note, contact; Statut, Accord,
+ * Juridique; « ⋯ ». The name opens the person's démarche in the Juridique,
+ * else the deal. */
 function ParticipationRow({
   projectId,
   participation,
+  titleCell,
   label,
   credit,
   columns,
@@ -827,6 +869,7 @@ function ParticipationRow({
 }: {
   projectId: string;
   participation: RecapParticipation;
+  titleCell: ReactNode;
   label: string;
   credit: Credit;
   columns: Columns;
@@ -842,6 +885,7 @@ function ParticipationRow({
   const active = isActiveParticipation(participation.status) && !dimmed;
   const facts = participation.recap;
   const artist = participation.artist.name;
+  const href = facts.contract?.href ?? facts.accord?.href ?? null;
   const accord = (inline: boolean) =>
     facts.accord ? (
       <AccordFacts
@@ -857,28 +901,17 @@ function ParticipationRow({
     ) : (
       <span className={muted}>{EMPTY_CELL}</span>
     );
-  const contact = (inline: boolean) => (
-    <ContactFacts
-      projectId={projectId}
-      participationId={participation.id}
-      artist={artist}
-      contact={facts.contact}
-      canManage={canManage}
-      canEditNetwork={canEditNetwork}
-      inline={inline}
-    />
-  );
   const legal = (inline: boolean) => (
     <LegalFacts fiche={facts.fiche} contract={facts.contract} inline={inline} />
   );
 
   return (
-    <DataTableRow>
-      <DataTableCell fill className={NAME_CELL}>
-        {/* Under its title (the row's inset holds the cell's own padding). */}
-        <span className="flex min-w-0 flex-col gap-0.5 pl-3 sm:pl-6">
-          {/* The role goes under the name when the line is too short (a
-              phone), rather than cutting the name. */}
+    <Row lead={titleCell !== null}>
+      {titleCell}
+      <DataTableCell fill className={ARTIST_CELL}>
+        <span className="flex min-w-0 flex-col gap-0.5">
+          {/* The role goes under the name when the table is narrow, rather
+              than cutting the name. */}
           <span className="flex min-w-0 flex-wrap items-baseline gap-x-1">
             <span
               className={cn(
@@ -886,18 +919,20 @@ function ParticipationRow({
                 !active && "text-[color:var(--text-secondary)]",
               )}
             >
-              <DataTableLink
-                href={facts.contract?.href ?? facts.accord?.href ?? null}
-              >
-                {artist}
-              </DataTableLink>
+              {href ? (
+                <ViewLink href={href} className={cn(NAME_LINK, "truncate")}>
+                  {artist}
+                </ViewLink>
+              ) : (
+                <span className="truncate">{artist}</span>
+              )}
             </span>
-            <span className={cn(muted, "hidden shrink-0 sm:inline")}>
+            <span className={cn(muted, "hidden shrink-0 @min-[624px]:inline")}>
               {`· ${t.participations.roles[participation.role]}`}
             </span>
           </span>
-          {/* On a phone, the role and the status under the name. */}
-          <span className="flex flex-wrap items-center gap-x-2 gap-y-1 sm:hidden">
+          {/* Under 624 px, the role and the status under the name. */}
+          <span className="flex flex-wrap items-center gap-x-2 gap-y-1 @min-[624px]:hidden">
             <span className={caption}>
               {t.participations.roles[participation.role]}
             </span>
@@ -910,6 +945,19 @@ function ParticipationRow({
             note={facts.note}
             canEdit={canManage}
           />
+          {/* None and nothing to do: no line (ContactFacts says nothing). */}
+          {(facts.contact !== null || canManage) && (
+            <span className="mt-1 flex min-w-0 flex-col">
+              <ContactFacts
+                projectId={projectId}
+                participationId={participation.id}
+                artist={artist}
+                contact={facts.contact}
+                canManage={canManage}
+                canEditNetwork={canEditNetwork}
+              />
+            </span>
+          )}
           {toCheck && (
             <span className={cn(caption, "flex items-start gap-1.5")}>
               <IconTriangleWarning
@@ -922,31 +970,31 @@ function ParticipationRow({
           {!dimmed && (
             <WaiverLines waivers={participation.waivers} today={today} />
           )}
-          {/* Under 1280 px, the hidden columns, still links and buttons. */}
-          <span className="mt-1.5 flex flex-col gap-1.5 xl:hidden">
-            {columns.accord && (
-              <StackedFact label={r.columns.accord}>{accord(true)}</StackedFact>
-            )}
-            <StackedFact label={r.columns.contact}>{contact(true)}</StackedFact>
-            {columns.legal && (
-              <StackedFact label={r.columns.legal}>{legal(true)}</StackedFact>
-            )}
-          </span>
+          {/* Under 976 px, Accord and Juridique, still links and buttons. */}
+          {(columns.accord || columns.legal) && (
+            <span className="mt-1.5 flex flex-col gap-1.5 @min-[976px]:hidden">
+              {columns.accord && (
+                <StackedFact label={r.columns.accord}>
+                  {accord(true)}
+                </StackedFact>
+              )}
+              {columns.legal && (
+                <StackedFact label={r.columns.legal}>{legal(true)}</StackedFact>
+              )}
+            </span>
+          )}
         </span>
       </DataTableCell>
-      <DataTableCell hideBelow="sm" className={COLUMN.status}>
+      <DataTableCell className={cn(COLUMN.status, TIER.merged)}>
         <ContactStatePill status={participation.status} />
       </DataTableCell>
       {columns.accord && (
-        <DataTableCell hideBelow="xl" className={COLUMN.accord}>
+        <DataTableCell className={cn(COLUMN.accord, TIER.full)}>
           {accord(false)}
         </DataTableCell>
       )}
-      <DataTableCell hideBelow="xl" className={COLUMN.contact}>
-        {contact(false)}
-      </DataTableCell>
       {columns.legal && (
-        <DataTableCell hideBelow="xl" className={COLUMN.legal}>
+        <DataTableCell className={cn(COLUMN.legal, TIER.full)}>
           {legal(false)}
         </DataTableCell>
       )}
@@ -960,42 +1008,31 @@ function ParticipationRow({
           />
         )}
       </DataTableActionsCell>
-    </DataTableRow>
+    </Row>
   );
 }
 
 /** « ⋯ » of a title: add an artist, rename and abandon in a modal (a
- * gesture that asks a saisie opens one), reactivate at once (nothing to
- * ask); its page in the Catalogue for everyone, once it has a master.
- * « Nommer » (the title's row) opens the rename form in its own words,
- * with « Rattacher un titre du Catalogue » under the field. */
-function TitleActions({
+ * gesture that asks a saisie opens one, TitleDialogs), reactivate at once
+ * (nothing to ask); its page in the Catalogue for everyone, once it has a
+ * master. Lot 7: a title not in the Catalogue yet gets its title there,
+ * provisional, at its first audio; or takes one the Catalogue has. */
+function TitleMenu({
   projectId,
   title,
   label,
-  artists,
-  invitedOn,
-  masterOptions,
   canManage,
-  credit,
-  dialog,
   onDialog,
 }: {
   projectId: string;
   title: RecapTitle;
   label: string;
-  artists: ArtistChoices;
-  invitedOn: Record<string, string[]>;
-  masterOptions: Record<string, string>;
   canManage: boolean;
-  credit: Credit;
-  dialog: Dialog | null;
-  onDialog: (dialog: Dialog | null) => void;
+  onDialog: (dialog: Dialog) => void;
 }) {
   const t = fr.projectTitles;
   const router = useRouter();
   const [, startTransition] = useTransition();
-  const close = () => onDialog(null);
   const catalog: RowAction[] = title.master
     ? [
         {
@@ -1006,8 +1043,6 @@ function TitleActions({
         },
       ]
     : [];
-  // Lot 7: a title not in the Catalogue yet gets its title there,
-  // provisional, at its first audio; or takes one the Catalogue has.
   const start: RowAction[] = title.master
     ? []
     : [
@@ -1076,107 +1111,131 @@ function TitleActions({
             onSelect: () => onDialog("abandon"),
           },
         ];
+
+  return <RowActions label={t.menu(label)} actions={actions} />;
+}
+
+/** The title's dialogs, once per title whichever of its cells is shown:
+ * add an artist, rename, name (« Nommer », in its own words, with «
+ * Rattacher un titre du Catalogue » under the field), attach, abandon. */
+function TitleDialogs({
+  projectId,
+  title,
+  label,
+  artists,
+  invitedOn,
+  masterOptions,
+  canManage,
+  credit,
+  dialog,
+  onDialog,
+}: {
+  projectId: string;
+  title: RecapTitle;
+  label: string;
+  artists: ArtistChoices;
+  invitedOn: Record<string, string[]>;
+  masterOptions: Record<string, string>;
+  canManage: boolean;
+  credit: Credit;
+  dialog: Dialog | null;
+  onDialog: (dialog: Dialog | null) => void;
+}) {
+  const t = fr.projectTitles;
+  if (!canManage) return null;
+  const close = () => onDialog(null);
   const provisional = title.master?.provisional
     ? t.rename.descriptionProvisional
     : undefined;
 
   return (
     <>
-      <RowActions label={t.menu(label)} actions={actions} />
-      {canManage && (
-        <>
-          <FormDialog
-            open={dialog === "add"}
-            onOpenChange={(next) => !next && close()}
-            title={t.participations.add.title(label)}
-            description={t.participations.add.description(
-              credit.mode,
-              credit.shared,
-            )}
-            closeLabel={fr.dialogs.close}
-          >
-            <AddParticipationForm
-              projectId={projectId}
-              title={title}
-              artists={artists}
-              invitedOn={invitedOn}
-              onDone={close}
-            />
-          </FormDialog>
-          <FormDialog
-            open={dialog === "rename"}
-            onOpenChange={(next) => !next && close()}
-            title={t.rename.title}
-            description={provisional}
-            closeLabel={fr.dialogs.close}
-          >
-            <RenameTitleForm
-              projectId={projectId}
-              title={title}
-              onDone={close}
-            />
-          </FormDialog>
-          <FormDialog
-            open={dialog === "name"}
-            onOpenChange={(next) => !next && close()}
-            title={t.recap.name.title(label)}
-            description={provisional}
-            closeLabel={fr.dialogs.close}
-          >
-            <RenameTitleForm
-              projectId={projectId}
-              title={title}
-              submitLabel={t.recap.name.submit}
-              doneMessage={t.recap.name.done}
-              onAttach={
-                !title.master && Object.keys(masterOptions).length > 0
-                  ? () => onDialog("attach")
-                  : undefined
-              }
-              onDone={close}
-            />
-          </FormDialog>
-          {!title.master && (
-            <FormDialog
-              open={dialog === "attach"}
-              onOpenChange={(next) => !next && close()}
-              title={t.catalogAttach.title(label)}
-              closeLabel={fr.dialogs.close}
-            >
-              <AttachCatalogTitleForm
-                projectId={projectId}
-                titleId={title.id}
-                masterOptions={masterOptions}
-                onDone={close}
-              />
-            </FormDialog>
-          )}
-          <FormDialog
-            open={dialog === "abandon"}
-            onOpenChange={(next) => !next && close()}
-            title={t.abandon.title(label)}
-            // Only a maquette in draft or in development becomes
-            // « abandonnée »; a validated one keeps its status (décision 8).
-            description={
-              title.master?.demoStatus === "draft" ||
-              title.master?.demoStatus === "developing"
-                ? t.abandon.demoNote
-                : undefined
-            }
-            closeLabel={fr.dialogs.close}
-          >
-            <ReasonForm
-              label={t.abandon.reason}
-              submitLabel={t.abandon.submit}
-              doneMessage={t.abandon.done}
-              run={(reason) =>
-                abandonProjectTitle({ projectId, titleId: title.id, reason })
-              }
-              onDone={close}
-            />
-          </FormDialog>
-        </>
+      <FormDialog
+        open={dialog === "add"}
+        onOpenChange={(next) => !next && close()}
+        title={t.participations.add.title(label)}
+        description={t.participations.add.description(
+          credit.mode,
+          credit.shared,
+        )}
+        closeLabel={fr.dialogs.close}
+      >
+        <AddParticipationForm
+          projectId={projectId}
+          title={title}
+          artists={artists}
+          invitedOn={invitedOn}
+          onDone={close}
+        />
+      </FormDialog>
+      <FormDialog
+        open={dialog === "rename"}
+        onOpenChange={(next) => !next && close()}
+        title={t.rename.title}
+        description={provisional}
+        closeLabel={fr.dialogs.close}
+      >
+        <RenameTitleForm projectId={projectId} title={title} onDone={close} />
+      </FormDialog>
+      <FormDialog
+        open={dialog === "name"}
+        onOpenChange={(next) => !next && close()}
+        title={t.recap.name.title(label)}
+        description={provisional}
+        closeLabel={fr.dialogs.close}
+      >
+        <RenameTitleForm
+          projectId={projectId}
+          title={title}
+          submitLabel={t.recap.name.submit}
+          doneMessage={t.recap.name.done}
+          onAttach={
+            !title.master && Object.keys(masterOptions).length > 0
+              ? () => onDialog("attach")
+              : undefined
+          }
+          onDone={close}
+        />
+      </FormDialog>
+      {!title.master && (
+        <FormDialog
+          open={dialog === "attach"}
+          onOpenChange={(next) => !next && close()}
+          title={t.catalogAttach.title(label)}
+          closeLabel={fr.dialogs.close}
+        >
+          <AttachCatalogTitleForm
+            projectId={projectId}
+            titleId={title.id}
+            masterOptions={masterOptions}
+            onDone={close}
+          />
+        </FormDialog>
       )}
+      <FormDialog
+        open={dialog === "abandon"}
+        onOpenChange={(next) => !next && close()}
+        title={t.abandon.title(label)}
+        // Only a maquette in draft or in development becomes
+        // « abandonnée »; a validated one keeps its status (décision 8).
+        description={
+          title.master?.demoStatus === "draft" ||
+          title.master?.demoStatus === "developing"
+            ? t.abandon.demoNote
+            : undefined
+        }
+        closeLabel={fr.dialogs.close}
+      >
+        <ReasonForm
+          label={t.abandon.reason}
+          submitLabel={t.abandon.submit}
+          doneMessage={t.abandon.done}
+          run={(reason) =>
+            abandonProjectTitle({ projectId, titleId: title.id, reason })
+          }
+          onDone={close}
+        />
+      </FormDialog>
     </>
   );
 }

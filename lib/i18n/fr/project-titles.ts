@@ -125,7 +125,7 @@ export const projectTitles = {
   // The title's page in the Catalogue, from its « ⋯ ».
   openCatalog: "Voir au Catalogue",
 
-  // « Titres et artistes » (lot 6): one row per title, under it one row
+  // « Titres et artistes » (lot 6): each title's cell, beside it one row
   // per participation; where each stands, computed (lib/projects/
   // title-board-rules.ts).
   board: {
@@ -149,7 +149,7 @@ export const projectTitles = {
     label: "Titres et artistes du projet",
     // The other columns: recap.columns (lot L2b).
     columns: {
-      title: "Titre ou artiste",
+      title: "Titre",
       actions: "Actions",
     },
     // The abandoned titles, after the others.
@@ -346,15 +346,14 @@ export const projectTitles = {
     // The number changed here is the Réseau's.
     phoneChanged: "Numéro changé dans le Réseau",
     // The screen of the recap (lot L2b): its columns, the counters that
-    // filter its artists, the title's facts in words on its band, and what
-    // is edited in place (contact, release, note).
+    // filter its artists, the title's facts in its cell, and what is edited
+    // in place (contact, release, note).
     columns: {
       status: "Statut",
       accord: "Accord",
-      contact: "Contact",
       legal: "Juridique",
-      // The overview's compact recap: one row per artist.
       artist: "Artiste",
+      // The overview's compact recap.
       mix: "Mix",
     },
     filters: "Filtrer les artistes par statut",
@@ -394,6 +393,8 @@ export const projectTitles = {
       callToPlan: "Call à caler",
     },
     contact: {
+      // Under the artist's name, before the contact's name.
+      label: "Contact",
       title: "Contact du manager",
       add: "Ajouter le contact",
       edit: (artist: string) => `Modifier le contact ${de(artist)}`,

@@ -8,16 +8,18 @@ import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { NegotiationCallButton } from "@/components/deals/negotiation-call-button";
 import { PersonPickerField } from "@/components/network/person-picker-field";
-import {
-  caption,
-  factsClass,
-  muted,
-} from "@/components/projects/titles/recap-facts";
+import { caption, factsClass } from "@/components/projects/titles/recap-facts";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { EMPTY_CELL } from "@/components/ui/data-table";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { SegmentedControl } from "@/components/ui/segmented-control";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Tooltip,
   TooltipContent,
@@ -43,8 +45,8 @@ import { cn } from "@/lib/utils";
 // What the collective's recap edits in place (retours d'Ibé du 18/11/2026,
 // lot 2: « contact, sortie oui / non, notes », nothing that has a module):
 // the release of a title, the note and the manager's contact of an artist,
-// and « Caler le call » (Sacha's NegotiationCallButton). Each one sits in a
-// row whose DataTableLink covers it: `relative z-10`.
+// and « Caler le call » (Sacha's NegotiationCallButton). `relative z-10`:
+// above a row's DataTableLink, where one covers the row.
 
 const fr = { dialogs, projectTitles };
 
@@ -58,8 +60,10 @@ export type ReleaseValue = "yes" | "no" | "undecided";
 export const releaseValueOf = (decision: boolean | null): ReleaseValue =>
   decision === true ? "yes" : decision === false ? "no" : "undecided";
 
-/** « Sortie » of a title: Oui / Non / Pas décidé, saved at the click
- * (setTitleRelease, by the board); read only, its word. */
+/** « Sortie » of a title: Oui / Non / Pas décidé, saved at the choice
+ * (setTitleRelease, by the board); read only, its word. A 32 px menu, the
+ * height of a row's menu (docs/DESIGN.md « Hauteur d'un champ »): three
+ * segments did not fit beside their label in the title's column. */
 export function ReleaseChoice({
   label,
   value,
@@ -78,20 +82,35 @@ export function ReleaseChoice({
     return (
       <span className="text-[color:var(--text-secondary)]">{t[value]}</span>
     );
+  const items: Record<ReleaseValue, string> = {
+    yes: t.yes,
+    no: t.no,
+    undecided: t.undecided,
+  };
   return (
-    <SegmentedControl<ReleaseValue>
-      aria-label={t.label(label)}
-      className="relative z-10"
-      options={[
-        { value: "yes", label: t.yes },
-        { value: "no", label: t.no },
-        { value: "undecided", label: t.undecided },
-      ]}
+    <Select
+      items={items}
       value={value}
-      onChange={(next) => next && next !== value && !pending && onPick(next)}
-    />
+      onValueChange={(next) => {
+        if (isReleaseValue(next) && next !== value && !pending) onPick(next);
+      }}
+    >
+      <SelectTrigger aria-label={t.label(label)} className="max-w-full">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {Object.entries(items).map(([option, optionLabel]) => (
+          <SelectItem key={option} value={option}>
+            {optionLabel}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
+
+const isReleaseValue = (value: unknown): value is ReleaseValue =>
+  value === "yes" || value === "no" || value === "undecided";
 
 // -------------------------------------------------------------------- Note
 
@@ -277,11 +296,12 @@ function IconAction({
 }
 
 /**
- * Who to call for the artist (the Excel's « Contact »): name, number, and
- * « Appeler » / « WhatsApp »; a private contact's coordinates the reader
- * may not read stay « Coordonnées privées ». For whoever writes the title
- * (another contact of the Réseau, a new one) or the Réseau (the number):
- * « Contact du manager » in a modal; none yet: « Ajouter le contact ».
+ * Who to call for the artist (the Excel's « Contact »), under the artist's
+ * name: « Contact », name, number, and « Appeler » / « WhatsApp »; a
+ * private contact's coordinates the reader may not read stay « Coordonnées
+ * privées ». For whoever writes the title (another contact of the Réseau, a
+ * new one) or the Réseau (the number): « Contact du manager » in a modal;
+ * none yet: « Ajouter le contact ». None and nothing to do: nothing.
  */
 export function ContactFacts({
   projectId,
@@ -290,7 +310,6 @@ export function ContactFacts({
   contact,
   canManage,
   canEditNetwork,
-  inline = false,
 }: {
   projectId: string;
   participationId: string;
@@ -298,7 +317,6 @@ export function ContactFacts({
   contact: RecapContact | null;
   canManage: boolean;
   canEditNetwork: boolean;
-  inline?: boolean;
 }) {
   const t = fr.projectTitles.recap.contact;
   const [open, setOpen] = useState(false);
@@ -327,7 +345,7 @@ export function ContactFacts({
           type="button"
           variant="outline"
           size="sm"
-          className="relative z-10"
+          className="relative z-10 self-start"
           aria-label={`${t.add} · ${artist}`}
           onClick={() => setOpen(true)}
         >
@@ -335,13 +353,12 @@ export function ContactFacts({
         </Button>
         {dialog}
       </>
-    ) : (
-      <span className={muted}>{EMPTY_CELL}</span>
-    );
+    ) : null;
 
   const whatsapp = contact.phone ? whatsappNumber(contact.phone) : null;
   return (
-    <span className={factsClass(inline)}>
+    <span className={factsClass(true)}>
+      <span className={caption}>{t.label}</span>
       <span className="max-w-full break-words" title={contact.name}>
         {contact.name}
       </span>
