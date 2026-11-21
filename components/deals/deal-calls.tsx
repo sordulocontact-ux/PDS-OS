@@ -30,7 +30,7 @@ export function DealCallCard({
 }: {
   call: DealCall;
   now: Date;
-  // « ⋯ » › « Modifier l'horaire » (DealCallMenu).
+  // « ⋯ » › « Modifier le call » (DealCallMenu).
   movable?: boolean;
 }) {
   const upcoming = isUpcoming(call, now);

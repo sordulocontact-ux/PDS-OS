@@ -139,7 +139,7 @@ export async function CallPage({
           organizer={organizer}
           upcoming={isUpcoming(call, now)}
           closed={data.closures.length > 0}
-          reschedulable={canEdit && !call.audioPath}
+          editable={canEdit && !call.audioPath}
           deletable={canDeleteCall(callDeleter(access), {
             ownerPersonId: project
               ? project.ownerPersonId

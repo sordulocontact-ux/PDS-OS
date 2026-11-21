@@ -159,6 +159,21 @@ export async function moveMeetEvent(input: {
   );
 }
 
+/** Renames the event (« Modifier le call »); Google tells every guest. */
+export async function renameMeetEvent(input: {
+  eventId: string;
+  title: string;
+}): Promise<void> {
+  const config = settings();
+  if (!config) throw new GoogleCalendarError("not_configured");
+  await request(
+    config,
+    "PATCH",
+    `/calendars/${encodeURIComponent(config.calendarId)}/events/${encodeURIComponent(input.eventId)}?sendUpdates=all`,
+    { summary: input.title },
+  );
+}
+
 /** Replaces the event's guests; Google invites the new ones and tells the
  * ones taken off (sendUpdates). */
 export async function setMeetEventGuests(input: {
