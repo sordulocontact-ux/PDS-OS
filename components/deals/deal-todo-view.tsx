@@ -124,12 +124,7 @@ export function DealTodoView({
         reopen={reopen}
         lead={callForm && <DealCallButton data={callForm} variant="default" />}
         planCall={
-          negotiationCall && (
-            <NegotiationCallButton
-              data={negotiationCall}
-              variant={nextCall ? "outline" : "default"}
-            />
-          )
+          negotiationCall && <NegotiationCallButton data={negotiationCall} />
         }
         nextCall={nextCall?.label ?? null}
       />
@@ -141,7 +136,7 @@ export function DealTodoView({
       )}
       {!isClosedStage(deal.stage) && (
         <PageSection id="prochaine-action" title={s.next}>
-          <DealNextAction deal={deal} nextCall={nextCall} />
+          <DealNextAction deal={deal} />
         </PageSection>
       )}
       {works("terms") && (

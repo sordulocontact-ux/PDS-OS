@@ -3,7 +3,6 @@
 export const dealCalls = {
   section: "Calls",
   empty: "Aucun call pour ce deal.",
-  open: (title: string) => `Ouvrir le call « ${title} »`,
   prepare: {
     button: "Préparer un call",
     dialogTitle: "Préparer un call",

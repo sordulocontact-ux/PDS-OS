@@ -9,11 +9,12 @@ import { Button } from "@/components/ui/button";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
-import { ViewLink } from "@/components/ui/view-link";
+import { documentCardClass } from "@/components/ui/document-card-classes";
 import { setDealNextAction } from "@/lib/deals/actions";
 import type { Deal } from "@/lib/deals/types";
 import { deals } from "@/lib/i18n/fr/deals";
 import { dialogs } from "@/lib/i18n/fr/dialogs";
+import { cn } from "@/lib/utils";
 import { formatDay } from "@/lib/utils/day";
 
 const fr = { deals, dialogs };
@@ -86,26 +87,19 @@ export function NextActionForm({
 }
 
 /**
- * A deal's next action, its follow-up date and its next call (BIZ 4, day
- * and hour: UX test of 12/11/2026), as facts; whoever
- * writes the deal changes them in a dialog.
+ * A deal's next action and its follow-up date (BIZ 4); whoever writes the
+ * deal changes them in a dialog. The next call is not repeated here: it is
+ * in « Calls » (Sacha 21/11/2026).
  */
-export function DealNextAction({
-  deal,
-  nextCall = null,
-}: {
-  deal: Deal;
-  // The next call still to hold: its day and hour, a link to it.
-  nextCall?: { label: string; href: string } | null;
-}) {
+export function DealNextAction({ deal }: { deal: Deal }) {
   const t = fr.deals.page.next;
   const [open, setOpen] = useState(false);
   return (
     <>
       {/* One sentence, not a table (Sacha 20/11/2026): the action and its
-          day, then the follow-up and the next call. None: the empty note of
-          the deal's other sections, its button inside (Sacha 20/11/2026). */}
-      {!deal.nextAction && !deal.followUpOn && !nextCall ? (
+          day, then the follow-up. None: the empty note of the deal's other
+          sections, its button inside (Sacha 20/11/2026). */}
+      {!deal.nextAction && !deal.followUpOn ? (
         <EmptyNote
           action={
             deal.canWrite && (
@@ -118,24 +112,24 @@ export function DealNextAction({
           {t.noneAction}
         </EmptyNote>
       ) : (
-        <div className="flex items-start justify-between gap-4">
+        <div
+          className={cn(
+            documentCardClass,
+            "flex-row items-start justify-between gap-4 p-4",
+          )}
+        >
           <div className="flex min-w-0 flex-col gap-1">
-            <p className="text-body-md font-medium text-pretty">
+            <p className="text-body-md font-semibold text-pretty">
               {deal.nextAction ?? t.noneAction}
-              {deal.nextActionOn && ` · ${formatDay(deal.nextActionOn)}`}
             </p>
-            {(deal.followUpOn || nextCall) && (
+            {(deal.nextActionOn || deal.followUpOn) && (
               <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
-                {deal.followUpOn && t.followUpOn(formatDay(deal.followUpOn))}
-                {deal.followUpOn && nextCall && " · "}
-                {nextCall && (
-                  <ViewLink
-                    href={nextCall.href}
-                    className="underline-offset-2 hover:underline"
-                  >
-                    {t.callOn(nextCall.label)}
-                  </ViewLink>
-                )}
+                {[
+                  deal.nextActionOn && formatDay(deal.nextActionOn),
+                  deal.followUpOn && t.followUpOn(formatDay(deal.followUpOn)),
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
               </p>
             )}
           </div>

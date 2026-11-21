@@ -240,7 +240,6 @@ export const deals = {
       title: (who: string | null) =>
         who ? `Caler le call avec ${who}` : "Caler le call de négociation",
       planned: (when: string) => `Call prévu : ${when}`,
-      why: "Aucun contrat ne part avant l'accord de principe validé par la direction : vous en êtes prévenu, puis vous lancez les contrats.",
     },
     waitDirection:
       "La direction est prévenue : elle valide l'accord de principe ou le renvoie en négociation.",
@@ -298,7 +297,6 @@ export const deals = {
       noneAction: "Aucune prochaine action.",
       add: "Ajouter une prochaine action",
       followUpOn: (day: string) => `Relancer le ${day}`,
-      callOn: (slot: string) => `Prochain call : ${slot}`,
       edit: "Modifier",
       editTitle: "Prochaine action et relance",
       editDescription:
