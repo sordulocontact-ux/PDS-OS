@@ -367,6 +367,38 @@ export function personKeyOf(input: {
 // ---------------------------------------------------------------- Contract
 
 /**
+ * A contract sent whose signed copy is back (the table CONTRATS of the
+ * Excel: « Contrat envoyé ? », « Contrat signé »). The person signs first,
+ * then PDS (migration 20261107200101): the copy is back when the person
+ * dropped it by their private link, or the team dropped it with the proof
+ * « signé autrement » (the rule of the contract's page, contractNowOf);
+ * - countersign: back, PDS has not signed yet (« à contresigner »);
+ * - check: back and countersigned, the team checks the signature and marks
+ *   the contract signed (« à vérifier »).
+ * Null: not back (still « en attente de retour »), or not sent.
+ */
+export type ContractBack = "countersign" | "check";
+
+export type ContractProof = {
+  // The signed copies of the contract (contract_files, category signed):
+  // how many, and whether one came by the person's link.
+  signedFiles: number;
+  signedViaLink: boolean;
+  // The proof « signé autrement » (category evidence) is kept.
+  evidence: boolean;
+  countersigned: boolean;
+};
+
+export function contractBackOf(
+  input: ContractProof & { state: AgreementState },
+): ContractBack | null {
+  if (input.state !== "signature_pending") return null;
+  const back = input.signedViaLink || (input.signedFiles > 0 && input.evidence);
+  if (!back) return null;
+  return input.countersigned ? "check" : "countersign";
+}
+
+/**
  * The artist's contract on this project (one per person: legal_agreement_
  * needs → contracts), for a participation:
  * - agreement: where it stands (the Juridique's AgreementState: the
@@ -378,7 +410,7 @@ export function personKeyOf(input: {
  * - none: not expected yet (proposed, invited) or no longer.
  */
 export type RecapContract =
-  | { kind: "agreement"; state: AgreementState }
+  | { kind: "agreement"; state: AgreementState; back: ContractBack | null }
   | { kind: "waiting_agreement" }
   | { kind: "hidden" }
   | { kind: "none" };
@@ -389,25 +421,32 @@ export function recapContract(input: {
   // accord is not validated (artistsAwaitingAgreement).
   artistPending: boolean;
   // The person's need, when the Juridique planned one.
-  need: { contractId: string | null; contract: ContractState | null } | null;
+  need: {
+    contractId: string | null;
+    contract: ContractState | null;
+    // What the contract's files say (contractBackOf's input).
+    proof: ContractProof;
+  } | null;
 }): RecapContract {
   const { need } = input;
-  if (need?.contractId)
-    return need.contract
-      ? {
-          kind: "agreement",
-          state: agreementStateOf({
-            mapped: true,
-            mappingApproved: true,
-            contract: need.contract,
-            ready: false,
-          }),
-        }
-      : { kind: "hidden" };
+  if (need?.contractId) {
+    if (!need.contract) return { kind: "hidden" };
+    const state = agreementStateOf({
+      mapped: true,
+      mappingApproved: true,
+      contract: need.contract,
+      ready: false,
+    });
+    return {
+      kind: "agreement",
+      state,
+      back: contractBackOf({ state, ...need.proof }),
+    };
+  }
   const confirmed = input.status === "confirmed";
   if (confirmed && input.artistPending) return { kind: "waiting_agreement" };
-  if (need) return { kind: "agreement", state: "needs_info" };
-  if (confirmed) return { kind: "agreement", state: "unmapped" };
+  if (need) return { kind: "agreement", state: "needs_info", back: null };
+  if (confirmed) return { kind: "agreement", state: "unmapped", back: null };
   return { kind: "none" };
 }
 

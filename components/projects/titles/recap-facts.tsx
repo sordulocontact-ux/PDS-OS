@@ -180,6 +180,11 @@ function contractPill(
     case "agreement": {
       // The recap's own short words (« Contrat · À rédiger »), not the
       // Juridique's (« Contrat · Contrat nécessaire »).
+      // Sent and the signed copy back: « Retour reçu · à contresigner ».
+      if (contract.back) {
+        const words = r.legal.contract(r.legal.contractBack[contract.back]);
+        return { label: words, full: words, tone: "action" };
+      }
       const words = r.legal.contract(r.legal.contractStates[contract.state]);
       return { label: words, full: words, tone: agreementTone[contract.state] };
     }

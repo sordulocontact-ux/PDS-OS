@@ -441,9 +441,16 @@ export const projectTitles = {
         draft: "Brouillon",
         review_required: "À valider",
         ready_for_signature: "À envoyer",
-        signature_pending: "Envoyé",
+        // The Excel's « Contrat envoyé ? » then « Contrat signé ».
+        signature_pending: "Envoyé · en attente de retour",
         signed: "Signé",
         ended: "Terminé",
+      },
+      // Sent, and the signed copy is back (the person signs first, then
+      // PDS): ContractBack.
+      contractBack: {
+        countersign: "Retour reçu · à contresigner",
+        check: "Retour reçu · à vérifier",
       },
       // A contract the reader may not read.
       hidden: "Lié",

@@ -30,6 +30,7 @@ import {
   showPlanCall,
   type CatalogManager,
   type ContactRow,
+  type ContractProof,
   type FicheForm,
   type RecapAccord,
   type RecapCredit,
@@ -150,61 +151,76 @@ export async function loadTitleRecap(
   const contractIds = (needs.data ?? []).flatMap((n) =>
     n.contract_id ? [n.contract_id] : [],
   );
-  const [credits, artistPeople, managers, terms, submissions, contracts, call] =
-    await Promise.all([
-      masterIds.length
-        ? supabase
-            .from("master_contributors")
-            .select("master_id, name, role, contact_id, created_at")
-            .in("master_id", masterIds)
-            .order("created_at")
-        : Promise.resolve(none),
-      artistIds.length
-        ? supabase
-            .from("network_contacts")
-            .select("id, artist_id, created_at")
-            .in("artist_id", artistIds)
-            .is("archived_at", null)
-            .order("created_at")
-        : Promise.resolve(none),
-      // Read with manage_catalog only (RLS): none for anyone else.
-      artistIds.length
-        ? supabase
-            .from("artist_contacts")
-            .select(
-              "artist_id, role, name, phone, is_primary, created_at, contact_id",
-            )
-            .in("artist_id", artistIds)
-            .eq("role", "manager")
-        : Promise.resolve(none),
-      // Whoever reads the deal reads its terms (deal_terms_select).
-      dealIds.length && board.dealReach !== "none"
-        ? supabase
-            .from("deal_terms")
-            .select("deal_id, term_key, value, state")
-            .in("deal_id", dealIds)
-        : Promise.resolve(none),
-      formIds.length
-        ? supabase
-            .from("legal_form_submissions")
-            .select(
-              "form_id, roles, other_role, person, contribution, corrections, created_at",
-            )
-            .in("form_id", formIds)
-            .order("created_at", { ascending: false })
-        : Promise.resolve(none),
-      // A contract the reader may not read stays unread (contracts_select_
-      // visible): « hidden », never « missing ».
-      contractIds.length
-        ? supabase
-            .from("contracts")
-            .select("id, status, ends_on")
-            .in("id", contractIds)
-        : Promise.resolve(none),
-      planning.length && planCalls
-        ? loadSharedNegotiationCall(assignees)
-        : null,
-    ]);
+  const [
+    credits,
+    artistPeople,
+    managers,
+    terms,
+    submissions,
+    contracts,
+    contractFiles,
+    call,
+  ] = await Promise.all([
+    masterIds.length
+      ? supabase
+          .from("master_contributors")
+          .select("master_id, name, role, contact_id, created_at")
+          .in("master_id", masterIds)
+          .order("created_at")
+      : Promise.resolve(none),
+    artistIds.length
+      ? supabase
+          .from("network_contacts")
+          .select("id, artist_id, created_at")
+          .in("artist_id", artistIds)
+          .is("archived_at", null)
+          .order("created_at")
+      : Promise.resolve(none),
+    // Read with manage_catalog only (RLS): none for anyone else.
+    artistIds.length
+      ? supabase
+          .from("artist_contacts")
+          .select(
+            "artist_id, role, name, phone, is_primary, created_at, contact_id",
+          )
+          .in("artist_id", artistIds)
+          .eq("role", "manager")
+      : Promise.resolve(none),
+    // Whoever reads the deal reads its terms (deal_terms_select).
+    dealIds.length && board.dealReach !== "none"
+      ? supabase
+          .from("deal_terms")
+          .select("deal_id, term_key, value, state")
+          .in("deal_id", dealIds)
+      : Promise.resolve(none),
+    formIds.length
+      ? supabase
+          .from("legal_form_submissions")
+          .select(
+            "form_id, roles, other_role, person, contribution, corrections, created_at",
+          )
+          .in("form_id", formIds)
+          .order("created_at", { ascending: false })
+      : Promise.resolve(none),
+    // A contract the reader may not read stays unread (contracts_select_
+    // visible): « hidden », never « missing ».
+    contractIds.length
+      ? supabase
+          .from("contracts")
+          .select("id, status, ends_on, pds_signed_at")
+          .in("id", contractIds)
+      : Promise.resolve(none),
+    // Whether a signed copy is back (« Retour reçu »): which files exist,
+    // never their names or paths.
+    contractIds.length
+      ? supabase
+          .from("contract_files")
+          .select("contract_id, category, via_contact_id")
+          .in("contract_id", contractIds)
+          .in("category", ["signed", "evidence"])
+      : Promise.resolve(none),
+    planning.length && planCalls ? loadSharedNegotiationCall(assignees) : null,
+  ]);
   for (const [scope, result] of Object.entries({
     credits,
     artistPeople,
@@ -212,6 +228,7 @@ export async function loadTitleRecap(
     terms,
     submissions,
     contracts,
+    contractFiles,
   }))
     if (result.error)
       throw new Error(`loadTitleRecap ${scope}: ${result.error.message}`);
@@ -299,6 +316,23 @@ export async function loadTitleRecap(
       ),
     ]),
   );
+  const proofOf = new Map<string, ContractProof>();
+  for (const c of contracts.data ?? [])
+    proofOf.set(c.id, {
+      signedFiles: 0,
+      signedViaLink: false,
+      evidence: false,
+      countersigned: c.pds_signed_at !== null,
+    });
+  for (const f of contractFiles.data ?? []) {
+    const proof = proofOf.get(f.contract_id);
+    if (!proof) continue;
+    if (f.category === "signed") {
+      proof.signedFiles += 1;
+      if (f.via_contact_id) proof.signedViaLink = true;
+    }
+    if (f.category === "evidence") proof.evidence = true;
+  }
   const needOf = new Map(
     (needs.data ?? []).map((n) => [
       n.contact_id,
@@ -307,6 +341,12 @@ export async function loadTitleRecap(
         contract: n.contract_id
           ? (contractOf.get(n.contract_id) ?? null)
           : null,
+        proof: (n.contract_id ? proofOf.get(n.contract_id) : undefined) ?? {
+          signedFiles: 0,
+          signedViaLink: false,
+          evidence: false,
+          countersigned: false,
+        },
       },
     ]),
   );
