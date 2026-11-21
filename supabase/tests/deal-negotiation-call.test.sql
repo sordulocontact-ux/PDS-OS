@@ -6,7 +6,7 @@
 -- owner is told when the accord is validated.
 -- Run with `supabase test db`.
 begin;
-select plan(37);
+select plan(43);
 
 -- Fixtures (as deal-calls.test.sql) ------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -155,6 +155,19 @@ select is((select occurred_at from public.calls where id = pg_temp.id_of('k1')),
   'to its new slot');
 select throws_ok($$ select public.reschedule_call(pg_temp.id_of('k1'), pg_temp.at(31),
   pg_temp.at(30)) $$, '22023', 'invalid_slot', 'a moved slot ends after it starts');
+select ok(public.can_arrange_call(pg_temp.id_of('k1')), 'she arranges the call she planned');
+select lives_ok($$ insert into public.call_guests (call_id, organization_id, email)
+  values (pg_temp.id_of('k1'), pg_temp.id_of('org'), 'avocat@nadia.test') $$, 'she adds a guest');
+select lives_ok($$ delete from public.call_guests where call_id = pg_temp.id_of('k1')
+  and email = 'avocat@nadia.test' $$, 'and takes one off');
+select is((select count(*)::int from public.call_guests
+            where call_id = pg_temp.id_of('k1') and email = 'avocat@nadia.test'), 0, 'taken off');
+update public.calls set agenda = '[{"topic": "Avance", "minutes": 10}]'::jsonb, title = 'Call · Nadia (2)'
+ where id = pg_temp.id_of('k1');
+select is((select title from public.calls where id = pg_temp.id_of('k1')), 'Call · Nadia (2)',
+  'she changes its name and agenda');
+select throws_ok($$ update public.calls set status = 'transcribed' where id = pg_temp.id_of('k1') $$,
+  '42501', 'forbidden', 'never its recording or processing');
 reset role;
 
 select pg_temp.act_as(pg_temp.id_of('glen'));

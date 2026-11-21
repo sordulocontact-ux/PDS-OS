@@ -99,6 +99,7 @@ export async function CallPage({
     : project
       ? canEditProject(access, project)
       : access.personId !== null && call.createdBy === access.personId;
+  const canArrange = canArrangeCall(access, call, deal, canEdit);
   const [transcript, report, audioUrls, members, taskProjects, deliverableId] =
     await Promise.all([
       loadLatestTranscript(supabase, call.id),
@@ -138,7 +139,7 @@ export async function CallPage({
           organizer={organizer}
           upcoming={isUpcoming(call, now)}
           closed={data.closures.length > 0}
-          reschedulable={canRescheduleCall(access, call, deal, canEdit)}
+          reschedulable={canArrange && !call.audioPath}
           deletable={canDeleteCall(callDeleter(access), {
             ownerPersonId: project
               ? project.ownerPersonId
@@ -149,6 +150,7 @@ export async function CallPage({
       transcript={transcript}
       audioUrls={audioUrls}
       canEdit={canEdit}
+      canArrange={canArrange}
       where={deal ? dealName(deal) : (project?.title ?? fr.calls.all.internal)}
       organizer={organizer}
       module={
@@ -177,16 +179,15 @@ export async function CallPage({
   );
 }
 
-/** « Modifier l'horaire » (reschedule_call decides again): whoever works on
- * the call, and whoever planned a deal's call (« Caler le call ») while the
- * deal is open; never once something is recorded. */
-function canRescheduleCall(
+/** Who arranges a call — its slot, people, agenda, link (can_arrange_call
+ * decides again): whoever works on it, and whoever planned a deal's call
+ * (« Caler le call ») while the deal is open (Sacha 21/11/2026). */
+function canArrangeCall(
   access: Access,
   call: CallDetail,
   deal: Deal | null,
   canEdit: boolean,
 ): boolean {
-  if (call.audioPath) return false;
   if (canEdit) return true;
   return (
     deal !== null &&

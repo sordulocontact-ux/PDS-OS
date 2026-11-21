@@ -38,6 +38,7 @@ export function CallWorkspace({
   transcript,
   audioUrls,
   canEdit,
+  canArrange = canEdit,
   where,
   organizer,
   module = null,
@@ -56,6 +57,9 @@ export function CallWorkspace({
   audioUrls: Array<string | null>;
   // Whoever works on the call: the project's owner, the meeting's creator.
   canEdit: boolean;
+  // Who arranges it (people, agenda, link): whoever works on it, and
+  // whoever planned a deal's call (can_arrange_call, Sacha 21/11/2026).
+  canArrange?: boolean;
   // The project's title or « Réunion interne » (the summary's subject).
   where: string;
   organizer: string | null;
@@ -95,7 +99,7 @@ export function CallWorkspace({
   });
   // A call held on site or by phone takes no video link.
   const linkable =
-    canEdit &&
+    canArrange &&
     !call.audioPath &&
     !transcript &&
     (!call.prepared?.format || call.prepared.format === "video");
@@ -152,7 +156,7 @@ export function CallWorkspace({
               callId={call.id}
               agenda={call.agenda}
               durationMinutes={call.durationMinutes}
-              canEdit={canEdit && !call.audioPath && !transcript}
+              canEdit={canArrange && !call.audioPath && !transcript}
               edited={call.agendaEdited}
             />
           )}
@@ -162,7 +166,7 @@ export function CallWorkspace({
           audioUrls={audioUrls}
           upcoming={upcoming}
           canEditLink={linkable}
-          canEditPeople={canEdit}
+          canEditPeople={canArrange}
         />
       </div>
     </div>

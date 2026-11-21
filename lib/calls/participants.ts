@@ -47,7 +47,8 @@ export async function ownedCall(
       )
       .eq("id", callId)
       .maybeSingle(),
-    supabase.rpc("is_call_owner", { p_call_id: callId }),
+    // Whoever works on it, or whoever planned a deal's call (can_arrange_call).
+    supabase.rpc("can_arrange_call", { p_call_id: callId }),
   ]);
   return call ? { call, owner: owner === true } : null;
 }

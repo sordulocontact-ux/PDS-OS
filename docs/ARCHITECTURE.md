@@ -8175,7 +8175,7 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
   notification `deal_assigned`), écrit le call, ses invités (`call_guests`) et fait passer un deal « À contacter » à
   « Call prévu » (journal `stage`, `detail.call`). Erreurs : `negotiator_required`, `negotiator_changed`,
   `negotiation_call_music_only`, `negotiation_call_too_late`, `invalid_slot`, `link_invalid`, `title_required`.
-  `set_deal_negotiation_call_link` : le lien Meet donné par Google, écrit une fois par qui a calé le call. Créneaux :
+  `set_deal_negotiation_call_link` : le lien Meet donné par Google, écrit une fois par qui a calé le call. **Qui a calé le call l'organise** (Sacha 21/11/2026, migration `20261121120101`) : `can_arrange_call` = `is_call_owner` ou l'auteur d'un call de deal ouvert qu'il lit ; horaire (`reschedule_call`, aussi depuis la page du call et le « ⋯ » de sa carte), participants, ordre du jour, lien, nom ; le trigger `a_guard_arranger` lui refuse toute autre colonne, il n'enregistre ni ne traite jamais le call. Créneaux :
   `negotiator_free_slots(p_person_id, p_from, p_to, p_minutes = 30)` (migration `20261121100101`) pour qui a
   `pilot_projects` ou `validate`, sur un membre qui a `negotiate` : les jours ouvrés de la période (deux mois au plus
   par appel, jusqu'à 5 ans, Sacha 21/11/2026 ; la page lit ce mois et le suivant, le calendrier lit chaque autre mois

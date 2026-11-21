@@ -23087,6 +23087,8 @@ export type Database = {
           title_position: number
         }[]
       }
+      // 20261121120101_call_planner_arranges.sql (added by hand).
+      can_arrange_call: { Args: { p_call_id: string }; Returns: boolean }
       // 20261121110101_reschedule_call.sql (added by hand).
       reschedule_call: {
         Args: { p_call_id: string; p_ends_at: string; p_starts_at: string }
