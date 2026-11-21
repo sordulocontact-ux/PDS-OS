@@ -733,6 +733,23 @@ saisie : `--destructive` reste à l'encre pour les actions définitives (décisi
 Un champ redevient normal dès qu'il est corrigé. Le bouton n'est jamais désactivé pour
 cause de champs manquants.
 
+### Texte à l'écran : le strict minimum (Ibé 17-18/11, Sacha 21/11/2026)
+
+Ibé (retour Notion « L'utilisateur n'a pas besoin de voir ça », 17/11) : « enlever le plus de choses
+possible », surtout ce qui semble « destiné à des machines » et non à un chef de projet « qui doit avoir
+l'esprit aéré » ; à la réunion du 18/11, l'historique « à traiter / bloqué » de la page projet « fait très
+algorithmique ». Sacha (21/11) : on ajoute trop d'informations inutiles. Avant d'écrire une ligne, se
+demander si l'utilisateur en a besoin **pour agir** ; sinon, elle ne s'écrit pas.
+
+- **Pas de ligne qui explique d'où vient une donnée ni comment le code la calcule** (« D'après ses calls
+  dans PDS OS, de 10 h à 18 h », « calculé à partir de… », état interne, historique de statuts) : c'est
+  pour le développement, sa place est `docs/` ou le guide de PO, qui répond si on lui demande.
+- **Pas de phrase sous un titre** de section, de modale ou de champ, sauf si elle change ce que la
+  personne va faire ; pas d'aide sous un champ qui répète son libellé ou ses choix.
+- **Pas de règle du code à l'écran** (« jamais un zéro », « additionnés seulement entre… ») : le code
+  l'applique, l'écran montre le résultat.
+- **Dans le doute, retirer** : un texte manquant se rajoute sur demande ; un texte en trop fatigue tout le monde.
+
 ### Sections d'une étape
 
 Dans une étape ouverte, chaque section a un titre à l'encre (`StepSection`, 18 px, semibold),
