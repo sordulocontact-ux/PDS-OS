@@ -98,7 +98,7 @@ export async function loadTitleRecap(
       .eq("project_id", project.id),
     supabase
       .from("title_participations")
-      .select("id, note, contact_id")
+      .select("id, note, contact_id, contact_label")
       .eq("project_id", project.id),
     loadParticipationDealStates(project.id),
     canReadLegal
@@ -512,6 +512,7 @@ export async function loadTitleRecap(
             participation: row?.contact_id
               ? (contactOf.get(row.contact_id) ?? null)
               : null,
+            participationLabel: row?.contact_label ?? null,
             manager,
             managerContact: manager?.contactId
               ? (contactOf.get(manager.contactId) ?? null)

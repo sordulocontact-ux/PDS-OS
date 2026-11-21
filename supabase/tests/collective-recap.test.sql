@@ -1,11 +1,11 @@
 -- Projet collectif, retours d'Ibé du 18/11/2026 (20261121200101_collective_recap):
--- a title's release decision and its journal; a participation's contact and
--- note; the project's owner told when a participation is confirmed or
+-- a title's release decision and its journal; a participation's contact (and
+-- its free label) and note; the project's owner told when a participation is confirmed or
 -- declined (never the author); the Catalogue refusing a homonym; the label
 -- of a title still to be named in SQL texts.
 -- Run with `supabase test db`.
 begin;
-select plan(42);
+select plan(56);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -136,14 +136,45 @@ select lives_ok($$ select public.set_title_participation_contact(pg_temp.id_of('
   'the interlocutor removed');
 select is((select contact_id from public.title_participations where id = pg_temp.id_of('p_jay')),
   null::uuid, 'none any more');
+-- Its label (« Producteur JL »: the label-side producer, no role of the Réseau).
+select lives_ok($$ select public.set_title_participation_contact(pg_temp.id_of('p_jay'), pg_temp.id_of('contact'), '  Producteur  ') $$,
+  'the owner says what the interlocutor is for the artist');
+select is((select contact_label from public.title_participations where id = pg_temp.id_of('p_jay')),
+  'Producteur', 'the label, trimmed');
+select lives_ok($$ select public.set_title_participation_contact(pg_temp.id_of('p_jay'), pg_temp.id_of('contact'), '   ') $$,
+  'a blank label');
+select is((select (contact_id, contact_label) from public.title_participations where id = pg_temp.id_of('p_jay')),
+  (pg_temp.id_of('contact'), null::text), 'is none, the contact stays');
+select throws_ok($$ select public.set_title_participation_contact(pg_temp.id_of('p_jay'), pg_temp.id_of('contact'), repeat('x', 41)) $$,
+  '22023', 'label_too_long', '40 characters at most');
+select lives_ok($$ select public.set_title_participation_contact(pg_temp.id_of('p_jay'), pg_temp.id_of('contact'), repeat('x', 40)) $$,
+  'forty are fine');
+select public.set_title_participation_contact(pg_temp.id_of('p_jay'), pg_temp.id_of('contact'), 'Manager');
+select lives_ok($$ select public.set_title_participation_contact(pg_temp.id_of('p_jay'), null) $$,
+  'removing the interlocutor');
+select is((select contact_label from public.title_participations where id = pg_temp.id_of('p_jay')),
+  null, 'removes its label too');
 reset role;
+select throws_ok($$ update public.title_participations set contact_label = 'Producteur'
+                     where id = pg_temp.id_of('p_jay') $$,
+  '23514', null, 'the table refuses a label without an interlocutor');
+select hasnt_function('public', 'set_title_participation_contact', array['uuid', 'uuid'],
+  'the two-argument version is gone: no ambiguous overload');
+select is((select has_function_privilege('anon', 'public.set_title_participation_contact(uuid, uuid, text)', 'execute')),
+  false, 'closed to anon');
+select is((select has_function_privilege('authenticated', 'public.set_title_participation_contact(uuid, uuid, text)', 'execute')),
+  true, 'open to the signed-in, the function checks the rights');
 select pg_temp.act_as(pg_temp.id_of('creative'));
 select throws_ok($$ select public.set_title_participation_contact(pg_temp.id_of('p_jay'), pg_temp.id_of('contact')) $$,
   '42501', 'forbidden', 'a member of the team without the right cannot');
+select throws_ok($$ select public.set_title_participation_contact(pg_temp.id_of('p_jay'), pg_temp.id_of('contact'), 'Producteur') $$,
+  '42501', 'forbidden', 'nor give it a label');
 reset role;
 select pg_temp.act_as(pg_temp.id_of('outsider'));
 select throws_ok($$ select public.set_title_participation_contact(pg_temp.id_of('p_jay'), null) $$,
   'P0002', 'participation_not_found', 'nor another house');
+select throws_ok($$ select public.set_title_participation_contact(pg_temp.id_of('p_jay'), null, 'Producteur') $$,
+  'P0002', 'participation_not_found', 'a label neither');
 reset role;
 
 -- 3. Note -------------------------------------------------------------------------------------

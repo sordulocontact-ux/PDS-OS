@@ -19931,6 +19931,7 @@ export type Database = {
         Row: {
           artist_id: string
           contact_id: string | null
+          contact_label: string | null
           contract_id: string | null
           created_at: string
           created_by: string | null
@@ -19948,6 +19949,7 @@ export type Database = {
         Insert: {
           artist_id: string
           contact_id?: string | null
+          contact_label?: string | null
           contract_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -19965,6 +19967,7 @@ export type Database = {
         Update: {
           artist_id?: string
           contact_id?: string | null
+          contact_label?: string | null
           contract_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -23539,7 +23542,11 @@ export type Database = {
         Returns: undefined
       }
       set_title_participation_contact: {
-        Args: { p_contact_id: string | null; p_participation_id: string }
+        Args: {
+          p_contact_id: string | null
+          p_label?: string | null
+          p_participation_id: string
+        }
         Returns: undefined
       }
       set_title_participation_note: {

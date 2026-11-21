@@ -12,7 +12,11 @@ import {
   PARTICIPATION_ROLES,
   PARTICIPATION_STATUSES,
 } from "@/lib/projects/participation-rules";
-import { NEW_CONTACT_ROLES } from "@/lib/projects/recap-rules";
+import {
+  CONTACT_KINDS,
+  CONTACT_LABEL_MAX,
+  contactLabelOf,
+} from "@/lib/projects/recap-rules";
 import { createClient } from "@/lib/supabase/server";
 import type { WriteDone, WriteResult } from "@/lib/utils/write-result";
 
@@ -27,7 +31,7 @@ import type { WriteDone, WriteResult } from "@/lib/utils/write-result";
 const idSchema = z.uuid();
 const roleSchema = z.enum(PARTICIPATION_ROLES);
 const statusSchema = z.enum(PARTICIPATION_STATUSES);
-const newContactRoleSchema = z.enum(NEW_CONTACT_ROLES);
+const contactKindSchema = z.enum(CONTACT_KINDS);
 
 type RpcError = { code?: string; message: string };
 
@@ -154,6 +158,13 @@ export async function setTitleParticipationStatus(input: {
 // DEFINER function (décision 5).
 
 const noteSchema = z.string().max(2000).nullable();
+// What the contact is for the artist (« Producteur »): blank, none.
+const contactLabelSchema = z
+  .string()
+  .trim()
+  .max(CONTACT_LABEL_MAX)
+  .nullable()
+  .transform((value) => value || null);
 const contactNameSchema = z.string().trim().min(1).max(200);
 // Blank: no number (null), as the Réseau stores it.
 const phoneSchema = z
@@ -171,24 +182,33 @@ function refreshContact(projectId: string, contactId: string) {
 }
 
 /** The participation's interlocutor (the artist's manager), a contact of
- * the Réseau; null removes it (the Catalogue's manager shows again). */
+ * the Réseau, and what it is for the artist (a free label, « Producteur »);
+ * null removes it and its label (the Catalogue's manager shows again). */
 export async function setParticipationContact(input: {
   projectId: string;
   participationId: string;
   contactId: string | null;
+  label?: string | null;
 }): Promise<WriteResult> {
   const t = fr.projectTitles.participations.errors;
   await requireApproved();
   const projectId = idSchema.safeParse(input.projectId);
   const participationId = idSchema.safeParse(input.participationId);
   const contactId = idSchema.nullable().safeParse(input.contactId || null);
-  if (!projectId.success || !participationId.success || !contactId.success)
+  const label = contactLabelSchema.safeParse(input.label ?? null);
+  if (
+    !projectId.success ||
+    !participationId.success ||
+    !contactId.success ||
+    !label.success
+  )
     return { ok: false, error: t.failed };
 
   const supabase = await createClient();
   const { error } = await supabase.rpc("set_title_participation_contact", {
     p_participation_id: participationId.data,
     p_contact_id: contactId.data,
+    p_label: label.data,
   });
   if (error)
     return {
@@ -201,9 +221,10 @@ export async function setParticipationContact(input: {
 
 /**
  * « Nouveau contact » from the recap: a contact of the Réseau (shared, a
- * person, with the role chosen: manager, producer or other), created with
- * the user's session (manage_network), then set as the participation's
- * interlocutor. The right to write the
+ * person, a manager of the Réseau or not), created with the user's session
+ * (manage_network), then set as the participation's interlocutor with what
+ * it is for the artist (manager, producer or other: « Producteur » is the
+ * participation's free label, no role of the Réseau). The right to write the
  * participation is checked first, so that a refusal leaves no contact
  * behind.
  */
@@ -212,9 +233,9 @@ export async function createParticipationContact(input: {
   participationId: string;
   name: string;
   phone: string;
-  // Its role for the artist (manager, producer, other): written in the
-  // roles of the contact in the Réseau.
-  role: string;
+  // What it is for the artist (manager, producer, other): manager is
+  // its role in the Réseau, producer the participation's label.
+  kind: string;
 }): Promise<
   (WriteDone & { contactId: string }) | { ok: false; error: string }
 > {
@@ -235,21 +256,22 @@ export async function createParticipationContact(input: {
     };
   const phone = phoneSchema.safeParse(input.phone);
   if (!phone.success) return { ok: false, error: r.phoneTooLong };
-  const role = newContactRoleSchema.safeParse(input.role);
-  if (!role.success) return { ok: false, error: r.failed };
+  const kind = contactKindSchema.safeParse(input.kind);
+  if (!kind.success) return { ok: false, error: r.failed };
 
   const supabase = await createClient();
   // Rewriting the interlocutor it has checks who may write it, and that
   // its title is not abandoned (lock_title_participation), changing nothing.
   const { data: current } = await supabase
     .from("title_participations")
-    .select("contact_id")
+    .select("contact_id, contact_label")
     .eq("id", participationId.data)
     .maybeSingle();
   if (!current) return { ok: false, error: t.notFound };
   const check = await supabase.rpc("set_title_participation_contact", {
     p_participation_id: participationId.data,
     p_contact_id: current.contact_id,
+    p_label: current.contact_label,
   });
   if (check.error)
     return {
@@ -264,7 +286,10 @@ export async function createParticipationContact(input: {
       kind: "person",
       name: name.data,
       phone: phone.data,
-      roles: [role.data],
+      // « Producteur » is no role of the Réseau (it is the label's
+      // producer, not the artistic one): « other », its label on the
+      // participation.
+      roles: [kind.data === "manager" ? "manager" : "other"],
     })
     .select("id")
     .single();
@@ -276,7 +301,12 @@ export async function createParticipationContact(input: {
   }
   const { error: setError } = await supabase.rpc(
     "set_title_participation_contact",
-    { p_participation_id: participationId.data, p_contact_id: contact.id },
+    {
+      p_participation_id: participationId.data,
+      p_contact_id: contact.id,
+      // A manager says it by its role of the Réseau.
+      p_label: kind.data === "producer" ? contactLabelOf("producer") : null,
+    },
   );
   if (setError)
     return {

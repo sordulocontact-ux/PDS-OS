@@ -33,7 +33,10 @@ import {
 } from "@/lib/deals/negotiation-call-rules";
 import { dialogs } from "@/lib/i18n/fr/dialogs";
 import { projectTitles } from "@/lib/i18n/fr/project-titles";
-import { listNetworkPeople } from "@/lib/network/people-actions";
+import {
+  listNetworkPeople,
+  type NetworkPersonOption,
+} from "@/lib/network/people-actions";
 import {
   createParticipationContact,
   setContactPhone,
@@ -41,9 +44,9 @@ import {
   setParticipationNote,
 } from "@/lib/projects/participation-actions";
 import {
-  contactRoleLabel,
-  NEW_CONTACT_ROLES,
-  type NewContactRole,
+  CONTACT_KINDS,
+  contactLabelOf,
+  type ContactKind,
   type RecapAccord,
   type RecapContact,
 } from "@/lib/projects/recap-rules";
@@ -365,9 +368,7 @@ export function ContactFacts({
   const whatsapp = contact.phone ? whatsappNumber(contact.phone) : null;
   return (
     <span className={factsClass(true)}>
-      <span className={caption}>
-        {contact.role ? contactRoleLabel(contact.role) : t.label}
-      </span>
+      <span className={caption}>{contact.role ?? t.label}</span>
       <span className="max-w-full break-words" title={contact.name}>
         {contact.name}
       </span>
@@ -473,6 +474,7 @@ function ContactForm({
           projectId={projectId}
           participationId={participationId}
           current={contact?.contactId ?? null}
+          currentKind={contact?.kind ?? "manager"}
           onDone={onDone}
         />
       ) : (
@@ -534,22 +536,52 @@ function PhoneForm({
   );
 }
 
+/** What the contact is for the artist: Manager, Producteur, Autre (the
+ * participation's label, see CONTACT_KINDS). */
+function KindChoice({
+  value,
+  onChange,
+}: {
+  value: ContactKind;
+  onChange: (kind: ContactKind) => void;
+}) {
+  const t = fr.projectTitles.recap.contact;
+  return (
+    <ChipChoice<ContactKind>
+      name="contactKind"
+      legend={t.role}
+      options={CONTACT_KINDS.map((kind) => ({
+        value: kind,
+        label: t.kinds[kind],
+      }))}
+      value={value}
+      onChange={(next) => next && onChange(next)}
+      fill
+    />
+  );
+}
+
 /** Another contact of the Réseau as the artist's interlocutor (the
- * Réseau's picker: search, or add one to the Réseau without leaving). */
+ * Réseau's picker: search, or add one to the Réseau without leaving), and
+ * what it is for the artist: the current one's kind, a manager of the
+ * Réseau once picked. */
 function PickForm({
   projectId,
   participationId,
   current,
+  currentKind,
   onDone,
 }: {
   projectId: string;
   participationId: string;
   current: string | null;
+  currentKind: ContactKind;
   onDone: () => void;
 }) {
   const t = fr.projectTitles.recap.contact;
   const { pending, error, run } = useWriteSubmit(onDone, t.picked);
   const [missing, setMissing] = useState(false);
+  const [kind, setKind] = useState<ContactKind>(currentKind);
   function submit(event: FormEvent<HTMLFormElement>) {
     // A contact added from the picker submits its own form (in a modal).
     if (event.target !== event.currentTarget) return;
@@ -560,7 +592,12 @@ function PickForm({
     setMissing(!contactId);
     if (contactId)
       run(() =>
-        setParticipationContact({ projectId, participationId, contactId }),
+        setParticipationContact({
+          projectId,
+          participationId,
+          contactId,
+          label: contactLabelOf(kind),
+        }),
       );
   }
   return (
@@ -574,10 +611,15 @@ function PickForm({
         defaultName={null}
         createRoles={["manager"]}
         refOfContact={(id) => id}
+        onPick={(option: NetworkPersonOption | null) =>
+          option &&
+          setKind(option.roles.includes("manager") ? "manager" : "other")
+        }
         allowNameOnly={false}
         required
         error={missing ? t.pickRequired : undefined}
       />
+      <KindChoice value={kind} onChange={setKind} />
       {error && <FormMessage kind="error">{error}</FormMessage>}
       <DialogFormActions
         pending={pending}
@@ -588,9 +630,9 @@ function PickForm({
   );
 }
 
-/** A new contact of the Réseau (name, number and role: a manager, a
- * producer or another), made the artist's interlocutor. The name is asked
- * again in red when left empty. */
+/** A new contact of the Réseau (name, number, and what it is for the artist:
+ * a manager, a producer or another), made the artist's interlocutor. The
+ * name is asked again in red when left empty. */
 function CreateForm({
   projectId,
   participationId,
@@ -603,7 +645,7 @@ function CreateForm({
   const t = fr.projectTitles.recap;
   const { pending, error, run } = useWriteSubmit(onDone, t.contact.created);
   const [missing, setMissing] = useState(false);
-  const [role, setRole] = useState<NewContactRole>("manager");
+  const [kind, setKind] = useState<ContactKind>("manager");
   return (
     <form
       noValidate
@@ -622,7 +664,7 @@ function CreateForm({
             participationId,
             name,
             phone,
-            role,
+            kind,
           }),
         );
       }}
@@ -645,17 +687,7 @@ function CreateForm({
         autoComplete="off"
         maxLength={40}
       />
-      <ChipChoice<NewContactRole>
-        name="contactRole"
-        legend={t.contact.role}
-        options={NEW_CONTACT_ROLES.map((value) => ({
-          value,
-          label: t.contact.newRoles[value],
-        }))}
-        value={role}
-        onChange={(next) => next && setRole(next)}
-        fill
-      />
+      <KindChoice value={kind} onChange={setKind} />
       {error && <FormMessage kind="error">{error}</FormMessage>}
       <DialogFormActions
         pending={pending}

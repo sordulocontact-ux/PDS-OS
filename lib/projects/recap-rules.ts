@@ -51,7 +51,6 @@ import type {
   TitleBoard,
 } from "@/lib/projects/title-board-rules";
 import type { Tone } from "@/lib/ui/state-tones";
-import { network } from "@/lib/i18n/fr/network";
 import { projectTitles } from "@/lib/i18n/fr/project-titles";
 import type { NetworkRole } from "@/lib/network/types";
 import { normalizeSearch } from "@/lib/utils/search";
@@ -117,31 +116,48 @@ export type ContactRow = {
   roles: readonly NetworkRole[];
 };
 
-/** What the recap says a contact is for the artist (Ibé 21/11: « Thibaud
- * manager », « Producteur JL »): the most relevant of its roles, a manager,
- * then a producer, else the first; « other » says nothing. Null: none. */
-export function contactRoleOf(
-  roles: readonly NetworkRole[],
-): NetworkRole | null {
-  const known = roles.filter((role) => role !== "other");
-  return (
-    known.find((role) => role === "manager") ??
-    known.find((role) => role === "producer") ??
-    known[0] ??
-    null
-  );
+/** What a contact is for the artist (Ibé 21/11: « Thibaud manager »,
+ * « Producteur JL »): a manager, the producer of the label, or another.
+ * « Producteur » is no role of the Réseau (its `producer` says
+ * « Réalisateur·rice », it has none for a label's producer): it is a free
+ * label of the participation (title_participations.contact_label). */
+export const CONTACT_KINDS = ["manager", "producer", "other"] as const;
+export type ContactKind = (typeof CONTACT_KINDS)[number];
+
+/** The longest label the participation keeps (the column's check). */
+export const CONTACT_LABEL_MAX = 40;
+
+/** The label written on the participation for a kind: the words of the
+ * kind, none for « Autre ». */
+export function contactLabelOf(kind: ContactKind): string | null {
+  return kind === "other" ? null : projectTitles.recap.contact.kinds[kind];
 }
 
-/** The roles offered for a new contact: the two Ibé names, and the rest. */
-export const NEW_CONTACT_ROLES = ["manager", "producer", "other"] as const;
-export type NewContactRole = (typeof NEW_CONTACT_ROLES)[number];
+/** The kind a participation's label says (« Producteur », « Manager »), else
+ * what the contact's Réseau roles say: a manager, or another. */
+export function contactKindOf(
+  label: string | null,
+  roles: readonly NetworkRole[],
+): ContactKind {
+  const key = label ? normalizeSearch(label) : null;
+  const kinds = projectTitles.recap.contact.kinds;
+  if (key === normalizeSearch(kinds.producer)) return "producer";
+  if (key === normalizeSearch(kinds.manager)) return "manager";
+  if (key) return "other";
+  return roles.includes("manager") ? "manager" : "other";
+}
 
-/** A role in the recap's words: « Producteur » for `producer` (the Réseau
- * says « Réalisateur·rice »), « Manager » for `manager` (« Management »),
- * the Réseau's words for the others. */
-export function contactRoleLabel(role: NetworkRole): string {
-  const own = projectTitles.recap.contact.roles;
-  return role in own ? own[role as keyof typeof own] : network.roles[role];
+/** What the recap says the contact is: the participation's label when it
+ * has one, else « Manager » for a manager of the Réseau; null: « Contact ».
+ * The Réseau's other roles say nothing (none says a label's producer). */
+export function contactRoleOf(
+  label: string | null,
+  roles: readonly NetworkRole[],
+): string | null {
+  if (label) return label;
+  return roles.includes("manager")
+    ? projectTitles.recap.contact.kinds.manager
+    : null;
 }
 
 /**
@@ -158,8 +174,10 @@ export type RecapContact = {
   name: string;
   phone: string | null;
   hidden: boolean;
-  // What it is for the artist; null: no role known (« Contact »).
-  role: NetworkRole | null;
+  // What it is for the artist, in words (contactRoleOf); null: « Contact ».
+  role: string | null;
+  // The same, as the form pre-selects it.
+  kind: ContactKind;
   source: "participation" | "catalog";
   href: string;
 };
@@ -193,8 +211,9 @@ export function mainManager(
 export function recapContact(input: {
   artistId: string;
   // The interlocutor's contact, when the participation has one the reader
-  // reads.
+  // reads, and the participation's label for it.
   participation: ContactRow | null;
+  participationLabel?: string | null;
   manager: CatalogManager | null;
   // The manager's contact of the Réseau, when linked.
   managerContact: ContactRow | null;
@@ -205,7 +224,14 @@ export function recapContact(input: {
       name: input.participation.name,
       phone: input.participation.phone,
       hidden: input.participation.hidden,
-      role: contactRoleOf(input.participation.roles),
+      role: contactRoleOf(
+        input.participationLabel ?? null,
+        input.participation.roles,
+      ),
+      kind: contactKindOf(
+        input.participationLabel ?? null,
+        input.participation.roles,
+      ),
       source: "participation",
       href: routes.networkContact(input.participation.id),
     };
@@ -219,7 +245,8 @@ export function recapContact(input: {
       phone: input.managerContact.phone,
       hidden: input.managerContact.hidden,
       // The Catalogue's manager of the artist, whatever the Réseau says.
-      role: "manager",
+      role: projectTitles.recap.contact.kinds.manager,
+      kind: "manager",
       source: "catalog",
       href: routes.networkContact(input.managerContact.id),
     };
@@ -229,7 +256,8 @@ export function recapContact(input: {
     name: input.manager.name,
     phone: input.manager.phone,
     hidden: false,
-    role: "manager",
+    role: projectTitles.recap.contact.kinds.manager,
+    kind: "manager",
     source: "catalog",
     href: routes.artist(input.artistId),
   };

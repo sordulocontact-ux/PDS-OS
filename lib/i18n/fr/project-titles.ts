@@ -396,13 +396,14 @@ export const projectTitles = {
       callToPlan: "Call à caler",
     },
     contact: {
-      // Under the artist's name, before the contact's name, when its role
-      // is not known.
+      // Under the artist's name, before the contact's name, when it is
+      // neither a manager nor named by the participation.
       label: "Contact",
-      // What the contact is for the artist, in Ibé's words (the Réseau says
-      // « Réalisateur·rice » for a producer, « Management » for a manager);
-      // the other roles are the Réseau's.
-      roles: { manager: "Manager", producer: "Producteur" },
+      // What the contact is for the artist, in Ibé's words (« Thibaud
+      // manager », « Producteur JL »). « Producteur » is the producer of
+      // the label, written on the participation as a free label: the Réseau's
+      // `producer` role says « Réalisateur·rice ».
+      kinds: { manager: "Manager", producer: "Producteur", other: "Autre" },
       title: "Contact de l'artiste",
       add: "Ajouter le contact",
       edit: (artist: string) => `Modifier le contact ${de(artist)}`,
@@ -423,9 +424,8 @@ export const projectTitles = {
       picked: "Contact de l'artiste changé.",
       name: "Nom",
       newPhone: "Numéro",
-      // The new contact's role (written in its roles in the Réseau).
+      // What the contact is for this artist (Manager, Producteur, Autre).
       role: "Rôle",
-      newRoles: { manager: "Manager", producer: "Producteur", other: "Autre" },
       createSubmit: "Ajouter au Réseau",
       created: "Contact ajouté au Réseau.",
     },
