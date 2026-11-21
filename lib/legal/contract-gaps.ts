@@ -14,6 +14,9 @@ export type ContractGap = {
   titleId: string;
   artist: string;
   title: string;
+  // The title has a name of its own (a working title or a named master):
+  // else `title` only repeats its guests (« Titre de Jay (à nommer) »).
+  named: boolean;
 };
 
 /**
@@ -55,6 +58,7 @@ export const loadContractGaps = trackedCache(
       participationId: row.participation_id,
       titleId: row.title_id,
       artist: row.artist_name,
+      named: Boolean(row.working_title || row.master_title),
       title: projectTitleLabel({
         position: row.title_position,
         workingTitle: row.working_title,
@@ -65,6 +69,14 @@ export const loadContractGaps = trackedCache(
   },
 );
 
-/** « Nadia Benali (Titre 2 · Néons), Lou (Titre de Lou (à nommer)) ». */
+/** « Nadia Benali (Titre 2 · Néons), Lou »: the title only when it has a
+ * name (a title still to be named is its guests: nothing to add), each
+ * entry once. */
 export const gapNames = (gaps: ContractGap[]) =>
-  gaps.map((gap) => `${gap.artist} (${gap.title})`).join(", ");
+  [
+    ...new Set(
+      gaps.map((gap) =>
+        gap.named ? `${gap.artist} (${gap.title})` : gap.artist,
+      ),
+    ),
+  ].join(", ");

@@ -3,7 +3,6 @@ import { EMPTY_CELL } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ViewLink } from "@/components/ui/view-link";
 import { deals } from "@/lib/i18n/fr/deals";
-import { legalContracts } from "@/lib/i18n/fr/legal-contracts";
 import { projectTitles } from "@/lib/i18n/fr/project-titles";
 import type { ParticipationStatus } from "@/lib/projects/participation-rules";
 import type {
@@ -27,7 +26,7 @@ import {
 // modules font »: each pill leads to its module; a link inside a row whose
 // DataTableLink covers it stays clickable (`relative z-10`).
 
-const fr = { deals, legalContracts, projectTitles };
+const fr = { deals, projectTitles };
 
 export const caption =
   "text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-tertiary)]";
@@ -37,12 +36,21 @@ export const muted = "text-[color:var(--text-tertiary)]";
 export const PILL_LINK =
   "relative z-10 inline-flex max-w-full rounded-full outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--focus-ring)]";
 
+// A pill of a cell wraps onto a second line rather than widen its column
+// (a table of 4 fixed columns besides the name does not scroll sideways):
+// `StatusBadge` is one line by default, `h-5`.
+const WRAPPING_PILLS =
+  "[&_[data-slot=status-badge]]:h-auto [&_[data-slot=status-badge]]:min-h-5 [&_[data-slot=status-badge]]:max-w-full [&_[data-slot=status-badge]]:py-0.5 [&_[data-slot=status-badge]]:text-left [&_[data-slot=status-badge]]:whitespace-normal";
+
 /** A cell's facts: one under the other in a column, side by side under the
  * name (`inline`, a small screen). */
 export const factsClass = (inline: boolean) =>
-  inline
-    ? "flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1"
-    : "flex min-w-0 flex-col items-start gap-1";
+  cn(
+    inline
+      ? "flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1"
+      : "flex min-w-0 flex-col items-start gap-1",
+    WRAPPING_PILLS,
+  );
 
 /** The first words of a state (« En attente · ouverte, pas renvoyée » →
  * « En attente »): a pill of the recap stays short, its whole label read
@@ -66,7 +74,7 @@ function LinkedPill({
     <StatusBadge
       tone={tone}
       size="sm"
-      className="max-w-full truncate"
+      className="h-auto min-h-5 max-w-full py-0.5 text-left [overflow-wrap:anywhere] whitespace-normal"
       title={full && full !== label ? full : undefined}
     >
       {label}
@@ -98,8 +106,9 @@ export function ContactStatePill({ status }: { status: ParticipationStatus }) {
  * The accord of an artist (the Business module): its deal's stage (« à
  * valider » while the direction decides), the rate, the day of the call
  * planned and who negotiates, linked to the deal. `planCall`: « Caler le
- * call », given by the board when the row may plan it (instead of the
- * call's day, gone once one is planned). Nothing known: « — ».
+ * call », given by the board when the row may plan it (the compact recap
+ * gives the words « Call à caler », linked to the board), instead of the
+ * call's day, gone once one is planned. Nothing known: « — ».
  */
 export function AccordFacts({
   accord,
@@ -157,7 +166,9 @@ export function AccordFacts({
         </span>
       )}
       {negotiator && stage && (
-        <span className={cn(caption, "max-w-full truncate")}>{negotiator}</span>
+        <span className={cn(caption, "max-w-full break-words")}>
+          {negotiator}
+        </span>
       )}
       {planCall}
     </span>
@@ -171,12 +182,10 @@ function contractPill(
   const r = fr.projectTitles.recap;
   switch (contract.kind) {
     case "agreement": {
-      const words = fr.legalContracts.agreements.states[contract.state];
-      return {
-        label: r.legal.contract(short(words)),
-        full: r.legal.contract(words),
-        tone: agreementTone[contract.state],
-      };
+      // The recap's own short words (« Contrat · À rédiger »), not the
+      // Juridique's (« Contrat · Contrat nécessaire »).
+      const words = r.legal.contract(r.legal.contractStates[contract.state]);
+      return { label: words, full: words, tone: agreementTone[contract.state] };
     }
     case "waiting_agreement":
       // § 3.5: no contract before the accord.

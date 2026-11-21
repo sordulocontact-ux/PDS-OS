@@ -172,18 +172,25 @@ function detailOf(title: RecapTitle, label: string): string {
 }
 
 // The columns of the artists' rows, shown from 1280 px; under it, said
-// under the name (`inline`).
+// under the name (`inline`). 720 px with the actions' column (48): in a
+// project's 1180 px the name keeps 460, in the 932 px of a 1280 px window
+// with both sidebars, 212. The cells wrap (their pills too, recap-facts):
+// nothing widens a column, so the table never scrolls sideways. `min-w-*`:
+// the name's `w-full` would otherwise squeeze them to their longest word.
 const COLUMN = {
-  status: "w-28",
-  accord: "w-48 whitespace-normal",
-  contact: "w-48 whitespace-normal",
-  legal: "w-48 whitespace-normal",
+  status: "w-32 min-w-32",
+  accord: "w-44 min-w-44 whitespace-normal",
+  contact: "w-48 min-w-48 whitespace-normal",
+  legal: "w-44 min-w-44 whitespace-normal",
 } as const;
 
 // The name's cell wraps (the table's cells do not): its lines under the
 // name — detail, note, warning, the hidden columns — never widen the table
-// past a phone's screen; the name itself stays on one line (DataTableLink).
-const NAME_CELL = "whitespace-normal";
+// past a screen; the name itself stays on one line (DataTableLink). `max-w-0`
+// with `w-full`: it takes what the fixed columns leave (DataTableCell's
+// `fill` does it on a phone only), its content cut or wrapped, never
+// pushing the table wider than its frame.
+const NAME_CELL = "whitespace-normal sm:w-full sm:max-w-0";
 
 /** Under 1280 px, a hidden column under the name: its label, its facts
  * (still links and buttons). */
@@ -473,6 +480,23 @@ function TitleGroup(props: GroupProps) {
     />
   );
 
+  const noArtist = (
+    <span className="flex flex-wrap items-center gap-x-3 gap-y-2 pl-3 sm:pl-6">
+      <span className={muted}>{fr.projectTitles.board.noArtist}</span>
+      {canManage && Object.keys(props.artists.options).length > 0 && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="relative z-10"
+          onClick={() => setDialog("add")}
+        >
+          {fr.projectTitles.participations.add.action}
+        </Button>
+      )}
+    </span>
+  );
+
   return (
     <DataTableBody>
       <TitleRow
@@ -520,23 +544,20 @@ function TitleGroup(props: GroupProps) {
       ))}
       {title.participations.length === 0 && !abandoned && (
         <DataTableRow>
-          {/* Over the status column too (no participation, no status):
-              the button never widens the table past a phone's screen. */}
-          <DataTableCell fill className={NAME_CELL} colSpan={2}>
-            <span className="flex flex-wrap items-center gap-x-3 gap-y-2 pl-3 sm:pl-6">
-              <span className={muted}>{fr.projectTitles.board.noArtist}</span>
-              {canManage && Object.keys(props.artists.options).length > 0 && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="relative z-10"
-                  onClick={() => setDialog("add")}
-                >
-                  {fr.projectTitles.participations.add.action}
-                </Button>
-              )}
-            </span>
+          {/* Over the status column too (no participation, no status), where
+              it is shown: the button never widens the table past a phone's
+              screen. Two cells for one, a colSpan being the same at every
+              width: 1 under 640 px, 2 from it, then the other columns from
+              1280 px, so that the row has as many cells as the header. */}
+          <DataTableCell fill className={cn(NAME_CELL, "sm:hidden")}>
+            {noArtist}
+          </DataTableCell>
+          <DataTableCell
+            fill
+            colSpan={2}
+            className={cn(NAME_CELL, "hidden sm:table-cell")}
+          >
+            {noArtist}
           </DataTableCell>
           <DataTableCell hideBelow="xl" colSpan={dataColumnCount(columns) - 1}>
             {null}
@@ -753,11 +774,24 @@ function TitleRow({
   );
   return (
     <DataTableRow className="bg-[var(--surface-soft)] hover:bg-[var(--surface-soft)]">
-      {/* Under 1280 px, over the status column too (it holds the artists'
-          statuses, nothing of the title's): its facts fit under its name.
-          From 1280 px, the name alone, then its facts across its artists'
-          columns, in words. One of the two name cells is shown. */}
-      <DataTableCell fill colSpan={2} className={cn(NAME_CELL, "xl:hidden")}>
+      {/* One of the three name cells is shown, and the row has as many cells
+          as the header (a colSpan is the same at every width):
+          - under 640 px, the name alone (the header has no status column
+            there: a colSpan of 2 would add a column, and push « ⋯ » out of
+            the artists' column);
+          - under 1280 px, over the status column too (it holds the
+            artists' statuses, nothing of the title's): its facts fit under
+            its name;
+          - from 1280 px, the name alone, then its facts across its
+            artists' columns, in words. */}
+      <DataTableCell fill className={cn(NAME_CELL, "sm:hidden")}>
+        {name(true)}
+      </DataTableCell>
+      <DataTableCell
+        fill
+        colSpan={2}
+        className={cn(NAME_CELL, "hidden sm:table-cell xl:hidden")}
+      >
         {name(true)}
       </DataTableCell>
       <DataTableCell fill hideBelow="xl" className={NAME_CELL}>
@@ -1056,9 +1090,6 @@ function TitleActions({
             onOpenChange={(next) => !next && close()}
             title={t.participations.add.title(label)}
             description={t.participations.add.description(
-              artists.mainArtistId
-                ? (artists.options[artists.mainArtistId] ?? null)
-                : null,
               credit.mode,
               credit.shared,
             )}
@@ -1076,7 +1107,7 @@ function TitleActions({
             open={dialog === "rename"}
             onOpenChange={(next) => !next && close()}
             title={t.rename.title}
-            description={provisional ?? t.rename.description}
+            description={provisional}
             closeLabel={fr.dialogs.close}
           >
             <RenameTitleForm
@@ -1110,7 +1141,6 @@ function TitleActions({
               open={dialog === "attach"}
               onOpenChange={(next) => !next && close()}
               title={t.catalogAttach.title(label)}
-              description={t.catalogAttach.description}
               closeLabel={fr.dialogs.close}
             >
               <AttachCatalogTitleForm
@@ -1130,8 +1160,8 @@ function TitleActions({
             description={
               title.master?.demoStatus === "draft" ||
               title.master?.demoStatus === "developing"
-                ? `${t.abandon.description} ${t.abandon.demoNote}`
-                : t.abandon.description
+                ? t.abandon.demoNote
+                : undefined
             }
             closeLabel={fr.dialogs.close}
           >

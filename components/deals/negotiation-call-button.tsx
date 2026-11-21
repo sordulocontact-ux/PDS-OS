@@ -29,9 +29,11 @@ const fr = { dealCalls, dialogs };
 export function NegotiationCallButton({
   data,
   variant = "default",
+  size = "default",
 }: {
   data: NegotiationCallData;
   variant?: "default" | "outline";
+  size?: "default" | "sm";
 }) {
   const t = fr.dealCalls.negotiation;
   const [open, setOpen] = useState(false);
@@ -53,7 +55,7 @@ export function NegotiationCallButton({
 
   return (
     <>
-      <Button variant={variant} onClick={() => setOpen(true)}>
+      <Button variant={variant} size={size} onClick={() => setOpen(true)}>
         {t.button}
       </Button>
       <FormDialog

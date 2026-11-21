@@ -342,14 +342,14 @@ export function ContactFacts({
   const whatsapp = contact.phone ? whatsappNumber(contact.phone) : null;
   return (
     <span className={factsClass(inline)}>
-      <span className="max-w-full truncate" title={contact.name}>
+      <span className="max-w-full break-words" title={contact.name}>
         {contact.name}
       </span>
       {contact.hidden ? (
         <span className={caption}>{t.hidden}</span>
       ) : (
         contact.phone && (
-          <span className="text-[color:var(--text-secondary)] tabular-nums">
+          <span className="whitespace-nowrap text-[color:var(--text-secondary)] tabular-nums">
             {contact.phone}
           </span>
         )
@@ -643,7 +643,7 @@ export function PlanCallButton({
   if (!data) return null;
   return (
     <span className="relative z-10">
-      <NegotiationCallButton data={data} variant="outline" />
+      <NegotiationCallButton data={data} variant="outline" size="sm" />
     </span>
   );
 }

@@ -64,8 +64,6 @@ export const projectTitles = {
       `Modifier les titres visés par « ${action} »`,
     button: "Titres",
     title: (action: string) => `Titres visés par « ${action} »`,
-    description:
-      "Une action peut valoir pour tout le projet, pour tous ses titres, pour certains, ou pour aucun : elle n'est jamais copiée par titre.",
     choice: "Périmètre",
     pick: "Titres",
     // What the chips chose, in words (a chip alone does not say it).
@@ -96,8 +94,6 @@ export const projectTitles = {
   catalogAttach: {
     action: "Rattacher un titre du Catalogue",
     title: (label: string) => `Rattacher un titre du Catalogue à « ${label} »`,
-    description:
-      "Le titre du projet prend ce titre du Catalogue, ses fichiers et ses crédits ; son titre de travail reste le sien.",
     placeholder: "Choisir un titre",
     submit: "Rattacher le titre",
     done: "Titre du Catalogue rattaché.",
@@ -105,8 +101,6 @@ export const projectTitles = {
   rename: {
     action: "Renommer",
     title: "Renommer le titre",
-    description:
-      "Le titre de travail sert dans le projet. Laissé vide, le titre redevient « à nommer » ou reprend son nom au Catalogue.",
     // Lot 7: its title in the Catalogue is provisional and takes the name.
     descriptionProvisional:
       "Son titre au Catalogue porte encore un nom provisoire : il prendra ce nom, et ne sera plus provisoire.",
@@ -116,9 +110,8 @@ export const projectTitles = {
   abandon: {
     action: "Abandonner",
     title: (label: string) => `Abandonner « ${label} »`,
-    description:
-      "Rien n'est supprimé : fichiers, versions, négociations et validations restent, et le titre peut être réactivé.",
-    // Only when its master is a maquette.
+    // Only when its master is a maquette: said in the modal, the one
+    // consequence outside the project.
     demoNote: "Sa maquette passe en « abandonnée » au Catalogue.",
     reason: "Motif de l'abandon",
     submit: "Abandonner le titre",
@@ -198,7 +191,7 @@ export const projectTitles = {
     action: "Changer l'artiste principal",
     title: "Changer l'artiste principal",
     description: (current: string | null) =>
-      `${current ? `Aujourd'hui : ${current}. ` : ""}Il est crédité en tête sur chaque titre ; les crédits déjà inscrits au Catalogue et l'identité choisie en Conception restent tels quels.`,
+      current ? `Aujourd'hui : ${current}.` : "",
     label: "Artiste principal",
     placeholder: "Choisir un artiste",
     search: "Chercher un artiste",
@@ -230,22 +223,11 @@ export const projectTitles = {
     add: {
       action: "Ajouter un artiste",
       title: (label: string) => `Ajouter un artiste à « ${label} »`,
-      // Names the project's main artist (not in the list: credited on every
-      // title), so that the role « Principal » reads as this title's credit;
-      // says when the credit comes, or that none comes on a title a simple
-      // project shares (`shared`: the warning, décision 10).
-      description: (
-        main: string | null,
-        mode: "now" | "later" | "manual",
-        shared: string,
-      ) =>
-        mode === "manual"
-          ? `${shared}. « D'accord » n'y écrit aucun crédit automatiquement.`
-          : `${main ? `${main}, artiste principal du projet, est crédité sur chaque titre. ` : ""}${
-              mode === "now"
-                ? "« D'accord », l'artiste est aussi crédité sur le titre au Catalogue."
-                : "« D'accord », l'artiste sera aussi crédité quand le titre sera au Catalogue."
-            }`,
+      // Only the title a simple project shares says something (`shared`:
+      // the credits are to check by hand, décision 10); the rule of the
+      // credits is not written on the screen.
+      description: (mode: "now" | "later" | "manual", shared: string) =>
+        mode === "manual" ? `${shared}.` : undefined,
       artist: "Artiste",
       artistPlaceholder: "Choisir un artiste",
       artistSearch: "Chercher un artiste",
@@ -273,17 +255,10 @@ export const projectTitles = {
       action: "Changer le statut",
       title: (artist: string, label: string) =>
         `Participation ${de(artist)} à « ${label} »`,
-      // A credit is never removed by a participation (décision 10): said
-      // before confirming, since withdrawing later keeps it; none is
-      // written on a title a simple project shares.
+      // Only the title a simple project shares says something (`shared`:
+      // the credits are to check by hand, décision 10).
       description: (mode: "now" | "later" | "manual", shared: string) =>
-        `${
-          mode === "now"
-            ? "« D'accord » crédite l'artiste sur le titre au Catalogue, et ce crédit reste ensuite."
-            : mode === "later"
-              ? "« D'accord » créditera l'artiste quand le titre sera au Catalogue."
-              : `${shared}. « D'accord » n'écrit aucun crédit automatiquement.`
-        } « A refusé » ou « Retiré », l'artiste reste listé et dans l'historique.`,
+        mode === "manual" ? `${shared}.` : undefined,
       label: "Statut",
       submit: "Changer le statut",
       done: "Statut changé.",
@@ -296,8 +271,9 @@ export const projectTitles = {
       action: "Retirer du titre",
       title: (artist: string, label: string) =>
         `Retirer ${artist} de « ${label} »`,
+      // A confirmation needs its sentence: what stays, and the way back.
       description:
-        "L'artiste passe en « Retiré » : il reste listé et dans l'historique, et les crédits déjà inscrits au Catalogue restent. Vous pourrez le rattacher ensuite.",
+        "Les crédits déjà inscrits au Catalogue restent. Vous pourrez le rattacher ensuite.",
       submit: "Retirer du titre",
       pending: "Retrait…",
       done: "Participation retirée",
@@ -414,6 +390,8 @@ export const projectTitles = {
     accord: {
       // « Call le Sam. 05/12/2026 » (formatDay).
       callOn: (day: string) => `Call le ${day}`,
+      // The overview's recap (read only) says it, the board has the button.
+      callToPlan: "Call à caler",
     },
     contact: {
       title: "Contact du manager",
@@ -442,6 +420,21 @@ export const projectTitles = {
     legal: {
       fiche: (state: string) => `Fiche · ${state}`,
       contract: (state: string) => `Contrat · ${state}`,
+      // The contract's state after « Contrat · », without repeating the
+      // word (the Juridique's own words stay its own: « Contrat
+      // nécessaire »), by AgreementState.
+      contractStates: {
+        unmapped: "À rédiger",
+        not_needed: "Non requis",
+        needs_info: "À rédiger",
+        ready_to_generate: "À rédiger",
+        draft: "Brouillon",
+        review_required: "À valider",
+        ready_for_signature: "À envoyer",
+        signature_pending: "Envoyé",
+        signed: "Signé",
+        ended: "Terminé",
+      },
       // A contract the reader may not read.
       hidden: "Lié",
     },

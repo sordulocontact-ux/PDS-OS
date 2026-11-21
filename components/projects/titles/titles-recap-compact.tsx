@@ -15,8 +15,11 @@ import {
   DataTableLink,
   DataTableRow,
 } from "@/components/ui/data-table";
+import { ViewLink } from "@/components/ui/view-link";
+import type { DealStage } from "@/lib/deals/types";
 import { projectTitles } from "@/lib/i18n/fr/project-titles";
-import type { TitleRecap } from "@/lib/projects/recap-rules";
+import type { ParticipationStatus } from "@/lib/projects/participation-rules";
+import type { RecapAccord, TitleRecap } from "@/lib/projects/recap-rules";
 import {
   titleMasterLabel,
   titleMasterStatus,
@@ -32,6 +35,22 @@ const COLUMN = {
   legal: "w-48 whitespace-normal",
   mix: "w-40 whitespace-normal",
 } as const;
+
+// The stages before the accord: the call is still to come.
+const BEFORE_ACCORD: ReadonlySet<DealStage | null> = new Set([
+  null,
+  "to_contact",
+  "call_planned",
+  "negotiation",
+]);
+
+/** The artist agreed and no call is planned yet, before the accord: the
+ * board has « Caler le call » (the overview only says it, and loads no
+ * slots for it). */
+const awaitsCall = (status: ParticipationStatus, accord: RecapAccord) =>
+  status === "confirmed" &&
+  !accord.nextCallAt &&
+  BEFORE_ACCORD.has(accord.stage);
 
 /** Under 1280 px, a hidden column under the name. */
 function StackedFact({
@@ -125,6 +144,17 @@ export function TitlesRecapCompact({
                 accord={facts.accord}
                 artist={artist}
                 inline={inline}
+                planCall={
+                  awaitsCall(participation.status, facts.accord) ? (
+                    <ViewLink
+                      href={href}
+                      className="relative z-10 rounded-sm text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-secondary)] outline-none hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--focus-ring)]"
+                    >
+                      {r.accord.callToPlan}
+                      <span className="sr-only">{` · ${artist}`}</span>
+                    </ViewLink>
+                  ) : undefined
+                }
               />
             );
           const legalFacts = (inline: boolean) => (
