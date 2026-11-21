@@ -1302,6 +1302,18 @@ export const dealStageTone = {
   abandoned: "neutral",
 } as const satisfies Record<string, Tone>;
 
+/** A deal's badge tone: the accord de principe waits (warning) until the
+ * direction validates it, then it is done (success, Maël 21/11/2026 : «
+ * Validé = vert »). Every other stage keeps its tone. */
+export function dealStageToneOf(deal: {
+  stage: keyof typeof dealStageTone;
+  agreementStatus?: string | null;
+}): Tone {
+  return deal.stage === "agreement" && deal.agreementStatus === "validated"
+    ? "success"
+    : dealStageTone[deal.stage];
+}
+
 /** A deal memo (BIZ 7): a draft waits for the direction, validated is done. */
 export const dealMemoTone = {
   draft: "warning",

@@ -2699,3 +2699,7 @@ tableau CONTRATS : contrat coproduction 50/50, envoyé ?, en attente de retour, 
   silence quand `getClaims()` ne rend rien (session en cours de renouvellement : un jeton de Claire a été révoqué pendant
   ces essais) et la barre ne dit rien. Piste : ne pas exiger la session courante (la barre n'existe qu'en pré-prod) et
   afficher une erreur si la connexion échoue.
+- **Pour Sacha — badge d'un deal** : « Accord de principe validé » était orange (`dealStageTone.agreement = warning`, quel que
+  soit `agreementStatus`). `DealStageBadge` lit maintenant `dealStageToneOf(deal)` (`lib/ui/state-tones.ts`) : accord à
+  valider = orange, **accord validé = vert** ; les autres étapes gardent leur ton. Partout où le badge s'affiche (Deals,
+  page d'un deal, récap des titres).
