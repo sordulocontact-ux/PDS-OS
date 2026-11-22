@@ -217,8 +217,6 @@ export const dealMemos = {
     title: (n: number) => `Le contrat face au deal memo n°${n}`,
     needMemo: "Validez un deal memo pour le comparer au contrat.",
     needContract: "Liez un contrat pour le comparer au deal memo validé.",
-    intro:
-      "PDS OS ne lit pas le PDF du contrat : vérifiez chaque terme, le contrat dit-il la même chose ?",
     differs: (count: number) =>
       count === 1
         ? "1 terme que le contrat contredit."

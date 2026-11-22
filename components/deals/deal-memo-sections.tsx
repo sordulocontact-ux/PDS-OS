@@ -75,11 +75,13 @@ export async function DealMemoSections({
   const pick = (category: string) =>
     contractFiles.find((f) => f.category === category) ?? null;
   const latestFile = pick("signed") ?? pick("pds_signed") ?? pick("draft");
-  // Generated from a template: its document, printed on demand.
-  const generated =
-    contractPart && contract?.visible && !latestFile
+  // Written by PDS OS from a template (the memo's terms): its document.
+  const written =
+    contractPart && contract?.visible
       ? (await getContractDocument(contract.id)) !== null
       : false;
+  // No file yet: the document, printed on demand.
+  const generated = written && !latestFile;
   const contractFile = latestFile
     ? { name: latestFile.fileName, openUrl: latestFile.openUrl }
     : generated && contract
@@ -167,16 +169,23 @@ export async function DealMemoSections({
                   : null
               }
             />
-            <DealMemoCompare
-              dealId={deal.id}
-              memo={validated && { id: validated.id, number: validated.number }}
-              rows={
-                validated && contract
-                  ? compareMemo(validated, contract, checks)
-                  : null
-              }
-              canWrite={canCheck}
-            />
+            {/* Written by PDS OS from the validated memo, the contract says
+                the same by construction: nothing to compare (Sacha
+                22/11/2026). Only a contract brought from elsewhere is. */}
+            {!written && (
+              <DealMemoCompare
+                dealId={deal.id}
+                memo={
+                  validated && { id: validated.id, number: validated.number }
+                }
+                rows={
+                  validated && contract
+                    ? compareMemo(validated, contract, checks)
+                    : null
+                }
+                canWrite={canCheck}
+              />
+            )}
           </div>
         </PageSection>
       )}

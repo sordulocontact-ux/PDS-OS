@@ -116,11 +116,7 @@ export function DealMemoCompare({
         <ToneCallout tone="danger">{t.differs(differs)}</ToneCallout>
       ) : allChecked && rows.length > 0 ? (
         <ToneCallout tone="success">{t.allConform}</ToneCallout>
-      ) : (
-        <p className="text-body-sm text-[color:var(--text-secondary)]">
-          {t.intro}
-        </p>
-      )}
+      ) : null}
       <FactRows>
         {rows.map((row) => {
           const verdict = row.check?.verdict ?? "unchecked";

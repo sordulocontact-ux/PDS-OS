@@ -1,8 +1,5 @@
 "use client";
 
-import { useState } from "react";
-
-import { FormMessage } from "@/components/auth/form-message";
 import { ContractProofSlot } from "@/components/legal/clearance/contract-proof-slot";
 import { SignatureGate } from "@/components/legal/signed-returns/signature-gate";
 import type { ContractProof } from "@/lib/contracts/proof";
@@ -14,8 +11,8 @@ const fr = { legal, legalClearance };
 /**
  * « Marquer comme signé » (proto « Projet complet »): the signed copy and
  * its proof dropped here, PDS's signature by the direction, then the
- * team's check and the contract marked signed (JUR-11) — refused, in red,
- * while a file is missing.
+ * team's check and the contract marked signed (JUR-11), shown once both
+ * files are here.
  */
 export function ContractSign({
   contractId,
@@ -43,7 +40,6 @@ export function ContractSign({
 }) {
   const f = fr.legalClearance.flow;
   const s = fr.legalClearance.stages.sign;
-  const [tried, setTried] = useState(false);
   const missing = [
     ...(proof?.signed ? [] : [f.signedMissing]),
     ...(proof?.evidence ? [] : [f.evidenceMissing]),
@@ -61,7 +57,6 @@ export function ContractSign({
             label={s.signedSlot}
             hint={s.slotHint}
             present={proof?.signed ?? false}
-            invalid={tried && !proof?.signed}
           />
           <ContractProofSlot
             organizationId={organizationId}
@@ -70,30 +65,29 @@ export function ContractSign({
             label={s.evidenceSlot}
             hint={s.evidenceHint}
             present={proof?.evidence ?? false}
-            invalid={tried && !proof?.evidence}
           />
         </div>
       )}
-      {tried && missing.length > 0 && (
-        <FormMessage kind="error">
-          {f.filesMissing(missing.join(f.and))}
-        </FormMessage>
+      {/* What comes next (PDS signs, the team checks) only once the
+          signed copy and its proof are here: before, the card still waits
+          for the person (Sacha 22/11/2026: « contradictoire »). */}
+      {missing.length === 0 ? (
+        <SignatureGate
+          contractId={contractId}
+          organizationId={organizationId}
+          proof={proof}
+          person={person}
+          countersign={proof?.countersign ?? null}
+          canCountersign={canCountersign}
+          direction={direction}
+          pending={pending}
+          onCountersign={onCountersign}
+          onSign={onSign}
+          extra={extra}
+        />
+      ) : (
+        extra && <div className="flex flex-wrap gap-2">{extra}</div>
       )}
-      <SignatureGate
-        contractId={contractId}
-        organizationId={organizationId}
-        proof={proof}
-        person={person}
-        countersign={proof?.countersign ?? null}
-        canCountersign={canCountersign}
-        direction={direction}
-        pending={pending}
-        onCountersign={onCountersign}
-        onSign={onSign}
-        ready={missing.length === 0}
-        onBlocked={() => setTried(true)}
-        extra={extra}
-      />
     </div>
   );
 }
