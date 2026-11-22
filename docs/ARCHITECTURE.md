@@ -8139,9 +8139,11 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
     modifications », « Valider » (en négociation comme à l'accord à valider, à la place du récapitulatif des termes).
   - **Contrat généré par PDS OS** (22/11/2026, `20261122140101`) : « Générer le contrat » (bouton principal, à côté
     de « Importer un contrat ») = un modèle validé de Contrats rempli depuis le deal (`DealContractGenerate`,
-    `loadDealContractDraft` / `generateDealContract`, valeurs lues par `dealFieldValues` : termes du dernier memo
-    validé en `{{deal.<terme>}}`, rémunération depuis avance / cachet / minimum garanti, projet, artiste, label ou
-    marque du Réseau, nom de la structure), chaque valeur affichée avec sa source et corrigeable, puis
+    `loadDealContractDraft` / `generateDealContract`, valeurs lues par `dealFieldValues` : la partie (label ou marque, sinon le contact de
+    l'artiste) lue comme dans le Juridique (`fieldValues` : fiche de renseignements d'abord, puis Réseau ; une structure
+    sans fiche = une société à son nom), termes du dernier memo validé en `{{deal.<terme>}}`, rémunération depuis
+    avance / cachet / minimum garanti, projet, artiste, nom de la structure ; modèle choisi dans une liste déroulante,
+    celui du type du deal présélectionné, puis ceux que le deal remplit le mieux), chaque valeur affichée avec sa source et corrigeable, puis
     `generate_deal_contract` (copie remplie v1 dans `contract_documents`, contrat créé et lié au deal, ou v1 du contrat
     déjà lié sans document ; jamais pour une participation). Les modèles ont un groupe « Les termes du deal »
     (`CONTRACT_FIELD_GROUPS.deal`, `deal.*` de `lib/legal/contracts/fields.ts`, jamais remplis dans le Juridique).

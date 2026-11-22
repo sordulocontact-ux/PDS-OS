@@ -9,6 +9,7 @@ import {
   dealFieldValues,
   type DealFieldValue,
 } from "@/lib/deals/contract-fields";
+import { dealContractDefaults } from "@/lib/deals/contract-defaults";
 import { dealFailure } from "@/lib/deals/errors";
 import { loadDeal } from "@/lib/deals/queries";
 import { deals } from "@/lib/i18n/fr/deals";
@@ -24,7 +25,11 @@ export type DealContractTemplate = {
 };
 
 export type DealContractDraft = {
+  // The deal's kind of contract first (a licence for a label…), then the
+  // ones the deal fills best.
   templates: DealContractTemplate[];
+  // The first of them, chosen at once.
+  recommended: string | null;
   values: Record<string, DealFieldValue>;
 };
 
@@ -40,7 +45,7 @@ export async function loadDealContractDraft(
   const [{ data: templates }, { data: organization }] = await Promise.all([
     supabase
       .from("contract_templates")
-      .select("id, name, fields")
+      .select("id, name, type, fields")
       .eq("status", "validated")
       .order("name"),
     supabase
@@ -49,13 +54,24 @@ export async function loadDealContractDraft(
       .eq("id", access.organizationId ?? "")
       .maybeSingle(),
   ]);
+  const values = await dealFieldValues(deal, organization?.name ?? null);
+  const wanted = dealContractDefaults(deal).type;
+  const filled = (fields: string[]) =>
+    fields.filter((id) => values[id]).length / Math.max(fields.length, 1);
+  const sorted = [...(templates ?? [])].sort(
+    (a, b) =>
+      Number(b.type === wanted) - Number(a.type === wanted) ||
+      filled(b.fields) - filled(a.fields) ||
+      a.name.localeCompare(b.name, "fr"),
+  );
   return {
-    templates: (templates ?? []).map((t) => ({
+    templates: sorted.map((t) => ({
       id: t.id,
       name: t.name,
       fields: t.fields,
     })),
-    values: await dealFieldValues(deal, organization?.name ?? null),
+    recommended: sorted[0]?.id ?? null,
+    values,
   };
 }
 

@@ -5,8 +5,8 @@ import { useState } from "react";
 
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
+import { OptionSelect } from "@/components/projects/option-select";
 import { EmptyNote } from "@/components/shell/empty-state";
-import { ChipChoice } from "@/components/ui/chip-choice";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { LoadedFormButton } from "@/components/ui/loaded-form-button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
@@ -32,8 +32,10 @@ function GenerateForm({
   draft: DealContractDraft;
   onDone: () => void;
 }) {
+  // The deal's kind of contract, chosen at once (a dropdown: Sacha
+  // 22/11/2026).
   const [templateId, setTemplateId] = useState<string | null>(
-    draft.templates.length === 1 ? draft.templates[0].id : null,
+    draft.recommended,
   );
   const [values, setValues] = useState<Record<string, string>>(() =>
     Object.fromEntries(
@@ -80,13 +82,14 @@ function GenerateForm({
         );
       }}
     >
-      <ChipChoice
+      <OptionSelect
+        id="deal-contract-template"
         name="deal-contract-template"
-        legend={t.template}
+        label={t.template}
         required
-        options={draft.templates.map((x) => ({ value: x.id, label: x.name }))}
-        value={templateId}
-        onChange={setTemplateId}
+        items={Object.fromEntries(draft.templates.map((x) => [x.id, x.name]))}
+        defaultValue={draft.recommended}
+        onValueChange={setTemplateId}
         error={tried && !template ? t.template : undefined}
       />
       {template && (
