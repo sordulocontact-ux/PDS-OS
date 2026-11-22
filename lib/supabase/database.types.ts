@@ -542,6 +542,9 @@ export type Database = {
           changes_at: string | null
           changes_by: string | null
           changes_reason: string | null
+          correction_sent_at: string | null
+          correction_sent_by: string | null
+          correction_sent_to: string | null
           created_at: string
           created_by: string | null
           deal_id: string
@@ -569,6 +572,9 @@ export type Database = {
           changes_at?: string | null
           changes_by?: string | null
           changes_reason?: string | null
+          correction_sent_at?: string | null
+          correction_sent_by?: string | null
+          correction_sent_to?: string | null
           created_at?: string
           created_by?: string | null
           deal_id: string
@@ -596,6 +602,9 @@ export type Database = {
           changes_at?: string | null
           changes_by?: string | null
           changes_reason?: string | null
+          correction_sent_at?: string | null
+          correction_sent_by?: string | null
+          correction_sent_to?: string | null
           created_at?: string
           created_by?: string | null
           deal_id?: string
@@ -23026,6 +23035,10 @@ export type Database = {
           p_text: string
         }
         Returns: string
+      }
+      record_deal_memo_correction_sent: {
+        Args: { p_memo_id: string; p_sent_to: string }
+        Returns: undefined
       }
       record_deal_memo_sent: {
         Args: { p_memo_id: string; p_sent_to: string }

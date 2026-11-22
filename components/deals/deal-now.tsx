@@ -159,9 +159,14 @@ export function DealNow({
         <p className={secondary}>{t.waitDirection}</p>
       </NowFrame>
     );
-  // Negotiating, the next stage is the deal memo shown to the direction
-  // (réunion avec Ibé du 18/11/2026, 20261122110101).
-  if (deal.stage === "negotiation" && memoNow)
+  // Negotiating, the next stage is the deal memo shown to the direction;
+  // the accord validated, it is sent back (réunion avec Ibé du 18/11/2026,
+  // 20261122110101).
+  if (
+    memoNow &&
+    (deal.stage === "negotiation" ||
+      (deal.stage === "agreement" && deal.agreementStatus === "validated"))
+  )
     return <NowFrame label={t.now}>{memoNow}</NowFrame>;
   const next = nextStageOf(deal, terms, callHeld);
   // No gesture of the moment, no frame (Sacha 22/11/2026, « ça sert à

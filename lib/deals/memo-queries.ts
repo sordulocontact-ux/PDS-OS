@@ -39,7 +39,7 @@ function termsOf(kind: DealKind, raw: unknown): MemoTerm[] {
 }
 
 const MEMO_COLUMNS =
-  "id, number, status, source, terms, stage, created_at, validated_at, email_from, email_subject, email_text, received_at, submitted_at, changes_reason, changes_at, sent_at, sent_to, author:people!deal_memos_created_by_fkey(first_name, last_name), validator:people!deal_memos_validated_by_fkey(first_name, last_name), submitter:people!deal_memos_submitted_by_fkey(first_name, last_name), changer:people!deal_memos_changes_by_fkey(first_name, last_name), sender:people!deal_memos_sent_by_fkey(first_name, last_name)";
+  "id, number, status, source, terms, stage, created_at, validated_at, email_from, email_subject, email_text, received_at, submitted_at, changes_reason, changes_at, correction_sent_at, correction_sent_to, sent_at, sent_to, author:people!deal_memos_created_by_fkey(first_name, last_name), validator:people!deal_memos_validated_by_fkey(first_name, last_name), submitter:people!deal_memos_submitted_by_fkey(first_name, last_name), changer:people!deal_memos_changes_by_fkey(first_name, last_name), sender:people!deal_memos_sent_by_fkey(first_name, last_name)";
 
 // A link to open a received PDF lives an hour (the page is read again long
 // before).
@@ -125,6 +125,9 @@ export async function loadDealMemos(
       m.changes_at && m.changes_reason
         ? { reason: m.changes_reason, by: nameOf(m.changer), at: m.changes_at }
         : null,
+    correction: m.correction_sent_at
+      ? { at: m.correction_sent_at, to: m.correction_sent_to }
+      : null,
     sent: m.sent_at
       ? { by: nameOf(m.sender), at: m.sent_at, to: m.sent_to }
       : null,

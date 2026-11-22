@@ -8128,6 +8128,11 @@ Postes `business_manager` et `business`, permission `negotiate` : BIZ 1 (`202611
     (`DealMemoNow`, `MemoStep` chargé par la page) : un memo pas encore montré → « Montrer à la direction » (la
     direction : « Valider ») ; aucun → deal Label ou Marque : « En attente du deal memo de <structure> », « Copier
     l'adresse du deal » et « Rédiger le deal memo » à côté ; deal Musique (PDS est le label) : « Rédiger le deal memo ».
+    Modifications demandées sur le memo du label → « Demander la correction à <structure> » : `DealMemoSendForm
+    correction` (motif de la DG dans le message), `sendMemoCorrection` envoie depuis po@ avec **l'adresse du deal en
+    réponse** (la version corrigée revient dans le deal), puis `record_deal_memo_correction_sent` (`20261122120101`,
+    colonnes `correction_sent_*`, événement `memo_correction_sent`) ; ensuite « En attente de la nouvelle version ».
+    Sur un memo écrit par PDS : « Rédiger la nouvelle version ». Accord validé : « Renvoyer l'accord validé à … ».
   - **Circuit** (fonctions SQL, `deal_memos` reçoit ses colonnes) : `submit_deal_memo` (« Montrer à la direction »,
     qui écrit le deal, le dernier brouillon, une fois), `request_deal_memo_changes` (direction, motif obligatoire,
     une fois ; la version corrigée arrive comme un **nouveau memo**, le statut reste `draft` : aucun nouveau statut,

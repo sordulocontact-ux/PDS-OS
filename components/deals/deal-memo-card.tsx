@@ -50,6 +50,9 @@ function lineOf(memo: DealMemo): string {
       : memo.submitted && !memo.changes
         ? t.submittedBy(memo.submitted.by, day(memo.submitted.at))
         : null,
+    memo.correction
+      ? t.correctionTo(memo.correction.to, day(memo.correction.at))
+      : null,
     memo.sent ? t.sentTo(memo.sent.to, day(memo.sent.at)) : null,
   ]
     .filter(Boolean)

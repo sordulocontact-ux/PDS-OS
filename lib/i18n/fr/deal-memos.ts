@@ -19,6 +19,9 @@ export const dealMemos = {
     validateButton: "Valider",
     write: "Rédiger le deal memo",
     waiting: (who: string) => `En attente du deal memo de ${who}`,
+    correct: (who: string) => `Demander la correction à ${who}`,
+    resend: (who: string) => `Renvoyer l'accord validé à ${who}`,
+    rewrite: "Rédiger la nouvelle version du deal memo",
     waitingAgain: (who: string) =>
       `En attente de la nouvelle version du deal memo de ${who}`,
     copyAddress: "Copier l'adresse du deal",
@@ -30,6 +33,10 @@ export const dealMemos = {
     who
       ? `Montré à la direction par ${who}, le ${day}`
       : `Montré à la direction le ${day}`,
+  correctionTo: (to: string | null, day: string) =>
+    to
+      ? `Correction demandée à ${to}, le ${day}`
+      : `Correction demandée le ${day}`,
   changesBy: (who: string | null, day: string, reason: string) =>
     `${who ?? "La direction"} demande des modifications (${day}) : « ${reason} »`,
   sentTo: (to: string | null, day: string) =>
@@ -50,6 +57,19 @@ export const dealMemos = {
       "Ce qui doit changer, par écrit : le business manager le reçoit, avec ce qui s'est dit en appel.",
     reason: "Ce qui doit changer",
     done: "Modifications demandées",
+  },
+  // « Demander la correction » (Sacha 22/11/2026): the direction's changes
+  // sent to the label from PDS OS, the next version coming back to the deal.
+  correction: {
+    button: (who: string) => `Écrire à ${who}`,
+    title: "Demander la correction",
+    description:
+      "Les modifications demandées par la direction partent au label depuis PDS OS ; sa nouvelle version revient dans ce deal.",
+    subject: (deal: string, received: string | null) =>
+      received ? `Re: ${received}` : `Deal memo · ${deal}`,
+    message: (reason: string) =>
+      `Bonjour,\n\nMerci pour le deal memo. Après relecture, nous souhaitons une modification :\n\n${reason}\n\nPouvez-vous nous renvoyer une version corrigée ?\n\nBien à vous,`,
+    done: "Correction demandée",
   },
   send: {
     button: "Renvoyer l'accord validé",
@@ -85,6 +105,7 @@ export const dealMemos = {
     submitted: "Il a été montré à la direction.",
     changes: (reason: string) =>
       `La direction demande des modifications : « ${reason} ».`,
+    correction: "La correction a été demandée au label.",
     sent: "L'accord validé a été renvoyé.",
   },
   loop: {
@@ -212,6 +233,9 @@ export const dealMemos = {
     memo_changes_requested:
       "Des modifications sont déjà demandées : la version suivante arrivera par e-mail.",
     memo_sent: "Cet accord est déjà renvoyé.",
+    memo_correction_sent: "La correction est déjà demandée au label.",
+    memo_no_changes:
+      "La direction n'a pas demandé de modification sur ce deal memo.",
     reason_required: "Dites ce qui doit changer.",
     loop_unchanged: "Cette personne est déjà dans la boucle.",
     loop_not_found: "Cette personne n'est plus dans la boucle.",

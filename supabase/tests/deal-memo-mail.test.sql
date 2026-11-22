@@ -4,7 +4,7 @@
 -- sent back once; the people in the loop; the notifications.
 -- Run with `supabase test db`.
 begin;
-select plan(48);
+select plan(51);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -148,6 +148,10 @@ select throws_ok($$ select public.submit_deal_memo(pg_temp.memo(1)) $$,
   'P0001', 'memo_changes_requested', 'a memo sent back is not shown again: the next version is');
 select throws_ok($$ select public.record_deal_memo_sent(pg_temp.memo(1), 'Label (a@label.fr)') $$,
   'P0001', 'memo_not_validated', 'only a validated memo is sent back');
+select lives_ok($$ select public.record_deal_memo_correction_sent(pg_temp.memo(1), 'Label (a@label.fr)') $$,
+  'the negotiator sends the correction asked to the label');
+select throws_ok($$ select public.record_deal_memo_correction_sent(pg_temp.memo(1), null) $$,
+  'P0001', 'memo_correction_sent', 'once');
 reset role;
 
 -- The next version, validated, sent back -------------------------------------------------------
@@ -159,6 +163,8 @@ select isnt(public.receive_deal_memo(pg_temp.id_of('deal'), '<m2@label>', 'a@lab
 reset role;
 select is((select number from public.deal_memos where email_message_id = '<m2@label>'), 2,
   'as memo n°2');
+select is((select count(*)::int from public.deal_events where deal_id = pg_temp.id_of('deal')
+            and kind = 'memo_correction_sent'), 1, 'the journal says the correction was asked to the label');
 select pg_temp.act_as(pg_temp.id_of('director'));
 select throws_ok($$ select public.validate_deal_memo(pg_temp.memo(1)) $$,
   'P0001', 'memo_not_latest', 'the latest only is validated');

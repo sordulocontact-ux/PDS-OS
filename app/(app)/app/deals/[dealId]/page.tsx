@@ -12,7 +12,12 @@ import { BackLink } from "@/components/shell/back-link";
 import { SectionFrame } from "@/components/shell/section-frame";
 import { TabBar } from "@/components/ui/tab-bar";
 import { can } from "@/lib/auth/access";
-import { dealMailSetup } from "@/lib/deals/memo-mail-queries";
+import {
+  dealMailSetup,
+  loadDealLoop,
+  memoReplyTo,
+} from "@/lib/deals/memo-mail-queries";
+import { dealMemos } from "@/lib/i18n/fr/deal-memos";
 import { loadDealMemos } from "@/lib/deals/memo-queries";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
@@ -182,25 +187,49 @@ async function DealTodo({
   | "nextCall"
   | "memoStep"
 >) {
-  // Negotiating, whoever writes the deal sees the deal memo's step.
-  const negotiating = deal.stage === "negotiation" && deal.canWrite;
-  const [callForm, negotiationCall, memos] = await Promise.all([
+  // Negotiating, or the accord validated, whoever writes the deal sees the
+  // deal memo's step (DealMemoNow).
+  const memoTime =
+    deal.canWrite &&
+    (deal.stage === "negotiation" ||
+      (deal.stage === "agreement" && deal.agreementStatus === "validated"));
+  const [callForm, negotiationCall, memos, loop] = await Promise.all([
     callFormFor(deal, terms, access.personId),
     loadDealNegotiationCall(deal, terms),
-    negotiating ? loadDealMemos(deal.id, deal.kind) : Promise.resolve([]),
+    memoTime ? loadDealMemos(deal.id, deal.kind, true) : Promise.resolve([]),
+    memoTime ? loadDealLoop(deal.id) : Promise.resolve([]),
   ]);
   const latest = memos[0] ?? null;
-  const memoStep: MemoStep | null = negotiating
+  const mail = dealMailSetup(deal.id);
+  const memoStep: MemoStep | null = memoTime
     ? {
+        stage: deal.stage === "agreement" ? "agreement" : "negotiation",
         memo: latest && {
           id: latest.id,
           open:
             latest.status === "draft" && !latest.submitted && !latest.changes,
+          changes: latest.changes?.reason ?? null,
+          correctionSent: latest.correction !== null,
+          toSend: latest.status === "validated" && !latest.sent,
+          received: latest.source === "email",
+          receivedSubject: latest.email?.subject ?? null,
+          attachment:
+            latest.files.length > 0
+              ? latest.files.map((f) => f.name).join(", ")
+              : dealMemos.pdf.file(dealName(deal), latest.number),
         },
-        changesAsked: latest?.changes != null,
-        address: dealMailSetup(deal.id).address,
+        address: mail.address,
         counterpart: deal.counterpartName,
         director: can(access, "validate"),
+        dealName: dealName(deal),
+        replyTo: await memoReplyTo(
+          memos.find((m) => m.email)?.email?.from ?? null,
+          deal.counterpartId,
+        ),
+        copies: loop
+          .filter((e) => e.kind === "contact" && e.email)
+          .map((e) => e.name),
+        canEmail: mail.canEmail,
       }
     : null;
   // An abandoned deal: the direction opens a new one for its artist.
